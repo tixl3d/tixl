@@ -35,7 +35,7 @@ internal static class SymbolUiJson
             WriteInputUis(symbolUi, writer);
             WriteChildUis(symbolUi, writer);
             WriteOutputUis(symbolUi, writer);
-            WriteAnnotations(symbolUi, writer);
+            WriteSections(symbolUi, writer);
             WriteLinks(symbolUi, writer);
             WriteTourPoints(symbolUi, writer);
             WriteSettings(symbolUi, writer);
@@ -94,8 +94,8 @@ internal static class SymbolUiJson
 
             writer.WriteComment(symbolChild.ReadableName);
 
-            if (childUi.CollapsedIntoAnnotationFrameId != Guid.Empty)
-                writer.WriteObject(JsonKeys.AnnotationId, childUi.CollapsedIntoAnnotationFrameId);
+            if (childUi.CollapsedIntoSectionFrameId != Guid.Empty)
+                writer.WriteObject(JsonKeys.SectionId, childUi.CollapsedIntoSectionFrameId);
 
             if (childUi.Style != SymbolUi.Child.Styles.Default)
             {
@@ -182,38 +182,38 @@ internal static class SymbolUiJson
         writer.WriteEndArray();
     }
 
-    private static void WriteAnnotations(SymbolUi symbolUi, JsonTextWriter writer)
+    private static void WriteSections(SymbolUi symbolUi, JsonTextWriter writer)
     {
-        if (symbolUi.Annotations.Count == 0)
+        if (symbolUi.Sections.Count == 0)
             return;
-        writer.WritePropertyName(JsonKeys.Annotations);
+        writer.WritePropertyName(JsonKeys.Sections);
         writer.WriteStartArray();
 
-        foreach (var annotation in symbolUi.Annotations.Values.OrderBy(x => x.Id))
+        foreach (var section in symbolUi.Sections.Values.OrderBy(x => x.Id))
         {
             writer.WriteStartObject();
-            writer.WriteObject(JsonKeys.Id, annotation.Id);
-            if (!string.IsNullOrEmpty(annotation.Title))
+            writer.WriteObject(JsonKeys.Id, section.Id);
+            if (!string.IsNullOrEmpty(section.Title))
             {
-                writer.WriteObject(JsonKeys.Title, annotation.Title);
+                writer.WriteObject(JsonKeys.Title, section.Title);
             }
 
-            if (!string.IsNullOrEmpty(annotation.Label))
+            if (!string.IsNullOrEmpty(section.Label))
             {
-                writer.WriteObject(JsonKeys.Label, annotation.Label);
+                writer.WriteObject(JsonKeys.Label, section.Label);
             }
 
-            if (annotation.Collapsed)
-                writer.WriteObject(JsonKeys.Collapsed, annotation.Collapsed);
+            if (section.Collapsed)
+                writer.WriteObject(JsonKeys.Collapsed, section.Collapsed);
 
             writer.WritePropertyName(JsonKeys.Color);
-            _vector4ToJson(writer, annotation.Color.Rgba);
+            _vector4ToJson(writer, section.Color.Rgba);
 
             writer.WritePropertyName(JsonKeys.Position);
-            _vector2ToJson(writer, annotation.PosOnCanvas);
+            _vector2ToJson(writer, section.PosOnCanvas);
 
             writer.WritePropertyName(JsonKeys.Size);
-            _vector2ToJson(writer, annotation.Size);
+            _vector2ToJson(writer, section.Size);
             writer.WriteEndObject();
         }
 
@@ -358,7 +358,7 @@ internal static class SymbolUiJson
             }
         }
 
-        var annotationDict = ReadAnnotations(mainObject);
+        var sectionDict = ReadSections(mainObject);
         var linksDict = ReadLinks(mainObject);
         var tourPoints = ReadTourPoints(mainObject);
 
@@ -376,7 +376,7 @@ internal static class SymbolUiJson
                                 childUis: parent => CreateSymbolUiChildren(parent, symbolChildUiJsonEnumerable),
                                 inputs: inputDict,
                                 outputs: outputDict,
-                                annotations: annotationDict,
+                                sections: sectionDict,
                                 links: linksDict,
                                 tourPoints: tourPoints,
                                 updateConsistency: false);
@@ -493,9 +493,10 @@ internal static class SymbolUiJson
                                 ? childStyle
                                 : SymbolUi.Child.Styles.Default;
 
-            if (JsonUtils.TryGetGuid(childEntry[JsonKeys.AnnotationId], out var annotationId))
+            var sectionIdToken = childEntry[JsonKeys.SectionId] ?? childEntry[JsonKeys.LegacyAnnotationId];
+            if (JsonUtils.TryGetGuid(sectionIdToken, out var sectionId))
             {
-                childUi.CollapsedIntoAnnotationFrameId = annotationId;
+                childUi.CollapsedIntoSectionFrameId = sectionId;
             }
 
             var conStyleEntry = childEntry[JsonKeys.ConnectionStyleOverrides];
@@ -521,42 +522,42 @@ internal static class SymbolUiJson
         return symbolChildUis;
     }
 
-    private static OrderedDictionary<Guid, Annotation> ReadAnnotations(JToken token)
+    private static OrderedDictionary<Guid, Section> ReadSections(JToken token)
     {
-        var annotationDict = new OrderedDictionary<Guid, Annotation>();
+        var sectionDict = new OrderedDictionary<Guid, Section>();
 
-        var annotationsToken = token[JsonKeys.Annotations];
-        if (annotationsToken is not JArray annotationsArray)
-            return annotationDict;
+        var sectionsToken = token[JsonKeys.Sections] ?? token[JsonKeys.LegacyAnnotations];
+        if (sectionsToken is not JArray sectionsArray)
+            return sectionDict;
 
-        foreach (var annotationEntry in annotationsArray)
+        foreach (var sectionEntry in sectionsArray)
         {
-            if (!JsonUtils.TryGetGuid(annotationEntry[JsonKeys.Id], out var id))
+            if (!JsonUtils.TryGetGuid(sectionEntry[JsonKeys.Id], out var id))
             {
-                Log.Warning("Skipping annotation with missing or invalid id");
+                Log.Warning("Skipping section with missing or invalid id");
                 continue;
             }
 
-            var annotation = new Annotation
+            var section = new Section
                                  {
                                      Id = id,
-                                     Title = annotationEntry[JsonKeys.Title]?.Value<string>() ?? string.Empty,
-                                     Label = annotationEntry[JsonKeys.Label]?.Value<string>() ?? string.Empty,
-                                     PosOnCanvas = GetVec2OrDefault(annotationEntry[JsonKeys.Position]),
-                                     Collapsed = annotationEntry[JsonKeys.Collapsed]?.Value<bool>() ?? false,
+                                     Title = sectionEntry[JsonKeys.Title]?.Value<string>() ?? string.Empty,
+                                     Label = sectionEntry[JsonKeys.Label]?.Value<string>() ?? string.Empty,
+                                     PosOnCanvas = GetVec2OrDefault(sectionEntry[JsonKeys.Position]),
+                                     Collapsed = sectionEntry[JsonKeys.Collapsed]?.Value<bool>() ?? false,
                                  };
 
-            var colorEntry = annotationEntry[JsonKeys.Color];
+            var colorEntry = sectionEntry[JsonKeys.Color];
             if (colorEntry != null)
             {
-                annotation.Color = new Color((Vector4)_jsonToVector4(colorEntry));
+                section.Color = new Color((Vector4)_jsonToVector4(colorEntry));
             }
 
-            annotation.Size = GetVec2OrDefault(annotationEntry[JsonKeys.Size]);
-            annotationDict[annotation.Id] = annotation;
+            section.Size = GetVec2OrDefault(sectionEntry[JsonKeys.Size]);
+            sectionDict[section.Id] = section;
         }
 
-        return annotationDict;
+        return sectionDict;
     }
 
     private static OrderedDictionary<Guid, ExternalLink> ReadLinks(JToken token)
@@ -574,7 +575,7 @@ internal static class SymbolUiJson
 
             if (!JsonUtils.TryGetGuid(linkEntry[JsonKeys.Id], out var id))
             {
-                Log.Warning("Skipping annotation with missing or invalid id");
+                Log.Warning("Skipping section with missing or invalid id");
                 continue;
             }
 
@@ -650,7 +651,7 @@ internal static class SymbolUiJson
         public const string InputUis = nameof(InputUis);
         public const string SymbolChildUis = nameof(SymbolChildUis);
         public const string OutputUis = nameof(OutputUis);
-        public const string Annotations = nameof(Annotations);
+        public const string Sections = nameof(Sections);
         public const string Links = nameof(Links);
         public const string TourPoints = nameof(TourPoints);
         // Settings is written by WriteSettings()
@@ -669,8 +670,12 @@ internal static class SymbolUiJson
         public const string Comment = nameof(Comment);
         public const string ConnectionStyleOverrides = nameof(ConnectionStyleOverrides);
 
-        // Annotation fields
-        public const string AnnotationId = nameof(AnnotationId);
+        // Section fields
+        public const string SectionId = nameof(SectionId);
+
+        // Back-compat: files saved before the annotation->section rename
+        public const string LegacyAnnotations = "Annotations";
+        public const string LegacyAnnotationId = "AnnotationId";
         public const string Title = nameof(Title);
         public const string Label = nameof(Label);
         public const string Color = nameof(Color);

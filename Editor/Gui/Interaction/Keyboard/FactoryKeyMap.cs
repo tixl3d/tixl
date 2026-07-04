@@ -51,7 +51,9 @@ internal static class FactoryKeyMap
                 new(UserActions.DisplayImageAsBackground, new KeyCombination(Key.P, ctrl: true)),
                 new(UserActions.ClearBackgroundImage, new KeyCombination(Key.P, ctrl: true, shift: true)),
                 new(UserActions.LayoutSelection, new KeyCombination(Key.G)),
-                new(UserActions.AddAnnotation, new KeyCombination(Key.A, shift: true)),
+                new(UserActions.AddSection, new KeyCombination(Key.S, shift: true)),
+                // Alias from the annotation days - muscle memory
+                new(UserActions.AddSection, new KeyCombination(Key.A, shift: true)),
                 new(UserActions.AddComment, new KeyCombination(Key.C, shift: true, ctrl: true)),
                 new(UserActions.ToggleVariationsWindow, new KeyCombination(Key.V, alt: true)),
                 new(UserActions.SearchGraph, new KeyCombination(Key.F, ctrl: true)),

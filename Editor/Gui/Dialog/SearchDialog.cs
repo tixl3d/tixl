@@ -148,7 +148,7 @@ internal sealed class SearchDialog : ModalDialog
         ImGui.PushID(symbolHash);
         {
             var instance = item.Instance;
-            if (item.Annotation == null)
+            if (item.Section == null)
             {
                 var symbolNamespace = instance.Symbol.Namespace;
                 var isRelevantNamespace = symbolNamespace.StartsWith("Lib.")
@@ -210,7 +210,7 @@ internal sealed class SearchDialog : ModalDialog
                 ImGui.PopStyleVar();
                 ImGui.PopStyleColor(3);
             }
-            else if (item.Annotation != null) 
+            else if (item.Section != null) 
             {
                 var isSelected = item == _selectedInstance;
                 var hasBeenClicked = ImGui.Selectable($"##Selectable{symbolHash.ToString()}", isSelected);
@@ -232,7 +232,7 @@ internal sealed class SearchDialog : ModalDialog
 
                 if (activate)
                 {
-                    components.GraphView.OpenAndFocusAnnotation(item.Instance.InstancePath, item.Annotation.Id);
+                    components.GraphView.OpenAndFocusSection(item.Instance.InstancePath, item.Section.Id);
                     _selectedInstance = item;
                 }
 
@@ -240,7 +240,7 @@ internal sealed class SearchDialog : ModalDialog
                 ImGui.TextUnformatted(item.Name);
                 
                 ImGui.SameLine(0,10);
-                CustomComponents.StylizedText("(Annotation)", Fonts.FontNormal, UiColors.TextMuted);
+                CustomComponents.StylizedText("(Section)", Fonts.FontNormal, UiColors.TextMuted);
 
             }
         }
@@ -291,9 +291,9 @@ internal sealed class SearchDialog : ModalDialog
                             {
                                 _matchingItems.Add(new SearchResult(instance));
                             },
-                            (compositionInstance, annotation) =>
+                            (compositionInstance, section) =>
                             {
-                                _matchingItems.Add(new SearchResult(compositionInstance, annotation));
+                                _matchingItems.Add(new SearchResult(compositionInstance, section));
                             });
         }
         
@@ -301,28 +301,28 @@ internal sealed class SearchDialog : ModalDialog
         
         _matchingItems.Sort((foundA, foundB) =>
                             {
-                                // 1. Sort by IsAnnotation (true first)
-                                if ((foundB.Annotation != null).CompareTo(foundA.Annotation !=null) != 0)
+                                // 1. Sort by IsSection (true first)
+                                if ((foundB.Section != null).CompareTo(foundA.Section !=null) != 0)
                                 {
-                                    return (foundB.Annotation != null).CompareTo(foundA.Annotation !=null);
+                                    return (foundB.Section != null).CompareTo(foundA.Section !=null);
                                 }
 
-                                // 2. If IsAnnotation is the same, sort by Name alphabetically
+                                // 2. If IsSection is the same, sort by Name alphabetically
                                 return string.Compare(foundA.Name, foundB.Name, StringComparison.Ordinal);
                             });
 
         //_matchingItems.Sort((foundA, foundB) => string.Compare(foundA.Name, foundB.Name, StringComparison.Ordinal));
     }
 
-    private void FindAllChildren(Instance composition, Action<Instance> instanceCallback, Action<Instance, Annotation> annotationCallback)
+    private void FindAllChildren(Instance composition, Action<Instance> instanceCallback, Action<Instance, Section> sectionCallback)
     {
         var symbolUi = composition.GetSymbolUi();
         
-        foreach (var annotation in symbolUi.Annotations.Values)
+        foreach (var section in symbolUi.Sections.Values)
         {
-            if (annotation.Label.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase) ||
-                annotation.Title.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase))
-                annotationCallback(composition, annotation);
+            if (section.Label.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase) ||
+                section.Title.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase))
+                sectionCallback(composition, section);
         }
 
         foreach (var child in composition.Children.Values)
@@ -338,7 +338,7 @@ internal sealed class SearchDialog : ModalDialog
                 continue;
 
 
-            FindAllChildren(child, instanceCallback, annotationCallback);
+            FindAllChildren(child, instanceCallback, sectionCallback);
         }
     }
 
@@ -358,21 +358,21 @@ internal sealed class SearchDialog : ModalDialog
             Id = instance.SymbolChildId;
         }
 
-        public SearchResult(Instance compositionInstance, Annotation annotation)
+        public SearchResult(Instance compositionInstance, Section section)
         {
             Instance = compositionInstance;
-            Annotation = annotation;
+            Section = section;
             GraphCanvas = ProjectView.Focused;
-            Id = annotation.Id;
+            Id = section.Id;
         }
 
         public readonly Guid Id;
         public readonly Instance Instance;
-        public readonly Annotation? Annotation;
+        public readonly Section? Section;
         public readonly ProjectView? GraphCanvas;
 
-        public string Name => Annotation != null 
-                                  ? Annotation?.Label ?? string.Empty 
+        public string Name => Section != null 
+                                  ? Section?.Label ?? string.Empty 
                                   : Instance.Symbol.Name;
     }
 

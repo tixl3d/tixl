@@ -9,33 +9,33 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 
 internal sealed partial class MagGraphView
 {
-    private void DrawAnnotation(MagGraphAnnotation magAnnotation, ImDrawListPtr drawList, GraphUiContext context)
+    private void DrawSection(MagGraphSection magSection, ImDrawListPtr drawList, GraphUiContext context)
     {
         var canvas = context.View;
 
-        var annotation = magAnnotation.Annotation;
-        var area = annotation.Collapsed
-                       ? ImRect.RectWithSize(annotation.PosOnCanvas, new Vector2(annotation.Size.X, MagGraphItem.LineHeight))
-                       :ImRect.RectWithSize(annotation.PosOnCanvas, annotation.Size) ;
+        var section = magSection.Section;
+        var area = section.Collapsed
+                       ? ImRect.RectWithSize(section.PosOnCanvas, new Vector2(section.Size.X, MagGraphItem.LineHeight))
+                       :ImRect.RectWithSize(section.PosOnCanvas, section.Size) ;
 
 
         if (!IsRectVisible(area))
             return;
 
-        // ImGui 1.91.2 ID-conflict guard: ensure all widgets in this annotation
-        // get a unique ID per annotation so the "##annotationHeader" / "##resize"
-        // labels don't collide between annotations.
-        ImGui.PushID(magAnnotation.Id.GetHashCode());
+        // ImGui 1.91.2 ID-conflict guard: ensure all widgets in this section
+        // get a unique ID per section so the "##sectionHeader" / "##resize"
+        // labels don't collide between sections.
+        ImGui.PushID(magSection.Id.GetHashCode());
 
-        var pMin = TransformPosition(magAnnotation.DampedPosOnCanvas);
-        var dampedSize = annotation.Collapsed 
-                             ? new Vector2( magAnnotation.DampedSize.X,MagGraphItem.LineHeight)
-                             : magAnnotation.DampedSize;
-        var pMax = TransformPosition(magAnnotation.DampedPosOnCanvas + dampedSize);
+        var pMin = TransformPosition(magSection.DampedPosOnCanvas);
+        var dampedSize = section.Collapsed 
+                             ? new Vector2( magSection.DampedSize.X,MagGraphItem.LineHeight)
+                             : magSection.DampedSize;
+        var pMax = TransformPosition(magSection.DampedPosOnCanvas + dampedSize);
 
         drawList.PushClipRect(pMin, pMax, true); // Start with a simple rectangular clip 
         // Background
-        var backgroundColor = ColorVariations.AnnotationBackground.Apply(annotation.Color).Fade(0.8f);
+        var backgroundColor = ColorVariations.SectionBackground.Apply(section.Color).Fade(0.8f);
 
         var rounding = 8;// * canvas.Scale.X; 
         var flags = ImDrawFlags.RoundCornersTop | ImDrawFlags.RoundCornersBottomLeft;
@@ -46,12 +46,12 @@ internal sealed partial class MagGraphView
                                backgroundColor,
                                rounding, flags);
 
-        var isNodeSelected = context.Selector.IsNodeSelected(annotation);
+        var isNodeSelected = context.Selector.IsNodeSelected(section);
 
         
         // Outline
         var borderColor = isNodeSelected ? UiColors.ForegroundFull 
-                                 : ColorVariations.AnnotationOutline.Apply(annotation.Color);
+                                 : ColorVariations.SectionOutline.Apply(section.Color);
         drawList.AddRect(pMin,
                          pMax,
                          borderColor.Fade(_context.GraphOpacity),
@@ -70,8 +70,8 @@ internal sealed partial class MagGraphView
             var positionInScreen = screenArea.Min  + new Vector2(-5,6) * T3Ui.UiScaleFactor;
             var labelPos = positionInScreen; // - new Vector2(2, Fonts.FontNormal.FontSize + 8);
             ImGui.SetCursorScreenPos(labelPos);
-            bool isCollapsed = annotation.Collapsed;
-            ImGui.PushID(annotation.Id.GetHashCode());
+            bool isCollapsed = section.Collapsed;
+            ImGui.PushID(section.Id.GetHashCode());
             if (CustomComponents.ToggleTwoIconsButton(ref isCollapsed, 
                                                       Icon.ChevronDown,
                                                       Icon.ChevronRight,
@@ -90,7 +90,7 @@ internal sealed partial class MagGraphView
 
                         
                         if(area.Contains(item.Area))
-                            item.ChildUi.CollapsedIntoAnnotationFrameId = magAnnotation.Id;
+                            item.ChildUi.CollapsedIntoSectionFrameId = magSection.Id;
                     }
                 }
                 else
@@ -101,16 +101,16 @@ internal sealed partial class MagGraphView
                         if (item.Variant != MagGraphItem.Variants.Operator || item.ChildUi == null)
                             continue;
 
-                        if (item.ChildUi.CollapsedIntoAnnotationFrameId == magAnnotation.Id)
+                        if (item.ChildUi.CollapsedIntoSectionFrameId == magSection.Id)
                         {
-                            item.ChildUi.CollapsedIntoAnnotationFrameId = Guid.Empty;
+                            item.ChildUi.CollapsedIntoSectionFrameId = Guid.Empty;
                         }
                             
                     }
 
                 }
                 context.Layout.FlagStructureAsChanged();
-                annotation.Collapsed = !annotation.Collapsed;
+                section.Collapsed = !section.Collapsed;
             }
             ImGui.PopID();
         }
@@ -119,14 +119,14 @@ internal sealed partial class MagGraphView
         ImGui.SetCursorScreenPos(clickableArea.Min );
         
         
-        var isRenaming = context.ActiveAnnotationId == magAnnotation.Id &&
-                         context.StateMachine.CurrentState == GraphStates.RenameAnnotation;
+        var isRenaming = context.ActiveSectionId == magSection.Id &&
+                         context.StateMachine.CurrentState == GraphStates.RenameSection;
         if (!isRenaming)
         {        
             var headerSize = clickableArea.GetSize();
             if (headerSize.X < 1f) headerSize.X = 1f;
             if (headerSize.Y < 1f) headerSize.Y = 1f;
-            ImGui.InvisibleButton("##annotationHeader", headerSize);
+            ImGui.InvisibleButton("##sectionHeader", headerSize);
 
             DrawUtils.DebugItemRect();
             var isHeaderHovered = ImGui.IsItemHovered() && context.StateMachine.CurrentState == GraphStates.Default;
@@ -145,8 +145,8 @@ internal sealed partial class MagGraphView
             // Clicked -> Drag
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left) && !ImGui.GetIO().KeyAlt)
             {
-                context.ActiveAnnotationId = magAnnotation.Id;
-                context.StateMachine.SetState(GraphStates.DragAnnotation, context);
+                context.ActiveSectionId = magSection.Id;
+                context.StateMachine.SetState(GraphStates.DragSection, context);
             }
         }
 
@@ -154,17 +154,17 @@ internal sealed partial class MagGraphView
         var shouldRename = (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left));
         if (shouldRename)
         {
-            context.ActiveAnnotationId = magAnnotation.Id;
-            context.StateMachine.SetState(GraphStates.RenameAnnotation, context);
+            context.ActiveSectionId = magSection.Id;
+            context.StateMachine.SetState(GraphStates.RenameSection, context);
         }
 
         // Label and description
-        if (context.ActiveAnnotationId != magAnnotation.Id || context.StateMachine.CurrentState != GraphStates.RenameAnnotation)
+        if (context.ActiveSectionId != magSection.Id || context.StateMachine.CurrentState != GraphStates.RenameSection)
         {
             var labelHeight = 0f;
             var canvasScale = canvas.Scale.X;
             {
-                if (!string.IsNullOrEmpty(annotation.Label))
+                if (!string.IsNullOrEmpty(section.Label))
                 {
                     var fade = MathUtils.SmootherStep(0.1f, 0.2f, canvasScale) * 0.8f * _context.GraphOpacity;
                     var fontSize = canvasScale > 1
@@ -176,15 +176,15 @@ internal sealed partial class MagGraphView
                     drawList.AddText(Fonts.FontLarge,
                                      fontSize,
                                      pMin + new Vector2(8 + 10, 3) * T3Ui.UiScaleFactor,
-                                     ColorVariations.OperatorLabel.Apply(annotation.Color.Fade(fade)),
-                                     annotation.Label);
+                                     ColorVariations.OperatorLabel.Apply(section.Color.Fade(fade)),
+                                     section.Label);
                     labelHeight = Fonts.FontLarge.FontSize;
                 }
             }
 
-            if (!string.IsNullOrEmpty(annotation.Title))
+            if (!string.IsNullOrEmpty(section.Title))
             {
-                var font = annotation.Title.StartsWith("# ") ? Fonts.FontLarge : Fonts.FontNormal;
+                var font = section.Title.StartsWith("# ") ? Fonts.FontLarge : Fonts.FontNormal;
                 drawList.PushClipRect(pMin, pMax, true);
                 var labelPos = pMin + new Vector2(8, 8 + labelHeight) * T3Ui.UiScaleFactor;
 
@@ -197,15 +197,15 @@ internal sealed partial class MagGraphView
                 drawList.AddText(font,
                                  fontSize,
                                  labelPos,
-                                 ColorVariations.OperatorLabel.Apply(annotation.Color.Fade(fade)),
-                                 annotation.Title);
+                                 ColorVariations.OperatorLabel.Apply(section.Color.Fade(fade)),
+                                 section.Title);
                 drawList.PopClipRect();
             }
         }
 
         // Resize handle
         {
-            ImGui.PushID(magAnnotation.Id.GetHashCode());
+            ImGui.PushID(magSection.Id.GetHashCode());
             
             var thumbSize = (int)10 * T3Ui.UiScaleFactor;
 
@@ -219,14 +219,14 @@ internal sealed partial class MagGraphView
 
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
-                context.ActiveAnnotationId = magAnnotation.Id;
-                context.StateMachine.SetState(GraphStates.ResizeAnnotation, context);
+                context.ActiveSectionId = magSection.Id;
+                context.StateMachine.SetState(GraphStates.ResizeSection, context);
             }
             drawList.AddTriangleFilled(screenArea.Max - new Vector2(11, 1) * T3Ui.UiScaleFactor, screenArea.Max - new Vector2(1, 11) * T3Ui.UiScaleFactor, screenArea.Max - new Vector2(1, 1) * T3Ui.UiScaleFactor, UiColors.BackgroundButton);
             drawList.PopClipRect();
             ImGui.PopID();
         }
 
-        ImGui.PopID(); // outer per-annotation PushID
+        ImGui.PopID(); // outer per-section PushID
     }
 }

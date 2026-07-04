@@ -93,7 +93,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         _projectView.TrySetCompositionOp(compositionPath, ScalableCanvas.Transition.JumpIn, path[^1]);
     }
 
-    public void OpenAndFocusAnnotation(IReadOnlyList<Guid> compositionPath, Guid annotationId)
+    public void OpenAndFocusSection(IReadOnlyList<Guid> compositionPath, Guid sectionId)
     {
         if (compositionPath.Count == 1)
         {
@@ -115,10 +115,10 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
             return;
 
         var symbolUi = _projectView.CompositionInstance.GetSymbolUi();
-        if (!symbolUi.Annotations.TryGetValue(annotationId, out var annotation))
+        if (!symbolUi.Sections.TryGetValue(sectionId, out var section))
             return;
 
-        var area = ImRect.RectWithSize(annotation.PosOnCanvas, annotation.Size);
+        var area = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
         area.Expand(100);
         RequestTargetViewAreaWithTransition(area, Transition.Smooth);
     }
@@ -433,23 +433,23 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
             }
         }
 
-        foreach (var magAnnotation in _context.Layout.Annotations.Values)
+        foreach (var magSection in _context.Layout.Sections.Values)
         {
-            var annotationArea = magAnnotation.Annotation.Collapsed
-                                     ? new ImRect(magAnnotation.PosOnCanvas,
-                                                  magAnnotation.PosOnCanvas + new Vector2(magAnnotation.Size.X, MagGraphItem.GridSize.Y))
-                                     : new ImRect(magAnnotation.PosOnCanvas, magAnnotation.PosOnCanvas + magAnnotation.Size);
+            var sectionArea = magSection.Section.Collapsed
+                                     ? new ImRect(magSection.PosOnCanvas,
+                                                  magSection.PosOnCanvas + new Vector2(magSection.Size.X, MagGraphItem.GridSize.Y))
+                                     : new ImRect(magSection.PosOnCanvas, magSection.PosOnCanvas + magSection.Size);
 
-            if (!boundsInCanvas.Contains(annotationArea))
+            if (!boundsInCanvas.Contains(sectionArea))
                 continue;
 
             if (selectMode == SelectionFence.SelectModes.Remove)
             {
-                _context.Selector.DeselectNode(magAnnotation.Annotation);
+                _context.Selector.DeselectNode(magSection.Section);
             }
             else
             {
-                _context.Selector.AddSelection(magAnnotation.Annotation);
+                _context.Selector.AddSelection(magSection.Section);
             }
         }
     }    
@@ -467,7 +467,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         return normalizedFile.StartsWith(normalizedDir, StringComparison.OrdinalIgnoreCase);
     }
 
-    // TODO: Support non graph items like annotations.
+    // TODO: Support non graph items like sections.
 
     // private void CenterView()
     // {

@@ -110,12 +110,12 @@ internal sealed class UiElements
                         mapSize.X = mapSize.Y * boundsAspect;
                     }
 
-                    foreach (var annotation in symbolUi.Annotations.Values)
+                    foreach (var section in symbolUi.Sections.Values)
                     {
-                        var rect = ImRect.RectWithSize(annotation.PosOnCanvas, annotation.Size);
+                        var rect = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
                         var min = (rect.Min - boundsMin) / boundsSize * mapSize + mapMin;
                         var max = (rect.Max - boundsMin) / boundsSize * mapSize + mapMin;
-                        dl.AddRectFilled(min, max, annotation.Color.Fade(0.1f * opacity));
+                        dl.AddRectFilled(min, max, section.Color.Fade(0.1f * opacity));
                     }
 
                     foreach (var child in symbolUi.ChildUis.Values)

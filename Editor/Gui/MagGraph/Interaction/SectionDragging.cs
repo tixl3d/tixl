@@ -13,9 +13,9 @@ using T3.Editor.UiModel.Selection;
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
 /// <summary>
-/// Handles the dragging of annotations
+/// Handles the dragging of sections
 /// </summary>
-internal static class AnnotationDragging
+internal static class SectionDragging
 {
     internal static void Draw(GraphUiContext context)
     {
@@ -27,36 +27,36 @@ internal static class AnnotationDragging
         if (instViewSymbolUi == null)
             return;
 
-        var annotationId = context.ActiveAnnotationId;
+        var sectionId = context.ActiveSectionId;
 
-        if (!context.Layout.Annotations.TryGetValue(annotationId, out var magAnnotation))
+        if (!context.Layout.Sections.TryGetValue(sectionId, out var magSection))
         {
-            context.ActiveAnnotationId = Guid.Empty;
+            context.ActiveSectionId = Guid.Empty;
             context.StateMachine.SetState(GraphStates.Default, context);
             return;
         }
 
-        var annotation = magAnnotation.Annotation;
+        var section = magSection.Section;
 
         // Start dragging...
         {
-            var started = context.ActiveAnnotationId != _draggedAnnotationId;
+            var started = context.ActiveSectionId != _draggedSectionId;
             if (started)
             {
-                _draggedAnnotationId = context.ActiveAnnotationId;
-                _dragStartDelta = ImGui.GetMousePos() - context.View.TransformPosition(magAnnotation.PosOnCanvas);
+                _draggedSectionId = context.ActiveSectionId;
+                _dragStartDelta = ImGui.GetMousePos() - context.View.TransformPosition(magSection.PosOnCanvas);
 
                 _draggedNodes.Clear();
-                if (context.Selector.IsNodeSelected(annotation))
+                if (context.Selector.IsNodeSelected(section))
                 {
                     _draggedNodes.AddRange(context.Selector.GetSelectedNodes<ISelectableCanvasObject>());
                 }
                 else
                 {
                     if (!ImGui.GetIO().KeyCtrl)
-                        _draggedNodes.AddRange(FindAnnotatedOps(context.ProjectView.InstView.SymbolUi, annotation));
+                        _draggedNodes.AddRange(FindOpsInSection(context.ProjectView.InstView.SymbolUi, section));
                     
-                    _draggedNodes.Add(annotation);
+                    _draggedNodes.Add(section);
                 }
 
                 _moveCommand = new ModifyCanvasElementsCommand(instViewSymbolUi, _draggedNodes, context.Selector);
@@ -71,35 +71,35 @@ internal static class AnnotationDragging
             var minSize = MathF.Min(MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y);
             var gridSize = Vector2.One * minSize;
 
-            _visibleAnnotationsForSnapping.Clear();
-            foreach (var snapTo in context.Layout.Annotations.Values)
+            _visibleSectionsForSnapping.Clear();
+            foreach (var snapTo in context.Layout.Sections.Values)
             {
                 if (context.View.IsItemVisible(snapTo))
-                    _visibleAnnotationsForSnapping.Add(snapTo);
+                    _visibleSectionsForSnapping.Add(snapTo);
             }
 
             var newDragPos = ImGui.GetMousePos() - _dragStartDelta;
             var newDragPosInCanvas = context.View.InverseTransformPositionFloat(newDragPos);
-            var moveDeltaOnCanvas = newDragPosInCanvas - magAnnotation.PosOnCanvas;
+            var moveDeltaOnCanvas = newDragPosInCanvas - magSection.PosOnCanvas;
 
             // Horizontal snapping
             var snapFactor = 0.5f;
             if (_snapHandlerX.TryCheckForSnapping(newDragPosInCanvas.X, out var snappedXValue,
                                                   context.View.Scale.X * snapFactor,
-                                                      [magAnnotation],
-                                                  _visibleAnnotationsForSnapping
+                                                      [magSection],
+                                                  _visibleSectionsForSnapping
                                                  ))
             {
                 var snapDelta = snappedXValue - newDragPosInCanvas.X;
                 moveDeltaOnCanvas.X += (float)snapDelta;
             }
-            else if (_snapHandlerX.TryCheckForSnapping(newDragPosInCanvas.X + magAnnotation.Size.X, out var snappedXValue2,
+            else if (_snapHandlerX.TryCheckForSnapping(newDragPosInCanvas.X + magSection.Size.X, out var snappedXValue2,
                                                        context.View.Scale.X * snapFactor,
-                                                           [magAnnotation],
-                                                       _visibleAnnotationsForSnapping
+                                                           [magSection],
+                                                       _visibleSectionsForSnapping
                                                       ))
             {
-                var snapDelta = snappedXValue2 - newDragPosInCanvas.X - magAnnotation.Size.X;
+                var snapDelta = snappedXValue2 - newDragPosInCanvas.X - magSection.Size.X;
                 moveDeltaOnCanvas.X += (float)snapDelta;
             }
             else if (_snapHandlerX.TryCheckForSnapping(newDragPosInCanvas.X, out var snappedXValue3,
@@ -118,20 +118,20 @@ internal static class AnnotationDragging
             // Vertical snapping...
             if (_snapHandlerY.TryCheckForSnapping(newDragPosInCanvas.Y, out var snappedYValue,
                                                   context.View.Scale.Y * snapFactor,
-                                                      [magAnnotation],
-                                                  _visibleAnnotationsForSnapping
+                                                      [magSection],
+                                                  _visibleSectionsForSnapping
                                                  ))
             {
                 var snapDelta = snappedYValue - newDragPosInCanvas.Y;
                 moveDeltaOnCanvas.Y += (float)snapDelta;
             }
-            else if (_snapHandlerY.TryCheckForSnapping(newDragPosInCanvas.Y + magAnnotation.Size.Y, out var snappedYValue2,
+            else if (_snapHandlerY.TryCheckForSnapping(newDragPosInCanvas.Y + magSection.Size.Y, out var snappedYValue2,
                                                        context.View.Scale.Y * snapFactor,
-                                                           [magAnnotation],
-                                                       _visibleAnnotationsForSnapping
+                                                           [magSection],
+                                                       _visibleSectionsForSnapping
                                                       ))
             {
-                moveDeltaOnCanvas.Y += (float)(snappedYValue2 - newDragPosInCanvas.Y - magAnnotation.Size.Y);
+                moveDeltaOnCanvas.Y += (float)(snappedYValue2 - newDragPosInCanvas.Y - magSection.Size.Y);
             }
             else if (_snapHandlerY.TryCheckForSnapping(newDragPosInCanvas.Y, out var snappedYValue3,
                                                        context.View.Scale.Y ,
@@ -165,11 +165,11 @@ internal static class AnnotationDragging
             else
             {
                 _moveCommand.Undo();
-                if (context.Selector.IsNodeSelected(annotation))
+                if (context.Selector.IsNodeSelected(section))
                 {
                     if (ImGui.GetIO().KeyShift)
                     {
-                        context.Selector.DeselectNode(annotation, null);
+                        context.Selector.DeselectNode(section, null);
                     }
                 }
                 else
@@ -177,23 +177,23 @@ internal static class AnnotationDragging
                     if (!ImGui.GetIO().KeyShift)
                         context.Selector.Clear();
 
-                    context.Selector.AddSelection(annotation);
+                    context.Selector.AddSelection(section);
                 }
             }
 
             context.StateMachine.SetState(GraphStates.Default, context);
             _draggedNodes.Clear();
-            _draggedAnnotationId = Guid.Empty;
+            _draggedSectionId = Guid.Empty;
             _moveCommand = null;
         }
     }
 
-    private static readonly List<MagGraphAnnotation> _visibleAnnotationsForSnapping = [];
+    private static readonly List<MagGraphSection> _visibleSectionsForSnapping = [];
 
-    private static List<ISelectableCanvasObject> FindAnnotatedOps(SymbolUi parentUi, Annotation annotation)
+    private static List<ISelectableCanvasObject> FindOpsInSection(SymbolUi parentUi, Section section)
     {
         var matches = new List<ISelectableCanvasObject>();
-        var aRect = new ImRect(annotation.PosOnCanvas, annotation.PosOnCanvas + annotation.Size);
+        var aRect = new ImRect(section.PosOnCanvas, section.PosOnCanvas + section.Size);
 
         // Find ops
         foreach (var n in parentUi.ChildUis.Values)
@@ -218,10 +218,10 @@ internal static class AnnotationDragging
         }
 
 
-        // Find nested annotations
-        foreach (var a in parentUi.Annotations.Values)
+        // Find nested sections
+        foreach (var a in parentUi.Sections.Values)
         {
-            if (a == annotation)
+            if (a == section)
                 continue;
 
             var nRect = new ImRect(a.PosOnCanvas, a.PosOnCanvas + a.Size);
@@ -232,7 +232,7 @@ internal static class AnnotationDragging
         return matches;
     }
 
-    private static Guid _draggedAnnotationId = Guid.Empty;
+    private static Guid _draggedSectionId = Guid.Empty;
     private static Vector2 _dragStartDelta;
     private static ModifyCanvasElementsCommand _moveCommand;
     private static readonly List<ISelectableCanvasObject> _draggedNodes = [];

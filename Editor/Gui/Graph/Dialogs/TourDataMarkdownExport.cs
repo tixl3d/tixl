@@ -85,7 +85,7 @@ internal static partial class TourDataMarkdownExport
         // find identical children and order them by height / pos x
         var childSymbolId = child.SymbolChild.Symbol.Id;
         var index = symbolUi.ChildUis.Values
-                            .Where(c => c.SymbolChild.Symbol.Id == childSymbolId && c.CollapsedIntoAnnotationFrameId == Guid.Empty)
+                            .Where(c => c.SymbolChild.Symbol.Id == childSymbolId && c.CollapsedIntoSectionFrameId == Guid.Empty)
                             .OrderBy(c => c.PosOnCanvas.Y + c.PosOnCanvas.X * 0.1f)
                             .Select((item, idx) => new { Item = item, Index = idx })
                             .FirstOrDefault(pair => pair.Item.Id == child.Id)?.Index ?? -1;
@@ -214,7 +214,7 @@ internal static partial class TourDataMarkdownExport
                     }
 
                     var targetChildUi = selectedChildUis
-                                       .Where(c => c.CollapsedIntoAnnotationFrameId == Guid.Empty)
+                                       .Where(c => c.CollapsedIntoSectionFrameId == Guid.Empty)
                                        .OrderByDescending(c => c.PosOnCanvas.Y + c.PosOnCanvas.X * 0.1f)
                                        .FirstOrDefault(c => string.Equals(tour.IdString, c.SymbolChild.Symbol.Id.ShortenGuid(),
                                                                           StringComparison.InvariantCulture));
@@ -416,7 +416,7 @@ internal static partial class TourDataMarkdownExport
             var matchIndex = 0;
             foreach (SymbolUi.Child childUi in symbolUi.ChildUis.Values)
             {
-                if (childUi.CollapsedIntoAnnotationFrameId != Guid.Empty)
+                if (childUi.CollapsedIntoSectionFrameId != Guid.Empty)
                     continue;
 
                 var childSymbolName = childUi.SymbolChild.Symbol.Name;

@@ -37,7 +37,7 @@ public partial class SymbolUi
         public Guid Id { get; }
         public Vector2 PosOnCanvas { get; set; } = Vector2.Zero;
         public Vector2 Size { get; set; } = DefaultOpSize;
-        public Guid CollapsedIntoAnnotationFrameId { get; set; }
+        public Guid CollapsedIntoSectionFrameId { get; set; }
         
 
         /// <summary>
@@ -103,7 +103,7 @@ public partial class SymbolUi
             {
                 PosOnCanvas = original.PosOnCanvas,
                 Size = original.Size,
-                CollapsedIntoAnnotationFrameId = original.CollapsedIntoAnnotationFrameId, // Careful! When duplicating the parent symbol or annotation, this needs to updated.
+                CollapsedIntoSectionFrameId = original.CollapsedIntoSectionFrameId, // Careful! When duplicating the parent symbol or section, this needs to updated.
                 Style = original.Style,
                 Comment = original.Comment,
                 SnapshotGroupIndex = original.SnapshotGroupIndex,
@@ -130,7 +130,7 @@ public partial class SymbolUi
                            Size = Size,
                            Style = Style,
                            Comment = Comment,
-                           CollapsedIntoAnnotationFrameId = CollapsedIntoAnnotationFrameId,
+                           CollapsedIntoSectionFrameId = CollapsedIntoSectionFrameId,
                            SnapshotGroupIndex = SnapshotGroupIndex,
                            SnapshotEnabledInputIds = SnapshotEnabledInputIds == null ? null : [..SnapshotEnabledInputIds],
                        };

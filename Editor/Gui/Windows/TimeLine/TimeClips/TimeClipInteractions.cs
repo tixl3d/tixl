@@ -197,8 +197,8 @@ internal sealed class TimeClipInteractions
             var originalName = symbolChildUi.SymbolChild.ReadableName;
             var newPos = symbolChildUi.PosOnCanvas;
             newPos.Y += MagGraphItem.GridSize.Y;
-            // Pass an empty annotation list (not null) so the command does not fall back
-            // to cloning every annotation in the composition.
+            // Pass an empty section list (not null) so the command does not fall back
+            // to cloning every section in the composition.
             var cmd = new CopySymbolChildrenCommand(compositionSymbolUi,
                                                     [symbolChildUi],
                                                     [],

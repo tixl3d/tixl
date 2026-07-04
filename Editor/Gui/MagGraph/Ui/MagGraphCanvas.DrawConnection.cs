@@ -47,10 +47,10 @@ internal sealed partial class MagGraphView
         Vector2 sourceOnCanvas;
         if (connection.SourceItem.IsCollapsedAway)
         {
-            if (!context.Layout.Annotations.TryGetValue(connection.SourceItem.ChildUi!.CollapsedIntoAnnotationFrameId, out var annotation))
+            if (!context.Layout.Sections.TryGetValue(connection.SourceItem.ChildUi!.CollapsedIntoSectionFrameId, out var section))
                 return;
 
-            sourceOnCanvas = annotation.PosOnCanvas + new Vector2(annotation.Size.X - 5, MagGraphItem.LineHeight/2);
+            sourceOnCanvas = section.PosOnCanvas + new Vector2(section.Size.X - 5, MagGraphItem.LineHeight/2);
         }
         else
         {
@@ -62,10 +62,10 @@ internal sealed partial class MagGraphView
         Vector2 targetOnCanvas;
         if (connection.TargetItem.IsCollapsedAway)
         {
-            if (!context.Layout.Annotations.TryGetValue(connection.TargetItem.ChildUi!.CollapsedIntoAnnotationFrameId, out var annotation))
+            if (!context.Layout.Sections.TryGetValue(connection.TargetItem.ChildUi!.CollapsedIntoSectionFrameId, out var section))
                 return;
 
-            targetOnCanvas = annotation.PosOnCanvas + new Vector2(2, MagGraphItem.LineHeight/2);
+            targetOnCanvas = section.PosOnCanvas + new Vector2(2, MagGraphItem.LineHeight/2);
         }
         else
         {

@@ -20,7 +20,7 @@ internal sealed class CombineToSymbolDialog : ModalDialog
         if (BeginDialog("Combine into symbol"))
         {
             var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToList();
-            var selectedAnnotations = projectView.NodeSelection.GetSelectedNodes<Annotation>().ToList();
+            var selectedSections = projectView.NodeSelection.GetSelectedNodes<Section>().ToList();
 
             if (_projectToCopyTo == null)
             {
@@ -51,7 +51,7 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                     if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))
                         throw new Exception($"Can't find symbol ui for symbol {symbolGuid}");
                     
-                    Combine.CombineAsNewType(compositionSymbolUi, _projectToCopyTo, selectedChildUis, selectedAnnotations, combineName, nameSpace, description,
+                    Combine.CombineAsNewType(compositionSymbolUi, _projectToCopyTo, selectedChildUis, selectedSections, combineName, nameSpace, description,
                                              _shouldBeTimeClip);
                     _shouldBeTimeClip = false; // Making timeclips this is normally a one-off operation
                     result = ChangeSymbol.SymbolModificationResults.StructureChanged;

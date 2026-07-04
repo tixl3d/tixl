@@ -42,7 +42,7 @@ internal static class GraphContextMenu
         Copy, Duplicate, Paste, Delete, RenameOutput,
         MoreMenu, CopyKeyframes, CopySymbolName, CopyDependencies, DuplicateConnected, PasteValues,
         OpenFolderMenu, OpenProjectFolder, OpenResourcesFolder,
-        AddNode, AddAnnotation, AddInput, AddOutput,
+        AddNode, AddSection, AddInput, AddOutput,
         SymbolDefMenu, RenameSymbol, DuplicateAsNewType, CombineIntoNewType, SetThumbnail,
     }
 
@@ -322,12 +322,12 @@ internal static class GraphContextMenu
             context.Placeholder.OpenOnCanvas(context, posOnCanvas);
         }
 
-        if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddAnnotation, Icon.None, "Annotation",
-                                          UserActions.AddAnnotation.ListShortcuts(), reserveIconColumn: false, state: muted))
+        if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddSection, Icon.None, "Section",
+                                          UserActions.AddSection.ListShortcuts(), reserveIconColumn: false, state: muted))
         {
-            var newAnnotation = NodeActions.AddAnnotation(nodeSelection, context.View, context.CompositionInstance, CustomComponents.ScreenPosOnOpeningContextMenu);
-            context.ActiveAnnotationId = newAnnotation.Id;
-            context.StateMachine.SetState(GraphStates.RenameAnnotation, context);
+            var newSection = NodeActions.AddSection(nodeSelection, context.View, context.CompositionInstance, CustomComponents.ScreenPosOnOpeningContextMenu);
+            context.ActiveSectionId = newSection.Id;
+            context.StateMachine.SetState(GraphStates.RenameSection, context);
         }
 
         if (canModify)

@@ -116,10 +116,10 @@ internal sealed partial class MagGraphView
                 HandleFenceSelection(_context, _selectionFence);
             }
 
-            // Draw annotations
-            foreach (var a in _context.Layout.Annotations.Values)
+            // Draw sections
+            foreach (var a in _context.Layout.Sections.Values)
             {
-                DrawAnnotation(a, drawList, _context);
+                DrawSection(a, drawList, _context);
             }
 
             // Draw items
@@ -171,13 +171,13 @@ internal sealed partial class MagGraphView
                     _context.StateMachine.SetState(GraphStates.Default, _context);
                 }
             }
-            else if (_context.StateMachine.CurrentState == GraphStates.RenameAnnotation)
+            else if (_context.StateMachine.CurrentState == GraphStates.RenameSection)
             {
-                AnnotationRenaming.Draw(_context);
+                SectionRenaming.Draw(_context);
             }
-            else if (_context.StateMachine.CurrentState == GraphStates.DragAnnotation)
+            else if (_context.StateMachine.CurrentState == GraphStates.DragSection)
             {
-                AnnotationDragging.Draw(_context);
+                SectionDragging.Draw(_context);
             }
 
             // Draw temp connections
@@ -338,10 +338,10 @@ internal sealed partial class MagGraphView
             i.DampedPosOnCanvas = Vector2.Lerp(i.PosOnCanvas, i.DampedPosOnCanvas, dampAmount);
         }
 
-        foreach (var a in _context.Layout.Annotations.Values)
+        foreach (var a in _context.Layout.Sections.Values)
         {
-            a.DampedPosOnCanvas = Vector2.Lerp(a.Annotation.PosOnCanvas, a.DampedPosOnCanvas, dampAmount);
-            a.DampedSize = Vector2.Lerp(a.Annotation.Size, a.DampedSize, dampAmount);
+            a.DampedPosOnCanvas = Vector2.Lerp(a.Section.PosOnCanvas, a.DampedPosOnCanvas, dampAmount);
+            a.DampedSize = Vector2.Lerp(a.Section.Size, a.DampedSize, dampAmount);
         }
 
         foreach (var c in _context.Layout.MagConnections)

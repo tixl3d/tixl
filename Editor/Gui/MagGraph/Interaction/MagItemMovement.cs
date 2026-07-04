@@ -225,13 +225,13 @@ internal sealed partial class MagItemMovement
             n.PosOnCanvas += requestedDeltaOnCanvas; // Move to request position
         }
 
-        // Only drag selected annotations along when the drag started from the selection itself,
+        // Only drag selected sections along when the drag started from the selection itself,
         // not when dragging an unselected snapped group.
         if (_draggedItemsFromSelection && DraggedItems.Count != _context.Selector.Selection.Count)
         {
             foreach (var a in _context.Selector.Selection)
             {
-                if (a is not Annotation)
+                if (a is not Section)
                     continue;
                 
                 a.PosOnCanvas -= _lastAppliedOffset; // Move to position

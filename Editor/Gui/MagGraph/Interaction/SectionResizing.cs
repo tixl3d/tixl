@@ -9,7 +9,7 @@ using T3.Editor.UiModel.Commands.Graph;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
-internal static class AnnotationResizing
+internal static class SectionResizing
 {
     internal static void Draw(GraphUiContext context)
     {
@@ -21,25 +21,25 @@ internal static class AnnotationResizing
         if (instViewSymbolUi == null)
             return;
 
-        var annotationId = context.ActiveAnnotationId;
+        var sectionId = context.ActiveSectionId;
 
-        if (!context.Layout.Annotations.TryGetValue(annotationId, out var magAnnotation))
+        if (!context.Layout.Sections.TryGetValue(sectionId, out var magSection))
         {
-            context.ActiveAnnotationId = Guid.Empty;
+            context.ActiveSectionId = Guid.Empty;
             context.StateMachine.SetState(GraphStates.Default, context);
             return;
         }
 
-        var annotation = magAnnotation.Annotation;
+        var section = magSection.Section;
 
         // Start dragging...
         {
-            var started = context.ActiveAnnotationId != _draggedAnnotationId;
+            var started = context.ActiveSectionId != _draggedSectionId;
             if (started)
             {
-                _draggedAnnotationId = context.ActiveAnnotationId;
-                _dragStartDelta = ImGui.GetMousePos() - context.View.TransformPosition(magAnnotation.PosOnCanvas + magAnnotation.Size);
-                _moveCommand = new ModifyCanvasElementsCommand(instViewSymbolUi, [annotation], context.Selector);
+                _draggedSectionId = context.ActiveSectionId;
+                _dragStartDelta = ImGui.GetMousePos() - context.View.TransformPosition(magSection.PosOnCanvas + magSection.Size);
+                _moveCommand = new ModifyCanvasElementsCommand(instViewSymbolUi, [section], context.Selector);
             }
 
             if (started)
@@ -56,8 +56,8 @@ internal static class AnnotationResizing
 
             if (_snapHandlerX.TryCheckForSnapping(newDragPosInCanvas.X, out var snappedPosX,
                                                   context.View.Scale.X * 0.25f,
-                                                      [magAnnotation],
-                                                  context.Layout.Annotations.Values
+                                                      [magSection],
+                                                  context.Layout.Sections.Values
                                                  ))
             {
                 newDragPosInCanvas.X = (float)snappedPosX;
@@ -77,8 +77,8 @@ internal static class AnnotationResizing
 
             if (_snapHandlerY.TryCheckForSnapping(newDragPosInCanvas.Y, out var snappedPosY,
                                                   context.View.Scale.Y * 0.25f,
-                                                      [magAnnotation],
-                                                  context.Layout.Annotations.Values
+                                                      [magSection],
+                                                  context.Layout.Sections.Values
                                                  ))
             {
                 newDragPosInCanvas.Y = (float)snappedPosY;
@@ -96,7 +96,7 @@ internal static class AnnotationResizing
                 newDragPosInCanvas.Y = (float)snappedYValue3;
             }            
 
-            annotation.Size = newDragPosInCanvas - annotation.PosOnCanvas;
+            section.Size = newDragPosInCanvas - section.PosOnCanvas;
         }
 
         // Complete dragging...
@@ -112,11 +112,11 @@ internal static class AnnotationResizing
             else
             {
                 _moveCommand.Undo();
-                if (context.Selector.IsNodeSelected(annotation))
+                if (context.Selector.IsNodeSelected(section))
                 {
                     if (ImGui.GetIO().KeyShift)
                     {
-                        context.Selector.DeselectNode(annotation, null);
+                        context.Selector.DeselectNode(section, null);
                     }
                 }
                 else
@@ -124,17 +124,17 @@ internal static class AnnotationResizing
                     if (!ImGui.GetIO().KeyShift)
                         context.Selector.Clear();
 
-                    context.Selector.AddSelection(annotation);
+                    context.Selector.AddSelection(section);
                 }
             }
 
             context.StateMachine.SetState(GraphStates.Default, context);
-            _draggedAnnotationId = Guid.Empty;
+            _draggedSectionId = Guid.Empty;
             _moveCommand = null;
         }
     }
 
-    private static Guid _draggedAnnotationId = Guid.Empty;
+    private static Guid _draggedSectionId = Guid.Empty;
     private static Vector2 _dragStartDelta;
     private static ModifyCanvasElementsCommand _moveCommand;
 

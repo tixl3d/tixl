@@ -117,7 +117,7 @@ public static partial class T3Ui
         // welcome window is closed (see the IsVisible guard below).
         CheckForVersionWelcome();
 
-        if (IsWindowLayoutComplete() && _versionWelcomeChecked && !WindowManager.WelcomeAlphaWindow.IsVisible)
+        if (IsWindowLayoutComplete() && _versionWelcomeChecked && !WindowManager.WelcomeWindow.IsVisible)
         {
             if (!UserSettings.IsUserNameDefined())
             {
@@ -160,7 +160,7 @@ public static partial class T3Ui
 
         var isNewVersion = VersionMarker.Classify() == VersionMarker.LaunchKind.NewToUser;
         if (UserSettings.Config.ShowWelcomeOnStartup || isNewVersion)
-            WindowManager.WelcomeAlphaWindow.Open();
+            WindowManager.WelcomeWindow.Open();
         else
             VersionMarker.MarkCurrentVersionSeen();
     }

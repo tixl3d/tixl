@@ -488,7 +488,7 @@ internal static class AppMenuBar
         {
             if (MenuItem(RuntimeAssemblies.IsAlpha ? "Welcome to Alpha" : "Welcome"))
             {
-                WindowManager.WelcomeAlphaWindow.Open();
+                WindowManager.WelcomeWindow.Open();
             }
 
             WindowManager.HelpWindow.DrawMenuItemToggle();

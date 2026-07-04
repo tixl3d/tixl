@@ -600,7 +600,7 @@ internal sealed class SnapshotControlView
 
     /// <summary>
     /// Header row with the clickable op name. Operator groups are not collapsible —
-    /// collapsing is reserved for the annotation/section groups coming with the section tree.
+    /// collapsing is reserved for the section/section groups coming with the section tree.
     /// A bypassable op gets a small bypass toggle on the right (like the parameter popup).
     /// </summary>
     private static void DrawGroupHeader(Guid groupId, string label, Color labelColor, out bool nameClicked,

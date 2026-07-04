@@ -74,8 +74,8 @@ internal sealed class ParameterWindow : Window
         if (!NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged))
         {
             var nodeSelection = ProjectView.Focused?.NodeSelection;
-            var annotationSettingsShown = nodeSelection != null && DrawSettingsForSelectedAnnotations(nodeSelection);
-            if (!annotationSettingsShown
+            var sectionSettingsShown = nodeSelection != null && DrawSettingsForSelectedSections(nodeSelection);
+            if (!sectionSettingsShown
                 && VariationHandling.ActivePoolForSnapshots != null
                 && !SkillTraining.IsInPlayMode)
             {
@@ -822,32 +822,32 @@ internal sealed class ParameterWindow : Window
             return true;
     }
 
-    private static bool DrawSettingsForSelectedAnnotations(NodeSelection nodeSelection)
+    private static bool DrawSettingsForSelectedSections(NodeSelection nodeSelection)
     {
         var somethingVisible = false;
-        // Draw Annotation settings
-        foreach (var annotation in nodeSelection.GetSelectedNodes<Annotation>())
+        // Draw Section settings
+        foreach (var section in nodeSelection.GetSelectedNodes<Section>())
         {   
-            ImGui.PushID(annotation.Id.GetHashCode());
+            ImGui.PushID(section.Id.GetHashCode());
             ImGui.Indent(10f * T3Ui.UiScaleFactor);
             //ImGui.SetCursorPosX(10f*T3Ui.UiScaleFactor);
             ImGui.PushFont(Fonts.FontLarge);
-            ImGui.TextUnformatted("Annotation settings");
+            ImGui.TextUnformatted("Section settings");
             ImGui.PopFont();
 
             FormInputs.AddVerticalSpace();
             ImGui.Separator();
             FormInputs.AddVerticalSpace();
 
-            ImGui.ColorEdit4("color", ref annotation.Color.Rgba);
+            ImGui.ColorEdit4("color", ref section.Color.Rgba);
 
             FormInputs.AddVerticalSpace();
             CustomComponents.StylizedText("Label:", Fonts.FontBold, UiColors.TextMuted, true);
-            ImGui.TextWrapped(annotation.Label);
+            ImGui.TextWrapped(section.Label);
 
             FormInputs.AddVerticalSpace();
             CustomComponents.StylizedText("Description:", Fonts.FontBold, UiColors.TextMuted.Rgba, true);
-            ImGui.TextWrapped(annotation.Title);
+            ImGui.TextWrapped(section.Title);
 
             FormInputs.AddVerticalSpace();
             ImGui.Separator();
@@ -855,14 +855,14 @@ internal sealed class ParameterWindow : Window
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
             CustomComponents.IconButton(Icon.Tip,new Vector2(20,20)* T3Ui.UiScaleFactor);
             ImGui.SameLine();
-            ImGui.TextWrapped("How to create an Annotation:\n" +
-                "1.Select the operators you want to include in the annotation.\n" +
-                "2.Shift + A to add the annotation." );
+            ImGui.TextWrapped("How to create an Section:\n" +
+                "1.Select the operators you want to include in the section.\n" +
+                "2.Shift + A to add the section." );
 
             FormInputs.AddVerticalSpace();
             CustomComponents.IconButton(Icon.Tip, new Vector2(20, 20) * T3Ui.UiScaleFactor);
             ImGui.SameLine();
-            ImGui.TextWrapped("How to edit an Annotation:\n" +
+            ImGui.TextWrapped("How to edit an Section:\n" +
                 "1.Double click on the header.\n" +
                 "2.Type in label and/or description");
             ImGui.PopStyleColor();

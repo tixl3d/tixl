@@ -245,10 +245,10 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                 _nodeGraphLayouting.ArrangeOps(compositionOp);
             }
 
-            if (!T3Ui.IsCurrentlySaving && UserActions.AddAnnotation.Triggered())
+            if (!T3Ui.IsCurrentlySaving && UserActions.AddSection.Triggered())
             {
-                var newAnnotation = NodeActions.AddAnnotation(_nodeSelection, this, compositionOp);
-                _graph.RenameAnnotation(newAnnotation);
+                var newSection = NodeActions.AddSection(_nodeSelection, this, compositionOp);
+                _graph.RenameSection(newSection);
             }
 
             {
@@ -476,7 +476,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
     {
         var boundsInCanvas = InverseTransformRect(bounds);
         var nodesToSelect = NodeSelection.GetSelectableChildren(compositionOp)
-                                         .Where(child => child is Annotation
+                                         .Where(child => child is Section
                                                              ? boundsInCanvas.Contains(child.Rect)
                                                              : child != null && child.Rect.Overlaps(boundsInCanvas));
 
@@ -874,13 +874,13 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                 }
             }
 
-            if (ImGui.MenuItem("Add Annotation",
-                               shortcut: UserActions.AddAnnotation.ListShortcuts(),
+            if (ImGui.MenuItem("Add Section",
+                               shortcut: UserActions.AddSection.ListShortcuts(),
                                selected: false,
                                enabled: true))
             {
-                var newAnnotation = NodeActions.AddAnnotation(_nodeSelection, this, compositionOp);
-                _graph.RenameAnnotation(newAnnotation);
+                var newSection = NodeActions.AddSection(_nodeSelection, this, compositionOp);
+                _graph.RenameSection(newSection);
             }
 
             ImGui.EndMenu();
@@ -1004,7 +1004,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         _projectView.TrySetCompositionOp(compositionPath, ScalableCanvas.Transition.JumpIn, path[^1]);
     }
 
-    public void OpenAndFocusAnnotation(IReadOnlyList<Guid> compositionPath, Guid annotationId)
+    public void OpenAndFocusSection(IReadOnlyList<Guid> compositionPath, Guid sectionId)
     {
         if (compositionPath.Count == 1)
         {
@@ -1026,10 +1026,10 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
             return;
 
         var symbolUi = _projectView.CompositionInstance.GetSymbolUi();
-        if (!symbolUi.Annotations.TryGetValue(annotationId, out var annotation))
+        if (!symbolUi.Sections.TryGetValue(sectionId, out var section))
             return;
 
-        var area = ImRect.RectWithSize(annotation.PosOnCanvas, annotation.Size);
+        var area = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
         RequestTargetViewAreaWithTransition(area, Transition.Smooth);
     }
     #endregion

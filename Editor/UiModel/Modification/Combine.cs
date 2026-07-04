@@ -5,7 +5,7 @@ using T3.Core.SystemUi;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.SystemUi;
 using T3.Editor.UiModel.Commands;
-using T3.Editor.UiModel.Commands.Annotations;
+using T3.Editor.UiModel.Commands.Sections;
 using T3.Editor.UiModel.Commands.Graph;
 
 namespace T3.Editor.UiModel.Modification;
@@ -16,7 +16,7 @@ internal static class Combine
     public static void CombineAsNewType(SymbolUi parentCompositionSymbolUi,
                                         EditableSymbolProject project,
                                         List<SymbolUi.Child> selectedChildUis,
-                                        List<Annotation> selectedAnnotations,
+                                        List<Section> selectedSections,
                                         string newSymbolName,
                                         string nameSpace, string description, bool shouldBeTimeClip)
     {
@@ -167,7 +167,7 @@ internal static class Combine
         newSymbolUi.FlagAsModified();
 
         // Apply content to new symbol
-        var copyCmd = new CopySymbolChildrenCommand(parentCompositionSymbolUi, selectedChildUis, selectedAnnotations, newSymbolUi, Vector2.Zero);
+        var copyCmd = new CopySymbolChildrenCommand(parentCompositionSymbolUi, selectedChildUis, selectedSections, newSymbolUi, Vector2.Zero);
         copyCmd.Do();
 
         var newChildrenArea = GetAreaFromChildren(newSymbolUi.ChildUis.Values);
@@ -247,11 +247,11 @@ internal static class Combine
         var deleteCmd = new DeleteSymbolChildrenCommand(parentCompositionSymbolUi, selectedChildUis);
         deleteCmd.Do();
 
-        // Delete original annotations
-        foreach (var annotation in selectedAnnotations)
+        // Delete original sections
+        foreach (var section in selectedSections)
         {
-            var deleteAnnotationCommand = new DeleteAnnotationCommand(parentCompositionSymbolUi, annotation);
-            deleteAnnotationCommand.Do();
+            var deleteSectionCommand = new DeleteSectionCommand(parentCompositionSymbolUi, section);
+            deleteSectionCommand.Do();
         }
 
         // Creating a new symbol/assembly can't be cleanly undone (undoing the children delete would

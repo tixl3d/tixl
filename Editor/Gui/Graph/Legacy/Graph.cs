@@ -185,34 +185,34 @@ internal sealed partial class Graph
             line.Draw(canvas.Scale, drawList);
         }
 
-        // 7. Draw Annotations
-        drawList.ChannelsSetCurrent((int)Channels.Annotations);
-        foreach (var annotation in compositionUi.Annotations.Values)
+        // 7. Draw Sections
+        drawList.ChannelsSetCurrent((int)Channels.Sections);
+        foreach (var section in compositionUi.Sections.Values)
         {
-            //var posOnScreen = GraphCanvas.Current.TransformPosition(annotation.Position);
+            //var posOnScreen = GraphCanvas.Current.TransformPosition(section.Position);
             //drawList.AddRectFilled(  posOnScreen, posOnScreen + new Vector2(300,300), Color.Green);
-            // todo - remove annotations that are not in the graph anymore?
-            if(!_annotationElements.TryGetValue(annotation, out var annotationElement))
+            // todo - remove sections that are not in the graph anymore?
+            if(!_sectionElements.TryGetValue(section, out var sectionElement))
             {
-                annotationElement = new AnnotationElement(_components, annotation);
-                _annotationElements[annotation] = annotationElement;
+                sectionElement = new SectionElement(_components, section);
+                _sectionElements[section] = sectionElement;
             }
                 
-            annotationElement.Draw(drawList, _view);
+            sectionElement.Draw(drawList, _view);
         }
 
         drawList.ChannelsMerge();
     }
 
-    internal void RenameAnnotation(Annotation annotation)
+    internal void RenameSection(Section section)
     {
-        if (!_annotationElements.TryGetValue(annotation, out var annotationElement))
+        if (!_sectionElements.TryGetValue(section, out var sectionElement))
         {
-            annotationElement = new AnnotationElement(_components, annotation);
-            _annotationElements[annotation] = annotationElement;
+            sectionElement = new SectionElement(_components, section);
+            _sectionElements[section] = sectionElement;
         }
             
-        annotationElement.StartRenaming();
+        sectionElement.StartRenaming();
     }
 
     internal sealed class ConnectionLineUi
@@ -289,7 +289,7 @@ internal sealed partial class Graph
         
     private enum Channels
     {
-        Annotations = 0,
+        Sections = 0,
         Operators = 1,
     }
 
@@ -299,5 +299,5 @@ internal sealed partial class Graph
     // Try to avoid allocations
     private readonly List<Symbol.Connection> AllConnections = new(100);
     private readonly Dictionary<SymbolUi.Child, GraphNode> _graphNodes = new();
-    private readonly Dictionary<Annotation, AnnotationElement> _annotationElements = new();
+    private readonly Dictionary<Section, SectionElement> _sectionElements = new();
 }

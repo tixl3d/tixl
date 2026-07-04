@@ -75,7 +75,7 @@ internal static class CrashReporting
                 var compositionUi = primaryComposition.Symbol.GetSymbolUi();
                 GraphOperations.TryCopyNodesAsJson(primaryComposition,
                                                    compositionUi.ChildUis.Values,
-                                                   compositionUi.Annotations.Values.ToList(),
+                                                   compositionUi.Sections.Values.ToList(),
                                                    out json);
             }
         }

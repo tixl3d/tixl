@@ -45,14 +45,14 @@ internal static class ExportDocumentationStrings
                                 });
             }
 
-            foreach (var annotation in symbolUi.Annotations.Values)
+            foreach (var section in symbolUi.Sections.Values)
             {
                 results.Add(new DocumentationEntry
                                 {
-                                    Type = DocumentationEntry.Types.Annotation,
-                                    Text = annotation.Title,
+                                    Type = DocumentationEntry.Types.Section,
+                                    Text = section.Title,
                                     SymbolId = symbolUi.Symbol.Id,
-                                    Id = annotation.Id
+                                    Id = section.Id
                                 });
             }
 
@@ -134,8 +134,8 @@ internal static class ExportDocumentationStrings
 
                         break;
 
-                    case DocumentationEntry.Types.Annotation:
-                        if (symbolUi!.Annotations.TryGetValue(r.Id, out var a))
+                    case DocumentationEntry.Types.Section:
+                        if (symbolUi!.Sections.TryGetValue(r.Id, out var a))
                         {
                             a.Title = r.Text;
                         }
@@ -164,7 +164,7 @@ internal static class ExportDocumentationStrings
         {
             Description,
             ParameterDescription,
-            Annotation,
+            Section,
             Comment,
         }
 

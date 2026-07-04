@@ -112,7 +112,7 @@ internal static class KeyboardActions
 
         if (UserActions.CopyToClipboard.Triggered())
         {
-            // Prevent node graph copy if a text input is active (e.g., annotation description)
+            // Prevent node graph copy if a text input is active (e.g., section description)
             if (!ImGuiNET.ImGui.IsAnyItemActive())
             {
                 NodeActions.CopySelectedNodesToClipboard(nodeSelection, compositionOp);
@@ -121,7 +121,7 @@ internal static class KeyboardActions
 
         if (!T3Ui.IsCurrentlySaving && UserActions.PasteFromClipboard.Triggered())
         {
-            // Prevent node graph paste if a text input is active (e.g., annotation description)
+            // Prevent node graph paste if a text input is active (e.g., section description)
             if (!ImGuiNET.ImGui.IsAnyItemActive())
             {
                 NodeActions.PasteClipboard(nodeSelection, context.View, compositionOp);
@@ -140,11 +140,11 @@ internal static class KeyboardActions
         //     _nodeGraphLayouting.ArrangeOps(compositionOp);
         // }
 
-        if (!T3Ui.IsCurrentlySaving && UserActions.AddAnnotation.Triggered())
+        if (!T3Ui.IsCurrentlySaving && UserActions.AddSection.Triggered())
         {
-            var newAnnotation = NodeActions.AddAnnotation(nodeSelection, context.View, compositionOp);
-            context.ActiveAnnotationId = newAnnotation.Id;
-            context.StateMachine.SetState(GraphStates.RenameAnnotation, context);
+            var newSection = NodeActions.AddSection(nodeSelection, context.View, compositionOp);
+            context.ActiveSectionId = newSection.Id;
+            context.StateMachine.SetState(GraphStates.RenameSection, context);
             context.Layout.FlagStructureAsChanged();
         }
 

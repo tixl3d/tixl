@@ -394,12 +394,12 @@
       "Saturation": 1.13,
       "Opacity": 2.37
     },
-    "AnnotationOutline": {
+    "SectionOutline": {
       "Brightness": 0.03,
       "Saturation": 0.0,
       "Opacity": 0.37
     },
-    "AnnotationBackground": {
+    "SectionBackground": {
       "Brightness": 0.02,
       "Saturation": 2.0,
       "Opacity": 0.3

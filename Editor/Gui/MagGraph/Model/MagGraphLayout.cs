@@ -40,7 +40,7 @@ internal sealed class MagGraphLayout
 {
     public readonly Dictionary<Guid, MagGraphItem> Items = new(127);
     public readonly List<MagGraphConnection> MagConnections = new(127);
-    public readonly Dictionary<Guid, MagGraphAnnotation> Annotations = new(63);
+    public readonly Dictionary<Guid, MagGraphSection> Sections = new(63);
 
     public void ComputeLayout(GraphUiContext context, bool forceUpdate = false)
     {
@@ -79,50 +79,50 @@ internal sealed class MagGraphLayout
 
         _structureUpdateCycle++;
         CollectItemReferences(composition, parentSymbolUi);
-        CollectedAnnotations(parentSymbolUi);
+        CollectedSections(parentSymbolUi);
         UpdateConnectionSources(composition);
         UpdateVisibleItemLines(context);
         CollectConnectionReferences(composition);
         StructureFlaggedAsChanged = false;
     }
 
-    private void CollectedAnnotations(SymbolUi compositionSymbolUi)
+    private void CollectedSections(SymbolUi compositionSymbolUi)
     {
-        Annotations.Clear();
+        Sections.Clear();
         var addedCount = 0;
         var updatedCount = 0;
 
-        foreach (var (annotationId, annotation) in compositionSymbolUi.Annotations)
+        foreach (var (sectionId, section) in compositionSymbolUi.Sections)
         {
-            if (Annotations.TryGetValue(annotationId, out var opItem))
+            if (Sections.TryGetValue(sectionId, out var opItem))
             {
                 updatedCount++;
                 opItem.LastUpdateCycle = _structureUpdateCycle;
             }
             else
             {
-                opItem = new MagGraphAnnotation
+                opItem = new MagGraphSection
                              {
-                                 Id = annotation.Id,
-                                 Annotation = annotation,
-                                 DampedPosOnCanvas = annotation.PosOnCanvas,
-                                 DampedSize = annotation.Size,
+                                 Id = section.Id,
+                                 Section = section,
+                                 DampedPosOnCanvas = section.PosOnCanvas,
+                                 DampedSize = section.Size,
                              };
 
-                Annotations[annotationId] = opItem;
+                Sections[sectionId] = opItem;
                 addedCount++;
             }
         }
 
-        var hasObsoleteAnnotations = Annotations.Count > updatedCount + addedCount;
-        if (!hasObsoleteAnnotations) return;
+        var hasObsoleteSections = Sections.Count > updatedCount + addedCount;
+        if (!hasObsoleteSections) return;
 
-        foreach (var a in Annotations.Values)
+        foreach (var a in Sections.Values)
         {
             if (a.LastUpdateCycle >= _structureUpdateCycle)
                 continue;
 
-            Annotations.Remove(a.Id);
+            Sections.Remove(a.Id);
             a.IsRemoved = true;
         }
     }

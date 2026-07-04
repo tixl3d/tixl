@@ -35,7 +35,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     public Vector2 DampedPosOnCanvas;
     public Vector2 Size { get; set; }
 
-    public bool IsCollapsedAway => ChildUi != null && ChildUi.CollapsedIntoAnnotationFrameId != Guid.Empty;
+    public bool IsCollapsedAway => ChildUi != null && ChildUi.CollapsedIntoSectionFrameId != Guid.Empty;
 
     public OpUiBinding? OpUiBinding;
     

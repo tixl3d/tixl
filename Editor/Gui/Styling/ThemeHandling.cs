@@ -169,7 +169,12 @@ public static class ThemeHandling
                 continue;
 
             if (!theme.Variations.TryGetValue(varField.Name, out var variation))
-                continue;
+            {
+                // Back-compat: themes saved before the annotation->section rename
+                var legacyName = varField.Name.Replace("Section", "Annotation");
+                if (legacyName == varField.Name || !theme.Variations.TryGetValue(legacyName, out variation))
+                    continue;
+            }
 
             varField.SetValue(ColorThemeEditor.Dummy, variation.Clone());
         }

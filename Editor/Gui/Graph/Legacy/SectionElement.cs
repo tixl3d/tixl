@@ -13,33 +13,33 @@ using T3.Editor.UiModel.Selection;
 namespace T3.Editor.Gui.Legacy;
 
 /// <summary>
-/// Draws an AnnotationElement and handles its interaction
+/// Draws an SectionElement and handles its interaction
 /// </summary>
-internal sealed class AnnotationElement
+internal sealed class SectionElement
 {
-    private readonly Annotation _annotation;
-    public AnnotationElement(ProjectView components, Annotation annotation)
+    private readonly Section _section;
+    public SectionElement(ProjectView components, Section section)
     {
         _components = components;
-        _annotation = annotation;
+        _section = section;
     }
         
     public void StartRenaming()
     {
-        _requestedRenameId = _annotation.Id;
+        _requestedRenameId = _section.Id;
     }
 
     private Guid _requestedRenameId = Guid.Empty;
 
     internal void Draw(ImDrawListPtr drawList, ScalableCanvas canvas)
     {
-        var annotation = _annotation;
-        var screenArea = canvas.TransformRect(new ImRect(annotation.PosOnCanvas, annotation.PosOnCanvas + annotation.Size));
-        var titleSize = annotation.Size;
+        var section = _section;
+        var screenArea = canvas.TransformRect(new ImRect(section.PosOnCanvas, section.PosOnCanvas + section.Size));
+        var titleSize = section.Size;
         titleSize.Y = MathF.Min(titleSize.Y, 14 * T3Ui.UiScaleFactor);
 
         // Keep height of title area at a minimum height when zooming out
-        var clickableArea = canvas.TransformRect(new ImRect(annotation.PosOnCanvas, annotation.PosOnCanvas + titleSize));
+        var clickableArea = canvas.TransformRect(new ImRect(section.PosOnCanvas, section.PosOnCanvas + titleSize));
         var height = MathF.Min(16 * T3Ui.UiScaleFactor, screenArea.GetHeight());
         clickableArea.Max.Y = clickableArea.Min.Y + height;
 
@@ -48,7 +48,7 @@ internal sealed class AnnotationElement
         if (!isVisible)
             return;
 
-        ImGui.PushID(annotation.Id.GetHashCode());
+        ImGui.PushID(section.Id.GetHashCode());
 
         // Resize indicator
         {
@@ -58,7 +58,7 @@ internal sealed class AnnotationElement
             if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
             {
                 var delta = canvas.InverseTransformDirection(ImGui.GetIO().MouseDelta);
-                annotation.Size += delta;
+                section.Size += delta;
             }
 
             ImGui.SetMouseCursor(ImGuiMouseCursor.Arrow);
@@ -72,7 +72,7 @@ internal sealed class AnnotationElement
 
         // Interaction
         ImGui.SetCursorScreenPos(clickableArea.Min);
-        ImGui.InvisibleButton("##annotationHeader", clickableArea.GetSize());
+        ImGui.InvisibleButton("##sectionHeader", clickableArea.GetSize());
 
         DrawUtils.DebugItemRect();
         var isHeaderHovered = ImGui.IsItemHovered();
@@ -83,17 +83,17 @@ internal sealed class AnnotationElement
 
         // Header
         drawList.AddRectFilled(clickableArea.Min, clickableArea.Max,
-                               annotation.Color.Fade(isHeaderHovered ? headerHoverAlpha : 0));
+                               section.Color.Fade(isHeaderHovered ? headerHoverAlpha : 0));
 
         HandleDragging();
-        var shouldRename = (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) || _requestedRenameId == annotation.Id;
-        RenamingAnnotation.Draw(annotation, screenArea, shouldRename);
+        var shouldRename = (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) || _requestedRenameId == section.Id;
+        RenamingSection.Draw(section, screenArea, shouldRename);
         if (shouldRename)
         {
             _requestedRenameId = Guid.Empty;
         }
 
-        var borderColor = _components.NodeSelection.IsNodeSelected(annotation)
+        var borderColor = _components.NodeSelection.IsNodeSelected(section)
                               ? UiColors.Selection
                               : UiColors.BackgroundFull.Fade(isHeaderHovered ? headerHoverAlpha : backgroundAlpha);
 
@@ -106,9 +106,9 @@ internal sealed class AnnotationElement
                          thickness);
 
         // Label
-        if(!string.IsNullOrEmpty(annotation.Title)) {
+        if(!string.IsNullOrEmpty(section.Title)) {
             var canvasScale = canvas.Scale.X;
-            var font = annotation.Title.StartsWith("# ") ? Fonts.FontLarge: Fonts.FontNormal;
+            var font = section.Title.StartsWith("# ") ? Fonts.FontLarge: Fonts.FontNormal;
             var fade = MathUtils.SmootherStep(0.25f, 0.6f, canvasScale);
             drawList.PushClipRect(screenArea.Min, screenArea.Max, true);
             var labelPos = screenArea.Min + new Vector2(8, 6) * T3Ui.UiScaleFactor;
@@ -121,8 +121,8 @@ internal sealed class AnnotationElement
             drawList.AddText(font,
                              fontSize,
                              labelPos,
-                             ColorVariations.OperatorLabel.Apply(annotation.Color.Fade(fade)),
-                             annotation.Title);
+                             ColorVariations.OperatorLabel.Apply(section.Color.Fade(fade)),
+                             section.Title);
             drawList.PopClipRect();
         }
 
@@ -137,8 +137,8 @@ internal sealed class AnnotationElement
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
                 var parentUi = _components.CompositionInstance.GetSymbolUi();
-                _draggedNodeId = _annotation.Id;
-                if (nodeSelection.IsNodeSelected(_annotation))
+                _draggedNodeId = _section.Id;
+                if (nodeSelection.IsNodeSelected(_section))
                 {
                     _draggedNodes = nodeSelection.GetSelectedNodes<ISelectableCanvasObject>().ToList();
                 }
@@ -146,18 +146,18 @@ internal sealed class AnnotationElement
                 {
 
                     if (!ImGui.GetIO().KeyCtrl)
-                        _draggedNodes = FindAnnotatedOps(parentUi, _annotation).ToList();
-                    _draggedNodes.Add(_annotation);
+                        _draggedNodes = FindOpsInSection(parentUi, _section).ToList();
+                    _draggedNodes.Add(_section);
                 }
 
                 _moveCommand = new ModifyCanvasElementsCommand(parentUi, _draggedNodes, nodeSelection);
             }
 
-            HandleNodeDragging(_annotation);
+            HandleNodeDragging(_section);
         }
         else if (ImGui.IsMouseReleased(0) && _moveCommand != null)
         {
-            if (_draggedNodeId != _annotation.Id)
+            if (_draggedNodeId != _section.Id)
                 return;
 
             // var singleDraggedNode = (_draggedNodes.Count == 1) ? _draggedNodes[0] : null;
@@ -172,20 +172,20 @@ internal sealed class AnnotationElement
             }
             else
             {
-                if (!nodeSelection.IsNodeSelected(_annotation))
+                if (!nodeSelection.IsNodeSelected(_section))
                 {
                     if (!ImGui.GetIO().KeyShift)
                     {
                         nodeSelection.Clear();
                     }
 
-                    nodeSelection.AddSelection(_annotation);
+                    nodeSelection.AddSelection(_section);
                 }
                 else
                 {
                     if (ImGui.GetIO().KeyShift)
                     {
-                        nodeSelection.DeselectNode(_annotation, null);
+                        nodeSelection.DeselectNode(_section, null);
                     }
                 }
             }
@@ -197,16 +197,16 @@ internal sealed class AnnotationElement
         if (ImGui.IsMouseReleased(ImGuiMouseButton.Right)
             && !wasDraggingRight
             && ImGui.IsItemHovered()
-            && !nodeSelection.IsNodeSelected(_annotation))
+            && !nodeSelection.IsNodeSelected(_section))
         {
-            nodeSelection.SetSelection(_annotation);
+            nodeSelection.SetSelection(_section);
         }
     }
 
-    private static List<ISelectableCanvasObject> FindAnnotatedOps(SymbolUi parentUi, Annotation annotation)
+    private static List<ISelectableCanvasObject> FindOpsInSection(SymbolUi parentUi, Section section)
     {
         var matches = new List<ISelectableCanvasObject>();
-        var aRect = new ImRect(annotation.PosOnCanvas, annotation.PosOnCanvas + annotation.Size);
+        var aRect = new ImRect(section.PosOnCanvas, section.PosOnCanvas + section.Size);
 
         foreach (var n in parentUi.ChildUis.Values)
         {
@@ -215,9 +215,9 @@ internal sealed class AnnotationElement
                 matches.Add(n);
         }
 
-        foreach (var a in parentUi.Annotations.Values)
+        foreach (var a in parentUi.Sections.Values)
         {
-            if (a == annotation)
+            if (a == section)
                 continue;
 
             var nRect = new ImRect(a.PosOnCanvas, a.PosOnCanvas + a.Size);

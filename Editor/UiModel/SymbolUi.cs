@@ -22,7 +22,7 @@ public sealed partial class SymbolUi : ISelectionContainer
 
         InputUis = new OrderedDictionary<Guid, IInputUi>();
         OutputUis = new OrderedDictionary<Guid, IOutputUi>();
-        Annotations = new OrderedDictionary<Guid, Annotation>();
+        Sections = new OrderedDictionary<Guid, Section>();
         Links = new OrderedDictionary<Guid, ExternalLink>();
         TourPoints = new List<TourPoint>();
 
@@ -36,7 +36,7 @@ public sealed partial class SymbolUi : ISelectionContainer
                       Func<Symbol, List<Child>> childUis,
                       OrderedDictionary<Guid, IInputUi> inputs,
                       OrderedDictionary<Guid, IOutputUi> outputs,
-                      OrderedDictionary<Guid, Annotation> annotations,
+                      OrderedDictionary<Guid, Section> sections,
                       OrderedDictionary<Guid, ExternalLink> links,
                       List<TourPoint> tourPoints,
                       bool updateConsistency) : this(symbol, false)
@@ -45,7 +45,7 @@ public sealed partial class SymbolUi : ISelectionContainer
 
         InputUis = inputs;
         OutputUis = outputs;
-        Annotations = annotations;
+        Sections = sections;
         Links = links;
         TourPoints = tourPoints;
         ReadOnly = true;
@@ -79,8 +79,8 @@ public sealed partial class SymbolUi : ISelectionContainer
         foreach (var outputUi in OutputUis)
             yield return outputUi.Value;
 
-        foreach (var annotation in Annotations)
-            yield return annotation.Value;
+        foreach (var section in Sections)
+            yield return section.Value;
     }
 
     /// <summary>
@@ -318,14 +318,14 @@ public sealed partial class SymbolUi : ISelectionContainer
     
     internal OrderedDictionary<Guid, IInputUi> InputUis { get; private set; }
     internal OrderedDictionary<Guid, IOutputUi> OutputUis { get; private set; }
-    internal OrderedDictionary<Guid, Annotation> Annotations { get; private set; }
+    internal OrderedDictionary<Guid, Section> Sections { get; private set; }
 
     internal void ReplaceWith(SymbolUi newSymbolUi)
     {
         _childUis = newSymbolUi._childUis;
         InputUis = newSymbolUi.InputUis;
         OutputUis = newSymbolUi.OutputUis;
-        Annotations = newSymbolUi.Annotations;
+        Sections = newSymbolUi.Sections;
         Links = newSymbolUi.Links;
         Description = newSymbolUi.Description;
     }

@@ -691,24 +691,24 @@ namespace T3.Editor.Gui.MagGraph.States
                   Exit: _ => { }
                  );
 
-        internal static State<GraphUiContext> RenameAnnotation
+        internal static State<GraphUiContext> RenameSection
             = new(
                   Enter: _ => { },
                   Update: _ => { },
                   Exit: _ => { }
                  );
 
-        internal static State<GraphUiContext> DragAnnotation
+        internal static State<GraphUiContext> DragSection
             = new(
                   Enter: _ => { },
                   Update: _ => { },
                   Exit: _ => { }
                  );
 
-        internal static State<GraphUiContext> ResizeAnnotation
+        internal static State<GraphUiContext> ResizeSection
             = new(
                   Enter: _ => { },
-                  Update: AnnotationResizing.Draw,
+                  Update: SectionResizing.Draw,
                   Exit: _ => { }
                  );
 

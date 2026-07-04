@@ -232,7 +232,7 @@ internal sealed class NodeSelection : ISelection
 
             selectableItems.AddRange(symbolUi.InputUis.Values);
             selectableItems.AddRange(symbolUi.OutputUis.Values);
-            selectableItems.AddRange(symbolUi.Annotations.Values);
+            selectableItems.AddRange(symbolUi.Sections.Values);
         }
         catch (Exception e)
         {
@@ -261,10 +261,10 @@ internal sealed class NodeSelection : ISelection
             if (element == null)
                 continue;
 
-            if (element is SymbolUi.Child item && item.CollapsedIntoAnnotationFrameId != Guid.Empty)
+            if (element is SymbolUi.Child item && item.CollapsedIntoSectionFrameId != Guid.Empty)
                 continue;
 
-            if (element is Annotation annotation && annotation.Collapsed)
+            if (element is Section section && section.Collapsed)
             {
                 bounds.Add(element.PosOnCanvas);
                 bounds.Add(element.PosOnCanvas + new Vector2(element.Size.X,10));

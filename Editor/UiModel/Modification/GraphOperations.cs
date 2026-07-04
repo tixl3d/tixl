@@ -29,7 +29,7 @@ internal static class GraphOperations
 
     public static bool TryCopyNodesAsJson(Instance composition, 
                                           IEnumerable<SymbolUi.Child> selectedChildren, 
-                                          List<Annotation> selectedAnnotations, out string resultJsonString)
+                                          List<Section> selectedSections, out string resultJsonString)
     {
         resultJsonString = string.Empty;
         
@@ -45,7 +45,7 @@ internal static class GraphOperations
             
         var cmd = new CopySymbolChildrenCommand(composition.GetSymbolUi(),
                                                 selectedChildren.ToList(),
-                                                selectedAnnotations,
+                                                selectedSections,
                                                 newContainerUi,
                                                 Vector2.Zero,
                                                 copyMode: CopySymbolChildrenCommand.CopyMode.ClipboardTarget);

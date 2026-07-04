@@ -5,7 +5,7 @@ using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
-using T3.Editor.UiModel.Commands.Annotations;
+using T3.Editor.UiModel.Commands.Sections;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
@@ -32,15 +32,15 @@ internal static class Modifications
         if (selectedChildUis.Count == 0)
             return;
 
-        var selectedAnnotations = context.Selector.GetSelectedNodes<Annotation>().ToList();
+        var selectedSections = context.Selector.GetSelectedNodes<Section>().ToList();
         var targetPosition = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
 
         var copyCommand = new CopySymbolChildrenCommand(compositionSymbolUi,
                                                         selectedChildUis,
-                                                        selectedAnnotations,
+                                                        selectedSections,
                                                         compositionSymbolUi,
                                                         targetPosition);
-        // Authoritative set of duplicated children (includes any pulled in via collapsed annotations).
+        // Authoritative set of duplicated children (includes any pulled in via collapsed sections).
         var oldToNewChildIds = copyCommand.OldToNewChildIds;
 
         // Connections feeding the selection from outside, kept with their original multi-input index so
@@ -144,11 +144,11 @@ internal static class Modifications
             }
         }
 
-        foreach (var newId in copyCommand.NewSymbolAnnotationIds)
+        foreach (var newId in copyCommand.NewSymbolSectionIds)
         {
-            if (compositionSymbolUi.Annotations.TryGetValue(newId, out var annotation))
+            if (compositionSymbolUi.Sections.TryGetValue(newId, out var section))
             {
-                context.Selector.AddSelection(annotation);
+                context.Selector.AddSelection(section);
             }
         }
     }
@@ -208,7 +208,7 @@ internal static class Modifications
         var deletedChildUis = new List<SymbolUi.Child>();
         var deletedInputUis = new List<IInputUi>();
         var deletedOutputUis = new List<IOutputUi>();
-        var deletedAnnotations = new List<MagGraphAnnotation>();
+        var deletedSections = new List<MagGraphSection>();
         
         foreach (var s in context.Selector.Selection)
         {
@@ -244,15 +244,15 @@ internal static class Modifications
                 deletedItems.Add(item);
                 deletedChildUis.Add(childUi);
             }
-            else if (s is Annotation annotation)
+            else if (s is Section section)
             {
-                if (!context.Layout.Annotations.TryGetValue(s.Id, out var mga))
+                if (!context.Layout.Sections.TryGetValue(s.Id, out var mga))
                 {
-                    Log.Warning("Can't find annotation: " + s.Id);
+                    Log.Warning("Can't find section: " + s.Id);
                     continue;
                 }
 
-                deletedAnnotations.Add(mga);
+                deletedSections.Add(mga);
             }
             else 
             {
@@ -278,7 +278,7 @@ internal static class Modifications
         }
         
         if (deletedChildUis.Count == 0 && deletedInputUis.Count == 0 && deletedOutputUis.Count == 0
-            && deletedAnnotations.Count==0)
+            && deletedSections.Count==0)
             return results;
 
         var macroCommand = new MacroCommand("Delete items");
@@ -410,11 +410,11 @@ internal static class Modifications
                                                                             deletedOutputUis.Select(entry => entry.Id).ToArray()));
         }
 
-        if (deletedAnnotations.Count > 0)
+        if (deletedSections.Count > 0)
         {
-            foreach (var a in deletedAnnotations)
+            foreach (var a in deletedSections)
             {
-                macroCommand.AddAndExecCommand(new DeleteAnnotationCommand(compositionUi, a.Annotation));
+                macroCommand.AddAndExecCommand(new DeleteSectionCommand(compositionUi, a.Section));
             }
         }
 

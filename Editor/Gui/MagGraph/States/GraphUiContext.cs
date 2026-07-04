@@ -120,7 +120,7 @@ internal sealed class GraphUiContext
     /** Only relevant while picking inputs or hovering an op while dragging connecting end. */
     internal MagGraphItem? ItemForInputSelection;
     
-    internal Guid ActiveAnnotationId { get; set; }
+    internal Guid ActiveSectionId { get; set; }
     
     /** Used to prevent disconnected inputLines from collapsing... */
     internal readonly HashSet<int> DisconnectedInputHashes = []; 

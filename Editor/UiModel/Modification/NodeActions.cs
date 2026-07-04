@@ -18,7 +18,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.SystemUi;
 using T3.Editor.UiModel.Commands;
-using T3.Editor.UiModel.Commands.Annotations;
+using T3.Editor.UiModel.Commands.Sections;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
@@ -79,9 +79,9 @@ internal static class NodeActions
             commands.Add(cmd);
         }
 
-        foreach (var selectedAnnotation in nodeSelection.GetSelectedNodes<Annotation>())
+        foreach (var selectedSection in nodeSelection.GetSelectedNodes<Section>())
         {
-            var cmd = new DeleteAnnotationCommand(compositionSymbolUi, selectedAnnotation);
+            var cmd = new DeleteSectionCommand(compositionSymbolUi, selectedSection);
             commands.Add(cmd);
         }
 
@@ -91,7 +91,7 @@ internal static class NodeActions
             selectedOutputUis ??= nodeSelection.GetSelectedNodes<IOutputUi>().ToList();
             if (selectedInputUis.Count > 0 || selectedOutputUis.Count > 0)
             {
-                // Added after the child/annotation deletes so its undo restores the slots before
+                // Added after the child/section deletes so its undo restores the slots before
                 // those commands restore child-side connections (see RemoveInputsOrOutputsCommand).
                 commands.Add(new RemoveInputsOrOutputsCommand(compositionSymbolUi.Symbol.Id,
                                                               selectedInputUis.Select(entry => entry.Id).ToArray(),
@@ -104,8 +104,8 @@ internal static class NodeActions
         nodeSelection.Clear();
     }
 
-    /// <param name="placementScreenPos">Screen position to place the annotation at when nothing is selected.</param>
-    public static Annotation AddAnnotation(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp, Vector2? placementScreenPos = null)
+    /// <param name="placementScreenPos">Screen position to place the section at when nothing is selected.</param>
+    public static Section AddSection(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp, Vector2? placementScreenPos = null)
     {
         var size = new Vector2(100, 140);
         var posOnCanvas = canvas.InverseTransformPositionFloat(placementScreenPos ?? ImGui.GetMousePos());
@@ -132,7 +132,7 @@ internal static class NodeActions
             area.Expand(new Vector2(60,120));
         }
 
-        var annotation = new Annotation
+        var section = new Section
                              {
                                  Id = Guid.NewGuid(),
                                  Title = "",
@@ -142,9 +142,9 @@ internal static class NodeActions
                                  Size = area.GetSize()
                              };
 
-        var command = new AddAnnotationCommand(compositionOp.GetSymbolUi(), annotation);
+        var command = new AddSectionCommand(compositionOp.GetSymbolUi(), section);
         UndoRedoStack.AddAndExecute(command);
-        return annotation;
+        return section;
     }
 
     public static void PinSelectedToOutputWindow(ProjectView components, NodeSelection nodeSelection, Instance compositionOp, bool unpinIfAlreadySelected =false)
@@ -183,11 +183,11 @@ internal static class NodeActions
     public static void CopySelectedNodesToClipboard(NodeSelection nodeSelection, Instance composition)
     {
         var selectedChildren = nodeSelection.GetSelectedNodes<SymbolUi.Child>().ToList();
-        var selectedAnnotations = nodeSelection.GetSelectedNodes<Annotation>().ToList();
-        if (selectedChildren.Count + selectedAnnotations.Count == 0)
+        var selectedSections = nodeSelection.GetSelectedNodes<Section>().ToList();
+        if (selectedChildren.Count + selectedSections.Count == 0)
             return;
 
-        if (!GraphOperations.TryCopyNodesAsJson(composition, selectedChildren, selectedAnnotations, out var resultJsonString))
+        if (!GraphOperations.TryCopyNodesAsJson(composition, selectedChildren, selectedSections, out var resultJsonString))
             return;
 
         EditorUi.Instance.SetClipboardText(resultJsonString);
@@ -230,7 +230,7 @@ internal static class NodeActions
             var compositionSymbolUi = compositionOp.GetSymbolUi();
             var cmd = new CopySymbolChildrenCommand(containerSymbolUi,
                                                     null,
-                                                    containerSymbolUi.Annotations.Values.ToList(),
+                                                    containerSymbolUi.Sections.Values.ToList(),
                                                     compositionSymbolUi,
                                                     canvas.InverseTransformPositionFloat(ImGui.GetMousePos()),
                                                     copyMode: CopySymbolChildrenCommand.CopyMode.ClipboardSource,
@@ -248,10 +248,10 @@ internal static class NodeActions
                 nodeSelection.AddSelection(newChildUi, instance);
             }
 
-            foreach (var id in cmd.NewSymbolAnnotationIds)
+            foreach (var id in cmd.NewSymbolSectionIds)
             {
-                var annotation = compositionSymbolUi.Annotations[id];
-                nodeSelection.AddSelection(annotation);
+                var section = compositionSymbolUi.Sections[id];
+                nodeSelection.AddSelection(section);
             }
         }
         catch (Exception e)

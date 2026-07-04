@@ -66,10 +66,11 @@ internal static class ProjectsPanel
         }
     }
 
-    private static void DrawProjectItem(GraphWindow window, EditorSymbolPackage package)
+    /// <summary>Draws one project row. Returns true when a click loaded the project into the given window.</summary>
+    internal static bool DrawProjectItem(GraphWindow window, EditorSymbolPackage package)
     {
         if (!package.HasHome)
-            return;
+            return false;
 
         var dl = ImGui.GetWindowDrawList();
 
@@ -131,20 +132,21 @@ internal static class ProjectsPanel
                         thumbnail.UvMin, thumbnail.UvMax);
         }
 
+        var wasOpened = false;
         if (clicked)
         {
+            // No early return on failure — the PushID/PopID pair below must stay balanced.
             if (!isOpened && package is EditorSymbolPackage editorPackage2)
             {
                 if (!OpenedProject.TryCreate(editorPackage2, out openedProject, out var error))
                 {
                     Log.Warning($"Failed to load project: {error}");
-                    return;
                 }
             }
 
             if (openedProject != null)
             {
-                window.TrySetToProject(openedProject);
+                wasOpened = window.TrySetToProject(openedProject);
             }
         }
 
@@ -181,6 +183,7 @@ internal static class ProjectsPanel
         ImGui.PopStyleVar();
 
         ImGui.PopID();
+        return wasOpened;
     }
 
     private static void DrawArchivedItem(ProjectSetup.ArchivedProjectInfo archivedProject)
