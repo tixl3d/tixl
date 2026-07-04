@@ -74,6 +74,46 @@ operator. Then resize it back so the operator is outside again.
   is moved.
 - An operator only half inside the frame does not get adopted.
 
+## Step: Resize from any edge or corner
+
+**Action:**
+On a reasonably large section, hover each of the four edges and the three free
+corners (top-right, bottom-left, bottom-right — top-left is the collapse
+chevron) and drag each one.
+
+**Expected:**
+- The cursor changes to the matching resize arrows on hover.
+- Each edge/corner resizes the frame from that side; the opposite side stays
+  anchored.
+- Edges snap to neighboring section borders and the grid.
+- The frame can't be resized smaller than roughly one operator cell.
+- On a very small (or far zoomed-out) frame only the bottom-right corner
+  offers resizing, so the frame stays easy to grab and drag.
+
+## Step: Collapse toggle scales with zoom
+
+**Action:**
+Zoom in and out on a section with a label and watch the chevron toggle in the
+header, clicking it at different zoom levels.
+
+**Expected:**
+- The chevron scales with the title text when zooming, instead of staying a
+  fixed tiny size.
+- It stays comfortably clickable even when zoomed far out.
+- The label text sits next to the chevron without overlapping it.
+
+## Step: No accidental header grabs when zoomed in
+
+**Action:**
+Zoom in until one section fills most of the graph view (only an edge or two
+visible). Try to fence-select operators by dragging from empty space near the
+section's top edge.
+
+**Expected:**
+- The drag starts a fence selection — the section is not grabbed or moved.
+- After zooming out so the section covers clearly less than the full view,
+  dragging its header moves it again as usual.
+
 ## Step: Drag operators in and out
 
 **Action:**

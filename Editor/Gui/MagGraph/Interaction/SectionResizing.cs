@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
@@ -12,6 +12,27 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 
 internal static class SectionResizing
 {
+    [Flags]
+    internal enum Handles
+    {
+        None = 0,
+        Left = 1 << 0,
+        Right = 1 << 1,
+        Top = 1 << 2,
+        Bottom = 1 << 3,
+
+        TopLeft = Top | Left,
+        TopRight = Top | Right,
+        BottomLeft = Bottom | Left,
+        BottomRight = Bottom | Right,
+    }
+
+    /// <summary>
+    /// The edges dragged by the current interaction. Set by the graph view's resize
+    /// handles before entering the ResizeSection state.
+    /// </summary>
+    internal static Handles ActiveHandles = Handles.BottomRight;
+
     internal static void Draw(GraphUiContext context)
     {
         _snapHandlerY.DrawSnapIndicator(context.View, UiColors.ForegroundFull.Fade(0.1f));
@@ -39,7 +60,9 @@ internal static class SectionResizing
             if (started)
             {
                 _draggedSectionId = context.ActiveSectionId;
-                _dragStartDelta = ImGui.GetMousePos() - context.View.TransformPosition(magSection.PosOnCanvas + magSection.Size);
+                _startBoundsMin = section.PosOnCanvas;
+                _startBoundsMax = section.PosOnCanvas + section.Size;
+                _startMousePosInCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
                 _moveCommand = new ModifyCanvasElementsCommand(instViewSymbolUi, [section], context.Selector);
             }
 
@@ -47,57 +70,44 @@ internal static class SectionResizing
                 return;
         }
 
+        ImGui.SetMouseCursor(GetCursorForHandles(ActiveHandles));
+
         // Update dragging...
         {
-            var minSize = MathF.Min(MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y);
-            var gridSize = Vector2.One * minSize;
-            
-            var newDragPos = ImGui.GetMousePos() - _dragStartDelta;
-            var newDragPosInCanvas = context.View.InverseTransformPositionFloat(newDragPos);
+            var mousePosInCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
+            var dragDelta = mousePosInCanvas - _startMousePosInCanvas;
 
-            if (_snapHandlerX.TryCheckForSnapping(newDragPosInCanvas.X, out var snappedPosX,
-                                                  context.View.Scale.X * 0.25f,
-                                                      [magSection],
-                                                  context.Layout.Sections.Values
-                                                 ))
+            var min = _startBoundsMin;
+            var max = _startBoundsMax;
+
+            if ((ActiveHandles & Handles.Left) != 0)
             {
-                newDragPosInCanvas.X = (float)snappedPosX;
+                var newEdge = SnapEdge(_snapHandlerX, _startBoundsMin.X + dragDelta.X, context, magSection, context.View.Scale.X,
+                                       RasterSnapAttractor.Directions.Horizontal);
+                min.X = MathF.Min(newEdge, max.X - MagGraphItem.GridSize.X);
             }
-            else if (_snapHandlerX.TryCheckForSnapping(newDragPosInCanvas.X, out var snappedXValue3,
-                                                       context.View.Scale.X * 0.25f,
-                                                           [],
-                                                           [new RasterSnapAttractor
-                                                                {
-                                                                    Canvas = context.View,
-                                                                    GridSize = gridSize,
-                                                                    Direction = RasterSnapAttractor.Directions.Horizontal
-                                                                }]))
+            else if ((ActiveHandles & Handles.Right) != 0)
             {
-                newDragPosInCanvas.X = (float)snappedXValue3;
+                var newEdge = SnapEdge(_snapHandlerX, _startBoundsMax.X + dragDelta.X, context, magSection, context.View.Scale.X,
+                                       RasterSnapAttractor.Directions.Horizontal);
+                max.X = MathF.Max(newEdge, min.X + MagGraphItem.GridSize.X);
             }
 
-            if (_snapHandlerY.TryCheckForSnapping(newDragPosInCanvas.Y, out var snappedPosY,
-                                                  context.View.Scale.Y * 0.25f,
-                                                      [magSection],
-                                                  context.Layout.Sections.Values
-                                                 ))
+            if ((ActiveHandles & Handles.Top) != 0)
             {
-                newDragPosInCanvas.Y = (float)snappedPosY;
+                var newEdge = SnapEdge(_snapHandlerY, _startBoundsMin.Y + dragDelta.Y, context, magSection, context.View.Scale.Y,
+                                       RasterSnapAttractor.Directions.Vertical);
+                min.Y = MathF.Min(newEdge, max.Y - MagGraphItem.GridSize.Y);
             }
-            else if (_snapHandlerY.TryCheckForSnapping(newDragPosInCanvas.Y, out var snappedYValue3,
-                                                       context.View.Scale.Y * 0.25f,
-                                                           [],
-                                                           [new RasterSnapAttractor
-                                                                {
-                                                                    Canvas = context.View,
-                                                                    GridSize = gridSize,
-                                                                    Direction = RasterSnapAttractor.Directions.Vertical
-                                                                }]))
+            else if ((ActiveHandles & Handles.Bottom) != 0)
             {
-                newDragPosInCanvas.Y = (float)snappedYValue3;
-            }            
+                var newEdge = SnapEdge(_snapHandlerY, _startBoundsMax.Y + dragDelta.Y, context, magSection, context.View.Scale.Y,
+                                       RasterSnapAttractor.Directions.Vertical);
+                max.Y = MathF.Max(newEdge, min.Y + MagGraphItem.GridSize.Y);
+            }
 
-            section.Size = newDragPosInCanvas - section.PosOnCanvas;
+            section.PosOnCanvas = min;
+            section.Size = max - min;
         }
 
         // Complete dragging...
@@ -135,11 +145,52 @@ internal static class SectionResizing
             context.StateMachine.SetState(GraphStates.Default, context);
             _draggedSectionId = Guid.Empty;
             _moveCommand = null;
+            ActiveHandles = Handles.None;
         }
     }
 
+    internal static ImGuiMouseCursor GetCursorForHandles(Handles handles)
+    {
+        return handles switch
+                   {
+                       Handles.TopLeft or Handles.BottomRight => ImGuiMouseCursor.ResizeNWSE,
+                       Handles.TopRight or Handles.BottomLeft => ImGuiMouseCursor.ResizeNESW,
+                       Handles.Left or Handles.Right          => ImGuiMouseCursor.ResizeEW,
+                       Handles.Top or Handles.Bottom          => ImGuiMouseCursor.ResizeNS,
+                       _                                      => ImGuiMouseCursor.Arrow,
+                   };
+    }
+
+    private static float SnapEdge(ValueSnapHandler snapHandler, float edgeValue, GraphUiContext context, MagGraphSection magSection,
+                                  float canvasScale, RasterSnapAttractor.Directions direction)
+    {
+        if (snapHandler.TryCheckForSnapping(edgeValue, out var snappedToSection, canvasScale * 0.25f,
+                                                [magSection],
+                                            context.Layout.Sections.Values))
+        {
+            return (float)snappedToSection;
+        }
+
+        var minGrid = MathF.Min(MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y);
+        if (snapHandler.TryCheckForSnapping(edgeValue, out var snappedToGrid, canvasScale * 0.25f,
+                                                [],
+                                                [new RasterSnapAttractor
+                                                     {
+                                                         Canvas = context.View,
+                                                         GridSize = Vector2.One * minGrid,
+                                                         Direction = direction
+                                                     }]))
+        {
+            return (float)snappedToGrid;
+        }
+
+        return edgeValue;
+    }
+
     private static Guid _draggedSectionId = Guid.Empty;
-    private static Vector2 _dragStartDelta;
+    private static Vector2 _startBoundsMin;
+    private static Vector2 _startBoundsMax;
+    private static Vector2 _startMousePosInCanvas;
     private static ModifyCanvasElementsCommand _moveCommand;
 
     private static readonly ValueSnapHandler _snapHandlerX = new(SnapResult.Orientations.Horizontal);
