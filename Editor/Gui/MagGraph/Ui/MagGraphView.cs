@@ -273,9 +273,11 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         _context.Layout.FlagStructureAsChanged();
         _context.Layout.ComputeLayout(_context);
 
-        if (!_context.Layout.Items.TryGetValue(item.Id, out item))
+        if (!_context.Layout.Items.TryGetValue(item.Id, out var item2))
             return;
 
+        item = item2; // prevent nullable warning
+        
         var inputLineIndex = 0;
         while (inputLineIndex < item.InputLines.Length && item.InputLines[inputLineIndex].Id != inputDefinition.Id)
         {

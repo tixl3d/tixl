@@ -132,11 +132,12 @@ internal sealed class SymbolFilter
                  }
 
                  var matchingInputDef = symbolUiSymbol.GetInputMatchingType(FilterInputType);
-                
+
                  if (matchingInputDef == null)
                      continue;
 
-                 if (OnlyMultiInputs && !symbolUiSymbol.InputDefinitions[0].IsMultiInput)
+                 // New connections land on the first input of matching type, so that one must be a multi-input...
+                 if (OnlyMultiInputs && !matchingInputDef.IsMultiInput)
                      continue;
             }
 

@@ -85,28 +85,59 @@ internal static class InputPicking
             Log.Warning("no visible output to connect?");
             return;
         }
-        
-        // Create connection
-
-        var sourceParentOrChildId = context.ActiveSourceItem.Variant == MagGraphItem.Variants.Input ? Guid.Empty : context.ActiveSourceItem.Id;
-        var connectionToAdd = new Symbol.Connection(sourceParentOrChildId,
-                                                    context.ActiveSourceOutputId,
-                                                    context.ItemForInputSelection.Id,
-                                                    targetInputUi.Id);
-        
-        if (Structure.CheckForCycle(composition.Symbol, connectionToAdd))
-        {
-            Log.Debug("This action is not allowed. This connection would create a cycle.");
-            return;
-        }
 
         var inputConnectionCount = context.CompositionInstance.Symbol.Connections.Count(c => c.TargetParentOrChildId == context.ItemForInputSelection.Id
                                                                                        && c.TargetSlotId == targetInputUi.Id);
-        
-         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(composition.Symbol,
-                                                                         connectionToAdd,
-                                                                         inputConnectionCount));
-         
+
+        var addedCount = 0;
+        if (context.TempConnections.Count > 1 && targetInputUi.InputDefinition.IsMultiInput)
+        {
+            // Connect all dragged connections to the picked multi-input...
+            foreach (var tempConnection in context.TempConnections)
+            {
+                if (tempConnection.SourceItem == null || tempConnection.SourceOutput == null)
+                    continue;
+
+                var connectionToAdd = new Symbol.Connection(tempConnection.SourceParentOrChildId,
+                                                            tempConnection.SourceOutput.Id,
+                                                            context.ItemForInputSelection.Id,
+                                                            targetInputUi.Id);
+
+                if (Structure.CheckForCycle(composition.Symbol, connectionToAdd))
+                {
+                    Log.Debug("This action is not allowed. This connection would create a cycle.");
+                    continue;
+                }
+
+                context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(composition.Symbol,
+                                                                                connectionToAdd,
+                                                                                inputConnectionCount + addedCount));
+                addedCount++;
+            }
+
+            if (addedCount == 0)
+                return;
+        }
+        else
+        {
+            var sourceParentOrChildId = context.ActiveSourceItem.Variant == MagGraphItem.Variants.Input ? Guid.Empty : context.ActiveSourceItem.Id;
+            var connectionToAdd = new Symbol.Connection(sourceParentOrChildId,
+                                                        context.ActiveSourceOutputId,
+                                                        context.ItemForInputSelection.Id,
+                                                        targetInputUi.Id);
+
+            if (Structure.CheckForCycle(composition.Symbol, connectionToAdd))
+            {
+                Log.Debug("This action is not allowed. This connection would create a cycle.");
+                return;
+            }
+
+            context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(composition.Symbol,
+                                                                            connectionToAdd,
+                                                                            inputConnectionCount));
+            addedCount = 1;
+        }
+
         // Find insertion index
         var visibleInputLines = context.ItemForInputSelection.InputLines;
         var allInputSlots = context.ItemForInputSelection.Instance!.Inputs;
@@ -118,7 +149,7 @@ internal static class InputPicking
             MagItemMovement.MoveSnappedItemsVertically(context,
                                                        MagItemMovement.CollectSnappedItems(context.ItemForInputSelection),
                                                        context.ItemForInputSelection.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (insertionLineIndex - 0.5f),
-                                                       MagGraphItem.GridSize.Y);
+                                                       MagGraphItem.GridSize.Y * addedCount);
         
         context.ItemMovement.Reset();
         context.Layout.FlagStructureAsChanged();
@@ -221,11 +252,15 @@ internal static class InputPicking
                 ImGui.TextColored(UiColors.TextMuted, typeName + " inputs");
                 ImGui.PopFont();
 
+                // With multiple dragged connections only multi-inputs can take them all...
+                var onlyMultiInputs = context.TempConnections.Count > 1;
+
                 var inputIndex = 0;
                 foreach (var inputUi in childUi.InputUis.Values)
                 {
                     var input = context.ItemForInputSelection.Instance!.Inputs[inputIndex];
-                    if (inputUi.Type == context.DraggedPrimaryOutputType)
+                    if (inputUi.Type == context.DraggedPrimaryOutputType
+                        && (!onlyMultiInputs || inputUi.InputDefinition.IsMultiInput))
                     {
                         var isConnected = input.HasInputConnections;
                         var prefix = isConnected ? "× " : "   ";

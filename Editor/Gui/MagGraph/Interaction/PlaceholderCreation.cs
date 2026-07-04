@@ -83,7 +83,8 @@ internal sealed class PlaceholderCreation
         context.StateMachine.SetState(GraphStates.Placeholder, context);
     }
 
-    internal void OpenOnCanvas(GraphUiContext context, Vector2 posOnCanvas, Type? inputTypeFilter = null, Type? outputTypeFilter = null)
+    internal void OpenOnCanvas(GraphUiContext context, Vector2 posOnCanvas, Type? inputTypeFilter = null, Type? outputTypeFilter = null,
+                               bool onlyMultiInputs = false)
     {
         // Might continue a macro command started by a preceding connection drag...
         context.StartOrContinueMacroCommand("Insert Operator");
@@ -98,7 +99,7 @@ internal sealed class PlaceholderCreation
                               };
 
         context.Layout.Items[PlaceHolderId] = PlaceholderItem;
-        PlaceHolderUi.Open(context, PlaceholderItem, inputFilter: inputTypeFilter, outputFilter: outputTypeFilter);
+        PlaceHolderUi.Open(context, PlaceholderItem, inputFilter: inputTypeFilter, outputFilter: outputTypeFilter, onlyMultiInputs: onlyMultiInputs);
     }
 
     internal void OpenForItemOutput(GraphUiContext context,
@@ -487,7 +488,7 @@ internal sealed class PlaceholderCreation
                                                MagGraphItem.GridSize.Y * (newHeight - 1));
             }
         }
-        else if (context.TryGetActiveOutputLine(out _))
+        else if (context.TempConnections.Count <= 1 && context.TryGetActiveOutputLine(out _))
         {
             var primaryInput = newInstance.Inputs.FirstOrDefault(i => i.ValueType == context.DraggedPrimaryOutputType);
             if (primaryInput != null)

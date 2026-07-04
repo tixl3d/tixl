@@ -225,43 +225,43 @@ internal static class HelpIndex
 
     private sealed class VideosFileDto
     {
-        [JsonProperty("videos")] public List<VideoDto>? Videos;
+        [JsonProperty("videos")] public List<VideoDto>? Videos { get; set; }
     }
 
     private sealed class VideoDto
     {
-        [JsonProperty("id")] public string? Id;
-        [JsonProperty("type")] public string? Type;
-        [JsonProperty("date")] public string? Date;
-        [JsonProperty("title")] public string? Title;
-        [JsonProperty("url")] public string? Url;
-        [JsonProperty("duration")] public string? Duration;
+        [JsonProperty("id")] public string? Id { get; set; }
+        [JsonProperty("type")] public string? Type { get; set; }
+        [JsonProperty("date")] public string? Date { get; set; }
+        [JsonProperty("title")] public string? Title { get; set; }
+        [JsonProperty("url")] public string? Url { get; set; }
+        [JsonProperty("duration")] public string? Duration { get; set; }
     }
 
     private sealed class SegmentDto
     {
-        [JsonProperty("video")] public string? Video;
-        [JsonProperty("startSecond")] public int StartSecond;
-        [JsonProperty("duration")] public int Duration;
-        [JsonProperty("url")] public string? Url;
-        [JsonProperty("depth")] public string? Depth;
-        [JsonProperty("style")] public string? Style;
-        [JsonProperty("purpose")] public string? Purpose;
-        [JsonProperty("confidence")] public int? Confidence;
-        [JsonProperty("note")] public string? Note;
-        [JsonProperty("focus")] public bool Focus;
-        [JsonProperty("momentCount")] public int MomentCount;
+        [JsonProperty("video")] public string? Video { get; set; }
+        [JsonProperty("startSecond")] public int StartSecond { get; set; }
+        [JsonProperty("duration")] public int Duration { get; set; }
+        [JsonProperty("url")] public string? Url { get; set; }
+        [JsonProperty("depth")] public string? Depth { get; set; }
+        [JsonProperty("style")] public string? Style { get; set; }
+        [JsonProperty("purpose")] public string? Purpose { get; set; }
+        [JsonProperty("confidence")] public int? Confidence { get; set; }
+        [JsonProperty("note")] public string? Note { get; set; }
+        [JsonProperty("focus")] public bool Focus { get; set; }
+        [JsonProperty("momentCount")] public int MomentCount { get; set; }
     }
 
     private sealed class TopicsFileDto
     {
-        [JsonProperty("topics")] public Dictionary<string, TopicDto>? Topics;
+        [JsonProperty("topics")] public Dictionary<string, TopicDto>? Topics { get; set; }
     }
 
     private sealed class TopicDto
     {
-        [JsonProperty("term")] public string? Term;
-        [JsonProperty("docFile")] public string? DocFile;
+        [JsonProperty("term")] public string? Term { get; set; }
+        [JsonProperty("docFile")] public string? DocFile { get; set; }
     }
 
     private static bool _loaded;

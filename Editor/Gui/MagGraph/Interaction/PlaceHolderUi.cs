@@ -27,13 +27,15 @@ internal static class PlaceHolderUi
         MagGraphItem placeholderItem,
         MagGraphItem.Directions connectionOrientation = MagGraphItem.Directions.Horizontal,
         Type? inputFilter = null,
-        Type? outputFilter = null)
+        Type? outputFilter = null,
+        bool onlyMultiInputs = false)
     {
         _selectedSymbolUi = null;
         _focusInputNextTime = true;
 
         Filter.FilterInputType = inputFilter;
         Filter.FilterOutputType = outputFilter;
+        Filter.OnlyMultiInputs = onlyMultiInputs;
         Filter.WasUpdated = true;
         Filter.SearchString = string.Empty;
         Filter.UpdateIfNecessary(context.Selector, forceUpdate: true);

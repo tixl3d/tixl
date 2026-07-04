@@ -120,7 +120,11 @@ namespace T3.Editor.Gui.MagGraph.States
                                   var clickedBackground = context.ActiveItem == null;
                                   if (clickedBackground)
                                   {
-                                      ProjectView.Focused.TrySetCompositionOpToParent();
+                                      // Already at the root composition -> return to the project hub
+                                      if (!ProjectView.Focused.TrySetCompositionOpToParent())
+                                      {
+                                          ProjectView.Focused.Close();
+                                      }
                                   }
                                   else
                                   {
@@ -380,27 +384,9 @@ namespace T3.Editor.Gui.MagGraph.States
                                       return;
                                   }
 
-                                  //var outputLine = context.GetActiveOutputLine();              
-                                  var output = outputLine.Output;
-                                  var posOnCanvas = sourceItem.PosOnCanvas + new Vector2(MagGraphItem.GridSize.X,
-                                                                                         MagGraphItem.GridSize.Y * (1.5f + outputLine.VisibleIndex));
-
-                                  var tempConnection = new MagGraphConnection
-                                                           {
-                                                               Style = MagGraphConnection.ConnectionStyles.Unknown,
-                                                               SourcePos = posOnCanvas,
-                                                               TargetPos = default,
-                                                               SourceItem = sourceItem,
-                                                               TargetItem = null,
-                                                               SourceOutput = output,
-                                                               OutputLineIndex = outputLine.VisibleIndex,
-                                                               VisibleOutputIndex = 0,
-                                                               ConnectionHash = 0,
-                                                               IsTemporary = true,
-                                                           };
-                                  context.TempConnections.Add(tempConnection);
+                                  AddTempConnectionsForOutputDrag(context, sourceItem, outputLine);
                                   context.ActiveSourceItem = sourceItem;
-                                  context.DraggedPrimaryOutputType = output.ValueType;
+                                  context.DraggedPrimaryOutputType = outputLine.Output.ValueType;
                                   context.StateMachine.SetState(DragConnectionEnd, context);
                               }
                           },
@@ -564,7 +550,8 @@ namespace T3.Editor.Gui.MagGraph.States
                               else
                               {
                                   // Was dropped on operator or background...
-                                  context.Placeholder.OpenOnCanvas(context, posOnCanvas, context.DraggedPrimaryOutputType);
+                                  context.Placeholder.OpenOnCanvas(context, posOnCanvas, context.DraggedPrimaryOutputType,
+                                                                   onlyMultiInputs: context.TempConnections.Count > 1);
                                   context.StateMachine.SetState(Placeholder, context);
                               }
                           },
@@ -719,5 +706,59 @@ namespace T3.Editor.Gui.MagGraph.States
                   Update: AnnotationResizing.Draw,
                   Exit: _ => { }
                  );
+
+        /// <summary>
+        /// Starts dragging temp connections from the picked output. If the dragged item is part of a multi-selection,
+        /// the primary outputs of all other selected operators with a matching type are picked up too, ordered by
+        /// canvas position, so they can be dropped onto a multi-input or the symbol browser together.
+        /// </summary>
+        private static void AddTempConnectionsForOutputDrag(GraphUiContext context, MagGraphItem sourceItem, MagGraphItem.OutputLine outputLine)
+        {
+            var draggedItems = new List<MagGraphItem> { sourceItem };
+
+            var outputType = outputLine.Output.ValueType;
+            if (context.Selector.IsSelected(sourceItem))
+            {
+                foreach (var item in context.Layout.Items.Values)
+                {
+                    if (item == sourceItem
+                        || item.Variant != MagGraphItem.Variants.Operator
+                        || !context.Selector.IsSelected(item))
+                        continue;
+
+                    if (item.OutputLines.Length == 0 || item.OutputLines[0].Output.ValueType != outputType)
+                        continue;
+
+                    draggedItems.Add(item);
+                }
+            }
+
+            draggedItems.Sort(static (a, b) => a.PosOnCanvas.Y != b.PosOnCanvas.Y
+                                                   ? a.PosOnCanvas.Y.CompareTo(b.PosOnCanvas.Y)
+                                                   : a.PosOnCanvas.X.CompareTo(b.PosOnCanvas.X));
+
+            for (var index = 0; index < draggedItems.Count; index++)
+            {
+                var item = draggedItems[index];
+                var itemOutputLine = item == sourceItem ? outputLine : item.OutputLines[0];
+                var posOnCanvas = item.PosOnCanvas + new Vector2(MagGraphItem.GridSize.X,
+                                                                 MagGraphItem.GridSize.Y * (1.5f + itemOutputLine.VisibleIndex));
+
+                context.TempConnections.Add(new MagGraphConnection
+                                                {
+                                                    Style = MagGraphConnection.ConnectionStyles.Unknown,
+                                                    SourcePos = posOnCanvas,
+                                                    TargetPos = default,
+                                                    SourceItem = item,
+                                                    TargetItem = null,
+                                                    SourceOutput = itemOutputLine.Output,
+                                                    OutputLineIndex = itemOutputLine.VisibleIndex,
+                                                    VisibleOutputIndex = 0,
+                                                    ConnectionHash = 0,
+                                                    IsTemporary = true,
+                                                    MultiInputIndex = index,
+                                                });
+            }
+        }
     }
 }

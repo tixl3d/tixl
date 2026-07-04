@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
@@ -56,15 +55,19 @@ internal static class InputSnapper
             context.StartMacroCommand("Create connection");
         }
 
-        //Debug.Assert(context.MacroCommand != null);
+        // Only multi-inputs can take more than one dragged connection...
+        var targetIsMultiInput = false;
+        foreach (var line in BestInputMatch.Item.InputLines)
+        {
+            if (line.Id != BestInputMatch.SlotId)
+                continue;
 
-        Debug.Assert(context.TempConnections.Count == 1);
+            targetIsMultiInput = line.InputUi?.InputDefinition.IsMultiInput ?? false;
+            break;
+        }
 
-        var tempConnection = context.TempConnections[0];
+        var connectionCount = targetIsMultiInput ? context.TempConnections.Count : 1;
 
-        // TODO: Use snap type...
-        // Create connection
-        var sourceParentOrChildId = tempConnection.SourceItem.Variant == MagGraphItem.Variants.Input ? Guid.Empty : tempConnection.SourceItem.Id;
         var targetParentOrChildId = BestInputMatch.Item.Variant == MagGraphItem.Variants.Output ? Guid.Empty : BestInputMatch.Item.Id;
 
         var existingConnection = context.CompositionInstance.Symbol.Connections.FirstOrDefault(c => c.TargetParentOrChildId == targetParentOrChildId
@@ -73,44 +76,36 @@ internal static class InputSnapper
         {
             context.MacroCommand?.AddAndExecCommand(new DeleteConnectionCommand(context.CompositionInstance.Symbol, existingConnection, BestInputMatch.MultiInputIndex));
         }
-        
-        var connectionToAdd = new Symbol.Connection(sourceParentOrChildId,
-                                                    tempConnection.SourceOutput.Id,
-                                                    targetParentOrChildId,
-                                                    BestInputMatch.SlotId);
-
-        if (Structure.CheckForCycle(context.CompositionInstance.Symbol, connectionToAdd))
-        {
-            Log.Debug("This action is not allowed. This connection would create a cycle.");
-            return false;
-        }
 
         var multiInputIndex = BestInputMatch.MultiInputIndex;
         var adjustedMultiInputIndex = multiInputIndex + (BestInputMatch.InputSnapType == InputSnapTypes.InsertAfterMultiInput ? 1 : 0);
-        
-        
-        
-        
-        if (BestInputMatch.InputSnapType == InputSnapTypes.ReplaceMultiInput)
+
+        var addedCount = 0;
+        for (var index = 0; index < connectionCount; index++)
         {
-            // context.MacroCommand!.AddAndExecCommand(new DeleteConnectionCommand(context.CompositionInstance.Symbol,
-            //                                                                     connectionToAdd,
-            //                                                                     adjustedMultiInputIndex));
+            var tempConnection = context.TempConnections[index];
+            var sourceParentOrChildId = tempConnection.SourceItem.Variant == MagGraphItem.Variants.Input ? Guid.Empty : tempConnection.SourceItem.Id;
+
+            var connectionToAdd = new Symbol.Connection(sourceParentOrChildId,
+                                                        tempConnection.SourceOutput.Id,
+                                                        targetParentOrChildId,
+                                                        BestInputMatch.SlotId);
+
+            if (Structure.CheckForCycle(context.CompositionInstance.Symbol, connectionToAdd))
+            {
+                Log.Debug("This action is not allowed. This connection would create a cycle.");
+                continue;
+            }
 
             context.MacroCommand!.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
                                                                              connectionToAdd,
-                                                                             adjustedMultiInputIndex));
-        }
-        else
-        {
-            context.MacroCommand!.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                             connectionToAdd,
-                                                                             adjustedMultiInputIndex));
+                                                                             adjustedMultiInputIndex + addedCount));
+            addedCount++;
         }
 
-        
-            
-        
+        if (addedCount == 0)
+            return false;
+
         // Push down other items
         {
             var lines = BestInputMatch.Item.InputLines;
@@ -124,13 +119,16 @@ internal static class InputSnapper
 
             var hasHeightChanged = (BestInputMatch.InputSnapType == InputSnapTypes.InsertAfterMultiInput ||
                                     BestInputMatch.InputSnapType == InputSnapTypes.InsertBeforeMultiInput)
-                                   || (BestInputMatch.InputSnapType == InputSnapTypes.Normal 
-                                       && !wasInputLineWasConnected 
-                                       && BestInputMatch.Item.Variant == MagGraphItem.Variants.Operator 
+                                   || (BestInputMatch.InputSnapType == InputSnapTypes.Normal
+                                       && !wasInputLineWasConnected
+                                       && BestInputMatch.Item.Variant == MagGraphItem.Variants.Operator
                                        && lines[inputLineIndex].InputUi.Relevancy == Relevancy.Optional
                                        && inputLineIndex > 0);
-            
-            if (  hasHeightChanged && inputLineIndex < lines.Length)
+
+            // Every connection beyond the first adds another input line...
+            var rowsToInsert = hasHeightChanged ? addedCount : addedCount - 1;
+
+            if (rowsToInsert > 0 && inputLineIndex < lines.Length)
             {
                 var insertionIndex = inputLineIndex + adjustedMultiInputIndex;
                 var collectSnappedItems = MagItemMovement.CollectSnappedItems(BestInputMatch.Item);
@@ -138,7 +136,7 @@ internal static class InputSnapper
                 MagItemMovement.MoveSnappedItemsVertically(context,
                                                            collectSnappedItems,
                                                            BestInputMatch.Item.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (insertionIndex - 0.5f),
-                                                           MagGraphItem.GridSize.Y);
+                                                           MagGraphItem.GridSize.Y * rowsToInsert);
             }
         }
         return true;
