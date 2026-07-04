@@ -276,37 +276,37 @@ internal class ImGuiDx11RenderForm : RenderForm
     }
 
     /// <summary>
-    /// Re-reads the physical modifier state from Windows and applies it to ImGui and
-    /// <see cref="KeyHandler"/>. Key-up events are lost while the app is unfocused or
-    /// halted at a debugger breakpoint, so modifiers must be re-synced on refocus.
+    /// Releases modifiers that are no longer physically held, according to Windows.
+    /// Key-up events are lost while the app is unfocused or halted at a debugger
+    /// breakpoint, so modifiers are re-checked whenever focus returns.
+    ///
+    /// This only ever *releases* keys: GetKeyState reflects the thread's synchronous
+    /// key state, which can report a stale "down" right after refocusing (the release
+    /// was delivered to the previously focused app). Synthesizing a key-down from it
+    /// would stick the modifier with no key-up ever arriving. A genuinely held
+    /// modifier re-registers through its auto-repeat WM_KEYDOWN messages.
     /// </summary>
     private static void SyncModifiersFromSystemState(ImGuiIOPtr io)
     {
-        var shiftDown = IsVkDown(VK_SHIFT);
-        io.KeyShift = shiftDown;
-        io.AddKeyEvent(ImGuiKey.ModShift, shiftDown);
-        SyncKeyHandlerKey(Key.ShiftKey, shiftDown);
-
-        var ctrlDown = IsVkDown(VK_CONTROL);
-        io.KeyCtrl = ctrlDown;
-        io.AddKeyEvent(ImGuiKey.ModCtrl, ctrlDown);
-        SyncKeyHandlerKey(Key.CtrlKey, ctrlDown);
-
-        var altDown = IsVkDown(VK_ALT);
-        io.KeyAlt = altDown;
-        io.AddKeyEvent(ImGuiKey.ModAlt, altDown);
-        SyncKeyHandlerKey(Key.Alt, altDown);
-    }
-
-    private static void SyncKeyHandlerKey(Key key, bool isDown)
-    {
-        if (isDown)
+        if (!IsVkDown(VK_SHIFT))
         {
-            KeyHandler.SetKeyDown(key);
+            io.KeyShift = false;
+            io.AddKeyEvent(ImGuiKey.ModShift, false);
+            KeyHandler.SetKeyUp(Key.ShiftKey);
         }
-        else
+
+        if (!IsVkDown(VK_CONTROL))
         {
-            KeyHandler.SetKeyUp(key);
+            io.KeyCtrl = false;
+            io.AddKeyEvent(ImGuiKey.ModCtrl, false);
+            KeyHandler.SetKeyUp(Key.CtrlKey);
+        }
+
+        if (!IsVkDown(VK_ALT))
+        {
+            io.KeyAlt = false;
+            io.AddKeyEvent(ImGuiKey.ModAlt, false);
+            KeyHandler.SetKeyUp(Key.Alt);
         }
     }
 
