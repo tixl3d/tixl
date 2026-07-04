@@ -4,8 +4,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.InputUi.VectorInputs;
+using T3.Editor.Gui.Interaction.Variations;
+using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using GraphUtils = T3.Editor.UiModel.Helpers.GraphUtils;
@@ -164,6 +167,8 @@ internal static class Duplicate
             newSelectables[i].PosOnCanvas = sourceSelectables[i].PosOnCanvas; // todo: check if this is enough or if id check needed
         }
 
+        DuplicateVariations(sourceSymbol.Id, newSymbol.Id, oldToNewIdMap);
+
         Log.Debug($"Created new symbol '{newTypeName}'");
 
         newSymbolUi.FlagAsModified();
@@ -175,6 +180,58 @@ internal static class Duplicate
         UndoRedoStack.Clear();
 
         return newSymbol;
+    }
+
+    /// <summary>
+    /// Copies the source symbol's presets and snapshots into the new symbol's variation pool.
+    /// Presets are keyed by the symbol's own input ids and snapshots by child ids — both were
+    /// regenerated during duplication, so they are remapped through the id map. Entries that
+    /// don't resolve (stale references in the source variation file) are skipped.
+    /// </summary>
+    private static void DuplicateVariations(Guid sourceSymbolId, Guid newSymbolId, Dictionary<Guid, Guid> oldToNewIdMap)
+    {
+        var sourcePool = VariationHandling.GetOrLoadVariations(sourceSymbolId);
+        if (sourcePool.AllVariations.Count == 0)
+            return;
+
+        var newPool = VariationHandling.GetOrLoadVariations(newSymbolId);
+
+        foreach (var variation in sourcePool.AllVariations)
+        {
+            var newVariation = variation.Clone();
+            var remappedSets = new Dictionary<Guid, Dictionary<Guid, InputValue>>(newVariation.ParameterSetsForChildIds.Count);
+
+            foreach (var (childId, parameterSet) in newVariation.ParameterSetsForChildIds)
+            {
+                if (childId == Guid.Empty)
+                {
+                    // Preset values reference the duplicated symbol's own inputs.
+                    var remappedParameters = new Dictionary<Guid, InputValue>(parameterSet.Count);
+                    foreach (var (inputId, value) in parameterSet)
+                    {
+                        if (oldToNewIdMap.TryGetValue(inputId, out var newInputId))
+                        {
+                            remappedParameters[newInputId] = value;
+                        }
+                    }
+
+                    if (remappedParameters.Count > 0)
+                    {
+                        remappedSets[Guid.Empty] = remappedParameters;
+                    }
+                }
+                else if (oldToNewIdMap.TryGetValue(childId, out var newChildId))
+                {
+                    // Snapshot values are keyed by the child's own symbol inputs, which are unchanged.
+                    remappedSets[newChildId] = parameterSet;
+                }
+            }
+
+            newVariation.ParameterSetsForChildIds = remappedSets;
+            newPool.AddUserVariation(newVariation);
+        }
+
+        newPool.SaveVariationsToFile();
     }
 
     private static string ReplaceGuidAttributeWith(Guid newSymbolId, string newSource)

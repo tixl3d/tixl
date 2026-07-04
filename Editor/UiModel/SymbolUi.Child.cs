@@ -131,6 +131,8 @@ public partial class SymbolUi
                            Style = Style,
                            Comment = Comment,
                            CollapsedIntoAnnotationFrameId = CollapsedIntoAnnotationFrameId,
+                           SnapshotGroupIndex = SnapshotGroupIndex,
+                           SnapshotEnabledInputIds = SnapshotEnabledInputIds == null ? null : [..SnapshotEnabledInputIds],
                        };
         }
 
