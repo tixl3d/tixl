@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "e6bbbeef-08d8-4105-b84d-39edadb549c0"/*PickBuffer*/,
   "Description": "Picks one of the connected GPU buffers. This can be useful for switching between different sets of Points or Vertices.",
   "SymbolTags": "1",

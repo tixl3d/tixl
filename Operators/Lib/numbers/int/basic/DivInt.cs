@@ -1,12 +1,11 @@
 namespace Lib.numbers.@int.basic;
 
 [Guid("eae8b8af-ce79-4e0a-9777-2dd0a99c18cb")]
-internal sealed class IntDiv : Instance<IntDiv>
-{
+internal sealed class DivInt :Instance<DivInt>{
     [Output(Guid = "3BB1068A-04EF-4804-83F8-3A3EE6922E2F")]
     public readonly Slot<int> Result = new();
 
-    public IntDiv()
+    public DivInt()
     {
         Result.UpdateAction += Update;
     }

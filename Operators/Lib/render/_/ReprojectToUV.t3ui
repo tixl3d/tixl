@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "4238439e-a6b4-4390-9984-e6ebf19c3a69"/*ReprojectToUV*/,
   "Description": "Uses a camera projection and the UV layout of the incoming mesh to reproject an image onto a geometry.\n\nThis can be useful for uses like projection mapping or immersive media installations.\n\nNote:\n\nFor the setup to work correctly make sure that...\n- the FOV of the viewer camera is wide enough.\n- the aspect ratio of the viewer camera matches the texture resolution\n\nSee [ReprojectToUvExample].\n\n\nFor simple methods to change the UVs of meshes, see [MeshProjectUV] or [TransformMeshUVs].",
   "SymbolTags": "8",
@@ -7,8 +9,8 @@
       "InputId": "04e2fd86-3dbc-4718-9f3b-361dff3e49c8"/*Texture*/,
       "Relevancy": "Relevant",
       "Position": {
-        "X": 1052.2343,
-        "Y": 4468.8706
+        "X": 1071.5016,
+        "Y": 4451.7437
       },
       "Description": "Render / Texture input",
       "AddPadding": "True"
@@ -17,16 +19,16 @@
       "InputId": "5ba52f22-0fe6-4316-a512-7577fcdff091"/*Mesh*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 1051.2126,
-        "Y": 4532.728
+        "X": 1429.2665,
+        "Y": 4536.998
       },
       "Description": "Mesh input"
     },
     {
       "InputId": "6ff4c0bd-f47c-48f2-a2bc-ba13f7cff3ce"/*Resolution*/,
       "Position": {
-        "X": 1053.3485,
-        "Y": 4886.0044
+        "X": 2521.981,
+        "Y": 4900.091
       },
       "Description": "Defines the resolution of the output.\nPowers of 2 are recommended (128, 256, 512, 1024, 2048, ...)",
       "AddPadding": "True"
@@ -34,8 +36,8 @@
     {
       "InputId": "c4fff7ca-02d3-4337-b4e8-9c3074f98eb5"/*ClearColor*/,
       "Position": {
-        "X": 1053.3485,
-        "Y": 4931.0044
+        "X": 2521.981,
+        "Y": 4935.091
       },
       "Description": "Defines the clear color",
       "Min": 0.0,
@@ -47,16 +49,16 @@
       "InputId": "cb1254ab-4d68-41db-a326-c5e34bb5d2f4"/*CameraReference*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 1051.5767,
-        "Y": 3975.7637
+        "X": 1885.4541,
+        "Y": 4055.1729
       },
       "Description": "Input for the camera reference output"
     },
     {
       "InputId": "e52b254e-e13b-4df8-81d4-35867aeb188e"/*TextureFormat*/,
       "Position": {
-        "X": 1053.3485,
-        "Y": 4976.0044
+        "X": 2521.981,
+        "Y": 4970.091
       },
       "Description": "Defines the DirectX format of rendering (color depths, channels, etc.)",
       "AddPadding": "True"
@@ -64,8 +66,8 @@
     {
       "InputId": "eb4da1b0-f9c6-480d-a1a3-ac875cbf1037"/*Color*/,
       "Position": {
-        "X": 1052.5778,
-        "Y": 4096.942
+        "X": 1750.2594,
+        "Y": 4166.026
       },
       "Description": "Color that is multiplied with the generated image"
     }
@@ -100,22 +102,22 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": 1749.5616,
-        "Y": 4130.944
+        "X": 1890.2594,
+        "Y": 4166.026
       }
     },
     {
       "ChildId": "4483843e-0fc0-4f4d-a3b5-f6daeeb7887e"/*GetBufferComponents*/,
       "Position": {
-        "X": 1746.0,
-        "Y": 4624.153
+        "X": 1709.2665,
+        "Y": 4571.998
       }
     },
     {
       "ChildId": "47c5968b-a9e6-4822-b6f9-a5280da91d15"/*VertexShader*/,
       "Position": {
-        "X": 2029.9541,
-        "Y": 4059.0217
+        "X": 2201.4685,
+        "Y": 4061.474
       }
     },
     {
@@ -126,8 +128,8 @@
         "Y": 588.3471
       },
       "Position": {
-        "X": 2520.687,
-        "Y": 3991.4377
+        "X": 2661.981,
+        "Y": 4655.0913
       }
     },
     {
@@ -140,8 +142,8 @@
     {
       "ChildId": "71a817a6-7eb3-424c-8eb6-6e44f49c33fc"/*GetTextureSize*/,
       "Position": {
-        "X": 1472.0688,
-        "Y": 4290.338
+        "X": 1610.2594,
+        "Y": 4271.026
       }
     },
     {
@@ -154,8 +156,8 @@
     {
       "ChildId": "82c2fccc-dd33-40aa-806e-9c2b4dcf76dc"/*PixelShader*/,
       "Position": {
-        "X": 2029.1719,
-        "Y": 4588.2505
+        "X": 2204.8281,
+        "Y": 4586.0454
       }
     },
     {
@@ -178,13 +180,6 @@
       }
     },
     {
-      "ChildId": "905560db-45c8-443d-a923-405a0d65b0e8"/*GetCamTransformBuffer*/,
-      "Position": {
-        "X": 2030.3088,
-        "Y": 3987.551
-      }
-    },
-    {
       "ChildId": "9a8ed876-5790-476c-8cf2-df750635e007"/*SamplerState*/,
       "Position": {
         "X": 2031.2971,
@@ -199,7 +194,7 @@
       }
     },
     {
-      "ChildId": "9c55ce18-0e51-4416-bae6-56a037f8a1e5"/*TransformsConstBuffer*/,
+      "ChildId": "9c55ce18-0e51-4416-bae6-56a037f8a1e5"/*_TransformsCBuffer*/,
       "Style": "Expanded",
       "Size": {
         "X": 140.0,
@@ -220,8 +215,8 @@
     {
       "ChildId": "aca6e9f3-28af-485b-86ce-4fc0cc33a9fb"/*Vector2Components*/,
       "Position": {
-        "X": 1612.0688,
-        "Y": 4325.338
+        "X": 1750.2594,
+        "Y": 4306.026
       }
     },
     {
@@ -241,8 +236,8 @@
     {
       "ChildId": "beebb61d-a899-4674-b2d6-c0196365704a"/*Div*/,
       "Position": {
-        "X": 1752.0688,
-        "Y": 4325.338
+        "X": 1890.2594,
+        "Y": 4306.026
       }
     },
     {
@@ -255,8 +250,8 @@
     {
       "ChildId": "d2434f72-5514-43ba-8e82-6087d19d9f65"/*RenderTarget*/,
       "Position": {
-        "X": 2692.1816,
-        "Y": 3991.585
+        "X": 2661.981,
+        "Y": 4865.091
       }
     },
     {
@@ -269,8 +264,8 @@
     {
       "ChildId": "da5145fe-e228-4a1b-aa0a-ee61a9e311aa"/*GetBufferComponents*/,
       "Position": {
-        "X": 1744.3322,
-        "Y": 4537.3423
+        "X": 1709.2665,
+        "Y": 4536.998
       }
     },
     {
@@ -286,14 +281,21 @@
         "X": 2343.7473,
         "Y": 3991.0168
       }
+    },
+    {
+      "ChildId": "fbf8d6a5-e15e-411f-9d32-1b63fced8e35"/*_TransformsCBuffer*/,
+      "Position": {
+        "X": 2025.4541,
+        "Y": 4055.1729
+      }
     }
   ],
   "OutputUis": [
     {
       "OutputId": "7d2fc5fe-0e1c-4132-9322-e08b3638bf83"/*TextureOutput*/,
       "Position": {
-        "X": 2873.4702,
-        "Y": 3992.4868
+        "X": 2661.981,
+        "Y": 5005.091
       }
     }
   ]

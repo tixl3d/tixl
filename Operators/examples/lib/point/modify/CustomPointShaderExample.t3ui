@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "d8feac82-1a5d-4c6f-bd1f-67ed7fc28193"/*CustomPointShaderExample*/,
   "Description": "",
   "InputUis": [],
@@ -154,8 +156,8 @@
     {
       "ChildId": "21a7bb94-759f-41dc-ab76-af3cfaca42d6"/*worldpos*/,
       "Position": {
-        "X": 2292.1992,
-        "Y": 1673.4839
+        "X": 2290.0823,
+        "Y": 1709.4741
       }
     },
     {
@@ -552,6 +554,13 @@
       }
     },
     {
+      "ChildId": "5f3a9d52-5227-498c-a03d-2ffed316b588"/*_TransformsCBuffer*/,
+      "Position": {
+        "X": 2150.0823,
+        "Y": 1744.4741
+      }
+    },
+    {
       "ChildId": "5f870be7-ee92-4852-9999-26e0333bfe14"/*ToneMapping*/,
       "Position": {
         "X": 3283.8276,
@@ -715,8 +724,8 @@
     {
       "ChildId": "7ded65c6-5b34-446c-9395-ba6841390b72"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 2164.6602,
-        "Y": 1774.1635
+        "X": 2152.199,
+        "Y": 1825.5023
       }
     },
     {
@@ -1123,13 +1132,6 @@
       "Position": {
         "X": 3143.8276,
         "Y": 1416.6414
-      }
-    },
-    {
-      "ChildId": "d111a367-5ae5-4723-a373-503debd7ebc3"/*GetCamTransformBuffer*/,
-      "Position": {
-        "X": 2152.1992,
-        "Y": 1708.4839
       }
     },
     {

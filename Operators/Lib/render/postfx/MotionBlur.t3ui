@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "196e14c7-3a71-4afd-a53b-e51d0fe8f414"/*MotionBlur*/,
   "Description": "Applies a post processing motion blur to a RenderTarget texture and its DepthBuffer.\n\nSee also [RenderWithMotionBlur] for an operator using multi-pass rendering to achieve high quality at the cost of more resources. \nDesigned primarily for video rendering, it can also be used for real-time applications with just a few passes, in simple scenes or on fast hardware.\n\nAlso see [DepthOfField], [DirectionalBlur]",
   "SymbolTags": "1",
@@ -42,7 +44,7 @@
       "InputId": "d757058a-a31e-487f-b002-cc06bc478535"/*CameraReference*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 84.384766,
+        "X": 84.38478,
         "Y": 818.59155
       }
     },
@@ -127,13 +129,6 @@
       }
     },
     {
-      "ChildId": "2e4c5ed0-459d-4ea5-acec-255c8860c5a4"/*GetCamTransformBuffer*/,
-      "Position": {
-        "X": 224.38477,
-        "Y": 818.59155
-      }
-    },
-    {
       "ChildId": "530a577e-b602-4847-a145-dd3472971533"/*OutputMergerStage*/,
       "Position": {
         "X": 412.4858,
@@ -173,6 +168,13 @@
       "Position": {
         "X": -207.00583,
         "Y": 885.5512
+      }
+    },
+    {
+      "ChildId": "aaa07538-426e-41f7-9970-2a9d4cde38bf"/*_TransformsCBuffer*/,
+      "Position": {
+        "X": 224.38478,
+        "Y": 818.59155
       }
     },
     {
@@ -239,7 +241,7 @@
       }
     },
     {
-      "ChildId": "ff7ffaa3-906c-4e63-a874-4f7e3327f7fc"/*TransformsConstBuffer*/,
+      "ChildId": "ff7ffaa3-906c-4e63-a874-4f7e3327f7fc"/*_TransformsCBuffer*/,
       "Position": {
         "X": 224.38477,
         "Y": 678.59155

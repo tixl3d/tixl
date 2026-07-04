@@ -1,7 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "475ea08b-0810-483f-bc6d-8b5d566cb8a2"/*IntAdd*/,
-  "Description": "Adds two integers\n\nSame as [AddInts]",
-  "SymbolTags": "1",
+  "Description": "Obsolete. Please use [AddInt]\n\nAdds two integers.",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "16dd5182-a0fb-4a26-b211-3c1bf3707579"/*Value1*/,

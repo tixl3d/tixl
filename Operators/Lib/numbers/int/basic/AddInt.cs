@@ -1,15 +1,14 @@
 namespace Lib.numbers.@int.basic;
 
 [Guid("ab73a49e-c548-437d-a4ab-b3fa41e30097")]
-internal sealed class AddInts : Instance<AddInts>
-{
+internal sealed class AddInt :Instance<AddInt>{
     [Output(Guid = "9B3E42F6-8980-4F30-8D8F-ED1DEA5F19B9")]
     public readonly Slot<int> Result = new();
 
     //         [Output(Guid = "{DF114783-6C8D-47E2-99B0-8C97217657A5}")]
     //         public readonly Slot<float> Result2 = new Slot<float>();
 
-    public AddInts()
+    public AddInt()
     {
         Result.UpdateAction += Update;
     }

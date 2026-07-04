@@ -1,7 +1,9 @@
 {
-  "Id": "843c9378-6836-4f39-b676-06fd2828af3e"/*GetCamTransformBuffer*/,
-  "Description": "Gets properties of a camera operator further down (further left) in the render graph. This can be useful for effects like motion blur.",
-  "SymbolTags": "8",
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "843c9378-6836-4f39-b676-06fd2828af3e"/*_TransformsCBufferFromCam*/,
+  "Description": "This operators is deprecated. Please use [_TransformsCBuffer]\nGets properties of a camera operator further down (further left) in the render graph. \nThis can be useful for effects like motion blur.",
+  "SymbolTags": "4104",
   "InputUis": [
     {
       "InputId": "a3190889-5473-4870-97cf-93e6cf94132b"/*CameraReference*/,

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "ed0bc47a-31ef-400b-b4e4-5552a859b309"/*CollisionForce*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "1e24d0ab-40f4-4791-a929-fb08584f516d"/*SortPointsExample*/,
   "Description": "",
   "InputUis": [],
@@ -272,8 +274,8 @@
     {
       "ChildId": "8d328111-d6e4-4412-b84f-14aa53830aaf"/*RenderTarget*/,
       "Position": {
-        "X": 1931.7433,
-        "Y": 2393.9502
+        "X": 1955.3457,
+        "Y": 2354.1987
       }
     },
     {
@@ -300,8 +302,8 @@
     {
       "ChildId": "931451e7-294d-459c-a1bf-d10f8eb74e15"/*Camera*/,
       "Position": {
-        "X": 497.99,
-        "Y": 664.1284
+        "X": 1332.5159,
+        "Y": 324.9981
       }
     },
     {
@@ -484,13 +486,6 @@
       "Position": {
         "X": 1102.1416,
         "Y": 1294.5198
-      }
-    },
-    {
-      "ChildId": "e3b5ec92-2b85-4016-a488-acd894131200"/*ReuseCamera*/,
-      "Position": {
-        "X": 1320.0936,
-        "Y": 343.20374
       }
     },
     {

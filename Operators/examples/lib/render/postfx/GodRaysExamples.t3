@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "4b8b7567-a9d2-4956-813d-91e542e1f661"/*GodRaysExamples*/,
   "Inputs": [],
   "Children": [
@@ -283,18 +285,6 @@
       "Outputs": []
     },
     {
-      "Id": "a98d66f9-17b7-4852-81ee-a1968af46f6d"/*_Time_old*/,
-      "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
-      "InputValues": [
-        {
-          "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*SpeedFactor*/,
-          "Type": "System.Single",
-          "Value": 16.0
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "ade079c8-4e6d-4e50-a4fb-cc9759f63dec"/*DustParticles*/,
       "SymbolId": "d14233a2-8240-47d3-bb92-0854f6d3b218",
       "InputValues": [
@@ -358,12 +348,6 @@
           }
         }
       ],
-      "Outputs": []
-    },
-    {
-      "Id": "c14c4dd3-b9d0-4a67-ab9f-82a3c73adb44"/*FractalNoise*/,
-      "SymbolId": "5a0b0485-7a55-4bf4-ae23-04f51d890334",
-      "InputValues": [],
       "Outputs": []
     },
     {

@@ -1,5 +1,7 @@
 {
-  "Id": "843c9378-6836-4f39-b676-06fd2828af3e"/*GetCamTransformBuffer*/,
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "843c9378-6836-4f39-b676-06fd2828af3e"/*_TransformsCBufferFromCam*/,
   "Inputs": [
     {
       "Id": "a3190889-5473-4870-97cf-93e6cf94132b"/*CameraReference*/,

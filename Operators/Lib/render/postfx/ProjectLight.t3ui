@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "7eb5ee83-2b5c-43bc-95d4-af5e18c85bc5"/*ProjectLight*/,
   "Description": "Renders light \"godrays\" from a projected image into a scene casting nice shadows.\n\nIt's a post render effect rendering an image and a shadow pass and combining it while applying some colors parameters.\n",
   "InputUis": [
@@ -13,8 +15,8 @@
     {
       "InputId": "03813cbd-06d7-4937-a843-d97d83170c05"/*StepCount*/,
       "Position": {
-        "X": 1485.8955,
-        "Y": 1414.292
+        "X": 1691.1718,
+        "Y": 1457.6838
       }
     },
     {
@@ -27,8 +29,8 @@
     {
       "InputId": "2d7ab50a-6a59-4031-b2e7-dbc33483d8e0"/*LightColor*/,
       "Position": {
-        "X": 1485.8955,
-        "Y": 1589.292
+        "X": 1691.1718,
+        "Y": 1632.6838
       },
       "GroupTitle": "Light Appearance",
       "Min": 0.0,
@@ -46,8 +48,8 @@
     {
       "InputId": "584ded98-20a2-4ee3-963d-168fc9920abe"/*AmbientColor*/,
       "Position": {
-        "X": 1485.8955,
-        "Y": 1449.292
+        "X": 1691.1718,
+        "Y": 1492.6838
       },
       "GroupTitle": "Surface",
       "Min": 0.0,
@@ -113,8 +115,8 @@
     {
       "InputId": "c358b13e-7715-4342-b6e9-54cfcb60d03c"/*RayIntensity*/,
       "Position": {
-        "X": 1625.8955,
-        "Y": 1379.292
+        "X": 1831.1718,
+        "Y": 1422.6838
       }
     },
     {
@@ -183,13 +185,6 @@
       }
     },
     {
-      "ChildId": "2ad1604d-ddca-4964-a107-484b3db40e39"/*ProjectorCamera*/,
-      "Position": {
-        "X": 2627.5046,
-        "Y": 1140.1173
-      }
-    },
-    {
       "ChildId": "388f9249-e27b-415c-a04b-1ea9b25a44b6"/*FrontLight*/,
       "Position": {
         "X": 945.8203,
@@ -199,8 +194,8 @@
     {
       "ChildId": "3a891aac-470b-44da-8dce-4f908701cbcc"/*ShadowScale*/,
       "Position": {
-        "X": 1625.8955,
-        "Y": 1344.292
+        "X": 1831.1718,
+        "Y": 1387.6838
       }
     },
     {
@@ -276,8 +271,8 @@
     {
       "ChildId": "650ee5f6-375b-44a7-b8e2-dd826603bf40"/*Vector4Components*/,
       "Position": {
-        "X": 1625.8955,
-        "Y": 1449.292
+        "X": 1831.1718,
+        "Y": 1492.6838
       }
     },
     {
@@ -290,8 +285,8 @@
     {
       "ChildId": "66ccf637-624e-4c98-8991-3a53511cf4ca"/*ShadowBias*/,
       "Position": {
-        "X": 1625.8955,
-        "Y": 1309.292
+        "X": 1831.1718,
+        "Y": 1352.6838
       }
     },
     {
@@ -313,13 +308,6 @@
       "Position": {
         "X": 656.4658,
         "Y": 1742.3579
-      }
-    },
-    {
-      "ChildId": "70ab706e-edfc-4e1c-918f-7cace4316080"/*ViewCamera*/,
-      "Position": {
-        "X": 2950.1948,
-        "Y": 1101.0326
       }
     },
     {
@@ -409,8 +397,8 @@
     {
       "ChildId": "859a2637-c722-4845-aef6-fbe48303090a"/*IntToFloat*/,
       "Position": {
-        "X": 1625.8955,
-        "Y": 1414.292
+        "X": 1831.1718,
+        "Y": 1457.6838
       }
     },
     {
@@ -451,8 +439,15 @@
     {
       "ChildId": "90634da5-adb9-45f6-9878-57cbc5c3927b"/*Vector4Components*/,
       "Position": {
-        "X": 1625.8955,
-        "Y": 1589.292
+        "X": 1831.1718,
+        "Y": 1632.6838
+      }
+    },
+    {
+      "ChildId": "a0e7f05f-24c2-418b-8dcc-9db28e3a01d8"/*ViewCamera*/,
+      "Position": {
+        "X": 2950.1948,
+        "Y": 1101.0326
       }
     },
     {
@@ -500,8 +495,15 @@
     {
       "ChildId": "d4ebf510-c35e-4775-9fc5-0c24f2b8759a"/*FloatsToBuffer*/,
       "Position": {
-        "X": 1765.8955,
-        "Y": 1274.292
+        "X": 1971.1718,
+        "Y": 1317.6838
+      }
+    },
+    {
+      "ChildId": "e122e064-9ba1-4235-979b-4f15630b3c0c"/*ProjectorCamera*/,
+      "Position": {
+        "X": 2950.1948,
+        "Y": 1136.0326
       }
     },
     {

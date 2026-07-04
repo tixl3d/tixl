@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "ed0bc47a-31ef-400b-b4e4-5552a859b309"/*CollisionForce*/,
   "Description": "A simple simulation of sphere collision between points. The radius of the points is defined on emit by the [ParticleSystem]'s PointRadiusW factor.\n\nSome recommendations:\n1. Try to increase the radius (either by increasing the emit points W attribute or the radius factor) and adjust the [DrawPoints] radius accordingly.\n2. Try to increase [ParticleSystem] damping.\n",
   "SymbolTags": "8",
@@ -6,8 +8,8 @@
     {
       "InputId": "0724bf0c-8f97-44de-bf42-6a89b89f1632"/*CellSize*/,
       "Position": {
-        "X": 2054.4348,
-        "Y": 265.25143
+        "X": 1963.3588,
+        "Y": 349.04147
       },
       "Min": 0.001,
       "Max": 100.0,
@@ -18,38 +20,38 @@
     {
       "InputId": "5b3fcf3c-7155-401f-b3ac-3a4ac9d921df"/*AttractionDecay*/,
       "Position": {
-        "X": 2047.7776,
-        "Y": 578.6934
+        "X": 2489.1,
+        "Y": 617.99634
       },
       "AddPadding": "True"
     },
     {
       "InputId": "78566405-8dee-4661-9cb7-489c8d322f64"/*IsEnabled*/,
       "Position": {
-        "X": 2047.7776,
-        "Y": 533.6934
+        "X": 3248.8274,
+        "Y": 83.25409
       },
       "AddPadding": "True"
     },
     {
       "InputId": "91459607-22c1-4536-a384-8b1f1d8ecb64"/*CollistionResolve*/,
       "Position": {
-        "X": 2047.7776,
-        "Y": 623.6934
+        "X": 2489.1,
+        "Y": 652.9964
       }
     },
     {
       "InputId": "91966b2c-342a-420a-bad1-cbcf4d6af1ae"/*Attraction*/,
       "Position": {
-        "X": 2054.4348,
-        "Y": 355.2514
+        "X": 2489.1,
+        "Y": 547.99634
       }
     },
     {
       "InputId": "d0036a34-d7e4-4542-b231-5d1b687b0028"/*Bounciness*/,
       "Position": {
-        "X": 2054.4348,
-        "Y": 310.25146
+        "X": 2489.1,
+        "Y": 512.99634
       },
       "AddPadding": "True"
     }
@@ -58,15 +60,15 @@
     {
       "ChildId": "02f3ed4a-bd5b-40c7-8bca-1b4e697d0984"/*_BuildSpatialHashMap*/,
       "Position": {
-        "X": 2367.118,
-        "Y": -25.071564
+        "X": 2427.5542,
+        "Y": 57.85269
       }
     },
     {
       "ChildId": "0c7fe6b5-c668-480e-a75d-842690488f7b"/*ComputeShader*/,
       "Position": {
-        "X": 2540.1619,
-        "Y": 103.1315
+        "X": 2628.708,
+        "Y": -2.2806854
       }
     },
     {
@@ -79,8 +81,8 @@
     {
       "ChildId": "316462bd-10c1-45e8-bf8d-6ad7116ba7fa"/*GetParticleComponents*/,
       "Position": {
-        "X": 1837.604,
-        "Y": -208.71158
+        "X": 1839.7899,
+        "Y": -59.58957
       }
     },
     {
@@ -93,29 +95,29 @@
     {
       "ChildId": "50565741-6e91-4dd8-84da-61ed2968b196"/*ComputeShader*/,
       "Position": {
-        "X": 2188.7776,
+        "X": 2160.823,
         "Y": -267.71378
       }
     },
     {
       "ChildId": "595b25a0-599a-4730-92c6-d8785a0773f2"/*ComputeShaderStage*/,
       "Position": {
-        "X": 2896.5867,
-        "Y": -60.79007
+        "X": 2968.282,
+        "Y": 17.899628
       }
     },
     {
       "ChildId": "5d60f5ef-5f06-453e-9aa9-6450fc5a1f2a"/*_ExecuteParticleUpdate*/,
       "Position": {
-        "X": 3323.9702,
-        "Y": -90.31113
+        "X": 3388.8274,
+        "Y": 48.25409
       }
     },
     {
       "ChildId": "814d264e-1181-4569-a12a-a984f1b45f45"/*CalcDispatchCount*/,
       "Position": {
-        "X": 2690.1619,
-        "Y": 125.25183
+        "X": 2768.708,
+        "Y": 32.719315
       }
     },
     {
@@ -126,8 +128,8 @@
         "Y": 86.29051
       },
       "Position": {
-        "X": 2688.8054,
-        "Y": 289.29855
+        "X": 2629.1,
+        "Y": 442.99637
       }
     },
     {
@@ -140,8 +142,8 @@
     {
       "ChildId": "d57e0521-90eb-4b76-8277-061ea359145b"/*Execute*/,
       "Position": {
-        "X": 3082.86,
-        "Y": -80.64429
+        "X": 3388.8274,
+        "Y": -56.74591
       }
     },
     {
@@ -156,8 +158,8 @@
     {
       "OutputId": "8c9461b8-9152-4389-938e-2ff67a6451ed"/*Particles*/,
       "Position": {
-        "X": 3473.9702,
-        "Y": -90.31113
+        "X": 3388.8274,
+        "Y": 118.25409
       }
     }
   ],
