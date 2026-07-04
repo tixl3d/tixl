@@ -120,10 +120,15 @@ namespace T3.Editor.Gui.MagGraph.States
                                   var clickedBackground = context.ActiveItem == null;
                                   if (clickedBackground)
                                   {
-                                      // Already at the root composition -> return to the project hub
-                                      if (!ProjectView.Focused.TrySetCompositionOpToParent())
+                                      // Skip double-clicks that started before the view was opened,
+                                      // e.g. the click that opened the project from the hub
+                                      if (!ProjectView.Focused.OpenedWithinDoubleClickTime)
                                       {
-                                          ProjectView.Focused.Close();
+                                          // Already at the root composition -> return to the project hub
+                                          if (!ProjectView.Focused.TrySetCompositionOpToParent())
+                                          {
+                                              ProjectView.Focused.Close();
+                                          }
                                       }
                                   }
                                   else

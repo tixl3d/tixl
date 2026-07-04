@@ -510,4 +510,12 @@ internal sealed partial class ProjectView
     
     
     public static ProjectView? Focused { get; private set; }
+
+    /// <summary>
+    /// True while a double-click's first click may predate this view being opened — e.g. the single
+    /// click that opened the project from the hub. Callers should ignore double-clicks during this window.
+    /// </summary>
+    public bool OpenedWithinDoubleClickTime => ImGui.GetTime() - _createdAtTime < ImGui.GetIO().MouseDoubleClickTime;
+
+    private readonly double _createdAtTime = ImGui.GetTime();
 }
