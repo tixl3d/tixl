@@ -10,6 +10,7 @@ using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -203,9 +204,103 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         _context.CompleteMacroCommand();
     }
 
-    void IGraphView.StartDraggingFromInputSlot(SymbolUi.Child symbolChildUi, Symbol.InputDefinition inputInputDefinition)
+    void IGraphView.StartDraggingFromInputSlot(SymbolUi.Child symbolChildUi, Symbol.InputDefinition inputDefinition)
     {
-        Log.Debug($"{nameof(IGraphView.StartDraggingFromInputSlot)}() not implemented yet");
+        // The caller fires every frame while the drag exceeds the click threshold, so only act from idle state.
+        if (_context.StateMachine.CurrentState != GraphStates.Default)
+            return;
+
+        if (!_context.Layout.Items.TryGetValue(symbolChildUi.Id, out var item))
+            return;
+
+        StartDraggingFromInput(item, inputDefinition);
+    }
+
+    /** Rips off an existing connection into the input or starts dragging a new one from it. */
+    internal void StartDraggingFromInput(MagGraphItem item, Symbol.InputDefinition inputDefinition)
+    {
+        // If the input is already connected, rip off the connection and drag its loose end...
+        MagGraphConnection? connectionIn = null;
+        foreach (var c in _context.Layout.MagConnections)
+        {
+            if (c.TargetItem != item || c.TargetInput.Id != inputDefinition.Id)
+                continue;
+
+            if (connectionIn == null || c.MultiInputIndex < connectionIn.MultiInputIndex)
+                connectionIn = c;
+        }
+
+        if (connectionIn != null)
+        {
+            _context.ActiveSourceOutputId = connectionIn.SourceOutput.Id;
+            _context.StartMacroCommand($"Disconnect {item.ReadableName}.{inputDefinition.Name}")
+                    .AddAndExecCommand(new DeleteConnectionCommand(_context.CompositionInstance.Symbol,
+                                                                   connectionIn.AsSymbolConnection(),
+                                                                   connectionIn.MultiInputIndex));
+
+            if (MagItemMovement.DisconnectedInputWouldCollapseLine(connectionIn))
+            {
+                var snappedItems = MagItemMovement.CollectSnappedItems(connectionIn.TargetItem);
+                snappedItems.Remove(connectionIn.TargetItem);
+                MagItemMovement.MoveSnappedItemsVertically(_context,
+                                                           snappedItems,
+                                                           connectionIn.TargetItem.PosOnCanvas.Y +
+                                                           MagGraphItem.GridSize.Y * (connectionIn.InputLineIndex + 0.5f),
+                                                           -MagGraphItem.GridSize.Y);
+            }
+
+            _context.TempConnections.Add(new MagGraphConnection
+                                             {
+                                                 Style = MagGraphConnection.ConnectionStyles.Unknown,
+                                                 SourcePos = connectionIn.SourcePos,
+                                                 SourceItem = connectionIn.SourceItem,
+                                                 SourceOutput = connectionIn.SourceOutput,
+                                                 IsTemporary = true,
+                                                 WasDisconnected = true,
+                                             });
+
+            _context.ActiveSourceItem = connectionIn.SourceItem;
+            _context.ActiveItem = connectionIn.SourceItem;
+            _context.DraggedPrimaryOutputType = connectionIn.Type;
+            _context.StateMachine.SetState(GraphStates.DragConnectionEnd, _context);
+            _context.Layout.FlagStructureAsChanged();
+            return;
+        }
+
+        // Unconnected input: keep its line visible while dragging, then drag a new connection's beginning.
+        // Irrelevant inputs have no line in the layout yet, so recompute synchronously to get its index.
+        _context.DisconnectedInputHashes.Add(MagGraphConnection.GetItemInputHash(item.Id, inputDefinition.Id, 0));
+        _context.Layout.FlagStructureAsChanged();
+        _context.Layout.ComputeLayout(_context);
+
+        if (!_context.Layout.Items.TryGetValue(item.Id, out item))
+            return;
+
+        var inputLineIndex = 0;
+        while (inputLineIndex < item.InputLines.Length && item.InputLines[inputLineIndex].Id != inputDefinition.Id)
+        {
+            inputLineIndex++;
+        }
+
+        if (inputLineIndex == item.InputLines.Length)
+        {
+            Log.Warning($"Can't find input line for {inputDefinition.Name}?");
+            return;
+        }
+
+        _context.StartMacroCommand($"Connect to {item.ReadableName}.{inputDefinition.Name}");
+        _context.TempConnections.Add(new MagGraphConnection
+                                         {
+                                             Style = MagGraphConnection.ConnectionStyles.Unknown,
+                                             TargetPos = new Vector2(item.Area.Min.X,
+                                                                     item.Area.Min.Y + MagGraphItem.GridSize.Y * (0.5f + inputLineIndex)),
+                                             TargetItem = item,
+                                             InputLineIndex = inputLineIndex,
+                                             MultiInputIndex = item.InputLines[inputLineIndex].MultiInputIndex,
+                                             IsTemporary = true,
+                                         });
+        _context.DraggedPrimaryOutputType = inputDefinition.DefaultValue.ValueType;
+        _context.StateMachine.SetState(GraphStates.DragConnectionBeginning, _context);
     }
     #endregion
 

@@ -424,7 +424,6 @@ namespace T3.Editor.Gui.MagGraph.States
                               {
                                   if (context.TryGetActiveInputLine(out var inputLine))
                                   {
-                                      //context.Placeholder.OpenForItem(context, sourceItem, inputLine, context.ActiveOutputDirection);
                                       context.Placeholder.OpenForItemInput(context, context.ActiveTargetItem, inputLine.Id, context.ActiveInputDirection);
                                       context.StateMachine.SetState(Placeholder, context);
                                   }
@@ -433,43 +432,22 @@ namespace T3.Editor.Gui.MagGraph.States
                                       context.StateMachine.SetState(Default, context);
                                   }
 
-                                  Log.Debug("Click");
                                   return;
                               }
 
-                              // // Start dragging...
-                              // if (ImGui.IsMouseDragging(ImGuiMouseButton.Left))
-                              // {
-                              //     if (!context.TryGetActiveOutputLine(out var outputLine))
-                              //     {
-                              //         Log.Warning("Output not found?");
-                              //         context.StateMachine.SetState(Default, context);
-                              //         return;
-                              //     }
-                              //
-                              //     //var outputLine = context.GetActiveOutputLine();              
-                              //     var output = outputLine.Output;
-                              //     var posOnCanvas = sourceItem.PosOnCanvas + new Vector2(MagGraphItem.GridSize.X,
-                              //                                                            MagGraphItem.GridSize.Y * (1.5f + outputLine.VisibleIndex));
-                              //
-                              //     var tempConnection = new MagGraphConnection
-                              //                              {
-                              //                                  Style = MagGraphConnection.ConnectionStyles.Unknown,
-                              //                                  SourcePos = posOnCanvas,
-                              //                                  TargetPos = default,
-                              //                                  SourceItem = sourceItem,
-                              //                                  TargetItem = null,
-                              //                                  SourceOutput = output,
-                              //                                  OutputLineIndex = outputLine.VisibleIndex,
-                              //                                  VisibleOutputIndex = 0,
-                              //                                  ConnectionHash = 0,
-                              //                                  IsTemporary = true,
-                              //                              };
-                              //     context.TempConnections.Add(tempConnection);
-                              //     context.ActiveSourceItem = sourceItem;
-                              //     context.DraggedPrimaryOutputType = output.ValueType;
-                              //     context.StateMachine.SetState(DragConnectionEnd, context);
-                              // }
+                              // Start dragging...
+                              if (ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+                              {
+                                  if (context.TryGetActiveInputLine(out var draggedInputLine)
+                                      && draggedInputLine.InputUi != null)
+                                  {
+                                      context.View.StartDraggingFromInput(context.ActiveTargetItem, draggedInputLine.InputUi.InputDefinition);
+                                  }
+                                  else
+                                  {
+                                      context.StateMachine.SetState(Default, context);
+                                  }
+                              }
                           },
                   Exit: _ => { }
                  );
@@ -682,10 +660,26 @@ namespace T3.Editor.Gui.MagGraph.States
                                   if (OutputSnapper.TryToReconnect(context))
                                   {
                                       context.Layout.FlagStructureAsChanged();
+                                      context.CompleteMacroCommand();
+                                      context.StateMachine.SetState(Default, context);
+                                      return;
                                   }
 
-                                  context.CompleteMacroCommand();
-                                  context.StateMachine.SetState(Default, context);
+                                  var hasDisconnections = context.TempConnections.Any(c => c.WasDisconnected);
+                                  if (hasDisconnections)
+                                  {
+                                      // Ripped off connection beginnings -> just keep them disconnected
+                                      context.CompleteMacroCommand();
+                                      context.StateMachine.SetState(Default, context);
+                                  }
+                                  else
+                                  {
+                                      // Dropped on background -> pick a new operator feeding the dragged input
+                                      var posOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
+                                      context.Placeholder.OpenOnCanvas(context, posOnCanvas, outputTypeFilter: context.DraggedPrimaryOutputType);
+                                      context.StateMachine.SetState(Placeholder, context);
+                                  }
+
                                   return;
                               }
 

@@ -83,9 +83,10 @@ internal sealed class PlaceholderCreation
         context.StateMachine.SetState(GraphStates.Placeholder, context);
     }
 
-    internal void OpenOnCanvas(GraphUiContext context, Vector2 posOnCanvas, Type? inputTypeFilter = null)
+    internal void OpenOnCanvas(GraphUiContext context, Vector2 posOnCanvas, Type? inputTypeFilter = null, Type? outputTypeFilter = null)
     {
-        context.StartMacroCommand("Insert Operator");
+        // Might continue a macro command started by a preceding connection drag...
+        context.StartOrContinueMacroCommand("Insert Operator");
 
         PlaceholderItem = new MagGraphItem
                               {
@@ -97,7 +98,7 @@ internal sealed class PlaceholderCreation
                               };
 
         context.Layout.Items[PlaceHolderId] = PlaceholderItem;
-        PlaceHolderUi.Open(context, PlaceholderItem, inputFilter: inputTypeFilter);
+        PlaceHolderUi.Open(context, PlaceholderItem, inputFilter: inputTypeFilter, outputFilter: outputTypeFilter);
     }
 
     internal void OpenForItemOutput(GraphUiContext context,
@@ -534,36 +535,34 @@ internal sealed class PlaceholderCreation
                 context.TempConnections.Add(tempConnectionOut);
             }
 
-            var primaryInput = newInstance.Inputs.FirstOrDefault();
-            var primaryOutput = newInstance.Outputs.FirstOrDefault();
-            if (primaryInput != null && primaryOutput != null)
+            foreach (var tc in context.TempConnections)
             {
-                foreach (var tc in context.TempConnections)
-                {
-                    if (!tc.IsTemporary)
-                        continue;
+                if (!tc.IsTemporary)
+                    continue;
 
-                    if (tc.SourceItem != null && tc.TargetItem == null)
+                if (tc.SourceItem != null && tc.TargetItem == null)
+                {
+                    var tcSourceOutput = tc.SourceOutput;
+                    var matchingInput = newInstance.Inputs.FirstOrDefault(i => i.ValueType == tcSourceOutput.ValueType);
+                    if (matchingInput != null)
                     {
-                        var tcSourceOutput = tc.SourceOutput;
-                        var matchingInput = newInstance.Inputs.FirstOrDefault(i => i.ValueType == tcSourceOutput.ValueType);
-                        if (matchingInput != null)
-                        {
-                            var connectionToAdd = new Symbol.Connection(tc.SourceParentOrChildId,
-                                                                        tcSourceOutput.Id,
-                                                                        newInstance.SymbolChildId,
-                                                                        matchingInput.Id);
-                            context.MacroCommand
-                                   .AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                               connectionToAdd,
-                                                                               tc.MultiInputIndex));
-                        }
-                        
+                        var connectionToAdd = new Symbol.Connection(tc.SourceParentOrChildId,
+                                                                    tcSourceOutput.Id,
+                                                                    newInstance.SymbolChildId,
+                                                                    matchingInput.Id);
+                        context.MacroCommand
+                               .AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
+                                                                           connectionToAdd,
+                                                                           tc.MultiInputIndex));
                     }
-                    else if (tc.SourceItem == null && tc.TargetItem != null)
+                }
+                else if (tc.SourceItem == null && tc.TargetItem != null)
+                {
+                    var matchingOutput = newInstance.Outputs.FirstOrDefault(o => o.ValueType == tc.Type);
+                    if (matchingOutput != null)
                     {
                         var connectionToAdd = new Symbol.Connection(newInstance.SymbolChildId,
-                                                                    primaryOutput.Id,
+                                                                    matchingOutput.Id,
                                                                     tc.TargetParentOrChildId,
                                                                     tc.TargetInput.Id);
                         context.MacroCommand

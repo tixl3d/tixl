@@ -219,6 +219,13 @@ internal sealed partial class MagGraphView
                     {
                         sourcePosOnScreen = TransformPosition(OutputSnapper.BestOutputMatch.Anchor.PositionOnCanvas);
                     }
+                    else if (tc.SourceItem == null
+                             && _context.StateMachine.CurrentState == GraphStates.Placeholder
+                             && _context.Placeholder.PlaceholderItem != null)
+                    {
+                        sourcePosOnScreen = TransformPosition(_context.Placeholder.PlaceholderItem.PosOnCanvas
+                                                              + new Vector2(MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y * 0.5f));
+                    }
 
                     var isDisconnectedMultiInput = tc.InputLineIndex >= tc.TargetItem.InputLines.Length;
                     if (isDisconnectedMultiInput)
