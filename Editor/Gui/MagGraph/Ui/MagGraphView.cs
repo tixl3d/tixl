@@ -74,6 +74,11 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         FitAreaOnCanvas(selectionBounds);
     }
 
+    public void FlagStructureAsChanged()
+    {
+        _context?.Layout.FlagStructureAsChanged();
+    }
+
     public void FocusViewToSelection(GraphUiContext context)
     {
         var areaOnCanvas = NodeSelection.GetSelectionBounds(context.Selector, context.CompositionInstance);

@@ -95,7 +95,7 @@ M01a_SomeName
 This doesn’t need to be perfect and can always be adjusted. The main sorting criterion is the namespace; within a Topic the Levels are sorted by symbol name.
 
 8. Open your copied Level.
-9. Although you can remove everything, keeping the *Solution* Annotation, the `[...Quiz]` operator, and the Symbol Output is convenient.
+9. Although you can remove everything, keeping the *Solution* Section, the `[...Quiz]` operator, and the Symbol Output is convenient.
 10. Create your challenge.
 11. When finished, open the Solution and duplicate your puzzle there.
 12. Connect the Solution to the Quiz’s second input.

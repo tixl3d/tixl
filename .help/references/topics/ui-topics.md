@@ -98,10 +98,10 @@ id: SearchWindow
 synonyms: Control F, Find
 classes: SearchDialog
 
-## Annotations
+## Sections
 id: Annotations
-synonyms: sections
-classes: MagGraphAnnotation
+synonyms: annotations, frames
+classes: MagGraphSection
 
 ## Operator Settings
 id: OperatorSettings

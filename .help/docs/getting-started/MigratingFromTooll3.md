@@ -38,7 +38,7 @@ In most cases, you probably won’t need to worry about this — but if you’re
   * `ProjectX.csproj` – Project definition file
   * `ProjectX.cs` – Your project’s C# operators
   * `ProjectX.t3` – Operator definitions (inputs, outputs, ops, connections)
-  * `ProjectX.t3ui` – UI layout and metadata (comments, annotations, layout)
+  * `ProjectX.t3ui` – UI layout and metadata (comments, sections, layout)
 
 ## Resource Paths
 

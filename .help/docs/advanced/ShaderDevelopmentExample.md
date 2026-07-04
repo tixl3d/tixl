@@ -51,7 +51,7 @@ Here's what we have to do:
 5. Write a billboard draw effect that uses a reference image, the lookup table, and the texture atlas to draw quads using the best matching texture.
 6. Find a method to initialize the image set and lookup table only once.
 
-We recommend to open the [ImageMosaicExample] in TiXL and follow along. It contains many comments and annotations explaining what's happening. If you want to learn even more, you can try to open TiXL with [RenderDoc](https://github.com/tixl3d/tixl/wiki/dev.UsingRenderDoc) to explore the state of the graphic card in further detail.
+We recommend to open the [ImageMosaicExample] in TiXL and follow along. It contains many comments and sections explaining what's happening. If you want to learn even more, you can try to open TiXL with [RenderDoc](https://github.com/tixl3d/tixl/wiki/dev.UsingRenderDoc) to explore the state of the graphic card in further detail.
 
 We've grouped the final effect into 3 operators to separate and clarify the different stages:
 

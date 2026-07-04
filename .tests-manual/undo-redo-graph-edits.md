@@ -17,26 +17,26 @@ behave for each one. For every step, `Ctrl+Z` should cleanly take the edit back
 and `Ctrl+Y` should put it right again — nothing should be left stranded, undone
 to the wrong thing, or do nothing at all.
 
-## Step: Undo/redo adding an annotation
+## Step: Undo/redo adding a section
 
 **Action:**
-With the [ui:Graph|Graph Window] focused, press `Shift+A` (or right-click → `Add...` →
-`Add Annotation`) to create an annotation. Press `Esc` to leave its rename mode,
+With the [ui:Graph|Graph Window] focused, press `Shift+S` (or right-click → `Add...` →
+`Section`) to create a section. Press `Esc` to leave its rename mode,
 then press `Ctrl+Z`, then `Ctrl+Y`.
 
 **Expected:**
-- The annotation appears on creation.
+- The section appears on creation.
 - `Ctrl+Z` removes it.
 - `Ctrl+Y` brings it back in the same place.
 
-## Step: Undo/redo deleting an annotation
+## Step: Undo/redo deleting a section
 
 **Action:**
-Select an existing annotation and press `Del` to delete it, then press `Ctrl+Z`,
+Select an existing section and press `Del` to delete it, then press `Ctrl+Z`,
 then `Ctrl+Y`.
 
 **Expected:**
-- The annotation is removed on delete.
+- The section frame is removed on delete; operators inside stay where they are.
 - `Ctrl+Z` restores it with its original text and position.
 - `Ctrl+Y` deletes it again.
 

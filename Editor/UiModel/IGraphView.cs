@@ -15,6 +15,13 @@ internal interface IGraphView
     ScalableCanvas Canvas { get; }
 
     void FocusViewToSelection();
+
+    /// <summary>
+    /// Notifies the view that the graph structure changed outside its own interactions
+    /// (e.g. a section added from the app menu), so it refreshes its layout model.
+    /// </summary>
+    void FlagStructureAsChanged();
+
     void OpenAndFocusInstance(IReadOnlyList<Guid> path);
     void OpenAndFocusSection(IReadOnlyList<Guid> compositionPath, Guid sectionId);
     public CanvasScope GetTargetScope();

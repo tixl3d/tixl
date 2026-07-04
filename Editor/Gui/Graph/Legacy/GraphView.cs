@@ -599,6 +599,11 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         FitAreaOnCanvas(NodeSelection.GetSelectionBounds(_nodeSelection, _projectView.CompositionInstance));
     }
 
+    public void FlagStructureAsChanged()
+    {
+        // The legacy graph rebuilds its view from the ui-model every frame
+    }
+
     private void DrawContextMenuContent(Instance compositionOp)
     {
         var clickPosition = ImGui.GetMousePosOnOpeningCurrentPopup();

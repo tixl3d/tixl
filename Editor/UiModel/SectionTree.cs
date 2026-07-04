@@ -109,6 +109,13 @@ internal static class SectionTree
         {
             childUi.HiddenInCollapsedSectionId = FindOutermostCollapsedSection(symbolUi, childUi.SectionId);
         }
+
+        // Nested frames hide with their collapsed ancestors; a collapsed section
+        // itself stays visible as its header
+        foreach (var section in symbolUi.Sections.Values)
+        {
+            section.HiddenInCollapsedSectionId = FindOutermostCollapsedSection(symbolUi, section.ParentSectionId);
+        }
     }
 
     /// <summary>
@@ -144,8 +151,9 @@ internal static class SectionTree
             if (section.Id == excludeId)
                 continue;
 
-            // Collapsed sections only keep their current members, they never adopt
-            if (section.Collapsed && section.Id != currentOwnerId)
+            // Collapsed sections (and frames hidden inside one) only keep their
+            // current members, they never adopt — their bounds are invisible
+            if (section.Id != currentOwnerId && IsSelfOrAncestorCollapsed(symbolUi, section))
                 continue;
 
             var area = new ImRect(section.PosOnCanvas, section.PosOnCanvas + section.Size);

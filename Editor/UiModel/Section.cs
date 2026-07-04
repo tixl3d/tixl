@@ -21,6 +21,15 @@ public sealed class Section : ISelectableCanvasObject
     public Vector2 Size { get; set; }
     public bool Collapsed = false;
 
+    /// <summary>
+    /// Runtime lookup: the outermost collapsed ancestor section this frame is hidden in,
+    /// or Guid.Empty when visible. A collapsed section itself stays visible as its header.
+    /// Recomputed by <see cref="SectionTree.UpdateCollapsedVisibility"/>; not serialized.
+    /// </summary>
+    internal Guid HiddenInCollapsedSectionId { get; set; }
+
+    internal bool IsHiddenInCollapsedSection => HiddenInCollapsedSectionId != Guid.Empty;
+
     internal Section Clone()
     {
         return new Section

@@ -75,5 +75,5 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
  | LayoutSelection                | G                                                  |
  | ToggleFullScreenGraph          | ctrl + F11                                         |
  | ToggleFocusMode                | Shift + Esc                                        |
- | AddAnnotation                  | A (NeedsWindowFocus)                               |
+ | AddSection                    | Shift+S, alias Shift+A (NeedsWindowFocus)          |
  | ToggleVariationsWindow         | Alt+V (NeedsWindowFocus)                           |

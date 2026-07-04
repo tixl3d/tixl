@@ -24,6 +24,7 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Exporting;
 using T3.Editor.UiModel.Helpers;
+using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
@@ -412,6 +413,19 @@ internal static class AppMenuBar
             if (MenuItem("Redo", "CTRL+SHIFT+Z", isEnabled: UndoRedoStack.CanRedo))
             {
                 UndoRedoStack.Redo();
+            }
+
+            CustomComponents.SeparatorLine();
+
+            var sectionView = ProjectView.Focused;
+            var canAddSection = sectionView?.CompositionInstance != null && !T3Ui.IsCurrentlySaving;
+            if (MenuItem("Add Section", UserActions.AddSection.ListShortcuts(), isEnabled: canAddSection))
+            {
+                // Placed around the selection, or at the center of the graph view
+                var canvas = sectionView!.GraphView.Canvas;
+                var centerScreen = canvas.WindowPos + canvas.WindowSize / 2;
+                NodeActions.AddSection(sectionView.NodeSelection, canvas, sectionView.CompositionInstance!, centerScreen);
+                sectionView.GraphView.FlagStructureAsChanged();
             }
 
             CustomComponents.SeparatorLine();
