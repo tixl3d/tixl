@@ -381,7 +381,26 @@ internal sealed class SymbolFilter
             }
             relevancy *= totalUsageCountBoost;
         }
+        
+        if ((int)(symbolUi.Tags & (SymbolUi.SymbolTags.Obsolete| SymbolUi.SymbolTags.NeedsFix | SymbolUi.SymbolTags.Research | SymbolUi.SymbolTags.Internal)) != 0)
+        {
+            relevancy *= 0.3f;
+            _logList.Add("Bad Tags x0.3f");
+        }
 
+        if ((int)(symbolUi.Tags & (SymbolUi.SymbolTags.Advanced)) != 0)
+        {
+            relevancy *= 0.8f;
+            _logList.Add("Bad Tags x0.3f");
+        }
+        
+        if ((int)(symbolUi.Tags & (SymbolUi.SymbolTags.Essential)) != 0)
+        {
+            relevancy *= 1.5f;
+            _logList.Add("Essential Tags x1.5f");
+        }
+
+        
         if (logOutput)
         {
             Log.Debug( $"{relevancy:0.0} " + string.Join(", ",_logList));
