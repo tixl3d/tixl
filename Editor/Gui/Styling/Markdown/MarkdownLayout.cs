@@ -134,7 +134,7 @@ internal static class MarkdownLayout
             for (var ri = 0; ri < line.RunCount; ri++)
             {
                 var run = doc.Runs[line.RunStart + ri];
-                EmitRun(src, run, opRefFont, ref penX, contentLeft, wrapWidth,
+                EmitRun(src, run, opRefFont, scale, ref penX, contentLeft, wrapWidth,
                         result, line, lineHeight, ref y,
                         ref firstVisualLineOfLogical, ref fragmentStart);
             }
@@ -149,7 +149,7 @@ internal static class MarkdownLayout
                         ref firstVisualLineOfLogical, ref fragmentStart);
     }
 
-    private static void EmitRun(string src, Run run, ImFontPtr opRefFont, ref float penX,
+    private static void EmitRun(string src, Run run, ImFontPtr opRefFont, float scale, ref float penX,
                                 float contentLeft, float wrapWidth,
                                 LayoutResult result, Line line, float lineHeight,
                                 ref float y, ref bool firstVisualLineOfLogical,
@@ -157,8 +157,11 @@ internal static class MarkdownLayout
     {
         // Bold/Code/OpRef runs need their own font for accurate measurement.
         var pushed = false;
-        if ((run.Style & RunStyle.OpRef) != 0)
+        var isOpRef = (run.Style & RunStyle.OpRef) != 0;
+        if (isOpRef)
         {
+            // Reserve the horizontal padding of the box the renderer draws behind op-refs.
+            penX += MarkdownView.OpRefPaddingX * scale;
             ImGui.PushFont(opRefFont);
             pushed = true;
         }
@@ -192,6 +195,9 @@ internal static class MarkdownLayout
             if (pushed)
                 ImGui.PopFont();
         }
+
+        if (isOpRef)
+            penX += MarkdownView.OpRefPaddingX * scale;
     }
 
     private static void EmitSlice(string src, int sliceStart, int sliceLen,
@@ -424,7 +430,7 @@ internal static class MarkdownLayout
     {
         unsafe
         {
-            return opt.OpRefFont.NativePtr != null ? opt.OpRefFont : Fonts.FontBold;
+            return opt.OpRefFont.NativePtr != null ? opt.OpRefFont : Fonts.FontNormal;
         }
     }
 }

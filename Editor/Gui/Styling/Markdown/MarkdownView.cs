@@ -47,7 +47,7 @@ internal sealed class MarkdownView
 
         /// <summary>
         /// Override the font for inline <c>[OpName]</c> references.
-        /// Default = unset → falls back to <see cref="Fonts.FontBold"/>, which can look
+        /// Default = unset → falls back to <see cref="Fonts.FontNormal"/>, which can look
         /// size-mismatched if <see cref="BodyFont"/> is larger (e.g. <see cref="Fonts.FontLarge"/>).
         /// </summary>
         public ImFontPtr OpRefFont { get; set; }
@@ -226,9 +226,27 @@ internal sealed class MarkdownView
             var opColor = _operatorColor != null && fragment.UrlIndex >= 0
                               ? _operatorColor(_layout.Urls[fragment.UrlIndex])
                               : UiColors.StatusActivated;
-            ImGui.PushStyleColor(ImGuiCol.Text, opColor.Rgba);
             ImGui.PushFont(OpRefFont);
-            fontPushed = true;            
+            fontPushed = true;
+
+            var padX = OpRefPaddingX * T3Ui.UiScaleFactor;
+
+            // A type-colored box behind the reference, styled like Symbol Library entries.
+            // Unresolved refs render as plain body text (see OperatorRefColor) and get no box.
+            // The horizontal padding is reserved by the layout pass and the trailing spacer below.
+            if (opColor.Rgba != UiColors.Text.Rgba)
+            {
+                var topLeft = ImGui.GetCursorScreenPos();
+                ImGui.GetWindowDrawList().AddRectFilled(topLeft,
+                                                        topLeft + ImGui.CalcTextSize(fragment.Text) + new Vector2(2 * padX, 0),
+                                                        ColorVariations.OperatorBackground.Apply(opColor),
+                                                        3 * T3Ui.UiScaleFactor);
+                opColor = ColorVariations.OperatorLabel.Apply(opColor);
+            }
+
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + padX);
+
+            ImGui.PushStyleColor(ImGuiCol.Text, opColor.Rgba);
             colorPushed = true;
         }
 
@@ -266,6 +284,14 @@ internal sealed class MarkdownView
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             }
         }
+
+        // Reserve the trailing box padding so the next fragment starts after the box,
+        // matching the width the layout pass measured.
+        if ((fragment.Style & RunStyle.OpRef) != 0)
+        {
+            ImGui.SameLine(0, 0);
+            ImGui.Dummy(new Vector2(OpRefPaddingX * T3Ui.UiScaleFactor, 1));
+        }
     }
 
     private (ImFontPtr font, Color color) LineStyle(LineKind kind)
@@ -300,10 +326,13 @@ internal sealed class MarkdownView
             {
                 return _options.OpRefFont.NativePtr != null
                            ? _options.OpRefFont
-                           : Fonts.FontBold;
+                           : Fonts.FontNormal;
             }
         }
     }
+
+    /// <summary>Unscaled horizontal padding reserved left and right of an <c>[OpName]</c> box.</summary>
+    internal const float OpRefPaddingX = 3f;
 
     private readonly Options _options;
     private OperatorRefColor? _operatorColor;
