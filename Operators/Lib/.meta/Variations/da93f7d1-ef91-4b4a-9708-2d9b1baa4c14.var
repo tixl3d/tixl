@@ -8,7 +8,7 @@
       "Title": "Wrapped Cycle",
       "PosOnCanvas": {
         "X": 106.77026,
-        "Y": -51.842346
+        "Y": -140.49402
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -24,7 +24,7 @@
       "Title": "Slack in the middle",
       "PosOnCanvas": {
         "X": 269.77026,
-        "Y": -51.842346
+        "Y": -140.49402
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -43,7 +43,7 @@
       "Title": "Alpha Mask for the poor",
       "PosOnCanvas": {
         "X": 106.77026,
-        "Y": 41.157654
+        "Y": -17.943466
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -63,7 +63,7 @@
       "Title": "Pinkg",
       "PosOnCanvas": {
         "X": 106.77026,
-        "Y": 134.15765
+        "Y": 104.60709
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -104,7 +104,7 @@
       "Title": "Green",
       "PosOnCanvas": {
         "X": 269.77026,
-        "Y": 134.15765
+        "Y": 104.60709
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

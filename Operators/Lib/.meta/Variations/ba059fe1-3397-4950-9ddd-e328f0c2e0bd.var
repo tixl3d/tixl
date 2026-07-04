@@ -24,7 +24,6 @@
             "Z": 1.0,
             "W": 0.0
           },
-          "2bd55eb6-8bca-4f34-bc0e-d1223f47b410": false,
           "b0e1cd04-9377-4ab0-9c4e-8780f4efa271": 58.0,
           "7328bfec-fad5-4262-9c10-fad57bd39e2e": 4.2
         }
@@ -39,11 +38,7 @@
         "X": 326.0,
         "Y": 0.0
       },
-      "ParameterSetsForChildIds": {
-        "00000000-0000-0000-0000-000000000000": {
-          "2bd55eb6-8bca-4f34-bc0e-d1223f47b410": false
-        }
-      }
+      "ParameterSetsForChildIds": {}
     },
     {
       "Id": "549551fa-bccc-4d50-99fb-0cf8567743ef",
@@ -52,7 +47,7 @@
       "Title": "Church",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -68,7 +63,6 @@
             "Z": 2.2,
             "W": 0.0
           },
-          "2bd55eb6-8bca-4f34-bc0e-d1223f47b410": false,
           "b0e1cd04-9377-4ab0-9c4e-8780f4efa271": 20.2,
           "7328bfec-fad5-4262-9c10-fad57bd39e2e": 0.74
         }
@@ -81,7 +75,7 @@
       "Title": "Arctic",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -97,7 +91,6 @@
             "Z": 1.0,
             "W": 0.0
           },
-          "2bd55eb6-8bca-4f34-bc0e-d1223f47b410": false,
           "b0e1cd04-9377-4ab0-9c4e-8780f4efa271": 5.43,
           "7328bfec-fad5-4262-9c10-fad57bd39e2e": 0.0
         }
@@ -110,7 +103,7 @@
       "Title": "Puzzled",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -126,7 +119,6 @@
             "Z": 0.49282295,
             "W": 0.0
           },
-          "2bd55eb6-8bca-4f34-bc0e-d1223f47b410": false,
           "b0e1cd04-9377-4ab0-9c4e-8780f4efa271": 5.0,
           "7328bfec-fad5-4262-9c10-fad57bd39e2e": 3.69
         }
@@ -139,7 +131,7 @@
       "Title": "ParkingLotMelting",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 186.0
+        "Y": 245.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -156,8 +148,7 @@
             "W": 0.0
           },
           "b0e1cd04-9377-4ab0-9c4e-8780f4efa271": 7.56,
-          "7328bfec-fad5-4262-9c10-fad57bd39e2e": 3.13,
-          "2bd55eb6-8bca-4f34-bc0e-d1223f47b410": true
+          "7328bfec-fad5-4262-9c10-fad57bd39e2e": 3.13
         }
       }
     }

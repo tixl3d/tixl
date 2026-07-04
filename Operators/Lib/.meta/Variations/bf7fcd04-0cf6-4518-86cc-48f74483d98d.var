@@ -83,7 +83,7 @@
       "Title": "45er",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -118,7 +118,7 @@
       "Title": "CopperBar",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -152,7 +152,7 @@
       "Title": "StarLike",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -183,7 +183,7 @@
       "Title": "Condom",
       "PosOnCanvas": {
         "X": 489.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -219,7 +219,7 @@
       "Title": "Blob Black",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 186.0
+        "Y": 245.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -255,7 +255,7 @@
       "Title": "256px white alpha blob",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 186.0
+        "Y": 245.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -268,8 +268,8 @@
           "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 1.0,
           "be43e160-f9a0-4991-b764-2b5e533b37cc": 1.0,
           "07e57992-ea38-4e3b-8d69-cb4e99ae587c": {
-            "Width": 256,
-            "Height": 256
+            "X": 256,
+            "Y": 256
           },
           "c9c66f57-5c8c-4481-9b9d-a8aa8569ac12": true
         }
@@ -282,7 +282,7 @@
       "Title": "Square",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 186.0
+        "Y": 245.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -297,7 +297,7 @@
       "Title": "Ring 256px",
       "PosOnCanvas": {
         "X": 489.0,
-        "Y": 186.0
+        "Y": 245.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -318,8 +318,8 @@
           "80bd2460-c28d-490c-981b-77a6e89f3983": 0.1,
           "be43e160-f9a0-4991-b764-2b5e533b37cc": 0.01,
           "07e57992-ea38-4e3b-8d69-cb4e99ae587c": {
-            "Width": 256,
-            "Height": 256
+            "X": 256,
+            "Y": 256
           },
           "c9c66f57-5c8c-4481-9b9d-a8aa8569ac12": true
         }
@@ -332,14 +332,14 @@
       "Title": "Square 256px",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 279.0
+        "Y": 367.65167
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
           "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 0.0,
           "07e57992-ea38-4e3b-8d69-cb4e99ae587c": {
-            "Width": 256,
-            "Height": 256
+            "X": 256,
+            "Y": 256
           }
         }
       }

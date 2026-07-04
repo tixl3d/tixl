@@ -1,0 +1,52 @@
+{
+  "Id": "8a203866-148d-4785-ae0e-61328b7646bb",
+  "Variations": [
+    {
+      "Id": "990a12ac-ced2-46e1-bb0f-30e0fcd62c2f",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "fe8b6a6c-4a9e-4bb8-b53b-c7b54bb23057",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Trainspotting",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4c51b5f5-5307-45a7-9641-25f572627926": 16.0,
+          "361a838a-7bf1-4fd2-8e0e-77edcef11965": 0.7,
+          "4e03d06a-d19b-463f-bbbd-b64d24c04b9e": 60,
+          "6dd98990-82a7-4f68-aef1-ff34d1825b3b": -1.6
+        }
+      }
+    },
+    {
+      "Id": "8aae88f5-2c72-4ce0-b718-88aa3cbfe8d3",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Fear and Loathing",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4c51b5f5-5307-45a7-9641-25f572627926": 16.0,
+          "361a838a-7bf1-4fd2-8e0e-77edcef11965": 1.3,
+          "4e03d06a-d19b-463f-bbbd-b64d24c04b9e": 3,
+          "6dd98990-82a7-4f68-aef1-ff34d1825b3b": -2.0
+        }
+      }
+    }
+  ]
+}

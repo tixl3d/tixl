@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "5a0b0485-7a55-4bf4-ae23-04f51d890334"/*FractalNoise*/,
   "Inputs": [
     {

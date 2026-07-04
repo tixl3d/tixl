@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "025b32e9-b570-45be-ae84-50424982aae3"/*ToneMapping*/,
   "Inputs": [
     {

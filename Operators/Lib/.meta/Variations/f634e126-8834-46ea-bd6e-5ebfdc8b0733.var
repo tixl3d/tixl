@@ -1,0 +1,160 @@
+{
+  "Id": "f634e126-8834-46ea-bd6e-5ebfdc8b0733",
+  "Variations": [
+    {
+      "Id": "e3c322c6-ffbe-4354-9b45-8a506c824948",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "10f7a505-56d0-4a81-a53e-fa66b3152694",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Core",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bb706662-2555-4f3b-a81e-60e04f052f36": 13.0,
+          "28e0b719-0888-4ef6-85d9-bbd75f7a4537": 0.7
+        }
+      }
+    },
+    {
+      "Id": "c657ddaa-2740-4e91-aef4-8ae1b539f49d",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Haze",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bb706662-2555-4f3b-a81e-60e04f052f36": 13.0,
+          "28e0b719-0888-4ef6-85d9-bbd75f7a4537": 0.7,
+          "355fa01e-b2c4-4d11-bead-18c5961d8e96": {
+            "X": 0.91,
+            "Y": 0.495
+          },
+          "c6a0cadc-9e1c-40ac-97f1-d9271b5376df": 1.41
+        }
+      }
+    },
+    {
+      "Id": "15bb24ca-2441-4b37-a7f5-297ecf530d34",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "I knew your dad",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bb706662-2555-4f3b-a81e-60e04f052f36": 4.9,
+          "be4e0dba-7613-4860-96e1-fe7ea493511f": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "7d302ba1-b9e6-445f-906d-dcf1f84145b3",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.3718534,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "dba44e12-7a56-4585-85e1-0acf0e863f57",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.9563408,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "355fa01e-b2c4-4d11-bead-18c5961d8e96": {
+            "X": 0.11500001,
+            "Y": 0.535
+          },
+          "2064aba1-658e-4795-a4fc-5be1026d7064": 8,
+          "e7412f9b-b5e3-4166-8f5e-4b142ccee55a": false
+        }
+      }
+    },
+    {
+      "Id": "693c2066-9aef-4a4e-8665-b1ef0b47205b",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Fire upon the deep",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bb706662-2555-4f3b-a81e-60e04f052f36": 10.6,
+          "28e0b719-0888-4ef6-85d9-bbd75f7a4537": 0.4,
+          "be4e0dba-7613-4860-96e1-fe7ea493511f": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "ba6a10f2-fd99-4fbe-9f8d-2fe1cbe76b73",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.2134636,
+                    "G": 1.0,
+                    "B": 0.8600104,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "f8dd8e9f-65e0-4d7f-badd-804be7cb8489",
+                  "NormalizedPosition": 0.70112944,
+                  "Color": {
+                    "R": 0.8851971,
+                    "G": 0.39974806,
+                    "B": 0.3483082,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "6982fa8b-8ffb-4b4e-a826-830a2c1147cf",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.5522783,
+                    "B": 0.2788188,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "355fa01e-b2c4-4d11-bead-18c5961d8e96": {
+            "X": 0.795,
+            "Y": 0.67
+          },
+          "2064aba1-658e-4795-a4fc-5be1026d7064": 8,
+          "e7412f9b-b5e3-4166-8f5e-4b142ccee55a": false
+        }
+      }
+    }
+  ]
+}

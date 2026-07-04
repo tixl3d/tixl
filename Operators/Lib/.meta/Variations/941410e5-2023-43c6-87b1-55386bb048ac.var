@@ -20,6 +20,59 @@
           }
         }
       }
+    },
+    {
+      "Id": "112cfc88-2534-4702-87ca-511df75273e5",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Look into my eyes",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "83f2dc32-5830-4558-9137-f6805f3f6ff6": 0.84,
+          "d796cbc2-26b4-4805-b1b7-bd23b42d1984": 3.2,
+          "627847c4-5ba3-4852-bb09-2b0d99e05451": -0.12
+        }
+      }
+    },
+    {
+      "Id": "55e3f91c-9fd8-4a50-bfae-66f928c9bdcc",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "It clicked",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "83f2dc32-5830-4558-9137-f6805f3f6ff6": 1.0,
+          "d796cbc2-26b4-4805-b1b7-bd23b42d1984": 0.5,
+          "627847c4-5ba3-4852-bb09-2b0d99e05451": -2.5,
+          "4bd38d2f-0c52-456f-9938-b1f571c719fe": {
+            "X": 2.0,
+            "Y": 2.2
+          }
+        }
+      }
+    },
+    {
+      "Id": "9dd5fd1c-06b7-4332-b570-a922ca51b482",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Up side down",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfcb7f48-517a-4791-96fa-4aa26862839b": 1
+        }
+      }
     }
   ]
 }

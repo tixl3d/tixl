@@ -1,0 +1,219 @@
+{
+  "Id": "c7b8359e-6b36-4ae0-a6b4-4ac0d0306966",
+  "Variations": [
+    {
+      "Id": "55c29a18-b51e-4399-9e2b-b513e5df701b",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "7aa108c0-31a3-4616-946f-9eab168e3f35",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "With FX",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9750e62b-e650-4eac-9ff6-ec7c2640d6d5": {
+            "X": 0.57,
+            "Y": 0.5
+          },
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 10.0
+        }
+      }
+    },
+    {
+      "Id": "ca8d1f39-2032-44a1-a26c-5bf9ff78dd97",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Effects Low",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9750e62b-e650-4eac-9ff6-ec7c2640d6d5": {
+            "X": 0.885,
+            "Y": 0.455
+          },
+          "3e373713-90bd-4d54-b4c8-6f8401efcd07": 4,
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 10.0
+        }
+      }
+    },
+    {
+      "Id": "15bd07d1-d2a2-47ab-b286-9f47222834d6",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Invert",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9750e62b-e650-4eac-9ff6-ec7c2640d6d5": {
+            "X": 0.885,
+            "Y": 0.455
+          },
+          "fb02efe3-cca5-4664-b8ce-33ace59c51d6": 4,
+          "3e373713-90bd-4d54-b4c8-6f8401efcd07": 70,
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 10.0
+        }
+      }
+    },
+    {
+      "Id": "560c75ee-7d93-46f8-bf05-e9ff6368582a",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Chaos 1",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "11be1492-a848-4172-83dd-d19eea7e7c88": 2,
+          "fb02efe3-cca5-4664-b8ce-33ace59c51d6": 4,
+          "3e373713-90bd-4d54-b4c8-6f8401efcd07": 1,
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 40.0
+        }
+      }
+    },
+    {
+      "Id": "b0f9dc04-9159-4dfe-ba74-665081871f05",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Petry Dish",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "11be1492-a848-4172-83dd-d19eea7e7c88": 3,
+          "fb02efe3-cca5-4664-b8ce-33ace59c51d6": 4,
+          "3e373713-90bd-4d54-b4c8-6f8401efcd07": 10,
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 62.0
+        }
+      }
+    },
+    {
+      "Id": "4ac83f43-080f-413a-bd58-6de69c52251f",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "I lost you hard drive",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 245.10112
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "11be1492-a848-4172-83dd-d19eea7e7c88": 4,
+          "9750e62b-e650-4eac-9ff6-ec7c2640d6d5": {
+            "X": 0.16500002,
+            "Y": 0.645
+          },
+          "fb02efe3-cca5-4664-b8ce-33ace59c51d6": 4,
+          "3e373713-90bd-4d54-b4c8-6f8401efcd07": 64,
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 194.0
+        }
+      }
+    },
+    {
+      "Id": "57e73009-7f47-4b66-9b26-b5b4b6585845",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "Data Snow",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 245.1011
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "11be1492-a848-4172-83dd-d19eea7e7c88": 4,
+          "9750e62b-e650-4eac-9ff6-ec7c2640d6d5": {
+            "X": 0.27000004,
+            "Y": 0.45499998
+          },
+          "3e373713-90bd-4d54-b4c8-6f8401efcd07": 28,
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 220.0
+        }
+      }
+    },
+    {
+      "Id": "dfb2f52c-c8ad-471d-a3a5-5fd08c05c48a",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "John, is that you?",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 245.1011
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8a5d12fd-5f64-4df2-bcf1-ed4968e6420c": {
+            "X": 1.0,
+            "Y": 0.18947816,
+            "Z": 0.3656571,
+            "W": 1.0
+          },
+          "4b175d22-d1a4-4458-96d9-2a72ecd77ae0": {
+            "X": 0.9464349,
+            "Y": 0.9598262,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "11be1492-a848-4172-83dd-d19eea7e7c88": 1,
+          "9750e62b-e650-4eac-9ff6-ec7c2640d6d5": {
+            "X": 0.77500004,
+            "Y": 0.695
+          },
+          "c269b97f-3126-420b-87f5-a28ff01b3808": 11.7,
+          "24dd4192-a1e8-4327-ab8e-88c1a34ef9b1": {
+            "X": 1.04,
+            "Y": 4.9
+          },
+          "3e373713-90bd-4d54-b4c8-6f8401efcd07": 18,
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 220.0
+        }
+      }
+    },
+    {
+      "Id": "1f800623-d312-4160-989a-4552bda6af0c",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Why not?",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 367.65167
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "11be1492-a848-4172-83dd-d19eea7e7c88": 3,
+          "9750e62b-e650-4eac-9ff6-ec7c2640d6d5": {
+            "X": 0.77500004,
+            "Y": 0.695
+          },
+          "c269b97f-3126-420b-87f5-a28ff01b3808": 2.4,
+          "24dd4192-a1e8-4327-ab8e-88c1a34ef9b1": {
+            "X": 1.12,
+            "Y": 100.0
+          },
+          "3e373713-90bd-4d54-b4c8-6f8401efcd07": 20,
+          "d97df58f-09ff-4f96-b9ac-5844a454e5c9": 220.0
+        }
+      }
+    }
+  ]
+}

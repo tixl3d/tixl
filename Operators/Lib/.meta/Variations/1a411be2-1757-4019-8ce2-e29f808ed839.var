@@ -8,7 +8,7 @@
       "Title": "BW 8x8 256px",
       "PosOnCanvas": {
         "X": 0.07079697,
-        "Y": 105.451324
+        "Y": 135.00189
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -101,7 +101,7 @@
       "Title": "256px Dark gray",
       "PosOnCanvas": {
         "X": 163.0708,
-        "Y": 105.451324
+        "Y": 135.00189
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

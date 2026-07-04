@@ -24,7 +24,7 @@
       "Title": "untitled",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -82,6 +82,147 @@
           "91d7a9e8-dc0e-4c77-8496-90ac7c4dfe0c": 0.12,
           "fcf28205-bcc4-46f3-af4c-1a3896a991a5": 0.63,
           "c07bdf4d-8395-4327-b57e-6ba38f36e8a0": 0.995
+        }
+      }
+    },
+    {
+      "Id": "a761d912-d298-4a0a-9922-ca58dfdcf463",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Apply",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5e6de9ce-c291-40fc-bbe4-cd74ebbe1434": false,
+          "0f3dd599-095e-4766-9483-c8cb21f9571a": {
+            "X": 0.0,
+            "Y": 0.012
+          },
+          "faf738e5-5ff4-4bcd-85dc-b1c1484edfa6": 1.0,
+          "225df965-a92b-45d8-abae-81238aada793": 0.44,
+          "91d7a9e8-dc0e-4c77-8496-90ac7c4dfe0c": 0.02
+        }
+      }
+    },
+    {
+      "Id": "b2dc7bd9-a689-4e20-a333-c02041173eaa",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Hokey Pokey",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5e6de9ce-c291-40fc-bbe4-cd74ebbe1434": false,
+          "0f3dd599-095e-4766-9483-c8cb21f9571a": {
+            "X": 0.0,
+            "Y": 0.012
+          },
+          "faf738e5-5ff4-4bcd-85dc-b1c1484edfa6": 1.0,
+          "225df965-a92b-45d8-abae-81238aada793": 0.44,
+          "91d7a9e8-dc0e-4c77-8496-90ac7c4dfe0c": 0.02,
+          "c07bdf4d-8395-4327-b57e-6ba38f36e8a0": 0.922
+        }
+      }
+    },
+    {
+      "Id": "17c09790-1674-4865-af6f-ab7108fecc61",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Unstable",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 245.10112
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5e6de9ce-c291-40fc-bbe4-cd74ebbe1434": false,
+          "0f3dd599-095e-4766-9483-c8cb21f9571a": {
+            "X": 0.0,
+            "Y": 0.012
+          },
+          "faf738e5-5ff4-4bcd-85dc-b1c1484edfa6": 1.0,
+          "225df965-a92b-45d8-abae-81238aada793": 0.44,
+          "91d7a9e8-dc0e-4c77-8496-90ac7c4dfe0c": 0.02,
+          "c07bdf4d-8395-4327-b57e-6ba38f36e8a0": 1.029,
+          "fcf28205-bcc4-46f3-af4c-1a3896a991a5": 1.6
+        }
+      }
+    },
+    {
+      "Id": "5307541d-215c-4df8-bc5f-4391458cebb9",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "Unstable Stabilize",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 245.1011
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5e6de9ce-c291-40fc-bbe4-cd74ebbe1434": false,
+          "0f3dd599-095e-4766-9483-c8cb21f9571a": {
+            "X": 0.0,
+            "Y": 0.012
+          },
+          "faf738e5-5ff4-4bcd-85dc-b1c1484edfa6": 1.0,
+          "225df965-a92b-45d8-abae-81238aada793": 0.44,
+          "91d7a9e8-dc0e-4c77-8496-90ac7c4dfe0c": 0.02,
+          "c07bdf4d-8395-4327-b57e-6ba38f36e8a0": 1.029,
+          "fcf28205-bcc4-46f3-af4c-1a3896a991a5": 1.6,
+          "18d0f554-e8f7-4b0f-98c7-24c9742b66af": 1.03
+        }
+      }
+    },
+    {
+      "Id": "66b79922-d875-4f8b-9c34-f150ce78e7d3",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "This is not correct",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 245.1011
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5e6de9ce-c291-40fc-bbe4-cd74ebbe1434": false,
+          "faf738e5-5ff4-4bcd-85dc-b1c1484edfa6": -11.5,
+          "225df965-a92b-45d8-abae-81238aada793": 0.1,
+          "91d7a9e8-dc0e-4c77-8496-90ac7c4dfe0c": 0.02,
+          "c07bdf4d-8395-4327-b57e-6ba38f36e8a0": 1.029,
+          "fcf28205-bcc4-46f3-af4c-1a3896a991a5": 1.6,
+          "18d0f554-e8f7-4b0f-98c7-24c9742b66af": 1.03
+        }
+      }
+    },
+    {
+      "Id": "78110c81-2908-4f19-8075-69381c851e78",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Water Colors",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 367.65167
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5e6de9ce-c291-40fc-bbe4-cd74ebbe1434": false,
+          "0f3dd599-095e-4766-9483-c8cb21f9571a": {
+            "X": 0.0,
+            "Y": -0.003
+          },
+          "faf738e5-5ff4-4bcd-85dc-b1c1484edfa6": -4.3,
+          "225df965-a92b-45d8-abae-81238aada793": -0.28,
+          "91d7a9e8-dc0e-4c77-8496-90ac7c4dfe0c": 0.041,
+          "83b4782b-9ac3-4426-b7d9-1669e97c89b1": 0.3,
+          "c07bdf4d-8395-4327-b57e-6ba38f36e8a0": 0.993,
+          "fcf28205-bcc4-46f3-af4c-1a3896a991a5": 1.2,
+          "18d0f554-e8f7-4b0f-98c7-24c9742b66af": 1.03
         }
       }
     }

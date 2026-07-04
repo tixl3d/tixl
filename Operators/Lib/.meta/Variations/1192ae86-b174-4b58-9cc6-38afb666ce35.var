@@ -43,7 +43,7 @@
       "Title": "GhostLines",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -62,7 +62,7 @@
       "Title": "Noise Machine",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -71,6 +71,26 @@
           "ab3206bf-9413-4f31-9c3d-0c1fe7477862": 0.0,
           "815975d2-5613-4ca8-b208-f09ac07b0518": -0.18,
           "dfa5e772-0cb4-440f-8483-dcc89b40107d": 0.75
+        }
+      }
+    },
+    {
+      "Id": "77128e47-c6dc-4f5f-ab9d-513072f88919",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Harry who?",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e94e2b7e-6f0a-42b5-bf5e-abdffe728273": 0.019,
+          "815975d2-5613-4ca8-b208-f09ac07b0518": 1.7,
+          "dfa5e772-0cb4-440f-8483-dcc89b40107d": 2.0,
+          "b295586d-2339-4d69-868a-c17468e77998": true,
+          "a3af8d20-8c09-4250-b5bd-806c12ad7c05": 3,
+          "ea812b8d-f275-4a91-bfae-cd3308c04362": 0.08
         }
       }
     }

@@ -59,7 +59,7 @@
       "Title": "Mask",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -89,7 +89,7 @@
       "Title": "MakeGreenWhite",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

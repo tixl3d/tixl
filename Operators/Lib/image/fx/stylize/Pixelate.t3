@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "1fa725a1-dab6-4a2a-8a4d-6efdfba5cf05"/*Pixelate*/,
   "Inputs": [
     {

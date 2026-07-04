@@ -27,8 +27,8 @@
       "ActivationIndex": 2,
       "Title": "One thin",
       "PosOnCanvas": {
-        "X": 174.3,
-        "Y": -98.100006
+        "X": 164.37895,
+        "Y": -133.03766
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -363,8 +363,8 @@
       "ActivationIndex": 11,
       "Title": "HalfRing",
       "PosOnCanvas": {
-        "X": 11.300003,
-        "Y": -98.100006
+        "X": 1.3789673,
+        "Y": -133.03766
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

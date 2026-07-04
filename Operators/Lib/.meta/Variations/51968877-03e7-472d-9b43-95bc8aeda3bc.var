@@ -166,7 +166,7 @@
       "Title": "R->White Alpha",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -211,7 +211,7 @@
       "Title": "Invert Alpha",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -255,7 +255,7 @@
       "Title": "Darks -> Alpha/Black",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -299,7 +299,7 @@
       "Title": "Darks -> Alpha/White",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 186.0
+        "Y": 245.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -343,7 +343,7 @@
       "Title": "Alpha -> GrayScale",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 186.0
+        "Y": 245.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

@@ -1,0 +1,80 @@
+{
+  "Id": "025b32e9-b570-45be-ae84-50424982aae3",
+  "Variations": [
+    {
+      "Id": "361d2103-03db-4703-a08f-5310f37ca671",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "7e9620fd-f430-46d1-b0d1-a2f5aabf398a",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Aces",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "37d4e1e6-e5a0-40b6-ada9-9481f5a807de": 0
+        }
+      }
+    },
+    {
+      "Id": "3569be5f-453b-492b-aaec-5674f0691d3f",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Filmic",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "37d4e1e6-e5a0-40b6-ada9-9481f5a807de": 2,
+          "be44974c-2685-40ff-86b6-bdf1cc38eee4": true
+        }
+      }
+    },
+    {
+      "Id": "d705ddee-6f8b-426b-a341-b129e714265c",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "AgX Gamma low expsore",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "37d4e1e6-e5a0-40b6-ada9-9481f5a807de": 4,
+          "be44974c-2685-40ff-86b6-bdf1cc38eee4": true,
+          "b3ac35c2-7f59-49fb-a4ad-84dc5a8c3841": 0.29
+        }
+      }
+    },
+    {
+      "Id": "a7ed3bdb-9647-4d8c-a023-52bdec771a58",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "AgX Punchy",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "37d4e1e6-e5a0-40b6-ada9-9481f5a807de": 5,
+          "be44974c-2685-40ff-86b6-bdf1cc38eee4": true
+        }
+      }
+    }
+  ]
+}

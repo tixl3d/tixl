@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "941410e5-2023-43c6-87b1-55386bb048ac"/*PolarCoordinates*/,
   "Description": "Applies a polar coordinate transformation that converts between circular and rectangular coordinates. In other words, it wraps and unwraps round images.\n\nAlso see [Equirectangle], [ConvertEquirectangle]",
   "SymbolTags": "1",
