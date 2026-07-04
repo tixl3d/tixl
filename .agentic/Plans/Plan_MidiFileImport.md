@@ -3,7 +3,10 @@
 Ticket: #1082 — https://github.com/tixl3d/tixl/issues/1082
 Size: M   Milestone: —
 
-**Status: Phases 0–2 implemented (2026-07-04), Phase 3 (sampler ops) pending.** Supersedes the earlier
+**Status: complete (2026-07-04)** — all phases implemented and verified in-editor, including a
+`WasHit` output on both samplers (event-start edge detection; added after testing showed
+same-velocity events are invisible in the sampled value). Help page:
+[MidiFileImport.md](../../.help/docs/using/MidiFileImport.md). Supersedes the earlier
 `Plan_LoadMidiFilesAsDataClips.md` (archived); its open questions are settled by the decisions below.
 Manual test set: [midi-file-import.md](../../.tests-manual/midi-file-import.md).
 
@@ -81,9 +84,9 @@ Implemented 2026-07-04. Notes from implementation:
   `MidiClip`, `OscInput`/`OscOutput`, `SimulateIoData`, …) from Lib into a new `Operators/Io`
   package referencing IoServices. Safe for user projects — symbols resolve by Guid regardless of
   owning package (LoadVideo precedent).
-- Deferred follow-ups with a natural home now: serial (`SerialConnectionManager`,
-  System.IO.Ports) and gamepad (`XInputGamepad`, SharpDX.XInput) could move to IoServices later,
-  freeing Core of those packages too. Not part of this feature.
+- Follow-up done (2026-07-04): serial (`SerialConnectionManager` + System.IO.Ports +
+  System.Management) and gamepad (`GamePadInput`, `XInputGamepad` + SharpDX.XInput) moved to
+  IoServices as well. Consumers were Lib-only (serial ops, DmxOutput, Gamepad).
 - Stays in Core: `DataSet` / `DataClip` / `DataSetCache` (NAudio-free, needed by Player + Editor),
   `DefaultOscPort` in `CoreSettings` (plain data), `BpmProvider` / `TapProvider`
   (playback-coupled).
@@ -112,7 +115,11 @@ Phase 2 (duration probe incl. drag preview) landed in the same pass in `Timeline
   Note: project BPM converts seconds→bars, so clips from files with a different tempo won't land on
   bar boundaries — same behavior as audio, accepted.
 
-### Phase 3 — sampler operators
+### Phase 3 — sampler operators — DONE
+Implemented 2026-07-04: `Operators/Lib/io/data/{SampleFloatFromDataClip,SampleGateFromDataClip}.cs`
+(+ .t3/.t3ui) with shared `DataClipSampling.cs` (cached channel resolution, playhead→source-secs
+mapping via `clip.Mapping`, binary-search sampling via `DataChannel.FindIndexForTime`). Output
+remap was deliberately left out — values stay raw; use [Remap] downstream.
 - `SampleFloatFromDataClip`: DataClip input, channel selection via string input with
   `CustomDropdown` usage + `ICustomDropdownHolder` (options = channel paths joined with `/`).
   Samples the last event at-or-before the current time. Default time: playhead mapped through the

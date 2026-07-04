@@ -60,3 +60,42 @@ Drag the same `.mid` file onto the graph background (not the timeline).
 
 **Expected:**
 - A [LoadMidiFile] op is created with its `FilePath` set to the imported asset.
+
+## Step: Sample a CC curve directly
+
+**Action:**
+Wire the clip's output into a [SampleFloatFromDataClip]. Open its `Channel` parameter —
+a dropdown should list all channels of the file. Pick a CC channel (`.../CC<n>`). Play
+the timeline through the clip.
+
+**Expected:**
+- The dropdown lists the same channels shown in the DataSet view, as `/`-joined paths.
+- `Result` steps through the CC curve as the playhead moves (raw 0–127 values), holding
+  each value until the next event.
+- Before the first event, `Result` returns the `DefaultValue` parameter.
+- Enabling `UseTimeOverride` and dragging `OverrideTime` samples the file at that source
+  time in seconds, independent of the playhead.
+
+## Step: Note gates trigger
+
+**Action:**
+Add a [SampleGateFromDataClip] on the same clip, pick a note channel (`.../N<note>`).
+Play through the clip.
+
+**Expected:**
+- `Gate` is true exactly while the note's bar is under the playhead in the clip body,
+  false between notes.
+- `Velocity` carries the note's velocity (0–127) while active, 0 when inactive.
+- Picking a CC channel instead shows a warning status on the op ("has no intervals").
+
+## Step: WasHit fires per event
+
+**Action:**
+On both sampler ops, pin the `WasHit` output. Pick a channel whose consecutive events
+carry the *same* value (repeated notes at one velocity, or a CC that re-sends its value).
+Play through the clip.
+
+**Expected:**
+- `WasHit` pulses true for one frame at every event start, even when `Result` /
+  `Velocity` doesn't change because the values are identical.
+- Scrubbing backwards doesn't fire hits; resuming forward playback does.

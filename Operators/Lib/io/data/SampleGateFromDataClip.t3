@@ -1,0 +1,22 @@
+{
+  "Id": "b1bce1f1-dab9-4b0f-bd2c-b7f564858675"/*SampleGateFromDataClip*/,
+  "Inputs": [
+    {
+      "Id": "8f1216bf-c3a6-426c-a861-9038cd2cc448"/*Clip*/
+    },
+    {
+      "Id": "96c0b232-6bdb-4bc2-bfc9-12e53db38c31"/*Channel*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "4289f47e-3f84-4e30-8663-744605374175"/*OverrideTime*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "73a53ce1-4e68-41fb-a4d0-e9fc2aac3f20"/*UseTimeOverride*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -22,7 +22,7 @@ namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 /// </summary>
 /// <remarks>
 /// Reads the slot's cached value when populated; falls back to loading the file directly
-/// via <see cref="DataSetCache"/> when no downstream consumer pulls on the op; falls
+/// via <see cref="DataClipFiles"/> when no downstream consumer pulls on the op; falls
 /// back further to the in-progress recording's live <see cref="DataSet"/> when this clip
 /// is the target of an active <see cref="RecordingSession"/>. All three paths feed the
 /// same per-channel renderer.
@@ -433,7 +433,7 @@ internal static class DataClipBodyRenderer
     /// (2) the live <see cref="DataSet"/> from an active <see cref="RecordingSession"/>
     ///     when this clip is the recording target — lets the timeline show events
     ///     streaming in during capture,
-    /// (3) the file on disk via the shared <see cref="DataSetCache"/> when the op is
+    /// (3) the file on disk via the shared <see cref="DataClipFiles"/> resolver when the op is
     ///     unwired and not being recorded into.
     /// </summary>
     /// <remarks>
