@@ -7,10 +7,10 @@ namespace Lib.render._dx11.api;
 internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
 {
     [Output(Guid = "7A76D147-4B8E-48CF-AA3E-AAC3AA90E888", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<Buffer> Buffer = new();
+    public readonly Slot<Buffer?> Buffer = new();
 
     [Output(Guid = "A200CC39-8FA3-4467-BC8F-EB03731A1ECE", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<Buffer> PrevBuffer = new();
+    public readonly Slot<Buffer?> PrevBuffer = new();
 
 
     public _TransformsCBuffer()
@@ -58,10 +58,11 @@ internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
 
         // Write *current* with this frame’s data
         var data = hasCam
-            ? new TransformBufferLayout(camera.CameraToClipSpace, camera.WorldToCamera, context.ObjectToWorld)
+            ? new TransformBufferLayout(camera!.CameraToClipSpace, camera.WorldToCamera, context.ObjectToWorld)
             : new TransformBufferLayout(context.CameraToClipSpace, context.WorldToCamera, context.ObjectToWorld);
 
-        ResourceManager.UpdateConstBuffer(data, current);
+        if(current != null)
+            ResourceManager.UpdateConstBuffer(data, current);
 
         // Expose buffers
         Buffer.Value = current;
@@ -105,6 +106,6 @@ internal sealed class _TransformsCBuffer : Instance<_TransformsCBuffer>
     public readonly InputSlot<Object> CameraReference = new();
 
 
-    private Buffer _cbA, _cbB; // ping-pong
+    private Buffer? _cbA, _cbB; // ping-pong
     private bool _toggle;
 }
