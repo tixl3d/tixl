@@ -2,49 +2,31 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using ImGuiNET;
-using T3.Core.Compilation;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Settings;
 using T3.Core.SystemUi;
-using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.TestRunner;
-// `Window` (singular) is also a sibling namespace, so the base class is referenced by its alias.
-using WindowBase = T3.Editor.Gui.Windows.Window;
 
 namespace T3.Editor.Gui.Dialog;
 
 /// <summary>
-/// Floating, non-modal welcome window shown the first time a user runs a version they haven't run in
-/// this folder before. A Settings-style sidebar splits it into Welcome (intro + release notes),
-/// Import Settings, Import Projects, and Test new Features. Reopenable via Help → Welcome.
-/// Currently serves both the alpha and the stable variant; named with the <c>Alpha</c> suffix to leave
-/// room for a future lighter-weight <c>WelcomeWindow</c> for the stable "what's new in this version" case.
+/// Floating, non-modal welcome window for alpha builds, shown the first time a user runs a version
+/// they haven't run in this folder before. A Settings-style sidebar splits it into Welcome (intro +
+/// release notes), Import Settings, Import Projects, and Test new Features. Reopenable via
+/// Help → Welcome. Stable builds show the lighter <see cref="WelcomeWindow"/> instead.
 /// </summary>
 [HelpUiID("WelcomeAlphaWindow")]
-internal sealed class WelcomeAlphaWindow : WindowBase
+internal sealed class WelcomeAlphaWindow : WelcomeWindowBase
 {
     internal WelcomeAlphaWindow()
     {
-        _isAlpha = RuntimeAssemblies.IsAlpha;
-        Config.Title = _isAlpha ? "Welcome to the TiXL Alpha" : "Welcome to TiXL";
-        // No window padding so the sidebar sits flush like the Settings window; the header and the
-        // content panel add their own inner padding. The base supplies the Settings-matching chrome.
-        WindowPaddingOverride = Vector2.Zero;
-        WindowSizeOverride = new Vector2(680, 480);
-        WindowFlags = ImGuiWindowFlags.NoDocking;
+        Config.Title = "Welcome to the TiXL Alpha";
     }
-
-    internal bool IsVisible => Config.Visible;
-
-    /// <summary>Opens the window (re-initialising its tabs). Used by the version-welcome trigger and Help → Welcome.</summary>
-    internal void Open() => Config.Visible = true;
-
-    internal override IReadOnlyList<WindowBase> GetInstances() => Array.Empty<WindowBase>();
 
     protected override void DrawContent()
     {
@@ -64,20 +46,19 @@ internal sealed class WelcomeAlphaWindow : WindowBase
         }
 
         NavigationSidebar.BeginLayout();
-        DrawHeaderBand();
+        DrawHeaderBand($"Thanks for testing v{FileLocations.TixlVersion} Alpha");
         DrawSidebar();
         DrawContentPanel();
     }
 
     protected override void Close()
     {
-        VersionMarker.MarkCurrentVersionSeen();
+        base.Close();
         _isInitialized = false;
     }
 
     private void Initialize()
     {
-        _isAlpha = RuntimeAssemblies.IsAlpha;
         _activeTab = Tab.Welcome;
         _settingsImported = false;
         _projectsImported = false;
@@ -101,31 +82,7 @@ internal sealed class WelcomeAlphaWindow : WindowBase
         }
 
         _testSets = TestSetParser.LoadAll(TestSetParser.ResolveTestsDirectory());
-        _releaseNotes = ReleaseNotesLoader.TryLoadForCurrentVersion();
-    }
-
-    private void DrawHeaderBand()
-    {
-        var scale = T3Ui.UiScaleFactor;
-        var shortVersion = FileLocations.TixlVersion;
-        var heading = _isAlpha ? $"Thanks for testing v{shortVersion} Alpha" : $"Welcome to TiXL v{shortVersion}";
-
-        // Window padding is 0, so pad the header explicitly.
-        ImGui.Dummy(new Vector2(0, 8 * scale));
-        ImGui.Indent(12 * scale);
-        ImGui.PushFont(Fonts.FontLarge);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted(heading);
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
-
-        // "Show on startup" toggle, right-aligned on the heading row.
-        DrawShowOnStartupCheckbox();
-
-        ImGui.Unindent(12 * scale);
-
-        ImGui.Dummy(new Vector2(0, 6 * scale));
-        ImGui.Separator();
+        LoadReleaseNotes();
     }
 
     private void DrawSidebar()
@@ -179,28 +136,13 @@ internal sealed class WelcomeAlphaWindow : WindowBase
     private void DrawWelcomeTab()
     {
         // Rendered as markdown so the [text](url) links sit inline in the prose.
-        _welcomeMarkdown.Draw(_isAlpha ? AlphaWelcomeMarkdown : StableWelcomeMarkdown,
+        _welcomeMarkdown.Draw(AlphaWelcomeMarkdown,
                               onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url));
 
         FormInputs.AddVerticalSpace(8);
         ImGui.Separator();
-        //FormInputs.AddSectionHeader(_isAlpha ? $"Release Notes v{FileLocations.TixlVersion} (WIP)" : $"Release Notes v{FileLocations.TixlVersion}");
 
-        if (_releaseNotes != null)
-        {
-            // Same renderer as the welcome prose, so [text](url) links and [OperatorName] references
-            // are both interactive — the latter open the Symbol Library on click.
-            _releaseNotesMarkdown.Draw(_releaseNotes,
-                                       onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url),
-                                       onOperatorRef: opName => MarkdownOperatorLinks.HandleOperatorRef(opName),
-                                       operatorColor: MarkdownOperatorLinks.GetOperatorColor);
-        }
-        else
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextWrapped("No release notes for this version yet.");
-            ImGui.PopStyleColor();
-        }
+        DrawReleaseNotes();
     }
 
     private void DrawImportSettingsTab()
@@ -308,29 +250,6 @@ internal sealed class WelcomeAlphaWindow : WindowBase
             FormInputs.AddVerticalSpace(6);
             DrawRestartEditorButton("Restart TiXL to load the imported projects.");
         }
-    }
-
-    private static void DrawShowOnStartupCheckbox()
-    {
-        var scale = T3Ui.UiScaleFactor;
-        const string label = "Show on startup";
-
-        var width = ImGui.GetFrameHeight() + ImGui.GetStyle().ItemInnerSpacing.X + ImGui.CalcTextSize(label).X;
-        CustomComponents.RightAlign(width + 14 * scale);
-
-        // Vertically center the normal-height checkbox against the FontLarge heading on this row.
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + (Fonts.FontLarge.FontSize - ImGui.GetFrameHeight()) * 0.5f);
-
-        var show = UserSettings.Config.ShowWelcomeOnStartup;
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        if (ImGui.Checkbox(label, ref show))
-        {
-            UserSettings.Config.ShowWelcomeOnStartup = show;
-            UserSettings.Save();
-        }
-
-        ImGui.PopStyleColor();
-        CustomComponents.TooltipForLastItem("When off, the window no longer opens at launch — reopen it any time from Help → Welcome.");
     }
 
     private static void DrawRestartEditorButton(string tooltip)
@@ -490,15 +409,9 @@ internal sealed class WelcomeAlphaWindow : WindowBase
         Please report all issues on our [Discord server](https://discord.gg/YmSyQdeH3S), or browse the [project planning board](https://github.com/orgs/tixl3d/projects/3/views/8).
         """;
 
-    private const string StableWelcomeMarkdown =
-        "Each TiXL version keeps its own folders for Settings and Projects, so different versions don't overwrite each other. Use the import options on the left to copy data from a previous version.";
-
     private readonly MarkdownView _welcomeMarkdown = new(new MarkdownView.Options());
-    private readonly MarkdownView _releaseNotesMarkdown = new(new MarkdownView.Options());
-    private string? _releaseNotes;
 
     private bool _isInitialized;
-    private bool _isAlpha;
     private Tab _activeTab = Tab.Welcome;
 
     private bool _hasPrevious;

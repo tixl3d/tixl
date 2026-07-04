@@ -1,0 +1,198 @@
+#nullable enable
+using ImGuiNET;
+using T3.Core.DataTypes.Vector;
+using T3.Core.Settings;
+using T3.Core.SystemUi;
+using T3.Editor.Gui.Hub;
+using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.Styling.Markdown;
+using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Window;
+using T3.Editor.UiModel;
+
+namespace T3.Editor.Gui.Dialog;
+
+/// <summary>
+/// Floating, non-modal welcome window for stable builds, shown the first time a user runs a version
+/// they haven't run in this folder before. A Settings-style sidebar splits it into Welcome (intro +
+/// release notes), Getting Started (learn links), and Projects (jump back into a project).
+/// Reopenable via Help → Welcome. Alpha builds show the <see cref="WelcomeAlphaWindow"/> instead.
+/// </summary>
+[HelpUiID("WelcomeWindow")]
+internal sealed class WelcomeWindow : WelcomeWindowBase
+{
+    internal WelcomeWindow()
+    {
+        Config.Title = "Welcome to TiXL";
+    }
+
+    protected override void DrawContent()
+    {
+        if (!_isInitialized)
+        {
+            Initialize();
+            _isInitialized = true;
+        }
+
+        NavigationSidebar.BeginLayout();
+        DrawHeaderBand($"Welcome to TiXL v{FileLocations.TixlVersion}");
+        DrawSidebar();
+        DrawContentPanel();
+    }
+
+    protected override void Close()
+    {
+        base.Close();
+        _isInitialized = false;
+    }
+
+    private void Initialize()
+    {
+        _activeTab = Tab.Welcome;
+        LoadReleaseNotes();
+    }
+
+    private void DrawSidebar()
+    {
+        NavigationSidebar.BeginColumn("sidebar", 150);
+
+        if (NavigationSidebar.Item("Welcome", _activeTab == Tab.Welcome))
+            _activeTab = Tab.Welcome;
+        if (NavigationSidebar.Item("Getting Started", _activeTab == Tab.GettingStarted))
+            _activeTab = Tab.GettingStarted;
+        if (NavigationSidebar.Item("Projects", _activeTab == Tab.Projects))
+            _activeTab = Tab.Projects;
+
+        NavigationSidebar.EndColumn();
+    }
+
+    private void DrawContentPanel()
+    {
+        var title = _activeTab switch
+                        {
+                            Tab.Welcome        => "Welcome",
+                            Tab.GettingStarted => "Getting Started",
+                            Tab.Projects       => "Projects",
+                            _                  => string.Empty,
+                        };
+
+        NavigationSidebar.BeginContentPanel(title, this);
+
+        switch (_activeTab)
+        {
+            case Tab.Welcome:
+                DrawWelcomeTab();
+                break;
+            case Tab.GettingStarted:
+                DrawGettingStartedTab();
+                break;
+            case Tab.Projects:
+                DrawProjectsTab();
+                break;
+        }
+
+        NavigationSidebar.EndContentPanel();
+    }
+
+    private void DrawWelcomeTab()
+    {
+        // Rendered as markdown so the [text](url) links sit inline in the prose.
+        _welcomeMarkdown.Draw(WelcomeMarkdown,
+                              onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url));
+
+        FormInputs.AddVerticalSpace(8);
+        ImGui.Separator();
+
+        DrawReleaseNotes();
+    }
+
+    private void DrawGettingStartedTab()
+    {
+        _gettingStartedMarkdown.Draw(GettingStartedMarkdown,
+                                     onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url));
+    }
+
+    private void DrawProjectsTab()
+    {
+        if (GraphWindow.GraphWindowInstances.Count == 0)
+        {
+            ImGui.TextColored(UiColors.TextMuted, "No graph window is open to load a project into.");
+            return;
+        }
+
+        var graphWindow = GraphWindow.GraphWindowInstances[0];
+        var scale = T3Ui.UiScaleFactor;
+
+        ImGui.TextColored(UiColors.TextMuted, "Open a project to pick up where you left off.");
+        FormInputs.AddVerticalSpace(6);
+
+        // Reserve the footer height so the list scrolls independently and the CTA stays pinned at the bottom.
+        var ctaSize = CustomComponents.GetCtaButtonSize("New Project...", Icon.None);
+        var footerHeight = ctaSize.Y + 12 * scale;
+        ImGui.BeginChild("projectList", new Vector2(0, -footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+        {
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 5) * scale);
+
+            var anyShown = false;
+            foreach (var package in EditableSymbolProject.AllProjects)
+            {
+                anyShown |= package.HasHome;
+                if (ProjectsPanel.DrawProjectItem(graphWindow, package))
+                    Config.Visible = false; // base calls Close() → stamps the version marker
+            }
+
+            if (!anyShown)
+                ImGui.TextColored(UiColors.TextMuted, "No projects yet — create your first one below.");
+
+            ImGui.PopStyleVar();
+        }
+        ImGui.EndChild();
+
+        CustomComponents.RightAlign(ctaSize.X, sameLine: false);
+        if (CustomComponents.DrawCtaButton("New Project...", Icon.None, UiColors.ForegroundFull, UiColors.StatusActivated, Color.Transparent))
+        {
+            T3Ui.NewProjectDialog.ShowNextFrame();
+            Config.Visible = false;
+        }
+    }
+
+    private enum Tab
+    {
+        Welcome,
+        GettingStarted,
+        Projects,
+    }
+
+    private const string WelcomeMarkdown =
+        """
+        TiXL is a free, open-source editor for creating real-time motion graphics.
+
+        If you are new, the **Getting Started** page on the left collects the best tutorials and links. The **Projects** page lists your projects so you can jump right back in.
+
+        Questions, feedback, and show-and-tell are always welcome on our [Discord server](https://discord.gg/YmSyQdeH3S).
+        """;
+
+    private const string GettingStartedMarkdown =
+        """
+        ## Learn the basics
+
+        - [Getting Started video (15 min)](https://www.youtube.com/watch?v=_zvzX0fZ8sc)
+        - [Tutorials playlist](https://www.youtube.com/playlist?list=PLj-rnPROvbn3LigXGRSDvmLtgTwmNHcQs)
+        - [Written introduction](https://github.com/tixl3d/tixl/wiki/help.Introduction)
+        - [FAQ](https://github.com/tixl3d/tixl/wiki/help.FAQ)
+
+        Prefer learning inside the editor? Close this window and follow the **Skill Quest** shown while no project is open — an interactive journey from playful basics to advanced real-time graphics.
+
+        ## Community
+
+        - [Discord community](https://discord.com/invite/YmSyQdeH3S) — ask questions, learn from each other, share your work or just hang out
+        - [Made with TiXL](https://www.youtube.com/playlist?list=PLj-rnPROvbn3LNU34daaRk5EiaXlwo2E0) — a playlist of work made by the community
+        """;
+
+    private readonly MarkdownView _welcomeMarkdown = new(new MarkdownView.Options());
+    private readonly MarkdownView _gettingStartedMarkdown = new(new MarkdownView.Options());
+
+    private bool _isInitialized;
+    private Tab _activeTab = Tab.Welcome;
+}

@@ -16,7 +16,7 @@ internal static partial class WindowManager
             if (window == SettingsWindow
                 || window == ProjectSettingsWindow
                 || window == GuidedFeatureTestsWindow
-                || window == WelcomeAlphaWindow
+                || window == WelcomeWindow
                 || window == HelpWindow)
                 continue;
 

@@ -22,15 +22,14 @@ TiXL remembers that it has already greeted you for a given version. To see the f
 Starting from a fresh settings folder (so this version hasn't been run here before), start TiXL. Dismiss the user-name dialog if it appears (only on a brand-new install).
 
 **Expected:**
-- A modal welcome popup appears.
-- For an alpha build the title references the alpha and a "development build" warning plus an "Open project planning board" button are shown.
-- For a stable build the title is a plain welcome with no alpha warning.
-- The Settings folder and Projects folder paths are shown, each with a "Copy" button.
+- A floating welcome window appears.
+- For an alpha build the title is "Welcome to the TiXL Alpha" and the sidebar shows Welcome, Import Settings, Import Projects, and Test new Features. The intro warns that this is a development build.
+- For a stable build the title is "Welcome to TiXL" and the sidebar shows Welcome, Getting Started, and Projects — no import or feature-test pages, no alpha warning.
 
-## Step: Import section appears only for a fresh folder
+## Step: Import section appears only for a fresh folder (alpha only)
 
 **Action:**
-Look at the popup for an "Import from previous version" section.
+On an alpha build, look at the popup for an "Import from previous version" section.
 
 **Expected:**
 - On a freshly created settings folder with a previous version present on disk, the section is shown with checkboxes: Projects, Settings, Layouts, Themes, Keymaps.
@@ -38,7 +37,7 @@ Look at the popup for an "Import from previous version" section.
 - The Projects row shows the approximate size of the previous project folder.
 - If this version has been run in this folder before, the import section is absent.
 
-## Step: Import settings only
+## Step: Import settings only (alpha only)
 
 **Action:**
 Tick only `Settings`, then click "Import selected".
@@ -48,7 +47,7 @@ Tick only `Settings`, then click "Import selected".
 - Your layouts and saved themes are not brought over — only the settings.
 - Your previous version is left untouched and still works as before.
 
-## Step: Import projects
+## Step: Import projects (alpha only)
 
 **Action:**
 On a fresh run, tick only `Projects`, click "Import selected", and wait for completion.
@@ -71,14 +70,33 @@ On the Welcome tab, scroll to the "Release Notes" section. Hover an operator ref
 - An unknown operator name renders as plain text with no tooltip or click.
 - If no release-notes file exists for the version, the section shows "No release notes for this version yet."
 
-## Step: Open Feature Tests from the welcome
+## Step: Open Feature Tests from the welcome (alpha only)
 
 **Action:**
-On the Test new Features tab, select a set and click "Start Test".
+On an alpha build, on the Test new Features tab, select a set and click "Start Test".
 
 **Expected:**
 - The manual feature tests window becomes visible and starts the selected set.
 - The welcome popup closes.
+
+## Step: Getting Started links (stable only)
+
+**Action:**
+On a stable build, open the Getting Started page and click one of the tutorial links.
+
+**Expected:**
+- The page lists learning links (videos, tutorials, introduction, FAQ) and community links.
+- Clicking a link opens it in the default browser; the window stays open.
+
+## Step: Open a project from the welcome (stable only)
+
+**Action:**
+On a stable build with at least one project, open the Projects page and click a project.
+
+**Expected:**
+- The Projects page lists your projects with name and folder, like the project hub.
+- Clicking a project loads it into the graph window and the welcome window closes.
+- Clicking "New Project..." closes the welcome window and opens the new-project dialog.
 
 ## Step: Marker is written, popup does not repeat
 
