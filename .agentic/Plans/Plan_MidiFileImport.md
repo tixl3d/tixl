@@ -80,10 +80,16 @@ Implemented 2026-07-04. Notes from implementation:
   leak NAudio types in their public API, so they move with the interfaces, no translation shims).
 - `Lib.csproj` and `Editor.csproj` add a project reference; `Core.csproj` drops NAudio.Midi and
   Rug.Osc.
-- Optional (mirrors the Video split fully): move the MIDI + OSC ops (`MidiInput`, `Midi*Output`,
-  `MidiClip`, `OscInput`/`OscOutput`, `SimulateIoData`, …) from Lib into a new `Operators/Io`
-  package referencing IoServices. Safe for user projects — symbols resolve by Guid regardless of
-  owning package (LoadVideo precedent).
+- Op move done (2026-07-04): new `Operators/Io` package (PackageId fcf9c228-c779-4a14-9395-35324763470e,
+  modeled on Video.csproj) holding the hardware-IO slice — `lib/io/{midi,osc,serial,dmx,data}` +
+  `Gamepad` (~33 ops). Ops keep their `Lib.io.*` namespaces and folder layout (Video precedent), so
+  user-visible paths and Guids are unchanged. Io references IoServices with `Private="false"`
+  (host-owned singletons) and declares `lib` + `Types` OperatorPackages deps (two compositions —
+  `LinkToMidiTime`, `VisualizeSpotLights` — use Lib children). Examples declares an `Io` dep.
+  Lib dropped Rug.Osc, Palink.ArtNet, System.IO.Ports, System.Management. The wider `io/` tree
+  (file/json/http/network/audio/video-devices) deliberately stayed in Lib — ~30 non-io Lib symbols
+  reference those ops (ReadFile, AudioReaction, MouseInput, FilesInFolder), which would create
+  bidirectional package coupling.
 - Follow-up done (2026-07-04): serial (`SerialConnectionManager` + System.IO.Ports +
   System.Management) and gamepad (`GamePadInput`, `XInputGamepad` + SharpDX.XInput) moved to
   IoServices as well. Consumers were Lib-only (serial ops, DmxOutput, Gamepad).

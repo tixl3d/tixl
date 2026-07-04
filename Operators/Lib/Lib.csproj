@@ -16,7 +16,10 @@
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Deterministic>true</Deterministic>
-    <NoWarn>$(NoWarn);NU1900</NoWarn>
+    <!-- NU1701 must be suppressed project-wide: it re-fires for net-framework packages arriving
+         transitively (OpenGL.Net via Mediapipe, Rug.Osc via IoServices), and per-package NoWarn
+         doesn't flow across project references. Same suppression as Video.csproj. -->
+    <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
     <PackageId>55612b33-e330-4730-a981-c2227b4cc904</PackageId>
     <IsArchived>false</IsArchived>
     <!-- Set the output path based on the version and release mode -->
@@ -113,14 +116,8 @@
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
-    <PackageReference Include="Palink.ArtNet" Version="1.0.0" />
-    <PackageReference Include="Rug.Osc" Version="1.2.5">
-      <NoWarn>NU1701</NoWarn>
-    </PackageReference>
     <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
     <PackageReference Include="Svg" Version="3.4.7" />
-    <PackageReference Include="System.IO.Ports" Version="10.0.5" />
-    <PackageReference Include="System.Management" Version="10.0.5" />
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively to other projects).
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
