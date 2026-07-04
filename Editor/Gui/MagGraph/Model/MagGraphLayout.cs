@@ -629,23 +629,23 @@ internal sealed class MagGraphLayout
                 var sourceOutput = sourceItem2.Instance.Outputs.FirstOrDefault(o => o.Id == c.SourceSlotId);
 
                 Debug.Assert(sourceOutput != null);
-                var outputIndex2 = 0;
-                var visibleOutputIndex = 0;
-                foreach (var outLine in sourceItem2.OutputLines)
-                {
-                    if (outLine.Output != sourceOutput)
-                        continue;
 
-                    outputIndex2 = outLine.OutputIndex;
-                    visibleOutputIndex = outLine.VisibleIndex;
-                    break;
+                // Find the position within OutputLines (not OutputLine.OutputIndex, which indexes
+                // instance.Outputs and diverges once hidden outputs are skipped)
+                int outputLineIndex2;
+                for (outputLineIndex2 = 0; outputLineIndex2 < sourceItem2.OutputLines.Length; outputLineIndex2++)
+                {
+                    if (sourceItem2.OutputLines[outputLineIndex2].Output == sourceOutput)
+                        break;
                 }
 
-                if (outputIndex2 >= sourceItem2.OutputLines.Length)
+                if (outputLineIndex2 >= sourceItem2.OutputLines.Length)
                 {
-                    //Log.Warning($"OutputIndex {outputIndex} exceeds number of output lines {sourceItem.OutputLines.Length} in {sourceItem}");
-                    outputIndex2 = sourceItem2.OutputLines.Length - 1;
+                    Log.Warning($"Can't find output line for connection to symbol output in {sourceItem2}");
+                    outputLineIndex2 = sourceItem2.OutputLines.Length - 1;
                 }
+
+                var visibleOutputIndex = sourceItem2.OutputLines[outputLineIndex2].VisibleIndex;
 
                 var connectionToSymbolOutput = new MagGraphConnection
                                                     {
@@ -655,13 +655,13 @@ internal sealed class MagGraphLayout
                                                         TargetItem = symbolOutputItem,
                                                         //TargetInput = targetInput,
                                                         InputLineIndex = 0,
-                                                        OutputLineIndex = outputIndex2,
+                                                        OutputLineIndex = outputLineIndex2,
                                                         ConnectionHash = c.GetHashCode(),
                                                         MultiInputIndex = 0,
                                                         VisibleOutputIndex = visibleOutputIndex,
                                                     };
 
-                sourceItem2.OutputLines[outputIndex2].ConnectionsOut.Add(connectionToSymbolOutput);
+                sourceItem2.OutputLines[outputLineIndex2].ConnectionsOut.Add(connectionToSymbolOutput);
                 symbolOutputItem.InputLines[0].ConnectionIn = connectionToSymbolOutput;
                 MagConnections.Add(connectionToSymbolOutput);
                 continue;
