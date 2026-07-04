@@ -225,7 +225,9 @@ internal sealed partial class MagItemMovement
             n.PosOnCanvas += requestedDeltaOnCanvas; // Move to request position
         }
 
-        if (DraggedItems.Count != _context.Selector.Selection.Count)
+        // Only drag selected annotations along when the drag started from the selection itself,
+        // not when dragging an unselected snapped group.
+        if (_draggedItemsFromSelection && DraggedItems.Count != _context.Selector.Selection.Count)
         {
             foreach (var a in _context.Selector.Selection)
             {
@@ -1409,6 +1411,7 @@ internal sealed partial class MagItemMovement
     internal void SetDraggedItemIds(List<Guid> selectedIds)
     {
         DraggedItems.Clear();
+        _draggedItemsFromSelection = false;
         foreach (var id in selectedIds)
         {
             if (_layout.Items.TryGetValue(id, out var i))
@@ -1421,6 +1424,7 @@ internal sealed partial class MagItemMovement
     internal void SetDraggedItems(List<ISelectableCanvasObject> selection)
     {
         DraggedItems.Clear();
+        _draggedItemsFromSelection = true;
         foreach (var s in selection)
         {
             if (_layout.Items.TryGetValue(s.Id, out var i))
@@ -1433,6 +1437,7 @@ internal sealed partial class MagItemMovement
     internal void SetDraggedItemIdsToSnappedForItem(MagGraphItem item)
     {
         DraggedItems.Clear();
+        _draggedItemsFromSelection = false;
         CollectSnappedItems(item, DraggedItems);
     }
 
@@ -1465,6 +1470,7 @@ internal sealed partial class MagItemMovement
     private readonly ShakeDetector _shakeDetector = new();
 
     internal readonly HashSet<MagGraphItem> DraggedItems = [];
+    private bool _draggedItemsFromSelection;
     private List<ISelectableCanvasObject> _draggedSelectables = [];
 
     /// <summary>
