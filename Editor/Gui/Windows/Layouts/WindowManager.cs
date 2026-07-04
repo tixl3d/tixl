@@ -67,6 +67,7 @@ internal static partial class WindowManager
     internal static readonly SnixlWindow SnixlWindow = new();
     internal static readonly GuidedFeatureTestsWindow GuidedFeatureTestsWindow = new();
     internal static readonly WelcomeAlphaWindow WelcomeAlphaWindow = new();
+    internal static readonly HelpWindow HelpWindow = new();
 
 
     private static void TryToInitialize()
@@ -88,7 +89,7 @@ internal static partial class WindowManager
                 new RenderWindow(),
                 new IoViewWindow(),
                 new PerformanceWindow(),
-                new HelpWindow(),
+                HelpWindow, // item shown in Help menu
                 Program.ConsoleLogWindow,
                 UtilitiesWindow,    // item shown in TiXL > Development menu
                 GuidedFeatureTestsWindow,

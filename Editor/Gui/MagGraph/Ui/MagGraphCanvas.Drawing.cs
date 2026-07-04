@@ -183,6 +183,21 @@ internal sealed partial class MagGraphView
             // Draw temp connections
             foreach (var tc in _context.TempConnections)
             {
+                // Placeholder snapped above its target: draw the vertical snap anchor triangle instead of a spline
+                if (tc.Style == MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedVertical
+                    && tc.SourceItem != null
+                    && tc.TargetItem != null)
+                {
+                    var anchorPosOnScreen = TransformPosition(new Vector2(tc.SourceItem.Area.Min.X + MagGraphItem.GridSize.X / 2,
+                                                                          tc.TargetItem.Area.Min.Y));
+                    var anchorColor = TypeUiRegistry.GetPropertiesForType(tc.Type).Color.Fade(0.6f);
+                    drawList.AddTriangleFilled(anchorPosOnScreen + new Vector2(-3, -2) * CanvasScale * 2,
+                                               anchorPosOnScreen + new Vector2(3, -2) * CanvasScale * 2,
+                                               anchorPosOnScreen + new Vector2(0, 2) * CanvasScale * 2,
+                                               anchorColor);
+                    continue;
+                }
+
                 var mousePos = ImGui.GetMousePos();
 
                 var sourcePosOnScreen = mousePos;

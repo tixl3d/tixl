@@ -491,6 +491,8 @@ internal static class AppMenuBar
                 WindowManager.WelcomeAlphaWindow.Open();
             }
 
+            WindowManager.HelpWindow.DrawMenuItemToggle();
+
             CustomComponents.SeparatorLine();
 
             if (BeginSubMenu("Documentation"))

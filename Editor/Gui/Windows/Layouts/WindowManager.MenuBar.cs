@@ -16,7 +16,8 @@ internal static partial class WindowManager
             if (window == SettingsWindow
                 || window == ProjectSettingsWindow
                 || window == GuidedFeatureTestsWindow
-                || window == WelcomeAlphaWindow)
+                || window == WelcomeAlphaWindow
+                || window == HelpWindow)
                 continue;
 
             window.DrawMenuItemToggle();

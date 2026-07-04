@@ -590,33 +590,40 @@ internal sealed class ParameterWindow : Window
             }
 
             CustomComponents.TooltipForLastItem(isDisabled ? "Disabled — click to enable" : "Disable this operator");
-
+            // Always drawn (disabled without an output window) so the icon row keeps its layout —
+            // skipping it would leave the preceding SameLine dangling and pull the parameter
+            // area up onto this line.
             ImGui.SameLine();
             var projectView = ProjectView.Focused;
-            if (projectView != null && RenderProcess.OutputWindow != null && projectView.CompositionInstance != null)
+            var canPin = projectView != null && RenderProcess.OutputWindow != null && projectView.CompositionInstance != null;
+            if (!canPin)
             {
-                var isPinned = RenderProcess.OutputWindow.Pinning.TryGetPinnedEvaluationInstance(projectView.Structure,
-                                   out var pinnedInstance) 
+                CustomComponents.IconButton(Icon.PlayOutput, Vector2.Zero, CustomComponents.ButtonStates.Disabled);
+                CustomComponents.TooltipForLastItem("Pin to output — needs an output window");
+            }
+            else
+            {
+                var isPinned = RenderProcess.OutputWindow!.Pinning.TryGetPinnedEvaluationInstance(projectView!.Structure,
+                                   out var pinnedInstance)
                                && pinnedInstance == op;
-                
+
                 if (CustomComponents.ToggleIconButton(ref isPinned, Icon.PlayOutput, Vector2.Zero))
                 {
                     if (LayoutHandling.FocusMode)
                     {
                         var selectedImage = projectView.NodeSelection.GetFirstSelectedInstance();
-                        if (selectedImage != null && ProjectView.Focused != null)
+                        if (selectedImage != null)
                         {
-                            ProjectView.Focused.SetBackgroundOutput(selectedImage);
+                            projectView.SetBackgroundOutput(selectedImage);
                         }
                     }
                     else
                     {
-                        if (ProjectView.Focused != null)
-                            NodeActions.PinSelectedToOutputWindow(ProjectView.Focused, 
-                                projectView.NodeSelection, 
-                                projectView.CompositionInstance, 
-                                true);
-                    }                    
+                        NodeActions.PinSelectedToOutputWindow(projectView,
+                            projectView.NodeSelection,
+                            projectView.CompositionInstance!,
+                            true);
+                    }
                 }
 
                 CustomComponents.TooltipForLastItem(isPinned
