@@ -623,6 +623,9 @@ internal sealed class SymbolLibrary : Window
     // The root node of the full symbol tree
     private readonly NamespaceTreeNode _treeNode = new(NamespaceTreeNode.RootNodeId);
 
+    // Corner rounding (unscaled px) for symbol item buttons and their badges
+    private const float ItemRounding = 3f;
+
     // The symbol filter for search and matching
     private readonly SymbolFilter _filter = new();
 
@@ -751,6 +754,16 @@ internal sealed class SymbolLibrary : Window
                 _scrollToSymbolId = null;
             }
 
+            // Skip layout and badge work for rows outside the visible scroll region — the tree
+            // can hold thousands of symbols. A dummy of the same height keeps scroll extents stable.
+            var rowHeight = ImGui.GetFrameHeight();
+            if (!ImGui.IsRectVisible(new Vector2(1, rowHeight)))
+            {
+                ImGui.Dummy(new Vector2(1, rowHeight));
+                ImGui.PopID();
+                return;
+            }
+
             // --- Highlight and Aim Icon for selected symbol ---
             var isSelected = false;
             var timeSinceSelection = 0f;
@@ -766,12 +779,14 @@ internal sealed class SymbolLibrary : Window
 
             ImGui.SameLine();
 
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, ItemRounding * T3Ui.UiScaleFactor);
             ImGui.PushStyleColor(ImGuiCol.Button, ColorVariations.OperatorBackground.Apply(color).Rgba);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColorVariations.OperatorBackgroundHover.Apply(color).Rgba);
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColorVariations.OperatorBackgroundHover.Apply(color).Rgba);
             ImGui.PushStyleColor(ImGuiCol.Text, ColorVariations.OperatorLabel.Apply(color).Rgba);
 
             bool buttonPressed = ImGui.Button(symbol.Name.AddSpacesForImGuiOutput());
+            ImGui.PopStyleVar();
             if (buttonPressed)
                 HelpWindow.ShowTopic(HelpTopic.ForOperator(symbol.Id));
 
@@ -786,7 +801,7 @@ internal sealed class SymbolLibrary : Window
                 var blinkFade = MathUtils.Lerp(-MathF.Cos(timeSinceSelection * 15f) * 0.8f + 0.2f, 1, fadeProgress);
 
                 var highlightColor = UiColors.StatusActivated.Fade(blinkFade);
-                ImGui.GetWindowDrawList().AddRect(buttonMin, buttonMax, highlightColor, 5);
+                ImGui.GetWindowDrawList().AddRect(buttonMin, buttonMax, highlightColor, ItemRounding * T3Ui.UiScaleFactor);
             }
 
             // Show tooltip with description if hovered
@@ -903,6 +918,7 @@ internal sealed class SymbolLibrary : Window
             if (ExampleSymbolLinking.TryGetExamples(symbol.Id, out var examples))
             {
                 ImGui.PushFont(Fonts.FontSmall);
+                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, ItemRounding * T3Ui.UiScaleFactor);
                 ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f * ImGui.GetStyle().Alpha);
                 for (var index = 0; index < examples.Count; index++)
                 {
@@ -912,7 +928,7 @@ internal sealed class SymbolLibrary : Window
                     HandleDragAndDropForSymbolItem(exampleSymbolUi.Symbol);
                 }
 
-                ImGui.PopStyleVar();
+                ImGui.PopStyleVar(2);
                 ImGui.PopFont();
             }
         }
