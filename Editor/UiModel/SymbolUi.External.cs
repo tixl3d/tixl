@@ -65,12 +65,6 @@ public sealed partial class SymbolUi
 
     internal void FlagAsModified()
     {
-        // TODO: Temporary probe - remove once the read-only save-as-copy popup issue is settled
-        if (ReadOnly && !_hasBeenModified)
-        {
-            Log.Debug($"Flagging read-only symbol '{Symbol.Name}' as modified:\n{Environment.StackTrace}");
-        }
-
         _hasBeenModified = true;
         BumpVersionCounter();
     }
