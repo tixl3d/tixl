@@ -356,7 +356,8 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
     private void HandleFenceSelection(GraphUiContext context, SelectionFence selectionFence)
     {
         var shouldBeActive =
-                ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup)
+                // ChildWindows: custom op-UIs (e.g. SampleCurve) use BeginChild; crossing them must not cancel an active fence drag.
+                ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup | ImGuiHoveredFlags.ChildWindows)
                 && (_context.StateMachine.CurrentState == GraphStates.Default
                     || _context.StateMachine.CurrentState == GraphStates.HoldBackground)
                 && _context.StateMachine.StateTime > 0.01f // Prevent glitches when coming from other states.
