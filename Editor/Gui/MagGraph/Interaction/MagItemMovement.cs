@@ -12,6 +12,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.Commands.Sections;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
@@ -62,11 +63,40 @@ internal sealed partial class MagItemMovement
         if (context.MacroCommand != null)
         {
             context.MoveElementsCommand?.StoreCurrentValues();
+            UpdateSectionMembershipAfterDrag(context);
             context.CompleteMacroCommand();
         }
 
         if (!InputPicking.TryInitializeInputSelectionPickerForDraggedItem(context))
             Reset();
+    }
+
+    /// <summary>
+    /// Dropped ops join the innermost section containing their center; dropping outside
+    /// all sections clears membership. Folded into the move macro so undo restores both.
+    /// </summary>
+    private void UpdateSectionMembershipAfterDrag(GraphUiContext context)
+    {
+        var symbolUi = context.CompositionInstance.GetSymbolUi();
+        var membershipChanged = false;
+
+        foreach (var item in DraggedItems)
+        {
+            if (item.Variant != MagGraphItem.Variants.Operator || item.ChildUi == null)
+                continue;
+
+            var center = item.PosOnCanvas + item.Size / 2;
+            var section = SectionTree.FindSectionAtPosition(symbolUi, center);
+            var newSectionId = section?.Id ?? Guid.Empty;
+            if (item.ChildUi.SectionId == newSectionId)
+                continue;
+
+            context.MacroCommand!.AddAndExecCommand(new AssignSectionMembershipCommand(symbolUi, item.ChildUi, newSectionId));
+            membershipChanged = true;
+        }
+
+        if (membershipChanged)
+            _layout.FlagStructureAsChanged();
     }
 
     /// <summary>

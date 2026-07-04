@@ -72,45 +72,17 @@ internal sealed partial class MagGraphView
             ImGui.SetCursorScreenPos(labelPos);
             bool isCollapsed = section.Collapsed;
             ImGui.PushID(section.Id.GetHashCode());
-            if (CustomComponents.ToggleTwoIconsButton(ref isCollapsed, 
+            if (CustomComponents.ToggleTwoIconsButton(ref isCollapsed,
                                                       Icon.ChevronDown,
                                                       Icon.ChevronRight,
                                                       CustomComponents.ButtonStates.Emphasized,
                                                       CustomComponents.ButtonStates.Emphasized,
-                                                      true, 
+                                                      true,
                                                       true))
             {
-                if (isCollapsed)
-                {
-                    // Flag children as collapsed...
-                    foreach (var item in context.Layout.Items.Values)
-                    {
-                        if (item.Variant != MagGraphItem.Variants.Operator || item.ChildUi == null)
-                            continue;
-
-                        
-                        if(area.Contains(item.Area))
-                            item.ChildUi.CollapsedIntoSectionFrameId = magSection.Id;
-                    }
-                }
-                else
-                {
-                    // Reveal all children...
-                    foreach (var item in context.Layout.Items.Values)
-                    {
-                        if (item.Variant != MagGraphItem.Variants.Operator || item.ChildUi == null)
-                            continue;
-
-                        if (item.ChildUi.CollapsedIntoSectionFrameId == magSection.Id)
-                        {
-                            item.ChildUi.CollapsedIntoSectionFrameId = Guid.Empty;
-                        }
-                            
-                    }
-
-                }
-                context.Layout.FlagStructureAsChanged();
+                // Member visibility is derived from explicit membership on the layout refresh
                 section.Collapsed = !section.Collapsed;
+                context.Layout.FlagStructureAsChanged();
             }
             ImGui.PopID();
         }

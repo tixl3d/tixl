@@ -206,25 +206,7 @@ internal sealed class SectionElement
     private static List<ISelectableCanvasObject> FindOpsInSection(SymbolUi parentUi, Section section)
     {
         var matches = new List<ISelectableCanvasObject>();
-        var aRect = new ImRect(section.PosOnCanvas, section.PosOnCanvas + section.Size);
-
-        foreach (var n in parentUi.ChildUis.Values)
-        {
-            var nRect = new ImRect(n.PosOnCanvas, n.PosOnCanvas + n.Size);
-            if (aRect.Contains(nRect))
-                matches.Add(n);
-        }
-
-        foreach (var a in parentUi.Sections.Values)
-        {
-            if (a == section)
-                continue;
-
-            var nRect = new ImRect(a.PosOnCanvas, a.PosOnCanvas + a.Size);
-            if (aRect.Contains(nRect))
-                matches.Add(a);
-        }
-
+        SectionTree.CollectSectionContents(parentUi, section, matches);
         return matches;
     }
 

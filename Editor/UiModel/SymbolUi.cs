@@ -131,6 +131,20 @@ public sealed partial class SymbolUi : ISelectionContainer
             _childUis.Remove(id);
         }
 
+        // Clear membership references to sections that no longer exist (e.g. hand-edited files,
+        // paste from a composition whose sections weren't copied along)
+        foreach (var childUi in _childUis.Values)
+        {
+            if (childUi.SectionId != Guid.Empty && !Sections.ContainsKey(childUi.SectionId))
+                childUi.SectionId = Guid.Empty;
+        }
+
+        foreach (var section in Sections.Values)
+        {
+            if (section.ParentSectionId != Guid.Empty && !Sections.ContainsKey(section.ParentSectionId))
+                section.ParentSectionId = Guid.Empty;
+        }
+
         // check if input UIs are missing
         var existingInputs = InputUis.Values.ToList();
         InputUis.Clear();

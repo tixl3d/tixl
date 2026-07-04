@@ -63,7 +63,7 @@ public sealed class CopySymbolChildrenCommand : ICommand
 
                 foreach (var childUi in sourceCompositionUi.ChildUis.Values)
                 {
-                    if (childUi.CollapsedIntoSectionFrameId == a.Id && !symbolChildrenToCopy.Contains(childUi))
+                    if (childUi.SectionId == a.Id && !symbolChildrenToCopy.Contains(childUi))
                     {
                         symbolChildrenToCopy.Add(childUi);
                     }
@@ -116,6 +116,17 @@ public sealed class CopySymbolChildrenCommand : ICommand
             newSection.PosOnCanvas += PositionOffset;
             _sectionsToCopy.Add(newSection);
             OldToSectionIds[orgSection.Id] = newSection.Id;
+        }
+
+        // Remap nesting between copied sections. Parents that weren't copied keep their id -
+        // valid when duplicating within the same composition, cleared by the consistency
+        // check when pasting into a composition where that section doesn't exist.
+        foreach (var newSection in _sectionsToCopy)
+        {
+            if (OldToSectionIds.TryGetValue(newSection.ParentSectionId, out var newParentId))
+            {
+                newSection.ParentSectionId = newParentId;
+            }
         }
     }
 
@@ -250,12 +261,12 @@ public sealed class CopySymbolChildrenCommand : ICommand
                 bypassedChildIds.Add(newSymbolChild.Id);
             }
 
-            // Update section id
-            if (newChildUi.CollapsedIntoSectionFrameId != Guid.Empty)
+            // Remap membership to the copied section
+            if (newChildUi.SectionId != Guid.Empty)
             {
-                if (OldToSectionIds.TryGetValue(newChildUi.CollapsedIntoSectionFrameId, out var newSectionId))
+                if (OldToSectionIds.TryGetValue(newChildUi.SectionId, out var newSectionId))
                 {
-                    newChildUi.CollapsedIntoSectionFrameId = newSectionId;
+                    newChildUi.SectionId = newSectionId;
                 }
             }
         }

@@ -11,7 +11,14 @@ namespace T3.Core.Model;
 public static class SymbolFormatVersion
 {
     /// <summary>Current format version written by this editor.</summary>
-    public const int Current = 2;
+    public const int Current = 3;
+
+    /// <summary>
+    /// Since this version, section (formerly annotation) membership is explicit: ops carry a
+    /// SectionId and sections a ParentSectionId. Older files derive membership from geometry
+    /// once on load.
+    /// </summary>
+    public const int SectionMembership = 3;
 
     /// <summary>The TiXL editor version string, written alongside the format version.</summary>
     public static string TixlVersion => RuntimeAssemblies.Version.ToString();
@@ -23,6 +30,7 @@ public static class SymbolFormatVersion
     [
         new(1, "4.2.0.1", "Added per-symbol ProjectSettings with PlaybackConfig; RenderExport in .t3ui Settings section"),
         new(2, "4.2.0.2","Keyframe interpolation format"),
+        new(3, "4.2.0.2","Sections (renamed from annotations) with explicit membership"),
     ];
 
     public sealed record FormatChange(int FormatVersion, string EditorVersion, string Description);

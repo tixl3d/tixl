@@ -94,8 +94,8 @@ internal static class SymbolUiJson
 
             writer.WriteComment(symbolChild.ReadableName);
 
-            if (childUi.CollapsedIntoSectionFrameId != Guid.Empty)
-                writer.WriteObject(JsonKeys.SectionId, childUi.CollapsedIntoSectionFrameId);
+            if (childUi.SectionId != Guid.Empty)
+                writer.WriteObject(JsonKeys.SectionId, childUi.SectionId);
 
             if (childUi.Style != SymbolUi.Child.Styles.Default)
             {
@@ -205,6 +205,9 @@ internal static class SymbolUiJson
 
             if (section.Collapsed)
                 writer.WriteObject(JsonKeys.Collapsed, section.Collapsed);
+
+            if (section.ParentSectionId != Guid.Empty)
+                writer.WriteObject(JsonKeys.ParentSectionId, section.ParentSectionId);
 
             writer.WritePropertyName(JsonKeys.Color);
             _vector4ToJson(writer, section.Color.Rgba);
@@ -389,9 +392,45 @@ internal static class SymbolUiJson
         if (tagsEntry?.Value<int>() != null)
             symbolUi.Tags = (SymbolUi.SymbolTags)tagsEntry.Value<int>();
 
+        if (formatVersion < SymbolFormatVersion.SectionMembership)
+            DeriveSectionMembershipFromGeometry(symbolUi);
+
         ReadSettings(mainObject, symbolUi);
 
         return true;
+    }
+
+    /// <summary>
+    /// Files from before explicit section membership derive it once from geometry —
+    /// the same innermost-containment rule the graph applied at runtime back then.
+    /// The result is only persisted when the user saves the symbol.
+    /// </summary>
+    private static void DeriveSectionMembershipFromGeometry(SymbolUi symbolUi)
+    {
+        if (symbolUi.Sections.Count == 0)
+            return;
+
+        foreach (var childUi in symbolUi.ChildUis.Values)
+        {
+            // Ops collapsed into a frame already got their membership from the legacy AnnotationId field
+            if (childUi.SectionId != Guid.Empty)
+                continue;
+
+            var childRect = new Gui.UiHelpers.ImRect(childUi.PosOnCanvas, childUi.PosOnCanvas + childUi.Size);
+            var section = SectionTree.FindSectionContainingRect(symbolUi, childRect, Guid.Empty);
+            if (section != null)
+                childUi.SectionId = section.Id;
+        }
+
+        foreach (var section in symbolUi.Sections.Values)
+        {
+            var sectionRect = new Gui.UiHelpers.ImRect(section.PosOnCanvas, section.PosOnCanvas + section.Size);
+            var parent = SectionTree.FindSectionContainingRect(symbolUi, sectionRect, section.Id);
+
+            // Strictly-larger check prevents identically-sized sections from parenting each other
+            if (parent != null && parent.Size.X * parent.Size.Y > section.Size.X * section.Size.Y)
+                section.ParentSectionId = parent.Id;
+        }
     }
 
     private static bool TryGetJArray(string key, JToken token, Symbol symbol, [NotNullWhen(true)] out JArray? array)
@@ -493,10 +532,11 @@ internal static class SymbolUiJson
                                 ? childStyle
                                 : SymbolUi.Child.Styles.Default;
 
+            // The legacy AnnotationId marked ops collapsed into a frame - those ops are members of it
             var sectionIdToken = childEntry[JsonKeys.SectionId] ?? childEntry[JsonKeys.LegacyAnnotationId];
             if (JsonUtils.TryGetGuid(sectionIdToken, out var sectionId))
             {
-                childUi.CollapsedIntoSectionFrameId = sectionId;
+                childUi.SectionId = sectionId;
             }
 
             var conStyleEntry = childEntry[JsonKeys.ConnectionStyleOverrides];
@@ -551,6 +591,11 @@ internal static class SymbolUiJson
             if (colorEntry != null)
             {
                 section.Color = new Color((Vector4)_jsonToVector4(colorEntry));
+            }
+
+            if (JsonUtils.TryGetGuid(sectionEntry[JsonKeys.ParentSectionId], out var parentSectionId))
+            {
+                section.ParentSectionId = parentSectionId;
             }
 
             section.Size = GetVec2OrDefault(sectionEntry[JsonKeys.Size]);
@@ -672,6 +717,7 @@ internal static class SymbolUiJson
 
         // Section fields
         public const string SectionId = nameof(SectionId);
+        public const string ParentSectionId = nameof(ParentSectionId);
 
         // Back-compat: files saved before the annotation->section rename
         public const string LegacyAnnotations = "Annotations";

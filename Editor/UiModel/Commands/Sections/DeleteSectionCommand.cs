@@ -11,6 +11,41 @@ public sealed class DeleteSectionCommand : ICommand
         _originalSection = section;
     }
 
+    public void Do()
+    {
+        if (!SymbolUiRegistry.TryGetSymbolUi(_symbolId, out var symbolUi))
+        {
+            Log.Warning($"Can't delete section - symbol {_symbolId} is no longer available.");
+            return;
+        }
+
+        // Members and nested sections inherit the deleted section's parent
+        _reassignedChildIds.Clear();
+        _reparentedSectionIds.Clear();
+        var parentId = _originalSection.ParentSectionId;
+
+        foreach (var childUi in symbolUi.ChildUis.Values)
+        {
+            if (childUi.SectionId != _originalSection.Id)
+                continue;
+
+            _reassignedChildIds.Add(childUi.Id);
+            childUi.SectionId = parentId;
+        }
+
+        foreach (var section in symbolUi.Sections.Values)
+        {
+            if (section.ParentSectionId != _originalSection.Id)
+                continue;
+
+            _reparentedSectionIds.Add(section.Id);
+            section.ParentSectionId = parentId;
+        }
+
+        symbolUi.Sections.Remove(_originalSection.Id);
+        symbolUi.FlagAsModified();
+    }
+
     public void Undo()
     {
         if (!SymbolUiRegistry.TryGetSymbolUi(_symbolId, out var symbolUi))
@@ -20,19 +55,24 @@ public sealed class DeleteSectionCommand : ICommand
         }
 
         symbolUi.Sections[_originalSection.Id] = _originalSection;
-    }
 
-    public void Do()
-    {
-        if (!SymbolUiRegistry.TryGetSymbolUi(_symbolId, out var symbolUi))
+        foreach (var childId in _reassignedChildIds)
         {
-            Log.Warning($"Can't delete section - symbol {_symbolId} is no longer available.");
-            return;
+            if (symbolUi.ChildUis.TryGetValue(childId, out var childUi))
+                childUi.SectionId = _originalSection.Id;
         }
 
-        symbolUi.Sections.Remove(_originalSection.Id);
+        foreach (var sectionId in _reparentedSectionIds)
+        {
+            if (symbolUi.Sections.TryGetValue(sectionId, out var section))
+                section.ParentSectionId = _originalSection.Id;
+        }
+
+        symbolUi.FlagAsModified();
     }
 
     private readonly Guid _symbolId;
     private readonly Section _originalSection;
+    private readonly List<Guid> _reassignedChildIds = [];
+    private readonly List<Guid> _reparentedSectionIds = [];
 }

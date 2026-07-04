@@ -83,9 +83,10 @@ internal static partial class TourDataMarkdownExport
         }
 
         // find identical children and order them by height / pos x
+        SectionTree.UpdateCollapsedVisibility(symbolUi);
         var childSymbolId = child.SymbolChild.Symbol.Id;
         var index = symbolUi.ChildUis.Values
-                            .Where(c => c.SymbolChild.Symbol.Id == childSymbolId && c.CollapsedIntoSectionFrameId == Guid.Empty)
+                            .Where(c => c.SymbolChild.Symbol.Id == childSymbolId && !c.IsHiddenInCollapsedSection)
                             .OrderBy(c => c.PosOnCanvas.Y + c.PosOnCanvas.X * 0.1f)
                             .Select((item, idx) => new { Item = item, Index = idx })
                             .FirstOrDefault(pair => pair.Item.Id == child.Id)?.Index ?? -1;
@@ -214,7 +215,7 @@ internal static partial class TourDataMarkdownExport
                     }
 
                     var targetChildUi = selectedChildUis
-                                       .Where(c => c.CollapsedIntoSectionFrameId == Guid.Empty)
+                                       .Where(c => !c.IsHiddenInCollapsedSection)
                                        .OrderByDescending(c => c.PosOnCanvas.Y + c.PosOnCanvas.X * 0.1f)
                                        .FirstOrDefault(c => string.Equals(tour.IdString, c.SymbolChild.Symbol.Id.ShortenGuid(),
                                                                           StringComparison.InvariantCulture));
@@ -413,10 +414,11 @@ internal static partial class TourDataMarkdownExport
 
         if (!string.IsNullOrEmpty(symbolName))
         {
+            SectionTree.UpdateCollapsedVisibility(symbolUi);
             var matchIndex = 0;
             foreach (SymbolUi.Child childUi in symbolUi.ChildUis.Values)
             {
-                if (childUi.CollapsedIntoSectionFrameId != Guid.Empty)
+                if (childUi.IsHiddenInCollapsedSection)
                     continue;
 
                 var childSymbolName = childUi.SymbolChild.Symbol.Name;

@@ -261,7 +261,7 @@ internal sealed class NodeSelection : ISelection
             if (element == null)
                 continue;
 
-            if (element is SymbolUi.Child item && item.CollapsedIntoSectionFrameId != Guid.Empty)
+            if (element is SymbolUi.Child item && item.IsHiddenInCollapsedSection)
                 continue;
 
             if (element is Section section && section.Collapsed)

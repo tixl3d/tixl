@@ -37,8 +37,23 @@ public partial class SymbolUi
         public Guid Id { get; }
         public Vector2 PosOnCanvas { get; set; } = Vector2.Zero;
         public Vector2 Size { get; set; } = DefaultOpSize;
-        public Guid CollapsedIntoSectionFrameId { get; set; }
-        
+
+        /// <summary>
+        /// The section this op belongs to; Guid.Empty when unsectioned. Explicit serialized
+        /// membership — changed only through discrete, undoable user actions, never derived
+        /// per frame from geometry.
+        /// </summary>
+        public Guid SectionId { get; set; }
+
+        /// <summary>
+        /// Runtime lookup: the outermost collapsed section this op is hidden in, or Guid.Empty
+        /// when visible. Recomputed by <see cref="SectionTree.UpdateCollapsedVisibility"/> on
+        /// structural changes; not serialized.
+        /// </summary>
+        internal Guid HiddenInCollapsedSectionId { get; set; }
+
+        public bool IsHiddenInCollapsedSection => HiddenInCollapsedSectionId != Guid.Empty;
+
 
         /// <summary>
         /// We use this index as a hack to distinuish the following states:
@@ -103,7 +118,7 @@ public partial class SymbolUi
             {
                 PosOnCanvas = original.PosOnCanvas,
                 Size = original.Size,
-                CollapsedIntoSectionFrameId = original.CollapsedIntoSectionFrameId, // Careful! When duplicating the parent symbol or section, this needs to updated.
+                SectionId = original.SectionId, // Careful! When duplicating the parent symbol or section, this needs to be updated.
                 Style = original.Style,
                 Comment = original.Comment,
                 SnapshotGroupIndex = original.SnapshotGroupIndex,
@@ -130,7 +145,7 @@ public partial class SymbolUi
                            Size = Size,
                            Style = Style,
                            Comment = Comment,
-                           CollapsedIntoSectionFrameId = CollapsedIntoSectionFrameId,
+                           SectionId = SectionId,
                            SnapshotGroupIndex = SnapshotGroupIndex,
                            SnapshotEnabledInputIds = SnapshotEnabledInputIds == null ? null : [..SnapshotEnabledInputIds],
                        };
