@@ -402,6 +402,16 @@ internal sealed partial class ProjectView
             RestoreWindowLayoutFromProject();
     }
 
+    /// <summary>
+    /// Captures the current window layout and visibility into the focused project's root symbol,
+    /// so a subsequent save persists the up-to-date state instead of the snapshot from the last
+    /// project close. Uses ImGui and must be called on the UI thread.
+    /// </summary>
+    internal static void SnapshotWindowLayoutForFocusedProject()
+    {
+        Focused?.SaveWindowLayoutToProject();
+    }
+
     private void SaveWindowLayoutToProject()
     {
         if (!UserSettings.Config.SaveWindowLayoutsWithProjects)
@@ -411,18 +421,42 @@ internal sealed partial class ProjectView
         if (symbolUi == null)
             return;
 
-        symbolUi.WindowLayout = ImGui.SaveIniSettingsToMemory();
-        symbolUi.WindowLayoutImGuiVersion = ImGui.GetVersion();
+        var imGuiSettings = ImGui.SaveIniSettingsToMemory();
+        var imGuiVersion = ImGui.GetVersion();
 
-        // Save window visibility
-        symbolUi.WindowVisibility = new Dictionary<string, bool>();
+        var windowVisibility = new Dictionary<string, bool>();
         foreach (var window in WindowManager.GetAllWindows())
         {
             if (!string.IsNullOrEmpty(window.Config.Title))
-                symbolUi.WindowVisibility[window.Config.Title] = window.Config.Visible;
+                windowVisibility[window.Config.Title] = window.Config.Visible;
         }
 
+        var unchanged = symbolUi.WindowLayout == imGuiSettings
+                        && symbolUi.WindowLayoutImGuiVersion == imGuiVersion
+                        && IsVisibilityUnchanged(symbolUi.WindowVisibility, windowVisibility);
+        if (unchanged)
+            return;
+
+        symbolUi.WindowLayout = imGuiSettings;
+        symbolUi.WindowLayoutImGuiVersion = imGuiVersion;
+        symbolUi.WindowVisibility = windowVisibility;
         symbolUi.FlagAsModified();
+    }
+
+    private static bool IsVisibilityUnchanged(Dictionary<string, bool>? saved, Dictionary<string, bool> current)
+    {
+        if (saved == null || saved.Count != current.Count)
+            return false;
+
+        foreach (var (title, visible) in current)
+        {
+            if (!saved.TryGetValue(title, out var savedVisible) || savedVisible != visible)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void RestoreWindowLayoutFromProject()

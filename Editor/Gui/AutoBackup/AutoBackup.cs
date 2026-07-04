@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using T3.Core.Settings;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.AutoBackup;
 
@@ -32,6 +33,10 @@ internal static class AutoBackup
             return;
 
         _isSaving = true;
+
+        // Refresh the layout snapshot here on the UI thread — the backup task
+        // saves modified symbols and must not call into ImGui.
+        ProjectView.SnapshotWindowLayoutForFocusedProject();
         Task.Run(CreateBackupCallback);
         _stopwatch.Restart();
     }

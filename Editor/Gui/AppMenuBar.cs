@@ -300,7 +300,7 @@ internal static class AppMenuBar
 
             if (MenuItem("Save All", isEnabled: !T3Ui.IsCurrentlySaving))
             {
-                Task.Run(() => { T3Ui.Save(true); });
+                T3Ui.SaveInBackground(saveAll: true);
             }
 
             if (MenuItem("Set Project Thumbnail", isEnabled: RenderProcess.MainOutputTexture != null))

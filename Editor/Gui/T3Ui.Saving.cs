@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui;
 
@@ -8,6 +9,9 @@ public static partial class T3Ui
 {
     internal static void SaveInBackground(bool saveAll)
     {
+        // Refresh the layout snapshot here on the UI thread — Save() may run on a
+        // background task and must not call into ImGui.
+        ProjectView.SnapshotWindowLayoutForFocusedProject();
         Task.Run(() => Save(saveAll));
     }
 
