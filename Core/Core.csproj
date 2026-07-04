@@ -40,10 +40,7 @@
         <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
         <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
         <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
-        <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
-        <PackageReference Include="System.IO.Ports" Version="10.0.5" />
-        <PackageReference Include="System.Management" Version="10.0.5" />
         <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
     </ItemGroup>
 

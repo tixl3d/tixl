@@ -1,4 +1,6 @@
-namespace T3.Core.IO;
+using System.Numerics;
+
+namespace T3.IoServices;
 
 public struct DirectionalPadState
 {

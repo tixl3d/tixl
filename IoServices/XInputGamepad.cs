@@ -1,7 +1,8 @@
+using System.Numerics;
 using SharpDX.XInput;
 
 
-namespace T3.Core.IO;
+namespace T3.IoServices;
 
 public sealed class XInputGamepad
 {
