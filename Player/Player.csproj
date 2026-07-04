@@ -46,6 +46,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Core\Core.csproj" />
+        <ProjectReference Include="..\IoServices\IoServices.csproj" />
         <ProjectReference Include="..\MsForms\MsForms.csproj" />
         <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
     </ItemGroup>

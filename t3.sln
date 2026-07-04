@@ -74,6 +74,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoServices", "VideoServi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoServices.Tests", "VideoServices.Tests\VideoServices.Tests.csproj", "{E746BB80-1FC8-4588-8DD0-F409A2F457FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoServices", "IoServices\IoServices.csproj", "{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -360,6 +362,18 @@ Global
 		{E746BB80-1FC8-4588-8DD0-F409A2F457FB}.Release|x64.Build.0 = Release|Any CPU
 		{E746BB80-1FC8-4588-8DD0-F409A2F457FB}.Release|x86.ActiveCfg = Release|Any CPU
 		{E746BB80-1FC8-4588-8DD0-F409A2F457FB}.Release|x86.Build.0 = Release|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Debug|x64.Build.0 = Debug|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Debug|x86.Build.0 = Debug|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Release|x64.ActiveCfg = Release|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Release|x64.Build.0 = Release|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Release|x86.ActiveCfg = Release|Any CPU
+		{6B9FA11C-1E6F-4511-BBE5-7FA6D595BEAD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

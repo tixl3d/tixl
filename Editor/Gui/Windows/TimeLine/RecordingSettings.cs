@@ -6,7 +6,7 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
 /// Per-composition recording configuration. Drives which sources the timeline Record
-/// button hooks into when the user clicks it. Editor-only — <see cref="T3.Core.IO.IoDataSetRecorder"/>
+/// button hooks into when the user clicks it. Editor-only — <see cref="T3.IoServices.IoDataSetRecorder"/>
 /// takes plain booleans, so there's no Core consumer for these flags. Lives on
 /// <see cref="T3.Editor.UiModel.SymbolUi.RecordingSettings"/> alongside
 /// <see cref="T3.Editor.Gui.Windows.RenderExport.RenderSettings"/> for the same reason

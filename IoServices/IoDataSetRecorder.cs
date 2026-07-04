@@ -4,15 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using NAudio.Midi;
-using Operators.Utils;
-using Operators.Utils.Recording;
 using Rug.Osc;
 using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
+using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
 
-namespace T3.Core.IO;
+namespace T3.IoServices;
 
 /// <summary>
 /// Session-scoped MIDI / OSC recorder. A single static façade starts a session, captures

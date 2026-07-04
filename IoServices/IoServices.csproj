@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)/Tixl.props" />
+  <PropertyGroup>
+    <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Files moved from Core were written under per-file nullable contexts; the newer ones opt in
+         with "#nullable enable" individually. -->
+    <Nullable>disable</Nullable>
+    <RootNamespace>T3.IoServices</RootNamespace>
+    <Configurations>Debug;Release</Configurations>
+    <Platforms>AnyCPU</Platforms>
+    <Deterministic>true</Deterministic>
+    <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio.Midi" Version="2.3.0" />
+    <PackageReference Include="Rug.Osc" Version="1.2.5">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Logging\Logging.csproj" />
+  </ItemGroup>
+
+</Project>

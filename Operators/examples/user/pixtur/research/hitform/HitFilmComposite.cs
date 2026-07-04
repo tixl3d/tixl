@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace Operators.Utils;
+namespace Examples.user.pixtur.research.hitform;
 
 public static class HitFilmComposite
 {

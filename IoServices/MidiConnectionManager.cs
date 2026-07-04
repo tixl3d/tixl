@@ -4,7 +4,7 @@ using NAudio.Midi;
 using T3.Core.IO;
 using T3.Core.Logging;
 
-namespace Operators.Utils;
+namespace T3.IoServices;
 
 public static class MidiConnectionManager
 {

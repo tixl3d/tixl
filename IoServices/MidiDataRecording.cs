@@ -5,7 +5,7 @@ using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.Model;
 
-namespace Operators.Utils.Recording;
+namespace T3.IoServices;
 
 /// <summary>
 /// This is a stub for an implementation of midi signal recording

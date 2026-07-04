@@ -3,7 +3,7 @@
 using System;
 using NAudio.Midi;
 
-namespace T3.Core.IO;
+namespace T3.IoServices;
 
 /// <summary>
 /// Parallel dispatch path for replaying recorded IO events through graph-side input

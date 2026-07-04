@@ -97,6 +97,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Mediapipe\Mediapipe.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="..\..\IoServices\IoServices.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Serialization\Serialization.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\SystemUi\SystemUi.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />

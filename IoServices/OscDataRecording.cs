@@ -8,7 +8,7 @@ using T3.Core.IO;
 using T3.Core.Settings;
 using T3.Core.Logging;
 
-namespace Operators.Utils.Recording;
+namespace T3.IoServices;
 
 /// <summary>
 /// A stub for OSC message recording.
