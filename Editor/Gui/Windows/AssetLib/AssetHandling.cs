@@ -102,6 +102,21 @@ internal static class AssetHandling
                                        IconId = (uint)Icon.FileDocument,
                                        Subfolders = ["dataclips", "data"],
                                    });
+        // MIDI files convert to DataClips with the recording channel conventions (see
+        // IoServices/MidiFileToDataSet.cs), so they replay through SimulateIoData like
+        // recorded .data clips.
+        AssetType.RegisterType(new AssetType("Midi", [
+                                       FileExtensionRegistry.GetUniqueId("mid"),
+                                       FileExtensionRegistry.GetUniqueId("midi"),
+                                   ])
+                                   {
+                                       PrimaryOperators =
+                                               [new Guid("b4766419-8bca-4fa0-a398-e6af90ef8971")], // LoadMidiFile
+                                       TimelineClipOperator = new Guid("b4766419-8bca-4fa0-a398-e6af90ef8971"), // LoadMidiFile
+                                       Color = UiColors.ColorForCommands,
+                                       IconId = (uint)Icon.FileAudio,
+                                       Subfolders = ["midi", "music"],
+                                   });
         AssetType.RegisterType(new AssetType("Shader", [
                                        FileExtensionRegistry.GetUniqueId("hlsl")
                                    ])

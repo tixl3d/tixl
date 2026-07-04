@@ -10,6 +10,7 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Styling;
+using T3.IoServices;
 
 namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 
@@ -477,11 +478,9 @@ internal static class DataClipBodyRenderer
         var path = descriptive.SourcePathSlot.TypedInputValue.Value;
         if (string.IsNullOrEmpty(path))
             return false;
-        if (!path.EndsWith(".data", StringComparison.OrdinalIgnoreCase))
-            return false;
         if (!AssetRegistry.TryResolveAddress(path, instance, out var absolutePath, out _))
             return false;
-        if (!DataSetCache.TryGet(absolutePath, out dataSet, out _))
+        if (!DataClipFiles.TryGetDataSetForFile(path, absolutePath, out dataSet, out _))
             return false;
 
         return TryBuildMapping(timeClip, out mapping);

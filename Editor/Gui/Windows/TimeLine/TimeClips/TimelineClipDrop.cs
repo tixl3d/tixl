@@ -3,6 +3,7 @@
 using System;
 using System.Numerics;
 using ImGuiNET;
+using Newtonsoft.Json.Linq;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Logging;
@@ -17,6 +18,7 @@ using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.IoServices;
 
 namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 
@@ -105,9 +107,19 @@ internal static class TimelineClipDrop
         // the preview uses the same placeholder length the drop would.
         double durationSecs = 0;
         if (asset.AssetType.Name == "Video")
+        {
             VideoClipDurationCache.TryGetDurationSecs(address, compositionOp, out durationSecs);
+        }
         else if (asset.AssetType.Name == "Audio")
+        {
             AudioClipDurationCache.TryGetDurationSecs(address, compositionOp, out durationSecs);
+        }
+        else if (asset.AssetType.Name == "Midi")
+        {
+            // Synchronous is fine here: the converter caches by (path, last-write), so only the
+            // first preview frame pays the parse.
+            durationSecs = TryProbeMidiDurationSecs(asset.FullPath);
+        }
 
         var durationBars = durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
 
@@ -194,12 +206,19 @@ internal static class TimelineClipDrop
     }
 
     /// <summary>
-    /// Initial clip length in bars. Audio and video are probed for their real duration so the clip matches the
-    /// file; types with no probe (e.g. data) default to a placeholder.
+    /// Initial clip length in bars. Audio, video and MIDI are probed for their real duration so the clip
+    /// matches the file; types with no probe (e.g. data) default to a placeholder.
     /// </summary>
     private static float ProbeDurationBars(string absolutePath, Playback playback)
     {
-        var durationSecs = AudioMixerManager.TryProbeAudioDurationSecs(absolutePath);
+        // MIDI goes first: the audio probe logs a FileFormat warning for non-audio files.
+        var durationSecs = TryProbeMidiDurationSecs(absolutePath);
+
+        if (durationSecs <= 0)
+        {
+            durationSecs = AudioMixerManager.TryProbeAudioDurationSecs(absolutePath);
+        }
+
         if (durationSecs <= 0 && VideoExport.Factory is { } factory
             && factory.TryProbeDurationSeconds(absolutePath, out var videoSecs))
         {
@@ -207,6 +226,25 @@ internal static class TimelineClipDrop
         }
 
         return durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
+    }
+
+    /// <summary>
+    /// Duration of a .mid/.midi file in seconds, or 0 for non-MIDI paths. The converter caches by
+    /// (path, last-write), so the parse cost is paid once and shared with the LoadMidiFile op the
+    /// drop creates.
+    /// </summary>
+    private static double TryProbeMidiDurationSecs(string absolutePath)
+    {
+        var extension = System.IO.Path.GetExtension(absolutePath);
+        var isMidi = string.Equals(extension, ".mid", StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(extension, ".midi", StringComparison.OrdinalIgnoreCase);
+        if (!isMidi)
+            return 0;
+
+        if (!MidiFileToDataSet.TryGet(absolutePath, out var dataSet, out _))
+            return 0;
+
+        return dataSet.Metadata?[MidiFileToDataSet.SourceDurationSecsKey]?.Value<double>() ?? 0;
     }
 
     private static void FinishMacro(Instance compositionOp, MacroCommand macro)

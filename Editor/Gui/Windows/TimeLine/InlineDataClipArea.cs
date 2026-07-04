@@ -11,6 +11,7 @@ using T3.Core.Resource.Assets;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.IoServices;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
@@ -145,13 +146,13 @@ internal sealed class InlineDataClipArea
             return null;
 
         var path = descriptive.SourcePathSlot.TypedInputValue.Value;
-        if (string.IsNullOrEmpty(path) || !path.EndsWith(".data", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(path))
             return null;
 
         if (!AssetRegistry.TryResolveAddress(path, instance, out var absolutePath, out _))
             return null;
 
-        return DataSetCache.TryGet(absolutePath, out var dataSet, out _) ? dataSet : null;
+        return DataClipFiles.TryGetDataSetForFile(path, absolutePath, out var dataSet, out _) ? dataSet : null;
     }
 
     private static void DrawEmptyState(float height, string message)

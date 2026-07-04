@@ -3,8 +3,9 @@
 Ticket: #1082 — https://github.com/tixl3d/tixl/issues/1082
 Size: M   Milestone: —
 
-**Status: Phase 0 implemented (2026-07-04), Phases 1–3 pending.** Supersedes the earlier
+**Status: Phases 0–2 implemented (2026-07-04), Phase 3 (sampler ops) pending.** Supersedes the earlier
 `Plan_LoadMidiFilesAsDataClips.md` (archived); its open questions are settled by the decisions below.
+Manual test set: [midi-file-import.md](../../.tests-manual/midi-file-import.md).
 
 ## Problem
 There is no way to bring a standard MIDI file (`.mid` / `.midi`) into TiXL. Live MIDI can be recorded
@@ -90,7 +91,11 @@ Implemented 2026-07-04. Notes from implementation:
   code — mechanical, but verify Player still builds (it consumes SimulatedIoBus transitively via
   Lib's SimulateIoData).
 
-### Phase 1 — LoadMidiFile operator + asset type
+### Phase 1 — LoadMidiFile operator + asset type — DONE
+Implemented 2026-07-04: `IoServices/MidiFileToDataSet.cs` (converter + (path, last-write) cache,
+writes `SourceDurationSecs` metadata), `Operators/Lib/io/midi/LoadMidiFile.cs` (+ .t3/.t3ui,
+Guid b4766419-8bca-4fa0-a398-e6af90ef8971), "Midi" asset type in `AssetHandling.InitAssetTypes()`.
+Phase 2 (duration probe incl. drag preview) landed in the same pass in `TimelineClipDrop.cs`.
 - New op `Operators/Lib/io/midi/LoadMidiFile.cs`, mirroring `LoadDataClip`:
   `TimeClipSlot<DataClip?>` output, `Resource<DataSet>` load with file-watch invalidation,
   `IStatusProvider`, `IDescriptiveFilename` (filter `*.mid;*.midi`).

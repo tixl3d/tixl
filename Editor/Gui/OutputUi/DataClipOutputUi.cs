@@ -3,6 +3,7 @@ using T3.Core.DataTypes.DataSet;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
+using T3.IoServices;
 
 namespace T3.Editor.Gui.OutputUi;
 
@@ -58,13 +59,13 @@ internal sealed class DataClipOutputUi : OutputUi<DataClip>
             return null;
 
         var path = descriptive.SourcePathSlot.TypedInputValue.Value;
-        if (string.IsNullOrEmpty(path) || !path.EndsWith(".data", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(path))
             return null;
 
         if (!AssetRegistry.TryResolveAddress(path, instance, out var absolutePath, out _))
             return null;
 
-        if (!DataSetCache.TryGet(absolutePath, out var dataSet, out _))
+        if (!DataClipFiles.TryGetDataSetForFile(path, absolutePath, out var dataSet, out _))
             return null;
 
         // Mapping is meaningful only when the slot is a TimeClipSlot — every concrete
