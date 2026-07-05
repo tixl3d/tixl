@@ -82,7 +82,6 @@ public static class JsonUtils
     {
         if (!File.Exists(filepath))
         {
-            Log.Debug($"{filepath} doesn't exist yet");
             result = default;
             return false;
         }

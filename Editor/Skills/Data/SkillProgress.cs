@@ -44,6 +44,7 @@ public sealed class SkillProgress
         if (!File.Exists(SkillProgressPath))
         {
             Data = new SkillProgress(); // Fallback
+            return;
         }
 
         try
