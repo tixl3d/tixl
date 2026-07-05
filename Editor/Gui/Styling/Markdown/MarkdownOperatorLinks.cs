@@ -3,8 +3,10 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Editor.Gui.Help;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.Gui.Windows.SymbolLib;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
 
@@ -12,8 +14,9 @@ namespace T3.Editor.Gui.Styling.Markdown;
 
 /// <summary>
 /// Supplies <see cref="MarkdownView.OperatorRefRendered"/>: resolves a bare <c>[OpName]</c> markdown
-/// reference to a symbol, shows a hover tooltip (namespace + description), and on click reveals the
-/// operator in the Symbol Library. Unresolved names get no interaction (the renderer already shows
+/// reference to a symbol, shows a hover tooltip (namespace + description), on click reveals the
+/// operator in the Symbol Library, and acts as a drag source so the chip can be dropped onto the
+/// graph to create an instance. Unresolved names get no interaction (the renderer already shows
 /// them as plain text via the missing UrlIndex).
 /// </summary>
 internal static class MarkdownOperatorLinks
@@ -31,17 +34,29 @@ internal static class MarkdownOperatorLinks
             return;
         }
 
-        if (!ImGui.IsItemHovered())
-            return;
-
         if (!TryResolve(opName, out var symbol))
             return;
 
-        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        // The chip is a drag source like a Symbol Library entry — dropping it onto the graph
+        // creates an instance. Skipped for the current composition (or a parent) to avoid recursion.
+        if (!SymbolLibrary.IsSymbolCurrentCompositionOrAParent(symbol))
+        {
+            DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.Symbol,
+                                                            symbol.Id.ToString());
+        }
+
+        // A release without notable movement is a click and reveals the operator; any real
+        // drag is handled above and must not trigger navigation.
+        if (ImGui.IsItemDeactivated() && ImGui.GetMouseDragDelta().Length() < 4)
         {
             HelpWindow.ShowTopic(HelpTopic.ForOperator(symbol.Id));
             WindowManager.SymbolLibrary.Reveal(symbol.Id);
         }
+
+        if (!ImGui.IsItemHovered() || DragAndDropHandling.IsDragging)
+            return;
+
+        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 
         // While the Help window previews hovered topics, a tooltip would double the content. Links inside
         // the Help window itself keep their tooltip — previewing would swap the body under the cursor.

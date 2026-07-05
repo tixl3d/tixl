@@ -21,6 +21,28 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 /// </summary>
 internal static class DropHandling
 {
+    /// <summary>
+    /// Called once per frame: draws a faint drop preview under the mouse while a symbol or
+    /// asset drag is in flight, so the drag reads before a graph window is hovered. The graph's
+    /// drop target draws the full-opacity preview on top when dropping is possible.
+    /// </summary>
+    internal static void DrawDragIndicator()
+    {
+        if (DragAndDropHandling.TryGetDragData(DragAndDropHandling.DragTypes.Symbol, out var symbolData))
+        {
+            if (Guid.TryParse(symbolData, out var symbolId)
+                && SymbolUiRegistry.TryGetSymbolUi(symbolId, out var symbolUi))
+            {
+                DrawDropPreviewItem(symbolUi.Symbol, fade: 0.2f);
+            }
+        }
+        else if (DragAndDropHandling.TryGetDragData(DragAndDropHandling.DragTypes.FileAsset, out var address)
+                 && AssetRegistry.TryGetAsset(address, out var asset))
+        {
+            DrawDropPreviewItem(asset, fade: 0.2f);
+        }
+    }
+
     internal static void HandleDropOnWindow(GraphUiContext context)
     {
         if (!DragAndDropHandling.IsDragging)
@@ -65,6 +87,17 @@ internal static class DropHandling
     private static bool HandleDropSymbol(GraphUiContext context)
     {
         var result=DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.Symbol, out var data);
+
+        if (result == DragAndDropHandling.DragInteractionResult.Hovering)
+        {
+            if (Guid.TryParse(data, out var hoveredSymbolId)
+                && SymbolUiRegistry.TryGetSymbolUi(hoveredSymbolId, out var hoveredSymbolUi))
+            {
+                DrawDropPreviewItem(hoveredSymbolUi.Symbol);
+            }
+
+            return false;
+        }
 
         if (result != DragAndDropHandling.DragInteractionResult.Dropped)
             return false;
@@ -128,11 +161,8 @@ internal static class DropHandling
         return false;
     }
 
-    private static void DrawDropPreviewItem(Asset asset)
+    private static void DrawDropPreviewItem(Asset asset, float fade = 1)
     {
-        // if (asset.AssetType == null)
-        //     return;
-
         if (asset.AssetType.PrimaryOperators.Count == 0)
             return;
 
@@ -141,13 +171,19 @@ internal static class DropHandling
             return;
         }
 
-        var color = mainSymbolUi.Symbol.OutputDefinitions.Count > 0
-                        ? TypeUiRegistry.GetPropertiesForType(mainSymbolUi.Symbol.OutputDefinitions[0]?.ValueType).Color
+        DrawDropPreviewItem(mainSymbolUi.Symbol, fade);
+    }
+
+    private static void DrawDropPreviewItem(Symbol symbol, float fade = 1)
+    {
+        var color = symbol.OutputDefinitions.Count > 0
+                        ? TypeUiRegistry.GetPropertiesForType(symbol.OutputDefinitions[0]?.ValueType).Color
                         : UiColors.Gray;
 
-        var dl = ImGui.GetWindowDrawList();
+        // Foreground list so the preview isn't clipped at the graph window's edges.
+        var dl = ImGui.GetForegroundDrawList();
         var pos = ImGui.GetMousePos();
-        dl.AddRectFilled(pos, pos + MagGraphItem.GridSize, color, 4);
+        dl.AddRectFilled(pos, pos + MagGraphItem.GridSize, color.Fade(fade), 4);
     }
 
     private static bool CreateAssetOperatorOnGraph(GraphUiContext context,

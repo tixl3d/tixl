@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
@@ -205,6 +206,16 @@ internal static class DragAndDropHandling
     internal static bool IsDraggingWith(DragTypes dragType)
     {
         return _activeDragType == dragType;
+    }
+
+    /// <summary>
+    /// Peeks at the payload of an active drag without acting as a drop zone —
+    /// e.g. for drawing a drag indicator under the mouse.
+    /// </summary>
+    internal static bool TryGetDragData(DragTypes dragType, [NotNullWhen(true)] out string? data)
+    {
+        data = _activeDragType == dragType ? _dataString : null;
+        return data != null;
     }
 
     private static bool HasData => _dataPtr != IntPtr.Zero;

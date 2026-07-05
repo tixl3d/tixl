@@ -118,6 +118,10 @@ internal sealed class MarkdownView
 
     private void Render(UrlClicked? onUrl, OperatorRefRendered? onOperatorRef)
     {
+        // Scope item ids to this view: several views can share a window (e.g. the operator help's
+        // description and parameter views), and fragment indices repeat across them.
+        ImGui.PushID(GetHashCode());
+
         var origin = ImGui.GetCursorPos();
         var scale = T3Ui.UiScaleFactor;
         var indentPx = _options.IndentPx > 0 ? _options.IndentPx * scale : 14f * scale;
@@ -147,6 +151,8 @@ internal sealed class MarkdownView
         // Reserve total height so subsequent ImGui content flows below.
         ImGui.SetCursorPos(new Vector2(origin.X, origin.Y + _layout.TotalHeight));
         ImGui.Dummy(new Vector2(1, 1));
+
+        ImGui.PopID();
     }
 
     private static void DrawMarker(LineBox box)
@@ -181,7 +187,7 @@ internal sealed class MarkdownView
             var fragmentY = lineOriginY + (lineFontAscent - fragmentFont.Ascent);
             ImGui.SetCursorPosY(fragmentY);
 
-            DrawFragment(fragment, onUrl, onOperatorRef);
+            DrawFragment(fragment, box.FragmentStart + fi, onUrl, onOperatorRef);
         }
 
         ImGui.PopStyleColor();
@@ -199,10 +205,13 @@ internal sealed class MarkdownView
         return lineFont;
     }
 
-    private void DrawFragment(Fragment fragment, UrlClicked? onUrl, OperatorRefRendered? onOperatorRef)
+    private void DrawFragment(Fragment fragment, int fragmentIndex, UrlClicked? onUrl, OperatorRefRendered? onOperatorRef)
     {
         var fontPushed = false;
         var colorPushed = false;
+        var isOpRef = (fragment.Style & RunStyle.OpRef) != 0;
+        var opRefTopLeft = Vector2.Zero;
+        var opRefSize = Vector2.Zero;
 
         if ((fragment.Style & RunStyle.Code) != 0)
         {
@@ -221,7 +230,7 @@ internal sealed class MarkdownView
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusActivated.Rgba);
             colorPushed = true;
         }
-        else if ((fragment.Style & RunStyle.OpRef) != 0)
+        else if (isOpRef)
         {
             var opColor = _operatorColor != null && fragment.UrlIndex >= 0
                               ? _operatorColor(_layout.Urls[fragment.UrlIndex])
@@ -230,16 +239,21 @@ internal sealed class MarkdownView
             fontPushed = true;
 
             var padX = OpRefPaddingX * T3Ui.UiScaleFactor;
+            opRefTopLeft = ImGui.GetCursorScreenPos();
+            opRefSize = ImGui.CalcTextSize(fragment.Text) + new Vector2(2 * padX, 0);
 
             // A type-colored box behind the reference, styled like Symbol Library entries.
             // Unresolved refs render as plain body text (see OperatorRefColor) and get no box.
-            // The horizontal padding is reserved by the layout pass and the trailing spacer below.
+            // The horizontal padding is reserved by the layout pass and the InvisibleButton below.
             if (opColor.Rgba != UiColors.Text.Rgba)
             {
-                var topLeft = ImGui.GetCursorScreenPos();
-                ImGui.GetWindowDrawList().AddRectFilled(topLeft,
-                                                        topLeft + ImGui.CalcTextSize(fragment.Text) + new Vector2(2 * padX, 0),
-                                                        ColorVariations.OperatorBackground.Apply(opColor),
+                var isHovered = ImGui.IsMouseHoveringRect(opRefTopLeft, opRefTopLeft + opRefSize);
+                var background = isHovered
+                                     ? ColorVariations.OperatorBackgroundHover.Apply(opColor)
+                                     : ColorVariations.OperatorBackground.Apply(opColor);
+                ImGui.GetWindowDrawList().AddRectFilled(opRefTopLeft,
+                                                        opRefTopLeft + opRefSize,
+                                                        background,
                                                         3 * T3Ui.UiScaleFactor);
                 opColor = ColorVariations.OperatorLabel.Apply(opColor);
             }
@@ -273,9 +287,17 @@ internal sealed class MarkdownView
                 }
             }
         }
-        else if ((fragment.Style & RunStyle.OpRef) != 0 && fragment.UrlIndex >= 0)
+        else if (isOpRef)
         {
-            if (onOperatorRef != null)
+            // Overlay an invisible button spanning the whole chip (incl. padding): it gives the
+            // callback an activatable item for click/drag handling and advances the cursor past
+            // the box so the next fragment starts after it, matching the measured layout width.
+            ImGui.SetCursorScreenPos(opRefTopLeft);
+            ImGui.PushID(fragmentIndex);
+            ImGui.InvisibleButton("opRef", opRefSize);
+            ImGui.PopID();
+
+            if (fragment.UrlIndex >= 0 && onOperatorRef != null)
             {
                 onOperatorRef(_layout.Urls[fragment.UrlIndex]);
             }
@@ -283,14 +305,6 @@ internal sealed class MarkdownView
             {
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             }
-        }
-
-        // Reserve the trailing box padding so the next fragment starts after the box,
-        // matching the width the layout pass measured.
-        if ((fragment.Style & RunStyle.OpRef) != 0)
-        {
-            ImGui.SameLine(0, 0);
-            ImGui.Dummy(new Vector2(OpRefPaddingX * T3Ui.UiScaleFactor, 1));
         }
     }
 
