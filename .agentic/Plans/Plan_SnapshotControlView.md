@@ -99,6 +99,8 @@ When the composition is active in a Parameter window, show:
 - Ordering switched to top-to-bottom / left-to-right (ascending) for groups and ops alike, matching `SectionTree`'s member order — this retires the "bottom-right first" ordering experiment.
 - Drag-to-reorder (stretch goal) not done — sections still don't own a persisted member order.
 
+**Name-click reverts to snapshot (2026-07-05):** in the control view, clicking a parameter name now reverts to the *active snapshot's* value (what the row highlight compares against) instead of the default — `SnapshotControlView.TryResetParameterToSnapshot`, hooked into `InputValueUi`'s name-click and gated on the same `_activeSnapshotMenuContext`; the hover hint/revert icon follow (`IsResetToSnapshotActive` + `DimHighlightOverride`), showing only when the row differs from the snapshot, and a matching value is a no-op (no undo entry). This made the per-row revert icon redundant, so it was removed together with its drag-to-scale infinity slider (`HandleRevertHandle`) — the right gutter is back to a single icon (the `…` actions menu), saving row width. "Reset to Snapshot" stays available in the menus.
+
 **Goal:** ops grouped under their enclosing section, with nesting paths.
 
 **Scope:**

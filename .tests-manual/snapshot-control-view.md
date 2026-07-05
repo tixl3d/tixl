@@ -126,26 +126,16 @@ Open the actions (…) menu in the selector bar and choose "Rename". Also try
 - The value changes exactly like in the regular parameter view, and the graph output updates live.
 - After a moment, the write and revert buttons in the selector bar become enabled (the current state differs from the snapshot).
 
-## Step: Modified rows are highlighted with a revert button
+## Step: Modified rows are highlighted; the name click reverts to the snapshot
 
 **Action:**
 1. In the snapshot control view, change one parameter's value and wait a moment.
+2. Hover the edited parameter's name, then click it. Also hover and click the name of a parameter that matches the snapshot but has a non-default value.
 
 **Expected:**
 - The edited parameter's name and value turn bright while parameters matching the snapshot stay muted — regardless of whether the values are at default.
-- A revert icon appears at the right end of the edited row, in the gap kept free beside the value.
-- Clicking it restores the snapshot's stored value for just that parameter (undoable); the row turns muted again, and if no other parameter differs, the selector bar's write/revert buttons disable.
-
-## Step: Scaling a change with the revert handle
-
-**Action:**
-1. Modify a parameter.
-2. Then press and drag horizontally on its revert icon.
-
-**Expected:**
-- An infinity-slider overlay appears showing a factor starting at 1.
-- Dragging the factor towards 0 moves the value back to the snapshot; dragging above 1 amplifies the difference beyond the current value.
-- Releasing keeps the scaled value (undoable as one step); releasing at factor 1 leaves the value unchanged.
+- Hovering the edited parameter's name shows a revert icon and a "Click to reset to snapshot" hint; clicking restores the snapshot's stored value for just that parameter (undoable). The row turns muted again, and if no other parameter differs, the selector bar's write/revert buttons disable.
+- On a row matching the snapshot, no revert hint appears and clicking the name changes nothing (in particular, it does **not** reset to default like in the regular parameter view, and no undo entry appears).
 
 ## Step: Per-parameter actions menu
 
@@ -162,12 +152,12 @@ to open the menu, on both an unchanged parameter and one you've edited. Then
   Snapshots"); its "Reset to Default" stays in the Parameter section.
 - **Write to snapshot** is enabled only when the parameter differs from the
   active snapshot; choosing it writes the current value into the snapshot (the
-  row's revert button then disables). Undoable.
+  row's highlight then fades). Undoable.
 - **Write to all snapshots** is enabled only when the value differs from at least
   one snapshot; choosing it writes the current value into every snapshot (one
   undo step). Switching snapshots no longer changes this parameter.
 - **Reset to Snapshot** restores the active snapshot's stored value (enabled when
-  modified) — the menu equivalent of the row's revert icon.
+  modified) — the menu equivalent of clicking the parameter's name.
 - **Reset to Default** returns the parameter to its operator default (undoable).
 - **Disable Snapshot control** removes the parameter from snapshot control (knob
   icon disappears, row leaves the view); it is disabled for the composition's own

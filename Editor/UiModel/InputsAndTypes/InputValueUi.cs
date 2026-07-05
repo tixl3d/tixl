@@ -486,7 +486,12 @@ public abstract class InputValueUi<T> : IInputUi
 
             if (isClicked)
             {
-                UndoRedoStack.AddAndExecute(new ResetInputToDefault(compositionSymbol, symbolChildUi.Id, input));
+                // In the snapshot control view the row highlight compares against the active
+                // snapshot, so the name-click reverts to that instead of the default
+                if (!SnapshotControlView.TryResetParameterToSnapshot(compositionSymbol, symbolChildUi, input))
+                {
+                    UndoRedoStack.AddAndExecute(new ResetInputToDefault(compositionSymbol, symbolChildUi.Id, input));
+                }
             }
 
             ImGui.SameLine();
@@ -654,7 +659,16 @@ public abstract class InputValueUi<T> : IInputUi
             return;
 
         var text = Description ?? string.Empty;
-        var additionalNotes = input.IsDefault ? null : "Click to reset to default";
+
+        // In the snapshot control view the name-click reverts to the active snapshot's value,
+        // matching the row highlight (which compares against the snapshot, not the default)
+        var resetsToSnapshot = SnapshotControlView.IsResetToSnapshotActive;
+        var canRevert = resetsToSnapshot
+                            ? !(InputArea.DimHighlightOverride ?? input.IsDefault)
+                            : !input.IsDefault;
+        var additionalNotes = canRevert
+                                  ? resetsToSnapshot ? "Click to reset to snapshot" : "Click to reset to default"
+                                  : null;
 
         if (skillQuestHint.HasValue || !string.IsNullOrEmpty(text) || !string.IsNullOrEmpty(additionalNotes))
         {
@@ -672,7 +686,7 @@ public abstract class InputValueUi<T> : IInputUi
                                                 });
         }
 
-        if (!input.IsDefault)
+        if (canRevert)
         {
             Icons.DrawIconAtScreenPosition(
                 Icon.Revert,

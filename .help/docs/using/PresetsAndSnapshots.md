@@ -32,7 +32,7 @@ Below the bar, all operators enabled for snapshots are listed in rounded panels 
 
 When the graph uses section frames, the list mirrors them: operators appear under collapsible group headers named after their section, with nested sections shown as a path (e.g. "INIT / RENDERING"), and operators outside any frame collect under "UNGROUPED" at the bottom. Clicking a header collapses or expands the group (per window — the frame in the graph is unaffected). Each section header offers two tools on the right: a crosshair that centers the frame in the graph, and a revert icon that restores the snapshot values for the operators in that group (enabled while any of them differ).
 
-Parameters that no longer match the snapshot are highlighted, with a revert handle next to them. Clicking the handle restores the snapshot value; dragging it opens a slider that scales the change — towards 0 reverts, above 1 amplifies it beyond the current value.
+Parameters that no longer match the snapshot are highlighted. Clicking a highlighted parameter's name restores the snapshot's stored value — in this view the name click reverts to the snapshot, not to the operator default, matching what the highlight compares against.
 
 All actions are undoable, and the view stays in sync with the Variations window — both operate on the same snapshots.
 

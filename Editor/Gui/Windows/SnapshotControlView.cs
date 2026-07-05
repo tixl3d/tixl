@@ -854,7 +854,8 @@ internal sealed class SnapshotControlView
     /// <summary>
     /// Draws editable parameter rows like the regular parameter view, but only for the
     /// controlled inputs — the blendable ones a snapshot write would capture. Rows are
-    /// highlighted when they no longer match the snapshot and get a revert button.
+    /// highlighted when they no longer match the snapshot; clicking the parameter name
+    /// reverts to the snapshot value (see <see cref="TryResetParameterToSnapshot"/>).
     /// </summary>
     private void DrawControlledParameters(Instance instance,
         SymbolUi symbolUi,
@@ -868,8 +869,8 @@ internal sealed class SnapshotControlView
         ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, UiColors.BackgroundHover.Rgba);
         ImGui.PushID(instance.GetHashCode());
 
-        // Keep room right of the value edits for the per-row revert button + actions menu
-        InputArea.ValueEditRightMargin = 2 * ImGui.GetFrameHeight() + 4 * T3Ui.UiScaleFactor;
+        // Keep room right of the value edits for the per-row actions menu
+        InputArea.ValueEditRightMargin = ImGui.GetFrameHeight() + 2 * T3Ui.UiScaleFactor;
 
         // Context for the parameter menus (right-click + per-row) so they can offer snapshot writes.
         var menuPool = VariationHandling.ActivePoolForSnapshots;
@@ -892,13 +893,11 @@ internal sealed class SnapshotControlView
                 continue;
 
             var isMismatch = _modificationCheck.IsInputModified(childKey, inputSlot.Id);
-            var isDraggingThis = _revertDragInputId == inputSlot.Id && _revertDragChildKey == childKey;
-            var highlight = isMismatch || isDraggingThis;
 
             ImGui.PushID(inputSlot.Id.GetHashCode());
 
             // In this view highlighting means "differs from the snapshot", not "non-default"
-            InputArea.DimHighlightOverride = !highlight;
+            InputArea.DimHighlightOverride = !isMismatch;
             var editState = inputUi.DrawParameterEdit(inputSlot, compositionSymbolUi, symbolChildUi,
                 hideNonEssentials: false, skipIfDefault: false);
             InputArea.DimHighlightOverride = null;
@@ -907,9 +906,6 @@ internal sealed class SnapshotControlView
             var valueMax = ImGui.GetItemRectMax();
 
             ParameterWindow.HandleInputEditState(instance, inputSlot, editState);
-
-            if (highlight)
-                HandleRevertHandle(instance, snapshot, childKey, inputSlot, valueMin, valueMax);
 
             DrawParameterActionMenu(instance, symbolChildUi, compositionSymbolUi, childKey, inputSlot, valueMin, valueMax);
 
@@ -924,122 +920,6 @@ internal sealed class SnapshotControlView
     }
 
     /// <summary>
-    /// Revert handle in the space reserved right of the value edit. A plain click reverts the
-    /// parameter to the snapshot value; dragging opens an infinity slider whose factor scales
-    /// the delta (1 = current, 0 = full revert, &gt;1 amplifies away from the snapshot).
-    /// </summary>
-    private void HandleRevertHandle(Instance instance, Variation snapshot, Guid childKey, IInputSlot inputSlot, Vector2 valueMin, Vector2 valueMax)
-    {
-        if (instance.Parent == null)
-            return;
-
-        var buttonSize = ImGui.GetFrameHeight();
-
-        var cursorToRestore = ImGui.GetCursorScreenPos();
-        ImGui.SetCursorScreenPos(new Vector2(valueMax.X + 2 * T3Ui.UiScaleFactor, valueMin.Y));
-
-        var isDraggingThis = _revertDragInputId == inputSlot.Id && _revertDragChildKey == childKey;
-        if (isDraggingThis)
-            CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize),
-                CustomComponents.ButtonStates.Activated);
-        else
-            CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize), UiColors.ForegroundFull);
-
-        CustomComponents.TooltipForLastItem("Click to revert, drag to scale the change");
-
-        if (ImGui.IsItemActivated())
-        {
-            _revertDragInputId = inputSlot.Id;
-            _revertDragChildKey = childKey;
-            _revertStartValue = inputSlot.Input.Value.Clone();
-            _revertSnapshotValue = snapshot.ParameterSetsForChildIds.TryGetValue(childKey, out var set)
-                                   && set.TryGetValue(inputSlot.Id, out var stored)
-                ? stored.Clone()
-                : inputSlot.Input.DefaultValue.Clone();
-            _revertFactor = 1;
-            _revertModified = false;
-            _revertDragCommand = null;
-            _revertSliderStarted = false;
-        }
-
-        var isThis = _revertDragInputId == inputSlot.Id && _revertDragChildKey == childKey;
-
-        if (isThis && ImGui.IsItemActive())
-        {
-            var draggedFar = ImGui.GetIO().MouseDragMaxDistanceSqr[0] > UserSettings.Config.ClickThreshold;
-            if (draggedFar
-                && _revertStartValue != null && _revertSnapshotValue != null
-                && ValueUtils.BlendMethods.TryGetValue(inputSlot.Input.Value.ValueType, out var blend))
-            {
-                // Restart on the first slider frame so the factor initializes to 1 rather than
-                // keeping the overlay's stale value from a previous (unrelated) edit.
-                var restarted = !_revertSliderStarted;
-                _revertSliderStarted = true;
-                InfinitySliderOverlay.Draw(ref _revertFactor, restarted, ImGui.GetMousePos(), min: 0, max: 1,
-                    scale: 0.05f * 0.25f);
-
-                var blended = blend(_revertSnapshotValue, _revertStartValue, (float) _revertFactor);
-                if (blended != null)
-                {
-                    _revertDragCommand ??= new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId,
-                        inputSlot.Input, inputSlot.Input.Value);
-                    _revertDragCommand.AssignNewValue(blended);
-                    inputSlot.DirtyFlag.Invalidate();
-                    _revertModified = true;
-                }
-            }
-        }
-
-        if (isThis && ImGui.IsItemDeactivated())
-        {
-            if (_revertModified && _revertDragCommand != null)
-            {
-                // Dragging back to factor 1 leaves the value unchanged — nothing to record
-                if (Math.Abs(_revertFactor - 1) > 0.0001)
-                    UndoRedoStack.Add(_revertDragCommand);
-            }
-            else
-            {
-                RevertParameterToSnapshot(instance, snapshot, childKey, inputSlot);
-            }
-
-            _revertDragInputId = Guid.Empty;
-            _revertDragChildKey = Guid.Empty;
-            _revertStartValue = null;
-            _revertSnapshotValue = null;
-            _revertDragCommand = null;
-            _revertModified = false;
-            _modificationCheck.Invalidate();
-        }
-
-        // Restoring the cursor with SetCursorScreenPos leaves ImGui's "set-pos" flag pending;
-        // a zero Dummy validates the extent so a following EndGroup (block box) doesn't assert.
-        ImGui.SetCursorScreenPos(cursorToRestore);
-        ImGui.Dummy(Vector2.Zero);
-    }
-
-    private void RevertParameterToSnapshot(Instance instance, Variation snapshot, Guid childKey, IInputSlot inputSlot)
-    {
-        if (instance.Parent == null)
-            return;
-
-        if (snapshot.ParameterSetsForChildIds.TryGetValue(childKey, out var parameterSet)
-            && parameterSet.TryGetValue(inputSlot.Id, out var storedValue))
-        {
-            UndoRedoStack.AddAndExecute(new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId,
-                inputSlot.Input, storedValue));
-        }
-        else
-        {
-            // Not captured in the snapshot: applying it would reset the parameter to default
-            UndoRedoStack.AddAndExecute(new ResetInputToDefault(instance.Parent.Symbol, instance.SymbolChildId,
-                inputSlot.Input));
-        }
-
-        _modificationCheck.Invalidate();
-    }
-
-    /// <summary>
     /// Per-parameter actions popup (opened by the "…" icon in the row's right gutter): write the
     /// parameter into the active snapshot / all snapshots, reset it, or drop it from snapshot control.
     /// </summary>
@@ -1050,8 +930,7 @@ internal sealed class SnapshotControlView
         var buttonSize = ImGui.GetFrameHeight();
         var cursorToRestore = ImGui.GetCursorScreenPos();
 
-        // Far slot — right of the revert column (which only shows when modified).
-        ImGui.SetCursorScreenPos(new Vector2(valueMax.X + 2 * scale + buttonSize + 2 * scale, valueMin.Y));
+        ImGui.SetCursorScreenPos(new Vector2(valueMax.X + 2 * scale, valueMin.Y));
 
         if (CustomComponents.IconButton(Icon.Settings2, new Vector2(buttonSize, buttonSize), CustomComponents.ButtonStates.Default))
             ImGui.OpenPopup(ParameterActionPopupId);
@@ -1154,6 +1033,38 @@ internal sealed class SnapshotControlView
 
         return acted;
     }
+
+    /// <summary>
+    /// While the control view draws its rows, clicking a parameter name reverts to the active
+    /// snapshot's value — the reference the row highlight is measured against — instead of the
+    /// default. Returns false when the view isn't drawing so the caller falls back to the
+    /// regular reset-to-default. Values already matching the snapshot are left untouched.
+    /// </summary>
+    internal static bool TryResetParameterToSnapshot(Symbol compositionSymbol, SymbolUi.Child symbolChildUi, Symbol.Child.Input input)
+    {
+        if (_activeSnapshotMenuContext is not { } ctx)
+            return false;
+
+        var inputId = input.InputDefinition.Id;
+        if (ctx.ActiveSnapshot.ParameterSetsForChildIds.TryGetValue(ctx.ChildKey, out var set)
+            && set.TryGetValue(inputId, out var stored))
+        {
+            if (!ValueUtils.CompareFunctions.TryGetValue(input.Value.ValueType, out var compare) || !compare(stored, input.Value))
+            {
+                UndoRedoStack.AddAndExecute(new ChangeInputValueCommand(compositionSymbol, symbolChildUi.Id, input, stored));
+            }
+        }
+        else if (!input.IsDefault)
+        {
+            // Not captured in the snapshot: applying it would reset the parameter to default
+            UndoRedoStack.AddAndExecute(new ResetInputToDefault(compositionSymbol, symbolChildUi.Id, input));
+        }
+
+        return true;
+    }
+
+    /// <summary>True while the control view draws its rows — name-click and its hover hint then mean "reset to snapshot".</summary>
+    internal static bool IsResetToSnapshotActive => _activeSnapshotMenuContext != null;
 
     private static bool SnapshotValueDiffers(Variation variation, Guid childKey, Guid inputId, InputValue current, InputValue defaultValue)
     {
@@ -1481,14 +1392,4 @@ internal sealed class SnapshotControlView
     private Guid _renamingSnapshotId;
     private int _renameFocusFramesLeft;
     private string _renameBuffer = "";
-
-    // Per-row revert drag (infinity slider scaling the delta to the snapshot)
-    private Guid _revertDragInputId;
-    private Guid _revertDragChildKey;
-    private InputValue? _revertStartValue;
-    private InputValue? _revertSnapshotValue;
-    private ChangeInputValueCommand? _revertDragCommand;
-    private double _revertFactor;
-    private bool _revertSliderStarted;
-    private bool _revertModified;
 }
