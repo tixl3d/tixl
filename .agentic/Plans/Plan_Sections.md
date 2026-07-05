@@ -37,7 +37,7 @@ Sections become a first-class structural element: membership is an explicit, ser
 
 ## Phases
 
-### Phase 1 — Model + rename (foundation; unblocks dependent plans)
+### Phase 1 — Model + rename (foundation; unblocks dependent plans) — DONE 2026-07-05
 
 **Goal:** sections exist as a tree with explicit membership; everything renamed; old files load.
 
@@ -51,7 +51,7 @@ Sections become a first-class structural element: membership is an explicit, ser
 
 **Verification:** old projects load with identical visual result; collapse/expand round-trips; undo restores membership with positions; manual test set added.
 
-### Phase 2 — Resize & interaction polish
+### Phase 2 — Resize & interaction polish — DONE 2026-07-05
 
 **Scope (issue points 2, 3, 6 partial):**
 
@@ -59,13 +59,17 @@ Sections become a first-class structural element: membership is an explicit, ser
 2. Collapse toggle sized/scaled with title font (`T3Ui.UiScaleFactor`-correct).
 3. Header hit-test fix when zoomed in (accidental clicks on invisible header near edges — issue point 6 status quo).
 
-### Phase 3 — Auto-expand & overlap avoidance
+**Implementation notes:** header interaction disables once a frame covers ≥70% of the viewport; no top-left corner resize handle (collapse chevron sits there — left/top edges cover it); small frames fall back to bottom-right-corner-only resizing; collapsed frames aren't resizable.
+
+### Phase 3 — Auto-expand & overlap avoidance — DONE 2026-07-05
 
 **Scope (issue points 4, 5):**
 
 1. Layout solver: expanding a section pushes neighboring sections (and their contents) to avoid overlap, preserving relative positions; capped-iteration, direction-of-change resolution.
 2. Invoked on: insert into stacks, section expand, add/duplicate/paste near bottom/right borders, (evaluate: collapse). All resulting moves folded into the triggering MacroCommand.
-3. Slow-resize mode: dragging nodes slowly against a section border grows the section; dragging a border slowly pushes neighbors. Disabled while the section is selected or Shift is held. Unlock speed ~10–30 px/s, smoothed — needs hands-on tuning.
+
+**Implementation notes:** solver lives in `SectionTree.CollectOverlapPushes` (scope-aware: pushes siblings within the same parent) with `ResolveBoundsExpansion` cascading parent growth up the ancestor chain. Programmatic op displacement funnels through `MagItemMovement.MoveItems`, which grows the owning frames — covering splice inserts, added multi-input rows, and placeholder insertion uniformly. Expand is undoable (`ChangeSectionCollapseCommand`); collapsing does not pull neighbors in. Collapsed frames occupy only their header strip for pushing/nesting; ownership of hidden ops/frames is fully sticky.
+3. Slow-resize mode: dragging nodes slowly against a section border grows the section; dragging a border slowly pushes neighbors. Disabled while the section is selected or Shift is held. Unlock speed smoothed, tunable via `UserSettings.SectionSlowResizeSpeed` (screen px/s, default 20, 0 disables). Bottom/right borders only. Border-push previews statelessly from frozen neighbor positions, so neighbors follow a retreating border during the drag.
 
 ### Phase 4 — Title visibility (clamped/stacked titles)
 
@@ -84,9 +88,10 @@ Sections become a first-class structural element: membership is an explicit, ser
 
 ## Open questions
 
-- Exact reassignment semantics when a *section* (not an op) is dragged: do contained ops move with it (presumably yes, as today), and does dragging a section into another section re-parent it?
-- Should `SectionId` apply to inputs/outputs of the composition too (issue implementation detail 1 says "all UI elements")? Concrete consumer unclear — defer until one exists.
-- Collapse of a section containing a *nested* section: nested collapse state preserved or forced?
+- Should `SectionId` apply to inputs/outputs of the composition too (issue implementation detail 1 says "all UI elements")? Concrete consumer unclear — defer until one exists. Until then inputs/outputs travel with frames by geometric containment.
+- Dropping a section whose bounds don't fit the target frame (e.g. a collapsed bar wider than the frame): auto-grow the target on drop? Deferred — geometry currently refuses the nesting.
+
+Resolved: section drags move explicit members and re-parent by geometry at the drop location; nested collapse state is preserved through outer collapse/expand round-trips.
 
 ## Documentation
 

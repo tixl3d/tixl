@@ -147,8 +147,10 @@ operators) into the space right below its header. Expand the collapsed section
 again via its chevron.
 
 **Expected:**
-- Expanding pushes the frames and loose operators below downward so nothing
-  overlaps the revealed area; their relative arrangement is preserved.
+- Expanding pushes the frames below downward so nothing overlaps the revealed
+  area; their internal arrangement is preserved. Loose operators are never
+  pushed — one sitting in the revealed area simply becomes a member of the
+  expanded section.
 - A single `Ctrl+Z` collapses the section again *and* returns the pushed
   neighbors to their previous places.
 - Collapsing never pulls neighbors back in on its own.
@@ -160,13 +162,17 @@ again via its chevron.
 
 **Action:**
 Inside a section, build a vertical stack of snapped operators that ends close
-to the frame's bottom border. Drag another operator into the middle of the
-stack so the lower part gets pushed down past the border.
+to the frame's bottom border. Try each of these near the bottom border:
+drag another operator into the middle of the stack; drop a connection onto a
+multi-input so a new input row appears; insert a new operator into the stack
+via the symbol browser (`Tab`).
 
 **Expected:**
-- The section grows so the pushed-down operators stay inside it.
+- Whenever the stack gets pushed down past the border, the section grows so
+  the operators stay inside it.
 - If another frame sits right below, it gets pushed down as well.
-- One `Ctrl+Z` reverts insertion, growth, and pushes together.
+- One `Ctrl+Z` reverts the triggering edit, the growth, and the pushes
+  together.
 - Dragging an operator *out* of the section does not grow the frame.
 
 ## Step: Pasting near the border grows the section
@@ -184,6 +190,33 @@ duplicate of ops inside the section near its border.
 - One `Ctrl+Z` reverts paste, growth, and pushes together.
 - Pasting with the mouse *outside* any section never resizes one.
 
+## Step: Slow-drag against the border grows the frame
+
+**Action:**
+Drag an operator inside a section toward the frame's bottom or right border.
+First push *slowly* against and across the border; then repeat the same move
+fast. Also try the slow push while holding `Shift`.
+
+**Expected:**
+- Moving slowly, the border yields: the frame grows and keeps the operator
+  inside, and frames beyond the border get pushed away on release.
+- Moving fast, the operator passes through the border and leaves the section.
+- With `Shift` held, the border never yields regardless of speed.
+- One `Ctrl+Z` reverts move, growth, and pushes together.
+
+## Step: Resizing never moves anything else
+
+**Action:**
+Place another frame and a few loose operators close below and right of a
+section. Resize the section's borders over and past them, then back.
+
+**Expected:**
+- No other frame or operator changes its position, ever — resizing only
+  changes this one frame's rect.
+- Operators and frames that end up mostly inside get adopted/nested (moving
+  the frame afterwards takes them along); resizing back releases them.
+- One `Ctrl+Z` reverts just the resize.
+
 ## Step: Nested sections
 
 **Action:**
@@ -196,6 +229,31 @@ frame, press `Shift+S`). Drag the outer section by its header.
 - Collapsing the outer section hides the inner frame and its operators too;
   expanding brings both back. The inner frame's own collapse state is
   preserved through the round-trip.
+
+## Step: Expanding a nested section grows its parent
+
+**Action:**
+Inside a larger section, collapse one of two nested frames and move it just
+above its expanded sibling. Expand it again via its chevron.
+
+**Expected:**
+- The sibling frame below gets pushed down.
+- The outer section grows so both nested frames stay inside it.
+- Anything below the outer section moves down in turn.
+- One `Ctrl+Z` restores collapse state, sibling position, and the outer
+  frame's size together.
+
+## Step: Collapsed frames nest by their visible bar
+
+**Action:**
+Collapse a section that is narrower than another expanded frame, and drag its
+collapsed bar fully inside that frame. Then collapse the target frame.
+
+**Expected:**
+- The collapsed bar nests into the frame: collapsing the target hides it.
+- Expanding the target shows the bar again, still collapsed, with its content
+  intact.
+- A collapsed bar *wider* than the target frame does not nest.
 
 ## Step: Old project loads correctly
 

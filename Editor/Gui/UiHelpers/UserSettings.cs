@@ -107,6 +107,12 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public int MaxSegmentCount = 32;
         public bool EnableHorizontalSnapping = true;
 
+        /// <summary>
+        /// Below this smoothed mouse speed (screen px/s) dragging ops against a section
+        /// border grows the frame, and dragging a border pushes neighbors. 0 disables.
+        /// </summary>
+        public float SectionSlowResizeSpeed = 20;
+
         public bool AddSpacesToParameterNames = true;
 
         public float ClickThreshold = 5; // Increase for high-res display and pen tablets

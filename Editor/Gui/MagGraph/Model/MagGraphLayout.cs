@@ -90,7 +90,6 @@ internal sealed class MagGraphLayout
 
     private void CollectedSections(SymbolUi compositionSymbolUi)
     {
-        Sections.Clear();
         var addedCount = 0;
         var updatedCount = 0;
 
@@ -99,6 +98,7 @@ internal sealed class MagGraphLayout
             if (Sections.TryGetValue(sectionId, out var opItem))
             {
                 updatedCount++;
+                opItem.Section = section; // instance can change through undo or reload
                 opItem.LastUpdateCycle = _structureUpdateCycle;
             }
             else
@@ -109,6 +109,7 @@ internal sealed class MagGraphLayout
                                  Section = section,
                                  DampedPosOnCanvas = section.PosOnCanvas,
                                  DampedSize = section.Size,
+                                 LastUpdateCycle = _structureUpdateCycle,
                              };
 
                 Sections[sectionId] = opItem;

@@ -112,10 +112,8 @@ internal static class SectionTree
                                   : section.Size;
             var rect = ImRect.RectWithSize(section.PosOnCanvas, visibleSize);
 
-            // Strictly-larger requirement prevents identically-sized sections from parenting each other
-            section.ParentSectionId = FindOwnerSectionId(symbolUi, rect, currentOwnerId: section.ParentSectionId,
-                                                         excludeId: section.Id,
-                                                         requireLargerThan: visibleSize.X * visibleSize.Y);
+            section.ParentSectionId = FindParentSectionId(symbolUi, rect, currentOwnerId: section.ParentSectionId,
+                                                          excludeId: section.Id);
         }
     }
 
@@ -165,8 +163,8 @@ internal static class SectionTree
     internal readonly record struct OverlapPush(ISelectableCanvasObject Block, Vector2 Delta);
 
     /// <summary>
-    /// Computes how far sibling blocks in the source's parent scope (sections with their
-    /// contents, direct member ops) must move along <paramref name="pushDirection"/> (a unit
+    /// Computes how far sibling frames in the source's parent scope (with their contents)
+    /// must move along <paramref name="pushDirection"/> (a unit
     /// axis) so nothing overlaps <paramref name="claimedBounds"/>. Pushes cascade to blocks
     /// shoved into others; the monotone relaxation is iteration-capped so cyclic
     /// arrangements can't loop forever. Growing the parent to fit is the caller's job —
@@ -174,9 +172,65 @@ internal static class SectionTree
     /// </summary>
     internal static void CollectOverlapPushes(SymbolUi symbolUi, Section source, ImRect claimedBounds, Vector2 pushDirection, List<OverlapPush> results)
     {
+        _pushBlocks.Clear();
+        CollectScopeBlocksIntoBuffer(symbolUi, source);
+        RunPushRelaxation(claimedBounds, allowDown: pushDirection.Y > 0, allowRight: pushDirection.X > 0);
+
+        foreach (var block in _pushBlocks)
+        {
+            if (block.PushDistance > 0)
+            {
+                results.Add(new OverlapPush(block.Root, block.PushAxis * block.PushDistance));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Snapshot of the sibling blocks the solver would consider for the given source —
+    /// used to freeze original bounds for stateless per-frame push previews.
+    /// </summary>
+    internal static void CollectScopeBlocks(SymbolUi symbolUi, Section source, List<(ISelectableCanvasObject Root, ImRect Bounds)> blocks)
+    {
+        _pushBlocks.Clear();
+        CollectScopeBlocksIntoBuffer(symbolUi, source);
+        foreach (var block in _pushBlocks)
+        {
+            blocks.Add((block.Root, block.Bounds));
+        }
+    }
+
+    /// <summary>
+    /// Push deltas against frozen block bounds, one delta per block index (zero when
+    /// unaffected). Each block resolves along a single axis - the one needing the smaller
+    /// displacement when both are allowed. Recomputed from the same original bounds every
+    /// frame, this yields a stateless preview: blocks return when the border retreats.
+    /// </summary>
+    internal static void ComputePushesForBlocks(IReadOnlyList<(ISelectableCanvasObject Root, ImRect Bounds)> blocks,
+                                                ImRect claimedBounds, bool allowDown, bool allowRight, List<Vector2> deltasPerBlock)
+    {
+        _pushBlocks.Clear();
+        foreach (var (root, bounds) in blocks)
+        {
+            _pushBlocks.Add(new PushBlock(root, bounds));
+        }
+
+        RunPushRelaxation(claimedBounds, allowDown, allowRight);
+
+        deltasPerBlock.Clear();
+        foreach (var block in _pushBlocks)
+        {
+            deltasPerBlock.Add(block.PushAxis * block.PushDistance);
+        }
+    }
+
+    private static void CollectScopeBlocksIntoBuffer(SymbolUi symbolUi, Section source)
+    {
+        // Only frames are pushed - loose ops are never moved by the solver. Shoving ops
+        // around would wreck hand-made layouts (and the relaxation would teleport them
+        // across large frames). An op overlapped by an expanding frame is simply adopted:
+        // visible inside the frame and reversible by dragging it out.
         var scopeId = source.ParentSectionId;
 
-        _pushBlocks.Clear();
         foreach (var section in symbolUi.Sections.Values)
         {
             // Only sibling frames in the same scope move as blocks; nested ones travel with them
@@ -189,15 +243,10 @@ internal static class SectionTree
                            : section.Size;
             _pushBlocks.Add(new PushBlock(section, ImRect.RectWithSize(section.PosOnCanvas, size)));
         }
+    }
 
-        foreach (var childUi in symbolUi.ChildUis.Values)
-        {
-            if (childUi.SectionId != scopeId)
-                continue;
-
-            _pushBlocks.Add(new PushBlock(childUi, ImRect.RectWithSize(childUi.PosOnCanvas, childUi.Size)));
-        }
-
+    private static void RunPushRelaxation(ImRect claimedBounds, bool allowDown, bool allowRight)
+    {
         _pushQueue.Clear();
         _pushQueue.Enqueue((claimedBounds, null));
 
@@ -214,11 +263,30 @@ internal static class SectionTree
                     continue;
 
                 var rect = block.Bounds;
-                rect.Translate(pushDirection * block.PushDistance);
+                rect.Translate(block.PushAxis * block.PushDistance);
                 if (!claimed.Overlaps(rect))
                     continue;
 
-                var required = pushDirection.Y > 0
+                // Each block resolves along a single axis, chosen on first contact by the
+                // smaller displacement. Blocks starting before the claim on an axis can't
+                // be pushed along it - they surround or precede the claim there; that's a
+                // container relationship handled by nesting.
+                if (block.PushDistance <= 0)
+                {
+                    var canPushDown = allowDown && block.Bounds.Min.Y >= claimed.Min.Y;
+                    var canPushRight = allowRight && block.Bounds.Min.X >= claimed.Min.X;
+                    if (!canPushDown && !canPushRight)
+                        continue;
+
+                    var requiredDown = claimed.Max.Y + PushPadding - block.Bounds.Min.Y;
+                    var requiredRight = claimed.Max.X + PushPadding - block.Bounds.Min.X;
+
+                    block.PushAxis = canPushDown && (!canPushRight || requiredDown <= requiredRight)
+                                         ? Vector2.UnitY
+                                         : Vector2.UnitX;
+                }
+
+                var required = block.PushAxis.Y > 0
                                    ? claimed.Max.Y + PushPadding - block.Bounds.Min.Y
                                    : claimed.Max.X + PushPadding - block.Bounds.Min.X;
 
@@ -227,17 +295,8 @@ internal static class SectionTree
 
                 block.PushDistance = required;
                 var newRect = block.Bounds;
-                newRect.Translate(pushDirection * required);
+                newRect.Translate(block.PushAxis * required);
                 _pushQueue.Enqueue((newRect, block));
-            }
-        }
-
-        foreach (var block in _pushBlocks)
-        {
-            if (block.PushDistance > 0)
-            {
-                Log.Debug($"  push block {block.Root} bounds {block.Bounds.Min}..{block.Bounds.Max} by {pushDirection * block.PushDistance}");
-                results.Add(new OverlapPush(block.Root, pushDirection * block.PushDistance));
             }
         }
     }
@@ -275,7 +334,7 @@ internal static class SectionTree
         var moveCommand = new Commands.Graph.ModifyCanvasElementsCommand(symbolUi, _elementsToPush, selector);
         for (var i = 0; i < _elementsToPush.Count; i++)
         {
-            Log.Debug($"  moving {_elementsToPush[i]} from {_elementsToPush[i].PosOnCanvas} by {_pushDeltas[i]}");
+            Log.Debug($"PushNeighbors by '{source.Title}' {claimedBounds.Min}..{claimedBounds.Max}: moving {_elementsToPush[i]} by {_pushDeltas[i]}");
             _elementsToPush[i].PosOnCanvas += _pushDeltas[i];
         }
 
@@ -416,7 +475,51 @@ internal static class SectionTree
     {
         internal readonly ISelectableCanvasObject Root = root;
         internal readonly ImRect Bounds = bounds;
+        internal Vector2 PushAxis = Vector2.UnitY;
         internal float PushDistance;
+    }
+
+    /// <summary>
+    /// Nesting is forgiving: a frame stays parented while the majority of its visible
+    /// footprint lies inside the candidate. Full containment would silently un-nest a
+    /// child poking slightly over the border, turning it into an overlapping "sibling"
+    /// that the overlap solver may then push out entirely.
+    /// </summary>
+    private static Guid FindParentSectionId(SymbolUi symbolUi, ImRect rect, Guid currentOwnerId, Guid excludeId)
+    {
+        var ownArea = rect.GetWidth() * rect.GetHeight();
+
+        Section? best = null;
+        var bestArea = float.PositiveInfinity;
+        foreach (var candidate in symbolUi.Sections.Values)
+        {
+            if (candidate.Id == excludeId)
+                continue;
+
+            // Collapsed frames (and frames hidden inside one) only keep their current
+            // children, they never adopt - their bounds are invisible
+            if (candidate.Id != currentOwnerId && IsSelfOrAncestorCollapsed(symbolUi, candidate))
+                continue;
+
+            // Strictly-larger requirement prevents identically-sized sections from parenting each other
+            var candidateArea = candidate.Size.X * candidate.Size.Y;
+            if (candidateArea <= ownArea || candidateArea >= bestArea)
+                continue;
+
+            var candidateRect = ImRect.RectWithSize(candidate.PosOnCanvas, candidate.Size);
+            var overlapWidth = MathF.Min(rect.Max.X, candidateRect.Max.X) - MathF.Max(rect.Min.X, candidateRect.Min.X);
+            var overlapHeight = MathF.Min(rect.Max.Y, candidateRect.Max.Y) - MathF.Max(rect.Min.Y, candidateRect.Min.Y);
+            if (overlapWidth <= 0 || overlapHeight <= 0)
+                continue;
+
+            if (overlapWidth * overlapHeight < ownArea * 0.5f)
+                continue;
+
+            bestArea = candidateArea;
+            best = candidate;
+        }
+
+        return best?.Id ?? Guid.Empty;
     }
 
     private static Guid FindOwnerSectionId(SymbolUi symbolUi, ImRect rect, Guid currentOwnerId, Guid excludeId, float requireLargerThan)

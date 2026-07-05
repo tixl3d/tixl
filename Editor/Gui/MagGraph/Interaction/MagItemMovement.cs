@@ -3,6 +3,7 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Utils;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Snapping;
@@ -62,6 +63,7 @@ internal sealed partial class MagItemMovement
         if (context.MacroCommand != null)
         {
             context.MoveElementsCommand?.StoreCurrentValues();
+            CompleteSlowGrow(context);
             GrowSectionsToFitDisplacedMembers(context);
             context.CompleteMacroCommand();
 
@@ -72,6 +74,139 @@ internal sealed partial class MagItemMovement
         if (!InputPicking.TryInitializeInputSelectionPickerForDraggedItem(context))
             Reset();
     }
+
+    /// <summary>
+    /// Dragging ops slowly against their section's bottom/right border makes the border
+    /// yield. The speed test only decides the initial engagement — once the border
+    /// yielded, it follows the dragged ops continuously, so the growth is smooth instead
+    /// of stuttering with the speed hovering around the threshold. Pulling the ops fully
+    /// back inside (or holding Shift) releases the latch, and the next border contact
+    /// decides afresh. Disabled while the frame is selected, or when
+    /// <see cref="UserSettings.ConfigData.SectionSlowResizeSpeed"/> is 0.
+    /// </summary>
+    private void TrySlowGrowSection(GraphUiContext context)
+    {
+        var unlockSpeed = UserSettings.Config.SectionSlowResizeSpeed;
+        if (unlockSpeed <= 0 || _slowGrowSectionId == Guid.Empty || DraggedItems.Count == 0)
+            return;
+
+        var io = ImGui.GetIO();
+        var speed = io.MouseDelta.Length() / MathF.Max(io.DeltaTime, 0.0001f) / T3Ui.UiScaleFactor;
+        _dampedDragSpeed = MathUtils.Lerp(_dampedDragSpeed, speed, 0.3f);
+
+        var symbolUi = context.CompositionInstance.GetSymbolUi();
+        if (!symbolUi.Sections.TryGetValue(_slowGrowSectionId, out var section)
+            || section.Collapsed || section.IsHiddenInCollapsedSection
+            || context.Selector.IsNodeSelected(section))
+            return;
+
+        var draggedBounds = MagGraphItem.GetItemsBounds(DraggedItems);
+        var boundsMin = section.PosOnCanvas;
+        var boundsMax = section.PosOnCanvas + section.Size;
+
+        // Border contact requires overlapping the frame on the other axis too - an op
+        // dragged past the frame's corner is outside, not pressing against the border
+        var overlapsVertically = draggedBounds.Min.Y < boundsMax.Y && draggedBounds.Max.Y > boundsMin.Y;
+        var overlapsHorizontally = draggedBounds.Min.X < boundsMax.X && draggedBounds.Max.X > boundsMin.X;
+
+        var touchesRight = overlapsVertically && draggedBounds.Max.X > boundsMax.X && draggedBounds.Min.X < boundsMax.X;
+        var touchesBottom = overlapsHorizontally && draggedBounds.Max.Y > boundsMax.Y && draggedBounds.Min.Y < boundsMax.Y;
+
+        if (io.KeyShift)
+        {
+            _slowGrowEngaged = false;
+            return;
+        }
+
+        if (!_slowGrowEngaged)
+        {
+            // Fully back inside? The next contact decides afresh.
+            if (!touchesRight && !touchesBottom)
+                return;
+
+            if (_dampedDragSpeed > unlockSpeed)
+                return;
+
+            _slowGrowEngaged = true;
+        }
+
+        // Follow the dragged ops continuously while engaged
+        var newMax = boundsMax;
+        if (touchesRight)
+            newMax.X = draggedBounds.Max.X + SectionTree.ContentPadding.X;
+
+        if (touchesBottom)
+            newMax.Y = draggedBounds.Max.Y + SectionTree.ContentPadding.Y;
+
+        if (draggedBounds.Max.X <= boundsMax.X && draggedBounds.Max.Y <= boundsMax.Y)
+        {
+            // Ops returned fully inside - release the latch (the frame keeps its size)
+            _slowGrowEngaged = false;
+            return;
+        }
+
+        if (newMax == boundsMax)
+            return;
+
+        if (_slowGrowCommand == null)
+        {
+            _slowGrowCommand = new ModifyCanvasElementsCommand(symbolUi, [section], context.Selector);
+            _growPushPreview.Engage(symbolUi, section, context.Selector);
+        }
+
+        _slowGrewX |= newMax.X > boundsMax.X;
+        _slowGrewY |= newMax.Y > boundsMax.Y;
+        section.Size = newMax - section.PosOnCanvas;
+
+        // Push neighbors ahead of the growing border right away - leaving overlaps
+        // unresolved until release would let ownership derivation flip memberships mid-drag
+        _growPushPreview.Update(section, pushDown: _slowGrewY, pushRight: _slowGrewX);
+        _layout.FlagStructureAsChanged();
+    }
+
+    /// <summary>
+    /// Folds the accumulated slow-grow resize into the drag's MacroCommand and pushes
+    /// neighbors out of the grown bounds.
+    /// </summary>
+    private void CompleteSlowGrow(GraphUiContext context)
+    {
+        if (_slowGrowCommand == null)
+        {
+            _slowGrowSectionId = Guid.Empty;
+            return;
+        }
+
+        Log.Debug($"CompleteSlowGrow: section {_slowGrowSectionId}");
+        _slowGrowCommand.StoreCurrentValues();
+        context.MacroCommand!.AddExecutedCommandForUndo(_slowGrowCommand);
+        _growPushPreview.Complete(context.MacroCommand);
+
+        // Sibling overlaps are already resolved by the live preview; this settles
+        // ancestor growth for nested frames
+        var symbolUi = context.CompositionInstance.GetSymbolUi();
+        if (symbolUi.Sections.TryGetValue(_slowGrowSectionId, out var grownSection))
+        {
+            // Only resolve along axes that actually grew - resolving the other axis would
+            // "fix" remaining overlaps by flinging neighbors sideways
+            var bounds = ImRect.RectWithSize(grownSection.PosOnCanvas, grownSection.Size);
+            if (_slowGrewY)
+                SectionTree.ResolveBoundsExpansion(symbolUi, grownSection, bounds, Vector2.UnitY, context.MacroCommand, context.Selector);
+
+            if (_slowGrewX)
+                SectionTree.ResolveBoundsExpansion(symbolUi, grownSection, bounds, Vector2.UnitX, context.MacroCommand, context.Selector);
+        }
+
+        _slowGrowCommand = null;
+        _slowGrowSectionId = Guid.Empty;
+    }
+
+    private Guid _slowGrowSectionId;
+    private ModifyCanvasElementsCommand? _slowGrowCommand;
+    private readonly SectionPushPreview _growPushPreview = new();
+    private bool _slowGrowEngaged;
+    private bool _slowGrewX;
+    private bool _slowGrewY;
+    private float _dampedDragSpeed;
 
     /// <summary>
     /// Splice-inserting into a stack pushes the ops below/right of the insertion — when such
@@ -99,38 +234,55 @@ internal sealed partial class MagItemMovement
             if (section.Collapsed || section.IsHiddenInCollapsedSection)
                 continue;
 
-            var membersMax = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
-            var hasStayingMembers = false;
-            foreach (var childUi in symbolUi.ChildUis.Values)
-            {
-                if (childUi.SectionId != section.Id || _draggedChildIds.Contains(childUi.Id))
-                    continue;
-
-                membersMax = Vector2.Max(membersMax, childUi.PosOnCanvas + childUi.Size);
-                hasStayingMembers = true;
-            }
-
-            if (!hasStayingMembers)
-                continue;
-
-            var boundsMax = section.PosOnCanvas + section.Size;
-            var requiredMax = Vector2.Max(boundsMax, membersMax + SectionTree.ContentPadding);
-            var grewX = requiredMax.X > boundsMax.X + 0.5f;
-            var grewY = requiredMax.Y > boundsMax.Y + 0.5f;
-            if (!grewX && !grewY)
-                continue;
-
-            var resizeCommand = new ModifyCanvasElementsCommand(symbolUi, [section], context.Selector);
-            section.Size = requiredMax - section.PosOnCanvas;
-            resizeCommand.StoreCurrentValues();
-            context.MacroCommand!.AddExecutedCommandForUndo(resizeCommand);
-
-            var newBounds = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
-            if (grewY)
-                SectionTree.ResolveBoundsExpansion(symbolUi, section, newBounds, Vector2.UnitY, context.MacroCommand, context.Selector);
-            if (grewX)
-                SectionTree.ResolveBoundsExpansion(symbolUi, section, newBounds, Vector2.UnitX, context.MacroCommand, context.Selector);
+            GrowSectionToFitContent(context, symbolUi, section, _draggedChildIds);
         }
+    }
+
+    /// <summary>
+    /// Grows a frame (bottom/right) so its member ops stay inside, pushing siblings and
+    /// growing ancestors via the bounds-expansion cascade. Folds into the interaction's
+    /// MacroCommand. Ops in <paramref name="excludedChildIds"/> are ignored, so a
+    /// deliberate drag out of the frame never grows it.
+    /// </summary>
+    private static void GrowSectionToFitContent(GraphUiContext context, SymbolUi symbolUi, Section section, HashSet<Guid>? excludedChildIds)
+    {
+        Debug.Assert(context.MacroCommand != null);
+
+        var contentMax = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+        var hasContent = false;
+        foreach (var childUi in symbolUi.ChildUis.Values)
+        {
+            if (childUi.SectionId != section.Id)
+                continue;
+
+            if (excludedChildIds != null && excludedChildIds.Contains(childUi.Id))
+                continue;
+
+            contentMax = Vector2.Max(contentMax, childUi.PosOnCanvas + childUi.Size);
+            hasContent = true;
+        }
+
+        if (!hasContent)
+            return;
+
+        var boundsMax = section.PosOnCanvas + section.Size;
+        var requiredMax = Vector2.Max(boundsMax, contentMax + SectionTree.ContentPadding);
+        var grewX = requiredMax.X > boundsMax.X + 0.5f;
+        var grewY = requiredMax.Y > boundsMax.Y + 0.5f;
+        if (!grewX && !grewY)
+            return;
+
+        Log.Debug($"GrowToFitContent: '{section.Title}' max {boundsMax} -> {requiredMax} (excluded: {excludedChildIds?.Count ?? 0})");
+        var resizeCommand = new ModifyCanvasElementsCommand(symbolUi, [section], context.Selector);
+        section.Size = requiredMax - section.PosOnCanvas;
+        resizeCommand.StoreCurrentValues();
+        context.MacroCommand!.AddExecutedCommandForUndo(resizeCommand);
+
+        var newBounds = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
+        if (grewY)
+            SectionTree.ResolveBoundsExpansion(symbolUi, section, newBounds, Vector2.UnitY, context.MacroCommand, context.Selector);
+        if (grewX)
+            SectionTree.ResolveBoundsExpansion(symbolUi, section, newBounds, Vector2.UnitX, context.MacroCommand, context.Selector);
     }
 
     private static readonly HashSet<Guid> _draggedChildIds = [];
@@ -143,6 +295,17 @@ internal sealed partial class MagItemMovement
         _lastAppliedOffset = Vector2.Zero;
         SpliceSets.Clear();
         DraggedItems.Clear();
+
+        // If the drag ended without CompleteDragOperation, take the uncommitted
+        // slow-grow preview back
+        if (_slowGrowCommand != null)
+        {
+            _slowGrowCommand.Undo();
+            _slowGrowCommand = null;
+        }
+
+        _growPushPreview.CancelAndReset();
+        _slowGrowSectionId = Guid.Empty;
     }
 
     /// <summary>
@@ -199,6 +362,9 @@ internal sealed partial class MagItemMovement
         }
 
         var snappingChanged = HandleSnappedDragging(context);
+
+        TrySlowGrowSection(context);
+
         if (!snappingChanged)
             return;
 
@@ -254,6 +420,39 @@ internal sealed partial class MagItemMovement
         {
             _dragStartPosInOpOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
             _hasDragged = true;
+
+            // Remember the frame the drag started in for the slow-grow interaction
+            _slowGrowSectionId = Guid.Empty;
+            _slowGrowCommand = null;
+            _growPushPreview.Reset();
+            _slowGrowEngaged = false;
+            _slowGrewX = false;
+            _slowGrewY = false;
+            _dampedDragSpeed = UserSettings.Config.SectionSlowResizeSpeed * 3; // start above unlock so a fresh grab doesn't engage instantly
+
+            // Rearranging a selection that includes frames must never auto-grow or push -
+            // that's deliberate layout work, not ops pressing against a border
+            var selectionIncludesSection = false;
+            foreach (var node in _nodeSelection.Selection)
+            {
+                if (node is not Section)
+                    continue;
+
+                selectionIncludesSection = true;
+                break;
+            }
+
+            if (!selectionIncludesSection)
+            {
+                foreach (var item in DraggedItems)
+                {
+                    if (item.ChildUi == null || item.ChildUi.SectionId == Guid.Empty)
+                        continue;
+
+                    _slowGrowSectionId = item.ChildUi.SectionId;
+                    break;
+                }
+            }
         }
 
         var mousePosOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
@@ -1317,17 +1516,7 @@ internal sealed partial class MagItemMovement
         if (movableItems.Count == 0)
             return;
 
-        // Move items down...
-        var affectedItemsAsNodes = movableItems.Select(i => i as ISelectableCanvasObject).ToList();
-        var newMoveComment = new ModifyCanvasElementsCommand(context.CompositionInstance.Symbol.Id, affectedItemsAsNodes, context.Selector);
-        context.MacroCommand.AddExecutedCommandForUndo(newMoveComment);
-
-        foreach (var item in affectedItemsAsNodes)
-        {
-            item.PosOnCanvas += new Vector2(0, yDistance);
-        }
-
-        newMoveComment.StoreCurrentValues();
+        MoveItems(context, movableItems, new Vector2(0, yDistance));
     }
 
     /// <summary>
@@ -1364,13 +1553,35 @@ internal sealed partial class MagItemMovement
         var newMoveComment = new ModifyCanvasElementsCommand(context.CompositionInstance.Symbol.Id, affectedItemsAsNodes, context.Selector);
         context.MacroCommand.AddExecutedCommandForUndo(newMoveComment);
 
+        Log.Debug($"MoveItems: {affectedItemsAsNodes.Count} items by {offset}");
         foreach (var item in affectedItemsAsNodes)
         {
             item.PosOnCanvas += offset;
         }
 
         newMoveComment.StoreCurrentValues();
+
+        // Programmatic pushes (splice inserts, added input rows, placeholder insertion) can
+        // shove ops across their section's bottom/right border - grow those frames to keep them
+        _growSectionIds.Clear();
+        var symbolUi = context.CompositionInstance.GetSymbolUi();
+        foreach (var item in movableItems)
+        {
+            if (item.ChildUi == null || item.ChildUi.SectionId == Guid.Empty)
+                continue;
+
+            if (!_growSectionIds.Add(item.ChildUi.SectionId))
+                continue;
+
+            if (!symbolUi.Sections.TryGetValue(item.ChildUi.SectionId, out var section)
+                || section.Collapsed || section.IsHiddenInCollapsedSection)
+                continue;
+
+            GrowSectionToFitContent(context, symbolUi, section, excludedChildIds: null);
+        }
     }
+
+    private static readonly HashSet<Guid> _growSectionIds = [];
 
     private void InitPrimaryDraggedOutput()
     {

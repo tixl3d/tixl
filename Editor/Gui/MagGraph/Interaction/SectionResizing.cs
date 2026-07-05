@@ -1,4 +1,5 @@
 using ImGuiNET;
+using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
@@ -6,6 +7,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Selection;
 using T3.Editor.UiModel.Commands.Graph;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
@@ -117,10 +119,10 @@ internal static class SectionResizing
             var wasDragging = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).LengthSquared() > UserSettings.Config.ClickThreshold;
             if (wasDragging)
             {
+                // Resizing changes only this frame's rect - it never moves other ops or
+                // frames. Ownership adjusts via derivation on the layout refresh.
                 _moveCommand.StoreCurrentValues();
                 UndoRedoStack.Add(_moveCommand);
-
-                // Section ownership is re-derived from geometry on the layout refresh
                 context.Layout.FlagStructureAsChanged();
             }
             else

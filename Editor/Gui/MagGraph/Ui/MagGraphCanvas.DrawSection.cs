@@ -71,11 +71,26 @@ internal sealed partial class MagGraphView
         var canvasScale = canvas.Scale.X;
 
         // The title font size also drives the collapse toggle and the label indent
-        var titleFontSize = canvasScale > 1
-                                ? Fonts.FontLarge.FontSize
-                                : canvasScale > 0.333 / Fonts.FontLarge.Scale
-                                    ? Fonts.FontLarge.FontSize
-                                    : Fonts.FontLarge.FontSize * canvasScale * 3;
+
+        float titleFontSize = 0;// Fonts.FontLarge.FontSize;
+
+        if (section.Collapsed)
+        {
+            titleFontSize = canvasScale > 1
+                ? Fonts.FontLarge.FontSize
+                : canvasScale > 1f / Fonts.FontLarge.Scale
+                    ? Fonts.FontLarge.FontSize
+                    : Fonts.FontLarge.FontSize * canvasScale * 1;
+        }
+        else
+        {
+            titleFontSize = canvasScale > 1
+                ? Fonts.FontLarge.FontSize
+                : canvasScale > 0.333f / Fonts.FontLarge.Scale
+                    ? Fonts.FontLarge.FontSize
+                    : Fonts.FontLarge.FontSize * canvasScale * 3;
+        }
+    
 
         // Collapse toggle - scaled with the title font, with a clickable minimum when zoomed out.
         // Emitted before header and resize handles so it wins their overlap zones.
@@ -104,7 +119,7 @@ internal sealed partial class MagGraphView
             var corner = 13 * T3Ui.UiScaleFactor;
             var edge = 5 * T3Ui.UiScaleFactor;
 
-            // On small frames only the bottom-right corner is offered - full handles
+            // On small frames only the bottom-right corner is offered - full handles 
             // would swallow most of the frame's clickable area
             var largeEnough = screenArea.GetWidth() > 6 * corner && screenArea.GetHeight() > 4 * corner;
             if (largeEnough)
@@ -121,7 +136,7 @@ internal sealed partial class MagGraphView
             {
                 EmitSectionResizeHandle(context, magSection, "##resizeL", new ImRect(new Vector2(pMin.X, pMin.Y + corner), new Vector2(pMin.X + edge, pMax.Y - corner)), SectionResizing.Handles.Left);
                 EmitSectionResizeHandle(context, magSection, "##resizeR", new ImRect(new Vector2(pMax.X - edge, pMin.Y + corner), new Vector2(pMax.X, pMax.Y - corner)), SectionResizing.Handles.Right);
-                EmitSectionResizeHandle(context, magSection, "##resizeT", new ImRect(new Vector2(pMin.X + corner, pMin.Y), new Vector2(pMax.X - corner, pMin.Y - edge)), SectionResizing.Handles.Top);
+                EmitSectionResizeHandle(context, magSection, "##resizeT", new ImRect(new Vector2(pMin.X + corner, pMin.Y - edge), new Vector2(pMax.X - corner, pMin.Y - 1)), SectionResizing.Handles.Top);
                 EmitSectionResizeHandle(context, magSection, "##resizeB", new ImRect(new Vector2(pMin.X + corner, pMax.Y - edge), new Vector2(pMax.X - corner, pMax.Y)), SectionResizing.Handles.Bottom);
             }
 
@@ -240,7 +255,6 @@ internal sealed partial class MagGraphView
             macro.AddAndExecCommand(new ChangeSectionCollapseCommand(symbolUi, section, collapsed: false));
 
             var expandedBounds = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
-            Log.Debug($"Expand '{section.Title}': pos={section.PosOnCanvas} size={section.Size} -> bounds {expandedBounds.Min}..{expandedBounds.Max}");
             SectionTree.ResolveBoundsExpansion(symbolUi, section, expandedBounds, Vector2.UnitY, macro, context.Selector);
 
             UndoRedoStack.Add(macro);
