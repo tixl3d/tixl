@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "271e397e-051c-473f-968f-a2251fed65d1"/*_GetSketchPoints*/,
   "Description": "An internal operator that gets the points of a selected sketch page.\nThis is required for onion skin rendering of sketch pages.",
   "InputUis": [

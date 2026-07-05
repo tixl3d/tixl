@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fc56f945-ba04-4d10-a516-68a479147016"/*Sigmoid*/,
   "Inputs": [
     {

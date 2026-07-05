@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8c41b312-6628-411c-a61d-604413b73a72"/*SrvFromStructuredBuffer*/,
   "Description": "Gets the ShaderResourceView from a buffer. \n\nThis operator is obsolete. Please use [GetBufferComponents].",
   "SymbolTags": "24",

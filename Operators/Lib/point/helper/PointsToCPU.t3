@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a5f4552f-7e25-43a5-bb14-21ab836fa0b3"/*PointsToCPU*/,
   "Inputs": [
     {
@@ -14,16 +16,16 @@
       "DefaultValue": true
     },
     {
+      "Id": "b2a36ab5-5b81-4b72-9f40-9e66d3dcf94b"/*Async*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "eff239da-39e9-41d3-968b-c74723ec2545"/*TriggerUpdate*/,
       "DefaultValue": true
     },
     {
       "Id": "f267534c-59ae-4758-b04a-13b6337bc0eb"/*PointBuffer*/,
       "DefaultValue": null
-    },
-    {
-      "Id": "b2a36ab5-5b81-4b72-9f40-9e66d3dcf94b"/*Async*/,
-      "DefaultValue": false
     }
   ],
   "Children": [],

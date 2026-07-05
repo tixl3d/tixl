@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4f89b41b-1643-442b-bec8-9f9ef2173baa"/*Raster*/,
   "Description": "Generates a wide range of patterns of dots and lines.\n\nConnecting a texture to the Image input will allow the pattern to be influenced differently at different parts of the texture.\n\nAKA: polkadot, pattern, grid, crosshair\n\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
   "SymbolTags": "1",
@@ -207,6 +209,5 @@
         "Y": -100.80272
       }
     }
-  ],
-  "Links": []
+  ]
 }

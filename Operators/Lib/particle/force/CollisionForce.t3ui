@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ed0bc47a-31ef-400b-b4e4-5552a859b309"/*CollisionForce*/,
   "Description": "A simple simulation of sphere collision between points. The radius of the points is defined on emit by the [ParticleSystem]'s PointRadiusW factor.\n\nSome recommendations:\n1. Try to increase the radius (either by increasing the emit points W attribute or the radius factor) and adjust the [DrawPoints] radius accordingly.\n2. Try to increase [ParticleSystem] damping.\n",
   "SymbolTags": "8",
@@ -73,6 +73,7 @@
     },
     {
       "ChildId": "0d705da7-9c19-4d99-b2d4-ab50ca862f0e"/*ComputeShaderStage*/,
+      "SectionId": "0a71289d-177f-4297-add3-5d5b7f281727",
       "Position": {
         "X": 2570.1177,
         "Y": -278.78647
@@ -87,6 +88,7 @@
     },
     {
       "ChildId": "4427d469-c9ca-4978-95e4-f05ae43e766f"/*StructuredBufferWithViews*/,
+      "SectionId": "0a71289d-177f-4297-add3-5d5b7f281727",
       "Position": {
         "X": 2160.823,
         "Y": -160.02792
@@ -94,6 +96,7 @@
     },
     {
       "ChildId": "50565741-6e91-4dd8-84da-61ed2968b196"/*ComputeShader*/,
+      "SectionId": "0a71289d-177f-4297-add3-5d5b7f281727",
       "Position": {
         "X": 2160.823,
         "Y": -267.71378
@@ -134,6 +137,7 @@
     },
     {
       "ChildId": "b292747b-1ded-4ea2-8448-e1e172cc729d"/*CalcDispatchCount*/,
+      "SectionId": "0a71289d-177f-4297-add3-5d5b7f281727",
       "Position": {
         "X": 2376.8535,
         "Y": -234.39873
@@ -148,6 +152,7 @@
     },
     {
       "ChildId": "f7be440e-238e-4509-be28-9b903dd99db9"/*GetBufferComponents*/,
+      "SectionId": "0a71289d-177f-4297-add3-5d5b7f281727",
       "Position": {
         "X": 2376.8535,
         "Y": -165.39873
@@ -163,7 +168,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "0a71289d-177f-4297-add3-5d5b7f281727",
       "Title": "Sadly, the _BuildSpatialHashMap helper requires a point buffer, \nso we have to copy particles to point buffer :(\n\nFor optimization, we could implement a Particle-version of the spatial hash map and also find some method of sharing this\nbetween Forces.",

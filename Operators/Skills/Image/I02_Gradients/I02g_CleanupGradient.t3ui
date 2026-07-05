@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cdcd9df3-e941-428a-9dd4-7b05266a4bec"/*I02g_CleanupGradient*/,
   "Description": "LinearGradient: Cleanup Tools",
   "InputUis": [],
@@ -14,7 +14,7 @@
     },
     {
       "ChildId": "1c51a945-eb82-4225-9545-7cfb524ec74f"/*LinearGradient*/,
-      "AnnotationId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
+      "SectionId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
       "Position": {
         "X": 1307.5101,
         "Y": 2086.0547
@@ -38,7 +38,6 @@
     },
     {
       "ChildId": "8559c44a-d917-49ae-a929-e5e5b9be98cf"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -46,7 +45,7 @@
     },
     {
       "ChildId": "95b95651-20d5-4140-9de4-d8d67ff51c55"/*ImageLevels*/,
-      "AnnotationId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
+      "SectionId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
       "Position": {
         "X": 1307.5101,
         "Y": 2156.0547
@@ -54,7 +53,7 @@
     },
     {
       "ChildId": "987672c1-096a-419e-84cf-cc4c54d72084"/*Time*/,
-      "AnnotationId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
+      "SectionId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
       "Position": {
         "X": 1167.5101,
         "Y": 2121.0547
@@ -78,7 +77,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
       "Label": "Solution",
@@ -109,13 +108,5 @@
       "Description": "Recreate the goal without dragging or changing any color steps.",
       "Style": "CallToAction"
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

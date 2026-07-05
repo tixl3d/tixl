@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "04ac6a30-a2ad-4e43-8954-94dc852b0602"/*AfterGlow2*/,
   "Description": "Creates an afterglow effect for moving images\n\nOther Useful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]\n\nAll Feedback Ops: [FluidFeedback] [AdvancedFeedback] [AdvancedFeedback2]",
   "SymbolTags": "1",

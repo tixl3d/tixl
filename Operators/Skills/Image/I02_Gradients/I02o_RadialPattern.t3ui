@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "58c70018-0764-43c3-8bc5-c7257c6dc5ba"/*I02o_RadialPattern*/,
   "Description": "RadialGradient: Invert Pattern",
   "InputUis": [],
@@ -15,7 +15,6 @@
     },
     {
       "ChildId": "3384e813-39d4-4e0d-90ee-1950d3052c9c"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -23,7 +22,7 @@
     },
     {
       "ChildId": "49f7b21b-4bc2-443e-b655-6eefe2b81cb5"/*RadialGradient*/,
-      "AnnotationId": "fe704489-0653-47fc-a168-df57af376b90",
+      "SectionId": "fe704489-0653-47fc-a168-df57af376b90",
       "Position": {
         "X": 1403.9335,
         "Y": 2147.1628
@@ -31,7 +30,7 @@
     },
     {
       "ChildId": "5fab7495-e9d1-4c08-ae70-b21943391798"/*Time*/,
-      "AnnotationId": "fe704489-0653-47fc-a168-df57af376b90",
+      "SectionId": "fe704489-0653-47fc-a168-df57af376b90",
       "Position": {
         "X": 1263.9335,
         "Y": 2182.1628
@@ -46,7 +45,7 @@
     },
     {
       "ChildId": "a42ff9c4-5a40-4b3f-b07d-a9b077670b38"/*RadialGradient*/,
-      "AnnotationId": "fe704489-0653-47fc-a168-df57af376b90",
+      "SectionId": "fe704489-0653-47fc-a168-df57af376b90",
       "Position": {
         "X": 1403.9335,
         "Y": 2112.1628
@@ -77,7 +76,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "fe704489-0653-47fc-a168-df57af376b90",
       "Label": "Solution",
@@ -108,13 +107,5 @@
       "Description": "Connect and adjust the parameters of the two gradients to recreate the pattern.",
       "Style": "CallToAction"
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "40757a26-1cd8-477c-a774-7463aadd6f0f"/*HowToDrawThings*/,
   "Description": "An interactive tutorial on how to render content with Tooll's rendering pipeline.",
   "SymbolTags": "3",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "051f0cfc-b352-4733-9bd7-fadf23ad904e"/*LoadObj*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "We use the geometry as OBJ (see the link in the description)...",
       "Position": {
         "X": -1268.3275,
@@ -14,6 +17,7 @@
     },
     {
       "ChildId": "0823549b-0920-4918-914a-6b5dd46ee73b"/*OrbitCamera*/,
+      "SectionId": "d8d8b8bf-155c-442f-8803-33d1adb4f4fa",
       "Comment": "... with a \"setup\" ...",
       "Position": {
         "X": -2023.8115,
@@ -22,6 +26,7 @@
     },
     {
       "ChildId": "0abc263f-1c0c-4405-a803-5b3c4fa09649"/*RenderTarget*/,
+      "SectionId": "172298dc-5619-4b11-9fd1-759b82cd840a",
       "Comment": "Render to an image buffer using anti-aliasing.",
       "Position": {
         "X": -1318.7814,
@@ -30,6 +35,7 @@
     },
     {
       "ChildId": "114f1697-de7a-4479-afef-4f0e75473c55"/*RenderTarget*/,
+      "SectionId": "d8d8b8bf-155c-442f-8803-33d1adb4f4fa",
       "Comment": "... into an image buffer ...",
       "Position": {
         "X": -2023.8115,
@@ -38,6 +44,7 @@
     },
     {
       "ChildId": "195fc78a-57a1-4e9e-b9ce-515d69f6d67d"/*DrawAsSplitView*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Comment": "This is a fancy operator, isn't it? If you are curious, you can double-click it to look inside and learn how this is made.",
       "Position": {
         "X": -921.0188,
@@ -46,6 +53,7 @@
     },
     {
       "ChildId": "24bb70f4-6ce4-4e1b-8de6-f1f93bd73e8f"/*RenderTarget*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "Notice how we increased the MultiSampling to 8 samples to reduce some of the aliasing on the finer details of the gun.\n\nThese samples are ONLY computed at the edges of the geometry, not of the surfaces.",
       "Position": {
         "X": -672.9573,
@@ -54,6 +62,7 @@
     },
     {
       "ChildId": "2745b191-3062-4079-8a4d-f4132a898330"/*ToneMapping*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Position": {
         "X": -1738.8679,
         "Y": 202.16583
@@ -61,6 +70,7 @@
     },
     {
       "ChildId": "2994f0ff-e918-48a2-92dc-4f768f2a0d8a"/*PointLight*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Comment": "We also add a rotating point light just for completeness.",
       "Position": {
         "X": -1878.8679,
@@ -69,6 +79,7 @@
     },
     {
       "ChildId": "30d0ea55-fdfe-4fbd-8aef-f5978f02897a"/*SetMaterial*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "Setting the material with a generative texture for the emissive color.\n\nNotice how the pattern highlight color is brighter than 1 so it glows nicely.\n",
       "Position": {
         "X": -1811.902,
@@ -77,6 +88,7 @@
     },
     {
       "ChildId": "34df234c-142c-4d14-be66-9a6066f4914d"/*RadialPoints*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -1268.3275,
         "Y": -38.503754
@@ -84,6 +96,7 @@
     },
     {
       "ChildId": "35b60bb9-6e7e-4077-9862-926a35be6116"/*ColorGrade*/,
+      "SectionId": "172298dc-5619-4b11-9fd1-759b82cd840a",
       "Comment": "Finally, we apply some color grading and a vignette.",
       "Position": {
         "X": -1178.7814,
@@ -92,6 +105,7 @@
     },
     {
       "ChildId": "380a3faa-8c55-4a6a-854f-4d65c0b18c65"/*LoadImage*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -812.95715,
         "Y": -43.753876
@@ -99,6 +113,7 @@
     },
     {
       "ChildId": "3b9b108e-e00e-4a85-9aa1-a6d181f756ce"/*Group*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -988.32764,
         "Y": -73.50375
@@ -106,6 +121,7 @@
     },
     {
       "ChildId": "3c854ec7-5b82-41f5-a3be-5e868217a7d6"/*DrawMeshAtPoints*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "...but you can also use a list of points to draw instances.",
       "Position": {
         "X": -1128.3275,
@@ -114,6 +130,7 @@
     },
     {
       "ChildId": "444fac4f-e84b-4ac7-9edf-7d6fbe27d543"/*DrawMesh as Wireframe*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Comment": "Note how we adjust the culling to None so we also render backfacing triangles.",
       "Position": {
         "X": -1061.0188,
@@ -122,6 +139,7 @@
     },
     {
       "ChildId": "457fa1a6-846e-44d5-a3ce-d55baeb52c16"/*MeshVerticesToPoints*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1201.0188,
         "Y": -1087.0078
@@ -129,6 +147,7 @@
     },
     {
       "ChildId": "4af260fa-2660-48af-824f-fec5b990582f"/*RenderTarget*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Comment": "Notice how we increased the MultiSampling to 8 samples to reduce some of the aliasing on the finer details of the gun.\n\nThese samples are ONLY computed at the edges of the geometry, not of the surfaces.",
       "Position": {
         "X": -1878.8679,
@@ -137,6 +156,7 @@
     },
     {
       "ChildId": "4c7d07bb-5677-4b81-b936-22d941c6bdc1"/*OrbitCamera*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -672.9573,
         "Y": 271.2461
@@ -144,6 +164,7 @@
     },
     {
       "ChildId": "4e98f2cd-6a52-433e-90bd-52a8e9d44a4c"/*DrawMesh*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1512.9346,
         "Y": -1143.1902
@@ -151,6 +172,7 @@
     },
     {
       "ChildId": "4eb05d75-64e7-436b-a35b-59646e69627d"/*_Time_old*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Position": {
         "X": -1951.902,
         "Y": -669.0894
@@ -158,6 +180,7 @@
     },
     {
       "ChildId": "5018e654-335b-4200-92c3-d13f3286d606"/*TextureToCubeMap*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Position": {
         "X": -1458.7814,
         "Y": -644.0035
@@ -165,6 +188,7 @@
     },
     {
       "ChildId": "524dfd98-efb7-49ef-b802-2b75d6b45a99"/*LoadImage*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -1081.6771,
         "Y": 63.695465
@@ -172,6 +196,7 @@
     },
     {
       "ChildId": "53c914fb-e460-4144-9737-884190a58651"/*SetEnvironment*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Comment": "SetEnvironment without a connected texture allows us to enable the default background and adjust its brightness.\n\nAlso check the documentation for this operator.",
       "Position": {
         "X": -1878.8679,
@@ -180,6 +205,7 @@
     },
     {
       "ChildId": "574ed504-4b1b-489b-b2c6-ccd23ef736e4"/*LoadGltfScene*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Position": {
         "X": -1878.8679,
         "Y": -147.83423
@@ -187,6 +213,7 @@
     },
     {
       "ChildId": "583ccf3e-c9f5-41d5-b805-48e44acbcb2d"/*LoadImage*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -812.95715,
         "Y": -8.753876
@@ -194,6 +221,7 @@
     },
     {
       "ChildId": "5ec89390-974c-4841-b585-71fbe0fb4561"/*Locator*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "We use this \"Null\"-object as a reference for the center of our scene, so we don't have to guess the depth of field's focus center.",
       "Position": {
         "X": -1044.7711,
@@ -202,6 +230,7 @@
     },
     {
       "ChildId": "5f06349f-20f9-4c08-9080-73cab767ec56"/*TorusMesh*/,
+      "SectionId": "d8d8b8bf-155c-442f-8803-33d1adb4f4fa",
       "Comment": "Some \"content\" like buffers or textures...\n\nYou can discover numerous additional mesh generators in the symbol browser within the lib.3d.mesh.generate namespace.",
       "Position": {
         "X": -2023.8115,
@@ -210,6 +239,7 @@
     },
     {
       "ChildId": "68b3dc43-c734-4b38-8dc2-fcea25ac74fd"/*DepthOfField*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Position": {
         "X": -1738.8679,
         "Y": 97.16577
@@ -217,6 +247,7 @@
     },
     {
       "ChildId": "6a465a04-8cf1-4196-b673-324c14dc484e"/*OscillateVec3*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Position": {
         "X": -1951.902,
         "Y": -319.08942
@@ -224,6 +255,7 @@
     },
     {
       "ChildId": "6ccb2f5c-8eac-4b9a-8543-ff661ef5e92b"/*ToneMapping*/,
+      "SectionId": "172298dc-5619-4b11-9fd1-759b82cd840a",
       "Position": {
         "X": -1178.7814,
         "Y": -434.00348
@@ -231,6 +263,7 @@
     },
     {
       "ChildId": "7042bd32-e3a9-4ee2-bf34-5214f8ee0515"/*Execute*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -672.9573,
         "Y": 61.246124
@@ -238,6 +271,7 @@
     },
     {
       "ChildId": "7241eb50-c918-457c-a2ba-0299b9d24281"/*CombineMaterialChannels*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "Note how we adjusted the Roughness Remap curve to make the gun slightly less shiny.",
       "Position": {
         "X": -941.67725,
@@ -246,6 +280,7 @@
     },
     {
       "ChildId": "728d0b53-cfe1-42f4-995a-ebb1ddd4b90a"/*DrawScene*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Position": {
         "X": -1878.8679,
         "Y": -112.83423
@@ -253,6 +288,7 @@
     },
     {
       "ChildId": "765e11b2-9c1a-4e91-9bbf-53cae74656c8"/*Camera*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -921.0188,
         "Y": -982.00793
@@ -260,6 +296,7 @@
     },
     {
       "ChildId": "77eabcd8-9cec-43a6-be9f-bb1a19c7fb21"/*LoadObj*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1572.2628,
         "Y": -990.9722
@@ -267,6 +304,7 @@
     },
     {
       "ChildId": "7b3387ab-9153-4d44-99c6-e62c9dff7131"/*SetMaterial*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "We're using CombineMaterialMaps to create the combined texture.\nThat's the reason we change the roughness offset to 0.",
       "Position": {
         "X": -672.9573,
@@ -275,6 +313,7 @@
     },
     {
       "ChildId": "83cfdd8a-5ad0-4963-933a-3350c723da68"/*Raster*/,
+      "SectionId": "d8d8b8bf-155c-442f-8803-33d1adb4f4fa",
       "Comment": "... and finally, we can apply a post-effect.\n\nPlease select this operator (and pin it in the output window) to see the result.\n\nAlso, check the video tutorial for the Raster effect linked in the description of this operator.",
       "Position": {
         "X": -2023.8115,
@@ -283,6 +322,7 @@
     },
     {
       "ChildId": "859c196d-7fb8-4b49-aa21-37f5a44e4f3d"/*LoadImage*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1368.063,
         "Y": -1195.2135
@@ -290,6 +330,7 @@
     },
     {
       "ChildId": "87709f46-6143-4860-a9b5-fdeec94083c1"/*PerlinNoise3*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1061.0188,
         "Y": -947.00793
@@ -297,6 +338,7 @@
     },
     {
       "ChildId": "8db2355a-03dd-463f-850c-e7c46f2e2542"/*DrawMesh*/,
+      "SectionId": "d8d8b8bf-155c-442f-8803-33d1adb4f4fa",
       "Comment": "... it's now drawn...",
       "Position": {
         "X": -2023.8115,
@@ -305,6 +347,7 @@
     },
     {
       "ChildId": "9117a6bb-1111-4c9a-be44-627211c9f307"/*PointLight*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "We also add a rotating point light just for completeness.",
       "Position": {
         "X": -672.9573,
@@ -313,6 +356,7 @@
     },
     {
       "ChildId": "93dc2607-bf39-4f76-bc53-416adec48b17"/*PointLight*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "We add a point light and animated it.",
       "Position": {
         "X": -1811.902,
@@ -321,6 +365,7 @@
     },
     {
       "ChildId": "999801fd-e4b2-4a36-822a-2881ecd204b3"/*DrawPointsShaded*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1061.0188,
         "Y": -1052.0078
@@ -328,6 +373,7 @@
     },
     {
       "ChildId": "9f1f826c-9b24-40cf-ade1-ed4dfc692dbd"/*SetEnvironment*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "SetEnvironment without a connected texture allows us to enable the default background and adjust its brightness.\n\nAlso check the documentation for this operator.",
       "Position": {
         "X": -672.9573,
@@ -336,6 +382,7 @@
     },
     {
       "ChildId": "9fab0cbe-51e6-4cd5-95db-7688cb1aa95c"/*DustParticles*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "Some dust particles that wiggle around.",
       "Position": {
         "X": -1951.902,
@@ -344,6 +391,7 @@
     },
     {
       "ChildId": "a6ba49d5-8bab-4963-be6b-4ed8a76ce845"/*Bloom*/,
+      "SectionId": "172298dc-5619-4b11-9fd1-759b82cd840a",
       "Position": {
         "X": -1178.7814,
         "Y": -504.00348
@@ -351,6 +399,7 @@
     },
     {
       "ChildId": "a887a0b1-a520-480f-951c-21fe157d48d7"/*_BlobOld*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Position": {
         "X": -1598.7814,
         "Y": -644.0035
@@ -358,6 +407,7 @@
     },
     {
       "ChildId": "ae38c453-6d05-4548-b6a8-f346081eac14"/*RyojiPattern2*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Position": {
         "X": -1951.902,
         "Y": -529.0894
@@ -365,6 +415,7 @@
     },
     {
       "ChildId": "b30e8746-c3cb-4bb7-88ec-871796fd66d6"/*SetEnvironment*/,
+      "SectionId": "172298dc-5619-4b11-9fd1-759b82cd840a",
       "Position": {
         "X": -1318.7814,
         "Y": -679.0035
@@ -372,6 +423,7 @@
     },
     {
       "ChildId": "b3f6b3fc-da9c-40ed-857f-fdbf279968df"/*OrbitCamera*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Position": {
         "X": -1878.8679,
         "Y": 62.16577
@@ -379,6 +431,7 @@
     },
     {
       "ChildId": "b49749e6-178d-44c8-9065-2f62f9037251"/*DrawPoints*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1061.0188,
         "Y": -1087.0078
@@ -386,6 +439,7 @@
     },
     {
       "ChildId": "badf9e48-e789-42de-8fea-6af901d453e1"/*DrawMeshUnlit*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1228.063,
         "Y": -1230.2136
@@ -393,6 +447,7 @@
     },
     {
       "ChildId": "bbced8d4-6f66-4ae5-a60a-72c60ae13286"/*OscillateVec3*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Position": {
         "X": -2018.868,
         "Y": 27.165771
@@ -400,6 +455,7 @@
     },
     {
       "ChildId": "c60d8bbe-4d2d-41a3-a8cd-6d2909cc6d6d"/*LoadObj*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "Load and distort a mesh...",
       "Position": {
         "X": -1811.902,
@@ -408,6 +464,7 @@
     },
     {
       "ChildId": "c7871b37-6d17-4099-9e56-db2b426b1e7e"/*OscillateVec3*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -812.95715,
         "Y": 236.24612
@@ -415,6 +472,7 @@
     },
     {
       "ChildId": "cecfc09f-2f16-4866-afe0-96bf34184e7d"/*PointsOnMesh*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1201.0188,
         "Y": -1052.0078
@@ -422,6 +480,7 @@
     },
     {
       "ChildId": "cf44730d-4b94-41d8-8daa-77a3cdc8dfa8"/*SetFog*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "A bit of colored fog for depth.",
       "Position": {
         "X": -1811.902,
@@ -430,6 +489,7 @@
     },
     {
       "ChildId": "d16957f5-2a78-4df6-b26d-50cdc991610a"/*DrawMesh*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "Now we draw the mesh. ",
       "Position": {
         "X": -1811.902,
@@ -438,6 +498,7 @@
     },
     {
       "ChildId": "da8c1027-7fe4-476b-9554-9a5def4a2acb"/*SplitMeshVertices*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "Split vertices for flat shading.",
       "Position": {
         "X": -1811.902,
@@ -446,6 +507,7 @@
     },
     {
       "ChildId": "db413f53-2fa5-4eec-87cb-3d5f4bf285c0"/*Group*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Position": {
         "X": -1811.902,
         "Y": -459.08942
@@ -453,6 +515,7 @@
     },
     {
       "ChildId": "df8b434b-a61b-4927-b6f8-f6cb293e716f"/*OrbitCamera*/,
+      "SectionId": "172298dc-5619-4b11-9fd1-759b82cd840a",
       "Position": {
         "X": -1318.7814,
         "Y": -609.0035
@@ -460,6 +523,7 @@
     },
     {
       "ChildId": "dfd46496-c4d4-47d5-9580-cbc377fe662d"/*DrawMeshHatched*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1229.1765,
         "Y": -1317.244
@@ -467,6 +531,7 @@
     },
     {
       "ChildId": "e069a7da-016d-475c-952b-0f69a551ef9d"/*SSAO*/,
+      "SectionId": "172298dc-5619-4b11-9fd1-759b82cd840a",
       "Comment": "Apply post-processing ambient occlusion to darken creases.\n\nNote how we also have to connect the RenderTarget.DepthOutput for this effect to work.",
       "Position": {
         "X": -1178.7814,
@@ -475,6 +540,7 @@
     },
     {
       "ChildId": "e13af1a0-015d-4c9e-93c8-27c39bdcb076"/*LenseFlareSetup*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "A lens flare setup that follows the point light position.",
       "Position": {
         "X": -1951.902,
@@ -483,6 +549,7 @@
     },
     {
       "ChildId": "e7b67aef-ad0e-4830-95a9-61bea7e9228e"/*_VisualizeTBN*/,
+      "SectionId": "297fac84-de17-4b6c-87b2-08935862abaf",
       "Position": {
         "X": -1061.0188,
         "Y": -1017.0078
@@ -490,6 +557,7 @@
     },
     {
       "ChildId": "e935f2d3-726e-4577-abad-176d02ca1c07"/*DrawMesh*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Comment": "Normally you draw a single mesh...",
       "Position": {
         "X": -1128.3275,
@@ -498,6 +566,7 @@
     },
     {
       "ChildId": "eafe5650-7120-4e63-87d1-ecd83e560116"/*Bloom*/,
+      "SectionId": "3a8bdb04-1d08-4008-b185-062af61f0302",
       "Position": {
         "X": -1738.8679,
         "Y": 167.16577
@@ -505,6 +574,7 @@
     },
     {
       "ChildId": "ef910487-9930-4bc9-afd2-c01c3821e1c8"/*DepthOfField*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -532.9564,
         "Y": 306.2461
@@ -512,6 +582,7 @@
     },
     {
       "ChildId": "f71f7807-9d5c-4b87-81f9-012fdda4a0e7"/*LoadImage*/,
+      "SectionId": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
       "Position": {
         "X": -1081.6771,
         "Y": 98.695465
@@ -519,6 +590,7 @@
     },
     {
       "ChildId": "fadf444e-7fa3-4a8f-b8f9-826dcc887a54"/*DisplaceMeshNoise*/,
+      "SectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Comment": "... we add a displacement effect and animate its phase over time ...\n\nYou can select this operator and press Shift-B to bypass this effect.",
       "Position": {
         "X": -1811.902,
@@ -535,11 +607,12 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "14e3c449-c384-414c-87b2-1f7c5de2a4aa",
       "Title": "Tooll is all about drawing (or \"rendering\") realtime content. \nThis playground will give you an introduction. ",
       "Label": "Drawing things...",
+      "ParentSectionId": "2a676163-423f-4e99-9d8a-b10469d0bb6e",
       "Color": {
         "X": 1.0,
         "Y": 1.0,
@@ -558,6 +631,7 @@
     {
       "Id": "172298dc-5619-4b11-9fd1-759b82cd840a",
       "Title": "Generate and apply environment texture and\nshow it in the background. The camera \nhas to follow later so the background \nmatches the camera movement.",
+      "ParentSectionId": "52f96e30-a573-452c-8454-b71544dd9cd1",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -596,6 +670,7 @@
       "Id": "2a676163-423f-4e99-9d8a-b10469d0bb6e",
       "Title": "Tooll is all about drawing (or \"rendering\") realtime content. \nThis playground will give you an introduction. ",
       "Label": "Drawing things...",
+      "ParentSectionId": "14e3c449-c384-414c-87b2-1f7c5de2a4aa",
       "Color": {
         "X": 1.0,
         "Y": 1.0,
@@ -615,6 +690,7 @@
       "Id": "3a203b9a-6ee3-44e1-8d48-3b27ba2c997e",
       "Title": "Tooll is all about drawing (or \"rendering\") realtime content. \nThis playground will give you an introduction. ",
       "Label": "Drawing things...",
+      "ParentSectionId": "14e3c449-c384-414c-87b2-1f7c5de2a4aa",
       "Color": {
         "X": 1.0,
         "Y": 1.0,
@@ -653,6 +729,7 @@
       "Id": "425a9b84-06ff-45b4-a2a9-3bfa73c6415d",
       "Title": "Tooll is all about drawing (or \"rendering\") realtime content. \nThis playground will give you an introduction. ",
       "Label": "Drawing things...",
+      "ParentSectionId": "14e3c449-c384-414c-87b2-1f7c5de2a4aa",
       "Color": {
         "X": 1.0,
         "Y": 1.0,
@@ -710,6 +787,7 @@
       "Id": "a93311e8-ac42-4a09-a6b9-561984e937c4",
       "Title": "Tooll is all about drawing (or \"rendering\") realtime content. \nThis playground will give you an introduction. ",
       "Label": "Drawing things...",
+      "ParentSectionId": "14e3c449-c384-414c-87b2-1f7c5de2a4aa",
       "Color": {
         "X": 1.0,
         "Y": 1.0,

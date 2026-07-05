@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "bc88304a-a2c7-4df9-93d8-b7dfecbce3de"/*SnapPointsToGrid*/,
   "Description": "Rounds (floors) the position of points onto a grid, i.e., snaps them to the position of a grid.\n\nThis can be useful to debug compute shader effects that rely on a spatial grid.",
   "SymbolTags": "1",

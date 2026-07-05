@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "743e18c7-eed5-40df-9a86-7caa996d94a2"/*KeepBoolean*/,
   "Description": "Keeps the state of flag until it is reset.",
   "SymbolTags": "1",

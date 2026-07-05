@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "53ff1a68-e888-444f-9ccc-23239c94d6db"/*LightRaysFx*/,
   "Description": "Based on \"Simpler God Rays\" by akufishi\nPimped by Newemka",
   "SymbolTags": "8",
@@ -80,6 +82,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "1ad828cf-9b7a-4c46-9ca7-ecb6b739e8fa"/*InputAssemblerStage*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 1209.1223,
         "Y": 935.63513
@@ -87,6 +90,7 @@
     },
     {
       "ChildId": "1c9ee15f-1734-440a-885c-3e78cb5e3b3b"/*PixelShader*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 801.24615,
         "Y": 1023.7451
@@ -101,6 +105,7 @@
     },
     {
       "ChildId": "273c8ffb-fb8d-4928-a29c-ca604b2e628f"/*Texture2d*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 694.07794,
         "Y": 1166.4528
@@ -129,6 +134,7 @@
     },
     {
       "ChildId": "38488885-f1bd-4526-8226-87e30ddd7c47"/*Draw*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 1059.1228,
         "Y": 1207.6337
@@ -199,6 +205,7 @@
     },
     {
       "ChildId": "8524802d-ccff-4aa7-99bb-c8e04676db5e"/*SrvFromTexture2d*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 801.24615,
         "Y": 980.7451
@@ -232,6 +239,7 @@
     },
     {
       "ChildId": "8cd8cc6d-037c-4d29-8340-e1b7da1ebdf6"/*SetPixelAndVertexShaderStage*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -291,6 +299,7 @@
     },
     {
       "ChildId": "be7d9e8c-e6a6-4223-9e89-0634b4fe37e4"/*Execute*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Style": "Resizable",
       "Size": {
         "X": 88.94497,
@@ -310,6 +319,7 @@
     },
     {
       "ChildId": "ccaa20f3-d60e-4970-aec8-af3c4b435505"/*OutputMergerStage*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 1209.1223,
         "Y": 1151.6342
@@ -317,6 +327,7 @@
     },
     {
       "ChildId": "e0663d81-c4f8-4944-b304-163758aa4702"/*RtvFromTexture2d*/,
+      "SectionId": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Position": {
         "X": 1059.1228,
         "Y": 1151.6342
@@ -372,7 +383,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
       "Title": "An ill-fated attempt to implement a second refinement pass.\nThe even distance scaling in the first pass sadly caused visual artifacts,\nthere were not obvious how to resolve.",

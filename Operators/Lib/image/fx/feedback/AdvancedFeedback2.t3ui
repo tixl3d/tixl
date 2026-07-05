@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a2ea3af5-d78b-46b4-84db-09d31f042798"/*AdvancedFeedback2*/,
   "Description": "An improved feedback effect based on OKLab space.\n\nAll Feedback Ops: [FluidFeedback] [AdvancedFeedback] [AdvancedFeedback2]\n\nAlso see [AfterGlow2]",
   "SymbolTags": "1",
@@ -300,6 +300,7 @@
     },
     {
       "ChildId": "4b648dd2-884e-4b14-8468-42ede346e2e7"/*HasTimeChanged*/,
+      "SectionId": "ce34ca61-78b4-4a50-889f-0d1457ef12c7",
       "Position": {
         "X": 883.65234,
         "Y": 1079.8125
@@ -424,6 +425,7 @@
     },
     {
       "ChildId": "99d24801-1244-4ac9-bf14-b83532d2d9f6"/*BoolToFloat*/,
+      "SectionId": "ce34ca61-78b4-4a50-889f-0d1457ef12c7",
       "Position": {
         "X": 1023.65234,
         "Y": 1149.8125
@@ -452,6 +454,7 @@
     },
     {
       "ChildId": "b69f8858-6e37-49e0-9342-98d17e6f1b24"/*Or*/,
+      "SectionId": "ce34ca61-78b4-4a50-889f-0d1457ef12c7",
       "Position": {
         "X": 1023.65234,
         "Y": 1079.8125
@@ -530,7 +533,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "ce34ca61-78b4-4a50-889f-0d1457ef12c7",
       "Title": "Resets the buffer when going backwards.",
@@ -549,31 +552,5 @@
         "Y": 201.69446
       }
     }
-  ],
-  "Links": [],
-  "Settings": {
-    "RenderExport": {
-  "TimeReference": "Bars",
-  "StartInBars": 0.0,
-  "EndInBars": 8.0,
-  "FrameRate": 60.0,
-  "OverrideMotionBlurSamples": -1,
-  "RenderMode": "Video",
-  "VideoCodec": "H264",
-  "Bitrate": 25000000,
-  "AutoIncrementVersionNumber": true,
-  "CreateSubFolder": true,
-  "AutoIncrementSubFolder": true,
-  "ExportAudio": true,
-  "FileFormat": "Png",
-  "TimeRange": "Custom",
-  "ContinuousClock": "Realtime",
-  "ContinuousFrameRate": "FixedFps",
-  "ResolutionFactor": 1.0,
-  "VideoFilePath": "./Render/render-v01.mp4",
-  "SequenceFilePath": "./ImageSequence/",
-  "SequenceFileName": "v01",
-  "SequencePrefix": "render"
-}
-  }
+  ]
 }

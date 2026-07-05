@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a368035f-2697-4ba5-a7bd-484eeb54c39b"/*TextureDisplaceMesh*/,
   "Description": "Uses a projected texture with a normal map to displace the mesh. \n\nThis is similar to [SamplePointAttributes].",
   "SymbolTags": "1",
@@ -294,7 +296,7 @@
       }
     },
     {
-      "ChildId": "e77aaa66-fe41-4ba0-aa68-1f50b6e15f2f"/*TransformsConstBuffer*/,
+      "ChildId": "e77aaa66-fe41-4ba0-aa68-1f50b6e15f2f"/*_TransformsCBuffer*/,
       "Position": {
         "X": -460.5838,
         "Y": 1653.0217

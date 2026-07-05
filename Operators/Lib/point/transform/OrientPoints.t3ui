@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "acc71a14-daad-4b36-b0bc-cf0a796cc5d9"/*OrientPoints*/,
   "Description": "Orients the rotation of points so that Z points towards a target position. You can also orient the point to the screen or the camera.",
   "SymbolTags": "1",
@@ -138,7 +140,7 @@
       }
     },
     {
-      "ChildId": "e2ffb3b1-9327-4cd8-83af-9f6c0d9e8842"/*TransformsConstBuffer*/,
+      "ChildId": "e2ffb3b1-9327-4cd8-83af-9f6c0d9e8842"/*_TransformsCBuffer*/,
       "Position": {
         "X": 184.57353,
         "Y": 1248.5173

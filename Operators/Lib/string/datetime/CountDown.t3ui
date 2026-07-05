@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e4a38f3c-bd4c-406a-9979-bb683d79b39b"/*CountDown*/,
   "Description": "Prints a formatted string counting down a duration or time to/since a fixed date.",
   "SymbolTags": "192",

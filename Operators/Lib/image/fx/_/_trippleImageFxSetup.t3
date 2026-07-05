@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5b999887-19df-4e91-9f58-1df2d8f1440b"/*_trippleImageFxSetup*/,
   "Inputs": [
     {
@@ -184,7 +186,7 @@
       "Outputs": []
     },
     {
-      "Id": "6ddd300b-1184-4e19-abec-2f9ba66cf63d"/*TransformsConstBuffer*/,
+      "Id": "6ddd300b-1184-4e19-abec-2f9ba66cf63d"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

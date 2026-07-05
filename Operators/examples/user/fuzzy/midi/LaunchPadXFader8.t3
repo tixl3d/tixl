@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c4d3e590-1780-4419-b946-7b3fc7d718aa"/*LaunchPadXFader8*/,
   "Inputs": [
     {

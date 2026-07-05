@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8fd60f01-9960-47fb-a730-45b50b9b94d2"/*ExecuteImage2dSdf*/,
   "Description": "Internal implementation of [Image2dSDF]. You will not need this operator.",
   "SymbolTags": "24",

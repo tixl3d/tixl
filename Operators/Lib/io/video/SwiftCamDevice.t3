@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5ea3d627-e44b-4531-9f06-4503a1a4dd0e"/*SwiftCamDevice*/,
   "Inputs": [
     {

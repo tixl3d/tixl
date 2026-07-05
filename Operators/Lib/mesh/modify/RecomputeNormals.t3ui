@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "68e0d0cb-1e57-4e9c-9f22-bd7927ddb4c5"/*RecomputeNormals*/,
   "Description": "Recalculates the normals (smoothing groups) of the surfaces of a mesh. For example, if these are changed by [DeformMesh] and similar operators",
   "SymbolTags": "8",
@@ -24,6 +26,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "1cce7fc3-02aa-4fee-887e-655099b2d3a4"/*MultiplyInt*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -43,6 +46,7 @@
     },
     {
       "ChildId": "3cacc8f6-d7f7-43e4-828a-50a474120f6e"/*GetBufferComponents*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1216.8098,
         "Y": 1765.0471
@@ -57,6 +61,7 @@
     },
     {
       "ChildId": "440d609a-4ae0-4e0f-b636-a9b92e7566a6"/*VerticeSize*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 912.0134,
         "Y": 1788.7645
@@ -64,6 +69,7 @@
     },
     {
       "ChildId": "4ec0fe37-23dd-4a8f-a90f-e9dee4804485"/*CalcDispatchCount*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1369.7988,
         "Y": 2069.8965
@@ -78,6 +84,7 @@
     },
     {
       "ChildId": "66ac4e94-3c7a-4894-aba3-2e7e74274d17"/*Execute*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1691.3508,
         "Y": 1443.6755
@@ -85,6 +92,7 @@
     },
     {
       "ChildId": "6c3229ef-efb6-4ba4-860d-5ac92736466f"/*NeighbourFaceIndices*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1056.237,
         "Y": 1885.9548
@@ -99,6 +107,7 @@
     },
     {
       "ChildId": "7fed5f04-445d-4eee-8485-6b1345205a83"/*ComputeShaderStage*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1478.217,
         "Y": 1321.5504
@@ -113,6 +122,7 @@
     },
     {
       "ChildId": "862cca82-1c69-409b-a2ad-e516345f8a77"/*CalcDispatchCount*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1100.8907,
         "Y": 1339.0497
@@ -127,6 +137,7 @@
     },
     {
       "ChildId": "982604ab-57ff-4f42-938a-c35b43f890d4"/*ComputeShaderStage*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1551.3497,
         "Y": 2038.7983
@@ -134,6 +145,7 @@
     },
     {
       "ChildId": "9a3f85aa-7fcb-4045-a489-3df1e17c6550"/*GetBufferComponents*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1206.237,
         "Y": 1885.9548
@@ -148,6 +160,7 @@
     },
     {
       "ChildId": "a1593636-be33-410c-b5f7-5826ecf48d4c"/*Any*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1067.043,
         "Y": 1540.4502
@@ -204,6 +217,7 @@
     },
     {
       "ChildId": "f46de77d-6eef-4c85-a518-64a1d154d434"/*ComputeShader*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 930.41943,
         "Y": 1321.8757
@@ -211,6 +225,7 @@
     },
     {
       "ChildId": "f999a1eb-1ca9-4a55-91ea-0cee090dd543"/*ComputeShader*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1199.3275,
         "Y": 2052.7227
@@ -218,6 +233,7 @@
     },
     {
       "ChildId": "fdc3cd90-fed5-4456-a90a-ebc40a225445"/*NewVertices*/,
+      "SectionId": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Position": {
         "X": 1062.0134,
         "Y": 1788.7645
@@ -233,7 +249,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "4718650c-dde4-4281-b4ec-116ce4d21e8a",
       "Title": "Reset and count neighbor faces",

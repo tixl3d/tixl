@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "21198ce9-7ef8-4f5e-a26a-f29b6abbcdec"/*DrawConnectionLinesExample*/,
   "Inputs": [],
   "Children": [

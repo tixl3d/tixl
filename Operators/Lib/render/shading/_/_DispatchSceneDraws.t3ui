@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6e32756e-4267-47f1-bad0-56ee8f58b070"/*_DispatchSceneDraws*/,
   "Description": "An internal helper that prepares the batching for drawing a [DrawScene] with multiple materials and meshes.",
   "SymbolTags": "16",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToDmxLights*/,
   "Description": "Converts 3D points into DMX channel values for lighting fixtures. Supports position, rotation (pan/tilt), color, and custom features.",
   "InputUis": [

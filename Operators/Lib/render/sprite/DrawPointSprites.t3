@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9d494c7e-f94c-477f-aeb3-7fa70788f225"/*DrawPointSprites*/,
   "Inputs": [
     {
@@ -83,7 +85,7 @@
       "Outputs": []
     },
     {
-      "Id": "26165f54-6f59-43af-9da1-4e28d4941158"/*TransformsConstBuffer*/,
+      "Id": "26165f54-6f59-43af-9da1-4e28d4941158"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

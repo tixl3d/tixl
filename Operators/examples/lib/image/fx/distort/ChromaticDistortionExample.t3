@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8c370b92-c977-449f-8d35-15abfb3f0e29"/*ChromaticDistortionExample*/,
   "Inputs": [],
   "Children": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/*ArtnetOutput*/,
   "Description": "Sends DMX data over the network using the Art-Net protocol.\n\nThis operator broadcasts or unicasts DMX data to Art-Net-enabled devices like lighting fixtures, nodes, or media servers. It can send multiple DMX universes simultaneously and uses a dedicated background thread for high-performance transmission.\n\nFeatures:\n- Multi-input support: Connect multiple lists to send different universes\n- Automatic universe expansion: Lists larger than 512 channels span multiple universes\n- Built-in ArtPoll discovery to find Art-Net nodes on your network\n- Frame rate limiting to prevent network flooding\n- Optional ArtSync for synchronized updates\n\nTips:\n- For broadcast, leave `TargetIpAddress` empty. For unicast, specify the destination IP.\n- Use `UniverseChannels` to define the starting universe for each input (auto-expands as needed)\n- Enable `SendTrigger` to start continuous transmission; disable to stop.\n\nAKA: artnet, dmx, lighting, sacn",
   "InputUis": [

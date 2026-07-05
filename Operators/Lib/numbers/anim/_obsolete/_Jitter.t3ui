@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3b0eb327-6ad8-424f-bca7-ccbfa2c9a986"/*_Jitter*/,
   "Description": "Generates random motion. This operator has been deprecated.\nPlease consider using [AnimValue] with a PerlinNoise shape.",
   "SymbolTags": "4096",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9df0e38e-ccf1-405a-ab18-6586e652cdf1"/*_ParamBlendingOverlay*/,
   "Description": "An internal scene that visualizes when playback has been slowed down",
   "InputUis": [
@@ -41,6 +43,7 @@
     },
     {
       "ChildId": "07b58592-de27-4fc0-ae8c-cc4090a82e67"/*TriggerAnim*/,
+      "SectionId": "58d471af-dc34-4f46-8282-43a1cc9df793",
       "Position": {
         "X": 919.897,
         "Y": 1259.3734
@@ -55,6 +58,7 @@
     },
     {
       "ChildId": "0b48a99b-cab1-4dc3-bc3c-ff1957d9d457"/*ListToBuffer*/,
+      "SectionId": "58d471af-dc34-4f46-8282-43a1cc9df793",
       "Position": {
         "X": 919.897,
         "Y": 1190.3734
@@ -69,6 +73,7 @@
     },
     {
       "ChildId": "14b33466-7533-4d93-b43b-505624e0a27e"/*LoadImage*/,
+      "SectionId": "58d471af-dc34-4f46-8282-43a1cc9df793",
       "Position": {
         "X": 1066.91,
         "Y": 1454.594
@@ -76,6 +81,7 @@
     },
     {
       "ChildId": "16081426-6cf4-466a-96e4-77a80528b874"/*SaveParameterSet*/,
+      "SectionId": "58d471af-dc34-4f46-8282-43a1cc9df793",
       "Position": {
         "X": 769.897,
         "Y": 1190.3734
@@ -104,6 +110,7 @@
     },
     {
       "ChildId": "1c218206-15ca-482d-ad51-48abd5bdf289"/*SampleGradient*/,
+      "SectionId": "58d471af-dc34-4f46-8282-43a1cc9df793",
       "Position": {
         "X": 1069.897,
         "Y": 1270.3734
@@ -146,6 +153,7 @@
     },
     {
       "ChildId": "32c59524-6f9f-4411-a5e5-a582e86f6ad1"/*DrawPoints*/,
+      "SectionId": "58d471af-dc34-4f46-8282-43a1cc9df793",
       "Position": {
         "X": 1219.897,
         "Y": 1190.3734
@@ -174,6 +182,7 @@
     },
     {
       "ChildId": "3cfaa915-bf76-4804-bfc7-06d5ddb7a667"/*SampleGradient*/,
+      "SectionId": "0f831f5f-f9af-49d1-82a5-de7917c4f0a7",
       "Position": {
         "X": 1024.5361,
         "Y": 1696.3223
@@ -391,6 +400,7 @@
     },
     {
       "ChildId": "962fc77c-5e83-480e-8ba1-d290ca9df97d"/*TransformPoints*/,
+      "SectionId": "58d471af-dc34-4f46-8282-43a1cc9df793",
       "Position": {
         "X": 1069.897,
         "Y": 1190.3734
@@ -412,6 +422,7 @@
     },
     {
       "ChildId": "a0129e8e-e5d7-4146-b2c0-9fd8fda9ce04"/*Layer2d*/,
+      "SectionId": "0f831f5f-f9af-49d1-82a5-de7917c4f0a7",
       "Position": {
         "X": 1174.5361,
         "Y": 1640.3223
@@ -545,6 +556,7 @@
     },
     {
       "ChildId": "d3c16a80-61bc-47a4-96b5-d27587aaf32f"/*TriggerAnim*/,
+      "SectionId": "0f831f5f-f9af-49d1-82a5-de7917c4f0a7",
       "Position": {
         "X": 874.53613,
         "Y": 1696.3223
@@ -552,6 +564,7 @@
     },
     {
       "ChildId": "d3fc5ef5-e7d9-4cdf-8b71-ee487490663a"/*LoadImage*/,
+      "SectionId": "0f831f5f-f9af-49d1-82a5-de7917c4f0a7",
       "Position": {
         "X": 1002.72943,
         "Y": 1895.4811
@@ -679,7 +692,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "0f831f5f-f9af-49d1-82a5-de7917c4f0a7",
       "Title": "Availability Indicator",

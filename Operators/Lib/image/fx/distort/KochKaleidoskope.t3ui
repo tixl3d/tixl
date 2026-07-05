@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f7366bdc-86b2-4951-8788-3826126ed8c2"/*KochKaleidoskope*/,
   "Description": "This effect is based on Koch snowflake fractal curve.\nAngle starts working with Steps set to 2 and above.\n\nFor a much simpler version see: [MirrorRepeat] or [TransformImage]\n\nSimilar effects or interesting combinations: [MosaicTiling] [VoronoiCells] [SubdivisionStretch]",
   "SymbolTags": "1",

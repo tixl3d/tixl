@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f1333224-e1e3-44b4-a84b-e9b13cacf320"/*RemoveStaticBackground*/,
   "Inputs": [
     {

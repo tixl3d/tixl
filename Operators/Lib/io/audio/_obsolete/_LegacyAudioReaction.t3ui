@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f8aed421-5e0e-4d1f-993c-1801153ebba8"/*_LegacyAudioReaction*/,
   "Description": "Can be used to drive float parameters through audio reaction. This requires [SetAudioReaction] to be added first.",
   "InputUis": [

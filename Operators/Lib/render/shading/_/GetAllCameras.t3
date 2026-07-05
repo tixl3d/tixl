@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5b538cf5-e3b6-4674-b23e-ab55fc59ada6"/*GetAllCameras*/,
   "Inputs": [
     {

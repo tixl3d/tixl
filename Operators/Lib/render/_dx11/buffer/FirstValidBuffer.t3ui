@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b4a8a055-6ae3-4b56-8b65-1b7b5f87d19a"/*FirstValidBuffer*/,
   "Description": "Checks all connected <BufferWithView> buffers and picks the first one with a valid (non-NULL) input. This can be useful for overriding buffers.",
   "SymbolTags": "8",

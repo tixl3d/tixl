@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4bf73e3c-1d8c-4007-b155-b0edf00c2e2e"/*TextureMapForceExample2*/,
   "Inputs": [],
   "Children": [
@@ -830,20 +832,16 @@
                 {
                   "Time": 0.3655,
                   "Value": 0.5024775266647339,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 1.4340122056503635,
                   "OutTangentAngle": 4.575604859240157
                 },
                 {
                   "Time": 0.7777,
                   "Value": 3.4971675872802734,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 1.434012205650363,
                   "OutTangentAngle": -1.70758044793943
                 }
@@ -1292,15 +1290,33 @@
       "TargetSlotId": "33752356-8348-4938-8f73-6257e6bb1c1f"
     }
   ],
-  "PlaybackSettings": {
+  "ProjectSettings": {
     "Enabled": true,
-    "Bpm": 120.0,
-    "AudioSource": 1,
-    "Syncing": 0,
-    "AudioDecayFactor": 0.9,
-    "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "",
-    "EnableAudioBeatLocking": "False",
-    "BeatLockAudioOffsetSec": "0"
+    "Playback": {
+      "Bpm": 120.0,
+      "AudioSource": 1,
+      "Syncing": 0,
+      "AudioDecayFactor": 0.9,
+      "AudioGainFactor": 1.0,
+      "AudioInputDeviceName": "",
+      "EnableAudioBeatLocking": "False",
+      "BeatLockAudioOffsetSec": "0"
+    },
+    "Audio": {
+      "SoundtrackMute": false,
+      "SoundtrackVolume": 0.5,
+      "OperatorMute": false,
+      "OperatorVolume": 1.0,
+      "AudioResyncThreshold": 0.04
+    },
+    "Export": {
+      "DefaultWindowMode": 1,
+      "EnablePlaybackControlWithKeyboard": true
+    },
+    "Proxy": {
+      "Format": 1,
+      "Resolution": 0.5,
+      "UseForPreview": true
+    }
   }
 }

@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9a7063ee-abde-45b0-b3f0-73a12721488f"/*MotionBlurExample2*/,
   "Description": "Illustrates some methods of how to generate motion blur.",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "085dca28-55a9-4402-a0af-3591fbf9c84e"/*HasTimeChanged*/,
+      "SectionId": "e753db42-0cae-4dc4-834f-b3417149d3f6",
       "Position": {
         "X": 1500.303,
         "Y": 318.4463
@@ -19,6 +22,7 @@
     },
     {
       "ChildId": "1730a691-ef06-4ee7-b13b-03bc56839303"/*Layer2d*/,
+      "SectionId": "a601c1e5-1968-4ee6-b20d-df7c2aeece9a",
       "Position": {
         "X": 1906.0289,
         "Y": -135.5473
@@ -26,6 +30,7 @@
     },
     {
       "ChildId": "224d4619-4ede-4503-bc37-6a4f23f0fa0b"/*UseTextureReference*/,
+      "SectionId": "e753db42-0cae-4dc4-834f-b3417149d3f6",
       "Position": {
         "X": 1178.4242,
         "Y": 301.4105
@@ -33,6 +38,7 @@
     },
     {
       "ChildId": "314f68f9-6a59-496f-975c-8d72c4e7f685"/*RenderWithMotionBlur*/,
+      "SectionId": "823d226a-5379-4de0-a208-1696ef012f1b",
       "Position": {
         "X": 1654.7104,
         "Y": 63.87256
@@ -47,6 +53,7 @@
     },
     {
       "ChildId": "52c4408e-92ad-4d96-961f-da9e7b4c20b1"/*Layer2d*/,
+      "SectionId": "e753db42-0cae-4dc4-834f-b3417149d3f6",
       "Position": {
         "X": 1353.8522,
         "Y": 329.00394
@@ -61,6 +68,7 @@
     },
     {
       "ChildId": "610d1603-fba3-4aa1-aeb5-307bf55a9fc5"/*Layer2d*/,
+      "SectionId": "e753db42-0cae-4dc4-834f-b3417149d3f6",
       "Position": {
         "X": 1800.303,
         "Y": 236.44629
@@ -75,6 +83,7 @@
     },
     {
       "ChildId": "98fcaf07-0865-45a4-ba59-5fa89ab58ddd"/*RenderTarget*/,
+      "SectionId": "a601c1e5-1968-4ee6-b20d-df7c2aeece9a",
       "Position": {
         "X": 1369.3976,
         "Y": -108.81961
@@ -96,6 +105,7 @@
     },
     {
       "ChildId": "c0e57a0d-387f-4eef-b69e-e3b08e13a36a"/*MotionBlur*/,
+      "SectionId": "a601c1e5-1968-4ee6-b20d-df7c2aeece9a",
       "Position": {
         "X": 1756.0289,
         "Y": -135.5473
@@ -103,6 +113,7 @@
     },
     {
       "ChildId": "c9f8cb18-cff0-49b3-bb23-4de98778ae11"/*Layer2d*/,
+      "SectionId": "823d226a-5379-4de0-a208-1696ef012f1b",
       "Position": {
         "X": 1804.7104,
         "Y": 63.87256
@@ -117,6 +128,7 @@
     },
     {
       "ChildId": "f0891a5b-095a-411c-b90e-20aa1b3550ea"/*RenderTarget*/,
+      "SectionId": "e753db42-0cae-4dc4-834f-b3417149d3f6",
       "Position": {
         "X": 1650.303,
         "Y": 236.44629
@@ -124,6 +136,7 @@
     },
     {
       "ChildId": "f2413b23-10ae-4fc1-87ae-56922136f4fc"/*Group*/,
+      "SectionId": "e753db42-0cae-4dc4-834f-b3417149d3f6",
       "Position": {
         "X": 1500.303,
         "Y": 236.44629
@@ -139,7 +152,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "823d226a-5379-4de0-a208-1696ef012f1b",
       "Title": "Render scene multiple times\n(Slow but nice for exporting videos)",

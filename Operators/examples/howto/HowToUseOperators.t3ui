@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fc3a89d4-e7ea-45d8-b1c5-41170c7cd2b8"/*HowToUseOperators*/,
   "Description": "This example gives a playful, interactive introduction to Tooll's operators and how they work.",
   "SymbolTags": "3",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0364b400-1df5-4f87-81e3-9be1bffe5926"/*Text*/,
+      "SectionId": "764be5c8-a525-4175-84e0-a6960d88ac14",
       "Position": {
         "X": -1525.0941,
         "Y": -146.69812
@@ -13,6 +16,7 @@
     },
     {
       "ChildId": "068ed5d7-7af6-4750-8903-57ab13e2b56f"/*DrawMeshAtPoints*/,
+      "SectionId": "764be5c8-a525-4175-84e0-a6960d88ac14",
       "Position": {
         "X": -1525.0941,
         "Y": -327.69812
@@ -20,6 +24,7 @@
     },
     {
       "ChildId": "1652203a-a660-4c38-9e45-4e2fdd868f96"/*TorusMesh*/,
+      "SectionId": "60143946-178c-46d0-87ad-42756155815b",
       "Position": {
         "X": -1731.727,
         "Y": -293.88135
@@ -27,6 +32,7 @@
     },
     {
       "ChildId": "208b31a2-c742-4669-8b9d-cbc0c2ce4479"/*OrbitCamera*/,
+      "SectionId": "63c6b793-896f-4771-aa9b-5ecc42880619",
       "Position": {
         "X": -1345.9817,
         "Y": -323.17822
@@ -34,6 +40,7 @@
     },
     {
       "ChildId": "246ebb95-a615-44b8-bb27-5a759acac9f7"/*OrbitCamera*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Position": {
         "X": -1544.8748,
         "Y": 1332.2559
@@ -41,6 +48,7 @@
     },
     {
       "ChildId": "25cb45d4-6540-49fc-ad2a-20a71ae048da"/*Vector3*/,
+      "SectionId": "3aae77b7-2887-4639-9066-9a6d724963f5",
       "Position": {
         "X": -1916.0188,
         "Y": -223.99164
@@ -48,6 +56,7 @@
     },
     {
       "ChildId": "26614e81-4026-427d-9d82-777fefd14f0f"/*DetectEdges*/,
+      "SectionId": "cb85d1d8-9d77-4f0e-a427-b635818f6f62",
       "Position": {
         "X": -768.85645,
         "Y": -229.08759
@@ -55,6 +64,7 @@
     },
     {
       "ChildId": "269a3347-a365-4809-866e-88f3222012f4"/*SampleCurve*/,
+      "SectionId": "3aae77b7-2887-4639-9066-9a6d724963f5",
       "Position": {
         "X": -1916.0188,
         "Y": -81.99164
@@ -62,6 +72,7 @@
     },
     {
       "ChildId": "2b484976-7a96-4885-a73e-0133c8de26f4"/*SetFog*/,
+      "SectionId": "63c6b793-896f-4771-aa9b-5ecc42880619",
       "Position": {
         "X": -1345.9817,
         "Y": -211.17822
@@ -69,6 +80,7 @@
     },
     {
       "ChildId": "31b653bd-4407-4693-baf9-d01a953ef0a3"/*DrawMesh*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1770.0626,
         "Y": 518.6839
@@ -76,6 +88,7 @@
     },
     {
       "ChildId": "32315db2-0a54-4955-939e-396166be9a3f"/*Blue Material*/,
+      "SectionId": "7dd94d2a-7335-4106-a707-09402a2a3d00",
       "Position": {
         "X": -1717.0685,
         "Y": 872.6817
@@ -83,6 +96,7 @@
     },
     {
       "ChildId": "36e05469-b80f-47d1-88e4-6d5296d7d7f6"/*DrawMesh*/,
+      "SectionId": "764be5c8-a525-4175-84e0-a6960d88ac14",
       "Position": {
         "X": -1525.0941,
         "Y": -383.69812
@@ -90,6 +104,7 @@
     },
     {
       "ChildId": "39adfc8e-9273-4eb2-b289-e6dc0e6a0e2e"/*RenderTarget*/,
+      "SectionId": "b03d9382-caa3-47b9-ad9c-5db277583562",
       "Position": {
         "X": -1403.3981,
         "Y": 318.19458
@@ -97,6 +112,7 @@
     },
     {
       "ChildId": "3be42ef4-a02c-488d-a637-31b7219b7da0"/*CubeMesh*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1910.0626,
         "Y": 518.6839
@@ -104,6 +120,7 @@
     },
     {
       "ChildId": "3ca0ec7b-492a-48be-8ad8-0a5801760ff8"/*DrawMesh*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Position": {
         "X": -1553.3928,
         "Y": 1211.1434
@@ -111,6 +128,7 @@
     },
     {
       "ChildId": "3f3cd83f-7c4d-4479-9565-93d07278d647"/*SphereMesh*/,
+      "SectionId": "60143946-178c-46d0-87ad-42756155815b",
       "Position": {
         "X": -1731.727,
         "Y": -250.88135
@@ -118,6 +136,7 @@
     },
     {
       "ChildId": "404f11b6-5bf6-47bd-9612-8d0dc40f45d8"/*Group*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1470.0626,
         "Y": 515.98047
@@ -125,6 +144,7 @@
     },
     {
       "ChildId": "408ef106-ec9b-4661-85be-99f940c2873b"/*Counter*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Comment": "We use the second \"was triggered\" output to count up an integer index.\n\nThat's a workaround because we can't directly connect the output float value to the integer index.\n\nAn alternative solution would be to use [FloatToInt].",
       "Position": {
         "X": -1725.4952,
@@ -133,6 +153,7 @@
     },
     {
       "ChildId": "480060ae-7e34-4e90-97f2-6303838f6f46"/*SetMaterial*/,
+      "SectionId": "63c6b793-896f-4771-aa9b-5ecc42880619",
       "Position": {
         "X": -1345.9817,
         "Y": -168.17822
@@ -140,6 +161,7 @@
     },
     {
       "ChildId": "48966aff-249c-4bac-a800-3bdf0356a427"/*Loop*/,
+      "SectionId": "6294dc30-d1fe-48ea-9e9c-fba59643b5d3",
       "Position": {
         "X": -1146.6223,
         "Y": -271.9068
@@ -147,6 +169,7 @@
     },
     {
       "ChildId": "5204f449-14b7-4ae8-b7b9-691311864af1"/*Red Material*/,
+      "SectionId": "7dd94d2a-7335-4106-a707-09402a2a3d00",
       "Position": {
         "X": -1567.0685,
         "Y": 872.6817
@@ -154,6 +177,7 @@
     },
     {
       "ChildId": "521038dd-6d3e-449d-bf14-69805857646a"/*String*/,
+      "SectionId": "3aae77b7-2887-4639-9066-9a6d724963f5",
       "Position": {
         "X": -1916.0188,
         "Y": -378.99164
@@ -161,6 +185,7 @@
     },
     {
       "ChildId": "52d3da60-2007-4b65-aab1-afeefecf920a"/*CubeMesh*/,
+      "SectionId": "60143946-178c-46d0-87ad-42756155815b",
       "Position": {
         "X": -1731.727,
         "Y": -336.88135
@@ -168,6 +193,7 @@
     },
     {
       "ChildId": "5ee5ff9f-fdd3-44c5-82b9-bb901c5b1761"/*RenderTarget*/,
+      "SectionId": "d4dc659e-f088-44da-87a4-962d9faa2984",
       "Position": {
         "X": -1299.3716,
         "Y": 999.8977
@@ -175,6 +201,7 @@
     },
     {
       "ChildId": "62d54121-bb5b-44d3-bfa3-8bae61b0f11b"/*Value*/,
+      "SectionId": "3aae77b7-2887-4639-9066-9a6d724963f5",
       "Position": {
         "X": -1916.0188,
         "Y": -335.99164
@@ -182,6 +209,7 @@
     },
     {
       "ChildId": "651b578c-29a6-475e-88ae-310c76f3ec2c"/*PointLight*/,
+      "SectionId": "63c6b793-896f-4771-aa9b-5ecc42880619",
       "Position": {
         "X": -1345.9817,
         "Y": -125.17822
@@ -189,6 +217,7 @@
     },
     {
       "ChildId": "66068d44-0d2b-49e7-b68c-98b156c23e61"/*PerlinNoise3*/,
+      "SectionId": "9201860c-0aad-40bc-9693-f280da49c181",
       "Position": {
         "X": -1772.847,
         "Y": 1070.2727
@@ -196,6 +225,7 @@
     },
     {
       "ChildId": "66d47c3f-ba6a-4c70-b0a1-0cd0335e39f1"/*Transform*/,
+      "SectionId": "9201860c-0aad-40bc-9693-f280da49c181",
       "Position": {
         "X": -1472.847,
         "Y": 1001.2727
@@ -203,6 +233,7 @@
     },
     {
       "ChildId": "6c270940-27f9-47aa-bc49-f40f2fd8ec9d"/*_GridPoints_Old*/,
+      "SectionId": "60143946-178c-46d0-87ad-42756155815b",
       "Position": {
         "X": -1731.727,
         "Y": -207.88135
@@ -210,6 +241,7 @@
     },
     {
       "ChildId": "6ec3428e-5393-4f10-970f-6b1e9f012275"/*Blur*/,
+      "SectionId": "cb85d1d8-9d77-4f0e-a427-b635818f6f62",
       "Position": {
         "X": -772.1941,
         "Y": -324.20966
@@ -217,6 +249,7 @@
     },
     {
       "ChildId": "760f8852-9420-4f8c-9285-ddd90d8e20bc"/*DrawMesh*/,
+      "SectionId": "c585a017-bbda-4ce7-b26a-159a9f4eb27a",
       "Position": {
         "X": -1740.9462,
         "Y": 316.52582
@@ -224,6 +257,7 @@
     },
     {
       "ChildId": "763490c0-ea9e-4f35-8ea8-ddda568da24c"/*SetMaterial*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1610.0626,
         "Y": 515.98047
@@ -231,6 +265,7 @@
     },
     {
       "ChildId": "76bda61a-c169-4db1-b2c8-85fbbae7242d"/*AnimValue*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Position": {
         "X": -1945.5009,
         "Y": 1251.1676
@@ -238,6 +273,7 @@
     },
     {
       "ChildId": "787be188-3863-47b0-a2c4-fa123903e814"/*TorusMesh*/,
+      "SectionId": "2fca86b0-adbd-45af-a8e1-f8bf5711cb07",
       "Position": {
         "X": -1907.5249,
         "Y": 316.52582
@@ -245,6 +281,7 @@
     },
     {
       "ChildId": "7a9f1f36-97c5-4013-a95f-6d0b24986bdb"/*RadialPoints*/,
+      "SectionId": "60143946-178c-46d0-87ad-42756155815b",
       "Position": {
         "X": -1731.727,
         "Y": -164.88135
@@ -252,6 +289,7 @@
     },
     {
       "ChildId": "7bc3a385-b225-49ad-bded-781c9e549a47"/*CountInt*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Position": {
         "X": -1585.4952,
         "Y": 1429.2295
@@ -259,6 +297,7 @@
     },
     {
       "ChildId": "815ea615-4492-49e1-a34e-7f52d93734a7"/*Execute*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1320.0626,
         "Y": 515.98047
@@ -266,6 +305,7 @@
     },
     {
       "ChildId": "851c8ad1-83e0-4614-abe5-4196e948e0ed"/*DrawMesh*/,
+      "SectionId": "d4dc659e-f088-44da-87a4-962d9faa2984",
       "Position": {
         "X": -1605.1173,
         "Y": 772.55304
@@ -273,6 +313,7 @@
     },
     {
       "ChildId": "86e3e9d7-9a3d-4a05-b164-dbd03c006a7d"/*Execute*/,
+      "SectionId": "6294dc30-d1fe-48ea-9e9c-fba59643b5d3",
       "Position": {
         "X": -1146.6223,
         "Y": -327.9068
@@ -280,6 +321,7 @@
     },
     {
       "ChildId": "9005532a-18fc-4235-bb07-797c3b4eff94"/*PerlinNoise3*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1610.0626,
         "Y": 585.98047
@@ -287,6 +329,7 @@
     },
     {
       "ChildId": "906c4169-6718-4b6b-9699-2d160258e7a0"/*LinePoints*/,
+      "SectionId": "60143946-178c-46d0-87ad-42756155815b",
       "Position": {
         "X": -1731.727,
         "Y": -121.88135
@@ -294,6 +337,7 @@
     },
     {
       "ChildId": "94808050-c368-45e2-a395-f408fe6f6ccb"/*Transform*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1610.0626,
         "Y": 550.98047
@@ -301,6 +345,7 @@
     },
     {
       "ChildId": "94c58a3f-97fc-4ed8-9c22-f37b5adc8a36"/*OrbitCamera*/,
+      "SectionId": "38cdb32d-2357-45fe-9774-6681b00b93fd",
       "Position": {
         "X": -1590.9462,
         "Y": 316.52582
@@ -308,6 +353,7 @@
     },
     {
       "ChildId": "9725f49e-0f8b-41c6-9839-6b4797aecd40"/*SampleGradient*/,
+      "SectionId": "3aae77b7-2887-4639-9066-9a6d724963f5",
       "Position": {
         "X": -1916.0188,
         "Y": -137.99164
@@ -315,6 +361,7 @@
     },
     {
       "ChildId": "98626f7f-d23f-4c84-b5cb-95a1863d89dd"/*Group*/,
+      "SectionId": "6294dc30-d1fe-48ea-9e9c-fba59643b5d3",
       "Position": {
         "X": -1146.6223,
         "Y": -383.9068
@@ -322,6 +369,7 @@
     },
     {
       "ChildId": "9b226694-68cd-4fb6-9fba-ce5b45838a7e"/*DrawPoints*/,
+      "SectionId": "764be5c8-a525-4175-84e0-a6960d88ac14",
       "Position": {
         "X": -1525.0941,
         "Y": -202.69812
@@ -329,6 +377,7 @@
     },
     {
       "ChildId": "9e03ecaa-bf56-42e6-9902-c98b5235e933"/*Camera*/,
+      "SectionId": "63c6b793-896f-4771-aa9b-5ecc42880619",
       "Position": {
         "X": -1345.9817,
         "Y": -379.17822
@@ -336,6 +385,7 @@
     },
     {
       "ChildId": "a81ebc9a-af31-4a51-b57a-dec59c3c3d1b"/*Transform*/,
+      "SectionId": "63c6b793-896f-4771-aa9b-5ecc42880619",
       "Position": {
         "X": -1345.9817,
         "Y": -267.17822
@@ -343,6 +393,7 @@
     },
     {
       "ChildId": "aa7371b0-0282-4a96-8dbc-75a57974b32a"/*Text*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1468.6932,
         "Y": 657.1432
@@ -350,6 +401,7 @@
     },
     {
       "ChildId": "b03a2d15-c2f5-4568-ad65-6df84bb90eb0"/*SampleGradient*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Position": {
         "X": -1795.5009,
         "Y": 1251.1676
@@ -357,6 +409,7 @@
     },
     {
       "ChildId": "b1506698-2723-4f01-b941-ace6926cfbf0"/*RenderTarget*/,
+      "SectionId": "a6e72c0c-14d5-4534-9678-918b37541511",
       "Position": {
         "X": -968.279,
         "Y": -349.24194
@@ -364,6 +417,7 @@
     },
     {
       "ChildId": "b3cbb0e7-2ddd-41a5-b8d2-28c393f0cad2"/*Vector2*/,
+      "SectionId": "3aae77b7-2887-4639-9066-9a6d724963f5",
       "Position": {
         "X": -1916.0188,
         "Y": -292.99164
@@ -371,6 +425,7 @@
     },
     {
       "ChildId": "b59e3cb8-d836-4781-a8b8-d4b51be0f12d"/*RenderTarget*/,
+      "SectionId": "54cb1d11-87a9-4a3e-9be8-bb675fffd24f",
       "Position": {
         "X": -1157.1608,
         "Y": 532.6686
@@ -378,6 +433,7 @@
     },
     {
       "ChildId": "c0cdfc66-21e1-4fff-b791-f812e1daeb52"/*DrawMesh*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Position": {
         "X": -1684.8748,
         "Y": 1332.2559
@@ -385,6 +441,7 @@
     },
     {
       "ChildId": "c892e811-9fb5-4531-9a12-e12ee808eb27"/*PerlinNoise3*/,
+      "SectionId": "9201860c-0aad-40bc-9693-f280da49c181",
       "Position": {
         "X": -1622.847,
         "Y": 1070.2727
@@ -392,6 +449,7 @@
     },
     {
       "ChildId": "cecc4ad0-ec7b-48c7-880c-6515f485e1aa"/*CubeMesh*/,
+      "SectionId": "d4dc659e-f088-44da-87a4-962d9faa2984",
       "Position": {
         "X": -1755.1174,
         "Y": 772.55304
@@ -399,6 +457,7 @@
     },
     {
       "ChildId": "d7b624ea-9391-41aa-b5f3-9493b89e0490"/*DrawLines*/,
+      "SectionId": "764be5c8-a525-4175-84e0-a6960d88ac14",
       "Position": {
         "X": -1525.0941,
         "Y": -258.69812
@@ -406,6 +465,7 @@
     },
     {
       "ChildId": "da843ba7-5ebb-4351-b26f-7268d72f22ed"/*Switch*/,
+      "SectionId": "6294dc30-d1fe-48ea-9e9c-fba59643b5d3",
       "Position": {
         "X": -1146.6223,
         "Y": -215.9068
@@ -413,6 +473,7 @@
     },
     {
       "ChildId": "de6a0951-4379-4bc1-bae5-1c2ad29bb70a"/*Load Obj*/,
+      "SectionId": "60143946-178c-46d0-87ad-42756155815b",
       "Position": {
         "X": -1731.727,
         "Y": -379.88135
@@ -420,6 +481,7 @@
     },
     {
       "ChildId": "e24e7679-a5c5-483f-8dfe-7e177ef63875"/*TorusMesh*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Position": {
         "X": -1945.5009,
         "Y": 1294.1676
@@ -427,6 +489,7 @@
     },
     {
       "ChildId": "ec8df3df-7aa2-4026-aff3-9af75710c513"/*Transform*/,
+      "SectionId": "9201860c-0aad-40bc-9693-f280da49c181",
       "Position": {
         "X": -1622.847,
         "Y": 1001.2727
@@ -434,6 +497,7 @@
     },
     {
       "ChildId": "f16f64d7-e078-419a-9c61-41aa3dec6a6e"/*Color*/,
+      "SectionId": "3aae77b7-2887-4639-9066-9a6d724963f5",
       "Position": {
         "X": -1916.0188,
         "Y": -180.99164
@@ -441,6 +505,7 @@
     },
     {
       "ChildId": "f2d85f4d-e920-4ac7-93fd-66ee79174877"/*RenderTarget*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Position": {
         "X": -1370.5378,
         "Y": 1402.1636
@@ -448,6 +513,7 @@
     },
     {
       "ChildId": "fa34d2db-546e-4e0b-8727-f7940e87c0a1"/*Switch*/,
+      "SectionId": "ac34d967-98a9-43f4-aa93-0c3d1c28c700",
       "Comment": "We use the connected index to pick which of the connected subgraphs should be evaluated.\n\nThere are a number of interesting things here:\n\n1. If the index is positive, it wraps around (i.e. uses a modulo with the count of connections)\n2. If parts of the subgraph are no longer evaluated, they fade out.\n\nTip:\n\nYou can use negative indices to show none or all children.",
       "Position": {
         "X": -1370.5378,
@@ -464,10 +530,11 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "2fca86b0-adbd-45af-a8e1-f8bf5711cb07",
       "Title": "4. ... finally, this operator \nprovides the actual data \nin the form of faces and \nvertices.",
+      "ParentSectionId": "d07b68ba-775d-44e2-9299-f9963d881164",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -486,6 +553,7 @@
     {
       "Id": "38cdb32d-2357-45fe-9774-6681b00b93fd",
       "Title": "2. This connected operator \nsets a camera perspective \nand also requests its \nconnected command.",
+      "ParentSectionId": "d07b68ba-775d-44e2-9299-f9963d881164",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -504,6 +572,7 @@
     {
       "Id": "3aae77b7-2887-4639-9066-9a6d724963f5",
       "Title": "Values",
+      "ParentSectionId": "f2ae8a9c-8d73-4698-9e04-e8fab0ac2797",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -540,6 +609,7 @@
     {
       "Id": "5bdcc582-0109-4388-bdf5-4d580fa2a967",
       "Title": "You can quickly distinguish the categories by their respective output types: \n\nFloat-Number, Buffer, Command, Image, etc. \nThere are many more types, but understanding these foundations will get you far...",
+      "ParentSectionId": "f2ae8a9c-8d73-4698-9e04-e8fab0ac2797",
       "Color": {
         "X": 0.56961846,
         "Y": 0.64893615,
@@ -558,6 +628,7 @@
     {
       "Id": "60143946-178c-46d0-87ad-42756155815b",
       "Title": "Buffers / Data on GPU",
+      "ParentSectionId": "f2ae8a9c-8d73-4698-9e04-e8fab0ac2797",
       "Color": {
         "X": 0.53900707,
         "Y": 0.42814746,
@@ -576,6 +647,7 @@
     {
       "Id": "6294dc30-d1fe-48ea-9e9c-fba59643b5d3",
       "Title": "Flow control",
+      "ParentSectionId": "f2ae8a9c-8d73-4698-9e04-e8fab0ac2797",
       "Color": {
         "X": 0.3647059,
         "Y": 0.64705884,
@@ -594,6 +666,7 @@
     {
       "Id": "63c6b793-896f-4771-aa9b-5ecc42880619",
       "Title": "Draw attributes",
+      "ParentSectionId": "f2ae8a9c-8d73-4698-9e04-e8fab0ac2797",
       "Color": {
         "X": 0.36588952,
         "Y": 0.64893615,
@@ -612,6 +685,7 @@
     {
       "Id": "764be5c8-a525-4175-84e0-a6960d88ac14",
       "Title": "Draw instructions",
+      "ParentSectionId": "f2ae8a9c-8d73-4698-9e04-e8fab0ac2797",
       "Color": {
         "X": 0.3647059,
         "Y": 0.64705884,
@@ -630,6 +704,7 @@
     {
       "Id": "7dd94d2a-7335-4106-a707-09402a2a3d00",
       "Title": "Settings for Material, Time, and resolution are overwritten. \nThe last one (on the left) wins.",
+      "ParentSectionId": "d4dc659e-f088-44da-87a4-962d9faa2984",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -648,6 +723,7 @@
     {
       "Id": "9201860c-0aad-40bc-9693-f280da49c181",
       "Title": "Transformations like Offset, Scale, and Rotation are accumulated.",
+      "ParentSectionId": "d4dc659e-f088-44da-87a4-962d9faa2984",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -666,6 +742,7 @@
     {
       "Id": "a6e72c0c-14d5-4534-9678-918b37541511",
       "Title": "Render Targets",
+      "ParentSectionId": "f2ae8a9c-8d73-4698-9e04-e8fab0ac2797",
       "Color": {
         "X": 0.75886506,
         "Y": 0.35521352,
@@ -702,6 +779,7 @@
     {
       "Id": "b03d9382-caa3-47b9-ad9c-5db277583562",
       "Title": "1. If this RenderTarget \nis selected, it \"requests\" \nits input command.",
+      "ParentSectionId": "d07b68ba-775d-44e2-9299-f9963d881164",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -720,6 +798,7 @@
     {
       "Id": "c585a017-bbda-4ce7-b26a-159a9f4eb27a",
       "Title": "3. This operator finally \nwants to \"draw\" something, \nbut it needs some content, \nso...",
+      "ParentSectionId": "d07b68ba-775d-44e2-9299-f9963d881164",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -738,6 +817,7 @@
     {
       "Id": "cb85d1d8-9d77-4f0e-a427-b635818f6f62",
       "Title": "Image Effects",
+      "ParentSectionId": "f2ae8a9c-8d73-4698-9e04-e8fab0ac2797",
       "Color": {
         "X": 0.7607843,
         "Y": 0.35686275,

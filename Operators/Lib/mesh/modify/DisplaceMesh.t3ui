@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "79c01289-f3a9-4bea-8e95-a6b5f89b752d"/*DisplaceMesh*/,
   "Description": "Distorts the input mesh by displacing its vertices by an amount controlled by the connected input texture.",
   "SymbolTags": "65",
@@ -202,7 +204,7 @@
       }
     },
     {
-      "ChildId": "96af98f9-424e-4526-9077-ec32fedeacb9"/*AddInts*/,
+      "ChildId": "96af98f9-424e-4526-9077-ec32fedeacb9"/*AddInt*/,
       "Position": {
         "X": 952.9591,
         "Y": 1856.3958

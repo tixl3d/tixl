@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1d958538-98e7-4053-b1e2-3b9f1bc4faa9"/*Combine3Images*/,
   "Inputs": [
     {

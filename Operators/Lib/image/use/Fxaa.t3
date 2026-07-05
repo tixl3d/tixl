@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0784b2ea-ac03-4f6e-8de3-4200cb93d651"/*Fxaa*/,
   "Inputs": [
     {

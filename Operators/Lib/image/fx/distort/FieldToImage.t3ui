@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f13b6fbd-bd73-4aab-90fc-98d62372baa8"/*FieldToImage*/,
   "Description": "",
   "InputUis": [

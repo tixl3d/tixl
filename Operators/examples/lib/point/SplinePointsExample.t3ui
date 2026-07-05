@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "eb7bd521-c84b-45ad-88c6-a1ed79e64806"/*SplinePointsExample*/,
   "Description": "",
   "InputUis": [],
@@ -18,7 +20,7 @@
       }
     },
     {
-      "ChildId": "055438d2-cb5f-4880-ac76-66935be85396"/*AddInts*/,
+      "ChildId": "055438d2-cb5f-4880-ac76-66935be85396"/*AddInt*/,
       "Position": {
         "X": 349.69,
         "Y": -182.98723
@@ -26,6 +28,7 @@
     },
     {
       "ChildId": "084d2e00-b857-41ae-a69e-befec4172892"/*Point*/,
+      "SectionId": "db58bd57-c851-4843-91bd-150dda27da7a",
       "Position": {
         "X": -410.57565,
         "Y": 189.01639
@@ -33,6 +36,7 @@
     },
     {
       "ChildId": "0e01a334-3931-49c4-bed3-e600538dcab0"/*Point*/,
+      "SectionId": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Position": {
         "X": -406.62585,
         "Y": 585.43146
@@ -47,6 +51,7 @@
     },
     {
       "ChildId": "27bfb911-cf9f-4a4f-8f48-c4d6dd67f9d3"/*Point*/,
+      "SectionId": "db58bd57-c851-4843-91bd-150dda27da7a",
       "Position": {
         "X": -410.57565,
         "Y": 60.016388
@@ -89,6 +94,7 @@
     },
     {
       "ChildId": "68c63c73-8fff-4e03-bae0-2ad7b6131f12"/*Point*/,
+      "SectionId": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Position": {
         "X": -406.62585,
         "Y": 671.43146
@@ -96,6 +102,7 @@
     },
     {
       "ChildId": "6aaeec86-3a77-4d2b-8b6e-18ba38321008"/*Point*/,
+      "SectionId": "db58bd57-c851-4843-91bd-150dda27da7a",
       "Position": {
         "X": -410.57565,
         "Y": 103.01639
@@ -111,6 +118,7 @@
     },
     {
       "ChildId": "740cf523-feba-44fb-a436-c1f736bbbda7"/*Point*/,
+      "SectionId": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Position": {
         "X": -406.62585,
         "Y": 628.43146
@@ -118,6 +126,7 @@
     },
     {
       "ChildId": "77010ddc-d90d-4965-ab7c-a813ac8c5530"/*Point*/,
+      "SectionId": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Position": {
         "X": -406.62585,
         "Y": 714.43146
@@ -160,6 +169,7 @@
     },
     {
       "ChildId": "86c8da07-2368-48d0-bdf3-a7e7c828aa40"/*Point*/,
+      "SectionId": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Position": {
         "X": -406.62585,
         "Y": 757.43146
@@ -174,6 +184,7 @@
     },
     {
       "ChildId": "92e12dd6-29c3-4032-9858-61e68924f750"/*Point*/,
+      "SectionId": "db58bd57-c851-4843-91bd-150dda27da7a",
       "Position": {
         "X": -410.57565,
         "Y": -25.983612
@@ -188,6 +199,7 @@
     },
     {
       "ChildId": "980c87ea-fcbb-4add-abd8-99c51bd63bd2"/*TransformPoints*/,
+      "SectionId": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Position": {
         "X": -8.335083,
         "Y": 618.8345
@@ -216,6 +228,7 @@
     },
     {
       "ChildId": "af6cccca-5bf8-4a12-b393-2f0971c5dd06"/*SplinePoints*/,
+      "SectionId": "db58bd57-c851-4843-91bd-150dda27da7a",
       "Style": "Resizable",
       "Size": {
         "X": 111.78958,
@@ -237,6 +250,7 @@
     },
     {
       "ChildId": "b304dd5c-99ea-4709-8fa1-bd0562d3d325"/*Point*/,
+      "SectionId": "db58bd57-c851-4843-91bd-150dda27da7a",
       "Position": {
         "X": -410.57565,
         "Y": 17.016388
@@ -252,6 +266,7 @@
     },
     {
       "ChildId": "b40937f0-8968-4dec-ba20-8a05e9375c48"/*Point*/,
+      "SectionId": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Position": {
         "X": -406.62585,
         "Y": 800.43146
@@ -266,6 +281,7 @@
     },
     {
       "ChildId": "bf7e00f9-6380-4b8b-8f03-180ca8f2de3b"/*SplinePoints*/,
+      "SectionId": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Position": {
         "X": -158.33508,
         "Y": 618.8345
@@ -316,6 +332,7 @@
     },
     {
       "ChildId": "ea603947-962b-4bcf-add1-47ae3a975c6e"/*Point*/,
+      "SectionId": "db58bd57-c851-4843-91bd-150dda27da7a",
       "Position": {
         "X": -410.57565,
         "Y": 146.01639
@@ -331,7 +348,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "6e062bf9-4764-4ec6-87c1-024e36d1e40d",
       "Title": "For DrawRibbons I had to fix the point orientation with TransformPoints,\nso the spline works well with DrawRibbons\nBonus: you can change the color of the control points\n",
@@ -368,6 +385,5 @@
         "Y": 350.59662
       }
     }
-  ],
-  "Links": []
+  ]
 }

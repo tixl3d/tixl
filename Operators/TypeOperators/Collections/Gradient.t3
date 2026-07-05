@@ -1,18 +1,10 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
-  "Id": "c5c3232c-70f8-4d1d-847d-6b6b25f3d9d6"/*SampleGradient2*/,
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
+  "Id": "c5c3232c-70f8-4d1d-847d-6b6b25f3d9d6"/*Gradient*/,
   "Inputs": [
     {
-      "Id": "0da9cbbe-09d3-4a5c-b1ec-189bf7055143"/*OverrideInterpolation*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "3ad07564-e191-4d51-ad79-db9c673478eb"/*Interpolation*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "b129b4d8-7c1b-47e4-b156-b24d6632b13a"/*Gradient*/,
+      "Id": "b129b4d8-7c1b-47e4-b156-b24d6632b13a"/*GradientInput*/,
       "DefaultValue": {
         "Gradient": {
           "Interpolation": "Linear",
@@ -40,10 +32,6 @@
           ]
         }
       }
-    },
-    {
-      "Id": "b945f9e1-c4ce-4e5b-8acf-0aee26318cb6"/*SamplePos*/,
-      "DefaultValue": 0.0
     }
   ],
   "Children": [],

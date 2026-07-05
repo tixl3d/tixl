@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c2b2758a-5b3e-465a-87b7-c6a13d3fba48"/*PlayAudioClip*/,
   "Description": "This is a workaround to playback audio clips without syncing.",
   "SymbolTags": "64",

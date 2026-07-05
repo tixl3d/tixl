@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a469ca9f-a7f9-46b8-b34c-0a1c109e1222"/*ExtrudeCurvesExample*/,
   "Description": "Three examples crafted by newemka for the [ExtrudeCurves] operator.",
   "InputUis": [],
@@ -19,6 +21,7 @@
     },
     {
       "ChildId": "0866dece-e4c3-49ad-b262-abe0f0a77ce4"/*VisualizePoints*/,
+      "SectionId": "b7d40bc4-8cae-43b8-b428-4c7f234aa088",
       "Position": {
         "X": 498.1972,
         "Y": 341.60886
@@ -26,6 +29,7 @@
     },
     {
       "ChildId": "093227ab-7a81-458c-96f1-50ec06ddaa96"/*ExtrudeCurves*/,
+      "SectionId": "b7d40bc4-8cae-43b8-b428-4c7f234aa088",
       "Comment": "If the generated mesh has holes on its surface, activate FixHoles",
       "Position": {
         "X": 351.40875,
@@ -34,6 +38,7 @@
     },
     {
       "ChildId": "0aba651d-2123-4126-9c8d-3cc801e775b2"/*RandomizePoints*/,
+      "SectionId": "b7d40bc4-8cae-43b8-b428-4c7f234aa088",
       "Position": {
         "X": 157.54651,
         "Y": 258.15018
@@ -147,6 +152,7 @@
     },
     {
       "ChildId": "5f98af3c-29b1-43be-88ba-371a5f8e4f11"/*BoolToInt*/,
+      "SectionId": "9a48534e-4b17-4374-b139-49f45dc65244",
       "Position": {
         "X": 952.2109,
         "Y": 454.88037
@@ -246,6 +252,7 @@
     },
     {
       "ChildId": "b522af85-d4d6-4d1c-a5e8-4eae02345698"/*AddNoise*/,
+      "SectionId": "b7d40bc4-8cae-43b8-b428-4c7f234aa088",
       "Position": {
         "X": 157.54651,
         "Y": 189.15016
@@ -274,6 +281,7 @@
     },
     {
       "ChildId": "caed574e-cb48-4472-a03f-11a20e9b7ab2"/*Execute*/,
+      "SectionId": "9a48534e-4b17-4374-b139-49f45dc65244",
       "Position": {
         "X": 788.85876,
         "Y": 328.77264
@@ -353,7 +361,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "9a48534e-4b17-4374-b139-49f45dc65244",
       "Title": "# 2 Visualize operators are useful to check the normals orientation",

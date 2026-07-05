@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "81377edc-0a42-4bb1-9440-2f2433d5757f"/*TransformFromClipSpace*/,
   "Description": "Transforms Point positions from world to clip space.",
   "SymbolTags": "64",
@@ -35,7 +37,7 @@
       }
     },
     {
-      "ChildId": "a6518541-3fb8-47c2-8a31-1dd5f3587704"/*TransformsConstBuffer*/,
+      "ChildId": "a6518541-3fb8-47c2-8a31-1dd5f3587704"/*_TransformsCBuffer*/,
       "Position": {
         "X": 243.30098,
         "Y": 742.5788

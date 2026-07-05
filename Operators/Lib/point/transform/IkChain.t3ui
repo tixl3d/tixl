@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "20eee636-7bd4-44e8-8a86-77fe4be1f50b"/*IkChain*/,
   "Description": "FABRIK inverse kinematic on the GPU. While this operator is still experimental, it works pretty good. Suggestions and help needed.\nUse [Once] to initialize.\n",
   "SymbolTags": "64",

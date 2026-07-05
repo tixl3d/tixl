@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "04858a08-f0fe-4536-9152-686659f0ab58"/*DepthStencilState*/,
   "Inputs": [
     {

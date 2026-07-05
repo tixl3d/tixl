@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3f7f8975-a7bb-47e6-96f7-061deb418e18"/*_WFEGameUi*/,
   "Inputs": [
     {
@@ -26,7 +28,7 @@
       "Outputs": []
     },
     {
-      "Id": "12a3a412-6340-402c-b26a-8bacc6785e86"/*AddInts*/,
+      "Id": "12a3a412-6340-402c-b26a-8bacc6785e86"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {
@@ -594,31 +596,22 @@
           {
             "Time": 0.0785,
             "Value": 0.0,
-            "InType": "Constant",
-            "OutType": "Constant",
-            "InEditMode": "Constant",
-            "OutEditMode": "Constant",
-            "InTangentAngle": 0.0,
+            "InInterpolation": "Constant",
+            "OutInterpolation": "Constant",
             "OutTangentAngle": 3.141592653589793
           },
           {
             "Time": 0.1192,
             "Value": 1.0,
-            "InType": "Constant",
-            "OutType": "Constant",
-            "InEditMode": "Constant",
-            "OutEditMode": "Constant",
-            "InTangentAngle": 0.0,
+            "InInterpolation": "Constant",
+            "OutInterpolation": "Constant",
             "OutTangentAngle": 3.141592653589793
           },
           {
             "Time": 0.1744,
             "Value": 0.0,
-            "InType": "Constant",
-            "OutType": "Constant",
-            "InEditMode": "Constant",
-            "OutEditMode": "Constant",
-            "InTangentAngle": 0.0,
+            "InInterpolation": "Constant",
+            "OutInterpolation": "Constant",
             "OutTangentAngle": -3.141592653589793
           }
         ]

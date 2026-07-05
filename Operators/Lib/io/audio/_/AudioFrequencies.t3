@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b72d968b-0045-408d-a2f9-5c739c692a66"/*AudioFrequencies*/,
   "Inputs": [
     {

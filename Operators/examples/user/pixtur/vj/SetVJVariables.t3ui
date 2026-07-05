@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e14af8a3-8672-4348-af9e-735714c31c92"/*SetVJVariables*/,
   "Description": "A small helper that sets LFO speed factor variables from MidiControllers into context. This setup is highly customized for WAKE performances and probably not applicable to your situation. But it might be a good starting point for tweaking your own setups.",
   "InputUis": [
@@ -21,6 +23,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0075bc70-b817-4c12-a538-57659a975af9"/*AnimValue*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -423.1518,
         "Y": 603.55884
@@ -28,6 +31,7 @@
     },
     {
       "ChildId": "0197bd9e-90e4-413c-97bb-a296a01dcaa7"/*BoolToInt*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -462.42377,
         "Y": 1309.2816
@@ -49,6 +53,7 @@
     },
     {
       "ChildId": "06cf347a-133b-4868-af38-fa9481484aee"/*Sum*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -251.52231,
         "Y": 596.6961
@@ -56,6 +61,7 @@
     },
     {
       "ChildId": "0f6d7d3f-f1cf-4cae-8817-0e6a0e5c03fd"/*AbletonLinkSync*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -506.47318,
         "Y": 469.89676
@@ -63,6 +69,7 @@
     },
     {
       "ChildId": "0fbc2d52-b596-4a68-9904-034a9ca31883"/*SetSpeedFactorA*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": 93.526825,
         "Y": 8.896759
@@ -70,6 +77,7 @@
     },
     {
       "ChildId": "11e7c592-713b-4b2e-9a85-b22ac1ccb130"/*SetFloatVar*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": 88.62906,
         "Y": 184.43045
@@ -77,6 +85,7 @@
     },
     {
       "ChildId": "124193dc-2184-4a92-b4e1-20643393c144"/*SetSpeedFactorB*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -28.445251,
         "Y": 877.4701
@@ -84,6 +93,7 @@
     },
     {
       "ChildId": "15ff0080-5986-4c4f-a4ad-d99395788d33"/*ValueToRate*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -56.473175,
         "Y": -74.10324
@@ -98,6 +108,7 @@
     },
     {
       "ChildId": "193cec34-cba6-423d-b2df-8fcf16ea8a8c"/*MidiInput*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -665.30066,
         "Y": 381.11224
@@ -112,6 +123,7 @@
     },
     {
       "ChildId": "1f5b9d89-2edc-4480-8d78-bad8a5102a74"/*BoolToFloat*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -369.68536,
         "Y": 1195.6268
@@ -119,6 +131,7 @@
     },
     {
       "ChildId": "21d6131f-2560-4e6e-971a-af385762db30"/*MidiInput*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -206.47318,
         "Y": -74.10324
@@ -126,6 +139,7 @@
     },
     {
       "ChildId": "23623f59-a037-4872-82d9-08c37a02ad4a"/*SetFloatVar*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -60.323273,
         "Y": 609.033
@@ -133,6 +147,7 @@
     },
     {
       "ChildId": "28b2146d-0434-4190-b142-ba8dc061035f"/*Midi SignalA*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -423.1518,
         "Y": 646.55884
@@ -140,6 +155,7 @@
     },
     {
       "ChildId": "2c2e450c-a56e-49f8-86bb-0f161bcd1081"/*SetTime*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -98.52823,
         "Y": 420.94888
@@ -147,6 +163,7 @@
     },
     {
       "ChildId": "42fda3ec-681d-4363-a1bc-fae5b4f30bf6"/*SetFloatVar*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -79.14734,
         "Y": 1200.0714
@@ -154,6 +171,7 @@
     },
     {
       "ChildId": "435e94bb-cd78-46ce-92bd-dd03ed7f9b16"/*MidiInput*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -509.91406,
         "Y": 839.2418
@@ -168,6 +186,7 @@
     },
     {
       "ChildId": "4ac6a6fb-f084-4694-9017-2c1a068b5c43"/*Group*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": 29.121338,
         "Y": 1438.4747
@@ -175,6 +194,7 @@
     },
     {
       "ChildId": "579465d3-9605-4749-be12-a218dbe5e778"/*AnimValue*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -660.85205,
         "Y": 1032.9076
@@ -189,6 +209,7 @@
     },
     {
       "ChildId": "604a2d61-cced-48cd-958d-9bdc09e52234"/*Midi SignalA*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -656.47314,
         "Y": 214.89676
@@ -196,6 +217,7 @@
     },
     {
       "ChildId": "68ef862d-d854-48d7-b71a-4b40f8b77586"/*Midi SignalA*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -329.3083,
         "Y": 978.162
@@ -203,6 +225,7 @@
     },
     {
       "ChildId": "69936fe1-9444-443c-9622-42a473ac2eb9"/*ValueToRate*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -178.44525,
         "Y": 960.46985
@@ -210,6 +233,7 @@
     },
     {
       "ChildId": "6b89801e-1290-42eb-ab67-7ce3dfa2d320"/*Execute*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Style": "Resizable",
       "Size": {
         "X": 76.353,
@@ -222,6 +246,7 @@
     },
     {
       "ChildId": "6c8ae24c-f800-4394-8b47-4971cde45532"/*ValueToRate*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -56.473175,
         "Y": 8.896759
@@ -241,6 +266,7 @@
     },
     {
       "ChildId": "71f6614e-aed8-4de8-b279-214b0c5a408c"/*Execute*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Style": "Resizable",
       "Size": {
         "X": 76.353,
@@ -253,6 +279,7 @@
     },
     {
       "ChildId": "72d67e5d-8fea-491d-a9f9-927492cfff55"/*Group*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": 75.27072,
         "Y": 498.3571
@@ -260,6 +287,7 @@
     },
     {
       "ChildId": "77593ebf-3b71-422b-99d8-94d455bdddf6"/*FloatToInt*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -479.5555,
         "Y": 1022.5702
@@ -267,6 +295,7 @@
     },
     {
       "ChildId": "82f0c30d-a0e8-4a25-a961-91ed32e9e5ba"/*BoolToFloat*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -206.47318,
         "Y": 257.89676
@@ -274,6 +303,7 @@
     },
     {
       "ChildId": "8e7926e7-b7d5-440d-8d4c-a6db486fca18"/*Midi SignalA*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -206.47318,
         "Y": 8.896759
@@ -281,6 +311,7 @@
     },
     {
       "ChildId": "94049366-45f6-48bf-9434-d69b7aa1109a"/*AnimValue*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -506.47318,
         "Y": 131.89676
@@ -295,6 +326,7 @@
     },
     {
       "ChildId": "a97527be-3364-41f3-a049-56b6c632b526"/*ValueToRate*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -178.44525,
         "Y": 877.4701
@@ -302,6 +334,7 @@
     },
     {
       "ChildId": "a9e808f3-c49c-40a4-b262-eaea0c77cbdc"/*SetTime*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -120.87866,
         "Y": 1438.4747
@@ -309,6 +342,7 @@
     },
     {
       "ChildId": "ac317f6d-2666-4b58-8ee2-28b48a21cea7"/*SetIntVar*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -170.93219,
         "Y": 1368.9303
@@ -316,6 +350,7 @@
     },
     {
       "ChildId": "b1d38b25-da2c-4785-b9de-c15d4fa34c59"/*Midi SignalB*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -328.44525,
         "Y": 877.4701
@@ -323,6 +358,7 @@
     },
     {
       "ChildId": "b29483e2-6786-4550-8b2e-f314494489aa"/*BoolToInt*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -56.473175,
         "Y": 353.89676
@@ -330,6 +366,7 @@
     },
     {
       "ChildId": "b86b972a-d47b-4b46-8835-71b5b40306d5"/*AbletonLinkSync*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -348.42697,
         "Y": 1498.1276
@@ -337,6 +374,7 @@
     },
     {
       "ChildId": "babca9cc-44e6-4661-92f9-61022f242094"/*BoolToInt*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -56.473175,
         "Y": 91.89676
@@ -344,6 +382,7 @@
     },
     {
       "ChildId": "be6ced22-c490-4e49-aa1d-0ef7e72a45f5"/*SetFloatVar*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -235.72157,
         "Y": 360.01093
@@ -351,6 +390,7 @@
     },
     {
       "ChildId": "c305debb-0d8f-4cc2-a4ad-4ccd2106f39e"/*SetSpeedFactorA*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -28.445251,
         "Y": 960.46985
@@ -358,6 +398,7 @@
     },
     {
       "ChildId": "ca3b48bf-24bc-47b1-b141-0608a5f9bbdb"/*Any*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -499.0984,
         "Y": 1130.172
@@ -365,6 +406,7 @@
     },
     {
       "ChildId": "cfee8ca0-f7bd-4770-9c47-ff7a97b2e420"/*AudioReaction*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -506.47318,
         "Y": 214.89676
@@ -372,6 +414,7 @@
     },
     {
       "ChildId": "d46094aa-5ed5-4f35-a8f0-744c4b9e9270"/*SetIntVar*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": 93.526825,
         "Y": 353.89676
@@ -379,6 +422,7 @@
     },
     {
       "ChildId": "d904c069-d10a-4da7-9c91-a40958adc2c0"/*Midi SignalA*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -796.72107,
         "Y": 1256.8217
@@ -386,6 +430,7 @@
     },
     {
       "ChildId": "dc27264e-fb68-4185-862d-7bda5cfefbff"/*Midi SignalA*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -415.25134,
         "Y": 937.3009
@@ -393,6 +438,7 @@
     },
     {
       "ChildId": "dd6fc729-c3ec-4bf4-9bd1-c4731925dd36"/*SetIntVar*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": 93.526825,
         "Y": 91.89676
@@ -400,6 +446,7 @@
     },
     {
       "ChildId": "dd97c14c-205f-4ead-80ac-116aa0bdd7ec"/*SetSpeedFactorB*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": 93.526825,
         "Y": -74.10324
@@ -407,6 +454,7 @@
     },
     {
       "ChildId": "def4c469-0818-44cb-9021-9f3b2f0da763"/*Sum*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -47.2211,
         "Y": 185.85083
@@ -414,6 +462,7 @@
     },
     {
       "ChildId": "e06c7a43-fae0-435c-b7ce-2e1da1f6272f"/*BoolToInt*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -276.84564,
         "Y": 1052.0922
@@ -421,6 +470,7 @@
     },
     {
       "ChildId": "e42b7a20-2d31-4a5c-a951-6db11851c065"/*SetIntVar*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -126.84564,
         "Y": 1052.0922
@@ -428,6 +478,7 @@
     },
     {
       "ChildId": "e679bda5-2d0a-40b7-b808-498830776b3f"/*Add*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -219.68536,
         "Y": 1195.6268
@@ -435,6 +486,7 @@
     },
     {
       "ChildId": "e8d943cd-a09d-42d3-8c69-9251416702c9"/*Any*/,
+      "SectionId": "cc77db97-a906-4175-b1ef-1d31239648f3",
       "Position": {
         "X": -356.47318,
         "Y": 131.89676
@@ -449,6 +501,7 @@
     },
     {
       "ChildId": "f9ab8f66-2000-487a-aa22-e62b5bfaccc3"/*SetFloatVar*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -42.386353,
         "Y": 1280.5272
@@ -456,6 +509,7 @@
     },
     {
       "ChildId": "f9c02487-ba7c-4f16-bded-69fb2255171e"/*AudioReaction*/,
+      "SectionId": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Position": {
         "X": -646.721,
         "Y": 1256.8217
@@ -471,7 +525,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "ba647b82-1433-4e74-8a15-da1e4aa06d93",
       "Title": "#APC Mini",

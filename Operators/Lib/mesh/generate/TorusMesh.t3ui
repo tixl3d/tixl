@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a835ab86-29c1-438e-a7f7-2e297108bfd5"/*TorusMesh*/,
   "Description": "Generates a procedural three-dimensional torus mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso known as: Donut\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].",
   "SymbolTags": "1",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c68fbb84-2f56-4aed-97ab-3c2df0ec700b"/*MosiacTiling*/,
   "Inputs": [
     {

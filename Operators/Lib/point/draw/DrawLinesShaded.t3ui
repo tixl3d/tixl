@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6b2f5350-6bb8-4f2c-92af-6e5fc81b8a82"/*DrawLinesShaded*/,
   "Description": "",
   "SymbolTags": "1024",
@@ -112,7 +112,7 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "07c49f4f-0ee4-45fd-a772-104c571b1500"/*TransformsConstBuffer*/,
+      "ChildId": "07c49f4f-0ee4-45fd-a772-104c571b1500"/*_TransformsCBuffer*/,
       "Position": {
         "X": 740.34015,
         "Y": 175.65
@@ -265,7 +265,7 @@
       }
     },
     {
-      "ChildId": "9cc21ba4-386f-4a83-9638-bcf54f0cbbd7"/*AddInts*/,
+      "ChildId": "9cc21ba4-386f-4a83-9638-bcf54f0cbbd7"/*AddInt*/,
       "Position": {
         "X": 1183.9767,
         "Y": 916.87506

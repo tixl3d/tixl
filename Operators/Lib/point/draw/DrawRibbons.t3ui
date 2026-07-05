@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "37a747b0-ec0e-4ebc-83dd-2e03022ad100"/*DrawRibbons*/,
   "Description": "Draws a point buffer as ribbons. The lines will distance to the camera. You can override this with the ScaleWithDistance parameter. \nWe use the points W attribute as a scale factor for the line width. \nIf the W attribute of a point is NaN (Not a Number), that point is not being drawn and acts as a separator between the adjacent line segments.\n\nAlso see [DrawPoints], [DrawLines] and [DrawBillboards].\nFor a detailed interactive Tutorial about Tools Renderpipeline see [HowToDrawThings].",
   "SymbolTags": "1",
@@ -247,7 +249,7 @@
       }
     },
     {
-      "ChildId": "941058e1-a4c2-4ecf-ab83-da0095a65054"/*TransformsConstBuffer*/,
+      "ChildId": "941058e1-a4c2-4ecf-ab83-da0095a65054"/*_TransformsCBuffer*/,
       "Position": {
         "X": 472.48523,
         "Y": -83.57388
@@ -294,7 +296,7 @@
       }
     },
     {
-      "ChildId": "e0a7f6bf-6448-41e6-b83e-220d0a64145f"/*AddInts*/,
+      "ChildId": "e0a7f6bf-6448-41e6-b83e-220d0a64145f"/*AddInt*/,
       "Position": {
         "X": 505.7359,
         "Y": 813.56067

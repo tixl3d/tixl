@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "46ce6fad-87fe-4d1f-b236-ae644dd1f76c"/*_ExecuteFastBlurPasses*/,
   "Description": "An internal operator that performs the necessary steps of the bloom effect.",
   "InputUis": [

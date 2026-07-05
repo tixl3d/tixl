@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "112ea923-a349-412f-8dd3-4d9d9fc42dc6"/*_AnalyzeSound*/,
   "Inputs": [
     {

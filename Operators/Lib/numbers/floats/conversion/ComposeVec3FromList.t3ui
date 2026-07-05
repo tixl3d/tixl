@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a52070ce-7110-439c-84e7-01f2a883b83f"/*ComposeVec3FromList*/,
   "Description": "Composes a Vector3 by selecting floats from a list.\nThis can be useful for converting data from OSC messages into positions or rotations.",
   "InputUis": [

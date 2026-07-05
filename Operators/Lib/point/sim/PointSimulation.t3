@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "10507c42-1240-47cc-9569-5e3f1c733e99"/*PointSimulation*/,
   "Inputs": [
     {

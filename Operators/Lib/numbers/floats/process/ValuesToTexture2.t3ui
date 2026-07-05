@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "78aee2e7-9fe6-44c4-bde3-57618007480f"/*ValuesToTexture2*/,
   "Description": "An upgrade version to convert a list of float value lists to a texture.",
   "InputUis": [

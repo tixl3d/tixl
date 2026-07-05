@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0c2dcf1f-48ff-45aa-a28b-c5900279ce6e"/*Int3*/,
   "Description": "Converts 3 single integers to an int3",
   "InputUis": [

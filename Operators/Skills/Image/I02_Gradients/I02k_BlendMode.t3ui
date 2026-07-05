@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cf84bdd7-14aa-4b4c-b461-cda2f525c696"/*I02k_BlendMode*/,
   "Description": "LinearGradient: Blend Modes",
   "InputUis": [],
@@ -12,7 +14,7 @@
     },
     {
       "ChildId": "1bc15b45-8d18-447a-b465-4ae8563cd5c0"/*LinearGradient*/,
-      "AnnotationId": "e53854d8-7f2a-4e6c-9324-d32eb7e42e1f",
+      "SectionId": "e53854d8-7f2a-4e6c-9324-d32eb7e42e1f",
       "Position": {
         "X": 1298.4766,
         "Y": 2117.3213
@@ -34,7 +36,7 @@
     },
     {
       "ChildId": "7dea3257-770a-4f28-8759-1ce1a7124625"/*LoadImage*/,
-      "AnnotationId": "e53854d8-7f2a-4e6c-9324-d32eb7e42e1f",
+      "SectionId": "e53854d8-7f2a-4e6c-9324-d32eb7e42e1f",
       "Position": {
         "X": 1298.4766,
         "Y": 2082.3213
@@ -42,7 +44,6 @@
     },
     {
       "ChildId": "fea4e891-8195-430a-b068-9c5ef24233f8"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -58,7 +59,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "e53854d8-7f2a-4e6c-9324-d32eb7e42e1f",
       "Label": "Solution",

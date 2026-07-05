@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f830faa6-02c1-475c-99aa-c5e0d9ea33b8"/*WLedSerialOutput*/,
   "Description": "Drives a WLED-based LED strip or ring over USB serial using the Adalight protocol.\n\nTakes a `Colors` list (e.g. from a [ColorList] or gradient op) and writes one frame per Update at the given `BaudRate` (115200 is the WLED default). Adalight framing and per-pixel color-order conversion are handled internally.\n\nTips:\n- Set `LedCount` to -1 to use the size of the `Colors` list. Otherwise the colors are mapped to `LedCount` LEDs using `MapMode` (Stretch = nearest-neighbor scaling, Repeat = tile).\n- `ColorOrder` must match the `LED Type / Color Order` saved in your WLED config (most WS281x rings are GRB).\n- Brightness multiplies all channels in the float domain; saves wiring a separate scale op.\n- The op auto-reconnects (every 2s) when the cable is unplugged and replugged. Status is reported via the warning-icon next to the op.\n- For first-time WLED setup (LED count, data pin, AP mode), use the WLED web UI before connecting this op.\n\nAKA: wled, adalight, led, neopixel, ws2812, ring, strip",
   "InputUis": [
@@ -37,6 +37,14 @@
       "Description": "Per-pixel byte order on the wire. Must match the `Color Order` saved in your WLED config. Most WS2812 / WS281x parts are GRB."
     },
     {
+      "InputId": "72cfdedc-7999-43c6-9615-bd4cae0a8903"/*LogMessages*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "Diagnostic toggle. When true, the op logs serial-write durations above 0.5 ms (both main-thread WriteBytes and background writer-thread _serialPort.Write). Leave off in normal use - the per-frame log calls are not free."
+    },
+    {
       "InputId": "8a58f4b4-3250-4344-af5c-346929ed2e6f"/*PortName*/,
       "Position": {
         "X": -200.0,
@@ -58,14 +66,6 @@
       "ClampMax": true
     },
     {
-      "InputId": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Sending*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 600.0
-      },
-      "Description": "While true, the op holds the serial port open and pushes a frame on every Update; auto-recovers if the cable is unplugged. Toggle off to release the port for other tools."
-    },
-    {
       "InputId": "ad110199-d20a-48a8-8dc2-892e67e7a6af"/*Reconnect*/,
       "Position": {
         "X": -200.0,
@@ -74,12 +74,12 @@
       "Description": "Trigger button: forces the connection to be torn down and reopened on the next frame. Useful when the link is wedged but `Sending` is still true. Auto-resets to false after firing."
     },
     {
-      "InputId": "72cfdedc-7999-43c6-9615-bd4cae0a8903"/*LogMessages*/,
+      "InputId": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Sending*/,
       "Position": {
         "X": -200.0,
-        "Y": 750.0
+        "Y": 600.0
       },
-      "Description": "Diagnostic toggle. When true, the op logs serial-write durations above 0.5 ms (both main-thread WriteBytes and background writer-thread _serialPort.Write). Leave off in normal use - the per-frame log calls are not free."
+      "Description": "While true, the op holds the serial port open and pushes a frame on every Update; auto-recovers if the cable is unplugged. Toggle off to release the port for other tools."
     },
     {
       "InputId": "ba4441fb-625e-4f49-8e9b-6c5237875f2b"/*BaudRate*/,

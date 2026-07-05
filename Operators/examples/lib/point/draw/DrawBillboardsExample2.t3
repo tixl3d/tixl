@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c1348a39-276f-4fe6-9210-f9f605cb0ece"/*DrawBillboardsExample2*/,
   "Inputs": [
     {
@@ -1413,15 +1415,33 @@
       "TargetSlotId": "aaba1602-e7a1-4b48-81d4-9d7b2b3aa8b1"
     }
   ],
-  "PlaybackSettings": {
+  "ProjectSettings": {
     "Enabled": true,
-    "Bpm": 120.0,
-    "AudioSource": 1,
-    "Syncing": 0,
-    "AudioDecayFactor": 0.9,
-    "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "",
-    "EnableAudioBeatLocking": "False",
-    "BeatLockAudioOffsetSec": "0"
+    "Playback": {
+      "Bpm": 120.0,
+      "AudioSource": 1,
+      "Syncing": 0,
+      "AudioDecayFactor": 0.9,
+      "AudioGainFactor": 1.0,
+      "AudioInputDeviceName": "",
+      "EnableAudioBeatLocking": "False",
+      "BeatLockAudioOffsetSec": "0"
+    },
+    "Audio": {
+      "SoundtrackMute": false,
+      "SoundtrackVolume": 0.5,
+      "OperatorMute": false,
+      "OperatorVolume": 1.0,
+      "AudioResyncThreshold": 0.04
+    },
+    "Export": {
+      "DefaultWindowMode": 1,
+      "EnablePlaybackControlWithKeyboard": true
+    },
+    "Proxy": {
+      "Format": 1,
+      "Resolution": 0.5,
+      "UseForPreview": true
+    }
   }
 }

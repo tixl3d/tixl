@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "72e627e9-f570-4936-92b1-b12ed8d6004e"/*EdgeRepeat*/,
   "Description": "Repeats (stretches) pixels of the input image along a line.\n\nPlease explore the presets.\n\nWorks well with [Dither]",
   "InputUis": [

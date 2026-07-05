@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cb89ed1d-03ea-4880-bfa0-1dd723e4bdab"/*FadingSlideShow*/,
   "Inputs": [
     {

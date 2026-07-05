@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ade1d03d-db80-41ad-bcfa-8a2b900e9d41"/*_ComputeDepthToLinear*/,
   "Inputs": [
     {

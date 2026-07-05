@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "09b2aeea-79fa-4209-860e-85161060b6c8"/*TransformWithImage*/,
   "Description": "Allows modifying various point attributes from an image.",
   "SymbolTags": "1",

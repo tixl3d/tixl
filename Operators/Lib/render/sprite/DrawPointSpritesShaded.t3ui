@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "122cbf32-b3e5-4db7-b18d-f2af5b10419c"/*DrawPointSpritesShaded*/,
   "Description": "",
   "SymbolTags": "64",
@@ -151,7 +153,7 @@
       }
     },
     {
-      "ChildId": "56d3b89d-c959-43ae-910b-aa6ee00c6d78"/*AddInts*/,
+      "ChildId": "56d3b89d-c959-43ae-910b-aa6ee00c6d78"/*AddInt*/,
       "Position": {
         "X": 505.7359,
         "Y": 813.56067
@@ -186,7 +188,7 @@
       }
     },
     {
-      "ChildId": "94bd3e1c-f6d0-43c5-9c04-8d55c7323a82"/*TransformsConstBuffer*/,
+      "ChildId": "94bd3e1c-f6d0-43c5-9c04-8d55c7323a82"/*_TransformsCBuffer*/,
       "Position": {
         "X": 472.48523,
         "Y": -83.57388

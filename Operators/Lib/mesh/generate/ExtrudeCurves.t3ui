@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2"/*ExtrudeCurves*/,
   "Description": "Generates a mesh by extruding a set of points along a set of other points.\n\nThe extrusion is done along the z-axis. This means that the rail points should be aligned in a way that z is pointing along the rail.\n\nAlso, the normals are directly taken from the extruded points' z-axis. You can use the [VisualizePoints] to verify the alignment and adjust it in [TransformPoints] in point space.",
   "SymbolTags": "8",
@@ -154,7 +156,7 @@
       }
     },
     {
-      "ChildId": "7e4fd046-3041-4caa-9e06-b053849abb84"/*AddInts*/,
+      "ChildId": "7e4fd046-3041-4caa-9e06-b053849abb84"/*AddInt*/,
       "Position": {
         "X": -713.0913,
         "Y": 907.6197
@@ -168,7 +170,7 @@
       }
     },
     {
-      "ChildId": "9018dac0-e0eb-4252-9e45-a8acc8a756d7"/*AddInts*/,
+      "ChildId": "9018dac0-e0eb-4252-9e45-a8acc8a756d7"/*AddInt*/,
       "Position": {
         "X": -713.0913,
         "Y": 872.6197

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6e29bd11-7927-4f74-a35e-a6b129464a55"/*Ease*/,
   "Description": "Note: The input value should evolve by steps (e.g., sudden changes) to fully utilize the easing effect.\nThis operator creates smooth, ease-in-out transitions between changing input values, perfect for animating any step change. Customize the transition style with options like cubic, exponential, or back easing, or choose a linear fallback for a simple interpolation. \n[Damp] [Spring] [EaseVec2] [EaseVec3]",
   "InputUis": [

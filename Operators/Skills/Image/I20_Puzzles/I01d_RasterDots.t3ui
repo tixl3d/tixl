@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a91e8394-db72-4fcb-8cd6-0676ada49848"/*I01d_RasterDots*/,
   "Description": "",
   "InputUis": [],
@@ -26,7 +28,7 @@
     },
     {
       "ChildId": "9fec925d-a19a-4643-bcd4-6443a859032a"/*LinearGradient*/,
-      "AnnotationId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
+      "SectionId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
       "Position": {
         "X": 1300.6509,
         "Y": 2105.737
@@ -34,7 +36,7 @@
     },
     {
       "ChildId": "b80eb708-9052-4370-ae04-8c41f5f32692"/*Raster*/,
-      "AnnotationId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
+      "SectionId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
       "Position": {
         "X": 1300.6509,
         "Y": 2175.7368
@@ -42,7 +44,7 @@
     },
     {
       "ChildId": "c0d8d4a7-68a4-4590-806d-34b42d6795f4"/*Time*/,
-      "AnnotationId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
+      "SectionId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
       "Position": {
         "X": 1160.6509,
         "Y": 2140.7368
@@ -65,7 +67,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
       "Label": "Solution",

@@ -1,11 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c6ae0c1e-b598-4bd2-81f7-97cf2af4f729"/*P01a_PointIntro*/,
   "Description": "A point is not just a Point",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "03f5e7ee-ba75-4b18-a8cd-1bb2fb91fbeb"/*AnimValue*/,
-      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1216.6234,
         "Y": 2318.6
@@ -41,7 +43,7 @@
     },
     {
       "ChildId": "2543a81f-ca63-4642-abb4-0e2111017a33"/*PerlinNoise3*/,
-      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1356.6234,
         "Y": 2248.6
@@ -63,7 +65,7 @@
     },
     {
       "ChildId": "738f5dc0-e3d0-4491-aa84-2d41d3ac266c"/*PerlinNoise*/,
-      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1356.6234,
         "Y": 2283.6
@@ -71,7 +73,7 @@
     },
     {
       "ChildId": "b128d131-a6a2-4d6b-9fa3-5196aa4b5b59"/*Point*/,
-      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1496.6234,
         "Y": 2248.6
@@ -79,7 +81,7 @@
     },
     {
       "ChildId": "b12920d8-0b9b-4ad1-b0bf-2a6c21939964"/*SampleGradient*/,
-      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1356.6234,
         "Y": 2318.6
@@ -94,7 +96,7 @@
     },
     {
       "ChildId": "e8c44512-734b-44e7-8fb2-54530e1fefc1"/*RenderTarget*/,
-      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1496.6234,
         "Y": 2388.6
@@ -109,7 +111,7 @@
     },
     {
       "ChildId": "ea65aec3-0770-4deb-a80d-a6d6729563ee"/*DrawPoints*/,
-      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "SectionId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Position": {
         "X": 1496.6234,
         "Y": 2353.6
@@ -125,7 +127,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
       "Label": "Solution",

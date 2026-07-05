@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f925e9b9-5c7a-4fbf-9572-b11fe2d54d6c"/*ApplyRandomWalk*/,
   "Description": "Applies random steps to the position and rotation of points.",
   "SymbolTags": "64",

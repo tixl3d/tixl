@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "70e97e6b-3ddf-4a88-b080-c63fdbd251c9"/*UVsViewerExample*/,
   "Description": "",
   "InputUis": [],
@@ -117,6 +119,7 @@
     },
     {
       "ChildId": "806e5072-9333-4660-b749-83c53a25845d"/*MeshProjectUV*/,
+      "SectionId": "34042f0b-29c3-41d0-b05e-bd3e3ffcaa91",
       "Position": {
         "X": 668.11865,
         "Y": 122.29932
@@ -265,7 +268,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "34042f0b-29c3-41d0-b05e-bd3e3ffcaa91",
       "Title": "Switch between 3D and 2D UV map ",

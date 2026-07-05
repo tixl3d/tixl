@@ -1,10 +1,18 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
-  "Id": "a60adc26-d7c6-4615-af78-8d2d6da46b79"/**/,
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
+  "Id": "a60adc26-d7c6-4615-af78-8d2d6da46b79"/*_TransformsCBuffer*/,
   "Description": "Provides a constant buffer with essential transform matrices:\n\n    float4x4 CameraToClipSpace;\n    float4x4 ClipSpaceToCamera;\n    float4x4 WorldToCamera;\n    float4x4 CameraToWorld;\n    float4x4 WorldToClipSpace;\n    float4x4 ClipSpaceToWorld;\n    float4x4 ObjectToWorld;\n    float4x4 WorldToObject;\n    float4x4 ObjectToCamera;\n    float4x4 ObjectToClipSpace;",
   "SymbolTags": "24",
-  "InputUis": [],
+  "InputUis": [
+    {
+      "InputId": "55dbf5b7-b3d2-4d61-86d5-ac3b167244b7"/*CameraReference*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
   "SymbolChildUis": [],
   "OutputUis": [
     {

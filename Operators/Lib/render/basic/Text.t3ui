@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fd31d208-12fe-46bf-bfa3-101211f8f497"/*Text*/,
   "Description": "Creates flat 2D Text as an Object in 3D Space from bitmap fonts.\nFor each character a quad mesh is generated. [TextSprites] can be used to manipulate these generated objects.\n\nAny String Operator like [AString], [RandomString], etc. can be used as string input.\n\nThe fonts used consist of a BmFont font definition file and the matching MSDF (multichannel distance field) texture",
   "SymbolTags": "1",
@@ -254,7 +256,7 @@
       }
     },
     {
-      "ChildId": "8991cb54-67d6-4dc9-b4fa-7861e367d737"/*TransformsConstBuffer*/,
+      "ChildId": "8991cb54-67d6-4dc9-b4fa-7861e367d737"/*_TransformsCBuffer*/,
       "Position": {
         "X": 738.59595,
         "Y": 202.63022

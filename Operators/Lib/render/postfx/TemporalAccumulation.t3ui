@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "196ad0dc-035a-4fb6-8871-a8f3c9cdbef5"/*TemporalAccumulation*/,
   "Description": "",
   "InputUis": [

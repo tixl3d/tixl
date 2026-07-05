@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8fb63c4d-80a8-4023-b55b-7f97bffbee48"/*_GetTidalTrigger*/,
   "Inputs": [
     {

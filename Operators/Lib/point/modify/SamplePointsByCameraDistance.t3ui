@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0f40e5e5-e406-4f87-854b-fbdd670b5504"/*SamplePointsByCameraDistance*/,
   "Description": "Changes the W value / F value of existing points based on their distance to the active camera.\nFor example, to make distant points appear larger or smaller than nearby points, etc.\nNeeds a point source such as: [GridPoints], [RadialPoints], [SpherePoints] etc.\nAnd [DrawPoints], [DrawLines] or similar in order to view the result.\n\nUseful combinations: [GridPoints] [TransformPoints]",
   "SymbolTags": "8",
@@ -87,7 +89,7 @@
       }
     },
     {
-      "ChildId": "4859ba59-1619-45d4-be9a-fff75b52b497"/*TransformsConstBuffer*/,
+      "ChildId": "4859ba59-1619-45d4-be9a-fff75b52b497"/*_TransformsCBuffer*/,
       "Position": {
         "X": 82.63007,
         "Y": 1064.2673

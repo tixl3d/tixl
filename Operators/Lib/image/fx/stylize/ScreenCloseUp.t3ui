@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "aaa64b7b-abe4-499e-ae29-a4d3df561c33"/*ScreenCloseUp*/,
   "Description": "Uses the incoming 2D image and puts it on a virtual LCD/screen in a 3D scene that looks as if it is being filmed by a real camera (including depth of field etc)\n\nWorks great with [PlayVideo] or any [RenderTarget] or [ScreenCapture].\n\nAdditional ops can be used to emphasize the illusion of a real camera such as: [ChromaticAbberation], [ColorGrade], [Grain]",
   "InputUis": [
@@ -373,6 +375,5 @@
         "Y": 275.161
       }
     }
-  ],
-  "Links": []
+  ]
 }

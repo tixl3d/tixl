@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b5515341-24ef-48ff-b832-d40e8189c6a4"/*ReflectionLines*/,
   "Description": "Intersects rays from a list of oriented points with geometry. This operation is slow!",
   "InputUis": [
@@ -56,7 +58,7 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "15a7106d-5b42-4c75-95c1-d6598d783ce5"/*AddInts*/,
+      "ChildId": "15a7106d-5b42-4c75-95c1-d6598d783ce5"/*AddInt*/,
       "Position": {
         "X": 23.601746,
         "Y": 512.2152

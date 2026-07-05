@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "20ad2907-524d-4160-802b-ad4a359b3d0d"/*TransformVec3*/,
   "Inputs": [
     {

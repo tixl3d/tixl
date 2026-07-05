@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8b4c95a8-d598-45a5-baa7-157120585695"/*SpatialDisplaceSDF*/,
   "Description": "3D spatial distortion of an SDF \nSamples simplex noise at 3 positions to apply spatial warping",
   "SymbolTags": "8",

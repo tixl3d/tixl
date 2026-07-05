@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "653100dc-0c7d-4ce2-aa23-fdba8d7d4395"/*MoveToSDFExample*/,
   "Description": "A complex example how to use use [MoveoToSDF] to visualzie distances to SDFs.",
   "InputUis": [],
@@ -41,6 +43,7 @@
     },
     {
       "ChildId": "41794f9d-3344-4085-8174-8995eff7e0c8"/*DrawLines*/,
+      "SectionId": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Position": {
         "X": 748.5374,
         "Y": 626.4053
@@ -76,6 +79,7 @@
     },
     {
       "ChildId": "7b88bace-c4d0-41df-afdb-278b334f6142"/*MoveToSDF*/,
+      "SectionId": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Comment": "We clamp the amount of the movement to zero to lock them to their original position.\nWe also write the distance to FX1 so we can use it as a scale factor for...",
       "Position": {
         "X": 748.5374,
@@ -128,6 +132,7 @@
     },
     {
       "ChildId": "d71f9ede-f9c6-4373-87d1-e636e9fe70c1"/*RadialPoints*/,
+      "SectionId": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Position": {
         "X": 608.5374,
         "Y": 591.4053
@@ -135,6 +140,7 @@
     },
     {
       "ChildId": "de9a4dc9-3fbc-49bc-8ea6-f56f0f6d6d31"/*RepeatAtPoints*/,
+      "SectionId": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Comment": "...repeating some circles at those points.",
       "Position": {
         "X": 748.5374,
@@ -174,7 +180,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
       "Label": "Visualize radius",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "61c70843-08ea-4249-ba90-9971493e45d1"/*Cos*/,
   "Description": "Creates a cosine wave also known as cosinusoidal wave or cosinusoid.\n\nUseful combinations: [Time] as an input\n\nAlternative with featuring more options: [Sin] \n\nAlso see: [AnimValue] [SampleCurve]",
   "SymbolTags": "9",

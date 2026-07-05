@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2443b2fd-c397-4ea6-9588-b595f918cf01"/*HasTimeChanged*/,
   "Description": "Triggers a bool if time was scrubbed back in the timeline by the user or by looping. Also known as: DidTimeChange.",
   "SymbolTags": "8",

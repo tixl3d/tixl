@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "436e93a8-03c0-4366-8d9a-2245e5bcaa6c"/*PerlinNoise*/,
   "Description": "Generates a continuously and randomly changing value in the predefined range based on Perlin Noise / Gradient Noise.\n\nUseful to create random looking animations e.g. flickering light, wind, fire, camshake, changing colors etc.\n\nThis creates PerlinNoise in 1 dimension. See [PerlinNoise2] and [PerlinNoise3] for Operators with more dimensions",
   "SymbolTags": "1",

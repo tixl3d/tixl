@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "69020cd2-de9a-4150-bac5-b547301e7bc8"/*TransformCpuPointExample*/,
   "Inputs": [],
   "Children": [

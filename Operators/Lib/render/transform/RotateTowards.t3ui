@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8373c170-a140-4ce4-b59b-47f42fb71700"/*RotateTowards*/,
   "Description": "Rotates the incoming scene / objects towards a specified target.\n\nAlso known as 'LookAt'\n\nUseful combination: Using the position output of a [Locator] creates a visible Target in the viewport with an interactive transform gizmo (if 'toggle gizmos and floor grid' are turned on in the Output window)",
   "SymbolTags": "8",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8bede700-4e3e-42d8-8097-9744abdb8ad3"/*DistortAndShade*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "25307357-6f6c-45b1-a38d-de635510a845"/*SpoutInput*/,
   "Description": "Spout live video input",
   "InputUis": [

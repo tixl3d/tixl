@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4369c0d2-2722-453d-a47a-aa9cc4f86d4b"/*LaunchpadXDisplay*/,
   "Description": "Convert a texture to a sysex frame for Launchpad X\nThe input texture should be stretch to a square.\n(LaunchPad should be set to Programmer Mode)\n",
   "InputUis": [

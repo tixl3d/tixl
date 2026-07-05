@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "61c11adb-94f0-4dc7-9611-c22c40709cf4"/*MidiTriggerOutput*/,
   "Inputs": [
     {

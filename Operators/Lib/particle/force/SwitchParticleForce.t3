@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "87f68a6d-e13d-49b7-ab0c-c24c0cefd453"/*SwitchParticleForce*/,
   "Inputs": [
     {

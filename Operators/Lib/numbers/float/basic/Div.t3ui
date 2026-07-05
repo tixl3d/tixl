@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "15fb88b2-81a1-43b8-97ba-41221293bb07"/*Div*/,
   "Description": "Divides two float values and outputs the quotient / result as float\n\nAlso see: [Multiply] [Sum] etc.",
   "SymbolTags": "1",

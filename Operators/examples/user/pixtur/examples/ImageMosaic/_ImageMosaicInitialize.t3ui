@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0c30ce21-0c02-4676-a636-63d744bfa788"/*_ImageMosaicInitialize*/,
   "Description": "Builds all images from a folder and sets up a texture atlas and a lookup table.",
   "InputUis": [
@@ -28,6 +30,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "00c39c1a-a631-43ef-9e42-c9bb686349d2"/*IntToFloat*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 546.4812,
         "Y": 1273.1316
@@ -35,6 +38,7 @@
     },
     {
       "ChildId": "0773e75d-3eda-4e1b-a43d-789598db5fbf"/*RenderTarget*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 1439.007,
         "Y": 1133.8542
@@ -42,6 +46,7 @@
     },
     {
       "ChildId": "0c2c63b7-fb16-4d87-b54c-f3c217e4716e"/*IntToFloat*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1329.904,
         "Y": 524.405
@@ -49,6 +54,7 @@
     },
     {
       "ChildId": "1b5e80d1-22a5-4981-b3ed-e4b5b839925f"/*Layer2d*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 964.5758,
         "Y": 1117.5566
@@ -56,6 +62,7 @@
     },
     {
       "ChildId": "1fa22b48-d5d1-4034-856f-2b40990c68a3"/*Texture2d*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1026.6556,
         "Y": 638.7123
@@ -63,6 +70,7 @@
     },
     {
       "ChildId": "29abf63f-6e33-453a-849d-7b67a5f76231"/*LoadImage*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 643.1192,
         "Y": 729.75134
@@ -70,6 +78,7 @@
     },
     {
       "ChildId": "358be473-a2c1-4638-a081-d487ecff9dd9"/*Layer2d*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1629.904,
         "Y": 630.405
@@ -77,6 +86,7 @@
     },
     {
       "ChildId": "37e6218b-d5d7-4c8f-bb11-2b272001210c"/*ClampInt*/,
+      "SectionId": "669f36ca-fc68-4f58-8560-6a218190d3ca",
       "Position": {
         "X": 213.61185,
         "Y": 901.40485
@@ -84,6 +94,7 @@
     },
     {
       "ChildId": "4134d245-9839-434d-978d-016352ff33bb"/*ComputeShaderStage*/,
+      "SectionId": "c0703f30-6c52-4b87-8f92-1e9707243de4",
       "Position": {
         "X": 1942.6559,
         "Y": 1467.8502
@@ -91,6 +102,7 @@
     },
     {
       "ChildId": "50f8d121-f16e-408e-a40c-fa89fbfa522a"/*GetFloatVar*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 715.77997,
         "Y": 1188.3147
@@ -98,6 +110,7 @@
     },
     {
       "ChildId": "6299743a-cf40-42a0-9573-de0173021e96"/*Execute*/,
+      "SectionId": "669f36ca-fc68-4f58-8560-6a218190d3ca",
       "Position": {
         "X": 1779.9042,
         "Y": 468.40503
@@ -105,6 +118,7 @@
     },
     {
       "ChildId": "66d9c4bf-37af-43c6-bffe-f38433995674"/*Int2Components*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1179.904,
         "Y": 468.40503
@@ -112,6 +126,7 @@
     },
     {
       "ChildId": "68cebb04-279f-420a-8607-fbe35f39f1c1"/*FilesInFolder*/,
+      "SectionId": "669f36ca-fc68-4f58-8560-6a218190d3ca",
       "Position": {
         "X": 76.45517,
         "Y": 746.62384
@@ -119,6 +134,7 @@
     },
     {
       "ChildId": "6cf25630-6d89-46db-88b8-306843703cce"/*Viewport*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1479.904,
         "Y": 468.40503
@@ -133,6 +149,7 @@
     },
     {
       "ChildId": "782a479a-1ae6-4f28-970f-11fa23782817"/*Texture3dComponents*/,
+      "SectionId": "c0703f30-6c52-4b87-8f92-1e9707243de4",
       "Position": {
         "X": 1792.6559,
         "Y": 1596.8497
@@ -140,6 +157,7 @@
     },
     {
       "ChildId": "81d8ef05-f31a-4bfc-a48b-9a4699e7ee3a"/*Layer2d*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 1264.5758,
         "Y": 1117.5566
@@ -147,6 +165,7 @@
     },
     {
       "ChildId": "81f41af6-d3f6-4fcc-b6f3-c63a7ce88fe9"/*SrvFromTexture2d*/,
+      "SectionId": "c0703f30-6c52-4b87-8f92-1e9707243de4",
       "Position": {
         "X": 1792.6559,
         "Y": 1510.8502
@@ -154,6 +173,7 @@
     },
     {
       "ChildId": "90ce73c2-d4d3-4754-a3b2-fb497367c5ef"/*Int2*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 1264.5758,
         "Y": 1173.5566
@@ -161,6 +181,7 @@
     },
     {
       "ChildId": "93195ff3-6106-4fdf-bde2-820fd8d094b1"/*ComputeShader*/,
+      "SectionId": "c0703f30-6c52-4b87-8f92-1e9707243de4",
       "Position": {
         "X": 1792.6559,
         "Y": 1467.8502
@@ -168,6 +189,7 @@
     },
     {
       "ChildId": "96ca0788-ab89-4434-b77a-fa251b5985ae"/*Execute*/,
+      "SectionId": "669f36ca-fc68-4f58-8560-6a218190d3ca",
       "Position": {
         "X": 1968.8622,
         "Y": 467.25916
@@ -175,6 +197,7 @@
     },
     {
       "ChildId": "a519904d-7561-48b0-879a-bb283d6eccfb"/*InvertFloat*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 715.77997,
         "Y": 1231.3147
@@ -182,6 +205,7 @@
     },
     {
       "ChildId": "aceee464-dbe4-4420-87f6-204d0edef825"/*IntToFloat*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1329.904,
         "Y": 468.40503
@@ -189,6 +213,7 @@
     },
     {
       "ChildId": "afa488d4-1337-4d4f-91b8-47fc54bd0dd4"/*Remap*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 865.77997,
         "Y": 1188.3147
@@ -196,6 +221,7 @@
     },
     {
       "ChildId": "b0a014f1-e9b0-440a-be23-08d6b58be6d7"/*GetIntVar*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 353.9353,
         "Y": 780.0753
@@ -203,6 +229,7 @@
     },
     {
       "ChildId": "b73eeb0b-1ed8-4909-9aac-185d50da5bfe"/*PickStringFromList*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 493.1192,
         "Y": 729.75134
@@ -217,6 +244,7 @@
     },
     {
       "ChildId": "bfd7d99a-721e-4c16-bb7b-c3f752257a87"/*GetIntVar*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 1112.9847,
         "Y": 1276.5037
@@ -224,6 +252,7 @@
     },
     {
       "ChildId": "c1116ba2-adf1-4b08-8f82-8d3a0c49f569"/*Texture3d*/,
+      "SectionId": "c0703f30-6c52-4b87-8f92-1e9707243de4",
       "Position": {
         "X": 1642.6558,
         "Y": 1596.8497
@@ -231,6 +260,7 @@
     },
     {
       "ChildId": "c413a444-a40a-46e1-a9b5-3f491dabe678"/*Vector2*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 1001.67615,
         "Y": 1190.7942
@@ -238,6 +268,7 @@
     },
     {
       "ChildId": "c9e677d1-fb72-4ec8-a9f8-c355447273bf"/*RenderTarget*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 1114.5758,
         "Y": 1117.5566
@@ -245,6 +276,7 @@
     },
     {
       "ChildId": "cd046405-840e-4e1f-a762-ada818431a54"/*Rasterizer*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1629.904,
         "Y": 468.40503
@@ -252,6 +284,7 @@
     },
     {
       "ChildId": "d0b4a250-78e1-42a0-89af-fe0c43a55793"/*SamplerState*/,
+      "SectionId": "c0703f30-6c52-4b87-8f92-1e9707243de4",
       "Position": {
         "X": 1792.6559,
         "Y": 1553.8497
@@ -259,6 +292,7 @@
     },
     {
       "ChildId": "d20a3707-d676-4468-8be4-4bedd0073a15"/*RtvFromTexture2d*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1479.904,
         "Y": 537.405
@@ -266,6 +300,7 @@
     },
     {
       "ChildId": "d9e8e21d-21dd-4ab1-91d1-d95288c226fd"/*OutputMergerStage*/,
+      "SectionId": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Position": {
         "X": 1629.904,
         "Y": 561.405
@@ -273,6 +308,7 @@
     },
     {
       "ChildId": "e7940e5f-843d-4a2d-94e9-8f1c2dd768a3"/*CompareInt*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 1262.9844,
         "Y": 1276.5037
@@ -287,6 +323,7 @@
     },
     {
       "ChildId": "f61db377-b07f-4ed6-8a5d-0520fbd3fca4"/*Layer2d*/,
+      "SectionId": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Position": {
         "X": 1586.6906,
         "Y": 1072.8802
@@ -308,6 +345,7 @@
     },
     {
       "ChildId": "fdb8a902-5a38-4b5e-adc4-2314b9532fee"/*Loop*/,
+      "SectionId": "669f36ca-fc68-4f58-8560-6a218190d3ca",
       "Position": {
         "X": 2118.862,
         "Y": 467.25916
@@ -337,10 +375,11 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "47780fe3-50e3-4bff-82f2-356a51539bd1",
       "Title": "Render all images into a TextureArray",
+      "ParentSectionId": "669f36ca-fc68-4f58-8560-6a218190d3ca",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -359,6 +398,7 @@
     {
       "Id": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
       "Title": "Render 1x1px scale-down versions into a 1000x1px texture.",
+      "ParentSectionId": "669f36ca-fc68-4f58-8560-6a218190d3ca",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

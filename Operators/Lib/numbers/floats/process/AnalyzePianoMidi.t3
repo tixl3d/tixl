@@ -1,7 +1,7 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
-  "Id": "60adca24-4ae4-474a-b205-a814d89a7d53"/*AnalysePianoMidi*/,
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
+  "Id": "60adca24-4ae4-474a-b205-a814d89a7d53"/*AnalyzePianoMidi*/,
   "Inputs": [
     {
       "Id": "3e02c9d5-28bb-4913-b983-bc5464c9f387"/*Input*/,

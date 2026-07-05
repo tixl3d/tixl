@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "53a8a318-81dc-4c76-96a1-f86d0e2fb1d7"/*_ReadBackImageDifference*/,
   "Inputs": [
     {

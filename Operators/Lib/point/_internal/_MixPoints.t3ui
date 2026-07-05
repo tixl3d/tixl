@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "bdd982c4-dfc4-48d6-888a-f067081dbe8e"/*_MixPoints*/,
   "Description": "This is an early internal implementation that has been deprecated. Consider using [MixPoints].",
   "InputUis": [

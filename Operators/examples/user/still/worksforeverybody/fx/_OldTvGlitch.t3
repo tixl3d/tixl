@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cb28de70-6111-4f64-b6ee-f52b1a35b44a"/*_OldTvGlitch*/,
   "Inputs": [
     {
@@ -307,30 +309,24 @@
                 {
                   "Time": 0.0,
                   "Value": 0.0,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 0.017908755441227164,
                   "OutTangentAngle": 3.1595014090310203
                 },
                 {
                   "Time": 0.6352,
                   "Value": 0.01137685775756836,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "InTangentAngle": 6.310044851585379,
                   "OutTangentAngle": 3.1684521979955855
                 },
                 {
                   "Time": 1.0038,
                   "Value": 0.047082409262657166,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Tangent",
-                  "OutEditMode": "Tangent",
+                  "InInterpolation": "Tangent",
+                  "OutInterpolation": "Tangent",
                   "InTangentAngle": 0.2113921344280243,
                   "OutTangentAngle": -2.930200519161769
                 }

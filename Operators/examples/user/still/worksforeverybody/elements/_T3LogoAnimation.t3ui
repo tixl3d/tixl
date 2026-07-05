@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "37b19195-5781-4f8d-af7b-c9ef6a4d146d"/*_T3LogoAnimation*/,
   "Description": "Retro animation for Works for Everybody",
   "InputUis": [],
@@ -229,6 +231,7 @@
     },
     {
       "ChildId": "c3ebe915-35fe-47ff-9826-e65463520304"/*RenderTarget*/,
+      "SectionId": "1bb0d613-03a5-46fc-aca8-a6ca850c11fa",
       "Position": {
         "X": 1930.3995,
         "Y": 141.80957
@@ -313,6 +316,7 @@
     },
     {
       "ChildId": "f9ddcfd2-39ad-4518-9307-62e50cb92f59"/*RenderWithMotionBlur*/,
+      "SectionId": "1bb0d613-03a5-46fc-aca8-a6ca850c11fa",
       "Position": {
         "X": 2080.3994,
         "Y": 141.80957
@@ -335,7 +339,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "1bb0d613-03a5-46fc-aca8-a6ca850c11fa",
       "Title": "This effect is really expensive. Let's only reuse it for the lines.",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "845371ef-a5c2-4ca2-8315-ea2b62f63ee2"/*PickMeshBuffer*/,
   "Inputs": [
     {

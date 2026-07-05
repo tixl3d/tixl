@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cd9f16bc-5306-458c-aff8-1cca3bb24469"/*Abs*/,
   "Description": "The absolute value of a number.",
   "SymbolTags": "1",

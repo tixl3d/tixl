@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4ae9e2f5-7cb3-40b0-a662-0662e8cb7c68"/*LinePoints*/,
   "Inputs": [
     {
@@ -210,7 +212,7 @@
       "Outputs": []
     },
     {
-      "Id": "ca4a31d2-5ad8-4303-8a27-a96095193d92"/*AddInts*/,
+      "Id": "ca4a31d2-5ad8-4303-8a27-a96095193d92"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

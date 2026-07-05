@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2446df39-b455-428a-807d-73c0e6cbab79"/*Image2dSDF*/,
   "Inputs": [
     {

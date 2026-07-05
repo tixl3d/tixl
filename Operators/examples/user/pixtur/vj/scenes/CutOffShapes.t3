@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "49bbae57-da13-4fe6-b28b-8878d63c1fee"/*CutOffShapes*/,
   "Inputs": [],
   "Children": [
@@ -875,7 +877,7 @@
       "Outputs": []
     },
     {
-      "Id": "596d3a84-9340-4c62-9bf0-e682d300c688"/*AddInts*/,
+      "Id": "596d3a84-9340-4c62-9bf0-e682d300c688"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

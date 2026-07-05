@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1e24d0ab-40f4-4791-a929-fb08584f516d"/*SortPointsExample*/,
   "Inputs": [],
   "Children": [

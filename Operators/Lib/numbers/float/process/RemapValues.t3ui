@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "efb9ecfc-5aa2-45f1-87b0-1455d7702aa7"/*RemapValues*/,
   "Description": "Takes in a list of Vector2 and picks the y component of the pair where X is closest to LookupValue.",
   "SymbolTags": "1",

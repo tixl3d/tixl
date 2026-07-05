@@ -1,7 +1,7 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
-  "Id": "0dbc4f3f-8fdb-402b-a7cb-6949cf21a98a"/*VideoClipLayer*/,
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
+  "Id": "0dbc4f3f-8fdb-402b-a7cb-6949cf21a98a"/*_VideoClipLayerObsolete*/,
   "Description": "Plays the source region of a video source defined by the time clip container.",
   "InputUis": [
     {
@@ -58,16 +58,5 @@
         "Y": 186.76013
       }
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 80.0,
-  "ScrollX": -2.5,
-  "Mode": "DopeView",
-  "TimelineHeight": -1,
-  "InlineDataClipEditEnabled": false,
-  "DetailsAreaHeight": 200.0,
-  "InlineDataClipStripHeight": null
-}
-  }
+  ]
 }

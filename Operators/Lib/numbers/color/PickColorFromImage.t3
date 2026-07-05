@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "42703423-1414-489e-aac2-21a3d7204262"/*PickColorFromImage*/,
   "Inputs": [
     {

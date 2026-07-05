@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9e27c32d-b187-4b7c-9761-0c5bb4ae3c45"/*CameraWithRotation*/,
   "Description": "An alternative camera operator",
   "SymbolTags": "8",

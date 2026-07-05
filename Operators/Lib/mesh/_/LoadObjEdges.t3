@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dd3d7e16-f33e-4fb0-89c6-4d8cbc9d702f"/*LoadObjEdges*/,
   "Inputs": [
     {

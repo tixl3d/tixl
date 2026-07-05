@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "109b1ca2-7b4c-4535-9cc6-8f176c4207dd"/*BlendMeshToPoints*/,
   "Inputs": [
     {

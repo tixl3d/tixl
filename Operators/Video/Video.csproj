@@ -20,7 +20,6 @@
     <PackageId>eb0ba418-08c9-444a-ba70-6abc7b5b1d47</PackageId>
     <IsArchived>false</IsArchived>
   </PropertyGroup>
-
   <!-- Operator global usings — mirrors Lib so the FFmpeg video operators compile unchanged when moved here. -->
   <ItemGroup>
     <Using Include="System" />
@@ -95,14 +94,12 @@
     <Using Alias="GeometryShader" Include="T3.Core.DataTypes.GeometryShader" />
     <Using Alias="SampleDescription" Include="SharpDX.DXGI.SampleDescription" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />
     <!-- FFmpeg video services (decode + encode). -->
     <ProjectReference Include="..\..\VideoServices\VideoServices.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <!-- FFmpeg natives for this package's video operators. Sdcb.FFmpeg = LGPL managed bindings; the native
          shared DLLs come from FFmpeg.LGPL (BtbN lgpl-shared, avcodec-61 = FFmpeg 7.x, no gpl/nonfree flags),
@@ -111,12 +108,10 @@
     <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
     <PackageReference Include="FFmpeg.LGPL" Version="20250329.1.0" />
   </ItemGroup>
-
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
     <Operators Include="Types" Version="1.0.0" ResourcesOnly="False" />
   </ItemGroup>
-
   <!-- Copy package content into this project's own output only (not transitively). -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <PackageAssets Include="Assets/**/*" Exclude="bin/**" />

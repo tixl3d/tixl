@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "38e88910-6063-41d1-840b-8aeeb0eeccc0"/*ResolutionConstBuffer*/,
   "Inputs": [
     {

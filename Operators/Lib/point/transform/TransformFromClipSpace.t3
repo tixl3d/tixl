@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "81377edc-0a42-4bb1-9440-2f2433d5757f"/*TransformFromClipSpace*/,
   "Inputs": [
     {
@@ -32,7 +34,7 @@
       "Outputs": []
     },
     {
-      "Id": "a6518541-3fb8-47c2-8a31-1dd5f3587704"/*TransformsConstBuffer*/,
+      "Id": "a6518541-3fb8-47c2-8a31-1dd5f3587704"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

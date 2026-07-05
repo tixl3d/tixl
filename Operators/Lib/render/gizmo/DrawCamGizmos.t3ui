@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cdf5dd6a-73dc-4779-a366-df19b69071a6"/*DrawCamGizmos*/,
   "Description": "An attempt to draw camera gizmos.",
   "SymbolTags": "8",

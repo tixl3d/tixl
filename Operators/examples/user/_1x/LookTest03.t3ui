@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4bc2ca61-54c3-4a6b-a8ae-619a79395870"/*LookTest03*/,
   "Description": "A little series of recreating and copying the look of certain stills / wallpapers found online to learn how to create certain looks in TiXL.",
   "SymbolTags": "2",

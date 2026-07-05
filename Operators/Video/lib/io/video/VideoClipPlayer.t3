@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f98d28ed-5f30-4416-93be-f0d7a15a7f77"/*VideoClipPlayer*/,
   "Inputs": [
     {

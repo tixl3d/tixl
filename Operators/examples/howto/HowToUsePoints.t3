@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e6a11c29-11f9-49a3-9eff-463a93503420"/*HowToUsePoints*/,
   "Inputs": [],
   "Children": [
@@ -694,20 +696,16 @@
                 {
                   "Time": 0.0,
                   "Value": 0.0,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 0.7853981633974483,
                   "OutTangentAngle": 3.9269908169872414
                 },
                 {
                   "Time": 1.0,
                   "Value": 1.0,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 0.7853981633974483,
                   "OutTangentAngle": -2.356194490192345
                 }

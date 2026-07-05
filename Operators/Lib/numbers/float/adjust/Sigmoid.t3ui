@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fc56f945-ba04-4d10-a516-68a479147016"/*Sigmoid*/,
   "Description": "Returns a sigmoid function 1/(1+e^x-1).\nIt's very similar to [SmoothStep] but never reaches the -1 and 1 boundaries.",
   "SymbolTags": "1",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6bb3fc41-f1d4-467e-afc6-62b452ec36be"/*_AnalyseAudioRange*/,
   "Description": "An internal visualization of sound levels.",
   "InputUis": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4f5999c9-8ade-4e31-8379-afb7db56e170"/*TextureMapForce*/,
   "Description": "Accelerate particles from a signed normal map. The map is stretched to the camera clip space.\n\nThis force can be very powerful in creating effects, such as particles flowing along images or tracing contours. It utilizes the R and G channels of the signed normal map to accelerate along the X and Y axes.\n\nImportant: This implies that the normal map needs to have negative values. One option is using [NormalMap] with the Gray_ToNormalizedRGBSigned mode. This can be especially potent when combined with the Rotation parameter.\n\nTip: You can also use the [ImageLevels] operator to verify that the texture contains negative values.\n\nYou can use the ViewConfinement and DepthConcentration parameters to keep the particles within the visible area for the camera view.\n\nPlease also check the example.",
   "SymbolTags": "1",
@@ -191,13 +193,14 @@
     },
     {
       "ChildId": "73f20e66-9144-4268-9e72-ee0c1147ea71"/*VisibleGizmos*/,
+      "SectionId": "75119d3c-2dc3-472f-953f-2d1fbdc6131d",
       "Position": {
         "X": 894.8252,
         "Y": 1847.6652
       }
     },
     {
-      "ChildId": "8cd63694-9e67-4758-81e1-41554a934dc8"/*TransformsConstBuffer*/,
+      "ChildId": "8cd63694-9e67-4758-81e1-41554a934dc8"/*_TransformsCBuffer*/,
       "Position": {
         "X": 1200.4359,
         "Y": 1380.1409
@@ -205,6 +208,7 @@
     },
     {
       "ChildId": "9054203a-1fe9-4ce3-b1fd-d81d5c0dca30"/*Camera*/,
+      "SectionId": "75119d3c-2dc3-472f-953f-2d1fbdc6131d",
       "Position": {
         "X": 894.8252,
         "Y": 1812.6652
@@ -212,6 +216,7 @@
     },
     {
       "ChildId": "95552486-1a94-4ad5-be83-2a6dff0be04e"/*Group*/,
+      "SectionId": "75119d3c-2dc3-472f-953f-2d1fbdc6131d",
       "Position": {
         "X": 894.8252,
         "Y": 1777.6652
@@ -226,6 +231,7 @@
     },
     {
       "ChildId": "ac85cf99-4b73-4f00-aa21-2cb50449e649"/*Layer2d*/,
+      "SectionId": "75119d3c-2dc3-472f-953f-2d1fbdc6131d",
       "Position": {
         "X": 894.8252,
         "Y": 1742.6652
@@ -240,6 +246,7 @@
     },
     {
       "ChildId": "c95137eb-31d1-47bb-a8be-32b1993347bc"/*Displace*/,
+      "SectionId": "75119d3c-2dc3-472f-953f-2d1fbdc6131d",
       "Position": {
         "X": 894.8252,
         "Y": 1637.6652
@@ -247,6 +254,7 @@
     },
     {
       "ChildId": "cc4d654e-8b0c-4474-ba6c-ac0f5bb4cbd7"/*Multiply*/,
+      "SectionId": "75119d3c-2dc3-472f-953f-2d1fbdc6131d",
       "Position": {
         "X": 754.8252,
         "Y": 1707.6652
@@ -254,6 +262,7 @@
     },
     {
       "ChildId": "d2cdb2b9-f2f6-4fb2-a7d9-78dd5c4f4f9a"/*Raster*/,
+      "SectionId": "75119d3c-2dc3-472f-953f-2d1fbdc6131d",
       "Position": {
         "X": 894.8252,
         "Y": 1602.6652
@@ -304,7 +313,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "75119d3c-2dc3-472f-953f-2d1fbdc6131d",
       "Title": "A wonky attempt to visualize the force field",

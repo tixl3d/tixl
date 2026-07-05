@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "eff2ffff-dc39-4b90-9b1c-3c0a9a0108c6"/*MouseInput*/,
   "Inputs": [
     {

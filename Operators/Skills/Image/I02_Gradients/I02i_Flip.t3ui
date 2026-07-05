@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "680bb1ae-d906-48cc-adbd-240e0df0497d"/*I02i_Flip*/,
   "Description": "LinearGradient: Flip with Negative Width",
   "InputUis": [],
@@ -14,7 +14,6 @@
     },
     {
       "ChildId": "8c09cc9f-ed7b-4cd2-a3de-176d84b0c5b5"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -30,7 +29,7 @@
     },
     {
       "ChildId": "c64506bf-8350-4f42-b06b-20d7eb4568e4"/*LinearGradient*/,
-      "AnnotationId": "076a333f-5467-47a0-89ed-ca4030edd244",
+      "SectionId": "076a333f-5467-47a0-89ed-ca4030edd244",
       "Position": {
         "X": 1306.5621,
         "Y": 2097.3557
@@ -46,7 +45,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "076a333f-5467-47a0-89ed-ca4030edd244",
       "Label": "Solution",
@@ -77,13 +76,5 @@
       "Description": "Solve the challenge without changing any of the gradient's color steps.",
       "Style": "CallToAction"
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

@@ -1,13 +1,13 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "88adf4e5-64af-4a86-b8f6-2b236fa7e4f3"/*I02f_Interpolation*/,
   "Description": "LinearGradient: Interpolation",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "0693aa98-5596-4149-8eec-1a2e5bc202ce"/*LinearGradient*/,
-      "AnnotationId": "af4084ba-8ee4-4a15-822a-9a942c414030",
+      "SectionId": "af4084ba-8ee4-4a15-822a-9a942c414030",
       "Position": {
         "X": 1143.9642,
         "Y": 2112.8691
@@ -15,7 +15,7 @@
     },
     {
       "ChildId": "1ca7b7e2-8fec-4805-b570-a8e5febc7d1a"/*ImageLevels*/,
-      "AnnotationId": "af4084ba-8ee4-4a15-822a-9a942c414030",
+      "SectionId": "af4084ba-8ee4-4a15-822a-9a942c414030",
       "Position": {
         "X": 1283.9642,
         "Y": 2112.8691
@@ -38,7 +38,6 @@
     },
     {
       "ChildId": "cf6f1aa3-22fd-4f37-9125-04c346e9c043"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -62,7 +61,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "af4084ba-8ee4-4a15-822a-9a942c414030",
       "Label": "Solution",
@@ -105,13 +104,5 @@
       "Description": "Most SkillQuest challenges use simple values like 1/2 or 1/10.\nYou can also use the Infinity Slider. It appears when dragging numeric values and often marks the target value with a small dot.",
       "Style": "Tip"
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cb2cdd1d-811a-4a30-a5bc-289f36c31028"/*MidiNoteOutputExample*/,
   "Inputs": [],
   "Children": [

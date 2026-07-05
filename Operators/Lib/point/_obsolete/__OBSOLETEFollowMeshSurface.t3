@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5e3648c0-3446-4f8f-b7ce-32d4a54b39de"/*__OBSOLETEFollowMeshSurface*/,
   "Inputs": [
     {

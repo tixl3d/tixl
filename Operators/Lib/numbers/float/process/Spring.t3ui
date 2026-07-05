@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0b337922-aeca-473a-bfe9-4ab6ff804b11"/*Spring*/,
   "Description": "Adds a bounce effect to the incoming value.\n\nAlso known as jump, bounce, wobble, rubber, flex\n\nA similar op: [Damp] [SpringVec2] [SpringVec3]",
   "SymbolTags": "1",

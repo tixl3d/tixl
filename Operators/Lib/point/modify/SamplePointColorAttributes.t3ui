@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "056ea55a-91a2-4b55-bcce-e44cc8602623"/*SamplePointColorAttributes*/,
   "Description": "Use a texture to color the points. Same as [SamplePointAttributes] but for colors only",
   "SymbolTags": "1",
@@ -216,7 +216,7 @@
       }
     },
     {
-      "ChildId": "49cc0dad-0bf3-4344-b2af-e09e3d34fb6a"/*TransformsConstBuffer*/,
+      "ChildId": "49cc0dad-0bf3-4344-b2af-e09e3d34fb6a"/*_TransformsCBuffer*/,
       "Position": {
         "X": -412.74338,
         "Y": 114.25565
@@ -357,13 +357,5 @@
         "Y": 915.90283
       }
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

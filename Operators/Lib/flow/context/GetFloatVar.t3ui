@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e6072ecf-30d2-4c52-afa1-3b195d61617b"/*GetFloatVar*/,
   "Description": "Fetches a float variable from the context.\n\nUse [SetFloatVar] to set the variable further up the graph. Also [GetIntVar]\n\nImportant:\nIf you're using this together with [Loop], don't forget to use 'f' as the normalized progress variable.",
   "SymbolTags": "8",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c0feef61-8cec-4418-8889-4001cbe1a957"/*_PhysrumAgents2*/,
   "Description": "",
   "SymbolTags": "16",
@@ -168,6 +170,7 @@
     },
     {
       "ChildId": "4d174624-1386-4da5-b520-f0b67197c399"/*SetPointLight*/,
+      "SectionId": "a097732e-1887-4a78-9d78-96a96a9e485e",
       "Position": {
         "X": -612.19293,
         "Y": -277.67606
@@ -229,6 +232,7 @@
     },
     {
       "ChildId": "7a38fbd2-1928-449a-a5cb-0a7269d4baf0"/*ColorGrade*/,
+      "SectionId": "a097732e-1887-4a78-9d78-96a96a9e485e",
       "Position": {
         "X": -612.19293,
         "Y": -102.676056
@@ -255,6 +259,7 @@
     },
     {
       "ChildId": "87f3f396-04e8-4bba-9c8d-100485970996"/*SetFog*/,
+      "SectionId": "a097732e-1887-4a78-9d78-96a96a9e485e",
       "Position": {
         "X": -612.19293,
         "Y": -312.67606
@@ -290,6 +295,7 @@
     },
     {
       "ChildId": "b1c2aac9-506f-40be-885f-add4b9b6ca87"/*AdjustColors*/,
+      "SectionId": "a097732e-1887-4a78-9d78-96a96a9e485e",
       "Position": {
         "X": -612.19293,
         "Y": -137.67606
@@ -366,6 +372,7 @@
     },
     {
       "ChildId": "e044ad8b-5aa7-42e0-b825-2e110605e6ba"/*RenderTarget*/,
+      "SectionId": "a097732e-1887-4a78-9d78-96a96a9e485e",
       "Position": {
         "X": -612.19293,
         "Y": -207.67606
@@ -387,6 +394,7 @@
     },
     {
       "ChildId": "f4751125-3b8c-4ba6-9473-fd4a024b6f6d"/*Camera*/,
+      "SectionId": "a097732e-1887-4a78-9d78-96a96a9e485e",
       "Position": {
         "X": -612.19293,
         "Y": -242.67606
@@ -416,7 +424,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "a097732e-1887-4a78-9d78-96a96a9e485e",
       "Label": "Debug?",

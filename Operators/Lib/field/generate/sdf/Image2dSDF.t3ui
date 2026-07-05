@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2446df39-b455-428a-807d-73c0e6cbab79"/*Image2dSDF*/,
   "Description": "Uses the grayscale information of a texture as (signed) distance data.\nThis works nicely with [JumpFloodFill]",
   "SymbolTags": "72",

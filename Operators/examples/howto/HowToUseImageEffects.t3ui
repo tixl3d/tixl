@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "649d4542-4165-4129-9484-dd8fb8663e15"/*HowToUseImageEffects*/,
   "Description": "This is a playground that gives an overview about Tooll's main image effects operators.",
   "SymbolTags": "3",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "16a393bc-102b-4285-863d-b4f0ca740f87"/*LinearGradient*/,
+      "SectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Position": {
         "X": -573.9602,
         "Y": 2199.3953
@@ -13,6 +16,7 @@
     },
     {
       "ChildId": "2438bf57-200c-447a-9982-f8e56ce2d068"/*LoadImage*/,
+      "SectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Position": {
         "X": -573.9602,
         "Y": 2046.3953
@@ -20,6 +24,7 @@
     },
     {
       "ChildId": "24986579-f249-48fc-ab7b-a48f44c977df"/*LoadImage*/,
+      "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -793.96643,
         "Y": 78.25729
@@ -27,6 +32,7 @@
     },
     {
       "ChildId": "2777e6c3-c78c-42c4-9b7e-d2a9bd562ac7"/*_AnimValueOld*/,
+      "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 635.0569,
         "Y": 2133.5337
@@ -34,6 +40,7 @@
     },
     {
       "ChildId": "293cb7d1-08f5-4437-aa94-502ddde4eb60"/*Blend*/,
+      "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Comment": "Note:\n\n1. Image B is rendered on top.\n2. We multiply the color from the gradient, so adjust its color and opacity.\n3. The effect uses the \"auto resolution\" [0,0], which here uses the resolution of Image A.\n4. Image B gets \"stretched.\" If you want to avoid that, see the [Layer2d] example below.",
       "Position": {
         "X": 755.9698,
@@ -42,6 +49,7 @@
     },
     {
       "ChildId": "2afd07a3-4a23-4900-92ff-96185ac2e52e"/*LoadImage*/,
+      "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Position": {
         "X": 567.1265,
         "Y": 1557.0297
@@ -49,6 +57,7 @@
     },
     {
       "ChildId": "34135c50-1c3a-4999-9653-1cb04bb1b567"/*Layer2d*/,
+      "SectionId": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Comment": "Note:\n\n1. The ScaleMode parameter is set to \"FitHeight.\" Feel free to experiment with the other modes.",
       "Position": {
         "X": 770.1049,
@@ -57,6 +66,7 @@
     },
     {
       "ChildId": "3c581874-d61d-46aa-bd7a-c85503d66283"/*AsciiRender*/,
+      "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -487.41382,
         "Y": 54.964844
@@ -64,6 +74,7 @@
     },
     {
       "ChildId": "3d53d881-5422-4ffb-a19d-fa2531266fc9"/*AnimValue*/,
+      "SectionId": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Position": {
         "X": -766.5144,
         "Y": 1894.6548
@@ -71,6 +82,7 @@
     },
     {
       "ChildId": "45cfc38a-cf19-458f-97e9-8cd2585c21ae"/*Rotate*/,
+      "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -781.48834,
         "Y": 123.58789
@@ -78,6 +90,7 @@
     },
     {
       "ChildId": "45f48cde-daf3-4657-894e-90c58c12031a"/*Steps*/,
+      "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -490.28662,
         "Y": 332.83597
@@ -85,6 +98,7 @@
     },
     {
       "ChildId": "50402b67-ea93-4784-bca9-8f11127f1632"/*FloatToInt*/,
+      "SectionId": "a35b622a-4f5c-4ee1-bf67-0c29c446415a",
       "Position": {
         "X": 73.99475,
         "Y": -127.86978
@@ -92,6 +106,7 @@
     },
     {
       "ChildId": "56160207-977c-4165-8b29-7fed4497d70f"/*Raster*/,
+      "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -484.1703,
         "Y": -191.20844
@@ -99,6 +114,7 @@
     },
     {
       "ChildId": "582bdcd1-f69d-428c-8f59-579553ff633d"/*OscillateVec2*/,
+      "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -757.7623,
         "Y": 936.28644
@@ -106,6 +122,7 @@
     },
     {
       "ChildId": "5a8a018b-21fd-432a-a945-ca51368ff454"/*LoadImage*/,
+      "SectionId": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Position": {
         "X": -33.451904,
         "Y": 1755.441
@@ -113,6 +130,7 @@
     },
     {
       "ChildId": "5cdc3815-8326-47b5-868f-72f2ddec00ef"/*LoadImage*/,
+      "SectionId": "eecc7921-23d8-4aa9-8e16-6d35fb2a816e",
       "Position": {
         "X": -746.052,
         "Y": 1426.823
@@ -120,6 +138,7 @@
     },
     {
       "ChildId": "668d6a32-5f84-4fb9-a5f5-82b65f2682f3"/*GlitchDisplace*/,
+      "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1570.8221,
         "Y": 1512.1493
@@ -127,6 +146,7 @@
     },
     {
       "ChildId": "6ce44056-bf52-46a6-833d-59e69e7d50b3"/*LoadImage*/,
+      "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Position": {
         "X": 567.1265,
         "Y": 1404.0297
@@ -134,6 +154,7 @@
     },
     {
       "ChildId": "72ab56a3-068a-44c6-82ab-35a1aeaa7a29"/*Dither*/,
+      "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -493.69778,
         "Y": 198.64536
@@ -141,6 +162,7 @@
     },
     {
       "ChildId": "77288e81-392a-4425-be2e-6484063c6de2"/*Rotate*/,
+      "SectionId": "eecc7921-23d8-4aa9-8e16-6d35fb2a816e",
       "Position": {
         "X": -746.052,
         "Y": 1469.823
@@ -148,6 +170,7 @@
     },
     {
       "ChildId": "7740580a-6af3-486b-8885-f7cf5f8db401"/*Counter*/,
+      "SectionId": "a35b622a-4f5c-4ee1-bf67-0c29c446415a",
       "Position": {
         "X": -76.00525,
         "Y": -127.86978
@@ -155,6 +178,7 @@
     },
     {
       "ChildId": "780c9435-f59f-4247-9201-37b152fcee3b"/*OscillateVec2*/,
+      "SectionId": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Position": {
         "X": -178.87439,
         "Y": 1554.5905
@@ -162,6 +186,7 @@
     },
     {
       "ChildId": "7d471c04-6981-4754-bf77-516ee976e233"/*Displace*/,
+      "SectionId": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Position": {
         "X": -435.11987,
         "Y": 1764.3967
@@ -169,6 +194,7 @@
     },
     {
       "ChildId": "7d6cad4b-ad65-4d2b-ac2f-44f5165936f5"/*EdgeRepeat*/,
+      "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -495.78198,
         "Y": 544.8115
@@ -176,6 +202,7 @@
     },
     {
       "ChildId": "7d77d004-92e5-4f7f-81e3-f276b3662600"/*_AnimValueOld*/,
+      "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1417.63,
         "Y": 1360.5756
@@ -183,6 +210,7 @@
     },
     {
       "ChildId": "887e3416-71f3-469e-87de-5ee14eeb0691"/*OscillateVec2*/,
+      "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -796.2522,
         "Y": -33.696136
@@ -190,6 +218,7 @@
     },
     {
       "ChildId": "8e5148ef-7d15-4b98-acd2-9860cedc6d15"/*Layer2d*/,
+      "SectionId": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Position": {
         "X": 770.1049,
         "Y": 1565.6539
@@ -197,6 +226,7 @@
     },
     {
       "ChildId": "990c72bf-1eac-47ca-aa79-e4d233491c80"/*SampleGradient*/,
+      "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Position": {
         "X": 567.1265,
         "Y": 1600.0297
@@ -204,6 +234,7 @@
     },
     {
       "ChildId": "9c3c7271-27fc-4add-b1c4-753791f75e7e"/*LoadImage*/,
+      "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 783.7207,
         "Y": 1870.238
@@ -211,6 +242,7 @@
     },
     {
       "ChildId": "9f37d3d3-ae06-42c4-98b8-9a89244ead5a"/*_BlobOld*/,
+      "SectionId": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Position": {
         "X": -28.87439,
         "Y": 1554.5905
@@ -218,6 +250,7 @@
     },
     {
       "ChildId": "9ff355e1-f077-4ba0-ad2e-d365912197bf"/*FakeLight*/,
+      "SectionId": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Position": {
         "X": 121.12561,
         "Y": 1401.5914
@@ -225,6 +258,7 @@
     },
     {
       "ChildId": "a32547d9-1bbd-4b77-8f2c-2b0315640c01"/*MirrorRepeat*/,
+      "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -498.82513,
         "Y": 796.5445
@@ -232,6 +266,7 @@
     },
     {
       "ChildId": "a9396aa0-98d4-44a4-97c2-3b84cdc894b3"/*Rotate*/,
+      "SectionId": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Position": {
         "X": -176.74231,
         "Y": 1864.7
@@ -239,6 +274,7 @@
     },
     {
       "ChildId": "b25770bf-184b-4434-be62-3326146ce95c"/*BubbleZoom*/,
+      "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -498.10532,
         "Y": 923.2319
@@ -246,6 +282,7 @@
     },
     {
       "ChildId": "b3b270aa-d2a8-493c-ab8d-9509ebbf9238"/*LoadImage*/,
+      "SectionId": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Position": {
         "X": -28.87439,
         "Y": 1401.5914
@@ -253,6 +290,7 @@
     },
     {
       "ChildId": "bd644acc-63c2-4e3e-9b4c-a8f651f94a93"/*LoadImage*/,
+      "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 783.7207,
         "Y": 2023.2385
@@ -260,6 +298,7 @@
     },
     {
       "ChildId": "c0bcb1c6-91e4-4b60-bb09-d26ee0be360f"/*LinearGradient*/,
+      "SectionId": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Position": {
         "X": -26.74231,
         "Y": 1864.7
@@ -267,6 +306,7 @@
     },
     {
       "ChildId": "c15501c2-1756-44f3-a47a-3929fbe5d591"/*Execute*/,
+      "SectionId": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Position": {
         "X": 920.1049,
         "Y": 1565.6539
@@ -274,6 +314,7 @@
     },
     {
       "ChildId": "c17b5d0d-69cb-4d2e-8a25-7223b63ab61e"/*BlendWithMask*/,
+      "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 933.7207,
         "Y": 1870.238
@@ -281,6 +322,7 @@
     },
     {
       "ChildId": "c8c2360c-73df-483e-bee1-4fe2a04da53c"/*BlurWithMask*/,
+      "SectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Position": {
         "X": -423.9602,
         "Y": 2046.3953
@@ -288,6 +330,7 @@
     },
     {
       "ChildId": "cba28168-419c-4024-964e-02000cec480f"/*DetectEdges*/,
+      "SectionId": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Position": {
         "X": -485.01575,
         "Y": -53.355743
@@ -295,6 +338,7 @@
     },
     {
       "ChildId": "cffbb39b-8be7-4ccd-a37b-4cd5814fb6c9"/*RenderTarget*/,
+      "SectionId": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Position": {
         "X": 1070.1042,
         "Y": 1565.6539
@@ -302,6 +346,7 @@
     },
     {
       "ChildId": "d0c165cc-6bbc-4d1b-a68d-555ffa7f91c9"/*DistortAndShade*/,
+      "SectionId": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Position": {
         "X": 116.548096,
         "Y": 1755.441
@@ -309,6 +354,7 @@
     },
     {
       "ChildId": "d5c0027d-2a90-4539-a0e5-bbbfcb9f468a"/*_FractalNoiseOld*/,
+      "SectionId": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Position": {
         "X": -616.5144,
         "Y": 1894.6548
@@ -316,6 +362,7 @@
     },
     {
       "ChildId": "d9431484-08a6-41d3-8479-d880b5178165"/*AnimValue*/,
+      "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1421.9293,
         "Y": 1577.1632
@@ -323,6 +370,7 @@
     },
     {
       "ChildId": "d9ecd28e-d8d7-4adb-8ee1-d2c8c8ea1313"/*_AnimValueOld*/,
+      "SectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Position": {
         "X": 417.12656,
         "Y": 1600.0297
@@ -330,6 +378,7 @@
     },
     {
       "ChildId": "dc62ad42-2aa6-4b7d-af87-f41068544c52"/*SortPixelGlitch*/,
+      "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1567.63,
         "Y": 1317.5756
@@ -337,6 +386,7 @@
     },
     {
       "ChildId": "e190ea1b-a8a5-476f-a38b-f84a71031a97"/*Rotate*/,
+      "SectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Position": {
         "X": -723.9602,
         "Y": 2199.3953
@@ -344,6 +394,7 @@
     },
     {
       "ChildId": "e43c6694-7a42-48c3-b533-1443f9a2a263"/*DirectionalBlur*/,
+      "SectionId": "eecc7921-23d8-4aa9-8e16-6d35fb2a816e",
       "Position": {
         "X": -577.41504,
         "Y": 1424.8762
@@ -351,6 +402,7 @@
     },
     {
       "ChildId": "edf1c3d0-01ae-4fe1-ba26-14dfc963b68d"/*KochKaleidoskope*/,
+      "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -495.94604,
         "Y": 669.857
@@ -358,6 +410,7 @@
     },
     {
       "ChildId": "ef6aca02-7dd1-4eaa-be1e-419236d1cf34"/*PickTexture*/,
+      "SectionId": "a35b622a-4f5c-4ee1-bf67-0c29c446415a",
       "Position": {
         "X": 256.91443,
         "Y": -206.18582
@@ -365,6 +418,7 @@
     },
     {
       "ChildId": "efd9e808-8f31-467e-8977-a0b08c59a23e"/*LoadImage*/,
+      "SectionId": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Position": {
         "X": -612.3684,
         "Y": 1775.7988
@@ -372,6 +426,7 @@
     },
     {
       "ChildId": "f48e49cc-bda9-43b8-baa6-fc1a713ded65"/*LoadImage*/,
+      "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1417.63,
         "Y": 1317.5756
@@ -379,6 +434,7 @@
     },
     {
       "ChildId": "f506c6d3-4095-4acf-82dd-d847515f6f1c"/*LinearGradient*/,
+      "SectionId": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Position": {
         "X": 785.0569,
         "Y": 2133.5337
@@ -386,6 +442,7 @@
     },
     {
       "ChildId": "f9664b47-b295-4c2e-87d7-b3212d073799"/*ChromaticDistortion*/,
+      "SectionId": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Position": {
         "X": -498.65253,
         "Y": 1046.5503
@@ -393,6 +450,7 @@
     },
     {
       "ChildId": "fd56af0c-52a3-4ea0-ab12-db8f8cc87294"/*AnimValue*/,
+      "SectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Position": {
         "X": -781.48834,
         "Y": 166.58789
@@ -400,6 +458,7 @@
     },
     {
       "ChildId": "fded24d6-fd46-4d1b-90bd-16e035752a8f"/*LoadImage*/,
+      "SectionId": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
       "Position": {
         "X": 1420.822,
         "Y": 1512.1493
@@ -415,10 +474,11 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Title": "Blend is the go-to operator to\ncombine image buffers. ",
+      "ParentSectionId": "e6afb637-c33e-4b9d-9ebd-b4275a0b9b3d",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -473,6 +533,7 @@
     {
       "Id": "5e8bd960-7a80-4d3b-9d1b-3ee52183a8fd",
       "Title": "However you should consider using [Layer2d]\nfor better rendering performance.\n",
+      "ParentSectionId": "341cd5a9-322a-46b4-bfa9-864e6aad8dd4",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -491,6 +552,7 @@
     {
       "Id": "6d0076de-13c0-4688-982d-c3cb67fe35de",
       "Title": "[BlendWithMask] uses a mask image to control the blending.",
+      "ParentSectionId": "e6afb637-c33e-4b9d-9ebd-b4275a0b9b3d",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -509,6 +571,7 @@
     {
       "Id": "7cf03de1-1d93-43f8-a91f-0d303e8fc2de",
       "Title": "Fake Light produces something like an emboss effect.\n",
+      "ParentSectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -527,6 +590,7 @@
     {
       "Id": "a35b622a-4f5c-4ee1-bf67-0c29c446415a",
       "Title": "This operator picks one of the incoming effects.\n\nYou can toggle the grid icon in the \nTime Controls to pause this.",
+      "ParentSectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -545,6 +609,7 @@
     {
       "Id": "ab3b2edb-7215-4bed-bfb8-cea5b6f5969e",
       "Title": "[Displace] uses the gradient of effect\nimages to distort images.",
+      "ParentSectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -563,6 +628,7 @@
     {
       "Id": "c57262d3-9928-48c2-ab08-eba3a204fcde",
       "Title": "Here are examples of effects that\ntransform or distort an image buffer.",
+      "ParentSectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -599,6 +665,7 @@
     {
       "Id": "d05d3d5d-240b-4de8-a970-e881f43d4c02",
       "Title": "There are effects that use the incoming \nimage to generate patterns or shapes.",
+      "ParentSectionId": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -635,6 +702,7 @@
     {
       "Id": "e7d3314e-404f-47ba-96eb-ac6a1624f8cf",
       "Title": "This is another displacement variation.",
+      "ParentSectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -653,6 +721,7 @@
     {
       "Id": "eecc7921-23d8-4aa9-8e16-6d35fb2a816e",
       "Title": "You don't need an effects layer for [DirectionalBlur].\nBut it really results in some very interesting visuals.",
+      "ParentSectionId": "374f4922-c82a-416b-86ec-7c52b7321fc4",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

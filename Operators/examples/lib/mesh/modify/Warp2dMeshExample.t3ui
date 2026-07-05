@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "11187aad-c763-48ed-9d5f-216fae079285"/*Warp2dMeshExample*/,
   "Description": "Can be used for projection mapping",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "010130e7-e376-4f53-8c49-da500a65becb"/*RepeatAtPoints*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 1052.0161,
         "Y": 1201.3746
@@ -12,6 +15,7 @@
     },
     {
       "ChildId": "07365f2a-9941-49cd-b0de-b6fc7daae599"/*Clamp*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.6208,
         "Y": 1157.0209
@@ -19,6 +23,7 @@
     },
     {
       "ChildId": "08471336-ed6c-4731-a8f4-dbc9f1f5321d"/*Camera*/,
+      "SectionId": "cac904e5-643a-4088-bd16-ca45fc401142",
       "Position": {
         "X": 975.0522,
         "Y": -92.51553
@@ -26,6 +31,7 @@
     },
     {
       "ChildId": "17c09a1e-0622-48d4-be6a-fa6e46dc8ce2"/*RenderTarget*/,
+      "SectionId": "cac904e5-643a-4088-bd16-ca45fc401142",
       "Position": {
         "X": 975.0522,
         "Y": -57.515533
@@ -40,6 +46,7 @@
     },
     {
       "ChildId": "1f2b8532-f5bb-4a8b-873a-7e7f4902de5d"/*Point*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 716.3779,
         "Y": 315.66925
@@ -47,6 +54,7 @@
     },
     {
       "ChildId": "2203a582-b20e-4677-9b40-4288b6cdb73e"/*DrawMesh*/,
+      "SectionId": "cac904e5-643a-4088-bd16-ca45fc401142",
       "Position": {
         "X": 975.0522,
         "Y": -162.51553
@@ -54,6 +62,7 @@
     },
     {
       "ChildId": "2693c2e8-59c0-4d41-869e-f48de154bf4e"/*LoadImage*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 826.1371,
         "Y": 922.3501
@@ -61,6 +70,7 @@
     },
     {
       "ChildId": "273601f3-f9c3-4d15-b219-fd4ea4488284"/*Point*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.6208,
         "Y": 817.3605
@@ -68,6 +78,7 @@
     },
     {
       "ChildId": "29596a8b-ebe5-44fb-aae6-47769150b0f6"/*Warp2dMesh*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 1058.5527,
         "Y": 802.39996
@@ -75,6 +86,7 @@
     },
     {
       "ChildId": "2bf9c82b-22be-4185-a430-3a6de48fda34"/*Point*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.62082,
         "Y": 1052.2533
@@ -82,6 +94,7 @@
     },
     {
       "ChildId": "464af54d-38d7-446d-be32-aa2acf2c6460"/*QuadMesh*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Comment": "For better rendering we need a fair amount of segments",
       "Position": {
         "X": 1043.5966,
@@ -90,6 +103,7 @@
     },
     {
       "ChildId": "4a19a64e-beaa-4e9b-83f5-1237d7623bd1"/*QuadMesh*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 1058.5527,
         "Y": 767.39996
@@ -97,6 +111,7 @@
     },
     {
       "ChildId": "51579207-fe29-4735-9231-0feec3808b92"/*ChannelMixer*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 826.1371,
         "Y": 957.3501
@@ -111,6 +126,7 @@
     },
     {
       "ChildId": "728aaf52-7cc1-47a7-b6c8-70536cf49b15"/*CombineBuffers*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 856.3779,
         "Y": 245.66925
@@ -118,6 +134,7 @@
     },
     {
       "ChildId": "7a1e39cf-b3a3-4f12-b91e-e4826cc4f510"/*Point*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 716.3779,
         "Y": 245.66925
@@ -125,6 +142,7 @@
     },
     {
       "ChildId": "7c15f477-e91c-4aa1-aa06-513ee7e1fbbd"/*Point*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.6208,
         "Y": 852.3606
@@ -132,6 +150,7 @@
     },
     {
       "ChildId": "819e9bca-950a-4338-a9d8-c9e864736e99"/*CommonPointSets*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 912.0161,
         "Y": 1236.3746
@@ -139,6 +158,7 @@
     },
     {
       "ChildId": "83c257b2-f6a1-4a21-b4bc-453abb984b14"/*Warp2dMesh*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 1043.5966,
         "Y": 282.29242
@@ -146,6 +166,7 @@
     },
     {
       "ChildId": "8538fc3e-1430-4163-b231-a2bd54a34667"/*DrawMeshUnlit*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 1042.0491,
         "Y": 445.74133
@@ -153,6 +174,7 @@
     },
     {
       "ChildId": "8a27283c-4061-4bf3-8d09-c8f90b7f418a"/*BlendPoints*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 795.60004,
         "Y": 788.99
@@ -160,6 +182,7 @@
     },
     {
       "ChildId": "8f16eb64-7156-4e1e-851c-9d4b51e8bc53"/*Point*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 716.3779,
         "Y": 280.66925
@@ -167,6 +190,7 @@
     },
     {
       "ChildId": "92fe0ce5-48e5-48b5-bf19-7c54aa98f845"/*Point*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.62082,
         "Y": 947.25323
@@ -174,6 +198,7 @@
     },
     {
       "ChildId": "aec6ae8e-97b7-40e7-aed2-1621d4c392e4"/*CombineBuffers*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 539.62085,
         "Y": 947.25323
@@ -181,6 +206,7 @@
     },
     {
       "ChildId": "b72a2c6e-949b-4a62-96c2-cf9d905b2384"/*BoxGradient*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 902.049,
         "Y": 480.7414
@@ -188,6 +214,7 @@
     },
     {
       "ChildId": "b9e35b0b-963a-44ed-ac2d-cde83abe2139"/*DrawMeshUnlit*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 1058.5527,
         "Y": 872.39996
@@ -195,6 +222,7 @@
     },
     {
       "ChildId": "c306efe3-5130-4552-b488-f7932831d601"/*Point*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.6208,
         "Y": 747.3604
@@ -202,6 +230,7 @@
     },
     {
       "ChildId": "c53a70c4-9008-407b-8613-06a51eef45f1"/*DrawLines*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 1052.0161,
         "Y": 1271.3746
@@ -209,6 +238,7 @@
     },
     {
       "ChildId": "cc93bcbe-f2df-475e-8d8b-c167c3ffe8db"/*AnimValue*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.6208,
         "Y": 1122.0209
@@ -223,6 +253,7 @@
     },
     {
       "ChildId": "dd011e87-dd83-4d5b-b2e8-01d4ff879836"/*AnimValue*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 762.049,
         "Y": 515.7414
@@ -230,6 +261,7 @@
     },
     {
       "ChildId": "de288c49-b6aa-4429-a700-cfb9f9345d02"/*TransformPoints*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 539.62085,
         "Y": 887.3604
@@ -237,6 +269,7 @@
     },
     {
       "ChildId": "df54fa95-5b89-40ee-aa10-79d8143b2a46"/*Point*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.62082,
         "Y": 1017.25323
@@ -244,6 +277,7 @@
     },
     {
       "ChildId": "e250b6af-8f8f-48f1-b45a-80f224ce6c73"/*PointLight*/,
+      "SectionId": "cac904e5-643a-4088-bd16-ca45fc401142",
       "Position": {
         "X": 975.0522,
         "Y": -127.51553
@@ -251,6 +285,7 @@
     },
     {
       "ChildId": "e75728a1-1476-4cc5-bc8c-13d01f5a87ec"/*Point*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.6208,
         "Y": 782.3604
@@ -258,6 +293,7 @@
     },
     {
       "ChildId": "ec429806-5898-4f9f-b5b5-b778acd609d5"/*CubeMesh*/,
+      "SectionId": "cac904e5-643a-4088-bd16-ca45fc401142",
       "Position": {
         "X": 975.0522,
         "Y": -197.51505
@@ -265,6 +301,7 @@
     },
     {
       "ChildId": "ec6f636d-a512-4a84-a88c-cbb0f8e47889"/*Point*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 399.62082,
         "Y": 982.25323
@@ -272,6 +309,7 @@
     },
     {
       "ChildId": "f6241920-6ae7-4000-972e-0f524706414e"/*Point*/,
+      "SectionId": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Position": {
         "X": 716.3779,
         "Y": 350.66925
@@ -279,6 +317,7 @@
     },
     {
       "ChildId": "fa1a254b-f115-4730-8364-f830dde13f80"/*CombineBuffers*/,
+      "SectionId": "90f07f82-413b-450b-a06b-5c91b924ddce",
       "Position": {
         "X": 539.62085,
         "Y": 747.3604
@@ -294,7 +333,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "898a4e9f-e772-43b9-84ea-17cd99ce78d7",
       "Title": "in the output view, enable the Gizmos\nthen select all the points\nin oder to edit their position within the output view",

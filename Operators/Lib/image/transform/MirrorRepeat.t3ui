@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1"/*MirrorRepeat*/,
   "Description": "Shifts, slices or mirrors the incoming image to create endless textures or kaleidoscopic patterns when combined with itself\n\nA more sophisticated version: [KochKaleidoskope]\nFor simpler transformations: [TransformImage]\n\nSimilar effects or interesting combinations: [MosaicTiling] [VoronoiCells] [SubdivisionStretch]",
   "SymbolTags": "1",

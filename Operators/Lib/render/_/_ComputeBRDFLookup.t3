@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "08d526d0-d5e5-4fc9-a039-98189721d2b8"/*_ComputeBRDFLookup*/,
   "Inputs": [
     {

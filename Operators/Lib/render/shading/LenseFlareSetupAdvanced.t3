@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8f4ca295-7268-44a2-94b0-4e974fac22a4"/*LenseFlareSetupAdvanced*/,
   "Inputs": [
     {

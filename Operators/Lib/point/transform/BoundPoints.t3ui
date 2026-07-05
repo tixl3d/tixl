@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ffbbef55-3149-48c1-95cf-cad691ce15fe"/*BoundPoints*/,
   "Description": "Constraints points within a boundary volume\nIt's the opposite of [BoundingBoxPoints]",
   "SymbolTags": "64",
@@ -90,7 +92,7 @@
       }
     },
     {
-      "ChildId": "b0dd6573-d0a0-4318-86b0-5d1073f77ce7"/*TransformsConstBuffer*/,
+      "ChildId": "b0dd6573-d0a0-4318-86b0-5d1073f77ce7"/*_TransformsCBuffer*/,
       "Position": {
         "X": 199.85052,
         "Y": 642.5657

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7d302c05-9898-4c56-a894-1f8f44b9b920"/*PointsFromMeshData*/,
   "Description": "You can use [PointCloudFromObj] to load an object and then get points on its surface.",
   "InputUis": [
@@ -50,7 +52,7 @@
       }
     },
     {
-      "ChildId": "7b86f16a-7d0c-4b92-b190-7e89e34821ff"/*TransformsConstBuffer*/,
+      "ChildId": "7b86f16a-7d0c-4b92-b190-7e89e34821ff"/*_TransformsCBuffer*/,
       "Position": {
         "X": 608.56104,
         "Y": 1443.3618

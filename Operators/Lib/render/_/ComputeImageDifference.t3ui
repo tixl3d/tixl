@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "45ddd1ac-5fd8-4479-81ac-eae5baf71fb6"/*ComputeImageDifference*/,
   "Description": "A shader that computes the relative difference between two images.",
   "InputUis": [

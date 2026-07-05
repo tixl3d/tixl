@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f2a0a8d9-e2dc-476b-ac97-de13101a6fdb"/*ZollnerPattern*/,
   "Description": "Creates an image for an optical illusion.\n\nOriginally programmed for [WorksForEverybody]\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
   "SymbolTags": "64",

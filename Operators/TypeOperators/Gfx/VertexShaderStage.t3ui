@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a9600440-4203-4315-bdb1-4dfd603b4515"/*VertexShaderStage*/,
   "Description": "",
   "InputUis": [

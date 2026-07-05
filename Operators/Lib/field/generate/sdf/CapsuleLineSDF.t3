@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "752e4358-05e0-4651-a147-f141138f5244"/*CapsuleLineSDF*/,
   "Inputs": [
     {

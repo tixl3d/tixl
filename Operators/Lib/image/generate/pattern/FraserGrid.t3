@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b882a5d0-f5ae-40a4-8c42-5b25e5775def"/*FraserGrid*/,
   "Inputs": [
     {

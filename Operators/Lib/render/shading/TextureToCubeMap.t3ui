@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e85d98cf-9240-4f5d-8df6-35425d325778"/*TextureToCubeMap*/,
   "Description": "Converts a 2d texture ([loaded with [LoadImage]) into a cube map that can then be used by [SetEnvironment] for PBR image-based lighting.\nCurrently Tooll supports Equirectangular Cubemaps.\n\nIf changing values and settings in this Operator does not cause any changes in the Viewport, it may be necessary to (temporarily) activate 'UpdateLive' in the following [SetEnvironment] op.",
   "SymbolTags": "1",

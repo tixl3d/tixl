@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "446d1664-5fcf-4792-874c-926450a900d7"/*SamplePointAttributesExample*/,
   "Description": "Shows how to sample attributes from a texture",
   "InputUis": [],

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2828fe15-4267-490c-9c12-6d6d3baf8ae9"/*SubdivideLinePointsExample*/,
   "Inputs": [],
   "Children": [
@@ -419,7 +421,7 @@
       "Outputs": []
     },
     {
-      "Id": "e37c16c0-0ec5-4dc9-be7a-af9203bd04f6"/*DrawLinesAlt*/,
+      "Id": "e37c16c0-0ec5-4dc9-be7a-af9203bd04f6"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {
@@ -466,7 +468,7 @@
       "Outputs": []
     },
     {
-      "Id": "fd508c14-7c88-4237-a09b-7b1a491b8f5b"/*DrawLinesAlt*/,
+      "Id": "fd508c14-7c88-4237-a09b-7b1a491b8f5b"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4912ba82-460a-4229-884d-6b647d64b08c"/*SetPointLight*/,
   "Description": "Adds a point light into the scene which illuminates geometry using a combination of \"Color\", \"Intensity\" and \"Decay\".\n\nBeware that [SetEnvironment] also affects the lighting in your scene, even if you are not using it, because every scene is always lit by a Default CubeMap (that can be deactivated by manually adding a [SetEnvironment]).\n\nCurrently a maximum of 8 Pointlights can be used in your scene. For example by daisy-chaining them right before your graph goes into the camera.\n",
   "SymbolTags": "16",

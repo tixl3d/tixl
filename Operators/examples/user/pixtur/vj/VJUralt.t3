@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a9e36415-58b3-4e2c-b42a-757000d5e337"/*VJUralt*/,
   "Inputs": [],
   "Children": [
@@ -2222,15 +2224,33 @@
       "TargetSlotId": "49ea5e01-cc8f-47a0-8988-3de2adb1805c"
     }
   ],
-  "PlaybackSettings": {
+  "ProjectSettings": {
     "Enabled": true,
-    "Bpm": 120.0,
-    "AudioSource": 1,
-    "Syncing": 0,
-    "AudioDecayFactor": 0.9,
-    "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "",
-    "EnableAudioBeatLocking": "False",
-    "BeatLockAudioOffsetSec": "0"
+    "Playback": {
+      "Bpm": 120.0,
+      "AudioSource": 1,
+      "Syncing": 0,
+      "AudioDecayFactor": 0.9,
+      "AudioGainFactor": 1.0,
+      "AudioInputDeviceName": "",
+      "EnableAudioBeatLocking": "False",
+      "BeatLockAudioOffsetSec": "0"
+    },
+    "Audio": {
+      "SoundtrackMute": false,
+      "SoundtrackVolume": 0.5,
+      "OperatorMute": false,
+      "OperatorVolume": 1.0,
+      "AudioResyncThreshold": 0.04
+    },
+    "Export": {
+      "DefaultWindowMode": 1,
+      "EnablePlaybackControlWithKeyboard": true
+    },
+    "Proxy": {
+      "Format": 1,
+      "Resolution": 0.5,
+      "UseForPreview": true
+    }
   }
 }

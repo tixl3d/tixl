@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cea24093-69f0-4905-a695-a0da2e47abc9"/*JonBakerSDFLoader*/,
   "Description": "SDF code loader\nhttps://jbaker.graphics/writings/DEC.html",
   "SymbolTags": "1152",

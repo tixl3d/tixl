@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8e6ed99c-a3e0-42c0-9f81-a89b1e340757"/*Sketch*/,
   "Description": "Allows adding sketches as annotations or storyboards. You can create multiple pages and switch between them by selecting or animating the PageIndex. Use the ShowAs parameter to toggle between showing the sketches as a single frame (e.g., as a comment), until the next frame (e.g., as a storyboard or animation), or with onion skinning. You can also use the following keyboard shortcuts:\n\n[P] - Draw mode\n[E] - Erase mode\n[X] - Cut Page\n[V] - Insert cut page\n[0-9] - Select brush size",
   "SymbolTags": "64",
@@ -109,6 +109,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "023cdfc3-edaa-499e-9ff2-0afb6fed08ce"/*RadialPoints*/,
+      "SectionId": "8432acf4-59cc-4410-bba7-4f8118fb828c",
       "Position": {
         "X": 819.13983,
         "Y": 225.05896
@@ -116,6 +117,7 @@
     },
     {
       "ChildId": "07c4e1b0-661d-496f-bcc7-be4b168664d2"/*Add*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 596.83453,
         "Y": -239.12848
@@ -142,6 +144,7 @@
     },
     {
       "ChildId": "1ea969a5-4a8b-4743-8281-64c06fa1e01d"/*PointsToCPU*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 959.13983,
         "Y": -329.78616
@@ -149,6 +152,7 @@
     },
     {
       "ChildId": "225afe4e-54c9-4933-9747-23d379d970a4"/*Clamp*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 141.26825,
         "Y": -183.05038
@@ -156,6 +160,7 @@
     },
     {
       "ChildId": "238bb2a5-5588-4e9d-ac6c-adab8a388ac9"/*Loop*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 819.13983,
         "Y": -224.78616
@@ -163,6 +168,7 @@
     },
     {
       "ChildId": "288f9f1d-f0c5-4ecf-a732-aa9b0af6226a"/*Execute*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 819.13983,
         "Y": -189.78616
@@ -170,6 +176,7 @@
     },
     {
       "ChildId": "295e2a9f-218e-4318-91de-034560aa32f8"/*ListToBuffer*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 819.13983,
         "Y": -329.78616
@@ -184,6 +191,7 @@
     },
     {
       "ChildId": "3acc495f-6973-4af4-817f-b0d2ba985e7b"/*Multiply*/,
+      "SectionId": "8432acf4-59cc-4410-bba7-4f8118fb828c",
       "Position": {
         "X": 679.13995,
         "Y": 365.05896
@@ -205,6 +213,7 @@
     },
     {
       "ChildId": "615f4037-2e7c-4a3c-a66f-13d76ad39b2c"/*GetIntVar*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 239.64822,
         "Y": -373.33875
@@ -233,6 +242,7 @@
     },
     {
       "ChildId": "8aeee990-d52d-4357-90c0-9202271a82e6"/*DrawLines*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 819.13983,
         "Y": -294.78616
@@ -247,6 +257,7 @@
     },
     {
       "ChildId": "92756a61-9eed-4eff-95d3-6c59734d03a8"/*SampleGradient*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 596.83453,
         "Y": -204.12848
@@ -254,6 +265,7 @@
     },
     {
       "ChildId": "9f9d8847-1bf9-476c-bb63-58dfac0f8a11"/*Div*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 351.74756,
         "Y": -225.38474
@@ -261,6 +273,7 @@
     },
     {
       "ChildId": "a3a18ed4-4537-4a2b-abd6-107a81724f8b"/*SubInts*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 239.64822,
         "Y": -338.33875
@@ -275,6 +288,7 @@
     },
     {
       "ChildId": "aee91aec-faeb-463b-b493-cfb99ec0a856"/*DrawLines*/,
+      "SectionId": "8432acf4-59cc-4410-bba7-4f8118fb828c",
       "Position": {
         "X": 819.13983,
         "Y": 260.05896
@@ -282,6 +296,7 @@
     },
     {
       "ChildId": "afa68593-28e1-4aff-b467-434d9f90209b"/*_GetSketchPoints*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 456.8344,
         "Y": -379.12848
@@ -338,6 +353,7 @@
     },
     {
       "ChildId": "f5b39d45-78e8-464c-aa45-4b2e6ce0ea47"/*Multiply*/,
+      "SectionId": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Position": {
         "X": 596.83453,
         "Y": -309.12848
@@ -359,6 +375,7 @@
     },
     {
       "ChildId": "fb5f0168-647c-47fb-aaf6-7fb27095cb38"/*Transform*/,
+      "SectionId": "8432acf4-59cc-4410-bba7-4f8118fb828c",
       "Position": {
         "X": 819.13983,
         "Y": 295.05896
@@ -381,7 +398,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "3c22fab6-384b-4bd8-b318-3f61458fcd4d",
       "Title": "Onion Skin Rendering",

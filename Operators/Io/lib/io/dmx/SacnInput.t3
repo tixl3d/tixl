@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e3207424-deaf-4462-acd5-21f2c6f16d1b"/*SacnInput*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "00618c91-f39a-44ea-b9d8-175c996460dc"/*LoadGltfScene*/,
   "Inputs": [
     {

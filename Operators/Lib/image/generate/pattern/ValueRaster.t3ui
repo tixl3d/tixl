@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3f955def-cf86-4bd4-be98-ff1adea8c495"/*ValueRaster*/,
   "Description": "",
   "InputUis": [
@@ -127,6 +129,5 @@
         "Y": -100.80272
       }
     }
-  ],
-  "Links": []
+  ]
 }

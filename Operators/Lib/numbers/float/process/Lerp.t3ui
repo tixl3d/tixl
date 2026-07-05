@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1f5294e1-9d0b-4cd5-9d65-14c8bbf59e61"/*Lerp*/,
   "Description": "Blends between two values (lerp). Also see [BlendValues] to blend between more values and [Remap] to blend between two value ranges.",
   "SymbolTags": "4096",

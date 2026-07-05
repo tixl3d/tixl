@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7d7c9abb-1742-407e-85c7-ba4f6e87f390"/*RenderTargetExample*/,
   "Description": "A simple example for not clearing a [RenderTarget].",
   "InputUis": [],

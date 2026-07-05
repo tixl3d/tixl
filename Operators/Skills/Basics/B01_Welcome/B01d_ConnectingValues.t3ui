@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "123a1ff1-2935-4d9a-880f-897a7f8885ad"/*B01d_ConnectingValues*/,
   "Description": "Take that value!",
   "SymbolTags": "16",
@@ -6,7 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "32966f34-ef59-45ba-b1db-7443e68f1144"/*Time*/,
-      "AnnotationId": "83594797-3ae4-4ab8-8e04-56af86e881c4",
+      "SectionId": "83594797-3ae4-4ab8-8e04-56af86e881c4",
       "Position": {
         "X": 1153.381,
         "Y": 2196.268
@@ -21,7 +23,7 @@
     },
     {
       "ChildId": "75f735c0-5354-49b6-860b-518557023656"/*RoundedRect*/,
-      "AnnotationId": "83594797-3ae4-4ab8-8e04-56af86e881c4",
+      "SectionId": "83594797-3ae4-4ab8-8e04-56af86e881c4",
       "Position": {
         "X": 1293.381,
         "Y": 2161.268
@@ -51,7 +53,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "83594797-3ae4-4ab8-8e04-56af86e881c4",
       "Label": "Solution",

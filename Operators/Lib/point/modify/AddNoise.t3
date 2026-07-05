@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dd586355-64b3-4e96-af6d-b4927595dee7"/*AddNoise*/,
   "Inputs": [
     {

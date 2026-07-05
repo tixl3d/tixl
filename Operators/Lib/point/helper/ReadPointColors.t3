@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fdb843e8-d859-451a-989e-f0e7a00f5e5a"/*ReadPointColors*/,
   "Inputs": [
     {
@@ -6,12 +8,12 @@
       "DefaultValue": null
     },
     {
-      "Id": "99bc9dc4-d416-4d50-9730-13e829c14bf2"/*StartIndex*/,
-      "DefaultValue": 0
-    },
-    {
       "Id": "7d40f8e1-cb43-4389-a12f-126160ab7e2c"/*MaxCount*/,
       "DefaultValue": 50
+    },
+    {
+      "Id": "99bc9dc4-d416-4d50-9730-13e829c14bf2"/*StartIndex*/,
+      "DefaultValue": 0
     },
     {
       "Id": "b038c123-cdac-4e6d-9863-3446631dfed5"/*Async*/,

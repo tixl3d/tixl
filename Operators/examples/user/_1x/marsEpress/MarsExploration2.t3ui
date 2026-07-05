@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ff101c21-e166-466e-8582-84858789f3b6"/*MarsExploration2*/,
   "Description": "A quick experiment with feedback effect.",
   "InputUis": [],

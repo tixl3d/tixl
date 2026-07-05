@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0db659a4-d0ba-4d23-acac-aea5ba5b57dc"/*_PointShaderTemplate*/,
   "Inputs": [
     {

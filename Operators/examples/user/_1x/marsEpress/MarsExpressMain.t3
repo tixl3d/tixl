@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ee4065db-3b30-4b1f-95e1-127c41a9d185"/*MarsExpressMain*/,
   "Inputs": [],
   "Children": [
@@ -155,26 +157,44 @@
       "TargetSlotId": "35f501f4-5c79-4628-9441-8b3782544bf6"
     }
   ],
-  "PlaybackSettings": {
+  "ProjectSettings": {
     "Enabled": true,
-    "Bpm": 120.0,
-    "AudioSource": 0,
-    "Syncing": 0,
-    "AudioDecayFactor": 0.98,
-    "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "",
-    "EnableAudioBeatLocking": "False",
-    "BeatLockAudioOffsetSec": "0",
-    "AudioClips": [
-      {
-        "Id": "00000000-0000-0000-0000-000000000000",
-        "StartTime": 0.0,
-        "EndTime": 0.0,
-        "Bpm": 120.0,
-        "DiscardAfterUse": true,
-        "IsSoundtrack": true,
-        "FilePath": "Resources/user/1x/mars-express/soundtrack/mars-express.mp3"
-      }
-    ]
+    "Playback": {
+      "Bpm": 120.0,
+      "AudioSource": 0,
+      "Syncing": 0,
+      "AudioDecayFactor": 0.98,
+      "AudioGainFactor": 1.0,
+      "AudioInputDeviceName": "",
+      "EnableAudioBeatLocking": "False",
+      "BeatLockAudioOffsetSec": "0",
+      "AudioClips": [
+        {
+          "Id": "4eeea431-8dd3-4eb9-aee4-f1cd1a760842",
+          "AssetPath": "Resources/user/1x/mars-express/soundtrack/mars-express.mp3",
+          "TimeRange": {
+            "Start": 0.0,
+            "End": 0.0
+          },
+          "IsMainSoundtrack": true
+        }
+      ]
+    },
+    "Audio": {
+      "SoundtrackMute": false,
+      "SoundtrackVolume": 0.5,
+      "OperatorMute": false,
+      "OperatorVolume": 1.0,
+      "AudioResyncThreshold": 0.04
+    },
+    "Export": {
+      "DefaultWindowMode": 1,
+      "EnablePlaybackControlWithKeyboard": true
+    },
+    "Proxy": {
+      "Format": 1,
+      "Resolution": 0.5,
+      "UseForPreview": true
+    }
   }
 }

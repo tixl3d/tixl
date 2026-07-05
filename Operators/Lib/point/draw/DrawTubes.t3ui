@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c12cf584-f6db-4d24-a03a-7801736d2c50"/*DrawTubes*/,
   "Description": "Draws a shaded 3D mesh for connected lines points.",
   "SymbolTags": "8",
@@ -182,7 +184,7 @@
       }
     },
     {
-      "ChildId": "3cb5bcf8-929b-47c9-826e-1d57b74d4a37"/*AddInts*/,
+      "ChildId": "3cb5bcf8-929b-47c9-826e-1d57b74d4a37"/*AddInt*/,
       "Position": {
         "X": 505.7359,
         "Y": 813.56067
@@ -231,7 +233,7 @@
       }
     },
     {
-      "ChildId": "8f0aa549-eada-4400-8a2d-7e5b435dc9c5"/*TransformsConstBuffer*/,
+      "ChildId": "8f0aa549-eada-4400-8a2d-7e5b435dc9c5"/*_TransformsCBuffer*/,
       "Position": {
         "X": 472.48523,
         "Y": -83.57388

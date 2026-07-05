@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "76cd7578-0f97-49a6-938a-caeaa98deaac"/*ChunkInstancingExample*/,
   "Inputs": [],
   "Children": [

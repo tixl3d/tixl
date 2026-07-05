@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "883e01f5-44ee-4724-9e6e-f885255c17e5"/*PlaneSDF*/,
   "Inputs": [
     {

@@ -1,11 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a85bbd92-afd8-488f-a52a-247ceda950ca"/*M01e_SinModulo*/,
   "Description": "Simple Chaos",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "0d2aff72-b45b-4acb-ab23-e5439622ef3a"/*Modulo*/,
-      "AnnotationId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
+      "SectionId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
       "Position": {
         "X": 1326.2296,
         "Y": 2017.0254
@@ -13,7 +15,7 @@
     },
     {
       "ChildId": "1fe68021-c103-4703-bf03-ba9a78365734"/*Sin*/,
-      "AnnotationId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
+      "SectionId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
       "Position": {
         "X": 1186.2296,
         "Y": 2052.0254
@@ -49,7 +51,7 @@
     },
     {
       "ChildId": "ddef0878-d327-457a-9063-2dc3520fcd89"/*Time*/,
-      "AnnotationId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
+      "SectionId": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
       "Position": {
         "X": 1186.2296,
         "Y": 2017.0256
@@ -65,7 +67,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "bc8e3da9-8b47-4608-9307-975f5e3bc9db",
       "Label": "Solution",

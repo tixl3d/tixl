@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f19a9234-cd23-4229-a794-aa9d97ad8027"/*DrawAsSplitView*/,
   "Inputs": [
     {

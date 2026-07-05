@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e7cdc103-4be4-4465-b77d-a66917cec5f6"/*KeyboardInputAsInt*/,
   "Description": "Returns integer values from 0 to 9 for pressed numeric keys.",
   "InputUis": [

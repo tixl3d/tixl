@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7d1f025c-89be-4ae3-9693-6da677a0ae2b"/*LaunchPadXButton*/,
   "Description": "Coordinates :\n\n- bottom left : (x=1, y=1)\n- top left : (x=1, y=8)\n- bottom right : (x=8, y=1)\n- top right : (x=8, y=8)\n\nThe operator must be connected to some Command operator.\n\nLaunchpad X must be in Programmer mode (Long press on session, RecordArm, Long press on session to exit settings)",
   "InputUis": [
@@ -281,7 +283,7 @@
       }
     },
     {
-      "ChildId": "f4e85db7-9487-4bbd-a4d9-dc0fce882cc9"/*AddInts*/,
+      "ChildId": "f4e85db7-9487-4bbd-a4d9-dc0fce882cc9"/*AddInt*/,
       "Position": {
         "X": 1352.6876,
         "Y": 473.96014

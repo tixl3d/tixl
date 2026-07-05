@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "63e6e642-827b-4518-ac64-9ab0a8d4391e"/*PickFloat*/,
   "Description": "Picks a value from the connected float inputs.",
   "SymbolTags": "1",

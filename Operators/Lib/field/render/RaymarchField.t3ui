@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9323e32f-078c-4156-941b-203f4c265ff5"/*RaymarchField*/,
   "Description": "Renders the connected shader graph SDF.\n\nIt uses the following [SetMaterial], [SetFog] and [PointLight] override. \nIt will correctly initialize the depth buffer so the output can be blended with other geometry like meshes.\n\nPlease check out the examples.\n\nAlso known as DrawField, DrawSDF, DrawRaymarchField, RaymarchSDF",
   "SymbolTags": "1",
@@ -301,7 +303,7 @@
       }
     },
     {
-      "ChildId": "e39b8798-65df-44f0-9cdb-6e0a151f6c21"/*TransformsConstBuffer*/,
+      "ChildId": "e39b8798-65df-44f0-9cdb-6e0a151f6c21"/*_TransformsCBuffer*/,
       "Position": {
         "X": 852.9934,
         "Y": 648.5422

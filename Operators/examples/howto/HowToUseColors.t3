@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dd0e8f4c-99bc-4e90-965c-d2d461d4a8fe"/*HowToUseColors*/,
   "Inputs": [],
   "Children": [
@@ -1617,30 +1619,23 @@
                 {
                   "Time": 0.0,
                   "Value": 0.0,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 1.1071487177940904,
                   "OutTangentAngle": 4.2487413713838835
                 },
                 {
                   "Time": 0.5,
                   "Value": 1.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 1.0,
                   "Value": 0.0,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": -1.1071487177940904,
                   "OutTangentAngle": -4.2487413713838835
                 }

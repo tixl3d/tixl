@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "df176113-ccc4-43e7-a462-5f37fff72fd2"/*MarsAsciiMirrorScene*/,
   "Description": "",
   "InputUis": [],

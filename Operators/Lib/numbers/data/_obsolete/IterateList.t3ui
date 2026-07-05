@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8b285708-3f20-4957-9eb2-bb40e0d320ee"/*IterateList*/,
   "Description": "Iterates over the elements of a structured list",
   "SymbolTags": "4224",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4bbc6fac-789d-496e-9833-a0af78c31c98"/*ScaleVector2*/,
   "Description": "Multiplies two incoming [Vector2]s with each other",
   "InputUis": [

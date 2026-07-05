@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0920c9cf-91b3-42ee-9db4-a5a63c16d71e"/*VisualizeUvMap*/,
   "Inputs": [
     {
@@ -222,7 +224,7 @@
       "Outputs": []
     },
     {
-      "Id": "61151d0f-e009-4de9-81d5-82f136f9cf91"/*DrawLinesAlt*/,
+      "Id": "61151d0f-e009-4de9-81d5-82f136f9cf91"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {

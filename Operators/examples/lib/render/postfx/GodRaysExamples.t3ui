@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4b8b7567-a9d2-4956-813d-91e542e1f661"/*GodRaysExamples*/,
   "Description": "Shows a simple setup for using the god-rays post-render effect.",
   "InputUis": [],

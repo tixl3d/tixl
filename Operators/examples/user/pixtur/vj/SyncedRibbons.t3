@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dda7898a-00c3-40c9-9fcd-020706969733"/*SyncedRibbons*/,
   "Inputs": [],
   "Children": [
@@ -525,41 +527,31 @@
                 {
                   "Time": 0.0,
                   "Value": 0.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 0.0189,
                   "Value": 2.5554795265197754,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "InTangentAngle": 6.283185307179586,
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 0.6538,
                   "Value": 0.7660001516342163,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "InTangentAngle": -1.1705770497438173,
                   "OutTangentAngle": 1.9710156038459758
                 },
                 {
                   "Time": 1.1,
                   "Value": 0.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": -3.141592653589793
                 }
               ]

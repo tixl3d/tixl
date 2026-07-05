@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d1a1f207-0537-416a-985b-e350c3f7e655"/*SimpleLiquid2*/,
   "Description": "This Simple Detailed Fluid effect is a port of 'https://www.shadertoy.com/view/sl3Szs' by Lomateron.\n\nParameters:\n\nIt yields very interesting results when combined with an FX Texture that can include the following channels:\n- RB -> Velocity vectors (0.5 is neutral)\n- G -> Mass\n- A -> Effect Amount\n\nEach of these channels can be multiplied with the ApplyFxTexture parameter.\n\nThe SpeedFactor is applied on each frame and can be used for adding friction (values smaller than 1) or dynamism (values larger than 1) to the system.\nThe StabilizeFactor will lower too intense and amplify too low mass values.\nThe iteration count will speed up the processing of the application.",
   "SymbolTags": "8",

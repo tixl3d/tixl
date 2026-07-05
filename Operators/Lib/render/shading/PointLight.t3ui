@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9c67a8c8-839f-4f67-a949-08cb38b9dffd"/*PointLight*/,
   "Description": "The standard point light with transform gizmo.\nThis can bring light into your scene using a combination of \"Color\", \"Intensity\" and \"Decay\".\nBeware that [SetEnvironment] also affects the lighting in your scene, even if you are not using it, because every scene is always lit by a Default CubeMap (that can be deactivated by manually adding a [SetEnvironment]).\n\nCurrently a maximum of 8 Pointlights can be used in your scene. For example by daisychaining them right before your graph goes into the camera.\n",
   "SymbolTags": "1",

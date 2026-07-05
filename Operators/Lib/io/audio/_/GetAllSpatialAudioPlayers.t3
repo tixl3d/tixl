@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "91f249cf-a398-4261-8654-22637a1b9c12"/*GetAllSpatialAudioPlayers*/,
   "Inputs": [
     {

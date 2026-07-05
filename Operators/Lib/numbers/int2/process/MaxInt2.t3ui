@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8e9a45db-a631-4c92-aea9-c252ea6e9708"/*MaxInt2*/,
   "Description": "Returns the larger of two integer values (also as an int2)\n\nExample: If connected to 4 and 7 it will return 7",
   "SymbolTags": "8",

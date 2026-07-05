@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "eb7bd521-c84b-45ad-88c6-a1ed79e64806"/*SplinePointsExample*/,
   "Inputs": [],
   "Children": [
@@ -52,7 +54,7 @@
       "Outputs": []
     },
     {
-      "Id": "055438d2-cb5f-4880-ac76-66935be85396"/*AddInts*/,
+      "Id": "055438d2-cb5f-4880-ac76-66935be85396"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

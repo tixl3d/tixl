@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "67f77fd3-7fe3-49ca-bc5b-34b92aa7ab00"/*ApplyVectorField*/,
   "Description": "Applies a signed XYZ vector field by setting the rotation and F1 to a set of points.\n\nIdeally this requires a _vector_ field, not a color or SDF, with signed vectors for the 3 axis in world space.\n\nAlso see [SdfToVector]",
   "SymbolTags": "1",

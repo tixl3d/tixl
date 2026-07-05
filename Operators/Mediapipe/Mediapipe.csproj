@@ -60,11 +60,9 @@
     <Using Alias="Format" Include="SharpDX.DXGI.Format" />
     <Using Alias="Texture2DDescription" Include="SharpDX.Direct3D11.Texture2DDescription" />
     <Using Alias="Texture3DDescription" Include="SharpDX.Direct3D11.Texture3DDescription" />
-    <Using Alias="RenderTargetBlendDescription"
-      Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
+    <Using Alias="RenderTargetBlendDescription" Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
     <Using Alias="SamplerState" Include="SharpDX.Direct3D11.SamplerState" />
-    <Using Alias="UnorderedAccessViewBufferFlags"
-      Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
+    <Using Alias="UnorderedAccessViewBufferFlags" Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
     <Using Alias="RawRectangle" Include="SharpDX.Mathematics.Interop.RawRectangle" />
     <Using Alias="RawViewportF" Include="SharpDX.Mathematics.Interop.RawViewportF" />
     <Using Alias="ResourceUsage" Include="SharpDX.Direct3D11.ResourceUsage" />
@@ -132,21 +130,12 @@
     <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
-  <Target Name="CopyPackageContent" AfterTargets="AfterBuild"
-    Condition="'$(Configuration)' == 'Release'">
-    <Copy SourceFiles="@(PackageAssets)"
-      DestinationFiles="@(PackageAssets->'$(OutputPath)/Assets/%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(PackageSymbols)"
-      DestinationFiles="@(PackageSymbols->'$(OutputPath)/Symbols/%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(PackageSymbolUis)"
-      DestinationFiles="@(PackageSymbolUis->'$(OutputPath)/SymbolUis/%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true" />
+  <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="@(PackageAssets)" DestinationFiles="@(PackageAssets->'$(OutputPath)/Assets/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbols)" DestinationFiles="@(PackageSymbols->'$(OutputPath)/Symbols/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbolUis)" DestinationFiles="@(PackageSymbolUis->'$(OutputPath)/SymbolUis/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(PackageSourceCode)"
-      DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
   <ItemGroup>
     <Compile Remove="Examples\**" />
@@ -185,7 +174,6 @@
         ]
         }</OperatorPackageInfoJson>
     </PropertyGroup>
-    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)"
-      Overwrite="True" Encoding="UTF-8" />
+    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
 </Project>

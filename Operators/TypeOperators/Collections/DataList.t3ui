@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "bfe540ef-f8ad-45a2-b557-cd419d9c8e44"/*DataList*/,
   "Description": "Shows a list table for the connected StructuredList input",
   "InputUis": [

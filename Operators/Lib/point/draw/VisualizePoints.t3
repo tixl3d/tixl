@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "37bdbafc-d14c-4b81-91c3-8f63c3b63812"/*VisualizePoints*/,
   "Inputs": [
     {

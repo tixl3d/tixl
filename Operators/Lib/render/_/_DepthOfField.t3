@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2cd650a1-5b77-4040-895b-6049dc09206e"/*_DepthOfField*/,
   "Inputs": [
     {

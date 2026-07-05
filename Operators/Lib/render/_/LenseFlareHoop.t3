@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "393da0ad-00ef-4a9c-bd53-9314bb16b08b"/*LenseFlareHoop*/,
   "Inputs": [
     {

@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "16235faf-61b7-474f-bdc7-f7abe3c538eb"/*FollowMeshSurfaceForceExample*/,
   "Description": "Uses a surface force to grow virtual stems with leaves.",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "039f598a-27da-460b-94da-eb2caf06479e"/*SphereMesh*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Comment": "We reduce poly count. It would work with the defaults, but it doesn't make a visual difference on the effect.",
       "Position": {
         "X": -47.901184,
@@ -27,6 +30,7 @@
     },
     {
       "ChildId": "19579242-519b-4304-8661-cf93e13b06da"/*DrawMeshAtPoints*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Position": {
         "X": 1555.945,
         "Y": 353.49512
@@ -34,6 +38,7 @@
     },
     {
       "ChildId": "207f32fb-778b-48cd-bfd1-864bcaaf32b0"/*TransformMesh*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 102.098816,
         "Y": 302.73633
@@ -41,6 +46,7 @@
     },
     {
       "ChildId": "20bb7685-955f-4e23-8c73-26ce536238e1"/*HasTimeChanged*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Position": {
         "X": 955.94495,
         "Y": 422.49512
@@ -48,6 +54,7 @@
     },
     {
       "ChildId": "23836a83-0129-40fb-8b71-e25b59ec6863"/*FilterPoints*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "We filter some of the stems...",
       "Position": {
         "X": 955.94495,
@@ -56,6 +63,7 @@
     },
     {
       "ChildId": "3100a557-1e74-421f-aa48-618965161fe9"/*MapPointAttributes*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "We add a small growth animation to the size.",
       "Position": {
         "X": 1255.945,
@@ -64,6 +72,7 @@
     },
     {
       "ChildId": "47d2ed8c-abd2-4bfe-af4d-a08d8dff97d6"/*ParticleSystem*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "and append them to another particle system.",
       "Position": {
         "X": 1105.945,
@@ -72,6 +81,7 @@
     },
     {
       "ChildId": "480b9d6c-1355-4800-a5b8-fa31435f46a4"/*CubeMesh*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 252.09882,
         "Y": 196.73633
@@ -79,6 +89,7 @@
     },
     {
       "ChildId": "4e6bf31c-1c5e-46d1-82f0-ece58232985c"/*PerlinNoise3*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 102.098816,
         "Y": 365.73633
@@ -86,6 +97,7 @@
     },
     {
       "ChildId": "5c5b7b71-a9d5-4ba0-9589-5341a2da896f"/*TransformMesh*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 252.09882,
         "Y": 239.73633
@@ -93,6 +105,7 @@
     },
     {
       "ChildId": "61a49ee8-aa7b-4680-ace5-63c5dd82ba6a"/*AnimValue*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 102.098816,
         "Y": 471.73633
@@ -114,6 +127,7 @@
     },
     {
       "ChildId": "72ff9d82-34da-42ea-99af-11b4eb12e615"/*AnimVec3*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 102.098816,
         "Y": 408.73633
@@ -121,6 +135,7 @@
     },
     {
       "ChildId": "74139d64-af04-4fe8-83db-b4e7d9c1ca7e"/*_Time_old*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Position": {
         "X": 1255.945,
         "Y": 409.49512
@@ -142,6 +157,7 @@
     },
     {
       "ChildId": "7d489fde-e97a-4d7b-9278-2fd9cd130563"/*LoadObj*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Comment": "This is as high poly as you should go.",
       "Position": {
         "X": 102.098816,
@@ -157,6 +173,7 @@
     },
     {
       "ChildId": "a5bb5adf-5b5a-4aac-9179-c041cb12c56b"/*PickMeshBuffer*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Comment": "Switching between our geometries...",
       "Position": {
         "X": 402.09882,
@@ -165,6 +182,7 @@
     },
     {
       "ChildId": "b7128776-9996-4f02-a3c8-6e09a19e9a9f"/*MapPointAttributes*/,
+      "SectionId": "f285df13-cf91-481a-9817-0e194dd89535",
       "Comment": "The moving particles are the tip of stems.\n\nWe add some random variation to color.",
       "Position": {
         "X": 1260.2389,
@@ -180,6 +198,7 @@
     },
     {
       "ChildId": "c4655e46-a146-4584-aedd-e5565fc59675"/*RandomizePoints*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "Adding some variations to the leaves' orientation and size.\n\nAnimating the RandomPhase will lead to a subtle secondary animation.",
       "Position": {
         "X": 1405.945,
@@ -188,6 +207,7 @@
     },
     {
       "ChildId": "ce5418cc-059e-4ec4-9a5b-80f0bb54bdfb"/*CountInt*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Position": {
         "X": 805.94495,
         "Y": 353.49512
@@ -195,6 +215,7 @@
     },
     {
       "ChildId": "d3bd7c3e-071c-4da8-b6fa-9434ee491b7b"/*PointTrail*/,
+      "SectionId": "f285df13-cf91-481a-9817-0e194dd89535",
       "Position": {
         "X": 1410.2389,
         "Y": 3.0
@@ -202,6 +223,7 @@
     },
     {
       "ChildId": "dabc93eb-a14c-49e7-a335-847a9a6094d0"/*CountInt*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Position": {
         "X": 252.09882,
         "Y": 471.73633
@@ -209,6 +231,7 @@
     },
     {
       "ChildId": "decbe1ee-3605-48d6-8620-13cf23d0781c"/*TransformMesh*/,
+      "SectionId": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
       "Comment": "Let's add some random movement to this sphere...",
       "Position": {
         "X": 252.09882,
@@ -224,6 +247,7 @@
     },
     {
       "ChildId": "e6f05223-7c72-45e2-89f5-d279d96ace87"/*_Time_old*/,
+      "SectionId": "f285df13-cf91-481a-9817-0e194dd89535",
       "Position": {
         "X": 1115.6064,
         "Y": 102.35278
@@ -231,6 +255,7 @@
     },
     {
       "ChildId": "eb66c5d4-50d1-48d3-8895-e8cafcd77b19"/*QuadMesh*/,
+      "SectionId": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Comment": "I'm not a leaf!",
       "Position": {
         "X": 1405.945,
@@ -246,6 +271,7 @@
     },
     {
       "ChildId": "fe33efc0-4537-45b0-af04-f8292d802772"/*DrawLines*/,
+      "SectionId": "f285df13-cf91-481a-9817-0e194dd89535",
       "Position": {
         "X": 1560.2389,
         "Y": 3.0
@@ -269,7 +295,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "807feda3-230a-4295-b55d-b49898bc5bfa",
       "Title": "Leaves",

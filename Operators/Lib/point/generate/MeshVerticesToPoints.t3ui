@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2467e1ed-f7fc-4c90-8230-b80ba6b42a2d"/*MeshVerticesToPoints*/,
   "Description": "Creates a point at each vertex of the connected mesh.\nIntended as a helper method to analyze meshes.\n\nUseful combinations [LoadObj], [DrawPoints] and grouped with [DrawMesh] with Fillmode set to 'Wireframe' (similar to [VisualizeMesh])\n\nSimilar Operators:\nTo create a point at each face center of the connected mesh [MeshFacesPoints] can be used.\nTo get evenly distributed points on a mesh [PointsOnMesh] can be used.\n\n ",
   "SymbolTags": "1",

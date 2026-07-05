@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0989e44b-f543-4b9a-a08e-5058d0032259"/*RenderWithMotionBlur*/,
   "Description": "This will render multiple instances of the incoming op each pass with slightly offset local time. \nIts primary purpose is to increase rendering quality for output with Render to Image Sequences or Video. Depending on the complexity of the graph, this effect can be very slow. You can use [HasTimeChanged] with Mode=AdvancedWithMotionBlur to trigger updates to the first pass. This can be useful for simulation or feedback effects. Tip: When rendering videos or sequences, you can override the sample count.\n\nAs an alternative: See [MotionBlur] for an operator that requires far fewer resources because it uses real-time camera data such as motion vectors.\n\nAlso see: [DepthOfField]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
   "SymbolTags": "1",
@@ -42,6 +44,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "06bbce77-f406-401d-a139-9845f0711c5a"/*Vector2Components*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 458.11816,
         "Y": -433.34
@@ -49,6 +52,7 @@
     },
     {
       "ChildId": "0b8977a9-16de-4f59-ad75-9b1791a73420"/*SamplerState*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 611.9359,
         "Y": -358.2346
@@ -56,6 +60,7 @@
     },
     {
       "ChildId": "2bb3f711-8b6d-4249-bd0b-a7d346a978ba"/*InputAssemblerStage*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 763.9828,
         "Y": -519.9224
@@ -63,6 +68,7 @@
     },
     {
       "ChildId": "34fefd30-621b-4218-999b-1ac72178b887"/*VertexShader*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 608.11816,
         "Y": -631.34
@@ -70,6 +76,7 @@
     },
     {
       "ChildId": "3c7705be-0fd6-44a0-98a6-3162ca36adfb"/*RasterizerState*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 611.9359,
         "Y": -315.2346
@@ -77,6 +84,7 @@
     },
     {
       "ChildId": "3e035ea8-13be-4213-80a0-eefafebc1a0c"/*IntToFloat*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 308.11816,
         "Y": -545.34
@@ -91,6 +99,7 @@
     },
     {
       "ChildId": "45faad80-4e74-47c4-941f-a3bebe633608"/*FloatsToBuffer*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 608.11816,
         "Y": -545.34
@@ -98,6 +107,7 @@
     },
     {
       "ChildId": "4772185e-c725-44bb-b8bf-8e49d065c0f2"/*SrvFromTexture2d*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 611.9359,
         "Y": -401.2346
@@ -105,6 +115,7 @@
     },
     {
       "ChildId": "5b0b33ea-1615-415e-979c-16d12162ab11"/*SetPixelAndVertexShaderStage*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 763.9828,
         "Y": -476.92245
@@ -119,6 +130,7 @@
     },
     {
       "ChildId": "6e041248-cdd6-469d-9b92-ec7cc6b679f7"/*Draw*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 761.9359,
         "Y": -190.23459
@@ -140,6 +152,7 @@
     },
     {
       "ChildId": "78bba8cc-4a19-458d-af3a-1a51e37acd22"/*Position*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 458.11816,
         "Y": -476.34
@@ -161,6 +174,7 @@
     },
     {
       "ChildId": "8bac64f8-214e-44aa-b480-3c56b1b38e6b"/*BlendState*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 611.9359,
         "Y": -216.23459
@@ -168,6 +182,7 @@
     },
     {
       "ChildId": "90800008-1e81-49e1-929b-80c86f9a3b6b"/*Execute*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 924.2852,
         "Y": -531.18036
@@ -182,6 +197,7 @@
     },
     {
       "ChildId": "9cdb9da6-b10d-4b5d-acfa-8a1a052e7a14"/*PixelShader*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 608.11816,
         "Y": -588.34
@@ -189,6 +205,7 @@
     },
     {
       "ChildId": "aa745e27-1f7c-4f1f-94cd-e46238c2a8d7"/*RenderTargetBlendDescription*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 461.9359,
         "Y": -216.23459
@@ -196,6 +213,7 @@
     },
     {
       "ChildId": "ab87ad80-8b11-4f4f-8d20-9e5cd3f33d98"/*DepthStencilState*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 611.9359,
         "Y": -259.2346
@@ -217,6 +235,7 @@
     },
     {
       "ChildId": "c06c65ca-15ce-4747-9832-f2db6f4270fb"/*Rasterizer*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 761.9359,
         "Y": -315.2346
@@ -231,6 +250,7 @@
     },
     {
       "ChildId": "d3b80f77-a730-40a4-a02e-4a7f9af5dd8e"/*Div*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 458.11816,
         "Y": -545.34
@@ -238,6 +258,7 @@
     },
     {
       "ChildId": "e92fe53b-dbf6-4dd2-a5cc-54cc73f4235c"/*OutputMergerStage*/,
+      "SectionId": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Position": {
         "X": 761.9359,
         "Y": -259.2346
@@ -260,7 +281,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "6443511c-49e6-484d-b155-30cf92cc9340",
       "Title": "Draw screenquad with RGBA additive blending.",

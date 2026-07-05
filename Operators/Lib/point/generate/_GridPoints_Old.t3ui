@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3ee8f66d-68df-43c1-b0eb-407259bf7e86"/*_GridPoints_Old*/,
   "Description": "Old version of [GridPoints] with default settings to Bounds. Please use [GridPoints] instead.\n\nCreates a buffer of GPU points distributed on a rectangular or hexagonal grid.\n\nTips:\n- Set any of the counts to 1 to create a plane of points.\n- Switch the SizeMode to set if the scaling refers to the padding between the points or the size of the volume.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nSimilar: [RadialPoints], [SpherePoints], [PointsOnMesh]",
   "SymbolTags": "4096",

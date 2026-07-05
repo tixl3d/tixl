@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a2612284-7b74-449e-903e-536eaab4833f"/*HoneyCombTilesExample*/,
   "Description": "A quick illustration of the [HoneyCombTiles] operator.",
   "InputUis": [],

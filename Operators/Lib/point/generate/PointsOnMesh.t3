@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "17188f49-1243-4511-a46c-1804cae10768"/*PointsOnMesh*/,
   "Inputs": [
     {

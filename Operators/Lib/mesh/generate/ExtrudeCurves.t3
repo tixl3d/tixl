@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2"/*ExtrudeCurves*/,
   "Inputs": [
     {
@@ -159,7 +161,7 @@
       "Outputs": []
     },
     {
-      "Id": "7e4fd046-3041-4caa-9e06-b053849abb84"/*AddInts*/,
+      "Id": "7e4fd046-3041-4caa-9e06-b053849abb84"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {
@@ -177,7 +179,7 @@
       "Outputs": []
     },
     {
-      "Id": "9018dac0-e0eb-4252-9e45-a8acc8a756d7"/*AddInts*/,
+      "Id": "9018dac0-e0eb-4252-9e45-a8acc8a756d7"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

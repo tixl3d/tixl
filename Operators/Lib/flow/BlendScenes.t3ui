@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6e67d136-9285-48c6-a557-0a07361fc847"/*BlendScenes*/,
   "Description": "Uses a float index to alpha blend between draw scenes.",
   "SymbolTags": "8",
@@ -70,7 +72,7 @@
       }
     },
     {
-      "ChildId": "9d6598df-7306-4cf1-b1ed-ed4a8f1b2e13"/*AddInts*/,
+      "ChildId": "9d6598df-7306-4cf1-b1ed-ed4a8f1b2e13"/*AddInt*/,
       "Position": {
         "X": -552.01416,
         "Y": 24.504463

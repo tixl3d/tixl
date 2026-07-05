@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b263a6a1-0872-4223-80e7-5e09f4aea19d"/*WrapPoints*/,
   "Description": "Wraps points within a boundary volume.",
   "SymbolTags": "1024",
@@ -41,7 +43,7 @@
       }
     },
     {
-      "ChildId": "33b9a0f8-30c6-40aa-92ad-454980476b39"/*TransformsConstBuffer*/,
+      "ChildId": "33b9a0f8-30c6-40aa-92ad-454980476b39"/*_TransformsCBuffer*/,
       "Position": {
         "X": 199.85052,
         "Y": 642.5657

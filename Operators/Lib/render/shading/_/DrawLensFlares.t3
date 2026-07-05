@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "de173d83-66e6-4363-a478-4336100c2dbd"/*DrawLensFlares*/,
   "Inputs": [
     {
@@ -86,7 +88,7 @@
       "Outputs": []
     },
     {
-      "Id": "4c16e5fb-5ebd-4c82-8d4f-38ea04a25135"/*TransformsConstBuffer*/,
+      "Id": "4c16e5fb-5ebd-4c82-8d4f-38ea04a25135"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

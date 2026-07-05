@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "722e79cc-47bc-42cc-8fce-2e06f36f8caa"/*PointsOnImage*/,
   "Description": "Uses the image brightness to emit points.\n\nWARNING: this is extremely slow for high resolution. We recommend setting fixed resolutions like 512x512px.",
   "SymbolTags": "1",
@@ -103,6 +105,7 @@
     },
     {
       "ChildId": "0fa51a80-e605-4533-ac49-5823f3732b30"/*ComputeShaderStage*/,
+      "SectionId": "cbf3f0ee-bce7-4a66-bb50-301cd42b7132",
       "Style": "Resizable",
       "Size": {
         "X": 110.60479,
@@ -143,6 +146,7 @@
     },
     {
       "ChildId": "32d0da61-1917-486e-a7f0-e7b740322863"/*ComputeShaderStage*/,
+      "SectionId": "f79c9c15-c89c-4296-9ebe-acfc704c33b4",
       "Style": "Resizable",
       "Size": {
         "X": 110.60479,
@@ -155,6 +159,7 @@
     },
     {
       "ChildId": "33203938-430c-4945-935c-ff1f56f0d41c"/*CalcDispatchCount*/,
+      "SectionId": "cbf3f0ee-bce7-4a66-bb50-301cd42b7132",
       "Position": {
         "X": 493.2115,
         "Y": 990.7926
@@ -162,6 +167,7 @@
     },
     {
       "ChildId": "48a58a1e-87a3-49f6-a850-1d45da35793a"/*StructuredBufferWithViews*/,
+      "SectionId": "35df41a3-4f88-4a08-b7c7-e886ab986224",
       "Position": {
         "X": 576.9323,
         "Y": 1973.9724
@@ -169,6 +175,7 @@
     },
     {
       "ChildId": "4f403291-1cfe-48b1-8d13-9a8bd3ef62f4"/*clampedSampler*/,
+      "SectionId": "35df41a3-4f88-4a08-b7c7-e886ab986224",
       "Position": {
         "X": 742.5412,
         "Y": 1907.9158
@@ -190,6 +197,7 @@
     },
     {
       "ChildId": "5a726518-8046-4bc4-8492-5395f44b2854"/*ComputeShader*/,
+      "SectionId": "35df41a3-4f88-4a08-b7c7-e886ab986224",
       "Position": {
         "X": 497.8405,
         "Y": 1711.3079
@@ -197,6 +205,7 @@
     },
     {
       "ChildId": "70dc34dd-24fb-4930-8cbe-49d33c66f036"/*ClampInt*/,
+      "SectionId": "35df41a3-4f88-4a08-b7c7-e886ab986224",
       "Position": {
         "X": 291.13022,
         "Y": 1823.5685
@@ -211,6 +220,7 @@
     },
     {
       "ChildId": "7a8487c8-df61-410d-b35b-613b16a24dac"/*CalcInt2DispatchCount*/,
+      "SectionId": "f79c9c15-c89c-4296-9ebe-acfc704c33b4",
       "Position": {
         "X": 631.7147,
         "Y": 1229.529
@@ -218,6 +228,7 @@
     },
     {
       "ChildId": "89b3e218-9d87-4685-85d1-6e0113f05a83"/*ComputeShader*/,
+      "SectionId": "f79c9c15-c89c-4296-9ebe-acfc704c33b4",
       "Position": {
         "X": 396.72125,
         "Y": 1206.9009
@@ -225,6 +236,7 @@
     },
     {
       "ChildId": "8aff11f2-1c5e-4d60-a907-a81a5572afbc"/*CalcDispatchCount*/,
+      "SectionId": "35df41a3-4f88-4a08-b7c7-e886ab986224",
       "Position": {
         "X": 742.5412,
         "Y": 1743.9158
@@ -260,6 +272,7 @@
     },
     {
       "ChildId": "b2c34af4-e6e3-475d-ada3-17d6de9f7b40"/*GetBufferComponents*/,
+      "SectionId": "35df41a3-4f88-4a08-b7c7-e886ab986224",
       "Position": {
         "X": 742.5412,
         "Y": 1950.9158
@@ -274,6 +287,7 @@
     },
     {
       "ChildId": "beeeec03-cef3-40fa-b2cb-935ef8b758f2"/*ComputeShaderStage*/,
+      "SectionId": "35df41a3-4f88-4a08-b7c7-e886ab986224",
       "Style": "Resizable",
       "Size": {
         "X": 111.4145,
@@ -300,6 +314,7 @@
     },
     {
       "ChildId": "e85b298a-5610-472a-b775-de46719ee752"/*CalcInt2DispatchCount*/,
+      "SectionId": "cbf3f0ee-bce7-4a66-bb50-301cd42b7132",
       "Position": {
         "X": 632.6108,
         "Y": 935.2029
@@ -336,7 +351,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "35df41a3-4f88-4a08-b7c7-e886ab986224",
       "Title": "Emit Points",

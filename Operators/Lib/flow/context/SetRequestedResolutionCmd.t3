@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8a104da8-3995-421f-b756-b6fc06953be3"/*SetRequestedResolutionCmd*/,
   "Inputs": [
     {

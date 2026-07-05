@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ce527990-258e-4eb6-8bba-665022c8beaf"/*CombineSDFExample*/,
   "Description": "A quick example how a bike can be build from combining SDF primitives.",
   "InputUis": [],

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a2b3c4d5-e6f7-4890-1234-567890abcdef"/*TcpClient*/,
   "Description": "Connects to a TCP server to send and receive data.\n\nThis operator establishes a client connection to a specified TCP server. It can send messages constructed from various parts and receives data from the server, which can be processed as a continuous string or as a list of lines.\n\nTips:\n- Use `SendOnChange` to automatically send data whenever the `MessageParts` input changes.\n- For manual control over sending, use the `SendTrigger` input.\n- Check the `IsConnected` output to verify the connection status before attempting to send data.\n\nAKA: tcp, network, socket, client",
   "InputUis": [

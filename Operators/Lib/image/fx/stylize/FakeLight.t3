@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6820b166-1782-43b9-bc5c-6b4f63b16f86"/*FakeLight*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dcacc281-92c6-4e47-8eea-91fa8954ed86"/*DrawMeshCelShading*/,
   "Description": "This is an attempt to create a cel shader. In fact, it's more a gradient-based shading as you need to use a gradient to define what colors will be used to shade your mesh. Make sure to use at least one [PointLight] and adjust the Brightness and the light intensity. You can set the gradient interpolation to hold, but you can still use the other interpolations; then you'll have full control, for example, if you don't want hard edges between colors.",
   "SymbolTags": "8",
@@ -304,7 +306,7 @@
       }
     },
     {
-      "ChildId": "e584ed5f-fc37-4aed-ba4b-b6c71f6c204b"/*TransformsConstBuffer*/,
+      "ChildId": "e584ed5f-fc37-4aed-ba4b-b6c71f6c204b"/*_TransformsCBuffer*/,
       "Style": "Expanded",
       "Size": {
         "X": 110.0,

@@ -1,16 +1,10 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3f78a8a8-2c0b-4486-813e-f052e01e4248"/*AudioClipPlayer*/,
   "Description": "Plays timeline [AudioClip]s. With AutoCollect on (default) it plays every [AudioClip] in the same composition — no wiring needed. You can also wire specific [AudioClip] outputs into it for explicit control.\n\nUnlike the editor's built-in auto-play, this op drives playback through the graph, so it also works for nested compositions and exported projects — insert it into your render command chain (e.g. via a [Group]) so it's evaluated each frame.",
   "SymbolTags": "64",
   "InputUis": [
-    {
-      "InputId": "98702b93-b904-4a19-8e58-90809aaa5c42"/*AudioClips*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      },
-      "Description": "Optional: wire specific [AudioClip] outputs here to play only those. Leave empty and use AutoCollect to play all clips in the composition."
-    },
     {
       "InputId": "301f0b3a-9958-4510-9f6b-b418f99cd1e0"/*AutoCollect*/,
       "Position": {
@@ -18,6 +12,14 @@
         "Y": 45.0
       },
       "Description": "When on (default), play every [AudioClip] in this composition, wired or not."
+    },
+    {
+      "InputId": "98702b93-b904-4a19-8e58-90809aaa5c42"/*AudioClips*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Optional: wire specific [AudioClip] outputs here to play only those. Leave empty and use AutoCollect to play all clips in the composition."
     }
   ],
   "SymbolChildUis": [],

@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7eb5ee83-2b5c-43bc-95d4-af5e18c85bc5"/*ProjectLight*/,
   "Inputs": [
     {

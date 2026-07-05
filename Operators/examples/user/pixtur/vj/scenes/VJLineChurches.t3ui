@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "60b237ce-5096-4aa5-bc56-76ae8d8016cd"/*VJLineChurches*/,
   "Description": "",
   "InputUis": [],
@@ -116,7 +118,7 @@
       }
     },
     {
-      "ChildId": "48ec0517-da17-4b4f-b47a-ef8161f75ab9"/*AddInts*/,
+      "ChildId": "48ec0517-da17-4b4f-b47a-ef8161f75ab9"/*AddInt*/,
       "Position": {
         "X": 841.92786,
         "Y": 921.00024

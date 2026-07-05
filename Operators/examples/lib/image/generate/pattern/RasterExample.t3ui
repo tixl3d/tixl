@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "014b8d6f-c7f2-43b5-84a8-033356e440ef"/*RasterExample*/,
   "Description": "",
   "InputUis": [],

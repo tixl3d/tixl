@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f9a3cbf2-a32a-4940-84ca-de11250d02cc"/*SdfReflectionLinePointsExample*/,
   "Inputs": [],
   "Children": [

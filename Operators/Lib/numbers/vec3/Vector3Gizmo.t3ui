@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e9dc80e1-8898-4b77-b515-bf6d589302de"/*Vector3Gizmo*/,
   "Description": "Creates a 3D Gizmo in the Output View (if gizmos are toggled on) and sends out the position data as a [Vector3].\nUseful to control the position of anything in 3D space that does not have a built-in gizmo.\nBut can be used to control anything that takes a Vec3, RGB colors for example.\n\nSimilar to [Locator]",
   "InputUis": [

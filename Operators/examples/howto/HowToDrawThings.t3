@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "40757a26-1cd8-477c-a774-7463aadd6f0f"/*HowToDrawThings*/,
   "Inputs": [],
   "Children": [
@@ -534,21 +536,16 @@
                 {
                   "Time": 0.0,
                   "Value": 0.16525006294250488,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Tangent",
-                  "OutEditMode": "Tangent",
+                  "InInterpolation": "Tangent",
+                  "OutInterpolation": "Tangent",
                   "InTangentAngle": 1.029903769493103,
                   "OutTangentAngle": 4.171496423082896
                 },
                 {
                   "Time": 0.9985,
                   "Value": 1.0166347026824951,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Horizontal",
-                  "OutEditMode": "Horizontal",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Horizontal",
+                  "OutInterpolation": "Horizontal",
                   "OutTangentAngle": -3.141592653589793
                 }
               ]

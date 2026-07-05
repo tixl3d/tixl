@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "57351603-f472-445f-b94b-e8f538f85517"/*HasBooleanChanged*/,
   "Description": "Returns true if the connected input changed, either from False to True or vice versa. This can be useful to detect the moment of the mouse click or mouse release.",
   "SymbolTags": "8",

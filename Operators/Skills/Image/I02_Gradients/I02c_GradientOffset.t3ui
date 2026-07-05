@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0534ef90-6c31-4c9c-bf3a-f0f558fa61c9"/*I02c_GradientOffset*/,
   "Description": "LinearGradient: Offset",
   "InputUis": [],
@@ -15,7 +15,7 @@
     },
     {
       "ChildId": "5115acfd-f376-4b5f-98c8-086ca4d2d0d6"/*LinearGradient*/,
-      "AnnotationId": "de748c10-0fdd-4287-ac18-8d1c11c36b55",
+      "SectionId": "de748c10-0fdd-4287-ac18-8d1c11c36b55",
       "Position": {
         "X": 1243.0592,
         "Y": 2132.8486
@@ -30,7 +30,6 @@
     },
     {
       "ChildId": "acab22e1-1286-4b80-b97e-03d725c220dd"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -46,7 +45,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "de748c10-0fdd-4287-ac18-8d1c11c36b55",
       "Label": "Solution",
@@ -78,13 +77,5 @@
       "Description": "Move the gradient so it only appears at the bottom of the screen without changing its color ramp.",
       "Style": "CallToAction"
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

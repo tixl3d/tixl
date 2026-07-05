@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9b1a1ff1-2935-4d9a-880f-897a7f8885ad"/*HowToAnimate*/,
   "Description": "An interactive playground that illustrates various methods to animate things in Tooll.\n\n[Value]",
   "SymbolTags": "3",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "00b7b514-f6a7-4adb-b6bf-04bc98a9c617"/*TriggerAnim*/,
+      "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
         "X": 2887.6194,
         "Y": 394.10345
@@ -13,6 +16,7 @@
     },
     {
       "ChildId": "0313aef1-7de5-4f01-8857-6fe06cefb103"/*_BlobOld*/,
+      "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
         "X": 1600.7869,
         "Y": 165.33206
@@ -20,6 +24,7 @@
     },
     {
       "ChildId": "05f16d8d-3868-4740-b0fa-61df5f7e0932"/*Click me!*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1319.3451,
         "Y": 499.1819
@@ -27,6 +32,7 @@
     },
     {
       "ChildId": "0e0db0d7-face-4ba8-93d9-ee528e288b12"/*TriggerAnim*/,
+      "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
         "X": 2724.7239,
         "Y": 209.30573
@@ -34,6 +40,7 @@
     },
     {
       "ChildId": "0f990286-95e1-4f3b-bc48-c15fa24e4559"/*Modulo*/,
+      "SectionId": "02b96af0-3803-4ddb-af58-2f839afe52c1",
       "Position": {
         "X": -153.33383,
         "Y": 739.68634
@@ -41,6 +48,7 @@
     },
     {
       "ChildId": "13723a46-c777-4fb3-98df-8489fa480a32"/*Modulo*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1469.3451,
         "Y": 628.1819
@@ -48,6 +56,7 @@
     },
     {
       "ChildId": "15e47922-80f8-43da-b425-f5a083cf0dd7"/*adfjk*/,
+      "SectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Position": {
         "X": 2496.8406,
         "Y": 392.57425
@@ -55,6 +64,7 @@
     },
     {
       "ChildId": "18453b94-56c2-48af-9dbb-c22f59979eac"/*Layer2d*/,
+      "SectionId": "61c00d70-55f1-496d-ab8b-d75387a440e6",
       "Position": {
         "X": -188.91554,
         "Y": 117.81756
@@ -62,6 +72,7 @@
     },
     {
       "ChildId": "1c06f740-adf3-43c8-8ce8-dacbdf159e30"/*AnimValue*/,
+      "SectionId": "02b96af0-3803-4ddb-af58-2f839afe52c1",
       "Position": {
         "X": -153.33383,
         "Y": 795.68634
@@ -69,6 +80,7 @@
     },
     {
       "ChildId": "28eb5a2d-00d7-4908-9bb9-3addca60fcdc"/*SequenceAnim*/,
+      "SectionId": "d5214db2-60b4-42b3-9a43-3297dd325454",
       "Position": {
         "X": 274.48932,
         "Y": 636.6996
@@ -76,6 +88,7 @@
     },
     {
       "ChildId": "2ae322d2-fefc-47e4-bab7-7cb30398df46"/*Text*/,
+      "SectionId": "10deadb1-757b-4c5a-a798-7184a5868feb",
       "Position": {
         "X": 1913.9928,
         "Y": 153.4797
@@ -83,6 +96,7 @@
     },
     {
       "ChildId": "336927ed-4ed7-4df9-965f-ad8dcacda22a"/*Pow*/,
+      "SectionId": "02b96af0-3803-4ddb-af58-2f839afe52c1",
       "Position": {
         "X": -3.3339539,
         "Y": 739.68634
@@ -90,6 +104,7 @@
     },
     {
       "ChildId": "3458ff59-b0cf-4d68-9fe3-065daa18b4fe"/*PerlinNoise*/,
+      "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
         "X": -192.5735,
         "Y": 387.46695
@@ -97,6 +112,7 @@
     },
     {
       "ChildId": "3b69dddf-5444-4190-824f-7ce75da7bec0"/*CountInt*/,
+      "SectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Position": {
         "X": 2701.5754,
         "Y": 787.6715
@@ -104,6 +120,7 @@
     },
     {
       "ChildId": "3d990140-3be5-4488-9a48-99214fc046b1"/*BlendColors*/,
+      "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
         "X": 3022.9338,
         "Y": 153.30573
@@ -111,6 +128,7 @@
     },
     {
       "ChildId": "3f74624d-2191-4390-a609-fc7bf8c5e781"/*AudioReaction*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1319.3451,
         "Y": 585.1819
@@ -118,6 +136,7 @@
     },
     {
       "ChildId": "4802b1d2-fbdc-4262-9b9f-8930e7848bb2"/*String*/,
+      "SectionId": "c160e623-08f7-4ba0-b9ee-701fa728eec6",
       "Position": {
         "X": 2928.2278,
         "Y": 615.6715
@@ -125,6 +144,7 @@
     },
     {
       "ChildId": "4ab1615c-525f-4e80-9a6e-84f810376b61"/*Sum*/,
+      "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
         "X": 3037.6194,
         "Y": 394.10345
@@ -132,6 +152,7 @@
     },
     {
       "ChildId": "4afcba9a-0694-4110-9cb3-27ad7122e4ce"/*SampleGradient*/,
+      "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
         "X": 2872.9338,
         "Y": 153.30573
@@ -145,6 +166,7 @@
     },
     {
       "ChildId": "5278aace-8eee-4cb0-a3fb-6a95e8121b36"/*MockStrings*/,
+      "SectionId": "c160e623-08f7-4ba0-b9ee-701fa728eec6",
       "Position": {
         "X": 2761.5754,
         "Y": 666.0719
@@ -152,6 +174,7 @@
     },
     {
       "ChildId": "5430f1a7-5ca9-4665-a7e2-344ff3888b51"/*PerlinNoise3*/,
+      "SectionId": "363650ae-441e-4058-9319-6c33eea9d63f",
       "Position": {
         "X": 278.6701,
         "Y": 1086.2256
@@ -159,6 +182,7 @@
     },
     {
       "ChildId": "571f2111-eaf3-49f5-9468-2616c3871ae7"/*Transform*/,
+      "SectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Position": {
         "X": 3484.3596,
         "Y": 395.9652
@@ -166,6 +190,7 @@
     },
     {
       "ChildId": "5c8a458a-7f48-43ce-af05-d6ac943f5a3c"/*PickMeshBuffer*/,
+      "SectionId": "0059af6e-4f43-4a20-81ee-064d0f932e1a",
       "Position": {
         "X": 3058.595,
         "Y": 890.0475
@@ -173,6 +198,7 @@
     },
     {
       "ChildId": "601b2b0f-01ba-46b9-b54b-5df317984e05"/*Counter*/,
+      "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
         "X": 1450.7869,
         "Y": 284.33206
@@ -180,6 +206,7 @@
     },
     {
       "ChildId": "63357015-06ec-4c8c-a592-0be05ab54626"/*Counter*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1970.3651,
         "Y": 647.597
@@ -187,6 +214,7 @@
     },
     {
       "ChildId": "683900dd-55c1-453c-8196-113fceb76220"/*PerlinNoise2*/,
+      "SectionId": "363650ae-441e-4058-9319-6c33eea9d63f",
       "Position": {
         "X": 278.6701,
         "Y": 1030.2256
@@ -194,6 +222,7 @@
     },
     {
       "ChildId": "6b4246f8-5478-4095-8a6c-106a4bdadc73"/*PickStringPart*/,
+      "SectionId": "c160e623-08f7-4ba0-b9ee-701fa728eec6",
       "Position": {
         "X": 2928.2278,
         "Y": 658.6715
@@ -201,6 +230,7 @@
     },
     {
       "ChildId": "6d90c12b-b3da-45ce-988c-93bef31f2e80"/*TriggerAnim*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1818.2223,
         "Y": 491.1814
@@ -208,6 +238,7 @@
     },
     {
       "ChildId": "70cf0a17-afbc-4bc4-828f-6a075d890cac"/*_Time_old*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1319.3451,
         "Y": 628.1819
@@ -215,6 +246,7 @@
     },
     {
       "ChildId": "72370a04-05e0-4602-ad47-0d5c67f3caf9"/*AnimValue*/,
+      "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
         "X": 273.9935,
         "Y": 389.04315
@@ -222,6 +254,7 @@
     },
     {
       "ChildId": "728f86d7-f3ac-4a4f-9d62-30ec4a1eea30"/*AudioReaction*/,
+      "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
         "X": 1300.7869,
         "Y": 221.33206
@@ -229,6 +262,7 @@
     },
     {
       "ChildId": "72b899b2-83ef-408a-aaca-c64ef418303d"/*Add*/,
+      "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
       "Position": {
         "X": -60.93071,
         "Y": 517.6301
@@ -236,6 +270,7 @@
     },
     {
       "ChildId": "742a5264-6b48-4b1a-b134-21d16d5d9f3c"/*TorusMesh*/,
+      "SectionId": "0059af6e-4f43-4a20-81ee-064d0f932e1a",
       "Position": {
         "X": 2908.595,
         "Y": 890.0475
@@ -243,6 +278,7 @@
     },
     {
       "ChildId": "79c41dfc-33c4-45a8-8279-51e958f31ce8"/*TriggerAnim*/,
+      "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
         "X": 2759.863,
         "Y": 448.03687
@@ -250,6 +286,7 @@
     },
     {
       "ChildId": "7a930515-14a5-4155-ab9a-e031b8ecf182"/*TriggerAnim*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1818.2223,
         "Y": 547.1814
@@ -257,6 +294,7 @@
     },
     {
       "ChildId": "83f3b379-fa6c-406b-a820-ad10f5035caa"/*Any*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1636.4865,
         "Y": 491.0504
@@ -264,6 +302,7 @@
     },
     {
       "ChildId": "855f1ca1-42ac-4ad6-9030-12821236102a"/*AnimValue*/,
+      "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
         "X": 273.9935,
         "Y": 475.04315
@@ -271,6 +310,7 @@
     },
     {
       "ChildId": "8673bcc9-4db5-4c56-98dc-218cffc563aa"/*Counter*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1319.3451,
         "Y": 542.1819
@@ -278,6 +318,7 @@
     },
     {
       "ChildId": "8aa869d6-0115-4690-a97e-a462e0bf9663"/*Counter*/,
+      "SectionId": "0f56d01a-e2bd-4948-8357-f52caa52a7ae",
       "Position": {
         "X": 278.01907,
         "Y": 776.65234
@@ -285,6 +326,7 @@
     },
     {
       "ChildId": "8b92443a-feb0-4030-ae0b-b170f42c8b14"/*Remap*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1968.2223,
         "Y": 491.1814
@@ -292,6 +334,7 @@
     },
     {
       "ChildId": "8d780e68-0ff3-43c8-a061-3bb327d23772"/*HasValueDecreased*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1619.3451,
         "Y": 628.1819
@@ -299,6 +342,7 @@
     },
     {
       "ChildId": "95a18394-0bbe-4e45-81b8-a048fe6a5a37"/*Counter*/,
+      "SectionId": "0f56d01a-e2bd-4948-8357-f52caa52a7ae",
       "Position": {
         "X": 278.01907,
         "Y": 819.65234
@@ -306,6 +350,7 @@
     },
     {
       "ChildId": "992bd107-7842-4405-8026-924ca2f7bac7"/*Sin*/,
+      "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
       "Position": {
         "X": -210.93073,
         "Y": 517.6301
@@ -313,6 +358,7 @@
     },
     {
       "ChildId": "9b240082-3647-4769-9792-2a479c94910e"/*AnimValue*/,
+      "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
         "X": 274.47964,
         "Y": 299.85956
@@ -320,6 +366,7 @@
     },
     {
       "ChildId": "9c6bf24a-41b5-4678-a23e-355332e3c424"/*ChangeCase*/,
+      "SectionId": "c160e623-08f7-4ba0-b9ee-701fa728eec6",
       "Position": {
         "X": 3228.2278,
         "Y": 615.6715
@@ -327,6 +374,7 @@
     },
     {
       "ChildId": "9d9fbf31-c57d-4ba8-be58-eeadf2e697ad"/*RenderTarget*/,
+      "SectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Style": "Resizable",
       "Size": {
         "X": 294.64554,
@@ -339,6 +387,7 @@
     },
     {
       "ChildId": "a36cd73f-3324-44f2-bc6a-e7ffc429f49f"/*DrawMesh*/,
+      "SectionId": "0059af6e-4f43-4a20-81ee-064d0f932e1a",
       "Position": {
         "X": 3208.595,
         "Y": 890.0475
@@ -346,6 +395,7 @@
     },
     {
       "ChildId": "a5894797-6104-49d1-b8d8-00b9812b359a"/*AnimValue*/,
+      "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
         "X": 274.47964,
         "Y": 342.85962
@@ -353,6 +403,7 @@
     },
     {
       "ChildId": "a75e25b9-48a1-454c-985e-8bd9d08e2073"/*Counter*/,
+      "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
         "X": 2722.9338,
         "Y": 153.30573
@@ -360,6 +411,7 @@
     },
     {
       "ChildId": "ab4ca174-ac94-4f69-807a-1cb99222bf4e"/*Vector3*/,
+      "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
         "X": -41.53813,
         "Y": 271.41602
@@ -367,6 +419,7 @@
     },
     {
       "ChildId": "ae379200-b3ef-42e0-b7a3-135e15b6623e"/*_Time_old*/,
+      "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
         "X": -344.7715,
         "Y": 302.99454
@@ -374,6 +427,7 @@
     },
     {
       "ChildId": "ae957e84-0280-43f4-81e6-6be75dc884e3"/*_Time_old*/,
+      "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
       "Position": {
         "X": -351.99863,
         "Y": 514.17896
@@ -381,6 +435,7 @@
     },
     {
       "ChildId": "b018e27d-f80b-4c37-a929-39dbaca6c528"/*SampleGradient*/,
+      "SectionId": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Position": {
         "X": 2872.9338,
         "Y": 209.30573
@@ -388,6 +443,7 @@
     },
     {
       "ChildId": "b0c738d3-14e5-45af-85ee-8f0c9d4aef95"/*PerlinNoise*/,
+      "SectionId": "531dc9b0-ad02-4259-9719-5977dcc4adba",
       "Position": {
         "X": -210.93073,
         "Y": 573.6301
@@ -395,6 +451,7 @@
     },
     {
       "ChildId": "b8254578-edb0-4506-84a3-8fa34397f9fb"/*CylinderMesh*/,
+      "SectionId": "0059af6e-4f43-4a20-81ee-064d0f932e1a",
       "Position": {
         "X": 2908.595,
         "Y": 976.0475
@@ -402,6 +459,7 @@
     },
     {
       "ChildId": "b9b2b384-fb88-4a59-a202-6783b99e76e6"/*SampleCurve*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 1970.3651,
         "Y": 591.597
@@ -409,6 +467,7 @@
     },
     {
       "ChildId": "bb8fd2be-6949-4adb-beba-352edf93cba1"/*OrbitCamera*/,
+      "SectionId": "0059af6e-4f43-4a20-81ee-064d0f932e1a",
       "Position": {
         "X": 3358.595,
         "Y": 890.0475
@@ -416,6 +475,7 @@
     },
     {
       "ChildId": "bbedfcb7-677c-483f-97af-a93cd358310b"/*CombineStrings*/,
+      "SectionId": "c160e623-08f7-4ba0-b9ee-701fa728eec6",
       "Position": {
         "X": 3078.2278,
         "Y": 615.6715
@@ -423,6 +483,7 @@
     },
     {
       "ChildId": "bd5afbb6-d96b-459d-9cc6-c2edde16b61f"/*Group*/,
+      "SectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Position": {
         "X": 3634.3596,
         "Y": 394.97052
@@ -430,6 +491,7 @@
     },
     {
       "ChildId": "bdae8c89-e17a-44b8-ad72-f727e0242405"/*SampleGradient*/,
+      "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
         "X": 1450.7869,
         "Y": 165.33206
@@ -437,6 +499,7 @@
     },
     {
       "ChildId": "c68df065-f78f-4bd2-9a0b-cc421158b84b"/*Text*/,
+      "SectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Position": {
         "X": 3334.3596,
         "Y": 395.9652
@@ -444,6 +507,7 @@
     },
     {
       "ChildId": "c86a1f1a-1b8d-4fe0-89a8-529f625410fd"/*SequenceAnim*/,
+      "SectionId": "d5214db2-60b4-42b3-9a43-3297dd325454",
       "Position": {
         "X": 274.48932,
         "Y": 593.6996
@@ -451,6 +515,7 @@
     },
     {
       "ChildId": "cd4606fc-1fd3-49cc-9a8e-f208a2551cfe"/*Sin*/,
+      "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
         "X": -192.5735,
         "Y": 331.46695
@@ -458,6 +523,7 @@
     },
     {
       "ChildId": "d0f693d6-1f2b-4ddb-a312-061df9948e43"/*Modulo*/,
+      "SectionId": "d1a48210-aa37-4a47-bc5b-ecb4974738b2",
       "Position": {
         "X": -191.53813,
         "Y": 271.41602
@@ -465,6 +531,7 @@
     },
     {
       "ChildId": "d1b1ec34-7218-4528-8049-b2916651184e"/*AudioReaction*/,
+      "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
         "X": 1300.7869,
         "Y": 165.33206
@@ -472,6 +539,7 @@
     },
     {
       "ChildId": "d8264630-7310-4c0c-baf8-d4ada4ed4a83"/*Vector4*/,
+      "SectionId": "6e01257e-ea2a-426e-95f1-57706f756c0c",
       "Position": {
         "X": 2169.7395,
         "Y": 535.13055
@@ -479,6 +547,7 @@
     },
     {
       "ChildId": "e189b5b6-de84-4a34-881c-9e2704f4512c"/*_Time_old*/,
+      "SectionId": "02b96af0-3803-4ddb-af58-2f839afe52c1",
       "Position": {
         "X": -303.33383,
         "Y": 739.68634
@@ -486,6 +555,7 @@
     },
     {
       "ChildId": "e2b60d54-7aba-4143-bd42-93dec16c259c"/*FloatsToList*/,
+      "SectionId": "558cb89d-7c4c-42fb-a837-fa6eec50fcf6",
       "Style": "Resizable",
       "Size": {
         "X": 29.23488,
@@ -498,6 +568,7 @@
     },
     {
       "ChildId": "e45d08b9-b612-4aa0-bfa4-d9e5086e8770"/*AnimValue*/,
+      "SectionId": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Position": {
         "X": 273.9935,
         "Y": 432.04315
@@ -505,6 +576,7 @@
     },
     {
       "ChildId": "e8cd0c7f-f6ff-45fb-9d76-6b16e37b4e07"/*Remap*/,
+      "SectionId": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Position": {
         "X": 2887.6194,
         "Y": 450.10345
@@ -512,6 +584,7 @@
     },
     {
       "ChildId": "efcd365f-6cc1-4ade-91a9-cd6f9b3feaa0"/*AnimValue*/,
+      "SectionId": "363650ae-441e-4058-9319-6c33eea9d63f",
       "Position": {
         "X": 278.6701,
         "Y": 974.22534
@@ -519,6 +592,7 @@
     },
     {
       "ChildId": "f05f819b-dc35-4855-a497-74424b41cea2"/*Remap*/,
+      "SectionId": "e068acab-3f1f-4c4a-936a-2d5a631b18d1",
       "Position": {
         "X": 1450.7869,
         "Y": 221.33206
@@ -526,6 +600,7 @@
     },
     {
       "ChildId": "f78ae4f0-f4de-4c3e-afc6-e590ca446cca"/*_Time_old*/,
+      "SectionId": "61c00d70-55f1-496d-ab8b-d75387a440e6",
       "Position": {
         "X": -338.91553,
         "Y": 117.81756
@@ -533,6 +608,7 @@
     },
     {
       "ChildId": "f99bb023-4fc0-44e6-af91-7cb2f8040aa0"/*CubeMesh*/,
+      "SectionId": "0059af6e-4f43-4a20-81ee-064d0f932e1a",
       "Position": {
         "X": 2908.595,
         "Y": 933.0476
@@ -548,10 +624,11 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "0059af6e-4f43-4a20-81ee-064d0f932e1a",
       "Title": "...and pick from a list of meshes to draw.",
+      "ParentSectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -588,6 +665,7 @@
     {
       "Id": "0f56d01a-e2bd-4948-8357-f52caa52a7ae",
       "Title": "[Counter] is similar to [AnimValue].\nIt can be useful to drive continuous values like\nrotations and phases.",
+      "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -642,6 +720,7 @@
     {
       "Id": "363650ae-441e-4058-9319-6c33eea9d63f",
       "Title": "[PerlinNoise] is the go-to algorithm to make things\njiggle in a natural way. Perfect for camera shaking\nand so many other things.",
+      "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -678,6 +757,7 @@
     {
       "Id": "558cb89d-7c4c-42fb-a837-fa6eec50fcf6",
       "Title": "Click me",
+      "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -750,6 +830,7 @@
     {
       "Id": "7333c3c1-a0f0-41c9-9fd8-518804226909",
       "Title": "Musicians might know the [AnimValue] operator as\n\"LFO\" (Low-frequency operator).\n\nYou can adjust its main parameters directly by holding \nthe CTRL key.\n- Drag Up/Down on the left adjusts the rate in steps /4x4\n- Drag the graph to adjust ratio and bias",
+      "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -768,6 +849,7 @@
     {
       "Id": "95812bb4-d98b-4bbe-b7e7-577c881298ca",
       "Title": "We create a new clear color for our render target by cycling through a gradient. \nNotice how [Counter] uses a modulo to repeat the cycle.",
+      "ParentSectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -786,6 +868,7 @@
     {
       "Id": "c160e623-08f7-4ba0-b9ee-701fa728eec6",
       "Title": "Use an integer count to pick a string from a list...",
+      "ParentSectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -804,6 +887,7 @@
     {
       "Id": "c6d0cf73-962f-4e66-ade9-60fb8e72f0d4",
       "Title": "* These are automatically connected to time.",
+      "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.464539,
         "Y": 0.464539,
@@ -858,6 +942,7 @@
     {
       "Id": "d5214db2-60b4-42b3-9a43-3297dd325454",
       "Title": "[SequenceAnim] is used to generate repetitive patterns.\nYou can adjust the steps by dragging with CTRL.\nCheck out the modes. It's very flexible.\n",
+      "ParentSectionId": "5f9df0dd-39ec-49e9-894b-e820413fdb70",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -894,6 +979,7 @@
     {
       "Id": "e297379b-e86e-465d-9470-b7744aaf4b80",
       "Title": "Combine two [TriggerAnimation] with [Remap] to \ncreate a bouncy font size.",
+      "ParentSectionId": "d0729712-35f1-4955-81db-6c74338387da",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -912,6 +998,7 @@
     {
       "Id": "ed0d2b3a-8791-4b08-a04b-408338187908",
       "Title": "If you click on \"Dope\" / \"Curve\" in the Time Control Bar,\nyou can toggle between Dopesheet and Curve mode.\nDragging keyframes while holding the Shift key toggles\nsnapping.",
+      "ParentSectionId": "10deadb1-757b-4c5a-a798-7184a5868feb",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f8593fe5-e845-4a81-a951-ceb7cd6d097c"/*HeightMapSdf*/,
   "Inputs": [
     {

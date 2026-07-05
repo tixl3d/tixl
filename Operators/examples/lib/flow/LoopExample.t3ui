@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a3945dbe-d5be-4f0f-a904-8ee287d14a9f"/*LoopExample*/,
   "Description": "Shows how to use [Loop] to iterate over the nodes connected to a [Switch]. ",
   "SymbolTags": "2",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "2228959d-02fc-45b0-8541-7bfd6fb72c04"/*CubeMesh*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 193.63564,
         "Y": 355.8151
@@ -13,6 +16,7 @@
     },
     {
       "ChildId": "47df1e17-8cfd-468e-bb27-cc051ce22014"/*Transform*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 776.85815,
         "Y": 232.34216
@@ -20,6 +24,7 @@
     },
     {
       "ChildId": "606fec06-ef80-47b8-b829-6f2bebfe36a8"/*Loop*/,
+      "SectionId": "95d1d86b-ae07-4f9c-91aa-61fffca633c0",
       "Position": {
         "X": 1038.6823,
         "Y": 269.1174
@@ -27,6 +32,7 @@
     },
     {
       "ChildId": "63b1d503-5bbd-4072-a663-3f218dcfac34"/*Add*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 376.199,
         "Y": 546.1314
@@ -34,6 +40,7 @@
     },
     {
       "ChildId": "6dda124a-c519-41fe-b2b3-0013a59b1e8e"/*TorusMesh*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 193.63565,
         "Y": 187.8151
@@ -41,6 +48,7 @@
     },
     {
       "ChildId": "7e31162d-17b9-4264-8e2a-4cb9d3928360"/*GetIntVar*/,
+      "SectionId": "3c3a2bbc-1853-4a4c-9d9e-d4f0e80f1c77",
       "Position": {
         "X": 367.0849,
         "Y": 457.3202
@@ -48,6 +56,7 @@
     },
     {
       "ChildId": "7f9c3d74-e490-4ec6-8c15-da6b64ea7017"/*DrawMesh*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 343.63565,
         "Y": 299.8151
@@ -55,6 +64,7 @@
     },
     {
       "ChildId": "96469476-6d6d-4476-b398-bcd81498f3a8"/*PerlinNoise3*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 526.199,
         "Y": 546.1314
@@ -62,6 +72,7 @@
     },
     {
       "ChildId": "98b72a66-8f85-41a7-b760-e75dbb9b5b1e"/*DrawMesh*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 343.63565,
         "Y": 355.8151
@@ -69,6 +80,7 @@
     },
     {
       "ChildId": "a08c97a9-343f-468c-8cbd-f9cd75ee5206"/*GetFloatVar*/,
+      "SectionId": "140c217c-fb66-48a6-9ea5-155b3f30d392",
       "Position": {
         "X": 81.03874,
         "Y": 650.27734
@@ -76,6 +88,7 @@
     },
     {
       "ChildId": "b65c668e-11e0-422c-a11a-0a8496e046f0"/*DrawMesh*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 343.63565,
         "Y": 187.8151
@@ -83,6 +96,7 @@
     },
     {
       "ChildId": "b6f2aa01-39d7-4064-8cb4-6474513768a1"/*Remap*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 526.199,
         "Y": 602.1314
@@ -90,6 +104,7 @@
     },
     {
       "ChildId": "bd64bdcc-1436-4106-ae8c-4a8db220969d"/*_Time_old*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 221.92297,
         "Y": 547.1119
@@ -97,6 +112,7 @@
     },
     {
       "ChildId": "dd958ed5-c746-4e7a-806c-917cd76cc67e"/*Switch*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 528.5691,
         "Y": 241.3797
@@ -104,6 +120,7 @@
     },
     {
       "ChildId": "f06a10be-4892-493d-8d67-94402e17da37"/*DrawMesh*/,
+      "SectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Position": {
         "X": 343.63565,
         "Y": 243.8151
@@ -119,10 +136,11 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "140c217c-fb66-48a6-9ea5-155b3f30d392",
       "Title": "This returns the normalized progress \"f\"\nof the loop as values between 0 and 1.",
+      "ParentSectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -141,6 +159,7 @@
     {
       "Id": "3c3a2bbc-1853-4a4c-9d9e-d4f0e80f1c77",
       "Title": "This returns the iteration index.",
+      "ParentSectionId": "ef2af288-141f-4063-bf15-e93628d40f6c",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

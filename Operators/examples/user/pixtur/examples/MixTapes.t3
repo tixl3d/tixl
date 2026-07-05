@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b48e2f43-e87f-4cba-ab86-078e7cdd7444"/*MixTapes*/,
   "Inputs": [
     {

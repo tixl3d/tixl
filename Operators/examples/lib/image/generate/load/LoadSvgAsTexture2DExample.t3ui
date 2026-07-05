@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "88c63a7f-7dc7-4e9d-8122-7c0a0dc29faa"/*LoadSvgAsTexture2DExample*/,
   "Description": "",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "039b0f5c-acb3-45fd-bea4-5b444ea10ec5"/*IntToString*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": 137.06104,
         "Y": 365.95078
@@ -12,6 +15,7 @@
     },
     {
       "ChildId": "0605c9df-1587-43ca-95a0-d234ac1b1ce4"/*Value*/,
+      "SectionId": "9b609457-945a-4222-a925-316bb31779d2",
       "Position": {
         "X": -118.40192,
         "Y": -41.084473
@@ -19,6 +23,7 @@
     },
     {
       "ChildId": "0772c3f2-9f57-4abd-8612-08ce9b46d20b"/*IntToString*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": 137.06104,
         "Y": 330.95078
@@ -26,6 +31,7 @@
     },
     {
       "ChildId": "07a8000a-9bf1-43d3-ac4f-bfbc2f6a0715"/*GetTextureSize*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": -148.76164,
         "Y": 270.31757
@@ -33,6 +39,7 @@
     },
     {
       "ChildId": "13cf87c5-f8c3-429d-90f5-965a468a84bb"/*Group*/,
+      "SectionId": "9b609457-945a-4222-a925-316bb31779d2",
       "Position": {
         "X": 318.8,
         "Y": -111.08438
@@ -40,6 +47,7 @@
     },
     {
       "ChildId": "14e03711-0dbb-42ae-bd3e-a77bfceb8780"/*Layer2d*/,
+      "SectionId": "9b609457-945a-4222-a925-316bb31779d2",
       "Position": {
         "X": 21.598083,
         "Y": -76.08447
@@ -47,6 +55,7 @@
     },
     {
       "ChildId": "15469dfb-bb11-4a7c-b630-503bd9adbc2f"/*LoadSvgAsTexture2D*/,
+      "SectionId": "9b609457-945a-4222-a925-316bb31779d2",
       "Position": {
         "X": -155.86176,
         "Y": -121.69379
@@ -54,6 +63,7 @@
     },
     {
       "ChildId": "180de18a-7d1c-4a50-970a-924c2c77a9e9"/*LoadSvgAsTexture2D*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": -148.76166,
         "Y": 191.18607
@@ -61,6 +71,7 @@
     },
     {
       "ChildId": "1b62e699-1b57-48ea-bfef-3185ddb2ddee"/*CombineStrings*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": 436.37918,
         "Y": 279.63956
@@ -68,6 +79,7 @@
     },
     {
       "ChildId": "22acee76-4cfe-470b-b5db-90510a238674"/*Int2Components*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": -148.76164,
         "Y": 305.31757
@@ -75,6 +87,7 @@
     },
     {
       "ChildId": "2734529f-0332-48e2-b494-bf01dc5d8f32"/*Group*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": 650.5781,
         "Y": 217.99359
@@ -82,6 +95,7 @@
     },
     {
       "ChildId": "2934da05-bece-4c3f-b7e3-05356101083a"/*Group*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": 469.15912,
         "Y": 783.49
@@ -89,6 +103,7 @@
     },
     {
       "ChildId": "29efbe2c-d976-4539-a422-fdbdd1d0f82b"/*Text*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": 329.15912,
         "Y": 783.49
@@ -96,6 +111,7 @@
     },
     {
       "ChildId": "2afd29d3-f878-46da-858f-355caf98b019"/*AnimVec3*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": -77.93403,
         "Y": 893.6613
@@ -103,6 +119,7 @@
     },
     {
       "ChildId": "397cd410-3b8c-4988-a0fa-d32c7c7c81b7"/*LoadSvgAsTexture2D*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": -119.25575,
         "Y": 781.17535
@@ -110,6 +127,7 @@
     },
     {
       "ChildId": "3cc7302e-89ce-4b7a-a3e2-253567759a10"/*CombineStrings*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": 277.06152,
         "Y": 330.95078
@@ -117,6 +135,7 @@
     },
     {
       "ChildId": "43088630-e175-4342-88ec-1ef716314444"/*Layer2d*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": 20.744232,
         "Y": 851.17535
@@ -124,6 +143,7 @@
     },
     {
       "ChildId": "47a12500-4ef2-4f0a-8f6c-49b3c75dcf99"/*SpreadLayout*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": 160.74423,
         "Y": 781.17535
@@ -131,6 +151,7 @@
     },
     {
       "ChildId": "527e74d7-7410-4bf8-9342-5363c7cb3c16"/*InputText*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Style": "Resizable",
       "Size": {
         "X": 120.0,
@@ -143,6 +164,7 @@
     },
     {
       "ChildId": "59ffccd0-69bd-4ba2-a9bf-a45571d6c9ca"/*Layer2d*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": 510.57812,
         "Y": 217.99359
@@ -150,6 +172,7 @@
     },
     {
       "ChildId": "5a209cc6-0c5b-4000-9480-3df2395c1223"/*LoadSvgAsTexture2D*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": -119.25578,
         "Y": 851.17535
@@ -157,6 +180,7 @@
     },
     {
       "ChildId": "5fe1d403-c09f-4b10-9248-b265d5f30947"/*RequestedResolution*/,
+      "SectionId": "a410df19-6bb8-4428-b706-6fde66bec2b9",
       "Position": {
         "X": 530.3624,
         "Y": 547.6074
@@ -164,6 +188,7 @@
     },
     {
       "ChildId": "71b90226-4334-4c6a-9d74-921d30c53e62"/*RenderTarget*/,
+      "SectionId": "a410df19-6bb8-4428-b706-6fde66bec2b9",
       "Position": {
         "X": 857.59094,
         "Y": 241.5336
@@ -171,6 +196,7 @@
     },
     {
       "ChildId": "7399489a-cbcb-4594-8ba2-142265213e4f"/*Transform*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": 160.74423,
         "Y": 921.17535
@@ -178,6 +204,7 @@
     },
     {
       "ChildId": "759230b8-a38b-4e54-b737-b7bab88f4543"/*AddVec3*/,
+      "SectionId": "a410df19-6bb8-4428-b706-6fde66bec2b9",
       "Position": {
         "X": 670.3624,
         "Y": 617.6074
@@ -185,6 +212,7 @@
     },
     {
       "ChildId": "914a7313-21b9-41a9-af85-92b417800f2a"/*IntToFloat*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": -98.97659,
         "Y": 469.94955
@@ -192,6 +220,7 @@
     },
     {
       "ChildId": "9dbf3fc0-312f-4ca4-974b-95de66864313"/*Text*/,
+      "SectionId": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Position": {
         "X": 436.3792,
         "Y": 349.63956
@@ -199,6 +228,7 @@
     },
     {
       "ChildId": "9ed898f3-c310-4da6-88b8-36a305010e3e"/*AnimVec3*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": -12.694534,
         "Y": 952.83563
@@ -206,6 +236,7 @@
     },
     {
       "ChildId": "9f0f3219-32fc-46f2-85ab-1f8793fd9cfe"/*Layer2d*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": 20.744263,
         "Y": 781.17535
@@ -213,6 +244,7 @@
     },
     {
       "ChildId": "aefe5d4c-1b81-499c-8487-d9d10724b64f"/*Text*/,
+      "SectionId": "9b609457-945a-4222-a925-316bb31779d2",
       "Position": {
         "X": 21.598083,
         "Y": -111.08438
@@ -220,6 +252,7 @@
     },
     {
       "ChildId": "b289faf3-892f-4b0b-aee4-3a170b2f5b81"/*Layer2d*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": 20.744263,
         "Y": 816.17535
@@ -227,6 +260,7 @@
     },
     {
       "ChildId": "c76d4ca4-bf54-4156-b053-2f7a6d15ee68"/*LoadSvgAsTexture2D*/,
+      "SectionId": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Position": {
         "X": -119.25575,
         "Y": 816.17535
@@ -234,6 +268,7 @@
     },
     {
       "ChildId": "c77bc14e-54ea-4c2a-9ade-ca9f8f6d9632"/*SpreadLayout*/,
+      "SectionId": "a410df19-6bb8-4428-b706-6fde66bec2b9",
       "Position": {
         "X": 857.59094,
         "Y": 80.08081
@@ -241,6 +276,7 @@
     },
     {
       "ChildId": "d29c911b-4b99-49b3-982f-6bca34c2182a"/*Vector3*/,
+      "SectionId": "a410df19-6bb8-4428-b706-6fde66bec2b9",
       "Position": {
         "X": 670.3624,
         "Y": 582.6074
@@ -256,11 +292,12 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Title": "[LoadSvgAsTexture 2D] allows to change the scale of the original vector design and generate a bitmap texture that will look sharp.\nNote that we intentionally made this SVG tiny in order to demonstrate the advantage of this load symbol. ",
       "Label": "Scaled up ",
+      "ParentSectionId": "a410df19-6bb8-4428-b706-6fde66bec2b9",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -280,6 +317,7 @@
       "Id": "9b609457-945a-4222-a925-316bb31779d2",
       "Title": "Try to increase the scale of [layer2d] to see how bad it will look\nPay attention to the Layer 2D scale mode is set to: \nMatch Pixel Resolution",
       "Label": "Original ViewBox size embedded in the svg file",
+      "ParentSectionId": "a410df19-6bb8-4428-b706-6fde66bec2b9",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -317,6 +355,7 @@
       "Id": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
       "Title": "pay attention to the settings of the second layer, the range contains two layers ",
       "Label": "Split to layers",
+      "ParentSectionId": "a410df19-6bb8-4428-b706-6fde66bec2b9",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "15f056a3-ee8b-41a2-92c9-eb85153f8200"/*_RandomizePoints_Legacy1*/,
   "Inputs": [
     {

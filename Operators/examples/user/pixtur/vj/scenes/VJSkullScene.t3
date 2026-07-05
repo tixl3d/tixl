@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "78024fb9-4c07-400d-a919-8e1488dc37c5"/*VJSkullScene*/,
   "Inputs": [],
   "Children": [
@@ -635,7 +637,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "pixtur.VJCasual:mesh/skull-01.obj"
+          "Value": "Examples:mesh/skull-01.obj"
         },
         {
           "Id": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,
@@ -803,21 +805,16 @@
                 {
                   "Time": 0.0081,
                   "Value": 0.15048551559448242,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Tangent",
-                  "OutEditMode": "Tangent",
+                  "InInterpolation": "Tangent",
+                  "OutInterpolation": "Tangent",
                   "InTangentAngle": 1.4628722667694092,
                   "OutTangentAngle": 4.604464920359202
                 },
                 {
                   "Time": 0.2418,
                   "Value": 0.986213743686676,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": -3.141592653589793
                 }
               ]

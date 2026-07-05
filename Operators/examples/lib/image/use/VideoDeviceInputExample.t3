@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "62df21a2-901e-4cb9-a5ed-84d555860852"/*VideoDeviceInputExample*/,
   "Inputs": [],
   "Children": [

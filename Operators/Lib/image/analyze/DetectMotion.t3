@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "830df85c-51df-4d55-956c-e6810e8e3081"/*DetectMotion*/,
   "Inputs": [
     {

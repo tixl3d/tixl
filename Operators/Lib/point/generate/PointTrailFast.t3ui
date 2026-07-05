@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "25db2a97-38b2-4503-8842-fab3922d7a6c"/*PointTrailFast*/,
   "Description": "Keeps previous copies of points in a cycling buffer that can be used to draw trails and other effects.\nHint: If some features don't work as expected try [PointTrail2]\n\nCan be used with [DrawPoints] [DrawLines] [DrawBillboards] and similar",
   "SymbolTags": "1",
@@ -74,6 +76,7 @@
     },
     {
       "ChildId": "0c8caa25-78dd-4af4-a3ad-6a64fb6f7b77"/*Any*/,
+      "SectionId": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
       "Position": {
         "X": -477.01392,
         "Y": -289.0255
@@ -102,6 +105,7 @@
     },
     {
       "ChildId": "579708d8-8488-40d9-a63e-98e4977d65d9"/*ComputeShader*/,
+      "SectionId": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
       "Position": {
         "X": -179.83272,
         "Y": -248.92209
@@ -109,6 +113,7 @@
     },
     {
       "ChildId": "5f0bdce4-6134-4870-b65b-c570117003cd"/*HasTimeChanged*/,
+      "SectionId": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
       "Position": {
         "X": -617.0139,
         "Y": -289.0255
@@ -116,6 +121,7 @@
     },
     {
       "ChildId": "671fe7f3-b820-4bd1-a793-f7a3996c98d3"/*Execute*/,
+      "SectionId": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
       "Position": {
         "X": 241.40436,
         "Y": -124.11795
@@ -144,6 +150,7 @@
     },
     {
       "ChildId": "a7193711-4814-4e56-9964-3aa854204ee7"/*ComputeShaderStage*/,
+      "SectionId": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
       "Position": {
         "X": 241.40436,
         "Y": -229.11795
@@ -171,7 +178,7 @@
       }
     },
     {
-      "ChildId": "b00a56e7-cdb5-44c4-ae06-d047f320bd6f"/*AddInts*/,
+      "ChildId": "b00a56e7-cdb5-44c4-ae06-d047f320bd6f"/*AddInt*/,
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -184,6 +191,7 @@
     },
     {
       "ChildId": "bc378a28-7ae4-43e5-9b66-15114b7c163e"/*CalcDispatchCount*/,
+      "SectionId": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
       "Position": {
         "X": -39.832718,
         "Y": -213.92209
@@ -212,6 +220,7 @@
     },
     {
       "ChildId": "f58e6118-455c-432e-9d96-1c60ee229afd"/*HasIntChanged*/,
+      "SectionId": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
       "Position": {
         "X": -617.0139,
         "Y": -254.02551
@@ -227,7 +236,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
       "Title": "Clear buffer",
@@ -246,6 +255,5 @@
         "Y": 315.0489
       }
     }
-  ],
-  "Links": []
+  ]
 }

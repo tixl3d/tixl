@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9d71d46c-f3d8-4bf4-a104-38c0b37cc88b"/*Equirectangle*/,
   "Description": "Renders the input scene as an image with depth with equirectangular mapping (for 360/VR/fulldome video)\n\nAlso see [PolarCoordinates], [ConvertEquirectangle]",
   "SymbolTags": "64",
@@ -51,6 +53,7 @@
     },
     {
       "ChildId": "39a1fcc7-39df-4c6a-a876-a29b9abc6276"/*GetIntVar*/,
+      "SectionId": "75337a7d-8716-447b-90f1-fe4b95895f61",
       "Position": {
         "X": -2559.071,
         "Y": 386.65112
@@ -58,6 +61,7 @@
     },
     {
       "ChildId": "3b5fce00-f8cd-4670-8249-2640cb217151"/*Multiply*/,
+      "SectionId": "75337a7d-8716-447b-90f1-fe4b95895f61",
       "Position": {
         "X": -2259.0715,
         "Y": 346.65112
@@ -86,6 +90,7 @@
     },
     {
       "ChildId": "5c29a745-534b-4722-b82f-0172ba32cbe4"/*Int2*/,
+      "SectionId": "3f153fe1-59d8-45e2-bf12-c7d86cb53b85",
       "Position": {
         "X": -1076.0898,
         "Y": 285.38763
@@ -107,6 +112,7 @@
     },
     {
       "ChildId": "738a21c2-91d8-4d10-aa72-83ae2b063711"/*Vector3*/,
+      "SectionId": "75337a7d-8716-447b-90f1-fe4b95895f61",
       "Position": {
         "X": -2109.0715,
         "Y": 290.65112
@@ -114,6 +120,7 @@
     },
     {
       "ChildId": "84c6bc06-eb3b-46de-a7aa-5458f970bf8d"/*MultiplyInt*/,
+      "SectionId": "3f153fe1-59d8-45e2-bf12-c7d86cb53b85",
       "Position": {
         "X": -1226.0898,
         "Y": 354.38763
@@ -121,6 +128,7 @@
     },
     {
       "ChildId": "b3afd95c-ebcf-4b04-a424-a64752fb9516"/*Vector3*/,
+      "SectionId": "75337a7d-8716-447b-90f1-fe4b95895f61",
       "Position": {
         "X": -2109.0715,
         "Y": 346.65112
@@ -128,6 +136,7 @@
     },
     {
       "ChildId": "c6ef0b76-18ff-4f77-8594-638779e48141"/*MultiplyInt*/,
+      "SectionId": "3f153fe1-59d8-45e2-bf12-c7d86cb53b85",
       "Position": {
         "X": -1232.6475,
         "Y": 285.38763
@@ -156,6 +165,7 @@
     },
     {
       "ChildId": "dadf542a-f781-402c-b7f8-2c35c189c7eb"/*IntToFloat*/,
+      "SectionId": "75337a7d-8716-447b-90f1-fe4b95895f61",
       "Position": {
         "X": -2409.0706,
         "Y": 346.65112
@@ -163,6 +173,7 @@
     },
     {
       "ChildId": "de6abf64-d10f-4cae-8f09-2ef2e0be2e6c"/*Int2*/,
+      "SectionId": "3f153fe1-59d8-45e2-bf12-c7d86cb53b85",
       "Position": {
         "X": -1076.0898,
         "Y": 354.38763
@@ -213,7 +224,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "3f153fe1-59d8-45e2-bf12-c7d86cb53b85",
       "Title": "Resolution",

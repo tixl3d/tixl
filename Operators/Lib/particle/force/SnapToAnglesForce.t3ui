@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7eefe668-d290-4673-b766-39c98b9ba12e"/*SnapToAnglesForce*/,
   "Description": "Slowly align particle velocity with repeated angle steps on the xy-plane. \n\nIt works well when combined with [TurbulenceForce] and [PointTrail].\n\nNote: This will have no effect if the particles have no default velocity or only along the z-axis.",
   "SymbolTags": "64",
@@ -140,7 +142,7 @@
       }
     },
     {
-      "ChildId": "6ef76d3a-e819-4051-bb95-ddb238c07fe0"/*TransformsConstBuffer*/,
+      "ChildId": "6ef76d3a-e819-4051-bb95-ddb238c07fe0"/*_TransformsCBuffer*/,
       "Position": {
         "X": -111.88202,
         "Y": 738.2599

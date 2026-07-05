@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3d958f08-9c0f-45eb-a252-de880b5834f3"/*CustomPointShader*/,
   "Description": "Manipulates the points of a buffer with a short HLSL code fragment - a very fast way to write custom compute shaders.\n\nModify the prepared point `p` (Position, Rotation, Color, Scale, FX1/FX2). `idx` is the point index, `f` its normalized 0…1 position in the buffer. Helpers like SampleGradient(f), Biased(f) and quaternion functions are available. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "SymbolTags": "8",

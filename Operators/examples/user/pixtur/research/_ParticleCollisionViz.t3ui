@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6a978975-3996-4e0b-ae9b-782a49e17c73"/*_ParticleCollisionViz*/,
   "Description": "A helper that visualizes particles in the 2D collision simulation.",
   "InputUis": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f5158500-39e4-481e-aa4f-f7dbe8cbe0fa"/*SetBpm*/,
   "Inputs": [
     {

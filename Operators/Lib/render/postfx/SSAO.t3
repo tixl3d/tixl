@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "13d5260d-4e50-48f8-909c-7d84d6f0a43f"/*SSAO*/,
   "Inputs": [
     {
@@ -306,7 +308,7 @@
       "Outputs": []
     },
     {
-      "Id": "a59e2dd0-5823-400c-a05c-8ef169b379ed"/*TransformsConstBuffer*/,
+      "Id": "a59e2dd0-5823-400c-a05c-8ef169b379ed"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

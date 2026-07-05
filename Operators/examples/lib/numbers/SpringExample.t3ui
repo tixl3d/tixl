@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "04b8f508-2101-42dc-8d91-60b585bc561e"/*SpringExample*/,
   "Description": "",
   "InputUis": [],
@@ -321,7 +321,10 @@
   "ScaleX": 126.15041,
   "ScrollX": 0.3109159,
   "Mode": "CurveEditor",
-  "TimelineHeight": 194
+  "TimelineHeight": 194,
+  "InlineDataClipEditEnabled": false,
+  "DetailsAreaHeight": 200.0,
+  "InlineDataClipStripHeight": null
 }
   }
 }

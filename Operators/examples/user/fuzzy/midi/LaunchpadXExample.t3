@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "55551bc1-1bf9-47d8-b25b-33c3596d21c4"/*LaunchpadXExample*/,
   "Inputs": [
     {

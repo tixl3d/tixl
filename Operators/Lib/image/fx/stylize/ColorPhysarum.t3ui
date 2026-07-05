@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "01f405c6-097f-40c7-8b5a-3995565c0034"/*ColorPhysarum*/,
   "Description": "Work in progress for a new edge detect like effect.",
   "SymbolTags": "192",

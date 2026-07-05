@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a9a768dd-d31e-471b-a6df-b088a37d1afb"/*AudioWaveformExample*/,
   "Inputs": [
     {

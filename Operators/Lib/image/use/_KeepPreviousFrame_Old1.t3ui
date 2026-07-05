@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b5b6c046-3c8e-478a-b423-899872c2e1c4"/*_KeepPreviousFrame_Old1*/,
   "Description": "Implements a double buffer to keep the previous image. This can be useful for effects that rely on image change comparison, like motion estimation.",
   "SymbolTags": "8",

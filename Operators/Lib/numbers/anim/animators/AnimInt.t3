@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "85b5a198-deb9-4bea-b760-dad211e16ee6"/*AnimInt*/,
   "Inputs": [
     {

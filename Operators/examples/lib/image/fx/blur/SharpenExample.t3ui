@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "eccd22ed-1a59-4655-b811-10790871cd4c"/*SharpenExample*/,
   "Description": "Example for the basic use of the sharpen filter.\nSmall radius values do normal image sharpening while larger radii allow for creative effects.",
   "SymbolTags": "2",

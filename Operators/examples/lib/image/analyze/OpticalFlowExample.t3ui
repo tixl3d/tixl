@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "db89bacd-db5a-4d52-a073-ed141f413f8d"/*OpticalFlowExample*/,
   "Description": "Illustrates how to use the [OpticalFlowEffect] on a [PlayVideo] texture.",
   "SymbolTags": "10",
@@ -15,6 +17,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "04edba45-b503-4f6c-b33e-a29d471c54cf"/*PlayVideo*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 93.77759,
         "Y": 915.17413
@@ -29,6 +32,7 @@
     },
     {
       "ChildId": "0ddc3103-e552-4ec0-97b0-373b20c189a4"/*CommonPointSets*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 693.7776,
         "Y": 1166.1742
@@ -58,6 +62,7 @@
     },
     {
       "ChildId": "1fc6361f-5c43-4b5c-bb33-cf2d50690001"/*Layer2d*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 1151.7695,
         "Y": 835.17413
@@ -72,6 +77,7 @@
     },
     {
       "ChildId": "273aef27-7be4-4872-86d5-2952c19f0f93"/*HasIntChanged*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "Video only plays with 25fps. So we have to figure out which frames to keep.",
       "Position": {
         "X": 243.77759,
@@ -102,6 +108,7 @@
     },
     {
       "ChildId": "32e85c68-d781-426f-bf6b-f652247b9225"/*ParticleSystem*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "We disable InitialVelocity and increase drag.",
       "Position": {
         "X": 843.7776,
@@ -125,6 +132,7 @@
     },
     {
       "ChildId": "42564df3-855f-4fd3-b6bc-64785046885a"/*DrawLines*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 1293.7776,
         "Y": 1014.17413
@@ -132,6 +140,7 @@
     },
     {
       "ChildId": "4771aebf-6745-4694-87c2-e3727cab0a39"/*ConvertFormat*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "PlayVideo returns textures in BGRA format. For Layer2d to render it correctly, we have to first convert to RGBA.",
       "Position": {
         "X": 1001.76953,
@@ -155,6 +164,7 @@
     },
     {
       "ChildId": "566c5a9b-555c-4274-baf6-25d3e55704cd"/*KeepPreviousFrame*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "The last version of [KeepPreviousFrame] didn't work correctly with non-60fps footage.",
       "Position": {
         "X": 393.7776,
@@ -163,6 +173,7 @@
     },
     {
       "ChildId": "5e542058-f818-46fc-9a0b-53b081936d0d"/*OpticalFlow*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Comment": "We feed both frames into the optical flow detection.",
       "Position": {
         "X": 543.7776,
@@ -171,6 +182,7 @@
     },
     {
       "ChildId": "76a0c247-2288-4a72-b274-69faf81ff98c"/*RepeatAtPoints*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 1143.7776,
         "Y": 1014.17413
@@ -185,6 +197,7 @@
     },
     {
       "ChildId": "85c3d46f-616d-4470-81c2-53933c9b992b"/*_Time_old*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": -56.222412,
         "Y": 915.17413
@@ -192,6 +205,7 @@
     },
     {
       "ChildId": "9b1c328b-c37e-404e-812d-b689aeb2fd48"/*TransformPoints*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 843.7776,
         "Y": 1166.1742
@@ -207,6 +221,7 @@
     },
     {
       "ChildId": "a87d1393-301b-48be-8a8c-028a9bf1732e"/*TextureMapForce*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 693.7776,
         "Y": 1057.1742
@@ -229,6 +244,7 @@
     },
     {
       "ChildId": "cbc9f786-19e2-43f5-90f9-2beaf2b050ab"/*_GridPoints_Old*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 693.7776,
         "Y": 1014.17413
@@ -236,6 +252,7 @@
     },
     {
       "ChildId": "d3adf557-1a26-4cf6-b72c-a4475e476475"/*RandomizePoints*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 993.7776,
         "Y": 1014.17413
@@ -243,6 +260,7 @@
     },
     {
       "ChildId": "d5e9c363-4567-4a67-8e69-7c9d57722aed"/*Group*/,
+      "SectionId": "587694e0-9a6f-4f31-9134-4da994582416",
       "Position": {
         "X": 1592.623,
         "Y": 822.47424
@@ -258,7 +276,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "587694e0-9a6f-4f31-9134-4da994582416",
       "Title": "An alternative example using a particle system.\n",

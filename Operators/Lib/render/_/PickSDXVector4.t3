@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a83f2e4f-cb4d-4a6f-9f7a-2ea7fdfab54b"/*PickSDXVector4*/,
   "Inputs": [
     {

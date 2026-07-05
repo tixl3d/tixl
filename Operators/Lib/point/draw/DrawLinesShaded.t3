@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6b2f5350-6bb8-4f2c-92af-6e5fc81b8a82"/*DrawLinesShaded*/,
   "Inputs": [
     {
@@ -67,7 +67,7 @@
   ],
   "Children": [
     {
-      "Id": "07c49f4f-0ee4-45fd-a772-104c571b1500"/*TransformsConstBuffer*/,
+      "Id": "07c49f4f-0ee4-45fd-a772-104c571b1500"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []
@@ -287,7 +287,7 @@
       "Outputs": []
     },
     {
-      "Id": "9cc21ba4-386f-4a83-9638-bcf54f0cbbd7"/*AddInts*/,
+      "Id": "9cc21ba4-386f-4a83-9638-bcf54f0cbbd7"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

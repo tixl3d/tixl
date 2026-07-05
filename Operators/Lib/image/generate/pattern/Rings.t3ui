@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d002bd90-5921-48b0-a940-a8d0c779f674"/*Rings*/,
   "Description": "Generates a procedural rings texture that can produce a wide variety of radial patterns. Please try the presets.\n\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
   "SymbolTags": "1",
@@ -308,6 +310,5 @@
         "Y": -45.68744
       }
     }
-  ],
-  "Links": []
+  ]
 }

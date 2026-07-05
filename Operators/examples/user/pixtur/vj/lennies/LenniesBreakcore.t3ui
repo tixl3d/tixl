@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "758e28e9-e149-4a41-be5a-dcaad705345c"/*LenniesBreakcore*/,
   "Description": "A VJ effect part that can be driven by snapshots",
   "InputUis": [],

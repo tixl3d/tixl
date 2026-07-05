@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "84e02044-3011-4a5e-b76a-c904d9b4557f"/*UavFromTexture2d*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ab496711-8b99-4463-aac9-b41fdf46608d"/*RepeatMeshAtPoints*/,
   "Description": "Creates a new mesh that repeats the incoming mesh at each point.\nNote: \nWarning: With detailed meshes, or very large scaled meshes and/or a very high number of points, this Operator can take up a lot of resources.\n\nAlso see: [DrawMeshAtPoints]",
   "SymbolTags": "1",
@@ -68,6 +70,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "1b79609d-fe80-46e0-91c4-8e34e31ec324"/*ComputeShader*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Position": {
         "X": 927.6344,
         "Y": 2110.083
@@ -75,6 +78,7 @@
     },
     {
       "ChildId": "239cee52-d55a-4b0e-ba1e-a776e61979f0"/*MultiplyInt*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Position": {
         "X": 927.6344,
         "Y": 1787.318
@@ -82,6 +86,7 @@
     },
     {
       "ChildId": "2af249e3-b10d-4fd3-8c53-49953a91f5d4"/*Vertices*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Position": {
         "X": 379.17526,
         "Y": 955.6152
@@ -89,6 +94,7 @@
     },
     {
       "ChildId": "2bd9a0f4-b248-4d2a-b3fe-58aba2ee546c"/*GetBufferComponents*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Position": {
         "X": 927.6344,
         "Y": 1927.318
@@ -103,6 +109,7 @@
     },
     {
       "ChildId": "38f8f253-f167-4af6-afdd-88283dd5e911"/*Indices*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Position": {
         "X": 369.70483,
         "Y": 1796.0748
@@ -110,6 +117,7 @@
     },
     {
       "ChildId": "3ce28e7c-22be-4a8c-b3d6-b62e66d4a411"/*newIndicesBuffer*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Position": {
         "X": 927.6344,
         "Y": 1857.318
@@ -124,6 +132,7 @@
     },
     {
       "ChildId": "4b94d5c7-3ecb-4a57-9e31-51123b22f89a"/*CalcInt2DispatchCount*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Position": {
         "X": 1207.6345,
         "Y": 1139.3281
@@ -138,6 +147,7 @@
     },
     {
       "ChildId": "519706e5-8d04-4759-8f4c-d04a3c873a7a"/*IndicesStride*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Position": {
         "X": 787.63434,
         "Y": 1892.318
@@ -145,6 +155,7 @@
     },
     {
       "ChildId": "54247e77-72ac-4d3b-9a95-8ae4cff441d2"/*Int2*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -164,6 +175,7 @@
     },
     {
       "ChildId": "5c5cbbdc-5f1e-406b-8691-cc99a9cd0567"/*ComputeShaderStage*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -183,6 +195,7 @@
     },
     {
       "ChildId": "76c3eb78-1e26-41db-951e-6db5d3ec58de"/*GetBufferComponents*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Position": {
         "X": 927.6345,
         "Y": 1211.8807
@@ -190,6 +203,7 @@
     },
     {
       "ChildId": "787b0cf7-00be-4330-bcd4-a3588ebe8fc0"/*newVertexBuffer*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Position": {
         "X": 927.6345,
         "Y": 1141.8802
@@ -197,6 +211,7 @@
     },
     {
       "ChildId": "8c328809-68c5-4197-8a15-6b391d22f134"/*ExecuteBufferUpdate*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -209,6 +224,7 @@
     },
     {
       "ChildId": "911de402-b27f-4d10-9a38-2c19627b4566"/*CalcInt2DispatchCount*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Position": {
         "X": 1207.6344,
         "Y": 1929.118
@@ -216,6 +232,7 @@
     },
     {
       "ChildId": "980686aa-f611-4e05-9e79-0e30c915d817"/*ExecuteBufferUpdate*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -235,6 +252,7 @@
     },
     {
       "ChildId": "a79638be-f870-4791-b4bd-3fa3e1cb5d63"/*Int2*/,
+      "SectionId": "ed64c113-bf47-4c49-a888-286cf3df2e39",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -261,6 +279,7 @@
     },
     {
       "ChildId": "d063548d-699e-4f7d-b9fc-05d4fbe3e5b1"/*MultiplyInt*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Position": {
         "X": 927.6345,
         "Y": 1071.8801
@@ -268,6 +287,7 @@
     },
     {
       "ChildId": "d2f1a399-db95-4288-ace5-07223ba6320e"/*ComputeShaderStage*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -280,6 +300,7 @@
     },
     {
       "ChildId": "dd7c4b52-5adc-4ee2-be6a-9b1ed96abb95"/*ComputeShader*/,
+      "SectionId": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Position": {
         "X": 927.6345,
         "Y": 866.62
@@ -295,7 +316,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "3a6fd618-4f25-4a4a-b745-481f2799ab0b",
       "Title": "Vertices",
@@ -332,6 +353,5 @@
         "Y": 549.6433
       }
     }
-  ],
-  "Links": []
+  ]
 }

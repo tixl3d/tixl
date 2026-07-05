@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c1348a39-276f-4fe6-9210-f9f605cb0ece"/*DrawBillboardsExample2*/,
   "Description": "Uses Draw Billboards to generate an old-school movie effect",
   "InputUis": [

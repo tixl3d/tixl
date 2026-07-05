@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3f0f0c40-482d-4d79-a201-b4651a0cd3a8"/*SplitMeshVertices*/,
   "Description": "This can be relevant to \"scatter\" smooth shaded geometry or change shading to flat.",
   "SymbolTags": "8",
@@ -44,6 +46,7 @@
     },
     {
       "ChildId": "4d0eebee-4f9b-461e-8057-e4c7adc5cf8c"/*MultiplyInt*/,
+      "SectionId": "69053100-817b-499a-afff-6d21b6476021",
       "Position": {
         "X": 888.94336,
         "Y": 2186.182
@@ -58,6 +61,7 @@
     },
     {
       "ChildId": "4fde3186-f5e3-4de0-a939-50f7fd3fdeb2"/*GetBufferComponents*/,
+      "SectionId": "69053100-817b-499a-afff-6d21b6476021",
       "Position": {
         "X": 1197.0577,
         "Y": 2136.4014
@@ -65,6 +69,7 @@
     },
     {
       "ChildId": "58f3b5a0-3989-4a3e-8063-3a81bdaac1cd"/*IntValue*/,
+      "SectionId": "69053100-817b-499a-afff-6d21b6476021",
       "Position": {
         "X": 719.5015,
         "Y": 2082.9453
@@ -72,6 +77,7 @@
     },
     {
       "ChildId": "68b7514d-775d-4977-879e-29329163882e"/*GetSRVProperties*/,
+      "SectionId": "69053100-817b-499a-afff-6d21b6476021",
       "Position": {
         "X": 736.53735,
         "Y": 2015.0759
@@ -93,6 +99,7 @@
     },
     {
       "ChildId": "885504a3-7dcb-4c72-97e7-07eb222c2551"/*GetBufferComponents*/,
+      "SectionId": "69053100-817b-499a-afff-6d21b6476021",
       "Position": {
         "X": 1198.3876,
         "Y": 1975.4832
@@ -126,6 +133,7 @@
     },
     {
       "ChildId": "ef89b18c-d0ad-4b38-8877-c92bf1cbd7fc"/*NewVertices*/,
+      "SectionId": "69053100-817b-499a-afff-6d21b6476021",
       "Position": {
         "X": 1049.558,
         "Y": 2184.2598
@@ -133,6 +141,7 @@
     },
     {
       "ChildId": "f5b7f0b6-db05-47e3-8eec-588b33bfe247"/*IntValue*/,
+      "SectionId": "69053100-817b-499a-afff-6d21b6476021",
       "Position": {
         "X": 726.31665,
         "Y": 2270.028
@@ -140,6 +149,7 @@
     },
     {
       "ChildId": "f769f9e5-b257-4cc7-b089-282305c79e1f"/*NewFaceIndices*/,
+      "SectionId": "69053100-817b-499a-afff-6d21b6476021",
       "Position": {
         "X": 1050.8878,
         "Y": 2023.3413
@@ -155,7 +165,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "69053100-817b-499a-afff-6d21b6476021",
       "Title": "Build a new vertex buffer.",

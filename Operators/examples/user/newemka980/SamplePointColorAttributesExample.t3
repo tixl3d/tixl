@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f4528476-298d-42b7-8138-3916bea2da6e"/*SamplePointColorAttributesExample*/,
   "Inputs": [],
   "Children": [

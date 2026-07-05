@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b85198a8-6475-45e1-b2d2-83ec8f59d6ed"/*CappedTorusSDF*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a35676b8-bcbc-4806-845a-8853b57f8ec7"/*ScatterMeshFacesExample*/,
   "Description": "Shows how to combine [SplitFaces], [SelectVertices], and [ScatterMesh] to create a noise distortion effect.",
   "InputUis": [],
@@ -54,6 +56,7 @@
     },
     {
       "ChildId": "94a599ad-0cf9-4ae2-99a2-f32a723b1f4a"/*SetEnvironment*/,
+      "SectionId": "899fd67c-cac3-4c8c-aaee-e3a5025b342d",
       "Position": {
         "X": 1208.2487,
         "Y": 317.49216
@@ -61,6 +64,7 @@
     },
     {
       "ChildId": "9797cf84-30ff-438c-ad0c-d3df5cab6d1d"/*TextureToCubeMap*/,
+      "SectionId": "899fd67c-cac3-4c8c-aaee-e3a5025b342d",
       "Position": {
         "X": 1050.0,
         "Y": 336.0
@@ -68,6 +72,7 @@
     },
     {
       "ChildId": "a53197a3-0eeb-4dca-a49f-fe85e77420d7"/*_BlobOld*/,
+      "SectionId": "899fd67c-cac3-4c8c-aaee-e3a5025b342d",
       "Position": {
         "X": 900.0,
         "Y": 336.0
@@ -139,7 +144,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "899fd67c-cac3-4c8c-aaee-e3a5025b342d",
       "Title": "Generate a custom HDR environment map.\nNotice how the Blob-Operator only has a resolution of 256px.",

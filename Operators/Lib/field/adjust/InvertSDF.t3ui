@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0707a816-d118-4419-84d6-7bdcbeee318d"/*InvertSDF*/,
   "Description": "Inverts the incoming SDF field.\nExample: A cube in infinite empty space thus becomes a cut-out space in infinite matter.\n\nHelpful combination: [CombineSDF] ",
   "SymbolTags": "1",

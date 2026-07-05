@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "45d12ccb-3da8-41e5-85fd-61d7abfaa92d"/*ChromaBlur*/,
   "Inputs": [
     {

@@ -1,10 +1,8 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0a8497a1-8740-4561-b258-51475c44473b"/*BlendSnapshots*/,
   "Inputs": [
-    {
-      "Id": "e1d2c3b4-5a6f-4e10-9b20-1a2b3c4d5e60"/*Enable*/,
-      "DefaultValue": false
-    },
     {
       "Id": "a3f4e5d6-7c8b-4a32-9d42-3c4d5e6f7a82"/*SnapshotIndices*/,
       "DefaultValue": {
@@ -12,14 +10,18 @@
       }
     },
     {
+      "Id": "b4a5f6e7-8d9c-4b43-ae53-4d5e6f7a8b93"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e1d2c3b4-5a6f-4e10-9b20-1a2b3c4d5e60"/*Enable*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "f2e3d4c5-6b7a-4f21-8c31-2b3c4d5e6f71"/*WeightFactors*/,
       "DefaultValue": {
         "Values": []
       }
-    },
-    {
-      "Id": "b4a5f6e7-8d9c-4b43-ae53-4d5e6f7a8b93"/*Mode*/,
-      "DefaultValue": 0
     }
   ],
   "Children": [],

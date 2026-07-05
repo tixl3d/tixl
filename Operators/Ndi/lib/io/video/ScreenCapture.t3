@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "80032e95-90ec-486d-92a4-ff3d225e556e"/*ScreenCapture*/,
   "Inputs": [
     {

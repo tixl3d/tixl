@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "74901305-773d-4246-b962-2478096159b7"/*RandomChoiceIndex*/,
   "Inputs": [
     {

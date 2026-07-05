@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dd7fa7ee-266a-43c8-b29f-3357488b26be"/*AnimRandomString*/,
   "Description": "Returns a random word per beat.",
   "SymbolTags": "8",
@@ -56,6 +58,5 @@
         "Y": 21.5
       }
     }
-  ],
-  "Links": []
+  ]
 }

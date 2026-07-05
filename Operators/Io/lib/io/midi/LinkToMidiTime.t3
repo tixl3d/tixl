@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3f10f526-d8ca-4f67-95a4-d703b713088e"/*LinkToMidiTime*/,
   "Inputs": [
     {

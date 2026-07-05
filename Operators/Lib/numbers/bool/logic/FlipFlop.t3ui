@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ec1ba1fb-ceb7-4d4f-86b4-389589c7e6f0"/*FlipFlop*/,
   "Description": "Holds the \"activated\" state of a boolean. Also check [DelayTrigger].",
   "SymbolTags": "8",

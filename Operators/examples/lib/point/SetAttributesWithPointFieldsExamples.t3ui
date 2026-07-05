@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7644e221-9785-414b-905d-31fd68ec080c"/*SetAttributesWithPointFieldsExamples*/,
   "Description": "Shows various examples on how this effect works.",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "00751863-bd67-4494-90a5-5bcad431747e"/*RadialPoints*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Comment": "We take 10 radial points (that's the max count of the effect)",
       "Position": {
         "X": 357.34485,
@@ -13,6 +16,7 @@
     },
     {
       "ChildId": "08bc63c3-236c-4e78-b94f-a2fee3841e55"/*RadialPoints*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 478.53546,
         "Y": 2479.985
@@ -20,6 +24,7 @@
     },
     {
       "ChildId": "099e1818-46b1-4e32-a0c4-87788f82a0ce"/*TransformMesh*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 478.53546,
         "Y": 2309.5344
@@ -27,6 +32,7 @@
     },
     {
       "ChildId": "0dc907e5-949c-4dfb-a5ad-e5226b4b9c41"/*RenderTarget*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 1874.2942,
         "Y": 333.45605
@@ -34,6 +40,7 @@
     },
     {
       "ChildId": "0de0c53d-e203-465a-9ace-2c22c0f83cf7"/*SetAttributesWithPointFields*/,
+      "SectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Comment": "Try to adjust the WCurve.\nYou can click the icon to open the popup.\n\nIn there, holding the shift key will snap to grid lines.",
       "Position": {
         "X": 1203.5074,
@@ -42,6 +49,7 @@
     },
     {
       "ChildId": "10014d9f-b571-4b2f-a4b9-f183fc68acef"/*DrawLines*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 1424.2942,
         "Y": 333.45605
@@ -49,6 +57,7 @@
     },
     {
       "ChildId": "150f01c3-fba9-4b79-bf10-c34b8d55db36"/*MapPointAttributes*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Comment": "We assign some colors to these points.",
       "Position": {
         "X": 507.34485,
@@ -57,6 +66,7 @@
     },
     {
       "ChildId": "1637809f-0f30-441c-9ad2-4d5cb9e15a11"/*_VisualizePointFields*/,
+      "SectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Position": {
         "X": 1355.2661,
         "Y": 1791.1082
@@ -64,6 +74,7 @@
     },
     {
       "ChildId": "183fa6dd-5b9e-45fc-9278-ebceb2229a49"/*PolarTransformPoints*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 628.53546,
         "Y": 2356.985
@@ -71,6 +82,7 @@
     },
     {
       "ChildId": "1a665229-ea5d-4e05-b569-a4d6b59750bc"/*PickPointList*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 807.34485,
         "Y": 684.0593
@@ -78,6 +90,7 @@
     },
     {
       "ChildId": "1b9024bb-7e19-4c5e-9d9c-672ec0f5cd63"/*PointsOnMesh*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 628.53546,
         "Y": 2300.985
@@ -85,6 +98,7 @@
     },
     {
       "ChildId": "1fc5e6d7-266f-4881-be4d-722328e67092"/*SetAttributesWithPointFields*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 928.53546,
         "Y": 2356.985
@@ -92,6 +106,7 @@
     },
     {
       "ChildId": "21adc266-85e2-492a-871d-f1de2c38acea"/*SetAttributesWithPointFields*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Comment": "The actual modifier with default settings.",
       "Position": {
         "X": 1274.2942,
@@ -100,6 +115,7 @@
     },
     {
       "ChildId": "21ee7735-d34f-4a7f-9540-5febf9d00115"/*SetAttributesWithPointFields*/,
+      "SectionId": "82fc553f-f73c-4f0b-b9e9-31f37071105b",
       "Comment": "The actual modifier with default settings.",
       "Position": {
         "X": 770.76715,
@@ -108,6 +124,7 @@
     },
     {
       "ChildId": "2376c855-04f9-4dae-a5d0-e9acab12d90e"/*_VisualizePointFields*/,
+      "SectionId": "82fc553f-f73c-4f0b-b9e9-31f37071105b",
       "Position": {
         "X": 920.76715,
         "Y": 1034.7513
@@ -115,6 +132,7 @@
     },
     {
       "ChildId": "2aca6a37-c346-4adf-bac9-3b36c6ea28fe"/*SSAO*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 1978.5359,
         "Y": 2356.985
@@ -122,6 +140,7 @@
     },
     {
       "ChildId": "2acd09f7-44d5-4d14-863a-ed3dd5971e7a"/*Point*/,
+      "SectionId": "9b52b011-daa0-4076-8096-cf101484704d",
       "Position": {
         "X": 780.7521,
         "Y": 1769.2847
@@ -129,6 +148,7 @@
     },
     {
       "ChildId": "2d60b0b0-3826-4eb2-ab4e-8ea84d5fe799"/*Final Output*/,
+      "SectionId": "82fc553f-f73c-4f0b-b9e9-31f37071105b",
       "Comment": "Select and pin this op to your Output window.\nPlease reset the view and enable gizmos (the grid icon).",
       "Position": {
         "X": 1070.7673,
@@ -137,6 +157,7 @@
     },
     {
       "ChildId": "2fd2027c-f6b6-4aad-82a9-c8a70d2707dc"/*LoadObj*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 566.507,
         "Y": 351.24194
@@ -144,6 +165,7 @@
     },
     {
       "ChildId": "34561d88-ad1b-402a-96dd-050f72e90bae"/*_GridPoints_Old*/,
+      "SectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Position": {
         "X": 920.3838,
         "Y": 2041.1122
@@ -151,6 +173,7 @@
     },
     {
       "ChildId": "39039b7d-3bda-4026-8f1b-1b2f950f8251"/*_GridPoints_Old*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 478.53546,
         "Y": 2356.985
@@ -158,6 +181,7 @@
     },
     {
       "ChildId": "40c0e356-16ef-4134-8617-5e1aed973be7"/*SelectPoints*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 778.53546,
         "Y": 2356.985
@@ -165,6 +189,7 @@
     },
     {
       "ChildId": "444580e6-65be-42f5-8bf2-127463083620"/*MapPointAttributes*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 628.53546,
         "Y": 2479.985
@@ -172,6 +197,7 @@
     },
     {
       "ChildId": "47e376e8-d4a0-4e26-bcf9-9f224d883371"/*AnimValue*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 716.50714,
         "Y": 464.75592
@@ -179,6 +205,7 @@
     },
     {
       "ChildId": "4979224f-faaa-4542-8be8-4fd474c633f3"/*OrbitCamera*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 1678.5354,
         "Y": 2356.985
@@ -186,6 +213,7 @@
     },
     {
       "ChildId": "4b4759f3-3fa6-4714-9354-70d410d594fd"/*ParticleSystem*/,
+      "SectionId": "9b52b011-daa0-4076-8096-cf101484704d",
       "Comment": "Notice how we limit the point count to 10 and disable initial velocity.\nWe adjusted the max live to a longer duration and set the normalized age to the W attribute.",
       "Position": {
         "X": 930.7521,
@@ -194,6 +222,7 @@
     },
     {
       "ChildId": "4b8ab7ef-8cb0-4517-8892-3ba3aa47b48f"/*_VisualizePointFields*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 1378.5354,
         "Y": 2412.985
@@ -201,6 +230,7 @@
     },
     {
       "ChildId": "4e10a424-249f-41e7-bb84-2e3d6c458f23"/*Point*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Position": {
         "X": 636.2516,
         "Y": 1551.7592
@@ -208,6 +238,7 @@
     },
     {
       "ChildId": "4f61a1cc-dbce-4a8c-87a3-d880539cda1d"/*DrawMeshAtPoints*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 1421.5654,
         "Y": 486.6278
@@ -215,6 +246,7 @@
     },
     {
       "ChildId": "50f2b05a-48fc-45df-9b3b-85bea1a56080"/*CubeMesh*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 928.53546,
         "Y": 2425.985
@@ -222,6 +254,7 @@
     },
     {
       "ChildId": "52d8194d-1bbc-49cc-b21d-c386749307d7"/*PerlinNoise3*/,
+      "SectionId": "9b52b011-daa0-4076-8096-cf101484704d",
       "Position": {
         "X": 630.7521,
         "Y": 1769.2847
@@ -229,6 +262,7 @@
     },
     {
       "ChildId": "5427a7ef-0adf-41cf-a489-dafa7d5cb8f7"/*AnimValue*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Position": {
         "X": 356.79196,
         "Y": 1419.603
@@ -236,6 +270,7 @@
     },
     {
       "ChildId": "5483dc1f-11ec-48d7-b537-f05b542f0d4f"/*AnimValue*/,
+      "SectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Position": {
         "X": 770.3838,
         "Y": 2041.1122
@@ -243,6 +278,7 @@
     },
     {
       "ChildId": "55abc77d-bec5-4109-89ec-4b5b930b38c7"/*CubeMesh*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Comment": "We stretched this cube along the z-axis,\nbecause this axis will be used for orientation towards\nthe field points.",
       "Position": {
         "X": 786.2516,
@@ -251,6 +287,7 @@
     },
     {
       "ChildId": "5d153a6a-d7dd-4457-9390-2e1b9e8f8fd0"/*CountInt*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 866.50714,
         "Y": 464.75592
@@ -258,6 +295,7 @@
     },
     {
       "ChildId": "6065297e-b3f1-4217-9772-44aaeb8d384b"/*TransformPoints*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 778.53546,
         "Y": 2479.985
@@ -265,6 +303,7 @@
     },
     {
       "ChildId": "6ca1affd-c811-4924-9edc-0add1aa0deb8"/*_Time_old*/,
+      "SectionId": "9b52b011-daa0-4076-8096-cf101484704d",
       "Position": {
         "X": 330.752,
         "Y": 1812.2848
@@ -272,6 +311,7 @@
     },
     {
       "ChildId": "6cc50276-8638-4fb2-8bb3-e800bf8df2e1"/*SetFog*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 1378.5354,
         "Y": 2356.985
@@ -279,6 +319,7 @@
     },
     {
       "ChildId": "71e4d01e-95c4-4aef-ae09-3e7afeb80896"/*CombineBuffers*/,
+      "SectionId": "82fc553f-f73c-4f0b-b9e9-31f37071105b",
       "Position": {
         "X": 608.45624,
         "Y": 1071.3567
@@ -286,6 +327,7 @@
     },
     {
       "ChildId": "734cde24-3ac2-4364-bac8-6885e4f854b0"/*MeshVerticesToPoints*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 866.50714,
         "Y": 408.7559
@@ -293,6 +335,7 @@
     },
     {
       "ChildId": "7475f895-c85a-4973-81ce-b05ffb0225e6"/*Range*/,
+      "SectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Comment": "We reduce the range to sharpen the edge.",
       "Position": {
         "X": 924.65845,
@@ -301,6 +344,7 @@
     },
     {
       "ChildId": "7c2fe531-c65c-4769-b1a1-e2abfb75f09e"/*DrawPoints*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 1427.5815,
         "Y": 415.68787
@@ -308,6 +352,7 @@
     },
     {
       "ChildId": "845c899e-105c-4ebb-87e0-e015adb5ba63"/*SampleGradient*/,
+      "SectionId": "9b52b011-daa0-4076-8096-cf101484704d",
       "Position": {
         "X": 630.7521,
         "Y": 1812.2848
@@ -315,6 +360,7 @@
     },
     {
       "ChildId": "8c1f3915-2295-4434-b63c-3600f83a290b"/*PerlinNoise3*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 628.53546,
         "Y": 2542.985
@@ -322,6 +368,7 @@
     },
     {
       "ChildId": "8d960df7-5be3-471e-b37f-5a7cb43752ac"/*_GridPoints_Old*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 866.50714,
         "Y": 302.75592
@@ -329,6 +376,7 @@
     },
     {
       "ChildId": "9330b31b-adbd-43b0-a5b3-b3a27006c402"/*AnimValue*/,
+      "SectionId": "9b52b011-daa0-4076-8096-cf101484704d",
       "Position": {
         "X": 780.7521,
         "Y": 1838.2847
@@ -336,6 +384,7 @@
     },
     {
       "ChildId": "99be16e0-9e2a-4c67-aa3f-8e9b6c420a7e"/*RenderWithMotionBlur*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Comment": "The [SetAttributesWithPointFields] effect is deterministic.\nThis means unlike with particle effects you can rewind the time and it will always produce the same effects.\n\nThis allows us to render with motion blur.",
       "Position": {
         "X": 2024.2947,
@@ -344,6 +393,7 @@
     },
     {
       "ChildId": "9aeb1974-5214-4795-ad01-c1d686cc574b"/*DrawMeshAtPoints*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 1078.5354,
         "Y": 2356.985
@@ -351,6 +401,7 @@
     },
     {
       "ChildId": "9ed14a10-aa01-4681-bf63-2b41837b9cfd"/*_GridPoints_Old*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Position": {
         "X": 636.2516,
         "Y": 1508.7592
@@ -358,6 +409,7 @@
     },
     {
       "ChildId": "a0143df1-d38d-4d8a-b570-563ac37fbe67"/*Final Output*/,
+      "SectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Comment": "Select and pin this op to your Output window.\nPlease reset the view and enable gizmos (the grid icon).",
       "Position": {
         "X": 1505.2662,
@@ -366,6 +418,7 @@
     },
     {
       "ChildId": "a02638c5-6a4f-43e7-8b9e-72c116f33867"/*SetAttributesWithPointFields*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Comment": "Try to play with the various parameters.",
       "Position": {
         "X": 786.2516,
@@ -374,6 +427,7 @@
     },
     {
       "ChildId": "a1218a11-e560-4330-9acf-61b694e3e653"/*LinePoints*/,
+      "SectionId": "82fc553f-f73c-4f0b-b9e9-31f37071105b",
       "Comment": "We generate 50 points in a line.",
       "Position": {
         "X": 620.76715,
@@ -382,6 +436,7 @@
     },
     {
       "ChildId": "a1658e95-3c8a-4b04-b185-23c3d78d53c6"/*OscillateVec3*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Comment": "We use Perlin noise to generate some random rotation angles.\nNotice how the periods are not factors of each other, so the process should be non-repetitive.",
       "Position": {
         "X": 507.34485,
@@ -390,6 +445,7 @@
     },
     {
       "ChildId": "a6173a1d-e14e-4f5e-b347-0b7d4d6c4e59"/*PickPointList*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 1016.5071,
         "Y": 259.75592
@@ -397,6 +453,7 @@
     },
     {
       "ChildId": "a76366ba-240e-4732-a93d-aa7a915846ab"/*CubeMesh*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 716.50714,
         "Y": 408.7559
@@ -404,6 +461,7 @@
     },
     {
       "ChildId": "a8f7ef33-04c4-4ada-80f6-55d823796ed1"/*_VisualizePointFields*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Position": {
         "X": 935.641,
         "Y": 1367.6228
@@ -411,6 +469,7 @@
     },
     {
       "ChildId": "a962f542-a7fb-446c-ae66-61635c4541c9"/*Offset*/,
+      "SectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Comment": "And we increase the offset to extend the effect.",
       "Position": {
         "X": 924.65845,
@@ -419,6 +478,7 @@
     },
     {
       "ChildId": "ad2e4030-3dd2-4cc8-8aa3-577f87528eae"/*SetMaterial*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 1228.5355,
         "Y": 2356.985
@@ -426,6 +486,7 @@
     },
     {
       "ChildId": "aec47179-d09e-4890-ae5d-5851c8781817"/*Offset*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Comment": "The Offset parameter extends or reduces the edge.",
       "Position": {
         "X": 506.79196,
@@ -434,6 +495,7 @@
     },
     {
       "ChildId": "b061c631-e34d-44dc-a0f0-f29efde82f0e"/*Point*/,
+      "SectionId": "1b80b1fa-e5a1-43e2-9888-02e7e335872b",
       "Position": {
         "X": 458.45624,
         "Y": 1071.3567
@@ -441,6 +503,7 @@
     },
     {
       "ChildId": "bbf1328a-9afa-4438-be0e-ab5b303eabfe"/*RenderTarget*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 1828.5354,
         "Y": 2356.985
@@ -448,6 +511,7 @@
     },
     {
       "ChildId": "c58d416a-ae5e-4dc5-b05b-d418f95100ce"/*Group*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 1528.5354,
         "Y": 2356.985
@@ -455,6 +519,7 @@
     },
     {
       "ChildId": "c8c2d71c-f791-4d3f-a17a-049394d0bb99"/*DrawingPoints*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Comment": "Everything together is a bit much. Feel free to disable the different draw types.",
       "Position": {
         "X": 1574.2942,
@@ -463,6 +528,7 @@
     },
     {
       "ChildId": "cd6eb564-d56a-4fb2-8c56-cf0c2f4c19b1"/*TransformMesh*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 716.50714,
         "Y": 351.24194
@@ -470,6 +536,7 @@
     },
     {
       "ChildId": "ceb9939e-d7d4-4b6a-8bd7-d3f78811730e"/*TransformPoints*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 657.34485,
         "Y": 684.0593
@@ -477,6 +544,7 @@
     },
     {
       "ChildId": "cf8cc493-6ef4-4271-987a-a9c8a2030987"/*CubeMesh*/,
+      "SectionId": "82fc553f-f73c-4f0b-b9e9-31f37071105b",
       "Comment": "We stretched this cube along the z-axis,\nbecause this axis will be used for orientation towards\nthe field points.",
       "Position": {
         "X": 770.76715,
@@ -485,6 +553,7 @@
     },
     {
       "ChildId": "d0ad5e91-a6c3-468a-ad2c-cdd0dd2820fa"/*DrawMeshAtPoints*/,
+      "SectionId": "82fc553f-f73c-4f0b-b9e9-31f37071105b",
       "Position": {
         "X": 920.76715,
         "Y": 941.7515
@@ -492,6 +561,7 @@
     },
     {
       "ChildId": "d53b3828-f575-4091-b53d-72edb08ad684"/*AnimVec3*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 628.53546,
         "Y": 2412.985
@@ -499,6 +569,7 @@
     },
     {
       "ChildId": "d5d67940-6f82-4fbe-9723-08911735077b"/*DrawPoints*/,
+      "SectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Position": {
         "X": 1353.5074,
         "Y": 2006.5778
@@ -506,6 +577,7 @@
     },
     {
       "ChildId": "dc8a07b0-97ed-42a8-a48a-c5963a3e314a"/*_VisualizePointFields*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 1421.5654,
         "Y": 555.6278
@@ -513,6 +585,7 @@
     },
     {
       "ChildId": "dcda6fcb-2c28-4ba4-b834-8ebd73a651b6"/*CubeMesh*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 1269.3672,
         "Y": 516.05707
@@ -520,6 +593,7 @@
     },
     {
       "ChildId": "e4f96277-ad14-430f-b02e-56a33bb2e1c7"/*Modulo*/,
+      "SectionId": "9b52b011-daa0-4076-8096-cf101484704d",
       "Position": {
         "X": 480.752,
         "Y": 1812.2848
@@ -527,6 +601,7 @@
     },
     {
       "ChildId": "e8cfe851-4fcc-47ae-9cca-39bcae4d7325"/*RadialPoints*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 866.50714,
         "Y": 259.75592
@@ -534,6 +609,7 @@
     },
     {
       "ChildId": "ed75ed13-b170-4561-ba41-d6884404764b"/*DrawMeshAtPoints*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Position": {
         "X": 936.2516,
         "Y": 1465.7592
@@ -541,6 +617,7 @@
     },
     {
       "ChildId": "ee91d807-6138-4788-ab3c-1ff7ccf08ddb"/*Range*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Comment": "The Range parameter controls how \"wide\" or \"smooth\" the edge of the field is.",
       "Position": {
         "X": 506.79196,
@@ -549,6 +626,7 @@
     },
     {
       "ChildId": "f246e978-93d6-4c9e-b2f1-633215921892"/*Point*/,
+      "SectionId": "1b80b1fa-e5a1-43e2-9888-02e7e335872b",
       "Position": {
         "X": 458.45624,
         "Y": 1114.3567
@@ -556,6 +634,7 @@
     },
     {
       "ChildId": "f3f98f58-e3dd-4bc5-a494-216a1cacac58"/*LoadObj*/,
+      "SectionId": "f699b0e3-cd55-44f7-b9cd-4ac4d7bbac4b",
       "Position": {
         "X": 328.53546,
         "Y": 2309.5344
@@ -563,6 +642,7 @@
     },
     {
       "ChildId": "f43ad31a-b1b8-45dd-a5f5-27157dbdef9a"/*Final Output*/,
+      "SectionId": "2e79bf70-5483-4528-9606-faed34443c98",
       "Comment": "Select and pin this op to your Output window.\nPlease reset the view and enable gizmos (the grid icon).",
       "Position": {
         "X": 1089.9711,
@@ -571,6 +651,7 @@
     },
     {
       "ChildId": "f98f612b-dd33-47fe-bbc7-3d3125ed1757"/*Execute*/,
+      "SectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Position": {
         "X": 1724.2942,
         "Y": 333.45605
@@ -578,6 +659,7 @@
     },
     {
       "ChildId": "fcdb170c-a995-4f6b-8a20-8778cdaa0c17"/*PointsOnMesh*/,
+      "SectionId": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Position": {
         "X": 866.50714,
         "Y": 345.75592
@@ -593,10 +675,11 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "1b80b1fa-e5a1-43e2-9888-02e7e335872b",
       "Title": "Try to select both operators.\nIf you enabled gizmos, you should\nbe able to move them around in the \noutput window.",
+      "ParentSectionId": "82fc553f-f73c-4f0b-b9e9-31f37071105b",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -687,6 +770,7 @@
     {
       "Id": "8cac2d3a-4dce-47a3-ad36-f337cf28bf6d",
       "Title": "A bunch of different point sets....",
+      "ParentSectionId": "3ccc7298-cefe-4783-b4b6-37e6aab50da0",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -705,6 +789,7 @@
     {
       "Id": "9b52b011-daa0-4076-8096-cf101484704d",
       "Title": "A simple particle effect that emits single points at random positions with random colors.",
+      "ParentSectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -723,6 +808,7 @@
     {
       "Id": "de58254a-fd4a-447f-9bb3-45b40cbd92b4",
       "Title": "There are probably way simpler methods to achieve a similar effect,\nbut it illustrates some aspects of how point attributes can be applied.",
+      "ParentSectionId": "73a8e890-2542-406c-ad5f-767f4b099908",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

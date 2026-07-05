@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0db659a4-d0ba-4d23-acac-aea5ba5b57dc"/*_PointShaderTemplate*/,
   "Description": "A simple template for programming new Point compute shaders.",
   "InputUis": [
@@ -28,6 +30,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0805902c-adbd-4567-8aaa-4de17e0a4621"/*StructuredBufferWithViews*/,
+      "SectionId": "dc8affb1-d3ea-44eb-bc8d-12a8fd5ade4a",
       "Position": {
         "X": -79.294556,
         "Y": 922.47754
@@ -35,6 +38,7 @@
     },
     {
       "ChildId": "16cedc58-0728-434b-bd0e-8e52f2890c74"/*GetBufferComponents*/,
+      "SectionId": "dc8affb1-d3ea-44eb-bc8d-12a8fd5ade4a",
       "Position": {
         "X": 186.48685,
         "Y": 884.0222
@@ -42,6 +46,7 @@
     },
     {
       "ChildId": "36c0d869-f211-4ded-84db-53b92c47ad84"/*ComputeShader*/,
+      "SectionId": "25ec73d0-2770-4767-9216-a851924a9820",
       "Position": {
         "X": 5.2371216,
         "Y": 356.4458
@@ -49,6 +54,7 @@
     },
     {
       "ChildId": "4156296b-f982-46f4-89ee-c62c23125735"/*ComputeShaderStage*/,
+      "SectionId": "11995ccc-443d-447b-8c14-0101552651e5",
       "Position": {
         "X": 395.8524,
         "Y": 501.43842
@@ -56,6 +62,7 @@
     },
     {
       "ChildId": "43289c51-c4d3-4740-93ba-a14378364f23"/*CalcDispatchCount*/,
+      "SectionId": "11995ccc-443d-447b-8c14-0101552651e5",
       "Position": {
         "X": 214.33832,
         "Y": 503.18958
@@ -63,6 +70,7 @@
     },
     {
       "ChildId": "5f5d677d-9dbf-4419-be00-6e8f042f3f03"/*GetSRVProperties*/,
+      "SectionId": "356e48a1-bbe5-4eb6-b0c0-1b9be5788255",
       "Position": {
         "X": -299.86755,
         "Y": 763.95416
@@ -77,6 +85,7 @@
     },
     {
       "ChildId": "6caedf16-71b7-4e5c-8751-d59fe0cdd00f"/*Vector3Components*/,
+      "SectionId": "2b4e0d94-84f9-48d0-93c3-68c178f8ac14",
       "Position": {
         "X": -397.75333,
         "Y": 540.2987
@@ -84,6 +93,7 @@
     },
     {
       "ChildId": "b8ca7814-ec01-43cd-b9f8-0d7d7794d0c7"/*GetBufferComponents*/,
+      "SectionId": "356e48a1-bbe5-4eb6-b0c0-1b9be5788255",
       "Position": {
         "X": -446.97894,
         "Y": 808.3369
@@ -91,6 +101,7 @@
     },
     {
       "ChildId": "bf02fb9e-e4c4-457b-8b57-57fb750010b4"/*FloatsToBuffer*/,
+      "SectionId": "2b4e0d94-84f9-48d0-93c3-68c178f8ac14",
       "Position": {
         "X": -229.5161,
         "Y": 532.2649
@@ -106,7 +117,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "11995ccc-443d-447b-8c14-0101552651e5",
       "Title": "Setup the compute shader and calculate\nthe number of dispatches ThreadGroups\nand buffer length.",

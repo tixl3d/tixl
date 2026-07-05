@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dda268e8-fed6-4137-b21d-56ed907e3a51"/*StairCombineSDF*/,
   "Inputs": [
     {

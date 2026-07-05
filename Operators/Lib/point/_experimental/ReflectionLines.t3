@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b5515341-24ef-48ff-b832-d40e8189c6a4"/*ReflectionLines*/,
   "Inputs": [
     {
@@ -32,7 +34,7 @@
   ],
   "Children": [
     {
-      "Id": "15a7106d-5b42-4c75-95c1-d6598d783ce5"/*AddInts*/,
+      "Id": "15a7106d-5b42-4c75-95c1-d6598d783ce5"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d31a8463-0699-46d7-8e96-9abc6adb997d"/*_AdjustFeedbackImage*/,
   "Inputs": [
     {

@@ -1,7 +1,7 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
-  "Id": "b4288f74-7997-40f4-bc4c-2833bf3797de"/*VideoClip*/,
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
+  "Id": "b4288f74-7997-40f4-bc4c-2833bf3797de"/*_VideoClipObsolete*/,
   "Inputs": [
     {
       "Id": "69c0c1fd-ca53-4943-9e26-6c78d79555be"/*Loop*/,

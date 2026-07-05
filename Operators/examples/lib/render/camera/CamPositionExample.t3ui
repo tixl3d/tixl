@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5fb11919-0eef-4cee-bddf-bf30e0a98ad9"/*CamPositionExample*/,
   "Description": "A visually pleasing example of how to use [CamPosition] to emit particles in front of an arbitrary camera.",
   "SymbolTags": "6",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "099a644e-b04a-4a40-898e-7f461a96940b"/*DrawLines*/,
+      "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Comment": "And yes, this is a very ugly trick: to fade the cells out, we just draw 100 cells on top of each other.\n\nThis is not a very performant way to do this.",
       "Position": {
         "X": 2293.9744,
@@ -28,6 +31,7 @@
     },
     {
       "ChildId": "13a453ea-ad12-4a01-86a4-7aee5fdd7def"/*RepeatAtPoints*/,
+      "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Position": {
         "X": 2143.9744,
         "Y": 555.3747
@@ -35,6 +39,7 @@
     },
     {
       "ChildId": "15ee3cd1-16a5-40e5-8012-299be8216c19"/*ScaleVector3*/,
+      "SectionId": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Position": {
         "X": 211.30313,
         "Y": 345.80145
@@ -57,6 +62,7 @@
     },
     {
       "ChildId": "1e366d81-2670-4e38-990a-6a18b6b5b865"/*RadialPoints*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.55,
         "Y": 991.95105
@@ -72,6 +78,7 @@
     },
     {
       "ChildId": "22381b76-cbd6-405a-852d-71dd1910d846"/*ListToBuffer*/,
+      "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Position": {
         "X": 1843.9744,
         "Y": 555.3747
@@ -79,6 +86,7 @@
     },
     {
       "ChildId": "25e8b622-b41d-4573-9d0c-b093850c7c45"/*_Time_old*/,
+      "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Comment": "We use the time to spin the emit points into a twirl.",
       "Position": {
         "X": 678.4601,
@@ -87,6 +95,7 @@
     },
     {
       "ChildId": "268bfcf1-8fe5-4b43-982d-ad5e66525301"/*RoundVec3*/,
+      "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Comment": "To get the center position of the active cell, we first have to floor...",
       "Position": {
         "X": 1393.9744,
@@ -103,6 +112,7 @@
     },
     {
       "ChildId": "2f0ee70b-bb1a-44a9-a4ae-c85e9de9826a"/*AddVec3*/,
+      "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Comment": "..then we have to add half a cell width.",
       "Position": {
         "X": 1543.9744,
@@ -111,6 +121,7 @@
     },
     {
       "ChildId": "3b813218-2ea1-4ac1-adb1-4825bcbf9710"/*_GridPoints_Old*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1843.55,
         "Y": 855.95105
@@ -118,6 +129,7 @@
     },
     {
       "ChildId": "4fe32b56-8bbb-4b57-9008-d35bdc72b3f4"/*AddVec3*/,
+      "SectionId": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Position": {
         "X": 361.30313,
         "Y": 302.80145
@@ -132,6 +144,7 @@
     },
     {
       "ChildId": "6c7666b1-b54a-40e3-ae05-01832949630b"/*GridSize*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1644.27,
         "Y": 736.9361
@@ -139,6 +152,7 @@
     },
     {
       "ChildId": "735dddfb-f47b-46e2-802e-f4064190f844"/*RepeatAtPoints*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.55,
         "Y": 855.95105
@@ -160,6 +174,7 @@
     },
     {
       "ChildId": "85884c6f-aa39-4de3-88ed-eec96f028a83"/*DrawLines*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2143.55,
         "Y": 967.95105
@@ -174,6 +189,7 @@
     },
     {
       "ChildId": "8c1887bd-56ce-4323-80f1-cef0d0c1f0b0"/*RepeatAtPoints*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.55,
         "Y": 729.951
@@ -181,6 +197,7 @@
     },
     {
       "ChildId": "8d7bb45a-a706-440a-b463-01c58bef5ee2"/*CommonPointSets*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.9744,
         "Y": 837.3747
@@ -204,6 +221,7 @@
     },
     {
       "ChildId": "9d4c0032-4ef7-4ee5-95d3-443733b00887"/*Point*/,
+      "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Comment": "Create a point at that center position.",
       "Position": {
         "X": 1693.9744,
@@ -212,6 +230,7 @@
     },
     {
       "ChildId": "a188d189-70dc-4f8e-9803-a645a2610f66"/*DrawLines*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2143.55,
         "Y": 855.95105
@@ -226,6 +245,7 @@
     },
     {
       "ChildId": "aa93f70f-6061-4bd5-85f4-16910e326004"/*DrawBillboards*/,
+      "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Position": {
         "X": 1128.4601,
         "Y": 111.223145
@@ -233,6 +253,7 @@
     },
     {
       "ChildId": "ac18e228-fa7b-42d9-9481-7cba9e62e576"/*PointTrailFast*/,
+      "SectionId": "2a6c1856-7f44-4249-aa32-4d76e65d7399",
       "Position": {
         "X": 1993.9744,
         "Y": 555.3747
@@ -240,6 +261,7 @@
     },
     {
       "ChildId": "b006ee19-bce7-4412-aa68-2d9e520e828a"/*DrawLines*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2143.55,
         "Y": 729.951
@@ -247,6 +269,7 @@
     },
     {
       "ChildId": "b0e4eaa3-6071-4bb4-9117-78a41fa16688"/*DrawLines*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2143.55,
         "Y": 911.95105
@@ -254,6 +277,7 @@
     },
     {
       "ChildId": "b15707dc-7227-4026-9656-5895ca66fce6"/*_GridPoints_Old*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1843.55,
         "Y": 729.951
@@ -261,6 +285,7 @@
     },
     {
       "ChildId": "b7539ffa-5826-4883-af1a-2b11b4dda080"/*RadialPoints*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1993.55,
         "Y": 935.95105
@@ -268,6 +293,7 @@
     },
     {
       "ChildId": "ca237d4f-f833-488f-892c-f46b648241e3"/*PerlinNoise3*/,
+      "SectionId": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Position": {
         "X": 361.30313,
         "Y": 421.80145
@@ -282,6 +308,7 @@
     },
     {
       "ChildId": "cdf3c961-0c31-415d-ab3f-946fe22ea125"/*Grid*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 2293.55,
         "Y": 729.951
@@ -289,6 +316,7 @@
     },
     {
       "ChildId": "d38ad4e6-2fd4-4de4-9006-86aafc10bb8f"/*AddVec3*/,
+      "SectionId": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Position": {
         "X": 511.30313,
         "Y": 302.80145
@@ -296,6 +324,7 @@
     },
     {
       "ChildId": "d6966486-fd1c-4347-a580-5d46da24dbf9"/*ParticleSystem*/,
+      "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Comment": "We set the w-attribute to the particle age so it can then be used by [DrawBillboards] for coloring the points.",
       "Position": {
         "X": 978.4601,
@@ -312,6 +341,7 @@
     },
     {
       "ChildId": "e2178966-b0db-4095-ba6f-431439c38095"/*CommonPointSets*/,
+      "SectionId": "3769fc78-7a43-41ad-a1bb-e3bbfae7bc72",
       "Position": {
         "X": 1843.55,
         "Y": 812.95105
@@ -333,6 +363,7 @@
     },
     {
       "ChildId": "f29ca9cb-6fa8-419c-9de3-50f4dcd55a3c"/*TurbulenceForce*/,
+      "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Comment": "We add a little bit of noise to make things more interesting.",
       "Position": {
         "X": 828.4601,
@@ -348,6 +379,7 @@
     },
     {
       "ChildId": "fdf61255-1945-4d60-b3ed-6e547adc9c77"/*RadialPoints*/,
+      "SectionId": "4a90a060-5873-4412-8b0d-3e4f1d18c8bb",
       "Comment": "Disable line mode and adjust orientation of circle and its points so that each point's z-axis is pointing outwards.",
       "Position": {
         "X": 828.4601,
@@ -364,7 +396,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "1ae65319-3191-4a09-8496-d0da1886214a",
       "Title": "Take the camera position and move it slightly\naway along the view direction. Then add some Perlin noise.",

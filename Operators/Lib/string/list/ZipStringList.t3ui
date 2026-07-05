@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "04d557f8-3cc7-471f-8f2f-39090fec63bb"/*ZipStringList*/,
   "Description": "Zip two lists of strings, if the list sizes are differents, additional values of the longest are ignored",
   "InputUis": [

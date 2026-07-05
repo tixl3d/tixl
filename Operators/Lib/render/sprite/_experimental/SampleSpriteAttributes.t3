@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4670ff79-f630-478c-8f3f-513e1f2b5913"/*SampleSpriteAttributes*/,
   "Inputs": [
     {
@@ -170,7 +172,7 @@
       "Outputs": []
     },
     {
-      "Id": "4b304c91-83f7-4d6e-9cb1-042d1ea40863"/*TransformsConstBuffer*/,
+      "Id": "4b304c91-83f7-4d6e-9cb1-042d1ea40863"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "318072b7-9d7b-4ad3-b163-484c3a987895"/*MultiplyInts*/,
   "Inputs": [
     {

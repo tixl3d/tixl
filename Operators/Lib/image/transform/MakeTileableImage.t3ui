@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1e29f81b-0c05-4784-b3ac-c475ce510159"/*MakeTileableImage*/,
   "Description": "Makes an incoming image tileable based on linear edge Falloff.\n\nThis can be used to repeat an imported or generated texture infinitely without any obviously visible borders.\n\nAlso see [MakeTileableImageAdvanced] for a version with more options.",
   "SymbolTags": "8",
@@ -48,6 +50,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "071cc25c-fdc7-447b-b1cb-a55a385569d0"/*TransformImage*/,
+      "SectionId": "f5a92c09-38bf-4b36-9b87-4bd4cca8e2d4",
       "Comment": "Now you can spot the vertical seam.\nIt's because we're shifting the texture on the X axis. And the texture wrapping mode is set to Wrap. \n",
       "Position": {
         "X": -78.65759,
@@ -56,6 +59,7 @@
     },
     {
       "ChildId": "2da10875-0de5-488f-b293-bf15675e205b"/*LinearGradient*/,
+      "SectionId": "f5a92c09-38bf-4b36-9b87-4bd4cca8e2d4",
       "Position": {
         "X": -58.10704,
         "Y": -169.98846
@@ -63,6 +67,7 @@
     },
     {
       "ChildId": "5b0b07e7-d749-48fd-8937-f4851eeb3870"/*BlendWithMask*/,
+      "SectionId": "24abb8f1-ca8c-400b-aad5-b6073b2942fc",
       "Comment": "Now this texture can be repeated to infinity",
       "Position": {
         "X": -39.93097,
@@ -79,6 +84,7 @@
     },
     {
       "ChildId": "829e2974-8da8-4067-a7e3-f2fdf07c3238"/*BlendWithMask*/,
+      "SectionId": "f5a92c09-38bf-4b36-9b87-4bd4cca8e2d4",
       "Comment": "We're blending in the first texture with the mask to hide the seam.",
       "Position": {
         "X": 195.14307,
@@ -87,6 +93,7 @@
     },
     {
       "ChildId": "835e9c38-d08b-4d97-a9f7-28edfb84285d"/*LinearGradient*/,
+      "SectionId": "24abb8f1-ca8c-400b-aad5-b6073b2942fc",
       "Position": {
         "X": -255.33267,
         "Y": 988.5493
@@ -101,6 +108,7 @@
     },
     {
       "ChildId": "b20adcd4-ed92-47bc-b8c1-4abf566fbc64"/*TransformImage*/,
+      "SectionId": "24abb8f1-ca8c-400b-aad5-b6073b2942fc",
       "Comment": "It's time to take care of the horizontal seam",
       "Position": {
         "X": -263.48935,
@@ -139,7 +147,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "24abb8f1-ca8c-400b-aad5-b6073b2942fc",
       "Title": "Only Horizontal",

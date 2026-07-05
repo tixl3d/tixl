@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "68e2031d-20ac-4a2e-a407-fc2cbd76aad2"/*ApplyCamTransform*/,
   "Inputs": [
     {

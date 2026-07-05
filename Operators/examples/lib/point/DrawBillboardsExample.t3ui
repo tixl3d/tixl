@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "93292762-bc39-4b66-ace0-583f461abf76"/*DrawBillboardsExample*/,
   "Description": "Illustrates different applications for DrawBillboards.\nIt also shows how to [CollectSpawnPoints] to drive simulated animations.",
   "InputUis": [],

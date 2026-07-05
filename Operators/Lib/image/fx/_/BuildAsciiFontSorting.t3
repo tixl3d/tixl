@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b536f791-ae9a-45a7-a153-e2f36a65cfb3"/*BuildAsciiFontSorting*/,
   "Inputs": [
     {

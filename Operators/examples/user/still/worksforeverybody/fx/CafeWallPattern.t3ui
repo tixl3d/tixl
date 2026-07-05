@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6854e04f-8b60-41b2-a369-ca0b715c4df3"/*CafeWallPattern*/,
   "Description": "A simple shader that creates a Cafe Wall optical illusion pattern.",
   "InputUis": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3f7f8975-a7bb-47e6-96f7-061deb418e18"/*_WFEGameUi*/,
   "Description": "Renders a visual representation for the timing game",
   "InputUis": [
@@ -40,7 +42,7 @@
       }
     },
     {
-      "ChildId": "12a3a412-6340-402c-b26a-8bacc6785e86"/*AddInts*/,
+      "ChildId": "12a3a412-6340-402c-b26a-8bacc6785e86"/*AddInt*/,
       "Position": {
         "X": 532.9296,
         "Y": 363.7437

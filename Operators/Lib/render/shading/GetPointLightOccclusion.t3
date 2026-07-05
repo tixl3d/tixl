@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "574d636f-64e6-4f07-ac17-49754d2c3599"/*GetPointLightOccclusion*/,
   "Inputs": [
     {
@@ -113,12 +115,12 @@
       "Outputs": []
     },
     {
-      "Id": "6d395410-129d-4cd5-8bd2-38ba8cb6b8a1"/*TransformsConstBuffer*/,
+      "Id": "6d395410-129d-4cd5-8bd2-38ba8cb6b8a1"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": [
         {
-          "Id": "7a76d147-4b8e-48cf-aa3e-aac3aa90e888"/*TransformsConstBuffer*/,
+          "Id": "7a76d147-4b8e-48cf-aa3e-aac3aa90e888"/*_TransformsCBuffer*/,
           "DirtyFlagTrigger": "Always"
         }
       ]

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b0981921-8e3d-4010-8b67-d7dcecca7758"/*NumberLinePoints*/,
   "Description": "Generates a buffer with line points to render multidigit integer numbers.",
   "InputUis": [
@@ -80,6 +82,7 @@
     },
     {
       "ChildId": "159b2afe-4bca-4c65-88fc-da90e191b579"/*LineTextPoints*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -894.175,
         "Y": 2157.7686
@@ -115,6 +118,7 @@
     },
     {
       "ChildId": "395b515e-0642-469e-b1e3-0febaa9a88d4"/*MultiplyInts*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -745.71436,
         "Y": 1958.2543
@@ -129,6 +133,7 @@
     },
     {
       "ChildId": "3f9fbfac-bc9c-4c08-87b0-3f6ed0556009"/*GetBufferComponents*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -614.1747,
         "Y": 2192.7686
@@ -157,6 +162,7 @@
     },
     {
       "ChildId": "53129c86-d5a9-4445-8310-81bb61366e3f"/*IntToFloat*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -605.7143,
         "Y": 1923.2543
@@ -178,6 +184,7 @@
     },
     {
       "ChildId": "6a6052ad-01aa-47af-9028-a0352833813f"/*CustomPointShader*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -465.7143,
         "Y": 1853.2543
@@ -185,6 +192,7 @@
     },
     {
       "ChildId": "7587fc09-f433-4ba7-a2ec-25a61617cd88"/*ListToBuffer*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -754.17487,
         "Y": 2192.7686
@@ -192,6 +200,7 @@
     },
     {
       "ChildId": "7a5757e1-bb44-4e27-8289-6574cd710913"/*Time*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -801.34143,
         "Y": 2068.681
@@ -213,6 +222,7 @@
     },
     {
       "ChildId": "a25a49ef-b63d-4ccd-935f-5adf336427d9"/*Text*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Style": "Resizable",
       "Size": {
         "X": 120.0,
@@ -225,6 +235,7 @@
     },
     {
       "ChildId": "a367ec73-ed3b-46d8-b2c4-9b02b38d57f7"/*IntToFloat*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -605.7143,
         "Y": 1888.2543
@@ -232,6 +243,7 @@
     },
     {
       "ChildId": "a42b7ff1-09af-453a-b337-333ca617d1b5"/*DigitCharLinePoints*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -754.175,
         "Y": 2157.7686
@@ -253,6 +265,7 @@
     },
     {
       "ChildId": "c894f220-2f46-400f-acc7-b4ca930997a0"/*StringLength*/,
+      "SectionId": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Position": {
         "X": -745.71436,
         "Y": 1923.2543
@@ -287,7 +300,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "ca464ca8-4e1b-4553-8d3d-b0b272afd276",
       "Title": "After this, the point buffer should have normalized point size of each digit",

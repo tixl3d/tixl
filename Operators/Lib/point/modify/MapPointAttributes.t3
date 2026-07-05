@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "191e5057-4da4-447e-b7cf-e9e0ed8c5dd8"/*MapPointAttributes*/,
   "Inputs": [
     {
@@ -11,21 +13,15 @@
             {
               "Time": -0.0118,
               "Value": 1.0,
-              "InType": "Linear",
-              "OutType": "Linear",
-              "InEditMode": "Linear",
-              "OutEditMode": "Linear",
-              "InTangentAngle": 0.0,
+              "InInterpolation": "Linear",
+              "OutInterpolation": "Linear",
               "OutTangentAngle": 3.141592653589793
             },
             {
               "Time": 1.0,
               "Value": 1.0,
-              "InType": "Linear",
-              "OutType": "Linear",
-              "InEditMode": "Linear",
-              "OutEditMode": "Linear",
-              "InTangentAngle": 0.0,
+              "InInterpolation": "Linear",
+              "OutInterpolation": "Linear",
               "OutTangentAngle": -3.141592653589793
             }
           ]
@@ -228,21 +224,15 @@
                 {
                   "Time": 0.0,
                   "Value": 0.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 1.0,
                   "Value": 1.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": -3.141592653589793
                 }
               ]

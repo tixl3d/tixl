@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e07550cf-033a-443d-b6f3-73eb71c72d9d"/*SpreadLayout*/,
   "Description": "Spatially distributes the incoming graph elements.",
   "SymbolTags": "8",

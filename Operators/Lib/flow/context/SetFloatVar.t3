@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2a0c932a-eb81-4a7d-aeac-836a23b0b789"/*SetFloatVar*/,
   "Inputs": [
     {

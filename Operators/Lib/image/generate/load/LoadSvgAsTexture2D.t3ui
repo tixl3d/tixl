@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d05739d3-f89d-488d-85d0-c0d115265b75"/*LoadSvgAsTexture2D*/,
   "Description": "Loads a SVG file as a Texture2D.\nNote: This is a rasterization of a SVG (Scalable Vector Graphics).\nYou shall not animate its parameters. \n",
   "SymbolTags": "1",

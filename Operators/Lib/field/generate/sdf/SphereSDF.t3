@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fc2a33fc-d957-4113-8096-92d4dcbe14b5"/*SphereSDF*/,
   "Inputs": [
     {

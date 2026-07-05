@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cb2cdd1d-811a-4a30-a5bc-289f36c31028"/*MidiNoteOutputExample*/,
   "Description": "An example for the new MidiOutputNodes creating generative music",
   "InputUis": [],
@@ -47,6 +49,7 @@
     },
     {
       "ChildId": "75d47ec9-5a71-4b01-a2fe-7c986ed68128"/*MidiPitchbendOutput*/,
+      "SectionId": "ce6b9168-d516-4ce5-a51a-2fa667cffa76",
       "Position": {
         "X": 844.734,
         "Y": 152.79486
@@ -82,6 +85,7 @@
     },
     {
       "ChildId": "9b4ee829-04a7-40e4-86e0-bc5e530a7646"/*MidiControlOutput*/,
+      "SectionId": "ce6b9168-d516-4ce5-a51a-2fa667cffa76",
       "Position": {
         "X": 844.734,
         "Y": 83.79486
@@ -96,6 +100,7 @@
     },
     {
       "ChildId": "a8a4da22-2b04-4b69-9884-7f0242c11b96"/*MidiNoteOutput*/,
+      "SectionId": "ce6b9168-d516-4ce5-a51a-2fa667cffa76",
       "Position": {
         "X": 844.734,
         "Y": 1.7948608
@@ -153,7 +158,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "ce6b9168-d516-4ce5-a51a-2fa667cffa76",
       "Title": "Be sure to set your output device!",

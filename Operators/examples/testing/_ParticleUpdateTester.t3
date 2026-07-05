@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9b550333-1caa-43d4-9e6f-245c55c2d24a"/*_ParticleUpdateTester*/,
   "Inputs": [
     {
@@ -453,21 +455,15 @@
           {
             "Time": 0.0,
             "Value": 1.0,
-            "InType": "Constant",
-            "OutType": "Constant",
-            "InEditMode": "Constant",
-            "OutEditMode": "Constant",
-            "InTangentAngle": 0.0,
+            "InInterpolation": "Constant",
+            "OutInterpolation": "Constant",
             "OutTangentAngle": 3.141592653589793
           },
           {
             "Time": 0.1972,
             "Value": 0.0,
-            "InType": "Constant",
-            "OutType": "Constant",
-            "InEditMode": "Constant",
-            "OutEditMode": "Constant",
-            "InTangentAngle": 0.0,
+            "InInterpolation": "Constant",
+            "OutInterpolation": "Constant",
             "OutTangentAngle": -3.141592653589793
           }
         ]

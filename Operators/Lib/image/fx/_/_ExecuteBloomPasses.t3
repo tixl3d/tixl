@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9d42dbe7-34a5-4165-877d-6f9c1c675b60"/*_ExecuteBloomPasses*/,
   "Inputs": [
     {

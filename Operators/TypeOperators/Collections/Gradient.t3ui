@@ -1,54 +1,20 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
-  "Id": "c5c3232c-70f8-4d1d-847d-6b6b25f3d9d6"/*SampleGradient2*/,
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
+  "Id": "c5c3232c-70f8-4d1d-847d-6b6b25f3d9d6"/*Gradient*/,
   "Description": "Defines a gradient that can then be sampled into a color or used further by [GradientsToTexture] or other operators.\nLeft-clicking the Gradient in the graph- or in the parameters window adds a color sample.\nDragging a color sample to the lower border removes it.\n\nThe first output returns the sampled color.\nThe second output the gradient structure.\n\nRight-click in the parameter window gradient to adjust interpolation mode or save presets.",
   "InputUis": [
     {
-      "InputId": "0da9cbbe-09d3-4a5c-b1ec-189bf7055143"/*OverrideInterpolation*/,
-      "Position": {
-        "X": 197.0,
-        "Y": 448.0
-      }
-    },
-    {
-      "InputId": "3ad07564-e191-4d51-ad79-db9c673478eb"/*Interpolation*/,
-      "Position": {
-        "X": 197.0,
-        "Y": 373.0
-      },
-      "Description": "Defines how the color is interpolated between the different samples on the gradient"
-    },
-    {
-      "InputId": "b129b4d8-7c1b-47e4-b156-b24d6632b13a"/*Gradient*/,
+      "InputId": "b129b4d8-7c1b-47e4-b156-b24d6632b13a"/*GradientInput*/,
       "Position": {
         "X": 197.0,
         "Y": 373.0
       },
       "Description": "Defines the color gradient\n\nLeft-click adds a new color sample\nDragging the color sample down deletes it"
-    },
-    {
-      "InputId": "b945f9e1-c4ce-4e5b-8acf-0aee26318cb6"/*SamplePos*/,
-      "Relevancy": "Relevant",
-      "Position": {
-        "X": 197.0,
-        "Y": 328.0
-      },
-      "Description": "Defines which color is given out",
-      "Min": -100.0,
-      "Max": 100.0,
-      "Scale": 0.01
     }
   ],
   "SymbolChildUis": [],
   "OutputUis": [
-    {
-      "OutputId": "32bcc6f3-9100-46b5-b5ca-86b821c63adf"/*Color*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 0.0
-      }
-    },
     {
       "OutputId": "631db643-e8af-44c5-be36-2e7c4c818015"/*OutGradient*/,
       "Position": {

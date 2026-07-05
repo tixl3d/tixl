@@ -1,24 +1,27 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c0d57acb-29cc-489b-89b0-f016968f2f4c"/*SampleFloatFromDataClip*/,
   "Inputs": [
     {
-      "Id": "b69fbaf8-57f7-4b37-b23f-50e1aa0cd4d5"/*Clip*/
+      "Id": "10066199-4e20-4f04-af17-5afe359de431"/*DefaultValue*/,
+      "DefaultValue": 0.0
     },
     {
       "Id": "237ae57a-2aba-4a6f-9ed0-049635a1e04c"/*Channel*/,
       "DefaultValue": ""
     },
     {
-      "Id": "10066199-4e20-4f04-af17-5afe359de431"/*DefaultValue*/,
-      "DefaultValue": 0.0
+      "Id": "5c470e20-fe8e-461e-9333-05e82ff348f0"/*UseTimeOverride*/,
+      "DefaultValue": false
     },
     {
       "Id": "61b5ef56-4a32-4026-a0c0-0b0c7b8ee1b1"/*OverrideTime*/,
       "DefaultValue": 0.0
     },
     {
-      "Id": "5c470e20-fe8e-461e-9333-05e82ff348f0"/*UseTimeOverride*/,
-      "DefaultValue": false
+      "Id": "b69fbaf8-57f7-4b37-b23f-50e1aa0cd4d5"/*Clip*/,
+      "DefaultValue": null
     }
   ],
   "Children": [],

@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "face6050-9e32-4f6e-8095-280e2ccf70e5"/*I02e_ImageLevels*/,
   "Description": "Analyze: ImageLevels",
   "InputUis": [],
@@ -15,7 +15,6 @@
     },
     {
       "ChildId": "9557cb56-b6bf-4fe5-b20c-d8b081aa96b1"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -23,7 +22,7 @@
     },
     {
       "ChildId": "abb14834-2d8c-4f1d-ba67-82bd24f26349"/*LinearGradient*/,
-      "AnnotationId": "52144bbb-0581-4f49-bc4a-bee46d64b0bd",
+      "SectionId": "52144bbb-0581-4f49-bc4a-bee46d64b0bd",
       "Position": {
         "X": 1148.7217,
         "Y": 2128.621
@@ -31,7 +30,7 @@
     },
     {
       "ChildId": "b4f60768-5b54-44ff-ad26-3b1e9186b7da"/*ImageLevels*/,
-      "AnnotationId": "52144bbb-0581-4f49-bc4a-bee46d64b0bd",
+      "SectionId": "52144bbb-0581-4f49-bc4a-bee46d64b0bd",
       "Position": {
         "X": 1288.7217,
         "Y": 2128.621
@@ -62,7 +61,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "52144bbb-0581-4f49-bc4a-bee46d64b0bd",
       "Label": "Solution",
@@ -108,13 +107,5 @@
       "Description": "Increase the width to better see the curve and to match the example.",
       "Style": "CallToAction"
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

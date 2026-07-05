@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f0008b50-091d-4e9f-91eb-baa212acfa20"/*AudioClip*/,
   "Description": "A timeline audio clip as an operator. Drop it on the timeline and it plays through the audio engine while the playhead is inside its time range — with all the standard clip interactions (drag, trim, split, snap, delete).\n\nWith AutoPlay on (default) the clip plays on its own, no [AudioClipPlayer] needed. Turn AutoPlay off to let an [AudioClipPlayer] (wired or AutoCollect) drive it instead.",
   "SymbolTags": "64",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a8a0e6c4-1f49-4ed8-8d0b-e7aa6cdf8a87"/*StructuredBuffer*/,
   "Description": "Generates a 'barebone' structured buffer with a shader resource view.\n\nUsage is discouraged. Please consider using [StructuredBuffer2].",
   "InputUis": [

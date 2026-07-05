@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a2567844-3314-48de-bda7-7904b5546535"/*_multiImageFxSetup*/,
   "Description": "",
   "SymbolTags": "16",
@@ -209,7 +211,7 @@
       }
     },
     {
-      "ChildId": "e5cef408-7948-414b-8392-05a47d214a8d"/*TransformsConstBuffer*/,
+      "ChildId": "e5cef408-7948-414b-8392-05a47d214a8d"/*_TransformsCBuffer*/,
       "Position": {
         "X": 658.7712,
         "Y": 132.81525

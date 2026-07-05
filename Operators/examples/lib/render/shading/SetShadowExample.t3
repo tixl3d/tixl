@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1f73d45d-fdbf-4429-8e17-741285a050f5"/*SetShadowExample*/,
   "Inputs": [],
   "Children": [

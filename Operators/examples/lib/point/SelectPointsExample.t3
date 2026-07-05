@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2fcb6afc-2d82-47a5-a6dd-39c85348b8c4"/*SelectPointsExample*/,
   "Inputs": [],
   "Children": [

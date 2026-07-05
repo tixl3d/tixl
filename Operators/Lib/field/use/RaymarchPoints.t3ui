@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a914c462-b707-4240-b57b-ed0e24e80a94"/*RaymarchPoints*/,
   "Description": "Moves points along their Z-axis until they hit an SDF surface.\n\nThis can be used for visualizing raymarching or simlurate rays being reflected from an SDF surface.",
   "SymbolTags": "8",
@@ -120,7 +120,7 @@
       }
     },
     {
-      "ChildId": "57df33fe-49b1-4716-91f6-a45a389f9d6b"/*AddInts*/,
+      "ChildId": "57df33fe-49b1-4716-91f6-a45a389f9d6b"/*AddInt*/,
       "Position": {
         "X": 560.3209,
         "Y": 1536.26

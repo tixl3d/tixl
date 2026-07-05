@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f5158500-39e4-481e-aa4f-f7dbe8cbe0fa"/*SetBpm*/,
   "Description": "DANGER: Overriding the BPM rate will interfere with your playback and animation speed. \n\nOnly use this operator if you know what you're doing (e.g., in VJ-set context where the BPM rate is provided by an external source like MIDI or OSC)",
   "SymbolTags": "72",

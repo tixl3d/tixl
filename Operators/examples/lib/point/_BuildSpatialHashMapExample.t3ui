@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "69776b58-e05d-47c8-b19f-2f44f7b9c915"/*_BuildSpatialHashMapExample*/,
   "Description": "Illustrates how to embed the SpatialHashMap algorithm.",
   "InputUis": [],

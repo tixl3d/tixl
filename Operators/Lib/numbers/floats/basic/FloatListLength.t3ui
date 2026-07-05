@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "affe33d0-b86a-4327-aae7-880553b4b7dc"/*FloatListLength*/,
   "Description": "Needs a [FloatsToList] Operator connected.\nThe amount of [Value]s connected to this Operator is counted and sent out as an integer",
   "InputUis": [

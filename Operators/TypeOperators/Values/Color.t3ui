@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "70176d3c-825c-40b3-8121-a465735518fe"/*Color*/,
   "Description": "Generates a single color defined by Red / Green / Blue / Alpha (RGBA) values.\nCan be connected to any Operator with a color input.\n\nMore versatile alternative: [SampleGradient]\n\nVaguely similar ops [Vector4], [RgbaToColor]",
   "InputUis": [

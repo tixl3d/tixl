@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "780edb20-f83f-494c-ab17-7015e2311250"/*RepeatAtPoints*/,
   "Inputs": [
     {
@@ -52,7 +54,7 @@
   ],
   "Children": [
     {
-      "Id": "08ce280a-b359-4cb3-8aa5-fdfc48d36811"/*AddInts*/,
+      "Id": "08ce280a-b359-4cb3-8aa5-fdfc48d36811"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [],
       "Outputs": []
@@ -104,7 +106,7 @@
       "Outputs": []
     },
     {
-      "Id": "6b3b966d-957a-408e-98f3-dc7d9743d78e"/*AddInts*/,
+      "Id": "6b3b966d-957a-408e-98f3-dc7d9743d78e"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

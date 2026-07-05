@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0ed2bee3-641f-4b08-8685-df1506e9af3c"/*SetMaterial*/,
   "Description": "Sets the Physically Based Rendering (PBR) Material for the current RenderTarget which is then used by [DrawMesh] and other PBR rendering operators. Each of the material properties can be controlled by a color and/or by connecting a texture input by using a [LoadImage] operator.\n\nPlease note that the color parameter is multiplied to the texture: so for an emissive texture to be visible, you have to first set the Emissive Color to white (or 1,1,1).\n\nThe base (albedo) color can also be adjusted by the Draw operators.\nPlease use [CombineMaterialChannels] to combine Roughness, Metallic and Occlusion textures into a single texture that can be connected to the .RoughnessMetallicOcclusion parameter.\nFor the roughness rendering the draw operators need an IBL texture set by [SetEnvironment]. If [SetEnvironment] is not used there is still a predefined default IBL.\n\n\nAlso see: [HowToDrawThings]\n\nIf no normalmap is available [NormalMap] can be used to generate one.",
   "SymbolTags": "1",

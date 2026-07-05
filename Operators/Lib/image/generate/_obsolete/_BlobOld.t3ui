@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c8590f8f-cca1-434a-a880-67bb91920e1a"/*_BlobOld*/,
   "Description": "Generates rectangles, circles, blobs, vignettes and other things.\n\nThis is a legacy operator; consider using the updated [Blob] or [RoundedRect] instead.",
   "InputUis": [

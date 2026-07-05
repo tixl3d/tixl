@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "468cafa2-d5ef-46f3-b0b7-626cdb0322cf"/*B01c_DragFromStack*/,
   "Inputs": [],
   "Children": [

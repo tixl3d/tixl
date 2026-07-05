@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c7b8359e-6b36-4ae0-a6b4-4ac0d0306966"/*MunchingSquares2*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0c7a44a2-93ef-4e7e-8a82-a2ff4d73ac2a"/*NormalMapExample*/,
   "Inputs": [],
   "Children": [

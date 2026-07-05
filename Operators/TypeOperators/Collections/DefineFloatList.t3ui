@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7ba0451c-9b8d-46a7-bfac-9dcb15e00023"/*DefineFloatList*/,
   "Description": "Creates and initializes a list of float values",
   "InputUis": [

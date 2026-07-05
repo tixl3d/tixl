@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5fb3dafe-aed4-4fff-a5b9-c144ea023d35"/*SphereMesh*/,
   "Inputs": [
     {

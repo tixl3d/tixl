@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c6014c28-c6ab-4b4e-b6bf-0cee92fb4b40"/*ConvertEquirectangle*/,
   "Inputs": [
     {

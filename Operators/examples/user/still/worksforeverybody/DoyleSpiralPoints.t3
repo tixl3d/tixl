@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4895a804-84df-4642-a2d3-db34a268d887"/*DoyleSpiralPoints*/,
   "Inputs": [
     {
@@ -121,60 +123,47 @@
                 {
                   "Time": -0.0504,
                   "Value": 0.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Horizontal",
-                  "OutEditMode": "Horizontal",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Horizontal",
+                  "OutInterpolation": "Horizontal",
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 0.3572,
                   "Value": 0.06391612440347672,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Tangent",
-                  "OutEditMode": "Tangent",
+                  "InInterpolation": "Tangent",
+                  "OutInterpolation": "Tangent",
                   "InTangentAngle": 0.30309566855430603,
                   "OutTangentAngle": 3.444688322144099
                 },
                 {
                   "Time": 0.5105,
                   "Value": 0.14576341211795807,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Tangent",
-                  "OutEditMode": "Tangent",
+                  "InInterpolation": "Tangent",
+                  "OutInterpolation": "Tangent",
                   "InTangentAngle": 0.6485862731933594,
                   "OutTangentAngle": 3.7901789267831525
                 },
                 {
                   "Time": 0.7067,
                   "Value": 0.34422722458839417,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "InTangentAngle": 0.9224690015920254,
                   "OutTangentAngle": 4.064061655181819
                 },
                 {
                   "Time": 0.8437,
                   "Value": 0.5855916738510132,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Tangent",
-                  "OutEditMode": "Tangent",
+                  "InInterpolation": "Tangent",
+                  "OutInterpolation": "Tangent",
                   "InTangentAngle": 1.079628348350525,
                   "OutTangentAngle": 4.221221001940318
                 },
                 {
                   "Time": 1.0,
                   "Value": 1.0,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 1.2101295949351165,
                   "OutTangentAngle": -1.9314630586546766
                 }

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "914fb032-d7eb-414b-9e09-2bdd7049e049"/*PlayVideo*/,
   "Inputs": [
     {
@@ -8,6 +10,10 @@
     {
       "Id": "21b5671b-862f-4cea-a355-fa019996c936"/*Loop*/,
       "DefaultValue": true
+    },
+    {
+      "Id": "28c8b698-1897-4f8c-b9e7-85a983dfa654"/*OptimizeFor*/,
+      "DefaultValue": 0
     },
     {
       "Id": "2fecfbb4-f7d9-4c53-95ae-b64ccbb6fbad"/*Volume*/,

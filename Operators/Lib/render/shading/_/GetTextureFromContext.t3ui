@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dee8f2de-5cbd-4ca7-9449-d6c74197546e"/*GetTextureFromContext*/,
   "Description": "Access a texture set by [SetContextTexture]",
   "SymbolTags": "16",

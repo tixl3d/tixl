@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "012119bf-aeec-4134-b7aa-6bc7f9816800"/*SoundInputExample*/,
   "Description": "Shows how [DetectBpm] is used to do a bpm sweep over a range of bpm rates and visualize the energy differences for all rates in a plot chart.\n",
   "InputUis": [],
@@ -256,7 +258,7 @@
       }
     },
     {
-      "ChildId": "c37adc3d-5615-41dd-a6fe-336bc8e67531"/*AddInts*/,
+      "ChildId": "c37adc3d-5615-41dd-a6fe-336bc8e67531"/*AddInt*/,
       "Position": {
         "X": -588.4408,
         "Y": 937.57874
@@ -298,7 +300,7 @@
       }
     },
     {
-      "ChildId": "f67e88cf-47fe-48de-bef8-0c06cf2a8f37"/*IntDiv*/,
+      "ChildId": "f67e88cf-47fe-48de-bef8-0c06cf2a8f37"/*DivInt*/,
       "Position": {
         "X": -678.34985,
         "Y": 836.3408

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "62f7408a-a34a-459a-bd7d-bb349196df9b"/*HasIntChanged*/,
   "Description": "Checks if the change of the incoming integer exceeded the given threshold.",
   "SymbolTags": "8",

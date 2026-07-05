@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e92bdb18-4a42-4a92-aacc-45765e5862bf"/*SpringVec3Example*/,
   "Inputs": [],
   "Children": [
@@ -544,15 +546,33 @@
       "TargetSlotId": "97429e1f-3f30-4789-89a6-8e930e356ee6"
     }
   ],
-  "PlaybackSettings": {
+  "ProjectSettings": {
     "Enabled": true,
-    "Bpm": 60.0,
-    "AudioSource": 1,
-    "Syncing": 1,
-    "AudioDecayFactor": 0.9,
-    "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "",
-    "EnableAudioBeatLocking": "False",
-    "BeatLockAudioOffsetSec": "0"
+    "Playback": {
+      "Bpm": 60.0,
+      "AudioSource": 1,
+      "Syncing": 1,
+      "AudioDecayFactor": 0.9,
+      "AudioGainFactor": 1.0,
+      "AudioInputDeviceName": "",
+      "EnableAudioBeatLocking": "False",
+      "BeatLockAudioOffsetSec": "0"
+    },
+    "Audio": {
+      "SoundtrackMute": false,
+      "SoundtrackVolume": 0.5,
+      "OperatorMute": false,
+      "OperatorVolume": 1.0,
+      "AudioResyncThreshold": 0.04
+    },
+    "Export": {
+      "DefaultWindowMode": 1,
+      "EnablePlaybackControlWithKeyboard": true
+    },
+    "Proxy": {
+      "Format": 1,
+      "Resolution": 0.5,
+      "UseForPreview": true
+    }
   }
 }

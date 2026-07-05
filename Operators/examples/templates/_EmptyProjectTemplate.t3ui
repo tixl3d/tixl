@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fe8aeb9b-61ac-4a0e-97ee-4833233ac9d1"/*_EmptyProjectTemplate*/,
   "Description": "",
   "InputUis": [],

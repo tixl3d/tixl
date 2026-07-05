@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "73d99108-f49a-48fb-aa5d-707c00abb1c2"/*RepetitionPoints*/,
   "Description": "Generate a list of points by repeating a transform operation.\nThis can be very useful in combination with [DrawMeshAtPoints].\n\nAlso, by driving the Offset parameter with an LFO, you can produce seamlessly animated endless scenes. This can be useful for VJ projects.",
   "SymbolTags": "72",
@@ -78,6 +80,5 @@
         "Y": 0.0
       }
     }
-  ],
-  "Links": []
+  ]
 }

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0e881c4d-c4ed-42c1-a2c9-d076b0489395"/*PointsToRGBList*/,
   "Description": "Converts a buffer of 3D points into a flat list of RGB float values (0-255).\n\nThis operator extracts the color (RGB) from each point in the input buffer and flattens it into a single list of floats, where each point contributes 3 float values (Red, Green, Blue). This can be useful for sending color data to systems that expect a linear list of values.\n\nAKA: rgb, color, points, list, obsolete",
   "InputUis": [

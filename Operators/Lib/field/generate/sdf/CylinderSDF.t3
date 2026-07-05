@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "67f21840-dc9a-4390-aa45-234ce81c8717"/*CylinderSDF*/,
   "Inputs": [
     {

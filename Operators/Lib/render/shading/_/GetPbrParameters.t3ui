@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ca4fe8c4-cf61-4196-84e4-d69dc8869a25"/*GetPbrParameters*/,
   "Description": "Fetches the current render setting buffers from the context. This includes things like materials.",
   "SymbolTags": "16",

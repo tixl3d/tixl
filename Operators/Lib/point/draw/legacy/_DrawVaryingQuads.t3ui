@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ffc0a7ed-fe61-4188-8db9-0b0f07c6b981"/*_DrawVaryingQuads*/,
   "Description": "Draws instances at Point-positions with the W-attribute driving properties like Color, Size and Offset; This can be especially useful in combination with [CollectSpawnPoints].\n\nNote: This operator has been deprecated. Please consider using [DrawBillboards].",
   "InputUis": [
@@ -249,7 +251,7 @@
       }
     },
     {
-      "ChildId": "7ac9b972-db80-4316-b445-eea9a6596569"/*TransformsConstBuffer*/,
+      "ChildId": "7ac9b972-db80-4316-b445-eea9a6596569"/*_TransformsCBuffer*/,
       "Position": {
         "X": 694.9881,
         "Y": 45.583923
@@ -407,6 +409,5 @@
         "Y": 109.5778
       }
     }
-  ],
-  "Links": []
+  ]
 }

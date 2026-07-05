@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c0045cbb-7eaf-438e-872e-9e0ba08040a4"/*_ExecuteSdfToColor_Old*/,
   "Description": "The internal implementation of [SDFToColor].\n\nYou will never need to use this directly.",
   "InputUis": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e3375df2-3475-4d76-970c-4c8fa3dcc941"/*M01c_Sine*/,
   "Inputs": [],
   "Children": [

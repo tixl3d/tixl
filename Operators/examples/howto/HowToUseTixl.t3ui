@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1ec749af-fe7d-4728-9855-d1fa3e879751"/*HowToUseTixl*/,
   "Description": "This interactive tutorial guides you through the user interface of TiXL.",
   "SymbolTags": "3",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "3ca68ae8-02bd-432b-94a4-be80b6eb5d1a"/*LoadImage*/,
+      "SectionId": "125f20a8-465e-4758-b8c0-7601c7dc0112",
       "Position": {
         "X": 20.162567,
         "Y": 269.22614
@@ -13,6 +16,7 @@
     },
     {
       "ChildId": "710e4b8a-f5c7-4d6c-82a7-df509ed708ce"/*AsciiRender*/,
+      "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 463.84412,
         "Y": 833.6876
@@ -20,6 +24,7 @@
     },
     {
       "ChildId": "73ef00c1-942d-4464-9390-b9632fef8468"/*DetectEdges*/,
+      "SectionId": "d26f5d4f-5727-4d0f-989b-9fcb19c037e6",
       "Comment": "You discovered a comment! \nIn many examples, we will use these to explain the purpose of certain operators in a graph or point out noteworthy parameter settings.",
       "Position": {
         "X": 272.81885,
@@ -28,6 +33,7 @@
     },
     {
       "ChildId": "8e521fb6-e59d-403c-80cc-9e9b38df0b23"/*Text*/,
+      "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 13.844116,
         "Y": 833.6876
@@ -35,6 +41,7 @@
     },
     {
       "ChildId": "b35105be-26e1-4847-bfb5-4686fb304d1b"/*RenderTarget*/,
+      "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 163.84412,
         "Y": 833.6876
@@ -42,6 +49,7 @@
     },
     {
       "ChildId": "cfcb9a91-54a9-4b04-a972-30fbb65f9ee2"/*Blur*/,
+      "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 313.84412,
         "Y": 833.6876
@@ -49,6 +57,7 @@
     },
     {
       "ChildId": "d7df48f3-9989-4b99-ad68-a266ed2b9760"/*Blob*/,
+      "SectionId": "54456a70-93a3-4455-b1e1-a2731d03de39",
       "Position": {
         "X": 544.6786,
         "Y": 505.31738
@@ -56,6 +65,7 @@
     },
     {
       "ChildId": "ebfeac4e-0baf-4d89-9572-311831b8e631"/*AnimValue*/,
+      "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 313.84412,
         "Y": 959.6876
@@ -63,6 +73,7 @@
     },
     {
       "ChildId": "f8b7be5b-bd28-40f3-9c30-880575a764f8"/*AnimVec2*/,
+      "SectionId": "14288e8d-d885-4a09-a83d-2849fea72054",
       "Position": {
         "X": 313.84412,
         "Y": 916.6876
@@ -78,10 +89,11 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "1058504f-053c-4b01-833c-4c5d8d5ea64a",
       "Title": "Creating new operators is easy:\n1. Select [DetectEdges] and...\n2. Press TAB on your keyboard.\n3. Type \"Color...\" and select \n [ColorGrade] by pressing return.",
+      "ParentSectionId": "474e3707-8497-44ea-890b-fc3f1f6b4448",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -100,6 +112,7 @@
     {
       "Id": "125f20a8-465e-4758-b8c0-7601c7dc0112",
       "Title": "This is an operator.\nIf you select it, you see its output \nin the Output-View.",
+      "ParentSectionId": "474e3707-8497-44ea-890b-fc3f1f6b4448",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -136,6 +149,7 @@
     {
       "Id": "1f963cbf-7a9d-4ffd-b881-a193e3ee1ce3",
       "Title": "4. Click on a color to open the color picker.\n5. Drag a color vertically to adjust transparency or brightness.",
+      "ParentSectionId": "54456a70-93a3-4455-b1e1-a2731d03de39",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -190,6 +204,7 @@
     {
       "Id": "86ddce6c-2d27-451c-acde-7edffdb45820",
       "Title": "1. Select the [Blob]...\n2. Notice how the Parameter Window now shows the parameters you adjust for the blob...\n",
+      "ParentSectionId": "54456a70-93a3-4455-b1e1-a2731d03de39",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -208,6 +223,7 @@
     {
       "Id": "a3cc2028-be91-472c-985d-cb6c707383c1",
       "Title": "Notice how the breadcrumbs in the top left corner also \nguide you back home...",
+      "ParentSectionId": "df329cf7-1e0e-496a-b91e-592a30ccbbd5",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -226,6 +242,7 @@
     {
       "Id": "ac1fcac6-637d-474b-8a07-98c92c18ab56",
       "Title": "Welcome - You made it!\nDouble-clicking on an operator will enter it. This is how you got here.\n\nTry to double-click on the background to get back to the [HomeCanvas].\n",
+      "ParentSectionId": "df329cf7-1e0e-496a-b91e-592a30ccbbd5",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -244,6 +261,7 @@
     {
       "Id": "d26f5d4f-5727-4d0f-989b-9fcb19c037e6",
       "Title": "You can create a connection by\ndragging the output of [LoadImage] \nto the Image input of [DetectEdges].\nThen select [DetectEdges] to see \nthe result.",
+      "ParentSectionId": "474e3707-8497-44ea-890b-fc3f1f6b4448",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -280,6 +298,7 @@
     {
       "Id": "f083606b-1507-4ed9-a5e1-d41787afec99",
       "Title": "6. Click on a parameter name, \"e.g. FillColor,\" to reset it to its default.",
+      "ParentSectionId": "54456a70-93a3-4455-b1e1-a2731d03de39",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -298,6 +317,7 @@
     {
       "Id": "f5ee65c5-76e7-4242-bdb2-6e6c8ab1cc2a",
       "Title": "You can...\n\n1. Drag values horizontally to change them.\n2. Click a value to type, e.g., values like \"2.1\" or formulas like \"1.4/3\"\n3. Hover over a value to use the mouse wheel. Try holding Shift (for finer) \n  or ALT (for faster) changes.\n\n",
+      "ParentSectionId": "54456a70-93a3-4455-b1e1-a2731d03de39",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

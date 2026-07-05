@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e2f54c8c-2507-4b55-bc94-22a242ddf0ff"/*I20a_Swimming*/,
   "Description": "Swimming upwards...",
   "InputUis": [],
@@ -12,7 +14,7 @@
     },
     {
       "ChildId": "86fba173-6ca3-46c8-bc07-4cf36f21eab7"/*RoundedRect*/,
-      "AnnotationId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
+      "SectionId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
       "Position": {
         "X": 1285.9601,
         "Y": 2118.6863
@@ -27,7 +29,7 @@
     },
     {
       "ChildId": "9b49ce28-2811-4472-8fb7-510116070391"/*Time*/,
-      "AnnotationId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
+      "SectionId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
       "Position": {
         "X": 1145.9601,
         "Y": 2153.6863
@@ -42,7 +44,7 @@
     },
     {
       "ChildId": "b7afbfe2-5a1c-49ba-80b7-bae2c6e1754e"/*MirrorRepeat*/,
-      "AnnotationId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
+      "SectionId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
       "Position": {
         "X": 1285.9601,
         "Y": 2188.6863
@@ -65,7 +67,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
       "Label": "Solution",

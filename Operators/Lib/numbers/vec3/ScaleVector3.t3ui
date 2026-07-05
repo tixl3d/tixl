@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "646d6a5d-a1d7-471e-86ab-e1fb2542a2c2"/*ScaleVector3*/,
   "Description": "Defines a value that is multiplied onto the incoming Vec3",
   "InputUis": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ab511978-bad5-4b69-90b2-c028447fe9f7"/*CurvesToTexture*/,
   "Description": "Tip: Hold Shift for snapping. Press F to extend the view to the selection.",
   "SymbolTags": "24",

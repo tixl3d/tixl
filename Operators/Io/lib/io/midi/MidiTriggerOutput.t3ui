@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "61c11adb-94f0-4dc7-9611-c22c40709cf4"/*MidiTriggerOutput*/,
   "Description": "Send ProgramChange or Sequencer commands to the selected Device on the chosen Channel. The ProgramChangeNumber is given as an integer between 0 and 127.\n\nAll parameters are sent when a trigger is received in the respective input.\nIt should only be a momentary, one frame long \"true\" value to not flood the receiving gear.\n\nBe aware that not many applications actually react to these triggers! Hardware is more likely to have them implemented.\n\nThis node can be used in combination with [MidiNoteOutput] [MidiControlOutput] and [MidiPitchbendOutput] to create generative music or control hardware.\n\nAKA: programchange, start, stop, continue, tempo, bpm",
   "SymbolTags": "8",

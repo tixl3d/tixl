@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "db162ead-71a4-4835-95c8-6a719511314e"/*MidiTestGround*/,
   "Description": "A small project to test using MIDI controllers for snapshots and other features.",
   "InputUis": [],
@@ -46,7 +48,7 @@
       }
     },
     {
-      "ChildId": "3e54cf99-4cf0-4637-87c2-56d8f9770e61"/*AddInts*/,
+      "ChildId": "3e54cf99-4cf0-4637-87c2-56d8f9770e61"/*AddInt*/,
       "Position": {
         "X": -695.4536,
         "Y": 169.59064
@@ -60,7 +62,7 @@
       }
     },
     {
-      "ChildId": "42d6398d-4de1-4ada-862c-aa6331ef036d"/*AddInts*/,
+      "ChildId": "42d6398d-4de1-4ada-862c-aa6331ef036d"/*AddInt*/,
       "Position": {
         "X": -608.1507,
         "Y": 291.19763
@@ -109,7 +111,7 @@
       }
     },
     {
-      "ChildId": "8db60eb5-58f7-40cb-a560-4ae9322184b7"/*AddInts*/,
+      "ChildId": "8db60eb5-58f7-40cb-a560-4ae9322184b7"/*AddInt*/,
       "Position": {
         "X": -908.1507,
         "Y": 291.19763

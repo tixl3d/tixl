@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4ba8019b-f265-4e41-8722-4ee0c2c64ba9"/*SimBlendTo*/,
   "Description": "",
   "SymbolTags": "1",

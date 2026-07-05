@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "08e40de8-aa4d-48d9-978d-690cd687220c"/*FrameClock*/,
   "Description": "Renders a clock with precise frame information at 60fps.\nThis can be useful for test renderings.",
   "SymbolTags": "66",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "059266c8-447a-4f5d-9d39-d1fd0b210f94"/*Layer2d*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 1277.8964
@@ -27,6 +30,7 @@
     },
     {
       "ChildId": "0c33b23f-6b52-4575-85b5-cdff68b253d5"/*ValuesToTexture*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 1032.8964
@@ -83,6 +87,7 @@
     },
     {
       "ChildId": "2890ed7d-34d1-4b5f-bbe3-2429e67283fb"/*RadialGradient*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 1242.8964
@@ -118,6 +123,7 @@
     },
     {
       "ChildId": "4f4ce6e4-3092-4c3b-8319-5d988204648f"/*Time*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 296.51373,
         "Y": 1312.8964
@@ -153,6 +159,7 @@
     },
     {
       "ChildId": "6c685887-0932-4100-97da-c97c12d39b42"/*LinearGradient*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 1172.8964
@@ -216,6 +223,7 @@
     },
     {
       "ChildId": "94b93144-718a-4fce-b070-812b1ffa293c"/*TransformImage*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 1137.8964
@@ -223,6 +231,7 @@
     },
     {
       "ChildId": "a0edff6b-17a5-40d0-87ac-77ad40e1be34"/*Remap*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 436.51373,
         "Y": 1312.8964
@@ -251,6 +260,7 @@
     },
     {
       "ChildId": "afe81386-05a9-4e7b-ba48-f51880afcb96"/*PlaybackFFT*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 997.89636
@@ -300,6 +310,7 @@
     },
     {
       "ChildId": "d5598666-aacd-48fc-9f11-25d949485cfe"/*RemapColor*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 1102.8964
@@ -307,6 +318,7 @@
     },
     {
       "ChildId": "d58810ab-0ead-456c-b3a5-0421606da419"/*SlidingHistory*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 1067.8964
@@ -314,6 +326,7 @@
     },
     {
       "ChildId": "e502f246-567a-4e37-9ab2-cd686162539f"/*PolarCoordinates*/,
+      "SectionId": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Position": {
         "X": 576.5138,
         "Y": 1207.8964
@@ -350,7 +363,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "cf606b18-a82e-4ed2-9291-e63eec38e592",
       "Title": "Yes, there are probably easier ways to do this...",

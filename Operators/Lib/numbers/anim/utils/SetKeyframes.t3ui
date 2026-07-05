@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "97ea4288-2deb-44ea-8714-8374c71fda88"/*SetKeyframes*/,
   "Description": "Allows to record keyframes to a connected animated operator",
   "InputUis": [

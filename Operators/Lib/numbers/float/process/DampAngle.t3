@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9757618d-e72a-4507-8352-6f824b56cc58"/*DampAngle*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2cc44046-2702-40d5-ab42-8b36ff3d6ca7"/*AxisStepForce*/,
   "Description": "A force for the [ParticleSystem] that applies random accelerations toward an axis direction. This can lead to interesting results in motion design. If ApplyTrigger is true, a random selection ratio of particles is chosen and accelerated.\n\nUse the following options:\n\n- AxisDistribution to control the frequency of XYZ axis selection.\n- AddOriginalVelocity to control whether the original acceleration is replaced or mixed in.\n- Set Seed to a value greater than 0 to control randomness. If it's set to 0, the current frame number is used as the random seed.\n\nPlease note that the RotationAxis space may depend on the [ParticleSystem.OrientTowardsVelocity] parameter. You can also try combining this effect with [ParticleSystem.Damp] for enhanced results.",
   "SymbolTags": "192",

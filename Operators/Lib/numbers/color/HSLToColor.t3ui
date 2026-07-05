@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1677fd74-6e54-479a-b478-c2ac77288f9c"/*HSLToColor*/,
   "Description": "Creates an RGBA color from HSL settings",
   "SymbolTags": "1",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7f69a5e5-28e5-44c1-b3e3-74b05faa0531"/*DrawRayLines*/,
   "Description": "A special line renderer that draws camera-facing 3D geometry lines without corner metering that can intersect the near plane.",
   "SymbolTags": "8",
@@ -158,7 +160,7 @@
       }
     },
     {
-      "ChildId": "4e04ef7b-5f9d-4cea-ba09-0fa6842768db"/*TransformsConstBuffer*/,
+      "ChildId": "4e04ef7b-5f9d-4cea-ba09-0fa6842768db"/*_TransformsCBuffer*/,
       "Position": {
         "X": 959.0162,
         "Y": 829.3687
@@ -205,7 +207,7 @@
       }
     },
     {
-      "ChildId": "85d5f2d4-34a7-4d65-8568-e507ca90fc0f"/*AddInts*/,
+      "ChildId": "85d5f2d4-34a7-4d65-8568-e507ca90fc0f"/*AddInt*/,
       "Position": {
         "X": 1099.0162,
         "Y": 1248.2164

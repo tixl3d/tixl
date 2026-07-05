@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "25db2a97-38b2-4503-8842-fab3922d7a6c"/*PointTrailFast*/,
   "Inputs": [
     {
@@ -189,7 +191,7 @@
       "Outputs": []
     },
     {
-      "Id": "b00a56e7-cdb5-44c4-ae06-d047f320bd6f"/*AddInts*/,
+      "Id": "b00a56e7-cdb5-44c4-ae06-d047f320bd6f"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

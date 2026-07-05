@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0cdb1267-438e-4647-a848-6233d6caa383"/*I01a_WelcomeImage*/,
   "Inputs": [],
   "Children": [

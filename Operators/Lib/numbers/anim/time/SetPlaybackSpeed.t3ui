@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fcd32cac-6544-42a3-8a14-203b8ca3559e"/*SetPlaybackSpeed*/,
   "Description": "An advanced option that allows you to slow down the playback (including audio). This might be useful in some situations, though some details might not work as expected.",
   "SymbolTags": "64",

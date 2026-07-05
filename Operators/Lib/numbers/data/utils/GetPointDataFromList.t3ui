@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1de7b1be-cab6-4beb-a837-4c817562efb2"/*GetPointDataFromList*/,
   "Description": "Returns Position, Rotation and W from a point.\nThis can be useful if combined with [PointsToCPU].",
   "SymbolTags": "8",

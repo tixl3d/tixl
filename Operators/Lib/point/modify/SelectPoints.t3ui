@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "371d72b8-69d4-4ced-beda-271386ad2fd6"/*SelectPoints*/,
   "Description": "Simulates a selection of points by setting the F1 or F2 attribute.",
   "SymbolTags": "1",
@@ -312,7 +314,7 @@
       }
     },
     {
-      "ChildId": "6f73ce6d-6ad0-4dbf-8bd7-390ddb671604"/*TransformsConstBuffer*/,
+      "ChildId": "6f73ce6d-6ad0-4dbf-8bd7-390ddb671604"/*_TransformsCBuffer*/,
       "Position": {
         "X": 391.8111,
         "Y": 1431.7645
@@ -454,7 +456,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "f18daffd-1ec8-4293-8280-1925aaef64ea",
       "Title": "Obsolete Parameters",

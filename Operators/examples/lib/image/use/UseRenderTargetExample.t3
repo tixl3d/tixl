@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1fdd634f-4c6a-4615-b75a-0c46732c9826"/*UseRenderTargetExample*/,
   "Inputs": [],
   "Children": [

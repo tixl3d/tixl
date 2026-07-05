@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7d1f025c-89be-4ae3-9693-6da677a0ae2b"/*LaunchPadXButton*/,
   "Inputs": [
     {
@@ -332,7 +334,7 @@
       "Outputs": []
     },
     {
-      "Id": "f4e85db7-9487-4bbd-a4d9-dc0fce882cc9"/*AddInts*/,
+      "Id": "f4e85db7-9487-4bbd-a4d9-dc0fce882cc9"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [],
       "Outputs": []

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8f1bc36a-0206-4c35-900d-ced5dd30481b"/*VJDeadlineAnimals*/,
   "Inputs": [],
   "Children": [
@@ -4137,7 +4139,7 @@
       "Outputs": []
     },
     {
-      "Id": "dcb9834a-0756-416b-b0d3-9631a46a7a96"/*AddInts*/,
+      "Id": "dcb9834a-0756-416b-b0d3-9631a46a7a96"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {
@@ -6421,26 +6423,44 @@
       "TargetSlotId": "4da253b7-4953-439a-b03f-1d515a78bddf"
     }
   ],
-  "PlaybackSettings": {
+  "ProjectSettings": {
     "Enabled": true,
-    "Bpm": 60.0,
-    "AudioSource": 1,
-    "Syncing": 1,
-    "AudioDecayFactor": 0.9,
-    "AudioGainFactor": 1.02,
-    "AudioInputDeviceName": "",
-    "EnableAudioBeatLocking": "False",
-    "BeatLockAudioOffsetSec": "0",
-    "AudioClips": [
-      {
-        "Id": "00000000-0000-0000-0000-000000000000",
-        "StartTime": 0.0,
-        "EndTime": 0.0,
-        "Bpm": 120.0,
-        "DiscardAfterUse": true,
-        "IsSoundtrack": true,
-        "FilePath": "Resources\\user\\still\\proj-fc2\\soundtrack\\fc2_11b.mp3"
-      }
-    ]
+    "Playback": {
+      "Bpm": 60.0,
+      "AudioSource": 1,
+      "Syncing": 1,
+      "AudioDecayFactor": 0.9,
+      "AudioGainFactor": 1.02,
+      "AudioInputDeviceName": "",
+      "EnableAudioBeatLocking": "False",
+      "BeatLockAudioOffsetSec": "0",
+      "AudioClips": [
+        {
+          "Id": "9cfc02ca-81d9-4c00-8f93-dc78277de96b",
+          "AssetPath": "Resources\\user\\still\\proj-fc2\\soundtrack\\fc2_11b.mp3",
+          "TimeRange": {
+            "Start": 0.0,
+            "End": 0.0
+          },
+          "IsMainSoundtrack": true
+        }
+      ]
+    },
+    "Audio": {
+      "SoundtrackMute": false,
+      "SoundtrackVolume": 0.5,
+      "OperatorMute": false,
+      "OperatorVolume": 1.0,
+      "AudioResyncThreshold": 0.04
+    },
+    "Export": {
+      "DefaultWindowMode": 1,
+      "EnablePlaybackControlWithKeyboard": true
+    },
+    "Proxy": {
+      "Format": 1,
+      "Resolution": 0.5,
+      "UseForPreview": true
+    }
   }
 }

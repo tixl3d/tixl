@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e64f95e4-c045-400f-98ca-7c020ad46174"/*Switch*/,
   "Description": "Switches between connected graphs. Can be used to \"cut\" between scenes.\nThe index starts with 0 for the first input and will wrap on values exceeding the count of connected inputs.\n\nTip: \n- use index -1 to activate none (i.e. disable all)\n- use index -2 to activate all\n\nThe naming of this operator diverges from the Pick... convention like [PickColor], [PickImage] etc because it also allows executing \"nothing\" or all connected inputs. \nThis is a consequence of command being the only \"type\" that doesn't return data but only executes connected commands.\n\nFor a more visual approach see [TimeClip].\n",
   "SymbolTags": "1",

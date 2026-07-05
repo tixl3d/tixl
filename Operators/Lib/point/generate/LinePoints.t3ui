@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4ae9e2f5-7cb3-40b0-a662-0662e8cb7c68"/*LinePoints*/,
   "Description": "Define points from a source position to a direction.",
   "SymbolTags": "1",
@@ -265,7 +267,7 @@
       }
     },
     {
-      "ChildId": "ca4a31d2-5ad8-4303-8a27-a96095193d92"/*AddInts*/,
+      "ChildId": "ca4a31d2-5ad8-4303-8a27-a96095193d92"/*AddInt*/,
       "Position": {
         "X": -183.18683,
         "Y": 667.1208
@@ -321,7 +323,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "f5623a2a-3dd6-4d05-8dec-02deefe8892f",
       "Title": "Obsolete Parameters",

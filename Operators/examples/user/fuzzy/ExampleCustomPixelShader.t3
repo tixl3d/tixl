@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3ff59cf2-33c3-4dd3-bcf8-83b88f8282e1"/*ExampleCustomPixelShader*/,
   "Inputs": [],
   "Children": [

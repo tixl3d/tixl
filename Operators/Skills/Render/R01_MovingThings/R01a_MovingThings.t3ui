@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ed778d74-6c42-4f64-bd0e-bb4953b260bf"/*R01a_MovingThings*/,
   "Description": "Moving Things",
   "InputUis": [],
@@ -12,7 +14,7 @@
     },
     {
       "ChildId": "236b4a8e-93d8-4b44-825a-dab293c785d2"/*AnimValue*/,
-      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "SectionId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
       "Position": {
         "X": 1133.8973,
         "Y": 2145.2126
@@ -34,7 +36,7 @@
     },
     {
       "ChildId": "71e24ba2-4519-4383-8de6-ca0d49f137ff"/*AnimValue*/,
-      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "SectionId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
       "Position": {
         "X": 1133.8973,
         "Y": 2110.2126
@@ -49,7 +51,7 @@
     },
     {
       "ChildId": "949b2993-a59d-43cc-a87d-bb7f6d3ac8c5"/*Vector3*/,
-      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "SectionId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
       "Position": {
         "X": 1273.8973,
         "Y": 2110.2126
@@ -57,7 +59,7 @@
     },
     {
       "ChildId": "a73d129f-8c58-4ab2-93e8-18f1a63e7a00"/*Distance*/,
-      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "SectionId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
       "Position": {
         "X": 1133.8973,
         "Y": 2180.2126
@@ -65,7 +67,7 @@
     },
     {
       "ChildId": "bb74c958-1559-4bbb-bcb2-076495f63059"/*DrawSphere*/,
-      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "SectionId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
       "Position": {
         "X": 1273.8973,
         "Y": 2215.2126
@@ -95,7 +97,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
       "Label": "Solution",

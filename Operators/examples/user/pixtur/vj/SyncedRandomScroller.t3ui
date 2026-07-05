@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "aaf19aea-06f6-4c5b-8765-9910f8ed7ad0"/*SyncedRandomScroller*/,
   "Description": "",
   "InputUis": [

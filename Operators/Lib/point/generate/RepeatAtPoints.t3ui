@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "780edb20-f83f-494c-ab17-7015e2311250"/*RepeatAtPoints*/,
   "Description": "Repeats a list of GPU points at positions provided by another list of points. The orientation of the target points can be applied, so this operator can be used to create point instantiation.\n\nIf the ApplyTargetScaleW parameter is activated, the W attribute of the target points is used as a scale factor.\n\nAlso known as: Copy, Replicate, Instance\n\nUseful combinations: [CommonPointSets] [DrawLines] [DrawPoints]",
   "SymbolTags": "1",
@@ -98,7 +100,7 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "08ce280a-b359-4cb3-8aa5-fdfc48d36811"/*AddInts*/,
+      "ChildId": "08ce280a-b359-4cb3-8aa5-fdfc48d36811"/*AddInt*/,
       "Position": {
         "X": -350.4997,
         "Y": 1212.1001
@@ -152,7 +154,7 @@
       }
     },
     {
-      "ChildId": "6b3b966d-957a-408e-98f3-dc7d9743d78e"/*AddInts*/,
+      "ChildId": "6b3b966d-957a-408e-98f3-dc7d9743d78e"/*AddInt*/,
       "Position": {
         "X": -216.58295,
         "Y": 1058.479
@@ -238,7 +240,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "75080e60-c4fc-4db6-91dc-28ec69e591a8",
       "Title": "Obsolete parameters",

@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "24848671-a827-45f0-84f2-52efccd4fbd5"/*PointInfoLines*/,
   "Description": "Generates a line point buffer that can visualize numerical point attribute data.\nThe result can be drawn with [DrawLines].",
   "SymbolTags": "8",
@@ -64,7 +64,7 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "1b3d0719-0ca0-47e6-a72d-67fe643e3afc"/*TransformsConstBuffer*/,
+      "ChildId": "1b3d0719-0ca0-47e6-a72d-67fe643e3afc"/*_TransformsCBuffer*/,
       "Position": {
         "X": 208.61678,
         "Y": 443.44916

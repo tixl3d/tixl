@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "590a0b0b-c847-433c-8ffa-602ed0ae8f28"/*SwapTextures*/,
   "Inputs": [
     {

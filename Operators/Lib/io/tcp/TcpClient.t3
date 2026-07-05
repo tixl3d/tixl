@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a2b3c4d5-e6f7-4890-1234-567890abcdef"/*TcpClient*/,
   "Inputs": [
     {

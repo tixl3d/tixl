@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "bd3f2fa7-48f7-4ca3-8c32-92fe0d9e3fff"/*B01b_RearrangeStacks*/,
   "Description": "Stack Attack",
   "SymbolTags": "16",
@@ -6,7 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "00d45d58-e13b-4d34-b2f1-b1d3f9ab1556"/*Raster*/,
-      "AnnotationId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
+      "SectionId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
       "Position": {
         "X": 1056.6931,
         "Y": 2185.0276
@@ -14,7 +16,7 @@
     },
     {
       "ChildId": "43d35c42-9c4b-400b-be28-e714421383b2"/*Blob*/,
-      "AnnotationId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
+      "SectionId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
       "Position": {
         "X": 1056.6931,
         "Y": 2150.0276
@@ -29,7 +31,7 @@
     },
     {
       "ChildId": "8a190a1c-779e-4fe4-841a-77f2a4b8a602"/*RoundedRect*/,
-      "AnnotationId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
+      "SectionId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
       "Position": {
         "X": 1056.6931,
         "Y": 2115.0286
@@ -66,7 +68,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
       "Label": "Solution",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "436e93a8-03c0-4366-8d9a-2245e5bcaa6c"/*PerlinNoise*/,
   "Inputs": [
     {

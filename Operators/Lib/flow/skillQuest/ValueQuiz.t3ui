@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "702f1f75-df90-44ca-b567-78ba9d1613b5"/*ValueQuiz*/,
   "Description": "Computes a visual comparison between a \"solution\" and a \"goal\" value animation.\n\nConnect your solution to the upper input.",
   "InputUis": [

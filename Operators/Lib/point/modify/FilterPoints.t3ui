@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "18251874-5d5a-4384-8dcd-fcf297e54886"/*FilterPoints*/,
   "Description": "Selects (i.e., picks) points based on the given criteria.\n\nCan be used to reduce the overall amount of points to increase performance.\n\nUseful combination [DrawPoints] [MeshFacesPoints] [MeshVerticesToPoints]\n\nVaguely similar [ClearSomePoints].",
   "SymbolTags": "1",

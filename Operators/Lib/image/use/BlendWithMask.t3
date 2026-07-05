@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7da55d23-0bd1-457b-a036-9b6b51d2e34b"/*BlendWithMask*/,
   "Inputs": [
     {

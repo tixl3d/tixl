@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "812561d8-cbb5-40c3-a53e-3c3f0ad2352e"/*HowToUseParticles*/,
   "Description": "This interactive tutorial explains how Tooll's [ParticleSystem] works and how you can use it.",
   "SymbolTags": "3",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "02b27e48-c3bf-475d-9838-bc20a0a8f2c1"/*ParticleSystem*/,
+      "SectionId": "ee30c5cf-c4ce-46da-8a73-58d3599733dc",
       "Position": {
         "X": 874.36475,
         "Y": 391.20554
@@ -13,6 +16,7 @@
     },
     {
       "ChildId": "03041eed-99b6-47f2-8b55-5d5471202045"/*AxisStepForce*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Comment": "...40% of the particles are accelerated along the x, y, or z-axis.\n\nNotice the y-axis: \n- it's chosen only 5% of the time, but then with 4x the velocity.",
       "Position": {
         "X": 752.1406,
@@ -21,6 +25,7 @@
     },
     {
       "ChildId": "09cd4ebe-c6a5-4382-b346-100007723e81"/*AnimValue*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Comment": "On every beat...",
       "Position": {
         "X": 598.9961,
@@ -29,6 +34,7 @@
     },
     {
       "ChildId": "0d092b4a-7378-4625-9d6a-f9b857208b13"/*DrawLines*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Comment": "We ignore the points for the lines.",
       "Position": {
         "X": 1201.3545,
@@ -37,6 +43,7 @@
     },
     {
       "ChildId": "11dc55eb-d346-4368-ac2a-b874b77a24c8"/*VisualizePoints*/,
+      "SectionId": "9380ea3e-c8c2-4f91-a995-46dfd61104a7",
       "Position": {
         "X": 200.87747,
         "Y": -84.30267
@@ -44,6 +51,7 @@
     },
     {
       "ChildId": "163e6056-b3bd-400a-949b-7ee78368ce43"/*VisualizePoints*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Position": {
         "X": 335.4139,
         "Y": -553.1865
@@ -51,6 +59,7 @@
     },
     {
       "ChildId": "17565682-1cb9-4f61-a428-d6c93527f6fe"/*_RandomizePoints_Legacy1*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Position": {
         "X": 752.2478,
         "Y": 969.8798
@@ -58,6 +67,7 @@
     },
     {
       "ChildId": "1a6a19f3-79ba-4c4c-81b2-480826283391"/*LoadObj*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 568.166,
         "Y": -157.54547
@@ -65,6 +75,7 @@
     },
     {
       "ChildId": "1b0352d2-3307-4e13-970a-b4e3ca7da0e9"/*AnimValue*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Position": {
         "X": -264.5861,
         "Y": -255.18652
@@ -72,6 +83,7 @@
     },
     {
       "ChildId": "1ca7f5dc-da64-4db1-8f38-10c7f0cee469"/*Text*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 569.6315,
         "Y": 18.891968
@@ -79,6 +91,7 @@
     },
     {
       "ChildId": "205a7af7-bb66-438f-bce1-f235858542ef"/*AnimValue*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Position": {
         "X": 1040.5278,
         "Y": 750.0976
@@ -86,6 +99,7 @@
     },
     {
       "ChildId": "2dafa35e-86e8-4d96-ac7a-5099b1a4e0d6"/*Reset*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Position": {
         "X": 752.1406,
         "Y": 1511.8049
@@ -93,6 +107,7 @@
     },
     {
       "ChildId": "3147c1a0-dff7-4068-a5fc-3c0ad1124fa2"/*DrawBillboards*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Comment": "Uses draw the W attributes to highlight fast particles.\n\nThe Gradient uses HDR colors that spread nicely with [Glow].",
       "Position": {
         "X": 1201.3545,
@@ -101,6 +116,7 @@
     },
     {
       "ChildId": "3310a3f6-ad0d-4c72-824b-7ae2951a4463"/*_Time_old*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Position": {
         "X": 602.2476,
         "Y": 1012.8799
@@ -108,6 +124,7 @@
     },
     {
       "ChildId": "33c4ad16-4e20-46d8-9065-0c9bf18f17d8"/*PointsOnMesh*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "This operator computes the size of each face to produce a uniform random distribution of points on the mesh surface. Note how these points are oriented with their normal pointing towards the mesh normal.",
       "Position": {
         "X": 718.1648,
@@ -116,6 +133,7 @@
     },
     {
       "ChildId": "3727ea90-2f55-4634-aaf3-7369b369135e"/*TurbulenceForce*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Comment": "This is a very simple particle force. We animate its force with the current time.",
       "Position": {
         "X": -114.58609,
@@ -124,6 +142,7 @@
     },
     {
       "ChildId": "3991a2a1-8905-4909-b84a-93053bab5ae0"/*one point*/,
+      "SectionId": "3c19a1c5-f12d-492c-a6ff-5ec22db39197",
       "Position": {
         "X": -246.95807,
         "Y": -76.71234
@@ -131,6 +150,7 @@
     },
     {
       "ChildId": "3e892c77-7d09-4e5b-86d5-185ff20b5b9b"/*Blob*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Position": {
         "X": 892.32715,
         "Y": 1191.7231
@@ -138,6 +158,7 @@
     },
     {
       "ChildId": "3f86cfb6-8b00-46aa-8a38-49e93255608a"/*_Time_old*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Position": {
         "X": -264.5861,
         "Y": -467.18652
@@ -145,6 +166,7 @@
     },
     {
       "ChildId": "40b444be-88b7-43c5-941b-5e9ca7020745"/*_Time_old*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 718.1648,
         "Y": -224.54547
@@ -152,6 +174,7 @@
     },
     {
       "ChildId": "42de9f29-5869-4ab8-84b9-fc9d7105a20e"/*CountInt*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Comment": "This counter is incremented once every bar and switches between different forces.",
       "Position": {
         "X": -114.58609,
@@ -160,6 +183,7 @@
     },
     {
       "ChildId": "481d81f4-d9cb-4171-b742-1b7bb34f9fca"/*RadialPoints*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Comment": "We change the orientation of this circle toward the y-axis (pointing up),\nand adjust the orientation so Z points inwards.\n",
       "Position": {
         "X": 602.2476,
@@ -168,6 +192,7 @@
     },
     {
       "ChildId": "4a3bfcd5-bab6-492c-818e-8b5ea327c90f"/*DirectionalForce*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 1072.6843,
         "Y": -295.54547
@@ -175,6 +200,7 @@
     },
     {
       "ChildId": "4a471478-679c-4806-8991-c90627cbc848"/*RadialPoints*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Position": {
         "X": 896.4121,
         "Y": 599.0199
@@ -182,6 +208,7 @@
     },
     {
       "ChildId": "5998e214-8825-427e-b009-7e628725a5cd"/*TransformPoints*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "We randomly rotate the points. Notice how we change the transformation space to \"Point\" to rotate around each point's center instead of the object center.",
       "Position": {
         "X": 868.1648,
@@ -190,6 +217,7 @@
     },
     {
       "ChildId": "5c4c4fdc-a15a-4a9d-bfee-2590bbd59a88"/*PickPointList*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "Switch between the different emit points on every bar.",
       "Position": {
         "X": 1072.6843,
@@ -198,6 +226,7 @@
     },
     {
       "ChildId": "5c9cb59d-7436-4d2f-b06e-36e6d53be0a8"/*AnimVec3*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Position": {
         "X": -264.5861,
         "Y": -361.18652
@@ -205,6 +234,7 @@
     },
     {
       "ChildId": "60b82aab-e07a-4eb9-8006-3f518048ec6d"/*OrbitCamera*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Position": {
         "X": 1651.3545,
         "Y": 1440.6941
@@ -212,6 +242,7 @@
     },
     {
       "ChildId": "6228a4bd-c9c1-4844-b980-20a94dedc951"/*ParticleSystem*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Comment": "We adjust the aging rate and write the particle age to the result points' W attribute so it can be used by [DrawBillboards].",
       "Position": {
         "X": 902.2478,
@@ -220,6 +251,7 @@
     },
     {
       "ChildId": "628ae78f-9eae-4479-89c1-5dcc580d62bd"/*RepeatAtPoints*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Comment": "We can also clone other points at the particles' positions.",
       "Position": {
         "X": 1040.5278,
@@ -228,6 +260,7 @@
     },
     {
       "ChildId": "67045d2a-cee3-4d5a-ae90-738e7efc7570"/*CountInt*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Position": {
         "X": 1190.5278,
         "Y": 761.0976
@@ -235,6 +268,7 @@
     },
     {
       "ChildId": "675c903a-3d04-4556-a180-ea0abc39a080"/*_RandomizePoints_Legacy1*/,
+      "SectionId": "ee30c5cf-c4ce-46da-8a73-58d3599733dc",
       "Position": {
         "X": 724.36475,
         "Y": 391.20554
@@ -242,6 +276,7 @@
     },
     {
       "ChildId": "6a7d4d78-cf03-4e0e-8bd6-308aed31939b"/*ParticleSystem*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 1225.043,
         "Y": -350.55988
@@ -249,6 +284,7 @@
     },
     {
       "ChildId": "6ae25dc8-48b7-4e70-9c52-4536d392a9cf"/*DirectionalForce*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Position": {
         "X": 752.2478,
         "Y": 1038.8801
@@ -256,6 +292,7 @@
     },
     {
       "ChildId": "6c70d237-9e63-4bba-9f46-8a7387ed7afa"/*RadialPoints*/,
+      "SectionId": "e8eaa7a4-561b-4bfa-9b05-2cba36dbb1f1",
       "Comment": "We adjusted its parameters so it creates 4 points on the Y-axis.\n\nNotice how we also adjusted the OrientationAxis to X and adjusted the orientation angle to adjust the point's Z (forward) direction.\n\nWe also disable the CloseCircleLine to prevent overlapping points at the start and end.",
       "Position": {
         "X": -161.66048,
@@ -264,6 +301,7 @@
     },
     {
       "ChildId": "6d2e61ef-c03e-492c-a591-7ffc6d24d8a5"/*ParticleSystem*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Position": {
         "X": 185.41391,
         "Y": -553.1865
@@ -271,6 +309,7 @@
     },
     {
       "ChildId": "6fa6a070-4415-45e0-ace9-7d63bd5849c8"/*SetFog*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "Select and pin this operator to see the results.\n\nTIP: Don't forget to start playback or enable Idle motion in the toolbar below.",
       "Position": {
         "X": 1672.5825,
@@ -279,6 +318,7 @@
     },
     {
       "ChildId": "6ffd458e-e272-475d-a972-e40529eeb06b"/*DrawPoints*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Position": {
         "X": 1190.5278,
         "Y": 705.0976
@@ -286,6 +326,7 @@
     },
     {
       "ChildId": "71d60463-8b96-4d44-a841-3bdd53ef6750"/*ParticleSystem*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Comment": "We reduce the particle count to 10k because we draw a line trail for each of those particles.\n\nThe current particle speed is written to W so it can be used by [DrawBillboards].",
       "Position": {
         "X": 902.1406,
@@ -294,6 +335,7 @@
     },
     {
       "ChildId": "72174cd2-fad8-4937-bd31-fef054611b64"/*VisualizePoints*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "Visualize the used emit points with their position and index.",
       "Position": {
         "X": 1372.5825,
@@ -302,6 +344,7 @@
     },
     {
       "ChildId": "772d2d86-561e-4267-b405-b736a2010dcc"/*PointsOnImage*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "Similar to [PointsOnMesh], this generates random points depending on an image's brightness. This operation is VERY slow for large image resolutions. Unless the image is animated, the result of this computation is cached though.",
       "Position": {
         "X": 869.6304,
@@ -310,6 +353,7 @@
     },
     {
       "ChildId": "7d5558da-5449-4a71-8b06-e7107d8bfd32"/*RadialPoints*/,
+      "SectionId": "ee30c5cf-c4ce-46da-8a73-58d3599733dc",
       "Position": {
         "X": 574.3639,
         "Y": 391.20554
@@ -317,6 +361,7 @@
     },
     {
       "ChildId": "7f3a6c54-887b-4d80-b32b-30a62f325235"/*ParticleSystem*/,
+      "SectionId": "35f2d883-63f6-49b9-809d-cd9b9b19e94b",
       "Position": {
         "X": -11.660477,
         "Y": -752.87067
@@ -324,6 +369,7 @@
     },
     {
       "ChildId": "84d998fe-77f6-4c6e-9daf-5a4f80c3ab8e"/*CountInt*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 868.1648,
         "Y": 152.45453
@@ -331,6 +377,7 @@
     },
     {
       "ChildId": "86aa7bfa-9399-4f34-909b-cddd87b8c656"/*SetFog*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Position": {
         "X": 1501.3545,
         "Y": 1440.6941
@@ -338,6 +385,7 @@
     },
     {
       "ChildId": "882ffd6d-3888-40e8-8990-727825ba2f1d"/*DrawLines*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Position": {
         "X": 1190.5278,
         "Y": 569.09753
@@ -345,6 +393,7 @@
     },
     {
       "ChildId": "88f59435-472d-47d9-90ae-59c74e57374a"/*DrawBillboards*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Comment": "We use the W attribute for sampling a gradient and scale curve for each particle.",
       "Position": {
         "X": 1041.0337,
@@ -353,6 +402,7 @@
     },
     {
       "ChildId": "8980fc15-5044-474c-9e9c-6ba02c55461a"/*SelectPoints*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Comment": "A similar volume with a slow falloff can be used for \"selecting\" points.\nSelection in this case means setting the W attribute.\n\nBecause this is then used by [DrawPoints], it looks like the points are fading out.",
       "Position": {
         "X": 1040.5278,
@@ -361,6 +411,7 @@
     },
     {
       "ChildId": "8abf67db-a867-42a2-8cb4-3d104c1f71c2"/*_Time_old*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Position": {
         "X": 602.24774,
         "Y": 1081.8804
@@ -368,6 +419,7 @@
     },
     {
       "ChildId": "8b4daadc-5cf6-4a95-b2e3-10d516a7439f"/*CollisionForceExample*/,
+      "SectionId": "ebd1c21e-7ce2-4983-918a-c6d5ca391ea7",
       "Position": {
         "X": 560.299,
         "Y": 1771.587
@@ -375,6 +427,7 @@
     },
     {
       "ChildId": "8b955137-664f-4e21-b4ba-daa480d58cfc"/*RenderTarget*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Position": {
         "X": 1801.3549,
         "Y": 1440.6941
@@ -382,6 +435,7 @@
     },
     {
       "ChildId": "937dc47f-0e80-4968-a26d-6721c6f336ac"/*RenderTarget*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Comment": "Select and pin operator and don't forget to enable Idle motion in the timeline toolbar.",
       "Position": {
         "X": 1672.2473,
@@ -390,6 +444,7 @@
     },
     {
       "ChildId": "9502243e-7360-4c55-807f-4361a5914813"/*SwitchParticleForce*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Comment": "Here we only pick a single force. But the particle system can be connected to many.",
       "Position": {
         "X": 35.41391,
@@ -398,6 +453,7 @@
     },
     {
       "ChildId": "9823e3c4-6b8b-4789-bbe5-b1528e045fe0"/*DrawMeshAtPoints*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Comment": "We can instantiate meshes at each point.",
       "Position": {
         "X": 1049.3423,
@@ -406,6 +462,7 @@
     },
     {
       "ChildId": "9917a374-3d0f-4ac7-b8af-e8e8ab2724ca"/*TurbulenceForce*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Position": {
         "X": 752.2478,
         "Y": 1081.8804
@@ -413,6 +470,7 @@
     },
     {
       "ChildId": "9955b499-b26c-42da-baba-c31efb02a409"/*AnimValue*/,
+      "SectionId": "3c19a1c5-f12d-492c-a6ff-5ec22db39197",
       "Position": {
         "X": -246.95807,
         "Y": -33.71234
@@ -420,6 +478,7 @@
     },
     {
       "ChildId": "a4206fa9-cf17-40d3-bae3-7b709177c7e0"/*Group*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Position": {
         "X": 1351.3545,
         "Y": 1440.6941
@@ -427,6 +486,7 @@
     },
     {
       "ChildId": "a872a7e0-6182-4e05-8eb0-a7d91f07f5fe"/*Glow*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Comment": "Everything looks better with glow.",
       "Position": {
         "X": 1951.3547,
@@ -435,6 +495,7 @@
     },
     {
       "ChildId": "aa2f90b8-26e9-4699-92ca-7b3a22d30551"/*DirectionalForce*/,
+      "SectionId": "1ca566cf-83ad-41fa-90b7-7c34ba1debe1",
       "Position": {
         "X": -252.22223,
         "Y": 72.6615
@@ -442,6 +503,7 @@
     },
     {
       "ChildId": "ab71bf02-58db-4cfa-ab8a-d0b78df35812"/*Switch*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Comment": "We switch between different draw styles once a frame.",
       "Position": {
         "X": 1372.2476,
@@ -450,6 +512,7 @@
     },
     {
       "ChildId": "b15f986a-9222-4b8a-b8ef-7a6dbe336441"/*DirectionalForce*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Position": {
         "X": 35.41391,
         "Y": -510.18652
@@ -457,6 +520,7 @@
     },
     {
       "ChildId": "b214aa0c-42ca-4c23-b860-68931c334cbe"/*FilterPoints*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "We utilize this operator to pick only one of the [LinePoints] for emitting. The index is incremented every frame.",
       "Position": {
         "X": 868.1648,
@@ -465,6 +529,7 @@
     },
     {
       "ChildId": "b2191dc2-b986-444a-833e-434e358553af"/*_Time_old*/,
+      "SectionId": "ee30c5cf-c4ce-46da-8a73-58d3599733dc",
       "Position": {
         "X": 574.3639,
         "Y": 434.20554
@@ -472,6 +537,7 @@
     },
     {
       "ChildId": "b2c37c94-1423-48db-9cc2-8b958ff886e0"/*SetFog*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Position": {
         "X": 1522.2473,
         "Y": 386.58792
@@ -479,6 +545,7 @@
     },
     {
       "ChildId": "b6b7bbbd-c81c-4b78-b96f-725e31a61c7e"/*PerlinNoise3*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 721.82886,
         "Y": -100.02365
@@ -486,6 +553,7 @@
     },
     {
       "ChildId": "b8729c32-9439-4651-abcd-1a7675d8baff"/*VolumeForce*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Comment": "This is also nice.",
       "Position": {
         "X": -114.58609,
@@ -494,6 +562,7 @@
     },
     {
       "ChildId": "b8a02b32-49cb-4eed-919d-1c4235185d15"/*OrbitCamera*/,
+      "SectionId": "f39ea71c-cb55-41d9-b75e-f823572ed031",
       "Position": {
         "X": 1191.0337,
         "Y": 964.99457
@@ -501,6 +570,7 @@
     },
     {
       "ChildId": "b8f5d737-73a1-4db9-97cc-0476cd36d7ce"/*RadialPoints*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 718.1648,
         "Y": -267.54547
@@ -508,6 +578,7 @@
     },
     {
       "ChildId": "c1d21d4e-48d6-4384-95f3-3cf3a783ec81"/*DrawPoints*/,
+      "SectionId": "3ca7df36-ea96-40c1-81ad-dabbeeb37b8b",
       "Position": {
         "X": 138.33952,
         "Y": -752.87067
@@ -515,6 +586,7 @@
     },
     {
       "ChildId": "c8ad57b5-2fa7-498e-a958-86fdb801f5ef"/*_GridPoints_Old*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Comment": "We constantly emit this one point in center, leading to a gradual increase in complexity.\n\nTip: Try using a [RadialPoint] op instead.",
       "Position": {
         "X": 752.1406,
@@ -523,6 +595,7 @@
     },
     {
       "ChildId": "c984bc5b-7380-4038-836b-d00834de3003"/*DrawPoints*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Position": {
         "X": 1190.5278,
         "Y": 649.09753
@@ -530,6 +603,7 @@
     },
     {
       "ChildId": "ca8a57cc-6b07-49f4-b652-d29b79f0d891"/*ParticleSystem*/,
+      "SectionId": "7f56c6ab-a59a-452c-a4e4-f40dda99b2f3",
       "Comment": "Note how we set \"SetWTo\" to ParticleSpeed. This can then be used by the [VisualizePoints] operator to show the length of the velocity indicator.",
       "Position": {
         "X": 27.356873,
@@ -538,6 +612,7 @@
     },
     {
       "ChildId": "cc6f1e99-1a0f-4e35-b82f-6b2d5391f5f1"/*DrawPointsShaded*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "This draws points as billboards with some shading.",
       "Position": {
         "X": 1375.043,
@@ -546,6 +621,7 @@
     },
     {
       "ChildId": "ce57c1de-b755-4b5d-b31a-50bd9156892f"/*VolumeForce*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Comment": "The [SurfaceForce] can be used as an attractor, a container, or a reflective surface. Also, see the examples further below.",
       "Position": {
         "X": -114.58609,
@@ -554,6 +630,7 @@
     },
     {
       "ChildId": "cf1d0e88-7880-458e-8593-f2a3a2997fd9"/*Group*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 1522.5825,
         "Y": -444.10205
@@ -561,6 +638,7 @@
     },
     {
       "ChildId": "cfc7c7c0-c7b5-4f68-a87b-0a4bb3a0c8f5"/*DrawPoints*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Comment": "Simple white points. Notice that the point's W attribute is used for scaling the points.",
       "Position": {
         "X": 1046.8801,
@@ -569,6 +647,7 @@
     },
     {
       "ChildId": "d01bd631-7d67-40b8-80fe-a6196434a16e"/*Point*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 718.1648,
         "Y": -442.54547
@@ -576,6 +655,7 @@
     },
     {
       "ChildId": "d1c36ea3-7e86-4b3d-8adf-fae436108a9e"/*DirectionalForce*/,
+      "SectionId": "3aa41853-402e-4ed6-aba6-982e98434d06",
       "Position": {
         "X": -163.73543,
         "Y": -645.9996
@@ -583,6 +663,7 @@
     },
     {
       "ChildId": "d8dd2bde-47f7-4f09-8a6a-cfcdab775007"/*PointTrailFast*/,
+      "SectionId": "a8e9c5d5-dd2f-47bd-b2e2-f62b1898f57e",
       "Comment": "These are very long trails leading to roughly 10 million points connected by particles.\n\nNotice how we also insert separators if the distance between source points is too large.",
       "Position": {
         "X": 1051.3545,
@@ -591,6 +672,7 @@
     },
     {
       "ChildId": "dff2e37e-6a76-4112-a785-42dde6c519c8"/*VolumeForce*/,
+      "SectionId": "1ca566cf-83ad-41fa-90b7-7c34ba1debe1",
       "Position": {
         "X": -252.22223,
         "Y": 115.6615
@@ -598,6 +680,7 @@
     },
     {
       "ChildId": "e19288b3-fde2-4e4a-b5ba-1750f7835487"/*SoftTransformPoints*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Comment": "This op uses a volume with a slow fall-off radius to define the strength of the transformation.\nThis can lead to very interesting results...",
       "Position": {
         "X": 1040.5278,
@@ -606,6 +689,7 @@
     },
     {
       "ChildId": "e5eeee16-5e4f-45ce-a0d0-21fd21fac3ee"/*AxisStepForce*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Position": {
         "X": -114.58609,
         "Y": -298.18652
@@ -613,6 +697,7 @@
     },
     {
       "ChildId": "e72c9fac-628b-471d-8c2c-72f255d6b81a"/*RenderTarget*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "Notice how we set a fixed resolution instead of using the requested output resolution.",
       "Position": {
         "X": 719.6304,
@@ -621,6 +706,7 @@
     },
     {
       "ChildId": "e87164ef-d1de-4a61-b1dc-c4f753d5acb2"/*CountInt*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 718.1648,
         "Y": -330.54547
@@ -628,6 +714,7 @@
     },
     {
       "ChildId": "edfc232d-0bcb-4d68-8cc1-8b3b4137422e"/*_RandomizePoints_Legacy1*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "We generate a new buffer with slightly randomized point orientations.",
       "Position": {
         "X": 868.1648,
@@ -636,6 +723,7 @@
     },
     {
       "ChildId": "f2cbfa53-d71a-412e-bd17-54e83703cecf"/*ListToBuffer*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "This converts the point into a GPU buffer.",
       "Position": {
         "X": 868.1648,
@@ -644,6 +732,7 @@
     },
     {
       "ChildId": "f6642b2a-10d2-49f9-86f5-807a7f15d2b4"/*one point*/,
+      "SectionId": "e458c89f-6239-4306-b90b-311446a1f617",
       "Position": {
         "X": 35.41391,
         "Y": -553.1865
@@ -651,6 +740,7 @@
     },
     {
       "ChildId": "f7b9071a-93ae-4d92-9d9f-e6349415d629"/*LinePoints*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 718.1648,
         "Y": -373.54547
@@ -658,6 +748,7 @@
     },
     {
       "ChildId": "fc7559df-10ef-4203-be0d-198fdafd850c"/*DirectionalForce*/,
+      "SectionId": "ee30c5cf-c4ce-46da-8a73-58d3599733dc",
       "Position": {
         "X": 724.36475,
         "Y": 460.20554
@@ -665,6 +756,7 @@
     },
     {
       "ChildId": "fdf33fe8-c3c7-47c5-9dc8-add26f3ff675"/*AnimValue*/,
+      "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Position": {
         "X": 718.1648,
         "Y": 152.45453
@@ -672,6 +764,7 @@
     },
     {
       "ChildId": "fe7c6798-fe54-4933-8ea6-3432c8358d53"/*CubeMesh*/,
+      "SectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Position": {
         "X": 909.08276,
         "Y": 524.14215
@@ -687,10 +780,11 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "1ca566cf-83ad-41fa-90b7-7c34ba1debe1",
       "Title": "These points are repelled out of the sphere and then attracted towards it.",
+      "ParentSectionId": "7f56c6ab-a59a-452c-a4e4-f40dda99b2f3",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -727,6 +821,7 @@
     {
       "Id": "3aa41853-402e-4ed6-aba6-982e98434d06",
       "Title": "One or more forces that are applied to\nthe emitted particles.",
+      "ParentSectionId": "35f2d883-63f6-49b9-809d-cd9b9b19e94b",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -745,6 +840,7 @@
     {
       "Id": "3c19a1c5-f12d-492c-a6ff-5ec22db39197",
       "Title": "Emit a single point once per bar.",
+      "ParentSectionId": "7f56c6ab-a59a-452c-a4e4-f40dda99b2f3",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -763,6 +859,7 @@
     {
       "Id": "3ca7df36-ea96-40c1-81ad-dabbeeb37b8b",
       "Title": "It generates points that can be used \nfor rendering or other effects.",
+      "ParentSectionId": "35f2d883-63f6-49b9-809d-cd9b9b19e94b",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -817,6 +914,7 @@
     {
       "Id": "9380ea3e-c8c2-4f91-a995-46dfd61104a7",
       "Title": "The VisualizePoints operator can be used to show the particle's velocity.",
+      "ParentSectionId": "7f56c6ab-a59a-452c-a4e4-f40dda99b2f3",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -889,6 +987,7 @@
     {
       "Id": "e8eaa7a4-561b-4bfa-9b05-2cba36dbb1f1",
       "Title": "A set of points to emit \n(this can be tens of thousands)",
+      "ParentSectionId": "35f2d883-63f6-49b9-809d-cd9b9b19e94b",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -925,6 +1024,7 @@
     {
       "Id": "ee30c5cf-c4ce-46da-8a73-58d3599733dc",
       "Title": "A VERY simple particle effect.",
+      "ParentSectionId": "5bdf284b-854d-4ca4-abb6-5cfb763f132b",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

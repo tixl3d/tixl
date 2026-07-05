@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "15ac7153-69af-45f8-bcdd-50cdef0c9ae1"/*AddVec3*/,
   "Description": "Adds two Vec3 variables together",
   "InputUis": [

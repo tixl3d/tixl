@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2c3d2c26-ac45-42e9-8f13-6ea338333568"/*LinearGradient*/,
   "Description": "Renders a linear color ramp defined by a gradient. This can be very useful in combination with [Steps].\n\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
   "SymbolTags": "1",

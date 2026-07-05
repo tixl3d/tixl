@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cd5a182e-254b-4e65-820b-ff754122614c"/*VideoDeviceInput*/,
   "Description": "Captures live video from a connected device like a webcam, capture card, or NDI source.\n\nThis operator provides access to video devices available on your system. You can select the device, resolution, and frame rate. It also allows for basic image manipulation like flipping and repositioning.\n\nTips:\n- To save system resources, enable `DeactivateWhenNotShowing`. This will pause the capture when the operator is not being rendered.\n- Use `OpenSettings` to access the device-specific configuration dialog for more advanced options like exposure and color balance.\n- The `Status` output provides useful information for troubleshooting connection issues.\n\nAKA: webcam, camera, capture card, ndi, directshow, video input",
   "InputUis": [

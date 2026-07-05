@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "02aed181-4bf1-48f8-ac2a-93d66c170c0c"/*EaseKeys*/,
   "Inputs": [
     {

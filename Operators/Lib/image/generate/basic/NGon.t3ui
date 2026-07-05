@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "22a3cd4e-02b3-44d7-ad2b-aab5810c5e88"/*NGon*/,
   "Description": "Renders a polygon shape similar to [Blob] or [RoundedRect].\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
   "SymbolTags": "8",

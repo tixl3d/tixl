@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9c378944-9a57-4ae4-a88e-36c07244bcf7"/*SimForceOffset*/,
   "Inputs": [
     {

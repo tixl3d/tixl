@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "786ad268-9a76-4675-a755-6c2922fb3916"/*DrawMeshChunksAtPointsExample*/,
   "Description": "",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "025d95f5-d3de-4bf5-88a2-fcfe70435338"/*AnimValue*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": -11.257095,
         "Y": 759.4174
@@ -12,6 +15,7 @@
     },
     {
       "ChildId": "04e1b999-3871-4d65-8238-9a39418dfbcc"/*SpringVec3*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 131.30443,
         "Y": 706.4666
@@ -26,6 +30,7 @@
     },
     {
       "ChildId": "13c5b9aa-f18c-4a04-b043-9cd4443dea66"/*ScaleVector3*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 131.30443,
         "Y": 671.4666
@@ -33,6 +38,7 @@
     },
     {
       "ChildId": "1831ee2a-6388-4a44-84a0-72d8f5a51784"/*DrawMeshChunksAtPoints*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": 1320.9945,
         "Y": 53.84607
@@ -40,6 +46,7 @@
     },
     {
       "ChildId": "1de3bd02-d57d-43db-92b5-e5cb0fa82edf"/*OscillateVec3*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 131.81645,
         "Y": 586.5227
@@ -47,6 +54,7 @@
     },
     {
       "ChildId": "3405a796-5116-46ee-9895-a711545937f5"/*BoolToFloat*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 128.7429,
         "Y": 829.4174
@@ -54,6 +62,7 @@
     },
     {
       "ChildId": "3633549b-08e5-45fa-ae43-d355752eb4af"/*Any*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": 148.05974,
         "Y": 281.9591
@@ -61,6 +70,7 @@
     },
     {
       "ChildId": "36c7defb-33e8-47c6-85b9-dfd1564540a2"/*UseMaterial*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": 1320.9945,
         "Y": 193.84607
@@ -68,6 +78,7 @@
     },
     {
       "ChildId": "7401c9f1-7533-4c83-9679-48f6340ff575"/*AnimVec3*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 131.30443,
         "Y": 636.4666
@@ -75,6 +86,7 @@
     },
     {
       "ChildId": "7b6b8af3-2e36-44e0-9844-6649c55e1ee0"/*BlendVector3*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 303.9253,
         "Y": 585.65125
@@ -82,6 +94,7 @@
     },
     {
       "ChildId": "89eb8d24-4501-42bd-a7ff-59bd3282f332"/*Ease*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 128.7429,
         "Y": 864.4174
@@ -89,6 +102,7 @@
     },
     {
       "ChildId": "89f18dc5-db69-47ce-ac83-74324b73c7c1"/*DrawPoints*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 467.3009,
         "Y": 623.01654
@@ -96,6 +110,7 @@
     },
     {
       "ChildId": "8c1dfe31-fcd1-4742-b551-8f62c32c9cbe"/*Trigger*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": -1.9402618,
         "Y": 324.95837
@@ -110,6 +125,7 @@
     },
     {
       "ChildId": "a6f068fb-0196-498e-b226-ebb557c98ce8"/*ToggleBoolean*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 128.7429,
         "Y": 794.4174
@@ -117,6 +133,7 @@
     },
     {
       "ChildId": "b40546a6-0933-4e5e-b93c-85e3bf1471c9"/*SetAttributesWithPointFields*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": 950.60394,
         "Y": -69.93396
@@ -131,6 +148,7 @@
     },
     {
       "ChildId": "c379b495-41a8-4b64-885e-ed36e13464d5"/*Point*/,
+      "SectionId": "bb581347-f5d3-431c-bfbd-00dcd628e38d",
       "Position": {
         "X": 467.3009,
         "Y": 588.01654
@@ -138,6 +156,7 @@
     },
     {
       "ChildId": "e888447c-34ff-40a3-9040-0645d193e209"/*Boolean*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": 1180.9945,
         "Y": 158.84607
@@ -145,6 +164,7 @@
     },
     {
       "ChildId": "ecd66ca4-cb9c-46e6-bdc5-eb353bcbcf75"/*LoadGltfScene*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": 383.414,
         "Y": 102.111694
@@ -152,6 +172,7 @@
     },
     {
       "ChildId": "ee132b30-b9fe-45b2-bb0c-2d79239947e0"/*Once*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": -1.9402618,
         "Y": 281.9591
@@ -159,6 +180,7 @@
     },
     {
       "ChildId": "eea3161f-bcad-4b58-ba18-07e6883d1a33"/*_GetSceneDefinitionPoints*/,
+      "SectionId": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Position": {
         "X": 751.65375,
         "Y": 5.9920654
@@ -181,7 +203,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "676994e0-30d5-4efd-95f3-a51e0479fc64",
       "Label": "Chuncks At Points ",

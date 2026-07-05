@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "025b32e9-b570-45be-ae84-50424982aae3"/*ToneMapping*/,
   "Description": "Tone mapping is the process of converting high dynamic range (HDR) imagery to a displayable format, adjusting the contrast and brightness to make it visually appealing while preserving details in both highlights and shadows.",
   "SymbolTags": "8",

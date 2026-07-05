@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "695d20dc-d1fe-4648-80fb-e1159b8aead4"/*SelectPointsWithSDF*/,
   "Inputs": [
     {

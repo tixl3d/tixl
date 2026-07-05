@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d3a19896-230f-458f-b4ba-e448f63f0d51"/*SumRange*/,
   "Inputs": [
     {

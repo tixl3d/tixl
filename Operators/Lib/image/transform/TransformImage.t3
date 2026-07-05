@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "32e18957-3812-4f64-8663-18454518d005"/*TransformImage*/,
   "Inputs": [
     {
@@ -95,7 +97,7 @@
       "Outputs": []
     },
     {
-      "Id": "401e51a0-e6cc-4132-9b19-a593e406c1a0"/*AddInts*/,
+      "Id": "401e51a0-e6cc-4132-9b19-a593e406c1a0"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

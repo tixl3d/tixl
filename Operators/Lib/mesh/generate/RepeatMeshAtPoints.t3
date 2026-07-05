@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ab496711-8b99-4463-aac9-b41fdf46608d"/*RepeatMeshAtPoints*/,
   "Inputs": [
     {

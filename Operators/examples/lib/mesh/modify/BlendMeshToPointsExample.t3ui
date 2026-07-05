@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "bce9bc96-ff9b-443b-97f5-2286ddd30908"/*BlendMeshToPointsExample*/,
   "Description": "MediaPipe [FaceLandmarkDetection] Example, make sure to select your webcam in [VideoDeviceInput] and activate it.",
   "InputUis": [],
@@ -19,6 +21,7 @@
     },
     {
       "ChildId": "290b6c8c-c7a0-4b43-95d7-81fdae66400e"/*Group*/,
+      "SectionId": "69917bcb-3e58-4647-9d2c-cef2d98669ee",
       "Position": {
         "X": 868.18585,
         "Y": 108.22247
@@ -33,6 +36,7 @@
     },
     {
       "ChildId": "2fcfdde0-555f-4d0e-97d3-7083b6eec9c2"/*DrawMeshUnlit*/,
+      "SectionId": "14ddf9d0-14d6-41b4-b5bc-341e05596498",
       "Position": {
         "X": 702.70435,
         "Y": -263.33304
@@ -47,6 +51,7 @@
     },
     {
       "ChildId": "43ddf6a1-fcc6-443f-8201-a5d881609b65"/*RenderTarget*/,
+      "SectionId": "69917bcb-3e58-4647-9d2c-cef2d98669ee",
       "Position": {
         "X": 868.18585,
         "Y": 178.22247
@@ -61,6 +66,7 @@
     },
     {
       "ChildId": "6a17c54a-b13c-4533-815c-d9be0187b426"/*Pixelate*/,
+      "SectionId": "14ddf9d0-14d6-41b4-b5bc-341e05596498",
       "Position": {
         "X": 702.70435,
         "Y": -319.7967
@@ -68,6 +74,7 @@
     },
     {
       "ChildId": "6bdaad86-94e9-47e2-af3b-1d1591998e44"/*RenderTarget*/,
+      "SectionId": "14ddf9d0-14d6-41b4-b5bc-341e05596498",
       "Position": {
         "X": 702.70435,
         "Y": -193.33304
@@ -117,6 +124,7 @@
     },
     {
       "ChildId": "8c873b2b-fa74-4fed-ae10-37ff1c95d380"/*VideoDeviceInput*/,
+      "SectionId": "9bddf185-79d1-4e0a-9602-85c1088075a3",
       "Comment": "Select your webcam",
       "Position": {
         "X": -23.37996,
@@ -153,6 +161,7 @@
     },
     {
       "ChildId": "c50bef83-3211-404c-86ab-ece033bd976c"/*Activate*/,
+      "SectionId": "9bddf185-79d1-4e0a-9602-85c1088075a3",
       "Position": {
         "X": -23.37996,
         "Y": -381.64294
@@ -167,6 +176,7 @@
     },
     {
       "ChildId": "d0e8c90c-51a6-441f-a353-6c2d4a2f4b3e"/*RenderTarget*/,
+      "SectionId": "14ddf9d0-14d6-41b4-b5bc-341e05596498",
       "Position": {
         "X": 702.70435,
         "Y": -354.7967
@@ -195,6 +205,7 @@
     },
     {
       "ChildId": "fa7a589d-3c08-4db9-a393-aefab460c89f"/*BlendWithMask*/,
+      "SectionId": "14ddf9d0-14d6-41b4-b5bc-341e05596498",
       "Position": {
         "X": 905.0058,
         "Y": -354.9028
@@ -217,7 +228,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "14ddf9d0-14d6-41b4-b5bc-341e05596498",
       "Label": "Anonymity ",

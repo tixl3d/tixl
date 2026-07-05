@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4abd5f2e-3296-4d71-8462-faa203091b1d"/*GeometryShaderStage*/,
   "Description": "",
   "InputUis": [

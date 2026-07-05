@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c276f4eb-f19c-405b-b247-3db159677571"/*CombineMeshes*/,
   "Inputs": [
     {

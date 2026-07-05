@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0626aba2-ed0c-40c4-9b50-2e729d0d8d86"/*SinForm*/,
   "Description": "Generates a sine curve with various parameters\n\nThe presets show various application possibilities for different patterns\n\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
   "SymbolTags": "8",

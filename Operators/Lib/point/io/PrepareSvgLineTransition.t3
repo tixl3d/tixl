@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b7345438-f3f4-4ad3-9c57-6076ed0e9399"/*PrepareSvgLineTransition*/,
   "Inputs": [
     {

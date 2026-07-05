@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "98df563e-fd59-4458-a490-b7b7604ec1f3"/*GrowStrains*/,
   "Inputs": [
     {
@@ -197,7 +199,7 @@
       "Outputs": []
     },
     {
-      "Id": "ee3058d6-ec63-4a6b-9837-28ea59a6297f"/*AddInts*/,
+      "Id": "ee3058d6-ec63-4a6b-9837-28ea59a6297f"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

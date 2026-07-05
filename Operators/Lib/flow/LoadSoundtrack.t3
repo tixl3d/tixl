@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "72b6327d-4304-48bb-b9b5-15705352c225"/*LoadSoundtrack*/,
   "Inputs": [
     {

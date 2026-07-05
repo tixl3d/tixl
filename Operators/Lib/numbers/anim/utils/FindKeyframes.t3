@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "127e1eb9-aca9-4f8e-b0c9-b709c8a0745a"/*FindKeyframes*/,
   "Inputs": [
     {

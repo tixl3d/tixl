@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "db162ead-71a4-4835-95c8-6a719511314e"/*MidiTestGround*/,
   "Inputs": [],
   "Children": [
@@ -63,7 +65,7 @@
       "Outputs": []
     },
     {
-      "Id": "3e54cf99-4cf0-4637-87c2-56d8f9770e61"/*AddInts*/,
+      "Id": "3e54cf99-4cf0-4637-87c2-56d8f9770e61"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {
@@ -112,7 +114,7 @@
       "Outputs": []
     },
     {
-      "Id": "42d6398d-4de1-4ada-862c-aa6331ef036d"/*AddInts*/,
+      "Id": "42d6398d-4de1-4ada-862c-aa6331ef036d"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {
@@ -280,7 +282,7 @@
       "Outputs": []
     },
     {
-      "Id": "8db60eb5-58f7-40cb-a560-4ae9322184b7"/*AddInts*/,
+      "Id": "8db60eb5-58f7-40cb-a560-4ae9322184b7"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

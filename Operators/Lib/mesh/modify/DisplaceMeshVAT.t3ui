@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "17a48029-6144-4c79-80f1-a53c87cadd33"/*DisplaceMeshVAT*/,
   "Description": "VAT stands for Vertex Animation Texture. \nThe animation is stored in textures.",
   "InputUis": [
@@ -54,7 +56,7 @@
       }
     },
     {
-      "ChildId": "14bf5436-c756-4ea0-8f57-b6006d45cb42"/*TransformsConstBuffer*/,
+      "ChildId": "14bf5436-c756-4ea0-8f57-b6006d45cb42"/*_TransformsCBuffer*/,
       "Position": {
         "X": 711.48376,
         "Y": 1020.2407

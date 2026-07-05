@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9f3e7a8b-83e9-45f5-a347-7a143f31da78"/*ImageFFTExample*/,
   "Inputs": [],
   "Children": [

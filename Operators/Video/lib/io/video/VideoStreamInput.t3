@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d9a7233d-5d03-4268-a58b-465972852a5b"/*VideoStreamInput*/,
   "Inputs": [
     {

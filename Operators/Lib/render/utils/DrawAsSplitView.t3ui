@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f19a9234-cd23-4229-a794-aa9d97ad8027"/*DrawAsSplitView*/,
   "Description": "Renders the connected draw commands as vertical ViewRect slices with optional labels.\n\nThis can be quite interesting as an effect or, for example, to show multiple variations.",
   "SymbolTags": "66",
@@ -37,6 +39,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0d67c292-49fb-41c4-bc2d-5b96b98045c6"/*SliceViewPort*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Comment": "Sadly, we can't reuse the other [SliceViewPort] because we want to override the camera so the labels are facing the camera.",
       "Position": {
         "X": 892.85364,
@@ -45,6 +48,7 @@
     },
     {
       "ChildId": "0e7e5a81-b2bc-42f6-9c87-460a89f1cdda"/*IntToFloat*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 196.74086,
         "Y": 393.6701
@@ -60,6 +64,7 @@
     },
     {
       "ChildId": "1e4309a6-554f-400f-9f22-0f167a668317"/*Text*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 892.85364,
         "Y": 184.93436
@@ -67,6 +72,7 @@
     },
     {
       "ChildId": "36bc32ce-c53b-41be-aad9-3d9027415dd0"/*Vector2*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 476.74084,
         "Y": 323.6701
@@ -74,6 +80,7 @@
     },
     {
       "ChildId": "3ffdae25-c262-4d90-a20a-270bd1201e56"/*SplitString*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 476.74084,
         "Y": 195.89444
@@ -81,6 +88,7 @@
     },
     {
       "ChildId": "49c28772-0993-4f67-b85b-a857c9d45d1e"/*StringLength*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 612.85364,
         "Y": 429.93436
@@ -103,6 +111,7 @@
     },
     {
       "ChildId": "72333a1c-72b8-4598-b2ac-f0462134bc98"/*CompareInt*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 752.85364,
         "Y": 429.93436
@@ -118,6 +127,7 @@
     },
     {
       "ChildId": "872983c2-dd4d-4e20-a69e-57f2c0fbac54"/*Transform*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 892.85364,
         "Y": 254.93436
@@ -125,6 +135,7 @@
     },
     {
       "ChildId": "a03f9238-314a-4f8f-adb1-74ef635403ae"/*PickStringFromList*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 476.74084,
         "Y": 230.89444
@@ -132,6 +143,7 @@
     },
     {
       "ChildId": "a7013152-234e-47e1-8089-a9e2ff0ebc4b"/*Camera*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 892.85364,
         "Y": 464.9344
@@ -160,6 +172,7 @@
     },
     {
       "ChildId": "eb7bd884-887e-4e87-80da-8d43b6dd8633"/*Execute*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 892.85364,
         "Y": 394.93436
@@ -167,6 +180,7 @@
     },
     {
       "ChildId": "ebb880e6-46b7-4d5a-b1df-47370a46d632"/*Div*/,
+      "SectionId": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Position": {
         "X": 336.74084,
         "Y": 358.6701
@@ -182,7 +196,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "34f78e9d-ee63-4b4f-a598-cf90d9d06f4d",
       "Title": "Draw labels...",

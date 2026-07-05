@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f830faa6-02c1-475c-99aa-c5e0d9ea33b8"/*WLedSerialOutput*/,
   "Inputs": [
     {
@@ -29,6 +29,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "72cfdedc-7999-43c6-9615-bd4cae0a8903"/*LogMessages*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "8a58f4b4-3250-4344-af5c-346929ed2e6f"/*PortName*/,
       "DefaultValue": ""
     },
@@ -37,16 +41,12 @@
       "DefaultValue": 1.0
     },
     {
-      "Id": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Sending*/,
-      "DefaultValue": true
-    },
-    {
       "Id": "ad110199-d20a-48a8-8dc2-892e67e7a6af"/*Reconnect*/,
       "DefaultValue": false
     },
     {
-      "Id": "72cfdedc-7999-43c6-9615-bd4cae0a8903"/*LogMessages*/,
-      "DefaultValue": false
+      "Id": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Sending*/,
+      "DefaultValue": true
     },
     {
       "Id": "ba4441fb-625e-4f49-8e9b-6c5237875f2b"/*BaudRate*/,

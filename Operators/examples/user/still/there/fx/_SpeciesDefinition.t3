@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "924b8cc0-5b4b-41d0-a71b-b26465683910"/*_SpeciesDefinition*/,
   "Inputs": [
     {

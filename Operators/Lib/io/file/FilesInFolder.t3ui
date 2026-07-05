@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f90fcd0a-eab9-4e2a-b393-e8d3a0380823"/*FilesInFolder*/,
   "Description": "Scans a folder for all existing files and creates a list that can be used with [PickFromStringList]\nIt also counts files in a folder and outputs the amount as an integer.\n\nSee the example [FilesInFolderExample] and [FadingSlideShow] for what might be a useful combination\n\nOther interesting related ops: [ReadFile] [RequestUrl] [PickStringPart] [WriteToFile] [GetAttributeFromJsonString]",
   "InputUis": [

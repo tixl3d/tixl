@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b9460cd7-c363-4a6e-8c3e-5c2f84a4aae3"/*_QuizUp*/,
   "Description": "Internal op that renders the skill quest tasks and sends completion messages.",
   "InputUis": [
@@ -37,6 +39,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "01145d68-0339-4885-ac2f-2e004494f290"/*Compare*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 391.84152,
         "Y": 775.2452
@@ -44,6 +47,7 @@
     },
     {
       "ChildId": "14c55cff-423d-4717-a811-4191d400a83e"/*Filled Bar*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 905.58765,
         "Y": 724.20215
@@ -58,6 +62,7 @@
     },
     {
       "ChildId": "2e8a0c8f-3d5c-4912-8906-f6a59bf42c84"/*DelayTriggerChange*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 905.58765,
         "Y": 554.05963
@@ -72,6 +77,7 @@
     },
     {
       "ChildId": "34737c01-9356-4f0b-9942-e4e95a0ad05c"/*All*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 581.11,
         "Y": 1084.7197
@@ -79,6 +85,7 @@
     },
     {
       "ChildId": "37f5baf3-c1ea-4be5-b888-df7f16a949ed"/*Group*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 1539.708,
         "Y": 721.60144
@@ -86,6 +93,7 @@
     },
     {
       "ChildId": "391411b7-9ad3-4838-91cb-ce06460cebab"/*Multiply*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 765.58765,
         "Y": 519.05963
@@ -93,6 +101,7 @@
     },
     {
       "ChildId": "4b027f50-e412-4a28-b0f6-6c72c7972e77"/*Bar Background*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 905.58765,
         "Y": 689.20215
@@ -114,6 +123,7 @@
     },
     {
       "ChildId": "70762678-3f83-443c-8a7a-c11cf57b9978"/*SetFloatVar*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 905.58765,
         "Y": 624.05963
@@ -121,6 +131,7 @@
     },
     {
       "ChildId": "736117d1-911d-4bb6-b79d-5b178befc075"/*Damp*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 140.0,
         "Y": 705.69037
@@ -128,6 +139,7 @@
     },
     {
       "ChildId": "805c54f9-a93e-48f4-afd7-0efae9adddb6"/*Vector2Components*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 0.0,
         "Y": 635.69037
@@ -135,6 +147,7 @@
     },
     {
       "ChildId": "9c19425b-e5c6-4343-87dd-d878f77da80a"/*Layer2d*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Comment": "A terrible hack to update bool.",
       "Position": {
         "X": 905.58765,
@@ -143,6 +156,7 @@
     },
     {
       "ChildId": "9ef58ad0-2945-496d-afb9-e4f4fedc809b"/*Remap*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 625.58765,
         "Y": 759.20215
@@ -150,6 +164,7 @@
     },
     {
       "ChildId": "a396a8ef-299e-44b0-88c9-75d5ae291489"/*ProgressBar*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 1156.0189,
         "Y": 617.32947
@@ -164,6 +179,7 @@
     },
     {
       "ChildId": "b51a152e-02d0-49a8-9623-b8e7057af7c8"/*Remap*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 391.84152,
         "Y": 933.79785
@@ -171,6 +187,7 @@
     },
     {
       "ChildId": "b7b08b7b-aff7-4a13-b184-f42cfd502052"/*Yours*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 1330.4087,
         "Y": 773.6125
@@ -178,6 +195,7 @@
     },
     {
       "ChildId": "bbb8bb7d-be06-4b37-8e4b-e3aae8cac327"/*TriggerAnim*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 391.84152,
         "Y": 845.24524
@@ -185,6 +203,7 @@
     },
     {
       "ChildId": "bc767979-96f4-42cc-a487-c71163475912"/*Remap*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 140.0,
         "Y": 600.69037
@@ -192,6 +211,7 @@
     },
     {
       "ChildId": "be2a38e7-f042-473b-86d8-a07affc857c2"/*BoolToFloat*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 905.58765,
         "Y": 589.05963
@@ -199,6 +219,7 @@
     },
     {
       "ChildId": "c177cf39-d79a-4faf-a9b8-323089ebee74"/*Compare*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Comment": "If Difference too large...",
       "Position": {
         "X": 905.58765,
@@ -221,6 +242,7 @@
     },
     {
       "ChildId": "cea91999-ea74-4a0e-832a-90b1afbc8fde"/*DelayTriggerChange*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 391.84152,
         "Y": 810.2452
@@ -228,6 +250,7 @@
     },
     {
       "ChildId": "cefc889e-272c-4eb7-a294-ea7fcab03411"/*Goal*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 1330.4087,
         "Y": 844.192
@@ -242,6 +265,7 @@
     },
     {
       "ChildId": "f6381442-f1f2-48d6-a0fe-b0b254d1f182"/*Vector2*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 765.58765,
         "Y": 759.20215
@@ -256,6 +280,7 @@
     },
     {
       "ChildId": "f69ba56b-061a-41c7-993d-c157207a4395"/*BoolToFloat*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 765.58765,
         "Y": 1000.1
@@ -263,6 +288,7 @@
     },
     {
       "ChildId": "fc8480e0-a733-4c87-8e63-c31f5900a5d8"/*COMPLETED*/,
+      "SectionId": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Position": {
         "X": 905.58765,
         "Y": 816.0481
@@ -285,7 +311,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
       "Label": "Progress Bar",

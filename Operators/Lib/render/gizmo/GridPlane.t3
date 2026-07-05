@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "935e6597-3d9f-4a79-b4a6-600e8f28861e"/*GridPlane*/,
   "Inputs": [
     {
@@ -101,7 +103,7 @@
       "Outputs": []
     },
     {
-      "Id": "6a42140e-ba87-4aa3-adcf-5a04ba183257"/*TransformsConstBuffer*/,
+      "Id": "6a42140e-ba87-4aa3-adcf-5a04ba183257"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

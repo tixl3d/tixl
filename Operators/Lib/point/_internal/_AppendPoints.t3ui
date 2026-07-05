@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9d3d0582-5e55-4268-9649-07d4dd11d792"/*_AppendPoints*/,
   "Description": "Combines two point buffers.\n\nThis operator has been deprecated. Consider using [CombineBuffer].",
   "InputUis": [
@@ -75,7 +77,7 @@
       }
     },
     {
-      "ChildId": "718e19ae-c237-4f18-b666-27ca3b533f41"/*AddInts*/,
+      "ChildId": "718e19ae-c237-4f18-b666-27ca3b533f41"/*AddInt*/,
       "Position": {
         "X": -236.44493,
         "Y": 412.8652
@@ -122,7 +124,7 @@
       }
     },
     {
-      "ChildId": "e36e9781-336a-4f35-ae6b-95ab83c7de74"/*AddInts*/,
+      "ChildId": "e36e9781-336a-4f35-ae6b-95ab83c7de74"/*AddInt*/,
       "Position": {
         "X": -90.735985,
         "Y": 404.42743

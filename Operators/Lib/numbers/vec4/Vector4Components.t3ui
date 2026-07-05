@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b15e4950-5c72-4655-84bc-c00647319030"/*Vector4Components*/,
   "Description": "Converts a Vector4 (or RGBA Color) into three individual values.\n\nOpposite of [RgbaToColor]",
   "InputUis": [

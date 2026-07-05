@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "10673c38-8c7e-4aa1-8dcd-3f2711c709b5"/*Random*/,
   "Description": "Generates a static random value based on a seed in the predefined range.",
   "SymbolTags": "8",

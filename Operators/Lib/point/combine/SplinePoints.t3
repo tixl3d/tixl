@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "edecd98f-209b-423d-8201-0fd7d590c4cf"/*SplinePoints*/,
   "Inputs": [
     {

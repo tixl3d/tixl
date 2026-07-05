@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f17aba3c-dafc-4cab-9513-ea6bc19bcb15"/*SubDivPattern3d*/,
   "Inputs": [
     {

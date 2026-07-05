@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c12cf584-f6db-4d24-a03a-7801736d2c50"/*DrawTubes*/,
   "Inputs": [
     {
@@ -155,7 +157,7 @@
       "Outputs": []
     },
     {
-      "Id": "3cb5bcf8-929b-47c9-826e-1d57b74d4a37"/*AddInts*/,
+      "Id": "3cb5bcf8-929b-47c9-826e-1d57b74d4a37"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {
@@ -247,7 +249,7 @@
       "Outputs": []
     },
     {
-      "Id": "8f0aa549-eada-4400-8a2d-7e5b435dc9c5"/*TransformsConstBuffer*/,
+      "Id": "8f0aa549-eada-4400-8a2d-7e5b435dc9c5"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e207e194-3f2d-48b6-b195-d1e147b09cca"/*I02j_ChainOverlay*/,
   "Description": "LinearGradient: Chain Overlay",
   "InputUis": [],
@@ -29,7 +29,6 @@
     },
     {
       "ChildId": "8e0ca329-24de-4719-ad61-ddfb3e5f1322"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -37,7 +36,7 @@
     },
     {
       "ChildId": "c1df97b1-7d37-4cb0-a246-90c0fc976274"/*LinearGradient*/,
-      "AnnotationId": "2215066d-6eae-4cb6-aeb2-e0f96980d57f",
+      "SectionId": "2215066d-6eae-4cb6-aeb2-e0f96980d57f",
       "Position": {
         "X": 1306.5621,
         "Y": 2097.3557
@@ -45,7 +44,7 @@
     },
     {
       "ChildId": "ce154adb-d96b-4f04-9939-d9421bfae52e"/*LoadImage*/,
-      "AnnotationId": "2215066d-6eae-4cb6-aeb2-e0f96980d57f",
+      "SectionId": "2215066d-6eae-4cb6-aeb2-e0f96980d57f",
       "Position": {
         "X": 1306.5621,
         "Y": 2062.3557
@@ -61,7 +60,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "2215066d-6eae-4cb6-aeb2-e0f96980d57f",
       "Label": "Solution",
@@ -94,13 +93,5 @@
       "Description": "Select a gradient step to open the Color picker. \nThen use the opacity slider at the bottom. \nAdjust the opacity of the gradient's color steps to complete the challenge.\n",
       "Style": "CallToAction"
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

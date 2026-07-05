@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "122cbf32-b3e5-4db7-b18d-f2af5b10419c"/*DrawPointSpritesShaded*/,
   "Inputs": [
     {
@@ -126,7 +128,7 @@
       "Outputs": []
     },
     {
-      "Id": "56d3b89d-c959-43ae-910b-aa6ee00c6d78"/*AddInts*/,
+      "Id": "56d3b89d-c959-43ae-910b-aa6ee00c6d78"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {
@@ -180,7 +182,7 @@
       "Outputs": []
     },
     {
-      "Id": "94bd3e1c-f6d0-43c5-9c04-8d55c7323a82"/*TransformsConstBuffer*/,
+      "Id": "94bd3e1c-f6d0-43c5-9c04-8d55c7323a82"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

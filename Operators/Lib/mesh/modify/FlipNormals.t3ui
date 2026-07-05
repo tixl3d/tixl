@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0f61b638-7bda-4331-944a-50fdca401223"/*FlipNormals*/,
   "Description": "Reverses the normals of the input mesh. This can be useful for drawing shader \"inside\" surfaces of a mesh.",
   "SymbolTags": "8",
@@ -15,6 +17,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "197f56f4-0a14-4e87-aaa7-d13781b0b008"/*PBRVertex.Stride*/,
+      "SectionId": "b9879f61-fa65-4373-be1a-094c36ab9583",
       "Position": {
         "X": 88.621124,
         "Y": 1066.9531
@@ -22,6 +25,7 @@
     },
     {
       "ChildId": "1d5a7084-6726-4488-bac6-6138bde8d52c"/*ComputeShaderStage*/,
+      "SectionId": "b9879f61-fa65-4373-be1a-094c36ab9583",
       "Position": {
         "X": 450.96606,
         "Y": 867.6275
@@ -29,6 +33,7 @@
     },
     {
       "ChildId": "3f2e7e43-8e1c-4d2f-8a56-2715164e948c"/*GetBufferComponents*/,
+      "SectionId": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Position": {
         "X": -45.571976,
         "Y": 392.5169
@@ -36,6 +41,7 @@
     },
     {
       "ChildId": "5cabf556-9310-4217-82a0-db1a9b57360d"/*GetBufferComponents*/,
+      "SectionId": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Position": {
         "X": 234.42802,
         "Y": 497.5169
@@ -50,6 +56,7 @@
     },
     {
       "ChildId": "69ffd097-1f14-4328-9916-5f0f00f75b2f"/*ExecuteBufferUpdate*/,
+      "SectionId": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Position": {
         "X": 456.773,
         "Y": 403.19116
@@ -57,6 +64,7 @@
     },
     {
       "ChildId": "75a8fe8f-cb1c-4f1f-8d95-457660c29126"/*GetBufferComponents*/,
+      "SectionId": "b9879f61-fa65-4373-be1a-094c36ab9583",
       "Position": {
         "X": 228.62112,
         "Y": 1101.9531
@@ -64,6 +72,7 @@
     },
     {
       "ChildId": "812bb75c-df6c-4eae-8f21-f20fade8d4cd"/*StructuredBufferWithViews*/,
+      "SectionId": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Position": {
         "X": 234.42802,
         "Y": 427.5169
@@ -71,6 +80,7 @@
     },
     {
       "ChildId": "99f61513-879b-4fd5-9fc4-ff914b470b3d"/*ComputeShaderStage*/,
+      "SectionId": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Position": {
         "X": 456.77298,
         "Y": 263.19116
@@ -78,6 +88,7 @@
     },
     {
       "ChildId": "b2d979cf-39d1-427c-82f9-7d2aeafd2245"/*ComputeShader*/,
+      "SectionId": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Position": {
         "X": 94.42804,
         "Y": 264.3413
@@ -85,6 +96,7 @@
     },
     {
       "ChildId": "b4626483-92d1-4568-92ac-531196a8717f"/*ComputeShader*/,
+      "SectionId": "b9879f61-fa65-4373-be1a-094c36ab9583",
       "Position": {
         "X": 88.621124,
         "Y": 868.7778
@@ -92,6 +104,7 @@
     },
     {
       "ChildId": "c6e4d87e-cd70-4e3d-bf51-dc0b3238e9a2"/*CalcDispatchCount*/,
+      "SectionId": "b9879f61-fa65-4373-be1a-094c36ab9583",
       "Position": {
         "X": 228.62112,
         "Y": 903.7778
@@ -99,6 +112,7 @@
     },
     {
       "ChildId": "d92b11c5-1ef4-4d82-8d37-8a48c0b724fb"/*PBRVertex.Stride*/,
+      "SectionId": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Position": {
         "X": 94.428024,
         "Y": 462.5169
@@ -106,6 +120,7 @@
     },
     {
       "ChildId": "dd745500-6d65-4a6d-bd43-f8bc72af34a8"/*StructuredBufferWithViews*/,
+      "SectionId": "b9879f61-fa65-4373-be1a-094c36ab9583",
       "Position": {
         "X": 228.62112,
         "Y": 1031.9531
@@ -113,6 +128,7 @@
     },
     {
       "ChildId": "e2506e04-0e2b-43dd-b6e1-d1a5f842084f"/*CalcDispatchCount*/,
+      "SectionId": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Position": {
         "X": 234.42804,
         "Y": 299.3413
@@ -120,6 +136,7 @@
     },
     {
       "ChildId": "e269c2a4-c75f-4961-a3d5-5dc3ec0819d9"/*ExecuteBufferUpdate*/,
+      "SectionId": "b9879f61-fa65-4373-be1a-094c36ab9583",
       "Position": {
         "X": 450.96606,
         "Y": 1007.62726
@@ -127,6 +144,7 @@
     },
     {
       "ChildId": "e4de1c73-43cc-450b-bed6-6b4ed81d95ef"/*GetBufferComponents*/,
+      "SectionId": "b9879f61-fa65-4373-be1a-094c36ab9583",
       "Position": {
         "X": -51.378876,
         "Y": 996.9532
@@ -149,7 +167,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "5946dee3-e912-428c-8303-c2695ad826bb",
       "Label": "Flip Normal Vectors",

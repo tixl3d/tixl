@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f99cb938-205d-4605-8c17-e0be67f25d98"/*GetAPrime*/,
   "Description": "Computes a prime number\n\nUseful with [IntToString] [IntToFloat]",
   "SymbolTags": "8",

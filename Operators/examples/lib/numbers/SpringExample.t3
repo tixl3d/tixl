@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "04b8f508-2101-42dc-8d91-60b585bc561e"/*SpringExample*/,
   "Inputs": [],
   "Children": [
@@ -993,6 +993,11 @@
     "Export": {
       "DefaultWindowMode": 1,
       "EnablePlaybackControlWithKeyboard": true
+    },
+    "Proxy": {
+      "Format": 1,
+      "Resolution": 0.5,
+      "UseForPreview": true
     }
   }
 }

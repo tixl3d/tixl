@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a3ceb788-4055-4556-961b-63b7221f93e7"/*MidiClip*/,
   "Inputs": [
     {

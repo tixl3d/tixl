@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3dd015ed-5d7a-4b0e-a6da-958c58f716bb"/*GridPositionExample*/,
   "Inputs": [],
   "Children": [

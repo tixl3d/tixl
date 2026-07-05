@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ca6f09ec-bbc4-4365-8210-bc10cd8d9f94"/*MergeIntLists*/,
   "Inputs": [
     {

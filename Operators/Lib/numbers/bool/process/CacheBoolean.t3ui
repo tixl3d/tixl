@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6502c40f-a38e-4bd9-8dbf-90e35079572d"/*CacheBoolean*/,
   "Description": "Prevents multiple updates by forwarding a boolean value that was computed earlier.",
   "InputUis": [

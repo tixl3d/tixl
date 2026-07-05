@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3af25959-fd3f-4608-b521-5860d82554df"/*MockStrings*/,
   "Description": "A small selection of strings of different categories.",
   "SymbolTags": "8",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0ecb95ca-7db2-4a11-a6e5-214ae91ec268"/*EaseVec3Keys*/,
   "Description": "[EaseKeys] [EaseVec2Keys]",
   "InputUis": [

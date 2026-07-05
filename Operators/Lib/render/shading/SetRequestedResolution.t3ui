@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5b3a0c1d-87d6-4d88-ae20-ff9f95049ecf"/*SetRequestedResolution*/,
   "Description": "Set the requested resolution (similar to the Resolution drop-down of the output windows).\n\nPlease be sure to understand how Tooll handles resolutions before using this operator. Check the tutorial linked below.\n\nAlso see: [RequestedResolution]",
   "SymbolTags": "8",
@@ -36,6 +38,5 @@
         "Y": 600.0
       }
     }
-  ],
-  "Links": []
+  ]
 }

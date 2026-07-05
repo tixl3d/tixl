@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "11958088-6358-4df1-b80f-c45fa6889a2e"/*PickGradient*/,
   "Description": "Picks one of the connected gradients",
   "InputUis": [

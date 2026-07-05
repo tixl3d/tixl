@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3f0f0c40-482d-4d79-a201-b4651a0cd3a8"/*SplitMeshVertices*/,
   "Inputs": [
     {

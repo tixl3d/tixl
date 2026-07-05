@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "40fc6dd9-5480-414d-8204-07e8142215a9"/*ImageFFT*/,
   "Inputs": [
     {
@@ -320,7 +322,7 @@
       "Outputs": []
     },
     {
-      "Id": "ed571f57-7c39-43ab-a12d-8da32ccf8497"/*AddInts*/,
+      "Id": "ed571f57-7c39-43ab-a12d-8da32ccf8497"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [],
       "Outputs": []

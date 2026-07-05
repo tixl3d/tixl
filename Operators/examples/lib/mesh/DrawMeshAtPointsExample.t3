@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4f113e4a-eb27-4e40-8843-d15d54610f33"/*DrawMeshAtPointsExample*/,
   "Inputs": [],
   "Children": [
@@ -230,7 +232,7 @@
       "Outputs": []
     },
     {
-      "Id": "7abc9c08-fc06-4ae2-8b26-56129187c379"/*DrawLinesAlt*/,
+      "Id": "7abc9c08-fc06-4ae2-8b26-56129187c379"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {

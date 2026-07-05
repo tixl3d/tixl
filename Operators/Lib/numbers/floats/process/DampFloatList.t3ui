@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c30ba288-9e40-4636-beb5-68401d91fe37"/*DampFloatList*/,
   "Description": "Damps (i.e., smoothens or filters) every value in an incoming float list.\n\nOther damping functions: [Damp], [DampAngle], [DampVec2], and [DampVec3].\n\nTips:\n- This operator is useful alongside FFT operators such as [AudioFrequencies] to create smoother frequency graphs.",
   "InputUis": [

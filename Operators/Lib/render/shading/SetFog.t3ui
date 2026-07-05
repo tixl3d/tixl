@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "74cbfce0-f8b8-46a1-b5d6-38477d4eec99"/*SetFog*/,
   "Description": "Adds fog to the incoming scene.\n\nProTip: If large meshes (for example a \"quadmesh\" as a ground plane) are not properly obscured by the fog, one possible reason could be that the tessellation is not high enough.\n\nUseful combinations [ColorGradeDepth]. An operator that allows objects far away from the camera to be colored differently than close objects.\n\nAlso see [SetEnvironment] and [DepthBufferAsGrayScale]",
   "SymbolTags": "1",

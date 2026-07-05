@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "085b7841-9502-4b49-896e-3b1fa023f1bf"/*CombineMaterialChannels*/,
   "Description": "Combines roughness, metallic, and ambient occlusion texture maps that are loaded with [LoadImage] into a single texture for [SetMaterial] to create PBR materials.\n\nIf no normal map is available, [NormalMap] can be used to generate one.\n\nOlder version: [CombineMaterialChannels2]",
   "SymbolTags": "8",
@@ -94,7 +96,7 @@
       }
     },
     {
-      "ChildId": "3cc52076-b74f-4131-a49a-5153a7a9a6e0"/*TransformsConstBuffer*/,
+      "ChildId": "3cc52076-b74f-4131-a49a-5153a7a9a6e0"/*_TransformsCBuffer*/,
       "Position": {
         "X": 271.97748,
         "Y": 89.51378

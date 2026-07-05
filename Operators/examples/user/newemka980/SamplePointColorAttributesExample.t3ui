@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f4528476-298d-42b7-8138-3916bea2da6e"/*SamplePointColorAttributesExample*/,
   "Description": "",
   "SymbolTags": "2",
@@ -20,6 +22,7 @@
     },
     {
       "ChildId": "10168210-b0ef-4917-a34e-2050a42a6fdf"/*Time 10.000*/,
+      "SectionId": "684c6c2d-583e-40e3-bedf-c055806e4632",
       "Position": {
         "X": 970.03125,
         "Y": -147.60257
@@ -27,6 +30,7 @@
     },
     {
       "ChildId": "150fa49d-055d-4fef-af9e-49103441606b"/*Time 0.010*/,
+      "SectionId": "4c5673b2-ee55-417a-9fe8-ffde739faf7b",
       "Position": {
         "X": 968.7439,
         "Y": -285.3278
@@ -41,6 +45,7 @@
     },
     {
       "ChildId": "1961f04e-769f-4ebd-bf09-1c704d2c26ab"/*AddNoise*/,
+      "SectionId": "4c5673b2-ee55-417a-9fe8-ffde739faf7b",
       "Comment": "We use the F1 as weight to control the noise",
       "Position": {
         "X": 1108.7439,
@@ -49,6 +54,7 @@
     },
     {
       "ChildId": "1d937046-3861-4b5b-9a60-aaff525ac9e1"/*TriggerAnim*/,
+      "SectionId": "4c5673b2-ee55-417a-9fe8-ffde739faf7b",
       "Position": {
         "X": 968.7439,
         "Y": -320.3278
@@ -77,6 +83,7 @@
     },
     {
       "ChildId": "476b6ff1-5f72-4ae6-b7b6-19870c8c53b3"/*AttributesFromImageChannels*/,
+      "SectionId": "4c5673b2-ee55-417a-9fe8-ffde739faf7b",
       "Position": {
         "X": 1108.7439,
         "Y": -460.3278
@@ -112,6 +119,7 @@
     },
     {
       "ChildId": "60658c6f-ad40-403a-9e69-aecc43df21d5"/*RandomizePoints*/,
+      "SectionId": "684c6c2d-583e-40e3-bedf-c055806e4632",
       "Position": {
         "X": 1110.0312,
         "Y": -182.60257
@@ -119,6 +127,7 @@
     },
     {
       "ChildId": "6b5a0d53-eba9-43f6-8251-f21519bdd465"/*Scale*/,
+      "SectionId": "6236b75c-515c-4857-8e32-9dbe69c095fc",
       "Style": "Resizable",
       "Size": {
         "X": 127.659935,
@@ -167,6 +176,7 @@
     },
     {
       "ChildId": "aa3005be-56c9-49a8-abb9-0c60979220eb"/*SamplePointColorAttributes*/,
+      "SectionId": "6236b75c-515c-4857-8e32-9dbe69c095fc",
       "Position": {
         "X": 1108.7439,
         "Y": -633.33624
@@ -188,6 +198,7 @@
     },
     {
       "ChildId": "cd0f456a-6389-458f-9d5c-6996be3e7b3f"/*Blast it!*/,
+      "SectionId": "9739d087-c13b-4218-a3d6-467f0a831b77",
       "Position": {
         "X": 375.37372,
         "Y": -249.55432
@@ -224,7 +235,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "4c5673b2-ee55-417a-9fe8-ffde739faf7b",
       "Title": "We sample a texture\nto set F1 in order to\ncontrol AddNoise",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "24b56330-b9c5-4454-a398-0500b0422ce1"/*Sqrt*/,
   "Description": "Computes the square root of a float value.\nTIP: You can use the [Pow] operator to compute roots for other bases by using 1/base for the exponent.",
   "SymbolTags": "8",

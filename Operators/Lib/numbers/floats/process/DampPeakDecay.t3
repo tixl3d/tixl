@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ef3a1411-e88c-43a8-83b4-931fdbf16c75"/*DampPeakDecay*/,
   "Inputs": [
     {

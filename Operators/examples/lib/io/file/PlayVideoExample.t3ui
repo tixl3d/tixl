@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1d56e2c6-9199-41e7-9404-24f4f6b75044"/*PlayVideoExample*/,
   "Description": "Shows how to playback multiple video files in a directory.\nSkip by clicking left/right.\n\nNote: this op needs timeline playback to run.",
   "InputUis": [
@@ -14,6 +16,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "01056ddd-d6d8-4d41-8604-478bdb93b89f"/*CountInt*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -765.1652,
         "Y": 312.80887
@@ -21,6 +24,7 @@
     },
     {
       "ChildId": "03b66837-47c6-4ffd-bc32-f9fdcfe77aec"/*And*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -948.78015,
         "Y": 284.1711
@@ -42,6 +46,7 @@
     },
     {
       "ChildId": "0d5f8855-d7f8-430e-87c8-bde7e6e98255"/*HasBooleanChanged*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -765.1652,
         "Y": 277.8089
@@ -105,6 +110,7 @@
     },
     {
       "ChildId": "3792ac68-f186-4127-87dc-f7dae1dfaada"/*MouseInput*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -1444.9406,
         "Y": 204.2945
@@ -119,6 +125,7 @@
     },
     {
       "ChildId": "3cdeb865-8a2b-4824-b1e2-418ed79d0806"/*BoolToInt*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -948.78015,
         "Y": 354.1711
@@ -126,6 +133,7 @@
     },
     {
       "ChildId": "4255e55f-8bed-47d2-9a76-7e0c10f1c499"/*Any*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -765.1652,
         "Y": 207.80888
@@ -161,6 +169,7 @@
     },
     {
       "ChildId": "6345a3a8-7ce9-408c-971d-c3c95ebb49ee"/*GetFloatVar*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -765.1652,
         "Y": 137.80888
@@ -196,6 +205,7 @@
     },
     {
       "ChildId": "814a22ad-9d35-49cf-90fc-31ccea04784f"/*Compare*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -1088.7802,
         "Y": 319.1711
@@ -203,6 +213,7 @@
     },
     {
       "ChildId": "8405272c-6ceb-4f54-9a4d-3a3a84a9b6c9"/*Vector2Components*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -1228.7802,
         "Y": 319.1711
@@ -217,6 +228,7 @@
     },
     {
       "ChildId": "8cb6c24e-0d6d-4e94-a929-47e7cfadbeb2"/*Compare*/,
+      "SectionId": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Position": {
         "X": -765.1652,
         "Y": 172.80888
@@ -316,7 +328,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "8b566dcd-0039-4f3c-bc7a-3f7650963153",
       "Title": "Skip to next/previous on mouse clicks",

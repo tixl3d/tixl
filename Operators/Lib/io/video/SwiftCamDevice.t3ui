@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5ea3d627-e44b-4531-9f06-4503a1a4dd0e"/*SwiftCamDevice*/,
   "Description": "Captures live video from a Swift Imaging scientific USB camera via the vendor SDK.\n\nDelivers BGRA8 frames into a Texture2D using the SDK's pull-mode callback. Hardware ROI, exposure and gain control, automatic recovery from disconnects.\n\nRequires the Swift Imaging SDK to be installed (provides swiftcam.dll at %LOCALAPPDATA%\\TiXL\\NativeDeps\\). If the DLL is missing, the Status output explains how to install it. Trigger Reconnect after install.\n\nAKA: swift, swiftcam, scientific camera, microscope camera",
   "InputUis": [

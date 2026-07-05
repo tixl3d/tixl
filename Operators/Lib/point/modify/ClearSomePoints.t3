@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e570b2e6-6e35-4a14-ade6-f377494fe96d"/*ClearSomePoints*/,
   "Inputs": [
     {

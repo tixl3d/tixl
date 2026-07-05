@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0bec016a-5e1b-467a-8273-368d4d6b9935"/*Trigger*/,
   "Inputs": [
     {

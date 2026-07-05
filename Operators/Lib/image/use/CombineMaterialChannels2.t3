@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3d0ad320-1055-4f71-b3c0-0e77261ca587"/*CombineMaterialChannels2*/,
   "Inputs": [
     {

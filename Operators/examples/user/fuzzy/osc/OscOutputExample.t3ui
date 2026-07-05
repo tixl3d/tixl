@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "48e284ff-cfcc-4d6c-83d4-256c9380de61"/*OscOutputExample*/,
   "Description": "Shows what the OscOutput operator can do.",
   "InputUis": [],
@@ -33,6 +35,7 @@
     },
     {
       "ChildId": "8b10c6d6-5d05-40db-82c4-4f01729e7b71"/*String*/,
+      "SectionId": "d28956a0-5be2-4264-b73a-dfe0668896da",
       "Position": {
         "X": 417.6133,
         "Y": -0.8947487
@@ -78,6 +81,7 @@
     },
     {
       "ChildId": "d77b1417-3d8b-403c-897d-e65973d98be2"/*IntValue*/,
+      "SectionId": "d28956a0-5be2-4264-b73a-dfe0668896da",
       "Position": {
         "X": 417.6133,
         "Y": 42.10525
@@ -112,7 +116,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "d28956a0-5be2-4264-b73a-dfe0668896da",
       "Title": "address:port, only dotted IPv4 are supported.",

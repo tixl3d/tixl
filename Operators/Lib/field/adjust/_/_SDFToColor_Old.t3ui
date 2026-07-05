@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "eff96322-0e4e-42d6-93de-18451b56ae31"/*_SDFToColor_Old*/,
   "Description": "Remaps an SDF function distance to colors or values.\n\nThis can be useful to convert a Signed Distance Function with a potentially very large distance to a value range that can be used for colors for effects.",
   "InputUis": [

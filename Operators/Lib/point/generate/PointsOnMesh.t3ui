@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "17188f49-1243-4511-a46c-1804cae10768"/*PointsOnMesh*/,
   "Description": "Get evenly distributed points on a mesh. Note that the initial evaluation of the mesh is extremely slow and should not be done on every frame.\n\nUseful combinations [LoadObj] and [DrawPoints]\n\nSimilar Operators:\nTo create a point at each vertex of the connected mesh [MeshVerticesToPoints] can be used.\nTo create a point at each face of the connected mesh [MeshFacesPoints] can be used.\n\nSimilar: [GridPoints], [RadialPoints], [SpherePoints],",
   "SymbolTags": "1",
@@ -61,6 +63,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "085c5dcb-67c4-4c20-bf2c-9841f5d2423e"/*ComputeShaderStage*/,
+      "SectionId": "54d3bbbf-bd30-4374-a969-c09e93b1f93e",
       "Style": "Resizable",
       "Size": {
         "X": 110.60479,
@@ -73,6 +76,7 @@
     },
     {
       "ChildId": "149c7a76-cd3a-4f71-8369-26ff90a8e3b8"/*GetSRVProperties*/,
+      "SectionId": "54d3bbbf-bd30-4374-a969-c09e93b1f93e",
       "Position": {
         "X": 412.8947,
         "Y": 1494.771
@@ -80,6 +84,7 @@
     },
     {
       "ChildId": "27496053-42a7-4423-91e3-f0f0e6f3df64"/*GetBufferComponents*/,
+      "SectionId": "54d3bbbf-bd30-4374-a969-c09e93b1f93e",
       "Position": {
         "X": 331.94485,
         "Y": 1302.4656
@@ -87,6 +92,7 @@
     },
     {
       "ChildId": "37c16acc-8a78-4811-8580-809623f685be"/*StructuredBufferWithViews*/,
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Position": {
         "X": 521.99414,
         "Y": 2093.9463
@@ -108,6 +114,7 @@
     },
     {
       "ChildId": "3e90e88d-9941-460a-b5cd-3bcb38fb991d"/*FloatsToBuffer*/,
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Position": {
         "X": 778.688,
         "Y": 1929.1914
@@ -122,6 +129,7 @@
     },
     {
       "ChildId": "47ac598c-e3fc-48d2-bf8e-49d1043866f7"/*GetBufferComponents*/,
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Position": {
         "X": 778.688,
         "Y": 2041.1914
@@ -129,6 +137,7 @@
     },
     {
       "ChildId": "4ad2c9fd-fc7a-4ea3-9d47-2bf5843f0f0c"/*ComputeShader*/,
+      "SectionId": "54d3bbbf-bd30-4374-a969-c09e93b1f93e",
       "Position": {
         "X": 331.94485,
         "Y": 1259.4656
@@ -150,6 +159,7 @@
     },
     {
       "ChildId": "628ab010-0b38-46c4-8123-7128d352fa85"/*StructuredBufferWithViews*/,
+      "SectionId": "54d3bbbf-bd30-4374-a969-c09e93b1f93e",
       "Position": {
         "X": 562.8947,
         "Y": 1494.771
@@ -171,6 +181,7 @@
     },
     {
       "ChildId": "7b3a74c4-f259-4952-8aa8-924127aa361f"/*ClampInt*/,
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Position": {
         "X": 327.27686,
         "Y": 2022.8219
@@ -185,6 +196,7 @@
     },
     {
       "ChildId": "8faa6788-a136-4773-b94d-80553cf8ea4e"/*GetBufferComponents*/,
+      "SectionId": "54d3bbbf-bd30-4374-a969-c09e93b1f93e",
       "Position": {
         "X": 712.8947,
         "Y": 1494.771
@@ -192,6 +204,7 @@
     },
     {
       "ChildId": "9017e90f-053e-4b03-b61e-5b2640c25e26"/*ComputeShader*/,
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Position": {
         "X": 533.9872,
         "Y": 1827.5835
@@ -206,6 +219,7 @@
     },
     {
       "ChildId": "b7f00bf2-b902-42e9-acbf-a0b9150463d5"/*SamplerState*/,
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Position": {
         "X": 778.688,
         "Y": 1998.1914
@@ -213,6 +227,7 @@
     },
     {
       "ChildId": "bc86792e-3181-4ec6-8dc9-07193acb34b2"/*ComputeShaderStage*/,
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Style": "Resizable",
       "Size": {
         "X": 111.4145,
@@ -232,6 +247,7 @@
     },
     {
       "ChildId": "d1d57ff8-f7d4-4e6a-b57b-ed2d3aa0294a"/*GetBufferComponents*/,
+      "SectionId": "54d3bbbf-bd30-4374-a969-c09e93b1f93e",
       "Position": {
         "X": 331.94485,
         "Y": 1358.4656
@@ -239,6 +255,7 @@
     },
     {
       "ChildId": "d69cda40-b96d-40b8-867b-84f807f2f6e2"/*CalcDispatchCount*/,
+      "SectionId": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Position": {
         "X": 778.688,
         "Y": 1860.1914
@@ -261,7 +278,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "0a625795-2500-41f5-aadc-26eb9065716c",
       "Title": "Emit Points",

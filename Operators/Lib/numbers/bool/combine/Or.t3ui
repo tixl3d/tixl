@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9786dec1-b0fc-49d7-bf79-c9a1d457f386"/*Or*/,
   "Description": "Returns true if one of its inputs is true. Consider using [Any] if you want to test more than two booleans.",
   "SymbolTags": "8",

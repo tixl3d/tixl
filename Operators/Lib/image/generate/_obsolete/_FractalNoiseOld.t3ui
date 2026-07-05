@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "97eb35ec-2825-4f63-8fdf-3fe38fa9e652"/*_FractalNoiseOld*/,
   "Description": "Generates animated 2D Perlin noise. \n\nNOTE: The legacy version is very resource-intensive at higher resolutions and might not run in real-time at 1080p.\nThe OpenSimplex is a faster implementation from 'https://www.shadertoy.com/view/ttdGR8'.",
   "InputUis": [

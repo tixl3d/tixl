@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "000e08d0-669f-48df-9083-7aa0a43bbc05"/*GpuMeasure*/,
   "Description": "Measures the time in milliseconds that the GPU (graphics card) needs to render the current image.\n\nSimilar to the Performance display top left next to the menu in TiXL's UI.",
   "SymbolTags": "8",

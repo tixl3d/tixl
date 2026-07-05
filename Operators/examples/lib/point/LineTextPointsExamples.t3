@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c49ebc17-b730-4e86-9ea7-2c404e4be3ad"/*LineTextPointsExamples*/,
   "Inputs": [],
   "Children": [
@@ -341,31 +343,22 @@
                 {
                   "Time": 0.0032,
                   "Value": 0.08437502384185791,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Horizontal",
-                  "OutEditMode": "Horizontal",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Horizontal",
+                  "OutInterpolation": "Horizontal",
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 0.1111,
                   "Value": 1.1125000715255737,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Horizontal",
-                  "OutEditMode": "Horizontal",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Horizontal",
+                  "OutInterpolation": "Horizontal",
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 0.9937,
                   "Value": 0.04062497615814209,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Horizontal",
-                  "OutEditMode": "Horizontal",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Horizontal",
+                  "OutInterpolation": "Horizontal",
                   "OutTangentAngle": -3.141592653589793
                 }
               ]

@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ea7536a2-f69b-4964-a04c-4474bfacfa56"/*PixelateExample*/,
   "Description": "This example is highly inspired by a Threedashes video on YouTube\n\nCheers! \n\nNewemka",
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "05a2388d-9a10-40f6-9df4-bf6d43152e31"/*IntDiv*/,
+      "ChildId": "05a2388d-9a10-40f6-9df4-bf6d43152e31"/*DivInt*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 684.21094,
         "Y": 491.33868
@@ -12,6 +15,7 @@
     },
     {
       "ChildId": "0d17f3a0-eec2-4ddb-bc41-febd434e7292"/*CheckerBoard*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1284.2109,
         "Y": 491.33868
@@ -19,6 +23,7 @@
     },
     {
       "ChildId": "11da2e20-bfca-487b-884c-450484d0aee7"/*Int2*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1437.4321,
         "Y": 777.01715
@@ -26,6 +31,7 @@
     },
     {
       "ChildId": "21632168-c3f6-40ad-8731-fe0e22edf1ce"/*RequestedResolution*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 237.43213,
         "Y": 793.5767
@@ -33,6 +39,7 @@
     },
     {
       "ChildId": "21c58078-fc2c-4031-9cbe-8bbf3f8bbac2"/*Shear*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1137.4321,
         "Y": 278.01715
@@ -40,6 +47,7 @@
     },
     {
       "ChildId": "2f33fda1-e469-4e26-82f2-786051756820"/*Vector2*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1134.2109,
         "Y": 491.33868
@@ -47,6 +55,7 @@
     },
     {
       "ChildId": "31815d73-d3cb-46a8-8c15-5f5b14cbc6a6"/*MockStrings*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 304.1048,
         "Y": 280.1646
@@ -54,6 +63,7 @@
     },
     {
       "ChildId": "39263bf5-36ce-473c-a31f-5629ad5a8d31"/*ChangeCase*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 630.32245,
         "Y": 279.47125
@@ -61,6 +71,7 @@
     },
     {
       "ChildId": "43c5fedf-1f8d-4234-b602-20a6b1ca8e8f"/*Int2*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1437.4321,
         "Y": 1032.0171
@@ -68,6 +79,7 @@
     },
     {
       "ChildId": "4932d364-81d7-49e3-8e78-b4ebd87f5474"/*Pixelate*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1587.4321,
         "Y": 976.01715
@@ -75,6 +87,7 @@
     },
     {
       "ChildId": "4afb1707-58f8-4d21-8e28-13876e6dc7f3"/*Blend*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1437.4321,
         "Y": 278.01715
@@ -82,6 +95,7 @@
     },
     {
       "ChildId": "616ba222-19c2-4df0-85d0-85f235f97abc"/*Displace*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1737.4321,
         "Y": 278.01715
@@ -89,6 +103,7 @@
     },
     {
       "ChildId": "6b7b28fa-af28-4fc2-87e8-94962a256b9f"/*IntToFloat*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 227.95703,
         "Y": 988.0061
@@ -96,6 +111,7 @@
     },
     {
       "ChildId": "7e074f05-e5b2-4356-86ee-e0f903bc16a9"/*Group*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 997.4321,
         "Y": 278.01715
@@ -103,6 +119,7 @@
     },
     {
       "ChildId": "84665f36-de4a-4280-9966-744b02e64ab7"/*IntValue*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 542.07074,
         "Y": 668.335
@@ -110,6 +127,7 @@
     },
     {
       "ChildId": "8959e601-b099-47ab-9516-25e01944b700"/*FractalNoise*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Comment": "Pay attention, both colors are green ",
       "Position": {
         "X": 1427.2311,
@@ -118,6 +136,7 @@
     },
     {
       "ChildId": "8e304a36-6d69-49b7-b6fe-3b0e5ab04d1e"/*RenderTarget*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1287.4321,
         "Y": 278.01715
@@ -125,6 +144,7 @@
     },
     {
       "ChildId": "902158fb-3212-4fce-871f-c8b83ba63fbe"/*Text*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 857.4321,
         "Y": 313.01715
@@ -132,6 +152,7 @@
     },
     {
       "ChildId": "97aba6b4-bdfd-4848-936e-1a97ad6ae9d7"/*CountInt*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 47.307693,
         "Y": 419.97363
@@ -139,6 +160,7 @@
     },
     {
       "ChildId": "a089bc11-1d07-4446-b53e-f3e70ef2f293"/*Pixelate*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1587.4321,
         "Y": 278.01715
@@ -153,6 +175,7 @@
     },
     {
       "ChildId": "b0a92317-f025-40f8-b6f3-c27d4cd10d8d"/*IntToFloat*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 834.21094,
         "Y": 491.33868
@@ -160,6 +183,7 @@
     },
     {
       "ChildId": "b25249ba-18ca-4504-bbfe-527b0793771f"/*Div*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 984.21094,
         "Y": 491.33868
@@ -167,6 +191,7 @@
     },
     {
       "ChildId": "ca235da4-099d-4f0a-b74e-256d56ba182b"/*PickStringPart*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 454.1048,
         "Y": 280.1646
@@ -174,13 +199,15 @@
     },
     {
       "ChildId": "cfbfff48-6f91-4d27-a210-50a298cc6712"/*Text*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 857.4321,
         "Y": 278.01715
       }
     },
     {
-      "ChildId": "d8434d37-0a75-4241-90c2-38f104101b12"/*IntDiv*/,
+      "ChildId": "d8434d37-0a75-4241-90c2-38f104101b12"/*DivInt*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 387.43213,
         "Y": 574.01715
@@ -188,6 +215,7 @@
     },
     {
       "ChildId": "ddab5752-1de2-4bca-b8de-3d05dc1f8fc8"/*AnimValue*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": -102.69231,
         "Y": 419.97363
@@ -195,6 +223,7 @@
     },
     {
       "ChildId": "e08b3ba1-d571-4a73-98aa-28069f2f40ef"/*AnimValue*/,
+      "SectionId": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Position": {
         "X": 1557.9686,
         "Y": 194.47684
@@ -210,7 +239,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "17de3d1b-e742-49b4-aa3d-67dd52d693d4",
       "Label": "It works better with multiple of 2 resolution",
@@ -229,6 +258,5 @@
         "Y": 1021.98254
       }
     }
-  ],
-  "Links": []
+  ]
 }

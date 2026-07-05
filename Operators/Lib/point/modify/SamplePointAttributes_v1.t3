@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b3de7a93-e921-4e43-8a56-6c84b2d18b74"/*SamplePointAttributes_v1*/,
   "Inputs": [
     {
@@ -418,7 +420,7 @@
       "Outputs": []
     },
     {
-      "Id": "e00506ed-5df1-410e-ac37-b37e967d8c1e"/*TransformsConstBuffer*/,
+      "Id": "e00506ed-5df1-410e-ac37-b37e967d8c1e"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

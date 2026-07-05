@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a469ca9f-a7f9-46b8-b34c-0a1c109e1222"/*ExtrudeCurvesExample*/,
   "Inputs": [],
   "Children": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6e67d136-9285-48c6-a557-0a07361fc847"/*BlendScenes*/,
   "Inputs": [
     {
@@ -66,7 +68,7 @@
       "Outputs": []
     },
     {
-      "Id": "9d6598df-7306-4cf1-b1ed-ed4a8f1b2e13"/*AddInts*/,
+      "Id": "9d6598df-7306-4cf1-b1ed-ed4a8f1b2e13"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

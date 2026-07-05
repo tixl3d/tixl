@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.2",
+  "TixlVersion": "4.2.0.3",
   "Id": "836f211f-b387-417c-8316-658e0dc6e117"/*DrawLines*/,
   "Description": "Draws a point buffer as lines. The lines will be aligned to the camera, but their width will shrink with distance to the camera. You can override this with the ScaleWithDistance parameter. We use the point’s W attribute as a scale factor for the line width. If the W attribute of a point is NaN (Not a Number), that point is not being drawn and acts as a separator between the adjacent line segments. This allows a point buffer to contain multiple disconnected line segments.\nDrawLines ignores the orientation defined by the points. Consider using [DrawRibbons] if you need consistent orientation.\n\n## Some caveats\n\nLong line segments that intersect the camera plane (i.e., one point is in front of the camera and the other behind the camera) will not be rendered correctly. Please consider using [DrawRaypoints] for this.\n\n## Performance considerations:\n\nDrawing lines is fast. Depending on your graphics card, you can draw millions of lines per frame. Performance will be impacted by the length of your lines rather than the point count. This is directly related to your render target’s resolution and multi-sampling level (MSAA).",
   "SymbolTags": "1",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "acdd78b1-4e66-4fd0-a36b-5318670fefd4"/*ChangeCase*/,
   "Description": "Changes a case of string to upper or lower case.",
   "SymbolTags": "1",

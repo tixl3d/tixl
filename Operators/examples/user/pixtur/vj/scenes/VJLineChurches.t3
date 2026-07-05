@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "60b237ce-5096-4aa5-bc56-76ae8d8016cd"/*VJLineChurches*/,
   "Inputs": [],
   "Children": [
@@ -284,7 +286,7 @@
       "Outputs": []
     },
     {
-      "Id": "48ec0517-da17-4b4f-b47a-ef8161f75ab9"/*AddInts*/,
+      "Id": "48ec0517-da17-4b4f-b47a-ef8161f75ab9"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [],
       "Outputs": []

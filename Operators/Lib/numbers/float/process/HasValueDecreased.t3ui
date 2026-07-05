@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f376121a-2360-4232-9724-0db6937062c3"/*HasValueDecreased*/,
   "Description": "Tests whether the incoming value has decreased by a defined threshold and outputs this as a Boolean\n\nOperator with more Options: [HasValueChanged]\n\nSimilar to [HasValueIncreased], [IsGreater] and [HasValueDecreased]",
   "SymbolTags": "8",

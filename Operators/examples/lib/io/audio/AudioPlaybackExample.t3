@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b5720b2d-262e-4fd5-ae90-06114b092338"/*AudioPlaybackExample*/,
   "Inputs": [],
   "Children": [
@@ -1672,26 +1674,44 @@
       "TargetSlotId": "dcd066ce-ac44-4e76-85b3-78821245d9dc"
     }
   ],
-  "PlaybackSettings": {
+  "ProjectSettings": {
     "Enabled": true,
-    "Bpm": 120.0,
-    "AudioSource": 0,
-    "Syncing": 0,
-    "AudioDecayFactor": 0.9,
-    "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "",
-    "EnableAudioBeatLocking": "False",
-    "BeatLockAudioOffsetSec": "0",
-    "AudioClips": [
-      {
-        "Id": "00000000-0000-0000-0000-000000000000",
-        "StartTime": 0.0,
-        "EndTime": 0.0,
-        "Bpm": 120.0,
-        "DiscardAfterUse": true,
-        "IsSoundtrack": true,
-        "FilePath": "Examples:user/still/proj-there/soundtrack/partial.mp3"
-      }
-    ]
+    "Playback": {
+      "Bpm": 120.0,
+      "AudioSource": 0,
+      "Syncing": 0,
+      "AudioDecayFactor": 0.9,
+      "AudioGainFactor": 1.0,
+      "AudioInputDeviceName": "",
+      "EnableAudioBeatLocking": "False",
+      "BeatLockAudioOffsetSec": "0",
+      "AudioClips": [
+        {
+          "Id": "c24b9d08-4a1d-4cef-aa38-ec9e62a37638",
+          "AssetPath": "Examples:user/still/proj-there/soundtrack/partial.mp3",
+          "TimeRange": {
+            "Start": 0.0,
+            "End": 0.0
+          },
+          "IsMainSoundtrack": true
+        }
+      ]
+    },
+    "Audio": {
+      "SoundtrackMute": false,
+      "SoundtrackVolume": 0.5,
+      "OperatorMute": false,
+      "OperatorVolume": 1.0,
+      "AudioResyncThreshold": 0.04
+    },
+    "Export": {
+      "DefaultWindowMode": 1,
+      "EnablePlaybackControlWithKeyboard": true
+    },
+    "Proxy": {
+      "Format": 1,
+      "Resolution": 0.5,
+      "UseForPreview": true
+    }
   }
 }

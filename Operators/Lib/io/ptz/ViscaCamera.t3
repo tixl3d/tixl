@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7c90d60d-0d12-736d-ad90-1d2e3f4d5d6d"/*ViscaCamera*/,
   "Inputs": [
     {

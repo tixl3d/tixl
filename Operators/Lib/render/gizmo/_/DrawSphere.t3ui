@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3b97856c-5397-402e-85ca-5d227af348dd"/*DrawSphere*/,
   "Description": "A simple helper to draw a sphere primitive.\n\nConsider using [SphereMesh] [DrawMesh] and [SetMaterial] instead.",
   "InputUis": [

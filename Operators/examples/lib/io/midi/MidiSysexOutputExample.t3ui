@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e6d13d72-1c00-4cd1-8911-4fc0526fe4d6"/*MidiSysexOutputExample*/,
   "Description": "This is an example of how to use the [MidiSysexOutput] node",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "4b01ddc7-37e3-493b-b7c4-60ef033449df"/*String*/,
+      "SectionId": "b8642c04-38b9-4104-8c93-131a2ca93d87",
       "Comment": "Midi Sysex for APC40 Mk1 Ableton Alternative Mode",
       "Position": {
         "X": -218.96451,
@@ -20,6 +23,7 @@
     },
     {
       "ChildId": "56ed772a-2690-4d45-a4a1-f3d20f1626d8"/*String*/,
+      "SectionId": "b8642c04-38b9-4104-8c93-131a2ca93d87",
       "Comment": "Midi Sysex for APC40 Mk1 Ableton Mode",
       "Position": {
         "X": -218.96451,
@@ -28,6 +32,7 @@
     },
     {
       "ChildId": "8fa34ee9-4d2d-4e58-9a0d-3792f1aacc8f"/*String*/,
+      "SectionId": "7caf5760-eec1-49a9-bf77-12ccb21b1507",
       "Comment": "Midi Sysex for APC40 Mk2 Generic Mode",
       "Position": {
         "X": -218.96452,
@@ -36,6 +41,7 @@
     },
     {
       "ChildId": "a6624e36-f2fc-468a-b2d0-05e565d61216"/*String*/,
+      "SectionId": "b8642c04-38b9-4104-8c93-131a2ca93d87",
       "Comment": "Midi Sysex for APC40 Mk1 Generic Mode",
       "Position": {
         "X": -218.96451,
@@ -44,6 +50,7 @@
     },
     {
       "ChildId": "b89c6929-abc5-43ff-8fd2-7c77fba1cb2b"/*String*/,
+      "SectionId": "7caf5760-eec1-49a9-bf77-12ccb21b1507",
       "Comment": "Midi Sysex for APC40 Mk2 Ableton Alternative Mode",
       "Position": {
         "X": -218.96452,
@@ -59,6 +66,7 @@
     },
     {
       "ChildId": "ebd5435f-c1c4-407b-a281-2e879bc714fe"/*String*/,
+      "SectionId": "7caf5760-eec1-49a9-bf77-12ccb21b1507",
       "Comment": "Midi Sysex for APC40 Mk2 Ableton Mode",
       "Position": {
         "X": -218.96452,
@@ -67,7 +75,7 @@
     }
   ],
   "OutputUis": [],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "7caf5760-eec1-49a9-bf77-12ccb21b1507",
       "Label": "APC40 Mk2 Sysex Commands",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a71dc141-2b99-4e63-887c-6408b0f0b83c"/*HexGridPoints*/,
   "Description": "Creates a buffer of GPU points distributed on a hexagonal grid.\nSame as [GridPoints] with TilingMode set to 'HoneyCombs' (but with fewer options).\n\nTips:\n- Set any of the counts to 1 to create a plane of points.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nSimilar: [RadialPoints], [SpherePoints], [PointsOnMesh]",
   "SymbolTags": "1032",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c7f100bf-05a0-44af-9cf4-c5a1b5937e33"/*SubdivideLinePoints*/,
   "Description": "Inserts additional points between line points.",
   "SymbolTags": "8",
@@ -43,7 +45,7 @@
       }
     },
     {
-      "ChildId": "45f7b499-d399-4ff7-b55b-1d4f2e9c59b7"/*AddInts*/,
+      "ChildId": "45f7b499-d399-4ff7-b55b-1d4f2e9c59b7"/*AddInt*/,
       "Position": {
         "X": -442.3599,
         "Y": 1472.3698

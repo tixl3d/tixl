@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "18d3d929-e530-45fa-9131-658368060ae2"/*DrawBillboards*/,
   "Inputs": [
     {
@@ -64,21 +66,15 @@
             {
               "Time": 0.0,
               "Value": 1.0,
-              "InType": "Spline",
-              "OutType": "Spline",
-              "InEditMode": "Smooth",
-              "OutEditMode": "Smooth",
-              "InTangentAngle": 0.0,
+              "InInterpolation": "Smooth",
+              "OutInterpolation": "Smooth",
               "OutTangentAngle": 3.141592653589793
             },
             {
               "Time": 1.0,
               "Value": 1.0,
-              "InType": "Spline",
-              "OutType": "Spline",
-              "InEditMode": "Smooth",
-              "OutEditMode": "Smooth",
-              "InTangentAngle": 0.0,
+              "InInterpolation": "Smooth",
+              "OutInterpolation": "Smooth",
               "OutTangentAngle": -3.141592653589793
             }
           ]
@@ -300,7 +296,7 @@
       "Outputs": []
     },
     {
-      "Id": "260a6df1-4a56-4864-b90b-546658c70ba3"/*TransformsConstBuffer*/,
+      "Id": "260a6df1-4a56-4864-b90b-546658c70ba3"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []
@@ -348,21 +344,15 @@
                 {
                   "Time": 0.0,
                   "Value": 0.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 1.0,
                   "Value": 1.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": -3.141592653589793
                 }
               ]

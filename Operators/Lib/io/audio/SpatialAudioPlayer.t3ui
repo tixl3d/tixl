@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f"/*SpatialAudioPlayer*/,
   "Description": "A 3D positional audio player using BASS audio library's 3D sound system. It simulates real-world audio by positioning sound sources in 3D space relative to a listener (camera). Features include:\n\n- [Distance Attenuation]: Sound volume decreases with distance between MinDistance (full volume) and MaxDistance (silent)\n- [Directional Sound Cones]: Define inner/outer cone angles to create directional audio sources (e.g., speakers, spotlights)\n- [Listener Orientation]: Audio panning based on listener position and rotation for realistic spatial perception\n- [3D Mode]: Normal (absolute positioning), Relative (source attached to listener for footsteps/breathing), or Off (mono playback)",
   "InputUis": [

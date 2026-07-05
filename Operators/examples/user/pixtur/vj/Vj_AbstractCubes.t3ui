@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "70e3725d-42d9-450a-8068-58ef244d0e09"/*Vj_AbstractCubes*/,
   "Description": "An abstract experiment with [SetMeshUvs]. Requires correctly set audio input.",
   "InputUis": [],

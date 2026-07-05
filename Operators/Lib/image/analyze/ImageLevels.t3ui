@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "592a2b6f-d4e3-43e0-9e73-034cca3b3900"/*ImageLevels*/,
   "Description": "Visualizes the image brightness distribution of an image.\nSee also [CompareImages] [WaveForm]",
   "SymbolTags": "1",

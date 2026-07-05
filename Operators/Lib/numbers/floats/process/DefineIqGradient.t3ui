@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "44cee07e-2a71-4dd5-9ded-8274e8e19332"/*DefineIqGradient*/,
   "Description": "A simple procedural method to define a gradient established by Inigo Quelez.\n\nIt's fun for playing around but takes some experimentation to get it under control. It can be very useful to find ABCD combinations for shaders.\n\nWatch the linked video for iq's excellent explanation.",
   "InputUis": [
@@ -73,6 +75,5 @@
         "Y": 200.0
       }
     }
-  ],
-  "Links": []
+  ]
 }

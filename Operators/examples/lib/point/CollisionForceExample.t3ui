@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "54bea221-f2db-4ff8-afeb-200bcfd37871"/*CollisionForceExample*/,
   "Description": "This example explores how to combine [ParticleCollisionForce] with a [SurfaceForce].\n\nAlso check the comments on the graph operators.",
   "InputUis": [],

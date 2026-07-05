@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "78cadb24-5a77-41e2-908f-01d61140c769"/*MidiSysexOutput*/,
   "Inputs": [
     {

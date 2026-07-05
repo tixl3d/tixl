@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4fdd6f40-c099-4caa-a05b-67c8a45961bb"/*StarGlowStreaksExample*/,
   "Inputs": [],
   "Children": [

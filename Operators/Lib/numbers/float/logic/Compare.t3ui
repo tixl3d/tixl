@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "026869ee-b62f-481e-aadf-f8a1db77fe65"/*Compare*/,
   "Description": "Compares two float values, outputting a boolean.\n\nAKA: greater, less, equal\n\nTips:\n- If you want to output the min or max value of a set of floats, try [Clamp].",
   "SymbolTags": "8",

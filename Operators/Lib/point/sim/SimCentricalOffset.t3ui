@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "87915d7b-f2aa-45da-80f9-bd1f6033d387"/*SimCentricalOffset*/,
   "Description": "Applies a directed force to points (acceleration stored in W). Use [SimForwardMovement] to move them as agents.",
   "SymbolTags": "1088",

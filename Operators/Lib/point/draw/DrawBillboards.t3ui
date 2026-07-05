@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "18d3d929-e530-45fa-9131-658368060ae2"/*DrawBillboards*/,
   "Description": "Draws points and billboards or quads. This operator is very flexible and allows for a wide spectrum of effects.\n\nIts parameters are grouped into different sections for various aspects of variations.",
   "SymbolTags": "1",
@@ -353,7 +355,7 @@
       }
     },
     {
-      "ChildId": "260a6df1-4a56-4864-b90b-546658c70ba3"/*TransformsConstBuffer*/,
+      "ChildId": "260a6df1-4a56-4864-b90b-546658c70ba3"/*_TransformsCBuffer*/,
       "Position": {
         "X": 1689.2078,
         "Y": 1347.3828

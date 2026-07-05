@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cc6100a4-73ed-45e4-87ab-601e7956fb36"/*RotatedPlaneSDF*/,
   "Description": "A plane defined by center and normal vector.\nThis is similar to [PlaneSDF] but allows finer control.",
   "SymbolTags": "8",

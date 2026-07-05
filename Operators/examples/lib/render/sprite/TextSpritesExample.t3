@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "23cb02f6-6622-47ef-8772-4fe5ae1d09dc"/*TextSpritesExample*/,
   "Inputs": [
     {

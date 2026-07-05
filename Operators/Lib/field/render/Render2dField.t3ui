@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0a2d0f9f-2737-4f19-9b2e-38348b2ab54e"/*Render2dField*/,
   "Description": "Renders a 2d color field into a texture.",
   "SymbolTags": "5120",
@@ -238,7 +240,7 @@
       }
     },
     {
-      "ChildId": "ad2d7c7a-ab92-4480-a0c6-825e7928da9b"/*TransformsConstBuffer*/,
+      "ChildId": "ad2d7c7a-ab92-4480-a0c6-825e7928da9b"/*_TransformsCBuffer*/,
       "Position": {
         "X": 602.56604,
         "Y": 621.341

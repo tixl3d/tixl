@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "31ab98ec-5e79-4667-9a85-2fb168f41fa1"/*AbletonLinkSync*/,
   "Inputs": [
     {

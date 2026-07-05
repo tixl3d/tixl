@@ -20,7 +20,6 @@
     <PackageId>fcf9c228-c779-4a14-9395-35324763470e</PackageId>
     <IsArchived>false</IsArchived>
   </PropertyGroup>
-
   <!-- Operator global usings — mirrors Lib so the moved IO operators compile unchanged. -->
   <ItemGroup>
     <Using Include="System" />
@@ -95,7 +94,6 @@
     <Using Alias="GeometryShader" Include="T3.Core.DataTypes.GeometryShader" />
     <Using Alias="SampleDescription" Include="SharpDX.DXGI.SampleDescription" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />
@@ -104,7 +102,6 @@
          must not be loaded twice across AssemblyLoadContexts. -->
     <ProjectReference Include="..\..\IoServices\IoServices.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Palink.ArtNet" Version="1.0.0" />
     <PackageReference Include="Rug.Osc" Version="1.2.5">
@@ -116,12 +113,10 @@
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
   </ItemGroup>
-
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
     <Operators Include="Types" Version="1.0.0" ResourcesOnly="False" />
   </ItemGroup>
-
   <!-- Copy package content into this project's own output only (not transitively). -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <PackageAssets Include="Assets/**/*" Exclude="bin/**" />

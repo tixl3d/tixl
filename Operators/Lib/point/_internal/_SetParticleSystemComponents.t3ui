@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "705df4fe-8f91-4b1e-a7d1-432011ffcb3f"/*_SetParticleSystemComponents*/,
   "Description": "Adds information about the current particle system to the context, as it can be accessed by particle effects operators.",
   "InputUis": [

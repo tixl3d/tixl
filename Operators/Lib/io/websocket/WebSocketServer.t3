@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9b4e3c2d-a1f0-4567-89bc-def012345678"/*WebSocketServer*/,
   "Inputs": [
     {

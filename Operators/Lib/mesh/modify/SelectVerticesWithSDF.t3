@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "058323b6-2e4c-4448-a4c4-ebbc878b3aae"/*SelectVerticesWithSDF*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4e588dd5-9171-4de9-bf39-9cd777c0d5c1"/*WaitingScene2*/,
   "Description": "",
   "InputUis": [],

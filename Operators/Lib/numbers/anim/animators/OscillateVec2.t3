@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "49796f63-27a8-4714-ba69-2073488ca833"/*OscillateVec2*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7b18587a-e75a-47c0-88de-c92ac6442c4c"/*_ColorCycleMotion2*/,
   "Inputs": [
     {
@@ -235,7 +237,7 @@
       "Outputs": []
     },
     {
-      "Id": "750ba0d9-d210-493b-930a-0eb25b0a23cb"/*AddInts*/,
+      "Id": "750ba0d9-d210-493b-930a-0eb25b0a23cb"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

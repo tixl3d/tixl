@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f83bd8ce-ca66-4d31-9f2f-65066f15a3b2"/*GetIteratedFloat*/,
   "Inputs": [
     {

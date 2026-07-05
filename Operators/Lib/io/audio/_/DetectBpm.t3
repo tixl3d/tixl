@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e712e801-863d-45c5-9ef8-fbe90dcb8375"/*DetectBpm*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8d8345b5-56b6-4220-8845-510bc59db871"/*RepeatField3*/,
   "Description": "Infinitely repeats the incoming field in every direction.\nSimilar node: [RepeatFieldLimit]\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
   "SymbolTags": "1",

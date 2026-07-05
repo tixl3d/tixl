@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "bf67074b-b2a2-4231-b1fc-6abd38e159aa"/*I02h_InterpolationMadness*/,
   "Description": "",
   "InputUis": [],
@@ -22,7 +22,7 @@
     },
     {
       "ChildId": "6561177b-012f-47dc-b2e5-22508649110b"/*ImageLevels*/,
-      "AnnotationId": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
+      "SectionId": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
       "Position": {
         "X": 1306.5621,
         "Y": 2132.3557
@@ -30,7 +30,6 @@
     },
     {
       "ChildId": "77576ab9-7784-45f3-be45-259e2b58605f"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -38,7 +37,7 @@
     },
     {
       "ChildId": "b6f65cd0-62d2-4921-8107-d7001e9a1092"/*LinearGradient*/,
-      "AnnotationId": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
+      "SectionId": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
       "Position": {
         "X": 1306.5621,
         "Y": 2097.3557
@@ -62,7 +61,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
       "Label": "Solution",
@@ -98,13 +97,5 @@
       "Description": "Select the [LinearGradient] operator.\n\nThen adjust the position of the middle gradient step to resolve the clamping.",
       "Style": "CallToAction"
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 7.054155,
-  "ScrollX": -13.796197,
-  "Mode": "DopeView",
-  "TimelineHeight": 155
-}
-  }
+  ]
 }

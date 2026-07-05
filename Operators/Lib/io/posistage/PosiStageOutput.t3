@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f1b2a3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*PosiStageOutput*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "13ff9adb-2634-4129-8bb4-4fb764d38be6"/*ResampleLinePoints*/,
   "Description": "",
   "SymbolTags": "8",

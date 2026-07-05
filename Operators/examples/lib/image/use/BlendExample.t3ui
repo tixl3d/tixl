@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "40c5312c-9684-4821-8b05-e8d6c40da07b"/*BlendExample*/,
   "Description": "Uses [Loop] to illustrate the different image blend modes.",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "06edaeb9-2922-4bfd-a859-311925dd72e7"/*Transform*/,
+      "SectionId": "8f258a4c-b6a5-4fd1-b5ae-3e37b9166503",
       "Position": {
         "X": 280.0,
         "Y": 449.80127
@@ -41,6 +44,7 @@
     },
     {
       "ChildId": "7c2ed0c2-6baf-417b-9b79-44711d6f8e97"/*Text*/,
+      "SectionId": "8f258a4c-b6a5-4fd1-b5ae-3e37b9166503",
       "Position": {
         "X": 280.0,
         "Y": 414.80127
@@ -48,6 +52,7 @@
     },
     {
       "ChildId": "8446c4ad-7697-49e0-88d0-746234b54684"/*PickStringPart*/,
+      "SectionId": "8f258a4c-b6a5-4fd1-b5ae-3e37b9166503",
       "Position": {
         "X": 280.0,
         "Y": 344.80127
@@ -62,6 +67,7 @@
     },
     {
       "ChildId": "9b3d3398-606c-493e-bb63-6951c938d982"/*GetFloatVar*/,
+      "SectionId": "8f258a4c-b6a5-4fd1-b5ae-3e37b9166503",
       "Position": {
         "X": 0.0,
         "Y": 449.80127
@@ -84,6 +90,7 @@
     },
     {
       "ChildId": "b4270083-2a10-4d0e-bc34-e7634ed241f8"/*Remap*/,
+      "SectionId": "8f258a4c-b6a5-4fd1-b5ae-3e37b9166503",
       "Position": {
         "X": 0.0,
         "Y": 484.80127
@@ -99,6 +106,7 @@
     },
     {
       "ChildId": "b8850cf9-98d7-418a-81fd-51013406bbba"/*Vector3*/,
+      "SectionId": "8f258a4c-b6a5-4fd1-b5ae-3e37b9166503",
       "Position": {
         "X": 140.0,
         "Y": 484.80127
@@ -120,6 +128,7 @@
     },
     {
       "ChildId": "dde5510f-7e41-41db-8e96-54d4d4a78e7f"/*String*/,
+      "SectionId": "8f258a4c-b6a5-4fd1-b5ae-3e37b9166503",
       "Position": {
         "X": 280.0,
         "Y": 309.80127
@@ -135,7 +144,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "8f258a4c-b6a5-4fd1-b5ae-3e37b9166503",
       "Label": "Draw Labels",

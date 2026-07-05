@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "62df21a2-901e-4cb9-a5ed-84d555860852"/*VideoDeviceInputExample*/,
   "Description": "Uses a [DetectMotion] and [VideoDeviceInput] to interact with particles.\n\nYou will need to enter and change the video camera input",
   "InputUis": [],
@@ -131,6 +133,7 @@
     },
     {
       "ChildId": "e1606537-1e46-4f2e-ae56-ff96a7f00e49"/*VideoDeviceInput*/,
+      "SectionId": "8e83c4fa-110f-40e0-9745-2fd7c6fcdf02",
       "Position": {
         "X": -55.026825,
         "Y": -98.74515
@@ -153,7 +156,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "8e83c4fa-110f-40e0-9745-2fd7c6fcdf02",
       "Title": "1. Select [VideoDeviceinput]\nIn the parameters window\n1. Click in the input device name field \n2. Select your webcam\n3. Tick activate\n4. Shake your body\n5. Click Trigger to add more particles",

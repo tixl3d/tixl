@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "065f6edb-6d3d-414b-ab36-4620a957a18c"/*DrawMeshAtPoints2*/,
   "Description": "Similar to [DrawBillboards], this operator draws meshes instead of images.",
   "SymbolTags": "64",
@@ -361,7 +363,7 @@
       }
     },
     {
-      "ChildId": "2b9744ca-52e1-48c3-879e-ea57bdd6a7fb"/*TransformsConstBuffer*/,
+      "ChildId": "2b9744ca-52e1-48c3-879e-ea57bdd6a7fb"/*_TransformsCBuffer*/,
       "Style": "Expanded",
       "Size": {
         "X": 110.0,

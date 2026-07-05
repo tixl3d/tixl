@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f3b66187-34b2-4018-8380-279f9f296ded"/*SetEnvironment*/,
   "Description": "Sets the image-based lighting (IBL) for the current RenderTarget. This texture can then be used by drawing operators for physically based rendering (PBR) further left in the graph.\nThe operators needed are: [LoadImage] -> [TextureToCubeMap] -> [SetEnvironment]\n\n\nSome background information: a standard technology for rendering is to use environment textures that store various degrees of roughness in their mip map levels: fully reflective chrome in the highest resolution and very blurry/diffuse reflections in the lower levels. This is not just done by blurring, though: a single ultra bright pixel (e.g. the sun) can brighten the complete diffuse reflection. This computation is very(!) expensive and should not be done in real-time for high resolution environment maps.\n\nTo compute this IBL map [SetEnvironment] needs a cube map texture. As of now you can load equirectangular HDR maps only in DDS format and convert them with a [TextureToCubemap]. We are working on making this more convenient. You can also use procedural image textures for this.\n\nNOTICE: For the background environment to have the correct alignment, the camera must be set after the environment:\n\n[DrawMesh]->[SetMaterial]->[SetPointLight]->[SetEnvironment]->[SetCamera].\n\nAlso see: [HowToDrawThings]",
   "SymbolTags": "1",
@@ -111,6 +113,7 @@
     },
     {
       "ChildId": "20636efb-c637-4879-93fd-0b507509ec4e"/*SetContextTexture*/,
+      "SectionId": "f7160267-14dc-4a30-92cf-4eb74eb9edfe",
       "Position": {
         "X": 1516.9678,
         "Y": 934.18555
@@ -146,6 +149,7 @@
     },
     {
       "ChildId": "456c9d13-1565-4aaf-8739-6f40d88e7b90"/*TextureToCubeMap*/,
+      "SectionId": "84075a2f-1303-42ae-b066-789a44dafc95",
       "Position": {
         "X": 418.41245,
         "Y": 889.7184
@@ -153,6 +157,7 @@
     },
     {
       "ChildId": "5254b03f-0846-458e-add4-340c1afb6552"/*PickTexture*/,
+      "SectionId": "49c02188-8b54-4ed7-a5f6-067ae0f121f0",
       "Position": {
         "X": 1095.3191,
         "Y": 588.2991
@@ -167,6 +172,7 @@
     },
     {
       "ChildId": "5f0299fd-0b37-449a-a0aa-219ae385cfa1"/*PickTexture*/,
+      "SectionId": "84075a2f-1303-42ae-b066-789a44dafc95",
       "Position": {
         "X": 558.4124,
         "Y": 889.7184
@@ -174,6 +180,7 @@
     },
     {
       "ChildId": "66262d33-299d-4752-beb5-845123b5593e"/*BoolToInt*/,
+      "SectionId": "49c02188-8b54-4ed7-a5f6-067ae0f121f0",
       "Position": {
         "X": 915.7092,
         "Y": 673.6948
@@ -209,6 +216,7 @@
     },
     {
       "ChildId": "9457bffd-906c-406e-824f-87665c3894d2"/*BoolToInt*/,
+      "SectionId": "84075a2f-1303-42ae-b066-789a44dafc95",
       "Position": {
         "X": 418.4124,
         "Y": 994.7184
@@ -216,6 +224,7 @@
     },
     {
       "ChildId": "9ff1ba3e-587e-4929-82b6-4d40aad07c42"/*SphereMesh*/,
+      "SectionId": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Position": {
         "X": 1516.9678,
         "Y": 549.1859
@@ -230,6 +239,7 @@
     },
     {
       "ChildId": "b6fe3bfd-ac8a-4c2f-a893-e10110268c18"/*Execute*/,
+      "SectionId": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Position": {
         "X": 1516.9678,
         "Y": 724.1858
@@ -263,6 +273,7 @@
     },
     {
       "ChildId": "ce742e93-72f1-4be4-ac1a-37e6a5a98c4e"/*GetTextureSize*/,
+      "SectionId": "84075a2f-1303-42ae-b066-789a44dafc95",
       "Position": {
         "X": 219.3588,
         "Y": 783.2045
@@ -270,6 +281,7 @@
     },
     {
       "ChildId": "d21fdf03-5b23-4752-bf5e-a01c4b525f55"/*Multiply*/,
+      "SectionId": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Position": {
         "X": 1516.9678,
         "Y": 514.1858
@@ -284,6 +296,7 @@
     },
     {
       "ChildId": "db7944aa-ade6-450e-af4d-d4af0fd039fc"/*DrawMeshUnlit*/,
+      "SectionId": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Position": {
         "X": 1516.9678,
         "Y": 584.1858
@@ -320,7 +333,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Label": "Draw Background Sphere",

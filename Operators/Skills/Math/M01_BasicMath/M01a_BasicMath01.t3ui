@@ -1,11 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2a80d6a2-57ff-4295-9ca9-c34f3619d106"/*M01a_BasicMath01*/,
   "Description": "An introduction to math.",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "64ea0207-e4f0-4f0f-934b-5da16bbdd0d7"/*Value*/,
-      "AnnotationId": "bc307786-333f-4896-b878-9dc3deedff7e",
+      "SectionId": "bc307786-333f-4896-b878-9dc3deedff7e",
       "Position": {
         "X": 1233.0248,
         "Y": 2040.2322
@@ -35,7 +37,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "bc307786-333f-4896-b878-9dc3deedff7e",
       "Label": "Solution",

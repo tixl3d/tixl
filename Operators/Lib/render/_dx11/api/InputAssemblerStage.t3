@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9d1266c5-23db-439f-a475-8000fdd1c318"/*InputAssemblerStage*/,
   "Inputs": [
     {

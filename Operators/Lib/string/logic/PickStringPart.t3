@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7baaa83d-5c09-42a0-b7bc-35dbcfa5156d"/*PickStringPart*/,
   "Inputs": [
     {

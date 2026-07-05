@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ffc0a7ed-fe61-4188-8db9-0b0f07c6b981"/*_DrawVaryingQuads*/,
   "Inputs": [
     {
@@ -47,21 +49,15 @@
             {
               "Time": 0.0,
               "Value": 0.0,
-              "InType": "Spline",
-              "OutType": "Spline",
-              "InEditMode": "Smooth",
-              "OutEditMode": "Smooth",
-              "InTangentAngle": 0.0,
+              "InInterpolation": "Smooth",
+              "OutInterpolation": "Smooth",
               "OutTangentAngle": 3.141592653589793
             },
             {
               "Time": 1.0,
               "Value": 1.0,
-              "InType": "Spline",
-              "OutType": "Spline",
-              "InEditMode": "Smooth",
-              "OutEditMode": "Smooth",
-              "InTangentAngle": 0.0,
+              "InInterpolation": "Smooth",
+              "OutInterpolation": "Smooth",
               "OutTangentAngle": -3.141592653589793
             }
           ]
@@ -213,21 +209,15 @@
                 {
                   "Time": 0.0,
                   "Value": 0.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": 3.141592653589793
                 },
                 {
                   "Time": 1.0,
                   "Value": 1.0,
-                  "InType": "Spline",
-                  "OutType": "Spline",
-                  "InEditMode": "Smooth",
-                  "OutEditMode": "Smooth",
-                  "InTangentAngle": 0.0,
+                  "InInterpolation": "Smooth",
+                  "OutInterpolation": "Smooth",
                   "OutTangentAngle": -3.141592653589793
                 }
               ]
@@ -298,7 +288,7 @@
       "Outputs": []
     },
     {
-      "Id": "7ac9b972-db80-4316-b445-eea9a6596569"/*TransformsConstBuffer*/,
+      "Id": "7ac9b972-db80-4316-b445-eea9a6596569"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []

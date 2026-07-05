@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1998f949-5c0a-4f39-82cf-b0bda31f7f21"/*DrawSphereGizmo*/,
   "Inputs": [
     {

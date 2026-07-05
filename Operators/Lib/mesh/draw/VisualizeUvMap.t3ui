@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0920c9cf-91b3-42ee-9db4-a5a63c16d71e"/*VisualizeUvMap*/,
   "Description": "A draw helper to check the UV maps of a given mesh",
   "InputUis": [
@@ -137,7 +139,7 @@
       }
     },
     {
-      "ChildId": "61151d0f-e009-4de9-81d5-82f136f9cf91"/*DrawLinesAlt*/,
+      "ChildId": "61151d0f-e009-4de9-81d5-82f136f9cf91"/*DrawClosedLines*/,
       "Position": {
         "X": 621.26025,
         "Y": 36.726883

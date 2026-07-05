@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3ce7996f-dd8a-4deb-9cd5-d0aed584026f"/*FragmentNoiseExample*/,
   "Description": "",
   "InputUis": [],

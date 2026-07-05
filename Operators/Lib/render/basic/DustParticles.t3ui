@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d14233a2-8240-47d3-bb92-0854f6d3b218"/*DustParticles*/,
   "Description": "Creates a volume around the camera in which points that behave like dust or snow are spawned and repeated / wrapped infinitely.\n\nTip: This effect can be combined with [SetFog], [DepthOfField], [MotionBlur] among others.",
   "SymbolTags": "1",

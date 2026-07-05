@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "8f1bc36a-0206-4c35-900d-ced5dd30481b"/*VJDeadlineAnimals*/,
   "Description": "Playing with mesh distort and simple geometry",
   "InputUis": [],
@@ -1918,7 +1920,7 @@
       }
     },
     {
-      "ChildId": "dcb9834a-0756-416b-b0d3-9631a46a7a96"/*AddInts*/,
+      "ChildId": "dcb9834a-0756-416b-b0d3-9631a46a7a96"/*AddInt*/,
       "Position": {
         "X": 2918.5742,
         "Y": 5943.494
@@ -2172,7 +2174,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "f77c1704-9061-4dcf-9a34-5494076e5307",
       "Title": "TODO\n- ConvertFormat doesn't work without generating mips?!",

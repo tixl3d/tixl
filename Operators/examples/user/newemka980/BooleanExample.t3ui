@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9913adf3-8fe5-4d85-95ab-f04439c6edcb"/*BooleanExample*/,
   "Description": "Here we are showcasing different uses of the boolean math operator ",
   "SymbolTags": "2",
@@ -297,6 +299,7 @@
     },
     {
       "ChildId": "e9b9ca99-cacb-4cfc-8562-7b1c32c7fa2f"/*Boolean*/,
+      "SectionId": "8d14f3b0-e813-4fd4-8988-ef8d85b5a4cb",
       "Position": {
         "X": -212.23216,
         "Y": -443.31915
@@ -355,7 +358,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "8d14f3b0-e813-4fd4-8988-ef8d85b5a4cb",
       "Title": "Welcome to the Boolean math operator example! \nClick on it in order to see what happens.\nIn the parameters window:\nYou can name it and change its color appearance.\n\n ",

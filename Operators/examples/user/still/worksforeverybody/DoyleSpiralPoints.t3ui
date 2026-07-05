@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4895a804-84df-4642-a2d3-db34a268d887"/*DoyleSpiralPoints*/,
   "Description": "Generate a set of points that with decreasing to sizes that can be used to draw a Doyle spiral:\n\nIn the mathematics of circle packing, a Doyle spiral is a pattern of non-crossing circles in the plane in which each circle is surrounded by a ring of six tangent circles. These patterns contain spiral arms formed by circles linked through opposite points of tangency, with their centers on logarithmic spirals of three different shapes. ",
   "InputUis": [

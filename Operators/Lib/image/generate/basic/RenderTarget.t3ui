@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1"/*RenderTarget*/,
   "Description": "The primary method of rendering 3D data into a 2D image texture. You will need this for all post-processing image effects and many other applications.",
   "SymbolTags": "1",
@@ -118,6 +120,5 @@
         "Y": 52.753784
       }
     }
-  ],
-  "Links": []
+  ]
 }

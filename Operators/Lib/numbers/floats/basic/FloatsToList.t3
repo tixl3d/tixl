@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5c5d855c-3167-40a3-b4c3-e7b27b0d61cf"/*FloatsToList*/,
   "Inputs": [
     {

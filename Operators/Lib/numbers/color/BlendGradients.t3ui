@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b9999f07-da19-45b9-ae12-f9d0662c694c"/*BlendGradients*/,
   "Description": "Blends two color gradients with the defined blendmode",
   "SymbolTags": "8",

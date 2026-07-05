@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "26bb382c-5e3d-49ae-b17e-5bd49b083d9a"/*FollowMeshSurfaceForce*/,
   "Description": "Contains particles close to a surface of a simple(!) mesh geometry.",
   "SymbolTags": "1",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "be52b670-9749-4c0d-89f0-d8b101395227"/*LoadObj*/,
   "Description": "Loads a mesh from an obj. file by generating Vertex and Index buffers which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAll surfaces must have valid UVs, otherwise they will appear black.\n\nFor a more comfortable import of 3d meshes (which also allows the import of already linked materials) use [LoadGltfScene] in combination with [DrawScene].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\n\nTo generate meshes procedurally with many adjustment options see [CubeMesh], [CylinderMesh], [QuadMesh], [SphereMesh] or [TorusMesh] etc.\n\n",
   "SymbolTags": "1",
@@ -63,6 +65,5 @@
         "Y": 0.0
       }
     }
-  ],
-  "Links": []
+  ]
 }

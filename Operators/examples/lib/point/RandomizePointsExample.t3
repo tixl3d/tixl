@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e555a0ca-8c81-4436-9f77-8c7a327d7379"/*RandomizePointsExample*/,
   "Inputs": [
     {
@@ -1196,20 +1198,16 @@
                 {
                   "Time": 0.0,
                   "Value": 1.0,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 0.4158128920301891,
                   "OutTangentAngle": 3.5574055456199822
                 },
                 {
                   "Time": 1.0121,
                   "Value": 1.4469026327133179,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 0.4158128920301891,
                   "OutTangentAngle": -2.725779761559604
                 }

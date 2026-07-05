@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "876e870a-2e34-4adb-bdc9-878b312e633b"/*DrawPointSpritesShadedExample*/,
   "Description": "Illustrates how to combine [SelectPoints], [TextSprites], and [DrawPointSpritesShaded] into a nice animation.",
   "InputUis": [],

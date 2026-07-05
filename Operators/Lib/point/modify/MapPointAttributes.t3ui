@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "191e5057-4da4-447e-b7cf-e9e0ed8c5dd8"/*MapPointAttributes*/,
   "Description": "Sets the points attribute and color from input attributes. This can be very powerful to remap point attributes.\n\nDifferent modes allow you to...\n- distribute the curve range along all points\n- or use different mapping ranges.\n\nYou can also connect a texture to provide an override for the curve.",
   "SymbolTags": "1",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4567890a-bcde-f123-4567-890abcdef123"/*HandLandmarkDetection*/,
   "Inputs": [
     {

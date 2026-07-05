@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0b3436db-e283-436e-ba85-2f3a1de76a9d"/*LoadImage*/,
   "Description": "Loads an image file as a Texture2D.\n\nSome notes:\n- Resources are cached, so accessing the same filename again will be much faster.\n- An ImageBuffer will forward its size so that image FX operators will produce buffers of identical sizes.\n- Mipmaps are created automatically.\n\nMost image types are supported, but only in 8-bit.\n\nTo directly use an image from a URL use [LoadImageFromUrl]",
   "SymbolTags": "1",

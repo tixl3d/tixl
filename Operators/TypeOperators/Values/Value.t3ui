@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe"/*Value*/,
   "Description": "Helpful to animate or control the setting of one or multiple nodes.\n\nCan be combined with [Add], [Multiply], [Divide], [Modulo], [Damp], [Div], [Remap] and many other Math Operators to create complex and helpful rigs and combinations.",
   "InputUis": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e3c3942b-451e-4e71-b6d8-ca5a6acd7ce1"/*WorleyNoiseExample*/,
   "Description": "",
   "InputUis": [],
@@ -26,6 +28,7 @@
     },
     {
       "ChildId": "1f9ab72e-4607-45a9-9682-11e827fd79f2"/*LoadImage*/,
+      "SectionId": "ba057009-968d-478d-89be-d0301b374092",
       "Position": {
         "X": 53.848267,
         "Y": 7.768799
@@ -145,6 +148,7 @@
     },
     {
       "ChildId": "af2673f8-6aea-4ffe-b165-d3633b1ab293"/*WorleyNoise*/,
+      "SectionId": "ba057009-968d-478d-89be-d0301b374092",
       "Position": {
         "X": 279.8827,
         "Y": 0.0
@@ -216,7 +220,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "ba057009-968d-478d-89be-d0301b374092",
       "Title": "# Voronoi Mosaic",

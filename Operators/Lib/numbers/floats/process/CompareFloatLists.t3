@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "136aef9b-373d-487d-9863-a8691d1b909f"/*CompareFloatLists*/,
   "Inputs": [
     {

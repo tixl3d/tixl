@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0b5b14bf-c850-493a-afb1-72643926e214"/*UavFromStructuredBuffer*/,
   "Inputs": [
     {

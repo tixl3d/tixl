@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "87915d7b-f2aa-45da-80f9-bd1f6033d387"/*SimCentricalOffset*/,
   "Inputs": [
     {

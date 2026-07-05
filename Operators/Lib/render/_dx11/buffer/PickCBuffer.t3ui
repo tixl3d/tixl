@@ -1,39 +1,38 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "690a64f6-7475-4766-a3f6-456fc5fcea86"/*PickCBuffer*/,
   "Description": "Picks one of the connected Constatnt buffers. \n",
   "InputUis": [
     {
-      "InputId": "a4305e0f-3ceb-4353-acf3-41655dcffd93"/*Index*/,
+      "InputId": "2168fd82-df85-405e-820f-7e6447298891"/*Input*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
       }
     },
     {
-      "InputId": "d0448a4c-5f95-460d-bc0e-c60c4ddb5c50"/*Input*/,
-      "Relevancy": "Required",
+      "InputId": "a4305e0f-3ceb-4353-acf3-41655dcffd93"/*Index*/,
       "Position": {
         "X": -200.0,
-        "Y": 45.0
+        "Y": 0.0
       }
     }
   ],
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "46c3adae-53fd-4285-82c1-c873f064836e"/*Output*/,
-      "Position": {
-        "X": 771.2465,
-        "Y": 846.7957
-      }
-    },
-    {
       "OutputId": "bc197bba-0f85-4872-b88d-753cd151a9ad"/*Count*/,
       "Position": {
         "X": 771.2465,
         "Y": 946.7957
+      }
+    },
+    {
+      "OutputId": "397f3890-43ba-4c2d-8143-3424808af5e3"/*Output*/,
+      "Position": {
+        "X": 771.2465,
+        "Y": 1046.7957
       }
     }
   ]

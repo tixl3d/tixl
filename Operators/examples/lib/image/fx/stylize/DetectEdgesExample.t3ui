@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5f381544-0b6d-4e78-802a-c959c9686836"/*DetectEdgesExample*/,
   "Description": "A simple example of how to combine [DetectEdges] with a transparent output with [AdvancedFeedback].",
   "InputUis": [],

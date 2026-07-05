@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "10507c42-1240-47cc-9569-5e3f1c733e99"/*PointSimulation*/,
   "Description": "Creates a simulation buffer for applying simulation-like force fields, curl noise, or flocking simulation. \n\nIt initially creates a copy of the connected source point buffer. You can then reset to this initial state or constantly blend towards this original state. This can be very helpful to \"mix in\" a valid state and thus keep a simulation under control.\n\nAlthough the operators in the namespace lib.point.sim are optimized to apply modifications onto this \"simulated\" buffer, the [ParticleSystem] provides a more convenient setup for this.\n\nAlso see: [SimulateBoidsExample], [HowToUsePoints].",
   "SymbolTags": "1",

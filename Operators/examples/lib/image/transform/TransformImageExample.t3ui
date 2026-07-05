@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "af89cc41-67ab-4ef8-8a63-ce0de82d8652"/*TransformImageExample*/,
   "Description": "",
   "InputUis": [],
@@ -41,6 +43,7 @@
     },
     {
       "ChildId": "6bc7c7e5-5f59-4161-9eb7-b97e09fbdc85"/*TransformImage*/,
+      "SectionId": "cca49c9b-3f2f-46a9-87ef-2c3f3800168d",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -61,6 +64,7 @@
     },
     {
       "ChildId": "ab54a3ff-f820-4dba-a624-55fd0c91634a"/*Image*/,
+      "SectionId": "cca49c9b-3f2f-46a9-87ef-2c3f3800168d",
       "Position": {
         "X": 443.81128,
         "Y": -169.21191
@@ -68,6 +72,7 @@
     },
     {
       "ChildId": "ac462d6c-1cf5-4811-9c64-db770f2dec4f"/*Position*/,
+      "SectionId": "cca49c9b-3f2f-46a9-87ef-2c3f3800168d",
       "Position": {
         "X": 506.04614,
         "Y": -54.69809
@@ -82,6 +87,7 @@
     },
     {
       "ChildId": "c23c06f9-f8df-489c-a8e7-2a53539bd88e"/*AnimValue*/,
+      "SectionId": "cca49c9b-3f2f-46a9-87ef-2c3f3800168d",
       "Position": {
         "X": 506.04614,
         "Y": -19.69809
@@ -131,6 +137,7 @@
     },
     {
       "ChildId": "fa527a1e-6d93-4661-9535-9d12a39fc5ae"/*CountInt*/,
+      "SectionId": "cca49c9b-3f2f-46a9-87ef-2c3f3800168d",
       "Position": {
         "X": 506.04614,
         "Y": 15.30191
@@ -146,7 +153,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "cca49c9b-3f2f-46a9-87ef-2c3f3800168d",
       "Title": "# Transform Image Example\n",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5b999887-19df-4e91-9f58-1df2d8f1440b"/*_trippleImageFxSetup*/,
   "Description": "Combining 3 images...",
   "SymbolTags": "16",
@@ -140,7 +142,7 @@
       }
     },
     {
-      "ChildId": "6ddd300b-1184-4e19-abec-2f9ba66cf63d"/*TransformsConstBuffer*/,
+      "ChildId": "6ddd300b-1184-4e19-abec-2f9ba66cf63d"/*_TransformsCBuffer*/,
       "Position": {
         "X": 275.10327,
         "Y": 219.75655

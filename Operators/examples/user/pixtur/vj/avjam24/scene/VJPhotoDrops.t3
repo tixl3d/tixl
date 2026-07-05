@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e443fb22-4186-4dd4-b455-1b6d76e666e9"/*VJPhotoDrops*/,
   "Inputs": [],
   "Children": [

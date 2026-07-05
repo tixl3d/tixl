@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "29da7486-cee4-40cd-a708-96b1a84c4f9c"/*MoveMeshToPointLineExample*/,
   "Description": "Deform a mesh along a path",
   "InputUis": [],
@@ -63,6 +63,7 @@
     },
     {
       "ChildId": "8da6ca85-7827-4e9c-83e1-c5d5394f0145"/*LoadObj*/,
+      "SectionId": "7f29cd99-534e-4312-b935-bab610b47570",
       "Position": {
         "X": 512.3794,
         "Y": -315.7703
@@ -120,7 +121,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "7f29cd99-534e-4312-b935-bab610b47570",
       "Title": "Your mesh needs\nenough vertex density\nin order to be deformed",
@@ -139,13 +140,5 @@
         "Y": 265.0
       }
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 126.15041,
-  "ScrollX": 0.3109159,
-  "Mode": "CurveEditor",
-  "TimelineHeight": 194
-}
-  }
+  ]
 }

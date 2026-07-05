@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fdb85ece-201b-49dc-899b-f044a98ac414"/*OctahedronSDF*/,
   "Description": "Generates a octahedron distande field.\n[BoxSDF] [PlaneSDF] [CombineSDF] [RaymarchField] \n",
   "SymbolTags": "8",

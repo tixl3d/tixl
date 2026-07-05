@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f1333224-e1e3-44b4-a84b-e9b13cacf320"/*RemoveStaticBackground*/,
   "Description": "Uses statistical filtering to remove static background from an image.\n\nThis is basically a keyer that tries to detect movement in front of a static background.",
   "InputUis": [
@@ -273,6 +275,7 @@
     },
     {
       "ChildId": "28ca3b2a-f97f-4387-bea1-28a2bde5df4c"/*Vector2Components*/,
+      "SectionId": "d6231f13-baff-46c5-b4a0-1ca4ea4021a2",
       "Position": {
         "X": 499.3943,
         "Y": 1359.6096
@@ -329,6 +332,7 @@
     },
     {
       "ChildId": "4cc41536-1f8b-4a9c-add6-f4f5e09d2028"/*IntsToBuffer*/,
+      "SectionId": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
       "Position": {
         "X": 623.5389,
         "Y": 1871.1793
@@ -343,6 +347,7 @@
     },
     {
       "ChildId": "5142142d-899a-4b3b-9ae0-08e00bdf483e"/*FloatsToBuffer*/,
+      "SectionId": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
       "Position": {
         "X": 623.5389,
         "Y": 1747.3048
@@ -350,6 +355,7 @@
     },
     {
       "ChildId": "52286dec-958e-445e-b46e-239521d5f94e"/*CalcInt2DispatchCount*/,
+      "SectionId": "d6231f13-baff-46c5-b4a0-1ca4ea4021a2",
       "Position": {
         "X": 639.3943,
         "Y": 1186.4581
@@ -406,6 +412,7 @@
     },
     {
       "ChildId": "7e365a31-5145-41f1-900b-d2855701705f"/*SpreadScale*/,
+      "SectionId": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
       "Position": {
         "X": 483.53888,
         "Y": 1782.3048
@@ -420,6 +427,7 @@
     },
     {
       "ChildId": "97f8eaf8-4529-415b-8022-0713596eb568"/*ComputeShaderStage*/,
+      "SectionId": "fb03321c-0a11-4184-a487-65e992451d15",
       "Style": "Resizable",
       "Size": {
         "X": 113.85364,
@@ -432,6 +440,7 @@
     },
     {
       "ChildId": "98fcee7b-28ce-4d97-8ea3-4ec233265df5"/*CalcInt2DispatchCount*/,
+      "SectionId": "fb03321c-0a11-4184-a487-65e992451d15",
       "Position": {
         "X": 534.841,
         "Y": 223.88004
@@ -458,6 +467,7 @@
     },
     {
       "ChildId": "a3b59f6e-63d3-4469-b9f8-18f91eb31382"/*ComputeShader*/,
+      "SectionId": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
       "Position": {
         "X": 483.53897,
         "Y": 1613.742
@@ -479,6 +489,7 @@
     },
     {
       "ChildId": "bde44930-689d-41df-8c2f-5245605864e7"/*ComputeShader*/,
+      "SectionId": "d6231f13-baff-46c5-b4a0-1ca4ea4021a2",
       "Position": {
         "X": 394.8411,
         "Y": 1128.1708
@@ -486,6 +497,7 @@
     },
     {
       "ChildId": "cb75afe8-16e3-4d85-b0ee-ea6260e7cb28"/*ZVizScale*/,
+      "SectionId": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
       "Position": {
         "X": 483.53888,
         "Y": 1817.3048
@@ -507,6 +519,7 @@
     },
     {
       "ChildId": "dd5fe4f9-3623-4f93-8446-e9b0b2a641a9"/*FloatsToBuffer*/,
+      "SectionId": "fb03321c-0a11-4184-a487-65e992451d15",
       "Position": {
         "X": 534.841,
         "Y": 327.03152
@@ -521,6 +534,7 @@
     },
     {
       "ChildId": "e77ff7e6-4411-4012-80ae-001ecab60f34"/*CalcInt2DispatchCount*/,
+      "SectionId": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
       "Position": {
         "X": 623.53894,
         "Y": 1648.742
@@ -528,6 +542,7 @@
     },
     {
       "ChildId": "ec61d45c-f425-4457-9d08-9be2f644dfee"/*ComputeShader*/,
+      "SectionId": "fb03321c-0a11-4184-a487-65e992451d15",
       "Position": {
         "X": 394.84113,
         "Y": 188.88004
@@ -535,6 +550,7 @@
     },
     {
       "ChildId": "ee1ff437-1bc1-4fb7-bc7d-6fe1f073449e"/*FloatsToBuffer*/,
+      "SectionId": "d6231f13-baff-46c5-b4a0-1ca4ea4021a2",
       "Position": {
         "X": 639.3943,
         "Y": 1289.6096
@@ -556,6 +572,7 @@
     },
     {
       "ChildId": "f66d69c4-5c0a-47fb-a2d4-1582428ca230"/*BoolToFloat*/,
+      "SectionId": "fb03321c-0a11-4184-a487-65e992451d15",
       "Position": {
         "X": 394.841,
         "Y": 642.0315
@@ -570,6 +587,7 @@
     },
     {
       "ChildId": "fdfabfb3-aa59-4420-9188-ad40595d3cd8"/*ComputeShaderStage*/,
+      "SectionId": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
       "Style": "Resizable",
       "Size": {
         "X": 113.85364,
@@ -590,7 +608,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
       "Label": "3. Output",

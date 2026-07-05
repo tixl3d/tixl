@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "92f3193e-a7dd-4417-b569-129823607fbe"/*PlotValueCurve*/,
   "Description": "Plots a history curve of a value.\n\nThis can be useful for debugging executables. While using the editor you might want to try [KeepFloatValues] or pinning a value operator to the output window.",
   "SymbolTags": "8",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cb89ed1d-03ea-4880-bfa0-1dd723e4bdab"/*FadingSlideShow*/,
   "Description": "Blends smoothly between image files read from a directory.\nBlendSpeed controls the speed of the transition.",
   "SymbolTags": "1",
@@ -124,6 +126,7 @@
     },
     {
       "ChildId": "15fa4204-99bb-41be-8ede-2c81a5aa482a"/*Layer2d*/,
+      "SectionId": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Position": {
         "X": 840.8394,
         "Y": 490.03958
@@ -145,6 +148,7 @@
     },
     {
       "ChildId": "2a5f70a5-fdcd-4d9b-a0ae-5785e2fce277"/*LoadImage*/,
+      "SectionId": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Position": {
         "X": 840.8394,
         "Y": 420.03958
@@ -159,6 +163,7 @@
     },
     {
       "ChildId": "576668eb-e1ce-4063-91ec-7f8436acfc3e"/*Blob*/,
+      "SectionId": "cd62dd3a-e66b-49c4-a1fc-39130ac7aa8d",
       "Position": {
         "X": 803.57245,
         "Y": -357.92618
@@ -180,6 +185,7 @@
     },
     {
       "ChildId": "593fa976-f854-4f27-883a-e56e4edac77a"/*PerlinNoise2*/,
+      "SectionId": "cd62dd3a-e66b-49c4-a1fc-39130ac7aa8d",
       "Position": {
         "X": 465.63834,
         "Y": -268.9165
@@ -201,6 +207,7 @@
     },
     {
       "ChildId": "6c374d2f-f2af-4e45-8bfb-6c542db4c3cf"/*AddVec2*/,
+      "SectionId": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Position": {
         "X": 551.64734,
         "Y": 558.80493
@@ -208,6 +215,7 @@
     },
     {
       "ChildId": "7ccb7619-c9ab-4e5a-ae0b-a06806d653a3"/*Layer2d*/,
+      "SectionId": "cd62dd3a-e66b-49c4-a1fc-39130ac7aa8d",
       "Position": {
         "X": 803.57245,
         "Y": -322.92618
@@ -222,6 +230,7 @@
     },
     {
       "ChildId": "9ee9e33c-a426-429b-aad9-382a77a4c854"/*Blob*/,
+      "SectionId": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Position": {
         "X": 840.8394,
         "Y": 455.03958
@@ -236,6 +245,7 @@
     },
     {
       "ChildId": "ae0bb937-7028-4098-a916-b56d7a1eb27d"/*PerlinNoise2*/,
+      "SectionId": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Position": {
         "X": 411.64734,
         "Y": 593.80493
@@ -243,6 +253,7 @@
     },
     {
       "ChildId": "af025c51-6dd8-4ab6-92bc-faec5391ebd4"/*LoadImage*/,
+      "SectionId": "cd62dd3a-e66b-49c4-a1fc-39130ac7aa8d",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -255,6 +266,7 @@
     },
     {
       "ChildId": "b7b2a9ac-3b23-4453-9a36-dd4f0c67ee76"/*IntToFloat*/,
+      "SectionId": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Position": {
         "X": 271.64734,
         "Y": 593.80493
@@ -262,6 +274,7 @@
     },
     {
       "ChildId": "b8296b8a-4ac8-4974-9d82-642dc33ada5f"/*PickStringFromList*/,
+      "SectionId": "cd62dd3a-e66b-49c4-a1fc-39130ac7aa8d",
       "Position": {
         "X": 803.57245,
         "Y": -462.92618
@@ -269,6 +282,7 @@
     },
     {
       "ChildId": "b8f9ec4f-6f45-47e5-a44e-5c584bc27144"/*AddVec2*/,
+      "SectionId": "cd62dd3a-e66b-49c4-a1fc-39130ac7aa8d",
       "Position": {
         "X": 605.6383,
         "Y": -303.9165
@@ -283,6 +297,7 @@
     },
     {
       "ChildId": "e3ad7f29-314b-4887-9433-25df610c7b5b"/*IntAdd*/,
+      "SectionId": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -302,6 +317,7 @@
     },
     {
       "ChildId": "f17ca302-f7c3-4314-887e-e0499ab2c8f3"/*IntToFloat*/,
+      "SectionId": "cd62dd3a-e66b-49c4-a1fc-39130ac7aa8d",
       "Position": {
         "X": 325.63834,
         "Y": -268.9165
@@ -309,6 +325,7 @@
     },
     {
       "ChildId": "f9d98cbe-6228-4ff1-baab-e5106fe95c04"/*PickStringFromList*/,
+      "SectionId": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Position": {
         "X": 840.8394,
         "Y": 350.03958
@@ -331,7 +348,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "40309590-e388-4fb2-bd12-30d1f1c7978c",
       "Title": "Next",

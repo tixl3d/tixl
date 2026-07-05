@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dc3d1571-ad9f-46aa-bed9-df2f4e1c7040"/*LegacyParticleSimulation*/,
   "Description": "Note: This operator has been deprecated by [ParticleSystem].\n\nIt collects emitted points into a buffer and increases their age over time. The age is stored in the W parameter of the points.\n\nThe returned points can be used for particle simulations using operators like...\n- [SimNoise], [SimDirectedForce]\n\n... or for drawing with operators like...\n- [DrawBillboards], [DrawPoints], [DrawMeshAtPoints]\n\nYou can also use the [TrailPoint] operator to create ribbon-like effects.\n\nNote: This was previously called [CollectedSpawnPoints].",
   "InputUis": [

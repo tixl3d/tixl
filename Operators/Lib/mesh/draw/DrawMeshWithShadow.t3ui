@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c08a6847-e7c4-46e6-a8fb-24bb62a64b96"/*DrawMeshWithShadow*/,
   "Description": "Is used together with [SetShadow] and a [SetPointLight] to render incoming geometry with a shadow map.\nSee [SetShadowExample]",
   "SymbolTags": "1",
@@ -155,6 +157,7 @@
     },
     {
       "ChildId": "28a4d21e-db74-4460-ba8b-bb00e5166954"/*LogMessage*/,
+      "SectionId": "048d3245-6237-408e-af00-ab21abe97dde",
       "Position": {
         "X": 3052.1658,
         "Y": 4191.5845
@@ -200,6 +203,7 @@
     },
     {
       "ChildId": "5799ef0f-5279-4f00-bafe-fbc688bfef23"/*GetIntVar*/,
+      "SectionId": "048d3245-6237-408e-af00-ab21abe97dde",
       "Position": {
         "X": 3052.1658,
         "Y": 4247.5845
@@ -309,7 +313,7 @@
       }
     },
     {
-      "ChildId": "d06bef6a-8edd-4c47-bf64-8945d05f2c04"/*TransformsConstBuffer*/,
+      "ChildId": "d06bef6a-8edd-4c47-bf64-8945d05f2c04"/*_TransformsCBuffer*/,
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -372,7 +376,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "048d3245-6237-408e-af00-ab21abe97dde",
       "Title": "Eventually it would be great to have a dedicated shadow pass shader for faster rendering.\n",

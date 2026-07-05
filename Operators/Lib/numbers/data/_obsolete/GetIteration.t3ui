@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4c088b67-be47-4599-bd64-5f277abb0113"/*GetIteration*/,
   "Description": "Returns index and progress of iteration",
   "SymbolTags": "4224",

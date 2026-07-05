@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "4f113e4a-eb27-4e40-8843-d15d54610f33"/*DrawMeshAtPointsExample*/,
   "Description": "",
   "InputUis": [],
@@ -12,6 +14,7 @@
     },
     {
       "ChildId": "1445525e-e0e3-4979-87b3-fcbbf467ffe4"/*RadialPoints*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 826.8147
@@ -19,6 +22,7 @@
     },
     {
       "ChildId": "1d7bee9e-2a2d-40bb-be53-901f6033da5b"/*Text*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 1224.1372
@@ -26,6 +30,7 @@
     },
     {
       "ChildId": "264e9fd5-ce72-470a-9d2c-8bfe31a60a17"/*TorusMesh*/,
+      "SectionId": "231d8ef4-3725-4070-9a73-67f9ea63afcf",
       "Comment": "We slightly adjust the radius and width...",
       "Position": {
         "X": 100.55701,
@@ -34,6 +39,7 @@
     },
     {
       "ChildId": "2b7f4d3b-2b14-4230-90cb-4c9f8530b142"/*Pixelate*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -405.2539,
         "Y": 497.63287
@@ -41,6 +47,7 @@
     },
     {
       "ChildId": "34c57881-99e1-42b3-a9ad-9c6543ba2452"/*Once*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -285.93738,
         "Y": 617.9954
@@ -48,6 +55,7 @@
     },
     {
       "ChildId": "376e6753-7742-421f-83c5-e2b449c76cd4"/*SetMaterial*/,
+      "SectionId": "bda487ef-ac41-4c53-afce-f58f09c440b1",
       "Position": {
         "X": 337.1156,
         "Y": 496.39642
@@ -55,6 +63,7 @@
     },
     {
       "ChildId": "44c37771-c13c-4b94-977f-f51fb2eb098c"/*RadialPoints*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 919.5224
@@ -62,6 +71,7 @@
     },
     {
       "ChildId": "4c08de4d-6118-4d44-8954-e599db10706e"/*DrawLines*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 954.5223
@@ -69,6 +79,7 @@
     },
     {
       "ChildId": "4c8437c4-2d02-489f-b303-a00ebfcada71"/*Size*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -1103.0171,
         "Y": 867.8534
@@ -76,6 +87,7 @@
     },
     {
       "ChildId": "51c385d6-9e9d-4c3f-ba87-f74b0cf9da36"/*CubeMesh*/,
+      "SectionId": "bda487ef-ac41-4c53-afce-f58f09c440b1",
       "Position": {
         "X": 197.11563,
         "Y": 461.39642
@@ -83,6 +95,7 @@
     },
     {
       "ChildId": "556736ad-1bec-41c8-9f92-e6b564a8ec57"/*CommonPointSets*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 1003.6744
@@ -90,6 +103,7 @@
     },
     {
       "ChildId": "59edaf9b-e951-4ce8-831d-be1e23bca097"/*Text*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 553.6371
@@ -97,6 +111,7 @@
     },
     {
       "ChildId": "5b03361d-ea03-4e75-a887-490868f19d7d"/*DrawLines*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 1073.6741
@@ -104,6 +119,7 @@
     },
     {
       "ChildId": "6c6b8c61-8e65-4cba-8fbc-4c671d45167e"/*Layer2d*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -145.93738,
         "Y": 547.9954
@@ -118,13 +134,15 @@
     },
     {
       "ChildId": "6d252a35-fa3e-41b0-b014-916195d74fa2"/*Text*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 456.02515
       }
     },
     {
-      "ChildId": "7abc9c08-fc06-4ae2-8b26-56129187c379"/*DrawLinesAlt*/,
+      "ChildId": "7abc9c08-fc06-4ae2-8b26-56129187c379"/*DrawClosedLines*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 861.8147
@@ -132,6 +150,7 @@
     },
     {
       "ChildId": "7ebf5125-22b6-44e1-bcf7-81d97d9818a7"/*LinearGradient*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -405.2539,
         "Y": 462.63287
@@ -139,6 +158,7 @@
     },
     {
       "ChildId": "85c4f022-5f2c-40b6-b6c7-486fdb7065dd"/*LoadImage*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 727.80536
@@ -146,6 +166,7 @@
     },
     {
       "ChildId": "8b4f61cc-e702-4566-9252-055b3a96152e"/*TransformPoints*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 1038.6741
@@ -153,6 +174,7 @@
     },
     {
       "ChildId": "9a690187-5b2e-4149-a36b-691c2ccf288d"/*Text*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 1130.0117
@@ -160,6 +182,7 @@
     },
     {
       "ChildId": "9cbfcdfb-3cff-4926-af6e-d64c4f3cd180"/*RenderTarget*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -592.75214,
         "Y": 979.0313
@@ -167,6 +190,7 @@
     },
     {
       "ChildId": "9f0b44c9-4cb7-4a57-a128-dc5224d5ffb4"/*OscillateVec3*/,
+      "SectionId": "231d8ef4-3725-4070-9a73-67f9ea63afcf",
       "Position": {
         "X": -39.442993,
         "Y": -94.95364
@@ -174,6 +198,7 @@
     },
     {
       "ChildId": "a20577b2-f3c9-44f4-acb2-46221868e440"/*Layer2d*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 762.80536
@@ -181,6 +206,7 @@
     },
     {
       "ChildId": "a80413c9-1559-4c88-947d-79d72060e702"/*RenderTarget*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -145.93738,
         "Y": 582.9954
@@ -188,6 +214,7 @@
     },
     {
       "ChildId": "aacdecb6-5db8-434c-8a1a-cf02e728b129"/*VisualizePoints*/,
+      "SectionId": "231d8ef4-3725-4070-9a73-67f9ea63afcf",
       "Comment": "Notice how the Tori are aligned towards the blue z-axis of each point.",
       "Position": {
         "X": 293.64304,
@@ -203,6 +230,7 @@
     },
     {
       "ChildId": "d5460edf-b802-4cbe-ad36-a9fafe5c7277"/*Text*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -808.89264,
         "Y": 646.60065
@@ -210,6 +238,7 @@
     },
     {
       "ChildId": "e050f184-4935-4282-a444-746dc608ecca"/*GridPoints*/,
+      "SectionId": "bda487ef-ac41-4c53-afce-f58f09c440b1",
       "Position": {
         "X": 337.1156,
         "Y": 321.39642
@@ -217,6 +246,7 @@
     },
     {
       "ChildId": "e197fd59-4516-43eb-88e1-bbf6696c6217"/*SpreadIntoGrid*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -592.75214,
         "Y": 664.0313
@@ -224,6 +254,7 @@
     },
     {
       "ChildId": "e5315f37-a88a-479a-88c3-f00f1e32affd"/*RadialPoints*/,
+      "SectionId": "231d8ef4-3725-4070-9a73-67f9ea63afcf",
       "Comment": "Notice how we disabled CloseCircleLine. Since we don't draw lines, we don't need to repeat the start and end points.\n\nWe also adjust the orientation angle with a random axis and adjust the orientation angle so that the Torus are aligned at the z-axis.",
       "Position": {
         "X": 100.55701,
@@ -232,6 +263,7 @@
     },
     {
       "ChildId": "e9b71734-6f3f-421d-a8ca-9c9e882f3c3b"/*DrawMeshAtPoints*/,
+      "SectionId": "bda487ef-ac41-4c53-afce-f58f09c440b1",
       "Position": {
         "X": 337.1156,
         "Y": 426.39642
@@ -239,6 +271,7 @@
     },
     {
       "ChildId": "ec957247-0313-4679-b495-e18eb64aa71e"/*DrawMeshAtPoints*/,
+      "SectionId": "231d8ef4-3725-4070-9a73-67f9ea63afcf",
       "Position": {
         "X": 293.64304,
         "Y": -18.291458
@@ -246,6 +279,7 @@
     },
     {
       "ChildId": "f2166300-a53e-4499-bb35-d16729e9dfb3"/*Time*/,
+      "SectionId": "bda487ef-ac41-4c53-afce-f58f09c440b1",
       "Position": {
         "X": 197.1156,
         "Y": 391.39642
@@ -253,6 +287,7 @@
     },
     {
       "ChildId": "f30b0666-2cb2-4b79-96f9-e4a8e5230ffc"/*Blend*/,
+      "SectionId": "53ca20f5-c6a0-4f8e-9845-972422ca4010",
       "Position": {
         "X": -405.2539,
         "Y": 532.6329
@@ -260,6 +295,7 @@
     },
     {
       "ChildId": "ff5915da-c770-48a0-b5b0-44b83d3bd6de"/*RandomizePoints*/,
+      "SectionId": "bda487ef-ac41-4c53-afce-f58f09c440b1",
       "Position": {
         "X": 337.1156,
         "Y": 356.39642
@@ -275,7 +311,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "231d8ef4-3725-4070-9a73-67f9ea63afcf",
       "Label": "Draw Mesh At Points",

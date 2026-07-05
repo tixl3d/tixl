@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2828fe15-4267-490c-9c12-6d6d3baf8ae9"/*SubdivideLinePointsExample*/,
   "Description": "Here is one example why it's interesting to subdivide a line. ",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "0d1c4b97-7014-4f3c-88e6-f3e7b08208c8"/*AnimValue*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -499.4938,
         "Y": -212.25699
@@ -19,6 +22,7 @@
     },
     {
       "ChildId": "48942247-7516-4daf-b77f-44545e44c9cc"/*RadialPoints*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -178.07077,
         "Y": -250.75873
@@ -26,6 +30,7 @@
     },
     {
       "ChildId": "5575ead8-7c76-4e57-b5f8-e687cc27bdb8"/*Time*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -90.86566,
         "Y": -7.8614197
@@ -33,6 +38,7 @@
     },
     {
       "ChildId": "588eff69-384d-4805-ad27-09cb25db2e18"/*SpreadLayout*/,
+      "SectionId": "9b6724ab-cd72-416d-9b27-3bc191480e7f",
       "Position": {
         "X": 457.1342,
         "Y": 505.77264
@@ -40,6 +46,7 @@
     },
     {
       "ChildId": "5d4f5582-0b84-4891-a759-583b604d81d7"/*CountInt*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -333.674,
         "Y": -332.40256
@@ -47,6 +54,7 @@
     },
     {
       "ChildId": "64f5f512-c6ae-4063-a025-de81d0a6c6b0"/*Subdivision*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": 133.31114,
         "Y": -142.20508
@@ -54,6 +62,7 @@
     },
     {
       "ChildId": "69020246-3750-46bb-a94b-f9392db97772"/*FloatToInt*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -499.4938,
         "Y": -107.25699
@@ -61,6 +70,7 @@
     },
     {
       "ChildId": "6f5eebef-d441-4fd4-99f1-de4a35e23dc3"/*AddNoise*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": 49.13434,
         "Y": -42.86142
@@ -75,6 +85,7 @@
     },
     {
       "ChildId": "8a23536b-8c9a-4ce1-a9d5-10a18392c931"/*Text*/,
+      "SectionId": "9b6724ab-cd72-416d-9b27-3bc191480e7f",
       "Position": {
         "X": 257.0466,
         "Y": 504.75333
@@ -89,6 +100,7 @@
     },
     {
       "ChildId": "901ffced-79c3-4702-9b15-d5accde5b698"/*Text*/,
+      "SectionId": "9b6724ab-cd72-416d-9b27-3bc191480e7f",
       "Position": {
         "X": 257.04663,
         "Y": 574.7532
@@ -96,6 +108,7 @@
     },
     {
       "ChildId": "95103e67-a48a-4696-ad0a-042e8da852cb"/*Remap*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -499.4938,
         "Y": -142.25699
@@ -103,6 +116,7 @@
     },
     {
       "ChildId": "978e369e-14dc-4f68-b975-c36202aab586"/*Text*/,
+      "SectionId": "9b6724ab-cd72-416d-9b27-3bc191480e7f",
       "Position": {
         "X": 257.04663,
         "Y": 539.7533
@@ -110,6 +124,7 @@
     },
     {
       "ChildId": "99bc8b83-e8be-49fd-83f3-30655f91e827"/*AnimValue*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": 184.409,
         "Y": 64.551544
@@ -117,6 +132,7 @@
     },
     {
       "ChildId": "a25f3c7e-9396-4b99-8a46-ef9af6bc6c5f"/*Vector3*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": 270.07086,
         "Y": 152.07132
@@ -124,6 +140,7 @@
     },
     {
       "ChildId": "a9d7d1c7-fe6a-449e-bbed-64412c1ef045"/*RadialPoints*/,
+      "SectionId": "9b6724ab-cd72-416d-9b27-3bc191480e7f",
       "Position": {
         "X": 103.520355,
         "Y": 370.56314
@@ -131,6 +148,7 @@
     },
     {
       "ChildId": "aab6be04-bf4c-4610-8081-520a955401d9"/*Base points*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -38.07077,
         "Y": -250.75873
@@ -138,6 +156,7 @@
     },
     {
       "ChildId": "afecf9aa-91cf-4832-9652-f1d5f9238b3a"/*LinearGradient*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": 184.409,
         "Y": 29.551544
@@ -145,6 +164,7 @@
     },
     {
       "ChildId": "beae4533-7bb4-478c-98ca-0d9af8b03e10"/*PickIntFromList*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -193.67401,
         "Y": -367.40253
@@ -152,6 +172,7 @@
     },
     {
       "ChildId": "c46e28be-9655-44eb-aec4-e5add3a22998"/*SubdivideLinePoints*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -178.07077,
         "Y": -144.06009
@@ -166,13 +187,15 @@
     },
     {
       "ChildId": "de748de1-db62-429b-82be-f0bb9adc57ce"/*SpreadLayout*/,
+      "SectionId": "9b6724ab-cd72-416d-9b27-3bc191480e7f",
       "Position": {
         "X": 462.12833,
         "Y": 359.9447
       }
     },
     {
-      "ChildId": "e37c16c0-0ec5-4dc9-be7a-af9203bd04f6"/*DrawLinesAlt*/,
+      "ChildId": "e37c16c0-0ec5-4dc9-be7a-af9203bd04f6"/*DrawClosedLines*/,
+      "SectionId": "9b6724ab-cd72-416d-9b27-3bc191480e7f",
       "Position": {
         "X": 243.52036,
         "Y": 370.56314
@@ -180,6 +203,7 @@
     },
     {
       "ChildId": "e74e7ff2-1d5a-4fc6-aea9-614aaa590c7f"/*SpreadLayout*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": 492.93927,
         "Y": -187.88788
@@ -187,13 +211,15 @@
     },
     {
       "ChildId": "f4008841-5bd2-43ca-9490-f131d4566dca"/*IntList*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": -333.674,
         "Y": -367.40253
       }
     },
     {
-      "ChildId": "fd508c14-7c88-4237-a09b-7b1a491b8f5b"/*DrawLinesAlt*/,
+      "ChildId": "fd508c14-7c88-4237-a09b-7b1a491b8f5b"/*DrawClosedLines*/,
+      "SectionId": "08b8c925-a852-4873-9713-f53377d875dd",
       "Position": {
         "X": 324.409,
         "Y": -5.448456
@@ -209,7 +235,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "08b8c925-a852-4873-9713-f53377d875dd",
       "Color": {

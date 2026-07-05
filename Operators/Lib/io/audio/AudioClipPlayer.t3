@@ -1,12 +1,15 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3f78a8a8-2c0b-4486-813e-f052e01e4248"/*AudioClipPlayer*/,
   "Inputs": [
     {
-      "Id": "98702b93-b904-4a19-8e58-90809aaa5c42"/*AudioClips*/
-    },
-    {
       "Id": "301f0b3a-9958-4510-9f6b-b418f99cd1e0"/*AutoCollect*/,
       "DefaultValue": true
+    },
+    {
+      "Id": "98702b93-b904-4a19-8e58-90809aaa5c42"/*AudioClips*/,
+      "DefaultValue": null
     }
   ],
   "Children": [],

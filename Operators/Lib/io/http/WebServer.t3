@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1d2e3f4a-5b6c-4789-0123-456789abcdef"/*WebServer*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cd43942a-887e-4e34-bc54-0c2e5e8bc2af"/*BoolToInt*/,
   "Description": "Returns different integer values depending on if a boolean is true or false. With its default values, it converts a boolean into 0 for false and 1 for true.",
   "SymbolTags": "1",

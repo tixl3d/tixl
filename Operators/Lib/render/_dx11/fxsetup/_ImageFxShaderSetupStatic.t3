@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "bd0b9c5b-c611-42d0-8200-31af9661f189"/*_ImageFxShaderSetupStatic*/,
   "Inputs": [
     {

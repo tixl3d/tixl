@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0f1bf849-949e-4462-a7af-ecb2ff3cd109"/*DirectionalForce*/,
   "Description": "Generates a force acting on particles in a defined direction in space.\n\nUseful for simulating gravity, wind or attractive forces.",
   "SymbolTags": "1",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "17b60044-9125-4961-8a79-ca94697b3726"/*Multiply*/,
   "Description": "Multiplies two floats.\n\nAlso see [Div] [Sum] etc.",
   "SymbolTags": "1",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9484cda8-a5ab-414d-a5bd-9a413796c7ab"/*InkingFx*/,
   "Inputs": [
     {
@@ -525,7 +527,7 @@
       "Outputs": []
     },
     {
-      "Id": "baab2bf5-c63e-47b0-bbe9-b1107604c91e"/*AddInts*/,
+      "Id": "baab2bf5-c63e-47b0-bbe9-b1107604c91e"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

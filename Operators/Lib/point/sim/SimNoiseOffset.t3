@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5f846187-e109-45d1-97e0-ae95e3e7d9ba"/*SimNoiseOffset*/,
   "Inputs": [
     {

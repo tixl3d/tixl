@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "87f959cc-4642-4075-a374-d566e1a48d11"/*LookTest11*/,
   "Inputs": [],
   "Children": [
@@ -153,20 +155,16 @@
                 {
                   "Time": 0.0088,
                   "Value": 0.09223300218582153,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 0.5470603781172731,
                   "OutTangentAngle": 3.6886530317070663
                 },
                 {
                   "Time": 0.9971,
                   "Value": 0.6941747665405273,
-                  "InType": "Linear",
-                  "OutType": "Linear",
-                  "InEditMode": "Linear",
-                  "OutEditMode": "Linear",
+                  "InInterpolation": "Linear",
+                  "OutInterpolation": "Linear",
                   "InTangentAngle": 0.5470603781172731,
                   "OutTangentAngle": -2.59453227547252
                 }

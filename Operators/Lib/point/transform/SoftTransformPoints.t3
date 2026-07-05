@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "697bbc2d-0b2e-4013-bbc3-d58a28a79f31"/*SoftTransformPoints*/,
   "Inputs": [
     {

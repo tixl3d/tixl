@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1e29f81b-0c05-4784-b3ac-c475ce510159"/*MakeTileableImage*/,
   "Inputs": [
     {

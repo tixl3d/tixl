@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "652a6c86-3af2-4bed-9370-912f57690a2c"/*CelShadingExample*/,
   "Description": "",
   "SymbolTags": "2",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "00a19f13-bdbb-4a5a-8587-a1aef59be141"/*ReuseCamera2*/,
+      "SectionId": "eca07e64-c910-48f0-b3c1-e52b4d9736bf",
       "Position": {
         "X": 866.2626,
         "Y": 190.49219
@@ -62,6 +65,7 @@
     },
     {
       "ChildId": "8bd95053-1ab9-41f5-89a4-ac833533a062"/*DetectEdges*/,
+      "SectionId": "eca07e64-c910-48f0-b3c1-e52b4d9736bf",
       "Position": {
         "X": 1179.0919,
         "Y": 198.29248
@@ -111,6 +115,7 @@
     },
     {
       "ChildId": "e2c6543e-89a8-4e10-a293-53366a285cc7"/*RenderTarget*/,
+      "SectionId": "eca07e64-c910-48f0-b3c1-e52b4d9736bf",
       "Position": {
         "X": 1029.0919,
         "Y": 198.29248
@@ -140,7 +145,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "eca07e64-c910-48f0-b3c1-e52b4d9736bf",
       "Title": "Outline",

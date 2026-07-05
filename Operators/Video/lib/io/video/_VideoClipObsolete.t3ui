@@ -1,7 +1,7 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
-  "Id": "b4288f74-7997-40f4-bc4c-2833bf3797de"/*VideoClip*/,
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
+  "Id": "b4288f74-7997-40f4-bc4c-2833bf3797de"/*_VideoClipObsolete*/,
   "Description": "",
   "InputUis": [
     {
@@ -114,16 +114,5 @@
         "Y": 194.13815
       }
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 80.0,
-  "ScrollX": -2.5,
-  "Mode": "DopeView",
-  "TimelineHeight": 200,
-  "InlineDataClipEditEnabled": false,
-  "DetailsAreaHeight": 200.0,
-  "InlineDataClipStripHeight": null
-}
-  }
+  ]
 }

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7f69a5e5-28e5-44c1-b3e3-74b05faa0531"/*DrawRayLines*/,
   "Inputs": [
     {
@@ -163,7 +165,7 @@
       "Outputs": []
     },
     {
-      "Id": "4e04ef7b-5f9d-4cea-ba09-0fa6842768db"/*TransformsConstBuffer*/,
+      "Id": "4e04ef7b-5f9d-4cea-ba09-0fa6842768db"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []
@@ -221,7 +223,7 @@
       "Outputs": []
     },
     {
-      "Id": "85d5f2d4-34a7-4d65-8568-e507ca90fc0f"/*AddInts*/,
+      "Id": "85d5f2d4-34a7-4d65-8568-e507ca90fc0f"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

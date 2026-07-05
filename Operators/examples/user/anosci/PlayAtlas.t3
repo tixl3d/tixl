@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9e243276-1807-49f7-9e78-29b582aafb39"/*PlayAtlas*/,
   "Inputs": [
     {
@@ -36,7 +38,7 @@
   ],
   "Children": [
     {
-      "Id": "03686acc-a185-4e57-97cd-075736dccc86"/*AddInts*/,
+      "Id": "03686acc-a185-4e57-97cd-075736dccc86"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [],
       "Outputs": []
@@ -95,7 +97,7 @@
       "Outputs": []
     },
     {
-      "Id": "28126558-fff8-4114-bacb-ea556909c6cd"/*IntDiv*/,
+      "Id": "28126558-fff8-4114-bacb-ea556909c6cd"/*DivInt*/,
       "SymbolId": "eae8b8af-ce79-4e0a-9777-2dd0a99c18cb",
       "InputValues": [],
       "Outputs": []
@@ -154,7 +156,7 @@
       "Outputs": []
     },
     {
-      "Id": "4afe5445-6d8f-4165-b97b-7415f29c6ac8"/*IntDiv*/,
+      "Id": "4afe5445-6d8f-4165-b97b-7415f29c6ac8"/*DivInt*/,
       "SymbolId": "eae8b8af-ce79-4e0a-9777-2dd0a99c18cb",
       "InputValues": [],
       "Outputs": []
@@ -214,7 +216,7 @@
       "Outputs": []
     },
     {
-      "Id": "6b5d582a-7766-4dfb-9bd6-5ef9d8dd1aac"/*AddInts*/,
+      "Id": "6b5d582a-7766-4dfb-9bd6-5ef9d8dd1aac"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {
@@ -244,7 +246,7 @@
       "Outputs": []
     },
     {
-      "Id": "7e3da07b-e9fb-412a-94b6-3903dd4a4880"/*IntDiv*/,
+      "Id": "7e3da07b-e9fb-412a-94b6-3903dd4a4880"/*DivInt*/,
       "SymbolId": "eae8b8af-ce79-4e0a-9777-2dd0a99c18cb",
       "InputValues": [],
       "Outputs": []
@@ -340,7 +342,7 @@
       "Outputs": []
     },
     {
-      "Id": "c92ce97c-6d3f-4a56-b805-ab05abe12438"/*AddInts*/,
+      "Id": "c92ce97c-6d3f-4a56-b805-ab05abe12438"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

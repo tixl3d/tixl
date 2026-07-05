@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e43370a7-dafd-48b0-bac6-f30ea1bcf4cb"/*AnalyzeMeshBuffers*/,
   "Inputs": [
     {

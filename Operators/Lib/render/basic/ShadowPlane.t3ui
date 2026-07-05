@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d38fe24e-be01-4a22-9595-b06bc906bf49"/*ShadowPlane*/,
   "Description": "Creates a Plane that is transparent except for a realtime rendered Shadowmap.\n\nSee [ShadowPlaneExample] on how to use it.",
   "SymbolTags": "64",

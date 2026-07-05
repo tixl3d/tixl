@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d35a403b-7e6e-4725-a344-6e8008a4e1e1"/*PrefixSum*/,
   "Inputs": [
     {
@@ -12,7 +14,7 @@
   ],
   "Children": [
     {
-      "Id": "08e6b4af-854b-41ca-8f70-dbd5a83babb3"/*IntDiv*/,
+      "Id": "08e6b4af-854b-41ca-8f70-dbd5a83babb3"/*DivInt*/,
       "SymbolId": "eae8b8af-ce79-4e0a-9777-2dd0a99c18cb",
       "InputValues": [
         {

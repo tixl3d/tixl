@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b4766419-8bca-4fa0-a398-e6af90ef8971"/*LoadMidiFile*/,
   "Description": "Loads a standard MIDI file (.mid / .midi) and presents it as a timeline-bound DataClip. Appears in the timeline clip area; drag and trim like any other TimeClip.\n\nThe file's tracks are converted into data channels following the MIDI recording conventions: notes become interval events carrying the raw velocity (0-127), control changes, pitch bend and channel pressure become tick events with raw MIDI values. The file name takes the place of the device name, so replaying through [SimulateIoData] drives [MidiInput] operators whose Device is set to the file name.\n\nParsing is shared, so multiple LoadMidiFile ops referencing the same file share one converted dataset.",
   "SymbolTags": "64",

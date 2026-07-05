@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2b20afce-2b54-4bcc-ba0e-e456a0d92833"/*_ImageFxShaderSetup2*/,
   "Description": "This is a new version that uses Fragment shaders instead of ComputeShader as in [_ImageFxShaderSetup].",
   "SymbolTags": "16",

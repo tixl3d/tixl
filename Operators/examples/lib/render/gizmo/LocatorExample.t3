@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "523bf3f7-d8f6-459b-a7fb-f681dce9e697"/*LocatorExample*/,
   "Inputs": [],
   "Children": [

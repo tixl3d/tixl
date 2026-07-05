@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "49bbae57-da13-4fe6-b28b-8878d63c1fee"/*CutOffShapes*/,
   "Description": "VJ content scene for a live show",
   "InputUis": [],
@@ -219,7 +221,7 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "596d3a84-9340-4c62-9bf0-e682d300c688"/*AddInts*/,
+      "ChildId": "596d3a84-9340-4c62-9bf0-e682d300c688"/*AddInt*/,
       "Position": {
         "X": 1922.7188,
         "Y": 1008.3154

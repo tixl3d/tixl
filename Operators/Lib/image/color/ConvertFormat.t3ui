@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e1cd1cdf-3982-4bb3-b080-9f0a851566d7"/*ConvertFormat*/,
   "Description": "Converts a texture into another format. This can be useful to speed up video file rendering or to fix unsupported texture formats for [PlayVideo].\n\nFor fast video exporting use [B8G8R8A8_UNorm].\n\nPlease note: The ScaleImage is only experimental and will crop from the upper left corner.",
   "SymbolTags": "8",
@@ -45,6 +47,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0516fdda-9803-4fef-80c9-02b98e768107"/*ComputeShaderStage*/,
+      "SectionId": "e7d777d9-106f-4ced-a406-082776548839",
       "Position": {
         "X": 1761.1736,
         "Y": 370.77182
@@ -52,6 +55,7 @@
     },
     {
       "ChildId": "110b0517-ed20-4896-84da-6d2311e83337"/*ExecuteTextureUpdate*/,
+      "SectionId": "e7d777d9-106f-4ced-a406-082776548839",
       "Position": {
         "X": 1918.708,
         "Y": 396.72363
@@ -66,6 +70,7 @@
     },
     {
       "ChildId": "2eb42bc0-4598-4fbc-acb6-2c43c94a7ee6"/*ComputeShaderStage*/,
+      "SectionId": "82c00fc8-d20d-48ac-bf7f-ecb576ed151a",
       "Position": {
         "X": 1725.7344,
         "Y": 796.02
@@ -101,6 +106,7 @@
     },
     {
       "ChildId": "6bd5358e-c7cc-4d09-b68c-a28003d4af7c"/*UavFromTexture2d*/,
+      "SectionId": "82c00fc8-d20d-48ac-bf7f-ecb576ed151a",
       "Position": {
         "X": 1531.5865,
         "Y": 883.8379
@@ -108,6 +114,7 @@
     },
     {
       "ChildId": "88861ea3-f6c3-425c-b584-a544094fa4c0"/*Texture2d*/,
+      "SectionId": "82c00fc8-d20d-48ac-bf7f-ecb576ed151a",
       "Position": {
         "X": 1381.5865,
         "Y": 883.8379
@@ -115,6 +122,7 @@
     },
     {
       "ChildId": "9838cfc2-c798-406f-b3d3-5cdf6ef99ca6"/*ExecuteTextureUpdate*/,
+      "SectionId": "82c00fc8-d20d-48ac-bf7f-ecb576ed151a",
       "Position": {
         "X": 1875.7344,
         "Y": 796.02
@@ -122,6 +130,7 @@
     },
     {
       "ChildId": "9f2330e0-847e-4b84-ac5f-8d4ef696a84f"/*GenerateMips*/,
+      "SectionId": "82c00fc8-d20d-48ac-bf7f-ecb576ed151a",
       "Position": {
         "X": 1539.2701,
         "Y": 1004.18774
@@ -129,6 +138,7 @@
     },
     {
       "ChildId": "bea8b06b-784d-4949-9e05-91f7934d0ad7"/*UavFromTexture2d*/,
+      "SectionId": "e7d777d9-106f-4ced-a406-082776548839",
       "Position": {
         "X": 1541.4395,
         "Y": 550.78284
@@ -150,6 +160,7 @@
     },
     {
       "ChildId": "e39c886b-6ea7-43aa-8442-a766ec5ea061"/*Texture2d*/,
+      "SectionId": "e7d777d9-106f-4ced-a406-082776548839",
       "Position": {
         "X": 1392.3016,
         "Y": 596.6234
@@ -165,7 +176,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "82c00fc8-d20d-48ac-bf7f-ecb576ed151a",
       "Title": "With MipMaps",

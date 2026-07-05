@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0626aba2-ed0c-40c4-9b50-2e729d0d8d86"/*SinForm*/,
   "Inputs": [
     {

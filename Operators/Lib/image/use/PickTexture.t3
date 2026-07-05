@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e6070817-cf2e-4430-87e0-bf3dd15afdb5"/*PickTexture*/,
   "Inputs": [
     {

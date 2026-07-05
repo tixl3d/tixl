@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "cc34a183-3978-4b6b-8ef1-dd8102410816"/*_multiImageFxSetupStatic*/,
   "Inputs": [
     {

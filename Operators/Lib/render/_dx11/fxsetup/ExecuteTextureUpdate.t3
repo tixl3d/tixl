@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6c2f8241-9f4b-451e-8a1d-871631d21163"/*ExecuteTextureUpdate*/,
   "Inputs": [
     {

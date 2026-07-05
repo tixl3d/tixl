@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "604bfb46-fe8f-4c8b-896b-1b7bc827137b"/*GetBoolVar*/,
   "Description": "",
   "InputUis": [

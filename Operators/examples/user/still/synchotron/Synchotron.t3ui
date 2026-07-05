@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "02625eeb-7f7d-4c48-af5b-13d9a2079b3b"/*Synchotron*/,
   "Description": "",
   "SymbolTags": "6",

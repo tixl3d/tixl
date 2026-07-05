@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "51943340-70b1-4bb5-8cb9-0e79d366a57b"/*JoinStringList*/,
   "Description": "Joins the members of a string with a separator.",
   "SymbolTags": "8",

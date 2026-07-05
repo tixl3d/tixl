@@ -1,10 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "245de58f-d3d0-4c57-ba27-1b884b7f6b31"/*DrivenByMossExample*/,
   "Description": "Install drivenbymoss extension for Reaper or Bitwig to use this",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "0cd474ee-4620-4167-a567-fcf56a296f6b"/*OscOutput*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -17,6 +20,7 @@
     },
     {
       "ChildId": "1cff6553-ccf8-46ac-94a5-d4139a11d14e"/*AnimValue*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 0.0,
         "Y": 340.11035
@@ -24,6 +28,7 @@
     },
     {
       "ChildId": "3262eb19-71ae-4c96-9061-2b77ba5e27a6"/*IntValue*/,
+      "SectionId": "68d848fc-25e6-4ea2-8287-c43717d28eb3",
       "Position": {
         "X": 481.3252,
         "Y": 43.0
@@ -31,6 +36,7 @@
     },
     {
       "ChildId": "32d91674-bee5-40d0-b18c-f6940c9082b6"/*HasValueDecreased*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 150.0,
         "Y": 340.11035
@@ -38,6 +44,7 @@
     },
     {
       "ChildId": "7644ee08-d19c-4e21-a24b-e1bd08f2b9d8"/*Remap*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 450.0,
         "Y": 131.11035
@@ -45,6 +52,7 @@
     },
     {
       "ChildId": "7af4d555-a4e4-434f-8a56-2a388edb1e23"/*FloatToInt*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 450.0,
         "Y": 340.11035
@@ -52,6 +60,7 @@
     },
     {
       "ChildId": "873bdb1f-a95c-4a7f-a14e-3948d2ad1bec"/*Multiply*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 600.0,
         "Y": 131.11035
@@ -59,6 +68,7 @@
     },
     {
       "ChildId": "ac803da7-52d3-4796-80ac-31b5abdd2d48"/*SplitString*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 450.0,
         "Y": 277.11035
@@ -66,6 +76,7 @@
     },
     {
       "ChildId": "b5285a5a-59bf-4d34-b37b-1cd5a459714d"/*Execute*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 900.0,
         "Y": 45.11035
@@ -73,6 +84,7 @@
     },
     {
       "ChildId": "b5d0dc15-6978-4b40-b192-a5cadc143ee9"/*OscOutput*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -85,6 +97,7 @@
     },
     {
       "ChildId": "c6e83411-b934-430f-bf45-ff139141ae2f"/*PickStringFromList*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 600.0,
         "Y": 277.11035
@@ -92,6 +105,7 @@
     },
     {
       "ChildId": "d7913360-57b2-47ed-bd0d-5a33ae19a460"/*Value*/,
+      "SectionId": "6612a9de-1c7a-4160-b8a2-f95e4b3f9a4b",
       "Position": {
         "X": 300.0,
         "Y": 74.17383
@@ -99,6 +113,7 @@
     },
     {
       "ChildId": "e83ed529-2b19-4a5c-ab6d-5305e90884f6"/*String*/,
+      "SectionId": "68d848fc-25e6-4ea2-8287-c43717d28eb3",
       "Position": {
         "X": 481.3252,
         "Y": 0.0
@@ -106,6 +121,7 @@
     },
     {
       "ChildId": "eb428fce-5ffc-4531-979c-7ebbd6d54bae"/*MockStrings*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 300.0,
         "Y": 277.11035
@@ -113,6 +129,7 @@
     },
     {
       "ChildId": "f146c02a-a838-4b84-9fac-7b26f91210c9"/*Counter*/,
+      "SectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Position": {
         "X": 300.0,
         "Y": 340.11035
@@ -128,7 +145,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Title": "Demo running along drivenbymoss OSC driver (https://www.mossgrabers.de) default settings.\nThis moves the 1st volume fader in the current bank, mind your)",
@@ -150,6 +167,7 @@
     {
       "Id": "6612a9de-1c7a-4160-b8a2-f95e4b3f9a4b",
       "Title": "Fader move range",
+      "ParentSectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -168,6 +186,7 @@
     {
       "Id": "68d848fc-25e6-4ea2-8287-c43717d28eb3",
       "Title": "address:port, only dotted IPv4 are supported.",
+      "ParentSectionId": "0418d19d-a844-40f7-a49c-075896e2f5e2",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

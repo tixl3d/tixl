@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "27e58fae-2b3d-404e-b9cd-307cb6ad4906"/*MandelbrotFractal*/,
   "Description": "",
   "SymbolTags": "64",

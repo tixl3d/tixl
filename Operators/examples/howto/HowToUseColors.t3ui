@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dd0e8f4c-99bc-4e90-965c-d2d461d4a8fe"/*HowToUseColors*/,
   "Description": "An overview into how to defined, manipulate and use colors.",
   "SymbolTags": "2",
@@ -6,6 +8,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "05b10781-5d14-4987-8e55-dcb4f3cd83cc"/*BuildGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 168.08798,
         "Y": -924.43695
@@ -13,6 +16,7 @@
     },
     {
       "ChildId": "07544b19-be9e-45be-9571-f4140f3c85a1"/*ColorListToInts*/,
+      "SectionId": "982bfc34-06b7-4e00-bcc4-7ecd67f1dc7b",
       "Position": {
         "X": 645.8737,
         "Y": 2627.855
@@ -20,6 +24,7 @@
     },
     {
       "ChildId": "07939ab6-aabe-4702-befe-f881b0b58db8"/*LoadImage*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 243.75021,
         "Y": 1407.108
@@ -27,6 +32,7 @@
     },
     {
       "ChildId": "08818da9-d27d-45b0-b6ee-3ee124c75203"/*LinearGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -838.5436
@@ -34,6 +40,7 @@
     },
     {
       "ChildId": "0c6a4f14-f34d-4157-a61a-413391f6ee00"/*TriggerAnim*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Comment": "With this [TriggerAnim] we generate\nvalue animation starting from 0.\n\nWe use this value...",
       "Position": {
         "X": 317.89432,
@@ -42,6 +49,7 @@
     },
     {
       "ChildId": "0c7025f6-456f-4016-8370-f4da90948395"/*DrawAsSplitView*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 596.01715,
         "Y": -661.82007
@@ -49,6 +57,7 @@
     },
     {
       "ChildId": "0cb2a0ac-a1bc-448e-9100-880f4cb701dc"/*ImageLevels*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 46.399918,
         "Y": 1507.6876
@@ -56,6 +65,7 @@
     },
     {
       "ChildId": "0d427288-5471-4914-9cd6-22882c0ce313"/*RemapVec2*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 57.682434,
         "Y": 612.50824
@@ -63,6 +73,7 @@
     },
     {
       "ChildId": "0f945944-6c87-40db-b813-686d6cc05ab5"/*LinearGradient*/,
+      "SectionId": "5bfded1d-9301-4435-bceb-952cdd1fe4af",
       "Position": {
         "X": 672.6467,
         "Y": -221.12775
@@ -70,6 +81,7 @@
     },
     {
       "ChildId": "12ec59bd-6684-404f-8eee-56e9867a4d95"/*LoadImage*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 882.7528,
         "Y": 1370.6112
@@ -77,6 +89,7 @@
     },
     {
       "ChildId": "13054630-2ee5-4993-bb7e-861273ad1bfc"/*RenderTarget*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1767.1694,
         "Y": 635.3499
@@ -84,6 +97,7 @@
     },
     {
       "ChildId": "13b6aebc-df33-4105-b914-e58c8907da45"/*PerlinNoise*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1347.1694,
         "Y": 530.3499
@@ -91,6 +105,7 @@
     },
     {
       "ChildId": "15152f32-7259-492d-b521-108dab21b58c"/*LinearGradient*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 337.68225,
         "Y": 647.50824
@@ -98,6 +113,7 @@
     },
     {
       "ChildId": "1607ded9-8e38-4434-8261-c6ee99506e30"/*WaveForm*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Comment": "With OKLch we can achieve a much smoother transitions in the Vectorscope.",
       "Position": {
         "X": 882.7528,
@@ -106,6 +122,7 @@
     },
     {
       "ChildId": "181a85fe-0131-43d1-b85b-439a515c29f5"/*ImageLevels*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Comment": "With something like [ToneMapping] we can bring these values back into valid range.",
       "Position": {
         "X": 427.9377,
@@ -114,6 +131,7 @@
     },
     {
       "ChildId": "1ce3207c-59ed-4751-a607-04ddcbde33a9"/*Remap*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1394.7999,
         "Y": -102.77478
@@ -121,6 +139,7 @@
     },
     {
       "ChildId": "1df51731-cb4d-413a-9e77-9369974ca82b"/*RenderTarget*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 810.1884,
         "Y": -571.2292
@@ -128,6 +147,7 @@
     },
     {
       "ChildId": "22b80ec8-1711-490c-b341-29dad041e530"/*Bloom*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Position": {
         "X": 737.89435,
         "Y": 2202.727
@@ -135,6 +155,7 @@
     },
     {
       "ChildId": "25173aff-aa0c-477e-9e84-9aa8accf70f4"/*GetFloatVar*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1394.7999,
         "Y": -137.7749
@@ -142,6 +163,7 @@
     },
     {
       "ChildId": "2b49797a-0cac-4f99-904d-fffa6989e3f9"/*OscillateVec2*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1534.7999,
         "Y": -207.7749
@@ -149,6 +171,7 @@
     },
     {
       "ChildId": "2baaedce-ccf1-4644-a5de-adb4548213b6"/*AnimValue*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 602.7528,
         "Y": 1440.6112
@@ -156,6 +179,7 @@
     },
     {
       "ChildId": "2be31c67-9cfd-4a64-aadc-5f23315aa8ad"/*Color*/,
+      "SectionId": "982bfc34-06b7-4e00-bcc4-7ecd67f1dc7b",
       "Position": {
         "X": 252.92487,
         "Y": 2592.5527
@@ -163,6 +187,7 @@
     },
     {
       "ChildId": "2c2b4d95-a007-416b-a063-244bbbbd03ff"/*ImageLevels*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Comment": "Notice the clamping of the HDR colors exceeding 1.",
       "Position": {
         "X": 243.75021,
@@ -171,6 +196,7 @@
     },
     {
       "ChildId": "2cd3a57f-eb22-41fb-b314-bea57ff17b1e"/*PointTrail*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 414.09796,
         "Y": 832.9399
@@ -178,6 +204,7 @@
     },
     {
       "ChildId": "2cd771db-5030-4fdd-924f-f1b215a5bc6c"/*Layer2d*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -512.8124
@@ -185,6 +212,7 @@
     },
     {
       "ChildId": "2e17cf65-7b64-4bc7-9027-cba5246e80c9"/*Color*/,
+      "SectionId": "982bfc34-06b7-4e00-bcc4-7ecd67f1dc7b",
       "Position": {
         "X": 252.92487,
         "Y": 2627.5527
@@ -192,6 +220,7 @@
     },
     {
       "ChildId": "31156ec0-c909-49a9-ac54-1425967ac6fc"/*LoadImage*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 197.68225,
         "Y": 542.50824
@@ -199,6 +228,7 @@
     },
     {
       "ChildId": "3299ed17-a03d-49c6-9957-27b846da6101"/*ColorList*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Comment": "Our colors.",
       "Position": {
         "X": 177.89432,
@@ -207,6 +237,7 @@
     },
     {
       "ChildId": "334a2ed4-68d3-4cc9-9ddf-e33b9202099c"/*BuildGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 168.08798,
         "Y": -673.74646
@@ -214,6 +245,7 @@
     },
     {
       "ChildId": "38c0f1d6-5ab0-4125-8351-d6c50dd63b01"/*ColorList*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": -65.3233,
         "Y": -880.6537
@@ -221,6 +253,7 @@
     },
     {
       "ChildId": "3c99dfca-a635-4ad6-ab37-d2c7fdda9ca3"/*Color*/,
+      "SectionId": "982bfc34-06b7-4e00-bcc4-7ecd67f1dc7b",
       "Position": {
         "X": 252.92487,
         "Y": 2662.5527
@@ -228,6 +261,7 @@
     },
     {
       "ChildId": "420041cd-2a67-4372-9414-7aec1556be0a"/*PickColorFromList*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Comment": "We pick a color...",
       "Position": {
         "X": 317.89432,
@@ -236,6 +270,7 @@
     },
     {
       "ChildId": "44ab057e-fb39-4e31-ad03-a49890e439b7"/*Bloom*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1903.3615,
         "Y": -145.3291
@@ -243,6 +278,7 @@
     },
     {
       "ChildId": "4511ece4-a4ff-406a-9e3d-4de864d7e52f"/*DrawPoints*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 414.09796,
         "Y": 937.9399
@@ -250,6 +286,7 @@
     },
     {
       "ChildId": "46098459-9a22-49cd-a10b-127e2b360992"/*Vec2ToVec3*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 414.09796,
         "Y": 762.93976
@@ -257,6 +294,7 @@
     },
     {
       "ChildId": "5070316d-58b8-4024-a8b2-b95198fb041d"/*Group*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 702.93616,
         "Y": 517.3382
@@ -264,6 +302,7 @@
     },
     {
       "ChildId": "538858b6-3dd2-4bb8-83d2-c73333f0bbd6"/*Text*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Position": {
         "X": 737.89435,
         "Y": 2097.727
@@ -271,6 +310,7 @@
     },
     {
       "ChildId": "53a9e7a1-deb9-47ec-a2ed-aa226c8fc864"/*AnimValue*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 602.7528,
         "Y": 1607.7981
@@ -278,6 +318,7 @@
     },
     {
       "ChildId": "569a5c4c-3d62-4aac-8bcc-ca71de3f6af7"/*SampleGradient*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Comment": "...to sample a gradient.\nNotice how the first gradient color is HDR.",
       "Position": {
         "X": 457.89432,
@@ -286,6 +327,7 @@
     },
     {
       "ChildId": "58d92dab-f541-4405-ae9d-3c06f40c51f7"/*HSLToColor*/,
+      "SectionId": "5bfded1d-9301-4435-bceb-952cdd1fe4af",
       "Position": {
         "X": 351.57794,
         "Y": -127.295044
@@ -293,6 +335,7 @@
     },
     {
       "ChildId": "5b99f0e7-cf59-40e9-87b9-d011ef5fe77c"/*Loop*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1903.3615,
         "Y": -250.32916
@@ -300,6 +343,7 @@
     },
     {
       "ChildId": "5cdb5743-1491-4c53-bef3-9e2e9b55a366"/*RgbaToColor*/,
+      "SectionId": "5bfded1d-9301-4435-bceb-952cdd1fe4af",
       "Position": {
         "X": 351.57794,
         "Y": -258.83542
@@ -307,6 +351,7 @@
     },
     {
       "ChildId": "5d3b2b76-ebb4-4221-aaa5-935f427bc9dc"/*RenderTarget*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Position": {
         "X": 737.89435,
         "Y": 2167.727
@@ -314,6 +359,7 @@
     },
     {
       "ChildId": "5e8f219b-6857-4d3a-92f5-79e3efae9858"/*ColorGrade*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 882.7528,
         "Y": 1405.6112
@@ -321,6 +367,7 @@
     },
     {
       "ChildId": "5ffc5007-d40b-447c-a1ae-0c31c2482012"/*Vector3Components*/,
+      "SectionId": "5bfded1d-9301-4435-bceb-952cdd1fe4af",
       "Position": {
         "X": 74.36963,
         "Y": -265.3072
@@ -328,6 +375,7 @@
     },
     {
       "ChildId": "620cdcef-1ea4-4e65-b1de-eb5a36959d23"/*BlendColors*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Comment": "We switch the blend mode to multiply.",
       "Position": {
         "X": 597.89435,
@@ -336,6 +384,7 @@
     },
     {
       "ChildId": "64678a1a-7710-4f2a-8ab1-c88af7d80eb5"/*GetFloatVar*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1254.8,
         "Y": -172.7749
@@ -343,6 +392,7 @@
     },
     {
       "ChildId": "69ea90a2-f57f-406c-b379-37a97ad40569"/*AnimValue*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1347.1694,
         "Y": 460.3499
@@ -350,6 +400,7 @@
     },
     {
       "ChildId": "6d6aec56-31e9-434e-b572-6cf4531e7fe3"/*HSLToColor*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 742.7528,
         "Y": 1440.6112
@@ -357,6 +408,7 @@
     },
     {
       "ChildId": "6e9d7cbc-62d5-4cd0-b5ad-d44bfd2d719c"/*GetFloatVar*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1254.8,
         "Y": -207.7749
@@ -364,6 +416,7 @@
     },
     {
       "ChildId": "7150a627-4fd0-4975-b3c3-2df80c0ea948"/*BuildGradient*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1627.1694,
         "Y": 565.3499
@@ -371,6 +424,7 @@
     },
     {
       "ChildId": "71f447da-8085-430a-8fca-2d1eb0dfc957"/*ConvertFormat*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Comment": "Notice how we first convert the original 8bit color range to a 16bit format to have some HDR bloom.",
       "Position": {
         "X": 243.75021,
@@ -379,6 +433,7 @@
     },
     {
       "ChildId": "733f19e9-93b9-4b18-bee9-f4f654dc1479"/*WaveForm*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Comment": "Notice the linear transitions in the vectorscope.",
       "Position": {
         "X": 882.7528,
@@ -387,6 +442,7 @@
     },
     {
       "ChildId": "7693316f-b0a8-4189-af32-3a6d2f50b6c5"/*ToneMapping*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 427.9377,
         "Y": 1476.0214
@@ -394,6 +450,7 @@
     },
     {
       "ChildId": "77893c9f-f6f5-4e27-92ec-8e736be86022"/*BuildGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 168.08798,
         "Y": -1050.7762
@@ -401,6 +458,7 @@
     },
     {
       "ChildId": "798d921d-9f0d-408d-8038-606377fb470f"/*RadialPoints*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1767.1694,
         "Y": 495.3499
@@ -408,6 +466,7 @@
     },
     {
       "ChildId": "7e708709-49c0-46ad-a34e-5f86fafe8977"/*PerlinNoise3*/,
+      "SectionId": "5bfded1d-9301-4435-bceb-952cdd1fe4af",
       "Position": {
         "X": -65.63043,
         "Y": -265.3072
@@ -415,6 +474,7 @@
     },
     {
       "ChildId": "7edf56dc-3bc5-4460-a044-41ebbfcebf49"/*MapPointAttributes*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 414.09796,
         "Y": 867.9399
@@ -422,6 +482,7 @@
     },
     {
       "ChildId": "8062edf8-ddfc-4182-9cba-dd2358083865"/*LinearGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -959.43695
@@ -429,6 +490,7 @@
     },
     {
       "ChildId": "821d48ce-f8be-4c16-b71c-37799aab9fc3"/*LinearGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -1085.7762
@@ -436,6 +498,7 @@
     },
     {
       "ChildId": "8335c249-73d3-4aea-9e71-ea267770df21"/*BuildGradient*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 197.68225,
         "Y": 682.50824
@@ -443,6 +506,7 @@
     },
     {
       "ChildId": "876e518f-6f86-4345-8250-87c61ca14495"/*ImageLevels*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 950.1884,
         "Y": -571.2292
@@ -450,6 +514,7 @@
     },
     {
       "ChildId": "921d44be-bd90-47aa-b46b-ab6bacb97049"/*Point*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 414.09796,
         "Y": 797.9398
@@ -457,6 +522,7 @@
     },
     {
       "ChildId": "95745cf7-5236-47f8-9030-4bc03dafde44"/*ColorsToList*/,
+      "SectionId": "5bfded1d-9301-4435-bceb-952cdd1fe4af",
       "Position": {
         "X": 532.6467,
         "Y": -256.12775
@@ -464,6 +530,7 @@
     },
     {
       "ChildId": "97ea4bee-a693-46ad-93b0-fd6c230f3d71"/*BuildGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 168.08798,
         "Y": -803.5436
@@ -471,6 +538,7 @@
     },
     {
       "ChildId": "97ff27ce-36aa-4bca-be2b-f5ea6aa8a54e"/*Layer2d*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 477.68225,
         "Y": 647.50824
@@ -478,6 +546,7 @@
     },
     {
       "ChildId": "99a76701-e971-4879-a8f1-86f81eaf1e24"/*Blur*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 46.399918,
         "Y": 1437.6876
@@ -485,6 +554,7 @@
     },
     {
       "ChildId": "9de3ccdf-f44c-464b-99a4-2b5e83baed20"/*Remap*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1394.7999,
         "Y": -207.7749
@@ -492,6 +562,7 @@
     },
     {
       "ChildId": "a2cf75af-da92-406a-908a-5d39b87f06cb"/*Layer2d*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -638.74646
@@ -499,6 +570,7 @@
     },
     {
       "ChildId": "a388ff10-13c6-4c95-bae6-21fc76fbaefa"/*BuildGradient*/,
+      "SectionId": "5bfded1d-9301-4435-bceb-952cdd1fe4af",
       "Position": {
         "X": 532.6467,
         "Y": -151.12775
@@ -506,6 +578,7 @@
     },
     {
       "ChildId": "a71acef3-3443-429d-80a8-9f2a03eab071"/*Layer2d*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -768.5436
@@ -513,6 +586,7 @@
     },
     {
       "ChildId": "a9e6890f-2a65-4fb4-b584-bc3c30439b87"/*LinearGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -708.74646
@@ -520,6 +594,7 @@
     },
     {
       "ChildId": "ae4b8a6b-6183-4323-a9ec-984ebf8094d0"/*RenderTarget*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1903.3615,
         "Y": -180.3291
@@ -527,6 +602,7 @@
     },
     {
       "ChildId": "b4a841aa-0949-4fcb-988d-b869ee76b0e2"/*LoadImage*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1534.7999,
         "Y": -242.77484
@@ -534,6 +610,7 @@
     },
     {
       "ChildId": "b4f4a023-2269-4e38-a3be-b6b9d7867b33"/*LoadImage*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 46.399918,
         "Y": 1402.6876
@@ -541,6 +618,7 @@
     },
     {
       "ChildId": "b50b05b9-c058-45af-963f-1651778c9400"/*KeepColors*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1487.1694,
         "Y": 565.3499
@@ -548,6 +626,7 @@
     },
     {
       "ChildId": "b5abe2a6-917e-4aa2-be61-6f81d804eb46"/*MouseInput*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 810.1884,
         "Y": -536.2292
@@ -555,6 +634,7 @@
     },
     {
       "ChildId": "b6645cea-8649-40d9-8e3f-40e71c5ef65f"/*ArtnetOutput*/,
+      "SectionId": "982bfc34-06b7-4e00-bcc4-7ecd67f1dc7b",
       "Position": {
         "X": 645.8737,
         "Y": 2662.855
@@ -562,6 +642,7 @@
     },
     {
       "ChildId": "b6e351a1-d374-48d1-815d-772f94df6a4e"/*AnimValue*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": -93.60008,
         "Y": 1472.6876
@@ -569,6 +650,7 @@
     },
     {
       "ChildId": "b739db47-1034-498d-8203-f36e7618f742"/*PerlinNoise*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1347.1694,
         "Y": 495.3499
@@ -576,6 +658,7 @@
     },
     {
       "ChildId": "be2badde-b3c8-47c8-a4d8-89ad00df8d8e"/*DrawPoints*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1767.1694,
         "Y": 600.3499
@@ -583,6 +666,7 @@
     },
     {
       "ChildId": "bfdc5ad5-ad70-4505-b6f3-cc9d87db8ab3"/*ColorGrade*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 882.7528,
         "Y": 1572.7981
@@ -590,6 +674,7 @@
     },
     {
       "ChildId": "c3663c7e-b24f-40d6-83f6-7489c859c306"/*Layer2d*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1674.7999,
         "Y": -242.77484
@@ -597,6 +682,7 @@
     },
     {
       "ChildId": "c8eb781d-c129-4f05-96cb-506b75975582"/*Bloom*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 243.75021,
         "Y": 1477.108
@@ -604,6 +690,7 @@
     },
     {
       "ChildId": "c93c564f-7abe-4321-bca0-6dc082f55bf2"/*Layer2d*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 477.68225,
         "Y": 525.4576
@@ -611,6 +698,7 @@
     },
     {
       "ChildId": "ce694361-ca30-4714-9730-b7250429fb9c"/*MapPointAttributes*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1767.1694,
         "Y": 530.3499
@@ -618,6 +706,7 @@
     },
     {
       "ChildId": "d479dcc6-8c07-497a-bb3a-c0f5aca3542f"/*Loop*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1903.3615,
         "Y": -215.3291
@@ -625,6 +714,7 @@
     },
     {
       "ChildId": "da0b13c9-1f7b-4479-b932-f65ee4869886"/*OKLChToColor*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 742.7528,
         "Y": 1607.7981
@@ -632,6 +722,7 @@
     },
     {
       "ChildId": "e1a9107c-7c6b-4908-8876-55001463f27e"/*PerlinNoise2*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": -44.968155,
         "Y": 724.7404
@@ -639,6 +730,7 @@
     },
     {
       "ChildId": "e2dfaef9-e235-44fb-8144-38c8feb2737d"/*OKLChToColor*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1534.7999,
         "Y": -137.7749
@@ -646,6 +738,7 @@
     },
     {
       "ChildId": "e539b175-5c40-4083-aa11-f5a724c5d668"/*PickColorFromImage*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 197.68225,
         "Y": 577.50824
@@ -653,6 +746,7 @@
     },
     {
       "ChildId": "e63373e9-3693-4568-b655-d85470708d1b"/*Layer2d*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -1015.77625
@@ -660,6 +754,7 @@
     },
     {
       "ChildId": "ea7b5b59-bedb-4b80-8816-5761ae23f1fb"/*BuildGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 168.08798,
         "Y": -547.8124
@@ -667,6 +762,7 @@
     },
     {
       "ChildId": "ec44782d-08de-4d60-9e1e-ee036c164150"/*AnimInt*/,
+      "SectionId": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Position": {
         "X": 177.89432,
         "Y": 2132.727
@@ -674,6 +770,7 @@
     },
     {
       "ChildId": "ed555b7d-5712-4fc6-a51b-bf6867f60ffb"/*LinearGradient*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -582.8124
@@ -681,6 +778,7 @@
     },
     {
       "ChildId": "ef9bcad2-08ae-46ec-8154-08cf1bd2be10"/*Layer2d*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 477.68225,
         "Y": 560.4577
@@ -688,6 +786,7 @@
     },
     {
       "ChildId": "f2892f51-a4e5-49ed-b296-fe93bc9f91fe"/*OKLChToColor*/,
+      "SectionId": "5bfded1d-9301-4435-bceb-952cdd1fe4af",
       "Position": {
         "X": 351.57794,
         "Y": 19.10199
@@ -695,6 +794,7 @@
     },
     {
       "ChildId": "f5003629-63c9-48cc-b48c-4940b8398764"/*OKLChToColor*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1487.1694,
         "Y": 460.3499
@@ -702,6 +802,7 @@
     },
     {
       "ChildId": "f6384798-5d3a-4744-9d69-b6dd50f9254e"/*Remap*/,
+      "SectionId": "f8a28b51-454e-4cb8-8355-027989531945",
       "Position": {
         "X": 1394.7999,
         "Y": -172.7749
@@ -709,6 +810,7 @@
     },
     {
       "ChildId": "f6fdfdbf-80bd-434d-bddf-68d51895c1af"/*LoadImage*/,
+      "SectionId": "f6e63a31-1fef-4234-875d-b56129a2a529",
       "Position": {
         "X": 882.7528,
         "Y": 1537.7981
@@ -716,6 +818,7 @@
     },
     {
       "ChildId": "f718f271-bbef-4f35-8722-73e89e7448cc"/*ColorsToList*/,
+      "SectionId": "982bfc34-06b7-4e00-bcc4-7ecd67f1dc7b",
       "Position": {
         "X": 392.92493,
         "Y": 2592.5527
@@ -723,6 +826,7 @@
     },
     {
       "ChildId": "f980b269-dd0f-4245-8ba2-a933259d7024"/*Bloom*/,
+      "SectionId": "dd8c1959-9f8f-4a83-a80e-88d77b7a8624",
       "Position": {
         "X": 1767.1694,
         "Y": 670.3499
@@ -730,6 +834,7 @@
     },
     {
       "ChildId": "fb039f2b-951c-409e-9654-95a749102572"/*KeepColors*/,
+      "SectionId": "32f52bda-dd55-44d1-b35e-3844fc23c026",
       "Position": {
         "X": 197.68225,
         "Y": 647.50824
@@ -737,6 +842,7 @@
     },
     {
       "ChildId": "fefd1193-f285-4b0d-86f4-019f8ad76fa9"/*Layer2d*/,
+      "SectionId": "90fede98-300b-4ddb-9a6c-e5366d1bbf9d",
       "Position": {
         "X": 308.08795,
         "Y": -889.43695
@@ -752,7 +858,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "0a618baa-0d95-4da2-99b4-9e63a35c4c01",
       "Title": "In this example, we pick colors from \na color list. Everytime the index for\npicking changes, we start a trigger animation\nto sample another color. We use this \nto sample an HDR gradient that is multiplied\nonto the color.",

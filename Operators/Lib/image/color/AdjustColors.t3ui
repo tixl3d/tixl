@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "55411442-d538-48bf-ab78-b8c24c85aa46"/*AdjustColors*/,
   "Description": "Adjusts various color properties of the incoming image and adds a slight vignette.\n\nOperator with more options that also allows objects far away from the camera to be colored differently than close objects: [ColorGradeDepth]\n\nAlso consider using [ColorGrade].",
   "SymbolTags": "1",

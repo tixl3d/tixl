@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6df238e1-a63d-481a-8e1d-5b534430b6b3"/*PointTrailExample*/,
   "Description": "Showing with two examples how [PointTrail] can be used to add secondary points to a scene.",
   "InputUis": [],

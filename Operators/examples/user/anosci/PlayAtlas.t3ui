@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9e243276-1807-49f7-9e78-29b582aafb39"/*PlayAtlas*/,
   "Description": "For animating image atlases. Great for GIFs, sprite sheets, tile sets, etc.\n\nBy default, this reacts to Idle Motion.\nIf you don't want this, set the PlaybackRate to 0 and connect a [AnimValue] to a [FloatToInt], then to StartFrame. Alternatively, you could animate StartFrame in the timeline.",
   "SymbolTags": "8",
@@ -84,7 +86,7 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "03686acc-a185-4e57-97cd-075736dccc86"/*AddInts*/,
+      "ChildId": "03686acc-a185-4e57-97cd-075736dccc86"/*AddInt*/,
       "Position": {
         "X": 438.03357,
         "Y": 1425.6674
@@ -106,6 +108,7 @@
     },
     {
       "ChildId": "1d7dde02-cfdc-42b2-953e-ad4cb3ec8cff"/*SubInts*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 2123.154,
         "Y": 390.29742
@@ -113,6 +116,7 @@
     },
     {
       "ChildId": "1e5c43bf-da7f-4ff9-939c-7cdc28858fa8"/*SubInts*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 1741.2513,
         "Y": 1110.6885
@@ -120,13 +124,14 @@
     },
     {
       "ChildId": "27858375-373c-4374-8ac9-f0f93875380c"/*BoolToInt*/,
+      "SectionId": "ba2ce098-3695-4995-873d-3f475181b01e",
       "Position": {
         "X": -49.021675,
         "Y": 215.91092
       }
     },
     {
-      "ChildId": "28126558-fff8-4114-bacb-ea556909c6cd"/*IntDiv*/,
+      "ChildId": "28126558-fff8-4114-bacb-ea556909c6cd"/*DivInt*/,
       "Position": {
         "X": 1078.0026,
         "Y": 1249.6451
@@ -134,6 +139,7 @@
     },
     {
       "ChildId": "2c2ab357-a955-4a11-a60f-d0228ad3601d"/*Int2*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 2355.5542,
         "Y": 1092.8279
@@ -141,6 +147,7 @@
     },
     {
       "ChildId": "2e138248-d920-4813-9db7-3d44126e0313"/*SubInts*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 2148.7373,
         "Y": 961.00665
@@ -155,6 +162,7 @@
     },
     {
       "ChildId": "42a89bc0-e86e-4683-b9c2-92a793f183b1"/*BoolToInt*/,
+      "SectionId": "0d9f91a5-4c35-41d9-9a81-ea905eec0fa4",
       "Position": {
         "X": -172.83124,
         "Y": 799.9963
@@ -162,13 +170,15 @@
     },
     {
       "ChildId": "4a14118a-74c5-4f48-ad69-e0215b6b6c6b"/*MultiplyInt*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 1951.2927,
         "Y": 365.38678
       }
     },
     {
-      "ChildId": "4afe5445-6d8f-4165-b97b-7415f29c6ac8"/*IntDiv*/,
+      "ChildId": "4afe5445-6d8f-4165-b97b-7415f29c6ac8"/*DivInt*/,
+      "SectionId": "b5a942f2-5593-49df-aee2-e2f0322421e2",
       "Position": {
         "X": 710.06146,
         "Y": 748.66656
@@ -176,6 +186,7 @@
     },
     {
       "ChildId": "532e59d9-f633-46b8-9ca9-c9d4710a76ec"/*SnapToMultiple*/,
+      "SectionId": "0d9f91a5-4c35-41d9-9a81-ea905eec0fa4",
       "Position": {
         "X": 279.0811,
         "Y": 671.2021
@@ -183,6 +194,7 @@
     },
     {
       "ChildId": "561fa13e-cb2b-470b-b50f-e363b9bf0f6c"/*IntValue*/,
+      "SectionId": "0d9f91a5-4c35-41d9-9a81-ea905eec0fa4",
       "Position": {
         "X": -39.186462,
         "Y": 731.2847
@@ -190,6 +202,7 @@
     },
     {
       "ChildId": "580e3af2-7af4-40f0-a0a1-15051f9f208c"/*PickInt*/,
+      "SectionId": "0d9f91a5-4c35-41d9-9a81-ea905eec0fa4",
       "Position": {
         "X": 428.87073,
         "Y": 773.53766
@@ -197,6 +210,7 @@
     },
     {
       "ChildId": "5f70e665-df3c-4a35-a713-5afc39d3d488"/*ModInt*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 1371.9825,
         "Y": 643.6753
@@ -204,6 +218,7 @@
     },
     {
       "ChildId": "618853ef-3f49-4dd9-aafa-a9dabace62ef"/*SubInts*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 2157.2827,
         "Y": 610.03687
@@ -211,6 +226,7 @@
     },
     {
       "ChildId": "68056aa6-31d3-4479-8447-e5ccd9b12e24"/*MultiplyInt*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 1842.0406,
         "Y": 905.7027
@@ -224,7 +240,8 @@
       }
     },
     {
-      "ChildId": "6b5d582a-7766-4dfb-9bd6-5ef9d8dd1aac"/*AddInts*/,
+      "ChildId": "6b5d582a-7766-4dfb-9bd6-5ef9d8dd1aac"/*AddInt*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 1517.03,
         "Y": 483.4265
@@ -232,6 +249,7 @@
     },
     {
       "ChildId": "700f1d29-bb96-476e-8e7e-666b4faad7ea"/*SubInts*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 1724.4285,
         "Y": 446.5158
@@ -245,7 +263,8 @@
       }
     },
     {
-      "ChildId": "7e3da07b-e9fb-412a-94b6-3903dd4a4880"/*IntDiv*/,
+      "ChildId": "7e3da07b-e9fb-412a-94b6-3903dd4a4880"/*DivInt*/,
+      "SectionId": "b4e6b0ad-dd73-4a69-a281-d4dcdf63060f",
       "Position": {
         "X": 819.57446,
         "Y": 161.45273
@@ -260,6 +279,7 @@
     },
     {
       "ChildId": "824ce6c4-be43-40ae-a65f-e1cf80bf16e1"/*Int2*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 2302.595,
         "Y": 502.43954
@@ -295,6 +315,7 @@
     },
     {
       "ChildId": "a8b4f066-1e93-42e8-a7fb-0951a422a85b"/*SnapToMultiple*/,
+      "SectionId": "ba2ce098-3695-4995-873d-3f475181b01e",
       "Position": {
         "X": 397.62436,
         "Y": 54.60092
@@ -309,6 +330,7 @@
     },
     {
       "ChildId": "c26cbb4e-82c8-40f5-8f1c-b8cff4257071"/*ModInt*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 1346.0464,
         "Y": 1292.4985
@@ -323,6 +345,7 @@
     },
     {
       "ChildId": "c6adaa8e-714b-409b-9cb6-dd80c46ce278"/*MultiplyInt*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 1985.071,
         "Y": 604.8128
@@ -330,13 +353,15 @@
     },
     {
       "ChildId": "c6b532a3-af49-4921-9834-fed35229a44b"/*MultiplyInt*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 1968.1156,
         "Y": 1029.5586
       }
     },
     {
-      "ChildId": "c92ce97c-6d3f-4a56-b805-ab05abe12438"/*AddInts*/,
+      "ChildId": "c92ce97c-6d3f-4a56-b805-ab05abe12438"/*AddInt*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 1533.8529,
         "Y": 1147.5991
@@ -344,6 +369,7 @@
     },
     {
       "ChildId": "d4071a33-0bc5-4dce-8dee-4db0563e8b09"/*SubInts*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 2177.9746,
         "Y": 1185.7659
@@ -351,6 +377,7 @@
     },
     {
       "ChildId": "d5706230-af1a-425a-996e-f4e9d710968e"/*IntValue*/,
+      "SectionId": "ba2ce098-3695-4995-873d-3f475181b01e",
       "Position": {
         "X": 25.125381,
         "Y": 143.04343
@@ -358,6 +385,7 @@
     },
     {
       "ChildId": "d5ea7059-bcb5-4a8a-8af3-e2a7c1f3c34b"/*MultiplyInt*/,
+      "SectionId": "1daaf43b-8f71-44eb-b747-092524794cb7",
       "Position": {
         "X": 1825.2178,
         "Y": 241.53079
@@ -365,6 +393,7 @@
     },
     {
       "ChildId": "ef29d038-64df-433c-b318-b8e0e4a70703"/*MultiplyInt*/,
+      "SectionId": "cf0f0fae-af98-4a29-9e3e-cd460b130022",
       "Position": {
         "X": 2001.8939,
         "Y": 1268.9854
@@ -379,6 +408,7 @@
     },
     {
       "ChildId": "f8ceece9-fc01-49e7-a0d7-8cf7eaa2db67"/*IntValue*/,
+      "SectionId": "f71ec894-31e5-45ef-b0a3-5f4582f63d60",
       "Position": {
         "X": 790.1343,
         "Y": 1452.4147
@@ -386,6 +416,7 @@
     },
     {
       "ChildId": "fe5c9a54-b124-4bde-af9a-640c06cbf3d4"/*PickInt*/,
+      "SectionId": "ba2ce098-3695-4995-873d-3f475181b01e",
       "Position": {
         "X": 538.38354,
         "Y": 186.32388
@@ -401,7 +432,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "0d9f91a5-4c35-41d9-9a81-ea905eec0fa4",
       "Title": "Ystepsize calculation\n",
@@ -441,6 +472,7 @@
     {
       "Id": "b4e6b0ad-dd73-4a69-a281-d4dcdf63060f",
       "Title": "Xstepsize",
+      "ParentSectionId": "ba2ce098-3695-4995-873d-3f475181b01e",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -459,6 +491,7 @@
     {
       "Id": "b5a942f2-5593-49df-aee2-e2f0322421e2",
       "Title": "Ystepsize",
+      "ParentSectionId": "0d9f91a5-4c35-41d9-9a81-ea905eec0fa4",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

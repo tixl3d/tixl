@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0cdb1267-438e-4647-a848-6233d6caa383"/*I01a_WelcomeImage*/,
   "Description": "Welcome to Images",
   "InputUis": [],
@@ -33,6 +35,7 @@
     },
     {
       "ChildId": "b80e728f-29a6-4e5b-bbd3-1dfa4130bfb8"/*LoadImage*/,
+      "SectionId": "7c76e86e-fe52-4d25-ae74-943be3eeb681",
       "Position": {
         "X": 1348.5419,
         "Y": 2113.3752
@@ -76,7 +79,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "7c76e86e-fe52-4d25-ae74-943be3eeb681",
       "Label": "Solution",

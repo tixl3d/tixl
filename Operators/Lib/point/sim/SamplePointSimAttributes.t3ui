@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e85f0fcb-303e-4d21-b592-ad4578286336"/*SamplePointSimAttributes*/,
   "Description": "Affects a point simulation by sampling a 2D texture.",
   "SymbolTags": "64",
@@ -249,7 +251,7 @@
       }
     },
     {
-      "ChildId": "95899c9d-a133-48f0-8ac3-fb058754d1b1"/*TransformsConstBuffer*/,
+      "ChildId": "95899c9d-a133-48f0-8ac3-fb058754d1b1"/*_TransformsCBuffer*/,
       "Position": {
         "X": 1126.4321,
         "Y": 371.31677

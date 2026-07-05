@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1cccb283-18f0-4ef2-817f-dd28d40ebb7a"/*SetCommandTimeExample*/,
   "Inputs": [],
   "Children": [
@@ -522,20 +524,16 @@
           {
             "Time": 0.375,
             "Value": -0.06000000238418579,
-            "InType": "Linear",
-            "OutType": "Linear",
-            "InEditMode": "Linear",
-            "OutEditMode": "Linear",
+            "InInterpolation": "Linear",
+            "OutInterpolation": "Linear",
             "InTangentAngle": 0.557607832093808,
             "OutTangentAngle": 3.699200485683601
           },
           {
             "Time": 3.55,
             "Value": 1.9200000762939453,
-            "InType": "Spline",
-            "OutType": "Spline",
-            "InEditMode": "Linear",
-            "OutEditMode": "Linear",
+            "InInterpolation": "Linear",
+            "OutInterpolation": "Linear",
             "InTangentAngle": 0.557607832093808,
             "OutTangentAngle": -2.583984821495985
           }

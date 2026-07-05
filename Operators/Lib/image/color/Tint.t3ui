@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d9a71078-8296-4a07-b7de-250d4e2b95ac"/*Tint*/,
   "Description": "Tints the bright and dark colors of an image. This can be an easy method for subtle color corrections to achieve a wide variety of conversion effects, like grayscale or threshold.\n\n\nAlso, see [RemapColor] for a similar operator.",
   "SymbolTags": "1",

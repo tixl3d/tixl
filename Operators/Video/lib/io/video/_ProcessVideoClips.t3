@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0162ddd9-4611-4a0a-b02f-8f68ded99cfb"/*_ProcessVideoClips*/,
   "Inputs": [
     {
@@ -8,6 +10,10 @@
     {
       "Id": "956080eb-e811-4b4a-bb73-d70a36455fa2"/*TextureReference*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "a431cf04-491d-4b0d-9691-a0375e07e855"/*AutoCollect*/,
+      "DefaultValue": false
     },
     {
       "Id": "b6930a1d-ae4a-4c79-81b4-97ff8c23b681"/*DrawCommand*/,

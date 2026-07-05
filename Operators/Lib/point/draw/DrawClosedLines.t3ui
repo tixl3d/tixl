@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6e89c814-cc67-40c2-933c-d03ff1b30ef7"/*DrawClosedLines*/,
   "Description": "Alternative version of [DrawLines] that allow to draw closed shapes by connecting the first and the last points. ",
   "SymbolTags": "8",
@@ -183,7 +183,7 @@
       }
     },
     {
-      "ChildId": "52a1de9c-f332-4c29-8dd8-af690e28f0fc"/*AddInts*/,
+      "ChildId": "52a1de9c-f332-4c29-8dd8-af690e28f0fc"/*AddInt*/,
       "Position": {
         "X": 1117.8761,
         "Y": 796.19684
@@ -249,7 +249,7 @@
       }
     },
     {
-      "ChildId": "98594268-276f-49fe-b38f-69799bd5023f"/*TransformsConstBuffer*/,
+      "ChildId": "98594268-276f-49fe-b38f-69799bd5023f"/*_TransformsCBuffer*/,
       "Position": {
         "X": 770.759,
         "Y": 270.83142

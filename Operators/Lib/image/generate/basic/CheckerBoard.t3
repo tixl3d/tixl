@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1a411be2-1757-4019-8ce2-e29f808ed839"/*CheckerBoard*/,
   "Inputs": [
     {

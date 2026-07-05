@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a40cb2a4-5e4c-41ef-b70d-40fa04adafbb"/*LerpVec3*/,
   "Inputs": [
     {

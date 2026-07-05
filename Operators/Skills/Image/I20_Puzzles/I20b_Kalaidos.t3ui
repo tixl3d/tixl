@@ -1,11 +1,13 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "98046598-4b25-44d3-95ef-268226a09038"/*I20b_Kalaidos*/,
   "Description": "",
   "InputUis": [],
   "SymbolChildUis": [
     {
       "ChildId": "13b8427a-b4a2-4cb3-abde-99386d664e68"/*MirrorRepeat*/,
-      "AnnotationId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
+      "SectionId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Position": {
         "X": 1317.2501,
         "Y": 2169.3525
@@ -27,7 +29,7 @@
     },
     {
       "ChildId": "78634de5-dd36-48dc-81fa-0b42fe71f2da"/*Time*/,
-      "AnnotationId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
+      "SectionId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Position": {
         "X": 1131.6339,
         "Y": 2186.936
@@ -35,7 +37,7 @@
     },
     {
       "ChildId": "8fa6edbf-9368-43bc-9097-89dd78a241b9"/*MirrorRepeat*/,
-      "AnnotationId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
+      "SectionId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Position": {
         "X": 1317.2501,
         "Y": 2099.3523
@@ -57,7 +59,7 @@
     },
     {
       "ChildId": "d9f887a5-afb1-4099-b3d4-20d6c5b215f3"/*LinearGradient*/,
-      "AnnotationId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
+      "SectionId": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Position": {
         "X": 1177.2501,
         "Y": 2099.3523
@@ -80,7 +82,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "ed1b88c6-7ef2-4f1a-b570-c4dbf61194f2",
       "Label": "Solution",

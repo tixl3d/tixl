@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b732a668-8994-4f34-ab96-5245d355e33f"/*Vec2ToVec3*/,
   "Description": "Converts a vec2 and a single to a vec3",
   "InputUis": [

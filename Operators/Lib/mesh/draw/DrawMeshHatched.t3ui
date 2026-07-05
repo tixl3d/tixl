@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c757cde3-511c-44cb-af62-39156557daa6"/*DrawMeshHatched*/,
   "Description": "Draws incoming geometry and meshnodes in an abstract shading style.\n\nAn interactive tutorial for the complete TiXL render pipeline can be found at [HowToDrawThings].\n\nThe most commonly used render methods are [Drawmesh], [DrawMeshUnlit], [DrawMeshHatched], and [DrawMeshAtPoints].\n\nThey can then be combined with [SetMaterial], [SetFog], [SetPointLight], and many others to create the look of scenes.",
   "SymbolTags": "64",
@@ -339,7 +341,7 @@
       }
     },
     {
-      "ChildId": "e16c884c-017b-435c-b048-dddbe9dd8c15"/*TransformsConstBuffer*/,
+      "ChildId": "e16c884c-017b-435c-b048-dddbe9dd8c15"/*_TransformsCBuffer*/,
       "Style": "Expanded",
       "Size": {
         "X": 110.0,

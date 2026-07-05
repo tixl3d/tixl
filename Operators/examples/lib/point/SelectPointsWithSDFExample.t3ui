@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "99cf2542-d408-4a81-ba49-4204eb2f6df8"/*SelectPointsWithSDFExample*/,
   "Description": "",
   "SymbolTags": "1152",
@@ -13,6 +15,7 @@
     },
     {
       "ChildId": "0315ea81-fdff-4785-a5ab-3cca27c0aa07"/*SelectPointsWithSDF*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 441.8961,
         "Y": -2257.1338
@@ -20,6 +23,7 @@
     },
     {
       "ChildId": "0466be5f-da21-4285-93b4-72889cf0e279"/*PlaneSDF*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 161.89609,
         "Y": -1670.4376
@@ -27,6 +31,7 @@
     },
     {
       "ChildId": "05b77742-e45c-4200-93dd-39ce9b252462"/*MapPointAttributes*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Comment": "We also use Fx1 to map a gradient.",
       "Position": {
         "X": 441.89572,
@@ -35,6 +40,7 @@
     },
     {
       "ChildId": "07b5edf0-24b8-4323-a750-0156a413520c"/*CombineMeshes*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": 59.364258
@@ -42,6 +48,7 @@
     },
     {
       "ChildId": "0879bf00-439b-4aad-88b0-cd950912c2cf"/*BoxSDF*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 301.8961,
         "Y": -2838.3062
@@ -49,6 +56,7 @@
     },
     {
       "ChildId": "08984a9f-cf6f-4acf-92bb-9ff26a41025c"/*SelectPointsWithSDF*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": -80.63574
@@ -56,6 +64,7 @@
     },
     {
       "ChildId": "0d8cd9ed-49c1-4df3-85bb-be3f2a7cbb29"/*SetShadow*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": 164.36426
@@ -63,6 +72,7 @@
     },
     {
       "ChildId": "0f199028-19a4-4a46-a3c1-b40926f2c17e"/*TransformField*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 301.8961,
         "Y": -2222.134
@@ -70,6 +80,7 @@
     },
     {
       "ChildId": "14b21e6c-472e-4be9-bf6d-16dae7005ff1"/*QuadMesh*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 597.10144,
         "Y": 94.36426
@@ -77,6 +88,7 @@
     },
     {
       "ChildId": "14c9a4d9-9414-41d1-942d-d579eac2ef1b"/*SelectPointsWithSDF*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 447.06125,
         "Y": -1691.7039
@@ -84,6 +96,7 @@
     },
     {
       "ChildId": "16199962-c7ce-4520-9aa4-b248d5870f4e"/*DrawPoints*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 447.06125,
         "Y": -1586.7039
@@ -91,6 +104,7 @@
     },
     {
       "ChildId": "16bb7853-bdc5-48ee-bcb4-c23407e2ae26"/*Camera*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": 269.36426
@@ -105,6 +119,7 @@
     },
     {
       "ChildId": "1b3c225b-b1cc-4b25-b6dc-ad7b0f08b1d8"/*RaymarchField*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 441.8961,
         "Y": -2152.134
@@ -112,6 +127,7 @@
     },
     {
       "ChildId": "1da4576e-fa2a-4086-8a82-65ea44d9add3"/*TorusMesh*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Comment": "We take a torus...",
       "Position": {
         "X": 441.89572,
@@ -120,6 +136,7 @@
     },
     {
       "ChildId": "1fd9d2e0-75e7-4071-b6b6-6087490db9a7"/*TransformMesh*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 641.0077,
         "Y": -2868.665
@@ -127,6 +144,7 @@
     },
     {
       "ChildId": "3ebfaa5d-8b95-4c30-8ce8-3032e104e8c1"/*RenderTarget*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 968.7312,
         "Y": -566.49146
@@ -134,6 +152,7 @@
     },
     {
       "ChildId": "4045a937-d7ab-41b9-9f54-c2314f2054ae"/*Execute*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 968.7312,
         "Y": -706.49146
@@ -148,6 +167,7 @@
     },
     {
       "ChildId": "4a2e2576-3fa1-42cf-b6f1-5e45c48d3bbd"/*SelectPointsWithSDF*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 641.0077,
         "Y": -2798.665
@@ -155,6 +175,7 @@
     },
     {
       "ChildId": "51c7b5dc-510b-4605-a6da-e9e093167835"/*DrawLines*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 828.7312,
         "Y": -671.49146
@@ -162,6 +183,7 @@
     },
     {
       "ChildId": "54ead466-f2d7-45a1-9cd8-6779d11f7adc"/*AnimValue*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 161.89609,
         "Y": -1546.339
@@ -169,6 +191,7 @@
     },
     {
       "ChildId": "584a9b44-ef97-4166-8018-a8640f0fe5b4"/*RaymarchField*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 501.00754,
         "Y": -2623.665
@@ -176,6 +199,7 @@
     },
     {
       "ChildId": "584eb0bf-950c-4812-9027-97594fad2353"/*Group*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 641.0077,
         "Y": -2658.665
@@ -183,6 +207,7 @@
     },
     {
       "ChildId": "63ee6497-217f-47f7-a993-a2a41c9fdcd1"/*OrbitCamera*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 581.896,
         "Y": -2082.134
@@ -190,6 +215,7 @@
     },
     {
       "ChildId": "65959f32-4ac6-4e47-874e-99032612a8b0"/*PairPointsForLines*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Comment": "And create lines by connecting to the offset points.",
       "Position": {
         "X": 688.7312,
@@ -198,6 +224,7 @@
     },
     {
       "ChildId": "66051700-792e-4f9e-8c43-a5ba8be8da73"/*LoadObj*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 641.0077,
         "Y": -2903.665
@@ -205,6 +232,7 @@
     },
     {
       "ChildId": "67b9c084-2c6a-40fb-9d26-390857e9180e"/*RenderTarget*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 581.896,
         "Y": -2047.134
@@ -212,6 +240,7 @@
     },
     {
       "ChildId": "6d609224-c68b-484a-b346-e6247bb983d8"/*CustomSDF*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 161.89609,
         "Y": -61.099365
@@ -219,6 +248,7 @@
     },
     {
       "ChildId": "72fcc523-9a57-494c-878c-0536ba98ec97"/*RenderTarget*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": 304.36426
@@ -226,6 +256,7 @@
     },
     {
       "ChildId": "76a038d9-3d65-4313-9125-37851fbad970"/*TransformPoints*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 641.0077,
         "Y": -2728.665
@@ -233,6 +264,7 @@
     },
     {
       "ChildId": "7ba7a3d5-1d0f-47ba-984f-6c33d59560fd"/*AnimVec3*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 161.89609,
         "Y": -2187.134
@@ -240,6 +272,7 @@
     },
     {
       "ChildId": "7c2c2fb0-4fee-4e0a-87b7-e373c582aba1"/*PerlinNoise3*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 161.89597,
         "Y": -700.3413
@@ -247,6 +280,7 @@
     },
     {
       "ChildId": "7f7e5e83-698a-497b-8599-06a2947795ea"/*AnimVec3*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 301.8961,
         "Y": -2873.3062
@@ -254,6 +288,7 @@
     },
     {
       "ChildId": "812ad3ab-15bd-4414-a051-54eb82f12cbb"/*SphereSDF*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 301.89597,
         "Y": -700.3413
@@ -261,6 +296,7 @@
     },
     {
       "ChildId": "84cf5839-4823-4b20-ae66-1a5f9925f444"/*DrawMeshAtPoints*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 688.7312,
         "Y": -542.13086
@@ -268,6 +304,7 @@
     },
     {
       "ChildId": "84ff75ee-673a-4be4-b8c7-9921b11becb0"/*TransformField*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 301.8961,
         "Y": -61.099365
@@ -275,6 +312,7 @@
     },
     {
       "ChildId": "89731f23-dfdf-4e32-aebe-ac678d7d6052"/*PointsOnMesh*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 641.0077,
         "Y": -2833.665
@@ -282,6 +320,7 @@
     },
     {
       "ChildId": "8a6678d7-92e4-44c5-86f4-c0acd45e4335"/*CubeMesh*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 597.10144,
         "Y": 24.364258
@@ -289,6 +328,7 @@
     },
     {
       "ChildId": "8c3847d7-c9c1-4f5a-ab23-77b6901e22b8"/*VisualizeFieldDistance*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 597.10144,
         "Y": 234.36426
@@ -296,6 +336,7 @@
     },
     {
       "ChildId": "92827035-d7a4-41bd-a8d5-7c9f9fb3a027"/*DrawPoints*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 447.06125,
         "Y": -1422.9314
@@ -310,6 +351,7 @@
     },
     {
       "ChildId": "93ddefef-0c9a-4b1b-aa80-a566d346b762"/*DrawMeshWithShadow*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": 129.36426
@@ -331,6 +373,7 @@
     },
     {
       "ChildId": "abb4b302-b7b3-4535-9533-b6435274772b"/*CustomSDF*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 161.89609,
         "Y": -2222.134
@@ -338,6 +381,7 @@
     },
     {
       "ChildId": "b0074085-670a-4e85-a9d4-d89c6099a757"/*SelectPointsWithSDF*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 447.06125,
         "Y": -1371.6725
@@ -345,6 +389,7 @@
     },
     {
       "ChildId": "b36d9b47-46ce-4bc1-b7ed-7734b9321635"/*SelectPointsWithSDF*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Comment": "Selecting the points with our sphere field",
       "Position": {
         "X": 441.89572,
@@ -353,6 +398,7 @@
     },
     {
       "ChildId": "b715f793-c906-4df3-8c0b-059b7c14887c"/*CubeMesh*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 548.7312,
         "Y": -507.13086
@@ -360,6 +406,7 @@
     },
     {
       "ChildId": "b8ffc828-d53b-42d6-918b-800e1f916903"/*AnimVec3*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 161.89609,
         "Y": -26.099365
@@ -367,6 +414,7 @@
     },
     {
       "ChildId": "b919d98b-2802-4fff-96fa-e16f08ead74d"/*NoiseDisplaceSDF*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 301.8961,
         "Y": -2803.3062
@@ -374,6 +422,7 @@
     },
     {
       "ChildId": "b9ef0d09-b616-4708-bbf4-70e67bdffa5c"/*TransformPoints*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Comment": "Transforming the points (in point space) toward the normal (Z).\n\nUsing the Selection channel Fx1 as strength factor.",
       "Position": {
         "X": 441.89572,
@@ -382,6 +431,7 @@
     },
     {
       "ChildId": "ba53a005-690b-4ee1-ab2f-89d672bc49d7"/*GridPoints*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 161.89609,
         "Y": -1714.3417
@@ -389,6 +439,7 @@
     },
     {
       "ChildId": "ba9db608-67f4-429e-8ecd-6ff10627efb2"/*DrawPoints*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 441.8961,
         "Y": -2187.134
@@ -396,6 +447,7 @@
     },
     {
       "ChildId": "bab6c9b5-4b2c-4ee1-bc95-a0f357f9756f"/*DrawPoints*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 447.06125,
         "Y": -1103.1061
@@ -403,6 +455,7 @@
     },
     {
       "ChildId": "beaf3e57-977d-4930-ae1a-d7760265c842"/*GridPoints*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": -115.63574
@@ -410,6 +463,7 @@
     },
     {
       "ChildId": "bf81ce2b-4fd8-4b07-84cd-008ef192e8d4"/*SetFog*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 581.896,
         "Y": -2117.134
@@ -417,6 +471,7 @@
     },
     {
       "ChildId": "c0b50325-40af-45a4-863e-5745a49c166d"/*OrbitCamera*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 968.7312,
         "Y": -601.49146
@@ -424,6 +479,7 @@
     },
     {
       "ChildId": "c332b223-130c-47fd-8022-a5421a312dd7"/*SetPointAttributes*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Comment": "We colorize the points on the torus red.",
       "Position": {
         "X": 688.7312,
@@ -432,6 +488,7 @@
     },
     {
       "ChildId": "c5fffa60-2505-43a3-b0ae-2957f390fec4"/*DrawAsSplitView*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 677.9962,
         "Y": -1594.6292
@@ -439,6 +496,7 @@
     },
     {
       "ChildId": "c733fc81-8379-4c8f-ad9b-1637c4bc23f6"/*AnimVec3*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 161.89609,
         "Y": -2768.3062
@@ -446,6 +504,7 @@
     },
     {
       "ChildId": "cb2440b9-8487-44dc-a82e-594d498f1569"/*SelectPointsWithSDF*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 447.06125,
         "Y": -1527.9314
@@ -453,6 +512,7 @@
     },
     {
       "ChildId": "d6272845-4a2a-4dc0-8895-0906af064f93"/*DrawPointsShaded*/,
+      "SectionId": "c33ba744-a857-46fa-b457-f58e0fb146cb",
       "Position": {
         "X": 641.0077,
         "Y": -2693.665
@@ -460,6 +520,7 @@
     },
     {
       "ChildId": "d65c49d3-8aeb-4e54-84c5-68f220906e97"/*Group*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 581.896,
         "Y": -2187.134
@@ -467,6 +528,7 @@
     },
     {
       "ChildId": "d9c727fe-e30b-4866-b1db-29d9d0f592af"/*RepeatMeshAtPoints*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": -10.635742
@@ -474,6 +536,7 @@
     },
     {
       "ChildId": "dd44ad3b-73c7-402a-82ed-211ad2f2ef59"/*MeshFacesPoints*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Comment": "Generate Points on its surface.",
       "Position": {
         "X": 441.89572,
@@ -482,6 +545,7 @@
     },
     {
       "ChildId": "de20b471-053b-447a-af2a-8759511a68c5"/*DrawPoints*/,
+      "SectionId": "d88fc474-d96e-4101-bcaf-d5a1342da991",
       "Position": {
         "X": 828.7312,
         "Y": -706.49146
@@ -489,6 +553,7 @@
     },
     {
       "ChildId": "e44bcc1a-6c7f-4b91-9ebe-d0f4233b2a8d"/*Group*/,
+      "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,
         "Y": 199.36426
@@ -496,6 +561,7 @@
     },
     {
       "ChildId": "eb868c8b-4eff-401c-9ebd-a7d25049dfe2"/*DrawPoints*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 447.06125,
         "Y": -1266.6726
@@ -503,6 +569,7 @@
     },
     {
       "ChildId": "f47800a3-0852-4897-827d-d286633eaf1d"/*RotateAxis*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 161.89609,
         "Y": -1635.4376
@@ -510,6 +577,7 @@
     },
     {
       "ChildId": "f4d4b19d-9f91-4f75-9a2e-8cc02a478831"/*GridPoints*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 441.8961,
         "Y": -2292.1335
@@ -517,6 +585,7 @@
     },
     {
       "ChildId": "fa13eed7-32e9-4c9a-a39a-45d8c28454d6"/*SelectPointsWithSDF*/,
+      "SectionId": "a6339b16-d65c-4742-bf41-63fd331c70c7",
       "Position": {
         "X": 447.06125,
         "Y": -1208.1061
@@ -524,6 +593,7 @@
     },
     {
       "ChildId": "fa5f3b85-284a-4355-84d4-ec3c08100aaa"/*SSAO*/,
+      "SectionId": "858d7106-da22-41e0-9c68-71238f326872",
       "Position": {
         "X": 721.896,
         "Y": -2047.134
@@ -539,7 +609,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Label": "FractalCubeSlice",

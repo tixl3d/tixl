@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6f3d09b4-5b3e-44cf-b023-7db157682897"/*LoadHFCSExample*/,
   "Description": "",
   "InputUis": [

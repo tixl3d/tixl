@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "82a5f040-926b-4970-9da2-aa36de94b436"/*RgbaToColor*/,
   "Description": "Creates a Color from 4 values (RGBA)\n\nSimilar to [AColor] and [PickColor] and the same as [Vector4]\nAlternative with more functions: [SampleGradient]\n\n\nFor the opposite see [Vector4Components]\n\nAlso see: [HSBToColor]\n",
   "InputUis": [

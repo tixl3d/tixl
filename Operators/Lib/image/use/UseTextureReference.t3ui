@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fd5ac393-02a4-43ae-8cdf-64a947abbafa"/*UseTextureReference*/,
   "Description": "Uses a reference to a [RenderTarget] to implement feedback effects.",
   "SymbolTags": "8",

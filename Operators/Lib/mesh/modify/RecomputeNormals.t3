@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "68e0d0cb-1e57-4e9c-9f22-bd7927ddb4c5"/*RecomputeNormals*/,
   "Inputs": [
     {

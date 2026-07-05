@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "de173d83-66e6-4363-a478-4336100c2dbd"/*DrawLensFlares*/,
   "Description": "Draws 2D Sprites defined in a sprite buffer. This can be used to render things like lens flare quads or other effects.\n\nAdditionally to a Point-buffer, Sprites also contain attributes like UV and color.",
   "SymbolTags": "1",
@@ -93,7 +95,7 @@
       }
     },
     {
-      "ChildId": "4c16e5fb-5ebd-4c82-8d4f-38ea04a25135"/*TransformsConstBuffer*/,
+      "ChildId": "4c16e5fb-5ebd-4c82-8d4f-38ea04a25135"/*_TransformsCBuffer*/,
       "Position": {
         "X": 694.9881,
         "Y": 45.583923

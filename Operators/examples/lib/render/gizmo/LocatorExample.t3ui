@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "523bf3f7-d8f6-459b-a7fb-f681dce9e697"/*LocatorExample*/,
   "Description": "A simple setup that illustrates how to attach objects to arbitrary moving worldspace positions.",
   "SymbolTags": "2",
@@ -14,6 +16,7 @@
     },
     {
       "ChildId": "1bf87b7f-51e1-4ad1-9485-e8b549bf0b4c"/*PerlinNoise3*/,
+      "SectionId": "5b52d0ec-c9cc-4f0d-8778-2962a4f7e337",
       "Position": {
         "X": 285.1338,
         "Y": -10.272919
@@ -28,6 +31,7 @@
     },
     {
       "ChildId": "2ad9aee7-8635-46cf-80a7-467a3cc9b235"/*Transform*/,
+      "SectionId": "5b52d0ec-c9cc-4f0d-8778-2962a4f7e337",
       "Position": {
         "X": 585.1338,
         "Y": -136.27292
@@ -114,6 +118,7 @@
     },
     {
       "ChildId": "c284f325-c82b-45c6-8b20-7be9e5add4da"/*OscillateVec3*/,
+      "SectionId": "5b52d0ec-c9cc-4f0d-8778-2962a4f7e337",
       "Position": {
         "X": 435.1338,
         "Y": -10.272919
@@ -121,6 +126,7 @@
     },
     {
       "ChildId": "c37e7979-a8d9-44bb-82ca-539ae91b6c1c"/*PerlinNoise3*/,
+      "SectionId": "5b52d0ec-c9cc-4f0d-8778-2962a4f7e337",
       "Position": {
         "X": 285.1338,
         "Y": 32.72708
@@ -158,6 +164,7 @@
     },
     {
       "ChildId": "f8ee8314-77ec-44cd-a794-8d5577ca629f"/*Transform*/,
+      "SectionId": "5b52d0ec-c9cc-4f0d-8778-2962a4f7e337",
       "Position": {
         "X": 435.1338,
         "Y": -136.27292
@@ -173,7 +180,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "5b52d0ec-c9cc-4f0d-8778-2962a4f7e337",
       "Title": "An example for a complex scene setup.",

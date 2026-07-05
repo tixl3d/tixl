@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dda7898a-00c3-40c9-9fcd-020706969733"/*SyncedRibbons*/,
   "Description": "A weird blurry VJ-Scene, that's quite versatile",
   "SymbolTags": "1232",

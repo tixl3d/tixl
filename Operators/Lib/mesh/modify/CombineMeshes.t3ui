@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c276f4eb-f19c-405b-b247-3db159677571"/*CombineMeshes*/,
   "Description": "Combines the connected mesh buffers into a new mesh",
   "SymbolTags": "1",
@@ -22,6 +24,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "03385269-8ab3-4ab4-af08-ce81e75b1afb"/*GetSRVProperties*/,
+      "SectionId": "9cfeb291-962b-4d28-8268-b7e0d738762b",
       "Position": {
         "X": 334.83194,
         "Y": 1604.3566
@@ -36,6 +39,7 @@
     },
     {
       "ChildId": "15f0c8a6-2512-434d-8ceb-a4befd1ae332"/*IntsToBuffer*/,
+      "SectionId": "9cfeb291-962b-4d28-8268-b7e0d738762b",
       "Position": {
         "X": 494.2664,
         "Y": 1667.6438
@@ -43,6 +47,7 @@
     },
     {
       "ChildId": "1dd679ab-846e-4c55-be19-f93fc9ce6000"/*ComputeShaderStage*/,
+      "SectionId": "d68dbe48-b64c-474e-ab2e-413ddb123770",
       "Position": {
         "X": 716.47833,
         "Y": 1110.5674
@@ -50,6 +55,7 @@
     },
     {
       "ChildId": "21f84b36-b989-4f98-a725-baeedace88d9"/*GetBufferComponents*/,
+      "SectionId": "9cfeb291-962b-4d28-8268-b7e0d738762b",
       "Position": {
         "X": 133.78496,
         "Y": 1645.5767
@@ -64,6 +70,7 @@
     },
     {
       "ChildId": "39cb2a4f-28fe-450b-9f25-a6ae413517f0"/*GetBufferComponents*/,
+      "SectionId": "9cfeb291-962b-4d28-8268-b7e0d738762b",
       "Position": {
         "X": 494.2664,
         "Y": 1749.6437
@@ -78,6 +85,7 @@
     },
     {
       "ChildId": "4b51733e-c0e6-442e-9e4a-f2ee5754226c"/*IntsToBuffer*/,
+      "SectionId": "d68dbe48-b64c-474e-ab2e-413ddb123770",
       "Position": {
         "X": 494.95782,
         "Y": 1233.5303
@@ -92,6 +100,7 @@
     },
     {
       "ChildId": "55e0ee91-1b2c-48df-9c84-38ed64172829"/*CalcDispatchCount*/,
+      "SectionId": "d68dbe48-b64c-474e-ab2e-413ddb123770",
       "Position": {
         "X": 489.28943,
         "Y": 1153.1494
@@ -106,6 +115,7 @@
     },
     {
       "ChildId": "6bf5560a-b60e-4f4d-b152-3ceefbd6e65c"/*ComputeShaderStage*/,
+      "SectionId": "9cfeb291-962b-4d28-8268-b7e0d738762b",
       "Position": {
         "X": 715.787,
         "Y": 1544.6809
@@ -113,6 +123,7 @@
     },
     {
       "ChildId": "6cf813db-6eb8-4400-896e-1e8568080973"/*CalcDispatchCount*/,
+      "SectionId": "9cfeb291-962b-4d28-8268-b7e0d738762b",
       "Position": {
         "X": 488.598,
         "Y": 1587.263
@@ -120,6 +131,7 @@
     },
     {
       "ChildId": "6e8b75df-3df8-4367-b84d-dd6e40612086"/*GetBufferComponents*/,
+      "SectionId": "d68dbe48-b64c-474e-ab2e-413ddb123770",
       "Position": {
         "X": 134.47638,
         "Y": 1211.4631
@@ -127,6 +139,7 @@
     },
     {
       "ChildId": "770c751d-2954-4a82-8c9a-e5e89faf9648"/*GetBufferComponents*/,
+      "SectionId": "d68dbe48-b64c-474e-ab2e-413ddb123770",
       "Position": {
         "X": 494.95782,
         "Y": 1302.5303
@@ -141,6 +154,7 @@
     },
     {
       "ChildId": "8a482f46-5159-4ad5-ae1b-8c2b14a24c72"/*StructuredBufferWithViews*/,
+      "SectionId": "d68dbe48-b64c-474e-ab2e-413ddb123770",
       "Position": {
         "X": 342.7178,
         "Y": 1345.0906
@@ -169,6 +183,7 @@
     },
     {
       "ChildId": "ce4f81ef-6556-457f-9c13-7b3a5008fadb"/*GetSRVProperties*/,
+      "SectionId": "d68dbe48-b64c-474e-ab2e-413ddb123770",
       "Position": {
         "X": 335.52335,
         "Y": 1170.243
@@ -184,7 +199,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "9cfeb291-962b-4d28-8268-b7e0d738762b",
       "Title": "Combine Indices",

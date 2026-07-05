@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b6c5be1d-b133-45e9-a269-8047ea0d6ad7"/*StructuredBufferWithViews*/,
   "Description": "Generates a GPU buffer with optional shader resource view and unordered access view. This 'BufferWithView' type makes it easier to use the buffer without generating new shader resource views.\n\nYou can access the views with [GetBufferComponents].",
   "InputUis": [

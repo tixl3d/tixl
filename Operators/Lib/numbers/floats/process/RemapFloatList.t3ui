@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "f4e26a76-f8c4-4889-b1dc-c690cd078296"/*RemapFloatList*/,
   "Description": "Remaps a list of float values from an input range to an output range.\n\nThis operator is useful for scaling or normalizing lists of numbers. For example, you can use it to map sensor readings from their raw range to a 0-1 range for use in animations.\n\nTips:\n- Use the `Mode` to control how the remapping is applied (e.g., clamping, looping).\n- `BiasAndGain` provides an alternative way to adjust the mapping curve.\n\nAKA: scale, normalize, range, map",
   "InputUis": [

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3352d3a1-ab04-4d0a-bb43-da69095b73fd"/*RadialPoints*/,
   "Inputs": [
     {

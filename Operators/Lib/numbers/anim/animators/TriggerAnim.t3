@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "95d586a2-ee14-4ff5-a5bb-40c497efde95"/*TriggerAnim*/,
   "Inputs": [
     {

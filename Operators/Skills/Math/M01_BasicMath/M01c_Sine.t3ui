@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e3375df2-3475-4d76-970c-4c8fa3dcc941"/*M01c_Sine*/,
   "Description": "Riding the wave",
   "InputUis": [],
@@ -26,7 +28,7 @@
     },
     {
       "ChildId": "b8770fb9-8f97-4928-aebf-430cdaf0705b"/*Time*/,
-      "AnnotationId": "aac7d66b-9522-46ba-835d-fee499a83356",
+      "SectionId": "aac7d66b-9522-46ba-835d-fee499a83356",
       "Position": {
         "X": 1322.5986,
         "Y": 2021.9336
@@ -34,7 +36,7 @@
     },
     {
       "ChildId": "dc535372-0ade-45a9-bf95-d327ce62f6bd"/*Sin*/,
-      "AnnotationId": "aac7d66b-9522-46ba-835d-fee499a83356",
+      "SectionId": "aac7d66b-9522-46ba-835d-fee499a83356",
       "Position": {
         "X": 1322.5986,
         "Y": 2056.934
@@ -50,7 +52,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "aac7d66b-9522-46ba-835d-fee499a83356",
       "Label": "Solution",

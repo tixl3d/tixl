@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d8010a72-68ac-4fde-9b9d-0984628b8a56"/*AnimFloatList*/,
   "Description": "",
   "InputUis": [

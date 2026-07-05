@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e92bdb18-4a42-4a92-aacc-45765e5862bf"/*SpringVec3Example*/,
   "Description": "",
   "SymbolTags": "2",

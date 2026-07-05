@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a9b8c7d6-e5f4-4210-9876-54321fedcba0"/*FreeDOutput*/,
   "Description": "Sends camera tracking data over UDP using the FreeD protocol. This is essential for virtual production, augmented reality, and broadcasting, allowing real-time integration with systems like Unreal Engine, Vizrt, or Aximmetry.\n\nAlso see: [FreeDInput]",
   "InputUis": [

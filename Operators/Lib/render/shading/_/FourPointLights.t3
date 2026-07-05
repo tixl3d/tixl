@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "d062c1c2-a7d1-4d4d-a9b1-e0e96df02385"/*FourPointLights*/,
   "Inputs": [
     {

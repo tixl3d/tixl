@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "32a6a351-6d22-4915-aa0e-e0483b7f4e76"/*GenerateMips*/,
   "Description": "Executes computing the mipmaps. This requires the mipmap feature to be enabled in the [Texture2d].\n\nIn most use cases this is done automatically and you don't need to care about this.",
   "SymbolTags": "24",

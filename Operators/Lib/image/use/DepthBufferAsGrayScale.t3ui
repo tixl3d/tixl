@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2d62dd4b-9597-4569-a09e-495abf880e34"/*DepthBufferAsGrayScale*/,
   "Description": "Converts the provided depth buffer into a grayscale texture.\n\nImportant: Requires the correct settings for near/far clipping.",
   "SymbolTags": "24",

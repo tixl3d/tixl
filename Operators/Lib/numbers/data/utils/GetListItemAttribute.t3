@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "37794826-a099-4af3-90f4-1e49092a09e1"/*GetListItemAttribute*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "2470272f-5e56-448f-803d-15c5231353ff"/*Video2DPointScanner*/,
   "Inputs": [
     {

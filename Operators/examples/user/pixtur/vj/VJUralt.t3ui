@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a9e36415-58b3-4e2c-b42a-757000d5e337"/*VJUralt*/,
   "Description": "A quick experiment for visuals.",
   "InputUis": [],
@@ -12,6 +14,7 @@
     },
     {
       "ChildId": "02fb9640-2b37-4bf2-8786-c30cefcd597f"/*Sum*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 2583.8225,
         "Y": -933.4549
@@ -19,6 +22,7 @@
     },
     {
       "ChildId": "06fd71d9-7ac8-4af4-ad7c-a32d84d1428c"/*Damp*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 2133.8225,
         "Y": -877.4549
@@ -47,6 +51,7 @@
     },
     {
       "ChildId": "1374f429-a5f4-4205-9bcb-742d39b4bf9d"/*Group*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Position": {
         "X": 1485.0825,
         "Y": 325.12445
@@ -54,6 +59,7 @@
     },
     {
       "ChildId": "16344482-4cbb-4e78-b0c8-f3c02355cb0c"/*Text*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Position": {
         "X": 1335.0825,
         "Y": 407.12445
@@ -61,6 +67,7 @@
     },
     {
       "ChildId": "1727c823-8ff6-4610-9bd2-ca9a5d306f23"/*SampleGradient*/,
+      "SectionId": "94637fc9-2092-43de-ab93-b2cb4c7e3a33",
       "Position": {
         "X": 1822.4603,
         "Y": -534.03253
@@ -89,6 +96,7 @@
     },
     {
       "ChildId": "2003ca97-ddd0-49d5-9cc8-6673171e6fb1"/*Remap*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 2433.8225,
         "Y": -877.4549
@@ -117,6 +125,7 @@
     },
     {
       "ChildId": "2981e733-e727-400d-acb7-37679a799be6"/*String*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Style": "Resizable",
       "Size": {
         "X": 112.6874,
@@ -157,6 +166,7 @@
     },
     {
       "ChildId": "356720d0-ee6d-4708-a325-51b900d23792"/*Clamp*/,
+      "SectionId": "94637fc9-2092-43de-ab93-b2cb4c7e3a33",
       "Position": {
         "X": 1372.4603,
         "Y": -534.03253
@@ -178,6 +188,7 @@
     },
     {
       "ChildId": "39dfe12d-df60-4152-92a1-302a9566b453"/*intensity*/,
+      "SectionId": "94637fc9-2092-43de-ab93-b2cb4c7e3a33",
       "Position": {
         "X": 1222.4603,
         "Y": -534.03253
@@ -269,6 +280,7 @@
     },
     {
       "ChildId": "5bc8e888-ac05-4809-af23-bb4639b0ad8c"/*BlendColors*/,
+      "SectionId": "94637fc9-2092-43de-ab93-b2cb4c7e3a33",
       "Position": {
         "X": 1522.4603,
         "Y": -534.03253
@@ -276,6 +288,7 @@
     },
     {
       "ChildId": "61dcc16b-20a4-4fe2-9fa3-6ee3f09cf9c1"/*MidiInput*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 1833.8046,
         "Y": -911.228
@@ -304,6 +317,7 @@
     },
     {
       "ChildId": "7060b926-fb9c-4c5b-8a15-0ede6a63f148"/*OscInput*/,
+      "SectionId": "046ea86b-d529-42b3-b629-190a4a7d780f",
       "Position": {
         "X": -954.6242,
         "Y": -313.468
@@ -311,6 +325,7 @@
     },
     {
       "ChildId": "70a7ea94-0dc9-4268-b153-6efbd18aac56"/*PickFloatFromList*/,
+      "SectionId": "046ea86b-d529-42b3-b629-190a4a7d780f",
       "Position": {
         "X": -788.8271,
         "Y": -311.12558
@@ -318,6 +333,7 @@
     },
     {
       "ChildId": "73623ce0-d255-4363-8419-106ec8097fd3"/*MidiInput*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Position": {
         "X": 1335.0825,
         "Y": 489.12445
@@ -325,6 +341,7 @@
     },
     {
       "ChildId": "75785e2f-21a0-4764-8537-32ca0c45b792"/*Layer2d*/,
+      "SectionId": "94637fc9-2092-43de-ab93-b2cb4c7e3a33",
       "Position": {
         "X": 1972.4603,
         "Y": -534.03253
@@ -332,6 +349,7 @@
     },
     {
       "ChildId": "78215892-6dc1-454c-b46a-2950ba7fe3c3"/*AdvancedFeedback*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 2733.8225,
         "Y": -933.4549
@@ -346,6 +364,7 @@
     },
     {
       "ChildId": "7cc34b75-64ee-4b99-8cc8-907230408f32"/*AudioReaction*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 1983.8047,
         "Y": -911.228
@@ -360,6 +379,7 @@
     },
     {
       "ChildId": "81c6fc7c-1e53-4645-8527-1d1fdb15c043"/*DefineGradient*/,
+      "SectionId": "94637fc9-2092-43de-ab93-b2cb4c7e3a33",
       "Style": "Expanded",
       "Size": {
         "X": 110.0,
@@ -407,6 +427,7 @@
     },
     {
       "ChildId": "a8950555-4e2d-4702-a3ad-5668f08be95a"/*MidiInput*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 2433.8225,
         "Y": -933.4549
@@ -428,6 +449,7 @@
     },
     {
       "ChildId": "b092942b-f34c-4d08-8fdf-1f28ef7a0fd5"/*PickStringPart*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Position": {
         "X": 1115.8816,
         "Y": 463.93253
@@ -470,6 +492,7 @@
     },
     {
       "ChildId": "c8241cd3-2f3c-461c-927a-d548f9635f4c"/*MidiInput*/,
+      "SectionId": "94637fc9-2092-43de-ab93-b2cb4c7e3a33",
       "Position": {
         "X": 1072.4603,
         "Y": -534.03253
@@ -477,6 +500,7 @@
     },
     {
       "ChildId": "c8a6355a-c45e-4a43-a444-c19997c2fbb1"/*Group*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Position": {
         "X": 1649.8953,
         "Y": 327.8263
@@ -484,6 +508,7 @@
     },
     {
       "ChildId": "cdaa1efc-32ab-4036-9f1d-0cabe27bc7f2"/*TriggerAnim*/,
+      "SectionId": "94637fc9-2092-43de-ab93-b2cb4c7e3a33",
       "Position": {
         "X": 1672.4603,
         "Y": -374.03253
@@ -491,6 +516,7 @@
     },
     {
       "ChildId": "ce0d722b-f4cd-44c0-8ac6-2e6c6e6db03b"/*Text*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Position": {
         "X": 1335.0825,
         "Y": 325.12445
@@ -505,6 +531,7 @@
     },
     {
       "ChildId": "cfccf520-f2d9-453a-a823-a6095b242faf"/*tracking*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Position": {
         "X": 1125.5405,
         "Y": 332.1536
@@ -533,6 +560,7 @@
     },
     {
       "ChildId": "e7e552b9-1d66-4463-934c-9944e52e0cc6"/*zoom offset*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 2433.8225,
         "Y": -821.4549
@@ -540,6 +568,7 @@
     },
     {
       "ChildId": "e883d505-2af3-4a35-8987-bc8c0fd54dbf"/*font-size*/,
+      "SectionId": "67a22cf3-cdd0-4c74-8ba4-a4b15f144c53",
       "Position": {
         "X": 1132.2678,
         "Y": 368.9135
@@ -575,6 +604,7 @@
     },
     {
       "ChildId": "ffe3f097-9610-44fc-8060-7c50788100d6"/*Sub*/,
+      "SectionId": "7b23ebb6-fd64-46b5-9f47-7a2c83bd39fc",
       "Position": {
         "X": 2283.8225,
         "Y": -877.4549
@@ -590,7 +620,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "046ea86b-d529-42b3-b629-190a4a7d780f",
       "Title": "Drumkit detection",

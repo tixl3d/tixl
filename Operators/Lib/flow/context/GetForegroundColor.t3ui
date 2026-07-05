@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "6c1271a0-058f-4ff0-940b-f196e5debdf7"/*GetForegroundColor*/,
   "Description": "Gets the current foreground color from the context.\nThis can then be used to apply it to drawing operators, which can be affected by the primary drawing color.",
   "SymbolTags": "24",

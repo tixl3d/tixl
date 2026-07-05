@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "73c028d1-3de2-4269-b503-97f62bbce320"/*GenerateShaderGraphCode*/,
   "Description": "The internal implementation for shader graph code generation.\n\nPlease refer to the documentation within the source code.",
   "SymbolTags": "24",

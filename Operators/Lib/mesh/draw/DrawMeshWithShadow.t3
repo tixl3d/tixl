@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "c08a6847-e7c4-46e6-a8fb-24bb62a64b96"/*DrawMeshWithShadow*/,
   "Inputs": [
     {
@@ -378,12 +380,12 @@
       "Outputs": []
     },
     {
-      "Id": "d06bef6a-8edd-4c47-bf64-8945d05f2c04"/*TransformsConstBuffer*/,
+      "Id": "d06bef6a-8edd-4c47-bf64-8945d05f2c04"/*_TransformsCBuffer*/,
       "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": [
         {
-          "Id": "7a76d147-4b8e-48cf-aa3e-aac3aa90e888"/*TransformsConstBuffer*/,
+          "Id": "7a76d147-4b8e-48cf-aa3e-aac3aa90e888"/*_TransformsCBuffer*/,
           "DirtyFlagTrigger": "Always"
         }
       ]

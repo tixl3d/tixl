@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "ed153af2-a673-426c-83f6-31352ab3f6f3"/*I02l_Dot*/,
   "Description": "RadialGradient: Dot",
   "InputUis": [],
@@ -12,7 +14,7 @@
     },
     {
       "ChildId": "78cac19b-0b1b-4d77-abf0-600f1ec89a38"/*RadialGradient*/,
-      "AnnotationId": "cc1b31eb-65d6-42c3-b384-beb93a8f3824",
+      "SectionId": "cc1b31eb-65d6-42c3-b384-beb93a8f3824",
       "Position": {
         "X": 1317.6292,
         "Y": 2129.9172
@@ -27,7 +29,6 @@
     },
     {
       "ChildId": "ef5a045a-d409-43a0-97f3-5fcee5306ee6"/*LinearGradient*/,
-      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
       "Position": {
         "X": 1441.7301,
         "Y": 2334.827
@@ -43,7 +44,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "cc1b31eb-65d6-42c3-b384-beb93a8f3824",
       "Label": "Solution",

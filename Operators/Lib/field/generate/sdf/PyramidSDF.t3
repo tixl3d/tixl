@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5b8604d0-65f4-45c9-9e85-4a044005a778"/*PyramidSDF*/,
   "Inputs": [
     {

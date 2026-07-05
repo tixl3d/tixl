@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "80032e95-90ec-486d-92a4-ff3d225e556e"/*ScreenCapture*/,
   "Description": "Loads and renders the content of the entire screen, similar to screen capturing software like OBS (Open Broadcaster Software).\n\nUseful combinations: Can be rendered to a file/image sequence within TiXL's 'Render To File' window to make a recording of TiXL's UI.\nCan be combined with [ScreenCloseUp] to make it look like the monitor is being filmed with a real camera.\nCan also be used to add 2D effects on the captured image like [Pixelate], [SortPixel], etc.",
   "InputUis": [

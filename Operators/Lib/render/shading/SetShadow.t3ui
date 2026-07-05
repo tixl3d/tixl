@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "facb7925-176a-4eae-bedc-cdbf532ff6ff"/*SetShadow*/,
   "Description": "Renders a shadow pass for a directional light source.\nNeeds a [DrawMeshWithShadow] and a [SetPointLight] or [PointLight] in order to work.",
   "SymbolTags": "1",
@@ -53,6 +55,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0785703f-9d1a-42d9-a320-e23db5cbf0e4"/*Texture2d*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -1433.6846,
         "Y": -512.61255
@@ -60,6 +63,7 @@
     },
     {
       "ChildId": "229ec977-e4b9-4c48-aa0e-7d76721870ab"/*DepthStencil*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -1429.0453,
         "Y": -325.53995
@@ -67,6 +71,7 @@
     },
     {
       "ChildId": "23a72af6-9299-4eb8-87d8-d981936029f4"/*Int2ToVector2*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -1253.8896,
         "Y": -616.9242
@@ -74,6 +79,7 @@
     },
     {
       "ChildId": "2c69d230-4b2e-4c61-a7ad-0d0e757f2a8f"/*ClearRenderTarget*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -722.49554,
         "Y": -752.0451
@@ -81,6 +87,7 @@
     },
     {
       "ChildId": "3603695e-3094-4803-a869-d03ede8b8b99"/*SetIntVar*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -812.3122,
         "Y": -484.6477
@@ -88,6 +95,7 @@
     },
     {
       "ChildId": "3b5eddab-549a-46d3-8894-4fc92836fa78"/*Vector2Components*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -1113.8896,
         "Y": -616.9242
@@ -102,6 +110,7 @@
     },
     {
       "ChildId": "6257ed9f-6c20-4808-8070-f139c264cc29"/*RtvFromTexture2d*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -1043.2849,
         "Y": -818.1228
@@ -116,6 +125,7 @@
     },
     {
       "ChildId": "7e7e8107-550d-4c19-b0f6-d9baae1f68cf"/*OutputMergerStage*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -722.49554,
         "Y": -869.9844
@@ -123,6 +133,7 @@
     },
     {
       "ChildId": "7ff94c0f-da58-48c0-929a-000f33c112e1"/*ShadowMapSize*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -1802.9755,
         "Y": -421.11142
@@ -144,6 +155,7 @@
     },
     {
       "ChildId": "9c89ccf2-078f-4835-87b3-7409dc085795"/*Execute*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -410.40082,
         "Y": -874.6442
@@ -158,6 +170,7 @@
     },
     {
       "ChildId": "ba26151b-4afe-4ee7-97cb-89963f029049"/*Rasterizer*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -722.49554,
         "Y": -635.822
@@ -207,6 +220,7 @@
     },
     {
       "ChildId": "ed994cf2-153d-404a-ad56-2a83f7e4f4c5"/*DsvFromTexture2d*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -1003.9862,
         "Y": -730.3097
@@ -221,6 +235,7 @@
     },
     {
       "ChildId": "f59e3a68-eaf8-44e2-bb4a-a009c82d1fcf"/*SetIntVar*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -209.59656,
         "Y": -389.56332
@@ -228,6 +243,7 @@
     },
     {
       "ChildId": "f6a02ae4-254e-49f4-8ebc-f0979432a10c"/*SetContextTexture*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -69.59656,
         "Y": -389.56332
@@ -242,6 +258,7 @@
     },
     {
       "ChildId": "fa671b46-4075-4ae6-835c-12e5e3a357d4"/*Viewport*/,
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
         "X": -973.88965,
         "Y": -651.9242
@@ -264,7 +281,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Title": "Initialize ShadowMap Render Target",

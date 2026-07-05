@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0998c5a8-8771-4161-801d-e14507c2e89c"/*PartialPhysarum2*/,
   "Description": "Experimenting with surface crawling transition",
   "SymbolTags": "16",
@@ -13,6 +15,7 @@
     },
     {
       "ChildId": "040dae90-05e2-4ad1-b620-4e4e92ffe27e"/*LoadImage*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1367.3738,
         "Y": 2071.8416
@@ -20,6 +23,7 @@
     },
     {
       "ChildId": "0a8cecb3-94c9-4926-ba68-a4333677e980"/*RenderTarget*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -667.37384,
         "Y": 2176.8416
@@ -27,6 +31,7 @@
     },
     {
       "ChildId": "0e90b99d-628a-4107-8522-14c59beef552"/*Layer2d*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -947.37384,
         "Y": 2141.8416
@@ -34,6 +39,7 @@
     },
     {
       "ChildId": "12a0ed3e-ce58-4667-b95a-36af98fa84ab"/*AdjustColors*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1087.3738,
         "Y": 2071.8416
@@ -83,6 +89,7 @@
     },
     {
       "ChildId": "377d1b90-3d79-4bb0-83c9-c9a9e978c34c"/*Transform*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -807.37384,
         "Y": 2071.8416
@@ -111,6 +118,7 @@
     },
     {
       "ChildId": "4bc0081e-dcad-49e4-bb27-9a02e65337b5"/*_BlobOld*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1227.3738,
         "Y": 2141.8416
@@ -139,6 +147,7 @@
     },
     {
       "ChildId": "5bfa8b23-0060-4411-ad76-3bef804a026b"/*Layer2d*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -947.37384,
         "Y": 2106.8416
@@ -174,6 +183,7 @@
     },
     {
       "ChildId": "651033c7-f75a-4e7d-a36a-b9d7b4202488"/*AdjustColors*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1087.3738,
         "Y": 2106.8416
@@ -195,6 +205,7 @@
     },
     {
       "ChildId": "78078113-cb1f-448f-af12-cd2d1af5fd6d"/*_BlobOld*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1227.3738,
         "Y": 2071.8416
@@ -209,6 +220,7 @@
     },
     {
       "ChildId": "86f7f03e-2603-468f-afca-3072a326d16b"/*Layer2d*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -947.37384,
         "Y": 2071.8416
@@ -216,6 +228,7 @@
     },
     {
       "ChildId": "8f7ab13d-2482-4a89-9f74-07ebd11697d0"/*AdjustColors*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1087.3738,
         "Y": 2141.8416
@@ -223,6 +236,7 @@
     },
     {
       "ChildId": "90899feb-0e94-435d-a55c-9d4e8462cefa"/*LoadImage*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1367.3738,
         "Y": 2106.8416
@@ -251,6 +265,7 @@
     },
     {
       "ChildId": "9d5ae16e-48aa-48fa-8c85-6775a86a9a79"/*Transform*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -807.37384,
         "Y": 2141.8416
@@ -312,6 +327,7 @@
     },
     {
       "ChildId": "b9a7a724-d80e-4f82-bc97-58574798aca9"/*Switch*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -667.37384,
         "Y": 2071.8416
@@ -429,6 +445,7 @@
     },
     {
       "ChildId": "e72f14c3-3e80-4525-b330-e96c27cffdba"/*Transform*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -807.37384,
         "Y": 2106.8416
@@ -443,6 +460,7 @@
     },
     {
       "ChildId": "ef461f53-22d1-4fee-bc9d-b48c08b7f85a"/*_BlobOld*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1227.3738,
         "Y": 2106.8416
@@ -457,6 +475,7 @@
     },
     {
       "ChildId": "fac282c7-df62-4a33-ba20-1a4e3f7ceed5"/*ChannelMixer*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -667.37384,
         "Y": 2211.8416
@@ -464,6 +483,7 @@
     },
     {
       "ChildId": "fe1494f3-3caf-4341-8dcd-004f69124140"/*LoadImage*/,
+      "SectionId": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Position": {
         "X": -1367.3738,
         "Y": 2141.8416
@@ -479,7 +499,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "de2e960c-be36-4301-8298-8e12825f77d5",
       "Label": "Switching driving forces",

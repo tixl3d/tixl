@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "1192ae86-b174-4b58-9cc6-38afb666ce35"/*DirectionalBlur*/,
   "Inputs": [
     {

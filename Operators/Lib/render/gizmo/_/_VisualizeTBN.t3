@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "dd353ac7-1f11-4dd6-aff5-5c557c695512"/*_VisualizeTBN*/,
   "Inputs": [
     {

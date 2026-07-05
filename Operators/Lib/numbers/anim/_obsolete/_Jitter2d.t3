@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "23794a1f-372d-484b-ac31-9470d0e77819"/*_Jitter2d*/,
   "Inputs": [
     {

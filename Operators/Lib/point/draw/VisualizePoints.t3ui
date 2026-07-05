@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "37bdbafc-d14c-4b81-91c3-8f63c3b63812"/*VisualizePoints*/,
   "Description": "This helper operator visualizes points and their orientation. It is permanently visible, but you can toggle the default settings for these gizmos using the \"Gizmo\" toggle in the output window.\n\nUnderstanding the size, order, and orientation of points in space can be crucial for content creation.\n\nDepending on the use case, this operator can help you visualize:\n\n   The centers\n   The \"w\" attribute (represented by the scale of the center points)\n   The \"w\" attribute (listed as the connected table on the left)\n   The orientation with its axes: x (right), y (up), z (forward)\n   The orientation as sprites (indicated with an \"F\")\n   The velocity of the points encoded in the rotation (relevant only for Simulation operators).\n\nAlso, please take a look at the presets.",
   "SymbolTags": "1",

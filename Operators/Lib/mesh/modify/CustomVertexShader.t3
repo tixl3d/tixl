@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b722014e-402f-4089-a876-16aefab3c012"/*CustomVertexShader*/,
   "Inputs": [
     {

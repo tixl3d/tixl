@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "0f1e2d3c-4b5a-4678-9012-3456789abcde"/*TcpServer*/,
   "Description": "Creates a TCP server to listen for incoming connections and receive data.\n\nThis operator starts a TCP server on a specified IP address and port, allowing multiple clients to connect simultaneously. It receives data from all connected clients and can broadcast messages to them.\n\nTips:\n- Use `Listen` to start and stop the server.\n- `ConnectionCount` shows how many clients are currently connected.\n- Messages sent via the `Message` input are broadcast to all connected clients.\n\nAKA: tcp, network, socket, server",
   "InputUis": [

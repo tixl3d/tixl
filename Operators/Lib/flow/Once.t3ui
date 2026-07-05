@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "e8d2b4ac-0ba2-400f-9c82-e5dd15a23d32"/*Once*/,
   "Description": "Briefly indicates whether the incoming Boolean value has changed.",
   "SymbolTags": "8",

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "816eda66-79c3-430c-9f03-d51b93b17987"/*DrawImageMosaic*/,
   "Description": "Initialize and draw an image mosaic",
   "InputUis": [
@@ -42,6 +44,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "073a8b8e-6b28-44f5-838a-d9a4764db843"/*SetPixelAndVertexShaderStage*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1325.8447,
         "Y": 330.97375
@@ -49,6 +52,7 @@
     },
     {
       "ChildId": "155dcd6f-d25f-49c1-bb34-3b8d43b07ebf"/*BlendState*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 741.20483
@@ -64,6 +68,7 @@
     },
     {
       "ChildId": "2572a86a-7515-404f-8eb9-04aa9ad83b3e"/*OutputMergerStage*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1325.8447,
         "Y": 741.20483
@@ -78,6 +83,7 @@
     },
     {
       "ChildId": "4348732e-5dba-44bc-a7b1-7629f518815e"/*Rasterizer*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1325.8447,
         "Y": 692.3164
@@ -85,13 +91,15 @@
     },
     {
       "ChildId": "4db6d1db-ddb8-4c5d-8696-14587621a4cc"/*Draw*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1325.8447,
         "Y": 825.42535
       }
     },
     {
-      "ChildId": "4f9e71e5-1f4f-4f52-984d-6fe8dd7d3ab5"/*TransformsConstBuffer*/,
+      "ChildId": "4f9e71e5-1f4f-4f52-984d-6fe8dd7d3ab5"/*_TransformsCBuffer*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 400.97375
@@ -99,6 +107,7 @@
     },
     {
       "ChildId": "521c7006-cbec-43f5-9d3c-82bd6a7fca9e"/*TextureArray*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 505.97375
@@ -113,6 +122,7 @@
     },
     {
       "ChildId": "6042f561-62a2-4a20-aeb6-0a349a237bcc"/*PointSampler*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 645.97375
@@ -128,6 +138,7 @@
     },
     {
       "ChildId": "70d2b005-493e-4e7c-a5fb-e7dfe4e6b1f8"/*RenderTargetBlendDescription*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1045.8447,
         "Y": 741.20483
@@ -135,6 +146,7 @@
     },
     {
       "ChildId": "74367db0-da9c-4f15-995d-d647aa22b4a8"/*Execute*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Style": "Resizable",
       "Size": {
         "X": 66.09437,
@@ -147,6 +159,7 @@
     },
     {
       "ChildId": "778fc991-7bdb-4ae1-b667-9d035bd4f874"/*SrvFromTexture2d*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 540.97375
@@ -168,6 +181,7 @@
     },
     {
       "ChildId": "94ae2ca5-8be3-4f8b-9a08-816ae488f336"/*VertexShader*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 330.97375
@@ -175,6 +189,7 @@
     },
     {
       "ChildId": "96111f2c-af83-4823-85b4-650e759321f0"/*InputAssemblerStage*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1390.0756,
         "Y": 295.86154
@@ -182,6 +197,7 @@
     },
     {
       "ChildId": "9fb2393a-56ad-4308-bcf5-95d699122ea5"/*ClampedSampler*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 610.97375
@@ -203,6 +219,7 @@
     },
     {
       "ChildId": "b69ddd60-312f-442a-a4ce-5e8751a96c8b"/*MultiplyInt*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 825.42535
@@ -210,6 +227,7 @@
     },
     {
       "ChildId": "ba137320-b781-4244-a4a5-f1d27672ece5"/*RasterizerState*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 692.3164
@@ -231,6 +249,7 @@
     },
     {
       "ChildId": "e5710d3b-4517-4600-9e58-80c650a0bee8"/*ClampInt*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1045.8447,
         "Y": 825.42535
@@ -238,6 +257,7 @@
     },
     {
       "ChildId": "e8160482-21eb-4217-a9c6-deed3f5d9a44"/*DepthStencilState*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 776.20483
@@ -245,6 +265,7 @@
     },
     {
       "ChildId": "fab376a4-8eb4-44c1-ba4b-deba7472dbca"/*PixelShader*/,
+      "SectionId": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Position": {
         "X": 1185.8447,
         "Y": 365.97375
@@ -267,7 +288,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "a7eab7f2-0e20-41e3-b3cc-1b7ab5336fb8",
       "Title": "Draw Mosaic Billboards",

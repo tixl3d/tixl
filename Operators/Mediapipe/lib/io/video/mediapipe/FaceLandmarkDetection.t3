@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "9b2c3d4e-5f6a-4798-89ab-cdef12345678"/*FaceLandmarkDetection*/,
   "Inputs": [
     {

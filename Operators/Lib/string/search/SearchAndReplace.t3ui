@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "b7910fc6-c3b2-4daf-93cd-010dcfe22a57"/*SearchAndReplace*/,
   "Description": "Looks for characters or strings within another string and returns a new string with the matches replaced.",
   "SymbolTags": "1",

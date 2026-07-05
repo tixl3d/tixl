@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7a610996-913a-443b-921a-12e6b05f4110"/*DmxOutput*/,
   "Description": "Sends DMX data to a connected DMX interface.\n\nThis operator sends a list of float values as DMX channels to a specified DMX universe via a connected DMX interface (e.g., FTDI-based USB-DMX interfaces). The input `DmxUniverse` should be a list of floats, where each float represents a DMX channel value (0-1).\n\nTips:\n- Ensure the correct `PortName` for your DMX interface is selected.\n- The `DmxUniverse` input expects a list of up to 512 float values. Use operators like `PointsToDMXLights` to generate this data.\n- `MaxFps` can be used to limit the update rate and reduce CPU usage.\n\nAKA: dmx, light, lighting, ftdi",
   "InputUis": [

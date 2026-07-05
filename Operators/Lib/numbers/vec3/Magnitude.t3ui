@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "99ce9535-23a3-4570-a98c-8d2262cb8755"/*Magnitude*/,
   "Description": "Returns the length of a Vector3.",
   "InputUis": [

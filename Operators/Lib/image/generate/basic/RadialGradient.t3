@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "82ad8911-c930-4851-803d-3f24422445bc"/*RadialGradient*/,
   "Inputs": [
     {

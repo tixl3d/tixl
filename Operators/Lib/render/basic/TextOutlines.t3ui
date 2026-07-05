@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "84e9333f-38d2-422f-abf5-bf3929f01c7e"/*TextOutlines*/,
   "Description": "Creates outlined text to use in combination with [Text] ",
   "SymbolTags": "2056",
@@ -260,7 +262,7 @@
       }
     },
     {
-      "ChildId": "9b90ce7d-226e-4892-b82a-be9445115293"/*TransformsConstBuffer*/,
+      "ChildId": "9b90ce7d-226e-4892-b82a-be9445115293"/*_TransformsCBuffer*/,
       "Position": {
         "X": 611.126,
         "Y": 324.03003

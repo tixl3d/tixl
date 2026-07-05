@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "fa45d013-5a1c-45a0-9b05-a4a4edfb06f9"/*TypoGridBuffer*/,
   "Inputs": [
     {

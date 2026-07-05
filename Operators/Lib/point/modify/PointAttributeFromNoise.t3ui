@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7af59063-88d2-4697-985c-e09b8c77a43f"/*PointAttributeFromNoise*/,
   "Description": "Changes point attributes with a built-in noise function.",
   "SymbolTags": "8",
@@ -231,7 +233,7 @@
       }
     },
     {
-      "ChildId": "b05407ad-c97e-4b84-8041-7c13d3c26d7a"/*TransformsConstBuffer*/,
+      "ChildId": "b05407ad-c97e-4b84-8041-7c13d3c26d7a"/*_TransformsCBuffer*/,
       "Position": {
         "X": -25.421453,
         "Y": 211.62825

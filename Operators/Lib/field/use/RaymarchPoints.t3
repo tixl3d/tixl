@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "a914c462-b707-4240-b57b-ed0e24e80a94"/*RaymarchPoints*/,
   "Inputs": [
     {
@@ -91,7 +91,7 @@
       "Outputs": []
     },
     {
-      "Id": "57df33fe-49b1-4716-91f6-a45a389f9d6b"/*AddInts*/,
+      "Id": "57df33fe-49b1-4716-91f6-a45a389f9d6b"/*AddInt*/,
       "SymbolId": "ab73a49e-c548-437d-a4ab-b3fa41e30097",
       "InputValues": [
         {

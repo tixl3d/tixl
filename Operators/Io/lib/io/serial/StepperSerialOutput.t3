@@ -1,6 +1,6 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "7f3a2c10-5b84-4e29-9a6d-1c7e0b45d832"/*StepperSerialOutput*/,
   "Inputs": [
     {

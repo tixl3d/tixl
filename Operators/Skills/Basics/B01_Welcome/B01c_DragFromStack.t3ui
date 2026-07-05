@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "468cafa2-d5ef-46f3-b0b7-626cdb0322cf"/*B01c_DragFromStack*/,
   "Description": "Get outta there!",
   "InputUis": [],
@@ -26,7 +28,7 @@
     },
     {
       "ChildId": "adaa629e-78b0-42a5-b618-fbfcad511e66"/*RoundedRect*/,
-      "AnnotationId": "e62796c7-c4ac-4081-ab3f-420fe05a2a0a",
+      "SectionId": "e62796c7-c4ac-4081-ab3f-420fe05a2a0a",
       "Position": {
         "X": 1238.9639,
         "Y": 2105.6155
@@ -34,7 +36,7 @@
     },
     {
       "ChildId": "b58f1da3-be7a-440f-9fc4-0fce8131e2e7"/*Raster*/,
-      "AnnotationId": "e62796c7-c4ac-4081-ab3f-420fe05a2a0a",
+      "SectionId": "e62796c7-c4ac-4081-ab3f-420fe05a2a0a",
       "Position": {
         "X": 1238.9639,
         "Y": 2140.615
@@ -57,7 +59,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "e62796c7-c4ac-4081-ab3f-420fe05a2a0a",
       "Label": "Solution",

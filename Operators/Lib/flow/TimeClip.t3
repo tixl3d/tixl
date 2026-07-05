@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "3036067a-a4c2-434b-b0e3-ac95c5c943f4"/*TimeClip*/,
   "Inputs": [
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "5317ade3-d4df-480d-872d-a17c63909da0"/*CameraExample*/,
   "Description": "",
   "SymbolTags": "2",
@@ -14,6 +16,7 @@
     },
     {
       "ChildId": "3fee99b3-aaa6-4ae9-a1a8-c3f78c20a2fc"/*CubeMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 151.60275,
         "Y": 336.0
@@ -21,6 +24,7 @@
     },
     {
       "ChildId": "6f6673cb-0927-47ac-a77f-9a4fc05b98a3"/*TransformMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 151.60275,
         "Y": 56.0
@@ -28,6 +32,7 @@
     },
     {
       "ChildId": "7ab99642-4270-411a-be34-ae9fe2065b12"/*TransformMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 151.60275,
         "Y": 112.0
@@ -35,6 +40,7 @@
     },
     {
       "ChildId": "7f7a8f84-d1e3-4b5a-bf55-4edf2041f154"/*TorusMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 1.602745,
         "Y": 112.0
@@ -49,6 +55,7 @@
     },
     {
       "ChildId": "935eafd0-4392-45b8-811f-073fdf96e7d3"/*Text*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 151.60275,
         "Y": 280.0
@@ -56,6 +63,7 @@
     },
     {
       "ChildId": "a599a4d4-2cf1-41c7-aded-b60cb13fd5ac"/*CubeMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 151.60275,
         "Y": 0.0
@@ -63,6 +71,7 @@
     },
     {
       "ChildId": "a965d0a1-cd5c-4661-bb71-9103c1c65441"/*CylinderMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 0.0,
         "Y": 179.79846
@@ -70,6 +79,7 @@
     },
     {
       "ChildId": "abf95939-a9b5-43f2-ab43-d5b35f76f616"/*DrawMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 301.60275,
         "Y": 112.0
@@ -77,6 +87,7 @@
     },
     {
       "ChildId": "b42d7783-7d1c-41e3-bdeb-c3f34e74042e"/*DrawMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 301.60275,
         "Y": 0.0
@@ -84,6 +95,7 @@
     },
     {
       "ChildId": "bc53c76e-2a7e-4637-897f-8b15f8853601"/*Text*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 151.60275,
         "Y": 224.0
@@ -91,6 +103,7 @@
     },
     {
       "ChildId": "c2de45ec-758e-473a-846b-40ddbec951f8"/*SphereMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 1.602745,
         "Y": 56.0
@@ -98,6 +111,7 @@
     },
     {
       "ChildId": "c7917b4d-8146-464c-9d6b-0871f9e6461c"/*DrawMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 301.60275,
         "Y": 336.0
@@ -105,6 +119,7 @@
     },
     {
       "ChildId": "d0171860-cc35-48f5-879f-a72a24cc6258"/*DrawMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 301.60275,
         "Y": 56.0
@@ -112,6 +127,7 @@
     },
     {
       "ChildId": "d3e5e889-3c3f-4c1c-961e-24892397bd67"/*Transform*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 301.60275,
         "Y": 224.0
@@ -119,6 +135,7 @@
     },
     {
       "ChildId": "ecfa7699-a770-46aa-b4d5-62332f80c855"/*DrawMesh*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 301.60275,
         "Y": 168.0
@@ -126,6 +143,7 @@
     },
     {
       "ChildId": "f70506a7-6ce5-4aa7-8661-e81789b16596"/*Transform*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 301.60275,
         "Y": 280.0
@@ -133,6 +151,7 @@
     },
     {
       "ChildId": "fdb9a1a0-0434-4b47-925f-ef185faf82ef"/*Execute*/,
+      "SectionId": "de5df825-b026-414c-941f-80ef7902ae41",
       "Position": {
         "X": 445.064,
         "Y": 39.343628
@@ -148,7 +167,7 @@
       }
     }
   ],
-  "Annotations": [
+  "Sections": [
     {
       "Id": "de5df825-b026-414c-941f-80ef7902ae41",
       "Title": "I know, this is a contemporary art masterpiece ;)",

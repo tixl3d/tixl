@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "05295c65-7dfd-4570-866e-9b5c4e735569"/*SelectBoolFromFloatDict*/,
   "Inputs": [
     {

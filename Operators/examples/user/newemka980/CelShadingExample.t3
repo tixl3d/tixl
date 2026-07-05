@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 3,
+  "TixlVersion": "4.2.0.3",
   "Id": "652a6c86-3af2-4bed-9370-912f57690a2c"/*CelShadingExample*/,
   "Inputs": [],
   "Children": [
