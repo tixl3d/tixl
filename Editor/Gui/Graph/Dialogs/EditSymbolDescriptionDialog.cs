@@ -11,13 +11,29 @@ namespace T3.Editor.Gui.Dialogs;
 
 public sealed class EditSymbolDescriptionDialog : ModalDialog
 {
-    public void Draw(Symbol operatorSymbol)
+    /// <summary>Sets the symbol whose description the dialog edits — callers pass the symbol they are
+    /// showing, which is not necessarily the graph selection (e.g. the Help window's current topic).</summary>
+    public void ShowNextFrame(Symbol symbol)
+    {
+        _symbolIdToEdit = symbol.Id;
+        ShowNextFrame();
+    }
+
+    public void Draw()
     {
         DialogSize = new Vector2(1100, 700);
 
         if (BeginDialog("Edit description"))
         {
-            var symbolUi = operatorSymbol.GetSymbolUi();
+            if (!SymbolUiRegistry.TryGetSymbolUi(_symbolIdToEdit, out var symbolUi))
+            {
+                // Symbol vanished while the dialog was open (project closed, package reload) — abandon the edit.
+                _editingSymbolId = Guid.Empty;
+                ImGui.CloseCurrentPopup();
+                EndDialogContent();
+                EndDialog();
+                return;
+            }
 
             if (ImGui.IsWindowAppearing())
             {
@@ -115,6 +131,9 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
                                   _editingSymbolId,
                                   _originalDescription, _originalLinks,
                                   currentDescription, newLinksSnapshot));
+
+            // Do() isn't executed above, so its FlagAsModified never runs — mark the symbol dirty here.
+            symbolUi.FlagAsModified();
         }
 
         _editingSymbolId = Guid.Empty;
@@ -143,6 +162,7 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
         return true;
     }
 
+    private Guid _symbolIdToEdit;
     private Guid _editingSymbolId;
     private string _originalDescription = string.Empty;
     private readonly List<ExternalLink> _originalLinks = [];

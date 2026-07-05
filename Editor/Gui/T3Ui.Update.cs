@@ -14,6 +14,7 @@ using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
+using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Skills.Training;
@@ -111,6 +112,7 @@ public static partial class T3Ui
         _userNameDialog.Draw();
         AboutDialog.Draw();
         ExitDialog.Draw();
+        OperatorHelp.EditDescriptionDialog.Draw();
         SkillMapPopup.Draw();
 
         // Classify the launch first so the welcome window claims the foreground before the

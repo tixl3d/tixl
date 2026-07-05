@@ -38,7 +38,7 @@ internal sealed class OperatorHelp
                                             : CustomComponents.ButtonStates.Default))
         {
             if (toggledToEdit)
-                EditDescriptionDialog.ShowNextFrame();
+                EditDescriptionDialog.ShowNextFrame(symbolUi.Symbol);
             else if (helpWindowIsOpen)
                 HelpWindow.CloseWindow();
             else
@@ -96,7 +96,7 @@ internal sealed class OperatorHelp
         {
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
-                EditDescriptionDialog.ShowNextFrame();
+                EditDescriptionDialog.ShowNextFrame(symbolUi.Symbol);
             }
 
             CustomComponents.TooltipForLastItem("Click to edit descriptions and links");
@@ -169,7 +169,7 @@ internal sealed class OperatorHelp
         {
             FormInputs.AddHint("No description yet.");
             if (ImGui.Button("Edit description... "))
-                EditDescriptionDialog.ShowNextFrame();
+                EditDescriptionDialog.ShowNextFrame(symbolUi.Symbol);
         }
 
         _parametersWithDescription.Clear();

@@ -123,10 +123,8 @@ internal sealed class HelpWindow : Window
 
         if (_shownSymbolUi != null)
         {
-            // Shared dialog instance drawn by the Parameter window (for its selected symbol) — so the
-            // dialog only appears while that window is open. Not ideal, but avoids two popup instances.
             if (CustomComponents.IconButton(Icon.PopUp, buttonSize))
-                OperatorHelp.EditDescriptionDialog.ShowNextFrame();
+                OperatorHelp.EditDescriptionDialog.ShowNextFrame(_shownSymbolUi.Symbol);
 
             CustomComponents.TooltipForLastItem("Edit description and links");
             ImGui.SameLine();
