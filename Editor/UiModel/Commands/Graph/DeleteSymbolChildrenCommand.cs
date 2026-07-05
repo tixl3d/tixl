@@ -55,6 +55,7 @@ public class DeleteSymbolChildrenCommand : ICommand
                                           ChildName = child.Name,
                                           PosInCanvas = childUi.PosOnCanvas,
                                           Size = childUi.Size,
+                                          SectionId = childUi.SectionId,
                                           OriginalValuesForInputs = originalValuesForNonDefaultInputs,
                                           TimeClipSettingsForOutputs = timeClipSettingsForOutputs,
                                       };
@@ -115,6 +116,10 @@ public class DeleteSymbolChildrenCommand : ICommand
                 
             var symbol = childSymbolUi.Symbol;
             var symbolChildUi = compositionSymbolUi.AddChild(symbol, childUndoData.ChildId, childUndoData.PosInCanvas, childUndoData.Size);
+
+            // Membership is usually re-derived from geometry, but ops hidden in a collapsed
+            // section are sticky - without restoring the id they would come back orphaned.
+            symbolChildUi.SectionId = childUndoData.SectionId;
             var symbolChild = symbolChildUi.SymbolChild;
                 
             foreach (var (inputId, input) in symbolChild!.Inputs)
@@ -153,6 +158,7 @@ public class DeleteSymbolChildrenCommand : ICommand
         public string ChildName { get; set; }
         public Vector2 PosInCanvas { get; set; }
         public Vector2 Size { get; set; }
+        public Guid SectionId { get; set; }
             
         public Dictionary<Guid, InputValue> OriginalValuesForInputs { get; set; }
         public Dictionary<Guid, TimeClip> TimeClipSettingsForOutputs { get; set; }

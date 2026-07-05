@@ -1067,7 +1067,7 @@ internal sealed class SymbolLibrary : Window
     /// <summary>
     /// Prevents dragging the current composition or any of its parents into itself.
     /// </summary>
-    private static bool IsSymbolCurrentCompositionOrAParent(Symbol symbol)
+    internal static bool IsSymbolCurrentCompositionOrAParent(Symbol symbol)
     {
         var components = ProjectView.Focused;
         if (components?.CompositionInstance == null)

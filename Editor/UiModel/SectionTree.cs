@@ -160,6 +160,18 @@ internal static class SectionTree
         }
     }
 
+    /// <summary>
+    /// Collects the member ops and nested frames hidden inside a collapsed section,
+    /// recursively. Used when deleting a collapsed frame: once its header is gone the
+    /// hidden contents have no visible representation left, so they are deleted with it.
+    /// </summary>
+    internal static void CollectHiddenContents(SymbolUi symbolUi, Section section, List<SymbolUi.Child> hiddenOps, List<Section> hiddenSections)
+    {
+        _visitedSectionIds.Clear();
+        _visitedSectionIds.Add(section.Id);
+        CollectHiddenContentsRecursively(symbolUi, section, hiddenOps, hiddenSections);
+    }
+
     internal readonly record struct OverlapPush(ISelectableCanvasObject Block, Vector2 Delta);
 
     /// <summary>
@@ -334,7 +346,6 @@ internal static class SectionTree
         var moveCommand = new Commands.Graph.ModifyCanvasElementsCommand(symbolUi, _elementsToPush, selector);
         for (var i = 0; i < _elementsToPush.Count; i++)
         {
-            Log.Debug($"PushNeighbors by '{source.Title}' {claimedBounds.Min}..{claimedBounds.Max}: moving {_elementsToPush[i]} by {_pushDeltas[i]}");
             _elementsToPush[i].PosOnCanvas += _pushDeltas[i];
         }
 
@@ -549,6 +560,28 @@ internal static class SectionTree
         }
 
         return best?.Id ?? Guid.Empty;
+    }
+
+    private static void CollectHiddenContentsRecursively(SymbolUi symbolUi, Section section, List<SymbolUi.Child> hiddenOps, List<Section> hiddenSections)
+    {
+        foreach (var childUi in symbolUi.ChildUis.Values)
+        {
+            if (childUi.SectionId == section.Id)
+                hiddenOps.Add(childUi);
+        }
+
+        foreach (var nested in symbolUi.Sections.Values)
+        {
+            if (nested.ParentSectionId != section.Id)
+                continue;
+
+            // Visited set guards against parent-reference cycles in hand-edited files
+            if (!_visitedSectionIds.Add(nested.Id))
+                continue;
+
+            hiddenSections.Add(nested);
+            CollectHiddenContentsRecursively(symbolUi, nested, hiddenOps, hiddenSections);
+        }
     }
 
     private static void CollectMembersRecursively(SymbolUi symbolUi, Section section, List<ISelectableCanvasObject> results)

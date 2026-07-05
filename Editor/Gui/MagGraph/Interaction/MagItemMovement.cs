@@ -176,7 +176,6 @@ internal sealed partial class MagItemMovement
             return;
         }
 
-        Log.Debug($"CompleteSlowGrow: section {_slowGrowSectionId}");
         _slowGrowCommand.StoreCurrentValues();
         context.MacroCommand!.AddExecutedCommandForUndo(_slowGrowCommand);
         _growPushPreview.Complete(context.MacroCommand);
@@ -272,7 +271,6 @@ internal sealed partial class MagItemMovement
         if (!grewX && !grewY)
             return;
 
-        Log.Debug($"GrowToFitContent: '{section.Title}' max {boundsMax} -> {requiredMax} (excluded: {excludedChildIds?.Count ?? 0})");
         var resizeCommand = new ModifyCanvasElementsCommand(symbolUi, [section], context.Selector);
         section.Size = requiredMax - section.PosOnCanvas;
         resizeCommand.StoreCurrentValues();

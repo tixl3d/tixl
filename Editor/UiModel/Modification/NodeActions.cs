@@ -72,16 +72,47 @@ internal static class NodeActions
     {
         var commands = new List<ICommand>();
         selectedChildUis ??= nodeSelection.GetSelectedChildUis().ToList();
-        Log.Debug("Selected node count " + selectedChildUis.Count);
-        if (selectedChildUis.Count != 0)
+
+        // Deleting a collapsed section deletes its hidden contents with it - once the
+        // header is gone they would have no visible representation left on the canvas
+        var sectionsToDelete = nodeSelection.GetSelectedNodes<Section>().ToList();
+        var hiddenOps = new List<SymbolUi.Child>();
+        foreach (var selectedSection in sectionsToDelete.ToArray())
         {
-            var cmd = new DeleteSymbolChildrenCommand(compositionSymbolUi, selectedChildUis);
+            if (selectedSection.Collapsed)
+            {
+                SectionTree.CollectHiddenContents(compositionSymbolUi, selectedSection, hiddenOps, sectionsToDelete);
+            }
+        }
+
+        var childUisToDelete = new List<SymbolUi.Child>(selectedChildUis);
+        var childIdsToDelete = new HashSet<Guid>();
+        foreach (var childUi in selectedChildUis)
+        {
+            childIdsToDelete.Add(childUi.Id);
+        }
+
+        foreach (var hiddenOp in hiddenOps)
+        {
+            if (childIdsToDelete.Add(hiddenOp.Id))
+            {
+                childUisToDelete.Add(hiddenOp);
+            }
+        }
+
+        if (childUisToDelete.Count != 0)
+        {
+            var cmd = new DeleteSymbolChildrenCommand(compositionSymbolUi, childUisToDelete);
             commands.Add(cmd);
         }
 
-        foreach (var selectedSection in nodeSelection.GetSelectedNodes<Section>())
+        var sectionIdsToDelete = new HashSet<Guid>();
+        foreach (var sectionToDelete in sectionsToDelete)
         {
-            var cmd = new DeleteSectionCommand(compositionSymbolUi, selectedSection);
+            if (!sectionIdsToDelete.Add(sectionToDelete.Id))
+                continue;
+
+            var cmd = new DeleteSectionCommand(compositionSymbolUi, sectionToDelete);
             commands.Add(cmd);
         }
 

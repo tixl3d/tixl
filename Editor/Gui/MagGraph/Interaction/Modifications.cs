@@ -257,10 +257,51 @@ internal static class Modifications
 
                 deletedSections.Add(mga);
             }
-            else 
+            else
             {
                 Log.Warning("Can't find selectable item " + s);
                 continue;
+            }
+        }
+
+        // Deleting a collapsed frame deletes its hidden contents with it - once the
+        // header is gone they would have no visible representation left on the canvas
+        if (deletedSections.Count > 0)
+        {
+            var hiddenOps = new List<SymbolUi.Child>();
+            var hiddenSections = new List<Section>();
+            foreach (var magSection in deletedSections.ToArray())
+            {
+                if (magSection.Section.Collapsed)
+                {
+                    SectionTree.CollectHiddenContents(compositionUi, magSection.Section, hiddenOps, hiddenSections);
+                }
+            }
+
+            foreach (var hiddenOp in hiddenOps)
+            {
+                if (deletedChildUis.Contains(hiddenOp))
+                    continue;
+
+                deletedChildUis.Add(hiddenOp);
+                if (context.Layout.Items.TryGetValue(hiddenOp.Id, out var hiddenItem))
+                {
+                    deletedItems.Add(hiddenItem);
+                }
+            }
+
+            foreach (var hiddenSection in hiddenSections)
+            {
+                if (!context.Layout.Sections.TryGetValue(hiddenSection.Id, out var hiddenMagSection))
+                {
+                    Log.Warning("Can't find hidden nested section: " + hiddenSection.Id);
+                    continue;
+                }
+
+                if (!deletedSections.Contains(hiddenMagSection))
+                {
+                    deletedSections.Add(hiddenMagSection);
+                }
             }
         }
 
