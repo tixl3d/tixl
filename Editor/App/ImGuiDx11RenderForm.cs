@@ -315,6 +315,29 @@ internal class ImGuiDx11RenderForm : RenderForm
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern short GetKeyState(int nVirtKey);
 
+    /// <summary>
+    /// Applies the cursor ImGui requested this frame right away. Windows only sends
+    /// WM_SETCURSOR on the next mouse movement, so waiting for it makes the pointer
+    /// shape trail one movement step behind the hover state — very noticeable on
+    /// small drag handles and splitters.
+    /// </summary>
+    internal void ApplyRequestedCursor()
+    {
+        var requested = ImGui.GetMouseCursor();
+        if (requested == _lastRequestedCursor)
+            return;
+
+        _lastRequestedCursor = requested;
+
+        // Outside our client area the cursor belongs to whoever is under it
+        if (!ClientRectangle.Contains(PointToClient(Cursor.Position)))
+            return;
+
+        UpdateMouseCursor();
+    }
+
+    private ImGuiMouseCursor _lastRequestedCursor = ImGuiMouseCursor.Arrow;
+
     private bool UpdateMouseCursor()
     {
         ImGuiIOPtr io = ImGui.GetIO();
@@ -366,6 +389,9 @@ internal class ImGuiDx11RenderForm : RenderForm
         if (Cursor.Current != newCursor)
         {
             Cursor = newCursor;
+
+            // Apply immediately - the next WM_SETCURSOR only comes with the next mouse move
+            Cursor.Current = newCursor;
         }
 
         return true;

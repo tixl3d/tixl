@@ -196,6 +196,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 ProgramWindows.RefreshViewport();
 
                 ImGui.Render();
+                ProgramWindows.Main.Form.ApplyRequestedCursor();
                 RenderDrawData(ImGui.GetDrawData());
             }
             catch (SEHException e)
