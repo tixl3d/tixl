@@ -10,6 +10,16 @@ Today the editor's startup is brittle in two ways:
    - Pick an older backup,
    - Restore without restarting.
 
+3. **Saving a symbol with unresolvable children silently destroys data.** Incident (2026-07-05): the new
+   `Io` operator package was missing from the Release build's `PackageNames` list in Editor.csproj, so all
+   its symbols (MidiInput, LoadDataClip, …) failed to resolve at load. `SymbolJson.TryReadSymbolChild`
+   logs a per-child warning ("Error loading symbol child …") and **drops the child**; the user sees ops
+   missing from graphs but gets no prominent alert. A subsequent "save all" then wrote the truncated
+   symbols to disk — 24 children and their connections were permanently stripped from
+   `Playground.t3`/`t3ui` and committed. Recovery was only possible because the projects folder happened
+   to be a git repo. Any future package-loading bug (or a user opening a project on an install missing a
+   package) repeats this as unrecoverable data loss.
+
 Per-project incremental backups already live at `<projectFolder>/.temp/Backup/` (see [AutoBackup.cs](Editor/Gui/AutoBackup/AutoBackup.cs)), so the data layer is in place. This plan covers the UX and lifecycle on top.
 
 ## Progress
@@ -47,6 +57,19 @@ These crashes are symptoms of the same root problem this plan addresses (partial
    - The existing project picker / dropdown lists user projects. Show broken ones with a distinct visual treatment (warning glyph + reason on hover) — same affordance as the existing archived-project styling.
    - Selecting a broken project shows a side panel: failure category, the explanation hint (if any), and the action buttons described in Phase 2.
 
+4. **Preserve unresolved children instead of dropping them (data-loss guard).**
+   - In `SymbolJson.TryReadSymbolChild` ([SymbolJson.cs:180](Core/Model/SymbolJson.cs:180)), when
+     `SymbolRegistry.TryGetSymbol` misses, retain the child's raw JSON on the parent symbol as an
+     *unresolved child* (id + original json blob) instead of discarding it.
+   - **Save round-trips unresolved children verbatim** — a symbol saved while a package is missing keeps
+     the children (and their connections) intact for when the package is back. This converts the failure
+     mode from silent data loss to a benign placeholder.
+   - Graph UI renders unresolved children as a distinct placeholder node ("missing op — package not
+     loaded?") so the user notices immediately; a startup toast summarising "N children could not be
+     resolved across M symbols" beats the current console-only warnings.
+   - Cheaper interim guard, if the full round-trip is too invasive: refuse to save (or force a
+     confirmation dialog on) any symbol that lost children during load.
+
 ### Notes / risks
 
 - **Dependency cascade.** A broken package may be a compile-time dependency of other packages (e.g. a `Lib` consumer). Today `Lib` is loaded first and most user projects reference it; user projects rarely depend on each other, so the cascade is usually shallow. We should still verify by trying loading order with a deliberately broken project. If cascading hits, mark dependents as "broken (transitive)" rather than fail-loading them.
@@ -58,6 +81,9 @@ Add `.tests-manual/BrokenPackageRecovery/` covering:
 - Project that fails NuGet restore (induce by adding a non-existent package reference).
 - Project whose `.cs` has a syntax error.
 - Project whose dependent `Lib` types changed underneath it.
+- Project using ops from a package that isn't loaded (induce by temporarily removing a package from
+  the Release `PackageNames` list): placeholders shown, saving and reloading with the package restored
+  brings the ops back intact.
 For each: editor still reaches main loop, broken project shown with explanation, other projects usable.
 
 ---

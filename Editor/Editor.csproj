@@ -179,6 +179,7 @@
         <PackageNames Include="spout" />
         <PackageNames Include="ndi" />
         <PackageNames Include="Video" />
+        <PackageNames Include="Io" />
         <PackageNames Include="Mediapipe">
             <Name>t3.mediapipe</Name>
         </PackageNames>
