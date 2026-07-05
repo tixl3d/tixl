@@ -32,6 +32,7 @@ public static partial class T3Ui
         Profiling.KeepFrameData();
         //ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
         DragAndDropHandling.Update();
+        MagGraph.Ui.DropHandling.DrawDragIndicator();
 
         CustomComponents.BeginFrame();
         FormInputs.BeginFrame();

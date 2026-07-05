@@ -28,10 +28,22 @@ namespace T3.Editor.Gui.Windows;
 [HelpUiID("ControlView")]
 internal sealed class SnapshotControlView
 {
-    private struct OpEntry
+    /// <summary>
+    /// One row of the section-grouped op list: a group header when <see cref="ChildUi"/> is
+    /// null (a null <see cref="Section"/> then means the "Ungrouped" bucket), an op otherwise.
+    /// Nesting is rolled out into the header label as a path ("TEST01 / SUBSECTION"), so each
+    /// group holds only the ops directly inside its section.
+    /// </summary>
+    private struct DisplayRow
     {
-        public Instance Instance;
-        public SymbolUi.Child ChildUi;
+        public Section? Section;
+        public SymbolUi.Child? ChildUi;
+
+        /// <summary>Headers only: the all-caps nesting path shown as the label.</summary>
+        public string? Label;
+
+        /// <summary>Headers only: index of the first row after this group's ops.</summary>
+        public int GroupEndIndex;
     }
 
     /// <summary>Set while the view draws its rows so the parameter menus can offer snapshot writes.</summary>
@@ -74,6 +86,18 @@ internal sealed class SnapshotControlView
         public bool IsInputModified(Guid childKey, Guid inputId)
         {
             return _modifiedInputs.Contains((childKey, inputId));
+        }
+
+        /// <summary>Whether any input of the given child differed in the last check.</summary>
+        public bool IsAnyInputModifiedForChild(Guid childKey)
+        {
+            foreach (var entry in _modifiedInputs)
+            {
+                if (entry.Item1 == childKey)
+                    return true;
+            }
+
+            return false;
         }
 
         internal static bool Compute(Instance composition, Variation variation)
@@ -481,7 +505,8 @@ internal sealed class SnapshotControlView
         }
 
 
-        CollectOpEntries(composition, selectedSnapshot);
+        CollectStaleChildIds(composition, selectedSnapshot);
+        UpdateDisplayRows(composition);
 
         var compositionUi = composition.GetSymbolUi();
 
@@ -501,37 +526,200 @@ internal sealed class SnapshotControlView
             }
         }
 
-        // Ops enabled for snapshots, sorted by canvas position
-        foreach (var entry in _opEntries)
+        // Ops enabled for snapshots, grouped by their enclosing section frames
+        var rowIndex = 0;
+        while (rowIndex < _displayRows.Count)
         {
-            var typeColor = entry.Instance.Outputs.Count > 0
-                ? TypeUiRegistry.GetPropertiesForType(entry.Instance.Outputs[0].ValueType).Color
-                : UiColors.Text;
-            var labelColor = ColorVariations.OperatorLabel.Apply(typeColor);
-
-            var symbolChild = entry.ChildUi.SymbolChild;
-            BeginBlock();
-            DrawGroupHeader(entry.ChildUi.Id, GetOpGroupLabel(symbolChild), labelColor, out var nameClicked,
-                bypassChild: entry.ChildUi);
-
-            if (nameClicked)
+            var row = _displayRows[rowIndex];
+            if (row.ChildUi == null)
             {
-                var projectView = ProjectView.Focused;
-                if (projectView != null)
-                {
-                    projectView.NodeSelection.SetSelection(entry.ChildUi, entry.Instance);
-                    FitViewToSelectionHandling.FitViewToSelection();
-                }
+                DrawSectionGroupHeader(composition, selectedSnapshot, row, rowIndex);
+                var isCollapsed = _collapsedGroupIds.Contains(row.Section?.Id ?? Guid.Empty);
+                rowIndex = isCollapsed ? row.GroupEndIndex : rowIndex + 1;
             }
+            else
+            {
+                if (composition.Children.TryGetChildInstance(row.ChildUi.Id, out var instance))
+                    DrawOpBlock(composition, compositionUi, selectedSnapshot, row.ChildUi, instance);
 
-            DrawControlledParameters(entry.Instance, entry.Instance.GetSymbolUi(), entry.ChildUi, compositionUi,
-                selectedSnapshot, childKey: entry.ChildUi.Id, onlyEnabledInputs: true);
-            EndBlock(entry.ChildUi.Id);
-
-            FormInputs.AddVerticalSpace(5);
+                rowIndex++;
+            }
         }
 
         DrawStaleEntries(composition, selectedSnapshot);
+    }
+
+    private void DrawOpBlock(Instance composition, SymbolUi compositionUi, Variation selectedSnapshot,
+        SymbolUi.Child childUi, Instance instance)
+    {
+        var typeColor = instance.Outputs.Count > 0
+            ? TypeUiRegistry.GetPropertiesForType(instance.Outputs[0].ValueType).Color
+            : UiColors.Text;
+        var labelColor = ColorVariations.OperatorLabel.Apply(typeColor);
+
+        BeginBlock();
+        DrawGroupHeader(childUi.Id, GetOpGroupLabel(childUi.SymbolChild), labelColor, out var nameClicked,
+            bypassChild: childUi);
+
+        if (nameClicked)
+        {
+            var projectView = ProjectView.Focused;
+            if (projectView != null)
+            {
+                // Ops hidden inside a collapsed frame have no visible node to center
+                // on - jump to the collapsed frame's header instead
+                if (childUi.HiddenInCollapsedSectionId != Guid.Empty)
+                {
+                    projectView.GraphView.OpenAndFocusSection(composition.InstancePath, childUi.HiddenInCollapsedSectionId);
+                }
+                else
+                {
+                    projectView.NodeSelection.SetSelection(childUi, instance);
+                    FitViewToSelectionHandling.FitViewToSelection();
+                }
+            }
+        }
+
+        DrawControlledParameters(instance, instance.GetSymbolUi(), childUi, compositionUi,
+            selectedSnapshot, childKey: childUi.Id, onlyEnabledInputs: true);
+        EndBlock(childUi.Id);
+
+        FormInputs.AddVerticalSpace(5);
+    }
+
+    /// <summary>
+    /// Collapsible group header for a section (a null section is the "Ungrouped" bucket).
+    /// The label shows the section's nesting path. Clicking the row toggles collapse - per
+    /// window instance, not serialized, independent of the frame's collapse state in the
+    /// graph. Right-side tools: center the frame in the graph and revert the group's ops
+    /// to the snapshot.
+    /// </summary>
+    private void DrawSectionGroupHeader(Instance composition, Variation selectedSnapshot, DisplayRow row, int headerIndex)
+    {
+        var section = row.Section;
+        var groupId = section?.Id ?? Guid.Empty;
+        var isCollapsed = _collapsedGroupIds.Contains(groupId);
+
+        ImGui.PushID(groupId.GetHashCode());
+
+        var scale = T3Ui.UiScaleFactor;
+        var frameHeight = ImGui.GetFrameHeight();
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+
+        var labelColor = UiColors.TextMuted;
+        var label = row.Label ?? "UNGROUPED";
+
+        var toolIconCount = section != null ? 2 : 1;
+        var toolsWidth = toolIconCount * frameHeight + (toolIconCount - 1) * spacing;
+        var nameWidth = MathF.Max(frameHeight, ImGui.GetContentRegionAvail().X - toolsWidth - spacing);
+
+        var toggleClicked = ImGui.InvisibleButton("##groupHeader", new Vector2(nameWidth, frameHeight));
+        var headerMin = ImGui.GetItemRectMin();
+        CustomComponents.DrawHoverHighlightOnLastItem();
+        CustomComponents.TooltipForLastItem(isCollapsed ? "Click to expand" : "Click to collapse");
+
+        var drawList = ImGui.GetWindowDrawList();
+        var iconSize = 13 * scale;
+        Icons.DrawIconAtScreenPosition(isCollapsed ? Icon.ChevronRight : Icon.ChevronDown,
+                                       headerMin + new Vector2(2 * scale, (frameHeight - iconSize) / 2),
+                                       new Vector2(iconSize, iconSize), drawList, labelColor);
+
+        ImGui.PushFont(Fonts.FontSmall);
+        drawList.AddText(new Vector2(headerMin.X + iconSize + 6 * scale,
+                                     headerMin.Y + (frameHeight - ImGui.GetTextLineHeight()) / 2),
+                         labelColor, label);
+        ImGui.PopFont();
+
+        CustomComponents.RightAlign(toolsWidth);
+
+        if (section != null)
+        {
+            if (DrawBarButton(Icon.Aim, true, "Center this frame in the graph", CustomComponents.ButtonStates.Default))
+            {
+                ProjectView.Focused?.GraphView.OpenAndFocusSection(composition.InstancePath, section.Id);
+            }
+
+            ImGui.SameLine();
+        }
+
+        var groupModified = IsGroupModified(headerIndex, row.GroupEndIndex);
+        if (DrawBarButton(Icon.Reset, groupModified, "Revert this group to the snapshot", CustomComponents.ButtonStates.Default))
+        {
+            RevertGroupToSnapshot(composition, selectedSnapshot, headerIndex, row.GroupEndIndex);
+        }
+
+        if (toggleClicked && !_collapsedGroupIds.Add(groupId))
+        {
+            _collapsedGroupIds.Remove(groupId);
+        }
+
+        ImGui.PopID();
+        FormInputs.AddVerticalSpace(1);
+    }
+
+    private bool IsGroupModified(int headerIndex, int groupEndIndex)
+    {
+        for (var i = headerIndex + 1; i < groupEndIndex; i++)
+        {
+            var childUi = _displayRows[i].ChildUi;
+            if (childUi != null && _modificationCheck.IsAnyInputModifiedForChild(childUi.Id))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Re-applies the snapshot for the ops of one group only, mirroring the apply semantics:
+    /// captured inputs return to their stored value, other controlled non-default inputs
+    /// reset to default. One undoable macro; unchanged values add no commands.
+    /// </summary>
+    private void RevertGroupToSnapshot(Instance composition, Variation snapshot, int headerIndex, int groupEndIndex)
+    {
+        var macro = new MacroCommand("Revert group to snapshot");
+        var anyCommands = false;
+
+        for (var i = headerIndex + 1; i < groupEndIndex; i++)
+        {
+            var childUi = _displayRows[i].ChildUi;
+            if (childUi == null)
+                continue;
+
+            if (!composition.Children.TryGetChildInstance(childUi.Id, out var instance))
+                continue;
+
+            snapshot.ParameterSetsForChildIds.TryGetValue(childUi.Id, out var parameterSet);
+
+            foreach (var inputSlot in instance.Inputs)
+            {
+                var valueType = inputSlot.Input.Value.ValueType;
+                if (!ValueUtils.BlendMethods.ContainsKey(valueType))
+                    continue;
+
+                if (!ValueUtils.CompareFunctions.TryGetValue(valueType, out var compare))
+                    continue;
+
+                if (parameterSet != null && parameterSet.TryGetValue(inputSlot.Id, out var storedValue))
+                {
+                    if (!compare(storedValue, inputSlot.Input.Value))
+                    {
+                        macro.AddAndExecCommand(new ChangeInputValueCommand(composition.Symbol, childUi.Id,
+                            inputSlot.Input, storedValue));
+                        anyCommands = true;
+                    }
+                }
+                else if (!inputSlot.Input.IsDefault && childUi.IsInputIncludedForVariation(inputSlot.Id))
+                {
+                    macro.AddAndExecCommand(new ResetInputToDefault(composition.Symbol, childUi.Id, inputSlot.Input));
+                    anyCommands = true;
+                }
+            }
+        }
+
+        if (anyCommands)
+            UndoRedoStack.Add(macro);
+
+        _modificationCheck.Invalidate();
     }
 
     /// <summary>
@@ -579,6 +767,21 @@ internal sealed class SnapshotControlView
     }
 
     /// <summary>
+    /// Section group headers render all-caps; the uppercased label is cached per section
+    /// so the path concatenation on rebuild reuses stable strings.
+    /// </summary>
+    private string GetGroupLabel(Section section)
+    {
+        var source = section.Label;
+        if (_groupLabelCache.TryGetValue(section.Id, out var cached) && ReferenceEquals(cached.Source, source))
+            return cached.Upper;
+
+        var upper = string.IsNullOrEmpty(source) ? "UNTITLED" : source.ToUpperInvariant();
+        _groupLabelCache[section.Id] = (source, upper);
+        return upper;
+    }
+
+    /// <summary>
     /// Renamed ops show as 'Blob "MyBlob"' — type first, then the custom name. Cached per
     /// child because the view draws every frame.
     /// </summary>
@@ -600,8 +803,8 @@ internal sealed class SnapshotControlView
 
     /// <summary>
     /// Header row with the clickable op name. Operator groups are not collapsible —
-    /// collapsing is reserved for the section/section groups coming with the section tree.
-    /// A bypassable op gets a small bypass toggle on the right (like the parameter popup).
+    /// collapsing happens at the section-group level. A bypassable op gets a small
+    /// bypass toggle on the right (like the parameter popup).
     /// </summary>
     private static void DrawGroupHeader(Guid groupId, string label, Color labelColor, out bool nameClicked,
         SymbolUi.Child? bypassChild = null)
@@ -1008,48 +1211,148 @@ internal sealed class SnapshotControlView
         }
     }
 
-    private void CollectOpEntries(Instance composition, Variation snapshot)
+    private void CollectStaleChildIds(Instance composition, Variation snapshot)
     {
-        _opEntries.Clear();
         _staleChildIds.Clear();
 
         var compositionUi = composition.GetSymbolUi();
-
-        foreach (var childInstance in composition.Children.Values)
-        {
-            if (!compositionUi.ChildUis.TryGetValue(childInstance.SymbolChildId, out var childUi))
-                continue;
-
-            if (!childUi.EnabledForSnapshots)
-                continue;
-
-            _opEntries.Add(new OpEntry
-            {
-                Instance = childInstance,
-                ChildUi = childUi,
-            });
-        }
-
-        _opEntries.Sort(_byCanvasPosition);
-
         foreach (var childId in snapshot.ParameterSetsForChildIds.Keys)
         {
             if (childId == Guid.Empty)
                 continue;
 
-            var isListed = false;
-            foreach (var entry in _opEntries)
-            {
-                if (entry.ChildUi.Id != childId)
-                    continue;
-
-                isListed = true;
-                break;
-            }
-
+            var isListed = compositionUi.ChildUis.TryGetValue(childId, out var childUi)
+                           && childUi.EnabledForSnapshots
+                           && composition.Children.TryGetChildInstance(childId, out _);
             if (!isListed)
                 _staleChildIds.Add(childId);
         }
+    }
+
+    /// <summary>
+    /// Rebuilds the section-grouped display rows from <see cref="SectionTree"/>. Structural
+    /// changes arrive via commands, so the undo-stack count plus section/op counts catch
+    /// nearly all of them; a low-frequency fallback covers the rest (in-flight drags in the
+    /// graph), mirroring the <see cref="ModificationCheck"/> throttling.
+    /// </summary>
+    private void UpdateDisplayRows(Instance composition)
+    {
+        var compositionUi = composition.GetSymbolUi();
+        var undoStackCount = UndoRedoStack.UndoStack.Count;
+        if (composition.Symbol.Id == _rowsSymbolId
+            && undoStackCount == _rowsUndoStackCount
+            && compositionUi.Sections.Count == _rowsSectionCount
+            && compositionUi.ChildUis.Count == _rowsChildCount
+            && --_rowsFramesUntilRefresh > 0)
+        {
+            return;
+        }
+
+        _rowsSymbolId = composition.Symbol.Id;
+        _rowsUndoStackCount = undoStackCount;
+        _rowsSectionCount = compositionUi.Sections.Count;
+        _rowsChildCount = compositionUi.ChildUis.Count;
+        _rowsFramesUntilRefresh = RowRefreshIntervalFrames;
+
+        _displayRows.Clear();
+        _unsectionedOps.Clear();
+
+        var roots = SectionTree.Build(compositionUi, _unsectionedOps);
+        roots.Sort(_byNodeCanvasPosition);
+
+        var hasGroups = false;
+        foreach (var node in roots)
+        {
+            hasGroups |= EmitSectionRows(node, parentPath: null);
+        }
+
+        var anyUngrouped = false;
+        foreach (var childUi in _unsectionedOps)
+        {
+            if (!childUi.EnabledForSnapshots)
+                continue;
+
+            anyUngrouped = true;
+            break;
+        }
+
+        if (!anyUngrouped)
+            return;
+
+        // Without any section groups the list stays flat, like before sections existed
+        var ungroupedHeaderIndex = -1;
+        if (hasGroups)
+        {
+            ungroupedHeaderIndex = _displayRows.Count;
+            _displayRows.Add(new DisplayRow { Label = "UNGROUPED" });
+        }
+
+        _unsectionedOps.Sort(_byChildCanvasPosition);
+        foreach (var childUi in _unsectionedOps)
+        {
+            if (!childUi.EnabledForSnapshots)
+                continue;
+
+            _displayRows.Add(new DisplayRow { ChildUi = childUi });
+        }
+
+        if (ungroupedHeaderIndex >= 0)
+        {
+            var header = _displayRows[ungroupedHeaderIndex];
+            header.GroupEndIndex = _displayRows.Count;
+            _displayRows[ungroupedHeaderIndex] = header;
+        }
+    }
+
+    /// <summary>
+    /// Emits one group per section that directly contains snapshot-enabled ops, labeled with
+    /// the section's nesting path ("TEST01 / SUBSECTION"), then recurses into nested sections.
+    /// Sections without direct ops leave no header of their own - their name only shows up
+    /// in their descendants' paths. Path strings are built here rather than per frame; the
+    /// rebuild is throttled, so the concatenation stays off the hot path.
+    /// </summary>
+    private bool EmitSectionRows(SectionTree.Node node, string? parentPath)
+    {
+        var sectionLabel = GetGroupLabel(node.Section);
+        var path = parentPath == null ? sectionLabel : parentPath + " / " + sectionLabel;
+
+        var hasDirectMembers = false;
+        foreach (var childUi in node.Members)
+        {
+            if (!childUi.EnabledForSnapshots)
+                continue;
+
+            hasDirectMembers = true;
+            break;
+        }
+
+        var emittedAny = false;
+        if (hasDirectMembers)
+        {
+            var headerIndex = _displayRows.Count;
+            _displayRows.Add(new DisplayRow { Section = node.Section, Label = path });
+
+            foreach (var childUi in node.Members)
+            {
+                if (!childUi.EnabledForSnapshots)
+                    continue;
+
+                _displayRows.Add(new DisplayRow { ChildUi = childUi });
+            }
+
+            var header = _displayRows[headerIndex];
+            header.GroupEndIndex = _displayRows.Count;
+            _displayRows[headerIndex] = header;
+            emittedAny = true;
+        }
+
+        node.Children.Sort(_byNodeCanvasPosition);
+        foreach (var child in node.Children)
+        {
+            emittedAny |= EmitSectionRows(child, path);
+        }
+
+        return emittedAny;
     }
 
     private void ApplySnapshot(SymbolVariationPool pool, Instance composition, Variation? snapshot)
@@ -1114,12 +1417,19 @@ internal sealed class SnapshotControlView
     private static readonly Comparison<Variation> _byActivationIndex
         = (a, b) => a.ActivationIndex.CompareTo(b.ActivationIndex);
 
-    // Temporary ordering experiment: bottom-right first → top-left last (descending Y, then X).
-    private static readonly Comparison<OpEntry> _byCanvasPosition
+    // Reading order: top-to-bottom, then left-to-right - matches the section tree's member order
+    private static readonly Comparison<SymbolUi.Child> _byChildCanvasPosition
         = (a, b) =>
         {
-            var byY = b.ChildUi.PosOnCanvas.Y.CompareTo(a.ChildUi.PosOnCanvas.Y);
-            return byY != 0 ? byY : b.ChildUi.PosOnCanvas.X.CompareTo(a.ChildUi.PosOnCanvas.X);
+            var byY = a.PosOnCanvas.Y.CompareTo(b.PosOnCanvas.Y);
+            return byY != 0 ? byY : a.PosOnCanvas.X.CompareTo(b.PosOnCanvas.X);
+        };
+
+    private static readonly Comparison<SectionTree.Node> _byNodeCanvasPosition
+        = (a, b) =>
+        {
+            var byY = a.Section.PosOnCanvas.Y.CompareTo(b.Section.PosOnCanvas.Y);
+            return byY != 0 ? byY : a.Section.PosOnCanvas.X.CompareTo(b.Section.PosOnCanvas.X);
         };
 
     private const string SnapshotActionsPopupId = "##snapshotActions";
@@ -1139,8 +1449,17 @@ internal sealed class SnapshotControlView
     private readonly VariationPicker _picker = new();
     private readonly SnapshotCanvas _snapshotCanvas = new();
     private readonly SnapshotControllerGrid _controllerGrid = new();
+    private const int RowRefreshIntervalFrames = 30;
+
     private readonly List<Variation> _snapshots = new();
-    private readonly List<OpEntry> _opEntries = new();
+    private readonly List<DisplayRow> _displayRows = new();
+    private readonly List<SymbolUi.Child> _unsectionedOps = new();
+    private readonly HashSet<Guid> _collapsedGroupIds = new();
+    private Guid _rowsSymbolId;
+    private int _rowsUndoStackCount = -1;
+    private int _rowsSectionCount = -1;
+    private int _rowsChildCount = -1;
+    private int _rowsFramesUntilRefresh;
     private readonly List<Guid> _staleChildIds = new();
     private readonly List<Instance> _affectedInstances = new();
     private readonly Guid[] _singleStaleId = new Guid[1];
@@ -1150,6 +1469,7 @@ internal sealed class SnapshotControlView
     private float _blockLeftX;
     private float _blockRightX;
     private readonly Dictionary<Guid, (string CustomName, string Label)> _opLabelCache = new();
+    private readonly Dictionary<Guid, (string Source, string Upper)> _groupLabelCache = new();
 
     private Guid _lastLabelVariationId = Guid.NewGuid(); // force initial label update
     private string? _lastLabelTitle;

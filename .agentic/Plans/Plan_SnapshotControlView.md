@@ -89,6 +89,16 @@ When the composition is active in a Parameter window, show:
 
 ### Phase C — Section grouping (depends on `Plan_Sections.md` Phase 1)
 
+**Status (2026-07-05): implemented** — the op list consumes `SectionTree.Build` (its first consumer) via a flattened row list (`DisplayRow`), rebuilt on undo-stack/section-count/op-count changes plus a 30-frame fallback (same throttling idiom as the `ModificationCheck`). Design deviations from the scope below:
+
+- **Path headers as originally sketched** ("TEST01 / SUBSECTION"), small muted all-caps, no indentation — an indented-tree variant was tried first but consumed too much row width. One group per section that *directly* contains snapshot-enabled ops; sections without direct ops leave no header, their name appears only in descendants' paths. Sections whose subtree holds no snapshot-enabled op are skipped entirely.
+- Collapse state per window instance (`HashSet<Guid>` in the view), not serialized, independent of the frame's collapse state in the graph. Collapsing hides only the group's own ops — nested groups keep their own headers and state.
+- Header tools right-aligned: **Aim icon** centers the frame via `IGraphView.OpenAndFocusSection` (selection-free — selecting a `Section` would flip the parameter window to section settings), **Reset icon** reverts the group's own ops to the snapshot (one macro; enabled via the dirty-cache's new `IsAnyInputModifiedForChild`).
+- Ops hidden in a collapsed graph frame stay listed; clicking their name jumps to the collapsed frame (`HiddenInCollapsedSectionId`) instead of selecting the invisible op.
+- "Ungrouped" bucket (pseudo-header, `Guid.Empty` collapse key) only appears when at least one real group exists; without sections the list stays flat as before.
+- Ordering switched to top-to-bottom / left-to-right (ascending) for groups and ops alike, matching `SectionTree`'s member order — this retires the "bottom-right first" ordering experiment.
+- Drag-to-reorder (stretch goal) not done — sections still don't own a persisted member order.
+
 **Goal:** ops grouped under their enclosing section, with nesting paths.
 
 **Scope:**

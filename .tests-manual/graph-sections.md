@@ -255,6 +255,23 @@ collapsed bar fully inside that frame. Then collapse the target frame.
   intact.
 - A collapsed bar *wider* than the target frame does not nest.
 
+## Step: Deleting a collapsed section deletes its contents
+
+**Action:**
+Collapse a section that contains a few connected operators (ideally with a
+connection passing through to an operator outside the frame). Select the
+collapsed bar and press `Delete`. Then press `Ctrl+Z`. For comparison, also
+delete an *expanded* section.
+
+**Expected:**
+- Deleting the collapsed bar removes the hidden operators (and any nested
+  frames) with it — nothing pops back onto the canvas.
+- A connection that ran through a deleted operator chain is bridged or
+  removed, same as deleting those operators directly.
+- One `Ctrl+Z` restores the section still collapsed, with all hidden
+  operators and connections intact; expanding it shows the previous layout.
+- Deleting an expanded section removes only the frame; its operators stay.
+
 ## Step: Old project loads correctly
 
 **Action:**

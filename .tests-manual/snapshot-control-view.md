@@ -272,6 +272,82 @@ highlight over different snapshots. Then toggle the canvas icon.
 - Hovering the panel highlights the matching operator node in the graph.
 - Hovering the operator node in the graph brightens its panel in the control view.
 
+## Step: Ops are grouped by their section frames
+
+**Action:**
+1. In the graph, select one of the snapshot-enabled operators and press `Shift+A` to wrap it in a section frame; double-click the frame header to give it a label and a color.
+2. Deselect everything so the snapshot control view shows.
+
+**Expected:**
+- The framed operator now appears under a collapsible group header showing the
+  section's label in small, muted all-caps, with a chevron on the left.
+- The remaining operator appears under a muted "UNGROUPED" header at the bottom.
+- Groups are ordered by the frames' position in the graph (top-to-bottom, then
+  left-to-right), ops inside a group likewise.
+
+## Step: Nested sections show as a path
+
+**Action:**
+1. In the graph, draw a second, larger section frame around the first one (select the frame and an op outside it, `Shift+A`), so the frames nest. Make sure the outer frame also directly contains a snapshot-enabled op.
+2. Deselect everything.
+
+**Expected:**
+- The inner section's group header shows the nesting path, e.g. "OUTER / INNER";
+  the outer section's own ops sit under a plain "OUTER" header before it. There
+  is no indentation — all rows use the full width.
+- A section frame without snapshot-enabled ops directly inside it gets no header
+  of its own; its name only appears as part of its descendants' paths.
+- Section frames without any snapshot-enabled operators anywhere inside them do
+  not appear in the list at all.
+
+## Step: Collapsing a group
+
+**Action:**
+1. Click a group header in the snapshot control view.
+2. Open a second Parameter window (if available) and compare.
+3. Check the section frame in the graph.
+
+**Expected:**
+- The group collapses to just its header (chevron turns right), hiding its ops;
+  nested sections keep their own headers and collapse state. Clicking again
+  expands it.
+- The collapse state is per Parameter window and is not saved with the project.
+- The frame in the graph does not collapse or expand with it (the two states are
+  independent).
+
+## Step: Centering a section from its group header
+
+**Action:**
+1. Click the crosshair (aim) icon at the right end of a section group header.
+
+**Expected:**
+- The graph view smoothly centers on that section frame.
+- Nothing gets selected — the Parameter window keeps showing the control view.
+
+## Step: Reverting a whole group
+
+**Action:**
+1. Modify parameters on two operators inside the same section group (wait a moment so their rows highlight).
+2. Click the revert icon on that group's header.
+
+**Expected:**
+- The revert icon on the header is only enabled while one of the group's own ops
+  differs from the snapshot (nested sections have their own headers and revert
+  buttons).
+- Clicking it restores the snapshot values for the ops in that group only — as a
+  single undo step; ops outside the group keep their modifications.
+
+## Step: Jumping to an op hidden in a collapsed frame
+
+**Action:**
+1. Collapse the section frame **in the graph** (its ops become hidden).
+2. In the snapshot control view, click that operator's name.
+
+**Expected:**
+- The hidden op still shows its editable parameters in the control view.
+- Clicking its name centers the graph on the collapsed frame's header instead of
+  selecting the invisible op.
+
 ## Step: Header shown when entering a composition
 
 **Action:**
