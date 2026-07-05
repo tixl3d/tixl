@@ -59,6 +59,13 @@ internal static class SectionDragging
                     _draggedNodes.Add(section);
                 }
 
+                _draggedSectionIds.Clear();
+                foreach (var node in _draggedNodes)
+                {
+                    if (node is Section draggedSection)
+                        _draggedSectionIds.Add(draggedSection.Id);
+                }
+
                 _moveCommand = new ModifyCanvasElementsCommand(instViewSymbolUi, _draggedNodes, context.Selector);
             }
 
@@ -71,9 +78,14 @@ internal static class SectionDragging
             var minSize = MathF.Min(MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y);
             var gridSize = Vector2.One * minSize;
 
+            // Frames moving with the drag can't be snap targets - the group would
+            // snap against itself and jitter
             _visibleSectionsForSnapping.Clear();
             foreach (var snapTo in context.Layout.Sections.Values)
             {
+                if (_draggedSectionIds.Contains(snapTo.Id))
+                    continue;
+
                 if (context.View.IsItemVisible(snapTo) && !snapTo.Section.IsHiddenInCollapsedSection)
                     _visibleSectionsForSnapping.Add(snapTo);
             }
@@ -192,6 +204,7 @@ internal static class SectionDragging
     }
 
     private static readonly List<MagGraphSection> _visibleSectionsForSnapping = [];
+    private static readonly HashSet<Guid> _draggedSectionIds = [];
 
     private static List<ISelectableCanvasObject> FindOpsInSection(SymbolUi parentUi, Section section)
     {
