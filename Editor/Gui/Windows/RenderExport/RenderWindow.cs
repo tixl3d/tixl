@@ -311,11 +311,22 @@ internal sealed class RenderWindow : Window
     }
 
     // Folder the next render writes to, used to enable the footer's "open folder" button.
+    // Relative paths must resolve against the project folder (like the render itself does), not the process CWD.
     private static string GetConfiguredOutputDirectory()
     {
         var s = RenderSettings.Current;
-        var path = s.RenderMode == RenderSettings.RenderModes.Video ? s.VideoFilePath : s.SequenceFilePath;
-        return string.IsNullOrEmpty(path) ? string.Empty : (Path.GetDirectoryName(path) ?? string.Empty);
+        if (s.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var path = s.VideoFilePath;
+            if (string.IsNullOrEmpty(path))
+                return string.Empty;
+
+            return Path.GetDirectoryName(RenderPaths.ResolveProjectRelativePath(path)) ?? string.Empty;
+        }
+
+        // SequenceFilePath is already a folder, not a file path.
+        var folder = s.SequenceFilePath;
+        return string.IsNullOrEmpty(folder) ? string.Empty : RenderPaths.ResolveProjectRelativePath(folder);
     }
 
     // The timeline loop range is empty (zero length), so rendering it would produce nothing.
