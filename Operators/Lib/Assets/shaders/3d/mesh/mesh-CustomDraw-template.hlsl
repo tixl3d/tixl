@@ -2,7 +2,7 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 #include "shared/pbr.hlsl"
-#include "shared/hash-functions.hlsl"
+#include "shared/bias-functions.hlsl"
 
 cbuffer Transforms : register(b0)
 {
@@ -22,11 +22,16 @@ cbuffer Params : register(b1)
 {
     float4 Color;
 
-    float Scale;
     float AlphaCutOff;
     float UseFlatShading;
-    float SpecularAA;
+    float SpecularAA;    
+    float Scale;
+
+    float UsePointScale;   //8
+    float ScaleFactorMode;  //9
 };
+
+
 
 cbuffer FogParams : register(b2)
 {
@@ -50,27 +55,32 @@ cbuffer PbrParams : register(b4)
     float Metal;
 }
 
-cbuffer IntParams : register(b5)
+cbuffer CustomParams : register(b5)
 {
-    int UsePointScale;
-    int ScaleFactorMode;
-    int2 AtlasSize;
-    int AtlasMode;
-};
+    float A;
+    float B;
+    float C;
+    float D;
+    float3 Offset;
+    float __padding;
+    float2 GainAndBias;
+}
 
-cbuffer FieldParams : register(b6)
+
+cbuffer Params : register(b6)
 {
     /*{FLOAT_PARAMS}*/
-};
+}
 
 struct psInput
 {
     float2 texCoord : TEXCOORD;
     float4 pixelPosition : SV_POSITION;
-    float4 color : COLOR;
     float3 worldPosition : POSITION;
     float3x3 tbnToWorld : TBASIS;
+    float3 colorRGB : COLOR; 
     float fog : VPOS;
+    int pointIndex: Extra1; 
 };
 
 struct psOutput
@@ -80,18 +90,23 @@ struct psOutput
 };
 
 sampler WrappedSampler : register(s0);
+//sampler LinearSampler : register(s1);
 sampler ClampedSampler : register(s1);
 
 StructuredBuffer<PbrVertex> PbrVertices : register(t0);
-StructuredBuffer<int3> FaceIndices :register( t1);
-StructuredBuffer<Point> Points :register( t2);
+StructuredBuffer<int3> FaceIndices : register(t1);
 
-Texture2D<float4> BaseColorMap : register(t3);
-Texture2D<float4> EmissiveColorMap : register(t4);
-Texture2D<float4> RSMOMap : register(t5);
-Texture2D<float4> NormalMap : register(t6);
-TextureCube<float4> PrefilteredSpecular : register(t7);
-Texture2D<float4> BRDFLookup : register(t8);
+Texture2D<float4> BaseColorMap : register(t2);
+Texture2D<float4> EmissiveColorMap : register(t3);
+Texture2D<float4> RSMOMap : register(t4);
+Texture2D<float4> NormalMap : register(t5);
+
+TextureCube<float4> PrefilteredSpecular : register(t6);
+Texture2D<float4> BRDFLookup : register(t7);
+
+Texture2D<float4> Gradient : register(t8);
+StructuredBuffer<Point> Points : register(t9);
+
 
 psInput vsMain(uint id
                : SV_VertexID)
@@ -106,10 +121,12 @@ psInput vsMain(uint id
     int faceIndex = (id % verticesPerInstance) / 3;
     int faceVertexIndex = id % 3;
 
+
     uint instanceCount, instanceStride;
     Points.GetDimensions(instanceCount, instanceStride);
 
     int instanceIndex = id / verticesPerInstance;
+    output.pointIndex = instanceIndex;
 
     PbrVertex vertex = PbrVertices[FaceIndices[faceIndex][faceVertexIndex]];
     float4 posInObject = float4(vertex.Position, 1);
@@ -123,38 +140,21 @@ psInput vsMain(uint id
                                                 : Points[instanceIndex].FX2;
 
     float3 s = Scale * sizeFactor * (UsePointScale ? Points[instanceIndex].Scale : 1);
+    
 
     posInObject.xyz *= s; //(0, resizeFromW) * Scale * resizeFromStretch;
     float4x4 orientationMatrix = transpose(qToMatrix(normalize(Points[instanceIndex].Rotation)));
     posInObject = mul(float4(posInObject.xyz, 1), orientationMatrix);
 
     posInObject += float4(Points[instanceIndex].Position, 0);
-    output.color = Points[instanceIndex].Color;
+    output.colorRGB = Points[instanceIndex].Color.rgb;
+    output.colorRGB = 1;
 
     float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);
     output.pixelPosition = posInClipSpace;
     
     // Texture Coordinates
-    float2 uv = vertex.TexCoord;
-    if (AtlasSize.x > 1 || AtlasSize.y > 1)
-    {
-        int textureCelX = (instanceIndex % AtlasSize.x);
-        int textureCelY = (instanceIndex / AtlasSize.y) % AtlasSize.y;      
-        
-        if (AtlasMode == 1) // use FX1
-        {      
-        textureCelX = Points[instanceIndex].FX1;
-        textureCelY = Points[instanceIndex].FX1/ AtlasSize.y;
-        }
-        else if (AtlasMode == 2) // use FX2
-        { 
-        textureCelX = Points[instanceIndex].FX2;
-        textureCelY = Points[instanceIndex].FX2 / AtlasSize.y;
-        }
-        uv /= AtlasSize;
-        uv += float2(textureCelX, textureCelY) / AtlasSize;   
-    }
-    
+    float2 uv = vertex.TexCoord;    
     output.texCoord = float2(uv.x, 1 - uv.y);
 
     // Pass tangent space basis vectors (for normal mapping).
@@ -180,11 +180,14 @@ psInput vsMain(uint id
     return output;
 }
 
+
+
+
 //=== Global functions ==============================================
 /*{GLOBALS}*/
 
 //=== Additional Resources ==========================================
-/*{RESOURCES(t9)}*/
+/*{RESOURCES(t10)}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -192,7 +195,7 @@ psInput vsMain(uint id
 //-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
-inline float4 GetField(float4 p)
+inline float4 GetField(float4 p) //.w:0 => distance  :1 => Color
 {
 #ifndef USE_WORLDSPACE
     //p.xyz = mul(float4(p.xyz, 1), WorldToObject).xyz;
@@ -244,53 +247,71 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     return N;
 }
 
-// inline float3 AdjustRoughnessForSpecularAA(float baseRoughness)
-// {
-//  // --- Specular anti-aliasing ---
-//     // Compute normal variance using screen-space derivatives and increase roughness accordingly.
-//     // This reduces specular aliasing on silhouettes and high-frequency normalmap regions.
-//     float3 Nx = ddx(frag.N);
-//     float3 Ny = ddy(frag.N);
-//     float normalVar = max(0.0, max(dot(Nx, Nx), dot(Ny, Ny)));
-//     normalVar *= SpecularAA;
-//     // convert roughness -> alpha (energy-preserving), combine variance, then convert back
-//     float baseR = saturate(baseRoughness);
-//     float baseR2 = baseR * baseR;
-//     float adjustedR = sqrt(baseR2 + normalVar);    
-//     return saturate(adjustedR);
-// }
-
-psOutput psMain(psInput pin) : SV_TARGET
+inline float3 AdjustRoughnessForSpecularAA(float baseRoughness)
 {
-    psOutput output;
+ // --- Specular anti-aliasing ---
+    // Compute normal variance using screen-space derivatives and increase roughness accordingly.
+    // This reduces specular aliasing on silhouettes and high-frequency normalmap regions.
+    float3 Nx = ddx(frag.N);
+    float3 Ny = ddy(frag.N);
+    float normalVar = max(0.0, max(dot(Nx, Nx), dot(Ny, Ny)));
+    normalVar *= SpecularAA;
+    // convert roughness -> alpha (energy-preserving), combine variance, then convert back
+    float baseR = saturate(baseRoughness);
+    float baseR2 = baseR * baseR;
+    float adjustedR = sqrt(baseR2 + normalVar);    
+    return saturate(adjustedR);
+}
 
+float Biased(float f){return ApplyGainAndBias(f, GainAndBias);}
+float4 SampleGradient(float f){return Gradient.SampleLevel(ClampedSampler, float2(f, 0.5), 0);}
+
+//- DEFINES ------------------------------------
+/*{defines}*/
+//----------------------------------------------
+
+
+void SetupFrag(psInput pin) {
     float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);
-
-    
     frag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);
     frag.Occlusion = roughnessMetallicOcclusion.z;
-    frag.albedo = BaseColorMap.Sample(WrappedSampler, pin.texCoord) * pin.color;
+    frag.albedo = BaseColorMap.Sample(WrappedSampler, pin.texCoord);
+    frag.albedo.rgb *= pin.colorRGB;
     frag.uv = pin.texCoord;
     frag.N = ComputeNormal(pin, pin.tbnToWorld);
+
     frag.Roughness = AdjustRoughnessForSpecularAA(roughnessMetallicOcclusion.x + Roughness, SpecularAA);
+
     frag.fog = pin.fog;
     frag.worldPosition = pin.worldPosition;
 
     float4 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld);
     frag.Lo = normalize(eyePosition.xyz - frag.worldPosition);
+}
 
-    float4 litColor = ComputePbr();
+psOutput psMain(psInput pin) : SV_TARGET
+{
+    psOutput output;
+    float4 c=float4(1,1,1,1);
 
-    litColor.rgba *= GetField(float4(pin.worldPosition.xyz, 0));
+{
+//- METHOD -------------------------------------
+/*{method}*/
+//----------------------------------------------
+}
 
-    if (AlphaCutOff > 0 && litColor.a < AlphaCutOff)
+    // Alpha testing
+    if (AlphaCutOff > 0 && c.a < AlphaCutOff)
     {
         discard;
     }
-
-    output.Color = litColor;
-
-    output.Normal = float4 (frag.N,1);
+    
+    float3 worldNormal = frag.N;
+    // Output to color buffer (SV_Target0)
+    output.Color = c;
+    // Output to normal buffer (SV_Target1)
+    output.Normal = float4(worldNormal, 1.0);
     
     return output;
+
 }

@@ -1,0 +1,172 @@
+{
+  "Id": "c78d114e-b404-491f-93a8-024a382586bd",
+  "Variations": [
+    {
+      "Id": "339faaa4-9f76-45f7-ad0f-f43851190c26",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": -478.47864,
+        "Y": -435.8
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);\nfrag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);\nfrag.Occlusion = roughnessMetallicOcclusion.z;\nfrag.albedo = BaseColorMap.Sample(WrappedSampler, pin.texCoord);\nfrag.albedo.rgb *= pin.colorRGB;\nfrag.uv = pin.texCoord;\nfrag.N = ComputeNormal(pin, pin.tbnToWorld);\n\nfrag.Roughness = AdjustRoughnessForSpecularAA(roughnessMetallicOcclusion.x + Roughness, SpecularAA);\n\nfrag.fog = pin.fog;\nfrag.worldPosition = pin.worldPosition;\n\nfloat4 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld);\nfrag.Lo = normalize(eyePosition.xyz - frag.worldPosition);\n\nfloat4 litColor = ComputePbr();\n\nlitColor.rgba *= GetField(float4(pin.worldPosition.xyz, 0)).rgba;\n\nc=litColor;\n\n\n",
+          "f9f36aec-ebbf-4221-a585-cdc6ea7f7c50": {
+            "X": 0.98725796,
+            "Y": 1.0,
+            "Z": 0.9967603,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "9f2ec5aa-33b6-437f-9e14-6383f0613368",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Simple Fresnel",
+      "PosOnCanvas": {
+        "X": -315.47864,
+        "Y": -435.8
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3fb1af41-eed4-4c38-9a6a-7efe494612d0": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 6.8,
+          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "d84a6afa-1711-46d6-bec5-5b2e7416c836",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "9397a0c5-b892-456f-8eab-2e916a238528",
+                  "NormalizedPosition": 0.94332993,
+                  "Color": {
+                    "R": 0.4333152,
+                    "G": 0.0,
+                    "B": 0.0028668633,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "7211f4cc-fb96-4a60-b51a-37a9287c7ae4",
+                  "NormalizedPosition": 0.9880858,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g=mul(frag.N.xyz,transpose((float3x3)CameraToWorld)).z;\nc.rgb= SampleGradient(g);\n\n\n"
+        }
+      }
+    },
+    {
+      "Id": "e9b96e27-b9c6-498f-8f77-ec668bcc4147",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Fresnel with offset",
+      "PosOnCanvas": {
+        "X": -478.47864,
+        "Y": -313.24942
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3fb1af41-eed4-4c38-9a6a-7efe494612d0": {
+            "X": -1.16,
+            "Y": 0.81,
+            "Z": 1.0
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g= dot(mul(frag.N.xyz, transpose((float3x3)CameraToWorld)), normalize(Offset));\nc.rgb= SampleGradient( Biased( saturate(g)));\n\n\n"
+        }
+      }
+    },
+    {
+      "Id": "2db7ce61-0996-4164-8ea8-92b5b2ba70c4",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Simple Distance Gradient",
+      "PosOnCanvas": {
+        "X": -315.47864,
+        "Y": -313.24942
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3fb1af41-eed4-4c38-9a6a-7efe494612d0": {
+            "X": 0.0,
+            "Y": 0.06,
+            "Z": 0.0
+          },
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 1.0,
+          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
+            "Gradient": {
+              "Interpolation": "OkLab",
+              "Steps": [
+                {
+                  "Id": "e565bb40-0322-40ac-b36b-0bf44d1835f7",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.72460896,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "68868b97-6754-45d9-b7d0-3be0b748f032",
+                  "NormalizedPosition": 0.33333334,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.48703903,
+                    "B": 0.13195556,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "e6ce2511-cff0-40cc-a4a3-381601895da8",
+                  "NormalizedPosition": 0.6666667,
+                  "Color": {
+                    "R": 0.49247694,
+                    "G": 0.08999183,
+                    "B": 0.6582595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "1804dbf9-dc81-407e-862d-4bcabb431b35",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.09676862,
+                    "G": 0.29133904,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "c.rgb *= SampleGradient( frac(GetDistance(pin.worldPosition - Offset) * A));"
+        }
+      }
+    }
+  ]
+}

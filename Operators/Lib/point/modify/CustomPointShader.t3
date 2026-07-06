@@ -217,7 +217,7 @@
         {
           "Id": "1f1838e4-8502-4ac4-a8df-dcb4cae57da4"/*Resolution*/,
           "Type": "System.Int32",
-          "Value": 263
+          "Value": 1024
         }
       ],
       "Outputs": []
