@@ -48,7 +48,12 @@ internal class EditorSymbolPackage : SymbolPackage
     {
         var id = symbol.Id;
         if (_filePathHandlers.TryGetValue(id, out var handler))
+        {
+            // A symbol removed and re-added across recompiles gets a new Symbol object under the same id -
+            // re-point the surviving handler so it doesn't act on the stale instance.
+            handler.Symbol = symbol;
             return;
+        }
 
         handler = new SymbolPathHandler(symbol, path);
         _filePathHandlers[id] = handler;

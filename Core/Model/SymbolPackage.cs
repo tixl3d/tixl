@@ -203,7 +203,15 @@ public abstract partial class SymbolPackage : IResourcePackage
 
         IDictionary<Guid, Type> newTypes;
 
-        var removedSymbolIds = new HashSet<Guid>(SymbolDict.Keys);
+        // Computed by set difference up front: LoadTypes may run in parallel, and removing from a
+        // shared HashSet inside it raced — lost removals made live symbols appear deleted.
+        var removedSymbolIds = new HashSet<Guid>();
+        foreach (var id in SymbolDict.Keys)
+        {
+            if (!AssemblyInformation.OperatorTypeInfo.ContainsKey(id))
+                removedSymbolIds.Add(id);
+        }
+
         ConcurrentBag<Symbol> updatedSymbols = new();
 
         if (parallel)
@@ -310,7 +318,6 @@ public abstract partial class SymbolPackage : IResourcePackage
         {
             if (SymbolDict.TryGetValue(guid, out var symbol))
             {
-                removedSymbolIds.Remove(guid);
                 if (symbol == null) // this should never happen??
                 {
                     Log.Error($"Skipping update of invalid symbol {guid}. Symbol entry was null - this is a bug.");

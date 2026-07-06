@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
+using T3.Editor.Compilation;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -25,13 +26,16 @@ public static partial class T3Ui
 
         _saveStopwatch.Restart();
 
-        // Todo - parallelize? 
-        foreach (var package in EditableSymbolProject.AllProjects)
+        lock (ProjectSetup.SymbolDataLock)
         {
-            if (saveAll)
-                package.SaveAll();
-            else
-                package.SaveModifiedSymbols();
+            // Todo - parallelize?
+            foreach (var package in EditableSymbolProject.AllProjects)
+            {
+                if (saveAll)
+                    package.SaveAll();
+                else
+                    package.SaveModifiedSymbols();
+            }
         }
 
         _saveStopwatch.Stop();

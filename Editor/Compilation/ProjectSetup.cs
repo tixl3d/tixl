@@ -20,6 +20,14 @@ namespace T3.Editor.Compilation;
 internal static partial class ProjectSetup
 {
     public const string EnvironmentVariableName = "T3_ASSEMBLY_PATH";
+
+    /// <summary>
+    /// Serializes symbol-file saves against package recompiles and reloads. The auto-backup
+    /// saves on a background task while recompilation rewrites the same files and symbol
+    /// dictionaries on the UI thread - both sides must hold this lock. Reentrant.
+    /// </summary>
+    internal static readonly object SymbolDataLock = new();
+
     static ProjectSetup()
     {
         SetEnvironmentVariable(EnvironmentVariableName, RuntimeAssemblies.CoreDirectory);
@@ -137,6 +145,14 @@ internal static partial class ProjectSetup
     }
 
     public static void UpdateSymbolPackages(params EditorSymbolPackage[] packages)
+    {
+        lock (SymbolDataLock)
+        {
+            UpdateSymbolPackagesInternal(packages);
+        }
+    }
+
+    private static void UpdateSymbolPackagesInternal(EditorSymbolPackage[] packages)
     {
         var parallel = UserSettings.Config.LoadMultiThreaded;
         

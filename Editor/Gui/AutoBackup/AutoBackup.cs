@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using T3.Core.Settings;
+using T3.Editor.Compilation;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
@@ -51,17 +52,22 @@ internal static class AutoBackup
                 return;
             }
 
-            T3Ui.Save(false);
-
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-
-            foreach (var project in EditableSymbolProject.AllProjects)
+            // Hold the lock across save AND zip - a recompile rewriting project files
+            // mid-zip would produce an inconsistent archive.
+            lock (ProjectSetup.SymbolDataLock)
             {
-                if (!project.HasHome)
-                    continue;
+                T3Ui.Save(false);
 
-                BackupProject(project.Folder);
+                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+                foreach (var project in EditableSymbolProject.AllProjects)
+                {
+                    if (!project.HasHome)
+                        continue;
+
+                    BackupProject(project.Folder);
+                }
             }
         }
         finally

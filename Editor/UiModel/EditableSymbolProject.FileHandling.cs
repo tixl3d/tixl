@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Resource;
+using T3.Editor.Compilation;
 
 namespace T3.Editor.UiModel;
 
@@ -13,18 +14,21 @@ internal sealed partial class EditableSymbolProject
 {
     public void SaveAll()
     {
-        if (IsSaving)
+        lock (ProjectSetup.SymbolDataLock)
         {
-            Log.Error($"{CsProjectFile.Name}: Saving is already in progress.");
-            return;
+            if (IsSaving)
+            {
+                Log.Error($"{CsProjectFile.Name}: Saving is already in progress.");
+                return;
+            }
+
+            Log.Debug($"{CsProjectFile.Name}: Saving...");
+
+            MarkAsSaving();
+            WriteAllSymbolFilesOf(SymbolUiDict.Values);
+            UpdateLastModifiedDate();
+            UnmarkAsSaving();
         }
-
-        Log.Debug($"{CsProjectFile.Name}: Saving...");
-
-        MarkAsSaving();
-        WriteAllSymbolFilesOf(SymbolUiDict.Values);
-        UpdateLastModifiedDate();
-        UnmarkAsSaving();
     }
 
     internal void Update(out bool needsUpdating)
@@ -55,28 +59,31 @@ internal sealed partial class EditableSymbolProject
 
     internal void SaveModifiedSymbols()
     {
-        if (IsSaving)
+        lock (ProjectSetup.SymbolDataLock)
         {
-            Log.Error($"{CsProjectFile.Name}: Saving is already in progress.");
-            return;
+            if (IsSaving)
+            {
+                Log.Error($"{CsProjectFile.Name}: Saving is already in progress.");
+                return;
+            }
+
+            MarkAsSaving();
+
+            var modifiedSymbolUis = SymbolUiDict
+                                   .Select(x => x.Value)
+                                   .Where(symbolUi => symbolUi.NeedsSaving)
+                                   .ToArray();
+
+            if (modifiedSymbolUis.Length != 0)
+            {
+                Log.Debug($"{CsProjectFile.Name}: Saving {modifiedSymbolUis.Length} modified symbols...");
+
+                WriteAllSymbolFilesOf(modifiedSymbolUis);
+                UpdateLastModifiedDate();
+            }
+
+            UnmarkAsSaving();
         }
-
-        MarkAsSaving();
-
-        var modifiedSymbolUis = SymbolUiDict
-                               .Select(x => x.Value)
-                               .Where(symbolUi => symbolUi.NeedsSaving)
-                               .ToArray();
-
-        if (modifiedSymbolUis.Length != 0)
-        {
-            Log.Debug($"{CsProjectFile.Name}: Saving {modifiedSymbolUis.Length} modified symbols...");
-
-            WriteAllSymbolFilesOf(modifiedSymbolUis);
-            UpdateLastModifiedDate();
-        }
-
-        UnmarkAsSaving();
     }
 
     public void UpdateLastModifiedDate() {
@@ -128,6 +135,10 @@ internal sealed partial class EditableSymbolProject
         Debug.Assert(symbol != null);
 
         SymbolUiDict.Remove(id, out _);
+
+        // Drop the path handler too - a stale one would keep referencing the old Symbol object
+        // if a symbol with the same id is re-added later.
+        FilePathHandlers.Remove(id, out _);
 
         Log.Info($"Removed symbol {symbol.Name}");
     }

@@ -226,31 +226,34 @@ internal partial class EditableSymbolProject
 
     private bool TryRecompile(bool updatePackage, [NotNullWhen(false)] out string? failureLog)
     {
-        SaveModifiedSymbols();
-        MarkAsSaving();
-        AssemblyInformation.Unload();
-        while (UnloadInProgress)
+        lock (ProjectSetup.SymbolDataLock)
         {
-            // wait for unload to finish
-            System.Threading.Thread.Sleep(10);
-        }
-        
-        bool success = false;
-        if (CsProjectFile.TryRecompile(false, out failureLog))
-        {
-            AssemblyInformation.ChangeAssemblyDirectory(CsProjectFile.GetBuildTargetDirectory());
-            success = true;
-        }
-        
-        UnmarkAsSaving();
-        _lastRecompilationTimeUtc = DateTime.UtcNow;
+            SaveModifiedSymbols();
+            MarkAsSaving();
+            AssemblyInformation.Unload();
+            while (UnloadInProgress)
+            {
+                // wait for unload to finish
+                System.Threading.Thread.Sleep(10);
+            }
 
-        if (updatePackage)
-        {
-            ProjectSetup.UpdateSymbolPackage(this);
-        }
+            bool success = false;
+            if (CsProjectFile.TryRecompile(false, out failureLog))
+            {
+                AssemblyInformation.ChangeAssemblyDirectory(CsProjectFile.GetBuildTargetDirectory());
+                success = true;
+            }
 
-        return success;
+            UnmarkAsSaving();
+            _lastRecompilationTimeUtc = DateTime.UtcNow;
+
+            if (updatePackage)
+            {
+                ProjectSetup.UpdateSymbolPackage(this);
+            }
+
+            return success;
+        }
     }
 
     internal static bool TryGetEditableProjectOfNamespace(string targetNamespace, 
