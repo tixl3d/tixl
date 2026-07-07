@@ -42,6 +42,56 @@ internal static class AutoBackup
         _stopwatch.Restart();
     }
 
+    /// <summary>
+    /// Writes a full backup that the pruner will never delete, tagged with a reason
+    /// (e.g. "pre4.2"). Used to snapshot a project before a one-way format upgrade so the
+    /// user can revert. No-op (returns false) if a pinned backup with the same tag already
+    /// exists for the project.
+    /// </summary>
+    public static bool CreatePinnedBackup(string projectFolder, string tag)
+    {
+        if (!IsValidKeepTag(tag))
+        {
+            Log.Warning($"Invalid backup keep-tag '{tag}'; must be letters, digits, or dots.");
+            return false;
+        }
+
+        var backupDir = Path.Combine(projectFolder, BackupSubFolder);
+        Directory.CreateDirectory(backupDir);
+
+        if (PinnedBackupExists(backupDir, tag))
+            return false;
+
+        var pendingZipPath = Path.Join(backupDir, PendingZipName);
+        if (File.Exists(pendingZipPath))
+            DeleteFile(pendingZipPath);
+
+        // Hold the lock across the zip so a recompile rewriting project files mid-archive
+        // can't produce an inconsistent snapshot (same reason as CreateBackupCallback).
+        lock (ProjectSetup.SymbolDataLock)
+        {
+            if (!TryWriteBackupZip(projectFolder, pendingZipPath, minimal: false))
+            {
+                DeleteFile(pendingZipPath);
+                return false;
+            }
+
+            var index = GetIndexOfLastBackup(backupDir) + 1;
+            var finalZipPath = Path.Join(backupDir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}-keep-{tag}.zip");
+            try
+            {
+                File.Move(pendingZipPath, finalZipPath);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to finalize pinned backup {0}: {1}", finalZipPath, e.Message);
+                DeleteFile(pendingZipPath);
+                return false;
+            }
+        }
+    }
+
     private static void CreateBackupCallback()
     {
         try
@@ -234,13 +284,16 @@ internal static class AutoBackup
             if (!match.Success)
                 return;
 
-            var index = int.Parse(match.Groups[1].Value);
-            var minimalSuffix = match.Groups[9].Success ? "-minimal" : "";
+            var index = int.Parse(match.Groups[IndexGroup].Value);
+            var minimalSuffix = match.Groups[MinimalMarkerGroup].Success ? "-minimal" : "";
+            // Preserve the "-keep-<tag>" pin marker, otherwise the dedup rename would strip
+            // it and the snapshot would become prunable.
+            var keepSuffix = match.Groups[KeepMarkerGroup].Success ? match.Groups[KeepMarkerGroup].Value : "";
             var dir = Path.GetDirectoryName(latestArchive);
             if (dir == null)
                 return;
 
-            var renamed = Path.Combine(dir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}{minimalSuffix}.zip");
+            var renamed = Path.Combine(dir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}{minimalSuffix}{keepSuffix}.zip");
             if (string.Equals(renamed, latestArchive, StringComparison.OrdinalIgnoreCase))
                 return;
 
@@ -434,7 +487,7 @@ internal static class AutoBackup
             var match = _backupNameRegex.Match(Path.GetFileName(path));
             if (!match.Success)
                 continue;
-            var index = int.Parse(match.Groups[1].Value);
+            var index = int.Parse(match.Groups[IndexGroup].Value);
             if (index > highestIndex)
                 highestIndex = index;
         }
@@ -453,7 +506,7 @@ internal static class AutoBackup
             var match = _backupNameRegex.Match(Path.GetFileName(path));
             if (!match.Success)
                 continue;
-            var index = int.Parse(match.Groups[1].Value);
+            var index = int.Parse(match.Groups[IndexGroup].Value);
             if (index > latestIndex)
             {
                 latestIndex = index;
@@ -461,6 +514,33 @@ internal static class AutoBackup
             }
         }
         return latestPath;
+    }
+
+    private static bool PinnedBackupExists(string backupDir, string tag)
+    {
+        var marker = $"-keep-{tag}";
+        foreach (var path in Directory.EnumerateFiles(backupDir, "*.zip", SearchOption.TopDirectoryOnly))
+        {
+            var match = _backupNameRegex.Match(Path.GetFileName(path));
+            if (match.Success
+                && match.Groups[KeepMarkerGroup].Success
+                && string.Equals(match.Groups[KeepMarkerGroup].Value, marker, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
+    private static bool IsValidKeepTag(string tag)
+    {
+        if (string.IsNullOrEmpty(tag))
+            return false;
+
+        foreach (var c in tag)
+        {
+            if (!char.IsAsciiLetterOrDigit(c) && c != '.')
+                return false;
+        }
+        return true;
     }
 
     /*
@@ -492,6 +572,7 @@ internal static class AutoBackup
     private static void ReduceNumberOfBackups(string backupDir, int backupDensity = 3)
     {
         var backupFilePathsByIndex = new Dictionary<int, string>();
+        var pinnedIndices = new HashSet<int>();
         var highestIndex = int.MinValue;
 
         foreach (var filename in Directory.EnumerateFiles(backupDir, "*.zip", SearchOption.TopDirectoryOnly))
@@ -500,10 +581,12 @@ internal static class AutoBackup
             if (!match.Success)
                 continue;
 
-            var index = int.Parse(match.Groups[1].Value);
+            var index = int.Parse(match.Groups[IndexGroup].Value);
             if (index > highestIndex)
                 highestIndex = index;
             backupFilePathsByIndex[index] = filename;
+            if (match.Groups[KeepMarkerGroup].Success)
+                pinnedIndices.Add(index);
         }
 
         var limit = 0;
@@ -523,6 +606,8 @@ internal static class AutoBackup
             else
             {
                 if (!backupFilePathsByIndex.TryGetValue(i, out var path))
+                    continue;
+                if (pinnedIndices.Contains(i))
                     continue;
                 DeleteFile(path);
             }
@@ -565,9 +650,14 @@ internal static class AutoBackup
 
     private const string PendingZipName = ".pending.zip";
 
-    // Group 9 captures the optional "-minimal" suffix that marks reduced backups.
+    // Named capture-group indices into _backupNameRegex. Timestamp components (2..8) are
+    // consumed positionally in ParseTimestampFromName and don't need names.
+    private const int IndexGroup = 1;
+    private const int MinimalMarkerGroup = 9;   // optional "-minimal" suffix that marks reduced backups
+    private const int KeepMarkerGroup = 10;     // optional "-keep-<tag>" pin marker; pinned backups are never pruned
+
     private static readonly Regex _backupNameRegex = new(
-        @"^#(\d{5})-(\d{4})_(\d{2})_(\d{2})-(\d{2})_(\d{2})_(\d{2})_(\d{3})(-minimal)?\.zip$",
+        @"^#(\d{5})-(\d{4})_(\d{2})_(\d{2})-(\d{2})_(\d{2})_(\d{2})_(\d{3})(-minimal)?(-keep-[A-Za-z0-9.]+)?\.zip$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly char[] _pathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
