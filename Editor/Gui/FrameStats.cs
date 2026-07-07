@@ -47,6 +47,7 @@ internal static class FrameStats
         internal bool HasKeyframesAfterCurrentTime;
         internal bool HasAnimatedParameters => HasKeyframesBeforeCurrentTime || HasKeyframesAfterCurrentTime;
         internal bool IsItemContextMenuOpen;
+        internal bool IsModalDialogOpen;
         internal bool OpenedPopupCapturedMouse;
         internal bool OpenedPopupHovered;
         internal bool UiColorsChanged;
@@ -65,6 +66,7 @@ internal static class FrameStats
             HasKeyframesBeforeCurrentTime = false;
             HasKeyframesAfterCurrentTime = false;
             IsItemContextMenuOpen = false;
+            IsModalDialogOpen = false;
             UiColorsChanged = false;
             OpenedPopUpName = string.Empty;
             OpenedPopupCapturedMouse = false;

@@ -32,7 +32,9 @@ public sealed class SelectionFence
                 || !ImGui.IsWindowHovered(hoverRules)
                 || !isLeftButtonDown
                 || ImGui.GetIO().KeyAlt
-                || FrameStats.Last.IsItemContextMenuOpen)
+                || FrameStats.Last.IsItemContextMenuOpen
+                // Dragging a modal dialog across the canvas must not start a fence below it.
+                || FrameStats.Last.IsModalDialogOpen)
             {
                 return States.Inactive;
             }

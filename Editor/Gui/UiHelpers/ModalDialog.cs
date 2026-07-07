@@ -67,6 +67,7 @@ public abstract class ModalDialog
             
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ItemSpacing);
         FrameStats.Current.OpenedPopUpName = title;
+        FrameStats.Current.IsModalDialogOpen = true;
         FrameStats.Current.OpenedPopupHovered = ImGui.IsWindowHovered();
         return true;
     }
