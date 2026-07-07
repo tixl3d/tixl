@@ -1037,6 +1037,42 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         var area = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
         RequestTargetViewAreaWithTransition(area, Transition.Smooth);
     }
+
+    public void OpenAndFocusInputOrOutput(IReadOnlyList<Guid> compositionPath, Guid ioId)
+    {
+        if (compositionPath.Count == 1)
+        {
+            if (!_projectView.TrySetCompositionOp(compositionPath, ScalableCanvas.Transition.JumpOut, compositionPath[0]))
+                return;
+        }
+        else
+        {
+            if (!_projectView.TrySetCompositionOp(compositionPath, ScalableCanvas.Transition.JumpIn, compositionPath[^1]))
+                return;
+        }
+
+        if (_projectView.CompositionInstance == null)
+            return;
+
+        var symbolUi = _projectView.CompositionInstance.GetSymbolUi();
+        ISelectableCanvasObject ioUi = null;
+        if (symbolUi.InputUis.TryGetValue(ioId, out var inputUi))
+        {
+            ioUi = inputUi;
+        }
+        else if (symbolUi.OutputUis.TryGetValue(ioId, out var outputUi))
+        {
+            ioUi = outputUi;
+        }
+
+        if (ioUi == null)
+            return;
+
+        _projectView.NodeSelection.SetSelection(ioUi);
+        var area = ImRect.RectWithSize(ioUi.PosOnCanvas, ioUi.Size);
+        area.Expand(150);
+        RequestTargetViewAreaWithTransition(area, Transition.Smooth);
+    }
     #endregion
 
     private bool _contextMenuIsOpen;

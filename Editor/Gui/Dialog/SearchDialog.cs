@@ -148,7 +148,7 @@ internal sealed class SearchDialog : ModalDialog
         ImGui.PushID(symbolHash);
         {
             var instance = item.Instance;
-            if (item.Section == null)
+            if (item.Kind == SearchResult.Kinds.Instance)
             {
                 var symbolNamespace = instance.Symbol.Namespace;
                 var isRelevantNamespace = symbolNamespace.StartsWith("Lib.")
@@ -238,10 +238,42 @@ internal sealed class SearchDialog : ModalDialog
 
                 ImGui.SameLine(0,2);
                 ImGui.TextUnformatted(item.Name);
-                
+
                 ImGui.SameLine(0,10);
                 CustomComponents.StylizedText("(Section)", Fonts.FontNormal, UiColors.TextMuted);
 
+            }
+            else
+            {
+                var isSelected = item == _selectedInstance;
+                var hasBeenClicked = ImGui.Selectable($"##Selectable{symbolHash.ToString()}", isSelected);
+
+                _selectedItemChanged |= hasBeenClicked;
+
+                var activate = false;
+                if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    _selectedInstance = item;
+                    activate = true;
+                }
+                else if (_selectedItemChanged && _selectedInstance == item)
+                {
+                    UiListHelpers.ScrollToMakeItemVisible();
+                    _selectedItemChanged = false;
+                    activate = true;
+                }
+
+                if (activate)
+                {
+                    components.GraphView.OpenAndFocusInputOrOutput(item.Instance.InstancePath, item.Id);
+                    _selectedInstance = item;
+                }
+
+                ImGui.SameLine(0,2);
+                ImGui.TextUnformatted(item.Name);
+
+                ImGui.SameLine(0,10);
+                CustomComponents.StylizedText(item.Kind == SearchResult.Kinds.InputNode ? "(Input)" : "(Output)", Fonts.FontNormal, UiColors.TextMuted);
             }
         }
 
@@ -286,43 +318,47 @@ internal sealed class SearchDialog : ModalDialog
 
         if (!string.IsNullOrEmpty(_searchString))
         {
-            FindAllChildren(composition,
-                            instance =>
-                            {
-                                _matchingItems.Add(new SearchResult(instance));
-                            },
-                            (compositionInstance, section) =>
-                            {
-                                _matchingItems.Add(new SearchResult(compositionInstance, section));
-                            });
+            FindAllChildren(composition);
         }
         
         
         
         _matchingItems.Sort((foundA, foundB) =>
                             {
-                                // 1. Sort by IsSection (true first)
-                                if ((foundB.Section != null).CompareTo(foundA.Section !=null) != 0)
+                                // 1. Sections and input/output nodes before instances
+                                var aIsInstance = foundA.Kind == SearchResult.Kinds.Instance;
+                                var bIsInstance = foundB.Kind == SearchResult.Kinds.Instance;
+                                if (aIsInstance != bIsInstance)
                                 {
-                                    return (foundB.Section != null).CompareTo(foundA.Section !=null);
+                                    return aIsInstance.CompareTo(bIsInstance);
                                 }
 
-                                // 2. If IsSection is the same, sort by Name alphabetically
+                                // 2. Then sort by Name alphabetically
                                 return string.Compare(foundA.Name, foundB.Name, StringComparison.Ordinal);
                             });
-
-        //_matchingItems.Sort((foundA, foundB) => string.Compare(foundA.Name, foundB.Name, StringComparison.Ordinal));
     }
 
-    private void FindAllChildren(Instance composition, Action<Instance> instanceCallback, Action<Instance, Section> sectionCallback)
+    private void FindAllChildren(Instance composition)
     {
         var symbolUi = composition.GetSymbolUi();
-        
+
         foreach (var section in symbolUi.Sections.Values)
         {
             if (section.Label.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase) ||
                 section.Title.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase))
-                sectionCallback(composition, section);
+                _matchingItems.Add(new SearchResult(composition, section));
+        }
+
+        foreach (var inputUi in symbolUi.InputUis.Values)
+        {
+            if (inputUi.InputDefinition.Name.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase))
+                _matchingItems.Add(new SearchResult(composition, inputUi.InputDefinition.Id, inputUi.InputDefinition.Name, isInput: true));
+        }
+
+        foreach (var outputUi in symbolUi.OutputUis.Values)
+        {
+            if (outputUi.OutputDefinition.Name.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase))
+                _matchingItems.Add(new SearchResult(composition, outputUi.OutputDefinition.Id, outputUi.OutputDefinition.Name, isInput: false));
         }
 
         foreach (var child in composition.Children.Values)
@@ -331,14 +367,14 @@ internal sealed class SearchDialog : ModalDialog
             if (child.Symbol.Name.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase)
                 || (symbolChild.HasCustomName && symbolChild.Name.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase)))
             {
-                instanceCallback(child);
+                _matchingItems.Add(new SearchResult(child));
             }
-            
+
             if (_searchMode == SearchModes.Local)
                 continue;
 
 
-            FindAllChildren(child, instanceCallback, sectionCallback);
+            FindAllChildren(child);
         }
     }
 
@@ -351,8 +387,17 @@ internal sealed class SearchDialog : ModalDialog
 
     private sealed class SearchResult
     {
+        public enum Kinds
+        {
+            Instance,
+            Section,
+            InputNode,
+            OutputNode,
+        }
+
         public SearchResult(Instance instance)
         {
+            Kind = Kinds.Instance;
             Instance = instance;
             GraphCanvas = ProjectView.Focused;
             Id = instance.SymbolChildId;
@@ -360,20 +405,36 @@ internal sealed class SearchDialog : ModalDialog
 
         public SearchResult(Instance compositionInstance, Section section)
         {
+            Kind = Kinds.Section;
             Instance = compositionInstance;
             Section = section;
             GraphCanvas = ProjectView.Focused;
             Id = section.Id;
         }
 
+        public SearchResult(Instance compositionInstance, Guid ioId, string ioName, bool isInput)
+        {
+            Kind = isInput ? Kinds.InputNode : Kinds.OutputNode;
+            Instance = compositionInstance;
+            GraphCanvas = ProjectView.Focused;
+            Id = ioId;
+            _ioName = ioName;
+        }
+
+        public readonly Kinds Kind;
         public readonly Guid Id;
         public readonly Instance Instance;
         public readonly Section? Section;
         public readonly ProjectView? GraphCanvas;
 
-        public string Name => Section != null 
-                                  ? Section?.Label ?? string.Empty 
-                                  : Instance.Symbol.Name;
+        public string Name => Kind switch
+                                  {
+                                      Kinds.Section                       => Section?.Label ?? string.Empty,
+                                      Kinds.InputNode or Kinds.OutputNode => _ioName,
+                                      _                                   => Instance.Symbol.Name,
+                                  };
+
+        private readonly string _ioName = string.Empty;
     }
 
     private enum SearchModes

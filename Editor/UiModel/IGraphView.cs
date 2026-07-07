@@ -24,6 +24,7 @@ internal interface IGraphView
 
     void OpenAndFocusInstance(IReadOnlyList<Guid> path);
     void OpenAndFocusSection(IReadOnlyList<Guid> compositionPath, Guid sectionId);
+    void OpenAndFocusInputOrOutput(IReadOnlyList<Guid> compositionPath, Guid ioId);
     public CanvasScope GetTargetScope();
     void BeginDraw(bool backgroundActive, bool bgHasInteractionFocus);
     void DrawGraph(ImDrawListPtr drawList, float graphOpacity);
