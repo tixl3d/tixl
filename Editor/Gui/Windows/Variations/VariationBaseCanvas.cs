@@ -48,14 +48,19 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         bool pinnedOutputChanged = false;
 
         // Render variations to pinned output
-        
-        
-        
         if (RenderProcess.OutputWindow != null)
         {
             var instanceForBlending = InstanceForBlendOperations;
 
-            if (RenderProcess.State == RenderProcess.States.ReadyForExport)
+            if (instanceForBlending != _currentRenderInstance)
+            {
+                pinnedOutputChanged = true;
+                _currentRenderInstance = instanceForBlending;
+            }
+
+            // Skip rendering on the change frame — the render state (index, pending capture,
+            // rerender flags) still belongs to the previous pool until RefreshView resets it.
+            if (!pinnedOutputChanged && RenderProcess.State == RenderProcess.States.ReadyForExport)
             {
                 if (RenderProcess.OutputWindow.ShownInstance is { Outputs.Count: > 0 } instanceForOutput)
                 {
@@ -65,12 +70,6 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
                         UpdateThumbnailRendering(instanceForBlending, textureSlot2);
                     }
                 }
-            }
-
-            if (instanceForBlending != _currentRenderInstance)
-            {
-                pinnedOutputChanged = true;
-                _currentRenderInstance = instanceForBlending;
             }
         }
 
@@ -729,6 +728,12 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     #region layout and view
     public void RefreshView()
     {
+        // Drop any pending re-render request — it targeted the previous pool. If it survived here
+        // (e.g. no texture output was pinned when a preset was created), it would render and save
+        // thumbnails for whatever op gets selected next, overwriting its curated defaults.
+        _rerenderRequested = false;
+        _rerenderToFileRequested = false;
+
         TriggerThumbnailUpdate();
         CanvasElementSelection.Clear();
         //ResetView();
