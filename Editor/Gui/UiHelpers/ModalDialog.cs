@@ -55,6 +55,8 @@ public abstract class ModalDialog
 
         // DialogSize is a minimum: the dialog grows with its content so primary actions at the
         // bottom are never cut off, and falls back to a scrollbar once it hits the screen limit.
+        // Content must have intrinsic height — a bottom-anchored child (new Vector2(0, -h))
+        // feeds back into AlwaysAutoResize and grows the window every frame.
         var minSize = DialogSize * T3Ui.UiScaleFactor;
         var maxHeight = MathF.Max(minSize.Y, ImGui.GetMainViewport().WorkSize.Y * 0.9f);
         ImGui.SetNextWindowSizeConstraints(minSize, new Vector2(minSize.X, maxHeight));

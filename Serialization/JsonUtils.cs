@@ -86,11 +86,14 @@ public static class JsonUtils
             return false;
         }
 
-        var jsonBlob = File.ReadAllText(filepath);
-        var serializer = JsonSerializer.Create();
-        var fileTextReader = new StringReader(jsonBlob);
         try
         {
+            // File.ReadAllText must stay inside the try: a concurrent writer (e.g. another instance
+            // saving settings on exit) can briefly lock the file. A lock/IO failure here has to fall
+            // back to defaults, not throw out of this "Try" method and crash the caller at startup.
+            var jsonBlob = File.ReadAllText(filepath);
+            var serializer = JsonSerializer.Create();
+            var fileTextReader = new StringReader(jsonBlob);
             if (serializer.Deserialize(fileTextReader, typeof(T)) is T configurations)
             {
                 result = configurations;

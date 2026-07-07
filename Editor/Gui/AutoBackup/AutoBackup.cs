@@ -16,6 +16,9 @@ namespace T3.Editor.Gui.AutoBackup;
 
 internal static class AutoBackup
 {
+    /// <summary>One backup archive of a project, parsed from its file name.</summary>
+    public readonly record struct BackupEntry(int Index, DateTime Timestamp, string FilePath, long SizeBytes, bool IsPinned);
+
     public static int SecondsBetweenSaves { get; set; } = 3 * 60;
 
     /// <summary>
@@ -43,13 +46,16 @@ internal static class AutoBackup
     }
 
     /// <summary>
-    /// Writes a full backup that the pruner will never delete, tagged with a reason
-    /// (e.g. "pre4.2"). Used to snapshot a project before a one-way format upgrade so the
-    /// user can revert. No-op (returns false) if a pinned backup with the same tag already
-    /// exists for the project.
+    /// Writes a backup that the pruner will never delete, tagged with a reason (e.g. "preFormat3").
+    /// Used to snapshot a project before a one-way format upgrade so the user can revert. Minimal
+    /// (sources and symbol files only) — assets aren't touched by format migrations, so zipping them
+    /// would only bloat a snapshot that is kept forever. No-op (returns false) if a pinned backup
+    /// with the same tag already exists for the project.
     /// </summary>
-    public static bool CreatePinnedBackup(string projectFolder, string tag)
+    public static bool CreatePinnedBackup(string projectFolder, string tag, out string? createdZipPath)
     {
+        createdZipPath = null;
+
         if (!IsValidKeepTag(tag))
         {
             Log.Warning($"Invalid backup keep-tag '{tag}'; must be letters, digits, or dots.");
@@ -70,17 +76,18 @@ internal static class AutoBackup
         // can't produce an inconsistent snapshot (same reason as CreateBackupCallback).
         lock (ProjectSetup.SymbolDataLock)
         {
-            if (!TryWriteBackupZip(projectFolder, pendingZipPath, minimal: false))
+            if (!TryWriteBackupZip(projectFolder, pendingZipPath, minimal: true))
             {
                 DeleteFile(pendingZipPath);
                 return false;
             }
 
             var index = GetIndexOfLastBackup(backupDir) + 1;
-            var finalZipPath = Path.Join(backupDir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}-keep-{tag}.zip");
+            var finalZipPath = Path.Join(backupDir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}-minimal-keep-{tag}.zip");
             try
             {
                 File.Move(pendingZipPath, finalZipPath);
+                createdZipPath = finalZipPath;
                 return true;
             }
             catch (Exception e)
@@ -187,14 +194,23 @@ internal static class AutoBackup
             foreach (var filepath in EnumerateProjectFiles(projectFolder))
             {
                 var fileInfo = new FileInfo(filepath);
-
-                if (minimal && !_minimalBackupExtensions.Contains(fileInfo.Extension))
-                    continue;
-
-                if (fileInfo.Length > MaxFileSizeBytes)
-                    continue;
-
                 var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
+
+                // Full backups are complete, shareable containers (assets, thumbnails, everything).
+                // Minimal backups keep only source, symbols, and .meta data (variations) — no bulky
+                // assets and no regenerable thumbnails.
+                if (minimal && !IsMinimalBackupFile(fileInfo.Extension, relativePath))
+                    continue;
+
+                // Minimal backups skip oversized files (and say so, rather than dropping them
+                // silently). Full backups are complete containers and keep everything, large or not.
+                if (minimal && fileInfo.Length > MinimalMaxFileSizeBytes)
+                {
+                    Log.Warning($"Backup: skipping oversized file in minimal backup: {relativePath} "
+                                + $"({fileInfo.Length / (1024 * 1024)} MB)");
+                    continue;
+                }
+
                 archive.CreateEntryFromFile(filepath, relativePath, CompressionLevel.Fastest);
             }
             return true;
@@ -275,6 +291,33 @@ internal static class AutoBackup
         return false;
     }
 
+    /// <summary>
+    /// Whether a file belongs in a minimal backup: source/symbol files, plus .meta data (variations),
+    /// but not the regenerable thumbnails. Full backups keep everything and don't use this.
+    /// </summary>
+    private static bool IsMinimalBackupFile(string extension, string relativePath)
+    {
+        if (_minimalBackupExtensions.Contains(extension))
+            return true;
+
+        return IsUnderMeta(relativePath) && !IsThumbnailPath(relativePath);
+    }
+
+    private static bool IsThumbnailPath(string relativePath)
+    {
+        return NormalizeSeparators(relativePath).StartsWith(_thumbnailsPrefix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsUnderMeta(string relativePath)
+    {
+        return NormalizeSeparators(relativePath).StartsWith(_metaPrefix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeSeparators(string path)
+    {
+        return path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+    }
+
     private static void TouchLatestBackupTimestamp(string latestArchive)
     {
         try
@@ -330,12 +373,43 @@ internal static class AutoBackup
         if (latestArchive == null)
             return false;
 
-        DeleteBuildArtifacts(projectFolder);
+        return RestoreFromArchive(projectFolder, latestArchive);
+    }
 
+    /// <summary>
+    /// Replaces a project's source/symbol/.meta files with the contents of a backup zip. Build
+    /// artifacts (bin/, obj/) and the existing graph files are deleted first — otherwise an operator
+    /// renamed or removed after the backup would survive the restore and collide by Guid (same id,
+    /// two files) with the version being restored. Assets and thumbnails are left in place: they
+    /// never collide, and a minimal backup wouldn't carry them to put back. Entries that would escape
+    /// the project folder are skipped. The caller is responsible for reloading — a restart is the safe
+    /// way to pick up the restored files.
+    /// </summary>
+    public static bool RestoreFromArchive(string projectFolder, string zipFilePath)
+    {
         try
         {
-            using var archive = ZipFile.Open(latestArchive, ZipArchiveMode.Read);
-            var projectFolderFull = Path.GetFullPath(projectFolder);
+            // Open first so a corrupt or unreadable archive is caught before anything is deleted.
+            using var archive = ZipFile.OpenRead(zipFilePath);
+
+            // bin/obj are regenerable and can be large — free them before the space check.
+            DeleteBuildArtifacts(projectFolder);
+
+            if (!HasEnoughFreeSpaceToExtract(projectFolder, archive, out var neededMb, out var freeMb))
+            {
+                Log.Error($"Restore aborted: needs ~{neededMb} MB but only {freeMb} MB is free on the "
+                          + "project's drive. No project files were removed.");
+                return false;
+            }
+
+            // Abort before extracting if a stale file can't be cleared — extracting over it would
+            // leave the colliding operator in place.
+            if (!ClearGraphFilesBeforeRestore(projectFolder))
+                return false;
+
+            // Compare against the folder *with* a trailing separator so a sibling like "Proj_evil"
+            // can't slip past the guard by prefix-matching "Proj".
+            var projectRootWithSeparator = WithTrailingSeparator(Path.GetFullPath(projectFolder));
 
             foreach (var entry in archive.Entries)
             {
@@ -345,8 +419,11 @@ internal static class AutoBackup
                 var targetPath = Path.GetFullPath(Path.Combine(projectFolder, entry.FullName));
 
                 // Defensive: refuse entries that would write outside the project folder.
-                if (!targetPath.StartsWith(projectFolderFull, StringComparison.OrdinalIgnoreCase))
+                if (!targetPath.StartsWith(projectRootWithSeparator, StringComparison.OrdinalIgnoreCase))
+                {
+                    Log.Warning($"Skipped backup entry that would extract outside the project: {entry.FullName}");
                     continue;
+                }
 
                 var directory = Path.GetDirectoryName(targetPath);
                 if (directory != null && !Directory.Exists(directory))
@@ -357,16 +434,122 @@ internal static class AutoBackup
         }
         catch (Exception e)
         {
-            Log.Error($"Restoring archive {latestArchive} failed. Is the zip corrupted? " + e.Message);
+            Log.Error($"Restoring archive {zipFilePath} failed. Is the zip corrupted? " + e.Message);
             return false;
         }
         return true;
+    }
+
+    /// <summary>Lists a project's backups newest first (pinned snapshots sort by their original index).</summary>
+    public static IReadOnlyList<BackupEntry> EnumerateBackupsFor(string projectFolder)
+    {
+        var backupDir = Path.Combine(projectFolder, BackupSubFolder);
+        if (!Directory.Exists(backupDir))
+            return [];
+
+        var entries = new List<BackupEntry>();
+        foreach (var path in Directory.EnumerateFiles(backupDir, "*.zip", SearchOption.TopDirectoryOnly))
+        {
+            var match = _backupNameRegex.Match(Path.GetFileName(path));
+            if (!match.Success)
+                continue;
+
+            var index = int.Parse(match.Groups[IndexGroup].Value);
+            var timestamp = ParseTimestampFromName(path) ?? DateTime.MinValue;
+
+            long size = 0;
+            try
+            {
+                size = new FileInfo(path).Length;
+            }
+            catch (IOException)
+            {
+                // Size is display-only; a stat failure shouldn't drop the entry.
+            }
+
+            entries.Add(new BackupEntry(index, timestamp, path, size, match.Groups[KeepMarkerGroup].Success));
+        }
+
+        entries.Sort((a, b) => b.Index.CompareTo(a.Index));
+        return entries;
     }
 
     private static void DeleteBuildArtifacts(string projectFolder)
     {
         TryDeleteRecursively(Path.Combine(projectFolder, "bin"));
         TryDeleteRecursively(Path.Combine(projectFolder, "obj"));
+    }
+
+    /// <summary>
+    /// Deletes the project's existing source/symbol/.meta files (the set a minimal backup manages)
+    /// before a restore, so a stale operator left over from a post-backup rename or deletion can't
+    /// survive and cause a Guid collision. Assets and thumbnails are deliberately left untouched.
+    /// Returns false if any file could not be removed (e.g. locked) — the caller must then abort
+    /// rather than extract over the leftover.
+    /// </summary>
+    private static bool ClearGraphFilesBeforeRestore(string projectFolder)
+    {
+        // Collect first — deleting while enumerating the directory is unsafe.
+        var toDelete = new List<string>();
+        foreach (var filepath in EnumerateProjectFiles(projectFolder))
+        {
+            var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
+            if (IsMinimalBackupFile(Path.GetExtension(filepath), relativePath))
+                toDelete.Add(filepath);
+        }
+
+        var failed = 0;
+        foreach (var filepath in toDelete)
+        {
+            if (!DeleteFile(filepath))
+                failed++;
+        }
+
+        if (failed > 0)
+            Log.Warning($"Restore aborted: {failed} existing project file(s) could not be removed (locked?). "
+                        + "Extracting over them could leave a duplicate operator (Guid collision).");
+
+        return failed == 0;
+    }
+
+    /// <summary>
+    /// True if the project's drive has room for the archive's uncompressed contents (plus a margin).
+    /// Cheap — reads entry sizes from the zip index, no decompression. Fails open (returns true) if the
+    /// free space can't be determined, so an inability to check never blocks a restore.
+    /// </summary>
+    private static bool HasEnoughFreeSpaceToExtract(string projectFolder, ZipArchive archive, out long neededMb, out long freeMb)
+    {
+        long uncompressed = 0;
+        foreach (var entry in archive.Entries)
+            uncompressed += entry.Length;
+
+        var needed = uncompressed + FreeSpaceMarginBytes;
+        neededMb = needed / (1024 * 1024);
+        freeMb = 0;
+
+        try
+        {
+            var root = Path.GetPathRoot(Path.GetFullPath(projectFolder));
+            if (string.IsNullOrEmpty(root))
+                return true;
+
+            var drive = new DriveInfo(root);
+            if (!drive.IsReady)
+                return true;
+
+            freeMb = drive.AvailableFreeSpace / (1024 * 1024);
+            return drive.AvailableFreeSpace >= needed;
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Could not check free space before restore: {e.Message}");
+            return true;
+        }
+    }
+
+    private static string WithTrailingSeparator(string path)
+    {
+        return path.EndsWith(Path.DirectorySeparatorChar) ? path : path + Path.DirectorySeparatorChar;
     }
 
     private static void TryDeleteRecursively(string folder)
@@ -636,15 +819,17 @@ internal static class AutoBackup
         return 0;
     }
 
-    private static void DeleteFile(string file)
+    private static bool DeleteFile(string file)
     {
         try
         {
             File.Delete(file);
+            return true;
         }
         catch (Exception e)
         {
             Log.Info("Failed to delete file: " + e.Message);
+            return false;
         }
     }
 
@@ -665,7 +850,17 @@ internal static class AutoBackup
     private static readonly string[] _excludedDirs =
         { "bin", "obj", ".git", ".temp", "Render", "Export", "ImageSequence", "Screenshots" };
 
-    private const long MaxFileSizeBytes = 100L * 1024 * 1024;
+    // Relative-path prefixes (OS separator). ".meta/" data (variations) is kept even in minimal
+    // backups; ".meta/Thumbnails/" is regenerable and kept only in full backups.
+    private static readonly string _metaPrefix = FileLocations.MetaSubFolder + Path.DirectorySeparatorChar;
+    private static readonly string _thumbnailsPrefix =
+        FileLocations.MetaSubFolder + Path.DirectorySeparatorChar + "Thumbnails" + Path.DirectorySeparatorChar;
+
+    // Minimal backups skip files larger than this (a guard against a stray huge source/json file);
+    // full backups have no cap so they stay complete. Restore requires this much headroom on top of
+    // the archive's uncompressed size before it will touch anything.
+    private const long MinimalMaxFileSizeBytes = 100L * 1024 * 1024;
+    private const long FreeSpaceMarginBytes = 50L * 1024 * 1024;
 
     private static readonly HashSet<string> _minimalBackupExtensions = new(StringComparer.OrdinalIgnoreCase)
     {

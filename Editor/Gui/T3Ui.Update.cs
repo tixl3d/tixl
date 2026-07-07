@@ -108,6 +108,7 @@ public static partial class T3Ui
         ThumbnailManager.Update();
         _searchDialog.Draw();
         NewProjectDialog.Draw();
+        RestoreBackupDialog.Draw();
         CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
         AboutDialog.Draw();
@@ -162,6 +163,12 @@ public static partial class T3Ui
         _versionWelcomeChecked = true;
 
         var isNewVersion = VersionMarker.Classify() == VersionMarker.LaunchKind.NewToUser;
+
+        // Snapshot existing projects before the first save can upgrade them to the new file format.
+        // Runs before the marker is written (on welcome-window close) so a crash mid-pass retries.
+        if (isNewVersion)
+            AutoBackup.PreUpgradeSnapshot.CreateForExistingProjects();
+
         if (UserSettings.Config.ShowWelcomeOnStartup || isNewVersion)
             WindowManager.WelcomeWindow.Open();
         else

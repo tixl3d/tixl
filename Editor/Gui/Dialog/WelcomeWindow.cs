@@ -1,8 +1,10 @@
 #nullable enable
+using System.IO;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Settings;
 using T3.Core.SystemUi;
+using T3.Editor.Gui.AutoBackup;
 using T3.Editor.Gui.Hub;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -97,6 +99,8 @@ internal sealed class WelcomeWindow : WelcomeWindowBase
 
     private void DrawWelcomeTab()
     {
+        DrawPreUpgradeBackupNotice();
+
         // Rendered as markdown so the [text](url) links sit inline in the prose.
         _welcomeMarkdown.Draw(WelcomeMarkdown,
                               onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url));
@@ -105,6 +109,40 @@ internal sealed class WelcomeWindow : WelcomeWindowBase
         ImGui.Separator();
 
         DrawReleaseNotes();
+    }
+
+    /// <summary>
+    /// One-time notice shown after a launch that snapshotted projects before a breaking file-format
+    /// change (see <see cref="PreUpgradeSnapshot"/>). Lists each backup's absolute path so the user
+    /// can revert to an earlier TiXL version without losing work.
+    /// </summary>
+    private static void DrawPreUpgradeBackupNotice()
+    {
+        var created = PreUpgradeSnapshot.Created;
+        if (created.Count == 0)
+            return;
+
+        CustomComponents.StylizedText($"{created.Count} project(s) were backed up before the format change",
+                                      Fonts.FontBold, UiColors.StatusAttention);
+        ImGui.TextWrapped($"TiXL v{FileLocations.TixlVersion} introduces a new project file format. A backup of each "
+                          + "project's source and symbol files was saved first, so you can return to an earlier "
+                          + "TiXL version without losing work.");
+
+        FormInputs.AddVerticalSpace(4);
+        foreach (var entry in created)
+        {
+            var backupFolder = Path.GetDirectoryName(entry.ZipPath) ?? entry.ZipPath;
+            ImGui.PushID(entry.ProjectName);
+            if (ImGui.SmallButton("Reveal"))
+                CoreUi.Instance.OpenWithDefaultApplication(backupFolder);
+            ImGui.SameLine();
+            ImGui.TextColored(UiColors.TextMuted, $"{entry.ProjectName}  —  {entry.ZipPath}");
+            ImGui.PopID();
+        }
+
+        FormInputs.AddVerticalSpace(8);
+        ImGui.Separator();
+        FormInputs.AddVerticalSpace(8);
     }
 
     private void DrawGettingStartedTab()

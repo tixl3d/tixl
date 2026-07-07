@@ -1,7 +1,12 @@
 ﻿#nullable enable
 
+using System.Collections.Concurrent;
+using System.IO;
+using System.IO.Compression;
+using System.Threading.Tasks;
 using ImGuiNET;
 using T3.Core.SystemUi;
+using T3.Core.Utils;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Input;
@@ -118,7 +123,7 @@ internal static class ProjectsPanel
         dl.AddText(Fonts.FontSmall,
                    Fonts.FontSmall.FontSize,
                    min + new Vector2(x, y),
-                   UiColors.TextMuted, package.Folder);
+                   UiColors.TextMuted, GetSavedInfoLabel(package));
 
         var thumbnail = ThumbnailManager.GetThumbnail(package.Id, package, ThumbnailManager.Categories.PackageMeta);
         if (thumbnail.IsReady && ThumbnailManager.AtlasSrv != null)
@@ -156,6 +161,12 @@ internal static class ProjectsPanel
             if (ImGui.MenuItem("Reveal in Explorer"))
             {
                 CoreUi.Instance.OpenWithDefaultApplication(package.Folder);
+            }
+
+            if (ImGui.BeginMenu("Restore from backup"))
+            {
+                DrawRestoreBackupItems(package);
+                ImGui.EndMenu();
             }
 
             if (ImGui.MenuItem("Unload project", "", false, isOpened))
@@ -255,4 +266,230 @@ internal static class ProjectsPanel
     }
 
     public static Vector2 ProjectItemSize => new Vector2(400, 65) * T3Ui.UiScaleFactor;
+
+    /// <summary>
+    /// "Saved 23 days ago with v4.2" for a project row. Composing it needs file mtime IO, so the
+    /// label is cached per project and refreshed only every few seconds.
+    /// </summary>
+    private static string GetSavedInfoLabel(EditorSymbolPackage package)
+    {
+        var now = ImGui.GetTime();
+        if (_savedInfoLabels.TryGetValue(package.Folder, out var cached) && now - cached.LastUpdate < 10)
+            return cached.Label;
+
+        var label = BuildSavedInfoLabel(package);
+        _savedInfoLabels[package.Folder] = (now, label);
+        return label;
+    }
+
+    private static string BuildSavedInfoLabel(EditorSymbolPackage package)
+    {
+        DateTime? savedAt = null;
+        try
+        {
+            // The editor rewrites the csproj on every save, so its mtime tracks the last save.
+            foreach (var csproj in Directory.EnumerateFiles(package.Folder, "*.csproj", SearchOption.TopDirectoryOnly))
+            {
+                savedAt = File.GetLastWriteTime(csproj);
+                break;
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Could not read save time for {package.DisplayName}: {e.Message}");
+        }
+
+        var savedPart = savedAt == null
+                            ? "Save time unknown"
+                            : $"Saved {savedAt.GetReadableRelativeTime()}";
+
+        if (package.AssemblyInformation.TryGetReleaseInfo(out var releaseInfo))
+        {
+            return $"{savedPart} with v{releaseInfo.EditorVersion.Major}.{releaseInfo.EditorVersion.Minor}";
+        }
+
+        return savedPart;
+    }
+
+    /// <summary>
+    /// Items of the "Restore from backup" submenu, newest first. Labels and the underlying
+    /// directory scan are cached and refreshed only every couple of seconds — the submenu body
+    /// runs every frame while open and must not do per-frame IO or string building.
+    /// </summary>
+    private static void DrawRestoreBackupItems(EditorSymbolPackage package)
+    {
+        var now = ImGui.GetTime();
+        if (_backupMenuFolder != package.Folder || now - _backupMenuUpdateTime > 2)
+        {
+            RefreshBackupMenuItems(package.Folder);
+            _backupMenuFolder = package.Folder;
+            _backupMenuUpdateTime = now;
+        }
+
+        if (_backupMenuItems.Count == 0)
+        {
+            ImGui.MenuItem("No backups found", "", false, false);
+            return;
+        }
+
+        foreach (var (label, backup) in _backupMenuItems)
+        {
+            if (ImGui.MenuItem(label))
+            {
+                T3Ui.RestoreBackupDialog.ShowNextFrame(package.DisplayName, package.Folder, backup);
+            }
+
+            if (ImGui.IsItemHovered())
+                DrawBackupTooltip(backup);
+        }
+    }
+
+    /// <summary>
+    /// Hover detail for a backup: absolute timestamp plus operator/connection counts. The counts need
+    /// decompressing the .t3 files, so they're computed lazily (only for hovered backups) on a
+    /// background thread and shown as "counting..." until ready.
+    /// </summary>
+    private static void DrawBackupTooltip(AutoBackup.AutoBackup.BackupEntry backup)
+    {
+        QueueBackupContentStats(backup.FilePath);
+
+        ImGui.BeginTooltip();
+
+        var absolute = backup.Timestamp == DateTime.MinValue
+                           ? "Unknown time"
+                           : backup.Timestamp.ToString("yyyy-MM-dd  HH:mm:ss");
+        ImGui.TextUnformatted(absolute);
+
+        var detail = _backupContentStats.TryGetValue(backup.FilePath, out var stats)
+                         ? $"{stats.Operators} operators, {stats.Connections} connections"
+                         : "counting...";
+        ImGui.TextColored(UiColors.TextMuted, detail);
+
+        ImGui.EndTooltip();
+    }
+
+    private static void RefreshBackupMenuItems(string projectFolder)
+    {
+        _backupMenuItems.Clear();
+        foreach (var backup in AutoBackup.AutoBackup.EnumerateBackupsFor(projectFolder))
+        {
+            _backupMenuItems.Add((BuildBackupMenuLabel(backup), backup));
+        }
+    }
+
+    private static string BuildBackupMenuLabel(AutoBackup.AutoBackup.BackupEntry backup)
+    {
+        var when = backup.Timestamp == DateTime.MinValue
+                       ? "unknown time"
+                       : ((DateTime?)backup.Timestamp).GetReadableRelativeTime();
+
+        var symbolCount = GetBackupSymbolCount(backup.FilePath);
+        var symbolsPart = symbolCount < 0 ? "" : $" · {symbolCount} symbols";
+        var pinPart = backup.IsPinned ? " · pinned" : "";
+
+        // Operator/connection counts need decompression and are shown in the hover tooltip instead.
+        return $"v{backup.Index}   {when}{symbolsPart} · {FormatSize(backup.SizeBytes)}{pinPart}";
+    }
+
+    /// <summary>Number of symbol (.t3) files in a backup zip, from the zip index only. Cached by path (zips are immutable).</summary>
+    private static int GetBackupSymbolCount(string zipPath)
+    {
+        if (_backupSymbolCountsByPath.TryGetValue(zipPath, out var cached))
+            return cached;
+
+        var count = 0;
+        try
+        {
+            using var archive = ZipFile.OpenRead(zipPath);
+            foreach (var entry in archive.Entries)
+            {
+                if (entry.Name.EndsWith(".t3", StringComparison.OrdinalIgnoreCase))
+                    count++;
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Could not read backup archive {zipPath}: {e.Message}");
+            count = -1;
+        }
+
+        _backupSymbolCountsByPath[zipPath] = count;
+        return count;
+    }
+
+    /// <summary>
+    /// Counts operators (symbol-children) and connections inside a backup's .t3 files. This needs
+    /// decompression, so it runs once on a background thread and caches by path (zips are immutable);
+    /// the menu label picks the result up on its next refresh.
+    /// </summary>
+    private static void QueueBackupContentStats(string zipPath)
+    {
+        if (_backupContentStats.ContainsKey(zipPath) || !_contentStatsQueued.Add(zipPath))
+            return;
+
+        Task.Run(() =>
+                 {
+                     try
+                     {
+                         _backupContentStats[zipPath] = ComputeBackupContentStats(zipPath);
+                     }
+                     catch (Exception e)
+                     {
+                         Log.Debug($"Could not compute backup stats for {zipPath}: {e.Message}");
+                     }
+                 });
+    }
+
+    private static BackupContentStats ComputeBackupContentStats(string zipPath)
+    {
+        var operators = 0;
+        var connections = 0;
+
+        using var archive = ZipFile.OpenRead(zipPath);
+        foreach (var entry in archive.Entries)
+        {
+            if (!entry.Name.EndsWith(".t3", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            using var reader = new StreamReader(entry.Open());
+            var text = reader.ReadToEnd();
+
+            // Each symbol-child serializes exactly one "SymbolId" key, each connection one
+            // "SourceParentOrChildId". Counting the quoted keys avoids parsing the whole document.
+            operators += CountOccurrences(text, "\"SymbolId\"");
+            connections += CountOccurrences(text, "\"SourceParentOrChildId\"");
+        }
+
+        return new BackupContentStats(operators, connections);
+    }
+
+    private static int CountOccurrences(string haystack, string needle)
+    {
+        var count = 0;
+        var index = 0;
+        while ((index = haystack.IndexOf(needle, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += needle.Length;
+        }
+        return count;
+    }
+
+    private static string FormatSize(long bytes)
+    {
+        const long mb = 1024 * 1024;
+        return bytes >= mb
+                   ? $"{bytes / (float)mb:0.0} MB"
+                   : $"{bytes / 1024} KB";
+    }
+
+    private readonly record struct BackupContentStats(int Operators, int Connections);
+
+    private static readonly Dictionary<string, (double LastUpdate, string Label)> _savedInfoLabels = new();
+    private static readonly List<(string Label, AutoBackup.AutoBackup.BackupEntry Entry)> _backupMenuItems = new();
+    private static readonly Dictionary<string, int> _backupSymbolCountsByPath = new();
+    private static readonly ConcurrentDictionary<string, BackupContentStats> _backupContentStats = new();
+    private static readonly HashSet<string> _contentStatsQueued = new();
+    private static string? _backupMenuFolder;
+    private static double _backupMenuUpdateTime;
 }

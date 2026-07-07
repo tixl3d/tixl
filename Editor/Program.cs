@@ -88,6 +88,10 @@ internal static class Program
         // Must run before anything reads FileLocations.SettingsDirectory (e.g. the log path below).
         ApplyVersionIdOverrideArg(args);
 
+        // Must run before the settings files are read — a restarted instance races the old
+        // instance's save-on-quit writes otherwise.
+        WaitForPredecessorArg(args);
+
         // Not calling this first will cause exceptions...
         Console.WriteLine("Starting T3 Editor");
         Console.WriteLine("Creating EditorUi");
@@ -297,6 +301,37 @@ internal static class Program
                 continue;
 
             Environment.SetEnvironmentVariable(FileLocations.VersionIdOverrideEnvVar, value);
+            return;
+        }
+    }
+
+    /// <summary>
+    /// Honors <c>--wait-for-exit=&lt;pid&gt;</c> by blocking until that process has exited (max 15s).
+    /// Passed by in-app restarts (e.g. after a backup restore): the new instance must not read the
+    /// settings files while the old instance's save-on-quit handlers are still writing them.
+    /// </summary>
+    private static void WaitForPredecessorArg(string[] args)
+    {
+        const string flag = "--wait-for-exit=";
+        foreach (var arg in args)
+        {
+            if (!arg.StartsWith(flag, StringComparison.Ordinal))
+                continue;
+
+            if (!int.TryParse(arg[flag.Length..], out var pid))
+                return;
+
+            try
+            {
+                using var predecessor = Process.GetProcessById(pid);
+                Console.WriteLine($"Waiting for previous instance (pid {pid}) to exit...");
+                if (!predecessor.WaitForExit(15_000))
+                    Console.WriteLine("Previous instance did not exit in time. Continuing...");
+            }
+            catch (ArgumentException)
+            {
+                // Process already gone — nothing to wait for.
+            }
             return;
         }
     }

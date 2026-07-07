@@ -26,6 +26,101 @@ Per-project incremental backups already live at `<projectFolder>/.temp/Backup/` 
 
 **2026-04-27** — NU1100 detection added: `Compiler.ExplainBuildFailure(string?)` ([Compiler.cs](Editor/Compilation/Compiler.cs)) recognises the missing-reference-pack error and returns a "install the matching .NET SDK / change the TFM" hint. Wired into [NewProjectDialog.cs](Editor/Gui/Graph/Dialogs/NewProjectDialog.cs) (replaces the "should never happen" dialog when the cause is known) and into the startup recompile log in [ProjectSetup.Startup.cs](Editor/Compilation/ProjectSetup.Startup.cs).
 
+**2026-07-07** — Phase 2 step 1 landed (de-risked slice, no startup-lifecycle changes). See also
+[Plan_PreUpgradeBackup](Plan_PreUpgradeBackup.md) for the pinned-backup primitive this builds on.
+- `AutoBackup.EnumerateBackupsFor(projectFolder)` → `IReadOnlyList<BackupEntry>` (index, timestamp,
+  path, size, isPinned), newest first ([AutoBackup.cs](Editor/Gui/AutoBackup/AutoBackup.cs)).
+- `AutoBackup.RestoreFromArchive(projectFolder, zipPath)` extracted public from the private
+  latest-restore; `RestoreLatestForProject` is now a thin wrapper.
+- New `RestoreBackupDialog` ([RestoreBackupDialog.cs](Editor/Gui/Graph/Dialogs/RestoreBackupDialog.cs)):
+  pick a version → labelled Restore CTA → result state telling the user to restart. Registered on
+  `T3Ui`, drawn in the dialog loop.
+- Wired into the Hub project context menu ("Restore from backup...") in
+  [ProjectsPanel.cs](Editor/Gui/Hub/ProjectsPanel.cs) — available for any healthy or broken project.
+
+**2026-07-07 (later)** — Restore flow reworked after UX review: the list-in-modal picker became a
+"Restore from backup" **submenu** in the project context menu ([ProjectsPanel.cs](Editor/Gui/Hub/ProjectsPanel.cs)),
+with scannable entries (`v231   23 min ago · 12 ops · 0.9 MB · pinned`; op count = `.t3` entries in
+the zip, cached per path; labels cached, no per-frame IO). Picking one opens a small confirm dialog
+([RestoreBackupDialog.cs](Editor/Gui/Graph/Dialogs/RestoreBackupDialog.cs)) with an
+"Archive current state before restoring" checkbox (default on) that writes a pinned
+`-keep-preRestore<timestamp>` backup first and aborts the restore if archiving fails. This also fixed
+the dialog growing one frame at a time — its bottom-anchored list child (`Vector2(0, -h)`) fed back
+into `ModalDialog`'s `AlwaysAutoResize`; the confirm dialog has intrinsic-height content and
+[ModalDialog.cs](Editor/Gui/UiHelpers/ModalDialog.cs) now documents the constraint.
+
+**2026-07-07 (evening)** — Restore now restarts the editor. Testing showed that after
+`RestoreFromArchive` the running instance is unstable (per-frame "No release info found" spam — stale
+assemblies and deleted bin/ under a live process), so the confirm CTA became **"Restore and Restart"**:
+on success the dialog spawns a fresh editor process (same exe + original command-line args, so
+`--override-version-id` survives) and exits via the plain exit path — which deliberately does *not*
+save projects, since saving would overwrite the just-restored files with in-memory state. Verified:
+no single-instance mutex exists, and `Program.cs` shutdown only disposes packages. If spawning fails,
+the dialog falls back to "restored — please restart manually". Also added a startup low-disk-space
+check ([StartUp.cs](Editor/Gui/Interaction/StartupCheck/StartUp.cs)): drives hosting the settings
+folder or any project directory with <100 MB free trigger a blocking warning before anything writes.
+
+**2026-07-07 (night)** — Restart-crash root cause found and fixed. The spawned instance died
+silently at startup because `JsonUtils.TryLoadingJson` ([JsonUtils.cs](Serialization/JsonUtils.cs))
+called `File.ReadAllText` **outside** its try/catch; when the exiting old instance held the settings
+file mid-write (`TrySaveJson`/`File.CreateText`), the read threw `IOException` past the "Try" method
+and killed the new process. Moved the read inside the try. To keep that fix from turning a crash into
+*silent settings loss*, `Settings<T>` ([Settings.cs](Core/IO/Settings.cs)) now latches
+`_preserveFileOnDisk` when an existing file fails to load, so save-on-quit won't overwrite the user's
+real config with defaults. The `--wait-for-exit` handshake still eliminates the overlap on a clean
+relaunch (bootstrap: the *spawning* build must have the flag-passing code), but the crash is now
+non-fatal even without it.
+
+**2026-07-08** — Restart confirmed working standalone; the earlier failures were Rider's debugger
+killing the spawned child via its job object on parent exit. Hardened with `UseShellExecute = true`
+([RestoreBackupDialog.cs](Editor/Gui/Graph/Dialogs/RestoreBackupDialog.cs)) so the child detaches from
+the job and survives even under the debugger. Diagnosis used a temporary `StartUp.Probe`
+facility writing to `startup-probe.log` plus milestone probes through `Program.Main`; in-Rider restart
+was then confirmed and all probes were removed. Also found+fixed the underlying crash that made the
+overlap fatal:
+`JsonUtils.TryLoadingJson` read the file outside its try/catch, and `Settings<T>` now preserves an
+unreadable file instead of clobbering it with defaults (see Plan_PreUpgradeBackup cross-refs).
+
+Backup menu labels reworked: ".t3 count" is now labelled **symbols** (not "ops"), kept cheap (zip
+index only) and stable in the label. **Operators** (symbol-children) and **connections** need
+decompression, so they moved to a **hover tooltip** (also showing the absolute timestamp), counted
+lazily — only for the hovered backup — on a background thread, cached per immutable zip path, shown as
+"counting..." until ready. No label pop, no eager decompression of every backup. Keyframes deferred —
+they live in a nested `Animator` block without an obvious per-keyframe key.
+
+**2026-07-08** — Restore now clears stale files first ([AutoBackup.cs](Editor/Gui/AutoBackup/AutoBackup.cs)).
+`RestoreFromArchive` previously only deleted bin/obj and extracted over the top, so an operator renamed
+or deleted after the backup survived the restore and collided by Guid (same id, two files) with the
+restored version. It now opens the archive first (corrupt-zip guard before any deletion), then deletes
+the existing source/symbol/.meta files (`ClearGraphFilesBeforeRestore`, scoped via `IsMinimalBackupFile`)
+before extracting. Assets/thumbnails are deliberately left untouched — they don't collide, and a minimal
+backup wouldn't carry them back; this also means the minimal pre-restore archive fully covers what the
+clear step could remove. Applies to crash-recovery restore too (same method). Dialog wording updated.
+
+**2026-07-08 (audit)** — Adversarial review of the backup/restore paths surfaced four issues, all fixed
+in [AutoBackup.cs](Editor/Gui/AutoBackup/AutoBackup.cs):
+1. **Zip-slip** — the "escape the project folder" guard compared against the folder path without a
+   trailing separator, so a sibling like `Proj_evil` prefix-matched `Proj`. Now compares against
+   `WithTrailingSeparator(...)` and logs skipped entries. Matters once backups are shared/imported.
+2. **Partial-restore safety** — `RestoreFromArchive` now pre-checks free disk space
+   (`HasEnoughFreeSpaceToExtract`, sums zip entry sizes, fails open) and aborts *before* deleting
+   anything; covers the crash-recovery caller which has no archive-first net.
+3. **Silent large-file drop** — the 100 MB cap was applied to all backups. Now minimal-only (renamed
+   `MinimalMaxFileSizeBytes`, logs when it skips); full backups keep everything so the "complete
+   container" promise holds.
+4. **Silent clear failure** — `ClearGraphFilesBeforeRestore` now returns success; if any stale file
+   can't be removed (locked), the restore aborts instead of extracting over it and re-creating the
+   Guid collision. `DeleteFile` returns a bool for this.
+
+Lower-severity items noted but left: same-second double-restore false abort, pre-restore pinned archives
+never pruned, `_isSaving` non-atomic, dedup timestamp cosmetic drift.
+
+**Still open (Phase 2 step 2 / Phase 1):** capture per-project startup compile failures into a
+`ProjectSetup.BrokenProjects` list (today `LoadProjects`' `failedProjects` is dropped as `out _`),
+surface a "Broken" section in the Hub, and auto-open the restore dialog on failure. This is the part
+that touches startup lifecycle (lenient loading, dependency-cascade risk) and wants deliberate testing.
+Restore currently requires a manual restart (Phase 3 = in-place reload, still a stretch).
+
 ## Related plans
 
 - [Plan_RuntimeConsistencyRecovery](Plan_RuntimeConsistencyRecovery.md) — the runtime-detection counterpart. Where this plan handles "package broken at load time" by routing it into a `BrokenProjectInfo`, the consistency-recovery plan handles "state observed to be corrupt at runtime" by suspending the editor and offering recovery. They share the backup-restore primitives in Phase 2 / 3 of this plan.
