@@ -1215,11 +1215,20 @@ internal sealed class SymbolVariationPool
     public static bool DoesInstanceMatchPreset(Instance instance, Variation preset)
         => DoesPresetVariationMatch(preset, instance) != MatchTypes.NoMatch;
 
+    /// <summary>
+    /// True when the preset fully describes the current state: its stored values match AND every other
+    /// preset-eligible parameter is at default. Stricter than <see cref="DoesInstanceMatchPreset"/>,
+    /// which tolerates additional non-default parameters.
+    /// </summary>
+    public static bool DoesInstanceMatchPresetExactly(Instance instance, Variation preset)
+        => DoesPresetVariationMatch(preset, instance) == MatchTypes.PresetAndDefaultParamsMatch;
+
     private static MatchTypes DoesPresetVariationMatch(Variation variation, Instance instance)
     {
         var setCorrectly = true;
         var foundOneMatch = false;
         var foundUnknownNonDefaults = false;
+        var symbolUi = instance.Symbol.GetSymbolUi();
 
         foreach (var (symbolChildId, values) in variation.ParameterSetsForChildIds)
         {
@@ -1251,12 +1260,17 @@ internal sealed class SymbolVariationPool
                 else
                 {
                     if (inputIsDefault)
-                    {
-                    }
-                    else
-                    {
-                        foundUnknownNonDefaults = true;
-                    }
+                        continue;
+
+                    // Mirror the eligibility filter of CreatePresetForInstanceSymbol: inputs that can
+                    // never be stored in a preset must not count as drift.
+                    if (!ValueUtils.BlendMethods.ContainsKey(input.ValueType))
+                        continue;
+
+                    if (symbolUi.InputUis.TryGetValue(input.Id, out var inputUi) && inputUi.ExcludedFromPresets)
+                        continue;
+
+                    foundUnknownNonDefaults = true;
                 }
             }
         }
@@ -1305,6 +1319,10 @@ internal sealed class SymbolVariationPool
         _userVariations.Remove(newVariation);
         _allVariations.Remove(newVariation);
         DropBlendWeight(newVariation.Id);
+
+        // Keep the active reference from dangling (e.g. undoing a preset creation or deleting the active one)
+        if (_activeVariation == newVariation)
+            ActiveVariation = null;
     }
 
     /// <summary>

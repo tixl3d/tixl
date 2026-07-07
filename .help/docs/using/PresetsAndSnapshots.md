@@ -10,6 +10,16 @@ Variations come in two flavours: Presets and Snapshots. Internally they are usin
 
 Presets showcase whats possible with an operator, and highlight options and parameter combinations you might not have discovered.
 
+### Presets in the Parameter window
+
+When a single operator is selected, the Parameter window shows a preset selector next to the instance name:
+
+- The dropdown names the preset that matches the current parameter values — no matter how you arrived at them. If no preset matches, it shows the last applied preset dimmed, or the number of available presets.
+- As soon as you change any parameter (or blend between presets), the **new-preset icon** next to the dropdown lights up to suggest saving the current values.
+- Clicking that icon creates a new preset: it is placed on a free spot in the Variations window (even when that window is closed), becomes the active preset, and the dropdown turns into a name field so you can name it right away. Press `Enter` to confirm, or `Escape` to keep it as "untitled".
+- Creating a preset can be undone — undo removes the preset again without changing the current parameter values.
+- Double-clicking the dropdown renames the selected preset.
+
 ## Working with snapshots
 
 **Snapshots** are parameter sets stored for a group of operator _instances_ in a composition. E.g. in an project for a live VJ-set you can use the context menu to activate Snapshots for some of the operators in that project. You can then use the + icon to save (I.e. create a snapshot of) the current state of all parameters of these operators into a single Snapshot. 

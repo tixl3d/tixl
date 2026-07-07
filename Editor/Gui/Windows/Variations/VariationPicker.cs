@@ -537,7 +537,7 @@ internal sealed class VariationPicker
         ImGui.PopFont();
     }
 
-    private static string GetTitle(Variation variation)
+    internal static string GetTitle(Variation variation)
     {
         return string.IsNullOrEmpty(variation.Title) || variation.Title == "untitled"
                    ? "Untitled"

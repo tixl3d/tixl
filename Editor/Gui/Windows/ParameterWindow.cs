@@ -519,19 +519,27 @@ internal sealed class ParameterWindow : Window
         {
             CollectPresets(presetPool!);
 
-            var selectedPreset = presetPool!.ActiveVariation is { IsPreset: true } activeVariation
-                                 && _presets.Contains(activeVariation)
+            // Which preset fully describes the current values? Scanning all presets (instead of only
+            // the last-activated one) keeps the indication correct after loading a project or when
+            // values were changed from elsewhere.
+            var matchingPreset = FindMatchingPreset(presetPool!, op);
+            var activePreset = presetPool!.ActiveVariation is { IsPreset: true } activeVariation
+                               && _presets.Contains(activeVariation)
                 ? activeVariation
                 : null;
 
             string label;
             Color labelColor;
-            if (selectedPreset != null)
+            if (matchingPreset != null)
             {
-                label = string.IsNullOrEmpty(selectedPreset.Title) || selectedPreset.Title == "untitled"
-                    ? "Untitled"
-                    : selectedPreset.Title;
+                label = VariationPicker.GetTitle(matchingPreset);
                 labelColor = UiColors.ForegroundFull;
+            }
+            else if (activePreset != null)
+            {
+                // Based on a preset but modified — the emphasized new-preset button carries the hint
+                label = VariationPicker.GetTitle(activePreset);
+                labelColor = UiColors.TextMuted;
             }
             else if (_presets.Count == 0)
             {
@@ -551,27 +559,74 @@ internal sealed class ParameterWindow : Window
             }
 
             ImGui.SameLine();
-            var chosen = _presetPicker.Draw(_presets, presetPool, op, selectedPreset, label, dropdownWidth, out _,
-                                            labelColor: labelColor);
-            if (chosen != null)
-                presetPool.Apply(op, chosen);
 
-            // Highlight the new-preset button while the current values drift from the selected preset
-            var presetModified = selectedPreset != null && !SymbolVariationPool.DoesInstanceMatchPreset(op, selectedPreset);
+            var renamingPreset = TryGetPresetById(_renamingPresetId);
+            if (renamingPreset != null)
+            {
+                // Naming a fresh preset replaces the dropdown; Enter confirms, Escape keeps "untitled".
+                ImGui.SetNextItemWidth(dropdownWidth);
+                if (_focusPresetRename)
+                {
+                    ImGui.SetKeyboardFocusHere();
+                    _focusPresetRename = false;
+                }
+
+                ImGui.InputText("##presetName", ref renamingPreset.Title, 256, ImGuiInputTextFlags.AutoSelectAll);
+                if (ImGui.IsItemDeactivated())
+                {
+                    _renamingPresetId = Guid.Empty;
+                    presetPool.SaveVariationsToFile();
+                }
+            }
+            else
+            {
+                _renamingPresetId = Guid.Empty; // The named preset may vanish mid-edit (e.g. undo)
+                var selectedPreset = matchingPreset ?? activePreset;
+                var chosen = _presetPicker.Draw(_presets, presetPool, op, selectedPreset, label, dropdownWidth,
+                                                out var renameRequested,
+                                                labelColor: labelColor);
+                if (chosen != null)
+                {
+                    presetPool.Apply(op, chosen);
+                }
+                else if (renameRequested && selectedPreset != null)
+                {
+                    _renamingPresetId = selectedPreset.Id;
+                    _focusPresetRename = true;
+                }
+            }
+
+            // Emphasize the new-preset button while there is something worth saving: non-default
+            // values that no existing preset describes. Dimmed (but still clickable) otherwise.
+            var hasNonDefaults = false;
+            foreach (var input in op.Inputs)
+            {
+                if (input.Input.IsDefault)
+                    continue;
+
+                hasNonDefaults = true;
+                break;
+            }
+
+            var suggestSaving = hasNonDefaults && matchingPreset == null;
 
             ImGui.SameLine();
             if (CustomComponents.IconButton(Icon.Presets, Vector2.Zero,
-                                            presetModified
-                                                ? CustomComponents.ButtonStates.NeedsAttention
+                                            suggestSaving
+                                                ? CustomComponents.ButtonStates.Emphasized
                                                 : CustomComponents.ButtonStates.Default))
             {
-                var newPreset = presetPool.CreatePresetForInstanceSymbol(op);
-                presetPool.SaveVariationsToFile();
-                VariationThumbnailRenderer.RequestRender(presetPool, op, newPreset.Id, toFile: true);
+                var newPreset = PresetCanvas.CreatePresetForActivePool();
+                if (newPreset != null)
+                {
+                    VariationThumbnailRenderer.RequestRender(presetPool, op, newPreset.Id, toFile: true);
+                    _renamingPresetId = newPreset.Id;
+                    _focusPresetRename = true;
+                }
             }
 
-            CustomComponents.TooltipForLastItem(presetModified
-                                                    ? "Parameters differ from the selected preset — save as new preset"
+            CustomComponents.TooltipForLastItem(suggestSaving
+                                                    ? "Parameters don't match any preset — save as new preset"
                                                     : "Create new preset from current values");
         }
 
@@ -661,6 +716,53 @@ internal sealed class ParameterWindow : Window
             if (variation.IsPreset)
                 _presets.Add(variation);
         }
+    }
+
+    /// <summary>
+    /// Finds the preset that exactly describes the instance's current values, with an early-out on
+    /// the previous frame's match so the full scan only runs while values are changing.
+    /// </summary>
+    private Variation? FindMatchingPreset(SymbolVariationPool pool, Instance op)
+    {
+        var cached = TryGetPresetById(_matchedPresetId);
+        if (cached != null && SymbolVariationPool.DoesInstanceMatchPresetExactly(op, cached))
+            return cached;
+
+        _matchedPresetId = Guid.Empty;
+
+        // Prefer the last-activated preset when several store identical values
+        if (pool.ActiveVariation is { IsPreset: true } active
+            && _presets.Contains(active)
+            && SymbolVariationPool.DoesInstanceMatchPresetExactly(op, active))
+        {
+            _matchedPresetId = active.Id;
+            return active;
+        }
+
+        foreach (var preset in _presets)
+        {
+            if (!SymbolVariationPool.DoesInstanceMatchPresetExactly(op, preset))
+                continue;
+
+            _matchedPresetId = preset.Id;
+            return preset;
+        }
+
+        return null;
+    }
+
+    private Variation? TryGetPresetById(Guid id)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var preset in _presets)
+        {
+            if (preset.Id == id)
+                return preset;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -905,5 +1007,8 @@ internal sealed class ParameterWindow : Window
     private readonly List<Variation> _presets = new();
     private int _lastPresetCountForLabel = -1;
     private string _presetCountLabel = "";
+    private Guid _matchedPresetId;
+    private Guid _renamingPresetId;
+    private bool _focusPresetRename;
     public static readonly RenameInputDialog RenameInputDialog = new();
 }

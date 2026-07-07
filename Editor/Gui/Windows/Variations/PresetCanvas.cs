@@ -37,23 +37,41 @@ internal class PresetCanvas : VariationBaseCanvas
         //ImGui.GetForegroundDrawList().AddRect(_keepWindowPos, _keepWindowPos+ _keepWindowSize, Color.Red);
     }
 
-    private void CreatePreset()
+    /// <summary>
+    /// Creates a preset from the active instance's current values, places it on a free canvas spot
+    /// and activates it — shared by the Variations canvas and the parameter window, so both entry
+    /// points behave identically (the canvas doesn't need to be visible).
+    /// </summary>
+    internal static Variation? CreatePresetForActivePool()
     {
-        if (VariationHandling.ActivePoolForPresets == null || VariationHandling.ActiveInstanceForPresets == null)
+        var pool = VariationHandling.ActivePoolForPresets;
+        var instance = VariationHandling.ActiveInstanceForPresets;
+        if (pool == null || instance == null)
         {
             Log.Warning("Can't create preset without variation pool or active instance");
-            return;
+            return null;
         }
-        
-        var newVariation = VariationHandling.ActivePoolForPresets.CreatePresetForInstanceSymbol(VariationHandling.ActiveInstanceForPresets);
-        if(VariationHandling.ActivePoolForPresets.AllVariations.Count > 1) 
-            newVariation.PosOnCanvas = FindFreePositionForNewThumbnail(VariationHandling.ActivePoolForPresets.AllVariations);
-        
-        VariationThumbnail.VariationForRenaming = newVariation;
-        VariationHandling.ActivePoolForPresets.SaveVariationsToFile();
 
+        var newVariation = pool.CreatePresetForInstanceSymbol(instance);
+        if (pool.AllVariations.Count > 1)
+            newVariation.PosOnCanvas = FindFreePositionForNewThumbnail(pool.AllVariations);
+
+        // The preset was built from the current values, so applying it would only push a no-op
+        // parameter command onto the undo stack.
+        pool.SetActiveVariationWithoutApply(newVariation);
+        pool.SaveVariationsToFile();
+        return newVariation;
+    }
+
+    private void CreatePreset()
+    {
+        var newVariation = CreatePresetForActivePool();
+        if (newVariation == null)
+            return;
+
+        VariationThumbnail.VariationForRenaming = newVariation;
         CanvasElementSelection.SetSelection(newVariation);
-        
+
         _keepWindowPos = ImGui.GetWindowPos();
         _keepWindowSize = ImGui.GetWindowSize();
         RequestResetView();
