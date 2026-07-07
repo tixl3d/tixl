@@ -335,13 +335,15 @@ internal static class GraphContextMenu
             if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddInput, Icon.None, "Input Parameter",
                                               reserveIconColumn: false, state: muted))
             {
-                context.AddInputDialog.ShowNextFrame();
+                var posOnCanvas = context.View.InverseTransformPositionFloat(CustomComponents.ScreenPosOnOpeningContextMenu);
+                context.AddInputDialog.ShowNextFrame(posOnCanvas);
             }
 
             if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddOutput, Icon.None, "Output",
                                               reserveIconColumn: false, state: muted))
             {
-                context.AddOutputDialog.ShowNextFrame();
+                var posOnCanvas = context.View.InverseTransformPositionFloat(CustomComponents.ScreenPosOnOpeningContextMenu);
+                context.AddOutputDialog.ShowNextFrame(posOnCanvas);
             }
         }
 

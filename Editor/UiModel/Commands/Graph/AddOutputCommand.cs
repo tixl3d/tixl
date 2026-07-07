@@ -12,13 +12,14 @@ internal sealed class AddOutputCommand : ICommand
     public string Name => "Add Output";
     public bool IsUndoable => true;
 
-    public AddOutputCommand(Guid symbolId, string outputName, Type outputType, bool isTimeClip)
+    public AddOutputCommand(Guid symbolId, string outputName, Type outputType, bool isTimeClip, Vector2? posOnCanvas = null)
     {
         _symbolId = symbolId;
         _outputId = Guid.NewGuid();
         _outputName = outputName;
         _outputType = outputType;
         _isTimeClip = isTimeClip;
+        _posOnCanvas = posOnCanvas;
     }
 
     public void Do()
@@ -29,7 +30,19 @@ internal sealed class AddOutputCommand : ICommand
             return;
         }
 
-        InputsAndOutputs.AddOutputToSymbol(_outputId, _outputName, _isTimeClip, _outputType, symbolUi.Symbol);
+        if (!InputsAndOutputs.AddOutputToSymbol(_outputId, _outputName, _isTimeClip, _outputType, symbolUi.Symbol))
+            return;
+
+        if (_posOnCanvas == null)
+            return;
+
+        // Recompiling recreates the ui entries, so re-resolve before placing the new output
+        if (SymbolUiRegistry.TryGetSymbolUi(_symbolId, out var updatedSymbolUi)
+            && updatedSymbolUi.OutputUis.TryGetValue(_outputId, out var outputUi))
+        {
+            outputUi.PosOnCanvas = _posOnCanvas.Value;
+            updatedSymbolUi.FlagAsModified();
+        }
     }
 
     public void Undo()
@@ -48,4 +61,5 @@ internal sealed class AddOutputCommand : ICommand
     private readonly string _outputName;
     private readonly Type _outputType;
     private readonly bool _isTimeClip;
+    private readonly Vector2? _posOnCanvas;
 }

@@ -4,6 +4,7 @@ using ImGuiNET;
 using T3.Core.Operator;
 using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
@@ -17,6 +18,12 @@ internal sealed class AddInputDialog : ModalDialog
     internal AddInputDialog()
     {
         Flags = ImGuiWindowFlags.NoResize;
+    }
+
+    internal void ShowNextFrame(Vector2 posOnCanvas)
+    {
+        _posOnCanvas = posOnCanvas;
+        ShowNextFrame();
     }
 
     internal ChangeSymbol.SymbolModificationResults  Draw(Symbol symbol)
@@ -39,8 +46,9 @@ internal sealed class AddInputDialog : ModalDialog
             
             if (CustomComponents.DrawCtaButton("Add", isValid))
             {
-                UndoRedoStack.AddAndExecute(new AddInputCommand(symbol.Id, _parameterName, _selectedType!, _multiInput));
+                UndoRedoStack.AddAndExecute(new AddInputCommand(symbol.Id, _parameterName, _selectedType!, _multiInput, _posOnCanvas));
                 _parameterName = string.Empty;
+                _posOnCanvas += new Vector2(0, MagGraphItem.GridSize.Y);
             }
 
             ImGui.SameLine();
@@ -59,5 +67,5 @@ internal sealed class AddInputDialog : ModalDialog
     private string _parameterName = string.Empty;
     private bool _multiInput;
     private Type _selectedType = typeof(float);
-
+    private Vector2? _posOnCanvas;
 }
