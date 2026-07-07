@@ -63,7 +63,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "45957158-9924-46c2-8b48-f90f72b7148f"/*Scatter*/,

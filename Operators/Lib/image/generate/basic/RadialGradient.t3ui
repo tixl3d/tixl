@@ -45,7 +45,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "6c1dc695-1c0a-47fe-aea1-e3abec904883"/*PingPong*/,

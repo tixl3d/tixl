@@ -70,7 +70,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "b42ee7e1-fa65-4231-917e-1a0824dc4a23"/*Field*/,

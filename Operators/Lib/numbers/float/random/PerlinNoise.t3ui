@@ -20,7 +20,7 @@
       },
       "Description": "Defines bias and gain, which can be used to weight the ranges (both in terms of time and intensity) in which the values are most likely to fluctuate",
       "AddPadding": "True",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "557ae817-ec36-4866-8fed-64490e9255be"/*RangeMax*/,

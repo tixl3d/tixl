@@ -70,7 +70,7 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "d09c7a75-d02d-421b-ba0f-17b345f523ec"/*ChannelWeights*/,

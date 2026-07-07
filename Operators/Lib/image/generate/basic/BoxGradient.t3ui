@@ -98,7 +98,7 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "94d46ad8-7dd6-490c-ade4-a527c7ee9d05"/*GradientWidth*/,

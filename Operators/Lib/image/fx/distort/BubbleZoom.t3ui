@@ -30,7 +30,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "0ce5b753-bcc0-4102-b011-64e603a50567"/*FeatherGradient*/,

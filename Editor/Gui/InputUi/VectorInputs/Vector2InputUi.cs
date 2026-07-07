@@ -77,7 +77,7 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
                 drawList.AddLine(new Vector2(center.X, min.Y), new Vector2(center.X, max.Y), UiColors.ForegroundFull.Fade(0.06f), 1);
                 drawList.AddLine(new Vector2(min.X, center.Y), new Vector2(max.X, center.Y), UiColors.ForegroundFull.Fade(0.06f), 1);
             }
-            else if (UseVec2Control == Vec2Controls.BiasAndGain)
+            else if (UseVec2Control == Vec2Controls.GainAndBias)
             {
                 shouldClamp = true;
                 drawList.AddCircleFilled(controlPointScreenPos, 2, color);
@@ -215,7 +215,15 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
     public override void Read(JToken? inputToken)
     {
         base.Read(inputToken);
-        UseVec2Control = JsonUtils.ReadEnum<Vec2Controls>(inputToken, nameof(UseVec2Control));
+
+        // Back-compat: older files use the legacy spelling "BiasAndGain"
+        var controlName = inputToken?[nameof(UseVec2Control)]?.Value<string>();
+        UseVec2Control = controlName switch
+                             {
+                                 "BiasAndGain"                                             => Vec2Controls.GainAndBias,
+                                 _ when Enum.TryParse(controlName, out Vec2Controls value) => value,
+                                 _                                                         => Vec2Controls.None,
+                             };
     }
 
     public Vec2Controls UseVec2Control;
@@ -225,7 +233,7 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
     {
         None,
         Position,
-        BiasAndGain,
+        GainAndBias,
         Range,
     }
 }

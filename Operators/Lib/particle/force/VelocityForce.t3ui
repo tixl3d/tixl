@@ -32,7 +32,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "ad33ce12-6c79-4285-afd6-eff31799e955"/*MaxSpeed*/,

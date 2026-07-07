@@ -84,7 +84,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "65f2a12d-f6b4-4562-a11c-2b14e2ab5e34"/*WrapMode*/,

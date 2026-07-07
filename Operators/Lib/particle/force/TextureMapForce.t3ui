@@ -37,7 +37,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "4a438635-1d96-4526-a154-626a6286a65a"/*Colorization*/,

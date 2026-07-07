@@ -53,7 +53,7 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "b1763a8b-aa98-4e00-a47c-a5d0d750ae6e"/*Cycle*/,

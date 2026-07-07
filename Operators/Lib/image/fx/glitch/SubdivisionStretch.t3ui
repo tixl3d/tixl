@@ -17,7 +17,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "32d082f5-d6e1-4068-bcd9-a01977ed72df"/*MaxSubdivisions*/,

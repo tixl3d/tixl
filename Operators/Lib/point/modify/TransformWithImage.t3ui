@@ -31,7 +31,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "1840ae3f-2dc4-4eb1-a3d0-de9c9d2e0afa"/*GPoints*/,

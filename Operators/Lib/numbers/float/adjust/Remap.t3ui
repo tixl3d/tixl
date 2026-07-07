@@ -15,7 +15,7 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "252276fb-8de1-42cc-ba41-07d6862015bd"/*RangeOutMax*/,

@@ -29,7 +29,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "dbd07421-6e96-467a-91ae-c526316e6aee"/*PeakDecay*/,

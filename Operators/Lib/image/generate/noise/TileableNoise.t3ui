@@ -126,7 +126,7 @@
       "Scale": 0.01,
       "ClampMin": true,
       "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "f1ed5a42-7366-4b6f-b286-f7195c6ae213"/*Lacunarity*/,

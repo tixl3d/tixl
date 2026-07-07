@@ -112,7 +112,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "b898c5a9-1c4b-4958-a7c1-01c27da10f6a"/*ShaderResources*/,

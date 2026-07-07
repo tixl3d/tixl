@@ -66,7 +66,7 @@
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "c427d83b-1046-4b8d-b44a-e616a64a702a"/*AmplitudeXYZ*/,

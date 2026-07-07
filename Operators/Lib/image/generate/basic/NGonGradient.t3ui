@@ -130,7 +130,7 @@
       },
       "Description": "Bias and gain to control the gradient",
       "AddPadding": "True",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "e16b0bb7-2d7b-49a1-9cb4-b7f71ace7cc5"/*PingPong*/,

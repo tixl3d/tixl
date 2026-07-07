@@ -28,7 +28,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "1d0cf561-858d-4510-95c4-f3ad9148355d"/*BlendMode*/,

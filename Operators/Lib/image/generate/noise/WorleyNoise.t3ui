@@ -93,7 +93,7 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "f29bca1f-d563-4dd3-8386-ab791f4b423e"/*Offset*/,

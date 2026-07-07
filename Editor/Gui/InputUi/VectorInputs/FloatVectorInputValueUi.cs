@@ -90,6 +90,8 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
         public string CustomFormat;
         public bool ClampRangeMin;
         public bool ClampRangeMax;
+        public Vector2InputUi.Vec2Controls Vec2Control;
+        public float? DefaultComponentValue;
     }
 
     private ValueSettingPreset[] _valueSettingPresets =
@@ -108,7 +110,8 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
                     Title = "Translation",
                     MinValue = -2,
                     MaxValue = 2,
-                    CustomFormat = null
+                    CustomFormat = null,
+                    Vec2Control = Vector2InputUi.Vec2Controls.Position,
                 },
             new()
                 {
@@ -138,12 +141,14 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
             new()
                 {
                     Scale = 0,
-                    Title = "Bias&Gain",
+                    Title = "Gain & Bias",
                     MinValue = 0,
                     MaxValue = 1,
                     CustomFormat = "{0:0.000}",
                     ClampRangeMin = true,
                     ClampRangeMax = true,
+                    Vec2Control = Vector2InputUi.Vec2Controls.GainAndBias,
+                    DefaultComponentValue = 0.5f,
                 },
         };
 
@@ -175,7 +180,17 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
                 ClampMin = p.ClampRangeMin;
                 ClampMax = p.ClampRangeMax;
                 Format = p.CustomFormat;
-                    
+
+                if (this is Vector2InputUi vector2InputUi)
+                {
+                    vector2InputUi.UseVec2Control = p.Vec2Control;
+                }
+
+                if (p.DefaultComponentValue is { } defaultComponentValue)
+                {
+                    ApplyDefaultComponentValue(defaultComponentValue);
+                }
+
                 Parent?.FlagAsModified();
                 ImGui.CloseCurrentPopup();
                 modified = true;
@@ -268,6 +283,29 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
         
         
         Format = inputToken["Format"]?.Value<string>();
+    }
+
+    private void ApplyDefaultComponentValue(float value)
+    {
+        switch (InputDefinition.DefaultValue)
+        {
+            case InputValue<float> floatValue:
+                floatValue.Value = value;
+                break;
+            case InputValue<Vector2> vector2Value:
+                vector2Value.Value = new Vector2(value);
+                break;
+            case InputValue<Vector3> vector3Value:
+                vector3Value.Value = new Vector3(value);
+                break;
+            case InputValue<Vector4> vector4Value:
+                vector4Value.Value = new Vector4(value);
+                break;
+            default:
+                return;
+        }
+
+        Parent?.Symbol.InvalidateInputDefaultInInstances(InputDefinition.Id);
     }
 
     private static float GetScaleFromRange(float scale, float min, float max)

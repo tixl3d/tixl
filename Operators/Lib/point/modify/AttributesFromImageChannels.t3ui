@@ -125,7 +125,7 @@
       "ClampMin": true,
       "ClampMax": true,
       "Format": "{0:0.000}",
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "98415cd6-b1ea-47a7-ade7-4b37e9f301da"/*GreenFactor*/,

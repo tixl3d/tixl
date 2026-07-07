@@ -34,7 +34,7 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "41ed1339-c762-4979-9c89-b1a347eb3d06"/*WOffset*/,

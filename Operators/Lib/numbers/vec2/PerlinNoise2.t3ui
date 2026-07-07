@@ -66,7 +66,7 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "cbcbce93-8c8d-41ed-b91b-9e3583c5a3b5"/*Octaves*/,
