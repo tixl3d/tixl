@@ -97,13 +97,14 @@ internal class EditorSymbolPackage : SymbolPackage
 
         var enumerator = parallel ? SymbolUiSearchFiles.AsParallel() : SymbolUiSearchFiles;
         var newlyReadSymbolUiList = enumerator
-                                   .Select(JsonFileResult<SymbolUi>.ReadAndCreate)
-                                   .Where(result => newSymbols.ContainsKey(result.Guid))
+                                   .Select(TryReadSymbolUiFile)
+                                   .Where(result => result != null && newSymbols.ContainsKey(result.Guid))
                                    .Select(uiJson =>
                                            {
-                                               if (!SymbolUiJson.TryReadSymbolUi(uiJson.JToken, newSymbols[uiJson.Guid], out var symbolUi))
+                                               var file = uiJson!;
+                                               if (!SymbolUiJson.TryReadSymbolUi(file.JToken, newSymbols[file.Guid], out var symbolUi))
                                                {
-                                                   Log.Error($"Error reading symbol Ui for {uiJson.Guid} from file \"{uiJson.FilePath}\"");
+                                                   Log.Error($"Error reading symbol Ui for {file.Guid} from file \"{file.FilePath}\"");
                                                    return null;
                                                }
 
@@ -116,7 +117,7 @@ internal class EditorSymbolPackage : SymbolPackage
                                                    return null;
                                                }
 
-                                               OnSymbolUiLoaded(uiJson.FilePath, symbolUi);
+                                               OnSymbolUiLoaded(file.FilePath, symbolUi);
                                                return symbolUi;
                                            })
                                    .Where(symbolUi => symbolUi != null)
@@ -144,6 +145,24 @@ internal class EditorSymbolPackage : SymbolPackage
         }
 
         newlyReadSymbolUis = newlyReadSymbolUiList.ToArray();
+        return;
+
+        JsonFileResult<SymbolUi>? TryReadSymbolUiFile(string filePath)
+        {
+            try
+            {
+                return JsonFileResult<SymbolUi>.ReadAndCreate(filePath);
+            }
+            catch (Exception e)
+            {
+                // A corrupt .t3ui holds only UI layout, not the graph — but it must not abort the load.
+                // Skip it (the symbol falls back to default UI) and record it so the package won't be
+                // saved over, keeping the file recoverable from a backup.
+                Log.Error($"Skipping corrupted symbol UI file '{filePath}': {e.Message}");
+                RecordCorruptedSymbolFile(filePath);
+                return null;
+            }
+        }
     }
 
     public void RegisterUiSymbols(SymbolUi[] newSymbolUis, SymbolUi[] preExistingSymbolUis)
@@ -405,7 +424,17 @@ internal class EditorSymbolPackage : SymbolPackage
         }
 
         // reload single ui
-        var symbolJson = JsonFileResult<Symbol>.ReadAndCreate(symbolPath);
+        JsonFileResult<Symbol> symbolJson;
+        try
+        {
+            symbolJson = JsonFileResult<Symbol>.ReadAndCreate(symbolPath);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Not reloading [{symbol}]: its symbol file is corrupt ({e.Message}). Keeping the loaded version.");
+            return;
+        }
+
         var result = SymbolJson.ReadSymbolRoot(symbol.Id, symbolJson.JToken, symbol.InstanceType, this);
         if (result.Symbol == null)
         {
@@ -426,7 +455,16 @@ internal class EditorSymbolPackage : SymbolPackage
 
         UpdateSymbolInstances(symbol, forceTypeUpdate: true);
 
-        var symbolUiJson = JsonFileResult<SymbolUi>.ReadAndCreate(symbolUiPath);
+        JsonFileResult<SymbolUi> symbolUiJson;
+        try
+        {
+            symbolUiJson = JsonFileResult<SymbolUi>.ReadAndCreate(symbolUiPath);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Not reloading UI for [{symbol}]: its .t3ui file is corrupt ({e.Message}). Keeping the loaded version.");
+            return;
+        }
 
         if (!SymbolUiJson.TryReadSymbolUi(symbolUiJson.JToken, symbol, out var newSymbolUi))
         {

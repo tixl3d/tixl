@@ -183,6 +183,10 @@ public static class SymbolJson
         if (!SymbolRegistry.TryGetSymbol(childJsonResult.SymbolId, out var symbol))
         {
             Log.Warning($"Error loading symbol child {childJsonResult.SymbolId}");
+            // Record the miss so the editor won't later overwrite this symbol's file and truncate
+            // the child (and its connections) that we couldn't resolve here. Same thread per parent,
+            // so a plain increment is safe.
+            parent.UnresolvedChildCount++;
             return false;
         }
 

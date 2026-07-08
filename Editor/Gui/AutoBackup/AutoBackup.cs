@@ -17,7 +17,8 @@ namespace T3.Editor.Gui.AutoBackup;
 internal static class AutoBackup
 {
     /// <summary>One backup archive of a project, parsed from its file name.</summary>
-    public readonly record struct BackupEntry(int Index, DateTime Timestamp, string FilePath, long SizeBytes, bool IsPinned);
+    public readonly record struct BackupEntry(
+        int Index, DateTime Timestamp, string FilePath, long SizeBytes, bool IsPinned, bool IsMinimal, string? KeepTag);
 
     public static int SecondsBetweenSaves { get; set; } = 3 * 60;
 
@@ -467,7 +468,10 @@ internal static class AutoBackup
                 // Size is display-only; a stat failure shouldn't drop the entry.
             }
 
-            entries.Add(new BackupEntry(index, timestamp, path, size, match.Groups[KeepMarkerGroup].Success));
+            var keepMarker = match.Groups[KeepMarkerGroup];
+            var keepTag = keepMarker.Success ? keepMarker.Value["-keep-".Length..] : null;
+            entries.Add(new BackupEntry(index, timestamp, path, size,
+                                        keepMarker.Success, match.Groups[MinimalMarkerGroup].Success, keepTag));
         }
 
         entries.Sort((a, b) => b.Index.CompareTo(a.Index));

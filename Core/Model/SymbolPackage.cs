@@ -257,15 +257,18 @@ public abstract partial class SymbolPackage : IResourcePackage
 
         if (newTypes.Count != 0)
         {
+            _corruptedSymbolFiles.Clear();
             var searchFileEnumerator = parallel ? SymbolSearchFiles.AsParallel() : SymbolSearchFiles;
             var symbolsRead = searchFileEnumerator
-                             .Select(JsonFileResult<Symbol>.ReadAndCreate)
+                             .Select(TryReadSymbolFile)
+                             .Where(result => result != null)
                              .Select(result =>
                                      {
-                                         if (!newTypes.TryGetValue(result.Guid, out var type))
+                                         var file = result!;
+                                         if (!newTypes.TryGetValue(file.Guid, out var type))
                                              return default;
 
-                                         return ReadSymbolFromJsonFileResult(result, type);
+                                         return ReadSymbolFromJsonFileResult(file, type);
                                      })
                              .Where(symbolReadResult => symbolReadResult.Result.Symbol is not null)
                              .ToArray();
@@ -349,7 +352,28 @@ public abstract partial class SymbolPackage : IResourcePackage
             }
             catch (Exception e)
             {
-                throw new FileCorruptedException(jsonInfo.FilePath, e.ToString());
+                // Skip a structurally-broken symbol instead of aborting the whole load; recorded so the
+                // package won't be saved over. The default result is dropped by the caller's Where.
+                Log.Error($"Skipping corrupted symbol file '{jsonInfo.FilePath}': {e.Message}");
+                _corruptedSymbolFiles.Add(jsonInfo.FilePath);
+                return default;
+            }
+        }
+
+        JsonFileResult<Symbol>? TryReadSymbolFile(string filePath)
+        {
+            try
+            {
+                return JsonFileResult<Symbol>.ReadAndCreate(filePath);
+            }
+            catch (Exception e)
+            {
+                // A single corrupt/unreadable .t3 must not abort loading every project. Skip it — the
+                // symbol goes missing (parents referencing it are protected by
+                // Symbol.HasUnresolvedChildren) and the file is recorded for restore-from-backup.
+                Log.Error($"Skipping corrupted symbol file '{filePath}': {e.Message}");
+                _corruptedSymbolFiles.Add(filePath);
+                return null;
             }
         }
     }
@@ -392,6 +416,21 @@ public abstract partial class SymbolPackage : IResourcePackage
     public readonly record struct SymbolJsonResult(in SymbolJson.SymbolReadResult Result, string Path);
 
     public IReadOnlyDictionary<Guid, Symbol> Symbols => SymbolDict;
+
+    private readonly ConcurrentBag<string> _corruptedSymbolFiles = new();
+
+    /// <summary>
+    /// Paths of .t3 files that were corrupt/unreadable during the last load and were skipped. When
+    /// non-empty the editor refuses to save this package, so a symbol re-created empty from its type
+    /// can't overwrite a file a backup could still recover.
+    /// </summary>
+    public IReadOnlyCollection<string> CorruptedSymbolFilePaths => _corruptedSymbolFiles;
+
+    /// <summary>Cheap per-frame check (unlike <see cref="CorruptedSymbolFilePaths"/>.Count) for UI flags.</summary>
+    public bool HasCorruptedSymbolFiles => !_corruptedSymbolFiles.IsEmpty;
+
+    /// <summary>Records a corrupt/unreadable symbol or symbol-UI file so the package won't be saved over it.</summary>
+    protected void RecordCorruptedSymbolFile(string filePath) => _corruptedSymbolFiles.Add(filePath);
     protected readonly ConcurrentDictionary<Guid, Symbol> SymbolDict = new();
 
     public const string SymbolExtension = ".t3";

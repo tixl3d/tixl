@@ -51,6 +51,18 @@ internal static class ProjectsPanel
                 }
             }
 
+            // 3. Draw Broken Projects (failed to load — offer recovery)
+            if (ProjectSetup.BrokenProjects.Count > 0)
+            {
+                ImGui.Separator();
+                FormInputs.AddSectionHeader("Broken");
+                ImGui.TextDisabled("These projects could not be loaded. Right-click to restore an earlier backup.");
+                foreach (var broken in ProjectSetup.BrokenProjects)
+                {
+                    DrawBrokenItem(broken);
+                }
+            }
+
             ImGui.PopStyleVar();
         }
         ImGui.EndChild();
@@ -93,11 +105,13 @@ internal static class ProjectsPanel
         dl.AddRectFilled(min, max, backgroundColor, 6);
 
         var padding = 3f * T3Ui.UiScaleFactor;
-        if (isOpened)
+        var hasCorruptFiles = package.HasCorruptedSymbolFiles;
+        if (hasCorruptFiles || isOpened)
         {
+            // Magenta "needs attention" bar for a project with corrupt files; the normal active bar otherwise.
             dl.AddRectFilled(min + Vector2.One * padding,
                              new Vector2(min.X + padding + 4, max.Y - padding),
-                             UiColors.BackgroundActive, 2);
+                             hasCorruptFiles ? UiColors.StatusAttention : UiColors.BackgroundActive, 2);
         }
 
         var rootName = package.RootNamespace.Split(".")[^1];
@@ -120,10 +134,29 @@ internal static class ProjectsPanel
 
         y += Fonts.FontSmall.FontSize + 5;
 
-        dl.AddText(Fonts.FontSmall,
-                   Fonts.FontSmall.FontSize,
-                   min + new Vector2(x, y),
-                   UiColors.TextMuted, GetSavedInfoLabel(package));
+        if (hasCorruptFiles)
+        {
+            var count = package.CorruptedSymbolFilePaths.Count;
+            var corruptLabel = count == 1
+                                   ? "1 corrupt file - restore from backup"
+                                   : $"{count} corrupt files - restore from backup";
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(x, y),
+                       UiColors.StatusAttention, corruptLabel);
+        }
+        else
+        {
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(x, y),
+                       UiColors.TextMuted, GetSavedInfoLabel(package));
+        }
+
+        if (hasCorruptFiles && isHovered)
+        {
+            ImGui.BeginTooltip();
+            ImGui.TextColored(UiColors.StatusAttention, "Corrupt operator file(s) - restore an earlier backup to recover:");
+            foreach (var path in package.CorruptedSymbolFilePaths)
+                ImGui.TextUnformatted(path);
+            ImGui.EndTooltip();
+        }
 
         var thumbnail = ThumbnailManager.GetThumbnail(package.Id, package, ThumbnailManager.Categories.PackageMeta);
         if (thumbnail.IsReady && ThumbnailManager.AtlasSrv != null)
@@ -138,7 +171,14 @@ internal static class ProjectsPanel
         }
 
         var wasOpened = false;
-        if (clicked)
+        if (clicked && hasCorruptFiles)
+        {
+            // Don't open a project with corrupt files — it would only show the empty shell that loaded
+            // in their place. Recovery is restore-from-backup (right-click), then restart.
+            Log.Warning($"'{package.DisplayName}' has corrupt operator file(s) and can't be opened. "
+                        + "Right-click it and restore an earlier backup first.");
+        }
+        else if (clicked)
         {
             // No early return on failure — the PushID/PopID pair below must stay balanced.
             if (!isOpened && package is EditorSymbolPackage editorPackage2)
@@ -165,7 +205,7 @@ internal static class ProjectsPanel
 
             if (ImGui.BeginMenu("Restore from backup"))
             {
-                DrawRestoreBackupItems(package);
+                DrawRestoreBackupItems(package.DisplayName, package.Folder);
                 ImGui.EndMenu();
             }
 
@@ -265,6 +305,68 @@ internal static class ProjectsPanel
         ImGui.PopID();
     }
 
+    private static void DrawBrokenItem(ProjectSetup.BrokenProjectInfo broken)
+    {
+        var dl = ImGui.GetWindowDrawList();
+
+        ImGui.PushID(broken.Folder);
+        ImGui.InvisibleButton(broken.Name, ProjectItemSize);
+        var isHovered = ImGui.IsItemHovered();
+        var backgroundColor = isHovered
+                                  ? UiColors.ForegroundFull.Fade(0.1f)
+                                  : UiColors.ForegroundFull.Fade(0.05f);
+
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+        dl.AddRectFilled(min, max, backgroundColor, 6);
+
+        // A magenta bar on the left flags "needs attention", matching the status-color convention.
+        var padding = 3f * T3Ui.UiScaleFactor;
+        dl.AddRectFilled(min + Vector2.One * padding,
+                         new Vector2(min.X + padding + 4, max.Y - padding),
+                         UiColors.StatusAttention, 2);
+
+        var y = padding;
+        var x = 20f;
+        dl.AddText(Fonts.FontBold, Fonts.FontBold.FontSize, min + new Vector2(x, y), UiColors.Text, broken.Name);
+
+        y += Fonts.FontNormal.FontSize + 5;
+        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(x, y),
+                   UiColors.TextMuted, broken.RootNamespace ?? broken.Folder);
+
+        y += Fonts.FontSmall.FontSize + 5;
+        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(x, y),
+                   UiColors.StatusAttention, broken.Reason);
+
+        if (isHovered && !string.IsNullOrEmpty(broken.Hint))
+        {
+            ImGui.BeginTooltip();
+            ImGui.TextUnformatted(broken.Hint);
+            ImGui.EndTooltip();
+        }
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
+        if (ImGui.BeginPopupContextItem("broken_context_menu"))
+        {
+            if (ImGui.BeginMenu("Restore from backup"))
+            {
+                DrawRestoreBackupItems(broken.Name, broken.Folder);
+                ImGui.EndMenu();
+            }
+
+            if (ImGui.MenuItem("Reveal in Explorer"))
+            {
+                CoreUi.Instance.OpenWithDefaultApplication(broken.Folder);
+            }
+
+            ImGui.EndPopup();
+        }
+
+        ImGui.PopStyleVar();
+
+        ImGui.PopID();
+    }
+
     public static Vector2 ProjectItemSize => new Vector2(400, 65) * T3Ui.UiScaleFactor;
 
     /// <summary>
@@ -316,13 +418,13 @@ internal static class ProjectsPanel
     /// directory scan are cached and refreshed only every couple of seconds — the submenu body
     /// runs every frame while open and must not do per-frame IO or string building.
     /// </summary>
-    private static void DrawRestoreBackupItems(EditorSymbolPackage package)
+    private static void DrawRestoreBackupItems(string displayName, string folder)
     {
         var now = ImGui.GetTime();
-        if (_backupMenuFolder != package.Folder || now - _backupMenuUpdateTime > 2)
+        if (_backupMenuFolder != folder || now - _backupMenuUpdateTime > 2)
         {
-            RefreshBackupMenuItems(package.Folder);
-            _backupMenuFolder = package.Folder;
+            RefreshBackupMenuItems(folder);
+            _backupMenuFolder = folder;
             _backupMenuUpdateTime = now;
         }
 
@@ -334,13 +436,22 @@ internal static class ProjectsPanel
 
         foreach (var (label, backup) in _backupMenuItems)
         {
+            // Pre-restore snapshots are the "before I restored" safety copies — often of the very state
+            // being recovered from — so mute them; they're rarely the version to restore *to*.
+            var isPreRestore = backup.KeepTag != null && backup.KeepTag.StartsWith("preRestore", StringComparison.Ordinal);
+            if (isPreRestore)
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+
             if (ImGui.MenuItem(label))
             {
-                T3Ui.RestoreBackupDialog.ShowNextFrame(package.DisplayName, package.Folder, backup);
+                T3Ui.RestoreBackupDialog.ShowNextFrame(displayName, folder, backup);
             }
 
             if (ImGui.IsItemHovered())
                 DrawBackupTooltip(backup);
+
+            if (isPreRestore)
+                ImGui.PopStyleColor();
         }
     }
 
@@ -385,10 +496,28 @@ internal static class ProjectsPanel
 
         var symbolCount = GetBackupSymbolCount(backup.FilePath);
         var symbolsPart = symbolCount < 0 ? "" : $" · {symbolCount} symbols";
-        var pinPart = backup.IsPinned ? " · pinned" : "";
+
+        var markers = "";
+        if (backup.IsMinimal)
+            markers += " · minimal";
+        var keepLabel = FriendlyKeepTag(backup.KeepTag);
+        if (keepLabel != null)
+            markers += $" · {keepLabel}";
 
         // Operator/connection counts need decompression and are shown in the hover tooltip instead.
-        return $"v{backup.Index}   {when}{symbolsPart} · {FormatSize(backup.SizeBytes)}{pinPart}";
+        return $"v{backup.Index}   {when}{symbolsPart} · {FormatSize(backup.SizeBytes)}{markers}";
+    }
+
+    /// <summary>Human-readable label for a pinned backup's keep-tag ("preRestore…" / "preFormat…").</summary>
+    private static string? FriendlyKeepTag(string? tag)
+    {
+        if (string.IsNullOrEmpty(tag))
+            return null;
+        if (tag.StartsWith("preRestore", StringComparison.Ordinal))
+            return "pre-restore";
+        if (tag.StartsWith("preFormat", StringComparison.Ordinal))
+            return "pre-format-upgrade";
+        return "kept";
     }
 
     /// <summary>Number of symbol (.t3) files in a backup zip, from the zip index only. Cached by path (zips are immutable).</summary>

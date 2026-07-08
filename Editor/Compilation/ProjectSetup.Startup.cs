@@ -57,7 +57,22 @@ internal static partial class ProjectSetup
         var csProjFiles = FindCsProjFiles(isDebugBuild);
 
         // Load projects
-        LoadProjects(csProjFiles, forceRecompile, failedProjects: out _);
+        LoadProjects(csProjFiles, forceRecompile, out var failedProjects);
+
+        // Keep projects that failed to load visible and recoverable instead of silently dropping them
+        // — a single broken project shouldn't just vanish from the Hub.
+        BrokenProjects.Clear();
+        foreach (var failed in failedProjects)
+        {
+            // Archived projects also land in failedProjects (success, but intentionally not loaded);
+            // only genuine failures are "broken".
+            if (failed.success)
+                continue;
+
+            BrokenProjects.Add(new BrokenProjectInfo(failed.fileInfo, failed.csProjFile,
+                                                     failed.failureReason ?? "The project could not be loaded.",
+                                                     failed.hint));
+        }
 
         // Phase 1: Initial Startup Migration
         // This happens only once here and not in subsequent UpdateSymbolPackages calls
@@ -77,6 +92,9 @@ internal static partial class ProjectSetup
         var allPackages = _activePackages.ToArray();
         // Update all symbol packages
         UpdateSymbolPackages(allPackages);
+
+        WarnAboutUnresolvedChildren(allPackages);
+        WarnAboutCorruptedSymbolFiles(allPackages);
 
         // Needs registered symbols to resolve which project owns each variation file
         VariationsMigration.MigrateLegacyVariationsToPackageMeta();
@@ -107,6 +125,54 @@ internal static partial class ProjectSetup
         #endif
     }
 
+    /// <summary>
+    /// Summarises symbols that lost children on load (missing package) into one clear warning, since
+    /// the per-child console warnings are just raw Guids and easy to miss. These symbols are protected
+    /// from being saved over (see <see cref="Symbol.HasUnresolvedChildren"/>), so nothing is lost.
+    /// </summary>
+    private static void WarnAboutUnresolvedChildren(EditorSymbolPackage[] packages)
+    {
+        var affectedSymbols = 0;
+        var totalChildren = 0;
+        foreach (var package in packages)
+        {
+            foreach (var symbol in package.Symbols.Values)
+            {
+                if (!symbol.HasUnresolvedChildren)
+                    continue;
+
+                affectedSymbols++;
+                totalChildren += symbol.UnresolvedChildCount;
+            }
+        }
+
+        if (affectedSymbols == 0)
+            return;
+
+        Log.Warning($"{totalChildren} operator(s) across {affectedSymbols} symbol(s) could not be loaded — "
+                    + "most likely a missing package. Those symbols are protected: the editor will not save over "
+                    + "them, so nothing is lost. Install the missing package(s) and reload to restore them.");
+    }
+
+    /// <summary>
+    /// Summarises symbol files that were corrupt and skipped during load (so one bad .t3 no longer
+    /// aborts the whole editor). The affected packages refuse to save until reloaded, so the corrupt —
+    /// but backup-recoverable — files aren't overwritten.
+    /// </summary>
+    private static void WarnAboutCorruptedSymbolFiles(EditorSymbolPackage[] packages)
+    {
+        var corrupted = new List<string>();
+        foreach (var package in packages)
+            corrupted.AddRange(package.CorruptedSymbolFilePaths);
+
+        if (corrupted.Count == 0)
+            return;
+
+        Log.Warning($"{corrupted.Count} operator file(s) are corrupt and were skipped so the rest of the editor "
+                    + "could load. The affected project(s) will not save until you restore an earlier backup:\n  "
+                    + string.Join("\n  ", corrupted));
+    }
+
     private static void LoadBuiltInPackages()
     {
         var directory = Directory.CreateDirectory(_coreOperatorDirectory);
@@ -121,12 +187,16 @@ internal static partial class ProjectSetup
                     });
     }
     
-    private readonly record struct ProjectLoadInfo(FileInfo fileInfo, CsProjectFile? csProjFile, bool success);
+    private readonly record struct ProjectLoadInfo(
+        FileInfo fileInfo,
+        CsProjectFile? csProjFile,
+        bool success,
+        string? failureReason = null,
+        string? hint = null);
 
     /// <summary>
     /// Load each project file and its associated assembly
     /// </summary>
-    [SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Local")]
     private static void LoadProjects(FileInfo[] csProjFiles, bool forceRecompile, out List<ProjectLoadInfo> failedProjects)
     {
         Log.Info("Loading projects...");
@@ -138,7 +208,8 @@ internal static partial class ProjectSetup
                                   if (!CsProjectFile.TryLoad(fileInfo, out var loadInfo))
                                   {
                                       Log.Error($"Failed to load project at \"{fileInfo.FullName}\":\n{loadInfo.Error}");
-                                      return new ProjectLoadInfo(fileInfo, null, false);
+                                      return new ProjectLoadInfo(fileInfo, null, false,
+                                                                 "The project file could not be read.", loadInfo.Error);
                                   }
                                   
                                   var csProjFile = loadInfo.CsProjectFile!;
@@ -161,7 +232,9 @@ internal static partial class ProjectSetup
                                       var explanation = Compiler.ExplainBuildFailure(failureLog);
                                       if (explanation != null)
                                           Log.Warning($"Likely cause for '{csProjFile.Name}' compile failure:\n{explanation}");
-                                      return new ProjectLoadInfo(fileInfo, csProjFile, false);
+                                      return new ProjectLoadInfo(fileInfo, csProjFile, false,
+                                                                 "The project failed to compile.",
+                                                                 explanation ?? "See the log for details.");
                                   }
 
                                   return new ProjectLoadInfo(fileInfo, csProjFile, true);

@@ -22,6 +22,14 @@ internal sealed partial class EditableSymbolProject
                 return;
             }
 
+            if (CorruptedSymbolFilePaths.Count > 0)
+            {
+                Log.Warning($"{CsProjectFile.Name}: Not saving — {CorruptedSymbolFilePaths.Count} operator file(s) "
+                            + "are corrupt. Restore an earlier backup to recover them; saving stays disabled until "
+                            + "then so nothing is overwritten.");
+                return;
+            }
+
             Log.Debug($"{CsProjectFile.Name}: Saving...");
 
             MarkAsSaving();
@@ -64,6 +72,14 @@ internal sealed partial class EditableSymbolProject
             if (IsSaving)
             {
                 Log.Error($"{CsProjectFile.Name}: Saving is already in progress.");
+                return;
+            }
+
+            if (CorruptedSymbolFilePaths.Count > 0)
+            {
+                // A corrupt file is present — skip the routine auto-save so nothing overwrites it.
+                // The prominent warning was already logged at startup.
+                Log.Debug($"{CsProjectFile.Name}: Skipping auto-save — corrupt operator file(s) present.");
                 return;
             }
 
@@ -160,6 +176,18 @@ internal sealed partial class EditableSymbolProject
     private void SaveSymbolFile(SymbolUi symbolUi)
     {
         var symbol = symbolUi.Symbol;
+
+        // Data-loss guard: if children couldn't be resolved on load (usually a missing package), the
+        // in-memory symbol is a truncated copy. Writing it would strip those operators and their
+        // connections from the on-disk file. Leave the intact file untouched instead.
+        if (symbol.HasUnresolvedChildren)
+        {
+            Log.Warning($"Not saving [{symbol.Name}]: {symbol.UnresolvedChildCount} operator(s) could not be "
+                        + "loaded — most likely a missing package. Leaving the existing file untouched so its "
+                        + "operators and connections aren't lost. Install the missing package and reload to edit it.");
+            return;
+        }
+
         var id = symbol.Id;
         var pathHandler = FilePathHandlers[id];
 

@@ -333,9 +333,23 @@ internal static partial class ProjectSetup
         public bool IsReadOnly => true;
         public IReadOnlyCollection<DependencyCounter> Dependencies => Array.Empty<DependencyCounter>();
     }
-    
+
+    /// <summary>
+    /// A project that failed to load at startup (could not be read or compiled). Kept so the Hub can
+    /// surface it and offer recovery instead of the project silently disappearing. Not persisted —
+    /// rebuilt on each startup from the load results. <see cref="ProjectFile"/> is null when the
+    /// .csproj itself could not be parsed.
+    /// </summary>
+    internal sealed record BrokenProjectInfo(FileInfo FileInfo, CsProjectFile? ProjectFile, string Reason, string? Hint)
+    {
+        public string Name => ProjectFile?.Name ?? Path.GetFileNameWithoutExtension(FileInfo.FullName);
+        public string Folder => ProjectFile?.Directory ?? FileInfo.DirectoryName ?? string.Empty;
+        public string? RootNamespace => ProjectFile?.RootNamespace;
+    }
+
     private static readonly HashSet<EditorSymbolPackage> _activePackages = [];
     internal static readonly List<ArchivedProjectInfo> ArchivedProjects = [];
+    internal static readonly List<BrokenProjectInfo> BrokenProjects = [];
     internal static readonly IEnumerable<SymbolPackage> AllPackages = _activePackages;
 
     private readonly record struct SymbolUiLoadInfo(SymbolUi[] NewlyLoaded, SymbolUi[] PreExisting);

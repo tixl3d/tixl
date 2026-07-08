@@ -115,6 +115,84 @@ in [AutoBackup.cs](Editor/Gui/AutoBackup/AutoBackup.cs):
 Lower-severity items noted but left: same-second double-restore false abort, pre-restore pinned archives
 never pruned, `_isSaving` non-atomic, dedup timestamp cosmetic drift.
 
+**2026-07-08 (Phase 1 core landed)** — Broken projects are now surfaced and recoverable instead of
+silently dropped. `LoadProjects`' `failedProjects` (previously `out _`) is captured in `LoadAll`
+([ProjectSetup.Startup.cs](Editor/Compilation/ProjectSetup.Startup.cs)); `ProjectLoadInfo` gained a
+failure reason + hint set at the parse-fail and compile-fail sites (the latter reuses
+`Compiler.ExplainBuildFailure`). New `ProjectSetup.BrokenProjectInfo` record + `BrokenProjects` list
+([ProjectSetup.cs](Editor/Compilation/ProjectSetup.cs)), mirroring `ArchivedProjectInfo` (handles a null
+`CsProjectFile` when the .csproj itself won't parse; not persisted, rebuilt each startup). The Hub shows
+a "Broken" section ([ProjectsPanel.cs](Editor/Gui/Hub/ProjectsPanel.cs)) with a magenta attention bar,
+the failure reason, the hint on hover, and a right-click menu → "Restore from backup" (the existing
+submenu, now taking name+folder so it works without a loaded package) + "Reveal in Explorer". Restore →
+restart picks up the recovered project. Purely additive to the load flow — loading was already lenient
+(failures were dropped and the editor continued), so resilience is unchanged; this only makes the
+failures visible and actionable.
+
+**2026-07-08 (Phase 1 task 4 — data-loss guard landed)** — The save-truncates-data scenario is now
+guarded. When `SymbolJson.TryReadSymbolChild` can't resolve a child (missing package), it increments
+`Symbol.UnresolvedChildCount` ([Symbol.cs](../Core/Operator/Symbol.cs)) instead of only logging. The
+editor then **refuses to overwrite that symbol's files** — `SaveSymbolFile`
+([EditableSymbolProject.FileHandling.cs](../Editor/UiModel/EditableSymbolProject.FileHandling.cs))
+returns early with a clear warning — so the intact on-disk copy (which still holds the child and its
+connections) is never truncated. A startup summary (`WarnAboutUnresolvedChildren` in
+[ProjectSetup.Startup.cs](../Editor/Compilation/ProjectSetup.Startup.cs)) reports "N operators across M
+symbols could not be loaded" so the raw per-child Guid warnings aren't missed.
+
+**Chose the refuse-to-save guard over the full round-trip** deliberately: the investigation confirmed
+that connections to a dropped child are *pruned during instance creation*
+([Instance.Connections.cs:77-83](../Core/Operator/Instance.Connections.cs)), so preserving just the
+child JSON is insufficient — a correct round-trip would have to preserve child *and* connection JSON
+and re-emit both in Core, where a mistake could write *worse* corruption. The guard is bulletproof and
+minimal; the round-trip (let the user keep saving with unresolved children preserved as opaque blobs)
+remains a future enhancement.
+
+**2026-07-08 (corrupt-.t3 tolerance)** — A single corrupt `.t3` used to throw `FileCorruptedException`
+through the parallel symbol load ([SymbolPackage.cs](../Core/Model/SymbolPackage.cs)), surface as an
+`AggregateException`, and **abort the entire editor startup** (the "Loading Operators failed" dialog →
+exit). Both read sites are now tolerant: `TryReadSymbolFile` (parse) and `ReadSymbolFromJsonFileResult`
+(build) skip the bad file, log it, record it in `CorruptedSymbolFilePaths`, and loading continues.
+`ReadAndCreate` wraps every read/parse error as `FileCorruptedException`, so catching it covers lock/IO
+failures too. **Data-safety:** a corrupt symbol's type still exists in the compiled assembly, so the
+symbol gets re-created *empty* from its type — to stop that empty version overwriting the (backup-
+recoverable) file, `EditableSymbolProject` refuses to save any package with `CorruptedSymbolFilePaths`
+(both `SaveAll` and the auto-save `SaveModifiedSymbols`). Startup summary via
+`WarnAboutCorruptedSymbolFiles`. Composes with the missing-package guards above — same recovery path
+(restore from backup), now robust at parse/build level too, not just compile level. The `.t3ui`
+(SymbolUi) load path had the identical exposure — `EditorSymbolPackage.LoadUiFiles`
+([EditorSymbolPackage.cs](../Editor/UiModel/EditorSymbolPackage.cs)) now uses a tolerant
+`TryReadSymbolUiFile` that records into the same `CorruptedSymbolFilePaths` set (via the base's
+`RecordCorruptedSymbolFile`), and the runtime hot-reload path (`Reload`) guards both its `ReadAndCreate`
+calls so a file corrupted while the editor runs keeps the loaded version instead of throwing.
+
+A project with corrupt files loads as an empty shell and stays in the *normal* Projects list (it's not
+a failed-to-load "Broken" project), so it needs its own flag: `DrawProjectItem`
+([ProjectsPanel.cs](Editor/Gui/Hub/ProjectsPanel.cs)) now shows a magenta `StatusAttention` bar and a
+"N corrupt file(s) - restore from backup" line when `package.HasCorruptedSymbolFiles` (a cheap
+`ConcurrentBag.IsEmpty`-based property, safe per-frame). The existing right-click "Restore from backup"
+is the recovery path. Clicking a corrupt-file project is **blocked** (it would only open the empty shell)
+with a log hint pointing at restore; a hover tooltip lists the corrupt file paths.
+
+**Dependency-cascade (not done, needs design):** because a corrupt symbol is re-created *empty from its
+type*, its Guid still resolves in the registry — so a dependent project referencing it does **not** get
+`HasUnresolvedChildren` and isn't auto-flagged; it silently shows empty instances. Proper transitive
+flagging would require marking the empty-from-corrupt symbol and propagating "references a damaged
+symbol" to dependents (or switching to the guid-skip approach so the symbol is absent and dependents
+go unresolved — but that leaves a corrupt *home* symbol's project homeless). Deferred as its own slice.
+
+**Known tradeoff:** a project with a corrupt file can't save until reloaded (protected, not lost); and a
+symbol with a permanently-missing package stays unsaveable for the session
+(protected, not lost) — the fix is installing the package and reloading. **Still open (from Phase 1):**
+the round-trip preservation (above) and dependency-cascade handling. A manual test set
+(`.tests-manual/BrokenPackageRecovery/`) is still to be written.
+
+**2026-07-08 (backup list markers)** — `BackupEntry` now carries `IsMinimal` + `KeepTag`
+([AutoBackup.cs](Editor/Gui/AutoBackup/AutoBackup.cs)); the restore submenu
+([ProjectsPanel.cs](Editor/Gui/Hub/ProjectsPanel.cs)) shows `· minimal` and a friendly keep-tag
+(`pre-restore` / `pre-format-upgrade`) instead of a generic "pinned", and **mutes pre-restore rows**
+(they snapshot the state being recovered from, so restoring one usually re-applies a bad state — the
+exact #16 trap). Helps the user avoid restoring a backup that captured the corruption.
+
 **Still open (Phase 2 step 2 / Phase 1):** capture per-project startup compile failures into a
 `ProjectSetup.BrokenProjects` list (today `LoadProjects`' `failedProjects` is dropped as `out _`),
 surface a "Broken" section in the Hub, and auto-open the restore dialog on failure. This is the part

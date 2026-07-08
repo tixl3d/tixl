@@ -50,6 +50,15 @@ public sealed partial class Symbol : IDisposable, IResource
 
     #endregion Saved Properties
 
+    /// <summary>
+    /// Number of child operators that could not be resolved when this symbol was loaded (their
+    /// package or symbol was missing). Set during deserialization; reset by a fresh load. When
+    /// &gt; 0 the editor refuses to overwrite this symbol's files, so the intact on-disk copy —
+    /// which still holds those children and their connections — is never truncated.
+    /// </summary>
+    public int UnresolvedChildCount { get; internal set; }
+    public bool HasUnresolvedChildren => UnresolvedChildCount > 0;
+
     public string Name => InstanceType?.Name;
     public string Namespace => InstanceType.Namespace ?? SymbolPackage.AssemblyInformation.Name;
     public Animator Animator { get; private set; } = new();
