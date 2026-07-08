@@ -50,6 +50,7 @@ internal sealed class UserNameDialog : ModalDialog
                 {
                     Log.Error($"Error while renaming user {e}");
                 }
+                UserSettings.Save();
 
                 ImGui.CloseCurrentPopup();
             }
