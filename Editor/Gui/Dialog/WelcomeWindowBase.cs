@@ -32,6 +32,7 @@ internal abstract class WelcomeWindowBase : WindowBase
         WindowPaddingOverride = Vector2.Zero;
         WindowSizeOverride = new Vector2(680, 480);
         WindowFlags = ImGuiWindowFlags.NoDocking;
+        CenterOnAppearing = true;
     }
 
     protected override void Close()

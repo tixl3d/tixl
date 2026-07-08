@@ -19,6 +19,10 @@ internal abstract class Window
     /// <summary>Initial window size (unscaled). Multiplied by <see cref="T3Ui.UiScaleFactor"/> when the window first appears.</summary>
     protected Vector2 WindowSizeOverride = new Vector2(550, 450);
 
+    /// <summary>Center the window in the main viewport whenever it appears. Re-centers on every reopen
+    /// (used by the version-welcome popup so it lands centered regardless of where it was left).</summary>
+    protected bool CenterOnAppearing;
+
     /// <summary>Override the window's inner-content backdrop (ImGui ChildBg). Null inherits the shared
     /// Panel Background; set it to give a window its own themeable background (e.g. the graph canvas).</summary>
     protected virtual Color? InnerBackgroundColor => null;
@@ -65,7 +69,15 @@ internal abstract class Window
 
         if (!_wasVisible)
         {
-            ImGui.SetNextWindowSize(WindowSizeOverride * T3Ui.UiScaleFactor);
+            var size = WindowSizeOverride * T3Ui.UiScaleFactor;
+            ImGui.SetNextWindowSize(size);
+
+            if (CenterOnAppearing)
+            {
+                var viewport = ImGui.GetMainViewport();
+                ImGui.SetNextWindowPos(viewport.GetCenter() - size * 0.5f);
+            }
+
             _wasVisible = true;
         }
 
@@ -149,6 +161,10 @@ internal abstract class Window
 
         if (!Config.Visible)
         {
+            // Re-arm the appearing logic so a re-opened window snaps back to its centered position.
+            if (CenterOnAppearing)
+                _wasVisible = false;
+
             Close();
         }
 
