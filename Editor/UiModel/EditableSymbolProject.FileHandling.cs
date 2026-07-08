@@ -7,6 +7,7 @@ using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Editor.Compilation;
+using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.UiModel;
 
@@ -22,11 +23,11 @@ internal sealed partial class EditableSymbolProject
                 return;
             }
 
-            if (CorruptedSymbolFilePaths.Count > 0)
+            if (UserSettings.Config.PreventSavingSymbolsWithMissingReferences && CorruptedSymbolFilePaths.Count > 0)
             {
                 Log.Warning($"{CsProjectFile.Name}: Not saving — {CorruptedSymbolFilePaths.Count} operator file(s) "
                             + "are corrupt. Restore an earlier backup to recover them; saving stays disabled until "
-                            + "then so nothing is overwritten.");
+                            + "then so nothing is overwritten. You can disable warning in Settings.");
                 return;
             }
 
@@ -180,7 +181,8 @@ internal sealed partial class EditableSymbolProject
         // Data-loss guard: if children couldn't be resolved on load (usually a missing package), the
         // in-memory symbol is a truncated copy. Writing it would strip those operators and their
         // connections from the on-disk file. Leave the intact file untouched instead.
-        if (symbol.HasUnresolvedChildren)
+        
+        if (UserSettings.Config.PreventSavingSymbolsWithMissingReferences && symbol.HasUnresolvedChildren)
         {
             Log.Warning($"Not saving [{symbol.Name}]: {symbol.UnresolvedChildCount} operator(s) could not be "
                         + "loaded — most likely a missing package. Leaving the existing file untouched so its "

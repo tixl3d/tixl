@@ -152,7 +152,7 @@ internal sealed partial class SettingsWindow : Window
                     }
 
                     FormInputs.AddVerticalSpace();
-                    
+
                     changed |= FormInputs.AddFloat("Scroll smoothing",
                                                    ref UserSettings.Config.ScrollSmoothing,
                                                    0.0f, 0.2f, 0.01f, true, true,
@@ -189,15 +189,15 @@ internal sealed partial class SettingsWindow : Window
 
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Input");
-                    
+
                     changed |= FormInputs.AddCheckBox("Enable Touchpad Panning",
                                                       ref UserSettings.Config.UseTouchPadPanning,
                                                       """
                                                       Use your trackpad for panning your graph and timeline views.
                                                       Zooming in/out is possible with pinch zoom.
-                                                      """, 
+                                                      """,
                                                       UserSettings.Defaults.UseTouchPadPanning);
-                    
+
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Timeline");
 
@@ -226,7 +226,6 @@ internal sealed partial class SettingsWindow : Window
                                                    "Seconds between captures when continuous screenshot mode is active. Ctrl-click the screenshot icon in the output window to start it.",
                                                    UserSettings.Defaults.ContinuousScreenshotDelay);
 
-
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Skill Quest");
                     FormInputs.SetIndentToLeft();
@@ -240,7 +239,6 @@ internal sealed partial class SettingsWindow : Window
                     if (ImGui.Button("Reset Skills Progress"))
                         SkillTraining.ResetProgress();
 
-                    
                     FormInputs.SetIndentToLeft();
                     FormInputs.AddVerticalSpace();
 
@@ -303,7 +301,7 @@ internal sealed partial class SettingsWindow : Window
                 case Categories.Projects:
                 {
                     CustomComponents
-                        .HelpText("These are global settings. Also see the Project Settings window.");
+                       .HelpText("These are global settings. Also see the Project Settings window.");
                     FormInputs.AddVerticalSpace();
 
                     FormInputs.AddSectionSubHeader("Project Settings");
@@ -316,13 +314,13 @@ internal sealed partial class SettingsWindow : Window
                                                              "Folder does not exist",
                                                              """
                                                              List of top-level directories that are scanned for projects.
-                                                             
+
                                                              This can be useful to manage your projects on multiple external drivers or repositories. 
-                                                             
+
                                                              Changes require a restart.
                                                              """
                                                             );
-                    
+
                     FormInputs.AddVerticalSpace();
                     FormInputs.SetIndentToLeft();
                     changed |= FormInputs.AddCheckBox("Detect Projects on USB",
@@ -333,7 +331,7 @@ internal sealed partial class SettingsWindow : Window
                                                       """,
                                                       true
                                                      );
-                    
+
                     FormInputs.SetIndentToParameters();
                     FormInputs.AddVerticalSpace();
                     changed |= FormInputs.AddStringInput("UserName",
@@ -359,31 +357,41 @@ internal sealed partial class SettingsWindow : Window
                                                        They are saved as zip-archives next to each user project at <project>/{AutoBackup.AutoBackup.BackupSubFolder}/.
                                                        """,
                                                       UserSettings.Defaults.EnableAutoBackup);
-                        if (UserSettings.Config.EnableAutoBackup)
-                            changed |= FormInputs.AddCheckBox("Enable Minimal Backup",
-                                                        ref UserSettings.Config.MinimalBackup,
-                                                        $""" 
-                                                        Only save the files with these extensions: .csproj, .cs, .t3, .t3ui, .hlsl, .json, .txt 
-                                                        This will considerably reduce the size of backup archives. 
-                                                        """,
-                                                        UserSettings.Defaults.MinimalBackup);
-                        FormInputs.AddVerticalSpace();
-                        changed |= FormInputs.AddCheckBox("Save Layout with Projects",
-                        ref UserSettings.Config.SaveWindowLayoutsWithProjects,
-                        """
-                        When enabled, TiXL will save the window layout for each project.
-                        """,
-                        UserSettings.Defaults.SaveWindowLayoutsWithProjects
-                    );
+                    if (UserSettings.Config.EnableAutoBackup)
+                        changed |= FormInputs.AddCheckBox("Enable Minimal Backup",
+                                                          ref UserSettings.Config.MinimalBackup,
+                                                          $""" 
+                                                           Only save the files with these extensions: .csproj, .cs, .t3, .t3ui, .hlsl, .json, .txt 
+                                                           This will considerably reduce the size of backup archives. 
+                                                           """,
+                                                          UserSettings.Defaults.MinimalBackup);
 
+                    FormInputs.AddVerticalSpace();
+                    changed |= FormInputs.AddCheckBox("Save Layout with Projects",
+                                                      ref UserSettings.Config.SaveWindowLayoutsWithProjects,
+                                                      """
+                                                      When enabled, TiXL will save the window layout for each project.
+                                                      """,
+                                                      UserSettings.Defaults.SaveWindowLayoutsWithProjects
+                                                     );
+
+                    FormInputs.AddVerticalSpace();
+                    changed |= FormInputs.AddCheckBox("Prevent Saving Symbols with Broken References",
+                                                      ref UserSettings.Config.PreventSavingSymbolsWithMissingReferences,
+                                                      """
+                                                      Warning: Saving symbols that reference other missing Symbols will purge this reference and all connections to it.
+                                                      This can't be undone or reverted.   
+                                                      """,
+                                                      UserSettings.Defaults.PreventSavingSymbolsWithMissingReferences
+                                                     );
                     
                     changed |= FormInputs.AddCheckBox("Load multi-threaded",
-                                                                     ref UserSettings.Config.LoadMultiThreaded,
-                                                                     """
-                                                                     Using multi-threading for loading projects can significantly increase startup time.
-                                                                     During development or if loading freezes during startup it might be useful to disable this setting.
-                                                                     """,
-                                                                     UserSettings.Config.LoadMultiThreaded);
+                                                      ref UserSettings.Config.LoadMultiThreaded,
+                                                      """
+                                                      Using multi-threading for loading projects can significantly increase startup time.
+                                                      During development or if loading freezes during startup it might be useful to disable this setting.
+                                                      """,
+                                                      UserSettings.Config.LoadMultiThreaded);
 
                     FormInputs.AddSectionSubHeader("Performance");
                     FormInputs.SetIndentToLeft();
@@ -478,24 +486,24 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddSectionSubHeader("Profiling");
                     FormInputs.AddVerticalSpace();
                     changed |= FormInputs.AddCheckBox("Enable Frame Profiling",
-                        ref UserSettings.Config.EnableFrameProfiling,
-                        "A basic frame profile for the duration of frame processing. Overhead is minimal.",
-                        UserSettings.Defaults.EnableFrameProfiling);
+                                                      ref UserSettings.Config.EnableFrameProfiling,
+                                                      "A basic frame profile for the duration of frame processing. Overhead is minimal.",
+                                                      UserSettings.Defaults.EnableFrameProfiling);
                     changed |= FormInputs.AddCheckBox("Keep Log Messages",
-                        ref UserSettings.Config.KeepTraceForLogMessages,
-                        "Store log messages in the profiling data. This can be useful to see correlation between frame drops and log messages.",
-                        UserSettings.Defaults.KeepTraceForLogMessages);
+                                                      ref UserSettings.Config.KeepTraceForLogMessages,
+                                                      "Store log messages in the profiling data. This can be useful to see correlation between frame drops and log messages.",
+                                                      UserSettings.Defaults.KeepTraceForLogMessages);
                     changed |= FormInputs.AddCheckBox("Log GC Profiling",
-                        ref UserSettings.Config.EnableGCProfiling,
-                        "Log garbage collection information. This can be useful to see correlation between frame drops and GC activity.",
-                        UserSettings.Defaults.EnableGCProfiling);
+                                                      ref UserSettings.Config.EnableGCProfiling,
+                                                      "Log garbage collection information. This can be useful to see correlation between frame drops and GC activity.",
+                                                      UserSettings.Defaults.EnableGCProfiling);
                     FormInputs.AddVerticalSpace();
 
                     // MIDI Controller Debug Logging (from origin/main)
                     changed |= FormInputs.AddCheckBox("MIDI Controller Debug Logging",
-                        ref UserSettings.Config.EnableMidiDebugLogging,
-                        "Log detailed MIDI controller messages including button mappings and mode switches. Useful for debugging custom controller implementations.",
-                        UserSettings.Defaults.EnableMidiDebugLogging);
+                                                      ref UserSettings.Config.EnableMidiDebugLogging,
+                                                      "Log detailed MIDI controller messages including button mappings and mode switches. Useful for debugging custom controller implementations.",
+                                                      UserSettings.Defaults.EnableMidiDebugLogging);
                     FormInputs.AddVerticalSpace();
 
                     // Audio System group
@@ -503,23 +511,24 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddSectionSubHeader("Audio System");
                     FormInputs.AddVerticalSpace();
                     if (FormInputs.AddCheckBox("Show Audio Logs",
-                            ref UserSettings.Config.LogAudioDetails,
-                            "Shows Debug and Info log messages from audio system classes. Warning and Error messages will still be logged.",
-                            UserSettings.Defaults.LogAudioDetails))
+                                               ref UserSettings.Config.LogAudioDetails,
+                                               "Shows Debug and Info log messages from audio system classes. Warning and Error messages will still be logged.",
+                                               UserSettings.Defaults.LogAudioDetails))
                     {
                         Log.Gated.AudioEnabled = UserSettings.Config.LogAudioDetails;
                         changed = true;
                     }
+
                     changed |= FormInputs.AddCheckBox("Profile Beat Syncing",
-                        ref CoreSettings.Config.EnableBeatSyncProfiling,
-                        "Logs beat sync timing to IO Window.",
-                        CoreSettings.Defaults.EnableBeatSyncProfiling);
+                                                      ref CoreSettings.Config.EnableBeatSyncProfiling,
+                                                      "Logs beat sync timing to IO Window.",
+                                                      CoreSettings.Defaults.EnableBeatSyncProfiling);
                     FormInputs.AddVerticalSpace();
 
                     changed |= FormInputs.AddCheckBox("Log Asset File Events",
-                        ref CoreSettings.Config.LogFileEvents,
-                        "Logs events related to changing and updating assets files.",
-                        CoreSettings.Defaults.LogFileEvents);
+                                                      ref CoreSettings.Config.LogFileEvents,
+                                                      "Logs events related to changing and updating assets files.",
+                                                      CoreSettings.Defaults.LogFileEvents);
                     FormInputs.AddVerticalSpace();
 
                     // Compilation group
@@ -527,57 +536,58 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddSectionSubHeader("Compilation");
                     FormInputs.AddVerticalSpace();
                     changed |= FormInputs.AddCheckBox("Log Assembly Version mismatches",
-                        ref CoreSettings.Config.LogAssemblyVersionMismatches,
-                        "Version mismatches are frequently caused by slightly outdated 3rd party library that we depend on.\nThese are only relevant in situations where you need to debug or analyse assembly loading problems.",
-                        CoreSettings.Defaults.LogAssemblyVersionMismatches);
+                                                      ref CoreSettings.Config.LogAssemblyVersionMismatches,
+                                                      "Version mismatches are frequently caused by slightly outdated 3rd party library that we depend on.\nThese are only relevant in situations where you need to debug or analyse assembly loading problems.",
+                                                      CoreSettings.Defaults.LogAssemblyVersionMismatches);
                     changed |= FormInputs.AddCheckBox("Log Loading Details",
-                        ref CoreSettings.Config.LogAssemblyLoadingDetails,
-                        "Logs additional details about resolving and identifying assemblies and other resources.\nThis can be useful to debug issues related to loading projects.",
-                        CoreSettings.Defaults.LogAssemblyLoadingDetails);
+                                                      ref CoreSettings.Config.LogAssemblyLoadingDetails,
+                                                      "Logs additional details about resolving and identifying assemblies and other resources.\nThis can be useful to debug issues related to loading projects.",
+                                                      CoreSettings.Defaults.LogAssemblyLoadingDetails);
                     changed |= FormInputs.AddCheckBox("Log C# Compilation Details",
-                        ref CoreSettings.Config.LogCompilationDetails,
-                        "Logs additional compilation details with the given severity",
-                        CoreSettings.Defaults.LogCompilationDetails);
+                                                      ref CoreSettings.Config.LogCompilationDetails,
+                                                      "Logs additional compilation details with the given severity",
+                                                      CoreSettings.Defaults.LogCompilationDetails);
                     if (CoreSettings.Config.LogCompilationDetails)
                     {
                         changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.CompileCsVerbosity,
-                            "C# compiler logs",
-                            null,
-                            UserSettings.Defaults.CompileCsVerbosity);
+                                                              "C# compiler logs",
+                                                              null,
+                                                              UserSettings.Defaults.CompileCsVerbosity);
                     }
+
                     FormInputs.AddVerticalSpace();
 
                     // Operator status indicator
                     FormInputs.SetIndentToLeft();
                     changed |= FormInputs.AddCheckBox("Show Operator status indicators",
-                        ref UserSettings.Config.ShowOperatorStats,
-                        "Draws an context overlay with various operator stats.",
-                        UserSettings.Defaults.ShowOperatorStats);
+                                                      ref UserSettings.Config.ShowOperatorStats,
+                                                      "Draws an context overlay with various operator stats.",
+                                                      UserSettings.Defaults.ShowOperatorStats);
                     FormInputs.AddVerticalSpace();
                     FormInputs.SetIndentToLeft();
                     FormInputs.AddSectionSubHeader("Rendering");
                     // Add Show Audio Render Logs here
                     var audioRenderingDebugChanged = FormInputs.AddCheckBox("Show Audio Render Logs",
-                        ref UserSettings.Config.LogAudioRenderingDetails,
-                        "Shows Debug and Info log messages from audio rendering classes (e.g., export, offline rendering).",
-                        UserSettings.Defaults.LogAudioRenderingDetails);
+                                                                            ref UserSettings.Config.LogAudioRenderingDetails,
+                                                                            "Shows Debug and Info log messages from audio rendering classes (e.g., export, offline rendering).",
+                                                                            UserSettings.Defaults.LogAudioRenderingDetails);
                     if (audioRenderingDebugChanged)
                     {
                         Log.Gated.AudioRenderEnabled = UserSettings.Config.LogAudioRenderingDetails;
                         changed = true;
                     }
-                    
-                    
+
                     // Change label for video rendering logs
                     var videoRenderingDebugChanged = FormInputs.AddCheckBox("Show Video Render Logs",
-                        ref UserSettings.Config.LogVideoRenderingDetails,
-                        "Shows Debug and Info log messages from video rendering/export (e.g., the FFmpeg writer, RenderProcess).",
-                        UserSettings.Defaults.LogVideoRenderingDetails);
+                                                                            ref UserSettings.Config.LogVideoRenderingDetails,
+                                                                            "Shows Debug and Info log messages from video rendering/export (e.g., the FFmpeg writer, RenderProcess).",
+                                                                            UserSettings.Defaults.LogVideoRenderingDetails);
                     if (videoRenderingDebugChanged)
                     {
                         Log.Gated.VideoRenderEnabled = UserSettings.Config.LogVideoRenderingDetails;
                         changed = true;
                     }
+
                     FormInputs.AddVerticalSpace();
                     break;
                 }
@@ -585,7 +595,7 @@ internal sealed partial class SettingsWindow : Window
 
             if (changed)
                 UserSettings.Save();
-            
+
             if (projectSettingsChanged)
                 CoreSettings.Save();
         }
@@ -610,4 +620,3 @@ internal sealed partial class SettingsWindow : Window
         return new List<Window>();
     }
 }
-

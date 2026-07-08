@@ -147,6 +147,8 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public string UserName = UndefinedUserName;
         public bool EnableAutoBackup = true;
         public bool MinimalBackup = true;
+        
+        public bool PreventSavingSymbolsWithMissingReferences = true;
 
         public float GizmoSize = 100;
 
