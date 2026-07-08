@@ -24,6 +24,13 @@ internal sealed class MagGraphSection : ISelectableCanvasObject, IValueSnapAttra
     public int LastUpdateCycle;
     public bool IsRemoved;
 
+    /// <summary>
+    /// Nesting depth in the section tree (0 = top level). Drives draw order so outer sections
+    /// paint before the inner ones they contain — otherwise an outer section's translucent
+    /// background washes over the nested sections' text.
+    /// </summary>
+    public int NestingDepth;
+
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)
     {
         if (snapResult.Orientation == SnapResult.Orientations.Horizontal)

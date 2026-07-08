@@ -42,6 +42,12 @@ internal sealed class MagGraphLayout
     public readonly List<MagGraphConnection> MagConnections = new(127);
     public readonly Dictionary<Guid, MagGraphSection> Sections = new(63);
 
+    /// <summary>
+    /// <see cref="Sections"/> ordered outermost-first, so nested sections draw on top of the
+    /// sections that contain them. Rebuilt on structural changes; iterate this when drawing.
+    /// </summary>
+    public readonly List<MagGraphSection> SectionsInDrawOrder = new(63);
+
     public void ComputeLayout(GraphUiContext context, bool forceUpdate = false)
     {
         var compositionOp = context.CompositionInstance;
@@ -82,6 +88,7 @@ internal sealed class MagGraphLayout
         CollectedSections(parentSymbolUi);
         SectionTree.UpdateOwnershipFromGeometry(parentSymbolUi);
         SectionTree.UpdateCollapsedVisibility(parentSymbolUi);
+        RebuildSectionDrawOrder(parentSymbolUi);
         UpdateConnectionSources(composition);
         UpdateVisibleItemLines(context);
         CollectConnectionReferences(composition);
@@ -128,6 +135,39 @@ internal sealed class MagGraphLayout
             Sections.Remove(a.Id);
             a.IsRemoved = true;
         }
+    }
+
+    /// <summary>
+    /// Orders sections outermost-first by nesting depth so inner sections draw on top of their
+    /// containers. Runs after ownership is resolved, so <see cref="Section.ParentSectionId"/> is current.
+    /// </summary>
+    private void RebuildSectionDrawOrder(SymbolUi compositionSymbolUi)
+    {
+        SectionsInDrawOrder.Clear();
+        foreach (var magSection in Sections.Values)
+        {
+            magSection.NestingDepth = GetSectionDepth(compositionSymbolUi, magSection.Section);
+            SectionsInDrawOrder.Add(magSection);
+        }
+
+        SectionsInDrawOrder.Sort(static (a, b) => a.NestingDepth.CompareTo(b.NestingDepth));
+    }
+
+    private static int GetSectionDepth(SymbolUi compositionSymbolUi, Section section)
+    {
+        var depth = 0;
+        var parentId = section.ParentSectionId;
+        var remainingSteps = compositionSymbolUi.Sections.Count; // guards against parent-reference cycles
+        while (parentId != Guid.Empty && remainingSteps-- > 0)
+        {
+            if (!compositionSymbolUi.Sections.TryGetValue(parentId, out var parent))
+                break;
+
+            depth++;
+            parentId = parent.ParentSectionId;
+        }
+
+        return depth;
     }
 
     /// <remarks>

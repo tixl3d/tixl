@@ -116,8 +116,8 @@ internal sealed partial class MagGraphView
                 HandleFenceSelection(_context, _selectionFence);
             }
 
-            // Draw sections
-            foreach (var a in _context.Layout.Sections.Values)
+            // Draw sections outermost-first so nested sections paint on top of their containers
+            foreach (var a in _context.Layout.SectionsInDrawOrder)
             {
                 if (a.Section.IsHiddenInCollapsedSection)
                     continue;

@@ -50,7 +50,7 @@ namespace T3.Editor.Gui.MagGraph.States
                                   && !ImGui.IsAnyItemActive())
                               {
                                   // Tab create placeholder
-                                  if (ImGui.IsKeyReleased(ImGuiKey.Tab))
+                                  if (ImGui.IsKeyReleased(ImGuiKey.Tab) && !ImGui.GetIO().KeyShift)
                                   {
                                       var focusedObject =
                                           context.Selector.Selection.Count == 1 &&

@@ -74,6 +74,7 @@ internal static class SectionRenaming
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(4, 4));
         ImGui.SetNextItemWidth(350);
         ImGui.InputText("##renameSectionLabel", ref _labelBuffer, 256, ImGuiInputTextFlags.AutoSelectAll);
+        var isLabelActive = ImGui.IsItemActive();
         ImGui.PopStyleVar();
         ImGui.GetWindowDrawList().AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), UiColors.ForegroundFull.Fade(0.1f));
         // Draw placeholder if label is empty
@@ -86,6 +87,7 @@ internal static class SectionRenaming
 
         // --- Title/description editing UI ---
         ImGui.InputTextMultiline("##renameSection", ref _titleBuffer, 1024, screenArea.GetSize() - new Vector2(0, ImGui.GetItemRectSize().Y) - Vector2.One * 3, ImGuiInputTextFlags.AutoSelectAll);
+        var isTitleActive = ImGui.IsItemActive();
         // Draw placeholder if title is empty
         if (string.IsNullOrEmpty(_titleBuffer))
         {
@@ -100,9 +102,11 @@ internal static class SectionRenaming
         if (justOpened || _changeSectionTextCommand == null)
             return;
 
-        // Detect if the user clicked outside, pressed Esc, or deactivated the item
+        // Close only when focus has left both inputs — not when tabbing/clicking between the
+        // label and the title, which keeps one of them active.
         var clickedOutside = ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !screenArea.Contains(ImGui.GetMousePos());
-        shouldClose |= ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(Key.Esc.ToImGuiKey()) || clickedOutside;
+        var focusLeftEditor = !isLabelActive && !isTitleActive;
+        shouldClose |= focusLeftEditor || ImGui.IsKeyPressed(Key.Esc.ToImGuiKey()) || clickedOutside;
         if (!shouldClose)
             return;
 
