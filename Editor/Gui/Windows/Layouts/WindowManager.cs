@@ -68,7 +68,7 @@ internal static partial class WindowManager
     internal static readonly SnixlWindow SnixlWindow = new();
     internal static readonly GuidedFeatureTestsWindow GuidedFeatureTestsWindow = new();
 
-    /// <summary>The version-welcome window matching the running build — alpha builds get the import/testing variant.</summary>
+    /// <summary>The version-welcome window matching the running build — only the "alpha" suffix gets the import/testing variant.</summary>
     internal static readonly WelcomeWindowBase WelcomeWindow = RuntimeAssemblies.IsAlpha
                                                                    ? new WelcomeAlphaWindow()
                                                                    : new WelcomeWindow();

@@ -63,8 +63,8 @@ internal sealed class WelcomeWindow : WelcomeWindowBase
             _activeTab = Tab.Welcome;
         if (NavigationSidebar.Item("Getting Started", _activeTab == Tab.GettingStarted))
             _activeTab = Tab.GettingStarted;
-        if (NavigationSidebar.Item("Projects", _activeTab == Tab.Projects))
-            _activeTab = Tab.Projects;
+        if (NavigationSidebar.Item("Release Notes", _activeTab == Tab.ReleaseNotes))
+            _activeTab = Tab.ReleaseNotes;
 
         NavigationSidebar.EndColumn();
     }
@@ -75,7 +75,7 @@ internal sealed class WelcomeWindow : WelcomeWindowBase
                         {
                             Tab.Welcome        => "Welcome",
                             Tab.GettingStarted => "Getting Started",
-                            Tab.Projects       => "Projects",
+                            Tab.ReleaseNotes       => "Release Notes",
                             _                  => string.Empty,
                         };
 
@@ -89,8 +89,8 @@ internal sealed class WelcomeWindow : WelcomeWindowBase
             case Tab.GettingStarted:
                 DrawGettingStartedTab();
                 break;
-            case Tab.Projects:
-                DrawProjectsTab();
+            case Tab.ReleaseNotes:
+                DrawReleaseNotes();
                 break;
         }
 
@@ -108,7 +108,7 @@ internal sealed class WelcomeWindow : WelcomeWindowBase
         FormInputs.AddVerticalSpace(8);
         ImGui.Separator();
 
-        DrawReleaseNotes();
+        //DrawReleaseNotes();
     }
 
     /// <summary>
@@ -150,56 +150,12 @@ internal sealed class WelcomeWindow : WelcomeWindowBase
         _gettingStartedMarkdown.Draw(GettingStartedMarkdown,
                                      onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url));
     }
-
-    private void DrawProjectsTab()
-    {
-        if (GraphWindow.GraphWindowInstances.Count == 0)
-        {
-            ImGui.TextColored(UiColors.TextMuted, "No graph window is open to load a project into.");
-            return;
-        }
-
-        var graphWindow = GraphWindow.GraphWindowInstances[0];
-        var scale = T3Ui.UiScaleFactor;
-
-        ImGui.TextColored(UiColors.TextMuted, "Open a project to pick up where you left off.");
-        FormInputs.AddVerticalSpace(6);
-
-        // Reserve the footer height so the list scrolls independently and the CTA stays pinned at the bottom.
-        var ctaSize = CustomComponents.GetCtaButtonSize("New Project...", Icon.None);
-        var footerHeight = ctaSize.Y + 12 * scale;
-        ImGui.BeginChild("projectList", new Vector2(0, -footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
-        {
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 5) * scale);
-
-            var anyShown = false;
-            foreach (var package in EditableSymbolProject.AllProjects)
-            {
-                anyShown |= package.HasHome;
-                if (ProjectsPanel.DrawProjectItem(graphWindow, package))
-                    Config.Visible = false; // base calls Close() → stamps the version marker
-            }
-
-            if (!anyShown)
-                ImGui.TextColored(UiColors.TextMuted, "No projects yet — create your first one below.");
-
-            ImGui.PopStyleVar();
-        }
-        ImGui.EndChild();
-
-        CustomComponents.RightAlign(ctaSize.X, sameLine: false);
-        if (CustomComponents.DrawCtaButton("New Project...", Icon.None, UiColors.ForegroundFull, UiColors.StatusActivated, Color.Transparent))
-        {
-            T3Ui.NewProjectDialog.ShowNextFrame();
-            Config.Visible = false;
-        }
-    }
-
+    
     private enum Tab
     {
         Welcome,
         GettingStarted,
-        Projects,
+        ReleaseNotes,
     }
 
     private const string WelcomeMarkdown =

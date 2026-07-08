@@ -109,7 +109,7 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
         if (VersionIdOverride != null)
             return $"{AppSubFolder}{TixlVersion}-{VersionIdOverride}";
 
-        return RuntimeAssemblies.IsAlpha
+        return RuntimeAssemblies.IsPreview
                    ? $"{AppSubFolder}{TixlVersion}-{RuntimeAssemblies.VersionSuffix}"
                    : $"{AppSubFolder}{TixlVersion}";
     }

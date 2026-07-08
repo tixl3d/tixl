@@ -7,7 +7,7 @@ namespace T3.Core.Compilation;
 
 /// <summary>
 /// Common info container for package loading and versioning, and the source of truth for
-/// whether this build is a prerelease — see <see cref="IsAlpha"/>.
+/// whether this build is a prerelease — see <see cref="IsPreview"/>.
 /// </summary>
 public static class RuntimeAssemblies
 {
@@ -32,7 +32,9 @@ public static class RuntimeAssemblies
     /// True for any prerelease build. Permissive on purpose so future <c>beta</c> / <c>rc</c>
     /// cycles get the same isolation without a code change.
     /// </summary>
-    public static readonly bool IsAlpha = !string.IsNullOrEmpty(VersionSuffix);
+    public static readonly bool IsPreview = !string.IsNullOrEmpty(VersionSuffix);
+    
+    public static readonly bool IsAlpha = !string.IsNullOrEmpty(VersionSuffix) && string.Equals(VersionSuffix, "alpha", StringComparison.Ordinal);
 
     /// <summary>
     /// Version formatted as semver without commit SHA — e.g. <c>"4.2.0.2-alpha"</c> or <c>"4.2.0.2"</c>.
