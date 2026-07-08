@@ -1,168 +1,129 @@
 {
+  "FormatVersion": 3,
   "Id": "{{GUID}}"/*{{PROJ}}*/,
   "Description": "{{USER}}'s workspace for {{PROJ}}.",
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "eb3041f4-dcf1-4ef7-948e-c18ee0a29bc8"/*ThereDemo*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
-      "Position": {
-        "X": -2236.0034,
-        "Y": -4395.7686
-      }
-    },
-    {
-      "ChildId": "d31691f2-3f93-474e-9327-b28281c057f3"/*FluidFeedback*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 49.0
-      },
-      "Position": {
-        "X": -1652.9976,
-        "Y": -4889.9697
-      }
-    },
-    {
-      "ChildId": "64fe5405-7f98-4303-b2a5-f53db065740c"/*TorusMesh*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
-      "Position": {
-        "X": -2102.9978,
-        "Y": -4826.9697
-      }
-    },
-    {
-      "ChildId": "dda89242-8a90-4442-b3df-ed2d855e32a4"/*DrawMesh*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 49.0
-      },
-      "Position": {
-        "X": -1952.9976,
-        "Y": -4889.9697
-      }
-    },
-    {
-      "ChildId": "2fe00e23-ee4a-4234-a0dc-213b9a6ca9fe"/*OrbitCamera*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 36.0
-      },
-      "Position": {
-        "X": -1802.9976,
-        "Y": -4889.9697
-      }
-    },
-    {
-      "ChildId": "bc999d1e-4b76-43f1-9e3d-8f51b9d22871"/*_AnimValueOld*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
-      "Position": {
-        "X": -2252.9978,
-        "Y": -4889.9697
-      }
-    },
-    {
       "ChildId": "018e0408-fac8-42f0-a17c-b9c0bb5ab5b7"/*SampleGradient*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 36.0
-      },
+      "SectionId": "7a6d050e-f043-49ca-9f1f-23caca7914d3",
       "Position": {
-        "X": -2102.9978,
-        "Y": -4889.9697
+        "X": -1918.7769,
+        "Y": -4865.5415
       }
     },
     {
       "ChildId": "13005c71-2ea0-4088-986b-ba8fbc91783b"/*Synchotron*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
+      "SectionId": "0c4f5f08-a8f1-4791-8764-f3a49aa77871",
       "Position": {
-        "X": -2086.003,
-        "Y": -4395.7686
+        "X": -2078.0986,
+        "Y": -4422.49
       }
     },
     {
-      "ChildId": "ecaa1d12-625b-46c0-9148-454dfc40b576"/*HowToUseTooll*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
+      "ChildId": "2fe00e23-ee4a-4234-a0dc-213b9a6ca9fe"/*OrbitCamera*/,
+      "SectionId": "7a6d050e-f043-49ca-9f1f-23caca7914d3",
       "Position": {
-        "X": -2101.4788,
-        "Y": -5021.86
+        "X": -1778.7769,
+        "Y": -4830.5415
+      }
+    },
+    {
+      "ChildId": "64fe5405-7f98-4303-b2a5-f53db065740c"/*TorusMesh*/,
+      "SectionId": "7a6d050e-f043-49ca-9f1f-23caca7914d3",
+      "Position": {
+        "X": -1918.7769,
+        "Y": -4900.5415
       }
     },
     {
       "ChildId": "665d7961-58a9-4181-94f1-eb40af17cdc7"/*HowToAnimate*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
+      "SectionId": "b4fc7f16-73ac-48ea-93d2-6253527680e3",
       "Position": {
-        "X": -2231.4658,
-        "Y": -4604.3564
+        "X": -2226.7622,
+        "Y": -4612.797
+      }
+    },
+    {
+      "ChildId": "6ff09257-3715-429c-8b3d-e3190df4e9b0"/*AnimValue*/,
+      "SectionId": "7a6d050e-f043-49ca-9f1f-23caca7914d3",
+      "Position": {
+        "X": -2058.7769,
+        "Y": -4865.5415
       }
     },
     {
       "ChildId": "73956a9d-0756-4d9c-a11b-ca59b3ee16fb"/*HowToDrawThings*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
+      "SectionId": "b4fc7f16-73ac-48ea-93d2-6253527680e3",
       "Position": {
-        "X": -2081.4658,
-        "Y": -4604.3564
-      }
-    },
-    {
-      "ChildId": "acbc034c-3c0d-4f7e-ac09-39cfd702f601"/*HowToUseImageEffects*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
-      "Position": {
-        "X": -1933.4803,
-        "Y": -4603.2993
-      }
-    },
-    {
-      "ChildId": "91dc79a2-ed7a-41dc-8245-2d3011f4aebe"/*HowToUseOperators*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
-      "Position": {
-        "X": -1783.4803,
-        "Y": -4603.2993
+        "X": -2076.7622,
+        "Y": -4612.797
       }
     },
     {
       "ChildId": "91042db3-81d6-4a17-8cef-423811aabb17"/*HowToUsePoints*/,
-      "Size": {
-        "X": 110.0,
-        "Y": 23.0
-      },
+      "SectionId": "b4fc7f16-73ac-48ea-93d2-6253527680e3",
       "Position": {
-        "X": -1633.4803,
-        "Y": -4603.2993
+        "X": -1628.7769,
+        "Y": -4611.7397
+      }
+    },
+    {
+      "ChildId": "91dc79a2-ed7a-41dc-8245-2d3011f4aebe"/*HowToUseOperators*/,
+      "SectionId": "b4fc7f16-73ac-48ea-93d2-6253527680e3",
+      "Position": {
+        "X": -1778.7769,
+        "Y": -4611.7397
+      }
+    },
+    {
+      "ChildId": "acbc034c-3c0d-4f7e-ac09-39cfd702f601"/*HowToUseImageEffects*/,
+      "SectionId": "b4fc7f16-73ac-48ea-93d2-6253527680e3",
+      "Position": {
+        "X": -1928.7769,
+        "Y": -4611.7397
+      }
+    },
+    {
+      "ChildId": "d31691f2-3f93-474e-9327-b28281c057f3"/*FluidFeedback*/,
+      "SectionId": "7a6d050e-f043-49ca-9f1f-23caca7914d3",
+      "Position": {
+        "X": -1778.7769,
+        "Y": -4795.5415
+      }
+    },
+    {
+      "ChildId": "dda89242-8a90-4442-b3df-ed2d855e32a4"/*DrawMesh*/,
+      "SectionId": "7a6d050e-f043-49ca-9f1f-23caca7914d3",
+      "Position": {
+        "X": -1778.7769,
+        "Y": -4900.5415
+      }
+    },
+    {
+      "ChildId": "eb3041f4-dcf1-4ef7-948e-c18ee0a29bc8"/*ThereDemo*/,
+      "SectionId": "0c4f5f08-a8f1-4791-8764-f3a49aa77871",
+      "Position": {
+        "X": -2228.099,
+        "Y": -4422.49
+      }
+    },
+    {
+      "ChildId": "ecaa1d12-625b-46c0-9148-454dfc40b576"/*HowToUseTixl*/,
+      "SectionId": "589f0a56-7537-4b0e-9305-ec21b76ae7fa",
+      "Position": {
+        "X": -2071.0452,
+        "Y": -5065.608
       }
     }
   ],
   "OutputUis": [],
-  "Annotations": [
+  "Sections": [
     {
-      "Id": "b81c6d34-6ca0-4cf8-aeb5-49e6bdeae95a",
-      "Title": "Welcome to TiXL\n\nThis short tutorial will guide you through the first steps.\n",
+      "Id": "0c4f5f08-a8f1-4791-8764-f3a49aa77871",
+      "Title": "Some more complex projects.",
+      "Label": "More Examples",
+      "ParentSectionId": "b81c6d34-6ca0-4cf8-aeb5-49e6bdeae95a",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -170,26 +131,28 @@
         "W": 1.0
       },
       "Position": {
-        "X": -2277.1924,
-        "Y": -5383.488
+        "X": -2257.4583,
+        "Y": -4514.9995
       },
       "Size": {
-        "X": 813.0497,
-        "Y": 614.5786
+        "X": 791.05005,
+        "Y": 177.02637
       }
     },
     {
       "Id": "1bb9e84d-84fb-4bc0-a070-ba1d76092369",
-      "Title": "This is the Graph Window.\n\nIn the top right corner, you see,  that it's \ncurrently showing your [Dashboard].",
+      "Title": "In the top right corner, you see,  that it's \ncurrently showing your [Dashboard].",
+      "Label": "This is the Graph Window.",
+      "ParentSectionId": "b81c6d34-6ca0-4cf8-aeb5-49e6bdeae95a",
       "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
+        "X": 0.5886525,
+        "Y": 0.5886525,
+        "Z": 0.5886525,
         "W": 1.0
       },
       "Position": {
-        "X": -2267.1064,
-        "Y": -5322.4688
+        "X": -2257.4583,
+        "Y": -5328.7397
       },
       "Size": {
         "X": 406.215,
@@ -198,7 +161,9 @@
     },
     {
       "Id": "3abc855f-23b7-4e19-b575-d7afc764b9ca",
-      "Title": "You can...\n- zoom with mouse wheel\n- pan with the right mouse button\n- or press [F] to adjust to the view to show all \n  content.",
+      "Title": "- zoom with mouse wheel\n- pan with the right mouse button\n- or press [F] to adjust to the view to show all \n  content.",
+      "Label": "You can...",
+      "ParentSectionId": "b81c6d34-6ca0-4cf8-aeb5-49e6bdeae95a",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -206,17 +171,19 @@
         "W": 1.0
       },
       "Position": {
-        "X": -1854.5667,
-        "Y": -5322.4688
+        "X": -1851.2433,
+        "Y": -5328.7397
       },
       "Size": {
-        "X": 379.77603,
-        "Y": 100.455734
+        "X": 384.83508,
+        "Y": 100.45557
       }
     },
     {
       "Id": "589f0a56-7537-4b0e-9305-ec21b76ae7fa",
-      "Title": "This is an Operator.\n\nIf you select it, you will see its output in the Output-Window.\n\nTry to double-click it, for an interactive tutorial that will guide you\nthrough Tooll's user interface.\n\n\n\n\n\n\n       Double click ------>",
+      "Title": "If you select it, you will see its output in the Output-Window.\n\nTry to double-click it, for an interactive tutorial that will guide you\nthrough Tooll's user interface.\n\n\n\n       Double click ------>",
+      "Label": "This is an Operator",
+      "ParentSectionId": "b81c6d34-6ca0-4cf8-aeb5-49e6bdeae95a",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -224,17 +191,19 @@
         "W": 1.0
       },
       "Position": {
-        "X": -2266.507,
-        "Y": -5218.758
+        "X": -2257.4583,
+        "Y": -5228.2837
       },
       "Size": {
-        "X": 791.0501,
-        "Y": 233.90132
+        "X": 791.05005,
+        "Y": 251.34863
       }
     },
     {
       "Id": "7a6d050e-f043-49ca-9f1f-23caca7914d3",
-      "Title": "This is a simple Graph. Select the [FluidFeedback] operator to see it's output.",
+      "Title": "Select the [FluidFeedback] operator to see it's output.",
+      "Label": "This is a simple Graph",
+      "ParentSectionId": "b81c6d34-6ca0-4cf8-aeb5-49e6bdeae95a",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -242,35 +211,19 @@
         "W": 1.0
       },
       "Position": {
-        "X": -2267.399,
-        "Y": -4976.9624
+        "X": -2258.35,
+        "Y": -4976.935
       },
       "Size": {
-        "X": 792.98834,
-        "Y": 185.8118
-      }
-    },
-    {
-      "Id": "0c4f5f08-a8f1-4791-8764-f3a49aa77871",
-      "Title": "Some more complex projects.",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": -2275.9617,
-        "Y": -4532.795
-      },
-      "Size": {
-        "X": 815.3256,
-        "Y": 174.20337
+        "X": 792.9883,
+        "Y": 241.99268
       }
     },
     {
       "Id": "b4fc7f16-73ac-48ea-93d2-6253527680e3",
       "Title": "These interactive playgrounds give you a first introduction on how to use different Operators.\nThere is also the \"Tip of the Day\"-playlist on YouTube.",
+      "Label": "Examples",
+      "ParentSectionId": "b81c6d34-6ca0-4cf8-aeb5-49e6bdeae95a",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -278,13 +231,157 @@
         "W": 1.0
       },
       "Position": {
-        "X": -2275.9617,
-        "Y": -4757.4165
+        "X": -2257.4583,
+        "Y": -4734.9424
       },
       "Size": {
-        "X": 813.3638,
-        "Y": 210.12221
+        "X": 792.09644,
+        "Y": 219.94238
+      }
+    },
+    {
+      "Id": "b81c6d34-6ca0-4cf8-aeb5-49e6bdeae95a",
+      "Title": "This short tutorial will guide you through the first steps.\n",
+      "Label": "Welcome to TiXL",
+      "Color": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -2268.1436,
+        "Y": -5398.2993
+      },
+      "Size": {
+        "X": 801.73535,
+        "Y": 1060.3267
       }
     }
-  ]
+  ],
+  "Settings": {
+    "WindowLayout": "[Window][DockSpaceViewport_11111111]\nPos=0,26\nSize=1920,1054\nCollapsed=0\n\n[Window][Graph View##1]\nPos=201,26\nSize=2109,1391\nCollapsed=0\nDockId=0x00000003,0\n\n[Window][Parameters]\nPos=1661,710\nSize=442,568\nCollapsed=0\nDockId=0x00000002,0\n\n[Window][Variations]\nPos=2839,669\nSize=601,748\nCollapsed=0\nDockId=0x0000000A,0\n\n[Window][Output View##0]\nPos=2312,26\nSize=1128,641\nCollapsed=0\nDockId=0x00000007,0\n\n[Window][Debug##Default]\nPos=60,60\nSize=400,400\nCollapsed=0\n\n[Window][Explore Variations]\nPos=810,306\nSize=768,283\nCollapsed=0\n\n[Window][Console]\nPos=1331,138\nSize=550,450\nCollapsed=0\n\n[Window][Output View##1]\nPos=0,26\nSize=2304,712\nCollapsed=0\n\n[Window][Symbol Library]\nPos=0,26\nSize=199,881\nCollapsed=0\nDockId=0x0000000D,0\n\n[Window][Render as Video]\nPos=2105,710\nSize=455,568\nCollapsed=0\nDockId=0x00000002,1\n\n[Window][##typeAheadSearchPopup]\nPos=1692,821\nSize=450,300\nCollapsed=0\n\n[Window][Combine into symbol]\nPos=1030,545\nSize=500,350\nCollapsed=0\n\n[Window][Parameters##98]\nPos=0,576\nSize=323,864\nCollapsed=0\n\n[Window][Add output]\nPos=1030,595\nSize=500,250\nCollapsed=0\n\n[Window][Duplicate as new symbol]\nPos=1030,580\nSize=500,280\nCollapsed=0\n\n[Window][Output View##97]\nPos=0,26\nSize=1728,927\nCollapsed=0\n\n[Window][Output View##98]\nPos=0,26\nSize=2304,593\nCollapsed=0\n\n[Window][Parameters##1]\nPos=2312,669\nSize=525,748\nCollapsed=0\nDockId=0x00000009,0\n\n[Window][Render To File]\nPos=1336,536\nSize=584,423\nCollapsed=0\nDockId=0x00000002,1\n\n[Window][Add parameter input]\nPos=1030,533\nSize=500,350\nCollapsed=0\n\n[Window][Variation Explorer]\nPos=0,26\nSize=1315,1414\nCollapsed=0\n\n[Window][Dear ImGui Demo]\nPos=650,46\nSize=550,680\nCollapsed=0\n\n[Window][Search]\nPos=710,390\nSize=500,300\nCollapsed=0\n\n[Window][##CurvePopup]\nPos=1164,199\nSize=500,400\nCollapsed=0\n\n[Window][Settings]\nPos=60,60\nSize=550,450\nCollapsed=0\n\n[Window][Output View##99]\nPos=763,26\nSize=1157,948\nCollapsed=0\n\n[Window][Rename symbol]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit description]\nPos=410,190\nSize=1100,700\nCollapsed=0\n\n[Window][Rename input]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit comment]\nPos=710,315\nSize=500,450\nCollapsed=0\n\n[Window][Output View##100]\nSize=550,448\nCollapsed=0\n\n[Window][WindowOverViewport_11111111]\nPos=0,26\nSize=3440,1391\nCollapsed=0\n\n[Window][Assets]\nPos=0,909\nSize=199,508\nCollapsed=0\nDockId=0x0000000E,0\n\n[Window][Output View##101]\nPos=1821,26\nSize=739,1272\nCollapsed=0\n\n[Window][ProgressionPopup]\nPos=930,578\nSize=700,260\nCollapsed=0\n\n[Window][Skill Quest Overview]\nPos=880,408\nSize=800,600\nCollapsed=0\n\n[Window][###ExitDialog]\nPos=1070,620\nSize=420,200\nCollapsed=0\n\n[Window][Editor Feature Tests]\nPos=389,265\nSize=588,457\nCollapsed=0\n\n[Window][Welcome to the TiXL Alpha]\nPos=60,60\nSize=680,480\nCollapsed=0\n\n[Window][Composition Settings]\nPos=705,117\nSize=553,453\nCollapsed=0\n\n[Window][Help]\nPos=2839,669\nSize=601,748\nCollapsed=0\nDockId=0x0000000A,1\n\n[Window][Edit username]\nPos=1420,558\nSize=600,300\nCollapsed=0\n\n[Window][Welcome to TiXL]\nPos=661,258\nSize=680,480\nCollapsed=0\n\n[Window][Create new project]\nPos=1445,542\nSize=550,333\nCollapsed=0\n\n[Docking][Data]\nDockSpace         ID=0x08BD597D Window=0x1BBC0F80 Pos=0,26 Size=3440,1391 Split=X Selected=0x8995E68A\n  DockNode        ID=0x0000000B Parent=0x08BD597D SizeRef=199,1391 Split=Y Selected=0x42C24103\n    DockNode      ID=0x0000000D Parent=0x0000000B SizeRef=549,881 HiddenTabBar=1 Selected=0xD41FC2E2\n    DockNode      ID=0x0000000E Parent=0x0000000B SizeRef=549,508 HiddenTabBar=1 Selected=0x42C24103\n  DockNode        ID=0x0000000C Parent=0x08BD597D SizeRef=3140,1391 Split=X\n    DockNode      ID=0x00000003 Parent=0x0000000C SizeRef=2010,1391 CentralNode=1 HiddenTabBar=1 Selected=0x8995E68A\n    DockNode      ID=0x00000004 Parent=0x0000000C SizeRef=1128,1391 Split=Y Selected=0xC9567BC1\n      DockNode    ID=0x00000007 Parent=0x00000004 SizeRef=916,641 HiddenTabBar=1 Selected=0xC9567BC1\n      DockNode    ID=0x00000008 Parent=0x00000004 SizeRef=916,748 Split=X Selected=0x35577784\n        DockNode  ID=0x00000009 Parent=0x00000008 SizeRef=525,446 HiddenTabBar=1 Selected=0x35577784\n        DockNode  ID=0x0000000A Parent=0x00000008 SizeRef=601,446 Selected=0x742F3B5B\nDockSpace         ID=0x7C6B3D9B Pos=0,26 Size=1953,1101 CentralNode=1 HiddenTabBar=1 Selected=0xF7A0F8A9\nDockSpace         ID=0x8B93E3BD Pos=0,26 Size=1920,1054 Split=X Selected=0x1F46795C\n  DockNode        ID=0x00000001 Parent=0x8B93E3BD SizeRef=824,1391 CentralNode=1 Selected=0xF7A0F8A9\n  DockNode        ID=0x00000002 Parent=0x8B93E3BD SizeRef=916,1391 Selected=0x9CE63BF6\n\n",
+    "WindowLayoutImGuiVersion": "1.91.6",
+    "WindowVisibility": {
+      "Variations": true,
+      "Output View##0": true,
+      "Output View##1": false,
+      "Output View##2": false,
+      "Output View##3": false,
+      "Output View##4": false,
+      "Output View##5": false,
+      "Output View##6": false,
+      "Output View##7": false,
+      "Output View##8": false,
+      "Output View##9": false,
+      "Output View##10": false,
+      "Output View##11": false,
+      "Output View##12": false,
+      "Output View##13": false,
+      "Output View##14": false,
+      "Output View##15": false,
+      "Output View##16": false,
+      "Output View##17": false,
+      "Output View##18": false,
+      "Output View##19": false,
+      "Output View##20": false,
+      "Output View##21": false,
+      "Output View##22": false,
+      "Output View##23": false,
+      "Output View##24": false,
+      "Output View##25": false,
+      "Output View##26": false,
+      "Output View##27": false,
+      "Output View##28": false,
+      "Output View##29": false,
+      "Output View##30": false,
+      "Output View##31": false,
+      "Output View##32": false,
+      "Output View##33": false,
+      "Output View##34": false,
+      "Output View##35": false,
+      "Output View##36": false,
+      "Output View##37": false,
+      "Output View##38": false,
+      "Output View##39": false,
+      "Output View##40": false,
+      "Output View##41": false,
+      "Output View##42": false,
+      "Output View##43": false,
+      "Output View##44": false,
+      "Output View##45": false,
+      "Output View##46": false,
+      "Output View##47": false,
+      "Output View##48": false,
+      "Output View##49": false,
+      "Output View##50": false,
+      "Output View##51": false,
+      "Output View##52": false,
+      "Output View##53": false,
+      "Output View##54": false,
+      "Output View##55": false,
+      "Output View##56": false,
+      "Output View##57": false,
+      "Output View##58": false,
+      "Output View##59": false,
+      "Output View##60": false,
+      "Output View##61": false,
+      "Output View##62": false,
+      "Output View##63": false,
+      "Output View##64": false,
+      "Output View##65": false,
+      "Output View##66": false,
+      "Output View##67": false,
+      "Output View##68": false,
+      "Output View##69": false,
+      "Output View##70": false,
+      "Output View##71": false,
+      "Output View##72": false,
+      "Output View##73": false,
+      "Output View##74": false,
+      "Output View##75": false,
+      "Output View##76": false,
+      "Output View##77": false,
+      "Output View##78": false,
+      "Output View##79": false,
+      "Output View##80": false,
+      "Output View##81": false,
+      "Output View##82": false,
+      "Output View##83": false,
+      "Output View##84": false,
+      "Output View##85": false,
+      "Output View##86": false,
+      "Output View##87": false,
+      "Output View##88": false,
+      "Output View##89": false,
+      "Output View##90": false,
+      "Output View##91": false,
+      "Output View##92": false,
+      "Output View##93": false,
+      "Output View##94": false,
+      "Output View##95": false,
+      "Output View##96": false,
+      "Output View##97": false,
+      "Output View##98": false,
+      "Output View##99": false,
+      "Output View##100": false,
+      "Graph View##0": false,
+      "Graph View##1": true,
+      "Parameters##1": true,
+      "Symbol Library": true,
+      "Assets": true,
+      "Variation Explorer": false,
+      "Render To File": false,
+      "IO Events": false,
+      "Performance": false,
+      "Help": true,
+      "Console": false,
+      "Utilities": false,
+      "Guided Feature Tests": false,
+      "Settings": false,
+      "Composition Settings": false,
+      "Screen Manager": false,
+      "Welcome to TiXL": false
+    }
+  }
 }
