@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4b207e35-64b4-4833-977c-da6c7154a081"/*Sharpen*/,
   "Description": "Sharpens the incoming image.\n\nCheck out the [ReactionDiffusionExample] for a more advanced use case",
   "SymbolTags": "1",

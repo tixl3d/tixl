@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e20f492c-490f-4297-a9c8-0e5aab14f9c1"/*ShadowPlaneExample*/,
   "Description": "Simple setup on how to use the [ShadowPlane] operator with two Pointlights.",
   "InputUis": [],

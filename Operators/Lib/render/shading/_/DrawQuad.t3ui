@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b89c5923-cc58-4d7a-8dce-eb1f8cdfc6e8"/*DrawQuad*/,
   "Description": "Draw a simple unlit quad geometry, ignoring the Image's aspect ratio.\n\nPlease consider using [Layer2d] instead.",
   "SymbolTags": "8",

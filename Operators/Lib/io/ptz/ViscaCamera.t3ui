@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7c90d60d-0d12-736d-ad90-1d2e3f4d5d6d"/*ViscaCamera*/,
   "Description": "Controls a PTZ camera using the VISCA over IP protocol.\n\nThis operator sends UDP packets to control Pan, Tilt, and Zoom. It supports absolute positioning.\n\nAKA: PTZ, Sony VISCA, Network Camera Control\n\nTips:\n* Ensure the camera is configured to accept VISCA over IP (often port 52381).\n* Pan and Tilt inputs are normalized (-1..1). Adjust 'Pan Range' and 'Tilt Range' to match your specific camera model's max steps (e.g., Sony SRG series often use 0x1800 for Pan).\n* Zoom is normalized (0..1).",
   "InputUis": [

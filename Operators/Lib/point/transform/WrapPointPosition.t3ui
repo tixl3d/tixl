@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0814a593-80ab-416f-a3ca-eef78b0a9c0c"/*WrapPointPosition*/,
   "Description": "Can be used to wrap positions around a cubic volume, e.g., around the current camera position.",
   "SymbolTags": "8",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b4766419-8bca-4fa0-a398-e6af90ef8971"/*LoadMidiFile*/,
   "Inputs": [
     {

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9a34f503-709b-42e0-a25f-bc74573afa6b"/*IsIntEven*/,
   "Description": "Checks whether the incoming or defined Integer is Odd or Even and gives out a bool accordingly\n\nCan be combined with [IntValue] and [Boolean] to visualize",
   "SymbolTags": "8",

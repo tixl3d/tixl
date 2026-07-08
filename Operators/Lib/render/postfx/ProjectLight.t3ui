@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7eb5ee83-2b5c-43bc-95d4-af5e18c85bc5"/*ProjectLight*/,
   "Description": "Renders light \"godrays\" from a projected image into a scene casting nice shadows.\n\nIt's a post render effect rendering an image and a shadow pass and combining it while applying some colors parameters.\n",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "cb89ed1d-03ea-4880-bfa0-1dd723e4bdab"/*FadingSlideShow*/,
   "Description": "Blends smoothly between image files read from a directory.\nBlendSpeed controls the speed of the transition.",
   "SymbolTags": "1",

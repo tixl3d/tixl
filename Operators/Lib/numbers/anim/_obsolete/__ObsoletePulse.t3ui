@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5952d7b4-29ac-41fb-9324-287392d55048"/*__ObsoletePulse*/,
   "Description": "Generates a pulse value with linear decay.\nAlso consider using [LFO].",
   "SymbolTags": "4096",

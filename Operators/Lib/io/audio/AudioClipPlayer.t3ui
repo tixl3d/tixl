@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3f78a8a8-2c0b-4486-813e-f052e01e4248"/*AudioClipPlayer*/,
   "Description": "Plays timeline [AudioClip]s. With AutoCollect on (default) it plays every [AudioClip] in the same composition — no wiring needed. You can also wire specific [AudioClip] outputs into it for explicit control.\n\nUnlike the editor's built-in auto-play, this op drives playback through the graph, so it also works for nested compositions and exported projects — insert it into your render command chain (e.g. via a [Group]) so it's evaluated each frame.",
   "SymbolTags": "64",

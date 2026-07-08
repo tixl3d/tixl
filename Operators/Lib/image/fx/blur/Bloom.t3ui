@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f634e126-8834-46ea-bd6e-5ebfdc8b0733"/*Bloom*/,
   "Description": "A more versatile and faster version of [Glow].\n\nThis uses a down sampling and blurring cascade to create multiple blurred copies of the original image and then combines these layers additively while applying a gradient.\n\nPlease also try the presets and check the documentation of the parameters.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Bloom] [Glow] [Grain] [Blur]",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "6681a029-e23f-4c6b-aa95-df30906ea58c"/*I02k_GainAndBiasControl*/,
   "Inputs": [],
   "Children": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a3945dbe-d5be-4f0f-a904-8ee287d14a9f"/*LoopExample*/,
   "Description": "Shows how to use [Loop] to iterate over the nodes connected to a [Switch]. ",
   "SymbolTags": "2",

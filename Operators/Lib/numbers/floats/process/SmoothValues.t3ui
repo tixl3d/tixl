@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "50bf9e01-6912-4ab7-b233-660ce67bca25"/*SmoothValues*/,
   "Description": "Smooths a list of values by applying a smoothing window.",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ee398291-674c-409b-aab8-9ca843ce6cef"/*HoneyCombTiles*/,
   "Description": "Creates a hexagonal pattern based on an incoming image.\nTip: Use [AdjustColors] on the incoming image to manipulate the pattern\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]",
   "SymbolTags": "8",

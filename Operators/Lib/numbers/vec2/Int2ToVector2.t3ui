@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "d1a66374-f0e8-4ef5-adf4-2871ec549d2a"/*Int2ToVector2*/,
   "Description": "Converts an [Int2] into a [Vector2]\n\nTo do the opposite two [FloatToInt] can be used.",
   "InputUis": [

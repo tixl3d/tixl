@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "fb801f10-8f84-4f69-9f7e-66cc7f6b7878"/*DampVec2*/,
   "Description": "Smooths the incoming Vector2.",
   "InputUis": [

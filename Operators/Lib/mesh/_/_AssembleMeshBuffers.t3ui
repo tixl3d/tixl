@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e0849edd-ea1b-4657-b22d-5aa646318aa8"/*_AssembleMeshBuffers*/,
   "Description": "An internal operator that combines structured buffers for Vertices and Face Indices into a MeshBuffer definition.\n\nIt's the reversal of [_MeshBufferComponents].",
   "SymbolTags": "16",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9b550333-1caa-43d4-9e6f-245c55c2d24a"/*_ParticleUpdateTester*/,
   "Description": "A helper to test frame independent update.",
   "InputUis": [

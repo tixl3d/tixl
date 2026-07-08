@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2ba45de7-c111-4c9f-9d19-8a17130dbcc8"/*SetFloatListValue*/,
   "Description": "Manipulate a value in a float list",
   "InputUis": [

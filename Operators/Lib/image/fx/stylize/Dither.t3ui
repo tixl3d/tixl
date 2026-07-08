@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "299e9912-2a6a-40ea-aa31-4c357bbec125"/*Dither*/,
   "Description": "Applies Floyd-Steinberg dithering to an image to convert it to black and white colors.\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]",
   "SymbolTags": "1",

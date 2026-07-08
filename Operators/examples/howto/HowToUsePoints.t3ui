@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e6a11c29-11f9-49a3-9eff-463a93503420"/*HowToUsePoints*/,
   "Description": "This playground gives you an introduction on how point buffers can be used to generate content and drive effects.",
   "SymbolTags": "3",

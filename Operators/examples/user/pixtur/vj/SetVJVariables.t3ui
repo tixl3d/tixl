@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e14af8a3-8672-4348-af9e-735714c31c92"/*SetVJVariables*/,
   "Description": "A small helper that sets LFO speed factor variables from MidiControllers into context. This setup is highly customized for WAKE performances and probably not applicable to your situation. But it might be a good starting point for tweaking your own setups.",
   "InputUis": [

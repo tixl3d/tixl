@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "10acf0aa-2cb3-446b-b837-b6abe24d44da"/*DateTimeToFloat*/,
   "Description": "Converts a DateTime into different float values like normalized time of day (between 0 ... 1), day of the year, etc.",
   "SymbolTags": "8",

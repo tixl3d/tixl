@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7ff47023-622e-4834-8de5-2438d56c09bd"/*DetectPulse*/,
   "Inputs": [
     {

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ce7c2103-3669-4c7a-ba61-a10428b9d467"/*RotateVector3*/,
   "Description": "Rotates a vector around an axis.",
   "InputUis": [

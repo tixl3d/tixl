@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7805285e-e74b-48f5-8228-20bbb178e828"/*NormalizeVector3*/,
   "Description": "Normalizes a Vec3",
   "InputUis": [

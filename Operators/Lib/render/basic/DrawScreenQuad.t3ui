@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5a2752e8-95ae-4d76-b903-1f52ef43bcdc"/*DrawScreenQuad*/,
   "Description": "Renders a rectangle that is locked to the camera view and automatically adjusts to the right image aspect ratio.",
   "SymbolTags": "24",

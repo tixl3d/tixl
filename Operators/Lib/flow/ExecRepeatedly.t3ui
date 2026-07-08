@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "46420979-1e56-4de3-a6ca-0447be1b9813"/*ExecRepeatedly*/,
   "Description": "Controls how frequently the sub graph is being executed. \nThis can be useful for increasing or slowing down simulation speeds.",
   "SymbolTags": "8",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b98ab7bd-1843-4208-9bdb-c279dfc5b5aa"/*PickBool*/,
   "Description": "Picks a bool from the connected inputs.",
   "SymbolTags": "8",

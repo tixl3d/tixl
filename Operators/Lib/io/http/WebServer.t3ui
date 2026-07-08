@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1d2e3f4a-5b6c-4789-0123-456789abcdef"/*WebServer*/,
   "Description": "Starts a simple HTTP web server to serve content over the network.\n\nThis operator can be used to create simple web interfaces, provide data to other applications via a basic REST API, or serve files. The content served to connecting clients is determined by the `HtmlContent` input.\n\nTips:\n- Use the `Listen` toggle to start and stop the server.\n- If `Port` is set to 0, the server will automatically pick a free port.\n- The server's URL will be http://[LocalIpAddress]:[Port]/\n\nAKA: http, server, web, rest, api",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5b911a78-8cad-4dbd-9f74-afccb0cb0787"/*AbsoluteSDF*/,
   "Description": "Returns the absolute value of the signed distance field\n\nHelpful combination: [CombineSDF] ",
   "SymbolTags": "8",

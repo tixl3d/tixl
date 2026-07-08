@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f0c38f0f-36ef-4562-a993-96a175cd03cd"/*CurrentCamMatrices*/,
   "Description": "Returns various matrices of the current context camera. \n\nThis is used internally for things like rendering shadow maps.",
   "InputUis": [],

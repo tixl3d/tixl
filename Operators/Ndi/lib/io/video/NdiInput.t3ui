@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7567c3b0-9d91-40d2-899d-3a95b481d023"/*NdiInput*/,
   "Description": "NDI live video input",
   "InputUis": [

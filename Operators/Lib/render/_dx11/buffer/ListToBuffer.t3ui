@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7e28c796-85e7-47ee-99bb-9599284dbeeb"/*ListToBuffer*/,
   "Description": "Sends the incoming structured list as StructuredBuffers to the GPU.\n\nThis is frequently used to upload multiple [APoint]s for further usage on the graphics card.",
   "SymbolTags": "8",

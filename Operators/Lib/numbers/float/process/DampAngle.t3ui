@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9757618d-e72a-4507-8352-6f824b56cc58"/*DampAngle*/,
   "Description": "Damps (i.e. smoothens or filters) an incoming float value. Avoids flips when jumping from 359 to 0 degrees.\n\nOther damping functions: [Damp], [DampVec2], [DampVec3] and [DampFloatList].",
   "SymbolTags": "8",

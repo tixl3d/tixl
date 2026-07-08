@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "16d10dc8-63b9-4ddf-90b8-41caef99d945"/*_DrawQuads*/,
   "Description": "Draws 3D rotated quads at point positions.\n\nThis can be useful for drawing oriented sprite-like shapes.\nPlease note that the orientation is not aligned toward the camera. \n\nNote: This operator has been deprecated. Consider using [DrawBillboards] with the rotation mode set to point rotation.",
   "InputUis": [

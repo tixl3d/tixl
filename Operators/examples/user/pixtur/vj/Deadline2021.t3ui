@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3664007f-9105-40b7-ba58-1466e4f6edbd"/*Deadline2021*/,
   "Description": "Oh dear",
   "InputUis": [],
@@ -484,13 +483,6 @@
       "Position": {
         "X": 783.17944,
         "Y": -1412.9807
-      }
-    },
-    {
-      "ChildId": "40a3eddf-c6e2-4c87-86a8-0a5e22246dee"/*WS4_Physarum*/,
-      "Position": {
-        "X": 2989.3044,
-        "Y": 1501.885
       }
     },
     {

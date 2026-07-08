@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "690a64f6-7475-4766-a3f6-456fc5fcea86"/*PickCBuffer*/,
   "Description": "Picks one of the connected Constatnt buffers. \n",
   "InputUis": [

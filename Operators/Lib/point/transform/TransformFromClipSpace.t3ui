@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "81377edc-0a42-4bb1-9440-2f2433d5757f"/*TransformFromClipSpace*/,
   "Description": "Transforms Point positions from world to clip space.",
   "SymbolTags": "64",

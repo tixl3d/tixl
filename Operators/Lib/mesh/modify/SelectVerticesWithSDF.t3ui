@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "058323b6-2e4c-4448-a4c4-ebbc878b3aae"/*SelectVerticesWithSDF*/,
   "Description": "Allows selecting and adding values to vertices in 3D space via SDF Objects/Fields.\nSimilar to [SelectPoints].\nNeeds any SDF such as [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input to select the points.\nAnd any form of points such as: [GridPoints], [RadialPoints], [SpherePoints], [PointsOnMesh], etc.",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "bc7594df-68f0-4678-aec7-523474b3b36a"/*SumInts*/,
   "Description": "Adds the connected integer values",
   "SymbolTags": "8",

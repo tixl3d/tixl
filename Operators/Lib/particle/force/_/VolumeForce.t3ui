@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "fbe1a703-f372-4236-9f20-5d0b69183843"/*VolumeForce*/,
   "Description": "Repels particles from primitive volumes.\n\nThis force uses the particle's radius in world units as defined on emit by [ParticleSystem]. Please check the documentation on that operator.\n\nThis op has been superceeded by [FieldVolumeForce].",
   "SymbolTags": "1",

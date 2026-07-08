@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "11187aad-c763-48ed-9d5f-216fae079285"/*Warp2dMeshExample*/,
   "Description": "Can be used for projection mapping",
   "InputUis": [],

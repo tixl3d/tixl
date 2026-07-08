@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "40f0b1c9-9f87-489c-a6b9-ff9a5bd263ec"/*AddInt2*/,
   "Description": "Adds two int2",
   "SymbolTags": "1",

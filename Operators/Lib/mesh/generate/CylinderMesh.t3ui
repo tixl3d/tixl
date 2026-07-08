@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5777a005-bbae-48d6-b633-5e998ca76c91"/*CylinderMesh*/,
   "Description": "Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh], [DrawMeshUnlit], and [DrawMeshHatched] among others.\n\nThis mesh can be generated with or without closing caps. You can use the Height, Fill, and RadiusOffset parameters to generate things like pie charts, torus diagrams, cones, and other shapes.\nCheck the presets.\n\nTip:\n- set the cap segments to 0 to skip drawing caps.\nAlso see [NGonMesh]\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
   "SymbolTags": "1",

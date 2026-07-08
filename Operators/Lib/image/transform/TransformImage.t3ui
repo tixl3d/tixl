@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "32e18957-3812-4f64-8663-18454518d005"/*TransformImage*/,
   "Description": "Rotates, offsets, and scales the incoming image.\nIt includes texture wrapping modes: Repeat, Mirror, Clamp, Border...\nIt's a powerful and versatile operator with many use cases such as tiling textures, patterns, decals...\n\nTo control how the image changes when it's repeating use: [MirrorRepeat]\nA more sophisticated version: [KochKaleidoskope]",
   "SymbolTags": "1",

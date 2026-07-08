@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "523bf3f7-d8f6-459b-a7fb-f681dce9e697"/*LocatorExample*/,
   "Description": "A simple setup that illustrates how to attach objects to arbitrary moving worldspace positions.",
   "SymbolTags": "2",

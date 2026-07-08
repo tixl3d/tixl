@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "8171c2f5-96df-41f6-884c-dbd004ae8a17"/*ValueToRate*/,
   "Description": "Converts a value to a rate.\n\nCan also be used with [MockStrings] to select between various other groups of numbers such as primes.",
   "SymbolTags": "8",

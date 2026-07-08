@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1dfc9f6d-effa-407b-8f8d-5adf62504205"/*_WFEGameState*/,
   "Description": "Checks if users hit key on right time and computes score.",
   "InputUis": [

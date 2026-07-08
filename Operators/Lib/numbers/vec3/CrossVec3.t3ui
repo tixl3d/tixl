@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "6cc830f0-cbc5-430d-9f32-1eab47b44693"/*CrossVec3*/,
   "Description": "Applies a cross product to two Vec3's",
   "InputUis": [

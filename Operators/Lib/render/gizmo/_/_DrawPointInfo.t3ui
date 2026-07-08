@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ff5b93e3-d29f-489f-8cca-cb12cd1af65d"/*_DrawPointInfo*/,
   "Description": "Draws additional information like index or position on points.",
   "SymbolTags": "16",

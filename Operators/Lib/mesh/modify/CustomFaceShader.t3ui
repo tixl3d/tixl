@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f97bfe16-dd7f-49b9-8238-cea1ee13a66f"/*CustomFaceShader*/,
   "Description": "Manipulates mesh triangles with a short HLSL code fragment - each face gets its own unshared vertices, which allows faceting effects.\n\nModify the prepared vertices `v1`, `v2`, `v3`; `pos1`-`pos3` keep the original positions and `faceIndex` identifies the triangle. Helpers like SampleGradient(f), Biased(f), noise and hash functions are available, and a connected Field can drive displacement or color. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "574d636f-64e6-4f07-ac17-49754d2c3599"/*GetPointLightOccclusion*/,
   "Inputs": [
     {

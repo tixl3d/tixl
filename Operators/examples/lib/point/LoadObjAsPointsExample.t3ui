@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3096f86e-e850-4f76-80de-1996fc811285"/*LoadObjAsPointsExample*/,
   "Description": "Shows how to load a point cloud with color information.",
   "InputUis": [],

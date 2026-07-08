@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c"/*OnvifCamera*/,
   "Inputs": [
     {

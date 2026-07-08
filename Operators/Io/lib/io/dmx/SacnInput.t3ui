@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e3207424-deaf-4462-acd5-21f2c6f16d1b"/*SacnInput*/,
   "Description": "Receives DMX data over the network using the sACN (Streaming ACN) protocol.\n\nThis operator listens for sACN packets on the local network, allowing you to receive DMX data from lighting consoles, media servers, or other sACN-enabled devices. It can listen to multiple DMX universes simultaneously.\n\nTips:\n- Select the correct `LocalIpAddress` for your network interface.\n- `StartUniverse` and `NumUniverses` define the range of DMX universes to listen to.\n- The output is a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n\nAKA: sacn, streaming acn, dmx, artnet, lighting",
   "InputUis": [

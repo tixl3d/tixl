@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f5aabc51-b275-4344-a244-934f4e4f7d3a"/*SerialInput*/,
   "Description": "Receives data from a serial port.\n\nThis operator listens for incoming data on a specified serial port, allowing communication with external hardware devices such as microcontrollers (e.g., Arduino) or other serial-enabled equipment. It can parse incoming data as individual lines or as a continuous string.\n\nTips:\n- Ensure the `BaudRate` and `PortName` match the settings of the sending device.\n- Use `ReceivedLines` to process multiple incoming messages, especially when the sending device terminates messages with a line ending.\n- `WasTrigger` can be used to trigger other operators when new data arrives.\n\nAKA: arduino, rs232, uart, com, serial reader",
   "InputUis": [

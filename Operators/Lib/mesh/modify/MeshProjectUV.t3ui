@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "97ffb173-f4cc-4143-a479-80cf3465cc7e"/*MeshProjectUV*/,
   "Description": "Overwrites the existing UV coordinates with planar mapping.\n\nBecomes visible with [DrawMesh].\n\nTo manipulate existing UV Coordinates see [TransformMeshUVs].\n\n\nAlso see [ReprojectToUV].",
   "SymbolTags": "1",

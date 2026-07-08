@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "46749ae5-ef10-43e7-a712-5cbd7a1d4398"/*TraceContourLines*/,
   "Description": "An experimental effect that moves points along the brightness levels of an input texture similar to contour lines on a map.\n\nThe \"zone\" defines a band of brightness within the input texture. This zone is divided into a set of \"target levels\".\n\nThe incoming point set is divided into lines with a \"step\" length. Each line has a target brightness within the \"zone\" it's trying to reach and then follows its contour.\n\nTry the presets. You can also experiment with PointSimulation and various distributions of input points (e.g., GridPoints, RadialPoints, or Randomized Points).",
   "InputUis": [

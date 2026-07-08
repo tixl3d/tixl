@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1d56e2c6-9199-41e7-9404-24f4f6b75044"/*PlayVideoExample*/,
   "Description": "Shows how to playback multiple video files in a directory.\nSkip by clicking left/right.\n\nNote: this op needs timeline playback to run.",
   "InputUis": [

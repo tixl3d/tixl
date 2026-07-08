@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "6ab63114-6477-4ab2-a071-a66a64a6d2b9"/*Sin*/,
   "Description": "Creates a sine wave also known as sinusoidal wave or sinusoid.\n\nUseful combinations: [Time] and an input\n\nAlternative: [Cos] [AnimValue] [SampleCurve]",
   "SymbolTags": "1",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2bd99e05-9a54-4466-a220-0289939406bd"/*ReprojectToUvExample*/,
   "Description": "Illustrates a potential setup for camera/media reprojection.\n\nIn combination with [Spout], this could be used to render content matching the visual perspective of an audience.",
   "InputUis": [],

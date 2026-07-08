@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "bc489196-9a30-4580-af6f-dc059f226da1"/*GetSRVProperties*/,
   "Description": "Returns the properties of a ShaderResourceView.",
   "SymbolTags": "24",

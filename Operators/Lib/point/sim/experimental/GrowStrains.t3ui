@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "98df563e-fd59-4458-a490-b7b7604ec1f3"/*GrowStrains*/,
   "Description": "Uses CollectedSpawnPoints and lines to animate W\nas weights moving across the strain with the age of \nthe spawn point.\n\nWe use a look-up texture that defines the growth \nprogression as follows:\n\n- Age from left (birth) to right (death)\n- Strain-Length from bottom (root / spawn position) to top.\n- R - Width\n- G - Noise amount\n- B - Twist\n",
   "SymbolTags": "64",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a2ea3af5-d78b-46b4-84db-09d31f042798"/*AdvancedFeedback2*/,
   "Description": "An improved feedback effect based on OKLab space.\n\nAll Feedback Ops: [FluidFeedback] [AdvancedFeedback] [AdvancedFeedback2]\n\nAlso see [AfterGlow2]",
   "SymbolTags": "1",

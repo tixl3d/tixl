@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "eb4d5014-2619-4368-a1b8-521db8372243"/*LenseFlareSetup*/,
   "Description": "Pre-made complex light flare setups with various styles.\n\nRequire at least one [PointLight] on the left side or within the same group / graph.",
   "SymbolTags": "8",

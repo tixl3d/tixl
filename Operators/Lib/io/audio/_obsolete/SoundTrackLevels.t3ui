@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a9e77500-ccb5-45b9-9f17-0d9bf9b58fb5"/*SoundTrackLevels*/,
   "Description": "This operator has been deprecated.\n\nIt uses a saved JSON export of soundtrack levels to scan for beats.\n\nConsider using [AudioReaction]",
   "InputUis": [

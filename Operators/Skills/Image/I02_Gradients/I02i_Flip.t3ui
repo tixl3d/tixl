@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "680bb1ae-d906-48cc-adbd-240e0df0497d"/*I02i_Flip*/,
   "Description": "LinearGradient: Flip with Negative Width",
   "InputUis": [],

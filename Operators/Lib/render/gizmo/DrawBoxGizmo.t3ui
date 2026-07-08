@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9123651a-5df8-4f85-9e14-2068f33e2ff1"/*DrawBoxGizmo*/,
   "Description": "Creates a 3D wireframe cube that can be used as a bounding box",
   "SymbolTags": "8",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ed0bc47a-31ef-400b-b4e4-5552a859b309"/*CollisionForce*/,
   "Description": "A simple simulation of sphere collision between points. The radius of the points is defined on emit by the [ParticleSystem]'s PointRadiusW factor.\n\nSome recommendations:\n1. Try to increase the radius (either by increasing the emit points W attribute or the radius factor) and adjust the [DrawPoints] radius accordingly.\n2. Try to increase [ParticleSystem] damping.\n",
   "SymbolTags": "8",

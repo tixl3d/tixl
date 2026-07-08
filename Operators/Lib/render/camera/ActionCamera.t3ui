@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "dfd4c912-4c4f-44b1-88aa-f27aa66b57af"/*ActionCamera*/,
   "Description": "Allows to interactive control a camera starting from a giving reference camera.\n\nAlso know as: FlyThrough, GameControlled camera, walk through, POV, Point of View.\n\nAlso see [BlendCameras].\n\n",
   "InputUis": [

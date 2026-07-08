@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "42cb88bc-beb8-4d89-ac99-44b77be5f03e"/*DrawMeshAtPoints*/,
   "Inputs": [
     {

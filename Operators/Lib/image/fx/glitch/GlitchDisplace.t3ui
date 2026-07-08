@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "43f15919-f6c3-4a10-9092-00973fc8e821"/*GlitchDisplace*/,
   "Description": "Takes the incoming image and applies an image effect that glitches and displaces parts of the image to mimic lossy signals, broken video files, codec glitches etc.\n\nVaguely similar Op: [SortPixelGlitch]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
   "InputUis": [

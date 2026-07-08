@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "23456789-0abc-def1-2345-67890abcdef1"/*ImageSegmentation*/,
   "Description": "Segments an image using MediaPipe Image Segmentation.\n\nThis operator uses MediaPipe Image Segmentation task to partition input image into different regions (e.g., background, person, hair, clothing). It outputs segmentation masks and data that can be used for compositing or analysis.\n\nInputs:\n- InputTexture: The image to process.\n- Enabled: Enables or disables image segmentation.\n- Model: Selects the segmentation model to use (e.g., SelfieSegmenter, DeepLabV3).\n- SelectedCategories: Comma-separated list of category indices to include in the mask.\n- Debug: Enables debug logging and debug texture output.\n- CategoryAllowlist: Comma-separated list of category names to allow (e.g. \"person, cup\").\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- MaskTexture: A texture where each pixel value corresponds to a category index.\n- UpdateCount: Increments each time a new frame is processed.\n- Confidence: The confidence score of the segmentation.\n- CategoryMask: A texture where each pixel value corresponds to a category index.\n- ConfidenceMask: A texture containing confidence scores for each pixel.\n- DebugTexture: Debug visualization texture.",
   "InputUis": [

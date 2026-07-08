@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0e13e34f-c07b-4ada-8c87-6b89f4ed8b41"/*CompareImages*/,
   "Description": "A simple helper to verify an image effect before and after. It shows both images divided by a movable border which also acts as a comparison monitor.\n\nAlso see: [ImageLevels] [WaveForm]",
   "SymbolTags": "1",

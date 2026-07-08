@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b0212daa-7fba-4f6a-851c-3dd9e2e8a23e"/*ShowTexture2d*/,
   "Description": "This operator is obsolete. Please use [ExecuteTextureUpdate]",
   "SymbolTags": "4096",

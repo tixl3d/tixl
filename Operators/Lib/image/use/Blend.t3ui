@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9f43f769-d32a-4f49-92ac-e0be3ba250cf"/*Blend*/,
   "Description": "Blends two images.\n\nIf you want to cross fade (mix) images, consider using [BlendImages]\n\nAll blend ops and similar: [BlendImages] [Blend] [BlendWithMask] [Combine3Images]",
   "SymbolTags": "1",

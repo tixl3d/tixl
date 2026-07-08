@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1e29f81b-0c05-4784-b3ac-c475ce510159"/*MakeTileableImage*/,
   "Description": "Makes an incoming image tileable based on linear edge Falloff.\n\nThis can be used to repeat an imported or generated texture infinitely without any obviously visible borders.\n\nAlso see [MakeTileableImageAdvanced] for a version with more options.",
   "SymbolTags": "8",

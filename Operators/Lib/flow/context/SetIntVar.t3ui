@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7953f704-ebee-498b-8bdd-a2c201dfe278"/*SetIntVar*/,
   "Description": "Sets or overwrites an int variable that can be retrieved by [GetIntVar] further down (left in) the graph.",
   "SymbolTags": "8",

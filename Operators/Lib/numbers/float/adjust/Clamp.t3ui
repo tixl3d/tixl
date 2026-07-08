@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c3a18346-930c-4242-9e42-aa9b3a439395"/*Clamp*/,
   "Description": "Clamps an input float between two values.\nCan be used to find minimum or maximum values.\n\nAKA: Min, Max\n\nTips: Also consider using [Remap] with clamping enabled.",
   "SymbolTags": "1",

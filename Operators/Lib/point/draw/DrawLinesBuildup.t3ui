@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "66f5a6af-b4a5-46ef-b1e5-4cdd035b6539"/*DrawLinesBuildup*/,
   "Description": "Renders incoming points as growing strokes. The points' W attribute encodes the U progress of the extension of the strokes.\n\nThis operator requires a texture with a [LinearGradient] that is transparent at the ends.\n\nAnother approach would be [SvgToPoints]->[PrepareSvgLineTransition]->[ListToBuffer]->[DrawLinesBuildup].",
   "SymbolTags": "8",

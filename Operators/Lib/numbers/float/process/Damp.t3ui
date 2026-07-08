@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "af9c5db8-7144-4164-b605-b287aaf71bf6"/*Damp*/,
   "Description": "Damps (i.e. smoothens or filters) an incoming float value.\n\nSee also: [DampVec2], [DampVec3] and [DampFloatList].",
   "SymbolTags": "1",

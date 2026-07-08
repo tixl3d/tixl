@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9b4e3c2d-a1f0-4567-89bc-def012345678"/*WebSocketServer*/,
   "Description": "Creates a WebSocket server to enable real-time, two-way communication with web clients.\n\nThis operator is ideal for building interactive web-based UIs, remote controls, or dashboards that can send data to and receive data from T3. It can broadcast messages to all connected clients and parse incoming messages from them.\n\nTips:\n- Use `Listen` to start and stop the server.\n- The server address will be `ws://[LocalIpAddress]:[Port]/[Path]`.\n- Messages sent from T3 via the `Message` input are broadcast to all connected clients.\n- Incoming messages from clients are available on the `LastReceived...` outputs.\n\nAKA: websocket, server, network, web, socket, real-time",
   "InputUis": [

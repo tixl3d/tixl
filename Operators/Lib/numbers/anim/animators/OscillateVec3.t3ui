@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "8a6ab5ec-caa6-4baa-a9d1-2079af22685c"/*OscillateVec3*/,
   "Description": "A helper that combines 3 sin waves into a vector\n\nSimilar Operators [OscillateVec2] [AnimValue] [AnimVec2] [AnimVec3]",
   "SymbolTags": "1",

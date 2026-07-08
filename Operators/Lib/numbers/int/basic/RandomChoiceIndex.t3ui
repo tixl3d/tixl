@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "74901305-773d-4246-b962-2478096159b7"/*RandomChoiceIndex*/,
   "Description": "Returns a random index for a given seed that can be used to pick from a list or scene.\n\nThe index will remain in the giving Modulo range and never repeat an index.",
   "InputUis": [

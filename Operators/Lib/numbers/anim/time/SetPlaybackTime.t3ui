@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c6d22dc3-a6ff-4a6f-aa14-8be6595da2b1"/*SetPlaybackTime*/,
   "Description": "An advanced playback control that will move the current playhead to the defined time. \n\n\nThis can be useful in complex VJ setups. Only use this operator if you know what you're doing. \nSetting the PlaybackTime frequently can interfere with user interactions like editing keyframes. \n\nNote: For this operator to work, the playback must be running.",
   "SymbolTags": "64",

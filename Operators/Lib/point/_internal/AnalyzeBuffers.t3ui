@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7ad3a38a-9f04-43ba-a16f-6982b87dd2d4"/*AnalyzeBuffers*/,
   "Description": "An internal operator that generates counts that can be used to combine multiple GPU buffers into a new buffer.",
   "InputUis": [

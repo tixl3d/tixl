@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1f2e3d4c-5b6a-4988-9a0b-c1d2e3f4a5b6"/*FreeDInput*/,
   "Description": "Receives camera tracking data over UDP using the FreeD protocol. This is essential for virtual production, augmented reality, and broadcasting, allowing real-time integration with systems like Unreal Engine, Vizrt, or Aximmetry.\n\nAlso see: [FreeDOutput]",
   "InputUis": [

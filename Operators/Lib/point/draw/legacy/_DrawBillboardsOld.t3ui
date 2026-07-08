@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "071c9aad-ecbf-47bf-b2f6-c43e8212d5b1"/*_DrawBillboardsOld*/,
   "Description": "Draws points as animated camera-aligned sprites. \nThe point's .W attributes control the lookup within the \"animation\" tracks for color and size.\n\nThis can be used for particle-like animations or to generate procedural designs.\n\nThis operator has been deprecated. Consider using [DrawBillboards] instead.\n",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "40fc6dd9-5480-414d-8204-07e8142215a9"/*ImageFFT*/,
   "Description": "Discrete Fourier Transform on 2d image. \nRG, BA channels of the texture store two complex values\ntexture size is expected to be pow2",
   "SymbolTags": "72",

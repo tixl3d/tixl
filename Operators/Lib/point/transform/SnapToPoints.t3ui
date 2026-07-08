@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5822b0d8-32ed-4db3-975b-0e8fb8d7dd17"/*SnapToPoints*/,
   "Description": "Generate a new point buffer with points snapped to other points if the distance is below a threshold.",
   "SymbolTags": "64",

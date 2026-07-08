@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0bee3ec6-7e0d-471b-9ef7-ab9c22c6883b"/*DateTimeInSecs*/,
   "Description": "Returns the seconds since 1970.",
   "SymbolTags": "8",

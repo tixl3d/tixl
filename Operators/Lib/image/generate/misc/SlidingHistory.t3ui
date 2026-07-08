@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1b69d98a-0b38-4563-aa43-aac5b8395c2b"/*SlidingHistory*/,
   "Description": "Generates a waveform image by feeding in a horizontal texture line at the bottom of the texture.",
   "SymbolTags": "8",

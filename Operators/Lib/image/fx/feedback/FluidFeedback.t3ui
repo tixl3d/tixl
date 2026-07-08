@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f9d453d1-04d9-43ef-9189-50008f93bcc2"/*FluidFeedback*/,
   "Description": "An example of how feedback combined with displacement can lead to a variety of effects.\n\nAll Feedback Ops: [FluidFeedback] [AdvancedFeedback] [AdvancedFeedback2]\n\nAlso see [AfterGlow2]",
   "SymbolTags": "192",

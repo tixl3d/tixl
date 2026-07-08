@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "11ebbb25-984a-4772-b720-b8c7e5214a83"/*_ReadIntFromGpuBuffer*/,
   "Inputs": [
     {

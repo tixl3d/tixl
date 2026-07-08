@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "862de1a8-f630-4823-8860-7afa918bb1bc"/*RunTime*/,
   "Description": "Returns the application runtime in seconds. This is rarely useful. Consider using [Time].",
   "SymbolTags": "8",

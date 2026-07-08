@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c029b846-b442-458b-933b-653609827b75"/*UdpInput*/,
   "Description": "Receives data from the network using the UDP (User Datagram Protocol).\n\nThis operator listens for UDP packets on a specified port, allowing communication with other applications or devices that send UDP data. UDP is a connectionless protocol, meaning data is sent without establishing a persistent connection, which is fast but less reliable than TCP.\n\nTips:\n- Ensure the `Port` and `LocalIpAddress` match the sender's destination settings.\n- `WasTrigger` becomes true for one frame whenever a new message is received, which can be used to trigger other actions.\n- Unlike TCP, UDP does not guarantee message delivery or order.\n\nAKA: udp, network, socket, datagram",
   "InputUis": [

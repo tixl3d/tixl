@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "01458940-287f-4d31-9906-998efa9a2641"/*NormalMap*/,
   "Description": "Converts the brightness of an image into a normal map that can be used with [SetMaterial].",
   "SymbolTags": "1",

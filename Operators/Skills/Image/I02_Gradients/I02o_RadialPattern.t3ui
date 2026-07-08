@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "58c70018-0764-43c3-8bc5-c7257c6dc5ba"/*I02o_RadialPattern*/,
   "Description": "RadialGradient: Invert Pattern",
   "InputUis": [],

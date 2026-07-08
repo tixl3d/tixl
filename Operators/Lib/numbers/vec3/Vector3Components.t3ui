@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a8083b41-951e-41f2-bb8a-9b511da26102"/*Vector3Components*/,
   "Description": "Converts a Vector3 into three individual values\n\nOpposite of [Vector3]",
   "InputUis": [

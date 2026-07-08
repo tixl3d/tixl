@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ad28819d-be62-4ed7-932a-fc861562983d"/*TextGrid*/,
   "Description": "An experiment that uses a texture to shade text characters written in a text block.\nThis is ",
   "SymbolTags": "160",

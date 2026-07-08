@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca"/*ReadFile*/,
   "Description": "Reads a file on the local disk and outputs the content as a string\n\nOpposite of: [WriteToFile]\n\nUseful combination: [PickStringPart]\n\nAlso see: [RequestUrl] which adds online capabilities and [GetAttributeFromJsonString]",
   "InputUis": [

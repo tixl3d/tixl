@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7644e221-9785-414b-905d-31fd68ec080c"/*SetAttributesWithPointFieldsExamples*/,
   "Description": "Shows various examples on how this effect works.",
   "InputUis": [],

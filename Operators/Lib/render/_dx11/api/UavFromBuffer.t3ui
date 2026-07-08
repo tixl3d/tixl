@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "cc4847f8-a8a3-4da5-8b71-c4f3a3f488e6"/*UavFromBuffer*/,
   "Description": "This operator is obsolete. Please use [GetBufferComponents] instead.",
   "SymbolTags": "8",

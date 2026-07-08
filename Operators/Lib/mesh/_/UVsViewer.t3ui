@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "68cf773d-30ac-4ae0-bc1e-b7a17ea322bb"/*UVsViewer*/,
   "Description": "Morph a mesh to its UV map. It can be useful when you edit the texture of a mesh. \n\n[TransformMeshUVs] [MeshProjectUV]",
   "InputUis": [

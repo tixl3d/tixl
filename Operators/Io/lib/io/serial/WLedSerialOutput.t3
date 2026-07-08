@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f830faa6-02c1-475c-99aa-c5e0d9ea33b8"/*WLedSerialOutput*/,
   "Inputs": [
     {

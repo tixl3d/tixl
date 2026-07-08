@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e4e608e7-1248-4d73-910c-e8bfbb34251b"/*SimpleLiquid*/,
   "Description": "A port of 'simple detailed fluid' from 'https://www.shadertoy.com/view/sl3Szs' by Lomateron.",
   "SymbolTags": "64",

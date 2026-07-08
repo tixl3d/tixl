@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "42c556fb-014b-4ac5-b390-f426ab415aa7"/*FilePathParts*/,
   "Description": "Extracts directory, filename and extension from a filepath and checks if filepath exists.",
   "SymbolTags": "8",

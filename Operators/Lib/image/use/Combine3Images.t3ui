@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1d958538-98e7-4053-b1e2-3b9f1bc4faa9"/*Combine3Images*/,
   "Description": "A node to combine 3 input images into the RGBA channels of a new one.\n\nAll blend ops and similar: [BlendImages] [Blend] [BlendWithMask] [Combine3Images]",
   "SymbolTags": "8",

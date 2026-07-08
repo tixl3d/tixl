@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "cb28de70-6111-4f64-b6ee-f52b1a35b44a"/*_OldTvGlitch*/,
   "Description": "A very slow prototype. Needs to be redone with proper parameters.",
   "InputUis": [

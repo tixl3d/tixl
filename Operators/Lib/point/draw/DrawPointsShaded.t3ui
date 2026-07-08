@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "84a93ea9-98fb-4088-a1e9-87454f7292f1"/*DrawPointsShaded*/,
   "Description": "Draws a point buffer as PBR-shaded spheres using the attributes defined by [SetMaterial].\n\nNote: This operator was previously called \"DrawMeshAsSpheres\".",
   "SymbolTags": "1",

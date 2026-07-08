@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0f61b638-7bda-4331-944a-50fdca401223"/*FlipNormals*/,
   "Description": "Reverses the normals of the input mesh. This can be useful for drawing shader \"inside\" surfaces of a mesh.",
   "SymbolTags": "8",

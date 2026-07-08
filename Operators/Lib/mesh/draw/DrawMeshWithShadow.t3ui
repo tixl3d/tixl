@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c08a6847-e7c4-46e6-a8fb-24bb62a64b96"/*DrawMeshWithShadow*/,
   "Description": "Is used together with [SetShadow] and a [SetPointLight] to render incoming geometry with a shadow map.\nSee [SetShadowExample]",
   "SymbolTags": "1",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2a5475c8-9e16-409f-8c40-a3063e045d38"/*DetectEdges*/,
   "Description": "Detects edges in the incoming image.\n\nTry the presets.\n\nFor similar effects see: [Steps] [DistortAndShade] [Displace] [FakeLight]",
   "SymbolTags": "1",

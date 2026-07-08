@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "812561d8-cbb5-40c3-a53e-3c3f0ad2352e"/*HowToUseParticles*/,
   "Description": "This interactive tutorial explains how Tooll's [ParticleSystem] works and how you can use it.",
   "SymbolTags": "3",

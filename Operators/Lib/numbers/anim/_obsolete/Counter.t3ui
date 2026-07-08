@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "11882635-4757-4cac-a024-70bb4e8b504c"/*Counter*/,
   "Description": "A very versatile operator that uses beat time to increment values periodically / in steps.\n\nNote that you can adjust many properties directly within the graph while holding CTRL+key.\n\nFor a variant that does not count up in steps but linearly see [Time] or [Accumulator].\n\nUseful combinations: [Trigger] [MidiInput] [KeyboardInput]",
   "SymbolTags": "1",

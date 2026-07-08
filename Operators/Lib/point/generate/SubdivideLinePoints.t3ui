@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c7f100bf-05a0-44af-9cf4-c5a1b5937e33"/*SubdivideLinePoints*/,
   "Description": "Inserts additional points between line points.",
   "SymbolTags": "8",

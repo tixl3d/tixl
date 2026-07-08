@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a18ae2d3-1735-40b8-bebb-65a6788bc872"/*And*/,
   "Description": "Returns True if both inputs are true. Consider using [All] if you want to test more than two booleans for true.",
   "SymbolTags": "8",

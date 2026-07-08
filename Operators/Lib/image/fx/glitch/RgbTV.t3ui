@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5972a57b-73cd-49b2-8b24-96636a4c294b"/*RgbTV*/,
   "Description": "Creates a vintage TV-glitch effect.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
   "SymbolTags": "1",

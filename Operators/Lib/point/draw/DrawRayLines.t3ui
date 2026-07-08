@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7f69a5e5-28e5-44c1-b3e3-74b05faa0531"/*DrawRayLines*/,
   "Description": "A special line renderer that draws camera-facing 3D geometry lines without corner metering that can intersect the near plane.",
   "SymbolTags": "8",

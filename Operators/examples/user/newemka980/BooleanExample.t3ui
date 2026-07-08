@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9913adf3-8fe5-4d85-95ab-f04439c6edcb"/*BooleanExample*/,
   "Description": "Here we are showcasing different uses of the boolean math operator ",
   "SymbolTags": "2",

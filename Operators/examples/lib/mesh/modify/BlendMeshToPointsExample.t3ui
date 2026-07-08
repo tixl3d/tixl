@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "bce9bc96-ff9b-443b-97f5-2286ddd30908"/*BlendMeshToPointsExample*/,
   "Description": "MediaPipe [FaceLandmarkDetection] Example, make sure to select your webcam in [VideoDeviceInput] and activate it.",
   "InputUis": [],

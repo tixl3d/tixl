@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3ee3597d-dbf1-43a2-89d9-2f7b099112c7"/*RyojiPattern1*/,
   "Description": "Generates animated patterns inspired by Ryoji Ikeda. It subdivides the image into smaller and smaller segments and can produce a wide variety of effects. Please check the presets and the example.\n\nFor a version with more options see: [RyojiPattern2]\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
   "SymbolTags": "8",

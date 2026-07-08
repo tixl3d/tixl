@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f2e323bd-f881-41a8-81e2-e8f2ac1984dc"/*Vector4*/,
   "Description": "Converts 4 single values to a vec4 value\n\nFor the opposite see [Vector4Components]\n\nSimilar to [RgbaToColor] and [AColor]",
   "InputUis": [

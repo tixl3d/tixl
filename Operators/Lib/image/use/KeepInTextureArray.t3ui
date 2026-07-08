@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a783908a-63c2-4961-94ca-b97d17ed0788"/*KeepInTextureArray*/,
   "Description": "Pick a single \"slice\" from a TextureArray",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b469d554-a69f-44a0-a03f-331853b82199"/*SerialOutput*/,
   "Description": "Sends data to a serial port.\n\nThis operator can be used to send data to hardware devices like Arduino, DMX interfaces, or other custom electronics using the serial protocol.\n\nMultiple values can be combined into a single message using the `MessageParts` input. \n\nTips:\n- Use `SendOnChange` to automatically send data when `MessageParts` changes.\n- Use `SendTrigger` for manual control over when messages are sent.\n- `AddLineEnding` is often required for text-based communication protocols.\n\nAKA: arduino, rs232, uart, com",
   "InputUis": [

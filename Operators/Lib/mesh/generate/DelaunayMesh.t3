@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "bf4daa46-ed0f-4a87-9ba1-93631b2ca29a"/*DelaunayMesh*/,
   "Inputs": [
     {

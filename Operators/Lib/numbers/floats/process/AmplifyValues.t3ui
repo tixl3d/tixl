@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4def850e-3627-46d8-ae2b-58b513843885"/*AmplifyValues*/,
   "Description": "A helper that smooths or amplifies a value list over time. This can be used to extract beats in an audio spectrum.",
   "InputUis": [

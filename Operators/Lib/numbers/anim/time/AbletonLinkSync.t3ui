@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "31ab98ec-5e79-4667-9a85-2fb168f41fa1"/*AbletonLinkSync*/,
   "Description": "An experimental implementation of the Ableton Link synchronization.\n\nThis operator uses the library provided by Ableton to identify available Ableton Link sources and automatically connects to them.\nAll instances of this operator share the same connection. To align the timing information provided by Link with Tooll's time units, we also provide various output timing formats.\n\nThis operator can be combined with [SetPlaybackTime] or [SetBpm]. \n\nNote: if the connection is cancelled by the host or client, it might be necessary to trigger reconnect.",
   "SymbolTags": "8",

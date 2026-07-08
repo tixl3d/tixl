@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1fec51bc-4de7-400a-8910-db39f4129579"/*NumberPattern*/,
   "Description": "Renders columns for values that can be driven by an input texture. This can create a nice effect as an overlay.",
   "SymbolTags": "64",

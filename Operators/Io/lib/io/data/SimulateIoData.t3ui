@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7e1c4a82-9c5d-4f8e-bd6f-1a2b3c4d5e60"/*SimulateIoData*/,
   "Description": "Replays one or more recorded DataClips so MidiInput and OscInput operators react identically to live hardware. Use case: tweak audio reactions, midi mappings, and animations against a captured live performance without the original devices plugged in.\n\nClips is a multi-input — wire as many LoadDataClip.Clip outputs as you want; each gets its own source-time cursor and event dispatch.\n\nToggle Enabled to mute the simulation.\n\nDoes NOT trigger Variation/Snapshot surface controllers — those need the active composition state to be reproducible across sessions, which is outside this op's scope.",
   "SymbolTags": "64",

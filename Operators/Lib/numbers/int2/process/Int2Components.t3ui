@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f86358e0-2573-4acd-9a90-e95108e8a4da"/*Int2Components*/,
   "Description": "Converts an int2 to 4 single integers\n\nFor the opposite see [Int2]",
   "SymbolTags": "1",

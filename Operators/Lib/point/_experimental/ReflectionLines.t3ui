@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b5515341-24ef-48ff-b832-d40e8189c6a4"/*ReflectionLines*/,
   "Description": "Intersects rays from a list of oriented points with geometry. This operation is slow!",
   "InputUis": [

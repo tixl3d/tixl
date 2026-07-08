@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1a8d2a8d-d189-472f-bab3-d645a63c7aff"/*ShiftCamera*/,
   "Description": "Shifts the clip space of the current context projection matrix.\nThis might be useful for the implementation of obscure rendering tricks.",
   "SymbolTags": "8",

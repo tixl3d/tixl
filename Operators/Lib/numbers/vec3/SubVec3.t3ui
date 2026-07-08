@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3021300c-7f56-49c1-bcaf-92447b716dad"/*SubVec3*/,
   "Description": "Subtracts two vectors",
   "InputUis": [

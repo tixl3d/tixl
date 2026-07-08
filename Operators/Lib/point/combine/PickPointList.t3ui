@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e9a0bdfd-6f6e-41e2-8c0c-cd5fee26e359"/*PickPointList*/,
   "Description": "Switches between different point buffers.",
   "SymbolTags": "1",

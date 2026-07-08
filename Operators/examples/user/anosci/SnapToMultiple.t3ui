@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c3090c65-194a-4f95-9b70-d003f54103f7"/*SnapToMultiple*/,
   "Description": "Similar to [ModInt], but instead of returning the remainder after the division by Mod, it returns the next lowest value of Mod that would result in a remainder of 0.",
   "SymbolTags": "16",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9e243276-1807-49f7-9e78-29b582aafb39"/*PlayAtlas*/,
   "Description": "For animating image atlases. Great for GIFs, sprite sheets, tile sets, etc.\n\nBy default, this reacts to Idle Motion.\nIf you don't want this, set the PlaybackRate to 0 and connect a [AnimValue] to a [FloatToInt], then to StartFrame. Alternatively, you could animate StartFrame in the timeline.",
   "SymbolTags": "8",

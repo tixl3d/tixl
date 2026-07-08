@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c7ef5f64-2654-47a8-a2ab-30b28446b934"/*BendField*/,
   "Description": "Bends / curves the incoming field along the given axis.\nThis works best for small source volumes within a limited unit range.\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nSimilar nodes: [ReflectField], [RepeatWithMirror], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
   "SymbolTags": "8",

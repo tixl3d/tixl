@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4cdc0f90-6ce9-4a03-9cd0-efeddee70567"/*Steps*/,
   "Description": "A versatile effect that uses the value of the input image to draw 'steps'. These can be shaded and animated.\n\nFor similar effects see: [DetectEdges] [DistortAndShade] [Displace] [Fakelight]",
   "SymbolTags": "1",

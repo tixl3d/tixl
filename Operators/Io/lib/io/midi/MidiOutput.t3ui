@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f9f4281b-92ee-430d-a930-6b588a5cb9a9"/*MidiOutput*/,
   "Description": "Send notes or controller change events to the selected device. This operator is experimental. The velocity is given as a normalized float value between 0 and 1.",
   "SymbolTags": "1",

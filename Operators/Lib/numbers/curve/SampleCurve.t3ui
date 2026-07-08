@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b724ea74-d5d7-4928-9cd1-7a7850e4e179"/*SampleCurve*/,
   "Description": "Creates a window in the 'graph' in which a curve editor with a single curve is created. \n\nThis curve can be edited (in the 'Parameters' view) in the same way as the animation curves in the standard timeline.\n\nFunctions:\n\n- Left mouse click: Select points\n- Left-click and drag: Move points and their Bezier points\n- Left-click + alt: Create new point on the curve\n- Right-click: Options (extra and interpolation etc.)\n- Right-click dragging: Panning the view inside the curve editor\n- Clicking the Icon in the upper left corner opens the curve in a bigger window\n\nProTip: If the 'result' from an [AnimValue] is connected to the U-Input, you get an easily editable automatically animated curve with many options\n\nInfo: Selecting and moving this operator in the graph can sometimes be difficult. To the left of the CurveEditor there is a surface (with anti-slip coating ;) ) that is best suited for selecting and moving the operator.",
   "SymbolTags": "8",

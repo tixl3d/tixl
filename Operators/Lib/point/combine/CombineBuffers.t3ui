@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4dd8a618-eb3b-40af-9851-89c50683d83e"/*CombineBuffers*/,
   "Description": "Combines multiple buffers of the same type (like points).",
   "SymbolTags": "1",

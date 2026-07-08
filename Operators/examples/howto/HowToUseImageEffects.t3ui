@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "649d4542-4165-4129-9484-dd8fb8663e15"/*HowToUseImageEffects*/,
   "Description": "This is a playground that gives an overview about Tooll's main image effects operators.",
   "SymbolTags": "3",

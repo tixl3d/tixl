@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b822a197-9cf6-4bda-abda-02cf98ed5b90"/*SetMatrixVar*/,
   "Description": "Stores a matrix as an array of vector4 on the evaluation context.\nThis is used internally by passing transform matrices between render passes for things like rendering shadow maps.",
   "SymbolTags": "8",

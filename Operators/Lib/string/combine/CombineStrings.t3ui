@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "48ab9824-76ca-4238-800f-9cf95311e6c0"/*CombineStrings*/,
   "Description": "Combines any number with strings with the provided optional separator.\n\nTo add line breaks use \"\\n\".\n\nAlternative titles: Concat, Join",
   "SymbolTags": "1",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2496ff9d-2953-4ed0-9550-b4d2ce322fa7"/*ProceduralMoon1x*/,
   "Description": "A tiny test scene made from a standard sphere and a procedural moon-ish surface material",
   "SymbolTags": "2",

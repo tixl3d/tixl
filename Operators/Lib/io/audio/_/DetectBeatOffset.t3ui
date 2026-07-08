@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1fa651c8-ab73-4ca0-9506-84602bbf2fcb"/*DetectBeatOffset*/,
   "Description": "Experimental attempt to constantly adjust BPM rate and sync offset to external audio source.",
   "SymbolTags": "128",

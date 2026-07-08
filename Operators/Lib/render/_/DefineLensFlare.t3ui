@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "947ad81e-47da-46c3-9b1d-8e578174d876"/*DefineLensFlare*/,
   "Description": "Generates a list of sprite positions that can be joined and rendered as sprites. ",
   "SymbolTags": "16",

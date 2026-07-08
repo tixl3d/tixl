@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "8e6ed99c-a3e0-42c0-9f81-a89b1e340757"/*Sketch*/,
   "Description": "Allows adding sketches as annotations or storyboards. You can create multiple pages and switch between them by selecting or animating the PageIndex. Use the ShowAs parameter to toggle between showing the sketches as a single frame (e.g., as a comment), until the next frame (e.g., as a storyboard or animation), or with onion skinning. You can also use the following keyboard shortcuts:\n\n[P] - Draw mode\n[E] - Erase mode\n[X] - Cut Page\n[V] - Insert cut page\n[0-9] - Select brush size",
   "SymbolTags": "64",

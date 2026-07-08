@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "1e1e65cd-3564-45e1-88f8-6cb4b4b18c5a"/*PrismSDF*/,
   "Description": "Generates a prism SDF (i.e. an n-sided cylinder).\n\nNOTE: the triangular prism does not support rounding.",
   "SymbolTags": "8",

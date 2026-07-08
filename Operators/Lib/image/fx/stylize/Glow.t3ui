@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "d392d4af-4c78-4f4a-bc3f-4c54c8c73538"/*Glow*/,
   "Description": "Adds a glow effect to the incoming image. It uses multiple resolution passes and is reasonably fast.\nYou can use the Offset parameter as a threshold for 'glowing' content.\n\nBetter alternative: [Bloom]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
   "SymbolTags": "1",

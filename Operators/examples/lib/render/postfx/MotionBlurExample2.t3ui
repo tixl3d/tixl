@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9a7063ee-abde-45b0-b3f0-73a12721488f"/*MotionBlurExample2*/,
   "Description": "Illustrates some methods of how to generate motion blur.",
   "InputUis": [],

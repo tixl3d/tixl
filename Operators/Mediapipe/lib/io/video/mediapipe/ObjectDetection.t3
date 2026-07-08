@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "12345678-90ab-cdef-1234-567890abcdef"/*ObjectDetection*/,
   "Inputs": [
     {

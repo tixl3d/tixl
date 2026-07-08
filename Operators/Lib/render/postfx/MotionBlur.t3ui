@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "196e14c7-3a71-4afd-a53b-e51d0fe8f414"/*MotionBlur*/,
   "Description": "Applies a post processing motion blur to a RenderTarget texture and its DepthBuffer.\n\nSee also [RenderWithMotionBlur] for an operator using multi-pass rendering to achieve high quality at the cost of more resources. \nDesigned primarily for video rendering, it can also be used for real-time applications with just a few passes, in simple scenes or on fast hardware.\n\nAlso see [DepthOfField], [DirectionalBlur]",
   "SymbolTags": "1",

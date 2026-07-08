@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a368035f-2697-4ba5-a7bd-484eeb54c39b"/*TextureDisplaceMesh*/,
   "Description": "Uses a projected texture with a normal map to displace the mesh. \n\nThis is similar to [SamplePointAttributes].",
   "SymbolTags": "1",

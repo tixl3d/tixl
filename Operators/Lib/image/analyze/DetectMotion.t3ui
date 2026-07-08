@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "830df85c-51df-4d55-956c-e6810e8e3081"/*DetectMotion*/,
   "Description": "Uses motion history or difference to detect changes in an image.\nThis might be useful for tracking.",
   "InputUis": [

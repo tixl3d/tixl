@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f830faa6-02c1-475c-99aa-c5e0d9ea33b8"/*WLedSerialOutput*/,
   "Description": "Drives a WLED-based LED strip or ring over USB serial using the Adalight protocol.\n\nTakes a `Colors` list (e.g. from a [ColorList] or gradient op) and writes one frame per Update at the given `BaudRate` (115200 is the WLED default). Adalight framing and per-pixel color-order conversion are handled internally.\n\nTips:\n- Set `LedCount` to -1 to use the size of the `Colors` list. Otherwise the colors are mapped to `LedCount` LEDs using `MapMode` (Stretch = nearest-neighbor scaling, Repeat = tile).\n- `ColorOrder` must match the `LED Type / Color Order` saved in your WLED config (most WS281x rings are GRB).\n- Brightness multiplies all channels in the float domain; saves wiring a separate scale op.\n- The op auto-reconnects (every 2s) when the cable is unplugged and replugged. Status is reported via the warning-icon next to the op.\n- For first-time WLED setup (LED count, data pin, AP mode), use the WLED web UI before connecting this op.\n\nAKA: wled, adalight, led, neopixel, ws2812, ring, strip",
   "InputUis": [

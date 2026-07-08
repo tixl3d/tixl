@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "03477b9a-860e-4887-81c3-5fe51621122c"/*AudioReaction*/,
   "Description": "Creates audio reaction from audio inputs.",
   "SymbolTags": "1",

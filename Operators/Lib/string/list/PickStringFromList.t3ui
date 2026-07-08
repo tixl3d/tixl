@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ef357e66-24e9-4f54-8d86-869db74602f4"/*PickStringFromList*/,
   "Description": "Can switch between different strings if the 'Fragments' output of a [SplitString] operator is used as an input",
   "SymbolTags": "1",

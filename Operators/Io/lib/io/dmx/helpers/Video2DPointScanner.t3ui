@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2470272f-5e56-448f-803d-15c5231353ff"/*Video2DPointScanner*/,
   "Description": "Scans a video input to detect the 2D positions of bright pixels, often used for projector-camera calibration or tracking LEDs.\n\nThis operator sequentially tests pixels by outputting a bright value and checking if the result is visible in the video feed. This process allows it to map the output pixel coordinates to the camera's view. The resulting 2D point map can be saved and later used with a [CameraCalibrator] to create a 3D spatial mapping.\n\nTips:\n- Connect a camera feed to `VideoIn`.\n- Set `PixelCount` to the number of lights or pixels you want to scan.\n- Use `ScanTrigger` to start the process.\n- The `DebugTexture` output is useful for visualizing the scanning process.\n\nAKA: projector calibration, led tracking, blob detection, camera mapping, structured light",
   "InputUis": [

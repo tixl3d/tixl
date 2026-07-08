@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0162ddd9-4611-4a0a-b02f-8f68ded99cfb"/*_ProcessVideoClips*/,
   "Description": "Internal helper for [VideoClipPlayer]: iterates the connected video-clip textures and composites each into the bound render target via the draw subgraph.",
   "SymbolTags": "16",

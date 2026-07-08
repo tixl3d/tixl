@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2d1c9633-b66e-4958-913c-116ae36963a5"/*MidiRecording*/,
   "Description": "An experimental implementation to record MIDI input signals.",
   "SymbolTags": "64",

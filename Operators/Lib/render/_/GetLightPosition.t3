@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5914f00f-6600-42a2-bbd5-4201053058ec"/*GetLightPosition*/,
   "Inputs": [
     {

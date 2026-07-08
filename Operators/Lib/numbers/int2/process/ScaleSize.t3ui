@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c6d50423-54ea-4c9d-b547-eb78cc2c950c"/*ScaleSize*/,
   "Description": "Uniformly scales/multiplies an int2 which is used for defining resolutions\n\nFor a similar operator with more settings see [ScaleResolution]\n\nAlso see [MakeResolution], [int2] etc.",
   "SymbolTags": "1",

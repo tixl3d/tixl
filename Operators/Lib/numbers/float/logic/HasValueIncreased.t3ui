@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c513c58d-e45c-408d-a0b8-250c9af31545"/*HasValueIncreased*/,
   "Description": "Tests whether the incoming value has increased by a defined threshold and outputs this as a Boolean\n\nOperator with more options: [HasValueChanged]\n\nSimilar to [HasValueIncreased], [IsGreater] and [HasValueDecreased]",
   "SymbolTags": "8",

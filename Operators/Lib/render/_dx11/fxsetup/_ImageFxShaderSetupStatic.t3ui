@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "bd0b9c5b-c611-42d0-8200-31af9661f189"/*_ImageFxShaderSetupStatic*/,
   "Description": "A version that has no time dependency with improved caching performance.",
   "SymbolTags": "16",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "78cadb24-5a77-41e2-908f-01d61140c769"/*MidiSysexOutput*/,
   "Description": "Allow sending midi sysex string to a selected midi device. \n\nExample: This is useful in the case of the APC40 to change device modes.",
   "InputUis": [

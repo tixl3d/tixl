@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "21b0a346-f214-449f-ae27-7bfbe5395d66"/*SetAttributesWithPointFields*/,
   "Description": "Sets various attribute points from the distance of a 2nd (small) set of points.",
   "SymbolTags": "64",

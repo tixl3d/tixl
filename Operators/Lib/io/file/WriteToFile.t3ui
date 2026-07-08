@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0db15e2d-b457-44d7-bb58-ace0a0708073"/*WriteToFile*/,
   "Description": "Writes the incoming string into a predefined file on the local disk\n\nInfo: This operator is unable to create files. The file has to exist in order to write something into it.\nDepending on the user and operating system, Tooll might need admin privileges.\n\n\n\nAlso see: [ReadFile] [RequestUrl] [FilesInFolder]",
   "InputUis": [

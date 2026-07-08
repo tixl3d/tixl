@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a1e3b8d3-3888-4e18-80e4-f6c65a136e75"/*ColorGradeDepth*/,
   "Description": "An advanced color grade that uses a depth buffer-based gradient look for additional effects.\n\nUseful combinations: [SetFog]",
   "SymbolTags": "8",

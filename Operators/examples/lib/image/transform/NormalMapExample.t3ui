@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0c7a44a2-93ef-4e7e-8a82-a2ff4d73ac2a"/*NormalMapExample*/,
   "Description": "Normal mapping enhances visual detail by altering how light interacts with a surface, simulating depth and texture without adding extra geometry.\nHere, a low-poly cube uses a normal map to appear more complex. Two point lights illuminate the cube, showcasing how the surface normals affect shading and reflections, giving the illusion of a rich, non-flat surface.",
   "InputUis": [],

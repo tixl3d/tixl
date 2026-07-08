@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "60adca24-4ae4-474a-b205-a814d89a7d53"/*AnalyzePianoMidi*/,
   "Description": "Takes a List<float> from [MidiInput] and computes average, last velocity and last played note.",
   "InputUis": [

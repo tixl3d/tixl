@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0bd77dd6-a93a-4e2e-b69b-bbeb73cb5ae9"/*DefineMaterials*/,
   "Description": "Defines materials for later use when drawing content or scenes.",
   "SymbolTags": "72",

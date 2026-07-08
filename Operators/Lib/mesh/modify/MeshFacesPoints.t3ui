@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "58a490b1-eb8a-4102-906a-f74a79c0ad1c"/*MeshFacesPoints*/,
   "Description": "\n\nCreate points at the center, corners or edges of the mesh's faces.\n\nThe size of each of the faces defines the size of the points and FX1 as the W attribute gets the radius. \n\nIn center mode uses the \"Inscribed Circle Center\".\n\nUseful combinations [LoadObj] and [DrawPoints] and more.\n\nSimilar Operators:\nTo create a point at each vertex of the connected mesh [MeshVerticesToPoints] can be used.\nTo get evenly distributed points on a mesh [PointsOnMesh] can be used.",
   "SymbolTags": "8",

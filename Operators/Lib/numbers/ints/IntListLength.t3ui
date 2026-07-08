@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9a90890f-f5e2-4f96-9d6d-f5229f8b7531"/*IntListLength*/,
   "Description": "Returns the number of elements in the connected int list.",
   "InputUis": [

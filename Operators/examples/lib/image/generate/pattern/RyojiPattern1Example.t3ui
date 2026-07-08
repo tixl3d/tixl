@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "d71a564b-44c7-42a6-b0ca-05d5f512be14"/*RyojiPattern1Example*/,
   "Description": "Example of how to use the [RyojiPattern] as an animated texture.",
   "InputUis": [],

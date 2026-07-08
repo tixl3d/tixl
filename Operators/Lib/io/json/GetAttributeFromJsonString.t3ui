@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "43783ad9-72a0-4928-bb86-c89aae5c5d85"/*GetAttributeFromJsonString*/,
   "Description": "Loads a JSON string from a URL and outputs the defined part as a string.\n\nSimpler alternative [RequestUrl]\n\nAlso see [LoadImageFromUrl] [WriteToFile] [ReadFile] [PickStringPart] [FilesInFolder]",
   "SymbolTags": "8",

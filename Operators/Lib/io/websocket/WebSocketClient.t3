@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "8e9f0a1b-2c3d-4e5f-6a7b-8c9d0e1f2a3b"/*WebSocketClient*/,
   "Inputs": [
     {

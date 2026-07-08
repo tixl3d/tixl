@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2db5e90a-f02a-47ce-b1c0-3c5c4513f8fd"/*CustomForce*/,
   "Description": "Applies a custom particle force written as a short HLSL code fragment.\n\nModify the prepared variables `vel`, `col` and `pos`; they are blended back into the particle by the Amount parameter. `age` and a connected Field (GetDistance, GetNormal) help with building collision and flow effects. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "SymbolTags": "8",

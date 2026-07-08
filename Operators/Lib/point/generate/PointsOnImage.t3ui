@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "722e79cc-47bc-42cc-8fce-2e06f36f8caa"/*PointsOnImage*/,
   "Description": "Uses the image brightness to emit points.\n\nWARNING: this is extremely slow for high resolution. We recommend setting fixed resolutions like 512x512px.",
   "SymbolTags": "1",

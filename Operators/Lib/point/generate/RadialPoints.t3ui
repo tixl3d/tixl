@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3352d3a1-ab04-4d0a-bb43-da69095b73fd"/*RadialPoints*/,
   "Description": "A versatile generator of circular point sets that can create a variety of circles, spirals, helixes, etc.\n\nTry the presets to get an overview.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nSimilar: [GridPoints], [SpherePoints], [PointsOnMesh]",
   "SymbolTags": "1",

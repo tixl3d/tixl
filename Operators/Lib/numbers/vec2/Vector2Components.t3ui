@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "0946c48b-85d8-4072-8f21-11d17cc6f6cf"/*Vector2Components*/,
   "Description": "Converts a Vector2 into two individual values\n\nOpposite of [Vector2]",
   "InputUis": [

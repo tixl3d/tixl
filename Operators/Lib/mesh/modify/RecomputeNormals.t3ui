@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "68e0d0cb-1e57-4e9c-9f22-bd7927ddb4c5"/*RecomputeNormals*/,
   "Description": "Recalculates the normals (smoothing groups) of the surfaces of a mesh. For example, if these are changed by [DeformMesh] and similar operators",
   "SymbolTags": "8",

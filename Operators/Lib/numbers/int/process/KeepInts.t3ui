@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "209aa9d9-0ba8-42da-8a6a-5ff9fdf09f0c"/*KeepInts*/,
   "Description": "Keeps integer values in a list",
   "InputUis": [

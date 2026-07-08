@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "501d75f4-c789-4946-a7ed-cca9245d38ef"/*ColorVerticesWithField*/,
   "Description": "Uses a color field to set vertex colors from their position in that field.",
   "InputUis": [

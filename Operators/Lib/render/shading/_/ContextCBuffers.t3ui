@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "d32a5484-880c-41d4-88ea-6ee1a3e61f0b"/*ContextCBuffers*/,
   "Description": "Get constant buffers (e.g. for rendering parameters) from evaluation context.",
   "SymbolTags": "16",

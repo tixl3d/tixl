@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e85f0fcb-303e-4d21-b592-ad4578286336"/*SamplePointSimAttributes*/,
   "Description": "Affects a point simulation by sampling a 2D texture.",
   "SymbolTags": "64",

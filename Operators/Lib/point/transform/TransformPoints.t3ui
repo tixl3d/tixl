@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e"/*TransformPoints*/,
   "Description": "Transforms incoming points.\n\nTips:\n- Try to activate .WIsWeight and combine this operator with [SelectPoints].\n- Changing the Space to Point can be used to offset the points.",
   "SymbolTags": "1",

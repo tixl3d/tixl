@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "92cdd8e1-5f31-4636-9ed3-f59a1e018586"/*MarsFractalRepeat*/,
   "Description": "Repeats a mesh with copies along a tetraeder geometry.",
   "InputUis": [

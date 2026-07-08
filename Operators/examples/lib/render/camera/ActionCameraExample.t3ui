@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "28712e30-6ee2-4118-a35a-21834ef266ee"/*ActionCameraExample*/,
   "Description": "A quick illustration how to use [ActionCamera] to move forward towards a random direction.",
   "InputUis": [],

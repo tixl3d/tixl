@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "39c96cfd-dedf-4f76-a471-d1c26c9ba9fa"/*FloatToString*/,
   "Description": "Converts a float value into a string.\n\nYou can use the .net string format descriptor for various effects, like...\n\nHere are some examples for the value 1.2345\n\n{0:P1} -> 123.45%\n{0:000.000} -> 001.234\n{0:0} -> 1\n{0:G3} -> 1.23\nneed {0:1.2} cookies  -> need 1.2 cookies\n",
   "SymbolTags": "1",

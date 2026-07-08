@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "de0e54c3-631b-4a01-a8a7-8cdff2e07e55"/*_ComputeLightOcclusions*/,
   "Description": "Internal operator that converts GPU data for point light occlusion.",
   "SymbolTags": "24",

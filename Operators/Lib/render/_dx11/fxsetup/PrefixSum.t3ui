@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "d35a403b-7e6e-4725-a344-6e8008a4e1e1"/*PrefixSum*/,
   "Description": "A complex compute shader setup that uses a spatial hash map to assist with GPU nearest neighbour search.",
   "SymbolTags": "8",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "658b6a44-ff5a-42ca-8673-33874b752004"/*VectorFieldForce*/,
   "Description": "Applies a vector field to the particle velocity. \n\nNote:  This will constantly pump more energy into your particle velocity. You might need to adjust the ParticleSystem Damp parameter.",
   "SymbolTags": "8",

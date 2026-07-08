@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3f10f526-d8ca-4f67-95a4-d703b713088e"/*LinkToMidiTime*/,
   "Description": "This helper uses MIDI time clock events to drive the playback time. This can be useful for live performances when you want to sync visuals to a clock provided by a DAW like Ableton or Traktor. Tip: When connecting the SyncTrigger parameter to a [MidiInput] and [HasValueIncreased], be sure to disable damping on the MidiInput.",
   "SymbolTags": "64",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "945014cf-ba0b-40b3-85f9-f7deed70fa8d"/*PointTrail*/,
   "Description": "Same as [PointTrail] with added internal features for [DrawBillboards]\nKeeps previous copies of points in a cycling buffer that can be used to draw trails and other effects.\n\nCan be used with [DrawPoints] [DrawLines] [DrawBillboards] and similar",
   "SymbolTags": "1",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "737a41db-bf35-4f66-8600-a083f0157cd5"/*ColorGradeDepthExample*/,
   "Description": "Illustrates how to use ColorGradeDepth to colorize points by distances to the camera.",
   "SymbolTags": "2",

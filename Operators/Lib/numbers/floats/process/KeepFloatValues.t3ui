@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "32a1d28e-23bc-44a8-becc-b52972464526"/*KeepFloatValues*/,
   "Description": "Builds a list of float values (e.g., a cycle buffer) but collects float values at the beginning of the list.",
   "InputUis": [

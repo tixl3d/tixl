@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "296dddbd-250b-4801-a039-bcb3cd555774"/*DrawLineGrid*/,
   "Description": "Renders a grid of lines in the given scaling. \nThis might be useful for debugging or to use as content.\n\nAlso see [GridPlane]",
   "SymbolTags": "8",

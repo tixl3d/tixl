@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ee4065db-3b30-4b1f-95e1-127c41a9d185"/*MarsExpressMain*/,
   "Description": "Tests for an upcoming project.",
   "InputUis": [],

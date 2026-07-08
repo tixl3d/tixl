@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "a5f4552f-7e25-43a5-bb14-21ab836fa0b3"/*PointsToCPU*/,
   "Description": "Fetches a point list from GPU to CPU. This can be useful for later exporting to a file (e.g., with [ExportPointList]).",
   "SymbolTags": "1",

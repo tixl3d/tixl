@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3a1d7ea0-5445-4df0-b08a-6596e53f815a"/*OscInput*/,
   "Description": "Receives OSC input from a connected server. \n\nIn most scenarios, it is useful to record some input messages and then pick the relevant addresses by using a [SelectFloatFromDict] or [SelectVec2FromDict] operator.\n\nYou might want to adjust the default OSC port in the settings window to see a visual indication of incoming messages in the timeline bar.",
   "SymbolTags": "1",

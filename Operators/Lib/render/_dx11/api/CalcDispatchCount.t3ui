@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "eb68addb-ec59-416f-8608-ff9d2319f3a3"/*CalcDispatchCount*/,
   "Description": "Uses the ThreadCount information from a compute shader to convert an element count into a thread group dispatch count.\n\nFor 2D Textures, also see [SizeToDispatchCount].",
   "SymbolTags": "8",

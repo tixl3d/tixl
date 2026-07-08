@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "653100dc-0c7d-4ce2-aa23-fdba8d7d4395"/*MoveToSDFExample*/,
   "Description": "A complex example how to use use [MoveoToSDF] to visualzie distances to SDFs.",
   "InputUis": [],

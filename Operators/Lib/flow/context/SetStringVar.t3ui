@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9c9274c1-3f85-4f57-9eb5-1e0a0b1cce00"/*SetStringVar*/,
   "Description": "Writes a string value to the context's float variable dictionary.\nUse [GetStringVar] to read this value further down the graph.\n\nExample: [SetContextVariableExample]",
   "InputUis": [

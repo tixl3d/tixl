@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "faa3e182-96e6-45e7-b037-fb2acd88825b"/*ArtnetPixelOutput*/,
   "Inputs": [
     {

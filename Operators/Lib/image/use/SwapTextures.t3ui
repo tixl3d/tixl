@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "590a0b0b-c847-433c-8ffa-602ed0ae8f28"/*SwapTextures*/,
   "Description": "A helper that swaps texture buffers. This can be useful for implementing buffer buffering in compute shader effects.",
   "SymbolTags": "8",

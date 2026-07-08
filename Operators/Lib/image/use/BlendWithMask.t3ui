@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7da55d23-0bd1-457b-a036-9b6b51d2e34b"/*BlendWithMask*/,
   "Description": "Blends two images by the brightness of a 3rd mask image.\n\nIn the mask, fully black areas will only render that portion of image A, and fully white areas will only render that of image B. Values in between will interpolate between the two.\n\nAll blend ops and similar: [BlendImages] [Blend] [BlendWithMask] [Combine3Images]",
   "SymbolTags": "1",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "cc34a183-3978-4b6b-8ef1-dd8102410816"/*_multiImageFxSetupStatic*/,
   "Description": "Setup for an image effect with two incoming textures that do not have any animated references.\nUsed with a fixed resolution this can be cached automatically.",
   "SymbolTags": "16",

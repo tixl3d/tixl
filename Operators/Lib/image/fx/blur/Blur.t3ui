@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "946da16c-f536-4887-b764-af9468f22c0f"/*Blur*/,
   "Description": "Blurs the incoming image\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
   "SymbolTags": "1",

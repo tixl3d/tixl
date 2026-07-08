@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5b127401-600c-4247-9d59-2f6ff359ba85"/*_GetSceneDefinitionPoints*/,
   "Description": "An internal helper for [DrawMeshChunksAtPoints].",
   "SymbolTags": "80",

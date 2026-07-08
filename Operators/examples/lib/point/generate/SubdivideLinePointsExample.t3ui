@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2828fe15-4267-490c-9c12-6d6d3baf8ae9"/*SubdivideLinePointsExample*/,
   "Description": "Here is one example why it's interesting to subdivide a line. ",
   "InputUis": [],

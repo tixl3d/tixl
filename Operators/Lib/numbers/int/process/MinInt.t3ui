@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "d1530d89-32b9-4e16-97fe-c08d095d9d03"/*MinInt*/,
   "Description": "Outputs the minimum integer of the connected inputs.\n\nTo find a minimum float value, use [Clamp].",
   "SymbolTags": "8",

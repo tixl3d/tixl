@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7c8f3a2e-9d4b-4e1f-8a5c-6b2d9f7e4c3a"/*AudioToneGenerator*/,
   "Description": "Generates test tone direct to the operator mixer for audio testing and debugging.",
   "InputUis": [

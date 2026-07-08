@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "787f44a8-8c51-4cfa-a7d5-7014d11b6a28"/*GetImageBrightness*/,
   "Description": "Analyzes the brightness of a 2D input and outputs the brightness as a float value.\nIn order to function, this op must be integrated into the active rendering tree.",
   "SymbolTags": "72",

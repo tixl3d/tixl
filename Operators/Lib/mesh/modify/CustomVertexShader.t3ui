@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b722014e-402f-4089-a876-16aefab3c012"/*CustomVertexShader*/,
   "Description": "Manipulates the vertices of a mesh with a short HLSL code fragment.\n\nModify the prepared vertex `v` (Position, Normal, TexCoord, ColorRGB, …); `vertexIndex` is the vertex index. Helpers like SampleGradient(f), Biased(f), noise and hash functions are available, and a connected Field can drive displacement or color. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "InputUis": [

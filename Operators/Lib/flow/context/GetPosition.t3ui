@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b7731197-b922-4ed8-8e22-bc7596c64f6c"/*GetPosition*/,
   "Description": "Gets the current position, rotation, and scale in the world so it can be applied to other transforms.",
   "SymbolTags": "8",

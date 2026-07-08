@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "258f6274-1a52-47d3-a991-7b3d08829c08"/*Image2dSDFExample*/,
   "Description": "How to use [Image2dSDF] in combination with [JumpFloodFill] to generate 3d text.",
   "InputUis": [],

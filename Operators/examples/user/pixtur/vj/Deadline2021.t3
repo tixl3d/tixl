@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "3664007f-9105-40b7-ba58-1466e4f6edbd"/*Deadline2021*/,
   "Inputs": [],
   "Children": [
@@ -1159,12 +1158,6 @@
           "Value": 0.1
         }
       ],
-      "Outputs": []
-    },
-    {
-      "Id": "40a3eddf-c6e2-4c87-86a8-0a5e22246dee"/*WS4_Physarum*/,
-      "SymbolId": "74ddc8f9-831e-4a82-945d-a9f5c53c040c",
-      "InputValues": [],
       "Outputs": []
     },
     {

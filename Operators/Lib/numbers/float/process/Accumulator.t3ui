@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "90b2c6d2-e9a6-4910-b42d-94202f07be27"/*Accumulator*/,
   "Description": "Accumulates a value with the incoming rate.\n\nNote that the increment is a rate that gets multiplied with the current frame duration: With an increment of 1 you have a full value change of 1 unit after one second.\n\nSimilar to [Time].\nFor a variant that does not count up linearly / smooth but in steps, see [Counter]",
   "SymbolTags": "1",

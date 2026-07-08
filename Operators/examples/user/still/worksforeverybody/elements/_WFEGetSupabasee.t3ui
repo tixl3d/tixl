@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5cc6cc51-75ab-474d-b0b8-aaa03ea77326"/*_WFEGetSupabasee*/,
   "Description": "Requests an API",
   "InputUis": [

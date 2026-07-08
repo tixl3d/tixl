@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e8d94dd7-eb54-42fe-a7b1-b43543dd457e"/*LoadSvg*/,
   "Description": "Loads an SVG file as points so it can be rendered as points or lines. The supported SVG feature set is very basic, and depending on your exporting applications, elements could be missing or not correctly represented. Missing SVG features include: - Masking - Text - Fill - Effects - Stroke styles like dashes The \"ImportAs Lines\" mode inserts double points so closed shapes will be closed when rendering lines. To draw the SVG, you can convert the list to a GPU point buffer with [ListToBuffer] and then use [DrawLines]. Also see: [PrepareSvgLineTransition], [SvgLineTransitionExample]",
   "SymbolTags": "1",

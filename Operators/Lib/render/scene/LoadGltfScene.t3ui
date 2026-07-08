@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "00618c91-f39a-44ea-b9d8-175c996460dc"/*LoadGltfScene*/,
   "Description": "Experimental op for loading complex scene setups using the glTF Format. Scenes have to be connected to a [DrawScene]-Op to be rendered.\nThis Operator supports *.glb and *.gltf + .bin + textures.\n\n\n\n\n\n\n\nAlso see [HowToDrawThings] ",
   "SymbolTags": "72",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "34567890-abcd-ef12-3456-7890abcdef12"/*PoseLandmarkDetection*/,
   "Inputs": [
     {

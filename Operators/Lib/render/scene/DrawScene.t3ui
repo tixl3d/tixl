@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2fcdea21-18f1-4006-a2fe-aab40893fed8"/*DrawScene*/,
   "Description": "Draw the connected SceneSetup.\n\nYou can use [LoadGltfScene] to load a scene.",
   "SymbolTags": "72",

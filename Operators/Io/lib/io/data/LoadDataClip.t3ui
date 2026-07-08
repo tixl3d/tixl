@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607"/*LoadDataClip*/,
   "Description": "Loads a recorded .data file and presents it as a timeline-bound DataClip. Appears in the timeline clip area; drag and trim like any other TimeClip.\n\nThe Clip output exposes a DataClip value containing the parsed DataSet plus the current timeline-to-source mapping. Downstream consumers (SimulateIoData for replay, future analysis ops) read .Set for content and .Mapping for timing.\n\nLoad / unload is shared via DataSetCache so multiple LoadDataClip ops referencing the same file share one parsed dataset.",
   "SymbolTags": "64",

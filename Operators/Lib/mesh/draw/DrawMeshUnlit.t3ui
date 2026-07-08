@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4499dcb1-c936-49ed-861b-2ad8ae58cb28"/*DrawMeshUnlit*/,
   "Description": "Draws incoming geometry and meshnodes without any shading and according to the desired settings.\n\nAn interactive tutorial for the complete TiXL render pipeline can be found at [HowToDrawThings].\n\nThe most commonly used render methods are [Drawmesh], [DrawMeshUnlit], [DrawMeshHatched], and [DrawMeshAtPoints].\n\nThey can then be combined with [SetMaterial], [SetFog], [SetPointLight], and many others to create the look of scenes.",
   "SymbolTags": "1",

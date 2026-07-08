@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b470fdf9-ac0b-4eb9-9600-453b8c094e3f"/*UseFallbackTexture*/,
   "Description": "Automatically replaces a non-loadable texture with a predefined backup. \nFor example to define a backup if a [LoadImageFromUrl] cannot be reached due to a lack of Internet.\n\nNeeds a [LoadImage].\n\nUseful combinations: [UnsplashAPI]",
   "SymbolTags": "8",

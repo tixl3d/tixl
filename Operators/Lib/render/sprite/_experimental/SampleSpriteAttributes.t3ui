@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4670ff79-f630-478c-8f3f-513e1f2b5913"/*SampleSpriteAttributes*/,
   "Description": "Sets Sprite definition from a texture. This can be used to colorize sprites.",
   "SymbolTags": "8",

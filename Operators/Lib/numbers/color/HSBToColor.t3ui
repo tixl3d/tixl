@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "13b08a56-0af1-473c-8dbc-20eccbcbd372"/*HSBToColor*/,
   "Description": "Creates an RGBA color from HSB settings (same as HSB in the Color Picker)",
   "InputUis": [

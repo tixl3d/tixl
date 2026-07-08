@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ef3a1411-e88c-43a8-83b4-931fdbf16c75"/*DampPeakDecay*/,
   "Description": "Compares the current input value to the current damped value. If the input value is great, it is immediately used and no damping applied.\nIf the input value is small, it is decaying slowly, similar to the peak indicators of equalizer visualizations.",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "58aa74af-32aa-4c46-8bb5-5811f16bf7f8"/*Pow*/,
   "Description": "Calculates the result of an exponential function\n\nIn C#: Math.Pow(x, y)",
   "SymbolTags": "1",

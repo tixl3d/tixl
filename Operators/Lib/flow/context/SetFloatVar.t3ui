@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2a0c932a-eb81-4a7d-aeac-836a23b0b789"/*SetFloatVar*/,
   "Description": "Writes a float value to the context's float variable dictionary.\nUse [ContextFloat] to read this value further down the graph.",
   "SymbolTags": "8",

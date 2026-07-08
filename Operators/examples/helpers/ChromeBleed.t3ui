@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "007b7ad9-e8f2-4830-be0f-d3f5f3444683"/*ChromeBleed*/,
   "Description": "A feedback effect that is seeded by geometry like texts, etc.",
   "InputUis": [

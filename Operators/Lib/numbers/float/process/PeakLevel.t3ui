@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "d3fb5baf-43f8-4983-a1d9-42f4005a3af0"/*PeakLevel*/,
   "Description": "Analyzes the incoming value changes and outputs information about the peaks\n\nOutput:\n1. attack level (float): Attack level\n2. foundPeak (bool): Did the incoming value just reach a peak True / False\n3. timeSincePeak (float): How much time has passed since the last peak\n4. movingSum (float): Passing on the incoming value",
   "SymbolTags": "8",

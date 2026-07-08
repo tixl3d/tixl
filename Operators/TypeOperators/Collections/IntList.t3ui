@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c35dc0e1-75cb-434e-b594-b2a4fb687d55"/*IntList*/,
   "Description": "A collection of int values. This can be useful to define indices.",
   "InputUis": [

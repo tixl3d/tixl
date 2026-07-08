@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ca3f3c1b-6f22-4bf3-b06b-d2b0d85a8881"/*BubbleZoom*/,
   "Description": "An image effect that enlarges the inner circular region with a smooth edge. Other terms for this would be 'Bulge', 'Blob distort', 'Fish Eye zoom', 'Magnifying glass'",
   "SymbolTags": "8",

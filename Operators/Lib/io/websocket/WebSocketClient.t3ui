@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "8e9f0a1b-2c3d-4e5f-6a7b-8c9d0e1f2a3b"/*WebSocketClient*/,
   "Description": "Connects to a WebSocket server to enable real-time, two-way communication.\n\nThis operator establishes a client connection to a WebSocket server, allowing you to send and receive messages. It's useful for interacting with web-based applications, APIs, or other systems that use the WebSocket protocol.\n\nTips:\n- The `Url` should start with 'ws://' or 'wss://' (for secure connections).\n- Use `SendOnChange` or `SendTrigger` to control when messages are sent.\n- Received messages can be accessed as a raw string, a list of lines, or parsed into a dictionary or list of parts, depending on the `ParsingMode`.\n\nAKA: websocket, socket, web, real-time, client",
   "InputUis": [

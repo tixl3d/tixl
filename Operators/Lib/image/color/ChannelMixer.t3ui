@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "51968877-03e7-472d-9b43-95bc8aeda3bc"/*ChannelMixer*/,
   "Description": "Adjusts the color of an incoming image.\n\nEach column defines a color channel of the output, whereas the incoming components are multiplied by a factor and summed up.\nFinally, a value is added to each component.\n\nYou can do a lot of things with this operator, like:\n- converting to grayscale\n- extracting an alpha channel to grayscale\n- inverting an image\n- swapping color channels.\n\nCheck the presets for examples.\nFor more natural color correction, try [Adjust Color].",
   "SymbolTags": "1",

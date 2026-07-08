@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e3ff58e2-847a-4c97-947c-cfbcf8f9c79d"/*BlendCameras*/,
   "Description": "Smoothly blends between multiple cameras by using a floating point index.",
   "SymbolTags": "8",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "2872d93c-882e-42ee-8bcf-747c24f9b042"/*FadingFaces*/,
   "Description": "An example of how to use the Unsplash API and combine it with feedback effects.",
   "InputUis": [],

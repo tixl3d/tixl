@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9"/*ComputeShaderStage*/,
   "Inputs": [
     {

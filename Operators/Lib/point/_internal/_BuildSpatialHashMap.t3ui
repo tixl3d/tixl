@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f61ceb9b-74f8-4883-88ea-7e6c35b63bbd"/*_BuildSpatialHashMap*/,
   "Description": "Building a spatial hashmap can be an important basis for complex simulations that require nearest neighbor search.\nThe implementation is based on work by Guillaume Boissé and involves multiple compute buffers and calculating an exclusive prefix sum.\n\nSome documentation can be found here: https://www.figma.com/file/wBNGUlaACjaCDOTdeBvBvR/ComputeShader-Ideas?node-id=8%3A0",
   "InputUis": [

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "94a392e6-3e03-4ccf-a114-e6fafa263b4f"/*SequenceAnim*/,
   "Description": "Creates a visual sequencer that can be controlled by adding a string of numbers",
   "SymbolTags": "9",

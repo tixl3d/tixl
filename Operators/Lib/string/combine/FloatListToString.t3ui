@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "abf1ec99-049d-474c-9023-5302d5a5c804"/*FloatListToString*/,
   "Description": "Converts a list of float numbers to String",
   "SymbolTags": "8",

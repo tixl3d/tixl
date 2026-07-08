@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "914fb032-d7eb-414b-9e09-2bdd7049e049"/*PlayVideo*/,
   "Description": "Plays a video file as a texture, decoded with FFmpeg.\n\nThe playback time follows the timeline. Connect [OverrideTimeInSecs] to offset or scrub the video independently, and enable Loop to repeat past the end (otherwise it holds on the last frame). The Duration output reports the clip length in seconds, and HasCompleted turns on once non-looping playback passes the end.\n\nOptimize For selects the decode strategy. Fast Seeking (the default) decodes in software and keeps a frame cache, so scrubbing back and forth and looping stay snappy and HD playback is smooth. Playback Performance decodes on the GPU with no read-back for the smoothest playback of large or 4K footage, at the cost of slower random seeks. Both fall back to software automatically when the codec or GPU profile is unsupported.\n\nAlso see [PlayVideoClip] for placing a video as a timeline clip.\n\nAKA: video, movie, footage, mp4, mkv",
   "SymbolTags": "1",

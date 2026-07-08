@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "7b4d3c2a-5b16-4b2a-8f3a-7e8c9d0b1a2b"/*CameraCalibrator*/,
   "Description": "Calibrates a camera to determine its intrinsic parameters (like focal length and lens distortion) and to remove distortion from the video feed.\n\nThis operator analyzes images of a known chessboard pattern to calculate the camera's properties. This process is essential for many computer vision tasks, such as 3D reconstruction, augmented reality, and spatial mapping.\n\nTo use:\n1. Set the `ChessboardSize` to match your physical chessboard pattern.\n2. Show the chessboard to the camera.\n3. Trigger `CaptureImage` multiple times from different angles and distances.\n4. Trigger `Calibrate` to compute the camera parameters.\n5. Switch `Mode` to 'LensCorrected' to see the corrected image on the `TextureOut` output.\n6. `Save` the calibration to a file for later use.\n\nAKA: lens calibration, camera intrinsics, undistort, computer vision, chessboard",
   "InputUis": [

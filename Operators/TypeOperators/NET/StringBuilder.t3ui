@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "fcdc3089-2df5-467b-841b-7745efaf13db"/*StringBuilder*/,
   "Description": "Sends the predefined (or incoming) string to the output when a trigger is activated\n\nThe output of this operator is made for [StringBuilderToString]",
   "InputUis": [

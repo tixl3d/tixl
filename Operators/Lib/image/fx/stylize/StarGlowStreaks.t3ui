@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "ecbb40c4-aef4-49a8-ac89-e82c3a09862f"/*StarGlowStreaks*/,
   "Description": "Renders streaks onto the incoming image. You can use the threshold to limit the range that is used for streaks. Also, check out the presets.",
   "SymbolTags": "1",

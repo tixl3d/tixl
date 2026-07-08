@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "abdf2c06-2b93-4938-afac-6d737a1c1be5"/*SimulateBoidsExample*/,
   "Description": "Illustrates how to combine boid simulation with [PointTrail] and [KeepPoints]",
   "SymbolTags": "1024",

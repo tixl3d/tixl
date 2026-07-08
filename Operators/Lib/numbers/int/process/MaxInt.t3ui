@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f7fd7342-18d1-443a-98ec-758974891434"/*MaxInt*/,
   "Description": "Outputs the maximum integer of the connected inputs.\n\nTo find a maximum float value, use [Clamp].",
   "SymbolTags": "8",

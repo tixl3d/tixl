@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "185958a3-be54-499d-a105-cad22c0dd448"/*EulerToAxisAngle*/,
   "Description": "Converts 3 Euler angles (heading, pitch, yaw) into an axis and angle representation.",
   "InputUis": [

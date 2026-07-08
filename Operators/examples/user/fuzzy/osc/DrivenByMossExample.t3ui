@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "245de58f-d3d0-4c57-ba27-1b884b7f6b31"/*DrivenByMossExample*/,
   "Description": "Install drivenbymoss extension for Reaper or Bitwig to use this",
   "InputUis": [],

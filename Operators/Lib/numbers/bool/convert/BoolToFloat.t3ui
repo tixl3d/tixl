@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf"/*BoolToFloat*/,
   "Description": "Allows the conversion of a Boolean value into a float value with predefined values\n\nAlso see [Boolean] / [Value]",
   "SymbolTags": "1",

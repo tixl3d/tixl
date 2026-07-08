@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "12dccab1-1d7d-4005-a4c1-0bebeeaeb6d3"/*EaseVec3*/,
   "Description": "[Ease] [SpringVec3] [DampVec3]",
   "InputUis": [

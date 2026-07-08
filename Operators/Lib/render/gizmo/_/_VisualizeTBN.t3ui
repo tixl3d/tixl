@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "dd353ac7-1f11-4dd6-aff5-5c557c695512"/*_VisualizeTBN*/,
   "Description": "Draws mesh normals, tangents and bitangents as lines for analysis. \nThis can be useful to verify that TBN space is spatially consistent.",
   "SymbolTags": "16",

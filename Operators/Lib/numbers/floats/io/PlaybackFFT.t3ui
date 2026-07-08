@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "cda108a1-db4f-4a0a-ae4d-d50e9aade467"/*PlaybackFFT*/,
   "Description": "Returns the bass audio FFT buffer during soundtrack playback.\n\nCheck [AudioFrequencies] if you're using an external audio device  ",
   "InputUis": [

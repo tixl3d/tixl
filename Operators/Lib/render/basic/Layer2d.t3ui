@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "d8c5330f-59b5-4907-b845-a02def3042fa"/*Layer2d*/,
   "Description": "Creates a 2D plane in 3D space onto which the incoming image is rendered.\nThis op automatically adjusts to the correct aspect ratio.\n\nA possible alternative [QuadMesh] -> [DrawMesh] -> [SetMaterial] in combination with [RenderTarget].",
   "SymbolTags": "1",

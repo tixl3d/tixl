@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "843c9378-6836-4f39-b676-06fd2828af3e"/*_TransformsCBufferFromCam*/,
   "Description": "This operators is deprecated. Please use [_TransformsCBuffer]\nGets properties of a camera operator further down (further left) in the render graph. \nThis can be useful for effects like motion blur.",
   "SymbolTags": "4104",

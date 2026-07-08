@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9"/*ComputeShaderStage*/,
   "Description": "Setup all necessary structures to dispatch a compute shader.\n\nThis can be dispatched for multiple iterations (e.g. to speed up processing).\n\nIf multiple iterations are required an additional ConstantBuffer is automatically bound with the current execution index.",
   "InputUis": [

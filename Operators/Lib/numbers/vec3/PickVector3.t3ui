@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "19b91067-8a0f-4a3c-a68e-b353bffd9657"/*PickVector3*/,
   "Description": "Selects one Vector3 from many, like a switch.",
   "InputUis": [

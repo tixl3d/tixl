@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "48781d5a-d67f-4b9f-8554-35185ddb6c5c"/*BlendImages*/,
   "Description": "Blends the connected input images with cross-fading and using a float index.\n\nPlease note: this will lead to inconsistent behavior if used with images of varying resolution unless you set an explicit resolution.\n\nAlso see: [PickTexture]\n\n\nAll blend ops and similar: [BlendImages] [Blend] [BlendWithMask] [Combine3Images]",
   "SymbolTags": "1",

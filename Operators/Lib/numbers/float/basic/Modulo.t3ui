@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "5202d3f6-c970-4006-933d-3c60d6c202dc"/*Modulo*/,
   "Description": "Modulo for floats.",
   "SymbolTags": "1",

@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b956f707-2a33-4330-b7ff-9c91edbcf041"/*SetPixelAndVertexShaderStage*/,
   "Inputs": [
     {

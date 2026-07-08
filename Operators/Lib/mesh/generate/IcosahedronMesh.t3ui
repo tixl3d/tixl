@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "e0cead3c-e19c-4726-8b5c-a9fefbf96ab9"/*IcosahedronMesh*/,
   "Description": "This generator is expensive, it's not recommended to animate its parameters",
   "SymbolTags": "192",

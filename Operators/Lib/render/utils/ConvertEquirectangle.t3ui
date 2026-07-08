@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "c6014c28-c6ab-4b4e-b6bf-0cee92fb4b40"/*ConvertEquirectangle*/,
   "Description": "Transforms a 360° image that was captured using a mirror ball or a panorama camera via equirectangular mapping so that it can be projected onto a cube without being distorted.\n\nUseful combinations: [LoadImage]\n\nAlso see: [Equirectangle], [PolarCoordinates]",
   "SymbolTags": "16",

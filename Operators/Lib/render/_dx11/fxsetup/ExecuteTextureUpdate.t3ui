@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "6c2f8241-9f4b-451e-8a1d-871631d21163"/*ExecuteTextureUpdate*/,
   "Description": "A helper that first evaluates a command input before returning a texture2d. This can be useful for compute shader processing.",
   "SymbolTags": "24",

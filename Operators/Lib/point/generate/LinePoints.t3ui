@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4ae9e2f5-7cb3-40b0-a662-0662e8cb7c68"/*LinePoints*/,
   "Description": "Define points from a source position to a direction.",
   "SymbolTags": "1",

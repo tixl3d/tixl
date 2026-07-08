@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "fc7fdcf6-8efa-4cec-82b6-cb6ce0696cc0"/*DrawClosedLinesExample*/,
   "Description": "With [DrawClosedLines] you can draw perfectly closed shapes like triangle, quad, star, arrow, diamond and more.",
   "InputUis": [],

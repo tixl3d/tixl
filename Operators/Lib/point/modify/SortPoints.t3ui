@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "b5008d45-dbda-4f76-b7e9-e05357688d6c"/*SortPoints*/,
   "Description": "Sort points by distance to camera, so that the distant sprites can be drawn first, and ones closer to camera get blended correctly",
   "SymbolTags": "8",

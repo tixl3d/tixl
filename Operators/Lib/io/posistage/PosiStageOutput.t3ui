@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f1b2a3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*PosiStageOutput*/,
   "Description": "Sends real-time 3D tracking data using the PosiStageNet (PSN) protocol.\n\nThis operator takes a list of points and sends them as PosiStageNet tracker data over the network. This allows T3 to act as a source of tracking information for other applications in a virtual production or live event workflow.\n\nTips:\n- The `TrackerData` input expects a structured buffer of points, where each point represents a tracker with position and orientation.\n- Use `SendOnChange` or `SendTrigger` to control when data is sent.\n- The `Names` input can be used to assign names to the trackers being sent.\n\nAKA: posistage, tracking, stage, psn, motion capture, sender",
   "InputUis": [

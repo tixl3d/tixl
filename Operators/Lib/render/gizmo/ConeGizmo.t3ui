@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "f7e3c9a4-2b8d-4e6f-a1c5-9d7b3e8f6a2c"/*ConeGizmo*/,
   "Description": "Generates points for drawing a wireframe audio cone visualization matching BASS/ManagedBass 3D audio cone behavior. BASS cones are simple conical shapes defined by full angles (0-360 degrees). The cone extends from the origin in the -Z direction (forward). Generates line segments for: base circle and radial lines from apex to base. No rounded cap is used as BASS implements a hard cone boundary. Output points can be fed into DrawLines for rendering.",
   "SymbolTags": "8",

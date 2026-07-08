@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "4f5999c9-8ade-4e31-8379-afb7db56e170"/*TextureMapForce*/,
   "Description": "Accelerate particles from a signed normal map. The map is stretched to the camera clip space.\n\nThis force can be very powerful in creating effects, such as particles flowing along images or tracing contours. It utilizes the R and G channels of the signed normal map to accelerate along the X and Y axes.\n\nImportant: This implies that the normal map needs to have negative values. One option is using [NormalMap] with the Gray_ToNormalizedRGBSigned mode. This can be especially potent when combined with the Rotation parameter.\n\nTip: You can also use the [ImageLevels] operator to verify that the texture contains negative values.\n\nYou can use the ViewConfinement and DepthConcentration parameters to keep the particles within the visible area for the camera view.\n\nPlease also check the example.",
   "SymbolTags": "1",

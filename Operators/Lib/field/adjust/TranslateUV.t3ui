@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "75286fcf-cb35-4eea-994b-51d628c8cda7"/*TranslateUV*/,
   "Description": "Moves the UV coordinates of the incoming SDF field along the X, Y, and Z axes.\n\nTo scale the UV coordinates, use ‘Texture Scale’ in [RaymarchField].",
   "SymbolTags": "8",

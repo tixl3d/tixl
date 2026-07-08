@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "83cb923e-a387-4be2-b391-4111c7bd90fe"/*ExecuteTests*/,
   "Description": "Groups and executes integration tests.\n\nAlso see [VisualTest] and [AllTests].",
   "InputUis": [

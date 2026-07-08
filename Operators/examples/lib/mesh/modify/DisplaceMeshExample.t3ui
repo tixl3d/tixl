@@ -1,6 +1,5 @@
 {
   "FormatVersion": 3,
-  "TixlVersion": "4.2.0.3",
   "Id": "6726bfb3-79cf-46d2-8052-32933e3940be"/*DisplaceMeshExample*/,
   "Description": "In this example we see a particular but interesting use case of [DisplaceMesh].\nA mesh can carry two sets of UVs coordinates, this allow to displace the mesh according to its first UV map (TexCoord) while applying the texture with the second UV map (TexCoord2).",
   "InputUis": [],
