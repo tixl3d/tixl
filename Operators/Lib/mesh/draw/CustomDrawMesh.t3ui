@@ -6,8 +6,8 @@
     {
       "InputId": "05feb9d0-3bfc-4c96-b79e-b884132813e9"/*B*/,
       "Position": {
-        "X": 1778.1022,
-        "Y": 4901.37
+        "X": 1911.0858,
+        "Y": 4558.186
       }
     },
     {
@@ -42,41 +42,41 @@
     {
       "InputId": "38404e1d-666e-42c3-9ece-8be0d69ff505"/*FragmentField*/,
       "Position": {
-        "X": 1770.5946,
-        "Y": 5267.9644
+        "X": 1911.0858,
+        "Y": 4907.54
       },
-      "GroupTitle": "Field Overrides...",
+      "GroupTitle": "Additional Options...",
       "Description": "An optional shader graph with a color function. \n\nIt will use the world position.xyz to generate a color that is multiplied before drawing the fragment.\nTry [SphereField]->[SdfToColor]->.FragmentField."
     },
     {
       "InputId": "3e7b6c69-f4d1-4f96-a693-a2162fe29a77"/*ShaderDefines*/,
       "Position": {
-        "X": 1770.5946,
-        "Y": 5302.9644
+        "X": 1762.7366,
+        "Y": 5001.0
       },
       "Description": "Additional shader code that can be injected before rendering. \nUsing this requirese knowledge about the internal implementation. Passing invalid code will break the rendering.\nThis is similar to shader flags but most powerful because it also allows to define methods that are applied before rendering the fragment.\n\nOptions are...\n\n#define USE_WORLDSPACE",
-      "Usage": "Multiline"
+      "Usage": "Default"
     },
     {
       "InputId": "3fb1af41-eed4-4c38-9a6a-7efe494612d0"/*Offset*/,
       "Position": {
-        "X": 1638.1022,
-        "Y": 5006.37
+        "X": 1771.0858,
+        "Y": 4663.186
       }
     },
     {
       "InputId": "43344f8e-5d14-438a-8f87-3922ce954cdb"/*Shading*/,
       "Position": {
-        "X": 1468.917,
-        "Y": 3714.7063
+        "X": 1805.991,
+        "Y": 3759.996
       },
       "Description": "Select shading mode"
     },
     {
       "InputId": "4494c16e-1ff2-42db-9204-ac389451088f"/*GainAndBias*/,
       "Position": {
-        "X": 1638.1022,
-        "Y": 5146.37
+        "X": 1771.0858,
+        "Y": 4803.186
       },
       "Min": 0.0,
       "Max": 1.0,
@@ -88,16 +88,16 @@
     {
       "InputId": "65f2a12d-f6b4-4562-a11c-2b14e2ab5e34"/*WrapMode*/,
       "Position": {
-        "X": 2000.3037,
-        "Y": 4216.784
+        "X": 2050.3704,
+        "Y": 4157.2036
       },
       "Description": "Defines how the texture behaves when repeated.\n\nWrap: The texture repeats itself continuously\nMirror: The texture is mirrored and repeats infinitely.\nClamp: The texture is cut off at the edge\nBorder: Unclear\nMirrOnce: The texture is mirrored once, then cut off"
     },
     {
       "InputId": "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe"/*ShaderCode*/,
       "Position": {
-        "X": 1269.887,
-        "Y": 5313.697
+        "X": 1911.0858,
+        "Y": 5187.54
       },
       "Usage": "Multiline"
     },
@@ -122,7 +122,7 @@
       "InputId": "93200afe-7b59-45a9-8662-4cfa477e011c"/*Points*/,
       "Position": {
         "X": 1442.394,
-        "Y": 3462.128
+        "Y": 3401.7888
       }
     },
     {
@@ -131,7 +131,7 @@
         "X": 2050.3704,
         "Y": 4095.2783
       },
-      "GroupTitle": "Texture Options",
+      "GroupTitle": "Texture Options...",
       "Description": "Defines the mode for texture filtering"
     },
     {
@@ -145,16 +145,16 @@
     {
       "InputId": "ada34207-e581-4f35-9ef5-8f6122e0bde5"/*D*/,
       "Position": {
-        "X": 1778.1022,
-        "Y": 4971.37
+        "X": 1911.0858,
+        "Y": 4628.186
       }
     },
     {
       "InputId": "d3c406b7-b17e-4c95-82b4-7249e6335675"/*Mesh*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 1300.3743,
-        "Y": 4077.8716
+        "X": 1380.8081,
+        "Y": 3942.326
       },
       "Description": "Input for Incoming Mesh Geometry"
     },
@@ -169,15 +169,15 @@
     {
       "InputId": "dc032839-eca3-48d0-be68-99b06da28167"/*C*/,
       "Position": {
-        "X": 1778.1022,
-        "Y": 4936.37
+        "X": 1911.0858,
+        "Y": 4593.186
       }
     },
     {
       "InputId": "e7dc01ac-cb1d-409a-b8f3-ad22b1255771"/*A*/,
       "Position": {
-        "X": 1778.1022,
-        "Y": 4866.37
+        "X": 1911.0858,
+        "Y": 4523.186
       }
     },
     {
@@ -186,23 +186,31 @@
         "X": 2404.7104,
         "Y": 4099.43
       },
-      "GroupTitle": "Draw Style",
+      "GroupTitle": "Draw Style...",
       "Description": "Toggles between colored Wireframe Rendering or default shading method."
+    },
+    {
+      "InputId": "ede123e4-14cd-49f7-b7ce-c538ec381415"/*ShaderTemplatePath*/,
+      "Position": {
+        "X": 1911.0857,
+        "Y": 4942.54
+      },
+      "Usage": "FilePath"
     },
     {
       "InputId": "eff4073a-619b-4b4c-8612-758c54dc12bf"/*Gradient*/,
       "Position": {
-        "X": 1355.8003,
-        "Y": 4307.3145
+        "X": 1380.808,
+        "Y": 4067.5027
       }
     },
     {
       "InputId": "f5754aaf-f276-474f-b36f-4b608bdbfe88"/*AdditionalDefines*/,
       "Position": {
-        "X": 1285.7698,
-        "Y": 5366.8213
+        "X": 1911.0858,
+        "Y": 5117.54
       },
-      "Usage": "Default"
+      "Usage": "Multiline"
     },
     {
       "InputId": "f9f36aec-ebbf-4221-a585-cdc6ea7f7c50"/*Color*/,
@@ -210,7 +218,7 @@
         "X": 1665.991,
         "Y": 3584.996
       },
-      "GroupTitle": "Appearance",
+      "GroupTitle": "Appearance...",
       "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings.",
       "Scale": 0.01
     }
@@ -220,21 +228,21 @@
       "ChildId": "09db099a-e26f-433a-bdfe-a366469f552f"/*clampedSampler*/,
       "Position": {
         "X": 2544.7104,
-        "Y": 4056.748
+        "Y": 4008.5835
       }
     },
     {
       "ChildId": "0aaf26a4-7b73-4427-9ab7-6be4a544665a"/*SearchAndReplace*/,
       "Position": {
-        "X": 1910.5946,
-        "Y": 5477.9644
+        "X": 2051.0857,
+        "Y": 5152.54
       }
     },
     {
       "ChildId": "11513e3d-2f7f-4d0f-987d-a4d9cd130398"/*IntValue*/,
       "Position": {
-        "X": 2051.6887,
-        "Y": 4686.212
+        "X": 2051.0857,
+        "Y": 4383.2446
       }
     },
     {
@@ -252,8 +260,8 @@
     {
       "ChildId": "140f3649-f8c2-4db6-a591-cd21b1059527"/*texSampler*/,
       "Position": {
-        "X": 2481.5154,
-        "Y": 3902.5068
+        "X": 2259.3296,
+        "Y": 4278.609
       }
     },
     {
@@ -271,8 +279,8 @@
         "Y": 921.4707
       },
       "Position": {
-        "X": 3003.2698,
-        "Y": 3271.7793
+        "X": 3072.7805,
+        "Y": 3240.7478
       }
     },
     {
@@ -300,21 +308,21 @@
       "ChildId": "20e3c932-5068-4188-81d5-9d964cc5f9d5"/*Point*/,
       "Position": {
         "X": 1442.394,
-        "Y": 3497.128
+        "Y": 3436.7888
       }
     },
     {
       "ChildId": "257c0d62-92a3-40fb-91e3-98bbde486d3f"/*SetPixelAndVertexShaderStage*/,
       "Position": {
         "X": 2684.7104,
-        "Y": 3321.748
+        "Y": 3273.5835
       }
     },
     {
       "ChildId": "27a73f64-ee5a-4891-bbc9-77efa77f9d28"/*ContextCBuffers*/,
       "Position": {
         "X": 2544.7104,
-        "Y": 3496.748
+        "Y": 3413.5835
       }
     },
     {
@@ -327,15 +335,15 @@
     {
       "ChildId": "3b3a626d-add3-45ff-b6e7-69450d91da1b"/*padding*/,
       "Position": {
-        "X": 1778.1022,
-        "Y": 5111.37
+        "X": 1911.0858,
+        "Y": 4768.186
       }
     },
     {
       "ChildId": "3b824fbe-58f3-4dfd-916e-9e8b85303458"/*FirstValidBuffer*/,
       "Position": {
         "X": 1582.394,
-        "Y": 3462.128
+        "Y": 3401.7888
       }
     },
     {
@@ -368,24 +376,17 @@
       }
     },
     {
-      "ChildId": "594b7ef2-863a-42ae-9fb4-55a41579ec7a"/*AdditionalDefines*/,
-      "Position": {
-        "X": 1685.6263,
-        "Y": 5518.9087
-      }
-    },
-    {
       "ChildId": "5af1f8dc-47c7-4925-bc0f-cb5aa69eb93b"/*GetBufferComponents*/,
       "Position": {
-        "X": 1656.9694,
-        "Y": 4123.3
+        "X": 1660.8081,
+        "Y": 3977.3264
       }
     },
     {
       "ChildId": "5ce18482-d4c0-4ebe-8d2e-062e884eca03"/*Vector2Components*/,
       "Position": {
-        "X": 1778.1022,
-        "Y": 5146.37
+        "X": 1911.0858,
+        "Y": 4803.186
       }
     },
     {
@@ -414,14 +415,7 @@
       "ChildId": "6cefed99-5277-42fb-aeee-30b0b6031d40"/*GetBufferComponents*/,
       "Position": {
         "X": 1582.394,
-        "Y": 3532.128
-      }
-    },
-    {
-      "ChildId": "6e15e18f-74dd-4817-9d16-80443d89ebc8"/*String*/,
-      "Position": {
-        "X": 1723.9585,
-        "Y": 5453.658
+        "Y": 3471.7888
       }
     },
     {
@@ -434,15 +428,8 @@
     {
       "ChildId": "7dc6d276-738b-447e-a3a7-effd203d7219"/*_MeshBufferComponents*/,
       "Position": {
-        "X": 1440.3743,
-        "Y": 4077.8716
-      }
-    },
-    {
-      "ChildId": "82fb7a47-138b-4a4a-9bc3-3ce4eb602a94"/*CustomPointShader*/,
-      "Position": {
-        "X": 732.0093,
-        "Y": 5082.3804
+        "X": 1520.8081,
+        "Y": 3942.326
       }
     },
     {
@@ -462,8 +449,8 @@
     {
       "ChildId": "8cd1ff79-de48-4627-a3fb-0ec36a4b2cea"/*FloatsToBuffer*/,
       "Position": {
-        "X": 1918.1022,
-        "Y": 4831.37
+        "X": 2051.0857,
+        "Y": 4488.186
       }
     },
     {
@@ -486,7 +473,7 @@
       "ChildId": "a4415bc1-de64-4888-be42-eff54bbbc37a"/*VertexShader*/,
       "Position": {
         "X": 2544.7104,
-        "Y": 3321.748
+        "Y": 3273.5835
       }
     },
     {
@@ -498,42 +485,42 @@
       },
       "Position": {
         "X": 2544.7104,
-        "Y": 3426.748
+        "Y": 3343.5835
       }
     },
     {
       "ChildId": "b73b8acc-3611-4ef4-9e7b-e9885282d7c0"/*GenerateShaderGraphCode*/,
       "Position": {
-        "X": 1910.5946,
-        "Y": 5267.9644
+        "X": 2051.0857,
+        "Y": 4907.54
       }
     },
     {
       "ChildId": "b784a938-0cf1-45a1-ab4b-4c28e8addf3a"/*PixelShaderFromSource*/,
       "Position": {
-        "X": 2050.5947,
-        "Y": 5477.9644
+        "X": 2191.0862,
+        "Y": 5152.54
       }
     },
     {
       "ChildId": "b865d4bf-dfd4-4514-8789-c9ccea15a570"/*Vector3Components*/,
       "Position": {
-        "X": 1778.1022,
-        "Y": 5006.37
+        "X": 1911.0858,
+        "Y": 4663.186
       }
     },
     {
       "ChildId": "bb4add27-e2d2-4b5b-8c7d-8bc040b2fdf6"/*GradientsToTexture*/,
       "Position": {
-        "X": 1495.8003,
-        "Y": 4307.3145
+        "X": 1520.808,
+        "Y": 4067.5027
       }
     },
     {
       "ChildId": "c2288493-5f42-4476-8fab-ce2cf09269d6"/*GetSRVProperties*/,
       "Position": {
-        "X": 2051.6887,
-        "Y": 4546.212
+        "X": 2051.0857,
+        "Y": 4243.2446
       }
     },
     {
@@ -546,8 +533,8 @@
     {
       "ChildId": "c37b49a5-ab3c-41b4-ba11-1c909277058d"/*Draw*/,
       "Position": {
-        "X": 2051.6887,
-        "Y": 4721.212
+        "X": 2051.0857,
+        "Y": 4418.2446
       }
     },
     {
@@ -560,8 +547,8 @@
     {
       "ChildId": "cf205baa-6323-484b-81a5-02d71aa9fb14"/*MultiplyInt*/,
       "Position": {
-        "X": 2051.6887,
-        "Y": 4616.212
+        "X": 2051.0857,
+        "Y": 4313.2446
       }
     },
     {
@@ -573,24 +560,17 @@
       }
     },
     {
-      "ChildId": "d927b720-3c25-47e2-96ba-9e8b38044b82"/*CustomPixelShader*/,
-      "Position": {
-        "X": 652.31903,
-        "Y": 5207.8013
-      }
-    },
-    {
       "ChildId": "da2bd6b3-6f6c-4335-a260-ad25ccc8b5f2"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 1635.8003,
-        "Y": 4307.3145
+        "X": 1660.808,
+        "Y": 4067.5027
       }
     },
     {
       "ChildId": "dd289f24-9f7b-46fa-8b5b-193d6b44e454"/*SearchAndReplace*/,
       "Position": {
-        "X": 1910.5946,
-        "Y": 5407.9644
+        "X": 2051.0857,
+        "Y": 5082.54
       }
     },
     {
@@ -603,8 +583,8 @@
     {
       "ChildId": "df3d8766-35d8-4957-85b0-69b228839185"/*InputAssemblerStage*/,
       "Position": {
-        "X": 2863.2698,
-        "Y": 3271.7793
+        "X": 2932.7805,
+        "Y": 3240.7478
       }
     },
     {
@@ -624,15 +604,15 @@
     {
       "ChildId": "f6f72f5b-d682-40aa-8f3a-7b3e46ff16e5"/*GetBufferComponents*/,
       "Position": {
-        "X": 1689.9645,
-        "Y": 4034.3838
+        "X": 1660.8081,
+        "Y": 3942.326
       }
     },
     {
       "ChildId": "ff20dccd-e313-45b9-a4bd-e7d0ab9d0a77"/*MultiplyInt*/,
       "Position": {
-        "X": 2051.6887,
-        "Y": 4581.212
+        "X": 2051.0857,
+        "Y": 4278.2446
       }
     }
   ],
@@ -640,8 +620,8 @@
     {
       "OutputId": "eed49fbd-9a7c-4aaa-8d42-abb682f7ebf8"/*Output*/,
       "Position": {
-        "X": 3003.2698,
-        "Y": 3446.7793
+        "X": 3072.7805,
+        "Y": 3415.7478
       }
     }
   ],

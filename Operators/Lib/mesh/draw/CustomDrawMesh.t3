@@ -98,6 +98,10 @@
       "DefaultValue": 3
     },
     {
+      "Id": "ede123e4-14cd-49f7-b7ce-c538ec381415"/*ShaderTemplatePath*/,
+      "DefaultValue": "Lib:shaders/3d/mesh/mesh-CustomDraw-template.hlsl"
+    },
+    {
       "Id": "eff4073a-619b-4b4c-8612-758c54dc12bf"/*Gradient*/,
       "DefaultValue": {
         "Gradient": {
@@ -263,13 +267,7 @@
     {
       "Id": "20e3c932-5068-4188-81d5-9d964cc5f9d5"/*Point*/,
       "SymbolId": "9989f539-f86c-4508-83d7-3fc0e559f502",
-      "InputValues": [
-        {
-          "Id": "3cdc9cab-36d4-431f-b9bd-c8d8f49ee465"/*Scale*/,
-          "Type": "System.Single",
-          "Value": 0.29
-        }
-      ],
+      "InputValues": [],
       "Outputs": []
     },
     {
@@ -335,19 +333,6 @@
       "Outputs": []
     },
     {
-      "Id": "594b7ef2-863a-42ae-9fb4-55a41579ec7a"/*AdditionalDefines*/,
-      "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
-      "Name": "AdditionalDefines",
-      "InputValues": [
-        {
-          "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
-          "Type": "System.String",
-          "Value": ""
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "5af1f8dc-47c7-4925-bc0f-cb5aa69eb93b"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
       "InputValues": [],
@@ -398,18 +383,6 @@
       "Outputs": []
     },
     {
-      "Id": "6e15e18f-74dd-4817-9d16-80443d89ebc8"/*String*/,
-      "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
-      "InputValues": [
-        {
-          "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
-          "Type": "System.String",
-          "Value": "#include \"shared/point.hlsl\"\n#include \"shared/quat-functions.hlsl\"\n#include \"shared/point-light.hlsl\"\n#include \"shared/pbr.hlsl\"\n\ncbuffer Transforms : register(b0)\n{\n    float4x4 CameraToClipSpace;\n    float4x4 ClipSpaceToCamera;\n    float4x4 WorldToCamera;\n    float4x4 CameraToWorld;\n    float4x4 WorldToClipSpace;\n    float4x4 ClipSpaceToWorld;\n    float4x4 ObjectToWorld;\n    float4x4 WorldToObject;\n    float4x4 ObjectToCamera;\n    float4x4 ObjectToClipSpace;\n};\n\ncbuffer Params : register(b1)\n{\n    float4 Color;\n\n    float AlphaCutOff;\n    float UseFlatShading;\n    float SpecularAA;\n};\n\ncbuffer FogParams : register(b2)\n{\n    float4 FogColor;\n    float FogDistance;\n    float FogBias;\n}\n\ncbuffer PointLights : register(b3)\n{\n    PointLight Lights[8];\n    int ActiveLightCount;\n}\n\ncbuffer PbrParams : register(b4)\n{\n    float4 BaseColor;\n    float4 EmissiveColor;\n    float Roughness;\n    float Specular;\n    float Metal;\n}\ncbuffer CustomParams : register(b5)\n{\n    float A;\n    float B;\n    float C;\n    float D;\n    float3 Offset;\n}\n\ncbuffer Params : register(b6)\n{\n    /*{FLOAT_PARAMS}*/\n}\n\nstruct psInput\n{\n    float2 texCoord : TEXCOORD;\n    float4 pixelPosition : SV_POSITION;\n    float3 worldPosition : POSITION;\n    float3x3 tbnToWorld : TBASIS;\n    float3 colorRGB : COLOR;\n    float fog : VPOS;\n};\n\nstruct psOutput\n{\n    float4 Color : SV_Target0;\n    float4 Normal : SV_Target1;\n};\n\nsampler WrappedSampler : register(s0);\n//sampler LinearSampler : register(s1);\nsampler ClampedSampler : register(s1);\n\nStructuredBuffer<PbrVertex> PbrVertices : register(t0);\nStructuredBuffer<int3> FaceIndices : register(t1);\n\nTexture2D<float4> BaseColorMap : register(t2);\nTexture2D<float4> EmissiveColorMap : register(t3);\nTexture2D<float4> RSMOMap : register(t4);\nTexture2D<float4> NormalMap : register(t5);\n\nTextureCube<float4> PrefilteredSpecular : register(t6);\nTexture2D<float4> BRDFLookup : register(t7);\n\npsInput vsMain(uint id : SV_VertexID)\n{\n    psInput output;\n\n    int faceIndex = id / 3; //  (id % verticesPerInstance) / 3;\n    int faceVertexIndex = id % 3;\n\n    PbrVertex vertex = PbrVertices[FaceIndices[faceIndex][faceVertexIndex]];\n\n    float4 posInObject = float4(vertex.Position, 1);\n\n    float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);\n    output.pixelPosition = posInClipSpace;\n\n    float2 uv = vertex.TexCoord;\n    output.texCoord = float2(uv.x, 1 - uv.y);\n    \n    output.colorRGB = vertex.ColorRGB;\n\n    // Pass tangent space basis vectors (for normal mapping).\n    float3x3 TBN = float3x3(vertex.Tangent, vertex.Bitangent, vertex.Normal);\n    TBN = mul(TBN, (float3x3)ObjectToWorld);\n\n    output.tbnToWorld = float3x3(\n        normalize(TBN._m00_m01_m02),\n        normalize(TBN._m10_m11_m12),\n        normalize(TBN._m20_m21_m22));\n\n    output.worldPosition = mul(posInObject, ObjectToWorld).xyz;\n\n    // Fog\n    if (FogDistance > 0)\n    {\n        float4 posInCamera = mul(posInObject, ObjectToCamera);\n        float fog = pow(saturate(-posInCamera.z / FogDistance), FogBias);\n        output.fog = fog;\n    }\n\n    return output;\n}\n\n//=== Global functions ==============================================\n/*{GLOBALS}*/\n\n//=== Additional Resources ==========================================\n/*{RESOURCES(t8)}*/\n\n//=== Field functions ===============================================\n/*{FIELD_FUNCTIONS}*/\n\n//-------------------------------------------------------------------\n\n//-------------------------------------------------------------------\ninline float4 GetField(float4 p)\n{\n#ifndef USE_WORLDSPACE\n    //p.xyz = mul(float4(p.xyz, 1), WorldToObject).xyz;\n#endif\n    float4 f = 1;\n    /*{FIELD_CALL}*/\n\n    return f;\n}\n\nfloat GetDistance(float3 p3)\n{\n    return GetField(float4(p3.xyz, 0)).w;\n}\n//===================================================================\n\n#include \"shared/pbr-render.hlsl\"\n\nfloat3 ComputeNormal(psInput pin, float3x3 tbnToWorld)\n{\n    float3 N;\n    if (UseFlatShading > 0.5)\n    {\n        // Flat shading: calculate geometric normal from world position derivatives\n        float3 dpdx = ddx(pin.worldPosition);\n        float3 dpdy = ddy(pin.worldPosition);\n        float3 geometricNormal = normalize(cross(dpdy, dpdx));\n\n        // Apply normal map details on top of flat normal\n        float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);\n        float3 normalDetail = normalize(2.0 * normalMap.rgb - 1.0);\n\n        // Create TBN basis using geometric normal and derivatives\n        float3 T = normalize(dpdx);\n        float3 B = normalize(cross(geometricNormal, T));\n        T = cross(B, geometricNormal); // Reorthogonalize\n        float3x3 flatTBN = float3x3(T, B, geometricNormal);\n\n        // Apply normal map in flat shading tangent space\n        N = normalize(mul(normalDetail, flatTBN));\n    }\n    else\n    {\n        // Standard shading: use interpolated normals with normal mapping\n        float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);\n        N = normalize(2.0 * normalMap.rgb - 1.0);\n        N = normalize(mul(N, tbnToWorld));\n    }\n    return N;\n}\n\ninline float3 AdjustRoughnessForSpecularAA(float baseRoughness)\n{\n // --- Specular anti-aliasing ---\n    // Compute normal variance using screen-space derivatives and increase roughness accordingly.\n    // This reduces specular aliasing on silhouettes and high-frequency normalmap regions.\n    float3 Nx = ddx(frag.N);\n    float3 Ny = ddy(frag.N);\n    float normalVar = max(0.0, max(dot(Nx, Nx), dot(Ny, Ny)));\n    normalVar *= SpecularAA;\n    // convert roughness -> alpha (energy-preserving), combine variance, then convert back\n    float baseR = saturate(baseRoughness);\n    float baseR2 = baseR * baseR;\n    float adjustedR = sqrt(baseR2 + normalVar);    \n    return saturate(adjustedR);\n}\n\n//- DEFINES ------------------------------------\n/*{defines}*/\n//----------------------------------------------\n\n\npsOutput psMain(psInput pin) : SV_TARGET\n{\n    psOutput output;\n    float4 c=float4(1,1,1,1);\n\n{\n//- METHOD -------------------------------------\n/*{method}*/\n//----------------------------------------------\n}\n\n    // Alpha testing\n    if (AlphaCutOff > 0 && c.a < AlphaCutOff)\n    {\n        discard;\n    }\n    \n    float3 worldNormal = frag.N;\n    // Output to color buffer (SV_Target0)\n    output.Color = c;\n    // Output to normal buffer (SV_Target1)\n    output.Normal = float4(worldNormal, 1.0);\n    \n    return output;\n}\n"
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "782b3adb-e6cd-4329-a047-255a379c325e"/*PickBlendMode*/,
       "SymbolId": "fd9bffd3-5c57-462f-8761-85f94c5a629b",
       "InputValues": [
@@ -424,12 +397,6 @@
     {
       "Id": "7dc6d276-738b-447e-a3a7-effd203d7219"/*_MeshBufferComponents*/,
       "SymbolId": "5b9f1d97-4e10-4f31-ba83-4cbf7be9719b",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "82fb7a47-138b-4a4a-9bc3-3ce4eb602a94"/*CustomPointShader*/,
-      "SymbolId": "3d958f08-9c0f-45eb-a252-de880b5834f3",
       "InputValues": [],
       "Outputs": []
     },
@@ -626,12 +593,6 @@
           "Value": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g=mul(frag.N.xyz,transpose((float3x3)CameraToWorld)).z;\nc.rgb=exp2(-g*g*15)*1;\n\n\n"
         }
       ],
-      "Outputs": []
-    },
-    {
-      "Id": "d927b720-3c25-47e2-96ba-9e8b38044b82"/*CustomPixelShader*/,
-      "SymbolId": "46daab0e-e957-413e-826c-0699569d0e07",
-      "InputValues": [],
       "Outputs": []
     },
     {
@@ -992,12 +953,6 @@
       "TargetSlotId": "01809b63-4b4a-47be-9588-98d5998ddb0c"
     },
     {
-      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
-      "SourceSlotId": "f5754aaf-f276-474f-b36f-4b608bdbfe88",
-      "TargetParentOrChildId": "594b7ef2-863a-42ae-9fb4-55a41579ec7a",
-      "TargetSlotId": "ceeae47b-d792-471d-a825-49e22749b7b9"
-    },
-    {
       "SourceParentOrChildId": "7dc6d276-738b-447e-a3a7-effd203d7219",
       "SourceSlotId": "78c53086-bb28-4c58-8b51-42cfdf6620c4",
       "TargetParentOrChildId": "5af1f8dc-47c7-4925-bc0f-cb5aa69eb93b",
@@ -1110,6 +1065,12 @@
       "SourceSlotId": "305d321d-3334-476a-9fa3-4847912a4c58",
       "TargetParentOrChildId": "8cd1ff79-de48-4627-a3fb-0ec36a4b2cea",
       "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "ede123e4-14cd-49f7-b7ce-c538ec381415",
+      "TargetParentOrChildId": "b73b8acc-3611-4ef4-9e7b-e9885282d7c0",
+      "TargetSlotId": "0b5cbbdf-afe7-4daf-9f1e-0e79792691f1"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
@@ -1238,8 +1199,8 @@
       "TargetSlotId": "3ca66cbd-a16a-479c-b858-84732e5023ad"
     },
     {
-      "SourceParentOrChildId": "594b7ef2-863a-42ae-9fb4-55a41579ec7a",
-      "SourceSlotId": "dd9d8718-addc-49b1-bd33-aac22b366f94",
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "f5754aaf-f276-474f-b36f-4b608bdbfe88",
       "TargetParentOrChildId": "dd289f24-9f7b-46fa-8b5b-193d6b44e454",
       "TargetSlotId": "de8297ae-c7d8-414a-8825-d0ff9c2e3d78"
     },

@@ -2,27 +2,6 @@
   "Id": "c78d114e-b404-491f-93a8-024a382586bd",
   "Variations": [
     {
-      "Id": "339faaa4-9f76-45f7-ad0f-f43851190c26",
-      "IsPreset": true,
-      "ActivationIndex": 1,
-      "Title": "Default",
-      "PosOnCanvas": {
-        "X": -478.47864,
-        "Y": -435.8
-      },
-      "ParameterSetsForChildIds": {
-        "00000000-0000-0000-0000-000000000000": {
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);\nfrag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);\nfrag.Occlusion = roughnessMetallicOcclusion.z;\nfrag.albedo = BaseColorMap.Sample(WrappedSampler, pin.texCoord);\nfrag.albedo.rgb *= pin.colorRGB;\nfrag.uv = pin.texCoord;\nfrag.N = ComputeNormal(pin, pin.tbnToWorld);\n\nfrag.Roughness = AdjustRoughnessForSpecularAA(roughnessMetallicOcclusion.x + Roughness, SpecularAA);\n\nfrag.fog = pin.fog;\nfrag.worldPosition = pin.worldPosition;\n\nfloat4 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld);\nfrag.Lo = normalize(eyePosition.xyz - frag.worldPosition);\n\nfloat4 litColor = ComputePbr();\n\nlitColor.rgba *= GetField(float4(pin.worldPosition.xyz, 0)).rgba;\n\nc=litColor;\n\n\n",
-          "f9f36aec-ebbf-4221-a585-cdc6ea7f7c50": {
-            "X": 0.98725796,
-            "Y": 1.0,
-            "Z": 0.9967603,
-            "W": 1.0
-          }
-        }
-      }
-    },
-    {
       "Id": "9f2ec5aa-33b6-437f-9e14-6383f0613368",
       "IsPreset": true,
       "ActivationIndex": 2,
@@ -101,9 +80,155 @@
       }
     },
     {
-      "Id": "2db7ce61-0996-4164-8ea8-92b5b2ba70c4",
+      "Id": "e9c0c6ac-8a34-4398-9e58-509af8f277e6",
       "IsPreset": true,
-      "ActivationIndex": 4,
+      "ActivationIndex": 5,
+      "Title": "FaceDents",
+      "PosOnCanvas": {
+        "X": -478.47864,
+        "Y": -190.69885
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": -0.9,
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "SetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nfloat3 nf=-normalize(cross(ddx(pin.worldPosition.xyz),ddy(pin.worldPosition.xyz)));\nfrag.N=normalize(lerp(nf,frag.N,A));\n\nc = ComputePbr();\n\n"
+        }
+      }
+    },
+    {
+      "Id": "e2b8c905-ff9a-4caa-8e70-0b20846ea41c",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Texture Fresnel",
+      "PosOnCanvas": {
+        "X": -315.47864,
+        "Y": -190.69885
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 1.0,
+          "05feb9d0-3bfc-4c96-b79e-b884132813e9": 0.5,
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "\nfloat3 vn=mul(ComputeNormal(pin, pin.tbnToWorld).xyz,transpose((float3x3)CameraToWorld));\npin.texCoord.xy=vn.xy*B*float2(1,-1)+.5;\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nfloat3 nf=-normalize(cross(ddx(pin.worldPosition.xyz),ddy(pin.worldPosition.xyz)));\nfrag.N=normalize(lerp(nf,frag.N,A));\nc=frag.albedo;\n//c = ComputePbr();\n\n"
+        }
+      }
+    },
+    {
+      "Id": "efdbeed7-dcda-4658-bdfd-97369b10e96e",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "SDF Distance",
+      "PosOnCanvas": {
+        "X": -478.47864,
+        "Y": -68.14829
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 74.0,
+          "05feb9d0-3bfc-4c96-b79e-b884132813e9": -0.037,
+          "dc032839-eca3-48d0-be68-99b06da28167": 130.0,
+          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
+            "Gradient": {
+              "Interpolation": "OkLab",
+              "Steps": [
+                {
+                  "Id": "00a3fa0e-794b-41cb-9cbf-0528569729f3",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.72460896,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "dab580c0-fbd0-42e9-ab9e-08157a65885b",
+                  "NormalizedPosition": 0.33333334,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.48703903,
+                    "B": 0.13195556,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "aa1b46f8-2c1e-4c61-b551-cc0e01c85860",
+                  "NormalizedPosition": 0.6666667,
+                  "Color": {
+                    "R": 0.49247694,
+                    "G": 0.08999183,
+                    "B": 0.6582595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "8c04a307-fca1-4362-b8a4-5da1b8ff7e1e",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.09676862,
+                    "G": 0.29133904,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "float3 p=mul(pin.worldPosition,WorldToObject).xyz;\nfloat d=GetDistance(p)+B;\n\nc.a=exp2(-abs(d)*A);\nc.rgb=SampleGradient(exp(d*C)/(1+exp(d*C)));",
+          "7f731ea3-c246-4e9c-95b3-b30260887161": true,
+          "92736363-ef71-4828-bf2b-4e9f407b1155": false
+        }
+      }
+    },
+    {
+      "Id": "1a2a49ac-5ffe-4c59-8e6b-4561937b034b",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "SDF Bevel",
+      "PosOnCanvas": {
+        "X": -315.47864,
+        "Y": -68.14829
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 213.7,
+          "05feb9d0-3bfc-4c96-b79e-b884132813e9": 0.86,
+          "dc032839-eca3-48d0-be68-99b06da28167": -0.16,
+          "ada34207-e581-4f35-9ef5-8f6122e0bde5": 0.09,
+          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "99d34055-ecd2-42dc-93a6-6b8242d235ba",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.4929639,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "9a83128c-9dc7-4050-9502-23148057a056",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.5215311,
+                    "G": 0.52152604,
+                    "B": 0.5215311,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "SetupFrag(pin);\n//frag.Metalness = Points[pin.pointIndex].FX1;\n//frag.Roughness = Points[pin.pointIndex].FX2;\n\nfloat3 p=mul(pin.worldPosition,WorldToObject).xyz;\nfloat2 e=float2(.0006,0);\nfloat3 nf=float3(GetDistance(p+e.xyy),GetDistance(p+e.yxy),GetDistance(p+e.yyx))-GetDistance(p);\nnf=(float3(FM(GetDistance(p+e.xyy)),FM(GetDistance(p+e.yxy)),FM(GetDistance(p+e.yyx)))-FM(GetDistance(p)))*.1/e.x;\nfrag.N=normalize(frag.N+mul(nf,transpose((float3x3)WorldToObject))*D);\nfrag.Metalness=FM(GetDistance(p));\nfloat mask=smoothstep(0.9,.99,FM(GetDistance(p)));\nfrag.albedo*=SampleGradient(mask);\nc = ComputePbr();\n\n"
+        }
+      }
+    },
+    {
+      "Id": "1c10edd6-2cfa-4aae-b430-6bd61c04499f",
+      "IsPreset": true,
+      "ActivationIndex": 9,
       "Title": "Simple Distance Gradient",
       "PosOnCanvas": {
         "X": -315.47864,
@@ -116,13 +241,13 @@
             "Y": 0.06,
             "Z": 0.0
           },
-          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 1.0,
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 0.13,
           "eff4073a-619b-4b4c-8612-758c54dc12bf": {
             "Gradient": {
               "Interpolation": "OkLab",
               "Steps": [
                 {
-                  "Id": "e565bb40-0322-40ac-b36b-0bf44d1835f7",
+                  "Id": "82e136d5-dc80-43e1-8e9a-2162d1df1cc9",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 1.0,
@@ -132,7 +257,7 @@
                   }
                 },
                 {
-                  "Id": "68868b97-6754-45d9-b7d0-3be0b748f032",
+                  "Id": "89b138b8-21ab-4327-bf24-0a9819ea5ed1",
                   "NormalizedPosition": 0.33333334,
                   "Color": {
                     "R": 1.0,
@@ -142,7 +267,7 @@
                   }
                 },
                 {
-                  "Id": "e6ce2511-cff0-40cc-a4a3-381601895da8",
+                  "Id": "0427e1df-b3cd-4e1e-9c1c-a4a5fdae7a3d",
                   "NormalizedPosition": 0.6666667,
                   "Color": {
                     "R": 0.49247694,
@@ -152,7 +277,7 @@
                   }
                 },
                 {
-                  "Id": "1804dbf9-dc81-407e-862d-4bcabb431b35",
+                  "Id": "1a012b87-da38-4176-ad9e-e517805feec8",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 0.09676862,
@@ -164,7 +289,27 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "c.rgb *= SampleGradient( frac(GetDistance(pin.worldPosition - Offset) * A));"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "c.rgb *= SampleGradient( frac(GetDistance(pin.worldPosition - Offset) / A));"
+        }
+      }
+    },
+    {
+      "Id": "6c57d3a4-b691-49a0-b636-f08dd4fd0846",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": -478.47864,
+        "Y": -435.8
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "f9f36aec-ebbf-4221-a585-cdc6ea7f7c50": {
+            "X": 0.98725796,
+            "Y": 1.0,
+            "Z": 0.9967603,
+            "W": 1.0
+          }
         }
       }
     }

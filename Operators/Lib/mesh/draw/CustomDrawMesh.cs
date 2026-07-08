@@ -109,6 +109,18 @@ internal sealed class CustomDrawMesh :Instance<CustomDrawMesh>,ICustomDropdownHo
         [Input(Guid = "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe")]
         public readonly InputSlot<string> ShaderCode = new InputSlot<string>();
 
+        [Input(Guid = "38404e1d-666e-42c3-9ece-8be0d69ff505")]
+        public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> FragmentField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
+
+        [Input(Guid = "f5754aaf-f276-474f-b36f-4b608bdbfe88")]
+        public readonly InputSlot<string> AdditionalDefines = new InputSlot<string>();
+
+        [Input(Guid = "ede123e4-14cd-49f7-b7ce-c538ec381415")]
+        public readonly InputSlot<string> ShaderTemplatePath = new InputSlot<string>();
+
+        [Input(Guid = "93200afe-7b59-45a9-8662-4cfa477e011c")]
+        public readonly InputSlot<T3.Core.DataTypes.BufferWithViews> Points = new InputSlot<T3.Core.DataTypes.BufferWithViews>();
+
         [Input(Guid = "f9f36aec-ebbf-4221-a585-cdc6ea7f7c50")]
         public readonly InputSlot<System.Numerics.Vector4> Color = new InputSlot<System.Numerics.Vector4>();
 
@@ -145,15 +157,6 @@ internal sealed class CustomDrawMesh :Instance<CustomDrawMesh>,ICustomDropdownHo
         [Input(Guid = "d5b24c95-4252-4b0b-ba37-0238f1957c4d")]
         public readonly InputSlot<string> UseMaterialId = new InputSlot<string>();
 
-        [Input(Guid = "38404e1d-666e-42c3-9ece-8be0d69ff505")]
-        public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> FragmentField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
-
         [Input(Guid = "3e7b6c69-f4d1-4f96-a693-a2162fe29a77")]
         public readonly InputSlot<string> ShaderDefines = new InputSlot<string>();
-
-        [Input(Guid = "f5754aaf-f276-474f-b36f-4b608bdbfe88")]
-        public readonly InputSlot<string> AdditionalDefines = new InputSlot<string>();
-
-        [Input(Guid = "93200afe-7b59-45a9-8662-4cfa477e011c")]
-        public readonly InputSlot<T3.Core.DataTypes.BufferWithViews> Points = new InputSlot<T3.Core.DataTypes.BufferWithViews>();
 }
