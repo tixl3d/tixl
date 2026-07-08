@@ -24,7 +24,6 @@ internal static class SymbolUiJson
             writer.WriteStartObject();
 
             writer.WriteValue(JsonKeys.FormatVersion, SymbolFormatVersion.Current);
-            writer.WriteObject(JsonKeys.TixlVersion, SymbolFormatVersion.TixlVersion);
             writer.WriteValue(JsonKeys.Id, symbolUi.Symbol.Id);
             writer.WriteComment(symbolUi.Symbol.Name);
 

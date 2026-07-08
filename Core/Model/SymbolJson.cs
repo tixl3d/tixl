@@ -23,7 +23,6 @@ public static class SymbolJson
         writer.WriteStartObject();
 
         writer.WriteValue(JsonKeys.FormatVersion, SymbolFormatVersion.Current);
-        writer.WriteObject(JsonKeys.TixlVersion, SymbolFormatVersion.TixlVersion);
         writer.WriteValue(JsonKeys.Id, symbol.Id);
         writer.WriteComment(symbol.Name);
 
