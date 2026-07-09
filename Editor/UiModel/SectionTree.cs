@@ -446,11 +446,20 @@ internal static class SectionTree
         if (target == null)
             return;
 
+        // Only measure pasted ops that actually landed inside the target frame. When a whole
+        // section is pasted, the anchor can fall inside a pasted sub-section (the target) whose
+        // members are scattered across the entire pasted region - measuring all of them would
+        // balloon the target and cascade a huge push through every neighbor.
+        var targetRect = ImRect.RectWithSize(target.PosOnCanvas, target.Size);
         var itemsMax = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
         var anyItems = false;
         foreach (var id in newChildIds)
         {
             if (!symbolUi.ChildUis.TryGetValue(id, out var childUi))
+                continue;
+
+            // Top-left inside means the op started in this frame and may overflow its bottom/right border
+            if (!targetRect.Contains(childUi.PosOnCanvas))
                 continue;
 
             itemsMax = Vector2.Max(itemsMax, childUi.PosOnCanvas + childUi.Size);
