@@ -66,7 +66,9 @@ internal sealed class OrbitCamera : Instance<OrbitCamera>
 
         Vector2 clip = NearFarClip.GetValue(context);
 
-        CameraToClipSpace = GraphicsMath.PerspectiveFovRH(fov, aspectRatio, clip.X, clip.Y);
+        var camToClipSpace = GraphicsMath.PerspectiveFovRH(fov, aspectRatio, clip.X, clip.Y);
+        CameraJitter.ApplyFromContext(context, ref camToClipSpace);
+        CameraToClipSpace = camToClipSpace;
 
         var radiusValue = DistanceToTarget.GetValue(context) == 0.0f ? .0001f : DistanceToTarget.GetValue(context); // avoid 0 radius that causes issues
         Vector3 p = new Vector3(0, 0, radiusValue);

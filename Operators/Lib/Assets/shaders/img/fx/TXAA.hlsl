@@ -88,7 +88,22 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     prevClip /= prevClip.w;
     float2 prevUv = float2(prevClip.x * 0.5 + 0.5, 0.5 - prevClip.y * 0.5);
 
+    // Un-jitter the reprojection so the accumulated history stays in stable (jitter-free) pixel
+    // alignment: with a static camera prevUv then equals uv exactly, avoiding the per-frame
+    // fractional resampling that would otherwise blur the history over time. The sub-pixel
+    // jitter lives in the projection matrices' NDC translation terms (same slots as LensShift;
+    // a constant lens shift cancels out here). NDC y is up while texel y is down, hence the flip.
+    float2 currentJitterUv = float2(CameraToClipSpace._31, -CameraToClipSpace._32) * 0.5;
+    float2 previousJitterUv = float2(PrevCameraToClipSpace._31, -PrevCameraToClipSpace._32) * 0.5;
+    // Remove the jitter *delta*: with a static camera the fetch then lands exactly on uv — the
+    // fixed point that keeps the accumulation stable while the zero-mean jittered current frame
+    // blends in as sub-pixel supersamples. (Correcting with only one frame's jitter shifts the
+    // fetch by the other frame's jitter every frame — the whole image vibrates.)
+    prevUv += previousJitterUv - currentJitterUv;
+
     float2 velocity = uv - prevUv;
+    //return float4((velocity * 1000) + 0.5,0,1);
+    //return float4(velocity * TargetWidth * 0.25 + 0.5, 0, 1);
 
     // YCoCg AABB of the 3x3 current neighborhood; history is clamped into this box, which is
     // the primary ghost suppressor for moving content within the screen.
@@ -118,6 +133,9 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     // History carries the previous resolved color in rgb and that frame's scene depth in alpha.
     float4 historySample = History.SampleLevel(texSampler, prevUv, 0);
+
+    //return lerp(Image.SampleLevel(texSampler, uv, 0), historySample, BlendFactor); // <--- Debug test
+
     float3 history = YCoCgToRgb(clamp(RgbToYCoCg(historySample.rgb), boxMin, boxMax));
 
     // Confidence in the history sample. Anything that makes reprojection unreliable drives

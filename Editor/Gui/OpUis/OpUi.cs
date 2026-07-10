@@ -120,6 +120,9 @@ public static class OpUi
                   { Guid.Parse("fdad077d-e919-4f40-a154-36e86245a585"), SetVec3VarUi.DrawChildUi },
                   { Guid.Parse("f21de2e1-6af8-4651-90a0-6c662bbb23af"), GetVec3VarUi.DrawChildUi },
 
+                  { Guid.Parse("332d7496-09ec-45b7-85b4-0653bb93dd62"), SetVec2VarUi.DrawChildUi },
+                  { Guid.Parse("411d3dd4-778b-4012-a19f-05d855fa1baf"), GetVec2VarUi.DrawChildUi },
+
                   { Guid.Parse("e6070817-cf2e-4430-87e0-bf3dd15afdb5"), PickTextureUi.DrawChildUi },
                   //
                   // { Guid.Parse("96b1e8f3-0b42-4a01-b82b-44ccbd857400"), SelectVec2FromDictUi.DrawChildUi },
@@ -133,7 +136,11 @@ public static class OpUi
     {
         if (sourceInstance.Parent == null)
             return;
-        
+
+        // An empty name would otherwise link all ops whose name input is equally empty.
+        if (string.IsNullOrWhiteSpace(variableName))
+            return;
+
         foreach (var child in sourceInstance.Parent.Children.Values)
         {
             if (child.Symbol.Id != symbolId)

@@ -73,36 +73,12 @@ internal sealed class Camera : Instance<Camera>, ICamera, ICameraPropertiesProvi
             
         _cameraDefinition.BuildProjectionMatrices(out var camToClipSpace, out var worldToCamera);
 
+        CameraJitter.ApplyFromContext(context, ref camToClipSpace);
+
         CameraToClipSpace = camToClipSpace;
         WorldToCamera = worldToCamera;
-            
-
     }
-
-    // public static void BuildProjectionMatrices(System.Numerics.Vector3 position, System.Numerics.Vector3 target, System.Numerics.Vector3 positionOffset, System.Numerics.Vector3 rotationOffset, float aspectRatio,
-    //                                             Vector2 nearFarClip, Vector2 viewPortShift, bool offsetAffectsTarget, float fov, float roll, System.Numerics.Vector3 up,
-    //                                             out Matrix camToClipSpace, out Matrix worldToCamera)
-    // {
-    //     camToClipSpace = Matrix.PerspectiveFovRH(fov, aspectRatio, nearFarClip.X, nearFarClip.Y);
-    //     camToClipSpace.M31 = viewPortShift.X;
-    //     camToClipSpace.M32 = viewPortShift.Y;
-    //
-    //     var eye = new System.Numerics.Vector3(position.X, position.Y, position.Z);
-    //     if (!offsetAffectsTarget)
-    //         eye += positionOffset.ToSharpDx();
-    //
-    //     var worldToCameraRoot = Matrix.LookAtRH(eye, target.ToSharpDx(), up.ToSharpDx());
-    //     var rollRotation = Matrix.RotationAxis(new System.Numerics.Vector3(0, 0, 1), -(float)roll);
-    //     var additionalTranslation = offsetAffectsTarget ? Matrix.Translation(positionOffset.X, positionOffset.Y, positionOffset.Z) : Matrix.Identity;
-    //
-    //     var additionalRotation = Matrix.RotationYawPitchRoll(MathUtil.DegreesToRadians(rotationOffset.Y),
-    //                                                          MathUtil.DegreesToRadians(rotationOffset.X),
-    //                                                          MathUtil.DegreesToRadians(rotationOffset.Z));
-    //
-    //     worldToCamera = worldToCameraRoot * rollRotation * additionalRotation * additionalTranslation;
-    // }
-        
-
+    
     public  CameraDefinition CameraDefinition => _cameraDefinition;
     private CameraDefinition _cameraDefinition;
         

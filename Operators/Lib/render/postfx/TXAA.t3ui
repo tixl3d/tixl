@@ -1,76 +1,92 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
   "Id": "22bb4788-d97a-4457-b6d1-1fc9ffe4f9ff"/*TXAA*/,
-  "Description": "Experimental TXAA operator",
+  "Description": "Temporal anti-aliasing (TXAA) that smooths edges and reduces specular flickering by accumulating frames rendered with sub-pixel camera jitter.\n\nThe previous result is reprojected with the camera motion (reconstructed from the depth map and the camera reference), so the accumulation stays stable while the camera moves. The required sub-pixel jitter is applied automatically by [Camera] and [OrbitCamera] through the _TXAA_JitterOffset context variable that this operator sets while rendering.\n\nRequirements:\n\n- All rendered content must write to the depth buffer. Content without depth (e.g. [Layer2d] with depth writing disabled) breaks the reprojection and smears or vibrates.\n- The scene camera must be connected to CameraReference so its matrices are available for reprojection.\n\nAKA: TAA, temporal anti-aliasing, temporal supersampling\n\nTips:\n\n- Judge the result in motion — a still comparison flatters the aliased original, whose extra \"sharpness\" is partly false detail.\n- Thin sub-pixel lines and content that intentionally flickers every frame cannot be fully stabilized; render lines at least one pixel wide.\n- After a hard camera cut, use Reset to clear the accumulated history for one frame.",
   "SymbolTags": "1216",
   "InputUis": [
     {
       "InputId": "19b07ddf-ba1e-4f8b-b476-e93485348e91"/*Image*/,
       "Relevancy": "Required",
+      "Description": "The rendered scene color to be anti-aliased. Must come from the same render pass and camera as DepthMap.",
       "Position": {
-        "X": -61.529907,
-        "Y": 840.35876
+        "X": -225.14397,
+        "Y": 944.8822
       }
     },
     {
       "InputId": "24b786f7-75d2-47d4-96e8-f7fcf0cc9258"/*DepthMap*/,
       "Relevancy": "Required",
+      "Description": "The scene's depth buffer, used to reconstruct where each pixel was in the previous frame. All content must write depth, otherwise it smears or vibrates.",
       "Position": {
-        "X": 209.65125,
-        "Y": 874.99677
+        "X": 131.33911,
+        "Y": 895.63794
       }
     },
     {
       "InputId": "414b89a2-128c-40c1-a3c7-137a788bb320"/*CameraReference*/,
       "Relevancy": "Required",
+      "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera]). Its matrices drive the reprojection of the previous frame.",
       "Position": {
-        "X": 209.65125,
-        "Y": 769.99677
+        "X": 131.33911,
+        "Y": 790.6382
       }
     },
     {
       "InputId": "5d6e7f80-91a2-43b4-8506-7d8e9f011223"/*BlendFactor*/,
+      "Description": "How much of the accumulated history is kept each frame. Higher values are smoother and more stable but react slower to changes; lower values are sharper but flicker more. Typical range: 0.85 … 0.93.",
       "Position": {
-        "X": -378.00055,
-        "Y": 744.56146
-      }
+        "X": -225.14398,
+        "Y": 573.38007
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
     },
     {
       "InputId": "6e7f8091-a2b3-44c5-9607-8e9f01122334"/*NeighborhoodClamp*/,
+      "Description": "Widens the color range the history is allowed to differ from the current frame. 0 is strict: crisp and ghost-free, but noisy details (speculars, thin lines) keep flickering. Higher values smooth such flickering at the risk of ghost trails behind moving content.",
       "Position": {
-        "X": -378.00055,
-        "Y": 779.56146
-      }
+        "X": -225.14398,
+        "Y": 608.38007
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
     },
     {
       "InputId": "6e95bd44-ebf7-44a3-b98e-dea871a676a4"/*SampleCount*/,
       "Position": {
-        "X": 109.08649,
-        "Y": 382.66113
+        "X": -468.96283,
+        "Y": -275.29044
       },
-      "Description": "Controls the fidelity of the effect.\nHigher numbers create smoother results at the cost of rendering speed.",
+      "Description": "Length of the repeating sub-pixel jitter pattern (a Halton sequence). It does not affect rendering speed. 8 or 16 are typical; higher values distribute the samples more finely but take longer to converge.",
       "AddPadding": "True"
     },
     {
       "InputId": "7f8091a2-b3c4-45d6-a708-9f0112233445"/*MotionThreshold*/,
+      "Description": "Screen-space motion (as a fraction of the image size) above which the history is discarded. A safety net for jumps and cuts that the reprojection can't follow — keep it high (0.1 or more) so it doesn't reduce quality during normal camera motion.",
       "Position": {
-        "X": -378.00055,
-        "Y": 814.56146
-      }
+        "X": -225.14398,
+        "Y": 643.38007
+      },
+      "Min": 0.0,
+      "ClampMin": true
     },
     {
       "InputId": "8091a2b3-c4d5-46e7-b809-011223344556"/*DepthRejection*/,
+      "Description": "World-space distance above which a surface is treated as newly revealed (disocclusion) and its history is rejected. Smaller values give harder, cleaner edges when objects move in front of each other; too small rejects history everywhere.",
       "Position": {
-        "X": -378.00055,
-        "Y": 849.56146
+        "X": -225.14398,
+        "Y": 678.38007
       }
     },
     {
       "InputId": "91a2b3c4-d5e6-47f8-8910-112233445566"/*Reset*/,
+      "Description": "Discards the accumulated history for this frame. Trigger on hard camera cuts to avoid a brief smear.",
       "Position": {
-        "X": -518.0006,
-        "Y": 884.56146
+        "X": -365.14404,
+        "Y": 713.37976
       }
     }
   ],
@@ -78,54 +94,47 @@
     {
       "ChildId": "044e99cf-87e8-4e61-9a33-84c9bd4d5dc0"/*ResolutionConstBuffer*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 734.99677
+        "X": 271.3391,
+        "Y": 755.6376
       }
     },
     {
       "ChildId": "0593d9eb-c223-4a59-a563-2fd71d15ae46"/*Rasterizer*/,
       "Position": {
-        "X": 529.08655,
-        "Y": 382.66113
+        "X": 554.3517,
+        "Y": 489.02124
       }
     },
     {
       "ChildId": "06f47ba0-274f-4864-823e-bdc4fdf41c79"/*PickTexture*/,
       "Position": {
-        "X": 1254.5441,
-        "Y": 78.10945
-      }
-    },
-    {
-      "ChildId": "070dfc26-c9f9-48ea-a457-c7710f9d653b"/*SetVec3Var*/,
-      "Position": {
-        "X": 749.6138,
-        "Y": 247.96588
+        "X": 958.2169,
+        "Y": 111.63057
       }
     },
     {
       "ChildId": "1791380e-a349-4a60-9fc0-704ec206ba38"/*Draw*/,
       "Position": {
-        "X": 529.08655,
-        "Y": 487.66113
+        "X": 554.3517,
+        "Y": 594.02124
       }
     },
     {
       "ChildId": "1d873630-1c44-42bd-a9dd-279d18e3b06e"/*FloatsToBuffer*/,
       "Position": {
-        "X": -238.00055,
-        "Y": 709.56146
+        "X": -85.14398,
+        "Y": 538.38007
       }
     },
     {
       "ChildId": "25049fb2-0b47-4c2f-afca-1044b5c02fe4"/*BoolToFloat*/,
       "Position": {
-        "X": -378.00055,
-        "Y": 884.56146
+        "X": -225.14398,
+        "Y": 713.37976
       }
     },
     {
-      "ChildId": "25b812c6-c4ce-4ac2-8105-ff4956d9207b"/*GetCamTransformBuffer*/,
+      "ChildId": "25b812c6-c4ce-4ac2-8105-ff4956d9207b"/*_TransformsCBufferFromCam*/,
       "Position": {
         "X": -1178.4167,
         "Y": 1598.534
@@ -134,22 +143,8 @@
     {
       "ChildId": "47d0712b-e14a-4e14-b0dc-4ffde500d710"/*OutputMergerStage*/,
       "Position": {
-        "X": 529.0865,
-        "Y": 417.66113
-      }
-    },
-    {
-      "ChildId": "4affbbfc-61a4-462c-ad9e-78affe2e39bf"/*OutputMergerStage*/,
-      "Position": {
-        "X": 453.67505,
-        "Y": 1095.8523
-      }
-    },
-    {
-      "ChildId": "549867b6-9c93-4211-a341-5a0c98e1193e"/*SrvFromTexture2d*/,
-      "Position": {
-        "X": -69.19849,
-        "Y": 609.5743
+        "X": 554.3516,
+        "Y": 524.02124
       }
     },
     {
@@ -162,50 +157,50 @@
     {
       "ChildId": "5b3f6c6a-f99b-4c7a-a5a2-804669a5420a"/*RenderTarget*/,
       "Position": {
-        "X": 1004.64325,
-        "Y": 209.07806
+        "X": 649.3823,
+        "Y": 137.6972
       }
     },
     {
       "ChildId": "5b41322a-2d8c-4483-96b3-55fa6e3f9485"/*SamplerState*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 944.9968
+        "X": 271.3391,
+        "Y": 965.6382
       }
     },
     {
       "ChildId": "6966569d-a742-4969-bf8b-a5a41fc9f078"/*UseTextureReference*/,
       "Position": {
-        "X": -354.40253,
-        "Y": -37.615585
+        "X": -328.6037,
+        "Y": 104.9568
       }
     },
     {
       "ChildId": "6d526d6c-85e8-4f3a-ae0f-0b6bc1aa5443"/*Execute*/,
       "Position": {
-        "X": 669.0865,
-        "Y": 347.66113
+        "X": 694.3517,
+        "Y": 454.02124
       }
     },
     {
       "ChildId": "714ab89c-548e-4d4a-92c0-c01d04e43931"/*UseTextureReference*/,
       "Position": {
-        "X": -354.4025,
-        "Y": 184.11954
+        "X": -328.60367,
+        "Y": 326.69193
       }
     },
     {
       "ChildId": "733867c2-7bdb-42a1-9c0c-ded3beaf7241"/*InputAssemblerStage*/,
       "Position": {
-        "X": 529.08655,
-        "Y": 347.66113
+        "X": 554.3517,
+        "Y": 454.02124
       }
     },
     {
       "ChildId": "737e4753-7dd5-4f77-97ce-249bf80599a1"/*RenderTargetBlendDescription*/,
       "Position": {
-        "X": 209.65125,
-        "Y": 447.16376
+        "X": 274.35162,
+        "Y": 524.02124
       }
     },
     {
@@ -218,26 +213,26 @@
     {
       "ChildId": "77f6bed6-e504-4da5-8e58-85cc0ec92135"/*Vec2JitterOffset*/,
       "Position": {
-        "X": 469.6137,
-        "Y": 247.96588
+        "X": 148.85208,
+        "Y": -287.79446
       }
     },
     {
       "ChildId": "7ef5a288-892c-4872-8f65-26befb9dd6c2"/*Mod 2*/,
       "Position": {
-        "X": -602.11835,
-        "Y": 375.96097
+        "X": -405.6495,
+        "Y": -51.644196
       }
     },
     {
       "ChildId": "7fb62317-c1e8-420e-b506-deb005b44634"/*SetPixelAndVertexShaderStage*/,
       "Position": {
-        "X": 489.65125,
-        "Y": 629.99677
+        "X": 411.3391,
+        "Y": 650.6381
       }
     },
     {
-      "ChildId": "826b3cc1-797d-4d5d-a3cb-306a6cc76e07"/*TransformsConstBuffer*/,
+      "ChildId": "826b3cc1-797d-4d5d-a3cb-306a6cc76e07"/*_TransformsCBuffer*/,
       "Position": {
         "X": -1138.8926,
         "Y": 1450.2217
@@ -246,29 +241,36 @@
     {
       "ChildId": "8e999040-43b4-4704-a4cd-334a1de217ea"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 909.99677
+        "X": 271.3391,
+        "Y": 930.63794
       }
     },
     {
       "ChildId": "93932d0c-0318-40c7-a710-8d5c32f79d7a"/*+1*/,
       "Position": {
-        "X": -602.11835,
-        "Y": 340.96097
+        "X": -405.6495,
+        "Y": -86.644196
       }
     },
     {
       "ChildId": "9424bdce-93cb-46b0-b544-eaca15a94611"/*PixelShader*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 664.99677
+        "X": 271.3391,
+        "Y": 685.6381
       }
     },
     {
       "ChildId": "97539374-0583-49ce-90f8-dc263f6ada44"/*RasterizerState*/,
       "Position": {
-        "X": 389.08652,
-        "Y": 382.66113
+        "X": 414.35165,
+        "Y": 489.02124
+      }
+    },
+    {
+      "ChildId": "a1b4a2a3-2cec-40c3-9179-81db94e32bc6"/*SetVec2Var*/,
+      "Position": {
+        "X": 577.55066,
+        "Y": -192.1865
       }
     },
     {
@@ -281,64 +283,64 @@
     {
       "ChildId": "af0de6a1-220b-4682-bb96-41153b2349da"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 874.99677
+        "X": 271.3391,
+        "Y": 895.63794
       }
     },
     {
-      "ChildId": "beaeecbb-11af-4573-82ab-267229aeba08"/*GetCamTransformBuffer*/,
+      "ChildId": "beaeecbb-11af-4573-82ab-267229aeba08"/*_TransformsCBufferFromCam*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 769.99677
+        "X": 271.3391,
+        "Y": 790.6382
       }
     },
     {
       "ChildId": "bfb4a41f-1860-4a14-9511-60ab1b3b77a9"/*BlendState*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 447.16376
+        "X": 414.35162,
+        "Y": 524.02124
       }
     },
     {
       "ChildId": "c25c64b0-68b1-4797-8aad-118b6a97e1c3"/*CountInt*/,
       "Position": {
-        "X": -602.11835,
-        "Y": 305.96097
+        "X": -405.6495,
+        "Y": -121.644196
       }
     },
     {
       "ChildId": "c67a6164-db27-46e6-a953-22ba6add028f"/*PickTexture*/,
       "Position": {
-        "X": -78.88617,
-        "Y": 8.352592
+        "X": -53.08734,
+        "Y": 150.92499
       }
     },
     {
       "ChildId": "d1a4bfc2-0b3b-4200-a829-3d04d52a0021"/*RenderTarget*/,
       "Position": {
-        "X": 1004.6433,
-        "Y": 63.948456
+        "X": 649.3824,
+        "Y": -7.4324036
       }
     },
     {
       "ChildId": "d31a513d-2298-41aa-b949-56abe8ee0798"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 839.99677
+        "X": 271.3391,
+        "Y": 860.63794
       }
     },
     {
       "ChildId": "d44e4397-0230-47b3-b16e-5467af598179"/*VertexShader*/,
       "Position": {
-        "X": 349.65125,
-        "Y": 629.99677
+        "X": 271.3391,
+        "Y": 650.6381
       }
     },
     {
       "ChildId": "d8916c2e-6469-4082-8dc8-9a18d7666163"/*GetTextureSize*/,
       "Position": {
-        "X": -45.02191,
-        "Y": 1012.9319
+        "X": 71.088745,
+        "Y": 395.33008
       }
     },
     {
@@ -349,24 +351,24 @@
       }
     },
     {
-      "ChildId": "ea30138d-17d1-4239-afe5-86a84e5d88e0"/*Vec2ToVec3*/,
+      "ChildId": "f1591381-80e7-468c-b382-55dcef676489"/*ExecuteTextureUpdate*/,
       "Position": {
-        "X": 609.6137,
-        "Y": 247.96588
-      }
-    },
-    {
-      "ChildId": "f5d67cfd-4db2-4240-a0c4-8917b57c307d"/*PickTexture*/,
-      "Position": {
-        "X": -78.88616,
-        "Y": 209.00061
+        "X": 1098.2169,
+        "Y": 76.63057
       }
     },
     {
       "ChildId": "f91c7f8a-5266-49bc-90f2-7f02460d1c72"/*Mod 2*/,
       "Position": {
-        "X": -487.26123,
-        "Y": 133.26346
+        "X": 818.2169,
+        "Y": 181.63057
+      }
+    },
+    {
+      "ChildId": "fe7062b8-6558-4e2c-b794-8e91460653c5"/*ScaleVector2*/,
+      "Position": {
+        "X": 344.73483,
+        "Y": -269.08847
       }
     }
   ],
@@ -374,20 +376,9 @@
     {
       "OutputId": "bb809d80-6e56-4d3f-b055-85a5ce2f0564"/*Output*/,
       "Position": {
-        "X": 1254.5441,
-        "Y": 183.10944
+        "X": 1098.2169,
+        "Y": 181.63057
       }
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 80.0,
-  "ScrollX": -2.5,
-  "Mode": "DopeView",
-  "TimelineHeight": -1,
-  "InlineDataClipEditEnabled": false,
-  "DetailsAreaHeight": 200.0,
-  "InlineDataClipStripHeight": null
-}
-  }
+  ]
 }
