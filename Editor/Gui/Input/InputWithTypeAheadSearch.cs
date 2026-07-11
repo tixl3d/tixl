@@ -158,7 +158,12 @@ internal static class InputWithTypeAheadSearch
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.Gray.Rgba);
                 
                 if(justOpened || filterInputChanged)
-                     FilterItems(items, searchString, ref _lastTypeAheadResults);
+                {
+                    // Reset the list selection when typing: a stale index would hijack Return
+                    // and prevent committing names that aren't defined in the list yet.
+                    _selectedResultIndex = -1;
+                    FilterItems(items, searchString, ref _lastTypeAheadResults);
+                }
                 
                 var index = 0;
                 //var lastProjectGroup = string.Empty;
