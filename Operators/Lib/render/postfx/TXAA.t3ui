@@ -1,43 +1,43 @@
 {
   "FormatVersion": 3,
   "Id": "22bb4788-d97a-4457-b6d1-1fc9ffe4f9ff"/*TXAA*/,
-  "Description": "Temporal anti-aliasing (TXAA) that smooths edges and reduces specular flickering by accumulating frames rendered with sub-pixel camera jitter.\n\nThe previous result is reprojected with the camera motion (reconstructed from the depth map and the camera reference), so the accumulation stays stable while the camera moves. The required sub-pixel jitter is applied automatically by [Camera] and [OrbitCamera] through the _TXAA_JitterOffset context variable that this operator sets while rendering.\n\nRequirements:\n\n- All rendered content must write to the depth buffer. Content without depth (e.g. [Layer2d] with depth writing disabled) breaks the reprojection and smears or vibrates.\n- The scene camera must be connected to CameraReference so its matrices are available for reprojection.\n\nAKA: TAA, temporal anti-aliasing, temporal supersampling\n\nTips:\n\n- Judge the result in motion — a still comparison flatters the aliased original, whose extra \"sharpness\" is partly false detail.\n- Thin sub-pixel lines and content that intentionally flickers every frame cannot be fully stabilized; render lines at least one pixel wide.\n- After a hard camera cut, use Reset to clear the accumulated history for one frame.",
+  "Description": "Temporal anti-aliasing (TXAA) that smooths edges and reduces specular flickering by accumulating frames rendered with sub-pixel camera jitter.\n\nThe previous result is reprojected with the camera motion (reconstructed from the depth map and the camera reference), so the accumulation stays stable while the camera moves. The required sub-pixel jitter is applied automatically by [Camera] and [OrbitCamera] through the _TXAA_JitterOffset context variable that this operator sets while rendering.\n\nRequirements:\n\n- All rendered content must write to the depth buffer. Content without depth (e.g. [Layer2d] with depth writing disabled) breaks the reprojection and smears or vibrates.\n- The scene camera must be connected to CameraReference so its matrices are available for reprojection.\n\nAKA: TAA, temporal anti-aliasing, temporal supersampling\n\nTips:\n\n- Judge the result in motion — a still comparison flatters the aliased original, whose extra \"sharpness\" is partly false detail.\n- Thin sub-pixel lines and content that intentionally flickers every frame cannot be fully stabilized; render lines at least one pixel wide.\n- After a hard camera cut, use Reset to clear the accumulated history for one frame.\n- The source [RenderTarget] doesn't require MSAA.",
   "SymbolTags": "1216",
   "InputUis": [
     {
       "InputId": "19b07ddf-ba1e-4f8b-b476-e93485348e91"/*Image*/,
       "Relevancy": "Required",
-      "Description": "The rendered scene color to be anti-aliased. Must come from the same render pass and camera as DepthMap.",
       "Position": {
         "X": -225.14397,
         "Y": 944.8822
-      }
+      },
+      "Description": "The rendered scene color to be anti-aliased. Must come from the same render pass and camera as DepthMap."
     },
     {
       "InputId": "24b786f7-75d2-47d4-96e8-f7fcf0cc9258"/*DepthMap*/,
       "Relevancy": "Required",
-      "Description": "The scene's depth buffer, used to reconstruct where each pixel was in the previous frame. All content must write depth, otherwise it smears or vibrates.",
       "Position": {
         "X": 131.33911,
         "Y": 895.63794
-      }
+      },
+      "Description": "The scene's depth buffer, used to reconstruct where each pixel was in the previous frame. All content must write depth, otherwise it smears or vibrates."
     },
     {
       "InputId": "414b89a2-128c-40c1-a3c7-137a788bb320"/*CameraReference*/,
       "Relevancy": "Required",
-      "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera]). Its matrices drive the reprojection of the previous frame.",
       "Position": {
         "X": 131.33911,
         "Y": 790.6382
-      }
+      },
+      "Description": "Reference output of the scene camera ([Camera] or [OrbitCamera]). Its matrices drive the reprojection of the previous frame."
     },
     {
       "InputId": "5d6e7f80-91a2-43b4-8506-7d8e9f011223"/*BlendFactor*/,
-      "Description": "How much of the accumulated history is kept each frame. Higher values are smoother and more stable but react slower to changes; lower values are sharper but flicker more. Typical range: 0.85 … 0.93.",
       "Position": {
         "X": -225.14398,
         "Y": 573.38007
       },
+      "Description": "How much of the accumulated history is kept each frame. Higher values are smoother and more stable but react slower to changes; lower values are sharper but flicker more. Typical range: 0.85 … 0.93.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -45,11 +45,11 @@
     },
     {
       "InputId": "6e7f8091-a2b3-44c5-9607-8e9f01122334"/*NeighborhoodClamp*/,
-      "Description": "Widens the color range the history is allowed to differ from the current frame. 0 is strict: crisp and ghost-free, but noisy details (speculars, thin lines) keep flickering. Higher values smooth such flickering at the risk of ghost trails behind moving content.",
       "Position": {
         "X": -225.14398,
         "Y": 608.38007
       },
+      "Description": "Widens the color range the history is allowed to differ from the current frame. 0 is strict: crisp and ghost-free, but noisy details (speculars, thin lines) keep flickering. Higher values smooth such flickering at the risk of ghost trails behind moving content.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -65,29 +65,33 @@
     },
     {
       "InputId": "7f8091a2-b3c4-45d6-a708-9f0112233445"/*MotionThreshold*/,
-      "Description": "Screen-space motion (as a fraction of the image size) above which the history is discarded. A safety net for jumps and cuts that the reprojection can't follow — keep it high (0.1 or more) so it doesn't reduce quality during normal camera motion.",
       "Position": {
         "X": -225.14398,
         "Y": 643.38007
       },
+      "Description": "Screen-space motion (as a fraction of the image size) above which the history is discarded. A safety net for jumps and cuts that the reprojection can't follow — keep it high (0.1 or more) so it doesn't reduce quality during normal camera motion.",
       "Min": 0.0,
+      "Max": 0.2,
       "ClampMin": true
     },
     {
       "InputId": "8091a2b3-c4d5-46e7-b809-011223344556"/*DepthRejection*/,
-      "Description": "World-space distance above which a surface is treated as newly revealed (disocclusion) and its history is rejected. Smaller values give harder, cleaner edges when objects move in front of each other; too small rejects history everywhere.",
       "Position": {
         "X": -225.14398,
         "Y": 678.38007
-      }
+      },
+      "Description": "World-space distance above which a surface is treated as newly revealed (disocclusion) and its history is rejected. Smaller values give harder, cleaner edges when objects move in front of each other; too small rejects history everywhere.",
+      "Min": 0.0,
+      "Max": 2000.0,
+      "ClampMin": true
     },
     {
       "InputId": "91a2b3c4-d5e6-47f8-8910-112233445566"/*Reset*/,
-      "Description": "Discards the accumulated history for this frame. Trigger on hard camera cuts to avoid a brief smear.",
       "Position": {
         "X": -365.14404,
         "Y": 713.37976
-      }
+      },
+      "Description": "Discards the accumulated history for this frame. Trigger on hard camera cuts to avoid a brief smear."
     }
   ],
   "SymbolChildUis": [

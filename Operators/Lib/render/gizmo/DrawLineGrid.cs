@@ -27,4 +27,7 @@ internal sealed class DrawLineGrid : Instance<DrawLineGrid>
         [Input(Guid = "ee938995-46a3-49dd-a791-d15f4045310b")]
         public readonly InputSlot<bool> ShowAxis = new InputSlot<bool>();
 
+        [Input(Guid = "2679515c-72d3-4cae-a14c-b68f007dfb7c")]
+        public readonly InputSlot<bool> EnableZTest = new InputSlot<bool>();
+
 }

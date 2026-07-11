@@ -19,7 +19,14 @@
       "InputId": "0b8c7835-078c-4990-8db5-edccd26018c9"/*BlendMod*/,
       "Position": {
         "X": -56.237,
-        "Y": -89.789185
+        "Y": -54.789185
+      }
+    },
+    {
+      "InputId": "2679515c-72d3-4cae-a14c-b68f007dfb7c"/*EnableZTest*/,
+      "Position": {
+        "X": -310.6382,
+        "Y": -88.957825
       }
     },
     {

@@ -1,0 +1,76 @@
+{
+  "Id": "22bb4788-d97a-4457-b6d1-1fc9ffe4f9ff",
+  "Variations": [
+    {
+      "Id": "e8ab7550-46a4-43be-86b5-75ba8784ab6d",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "4 Samples Low",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5d6e7f80-91a2-43b4-8506-7d8e9f011223": 0.78,
+          "7f8091a2-b3c4-45d6-a708-9f0112233445": 0.015,
+          "91a2b3c4-d5e6-47f8-8910-112233445566": false,
+          "6e95bd44-ebf7-44a3-b98e-dea871a676a4": 4
+        }
+      }
+    },
+    {
+      "Id": "316e3327-513e-4cf0-b277-eb74034169d5",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "DataMosh",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5d6e7f80-91a2-43b4-8506-7d8e9f011223": 1.0,
+          "6e7f8091-a2b3-44c5-9607-8e9f01122334": 100.0,
+          "7f8091a2-b3c4-45d6-a708-9f0112233445": 10000.0,
+          "91a2b3c4-d5e6-47f8-8910-112233445566": false
+        }
+      }
+    },
+    {
+      "Id": "63c3c12d-2a86-48db-a62b-02d616891149",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Slow and Soft",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5d6e7f80-91a2-43b4-8506-7d8e9f011223": 0.9,
+          "6e7f8091-a2b3-44c5-9607-8e9f01122334": 100.0,
+          "7f8091a2-b3c4-45d6-a708-9f0112233445": 0.2,
+          "8091a2b3-c4d5-46e7-b809-011223344556": 1140.0,
+          "91a2b3c4-d5e6-47f8-8910-112233445566": false,
+          "6e95bd44-ebf7-44a3-b98e-dea871a676a4": 16
+        }
+      }
+    },
+    {
+      "Id": "dbc63095-3a5a-4f86-a79d-0479e9934075",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "91a2b3c4-d5e6-47f8-8910-112233445566": false
+        }
+      }
+    }
+  ]
+}
