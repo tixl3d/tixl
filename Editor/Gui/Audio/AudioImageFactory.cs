@@ -18,7 +18,13 @@ internal static class AudioImageFactory
 
         if (string.IsNullOrEmpty(audioClip.AssetPath) || handle.LoadingAttemptFailed)
             return false;
-            
+
+        // A file that failed to produce a waveform (e.g. an empty recording) will keep failing.
+        // Without this guard the per-frame callers respawn a generation task every frame and
+        // re-log the same error endlessly. Cleared on explicit Reload (see ResetImageCache).
+        if (_failedClips.ContainsKey(audioClip.AssetPath))
+            return false;
+
         if (_loadingClips.ContainsKey(audioClip.AssetPath))
         {
             imagePath = null;
@@ -52,6 +58,7 @@ internal static class AudioImageFactory
                          {
                              Log.Error($"Failed to create sound image for {audioClip.AssetPath}", handle.Owner);
                              _imageForAudioFiles.TryRemove(audioClip.AssetPath, out _);
+                             _failedClips.TryAdd(audioClip.AssetPath, true);
                          }
                      }
                      catch (Exception e)
@@ -60,6 +67,7 @@ internal static class AudioImageFactory
                          // _loadingClips forever — permanently blocking regeneration with no log line.
                          Log.Error($"Sound image generation threw for {audioClip.AssetPath}: {e}", handle.Owner);
                          _imageForAudioFiles.TryRemove(audioClip.AssetPath, out _);
+                         _failedClips.TryAdd(audioClip.AssetPath, true);
                      }
                      finally
                      {
@@ -73,10 +81,15 @@ internal static class AudioImageFactory
     public static void ResetImageCache()
     {
         _imageForAudioFiles.Clear();
+        _failedClips.Clear();
     }
 
     
     // TODO: should be a hashset, but there is no ConcurrentHashset -_-
     private static readonly ConcurrentDictionary<string, bool> _loadingClips = new();
     private static readonly ConcurrentDictionary<string, string> _imageForAudioFiles = new();
+
+    // Paths whose waveform generation failed permanently (empty/unreadable file). Guards against
+    // the per-frame callers retrying and re-logging forever. Cleared by ResetImageCache on Reload.
+    private static readonly ConcurrentDictionary<string, bool> _failedClips = new();
 }

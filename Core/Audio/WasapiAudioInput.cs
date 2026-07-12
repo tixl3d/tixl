@@ -301,7 +301,20 @@ public static class WasapiAudioInput
         // next frame avoids a stutter if BeginRecording is called again immediately.
         _isCaptureNeededForRecording = false;
 
-        Log.Debug($"WAV recording stopped: {writer.Path} ({writer.DurationSeconds:F1} s, {writer.BytesWritten} bytes)");
+        if (writer.BytesWritten == 0)
+        {
+            // A finalised-but-silent WAV means capture ran yet WASAPI never delivered frames —
+            // typically another app holds the device in exclusive mode (e.g. Audacity), the input
+            // is muted, or the wrong device is selected in Playback settings.
+            Log.Warning($"Audio recording captured no samples — '{Path.GetFileName(writer.Path)}' is silent. "
+                        + "Check that the input device isn't muted, that the right one is selected in Playback settings, "
+                        + "and that no other app (e.g. Audacity in exclusive mode) is holding it.");
+        }
+        else
+        {
+            Log.Debug($"WAV recording stopped: {writer.Path} ({writer.DurationSeconds:F1} s, {writer.BytesWritten} bytes)");
+        }
+
         return writer.Path;
     }
 

@@ -253,6 +253,26 @@ internal static class RecordingSession
         // under the active package, register with AssetRegistry, and show up in the
         // AssetLib UI. The temp-staging copy in the recordings dir is removed on success
         // (see TryImportRecording) so each session doesn't leave a duplicate behind.
+        // Drop a silent take before import: capture ran but WASAPI delivered no frames (device held
+        // exclusively by another app, muted input, or wrong device), so the WAV is a header-only file
+        // with no samples. Importing it would litter the project's Assets and leave the clip pointing at
+        // an unreadable file. Delete the temp file and leave the audio clip's path empty — the session is
+        // one undo macro, so the leftover empty clip is a single Ctrl+Z away.
+        if (!string.IsNullOrEmpty(audioPath) && IsSilentRecording(audioPath))
+        {
+            Log.Debug($"RecordingSession: discarding silent audio take '{audioPath}'.");
+            try
+            {
+                System.IO.File.Delete(audioPath);
+            }
+            catch (Exception e)
+            {
+                Log.Debug($"RecordingSession: could not remove silent recording '{audioPath}': {e.Message}");
+            }
+
+            audioPath = null;
+        }
+
         var package = compositionUi.Symbol.SymbolPackage;
         var dataAddress = TryImportRecording(dataPath, package) ?? dataPath;
         var audioAddress = TryImportRecording(audioPath, package) ?? audioPath;
@@ -344,6 +364,27 @@ internal static class RecordingSession
 
         return asset.Address;
     }
+
+    /// <summary>
+    /// True when a finalised recording holds no audio samples — a header-only WAV produced when capture
+    /// ran but WASAPI delivered no frames. Such a file is unreadable as a waveform and shouldn't be
+    /// imported. A missing or unstattable file is treated as not-silent so the normal import path runs.
+    /// </summary>
+    private static bool IsSilentRecording(string absolutePath)
+    {
+        try
+        {
+            // A PCM WAV with no sample data is exactly its 44-byte RIFF/fmt/data header (see WavFileWriter).
+            return new System.IO.FileInfo(absolutePath).Length <= WavHeaderBytes;
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"RecordingSession: couldn't stat recording '{absolutePath}': {e.Message}");
+            return false;
+        }
+    }
+
+    private const long WavHeaderBytes = 44;
 
     /// <summary>
     /// Directories scanned to pick the next session index: the project's imported-recording folders (the
