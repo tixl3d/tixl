@@ -1,0 +1,65 @@
+{
+  "Id": "1112d3ea-fef0-4d7c-a265-a067030256a1",
+  "Variations": [
+    {
+      "Id": "098aaa77-abfa-45b3-b45b-0347e7d78e3c",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Sharp",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "01d8a4a8-56ca-4e6d-a6c9-8092e4153963": 1
+        }
+      }
+    },
+    {
+      "Id": "eef5c0f1-8e71-4c13-8cee-ad7f12f6588d",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Slighty Blurry",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "01d8a4a8-56ca-4e6d-a6c9-8092e4153963": 3
+        }
+      }
+    },
+    {
+      "Id": "da57afa7-8ce3-44da-80da-590859019643",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Very Blurry",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "01d8a4a8-56ca-4e6d-a6c9-8092e4153963": 5
+        }
+      }
+    },
+    {
+      "Id": "df5bf06b-83b2-429b-920e-fd224b2230c2",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "My Eyes at 70",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "01d8a4a8-56ca-4e6d-a6c9-8092e4153963": 7
+        }
+      }
+    }
+  ]
+}

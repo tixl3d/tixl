@@ -8,8 +8,8 @@
       "InputId": "3123b47e-d18c-4d58-a4b1-a80fc37ebac4"/*CameraReference*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 1988.1278,
-        "Y": 2089.7476
+        "X": 1988.8242,
+        "Y": 2108.0764
       }
     },
     {
@@ -112,8 +112,8 @@
       "ChildId": "3859b23f-f971-4a3a-905d-8f2b9b638d68"/*ComputeShaderStage*/,
       "SectionId": "da157351-831c-42e2-abc3-e67f782c5690",
       "Position": {
-        "X": 2538.452,
-        "Y": 2453.9668
+        "X": 2539.1484,
+        "Y": 2472.2957
       }
     },
     {
@@ -276,8 +276,8 @@
       "ChildId": "907e15ef-3049-4a7a-9ee2-21741c2128db"/*_TransformsCBuffer*/,
       "SectionId": "da157351-831c-42e2-abc3-e67f782c5690",
       "Position": {
-        "X": 2174.215,
-        "Y": 2062.9497
+        "X": 2174.9116,
+        "Y": 2081.2786
       }
     },
     {
@@ -291,8 +291,8 @@
       "ChildId": "9805b6ee-db58-44db-905b-b4f78e601469"/*ComputeShader*/,
       "SectionId": "da157351-831c-42e2-abc3-e67f782c5690",
       "Position": {
-        "X": 2046.1643,
-        "Y": 2440.1104
+        "X": 2046.8607,
+        "Y": 2458.4392
       }
     },
     {
@@ -315,8 +315,8 @@
       "ChildId": "9c52319e-943d-4bac-baa7-7fe2a412e2dd"/*CalcDispatchCount*/,
       "SectionId": "da157351-831c-42e2-abc3-e67f782c5690",
       "Position": {
-        "X": 2186.1643,
-        "Y": 2475.1104
+        "X": 2186.8608,
+        "Y": 2493.4392
       }
     },
     {
@@ -338,8 +338,8 @@
       "ChildId": "a3c943fc-d50d-4add-b5ab-f055e31317b8"/*GetBufferComponents*/,
       "SectionId": "da157351-831c-42e2-abc3-e67f782c5690",
       "Position": {
-        "X": 1670.3881,
-        "Y": 2383.204
+        "X": 1671.0845,
+        "Y": 2401.533
       }
     },
     {
@@ -519,8 +519,8 @@
       "ChildId": "e4cc7db6-8e55-4ab0-8b24-0254332a2e0c"/*StructuredBufferWithViews*/,
       "SectionId": "da157351-831c-42e2-abc3-e67f782c5690",
       "Position": {
-        "X": 1670.3881,
-        "Y": 2348.2036
+        "X": 1671.0845,
+        "Y": 2366.5325
       }
     },
     {
@@ -636,8 +636,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1622.618,
-        "Y": 2053.7754
+        "X": 1623.3145,
+        "Y": 2072.1042
       },
       "Size": {
         "X": 1093.7422,

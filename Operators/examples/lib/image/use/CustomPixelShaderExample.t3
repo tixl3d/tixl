@@ -795,7 +795,7 @@
         {
           "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
           "Type": "System.String",
-          "Value": "Texture2D<float4> Image3 : register(t2);\nTexture2D<float4> Image4 : register(t3);\n\ncbuffer AdditionalIntParams : register(b2)\n{\n    int Index;\n}\ncbuffer AdditionalFloatParams : register(b3)\n{\n    float4 Color;\n}"
+          "Value": "Texture2D<float4> Image3 : register(t3);\nTexture2D<float4> Image4 : register(t4);\n\ncbuffer AdditionalIntParams : register(b2)\n{\n    int Index;\n}\ncbuffer AdditionalFloatParams : register(b3)\n{\n    float4 Color;\n}"
         }
       ],
       "Outputs": []

@@ -72,7 +72,7 @@ uint2 GetSwapPairBitonic(uint i, uint ip, uint TotalCount){
 
 float c2k(Point c){
     float3 p=c.Position.xyz;
-    if(isnan(c.Scale.x)){return -1;}
+    if(isnan(c.Scale.x)){ return -1; }
     float k=length(c.Position.xyz-CameraToWorld[3].xyz);
     // float k=-mul(float4(c.Position.xyz,1),WorldToCamera).z;//viewspace z
     if(Ascending>0)k=-k;
@@ -119,10 +119,22 @@ float c2k(Point c){
 
     uint pi1=IndexBuffer[idx1].x;
     uint pi2=IndexBuffer[idx2].x;
-    if(Reset){pi1=idx1;pi2=idx2;}
+    //reset on first dispatch only
+    if(Reset&&CallIndex==0){pi1=idx1;pi2=idx2;}
 
     if(uint(pi2)>=TotalPoints)return;
     if(uint(idx2)>=TotalPoints)return;
+
+    //dont swap elements outsize of input point buffer
+    //still need to write index value for first dispatch
+    uint InputPointCount;
+    SourcePoints.GetDimensions(InputPointCount, stride);
+    if(max(pi1,pi2)>=InputPointCount){
+        IndexBuffer[idx1]=pi1;
+        IndexBuffer[idx2]=pi2;
+        return;
+    }
+
     Point c1=SourcePoints[pi1];
     Point c2=SourcePoints[pi2];
     float k1=c2k(c1);

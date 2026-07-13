@@ -312,6 +312,52 @@
           }
         }
       }
+    },
+    {
+      "Id": "ef893491-9841-450d-b72e-452b749191c9",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "Simple Fresnel",
+      "PosOnCanvas": {
+        "X": -478.47864,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4494c16e-1ff2-42db-9204-ac389451088f": {
+            "X": 0.445,
+            "Y": 0.61
+          },
+          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
+            "Gradient": {
+              "Interpolation": "Spline",
+              "Steps": [
+                {
+                  "Id": "85f1d164-2c5b-45c1-b431-af08106e70f4",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.56504714,
+                    "G": 0.5933014,
+                    "B": 0.5883609,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "a66f78fd-85db-43fb-8b1b-4846806e58cb",
+                  "NormalizedPosition": 0.6461337,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "SetupFrag(pin);\nc= ComputePbr(); // Computes CosLo\nc+= SampleGradient( Biased(frag.cosLo));\n"
+        }
+      }
     }
   ]
 }
