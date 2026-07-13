@@ -80,8 +80,8 @@ struct vsOutput
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
     float3 viewDir : VPOS;
-    float3 worldTViewDir : TEXCOORD1;
-    float3 worldTViewPos : TEXCOORD2;
+    //float3 worldTViewDir : TEXCOORD1;
+    //float3 worldTViewPos : TEXCOORD2;
 };
 
 static const float3 Quad[] =
@@ -110,9 +110,6 @@ vsOutput vsMain4(uint vertexId : SV_VertexID)
     float4 viewTFarFragPos = float4(texCoord.x * 2.0 - 1.0, -texCoord.y * 2.0 + 1.0, 1.0, 1.0);
     float4 worldTFarFragPos = mul(viewTFarFragPos, ViewToWorld);
     worldTFarFragPos /= worldTFarFragPos.w;
-
-    output.worldTViewDir = normalize(worldTFarFragPos.xyz - worldTNearFragPos.xyz);
-    output.worldTViewPos = worldTNearFragPos.xyz;
 
     output.viewDir = -normalize(float3(CameraToWorld._31, CameraToWorld._32, CameraToWorld._33));
 
@@ -381,12 +378,22 @@ TriPlanarN TriplanarNormal2(float3 p, float h, float scale, Texture2D texN, Samp
 
 PSOutput psMain(vsOutput input)
 {
-    float3 eye = input.worldTViewPos;
+    float3 eye=CameraToWorld[3].xyz;
+    float3 dp=normalize(
+        mul(
+            float4(mul( float4((input.texCoord.xy*2-1) * float2(1,-1), 0, 1), 
+                        ClipSpaceToCamera).xy,-1,0
+            ),
+            CameraToWorld        
+        ).xyz
+    );
+
+    //float3 eye = input.worldTViewPos;
 
     // eye = mul(float4(eye,1), ObjectToWorld).xyz;
     float3 p = eye;
     float3 tmpP = p;
-    float3 dp = normalize(input.worldTViewDir);
+    //float3 dp = normalize(input.worldTViewDir);
     // dp = mul(float4(dp,0), ObjectToWorld).xyz;
 
     float totalD = 0.0;
