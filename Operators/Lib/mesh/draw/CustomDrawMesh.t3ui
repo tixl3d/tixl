@@ -13,8 +13,8 @@
     {
       "InputId": "07f34663-a753-4186-ac02-ef937e482f6f"/*AlphaCutOff*/,
       "Position": {
-        "X": 1945.9911,
-        "Y": 3724.996
+        "X": 1887.6998,
+        "Y": 3550.1223
       },
       "Description": "This value controls transparency if a texture containing an alpha channel is used.",
       "Scale": 0.01
@@ -30,8 +30,8 @@
     {
       "InputId": "1aa04960-2b81-49dd-8389-31176df558c8"/*SpecularAA*/,
       "Position": {
-        "X": 1945.991,
-        "Y": 3794.996
+        "X": 1887.6997,
+        "Y": 3620.1223
       },
       "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
       "Min": 0.0,
@@ -67,8 +67,8 @@
     {
       "InputId": "43344f8e-5d14-438a-8f87-3922ce954cdb"/*Shading*/,
       "Position": {
-        "X": 1805.991,
-        "Y": 3759.996
+        "X": 1747.6997,
+        "Y": 3585.1223
       },
       "Description": "Select shading mode"
     },
@@ -92,6 +92,13 @@
         "Y": 4157.2036
       },
       "Description": "Defines how the texture behaves when repeated.\n\nWrap: The texture repeats itself continuously\nMirror: The texture is mirrored and repeats infinitely.\nClamp: The texture is cut off at the edge\nBorder: Unclear\nMirrOnce: The texture is mirrored once, then cut off"
+    },
+    {
+      "InputId": "70f947b7-6e25-417a-94ce-cb4522f35797"/*Image*/,
+      "Position": {
+        "X": 1458.2148,
+        "Y": 3804.423
+      }
     },
     {
       "InputId": "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe"/*ShaderCode*/,
@@ -121,8 +128,8 @@
     {
       "InputId": "93200afe-7b59-45a9-8662-4cfa477e011c"/*Points*/,
       "Position": {
-        "X": 1442.394,
-        "Y": 3401.7888
+        "X": 1296.666,
+        "Y": 3268.5518
       }
     },
     {
@@ -215,8 +222,8 @@
     {
       "InputId": "f9f36aec-ebbf-4221-a585-cdc6ea7f7c50"/*Color*/,
       "Position": {
-        "X": 1665.991,
-        "Y": 3584.996
+        "X": 1607.6997,
+        "Y": 3410.1223
       },
       "GroupTitle": "Appearance...",
       "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings.",
@@ -228,7 +235,7 @@
       "ChildId": "09db099a-e26f-433a-bdfe-a366469f552f"/*clampedSampler*/,
       "Position": {
         "X": 2544.7104,
-        "Y": 4008.5835
+        "Y": 4043.5835
       }
     },
     {
@@ -253,8 +260,8 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": 1945.991,
-        "Y": 3584.996
+        "X": 1887.6997,
+        "Y": 3410.1223
       }
     },
     {
@@ -293,8 +300,8 @@
     {
       "ChildId": "1c3025dd-b203-486f-8f12-3a75085d313c"/*UsePointScale*/,
       "Position": {
-        "X": 1945.991,
-        "Y": 3864.996
+        "X": 1887.6997,
+        "Y": 3690.1223
       }
     },
     {
@@ -307,8 +314,8 @@
     {
       "ChildId": "20e3c932-5068-4188-81d5-9d964cc5f9d5"/*Point*/,
       "Position": {
-        "X": 1442.394,
-        "Y": 3436.7888
+        "X": 1296.666,
+        "Y": 3303.5518
       }
     },
     {
@@ -342,15 +349,15 @@
     {
       "ChildId": "3b824fbe-58f3-4dfd-916e-9e8b85303458"/*FirstValidBuffer*/,
       "Position": {
-        "X": 1582.394,
-        "Y": 3401.7888
+        "X": 1436.666,
+        "Y": 3268.5518
       }
     },
     {
       "ChildId": "4f1d3220-0a44-4873-8e4b-604f98a7c5b3"/*GetForegroundColor*/,
       "Position": {
-        "X": 1665.991,
-        "Y": 3619.996
+        "X": 1607.6997,
+        "Y": 3445.1223
       }
     },
     {
@@ -371,8 +378,8 @@
     {
       "ChildId": "563112ac-1605-4317-8dd9-1ba6e96ab7a5"/*IntToFloat*/,
       "Position": {
-        "X": 1945.991,
-        "Y": 3759.996
+        "X": 1887.6997,
+        "Y": 3585.1223
       }
     },
     {
@@ -392,8 +399,8 @@
     {
       "ChildId": "5da435d7-d8bf-4597-b9cf-eb953885da00"/*Scale*/,
       "Position": {
-        "X": 1945.991,
-        "Y": 3829.996
+        "X": 1887.6997,
+        "Y": 3655.1223
       }
     },
     {
@@ -414,8 +421,8 @@
     {
       "ChildId": "6cefed99-5277-42fb-aeee-30b0b6031d40"/*GetBufferComponents*/,
       "Position": {
-        "X": 1582.394,
-        "Y": 3471.7888
+        "X": 1436.666,
+        "Y": 3338.5518
       }
     },
     {
@@ -435,8 +442,8 @@
     {
       "ChildId": "857051e2-a437-4c7e-8b1e-d9ea5457eb8f"/*IntToFloat*/,
       "Position": {
-        "X": 1945.9911,
-        "Y": 3899.996
+        "X": 1887.6998,
+        "Y": 3725.1223
       }
     },
     {
@@ -489,6 +496,13 @@
       }
     },
     {
+      "ChildId": "ae82ea0e-2ed7-4f3a-82e9-4cb0f8b0fa90"/*LoadImage*/,
+      "Position": {
+        "X": 1458.2148,
+        "Y": 3839.423
+      }
+    },
+    {
       "ChildId": "b73b8acc-3611-4ef4-9e7b-e9885282d7c0"/*GenerateShaderGraphCode*/,
       "Position": {
         "X": 2051.0857,
@@ -517,6 +531,13 @@
       }
     },
     {
+      "ChildId": "c118c781-b995-4714-b8f7-a4afde6dd071"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1820.1771,
+        "Y": 3824.6528
+      }
+    },
+    {
       "ChildId": "c2288493-5f42-4476-8fab-ce2cf09269d6"/*GetSRVProperties*/,
       "Position": {
         "X": 2051.0857,
@@ -540,8 +561,8 @@
     {
       "ChildId": "cdca5f22-78d7-4178-b062-06aff7d4a472"/*FloatsToBuffer*/,
       "Position": {
-        "X": 2085.991,
-        "Y": 3549.996
+        "X": 2027.6997,
+        "Y": 3375.1223
       }
     },
     {
@@ -576,8 +597,8 @@
     {
       "ChildId": "dead7386-898d-4a8c-bd9f-614beb7653a7"/*IntValue*/,
       "Position": {
-        "X": 1805.9911,
-        "Y": 3899.996
+        "X": 1747.6998,
+        "Y": 3725.1223
       }
     },
     {
@@ -590,8 +611,8 @@
     {
       "ChildId": "e9467080-4dcb-43af-9139-088011d15b52"/*BlendColors*/,
       "Position": {
-        "X": 1805.991,
-        "Y": 3584.996
+        "X": 1747.6997,
+        "Y": 3410.1223
       }
     },
     {
@@ -609,6 +630,13 @@
       }
     },
     {
+      "ChildId": "fbefbd11-8c2b-4934-9024-5e326aaf4e40"/*FirstValidTexture*/,
+      "Position": {
+        "X": 1598.2148,
+        "Y": 3804.423
+      }
+    },
+    {
       "ChildId": "ff20dccd-e313-45b9-a4bd-e7d0ab9d0a77"/*MultiplyInt*/,
       "Position": {
         "X": 2051.0857,
@@ -622,6 +650,13 @@
       "Position": {
         "X": 3072.7805,
         "Y": 3415.7478
+      }
+    },
+    {
+      "OutputId": "8a92e09d-8e50-4b9d-9981-cc8d7a4ebb95"/*OutShaderCode*/,
+      "Position": {
+        "X": 3237.3604,
+        "Y": 3937.3828
       }
     }
   ],

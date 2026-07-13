@@ -106,6 +106,7 @@ Texture2D<float4> BRDFLookup : register(t7);
 
 Texture2D<float4> Gradient : register(t8);
 StructuredBuffer<Point> Points : register(t9);
+Texture2D<float4> Image : register(t10);
 
 
 psInput vsMain(uint id
@@ -147,8 +148,7 @@ psInput vsMain(uint id
     posInObject = mul(float4(posInObject.xyz, 1), orientationMatrix);
 
     posInObject += float4(Points[instanceIndex].Position, 0);
-    output.colorRGB = Points[instanceIndex].Color.rgb;
-    output.colorRGB = 1;
+    output.colorRGB = vertex.ColorRGB;
 
     float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);
     output.pixelPosition = posInClipSpace;
@@ -187,7 +187,7 @@ psInput vsMain(uint id
 /*{GLOBALS}*/
 
 //=== Additional Resources ==========================================
-/*{RESOURCES(t10)}*/
+/*{RESOURCES(t11)}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -249,7 +249,7 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
 
 inline float3 AdjustRoughnessForSpecularAA(float baseRoughness)
 {
- // --- Specular anti-aliasing ---
+    // --- Specular anti-aliasing ---
     // Compute normal variance using screen-space derivatives and increase roughness accordingly.
     // This reduces specular aliasing on silhouettes and high-frequency normalmap regions.
     float3 Nx = ddx(frag.N);
@@ -276,7 +276,8 @@ void SetupFrag(psInput pin) {
     frag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);
     frag.Occlusion = roughnessMetallicOcclusion.z;
     frag.albedo = BaseColorMap.Sample(WrappedSampler, pin.texCoord);
-    frag.albedo.rgb *= pin.colorRGB;
+    frag.albedo.rgb *= pin.colorRGB * Points[pin.pointIndex].Color.rgb;
+    
     frag.uv = pin.texCoord;
     frag.N = ComputeNormal(pin, pin.tbnToWorld);
 

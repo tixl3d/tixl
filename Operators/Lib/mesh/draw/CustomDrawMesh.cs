@@ -8,6 +8,9 @@ internal sealed class CustomDrawMesh :Instance<CustomDrawMesh>,ICustomDropdownHo
 {
     [Output(Guid = "eed49fbd-9a7c-4aaa-8d42-abb682f7ebf8")]
     public readonly Slot<Command> Output = new();
+
+        [Output(Guid = "8a92e09d-8e50-4b9d-9981-cc8d7a4ebb95")]
+        public readonly Slot<string> OutShaderCode = new Slot<string>();
         
         
     public CustomDrawMesh()
@@ -159,4 +162,7 @@ internal sealed class CustomDrawMesh :Instance<CustomDrawMesh>,ICustomDropdownHo
 
         [Input(Guid = "3e7b6c69-f4d1-4f96-a693-a2162fe29a77")]
         public readonly InputSlot<string> ShaderDefines = new InputSlot<string>();
+
+        [Input(Guid = "70f947b7-6e25-417a-94ce-cb4522f35797")]
+        public readonly InputSlot<T3.Core.DataTypes.Texture2D> Image = new InputSlot<T3.Core.DataTypes.Texture2D>();
 }
