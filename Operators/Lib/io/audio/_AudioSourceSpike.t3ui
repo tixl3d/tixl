@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "e2b0c1d8-5e42-4c8a-9f31-0ab1cd2ef100"/*_AudioSourceSpike*/,
+  "Description": "THROWAWAY SPIKE (2a) — a leaf audio-graph source node. Emits an AudioGraphNode with a Label so a downstream [_AudioRootSpike] can prove recursive, off-update-path collection. No audio. Delete after 2b.",
+  "InputUis": [
+    {
+      "InputId": "e2b0c1d8-0002-4c8a-9f31-0ab1cd2ef100"/*Label*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e2b0c1d8-0001-4c8a-9f31-0ab1cd2ef100"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

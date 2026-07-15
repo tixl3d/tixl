@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "e2b0c1d8-5e42-4c8a-9f31-0ab1cd2ef200"/*_AudioGroupSpike*/,
+  "Inputs": [
+    {
+      "Id": "e2b0c1d8-0002-4c8a-9f31-0ab1cd2ef200"/*Input*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
