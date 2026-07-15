@@ -299,13 +299,13 @@ internal partial class EditableSymbolProject
         string newSourceCode, originalCode;
         if (FilePathHandlers.TryGetValue(id, out var filePathHandler) && filePathHandler.SourceCodePath != null)
         {
-            if (!TryConvertToValidCodeNamespace(sourceNamespace, out var sourceCodeNamespace))
+            if (!GraphUtils.TryConvertToValidCodeNamespace(sourceNamespace, out var sourceCodeNamespace))
             {
                 failureLog = $"Source namespace {sourceNamespace} is not a valid namespace. This is a bug.";
                 return false;
             }
 
-            if (!TryConvertToValidCodeNamespace(newNamespace, out var newCodeNamespace))
+            if (!GraphUtils.TryConvertToValidCodeNamespace(newNamespace, out var newCodeNamespace))
             {
                 failureLog = $"{newNamespace} is not a valid namespace.";
                 return false;
@@ -395,30 +395,6 @@ internal partial class EditableSymbolProject
     public bool TryGetPendingSourceCode(Guid symbolId, out string? sourceCode)
     {
         return _pendingSource.TryGetValue(symbolId, out sourceCode);
-    }
-
-    private static bool TryConvertToValidCodeNamespace(string sourceNamespace, out string result)
-    {
-        // prepend any reserved words with a '@'
-        var parts = sourceNamespace.Split('.');
-        for (var i = 0; i < parts.Length; i++)
-        {
-            var part = parts[i];
-            if (!GraphUtils.IsIdentifierValid(part))
-            {
-                var newPart = "@" + part;
-                if (!GraphUtils.IsIdentifierValid(newPart))
-                {
-                    result = string.Empty;
-                    return false;
-                }
-
-                parts[i] = newPart;
-            }
-        }
-
-        result = string.Join('.', parts);
-        return true;
     }
 
     private readonly record struct PackageNamespaceInfo(EditableSymbolProject Project, string? RootNamespace);

@@ -42,13 +42,25 @@ internal static class Duplicate
         root = classRenamer.Visit(root);
 
         var memberRewriter = new Duplicate.MemberDuplicateRewriter(sourceSymbol.Name, newTypeName);
-        
+
         root = memberRewriter.Visit(root);
         var oldToNewIdMap = memberRewriter.OldToNewGuidDict;
+
+        // Symbol.Namespace comes from reflection and lacks the '@' escapes present in source code
+        // (e.g. Lib.numbers.@float.basic), so a plain text replace can miss the declaration and leave
+        // the duplicate in the source namespace — rewrite the declaration node instead.
+        if (!GraphUtils.TryConvertToValidCodeNamespace(nameSpace, out var codeNamespace))
+        {
+            Log.Error($"'{nameSpace}' is not a valid namespace.");
+            return null;
+        }
+
+        var namespaceRewriter = new NamespaceRenameRewriter(codeNamespace);
+        root = namespaceRewriter.Visit(root);
+
         var newSource = root.GetText().ToString();
 
         var newSymbolId = Guid.NewGuid();
-        newSource = newSource.Replace(sourceSymbol.Namespace, nameSpace);
         newSource = ReplaceGuidAttributeWith(newSymbolId, newSource);
         Log.Debug(newSource);
 
@@ -255,6 +267,26 @@ internal static class Duplicate
     {
         public Symbol.Connection Connection { get; set; }
         public int MultiInputIndex { get; set; }
+    }
+
+    private sealed class NamespaceRenameRewriter : CSharpSyntaxRewriter
+    {
+        private readonly string _newNamespace;
+
+        public NamespaceRenameRewriter(string newNamespace)
+        {
+            _newNamespace = newNamespace;
+        }
+
+        public override SyntaxNode VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node)
+        {
+            return node.WithName(SyntaxFactory.ParseName(_newNamespace).WithTriviaFrom(node.Name));
+        }
+
+        public override SyntaxNode VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+        {
+            return node.WithName(SyntaxFactory.ParseName(_newNamespace).WithTriviaFrom(node.Name));
+        }
     }
 
     private sealed class MemberDuplicateRewriter : CSharpSyntaxRewriter

@@ -146,6 +146,33 @@ internal static partial class GraphUtils
         return true;
     }
 
+    /// <summary>
+    /// Converts a namespace to its source-code form by escaping reserved-word segments with '@'
+    /// (e.g. Lib.numbers.float.basic → Lib.numbers.@float.basic).
+    /// </summary>
+    public static bool TryConvertToValidCodeNamespace(string sourceNamespace, out string result)
+    {
+        var parts = sourceNamespace.Split('.');
+        for (var i = 0; i < parts.Length; i++)
+        {
+            var part = parts[i];
+            if (!IsIdentifierValid(part))
+            {
+                var newPart = "@" + part;
+                if (!IsIdentifierValid(newPart))
+                {
+                    result = string.Empty;
+                    return false;
+                }
+
+                parts[i] = newPart;
+            }
+        }
+
+        result = string.Join('.', parts);
+        return true;
+    }
+
     public static bool IsIdentifierValid(string? className) => !string.IsNullOrWhiteSpace(className)
                                                                && IsIdentifierValidNotEmpty(className);
     
