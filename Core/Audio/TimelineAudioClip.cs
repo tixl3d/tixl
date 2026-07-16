@@ -124,6 +124,15 @@ public sealed class TimelineAudioClip
     public double LengthInSeconds;
 
     /// <summary>
+    /// Transient (not serialized): set each frame by the [AudioClip] op when its <c>AudioReference</c> output is
+    /// wired into the audio-processing graph. While true, the graph owns this clip's channel — it moves it out of
+    /// the SoundtrackMixer into a bus submix and applies its own gain — so <see cref="SoundtrackClipStream"/>
+    /// keeps position-syncing the channel but stops setting its volume and stops managing its mixer membership.
+    /// The engine still creates and frees the stream; only routing + level hand off to the graph.
+    /// </summary>
+    public bool IsRoutedToGraph;
+
+    /// <summary>
     /// Returns a resource handle for this clip, cached per owner. Per-frame callers must reuse the
     /// same handle so the engine's load/fail state (<see cref="AudioClipResourceHandle.LoadingAttemptFailed"/>)
     /// and stream-dictionary key stay stable — a fresh handle each frame would re-attempt a missing

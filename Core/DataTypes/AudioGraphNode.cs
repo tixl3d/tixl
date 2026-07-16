@@ -30,6 +30,12 @@ public sealed class AudioGraphNode
     /// <summary>Leaf only: the source's BASS decode-stream handle, for the root to route into a bus. 0 = combinator / none.</summary>
     public int SourceChannel;
 
+    /// <summary>Leaf only: the channel's lifetime and playback position are owned by another subsystem (the
+    /// <c>AudioEngine</c> soundtrack path for an [AudioClip]), not by the graph. The root must route it
+    /// <b>without</b> <c>MixerChanBuffer</c> (buffer latency breaks the engine's seek/resync) and must not free
+    /// it on removal. False for graph-owned sources (tone / file) whose channel the graph creates and frees.</summary>
+    public bool ExternallyManagedChannel;
+
     /// <summary>Per-node gain the root applies to this source's channel when routing it.</summary>
     public float Gain = 1f;
 

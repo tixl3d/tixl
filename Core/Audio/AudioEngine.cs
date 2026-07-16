@@ -170,6 +170,23 @@ public static class AudioEngine
     }
 
     /// <summary>
+    /// Exposes a soundtrack clip's live BASS channel so the audio-processing graph (an [AudioBus]) can route it.
+    /// Only valid while the clip is in use — its stream is created lazily on the first <see cref="UseSoundtrackClip"/>
+    /// (i.e. the clip must be AutoPlay or driven by a player). Returns false until then.
+    /// </summary>
+    public static bool TryGetSoundtrackChannel(AudioClipResourceHandle? handle, out int channel)
+    {
+        if (handle != null && SoundtrackClipStreams.TryGetValue(handle, out var stream) && stream.StreamHandle != 0)
+        {
+            channel = stream.StreamHandle;
+            return true;
+        }
+
+        channel = 0;
+        return false;
+    }
+
+    /// <summary>
     /// Completes the audio processing for the current frame, handling soundtrack clips,
     /// FFT analysis, and stale operator detection.
     /// </summary>
@@ -189,6 +206,10 @@ public static class AudioEngine
             AudioAnalysis.ProcessUpdate(playback.Settings.Playback.AudioGainFactor, playback.Settings.Playback.AudioDecayFactor);
 
         StopStaleOperators();
+
+        // Silence bus submixes whose [AudioBus] wasn't evaluated this frame — a stale bus would otherwise
+        // keep playing its last routing/gain state, frozen and deaf to upstream parameter changes.
+        AudioBusRegistry.PauseStaleBuses();
         
         // Ensure the frame token is incremented even when no audio operators update.
         // This must be called AFTER StopStaleOperators() so stale detection compares

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ManagedBass;
 using ManagedBass.Mix;
+using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Operator;
@@ -29,6 +30,11 @@ public static class AudioGraphCollector
 
         if (!EnsureDefaultBus())
             return;
+
+        // Transport gating: loose sources follow the transport too — stopped playback means silence,
+        // giving stop=quiet as the natural off-switch for implicitly playing audio.
+        var transportStopped = (Playback.Current?.PlaybackSpeed ?? 0) == 0;
+        BassMix.ChannelFlags(_defaultBus, transportStopped ? BassFlags.MixerChanPause : 0, BassFlags.MixerChanPause);
 
         // Ensure each loose source's channel (from static inputs) and build the desired set.
         _desired.Clear();

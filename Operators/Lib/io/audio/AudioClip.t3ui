@@ -36,7 +36,8 @@
       },
       "Description": "Path to the audio file (.wav / .mp3 / .ogg).",
       "AddPadding": "True",
-      "Usage": "FilePath"
+      "Usage": "FilePath",
+      "FileFilter": "mp3,wav,ogg,aiff"
     },
     {
       "InputId": "97948c5e-10d5-4e18-824e-aea17eb4eb2a"/*Command*/,
@@ -53,6 +54,13 @@
       "Position": {
         "X": 300.0,
         "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "4c9e7a20-3f81-4d5a-b6e2-1a2b3c4d5e6f"/*AudioReference*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
       }
     }
   ]

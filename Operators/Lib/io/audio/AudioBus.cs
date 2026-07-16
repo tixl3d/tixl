@@ -29,6 +29,10 @@ namespace Lib.io.audio
             if (_submix == 0)
                 return;
 
+            // Heartbeat: if this bus stops being evaluated, the engine pauses its submix (instead of
+            // leaving it playing a frozen last state that ignores upstream parameter changes).
+            AudioBusRegistry.MarkAlive(_submix);
+
             _collected.Clear();
             var inputs = Input.GetCollectedTypedInputs(true);
             for (var i = 0; i < inputs.Count; i++)
@@ -36,6 +40,7 @@ namespace Lib.io.audio
             Input.DirtyFlag.Clear();
 
             _desired.Clear();
+            _externallyManaged.Clear();
             for (var i = 0; i < _collected.Count; i++)
             {
                 var src = _collected[i];
@@ -47,6 +52,8 @@ namespace Lib.io.audio
                     continue;
 
                 _desired.Add(ch);
+                if (src.Leaf.ExternallyManagedChannel)
+                    _externallyManaged.Add(ch);
                 Bass.ChannelSetAttribute(ch, ChannelAttribute.Volume, src.Gain);
             }
 
@@ -56,7 +63,15 @@ namespace Lib.io.audio
                 if (_routed.Contains(ch))
                     continue;
 
-                if (BassMix.MixerAddChannel(_submix, ch, BassFlags.MixerChanBuffer))
+                // A clip channel lives in the SoundtrackMixer (engine-owned) — a BASS channel can only be in one
+                // mixer, so pull it out first, and add it un-buffered: MixerChanBuffer latency would break the
+                // engine's per-frame seek/resync of the clip position.
+                var externallyManaged = _externallyManaged.Contains(ch);
+                if (externallyManaged)
+                    BassMix.MixerRemoveChannel(ch);
+
+                var flags = externallyManaged ? BassFlags.Default : BassFlags.MixerChanBuffer;
+                if (BassMix.MixerAddChannel(_submix, ch, flags))
                 {
                     _routed.Add(ch);
                     changed = true;
@@ -76,6 +91,11 @@ namespace Lib.io.audio
             }
 
             Bass.ChannelSetAttribute(_submix, ChannelAttribute.Volume, Volume.GetValue(context));
+
+            // Transport gating: graph audio follows the transport. While stopped (PlaybackSpeed == 0) the
+            // submix pauses — which also stops pulling generator streams — matching soundtrack-clip behaviour.
+            var transportStopped = context.Playback.PlaybackSpeed == 0;
+            BassMix.ChannelFlags(_submix, transportStopped ? BassFlags.MixerChanPause : 0, BassFlags.MixerChanPause);
 
             if (!changed)
                 return;
@@ -111,6 +131,7 @@ namespace Lib.io.audio
         {
             if (_submix != 0)
             {
+                AudioBusRegistry.Unregister(_submix);
                 Bass.StreamFree(_submix);
                 _submix = 0;
             }
@@ -118,6 +139,7 @@ namespace Lib.io.audio
 
         private readonly List<AudioGraphNode.CollectedSource> _collected = new();
         private readonly HashSet<int> _desired = new();
+        private readonly HashSet<int> _externallyManaged = new();
         private readonly HashSet<int> _routed = new();
         private readonly List<int> _toRemove = new();
         private int _submix;
