@@ -43,6 +43,10 @@ public static class PlaybackUtils
                                                  Playback.Current.TimeInBars,
                                                  Playback.Current.TimeInSecs);
 
+        // Play "loose" audio-graph sources (whose output isn't wired into any bus) through an implicit
+        // default bus, so basic audio plays without an [AudioBus] op. Wired sources go through their bus.
+        AudioGraphCollector.CollectLooseSources(ProjectView.Focused?.CompositionInstance);
+
         if (settings.Playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice
             && settings.Playback.Syncing == CompositionSettings.SyncModes.Tapping)
         {

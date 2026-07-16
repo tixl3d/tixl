@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "c3f10a50-1e42-4c8a-9f31-0ab1cd2e0100"/*_AudioFileSpike*/,
+  "Inputs": [
+    {
+      "Id": "c3f10a50-0002-4c8a-9f31-0ab1cd2e0100"/*Path*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "c3f10a50-0003-4c8a-9f31-0ab1cd2e0100"/*Volume*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

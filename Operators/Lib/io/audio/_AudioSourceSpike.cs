@@ -6,13 +6,13 @@ using T3.Core.Audio;
 namespace Lib.io.audio
 {
     /// <summary>
-    /// THROWAWAY SPIKE (2b) — a leaf audio source. Generates a sine tone as a BASS decode stream and
-    /// exposes it (unrouted) on its <see cref="AudioGraphNode"/>; the downstream [_AudioRootSpike] routes
-    /// it into a bus. Proves the join: R1 collection drives R2 routing — you hear which sources a root
-    /// collected. Delete after real ops land.
+    /// THROWAWAY SPIKE — a leaf audio source. Generates a sine tone as a BASS decode stream and exposes it
+    /// (unrouted) on its <see cref="AudioGraphNode"/>; a downstream [AudioBus] routes it. Implements
+    /// <see cref="IAudioSource"/> so a loose (unwired) instance auto-plays via the implicit collector at static
+    /// input values. Delete once real source ops land.
     /// </summary>
     [Guid("e2b0c1d8-5e42-4c8a-9f31-0ab1cd2ef100")]
-    internal sealed class _AudioSourceSpike : Instance<_AudioSourceSpike>
+    internal sealed class _AudioSourceSpike : Instance<_AudioSourceSpike>, IAudioSource
     {
         [Output(Guid = "e2b0c1d8-0001-4c8a-9f31-0ab1cd2ef100")]
         public readonly Slot<AudioGraphNode> Result = new();
@@ -34,6 +34,20 @@ namespace Lib.io.audio
             var label = Label.GetValue(context);
             _node.SourceLabel = string.IsNullOrEmpty(label) ? $"{_frequency:0}Hz" : label;
             _node.Update(context);
+        }
+
+        // IAudioSource — context-free path used by the implicit collector for loose (unwired) auto-play.
+        Slot<AudioGraphNode> IAudioSource.AudioReferenceOutput => Result;
+
+        void IAudioSource.EnsureChannelFromStaticInputs()
+        {
+            _frequency = Frequency.TypedInputValue.Value;
+            EnsureStream();
+
+            _node.SourceChannel = _stream;
+            _node.Gain = Volume.TypedInputValue.Value;
+            var label = Label.TypedInputValue.Value;
+            _node.SourceLabel = string.IsNullOrEmpty(label) ? $"{_frequency:0}Hz" : label;
         }
 
         private void EnsureStream()
@@ -60,7 +74,7 @@ namespace Lib.io.audio
             }
         }
 
-        // Generates a raw sine at _frequency; the root applies gain on the channel, so this is unity (-headroom).
+        // Generates a raw sine at _frequency; gain is applied by the router on the channel.
         private int StreamCallback(int handle, IntPtr buffer, int length, IntPtr user)
         {
             var floatCount = length / sizeof(float);
@@ -82,7 +96,7 @@ namespace Lib.io.audio
         {
             if (_stream != 0)
             {
-                Bass.StreamFree(_stream); // also detaches it from any mixer the root added it to
+                Bass.StreamFree(_stream);
                 _stream = 0;
             }
 
