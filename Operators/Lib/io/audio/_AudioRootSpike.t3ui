@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e2b0c1d8-5e42-4c8a-9f31-0ab1cd2ef300"/*_AudioRootSpike*/,
-  "Description": "THROWAWAY SPIKE (2a) — the audio-graph root. Collects all leaf sources reachable through its input (recursively, through groups) off the per-frame dirty path and logs them when the set changes. Proves structural collection with no BASS. Wire Result into your render chain so it evaluates. Delete after 2b.",
+  "Description": "THROWAWAY SPIKE (2b) — the audio-graph root. Collects all leaf sources reachable through its input (recursively, through groups) and routes each source's tone into a root-owned BASS bus under the operator mixer, reconciling live. Master Volume on the bus. Wire Result into your render chain so it evaluates. Delete after 2b.",
   "InputUis": [
     {
       "InputId": "e2b0c1d8-0002-4c8a-9f31-0ab1cd2ef300"/*Input*/,
@@ -9,6 +9,16 @@
         "X": -200.0,
         "Y": 0.0
       }
+    },
+    {
+      "InputId": "e2b0c1d8-0003-4c8a-9f31-0ab1cd2ef300"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
     }
   ],
   "SymbolChildUis": [],

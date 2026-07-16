@@ -5,6 +5,14 @@
     {
       "Id": "e2b0c1d8-0002-4c8a-9f31-0ab1cd2ef100"/*Label*/,
       "DefaultValue": ""
+    },
+    {
+      "Id": "e2b0c1d8-0003-4c8a-9f31-0ab1cd2ef100"/*Frequency*/,
+      "DefaultValue": 440.0
+    },
+    {
+      "Id": "e2b0c1d8-0004-4c8a-9f31-0ab1cd2ef100"/*Volume*/,
+      "DefaultValue": 1.0
     }
   ],
   "Children": [],

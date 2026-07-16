@@ -6,19 +6,19 @@ using T3.Core.Audio;
 namespace Lib.io.audio
 {
     /// <summary>
-    /// THROWAWAY SPIKE — stand-in audio-graph root. Collects leaf sources (recursively, through groups) with
-    /// effective gain, and routes each collected source's BASS channel into a root-owned submix (bus) under
-    /// the operator mixer, reconciling live. Master <see cref="Volume"/> on the bus; <c>Direct</c>-routed
-    /// sources bypass it (realised later). Wire Result into your render chain so it evaluates. Superseded by
-    /// the real [AudioClipPlayer] root in G3 — delete then.
+    /// Output of the audio processing graph. Collects the audio sources wired into it (recursively, through
+    /// [CombineAudio]s), routes each collected source's channel into a bus (submix) under the operator mixer —
+    /// reconciling add/remove live as the graph changes — and applies a master <see cref="Volume"/>.
+    /// <c>Direct</c>-routed sources (spatial HW-3D) bypass the bus. Wire Result into your render command chain
+    /// so it is evaluated each frame.
     /// </summary>
-    [Guid("e2b0c1d8-5e42-4c8a-9f31-0ab1cd2ef300")]
-    internal sealed class _AudioRootSpike : Instance<_AudioRootSpike>
+    [Guid("b7e0d240-1e42-4c8a-9f31-0ab1cd2e0100")]
+    internal sealed class AudioBus : Instance<AudioBus>
     {
-        [Output(Guid = "e2b0c1d8-0001-4c8a-9f31-0ab1cd2ef300", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
+        [Output(Guid = "b7e0d240-0001-4c8a-9f31-0ab1cd2e0100", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
         public readonly Slot<Command> Result = new();
 
-        public _AudioRootSpike()
+        public AudioBus()
         {
             Result.UpdateAction += Update;
         }
@@ -29,26 +29,24 @@ namespace Lib.io.audio
             if (_submix == 0)
                 return;
 
-            // --- Collect leaf sources with effective gain (R1) ---
             _collected.Clear();
             var inputs = Input.GetCollectedTypedInputs(true);
             for (var i = 0; i < inputs.Count; i++)
                 inputs[i]?.GetValue(context)?.Collect(_collected, 1f);
             Input.DirtyFlag.Clear();
 
-            // --- Reconcile the submix against the collected set (R2) ---
             _desired.Clear();
             for (var i = 0; i < _collected.Count; i++)
             {
                 var src = _collected[i];
                 if (src.Leaf.Routing == AudioGraphNode.RoutingKind.Direct)
-                    continue; // spatial/HW-3D bypasses the bus — realised in G5
+                    continue; // spatial/HW-3D bypasses the bus
 
                 var ch = src.Leaf.SourceChannel;
                 if (ch == 0)
                     continue;
 
-                _desired.Add(ch); // a source reached via two paths dedups to one bus channel
+                _desired.Add(ch);
                 Bass.ChannelSetAttribute(ch, ChannelAttribute.Volume, src.Gain);
             }
 
@@ -58,8 +56,6 @@ namespace Lib.io.audio
                 if (_routed.Contains(ch))
                     continue;
 
-                // A source channel lives in one mixer; a second root collecting the same source fails here
-                // (multi-send needs split streams — deferred). Test with one root.
                 if (BassMix.MixerAddChannel(_submix, ch, BassFlags.MixerChanBuffer))
                 {
                     _routed.Add(ch);
@@ -81,12 +77,11 @@ namespace Lib.io.audio
 
             Bass.ChannelSetAttribute(_submix, ChannelAttribute.Volume, Volume.GetValue(context));
 
-            // Log only when the routed set changes (not every frame an animated param moves).
             if (!changed)
                 return;
 
             var labels = string.Join(", ", _collected.ConvertAll(c => $"{c.Leaf}×{c.Gain:0.00}"));
-            Log.Debug($"[_AudioRootSpike] bus routing {_routed.Count} channel(s): {labels}", this);
+            Log.Debug($"[AudioBus] routing {_routed.Count} channel(s): {labels}", this);
         }
 
         private void EnsureSubmix()
@@ -104,15 +99,15 @@ namespace Lib.io.audio
             _submix = BassMix.CreateMixerStream(AudioConfig.MixerFrequency, 2, BassFlags.MixerNonStop | BassFlags.Decode | BassFlags.Float);
             if (_submix == 0)
             {
-                Log.Warning($"[_AudioRootSpike] failed to create bus submix: {Bass.LastError}", this);
+                Log.Warning($"[AudioBus] failed to create bus submix: {Bass.LastError}", this);
                 return;
             }
 
             if (!BassMix.MixerAddChannel(AudioMixerManager.OperatorMixerHandle, _submix, BassFlags.MixerChanBuffer))
-                Log.Error($"[_AudioRootSpike] failed to add bus to operator mixer: {Bass.LastError}", this);
+                Log.Error($"[AudioBus] failed to add bus to operator mixer: {Bass.LastError}", this);
         }
 
-        ~_AudioRootSpike()
+        ~AudioBus()
         {
             if (_submix != 0)
             {
@@ -127,10 +122,10 @@ namespace Lib.io.audio
         private readonly List<int> _toRemove = new();
         private int _submix;
 
-        [Input(Guid = "e2b0c1d8-0002-4c8a-9f31-0ab1cd2ef300")]
+        [Input(Guid = "b7e0d240-0002-4c8a-9f31-0ab1cd2e0100")]
         public readonly MultiInputSlot<AudioGraphNode> Input = new();
 
-        [Input(Guid = "e2b0c1d8-0003-4c8a-9f31-0ab1cd2ef300")]
+        [Input(Guid = "b7e0d240-0003-4c8a-9f31-0ab1cd2e0100")]
         public readonly InputSlot<float> Volume = new();
     }
 }

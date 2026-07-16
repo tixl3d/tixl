@@ -16,14 +16,45 @@ Three usage tiers, all on one substrate:
 
 ## Implementation status (resume here)
 
-Both architectural risks are **validated by working spike code** (all `_`-prefixed, throwaway, in `Operators/Lib/io/audio/` unless noted):
+The full core mechanism is **validated end-to-end by working spike code** (`_`-prefixed, throwaway, in `Operators/Lib/io/audio/`; `AudioGraphNode` in `Core/DataTypes/`, registered in `Core` `SymbolPackage.RegisterTypes`):
 
-- **R2 — live BASS submix routing:** ✅ proven. `_AudioBusSpike` (`.cs`/`.t3`/`.t3ui`) — dynamically creates decode submixes under the operator mixer, routes a looping file through one, per-bus gain via `ChannelSetAttribute`, and glitch-free live reroute (`MixerRemoveChannel`→`MixerAddChannel` on a playing source).
-- **R1 — off-update-path recursive collection:** ✅ proven. `AudioGraphNode` (`Core/DataTypes/AudioGraphNode.cs`, registered in `Core` `SymbolPackage.RegisterTypes`) + `_AudioSourceSpike` / `_AudioGroupSpike` / `_AudioRootSpike`. The root logs the correct recursive collected source set, updating live as the graph is rewired.
+- **R1 — off-update-path recursive collection:** ✅ proven (2a). The root logs the correct recursive collected source set, updating live as the graph is rewired.
+- **R2 — live BASS submix routing:** ✅ proven (2b). The root builds a decode submix under the operator mixer and reconciles each collected source's channel into it (`MixerAddChannel` / `MixerRemoveChannel` + per-channel gain) as the graph changes.
+- **The join + animated params:** ✅ proven (2b). `_AudioSourceSpike` emits a sine-tone channel; `_AudioGroupSpike` folds sources; `_AudioRootSpike` collects recursively and routes — **you hear the collected sources mixed, and the mix follows the graph live.** A `Frequency` driven by an Anim Wave sweeps *audibly*, confirming the "root updates the animatable inputs of every collected node" path (the automation that would otherwise silently freeze).
 
-**Next — 2b (the join):** give the leaf `AudioGraphNode` a source channel; have the root create one BASS bus per collected source (reusing `_AudioBusSpike`'s routing) and set each bus's gain from the node — so source→group→root actually *plays*, routed. Fold in hardening in the same rebuild: register `AudioGraphNode` in `Symbol.Child._bypassableTypes` and `TypeUiRegistry` (color), matching `ShaderGraphNode` (a transient NRE appeared mid-wiring while these were absent).
+So the core of this plan — reference nodes collected off the update path and realised against BASS — is fully de-risked. Hardening also landed: `AudioGraphNode` registered in `Symbol.Child._bypassableTypes` and `TypeUiRegistry` (placeholder colour).
 
-**Throwaway, delete once real ops land:** the five `_`-prefixed spike ops above.
+**Next — graduate from spike to real ops (Phase A/C):** replace the throwaway spikes with the real `AudioReference` contract — a source channel from an actual `[AudioClip]`, the `Mixable`/`Direct` routing kind, `[AudioGroup]`/`[AudioMix]` combinators, and the `GenerateAudioProcessingBlock` root — on the reference-on-wire model. Bigger step; its own phase.
+
+**Throwaway, delete once real ops land:** `_AudioSourceSpike` / `_AudioGroupSpike` / `_AudioRootSpike` (+ `.t3`/`.t3ui`), and the tone/`SourceChannel`/`Gain` spike bits on `AudioGraphNode`.
+
+## Graduation steps (spike → real ops)
+
+Incremental — each step compiles and is testable on the last. Fork choices favour the simplest always-working path; the richer variant is the named follow-on.
+
+- **G1 — Contract foundation (Core, additive).** ✅ Add `RoutingKind { Mixable, Direct }` to `AudioGraphNode` (the wire value) — the one field expensive to retrofit once the wire ships (interface-stability audit). Default `Mixable`; `Direct` handled in G5. Spikes keep working. *Test: no regression.*
+- **G2 — Real combinator `[AudioGroup]`.** Replaces `_AudioGroupSpike`: folds `MultiInputSlot<AudioReference>` with a group `Volume`. **Fork A — group gain:** fold gain *down into* collected sources (flat root submix, no group FX) now; group-as-its-own-submix (reverb-on-a-group) is the follow-on in G5. *Test: two tones through an `[AudioGroup]` with group volume → volume scales both.*
+- **G3 — Real root `[AudioClipPlayer]`** (hosts `GenerateAudioProcessingBlock`). Replaces `_AudioRootSpike`: the reconciler (per-frame diff; `StructureHash` gating deferred as a perf step), master volume, and **AutoCollect** (scan composition children for sources → tier-1, like `AudioClipCollector`). Honours `RoutingKind.Direct` (skip the submix). *Test: tones play wired and unwired (AutoCollect).*
+- **G4 — Real audio source.** **Fork B — first real audio:** a minimal file-source op (`.wav` → BASS channel → node) first, to prove real files (path resolution + real streams) through the graph; then integrate the canonical `[AudioClip]` (expose its `SoundtrackClipStream` channel; keep the existing `AudioEngine` playback path working during transition). *Test: a wav plays, routed/grouped, following the graph.*
+- **G5 — Tier-3 richness.** Group-as-submix + FX inserts (reverb), `Direct`/spatial realization, multi-send via split streams, `[Duck]`/`[AudioLevel]` metered control — each its own increment.
+- **G6 — Retire spikes + wire to output.** Delete `_Audio*Spike`; connect the real root into the timeline/render output; then migration + Display/Style + reference-lines per their sections.
+
+## Op taxonomy & naming (cleanup pass — after the graph ops land)
+
+Naming rule: **verb+`Audio` for operations** (transform/combine references), **`Audio`+noun for things** (a clip, a bus), **`Play…` for trigger/event sample players**. Renames are GUID-safe (existing instances survive a rename); only *removals* need migration.
+
+- **Sources** (emit `AudioReference`):
+  - `AudioClip` — keep.
+  - `AudioPlayer` → **`PlayAudioSample`** (haas' sampler).
+  - `SpatialAudioPlayer` → **`PlaySpatialAudioSample`** (`Direct` routing kind — HW-3D, bypasses the bus).
+  - `AudioToneGenerator` — fix (currently broken) + integrate as a source (≈ the `_AudioSourceSpike` role).
+- **Combinators** (fold references):
+  - **`CombineAudio`** ✅ (was `AudioGroup` → `GroupAudio`) — combine sources + volume fold.
+  - **`BlendAudio`** (new) — crossfade N inputs by one float index (like `BlendScenes`); weights the two adjacent inputs internally. A weight-*list* **`MixAudio`** is the later general case (reuses the same per-child weighting).
+  - later: `MixAudio`, `AudioReverb` / effects, `Duck`.
+- **Output:** tier-1 is *implicit* (no op → no "why is it silent / where's the player?" confusion). The tier-3 explicit bus = **`AudioBus`** (replaces the `AudioClipPlayer` role — it collects *all* sources, not just clips, and isn't required to play them). Optional; multiple allowed; `AutoCollectSources` **exclusive** (one bus auto-collects, so no double-collection). Verify the implicit path covers nested-comp + export before finalising (the historical reason `AudioClipPlayer` existed).
+- **Analysis:** `AudioReaction` — **keep the name** (×30 uses); extend with an optional `AudioReference` input to analyse a specific source/bus instead of only the global mix.
+- **Remove:** `PlayAudioClip` (6 uses, all experimental — confirmed safe to hard-delete).
 
 ## Architectural decisions (locked in)
 

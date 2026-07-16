@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "e2b0c1d8-5e42-4c8a-9f31-0ab1cd2ef100"/*_AudioSourceSpike*/,
-  "Description": "THROWAWAY SPIKE (2a) — a leaf audio-graph source node. Emits an AudioGraphNode with a Label so a downstream [_AudioRootSpike] can prove recursive, off-update-path collection. No audio. Delete after 2b.",
+  "Description": "THROWAWAY SPIKE (2b) — a leaf audio-graph source. Generates a sine tone (BASS decode stream) at Frequency and exposes it for a downstream [_AudioRootSpike] to route into a bus. Gain is applied by the root. No file loading. Delete after 2b.",
   "InputUis": [
     {
       "InputId": "e2b0c1d8-0002-4c8a-9f31-0ab1cd2ef100"/*Label*/,
@@ -9,6 +9,28 @@
         "X": -200.0,
         "Y": 0.0
       }
+    },
+    {
+      "InputId": "e2b0c1d8-0003-4c8a-9f31-0ab1cd2ef100"/*Frequency*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 20.0,
+      "Max": 2000.0,
+      "Scale": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "e2b0c1d8-0004-4c8a-9f31-0ab1cd2ef100"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
     }
   ],
   "SymbolChildUis": [],

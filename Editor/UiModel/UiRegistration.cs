@@ -91,6 +91,10 @@ internal static class UiRegistration
         
         RegisterTypesToProperty(UiProperties.ShaderGraph,
                                 typeof(ShaderGraphNode));
+
+        // SPIKE: placeholder colour for the audio reference-graph wire type until it gets its own.
+        RegisterTypesToProperty(UiProperties.Command,
+                                typeof(AudioGraphNode));
         
                                 // set colors of input and output UIs
         

@@ -5,6 +5,10 @@
     {
       "Id": "e2b0c1d8-0002-4c8a-9f31-0ab1cd2ef300"/*Input*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "e2b0c1d8-0003-4c8a-9f31-0ab1cd2ef300"/*Volume*/,
+      "DefaultValue": 1.0
     }
   ],
   "Children": [],

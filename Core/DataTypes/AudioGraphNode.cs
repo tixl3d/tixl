@@ -16,8 +16,22 @@ namespace T3.Core.DataTypes;
 /// </summary>
 public sealed class AudioGraphNode
 {
+    /// <summary>How the root routes a leaf source: <c>Mixable</c> joins a bus submix (default); <c>Direct</c> routes
+    /// straight to the output / 3D engine (spatial hardware 3D) and can't be bus-inserted.</summary>
+    public enum RoutingKind { Mixable, Direct }
+
+    /// <summary>Leaf routing kind (combinators ignore it). Baked into the wire value now so adding it later
+    /// wouldn't be a shape migration; only <c>Mixable</c> is realised until G5 wires up Direct/spatial.</summary>
+    public RoutingKind Routing = RoutingKind.Mixable;
+
     /// <summary>Leaf identity for logging / inspection (e.g. a source label). Null for combinators.</summary>
     public string? SourceLabel;
+
+    /// <summary>Leaf only: the source's BASS decode-stream handle, for the root to route into a bus. 0 = combinator / none.</summary>
+    public int SourceChannel;
+
+    /// <summary>Per-node gain the root applies to this source's channel when routing it.</summary>
+    public float Gain = 1f;
 
     /// <summary>Populated each traversal from the connected input nodes; empty for a leaf source.</summary>
     public readonly List<AudioGraphNode> InputNodes = new();
@@ -56,17 +70,28 @@ public sealed class AudioGraphNode
         _multiInput.DirtyFlag.Clear();
     }
 
-    /// <summary>Collects every leaf source reachable under this node (depth-first). A leaf has no input nodes.</summary>
-    public void CollectLeafSources(List<AudioGraphNode> results)
+    /// <summary>A leaf source reached by the root's collection, paired with its effective gain
+    /// (product of ancestor combinator gains × its own gain).</summary>
+    public readonly record struct CollectedSource(AudioGraphNode Leaf, float Gain);
+
+    /// <summary>
+    /// Collects reachable leaf sources (depth-first) with effective gain. A combinator folds its own
+    /// <see cref="Gain"/> (e.g. a group volume) into all descendants; a leaf contributes its channel at
+    /// the accumulated gain. Leaves without a channel are skipped.
+    /// </summary>
+    public void Collect(List<CollectedSource> results, float gainSoFar)
     {
+        var gain = gainSoFar * Gain;
+
         if (InputNodes.Count == 0)
         {
-            results.Add(this);
+            if (SourceChannel != 0)
+                results.Add(new CollectedSource(this, gain));
             return;
         }
 
         for (var i = 0; i < InputNodes.Count; i++)
-            InputNodes[i].CollectLeafSources(results);
+            InputNodes[i].Collect(results, gain);
     }
 
     public override string ToString() => SourceLabel ?? _instance.Symbol.Name;
