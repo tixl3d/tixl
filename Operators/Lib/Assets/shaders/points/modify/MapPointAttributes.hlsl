@@ -72,7 +72,7 @@ inline float3 fmod(float3 x, float3 y)
     switch (InputMode)
     {
     case INPUTMODE_BUFFERORDER:
-        f0 = (float)index / (pointCount - 1);
+        f0 = (float)index / (pointCount - (MappingMode ==MAPPING_NORMAL ? 1:0));
         break;
 
     case INPUTMODE_F1:
