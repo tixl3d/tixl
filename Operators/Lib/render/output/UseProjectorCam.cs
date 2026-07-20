@@ -31,9 +31,6 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>
         }
 
         var cam = output.Camera;
-        var position = cam?.ManualPosition ?? new Vector3(0, 1, 3);
-        var target = cam?.ManualTarget ?? Vector3.Zero;
-        var fovY = (cam?.ManualFovYDegrees ?? 45f).ToRadians();
         var aspect = output.CanvasResolution.Height > 0
                          ? output.CanvasResolution.Width / (float)output.CanvasResolution.Height
                          : 1f;
@@ -41,8 +38,20 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>
         var prevWorldToCamera = context.WorldToCamera;
         var prevCameraToClipSpace = context.CameraToClipSpace;
 
-        context.WorldToCamera = GraphicsMath.LookAtRH(position, target, new Vector3(0, 1, 0));
-        context.CameraToClipSpace = GraphicsMath.PerspectiveFovRH(fovY, aspect, 0.01f, 1000f);
+        // Prefer the calibration-solved pose/lens; fall back to the manual look-at until a solve exists.
+        if (cam?.Pose is { } pose && cam.Lens is { } lens)
+        {
+            context.WorldToCamera = pose.ToViewMatrix();
+            context.CameraToClipSpace = lens.GetMatrix(aspect);
+        }
+        else
+        {
+            var position = cam?.ManualPosition ?? new Vector3(0, 1, 3);
+            var target = cam?.ManualTarget ?? Vector3.Zero;
+            var fovY = (cam?.ManualFovYDegrees ?? 45f).ToRadians();
+            context.WorldToCamera = GraphicsMath.LookAtRH(position, target, new Vector3(0, 1, 0));
+            context.CameraToClipSpace = GraphicsMath.PerspectiveFovRH(fovY, aspect, 0.01f, 1000f);
+        }
 
         Command.GetValue(context);
 

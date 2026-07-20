@@ -1,5 +1,6 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.Logging;
 using T3.Core.Output;
 using T3.Core.Resource;
 using T3.Editor.Gui.Interaction;
@@ -25,6 +26,7 @@ internal sealed class SetupOutputView
     {
         Output,
         Content,
+        Calibrate,
     }
 
     public SetupOutputView()
@@ -47,10 +49,16 @@ internal sealed class SetupOutputView
         DrawHeader(setup, output, outputId);
         DrawCameraEditor(output);
 
+        // Calibration controls sit above the canvas, so draw them before UpdateCanvas measures the region.
+        if (_editMode == EditMode.Calibrate)
+            DrawCalibrationControls(output);
+
         _canvas.UpdateCanvas(out _);
 
         if (_editMode == EditMode.Content)
             DrawContentCanvas(setup, outputId);
+        else if (_editMode == EditMode.Calibrate)
+            DrawCalibrationMarkers(output, outputId);
         else
             DrawOutputCanvas(setup, output, outputId);
     }
@@ -169,6 +177,13 @@ internal sealed class SetupOutputView
         if (CustomComponents.StateButton("Content", ModeButtonState(EditMode.Content)))
             _editMode = EditMode.Content;
 
+        if (output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display)
+        {
+            ImGui.SameLine();
+            if (CustomComponents.StateButton("Calibrate", ModeButtonState(EditMode.Calibrate)))
+                _editMode = EditMode.Calibrate;
+        }
+
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             var surface = setup.Surfaces[i];
@@ -207,6 +222,115 @@ internal sealed class SetupOutputView
         changed |= ImGui.DragFloat("Field of View", ref camera.ManualFovYDegrees, 0.2f, 1f, 179f);
         if (changed)
             OutputSetupHandling.SaveActive();
+    }
+
+    // Calibration: place >=6 stage↔pixel correspondences, then solve the projector's pose/lens. The
+    // stage positions are entered here; the output pixels are dragged as markers on the canvas.
+    private static void DrawCalibrationControls(OutputDefinition output)
+    {
+        var camera = output.Camera ??= new OutputDefinition.ProjectorCamera();
+        var points = camera.CalibrationPoints;
+
+        if (ImGui.Button("Add Point"))
+        {
+            points.Add(new CalibrationPoint
+                           {
+                               OutputPixel = new Vector2(output.CanvasResolution.Width * 0.5f, output.CanvasResolution.Height * 0.5f),
+                           });
+            OutputSetupHandling.SaveActive();
+        }
+
+        ImGui.SameLine();
+        if (points.Count >= ProjectorSolver.MinPointCount)
+        {
+            if (ImGui.Button("Solve"))
+            {
+                if (ProjectorSolver.TrySolve(points, output.CanvasResolution, out var result))
+                {
+                    camera.Pose = result.Pose;
+                    camera.Lens = result.Lens;
+                    camera.ResidualPx = result.MeanResidualPx;
+                    OutputSetupHandling.SaveActive();
+                }
+                else
+                {
+                    Log.Warning("Projector solve failed — need 6+ points spanning two non-parallel planes.");
+                }
+            }
+        }
+        else
+        {
+            ImGui.TextDisabled($"Add {ProjectorSolver.MinPointCount - points.Count} more to solve");
+        }
+
+        if (camera.Pose != null)
+        {
+            ImGui.SameLine();
+            CustomComponents.StylizedText($"residual {camera.ResidualPx:0.0} px", Fonts.FontSmall, UiColors.TextMuted);
+        }
+
+        if (ImGui.CollapsingHeader("Stage Positions"))
+        {
+            var removeIndex = -1;
+            for (var i = 0; i < points.Count; i++)
+            {
+                ImGui.PushID(i);
+                ImGui.SetNextItemWidth(180 * T3Ui.UiScaleFactor);
+                if (ImGui.DragFloat3($"#{i + 1}", ref points[i].StagePosition, 0.02f))
+                    OutputSetupHandling.SaveActive();
+
+                ImGui.SameLine();
+                if (ImGui.SmallButton("x"))
+                    removeIndex = i;
+
+                ImGui.PopID();
+            }
+
+            if (removeIndex >= 0)
+            {
+                points.RemoveAt(removeIndex);
+                OutputSetupHandling.SaveActive();
+            }
+        }
+    }
+
+    private void DrawCalibrationMarkers(OutputDefinition output, Guid outputId)
+    {
+        var camera = output.Camera;
+        if (camera == null)
+            return;
+
+        var canvasSize = new Vector2(Math.Max(1, output.CanvasResolution.Width), Math.Max(1, output.CanvasResolution.Height));
+        FitToArea(canvasSize, EditMode.Calibrate, outputId);
+
+        var dl = ImGui.GetWindowDrawList();
+        var frameMin = _projection.CanvasToScreen(Vector2.Zero);
+        var frameMax = _projection.CanvasToScreen(canvasSize);
+        dl.AddRectFilled(frameMin, frameMax, UiColors.BackgroundFull.Fade(0.4f));
+
+        var composite = OutputManager.RenderOutput(outputId);
+        if (composite is { IsDisposed: false })
+        {
+            var srv = SrvManager.GetSrvForTexture(composite);
+            if (srv is { IsDisposed: false })
+                dl.AddImage(srv.NativePointer, frameMin, frameMax);
+        }
+
+        dl.AddRect(frameMin, frameMax, UiColors.ForegroundFull.Fade(0.25f));
+
+        var style = CanvasPointHandle.Style.Default(UiColors.StatusAnimated);
+        for (var i = 0; i < camera.CalibrationPoints.Count; i++)
+        {
+            ImGui.PushID(i);
+            var point = camera.CalibrationPoints[i];
+            var phase = CanvasPointHandle.Draw(ref point.OutputPixel, _projection, style);
+            if (phase == CanvasPointHandle.DragPhase.Completed)
+                OutputSetupHandling.SaveActive();
+
+            var screen = _projection.CanvasToScreen(point.OutputPixel);
+            dl.AddText(screen + new Vector2(8, -8) * T3Ui.UiScaleFactor, UiColors.ForegroundFull, $"{i + 1}");
+            ImGui.PopID();
+        }
     }
 
     private CustomComponents.ButtonStates ModeButtonState(EditMode mode)
