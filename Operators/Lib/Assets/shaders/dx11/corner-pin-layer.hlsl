@@ -1,6 +1,8 @@
 cbuffer Params : register(b0)
 {
     row_major float4x4 Homography;
+    float4 SourceTLTR; // source UV corners: TL.xy, TR.xy
+    float4 SourceBRBL; // source UV corners: BR.xy, BL.xy
     float4 Color;
 }
 
@@ -31,7 +33,12 @@ vsOutput vsMain(uint vertexId : SV_VertexID)
 
     // The homography acts on (x, y, w); the rasterizer's perspective divide completes it.
     output.position = mul(float4(corner, 0, 1), Homography);
-    output.texCoord = corner;
+
+    // Sample the surface's source region: bilinear of the four source-quad UV corners by (u, v).
+    // The rasterizer interpolates this perspective-correctly via position.w.
+    float2 top = lerp(SourceTLTR.xy, SourceTLTR.zw, corner.x);
+    float2 bottom = lerp(SourceBRBL.zw, SourceBRBL.xy, corner.x);
+    output.texCoord = lerp(top, bottom, corner.y);
     return output;
 }
 

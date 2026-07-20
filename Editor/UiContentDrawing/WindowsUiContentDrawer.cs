@@ -16,6 +16,7 @@ using T3.Editor.Gui;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Analyze;
+using T3.Editor.Gui.Windows.Output;
 using T3.Editor.SystemUi;
 using T3.SystemUi;
 using Buffer = SharpDX.Direct3D11.Buffer;
@@ -141,6 +142,11 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             }
 
             ImGui.NewFrame();
+
+            // Drive projection-mapping outputs: renders each bound output's composite every frame
+            // (so its content evaluates even when nothing shows it), sets the viewer texture, and
+            // auto-presents. Must run before the viewer's back buffer is bound below.
+            OutputManager.UpdatePresentation();
 
             // Render 2nd view
             ProgramWindows.Viewer.SetVisible(T3Ui.ShowSecondaryRenderWindow);

@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Core.Output;
+using T3.Core.Resource;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
@@ -59,6 +60,20 @@ internal sealed class SetupOutputView
         var frameMin = _projection.CanvasToScreen(Vector2.Zero);
         var frameMax = _projection.CanvasToScreen(canvasSize);
         dl.AddRectFilled(frameMin, frameMax, UiColors.BackgroundFull.Fade(0.4f));
+
+        // Live composite behind the handles: what the output manager would send to this output.
+        var composite = OutputManager.RenderOutput(outputId);
+        var hasContent = false;
+        if (composite is { IsDisposed: false })
+        {
+            var srv = SrvManager.GetSrvForTexture(composite);
+            if (srv is { IsDisposed: false })
+            {
+                dl.AddImage(srv.NativePointer, frameMin, frameMax);
+                hasContent = true;
+            }
+        }
+
         dl.AddRect(frameMin, frameMax, UiColors.ForegroundFull.Fade(0.25f));
 
         for (var i = 0; i < setup.Surfaces.Count; i++)
@@ -69,7 +84,9 @@ internal sealed class SetupOutputView
                 continue;
 
             ImGui.PushID(surface.Id.GetHashCode());
+            // The checker is only a stand-in; drop it once the real composite fills the surface.
             var style = CornerPinHandles.Style.ForSurface(surface.Name, editable: true);
+            style.DrawChecker = !hasContent;
             var phase = CornerPinHandles.Draw(mappingData.Quad, _projection, style, out _);
             HandleDrag(phase, surface.Id, outputId, mappingData);
             ImGui.PopID();

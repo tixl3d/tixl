@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60"/*SendToOutput*/,
+  "Description": "Sends a texture to a setup output, optionally to a specific surface on it.\n\nThis is a sink: it declares that its incoming texture belongs on the referenced output (and surface) of the project's active output setup, and needs no output connection. The output manager collects these, corner-pin warps each surface's slice, and composites and presents the result. With only an output set, every surface on that output slices the same image.\n\nAKA: corner pin, perspective, map, warp, projector output, send, sink",
+  "InputUis": [
+    {
+      "InputId": "1d83a6f2-49c0-4e17-8b5d-c72e90fa4b36"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "5c7e19a4-8b3d-4f6e-a201-93d5c4b7f180"/*OutputRef*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Usage": "OutputSetupEntities"
+    },
+    {
+      "InputId": "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942"/*Texture*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*SurfaceRef*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Usage": "OutputSetupEntities"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": []
+}

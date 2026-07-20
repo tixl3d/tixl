@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60"/*OutputLayer*/,
+  "Id": "0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60"/*SendToOutput*/,
   "Inputs": [
     {
       "Id": "1d83a6f2-49c0-4e17-8b5d-c72e90fa4b36"/*Color*/,

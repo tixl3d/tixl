@@ -168,7 +168,7 @@ internal static class ResolutionHandling
                                            DisplayIndex = screenIndex,
                                        });
                 OutputSetupHandling.SaveActive();
-                PresentOnDisplay(screenIndex);
+                PresentOnDisplay(screenIndex, output.Id);
             }
         }
 
@@ -180,12 +180,15 @@ internal static class ResolutionHandling
                 machineConfig.Unbind(output.Id);
                 OutputSetupHandling.SaveActive();
                 WindowManager.ShowSecondaryRenderWindow = false;
+                if (OutputManager.PresentedOutputId == output.Id)
+                    OutputManager.PresentedOutputId = Guid.Empty;
             }
         }
     }
 
-    private static void PresentOnDisplay(int screenIndex)
+    private static void PresentOnDisplay(int screenIndex, Guid outputId)
     {
+        OutputManager.PresentedOutputId = outputId;
         WindowManager.ShowSecondaryRenderWindow = true;
         ProgramWindows.Viewer.SetFullScreen(screenIndex);
     }

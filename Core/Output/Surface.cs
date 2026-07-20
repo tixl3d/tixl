@@ -34,12 +34,26 @@ public sealed class Surface
         /// <summary>Corners in OutputCanvas pixels: top-left, top-right, bottom-right, bottom-left of the content canvas.</summary>
         public Vector2[] Quad = new Vector2[4];
 
+        /// <summary>
+        /// The slice of the incoming content this surface shows, in normalized UV (0..1),
+        /// same winding as <see cref="Quad"/>. Defaults to the full image; set a sub-region to
+        /// take a slice of a shared render (several surfaces slicing one image).
+        /// </summary>
+        public Vector2[] SourceQuad = FullSourceQuad();
+
+        /// <summary>The whole image — the default source region (no slicing).</summary>
+        public static Vector2[] FullSourceQuad()
+        {
+            return [new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1)];
+        }
+
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
             writer.WriteObject("OutputId", OutputId);
             writer.WriteString("Mode", Mode);
             writer.WriteQuad("Quad", Quad);
+            writer.WriteQuad("SourceQuad", SourceQuad);
             writer.WriteEndObject();
         }
 
@@ -50,6 +64,8 @@ public sealed class Surface
                            OutputId = OutputJson.ReadGuid(token["OutputId"]),
                            Mode = token.ReadValueSafe("Mode", Modes.CornerPin) ?? Modes.CornerPin,
                            Quad = OutputJson.ReadQuad(token["Quad"]),
+                           // Absent (older setups) → full image, not a zero-quad.
+                           SourceQuad = token["SourceQuad"] != null ? OutputJson.ReadQuad(token["SourceQuad"]) : FullSourceQuad(),
                        };
         }
     }
