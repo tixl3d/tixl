@@ -97,6 +97,7 @@ internal static class UiRegistration
                                 // system types
                                 RegisterIOType(typeof(float), () => new FloatInputUi(), () => new FloatOutputUi());
         RegisterIOType(typeof(int), () => new IntInputUi());
+        RegisterIOType(typeof(Guid), () => new GuidInputUi());
         RegisterIOType(typeof(bool), () => new BoolInputUi(), () => new BoolOutputUi());
         RegisterIOType(typeof(double), () => new FloatInputUi(), () => new FloatOutputUi());
 

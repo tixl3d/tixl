@@ -85,6 +85,13 @@ public partial class SymbolPackage
                      (writer, value) => writer.WriteValue((string)value),
                      jsonToken => jsonToken?.Value<string>()??string.Empty);
 
+        // Reference to a setup entity (surface, output, ...) — the graph binds by GUID so
+        // swapping the setup re-targets the whole show; names are only display hints.
+        RegisterType(typeof(Guid), "Guid",
+                     InputDefaultValueCreator<Guid>,
+                     (writer, obj) => writer.WriteValue(((Guid)obj).ToString()),
+                     jsonToken => Guid.TryParse(jsonToken?.Value<string>(), out var guid) ? guid : Guid.Empty);
+
         // system types
         RegisterType(typeof(System.Numerics.Vector2), "Vector2",
                      InputDefaultValueCreator<System.Numerics.Vector2>,
