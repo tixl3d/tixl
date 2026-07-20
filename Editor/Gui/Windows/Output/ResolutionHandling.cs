@@ -1,8 +1,11 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Output;
 using T3.Core.Settings;
+using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.Serialization;
 
 namespace T3.Editor.Gui.Windows.Output;
@@ -40,6 +43,8 @@ internal static class ResolutionHandling
                                                     "##bla");
                 ImGui.PopID();
             }
+
+            DrawSetupOutputEntries(ref selectedResolution);
 
             CustomComponents.SeparatorLine();
             if(CustomComponents.DrawMenuItem(666, "Add"))
@@ -93,8 +98,113 @@ internal static class ResolutionHandling
                 return Resolutions[i];
         }
 
+        // Setup outputs are also selectable presets (restored by title from window state)
+        foreach (var resolution in _setupOutputResolutions.Values)
+        {
+            if (resolution.Title == title)
+                return resolution;
+        }
+
         return null;
     }
+
+    /// <summary>
+    /// The active Setup's outputs as selectable presets: picking one sources the context-requested
+    /// resolution from the output's canvas — the Default output makes today's implicit preview
+    /// resolution explicit; projector/display entries also carry the present-on-display binding.
+    /// </summary>
+    private static void DrawSetupOutputEntries(ref Resolution selectedResolution)
+    {
+        if (!ProjectSetups.TryGetActiveSetup(out var setup, out var machineConfig))
+            return;
+
+        if (setup.Outputs.Count == 0)
+            return;
+
+        CustomComponents.SeparatorLine();
+        CustomComponents.MenuGroupHeader("Setup Outputs");
+        for (var index = 0; index < setup.Outputs.Count; index++)
+        {
+            var output = setup.Outputs[index];
+            var resolution = GetOrUpdateSetupResolution(output);
+
+            ImGui.PushID(output.Id.GetHashCode());
+            var binding = machineConfig.TryGetBinding(output.Id);
+            var label = binding == null
+                            ? $"{resolution.Title}  ·  {output.CanvasResolution.Width}×{output.CanvasResolution.Height}"
+                            : $"{resolution.Title}  →  Display {binding.DisplayIndex + 1}";
+
+            if (CustomComponents.DrawMenuItem(1000 + index, label, isChecked: resolution == selectedResolution))
+            {
+                selectedResolution = resolution;
+            }
+
+            var isBindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
+            if (isBindable)
+            {
+                CustomComponents.ContextMenuForItem(() => DrawBindingMenuItems(output, machineConfig),
+                                                    "Present on...");
+            }
+
+            ImGui.PopID();
+        }
+    }
+
+    private static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)
+    {
+        var screens = System.Windows.Forms.Screen.AllScreens;
+        var binding = machineConfig.TryGetBinding(output.Id);
+        for (var screenIndex = 0; screenIndex < screens.Length; screenIndex++)
+        {
+            var screen = screens[screenIndex];
+            var isBound = binding != null && binding.DisplayIndex == screenIndex;
+            var label = $"Fullscreen on Display {screenIndex + 1} ({screen.Bounds.Width}×{screen.Bounds.Height})";
+            if (CustomComponents.DrawMenuItem(screenIndex, label, isChecked: isBound))
+            {
+                machineConfig.Bind(new DeviceBinding
+                                       {
+                                           OutputId = output.Id,
+                                           DisplayName = screen.DeviceName,
+                                           DisplayIndex = screenIndex,
+                                       });
+                ProjectSetups.SaveActive();
+                PresentOnDisplay(screenIndex);
+            }
+        }
+
+        if (binding != null)
+        {
+            CustomComponents.SeparatorLine();
+            if (CustomComponents.DrawMenuItem(999, "Stop presenting"))
+            {
+                machineConfig.Unbind(output.Id);
+                ProjectSetups.SaveActive();
+                WindowManager.ShowSecondaryRenderWindow = false;
+            }
+        }
+    }
+
+    private static void PresentOnDisplay(int screenIndex)
+    {
+        WindowManager.ShowSecondaryRenderWindow = true;
+        ProgramWindows.Viewer.SetFullScreen(screenIndex);
+    }
+
+    private static Resolution GetOrUpdateSetupResolution(OutputDefinition output)
+    {
+        if (!_setupOutputResolutions.TryGetValue(output.Id, out var resolution))
+        {
+            resolution = new Resolution(output.Name, output.CanvasResolution.Width, output.CanvasResolution.Height);
+            _setupOutputResolutions[output.Id] = resolution;
+        }
+
+        // Keep title/size in sync — outputs get renamed and re-configured in the setup
+        resolution.Title = output.Name;
+        resolution.Size = output.CanvasResolution;
+        return resolution;
+    }
+
+    private static readonly Dictionary<Guid, Resolution> _setupOutputResolutions = new();
 
     private static Resolution _resolutionForEdit = new("untitled", 256, 256);
 
