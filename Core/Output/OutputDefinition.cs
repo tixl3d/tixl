@@ -36,6 +36,12 @@ public sealed class OutputDefinition
         /// <summary>Mean reprojection error in pixels of the last solve; 0 = never solved.</summary>
         public float ResidualPx;
 
+        /// <summary>Manual camera used until a calibration solve fills <see cref="Pose"/>/<see cref="Lens"/>:
+        /// a look-at (position → target) with a vertical field of view, so the render path works before calibration.</summary>
+        public System.Numerics.Vector3 ManualPosition = new(0, 1, 3);
+        public System.Numerics.Vector3 ManualTarget = System.Numerics.Vector3.Zero;
+        public float ManualFovYDegrees = 45;
+
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
@@ -50,6 +56,10 @@ public sealed class OutputDefinition
                 writer.WriteValue("FieldOfViewY", lens.FieldOfViewY);
                 writer.WriteVector2("LensShift", lens.LensShift);
             }
+
+            writer.WriteVector3("ManualPosition", ManualPosition);
+            writer.WriteVector3("ManualTarget", ManualTarget);
+            writer.WriteValue("ManualFovY", ManualFovYDegrees);
 
             writer.WritePropertyName("CalibrationPoints");
             writer.WriteStartArray();
@@ -70,6 +80,9 @@ public sealed class OutputDefinition
                              {
                                  CalibrationPoints = token.ReadListSafe("CalibrationPoints", CalibrationPoint.ReadFromJson),
                                  ResidualPx = token.ReadValueSafe("ResidualPx", 0f),
+                                 ManualPosition = OutputJson.ReadVector3(token["ManualPosition"], new System.Numerics.Vector3(0, 1, 3)),
+                                 ManualTarget = OutputJson.ReadVector3(token["ManualTarget"]),
+                                 ManualFovYDegrees = token.ReadValueSafe("ManualFovY", 45f),
                              };
 
             if (token["Position"] != null && token["Orientation"] != null)

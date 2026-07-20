@@ -45,6 +45,7 @@ internal sealed class SetupOutputView
         _focusedSurfaceId = focusedSurfaceId;
 
         DrawHeader(setup, output, outputId);
+        DrawCameraEditor(output);
 
         _canvas.UpdateCanvas(out _);
 
@@ -187,6 +188,25 @@ internal sealed class SetupOutputView
                                                 "Drops a centered corner-pin quad you can then drag into place.");
             ImGui.PopID();
         }
+    }
+
+    // Manual projector camera used by the UseProjectorCam op (Shape 2), until calibration provides a
+    // solved pose/lens. Only meaningful for projector/display outputs; collapsed by default.
+    private static void DrawCameraEditor(OutputDefinition output)
+    {
+        if (output.Kind is not (OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display))
+            return;
+
+        if (!ImGui.CollapsingHeader("Projector Camera"))
+            return;
+
+        var camera = output.Camera ??= new OutputDefinition.ProjectorCamera();
+        var changed = false;
+        changed |= ImGui.DragFloat3("Position", ref camera.ManualPosition, 0.02f);
+        changed |= ImGui.DragFloat3("Target", ref camera.ManualTarget, 0.02f);
+        changed |= ImGui.DragFloat("Field of View", ref camera.ManualFovYDegrees, 0.2f, 1f, 179f);
+        if (changed)
+            OutputSetupHandling.SaveActive();
     }
 
     private CustomComponents.ButtonStates ModeButtonState(EditMode mode)

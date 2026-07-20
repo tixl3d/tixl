@@ -155,6 +155,20 @@ internal static class OutputManager
             }
         }
 
+        // No mapped surfaces — full-frame a sink bound to the output (Shape 2: the content was rendered
+        // through the projector camera, so it already maps 1:1 to the output; no corner-pin warp).
+        if (_drawItems.Count == 0)
+        {
+            var sink = FindAnySink(outputId);
+            var content = sink?.GetContent(_context);
+            if (content is { IsDisposed: false })
+            {
+                var srv = SrvManager.GetSrvForTexture(content);
+                if (srv is { IsDisposed: false })
+                    _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), _fullSourceQuad, sink!.GetColor(_context)));
+            }
+        }
+
         if (_drawItems.Count == 0)
             return null;
 
@@ -219,6 +233,18 @@ internal static class OutputManager
         }
 
         return outputScoped;
+    }
+
+    /// <summary>Any sink bound to the output (used for the full-frame path when there are no surfaces).</summary>
+    private static IOutputSink? FindAnySink(Guid outputId)
+    {
+        foreach (var sink in OutputSinkRegistry.Sinks)
+        {
+            if (sink.GetOutputId(_context!) == outputId)
+                return sink;
+        }
+
+        return null;
     }
 
     private static void SetSourceQuad(Vector2[] source)
@@ -358,6 +384,7 @@ internal static class OutputManager
 
     private static readonly Vector2[] _unitQuad = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
     private static readonly Vector2[] _fullSourceQuad = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
+    private static readonly Homography _fullscreenNdc = new() { M11 = 2, M13 = -1, M22 = -2, M23 = 1, M33 = 1 };
 
     private static readonly Dictionary<Guid, Target> _targets = new();
     private static readonly List<DrawItem> _drawItems = [];
