@@ -26,6 +26,10 @@ internal static class OutputSetupHandling
         var entry = GetOrLoadEntry(package.Folder);
         setup = entry.Setup;
         machineConfig = entry.MachineConfig;
+
+        // Publish for operators — they only reference Core and resolve GUIDs via ActiveSetup
+        ActiveSetup.Current = setup;
+        ActiveSetup.Machine = machineConfig;
         return true;
     }
 

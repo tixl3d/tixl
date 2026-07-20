@@ -80,7 +80,9 @@ next to SURFACES, then click between the new surface and the Default output in
 the outline.
 
 **Expected:**
-- Each click shows an info card in the view area (name, kind, size/resolution).
+- Selecting the surface shows an info card in the view area (name, kind, size).
+- Selecting the Default output opens its editing canvas instead (the output frame; see
+  the `corner-pin-editing` set).
 - The new surface was saved to the setup file (check the JSON).
 - With nothing selected yet, the view shows "Select an entity in the setup panel".
 

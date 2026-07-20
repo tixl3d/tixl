@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60"/*OutputLayer*/,
+  "Description": "Renders a texture onto a setup surface through its corner-pin output mapping.\n\nThe surface and output references resolve against the project's active output setup. The texture is drawn as a perspective-warped quad into the currently bound render target; without a matching mapping it falls back to drawing fullscreen.\n\nAKA: corner pin, perspective, map, warp, projector output",
+  "InputUis": [
+    {
+      "InputId": "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942"/*Texture*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "5c7e19a4-8b3d-4f6e-a201-93d5c4b7f180"/*OutputRef*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Usage": "OutputSetupEntities"
+    },
+    {
+      "InputId": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*SurfaceRef*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Usage": "OutputSetupEntities"
+    },
+    {
+      "InputId": "1d83a6f2-49c0-4e17-8b5d-c72e90fa4b36"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "3f9d2c68-1e57-4a0b-9c31-d6b84fa5c7e2"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

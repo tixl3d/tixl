@@ -37,7 +37,14 @@ internal sealed class OutputSetupModeView
     {
         if (TryGetShownEntity(out var entityKind, out var entityId))
         {
-            SetupPanel.DrawEntityCard(entityKind, entityId);
+            if (entityKind == SetupEntitySelection.EntityKind.Output)
+            {
+                _outputView.Draw(entityId);
+            }
+            else
+            {
+                SetupPanel.DrawEntityCard(entityKind, entityId);
+            }
         }
         else
         {
@@ -105,4 +112,5 @@ internal sealed class OutputSetupModeView
     private const string ViewModePopupId = "##outputViewMode";
     private bool _showSetupPanel;
     private readonly SetupEntitySelection _entitySelection = new();
+    private readonly SetupOutputView _outputView = new();
 }
