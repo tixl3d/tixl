@@ -32,12 +32,15 @@ internal static class SetupPanel
             DrawEntityRow(selection, SetupEntitySelection.EntityKind.ReferenceImage, image.Id, image.Name, null);
         }
 
-        DrawSection("SURFACES", "##addSurface", selection, AddSurface);
-        for (var i = 0; i < setup.Surfaces.Count; i++)
+        // Surfaces are shown nested under the output(s) they map to — a surface used on several
+        // outputs (edge blending) appears under each, which makes its usage visible.
+        DrawSection("OUTPUTS", "##addOutput", selection, AddOutput);
+        for (var i = 0; i < setup.Outputs.Count; i++)
         {
-            var surface = setup.Surfaces[i];
-            DrawEntityRow(selection, SetupEntitySelection.EntityKind.Surface, surface.Id, surface.Name, null);
+            DrawOutputWithSurfaces(selection, setup, machineConfig, setup.Outputs[i]);
         }
+
+        DrawUnassignedSurfaces(selection, setup);
 
         DrawSection("PROPS", "##addProp", selection, AddProp);
         for (var i = 0; i < setup.Props.Count; i++)
@@ -45,14 +48,58 @@ internal static class SetupPanel
             var prop = setup.Props[i];
             DrawEntityRow(selection, SetupEntitySelection.EntityKind.Prop, prop.Id, prop.Kind, null);
         }
+    }
 
-        DrawSection("OUTPUTS", "##addOutput", selection, AddOutput);
-        for (var i = 0; i < setup.Outputs.Count; i++)
+    private static void DrawOutputWithSurfaces(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig, OutputDefinition output)
+    {
+        var binding = machineConfig.TryGetBinding(output.Id);
+        var status = binding == null ? null : $"Display {binding.DisplayIndex + 1}";
+        var outputId = output.Id;
+        DrawEntityRow(selection, SetupEntitySelection.EntityKind.Output, output.Id, output.Name, status,
+                      onDelete: () => DeleteOutput(setup, machineConfig, outputId));
+
+        ImGui.Indent(12 * T3Ui.UiScaleFactor);
+        for (var i = 0; i < setup.Surfaces.Count; i++)
         {
-            var output = setup.Outputs[i];
-            var binding = machineConfig.TryGetBinding(output.Id);
-            var status = binding == null ? "unbound" : $"Display {binding.DisplayIndex + 1}";
-            DrawEntityRow(selection, SetupEntitySelection.EntityKind.Output, output.Id, output.Name, status);
+            var surface = setup.Surfaces[i];
+            if (!surface.OutputMappings.Exists(m => m.OutputId == output.Id))
+                continue;
+
+            var surfaceId = surface.Id;
+            DrawEntityRow(selection, SetupEntitySelection.EntityKind.Surface, surface.Id, surface.Name, null,
+                          onDelete: () => DeleteSurface(setup, surfaceId),
+                          onRemoveFromOutput: () => RemoveMapping(setup, surfaceId, outputId));
+        }
+
+        ImGui.PushID(output.Id.GetHashCode());
+        ImGui.Indent(8 * T3Ui.UiScaleFactor);
+        if (ImGui.SmallButton("+ Surface"))
+        {
+            AddSurfaceToOutput(setup, output, selection);
+            OutputSetupHandling.SaveActive();
+        }
+
+        ImGui.Unindent(8 * T3Ui.UiScaleFactor);
+        ImGui.PopID();
+        ImGui.Unindent(12 * T3Ui.UiScaleFactor);
+    }
+
+    private static void DrawUnassignedSurfaces(SetupEntitySelection selection, Setup setup)
+    {
+        if (!setup.Surfaces.Exists(s => s.OutputMappings.Count == 0))
+            return;
+
+        FormInputs.AddVerticalSpace(6);
+        CustomComponents.StylizedText("UNASSIGNED SURFACES", Fonts.FontSmall, UiColors.TextMuted);
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            var surface = setup.Surfaces[i];
+            if (surface.OutputMappings.Count != 0)
+                continue;
+
+            var surfaceId = surface.Id;
+            DrawEntityRow(selection, SetupEntitySelection.EntityKind.Surface, surface.Id, surface.Name, null,
+                          onDelete: () => DeleteSurface(setup, surfaceId));
         }
     }
 
@@ -182,7 +229,8 @@ internal static class SetupPanel
         }
     }
 
-    private static void DrawEntityRow(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id, string name, string? status)
+    private static void DrawEntityRow(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id, string name, string? status,
+                                      Action? onDelete = null, Action? onRemoveFromOutput = null)
     {
         ImGui.PushID(id.GetHashCode());
         var isSelected = selection.IsSelected(kind, id);
@@ -191,6 +239,19 @@ internal static class SetupPanel
         if (ImGui.Selectable(label, isSelected))
         {
             selection.Select(kind, id);
+        }
+
+        if (onDelete != null || onRemoveFromOutput != null)
+        {
+            CustomComponents.ContextMenuForItem(() =>
+                                                {
+                                                    if (onRemoveFromOutput != null && CustomComponents.DrawMenuItem(1, "Remove from output"))
+                                                        onRemoveFromOutput();
+
+                                                    if (onDelete != null && CustomComponents.DrawMenuItem(2, "Delete"))
+                                                        onDelete();
+                                                },
+                                                null);
         }
 
         if (status != null)
@@ -213,14 +274,51 @@ internal static class SetupPanel
         selection.Select(SetupEntitySelection.EntityKind.ReferenceImage, image.Id);
     }
 
-    private static void AddSurface(SetupEntitySelection selection)
+    private static void AddSurfaceToOutput(Setup setup, OutputDefinition output, SetupEntitySelection selection)
     {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
-
         var surface = new Surface { Name = $"Surface {setup.Surfaces.Count + 1}" };
+        surface.OutputMappings.Add(CreateDefaultMapping(output));
         setup.Surfaces.Add(surface);
         selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
+    }
+
+    private static Surface.OutputMapping CreateDefaultMapping(OutputDefinition output)
+    {
+        float w = Math.Max(1, output.CanvasResolution.Width);
+        float h = Math.Max(1, output.CanvasResolution.Height);
+        float x0 = w * 0.2f, x1 = w * 0.8f, y0 = h * 0.2f, y1 = h * 0.8f;
+        return new Surface.OutputMapping
+                   {
+                       OutputId = output.Id,
+                       Quad = [new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1)],
+                   };
+    }
+
+    private static void DeleteSurface(Setup setup, Guid surfaceId)
+    {
+        setup.Surfaces.RemoveAll(s => s.Id == surfaceId);
+        OutputSetupHandling.SaveActive();
+    }
+
+    private static void RemoveMapping(Setup setup, Guid surfaceId, Guid outputId)
+    {
+        setup.Surfaces.Find(s => s.Id == surfaceId)?.OutputMappings.RemoveAll(m => m.OutputId == outputId);
+        OutputSetupHandling.SaveActive();
+    }
+
+    // Deleting an output cascades: drop every surface's mapping onto it, unbind the display, and stop
+    // presenting it. Surfaces left without a mapping fall into the "unassigned" group, not lost.
+    private static void DeleteOutput(Setup setup, MachineConfig machineConfig, Guid outputId)
+    {
+        setup.Outputs.RemoveAll(o => o.Id == outputId);
+        foreach (var surface in setup.Surfaces)
+            surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
+
+        machineConfig.Unbind(outputId);
+        if (OutputManager.PresentedOutputId == outputId)
+            OutputManager.PresentedOutputId = Guid.Empty;
+
+        OutputSetupHandling.SaveActive();
     }
 
     private static void AddProp(SetupEntitySelection selection)

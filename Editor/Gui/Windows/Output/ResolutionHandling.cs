@@ -110,11 +110,10 @@ internal static class ResolutionHandling
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
             return;
 
-        if (!ImGui.BeginMenu("Output Binding"))
-            return;
+        CustomComponents.DrawMenuGroupLabel("Outputs");
 
         if (setup.Outputs.Count == 0)
-            ImGui.TextDisabled("No outputs in this setup");
+            CustomComponents.DrawMenuItem(999, "No outputs in this setup", isEnabled: false);
 
         for (var index = 0; index < setup.Outputs.Count; index++)
         {
@@ -125,10 +124,9 @@ internal static class ResolutionHandling
                             ? $"{output.Name}  ·  {output.CanvasResolution.Width}×{output.CanvasResolution.Height}"
                             : $"{output.Name}  →  Display {binding.DisplayIndex + 1}";
 
-            ImGui.PushID(output.Id.GetHashCode());
             if (isBindable)
             {
-                if (ImGui.BeginMenu(label))
+                if (CustomComponents.DrawSubMenu(1000 + index, label))
                 {
                     DrawBindingMenuItems(output, machineConfig);
                     ImGui.EndMenu();
@@ -137,13 +135,9 @@ internal static class ResolutionHandling
             else
             {
                 // Default/format outputs are render targets, not something you present to a display.
-                ImGui.MenuItem(label, false);
+                CustomComponents.DrawMenuItem(1000 + index, label, isEnabled: false);
             }
-
-            ImGui.PopID();
         }
-
-        ImGui.EndMenu();
     }
 
     private static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)

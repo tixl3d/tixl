@@ -27,6 +27,7 @@ internal sealed partial class OutputWindow
     private void DrawOutputMenuExtras()
     {
         ResolutionHandling.DrawOutputBindingMenu();
+        CustomComponents.SeparatorLine();
         _setupMode.DrawSetupPanelMenuItem();
     }
 

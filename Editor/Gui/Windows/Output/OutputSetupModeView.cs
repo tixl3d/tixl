@@ -55,6 +55,8 @@ internal sealed class OutputSetupModeView
         {
             if (entityKind == SetupEntitySelection.EntityKind.Output)
                 _outputView.Draw(entityId);
+            else if (entityKind == SetupEntitySelection.EntityKind.Surface && TryGetSurfaceOutput(entityId, out var surfaceOutputId))
+                _outputView.Draw(surfaceOutputId, entityId);
             else
                 SetupPanel.DrawEntityCard(entityKind, entityId);
         }
@@ -73,8 +75,23 @@ internal sealed class OutputSetupModeView
     /// <summary>The "Show Setup Panel" toggle — hung inside the output window's breadcrumb menu.</summary>
     public void DrawSetupPanelMenuItem()
     {
-        if (ImGui.MenuItem("Show Setup Panel", "", _showSetupPanel))
+        if (CustomComponents.DrawMenuItem(1, "Show Setup Panel", isChecked: _showSetupPanel))
             _showSetupPanel = !_showSetupPanel;
+    }
+
+    /// <summary>The output a selected surface should be shown on — its first mapping's output.</summary>
+    private static bool TryGetSurfaceOutput(Guid surfaceId, out Guid outputId)
+    {
+        outputId = Guid.Empty;
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return false;
+
+        var surface = setup.Surfaces.Find(s => s.Id == surfaceId);
+        if (surface == null || surface.OutputMappings.Count == 0)
+            return false;
+
+        outputId = surface.OutputMappings[0].OutputId;
+        return true;
     }
 
     private bool TryGetShownEntity(out SetupEntitySelection.EntityKind kind, out Guid id)

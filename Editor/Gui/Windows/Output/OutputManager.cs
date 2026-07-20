@@ -79,6 +79,36 @@ internal static class OutputManager
         }
     }
 
+    /// <summary>
+    /// A representative source-content texture for the output — the first surface's content. Used as the
+    /// backdrop of the content-slice editor. (Shared-content case; surfaces bound to different content
+    /// still resolve their own slices, they just share this one backdrop.)
+    /// </summary>
+    public static Texture2D? TryGetOutputContent(Guid outputId)
+    {
+        var setup = ActiveSetup.Current;
+        var output = ActiveSetup.TryFindOutput(outputId);
+        if (setup == null || output == null)
+            return null;
+
+        _context ??= new EvaluationContext();
+        _context.Reset();
+        _context.RequestedResolution = output.CanvasResolution;
+
+        DirtyFlag.GlobalInvalidationTick++;
+        foreach (var sink in OutputSinkRegistry.Sinks)
+            sink.InvalidateContent();
+
+        foreach (var surface in setup.Surfaces)
+        {
+            var content = FindSink(outputId, surface.Id)?.GetContent(_context);
+            if (content is { IsDisposed: false })
+                return content;
+        }
+
+        return null;
+    }
+
     /// <summary>Renders the output's composite, or null if nothing is bound to it.</summary>
     public static Texture2D? RenderOutput(Guid outputId)
     {
