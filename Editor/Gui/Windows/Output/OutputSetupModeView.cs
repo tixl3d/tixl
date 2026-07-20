@@ -1,5 +1,7 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.Operator;
+using T3.Core.Output;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.ProjectHandling;
 using Vector2 = System.Numerics.Vector2;
@@ -7,16 +9,13 @@ using Vector2 = System.Numerics.Vector2;
 namespace T3.Editor.Gui.Windows.Output;
 
 /// <summary>
-/// The setup-mode side of an output window: whether the window shows setup entities instead
-/// of an operator output, the window-owned entity selection, the side panel, and the entity
-/// view drawing. Owning the selection makes every setup-mode window implicitly "pinned";
-/// no extra lock step. One instance per OutputWindow.
+/// The output-editing side of an output window. There is no explicit Operator/Setup mode — the window
+/// follows focus: a focused <see cref="IOutputSink"/> (SendToOutput) op shows its output's editing
+/// canvas, and a picked panel entity shows that entity. Selecting any op in the graph drops a panel
+/// edit (graph selection wins). Owns the side panel and the window's entity selection. One per OutputWindow.
 /// </summary>
 internal sealed class OutputSetupModeView
 {
-    /// <summary>When active, the window shows the selected setup entity instead of the operator output.</summary>
-    public bool IsActive { get; private set; }
-
     /// <summary>Draws the setup outline side panel when enabled. Call first — it splits the window horizontally.</summary>
     public void DrawSidePanel()
     {
@@ -32,67 +31,50 @@ internal sealed class OutputSetupModeView
         ImGui.SameLine();
     }
 
-    /// <summary>Draws the selected entity (or a prompt) plus the minimal entity toolbar.</summary>
-    public void DrawEntityView(bool hideToolbar)
+    /// <summary>
+    /// Draws an output-editing view if one applies to the current focus, and returns true; returns false
+    /// when the caller should draw the operator output instead. A picked panel entity takes precedence
+    /// over a focused sink; both are dropped when the focused op changes (graph selection wins).
+    /// </summary>
+    public bool TryDrawEditingView(Instance? focusedInstance, EvaluationContext context)
     {
+        var focusedId = focusedInstance?.SymbolChildId ?? Guid.Empty;
+        if (focusedId != _lastFocusedId)
+        {
+            _entitySelection.Clear();
+
+            // The panel follows the OE-editing context: a focused sink opens it (its surfaces/outputs are
+            // at hand); selecting any other op — or clicking the graph background — closes it. Only on the
+            // transition, so it can still be toggled manually while the focus stays put.
+            _showSetupPanel = focusedInstance is IOutputSink;
+
+            _lastFocusedId = focusedId;
+        }
+
         if (TryGetShownEntity(out var entityKind, out var entityId))
         {
             if (entityKind == SetupEntitySelection.EntityKind.Output)
-            {
                 _outputView.Draw(entityId);
-            }
             else
-            {
                 SetupPanel.DrawEntityCard(entityKind, entityId);
-            }
         }
         else
         {
-            CustomComponents.EmptyWindowMessage("Select an entity in the setup panel");
+            var sinkOutputId = (focusedInstance as IOutputSink)?.GetOutputId(context) ?? Guid.Empty;
+            if (sinkOutputId == Guid.Empty)
+                return false;
+
+            _outputView.Draw(sinkOutputId);
         }
 
-        if (!hideToolbar)
-        {
-            ImGui.SetCursorPos(ImGui.GetCursorStartPos());
-            CustomComponents.PushToolbarIconBackground();
-            DrawViewModeMenu();
-            CustomComponents.PopToolbarIconBackground();
-        }
+        return true;
     }
 
-    /// <summary>The Output Mode menu — also drawn by the operator toolbar.</summary>
-    public void DrawViewModeMenu()
+    /// <summary>The "Show Setup Panel" toggle — hung inside the output window's breadcrumb menu.</summary>
+    public void DrawSetupPanelMenuItem()
     {
-        if (CustomComponents.StateButton("View", CustomComponents.ButtonStates.Default))
-        {
-            ImGui.OpenPopup(ViewModePopupId);
-        }
-
-        if (!ImGui.BeginPopup(ViewModePopupId))
-            return;
-
-        CustomComponents.MenuGroupHeader("Output Mode");
-        if (CustomComponents.DrawMenuItem(1, "Operator", isChecked: !IsActive))
-        {
-            IsActive = false;
-        }
-
-        if (CustomComponents.DrawMenuItem(2, "Setup", isChecked: IsActive))
-        {
-            IsActive = true;
-            _showSetupPanel = true;   // the panel is the entity picker; without it the mode is a dead end
-        }
-        CustomComponents.TooltipForLastItem("Shows setup entities picked in this window's panel",
-                                            "Each window browses independently; switch back to Operator for the graph output.");
-
-        CustomComponents.SeparatorLine();
-
-        if (CustomComponents.DrawMenuItem(4, "Show Setup Panel", isChecked: _showSetupPanel))
-        {
+        if (ImGui.MenuItem("Show Setup Panel", "", _showSetupPanel))
             _showSetupPanel = !_showSetupPanel;
-        }
-
-        ImGui.EndPopup();
     }
 
     private bool TryGetShownEntity(out SetupEntitySelection.EntityKind kind, out Guid id)
@@ -100,17 +82,14 @@ internal sealed class OutputSetupModeView
         kind = SetupEntitySelection.EntityKind.None;
         id = Guid.Empty;
 
-        if (!IsActive)
-            return false;
-
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return false;
 
         return _entitySelection.TryResolve(setup, out kind, out id);
     }
 
-    private const string ViewModePopupId = "##outputViewMode";
     private bool _showSetupPanel;
+    private Guid _lastFocusedId;
     private readonly SetupEntitySelection _entitySelection = new();
     private readonly SetupOutputView _outputView = new();
 }

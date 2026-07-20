@@ -44,8 +44,6 @@ internal static class ResolutionHandling
                 ImGui.PopID();
             }
 
-            DrawSetupOutputEntries(ref selectedResolution);
-
             CustomComponents.SeparatorLine();
             if(CustomComponents.DrawMenuItem(666, "Add"))
             {
@@ -98,56 +96,54 @@ internal static class ResolutionHandling
                 return Resolutions[i];
         }
 
-        // Setup outputs are also selectable presets (restored by title from window state)
-        foreach (var resolution in _setupOutputResolutions.Values)
-        {
-            if (resolution.Title == title)
-                return resolution;
-        }
-
         return null;
     }
 
     /// <summary>
-    /// The active Setup's outputs as selectable presets: picking one sources the context-requested
-    /// resolution from the output's canvas — the Default output makes today's implicit preview
-    /// resolution explicit; projector/display entries also carry the present-on-display binding.
+    /// The active setup's outputs and their present-on-display bindings, hung in the output window's
+    /// breadcrumb menu. Binding a projector/display presents it fullscreen; the output manager then
+    /// composites and drives it. This lives here (not in the resolution selector) — an output target
+    /// is not a view resolution.
     /// </summary>
-    private static void DrawSetupOutputEntries(ref Resolution selectedResolution)
+    public static void DrawOutputBindingMenu()
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
             return;
 
-        if (setup.Outputs.Count == 0)
+        if (!ImGui.BeginMenu("Output Binding"))
             return;
 
-        CustomComponents.SeparatorLine();
-        CustomComponents.MenuGroupHeader("Setup Outputs");
+        if (setup.Outputs.Count == 0)
+            ImGui.TextDisabled("No outputs in this setup");
+
         for (var index = 0; index < setup.Outputs.Count; index++)
         {
             var output = setup.Outputs[index];
-            var resolution = GetOrUpdateSetupResolution(output);
+            var binding = machineConfig.TryGetBinding(output.Id);
+            var isBindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
+            var label = binding == null
+                            ? $"{output.Name}  ·  {output.CanvasResolution.Width}×{output.CanvasResolution.Height}"
+                            : $"{output.Name}  →  Display {binding.DisplayIndex + 1}";
 
             ImGui.PushID(output.Id.GetHashCode());
-            var binding = machineConfig.TryGetBinding(output.Id);
-            var label = binding == null
-                            ? $"{resolution.Title}  ·  {output.CanvasResolution.Width}×{output.CanvasResolution.Height}"
-                            : $"{resolution.Title}  →  Display {binding.DisplayIndex + 1}";
-
-            if (CustomComponents.DrawMenuItem(1000 + index, label, isChecked: resolution == selectedResolution))
-            {
-                selectedResolution = resolution;
-            }
-
-            var isBindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
             if (isBindable)
             {
-                CustomComponents.ContextMenuForItem(() => DrawBindingMenuItems(output, machineConfig),
-                                                    "Present on...");
+                if (ImGui.BeginMenu(label))
+                {
+                    DrawBindingMenuItems(output, machineConfig);
+                    ImGui.EndMenu();
+                }
+            }
+            else
+            {
+                // Default/format outputs are render targets, not something you present to a display.
+                ImGui.MenuItem(label, false);
             }
 
             ImGui.PopID();
         }
+
+        ImGui.EndMenu();
     }
 
     private static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)
@@ -192,22 +188,6 @@ internal static class ResolutionHandling
         WindowManager.ShowSecondaryRenderWindow = true;
         ProgramWindows.Viewer.SetFullScreen(screenIndex);
     }
-
-    private static Resolution GetOrUpdateSetupResolution(OutputDefinition output)
-    {
-        if (!_setupOutputResolutions.TryGetValue(output.Id, out var resolution))
-        {
-            resolution = new Resolution(output.Name, output.CanvasResolution.Width, output.CanvasResolution.Height);
-            _setupOutputResolutions[output.Id] = resolution;
-        }
-
-        // Keep title/size in sync — outputs get renamed and re-configured in the setup
-        resolution.Title = output.Name;
-        resolution.Size = output.CanvasResolution;
-        return resolution;
-    }
-
-    private static readonly Dictionary<Guid, Resolution> _setupOutputResolutions = new();
 
     private static Resolution _resolutionForEdit = new("untitled", 256, 256);
 

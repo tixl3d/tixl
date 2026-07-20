@@ -23,6 +23,13 @@ namespace T3.Editor.Gui.Windows.Output;
 
 internal sealed partial class OutputWindow
 {
+    /// <summary>Output-specific items appended to the breadcrumb menu: display binding + the setup panel toggle.</summary>
+    private void DrawOutputMenuExtras()
+    {
+        ResolutionHandling.DrawOutputBindingMenu();
+        _setupMode.DrawSetupPanelMenuItem();
+    }
+
     private void DrawToolbar(Type? drawnType)
     {
         // Set cursor to top of the window
@@ -37,9 +44,7 @@ internal sealed partial class OutputWindow
         // Keep filled backgrounds so the toolbar reads as a continuous bar.
         CustomComponents.PushToolbarIconBackground();
 
-        Pinning.DrawPinning();
-
-        _setupMode.DrawViewModeMenu();
+        Pinning.DrawPinning(_drawOutputMenuExtras);
         ImGui.SameLine();
 
         if (CustomComponents.StateButton("1:1",

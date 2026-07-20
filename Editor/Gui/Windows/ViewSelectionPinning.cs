@@ -20,7 +20,7 @@ namespace T3.Editor.Gui.Windows;
 /// </summary>
 internal sealed class ViewSelectionPinning
 {
-    public void DrawPinning()
+    public void DrawPinning(Action? drawExtraMenuItems = null)
     {
         if (!TryGetPinnedOrSelectedInstance(out var pinnedOrSelectedInstance, out var canvas))
         {
@@ -185,8 +185,12 @@ internal sealed class ViewSelectionPinning
                 }
             }
 
-            ImGui.Separator();
-            ImGui.MenuItem("Show hovered outputs", false);
+            if (drawExtraMenuItems != null)
+            {
+                ImGui.Separator();
+                drawExtraMenuItems();
+            }
+
             ImGui.PopStyleVar();
             ImGui.EndCombo();
         }

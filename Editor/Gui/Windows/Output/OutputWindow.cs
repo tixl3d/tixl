@@ -36,6 +36,7 @@ internal sealed partial class OutputWindow : Window
 
         _instanceCounter++;
         _camSelectionHandling = new CameraSelectionHandling();
+        _drawOutputMenuExtras = DrawOutputMenuExtras;
         OutputWindowInstances.Add(this);
     }
     
@@ -120,9 +121,17 @@ internal sealed partial class OutputWindow : Window
 
             Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
 
-            if (_setupMode.IsActive)
+            if (_setupMode.TryDrawEditingView(drawnInstance, EvaluationContext))
             {
-                _setupMode.DrawEntityView(hideToolbar: SkillTraining.IsInPlayMode);
+                // Output-editing view (focused sink or picked panel entity) was drawn — give it the
+                // breadcrumb so the setup panel and op selection stay reachable while editing.
+                if (!SkillTraining.IsInPlayMode)
+                {
+                    ImGui.SetCursorPos(ImGui.GetCursorStartPos());
+                    CustomComponents.PushToolbarIconBackground();
+                    Pinning.DrawPinning(_drawOutputMenuExtras);
+                    CustomComponents.PopToolbarIconBackground();
+                }
             }
             else if (graphCanvas != null)
             {
@@ -187,6 +196,7 @@ internal sealed partial class OutputWindow : Window
     internal readonly EvaluationContext EvaluationContext = new();
     private readonly ImageOutputCanvas _imageCanvas = new();
     private readonly CameraSelectionHandling _camSelectionHandling;
+    private readonly System.Action _drawOutputMenuExtras;
     private static int _instanceCounter;
     private ResolutionHandling.Resolution _selectedResolution = ResolutionHandling.DefaultResolution;
     internal Int2 RequestedResolution { get; private set; }
