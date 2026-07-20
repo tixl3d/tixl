@@ -57,6 +57,8 @@ internal sealed class OutputSetupModeView
                 _outputView.Draw(entityId);
             else if (entityKind == SetupEntitySelection.EntityKind.Surface && TryGetSurfaceOutput(entityId, out var surfaceOutputId))
                 _outputView.Draw(surfaceOutputId, entityId);
+            else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage)
+                _referenceImageView.Draw(entityId);
             else
                 SetupPanel.DrawEntityCard(entityKind, entityId);
         }
@@ -109,4 +111,5 @@ internal sealed class OutputSetupModeView
     private Guid _lastFocusedId;
     private readonly SetupEntitySelection _entitySelection = new();
     private readonly SetupOutputView _outputView = new();
+    private readonly ReferenceImageView _referenceImageView = new();
 }

@@ -215,6 +215,54 @@ internal static class OutputManager
         return target.Texture;
     }
 
+    /// <summary>
+    /// Warps a texture (sampled full) into a scratch render target so its corners land on
+    /// <paramref name="destQuad"/> (in <paramref name="targetSize"/> pixels). Used by the reference-image
+    /// straighten transition; returns the warped texture (reused across calls) or null.
+    /// </summary>
+    public static Texture2D? RenderWarpedTexture(Texture2D? source, Vector2[] destQuad, Int2 targetSize)
+    {
+        if (source is not { IsDisposed: false })
+            return null;
+
+        var srv = SrvManager.GetSrvForTexture(source);
+        if (srv is not { IsDisposed: false })
+            return null;
+
+        if (!TryComputeNdcHomography(destQuad, targetSize, out var homography))
+            return null;
+
+        var target = GetOrCreateTarget(_scratchTargetId, targetSize);
+        if (target == null || !EnsureShaders())
+            return null;
+
+        var deviceContext = ResourceManager.Device.ImmediateContext;
+        deviceContext.OutputMerger.SetTargets(target.Rtv);
+        deviceContext.Rasterizer.SetViewport(new ViewportF(0, 0, target.Size.Width, target.Size.Height, 0f, 1f));
+        deviceContext.ClearRenderTargetView(target.Rtv, new RawColor4(0, 0, 0, 0));
+
+        deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+        deviceContext.InputAssembler.InputLayout = null;
+        deviceContext.VertexShader.Set(_vertexShaderResource!.Value);
+        deviceContext.GeometryShader.Set(null);
+        deviceContext.PixelShader.Set(_pixelShaderResource!.Value);
+        deviceContext.PixelShader.SetSampler(0, LinearSampler);
+        deviceContext.Rasterizer.State = CullNoneRasterizerState;
+        deviceContext.OutputMerger.BlendState = DefaultRenderingStates.DefaultBlendState;
+        deviceContext.OutputMerger.DepthStencilState = DefaultRenderingStates.DisabledDepthStencilState;
+
+        _shaderParams.Homography = homography;
+        _shaderParams.Color = Vector4.One;
+        SetSourceQuad(_fullSourceQuad);
+        ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
+        deviceContext.VertexShader.SetConstantBuffer(0, _paramBuffer);
+        deviceContext.PixelShader.SetConstantBuffer(0, _paramBuffer);
+        deviceContext.PixelShader.SetShaderResource(0, srv);
+        deviceContext.Draw(6, 0);
+        deviceContext.PixelShader.SetShaderResource(0, null);
+        return target.Texture;
+    }
+
     /// <summary>Sink bound to (output, surface): an exact surface match wins over an output-scoped sink.</summary>
     private static IOutputSink? FindSink(Guid outputId, Guid surfaceId)
     {
@@ -386,6 +434,7 @@ internal static class OutputManager
     private static readonly Vector2[] _fullSourceQuad = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
     private static readonly Homography _fullscreenNdc = new() { M11 = 2, M13 = -1, M22 = -2, M23 = 1, M33 = 1 };
 
+    private static readonly Guid _scratchTargetId = new("f1e2d3c4-b5a6-4788-9012-3456789abcde");
     private static readonly Dictionary<Guid, Target> _targets = new();
     private static readonly List<DrawItem> _drawItems = [];
 
