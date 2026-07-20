@@ -115,7 +115,7 @@ internal static class ResolutionHandling
     /// </summary>
     private static void DrawSetupOutputEntries(ref Resolution selectedResolution)
     {
-        if (!ProjectSetups.TryGetActiveSetup(out var setup, out var machineConfig))
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
             return;
 
         if (setup.Outputs.Count == 0)
@@ -167,7 +167,7 @@ internal static class ResolutionHandling
                                            DisplayName = screen.DeviceName,
                                            DisplayIndex = screenIndex,
                                        });
-                ProjectSetups.SaveActive();
+                OutputSetupHandling.SaveActive();
                 PresentOnDisplay(screenIndex);
             }
         }
@@ -178,7 +178,7 @@ internal static class ResolutionHandling
             if (CustomComponents.DrawMenuItem(999, "Stop presenting"))
             {
                 machineConfig.Unbind(output.Id);
-                ProjectSetups.SaveActive();
+                OutputSetupHandling.SaveActive();
                 WindowManager.ShowSecondaryRenderWindow = false;
             }
         }

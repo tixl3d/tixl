@@ -94,6 +94,17 @@ internal sealed class OutputWindow : Window
         // Sync copy-based fields to State every frame so saves always capture current values
         SyncCopyFieldsToState();
 
+        if (_showSetupPanel)
+        {
+            ImGui.BeginChild("##setupPanel",
+                             new Vector2(240 * T3Ui.UiScaleFactor, ImGui.GetWindowHeight()),
+                             ImGuiChildFlags.None,
+                             ImGuiWindowFlags.None);
+            SetupPanel.Draw(_entitySelection);
+            ImGui.EndChild();
+            ImGui.SameLine();
+        }
+
         ImGui.BeginChild("##content",
                          new Vector2(0, ImGui.GetWindowHeight()),
                          ImGuiChildFlags.None,
@@ -118,7 +129,23 @@ internal sealed class OutputWindow : Window
 
             Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
 
-            if (graphCanvas != null)
+            if (_setupModeActive)
+            {
+                if (TryGetShownEntity(out var entityKind, out var entityId))
+                {
+                    SetupPanel.DrawEntityCard(entityKind, entityId);
+                }
+                else
+                {
+                    CustomComponents.EmptyWindowMessage("Select an entity in the setup panel");
+                }
+
+                if (!SkillTraining.IsInPlayMode)
+                {
+                    DrawEntityToolbar();
+                }
+            }
+            else if (graphCanvas != null)
             {
                 Pinning.TryGetPinnedEvaluationInstance(graphCanvas.Structure, out var evaluationInstance);
 
@@ -187,6 +214,9 @@ internal sealed class OutputWindow : Window
         CustomComponents.PushToolbarIconBackground();
 
         Pinning.DrawPinning();
+
+        DrawViewModeMenu();
+        ImGui.SameLine();
 
         if (CustomComponents.StateButton("1:1",
                                          Math.Abs(_imageCanvas.Scale.X - 1f) < 0.001f
@@ -718,4 +748,72 @@ internal sealed class OutputWindow : Window
     private ResolutionHandling.Resolution _selectedResolution = ResolutionHandling.DefaultResolution;
     internal Int2 RequestedResolution { get; private set; }
     private readonly EditResolutionDialog _resolutionDialog = new();
+
+    #region setup entity views
+    /// <summary>
+    /// In setup mode the window shows the entity selected in its own panel — owning the
+    /// selection makes every setup-mode window implicitly "pinned"; no extra lock step.
+    /// </summary>
+    private bool TryGetShownEntity(out SetupEntitySelection.EntityKind kind, out Guid id)
+    {
+        kind = SetupEntitySelection.EntityKind.None;
+        id = Guid.Empty;
+
+        if (!_setupModeActive)
+            return false;
+
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return false;
+
+        return _entitySelection.TryResolve(setup, out kind, out id);
+    }
+
+    /// <summary>Minimal toolbar for entity views — just the view-mode menu to get back.</summary>
+    private void DrawEntityToolbar()
+    {
+        ImGui.SetCursorPos(ImGui.GetCursorStartPos());
+        CustomComponents.PushToolbarIconBackground();
+        DrawViewModeMenu();
+        CustomComponents.PopToolbarIconBackground();
+    }
+
+    private void DrawViewModeMenu()
+    {
+        if (CustomComponents.StateButton("View", CustomComponents.ButtonStates.Default))
+        {
+            ImGui.OpenPopup(ViewModePopupId);
+        }
+
+        if (!ImGui.BeginPopup(ViewModePopupId))
+            return;
+
+        CustomComponents.MenuGroupHeader("Output Mode");
+        if (CustomComponents.DrawMenuItem(1, "Operator", isChecked: !_setupModeActive))
+        {
+            _setupModeActive = false;
+        }
+
+        if (CustomComponents.DrawMenuItem(2, "Setup", isChecked: _setupModeActive))
+        {
+            _setupModeActive = true;
+            _showSetupPanel = true;   // the panel is the entity picker; without it the mode is a dead end
+        }
+        CustomComponents.TooltipForLastItem("Shows setup entities picked in this window's panel",
+                                            "Each window browses independently; switch back to Operator for the graph output.");
+
+        CustomComponents.SeparatorLine();
+
+        if (CustomComponents.DrawMenuItem(4, "Show Setup Panel", isChecked: _showSetupPanel))
+        {
+            _showSetupPanel = !_showSetupPanel;
+        }
+
+        ImGui.EndPopup();
+    }
+
+    private const string ViewModePopupId = "##outputViewMode";
+    private bool _showSetupPanel;
+    private bool _setupModeActive;
+    private readonly SetupEntitySelection _entitySelection = new();
+    #endregion
 }

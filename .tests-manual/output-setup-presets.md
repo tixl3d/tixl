@@ -60,6 +60,53 @@ Click the entry for the second display.
 - The project folder contains `.meta/outputs.machine.json` with the binding
   (output GUID, display name, index).
 
+## Step: Opening the Setup Panel
+
+**Action:**
+In the Output Window toolbar, click `View` and enable "Show Setup Panel".
+
+**Expected:**
+- A sidebar appears on the left with sections REFERENCE IMAGES, SURFACES, PROPS,
+  OUTPUTS — each with a `+` button.
+- The panel title is a dropdown showing the active setup's name (e.g. "Setup 1").
+- The OUTPUTS section lists the Default output; bound outputs show their display,
+  unbound ones show "unbound".
+
+## Step: Navigating entities in setup mode
+
+**Action:**
+Open `View` and choose Output Mode "Setup" (this also opens the panel). Click `+`
+next to SURFACES, then click between the new surface and the Default output in
+the outline.
+
+**Expected:**
+- Each click shows an info card in the view area (name, kind, size/resolution).
+- The new surface was saved to the setup file (check the JSON).
+- With nothing selected yet, the view shows "Select an entity in the setup panel".
+
+## Step: Windows browse independently
+
+**Action:**
+Open a second Output Window, put it in Setup mode too, and select a different
+entity in each window's panel.
+
+**Expected:**
+- Each window keeps showing its own entity — selections do not affect the other
+  window.
+- `View → Operator` returns a window to the normal operator output; the graph
+  selection renders again.
+
+## Step: Setup switcher duplicates and deletes
+
+**Action:**
+In the panel title dropdown, choose "Duplicate current". Then open the dropdown
+again and switch between the two setups. Finally delete the copy.
+
+**Expected:**
+- The duplicate (e.g. "Setup 1 copy") becomes active and appears in `.meta/`.
+- Entity ids in both files are identical (GUID-preserving duplication).
+- After deleting, the original setup is active again and the copy's file is gone.
+
 ## Step: Unbinding stops the presentation
 
 **Action:**
