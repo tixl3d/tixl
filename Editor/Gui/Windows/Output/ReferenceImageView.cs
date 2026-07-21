@@ -37,8 +37,8 @@ internal sealed class ReferenceImageView
         if (image == null)
             return;
 
-        var tracedSurface = FindTracedSurface(setup, imageId);
-        DrawHeader(setup, image, imageId, tracedSurface != null);
+        var activeSurface = GetSelectedTracedSurface(setup, imageId);
+        DrawHeader(setup, image, imageId, activeSurface != null);
 
         // Ease the photo→straight transition (no visual jump).
         _straightenT += (_straightenTarget - _straightenT) * Math.Min(1f, ImGui.GetIO().DeltaTime * 8f);
@@ -65,23 +65,45 @@ internal sealed class ReferenceImageView
         }
 
         var dl = ImGui.GetWindowDrawList();
+
+        var straightening = activeSurface?.Reference != null && _straightenT > 0.001f;
+        if (straightening
+            && TryRenderStraightened(image, activeSurface!.Reference!, texture,
+                                     out var warped, out var bboxMin, out var bboxMax, out var regionMin, out var regionMax)
+            && warped is { IsDisposed: false })
+        {
+            var srv = SrvManager.GetSrvForTexture(warped);
+            if (srv is { IsDisposed: false })
+            {
+                // Show the full warped photo at its true (un-clipped) extent, dimmed; the rectified surface
+                // region at full opacity so the focus reads as the straightened surface.
+                var sMin = _projection.CanvasToScreen(bboxMin);
+                var sMax = _projection.CanvasToScreen(bboxMax);
+                dl.AddImage(srv.NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, (uint)UiColors.ForegroundFull.Fade(0.2f));
+
+                var rMin = _projection.CanvasToScreen(regionMin);
+                var rMax = _projection.CanvasToScreen(regionMax);
+                dl.PushClipRect(rMin, rMax, true);
+                dl.AddImage(srv.NativePointer, sMin, sMax);
+                dl.PopClipRect();
+
+                dl.AddRect(rMin, rMax, UiColors.ForegroundFull.Fade(0.5f));
+            }
+
+            return;
+        }
+
         var min = _projection.CanvasToScreen(Vector2.Zero);
         var max = _projection.CanvasToScreen(size);
         dl.AddRectFilled(min, max, UiColors.BackgroundFull.Fade(0.4f));
 
-        // While straightening, show the photo warped so the traced surface rectifies; otherwise the raw photo.
-        var straightening = tracedSurface?.Reference != null && _straightenT > 0.001f;
-        var shownTexture = straightening ? RenderStraightened(image, tracedSurface!.Reference!, texture) : texture;
-        var srv = SrvManager.GetSrvForTexture(shownTexture is { IsDisposed: false } ? shownTexture : texture);
-        if (srv is { IsDisposed: false })
-            dl.AddImage(srv.NativePointer, min, max);
+        var photoSrv = SrvManager.GetSrvForTexture(texture);
+        if (photoSrv is { IsDisposed: false })
+            dl.AddImage(photoSrv.NativePointer, min, max);
 
         dl.AddRect(min, max, UiColors.ForegroundFull.Fade(0.25f));
 
-        // Trace handles only make sense on the un-straightened photo.
-        if (straightening)
-            return;
-
+        // Traced surface outlines (draggable); the active surface is highlighted.
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             var surface = setup.Surfaces[i];
@@ -92,6 +114,9 @@ internal sealed class ReferenceImageView
             ImGui.PushID(surface.Id.GetHashCode());
             var style = CornerPinHandles.Style.ForSurface(surface.Name, editable: true);
             style.DrawChecker = false;
+            if (surface.Id == _selectedSurfaceId)
+                style.EdgeColor = UiColors.ForegroundFull;
+
             var phase = CornerPinHandles.Draw(binding.Quad, _projection, style, out _);
             if (phase == CanvasPointHandle.DragPhase.Completed)
                 OutputSetupHandling.SaveActive();
@@ -100,22 +125,37 @@ internal sealed class ReferenceImageView
         }
     }
 
-    private static Surface? FindTracedSurface(Setup setup, Guid imageId)
+    // The traced surface the straighten targets: the selected one if valid, else the first traced (which it selects).
+    private Surface? GetSelectedTracedSurface(Setup setup, Guid imageId)
     {
+        Surface? selected = null;
+        Surface? first = null;
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
-            if (setup.Surfaces[i].Reference?.ImageId == imageId)
-                return setup.Surfaces[i];
+            var surface = setup.Surfaces[i];
+            if (surface.Reference?.ImageId != imageId)
+                continue;
+
+            first ??= surface;
+            if (surface.Id == _selectedSurfaceId)
+                selected = surface;
         }
 
-        return null;
+        if (selected == null && first != null)
+            _selectedSurfaceId = first.Id;
+
+        return selected ?? first;
     }
 
-    // Warps the photo so the traced quad rectifies to its bounding box, interpolated by the transition.
-    private Texture2D? RenderStraightened(ReferenceImage image, Surface.ReferenceBinding binding, Texture2D texture)
+    // Warps the photo so the surface's traced quad rectifies (to its bbox), interpolated by the transition.
+    // Out: the warped texture, the warped-photo extent, and the surface-region extent — all in photo pixels.
+    private bool TryRenderStraightened(ReferenceImage image, Surface.ReferenceBinding binding, Texture2D texture,
+                                       out Texture2D? warped, out Vector2 bboxMin, out Vector2 bboxMax, out Vector2 regionMin, out Vector2 regionMax)
     {
+        warped = null;
+        bboxMin = bboxMax = regionMin = regionMax = Vector2.Zero;
         if (binding.Quad.Length < 4)
-            return null;
+            return false;
 
         var w = Math.Max(1, image.Width);
         var h = Math.Max(1, image.Height);
@@ -126,17 +166,43 @@ internal sealed class ReferenceImageView
             interp[i] = Vector2.Lerp(binding.Quad[i], targetRect[i], _straightenT);
 
         if (!Homography.TryComputeQuadToQuad(binding.Quad, interp, out var homography))
-            return null;
+            return false;
 
-        var destQuad = new[]
-                           {
-                               homography.TransformPoint(new Vector2(0, 0)),
-                               homography.TransformPoint(new Vector2(w, 0)),
-                               homography.TransformPoint(new Vector2(w, h)),
-                               homography.TransformPoint(new Vector2(0, h)),
-                           };
+        Span<Vector2> dest = stackalloc Vector2[4];
+        dest[0] = homography.TransformPoint(new Vector2(0, 0));
+        dest[1] = homography.TransformPoint(new Vector2(w, 0));
+        dest[2] = homography.TransformPoint(new Vector2(w, h));
+        dest[3] = homography.TransformPoint(new Vector2(0, h));
 
-        return OutputManager.RenderWarpedTexture(texture, destQuad, new Int2(w, h));
+        Bbox(dest, out bboxMin, out bboxMax);
+        Bbox(interp, out regionMin, out regionMax);
+
+        // Render into an RT covering the whole warped extent (nothing clipped at the photo edge), size-capped.
+        var bboxSize = bboxMax - bboxMin;
+        var maxDim = Math.Max(bboxSize.X, bboxSize.Y);
+        var scale = maxDim > 4096f ? 4096f / maxDim : 1f;
+        var rtSize = new Int2(Math.Max(1, (int)(bboxSize.X * scale)), Math.Max(1, (int)(bboxSize.Y * scale)));
+
+        var destLocal = new[]
+                            {
+                                (dest[0] - bboxMin) * scale,
+                                (dest[1] - bboxMin) * scale,
+                                (dest[2] - bboxMin) * scale,
+                                (dest[3] - bboxMin) * scale,
+                            };
+
+        warped = OutputManager.RenderWarpedTexture(texture, destLocal, rtSize);
+        return warped is { IsDisposed: false };
+    }
+
+    private static void Bbox(ReadOnlySpan<Vector2> points, out Vector2 min, out Vector2 max)
+    {
+        min = max = points[0];
+        for (var i = 1; i < points.Length; i++)
+        {
+            min = Vector2.Min(min, points[i]);
+            max = Vector2.Max(max, points[i]);
+        }
     }
 
     private static Vector2[] BoundingBoxQuad(Vector2[] quad)
@@ -171,8 +237,28 @@ internal sealed class ReferenceImageView
                 _straightenTarget = 1f;
         }
 
-        // Trace untraced surfaces onto this image.
+        // Traced surfaces on this image — selectable (the selected one is highlighted and straightened).
         var drewButton = false;
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            var surface = setup.Surfaces[i];
+            if (surface.Reference?.ImageId != imageId)
+                continue;
+
+            if (drewButton)
+                ImGui.SameLine();
+
+            drewButton = true;
+            ImGui.PushID(surface.Id.GetHashCode());
+            var label = string.IsNullOrEmpty(surface.Name) ? "untitled" : surface.Name;
+            var state = surface.Id == _selectedSurfaceId ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default;
+            if (CustomComponents.StateButton(label, state))
+                _selectedSurfaceId = surface.Id;
+
+            ImGui.PopID();
+        }
+
+        // Untraced surfaces — trace them onto this image.
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             var surface = setup.Surfaces[i];
@@ -188,6 +274,7 @@ internal sealed class ReferenceImageView
             if (ImGui.SmallButton("+ Trace " + label))
             {
                 surface.Reference = new Surface.ReferenceBinding { ImageId = imageId, Quad = DefaultReferenceQuad(image) };
+                _selectedSurfaceId = surface.Id;
                 OutputSetupHandling.SaveActive();
             }
 
@@ -221,6 +308,7 @@ internal sealed class ReferenceImageView
     private readonly ScalableCanvas _canvas = new();
     private readonly ScalableCanvasProjection _projection;
     private Guid _fittedImageId;
+    private Guid _selectedSurfaceId;
     private float _straightenTarget;
     private float _straightenT;
     private string _loadedPath = string.Empty;
