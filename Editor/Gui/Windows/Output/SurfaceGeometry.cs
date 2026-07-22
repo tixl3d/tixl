@@ -79,6 +79,91 @@ internal static class SurfaceGeometry
             (surface.Placement ??= new Surface.StagePlacement()).Pivot = newPivot;
     }
 
+    /// <summary>
+    /// The surface that actually carries the corner pin for <paramref name="surfaceId"/> on this output —
+    /// itself, or the nearest ancestor for a Layout child. A child has no mapping of its own, so anything that
+    /// needs the projection (straightening, framing, editing) has to work from its carrier instead.
+    /// Null when nothing in the chain is mapped to the output.
+    /// </summary>
+    public static Surface? FindCarrier(Setup setup, Guid surfaceId, Guid outputId)
+    {
+        if (surfaceId == Guid.Empty)
+            return null;
+
+        var surface = setup.Surfaces.Find(s => s.Id == surfaceId);
+        for (var guard = 0; surface != null && guard < 16; guard++)
+        {
+            if (surface.OutputMappings.Exists(m => m.OutputId == outputId))
+                return surface;
+
+            if (surface.ParentId == Guid.Empty)
+                break;
+
+            var parentId = surface.ParentId;
+            surface = setup.Surfaces.Find(s => s.Id == parentId);
+        }
+
+        return null;
+    }
+
+    /// <summary>The anchor's position in a surface's own space (origin top-left, Y down).</summary>
+    public static Vector2 AnchorInSurface(Surface surface)
+    {
+        var size = surface.SizeInMeters;
+        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
+        return new Vector2(pivot.X * size.X, size.Y - pivot.Y * size.Y);
+    }
+
+    /// <summary>
+    /// A Layout child's rectangle expressed in its parent's space. The child stores its bottom-left in meters
+    /// from the parent's anchor (X right, Y up), so this is where that lands with the parent's Y-down frame.
+    /// </summary>
+    public static Vector2[] ChildRectInParent(Surface parent, Surface child)
+    {
+        var anchor = AnchorInSurface(parent);
+        var bottomLeft = anchor + new Vector2(child.LocalPosition.X, -child.LocalPosition.Y);
+        var size = child.SizeInMeters;
+        return RectFromBounds(new Vector2(bottomLeft.X, bottomLeft.Y - size.Y),
+                              new Vector2(bottomLeft.X + size.X, bottomLeft.Y));
+    }
+
+    /// <summary>
+    /// A Layout child has no corner pin of its own — it rides its parent's, so its quad is derived by pushing
+    /// its rectangle through the parent's projection for that output.
+    /// </summary>
+    /// <summary>
+    /// Writes a child's rectangle back, given bounds in the parent's space — the inverse of
+    /// <see cref="ChildRectInParent"/>. Position is stored relative to the parent's anchor, so it survives the
+    /// parent being cropped.
+    /// </summary>
+    public static void SetChildRect(Surface parent, Surface child, Vector2 min, Vector2 max)
+    {
+        var size = new Vector2(MathF.Max(max.X - min.X, MinSize), MathF.Max(max.Y - min.Y, MinSize));
+        var anchor = AnchorInSurface(parent);
+
+        child.SizeInMeters = size;
+        child.LocalPosition = new Vector2(min.X - anchor.X, anchor.Y - (min.Y + size.Y));
+    }
+
+    /// <param name="quad">Caller-owned buffer of at least 4 entries — this runs per frame, so it doesn't allocate.</param>
+    public static bool TryGetChildQuad(Surface parent, Surface child, Surface.OutputMapping parentMapping, Vector2[] quad)
+    {
+        if (quad.Length < 4 || !TryGetSurfaceToOutput(parent, parentMapping, out var surfaceToOutput))
+            return false;
+
+        var anchor = AnchorInSurface(parent);
+        var bottomLeft = anchor + new Vector2(child.LocalPosition.X, -child.LocalPosition.Y);
+        var size = child.SizeInMeters;
+        var min = new Vector2(bottomLeft.X, bottomLeft.Y - size.Y);
+        var max = new Vector2(bottomLeft.X + size.X, bottomLeft.Y);
+
+        quad[0] = surfaceToOutput.TransformPoint(min);
+        quad[1] = surfaceToOutput.TransformPoint(new Vector2(max.X, min.Y));
+        quad[2] = surfaceToOutput.TransformPoint(max);
+        quad[3] = surfaceToOutput.TransformPoint(new Vector2(min.X, max.Y));
+        return true;
+    }
+
     /// <summary>Resizes keeping the pivot anchored, so editing one dimension extends rather than recentres.</summary>
     public static void ResizeAnchored(Surface surface, Vector2 newSize)
     {

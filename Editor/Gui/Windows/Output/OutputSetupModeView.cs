@@ -64,7 +64,7 @@ internal sealed class OutputSetupModeView
             if (entityKind == SetupEntitySelection.EntityKind.Output)
                 _outputView.Draw(entityId);
             else if (entityKind == SetupEntitySelection.EntityKind.Surface && TryGetSurfaceOutput(entityId, out var surfaceOutputId))
-                _outputView.Draw(surfaceOutputId, entityId);
+                _outputView.Draw(surfaceOutputId, entityId, _entitySelection); // labels on the canvas can re-pick
             else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage)
                 _referenceImageView.Draw(entityId);
             else if (entityKind == SetupEntitySelection.EntityKind.ContentSource && TryGetContentOutput(entityId, context, out var contentOutputId))
@@ -132,7 +132,11 @@ internal sealed class OutputSetupModeView
         ImGui.SameLine();
     }
 
-    /// <summary>The output a selected surface should be shown on — its first mapping's output.</summary>
+    /// <summary>
+    /// The output a selected surface should be shown on — its first mapping's output. A Layout child carries
+    /// no mapping of its own; it's shown wherever its parent is mapped, so walk up to the surface that
+    /// actually holds the corner pin rather than reporting the child as unmapped.
+    /// </summary>
     private static bool TryGetSurfaceOutput(Guid surfaceId, out Guid outputId)
     {
         outputId = Guid.Empty;
@@ -140,11 +144,22 @@ internal sealed class OutputSetupModeView
             return false;
 
         var surface = setup.Surfaces.Find(s => s.Id == surfaceId);
-        if (surface == null || surface.OutputMappings.Count == 0)
-            return false;
+        for (var guard = 0; surface != null && guard < 16; guard++)
+        {
+            if (surface.OutputMappings.Count > 0)
+            {
+                outputId = surface.OutputMappings[0].OutputId;
+                return true;
+            }
 
-        outputId = surface.OutputMappings[0].OutputId;
-        return true;
+            if (surface.ParentId == Guid.Empty)
+                break;
+
+            var parentId = surface.ParentId;
+            surface = setup.Surfaces.Find(s => s.Id == parentId);
+        }
+
+        return false;
     }
 
     private bool TryGetShownEntity(out SetupEntitySelection.EntityKind kind, out Guid id)

@@ -33,6 +33,10 @@ internal static class CanvasPointHandle
     {
         public Color Color;
         public Color ActiveColor;
+
+        /// <summary>Drawn around the fill; transparent by default so plain handles are unchanged.</summary>
+        public Color OutlineColor;
+
         public Shape Shape;
         public float Radius; // unscaled screen pixels
         public bool Editable;
@@ -43,6 +47,7 @@ internal static class CanvasPointHandle
                        {
                            Color = color,
                            ActiveColor = UiColors.ForegroundFull,
+                           OutlineColor = new Color(0f, 0f, 0f, 0f),
                            Shape = shape,
                            Radius = 5,
                            Editable = editable,
@@ -95,14 +100,21 @@ internal static class CanvasPointHandle
 
         var isActive = isHovered || phase == DragPhase.Started || phase == DragPhase.Dragging;
         var color = isActive ? style.ActiveColor : style.Color;
+        var outlineWidth = 1.5f * T3Ui.UiScaleFactor;
+        var hasOutline = style.OutlineColor.Rgba.W > 0.01f;
+
         if (style.Shape == Shape.Square)
         {
             var half = new Vector2(radius);
             dl.AddRectFilled(screen - half, screen + half, color);
+            if (hasOutline)
+                dl.AddRect(screen - half, screen + half, style.OutlineColor, 0, ImDrawFlags.None, outlineWidth);
         }
         else
         {
             dl.AddCircleFilled(screen, radius, color);
+            if (hasOutline)
+                dl.AddCircle(screen, radius, style.OutlineColor, 0, outlineWidth);
         }
 
         return phase;

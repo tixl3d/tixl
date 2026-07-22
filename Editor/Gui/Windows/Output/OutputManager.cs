@@ -164,47 +164,57 @@ internal static class OutputManager
             if (!surface.Render)
                 continue;
 
-            var sink = FindSinkForTarget(surface.Id);
-            var content = sink?.GetContent(_context);
-            if (content is { IsDisposed: false })
+            // A Layout child carries no corner pin of its own — it rides its parent's, so the mappings to walk
+            // (and the quad each one yields) come from the parent.
+            var carrier = surface;
+            if (surface.Kind == T3.Core.Output.Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
             {
-                var srv = SrvManager.GetSrvForTexture(content);
-                if (srv is { IsDisposed: false })
-                {
-                    var color = sink!.GetColor(_context);
-                    var sourceRect = sink.GetSourceRect(_context);
-                    foreach (var mapping in surface.OutputMappings)
-                    {
-                        if (mapping.OutputId != outputId)
-                            continue;
-
-                        if (TryComputeNdcHomography(mapping.Quad, output.CanvasResolution, out var homography))
-                            _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero, Vector4.Zero));
-                    }
-                }
+                carrier = setup.Surfaces.Find(s => s.Id == surface.ParentId);
+                if (carrier == null || !carrier.Render)
+                    continue;
             }
 
-            // Calibration raster last, so it composites *over* the content and stays readable while aligning.
-            // Emitted whether or not the surface has content — with none, it's lines on the cleared black.
-            if (surface.ShowGrid)
-            {
-                // Metres spanned by the surface, and the origin (its anchor) in source UV — the pivot is
-                // normalized from the bottom-left while V runs downward.
-                var metres = new Vector2(Math.Clamp(surface.SizeInMeters.X, 0.01f, 1000f),
-                                         Math.Clamp(surface.SizeInMeters.Y, 0.01f, 1000f));
-                var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
-                var gridOrigin = new Vector4(pivot.X, 1f - pivot.Y,
-                                             Math.Clamp(surface.GridSubdivisions, 1, 100), _gridMinorOpacity);
+            var sink = FindSinkForTarget(surface.Id);
+            var content = sink?.GetContent(_context);
+            var srv = content is { IsDisposed: false } ? SrvManager.GetSrvForTexture(content) : null;
+            var hasContent = srv is { IsDisposed: false };
+            var color = hasContent ? sink!.GetColor(_context) : Vector4.One;
+            var sourceRect = hasContent ? sink!.GetSourceRect(_context) : _fullSourceRect;
 
-                foreach (var mapping in surface.OutputMappings)
+            // Metres spanned by the surface, and the origin (its anchor) in source UV — the pivot is
+            // normalized from the bottom-left while V runs downward.
+            var metres = new Vector2(Math.Clamp(surface.SizeInMeters.X, 0.01f, 1000f),
+                                     Math.Clamp(surface.SizeInMeters.Y, 0.01f, 1000f));
+            var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
+            var gridOrigin = new Vector4(pivot.X, 1f - pivot.Y,
+                                         Math.Clamp(surface.GridSubdivisions, 1, 100), _gridMinorOpacity);
+
+            foreach (var mapping in carrier.OutputMappings)
+            {
+                if (mapping.OutputId != outputId)
+                    continue;
+
+                var quad = mapping.Quad;
+                if (!ReferenceEquals(carrier, surface))
                 {
-                    if (mapping.OutputId != outputId)
+                    // Buffer is consumed by TryComputeNdcHomography before the next iteration reuses it.
+                    if (!SurfaceGeometry.TryGetChildQuad(carrier, surface, mapping, _childQuadBuffer))
                         continue;
 
-                    if (TryComputeNdcHomography(mapping.Quad, output.CanvasResolution, out var gridHomography))
-                        _drawItems.Add(new DrawItem(null, gridHomography, _fullSourceRect, Vector4.One,
-                                                    new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin));
+                    quad = _childQuadBuffer;
                 }
+
+                if (!TryComputeNdcHomography(quad, output.CanvasResolution, out var homography))
+                    continue;
+
+                if (hasContent)
+                    _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero, Vector4.Zero));
+
+                // Calibration raster after the content, so it composites *over* it and stays readable while
+                // aligning. Emitted with or without content — with none, it's lines on the cleared black.
+                if (surface.ShowGrid)
+                    _drawItems.Add(new DrawItem(null, homography, _fullSourceRect, Vector4.One,
+                                                new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin));
             }
         }
 
@@ -524,6 +534,9 @@ internal static class OutputManager
     private const float _gridLineThickness = 1.3f;
     private const float _gridMinorOpacity = 0.35f; // subdivisions sit clearly under the metre lines
     private static readonly Homography _fullscreenNdc = new() { M11 = 2, M13 = -1, M22 = -2, M23 = 1, M33 = 1 };
+
+    // Scratch for a Layout child's derived quad; consumed before the next mapping reuses it.
+    private static readonly Vector2[] _childQuadBuffer = new Vector2[4];
 
     private static readonly Guid _scratchTargetId = new("f1e2d3c4-b5a6-4788-9012-3456789abcde");
     private static readonly Dictionary<Guid, Target> _targets = new();

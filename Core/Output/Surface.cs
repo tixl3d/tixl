@@ -139,6 +139,13 @@ public sealed class Surface
     /// <summary>Parent surface for nesting; <see cref="Guid.Empty"/> for a root. A Layout child inherits its parent's plane.</summary>
     public Guid ParentId;
 
+    /// <summary>
+    /// For a Layout child: its bottom-left corner in meters from the *parent's anchor*, X right and Y up.
+    /// Anchoring to the parent's grid origin — rather than normalizing to the parent's rect — is what keeps
+    /// sub-regions welded to the meter raster when the parent is cropped or stretched.
+    /// </summary>
+    public Vector2 LocalPosition;
+
     /// <summary>Optional compact label for gutters/badges; empty = auto-abbreviate from <see cref="Name"/>.</summary>
     public string ShortName = string.Empty;
 
@@ -174,6 +181,7 @@ public sealed class Surface
         writer.WriteString("Type", Type);
         writer.WriteString("Kind", Kind);
         writer.WriteObject("ParentId", ParentId);
+        writer.WriteVector2("LocalPosition", LocalPosition);
         writer.WriteString("ShortName", ShortName);
         writer.WriteValue("Render", Render);
         writer.WriteVector2("SizeInMeters", SizeInMeters);
@@ -212,6 +220,7 @@ public sealed class Surface
                               Type = token.ReadValueSafe("Type", SurfaceTypes.Rect) ?? SurfaceTypes.Rect,
                               Kind = token.ReadValueSafe("Kind", SurfaceKinds.Physical) ?? SurfaceKinds.Physical,
                               ParentId = OutputJson.ReadGuid(token["ParentId"]),
+                              LocalPosition = OutputJson.ReadVector2(token["LocalPosition"], Vector2.Zero),
                               ShortName = token.ReadValueSafe("ShortName", string.Empty) ?? string.Empty,
                               Render = token.ReadValueSafe("Render", true),
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),

@@ -34,6 +34,9 @@ internal sealed class ResizeSurfaceCommand : ICommand
         {
             Size = surface.SizeInMeters;
 
+            // A Layout child's rectangle is size + where it sits in its parent, so both travel together.
+            LocalPosition = surface.LocalPosition;
+
             // The pivot belongs to the rectangle: resizing counter-moves it to hold the anchor in place, so it
             // has to travel with the snapshot — both for undo and to re-base a live drag.
             HasPlacement = surface.Placement != null;
@@ -48,6 +51,7 @@ internal sealed class ResizeSurfaceCommand : ICommand
         }
 
         public readonly Vector2 Size;
+        public readonly Vector2 LocalPosition;
         public readonly Vector2 Pivot;
         public readonly bool HasPlacement;
         public readonly (Guid OutputId, Vector2[] Quad)[] Quads;
@@ -75,6 +79,7 @@ internal sealed class ResizeSurfaceCommand : ICommand
         public void Restore(Surface surface)
         {
             surface.SizeInMeters = Size;
+            surface.LocalPosition = LocalPosition;
 
             if (!HasPlacement)
                 surface.Placement = null; // it can only have appeared via the anchor counter-move

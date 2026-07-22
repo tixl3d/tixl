@@ -171,6 +171,19 @@ internal static class SetupPanel
             placement.Pose = new Pose(new Vector3(pos[0], pos[1], pos[2]), placement.Pose.Orientation);
         }
 
+        // A Layout child inherits its parent's plane, so it's placed in the parent's local space instead of the stage.
+        if (surface.Kind == Surface.SurfaceKinds.Layout)
+        {
+            Span<float> local = [surface.LocalPosition.X, surface.LocalPosition.Y];
+            var localState = FormInputsNarrow.DrawFloats("Position in parent (m)", local,
+                                                        "Bottom-left corner, in metres from the parent's anchor (X right, Y up).");
+            if ((localState & InputEditStateFlags.Modified) != 0)
+                surface.LocalPosition = new Vector2(local[0], local[1]);
+
+            if ((localState & InputEditStateFlags.Finished) != 0)
+                OutputSetupHandling.SaveActive();
+        }
+
         Span<float> size = [surface.SizeInMeters.X, surface.SizeInMeters.Y];
         var sizeState = FormInputsNarrow.DrawFloats("Size (m)", size,
                                                     "Resizes the surface's footprint — the corner pin follows, so it covers a different area of the wall.",
@@ -586,22 +599,39 @@ internal static class SetupPanel
     private static void DrawSurfaceRow(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
     {
         var surfaceId = surface.Id;
-        if (depth > 0)
-            ImGui.Indent(depth * 12 * T3Ui.UiScaleFactor);
+        var hasChildren = CountChildren(setup, surfaceId) > 0;
+        var isExpanded = !_collapsedSurfaces.Contains(surfaceId);
 
         var (outputIcon, outputText) = DescribeSurfaceOutputGutter(setup, surface);
         DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Surface, surface.Id, surface.Name,
                       outputText,
-                      onDelete: () => DeleteSurface(setup, surfaceId), leadingIcon: Icon.Grid, trailingIcon: outputIcon);
+                      onDelete: () => DeleteSurface(setup, surfaceId), leadingIcon: Icon.Grid, trailingIcon: outputIcon,
+                      drawExtraMenuItems: () =>
+                                          {
+                                              if (CustomComponents.DrawMenuItem(4, "Add sub-region"))
+                                                  AddSubRegion(selection, setup, surface);
 
-        if (depth > 0)
-            ImGui.Unindent(depth * 12 * T3Ui.UiScaleFactor);
+                                              if (CustomComponents.DrawMenuItem(5, "Clear content inputs"))
+                                                  ClearContentInputs(surfaceId);
+                                          },
+                      depth: depth,
+                      isExpanded: hasChildren ? isExpanded : null,
+                      onToggleExpanded: () => ToggleSurfaceExpanded(surfaceId));
+
+        if (!hasChildren || !isExpanded)
+            return;
 
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             if (setup.Surfaces[i].ParentId == surfaceId)
                 DrawSurfaceRow(selection, setup, setup.Surfaces[i], depth + 1);
         }
+    }
+
+    private static void ToggleSurfaceExpanded(Guid surfaceId)
+    {
+        if (!_collapsedSurfaces.Add(surfaceId))
+            _collapsedSurfaces.Remove(surfaceId);
     }
 
     // Out-gutter for a surface: the projector icon + the mapped output name (+N for edge-blended extras).
@@ -969,14 +999,19 @@ internal static class SetupPanel
         return expanded;
     }
 
+    /// <param name="depth">Tree depth. The row's background stays full width — only its content indents, so
+    /// the selection highlight still reads as one row. (ImGui.Indent can't do this: the row is positioned from
+    /// the window edges, not the cursor.)</param>
+    /// <param name="isExpanded">null when the row has no children, so no chevron is drawn.</param>
     private static void DrawEntityRow(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id, string name, string? status,
                                       Action? onDelete = null, Action? onRemoveFromOutput = null, Icon? leadingIcon = null, Icon? trailingIcon = null,
-                                      Action? drawExtraMenuItems = null)
+                                      Action? drawExtraMenuItems = null, int depth = 0, bool? isExpanded = null, Action? onToggleExpanded = null)
     {
         var scale = T3Ui.UiScaleFactor;
         var rounding = 4 * scale;
         // Odd height so a 15px icon centers exactly ((23-15)/2 = 4).
         var height = (float)Math.Round(23 * scale);
+        var indent = depth * 12 * scale;
 
         ImGui.PushID(id.GetHashCode());
 
@@ -1000,7 +1035,14 @@ internal static class SetupPanel
 
         var isHovered = ImGui.IsItemHovered();
 
-        if (clicked)
+        // The chevron shares the row's selectable rather than overlapping it with its own button — a click in
+        // its column toggles instead of selecting.
+        var chevronMaxX = rowMin.X + indent + 20 * scale;
+        if (clicked && isExpanded.HasValue && ImGui.GetMousePos().X < chevronMaxX)
+        {
+            onToggleExpanded?.Invoke();
+        }
+        else if (clicked)
         {
             var io = ImGui.GetIO();
             if (io.KeyCtrl)
@@ -1054,7 +1096,18 @@ internal static class SetupPanel
         var contentY = (float)Math.Round(rowMin.Y + (height - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
         var iconY = contentY + 3 * scale; // glyphs render high vs the text baseline — drop them to match.
 
-        var contentX = rowMin.X + 6 * scale;
+        var contentX = rowMin.X + 6 * scale + indent;
+        if (isExpanded.HasValue)
+        {
+            ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
+            DrawInlineIcon(isExpanded.Value ? Icon.ChevronDown : Icon.ChevronRight, UiColors.TextMuted.Fade(0.6f).Rgba);
+            contentX = ImGui.GetItemRectMax().X + 3 * scale;
+        }
+        else if (depth > 0)
+        {
+            contentX += 14 * scale; // keep children aligned with their siblings that do have a chevron
+        }
+
         if (leadingIcon.HasValue)
         {
             ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
@@ -1102,6 +1155,60 @@ internal static class SetupPanel
         var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
         setup.ReferenceImages.Add(image);
         selection.Select(SetupEntitySelection.EntityKind.ReferenceImage, image.Id);
+    }
+
+    /// <summary>
+    /// Drops this surface from every send that targets it, so it stops receiving content. The surface itself
+    /// and its calibration are untouched — this only edits the sends' target lists (op-side, like the drag).
+    /// </summary>
+    private static void ClearContentInputs(Guid surfaceId)
+    {
+        foreach (var sink in OutputSinkRegistry.Sinks)
+            sink.RemoveTarget(surfaceId);
+    }
+
+    /// <summary>
+    /// Adds a Layout child — a rectangle living inside its parent, riding the parent's corner pin rather than
+    /// carrying one of its own. Its position is stored in meters from the parent's anchor, so it stays welded
+    /// to the meter raster when the parent is cropped or stretched.
+    /// </summary>
+    private static void AddSubRegion(SetupEntitySelection selection, Setup setup, Surface parent)
+    {
+        var parentSize = parent.SizeInMeters;
+        var size = new Vector2(MathF.Max(parentSize.X * 0.3f, SurfaceGeometry.MinSize),
+                               MathF.Max(parentSize.Y * 0.3f, SurfaceGeometry.MinSize));
+
+        // Land inside the parent rather than at its anchor: cropping an edge past the anchor legitimately
+        // pushes the pivot outside [0..1], and a child sitting on it would then start outside the parent —
+        // where extrapolating through a keystoned projection sends it a very long way off.
+        var anchor = SurfaceGeometry.AnchorInSurface(parent);
+        var bottomLeft = new Vector2(parentSize.X * 0.1f, parentSize.Y * 0.9f); // surface space runs Y down
+
+        var child = new Surface
+                        {
+                            Name = $"Sub region {CountChildren(setup, parent.Id) + 1}",
+                            Kind = Surface.SurfaceKinds.Layout,
+                            ParentId = parent.Id,
+                            SizeInMeters = size,
+                            LocalPosition = new Vector2(bottomLeft.X - anchor.X, anchor.Y - bottomLeft.Y),
+                            PixelsPerMeter = parent.PixelsPerMeter,
+                        };
+
+        setup.Surfaces.Add(child);
+        selection.Select(SetupEntitySelection.EntityKind.Surface, child.Id);
+        OutputSetupHandling.SaveActive();
+    }
+
+    private static int CountChildren(Setup setup, Guid parentId)
+    {
+        var count = 0;
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            if (setup.Surfaces[i].ParentId == parentId)
+                count++;
+        }
+
+        return count;
     }
 
     private static void AddSurface(SetupEntitySelection selection)
@@ -1221,6 +1328,9 @@ internal static class SetupPanel
 
     // Pre-edit rectangle snapshot while a Size (m) field is being dragged, so the resize undoes as one step.
     private static ResizeSurfaceCommand.State? _resizeOldState;
+
+    // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
+    private static readonly HashSet<Guid> _collapsedSurfaces = [];
 
     private const string MeasuredSizePopupId = "##measuredSize";
     private static Vector2 _measuredEdit;

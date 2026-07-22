@@ -20,23 +20,36 @@ internal static class CornerPinHandles
     {
         public Color EdgeColor;
         public Color HandleColor;
-        public Color TopLeftColor;
+        public Color HandleOutlineColor;
         public Color LabelColor;
+        public Color LabelBackgroundColor;
         public Color CheckerColor;
         public bool DrawChecker;
         public string? Label;
         public bool Editable;
 
-        /// <summary>A surface quad: blue edges (linked mapping), orange top-left marker, faint checker.</summary>
-        public static Style ForSurface(string? label, bool editable)
+        /// <summary>
+        /// A surface quad. Blue means "selected" — an unselected surface stays neutral so the two read apart at
+        /// a glance. Handles are white with a blue rim when selected, and recede when not.
+        /// </summary>
+        public static Style ForSurface(string? label, bool editable, bool selected = false, float emphasis = 1f)
         {
             return new Style
                        {
-                           EdgeColor = UiColors.StatusAutomated,
-                           HandleColor = UiColors.ForegroundFull,
-                           TopLeftColor = UiColors.StatusAnimated,
-                           LabelColor = UiColors.Text,
-                           CheckerColor = UiColors.ForegroundFull.Fade(0.06f),
+                           EdgeColor = selected
+                                           ? UiColors.StatusActivated.Fade(emphasis)
+                                           : UiColors.ForegroundFull.Fade(0.4f * emphasis),
+                           HandleColor = UiColors.ForegroundFull.Fade(selected ? emphasis : 0.6f * emphasis),
+                           HandleOutlineColor = selected
+                                                    ? UiColors.StatusActivated.Fade(emphasis)
+                                                    : new Color(0f, 0f, 0f, 0f),
+                           LabelColor = selected
+                                            ? UiColors.ForegroundFull.Fade(emphasis)
+                                            : UiColors.Text.Fade(0.7f * emphasis),
+                           LabelBackgroundColor = selected
+                                                      ? UiColors.StatusActivated.Fade(emphasis)
+                                                      : UiColors.BackgroundFull.Fade(0.6f * emphasis),
+                           CheckerColor = UiColors.ForegroundFull.Fade(0.06f * emphasis),
                            DrawChecker = true,
                            Label = label,
                            Editable = editable,
@@ -68,16 +81,16 @@ internal static class CornerPinHandles
             dl.AddLine(screen[i], screen[(i + 1) % 4], style.EdgeColor, edgeThickness);
 
         if (!string.IsNullOrEmpty(style.Label))
-            DrawCenteredLabel(dl, screen, style.Label!, style.LabelColor);
+            DrawCenteredLabel(dl, screen, style.Label!, style.LabelColor, style.LabelBackgroundColor);
 
         var phase = CanvasPointHandle.DragPhase.None;
         for (var i = 0; i < 4; i++)
         {
             ImGui.PushID(i);
-            var handleStyle = CanvasPointHandle.Style.Default(
-                                                              i == 0 ? style.TopLeftColor : style.HandleColor,
-                                                              i == 0 ? CanvasPointHandle.Shape.Square : CanvasPointHandle.Shape.Circle,
-                                                              style.Editable);
+            // Corners are circles, edge handles squares — the anchor marker shows orientation, so the corners
+            // don't need a winding cue of their own.
+            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Circle, style.Editable);
+            handleStyle.OutlineColor = style.HandleOutlineColor;
             var handlePhase = CanvasPointHandle.Draw(ref corners[i], projection, handleStyle);
             if (handlePhase != CanvasPointHandle.DragPhase.None)
             {
@@ -113,6 +126,7 @@ internal static class CornerPinHandles
             ImGui.PushID(i);
             var midpoint = (corners[i] + corners[(i + 1) % 4]) * 0.5f;
             var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Square, style.Editable);
+            handleStyle.OutlineColor = style.HandleOutlineColor;
             handleStyle.Radius = 4;
 
             var handlePhase = CanvasPointHandle.Draw(ref midpoint, projection, handleStyle);
@@ -158,12 +172,34 @@ internal static class CornerPinHandles
         return Vector2.Lerp(top, bottom, v);
     }
 
-    private static void DrawCenteredLabel(ImDrawListPtr dl, ReadOnlySpan<Vector2> screen, string label, Color color)
+    /// <summary>
+    /// Screen rect of the centered label chip. Exposed separately so callers can hit-test it — the label
+    /// doubles as the surface's grab handle.
+    /// </summary>
+    public static (Vector2 Min, Vector2 Max) GetCenteredLabelRect(ReadOnlySpan<Vector2> screen, string label)
     {
         var centroid = (screen[0] + screen[1] + screen[2] + screen[3]) * 0.25f;
         ImGui.PushFont(Fonts.FontSmall);
         var size = ImGui.CalcTextSize(label);
         ImGui.PopFont();
-        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, centroid - size * 0.5f, color, label);
+
+        var padding = new Vector2(5, 2) * T3Ui.UiScaleFactor;
+        var position = centroid - size * 0.5f;
+        return (position - padding, position + size + padding);
+    }
+
+    /// <summary>Label on a chip, so it stays legible over content, a raster, or another surface behind it.</summary>
+    public static void DrawLabelChip(ImDrawListPtr dl, (Vector2 Min, Vector2 Max) rect, string label, Color color, Color backgroundColor)
+    {
+        if (backgroundColor.Rgba.W > 0.01f)
+            dl.AddRectFilled(rect.Min, rect.Max, backgroundColor, 3 * T3Ui.UiScaleFactor);
+
+        var padding = new Vector2(5, 2) * T3Ui.UiScaleFactor;
+        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, rect.Min + padding, color, label);
+    }
+
+    public static void DrawCenteredLabel(ImDrawListPtr dl, ReadOnlySpan<Vector2> screen, string label, Color color, Color backgroundColor)
+    {
+        DrawLabelChip(dl, GetCenteredLabelRect(screen, label), label, color, backgroundColor);
     }
 }
