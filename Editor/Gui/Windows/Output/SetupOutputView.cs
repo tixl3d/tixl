@@ -25,6 +25,7 @@ internal sealed class SetupOutputView
     private enum EditMode
     {
         Output,
+        Straight,
         Content,
         Calibrate,
     }
@@ -53,6 +54,14 @@ internal sealed class SetupOutputView
         if (_editMode == EditMode.Calibrate)
             DrawCalibrationControls(output);
 
+        // Straighten is a continuous parameter, not a hard mode switch: Original (0) and Straight (1) are the
+        // two ends of a global rectify applied to the whole output canvas, animated so the view morphs.
+        var straightenTarget = _editMode == EditMode.Straight ? 1f : 0f;
+        var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
+        _straightenT += (straightenTarget - _straightenT) * (1f - MathF.Exp(-dt * 14f));
+        if (MathF.Abs(_straightenT - straightenTarget) < 0.0005f)
+            _straightenT = straightenTarget;
+
         _canvas.UpdateCanvas(out _);
 
         if (_editMode == EditMode.Content)
@@ -60,34 +69,111 @@ internal sealed class SetupOutputView
         else if (_editMode == EditMode.Calibrate)
             DrawCalibrationMarkers(output, outputId);
         else
-            DrawOutputCanvas(setup, output, outputId);
+            DrawOutputCanvas(setup, output, outputId); // Output and Straight, morphed by _straightenT
     }
 
+    // The output canvas carries a global rectify transform R (output px → view space): identity at
+    // _straightenT 0 (Original), and at 1 it maps the focused surface's quad onto its own axis-aligned
+    // bounding box, carrying the whole composite and every surface with it. Blending R makes the modes morph.
     private void DrawOutputCanvas(Setup setup, OutputDefinition output, Guid outputId)
     {
         var canvasSize = new Vector2(Math.Max(1, output.CanvasResolution.Width),
                                      Math.Max(1, output.CanvasResolution.Height));
-        FitToArea(canvasSize, EditMode.Output, outputId);
+
+        // Rectify basis = the focused surface. Freeze it while it is the one being dragged, so the transform
+        // doesn't chase its own edit; otherwise the live quad keeps R settled and current.
+        var basis = _straightenT > 0.0001f ? setup.Surfaces.Find(s => s.Id == _focusedSurfaceId) : null;
+        var basisMapping = basis?.OutputMappings.Find(m => m.OutputId == outputId);
+
+        var rToView = _identity;
+        var rToOutput = _identity;
+        var viewMin = Vector2.Zero;
+        var viewSize = canvasSize;
+
+        if (basisMapping != null && basisMapping.Quad.Length >= 4)
+        {
+            var basisQuad = _dragOldQuad != null && _dragSurfaceId == _focusedSurfaceId ? _dragOldQuad : basisMapping.Quad;
+            var box = BoundingBoxQuad(basisQuad);
+            var interp = new[]
+                             {
+                                 Vector2.Lerp(basisQuad[0], box[0], _straightenT),
+                                 Vector2.Lerp(basisQuad[1], box[1], _straightenT),
+                                 Vector2.Lerp(basisQuad[2], box[2], _straightenT),
+                                 Vector2.Lerp(basisQuad[3], box[3], _straightenT),
+                             };
+
+            if (Homography.TryComputeQuadToQuad(basisQuad, interp, out rToView)
+                && Homography.TryComputeQuadToQuad(interp, basisQuad, out rToOutput))
+            {
+                // Frame to the focused surface's straightened bounds + margin — not the whole warped canvas,
+                // which a steep rectify sends toward infinity. Interpolated from the full canvas at t=0.
+                Bounds(interp, out var focusMin, out var focusMax);
+                var m = (focusMax - focusMin) * _straightSurroundFactor;
+                viewMin = Vector2.Lerp(Vector2.Zero, focusMin - m, _straightenT);
+                var viewMax = Vector2.Lerp(canvasSize, focusMax + m, _straightenT);
+                viewSize = viewMax - viewMin;
+            }
+            else
+            {
+                rToView = _identity;
+                rToOutput = _identity;
+            }
+        }
+
+        var rectifying = _straightenT > 0.0001f;
+        FitToArea(viewSize, EditMode.Output, outputId);
 
         var dl = ImGui.GetWindowDrawList();
         var frameMin = _projection.CanvasToScreen(Vector2.Zero);
-        var frameMax = _projection.CanvasToScreen(canvasSize);
+        var frameMax = _projection.CanvasToScreen(viewSize);
         dl.AddRectFilled(frameMin, frameMax, UiColors.BackgroundFull.Fade(0.4f));
 
-        // Live composite behind the handles: what the output manager would send to this output.
+        // The composite, transformed by R. At t=0 it's drawn 1:1; while rectifying it's warped into a scratch
+        // target so the perspective stays correct.
         var composite = OutputManager.RenderOutput(outputId);
         var hasContent = false;
         if (composite is { IsDisposed: false })
         {
-            var srv = SrvManager.GetSrvForTexture(composite);
-            if (srv is { IsDisposed: false })
+            if (rectifying)
             {
-                dl.AddImage(srv.NativePointer, frameMin, frameMax);
-                hasContent = true;
+                var maxDim = Math.Max(viewSize.X, viewSize.Y);
+                var renderScale = maxDim > 4096f ? 4096f / maxDim : 1f;
+                var rtSize = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(viewSize.X * renderScale)),
+                                                               Math.Max(1, (int)(viewSize.Y * renderScale)));
+                var w = canvasSize.X;
+                var h = canvasSize.Y;
+                var dest = new[]
+                               {
+                                   (rToView.TransformPoint(new Vector2(0, 0)) - viewMin) * renderScale,
+                                   (rToView.TransformPoint(new Vector2(w, 0)) - viewMin) * renderScale,
+                                   (rToView.TransformPoint(new Vector2(w, h)) - viewMin) * renderScale,
+                                   (rToView.TransformPoint(new Vector2(0, h)) - viewMin) * renderScale,
+                               };
+
+                var warped = OutputManager.RenderWarpedTexture(composite, dest, rtSize);
+                var warpedSrv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
+                if (warpedSrv is { IsDisposed: false })
+                {
+                    dl.AddImage(warpedSrv.NativePointer, frameMin, frameMax);
+                    hasContent = true;
+                }
+            }
+            else
+            {
+                var srv = SrvManager.GetSrvForTexture(composite);
+                if (srv is { IsDisposed: false })
+                {
+                    dl.AddImage(srv.NativePointer, frameMin, frameMax);
+                    hasContent = true;
+                }
             }
         }
 
         dl.AddRect(frameMin, frameMax, UiColors.ForegroundFull.Fade(0.25f));
+
+        // Corner-pin handles are editable only when the morph is settled (fully Original or fully Straight),
+        // so a mid-animation drag can't fight the moving transform.
+        var editable = _straightenT < 0.001f || _straightenT > 0.999f;
 
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
@@ -96,14 +182,28 @@ internal sealed class SetupOutputView
             if (mappingData == null)
                 continue;
 
+            // The quad in view space: R applied, then offset into the framed region.
+            var viewQuad = new[]
+                               {
+                                   rToView.TransformPoint(mappingData.Quad[0]) - viewMin,
+                                   rToView.TransformPoint(mappingData.Quad[1]) - viewMin,
+                                   rToView.TransformPoint(mappingData.Quad[2]) - viewMin,
+                                   rToView.TransformPoint(mappingData.Quad[3]) - viewMin,
+                               };
+
             ImGui.PushID(surface.Id.GetHashCode());
             // The checker is only a stand-in; drop it once the real composite fills the surface.
-            var style = CornerPinHandles.Style.ForSurface(surface.Name, editable: true);
+            var style = CornerPinHandles.Style.ForSurface(surface.Name, editable: editable);
             style.DrawChecker = !hasContent;
             if (surface.Id == _focusedSurfaceId)
                 style.EdgeColor = UiColors.ForegroundFull;
 
-            var phase = CornerPinHandles.Draw(mappingData.Quad, _projection, style, out _);
+            var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out _);
+
+            // Map the (possibly edited) view-space quad back to projector space. A no-op at rest / t=0.
+            for (var c = 0; c < 4; c++)
+                mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin);
+
             HandleDrag(phase, surface.Id, outputId, mappingData.Quad);
             ImGui.PopID();
         }
@@ -143,6 +243,20 @@ internal sealed class SetupOutputView
         ImGui.SameLine();
         if (CustomComponents.StateButton("Output", ModeButtonState(EditMode.Output)))
             _editMode = EditMode.Output;
+
+        // Straightening rectifies a single surface, so only offer it when one mapped to this output is focused.
+        if (_focusedSurfaceId != default
+            && setup.Surfaces.Exists(s => s.Id == _focusedSurfaceId && s.OutputMappings.Exists(m => m.OutputId == outputId)))
+        {
+            ImGui.SameLine();
+            if (CustomComponents.StateButton("Straight", ModeButtonState(EditMode.Straight)))
+                _editMode = EditMode.Straight;
+        }
+        else if (_editMode == EditMode.Straight)
+        {
+            // Focus moved off the surface — fall back so we don't sit in a mode with no button to leave it.
+            _editMode = EditMode.Output;
+        }
 
         ImGui.SameLine();
         if (CustomComponents.StateButton("Content", ModeButtonState(EditMode.Content)))
@@ -357,6 +471,7 @@ internal sealed class SetupOutputView
             case CanvasPointHandle.DragPhase.Started:
                 // The quad still holds its pre-drag value on the activation frame.
                 _dragOldQuad = (Vector2[])liveQuad.Clone();
+                _dragSurfaceId = surfaceId;
                 break;
 
             case CanvasPointHandle.DragPhase.Completed:
@@ -366,11 +481,33 @@ internal sealed class SetupOutputView
                     UndoRedoStack.Add(new ChangeOutputMappingQuadCommand(surfaceId, outputId, _dragOldQuad, liveQuad));
                     OutputSetupHandling.SaveActive();
                     _dragOldQuad = null;
+                    _dragSurfaceId = Guid.Empty;
                 }
 
                 break;
         }
     }
+
+    // Axis-aligned bounding box of a quad, returned as a TL, TR, BR, BL corner list (matching the quad winding).
+    private static Vector2[] BoundingBoxQuad(Vector2[] quad)
+    {
+        Bounds(quad, out var min, out var max);
+        return [new Vector2(min.X, min.Y), new Vector2(max.X, min.Y), new Vector2(max.X, max.Y), new Vector2(min.X, max.Y)];
+    }
+
+    private static void Bounds(Vector2[] points, out Vector2 min, out Vector2 max)
+    {
+        min = max = points[0];
+        for (var i = 1; i < points.Length; i++)
+        {
+            min = Vector2.Min(min, points[i]);
+            max = Vector2.Max(max, points[i]);
+        }
+    }
+
+    // Straight morph: fraction of the focused surface's straightened size kept as surround margin (context).
+    private const float _straightSurroundFactor = 0.4f;
+    private static readonly Homography _identity = new() { M11 = 1, M22 = 1, M33 = 1 };
 
     private readonly ScalableCanvas _canvas = new();
     private readonly ScalableCanvasProjection _projection;
@@ -378,6 +515,10 @@ internal sealed class SetupOutputView
     private Guid _focusedSurfaceId;
     private (Guid, EditMode, Vector2) _fitKey;
 
-    // Pre-drag quad snapshot; only one corner drags at a time, so a single slot suffices.
+    // Original↔Straight morph amount (0 = projector space, 1 = focused surface straightened), animated.
+    private float _straightenT;
+
+    // Pre-drag quad snapshot + which surface it belongs to (so R can freeze only when the basis is dragged).
     private Vector2[]? _dragOldQuad;
+    private Guid _dragSurfaceId;
 }

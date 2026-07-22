@@ -17,6 +17,18 @@ mapping, while shipping a legitimate standalone calibration method.
 - **Straight** — the rectified content canvas (axis-aligned); crop + regions edit here and map back through
   the *locked* corner-pin. `Straight` is a view/edit mode, a peer tab to `Original`, not a one-shot action.
 
+## Status
+- **Thin slice LANDED (2026-07-22, uncommitted, builds green):** all three chunks below done. Grid emitted
+  through the corner-pin composite (shader `GridParams`/`GridColor`, analytic AA lines); surface card has
+  Show size raster + Link cell size + Cell size (cm). **Original↔Straight is a continuous morph, not a mode
+  switch:** `DrawOutputCanvas` carries a global rectify transform R driven by an animated `_straightenT`
+  (0 = identity/Original, 1 = focused surface straightened to its axis-aligned bbox), framed to the surface's
+  bbox + margin. Composite warped via `RenderWarpedTexture` while rectifying; all surfaces stay editable
+  (reuse `CornerPinHandles` + undo; drags map back through R⁻¹; R frozen to the drag-start quad when the
+  focused basis is the one dragged). `DrawStraightCanvas` deleted. NOT the full sketch toolbar (deferred).
+  Note: content is digitally on the quad, so the editor view always renders straight — corner editing
+  repositions/compensates the projection, judged on the wall.
+
 ## Thin slice = grid + size + Straight view
 1. **Projected calibration grid** (this chunk): `Surface.ShowGrid` + `GridCellSize` (m) + `GridCellLinked`.
    The corner-pin composite shader draws an analytic grid (crisp, AA via `fwidth`) when a grid draw-item is
