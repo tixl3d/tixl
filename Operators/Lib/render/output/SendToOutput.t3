@@ -25,6 +25,10 @@
       "DefaultValue": null
     },
     {
+      "Id": "9a1c4f7e-2d38-4b6a-8e50-1f7c3d9b0a24"/*Update*/,
+      "DefaultValue": true
+    },
+    {
       "Id": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*TargetId*/,
       "DefaultValue": "00000000-0000-0000-0000-000000000000"
     }

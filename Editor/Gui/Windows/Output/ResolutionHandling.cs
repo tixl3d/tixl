@@ -140,7 +140,7 @@ internal static class ResolutionHandling
         }
     }
 
-    private static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)
+    internal static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)
     {
         var screens = System.Windows.Forms.Screen.AllScreens;
         var binding = machineConfig.TryGetBinding(output.Id);

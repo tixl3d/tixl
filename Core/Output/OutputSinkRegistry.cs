@@ -28,6 +28,11 @@ public interface IOutputSink
     /// <summary>Points this sink at a new target (a surface/region or output id) — the host retargets by drag.</summary>
     void SetTarget(Guid targetId);
 
+    /// <summary>When false the host stops invalidating this content, freezing it at its last frame.</summary>
+    bool GetUpdateEnabled(EvaluationContext context);
+
+    void SetUpdateEnabled(bool enabled);
+
     /// <summary>Marks the content input graph dirty so a following <see cref="GetContent"/> re-evaluates
     /// time-dependent upstream ops (the manager pulls content manually, outside the normal output path).</summary>
     void InvalidateContent();

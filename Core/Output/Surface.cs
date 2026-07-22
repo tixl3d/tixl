@@ -139,6 +139,12 @@ public sealed class Surface
     /// <summary>Parent surface for nesting; <see cref="Guid.Empty"/> for a root. A Layout child inherits its parent's plane.</summary>
     public Guid ParentId;
 
+    /// <summary>Optional compact label for gutters/badges; empty = auto-abbreviate from <see cref="Name"/>.</summary>
+    public string ShortName = string.Empty;
+
+    /// <summary>When false the output manager skips this surface (kept in the setup, just not drawn).</summary>
+    public bool Render = true;
+
     /// <summary>Physical size in meters. Defines the ContentCanvas aspect.</summary>
     public Vector2 SizeInMeters = new(1, 1);
 
@@ -160,6 +166,8 @@ public sealed class Surface
         writer.WriteString("Type", Type);
         writer.WriteString("Kind", Kind);
         writer.WriteObject("ParentId", ParentId);
+        writer.WriteString("ShortName", ShortName);
+        writer.WriteValue("Render", Render);
         writer.WriteVector2("SizeInMeters", SizeInMeters);
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
 
@@ -194,6 +202,8 @@ public sealed class Surface
                               Type = token.ReadValueSafe("Type", SurfaceTypes.Rect) ?? SurfaceTypes.Rect,
                               Kind = token.ReadValueSafe("Kind", SurfaceKinds.Physical) ?? SurfaceKinds.Physical,
                               ParentId = OutputJson.ReadGuid(token["ParentId"]),
+                              ShortName = token.ReadValueSafe("ShortName", string.Empty) ?? string.Empty,
+                              Render = token.ReadValueSafe("Render", true),
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),

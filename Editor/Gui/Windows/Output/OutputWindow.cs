@@ -95,6 +95,7 @@ internal sealed partial class OutputWindow : Window
         // Sync copy-based fields to State every frame so saves always capture current values
         SyncCopyFieldsToState();
 
+        Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
         _setupMode.DrawSidePanel();
 
         ImGui.BeginChild("##content",
@@ -119,8 +120,6 @@ internal sealed partial class OutputWindow : Window
             // and does not emit items, so submit an empty Dummy as an extent marker.
             ImGui.Dummy(Vector2.Zero);
 
-            Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
-
             if (_setupMode.TryDrawEditingView(drawnInstance, EvaluationContext))
             {
                 // Output-editing view (focused sink or picked panel entity) was drawn — give it the
@@ -129,6 +128,7 @@ internal sealed partial class OutputWindow : Window
                 {
                     ImGui.SetCursorPos(ImGui.GetCursorStartPos());
                     CustomComponents.PushToolbarIconBackground();
+                    _setupMode.DrawPanelToggleButton();
                     Pinning.DrawPinning(_drawOutputMenuExtras);
                     CustomComponents.PopToolbarIconBackground();
                 }

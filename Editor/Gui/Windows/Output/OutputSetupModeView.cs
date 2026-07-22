@@ -44,7 +44,12 @@ internal sealed class OutputSetupModeView
         var focusedId = focusedInstance?.SymbolChildId ?? Guid.Empty;
         if (focusedId != _lastFocusedId)
         {
-            _entitySelection.Clear();
+            // One shared selection: focusing a SendToOutput in the graph selects its CONTENT row; a later
+            // sidebar pick (a surface/output) simply replaces it — so we never show two selected rows.
+            if (focusedInstance is IOutputSink)
+                _entitySelection.Select(SetupEntitySelection.EntityKind.ContentSource, focusedId);
+            else
+                _entitySelection.Clear();
 
             // The panel follows the OE-editing context: a focused sink opens it (its surfaces/outputs are
             // at hand); selecting any other op — or clicking the graph background — closes it. Only on the
@@ -62,6 +67,8 @@ internal sealed class OutputSetupModeView
                 _outputView.Draw(surfaceOutputId, entityId);
             else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage)
                 _referenceImageView.Draw(entityId);
+            else if (entityKind == SetupEntitySelection.EntityKind.ContentSource && TryGetContentOutput(entityId, context, out var contentOutputId))
+                _outputView.Draw(contentOutputId);
             else
                 SetupPanel.DrawEntityCard(entityKind, entityId);
         }
@@ -78,6 +85,19 @@ internal sealed class OutputSetupModeView
 
     /// <summary>The output a focused sink's editing view should show: its target directly if that's an output,
     /// otherwise the target surface's first mapped output.</summary>
+    /// <summary>The output a selected content row (a live sink, by child-id) resolves to.</summary>
+    private static bool TryGetContentOutput(Guid childId, EvaluationContext context, out Guid outputId)
+    {
+        outputId = Guid.Empty;
+        foreach (var sink in OutputSinkRegistry.Sinks)
+        {
+            if (sink is Instance instance && instance.SymbolChildId == childId)
+                return TryGetSinkOutput(sink, context, out outputId);
+        }
+
+        return false;
+    }
+
     private static bool TryGetSinkOutput(IOutputSink sink, EvaluationContext context, out Guid outputId)
     {
         var targetId = sink.GetTargetId(context);
@@ -95,6 +115,16 @@ internal sealed class OutputSetupModeView
     {
         if (CustomComponents.DrawMenuItem(1, "Show Setup Panel", isChecked: _showSetupPanel))
             _showSetupPanel = !_showSetupPanel;
+    }
+
+    /// <summary>The sidebar toggle icon for the output toolbar — filled when open, dimmed when closed.</summary>
+    public void DrawPanelToggleButton()
+    {
+        var state = _showSetupPanel ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default;
+        if (CustomComponents.IconButton(Icon.SidePanelLeft, Vector2.Zero, state))
+            _showSetupPanel = !_showSetupPanel;
+
+        ImGui.SameLine();
     }
 
     /// <summary>The output a selected surface should be shown on — its first mapping's output.</summary>

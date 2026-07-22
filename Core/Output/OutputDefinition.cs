@@ -107,6 +107,9 @@ public sealed class OutputDefinition
     public Int2 CanvasResolution = new(1920, 1080);
     public ProjectorCamera? Camera;
 
+    /// <summary>Pause presenting to this output without dropping its device binding (e.g. mute an NDI feed).</summary>
+    public bool Send = true;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -114,6 +117,7 @@ public sealed class OutputDefinition
         writer.WriteString("Name", Name);
         writer.WriteString("Kind", Kind);
         writer.WriteInt2("CanvasResolution", CanvasResolution);
+        writer.WriteValue("Send", Send);
         if (Camera != null)
         {
             writer.WritePropertyName("Camera");
@@ -131,6 +135,7 @@ public sealed class OutputDefinition
                              Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
                              Kind = token.ReadValueSafe("Kind", Kinds.Display) ?? Kinds.Display,
                              CanvasResolution = OutputJson.ReadInt2(token["CanvasResolution"], new Int2(1920, 1080)),
+                             Send = token.ReadValueSafe("Send", true),
                          };
 
         if (token["Camera"] is JObject cameraToken)

@@ -5,7 +5,9 @@ using T3.Core.Output;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.Output;
 
@@ -48,8 +50,10 @@ internal static class SetupPanel
                 var binding = machineConfig.TryGetBinding(output.Id);
                 var outputId = output.Id;
                 var status = binding == null ? null : $"Display {binding.DisplayIndex + 1}";
+                var bindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
                 DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Output, output.Id, output.Name, status,
-                              onDelete: () => DeleteOutput(setup, machineConfig, outputId), leadingIcon: Icon.Projector);
+                              onDelete: () => DeleteOutput(setup, machineConfig, outputId), leadingIcon: Icon.Projector,
+                              drawExtraMenuItems: bindable ? () => DrawOutputBindingSubMenu(output, machineConfig) : null);
             }
         }
 
@@ -250,7 +254,7 @@ internal static class SetupPanel
 
             var (icon, text) = DescribeSinkTargetGutter(setup, sinks[i].GetTargetId(_sinkContext));
             DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ContentSource, instance.SymbolChildId, SinkName(instance), text,
-                          leadingIcon: Icon.Slice, trailingIcon: icon);
+                          leadingIcon: Icon.FileImage, trailingIcon: icon);
         }
     }
 
@@ -273,6 +277,22 @@ internal static class SetupPanel
         }
 
         return null;
+    }
+
+    // Select the content's SendToOutput op in the focused graph and frame it — the sidebar → graph half of
+    // the sync (the graph → sidebar highlight is handled by the highlighted-content id).
+    private static void RevealContentOpInGraph(Guid childId)
+    {
+        var instance = FindSinkInstance(childId);
+        var parentSymbolUi = instance?.Parent?.GetSymbolUi();
+        if (instance == null || parentSymbolUi == null || ProjectView.Focused == null)
+            return;
+
+        if (!parentSymbolUi.ChildUis.TryGetValue(instance.SymbolChildId, out var childUi))
+            return;
+
+        ProjectView.Focused.NodeSelection.SetSelection(childUi, instance);
+        FitViewToSelectionHandling.FitViewToSelection();
     }
 
     private static string DescribeSinkTarget(Setup setup, Guid targetId)
@@ -298,11 +318,11 @@ internal static class SetupPanel
         {
             var surface = setup.Surfaces.Find(s => s.Id == targetId);
             if (surface != null)
-                return (Icon.Grid, string.IsNullOrEmpty(surface.Name) ? "surface" : surface.Name);
+                return (Icon.Grid, string.IsNullOrEmpty(surface.Name) ? "surface" : Abbreviate(surface.Name));
 
             var output = setup.Outputs.Find(o => o.Id == targetId);
             if (output != null)
-                return (Icon.Projector, string.IsNullOrEmpty(output.Name) ? "output" : output.Name);
+                return (Icon.Projector, string.IsNullOrEmpty(output.Name) ? "output" : Abbreviate(output.Name));
         }
 
         return (null, "unbound");
@@ -347,7 +367,7 @@ internal static class SetupPanel
             return (null, null);
 
         var firstOutput = setup.Outputs.Find(o => o.Id == surface.OutputMappings[0].OutputId);
-        var name = firstOutput == null ? "?" : firstOutput.Name;
+        var name = firstOutput == null ? "?" : Abbreviate(firstOutput.Name);
         var text = surface.OutputMappings.Count > 1 ? $"{name} +{surface.OutputMappings.Count - 1}" : name;
         return (Icon.Projector, text);
     }
@@ -438,8 +458,21 @@ internal static class SetupPanel
 
     private static void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection)
     {
-        ImGui.SetNextItemWidth(-1);
-        if (ImGui.BeginCombo("##setupSwitcher", setup.Name, ImGuiComboFlags.HeightLargest))
+        var scale = T3Ui.UiScaleFactor;
+        var pos = ImGui.GetCursorScreenPos();
+        var height = ImGui.GetFrameHeight();
+        if (ImGui.InvisibleButton("##setupSwitcher", new Vector2(ImGui.GetContentRegionAvail().X, height)))
+            ImGui.OpenPopup("##setupMenu");
+
+        // Label + chevron drawn over the button so the chevron sits next to the name (not far-right like a combo).
+        ImGui.SetCursorScreenPos(new Vector2(pos.X + 2 * scale, pos.Y));
+        ImGui.AlignTextToFramePadding();
+        CustomComponents.StylizedText(setup.Name, Fonts.FontNormal, UiColors.Text);
+        ImGui.SameLine(0, 4 * scale);
+        DrawInlineIcon(Icon.ChevronDown, UiColors.TextMuted.Rgba);
+        ImGui.SetCursorScreenPos(new Vector2(pos.X, pos.Y + height));
+
+        if (ImGui.BeginPopup("##setupMenu"))
         {
             CustomComponents.MenuGroupHeader("Setups");
             _availableNames.Clear();
@@ -476,8 +509,23 @@ internal static class SetupPanel
                     selection.Clear();
             }
 
-            ImGui.EndCombo();
+            ImGui.EndPopup();
         }
+    }
+
+    // Compact gutter form: uppercase letters + digits ("Surface 1" → "S1", "WallFront" → "WF"), falling back
+    // to the full name when there's nothing to abbreviate (all-lowercase).
+    private static string Abbreviate(string name)
+    {
+        Span<char> buffer = stackalloc char[6];
+        var length = 0;
+        foreach (var c in name)
+        {
+            if ((char.IsUpper(c) || char.IsDigit(c)) && length < buffer.Length)
+                buffer[length++] = c;
+        }
+
+        return length >= 1 ? new string(buffer[..length]) : name;
     }
 
     // An icon drawn as a font glyph on the current text line — aligns with AlignTextToFramePadding'd text,
@@ -495,6 +543,15 @@ internal static class SetupPanel
     private static bool DrawSectionLabel(string title)
     {
         FormInputs.AddVerticalSpace(6);
+
+        // Section top edge: a black divider line + a rounded-NW corner notch, giving the section a rounded top.
+        var scale = T3Ui.UiScaleFactor;
+        var dl = ImGui.GetWindowDrawList();
+        var edgeY = (float)Math.Round(ImGui.GetCursorScreenPos().Y);
+        var winMinX = ImGui.GetWindowPos().X;
+        dl.AddLine(new Vector2(winMinX, edgeY), new Vector2(winMinX + ImGui.GetWindowWidth(), edgeY), UiColors.BackgroundFull, 1 * scale);
+        Icons.DrawIconAtScreenPosition(Icon.RoundingNW, new Vector2(winMinX, edgeY), dl, UiColors.BackgroundFull.Fade(0.5f));
+
         var expanded = _expandedSections.GetValueOrDefault(title, true);
 
         ImGui.PushID(title);
@@ -527,11 +584,13 @@ internal static class SetupPanel
     }
 
     private static void DrawEntityRow(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id, string name, string? status,
-                                      Action? onDelete = null, Action? onRemoveFromOutput = null, Icon? leadingIcon = null, Icon? trailingIcon = null)
+                                      Action? onDelete = null, Action? onRemoveFromOutput = null, Icon? leadingIcon = null, Icon? trailingIcon = null,
+                                      Action? drawExtraMenuItems = null)
     {
         var scale = T3Ui.UiScaleFactor;
         var rounding = 4 * scale;
-        var height = ImGui.GetFrameHeight();
+        // Odd height so a 15px icon centers exactly ((23-15)/2 = 4).
+        var height = (float)Math.Round(23 * scale);
 
         ImGui.PushID(id.GetHashCode());
 
@@ -563,21 +622,30 @@ internal static class SetupPanel
             else if (io.KeyShift)
                 selection.Add(kind, id);
             else
+            {
                 selection.Select(kind, id);
+                // A content row is a live op — a plain click selects it in the graph and brings it into view.
+                if (kind == SetupEntitySelection.EntityKind.ContentSource)
+                    RevealContentOpInGraph(id);
+            }
         }
 
         if (isHovered)
         {
             _pendingHoveredKind = kind;
             _pendingHoveredId = id;
+            if (kind == SetupEntitySelection.EntityKind.ContentSource)
+                FrameStats.AddHoveredId(id);
         }
 
         HandleRowDragDrop(setup, kind, id);
 
-        if (onDelete != null || onRemoveFromOutput != null)
+        if (onDelete != null || onRemoveFromOutput != null || drawExtraMenuItems != null)
         {
             CustomComponents.ContextMenuForItem(() =>
                                                 {
+                                                    drawExtraMenuItems?.Invoke();
+
                                                     if (onRemoveFromOutput != null && CustomComponents.DrawMenuItem(1, "Remove from output"))
                                                         onRemoveFromOutput();
 
@@ -595,10 +663,10 @@ internal static class SetupPanel
         if (!isSelected && IsReferenced(kind, id))
             dl.AddRect(rowMin, rowMax, UiColors.StatusAutomated.Fade(0.6f), rounding);
 
-        // Content over the background (the selectable is transparent). One AlignTextToFramePadding plus
-        // font-glyph icons keeps icon and text on a single vertically-centered baseline.
-        ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 6 * scale, rowMin.Y));
-        ImGui.AlignTextToFramePadding();
+        // Content over the background (the selectable is transparent), vertically centered in the fixed row
+        // (the -1px nudges the label up so it isn't sitting low).
+        var contentY = (float)Math.Round(rowMin.Y + (height - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
+        ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 6 * scale, contentY));
         if (leadingIcon.HasValue)
         {
             DrawInlineIcon(leadingIcon.Value, UiColors.TextMuted.Rgba);
@@ -609,8 +677,7 @@ internal static class SetupPanel
 
         if (trailingIcon.HasValue || status != null)
         {
-            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + (rowMax.X - rowMin.X) * 0.55f, rowMin.Y));
-            ImGui.AlignTextToFramePadding();
+            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + (rowMax.X - rowMin.X) * 0.55f, contentY));
             if (trailingIcon.HasValue)
             {
                 DrawInlineIcon(Icon.ArrowRight, UiColors.TextMuted.Fade(0.3f).Rgba);
@@ -660,6 +727,15 @@ internal static class SetupPanel
 
         setup.Surfaces.RemoveAll(s => s.Id == surfaceId);
         OutputSetupHandling.SaveActive();
+    }
+
+    private static void DrawOutputBindingSubMenu(OutputDefinition output, MachineConfig machineConfig)
+    {
+        if (CustomComponents.DrawSubMenu(3, "Bind to display"))
+        {
+            ResolutionHandling.DrawBindingMenuItems(output, machineConfig);
+            ImGui.EndMenu();
+        }
     }
 
     // Deleting an output cascades: drop every surface's mapping onto it, unbind the display, and stop

@@ -308,11 +308,13 @@ internal static class Icons
             new(Icon.Apply, slotIndex: 151),
             new(Icon.DragIndicator, slotIndex: 152),
             new(Icon.Projector, slotIndex: 153),
-            new(Icon.Slice, slotIndex: 154),
-            new(Icon.RoundingNW, slotIndex: 155),
-            new(Icon.RoundingNE, slotIndex: 156),
-            new(Icon.RoundingSE, slotIndex: 157),
-            new(Icon.RoundingSW, slotIndex: 158),
+            new(Icon.Mapping, slotIndex: 154),
+            new(Icon.Slice, slotIndex: 155),
+            new(Icon.RoundingNW, slotIndex: 156),
+            new(Icon.RoundingNE, slotIndex: 157),
+            new(Icon.RoundingSE, slotIndex: 158),
+            new(Icon.RoundingSW, slotIndex: 159),
+            new(Icon.ChevronUpDown, slotIndex: 160),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -489,5 +491,7 @@ public enum Icon
     RoundingNW,
     RoundingNE,
     RoundingSE,
-    RoundingSW
+    RoundingSW,
+    Mapping,
+    ChevronUpDown
 }
