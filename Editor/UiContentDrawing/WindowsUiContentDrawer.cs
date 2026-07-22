@@ -173,6 +173,8 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 }
                 else
                 {
+                    // No texture yet (bound output with nothing composited, or update paused) — the
+                    // window just stays cleared this frame. Not an error, so don't log per-frame.
                     if (viewer.Texture is { IsDisposed: false })
                     {
                         if (_viewWindowBackgroundSrv == null ||
@@ -185,10 +187,6 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                         ProgramWindows.SetRasterizerState(SharedResources.ViewWindowRasterizerState);
                         ProgramWindows.SetPixelShaderSRV(_viewWindowBackgroundSrv);
                         ProgramWindows.DrawTextureToSecondaryRenderOutput();
-                    }
-                    else
-                    {
-                        Log.Debug($"Null {nameof(ShaderResourceView)} for 2nd render view");
                     }
                 }
             }

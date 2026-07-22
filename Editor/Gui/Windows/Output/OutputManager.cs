@@ -83,7 +83,13 @@ internal static class OutputManager
         }
 
         PresentedOutputId = boundOutput.Id;
-        ProgramWindows.Viewer.Texture = RenderOutput(boundOutput.Id);
+
+        // RenderOutput returns null when there's nothing to composite (no active sink for this
+        // output, empty target list, paused update). Assigning null trips the Texture2D→SharpDX
+        // implicit conversion (dereferences TextureObject) — keep the last presented frame instead.
+        var composite = RenderOutput(boundOutput.Id);
+        if (composite != null)
+            ProgramWindows.Viewer.Texture = composite;
 
         if (!WindowManager.ShowSecondaryRenderWindow || _presentedDisplayIndex != binding.DisplayIndex)
         {
@@ -298,8 +304,12 @@ internal static class OutputManager
 
         foreach (var sink in OutputSinkRegistry.Sinks)
         {
-            if (sink.GetTargetId(_context!) == targetId)
-                return sink;
+            var targets = sink.GetTargetIds(_context!);
+            for (var i = 0; i < targets.Count; i++)
+            {
+                if (targets[i] == targetId)
+                    return sink;
+            }
         }
 
         return null;

@@ -29,8 +29,10 @@
       "DefaultValue": true
     },
     {
-      "Id": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*TargetId*/,
-      "DefaultValue": "00000000-0000-0000-0000-000000000000"
+      "Id": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*TargetIds*/,
+      "DefaultValue": {
+        "Values": []
+      }
     }
   ],
   "Children": [],

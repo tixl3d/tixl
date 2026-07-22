@@ -100,7 +100,12 @@ internal sealed class OutputSetupModeView
     /// otherwise the target surface's first mapped output.</summary>
     private static bool TryGetSinkOutput(IOutputSink sink, EvaluationContext context, out Guid outputId)
     {
-        var targetId = sink.GetTargetId(context);
+        outputId = Guid.Empty;
+        var targets = sink.GetTargetIds(context);
+        if (targets.Count == 0)
+            return false;
+
+        var targetId = targets[0];
         if (ActiveSetup.TryFindOutput(targetId) != null)
         {
             outputId = targetId;

@@ -33,12 +33,11 @@
       }
     },
     {
-      "InputId": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*TargetId*/,
+      "InputId": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*TargetIds*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      },
-      "Usage": "OutputSetupEntities"
+      }
     }
   ],
   "SymbolChildUis": [],

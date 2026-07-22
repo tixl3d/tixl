@@ -250,6 +250,33 @@ public partial class SymbolPackage
                      },
                      jsonToken => jsonToken.ReadListSafe<string>("Values"));
 
+        RegisterType(typeof(System.Collections.Generic.List<Guid>), "List<Guid>",
+                     () => new InputValue<List<Guid>>([]),
+                     (writer, obj) =>
+                     {
+                         var list = (List<Guid>)obj;
+                         writer.WriteStartObject();
+                         writer.WritePropertyName("Values");
+                         writer.WriteStartArray();
+                         list.ForEach(g => writer.WriteValue(g.ToString()));
+                         writer.WriteEndArray();
+                         writer.WriteEndObject();
+                     },
+                     jsonToken =>
+                     {
+                         var result = new List<Guid>();
+                         if (jsonToken["Values"] is { } entries)
+                         {
+                             foreach (var entry in entries)
+                             {
+                                 if (Guid.TryParse(entry.Value<string>(), out var id))
+                                     result.Add(id);
+                             }
+                         }
+
+                         return result;
+                     });
+
         RegisterType(typeof(Int2), nameof(Int2),
                      InputDefaultValueCreator<Int2>,
                      (writer, obj) =>

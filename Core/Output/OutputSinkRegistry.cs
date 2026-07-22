@@ -15,18 +15,22 @@ namespace T3.Core.Output;
 /// </summary>
 public interface IOutputSink
 {
-    /// <summary>The setup entity this content is for: a Surface/Region (mapped) or an Output (direct full-frame).
-    /// Resolved against the active setup by the host; <see cref="Guid.Empty"/> = unbound.</summary>
-    Guid GetTargetId(EvaluationContext context);
+    /// <summary>The setup entities this content is shown on — surfaces (mapped) and/or outputs (direct
+    /// full-frame). One content can fan out to several surfaces (the same feed mirrored). Empty = unbound.</summary>
+    IReadOnlyList<Guid> GetTargetIds(EvaluationContext context);
+
+    /// <summary>Replaces the target set (the host adds/removes by drag).</summary>
+    void SetTargets(IReadOnlyList<Guid> targetIds);
+
+    /// <summary>Drops a target id from the set if present (and the input isn't procedurally driven).
+    /// Called when a surface/output is deleted so no dangling reference lingers in the op's parameter.</summary>
+    void RemoveTarget(Guid targetId);
 
     /// <summary>The slice of the source texture to show, as a UV rect (xMin, yMin, xMax, yMax). Full = (0,0,1,1).</summary>
     Vector4 GetSourceRect(EvaluationContext context);
 
     Vector4 GetColor(EvaluationContext context);
     Texture2D? GetContent(EvaluationContext context);
-
-    /// <summary>Points this sink at a new target (a surface/region or output id) — the host retargets by drag.</summary>
-    void SetTarget(Guid targetId);
 
     /// <summary>When false the host stops invalidating this content, freezing it at its last frame.</summary>
     bool GetUpdateEnabled(EvaluationContext context);

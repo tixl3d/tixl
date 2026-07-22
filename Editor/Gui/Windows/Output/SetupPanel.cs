@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Output;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.InputUi.ListInputs;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -20,6 +21,15 @@ namespace T3.Editor.Gui.Windows.Output;
 /// </summary>
 internal static class SetupPanel
 {
+    /// <summary>Installs the Guid-list parameter hooks so SendToOutput.TargetIds shows target names and a
+    /// surface/output picker in the op parameter window. Called from UI registration at startup, so it works
+    /// even before the setup sidebar has been drawn (which is what a lazy static ctor would have waited for).</summary>
+    internal static void RegisterGuidListHooks()
+    {
+        GuidListLabels.Resolver = ResolveTargetLabel;
+        GuidListLabels.Picker = PickTarget;
+    }
+
     public static void Draw(SetupEntitySelection selection)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
@@ -212,7 +222,7 @@ internal static class SetupPanel
         var sinks = OutputSinkRegistry.Sinks;
         for (var i = 0; i < sinks.Count; i++)
         {
-            if (sinks[i].GetTargetId(_sinkContext) == output.Id && sinks[i] is Instance instance)
+            if (sinks[i] is Instance instance && SinkTargets(sinks[i], output.Id))
                 FormInputsNarrow.DrawListItem(SinkName(instance));
         }
     }
@@ -227,6 +237,11 @@ internal static class SetupPanel
 
         _sinkContext ??= new EvaluationContext();
         _sinkContext.Reset();
+
+        // Reset() leaves RequestedResolution at 0×0; pulling the content preview at that size makes the
+        // graph's auto-sized RenderTargets bail ("invalid texture size") and stop updating. Preview at
+        // the resolution the content would render at when bound.
+        _sinkContext.RequestedResolution = ContentPreviewResolution(setup);
 
         var update = sink.GetUpdateEnabled(_sinkContext);
         if (FormInputsNarrow.DrawCheckbox("Update", ref update, "When off, freezes this content at its last frame."))
@@ -286,11 +301,15 @@ internal static class SetupPanel
             {
                 if (FindSinkInstance(_hoveredId) is IOutputSink sink)
                 {
-                    var targetId = sink.GetTargetId(_sinkContext);
-                    if (setup.Surfaces.Exists(s => s.Id == targetId))
-                        _referenced.Add((SetupEntitySelection.EntityKind.Surface, targetId));
-                    else if (setup.Outputs.Exists(o => o.Id == targetId))
-                        _referenced.Add((SetupEntitySelection.EntityKind.Output, targetId));
+                    var targets = sink.GetTargetIds(_sinkContext);
+                    for (var i = 0; i < targets.Count; i++)
+                    {
+                        var targetId = targets[i];
+                        if (setup.Surfaces.Exists(s => s.Id == targetId))
+                            _referenced.Add((SetupEntitySelection.EntityKind.Surface, targetId));
+                        else if (setup.Outputs.Exists(o => o.Id == targetId))
+                            _referenced.Add((SetupEntitySelection.EntityKind.Output, targetId));
+                    }
                 }
 
                 break;
@@ -313,7 +332,7 @@ internal static class SetupPanel
         var sinks = OutputSinkRegistry.Sinks;
         for (var i = 0; i < sinks.Count; i++)
         {
-            if (sinks[i] is Instance instance && sinks[i].GetTargetId(_sinkContext!) == targetId)
+            if (sinks[i] is Instance instance && SinkTargets(sinks[i], targetId))
                 _referenced.Add((SetupEntitySelection.EntityKind.ContentSource, instance.SymbolChildId));
         }
     }
@@ -383,9 +402,19 @@ internal static class SetupPanel
             return;
         }
 
-        // A content send dropped on a surface or output points its target there (persisted on the op).
+        // A content send dropped on a surface or output adds it to the send's targets (one content can fan
+        // out to several surfaces). Persisted on the op.
         if (dragKind == SetupEntitySelection.EntityKind.ContentSource && FindSinkInstance(dragId) is IOutputSink sink)
-            sink.SetTarget(targetId);
+        {
+            _sinkContext ??= new EvaluationContext();
+            _sinkContext.Reset();
+            var targets = new List<Guid>(sink.GetTargetIds(_sinkContext));
+            if (!targets.Contains(targetId))
+            {
+                targets.Add(targetId);
+                sink.SetTargets(targets);
+            }
+        }
     }
 
     private static Surface.OutputMapping CreateDefaultMapping(OutputDefinition output)
@@ -419,7 +448,7 @@ internal static class SetupPanel
             if (sinks[i] is not Instance instance)
                 continue;
 
-            var (icon, text) = DescribeSinkTargetGutter(setup, sinks[i].GetTargetId(_sinkContext));
+            var (icon, text) = DescribeSinkTargetsGutter(setup, sinks[i].GetTargetIds(_sinkContext));
             DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ContentSource, instance.SymbolChildId, SinkName(instance), text,
                           leadingIcon: Icon.FileImage, trailingIcon: icon);
         }
@@ -462,37 +491,39 @@ internal static class SetupPanel
         FitViewToSelectionHandling.FitViewToSelection();
     }
 
-    private static string DescribeSinkTarget(Setup setup, Guid targetId)
+    // Out-gutter for a content send: the first target's type icon + short label, "+N" for extra targets.
+    private static (Icon? icon, string text) DescribeSinkTargetsGutter(Setup setup, IReadOnlyList<Guid> targets)
     {
-        if (targetId == Guid.Empty)
-            return "unbound";
+        if (targets.Count == 0)
+            return (null, "unbound");
 
+        var (icon, name) = DescribeSingleTarget(setup, targets[0]);
+        return (icon, targets.Count > 1 ? $"{name} +{targets.Count - 1}" : name);
+    }
+
+    private static (Icon? icon, string name) DescribeSingleTarget(Setup setup, Guid targetId)
+    {
         var surface = setup.Surfaces.Find(s => s.Id == targetId);
         if (surface != null)
-            return "→ " + (string.IsNullOrEmpty(surface.Name) ? "surface" : surface.Name);
+            return (Icon.Grid, SurfaceShortLabel(surface));
 
         var output = setup.Outputs.Find(o => o.Id == targetId);
         if (output != null)
-            return "→ " + (string.IsNullOrEmpty(output.Name) ? "output" : output.Name);
+            return (Icon.Projector, string.IsNullOrEmpty(output.Name) ? "output" : Abbreviate(output.Name));
 
-        return "→ ?";
+        return (Icon.Grid, "?");
     }
 
-    // Out-gutter for a content send: the target's type icon (grid = surface, projector = output) + its name.
-    private static (Icon? icon, string text) DescribeSinkTargetGutter(Setup setup, Guid targetId)
+    private static bool SinkTargets(IOutputSink sink, Guid targetId)
     {
-        if (targetId != Guid.Empty)
+        var targets = sink.GetTargetIds(_sinkContext!);
+        for (var i = 0; i < targets.Count; i++)
         {
-            var surface = setup.Surfaces.Find(s => s.Id == targetId);
-            if (surface != null)
-                return (Icon.Grid, SurfaceShortLabel(surface));
-
-            var output = setup.Outputs.Find(o => o.Id == targetId);
-            if (output != null)
-                return (Icon.Projector, string.IsNullOrEmpty(output.Name) ? "output" : Abbreviate(output.Name));
+            if (targets[i] == targetId)
+                return true;
         }
 
-        return (null, "unbound");
+        return false;
     }
 
     // Surfaces as a tree: roots first, each followed by its children (nested by ParentId). The mapped
@@ -613,7 +644,9 @@ internal static class SetupPanel
                     _sinkContext.Reset();
                     CustomComponents.StylizedText("Content · SendToOutput", Fonts.FontSmall, UiColors.TextMuted);
                     CustomComponents.StylizedText(SinkName(instance), Fonts.FontLarge, UiColors.Text);
-                    CustomComponents.StylizedText(DescribeSinkTarget(setup, sink.GetTargetId(_sinkContext)), Fonts.FontNormal, UiColors.TextMuted);
+                    var targets = sink.GetTargetIds(_sinkContext);
+                    var (_, targetText) = DescribeSinkTargetsGutter(setup, targets);
+                    CustomComponents.StylizedText(targetText, Fonts.FontNormal, UiColors.TextMuted);
                 }
 
                 break;
@@ -681,6 +714,92 @@ internal static class SetupPanel
     }
 
     // A surface's compact label: its explicit ShortName, else the auto-abbreviation.
+    /// <summary>Full-width dropdown for a SendToOutput target-id list item: lists the active setup's surfaces
+    /// then outputs; picking one returns the new id. The row's ImGui ID stack keeps each item's popup distinct.</summary>
+    private static bool PickTarget(Guid current, float width, out Guid picked)
+    {
+        picked = current;
+
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+        {
+            ImGui.BeginDisabled();
+            ImGui.Button("(no setup)", new Vector2(width, 0));
+            ImGui.EndDisabled();
+            return false;
+        }
+
+        // Stable "###" id so the button keeps its identity as its label changes.
+        if (ImGui.Button(ResolveTargetLabel(current) + "###pickTarget", new Vector2(width, 0)))
+            ImGui.OpenPopup("##pickTargetPopup");
+
+        var changed = false;
+        if (ImGui.BeginPopup("##pickTargetPopup"))
+        {
+            for (var i = 0; i < setup.Surfaces.Count; i++)
+            {
+                var surface = setup.Surfaces[i];
+                if (ImGui.Selectable($"{surface.Name}##s{i}", surface.Id == current))
+                {
+                    picked = surface.Id;
+                    changed = true;
+                }
+            }
+
+            if (setup.Surfaces.Count > 0 && setup.Outputs.Count > 0)
+                ImGui.Separator();
+
+            for (var i = 0; i < setup.Outputs.Count; i++)
+            {
+                var output = setup.Outputs[i];
+                if (ImGui.Selectable($"{output.Name}##o{i}", output.Id == current))
+                {
+                    picked = output.Id;
+                    changed = true;
+                }
+            }
+
+            ImGui.EndPopup();
+        }
+
+        return changed;
+    }
+
+    /// <summary>Names a SendToOutput target id for the parameter-window Guid list: a surface's short label
+    /// or an output's name; "(missing)" when it resolves to nothing in the active setup (e.g. a target whose
+    /// surface was deleted).</summary>
+    private static string ResolveTargetLabel(Guid id)
+    {
+        if (id == Guid.Empty)
+            return "(none)";
+
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return id.ToString("D")[..8];
+
+        var surface = setup.Surfaces.Find(s => s.Id == id);
+        if (surface != null)
+            return SurfaceShortLabel(surface);
+
+        var output = setup.Outputs.Find(o => o.Id == id);
+        if (output != null)
+            return output.Name;
+
+        return "(missing)";
+    }
+
+    // A valid render resolution for previewing a content graph: the first output's canvas size, else a
+    // 1080p fallback. Never 0×0 (which auto-sized RenderTargets treat as invalid and skip).
+    private static T3.Core.DataTypes.Vector.Int2 ContentPreviewResolution(Setup setup)
+    {
+        for (var i = 0; i < setup.Outputs.Count; i++)
+        {
+            var r = setup.Outputs[i].CanvasResolution;
+            if (r.Width > 0 && r.Height > 0)
+                return r;
+        }
+
+        return new T3.Core.DataTypes.Vector.Int2(1920, 1080);
+    }
+
     private static string SurfaceShortLabel(Surface surface)
     {
         return string.IsNullOrEmpty(surface.ShortName) ? Abbreviate(surface.Name) : surface.ShortName;
@@ -912,6 +1031,11 @@ internal static class SetupPanel
         }
 
         setup.Surfaces.RemoveAll(s => s.Id == surfaceId);
+
+        // Prune the deleted surface from every send that targeted it, so no dangling id lingers.
+        foreach (var sink in OutputSinkRegistry.Sinks)
+            sink.RemoveTarget(surfaceId);
+
         OutputSetupHandling.SaveActive();
     }
 
@@ -931,6 +1055,10 @@ internal static class SetupPanel
         setup.Outputs.RemoveAll(o => o.Id == outputId);
         foreach (var surface in setup.Surfaces)
             surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
+
+        // Prune the deleted output from every send that targeted it directly (full-frame).
+        foreach (var sink in OutputSinkRegistry.Sinks)
+            sink.RemoveTarget(outputId);
 
         machineConfig.Unbind(outputId);
         if (OutputManager.PresentedOutputId == outputId)
