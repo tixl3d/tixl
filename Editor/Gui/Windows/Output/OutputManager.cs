@@ -320,6 +320,40 @@ internal static class OutputManager
 
     /// <summary>The first sink whose target is <paramref name="targetId"/> — a surface (mapped) or an output
     /// (the direct full-frame path).</summary>
+    /// <summary>
+    /// Aspect (width/height) of the content feeding a target, accounting for its source rect — the shape the
+    /// source has before it gets fitted onto the surface. Used to un-squeeze it when framing the content.
+    /// False when nothing feeds the target (or before the first composite has run).
+    /// </summary>
+    public static bool TryGetTargetContentAspect(Guid targetId, out float aspect)
+    {
+        aspect = 1f;
+        if (_context == null)
+            return false;
+
+        var sink = FindSinkForTarget(targetId);
+        var content = sink?.GetContent(_context);
+        if (content is not { IsDisposed: false })
+            return false;
+
+        var rect = sink!.GetSourceRect(_context);
+        var uWidth = rect.Z - rect.X;
+        var uHeight = rect.W - rect.Y;
+        if (uWidth <= 0 || uHeight <= 0)
+        {
+            uWidth = 1;
+            uHeight = 1;
+        }
+
+        var width = content.Description.Width * uWidth;
+        var height = content.Description.Height * uHeight;
+        if (width <= 0 || height <= 0)
+            return false;
+
+        aspect = width / height;
+        return true;
+    }
+
     private static IOutputSink? FindSinkForTarget(Guid targetId)
     {
         if (targetId == Guid.Empty)

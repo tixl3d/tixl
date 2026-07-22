@@ -54,35 +54,70 @@ internal sealed class SetupOutputView
         if (_editMode == EditMode.Calibrate)
             DrawCalibrationControls(output);
 
-        // Straighten is a continuous parameter, not a hard mode switch: Original (0) and Straight (1) are the
-        // two ends of a global rectify applied to the whole output canvas, animated so the view morphs.
-        var straightenTarget = _editMode == EditMode.Straight ? 1f : 0f;
-        var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-        _straightenT += (straightenTarget - _straightenT) * (1f - MathF.Exp(-dt * 14f));
-        if (MathF.Abs(_straightenT - straightenTarget) < 0.0005f)
-            _straightenT = straightenTarget;
+        // Original (0) → Straight (1) → Content (2) is one continuous axis, not three modes. The composite is
+        // the content texture already warped through the corner-pin, so all three are the same pixels at
+        // different points of one homography chain — a blended rectify plus a framing that tightens onto the
+        // focused surface. No cross-fading anywhere. Time-driven with an ease-in power (slow start, fast
+        // finish): the visual midpoint lands at 75% of the duration.
+        var hasFocusBasis = _focusedSurfaceId != Guid.Empty
+                            && setup.Surfaces.Exists(s => s.Id == _focusedSurfaceId
+                                                          && s.OutputMappings.Exists(m => m.OutputId == outputId));
+
+        var target = !hasFocusBasis
+                         ? 0f
+                         : _editMode switch
+                               {
+                                   EditMode.Straight => 1f,
+                                   EditMode.Content  => 2f,
+                                   _                 => 0f,
+                               };
+
+        if (target != _morphTarget)
+        {
+            _morphTarget = target;
+            _morphFrom = _viewMorph;
+            _morphProgress = 0f;
+            _morphFromScope = _canvas.GetCurrentScope(); // so the pan/zoom eases too, instead of snapping
+        }
+
+        if (_morphProgress < 1f)
+        {
+            var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
+            _morphProgress = MathF.Min(1f, _morphProgress + dt / _morphDuration);
+            var eased = MathF.Pow(_morphProgress, _morphEaseExponent);
+            _viewMorph = _morphProgress >= 1f ? _morphTarget : _morphFrom + (_morphTarget - _morphFrom) * eased;
+        }
 
         _canvas.UpdateCanvas(out _);
 
-        if (_editMode == EditMode.Content)
-            DrawContentCanvas(outputId);
-        else if (_editMode == EditMode.Calibrate)
+        if (_editMode == EditMode.Calibrate)
             DrawCalibrationMarkers(output, outputId);
+        else if (_editMode == EditMode.Content && !hasFocusBasis)
+            DrawContentCanvas(outputId); // no surface to frame onto — plain content preview
         else
-            DrawOutputCanvas(setup, output, outputId); // Output and Straight, morphed by _straightenT
+            DrawOutputCanvas(setup, output, outputId); // Original / Straight / Content, morphed by _viewMorph
     }
 
-    // The output canvas carries a global rectify transform R (output px → view space): identity at
-    // _straightenT 0 (Original), and at 1 it maps the focused surface's quad onto its own axis-aligned
-    // bounding box, carrying the whole composite and every surface with it. Blending R makes the modes morph.
+    // The output canvas carries a global rectify transform R (output px → view space): identity at _viewMorph
+    // 0 (Original), and by 1 (Straight) it maps the focused surface's quad onto its own axis-aligned bounding
+    // box, carrying the whole composite and every surface with it. From 1 to 2 (Content) R holds and the
+    // framing tightens onto that surface. Blending R and the framing is what makes the views morph.
     private void DrawOutputCanvas(Setup setup, OutputDefinition output, Guid outputId)
     {
         var canvasSize = new Vector2(Math.Max(1, output.CanvasResolution.Width),
                                      Math.Max(1, output.CanvasResolution.Height));
 
+        // Stage one (0→1) blends the rectify in; stage two (1→2) keeps it, drops the surround, and undoes the
+        // content→surface fit so the source ends up framed at its own aspect rather than the surface's.
+        var straighten = Math.Clamp(_viewMorph, 0f, 1f);
+        var toContent = Math.Clamp(_viewMorph - 1f, 0f, 1f);
+
+        // Pulled before the transform so the content aspect below reads a live evaluation context.
+        var composite = OutputManager.RenderOutput(outputId);
+
         // Rectify basis = the focused surface. Freeze it while it is the one being dragged, so the transform
         // doesn't chase its own edit; otherwise the live quad keeps R settled and current.
-        var basis = _straightenT > 0.0001f ? setup.Surfaces.Find(s => s.Id == _focusedSurfaceId) : null;
+        var basis = _viewMorph > 0.0001f ? setup.Surfaces.Find(s => s.Id == _focusedSurfaceId) : null;
         var basisMapping = basis?.OutputMappings.Find(m => m.OutputId == outputId);
 
         var rToView = _identity;
@@ -93,13 +128,40 @@ internal sealed class SetupOutputView
         if (basisMapping != null && basisMapping.Quad.Length >= 4)
         {
             var basisQuad = _dragOldQuad != null && _dragSurfaceId == _focusedSurfaceId ? _dragOldQuad : basisMapping.Quad;
-            var box = BoundingBoxQuad(basisQuad);
+            Bounds(basisQuad, out var quadMin, out var quadMax);
+            var pivot = basis!.Placement?.Pivot ?? Vector2.Zero;
+
+            // Straightening lands on the surface's real content canvas (metres × px/m) — so Size (m) is what
+            // gives the rectangle its aspect. Anchored at the pivot, so changing a dimension extends the rect
+            // from there rather than recentring it.
+            var straightSize = new Vector2(MathF.Max(basis.SizeInMeters.X, 0.001f),
+                                           MathF.Max(basis.SizeInMeters.Y, 0.001f)) * MathF.Max(basis.PixelsPerMeter, 1f);
+            var stageTarget = AnchoredRect(quadMin, quadMax, pivot, straightSize);
+
+            // Stage two restretches that to the content's own aspect: the composite holds the source already
+            // fitted to the surface, so mapping the quad onto this un-squeezes it. Anchored the same way.
+            if (toContent > 0f
+                && OutputManager.TryGetTargetContentAspect(basis.Id, out var contentAspect)
+                && contentAspect > 0.0001f)
+            {
+                Bounds(stageTarget, out var straightMin, out var straightMax);
+                var width = straightMax.X - straightMin.X;
+                var contentRect = AnchoredRect(straightMin, straightMax, pivot, new Vector2(width, width / contentAspect));
+                stageTarget =
+                    [
+                        Vector2.Lerp(stageTarget[0], contentRect[0], toContent),
+                        Vector2.Lerp(stageTarget[1], contentRect[1], toContent),
+                        Vector2.Lerp(stageTarget[2], contentRect[2], toContent),
+                        Vector2.Lerp(stageTarget[3], contentRect[3], toContent),
+                    ];
+            }
+
             var interp = new[]
                              {
-                                 Vector2.Lerp(basisQuad[0], box[0], _straightenT),
-                                 Vector2.Lerp(basisQuad[1], box[1], _straightenT),
-                                 Vector2.Lerp(basisQuad[2], box[2], _straightenT),
-                                 Vector2.Lerp(basisQuad[3], box[3], _straightenT),
+                                 Vector2.Lerp(basisQuad[0], stageTarget[0], straighten),
+                                 Vector2.Lerp(basisQuad[1], stageTarget[1], straighten),
+                                 Vector2.Lerp(basisQuad[2], stageTarget[2], straighten),
+                                 Vector2.Lerp(basisQuad[3], stageTarget[3], straighten),
                              };
 
             if (Homography.TryComputeQuadToQuad(basisQuad, interp, out rToView)
@@ -107,10 +169,11 @@ internal sealed class SetupOutputView
             {
                 // Frame to the focused surface's straightened bounds + margin — not the whole warped canvas,
                 // which a steep rectify sends toward infinity. Interpolated from the full canvas at t=0.
+                // The surround shrinks to nothing as we go on to Content, so the surface itself fills the view.
                 Bounds(interp, out var focusMin, out var focusMax);
-                var m = (focusMax - focusMin) * _straightSurroundFactor;
-                viewMin = Vector2.Lerp(Vector2.Zero, focusMin - m, _straightenT);
-                var viewMax = Vector2.Lerp(canvasSize, focusMax + m, _straightenT);
+                var m = (focusMax - focusMin) * _straightSurroundFactor * (1f - toContent);
+                viewMin = Vector2.Lerp(Vector2.Zero, focusMin - m, straighten);
+                var viewMax = Vector2.Lerp(canvasSize, focusMax + m, straighten);
                 viewSize = viewMax - viewMin;
             }
             else
@@ -120,17 +183,28 @@ internal sealed class SetupOutputView
             }
         }
 
-        var rectifying = _straightenT > 0.0001f;
+        var rectifying = _viewMorph > 0.0001f;
         FitToArea(viewSize, EditMode.Output, outputId);
 
         var dl = ImGui.GetWindowDrawList();
         var frameMin = _projection.CanvasToScreen(Vector2.Zero);
         var frameMax = _projection.CanvasToScreen(viewSize);
-        dl.AddRectFilled(frameMin, frameMax, UiColors.BackgroundFull.Fade(0.4f));
 
-        // The composite, transformed by R. At t=0 it's drawn 1:1; while rectifying it's warped into a scratch
-        // target so the perspective stays correct.
-        var composite = OutputManager.RenderOutput(outputId);
+        // The projector canvas boundary, carried through R like everything else. Drawing it as an axis-aligned
+        // rect around the framing window instead would read as a false edge once the view straightens — the
+        // framing is just where we render, not where the projector's coverage actually ends.
+        var canvasOutline = new[]
+                                {
+                                    _projection.CanvasToScreen(rToView.TransformPoint(Vector2.Zero) - viewMin),
+                                    _projection.CanvasToScreen(rToView.TransformPoint(new Vector2(canvasSize.X, 0)) - viewMin),
+                                    _projection.CanvasToScreen(rToView.TransformPoint(canvasSize) - viewMin),
+                                    _projection.CanvasToScreen(rToView.TransformPoint(new Vector2(0, canvasSize.Y)) - viewMin),
+                                };
+
+        dl.AddQuadFilled(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.BackgroundFull.Fade(0.4f));
+
+        // The composite (rendered above), transformed by R. At t=0 it's drawn 1:1; while rectifying it's warped
+        // into a scratch target so the perspective stays correct.
         var hasContent = false;
         if (composite is { IsDisposed: false })
         {
@@ -169,11 +243,14 @@ internal sealed class SetupOutputView
             }
         }
 
-        dl.AddRect(frameMin, frameMax, UiColors.ForegroundFull.Fade(0.25f));
+        dl.AddQuad(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.ForegroundFull.Fade(0.25f));
 
-        // Corner-pin handles are editable only when the morph is settled (fully Original or fully Straight),
-        // so a mid-animation drag can't fight the moving transform.
-        var editable = _straightenT < 0.001f || _straightenT > 0.999f;
+        // Corner-pin handles are editable only when the morph has settled (so a mid-animation drag can't fight
+        // the moving transform) and we're not on the Content end, where the projection isn't the subject.
+        var editable = _morphProgress >= 1f && _viewMorph < 1.5f;
+
+        // ...and they fade out over stage two rather than being switched off, so nothing pops.
+        var handleFade = 1f - toContent;
 
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
@@ -197,6 +274,15 @@ internal sealed class SetupOutputView
             style.DrawChecker = !hasContent;
             if (surface.Id == _focusedSurfaceId)
                 style.EdgeColor = UiColors.ForegroundFull;
+
+            if (handleFade < 1f)
+            {
+                style.EdgeColor = style.EdgeColor.Fade(handleFade);
+                style.HandleColor = style.HandleColor.Fade(handleFade);
+                style.TopLeftColor = style.TopLeftColor.Fade(handleFade);
+                style.LabelColor = style.LabelColor.Fade(handleFade);
+                style.CheckerColor = style.CheckerColor.Fade(handleFade);
+            }
 
             var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out _);
 
@@ -425,8 +511,26 @@ internal sealed class SetupOutputView
 
     private void FitToArea(Vector2 size, EditMode mode, Guid outputId)
     {
-        // Instant fit whenever the framed area changes (output, mode, or content size) — no jump-then-settle.
         var key = (outputId, mode, size);
+
+        // While the view morphs, ease the canvas scope from wherever the user had panned/zoomed it to the fit
+        // for the current framing. Snapping straight to the fit (as we do at rest) would throw their view away
+        // the instant a transition starts — the scale/offset has to animate along with everything else.
+        if (_morphProgress < 1f)
+        {
+            _canvas.FitAreaOnCanvas(ImRect.RectWithSize(Vector2.Zero, size));
+            var fit = _canvas.GetTargetScope();
+            var eased = MathF.Pow(_morphProgress, _morphEaseExponent);
+            _canvas.SetScopeInstant(new CanvasScope
+                                        {
+                                            Scale = Vector2.Lerp(_morphFromScope.Scale, fit.Scale, eased),
+                                            Scroll = Vector2.Lerp(_morphFromScope.Scroll, fit.Scroll, eased),
+                                        });
+            _fitKey = key;
+            return;
+        }
+
+        // Instant fit whenever the framed area changes (output, mode, or content size) — no jump-then-settle.
         if (_fitKey == key)
             return;
 
@@ -488,11 +592,22 @@ internal sealed class SetupOutputView
         }
     }
 
-    // Axis-aligned bounding box of a quad, returned as a TL, TR, BR, BL corner list (matching the quad winding).
-    private static Vector2[] BoundingBoxQuad(Vector2[] quad)
+    /// <summary>
+    /// An axis-aligned rect of <paramref name="size"/> placed so its anchor coincides with the same anchor of
+    /// the reference box — so resizing extends the rect from the anchor instead of recentring it. The pivot is
+    /// normalized from the surface's bottom-left, while canvas Y grows downward. Returns TL, TR, BR, BL.
+    /// </summary>
+    private static Vector2[] AnchoredRect(Vector2 refMin, Vector2 refMax, Vector2 pivot, Vector2 size)
     {
-        Bounds(quad, out var min, out var max);
-        return [new Vector2(min.X, min.Y), new Vector2(max.X, min.Y), new Vector2(max.X, max.Y), new Vector2(min.X, max.Y)];
+        var anchorX = refMin.X + pivot.X * (refMax.X - refMin.X);
+        var anchorY = refMax.Y - pivot.Y * (refMax.Y - refMin.Y);
+
+        var minX = anchorX - pivot.X * size.X;
+        var maxX = minX + size.X;
+        var maxY = anchorY + pivot.Y * size.Y;
+        var minY = maxY - size.Y;
+
+        return [new Vector2(minX, minY), new Vector2(maxX, minY), new Vector2(maxX, maxY), new Vector2(minX, maxY)];
     }
 
     private static void Bounds(Vector2[] points, out Vector2 min, out Vector2 max)
@@ -509,14 +624,26 @@ internal sealed class SetupOutputView
     private const float _straightSurroundFactor = 0.4f;
     private static readonly Homography _identity = new() { M11 = 1, M22 = 1, M33 = 1 };
 
+    // View morph timing: eased in so it starts slowly and finishes quickly. The exponent solves 0.75^k = 0.5,
+    // i.e. the visual midpoint is reached at 75% of the duration.
+    private const float _morphDuration = 0.5f;
+    private const float _morphEaseExponent = 2.41f;
+
     private readonly ScalableCanvas _canvas = new();
     private readonly ScalableCanvasProjection _projection;
     private EditMode _editMode = EditMode.Output;
     private Guid _focusedSurfaceId;
     private (Guid, EditMode, Vector2) _fitKey;
 
-    // Original↔Straight morph amount (0 = projector space, 1 = focused surface straightened), animated.
-    private float _straightenT;
+    // View morph position: 0 = Original (projector space), 1 = Straight (focused surface rectified),
+    // 2 = Content (framing tightened onto that surface). One continuous axis, animated.
+    private float _viewMorph;
+    private float _morphTarget;
+    private float _morphFrom;
+    private float _morphProgress = 1f; // 1 = settled (no animation running)
+
+    // Canvas scale/offset at the moment the morph started, so the framing eases from the user's view.
+    private CanvasScope _morphFromScope;
 
     // Pre-drag quad snapshot + which surface it belongs to (so R can freeze only when the basis is dragged).
     private Vector2[]? _dragOldQuad;

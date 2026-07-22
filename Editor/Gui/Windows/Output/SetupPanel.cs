@@ -172,7 +172,7 @@ internal static class SetupPanel
         Span<float> size = [surface.SizeInMeters.X, surface.SizeInMeters.Y];
         var sizeState = FormInputsNarrow.DrawFloats("Size (m)", size);
         if ((sizeState & InputEditStateFlags.Modified) != 0)
-            surface.SizeInMeters = new Vector2(size[0], size[1]);
+            ResizeSurface(surface, new Vector2(size[0], size[1]));
 
         var showGrid = surface.ShowGrid;
         if (FormInputsNarrow.DrawCheckbox("Show size raster", ref showGrid,
@@ -822,6 +822,57 @@ internal static class SetupPanel
             return output.Name;
 
         return "(missing)";
+    }
+
+    /// <summary>
+    /// Applies a new physical size, carrying the surface's corner-pin mappings with it. A quad is the
+    /// projective image of the surface's rectangle, so we recover that projection from the current quad and
+    /// re-project the resized rectangle: the projector's own view doesn't move, only the surface's footprint
+    /// changes shape — growing from the anchor, so editing one dimension extends rather than recentres.
+    /// </summary>
+    private static void ResizeSurface(Surface surface, Vector2 newSize)
+    {
+        newSize = new Vector2(MathF.Max(newSize.X, 0.001f), MathF.Max(newSize.Y, 0.001f));
+
+        var oldSize = surface.SizeInMeters;
+        if (oldSize.X <= 0.0001f || oldSize.Y <= 0.0001f)
+        {
+            surface.SizeInMeters = newSize;
+            return;
+        }
+
+        // Surface space with Y down, matching the quad's TL, TR, BR, BL winding.
+        var oldRect = new[]
+                          {
+                              Vector2.Zero, new Vector2(oldSize.X, 0),
+                              new Vector2(oldSize.X, oldSize.Y), new Vector2(0, oldSize.Y),
+                          };
+
+        // The resized rectangle, placed so the pivot point stays put (pivot is measured from the bottom-left).
+        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
+        var minX = pivot.X * oldSize.X - pivot.X * newSize.X;
+        var maxY = oldSize.Y - pivot.Y * oldSize.Y + pivot.Y * newSize.Y;
+        var maxX = minX + newSize.X;
+        var minY = maxY - newSize.Y;
+        var newRect = new[]
+                          {
+                              new Vector2(minX, minY), new Vector2(maxX, minY),
+                              new Vector2(maxX, maxY), new Vector2(minX, maxY),
+                          };
+
+        foreach (var mapping in surface.OutputMappings)
+        {
+            if (mapping.Quad.Length < 4)
+                continue;
+
+            if (!Homography.TryComputeQuadToQuad(oldRect, mapping.Quad, out var surfaceToOutput))
+                continue;
+
+            for (var i = 0; i < 4; i++)
+                mapping.Quad[i] = surfaceToOutput.TransformPoint(newRect[i]);
+        }
+
+        surface.SizeInMeters = newSize;
     }
 
     // A valid render resolution for previewing a content graph: the first output's canvas size, else a
