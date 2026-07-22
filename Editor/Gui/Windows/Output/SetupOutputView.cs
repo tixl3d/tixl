@@ -56,7 +56,7 @@ internal sealed class SetupOutputView
         _canvas.UpdateCanvas(out _);
 
         if (_editMode == EditMode.Content)
-            DrawContentCanvas(setup, outputId);
+            DrawContentCanvas(outputId);
         else if (_editMode == EditMode.Calibrate)
             DrawCalibrationMarkers(output, outputId);
         else
@@ -104,17 +104,19 @@ internal sealed class SetupOutputView
                 style.EdgeColor = UiColors.ForegroundFull;
 
             var phase = CornerPinHandles.Draw(mappingData.Quad, _projection, style, out _);
-            HandleDrag(phase, surface.Id, outputId, mappingData.Quad, isSource: false);
+            HandleDrag(phase, surface.Id, outputId, mappingData.Quad);
             ImGui.PopID();
         }
     }
 
-    private void DrawContentCanvas(Setup setup, Guid outputId)
+    // Preview of the content the output manager sends to this output. Per-slice source editing now lives on
+    // the SendToOutput op (its SourceRect), so this canvas is a read-only backdrop.
+    private void DrawContentCanvas(Guid outputId)
     {
         var content = OutputManager.TryGetOutputContent(outputId);
         if (content is not { IsDisposed: false })
         {
-            CustomComponents.EmptyWindowMessage("No content yet — connect a texture to a\nSendToOutput bound to this output.");
+            CustomComponents.EmptyWindowMessage("No content yet — connect a texture to a\nSendToOutput targeting this output.");
             return;
         }
 
@@ -131,37 +133,6 @@ internal sealed class SetupOutputView
             dl.AddImage(srv.NativePointer, min, max);
 
         dl.AddRect(min, max, UiColors.ForegroundFull.Fade(0.25f));
-
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            var surface = setup.Surfaces[i];
-            var mappingData = surface.OutputMappings.Find(m => m.OutputId == outputId);
-            if (mappingData == null || mappingData.SourceQuad.Length < 4)
-                continue;
-
-            ImGui.PushID(surface.Id.GetHashCode());
-
-            // The source quad is stored in UV [0..1]; edit it in the content's pixel space, then map back.
-            var source = mappingData.SourceQuad;
-            for (var c = 0; c < 4; c++)
-                _sourcePixels[c] = source[c] * texSize;
-
-            var style = CornerPinHandles.Style.ForSurface(surface.Name, editable: true);
-            style.DrawChecker = false;
-            if (surface.Id == _focusedSurfaceId)
-                style.EdgeColor = UiColors.ForegroundFull;
-
-            var phase = CornerPinHandles.Draw(_sourcePixels, _projection, style, out _);
-
-            if (phase == CanvasPointHandle.DragPhase.Dragging)
-            {
-                for (var c = 0; c < 4; c++)
-                    source[c] = _sourcePixels[c] / texSize;
-            }
-
-            HandleDrag(phase, surface.Id, outputId, source, isSource: true);
-            ImGui.PopID();
-        }
     }
 
     private void DrawHeader(Setup setup, OutputDefinition output, Guid outputId)
@@ -379,7 +350,7 @@ internal sealed class SetupOutputView
         surface.OutputMappings.Add(new Surface.OutputMapping { OutputId = outputId, Quad = quad });
     }
 
-    private void HandleDrag(CanvasPointHandle.DragPhase phase, Guid surfaceId, Guid outputId, Vector2[] liveQuad, bool isSource)
+    private void HandleDrag(CanvasPointHandle.DragPhase phase, Guid surfaceId, Guid outputId, Vector2[] liveQuad)
     {
         switch (phase)
         {
@@ -391,10 +362,8 @@ internal sealed class SetupOutputView
             case CanvasPointHandle.DragPhase.Completed:
                 if (_dragOldQuad != null)
                 {
-                    ICommand command = isSource
-                                           ? new ChangeSourceQuadCommand(surfaceId, outputId, _dragOldQuad, liveQuad)
-                                           : new ChangeOutputMappingQuadCommand(surfaceId, outputId, _dragOldQuad, liveQuad);
-                    UndoRedoStack.Add(command); // value already applied live during the drag
+                    // Value already applied live during the drag.
+                    UndoRedoStack.Add(new ChangeOutputMappingQuadCommand(surfaceId, outputId, _dragOldQuad, liveQuad));
                     OutputSetupHandling.SaveActive();
                     _dragOldQuad = null;
                 }
@@ -408,9 +377,6 @@ internal sealed class SetupOutputView
     private EditMode _editMode = EditMode.Output;
     private Guid _focusedSurfaceId;
     private (Guid, EditMode, Vector2) _fitKey;
-
-    // Scratch for editing the source quad in pixel space; only one output view draws at a time.
-    private readonly Vector2[] _sourcePixels = new Vector2[4];
 
     // Pre-drag quad snapshot; only one corner drags at a time, so a single slot suffices.
     private Vector2[]? _dragOldQuad;

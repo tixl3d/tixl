@@ -15,8 +15,13 @@ namespace T3.Core.Output;
 /// </summary>
 public interface IOutputSink
 {
-    Guid GetOutputId(EvaluationContext context);
-    Guid GetSurfaceId(EvaluationContext context);
+    /// <summary>The setup entity this content is for: a Surface/Region (mapped) or an Output (direct full-frame).
+    /// Resolved against the active setup by the host; <see cref="Guid.Empty"/> = unbound.</summary>
+    Guid GetTargetId(EvaluationContext context);
+
+    /// <summary>The slice of the source texture to show, as a UV rect (xMin, yMin, xMax, yMax). Full = (0,0,1,1).</summary>
+    Vector4 GetSourceRect(EvaluationContext context);
+
     Vector4 GetColor(EvaluationContext context);
     Texture2D? GetContent(EvaluationContext context);
 

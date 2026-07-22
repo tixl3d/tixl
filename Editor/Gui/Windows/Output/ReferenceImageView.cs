@@ -299,10 +299,26 @@ internal sealed class ReferenceImageView
         {
             _textureResource = ResourceManager.CreateTextureResource(image.FilePath, null);
             _loadedPath = image.FilePath;
+            _mipsGenerated = false;
         }
 
         _context ??= new EvaluationContext();
-        return _textureResource.GetValue(_context);
+        var texture = _textureResource.GetValue(_context);
+
+        // The bitmap loader allocates a full mip chain but fills only level 0 — the coarse levels are garbage
+        // until regenerated (LoadImage does the same after loading). Without this, the oblique straighten warp
+        // minifies into the corrupt mips and bands. Once per load.
+        if (!_mipsGenerated && texture is { IsDisposed: false })
+        {
+            var srv = SrvManager.GetSrvForTexture(texture);
+            if (srv is { IsDisposed: false })
+            {
+                ResourceManager.Device.ImmediateContext.GenerateMips(srv);
+                _mipsGenerated = true;
+            }
+        }
+
+        return texture;
     }
 
     private readonly ScalableCanvas _canvas = new();
@@ -312,6 +328,7 @@ internal sealed class ReferenceImageView
     private float _straightenTarget;
     private float _straightenT;
     private string _loadedPath = string.Empty;
+    private bool _mipsGenerated;
     private Resource<Texture2D>? _textureResource;
     private EvaluationContext? _context;
 }

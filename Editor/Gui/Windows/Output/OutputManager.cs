@@ -101,12 +101,13 @@ internal static class OutputManager
 
         foreach (var surface in setup.Surfaces)
         {
-            var content = FindSink(outputId, surface.Id)?.GetContent(_context);
+            var content = FindSinkForTarget(surface.Id)?.GetContent(_context);
             if (content is { IsDisposed: false })
                 return content;
         }
 
-        return null;
+        var direct = FindSinkForTarget(outputId)?.GetContent(_context);
+        return direct is { IsDisposed: false } ? direct : null;
     }
 
     /// <summary>Renders the output's composite, or null if nothing is bound to it.</summary>
@@ -132,7 +133,7 @@ internal static class OutputManager
         _drawItems.Clear();
         foreach (var surface in setup.Surfaces)
         {
-            var sink = FindSink(outputId, surface.Id);
+            var sink = FindSinkForTarget(surface.Id);
             if (sink == null)
                 continue;
 
@@ -145,27 +146,28 @@ internal static class OutputManager
                 continue;
 
             var color = sink.GetColor(_context);
+            var sourceRect = sink.GetSourceRect(_context);
             foreach (var mapping in surface.OutputMappings)
             {
                 if (mapping.OutputId != outputId)
                     continue;
 
                 if (TryComputeNdcHomography(mapping.Quad, output.CanvasResolution, out var homography))
-                    _drawItems.Add(new DrawItem(srv, homography, mapping.SourceQuad, color));
+                    _drawItems.Add(new DrawItem(srv, homography, sourceRect, color));
             }
         }
 
-        // No mapped surfaces — full-frame a sink bound to the output (Shape 2: the content was rendered
-        // through the projector camera, so it already maps 1:1 to the output; no corner-pin warp).
+        // No mapped surfaces — full-frame a sink that targets the output directly (Shape 2: the content was
+        // rendered through the projector camera, so it already maps 1:1 to the output; no corner-pin warp).
         if (_drawItems.Count == 0)
         {
-            var sink = FindAnySink(outputId);
+            var sink = FindSinkForTarget(outputId);
             var content = sink?.GetContent(_context);
             if (content is { IsDisposed: false })
             {
                 var srv = SrvManager.GetSrvForTexture(content);
                 if (srv is { IsDisposed: false })
-                    _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), _fullSourceQuad, sink!.GetColor(_context)));
+                    _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), sink!.GetSourceRect(_context), sink.GetColor(_context)));
             }
         }
 
@@ -203,7 +205,7 @@ internal static class OutputManager
         {
             _shaderParams.Homography = item.Homography;
             _shaderParams.Color = item.Color;
-            SetSourceQuad(item.SourceQuad);
+            SetSourceRect(item.SourceRect);
             ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
             deviceContext.VertexShader.SetConstantBuffer(0, _paramBuffer);
             deviceContext.PixelShader.SetConstantBuffer(0, _paramBuffer);
@@ -253,7 +255,7 @@ internal static class OutputManager
 
         _shaderParams.Homography = homography;
         _shaderParams.Color = Vector4.One;
-        SetSourceQuad(_fullSourceQuad);
+        SetSourceRect(_fullSourceRect);
         ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
         deviceContext.VertexShader.SetConstantBuffer(0, _paramBuffer);
         deviceContext.PixelShader.SetConstantBuffer(0, _paramBuffer);
@@ -263,46 +265,31 @@ internal static class OutputManager
         return target.Texture;
     }
 
-    /// <summary>Sink bound to (output, surface): an exact surface match wins over an output-scoped sink.</summary>
-    private static IOutputSink? FindSink(Guid outputId, Guid surfaceId)
+    /// <summary>The first sink whose target is <paramref name="targetId"/> — a surface (mapped) or an output
+    /// (the direct full-frame path).</summary>
+    private static IOutputSink? FindSinkForTarget(Guid targetId)
     {
-        IOutputSink? outputScoped = null;
+        if (targetId == Guid.Empty)
+            return null;
+
         foreach (var sink in OutputSinkRegistry.Sinks)
         {
-            if (sink.GetOutputId(_context!) != outputId)
-                continue;
-
-            var sinkSurface = sink.GetSurfaceId(_context!);
-            if (sinkSurface == surfaceId)
-                return sink;
-
-            if (sinkSurface == Guid.Empty)
-                outputScoped ??= sink;
-        }
-
-        return outputScoped;
-    }
-
-    /// <summary>Any sink bound to the output (used for the full-frame path when there are no surfaces).</summary>
-    private static IOutputSink? FindAnySink(Guid outputId)
-    {
-        foreach (var sink in OutputSinkRegistry.Sinks)
-        {
-            if (sink.GetOutputId(_context!) == outputId)
+            if (sink.GetTargetId(_context!) == targetId)
                 return sink;
         }
 
         return null;
     }
 
-    private static void SetSourceQuad(Vector2[] source)
+    // Source is a UV rect (xMin, yMin, xMax, yMax); a degenerate rect falls back to the full image.
+    private static void SetSourceRect(Vector4 rect)
     {
-        if (source.Length < 4)
-            source = _fullSourceQuad;
+        if (rect.Z <= rect.X || rect.W <= rect.Y)
+            rect = _fullSourceRect;
 
         // TL, TR, BR, BL — matches the shader cbuffer packing.
-        _shaderParams.SourceTlTr = new Vector4(source[0].X, source[0].Y, source[1].X, source[1].Y);
-        _shaderParams.SourceBrBl = new Vector4(source[2].X, source[2].Y, source[3].X, source[3].Y);
+        _shaderParams.SourceTlTr = new Vector4(rect.X, rect.Y, rect.Z, rect.Y);
+        _shaderParams.SourceBrBl = new Vector4(rect.Z, rect.W, rect.X, rect.W);
     }
 
     // Unit quad → dest quad (output pixels) → NDC, using the output's own canvas resolution.
@@ -404,7 +391,7 @@ internal static class OutputManager
         }
     }
 
-    private readonly record struct DrawItem(ShaderResourceView Srv, Matrix4x4 Homography, Vector2[] SourceQuad, Vector4 Color);
+    private readonly record struct DrawItem(ShaderResourceView Srv, Matrix4x4 Homography, Vector4 SourceRect, Vector4 Color);
 
     private sealed class Target : IDisposable
     {
@@ -431,7 +418,7 @@ internal static class OutputManager
     private const string ShaderPath = "Lib:shaders/dx11/corner-pin-layer.hlsl";
 
     private static readonly Vector2[] _unitQuad = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
-    private static readonly Vector2[] _fullSourceQuad = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
+    private static readonly Vector4 _fullSourceRect = new(0, 0, 1, 1);
     private static readonly Homography _fullscreenNdc = new() { M11 = 2, M13 = -1, M22 = -2, M23 = 1, M33 = 1 };
 
     private static readonly Guid _scratchTargetId = new("f1e2d3c4-b5a6-4788-9012-3456789abcde");

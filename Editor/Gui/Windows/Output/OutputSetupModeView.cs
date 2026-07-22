@@ -64,14 +64,27 @@ internal sealed class OutputSetupModeView
         }
         else
         {
-            var sinkOutputId = (focusedInstance as IOutputSink)?.GetOutputId(context) ?? Guid.Empty;
-            if (sinkOutputId == Guid.Empty)
+            if (focusedInstance is not IOutputSink sink || !TryGetSinkOutput(sink, context, out var sinkOutputId))
                 return false;
 
             _outputView.Draw(sinkOutputId);
         }
 
         return true;
+    }
+
+    /// <summary>The output a focused sink's editing view should show: its target directly if that's an output,
+    /// otherwise the target surface's first mapped output.</summary>
+    private static bool TryGetSinkOutput(IOutputSink sink, EvaluationContext context, out Guid outputId)
+    {
+        var targetId = sink.GetTargetId(context);
+        if (ActiveSetup.TryFindOutput(targetId) != null)
+        {
+            outputId = targetId;
+            return true;
+        }
+
+        return TryGetSurfaceOutput(targetId, out outputId);
     }
 
     /// <summary>The "Show Setup Panel" toggle — hung inside the output window's breadcrumb menu.</summary>

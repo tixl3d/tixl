@@ -20,6 +20,15 @@ public sealed class Surface
         public const string Rect = "Rect";
     }
 
+    public static class SurfaceKinds
+    {
+        /// <summary>A real plane placed in the stage — meters, own pose, calibratable.</summary>
+        public const string Physical = "Physical";
+
+        /// <summary>A coplanar child arranged in pixels; no independent pose, inherits its parent's plane.</summary>
+        public const string Layout = "Layout";
+    }
+
     /// <summary>ContentCanvas → OutputCanvas transfer for one output (L1/L2 corner pin).</summary>
     public sealed class OutputMapping
     {
@@ -34,26 +43,12 @@ public sealed class Surface
         /// <summary>Corners in OutputCanvas pixels: top-left, top-right, bottom-right, bottom-left of the content canvas.</summary>
         public Vector2[] Quad = new Vector2[4];
 
-        /// <summary>
-        /// The slice of the incoming content this surface shows, in normalized UV (0..1),
-        /// same winding as <see cref="Quad"/>. Defaults to the full image; set a sub-region to
-        /// take a slice of a shared render (several surfaces slicing one image).
-        /// </summary>
-        public Vector2[] SourceQuad = FullSourceQuad();
-
-        /// <summary>The whole image — the default source region (no slicing).</summary>
-        public static Vector2[] FullSourceQuad()
-        {
-            return [new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1)];
-        }
-
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
             writer.WriteObject("OutputId", OutputId);
             writer.WriteString("Mode", Mode);
             writer.WriteQuad("Quad", Quad);
-            writer.WriteQuad("SourceQuad", SourceQuad);
             writer.WriteEndObject();
         }
 
@@ -64,8 +59,6 @@ public sealed class Surface
                            OutputId = OutputJson.ReadGuid(token["OutputId"]),
                            Mode = token.ReadValueSafe("Mode", Modes.CornerPin) ?? Modes.CornerPin,
                            Quad = OutputJson.ReadQuad(token["Quad"]),
-                           // Absent (older setups) → full image, not a zero-quad.
-                           SourceQuad = token["SourceQuad"] != null ? OutputJson.ReadQuad(token["SourceQuad"]) : FullSourceQuad(),
                        };
         }
     }
@@ -140,6 +133,12 @@ public sealed class Surface
     public string Name = string.Empty;
     public string Type = SurfaceTypes.Rect;
 
+    /// <summary>Physical (own stage pose, meters) vs Layout (coplanar child, pixels) — see <see cref="SurfaceKinds"/>.</summary>
+    public string Kind = SurfaceKinds.Physical;
+
+    /// <summary>Parent surface for nesting; <see cref="Guid.Empty"/> for a root. A Layout child inherits its parent's plane.</summary>
+    public Guid ParentId;
+
     /// <summary>Physical size in meters. Defines the ContentCanvas aspect.</summary>
     public Vector2 SizeInMeters = new(1, 1);
 
@@ -159,6 +158,8 @@ public sealed class Surface
         writer.WriteObject("Id", Id);
         writer.WriteString("Name", Name);
         writer.WriteString("Type", Type);
+        writer.WriteString("Kind", Kind);
+        writer.WriteObject("ParentId", ParentId);
         writer.WriteVector2("SizeInMeters", SizeInMeters);
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
 
@@ -191,6 +192,8 @@ public sealed class Surface
                               Id = OutputJson.ReadGuid(token["Id"]),
                               Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
                               Type = token.ReadValueSafe("Type", SurfaceTypes.Rect) ?? SurfaceTypes.Rect,
+                              Kind = token.ReadValueSafe("Kind", SurfaceKinds.Physical) ?? SurfaceKinds.Physical,
+                              ParentId = OutputJson.ReadGuid(token["ParentId"]),
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),
