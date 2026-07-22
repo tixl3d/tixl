@@ -91,6 +91,45 @@ internal static class CornerPinHandles
         return phase;
     }
 
+    /// <summary>
+    /// Draws a handle at the midpoint of each edge and processes its drag. Unlike the corners — which move
+    /// freely and so introduce perspective — an edge drag means "move this edge", which the caller resolves in
+    /// its own space (for a surface: crop the rectangle, keeping the opposite edge fixed). The handle position
+    /// is therefore reported rather than written back into <paramref name="corners"/>.
+    /// Edges are indexed 0 = top, 1 = right, 2 = bottom, 3 = left, matching the TL, TR, BR, BL winding.
+    /// </summary>
+    public static CanvasPointHandle.DragPhase DrawEdgeHandles(Vector2[] corners, ICanvasProjection projection, in Style style,
+                                                              out int draggedEdge, out Vector2 draggedPosition)
+    {
+        draggedEdge = -1;
+        draggedPosition = Vector2.Zero;
+        if (corners.Length != 4)
+            return CanvasPointHandle.DragPhase.None;
+
+        var phase = CanvasPointHandle.DragPhase.None;
+        ImGui.PushID("edges");
+        for (var i = 0; i < 4; i++)
+        {
+            ImGui.PushID(i);
+            var midpoint = (corners[i] + corners[(i + 1) % 4]) * 0.5f;
+            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Square, style.Editable);
+            handleStyle.Radius = 4;
+
+            var handlePhase = CanvasPointHandle.Draw(ref midpoint, projection, handleStyle);
+            if (handlePhase != CanvasPointHandle.DragPhase.None)
+            {
+                phase = handlePhase;
+                draggedEdge = i;
+                draggedPosition = midpoint;
+            }
+
+            ImGui.PopID();
+        }
+
+        ImGui.PopID();
+        return phase;
+    }
+
     private static void DrawChecker(ImDrawListPtr dl, Vector2[] corners, ICanvasProjection projection, Color color)
     {
         const int cellsX = 6;

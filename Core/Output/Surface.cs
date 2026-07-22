@@ -149,14 +149,12 @@ public sealed class Surface
     public Vector2 SizeInMeters = new(1, 1);
 
     /// <summary>Projects a real-world calibration raster over this surface (no content needed) so its
-    /// corner-pin can be hand-aligned to physical wall features.</summary>
+    /// corner-pin can be hand-aligned to physical wall features. Major lines are one meter apart and start at
+    /// the <see cref="StagePlacement.Pivot"/>, so the raster doubles as a ruler you can match to marks on the wall.</summary>
     public bool ShowGrid;
 
-    /// <summary>Raster cell size in meters (default 25×25 cm). Cell counts derive from <see cref="SizeInMeters"/>.</summary>
-    public Vector2 GridCellSize = new(0.25f, 0.25f);
-
-    /// <summary>When set, editing one grid-cell dimension scales the other proportionally.</summary>
-    public bool GridCellLinked = true;
+    /// <summary>Minor raster lines per meter; 1 draws meter lines only. They fade out once too dense to resolve.</summary>
+    public int GridSubdivisions = 10;
 
     /// <summary>
     /// ContentCanvas resolution policy: pixel size is derived (px/m × physical size, clamped),
@@ -181,8 +179,7 @@ public sealed class Surface
         writer.WriteVector2("SizeInMeters", SizeInMeters);
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
         writer.WriteValue("ShowGrid", ShowGrid);
-        writer.WriteVector2("GridCellSize", GridCellSize);
-        writer.WriteValue("GridCellLinked", GridCellLinked);
+        writer.WriteValue("GridSubdivisions", GridSubdivisions);
 
         writer.WritePropertyName("OutputMappings");
         writer.WriteStartArray();
@@ -220,8 +217,7 @@ public sealed class Surface
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               ShowGrid = token.ReadValueSafe("ShowGrid", false),
-                              GridCellSize = OutputJson.ReadVector2(token["GridCellSize"], new Vector2(0.25f, 0.25f)),
-                              GridCellLinked = token.ReadValueSafe("GridCellLinked", true),
+                              GridSubdivisions = token.ReadValueSafe("GridSubdivisions", 10),
                               OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),
                           };
 

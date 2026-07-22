@@ -4,8 +4,9 @@ cbuffer Params : register(b0)
     float4 SourceTLTR; // source UV corners: TL.xy, TR.xy
     float4 SourceBRBL; // source UV corners: BR.xy, BL.xy
     float4 Color;
-    float4 GridParams; // xy = cell counts across content canvas, z = line thickness (px), w = grid mode (>0.5)
+    float4 GridParams; // xy = metres spanned by the surface, z = line thickness (px), w = grid mode (>0.5)
     float4 GridColor;
+    float4 GridOrigin; // xy = raster origin in source UV, z = minor lines per metre, w = minor line opacity
 }
 
 Texture2D<float4> InputTexture : register(t0);
@@ -44,6 +45,16 @@ vsOutput vsMain(uint vertexId : SV_VertexID)
     return output;
 }
 
+// Anti-aliased line mask for a unit-periodic coordinate: 1 on the integer lines, 0 between them. Widths come
+// from fwidth, so lines keep a constant screen thickness however the corner-pin warps the surface.
+float gridLineMask(float2 coord, float thickness)
+{
+    float2 distToLine = abs(frac(coord) - 0.5);
+    float2 pixelWidth = fwidth(coord);
+    float2 lineAa = smoothstep(0.5, 0.5 - pixelWidth * max(thickness, 1), distToLine);
+    return 1 - saturate(min(lineAa.x, lineAa.y));
+}
+
 float4 psMain(vsOutput input) : SV_TARGET
 {
     // Grid mode: draw an analytic calibration raster over an opaque black canvas (unlit wall = black),
@@ -51,12 +62,21 @@ float4 psMain(vsOutput input) : SV_TARGET
     // constant thickness however the corner-pin warps the surface.
     if (GridParams.w > 0.5)
     {
-        float2 cellUv = input.texCoord * GridParams.xy;         // fractional cell coordinate
-        float2 distToLine = abs(frac(cellUv) - 0.5);            // 0.5 at cell centre, 0 at a grid line
-        float2 pixelWidth = fwidth(cellUv) ;                     // one screen pixel in cell units
-        float2 lineAa = smoothstep(0.5, 0.5 - pixelWidth * max(GridParams.z, 1), distToLine);
-        float lineIntensity = 1-saturate(min(lineAa.x, lineAa.y));
-        return float4(GridColor.rgb * lineIntensity, 1);
+        // Metres measured from the surface's anchor, so the raster's origin sits exactly where the anchor is
+        // and its lines can be matched against real marks on the wall.
+        float2 metres = (input.texCoord - GridOrigin.xy) * GridParams.xy;
+
+        float major = gridLineMask(metres, GridParams.z * 2.7);
+
+        // Subdivisions, dropped once they get too dense to resolve — otherwise they alias into moiré.
+        float2 minorCoord = metres * max(GridOrigin.z, 1);
+        float2 minorWidth = fwidth(minorCoord);
+        float minorFade = saturate(1 - max(minorWidth.x, minorWidth.y) * 1);
+        float minor = gridLineMask(minorCoord, GridParams.z *2) * GridOrigin.w * minorFade;
+
+        // Alpha, not an opaque black backdrop: the raster is composited over the content so it stays readable
+        // on top of it. Between the lines it's fully transparent, leaving content (or the cleared black) alone.
+        return float4(GridColor.rgb, max(major, minor) * GridColor.a);
     }
 
     return InputTexture.Sample(texSampler, input.texCoord) * Color;

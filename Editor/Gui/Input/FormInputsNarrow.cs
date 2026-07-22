@@ -66,14 +66,17 @@ internal static class FormInputsNarrow
     /// <summary>Row of float fields using the editor's custom drag-edit (range indicator, consistent style).
     /// Returns the combined edit state — apply the value on <see cref="InputEditStateFlags.Modified"/>, persist
     /// on <see cref="InputEditStateFlags.Finished"/>.</summary>
+    /// <param name="reserveRight">Extra unscaled width kept free at the right, so the caller can put a trailing
+    /// button on the same line.</param>
     public static InputEditStateFlags DrawFloats(string label, System.Span<float> values, string? tooltip = null, float speed = 0.01f,
-                                                 bool readOnly = false, string format = "{0:0.###}")
+                                                 bool readOnly = false, string format = "{0:0.###}", float reserveRight = 0)
     {
         DrawLabel(label, tooltip);
         ImGui.PushID(label);
         var result = InputEditStateFlags.Nothing;
         var spacing = 4 * T3Ui.UiScaleFactor;
-        var size = new Vector2((ImGui.GetContentRegionAvail().X - RightMargin * T3Ui.UiScaleFactor - spacing * (values.Length - 1)) / values.Length, ImGui.GetFrameHeight());
+        var size = new Vector2((ImGui.GetContentRegionAvail().X - (RightMargin + reserveRight) * T3Ui.UiScaleFactor - spacing * (values.Length - 1)) / values.Length,
+                               ImGui.GetFrameHeight());
         if (readOnly)
             ImGui.BeginDisabled();
 

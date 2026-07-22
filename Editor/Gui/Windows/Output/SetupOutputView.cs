@@ -127,15 +127,34 @@ internal sealed class SetupOutputView
 
         if (basisMapping != null && basisMapping.Quad.Length >= 4)
         {
-            var basisQuad = _dragOldQuad != null && _dragSurfaceId == _focusedSurfaceId ? _dragOldQuad : basisMapping.Quad;
+            // Freeze the basis while the focused surface is being dragged, so the transform doesn't chase its
+            // own edit. A corner drag only moves the quad; an edge crop rewrites the quad *and* the size, and
+            // R depends on both — leaving either live makes the drag run away.
+            var basisQuad = basisMapping.Quad;
+            var basisSize = basis!.SizeInMeters;
+            var pivot = basis.Placement?.Pivot ?? Vector2.Zero;
+            if (_dragOldQuad != null && _dragSurfaceId == _focusedSurfaceId)
+            {
+                basisQuad = _dragOldQuad;
+            }
+            else if (_resizeOldState != null && _edgeDragSurfaceId == _focusedSurfaceId)
+            {
+                if (_resizeOldState.Value.TryGetQuad(outputId, out var frozenQuad) && frozenQuad.Length >= 4)
+                    basisQuad = frozenQuad;
+
+                // The pivot counter-moves on every crop, and R is built from it — leaving it live feeds that
+                // correction straight back into the drag, which runs away when the dragged edge is the anchor's.
+                basisSize = _resizeOldState.Value.Size;
+                pivot = _resizeOldState.Value.Pivot;
+            }
+
             Bounds(basisQuad, out var quadMin, out var quadMax);
-            var pivot = basis!.Placement?.Pivot ?? Vector2.Zero;
 
             // Straightening lands on the surface's real content canvas (metres × px/m) — so Size (m) is what
             // gives the rectangle its aspect. Anchored at the pivot, so changing a dimension extends the rect
             // from there rather than recentring it.
-            var straightSize = new Vector2(MathF.Max(basis.SizeInMeters.X, 0.001f),
-                                           MathF.Max(basis.SizeInMeters.Y, 0.001f)) * MathF.Max(basis.PixelsPerMeter, 1f);
+            var straightSize = new Vector2(MathF.Max(basisSize.X, 0.001f),
+                                           MathF.Max(basisSize.Y, 0.001f)) * MathF.Max(basis.PixelsPerMeter, 1f);
             var stageTarget = AnchoredRect(quadMin, quadMax, pivot, straightSize);
 
             // Stage two restretches that to the content's own aspect: the composite holds the source already
@@ -291,6 +310,19 @@ internal sealed class SetupOutputView
                 mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin);
 
             HandleDrag(phase, surface.Id, outputId, mappingData.Quad);
+
+            if (surface.Id == _focusedSurfaceId)
+                DrawAnchorMarker(dl, surface, mappingData, rToView, viewMin, handleFade);
+
+            // Edge handles belong to the focused surface only — they're contextual, and four extra dots on
+            // every quad would drown the canvas. A corner moves freely (perspective); an edge crops.
+            if (editable && surface.Id == _focusedSurfaceId)
+            {
+                var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
+                if (edge >= 0)
+                    HandleEdgeDrag(edgePhase, surface, mappingData, edge, edgePos, rToOutput, viewMin);
+            }
+
             ImGui.PopID();
         }
     }
@@ -568,6 +600,82 @@ internal sealed class SetupOutputView
         surface.OutputMappings.Add(new Surface.OutputMapping { OutputId = outputId, Quad = quad });
     }
 
+    /// <summary>
+    /// Marks the surface's anchor — where the calibration raster's origin sits, and what a resize grows from.
+    /// Drawn as a crosshair ring so it can't be confused with the orange top-left corner, which only marks the
+    /// quad's winding.
+    /// </summary>
+    private void DrawAnchorMarker(ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping,
+                                  Homography rToView, Vector2 viewMin, float fade)
+    {
+        if (fade <= 0.01f || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+            return;
+
+        // Pivot is normalized from the surface's bottom-left; surface space runs Y down.
+        var size = surface.SizeInMeters;
+        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
+        var anchorInSurface = new Vector2(pivot.X * size.X, size.Y - pivot.Y * size.Y);
+
+        var screen = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(anchorInSurface)) - viewMin);
+
+        // Deliberately not the corner marker's orange (StatusAnimated) — these are unrelated things.
+        var color = UiColors.StatusControlled.Fade(fade);
+        var radius = 7 * T3Ui.UiScaleFactor;
+        var arm = radius * 1.9f;
+
+        dl.AddCircle(screen, radius, color, 0, 1.5f * T3Ui.UiScaleFactor);
+        dl.AddLine(screen - new Vector2(arm, 0), screen + new Vector2(arm, 0), color, 1.5f * T3Ui.UiScaleFactor);
+        dl.AddLine(screen - new Vector2(0, arm), screen + new Vector2(0, arm), color, 1.5f * T3Ui.UiScaleFactor);
+    }
+
+    /// <summary>
+    /// An edge drag crops the surface's rectangle — moving that edge while the opposite one stays put. Ctrl
+    /// stretches instead: same physical rectangle, different area on the projector. The handle is dragged in
+    /// view space, so it's carried back through R into projector pixels and then into the surface's own space,
+    /// where both are a plain rect edit.
+    /// </summary>
+    private void HandleEdgeDrag(CanvasPointHandle.DragPhase phase, Surface surface, Surface.OutputMapping mapping,
+                                int edge, Vector2 viewPos, Homography rToOutput, Vector2 viewMin)
+    {
+        switch (phase)
+        {
+            case CanvasPointHandle.DragPhase.Started:
+                _resizeOldState = new ResizeSurfaceCommand.State(surface);
+                _edgeDragSurfaceId = surface.Id;
+                break;
+
+            case CanvasPointHandle.DragPhase.Dragging:
+            {
+                if (_resizeOldState == null)
+                    return;
+
+                // Re-base to the pre-drag rectangle first: the crop rewrites the surface's own frame, so an
+                // incremental edit would compound frame over frame. From the snapshot the cursor maps to one
+                // absolute edge position, which is stable however long the drag runs.
+                _resizeOldState.Value.Restore(surface);
+                if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, out var outputToSurface))
+                    return;
+
+                var surfacePos = outputToSurface.TransformPoint(rToOutput.TransformPoint(viewPos + viewMin));
+                SurfaceGeometry.DragEdge(surface, edge, surfacePos, ImGui.GetIO().KeyCtrl);
+                break;
+            }
+
+            case CanvasPointHandle.DragPhase.Completed:
+                if (_resizeOldState != null)
+                {
+                    // Value already applied live during the drag.
+                    UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, _resizeOldState.Value,
+                                                               new ResizeSurfaceCommand.State(surface)));
+                    OutputSetupHandling.SaveActive();
+                    _resizeOldState = null;
+                    _edgeDragSurfaceId = Guid.Empty;
+                }
+
+                break;
+        }
+    }
+
     private void HandleDrag(CanvasPointHandle.DragPhase phase, Guid surfaceId, Guid outputId, Vector2[] liveQuad)
     {
         switch (phase)
@@ -648,4 +756,8 @@ internal sealed class SetupOutputView
     // Pre-drag quad snapshot + which surface it belongs to (so R can freeze only when the basis is dragged).
     private Vector2[]? _dragOldQuad;
     private Guid _dragSurfaceId;
+
+    // Pre-drag rectangle snapshot for an edge crop (size + every quad that follows it), and whose it is.
+    private ResizeSurfaceCommand.State? _resizeOldState;
+    private Guid _edgeDragSurfaceId;
 }

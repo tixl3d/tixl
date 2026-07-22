@@ -7,6 +7,8 @@ using T3.Editor.Gui.InputUi.ListInputs;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -170,9 +172,35 @@ internal static class SetupPanel
         }
 
         Span<float> size = [surface.SizeInMeters.X, surface.SizeInMeters.Y];
-        var sizeState = FormInputsNarrow.DrawFloats("Size (m)", size);
+        var sizeState = FormInputsNarrow.DrawFloats("Size (m)", size,
+                                                    "Resizes the surface's footprint — the corner pin follows, so it covers a different area of the wall.",
+                                                    reserveRight: 20);
+
+        // Measuring is a different act from resizing: it states how big the rect you already aligned really
+        // is, and must leave the projection alone. Explicit icon + Apply, rather than overloading the field.
+        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+        if (CustomComponents.IconButton(Icon.Scale, Vector2.Zero))
+        {
+            _measuredEdit = surface.SizeInMeters;
+            ImGui.OpenPopup(MeasuredSizePopupId);
+        }
+
+        CustomComponents.TooltipForLastItem("Set measured dimensions",
+                                            "Declares how big this surface really is, without moving the projection.");
+        DrawMeasuredSizePopup(surface);
+
+        if ((sizeState & InputEditStateFlags.Started) != 0)
+            _resizeOldState = new ResizeSurfaceCommand.State(surface);
+
         if ((sizeState & InputEditStateFlags.Modified) != 0)
-            ResizeSurface(surface, new Vector2(size[0], size[1]));
+            SurfaceGeometry.ResizeAnchored(surface, new Vector2(size[0], size[1]));
+
+        // Resizing re-projects the corner pins, so it has to be undoable as one step.
+        if ((sizeState & InputEditStateFlags.Finished) != 0 && _resizeOldState != null)
+        {
+            UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, _resizeOldState.Value, new ResizeSurfaceCommand.State(surface)));
+            _resizeOldState = null;
+        }
 
         var showGrid = surface.ShowGrid;
         if (FormInputsNarrow.DrawCheckbox("Show size raster", ref showGrid,
@@ -185,31 +213,11 @@ internal static class SetupPanel
         var gridCellState = InputEditStateFlags.Nothing;
         if (surface.ShowGrid)
         {
-            var linked = surface.GridCellLinked;
-            if (FormInputsNarrow.DrawCheckbox("Link cell size", ref linked, "Keep grid cells square: editing one dimension scales the other."))
-            {
-                surface.GridCellLinked = linked;
-                OutputSetupHandling.SaveActive();
-            }
-
-            // Stored in metres; edited in centimetres (25 cm default reads better than 0.25 m).
-            Span<float> cell = [surface.GridCellSize.X * 100f, surface.GridCellSize.Y * 100f];
-            gridCellState = FormInputsNarrow.DrawFloats("Cell size (cm)", cell, "Grid spacing in centimetres.", speed: 0.1f);
+            Span<int> subdivisions = [surface.GridSubdivisions];
+            gridCellState = FormInputsNarrow.DrawInts("Subdivisions / m", subdivisions,
+                                                      "Minor lines per metre; 1 draws metre lines only. They fade out once too dense to resolve.");
             if ((gridCellState & InputEditStateFlags.Modified) != 0)
-            {
-                var nx = MathF.Max(cell[0] / 100f, 0.001f);
-                var ny = MathF.Max(cell[1] / 100f, 0.001f);
-                if (surface.GridCellLinked)
-                {
-                    // Whichever field the user moved drives the other proportionally.
-                    if (MathF.Abs(cell[0] - surface.GridCellSize.X * 100f) >= MathF.Abs(cell[1] - surface.GridCellSize.Y * 100f))
-                        ny = surface.GridCellSize.Y * (nx / MathF.Max(surface.GridCellSize.X, 0.001f));
-                    else
-                        nx = surface.GridCellSize.X * (ny / MathF.Max(surface.GridCellSize.Y, 0.001f));
-                }
-
-                surface.GridCellSize = new Vector2(nx, ny);
-            }
+                surface.GridSubdivisions = Math.Clamp(subdivisions[0], 1, 100);
         }
 
         Span<float> anchor = [pivot.X, pivot.Y];
@@ -825,54 +833,51 @@ internal static class SetupPanel
     }
 
     /// <summary>
-    /// Applies a new physical size, carrying the surface's corner-pin mappings with it. A quad is the
-    /// projective image of the surface's rectangle, so we recover that projection from the current quad and
-    /// re-project the resized rectangle: the projector's own view doesn't move, only the surface's footprint
-    /// changes shape — growing from the anchor, so editing one dimension extends rather than recentres.
+    /// "Set measured dimensions": states the surface's real size without touching its corner pins. Used after
+    /// the rect is already aligned on the wall — you're correcting the measurement, not moving the projection.
+    /// The declared size drives the calibration raster's density and the straighten hypothesis.
     /// </summary>
-    private static void ResizeSurface(Surface surface, Vector2 newSize)
+    private static void DrawMeasuredSizePopup(Surface surface)
     {
-        newSize = new Vector2(MathF.Max(newSize.X, 0.001f), MathF.Max(newSize.Y, 0.001f));
-
-        var oldSize = surface.SizeInMeters;
-        if (oldSize.X <= 0.0001f || oldSize.Y <= 0.0001f)
-        {
-            surface.SizeInMeters = newSize;
+        ImGui.SetNextWindowSize(new Vector2(230 * T3Ui.UiScaleFactor, 0));
+        if (!ImGui.BeginPopup(MeasuredSizePopupId))
             return;
-        }
 
-        // Surface space with Y down, matching the quad's TL, TR, BR, BL winding.
-        var oldRect = new[]
-                          {
-                              Vector2.Zero, new Vector2(oldSize.X, 0),
-                              new Vector2(oldSize.X, oldSize.Y), new Vector2(0, oldSize.Y),
-                          };
+        ImGui.PushFont(Fonts.FontBold);
+        ImGui.TextUnformatted("Set measured dimensions");
+        ImGui.PopFont();
 
-        // The resized rectangle, placed so the pivot point stays put (pivot is measured from the bottom-left).
-        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
-        var minX = pivot.X * oldSize.X - pivot.X * newSize.X;
-        var maxY = oldSize.Y - pivot.Y * oldSize.Y + pivot.Y * newSize.Y;
-        var maxX = minX + newSize.X;
-        var minY = maxY - newSize.Y;
-        var newRect = new[]
-                          {
-                              new Vector2(minX, minY), new Vector2(maxX, minY),
-                              new Vector2(maxX, maxY), new Vector2(minX, maxY),
-                          };
+        CustomComponents.StylizedText("The projection stays put — this only records\nhow big the surface really is.",
+                                      Fonts.FontSmall, UiColors.TextMuted);
 
-        foreach (var mapping in surface.OutputMappings)
+        Span<float> measured = [_measuredEdit.X, _measuredEdit.Y];
+        FormInputsNarrow.DrawFloats("Width × Height (m)", measured);
+        _measuredEdit = new Vector2(measured[0], measured[1]);
+
+        FormInputs.AddVerticalSpace(4);
+        if (ImGui.Button("Apply"))
         {
-            if (mapping.Quad.Length < 4)
-                continue;
-
-            if (!Homography.TryComputeQuadToQuad(oldRect, mapping.Quad, out var surfaceToOutput))
-                continue;
-
-            for (var i = 0; i < 4; i++)
-                mapping.Quad[i] = surfaceToOutput.TransformPoint(newRect[i]);
+            ApplyMeasuredSize(surface, _measuredEdit);
+            ImGui.CloseCurrentPopup();
         }
 
-        surface.SizeInMeters = newSize;
+        ImGui.SameLine();
+        if (ImGui.Button("Cancel"))
+            ImGui.CloseCurrentPopup();
+
+        ImGui.EndPopup();
+    }
+
+    private static void ApplyMeasuredSize(Surface surface, Vector2 measured)
+    {
+        var oldState = new ResizeSurfaceCommand.State(surface);
+
+        // Deliberately not SurfaceGeometry.ResizeAnchored: the quads must not move.
+        surface.SizeInMeters = new Vector2(MathF.Max(measured.X, SurfaceGeometry.MinSize),
+                                           MathF.Max(measured.Y, SurfaceGeometry.MinSize));
+
+        UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, oldState, new ResizeSurfaceCommand.State(surface)));
+        OutputSetupHandling.SaveActive();
     }
 
     // A valid render resolution for previewing a content graph: the first output's canvas size, else a
@@ -1213,6 +1218,12 @@ internal static class SetupPanel
     private static readonly List<string> _availableNames = [];
     private static readonly Dictionary<string, bool> _expandedSections = [];
     private static EvaluationContext? _sinkContext;
+
+    // Pre-edit rectangle snapshot while a Size (m) field is being dragged, so the resize undoes as one step.
+    private static ResizeSurfaceCommand.State? _resizeOldState;
+
+    private const string MeasuredSizePopupId = "##measuredSize";
+    private static Vector2 _measuredEdit;
 
     // Cross-highlight: the row hovered this frame (committed at end of Draw), and the entities it references.
     private static SetupEntitySelection.EntityKind _hoveredKind;

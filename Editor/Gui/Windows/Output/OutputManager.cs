@@ -164,11 +164,38 @@ internal static class OutputManager
             if (!surface.Render)
                 continue;
 
-            // Calibration raster: a backdrop for hand-aligning the corner-pin to physical wall features.
-            // Emitted regardless of content (drawn first, so any content composites on top of it).
+            var sink = FindSinkForTarget(surface.Id);
+            var content = sink?.GetContent(_context);
+            if (content is { IsDisposed: false })
+            {
+                var srv = SrvManager.GetSrvForTexture(content);
+                if (srv is { IsDisposed: false })
+                {
+                    var color = sink!.GetColor(_context);
+                    var sourceRect = sink.GetSourceRect(_context);
+                    foreach (var mapping in surface.OutputMappings)
+                    {
+                        if (mapping.OutputId != outputId)
+                            continue;
+
+                        if (TryComputeNdcHomography(mapping.Quad, output.CanvasResolution, out var homography))
+                            _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero, Vector4.Zero));
+                    }
+                }
+            }
+
+            // Calibration raster last, so it composites *over* the content and stays readable while aligning.
+            // Emitted whether or not the surface has content — with none, it's lines on the cleared black.
             if (surface.ShowGrid)
             {
-                var cells = ComputeGridCells(surface);
+                // Metres spanned by the surface, and the origin (its anchor) in source UV — the pivot is
+                // normalized from the bottom-left while V runs downward.
+                var metres = new Vector2(Math.Clamp(surface.SizeInMeters.X, 0.01f, 1000f),
+                                         Math.Clamp(surface.SizeInMeters.Y, 0.01f, 1000f));
+                var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
+                var gridOrigin = new Vector4(pivot.X, 1f - pivot.Y,
+                                             Math.Clamp(surface.GridSubdivisions, 1, 100), _gridMinorOpacity);
+
                 foreach (var mapping in surface.OutputMappings)
                 {
                     if (mapping.OutputId != outputId)
@@ -176,31 +203,8 @@ internal static class OutputManager
 
                     if (TryComputeNdcHomography(mapping.Quad, output.CanvasResolution, out var gridHomography))
                         _drawItems.Add(new DrawItem(null, gridHomography, _fullSourceRect, Vector4.One,
-                                                    new Vector4(cells.X, cells.Y, _gridLineThickness, 1), _gridColor));
+                                                    new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin));
                 }
-            }
-
-            var sink = FindSinkForTarget(surface.Id);
-            if (sink == null)
-                continue;
-
-            var content = sink.GetContent(_context);
-            if (content == null || content.IsDisposed)
-                continue;
-
-            var srv = SrvManager.GetSrvForTexture(content);
-            if (srv == null || srv.IsDisposed)
-                continue;
-
-            var color = sink.GetColor(_context);
-            var sourceRect = sink.GetSourceRect(_context);
-            foreach (var mapping in surface.OutputMappings)
-            {
-                if (mapping.OutputId != outputId)
-                    continue;
-
-                if (TryComputeNdcHomography(mapping.Quad, output.CanvasResolution, out var homography))
-                    _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero));
             }
         }
 
@@ -215,7 +219,7 @@ internal static class OutputManager
                 var srv = SrvManager.GetSrvForTexture(content);
                 if (srv is { IsDisposed: false })
                     _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), sink!.GetSourceRect(_context), sink.GetColor(_context),
-                                                Vector4.Zero, Vector4.Zero));
+                                                Vector4.Zero, Vector4.Zero, Vector4.Zero));
             }
         }
 
@@ -257,6 +261,7 @@ internal static class OutputManager
             _shaderParams.Color = item.Color;
             _shaderParams.GridParams = item.GridParams;
             _shaderParams.GridColor = item.GridColor;
+            _shaderParams.GridOrigin = item.GridOrigin;
             SetSourceRect(item.SourceRect);
             ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
             deviceContext.VertexShader.SetConstantBuffer(0, _paramBuffer);
@@ -383,16 +388,6 @@ internal static class OutputManager
         _shaderParams.SourceBrBl = new Vector4(rect.Z, rect.W, rect.X, rect.W);
     }
 
-    // Calibration-grid cell counts across the content canvas = physical size / cell size, clamped so a
-    // degenerate cell size or a huge surface can't ask for an unreasonable line count.
-    private static Vector2 ComputeGridCells(T3.Core.Output.Surface surface)
-    {
-        var cellW = MathF.Max(surface.GridCellSize.X, 0.001f);
-        var cellH = MathF.Max(surface.GridCellSize.Y, 0.001f);
-        return new Vector2(Math.Clamp(surface.SizeInMeters.X / cellW, 1f, 512f),
-                           Math.Clamp(surface.SizeInMeters.Y / cellH, 1f, 512f));
-    }
-
     // Unit quad → dest quad (output pixels) → NDC, using the output's own canvas resolution.
     private static bool TryComputeNdcHomography(Vector2[] destQuad, Int2 resolution, out Matrix4x4 matrix)
     {
@@ -494,7 +489,7 @@ internal static class OutputManager
 
     // GridParams.w > 0.5 selects the analytic calibration grid (Srv unused); otherwise Srv is warped as content.
     private readonly record struct DrawItem(ShaderResourceView? Srv, Matrix4x4 Homography, Vector4 SourceRect, Vector4 Color,
-                                            Vector4 GridParams, Vector4 GridColor);
+                                            Vector4 GridParams, Vector4 GridColor, Vector4 GridOrigin);
 
     private sealed class Target : IDisposable
     {
@@ -516,8 +511,9 @@ internal static class OutputManager
         public Vector4 SourceTlTr;
         public Vector4 SourceBrBl;
         public Vector4 Color;
-        public Vector4 GridParams; // xy = cell counts, z = line thickness px, w = grid mode
+        public Vector4 GridParams; // xy = metres spanned, z = line thickness px, w = grid mode
         public Vector4 GridColor;
+        public Vector4 GridOrigin; // xy = origin UV, z = minor lines per metre, w = minor opacity
     }
 
     private const string ShaderPath = "Lib:shaders/dx11/corner-pin-layer.hlsl";
@@ -526,6 +522,7 @@ internal static class OutputManager
     private static readonly Vector4 _fullSourceRect = new(0, 0, 1, 1);
     private static readonly Vector4 _gridColor = new(0.70f, 0.75f, 0.85f, 1); // cool light-gray raster lines
     private const float _gridLineThickness = 1.3f;
+    private const float _gridMinorOpacity = 0.35f; // subdivisions sit clearly under the metre lines
     private static readonly Homography _fullscreenNdc = new() { M11 = 2, M13 = -1, M22 = -2, M23 = 1, M33 = 1 };
 
     private static readonly Guid _scratchTargetId = new("f1e2d3c4-b5a6-4788-9012-3456789abcde");
