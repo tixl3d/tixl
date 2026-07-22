@@ -123,6 +123,15 @@ model and grows the sidebar/canvas/calibration around them.
 
 ---
 
+## Sidebar interaction backlog (post-panel polish)
+Captured from testing — not yet built:
+1. **Reorder / re-parent surfaces by dragging** in the SURFACES tree (drag a row to change order and `ParentId`).
+2. **Reorder CONTENT and OUTPUT rows** by dragging (content is op-order; outputs are setup order).
+3. **Blink the hover outline** on sidebar rows (animated, not a static outline) for the cross-highlight.
+4. **Blink the hovered shape outline on the canvas** too (mirror the sidebar hover on the corner-pin quad).
+5. **Drag timing threshold** — require a short hold before a cross-section drop reorders (so dragging a CONTENT
+   row toward SURFACES to *retarget* isn't misread as a *reorder*). Distinguish reorder vs. drop-on-target by dwell.
+
 ## Suggested first cut
 After **Phase 1**, don't fully flesh 3 & 4 — build a **thin vertical slice**: minimal sidebar (list + select)
 + minimal canvas (corner drag only) for **one surface, one send, one output**. It validates the whole

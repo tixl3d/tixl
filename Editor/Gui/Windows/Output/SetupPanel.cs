@@ -6,6 +6,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -47,6 +48,10 @@ internal static class SetupPanel
             for (var i = 0; i < setup.Outputs.Count; i++)
             {
                 var output = setup.Outputs[i];
+                // The Default output is the editor's internal preview, not something you present or map — hide it.
+                if (output.Kind == OutputDefinition.Kinds.Default)
+                    continue;
+
                 var binding = machineConfig.TryGetBinding(output.Id);
                 var outputId = output.Id;
                 var status = binding == null ? null : $"Display {binding.DisplayIndex + 1}";
@@ -75,8 +80,170 @@ internal static class SetupPanel
             }
         }
 
+        DrawPropertiesFooter(selection, setup, machineConfig);
+
         _hoveredKind = _pendingHoveredKind;
         _hoveredId = _pendingHoveredId;
+    }
+
+    // Properties card for the selected entity, at the bottom of the panel.
+    private static void DrawPropertiesFooter(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
+    {
+        if (!selection.TryResolve(setup, out var kind, out var id))
+            return;
+
+        FormInputs.AddVerticalSpace(12);
+        ImGui.Indent(6 * T3Ui.UiScaleFactor); // 6px margin to the sidebar edges (right reserved inside the inputs).
+        // Match FormInputs' field background (the default FrameBg is near-black in the panel).
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
+        switch (kind)
+        {
+            case SetupEntitySelection.EntityKind.Surface:
+                DrawSurfaceCard(setup, id);
+                break;
+            case SetupEntitySelection.EntityKind.Output:
+                DrawOutputCard(setup, machineConfig, id);
+                break;
+            case SetupEntitySelection.EntityKind.ContentSource:
+                DrawContentCard(setup, id);
+                break;
+        }
+
+        ImGui.PopStyleColor();
+        ImGui.Unindent(6 * T3Ui.UiScaleFactor);
+    }
+
+    private static void DrawSurfaceCard(Setup setup, Guid id)
+    {
+        var surface = setup.Surfaces.Find(s => s.Id == id);
+        if (surface == null)
+            return;
+
+        FormInputsNarrow.DrawCardHeader("Surface");
+
+        var render = surface.Render;
+        if (FormInputsNarrow.DrawCheckbox("Render", ref render, "Skip drawing this surface without removing it."))
+        {
+            surface.Render = render;
+            OutputSetupHandling.SaveActive();
+        }
+
+        var name = surface.Name;
+        if (FormInputsNarrow.DrawString("Label", ref name, "surface name"))
+        {
+            surface.Name = name;
+            OutputSetupHandling.SaveActive();
+        }
+
+        var shortName = surface.ShortName;
+        if (FormInputsNarrow.DrawString("Short Name", ref shortName, "Auto", "Empty = auto-abbreviated (e.g. S1)."))
+        {
+            surface.ShortName = shortName;
+            OutputSetupHandling.SaveActive();
+        }
+
+        FormInputsNarrow.DrawLabel("Sending to…", "Outputs this surface is mapped to.");
+        for (var i = 0; i < surface.OutputMappings.Count; i++)
+        {
+            var output = setup.Outputs.Find(o => o.Id == surface.OutputMappings[i].OutputId);
+            FormInputsNarrow.DrawListItem(output == null ? "?" : output.Name);
+        }
+
+        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
+        var position = surface.Placement?.Pose.Position ?? Vector3.Zero;
+        Span<float> pos = [position.X, position.Y, position.Z];
+        var posState = FormInputsNarrow.DrawFloats("Position (m)", pos);
+        if ((posState & InputEditStateFlags.Modified) != 0)
+        {
+            var placement = surface.Placement ??= new Surface.StagePlacement();
+            placement.Pose = new Pose(new Vector3(pos[0], pos[1], pos[2]), placement.Pose.Orientation);
+        }
+
+        Span<float> size = [surface.SizeInMeters.X, surface.SizeInMeters.Y];
+        var sizeState = FormInputsNarrow.DrawFloats("Size (m)", size);
+        if ((sizeState & InputEditStateFlags.Modified) != 0)
+            surface.SizeInMeters = new Vector2(size[0], size[1]);
+
+        Span<float> anchor = [pivot.X, pivot.Y];
+        var anchorState = FormInputsNarrow.DrawFloats("Anchor (0..1)", anchor);
+        if ((anchorState & InputEditStateFlags.Modified) != 0)
+            (surface.Placement ??= new Surface.StagePlacement()).Pivot = new Vector2(anchor[0], anchor[1]);
+
+        // Value applied live above; persist once when the drag/edit completes.
+        if (((posState | sizeState | anchorState) & InputEditStateFlags.Finished) != 0)
+            OutputSetupHandling.SaveActive();
+    }
+
+    private static void DrawOutputCard(Setup setup, MachineConfig machineConfig, Guid id)
+    {
+        var output = setup.Outputs.Find(o => o.Id == id);
+        if (output == null)
+            return;
+
+        FormInputsNarrow.DrawCardHeader("Output");
+
+        var send = output.Send;
+        if (FormInputsNarrow.DrawCheckbox("Send", ref send, "Pause presenting without dropping the display binding."))
+        {
+            output.Send = send;
+            OutputSetupHandling.SaveActive();
+        }
+
+        var name = output.Name;
+        if (FormInputsNarrow.DrawString("Label", ref name, "output name"))
+        {
+            output.Name = name;
+            OutputSetupHandling.SaveActive();
+        }
+
+        var binding = machineConfig.TryGetBinding(output.Id);
+        FormInputsNarrow.DrawLabel("Bound To", "Right-click the OUTPUT row to change the display binding.");
+        FormInputsNarrow.DrawListItem(binding == null ? "unbound" : $"Display {binding.DisplayIndex + 1}");
+
+        FormInputsNarrow.DrawLabel("Sending…", "Surfaces and content feeding this output.");
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            if (setup.Surfaces[i].OutputMappings.Exists(m => m.OutputId == output.Id))
+                FormInputsNarrow.DrawListItem(SurfaceShortLabel(setup.Surfaces[i]));
+        }
+
+        _sinkContext ??= new EvaluationContext();
+        _sinkContext.Reset();
+        var sinks = OutputSinkRegistry.Sinks;
+        for (var i = 0; i < sinks.Count; i++)
+        {
+            if (sinks[i].GetTargetId(_sinkContext) == output.Id && sinks[i] is Instance instance)
+                FormInputsNarrow.DrawListItem(SinkName(instance));
+        }
+    }
+
+    private static void DrawContentCard(Setup setup, Guid childId)
+    {
+        var instance = FindSinkInstance(childId);
+        if (instance is not IOutputSink sink)
+            return;
+
+        FormInputsNarrow.DrawCardHeader("Content");
+
+        _sinkContext ??= new EvaluationContext();
+        _sinkContext.Reset();
+
+        var update = sink.GetUpdateEnabled(_sinkContext);
+        if (FormInputsNarrow.DrawCheckbox("Update", ref update, "When off, freezes this content at its last frame."))
+            sink.SetUpdateEnabled(update);
+
+        var name = SinkName(instance);
+        FormInputsNarrow.DrawString("Label", ref name, "content name", "The op's name — rename the SendToOutput op.", readOnly: true);
+
+        Span<int> resolution = [1, 1];
+        var content = sink.GetContent(_sinkContext);
+        if (content is { IsDisposed: false })
+        {
+            resolution[0] = content.Description.Width;
+            resolution[1] = content.Description.Height;
+        }
+
+        FormInputsNarrow.DrawInts("Resolution (px)", resolution, "Comes from the source texture (read-only).", readOnly: true);
     }
 
     // Fills _referenced with the entities the currently-hovered row points at, along the
@@ -318,7 +485,7 @@ internal static class SetupPanel
         {
             var surface = setup.Surfaces.Find(s => s.Id == targetId);
             if (surface != null)
-                return (Icon.Grid, string.IsNullOrEmpty(surface.Name) ? "surface" : Abbreviate(surface.Name));
+                return (Icon.Grid, SurfaceShortLabel(surface));
 
             var output = setup.Outputs.Find(o => o.Id == targetId);
             if (output != null)
@@ -513,6 +680,12 @@ internal static class SetupPanel
         }
     }
 
+    // A surface's compact label: its explicit ShortName, else the auto-abbreviation.
+    private static string SurfaceShortLabel(Surface surface)
+    {
+        return string.IsNullOrEmpty(surface.ShortName) ? Abbreviate(surface.Name) : surface.ShortName;
+    }
+
     // Compact gutter form: uppercase letters + digits ("Surface 1" → "S1", "WallFront" → "WF"), falling back
     // to the full name when there's nothing to abbreviate (all-lowercase).
     private static string Abbreviate(string name)
@@ -666,28 +839,41 @@ internal static class SetupPanel
         // Content over the background (the selectable is transparent), vertically centered in the fixed row
         // (the -1px nudges the label up so it isn't sitting low).
         var contentY = (float)Math.Round(rowMin.Y + (height - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
-        ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 6 * scale, contentY));
+        var iconY = contentY + 3 * scale; // glyphs render high vs the text baseline — drop them to match.
+
+        var contentX = rowMin.X + 6 * scale;
         if (leadingIcon.HasValue)
         {
+            ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
             DrawInlineIcon(leadingIcon.Value, UiColors.TextMuted.Rgba);
-            ImGui.SameLine(0, 5 * scale);
+            contentX = ImGui.GetItemRectMax().X + 5 * scale;
         }
 
+        ImGui.SetCursorScreenPos(new Vector2(contentX, contentY));
         CustomComponents.StylizedText(string.IsNullOrEmpty(name) ? "untitled" : name, Fonts.FontNormal, UiColors.Text);
 
         if (trailingIcon.HasValue || status != null)
         {
-            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + (rowMax.X - rowMin.X) * 0.55f, contentY));
+            var trailX = rowMin.X + (rowMax.X - rowMin.X) * 0.55f;
             if (trailingIcon.HasValue)
             {
+                ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
                 DrawInlineIcon(Icon.ArrowRight, UiColors.TextMuted.Fade(0.3f).Rgba);
-                ImGui.SameLine(0, 2 * scale);
+                ImGui.SetCursorScreenPos(new Vector2(ImGui.GetItemRectMax().X + 2 * scale, iconY));
                 DrawInlineIcon(trailingIcon.Value, UiColors.TextMuted.Rgba);
-                ImGui.SameLine(0, 4 * scale);
+                trailX = ImGui.GetItemRectMax().X + 4 * scale;
             }
 
             if (status != null)
+            {
+                // FontSmall is shorter than the row's FontNormal baseline — center it on its own height.
+                ImGui.PushFont(Fonts.FontSmall);
+                var smallHeight = ImGui.GetTextLineHeight();
+                ImGui.PopFont();
+                var statusY = (float)Math.Round(rowMin.Y + (height - smallHeight) * 0.5f - 1 * scale);
+                ImGui.SetCursorScreenPos(new Vector2(trailX, statusY));
                 CustomComponents.StylizedText(status, Fonts.FontSmall, UiColors.TextMuted);
+            }
         }
 
         // Next row starts a tight 2px below, independent of the content cursor above.

@@ -56,6 +56,10 @@ internal static class OutputManager
         DeviceBinding? binding = null;
         foreach (var output in setup.Outputs)
         {
+            // Send=false pauses presenting this output without dropping its binding.
+            if (!output.Send)
+                continue;
+
             var candidate = machineConfig.TryGetBinding(output.Id);
             if (candidate == null)
                 continue;
@@ -66,7 +70,17 @@ internal static class OutputManager
         }
 
         if (boundOutput == null || binding == null)
+        {
+            // Nothing presentable (unbound, or Send paused) — take down the second window if it was up.
+            if (PresentedOutputId != Guid.Empty)
+            {
+                WindowManager.ShowSecondaryRenderWindow = false;
+                PresentedOutputId = Guid.Empty;
+                _presentedDisplayIndex = -1;
+            }
+
             return;
+        }
 
         PresentedOutputId = boundOutput.Id;
         ProgramWindows.Viewer.Texture = RenderOutput(boundOutput.Id);
@@ -97,7 +111,11 @@ internal static class OutputManager
 
         DirtyFlag.GlobalInvalidationTick++;
         foreach (var sink in OutputSinkRegistry.Sinks)
-            sink.InvalidateContent();
+        {
+            // Update=false freezes this content at its last frame — skip its invalidation.
+            if (sink.GetUpdateEnabled(_context!))
+                sink.InvalidateContent();
+        }
 
         foreach (var surface in setup.Surfaces)
         {
@@ -126,7 +144,11 @@ internal static class OutputManager
         // invalidation it does — otherwise time-dependent content stays frozen at its cached frame.
         DirtyFlag.GlobalInvalidationTick++;
         foreach (var sink in OutputSinkRegistry.Sinks)
-            sink.InvalidateContent();
+        {
+            // Update=false freezes this content at its last frame — skip its invalidation.
+            if (sink.GetUpdateEnabled(_context!))
+                sink.InvalidateContent();
+        }
 
         // Phase 1: resolve each surface's content and mapping. Pulling content here (before our RT is
         // bound) keeps the content's own rendering from clobbering the target we bind in phase 2.
@@ -189,7 +211,9 @@ internal static class OutputManager
         var deviceContext = ResourceManager.Device.ImmediateContext;
         deviceContext.OutputMerger.SetTargets(target.Rtv);
         deviceContext.Rasterizer.SetViewport(new ViewportF(0, 0, target.Size.Width, target.Size.Height, 0f, 1f));
-        deviceContext.ClearRenderTargetView(target.Rtv, new RawColor4(0, 0, 0, 0));
+        // Opaque black: uncovered output area is "no projection", and the editor preview shouldn't show the
+        // panel gray through a transparent composite.
+        deviceContext.ClearRenderTargetView(target.Rtv, new RawColor4(0, 0, 0, 1));
 
         deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         deviceContext.InputAssembler.InputLayout = null;

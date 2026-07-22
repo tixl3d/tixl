@@ -27,11 +27,11 @@ internal sealed class OutputSetupModeView
         ImGui.BeginChild("##setupPanel",
                          new Vector2(240 * T3Ui.UiScaleFactor, ImGui.GetWindowHeight()),
                          ImGuiChildFlags.None,
-                         ImGuiWindowFlags.None);
+                         ImGuiWindowFlags.NoBackground);
         SetupPanel.Draw(_entitySelection);
         ImGui.EndChild();
         ImGui.PopStyleColor();
-        ImGui.SameLine();
+        ImGui.SameLine(0,2);
     }
 
     /// <summary>
@@ -83,8 +83,6 @@ internal sealed class OutputSetupModeView
         return true;
     }
 
-    /// <summary>The output a focused sink's editing view should show: its target directly if that's an output,
-    /// otherwise the target surface's first mapped output.</summary>
     /// <summary>The output a selected content row (a live sink, by child-id) resolves to.</summary>
     private static bool TryGetContentOutput(Guid childId, EvaluationContext context, out Guid outputId)
     {
@@ -98,6 +96,8 @@ internal sealed class OutputSetupModeView
         return false;
     }
 
+    /// <summary>The output a focused sink's editing view should show: its target directly if that's an output,
+    /// otherwise the target surface's first mapped output.</summary>
     private static bool TryGetSinkOutput(IOutputSink sink, EvaluationContext context, out Guid outputId)
     {
         var targetId = sink.GetTargetId(context);
