@@ -28,7 +28,9 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
  | PasteFromClipboard             | ctrl + V (NeedsWindowFocus)                        |
  | InsertKeyframe                 | C (NeedsWindowFocus)                               |
  | InsertKeyframeWithIncrement    | C, shift (NeedsWindowFocus)                        |
- | ToggleDisabled                 | D (NeedsWindowFocus)                               |
+ | ToggleDisabled                 | Shift + D (NeedsWindowFocus)                       |
+ | ToggleBypassed                 | Shift + B (NeedsWindowFocus)                       |
+ | Disconnect                     | Alt + D (NeedsWindowFocus)                         |
  | PinToOutputWindow              | P (NeedsWindowFocus)                               |
  | DisplayImageAsBackground       | ctrl + P                                           |
  | ClearBackgroundImage           | ctrl + P (NeedsWindowFocus) or use Clear BG button |

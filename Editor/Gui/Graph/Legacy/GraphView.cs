@@ -204,6 +204,11 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                 NodeActions.ToggleBypassedForSelectedElements(_nodeSelection);
             }
 
+            if (UserActions.Disconnect.Triggered())
+            {
+                NodeActions.DisconnectNodes(compositionOp, _nodeSelection.Selection.ToList());
+            }
+
             if (UserActions.PinToOutputWindow.Triggered())
             {
                 if (LayoutHandling.FocusMode)
@@ -652,6 +657,19 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         {
             NodeActions.ToggleBypassedForSelectedElements(_nodeSelection);
         }
+
+        
+        var selectedIds = new HashSet<Guid>(selectedChildUis.Select(c => c.Id));
+        var canDisconnect = compositionOp.Symbol.Connections.Exists(c => selectedIds.Contains(c.SourceParentOrChildId) != selectedIds.Contains(c.TargetParentOrChildId));
+        
+        if (ImGui.MenuItem("Disconnect",
+                           UserActions.Disconnect.ListShortcuts(),
+                           selected: false,
+                           enabled: canDisconnect))
+        {
+            NodeActions.DisconnectNodes(_projectView.CompositionInstance, _nodeSelection.Selection.ToList());
+        }
+
 
         if (ImGui.MenuItem("Rename", oneOpSelected))
         {

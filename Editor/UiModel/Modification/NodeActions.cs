@@ -538,12 +538,13 @@ internal static class NodeActions
         }
     }
 
-    public static void DisconnectDraggedNodes(Instance compositionOp, List<ISelectableCanvasObject> draggedNodes)
+    public static void DisconnectNodes(Instance compositionOp, List<ISelectableCanvasObject> nodes)
     {
+        Log.Info($"Disconnecting {nodes.Count} nodes from their inputs and outputs");
         var removeCommands = new List<ICommand>();
         var inputConnections = new List<(Symbol.Connection connection, Type connectionType, bool isMultiIndex, int multiInputIndex)>();
         var outputConnections = new List<(Symbol.Connection connection, Type connectionType, bool isMultiIndex, int multiInputIndex)>();
-        foreach (var node in draggedNodes)
+        foreach (var node in nodes)
         {
             if (node is not SymbolUi.Child childUi)
                 continue;
@@ -557,7 +558,7 @@ internal static class NodeActions
             // Get all input connections and
             // relative index if they have multi-index inputs
             var connectionsToInput = instance.Parent.Symbol.Connections.FindAll(c => c.TargetParentOrChildId == instance.SymbolChildId
-                                                                                     && draggedNodes.All(c2 => c2.Id != c.SourceParentOrChildId));                
+                                                                                     && nodes.All(c2 => c2.Id != c.SourceParentOrChildId));                
             var inConnectionInputIndex = 0;
             foreach (var connectionToInput in connectionsToInput)
             {
@@ -573,7 +574,7 @@ internal static class NodeActions
             // Get all output connections and
             // relative index if they have multi-index inputs
             var connectionsToOutput = instance.Parent.Symbol.Connections.FindAll(c => c.SourceParentOrChildId == instance.SymbolChildId
-                                                                                      && draggedNodes.All(c2 => c2.Id != c.TargetParentOrChildId));
+                                                                                      && nodes.All(c2 => c2.Id != c.TargetParentOrChildId));
             var outConnectionInputIndex = 0;
             foreach (var connectionToOutput in connectionsToOutput)
             {
@@ -647,7 +648,7 @@ internal static class NodeActions
 
         if (removeCommands.Count > 0)
         {
-            var macro = new MacroCommand("Shake off connections", removeCommands);
+            var macro = new MacroCommand("Disconnect nodes", removeCommands);
             UndoRedoStack.AddAndExecute(macro);
         }
     }

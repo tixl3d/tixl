@@ -67,6 +67,12 @@ internal static class KeyboardActions
             NodeActions.ToggleBypassedForSelectedElements(nodeSelection);
         }
 
+        if (UserActions.Disconnect.Triggered())
+        {
+            NodeActions.DisconnectNodes(context.CompositionInstance, nodeSelection.Selection.ToList());
+            context.Layout.FlagStructureAsChanged();
+        }
+
         // Navigation backwards / forward
         {
             IReadOnlyList<Guid>? navigationPath = null;
