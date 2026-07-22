@@ -30,6 +30,7 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IOutputSink
     Vector4 IOutputSink.GetColor(EvaluationContext context) => Color.GetValue(context);
     T3.Core.DataTypes.Texture2D IOutputSink.GetContent(EvaluationContext context) => Texture.GetValue(context);
     void IOutputSink.InvalidateContent() => Texture.InvalidateGraph();
+    void IOutputSink.SetTarget(Guid targetId) => TargetId.SetTypedInputValue(targetId);
 
     [Input(Guid = "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942")]
     public readonly InputSlot<T3.Core.DataTypes.Texture2D> Texture = new();

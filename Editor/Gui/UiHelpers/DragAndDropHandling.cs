@@ -232,5 +232,6 @@ internal static class DragAndDropHandling
         FileAsset,
         ExternalFile,
         SymbolNameSpace,
+        SetupEntity,
     }
 }

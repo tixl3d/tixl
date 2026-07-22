@@ -22,12 +22,15 @@ internal sealed class OutputSetupModeView
         if (!_showSetupPanel)
             return;
 
+        // Match the settings windows' content-section background so the light hover/selection fills read.
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundPopup.Rgba);
         ImGui.BeginChild("##setupPanel",
                          new Vector2(240 * T3Ui.UiScaleFactor, ImGui.GetWindowHeight()),
                          ImGuiChildFlags.None,
                          ImGuiWindowFlags.None);
         SetupPanel.Draw(_entitySelection);
         ImGui.EndChild();
+        ImGui.PopStyleColor();
         ImGui.SameLine();
     }
 

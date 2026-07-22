@@ -174,10 +174,16 @@ internal sealed class ReferenceImageView
         dest[2] = homography.TransformPoint(new Vector2(w, h));
         dest[3] = homography.TransformPoint(new Vector2(0, h));
 
-        Bbox(dest, out bboxMin, out bboxMax);
         Bbox(interp, out regionMin, out regionMax);
 
-        // Render into an RT covering the whole warped extent (nothing clipped at the photo edge), size-capped.
+        // Extent = the rectified surface plus a margin of surround (so it isn't clipped to the photo rect).
+        // Bounding to the region — not the whole warped photo — is essential: a steep rectification sends the
+        // far photo corners toward infinity, so sizing to the full warp would blow the RT up and leave the
+        // surface sub-pixel (it vanishes). The runaway surround is simply cropped to this window.
+        var regionSize = regionMax - regionMin;
+        bboxMin = regionMin - regionSize;
+        bboxMax = regionMax + regionSize;
+
         var bboxSize = bboxMax - bboxMin;
         var maxDim = Math.Max(bboxSize.X, bboxSize.Y);
         var scale = maxDim > 4096f ? 4096f / maxDim : 1f;

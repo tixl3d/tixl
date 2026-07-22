@@ -7,6 +7,34 @@ zero. Grounded in `data-model.md` (the deltas) and the current `Core/Output/` + 
 code.
 
 ## Status
+- **Phase 3b (part 3) — out-gutter icons landed (uncommitted), builds green.** Using `Icon.Grid` (surface),
+  `Icon.Projector` (output). CONTENT rows show `→ [grid] Surface` / `[projector] Output` / `unbound`; SURFACE
+  rows show `[projector] Output +N`. Left *in*-gutter (content-in on surfaces, surface-in on outputs) still to
+  come — it needs the left-margin layout. Per-row state matrix (states.md) also still open.
+- **Phase 3b (part 2) — drag-to-map landed (uncommitted), builds green** (Editor + Lib). Drag a **surface onto
+  an output** → adds a default corner-pin mapping; drag a **content send onto a surface or output** → retargets
+  it (new `IOutputSink.SetTarget` → `TargetId.SetTypedInputValue`, which persists). Uses the shared
+  `DragAndDropHandling` helper (added a `SetupEntity` drag type) so the orange drop indicator shows on valid
+  targets only. **Caveat:** neither drop is undoable yet (structural-undo is still the standing gap); retarget
+  persists on the op but has no undo command. Not runtime-tested — drag mechanics built blind.
+- **Phase 3b (part 1) — hover cross-highlight landed (uncommitted), builds green.** Hovering a row outlines the
+  rows it references (blue `StatusAutomated`) along content→surface→output (+ reference-image→its surfaces),
+  one-frame-lagged. **Icon gutters are blocked**: `Icon.Slice`/`Projector`/`Link`/`Referenced` exist, but the
+  gutter grammar needs a **surface/grid glyph** for the CONTENT→surface and OUTPUT←surface indicators — needs
+  adding to `Icons.cs` before those gutters can be drawn (per the "don't fake glyphs" rule). Drag-to-map + per-row
+  state rendering still to come.
+- **Phase 3a — sidebar information-architecture reshape landed (uncommitted), builds green.** Five sections in
+  the target order (CONTENT / SURFACES / OUTPUTS / REFERENCE IMAGES / PROPS); new **CONTENT** section lists the
+  live `SendToOutput` sinks by op name with their target; **surfaces are their own tree** (nested by `ParentId`),
+  un-nested from outputs; relationships shown as text (`→ Output`) until the icon gutters land. Content rows are
+  selectable (ContentSource kind) with a matching entity card. **Deferred to 3b:** icon gutters, hover
+  cross-highlight (Referenced state), drag-to-map, per-row state rendering, region-editing. Panel add/remove/
+  rename preserved; mapping a surface to an output still happens in the output view's `+ surface` buttons.
+- **Phase 2 — foundation landed (uncommitted), builds green.** `SelectionTarget` + `SubPart` address form;
+  `SetupEntitySelection` is now ordered **multi-select** (Select/Add/Toggle/IsSelected/Clear/TryResolve over
+  targets) with `Slice`/`ContentSource` kinds added; panel rows are ctrl/shift modifier-aware. The
+  **sub-element `CanvasSelection` plane is deferred to Phase 4** (built where the canvas handles consume it,
+  rather than as an unused class now). Entity-plane multi-select works; multi-*actions* (delete/drag) come with P3.
 - **Phase 1 — landed (uncommitted), builds green** (Editor + Operators/Lib). Model reshaped to the settled
   shapes; corner-pin render path preserved. Deviations from the phase sketch, all deliberate:
   - `Warp?`/`Mask?`/`CornerColors?` on `OutputMapping` were **deferred to Phase 5** (no back-compat cost on
