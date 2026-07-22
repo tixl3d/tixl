@@ -148,6 +148,16 @@ public sealed class Surface
     /// <summary>Physical size in meters. Defines the ContentCanvas aspect.</summary>
     public Vector2 SizeInMeters = new(1, 1);
 
+    /// <summary>Projects a real-world calibration raster over this surface (no content needed) so its
+    /// corner-pin can be hand-aligned to physical wall features.</summary>
+    public bool ShowGrid;
+
+    /// <summary>Raster cell size in meters (default 25×25 cm). Cell counts derive from <see cref="SizeInMeters"/>.</summary>
+    public Vector2 GridCellSize = new(0.25f, 0.25f);
+
+    /// <summary>When set, editing one grid-cell dimension scales the other proportionally.</summary>
+    public bool GridCellLinked = true;
+
     /// <summary>
     /// ContentCanvas resolution policy: pixel size is derived (px/m × physical size, clamped),
     /// never stored — surfaces get resized during calibration and content must survive it.
@@ -170,6 +180,9 @@ public sealed class Surface
         writer.WriteValue("Render", Render);
         writer.WriteVector2("SizeInMeters", SizeInMeters);
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
+        writer.WriteValue("ShowGrid", ShowGrid);
+        writer.WriteVector2("GridCellSize", GridCellSize);
+        writer.WriteValue("GridCellLinked", GridCellLinked);
 
         writer.WritePropertyName("OutputMappings");
         writer.WriteStartArray();
@@ -206,6 +219,9 @@ public sealed class Surface
                               Render = token.ReadValueSafe("Render", true),
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
+                              ShowGrid = token.ReadValueSafe("ShowGrid", false),
+                              GridCellSize = OutputJson.ReadVector2(token["GridCellSize"], new Vector2(0.25f, 0.25f)),
+                              GridCellLinked = token.ReadValueSafe("GridCellLinked", true),
                               OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),
                           };
 

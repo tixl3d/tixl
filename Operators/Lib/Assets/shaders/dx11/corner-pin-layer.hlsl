@@ -4,6 +4,8 @@ cbuffer Params : register(b0)
     float4 SourceTLTR; // source UV corners: TL.xy, TR.xy
     float4 SourceBRBL; // source UV corners: BR.xy, BL.xy
     float4 Color;
+    float4 GridParams; // xy = cell counts across content canvas, z = line thickness (px), w = grid mode (>0.5)
+    float4 GridColor;
 }
 
 Texture2D<float4> InputTexture : register(t0);
@@ -44,5 +46,18 @@ vsOutput vsMain(uint vertexId : SV_VertexID)
 
 float4 psMain(vsOutput input) : SV_TARGET
 {
+    // Grid mode: draw an analytic calibration raster over an opaque black canvas (unlit wall = black),
+    // ignoring the input texture. Lines are anti-aliased in screen space via fwidth, so they stay a
+    // constant thickness however the corner-pin warps the surface.
+    if (GridParams.w > 0.5)
+    {
+        float2 cellUv = input.texCoord * GridParams.xy;         // fractional cell coordinate
+        float2 distToLine = abs(frac(cellUv) - 0.5);            // 0.5 at cell centre, 0 at a grid line
+        float2 pixelWidth = fwidth(cellUv) ;                     // one screen pixel in cell units
+        float2 lineAa = smoothstep(0.5, 0.5 - pixelWidth * max(GridParams.z, 1), distToLine);
+        float lineIntensity = 1-saturate(min(lineAa.x, lineAa.y));
+        return float4(GridColor.rgb * lineIntensity, 1);
+    }
+
     return InputTexture.Sample(texSampler, input.texCoord) * Color;
 }

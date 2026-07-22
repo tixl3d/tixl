@@ -174,13 +174,51 @@ internal static class SetupPanel
         if ((sizeState & InputEditStateFlags.Modified) != 0)
             surface.SizeInMeters = new Vector2(size[0], size[1]);
 
+        var showGrid = surface.ShowGrid;
+        if (FormInputsNarrow.DrawCheckbox("Show size raster", ref showGrid,
+                                          "Projects a real-world grid (no content needed) so you can hand-align the corner-pin to physical wall features."))
+        {
+            surface.ShowGrid = showGrid;
+            OutputSetupHandling.SaveActive();
+        }
+
+        var gridCellState = InputEditStateFlags.Nothing;
+        if (surface.ShowGrid)
+        {
+            var linked = surface.GridCellLinked;
+            if (FormInputsNarrow.DrawCheckbox("Link cell size", ref linked, "Keep grid cells square: editing one dimension scales the other."))
+            {
+                surface.GridCellLinked = linked;
+                OutputSetupHandling.SaveActive();
+            }
+
+            // Stored in metres; edited in centimetres (25 cm default reads better than 0.25 m).
+            Span<float> cell = [surface.GridCellSize.X * 100f, surface.GridCellSize.Y * 100f];
+            gridCellState = FormInputsNarrow.DrawFloats("Cell size (cm)", cell, "Grid spacing in centimetres.", speed: 0.1f);
+            if ((gridCellState & InputEditStateFlags.Modified) != 0)
+            {
+                var nx = MathF.Max(cell[0] / 100f, 0.001f);
+                var ny = MathF.Max(cell[1] / 100f, 0.001f);
+                if (surface.GridCellLinked)
+                {
+                    // Whichever field the user moved drives the other proportionally.
+                    if (MathF.Abs(cell[0] - surface.GridCellSize.X * 100f) >= MathF.Abs(cell[1] - surface.GridCellSize.Y * 100f))
+                        ny = surface.GridCellSize.Y * (nx / MathF.Max(surface.GridCellSize.X, 0.001f));
+                    else
+                        nx = surface.GridCellSize.X * (ny / MathF.Max(surface.GridCellSize.Y, 0.001f));
+                }
+
+                surface.GridCellSize = new Vector2(nx, ny);
+            }
+        }
+
         Span<float> anchor = [pivot.X, pivot.Y];
         var anchorState = FormInputsNarrow.DrawFloats("Anchor (0..1)", anchor);
         if ((anchorState & InputEditStateFlags.Modified) != 0)
             (surface.Placement ??= new Surface.StagePlacement()).Pivot = new Vector2(anchor[0], anchor[1]);
 
         // Value applied live above; persist once when the drag/edit completes.
-        if (((posState | sizeState | anchorState) & InputEditStateFlags.Finished) != 0)
+        if (((posState | sizeState | anchorState | gridCellState) & InputEditStateFlags.Finished) != 0)
             OutputSetupHandling.SaveActive();
     }
 
