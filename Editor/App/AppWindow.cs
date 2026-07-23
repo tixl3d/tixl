@@ -103,6 +103,11 @@ internal sealed class AppWindow
         Form.FormBorderStyle = FormBorderStyle.Sizable;
         Form.WindowState = FormWindowState.Normal;
         Form.FormBorderStyle = FormBorderStyle.None;
+        if (screenIndex >= Screen.AllScreens.Length)
+        {
+            Log.Error($"Attempt to set out of bounds screen #{screenIndex} to fullscreen");
+            return;
+        }
         Form.Bounds = Screen.AllScreens[screenIndex].Bounds;
   
     }
