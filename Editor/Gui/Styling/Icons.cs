@@ -14,7 +14,7 @@ namespace T3.Editor.Gui.Styling;
 internal static class Icons
 {
     public static ImFontPtr IconFont { get; set; }
-    public static float FontSize = 16;
+    public static float FontSize = 15;
 
     /** Draws icon vertically aligned to the current font */
     public static void DrawAtCursor(this Icon icon)

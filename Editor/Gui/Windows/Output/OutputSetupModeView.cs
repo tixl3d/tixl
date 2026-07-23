@@ -71,8 +71,10 @@ internal sealed class OutputSetupModeView
             else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage)
                 _referenceImageView.Draw(entityId);
             else if (entityKind == SetupEntitySelection.EntityKind.ContentSource)
-                // A slice belongs to the send, so selecting content opens its source with every slice on it.
+                // Slices live on the source, so selecting content opens it with every slice laid out on it.
                 _outputView.DrawSourceCanvas(entityId, _entitySelection);
+            else if (entityKind == SetupEntitySelection.EntityKind.Slice && TryGetSliceSource(entityId, out var sliceChildId))
+                _outputView.DrawSourceCanvas(sliceChildId, _entitySelection, entityId);
             else
                 SetupPanel.DrawEntityCard(entityKind, entityId);
         }
@@ -123,6 +125,22 @@ internal sealed class OutputSetupModeView
         }
 
         return false;
+    }
+
+    /// <summary>The op supplying a slice's source, so selecting a slice can open the canvas it lives on.</summary>
+    private static bool TryGetSliceSource(Guid sliceId, out Guid symbolChildId)
+    {
+        symbolChildId = Guid.Empty;
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return false;
+
+        var slice = setup.Slices.Find(s => s.Id == sliceId);
+        var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        if (source == null)
+            return false;
+
+        symbolChildId = source.SymbolChildId;
+        return true;
     }
 
     /// <summary>The "Show Setup Panel" toggle — hung inside the output window's breadcrumb menu.</summary>

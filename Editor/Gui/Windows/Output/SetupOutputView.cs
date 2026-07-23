@@ -104,7 +104,7 @@ internal sealed class SetupOutputView
     /// texture at once, so overlaps and gaps are visible. No perspective is involved, which is exactly why
     /// slices are arranged here rather than on the wall.
     /// </summary>
-    public void DrawSourceCanvas(Guid contentChildId, SetupEntitySelection? selection = null)
+    public void DrawSourceCanvas(Guid contentChildId, SetupEntitySelection? selection = null, Guid selectedSliceId = default)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -116,6 +116,9 @@ internal sealed class SetupOutputView
             CustomComponents.EmptyWindowMessage("No content yet — connect a texture to this\nSendToOutput to lay out its slices.");
             return;
         }
+
+        if (selectedSliceId != Guid.Empty)
+            _selectedSliceId = selectedSliceId;
 
         _canvas.UpdateCanvas(out _);
 

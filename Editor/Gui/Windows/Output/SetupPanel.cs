@@ -437,7 +437,8 @@ internal static class SetupPanel
     // output retargets it. Call right after a row's Selectable so it acts as that item's source/target.
     private static void HandleRowDragDrop(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
     {
-        if (kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource)
+        if (kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
+                 or SetupEntitySelection.EntityKind.Slice)
             DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.SetupEntity, $"{(int)kind}:{id}");
 
         if (kind is not (SetupEntitySelection.EntityKind.Output or SetupEntitySelection.EntityKind.Surface))
@@ -449,7 +450,7 @@ internal static class SetupPanel
 
         var accepts = kind == SetupEntitySelection.EntityKind.Output
                           ? dragKind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
-                          : dragKind == SetupEntitySelection.EntityKind.ContentSource;
+                          : dragKind is SetupEntitySelection.EntityKind.ContentSource or SetupEntitySelection.EntityKind.Slice;
         if (!accepts || dragId == id)
             return;
 
@@ -489,6 +490,24 @@ internal static class SetupPanel
 
         // Dropping a source onto a surface shows one of its slices there, creating a full-frame slice if the
         // source has none yet. Routing is setup data now, so this is a plain field write.
+        // Dropping a slice on a free surface shows it there. If the surface already shows something, the drop
+        // can't have meant "replace it", so it lands as a sub-region cut to the slice's own aspect instead —
+        // which is the poster-slot case, and never destroys an existing assignment.
+        if (dragKind == SetupEntitySelection.EntityKind.Slice)
+        {
+            var slice = setup.Slices.Find(s => s.Id == dragId);
+            var surface = setup.Surfaces.Find(s => s.Id == targetId);
+            if (slice != null && surface != null)
+            {
+                if (surface.SliceId == Guid.Empty)
+                    surface.SliceId = slice.Id;
+                else
+                    AddRegionForSlice(setup, surface, slice);
+
+                OutputSetupHandling.SaveActive();
+            }
+        }
+
         if (dragKind == SetupEntitySelection.EntityKind.ContentSource)
         {
             var source = setup.ContentSources.Find(c => c.SymbolChildId == dragId);
@@ -532,10 +551,142 @@ internal static class SetupPanel
             if (sinks[i] is not Instance instance)
                 continue;
 
-            var (icon, text) = DescribeSourceGutter(setup, instance.SymbolChildId);
-            DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ContentSource, instance.SymbolChildId, SinkName(instance), text,
-                          leadingIcon: Icon.FileImage, trailingIcon: icon);
+            var childId = instance.SymbolChildId;
+            var source = setup.ContentSources.Find(c => c.SymbolChildId == childId);
+            var sliceCount = source == null ? 0 : setup.Slices.FindAll(x => x.SourceId == source.Id).Count;
+            var expanded = !_collapsedSources.Contains(childId);
+
+            var (icon, text) = DescribeSourceGutter(setup, childId);
+            DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ContentSource, childId, SinkName(instance), text,
+                          leadingIcon: Icon.FileImage, trailingIcon: icon,
+                          drawExtraMenuItems: source == null ? null : () =>
+                                                                      {
+                                                                          if (CustomComponents.DrawMenuItem(8, "Add slice"))
+                                                                              AddSlice(selection, setup, source);
+                                                                      },
+                          isExpanded: sliceCount > 0 ? expanded : null,
+                          onToggleExpanded: () => ToggleSourceExpanded(childId),
+                          reserveExpander: true,
+                          // No surface shows this source, so it steps back visually.
+                          muted: icon == null);
+
+            if (source == null || sliceCount == 0 || !expanded)
+                continue;
+
+            foreach (var slice in setup.Slices)
+            {
+                if (slice.SourceId != source.Id)
+                    continue;
+
+                DrawSliceRow(selection, setup, slice);
+            }
         }
+    }
+
+    /// <summary>
+    /// A slice under its source. The status carries its aspect, flagged when it disagrees with the surface
+    /// showing it — a mismatch means the content lands stretched, which is invisible until it's on the wall.
+    /// A slice nothing shows reads as "unused".
+    /// </summary>
+    private static void DrawSliceRow(SetupEntitySelection selection, Setup setup, Slice slice)
+    {
+        var sliceId = slice.Id;
+        var status = DescribeSliceStatus(setup, slice, out var mismatched);
+
+        DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Slice, sliceId,
+                      string.IsNullOrEmpty(slice.Name) ? "slice" : slice.Name, status,
+                      onDelete: () => DeleteSlice(setup, sliceId),
+                      leadingIcon: Icon.Slice,
+                      trailingIcon: mismatched ? Icon.Warning : null,
+                      depth: 1,
+                      muted: status is "unused" or "no source");
+    }
+
+    /// <summary>Aspect of the slice's pixels, plus whether that disagrees with what shows it.</summary>
+    private static string DescribeSliceStatus(Setup setup, Slice slice, out bool mismatched)
+    {
+        mismatched = false;
+
+        var source = setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        if (source == null || !OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content)
+            || content is not { IsDisposed: false })
+            return "no source";
+
+        var width = content.Description.Width * MathF.Max(slice.UvRect.Z - slice.UvRect.X, 0.0001f);
+        var height = content.Description.Height * MathF.Max(slice.UvRect.W - slice.UvRect.Y, 0.0001f);
+        if (height <= 0)
+            return "no source";
+
+        var aspect = width / height;
+
+        Surface? shownBy = null;
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId != slice.Id)
+                continue;
+
+            shownBy = surface;
+            break;
+        }
+
+        if (shownBy == null)
+            return "unused";
+
+        var surfaceAspect = shownBy.SizeInMeters.X / MathF.Max(shownBy.SizeInMeters.Y, 0.0001f);
+        mismatched = MathF.Abs(aspect - surfaceAspect) > surfaceAspect * 0.02f;
+        return FormatAspect(aspect);
+    }
+
+    /// <summary>A ratio reads faster than a decimal, so prefer a small whole-number one when it's close.</summary>
+    private static string FormatAspect(float aspect)
+    {
+        for (var denominator = 1; denominator <= 16; denominator++)
+        {
+            var numerator = aspect * denominator;
+            if (MathF.Abs(numerator - MathF.Round(numerator)) < 0.02f)
+                return $"{(int)MathF.Round(numerator)}:{denominator}";
+        }
+
+        return $"{aspect:0.00}:1";
+    }
+
+    private static void ToggleSourceExpanded(Guid childId)
+    {
+        if (!_collapsedSources.Add(childId))
+            _collapsedSources.Remove(childId);
+    }
+
+    private static void AddSlice(SetupEntitySelection selection, Setup setup, ContentSource source)
+    {
+        var count = setup.Slices.FindAll(x => x.SourceId == source.Id).Count;
+        var slice = new Slice
+                        {
+                            SourceId = source.Id,
+                            Name = count == 0 ? source.Name : $"Slice {count + 1}",
+                        };
+
+        setup.Slices.Add(slice);
+        selection.Select(SetupEntitySelection.EntityKind.Slice, slice.Id);
+        OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>Deleting a slice clears it from anything showing it — the reference would mean nothing.</summary>
+    private static void DeleteSlice(Setup setup, Guid sliceId)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId == sliceId)
+                surface.SliceId = Guid.Empty;
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            if (output.SliceId == sliceId)
+                output.SliceId = Guid.Empty;
+        }
+
+        setup.Slices.RemoveAll(s => s.Id == sliceId);
+        OutputSetupHandling.SaveActive();
     }
 
     private static string SinkName(Instance instance)
@@ -596,6 +747,79 @@ internal static class SetupPanel
             return (Icon.Projector, string.IsNullOrEmpty(output.Name) ? "output" : Abbreviate(output.Name));
 
         return (Icon.Grid, "?");
+    }
+
+    /// <summary>
+    /// Reshapes the surface so its real-world proportions match the pixels of the slice it shows — the inverse
+    /// of the slice's "Match target aspect", for when the wall is what should give. Keeps the width and solves
+    /// the height, so it reads as a nudge rather than a jump.
+    /// </summary>
+    private static void MatchSurfaceToSliceAspect(Setup setup, Surface surface)
+    {
+        var slice = setup.Slices.Find(s => s.Id == surface.SliceId);
+        if (slice == null || !TryGetSliceAspect(setup, slice, out var aspect))
+            return;
+
+        var oldState = new ResizeSurfaceCommand.State(surface);
+        var width = MathF.Max(surface.SizeInMeters.X, SurfaceGeometry.MinSize);
+        SurfaceGeometry.ResizeAnchored(surface, new Vector2(width, width / MathF.Max(aspect, 0.0001f)));
+
+        UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, oldState, new ResizeSurfaceCommand.State(surface)));
+        OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>
+    /// A sub-region shaped to a slice: sized so its real-world proportions match the slice's pixels, so the
+    /// content lands undistorted, and centred in the parent.
+    /// </summary>
+    private static void AddRegionForSlice(Setup setup, Surface parent, Slice slice)
+    {
+        var parentSize = parent.SizeInMeters;
+        var aspect = TryGetSliceAspect(setup, slice, out var value) ? value : 1f;
+
+        var width = parentSize.X * 0.5f;
+        var height = width / MathF.Max(aspect, 0.0001f);
+        if (height > parentSize.Y * 0.8f)
+        {
+            height = parentSize.Y * 0.5f;
+            width = height * aspect;
+        }
+
+        // Centre it: surface space runs Y down, so the bottom edge is below the middle.
+        var anchor = SurfaceGeometry.AnchorInSurface(parent);
+        var bottomLeft = new Vector2(parentSize.X * 0.5f - width * 0.5f, parentSize.Y * 0.5f + height * 0.5f);
+
+        var region = new Surface
+                         {
+                             Name = string.IsNullOrEmpty(slice.Name) ? $"Sub region {CountChildren(setup, parent.Id) + 1}" : slice.Name,
+                             Kind = Surface.SurfaceKinds.Layout,
+                             ParentId = parent.Id,
+                             SizeInMeters = new Vector2(MathF.Max(width, SurfaceGeometry.MinSize),
+                                                        MathF.Max(height, SurfaceGeometry.MinSize)),
+                             LocalPosition = new Vector2(bottomLeft.X - anchor.X, anchor.Y - bottomLeft.Y),
+                             PixelsPerMeter = parent.PixelsPerMeter,
+                             SliceId = slice.Id,
+                         };
+
+        setup.Surfaces.Add(region);
+    }
+
+    /// <summary>Aspect of a slice's pixels — its uv extent against the source's resolution.</summary>
+    private static bool TryGetSliceAspect(Setup setup, Slice slice, out float aspect)
+    {
+        aspect = 1f;
+        var source = setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        if (source == null || !OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content)
+            || content is not { IsDisposed: false })
+            return false;
+
+        var width = content.Description.Width * MathF.Max(slice.UvRect.Z - slice.UvRect.X, 0.0001f);
+        var height = content.Description.Height * MathF.Max(slice.UvRect.W - slice.UvRect.Y, 0.0001f);
+        if (width <= 0 || height <= 0)
+            return false;
+
+        aspect = width / height;
+        return true;
     }
 
     /// <summary>Whether a slice belongs to the given source.</summary>
@@ -673,7 +897,8 @@ internal static class SetupPanel
                       drawExtraMenuItems: () => DrawSurfaceMenuItems(selection, setup, surface, includeDelete: false),
                       depth: depth,
                       isExpanded: hasChildren ? isExpanded : null,
-                      onToggleExpanded: () => ToggleSurfaceExpanded(surfaceId));
+                      onToggleExpanded: () => ToggleSurfaceExpanded(surfaceId),
+                      reserveExpander: true);
 
         if (!hasChildren || !isExpanded)
             return;
@@ -1067,13 +1292,17 @@ internal static class SetupPanel
     /// <param name="isExpanded">null when the row has no children, so no chevron is drawn.</param>
     private static void DrawEntityRow(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id, string name, string? status,
                                       Action? onDelete = null, Action? onRemoveFromOutput = null, Icon? leadingIcon = null, Icon? trailingIcon = null,
-                                      Action? drawExtraMenuItems = null, int depth = 0, bool? isExpanded = null, Action? onToggleExpanded = null)
+                                      Action? drawExtraMenuItems = null, int depth = 0, bool? isExpanded = null, Action? onToggleExpanded = null,
+                                      bool reserveExpander = false, bool muted = false)
     {
         var scale = T3Ui.UiScaleFactor;
         var rounding = 4 * scale;
         // Odd height so a 15px icon centers exactly ((23-15)/2 = 4).
         var height = (float)Math.Round(23 * scale);
         var indent = depth * 12 * scale;
+
+        // Nothing shows this entity, so it recedes rather than competing with the rows that are in use.
+        var fade = muted ? 0.45f : 1f;
 
         ImGui.PushID(id.GetHashCode());
 
@@ -1165,42 +1394,55 @@ internal static class SetupPanel
             DrawInlineIcon(isExpanded.Value ? Icon.ChevronDown : Icon.ChevronRight, UiColors.TextMuted.Fade(0.6f).Rgba);
             contentX = ImGui.GetItemRectMax().X + 3 * scale;
         }
-        else if (depth > 0)
+        else if (depth > 0 || reserveExpander)
         {
-            contentX += 14 * scale; // keep children aligned with their siblings that do have a chevron
+            // Keep the chevron column even when this row has nothing to expand — otherwise a childless row
+            // sits further left than its siblings and the tree reads as ragged. Drawing the same glyph fully
+            // transparent reserves *exactly* the width the real one takes, rather than a guessed constant.
+            ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
+            DrawInlineIcon(Icon.ChevronRight, new Vector4(0, 0, 0, 0));
+            contentX = ImGui.GetItemRectMax().X + 3 * scale;
         }
 
         if (leadingIcon.HasValue)
         {
             ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
-            DrawInlineIcon(leadingIcon.Value, UiColors.TextMuted.Rgba);
+            DrawInlineIcon(leadingIcon.Value, UiColors.TextMuted.Fade(fade).Rgba);
             contentX = ImGui.GetItemRectMax().X + 5 * scale;
         }
 
         ImGui.SetCursorScreenPos(new Vector2(contentX, contentY));
-        CustomComponents.StylizedText(string.IsNullOrEmpty(name) ? "untitled" : name, Fonts.FontNormal, UiColors.Text);
+        CustomComponents.StylizedText(string.IsNullOrEmpty(name) ? "untitled" : name, Fonts.FontNormal, UiColors.Text.Fade(fade));
 
         if (trailingIcon.HasValue || status != null)
         {
-            var trailX = rowMin.X + (rowMax.X - rowMin.X) * 0.55f;
+            // Right-aligned rather than parked at a fixed fraction of the row: a long name used to run
+            // straight into the gutter. Measure the group first, then lay it out from the right edge.
+            ImGui.PushFont(Fonts.FontSmall);
+            var smallHeight = ImGui.GetTextLineHeight();
+            var statusWidth = status != null ? ImGui.CalcTextSize(status).X : 0;
+            ImGui.PopFont();
+
+            var gutterWidth = statusWidth;
+            if (trailingIcon.HasValue)
+                gutterWidth += Icons.FontSize * 2 + 2 * scale + 4 * scale;
+
+            var trailX = rowMax.X - 6 * scale - gutterWidth;
             if (trailingIcon.HasValue)
             {
                 ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
-                DrawInlineIcon(Icon.ArrowRight, UiColors.TextMuted.Fade(0.3f).Rgba);
+                DrawInlineIcon(Icon.ArrowRight, UiColors.TextMuted.Fade(0.3f * fade).Rgba);
                 ImGui.SetCursorScreenPos(new Vector2(ImGui.GetItemRectMax().X + 2 * scale, iconY));
-                DrawInlineIcon(trailingIcon.Value, UiColors.TextMuted.Rgba);
+                DrawInlineIcon(trailingIcon.Value, UiColors.TextMuted.Fade(fade).Rgba);
                 trailX = ImGui.GetItemRectMax().X + 4 * scale;
             }
 
             if (status != null)
             {
                 // FontSmall is shorter than the row's FontNormal baseline — center it on its own height.
-                ImGui.PushFont(Fonts.FontSmall);
-                var smallHeight = ImGui.GetTextLineHeight();
-                ImGui.PopFont();
                 var statusY = (float)Math.Round(rowMin.Y + (height - smallHeight) * 0.5f - 1 * scale);
                 ImGui.SetCursorScreenPos(new Vector2(trailX, statusY));
-                CustomComponents.StylizedText(status, Fonts.FontSmall, UiColors.TextMuted);
+                CustomComponents.StylizedText(status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
             }
         }
 
@@ -1229,6 +1471,10 @@ internal static class SetupPanel
 
         if (CustomComponents.DrawMenuItem(5, "Duplicate"))
             DuplicateSurface(selection, setup, surface);
+
+        // Only meaningful once something is shown here — there's no aspect to match otherwise.
+        if (surface.SliceId != Guid.Empty && CustomComponents.DrawMenuItem(9, "Adjust aspect to slice"))
+            MatchSurfaceToSliceAspect(setup, surface);
 
         if (CustomComponents.DrawMenuItem(6, "Clear content inputs"))
             ClearContentInputs(surface.Id);
@@ -1488,6 +1734,7 @@ internal static class SetupPanel
 
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
     private static readonly HashSet<Guid> _collapsedSurfaces = [];
+    private static readonly HashSet<Guid> _collapsedSources = [];
 
     private const string MeasuredSizePopupId = "##measuredSize";
     private static Vector2 _measuredEdit;
