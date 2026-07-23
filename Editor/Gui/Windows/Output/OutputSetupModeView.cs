@@ -41,12 +41,15 @@ internal sealed class OutputSetupModeView
     /// </summary>
     public bool TryDrawEditingView(Instance? focusedInstance, EvaluationContext context)
     {
-        var focusedId = focusedInstance?.SymbolChildId ?? Guid.Empty;
+        // What's *drawn* here may be pinned, so it doesn't follow the graph. Which CONTENT row is selected
+        // should follow the graph selection regardless — picking a send in the graph is how you get to it.
+        var selectedInGraph = ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
+        var focusedId = selectedInGraph?.SymbolChildId ?? Guid.Empty;
         if (focusedId != _lastFocusedId)
         {
             // One shared selection: focusing a SendToOutput in the graph selects its CONTENT row; a later
             // sidebar pick (a surface/output) simply replaces it — so we never show two selected rows.
-            if (focusedInstance is IOutputSink)
+            if (selectedInGraph is IOutputSink)
                 _entitySelection.Select(SetupEntitySelection.EntityKind.ContentSource, focusedId);
             else
                 _entitySelection.Clear();
@@ -54,7 +57,7 @@ internal sealed class OutputSetupModeView
             // The panel follows the OE-editing context: a focused sink opens it (its surfaces/outputs are
             // at hand); selecting any other op — or clicking the graph background — closes it. Only on the
             // transition, so it can still be toggled manually while the focus stays put.
-            _showSetupPanel = focusedInstance is IOutputSink;
+            _showSetupPanel = selectedInGraph is IOutputSink;
 
             _lastFocusedId = focusedId;
         }
@@ -67,14 +70,15 @@ internal sealed class OutputSetupModeView
                 _outputView.Draw(surfaceOutputId, entityId, _entitySelection); // labels on the canvas can re-pick
             else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage)
                 _referenceImageView.Draw(entityId);
-            else if (entityKind == SetupEntitySelection.EntityKind.ContentSource && TryGetContentOutput(entityId, context, out var contentOutputId))
-                _outputView.Draw(contentOutputId);
+            else if (entityKind == SetupEntitySelection.EntityKind.ContentSource)
+                // A slice belongs to the send, so selecting content opens its source with every slice on it.
+                _outputView.DrawSourceCanvas(entityId, _entitySelection);
             else
                 SetupPanel.DrawEntityCard(entityKind, entityId);
         }
         else
         {
-            if (focusedInstance is not IOutputSink sink || !TryGetSinkOutput(sink, context, out var sinkOutputId))
+            if (focusedInstance is not IOutputSink || !TryGetSinkOutput(focusedInstance, out var sinkOutputId))
                 return false;
 
             _outputView.Draw(sinkOutputId);
@@ -83,36 +87,42 @@ internal sealed class OutputSetupModeView
         return true;
     }
 
-    /// <summary>The output a selected content row (a live sink, by child-id) resolves to.</summary>
-    private static bool TryGetContentOutput(Guid childId, EvaluationContext context, out Guid outputId)
+    /// <summary>
+    /// The output a focused send's editing view should show: the first output reached by anything displaying
+    /// one of its slices — a surface's mapping, or an output showing it full-frame.
+    /// </summary>
+    private static bool TryGetSinkOutput(Instance instance, out Guid outputId)
     {
         outputId = Guid.Empty;
-        foreach (var sink in OutputSinkRegistry.Sinks)
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return false;
+
+        var source = setup.ContentSources.Find(c => c.SymbolChildId == instance.SymbolChildId);
+        if (source == null)
+            return false;
+
+        foreach (var slice in setup.Slices)
         {
-            if (sink is Instance instance && instance.SymbolChildId == childId)
-                return TryGetSinkOutput(sink, context, out outputId);
+            if (slice.SourceId != source.Id)
+                continue;
+
+            foreach (var output in setup.Outputs)
+            {
+                if (output.SliceId == slice.Id)
+                {
+                    outputId = output.Id;
+                    return true;
+                }
+            }
+
+            foreach (var surface in setup.Surfaces)
+            {
+                if (surface.SliceId == slice.Id && TryGetSurfaceOutput(surface.Id, out outputId))
+                    return true;
+            }
         }
 
         return false;
-    }
-
-    /// <summary>The output a focused sink's editing view should show: its target directly if that's an output,
-    /// otherwise the target surface's first mapped output.</summary>
-    private static bool TryGetSinkOutput(IOutputSink sink, EvaluationContext context, out Guid outputId)
-    {
-        outputId = Guid.Empty;
-        var targets = sink.GetTargetIds(context);
-        if (targets.Count == 0)
-            return false;
-
-        var targetId = targets[0];
-        if (ActiveSetup.TryFindOutput(targetId) != null)
-        {
-            outputId = targetId;
-            return true;
-        }
-
-        return TryGetSurfaceOutput(targetId, out outputId);
     }
 
     /// <summary>The "Show Setup Panel" toggle — hung inside the output window's breadcrumb menu.</summary>

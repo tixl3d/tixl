@@ -152,6 +152,10 @@ public sealed class Surface
     /// <summary>When false the output manager skips this surface (kept in the setup, just not drawn).</summary>
     public bool Render = true;
 
+    /// <summary>The <see cref="Slice"/> this surface shows; <see cref="Guid.Empty"/> for none. Several
+    /// surfaces may name the same slice (the feed mirrored), and a surface shows at most one.</summary>
+    public Guid SliceId;
+
     /// <summary>Physical size in meters. Defines the ContentCanvas aspect.</summary>
     public Vector2 SizeInMeters = new(1, 1);
 
@@ -184,6 +188,7 @@ public sealed class Surface
         writer.WriteVector2("LocalPosition", LocalPosition);
         writer.WriteString("ShortName", ShortName);
         writer.WriteValue("Render", Render);
+        writer.WriteObject("SliceId", SliceId);
         writer.WriteVector2("SizeInMeters", SizeInMeters);
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
         writer.WriteValue("ShowGrid", ShowGrid);
@@ -223,6 +228,7 @@ public sealed class Surface
                               LocalPosition = OutputJson.ReadVector2(token["LocalPosition"], Vector2.Zero),
                               ShortName = token.ReadValueSafe("ShortName", string.Empty) ?? string.Empty,
                               Render = token.ReadValueSafe("Render", true),
+                              SliceId = OutputJson.ReadGuid(token["SliceId"]),
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               ShowGrid = token.ReadValueSafe("ShowGrid", false),

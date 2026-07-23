@@ -8,30 +8,12 @@ using T3.Core.Operator;
 namespace T3.Core.Output;
 
 /// <summary>
-/// A graph node that declares "this content belongs on this output/surface" — it does no drawing.
-/// It registers itself with the <see cref="OutputSinkRegistry"/> so the host's output manager can
-/// walk backwards from the active outputs, pull the content, and composite it. Implemented by the
-/// SendToOutput operator; the getters read the op's input slots so bindings can be driven or static.
+/// A graph node that supplies pixels to the output setup. It does no drawing: it registers itself with the
+/// <see cref="OutputSinkRegistry"/> so the host's output manager can pull the content and composite it.
+/// Routing (which surface shows what) is setup data keyed to this op's SymbolChild, not state on the op.
 /// </summary>
 public interface IOutputSink
 {
-    /// <summary>The setup entities this content is shown on — surfaces (mapped) and/or outputs (direct
-    /// full-frame). One content can fan out to several surfaces (the same feed mirrored). Empty = unbound.</summary>
-    IReadOnlyList<Guid> GetTargetIds(EvaluationContext context);
-
-    /// <summary>Replaces the target set (the host adds/removes by drag).</summary>
-    void SetTargets(IReadOnlyList<Guid> targetIds);
-
-    /// <summary>Drops a target id from the set if present (and the input isn't procedurally driven).
-    /// Called when a surface/output is deleted so no dangling reference lingers in the op's parameter.</summary>
-    void RemoveTarget(Guid targetId);
-
-    /// <summary>The slice of the source texture to show, as a UV rect (xMin, yMin, xMax, yMax). Full = (0,0,1,1).</summary>
-    Vector4 GetSourceRect(EvaluationContext context);
-
-    /// <summary>Replaces that slice — the host edits it as a rectangle on the source texture.</summary>
-    void SetSourceRect(Vector4 sourceRect);
-
     Vector4 GetColor(EvaluationContext context);
     Texture2D? GetContent(EvaluationContext context);
 
@@ -52,15 +34,25 @@ public interface IOutputSink
 /// </summary>
 public static class OutputSinkRegistry
 {
+    /// <summary>
+    /// Bumped whenever membership changes. Lets hosts skip work that can only be invalidated by a send
+    /// appearing or disappearing — notably scanning the symbol library to see whether an op was deleted.
+    /// </summary>
+    public static int Version { get; private set; }
+
     public static void Register(IOutputSink sink)
     {
-        if (!_sinks.Contains(sink))
-            _sinks.Add(sink);
+        if (_sinks.Contains(sink))
+            return;
+
+        _sinks.Add(sink);
+        Version++;
     }
 
     public static void Unregister(IOutputSink sink)
     {
-        _sinks.Remove(sink);
+        if (_sinks.Remove(sink))
+            Version++;
     }
 
     public static IReadOnlyList<IOutputSink> Sinks => _sinks;

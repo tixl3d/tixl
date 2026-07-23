@@ -12,27 +12,12 @@
       }
     },
     {
-      "Id": "7c3f9d21-4e8a-4b56-9f10-2d6c8b41a093"/*SourceRect*/,
-      "DefaultValue": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 1.0,
-        "W": 1.0
-      }
-    },
-    {
       "Id": "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942"/*Texture*/,
       "DefaultValue": null
     },
     {
       "Id": "9a1c4f7e-2d38-4b6a-8e50-1f7c3d9b0a24"/*Update*/,
       "DefaultValue": true
-    },
-    {
-      "Id": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*TargetIds*/,
-      "DefaultValue": {
-        "Values": []
-      }
     }
   ],
   "Children": [],

@@ -28,6 +28,13 @@ public sealed class Setup
     public string Name = string.Empty;
     public List<ReferenceImage> ReferenceImages = [];
     public List<Surface> Surfaces = [];
+
+    /// <summary>Pixel sources, one per supplying op, and the rectangles cut from them. Routing lives here
+    /// rather than on the ops: a surface names the slice it shows, so it survives re-instantiation and
+    /// duplicates with the setup.</summary>
+    public List<ContentSource> ContentSources = [];
+
+    public List<Slice> Slices = [];
     public List<OutputDefinition> Outputs = [];
     public List<Prop> Props = [];
 
@@ -75,6 +82,20 @@ public sealed class Setup
 
         writer.WriteEndArray();
 
+        writer.WritePropertyName("ContentSources");
+        writer.WriteStartArray();
+        foreach (var source in ContentSources)
+            source.WriteToJson(writer);
+
+        writer.WriteEndArray();
+
+        writer.WritePropertyName("Slices");
+        writer.WriteStartArray();
+        foreach (var slice in Slices)
+            slice.WriteToJson(writer);
+
+        writer.WriteEndArray();
+
         writer.WritePropertyName("Outputs");
         writer.WriteStartArray();
         foreach (var output in Outputs)
@@ -103,6 +124,8 @@ public sealed class Setup
                        Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
                        ReferenceImages = token.ReadListSafe("ReferenceImages", ReferenceImage.ReadFromJson),
                        Surfaces = token.ReadListSafe("Surfaces", Surface.ReadFromJson),
+                       ContentSources = token.ReadListSafe("ContentSources", ContentSource.ReadFromJson),
+                       Slices = token.ReadListSafe("Slices", Slice.ReadFromJson),
                        Outputs = token.ReadListSafe("Outputs", OutputDefinition.ReadFromJson),
                        Props = token.ReadListSafe("Props", Prop.ReadFromJson),
                    };

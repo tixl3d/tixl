@@ -110,6 +110,11 @@ public sealed class OutputDefinition
     /// <summary>Pause presenting to this output without dropping its device binding (e.g. mute an NDI feed).</summary>
     public bool Send = true;
 
+    /// <summary>A <see cref="Slice"/> shown full-frame on this output, bypassing surfaces — the content was
+    /// already rendered through the projector's camera, so it maps 1:1 and needs no corner pin.
+    /// <see cref="Guid.Empty"/> for none.</summary>
+    public Guid SliceId;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -118,6 +123,7 @@ public sealed class OutputDefinition
         writer.WriteString("Kind", Kind);
         writer.WriteInt2("CanvasResolution", CanvasResolution);
         writer.WriteValue("Send", Send);
+        writer.WriteObject("SliceId", SliceId);
         if (Camera != null)
         {
             writer.WritePropertyName("Camera");
@@ -136,6 +142,7 @@ public sealed class OutputDefinition
                              Kind = token.ReadValueSafe("Kind", Kinds.Display) ?? Kinds.Display,
                              CanvasResolution = OutputJson.ReadInt2(token["CanvasResolution"], new Int2(1920, 1080)),
                              Send = token.ReadValueSafe("Send", true),
+                              SliceId = OutputJson.ReadGuid(token["SliceId"]),
                          };
 
         if (token["Camera"] is JObject cameraToken)

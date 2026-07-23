@@ -37,6 +37,17 @@ internal static class OutputJson
         writer.WriteEndArray();
     }
 
+    public static void WriteVector4(this JsonTextWriter writer, string name, Vector4 v)
+    {
+        writer.WritePropertyName(name);
+        writer.WriteStartArray();
+        writer.WriteValue(v.X);
+        writer.WriteValue(v.Y);
+        writer.WriteValue(v.Z);
+        writer.WriteValue(v.W);
+        writer.WriteEndArray();
+    }
+
     public static void WriteQuaternion(this JsonTextWriter writer, string name, Quaternion q)
     {
         writer.WritePropertyName(name);
@@ -89,6 +100,17 @@ internal static class OutputJson
         return new Vector3(JsonUtils.SafeFloatFromArray(arr, 0),
                            JsonUtils.SafeFloatFromArray(arr, 1),
                            JsonUtils.SafeFloatFromArray(arr, 2));
+    }
+
+    public static Vector4 ReadVector4(JToken? token, Vector4 fallback = default)
+    {
+        if (token is not JArray { Count: >= 4 } arr)
+            return fallback;
+
+        return new Vector4(JsonUtils.SafeFloatFromArray(arr, 0),
+                           JsonUtils.SafeFloatFromArray(arr, 1),
+                           JsonUtils.SafeFloatFromArray(arr, 2),
+                           JsonUtils.SafeFloatFromArray(arr, 3));
     }
 
     public static Quaternion ReadQuaternion(JToken? token)

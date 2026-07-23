@@ -1,20 +1,13 @@
 {
   "FormatVersion": 3,
   "Id": "0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60"/*SendToOutput*/,
-  "Description": "Sends a texture to a target of the project's active output setup — a surface (mapped through the setup's corner-pin) or an output (direct, full-frame).\n\nThis is a sink: it declares that its incoming texture belongs on the referenced target, and needs no output connection. The output manager collects these, warps each surface's slice, and composites and presents the result. SourceRect (UV xMin,yMin,xMax,yMax) takes a sub-region of the source, so several sends can slice one shared render.\n\nAKA: corner pin, perspective, map, warp, projector output, send, sink",
+  "Description": "Supplies a texture to the project's active output setup.\n\nRouting lives in the setup, not on this op: the setup holds a content source standing 1:1 with this node, slices cut rectangles from it, and surfaces name the slice they show. So one render can be sliced across many surfaces without this op knowing about any of them.\n\nThis is a sink: it needs no output connection.\n\nAKA: corner pin, perspective, map, warp, projector output, send, sink, slice, atlas",
   "InputUis": [
     {
       "InputId": "1d83a6f2-49c0-4e17-8b5d-c72e90fa4b36"/*Color*/,
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
-    },
-    {
-      "InputId": "7c3f9d21-4e8a-4b56-9f10-2d6c8b41a093"/*SourceRect*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 90.0
       }
     },
     {
@@ -30,13 +23,6 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
-    },
-    {
-      "InputId": "e2b64f0d-71a9-4d38-b5c6-08af92d31e75"/*TargetIds*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 45.0
       }
     }
   ],

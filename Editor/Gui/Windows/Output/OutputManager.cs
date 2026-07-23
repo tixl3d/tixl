@@ -125,12 +125,18 @@ internal static class OutputManager
 
         foreach (var surface in setup.Surfaces)
         {
-            var content = FindSinkForTarget(surface.Id)?.GetContent(_context);
+            if (!TryResolveSurfaceContent(setup, surface, out var surfaceSink, out _) || surfaceSink == null)
+                continue;
+
+            var content = surfaceSink.GetContent(_context);
             if (content is { IsDisposed: false })
                 return content;
         }
 
-        var direct = FindSinkForTarget(outputId)?.GetContent(_context);
+        if (!TryResolveSliceContent(setup, output.SliceId, out var directSink, out _) || directSink == null)
+            return null;
+
+        var direct = directSink.GetContent(_context);
         return direct is { IsDisposed: false } ? direct : null;
     }
 
@@ -175,12 +181,12 @@ internal static class OutputManager
                     continue;
             }
 
-            var sink = FindSinkForTarget(surface.Id);
+            TryResolveSurfaceContent(setup, surface, out var sink, out var resolvedRect);
             var content = sink?.GetContent(_context);
             var srv = content is { IsDisposed: false } ? SrvManager.GetSrvForTexture(content) : null;
             var hasContent = srv is { IsDisposed: false };
             var color = hasContent ? sink!.GetColor(_context) : Vector4.One;
-            var sourceRect = hasContent ? sink!.GetSourceRect(_context) : _fullSourceRect;
+            var sourceRect = hasContent ? resolvedRect : _fullSourceRect;
 
             // Metres spanned by the surface, and the origin (its anchor) in source UV — the pivot is
             // normalized from the bottom-left while V runs downward.
@@ -219,17 +225,16 @@ internal static class OutputManager
             }
         }
 
-        // No mapped surfaces — full-frame a sink that targets the output directly (Shape 2: the content was
-        // rendered through the projector camera, so it already maps 1:1 to the output; no corner-pin warp).
-        if (_drawItems.Count == 0)
+        // The output can also name a slice directly, shown full-frame (Shape 2: the content was rendered
+        // through the projector camera, so it already maps 1:1 to the output; no corner-pin warp).
+        if (_drawItems.Count == 0 && TryResolveSliceContent(setup, output.SliceId, out var directSink, out var directRect))
         {
-            var sink = FindSinkForTarget(outputId);
-            var content = sink?.GetContent(_context);
+            var content = directSink!.GetContent(_context);
             if (content is { IsDisposed: false })
             {
                 var srv = SrvManager.GetSrvForTexture(content);
                 if (srv is { IsDisposed: false })
-                    _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), sink!.GetSourceRect(_context), sink.GetColor(_context),
+                    _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), directRect, directSink.GetColor(_context),
                                                 Vector4.Zero, Vector4.Zero, Vector4.Zero));
             }
         }
@@ -336,60 +341,56 @@ internal static class OutputManager
 
     /// <summary>The first sink whose target is <paramref name="targetId"/> — a surface (mapped) or an output
     /// (the direct full-frame path).</summary>
-    /// <summary>
-    /// The sink feeding a target, together with its source texture and the slice it takes — everything the
-    /// slice editor needs to draw the whole source and mark the part this target uses.
-    /// </summary>
-    public static bool TryGetTargetSlice(Guid targetId, out IOutputSink? sink, out Texture2D? content, out Vector4 sourceRect)
+    /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>
+    public static bool TryGetSourceContent(Guid symbolChildId, out IOutputSink? sink, out Texture2D? content)
     {
-        sink = null;
         content = null;
-        sourceRect = _fullSourceRect;
-        if (_context == null)
-            return false;
-
-        sink = FindSinkForTarget(targetId);
-        if (sink == null)
+        sink = FindSinkByChildId(symbolChildId);
+        if (sink == null || _context == null)
             return false;
 
         content = sink.GetContent(_context);
-        if (content is not { IsDisposed: false })
+        return content is { IsDisposed: false };
+    }
+
+    /// <summary>
+    /// What a surface shows, resolved through the setup: its slice, the source that slice cuts from, and the
+    /// live texture behind it.
+    /// </summary>
+    public static bool TryGetSurfaceSlice(Guid surfaceId, out Slice? slice, out Texture2D? content, out Vector4 uv)
+    {
+        slice = null;
+        content = null;
+        uv = _fullSourceRect;
+
+        var setup = ActiveSetup.Current;
+        var surface = setup?.Surfaces.Find(s => s.Id == surfaceId);
+        if (setup == null || surface == null || surface.SliceId == Guid.Empty)
             return false;
 
-        var rect = sink.GetSourceRect(_context);
-        if (rect.Z > rect.X && rect.W > rect.Y)
-            sourceRect = rect;
+        var found = setup.Slices.Find(s => s.Id == surface.SliceId);
+        slice = found;
+        var sourceId = found?.SourceId ?? Guid.Empty;
+        var source = sourceId == Guid.Empty ? null : setup.ContentSources.Find(c => c.Id == sourceId);
+        if (source == null || !TryGetSourceContent(source.SymbolChildId, out _, out content))
+            return false;
 
+        uv = slice!.UvRect;
         return true;
     }
 
     /// <summary>
-    /// Aspect (width/height) of the content feeding a target, accounting for its source rect — the shape the
-    /// source has before it gets fitted onto the surface. Used to un-squeeze it when framing the content.
-    /// False when nothing feeds the target (or before the first composite has run).
+    /// Aspect (width/height) of what a surface shows, accounting for its slice — the shape the pixels have
+    /// before being fitted onto the surface. Used to un-squeeze the content view.
     /// </summary>
-    public static bool TryGetTargetContentAspect(Guid targetId, out float aspect)
+    public static bool TryGetTargetContentAspect(Guid surfaceId, out float aspect)
     {
         aspect = 1f;
-        if (_context == null)
+        if (!TryGetSurfaceSlice(surfaceId, out _, out var content, out var uv) || content == null)
             return false;
 
-        var sink = FindSinkForTarget(targetId);
-        var content = sink?.GetContent(_context);
-        if (content is not { IsDisposed: false })
-            return false;
-
-        var rect = sink!.GetSourceRect(_context);
-        var uWidth = rect.Z - rect.X;
-        var uHeight = rect.W - rect.Y;
-        if (uWidth <= 0 || uHeight <= 0)
-        {
-            uWidth = 1;
-            uHeight = 1;
-        }
-
-        var width = content.Description.Width * uWidth;
-        var height = content.Description.Height * uHeight;
+        var width = content.Description.Width * MathF.Max(uv.Z - uv.X, 0.0001f);
+        var height = content.Description.Height * MathF.Max(uv.W - uv.Y, 0.0001f);
         if (width <= 0 || height <= 0)
             return false;
 
@@ -397,19 +398,38 @@ internal static class OutputManager
         return true;
     }
 
-    private static IOutputSink? FindSinkForTarget(Guid targetId)
+    /// <summary>
+    /// A slice's live sink and its uv rect: <c>Slice → SourceId → ContentSource → SymbolChildId → op</c>.
+    /// Routing is setup data, so it survives the op being re-instantiated.
+    /// </summary>
+    private static bool TryResolveSliceContent(Setup setup, Guid sliceId, out IOutputSink? sink, out Vector4 sourceRect)
     {
-        if (targetId == Guid.Empty)
-            return null;
+        sink = null;
+        sourceRect = _fullSourceRect;
+        if (sliceId == Guid.Empty)
+            return false;
 
+        var slice = setup.Slices.Find(s => s.Id == sliceId);
+        var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        if (source == null)
+            return false;
+
+        sink = FindSinkByChildId(source.SymbolChildId);
+        sourceRect = slice!.UvRect;
+        return sink != null;
+    }
+
+    private static bool TryResolveSurfaceContent(Setup setup, T3.Core.Output.Surface surface, out IOutputSink? sink, out Vector4 sourceRect)
+    {
+        return TryResolveSliceContent(setup, surface.SliceId, out sink, out sourceRect);
+    }
+
+    private static IOutputSink? FindSinkByChildId(Guid childId)
+    {
         foreach (var sink in OutputSinkRegistry.Sinks)
         {
-            var targets = sink.GetTargetIds(_context!);
-            for (var i = 0; i < targets.Count; i++)
-            {
-                if (targets[i] == targetId)
-                    return sink;
-            }
+            if (sink is Instance instance && instance.SymbolChildId == childId)
+                return sink;
         }
 
         return null;

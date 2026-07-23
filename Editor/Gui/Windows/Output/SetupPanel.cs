@@ -40,6 +40,9 @@ internal static class SetupPanel
             return;
         }
 
+        // Sources are 1:1 with the ops that supply them, so adopt new sends and cascade away deleted ones.
+        ContentSourceSync.Update(setup);
+
         // Cross-highlight: what the row hovered last frame references (one-frame lag is imperceptible for hover).
         ComputeReferenced(setup);
         _pendingHoveredKind = SetupEntitySelection.EntityKind.None;
@@ -276,13 +279,11 @@ internal static class SetupPanel
                 FormInputsNarrow.DrawListItem(SurfaceShortLabel(setup.Surfaces[i]));
         }
 
-        _sinkContext ??= new EvaluationContext();
-        _sinkContext.Reset();
-        var sinks = OutputSinkRegistry.Sinks;
-        for (var i = 0; i < sinks.Count; i++)
+        // Sources feeding this output, via the slices its surfaces show.
+        foreach (var source in setup.ContentSources)
         {
-            if (sinks[i] is Instance instance && SinkTargets(sinks[i], output.Id))
-                FormInputsNarrow.DrawListItem(SinkName(instance));
+            if (FeedsOutput(setup, source, output.Id))
+                FormInputsNarrow.DrawListItem(source.Name);
         }
     }
 
@@ -358,16 +359,20 @@ internal static class SetupPanel
             }
             case SetupEntitySelection.EntityKind.ContentSource:
             {
-                if (FindSinkInstance(_hoveredId) is IOutputSink sink)
+                // A source references whatever shows one of its slices.
+                var hoveredSource = setup.ContentSources.Find(c => c.SymbolChildId == _hoveredId);
+                if (hoveredSource != null)
                 {
-                    var targets = sink.GetTargetIds(_sinkContext);
-                    for (var i = 0; i < targets.Count; i++)
+                    foreach (var surface in setup.Surfaces)
                     {
-                        var targetId = targets[i];
-                        if (setup.Surfaces.Exists(s => s.Id == targetId))
-                            _referenced.Add((SetupEntitySelection.EntityKind.Surface, targetId));
-                        else if (setup.Outputs.Exists(o => o.Id == targetId))
-                            _referenced.Add((SetupEntitySelection.EntityKind.Output, targetId));
+                        if (IsSliceOf(setup, surface.SliceId, hoveredSource.Id))
+                            _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id));
+                    }
+
+                    foreach (var output in setup.Outputs)
+                    {
+                        if (IsSliceOf(setup, output.SliceId, hoveredSource.Id))
+                            _referenced.Add((SetupEntitySelection.EntityKind.Output, output.Id));
                     }
                 }
 
@@ -386,14 +391,35 @@ internal static class SetupPanel
         }
     }
 
+    /// <summary>Sources whose slice is shown by this surface or output — the reverse of the content gutter.</summary>
     private static void AddSinksTargeting(Guid targetId)
     {
-        var sinks = OutputSinkRegistry.Sinks;
-        for (var i = 0; i < sinks.Count; i++)
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return;
+
+        var surface = setup.Surfaces.Find(s => s.Id == targetId);
+        var sliceId = surface?.SliceId ?? setup.Outputs.Find(o => o.Id == targetId)?.SliceId ?? Guid.Empty;
+        if (sliceId == Guid.Empty)
+            return;
+
+        var slice = setup.Slices.Find(s => s.Id == sliceId);
+        var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        if (source != null)
+            _referenced.Add((SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId));
+    }
+
+    /// <summary>Whether any surface mapped to this output shows one of the source's slices.</summary>
+    private static bool FeedsOutput(Setup setup, ContentSource source, Guid outputId)
+    {
+        foreach (var surface in setup.Surfaces)
         {
-            if (sinks[i] is Instance instance && SinkTargets(sinks[i], targetId))
-                _referenced.Add((SetupEntitySelection.EntityKind.ContentSource, instance.SymbolChildId));
+            if (IsSliceOf(setup, surface.SliceId, source.Id)
+                && surface.OutputMappings.Exists(m => m.OutputId == outputId))
+                return true;
         }
+
+        var output = setup.Outputs.Find(o => o.Id == outputId);
+        return output != null && IsSliceOf(setup, output.SliceId, source.Id);
     }
 
     private static bool IsReferenced(SetupEntitySelection.EntityKind kind, Guid id)
@@ -461,17 +487,16 @@ internal static class SetupPanel
             return;
         }
 
-        // A content send dropped on a surface or output adds it to the send's targets (one content can fan
-        // out to several surfaces). Persisted on the op.
-        if (dragKind == SetupEntitySelection.EntityKind.ContentSource && FindSinkInstance(dragId) is IOutputSink sink)
+        // Dropping a source onto a surface shows one of its slices there, creating a full-frame slice if the
+        // source has none yet. Routing is setup data now, so this is a plain field write.
+        if (dragKind == SetupEntitySelection.EntityKind.ContentSource)
         {
-            _sinkContext ??= new EvaluationContext();
-            _sinkContext.Reset();
-            var targets = new List<Guid>(sink.GetTargetIds(_sinkContext));
-            if (!targets.Contains(targetId))
+            var source = setup.ContentSources.Find(c => c.SymbolChildId == dragId);
+            var surface = source == null ? null : setup.Surfaces.Find(s => s.Id == targetId);
+            if (source != null && surface != null)
             {
-                targets.Add(targetId);
-                sink.SetTargets(targets);
+                surface.SliceId = EnsureSlice(setup, source).Id;
+                OutputSetupHandling.SaveActive();
             }
         }
     }
@@ -507,7 +532,7 @@ internal static class SetupPanel
             if (sinks[i] is not Instance instance)
                 continue;
 
-            var (icon, text) = DescribeSinkTargetsGutter(setup, sinks[i].GetTargetIds(_sinkContext));
+            var (icon, text) = DescribeSourceGutter(setup, instance.SymbolChildId);
             DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ContentSource, instance.SymbolChildId, SinkName(instance), text,
                           leadingIcon: Icon.FileImage, trailingIcon: icon);
         }
@@ -573,16 +598,54 @@ internal static class SetupPanel
         return (Icon.Grid, "?");
     }
 
-    private static bool SinkTargets(IOutputSink sink, Guid targetId)
+    /// <summary>Whether a slice belongs to the given source.</summary>
+    private static bool IsSliceOf(Setup setup, Guid sliceId, Guid sourceId)
     {
-        var targets = sink.GetTargetIds(_sinkContext!);
-        for (var i = 0; i < targets.Count; i++)
+        if (sliceId == Guid.Empty)
+            return false;
+
+        var slice = setup.Slices.Find(s => s.Id == sliceId);
+        return slice != null && slice.SourceId == sourceId;
+    }
+
+    /// <summary>
+    /// A source's first slice, creating a full-frame one if it has none — assigning content needs a slice to
+    /// name, and "the whole image" is simply the identity rect.
+    /// </summary>
+    private static Slice EnsureSlice(Setup setup, ContentSource source)
+    {
+        var existing = setup.Slices.Find(s => s.SourceId == source.Id);
+        if (existing != null)
+            return existing;
+
+        var slice = new Slice { SourceId = source.Id, Name = source.Name };
+        setup.Slices.Add(slice);
+        return slice;
+    }
+
+    /// <summary>Out-gutter for a content row: what shows one of this source's slices.</summary>
+    private static (Icon? icon, string? text) DescribeSourceGutter(Setup setup, Guid symbolChildId)
+    {
+        var source = setup.ContentSources.Find(c => c.SymbolChildId == symbolChildId);
+        if (source == null)
+            return (null, "unbound");
+
+        Surface? first = null;
+        var count = 0;
+        foreach (var surface in setup.Surfaces)
         {
-            if (targets[i] == targetId)
-                return true;
+            if (!IsSliceOf(setup, surface.SliceId, source.Id))
+                continue;
+
+            first = first ?? surface;
+            count++;
         }
 
-        return false;
+        if (first == null)
+            return (null, "unused");
+
+        var label = SurfaceShortLabel(first);
+        return (Icon.Grid, count > 1 ? label + " +" + (count - 1) : label);
     }
 
     // Surfaces as a tree: roots first, each followed by its children (nested by ParentId). The mapped
@@ -714,9 +777,8 @@ internal static class SetupPanel
                     _sinkContext.Reset();
                     CustomComponents.StylizedText("Content · SendToOutput", Fonts.FontSmall, UiColors.TextMuted);
                     CustomComponents.StylizedText(SinkName(instance), Fonts.FontLarge, UiColors.Text);
-                    var targets = sink.GetTargetIds(_sinkContext);
-                    var (_, targetText) = DescribeSinkTargetsGutter(setup, targets);
-                    CustomComponents.StylizedText(targetText, Fonts.FontNormal, UiColors.TextMuted);
+                    var (_, targetText) = DescribeSourceGutter(setup, instance.SymbolChildId);
+                    CustomComponents.StylizedText(targetText ?? "unused", Fonts.FontNormal, UiColors.TextMuted);
                 }
 
                 break;
@@ -916,6 +978,12 @@ internal static class SetupPanel
         }
 
         return new T3.Core.DataTypes.Vector.Int2(1920, 1080);
+    }
+
+    /// <summary>Display name of a content send, for labelling its slice on the source canvas.</summary>
+    internal static string? TryGetContentName(Guid contentChildId)
+    {
+        return FindSinkInstance(contentChildId) is { } instance ? SinkName(instance) : null;
     }
 
     private static string SurfaceShortLabel(Surface surface)
@@ -1253,8 +1321,15 @@ internal static class SetupPanel
     /// </summary>
     private static void ClearContentInputs(Guid surfaceId)
     {
-        foreach (var sink in OutputSinkRegistry.Sinks)
-            sink.RemoveTarget(surfaceId);
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return;
+
+        var surface = setup.Surfaces.Find(s => s.Id == surfaceId);
+        if (surface == null || surface.SliceId == Guid.Empty)
+            return;
+
+        surface.SliceId = Guid.Empty;
+        OutputSetupHandling.SaveActive();
     }
 
     /// <summary>
@@ -1323,10 +1398,6 @@ internal static class SetupPanel
 
         setup.Surfaces.RemoveAll(s => s.Id == surfaceId);
 
-        // Prune the deleted surface from every send that targeted it, so no dangling id lingers.
-        foreach (var sink in OutputSinkRegistry.Sinks)
-            sink.RemoveTarget(surfaceId);
-
         OutputSetupHandling.SaveActive();
     }
 
@@ -1346,10 +1417,6 @@ internal static class SetupPanel
         setup.Outputs.RemoveAll(o => o.Id == outputId);
         foreach (var surface in setup.Surfaces)
             surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
-
-        // Prune the deleted output from every send that targeted it directly (full-frame).
-        foreach (var sink in OutputSinkRegistry.Sinks)
-            sink.RemoveTarget(outputId);
 
         machineConfig.Unbind(outputId);
         if (OutputManager.PresentedOutputId == outputId)
