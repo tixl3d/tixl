@@ -162,22 +162,63 @@ internal sealed class SetupOutputView
                                            MathF.Max(basisSize.Y, 0.001f)) * MathF.Max(basis.PixelsPerMeter, 1f);
             var stageTarget = AnchoredRect(quadMin, quadMax, pivot, straightSize);
 
-            // Stage two restretches that to the content's own aspect: the composite holds the source already
-            // fitted to the surface, so mapping the quad onto this un-squeezes it. Anchored the same way.
+            // Stage two restretches to the content's own aspect (the composite holds the source already fitted
+            // to the surface, so this un-squeezes it) and then keeps going, expanding to the *whole* source
+            // with the slice left where the surface was — so Straight→Content zooms out from the wall onto the
+            // atlas rather than stopping at the crop.
+            _sliceRectInView = null;
             if (toContent > 0f
-                && OutputManager.TryGetTargetContentAspect(basis.Id, out var contentAspect)
-                && contentAspect > 0.0001f)
+                && OutputManager.TryGetTargetSlice(basis.Id, out _, out var sourceTexture, out var liveUv)
+                && sourceTexture is { IsDisposed: false })
             {
+                // The framing is pinned to the slice as it was when Content was entered. Deriving it from the
+                // live slice instead would feed every edit back into the view transform — which is what made
+                // dragging one edge shift the other, and what re-framed the atlas on release.
+                _sliceViewUv ??= liveUv;
+                var uv = _sliceViewUv.Value;
+                var uvWidth = MathF.Max(uv.Z - uv.X, 0.0001f);
+                var uvHeight = MathF.Max(uv.W - uv.Y, 0.0001f);
+                var aspect = MathF.Max(sourceTexture.Description.Width * uvWidth
+                                       / MathF.Max(sourceTexture.Description.Height * uvHeight, 1f), 0.0001f);
+
                 Bounds(stageTarget, out var straightMin, out var straightMax);
                 var width = straightMax.X - straightMin.X;
-                var contentRect = AnchoredRect(straightMin, straightMax, pivot, new Vector2(width, width / contentAspect));
+                Bounds(AnchoredRect(straightMin, straightMax, pivot, new Vector2(width, width / aspect)),
+                       out var sliceMin, out var sliceMax);
+
+                // Grow the slice out to the whole source it was cut from, leaving the slice itself in place.
+                var sliceSize = sliceMax - sliceMin;
+                var sourceSize = new Vector2(sliceSize.X / uvWidth, sliceSize.Y / uvHeight);
+                var sourceOrigin = new Vector2(sliceMin.X - uv.X * sourceSize.X, sliceMin.Y - uv.Y * sourceSize.Y);
+                // R lands the surface on its *slice*, not on the whole source — the surface's pixels are the
+                // slice's pixels. Revealing the rest of the atlas is the framing's job, below.
+                var sliceCorners = RectCorners(sliceMin, sliceMax);
                 stageTarget =
                     [
-                        Vector2.Lerp(stageTarget[0], contentRect[0], toContent),
-                        Vector2.Lerp(stageTarget[1], contentRect[1], toContent),
-                        Vector2.Lerp(stageTarget[2], contentRect[2], toContent),
-                        Vector2.Lerp(stageTarget[3], contentRect[3], toContent),
+                        Vector2.Lerp(stageTarget[0], sliceCorners[0], toContent),
+                        Vector2.Lerp(stageTarget[1], sliceCorners[1], toContent),
+                        Vector2.Lerp(stageTarget[2], sliceCorners[2], toContent),
+                        Vector2.Lerp(stageTarget[3], sliceCorners[3], toContent),
                     ];
+
+                _sliceSourceTexture = sourceTexture;
+                _sliceFramingTarget = (sourceOrigin, sourceOrigin + sourceSize);
+
+                // The editable rect follows the *live* slice against that pinned source, so it resizes under
+                // the cursor while the atlas stays put.
+                if (toContent > 0.999f)
+                {
+                    _sliceSourceOrigin = sourceOrigin;
+                    _sliceSourceSize = sourceSize;
+                    _sliceRectInView = (sourceOrigin + new Vector2(liveUv.X, liveUv.Y) * sourceSize,
+                                        sourceOrigin + new Vector2(liveUv.Z, liveUv.W) * sourceSize);
+                }
+            }
+            else if (toContent <= 0f)
+            {
+                _sliceViewUv = null; // left Content — re-pin next time it's entered
+                _sliceFramingTarget = null;
+                _sliceSourceTexture = null;
             }
 
             var interp = new[]
@@ -196,8 +237,19 @@ internal sealed class SetupOutputView
                 // The surround shrinks to nothing as we go on to Content, so the surface itself fills the view.
                 Bounds(interp, out var focusMin, out var focusMax);
                 var m = (focusMax - focusMin) * _straightSurroundFactor * (1f - toContent);
-                viewMin = Vector2.Lerp(Vector2.Zero, focusMin - m, straighten);
-                var viewMax = Vector2.Lerp(canvasSize, focusMax + m, straighten);
+                var framedMin = focusMin - m;
+                var framedMax = focusMax + m;
+
+                // Stage two opens the framing out to the whole source, so the atlas around the slice comes
+                // into view while the slice itself stays put.
+                if (toContent > 0f && _sliceFramingTarget != null)
+                {
+                    framedMin = Vector2.Lerp(framedMin, _sliceFramingTarget.Value.Min, toContent);
+                    framedMax = Vector2.Lerp(framedMax, _sliceFramingTarget.Value.Max, toContent);
+                }
+
+                viewMin = Vector2.Lerp(Vector2.Zero, framedMin, straighten);
+                var viewMax = Vector2.Lerp(canvasSize, framedMax, straighten);
                 viewSize = viewMax - viewMin;
             }
             else
@@ -226,6 +278,23 @@ internal sealed class SetupOutputView
                                 };
 
         dl.AddQuadFilled(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.BackgroundFull.Fade(0.4f));
+
+        // Past the halfway point of stage two we show the source itself rather than the composite: the two
+        // agree over the slice, but only the source has the rest of the atlas, which is what's being framed.
+        if (toContent > 0.5f && _sliceSourceTexture is { IsDisposed: false } && _sliceFramingTarget != null)
+        {
+            var sourceSrv = SrvManager.GetSrvForTexture(_sliceSourceTexture);
+            if (sourceSrv is { IsDisposed: false })
+            {
+                var sourceMin = _projection.CanvasToScreen(_sliceFramingTarget.Value.Min - viewMin);
+                var sourceMax = _projection.CanvasToScreen(_sliceFramingTarget.Value.Max - viewMin);
+                dl.AddImage(sourceSrv.NativePointer, sourceMin, sourceMax);
+                dl.AddQuad(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.ForegroundFull.Fade(0.25f));
+                DrawSliceEditor(setup, dl, focusCarrierId, viewMin, toContent);
+                ResolveLabelPicking(setup, selection);
+                return;
+            }
+        }
 
         // The composite (rendered above), transformed by R. At t=0 it's drawn 1:1; while rectifying it's warped
         // into a scratch target so the perspective stays correct.
@@ -354,7 +423,261 @@ internal sealed class SetupOutputView
             DrawSurfaceLabel(dl, labelQuad, surface.Id, surface.Name, isSelected, emphasis);
         }
 
+        DrawSliceEditor(setup, dl, focusCarrierId, viewMin, toContent);
         ResolveLabelPicking(setup, selection);
+    }
+
+    /// <summary>
+    /// At the Content end the view has zoomed out onto the whole source, so the slice becomes a plain
+    /// axis-aligned rect on it — draggable by its edges, moveable by its middle, snapping to the source's own
+    /// bounds. Edits go straight to the send's SourceRect. No perspective is involved here: the source is
+    /// shown flat, which is exactly why slices are edited at this end and not on the wall.
+    /// </summary>
+    private void DrawSliceEditor(Setup setup, ImDrawListPtr dl, Guid targetId, Vector2 viewMin, float toContent)
+    {
+        if (_sliceRectInView == null || toContent < 0.999f || targetId == Guid.Empty)
+            return;
+
+        if (!OutputManager.TryGetTargetSlice(targetId, out var sink, out _, out var uv) || sink == null)
+            return;
+
+        var (sliceMin, sliceMax) = _sliceRectInView.Value;
+        var min = _projection.CanvasToScreen(sliceMin - viewMin);
+        var max = _projection.CanvasToScreen(sliceMax - viewMin);
+
+        // Dim the source outside the slice — this view exists to judge one surface's crop, so everything the
+        // surface won't show recedes. (The atlas view, where every slice matters equally, won't do this.)
+        if (_sliceFramingTarget != null)
+        {
+            var sourceMin = _projection.CanvasToScreen(_sliceFramingTarget.Value.Min - viewMin);
+            var sourceMax = _projection.CanvasToScreen(_sliceFramingTarget.Value.Max - viewMin);
+            var scrim = UiColors.BackgroundFull.Fade(0.3f);
+
+            dl.AddRectFilled(sourceMin, new Vector2(sourceMax.X, min.Y), scrim);                  // above
+            dl.AddRectFilled(new Vector2(sourceMin.X, max.Y), sourceMax, scrim);                  // below
+            dl.AddRectFilled(new Vector2(sourceMin.X, min.Y), new Vector2(min.X, max.Y), scrim);  // left
+            dl.AddRectFilled(new Vector2(max.X, min.Y), new Vector2(sourceMax.X, max.Y), scrim);  // right
+        }
+
+        // No tint inside: the crop now reads from the dimmed surround, and colouring the content would work
+        // against judging it.
+        dl.AddRect(min, max, UiColors.StatusActivated, 0, ImDrawFlags.None, 2 * T3Ui.UiScaleFactor);
+
+        // The pinned source mapping, so a drag converts to UV against a stationary atlas.
+        var sourceOrigin = _sliceSourceOrigin;
+        var sourceSize = _sliceSourceSize;
+        if (sourceSize.X <= 0.0001f || sourceSize.Y <= 0.0001f)
+            return;
+
+        // Canvas space, like every other handle — the projection subtracts the framing origin itself.
+        _sliceQuadBuffer[0] = sliceMin - viewMin;
+        _sliceQuadBuffer[1] = new Vector2(sliceMax.X, sliceMin.Y) - viewMin;
+        _sliceQuadBuffer[2] = sliceMax - viewMin;
+        _sliceQuadBuffer[3] = new Vector2(sliceMin.X, sliceMax.Y) - viewMin;
+
+        ImGui.PushID("slice");
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true);
+        var edgePhase = CornerPinHandles.DrawEdgeHandles(_sliceQuadBuffer, _projection, style, out var edge, out var edgePos);
+
+        // A slice has no label to grab, so the middle carries the move handle.
+        var centre = (min + max) * 0.5f;
+        var moveStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Circle);
+        moveStyle.OutlineColor = style.HandleOutlineColor;
+        moveStyle.Radius = 6;
+
+        var centreInCanvas = _projection.ScreenToCanvas(centre);
+        ImGui.PushID("move");
+        var movePhase = CanvasPointHandle.Draw(ref centreInCanvas, _projection, moveStyle);
+        ImGui.PopID();
+        ImGui.PopID();
+
+        // One screen pixel in UV, so snapping feels the same at any zoom.
+        var perPixel = (_projection.ScreenToCanvas(new Vector2(1, 0)) - _projection.ScreenToCanvas(Vector2.Zero)).X;
+        var threshold = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(sourceSize.X, 0.0001f);
+        var snapping = !ImGui.GetIO().KeyShift;
+
+        if (edge >= 0 && edgePhase is not CanvasPointHandle.DragPhase.None)
+        {
+            var inSource = (edgePos + viewMin - sourceOrigin) / sourceSize;
+            var next = uv;
+            switch (edge)
+            {
+                case 0: next.Y = MathF.Min(inSource.Y, uv.W - MinSliceSize); break;
+                case 1: next.Z = MathF.Max(inSource.X, uv.X + MinSliceSize); break;
+                case 2: next.W = MathF.Max(inSource.Y, uv.Y + MinSliceSize); break;
+                default: next.X = MathF.Min(inSource.X, uv.Z - MinSliceSize); break;
+            }
+
+            // Snap to the source's own edges and centre — a slice flush to the atlas border is the common case.
+            if (snapping)
+                SnapToSourceBounds(ref next, edge, threshold);
+
+            sink.SetSourceRect(new Vector4(Math.Clamp(next.X, 0, 1), Math.Clamp(next.Y, 0, 1),
+                                           Math.Clamp(next.Z, 0, 1), Math.Clamp(next.W, 0, 1)));
+            return;
+        }
+
+        // Corners resize about the opposite corner and hold the slice's aspect, so a slice cut to a surface's
+        // shape keeps that shape while it's scaled.
+        ImGui.PushID("sliceCorners");
+        var cornerStyle = CanvasPointHandle.Style.Default(style.HandleColor);
+        cornerStyle.OutlineColor = style.HandleOutlineColor;
+
+        var cornerPhase = CanvasPointHandle.DragPhase.None;
+        var draggedCorner = -1;
+        var cornerPos = Vector2.Zero;
+        for (var i = 0; i < 4; i++)
+        {
+            ImGui.PushID(i);
+            var point = _sliceQuadBuffer[i];
+            var phase = CanvasPointHandle.Draw(ref point, _projection, cornerStyle);
+            if (phase is not CanvasPointHandle.DragPhase.None)
+            {
+                cornerPhase = phase;
+                draggedCorner = i;
+                cornerPos = point;
+            }
+
+            ImGui.PopID();
+        }
+
+        ImGui.PopID();
+
+        if (draggedCorner >= 0 && cornerPhase is not CanvasPointHandle.DragPhase.None)
+        {
+            var dragged = (cornerPos + viewMin - sourceOrigin) / sourceSize;
+            var currentWidth = MathF.Max(uv.Z - uv.X, 0.0001f);
+            var currentHeight = MathF.Max(uv.W - uv.Y, 0.0001f);
+
+            // Corners are TL, TR, BR, BL — each scales away from the one diagonally across.
+            var fixedCorner = draggedCorner switch
+                                  {
+                                      0 => new Vector2(uv.Z, uv.W),
+                                      1 => new Vector2(uv.X, uv.W),
+                                      2 => new Vector2(uv.X, uv.Y),
+                                      _ => new Vector2(uv.Z, uv.Y),
+                                  };
+
+            var scale = MathF.Max(MathF.Abs(dragged.X - fixedCorner.X) / currentWidth,
+                                  MathF.Abs(dragged.Y - fixedCorner.Y) / currentHeight);
+            var width = MathF.Max(currentWidth * scale, MinSliceSize);
+            var height = MathF.Max(currentHeight * scale, MinSliceSize);
+
+            var moved = fixedCorner + new Vector2(draggedCorner is 1 or 2 ? width : -width,
+                                                  draggedCorner is 2 or 3 ? height : -height);
+            var cornerMin = Vector2.Min(fixedCorner, moved);
+            var cornerMax = Vector2.Max(fixedCorner, moved);
+            sink.SetSourceRect(new Vector4(Math.Clamp(cornerMin.X, 0, 1), Math.Clamp(cornerMin.Y, 0, 1),
+                                           Math.Clamp(cornerMax.X, 0, 1), Math.Clamp(cornerMax.Y, 0, 1)));
+            return;
+        }
+
+        DrawSliceMenu(setup, targetId, sink, uv, min, max);
+
+        var cursorUv = (centreInCanvas + viewMin - sourceOrigin) / sourceSize;
+        switch (movePhase)
+        {
+            case CanvasPointHandle.DragPhase.Started:
+                // Recomputed from this snapshot each frame, so the move can't accumulate drift.
+                _sliceMoveStart = (cursorUv, uv);
+                break;
+
+            case CanvasPointHandle.DragPhase.Dragging when _sliceMoveStart != null:
+            {
+                var (origin, startUv) = _sliceMoveStart.Value;
+                var size = new Vector2(startUv.Z - startUv.X, startUv.W - startUv.Y);
+                var delta = cursorUv - origin;
+                var sliceOrigin = new Vector2(startUv.X, startUv.Y) + delta;
+
+                if (snapping)
+                {
+                    // Either edge, or the centre, may catch — whichever is closest wins per axis.
+                    Span<float> xs = [sliceOrigin.X, sliceOrigin.X + size.X * 0.5f, sliceOrigin.X + size.X];
+                    Span<float> ys = [sliceOrigin.Y, sliceOrigin.Y + size.Y * 0.5f, sliceOrigin.Y + size.Y];
+                    if (SurfaceGeometry.TrySnapOffset(_sourceBoundCandidates, xs, threshold, out var offsetX, out _))
+                        sliceOrigin.X += offsetX;
+
+                    if (SurfaceGeometry.TrySnapOffset(_sourceBoundCandidates, ys, threshold, out var offsetY, out _))
+                        sliceOrigin.Y += offsetY;
+                }
+
+                sliceOrigin.X = Math.Clamp(sliceOrigin.X, 0, MathF.Max(1 - size.X, 0));
+                sliceOrigin.Y = Math.Clamp(sliceOrigin.Y, 0, MathF.Max(1 - size.Y, 0));
+                sink.SetSourceRect(new Vector4(sliceOrigin.X, sliceOrigin.Y, sliceOrigin.X + size.X, sliceOrigin.Y + size.Y));
+                break;
+            }
+
+            case CanvasPointHandle.DragPhase.Completed:
+                _sliceMoveStart = null;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Right-click inside a slice (on release, so it doesn't fight right-drag panning) for actions that are
+    /// awkward by hand — chiefly cutting it to the shape of the surface it feeds, so the content lands
+    /// undistorted.
+    /// </summary>
+    private void DrawSliceMenu(Setup setup, Guid targetId, IOutputSink sink, Vector4 uv, Vector2 min, Vector2 max)
+    {
+        var mouse = ImGui.GetMousePos();
+        var inside = mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y;
+        var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
+        if (inside && !wasDraggingRight && ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !ImGui.IsAnyItemHovered())
+            ImGui.OpenPopup(SliceMenuId);
+
+        if (!ImGui.BeginPopup(SliceMenuId))
+            return;
+
+        if (CustomComponents.DrawMenuItem(1, "Match target aspect"))
+            MatchSliceToTargetAspect(setup, targetId, sink, uv);
+
+        ImGui.EndPopup();
+    }
+
+    /// <summary>
+    /// Reshapes the slice so its pixels have the same aspect as the surface it feeds — keeping its centre, and
+    /// shrinking to fit if the new shape would run off the source.
+    /// </summary>
+    private void MatchSliceToTargetAspect(Setup setup, Guid targetId, IOutputSink sink, Vector4 uv)
+    {
+        var surface = setup.Surfaces.Find(s => s.Id == targetId);
+        if (surface == null || _sliceSourceTexture is not { IsDisposed: false })
+            return;
+
+        var surfaceAspect = surface.SizeInMeters.X / MathF.Max(surface.SizeInMeters.Y, 0.0001f);
+        var textureWidth = MathF.Max(_sliceSourceTexture.Description.Width, 1);
+        var textureHeight = MathF.Max(_sliceSourceTexture.Description.Height, 1);
+
+        // Want (width·texW)/(height·texH) == surfaceAspect; keep the width and solve for the height.
+        var width = MathF.Max(uv.Z - uv.X, MinSliceSize);
+        var height = width * textureWidth / (textureHeight * MathF.Max(surfaceAspect, 0.0001f));
+
+        var fit = MathF.Min(1f, MathF.Min(1f / MathF.Max(width, 0.0001f), 1f / MathF.Max(height, 0.0001f)));
+        width *= fit;
+        height *= fit;
+
+        var centreX = (uv.X + uv.Z) * 0.5f;
+        var centreY = (uv.Y + uv.W) * 0.5f;
+        var minX = Math.Clamp(centreX - width * 0.5f, 0, MathF.Max(1 - width, 0));
+        var minY = Math.Clamp(centreY - height * 0.5f, 0, MathF.Max(1 - height, 0));
+
+        sink.SetSourceRect(new Vector4(minX, minY, minX + width, minY + height));
+    }
+
+    private static void SnapToSourceBounds(ref Vector4 rect, int edge, float threshold)
+    {
+        Span<float> candidates = [0f, 0.5f, 1f];
+        foreach (var candidate in candidates)
+        {
+            switch (edge)
+            {
+                case 0 when MathF.Abs(rect.Y - candidate) < threshold: rect.Y = candidate; return;
+                case 1 when MathF.Abs(rect.Z - candidate) < threshold: rect.Z = candidate; return;
+                case 2 when MathF.Abs(rect.W - candidate) < threshold: rect.W = candidate; return;
+                case 3 when MathF.Abs(rect.X - candidate) < threshold: rect.X = candidate; return;
+            }
+        }
     }
 
     // Preview of the content the output manager sends to this output. Per-slice source editing now lives on
@@ -866,6 +1189,11 @@ internal sealed class SetupOutputView
         DrawSnapGuide(dl, surfaceToOutput, rToView, viewMin, parent, _childMoveAxis == 2, _childMoveAxis == 1 ? mid.Y : mid.X, parentOrigin);
     }
 
+    private static Vector2[] RectCorners(Vector2 min, Vector2 max)
+    {
+        return [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)];
+    }
+
     /// <summary>Snap distance in the parent's own units, from a fixed screen distance — so it feels the same
     /// however far you're zoomed in, and on a surface of any real size.</summary>
     private float SnapThreshold(Homography surfaceToOutput, Homography rToView, Vector2 viewMin, Surface parent, Vector2 originInCarrier)
@@ -1188,6 +1516,23 @@ internal sealed class SetupOutputView
     private Guid _labelPickId;
     private Guid _labelMoveSurfaceId;
     private Guid _labelMenuSurfaceId;
+
+    // Where the focused target's slice sits once the view has zoomed fully out onto the source, in view units.
+    private (Vector2 Min, Vector2 Max)? _sliceRectInView;
+    private const float MinSliceSize = 0.01f;
+    private const string SliceMenuId = "##sliceMenu";
+    private readonly Vector2[] _sliceQuadBuffer = new Vector2[4];
+
+    // Slice framing pinned while Content is open, plus the resulting source mapping in view units.
+    private Vector4? _sliceViewUv;
+    private Vector2 _sliceSourceOrigin;
+    private Vector2 _sliceSourceSize;
+    private (Vector2 Min, Vector2 Max)? _sliceFramingTarget;
+    private T3.Core.DataTypes.Texture2D? _sliceSourceTexture;
+    private (Vector2 Origin, Vector4 Uv)? _sliceMoveStart;
+
+    // The source's own borders and centre, in UV — what a slice snaps against.
+    private static readonly List<float> _sourceBoundCandidates = [0f, 0.5f, 1f];
 
     // Snap candidates in the parent's space, rebuilt per drag frame; reused so dragging doesn't allocate.
     private readonly List<float> _snapXs = [];

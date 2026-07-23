@@ -39,28 +39,25 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
 
 
 
-
-
-
-
-
-
 ## For later:
 
 - Setup menu should provide options to rename setup
 - In straight mode selecting different surfaces should have a view transition 
-- Setup menu should have a hover indication (e.g. change font color ForegroundFull)
+- Setup menu should have a hover indication (e.g. change font color ForeGroundFull)
 - Unused surfaces (without any Content being routed into should be shown as unused)
 - it would be nice to have a vertical splitter to adjust the width of the output settings panel
 - Deleting an operator on the graph should also delete the Content item in the side panel
+- Collapsed-States of items and sections should be saved with the Setup.
 - We need an option to remove a reference like Content -> Surface. Not sure, about the interaction though. Some ideas:
   1. Context menu on Content Item listing all targets
   1. Listing the inputs in the target (e.g. Surface)
   1. Selecting a surface icon could show input target indicators (e.g. Icon.ArrorLeft) on the left side of potential targets. Active targets are highlighted (e.g. with UiColors.StatusActive). Inactive would be show as BackgroundFull.Fade(0.5). Clicking the input indicator would toggle the reference.
   1. Dragging a source onto a target could clear the old reference (Maybe this could be avoid with a keyboard shortcut)
-- It would be great to have a quick fix "rotate/pan" project mapping (e.g. somebody hit the project trippod would primarily affect the rotation of projector, so rotating and panning all corner points of a surface would be nice).
+- It would be great to have a quick fix "rotate/pan" project mapping (e.g. somebody hit the project tripod would primarily affect the rotation of projector, so rotating and panning all corner points of a surface would be nice).
 - Surface Context menu could have menu item "Rename Surface" that focuses (and scrolls into view if necessary) the surface name input
-- 
+- Rearranging / ordering the nested surface structure via drag and drop
+- Default name of sub-regions should be `{ParentSurfaceName}.{IncrementedCounter}`
+- Fix gizmo initialization with output setup rendering and selecting `ITransformGizmoProvider` in graph
 
 
 
@@ -73,10 +70,9 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
 ## Use-case: "blinking boards"
 
 1. Create gradient
-2. Steps
-3. 
-4. Connect projecter
-5. 
+2. (Gradient + IntAnim)->Steps->SendToOutput
+3. Connect projecter
+4. 
 
 
 

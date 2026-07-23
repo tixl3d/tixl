@@ -44,6 +44,7 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IOutputSink
         TargetIds.SetTypedInputValue(next);
     }
     Vector4 IOutputSink.GetSourceRect(EvaluationContext context) => SourceRect.GetValue(context);
+    void IOutputSink.SetSourceRect(Vector4 sourceRect) => SourceRect.SetTypedInputValue(sourceRect);
     Vector4 IOutputSink.GetColor(EvaluationContext context) => Color.GetValue(context);
     T3.Core.DataTypes.Texture2D IOutputSink.GetContent(EvaluationContext context) => Texture.GetValue(context);
     void IOutputSink.InvalidateContent() => Texture.InvalidateGraph();

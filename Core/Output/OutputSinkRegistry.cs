@@ -29,6 +29,9 @@ public interface IOutputSink
     /// <summary>The slice of the source texture to show, as a UV rect (xMin, yMin, xMax, yMax). Full = (0,0,1,1).</summary>
     Vector4 GetSourceRect(EvaluationContext context);
 
+    /// <summary>Replaces that slice — the host edits it as a rectangle on the source texture.</summary>
+    void SetSourceRect(Vector4 sourceRect);
+
     Vector4 GetColor(EvaluationContext context);
     Texture2D? GetContent(EvaluationContext context);
 

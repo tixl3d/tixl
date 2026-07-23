@@ -337,6 +337,33 @@ internal static class OutputManager
     /// <summary>The first sink whose target is <paramref name="targetId"/> — a surface (mapped) or an output
     /// (the direct full-frame path).</summary>
     /// <summary>
+    /// The sink feeding a target, together with its source texture and the slice it takes — everything the
+    /// slice editor needs to draw the whole source and mark the part this target uses.
+    /// </summary>
+    public static bool TryGetTargetSlice(Guid targetId, out IOutputSink? sink, out Texture2D? content, out Vector4 sourceRect)
+    {
+        sink = null;
+        content = null;
+        sourceRect = _fullSourceRect;
+        if (_context == null)
+            return false;
+
+        sink = FindSinkForTarget(targetId);
+        if (sink == null)
+            return false;
+
+        content = sink.GetContent(_context);
+        if (content is not { IsDisposed: false })
+            return false;
+
+        var rect = sink.GetSourceRect(_context);
+        if (rect.Z > rect.X && rect.W > rect.Y)
+            sourceRect = rect;
+
+        return true;
+    }
+
+    /// <summary>
     /// Aspect (width/height) of the content feeding a target, accounting for its source rect — the shape the
     /// source has before it gets fitted onto the surface. Used to un-squeeze it when framing the content.
     /// False when nothing feeds the target (or before the first composite has run).
