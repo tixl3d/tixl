@@ -45,6 +45,15 @@ internal static class SetupPanel
 
         // Cross-highlight: what the row hovered last frame references (one-frame lag is imperceptible for hover).
         ComputeReferenced(setup);
+
+        // Resolved once: TryResolve prunes the target list behind a closure, and every row asks for the
+        // primary when deciding whether to offer an in-gutter toggle.
+        if (!selection.TryResolve(setup, out _primaryKind, out _primaryId))
+        {
+            _primaryKind = SetupEntitySelection.EntityKind.None;
+            _primaryId = Guid.Empty;
+        }
+
         _pendingHoveredKind = SetupEntitySelection.EntityKind.None;
         _pendingHoveredId = Guid.Empty;
 
@@ -823,6 +832,111 @@ internal static class SetupPanel
     }
 
     /// <summary>Whether a slice belongs to the given source.</summary>
+    /// <summary>
+    /// Whether <paramref name="kind"/>/<paramref name="id"/> can take the primary selection as its input, and
+    /// whether it already does. Clicking the in-gutter then binds or unbinds without any dragging: select a
+    /// slice and the surfaces that could show it light up; select a surface and the outputs light up.
+    /// </summary>
+    private static bool TryDescribeInputToggle(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, out bool isBound)
+    {
+        isBound = false;
+        var sourceKind = _primaryKind;
+        var sourceId = _primaryId;
+        if (sourceKind == SetupEntitySelection.EntityKind.None)
+            return false;
+
+        switch (kind)
+        {
+            case SetupEntitySelection.EntityKind.Surface:
+            {
+                var surface = setup.Surfaces.Find(x => x.Id == id);
+                if (surface == null)
+                    return false;
+
+                if (sourceKind == SetupEntitySelection.EntityKind.Slice)
+                {
+                    isBound = surface.SliceId == sourceId;
+                    return setup.Slices.Exists(x => x.Id == sourceId);
+                }
+
+                if (sourceKind == SetupEntitySelection.EntityKind.ContentSource)
+                {
+                    var source = setup.ContentSources.Find(c => c.SymbolChildId == sourceId);
+                    if (source == null)
+                        return false;
+
+                    isBound = IsSliceOf(setup, surface.SliceId, source.Id);
+                    return true;
+                }
+
+                return false;
+            }
+
+            case SetupEntitySelection.EntityKind.Output:
+            {
+                if (sourceKind != SetupEntitySelection.EntityKind.Surface)
+                    return false;
+
+                var surface = setup.Surfaces.Find(x => x.Id == sourceId);
+                if (surface == null)
+                    return false;
+
+                isBound = surface.OutputMappings.Exists(m => m.OutputId == id);
+                return true;
+            }
+
+            default:
+                return false;
+        }
+    }
+
+    private static void ToggleInput(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        if (!TryDescribeInputToggle(setup, kind, id, out var isBound))
+            return;
+
+        var sourceKind = _primaryKind;
+        var sourceId = _primaryId;
+
+        if (kind == SetupEntitySelection.EntityKind.Surface)
+        {
+            var surface = setup.Surfaces.Find(x => x.Id == id);
+            if (surface == null)
+                return;
+
+            if (isBound)
+            {
+                surface.SliceId = Guid.Empty;
+            }
+            else if (sourceKind == SetupEntitySelection.EntityKind.Slice)
+            {
+                surface.SliceId = sourceId;
+            }
+            else
+            {
+                var source = setup.ContentSources.Find(c => c.SymbolChildId == sourceId);
+                if (source == null)
+                    return;
+
+                surface.SliceId = EnsureSlice(setup, source).Id;
+            }
+        }
+        else
+        {
+            var surface = setup.Surfaces.Find(x => x.Id == sourceId);
+            var output = setup.Outputs.Find(o => o.Id == id);
+            if (surface == null || output == null)
+                return;
+
+            if (isBound)
+                surface.OutputMappings.RemoveAll(m => m.OutputId == id);
+            else
+                surface.OutputMappings.Add(CreateDefaultMapping(output));
+        }
+
+        OutputSetupHandling.SaveActive();
+    }
+
     private static bool IsSliceOf(Setup setup, Guid sliceId, Guid sourceId)
     {
         if (sliceId == Guid.Empty)
@@ -1304,6 +1418,12 @@ internal static class SetupPanel
         // Nothing shows this entity, so it recedes rather than competing with the rows that are in use.
         var fade = muted ? 0.45f : 1f;
 
+        // Rows that consume something own a left in-gutter (surfaces take content, outputs take surfaces).
+        // The column is reserved whether or not a toggle is currently shown, so nothing shifts sideways when
+        // the selection changes.
+        var hasInputGutter = kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.Output;
+        var gutterWidth = hasInputGutter ? Icons.FontSize + 4 * scale : 0;
+
         ImGui.PushID(id.GetHashCode());
 
         // Rounded row inset 4px from the window edges (so the selection/outline never clips), pixel-snapped
@@ -1328,7 +1448,17 @@ internal static class SetupPanel
 
         // The chevron shares the row's selectable rather than overlapping it with its own button — a click in
         // its column toggles instead of selecting.
-        var chevronMaxX = rowMin.X + indent + 20 * scale;
+        // A source is selected, so every row that could take it offers a click-target to bind or unbind.
+        var isBound = false;
+        var canBind = hasInputGutter && TryDescribeInputToggle(setup, kind, id, out isBound);
+        var gutterMaxX = rowMin.X + gutterWidth;
+        if (clicked && canBind && ImGui.GetMousePos().X < gutterMaxX)
+        {
+            ToggleInput(setup, kind, id);
+            clicked = false;
+        }
+
+        var chevronMaxX = rowMin.X + gutterWidth + indent + 20 * scale;
         if (clicked && isExpanded.HasValue && ImGui.GetMousePos().X < chevronMaxX)
         {
             onToggleExpanded?.Invoke();
@@ -1387,7 +1517,15 @@ internal static class SetupPanel
         var contentY = (float)Math.Round(rowMin.Y + (height - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
         var iconY = contentY + 3 * scale; // glyphs render high vs the text baseline — drop them to match.
 
-        var contentX = rowMin.X + 6 * scale + indent;
+        if (canBind)
+        {
+            var overGutter = isHovered && ImGui.GetMousePos().X < gutterMaxX;
+            var color = isBound ? UiColors.StatusActivated : UiColors.BackgroundFull.Fade(0.5f);
+            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 4 * scale, iconY));
+            DrawInlineIcon(Icon.ArrowRight, overGutter ? UiColors.ForegroundFull.Rgba : color.Rgba);
+        }
+
+        var contentX = rowMin.X + 6 * scale + gutterWidth + indent;
         if (isExpanded.HasValue)
         {
             ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
@@ -1423,11 +1561,11 @@ internal static class SetupPanel
             var statusWidth = status != null ? ImGui.CalcTextSize(status).X : 0;
             ImGui.PopFont();
 
-            var gutterWidth = statusWidth;
+            var trailWidth = statusWidth;
             if (trailingIcon.HasValue)
-                gutterWidth += Icons.FontSize * 2 + 2 * scale + 4 * scale;
+                trailWidth += Icons.FontSize * 2 + 2 * scale + 4 * scale;
 
-            var trailX = rowMax.X - 6 * scale - gutterWidth;
+            var trailX = rowMax.X - 6 * scale - trailWidth;
             if (trailingIcon.HasValue)
             {
                 ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
@@ -1735,6 +1873,8 @@ internal static class SetupPanel
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
     private static readonly HashSet<Guid> _collapsedSurfaces = [];
     private static readonly HashSet<Guid> _collapsedSources = [];
+    private static SetupEntitySelection.EntityKind _primaryKind;
+    private static Guid _primaryId;
 
     private const string MeasuredSizePopupId = "##measuredSize";
     private static Vector2 _measuredEdit;
