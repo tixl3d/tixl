@@ -290,13 +290,16 @@ internal sealed class SetupOutputView
                 if (surface.Kind != Surface.SurfaceKinds.Layout || surface.ParentId == Guid.Empty)
                     continue;
 
-                var parent = setup.Surfaces.Find(s => s.Id == surface.ParentId);
-                var parentMapping = parent?.OutputMappings.Find(m => m.OutputId == outputId);
-                if (parent == null || parentMapping == null
-                    || !SurfaceGeometry.TryGetChildQuad(parent, surface, parentMapping, _childQuadBuffer))
+                // The pin lives on some ancestor (possibly several levels up); edits live in the immediate
+                // parent's space, so both are needed.
+                var carrier = SurfaceGeometry.FindCarrier(setup, surface.Id, outputId);
+                var carrierMapping = carrier?.OutputMappings.Find(m => m.OutputId == outputId);
+                var immediateParent = setup.Surfaces.Find(s => s.Id == surface.ParentId);
+                if (carrier == null || carrierMapping == null || immediateParent == null
+                    || !SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, carrierMapping, _childQuadBuffer))
                     continue;
 
-                DrawChildRegion(dl, rToView, rToOutput, viewMin, parent, parentMapping, surface, editable, handleFade);
+                DrawChildRegion(setup, dl, rToView, rToOutput, viewMin, carrier, carrierMapping, immediateParent, surface, editable, handleFade);
                 continue;
             }
 
@@ -351,7 +354,7 @@ internal sealed class SetupOutputView
             DrawSurfaceLabel(dl, labelQuad, surface.Id, surface.Name, isSelected, emphasis);
         }
 
-        ResolveLabelPicking(selection);
+        ResolveLabelPicking(setup, selection);
     }
 
     // Preview of the content the output manager sends to this output. Per-slice source editing now lives on
@@ -636,8 +639,9 @@ internal sealed class SetupOutputView
     /// thinner than a mapped surface, and without handles, because it isn't independently editable — its shape
     /// comes from the parent's corner pin plus its own rectangle in the parent's space.
     /// </summary>
-    private void DrawChildRegion(ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
-                                 Surface parent, Surface.OutputMapping parentMapping, Surface child, bool editable, float fade)
+    private void DrawChildRegion(Setup setup, ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
+                                 Surface carrier, Surface.OutputMapping carrierMapping, Surface parent, Surface child,
+                                 bool editable, float fade)
     {
         if (fade <= 0.01f)
             return;
@@ -665,35 +669,58 @@ internal sealed class SetupOutputView
             dl.AddLine(screen[i], screen[(i + 1) % 4], style.EdgeColor, (isFocused ? 2f : 1f) * T3Ui.UiScaleFactor);
 
         // A region has its own anchor, in its own space — mapped out through the parent's rectangle and pin.
-        if (isFocused && SurfaceGeometry.TryGetSurfaceToOutput(parent, parentMapping, out var parentToOutput))
+        if (isFocused
+            && SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var carrierToOutput)
+            && SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out var rectMin, out _, out _))
         {
-            var anchorInParent = SurfaceGeometry.ChildRectInParent(parent, child)[0] + SurfaceGeometry.AnchorInSurface(child);
-            DrawAnchorGlyph(dl, _projection.CanvasToScreen(rToView.TransformPoint(parentToOutput.TransformPoint(anchorInParent)) - viewMin), fade);
-        }
-
-        if (!isFocused || !editable)
-        {
-            if (!string.IsNullOrEmpty(child.Name))
-                CornerPinHandles.DrawCenteredLabel(dl, screen, child.Name, style.LabelColor, style.LabelBackgroundColor);
-
-            return;
+            var anchorInCarrier = rectMin + SurfaceGeometry.AnchorInSurface(child);
+            DrawAnchorGlyph(dl, _projection.CanvasToScreen(rToView.TransformPoint(carrierToOutput.TransformPoint(anchorInCarrier)) - viewMin), fade);
         }
 
         // Edited in the parent's space: the child has no projection of its own, so the parent's inverse maps
         // handles back into plain rectangle edits. Nothing here changes the parent, so the transform driving
         // this view stays put and the drag can't feed back on itself.
-        if (!SurfaceGeometry.TryGetOutputToSurface(parent, parentMapping, out var outputToSurface))
+        var hasInverse = SurfaceGeometry.TryGetOutputToSurface(carrier, carrierMapping, out var outputToSurface);
+        if (!isFocused || !editable || !hasInverse)
+        {
+            // Still registered as a pick target — an unselected region has to stay clickable, which is the
+            // only way to reach it while its parent is selected.
+            DrawSurfaceLabel(dl, screen, child.Id, child.Name, isFocused, fade);
             return;
+        }
 
         ImGui.PushID(child.Id.GetHashCode());
 
         var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
         if (edge >= 0)
         {
+            var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var parentProjection);
+            SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out _, out _, out var edgeParentOrigin);
             HandleChildEdit(edgePhase, parent, child,
                             () =>
                             {
-                                var pos = outputToSurface.TransformPoint(rToOutput.TransformPoint(edgePos + viewMin));
+                                var pos = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin, edgePos);
+                                var horizontal = edge is 1 or 3;
+                                float? guide = null;
+
+                                // The dragged edge snaps to the parent's and the siblings' edges and centres.
+                                if (!ImGui.GetIO().KeyShift && hasProjection)
+                                {
+                                    SurfaceGeometry.CollectSnapCandidates(setup, parent, child.Id, _snapXs, _snapYs);
+                                    Span<float> anchor = [horizontal ? pos.X : pos.Y];
+                                    if (SurfaceGeometry.TrySnapOffset(horizontal ? _snapXs : _snapYs, anchor,
+                                                                      SnapThreshold(parentProjection, rToView, viewMin, parent, edgeParentOrigin),
+                                                                      out var offset, out var target))
+                                    {
+                                        if (horizontal)
+                                            pos.X += offset;
+                                        else
+                                            pos.Y += offset;
+
+                                        guide = target;
+                                    }
+                                }
+
                                 var rect = SurfaceGeometry.ChildRectInParent(parent, child);
                                 var min = rect[0];
                                 var max = rect[2];
@@ -706,22 +733,25 @@ internal sealed class SetupOutputView
                                 }
 
                                 SurfaceGeometry.SetChildRect(parent, child, min, max);
+
+                                if (guide.HasValue && hasProjection)
+                                    DrawSnapGuide(dl, parentProjection, rToView, viewMin, parent, horizontal, guide.Value, edgeParentOrigin);
                             });
         }
 
         ImGui.PopID();
 
         DrawSurfaceLabel(dl, screen, child.Id, child.Name, isFocused, fade);
-        HandleLabelMove(dl, rToView, rToOutput, viewMin, outputToSurface, parent, parentMapping, child, screen);
+        HandleLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child, screen);
     }
 
     /// <summary>
     /// The label doubles as the region's move handle. Free movement, but a nearly-straight drag snaps flat and
     /// draws the axis it locked to — placing a region level with its neighbours is the common case.
     /// </summary>
-    private void HandleLabelMove(ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
-                                 Homography outputToSurface, Surface parent, Surface.OutputMapping parentMapping,
-                                 Surface child, ReadOnlySpan<Vector2> screen)
+    private void HandleLabelMove(Setup setup, ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
+                                 Homography outputToSurface, Surface carrier, Surface.OutputMapping carrierMapping,
+                                 Surface parent, Surface child, ReadOnlySpan<Vector2> screen)
     {
         if (string.IsNullOrEmpty(child.Name))
             return;
@@ -739,7 +769,7 @@ internal sealed class SetupOutputView
 
             var rect = SurfaceGeometry.ChildRectInParent(parent, child);
             _labelMoveSurfaceId = child.Id;
-            _childMoveStart = (ToParentSpace(outputToSurface, rToOutput, viewMin), rect[0], rect[2]);
+            _childMoveStart = (ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin), rect[0], rect[2]);
             _resizeOldState = new ResizeSurfaceCommand.State(child);
             _childMoveAxis = 0;
             return;
@@ -763,40 +793,117 @@ internal sealed class SetupOutputView
         if (_childMoveStart == null)
             return;
 
+        SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out _, out _, out var parentOrigin);
         var (origin, startMin, startMax) = _childMoveStart.Value;
-        var delta = ToParentSpace(outputToSurface, rToOutput, viewMin) - origin;
+        var delta = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin) - origin;
+        var snapping = !ImGui.GetIO().KeyShift;
 
         // ~14° cone around each axis.
-        var snapX = MathF.Abs(delta.X) > MathF.Abs(delta.Y) * 4;
-        var snapY = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 4;
-        if (snapX)
-            delta.Y = 0;
-        else if (snapY)
-            delta.X = 0;
+        if (snapping)
+        {
+            var lockX = MathF.Abs(delta.X) > MathF.Abs(delta.Y) * 4;
+            var lockY = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 4;
+            if (lockX)
+                delta.Y = 0;
+            else if (lockY)
+                delta.X = 0;
 
-        _childMoveAxis = snapX ? 1 : snapY ? 2 : 0;
-        SurfaceGeometry.SetChildRect(parent, child, startMin + delta, startMax + delta);
+            _childMoveAxis = lockX ? 1 : lockY ? 2 : 0;
+        }
+        else
+        {
+            _childMoveAxis = 0;
+        }
 
-        if (_childMoveAxis == 0 || !SurfaceGeometry.TryGetSurfaceToOutput(parent, parentMapping, out var surfaceToOutput))
+        var newMin = startMin + delta;
+        var newMax = startMax + delta;
+
+        var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var surfaceToOutput);
+        float? guideX = null;
+        float? guideY = null;
+
+        // Align to the parent's and the siblings' edges and centres — which also makes dropping a region into
+        // a corner just land there, since the parent's own edges are candidates.
+        if (snapping && hasProjection)
+        {
+            var threshold = SnapThreshold(surfaceToOutput, rToView, viewMin, parent, parentOrigin);
+            SurfaceGeometry.CollectSnapCandidates(setup, parent, child.Id, _snapXs, _snapYs);
+
+            Span<float> anchorsX = [newMin.X, (newMin.X + newMax.X) * 0.5f, newMax.X];
+            if (SurfaceGeometry.TrySnapOffset(_snapXs, anchorsX, threshold, out var offsetX, out var targetX))
+            {
+                newMin.X += offsetX;
+                newMax.X += offsetX;
+                guideX = targetX;
+            }
+
+            Span<float> anchorsY = [newMin.Y, (newMin.Y + newMax.Y) * 0.5f, newMax.Y];
+            if (SurfaceGeometry.TrySnapOffset(_snapYs, anchorsY, threshold, out var offsetY, out var targetY))
+            {
+                newMin.Y += offsetY;
+                newMax.Y += offsetY;
+                guideY = targetY;
+            }
+        }
+
+        SurfaceGeometry.SetChildRect(parent, child, newMin, newMax);
+
+        if (!hasProjection)
             return;
 
-        // The locked axis, drawn across the parent so it reads as a guide rather than a stub.
+        if (guideX.HasValue)
+            DrawSnapGuide(dl, surfaceToOutput, rToView, viewMin, parent, true, guideX.Value, parentOrigin);
+
+        if (guideY.HasValue)
+            DrawSnapGuide(dl, surfaceToOutput, rToView, viewMin, parent, false, guideY.Value, parentOrigin);
+
+        if (_childMoveAxis == 0)
+            return;
+
+        // The locked movement axis, drawn across the parent so it reads as a guide rather than a stub.
         var rectNow = SurfaceGeometry.ChildRectInParent(parent, child);
         var mid = (rectNow[0] + rectNow[2]) * 0.5f;
-        var parentSize = parent.SizeInMeters;
-        var from = _childMoveAxis == 1 ? new Vector2(-parentSize.X, mid.Y) : new Vector2(mid.X, -parentSize.Y);
-        var to = _childMoveAxis == 1 ? new Vector2(parentSize.X * 2, mid.Y) : new Vector2(mid.X, parentSize.Y * 2);
+        DrawSnapGuide(dl, surfaceToOutput, rToView, viewMin, parent, _childMoveAxis == 2, _childMoveAxis == 1 ? mid.Y : mid.X, parentOrigin);
+    }
+
+    /// <summary>Snap distance in the parent's own units, from a fixed screen distance — so it feels the same
+    /// however far you're zoomed in, and on a surface of any real size.</summary>
+    private float SnapThreshold(Homography surfaceToOutput, Homography rToView, Vector2 viewMin, Surface parent, Vector2 originInCarrier)
+    {
+        var a = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(originInCarrier)) - viewMin);
+        var b = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(originInCarrier + new Vector2(parent.SizeInMeters.X, 0))) - viewMin);
+        var pixels = Vector2.Distance(a, b);
+        return pixels > 1f ? parent.SizeInMeters.X / pixels * 7 * T3Ui.UiScaleFactor : 0f;
+    }
+
+    private void DrawSnapGuide(ImDrawListPtr dl, Homography surfaceToOutput, Homography rToView, Vector2 viewMin,
+                               Surface parent, bool vertical, float coordinate, Vector2 originInCarrier)
+    {
+        // Coordinates are in the parent's space; the projection expects the carrier's, so step across.
+        var size = parent.SizeInMeters;
+        var from = originInCarrier + (vertical ? new Vector2(coordinate, -size.Y) : new Vector2(-size.X, coordinate));
+        var to = originInCarrier + (vertical ? new Vector2(coordinate, size.Y * 2) : new Vector2(size.X * 2, coordinate));
 
         var a = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(from)) - viewMin);
         var b = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(to)) - viewMin);
-        dl.AddLine(a, b, UiColors.StatusAnimated.Fade(0.5f), 1 * T3Ui.UiScaleFactor);
+        dl.AddLine(a, b, UiColors.StatusAnimated.Fade(0.6f), 1 * T3Ui.UiScaleFactor);
     }
 
     /// <summary>The mouse in the parent surface's own space — through the view transform, then the parent's pin.</summary>
-    private Vector2 ToParentSpace(Homography outputToSurface, Homography rToOutput, Vector2 viewMin)
+    /// <summary>
+    /// A point (the cursor by default) in the child's <em>immediate parent's</em> space. The inverse only gets
+    /// us into the carrier's space, so for a nested region we still have to step down by the parent's origin —
+    /// that offset is what makes editing work at any nesting depth.
+    /// </summary>
+    private Vector2 ToParentSpace(Setup setup, Surface carrier, Surface child, Homography outputToSurface,
+                                  Homography rToOutput, Vector2 viewMin, Vector2? viewPoint = null)
     {
-        var inView = _projection.ScreenToCanvas(ImGui.GetMousePos());
-        return outputToSurface.TransformPoint(rToOutput.TransformPoint(inView + viewMin));
+        var inView = viewPoint ?? _projection.ScreenToCanvas(ImGui.GetMousePos());
+        var inCarrier = outputToSurface.TransformPoint(rToOutput.TransformPoint(inView + viewMin));
+
+        return SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out _, out _, out var parentOrigin)
+                   ? inCarrier - parentOrigin
+                   : inCarrier;
     }
 
     /// <summary>
@@ -826,7 +933,7 @@ internal sealed class SetupOutputView
     /// one after whatever is currently selected, so a stack of regions can be reached without moving anything.
     /// Also decides which label the next frame draws as hovered.
     /// </summary>
-    private void ResolveLabelPicking(SetupEntitySelection? selection)
+    private void ResolveLabelPicking(Setup setup, SetupEntitySelection? selection)
     {
         _labelsUnderMouse.Clear();
         var mouse = ImGui.GetMousePos();
@@ -836,18 +943,51 @@ internal sealed class SetupOutputView
                 _labelsUnderMouse.Add(id);
         }
 
-        if (_labelsUnderMouse.Count == 0 || ImGui.IsAnyItemHovered())
+        if (_labelsUnderMouse.Count > 0 && !ImGui.IsAnyItemHovered())
+        {
+            var next = _labelsUnderMouse[(_labelsUnderMouse.IndexOf(_focusedSurfaceId) + 1) % _labelsUnderMouse.Count];
+            _labelPickId = next;
+
+            // A drag on the selected region's label moves it, so that press mustn't also count as a pick.
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && _labelMoveSurfaceId == Guid.Empty)
+                selection?.Select(SetupEntitySelection.EntityKind.Surface, next);
+
+            // On release, and only if the button wasn't dragged — right-drag pans the canvas, and opening a
+            // menu on press would fire at the start of every pan that happens to begin over a label.
+            var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
+            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !wasDraggingRight)
+            {
+                // Right-click selects too, so the menu always acts on what's under the cursor.
+                selection?.Select(SetupEntitySelection.EntityKind.Surface, next);
+                _labelMenuSurfaceId = next;
+                ImGui.OpenPopup(LabelMenuId);
+            }
+        }
+        else
         {
             _labelPickId = Guid.Empty;
-            return;
         }
 
-        var next = _labelsUnderMouse[(_labelsUnderMouse.IndexOf(_focusedSurfaceId) + 1) % _labelsUnderMouse.Count];
-        _labelPickId = next;
+        if (ImGui.BeginPopup(LabelMenuId))
+        {
+            var target = setup.Surfaces.Find(s => s.Id == _labelMenuSurfaceId);
+            if (target != null && selection != null)
+                SetupPanel.DrawSurfaceMenuItems(selection, setup, target, includeDelete: true);
 
-        // A drag on the selected region's label moves it, so that press mustn't also count as a pick.
-        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && _labelMoveSurfaceId == Guid.Empty)
-            selection?.Select(SetupEntitySelection.EntityKind.Surface, next);
+            ImGui.EndPopup();
+        }
+
+        // Ctrl+D duplicates whatever is selected, matching the menu entry.
+        if (selection != null
+            && _focusedSurfaceId != Guid.Empty
+            && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows)
+            && ImGui.GetIO().KeyCtrl
+            && ImGui.IsKeyPressed(ImGuiKey.D, false))
+        {
+            var focused = setup.Surfaces.Find(s => s.Id == _focusedSurfaceId);
+            if (focused != null)
+                SetupPanel.DuplicateSurface(selection, setup, focused);
+        }
     }
 
     /// <summary>Runs a child rectangle edit through the same snapshot/undo lifecycle as a surface resize.</summary>
@@ -1047,6 +1187,12 @@ internal sealed class SetupOutputView
     private readonly List<Guid> _labelsUnderMouse = [];
     private Guid _labelPickId;
     private Guid _labelMoveSurfaceId;
+    private Guid _labelMenuSurfaceId;
+
+    // Snap candidates in the parent's space, rebuilt per drag frame; reused so dragging doesn't allocate.
+    private readonly List<float> _snapXs = [];
+    private readonly List<float> _snapYs = [];
+    private const string LabelMenuId = "##surfaceLabelMenu";
 
     // Scratch for a Layout child's derived quad; consumed before the next child reuses it.
     private readonly Vector2[] _childQuadBuffer = new Vector2[4];

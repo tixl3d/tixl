@@ -145,23 +145,137 @@ internal static class SurfaceGeometry
         child.LocalPosition = new Vector2(min.X - anchor.X, anchor.Y - (min.Y + size.Y));
     }
 
-    /// <param name="quad">Caller-owned buffer of at least 4 entries — this runs per frame, so it doesn't allocate.</param>
-    public static bool TryGetChildQuad(Surface parent, Surface child, Surface.OutputMapping parentMapping, Vector2[] quad)
+    /// <summary>
+    /// A descendant's rectangle in its <paramref name="carrier"/>'s space, composed down the whole chain — so
+    /// regions can nest arbitrarily deep, not just one level. Every level is metres on the same plane, so each
+    /// step is a plain translation by the parent's origin. <paramref name="parentOrigin"/> is the immediate
+    /// parent's origin in carrier space, which is what converts a cursor back into the space edits live in.
+    /// </summary>
+    public static bool TryGetDescendantRect(Setup setup, Surface carrier, Surface child,
+                                            out Vector2 min, out Vector2 max, out Vector2 parentOrigin)
     {
-        if (quad.Length < 4 || !TryGetSurfaceToOutput(parent, parentMapping, out var surfaceToOutput))
+        min = max = parentOrigin = Vector2.Zero;
+
+        // Walk up to the carrier, then apply the rectangles top-down.
+        _chainScratch.Clear();
+        var node = child;
+        for (var guard = 0; guard < 16; guard++)
+        {
+            _chainScratch.Add(node);
+            if (node.ParentId == carrier.Id)
+                break;
+
+            if (node.ParentId == Guid.Empty)
+                return false;
+
+            var parentId = node.ParentId;
+            node = setup.Surfaces.Find(s => s.Id == parentId);
+            if (node == null)
+                return false;
+        }
+
+        if (_chainScratch.Count == 0 || _chainScratch[^1].ParentId != carrier.Id)
             return false;
 
-        var anchor = AnchorInSurface(parent);
-        var bottomLeft = anchor + new Vector2(child.LocalPosition.X, -child.LocalPosition.Y);
-        var size = child.SizeInMeters;
-        var min = new Vector2(bottomLeft.X, bottomLeft.Y - size.Y);
-        var max = new Vector2(bottomLeft.X + size.X, bottomLeft.Y);
+        var offset = Vector2.Zero;
+        var parent = carrier;
+        for (var i = _chainScratch.Count - 1; i >= 0; i--)
+        {
+            var current = _chainScratch[i];
+            var rect = ChildRectInParent(parent, current);
+            parentOrigin = offset;
+            min = offset + rect[0];
+            max = offset + rect[2];
+
+            offset = min; // this level's space origin, for the level below
+            parent = current;
+        }
+
+        return true;
+    }
+
+    /// <param name="quad">Caller-owned buffer of at least 4 entries — this runs per frame, so it doesn't allocate.</param>
+    public static bool TryGetChildQuad(Setup setup, Surface carrier, Surface child, Surface.OutputMapping carrierMapping, Vector2[] quad)
+    {
+        if (quad.Length < 4
+            || !TryGetSurfaceToOutput(carrier, carrierMapping, out var surfaceToOutput)
+            || !TryGetDescendantRect(setup, carrier, child, out var min, out var max, out _))
+            return false;
 
         quad[0] = surfaceToOutput.TransformPoint(min);
         quad[1] = surfaceToOutput.TransformPoint(new Vector2(max.X, min.Y));
         quad[2] = surfaceToOutput.TransformPoint(max);
         quad[3] = surfaceToOutput.TransformPoint(new Vector2(min.X, max.Y));
         return true;
+    }
+
+    // Ancestor chain scratch — the editor is single-threaded, and this runs inside the per-frame draw.
+    private static readonly List<Surface> _chainScratch = [];
+
+    /// <summary>
+    /// Coordinates worth snapping to, in the parent's space: the parent's own edges and centre, plus every
+    /// sibling's. Filled into caller-owned lists, since this runs inside a drag. Snapping in the parent's
+    /// space (rather than on screen) means alignments survive the perspective — edges that read as flush stay
+    /// flush on the wall.
+    /// </summary>
+    public static void CollectSnapCandidates(Setup setup, Surface parent, Guid excludeId, List<float> xs, List<float> ys)
+    {
+        xs.Clear();
+        ys.Clear();
+
+        var size = parent.SizeInMeters;
+        xs.Add(0);
+        xs.Add(size.X * 0.5f);
+        xs.Add(size.X);
+        ys.Add(0);
+        ys.Add(size.Y * 0.5f);
+        ys.Add(size.Y);
+
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            var sibling = setup.Surfaces[i];
+            if (sibling.ParentId != parent.Id || sibling.Id == excludeId)
+                continue;
+
+            var rect = ChildRectInParent(parent, sibling);
+            xs.Add(rect[0].X);
+            xs.Add((rect[0].X + rect[2].X) * 0.5f);
+            xs.Add(rect[2].X);
+            ys.Add(rect[0].Y);
+            ys.Add((rect[0].Y + rect[2].Y) * 0.5f);
+            ys.Add(rect[2].Y);
+        }
+    }
+
+    /// <summary>
+    /// Nearest candidate to any of <paramref name="anchors"/> (a rectangle offers its two edges and its
+    /// centre), returning the offset that lands on it and the coordinate hit, so a guide can be drawn.
+    /// </summary>
+    public static bool TrySnapOffset(List<float> candidates, ReadOnlySpan<float> anchors, float threshold,
+                                     out float offset, out float target)
+    {
+        offset = 0;
+        target = 0;
+        var bestDistance = threshold;
+        var found = false;
+
+        foreach (var anchor in anchors)
+        {
+            foreach (var candidate in candidates)
+            {
+                var delta = candidate - anchor;
+                var distance = MathF.Abs(delta);
+                if (distance >= bestDistance)
+                    continue;
+
+                bestDistance = distance;
+                offset = delta;
+                target = candidate;
+                found = true;
+            }
+        }
+
+        return found;
     }
 
     /// <summary>Resizes keeping the pivot anchored, so editing one dimension extends rather than recentres.</summary>

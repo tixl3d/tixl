@@ -606,14 +606,8 @@ internal static class SetupPanel
         DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Surface, surface.Id, surface.Name,
                       outputText,
                       onDelete: () => DeleteSurface(setup, surfaceId), leadingIcon: Icon.Grid, trailingIcon: outputIcon,
-                      drawExtraMenuItems: () =>
-                                          {
-                                              if (CustomComponents.DrawMenuItem(4, "Add sub-region"))
-                                                  AddSubRegion(selection, setup, surface);
-
-                                              if (CustomComponents.DrawMenuItem(5, "Clear content inputs"))
-                                                  ClearContentInputs(surfaceId);
-                                          },
+                      // Delete comes from the row itself, so it isn't repeated here.
+                      drawExtraMenuItems: () => DrawSurfaceMenuItems(selection, setup, surface, includeDelete: false),
                       depth: depth,
                       isExpanded: hasChildren ? isExpanded : null,
                       onToggleExpanded: () => ToggleSurfaceExpanded(surfaceId));
@@ -1155,6 +1149,102 @@ internal static class SetupPanel
         var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
         setup.ReferenceImages.Add(image);
         selection.Select(SetupEntitySelection.EntityKind.ReferenceImage, image.Id);
+    }
+
+    /// <summary>
+    /// The surface actions, shared by the sidebar row and the canvas label so the two can't drift apart.
+    /// </summary>
+    internal static void DrawSurfaceMenuItems(SetupEntitySelection selection, Setup setup, Surface surface, bool includeDelete)
+    {
+        if (CustomComponents.DrawMenuItem(4, "Add sub-region"))
+            AddSubRegion(selection, setup, surface);
+
+        if (CustomComponents.DrawMenuItem(5, "Duplicate"))
+            DuplicateSurface(selection, setup, surface);
+
+        if (CustomComponents.DrawMenuItem(6, "Clear content inputs"))
+            ClearContentInputs(surface.Id);
+
+        if (includeDelete && CustomComponents.DrawMenuItem(7, "Delete"))
+            DeleteSurface(setup, surface.Id);
+    }
+
+    /// <summary>
+    /// Copies a surface — with its sub-regions — offset a little so it doesn't hide under the original. The
+    /// copy gets fresh GUIDs, so content sends still point at the original; the duplicate starts unbound.
+    /// </summary>
+    internal static void DuplicateSurface(SetupEntitySelection selection, Setup setup, Surface surface)
+    {
+        var copy = CloneSurface(surface);
+        var isChild = surface.ParentId != Guid.Empty;
+        copy.Name = isChild ? $"Sub region {CountChildren(setup, surface.ParentId) + 1}" : surface.Name + " copy";
+
+        if (isChild)
+        {
+            copy.LocalPosition = surface.LocalPosition + new Vector2(surface.SizeInMeters.X * 0.15f,
+                                                                    -surface.SizeInMeters.Y * 0.15f);
+        }
+        else
+        {
+            // A root carries its own pins, so nudge those instead.
+            foreach (var mapping in copy.OutputMappings)
+            {
+                for (var i = 0; i < mapping.Quad.Length; i++)
+                    mapping.Quad[i] += new Vector2(24, 24);
+            }
+        }
+
+        setup.Surfaces.Add(copy);
+        DuplicateChildrenOf(setup, surface.Id, copy.Id);
+
+        selection.Select(SetupEntitySelection.EntityKind.Surface, copy.Id);
+        OutputSetupHandling.SaveActive();
+    }
+
+    private static void DuplicateChildrenOf(Setup setup, Guid sourceParentId, Guid newParentId)
+    {
+        // Snapshot first: the loop appends to the same list it walks.
+        var originals = setup.Surfaces.FindAll(s => s.ParentId == sourceParentId);
+        foreach (var original in originals)
+        {
+            var copy = CloneSurface(original);
+            copy.ParentId = newParentId;
+            setup.Surfaces.Add(copy);
+            DuplicateChildrenOf(setup, original.Id, copy.Id);
+        }
+    }
+
+    private static Surface CloneSurface(Surface source)
+    {
+        var copy = new Surface
+                       {
+                           Name = source.Name,
+                           Type = source.Type,
+                           Kind = source.Kind,
+                           ParentId = source.ParentId,
+                           ShortName = string.Empty, // auto-abbreviated, so two surfaces don't share a gutter label
+                           Render = source.Render,
+                           SizeInMeters = source.SizeInMeters,
+                           LocalPosition = source.LocalPosition,
+                           PixelsPerMeter = source.PixelsPerMeter,
+                           ShowGrid = source.ShowGrid,
+                           GridSubdivisions = source.GridSubdivisions,
+                       };
+
+        foreach (var mapping in source.OutputMappings)
+        {
+            copy.OutputMappings.Add(new Surface.OutputMapping
+                                        {
+                                            OutputId = mapping.OutputId,
+                                            Mode = mapping.Mode,
+                                            Quad = (Vector2[])mapping.Quad.Clone(),
+                                        });
+        }
+
+        if (source.Placement != null)
+            copy.Placement = new Surface.StagePlacement { Pose = source.Placement.Pose, Pivot = source.Placement.Pivot };
+
+        return copy;
     }
 
     /// <summary>

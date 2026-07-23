@@ -166,10 +166,11 @@ internal static class OutputManager
 
             // A Layout child carries no corner pin of its own — it rides its parent's, so the mappings to walk
             // (and the quad each one yields) come from the parent.
+            // Regions nest arbitrarily deep, so walk up to whichever ancestor actually holds the pin.
             var carrier = surface;
             if (surface.Kind == T3.Core.Output.Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
             {
-                carrier = setup.Surfaces.Find(s => s.Id == surface.ParentId);
+                carrier = SurfaceGeometry.FindCarrier(setup, surface.Id, outputId);
                 if (carrier == null || !carrier.Render)
                     continue;
             }
@@ -198,7 +199,7 @@ internal static class OutputManager
                 if (!ReferenceEquals(carrier, surface))
                 {
                     // Buffer is consumed by TryComputeNdcHomography before the next iteration reuses it.
-                    if (!SurfaceGeometry.TryGetChildQuad(carrier, surface, mapping, _childQuadBuffer))
+                    if (!SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, mapping, _childQuadBuffer))
                         continue;
 
                     quad = _childQuadBuffer;
