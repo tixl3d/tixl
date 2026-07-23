@@ -1491,15 +1491,34 @@ internal static class SetupPanel
 
         if (onDelete != null || onRemoveFromOutput != null || drawExtraMenuItems != null)
         {
+            // Right-clicking inside a multi-selection acts on the whole thing. The per-entity actions stay
+            // visible but dimmed rather than vanishing, so the menu keeps its shape and it is obvious *why*
+            // they can't be used.
+            var multi = isSelected && selection.Count > 1;
+            var deletable = multi ? CountDeletable(selection) : 0;
             CustomComponents.ContextMenuForItem(() =>
                                                 {
+                                                    CustomComponents.MenuItemsDisabled = multi;
+                                                    ImGui.BeginDisabled(multi);
                                                     drawExtraMenuItems?.Invoke();
 
                                                     if (onRemoveFromOutput != null && CustomComponents.DrawMenuItem(1, "Remove from output"))
                                                         onRemoveFromOutput();
 
-                                                    if (onDelete != null && CustomComponents.DrawMenuItem(2, "Delete"))
+                                                    ImGui.EndDisabled();
+                                                    CustomComponents.MenuItemsDisabled = false;
+
+                                                    // Deleting is the one action that reads the selection rather than the row, so it is
+                                                    // offered even from a row that isn't itself deletable.
+                                                    if (multi)
+                                                    {
+                                                        if (deletable > 0 && CustomComponents.DrawMenuItem(2, $"Delete {deletable}"))
+                                                            DeleteSelection(selection, setup);
+                                                    }
+                                                    else if (onDelete != null && CustomComponents.DrawMenuItem(2, "Delete"))
+                                                    {
                                                         onDelete();
+                                                    }
                                                 },
                                                 null);
         }
@@ -1770,6 +1789,75 @@ internal static class SetupPanel
         selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
     }
 
+    /// <summary>
+    /// How many of the selected entities this panel can actually delete. A content source is a graph op and a
+    /// slice's source may be gone, so the menu counts what will really go rather than how many rows are lit.
+    /// </summary>
+    private static int CountDeletable(SetupEntitySelection selection)
+    {
+        var count = 0;
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            if (IsDeletable(selection.Targets[i].Kind))
+                count++;
+        }
+
+        return count;
+    }
+
+    private static bool IsDeletable(SetupEntitySelection.EntityKind kind)
+    {
+        return kind is SetupEntitySelection.EntityKind.Surface
+                    or SetupEntitySelection.EntityKind.Slice
+                    or SetupEntitySelection.EntityKind.Output
+                    or SetupEntitySelection.EntityKind.ReferenceImage
+                    or SetupEntitySelection.EntityKind.Prop;
+    }
+
+    /// <summary>
+    /// Deletes everything deletable in the selection. Each kind keeps its own cascade (a surface re-parents
+    /// its children, an output drops the mappings onto it), so deleting a set is just deleting each in turn —
+    /// which is why the targets are copied first: those cascades mutate the setup underneath us.
+    /// </summary>
+    private static void DeleteSelection(SetupEntitySelection selection, Setup setup)
+    {
+        if (!OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
+            return;
+
+        _deleteBuffer.Clear();
+        _deleteBuffer.AddRange(selection.Targets);
+
+        foreach (var target in _deleteBuffer)
+        {
+            var id = target.EntityId;
+            switch (target.Kind)
+            {
+                case SetupEntitySelection.EntityKind.Surface:
+                    DeleteSurface(setup, id);
+                    break;
+
+                case SetupEntitySelection.EntityKind.Slice:
+                    DeleteSlice(setup, id);
+                    break;
+
+                case SetupEntitySelection.EntityKind.Output:
+                    DeleteOutput(setup, machineConfig, id);
+                    break;
+
+                case SetupEntitySelection.EntityKind.ReferenceImage:
+                    setup.ReferenceImages.RemoveAll(r => r.Id == id);
+                    break;
+
+                case SetupEntitySelection.EntityKind.Prop:
+                    setup.Props.RemoveAll(r => r.Id == id);
+                    break;
+            }
+        }
+
+        selection.Clear();
+        OutputSetupHandling.SaveActive();
+    }
+
     private static void DeleteSurface(Setup setup, Guid surfaceId)
     {
         // Re-parent orphaned children to the deleted surface's parent so the tree stays connected.
@@ -1873,6 +1961,7 @@ internal static class SetupPanel
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
     private static readonly HashSet<Guid> _collapsedSurfaces = [];
     private static readonly HashSet<Guid> _collapsedSources = [];
+    private static readonly List<SelectionTarget> _deleteBuffer = [];
     private static SetupEntitySelection.EntityKind _primaryKind;
     private static Guid _primaryId;
 

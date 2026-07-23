@@ -165,6 +165,8 @@ internal static class OutputManager
         // Phase 1: resolve each surface's content and mapping. Pulling content here (before our RT is
         // bound) keeps the content's own rendering from clobbering the target we bind in phase 2.
         _drawItems.Clear();
+        _overlayLines.Clear();
+        _overlayQuads.Clear();
         foreach (var surface in setup.Surfaces)
         {
             if (!surface.Render)
@@ -220,8 +222,16 @@ internal static class OutputManager
                 // Calibration raster after the content, so it composites *over* it and stays readable while
                 // aligning. Emitted with or without content — with none, it's lines on the cleared black.
                 if (surface.ShowGrid)
+                {
                     _drawItems.Add(new DrawItem(null, homography, _fullSourceRect, Vector4.One,
                                                 new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin));
+
+                    // Annotation lines have to reach the wall to be usable at all: you align one by nudging
+                    // it until its *projection* lies along a real feature. They ride the same switch as the
+                    // raster — same calibration session, and neither belongs in a show.
+                    if (ReferenceEquals(carrier, surface))
+                        CollectAnnotationOverlay(surface, mapping);
+                }
             }
         }
 
@@ -287,7 +297,153 @@ internal static class OutputManager
         }
 
         deviceContext.PixelShader.SetShaderResource(0, null);
+
+        DrawOverlay(deviceContext, output.CanvasResolution);
         return target.Texture;
+    }
+
+    /// <summary>
+    /// Where a tool is currently being aimed on <paramref name="surfaceId"/>, in surface meters. Projected as
+    /// a crosshair so the point can be placed against a physical feature *before* the drag starts — until the
+    /// first press there is nothing else on the wall to aim with. Re-stated every frame the tool is armed;
+    /// it expires on its own once that stops.
+    /// </summary>
+    public static void SetAimPoint(Guid surfaceId, Vector2 inSurface)
+    {
+        _aimSurfaceId = surfaceId;
+        _aimInSurface = inSurface;
+        _aimFrame = ImGuiNET.ImGui.GetFrameCount();
+    }
+
+    /// <summary>
+    /// Carries a surface's annotation lines through its corner pin into output pixels. Warping here rather
+    /// than in the shader is what keeps the projected line an even width — by the time it is drawn, no
+    /// perspective is left in it.
+    /// </summary>
+    private static void CollectAnnotationOverlay(T3.Core.Output.Surface surface, T3.Core.Output.Surface.OutputMapping mapping)
+    {
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+            return;
+
+        // The frame check covers both staleness (the tool was disarmed) and an output being composited more
+        // than once in a frame, where consuming the point would make it flicker.
+        if (_aimSurfaceId == surface.Id && ImGuiNET.ImGui.GetFrameCount() - _aimFrame <= 1)
+        {
+            var aim = surfaceToOutput.TransformPoint(_aimInSurface);
+            var arm = _aimCrosshairSize * 0.5f;
+            var aimParams = new Vector4(_aimLineWidth, 0, 0, 0);
+            var aimColor = T3.Editor.Gui.Styling.UiColors.StatusAnimated.Rgba;
+            _overlayLines.Add(new OverlayLine(new Vector4(aim.X - arm, aim.Y, aim.X + arm, aim.Y), aimColor, aimParams));
+            _overlayLines.Add(new OverlayLine(new Vector4(aim.X, aim.Y - arm, aim.X, aim.Y + arm), aimColor, aimParams));
+        }
+
+        var markerSize = new Vector2(_annotationMarkerSize, _annotationMarkerSize);
+        foreach (var annotation in surface.Annotations)
+        {
+            LineRectifier.IsHorizontal(annotation.P1, annotation.P2, out var deviation);
+            var color = AlignmentColor(deviation).Rgba;
+
+            var a = surfaceToOutput.TransformPoint(annotation.P1);
+            var b = surfaceToOutput.TransformPoint(annotation.P2);
+            _overlayLines.Add(new OverlayLine(new Vector4(a.X, a.Y, b.X, b.Y), color,
+                                              new Vector4(_annotationLineWidth, 0, 0, 0)));
+
+            // The endpoints are what you actually aim at a feature, so they are drawn as their own primitive
+            // — round for now, and the slot a textured handle drops into later.
+            _overlayQuads.Add(new OverlayQuad(new Vector4(a.X, a.Y, markerSize.X, markerSize.Y), color, _markerShape));
+            _overlayQuads.Add(new OverlayQuad(new Vector4(b.X, b.Y, markerSize.X, markerSize.Y), color, _markerShape));
+        }
+    }
+
+    /// <summary>
+    /// The overlay passes, drawn last so they sit over the raster they are being aligned against. Both read a
+    /// structured buffer of instances and expand six vertices each — no vertex buffer, no input layout.
+    /// </summary>
+    private static void DrawOverlay(DeviceContext deviceContext, Int2 canvasResolution)
+    {
+        if (_overlayLines.Count == 0 && _overlayQuads.Count == 0)
+            return;
+
+        if (!EnsureOverlayShaders())
+            return;
+
+        _overlayParams.TargetSize = new Vector4(Math.Max(1, canvasResolution.Width), Math.Max(1, canvasResolution.Height), 0, 0);
+        ResourceManager.SetupConstBuffer(_overlayParams, ref _overlayParamBuffer);
+        deviceContext.VertexShader.SetConstantBuffer(0, _overlayParamBuffer);
+        deviceContext.PixelShader.SetConstantBuffer(0, _overlayParamBuffer);
+
+        if (TryUploadInstances(_overlayLines, ref _lineBuffer, ref _lineSrvSource, ref _lineSrv, out var lineCount))
+        {
+            deviceContext.VertexShader.Set(_lineVertexShader!.Value);
+            deviceContext.PixelShader.Set(_linePixelShader!.Value);
+            deviceContext.VertexShader.SetShaderResource(0, _lineSrv);
+            deviceContext.Draw(lineCount * 6, 0);
+        }
+
+        if (TryUploadInstances(_overlayQuads, ref _quadBuffer, ref _quadSrvSource, ref _quadSrv, out var quadCount))
+        {
+            deviceContext.VertexShader.Set(_quadVertexShader!.Value);
+            deviceContext.PixelShader.Set(_quadPixelShader!.Value);
+            deviceContext.VertexShader.SetShaderResource(0, _quadSrv);
+            deviceContext.Draw(quadCount * 6, 0);
+        }
+
+        deviceContext.VertexShader.SetShaderResource(0, null);
+    }
+
+    /// <summary>
+    /// Uploads instances into a structured buffer, re-creating the view when the buffer had to be rebuilt —
+    /// which <see cref="ResourceManager.SetupStructuredBuffer{T}"/> does whenever the count changes, leaving
+    /// any earlier view pointing at a disposed buffer.
+    /// </summary>
+    private static bool TryUploadInstances<T>(List<T> instances, ref Buffer? buffer, ref Buffer? viewSource,
+                                              ref ShaderResourceView? srv, out int count) where T : struct
+    {
+        count = instances.Count;
+        if (count == 0)
+            return false;
+
+        var stride = System.Runtime.InteropServices.Marshal.SizeOf<T>();
+        using (var data = new SharpDX.DataStream(stride * count, true, true))
+        {
+            // Written one at a time: the span overload would want an array, and materializing one here would
+            // allocate every frame the overlay is visible.
+            foreach (var instance in instances)
+                data.Write(instance);
+
+            data.Position = 0;
+            ResourceManager.SetupStructuredBuffer(data, stride * count, stride, ref buffer);
+        }
+
+        if (buffer == null)
+            return false;
+
+        if (!ReferenceEquals(viewSource, buffer))
+        {
+            ResourceManager.CreateStructuredBufferSrv(buffer, ref srv);
+            viewSource = buffer;
+        }
+
+        return srv is { IsDisposed: false };
+    }
+
+    private static bool EnsureOverlayShaders()
+    {
+        _lineVertexShader ??= ResourceManager.CreateShaderResource<T3.Core.DataTypes.VertexShader>(LineShaderPath, null, () => "vsMain");
+        _linePixelShader ??= ResourceManager.CreateShaderResource<T3.Core.DataTypes.PixelShader>(LineShaderPath, null, () => "psMain");
+        _quadVertexShader ??= ResourceManager.CreateShaderResource<T3.Core.DataTypes.VertexShader>(QuadShaderPath, null, () => "vsMain");
+        _quadPixelShader ??= ResourceManager.CreateShaderResource<T3.Core.DataTypes.PixelShader>(QuadShaderPath, null, () => "psMain");
+        return _lineVertexShader.Value != null && _linePixelShader.Value != null
+               && _quadVertexShader.Value != null && _quadPixelShader.Value != null;
+    }
+
+    /// <summary>Aligned to within a fraction of a degree reads as good; off by a few, as work left to do.</summary>
+    public static T3.Core.DataTypes.Vector.Color AlignmentColor(float deviationInDegrees)
+    {
+        var t = Math.Clamp((deviationInDegrees - LineRectifier.AlignedDegrees)
+                           / (LineRectifier.MisalignedDegrees - LineRectifier.AlignedDegrees), 0f, 1f);
+        return T3.Core.DataTypes.Vector.Color.MixOkLab(T3.Editor.Gui.Styling.UiColors.StatusOkay,
+                                                       T3.Editor.Gui.Styling.UiColors.StatusWarning, t);
     }
 
     /// <summary>
@@ -574,7 +730,30 @@ internal static class OutputManager
         public Vector4 GridOrigin; // xy = origin UV, z = minor lines per metre, w = minor opacity
     }
 
+    // Overlay instances. Every member is a float4 so the C# layout and the HLSL structured-buffer packing
+    // rules cannot disagree, and the spare lanes leave room to grow (texture slot, dash pattern).
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4)]
+    private readonly record struct OverlayLine(Vector4 Points, Vector4 Color, Vector4 Params);
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4)]
+    private readonly record struct OverlayQuad(Vector4 Rect, Vector4 Color, Vector4 Params);
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4)]
+    private struct OverlayShaderParams
+    {
+        public Vector4 TargetSize;
+    }
+
     private const string ShaderPath = "Lib:shaders/dx11/corner-pin-layer.hlsl";
+    private const string LineShaderPath = "Lib:shaders/dx11/output-lines.hlsl";
+    private const string QuadShaderPath = "Lib:shaders/dx11/output-quads.hlsl";
+    private const float _annotationLineWidth = 2.5f;
+    private const float _annotationMarkerSize = 11f;
+    private const float _aimCrosshairSize = 60f;
+    private const float _aimLineWidth = 1.5f;
+
+    // Radius half the size, so the marker is a dot; a zero radius would make the same primitive a square.
+    private static readonly Vector4 _markerShape = new(0, _annotationMarkerSize * 0.5f, 0, 0);
 
     private static readonly Vector2[] _unitQuad = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
     private static readonly Vector4 _fullSourceRect = new(0, 0, 1, 1);
@@ -596,6 +775,24 @@ internal static class OutputManager
     private static Resource<T3.Core.DataTypes.PixelShader>? _pixelShaderResource;
     private static ShaderParams _shaderParams;
     private static Buffer? _paramBuffer;
+
+    private static Guid _aimSurfaceId;
+    private static Vector2 _aimInSurface;
+    private static int _aimFrame = -10;
+    private static readonly List<OverlayLine> _overlayLines = [];
+    private static readonly List<OverlayQuad> _overlayQuads = [];
+    private static Resource<T3.Core.DataTypes.VertexShader>? _lineVertexShader;
+    private static Resource<T3.Core.DataTypes.PixelShader>? _linePixelShader;
+    private static Resource<T3.Core.DataTypes.VertexShader>? _quadVertexShader;
+    private static Resource<T3.Core.DataTypes.PixelShader>? _quadPixelShader;
+    private static OverlayShaderParams _overlayParams;
+    private static Buffer? _overlayParamBuffer;
+    private static Buffer? _lineBuffer;
+    private static Buffer? _lineSrvSource;
+    private static ShaderResourceView? _lineSrv;
+    private static Buffer? _quadBuffer;
+    private static Buffer? _quadSrvSource;
+    private static ShaderResourceView? _quadSrv;
     private static SamplerState? _linearSampler;
     private static RasterizerState? _cullNoneRasterizerState;
 }

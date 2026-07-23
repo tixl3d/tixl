@@ -72,6 +72,12 @@ internal sealed class SetupEntitySelection
 
     public bool IsSelected(EntityKind kind, Guid id) => _targets.Contains(new SelectionTarget(kind, id));
 
+    public int Count => _targets.Count;
+
+    /// <summary>The selection in order, primary first. Copy before acting on it — anything that deletes
+    /// entities prunes this list as it goes.</summary>
+    public IReadOnlyList<SelectionTarget> Targets => _targets;
+
     /// <summary>Resolves the primary selection against a setup, dropping any target whose entity is gone.</summary>
     public bool TryResolve(Setup setup, out EntityKind kind, out Guid id)
     {

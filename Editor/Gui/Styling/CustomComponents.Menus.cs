@@ -86,10 +86,19 @@ internal static partial class CustomComponents
     /// <see cref="ButtonStates.Emphasized"/> reads as the primary/active row, <see cref="ButtonStates.Default"/>
     /// as a muted secondary row. A disabled item always renders greyed regardless of <paramref name="state"/>.
     /// </summary>
+    /// <summary>
+    /// Grays out every item drawn while it is set, without the callers having to thread an enabled flag
+    /// through. Used where a menu is shared between contexts and only some of its items apply — a
+    /// multi-selection, say, where the per-entity actions can't act on N things at once. Set it around the
+    /// items that should dim and clear it afterwards; it is not scoped for you.
+    /// </summary>
+    public static bool MenuItemsDisabled;
+
     public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true,
                                     bool reserveCheckmarkColumn = true, bool reserveIconColumn = true,
                                     ButtonStates state = ButtonStates.Default)
     {
+        isEnabled &= !MenuItemsDisabled;
         var h = ImGui.GetFrameHeight();
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
 

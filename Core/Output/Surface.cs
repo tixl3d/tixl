@@ -173,6 +173,14 @@ public sealed class Surface
     /// </summary>
     public float PixelsPerMeter = 400;
 
+    /// <summary>
+    /// Measuring lines in <b>surface space</b> (meters, origin top-left, Y down) — drawn across features of
+    /// the projected raster that were measured for real. Distinct from <see cref="ReferenceBinding.Annotations"/>,
+    /// which live in reference-photo pixels: these say how big this surface actually is, and "apply lengths"
+    /// re-meters the surface from them without moving anything on the wall.
+    /// </summary>
+    public List<LineAnnotation> Annotations = [];
+
     public List<OutputMapping> OutputMappings = [];
     public ReferenceBinding? Reference;
     public StagePlacement? Placement;
@@ -193,6 +201,16 @@ public sealed class Surface
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
         writer.WriteValue("ShowGrid", ShowGrid);
         writer.WriteValue("GridSubdivisions", GridSubdivisions);
+
+        if (Annotations.Count > 0)
+        {
+            writer.WritePropertyName("Annotations");
+            writer.WriteStartArray();
+            foreach (var annotation in Annotations)
+                annotation.WriteToJson(writer);
+
+            writer.WriteEndArray();
+        }
 
         writer.WritePropertyName("OutputMappings");
         writer.WriteStartArray();
@@ -233,6 +251,7 @@ public sealed class Surface
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               ShowGrid = token.ReadValueSafe("ShowGrid", false),
                               GridSubdivisions = token.ReadValueSafe("GridSubdivisions", 10),
+                              Annotations = token.ReadListSafe("Annotations", LineAnnotation.ReadFromJson),
                               OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),
                           };
 
