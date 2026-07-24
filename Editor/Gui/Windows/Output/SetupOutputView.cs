@@ -178,7 +178,7 @@ internal sealed class SetupOutputView
             Span<Vector2> corners =
                 [sliceMin, new Vector2(sliceMax.X, sliceMin.Y), sliceMax, new Vector2(sliceMin.X, sliceMax.Y)];
             CornerPinHandles.DrawCenteredLabel(dl, corners, SetupPanel.SliceLabel(setup, slice), UiColors.Text.Fade(0.7f), UiColors.BackgroundFull.Fade(0.6f));
-            _labelTargets.Add((slice.Id, sliceMin, sliceMax));
+            _picker.AddTarget(SetupEntitySelection.EntityKind.Slice, slice.Id, sliceMin, sliceMax);
         }
 
         // No scrim here: on an atlas every slice matters equally. No fallback to the first slice either — with
@@ -187,61 +187,9 @@ internal sealed class SetupOutputView
             EditSlice(setup, dl, selected, selected.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
 
         dl.PopClipRect();
-        ResolveSlicePicking(setup, selection);
+        ResolvePicking(setup, selection);
     }
 
-    private const string SliceLabelMenuId = "##sliceLabelMenu";
-
-    /// <summary>
-    /// Clicking a slice's frame label selects it (in the shared selection, so the panel and edit target follow),
-    /// and right-clicking it opens that slice's context menu — the atlas can be walked and managed without the
-    /// sidebar. Left-select and right-menu both act on the label under the cursor.
-    /// </summary>
-    private void ResolveSlicePicking(Setup setup, SetupEntitySelection? selection)
-    {
-        var mouse = ImGui.GetMousePos();
-        var hit = Guid.Empty;
-        foreach (var (id, rectMin, rectMax) in _labelTargets)
-        {
-            if (mouse.X < rectMin.X || mouse.X > rectMax.X || mouse.Y < rectMin.Y || mouse.Y > rectMax.Y)
-                continue;
-
-            hit = id;
-            break;
-        }
-
-        if (hit != Guid.Empty && !ImGui.IsAnyItemHovered())
-        {
-            FrameStats.PulseItemWithId(hit);
-
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-            {
-                _selectedSliceId = hit;
-                selection?.Select(SetupEntitySelection.EntityKind.Slice, hit);
-            }
-
-            // Release-without-drag, so opening the menu doesn't fight a right-drag pan of the canvas.
-            var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
-            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !wasDraggingRight)
-            {
-                _selectedSliceId = hit;
-                selection?.Select(SetupEntitySelection.EntityKind.Slice, hit);
-                _sliceMenuId = hit;
-                ImGui.OpenPopup(SliceLabelMenuId);
-            }
-        }
-
-        if (ImGui.BeginPopup(SliceLabelMenuId))
-        {
-            var slice = setup.Slices.Find(s => s.Id == _sliceMenuId);
-            if (slice != null && selection != null)
-                SetupPanel.DrawSliceMenuItems(selection, setup, slice);
-
-            ImGui.EndPopup();
-        }
-
-        _labelTargets.Clear();
-    }
 
     // The output canvas carries a global rectify transform R (output px → view space): identity at _viewMorph
     // 0 (Original), and by 1 (Straight) it maps the focused surface's quad onto its own axis-aligned bounding
@@ -448,7 +396,7 @@ internal sealed class SetupOutputView
                 dl.AddImage(sourceSrv.NativePointer, sourceMin, sourceMax);
                 dl.AddQuad(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.ForegroundFull.Fade(0.25f));
                 DrawSliceEditor(setup, dl, focusCarrierId, viewMin, toContent);
-                ResolveLabelPicking(setup, selection);
+                ResolvePicking(setup, selection);
                 return;
             }
         }
@@ -502,7 +450,6 @@ internal sealed class SetupOutputView
         // ...and they fade out over stage two rather than being switched off, so nothing pops.
         var handleFade = 1f - toContent;
 
-        _labelTargets.Clear();
         Span<Vector2> labelQuad = stackalloc Vector2[4]; // hoisted: one buffer reused by every surface
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
@@ -611,14 +558,14 @@ internal sealed class SetupOutputView
 
             // Under isolate the other frames' labels recede further, so the focused one clearly owns the canvas.
             var labelEmphasis = lockedByIsolate ? emphasis * 0.4f : emphasis;
-            DrawEntityLabel(dl, labelQuad, surface.Id, surface.Name, isSelected, labelEmphasis, surfacePulse);
+            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, labelQuad, surface.Id, surface.Name, isSelected, labelEmphasis, surfacePulse);
         }
 
         if (basis != null && basisMapping != null)
             DrawAnnotations(dl, basis, basisMapping, rToView, rToOutput, viewMin, editable, handleFade * straighten);
 
         DrawSliceEditor(setup, dl, focusCarrierId, viewMin, toContent);
-        ResolveLabelPicking(setup, selection);
+        ResolvePicking(setup, selection);
     }
 
     /// <summary>
@@ -1040,7 +987,7 @@ internal sealed class SetupOutputView
         labelCorners[2] = max;
         labelCorners[3] = new Vector2(min.X, max.Y);
         var sliceName = SetupPanel.SliceLabel(setup, slice);
-        DrawEntityLabel(dl, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
+        DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Slice, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
 
         // Move is detected by hand rather than an InvisibleButton, so the label stays a plain draw and the
         // frame-label pick pass (which selects and opens the context menu) isn't blocked by a hovered item.
@@ -1736,7 +1683,7 @@ internal sealed class SetupOutputView
         {
             // Still registered as a pick target — an unselected region has to stay clickable, which is the
             // only way to reach it while its parent is selected.
-            DrawEntityLabel(dl, screen, child.Id, child.Name, isFocused, fade, childPulse);
+            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, isFocused, fade, childPulse);
             return;
         }
 
@@ -1798,7 +1745,7 @@ internal sealed class SetupOutputView
 
         ImGui.PopID();
 
-        DrawEntityLabel(dl, screen, child.Id, child.Name, isFocused, fade, childPulse);
+        DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, isFocused, fade, childPulse);
         HandleLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child, screen);
     }
 
@@ -1987,19 +1934,19 @@ internal sealed class SetupOutputView
 
     /// <summary>
     /// A name chip centred on an entity's quad — a surface, a region, or a slice — doubling as its pick/grab
-    /// area. Registers the chip in <see cref="_labelTargets"/> so a click can resolve to this entity, and
+    /// area. Registers the chip with <see cref="_picker"/> so a click can resolve to this entity, and
     /// styles by selection/hover so the same label reads the same in the tree and on the canvas.
     /// </summary>
-    private void DrawEntityLabel(ImDrawListPtr dl, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected, float emphasis,
-                                 float pulse = 0f)
+    private void DrawEntityLabel(ImDrawListPtr dl, SetupEntitySelection.EntityKind kind, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected,
+                                 float emphasis, float pulse = 0f)
     {
         if (string.IsNullOrEmpty(name) || emphasis <= 0.01f)
             return;
 
         var rect = CornerPinHandles.GetCenteredLabelRect(screenQuad, name);
-        _labelTargets.Add((id, rect.Min, rect.Max));
+        _picker.AddTarget(kind, id, rect.Min, rect.Max);
 
-        var alpha = (id == _labelPickId ? 1f : 0.9f) * emphasis;
+        var alpha = (_picker.IsPicked(id) ? 1f : 0.9f) * emphasis;
         var text = (isSelected ? UiColors.ForegroundFull : UiColors.Text).Fade((isSelected ? 1f : 0.7f) * alpha);
         var background = (isSelected ? UiColors.StatusActivated : UiColors.BackgroundFull).Fade((isSelected ? 1f : 0.6f) * alpha);
 
@@ -2021,56 +1968,48 @@ internal sealed class SetupOutputView
     /// one after whatever is currently selected, so a stack of regions can be reached without moving anything.
     /// Also decides which label the next frame draws as hovered.
     /// </summary>
-    private void ResolveLabelPicking(Setup setup, SetupEntitySelection? selection)
+    /// <summary>
+    /// One pick pass for every labeled frame on the canvas — surfaces, regions, slices. Left-click selects the
+    /// label under the cursor (cycling through a stack on repeated clicks), right-click opens that entity's
+    /// context menu, and the picked label pulses. Selection and menu dispatch by the target's kind; everything
+    /// else — hit-test, overlap cycling, isolate gating, the right-drag guard — is identical across kinds.
+    /// </summary>
+    private void ResolvePicking(Setup setup, SetupEntitySelection? selection)
     {
-        _labelsUnderMouse.Clear();
-        var mouse = ImGui.GetMousePos();
-        foreach (var (id, min, max) in _labelTargets)
-        {
-            if (mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y)
-                _labelsUnderMouse.Add(id);
-        }
+        // Cycle relative to whatever is currently the subject, so clicking a stack walks it. The primary
+        // selection is that subject for either kind (the focused surface, or the selected slice).
+        var current = selection != null && selection.TryResolve(setup, out _, out var primaryId) ? primaryId : Guid.Empty;
+        var hit = _picker.Resolve(current);
 
-        if (_labelsUnderMouse.Count > 0 && !ImGui.IsAnyItemHovered())
+        if (hit.HasHit)
         {
-            var next = _labelsUnderMouse[(_labelsUnderMouse.IndexOf(_focusedSurfaceId) + 1) % _labelsUnderMouse.Count];
-            _labelPickId = next;
-            FrameStats.PulseItemWithId(next);
+            FrameStats.PulseItemWithId(hit.Id);
 
             // Isolate takes selection off the canvas: only the focused frame's label still acts (so it can move
-            // and its menu opens); the others are inert until picked in the sidebar.
-            var canPick = !_isolate || next == _focusedSurfaceId;
+            // and its menu opens); the others are inert until picked in the sidebar. (Slices aren't isolated.)
+            var canPick = !_isolate || hit.Id == _focusedSurfaceId;
 
             // A drag on the selected region's label moves it, so that press mustn't also count as a pick.
-            if (canPick && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && _labelMoveSurfaceId == Guid.Empty)
-                selection?.Select(SetupEntitySelection.EntityKind.Surface, next);
+            if (canPick && hit.LeftClicked && _labelMoveSurfaceId == Guid.Empty)
+                SelectPicked(selection, hit.Kind, hit.Id);
 
-            // On release, and only if the button wasn't dragged — right-drag pans the canvas, and opening a
-            // menu on press would fire at the start of every pan that happens to begin over a label.
-            var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
-            if (canPick && ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !wasDraggingRight)
+            if (canPick && hit.MenuRequested)
             {
                 // Right-click selects too, so the menu always acts on what's under the cursor.
-                selection?.Select(SetupEntitySelection.EntityKind.Surface, next);
-                _labelMenuSurfaceId = next;
-                ImGui.OpenPopup(LabelMenuId);
+                SelectPicked(selection, hit.Kind, hit.Id);
+                _menuKind = hit.Kind;
+                _menuId = hit.Id;
+                ImGui.OpenPopup(PickMenuId);
             }
         }
-        else
-        {
-            _labelPickId = Guid.Empty;
-        }
 
-        if (ImGui.BeginPopup(LabelMenuId))
+        if (ImGui.BeginPopup(PickMenuId))
         {
-            var target = setup.Surfaces.Find(s => s.Id == _labelMenuSurfaceId);
-            if (target != null && selection != null)
-                SetupPanel.DrawSurfaceMenuItems(selection, setup, target, includeDelete: true);
-
+            DrawPickMenu(setup, selection);
             ImGui.EndPopup();
         }
 
-        // Ctrl+D duplicates whatever is selected, matching the menu entry.
+        // Ctrl+D duplicates the selected surface, matching the menu entry.
         if (selection != null
             && _focusedSurfaceId != Guid.Empty
             && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows)
@@ -2083,27 +2022,75 @@ internal sealed class SetupOutputView
         }
     }
 
+    private void SelectPicked(SetupEntitySelection? selection, SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        selection?.Select(kind, id);
+        // The atlas view tracks its edited slice locally too, so keep it in step with the selection.
+        if (kind == SetupEntitySelection.EntityKind.Slice)
+            _selectedSliceId = id;
+    }
+
+    private void DrawPickMenu(Setup setup, SetupEntitySelection? selection)
+    {
+        if (selection == null)
+            return;
+
+        switch (_menuKind)
+        {
+            case SetupEntitySelection.EntityKind.Surface:
+            {
+                var surface = setup.Surfaces.Find(x => x.Id == _menuId);
+                if (surface != null)
+                    SetupPanel.DrawSurfaceMenuItems(selection, setup, surface, includeDelete: true);
+
+                break;
+            }
+            case SetupEntitySelection.EntityKind.Slice:
+            {
+                var slice = setup.Slices.Find(x => x.Id == _menuId);
+                if (slice != null)
+                    SetupPanel.DrawSliceMenuItems(selection, setup, slice);
+
+                break;
+            }
+        }
+    }
+
     /// <summary>Runs a child rectangle edit through the same snapshot/undo lifecycle as a surface resize.</summary>
     private void HandleChildEdit(CanvasPointHandle.DragPhase phase, Surface parent, Surface child,
                                  Action applyDrag, Action? onStarted = null, Action? onCompleted = null)
     {
+        RunResizeDrag(phase, child, applyDrag, onStarted, onCompleted);
+    }
+
+    /// <summary>
+    /// The shared skeleton for a rectangle edit that resizes a surface: snapshot it for undo on Started, apply
+    /// the drag each frame, and commit a <see cref="ResizeSurfaceCommand"/> on Completed. The snapshot in
+    /// <see cref="_resizeOldState"/> (tagged with <see cref="_edgeDragSurfaceId"/>) is also what the morph basis
+    /// freezes against mid-drag — which is why both the surface-edge crop and the region edit route through here.
+    /// </summary>
+    private void RunResizeDrag(CanvasPointHandle.DragPhase phase, Surface target, Action onDragging,
+                               Action? onStarted = null, Action? onCompleted = null)
+    {
         switch (phase)
         {
             case CanvasPointHandle.DragPhase.Started:
-                _resizeOldState = new ResizeSurfaceCommand.State(child);
-                _edgeDragSurfaceId = child.Id;
+                _resizeOldState = new ResizeSurfaceCommand.State(target);
+                _edgeDragSurfaceId = target.Id;
                 onStarted?.Invoke();
                 break;
 
             case CanvasPointHandle.DragPhase.Dragging:
-                applyDrag();
+                if (_resizeOldState != null)
+                    onDragging();
+
                 break;
 
             case CanvasPointHandle.DragPhase.Completed:
                 if (_resizeOldState != null)
                 {
-                    UndoRedoStack.Add(new ResizeSurfaceCommand(child.Id, _resizeOldState.Value,
-                                                               new ResizeSurfaceCommand.State(child)));
+                    UndoRedoStack.Add(new ResizeSurfaceCommand(target.Id, _resizeOldState.Value,
+                                                               new ResizeSurfaceCommand.State(target)));
                     OutputSetupHandling.SaveActive();
                     _resizeOldState = null;
                     _edgeDragSurfaceId = Guid.Empty;
@@ -2154,43 +2141,18 @@ internal sealed class SetupOutputView
     private void HandleEdgeDrag(CanvasPointHandle.DragPhase phase, Surface surface, Surface.OutputMapping mapping,
                                 int edge, Vector2 viewPos, Homography rToOutput, Vector2 viewMin)
     {
-        switch (phase)
-        {
-            case CanvasPointHandle.DragPhase.Started:
-                _resizeOldState = new ResizeSurfaceCommand.State(surface);
-                _edgeDragSurfaceId = surface.Id;
-                break;
+        RunResizeDrag(phase, surface, () =>
+                                      {
+                                          // Re-base to the pre-drag rectangle first: the crop rewrites the surface's own frame, so
+                                          // an incremental edit would compound frame over frame. From the snapshot the cursor maps to
+                                          // one absolute edge position, stable however long the drag runs.
+                                          _resizeOldState!.Value.Restore(surface);
+                                          if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, out var outputToSurface))
+                                              return;
 
-            case CanvasPointHandle.DragPhase.Dragging:
-            {
-                if (_resizeOldState == null)
-                    return;
-
-                // Re-base to the pre-drag rectangle first: the crop rewrites the surface's own frame, so an
-                // incremental edit would compound frame over frame. From the snapshot the cursor maps to one
-                // absolute edge position, which is stable however long the drag runs.
-                _resizeOldState.Value.Restore(surface);
-                if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, out var outputToSurface))
-                    return;
-
-                var surfacePos = outputToSurface.TransformPoint(rToOutput.TransformPoint(viewPos + viewMin));
-                SurfaceGeometry.DragEdge(surface, edge, surfacePos, ImGui.GetIO().KeyCtrl);
-                break;
-            }
-
-            case CanvasPointHandle.DragPhase.Completed:
-                if (_resizeOldState != null)
-                {
-                    // Value already applied live during the drag.
-                    UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, _resizeOldState.Value,
-                                                               new ResizeSurfaceCommand.State(surface)));
-                    OutputSetupHandling.SaveActive();
-                    _resizeOldState = null;
-                    _edgeDragSurfaceId = Guid.Empty;
-                }
-
-                break;
-        }
+                                          var surfacePos = outputToSurface.TransformPoint(rToOutput.TransformPoint(viewPos + viewMin));
+                                          SurfaceGeometry.DragEdge(surface, edge, surfacePos, ImGui.GetIO().KeyCtrl);
+                                      });
     }
 
     private void HandleDrag(CanvasPointHandle.DragPhase phase, Guid surfaceId, Guid outputId, Vector2[] liveQuad)
@@ -2287,14 +2249,12 @@ internal sealed class SetupOutputView
 
     // Label chips collected this frame (id + screen rect) and the pick they resolve to — labels double as
     // each surface's click target, and overlapping ones cycle.
-    private readonly List<(Guid Id, Vector2 Min, Vector2 Max)> _labelTargets = [];
-    private readonly List<Guid> _labelsUnderMouse = [];
-    private Guid _labelPickId;
+    private readonly CanvasItemPicker<SetupEntitySelection.EntityKind> _picker = new();
     private Guid _labelMoveSurfaceId;
-    private Guid _labelMenuSurfaceId;
+    private SetupEntitySelection.EntityKind _menuKind;
+    private Guid _menuId;
     private Guid _selectedSliceId;
     private bool _sliceLabelDragging;
-    private Guid _sliceMenuId;
 
     // Where the focused target's slice sits once the view has zoomed fully out onto the source, in view units.
     private (Vector2 Min, Vector2 Max)? _sliceRectInView;
@@ -2319,7 +2279,7 @@ internal sealed class SetupOutputView
     // Snap candidates in the parent's space, rebuilt per drag frame; reused so dragging doesn't allocate.
     private readonly List<float> _snapXs = [];
     private readonly List<float> _snapYs = [];
-    private const string LabelMenuId = "##surfaceLabelMenu";
+    private const string PickMenuId = "##canvasPickMenu";
 
     // Scratch for a Layout child's derived quad; consumed before the next child reuses it.
     private readonly Vector2[] _childQuadBuffer = new Vector2[4];

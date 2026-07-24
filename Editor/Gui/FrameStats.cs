@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using T3.Editor.Gui.Windows.Layouts;
+﻿using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui;
@@ -14,7 +13,6 @@ internal static class FrameStats
     {
         (Current, Last) = (Last, Current);
         Current.Clear();
-        UpdatePulses();
 
         WindowLayoutChanged = HasChanged(ref _lastWindowLayoutCounter, LayoutHandling.ChangeCounter);
         SelectionChanged = ProjectView.Focused != null && 
@@ -44,64 +42,24 @@ internal static class FrameStats
     }
 
     /// <summary>
-    /// Flags an item for a cross-highlight flash, wherever it happens to be drawn. Lets one place (a hovered
-    /// list row, a search hit, a validation warning) draw attention to an item elsewhere without the two
-    /// sharing anything but its <see cref="Guid"/>. Read the amount with <see cref="GetPulse"/> and use it to
-    /// mix a highlight color toward the item's own — <c>lerp(itemColor, highlight, GetPulse(id))</c>.
-    /// <para>The amount is animated, not oscillating: a fresh pulse <b>flashes</b> to <see cref="PulseFlash"/>
-    /// and settles to <see cref="PulseHold"/>; calling it every frame (a live hover) holds there; once the
-    /// calls stop it fades to 0 within ~0.5 s. No explicit clear.</para>
+    /// Flags an item for a cross-highlight, wherever it happens to be drawn. Lets one place (a hovered list
+    /// row, a search hit) draw attention to an item elsewhere without the two sharing anything but its
+    /// <see cref="Guid"/>. Read the amount with <see cref="GetPulse"/> and mix a highlight toward the item's
+    /// own color by it — <c>lerp(itemColor, highlight, GetPulse(id))</c>. A plain on/off hover, no animation:
+    /// double-buffered like <see cref="HoveredIds"/>, so it lands one frame later (imperceptible).
     /// </summary>
     internal static void PulseItemWithId(Guid id)
     {
-        _pulsedThisFrame.Add(id);
+        Current.PulsingIds.Add(id);
     }
 
-    /// <summary>The highlight-mix amount in [0, <see cref="PulseFlash"/>] for <paramref name="id"/>; 0 if it isn't pulsing.</summary>
+    /// <summary>The highlight-mix amount for <paramref name="id"/> — <see cref="PulseMixAmount"/> while it's pulsing, else 0.</summary>
     internal static float GetPulse(Guid id)
     {
-        return _pulseValues.GetValueOrDefault(id);
+        return Last.PulsingIds.Contains(id) ? PulseMixAmount : 0f;
     }
 
-    private const float PulseFlash = 0.8f;      // the initial flash
-    private const float PulseHold = 0.4f;       // steady level while it keeps being pulsed
-    private const float PulseRatePerSecond = 0.8f; // covers the 0.4 flash→hold drop (and hold→0 fade) in ~0.5 s
-
-    private static readonly Dictionary<Guid, float> _pulseValues = new();
-    private static HashSet<Guid> _pulsedThisFrame = [];
-    private static HashSet<Guid> _pulsedLastFrame = [];
-    private static readonly List<Guid> _pulseKeys = [];
-
-    // Advances every live pulse once per frame toward its target: PulseHold while still being pulsed, 0 once
-    // it stops. A pulse that wasn't active last frame flashes to PulseFlash first, then eases down.
-    private static void UpdatePulses()
-    {
-        var step = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f) * PulseRatePerSecond;
-
-        foreach (var id in _pulsedThisFrame)
-        {
-            if (!_pulsedLastFrame.Contains(id))
-                _pulseValues[id] = PulseFlash; // rising edge
-            else if (!_pulseValues.ContainsKey(id))
-                _pulseValues[id] = PulseHold;
-        }
-
-        _pulseKeys.Clear();
-        _pulseKeys.AddRange(_pulseValues.Keys);
-        foreach (var id in _pulseKeys)
-        {
-            var target = _pulsedThisFrame.Contains(id) ? PulseHold : 0f;
-            var v = _pulseValues[id];
-            v = v > target ? MathF.Max(target, v - step) : MathF.Min(target, v + step);
-            if (v <= 0.001f && target <= 0f)
-                _pulseValues.Remove(id);
-            else
-                _pulseValues[id] = v;
-        }
-
-        (_pulsedLastFrame, _pulsedThisFrame) = (_pulsedThisFrame, _pulsedLastFrame);
-        _pulsedThisFrame.Clear();
-    }
+    private const float PulseMixAmount = 0.7f;
 
     internal sealed class Stats
     {
@@ -116,6 +74,7 @@ internal static class FrameStats
         internal bool SomethingWithTooltipHovered;
         internal bool UndoRedoTriggered;
         internal readonly HashSet<Guid> HoveredIds = [];
+        internal readonly HashSet<Guid> PulsingIds = [];
             
         /// <summary>
         /// This is reset on Frame start and can be useful for allow context menu to stay open even if a
@@ -136,6 +95,7 @@ internal static class FrameStats
             SomethingWithTooltipHovered = false;
             UndoRedoTriggered = false;
             HoveredIds.Clear();
+            PulsingIds.Clear();
         }
     }
 
