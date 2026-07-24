@@ -65,7 +65,9 @@ internal sealed class OutputSetupModeView
         if (TryGetShownEntity(out var entityKind, out var entityId))
         {
             if (entityKind == SetupEntitySelection.EntityKind.Output)
-                _outputView.Draw(entityId);
+                // Pass the selection so a surface label on the canvas can still be clicked to select it, even
+                // though the shown entity is the output itself (no surface focused).
+                _outputView.Draw(entityId, selection: _entitySelection);
             else if (entityKind == SetupEntitySelection.EntityKind.Surface && TryGetSurfaceOutput(entityId, out var surfaceOutputId))
                 _outputView.Draw(surfaceOutputId, entityId, _entitySelection); // labels on the canvas can re-pick
             else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage)

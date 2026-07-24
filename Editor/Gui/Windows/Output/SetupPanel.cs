@@ -8,6 +8,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
@@ -138,6 +139,9 @@ internal static class SetupPanel
                 break;
             case SetupEntitySelection.EntityKind.ContentSource:
                 DrawContentCard(setup, id);
+                break;
+            case SetupEntitySelection.EntityKind.Slice:
+                DrawSliceCard(setup, id);
                 break;
         }
 
@@ -308,6 +312,62 @@ internal static class SetupPanel
 
         FormInputsNarrow.DrawInts("Resolution (px)", resolution, "Comes from the source texture (read-only).", readOnly: true);
     }
+
+    private static void DrawSliceCard(Setup setup, Guid id)
+    {
+        var slice = setup.Slices.Find(s => s.Id == id);
+        if (slice == null)
+            return;
+
+        FormInputsNarrow.DrawCardHeader("Slice");
+
+        // Pixels come from the source texture; without a live source there's nothing to measure against, so
+        // fall back to the normalized rect.
+        var source = setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        var texW = 0;
+        var texH = 0;
+        if (source != null && OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content)
+            && content is { IsDisposed: false })
+        {
+            texW = content.Description.Width;
+            texH = content.Description.Height;
+        }
+
+        var uv = slice.UvRect;
+        if (texW <= 0 || texH <= 0)
+        {
+            FormInputsNarrow.DrawLabel("Position", "Connect the source op to edit in pixels.");
+            Span<float> posUv = [uv.X, uv.Y];
+            FormInputsNarrow.DrawFloats("Position (uv)", posUv, readOnly: true);
+            Span<float> sizeUv = [uv.Z - uv.X, uv.W - uv.Y];
+            FormInputsNarrow.DrawFloats("Size (uv)", sizeUv, readOnly: true);
+            return;
+        }
+
+        var widthUv = MathF.Max(uv.Z - uv.X, MinSliceSize);
+        var heightUv = MathF.Max(uv.W - uv.Y, MinSliceSize);
+
+        Span<int> position = [(int)MathF.Round(uv.X * texW), (int)MathF.Round(uv.Y * texH)];
+        if ((FormInputsNarrow.DrawInts("Position (px)", position) & InputEditStateFlags.Modified) != 0)
+        {
+            var nx = Math.Clamp(position[0] / (float)texW, 0f, 1f - widthUv);
+            var ny = Math.Clamp(position[1] / (float)texH, 0f, 1f - heightUv);
+            slice.UvRect = new Vector4(nx, ny, nx + widthUv, ny + heightUv);
+            OutputSetupHandling.SaveActive();
+        }
+
+        Span<int> size = [(int)MathF.Round(widthUv * texW), (int)MathF.Round(heightUv * texH)];
+        if ((FormInputsNarrow.DrawInts("Size (px)", size) & InputEditStateFlags.Modified) != 0)
+        {
+            var nw = Math.Clamp(size[0] / (float)texW, MinSliceSize, 1f - uv.X);
+            var nh = Math.Clamp(size[1] / (float)texH, MinSliceSize, 1f - uv.Y);
+            slice.UvRect = new Vector4(uv.X, uv.Y, uv.X + nw, uv.Y + nh);
+            OutputSetupHandling.SaveActive();
+        }
+    }
+
+    /// <summary>Smallest slice fraction — mirrors <c>SetupOutputView.MinSliceSize</c>.</summary>
+    private const float MinSliceSize = 0.01f;
 
     // Fills _referenced with the entities the currently-hovered row points at, along the
     // content → surface → output chain, so those rows can draw the Referenced state.
@@ -571,7 +631,9 @@ internal static class SetupPanel
                           onToggleExpanded: () => ToggleSourceExpanded(childId),
                           reserveExpander: true,
                           // No surface shows this source, so it steps back visually.
-                          muted: icon == null);
+                          muted: icon == null,
+                          // A source *is* its op, so renaming it renames the op (and cascades back through the sync).
+                          onRename: n => RenameContentSourceOp(childId, n));
 
             if (source == null || sliceCount == 0 || !expanded)
                 continue;
@@ -746,6 +808,21 @@ internal static class SetupPanel
             return child.ReadableName;
 
         return "content";
+    }
+
+    /// <summary>
+    /// Renames a content source by renaming its op — the source has no name of its own, it mirrors the
+    /// SendToOutput op (see <see cref="ContentSourceSync"/>). Needs a live instance to reach the graph; an
+    /// op that isn't instantiated can't be renamed from here.
+    /// </summary>
+    private static void RenameContentSourceOp(Guid childId, string newName)
+    {
+        var parent = FindSinkInstance(childId)?.Parent;
+        var parentSymbolUi = parent?.GetSymbolUi();
+        if (parentSymbolUi == null || !parentSymbolUi.ChildUis.TryGetValue(childId, out var childUi))
+            return;
+
+        UndoRedoStack.AddAndExecute(new ChangeSymbolChildNameCommand(childUi, parentSymbolUi.Symbol) { NewName = newName });
     }
 
     private static Instance? FindSinkInstance(Guid childId)
@@ -1549,6 +1626,7 @@ internal static class SetupPanel
         {
             _pendingHoveredKind = kind;
             _pendingHoveredId = id;
+            FrameStats.PulseItemWithId(id);
             if (kind == SetupEntitySelection.EntityKind.ContentSource)
                 FrameStats.AddHoveredId(id);
         }
@@ -1601,10 +1679,16 @@ internal static class SetupPanel
         // scoped by the row's PushID, so this only matches our own menu.
         var menuOpen = ImGui.IsPopupOpen("context_menu");
 
+        // Hovered from the canvas (its frame is under the cursor) but not here: pulse so the eye is drawn to
+        // the row that answers "which item is that frame?".
+        var canvasPulse = !isHovered && !isSelected && !menuOpen ? FrameStats.GetPulse(id) : 0;
+
         if (isSelected)
             dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.3f), rounding);
         else if (isHovered || menuOpen)
             dl.AddRectFilled(rowMin, rowMax, UiColors.ForegroundFull.Fade(0.2f), rounding);
+        else if (canvasPulse > 0.001f)
+            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(canvasPulse), rounding);
 
         if (!isSelected && IsReferenced(kind, id))
             dl.AddRect(rowMin, rowMax, UiColors.StatusAutomated.Fade(0.6f), rounding);

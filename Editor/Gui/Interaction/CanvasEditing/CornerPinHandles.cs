@@ -64,7 +64,16 @@ internal static class CornerPinHandles
     /// </summary>
     public static CanvasPointHandle.DragPhase Draw(Vector2[] corners, ICanvasProjection projection, in Style style, out int draggedCorner)
     {
+        return Draw(corners, projection, style, out draggedCorner, out _);
+    }
+
+    /// <summary>As <see cref="Draw(Vector2[],ICanvasProjection,in Style,out int)"/>, also reporting whether any
+    /// of the four corner handles is hovered — used to cross-highlight the quad's entity from the canvas.</summary>
+    public static CanvasPointHandle.DragPhase Draw(Vector2[] corners, ICanvasProjection projection, in Style style,
+                                                   out int draggedCorner, out bool hovered)
+    {
         draggedCorner = -1;
+        hovered = false;
         if (corners.Length != 4)
             return CanvasPointHandle.DragPhase.None;
 
@@ -98,6 +107,7 @@ internal static class CornerPinHandles
                 draggedCorner = i;
             }
 
+            hovered |= style.Editable && (ImGui.IsItemHovered() || ImGui.IsItemActive());
             ImGui.PopID();
         }
 
@@ -114,8 +124,16 @@ internal static class CornerPinHandles
     public static CanvasPointHandle.DragPhase DrawEdgeHandles(Vector2[] corners, ICanvasProjection projection, in Style style,
                                                               out int draggedEdge, out Vector2 draggedPosition)
     {
+        return DrawEdgeHandles(corners, projection, style, out draggedEdge, out draggedPosition, out _);
+    }
+
+    /// <summary>As the four-out overload, also reporting whether any edge handle is hovered.</summary>
+    public static CanvasPointHandle.DragPhase DrawEdgeHandles(Vector2[] corners, ICanvasProjection projection, in Style style,
+                                                              out int draggedEdge, out Vector2 draggedPosition, out bool hovered)
+    {
         draggedEdge = -1;
         draggedPosition = Vector2.Zero;
+        hovered = false;
         if (corners.Length != 4)
             return CanvasPointHandle.DragPhase.None;
 
@@ -137,6 +155,7 @@ internal static class CornerPinHandles
                 draggedPosition = midpoint;
             }
 
+            hovered |= style.Editable && (ImGui.IsItemHovered() || ImGui.IsItemActive());
             ImGui.PopID();
         }
 

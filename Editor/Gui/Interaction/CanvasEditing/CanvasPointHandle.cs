@@ -67,12 +67,14 @@ internal static class CanvasPointHandle
 
         var phase = DragPhase.None;
         var isHovered = false;
+        var isHeld = false;
         if (style.Editable)
         {
             var hitSize = new Vector2(radius * 3);
             ImGui.SetCursorScreenPos(screen - hitSize * 0.5f);
             ImGui.InvisibleButton("handle", hitSize);
             isHovered = ImGui.IsItemHovered();
+            isHeld = ImGui.IsItemActive(); // stays true through a paused drag, when hover/drag both read false
             if (isHovered)
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 
@@ -98,7 +100,7 @@ internal static class CanvasPointHandle
             }
         }
 
-        var isActive = isHovered || phase == DragPhase.Started || phase == DragPhase.Dragging;
+        var isActive = isHovered || isHeld;
         var color = isActive ? style.ActiveColor : style.Color;
         var outlineWidth = 1.5f * T3Ui.UiScaleFactor;
         var hasOutline = style.OutlineColor.Rgba.W > 0.01f;

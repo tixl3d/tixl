@@ -167,6 +167,12 @@ internal sealed class SetupOutputView
             var rect = slice.UvRect;
             var sliceMin = _projection.CanvasToScreen(new Vector2(rect.X, rect.Y) * textureSize);
             var sliceMax = _projection.CanvasToScreen(new Vector2(rect.Z, rect.W) * textureSize);
+
+            // Hovered from the sidebar: pulse the rect so its row and its frame read as the same thing.
+            var slicePulse = FrameStats.GetPulse(slice.Id);
+            if (slicePulse > 0.001f)
+                dl.AddRectFilled(sliceMin, sliceMax, UiColors.StatusActivated.Fade(slicePulse));
+
             dl.AddRect(sliceMin, sliceMax, UiColors.ForegroundFull.Fade(0.4f), 0, ImDrawFlags.None, 1 * T3Ui.UiScaleFactor);
 
             Span<Vector2> corners =
@@ -206,6 +212,8 @@ internal sealed class SetupOutputView
 
         if (hit != Guid.Empty && !ImGui.IsAnyItemHovered())
         {
+            FrameStats.PulseItemWithId(hit);
+
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
                 _selectedSliceId = hit;
@@ -296,6 +304,10 @@ internal sealed class SetupOutputView
                 basisSize = _resizeOldState.Value.Size;
                 pivot = _resizeOldState.Value.Pivot;
             }
+
+            // Selecting a different surface while rectified moves the basis; ease it so the whole scene turns
+            // toward the new selection instead of snapping there.
+            basisQuad = BlendBasisTransition(basisId, basisQuad, ref basisSize, ref pivot, framingFrozen);
 
             Bounds(basisQuad, out var quadMin, out var quadMax);
 
@@ -544,22 +556,43 @@ internal sealed class SetupOutputView
             for (var c = 0; c < 4; c++)
                 labelQuad[c] = _projection.CanvasToScreen(viewQuad[c]);
 
+            // Hovered from the sidebar or a handle (not itself the subject): highlight the frame so "which
+            // frame is that row?" answers itself. The outline carries it (it reads first); the fill is only a
+            // faint wash behind, and the label picks it up below.
+            var surfacePulse = isSelected ? 0 : FrameStats.GetPulse(surface.Id);
+            if (surfacePulse > 0.001f)
+                dl.AddQuadFilled(labelQuad[0], labelQuad[1], labelQuad[2], labelQuad[3],
+                                 UiColors.StatusActivated.Fade(surfacePulse * 0.2f * handleFade));
+
+            style.EdgeColor = PulseColor(style.EdgeColor, surfacePulse);
+
             var handleActive = (_dragOldQuad != null && _dragSurfaceId == surface.Id)
                                || (_resizeOldState != null && _edgeDragSurfaceId == surface.Id);
             var pointerOverLabel = !handleActive && !string.IsNullOrEmpty(surface.Name)
                                    && IsMouseOverLabel(labelQuad, surface.Name);
-            var handlesEditable = editable && !pointerOverLabel;
+            // In isolate only the focused frame is editable; the others are locked (they still snap).
+            var lockedByIsolate = _isolate && !isSelected;
+            var handlesEditable = editable && !pointerOverLabel && !lockedByIsolate;
             style.Editable = handlesEditable;
 
             // The label is drawn separately so it can be hit-tested as the surface's pick/grab area.
             style.Label = null;
-            var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out _);
+            var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out _, out var cornerHovered);
 
             // Map the (possibly edited) view-space quad back to projector space. A no-op at rest / t=0.
             for (var c = 0; c < 4; c++)
                 mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin);
 
             HandleDrag(phase, surface.Id, outputId, mappingData.Quad);
+
+            // A handle stands in for its frame: hovering one lights the frame (and its sidebar row), and
+            // grabbing one selects it — so you can't edit a frame that isn't the selected item. Isolate mode
+            // takes selection off the canvas entirely, so it doesn't fire there.
+            if (cornerHovered || phase != CanvasPointHandle.DragPhase.None)
+                FrameStats.PulseItemWithId(surface.Id);
+
+            if (phase == CanvasPointHandle.DragPhase.Started && !_isolate)
+                selection?.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
 
             // Only the selected surface shows its anchor — one origin at a time, or the canvas fills with them.
             if (isSelected)
@@ -576,7 +609,9 @@ internal sealed class SetupOutputView
 
             ImGui.PopID();
 
-            DrawEntityLabel(dl, labelQuad, surface.Id, surface.Name, isSelected, emphasis);
+            // Under isolate the other frames' labels recede further, so the focused one clearly owns the canvas.
+            var labelEmphasis = lockedByIsolate ? emphasis * 0.4f : emphasis;
+            DrawEntityLabel(dl, labelQuad, surface.Id, surface.Name, isSelected, labelEmphasis, surfacePulse);
         }
 
         if (basis != null && basisMapping != null)
@@ -1286,6 +1321,30 @@ internal sealed class SetupOutputView
         else if (!canCalibrate && _editMode == EditMode.Calibrate)
             _editMode = EditMode.Output;
 
+        // Isolate: locks the canvas to the focused frame — the others stay visible and keep snapping, but
+        // can't be selected or edited from the canvas, so you can work one frame without nudging its
+        // neighbours. Only meaningful with a frame selected, and auto-clears when that lapses. Rendered in
+        // StatusAttention so the locked state reads as deliberate rather than a glitch.
+        var canIsolate = straightCarrier != null;
+        if (!canIsolate)
+            _isolate = false;
+
+        ImGui.SameLine();
+        ImGui.BeginDisabled(!canIsolate);
+        var isoColor = _isolate ? UiColors.StatusAttention : UiColors.BackgroundButton;
+        ImGui.PushStyleColor(ImGuiCol.Button, isoColor.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, isoColor.Fade(0.85f).Rgba);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, isoColor.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.Text, (_isolate ? UiColors.ForegroundFull : UiColors.Text).Rgba);
+        ImGui.AlignTextToFramePadding();
+        if (ImGui.Button("Isolate") && canIsolate)
+            _isolate = !_isolate;
+
+        ImGui.PopStyleColor(4);
+        ImGui.EndDisabled();
+        if (canIsolate && ImGui.IsItemHovered())
+            ImGui.SetTooltip("Lock the canvas to the selected frame.\nOthers stay visible and snap, but change selection in the sidebar.");
+
         // Measuring only makes sense against the straightened surface — on the projector canvas the
         // lengths would be perspective-foreshortened and mean nothing.
         if (_editMode == EditMode.Straight && straightCarrier != null)
@@ -1486,6 +1545,56 @@ internal sealed class SetupOutputView
 
     /// <param name="keepScope">Adopt the new framing without moving the view — for a size change the user
     /// caused themselves, where a refit reads as the canvas jumping out from under them.</param>
+    /// <summary>
+    /// Eases the rectify basis from the previously focused surface to the newly selected one. Blends on a
+    /// private buffer so the stored quad is never touched, and only between two real surfaces — entering or
+    /// leaving the rectified view snaps (there's nothing to turn from), as does an active edit.
+    /// </summary>
+    private Vector2[] BlendBasisTransition(Guid basisId, Vector2[] targetQuad, ref Vector2 targetSize, ref Vector2 targetPivot, bool frozen)
+    {
+        if (basisId != _basisTransitionId)
+        {
+            if (!frozen && _basisTransitionId != Guid.Empty && basisId != Guid.Empty && _basisHasLast)
+            {
+                for (var i = 0; i < 4; i++)
+                    _basisFromQuad[i] = _basisLastQuad[i];
+
+                _basisFromSize = _basisLastSize;
+                _basisFromPivot = _basisLastPivot;
+                _basisMorph = 0f;
+            }
+            else
+            {
+                _basisMorph = 1f;
+            }
+
+            _basisTransitionId = basisId;
+        }
+
+        var resultQuad = targetQuad;
+        if (_basisMorph < 1f && !frozen)
+        {
+            var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
+            _basisMorph = MathF.Min(1f, _basisMorph + dt / _morphDuration);
+            var t = MathF.Pow(_basisMorph, _morphEaseExponent);
+            for (var i = 0; i < 4; i++)
+                _basisBlendQuad[i] = Vector2.Lerp(_basisFromQuad[i], targetQuad[i], t);
+
+            targetSize = Vector2.Lerp(_basisFromSize, targetSize, t);
+            targetPivot = Vector2.Lerp(_basisFromPivot, targetPivot, t);
+            resultQuad = _basisBlendQuad;
+        }
+
+        // Remember the resolved basis, so a transition interrupted by another selection chains from here.
+        for (var i = 0; i < 4; i++)
+            _basisLastQuad[i] = resultQuad[i];
+
+        _basisLastSize = targetSize;
+        _basisLastPivot = targetPivot;
+        _basisHasLast = true;
+        return resultQuad;
+    }
+
     private void FitToArea(Vector2 size, EditMode mode, Guid outputId, bool keepScope = false)
     {
         var key = (outputId, mode, size);
@@ -1495,8 +1604,7 @@ internal sealed class SetupOutputView
         // the instant a transition starts — the scale/offset has to animate along with everything else.
         if (_morphProgress < 1f)
         {
-            _canvas.FitAreaOnCanvas(ImRect.RectWithSize(Vector2.Zero, size));
-            var fit = _canvas.GetTargetScope();
+            var fit = FitScopeWithMargin(size);
             var eased = MathF.Pow(_morphProgress, _morphEaseExponent);
             _canvas.SetScopeInstant(new CanvasScope
                                         {
@@ -1517,9 +1625,30 @@ internal sealed class SetupOutputView
             return;
         }
 
-        _canvas.FitAreaOnCanvas(ImRect.RectWithSize(Vector2.Zero, size));
-        _canvas.SetScopeInstant(_canvas.GetTargetScope());
+        _canvas.SetScopeInstant(FitScopeWithMargin(size));
         _fitKey = key;
+    }
+
+    /// <summary>
+    /// Fits <paramref name="size"/> with a small screen-space margin so a surface that overhangs the output
+    /// (common in Content/Output views) isn't jammed against the window edge. Done by inflating the fitted area
+    /// by the margin in canvas units — which keeps <see cref="ScalableCanvas.FitAreaOnCanvas"/>'s (correct)
+    /// vertical convention, rather than the flipped one <see cref="ScalableCanvas.SetScopeToCanvasArea"/> uses.
+    /// The setup canvas only — the presented output window fills its resolution edge-to-edge, deliberately.
+    /// </summary>
+    private CanvasScope FitScopeWithMargin(Vector2 size)
+    {
+        var marginPx = 10 * T3Ui.UiScaleFactor;
+        _canvas.FitAreaOnCanvas(ImRect.RectWithSize(Vector2.Zero, size));
+
+        var scale = MathF.Abs(_canvas.GetTargetScope().Scale.X);
+        if (scale > 0.0001f)
+        {
+            var m = marginPx / scale;
+            _canvas.FitAreaOnCanvas(ImRect.RectWithSize(new Vector2(-m, -m), size + new Vector2(2 * m, 2 * m)));
+        }
+
+        return _canvas.GetTargetScope();
     }
 
     private static void AddMapping(Surface surface, OutputDefinition output, Guid outputId)
@@ -1579,11 +1708,16 @@ internal sealed class SetupOutputView
             screen[i] = _projection.CanvasToScreen(viewQuad[i]);
 
         var style = CornerPinHandles.Style.ForSurface(child.Name, editable && isFocused, isFocused, fade);
+        var childPulse = isFocused ? 0f : FrameStats.GetPulse(child.Id);
         if (isFocused)
             dl.AddQuadFilled(screen[0], screen[1], screen[2], screen[3], UiColors.StatusActivated.Fade(0.12f * fade));
+        else if (childPulse > 0.001f)
+            dl.AddQuadFilled(screen[0], screen[1], screen[2], screen[3], UiColors.StatusActivated.Fade(childPulse * 0.2f * fade));
 
+        // The outline carries the hover highlight, same as a top-level surface.
+        var edgeColor = PulseColor(style.EdgeColor, childPulse);
         for (var i = 0; i < 4; i++)
-            dl.AddLine(screen[i], screen[(i + 1) % 4], style.EdgeColor, (isFocused ? 2f : 1f) * T3Ui.UiScaleFactor);
+            dl.AddLine(screen[i], screen[(i + 1) % 4], edgeColor, (isFocused ? 2f : 1f) * T3Ui.UiScaleFactor);
 
         // A region has its own anchor, in its own space — mapped out through the parent's rectangle and pin.
         if (isFocused
@@ -1602,7 +1736,7 @@ internal sealed class SetupOutputView
         {
             // Still registered as a pick target — an unselected region has to stay clickable, which is the
             // only way to reach it while its parent is selected.
-            DrawEntityLabel(dl, screen, child.Id, child.Name, isFocused, fade);
+            DrawEntityLabel(dl, screen, child.Id, child.Name, isFocused, fade, childPulse);
             return;
         }
 
@@ -1664,7 +1798,7 @@ internal sealed class SetupOutputView
 
         ImGui.PopID();
 
-        DrawEntityLabel(dl, screen, child.Id, child.Name, isFocused, fade);
+        DrawEntityLabel(dl, screen, child.Id, child.Name, isFocused, fade, childPulse);
         HandleLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child, screen);
     }
 
@@ -1856,7 +1990,8 @@ internal sealed class SetupOutputView
     /// area. Registers the chip in <see cref="_labelTargets"/> so a click can resolve to this entity, and
     /// styles by selection/hover so the same label reads the same in the tree and on the canvas.
     /// </summary>
-    private void DrawEntityLabel(ImDrawListPtr dl, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected, float emphasis)
+    private void DrawEntityLabel(ImDrawListPtr dl, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected, float emphasis,
+                                 float pulse = 0f)
     {
         if (string.IsNullOrEmpty(name) || emphasis <= 0.01f)
             return;
@@ -1867,7 +2002,18 @@ internal sealed class SetupOutputView
         var alpha = (id == _labelPickId ? 1f : 0.9f) * emphasis;
         var text = (isSelected ? UiColors.ForegroundFull : UiColors.Text).Fade((isSelected ? 1f : 0.7f) * alpha);
         var background = (isSelected ? UiColors.StatusActivated : UiColors.BackgroundFull).Fade((isSelected ? 1f : 0.6f) * alpha);
+
+        // Pulls the chip toward the selected look while pulsing, so the label answers the hover like the outline.
+        text = PulseColor(text, pulse);
+        background = PulseColor(background, pulse);
         CornerPinHandles.DrawLabelChip(dl, rect, name, text, background);
+    }
+
+    /// <summary>Mixes <paramref name="baseColor"/> toward the selection highlight by the pulse amount (see
+    /// <see cref="FrameStats.GetPulse"/>) — the shared way a hovered frame's outline/label/fill light up.</summary>
+    private static T3.Core.DataTypes.Vector.Color PulseColor(T3.Core.DataTypes.Vector.Color baseColor, float pulse)
+    {
+        return pulse <= 0.001f ? baseColor : T3.Core.DataTypes.Vector.Color.Mix(baseColor, UiColors.StatusActivated, pulse);
     }
 
     /// <summary>
@@ -1889,15 +2035,20 @@ internal sealed class SetupOutputView
         {
             var next = _labelsUnderMouse[(_labelsUnderMouse.IndexOf(_focusedSurfaceId) + 1) % _labelsUnderMouse.Count];
             _labelPickId = next;
+            FrameStats.PulseItemWithId(next);
+
+            // Isolate takes selection off the canvas: only the focused frame's label still acts (so it can move
+            // and its menu opens); the others are inert until picked in the sidebar.
+            var canPick = !_isolate || next == _focusedSurfaceId;
 
             // A drag on the selected region's label moves it, so that press mustn't also count as a pick.
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && _labelMoveSurfaceId == Guid.Empty)
+            if (canPick && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && _labelMoveSurfaceId == Guid.Empty)
                 selection?.Select(SetupEntitySelection.EntityKind.Surface, next);
 
             // On release, and only if the button wasn't dragged — right-drag pans the canvas, and opening a
             // menu on press would fire at the start of every pan that happens to begin over a label.
             var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
-            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !wasDraggingRight)
+            if (canPick && ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !wasDraggingRight)
             {
                 // Right-click selects too, so the menu always acts on what's under the cursor.
                 selection?.Select(SetupEntitySelection.EntityKind.Surface, next);
@@ -2106,6 +2257,7 @@ internal sealed class SetupOutputView
     private readonly ScalableCanvas _canvas = new();
     private readonly ScalableCanvasProjection _projection;
     private EditMode _editMode = EditMode.Output;
+    private bool _isolate;
     private Guid _focusedSurfaceId;
     private (Guid, EditMode, Vector2) _fitKey;
 
@@ -2118,6 +2270,16 @@ internal sealed class SetupOutputView
 
     // Canvas scale/offset at the moment the morph started, so the framing eases from the user's view.
     private CanvasScope _morphFromScope;
+
+    // Basis transition: eases the rectify basis (quad/size/pivot) from the previously focused surface to the
+    // newly selected one, so switching selection in a rectified view turns the scene rather than snapping.
+    private readonly Vector2[] _basisFromQuad = new Vector2[4];
+    private readonly Vector2[] _basisLastQuad = new Vector2[4];
+    private readonly Vector2[] _basisBlendQuad = new Vector2[4];
+    private Vector2 _basisFromSize, _basisLastSize, _basisFromPivot, _basisLastPivot;
+    private Guid _basisTransitionId;
+    private float _basisMorph = 1f; // 1 = settled
+    private bool _basisHasLast;
 
     // Pre-drag quad snapshot + which surface it belongs to (so R can freeze only when the basis is dragged).
     private Vector2[]? _dragOldQuad;
