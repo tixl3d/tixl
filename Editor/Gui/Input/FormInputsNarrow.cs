@@ -14,17 +14,13 @@ namespace T3.Editor.Gui.Input;
 /// </summary>
 internal static class FormInputsNarrow
 {
-    /// <summary>Card frame with a title and a close (×) button. Returns true if × was clicked.</summary>
-    public static bool DrawCardHeader(string title)
+    /// <summary>Card title. (The close button is omitted until there's a use for it.)</summary>
+    public static void DrawCardHeader(string title)
     {
         ImGui.PushFont(Fonts.FontBold);
         ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(title);
         ImGui.PopFont();
-
-        CustomComponents.RightAlign(ImGui.GetFrameHeight());
-        var closed = CustomComponents.IconButton(Icon.Close, Vector2.Zero);
-        return closed;
     }
 
     /// <summary>A checkbox as a rounded TiXL-style button with a checkmark + a clickable label (whole element hits).</summary>

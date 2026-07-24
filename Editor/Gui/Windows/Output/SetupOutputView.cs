@@ -128,8 +128,9 @@ internal sealed class SetupOutputView
             return;
         }
 
-        if (selectedSliceId != Guid.Empty)
-            _selectedSliceId = selectedSliceId;
+        // Only a selected *slice* is framed. Selecting the source itself (no slice id) frames nothing, rather
+        // than leaving whichever slice was last selected still drawn as selected.
+        _selectedSliceId = selectedSliceId;
 
         var canvasTop = ImGui.GetCursorScreenPos();
         _canvas.UpdateCanvas(out _);
@@ -174,31 +175,61 @@ internal sealed class SetupOutputView
             _labelTargets.Add((slice.Id, sliceMin, sliceMax));
         }
 
-        // No scrim here: on an atlas every slice matters equally.
-        selected ??= setup.Slices.Find(s => s.SourceId == source.Id);
+        // No scrim here: on an atlas every slice matters equally. No fallback to the first slice either — with
+        // the source selected (and no slice), nothing is framed.
         if (selected != null)
-        {
-            _selectedSliceId = selected.Id;
             EditSlice(setup, dl, selected, selected.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
-        }
 
         dl.PopClipRect();
-        ResolveSlicePicking();
+        ResolveSlicePicking(setup, selection);
     }
 
-    /// <summary>Clicking another slice selects it, so an atlas can be walked without the sidebar.</summary>
-    private void ResolveSlicePicking()
+    private const string SliceLabelMenuId = "##sliceLabelMenu";
+
+    /// <summary>
+    /// Clicking a slice's frame label selects it (in the shared selection, so the panel and edit target follow),
+    /// and right-clicking it opens that slice's context menu — the atlas can be walked and managed without the
+    /// sidebar. Left-select and right-menu both act on the label under the cursor.
+    /// </summary>
+    private void ResolveSlicePicking(Setup setup, SetupEntitySelection? selection)
     {
         var mouse = ImGui.GetMousePos();
+        var hit = Guid.Empty;
         foreach (var (id, rectMin, rectMax) in _labelTargets)
         {
             if (mouse.X < rectMin.X || mouse.X > rectMax.X || mouse.Y < rectMin.Y || mouse.Y > rectMax.Y)
                 continue;
 
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered())
-                _selectedSliceId = id;
-
+            hit = id;
             break;
+        }
+
+        if (hit != Guid.Empty && !ImGui.IsAnyItemHovered())
+        {
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            {
+                _selectedSliceId = hit;
+                selection?.Select(SetupEntitySelection.EntityKind.Slice, hit);
+            }
+
+            // Release-without-drag, so opening the menu doesn't fight a right-drag pan of the canvas.
+            var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
+            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !wasDraggingRight)
+            {
+                _selectedSliceId = hit;
+                selection?.Select(SetupEntitySelection.EntityKind.Slice, hit);
+                _sliceMenuId = hit;
+                ImGui.OpenPopup(SliceLabelMenuId);
+            }
+        }
+
+        if (ImGui.BeginPopup(SliceLabelMenuId))
+        {
+            var slice = setup.Slices.Find(s => s.Id == _sliceMenuId);
+            if (slice != null && selection != null)
+                SetupPanel.DrawSliceMenuItems(selection, setup, slice);
+
+            ImGui.EndPopup();
         }
 
         _labelTargets.Clear();
@@ -545,7 +576,7 @@ internal sealed class SetupOutputView
 
             ImGui.PopID();
 
-            DrawSurfaceLabel(dl, labelQuad, surface.Id, surface.Name, isSelected, emphasis);
+            DrawEntityLabel(dl, labelQuad, surface.Id, surface.Name, isSelected, emphasis);
         }
 
         if (basis != null && basisMapping != null)
@@ -966,16 +997,40 @@ internal sealed class SetupOutputView
         var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true);
         var edgePhase = CornerPinHandles.DrawEdgeHandles(_sliceQuadBuffer, _projection, style, out var edge, out var edgePos);
 
-        // A slice has no label to grab, so the middle carries the move handle.
-        var centre = (min + max) * 0.5f;
-        var moveStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Circle);
-        moveStyle.OutlineColor = style.HandleOutlineColor;
-        moveStyle.Radius = 6;
+        // The slice's name label doubles as its move handle, the same as a surface — so there's no separate
+        // centre dot, and the selected slice reads its name on the canvas like everything else.
+        Span<Vector2> labelCorners = stackalloc Vector2[4];
+        labelCorners[0] = min;
+        labelCorners[1] = new Vector2(max.X, min.Y);
+        labelCorners[2] = max;
+        labelCorners[3] = new Vector2(min.X, max.Y);
+        var sliceName = SetupPanel.SliceLabel(setup, slice);
+        DrawEntityLabel(dl, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
 
-        var centreInCanvas = _projection.ScreenToCanvas(centre);
-        ImGui.PushID("move");
-        var movePhase = CanvasPointHandle.Draw(ref centreInCanvas, _projection, moveStyle);
-        ImGui.PopID();
+        // Move is detected by hand rather than an InvisibleButton, so the label stays a plain draw and the
+        // frame-label pick pass (which selects and opens the context menu) isn't blocked by a hovered item.
+        var (labelMin, labelMax) = CornerPinHandles.GetCenteredLabelRect(labelCorners, sliceName);
+        var mousePos = ImGui.GetMousePos();
+        var overLabel = mousePos.X >= labelMin.X && mousePos.X <= labelMax.X
+                        && mousePos.Y >= labelMin.Y && mousePos.Y <= labelMax.Y;
+        if (overLabel && !ImGui.IsAnyItemHovered())
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+
+        var movePhase = CanvasPointHandle.DragPhase.None;
+        if (_sliceLabelDragging)
+        {
+            movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhase.Dragging
+                                                                 : CanvasPointHandle.DragPhase.Completed;
+            if (movePhase == CanvasPointHandle.DragPhase.Completed)
+                _sliceLabelDragging = false;
+        }
+        else if (overLabel && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            _sliceLabelDragging = true;
+            movePhase = CanvasPointHandle.DragPhase.Started;
+        }
+
+        var centreInCanvas = _projection.ScreenToCanvas(mousePos);
         ImGui.PopID();
 
         // One screen pixel in UV, so snapping feels the same at any zoom.
@@ -1059,7 +1114,10 @@ internal sealed class SetupOutputView
             return;
         }
 
-        DrawSliceMenu(setup, targetId, slice, uv, min, max);
+        // The atlas (no target) reaches its slice menus through the frame-label pick pass instead, so only the
+        // surface-content view (which can "match target aspect") opens the in-rect menu here.
+        if (targetId != Guid.Empty)
+            DrawSliceMenu(setup, targetId, slice, uv, min, max);
 
         var cursorUv = (centreInCanvas - sourceOrigin) / sourceSize;
         switch (movePhase)
@@ -1544,7 +1602,7 @@ internal sealed class SetupOutputView
         {
             // Still registered as a pick target — an unselected region has to stay clickable, which is the
             // only way to reach it while its parent is selected.
-            DrawSurfaceLabel(dl, screen, child.Id, child.Name, isFocused, fade);
+            DrawEntityLabel(dl, screen, child.Id, child.Name, isFocused, fade);
             return;
         }
 
@@ -1606,7 +1664,7 @@ internal sealed class SetupOutputView
 
         ImGui.PopID();
 
-        DrawSurfaceLabel(dl, screen, child.Id, child.Name, isFocused, fade);
+        DrawEntityLabel(dl, screen, child.Id, child.Name, isFocused, fade);
         HandleLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child, screen);
     }
 
@@ -1793,7 +1851,12 @@ internal sealed class SetupOutputView
         return mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y;
     }
 
-    private void DrawSurfaceLabel(ImDrawListPtr dl, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected, float emphasis)
+    /// <summary>
+    /// A name chip centred on an entity's quad — a surface, a region, or a slice — doubling as its pick/grab
+    /// area. Registers the chip in <see cref="_labelTargets"/> so a click can resolve to this entity, and
+    /// styles by selection/hover so the same label reads the same in the tree and on the canvas.
+    /// </summary>
+    private void DrawEntityLabel(ImDrawListPtr dl, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected, float emphasis)
     {
         if (string.IsNullOrEmpty(name) || emphasis <= 0.01f)
             return;
@@ -2068,6 +2131,8 @@ internal sealed class SetupOutputView
     private Guid _labelMoveSurfaceId;
     private Guid _labelMenuSurfaceId;
     private Guid _selectedSliceId;
+    private bool _sliceLabelDragging;
+    private Guid _sliceMenuId;
 
     // Where the focused target's slice sits once the view has zoomed fully out onto the source, in view units.
     private (Vector2 Min, Vector2 Max)? _sliceRectInView;

@@ -82,7 +82,11 @@ internal static class SetupPanel
                 var bindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
                 DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Output, output.Id, output.Name, status,
                               onDelete: () => DeleteOutput(setup, machineConfig, outputId), leadingIcon: Icon.Projector,
-                              drawExtraMenuItems: bindable ? () => DrawOutputBindingSubMenu(output, machineConfig) : null);
+                              drawExtraMenuItems: bindable ? () => DrawOutputBindingSubMenu(output, machineConfig) : null,
+                              // A paused output (Send off) reads the same as a non-rendering surface.
+                              muted: !output.Send,
+                              strikeLeadingIcon: !output.Send,
+                              onRename: n => { output.Name = n; OutputSetupHandling.SaveActive(); });
             }
         }
 
@@ -91,7 +95,8 @@ internal static class SetupPanel
             for (var i = 0; i < setup.ReferenceImages.Count; i++)
             {
                 var image = setup.ReferenceImages[i];
-                DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ReferenceImage, image.Id, image.Name, null);
+                DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ReferenceImage, image.Id, image.Name, null,
+                              onRename: n => { image.Name = n; OutputSetupHandling.SaveActive(); });
             }
         }
 
@@ -117,6 +122,9 @@ internal static class SetupPanel
             return;
 
         FormInputs.AddVerticalSpace(12);
+        // Divider above the card, matching the section top edge, plus a 2px gap before the first item.
+        DrawPanelDivider();
+        FormInputs.AddVerticalSpace(2);
         ImGui.Indent(6 * T3Ui.UiScaleFactor); // 6px margin to the sidebar edges (right reserved inside the inputs).
         // Match FormInputs' field background (the default FrameBg is near-black in the panel).
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
@@ -126,7 +134,7 @@ internal static class SetupPanel
                 DrawSurfaceCard(setup, id);
                 break;
             case SetupEntitySelection.EntityKind.Output:
-                DrawOutputCard(setup, machineConfig, id);
+                DrawOutputCard(setup, id);
                 break;
             case SetupEntitySelection.EntityKind.ContentSource:
                 DrawContentCard(setup, id);
@@ -152,13 +160,7 @@ internal static class SetupPanel
             OutputSetupHandling.SaveActive();
         }
 
-        var name = surface.Name;
-        if (FormInputsNarrow.DrawString("Label", ref name, "surface name"))
-        {
-            surface.Name = name;
-            OutputSetupHandling.SaveActive();
-        }
-
+        // Name is renamed inline in the tree (double-click the row) rather than via a field here.
         var shortName = surface.ShortName;
         if (FormInputsNarrow.DrawString("Short Name", ref shortName, "Auto", "Empty = auto-abbreviated (e.g. S1)."))
         {
@@ -255,7 +257,7 @@ internal static class SetupPanel
             OutputSetupHandling.SaveActive();
     }
 
-    private static void DrawOutputCard(Setup setup, MachineConfig machineConfig, Guid id)
+    private static void DrawOutputCard(Setup setup, Guid id)
     {
         var output = setup.Outputs.Find(o => o.Id == id);
         if (output == null)
@@ -270,30 +272,10 @@ internal static class SetupPanel
             OutputSetupHandling.SaveActive();
         }
 
-        var name = output.Name;
-        if (FormInputsNarrow.DrawString("Label", ref name, "output name"))
-        {
-            output.Name = name;
-            OutputSetupHandling.SaveActive();
-        }
-
-        var binding = machineConfig.TryGetBinding(output.Id);
-        FormInputsNarrow.DrawLabel("Bound To", "Right-click the OUTPUT row to change the display binding.");
-        FormInputsNarrow.DrawListItem(binding == null ? "unbound" : $"Display {binding.DisplayIndex + 1}");
-
-        FormInputsNarrow.DrawLabel("Sending…", "Surfaces and content feeding this output.");
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            if (setup.Surfaces[i].OutputMappings.Exists(m => m.OutputId == output.Id))
-                FormInputsNarrow.DrawListItem(SurfaceShortLabel(setup.Surfaces[i]));
-        }
-
-        // Sources feeding this output, via the slices its surfaces show.
-        foreach (var source in setup.ContentSources)
-        {
-            if (FeedsOutput(setup, source, output.Id))
-                FormInputsNarrow.DrawListItem(source.Name);
-        }
+        // Name is renamed inline in the tree (double-click the row).
+        // The display binding and the list of feeders are both visible in the tree (row gutter / cross-
+        // highlight), so they don't earn card space here. Render order will move to an "Adjust render order"
+        // context-menu action + popup rather than a passive list.
     }
 
     private static void DrawContentCard(Setup setup, Guid childId)
@@ -315,9 +297,6 @@ internal static class SetupPanel
         var update = sink.GetUpdateEnabled(_sinkContext);
         if (FormInputsNarrow.DrawCheckbox("Update", ref update, "When off, freezes this content at its last frame."))
             sink.SetUpdateEnabled(update);
-
-        var name = SinkName(instance);
-        FormInputsNarrow.DrawString("Label", ref name, "content name", "The op's name — rename the SendToOutput op.", readOnly: true);
 
         Span<int> resolution = [1, 1];
         var content = sink.GetContent(_sinkContext);
@@ -418,19 +397,6 @@ internal static class SetupPanel
     }
 
     /// <summary>Whether any surface mapped to this output shows one of the source's slices.</summary>
-    private static bool FeedsOutput(Setup setup, ContentSource source, Guid outputId)
-    {
-        foreach (var surface in setup.Surfaces)
-        {
-            if (IsSliceOf(setup, surface.SliceId, source.Id)
-                && surface.OutputMappings.Exists(m => m.OutputId == outputId))
-                return true;
-        }
-
-        var output = setup.Outputs.Find(o => o.Id == outputId);
-        return output != null && IsSliceOf(setup, output.SliceId, source.Id);
-    }
-
     private static bool IsReferenced(SetupEntitySelection.EntityKind kind, Guid id)
     {
         for (var i = 0; i < _referenced.Count; i++)
@@ -636,7 +602,8 @@ internal static class SetupPanel
                       leadingIcon: Icon.Slice,
                       trailingIcon: mismatched ? Icon.Warning : null,
                       depth: 1,
-                      muted: status is "unused" or "no source");
+                      muted: status is "unused" or "no source",
+                      onRename: n => { slice.Name = n; OutputSetupHandling.SaveActive(); });
     }
 
     /// <summary>Aspect of the slice's pixels, plus whether that disagrees with what shows it.</summary>
@@ -732,6 +699,28 @@ internal static class SetupPanel
     }
 
     /// <summary>Deleting a slice clears it from anything showing it — the reference would mean nothing.</summary>
+    /// <summary>Enters inline-rename mode for a row: selects it, seeds the buffer, and focuses the field next frame.</summary>
+    private static void BeginRename(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id, string name)
+    {
+        selection.Select(kind, id);
+        _renamingId = id;
+        _renameBuffer = name ?? string.Empty;
+        _renameFocusPending = true;
+    }
+
+    /// <summary>The slice's context menu, shared by its sidebar row and its frame label on the canvas.</summary>
+    internal static void DrawSliceMenuItems(SetupEntitySelection selection, Setup setup, Slice slice)
+    {
+        CustomComponents.MenuItemsFlushLeft = true;
+        if (CustomComponents.DrawMenuItem(2, "Delete"))
+        {
+            DeleteSlice(setup, slice.Id);
+            selection.Clear();
+        }
+
+        CustomComponents.MenuItemsFlushLeft = false;
+    }
+
     private static void DeleteSlice(Setup setup, Guid sliceId)
     {
         foreach (var surface in setup.Surfaces)
@@ -1065,7 +1054,11 @@ internal static class SetupPanel
                       depth: depth,
                       isExpanded: hasChildren ? isExpanded : null,
                       onToggleExpanded: () => ToggleSurfaceExpanded(surfaceId),
-                      reserveExpander: true);
+                      reserveExpander: true,
+                      // A surface that won't render reads as unused (dimmed) and is struck through its icon.
+                      muted: !surface.Render,
+                      strikeLeadingIcon: !surface.Render,
+                      onRename: n => { surface.Name = n; OutputSetupHandling.SaveActive(); });
 
         if (!hasChildren || !isExpanded)
             return;
@@ -1410,17 +1403,22 @@ internal static class SetupPanel
     }
 
     // A collapsible section header: chevron toggle + label. Returns whether the section is expanded.
-    private static bool DrawSectionLabel(string title)
+    /// <summary>The black divider line + rounded-NW corner notch that tops each section — a shared edge so the
+    /// properties card can reuse the exact look.</summary>
+    private static void DrawPanelDivider()
     {
-        FormInputs.AddVerticalSpace(6);
-
-        // Section top edge: a black divider line + a rounded-NW corner notch, giving the section a rounded top.
         var scale = T3Ui.UiScaleFactor;
         var dl = ImGui.GetWindowDrawList();
         var edgeY = (float)Math.Round(ImGui.GetCursorScreenPos().Y);
         var winMinX = ImGui.GetWindowPos().X;
         dl.AddLine(new Vector2(winMinX, edgeY), new Vector2(winMinX + ImGui.GetWindowWidth(), edgeY), UiColors.BackgroundFull, 1 * scale);
         Icons.DrawIconAtScreenPosition(Icon.RoundingNW, new Vector2(winMinX, edgeY), dl, UiColors.BackgroundFull.Fade(0.5f));
+    }
+
+    private static bool DrawSectionLabel(string title)
+    {
+        FormInputs.AddVerticalSpace(6);
+        DrawPanelDivider();
 
         var expanded = _expandedSections.GetValueOrDefault(title, true);
 
@@ -1460,7 +1458,8 @@ internal static class SetupPanel
     private static void DrawEntityRow(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id, string name, string? status,
                                       Action? onDelete = null, Action? onRemoveFromOutput = null, Icon? leadingIcon = null, Icon? trailingIcon = null,
                                       Action? drawExtraMenuItems = null, int depth = 0, bool? isExpanded = null, Action? onToggleExpanded = null,
-                                      bool reserveExpander = false, bool muted = false)
+                                      bool reserveExpander = false, bool muted = false, bool strikeLeadingIcon = false,
+                                      Action<string>? onRename = null)
     {
         var scale = T3Ui.UiScaleFactor;
         var rounding = 4 * scale;
@@ -1498,6 +1497,20 @@ internal static class SetupPanel
         ImGui.PopStyleColor(3);
 
         var isHovered = ImGui.IsItemHovered();
+
+        var isRenaming = onRename != null && _renamingId == id;
+
+        // Double-click a renamable row to edit its name inline. Suppress the click-select handling below so the
+        // double-click doesn't also toggle/reselect while the field takes focus.
+        if (onRename != null && !isRenaming && isHovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        {
+            BeginRename(selection, kind, id, name);
+            isRenaming = true;
+            clicked = false;
+        }
+
+        if (isRenaming)
+            clicked = false;
 
         // The chevron shares the row's selectable rather than overlapping it with its own button — a click in
         // its column toggles instead of selecting.
@@ -1542,7 +1555,7 @@ internal static class SetupPanel
 
         HandleRowDragDrop(setup, kind, id);
 
-        if (onDelete != null || onRemoveFromOutput != null || drawExtraMenuItems != null)
+        if (onDelete != null || onRemoveFromOutput != null || drawExtraMenuItems != null || onRename != null)
         {
             // Right-clicking inside a multi-selection acts on the whole thing. The per-entity actions stay
             // visible but dimmed rather than vanishing, so the menu keeps its shape and it is obvious *why*
@@ -1562,6 +1575,9 @@ internal static class SetupPanel
 
                                                     ImGui.EndDisabled();
                                                     CustomComponents.MenuItemsDisabled = false;
+
+                                                    if (onRename != null && !multi && CustomComponents.DrawMenuItem(3, "Rename"))
+                                                        BeginRename(selection, kind, id, name);
 
                                                     // Deleting is the one action that reads the selection rather than the row, so it is
                                                     // offered even from a row that isn't itself deletable.
@@ -1627,13 +1643,56 @@ internal static class SetupPanel
         {
             ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
             DrawInlineIcon(leadingIcon.Value, UiColors.TextMuted.Fade(fade).Rgba);
+
+            // A disabled (non-rendered) surface is struck through its icon — visible at a glance without
+            // stealing the gutter or the name.
+            if (strikeLeadingIcon)
+            {
+                var iconMin = ImGui.GetItemRectMin();
+                var iconMax = ImGui.GetItemRectMax();
+                dl.AddLine(new Vector2(iconMin.X, iconMax.Y), new Vector2(iconMax.X, iconMin.Y),
+                           UiColors.StatusAttention, 1.5f * scale);
+            }
+
             contentX = ImGui.GetItemRectMax().X + 5 * scale;
         }
 
-        ImGui.SetCursorScreenPos(new Vector2(contentX, contentY));
-        CustomComponents.StylizedText(string.IsNullOrEmpty(name) ? "untitled" : name, Fonts.FontNormal, UiColors.Text.Fade(fade));
+        if (isRenaming)
+        {
+            // Inline editor in place of the name. Full row height, seeded and focused on the first frame;
+            // commits on Enter/blur, cancels on Escape.
+            var fieldY = (float)Math.Round(rowMin.Y + (height - ImGui.GetFrameHeight()) * 0.5f);
+            ImGui.SetCursorScreenPos(new Vector2(contentX, fieldY));
+            ImGui.SetNextItemWidth(rowMax.X - contentX - 6 * scale);
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
+            if (_renameFocusPending)
+            {
+                ImGui.SetKeyboardFocusHere();
+                _renameFocusPending = false;
+            }
 
-        if (trailingIcon.HasValue || status != null)
+            ImGui.InputText("##rename", ref _renameBuffer, 256);
+            if (ImGui.IsItemDeactivatedAfterEdit())
+            {
+                if (!string.IsNullOrWhiteSpace(_renameBuffer))
+                    onRename!(_renameBuffer.Trim());
+
+                _renamingId = Guid.Empty;
+            }
+            else if (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(ImGuiKey.Escape))
+            {
+                _renamingId = Guid.Empty;
+            }
+
+            ImGui.PopStyleColor();
+        }
+        else
+        {
+            ImGui.SetCursorScreenPos(new Vector2(contentX, contentY));
+            CustomComponents.StylizedText(string.IsNullOrEmpty(name) ? "untitled" : name, Fonts.FontNormal, UiColors.Text.Fade(fade));
+        }
+
+        if (!isRenaming && (trailingIcon.HasValue || status != null))
         {
             // Right-aligned rather than parked at a fixed fraction of the row: a long name used to run
             // straight into the gutter. Measure the group first, then lay it out from the right edge.
@@ -2024,6 +2083,9 @@ internal static class SetupPanel
     private static readonly HashSet<Guid> _collapsedSurfaces = [];
     private static readonly HashSet<Guid> _collapsedSources = [];
     private static readonly List<SelectionTarget> _deleteBuffer = [];
+    private static Guid _renamingId;
+    private static string _renameBuffer = string.Empty;
+    private static bool _renameFocusPending;
     private static SetupEntitySelection.EntityKind _primaryKind;
     private static Guid _primaryId;
 
