@@ -310,10 +310,50 @@ internal class ImGuiDx11RenderForm : RenderForm
         }
     }
 
+    /// <summary>
+    /// Per-frame safety net for a modifier whose key-up we never received. Alt+Tab between the two windows of
+    /// this same process (main ↔ viewer) fires no <c>WM_ACTIVATEAPP</c>, and the Alt release is delivered to
+    /// the shell's task switcher rather than to us — so <see cref="SyncModifiersFromSystemState"/> on focus
+    /// can't catch it (Alt is still held then), and <c>GetKeyState</c> stays stuck because no release message
+    /// is ever queued to our thread. <c>GetAsyncKeyState</c> reads the real-time hardware state instead, so a
+    /// modifier ImGui still thinks is down while it is physically up gets released here.
+    /// <para>Release-only, like <see cref="SyncModifiersFromSystemState"/>: a genuinely held modifier reads
+    /// down and is left alone.</para>
+    /// </summary>
+    public static void ReconcileStuckModifiers()
+    {
+        var io = ImGui.GetIO();
+
+        if (io.KeyAlt && !IsVkPhysicallyDown(VK_ALT))
+        {
+            io.KeyAlt = false;
+            io.AddKeyEvent(ImGuiKey.ModAlt, false);
+            KeyHandler.SetKeyUp(Key.Alt);
+        }
+
+        if (io.KeyCtrl && !IsVkPhysicallyDown(VK_CONTROL))
+        {
+            io.KeyCtrl = false;
+            io.AddKeyEvent(ImGuiKey.ModCtrl, false);
+            KeyHandler.SetKeyUp(Key.CtrlKey);
+        }
+
+        if (io.KeyShift && !IsVkPhysicallyDown(VK_SHIFT))
+        {
+            io.KeyShift = false;
+            io.AddKeyEvent(ImGuiKey.ModShift, false);
+            KeyHandler.SetKeyUp(Key.ShiftKey);
+        }
+    }
+
     private static bool IsVkDown(int vkCode) => (GetKeyState(vkCode) & 0x8000) != 0;
+    private static bool IsVkPhysicallyDown(int vkCode) => (GetAsyncKeyState(vkCode) & 0x8000) != 0;
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern short GetKeyState(int nVirtKey);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int nVirtKey);
 
     /// <summary>
     /// Applies the cursor ImGui requested this frame right away. Windows only sends

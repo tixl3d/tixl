@@ -141,6 +141,10 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 Program.NewImGuiLayoutDefinition = string.Empty;
             }
 
+            // Release any modifier whose key-up we never saw (Alt+Tab between the main and viewer windows is
+            // the usual culprit) before it can strand canvas interaction for the whole frame.
+            ImGuiDx11RenderForm.ReconcileStuckModifiers();
+
             ImGui.NewFrame();
 
             // Drive projection-mapping outputs: renders each bound output's composite every frame
