@@ -260,7 +260,14 @@ internal sealed partial class SetupOutputView
                 // which a steep rectify sends toward infinity. Interpolated from the full canvas at t=0.
                 // The surround shrinks to nothing as we go on to Content, so the surface itself fills the view.
                 Bounds(interp, out var focusMin, out var focusMax);
-                var m = (focusMax - focusMin) * _straightSurroundFactor * (1f - toContent);
+
+                // Uniform surround from the larger dimension, not per-axis: a thin surface (a beam, a strip) has
+                // a near-zero short axis, and a per-axis margin there collapses the frame onto the surface,
+                // clipping the neighbouring surfaces' content out of the warped composite. Off the long side it
+                // stays generous on both.
+                var focusSpan = focusMax - focusMin;
+                var surround = MathF.Max(focusSpan.X, focusSpan.Y) * _straightSurroundFactor * (1f - toContent);
+                var m = new Vector2(surround);
                 var framedMin = focusMin - m;
                 var framedMax = focusMax + m;
 

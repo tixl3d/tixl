@@ -85,7 +85,10 @@ internal sealed class OutputSetupModeView
             if (focusedInstance is not IOutputSink || !TryGetSinkOutput(focusedInstance, out var sinkOutputId))
                 return false;
 
-            _outputView.Draw(sinkOutputId);
+            // Pass the selection here too: with nothing selected in the sidebar (e.g. after ctrl-clicking the
+            // selected output away) this is the path that draws the canvas, and a frame label still has to be
+            // clickable to select its surface.
+            _outputView.Draw(sinkOutputId, selection: _entitySelection);
         }
 
         return true;
