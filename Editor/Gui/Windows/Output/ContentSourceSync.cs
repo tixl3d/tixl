@@ -34,6 +34,7 @@ internal static class ContentSourceSync
                                          {
                                              SymbolChildId = childId,
                                              Name = ReadName(instance),
+                                             IsRenamed = HasCustomName(instance),
                                          });
             changed = true;
         }
@@ -45,10 +46,12 @@ internal static class ContentSourceSync
                 continue;
 
             var name = ReadName(instance!);
-            if (string.IsNullOrEmpty(name) || name == source.Name)
+            var renamed = HasCustomName(instance!);
+            if ((string.IsNullOrEmpty(name) || name == source.Name) && renamed == source.IsRenamed)
                 continue;
 
             source.Name = name;
+            source.IsRenamed = renamed;
             changed = true;
         }
 
@@ -147,5 +150,13 @@ internal static class ContentSourceSync
         var childUi = instance.Parent?.GetSymbolUi().ChildUis.GetValueOrDefault(instance.SymbolChildId);
         var name = childUi?.SymbolChild.Name;
         return string.IsNullOrEmpty(name) ? instance.Symbol.Name : name!;
+    }
+
+    /// <summary>The op carries a name of its own when its <see cref="SymbolChild"/> name is set; otherwise it
+    /// only shows its symbol's default. This is what distinguishes "Slice N" from "{op}.N".</summary>
+    private static bool HasCustomName(Instance instance)
+    {
+        var childUi = instance.Parent?.GetSymbolUi().ChildUis.GetValueOrDefault(instance.SymbolChildId);
+        return !string.IsNullOrEmpty(childUi?.SymbolChild.Name);
     }
 }

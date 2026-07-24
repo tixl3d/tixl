@@ -459,6 +459,7 @@ internal static class SetupPanel
 
         var accepts = kind == SetupEntitySelection.EntityKind.Output
                           ? dragKind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
+                                     or SetupEntitySelection.EntityKind.Slice
                           : dragKind is SetupEntitySelection.EntityKind.ContentSource or SetupEntitySelection.EntityKind.Slice;
         if (!accepts || dragId == id)
             return;
@@ -492,6 +493,33 @@ internal static class SetupPanel
             {
                 surface.OutputMappings.Add(CreateDefaultMapping(output));
                 OutputSetupHandling.SaveActive();
+            }
+
+            return;
+        }
+
+        // Dropping a source or slice straight onto an output shows it full-frame (the direct path, no surface
+        // or corner-pin) — an output names a slice through OutputDefinition.SliceId.
+        if (targetKind == SetupEntitySelection.EntityKind.Output
+            && dragKind is SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.ContentSource)
+        {
+            var output = setup.Outputs.Find(o => o.Id == targetId);
+            if (output == null)
+                return;
+
+            if (dragKind == SetupEntitySelection.EntityKind.Slice && setup.Slices.Exists(s => s.Id == dragId))
+            {
+                output.SliceId = dragId;
+                OutputSetupHandling.SaveActive();
+            }
+            else if (dragKind == SetupEntitySelection.EntityKind.ContentSource)
+            {
+                var source = setup.ContentSources.Find(c => c.SymbolChildId == dragId);
+                if (source != null)
+                {
+                    output.SliceId = EnsureSlice(setup, source).Id;
+                    OutputSetupHandling.SaveActive();
+                }
             }
 
             return;
@@ -603,7 +631,7 @@ internal static class SetupPanel
         var status = DescribeSliceStatus(setup, slice, out var mismatched);
 
         DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Slice, sliceId,
-                      string.IsNullOrEmpty(slice.Name) ? "slice" : slice.Name, status,
+                      SliceLabel(setup, slice), status,
                       onDelete: () => DeleteSlice(setup, sliceId),
                       leadingIcon: Icon.Slice,
                       trailingIcon: mismatched ? Icon.Warning : null,
@@ -667,16 +695,40 @@ internal static class SetupPanel
 
     private static void AddSlice(SetupEntitySelection selection, Setup setup, ContentSource source)
     {
-        var count = setup.Slices.FindAll(x => x.SourceId == source.Id).Count;
-        var slice = new Slice
-                        {
-                            SourceId = source.Id,
-                            Name = count == 0 ? source.Name : $"Slice {count + 1}",
-                        };
+        // Left unnamed: the label is derived from the source, so it stays right when the op is later renamed.
+        var slice = new Slice { SourceId = source.Id };
 
         setup.Slices.Add(slice);
         selection.Select(SetupEntitySelection.EntityKind.Slice, slice.Id);
         OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>
+    /// A slice's display name: a name the user typed if there is one, otherwise a default derived from its
+    /// source. Unnamed sources give "Slice N"; a renamed source gives "{name}.N", so naming the op renames
+    /// every one of its auto-named slices at once. N is the slice's position among its source's slices.
+    /// </summary>
+    internal static string SliceLabel(Setup setup, Slice slice)
+    {
+        if (!string.IsNullOrEmpty(slice.Name))
+            return slice.Name;
+
+        var ordinal = 1;
+        foreach (var other in setup.Slices)
+        {
+            if (other.SourceId != slice.SourceId)
+                continue;
+
+            if (other.Id == slice.Id)
+                break;
+
+            ordinal++;
+        }
+
+        var source = setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        return source is { IsRenamed: true } && !string.IsNullOrEmpty(source.Name)
+                   ? $"{source.Name}.{ordinal}"
+                   : $"Slice {ordinal}";
     }
 
     /// <summary>Deleting a slice clears it from anything showing it — the reference would mean nothing.</summary>
@@ -956,7 +1008,8 @@ internal static class SetupPanel
         if (existing != null)
             return existing;
 
-        var slice = new Slice { SourceId = source.Id, Name = source.Name };
+        // Unnamed: its label is derived from the source (see SliceLabel), so renaming the op renames it too.
+        var slice = new Slice { SourceId = source.Id };
         setup.Slices.Add(slice);
         return slice;
     }
@@ -1498,6 +1551,8 @@ internal static class SetupPanel
             var deletable = multi ? CountDeletable(selection) : 0;
             CustomComponents.ContextMenuForItem(() =>
                                                 {
+                                                    // These row menus carry no toggles or icons, so their labels sit flush left.
+                                                    CustomComponents.MenuItemsFlushLeft = true;
                                                     CustomComponents.MenuItemsDisabled = multi;
                                                     ImGui.BeginDisabled(multi);
                                                     drawExtraMenuItems?.Invoke();
@@ -1519,13 +1574,20 @@ internal static class SetupPanel
                                                     {
                                                         onDelete();
                                                     }
+
+                                                    CustomComponents.MenuItemsFlushLeft = false;
                                                 },
                                                 null);
         }
 
+        // While this row's context menu is open the pointer sits on the popup, not the row, so keep the row
+        // lit anyway — otherwise it's no longer obvious which entity the menu belongs to. The popup id is
+        // scoped by the row's PushID, so this only matches our own menu.
+        var menuOpen = ImGui.IsPopupOpen("context_menu");
+
         if (isSelected)
             dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.3f), rounding);
-        else if (isHovered)
+        else if (isHovered || menuOpen)
             dl.AddRectFilled(rowMin, rowMax, UiColors.ForegroundFull.Fade(0.2f), rounding);
 
         if (!isSelected && IsReferenced(kind, id))

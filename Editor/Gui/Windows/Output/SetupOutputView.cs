@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.Logging;
 using T3.Core.Output;
 using T3.Core.Resource;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
@@ -22,11 +23,14 @@ namespace T3.Editor.Gui.Windows.Output;
 /// </summary>
 internal sealed class SetupOutputView
 {
+    // Declaration order is the tab order in the segmented control — source-to-sink: lay out content, rectify
+    // the surface, view the projector composite, calibrate the projector. The morph axis and every switch key
+    // off the enum values, not their order, so this is a purely visual arrangement.
     private enum EditMode
     {
-        Output,
-        Straight,
         Content,
+        Straight,
+        Output,
         Calibrate,
     }
 
@@ -88,7 +92,12 @@ internal sealed class SetupOutputView
             _viewMorph = _morphProgress >= 1f ? _morphTarget : _morphFrom + (_morphTarget - _morphFrom) * eased;
         }
 
+        // Clip the canvas to the region below the toolbar: it draws straight to the window draw list, so
+        // without this the pan/zoom transform lets content spill up over the header.
+        var canvasTop = ImGui.GetCursorScreenPos();
         _canvas.UpdateCanvas(out _);
+        var dl = ImGui.GetWindowDrawList();
+        dl.PushClipRect(canvasTop, ImGui.GetWindowPos() + ImGui.GetWindowSize(), true);
 
         if (_editMode == EditMode.Calibrate)
             DrawCalibrationMarkers(output, outputId);
@@ -96,6 +105,8 @@ internal sealed class SetupOutputView
             DrawContentCanvas(outputId); // no surface to frame onto — plain content preview
         else
             DrawOutputCanvas(setup, output, outputId, selection); // Original / Straight / Content, morphed by _viewMorph
+
+        dl.PopClipRect();
     }
 
     /// <summary>
@@ -120,12 +131,15 @@ internal sealed class SetupOutputView
         if (selectedSliceId != Guid.Empty)
             _selectedSliceId = selectedSliceId;
 
+        var canvasTop = ImGui.GetCursorScreenPos();
         _canvas.UpdateCanvas(out _);
 
         var textureSize = new Vector2(Math.Max(1, content.Description.Width), Math.Max(1, content.Description.Height));
         FitToArea(textureSize, EditMode.Content, contentChildId);
 
         var dl = ImGui.GetWindowDrawList();
+        // Clip to the region below the toolbar — the canvas draws to the window list and would spill up over it.
+        dl.PushClipRect(canvasTop, ImGui.GetWindowPos() + ImGui.GetWindowSize(), true);
         var min = _projection.CanvasToScreen(Vector2.Zero);
         var max = _projection.CanvasToScreen(textureSize);
         dl.AddRectFilled(min, max, UiColors.BackgroundFull.Fade(0.4f));
@@ -154,12 +168,9 @@ internal sealed class SetupOutputView
             var sliceMax = _projection.CanvasToScreen(new Vector2(rect.Z, rect.W) * textureSize);
             dl.AddRect(sliceMin, sliceMax, UiColors.ForegroundFull.Fade(0.4f), 0, ImDrawFlags.None, 1 * T3Ui.UiScaleFactor);
 
-            if (string.IsNullOrEmpty(slice.Name))
-                continue;
-
             Span<Vector2> corners =
                 [sliceMin, new Vector2(sliceMax.X, sliceMin.Y), sliceMax, new Vector2(sliceMin.X, sliceMax.Y)];
-            CornerPinHandles.DrawCenteredLabel(dl, corners, slice.Name, UiColors.Text.Fade(0.7f), UiColors.BackgroundFull.Fade(0.6f));
+            CornerPinHandles.DrawCenteredLabel(dl, corners, SetupPanel.SliceLabel(setup, slice), UiColors.Text.Fade(0.7f), UiColors.BackgroundFull.Fade(0.6f));
             _labelTargets.Add((slice.Id, sliceMin, sliceMax));
         }
 
@@ -171,6 +182,7 @@ internal sealed class SetupOutputView
             EditSlice(setup, dl, selected, selected.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
         }
 
+        dl.PopClipRect();
         ResolveSlicePicking();
     }
 
@@ -494,6 +506,20 @@ internal sealed class SetupOutputView
             var style = CornerPinHandles.Style.ForSurface(surface.Name, editable, isSelected, emphasis);
             style.DrawChecker = !hasContent;
 
+            // The label doubles as the surface's grab area, and it sits over the middle where an edge or corner
+            // handle can land under it. Grabbing the label was the intent, so while the pointer rests on it the
+            // handles go non-interactive — unless a handle drag is already live, which must not be dropped just
+            // because the cursor passed over the label.
+            for (var c = 0; c < 4; c++)
+                labelQuad[c] = _projection.CanvasToScreen(viewQuad[c]);
+
+            var handleActive = (_dragOldQuad != null && _dragSurfaceId == surface.Id)
+                               || (_resizeOldState != null && _edgeDragSurfaceId == surface.Id);
+            var pointerOverLabel = !handleActive && !string.IsNullOrEmpty(surface.Name)
+                                   && IsMouseOverLabel(labelQuad, surface.Name);
+            var handlesEditable = editable && !pointerOverLabel;
+            style.Editable = handlesEditable;
+
             // The label is drawn separately so it can be hit-tested as the surface's pick/grab area.
             style.Label = null;
             var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out _);
@@ -510,7 +536,7 @@ internal sealed class SetupOutputView
 
             // Edge handles belong to the focused surface only — they're contextual, and four extra dots on
             // every quad would drown the canvas. A corner moves freely (perspective); an edge crops.
-            if (editable && surface.Id == _focusedSurfaceId)
+            if (handlesEditable && surface.Id == _focusedSurfaceId)
             {
                 var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
                 if (edge >= 0)
@@ -518,9 +544,6 @@ internal sealed class SetupOutputView
             }
 
             ImGui.PopID();
-
-            for (var c = 0; c < 4; c++)
-                labelQuad[c] = _projection.CanvasToScreen(viewQuad[c]);
 
             DrawSurfaceLabel(dl, labelQuad, surface.Id, surface.Name, isSelected, emphasis);
         }
@@ -1183,77 +1206,70 @@ internal sealed class SetupOutputView
                                       Fonts.FontSmall, UiColors.TextMuted);
 
         ImGui.SameLine();
-        if (CustomComponents.StateButton("Output", ModeButtonState(EditMode.Output)))
-            _editMode = EditMode.Output;
 
-        // Straightening rectifies a single surface, so only offer it when the focused entity resolves to one
-        // mapped to this output — for a Layout child that's its parent.
+        // The four modes as one segmented control. Straightening rectifies a single surface, so it is only
+        // usable when the focused entity resolves to one mapped to this output (for a Layout child, its
+        // parent); calibration only for a projector/display. Those segments show disabled rather than
+        // vanishing, so the toolbar keeps its shape.
         var straightCarrier = SurfaceGeometry.FindCarrier(setup, _focusedSurfaceId, outputId);
-        if (straightCarrier != null)
-        {
-            ImGui.SameLine();
-            if (CustomComponents.StateButton("Straight", ModeButtonState(EditMode.Straight)))
-                _editMode = EditMode.Straight;
+        var canCalibrate = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
+        FormInputs.SegmentedButton(ref _editMode,
+                                   isItemDisabled: mode => mode switch
+                                                               {
+                                                                   EditMode.Straight => straightCarrier == null,
+                                                                   EditMode.Calibrate => !canCalibrate,
+                                                                   _ => false,
+                                                               });
 
-            // Measuring only makes sense against the straightened surface — on the projector canvas the
-            // lengths would be perspective-foreshortened and mean nothing.
-            if (_editMode == EditMode.Straight)
-            {
-                ImGui.SameLine();
-                if (CustomComponents.StateButton("+ Line", _measureArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
-                    _measureArmed = !_measureArmed;
-
-                // Nothing else on the canvas says a drag is now expected, and the tool disarms after one
-                // line — so say what to do with it while it is armed.
-                if (_measureArmed)
-                {
-                    ImGui.SameLine();
-                    CustomComponents.StylizedText("drag along something straight in reality", Fonts.FontSmall, UiColors.StatusAnimated);
-                }
-
-                // Straighten first (it fixes the keystone but cannot know the aspect), lengths second. Both
-                // stay visible and disabled rather than appearing once they happen to qualify — a button that
-                // isn't there yet can't explain what it wants.
-                var canStraighten = straightCarrier.Annotations.Count >= MinLinesToStraighten;
-                ImGui.SameLine();
-                ImGui.BeginDisabled(!canStraighten);
-                if (ImGui.SmallButton("Straighten") && canStraighten)
-                    TryStraightenFromLines(straightCarrier, outputId);
-
-                ImGui.EndDisabled();
-                if (!canStraighten && ImGui.IsItemHovered())
-                    ImGui.SetTooltip($"Trace at least {MinLinesToStraighten} reference lines along features that are straight in reality.");
-
-                var canApply = straightCarrier.Annotations.Exists(a => a.LengthInMeters > 0);
-                ImGui.SameLine();
-                ImGui.BeginDisabled(!canApply);
-                if (ImGui.SmallButton("Apply lengths") && canApply)
-                    TryApplyLengths(setup, straightCarrier);
-
-                ImGui.EndDisabled();
-                if (!canApply && ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Double-click a line to give it a real length first.");
-            }
-            else
-            {
-                _measureArmed = false;
-            }
-        }
-        else if (_editMode == EditMode.Straight)
-        {
-            // Focus moved off the surface — fall back so we don't sit in a mode with no button to leave it.
+        // A disabled segment can't be clicked away, so a mode left selected after its precondition lapses
+        // (focus moved off the surface, output kind changed) is reset here instead.
+        if (straightCarrier == null && _editMode == EditMode.Straight)
             _editMode = EditMode.Output;
-        }
+        else if (!canCalibrate && _editMode == EditMode.Calibrate)
+            _editMode = EditMode.Output;
 
-        ImGui.SameLine();
-        if (CustomComponents.StateButton("Content", ModeButtonState(EditMode.Content)))
-            _editMode = EditMode.Content;
-
-        if (output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display)
+        // Measuring only makes sense against the straightened surface — on the projector canvas the
+        // lengths would be perspective-foreshortened and mean nothing.
+        if (_editMode == EditMode.Straight && straightCarrier != null)
         {
             ImGui.SameLine();
-            if (CustomComponents.StateButton("Calibrate", ModeButtonState(EditMode.Calibrate)))
-                _editMode = EditMode.Calibrate;
+            if (CustomComponents.StateButton("+ Line", _measureArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+                _measureArmed = !_measureArmed;
+
+            // Nothing else on the canvas says a drag is now expected, and the tool disarms after one
+            // line — so say what to do with it while it is armed.
+            if (_measureArmed)
+            {
+                ImGui.SameLine();
+                CustomComponents.StylizedText("drag along something straight in reality", Fonts.FontSmall, UiColors.StatusAnimated);
+            }
+
+            // Straighten first (it fixes the keystone but cannot know the aspect), lengths second. Both
+            // stay visible and disabled rather than appearing once they happen to qualify — a button that
+            // isn't there yet can't explain what it wants.
+            var canStraighten = straightCarrier.Annotations.Count >= MinLinesToStraighten;
+            ImGui.SameLine();
+            ImGui.BeginDisabled(!canStraighten);
+            if (ImGui.SmallButton("Straighten") && canStraighten)
+                TryStraightenFromLines(straightCarrier, outputId);
+
+            ImGui.EndDisabled();
+            if (!canStraighten && ImGui.IsItemHovered())
+                ImGui.SetTooltip($"Trace at least {MinLinesToStraighten} reference lines along features that are straight in reality.");
+
+            var canApply = straightCarrier.Annotations.Exists(a => a.LengthInMeters > 0);
+            ImGui.SameLine();
+            ImGui.BeginDisabled(!canApply);
+            if (ImGui.SmallButton("Apply lengths") && canApply)
+                TryApplyLengths(setup, straightCarrier);
+
+            ImGui.EndDisabled();
+            if (!canApply && ImGui.IsItemHovered())
+                ImGui.SetTooltip("Double-click a line to give it a real length first.");
+        }
+        else
+        {
+            _measureArmed = false;
         }
 
         for (var i = 0; i < setup.Surfaces.Count; i++)
@@ -1409,10 +1425,6 @@ internal sealed class SetupOutputView
         }
     }
 
-    private CustomComponents.ButtonStates ModeButtonState(EditMode mode)
-    {
-        return _editMode == mode ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default;
-    }
 
     /// <param name="keepScope">Adopt the new framing without moving the view — for a size change the user
     /// caused themselves, where a refit reads as the canvas jumping out from under them.</param>
@@ -1537,6 +1549,12 @@ internal sealed class SetupOutputView
         }
 
         ImGui.PushID(child.Id.GetHashCode());
+
+        // The label doubles as this region's move handle, so it wins over the edge handles beneath it — unless
+        // an edge crop is already live, which the cursor passing over the label mustn't drop.
+        var edgeActive = _resizeOldState != null && _edgeDragSurfaceId == child.Id && _labelMoveSurfaceId == Guid.Empty;
+        if (!edgeActive && !string.IsNullOrEmpty(child.Name) && IsMouseOverLabel(screen, child.Name))
+            style.Editable = false;
 
         var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
         if (edge >= 0)
@@ -1766,6 +1784,15 @@ internal sealed class SetupOutputView
     /// Draws a surface's label chip and registers it as a pick target. The label is the surface's grab area —
     /// hovering lifts it, clicking selects, and for a selected region dragging it moves the region.
     /// </summary>
+    /// <summary>Whether the cursor is on a surface's centre label chip — its grab area, which takes priority
+    /// over any handle beneath it.</summary>
+    private static bool IsMouseOverLabel(ReadOnlySpan<Vector2> screenQuad, string name)
+    {
+        var (min, max) = CornerPinHandles.GetCenteredLabelRect(screenQuad, name);
+        var mouse = ImGui.GetMousePos();
+        return mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y;
+    }
+
     private void DrawSurfaceLabel(ImDrawListPtr dl, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected, float emphasis)
     {
         if (string.IsNullOrEmpty(name) || emphasis <= 0.01f)

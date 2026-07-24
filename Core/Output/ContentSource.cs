@@ -23,12 +23,19 @@ public sealed class ContentSource
     /// <summary>Mirrors the op's name, so the setup still reads sensibly while nothing is instantiated.</summary>
     public string Name = string.Empty;
 
+    /// <summary>Whether the op carries a name the user gave it, rather than falling back to its symbol's
+    /// default. Auto-named slices read as "Slice N" until their source is named, then as "{Name}.N".</summary>
+    public bool IsRenamed;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
         writer.WriteObject("Id", Id);
         writer.WriteObject("SymbolChildId", SymbolChildId);
         writer.WriteString("Name", Name);
+        if (IsRenamed)
+            writer.WriteValue("IsRenamed", IsRenamed);
+
         writer.WriteEndObject();
     }
 
@@ -39,6 +46,7 @@ public sealed class ContentSource
                        Id = OutputJson.ReadGuid(token["Id"]),
                        SymbolChildId = OutputJson.ReadGuid(token["SymbolChildId"]),
                        Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
+                       IsRenamed = token.ReadValueSafe("IsRenamed", false),
                    };
     }
 }
