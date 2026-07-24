@@ -211,12 +211,21 @@ internal static partial class CustomComponents
         // No PushID here: when the submenu opens, BeginMenu switches to the child window before we could
         // pop, so a PushID/PopID pair would straddle two per-window id stacks ("Missing PopID()"). The
         // label (plus ##id for uniqueness) is the menu's id; the style-color stack is global, so its pops are safe.
+        // We draw the label indented by the checkmark column and put the chevron in a column flush right, but
+        // ImGui sizes BeginMenu from the bare label and knows about neither — so on a narrow popup the label
+        // runs under the chevron. Pad the (hidden) sizing label with spaces to reserve both columns, mirroring
+        // the explicit width DrawMenuItem computes.
+        var spaceWidth = ImGui.CalcTextSize(" ").X;
+        var reserve = (reserveCheckmarkColumn ? iconSlotWidth : 0f) + iconSlotWidth;
+        var padCount = spaceWidth > 0.01f ? (int)MathF.Ceiling(reserve / spaceWidth) : 0;
+        var sizingLabel = label + new string(' ', padCount);
+
         var transparent = UiColors.ForegroundFull.Fade(0f).Rgba;
         ImGui.PushStyleColor(ImGuiCol.Text, transparent);
         ImGui.PushStyleColor(ImGuiCol.Header, transparent);
         ImGui.PushStyleColor(ImGuiCol.HeaderHovered, transparent);
         ImGui.PushStyleColor(ImGuiCol.HeaderActive, transparent);
-        var isOpen = ImGui.BeginMenu($"{label}##{id}", isEnabled);
+        var isOpen = ImGui.BeginMenu($"{sizingLabel}##{id}", isEnabled);
         ImGui.PopStyleColor(4);
 
         if (isEnabled && (isOpen || ImGui.IsItemHovered()))
