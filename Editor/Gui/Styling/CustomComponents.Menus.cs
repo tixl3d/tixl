@@ -94,11 +94,24 @@ internal static partial class CustomComponents
     /// </summary>
     public static bool MenuItemsDisabled;
 
+    /// <summary>
+    /// Drops the left checkmark and icon columns for a menu that uses neither, so its labels sit flush left
+    /// instead of behind empty gutters. Set it around such a menu and clear it afterwards; it is not scoped
+    /// for you. Only for menus with no toggles and no icons — an item that draws an icon while this is set
+    /// would collide with its own label.
+    /// </summary>
+    public static bool MenuItemsFlushLeft;
+
     public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true,
                                     bool reserveCheckmarkColumn = true, bool reserveIconColumn = true,
                                     ButtonStates state = ButtonStates.Default)
     {
         isEnabled &= !MenuItemsDisabled;
+        if (MenuItemsFlushLeft)
+        {
+            reserveCheckmarkColumn = false;
+            reserveIconColumn = false;
+        }
         var h = ImGui.GetFrameHeight();
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
 
@@ -194,6 +207,9 @@ internal static partial class CustomComponents
     /// </summary>
     public static bool DrawSubMenu(int id, string label, bool isEnabled = true, bool reserveCheckmarkColumn = true)
     {
+        if (MenuItemsFlushLeft)
+            reserveCheckmarkColumn = false;
+
         var iconSlotWidth = Icons.FontSize * 1.4f;
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
         // Match DrawMenuItem's label start (checkmark column reserved, no icon column) so headers align with rows.
