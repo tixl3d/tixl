@@ -29,7 +29,7 @@ internal static class FormInputsNarrow
         var scale = T3Ui.UiScaleFactor;
         var dl = ImGui.GetWindowDrawList();
         var pos = ImGui.GetCursorScreenPos();
-        var boxSize = ImGui.GetFrameHeight();
+        var boxSize = 19 * scale;
         var labelSize = ImGui.CalcTextSize(label);
         var gap = 6 * scale;
 
@@ -38,25 +38,15 @@ internal static class FormInputsNarrow
             value = !value;
 
         var boxMax = pos + new Vector2(boxSize, boxSize);
-        var bg = value
-                     ? UiColors.StatusActivated
-                     : (ImGui.IsItemHovered() ? UiColors.BackgroundHover : UiColors.BackgroundButton);
+        var bg = ImGui.IsItemHovered() ? UiColors.BackgroundHover : UiColors.BackgroundButton;
         dl.AddRectFilled(pos, boxMax, bg, 4 * scale);
         if (value)
-            Icons.DrawIconAtScreenPosition(Icon.Checkmark, pos + new Vector2(boxSize * 0.15f), new Vector2(boxSize * 0.7f), dl, UiColors.ForegroundFull);
+            Icons.DrawIconAtScreenPosition(Icon.Checkmark, pos + new Vector2(boxSize * 0.15f), new Vector2(boxSize * 0.7f), dl, UiColors.StatusActivated);
 
         dl.AddText(new Vector2(boxMax.X + gap, pos.Y + (boxSize - labelSize.Y) * 0.5f), UiColors.Text, label);
 
         DrawHelpIcon(tooltip);
         return clicked;
-    }
-
-    public static bool DrawString(string label, ref string value, string hint = "", string? tooltip = null, bool readOnly = false)
-    {
-        DrawLabel(label, tooltip);
-        ImGui.SetNextItemWidth(-RightMargin * T3Ui.UiScaleFactor);
-        var flags = readOnly ? ImGuiInputTextFlags.ReadOnly : ImGuiInputTextFlags.None;
-        return ImGui.InputTextWithHint("##" + label, hint, ref value, 256, flags);
     }
 
     /// <summary>Row of float fields using the editor's custom drag-edit (range indicator, consistent style).
@@ -70,9 +60,10 @@ internal static class FormInputsNarrow
         DrawLabel(label, tooltip);
         ImGui.PushID(label);
         var result = InputEditStateFlags.Nothing;
-        var spacing = 4 * T3Ui.UiScaleFactor;
+        var spacing = FieldGroupSpacing * T3Ui.UiScaleFactor;
         var size = new Vector2((ImGui.GetContentRegionAvail().X - (RightMargin + reserveRight) * T3Ui.UiScaleFactor - spacing * (values.Length - 1)) / values.Length,
                                ImGui.GetFrameHeight());
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, FieldGroupRounding * T3Ui.UiScaleFactor);
         if (readOnly)
             ImGui.BeginDisabled();
 
@@ -91,6 +82,7 @@ internal static class FormInputsNarrow
         if (readOnly)
             ImGui.EndDisabled();
 
+        ImGui.PopStyleVar();
         ImGui.PopID();
         return result;
     }
@@ -100,8 +92,9 @@ internal static class FormInputsNarrow
         DrawLabel(label, tooltip);
         ImGui.PushID(label);
         var result = InputEditStateFlags.Nothing;
-        var spacing = 4 * T3Ui.UiScaleFactor;
+        var spacing = FieldGroupSpacing * T3Ui.UiScaleFactor;
         var size = new Vector2((ImGui.GetContentRegionAvail().X - RightMargin * T3Ui.UiScaleFactor - spacing * (values.Length - 1)) / values.Length, ImGui.GetFrameHeight());
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, FieldGroupRounding * T3Ui.UiScaleFactor);
         if (readOnly)
             ImGui.BeginDisabled();
 
@@ -120,19 +113,9 @@ internal static class FormInputsNarrow
         if (readOnly)
             ImGui.EndDisabled();
 
+        ImGui.PopStyleVar();
         ImGui.PopID();
         return result;
-    }
-
-    /// <summary>A read-only relationship row (drag handle + name + ×), muted. For the "Sending to…" lists.</summary>
-    public static void DrawListItem(string name)
-    {
-        ImGui.AlignTextToFramePadding();
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Fade(0.6f).Rgba);
-        DrawGlyph(Icon.DragIndicator);
-        ImGui.SameLine(0, 5 * T3Ui.UiScaleFactor);
-        DrawSmallText(name);
-        ImGui.PopStyleColor();
     }
 
     public static void DrawLabel(string label, string? tooltip = null)
@@ -175,4 +158,8 @@ internal static class FormInputsNarrow
 
     // Right inset (unscaled px) so inputs don't touch the sidebar edge; the caller indents the left by the same.
     private const float RightMargin = 6;
+
+    // Vector fields (X/Y/Z) read as one control: a hairline gap between components and a rounded frame.
+    private const float FieldGroupSpacing = 1;
+    private const float FieldGroupRounding = 3;
 }

@@ -146,9 +146,6 @@ public sealed class Surface
     /// </summary>
     public Vector2 LocalPosition;
 
-    /// <summary>Optional compact label for gutters/badges; empty = auto-abbreviate from <see cref="Name"/>.</summary>
-    public string ShortName = string.Empty;
-
     /// <summary>When false the output manager skips this surface (kept in the setup, just not drawn).</summary>
     public bool Render = true;
 
@@ -158,6 +155,9 @@ public sealed class Surface
 
     /// <summary>Physical size in meters. Defines the ContentCanvas aspect.</summary>
     public Vector2 SizeInMeters = new(1, 1);
+
+    /// <summary>When set, resizing keeps the current width/height ratio: editing one dimension solves the other.</summary>
+    public bool LockAspect;
 
     /// <summary>Projects a real-world calibration raster over this surface (no content needed) so its
     /// corner-pin can be hand-aligned to physical wall features. Major lines are one meter apart and start at
@@ -194,10 +194,10 @@ public sealed class Surface
         writer.WriteString("Kind", Kind);
         writer.WriteObject("ParentId", ParentId);
         writer.WriteVector2("LocalPosition", LocalPosition);
-        writer.WriteString("ShortName", ShortName);
         writer.WriteValue("Render", Render);
         writer.WriteObject("SliceId", SliceId);
         writer.WriteVector2("SizeInMeters", SizeInMeters);
+        writer.WriteValue("LockAspect", LockAspect);
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
         writer.WriteValue("ShowGrid", ShowGrid);
         writer.WriteValue("GridSubdivisions", GridSubdivisions);
@@ -244,10 +244,10 @@ public sealed class Surface
                               Kind = token.ReadValueSafe("Kind", SurfaceKinds.Physical) ?? SurfaceKinds.Physical,
                               ParentId = OutputJson.ReadGuid(token["ParentId"]),
                               LocalPosition = OutputJson.ReadVector2(token["LocalPosition"], Vector2.Zero),
-                              ShortName = token.ReadValueSafe("ShortName", string.Empty) ?? string.Empty,
                               Render = token.ReadValueSafe("Render", true),
                               SliceId = OutputJson.ReadGuid(token["SliceId"]),
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
+                              LockAspect = token.ReadValueSafe("LockAspect", false),
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               ShowGrid = token.ReadValueSafe("ShowGrid", false),
                               GridSubdivisions = token.ReadValueSafe("GridSubdivisions", 10),

@@ -1,6 +1,8 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 using T3.Core.Output;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.InputUi.ListInputs;
@@ -11,6 +13,7 @@ using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -33,7 +36,7 @@ internal static class SetupPanel
         GuidListLabels.Picker = PickTarget;
     }
 
-    public static void Draw(SetupEntitySelection selection)
+    public static void Draw(SetupEntitySelection selection, Action? onCollapse = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
@@ -57,11 +60,15 @@ internal static class SetupPanel
         _pendingHoveredKind = SetupEntitySelection.EntityKind.None;
         _pendingHoveredId = Guid.Empty;
 
-        DrawSetupSwitcher(setup, selection);
+        // Relationship highlights follow last frame's hover (committed at the end of Draw), so related rows can
+        // light their gutters before they're drawn this frame — a 1-frame lag that's imperceptible.
+        ComputeReferenced(setup);
+
+        DrawSetupSwitcher(setup, selection, onCollapse);
         FormInputs.AddVerticalSpace(4);
 
         // CONTENT — live SendToOutput sinks (their targeting lives on the op, so they aren't setup entities).
-        if (DrawSectionLabel("CONTENT"))
+        if (DrawSection("CONTENT", "##addContent", selection, AddContentSink))
             DrawContentSinks(selection, setup);
 
         if (DrawSection("SURFACES", "##addSurface", selection, AddSurface))
@@ -122,9 +129,9 @@ internal static class SetupPanel
             return;
 
         FormInputs.AddVerticalSpace(12);
-        // Divider above the card, matching the section top edge, plus a 2px gap before the first item.
+        // Divider above the card, matching the section top edge, plus a small gap before the first item.
         DrawPanelDivider();
-        FormInputs.AddVerticalSpace(2);
+        FormInputs.AddVerticalSpace(3);
         ImGui.Indent(6 * T3Ui.UiScaleFactor); // 6px margin to the sidebar edges (right reserved inside the inputs).
         // Match FormInputs' field background (the default FrameBg is near-black in the panel).
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
@@ -164,20 +171,6 @@ internal static class SetupPanel
         }
 
         // Name is renamed inline in the tree (double-click the row) rather than via a field here.
-        var shortName = surface.ShortName;
-        if (FormInputsNarrow.DrawString("Short Name", ref shortName, "Auto", "Empty = auto-abbreviated (e.g. S1)."))
-        {
-            surface.ShortName = shortName;
-            OutputSetupHandling.SaveActive();
-        }
-
-        FormInputsNarrow.DrawLabel("Sending to…", "Outputs this surface is mapped to.");
-        for (var i = 0; i < surface.OutputMappings.Count; i++)
-        {
-            var output = setup.Outputs.Find(o => o.Id == surface.OutputMappings[i].OutputId);
-            FormInputsNarrow.DrawListItem(output == null ? "?" : output.Name);
-        }
-
         var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
         var position = surface.Placement?.Pose.Position ?? Vector3.Zero;
         Span<float> pos = [position.X, position.Y, position.Z];
@@ -204,7 +197,18 @@ internal static class SetupPanel
         Span<float> size = [surface.SizeInMeters.X, surface.SizeInMeters.Y];
         var sizeState = FormInputsNarrow.DrawFloats("Size (m)", size,
                                                     "Resizes the surface's footprint — the corner pin follows, so it covers a different area of the wall.",
-                                                    reserveRight: 20);
+                                                    reserveRight: 44);
+
+        // Locking keeps the current width/height ratio while resizing — the edited axis drives, the other follows.
+        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+        if (CustomComponents.IconButton(Icon.Link, Vector2.Zero,
+                                        surface.LockAspect ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+        {
+            surface.LockAspect = !surface.LockAspect;
+            OutputSetupHandling.SaveActive();
+        }
+
+        CustomComponents.TooltipForLastItem("Lock aspect ratio", "Resizing keeps the current width-to-height ratio.");
 
         // Measuring is a different act from resizing: it states how big the rect you already aligned really
         // is, and must leave the projection alone. Explicit icon + Apply, rather than overloading the field.
@@ -223,7 +227,7 @@ internal static class SetupPanel
             _resizeOldState = new ResizeSurfaceCommand.State(surface);
 
         if ((sizeState & InputEditStateFlags.Modified) != 0)
-            SurfaceGeometry.ResizeAnchored(surface, new Vector2(size[0], size[1]));
+            SurfaceGeometry.ResizeAnchored(surface, ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.LockAspect));
 
         // Resizing re-projects the corner pins, so it has to be undoable as one step.
         if ((sizeState & InputEditStateFlags.Finished) != 0 && _resizeOldState != null)
@@ -368,61 +372,54 @@ internal static class SetupPanel
     /// <summary>Smallest slice fraction — mirrors <c>SetupOutputView.MinSliceSize</c>.</summary>
     private const float MinSliceSize = 0.01f;
 
-    // Fills _referenced with the entities the currently-hovered row points at, along the
-    // content → surface → output chain, so those rows can draw the Referenced state.
+    // Fills _referenced with the rows related to the currently-hovered one, and which gutter to light on each:
+    // upstream producers (a shown source/slice, a mapped surface) get their trailing output gutter; downstream
+    // consumers (a surface/output that shows the hovered feed) get their left input arrow. So a hover traces the
+    // content → slice → surface → output chain in both directions without lighting whole rows.
     private static void ComputeReferenced(Setup setup)
     {
         _referenced.Clear();
         if (_hoveredKind == SetupEntitySelection.EntityKind.None)
             return;
 
-        _sinkContext ??= new EvaluationContext();
-        _sinkContext.Reset();
-
         switch (_hoveredKind)
         {
             case SetupEntitySelection.EntityKind.Surface:
             {
                 var surface = setup.Surfaces.Find(s => s.Id == _hoveredId);
-                if (surface != null)
-                {
-                    foreach (var mapping in surface.OutputMappings)
-                        _referenced.Add((SetupEntitySelection.EntityKind.Output, mapping.OutputId));
-                }
+                if (surface == null)
+                    break;
 
-                AddSinksTargeting(_hoveredId);
+                AddOutputsOfSurface(setup, surface); // where it goes → consumers' input arrow
+                AddSourceOfSlice(setup, surface.SliceId); // what feeds it → producers' trailing gutter
                 break;
             }
             case SetupEntitySelection.EntityKind.Output:
             {
                 foreach (var surface in setup.Surfaces)
                 {
-                    if (surface.OutputMappings.Exists(m => m.OutputId == _hoveredId))
-                        _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id));
+                    if (!surface.OutputMappings.Exists(m => m.OutputId == _hoveredId))
+                        continue;
+
+                    _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, false));
+                    AddSourceOfSlice(setup, surface.SliceId); // the feed behind each mapped surface
                 }
 
-                AddSinksTargeting(_hoveredId);
+                var output = setup.Outputs.Find(o => o.Id == _hoveredId);
+                if (output != null)
+                    AddSourceOfSlice(setup, output.SliceId); // or a full-frame slice shown directly
                 break;
             }
             case SetupEntitySelection.EntityKind.ContentSource:
             {
-                // A source references whatever shows one of its slices.
-                var hoveredSource = setup.ContentSources.Find(c => c.SymbolChildId == _hoveredId);
-                if (hoveredSource != null)
-                {
-                    foreach (var surface in setup.Surfaces)
-                    {
-                        if (IsSliceOf(setup, surface.SliceId, hoveredSource.Id))
-                            _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id));
-                    }
-
-                    foreach (var output in setup.Outputs)
-                    {
-                        if (IsSliceOf(setup, output.SliceId, hoveredSource.Id))
-                            _referenced.Add((SetupEntitySelection.EntityKind.Output, output.Id));
-                    }
-                }
-
+                var source = setup.ContentSources.Find(c => c.SymbolChildId == _hoveredId);
+                if (source != null)
+                    AddConsumersOfSource(setup, source.Id);
+                break;
+            }
+            case SetupEntitySelection.EntityKind.Slice:
+            {
+                AddConsumersOfSlice(setup, _hoveredId);
                 break;
             }
             case SetupEntitySelection.EntityKind.ReferenceImage:
@@ -430,7 +427,7 @@ internal static class SetupPanel
                 foreach (var surface in setup.Surfaces)
                 {
                     if (surface.Reference != null && surface.Reference.ImageId == _hoveredId)
-                        _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id));
+                        _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, true));
                 }
 
                 break;
@@ -438,29 +435,89 @@ internal static class SetupPanel
         }
     }
 
-    /// <summary>Sources whose slice is shown by this surface or output — the reverse of the content gutter.</summary>
-    private static void AddSinksTargeting(Guid targetId)
+    /// <summary>The outputs a surface reaches — its own mappings, or a coplanar child's nearest mapped ancestor.
+    /// Marked as consumers (input arrow), since they sit downstream of the surface.</summary>
+    private static void AddOutputsOfSurface(Setup setup, Surface? surface)
     {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
+        for (var guard = 0; surface != null && guard < 16; guard++)
+        {
+            if (surface.OutputMappings.Count > 0)
+            {
+                foreach (var mapping in surface.OutputMappings)
+                    _referenced.Add((SetupEntitySelection.EntityKind.Output, mapping.OutputId, true));
 
-        var surface = setup.Surfaces.Find(s => s.Id == targetId);
-        var sliceId = surface?.SliceId ?? setup.Outputs.Find(o => o.Id == targetId)?.SliceId ?? Guid.Empty;
+                return;
+            }
+
+            if (surface.ParentId == Guid.Empty)
+                return;
+
+            var parentId = surface.ParentId;
+            surface = setup.Surfaces.Find(s => s.Id == parentId);
+        }
+    }
+
+    /// <summary>The slice and its content source feeding a surface/output — producers (trailing gutter).</summary>
+    private static void AddSourceOfSlice(Setup setup, Guid sliceId)
+    {
         if (sliceId == Guid.Empty)
             return;
 
+        _referenced.Add((SetupEntitySelection.EntityKind.Slice, sliceId, false));
         var slice = setup.Slices.Find(s => s.Id == sliceId);
         var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
         if (source != null)
-            _referenced.Add((SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId));
+            _referenced.Add((SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId, false));
     }
 
-    /// <summary>Whether any surface mapped to this output shows one of the source's slices.</summary>
-    private static bool IsReferenced(SetupEntitySelection.EntityKind kind, Guid id)
+    /// <summary>Surfaces and outputs showing any slice of this source — consumers, lit on their input arrow.</summary>
+    private static void AddConsumersOfSource(Setup setup, Guid sourceId)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (IsSliceOf(setup, surface.SliceId, sourceId))
+                _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, true));
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            if (IsSliceOf(setup, output.SliceId, sourceId))
+                _referenced.Add((SetupEntitySelection.EntityKind.Output, output.Id, true));
+        }
+    }
+
+    /// <summary>Surfaces and outputs showing this exact slice — consumers, lit on their input arrow.</summary>
+    private static void AddConsumersOfSlice(Setup setup, Guid sliceId)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId == sliceId)
+                _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, true));
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            if (output.SliceId == sliceId)
+                _referenced.Add((SetupEntitySelection.EntityKind.Output, output.Id, true));
+        }
+    }
+
+    private static bool IsHoverInputHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
     {
         for (var i = 0; i < _referenced.Count; i++)
         {
-            if (_referenced[i].kind == kind && _referenced[i].id == id)
+            if (_referenced[i].onInput && _referenced[i].kind == kind && _referenced[i].id == id)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsHoverTrailingHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        for (var i = 0; i < _referenced.Count; i++)
+        {
+            if (!_referenced[i].onInput && _referenced[i].kind == kind && _referenced[i].id == id)
                 return true;
         }
 
@@ -902,6 +959,23 @@ internal static class SetupPanel
     }
 
     /// <summary>
+    /// Applies a typed size, optionally preserving the previous ratio: the axis that changed more drives, the
+    /// other follows. Keeps the driven axis exact so the number the user typed is what lands.
+    /// </summary>
+    private static Vector2 ConstrainSize(Vector2 old, Vector2 typed, bool lockAspect)
+    {
+        if (!lockAspect || old.X <= 0 || old.Y <= 0)
+            return typed;
+
+        var dx = MathF.Abs(typed.X - old.X);
+        var dy = MathF.Abs(typed.Y - old.Y);
+        if (dx >= dy)
+            return new Vector2(typed.X, typed.X * (old.Y / old.X));
+
+        return new Vector2(typed.Y * (old.X / old.Y), typed.Y);
+    }
+
+    /// <summary>
     /// A sub-region shaped to a slice: sized so its real-world proportions match the slice's pixels, so the
     /// content lands undistorted, and centred in the parent.
     /// </summary>
@@ -1245,12 +1319,15 @@ internal static class SetupPanel
         ImGui.EndGroup();
     }
 
-    private static void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection)
+    private static void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection, Action? onCollapse)
     {
         var scale = T3Ui.UiScaleFactor;
         var pos = ImGui.GetCursorScreenPos();
         var height = ImGui.GetFrameHeight();
-        if (ImGui.InvisibleButton("##setupSwitcher", new Vector2(ImGui.GetContentRegionAvail().X, height)))
+        // Leave room on the right for the collapse button so its clicks don't fall through to the switcher.
+        var collapseWidth = onCollapse != null ? height + 2 * scale : 0;
+        var switcherWidth = ImGui.GetContentRegionAvail().X - collapseWidth;
+        if (ImGui.InvisibleButton("##setupSwitcher", new Vector2(switcherWidth, height)))
             ImGui.OpenPopup("##setupMenu");
 
         // Label + chevron drawn over the button so the chevron sits next to the name (not far-right like a combo).
@@ -1259,6 +1336,16 @@ internal static class SetupPanel
         CustomComponents.StylizedText(setup.Name, Fonts.FontNormal, UiColors.Text);
         ImGui.SameLine(0, 4 * scale);
         DrawInlineIcon(Icon.ChevronDown, UiColors.TextMuted.Rgba);
+
+        if (onCollapse != null)
+        {
+            ImGui.SetCursorScreenPos(new Vector2(pos.X + switcherWidth + 2 * scale, pos.Y));
+            if (CustomComponents.IconButton(Icon.SidePanelLeft, Vector2.Zero))
+                onCollapse();
+
+            CustomComponents.TooltipForLastItem("Hide the setup panel");
+        }
+
         ImGui.SetCursorScreenPos(new Vector2(pos.X, pos.Y + height));
 
         if (ImGui.BeginPopup("##setupMenu"))
@@ -1302,7 +1389,6 @@ internal static class SetupPanel
         }
     }
 
-    // A surface's compact label: its explicit ShortName, else the auto-abbreviation.
     /// <summary>Full-width dropdown for a SendToOutput target-id list item: lists the active setup's surfaces
     /// then outputs; picking one returns the new id. The row's ImGui ID stack keeps each item's popup distinct.</summary>
     private static bool PickTarget(Guid current, float width, out Guid picked)
@@ -1445,7 +1531,7 @@ internal static class SetupPanel
 
     private static string SurfaceShortLabel(Surface surface)
     {
-        return string.IsNullOrEmpty(surface.ShortName) ? Abbreviate(surface.Name) : surface.ShortName;
+        return Abbreviate(surface.Name);
     }
 
     // Compact gutter form: uppercase letters + digits ("Surface 1" → "S1", "WallFront" → "WF"), falling back
@@ -1689,7 +1775,9 @@ internal static class SetupPanel
         }
         else if (canvasPulse > 0.001f)
         {
-            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(canvasPulse), rounding);
+            // Match the mouse-hover look (light fill + outline) so a canvas-driven highlight reads the same.
+            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.2f), rounding);
+            dl.AddRect(rowMin, rowMax, UiColors.StatusActivated.Fade(0.8f), rounding);
         }
 
         // Content over the background (the selectable is transparent), vertically centered in the fixed row
@@ -1703,6 +1791,12 @@ internal static class SetupPanel
             var color = isBound ? UiColors.StatusActivated : UiColors.BackgroundFull.Fade(0.5f);
             ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 4 * scale, iconY));
             DrawInlineIcon(Icon.ArrowRight, overGutter ? UiColors.ForegroundFull.Rgba : color.Rgba);
+        }
+        else if (hasInputGutter && IsHoverInputHighlighted(kind, id))
+        {
+            // This row consumes the hovered feed: point its input arrow back at it (read-only, no bind click).
+            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 4 * scale, iconY));
+            DrawInlineIcon(Icon.ArrowRight, UiColors.StatusActivated.Rgba);
         }
 
         var contentX = rowMin.X + 6 * scale + gutterWidth + indent;
@@ -1776,21 +1870,12 @@ internal static class SetupPanel
                                           isSelected ? Fonts.FontBold : Fonts.FontNormal, UiColors.Text.Fade(fade));
         }
 
-        // The row that feeds the selected item (a surface's slice, a slice's source): marked with a
-        // StatusActivated arrow-into-a-bar at the right edge, taking the gutter's place so the source reads at
-        // a glance. "→|" — it flows into the selection.
-        if (!isRenaming && IsSourceOfPrimary(setup, kind, id))
+        // Right-aligned trailing gutter "→ [count] [target-icon]": arrow, then the ×N count (if any), then the
+        // target type at the very edge. When this row feeds the selected item — or the hovered one — the whole
+        // group is bright StatusActivated so the source reads at a glance; otherwise the gutter is dim.
+        var isSource = IsSourceOfPrimary(setup, kind, id) || IsHoverTrailingHighlighted(kind, id);
+        if (!isRenaming && (isSource || trailingIcon.HasValue || status != null))
         {
-            var barX = rowMax.X - 5 * scale;
-            ImGui.SetCursorScreenPos(new Vector2(barX - Icons.FontSize - 4 * scale, iconY));
-            DrawInlineIcon(Icon.ArrowRight, UiColors.StatusActivated.Rgba);
-            dl.AddLine(new Vector2(barX, rowMin.Y + 5 * scale), new Vector2(barX, rowMax.Y - 5 * scale),
-                       UiColors.StatusActivated, 2 * scale);
-        }
-        else if (!isRenaming && (trailingIcon.HasValue || status != null))
-        {
-            // Right-aligned as "→ [count] [target-icon]": arrow, then the ×N count (if any), then the target
-            // type at the very edge. Measure the group first, then lay it out from the right edge.
             ImGui.PushFont(Fonts.FontSmall);
             var smallHeight = ImGui.GetTextLineHeight();
             var statusWidth = status != null ? ImGui.CalcTextSize(status).X : 0;
@@ -1802,9 +1887,12 @@ internal static class SetupPanel
             if (trailingIcon.HasValue)
                 trailWidth += Icons.FontSize + 3 * scale;
 
+            var arrowColor = isSource ? UiColors.StatusActivated : UiColors.TextMuted.Fade(0.3f * fade);
+            var textColor = isSource ? UiColors.StatusActivated : UiColors.TextMuted.Fade(fade);
+
             var trailX = rowMax.X - 6 * scale - trailWidth;
             ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
-            DrawInlineIcon(Icon.ArrowRight, UiColors.TextMuted.Fade(0.3f * fade).Rgba);
+            DrawInlineIcon(Icon.ArrowRight, arrowColor.Rgba);
             trailX = ImGui.GetItemRectMax().X + 3 * scale;
 
             if (status != null)
@@ -1812,14 +1900,14 @@ internal static class SetupPanel
                 // FontSmall is shorter than the row's FontNormal baseline — center it on its own height.
                 var statusY = (float)Math.Round(rowMin.Y + (height - smallHeight) * 0.5f - 1 * scale);
                 ImGui.SetCursorScreenPos(new Vector2(trailX, statusY));
-                CustomComponents.StylizedText(status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
+                CustomComponents.StylizedText(status, Fonts.FontSmall, textColor);
                 trailX += statusWidth + 3 * scale;
             }
 
             if (trailingIcon.HasValue)
             {
                 ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
-                DrawInlineIcon(trailingIcon.Value, UiColors.TextMuted.Fade(fade).Rgba);
+                DrawInlineIcon(trailingIcon.Value, textColor.Rgba);
             }
         }
 
@@ -1913,9 +2001,9 @@ internal static class SetupPanel
                            Type = source.Type,
                            Kind = source.Kind,
                            ParentId = source.ParentId,
-                           ShortName = string.Empty, // auto-abbreviated, so two surfaces don't share a gutter label
                            Render = source.Render,
                            SizeInMeters = source.SizeInMeters,
+                           LockAspect = source.LockAspect,
                            LocalPosition = source.LocalPosition,
                            PixelsPerMeter = source.PixelsPerMeter,
                            ShowGrid = source.ShowGrid,
@@ -1997,6 +2085,53 @@ internal static class SetupPanel
         }
 
         return count;
+    }
+
+    /// <summary>
+    /// Drops a <c>SendToOutput</c> op into the focused composition, selects it, and frames the view on it. When a
+    /// texture-outputting op is selected it lands to its right and is wired straight in, so the feed shows up in
+    /// the setup at once (the CONTENT row appears next frame, once <see cref="ContentSourceSync"/> adopts it).
+    /// </summary>
+    private static void AddContentSink(SetupEntitySelection selection)
+    {
+        var projectView = ProjectView.Focused;
+        var composition = projectView?.CompositionInstance;
+        if (projectView == null || composition == null)
+            return;
+
+        if (!composition.Symbol.TryGetSymbolUi(out var compositionUi)
+            || !SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out var sinkSymbolUi))
+            return;
+
+        // A selected texture op becomes the feed: place the sink to its right and wire it up.
+        var selected = projectView.NodeSelection.GetSelectedInstanceWithoutComposition();
+        var sourceSlot = selected == null ? null : FindTextureOutput(selected);
+        var selectedUi = selected?.GetChildUi();
+        var pos = selectedUi != null
+                      ? selectedUi.PosOnCanvas + new Vector2(selectedUi.Size.X + 40, 0)
+                      : Vector2.Zero;
+
+        var newChildUi = GraphOperations.AddSymbolChild(sinkSymbolUi.Symbol, compositionUi, pos);
+
+        if (sourceSlot != null && selectedUi != null)
+        {
+            var connection = new Symbol.Connection(selectedUi.Id, sourceSlot.Id, newChildUi.Id, SendToOutputTextureInputId);
+            UndoRedoStack.AddAndExecute(new AddConnectionCommand(compositionUi.Symbol, connection, 0));
+        }
+
+        projectView.NodeSelection.TrySelectCompositionChild(composition, newChildUi.Id, add: false);
+        projectView.FocusViewToSelection();
+    }
+
+    private static ISlot? FindTextureOutput(Instance instance)
+    {
+        foreach (var slot in instance.Outputs)
+        {
+            if (slot.ValueType == typeof(Texture2D))
+                return slot;
+        }
+
+        return null;
     }
 
     private static void AddSurface(SetupEntitySelection selection)
@@ -2191,10 +2326,15 @@ internal static class SetupPanel
     private const string MeasuredSizePopupId = "##measuredSize";
     private static Vector2 _measuredEdit;
 
+    // Lib SendToOutput op and its texture input — the CONTENT "+" instantiates this and wires a selected feed in.
+    private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
+    private static readonly Guid SendToOutputTextureInputId = new("8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942");
+
     // Cross-highlight: the row hovered this frame (committed at end of Draw), and the entities it references.
     private static SetupEntitySelection.EntityKind _hoveredKind;
     private static Guid _hoveredId;
     private static SetupEntitySelection.EntityKind _pendingHoveredKind;
     private static Guid _pendingHoveredId;
-    private static readonly List<(SetupEntitySelection.EntityKind kind, Guid id)> _referenced = [];
+    // Rows related to the hovered one; onInput = light the left input arrow (consumer) vs the trailing gutter (producer).
+    private static readonly List<(SetupEntitySelection.EntityKind kind, Guid id, bool onInput)> _referenced = [];
 }

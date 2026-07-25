@@ -22,16 +22,42 @@ internal sealed class OutputSetupModeView
         if (!_showSetupPanel)
             return;
 
+        var scale = T3Ui.UiScaleFactor;
+
         // Match the settings windows' content-section background so the light hover/selection fills read.
         ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundPopup.Rgba);
         ImGui.BeginChild("##setupPanel",
-                         new Vector2(240 * T3Ui.UiScaleFactor, ImGui.GetWindowHeight()),
+                         new Vector2(_panelWidth * scale, ImGui.GetWindowHeight()),
                          ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoBackground);
-        SetupPanel.Draw(_entitySelection);
+        _collapsePanel ??= () => _showSetupPanel = false;
+        SetupPanel.Draw(_entitySelection, _collapsePanel);
         ImGui.EndChild();
         ImGui.PopStyleColor();
-        ImGui.SameLine(0,2);
+
+        DrawPanelSplitter(scale);
+    }
+
+    /// <summary>A drag handle on the panel's right edge. Width is per-window session state (not persisted).</summary>
+    private void DrawPanelSplitter(float scale)
+    {
+        var thickness = 4 * scale;
+        ImGui.SameLine(0, 0);
+        var p = ImGui.GetCursorScreenPos();
+        ImGui.InvisibleButton("##panelSplitter", new Vector2(thickness, ImGui.GetWindowHeight()));
+
+        var active = ImGui.IsItemActive();
+        var hovered = ImGui.IsItemHovered();
+        if (active || hovered)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+
+        if (active)
+            _panelWidth = Math.Clamp(_panelWidth + ImGui.GetIO().MouseDelta.X / scale, MinPanelWidth, MaxPanelWidth);
+
+        var color = active ? UiColors.StatusActivated : (hovered ? UiColors.BackgroundHover : UiColors.BackgroundFull);
+        ImGui.GetWindowDrawList().AddRectFilled(p, p + new Vector2(thickness, ImGui.GetWindowHeight()), color);
+
+        ImGui.SameLine(0, 2 * scale);
     }
 
     /// <summary>
@@ -207,7 +233,13 @@ internal sealed class OutputSetupModeView
     }
 
     private bool _showSetupPanel;
+    private float _panelWidth = DefaultPanelWidth; // unscaled px; scaled at draw time
+    private Action? _collapsePanel; // cached so the side-panel draw doesn't allocate a closure each frame
     private Guid _lastFocusedId;
+
+    private const float DefaultPanelWidth = 240;
+    private const float MinPanelWidth = 180;
+    private const float MaxPanelWidth = 520;
     private readonly SetupEntitySelection _entitySelection = new();
     private readonly SetupOutputView _outputView = new();
     private readonly ReferenceImageView _referenceImageView = new();
