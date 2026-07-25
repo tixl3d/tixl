@@ -177,7 +177,12 @@ internal sealed partial class OutputWindow
 
         ImGui.SameLine();
 
+        // Picking a resolution mutates _selectedResolution but nothing else flags it, so it was lost on restart.
+        // The list holds singletons, so a reference change means a different one was chosen — persist the state.
+        var resolutionBefore = _selectedResolution;
         ResolutionHandling.DrawSelector(ref _selectedResolution, _resolutionDialog);
+        if (!ReferenceEquals(_selectedResolution, resolutionBefore))
+            SaveStateToProject();
 
         // Screenshot and Render
         if (RenderProcess.State != RenderProcess.States.NoValidOutputType && RenderProcess.State != RenderProcess.States.NoOutputWindow)

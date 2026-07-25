@@ -289,6 +289,12 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal Gui.Windows.TimeLine.TimelineState? TimelineState { get; set; }
 
     /// <summary>
+    /// The output setup (projection-mapping venue) this project last had active, so it reopens on the same
+    /// one. The setups themselves live in .meta/*.setup.json; this is just which is current. Serialized to .t3ui.
+    /// </summary>
+    internal string? ActiveOutputSetupName { get; set; }
+
+    /// <summary>
     /// ImGui docking layout string for this project (stored on root op only).
     /// Serialized to .t3ui files.
     /// </summary>

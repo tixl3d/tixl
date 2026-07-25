@@ -44,8 +44,7 @@ internal static class SetupPanel
         // Sources are 1:1 with the ops that supply them, so adopt new sends and cascade away deleted ones.
         ContentSourceSync.Update(setup);
 
-        // Cross-highlight: what the row hovered last frame references (one-frame lag is imperceptible for hover).
-        ComputeReferenced(setup);
+        // (The hover cross-highlight border was removed — selection now shows its source via the "→|" marker.)
 
         // Resolved once: TryResolve prunes the target list behind a closure, and every row asks for the
         // primary when deciding whether to offer an in-gutter toggle.
@@ -468,6 +467,36 @@ internal static class SetupPanel
         return false;
     }
 
+    /// <summary>
+    /// Whether <paramref name="kind"/>/<paramref name="id"/> is the immediate <em>source</em> feeding the
+    /// primary-selected entity — the slice a selected surface (or output) shows, or the content source a
+    /// selected slice belongs to. Used to point the "→|" source marker at that row.
+    /// </summary>
+    private static bool IsSourceOfPrimary(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        if (id == Guid.Empty)
+            return false;
+
+        switch (_primaryKind)
+        {
+            case SetupEntitySelection.EntityKind.Surface:
+                var surface = setup.Surfaces.Find(s => s.Id == _primaryId);
+                return surface != null && kind == SetupEntitySelection.EntityKind.Slice && surface.SliceId == id;
+
+            case SetupEntitySelection.EntityKind.Output:
+                var output = setup.Outputs.Find(o => o.Id == _primaryId);
+                return output != null && kind == SetupEntitySelection.EntityKind.Slice && output.SliceId == id;
+
+            case SetupEntitySelection.EntityKind.Slice:
+                var slice = setup.Slices.Find(s => s.Id == _primaryId);
+                var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
+                return source != null && kind == SetupEntitySelection.EntityKind.ContentSource && source.SymbolChildId == id;
+
+            default:
+                return false;
+        }
+    }
+
     // Drag-to-map: a surface dropped on an output adds a mapping; a content send dropped on a surface or
     // output retargets it. Call right after a row's Selectable so it acts as that item's source/target.
     private static void HandleRowDragDrop(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
@@ -656,65 +685,42 @@ internal static class SetupPanel
     private static void DrawSliceRow(SetupEntitySelection selection, Setup setup, Slice slice)
     {
         var sliceId = slice.Id;
-        var status = DescribeSliceStatus(setup, slice, out var mismatched);
+        var (targetIcon, targetText) = DescribeSliceTargetGutter(setup, slice);
 
         DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Slice, sliceId,
-                      SliceLabel(setup, slice), status,
+                      SliceLabel(setup, slice), targetText,
                       onDelete: () => DeleteSlice(setup, sliceId),
                       leadingIcon: Icon.Slice,
-                      trailingIcon: mismatched ? Icon.Warning : null,
+                      trailingIcon: targetIcon,
                       depth: 1,
-                      muted: status is "unused" or "no source",
+                      // Nothing shows this slice, so it steps back visually.
+                      muted: targetIcon == null,
                       onRename: n => { slice.Name = n; OutputSetupHandling.SaveActive(); });
     }
 
-    /// <summary>Aspect of the slice's pixels, plus whether that disagrees with what shows it.</summary>
-    private static string DescribeSliceStatus(Setup setup, Slice slice, out bool mismatched)
+    /// <summary>Out-gutter for a slice: the target-type icon plus a count when it feeds more than one. No
+    /// label — the fade already says "unused", and where it lands is the icon; a name adds noise.</summary>
+    private static (Icon? icon, string? text) DescribeSliceTargetGutter(Setup setup, Slice slice)
     {
-        mismatched = false;
+        if (!setup.ContentSources.Exists(c => c.Id == slice.SourceId))
+            return (null, null);
 
-        var source = setup.ContentSources.Find(c => c.Id == slice.SourceId);
-        if (source == null || !OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content)
-            || content is not { IsDisposed: false })
-            return "no source";
-
-        var width = content.Description.Width * MathF.Max(slice.UvRect.Z - slice.UvRect.X, 0.0001f);
-        var height = content.Description.Height * MathF.Max(slice.UvRect.W - slice.UvRect.Y, 0.0001f);
-        if (height <= 0)
-            return "no source";
-
-        var aspect = width / height;
-
-        Surface? shownBy = null;
+        var count = 0;
         foreach (var surface in setup.Surfaces)
         {
-            if (surface.SliceId != slice.Id)
-                continue;
-
-            shownBy = surface;
-            break;
+            if (surface.SliceId == slice.Id)
+                count++;
         }
 
-        if (shownBy == null)
-            return "unused";
+        if (count > 0)
+            return (Icon.Grid, CountSuffix(count));
 
-        var surfaceAspect = shownBy.SizeInMeters.X / MathF.Max(shownBy.SizeInMeters.Y, 0.0001f);
-        mismatched = MathF.Abs(aspect - surfaceAspect) > surfaceAspect * 0.02f;
-        return FormatAspect(aspect);
+        // Or an output showing the slice full-frame (the direct path).
+        return setup.Outputs.Exists(o => o.SliceId == slice.Id) ? (Icon.Projector, null) : (null, null);
     }
 
-    /// <summary>A ratio reads faster than a decimal, so prefer a small whole-number one when it's close.</summary>
-    private static string FormatAspect(float aspect)
-    {
-        for (var denominator = 1; denominator <= 16; denominator++)
-        {
-            var numerator = aspect * denominator;
-            if (MathF.Abs(numerator - MathF.Round(numerator)) < 0.02f)
-                return $"{(int)MathF.Round(numerator)}:{denominator}";
-        }
-
-        return $"{aspect:0.00}:1";
-    }
+    /// <summary>"×N" once there's more than one target; nothing for a single one.</summary>
+    private static string? CountSuffix(int count) => count > 1 ? "×" + count : null;
 
     private static void ToggleSourceExpanded(Guid childId)
     {
@@ -1080,29 +1086,22 @@ internal static class SetupPanel
         return slice;
     }
 
-    /// <summary>Out-gutter for a content row: what shows one of this source's slices.</summary>
+    /// <summary>Out-gutter for a content row: the surface-target icon plus a count when more than one surface
+    /// shows this source's slices. No label; the fade already reads as "unused".</summary>
     private static (Icon? icon, string? text) DescribeSourceGutter(Setup setup, Guid symbolChildId)
     {
         var source = setup.ContentSources.Find(c => c.SymbolChildId == symbolChildId);
         if (source == null)
-            return (null, "unbound");
+            return (null, null);
 
-        Surface? first = null;
         var count = 0;
         foreach (var surface in setup.Surfaces)
         {
-            if (!IsSliceOf(setup, surface.SliceId, source.Id))
-                continue;
-
-            first = first ?? surface;
-            count++;
+            if (IsSliceOf(setup, surface.SliceId, source.Id))
+                count++;
         }
 
-        if (first == null)
-            return (null, "unused");
-
-        var label = SurfaceShortLabel(first);
-        return (Icon.Grid, count > 1 ? label + " +" + (count - 1) : label);
+        return count > 0 ? (Icon.Grid, CountSuffix(count)) : (null, null);
     }
 
     // Surfaces as a tree: roots first, each followed by its children (nested by ParentId). The mapped
@@ -1153,16 +1152,12 @@ internal static class SetupPanel
             _collapsedSurfaces.Remove(surfaceId);
     }
 
-    // Out-gutter for a surface: the projector icon + the mapped output name (+N for edge-blended extras).
+    // Out-gutter for a surface: the projector icon + a count when mapped to more than one output (edge blends).
     private static (Icon? icon, string? text) DescribeSurfaceOutputGutter(Setup setup, Surface surface)
     {
-        if (surface.OutputMappings.Count == 0)
-            return (null, null);
-
-        var firstOutput = setup.Outputs.Find(o => o.Id == surface.OutputMappings[0].OutputId);
-        var name = firstOutput == null ? "?" : Abbreviate(firstOutput.Name);
-        var text = surface.OutputMappings.Count > 1 ? $"{name} +{surface.OutputMappings.Count - 1}" : name;
-        return (Icon.Projector, text);
+        return surface.OutputMappings.Count == 0
+                   ? (null, null)
+                   : (Icon.Projector, CountSuffix(surface.OutputMappings.Count));
     }
 
     /// <summary>Info card shown in the output view for a selected/pinned setup entity.</summary>
@@ -1684,14 +1679,18 @@ internal static class SetupPanel
         var canvasPulse = !isHovered && !isSelected && !menuOpen ? FrameStats.GetPulse(id) : 0;
 
         if (isSelected)
+        {
             dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.3f), rounding);
+        }
         else if (isHovered || menuOpen)
-            dl.AddRectFilled(rowMin, rowMax, UiColors.ForegroundFull.Fade(0.2f), rounding);
+        {
+            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.2f), rounding);
+            dl.AddRect(rowMin, rowMax, UiColors.StatusActivated.Fade(0.8f), rounding);
+        }
         else if (canvasPulse > 0.001f)
+        {
             dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(canvasPulse), rounding);
-
-        if (!isSelected && IsReferenced(kind, id))
-            dl.AddRect(rowMin, rowMax, UiColors.StatusAutomated.Fade(0.6f), rounding);
+        }
 
         // Content over the background (the selectable is transparent), vertically centered in the fixed row
         // (the -1px nudges the label up so it isn't sitting low).
@@ -1773,31 +1772,40 @@ internal static class SetupPanel
         else
         {
             ImGui.SetCursorScreenPos(new Vector2(contentX, contentY));
-            CustomComponents.StylizedText(string.IsNullOrEmpty(name) ? "untitled" : name, Fonts.FontNormal, UiColors.Text.Fade(fade));
+            CustomComponents.StylizedText(string.IsNullOrEmpty(name) ? "untitled" : name,
+                                          isSelected ? Fonts.FontBold : Fonts.FontNormal, UiColors.Text.Fade(fade));
         }
 
-        if (!isRenaming && (trailingIcon.HasValue || status != null))
+        // The row that feeds the selected item (a surface's slice, a slice's source): marked with a
+        // StatusActivated arrow-into-a-bar at the right edge, taking the gutter's place so the source reads at
+        // a glance. "→|" — it flows into the selection.
+        if (!isRenaming && IsSourceOfPrimary(setup, kind, id))
         {
-            // Right-aligned rather than parked at a fixed fraction of the row: a long name used to run
-            // straight into the gutter. Measure the group first, then lay it out from the right edge.
+            var barX = rowMax.X - 5 * scale;
+            ImGui.SetCursorScreenPos(new Vector2(barX - Icons.FontSize - 4 * scale, iconY));
+            DrawInlineIcon(Icon.ArrowRight, UiColors.StatusActivated.Rgba);
+            dl.AddLine(new Vector2(barX, rowMin.Y + 5 * scale), new Vector2(barX, rowMax.Y - 5 * scale),
+                       UiColors.StatusActivated, 2 * scale);
+        }
+        else if (!isRenaming && (trailingIcon.HasValue || status != null))
+        {
+            // Right-aligned as "→ [count] [target-icon]": arrow, then the ×N count (if any), then the target
+            // type at the very edge. Measure the group first, then lay it out from the right edge.
             ImGui.PushFont(Fonts.FontSmall);
             var smallHeight = ImGui.GetTextLineHeight();
             var statusWidth = status != null ? ImGui.CalcTextSize(status).X : 0;
             ImGui.PopFont();
 
-            var trailWidth = statusWidth;
+            var trailWidth = Icons.FontSize; // the direction arrow
+            if (status != null)
+                trailWidth += statusWidth + 3 * scale;
             if (trailingIcon.HasValue)
-                trailWidth += Icons.FontSize * 2 + 2 * scale + 4 * scale;
+                trailWidth += Icons.FontSize + 3 * scale;
 
             var trailX = rowMax.X - 6 * scale - trailWidth;
-            if (trailingIcon.HasValue)
-            {
-                ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
-                DrawInlineIcon(Icon.ArrowRight, UiColors.TextMuted.Fade(0.3f * fade).Rgba);
-                ImGui.SetCursorScreenPos(new Vector2(ImGui.GetItemRectMax().X + 2 * scale, iconY));
-                DrawInlineIcon(trailingIcon.Value, UiColors.TextMuted.Fade(fade).Rgba);
-                trailX = ImGui.GetItemRectMax().X + 4 * scale;
-            }
+            ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
+            DrawInlineIcon(Icon.ArrowRight, UiColors.TextMuted.Fade(0.3f * fade).Rgba);
+            trailX = ImGui.GetItemRectMax().X + 3 * scale;
 
             if (status != null)
             {
@@ -1805,6 +1813,13 @@ internal static class SetupPanel
                 var statusY = (float)Math.Round(rowMin.Y + (height - smallHeight) * 0.5f - 1 * scale);
                 ImGui.SetCursorScreenPos(new Vector2(trailX, statusY));
                 CustomComponents.StylizedText(status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
+                trailX += statusWidth + 3 * scale;
+            }
+
+            if (trailingIcon.HasValue)
+            {
+                ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
+                DrawInlineIcon(trailingIcon.Value, UiColors.TextMuted.Fade(fade).Rgba);
             }
         }
 

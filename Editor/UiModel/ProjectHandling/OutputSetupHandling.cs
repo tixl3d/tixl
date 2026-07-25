@@ -42,6 +42,14 @@ internal static class OutputSetupHandling
         Directory.CreateDirectory(metaFolder);
         entry.Setup.TrySaveToFile(SetupFilePath(metaFolder, entry.Setup.Name));
         entry.MachineConfig.TrySaveToFile(Path.Combine(metaFolder, MachineConfig.FileName));
+
+        // Remember which setup is active in the project's settings (.t3ui), so a restart reopens the same venue.
+        var symbolUi = ProjectView.Focused?.RootInstance?.Symbol.GetSymbolUi();
+        if (symbolUi is { ReadOnly: false } && symbolUi.ActiveOutputSetupName != entry.Setup.Name)
+        {
+            symbolUi.ActiveOutputSetupName = entry.Setup.Name;
+            symbolUi.FlagAsModified();
+        }
     }
 
     /// <summary>Setup names available for the focused project (from .meta/*.setup.json).</summary>
@@ -67,6 +75,7 @@ internal static class OutputSetupHandling
             return false;
 
         entry.Setup = setup;
+        SaveActive(); // records the new active setup name so the switch survives a restart
         return true;
     }
 
@@ -164,13 +173,32 @@ internal static class OutputSetupHandling
 
         var metaFolder = Path.Combine(projectFolder, Setup.FolderName);
 
+        // Load the machine config first — it remembers which setup this machine last had active.
+        var machineConfigPath = Path.Combine(metaFolder, MachineConfig.FileName);
+        var machineConfig = new MachineConfig();
+        if (File.Exists(machineConfigPath))
+            MachineConfig.TryLoadFromFile(machineConfigPath, out machineConfig);
+
         Setup? setup = null;
         if (Directory.Exists(metaFolder))
         {
-            foreach (var filePath in Directory.EnumerateFiles(metaFolder, "*" + Setup.FileSuffix))
+            // Prefer the setup the project last had active (from its .t3ui settings); fall back to the first on
+            // disk if it's gone or none was recorded.
+            var activeName = ProjectView.Focused?.RootInstance?.Symbol.GetSymbolUi()?.ActiveOutputSetupName;
+            if (!string.IsNullOrEmpty(activeName))
             {
-                if (Setup.TryLoadFromFile(filePath, out setup))
-                    break;
+                var preferred = SetupFilePath(metaFolder, activeName);
+                if (File.Exists(preferred))
+                    Setup.TryLoadFromFile(preferred, out setup);
+            }
+
+            if (setup == null)
+            {
+                foreach (var filePath in Directory.EnumerateFiles(metaFolder, "*" + Setup.FileSuffix))
+                {
+                    if (Setup.TryLoadFromFile(filePath, out setup))
+                        break;
+                }
             }
         }
 
@@ -180,11 +208,6 @@ internal static class OutputSetupHandling
             Directory.CreateDirectory(metaFolder);
             setup.TrySaveToFile(SetupFilePath(metaFolder, setup.Name));
         }
-
-        var machineConfigPath = Path.Combine(metaFolder, MachineConfig.FileName);
-        var machineConfig = new MachineConfig();
-        if (File.Exists(machineConfigPath))
-            MachineConfig.TryLoadFromFile(machineConfigPath, out machineConfig);
 
         entry = new ProjectEntry { Setup = setup, MachineConfig = machineConfig };
         _entriesByProjectFolder[projectFolder] = entry;

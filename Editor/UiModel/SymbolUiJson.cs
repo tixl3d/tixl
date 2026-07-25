@@ -714,8 +714,10 @@ internal static class SymbolUiJson
         var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 } && isComposition;
         var hasTimelineState = symbolUi.TimelineState != null && isComposition;
         var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
+        var hasActiveOutputSetup = !string.IsNullOrEmpty(symbolUi.ActiveOutputSetupName);
 
-        if (!hasRenderSettings && !hasRecordingSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)
+        if (!hasRenderSettings && !hasRecordingSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout
+            && !hasActiveOutputSetup)
             return;
 
         writer.WritePropertyName("Settings");
@@ -729,6 +731,12 @@ internal static class SymbolUiJson
                 OutputWindowState.WriteAllToJson(writer, symbolUi.OutputWindowStates);
             if (hasTimelineState)
                 symbolUi.TimelineState!.WriteToJson(writer);
+
+            if (hasActiveOutputSetup)
+            {
+                writer.WritePropertyName("ActiveOutputSetupName");
+                writer.WriteValue(symbolUi.ActiveOutputSetupName);
+            }
 
             if (hasWindowLayout)
             {
@@ -763,6 +771,7 @@ internal static class SymbolUiJson
         symbolUi.RecordingSettings = Gui.Windows.TimeLine.RecordingSettings.ReadFromJson(settingsToken);
         symbolUi.OutputWindowStates = OutputWindowState.ReadAllFromJson(settingsToken);
         symbolUi.TimelineState = Gui.Windows.TimeLine.TimelineState.ReadFromJson(settingsToken);
+        symbolUi.ActiveOutputSetupName = settingsToken["ActiveOutputSetupName"]?.Value<string>();
         symbolUi.WindowLayout = settingsToken["WindowLayout"]?.Value<string>();
         symbolUi.WindowLayoutImGuiVersion = settingsToken["WindowLayoutImGuiVersion"]?.Value<string>();
 
