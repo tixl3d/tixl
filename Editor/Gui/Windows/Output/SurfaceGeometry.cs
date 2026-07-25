@@ -49,7 +49,10 @@ internal static class SurfaceGeometry
     /// rectangle. Every mapping's quad is re-projected through its own recovered projection, so what the
     /// projector shows stays put while the surface's footprint changes.
     /// </summary>
-    public static void ApplyRect(Surface surface, Vector2[] newRect)
+    /// <param name="pinAnnotations">When the origin moves (a crop/resize), re-base the measuring lines by the
+    /// same offset so they stay on their physical features next to the grid. A stretch keeps the surface's own
+    /// space, so it passes false and leaves them where they are.</param>
+    public static void ApplyRect(Surface surface, Vector2[] newRect, bool pinAnnotations = true)
     {
         var oldSize = surface.SizeInMeters;
         var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
@@ -77,6 +80,18 @@ internal static class SurfaceGeometry
         var newPivot = new Vector2((anchor.X - min.X) / newSize.X, (max.Y - anchor.Y) / newSize.Y);
         if (MathF.Abs(newPivot.X - pivot.X) > 0.0001f || MathF.Abs(newPivot.Y - pivot.Y) > 0.0001f)
             (surface.Placement ??= new Surface.StagePlacement()).Pivot = newPivot;
+
+        // Measuring lines are stored from the top-left origin, so the same origin shift has to travel to them —
+        // otherwise cropping the top/left edge slides them off the features they mark. The grid follows the
+        // (counter-moved) pivot, so this is what keeps the two aligned.
+        if (pinAnnotations && (min.X != 0 || min.Y != 0))
+        {
+            foreach (var annotation in surface.Annotations)
+            {
+                annotation.P1 -= min;
+                annotation.P2 -= min;
+            }
+        }
     }
 
     /// <summary>
@@ -323,7 +338,9 @@ internal static class SurfaceGeometry
             default: min.X = MathF.Min(surfacePos.X, max.X - MinSize); break;
         }
 
-        ApplyRect(surface, RectFromBounds(min, max));
+        // A stretch restores the surface's own space below, so its annotations must stay put (pinAnnotations:
+        // false); a crop re-bases the space, so they ride the origin shift.
+        ApplyRect(surface, RectFromBounds(min, max), pinAnnotations: !keepDimensions);
 
         if (!keepDimensions)
             return;

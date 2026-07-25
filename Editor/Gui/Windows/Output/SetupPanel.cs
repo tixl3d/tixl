@@ -637,16 +637,14 @@ internal static class SetupPanel
             return;
         }
 
-        // Dropping a source onto a surface shows one of its slices there, creating a full-frame slice if the
-        // source has none yet. Routing is setup data now, so this is a plain field write.
-        // Dropping a slice on a free surface shows it there. If the surface already shows something, the drop
-        // can't have meant "replace it", so it lands as a sub-region cut to the slice's own aspect instead —
-        // which is the poster-slot case, and never destroys an existing assignment.
+        // Dropping a slice on a free surface shows it there. A *different* slice dropped on an occupied surface
+        // lands as a sub-region cut to its own aspect (the poster-slot case) rather than replacing — but
+        // re-dropping the slice the surface already shows is a no-op, not a spurious duplicate sub-region.
         if (dragKind == SetupEntitySelection.EntityKind.Slice)
         {
             var slice = setup.Slices.Find(s => s.Id == dragId);
             var surface = setup.Surfaces.Find(s => s.Id == targetId);
-            if (slice != null && surface != null)
+            if (slice != null && surface != null && surface.SliceId != slice.Id)
             {
                 if (surface.SliceId == Guid.Empty)
                     surface.SliceId = slice.Id;
@@ -2213,19 +2211,12 @@ internal static class SetupPanel
         OutputSetupHandling.SaveActive();
     }
 
+    // Deleting a surface takes its sub-regions with it (they're cuts of the parent, meaningless on their own).
     private static void DeleteSurface(Setup setup, Guid surfaceId)
     {
-        // Re-parent orphaned children to the deleted surface's parent so the tree stays connected.
-        var parentId = setup.Surfaces.Find(s => s.Id == surfaceId)?.ParentId ?? Guid.Empty;
-        foreach (var surface in setup.Surfaces)
-        {
-            if (surface.ParentId == surfaceId)
-                surface.ParentId = parentId;
-        }
-
-        setup.Surfaces.RemoveAll(s => s.Id == surfaceId);
-
-        OutputSetupHandling.SaveActive();
+        var command = new DeleteSurfaceCommand(setup, surfaceId);
+        if (command.HasSurfaces)
+            UndoRedoStack.AddAndExecute(command);
     }
 
     private static void DrawOutputBindingSubMenu(OutputDefinition output, MachineConfig machineConfig)

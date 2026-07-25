@@ -316,6 +316,18 @@ internal static class OutputManager
     }
 
     /// <summary>
+    /// Marks one of a surface's annotation lines as the one being edited, so the projected composite draws it
+    /// thick and pulsing on the wall (the whole point of calibrating is watching that projection). Re-stated
+    /// each drag frame; expires on its own like the aim point.
+    /// </summary>
+    public static void EmphasizeAnnotation(Guid surfaceId, int index)
+    {
+        _emphasizedSurfaceId = surfaceId;
+        _emphasizedIndex = index;
+        _emphasizedFrame = ImGuiNET.ImGui.GetFrameCount();
+    }
+
+    /// <summary>
     /// Carries a surface's annotation lines through its corner pin into output pixels. Warping here rather
     /// than in the shader is what keeps the projected line an even width — by the time it is drawn, no
     /// perspective is left in it.
@@ -337,21 +349,35 @@ internal static class OutputManager
             _overlayLines.Add(new OverlayLine(new Vector4(aim.X, aim.Y - arm, aim.X, aim.Y + arm), aimColor, aimParams));
         }
 
-        var markerSize = new Vector2(_annotationMarkerSize, _annotationMarkerSize);
-        foreach (var annotation in surface.Annotations)
+        // Lines over a projected grid on a real wall are hard to pick out, so the endpoints pulse white and the
+        // line being dragged thickens and pulses white ↔ its alignment colour — the readout you're aligning by.
+        var blink = MathF.Sin((float)ImGuiNET.ImGui.GetTime() * _overlayBlinkRate) * 0.5f + 0.5f;
+        var white = T3.Editor.Gui.Styling.UiColors.ForegroundFull.Rgba;
+        var emphasizedIndex = _emphasizedSurfaceId == surface.Id && ImGuiNET.ImGui.GetFrameCount() - _emphasizedFrame <= 1
+                                  ? _emphasizedIndex
+                                  : -1;
+
+        for (var i = 0; i < surface.Annotations.Count; i++)
         {
+            var annotation = surface.Annotations[i];
             LineRectifier.IsHorizontal(annotation.P1, annotation.P2, out var deviation);
             var color = AlignmentColor(deviation).Rgba;
+            var isEmphasized = i == emphasizedIndex;
 
             var a = surfaceToOutput.TransformPoint(annotation.P1);
             var b = surfaceToOutput.TransformPoint(annotation.P2);
-            _overlayLines.Add(new OverlayLine(new Vector4(a.X, a.Y, b.X, b.Y), color,
-                                              new Vector4(_annotationLineWidth, 0, 0, 0)));
 
-            // The endpoints are what you actually aim at a feature, so they are drawn as their own primitive
-            // — round for now, and the slot a textured handle drops into later.
-            _overlayQuads.Add(new OverlayQuad(new Vector4(a.X, a.Y, markerSize.X, markerSize.Y), color, _markerShape));
-            _overlayQuads.Add(new OverlayQuad(new Vector4(b.X, b.Y, markerSize.X, markerSize.Y), color, _markerShape));
+            var lineColor = isEmphasized ? Vector4.Lerp(color, white, blink) : color;
+            var lineWidth = isEmphasized ? _annotationLineWidth * 3f : _annotationLineWidth;
+            _overlayLines.Add(new OverlayLine(new Vector4(a.X, a.Y, b.X, b.Y), lineColor, new Vector4(lineWidth, 0, 0, 0)));
+
+            // The endpoints are what you actually aim at a feature: they pulse white to be findable, and the
+            // dragged line's grow. Round for now — the slot a textured handle drops into later.
+            var markerColor = Vector4.Lerp(color, white, blink);
+            var markerSize = isEmphasized ? _annotationMarkerSize * 1.5f : _annotationMarkerSize;
+            var markerShape = new Vector4(0, markerSize * 0.5f, 0, 0);
+            _overlayQuads.Add(new OverlayQuad(new Vector4(a.X, a.Y, markerSize, markerSize), markerColor, markerShape));
+            _overlayQuads.Add(new OverlayQuad(new Vector4(b.X, b.Y, markerSize, markerSize), markerColor, markerShape));
         }
     }
 
@@ -751,9 +777,7 @@ internal static class OutputManager
     private const float _annotationMarkerSize = 11f;
     private const float _aimCrosshairSize = 60f;
     private const float _aimLineWidth = 1.5f;
-
-    // Radius half the size, so the marker is a dot; a zero radius would make the same primitive a square.
-    private static readonly Vector4 _markerShape = new(0, _annotationMarkerSize * 0.5f, 0, 0);
+    private const float _overlayBlinkRate = 8f; // matches the editor-canvas handles so the two stay in phase
 
     private static readonly Vector2[] _unitQuad = [new(0, 0), new(1, 0), new(1, 1), new(0, 1)];
     private static readonly Vector4 _fullSourceRect = new(0, 0, 1, 1);
@@ -779,6 +803,10 @@ internal static class OutputManager
     private static Guid _aimSurfaceId;
     private static Vector2 _aimInSurface;
     private static int _aimFrame = -10;
+
+    private static Guid _emphasizedSurfaceId;
+    private static int _emphasizedIndex = -1;
+    private static int _emphasizedFrame = -10;
     private static readonly List<OverlayLine> _overlayLines = [];
     private static readonly List<OverlayQuad> _overlayQuads = [];
     private static Resource<T3.Core.DataTypes.VertexShader>? _lineVertexShader;

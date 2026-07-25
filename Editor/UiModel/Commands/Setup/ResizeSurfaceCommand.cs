@@ -48,6 +48,12 @@ internal sealed class ResizeSurfaceCommand : ICommand
                 var mapping = surface.OutputMappings[i];
                 Quads[i] = (mapping.OutputId, (Vector2[])mapping.Quad.Clone());
             }
+
+            // A crop re-bases the surface's own frame, which shifts the measuring lines with it. Snapshotting
+            // them keeps the live re-base (restore-then-apply each frame) from compounding, and lets a crop undo.
+            Annotations = new (Vector2, Vector2)[surface.Annotations.Count];
+            for (var i = 0; i < surface.Annotations.Count; i++)
+                Annotations[i] = (surface.Annotations[i].P1, surface.Annotations[i].P2);
         }
 
         public readonly Vector2 Size;
@@ -55,6 +61,7 @@ internal sealed class ResizeSurfaceCommand : ICommand
         public readonly Vector2 Pivot;
         public readonly bool HasPlacement;
         public readonly (Guid OutputId, Vector2[] Quad)[] Quads;
+        public readonly (Vector2 P1, Vector2 P2)[] Annotations;
 
         public bool TryGetQuad(Guid outputId, out Vector2[] quad)
         {
@@ -91,6 +98,13 @@ internal sealed class ResizeSurfaceCommand : ICommand
                 var mapping = surface.OutputMappings.Find(m => m.OutputId == outputId);
                 if (mapping != null && mapping.Quad.Length >= 4 && quad.Length >= 4)
                     Array.Copy(quad, mapping.Quad, 4);
+            }
+
+            // Measuring lines ride the frame; restore them from the same snapshot (count is stable across a crop).
+            for (var i = 0; i < Annotations.Length && i < surface.Annotations.Count; i++)
+            {
+                surface.Annotations[i].P1 = Annotations[i].P1;
+                surface.Annotations[i].P2 = Annotations[i].P2;
             }
         }
     }

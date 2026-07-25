@@ -6,6 +6,7 @@ using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
+using Color = T3.Core.DataTypes.Vector.Color;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.Output;
@@ -90,6 +91,13 @@ internal sealed partial class SetupOutputView
         }
 
         var scale = T3Ui.UiScaleFactor;
+
+        // The lines sit over a projected grid on a real wall, so they're genuinely hard to see. A white blink
+        // draws the eye to the active handle/line without hiding the alignment colour the rest of the time.
+        var blink = MathF.Sin((float)ImGui.GetTime() * BlinkRate) * 0.5f + 0.5f;
+        var white = UiColors.ForegroundFull.Fade(fade);
+        var nextDragIndex = -1;
+
         for (var i = 0; i < annotations.Count; i++)
         {
             var annotation = annotations[i];
@@ -105,12 +113,24 @@ internal sealed partial class SetupOutputView
 
             var p1 = ToView(annotation.P1);
             var p2 = ToView(annotation.P2);
-            dl.AddLine(_projection.CanvasToScreen(p1), _projection.CanvasToScreen(p2), color, 2f * scale);
+
+            // While dragging (this frame's draft, or an endpoint grabbed last frame) the line pulses white ↔ its
+            // alignment colour and thickens, so it's unmistakable under the cursor — in the editor overlay and,
+            // via the projected composite, on the wall itself.
+            var isDragging = i == _measureDraftIndex || i == _measureDragIndex;
+            if (isDragging)
+                OutputManager.EmphasizeAnnotation(carrier.Id, i);
+
+            var lineColor = isDragging ? Color.Mix(color, white, blink) : color;
+            var lineWidth = (isDragging ? 6f : 2f) * scale;
+            dl.AddLine(_projection.CanvasToScreen(p1), _projection.CanvasToScreen(p2), lineColor, lineWidth);
 
             if (canEdit && _measureDraftIndex < 0)
             {
                 var style = CanvasPointHandle.Style.Default(color);
-                style.Radius = 4;
+                // Idle endpoints blink white and sit larger, so they read against the grid before you grab one.
+                style.Color = Color.Mix(color, white, blink);
+                style.Radius = 7;
 
                 ImGui.PushID("p1");
                 var phase1 = CanvasPointHandle.Draw(ref p1, _projection, style);
@@ -124,6 +144,10 @@ internal sealed partial class SetupOutputView
 
                 if (phase2 != CanvasPointHandle.DragPhase.None)
                     annotation.P2 = ToSurface(p2);
+
+                if (phase1 is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging
+                    || phase2 is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging)
+                    nextDragIndex = i;
 
                 if (phase1 == CanvasPointHandle.DragPhase.Completed || phase2 == CanvasPointHandle.DragPhase.Completed)
                     OutputSetupHandling.SaveActive();
@@ -139,6 +163,9 @@ internal sealed partial class SetupOutputView
                                 color, canEdit, requestLength);
             ImGui.PopID();
         }
+
+        // A handle's drag phase is only known after it's drawn (below its line), so the line reads it next frame.
+        _measureDragIndex = nextDragIndex;
 
         if (_annotationToDelete >= 0)
         {
@@ -370,6 +397,9 @@ internal sealed partial class SetupOutputView
     // Measure/straighten state.
     private bool _measureArmed;
     private int _measureDraftIndex = -1;
+    private int _measureDragIndex = -1; // endpoint grabbed last frame, so its line can emphasize this frame
+
+    private const float BlinkRate = 8f;
     private static float _lengthEdit;
     private static int _annotationToDelete = -1;
     private static readonly List<Vector4> _refineLines = [];
