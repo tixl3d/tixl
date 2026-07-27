@@ -210,9 +210,27 @@ internal sealed partial class SetupOutputView
                 default: next.X = MathF.Min(inSource.X, uv.Z - MinSliceSize); break;
             }
 
-            // Snap to the source's own edges and centre — a slice flush to the atlas border is the common case.
+            // Snap to the source's bounds/midlines and the sibling slices' edges and centres — the same
+            // vocabulary a surface edge snaps to (parent + siblings), so the two feel alike.
             if (snapping)
-                SnapToSourceBounds(ref next, edge, threshold);
+            {
+                CollectSliceSnapCandidates(setup, slice);
+                var movesX = edge is 1 or 3;
+                Span<float> anchor = [edge switch { 0 => next.Y, 1 => next.Z, 2 => next.W, _ => next.X }];
+                if (SurfaceGeometry.TrySnapOffset(movesX ? _sliceSnapXs : _sliceSnapYs, anchor, threshold,
+                                                  out var snapOffset, out var snapTarget))
+                {
+                    switch (edge)
+                    {
+                        case 0: next.Y += snapOffset; break;
+                        case 1: next.Z += snapOffset; break;
+                        case 2: next.W += snapOffset; break;
+                        default: next.X += snapOffset; break;
+                    }
+
+                    DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, movesX, snapTarget);
+                }
+            }
 
             ApplySliceRect(slice, new Vector4(Math.Clamp(next.X, 0, 1), Math.Clamp(next.Y, 0, 1),
                                            Math.Clamp(next.Z, 0, 1), Math.Clamp(next.W, 0, 1)));
@@ -292,18 +310,46 @@ internal sealed partial class SetupOutputView
                 var (origin, startUv) = _sliceMoveStart.Value;
                 var size = new Vector2(startUv.Z - startUv.X, startUv.W - startUv.Y);
                 var delta = cursorUv - origin;
+
+                // Same ~14° axis-lock cone as a surface move.
+                var lockX = false;
+                var lockY = false;
+                if (snapping)
+                {
+                    lockX = MathF.Abs(delta.X) > MathF.Abs(delta.Y) * 4;
+                    lockY = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 4;
+                    if (lockX)
+                        delta.Y = 0;
+                    else if (lockY)
+                        delta.X = 0;
+                }
+
                 var sliceOrigin = new Vector2(startUv.X, startUv.Y) + delta;
 
                 if (snapping)
                 {
-                    // Either edge, or the centre, may catch — whichever is closest wins per axis.
+                    // Either edge, or the centre, may catch — whichever is closest wins per axis. Candidates
+                    // are the source bounds plus the sibling slices, same as a surface snapping to siblings.
+                    CollectSliceSnapCandidates(setup, slice);
                     Span<float> xs = [sliceOrigin.X, sliceOrigin.X + size.X * 0.5f, sliceOrigin.X + size.X];
                     Span<float> ys = [sliceOrigin.Y, sliceOrigin.Y + size.Y * 0.5f, sliceOrigin.Y + size.Y];
-                    if (SurfaceGeometry.TrySnapOffset(_sourceBoundCandidates, xs, threshold, out var offsetX, out _))
+                    if (SurfaceGeometry.TrySnapOffset(_sliceSnapXs, xs, threshold, out var offsetX, out var targetX))
+                    {
                         sliceOrigin.X += offsetX;
+                        DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: true, targetX);
+                    }
 
-                    if (SurfaceGeometry.TrySnapOffset(_sourceBoundCandidates, ys, threshold, out var offsetY, out _))
+                    if (SurfaceGeometry.TrySnapOffset(_sliceSnapYs, ys, threshold, out var offsetY, out var targetY))
+                    {
                         sliceOrigin.Y += offsetY;
+                        DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: false, targetY);
+                    }
+
+                    // The locked movement axis, drawn across the source so it reads as a guide (surface parity).
+                    if (lockX)
+                        DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: false, sliceOrigin.Y + size.Y * 0.5f);
+                    else if (lockY)
+                        DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: true, sliceOrigin.X + size.X * 0.5f);
                 }
 
                 sliceOrigin.X = Math.Clamp(sliceOrigin.X, 0, MathF.Max(1 - size.X, 0));
@@ -377,19 +423,42 @@ internal sealed partial class SetupOutputView
         OutputSetupHandling.SaveActive();
     }
 
-    private static void SnapToSourceBounds(ref Vector4 rect, int edge, float threshold)
+    /// <summary>Snap targets for slice edits, in source UV: the source's bounds and midlines plus every
+    /// sibling slice's edges and centres — the same vocabulary a surface edit snaps to (parent + siblings).</summary>
+    private static void CollectSliceSnapCandidates(Setup setup, Slice slice)
     {
-        Span<float> candidates = [0f, 0.5f, 1f];
-        foreach (var candidate in candidates)
+        _sliceSnapXs.Clear();
+        _sliceSnapYs.Clear();
+        _sliceSnapXs.Add(0);
+        _sliceSnapXs.Add(0.5f);
+        _sliceSnapXs.Add(1);
+        _sliceSnapYs.Add(0);
+        _sliceSnapYs.Add(0.5f);
+        _sliceSnapYs.Add(1);
+
+        foreach (var other in setup.Slices)
         {
-            switch (edge)
-            {
-                case 0 when MathF.Abs(rect.Y - candidate) < threshold: rect.Y = candidate; return;
-                case 1 when MathF.Abs(rect.Z - candidate) < threshold: rect.Z = candidate; return;
-                case 2 when MathF.Abs(rect.W - candidate) < threshold: rect.W = candidate; return;
-                case 3 when MathF.Abs(rect.X - candidate) < threshold: rect.X = candidate; return;
-            }
+            if (other.Id == slice.Id || other.SourceId != slice.SourceId)
+                continue;
+
+            var rect = other.UvRect;
+            _sliceSnapXs.Add(rect.X);
+            _sliceSnapXs.Add((rect.X + rect.Z) * 0.5f);
+            _sliceSnapXs.Add(rect.Z);
+            _sliceSnapYs.Add(rect.Y);
+            _sliceSnapYs.Add((rect.Y + rect.W) * 0.5f);
+            _sliceSnapYs.Add(rect.W);
         }
+    }
+
+    /// <summary>A caught snap line across the source (extended past its bounds, matching the surface guides).</summary>
+    private void DrawSliceSnapGuide(ImDrawListPtr dl, Vector2 sourceOrigin, Vector2 sourceSize, bool vertical, float uvCoordinate)
+    {
+        var from = vertical ? new Vector2(uvCoordinate, -1f) : new Vector2(-1f, uvCoordinate);
+        var to = vertical ? new Vector2(uvCoordinate, 2f) : new Vector2(2f, uvCoordinate);
+        var a = _projection.CanvasToScreen(sourceOrigin + from * sourceSize);
+        var b = _projection.CanvasToScreen(sourceOrigin + to * sourceSize);
+        dl.AddLine(a, b, UiColors.StatusAnimated.Fade(0.6f), 1 * T3Ui.UiScaleFactor);
     }
 
     // Slice-editing state (the rest — _selectedSliceId, the Content-stage framing — lives with the morph in
@@ -404,5 +473,6 @@ internal sealed partial class SetupOutputView
     private readonly List<(Guid ChildId, IOutputSink Sink, Vector4 SourceRect)> _sharingSinks = [];
 
     // The source's own borders and centre, in UV — what a slice snaps against.
-    private static readonly List<float> _sourceBoundCandidates = [0f, 0.5f, 1f];
+    private static readonly List<float> _sliceSnapXs = [];
+    private static readonly List<float> _sliceSnapYs = [];
 }

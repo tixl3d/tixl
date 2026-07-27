@@ -89,3 +89,48 @@ Select `Surface 1` (or any other entity) in the panel, then click `P1` again. Op
 - The quad reappears exactly where it was left.
 - The surface's `OutputMappings` entry — with the four `Quad` points in output pixels — is
   present in the setup JSON (written on drag release).
+
+## Step: Corner selection on the canvas
+
+**Action:**
+With two mapped surfaces on one output, click a corner handle of the first surface. Then
+shift-click a corner of the second surface, and ctrl-click one of the two to toggle it off
+and on again.
+
+**Expected:**
+- A selected corner renders marked: status-colored fill with a bright rim, slightly larger.
+- Shift adds to the corner selection across surfaces; ctrl toggles a single corner.
+- Plain-clicking an *unselected* corner replaces the corner selection with just that corner.
+
+## Step: Marquee-select corners
+
+**Action:**
+In the plain output view, left-drag on empty canvas space to draw a marquee across several
+corner handles. Then left-click on empty space.
+
+**Expected:**
+- A selection rectangle appears while dragging; corners inside it are selected live.
+- Shift-marquee adds to the existing corner selection; ctrl-marquee removes.
+- Panning still works via right-drag/middle-drag — left-drag on empty space is the marquee.
+- The empty click clears the corner selection (the entity selection keeps its own rules).
+
+## Step: Group-drag selected corners
+
+**Action:**
+Select corners on both surfaces (marquee or shift-click), then drag one of the selected
+corners.
+
+**Expected:**
+- All selected corners move together by the same offset, across both surfaces.
+- Snapping applies to the dragged corner and the group follows it.
+- A single Ctrl-Z undoes the whole group move at once (both surfaces restore); Ctrl-Y
+  redoes it.
+
+## Step: Corner selection follows the shown canvas
+
+**Action:**
+With corners selected, switch to another output (or another edit mode), then back.
+
+**Expected:**
+- The corner selection is cleared on the switch — it never carries over to a different
+  canvas view.

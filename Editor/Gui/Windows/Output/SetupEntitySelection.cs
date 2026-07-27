@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using T3.Core.Operator;
 using T3.Core.Output;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.Output;
 
@@ -47,27 +48,13 @@ internal sealed class SetupEntitySelection
     }
 
     /// <summary>Replace the selection with a single entity.</summary>
-    public void Select(EntityKind kind, Guid id)
-    {
-        _targets.Clear();
-        _targets.Add(new SelectionTarget(kind, id));
-    }
+    public void Select(EntityKind kind, Guid id) => _targets.Set(new SelectionTarget(kind, id));
 
     /// <summary>Add an entity to the selection (no-op if already present).</summary>
-    public void Add(EntityKind kind, Guid id)
-    {
-        var target = new SelectionTarget(kind, id);
-        if (!_targets.Contains(target))
-            _targets.Add(target);
-    }
+    public void Add(EntityKind kind, Guid id) => _targets.Add(new SelectionTarget(kind, id));
 
     /// <summary>Toggle an entity's membership.</summary>
-    public void Toggle(EntityKind kind, Guid id)
-    {
-        var target = new SelectionTarget(kind, id);
-        if (!_targets.Remove(target))
-            _targets.Add(target);
-    }
+    public void Toggle(EntityKind kind, Guid id) => _targets.Toggle(new SelectionTarget(kind, id));
 
     public void Clear() => _targets.Clear();
 
@@ -77,27 +64,26 @@ internal sealed class SetupEntitySelection
 
     /// <summary>The selection in order, primary first. Copy before acting on it — anything that deletes
     /// entities prunes this list as it goes.</summary>
-    public IReadOnlyList<SelectionTarget> Targets => _targets;
+    public IReadOnlyList<SelectionTarget> Targets => _targets.Items;
 
     /// <summary>Resolves the primary selection against a setup, dropping any target whose entity is gone.</summary>
     public bool TryResolve(Setup setup, out EntityKind kind, out Guid id)
     {
-        // Manual loop: this runs several times per frame, so no RemoveAll/Exists closures.
         for (var i = _targets.Count - 1; i >= 0; i--)
         {
             if (!ExistsInSetup(setup, _targets[i]))
                 _targets.RemoveAt(i);
         }
 
-        if (_targets.Count == 0)
+        if (!_targets.TryGetPrimary(out var primary))
         {
             kind = EntityKind.None;
             id = Guid.Empty;
             return false;
         }
 
-        kind = _targets[0].Kind;
-        id = _targets[0].EntityId;
+        kind = primary.Kind;
+        id = primary.EntityId;
         return true;
     }
 
@@ -174,5 +160,5 @@ internal sealed class SetupEntitySelection
         }
     }
 
-    private readonly List<SelectionTarget> _targets = [];
+    private readonly SelectionSet<SelectionTarget> _targets = new();
 }

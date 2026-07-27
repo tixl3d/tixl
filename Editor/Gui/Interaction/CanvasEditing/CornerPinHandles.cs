@@ -68,9 +68,10 @@ internal static class CornerPinHandles
     }
 
     /// <summary>As <see cref="Draw(Vector2[],ICanvasProjection,in Style,out int)"/>, also reporting whether any
-    /// of the four corner handles is hovered — used to cross-highlight the quad's entity from the canvas.</summary>
+    /// of the four corner handles is hovered — used to cross-highlight the quad's entity from the canvas.
+    /// <paramref name="selectedCornersMask"/> marks corners in the canvas sub-element selection (bit per corner).</summary>
     public static CanvasPointHandle.DragPhase Draw(Vector2[] corners, ICanvasProjection projection, in Style style,
-                                                   out int draggedCorner, out bool hovered)
+                                                   out int draggedCorner, out bool hovered, int selectedCornersMask = 0)
     {
         draggedCorner = -1;
         hovered = false;
@@ -100,6 +101,15 @@ internal static class CornerPinHandles
             // don't need a winding cue of their own.
             var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Circle, style.Editable);
             handleStyle.OutlineColor = style.HandleOutlineColor;
+
+            // A selected corner reads as part of the active set: status-colored fill, bright rim, a touch larger.
+            if ((selectedCornersMask & (1 << i)) != 0)
+            {
+                handleStyle.Color = UiColors.StatusActivated;
+                handleStyle.OutlineColor = UiColors.ForegroundFull;
+                handleStyle.Radius += 1;
+            }
+
             var handlePhase = CanvasPointHandle.Draw(ref corners[i], projection, handleStyle);
             if (handlePhase != CanvasPointHandle.DragPhase.None)
             {

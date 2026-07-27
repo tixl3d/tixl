@@ -11,6 +11,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Editor.UiModel.Selection;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.Output;
@@ -156,9 +157,9 @@ internal sealed partial class SetupOutputView
             var basisQuad = basisMapping.Quad;
             var basisSize = basis!.SizeInMeters;
             var pivot = basis.Placement?.Pivot ?? Vector2.Zero;
-            if (_dragOldQuad != null && _dragSurfaceId == basisId)
+            if (_dragSurfaceId == basisId && _cornerDragOldQuads.TryGetValue(basisId, out var preDragQuad))
             {
-                basisQuad = _dragOldQuad;
+                basisQuad = preDragQuad;
                 framingFrozen = true;
             }
             else if (_resizeOldState != null && _edgeDragSurfaceId == basisId)
@@ -377,6 +378,7 @@ internal sealed partial class SetupOutputView
         // ...and they fade out over stage two rather than being switched off, so nothing pops.
         var handleFade = 1f - toContent;
 
+        _fenceCandidates.Clear();
         Span<Vector2> labelQuad = stackalloc Vector2[4]; // hoisted: one buffer reused by every surface
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
@@ -440,7 +442,7 @@ internal sealed partial class SetupOutputView
 
             style.EdgeColor = PulseColor(style.EdgeColor, surfacePulse);
 
-            var handleActive = (_dragOldQuad != null && _dragSurfaceId == surface.Id)
+            var handleActive = (_cornerDragOldQuads.Count > 0 && _dragSurfaceId == surface.Id)
                                || (_resizeOldState != null && _edgeDragSurfaceId == surface.Id);
             var pointerOverLabel = !handleActive && !string.IsNullOrEmpty(surface.Name)
                                    && IsMouseOverLabel(labelQuad, surface.Name);
@@ -449,20 +451,52 @@ internal sealed partial class SetupOutputView
             var handlesEditable = editable && !pointerOverLabel && !lockedByIsolate;
             style.Editable = handlesEditable;
 
-            // The label is drawn separately so it can be hit-tested as the surface's pick/grab area.
-            style.Label = null;
-            var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out _, out var cornerHovered);
-
-            // Map the edited view-space quad back to projector space — only while a corner drag is live.
-            // At rest the round-trip is only near-identity in float, so writing it back every frame would
-            // slowly drift the stored quad while merely viewing in a rectified mode.
-            if (phase != CanvasPointHandle.DragPhase.None)
+            // Selected corners render marked, and every editable corner is a fence-select candidate.
+            var selectedMask = 0;
+            for (var c = 0; c < 4; c++)
             {
-                for (var c = 0; c < 4; c++)
-                    mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin);
+                var cornerTarget = new SelectionTarget(SetupEntitySelection.EntityKind.Surface, surface.Id, SubPart.Corner, c);
+                if (_canvasSelection.Contains(cornerTarget))
+                    selectedMask |= 1 << c;
+
+                if (handlesEditable)
+                    _fenceCandidates.Add((cornerTarget, labelQuad[c]));
             }
 
-            HandleDrag(phase, surface.Id, outputId, mappingData.Quad);
+            // The label is drawn separately so it can be hit-tested as the surface's pick/grab area.
+            style.Label = null;
+            var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out var draggedCorner, out var cornerHovered, selectedMask);
+
+            if (phase != CanvasPointHandle.DragPhase.None)
+            {
+                // Grabbing a corner selects it in the sub-element plane: ctrl toggles, shift adds, plain replaces —
+                // unless the corner is already selected, which keeps the set so the grab starts a group drag.
+                if (phase == CanvasPointHandle.DragPhase.Started && draggedCorner >= 0)
+                {
+                    var target = new SelectionTarget(SetupEntitySelection.EntityKind.Surface, surface.Id, SubPart.Corner, draggedCorner);
+                    var io = ImGui.GetIO();
+                    if (io.KeyCtrl)
+                        _canvasSelection.Toggle(target);
+                    else if (io.KeyShift)
+                        _canvasSelection.Add(target);
+                    else if (!_canvasSelection.Contains(target))
+                        _canvasSelection.Set(target);
+                }
+
+                // Map the edited view-space quad back to projector space — only while a corner drag is live.
+                // At rest the round-trip is only near-identity in float, so writing it back every frame would
+                // slowly drift the stored quad while merely viewing in a rectified mode.
+                var previousDraggedCorner = draggedCorner >= 0 ? mappingData.Quad[draggedCorner] : Vector2.Zero;
+                for (var c = 0; c < 4; c++)
+                    mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin);
+
+                // Group drag: the dragged corner's output-space delta rides onto every other selected corner.
+                if (phase == CanvasPointHandle.DragPhase.Dragging && draggedCorner >= 0)
+                    ApplyGroupCornerDelta(setup, outputId, surface.Id, draggedCorner,
+                                          mappingData.Quad[draggedCorner] - previousDraggedCorner);
+            }
+
+            HandleDrag(phase, setup, surface.Id, outputId, mappingData.Quad);
 
             // A handle stands in for its frame: hovering one lights the frame (and its sidebar row), and
             // grabbing one selects it — so you can't edit a frame that isn't the selected item. Isolate mode
@@ -493,11 +527,61 @@ internal sealed partial class SetupOutputView
             DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, labelQuad, surface.Id, surface.Name, isSelected, labelEmphasis, surfacePulse);
         }
 
+        // Marquee over corner handles — plain output view only for now, and never while another canvas
+        // drag is live (label moves and slice/annotation drags are manual, so the fence can't see them
+        // through IsAnyItemActive alone).
+        if (_editMode == EditMode.Output && editable
+            && _cornerDragOldQuads.Count == 0 && _resizeOldState == null && _labelMoveSurfaceId == Guid.Empty
+            && !ImGui.IsAnyItemActive())
+        {
+            UpdateCornerFence();
+        }
+        else
+        {
+            _fence.Reset();
+        }
+
         if (basis != null && basisMapping != null)
             DrawAnnotations(dl, basis, basisMapping, rToView, rToOutput, viewMin, editable, handleFade * straighten);
 
         DrawSliceEditor(setup, dl, focusCarrierId, viewMin, toContent);
         ResolvePicking(setup, selection);
+    }
+
+    private void UpdateCornerFence()
+    {
+        switch (_fence.UpdateAndDraw(out var selectMode))
+        {
+            case SelectionFence.States.Updated:
+            case SelectionFence.States.CompletedAsArea:
+                ApplyCornerFence(selectMode);
+                break;
+
+            case SelectionFence.States.CompletedAsClick:
+                // Empty click clears only this plane — the entity plane keeps its own click rules.
+                _canvasSelection.Clear();
+                break;
+        }
+    }
+
+    private void ApplyCornerFence(SelectionFence.SelectModes selectMode)
+    {
+        // Replace rebuilds from scratch every update frame, so the marquee reads live.
+        if (selectMode == SelectionFence.SelectModes.Replace)
+            _canvasSelection.Clear();
+
+        var bounds = _fence.BoundsInScreen;
+        for (var i = 0; i < _fenceCandidates.Count; i++)
+        {
+            var (target, screenPos) = _fenceCandidates[i];
+            if (!bounds.Contains(screenPos))
+                continue;
+
+            if (selectMode == SelectionFence.SelectModes.Remove)
+                _canvasSelection.Remove(target);
+            else
+                _canvasSelection.Add(target);
+        }
     }
 
 
@@ -833,6 +917,10 @@ internal sealed partial class SetupOutputView
     private void FitToArea(Vector2 size, EditMode mode, Guid outputId, bool keepScope = false)
     {
         var key = (outputId, mode, size);
+
+        // A different framed canvas shows different handles — the sub-element plane can't carry over.
+        if (_fitKey.Item1 != outputId || _fitKey.Item2 != mode)
+            _canvasSelection.Clear();
 
         // While the view morphs, ease the canvas scope from wherever the user had panned/zoomed it to the fit
         // for the current framing. Snapping straight to the fit (as we do at rest) would throw their view away
@@ -1309,7 +1397,18 @@ internal sealed partial class SetupOutputView
 
     private void SelectPicked(SetupEntitySelection? selection, SetupEntitySelection.EntityKind kind, Guid id)
     {
-        selection?.Select(kind, id);
+        if (selection != null)
+        {
+            // Same modifiers as the sidebar rows: ctrl toggles, shift adds, plain replaces.
+            var io = ImGui.GetIO();
+            if (io.KeyCtrl)
+                selection.Toggle(kind, id);
+            else if (io.KeyShift)
+                selection.Add(kind, id);
+            else
+                selection.Select(kind, id);
+        }
+
         // The atlas view tracks its edited slice locally too, so keep it in step with the selection.
         if (kind == SetupEntitySelection.EntityKind.Slice)
             _selectedSliceId = id;
@@ -1429,28 +1528,90 @@ internal sealed partial class SetupOutputView
                                       });
     }
 
-    private void HandleDrag(CanvasPointHandle.DragPhase phase, Guid surfaceId, Guid outputId, Vector2[] liveQuad)
+    private void HandleDrag(CanvasPointHandle.DragPhase phase, Setup setup, Guid surfaceId, Guid outputId, Vector2[] liveQuad)
     {
         switch (phase)
         {
             case CanvasPointHandle.DragPhase.Started:
-                // The quad still holds its pre-drag value on the activation frame.
-                _dragOldQuad = (Vector2[])liveQuad.Clone();
+                // The quads still hold their pre-drag values on the activation frame. Snapshot every surface
+                // the drag can touch: the grabbed one plus any with corners in the sub-element selection.
+                _cornerDragOldQuads.Clear();
+                _cornerDragOldQuads[surfaceId] = (Vector2[])liveQuad.Clone();
+                for (var i = 0; i < _canvasSelection.Count; i++)
+                {
+                    var target = _canvasSelection[i];
+                    if (target.Part != SubPart.Corner || _cornerDragOldQuads.ContainsKey(target.EntityId))
+                        continue;
+
+                    var mapping = setup.FindSurface(target.EntityId)?.OutputMappings.Find(m => m.OutputId == outputId);
+                    if (mapping != null)
+                        _cornerDragOldQuads[target.EntityId] = (Vector2[])mapping.Quad.Clone();
+                }
+
                 _dragSurfaceId = surfaceId;
                 break;
 
             case CanvasPointHandle.DragPhase.Completed:
-                if (_dragOldQuad != null)
+                if (_cornerDragOldQuads.Count > 0)
                 {
-                    // Value already applied live during the drag.
-                    UndoRedoStack.Add(new ChangeOutputMappingQuadCommand(surfaceId, outputId, _dragOldQuad, liveQuad));
-                    OutputSetupHandling.SaveActive();
-                    _dragOldQuad = null;
+                    // Values were applied live during the drag; one undo step covers the whole group.
+                    _cornerDragCommands.Clear();
+                    foreach (var (id, oldQuad) in _cornerDragOldQuads)
+                    {
+                        var mapping = setup.FindSurface(id)?.OutputMappings.Find(m => m.OutputId == outputId);
+                        if (mapping == null || !QuadsDiffer(oldQuad, mapping.Quad))
+                            continue;
+
+                        _cornerDragCommands.Add(new ChangeOutputMappingQuadCommand(id, outputId, oldQuad, mapping.Quad));
+                    }
+
+                    if (_cornerDragCommands.Count == 1)
+                        UndoRedoStack.Add(_cornerDragCommands[0]);
+                    else if (_cornerDragCommands.Count > 1)
+                        UndoRedoStack.Add(new MacroCommand("Adjust corner pins", _cornerDragCommands));
+
+                    if (_cornerDragCommands.Count > 0)
+                        OutputSetupHandling.SaveActive();
+
+                    _cornerDragCommands.Clear();
+                    _cornerDragOldQuads.Clear();
                     _dragSurfaceId = Guid.Empty;
                 }
 
                 break;
         }
+    }
+
+    /// <summary>Moves every other selected corner by the dragged corner's output-space delta — the group drag.</summary>
+    private void ApplyGroupCornerDelta(Setup setup, Guid outputId, Guid draggedSurfaceId, int draggedCorner, Vector2 delta)
+    {
+        if (_canvasSelection.Count < 2 || (delta.X == 0 && delta.Y == 0))
+            return;
+
+        for (var i = 0; i < _canvasSelection.Count; i++)
+        {
+            var target = _canvasSelection[i];
+            if (target.Part != SubPart.Corner)
+                continue;
+
+            if (target.EntityId == draggedSurfaceId && target.Index == draggedCorner)
+                continue;
+
+            var mapping = setup.FindSurface(target.EntityId)?.OutputMappings.Find(m => m.OutputId == outputId);
+            if (mapping != null && target.Index >= 0 && target.Index < mapping.Quad.Length)
+                mapping.Quad[target.Index] += delta;
+        }
+    }
+
+    private static bool QuadsDiffer(Vector2[] a, Vector2[] b)
+    {
+        for (var i = 0; i < a.Length && i < b.Length; i++)
+        {
+            if (a[i] != b[i])
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -1518,8 +1679,17 @@ internal sealed partial class SetupOutputView
     private bool _basisHasLast;
 
     // Pre-drag quad snapshot + which surface it belongs to (so R can freeze only when the basis is dragged).
-    private Vector2[]? _dragOldQuad;
+    // Pre-drag quad snapshots for every surface a corner drag can touch — the grabbed one plus any with
+    // selected corners. Non-empty = a corner drag is live; also serves the straighten path's pre-drag basis.
+    private readonly Dictionary<Guid, Vector2[]> _cornerDragOldQuads = new();
     private Guid _dragSurfaceId;
+
+    // The canvas sub-element plane: selected mapping-quad corners (SelectionTarget.Part == Corner) of the
+    // shown output canvas. Deliberately separate from the entity selection — the two planes never mix.
+    private readonly SelectionSet<SelectionTarget> _canvasSelection = new();
+    private readonly SelectionFence _fence = new();
+    private readonly List<(SelectionTarget Target, Vector2 ScreenPos)> _fenceCandidates = new();
+    private static readonly List<ICommand> _cornerDragCommands = [];
 
     // Label chips collected this frame (id + screen rect) and the pick they resolve to — labels double as
     // each surface's click target, and overlapping ones cycle.

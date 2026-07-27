@@ -226,7 +226,19 @@ with an explanatory comment) — the row-callback API design made compliance imp
   extracted (delegate-free item widget: args struct, action-result, cached context-menu delegate, drag
   payload only built while active); `Icons.DrawInlineGlyph` replaces both private glyph copies; rename
   state moved into `EntityItem`. `SetupPanel` is now ~1,270 lines of pure panel layout/cards/highlights.
-  Next: selection completion (P2.2), then undo completion (P2.3).
+- **2026-07-27 (later):** UI consistency pass — one shared context menu (`EntityItem.DrawContextMenuItems`)
+  for sidebar rows and canvas labels with uniform Duplicate/Rename/Delete (new `DuplicateEntity` via JSON
+  clone; `DeleteEntity` covers ref-images/props with binding cleanup); drags direction-agnostic
+  (`CanConnect` + normalization in `ApplyDrop`; outputs draggable). Selection completion, first slice:
+  generic `SelectionSet<T>` (UiModel/Selection); sub-element plane in `SetupOutputView._canvasSelection`
+  (corners as `SelectionTarget.Part=Corner`); selected-corner rendering; ctrl/shift on corners and on
+  canvas entity picks; `SelectionFence` marquee over corners (Output mode, guarded); group corner drag
+  across surfaces with MacroCommand undo; plane clears on canvas-view change. Slice-vs-surface snapping
+  unified (sibling candidates, ~14° axis lock, guide lines in the slice editor).
+  **Still open from P2.2:** drag-state-machine unification in `SetupOutputView`; the `_focusedSurfaceId`/
+  `_selectedSliceId` selection shadows; routing snapping through `ICanvasPointSnapper` (behavior now
+  matches, but the seam is still bypassed); sub-element selection for slice corners / annotation endpoints.
+  Then undo completion (P2.3).
 
 ## Suggested order (revised for the flow-view pivot)
 
