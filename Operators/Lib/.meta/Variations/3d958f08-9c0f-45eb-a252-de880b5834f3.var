@@ -201,6 +201,44 @@
           "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 6120
         }
       }
+    },
+    {
+      "Id": "21b5ed36-5ad5-4c9b-9a62-5a57b26cb098",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "AdjustColors",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 367.65167
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 0.59,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": 0.0,
+          "b909844f-cff7-4907-9bc8-e9c2281582bf": 0.0,
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "float3 rgbImage = saturate(p.Color.rgb);\nfloat3 hsv = rgb2hsv(rgbImage);\nhsv.x += A;\nhsv.y += B;\nhsv.z += C;\n\np.Color.rgb = hsv2rgb(hsv);",
+          "864dfe5a-14f2-490f-be9c-ee13ad58605c": "float3 hsv2rgb(float3 hsv){\n   return lerp(1,saturate(abs(frac((hsv.x-float3(0,2,4)/6))-.5)*6-1),hsv.y)*hsv.z;\n}\n\nfloat3 rgb2hsv(float3 c){\n     float v=max(c.x,max(c.y,c.z));float m=min(c.x,min(c.y,c.z));float r=v-m;\n     float h=(r!=0)?frac(((v==c.x)?((c.y-c.z)/r):(v==c.y)?(2+(c.z-c.x)/r):(4+(c.x-c.y)/r))/6):0;\n     float s=(v!=0)?(1-m/v):0;\n     return float3(h,s,v);\n}"
+        }
+      }
+    },
+    {
+      "Id": "9e76d6a5-5e6d-49e4-b0b9-fcf97ccdc7b2",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "Sample Color From Image",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 367.65167
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "362e446c-b471-40fc-a21f-ddc25dafd01b": {
+            "X": 0.475,
+            "Y": 0.5
+          },
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "float4 c = Image.SampleLevel(Sampler, float2(Biased(f), 0.5),0);\np.Color = c;"
+        }
+      }
     }
   ]
 }

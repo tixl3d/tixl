@@ -15,7 +15,7 @@
       "DefaultValue": true
     },
     {
-      "Id": "91459607-22c1-4536-a384-8b1f1d8ecb64"/*CollistionResolve*/,
+      "Id": "91459607-22c1-4536-a384-8b1f1d8ecb64"/*CollisionResolve*/,
       "DefaultValue": 0.5
     },
     {

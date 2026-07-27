@@ -23,5 +23,5 @@ internal sealed class CollisionForce : Instance<CollisionForce>
     public readonly InputSlot<float> AttractionDecay = new();
 
     [Input(Guid = "91459607-22c1-4536-a384-8b1f1d8ecb64")]
-    public readonly InputSlot<float> CollistionResolve = new();
+    public readonly InputSlot<float> CollisionResolve = new();
 }
