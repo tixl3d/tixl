@@ -45,7 +45,7 @@ internal sealed partial class SetupOutputView
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        var output = setup.Outputs.Find(o => o.Id == outputId);
+        var output = setup.FindOutput(outputId);
         if (output == null)
             return;
 
@@ -394,7 +394,7 @@ internal sealed partial class SetupOutputView
                 // parent's space, so both are needed.
                 var carrier = SurfaceGeometry.FindCarrier(setup, surface.Id, outputId);
                 var carrierMapping = carrier?.OutputMappings.Find(m => m.OutputId == outputId);
-                var immediateParent = setup.Surfaces.Find(s => s.Id == surface.ParentId);
+                var immediateParent = setup.FindSurface(surface.ParentId);
                 if (carrier == null || carrierMapping == null || immediateParent == null
                     || !SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, carrierMapping, _childQuadBuffer))
                     continue;
@@ -453,9 +453,14 @@ internal sealed partial class SetupOutputView
             style.Label = null;
             var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out _, out var cornerHovered);
 
-            // Map the (possibly edited) view-space quad back to projector space. A no-op at rest / t=0.
-            for (var c = 0; c < 4; c++)
-                mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin);
+            // Map the edited view-space quad back to projector space — only while a corner drag is live.
+            // At rest the round-trip is only near-identity in float, so writing it back every frame would
+            // slowly drift the stored quad while merely viewing in a rectified mode.
+            if (phase != CanvasPointHandle.DragPhase.None)
+            {
+                for (var c = 0; c < 4; c++)
+                    mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin);
+            }
 
             HandleDrag(phase, surface.Id, outputId, mappingData.Quad);
 
@@ -1297,9 +1302,9 @@ internal sealed partial class SetupOutputView
             && ImGui.GetIO().KeyCtrl
             && ImGui.IsKeyPressed(ImGuiKey.D, false))
         {
-            var focused = setup.Surfaces.Find(s => s.Id == _focusedSurfaceId);
+            var focused = setup.FindSurface(_focusedSurfaceId);
             if (focused != null)
-                SetupPanel.DuplicateSurface(selection, setup, focused);
+                SetupActions.DuplicateSurface(selection, setup, focused);
         }
     }
 
@@ -1320,17 +1325,17 @@ internal sealed partial class SetupOutputView
         {
             case SetupEntitySelection.EntityKind.Surface:
             {
-                var surface = setup.Surfaces.Find(x => x.Id == _menuId);
+                var surface = setup.FindSurface(_menuId);
                 if (surface != null)
-                    SetupPanel.DrawSurfaceMenuItems(selection, setup, surface, includeDelete: true);
+                    SetupActions.DrawSurfaceMenuItems(selection, setup, surface, includeDelete: true);
 
                 break;
             }
             case SetupEntitySelection.EntityKind.Slice:
             {
-                var slice = setup.Slices.Find(x => x.Id == _menuId);
+                var slice = setup.FindSlice(_menuId);
                 if (slice != null)
-                    SetupPanel.DrawSliceMenuItems(selection, setup, slice);
+                    SetupActions.DrawSliceMenuItems(selection, setup, slice);
 
                 break;
             }

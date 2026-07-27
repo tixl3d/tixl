@@ -17,6 +17,7 @@ internal sealed class DeleteSurfaceCommand : ICommand
 
     public DeleteSurfaceCommand(T3.Core.Output.Setup setup, Guid surfaceId)
     {
+        _setupId = setup.Id;
         CollectSubtree(setup, surfaceId, _removed);
     }
 
@@ -25,8 +26,7 @@ internal sealed class DeleteSurfaceCommand : ICommand
 
     public void Do()
     {
-        var setup = ActiveSetup.Current;
-        if (setup == null)
+        if (!SetupCommands.TryGetSetup(_setupId, Name, out var setup))
             return;
 
         foreach (var (_, surface) in _removed)
@@ -37,8 +37,7 @@ internal sealed class DeleteSurfaceCommand : ICommand
 
     public void Undo()
     {
-        var setup = ActiveSetup.Current;
-        if (setup == null)
+        if (!SetupCommands.TryGetSetup(_setupId, Name, out var setup))
             return;
 
         // Re-insert in ascending original index: each earlier insertion shifts the rest right, so the captured
@@ -73,5 +72,6 @@ internal sealed class DeleteSurfaceCommand : ICommand
         }
     }
 
+    private readonly Guid _setupId;
     private readonly List<(int index, Surface surface)> _removed = [];
 }

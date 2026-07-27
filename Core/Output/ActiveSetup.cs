@@ -14,33 +14,7 @@ public static class ActiveSetup
     public static Setup? Current;
     public static MachineConfig? Machine;
 
-    public static Surface? TryFindSurface(Guid id)
-    {
-        var setup = Current;
-        if (setup == null || id == Guid.Empty)
-            return null;
+    public static Surface? TryFindSurface(Guid id) => Current?.FindSurface(id);
 
-        foreach (var surface in setup.Surfaces)
-        {
-            if (surface.Id == id)
-                return surface;
-        }
-
-        return null;
-    }
-
-    public static OutputDefinition? TryFindOutput(Guid id)
-    {
-        var setup = Current;
-        if (setup == null || id == Guid.Empty)
-            return null;
-
-        foreach (var output in setup.Outputs)
-        {
-            if (output.Id == id)
-                return output;
-        }
-
-        return null;
-    }
+    public static OutputDefinition? TryFindOutput(Guid id) => Current?.FindOutput(id);
 }

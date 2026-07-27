@@ -44,7 +44,23 @@ Any new field or entity must be added there **and** kept back-compatible (reader
 
 ## 2. Target model vs. as-built — gaps & contradictions
 
-### 2.1 Slice — ❌ not defined · **RESOLVED (revised): op-side, NOT the Setup**
+### 2.1 Slice — **RE-REVISED (2026-07-27): setup-side, as built — the 07-22 op-side decision is reversed**
+
+The implementation went setup-side (`Setup.ContentSources` + `Setup.Slices`; `Surface.SliceId` points at a
+slice; sources keyed by the op's `SymbolChildId`), and after review this is **blessed as the shipping model**:
+- **Why setup-side won in practice:** routing lives where the rest of the calibration is edited, survives
+  re-instantiation and hot reloads without an op eval, duplicates with the venue, and reads sensibly from the
+  file while nothing is instantiated. Slices as named entities (with `Unused` = unreferenced) fell out
+  naturally; op-side would have re-scattered them across ops.
+- **Accepted costs (documented, not bugs):** duplicating a `SendToOutput` op does *not* carry routing (the
+  source keys on the original `SymbolChildId` — the duplicate appears as a new unbound source); the
+  `ContentSourceSync` adopt/rename/cascade subsystem is permanent (now frame-driven, save-debounced); a
+  composition instanced twice yields ambiguous `SymbolChildId` sinks (first-registered wins — a known open
+  edge, fix when multi-instancing sends becomes a real use case).
+- The flow-view connection lines render this model: ContentSource → Slice → Surface/Output edges are all
+  setup data; only the source↔op link crosses into the live graph.
+
+<details><summary>Superseded 07-22 decision (op-side), kept for history</summary>
 The mockup shows `Atlas → {Poster Left, Poster Right, Unused}` — **named slices under a content source**,
 one *unbound*. Today the only slice concept is `OutputMapping.SourceQuad`: a single, **unnamed** UV quad on
 the surface's mapping, with no `Unused` notion.
@@ -54,6 +70,8 @@ the surface's mapping, with no `Unused` notion.
   Surface/Region or Output (empty = `Unused`), resolved against `ActiveSetup` each eval.
 - The `CONTENT` panel groups send-ops by shared upstream texture for the "Atlas → sends" visual (a view, not
   a stored parent). Fork closed 2026-07-22 (model (b), an op-held slice-list, dropped).
+
+</details>
 
 ### 2.2 Region / Surface unification — ❌ not defined · **RESOLVED: nested tree + explicit `Kind`**
 `Surface` is **flat**: no parent, no plane-root flag. Sub-regions can't be expressed, and the "physical (m)
@@ -87,7 +105,11 @@ per surface is already expressible; earlier notes described it as singular, whic
   `Setup.Mappings[]` join table `{SurfaceId, OutputId, …}`. Surface-side is fine; a join table reads more
   naturally for the by-Output sidebar view. Low stakes — decide when building the view.
 
-### 2.4 `SendToOutput` — **RESOLVED (revised): targeting stays an op Guid-param, content leaves the Setup**
+### 2.4 `SendToOutput` — **RE-REVISED (2026-07-27): superseded by §2.1 — content and targeting are setup-side.**
+`SendToOutput` stays `{ Texture, Update, Color }` with no target param; routing is `Surface.SliceId` /
+`OutputDefinition.SliceId` in the Setup. The section below records the superseded 07-22 reasoning.
+
+<details><summary>Superseded 07-22 decision (op-side targeting), kept for history</summary>
 The earlier "setup owns targeting, keyed by op-id-path" fought the existing venue-swap design. `Setup.Duplicate`
 preserves entity GUIDs *precisely so ops can reference setup entities by Guid across venues* (`UseProjectorCam`
 already resolves an `OutputRef` Guid against `ActiveSetup` each eval). And `Setup` is "everything re-done when
@@ -105,6 +127,8 @@ the physical situation changes" — targeting is **not** re-done per venue. So:
   input values persist on the op — confirmed). No variable per-op list needed. The `CONTENT` panel renders
   the "Atlas → sends" tree as a **group-by-shared-upstream-texture view**, not a stored parent.
 - **No migration on this branch** — pm entities can change freely; rebuild examples after merge.
+
+</details>
 
 ### 2.5 Direct-to-output (surfaceless pipe) — 🟡 half-present
 The full-frame path exists in `OutputManager` (`_fullscreenNdc`), and `OutputDefinition.Kind` already
@@ -180,10 +204,12 @@ reorder Surface·Region·Slice·Output·ReferenceImage·Prop, and re-parenting o
 
 ---
 
-## 4. Decisions — **all settled** (2026-07-21)
+## 4. Decisions — **all settled** (2026-07-21, №1 re-revised 2026-07-27)
 
-1. **Content is op-side, not the Setup** — targeting = `TargetId:InputSlot<Guid>` on the op (venue-swap +
-   duplication + future procedural). Slice multiplicity = **(a) one send-op per target**. ✅ (§2.1/§2.4)
+1. **Content and routing are SETUP-side** (re-revised 2026-07-27, reversing the 07-22 op-side call — see
+   §2.1 for rationale and accepted costs): `Setup.ContentSources` + `Setup.Slices`; `Surface.SliceId` /
+   `OutputDefinition.SliceId` bind targets; sources key on the op's `SymbolChildId`; `ContentSourceSync`
+   keeps the 1:1 op↔source invariant. ✅ (§2.1/§2.4)
 2. **Surface tree = flat list + `ParentId`** (nested via parent pointers). ✅ (§2.2)
 3. **Physical vs Layout is an explicit `Kind` field**, chosen at creation (callout 22) — not inferred from a
    pose. ✅ (§2.2)

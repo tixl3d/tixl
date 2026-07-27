@@ -105,7 +105,7 @@ internal static class SurfaceGeometry
         if (surfaceId == Guid.Empty)
             return null;
 
-        var surface = setup.Surfaces.Find(s => s.Id == surfaceId);
+        var surface = setup.FindSurface(surfaceId);
         for (var guard = 0; surface != null && guard < 16; guard++)
         {
             if (surface.OutputMappings.Exists(m => m.OutputId == outputId))
@@ -115,7 +115,7 @@ internal static class SurfaceGeometry
                 break;
 
             var parentId = surface.ParentId;
-            surface = setup.Surfaces.Find(s => s.Id == parentId);
+            surface = setup.FindSurface(parentId);
         }
 
         return null;
@@ -184,7 +184,7 @@ internal static class SurfaceGeometry
                 return false;
 
             var parentId = node.ParentId;
-            node = setup.Surfaces.Find(s => s.Id == parentId);
+            node = setup.FindSurface(parentId);
             if (node == null)
                 return false;
         }

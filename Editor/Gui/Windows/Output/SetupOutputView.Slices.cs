@@ -30,7 +30,7 @@ internal sealed partial class SetupOutputView
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        var source = setup.ContentSources.Find(c => c.SymbolChildId == contentChildId);
+        var source = setup.FindSourceByChildId(contentChildId);
         if (source == null || !OutputManager.TryGetSourceContent(contentChildId, out _, out var content)
             || content is not { IsDisposed: false })
         {
@@ -87,7 +87,7 @@ internal sealed partial class SetupOutputView
 
             Span<Vector2> corners =
                 [sliceMin, new Vector2(sliceMax.X, sliceMin.Y), sliceMax, new Vector2(sliceMin.X, sliceMax.Y)];
-            CornerPinHandles.DrawCenteredLabel(dl, corners, SetupPanel.SliceLabel(setup, slice), UiColors.Text.Fade(0.7f), UiColors.BackgroundFull.Fade(0.6f));
+            CornerPinHandles.DrawCenteredLabel(dl, corners, SetupActions.SliceLabel(setup, slice), UiColors.Text.Fade(0.7f), UiColors.BackgroundFull.Fade(0.6f));
             _picker.AddTarget(SetupEntitySelection.EntityKind.Slice, slice.Id, sliceMin, sliceMax);
         }
 
@@ -164,7 +164,7 @@ internal sealed partial class SetupOutputView
         labelCorners[1] = new Vector2(max.X, min.Y);
         labelCorners[2] = max;
         labelCorners[3] = new Vector2(min.X, max.Y);
-        var sliceName = SetupPanel.SliceLabel(setup, slice);
+        var sliceName = SetupActions.SliceLabel(setup, slice);
         DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Slice, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
 
         // Move is detected by hand rather than an InvisibleButton, so the label stays a plain draw and the
@@ -346,7 +346,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void MatchSliceToTargetAspect(Setup setup, Guid targetId, Slice slice, Vector4 uv)
     {
-        var surface = setup.Surfaces.Find(s => s.Id == targetId);
+        var surface = setup.FindSurface(targetId);
         if (surface == null || _sliceSourceTexture is not { IsDisposed: false })
             return;
 

@@ -44,9 +44,6 @@ internal static class SetupPanel
             return;
         }
 
-        // Sources are 1:1 with the ops that supply them, so adopt new sends and cascade away deleted ones.
-        ContentSourceSync.Update(setup);
-
         // (The hover cross-highlight border was removed — selection now shows its source via the "→|" marker.)
 
         // Resolved once: TryResolve prunes the target list behind a closure, and every row asks for the
@@ -68,13 +65,13 @@ internal static class SetupPanel
         FormInputs.AddVerticalSpace(4);
 
         // CONTENT — live SendToOutput sinks (their targeting lives on the op, so they aren't setup entities).
-        if (DrawSection("CONTENT", "##addContent", selection, AddContentSink))
+        if (DrawSection("CONTENT", "##addContent", selection, SetupActions.AddContentSink))
             DrawContentSinks(selection, setup);
 
-        if (DrawSection("SURFACES", "##addSurface", selection, AddSurface))
+        if (DrawSection("SURFACES", "##addSurface", selection, SetupActions.AddSurface))
             DrawSurfaces(selection, setup);
 
-        if (DrawSection("OUTPUTS", "##addOutput", selection, AddOutput))
+        if (DrawSection("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput))
         {
             for (var i = 0; i < setup.Outputs.Count; i++)
             {
@@ -88,7 +85,7 @@ internal static class SetupPanel
                 var status = binding == null ? null : $"Display {binding.DisplayIndex + 1}";
                 var bindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
                 DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Output, output.Id, output.Name, status,
-                              onDelete: () => DeleteOutput(setup, machineConfig, outputId), leadingIcon: Icon.Projector,
+                              onDelete: () => SetupActions.DeleteOutput(setup, machineConfig, outputId), leadingIcon: Icon.Projector,
                               drawExtraMenuItems: bindable ? () => DrawOutputBindingSubMenu(output, machineConfig) : null,
                               // A paused output (Send off) reads the same as a non-rendering surface.
                               muted: !output.Send,
@@ -97,7 +94,7 @@ internal static class SetupPanel
             }
         }
 
-        if (DrawSection("REFERENCE IMAGES", "##addRefImage", selection, AddReferenceImage))
+        if (DrawSection("REFERENCE IMAGES", "##addRefImage", selection, SetupActions.AddReferenceImage))
         {
             for (var i = 0; i < setup.ReferenceImages.Count; i++)
             {
@@ -107,7 +104,7 @@ internal static class SetupPanel
             }
         }
 
-        if (DrawSection("PROPS", "##addProp", selection, AddProp))
+        if (DrawSection("PROPS", "##addProp", selection, SetupActions.AddProp))
         {
             for (var i = 0; i < setup.Props.Count; i++)
             {
@@ -157,7 +154,7 @@ internal static class SetupPanel
 
     private static void DrawSurfaceCard(Setup setup, Guid id)
     {
-        var surface = setup.Surfaces.Find(s => s.Id == id);
+        var surface = setup.FindSurface(id);
         if (surface == null)
             return;
 
@@ -266,7 +263,7 @@ internal static class SetupPanel
 
     private static void DrawOutputCard(Setup setup, Guid id)
     {
-        var output = setup.Outputs.Find(o => o.Id == id);
+        var output = setup.FindOutput(id);
         if (output == null)
             return;
 
@@ -287,7 +284,7 @@ internal static class SetupPanel
 
     private static void DrawContentCard(Setup setup, Guid childId)
     {
-        var instance = FindSinkInstance(childId);
+        var instance = SetupActions.FindSinkInstance(childId);
         if (instance is not IOutputSink sink)
             return;
 
@@ -318,7 +315,7 @@ internal static class SetupPanel
 
     private static void DrawSliceCard(Setup setup, Guid id)
     {
-        var slice = setup.Slices.Find(s => s.Id == id);
+        var slice = setup.FindSlice(id);
         if (slice == null)
             return;
 
@@ -326,7 +323,7 @@ internal static class SetupPanel
 
         // Pixels come from the source texture; without a live source there's nothing to measure against, so
         // fall back to the normalized rect.
-        var source = setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        var source = setup.FindSource(slice.SourceId);
         var texW = 0;
         var texH = 0;
         if (source != null && OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content)
@@ -386,7 +383,7 @@ internal static class SetupPanel
         {
             case SetupEntitySelection.EntityKind.Surface:
             {
-                var surface = setup.Surfaces.Find(s => s.Id == _hoveredId);
+                var surface = setup.FindSurface(_hoveredId);
                 if (surface == null)
                     break;
 
@@ -405,14 +402,14 @@ internal static class SetupPanel
                     AddSourceOfSlice(setup, surface.SliceId); // the feed behind each mapped surface
                 }
 
-                var output = setup.Outputs.Find(o => o.Id == _hoveredId);
+                var output = setup.FindOutput(_hoveredId);
                 if (output != null)
                     AddSourceOfSlice(setup, output.SliceId); // or a full-frame slice shown directly
                 break;
             }
             case SetupEntitySelection.EntityKind.ContentSource:
             {
-                var source = setup.ContentSources.Find(c => c.SymbolChildId == _hoveredId);
+                var source = setup.FindSourceByChildId(_hoveredId);
                 if (source != null)
                     AddConsumersOfSource(setup, source.Id);
                 break;
@@ -453,7 +450,7 @@ internal static class SetupPanel
                 return;
 
             var parentId = surface.ParentId;
-            surface = setup.Surfaces.Find(s => s.Id == parentId);
+            surface = setup.FindSurface(parentId);
         }
     }
 
@@ -464,8 +461,8 @@ internal static class SetupPanel
             return;
 
         _referenced.Add((SetupEntitySelection.EntityKind.Slice, sliceId, false));
-        var slice = setup.Slices.Find(s => s.Id == sliceId);
-        var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        var slice = setup.FindSlice(sliceId);
+        var source = slice == null ? null : setup.FindSource(slice.SourceId);
         if (source != null)
             _referenced.Add((SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId, false));
     }
@@ -475,13 +472,13 @@ internal static class SetupPanel
     {
         foreach (var surface in setup.Surfaces)
         {
-            if (IsSliceOf(setup, surface.SliceId, sourceId))
+            if (SetupActions.IsSliceOf(setup, surface.SliceId, sourceId))
                 _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, true));
         }
 
         foreach (var output in setup.Outputs)
         {
-            if (IsSliceOf(setup, output.SliceId, sourceId))
+            if (SetupActions.IsSliceOf(setup, output.SliceId, sourceId))
                 _referenced.Add((SetupEntitySelection.EntityKind.Output, output.Id, true));
         }
     }
@@ -537,16 +534,16 @@ internal static class SetupPanel
         switch (_primaryKind)
         {
             case SetupEntitySelection.EntityKind.Surface:
-                var surface = setup.Surfaces.Find(s => s.Id == _primaryId);
+                var surface = setup.FindSurface(_primaryId);
                 return surface != null && kind == SetupEntitySelection.EntityKind.Slice && surface.SliceId == id;
 
             case SetupEntitySelection.EntityKind.Output:
-                var output = setup.Outputs.Find(o => o.Id == _primaryId);
+                var output = setup.FindOutput(_primaryId);
                 return output != null && kind == SetupEntitySelection.EntityKind.Slice && output.SliceId == id;
 
             case SetupEntitySelection.EntityKind.Slice:
-                var slice = setup.Slices.Find(s => s.Id == _primaryId);
-                var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
+                var slice = setup.FindSlice(_primaryId);
+                var source = slice == null ? null : setup.FindSource(slice.SourceId);
                 return source != null && kind == SetupEntitySelection.EntityKind.ContentSource && source.SymbolChildId == id;
 
             default:
@@ -566,7 +563,7 @@ internal static class SetupPanel
             return;
 
         if (!DragAndDropHandling.TryGetDragData(DragAndDropHandling.DragTypes.SetupEntity, out var dragData)
-            || !TryParseDrag(dragData, out var dragKind, out var dragId))
+            || !SetupActions.TryParseDrag(dragData, out var dragKind, out var dragId))
             return;
 
         var accepts = kind == SetupEntitySelection.EntityKind.Output
@@ -577,106 +574,7 @@ internal static class SetupPanel
             return;
 
         if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) == DragAndDropHandling.DragInteractionResult.Dropped)
-            ApplyDrop(setup, dragKind, dragId, kind, id);
-    }
-
-    private static bool TryParseDrag(string data, out SetupEntitySelection.EntityKind kind, out Guid id)
-    {
-        kind = SetupEntitySelection.EntityKind.None;
-        id = Guid.Empty;
-        var separator = data.IndexOf(':');
-        if (separator <= 0
-            || !int.TryParse(data.AsSpan(0, separator), out var kindInt)
-            || !Guid.TryParse(data.AsSpan(separator + 1), out id))
-            return false;
-
-        kind = (SetupEntitySelection.EntityKind)kindInt;
-        return true;
-    }
-
-    private static void ApplyDrop(Setup setup, SetupEntitySelection.EntityKind dragKind, Guid dragId,
-                                  SetupEntitySelection.EntityKind targetKind, Guid targetId)
-    {
-        if (targetKind == SetupEntitySelection.EntityKind.Output && dragKind == SetupEntitySelection.EntityKind.Surface)
-        {
-            var surface = setup.Surfaces.Find(s => s.Id == dragId);
-            var output = setup.Outputs.Find(o => o.Id == targetId);
-            if (surface != null && output != null && !surface.OutputMappings.Exists(m => m.OutputId == targetId))
-            {
-                surface.OutputMappings.Add(CreateDefaultMapping(output));
-                OutputSetupHandling.SaveActive();
-            }
-
-            return;
-        }
-
-        // Dropping a source or slice straight onto an output shows it full-frame (the direct path, no surface
-        // or corner-pin) — an output names a slice through OutputDefinition.SliceId.
-        if (targetKind == SetupEntitySelection.EntityKind.Output
-            && dragKind is SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.ContentSource)
-        {
-            var output = setup.Outputs.Find(o => o.Id == targetId);
-            if (output == null)
-                return;
-
-            if (dragKind == SetupEntitySelection.EntityKind.Slice && setup.Slices.Exists(s => s.Id == dragId))
-            {
-                output.SliceId = dragId;
-                OutputSetupHandling.SaveActive();
-            }
-            else if (dragKind == SetupEntitySelection.EntityKind.ContentSource)
-            {
-                var source = setup.ContentSources.Find(c => c.SymbolChildId == dragId);
-                if (source != null)
-                {
-                    output.SliceId = EnsureSlice(setup, source).Id;
-                    OutputSetupHandling.SaveActive();
-                }
-            }
-
-            return;
-        }
-
-        // Dropping a slice on a free surface shows it there. A *different* slice dropped on an occupied surface
-        // lands as a sub-region cut to its own aspect (the poster-slot case) rather than replacing — but
-        // re-dropping the slice the surface already shows is a no-op, not a spurious duplicate sub-region.
-        if (dragKind == SetupEntitySelection.EntityKind.Slice)
-        {
-            var slice = setup.Slices.Find(s => s.Id == dragId);
-            var surface = setup.Surfaces.Find(s => s.Id == targetId);
-            if (slice != null && surface != null && surface.SliceId != slice.Id)
-            {
-                if (surface.SliceId == Guid.Empty)
-                    surface.SliceId = slice.Id;
-                else
-                    AddRegionForSlice(setup, surface, slice);
-
-                OutputSetupHandling.SaveActive();
-            }
-        }
-
-        if (dragKind == SetupEntitySelection.EntityKind.ContentSource)
-        {
-            var source = setup.ContentSources.Find(c => c.SymbolChildId == dragId);
-            var surface = source == null ? null : setup.Surfaces.Find(s => s.Id == targetId);
-            if (source != null && surface != null)
-            {
-                surface.SliceId = EnsureSlice(setup, source).Id;
-                OutputSetupHandling.SaveActive();
-            }
-        }
-    }
-
-    private static Surface.OutputMapping CreateDefaultMapping(OutputDefinition output)
-    {
-        float w = Math.Max(1, output.CanvasResolution.Width);
-        float h = Math.Max(1, output.CanvasResolution.Height);
-        float x0 = w * 0.2f, x1 = w * 0.8f, y0 = h * 0.2f, y1 = h * 0.8f;
-        return new Surface.OutputMapping
-                   {
-                       OutputId = output.Id,
-                       Quad = [new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1)],
-                   };
+            SetupActions.ApplyDrop(setup, dragKind, dragId, kind, id);
     }
 
     private static void DrawContentSinks(SetupEntitySelection selection, Setup setup)
@@ -699,17 +597,17 @@ internal static class SetupPanel
                 continue;
 
             var childId = instance.SymbolChildId;
-            var source = setup.ContentSources.Find(c => c.SymbolChildId == childId);
-            var sliceCount = source == null ? 0 : setup.Slices.FindAll(x => x.SourceId == source.Id).Count;
+            var source = setup.FindSourceByChildId(childId);
+            var sliceCount = source == null ? 0 : SetupActions.CountSlicesOfSource(setup, source.Id);
             var expanded = !_collapsedSources.Contains(childId);
 
             var (icon, text) = DescribeSourceGutter(setup, childId);
-            DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ContentSource, childId, SinkName(instance), text,
+            DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ContentSource, childId, SetupActions.SinkName(instance), text,
                           leadingIcon: Icon.FileImage, trailingIcon: icon,
                           drawExtraMenuItems: source == null ? null : () =>
                                                                       {
                                                                           if (CustomComponents.DrawMenuItem(8, "Add slice"))
-                                                                              AddSlice(selection, setup, source);
+                                                                              SetupActions.AddSlice(selection, setup, source);
                                                                       },
                           isExpanded: sliceCount > 0 ? expanded : null,
                           onToggleExpanded: () => ToggleSourceExpanded(childId),
@@ -717,7 +615,7 @@ internal static class SetupPanel
                           // No surface shows this source, so it steps back visually.
                           muted: icon == null,
                           // A source *is* its op, so renaming it renames the op (and cascades back through the sync).
-                          onRename: n => RenameContentSourceOp(childId, n));
+                          onRename: n => SetupActions.RenameContentSourceOp(childId, n));
 
             if (source == null || sliceCount == 0 || !expanded)
                 continue;
@@ -743,8 +641,8 @@ internal static class SetupPanel
         var (targetIcon, targetText) = DescribeSliceTargetGutter(setup, slice);
 
         DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Slice, sliceId,
-                      SliceLabel(setup, slice), targetText,
-                      onDelete: () => DeleteSlice(setup, sliceId),
+                      SetupActions.SliceLabel(setup, slice), targetText,
+                      onDelete: () => SetupActions.DeleteSlice(setup, sliceId),
                       leadingIcon: Icon.Slice,
                       trailingIcon: targetIcon,
                       depth: 1,
@@ -757,7 +655,7 @@ internal static class SetupPanel
     /// label — the fade already says "unused", and where it lands is the icon; a name adds noise.</summary>
     private static (Icon? icon, string? text) DescribeSliceTargetGutter(Setup setup, Slice slice)
     {
-        if (!setup.ContentSources.Exists(c => c.Id == slice.SourceId))
+        if (setup.FindSource(slice.SourceId) == null)
             return (null, null);
 
         var count = 0;
@@ -783,45 +681,6 @@ internal static class SetupPanel
             _collapsedSources.Remove(childId);
     }
 
-    private static void AddSlice(SetupEntitySelection selection, Setup setup, ContentSource source)
-    {
-        // Left unnamed: the label is derived from the source, so it stays right when the op is later renamed.
-        var slice = new Slice { SourceId = source.Id };
-
-        setup.Slices.Add(slice);
-        selection.Select(SetupEntitySelection.EntityKind.Slice, slice.Id);
-        OutputSetupHandling.SaveActive();
-    }
-
-    /// <summary>
-    /// A slice's display name: a name the user typed if there is one, otherwise a default derived from its
-    /// source. Unnamed sources give "Slice N"; a renamed source gives "{name}.N", so naming the op renames
-    /// every one of its auto-named slices at once. N is the slice's position among its source's slices.
-    /// </summary>
-    internal static string SliceLabel(Setup setup, Slice slice)
-    {
-        if (!string.IsNullOrEmpty(slice.Name))
-            return slice.Name;
-
-        var ordinal = 1;
-        foreach (var other in setup.Slices)
-        {
-            if (other.SourceId != slice.SourceId)
-                continue;
-
-            if (other.Id == slice.Id)
-                break;
-
-            ordinal++;
-        }
-
-        var source = setup.ContentSources.Find(c => c.Id == slice.SourceId);
-        return source is { IsRenamed: true } && !string.IsNullOrEmpty(source.Name)
-                   ? $"{source.Name}.{ordinal}"
-                   : $"Slice {ordinal}";
-    }
-
-    /// <summary>Deleting a slice clears it from anything showing it — the reference would mean nothing.</summary>
     /// <summary>Enters inline-rename mode for a row: selects it, seeds the buffer, and focuses the field next frame.</summary>
     private static void BeginRename(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id, string name)
     {
@@ -829,89 +688,6 @@ internal static class SetupPanel
         _renamingId = id;
         _renameBuffer = name ?? string.Empty;
         _renameFocusPending = true;
-    }
-
-    /// <summary>The slice's context menu, shared by its sidebar row and its frame label on the canvas.</summary>
-    internal static void DrawSliceMenuItems(SetupEntitySelection selection, Setup setup, Slice slice)
-    {
-        CustomComponents.MenuItemsFlushLeft = true;
-        if (CustomComponents.DrawMenuItem(2, "Delete"))
-        {
-            DeleteSlice(setup, slice.Id);
-            selection.Clear();
-        }
-
-        CustomComponents.MenuItemsFlushLeft = false;
-    }
-
-    private static void DeleteSlice(Setup setup, Guid sliceId)
-    {
-        foreach (var surface in setup.Surfaces)
-        {
-            if (surface.SliceId == sliceId)
-                surface.SliceId = Guid.Empty;
-        }
-
-        foreach (var output in setup.Outputs)
-        {
-            if (output.SliceId == sliceId)
-                output.SliceId = Guid.Empty;
-        }
-
-        setup.Slices.RemoveAll(s => s.Id == sliceId);
-        OutputSetupHandling.SaveActive();
-    }
-
-    private static string SinkName(Instance instance)
-    {
-        var parent = instance.Parent;
-        if (parent != null && parent.Symbol.Children.TryGetValue(instance.SymbolChildId, out var child))
-            return child.ReadableName;
-
-        return "content";
-    }
-
-    /// <summary>
-    /// Renames a content source by renaming its op — the source has no name of its own, it mirrors the
-    /// SendToOutput op (see <see cref="ContentSourceSync"/>). Needs a live instance to reach the graph; an
-    /// op that isn't instantiated can't be renamed from here.
-    /// </summary>
-    private static void RenameContentSourceOp(Guid childId, string newName)
-    {
-        var parent = FindSinkInstance(childId)?.Parent;
-        var parentSymbolUi = parent?.GetSymbolUi();
-        if (parentSymbolUi == null || !parentSymbolUi.ChildUis.TryGetValue(childId, out var childUi))
-            return;
-
-        UndoRedoStack.AddAndExecute(new ChangeSymbolChildNameCommand(childUi, parentSymbolUi.Symbol) { NewName = newName });
-    }
-
-    private static Instance? FindSinkInstance(Guid childId)
-    {
-        var sinks = OutputSinkRegistry.Sinks;
-        for (var i = 0; i < sinks.Count; i++)
-        {
-            if (sinks[i] is Instance instance && instance.SymbolChildId == childId)
-                return instance;
-        }
-
-        return null;
-    }
-
-    // Select the content's SendToOutput op in the focused graph and frame it — the sidebar → graph half of
-    // the sync (the graph → sidebar highlight is handled by the highlighted-content id).
-    private static void RevealContentOpInGraph(Guid childId)
-    {
-        var instance = FindSinkInstance(childId);
-        var parentSymbolUi = instance?.Parent?.GetSymbolUi();
-        if (instance == null || parentSymbolUi == null || ProjectView.Focused == null)
-            return;
-
-        if (!parentSymbolUi.ChildUis.TryGetValue(instance.SymbolChildId, out var childUi))
-            return;
-
-        ProjectView.Focused.NodeSelection.SetSelection(childUi, instance);
-        FitViewToSelectionHandling.FitViewToSelection();
     }
 
     // Out-gutter for a content send: the first target's type icon + short label, "+N" for extra targets.
@@ -926,34 +702,15 @@ internal static class SetupPanel
 
     private static (Icon? icon, string name) DescribeSingleTarget(Setup setup, Guid targetId)
     {
-        var surface = setup.Surfaces.Find(s => s.Id == targetId);
+        var surface = setup.FindSurface(targetId);
         if (surface != null)
-            return (Icon.Grid, SurfaceShortLabel(surface));
+            return (Icon.Grid, SetupActions.SurfaceShortLabel(surface));
 
-        var output = setup.Outputs.Find(o => o.Id == targetId);
+        var output = setup.FindOutput(targetId);
         if (output != null)
-            return (Icon.Projector, string.IsNullOrEmpty(output.Name) ? "output" : Abbreviate(output.Name));
+            return (Icon.Projector, string.IsNullOrEmpty(output.Name) ? "output" : SetupActions.Abbreviate(output.Name));
 
         return (Icon.Grid, "?");
-    }
-
-    /// <summary>
-    /// Reshapes the surface so its real-world proportions match the pixels of the slice it shows — the inverse
-    /// of the slice's "Match target aspect", for when the wall is what should give. Keeps the width and solves
-    /// the height, so it reads as a nudge rather than a jump.
-    /// </summary>
-    private static void MatchSurfaceToSliceAspect(Setup setup, Surface surface)
-    {
-        var slice = setup.Slices.Find(s => s.Id == surface.SliceId);
-        if (slice == null || !TryGetSliceAspect(setup, slice, out var aspect))
-            return;
-
-        var oldState = new ResizeSurfaceCommand.State(surface);
-        var width = MathF.Max(surface.SizeInMeters.X, SurfaceGeometry.MinSize);
-        SurfaceGeometry.ResizeAnchored(surface, new Vector2(width, width / MathF.Max(aspect, 0.0001f)));
-
-        UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, oldState, new ResizeSurfaceCommand.State(surface)));
-        OutputSetupHandling.SaveActive();
     }
 
     /// <summary>
@@ -973,203 +730,18 @@ internal static class SetupPanel
         return new Vector2(typed.Y * (old.X / old.Y), typed.Y);
     }
 
-    /// <summary>
-    /// A sub-region shaped to a slice: sized so its real-world proportions match the slice's pixels, so the
-    /// content lands undistorted, and centred in the parent.
-    /// </summary>
-    private static void AddRegionForSlice(Setup setup, Surface parent, Slice slice)
-    {
-        var parentSize = parent.SizeInMeters;
-        var aspect = TryGetSliceAspect(setup, slice, out var value) ? value : 1f;
-
-        var width = parentSize.X * 0.5f;
-        var height = width / MathF.Max(aspect, 0.0001f);
-        if (height > parentSize.Y * 0.8f)
-        {
-            height = parentSize.Y * 0.5f;
-            width = height * aspect;
-        }
-
-        // Centre it: surface space runs Y down, so the bottom edge is below the middle.
-        var anchor = SurfaceGeometry.AnchorInSurface(parent);
-        var bottomLeft = new Vector2(parentSize.X * 0.5f - width * 0.5f, parentSize.Y * 0.5f + height * 0.5f);
-
-        var region = new Surface
-                         {
-                             Name = string.IsNullOrEmpty(slice.Name) ? $"Sub region {CountChildren(setup, parent.Id) + 1}" : slice.Name,
-                             Kind = Surface.SurfaceKinds.Layout,
-                             ParentId = parent.Id,
-                             SizeInMeters = new Vector2(MathF.Max(width, SurfaceGeometry.MinSize),
-                                                        MathF.Max(height, SurfaceGeometry.MinSize)),
-                             LocalPosition = new Vector2(bottomLeft.X - anchor.X, anchor.Y - bottomLeft.Y),
-                             PixelsPerMeter = parent.PixelsPerMeter,
-                             SliceId = slice.Id,
-                         };
-
-        setup.Surfaces.Add(region);
-    }
-
-    /// <summary>Aspect of a slice's pixels — its uv extent against the source's resolution.</summary>
-    private static bool TryGetSliceAspect(Setup setup, Slice slice, out float aspect)
-    {
-        aspect = 1f;
-        var source = setup.ContentSources.Find(c => c.Id == slice.SourceId);
-        if (source == null || !OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content)
-            || content is not { IsDisposed: false })
-            return false;
-
-        var width = content.Description.Width * MathF.Max(slice.UvRect.Z - slice.UvRect.X, 0.0001f);
-        var height = content.Description.Height * MathF.Max(slice.UvRect.W - slice.UvRect.Y, 0.0001f);
-        if (width <= 0 || height <= 0)
-            return false;
-
-        aspect = width / height;
-        return true;
-    }
-
-    /// <summary>Whether a slice belongs to the given source.</summary>
-    /// <summary>
-    /// Whether <paramref name="kind"/>/<paramref name="id"/> can take the primary selection as its input, and
-    /// whether it already does. Clicking the in-gutter then binds or unbinds without any dragging: select a
-    /// slice and the surfaces that could show it light up; select a surface and the outputs light up.
-    /// </summary>
-    private static bool TryDescribeInputToggle(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, out bool isBound)
-    {
-        isBound = false;
-        var sourceKind = _primaryKind;
-        var sourceId = _primaryId;
-        if (sourceKind == SetupEntitySelection.EntityKind.None)
-            return false;
-
-        switch (kind)
-        {
-            case SetupEntitySelection.EntityKind.Surface:
-            {
-                var surface = setup.Surfaces.Find(x => x.Id == id);
-                if (surface == null)
-                    return false;
-
-                if (sourceKind == SetupEntitySelection.EntityKind.Slice)
-                {
-                    isBound = surface.SliceId == sourceId;
-                    return setup.Slices.Exists(x => x.Id == sourceId);
-                }
-
-                if (sourceKind == SetupEntitySelection.EntityKind.ContentSource)
-                {
-                    var source = setup.ContentSources.Find(c => c.SymbolChildId == sourceId);
-                    if (source == null)
-                        return false;
-
-                    isBound = IsSliceOf(setup, surface.SliceId, source.Id);
-                    return true;
-                }
-
-                return false;
-            }
-
-            case SetupEntitySelection.EntityKind.Output:
-            {
-                if (sourceKind != SetupEntitySelection.EntityKind.Surface)
-                    return false;
-
-                var surface = setup.Surfaces.Find(x => x.Id == sourceId);
-                if (surface == null)
-                    return false;
-
-                isBound = surface.OutputMappings.Exists(m => m.OutputId == id);
-                return true;
-            }
-
-            default:
-                return false;
-        }
-    }
-
-    private static void ToggleInput(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
-    {
-        if (!TryDescribeInputToggle(setup, kind, id, out var isBound))
-            return;
-
-        var sourceKind = _primaryKind;
-        var sourceId = _primaryId;
-
-        if (kind == SetupEntitySelection.EntityKind.Surface)
-        {
-            var surface = setup.Surfaces.Find(x => x.Id == id);
-            if (surface == null)
-                return;
-
-            if (isBound)
-            {
-                surface.SliceId = Guid.Empty;
-            }
-            else if (sourceKind == SetupEntitySelection.EntityKind.Slice)
-            {
-                surface.SliceId = sourceId;
-            }
-            else
-            {
-                var source = setup.ContentSources.Find(c => c.SymbolChildId == sourceId);
-                if (source == null)
-                    return;
-
-                surface.SliceId = EnsureSlice(setup, source).Id;
-            }
-        }
-        else
-        {
-            var surface = setup.Surfaces.Find(x => x.Id == sourceId);
-            var output = setup.Outputs.Find(o => o.Id == id);
-            if (surface == null || output == null)
-                return;
-
-            if (isBound)
-                surface.OutputMappings.RemoveAll(m => m.OutputId == id);
-            else
-                surface.OutputMappings.Add(CreateDefaultMapping(output));
-        }
-
-        OutputSetupHandling.SaveActive();
-    }
-
-    private static bool IsSliceOf(Setup setup, Guid sliceId, Guid sourceId)
-    {
-        if (sliceId == Guid.Empty)
-            return false;
-
-        var slice = setup.Slices.Find(s => s.Id == sliceId);
-        return slice != null && slice.SourceId == sourceId;
-    }
-
-    /// <summary>
-    /// A source's first slice, creating a full-frame one if it has none — assigning content needs a slice to
-    /// name, and "the whole image" is simply the identity rect.
-    /// </summary>
-    private static Slice EnsureSlice(Setup setup, ContentSource source)
-    {
-        var existing = setup.Slices.Find(s => s.SourceId == source.Id);
-        if (existing != null)
-            return existing;
-
-        // Unnamed: its label is derived from the source (see SliceLabel), so renaming the op renames it too.
-        var slice = new Slice { SourceId = source.Id };
-        setup.Slices.Add(slice);
-        return slice;
-    }
-
     /// <summary>Out-gutter for a content row: the surface-target icon plus a count when more than one surface
     /// shows this source's slices. No label; the fade already reads as "unused".</summary>
     private static (Icon? icon, string? text) DescribeSourceGutter(Setup setup, Guid symbolChildId)
     {
-        var source = setup.ContentSources.Find(c => c.SymbolChildId == symbolChildId);
+        var source = setup.FindSourceByChildId(symbolChildId);
         if (source == null)
             return (null, null);
 
         var count = 0;
         foreach (var surface in setup.Surfaces)
         {
-            if (IsSliceOf(setup, surface.SliceId, source.Id))
+            if (SetupActions.IsSliceOf(setup, surface.SliceId, source.Id))
                 count++;
         }
 
@@ -1190,15 +762,15 @@ internal static class SetupPanel
     private static void DrawSurfaceRow(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
     {
         var surfaceId = surface.Id;
-        var hasChildren = CountChildren(setup, surfaceId) > 0;
+        var hasChildren = SetupActions.CountChildren(setup, surfaceId) > 0;
         var isExpanded = !_collapsedSurfaces.Contains(surfaceId);
 
         var (outputIcon, outputText) = DescribeSurfaceOutputGutter(setup, surface);
         DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Surface, surface.Id, surface.Name,
                       outputText,
-                      onDelete: () => DeleteSurface(setup, surfaceId), leadingIcon: Icon.Grid, trailingIcon: outputIcon,
+                      onDelete: () => SetupActions.DeleteSurface(setup, surfaceId), leadingIcon: Icon.Grid, trailingIcon: outputIcon,
                       // Delete comes from the row itself, so it isn't repeated here.
-                      drawExtraMenuItems: () => DrawSurfaceMenuItems(selection, setup, surface, includeDelete: false),
+                      drawExtraMenuItems: () => SetupActions.DrawSurfaceMenuItems(selection, setup, surface, includeDelete: false),
                       depth: depth,
                       isExpanded: hasChildren ? isExpanded : null,
                       onToggleExpanded: () => ToggleSurfaceExpanded(surfaceId),
@@ -1244,7 +816,7 @@ internal static class SetupPanel
         {
             case SetupEntitySelection.EntityKind.ReferenceImage:
             {
-                var image = setup.ReferenceImages.Find(e => e.Id == id);
+                var image = setup.FindReferenceImage(id);
                 if (image != null)
                 {
                     CustomComponents.StylizedText($"Reference Image · {image.Kind}", Fonts.FontSmall, UiColors.TextMuted);
@@ -1259,7 +831,7 @@ internal static class SetupPanel
             }
             case SetupEntitySelection.EntityKind.Surface:
             {
-                var surface = setup.Surfaces.Find(e => e.Id == id);
+                var surface = setup.FindSurface(id);
                 if (surface != null)
                 {
                     CustomComponents.StylizedText($"Surface · {surface.Kind}", Fonts.FontSmall, UiColors.TextMuted);
@@ -1272,7 +844,7 @@ internal static class SetupPanel
             }
             case SetupEntitySelection.EntityKind.Prop:
             {
-                var prop = setup.Props.Find(e => e.Id == id);
+                var prop = setup.FindProp(id);
                 if (prop != null)
                 {
                     CustomComponents.StylizedText("Prop", Fonts.FontSmall, UiColors.TextMuted);
@@ -1284,7 +856,7 @@ internal static class SetupPanel
             }
             case SetupEntitySelection.EntityKind.Output:
             {
-                var output = setup.Outputs.Find(e => e.Id == id);
+                var output = setup.FindOutput(id);
                 if (output != null)
                 {
                     CustomComponents.StylizedText($"Output · {output.Kind}", Fonts.FontSmall, UiColors.TextMuted);
@@ -1299,13 +871,13 @@ internal static class SetupPanel
             }
             case SetupEntitySelection.EntityKind.ContentSource:
             {
-                var instance = FindSinkInstance(id);
+                var instance = SetupActions.FindSinkInstance(id);
                 if (instance is IOutputSink sink)
                 {
                     _sinkContext ??= new EvaluationContext();
                     _sinkContext.Reset();
                     CustomComponents.StylizedText("Content · SendToOutput", Fonts.FontSmall, UiColors.TextMuted);
-                    CustomComponents.StylizedText(SinkName(instance), Fonts.FontLarge, UiColors.Text);
+                    CustomComponents.StylizedText(SetupActions.SinkName(instance), Fonts.FontLarge, UiColors.Text);
                     var (_, targetText) = DescribeSourceGutter(setup, instance.SymbolChildId);
                     CustomComponents.StylizedText(targetText ?? "unused", Fonts.FontNormal, UiColors.TextMuted);
                 }
@@ -1448,11 +1020,11 @@ internal static class SetupPanel
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return id.ToString("D")[..8];
 
-        var surface = setup.Surfaces.Find(s => s.Id == id);
+        var surface = setup.FindSurface(id);
         if (surface != null)
-            return SurfaceShortLabel(surface);
+            return SetupActions.SurfaceShortLabel(surface);
 
-        var output = setup.Outputs.Find(o => o.Id == id);
+        var output = setup.FindOutput(id);
         if (output != null)
             return output.Name;
 
@@ -1519,32 +1091,6 @@ internal static class SetupPanel
         }
 
         return new T3.Core.DataTypes.Vector.Int2(1920, 1080);
-    }
-
-    /// <summary>Display name of a content send, for labelling its slice on the source canvas.</summary>
-    internal static string? TryGetContentName(Guid contentChildId)
-    {
-        return FindSinkInstance(contentChildId) is { } instance ? SinkName(instance) : null;
-    }
-
-    private static string SurfaceShortLabel(Surface surface)
-    {
-        return Abbreviate(surface.Name);
-    }
-
-    // Compact gutter form: uppercase letters + digits ("Surface 1" → "S1", "WallFront" → "WF"), falling back
-    // to the full name when there's nothing to abbreviate (all-lowercase).
-    private static string Abbreviate(string name)
-    {
-        Span<char> buffer = stackalloc char[6];
-        var length = 0;
-        foreach (var c in name)
-        {
-            if ((char.IsUpper(c) || char.IsDigit(c)) && length < buffer.Length)
-                buffer[length++] = c;
-        }
-
-        return length >= 1 ? new string(buffer[..length]) : name;
     }
 
     // An icon drawn as a font glyph on the current text line — aligns with AlignTextToFramePadding'd text,
@@ -1672,11 +1218,11 @@ internal static class SetupPanel
         // its column toggles instead of selecting.
         // A source is selected, so every row that could take it offers a click-target to bind or unbind.
         var isBound = false;
-        var canBind = hasInputGutter && TryDescribeInputToggle(setup, kind, id, out isBound);
+        var canBind = hasInputGutter && SetupActions.TryDescribeInputToggle(setup, kind, id, _primaryKind, _primaryId, out isBound);
         var gutterMaxX = rowMin.X + gutterWidth;
         if (clicked && canBind && ImGui.GetMousePos().X < gutterMaxX)
         {
-            ToggleInput(setup, kind, id);
+            SetupActions.ToggleInput(setup, kind, id, _primaryKind, _primaryId);
             clicked = false;
         }
 
@@ -1697,7 +1243,7 @@ internal static class SetupPanel
                 selection.Select(kind, id);
                 // A content row is a live op — a plain click selects it in the graph and brings it into view.
                 if (kind == SetupEntitySelection.EntityKind.ContentSource)
-                    RevealContentOpInGraph(id);
+                    SetupActions.RevealContentOpInGraph(id);
             }
         }
 
@@ -1718,7 +1264,7 @@ internal static class SetupPanel
             // visible but dimmed rather than vanishing, so the menu keeps its shape and it is obvious *why*
             // they can't be used.
             var multi = isSelected && selection.Count > 1;
-            var deletable = multi ? CountDeletable(selection) : 0;
+            var deletable = multi ? SetupActions.CountDeletable(selection) : 0;
             CustomComponents.ContextMenuForItem(() =>
                                                 {
                                                     // These row menus carry no toggles or icons, so their labels sit flush left.
@@ -1741,7 +1287,7 @@ internal static class SetupPanel
                                                     if (multi)
                                                     {
                                                         if (deletable > 0 && CustomComponents.DrawMenuItem(2, $"Delete {deletable}"))
-                                                            DeleteSelection(selection, setup);
+                                                            SetupActions.DeleteSelection(selection, setup);
                                                     }
                                                     else if (onDelete != null && CustomComponents.DrawMenuItem(2, "Delete"))
                                                     {
@@ -1914,311 +1460,6 @@ internal static class SetupPanel
         ImGui.PopID();
     }
 
-    private static void AddReferenceImage(SetupEntitySelection selection)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
-
-        var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
-        setup.ReferenceImages.Add(image);
-        selection.Select(SetupEntitySelection.EntityKind.ReferenceImage, image.Id);
-    }
-
-    /// <summary>
-    /// The surface actions, shared by the sidebar row and the canvas label so the two can't drift apart.
-    /// </summary>
-    internal static void DrawSurfaceMenuItems(SetupEntitySelection selection, Setup setup, Surface surface, bool includeDelete)
-    {
-        if (CustomComponents.DrawMenuItem(4, "Add sub-region"))
-            AddSubRegion(selection, setup, surface);
-
-        if (CustomComponents.DrawMenuItem(5, "Duplicate"))
-            DuplicateSurface(selection, setup, surface);
-
-        // Only meaningful once something is shown here — there's no aspect to match otherwise.
-        if (surface.SliceId != Guid.Empty && CustomComponents.DrawMenuItem(9, "Adjust aspect to slice"))
-            MatchSurfaceToSliceAspect(setup, surface);
-
-        if (CustomComponents.DrawMenuItem(6, "Clear content inputs"))
-            ClearContentInputs(surface.Id);
-
-        if (includeDelete && CustomComponents.DrawMenuItem(7, "Delete"))
-            DeleteSurface(setup, surface.Id);
-    }
-
-    /// <summary>
-    /// Copies a surface — with its sub-regions — offset a little so it doesn't hide under the original. The
-    /// copy gets fresh GUIDs, so content sends still point at the original; the duplicate starts unbound.
-    /// </summary>
-    internal static void DuplicateSurface(SetupEntitySelection selection, Setup setup, Surface surface)
-    {
-        var copy = CloneSurface(surface);
-        var isChild = surface.ParentId != Guid.Empty;
-        copy.Name = isChild ? $"Sub region {CountChildren(setup, surface.ParentId) + 1}" : surface.Name + " copy";
-
-        if (isChild)
-        {
-            copy.LocalPosition = surface.LocalPosition + new Vector2(surface.SizeInMeters.X * 0.15f,
-                                                                    -surface.SizeInMeters.Y * 0.15f);
-        }
-        else
-        {
-            // A root carries its own pins, so nudge those instead.
-            foreach (var mapping in copy.OutputMappings)
-            {
-                for (var i = 0; i < mapping.Quad.Length; i++)
-                    mapping.Quad[i] += new Vector2(24, 24);
-            }
-        }
-
-        setup.Surfaces.Add(copy);
-        DuplicateChildrenOf(setup, surface.Id, copy.Id);
-
-        selection.Select(SetupEntitySelection.EntityKind.Surface, copy.Id);
-        OutputSetupHandling.SaveActive();
-    }
-
-    private static void DuplicateChildrenOf(Setup setup, Guid sourceParentId, Guid newParentId)
-    {
-        // Snapshot first: the loop appends to the same list it walks.
-        var originals = setup.Surfaces.FindAll(s => s.ParentId == sourceParentId);
-        foreach (var original in originals)
-        {
-            var copy = CloneSurface(original);
-            copy.ParentId = newParentId;
-            setup.Surfaces.Add(copy);
-            DuplicateChildrenOf(setup, original.Id, copy.Id);
-        }
-    }
-
-    private static Surface CloneSurface(Surface source)
-    {
-        var copy = new Surface
-                       {
-                           Name = source.Name,
-                           Type = source.Type,
-                           Kind = source.Kind,
-                           ParentId = source.ParentId,
-                           Render = source.Render,
-                           SizeInMeters = source.SizeInMeters,
-                           LockAspect = source.LockAspect,
-                           LocalPosition = source.LocalPosition,
-                           PixelsPerMeter = source.PixelsPerMeter,
-                           ShowGrid = source.ShowGrid,
-                           GridSubdivisions = source.GridSubdivisions,
-                       };
-
-        foreach (var mapping in source.OutputMappings)
-        {
-            copy.OutputMappings.Add(new Surface.OutputMapping
-                                        {
-                                            OutputId = mapping.OutputId,
-                                            Mode = mapping.Mode,
-                                            Quad = (Vector2[])mapping.Quad.Clone(),
-                                        });
-        }
-
-        if (source.Placement != null)
-            copy.Placement = new Surface.StagePlacement { Pose = source.Placement.Pose, Pivot = source.Placement.Pivot };
-
-        return copy;
-    }
-
-    /// <summary>
-    /// Drops this surface from every send that targets it, so it stops receiving content. The surface itself
-    /// and its calibration are untouched — this only edits the sends' target lists (op-side, like the drag).
-    /// </summary>
-    private static void ClearContentInputs(Guid surfaceId)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
-
-        var surface = setup.Surfaces.Find(s => s.Id == surfaceId);
-        if (surface == null || surface.SliceId == Guid.Empty)
-            return;
-
-        surface.SliceId = Guid.Empty;
-        OutputSetupHandling.SaveActive();
-    }
-
-    /// <summary>
-    /// Adds a Layout child — a rectangle living inside its parent, riding the parent's corner pin rather than
-    /// carrying one of its own. Its position is stored in meters from the parent's anchor, so it stays welded
-    /// to the meter raster when the parent is cropped or stretched.
-    /// </summary>
-    private static void AddSubRegion(SetupEntitySelection selection, Setup setup, Surface parent)
-    {
-        var parentSize = parent.SizeInMeters;
-        var size = new Vector2(MathF.Max(parentSize.X * 0.3f, SurfaceGeometry.MinSize),
-                               MathF.Max(parentSize.Y * 0.3f, SurfaceGeometry.MinSize));
-
-        // Land inside the parent rather than at its anchor: cropping an edge past the anchor legitimately
-        // pushes the pivot outside [0..1], and a child sitting on it would then start outside the parent —
-        // where extrapolating through a keystoned projection sends it a very long way off.
-        var anchor = SurfaceGeometry.AnchorInSurface(parent);
-        var bottomLeft = new Vector2(parentSize.X * 0.1f, parentSize.Y * 0.9f); // surface space runs Y down
-
-        var child = new Surface
-                        {
-                            Name = $"Sub region {CountChildren(setup, parent.Id) + 1}",
-                            Kind = Surface.SurfaceKinds.Layout,
-                            ParentId = parent.Id,
-                            SizeInMeters = size,
-                            LocalPosition = new Vector2(bottomLeft.X - anchor.X, anchor.Y - bottomLeft.Y),
-                            PixelsPerMeter = parent.PixelsPerMeter,
-                        };
-
-        setup.Surfaces.Add(child);
-        selection.Select(SetupEntitySelection.EntityKind.Surface, child.Id);
-        OutputSetupHandling.SaveActive();
-    }
-
-    private static int CountChildren(Setup setup, Guid parentId)
-    {
-        var count = 0;
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            if (setup.Surfaces[i].ParentId == parentId)
-                count++;
-        }
-
-        return count;
-    }
-
-    /// <summary>
-    /// Drops a <c>SendToOutput</c> op into the focused composition, selects it, and frames the view on it. When a
-    /// texture-outputting op is selected it lands to its right and is wired straight in, so the feed shows up in
-    /// the setup at once (the CONTENT row appears next frame, once <see cref="ContentSourceSync"/> adopts it).
-    /// </summary>
-    private static void AddContentSink(SetupEntitySelection selection)
-    {
-        var projectView = ProjectView.Focused;
-        var composition = projectView?.CompositionInstance;
-        if (projectView == null || composition == null)
-            return;
-
-        if (!composition.Symbol.TryGetSymbolUi(out var compositionUi)
-            || !SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out var sinkSymbolUi))
-            return;
-
-        // A selected texture op becomes the feed: place the sink to its right and wire it up.
-        var selected = projectView.NodeSelection.GetSelectedInstanceWithoutComposition();
-        var sourceSlot = selected == null ? null : FindTextureOutput(selected);
-        var selectedUi = selected?.GetChildUi();
-        var pos = selectedUi != null
-                      ? selectedUi.PosOnCanvas + new Vector2(selectedUi.Size.X + 40, 0)
-                      : Vector2.Zero;
-
-        var newChildUi = GraphOperations.AddSymbolChild(sinkSymbolUi.Symbol, compositionUi, pos);
-
-        if (sourceSlot != null && selectedUi != null)
-        {
-            var connection = new Symbol.Connection(selectedUi.Id, sourceSlot.Id, newChildUi.Id, SendToOutputTextureInputId);
-            UndoRedoStack.AddAndExecute(new AddConnectionCommand(compositionUi.Symbol, connection, 0));
-        }
-
-        projectView.NodeSelection.TrySelectCompositionChild(composition, newChildUi.Id, add: false);
-        projectView.FocusViewToSelection();
-    }
-
-    private static ISlot? FindTextureOutput(Instance instance)
-    {
-        foreach (var slot in instance.Outputs)
-        {
-            if (slot.ValueType == typeof(Texture2D))
-                return slot;
-        }
-
-        return null;
-    }
-
-    private static void AddSurface(SetupEntitySelection selection)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
-
-        var surface = new Surface { Name = $"Surface {setup.Surfaces.Count + 1}" };
-        setup.Surfaces.Add(surface);
-        selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
-    }
-
-    /// <summary>
-    /// How many of the selected entities this panel can actually delete. A content source is a graph op and a
-    /// slice's source may be gone, so the menu counts what will really go rather than how many rows are lit.
-    /// </summary>
-    private static int CountDeletable(SetupEntitySelection selection)
-    {
-        var count = 0;
-        for (var i = 0; i < selection.Targets.Count; i++)
-        {
-            if (IsDeletable(selection.Targets[i].Kind))
-                count++;
-        }
-
-        return count;
-    }
-
-    private static bool IsDeletable(SetupEntitySelection.EntityKind kind)
-    {
-        return kind is SetupEntitySelection.EntityKind.Surface
-                    or SetupEntitySelection.EntityKind.Slice
-                    or SetupEntitySelection.EntityKind.Output
-                    or SetupEntitySelection.EntityKind.ReferenceImage
-                    or SetupEntitySelection.EntityKind.Prop;
-    }
-
-    /// <summary>
-    /// Deletes everything deletable in the selection. Each kind keeps its own cascade (a surface re-parents
-    /// its children, an output drops the mappings onto it), so deleting a set is just deleting each in turn —
-    /// which is why the targets are copied first: those cascades mutate the setup underneath us.
-    /// </summary>
-    private static void DeleteSelection(SetupEntitySelection selection, Setup setup)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
-            return;
-
-        _deleteBuffer.Clear();
-        _deleteBuffer.AddRange(selection.Targets);
-
-        foreach (var target in _deleteBuffer)
-        {
-            var id = target.EntityId;
-            switch (target.Kind)
-            {
-                case SetupEntitySelection.EntityKind.Surface:
-                    DeleteSurface(setup, id);
-                    break;
-
-                case SetupEntitySelection.EntityKind.Slice:
-                    DeleteSlice(setup, id);
-                    break;
-
-                case SetupEntitySelection.EntityKind.Output:
-                    DeleteOutput(setup, machineConfig, id);
-                    break;
-
-                case SetupEntitySelection.EntityKind.ReferenceImage:
-                    setup.ReferenceImages.RemoveAll(r => r.Id == id);
-                    break;
-
-                case SetupEntitySelection.EntityKind.Prop:
-                    setup.Props.RemoveAll(r => r.Id == id);
-                    break;
-            }
-        }
-
-        selection.Clear();
-        OutputSetupHandling.SaveActive();
-    }
-
-    // Deleting a surface takes its sub-regions with it (they're cuts of the parent, meaningless on their own).
-    private static void DeleteSurface(Setup setup, Guid surfaceId)
-    {
-        var command = new DeleteSurfaceCommand(setup, surfaceId);
-        if (command.HasSurfaces)
-            UndoRedoStack.AddAndExecute(command);
-    }
-
     private static void DrawOutputBindingSubMenu(OutputDefinition output, MachineConfig machineConfig)
     {
         if (CustomComponents.DrawSubMenu(3, "Bind to display"))
@@ -2226,58 +1467,6 @@ internal static class SetupPanel
             ResolutionHandling.DrawBindingMenuItems(output, machineConfig);
             ImGui.EndMenu();
         }
-    }
-
-    // Deleting an output cascades: drop every surface's mapping onto it, unbind the display, and stop
-    // presenting it. Surfaces left without a mapping simply have no output — not lost.
-    private static void DeleteOutput(Setup setup, MachineConfig machineConfig, Guid outputId)
-    {
-        setup.Outputs.RemoveAll(o => o.Id == outputId);
-        foreach (var surface in setup.Surfaces)
-            surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
-
-        machineConfig.Unbind(outputId);
-        if (OutputManager.PresentedOutputId == outputId)
-            OutputManager.PresentedOutputId = Guid.Empty;
-
-        OutputSetupHandling.SaveActive();
-    }
-
-    private static void AddProp(SetupEntitySelection selection)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
-
-        var prop = new Prop();
-        setup.Props.Add(prop);
-        selection.Select(SetupEntitySelection.EntityKind.Prop, prop.Id);
-    }
-
-    private static void AddOutput(SetupEntitySelection selection)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
-
-        var output = new OutputDefinition
-                         {
-                             Name = $"P{CountProjectorOutputs(setup) + 1}",
-                             Kind = OutputDefinition.Kinds.Projector,
-                             CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1200),
-                         };
-        setup.Outputs.Add(output);
-        selection.Select(SetupEntitySelection.EntityKind.Output, output.Id);
-    }
-
-    private static int CountProjectorOutputs(Setup setup)
-    {
-        var count = 0;
-        foreach (var output in setup.Outputs)
-        {
-            if (output.Kind == OutputDefinition.Kinds.Projector)
-                count++;
-        }
-
-        return count;
     }
 
     private static string GetFreeName(string baseName)
@@ -2307,7 +1496,6 @@ internal static class SetupPanel
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
     private static readonly HashSet<Guid> _collapsedSurfaces = [];
     private static readonly HashSet<Guid> _collapsedSources = [];
-    private static readonly List<SelectionTarget> _deleteBuffer = [];
     private static Guid _renamingId;
     private static string _renameBuffer = string.Empty;
     private static bool _renameFocusPending;
@@ -2316,10 +1504,6 @@ internal static class SetupPanel
 
     private const string MeasuredSizePopupId = "##measuredSize";
     private static Vector2 _measuredEdit;
-
-    // Lib SendToOutput op and its texture input — the CONTENT "+" instantiates this and wires a selected feed in.
-    private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
-    private static readonly Guid SendToOutputTextureInputId = new("8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942");
 
     // Cross-highlight: the row hovered this frame (committed at end of Draw), and the entities it references.
     private static SetupEntitySelection.EntityKind _hoveredKind;

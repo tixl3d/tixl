@@ -130,7 +130,7 @@ internal sealed class OutputSetupModeView
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return false;
 
-        var source = setup.ContentSources.Find(c => c.SymbolChildId == instance.SymbolChildId);
+        var source = setup.FindSourceByChildId(instance.SymbolChildId);
         if (source == null)
             return false;
 
@@ -165,8 +165,8 @@ internal sealed class OutputSetupModeView
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return false;
 
-        var slice = setup.Slices.Find(s => s.Id == sliceId);
-        var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        var slice = setup.FindSlice(sliceId);
+        var source = slice == null ? null : setup.FindSource(slice.SourceId);
         if (source == null)
             return false;
 
@@ -202,7 +202,7 @@ internal sealed class OutputSetupModeView
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return false;
 
-        var surface = setup.Surfaces.Find(s => s.Id == surfaceId);
+        var surface = setup.FindSurface(surfaceId);
         for (var guard = 0; surface != null && guard < 16; guard++)
         {
             if (surface.OutputMappings.Count > 0)
@@ -215,7 +215,7 @@ internal sealed class OutputSetupModeView
                 break;
 
             var parentId = surface.ParentId;
-            surface = setup.Surfaces.Find(s => s.Id == parentId);
+            surface = setup.FindSurface(parentId);
         }
 
         return false;

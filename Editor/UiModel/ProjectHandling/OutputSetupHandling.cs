@@ -14,6 +14,32 @@ namespace T3.Editor.UiModel.ProjectHandling;
 /// </summary>
 internal static class OutputSetupHandling
 {
+    /// <summary>
+    /// Publishes the focused project's setup to <see cref="ActiveSetup"/> once per frame — operators only
+    /// reference Core and resolve GUIDs against it. Publication must not depend on any window being open or
+    /// any UI code happening to query the setup, so this runs from the frame loop, not from a getter.
+    /// </summary>
+    public static void UpdateFrame()
+    {
+        var package = ProjectView.Focused?.OpenedProject.Package;
+        if (package == null)
+        {
+            ActiveSetup.Current = null;
+            ActiveSetup.Machine = null;
+            return;
+        }
+
+        var entry = GetOrLoadEntry(package.Folder);
+        ActiveSetup.Current = entry.Setup;
+        ActiveSetup.Machine = entry.MachineConfig;
+    }
+
+    /// <summary>Drops a closed project's cached setup, so reopening reloads from disk.</summary>
+    public static void OnProjectClosed(string projectFolder)
+    {
+        _entriesByProjectFolder.Remove(projectFolder);
+    }
+
     public static bool TryGetActiveSetup(out Setup setup, out MachineConfig machineConfig)
     {
         setup = null!;
@@ -26,10 +52,6 @@ internal static class OutputSetupHandling
         var entry = GetOrLoadEntry(package.Folder);
         setup = entry.Setup;
         machineConfig = entry.MachineConfig;
-
-        // Publish for operators — they only reference Core and resolve GUIDs via ActiveSetup
-        ActiveSetup.Current = setup;
-        ActiveSetup.Machine = machineConfig;
         return true;
     }
 

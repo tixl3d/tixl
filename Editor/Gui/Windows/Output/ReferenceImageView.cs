@@ -33,7 +33,7 @@ internal sealed class ReferenceImageView
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        var image = setup.ReferenceImages.Find(r => r.Id == imageId);
+        var image = setup.FindReferenceImage(imageId);
         if (image == null)
             return;
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using ImGuiNET;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
@@ -115,13 +116,7 @@ internal static class OutputManager
         _context.Reset();
         _context.RequestedResolution = output.CanvasResolution;
 
-        DirtyFlag.GlobalInvalidationTick++;
-        foreach (var sink in OutputSinkRegistry.Sinks)
-        {
-            // Update=false freezes this content at its last frame — skip its invalidation.
-            if (sink.GetUpdateEnabled(_context!))
-                sink.InvalidateContent();
-        }
+        InvalidateContentOncePerFrame(_context);
 
         foreach (var surface in setup.Surfaces)
         {
@@ -140,6 +135,28 @@ internal static class OutputManager
         return direct is { IsDisposed: false } ? direct : null;
     }
 
+    /// <summary>
+    /// Content is pulled manually, outside the normal output path, so the same graph invalidation must run —
+    /// but only once per frame: presentation, the setup canvas, and the content preview can all pull in one
+    /// frame, and every extra tick re-evaluates each sink's whole upstream graph.
+    /// </summary>
+    private static void InvalidateContentOncePerFrame(EvaluationContext context)
+    {
+        var frame = ImGui.GetFrameCount();
+        if (frame == _invalidatedContentFrame)
+            return;
+
+        _invalidatedContentFrame = frame;
+
+        DirtyFlag.GlobalInvalidationTick++;
+        foreach (var sink in OutputSinkRegistry.Sinks)
+        {
+            // Update=false freezes this content at its last frame — skip its invalidation.
+            if (sink.GetUpdateEnabled(context))
+                sink.InvalidateContent();
+        }
+    }
+
     /// <summary>Renders the output's composite, or null if nothing is bound to it.</summary>
     public static Texture2D? RenderOutput(Guid outputId)
     {
@@ -152,15 +169,7 @@ internal static class OutputManager
         _context.Reset();
         _context.RequestedResolution = output.CanvasResolution;
 
-        // We pull content manually, outside the normal output path, so we must run the same graph
-        // invalidation it does — otherwise time-dependent content stays frozen at its cached frame.
-        DirtyFlag.GlobalInvalidationTick++;
-        foreach (var sink in OutputSinkRegistry.Sinks)
-        {
-            // Update=false freezes this content at its last frame — skip its invalidation.
-            if (sink.GetUpdateEnabled(_context!))
-                sink.InvalidateContent();
-        }
+        InvalidateContentOncePerFrame(_context);
 
         // Phase 1: resolve each surface's content and mapping. Pulling content here (before our RT is
         // bound) keeps the content's own rendering from clobbering the target we bind in phase 2.
@@ -546,14 +555,14 @@ internal static class OutputManager
         uv = _fullSourceRect;
 
         var setup = ActiveSetup.Current;
-        var surface = setup?.Surfaces.Find(s => s.Id == surfaceId);
+        var surface = setup?.FindSurface(surfaceId);
         if (setup == null || surface == null || surface.SliceId == Guid.Empty)
             return false;
 
-        var found = setup.Slices.Find(s => s.Id == surface.SliceId);
+        var found = setup.FindSlice(surface.SliceId);
         slice = found;
         var sourceId = found?.SourceId ?? Guid.Empty;
-        var source = sourceId == Guid.Empty ? null : setup.ContentSources.Find(c => c.Id == sourceId);
+        var source = sourceId == Guid.Empty ? null : setup.FindSource(sourceId);
         if (source == null || !TryGetSourceContent(source.SymbolChildId, out _, out content))
             return false;
 
@@ -591,8 +600,8 @@ internal static class OutputManager
         if (sliceId == Guid.Empty)
             return false;
 
-        var slice = setup.Slices.Find(s => s.Id == sliceId);
-        var source = slice == null ? null : setup.ContentSources.Find(c => c.Id == slice.SourceId);
+        var slice = setup.FindSlice(sliceId);
+        var source = slice == null ? null : setup.FindSource(slice.SourceId);
         if (source == null)
             return false;
 
@@ -795,6 +804,7 @@ internal static class OutputManager
 
     private static int _presentedDisplayIndex = -1;
     private static EvaluationContext? _context;
+    private static int _invalidatedContentFrame = -1;
     private static Resource<T3.Core.DataTypes.VertexShader>? _vertexShaderResource;
     private static Resource<T3.Core.DataTypes.PixelShader>? _pixelShaderResource;
     private static ShaderParams _shaderParams;

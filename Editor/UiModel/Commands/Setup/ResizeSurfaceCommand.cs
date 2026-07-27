@@ -19,6 +19,7 @@ internal sealed class ResizeSurfaceCommand : ICommand
 
     public ResizeSurfaceCommand(Guid surfaceId, State oldState, State newState)
     {
+        _setupId = ActiveSetup.Current?.Id ?? Guid.Empty;
         _surfaceId = surfaceId;
         _oldState = oldState;
         _newState = newState;
@@ -111,7 +112,10 @@ internal sealed class ResizeSurfaceCommand : ICommand
 
     private void Apply(State state)
     {
-        var surface = ActiveSetup.Current?.Surfaces.Find(s => s.Id == _surfaceId);
+        if (!SetupCommands.TryGetSetup(_setupId, Name, out var activeSetup))
+            return;
+
+        var surface = activeSetup.FindSurface(_surfaceId);
         if (surface == null)
         {
             Log.Warning($"Surface {_surfaceId} no longer exists — skipping resize.");
@@ -122,6 +126,7 @@ internal sealed class ResizeSurfaceCommand : ICommand
         OutputSetupHandling.SaveActive();
     }
 
+    private readonly Guid _setupId;
     private readonly Guid _surfaceId;
     private readonly State _oldState;
     private readonly State _newState;

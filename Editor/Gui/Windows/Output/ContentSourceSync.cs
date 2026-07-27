@@ -1,4 +1,5 @@
 #nullable enable
+using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Output;
 using T3.Editor.UiModel;
@@ -16,7 +17,16 @@ namespace T3.Editor.Gui.Windows.Output;
 /// </summary>
 internal static class ContentSourceSync
 {
-    public static void Update(Setup setup)
+    /// <summary>Runs the sync against the published active setup. Called from the frame loop, so the
+    /// source list stays in step with the graph whether or not any output UI is open.</summary>
+    public static void UpdateFrame()
+    {
+        var setup = ActiveSetup.Current;
+        if (setup != null)
+            Update(setup);
+    }
+
+    private static void Update(Setup setup)
     {
         var changed = false;
 
@@ -27,7 +37,7 @@ internal static class ContentSourceSync
                 continue;
 
             var childId = instance.SymbolChildId;
-            if (setup.ContentSources.Exists(s => s.SymbolChildId == childId))
+            if (setup.FindSourceByChildId(childId) != null)
                 continue;
 
             setup.ContentSources.Add(new ContentSource
@@ -65,10 +75,20 @@ internal static class ContentSourceSync
             changed |= DropDeletedSources(setup);
         }
 
+        // Debounced: rename propagation changes the mirrored name once per keystroke, so saving
+        // immediately would write the setup file per keypress. A short quiet period batches them;
+        // every other setup edit saves through SaveActive anyway, flushing whatever is pending.
         if (changed)
+            _pendingSaveSince = ImGui.GetTime();
+
+        if (_pendingSaveSince != null && ImGui.GetTime() - _pendingSaveSince > 1.0)
+        {
+            _pendingSaveSince = null;
             OutputSetupHandling.SaveActive();
+        }
     }
 
+    private static double? _pendingSaveSince;
     private static int _sweptRegistryVersion = -1;
     private static Guid _sweptSetupId;
 

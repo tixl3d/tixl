@@ -18,6 +18,7 @@ using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Analyze;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.SystemUi;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.SystemUi;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
@@ -146,6 +147,11 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             ImGuiDx11RenderForm.ReconcileStuckModifiers();
 
             ImGui.NewFrame();
+
+            // Publish the focused project's setup for operators, then keep the content-source list in
+            // step with the live send ops — both independent of which windows are open.
+            OutputSetupHandling.UpdateFrame();
+            ContentSourceSync.UpdateFrame();
 
             // Drive projection-mapping outputs: renders each bound output's composite every frame
             // (so its content evaluates even when nothing shows it), sets the viewer texture, and

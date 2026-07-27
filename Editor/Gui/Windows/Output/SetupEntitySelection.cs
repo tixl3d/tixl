@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using T3.Core.Operator;
 using T3.Core.Output;
 
 namespace T3.Editor.Gui.Windows.Output;
@@ -81,7 +82,12 @@ internal sealed class SetupEntitySelection
     /// <summary>Resolves the primary selection against a setup, dropping any target whose entity is gone.</summary>
     public bool TryResolve(Setup setup, out EntityKind kind, out Guid id)
     {
-        _targets.RemoveAll(t => !ExistsInSetup(setup, t));
+        // Manual loop: this runs several times per frame, so no RemoveAll/Exists closures.
+        for (var i = _targets.Count - 1; i >= 0; i--)
+        {
+            if (!ExistsInSetup(setup, _targets[i]))
+                _targets.RemoveAt(i);
+        }
 
         if (_targets.Count == 0)
         {
@@ -95,18 +101,77 @@ internal sealed class SetupEntitySelection
         return true;
     }
 
-    // Slice/ContentSource live on live graph ops, not the setup, so they can't be validated here — kept.
     private static bool ExistsInSetup(Setup setup, SelectionTarget target)
     {
-        return target.Kind switch
-                   {
-                       EntityKind.ReferenceImage => setup.ReferenceImages.Exists(e => e.Id == target.EntityId),
-                       EntityKind.Surface => setup.Surfaces.Exists(e => e.Id == target.EntityId),
-                       EntityKind.Prop => setup.Props.Exists(e => e.Id == target.EntityId),
-                       EntityKind.Output => setup.Outputs.Exists(e => e.Id == target.EntityId),
-                       EntityKind.Slice or EntityKind.ContentSource => true,
-                       _ => false,
-                   };
+        var id = target.EntityId;
+        switch (target.Kind)
+        {
+            case EntityKind.ReferenceImage:
+                foreach (var e in setup.ReferenceImages)
+                {
+                    if (e.Id == id)
+                        return true;
+                }
+
+                return false;
+
+            case EntityKind.Surface:
+                foreach (var e in setup.Surfaces)
+                {
+                    if (e.Id == id)
+                        return true;
+                }
+
+                return false;
+
+            case EntityKind.Prop:
+                foreach (var e in setup.Props)
+                {
+                    if (e.Id == id)
+                        return true;
+                }
+
+                return false;
+
+            case EntityKind.Output:
+                foreach (var e in setup.Outputs)
+                {
+                    if (e.Id == id)
+                        return true;
+                }
+
+                return false;
+
+            case EntityKind.Slice:
+                foreach (var e in setup.Slices)
+                {
+                    if (e.Id == id)
+                        return true;
+                }
+
+                return false;
+
+            case EntityKind.ContentSource:
+                // Content rows are addressed by the op's SymbolChildId, not ContentSource.Id. A freshly
+                // created send can be selected before the sync adopts it into the setup, so a live sink
+                // with that child also counts as existing.
+                foreach (var source in setup.ContentSources)
+                {
+                    if (source.SymbolChildId == id)
+                        return true;
+                }
+
+                foreach (var sink in OutputSinkRegistry.Sinks)
+                {
+                    if (sink is Instance instance && instance.SymbolChildId == id)
+                        return true;
+                }
+
+                return false;
+
+            default:
+                return false;
+        }
     }
 
     private readonly List<SelectionTarget> _targets = [];

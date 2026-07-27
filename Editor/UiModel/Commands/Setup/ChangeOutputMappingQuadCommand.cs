@@ -19,6 +19,7 @@ internal sealed class ChangeOutputMappingQuadCommand : ICommand
 
     public ChangeOutputMappingQuadCommand(Guid surfaceId, Guid outputId, Vector2[] oldQuad, Vector2[] newQuad)
     {
+        _setupId = ActiveSetup.Current?.Id ?? Guid.Empty;
         _surfaceId = surfaceId;
         _outputId = outputId;
         _oldQuad = (Vector2[])oldQuad.Clone();
@@ -30,7 +31,10 @@ internal sealed class ChangeOutputMappingQuadCommand : ICommand
 
     private void Apply(Vector2[] quad)
     {
-        var surface = ActiveSetup.Current?.Surfaces.Find(s => s.Id == _surfaceId);
+        if (!SetupCommands.TryGetSetup(_setupId, Name, out var setup))
+            return;
+
+        var surface = setup.FindSurface(_surfaceId);
         var mapping = surface?.OutputMappings.Find(m => m.OutputId == _outputId);
         if (mapping == null || mapping.Quad.Length < 4)
         {
@@ -42,6 +46,7 @@ internal sealed class ChangeOutputMappingQuadCommand : ICommand
         OutputSetupHandling.SaveActive();
     }
 
+    private readonly Guid _setupId;
     private readonly Guid _surfaceId;
     private readonly Guid _outputId;
     private readonly Vector2[] _oldQuad;

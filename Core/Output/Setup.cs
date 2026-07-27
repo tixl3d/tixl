@@ -61,6 +61,106 @@ public sealed class Setup
         return clone;
     }
 
+    // Lookup helpers — plain loops, so per-frame callers don't pay a List.Find closure per call.
+    public Surface? FindSurface(Guid id)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var surface in Surfaces)
+        {
+            if (surface.Id == id)
+                return surface;
+        }
+
+        return null;
+    }
+
+    public OutputDefinition? FindOutput(Guid id)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var output in Outputs)
+        {
+            if (output.Id == id)
+                return output;
+        }
+
+        return null;
+    }
+
+    public Slice? FindSlice(Guid id)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var slice in Slices)
+        {
+            if (slice.Id == id)
+                return slice;
+        }
+
+        return null;
+    }
+
+    public ContentSource? FindSource(Guid id)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var source in ContentSources)
+        {
+            if (source.Id == id)
+                return source;
+        }
+
+        return null;
+    }
+
+    /// <summary>Content rows and sinks address sources by the supplying op's SymbolChildId, not by entity id.</summary>
+    public ContentSource? FindSourceByChildId(Guid symbolChildId)
+    {
+        if (symbolChildId == Guid.Empty)
+            return null;
+
+        foreach (var source in ContentSources)
+        {
+            if (source.SymbolChildId == symbolChildId)
+                return source;
+        }
+
+        return null;
+    }
+
+    public ReferenceImage? FindReferenceImage(Guid id)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var image in ReferenceImages)
+        {
+            if (image.Id == id)
+                return image;
+        }
+
+        return null;
+    }
+
+    public Prop? FindProp(Guid id)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var prop in Props)
+        {
+            if (prop.Id == id)
+                return prop;
+        }
+
+        return null;
+    }
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
