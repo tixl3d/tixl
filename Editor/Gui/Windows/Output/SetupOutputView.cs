@@ -1295,16 +1295,15 @@ internal sealed partial class SetupOutputView
             ImGui.EndPopup();
         }
 
-        // Ctrl+D duplicates the selected surface, matching the menu entry.
+        // Ctrl+D duplicates the primary selection, matching the menu entry — any duplicable kind, not just surfaces.
         if (selection != null
-            && _focusedSurfaceId != Guid.Empty
             && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows)
             && ImGui.GetIO().KeyCtrl
-            && ImGui.IsKeyPressed(ImGuiKey.D, false))
+            && ImGui.IsKeyPressed(ImGuiKey.D, false)
+            && selection.TryResolve(setup, out var duplicateKind, out var duplicateId)
+            && SetupActions.CanDuplicate(duplicateKind))
         {
-            var focused = setup.FindSurface(_focusedSurfaceId);
-            if (focused != null)
-                SetupActions.DuplicateSurface(selection, setup, focused);
+            SetupActions.DuplicateEntity(selection, setup, duplicateKind, duplicateId);
         }
     }
 
@@ -1321,25 +1320,20 @@ internal sealed partial class SetupOutputView
         if (selection == null)
             return;
 
-        switch (_menuKind)
-        {
-            case SetupEntitySelection.EntityKind.Surface:
-            {
-                var surface = setup.FindSurface(_menuId);
-                if (surface != null)
-                    SetupActions.DrawSurfaceMenuItems(selection, setup, surface, includeDelete: true);
+        // Same menu as the sidebar row — the shared body keeps the two from drifting apart. Rename opens
+        // the sidebar row's inline editor.
+        var name = _menuKind switch
+                       {
+                           SetupEntitySelection.EntityKind.Surface => setup.FindSurface(_menuId)?.Name,
+                           SetupEntitySelection.EntityKind.Slice => setup.FindSlice(_menuId) is { } slice
+                                                                        ? SetupActions.SliceLabel(setup, slice)
+                                                                        : null,
+                           _ => null,
+                       };
+        if (name == null)
+            return;
 
-                break;
-            }
-            case SetupEntitySelection.EntityKind.Slice:
-            {
-                var slice = setup.FindSlice(_menuId);
-                if (slice != null)
-                    SetupActions.DrawSliceMenuItems(selection, setup, slice);
-
-                break;
-            }
-        }
+        EntityItem.DrawContextMenuItems(selection, setup, _menuKind, _menuId, name);
     }
 
     /// <summary>Runs a child rectangle edit through the same snapshot/undo lifecycle as a surface resize.</summary>

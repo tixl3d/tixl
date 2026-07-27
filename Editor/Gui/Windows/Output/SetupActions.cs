@@ -1,4 +1,8 @@
 #nullable enable
+using System.IO;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -21,9 +25,52 @@ namespace T3.Editor.Gui.Windows.Output;
 /// </summary>
 internal static class SetupActions
 {
+    /// <summary>
+    /// Whether the two kinds form a routing connection at all — the drop matrix, direction-agnostic.
+    /// Connectable pairs: surface↔output, slice↔output, source↔output, slice↔surface, source↔surface.
+    /// </summary>
+    internal static bool CanConnect(SetupEntitySelection.EntityKind a, SetupEntitySelection.EntityKind b)
+    {
+        // Normalize so `a` is the content-flow upstream side.
+        if (RoutingRank(a) > RoutingRank(b))
+            (a, b) = (b, a);
+
+        return b switch
+                   {
+                       SetupEntitySelection.EntityKind.Output => a is SetupEntitySelection.EntityKind.Surface
+                                                                      or SetupEntitySelection.EntityKind.Slice
+                                                                      or SetupEntitySelection.EntityKind.ContentSource,
+                       SetupEntitySelection.EntityKind.Surface => a is SetupEntitySelection.EntityKind.Slice
+                                                                       or SetupEntitySelection.EntityKind.ContentSource,
+                       _ => false,
+                   };
+    }
+
+    // Position along the content flow (source → slice → surface → output); used to normalize drop direction.
+    private static int RoutingRank(SetupEntitySelection.EntityKind kind)
+    {
+        return kind switch
+                   {
+                       SetupEntitySelection.EntityKind.ContentSource => 0,
+                       SetupEntitySelection.EntityKind.Slice => 1,
+                       SetupEntitySelection.EntityKind.Surface => 2,
+                       SetupEntitySelection.EntityKind.Output => 3,
+                       _ => -1,
+                   };
+    }
+
     internal static void ApplyDrop(Setup setup, SetupEntitySelection.EntityKind dragKind, Guid dragId,
                                    SetupEntitySelection.EntityKind targetKind, Guid targetId)
     {
+        // A drop means "connect these two" regardless of which one was picked up — dragging an output onto a
+        // surface is the same link as dragging the surface onto the output. Normalize so the upstream side is
+        // always the drag and the cases below only handle one direction each.
+        if (RoutingRank(dragKind) > RoutingRank(targetKind))
+        {
+            (dragKind, targetKind) = (targetKind, dragKind);
+            (dragId, targetId) = (targetId, dragId);
+        }
+
         if (targetKind == SetupEntitySelection.EntityKind.Output && dragKind == SetupEntitySelection.EntityKind.Surface)
         {
             var surface = setup.FindSurface(dragId);
@@ -369,38 +416,11 @@ internal static class SetupActions
     /// </summary>
     internal static void DeleteSelection(SetupEntitySelection selection, Setup setup)
     {
-        if (!OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
-            return;
-
         _deleteBuffer.Clear();
         _deleteBuffer.AddRange(selection.Targets);
 
         foreach (var target in _deleteBuffer)
-        {
-            var id = target.EntityId;
-            switch (target.Kind)
-            {
-                case SetupEntitySelection.EntityKind.Surface:
-                    DeleteSurface(setup, id);
-                    break;
-
-                case SetupEntitySelection.EntityKind.Slice:
-                    DeleteSlice(setup, id);
-                    break;
-
-                case SetupEntitySelection.EntityKind.Output:
-                    DeleteOutput(setup, machineConfig, id);
-                    break;
-
-                case SetupEntitySelection.EntityKind.ReferenceImage:
-                    setup.ReferenceImages.RemoveAll(r => r.Id == id);
-                    break;
-
-                case SetupEntitySelection.EntityKind.Prop:
-                    setup.Props.RemoveAll(r => r.Id == id);
-                    break;
-            }
-        }
+            DeleteEntity(setup, target.Kind, target.EntityId);
 
         selection.Clear();
         OutputSetupHandling.SaveActive();
@@ -455,12 +475,14 @@ internal static class SetupActions
         OutputSetupHandling.SaveActive();
     }
 
-    /// <summary>Kinds whose row/item offers a direct Delete (the others delete via selection or not at all).</summary>
+    /// <summary>A content source is a graph op (delete the op instead); everything else deletes here.</summary>
     internal static bool CanDeleteDirectly(SetupEntitySelection.EntityKind kind)
     {
         return kind is SetupEntitySelection.EntityKind.Surface
                     or SetupEntitySelection.EntityKind.Slice
-                    or SetupEntitySelection.EntityKind.Output;
+                    or SetupEntitySelection.EntityKind.Output
+                    or SetupEntitySelection.EntityKind.ReferenceImage
+                    or SetupEntitySelection.EntityKind.Prop;
     }
 
     internal static void DeleteEntity(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
@@ -480,7 +502,131 @@ internal static class SetupActions
                     DeleteOutput(setup, machineConfig, id);
 
                 break;
+
+            case SetupEntitySelection.EntityKind.ReferenceImage:
+                // Surfaces traced on this image lose their binding — a dangling ImageId would mean nothing.
+                foreach (var surface in setup.Surfaces)
+                {
+                    if (surface.Reference?.ImageId == id)
+                        surface.Reference = null;
+                }
+
+                setup.ReferenceImages.RemoveAll(r => r.Id == id);
+                OutputSetupHandling.SaveActive();
+                break;
+
+            case SetupEntitySelection.EntityKind.Prop:
+                setup.Props.RemoveAll(p => p.Id == id);
+                OutputSetupHandling.SaveActive();
+                break;
         }
+    }
+
+    /// <summary>A content source is its op — duplicating it wouldn't carry the feed; everything else clones.</summary>
+    internal static bool CanDuplicate(SetupEntitySelection.EntityKind kind)
+    {
+        return kind is SetupEntitySelection.EntityKind.Surface
+                    or SetupEntitySelection.EntityKind.Slice
+                    or SetupEntitySelection.EntityKind.Output
+                    or SetupEntitySelection.EntityKind.ReferenceImage
+                    or SetupEntitySelection.EntityKind.Prop;
+    }
+
+    /// <summary>A prop has no name to rename; a content source renames its op.</summary>
+    internal static bool CanRename(SetupEntitySelection.EntityKind kind)
+    {
+        return kind is not (SetupEntitySelection.EntityKind.Prop or SetupEntitySelection.EntityKind.None);
+    }
+
+    internal static void DuplicateEntity(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        switch (kind)
+        {
+            case SetupEntitySelection.EntityKind.Surface:
+                var surface = setup.FindSurface(id);
+                if (surface != null)
+                    DuplicateSurface(selection, setup, surface);
+
+                return; // DuplicateSurface selects and saves itself.
+
+            case SetupEntitySelection.EntityKind.Slice:
+            {
+                var slice = setup.FindSlice(id);
+                var copy = slice == null ? null : CloneViaJson(slice.WriteToJson, Slice.ReadFromJson);
+                if (copy == null)
+                    return;
+
+                copy.Id = Guid.NewGuid();
+                if (!string.IsNullOrEmpty(copy.Name))
+                    copy.Name += " copy";
+
+                setup.Slices.Add(copy);
+                selection.Select(SetupEntitySelection.EntityKind.Slice, copy.Id);
+                break;
+            }
+
+            case SetupEntitySelection.EntityKind.Output:
+            {
+                var output = setup.FindOutput(id);
+                var copy = output == null ? null : CloneViaJson(output.WriteToJson, OutputDefinition.ReadFromJson);
+                if (copy == null)
+                    return;
+
+                // Fresh id: mappings and the machine's display binding stay with the original.
+                copy.Id = Guid.NewGuid();
+                copy.Name += " copy";
+                setup.Outputs.Add(copy);
+                selection.Select(SetupEntitySelection.EntityKind.Output, copy.Id);
+                break;
+            }
+
+            case SetupEntitySelection.EntityKind.ReferenceImage:
+            {
+                var image = setup.FindReferenceImage(id);
+                var copy = image == null ? null : CloneViaJson(image.WriteToJson, ReferenceImage.ReadFromJson);
+                if (copy == null)
+                    return;
+
+                copy.Id = Guid.NewGuid();
+                copy.Name += " copy";
+                setup.ReferenceImages.Add(copy);
+                selection.Select(SetupEntitySelection.EntityKind.ReferenceImage, copy.Id);
+                break;
+            }
+
+            case SetupEntitySelection.EntityKind.Prop:
+            {
+                var prop = setup.FindProp(id);
+                var copy = prop == null ? null : CloneViaJson(prop.WriteToJson, Prop.ReadFromJson);
+                if (copy == null)
+                    return;
+
+                copy.Id = Guid.NewGuid();
+                setup.Props.Add(copy);
+                selection.Select(SetupEntitySelection.EntityKind.Prop, copy.Id);
+                break;
+            }
+
+            default:
+                return;
+        }
+
+        OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>Clones a setup entity through its own JSON round-trip, so new fields are picked up without
+    /// touching the clone. The caller re-ids the copy.</summary>
+    private static T? CloneViaJson<T>(Action<JsonTextWriter> write, Func<JToken, T> read) where T : class
+    {
+        var sb = new StringBuilder();
+        using (var stringWriter = new StringWriter(sb))
+        using (var writer = new JsonTextWriter(stringWriter))
+        {
+            write(writer);
+            writer.Flush();
+        }
+
+        return read(JObject.Parse(sb.ToString()));
     }
 
     // Deleting a surface takes its sub-regions with it (they're cuts of the parent, meaningless on their own).
@@ -515,7 +661,7 @@ internal static class SetupActions
         var count = 0;
         for (var i = 0; i < selection.Targets.Count; i++)
         {
-            if (IsDeletable(selection.Targets[i].Kind))
+            if (CanDeleteDirectly(selection.Targets[i].Kind))
                 count++;
         }
 
@@ -652,41 +798,6 @@ internal static class SetupActions
         return length >= 1 ? new string(buffer[..length]) : name;
     }
 
-    /// <summary>
-    /// The surface actions, shared by the sidebar row and the canvas label so the two can't drift apart.
-    /// </summary>
-    internal static void DrawSurfaceMenuItems(SetupEntitySelection selection, Setup setup, Surface surface, bool includeDelete)
-    {
-        if (CustomComponents.DrawMenuItem(4, "Add sub-region"))
-            AddSubRegion(selection, setup, surface);
-
-        if (CustomComponents.DrawMenuItem(5, "Duplicate"))
-            DuplicateSurface(selection, setup, surface);
-
-        // Only meaningful once something is shown here — there's no aspect to match otherwise.
-        if (surface.SliceId != Guid.Empty && CustomComponents.DrawMenuItem(9, "Adjust aspect to slice"))
-            MatchSurfaceToSliceAspect(setup, surface);
-
-        if (CustomComponents.DrawMenuItem(6, "Clear content inputs"))
-            ClearContentInputs(surface.Id);
-
-        if (includeDelete && CustomComponents.DrawMenuItem(7, "Delete"))
-            DeleteSurface(setup, surface.Id);
-    }
-
-    /// <summary>The slice's context menu, shared by its sidebar row and its frame label on the canvas.</summary>
-    internal static void DrawSliceMenuItems(SetupEntitySelection selection, Setup setup, Slice slice)
-    {
-        CustomComponents.MenuItemsFlushLeft = true;
-        if (CustomComponents.DrawMenuItem(2, "Delete"))
-        {
-            DeleteSlice(setup, slice.Id);
-            selection.Clear();
-        }
-
-        CustomComponents.MenuItemsFlushLeft = false;
-    }
-
     private static Surface.OutputMapping CreateDefaultMapping(OutputDefinition output)
     {
         float w = Math.Max(1, output.CanvasResolution.Width);
@@ -756,7 +867,7 @@ internal static class SetupActions
     /// of the slice's "Match target aspect", for when the wall is what should give. Keeps the width and solves
     /// the height, so it reads as a nudge rather than a jump.
     /// </summary>
-    private static void MatchSurfaceToSliceAspect(Setup setup, Surface surface)
+    internal static void MatchSurfaceToSliceAspect(Setup setup, Surface surface)
     {
         var slice = setup.FindSlice(surface.SliceId);
         if (slice == null || !TryGetSliceAspect(setup, slice, out var aspect))
@@ -839,7 +950,7 @@ internal static class SetupActions
     /// carrying one of its own. Its position is stored in meters from the parent's anchor, so it stays welded
     /// to the meter raster when the parent is cropped or stretched.
     /// </summary>
-    private static void AddSubRegion(SetupEntitySelection selection, Setup setup, Surface parent)
+    internal static void AddSubRegion(SetupEntitySelection selection, Setup setup, Surface parent)
     {
         var parentSize = parent.SizeInMeters;
         var size = new Vector2(MathF.Max(parentSize.X * 0.3f, SurfaceGeometry.MinSize),
@@ -870,7 +981,7 @@ internal static class SetupActions
     /// Drops this surface from every send that targets it, so it stops receiving content. The surface itself
     /// and its calibration are untouched — this only edits the sends' target lists (op-side, like the drag).
     /// </summary>
-    private static void ClearContentInputs(Guid surfaceId)
+    internal static void ClearContentInputs(Guid surfaceId)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -892,15 +1003,6 @@ internal static class SetupActions
         }
 
         return null;
-    }
-
-    private static bool IsDeletable(SetupEntitySelection.EntityKind kind)
-    {
-        return kind is SetupEntitySelection.EntityKind.Surface
-                    or SetupEntitySelection.EntityKind.Slice
-                    or SetupEntitySelection.EntityKind.Output
-                    or SetupEntitySelection.EntityKind.ReferenceImage
-                    or SetupEntitySelection.EntityKind.Prop;
     }
 
     private static int CountProjectorOutputs(Setup setup)

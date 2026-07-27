@@ -53,14 +53,6 @@ internal static class EntityItem
         /// <summary>Strike the leading icon (a paused output / non-rendered surface).</summary>
         public bool StrikeLeadingIcon;
 
-        public bool CanRename;
-
-        /// <summary>Offer the "Bind to display" submenu (bindable output kinds).</summary>
-        public bool ShowBindingSubMenu;
-
-        /// <summary>Content row whose source is adopted into the setup — offers "Add slice".</summary>
-        public bool HasAdoptedSource;
-
         /// <summary>The selection primary, for the in-gutter bind toggle.</summary>
         public SetupEntitySelection.EntityKind PrimaryKind;
 
@@ -114,11 +106,12 @@ internal static class EntityItem
         var isHovered = ImGui.IsItemHovered();
         hovered = isHovered;
 
-        var isRenaming = args.CanRename && _renamingId == args.Id;
+        var canRename = SetupActions.CanRename(args.Kind);
+        var isRenaming = canRename && _renamingId == args.Id;
 
         // Double-click a renamable row to edit its name inline. Suppress the click-select handling below so the
         // double-click doesn't also toggle/reselect while the field takes focus.
-        if (args.CanRename && !isRenaming && isHovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        if (canRename && !isRenaming && isHovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
         {
             BeginRename(selection, args.Kind, args.Id, args.Name);
             isRenaming = true;
@@ -171,10 +164,7 @@ internal static class EntityItem
 
         HandleDragDrop(setup, args.Kind, args.Id);
 
-        var hasMenu = args.CanRename || args.ShowBindingSubMenu || args.HasAdoptedSource
-                      || args.Kind == SetupEntitySelection.EntityKind.Surface
-                      || SetupActions.CanDeleteDirectly(args.Kind);
-        if (hasMenu)
+        if (args.Kind != SetupEntitySelection.EntityKind.None)
         {
             // Static context + a cached delegate: the menu body only runs for the row whose popup is open,
             // and ContextMenuForItem invokes it synchronously within this call — so per-row closures would
@@ -182,8 +172,6 @@ internal static class EntityItem
             _menuArgs = args;
             _menuSelection = selection;
             _menuSetup = setup;
-            _menuMulti = isSelected && selection.Count > 1;
-            _menuDeletableCount = _menuMulti ? SetupActions.CountDeletable(selection) : 0;
             CustomComponents.ContextMenuForItem(_drawMenuItemsCached, null);
         }
 
@@ -360,27 +348,23 @@ internal static class EntityItem
 
     private static void HandleDragDrop(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
     {
-        if (kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
-                 or SetupEntitySelection.EntityKind.Slice)
-        {
-            // The payload is only read while the item is active (the drag start), so skip the string build
-            // for the idle case — the helper's deactivation cleanup doesn't use it.
-            var payload = ImGui.IsItemActive() ? $"{(int)kind}:{id}" : string.Empty;
-            DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.SetupEntity, payload);
-        }
-
-        if (kind is not (SetupEntitySelection.EntityKind.Output or SetupEntitySelection.EntityKind.Surface))
+        // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
+        // (ApplyDrop normalizes), so dragging an output onto a source works the same as the reverse.
+        var routable = kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
+                            or SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.Output;
+        if (!routable)
             return;
+
+        // The payload is only read while the item is active (the drag start), so skip the string build
+        // for the idle case — the helper's deactivation cleanup doesn't use it.
+        var payload = ImGui.IsItemActive() ? $"{(int)kind}:{id}" : string.Empty;
+        DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.SetupEntity, payload);
 
         if (!DragAndDropHandling.TryGetDragData(DragAndDropHandling.DragTypes.SetupEntity, out var dragData)
             || !SetupActions.TryParseDrag(dragData, out var dragKind, out var dragId))
             return;
 
-        var accepts = kind == SetupEntitySelection.EntityKind.Output
-                          ? dragKind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
-                                     or SetupEntitySelection.EntityKind.Slice
-                          : dragKind is SetupEntitySelection.EntityKind.ContentSource or SetupEntitySelection.EntityKind.Slice;
-        if (!accepts || dragId == id)
+        if (!SetupActions.CanConnect(dragKind, kind) || dragId == id)
             return;
 
         if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) == DragAndDropHandling.DragInteractionResult.Dropped)
@@ -389,74 +373,97 @@ internal static class EntityItem
 
     private static void DrawMenuItemsForCurrent()
     {
-        var args = _menuArgs;
-        var selection = _menuSelection;
-        var setup = _menuSetup;
-        if (selection == null || setup == null)
+        if (_menuSelection == null || _menuSetup == null)
             return;
 
+        DrawContextMenuItems(_menuSelection, _menuSetup, _menuArgs.Kind, _menuArgs.Id, _menuArgs.Name);
+    }
+
+    /// <summary>
+    /// The one context menu for a setup entity — identical whether opened from a sidebar row or a canvas
+    /// label: kind-specific extras first, then the common Duplicate / Rename / Delete verbs wherever the
+    /// kind supports them.
+    /// </summary>
+    public static void DrawContextMenuItems(SetupEntitySelection selection, Setup setup,
+                                            SetupEntitySelection.EntityKind kind, Guid id, string name)
+    {
         // Right-clicking inside a multi-selection acts on the whole thing. The per-entity actions stay
         // visible but dimmed rather than vanishing, so the menu keeps its shape and it is obvious *why*
         // they can't be used.
-        var multi = _menuMulti;
+        var multi = selection.IsSelected(kind, id) && selection.Count > 1;
 
-        // These row menus carry no toggles or icons, so their labels sit flush left.
+        // These menus carry no toggles or icons, so their labels sit flush left.
         CustomComponents.MenuItemsFlushLeft = true;
         CustomComponents.MenuItemsDisabled = multi;
         ImGui.BeginDisabled(multi);
-        DrawKindMenuItems(selection, setup, in args);
+
+        DrawKindMenuItems(selection, setup, kind, id);
+
+        if (SetupActions.CanDuplicate(kind) && CustomComponents.DrawMenuItem(5, "Duplicate"))
+            SetupActions.DuplicateEntity(selection, setup, kind, id);
+
+        if (SetupActions.CanRename(kind) && CustomComponents.DrawMenuItem(3, "Rename"))
+            BeginRename(selection, kind, id, name);
+
         ImGui.EndDisabled();
         CustomComponents.MenuItemsDisabled = false;
 
-        if (args.CanRename && !multi && CustomComponents.DrawMenuItem(3, "Rename"))
-            BeginRename(selection, args.Kind, args.Id, args.Name);
-
-        // Deleting is the one action that reads the selection rather than the row, so it is
-        // offered even from a row that isn't itself deletable.
+        // Deleting is the one action that reads the selection rather than the item, so it is offered even
+        // from an item that isn't itself deletable.
         if (multi)
         {
-            if (_menuDeletableCount > 0 && CustomComponents.DrawMenuItem(2, $"Delete {_menuDeletableCount}"))
+            var deletable = SetupActions.CountDeletable(selection);
+            if (deletable > 0 && CustomComponents.DrawMenuItem(2, $"Delete {deletable}"))
                 SetupActions.DeleteSelection(selection, setup);
         }
-        else if (SetupActions.CanDeleteDirectly(args.Kind) && CustomComponents.DrawMenuItem(2, "Delete"))
+        else if (SetupActions.CanDeleteDirectly(kind) && CustomComponents.DrawMenuItem(2, "Delete"))
         {
-            SetupActions.DeleteEntity(setup, args.Kind, args.Id);
+            SetupActions.DeleteEntity(setup, kind, id);
         }
 
         CustomComponents.MenuItemsFlushLeft = false;
     }
 
-    private static void DrawKindMenuItems(SetupEntitySelection selection, Setup setup, in Args args)
+    private static void DrawKindMenuItems(SetupEntitySelection selection, Setup setup,
+                                          SetupEntitySelection.EntityKind kind, Guid id)
     {
-        switch (args.Kind)
+        switch (kind)
         {
-            case SetupEntitySelection.EntityKind.Output when args.ShowBindingSubMenu:
-                if (CustomComponents.DrawSubMenu(3, "Bind to display")
+            case SetupEntitySelection.EntityKind.Output:
+                var output = setup.FindOutput(id);
+                if (output is not { Kind: OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display })
+                    break;
+
+                if (CustomComponents.DrawSubMenu(4, "Bind to display")
                     && OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
                 {
-                    var output = setup.FindOutput(args.Id);
-                    if (output != null)
-                        ResolutionHandling.DrawBindingMenuItems(output, machineConfig);
-
+                    ResolutionHandling.DrawBindingMenuItems(output, machineConfig);
                     ImGui.EndMenu();
                 }
 
                 break;
 
-            case SetupEntitySelection.EntityKind.ContentSource when args.HasAdoptedSource:
-                if (CustomComponents.DrawMenuItem(8, "Add slice"))
-                {
-                    var source = setup.FindSourceByChildId(args.Id);
-                    if (source != null)
-                        SetupActions.AddSlice(selection, setup, source);
-                }
+            case SetupEntitySelection.EntityKind.ContentSource:
+                var source = setup.FindSourceByChildId(id);
+                if (source != null && CustomComponents.DrawMenuItem(8, "Add slice"))
+                    SetupActions.AddSlice(selection, setup, source);
 
                 break;
 
             case SetupEntitySelection.EntityKind.Surface:
-                var surface = setup.FindSurface(args.Id);
-                if (surface != null)
-                    SetupActions.DrawSurfaceMenuItems(selection, setup, surface, includeDelete: false);
+                var surface = setup.FindSurface(id);
+                if (surface == null)
+                    break;
+
+                if (CustomComponents.DrawMenuItem(4, "Add sub-region"))
+                    SetupActions.AddSubRegion(selection, setup, surface);
+
+                // Only meaningful once something is shown here — there's no aspect to match otherwise.
+                if (surface.SliceId != Guid.Empty && CustomComponents.DrawMenuItem(9, "Adjust aspect to slice"))
+                    SetupActions.MatchSurfaceToSliceAspect(setup, surface);
+
+                if (CustomComponents.DrawMenuItem(6, "Clear content inputs"))
+                    SetupActions.ClearContentInputs(surface.Id);
 
                 break;
         }
@@ -468,8 +475,6 @@ internal static class EntityItem
     private static Args _menuArgs;
     private static SetupEntitySelection? _menuSelection;
     private static Setup? _menuSetup;
-    private static bool _menuMulti;
-    private static int _menuDeletableCount;
 
     private static Guid _renamingId;
     private static string _renameBuffer = string.Empty;

@@ -82,7 +82,6 @@ internal static class SetupPanel
 
                 var binding = machineConfig.TryGetBinding(output.Id);
                 var status = binding == null ? null : $"Display {binding.DisplayIndex + 1}";
-                var bindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
                 var args = new EntityItem.Args
                                {
                                    Kind = SetupEntitySelection.EntityKind.Output,
@@ -93,8 +92,6 @@ internal static class SetupPanel
                                    // A paused output (Send off) reads the same as a non-rendering surface.
                                    Muted = !output.Send,
                                    StrikeLeadingIcon = !output.Send,
-                                   CanRename = true,
-                                   ShowBindingSubMenu = bindable,
                                };
                 DrawRow(selection, setup, ref args);
             }
@@ -110,7 +107,6 @@ internal static class SetupPanel
                                    Kind = SetupEntitySelection.EntityKind.ReferenceImage,
                                    Id = image.Id,
                                    Name = image.Name,
-                                   CanRename = true,
                                };
                 DrawRow(selection, setup, ref args);
             }
@@ -606,9 +602,6 @@ internal static class SetupPanel
                                ReserveExpander = true,
                                // No surface shows this source, so it steps back visually.
                                Muted = icon == null,
-                               // A source *is* its op, so renaming it renames the op (and cascades back through the sync).
-                               CanRename = true,
-                               HasAdoptedSource = source != null,
                            };
             if (DrawRow(selection, setup, ref args) == EntityItem.ItemAction.ToggleExpanded)
                 ToggleSourceExpanded(childId);
@@ -645,7 +638,6 @@ internal static class SetupPanel
                            Depth = 1,
                            // Nothing shows this slice, so it steps back visually.
                            Muted = targetIcon == null,
-                           CanRename = true,
                        };
         DrawRow(selection, setup, ref args);
     }
@@ -770,7 +762,6 @@ internal static class SetupPanel
                            // A surface that won't render reads as unused (dimmed) and is struck through its icon.
                            Muted = !surface.Render,
                            StrikeLeadingIcon = !surface.Render,
-                           CanRename = true,
                        };
         if (DrawRow(selection, setup, ref args) == EntityItem.ItemAction.ToggleExpanded)
             ToggleSurfaceExpanded(surfaceId);
