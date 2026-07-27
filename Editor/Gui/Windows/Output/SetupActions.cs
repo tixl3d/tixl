@@ -406,6 +406,83 @@ internal static class SetupActions
         OutputSetupHandling.SaveActive();
     }
 
+    /// <summary>Renames an entity by kind. A content source has no name of its own — renaming it renames its
+    /// op, which flows back through the sync.</summary>
+    internal static void RenameEntity(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, string newName)
+    {
+        switch (kind)
+        {
+            case SetupEntitySelection.EntityKind.ContentSource:
+                RenameContentSourceOp(id, newName);
+                return;
+
+            case SetupEntitySelection.EntityKind.Output:
+                var output = setup.FindOutput(id);
+                if (output == null)
+                    return;
+
+                output.Name = newName;
+                break;
+
+            case SetupEntitySelection.EntityKind.ReferenceImage:
+                var image = setup.FindReferenceImage(id);
+                if (image == null)
+                    return;
+
+                image.Name = newName;
+                break;
+
+            case SetupEntitySelection.EntityKind.Surface:
+                var surface = setup.FindSurface(id);
+                if (surface == null)
+                    return;
+
+                surface.Name = newName;
+                break;
+
+            case SetupEntitySelection.EntityKind.Slice:
+                var slice = setup.FindSlice(id);
+                if (slice == null)
+                    return;
+
+                slice.Name = newName;
+                break;
+
+            default:
+                return;
+        }
+
+        OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>Kinds whose row/item offers a direct Delete (the others delete via selection or not at all).</summary>
+    internal static bool CanDeleteDirectly(SetupEntitySelection.EntityKind kind)
+    {
+        return kind is SetupEntitySelection.EntityKind.Surface
+                    or SetupEntitySelection.EntityKind.Slice
+                    or SetupEntitySelection.EntityKind.Output;
+    }
+
+    internal static void DeleteEntity(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        switch (kind)
+        {
+            case SetupEntitySelection.EntityKind.Surface:
+                DeleteSurface(setup, id);
+                break;
+
+            case SetupEntitySelection.EntityKind.Slice:
+                DeleteSlice(setup, id);
+                break;
+
+            case SetupEntitySelection.EntityKind.Output:
+                if (OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
+                    DeleteOutput(setup, machineConfig, id);
+
+                break;
+        }
+    }
+
     // Deleting a surface takes its sub-regions with it (they're cuts of the parent, meaningless on their own).
     internal static void DeleteSurface(Setup setup, Guid surfaceId)
     {

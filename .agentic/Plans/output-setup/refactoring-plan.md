@@ -216,6 +216,18 @@ with an explanatory comment) — the row-callback API design made compliance imp
 
 ---
 
+## Progress
+
+- **2026-07-27:** P0 all fixed (quad drift, cross-venue undo guard via `SetupCommands.TryGetSetup`, slice
+  selection validation, frame-loop `ActiveSetup` publication + project-close eviction, frame-driven
+  debounced `ContentSourceSync`, once-per-frame sink invalidation). P1 decided (setup-side). `Setup.Find*`
+  lookup helpers added; 73 closure call sites swept. `SetupActions` extracted (43 members; canvas no longer
+  references the panel; +`RenameEntity`/`DeleteEntity`/`CanDeleteDirectly` kind dispatch). `EntityItem`
+  extracted (delegate-free item widget: args struct, action-result, cached context-menu delegate, drag
+  payload only built while active); `Icons.DrawInlineGlyph` replaces both private glyph copies; rename
+  state moved into `EntityItem`. `SetupPanel` is now ~1,270 lines of pure panel layout/cards/highlights.
+  Next: selection completion (P2.2), then undo completion (P2.3).
+
 ## Suggested order (revised for the flow-view pivot)
 
 1. **P0** (bug fixes, 1–2 days) — independent of every decision below.

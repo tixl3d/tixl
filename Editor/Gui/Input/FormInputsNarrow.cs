@@ -142,18 +142,9 @@ internal static class FormInputsNarrow
 
         ImGui.SameLine();
         CustomComponents.RightAlign(ImGui.GetFrameHeight());
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Fade(0.5f).Rgba);
-        DrawGlyph(Icon.Help);
-        ImGui.PopStyleColor();
+        Icons.DrawInlineGlyph(Icon.Help, UiColors.TextMuted.Fade(0.5f).Rgba);
         if (ImGui.IsItemHovered())
             CustomComponents.TooltipForLastItem(tooltip);
-    }
-
-    private static void DrawGlyph(Icon icon)
-    {
-        ImGui.PushFont(Icons.IconFont);
-        ImGui.TextUnformatted(((char)icon).ToString());
-        ImGui.PopFont();
     }
 
     // Right inset (unscaled px) so inputs don't touch the sidebar edge; the caller indents the left by the same.

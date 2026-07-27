@@ -81,16 +81,22 @@ internal static class SetupPanel
                     continue;
 
                 var binding = machineConfig.TryGetBinding(output.Id);
-                var outputId = output.Id;
                 var status = binding == null ? null : $"Display {binding.DisplayIndex + 1}";
                 var bindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
-                DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Output, output.Id, output.Name, status,
-                              onDelete: () => SetupActions.DeleteOutput(setup, machineConfig, outputId), leadingIcon: Icon.Projector,
-                              drawExtraMenuItems: bindable ? () => DrawOutputBindingSubMenu(output, machineConfig) : null,
-                              // A paused output (Send off) reads the same as a non-rendering surface.
-                              muted: !output.Send,
-                              strikeLeadingIcon: !output.Send,
-                              onRename: n => { output.Name = n; OutputSetupHandling.SaveActive(); });
+                var args = new EntityItem.Args
+                               {
+                                   Kind = SetupEntitySelection.EntityKind.Output,
+                                   Id = output.Id,
+                                   Name = output.Name,
+                                   Status = status,
+                                   LeadingIcon = Icon.Projector,
+                                   // A paused output (Send off) reads the same as a non-rendering surface.
+                                   Muted = !output.Send,
+                                   StrikeLeadingIcon = !output.Send,
+                                   CanRename = true,
+                                   ShowBindingSubMenu = bindable,
+                               };
+                DrawRow(selection, setup, ref args);
             }
         }
 
@@ -99,8 +105,14 @@ internal static class SetupPanel
             for (var i = 0; i < setup.ReferenceImages.Count; i++)
             {
                 var image = setup.ReferenceImages[i];
-                DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ReferenceImage, image.Id, image.Name, null,
-                              onRename: n => { image.Name = n; OutputSetupHandling.SaveActive(); });
+                var args = new EntityItem.Args
+                               {
+                                   Kind = SetupEntitySelection.EntityKind.ReferenceImage,
+                                   Id = image.Id,
+                                   Name = image.Name,
+                                   CanRename = true,
+                               };
+                DrawRow(selection, setup, ref args);
             }
         }
 
@@ -109,7 +121,13 @@ internal static class SetupPanel
             for (var i = 0; i < setup.Props.Count; i++)
             {
                 var prop = setup.Props[i];
-                DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Prop, prop.Id, prop.Kind, null);
+                var args = new EntityItem.Args
+                               {
+                                   Kind = SetupEntitySelection.EntityKind.Prop,
+                                   Id = prop.Id,
+                                   Name = prop.Kind,
+                               };
+                DrawRow(selection, setup, ref args);
             }
         }
 
@@ -551,32 +569,6 @@ internal static class SetupPanel
         }
     }
 
-    // Drag-to-map: a surface dropped on an output adds a mapping; a content send dropped on a surface or
-    // output retargets it. Call right after a row's Selectable so it acts as that item's source/target.
-    private static void HandleRowDragDrop(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
-    {
-        if (kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
-                 or SetupEntitySelection.EntityKind.Slice)
-            DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.SetupEntity, $"{(int)kind}:{id}");
-
-        if (kind is not (SetupEntitySelection.EntityKind.Output or SetupEntitySelection.EntityKind.Surface))
-            return;
-
-        if (!DragAndDropHandling.TryGetDragData(DragAndDropHandling.DragTypes.SetupEntity, out var dragData)
-            || !SetupActions.TryParseDrag(dragData, out var dragKind, out var dragId))
-            return;
-
-        var accepts = kind == SetupEntitySelection.EntityKind.Output
-                          ? dragKind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
-                                     or SetupEntitySelection.EntityKind.Slice
-                          : dragKind is SetupEntitySelection.EntityKind.ContentSource or SetupEntitySelection.EntityKind.Slice;
-        if (!accepts || dragId == id)
-            return;
-
-        if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) == DragAndDropHandling.DragInteractionResult.Dropped)
-            SetupActions.ApplyDrop(setup, dragKind, dragId, kind, id);
-    }
-
     private static void DrawContentSinks(SetupEntitySelection selection, Setup setup)
     {
         var sinks = OutputSinkRegistry.Sinks;
@@ -602,20 +594,24 @@ internal static class SetupPanel
             var expanded = !_collapsedSources.Contains(childId);
 
             var (icon, text) = DescribeSourceGutter(setup, childId);
-            DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.ContentSource, childId, SetupActions.SinkName(instance), text,
-                          leadingIcon: Icon.FileImage, trailingIcon: icon,
-                          drawExtraMenuItems: source == null ? null : () =>
-                                                                      {
-                                                                          if (CustomComponents.DrawMenuItem(8, "Add slice"))
-                                                                              SetupActions.AddSlice(selection, setup, source);
-                                                                      },
-                          isExpanded: sliceCount > 0 ? expanded : null,
-                          onToggleExpanded: () => ToggleSourceExpanded(childId),
-                          reserveExpander: true,
-                          // No surface shows this source, so it steps back visually.
-                          muted: icon == null,
-                          // A source *is* its op, so renaming it renames the op (and cascades back through the sync).
-                          onRename: n => SetupActions.RenameContentSourceOp(childId, n));
+            var args = new EntityItem.Args
+                           {
+                               Kind = SetupEntitySelection.EntityKind.ContentSource,
+                               Id = childId,
+                               Name = SetupActions.SinkName(instance),
+                               Status = text,
+                               LeadingIcon = Icon.FileImage,
+                               TrailingIcon = icon,
+                               IsExpanded = sliceCount > 0 ? expanded : null,
+                               ReserveExpander = true,
+                               // No surface shows this source, so it steps back visually.
+                               Muted = icon == null,
+                               // A source *is* its op, so renaming it renames the op (and cascades back through the sync).
+                               CanRename = true,
+                               HasAdoptedSource = source != null,
+                           };
+            if (DrawRow(selection, setup, ref args) == EntityItem.ItemAction.ToggleExpanded)
+                ToggleSourceExpanded(childId);
 
             if (source == null || sliceCount == 0 || !expanded)
                 continue;
@@ -637,18 +633,21 @@ internal static class SetupPanel
     /// </summary>
     private static void DrawSliceRow(SetupEntitySelection selection, Setup setup, Slice slice)
     {
-        var sliceId = slice.Id;
         var (targetIcon, targetText) = DescribeSliceTargetGutter(setup, slice);
-
-        DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Slice, sliceId,
-                      SetupActions.SliceLabel(setup, slice), targetText,
-                      onDelete: () => SetupActions.DeleteSlice(setup, sliceId),
-                      leadingIcon: Icon.Slice,
-                      trailingIcon: targetIcon,
-                      depth: 1,
-                      // Nothing shows this slice, so it steps back visually.
-                      muted: targetIcon == null,
-                      onRename: n => { slice.Name = n; OutputSetupHandling.SaveActive(); });
+        var args = new EntityItem.Args
+                       {
+                           Kind = SetupEntitySelection.EntityKind.Slice,
+                           Id = slice.Id,
+                           Name = SetupActions.SliceLabel(setup, slice),
+                           Status = targetText,
+                           LeadingIcon = Icon.Slice,
+                           TrailingIcon = targetIcon,
+                           Depth = 1,
+                           // Nothing shows this slice, so it steps back visually.
+                           Muted = targetIcon == null,
+                           CanRename = true,
+                       };
+        DrawRow(selection, setup, ref args);
     }
 
     /// <summary>Out-gutter for a slice: the target-type icon plus a count when it feeds more than one. No
@@ -679,15 +678,6 @@ internal static class SetupPanel
     {
         if (!_collapsedSources.Add(childId))
             _collapsedSources.Remove(childId);
-    }
-
-    /// <summary>Enters inline-rename mode for a row: selects it, seeds the buffer, and focuses the field next frame.</summary>
-    private static void BeginRename(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id, string name)
-    {
-        selection.Select(kind, id);
-        _renamingId = id;
-        _renameBuffer = name ?? string.Empty;
-        _renameFocusPending = true;
     }
 
     // Out-gutter for a content send: the first target's type icon + short label, "+N" for extra targets.
@@ -766,19 +756,24 @@ internal static class SetupPanel
         var isExpanded = !_collapsedSurfaces.Contains(surfaceId);
 
         var (outputIcon, outputText) = DescribeSurfaceOutputGutter(setup, surface);
-        DrawEntityRow(selection, setup, SetupEntitySelection.EntityKind.Surface, surface.Id, surface.Name,
-                      outputText,
-                      onDelete: () => SetupActions.DeleteSurface(setup, surfaceId), leadingIcon: Icon.Grid, trailingIcon: outputIcon,
-                      // Delete comes from the row itself, so it isn't repeated here.
-                      drawExtraMenuItems: () => SetupActions.DrawSurfaceMenuItems(selection, setup, surface, includeDelete: false),
-                      depth: depth,
-                      isExpanded: hasChildren ? isExpanded : null,
-                      onToggleExpanded: () => ToggleSurfaceExpanded(surfaceId),
-                      reserveExpander: true,
-                      // A surface that won't render reads as unused (dimmed) and is struck through its icon.
-                      muted: !surface.Render,
-                      strikeLeadingIcon: !surface.Render,
-                      onRename: n => { surface.Name = n; OutputSetupHandling.SaveActive(); });
+        var args = new EntityItem.Args
+                       {
+                           Kind = SetupEntitySelection.EntityKind.Surface,
+                           Id = surface.Id,
+                           Name = surface.Name,
+                           Status = outputText,
+                           LeadingIcon = Icon.Grid,
+                           TrailingIcon = outputIcon,
+                           Depth = depth,
+                           IsExpanded = hasChildren ? isExpanded : null,
+                           ReserveExpander = true,
+                           // A surface that won't render reads as unused (dimmed) and is struck through its icon.
+                           Muted = !surface.Render,
+                           StrikeLeadingIcon = !surface.Render,
+                           CanRename = true,
+                       };
+        if (DrawRow(selection, setup, ref args) == EntityItem.ItemAction.ToggleExpanded)
+            ToggleSurfaceExpanded(surfaceId);
 
         if (!hasChildren || !isExpanded)
             return;
@@ -905,7 +900,7 @@ internal static class SetupPanel
         ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText(setup.Name, Fonts.FontNormal, UiColors.Text);
         ImGui.SameLine(0, 4 * scale);
-        DrawInlineIcon(Icon.ChevronDown, UiColors.TextMuted.Rgba);
+        Icons.DrawInlineGlyph(Icon.ChevronDown, UiColors.TextMuted.Rgba);
 
         if (onCollapse != null)
         {
@@ -1095,15 +1090,6 @@ internal static class SetupPanel
 
     // An icon drawn as a font glyph on the current text line — aligns with AlignTextToFramePadding'd text,
     // unlike DrawAtCursor which adds its own vertical offset.
-    private static void DrawInlineIcon(Icon icon, Vector4 rgba)
-    {
-        ImGui.PushStyleColor(ImGuiCol.Text, rgba);
-        ImGui.PushFont(Icons.IconFont);
-        ImGui.TextUnformatted(((char)icon).ToString());
-        ImGui.PopFont();
-        ImGui.PopStyleColor();
-    }
-
     // A collapsible section header: chevron toggle + label. Returns whether the section is expanded.
     /// <summary>The black divider line + rounded-NW corner notch that tops each section — a shared edge so the
     /// properties card can reuse the exact look.</summary>
@@ -1153,320 +1139,23 @@ internal static class SetupPanel
         return expanded;
     }
 
-    /// <param name="depth">Tree depth. The row's background stays full width — only its content indents, so
-    /// the selection highlight still reads as one row. (ImGui.Indent can't do this: the row is positioned from
-    /// the window edges, not the cursor.)</param>
-    /// <param name="isExpanded">null when the row has no children, so no chevron is drawn.</param>
-    private static void DrawEntityRow(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id, string name, string? status,
-                                      Action? onDelete = null, Action? onRemoveFromOutput = null, Icon? leadingIcon = null, Icon? trailingIcon = null,
-                                      Action? drawExtraMenuItems = null, int depth = 0, bool? isExpanded = null, Action? onToggleExpanded = null,
-                                      bool reserveExpander = false, bool muted = false, bool strikeLeadingIcon = false,
-                                      Action<string>? onRename = null)
+    /// <summary>Panel-side row wrapper: injects the cross-highlight context every row needs and records
+    /// hover for next frame's referenced-row highlighting.</summary>
+    private static EntityItem.ItemAction DrawRow(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
     {
-        var scale = T3Ui.UiScaleFactor;
-        var rounding = 4 * scale;
-        // Odd height so a 15px icon centers exactly ((23-15)/2 = 4).
-        var height = (float)Math.Round(23 * scale);
-        var indent = depth * 12 * scale;
+        args.PrimaryKind = _primaryKind;
+        args.PrimaryId = _primaryId;
+        args.HighlightInputArrow = IsHoverInputHighlighted(args.Kind, args.Id);
+        args.HighlightTrailing = IsSourceOfPrimary(setup, args.Kind, args.Id) || IsHoverTrailingHighlighted(args.Kind, args.Id);
 
-        // Nothing shows this entity, so it recedes rather than competing with the rows that are in use.
-        var fade = muted ? 0.45f : 1f;
-
-        // Rows that consume something own a left in-gutter (surfaces take content, outputs take surfaces).
-        // The column is reserved whether or not a toggle is currently shown, so nothing shifts sideways when
-        // the selection changes.
-        var hasInputGutter = kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.Output;
-        var gutterWidth = hasInputGutter ? Icons.FontSize + 4 * scale : 0;
-
-        ImGui.PushID(id.GetHashCode());
-
-        // Rounded row inset 4px from the window edges (so the selection/outline never clips), pixel-snapped
-        // to avoid a blurry sub-pixel edge.
-        var entryPos = ImGui.GetCursorScreenPos();
-        var windowPos = ImGui.GetWindowPos();
-        var rowMin = new Vector2((float)Math.Round(windowPos.X + 4 * scale), (float)Math.Round(entryPos.Y));
-        var rowMax = new Vector2((float)Math.Round(windowPos.X + ImGui.GetWindowWidth() - 4 * scale), rowMin.Y + height);
-        var dl = ImGui.GetWindowDrawList();
-        var isSelected = selection.IsSelected(kind, id);
-
-        // Full-row hit test — a selectable spanning the padded row; its own header background is suppressed
-        // so we can draw a rounded one instead.
-        ImGui.PushStyleColor(ImGuiCol.Header, Vector4.Zero);
-        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Vector4.Zero);
-        ImGui.PushStyleColor(ImGuiCol.HeaderActive, Vector4.Zero);
-        ImGui.SetCursorScreenPos(rowMin);
-        var clicked = ImGui.Selectable("##row", isSelected, ImGuiSelectableFlags.None, new Vector2(rowMax.X - rowMin.X, height));
-        ImGui.PopStyleColor(3);
-
-        var isHovered = ImGui.IsItemHovered();
-
-        var isRenaming = onRename != null && _renamingId == id;
-
-        // Double-click a renamable row to edit its name inline. Suppress the click-select handling below so the
-        // double-click doesn't also toggle/reselect while the field takes focus.
-        if (onRename != null && !isRenaming && isHovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        var action = EntityItem.DrawRow(selection, setup, in args, out var hovered);
+        if (hovered)
         {
-            BeginRename(selection, kind, id, name);
-            isRenaming = true;
-            clicked = false;
+            _pendingHoveredKind = args.Kind;
+            _pendingHoveredId = args.Id;
         }
 
-        if (isRenaming)
-            clicked = false;
-
-        // The chevron shares the row's selectable rather than overlapping it with its own button — a click in
-        // its column toggles instead of selecting.
-        // A source is selected, so every row that could take it offers a click-target to bind or unbind.
-        var isBound = false;
-        var canBind = hasInputGutter && SetupActions.TryDescribeInputToggle(setup, kind, id, _primaryKind, _primaryId, out isBound);
-        var gutterMaxX = rowMin.X + gutterWidth;
-        if (clicked && canBind && ImGui.GetMousePos().X < gutterMaxX)
-        {
-            SetupActions.ToggleInput(setup, kind, id, _primaryKind, _primaryId);
-            clicked = false;
-        }
-
-        var chevronMaxX = rowMin.X + gutterWidth + indent + 20 * scale;
-        if (clicked && isExpanded.HasValue && ImGui.GetMousePos().X < chevronMaxX)
-        {
-            onToggleExpanded?.Invoke();
-        }
-        else if (clicked)
-        {
-            var io = ImGui.GetIO();
-            if (io.KeyCtrl)
-                selection.Toggle(kind, id);
-            else if (io.KeyShift)
-                selection.Add(kind, id);
-            else
-            {
-                selection.Select(kind, id);
-                // A content row is a live op — a plain click selects it in the graph and brings it into view.
-                if (kind == SetupEntitySelection.EntityKind.ContentSource)
-                    SetupActions.RevealContentOpInGraph(id);
-            }
-        }
-
-        if (isHovered)
-        {
-            _pendingHoveredKind = kind;
-            _pendingHoveredId = id;
-            FrameStats.PulseItemWithId(id);
-            if (kind == SetupEntitySelection.EntityKind.ContentSource)
-                FrameStats.AddHoveredId(id);
-        }
-
-        HandleRowDragDrop(setup, kind, id);
-
-        if (onDelete != null || onRemoveFromOutput != null || drawExtraMenuItems != null || onRename != null)
-        {
-            // Right-clicking inside a multi-selection acts on the whole thing. The per-entity actions stay
-            // visible but dimmed rather than vanishing, so the menu keeps its shape and it is obvious *why*
-            // they can't be used.
-            var multi = isSelected && selection.Count > 1;
-            var deletable = multi ? SetupActions.CountDeletable(selection) : 0;
-            CustomComponents.ContextMenuForItem(() =>
-                                                {
-                                                    // These row menus carry no toggles or icons, so their labels sit flush left.
-                                                    CustomComponents.MenuItemsFlushLeft = true;
-                                                    CustomComponents.MenuItemsDisabled = multi;
-                                                    ImGui.BeginDisabled(multi);
-                                                    drawExtraMenuItems?.Invoke();
-
-                                                    if (onRemoveFromOutput != null && CustomComponents.DrawMenuItem(1, "Remove from output"))
-                                                        onRemoveFromOutput();
-
-                                                    ImGui.EndDisabled();
-                                                    CustomComponents.MenuItemsDisabled = false;
-
-                                                    if (onRename != null && !multi && CustomComponents.DrawMenuItem(3, "Rename"))
-                                                        BeginRename(selection, kind, id, name);
-
-                                                    // Deleting is the one action that reads the selection rather than the row, so it is
-                                                    // offered even from a row that isn't itself deletable.
-                                                    if (multi)
-                                                    {
-                                                        if (deletable > 0 && CustomComponents.DrawMenuItem(2, $"Delete {deletable}"))
-                                                            SetupActions.DeleteSelection(selection, setup);
-                                                    }
-                                                    else if (onDelete != null && CustomComponents.DrawMenuItem(2, "Delete"))
-                                                    {
-                                                        onDelete();
-                                                    }
-
-                                                    CustomComponents.MenuItemsFlushLeft = false;
-                                                },
-                                                null);
-        }
-
-        // While this row's context menu is open the pointer sits on the popup, not the row, so keep the row
-        // lit anyway — otherwise it's no longer obvious which entity the menu belongs to. The popup id is
-        // scoped by the row's PushID, so this only matches our own menu.
-        var menuOpen = ImGui.IsPopupOpen("context_menu");
-
-        // Hovered from the canvas (its frame is under the cursor) but not here: pulse so the eye is drawn to
-        // the row that answers "which item is that frame?".
-        var canvasPulse = !isHovered && !isSelected && !menuOpen ? FrameStats.GetPulse(id) : 0;
-
-        if (isSelected)
-        {
-            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.3f), rounding);
-        }
-        else if (isHovered || menuOpen)
-        {
-            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.2f), rounding);
-            dl.AddRect(rowMin, rowMax, UiColors.StatusActivated.Fade(0.8f), rounding);
-        }
-        else if (canvasPulse > 0.001f)
-        {
-            // Match the mouse-hover look (light fill + outline) so a canvas-driven highlight reads the same.
-            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.2f), rounding);
-            dl.AddRect(rowMin, rowMax, UiColors.StatusActivated.Fade(0.8f), rounding);
-        }
-
-        // Content over the background (the selectable is transparent), vertically centered in the fixed row
-        // (the -1px nudges the label up so it isn't sitting low).
-        var contentY = (float)Math.Round(rowMin.Y + (height - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
-        var iconY = contentY + 3 * scale; // glyphs render high vs the text baseline — drop them to match.
-
-        if (canBind)
-        {
-            var overGutter = isHovered && ImGui.GetMousePos().X < gutterMaxX;
-            var color = isBound ? UiColors.StatusActivated : UiColors.BackgroundFull.Fade(0.5f);
-            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 4 * scale, iconY));
-            DrawInlineIcon(Icon.ArrowRight, overGutter ? UiColors.ForegroundFull.Rgba : color.Rgba);
-        }
-        else if (hasInputGutter && IsHoverInputHighlighted(kind, id))
-        {
-            // This row consumes the hovered feed: point its input arrow back at it (read-only, no bind click).
-            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 4 * scale, iconY));
-            DrawInlineIcon(Icon.ArrowRight, UiColors.StatusActivated.Rgba);
-        }
-
-        var contentX = rowMin.X + 6 * scale + gutterWidth + indent;
-        if (isExpanded.HasValue)
-        {
-            ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
-            DrawInlineIcon(isExpanded.Value ? Icon.ChevronDown : Icon.ChevronRight, UiColors.TextMuted.Fade(0.6f).Rgba);
-            contentX = ImGui.GetItemRectMax().X + 3 * scale;
-        }
-        else if (depth > 0 || reserveExpander)
-        {
-            // Keep the chevron column even when this row has nothing to expand — otherwise a childless row
-            // sits further left than its siblings and the tree reads as ragged. Drawing the same glyph fully
-            // transparent reserves *exactly* the width the real one takes, rather than a guessed constant.
-            ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
-            DrawInlineIcon(Icon.ChevronRight, new Vector4(0, 0, 0, 0));
-            contentX = ImGui.GetItemRectMax().X + 3 * scale;
-        }
-
-        if (leadingIcon.HasValue)
-        {
-            ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
-            DrawInlineIcon(leadingIcon.Value, UiColors.TextMuted.Fade(fade).Rgba);
-
-            // A disabled (non-rendered) surface is struck through its icon — visible at a glance without
-            // stealing the gutter or the name.
-            if (strikeLeadingIcon)
-            {
-                var iconMin = ImGui.GetItemRectMin();
-                var iconMax = ImGui.GetItemRectMax();
-                dl.AddLine(new Vector2(iconMin.X, iconMax.Y), new Vector2(iconMax.X, iconMin.Y),
-                           UiColors.StatusAttention, 1.5f * scale);
-            }
-
-            contentX = ImGui.GetItemRectMax().X + 5 * scale;
-        }
-
-        if (isRenaming)
-        {
-            // Inline editor in place of the name. Full row height, seeded and focused on the first frame;
-            // commits on Enter/blur, cancels on Escape.
-            var fieldY = (float)Math.Round(rowMin.Y + (height - ImGui.GetFrameHeight()) * 0.5f);
-            ImGui.SetCursorScreenPos(new Vector2(contentX, fieldY));
-            ImGui.SetNextItemWidth(rowMax.X - contentX - 6 * scale);
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
-            if (_renameFocusPending)
-            {
-                ImGui.SetKeyboardFocusHere();
-                _renameFocusPending = false;
-            }
-
-            ImGui.InputText("##rename", ref _renameBuffer, 256);
-            if (ImGui.IsItemDeactivatedAfterEdit())
-            {
-                if (!string.IsNullOrWhiteSpace(_renameBuffer))
-                    onRename!(_renameBuffer.Trim());
-
-                _renamingId = Guid.Empty;
-            }
-            else if (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(ImGuiKey.Escape))
-            {
-                _renamingId = Guid.Empty;
-            }
-
-            ImGui.PopStyleColor();
-        }
-        else
-        {
-            ImGui.SetCursorScreenPos(new Vector2(contentX, contentY));
-            CustomComponents.StylizedText(string.IsNullOrEmpty(name) ? "untitled" : name,
-                                          isSelected ? Fonts.FontBold : Fonts.FontNormal, UiColors.Text.Fade(fade));
-        }
-
-        // Right-aligned trailing gutter "→ [count] [target-icon]": arrow, then the ×N count (if any), then the
-        // target type at the very edge. When this row feeds the selected item — or the hovered one — the whole
-        // group is bright StatusActivated so the source reads at a glance; otherwise the gutter is dim.
-        var isSource = IsSourceOfPrimary(setup, kind, id) || IsHoverTrailingHighlighted(kind, id);
-        if (!isRenaming && (isSource || trailingIcon.HasValue || status != null))
-        {
-            ImGui.PushFont(Fonts.FontSmall);
-            var smallHeight = ImGui.GetTextLineHeight();
-            var statusWidth = status != null ? ImGui.CalcTextSize(status).X : 0;
-            ImGui.PopFont();
-
-            var trailWidth = Icons.FontSize; // the direction arrow
-            if (status != null)
-                trailWidth += statusWidth + 3 * scale;
-            if (trailingIcon.HasValue)
-                trailWidth += Icons.FontSize + 3 * scale;
-
-            var arrowColor = isSource ? UiColors.StatusActivated : UiColors.TextMuted.Fade(0.3f * fade);
-            var textColor = isSource ? UiColors.StatusActivated : UiColors.TextMuted.Fade(fade);
-
-            var trailX = rowMax.X - 6 * scale - trailWidth;
-            ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
-            DrawInlineIcon(Icon.ArrowRight, arrowColor.Rgba);
-            trailX = ImGui.GetItemRectMax().X + 3 * scale;
-
-            if (status != null)
-            {
-                // FontSmall is shorter than the row's FontNormal baseline — center it on its own height.
-                var statusY = (float)Math.Round(rowMin.Y + (height - smallHeight) * 0.5f - 1 * scale);
-                ImGui.SetCursorScreenPos(new Vector2(trailX, statusY));
-                CustomComponents.StylizedText(status, Fonts.FontSmall, textColor);
-                trailX += statusWidth + 3 * scale;
-            }
-
-            if (trailingIcon.HasValue)
-            {
-                ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
-                DrawInlineIcon(trailingIcon.Value, textColor.Rgba);
-            }
-        }
-
-        // Next row starts a tight 2px below, independent of the content cursor above.
-        ImGui.SetCursorScreenPos(new Vector2(entryPos.X, rowMax.Y + 2 * scale));
-        ImGui.PopID();
-    }
-
-    private static void DrawOutputBindingSubMenu(OutputDefinition output, MachineConfig machineConfig)
-    {
-        if (CustomComponents.DrawSubMenu(3, "Bind to display"))
-        {
-            ResolutionHandling.DrawBindingMenuItems(output, machineConfig);
-            ImGui.EndMenu();
-        }
+        return action;
     }
 
     private static string GetFreeName(string baseName)
@@ -1496,9 +1185,6 @@ internal static class SetupPanel
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
     private static readonly HashSet<Guid> _collapsedSurfaces = [];
     private static readonly HashSet<Guid> _collapsedSources = [];
-    private static Guid _renamingId;
-    private static string _renameBuffer = string.Empty;
-    private static bool _renameFocusPending;
     private static SetupEntitySelection.EntityKind _primaryKind;
     private static Guid _primaryId;
 
