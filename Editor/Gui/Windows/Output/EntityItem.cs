@@ -14,7 +14,7 @@ namespace T3.Editor.Gui.Windows.Output;
 /// <para>Deliberately delegate-free: rows draw every frame, so all per-kind behavior (rename, delete,
 /// extra menu items) dispatches through <see cref="SetupActions"/> instead of per-item callbacks.</para>
 /// </summary>
-internal static class EntityItem
+internal sealed class EntityItem
 {
     /// <summary>What the caller must react to; everything else (selection, rename, delete, menus) is
     /// handled internally.</summary>
@@ -66,7 +66,7 @@ internal static class EntityItem
     }
 
     /// <param name="hovered">Reported so the caller can track hover-driven cross-highlights.</param>
-    public static ItemAction DrawRow(SetupEntitySelection selection, Setup setup, in Args args, out bool hovered)
+    public ItemAction DrawRow(SetupEntitySelection selection, Setup setup, in Args args, out bool hovered)
     {
         var action = ItemAction.None;
         var scale = T3Ui.UiScaleFactor;
@@ -338,7 +338,7 @@ internal static class EntityItem
     }
 
     /// <summary>Enters inline-rename mode for an item: selects it, seeds the buffer, and focuses the field next frame.</summary>
-    public static void BeginRename(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id, string name)
+    public void BeginRename(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id, string name)
     {
         selection.Select(kind, id);
         _renamingId = id;
@@ -346,7 +346,7 @@ internal static class EntityItem
         _renameFocusPending = true;
     }
 
-    private static void HandleDragDrop(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    private void HandleDragDrop(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
     {
         // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
         // (ApplyDrop normalizes), so dragging an output onto a source works the same as the reverse.
@@ -371,7 +371,7 @@ internal static class EntityItem
             SetupActions.ApplyDrop(setup, dragKind, dragId, kind, id);
     }
 
-    private static void DrawMenuItemsForCurrent()
+    private void DrawMenuItemsForCurrent()
     {
         if (_menuSelection == null || _menuSetup == null)
             return;
@@ -384,7 +384,7 @@ internal static class EntityItem
     /// label: kind-specific extras first, then the common Duplicate / Rename / Delete verbs wherever the
     /// kind supports them.
     /// </summary>
-    public static void DrawContextMenuItems(SetupEntitySelection selection, Setup setup,
+    public void DrawContextMenuItems(SetupEntitySelection selection, Setup setup,
                                             SetupEntitySelection.EntityKind kind, Guid id, string name)
     {
         // Right-clicking inside a multi-selection acts on the whole thing. The per-entity actions stay
@@ -424,7 +424,7 @@ internal static class EntityItem
         CustomComponents.MenuItemsFlushLeft = false;
     }
 
-    private static void DrawKindMenuItems(SetupEntitySelection selection, Setup setup,
+    private void DrawKindMenuItems(SetupEntitySelection selection, Setup setup,
                                           SetupEntitySelection.EntityKind kind, Guid id)
     {
         switch (kind)
@@ -469,14 +469,20 @@ internal static class EntityItem
         }
     }
 
+    public EntityItem()
+    {
+        // Cached once per instance, so the per-item ContextMenuForItem call allocates no closure per frame.
+        _drawMenuItemsCached = DrawMenuItemsForCurrent;
+    }
+
     // Menu context for the cached delegate: set per item before ContextMenuForItem, which invokes the body
     // synchronously for the (single) item whose popup is open — so these always hold that item's values.
-    private static readonly Action _drawMenuItemsCached = DrawMenuItemsForCurrent;
-    private static Args _menuArgs;
-    private static SetupEntitySelection? _menuSelection;
-    private static Setup? _menuSetup;
+    private readonly Action _drawMenuItemsCached;
+    private Args _menuArgs;
+    private SetupEntitySelection? _menuSelection;
+    private Setup? _menuSetup;
 
-    private static Guid _renamingId;
-    private static string _renameBuffer = string.Empty;
-    private static bool _renameFocusPending;
+    private Guid _renamingId;
+    private string _renameBuffer = string.Empty;
+    private bool _renameFocusPending;
 }

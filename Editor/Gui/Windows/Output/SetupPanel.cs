@@ -25,8 +25,15 @@ namespace T3.Editor.Gui.Windows.Output;
 /// <see cref="Surface.ParentId"/>); the relationships between content, surfaces, and outputs are shown
 /// per row. CONTENT lists the live <see cref="IOutputSink"/> ops, everything else the active setup.
 /// </summary>
-internal static class SetupPanel
+internal sealed class SetupPanel
 {
+    /// <summary>One panel per output window, sharing the window's <see cref="EntityItem"/> with its canvas
+    /// views — so rename state and menus stay per-window instead of bleeding between open windows.</summary>
+    public SetupPanel(EntityItem entityItem)
+    {
+        _entityItem = entityItem;
+    }
+
     /// <summary>Installs the Guid-list parameter hooks so SendToOutput.TargetIds shows target names and a
     /// surface/output picker in the op parameter window. Called from UI registration at startup, so it works
     /// even before the setup sidebar has been drawn (which is what a lazy static ctor would have waited for).</summary>
@@ -36,7 +43,7 @@ internal static class SetupPanel
         GuidListLabels.Picker = PickTarget;
     }
 
-    public static void Draw(SetupEntitySelection selection, Action? onCollapse = null)
+    public void Draw(SetupEntitySelection selection, Action? onCollapse = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
@@ -134,7 +141,7 @@ internal static class SetupPanel
     }
 
     // Properties card for the selected entity, at the bottom of the panel.
-    private static void DrawPropertiesFooter(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
+    private void DrawPropertiesFooter(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
     {
         if (!selection.TryResolve(setup, out var kind, out var id))
             return;
@@ -166,7 +173,7 @@ internal static class SetupPanel
         ImGui.Unindent(6 * T3Ui.UiScaleFactor);
     }
 
-    private static void DrawSurfaceCard(Setup setup, Guid id)
+    private void DrawSurfaceCard(Setup setup, Guid id)
     {
         var surface = setup.FindSurface(id);
         if (surface == null)
@@ -277,7 +284,7 @@ internal static class SetupPanel
         CommitFieldUndo(setup, "Move anchor", anchorState);
     }
 
-    private static void DrawOutputCard(Setup setup, Guid id)
+    private void DrawOutputCard(Setup setup, Guid id)
     {
         var output = setup.FindOutput(id);
         if (output == null)
@@ -295,7 +302,7 @@ internal static class SetupPanel
         // context-menu action + popup rather than a passive list.
     }
 
-    private static void DrawContentCard(Setup setup, Guid childId)
+    private void DrawContentCard(Setup setup, Guid childId)
     {
         var instance = SetupActions.FindSinkInstance(childId);
         if (instance is not IOutputSink sink)
@@ -326,7 +333,7 @@ internal static class SetupPanel
         FormInputsNarrow.DrawInts("Resolution (px)", resolution, "Comes from the source texture (read-only).", readOnly: true);
     }
 
-    private static void DrawSliceCard(Setup setup, Guid id)
+    private void DrawSliceCard(Setup setup, Guid id)
     {
         var slice = setup.FindSlice(id);
         if (slice == null)
@@ -394,7 +401,7 @@ internal static class SetupPanel
     /// captured on the gesture's first event and committed as one undo step + a single save when the edit
     /// finishes — a whole drag (or typed entry) is one step, with no file writes while dragging.
     /// </summary>
-    private static void BeginFieldUndo(Setup setup, InputEditStateFlags state)
+    private void BeginFieldUndo(Setup setup, InputEditStateFlags state)
     {
         if ((state & InputEditStateFlags.Started) != 0)
             _fieldEditOldJson = setup.ToJsonString();
@@ -402,7 +409,7 @@ internal static class SetupPanel
             _fieldEditOldJson ??= setup.ToJsonString();
     }
 
-    private static void CommitFieldUndo(Setup setup, string name, InputEditStateFlags state)
+    private void CommitFieldUndo(Setup setup, string name, InputEditStateFlags state)
     {
         if ((state & InputEditStateFlags.Finished) == 0 || _fieldEditOldJson == null)
             return;
@@ -421,7 +428,7 @@ internal static class SetupPanel
     // upstream producers (a shown source/slice, a mapped surface) get their trailing output gutter; downstream
     // consumers (a surface/output that shows the hovered feed) get their left input arrow. So a hover traces the
     // content → slice → surface → output chain in both directions without lighting whole rows.
-    private static void ComputeReferenced(Setup setup)
+    private void ComputeReferenced(Setup setup)
     {
         _referenced.Clear();
         if (_hoveredKind == SetupEntitySelection.EntityKind.None)
@@ -482,7 +489,7 @@ internal static class SetupPanel
 
     /// <summary>The outputs a surface reaches — its own mappings, or a coplanar child's nearest mapped ancestor.
     /// Marked as consumers (input arrow), since they sit downstream of the surface.</summary>
-    private static void AddOutputsOfSurface(Setup setup, Surface? surface)
+    private void AddOutputsOfSurface(Setup setup, Surface? surface)
     {
         for (var guard = 0; surface != null && guard < 16; guard++)
         {
@@ -503,7 +510,7 @@ internal static class SetupPanel
     }
 
     /// <summary>The slice and its content source feeding a surface/output — producers (trailing gutter).</summary>
-    private static void AddSourceOfSlice(Setup setup, Guid sliceId)
+    private void AddSourceOfSlice(Setup setup, Guid sliceId)
     {
         if (sliceId == Guid.Empty)
             return;
@@ -516,7 +523,7 @@ internal static class SetupPanel
     }
 
     /// <summary>Surfaces and outputs showing any slice of this source — consumers, lit on their input arrow.</summary>
-    private static void AddConsumersOfSource(Setup setup, Guid sourceId)
+    private void AddConsumersOfSource(Setup setup, Guid sourceId)
     {
         foreach (var surface in setup.Surfaces)
         {
@@ -532,7 +539,7 @@ internal static class SetupPanel
     }
 
     /// <summary>Surfaces and outputs showing this exact slice — consumers, lit on their input arrow.</summary>
-    private static void AddConsumersOfSlice(Setup setup, Guid sliceId)
+    private void AddConsumersOfSlice(Setup setup, Guid sliceId)
     {
         foreach (var surface in setup.Surfaces)
         {
@@ -547,7 +554,7 @@ internal static class SetupPanel
         }
     }
 
-    private static bool IsHoverInputHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
+    private bool IsHoverInputHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
     {
         for (var i = 0; i < _referenced.Count; i++)
         {
@@ -558,7 +565,7 @@ internal static class SetupPanel
         return false;
     }
 
-    private static bool IsHoverTrailingHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
+    private bool IsHoverTrailingHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
     {
         for (var i = 0; i < _referenced.Count; i++)
         {
@@ -574,7 +581,7 @@ internal static class SetupPanel
     /// primary-selected entity — the slice a selected surface (or output) shows, or the content source a
     /// selected slice belongs to. Used to point the "→|" source marker at that row.
     /// </summary>
-    private static bool IsSourceOfPrimary(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    private bool IsSourceOfPrimary(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
     {
         if (id == Guid.Empty)
             return false;
@@ -599,7 +606,7 @@ internal static class SetupPanel
         }
     }
 
-    private static void DrawContentSinks(SetupEntitySelection selection, Setup setup)
+    private void DrawContentSinks(SetupEntitySelection selection, Setup setup)
     {
         var sinks = OutputSinkRegistry.Sinks;
         if (sinks.Count == 0)
@@ -658,7 +665,7 @@ internal static class SetupPanel
     /// showing it — a mismatch means the content lands stretched, which is invisible until it's on the wall.
     /// A slice nothing shows reads as "unused".
     /// </summary>
-    private static void DrawSliceRow(SetupEntitySelection selection, Setup setup, Slice slice)
+    private void DrawSliceRow(SetupEntitySelection selection, Setup setup, Slice slice)
     {
         var (targetIcon, targetText) = DescribeSliceTargetGutter(setup, slice);
         var args = new EntityItem.Args
@@ -678,7 +685,7 @@ internal static class SetupPanel
 
     /// <summary>Out-gutter for a slice: the target-type icon plus a count when it feeds more than one. No
     /// label — the fade already says "unused", and where it lands is the icon; a name adds noise.</summary>
-    private static (Icon? icon, string? text) DescribeSliceTargetGutter(Setup setup, Slice slice)
+    private (Icon? icon, string? text) DescribeSliceTargetGutter(Setup setup, Slice slice)
     {
         if (setup.FindSource(slice.SourceId) == null)
             return (null, null);
@@ -700,14 +707,14 @@ internal static class SetupPanel
     /// <summary>"×N" once there's more than one target; nothing for a single one.</summary>
     private static string? CountSuffix(int count) => count > 1 ? "×" + count : null;
 
-    private static void ToggleSourceExpanded(Guid childId)
+    private void ToggleSourceExpanded(Guid childId)
     {
         if (!_collapsedSources.Add(childId))
             _collapsedSources.Remove(childId);
     }
 
     // Out-gutter for a content send: the first target's type icon + short label, "+N" for extra targets.
-    private static (Icon? icon, string text) DescribeSinkTargetsGutter(Setup setup, IReadOnlyList<Guid> targets)
+    private (Icon? icon, string text) DescribeSinkTargetsGutter(Setup setup, IReadOnlyList<Guid> targets)
     {
         if (targets.Count == 0)
             return (null, "unbound");
@@ -716,7 +723,7 @@ internal static class SetupPanel
         return (icon, targets.Count > 1 ? $"{name} +{targets.Count - 1}" : name);
     }
 
-    private static (Icon? icon, string name) DescribeSingleTarget(Setup setup, Guid targetId)
+    private (Icon? icon, string name) DescribeSingleTarget(Setup setup, Guid targetId)
     {
         var surface = setup.FindSurface(targetId);
         if (surface != null)
@@ -733,7 +740,7 @@ internal static class SetupPanel
     /// Applies a typed size, optionally preserving the previous ratio: the axis that changed more drives, the
     /// other follows. Keeps the driven axis exact so the number the user typed is what lands.
     /// </summary>
-    private static Vector2 ConstrainSize(Vector2 old, Vector2 typed, bool lockAspect)
+    private Vector2 ConstrainSize(Vector2 old, Vector2 typed, bool lockAspect)
     {
         if (!lockAspect || old.X <= 0 || old.Y <= 0)
             return typed;
@@ -748,7 +755,7 @@ internal static class SetupPanel
 
     /// <summary>Out-gutter for a content row: the surface-target icon plus a count when more than one surface
     /// shows this source's slices. No label; the fade already reads as "unused".</summary>
-    private static (Icon? icon, string? text) DescribeSourceGutter(Setup setup, Guid symbolChildId)
+    private (Icon? icon, string? text) DescribeSourceGutter(Setup setup, Guid symbolChildId)
     {
         var source = setup.FindSourceByChildId(symbolChildId);
         if (source == null)
@@ -766,7 +773,7 @@ internal static class SetupPanel
 
     // Surfaces as a tree: roots first, each followed by its children (nested by ParentId). The mapped
     // output(s) are shown as the row status until the icon gutters land.
-    private static void DrawSurfaces(SetupEntitySelection selection, Setup setup)
+    private void DrawSurfaces(SetupEntitySelection selection, Setup setup)
     {
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
@@ -775,7 +782,7 @@ internal static class SetupPanel
         }
     }
 
-    private static void DrawSurfaceRow(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
+    private void DrawSurfaceRow(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
     {
         var surfaceId = surface.Id;
         var hasChildren = SetupActions.CountChildren(setup, surfaceId) > 0;
@@ -810,14 +817,14 @@ internal static class SetupPanel
         }
     }
 
-    private static void ToggleSurfaceExpanded(Guid surfaceId)
+    private void ToggleSurfaceExpanded(Guid surfaceId)
     {
         if (!_collapsedSurfaces.Add(surfaceId))
             _collapsedSurfaces.Remove(surfaceId);
     }
 
     // Out-gutter for a surface: the projector icon + a count when mapped to more than one output (edge blends).
-    private static (Icon? icon, string? text) DescribeSurfaceOutputGutter(Setup setup, Surface surface)
+    private (Icon? icon, string? text) DescribeSurfaceOutputGutter(Setup setup, Surface surface)
     {
         return surface.OutputMappings.Count == 0
                    ? (null, null)
@@ -825,7 +832,7 @@ internal static class SetupPanel
     }
 
     /// <summary>Info card shown in the output view for a selected/pinned setup entity.</summary>
-    public static void DrawEntityCard(SetupEntitySelection.EntityKind kind, Guid id)
+    public void DrawEntityCard(SetupEntitySelection.EntityKind kind, Guid id)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
             return;
@@ -909,7 +916,7 @@ internal static class SetupPanel
         ImGui.EndGroup();
     }
 
-    private static void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection, Action? onCollapse)
+    private void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection, Action? onCollapse)
     {
         var scale = T3Ui.UiScaleFactor;
         var pos = ImGui.GetCursorScreenPos();
@@ -1056,7 +1063,7 @@ internal static class SetupPanel
     /// the rect is already aligned on the wall — you're correcting the measurement, not moving the projection.
     /// The declared size drives the calibration raster's density and the straighten hypothesis.
     /// </summary>
-    private static void DrawMeasuredSizePopup(Surface surface)
+    private void DrawMeasuredSizePopup(Surface surface)
     {
         ImGui.SetNextWindowSize(new Vector2(230 * T3Ui.UiScaleFactor, 0));
         if (!ImGui.BeginPopup(MeasuredSizePopupId))
@@ -1087,7 +1094,7 @@ internal static class SetupPanel
         ImGui.EndPopup();
     }
 
-    private static void ApplyMeasuredSize(Surface surface, Vector2 measured)
+    private void ApplyMeasuredSize(Surface surface, Vector2 measured)
     {
         var oldState = new ResizeSurfaceCommand.State(surface);
 
@@ -1118,7 +1125,7 @@ internal static class SetupPanel
     // A collapsible section header: chevron toggle + label. Returns whether the section is expanded.
     /// <summary>The black divider line + rounded-NW corner notch that tops each section — a shared edge so the
     /// properties card can reuse the exact look.</summary>
-    private static void DrawPanelDivider()
+    private void DrawPanelDivider()
     {
         var scale = T3Ui.UiScaleFactor;
         var dl = ImGui.GetWindowDrawList();
@@ -1128,7 +1135,7 @@ internal static class SetupPanel
         Icons.DrawIconAtScreenPosition(Icon.RoundingNW, new Vector2(winMinX, edgeY), dl, UiColors.BackgroundFull.Fade(0.5f));
     }
 
-    private static bool DrawSectionLabel(string title)
+    private bool DrawSectionLabel(string title)
     {
         FormInputs.AddVerticalSpace(6);
         DrawPanelDivider();
@@ -1149,7 +1156,7 @@ internal static class SetupPanel
         return expanded;
     }
 
-    private static bool DrawSection(string title, string addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection> onAdd)
+    private bool DrawSection(string title, string addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection> onAdd)
     {
         var expanded = DrawSectionLabel(title);
         CustomComponents.RightAlign(ImGui.GetFrameHeight());
@@ -1166,14 +1173,14 @@ internal static class SetupPanel
 
     /// <summary>Panel-side row wrapper: injects the cross-highlight context every row needs and records
     /// hover for next frame's referenced-row highlighting.</summary>
-    private static EntityItem.ItemAction DrawRow(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
+    private EntityItem.ItemAction DrawRow(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
     {
         args.PrimaryKind = _primaryKind;
         args.PrimaryId = _primaryId;
         args.HighlightInputArrow = IsHoverInputHighlighted(args.Kind, args.Id);
         args.HighlightTrailing = IsSourceOfPrimary(setup, args.Kind, args.Id) || IsHoverTrailingHighlighted(args.Kind, args.Id);
 
-        var action = EntityItem.DrawRow(selection, setup, in args, out var hovered);
+        var action = _entityItem.DrawRow(selection, setup, in args, out var hovered);
         if (hovered)
         {
             _pendingHoveredKind = args.Kind;
@@ -1201,29 +1208,30 @@ internal static class SetupPanel
     }
 
     private static readonly List<string> _availableNames = [];
-    private static readonly Dictionary<string, bool> _expandedSections = [];
+    private readonly Dictionary<string, bool> _expandedSections = [];
     private static EvaluationContext? _sinkContext;
 
     // Pre-edit rectangle snapshot while a Size (m) field is being dragged, so the resize undoes as one step.
-    private static ResizeSurfaceCommand.State? _resizeOldState;
+    private ResizeSurfaceCommand.State? _resizeOldState;
 
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
-    private static readonly HashSet<Guid> _collapsedSurfaces = [];
-    private static readonly HashSet<Guid> _collapsedSources = [];
-    private static SetupEntitySelection.EntityKind _primaryKind;
-    private static Guid _primaryId;
+    private readonly HashSet<Guid> _collapsedSurfaces = [];
+    private readonly HashSet<Guid> _collapsedSources = [];
+    private readonly EntityItem _entityItem;
+    private SetupEntitySelection.EntityKind _primaryKind;
+    private Guid _primaryId;
 
     private const string MeasuredSizePopupId = "##measuredSize";
-    private static Vector2 _measuredEdit;
+    private Vector2 _measuredEdit;
 
     // Pre-edit setup snapshot while a card drag-field gesture is live (see BeginFieldUndo/CommitFieldUndo).
-    private static string? _fieldEditOldJson;
+    private string? _fieldEditOldJson;
 
     // Cross-highlight: the row hovered this frame (committed at end of Draw), and the entities it references.
-    private static SetupEntitySelection.EntityKind _hoveredKind;
-    private static Guid _hoveredId;
-    private static SetupEntitySelection.EntityKind _pendingHoveredKind;
-    private static Guid _pendingHoveredId;
+    private SetupEntitySelection.EntityKind _hoveredKind;
+    private Guid _hoveredId;
+    private SetupEntitySelection.EntityKind _pendingHoveredKind;
+    private Guid _pendingHoveredId;
     // Rows related to the hovered one; onInput = light the left input arrow (consumer) vs the trailing gutter (producer).
-    private static readonly List<(SetupEntitySelection.EntityKind kind, Guid id, bool onInput)> _referenced = [];
+    private readonly List<(SetupEntitySelection.EntityKind kind, Guid id, bool onInput)> _referenced = [];
 }

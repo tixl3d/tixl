@@ -31,7 +31,7 @@ internal sealed class OutputSetupModeView
                          ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoBackground);
         _collapsePanel ??= () => _showSetupPanel = false;
-        SetupPanel.Draw(_entitySelection, _collapsePanel);
+        _panel.Draw(_entitySelection, _collapsePanel);
         ImGui.EndChild();
         ImGui.PopStyleColor();
 
@@ -104,7 +104,7 @@ internal sealed class OutputSetupModeView
             else if (entityKind == SetupEntitySelection.EntityKind.Slice && TryGetSliceSource(entityId, out var sliceChildId))
                 _outputView.DrawSourceCanvas(sliceChildId, _entitySelection, entityId);
             else
-                SetupPanel.DrawEntityCard(entityKind, entityId);
+                _panel.DrawEntityCard(entityKind, entityId);
         }
         else
         {
@@ -245,6 +245,16 @@ internal sealed class OutputSetupModeView
     private const float MinPanelWidth = 180;
     private const float MaxPanelWidth = 520;
     private readonly SetupEntitySelection _entitySelection = new();
-    private readonly SetupOutputView _outputView = new();
+    public OutputSetupModeView()
+    {
+        // One EntityItem per window: the panel rows and the canvas menus share its rename/menu state,
+        // and separate windows can't bleed into each other.
+        _panel = new SetupPanel(_entityItem);
+        _outputView = new SetupOutputView(_entityItem);
+    }
+
+    private readonly EntityItem _entityItem = new();
+    private readonly SetupPanel _panel;
+    private readonly SetupOutputView _outputView;
     private readonly ReferenceImageView _referenceImageView = new();
 }

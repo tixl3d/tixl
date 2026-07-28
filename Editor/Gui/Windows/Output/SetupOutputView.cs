@@ -35,8 +35,9 @@ internal sealed partial class SetupOutputView
         Calibrate,
     }
 
-    public SetupOutputView()
+    public SetupOutputView(EntityItem entityItem)
     {
+        _entityItem = entityItem;
         _canvas.FillMode = ScalableCanvas.FillModes.FillAvailableContentRegion;
         _projection = new ScalableCanvasProjection(_canvas);
     }
@@ -1596,7 +1597,7 @@ internal sealed partial class SetupOutputView
         if (name == null)
             return;
 
-        EntityItem.DrawContextMenuItems(selection, setup, _menuKind, _menuId, name);
+        _entityItem.DrawContextMenuItems(selection, setup, _menuKind, _menuId, name);
     }
 
     /// <summary>Runs a child rectangle edit through the same snapshot/undo lifecycle as a surface resize.</summary>
@@ -1845,6 +1846,7 @@ internal sealed partial class SetupOutputView
 
     private readonly ScalableCanvas _canvas = new();
     private readonly ScalableCanvasProjection _projection;
+    private readonly EntityItem _entityItem;
     private EditMode _editMode = EditMode.Output;
     private bool _isolate;
     private Guid _focusedSurfaceId;

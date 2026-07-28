@@ -274,6 +274,13 @@ with an explanatory comment) — the row-callback API design made compliance imp
   **Open modifier-map decision (flagged in canvas-interaction.md):** Shift currently *suspends snapping*,
   but the plan wants Shift = *constrain to H/V/45°* — one key, two meanings; settle before muscle memory
   hardens (e.g. Shift = constrain, Alt = suspend).
+- **2026-07-28 (instance-ification):** `SetupPanel` and `EntityItem` are per-window instances, owned by
+  `OutputSetupModeView` and shared between the panel and `SetupOutputView` — rename state, hover
+  cross-highlight, collapse sets, primary cache, and menu context no longer bleed between open output
+  windows. Still static, deliberately: the Guid-list hooks (global registry), pure helpers, and the
+  `_availableNames`/`_sinkContext` scratch buffers (single-threaded reuse, no per-window semantics).
+  Next per the pre-flow-view list: remove the `_focusedSurfaceId`/`_selectedSliceId` selection shadows,
+  then round-trip tests for the newest serialized fields, then the P4 hygiene batch.
   **Still open from P2.2:** the `_focusedSurfaceId`/`_selectedSliceId` selection shadows; the bypassed
   `ICanvasPointSnapper` seam; sub-element selection for slice corners / annotation endpoints.
 
