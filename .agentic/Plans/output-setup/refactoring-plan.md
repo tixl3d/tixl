@@ -256,6 +256,24 @@ with an explanatory comment) — the row-callback API design made compliance imp
   slice px fields previously saved per mouse-move frame. Size (m) keeps its `ResizeSurfaceCommand` path.
   The Content card's Update toggle stays op-side (graph state, not setup data). Setup undo coverage is
   now complete except op-side edits, which have their own graph commands.
+- **2026-07-28 (testing round):** user-test fixes — per-axis local snap thresholds (X-scale was applied to
+  Y; slice editor too); straight framing is captured only at the settled state and *held* across all edits
+  and releases (`_easeKeepsFraming`: a same-basis settle eases R inside the stationary window — the camera
+  never chases an edit; only basis/mode changes re-frame); click threshold before a label grab becomes a
+  move; whole-quad label move for top-level surfaces (press selects via picker with stack cycling, hold
+  moves); multi-select shown on canvases; toolbar panel-toggle only when the panel is closed. New
+  `SetupSanitizer` (UiModel/ProjectHandling): setups are hostile input — on load/switch it force-repairs
+  non-finite/absurd/degenerate quads, invalid sizes/anchors, and **strips stray OutputMappings from Layout
+  children** (a mapped region silently becomes an independent surface — the hierarchy-corruption bug), each
+  with a warning, persisted immediately. Writers guarded: region→output drops and bind toggles refuse
+  Layout children. Children are called **Region** in all display strings (card header, menus, default
+  names); nested non-Layout surfaces are detached to roots on load. The harsh-snapping root cause was the
+  **axis-lock cone** (capture zone = drag distance ÷ 4 → 100px+ on long drags — log-probed, point snapping
+  was innocent): the lock now keeps its ~14° directional condition but caps capture at ~1.5× the snap
+  threshold (~10px screen), constant at any zoom/distance; same fix in the slice move.
+  **Open modifier-map decision (flagged in canvas-interaction.md):** Shift currently *suspends snapping*,
+  but the plan wants Shift = *constrain to H/V/45°* — one key, two meanings; settle before muscle memory
+  hardens (e.g. Shift = constrain, Alt = suspend).
   **Still open from P2.2:** the `_focusedSurfaceId`/`_selectedSliceId` selection shadows; the bypassed
   `ICanvasPointSnapper` seam; sub-element selection for slice corners / annotation endpoints.
 

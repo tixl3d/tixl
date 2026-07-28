@@ -455,7 +455,7 @@ internal static class EntityItem
                 if (surface == null)
                     break;
 
-                if (CustomComponents.DrawMenuItem(4, "Add sub-region"))
+                if (CustomComponents.DrawMenuItem(4, "Add region"))
                     SetupActions.AddSubRegion(selection, setup, surface);
 
                 // Only meaningful once something is shown here — there's no aspect to match otherwise.

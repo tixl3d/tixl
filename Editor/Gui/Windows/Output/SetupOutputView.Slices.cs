@@ -63,7 +63,12 @@ internal sealed partial class SetupOutputView
 
         dl.AddRect(min, max, UiColors.ForegroundFull.Fade(0.25f));
 
-        // Every slice cut from this source. The selected one is editable; the rest are context you can click.
+        // A grab that never turned into a drag (released before the editor picked it up) must not linger.
+        if (_sliceLabelGrabPending && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            _sliceLabelGrabPending = false;
+
+        // Every slice cut from this source. The primary one is editable; the other selected ones read as
+        // selected (multi-select), and the rest are context you can click.
         Slice? selected = null;
         foreach (var slice in setup.Slices)
         {
@@ -85,12 +90,34 @@ internal sealed partial class SetupOutputView
             if (slicePulse > 0.001f)
                 dl.AddRectFilled(sliceMin, sliceMax, UiColors.StatusActivated.Fade(slicePulse));
 
-            dl.AddRect(sliceMin, sliceMax, UiColors.ForegroundFull.Fade(0.4f), 0, ImDrawFlags.None, 1 * T3Ui.UiScaleFactor);
+            // A multi-selected (non-primary) slice reads selected, like the primary's frame — only editing
+            // stays with the primary.
+            var isSelected = selection != null && selection.IsSelected(SetupEntitySelection.EntityKind.Slice, slice.Id);
+            dl.AddRect(sliceMin, sliceMax,
+                       isSelected ? UiColors.StatusActivated : UiColors.ForegroundFull.Fade(0.4f),
+                       0, ImDrawFlags.None, (isSelected ? 2f : 1f) * T3Ui.UiScaleFactor);
 
             Span<Vector2> corners =
                 [sliceMin, new Vector2(sliceMax.X, sliceMin.Y), sliceMax, new Vector2(sliceMin.X, sliceMax.Y)];
-            CornerPinHandles.DrawCenteredLabel(dl, corners, SetupActions.SliceLabel(setup, slice), UiColors.Text.Fade(0.7f), UiColors.BackgroundFull.Fade(0.6f));
+            var sliceName = SetupActions.SliceLabel(setup, slice);
+            CornerPinHandles.DrawCenteredLabel(dl, corners, sliceName,
+                                               isSelected ? UiColors.ForegroundFull : UiColors.Text.Fade(0.7f),
+                                               isSelected ? UiColors.StatusActivated.Fade(0.6f) : UiColors.BackgroundFull.Fade(0.6f));
             _picker.AddTarget(SetupEntitySelection.EntityKind.Slice, slice.Id, sliceMin, sliceMax);
+
+            // Grab-to-move without the select-first click: pressing a slice's label selects it and starts its
+            // move in the same gesture — the editor takes over next frame, mouse still held.
+            if (!_sliceLabelDragging && !_sliceLabelGrabPending
+                && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered())
+            {
+                var (labelMin, labelMax) = CornerPinHandles.GetCenteredLabelRect(corners, sliceName);
+                var mouse = ImGui.GetMousePos();
+                if (mouse.X >= labelMin.X && mouse.X <= labelMax.X && mouse.Y >= labelMin.Y && mouse.Y <= labelMax.Y)
+                {
+                    SelectPicked(selection, SetupEntitySelection.EntityKind.Slice, slice.Id);
+                    _sliceLabelGrabPending = true;
+                }
+            }
         }
 
         // No scrim here: on an atlas every slice matters equally. No fallback to the first slice either — with
@@ -179,7 +206,15 @@ internal sealed partial class SetupOutputView
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 
         var movePhase = CanvasPointHandle.DragPhase.None;
-        if (_sliceLabelDragging)
+        if (_sliceLabelGrabPending)
+        {
+            // The grab from the source-canvas label (select + move in one gesture) lands here one frame
+            // later, once this slice is the edited one.
+            _sliceLabelGrabPending = false;
+            _sliceLabelDragging = true;
+            movePhase = CanvasPointHandle.DragPhase.Started;
+        }
+        else if (_sliceLabelDragging)
         {
             movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhase.Dragging
                                                                  : CanvasPointHandle.DragPhase.Completed;
@@ -195,9 +230,11 @@ internal sealed partial class SetupOutputView
         var centreInCanvas = _projection.ScreenToCanvas(mousePos);
         ImGui.PopID();
 
-        // One screen pixel in UV, so snapping feels the same at any zoom.
+        // One screen pixel in UV — per axis, since UV is normalized: on a non-square source the same 7px is
+        // a different UV distance horizontally than vertically.
         var perPixel = (_projection.ScreenToCanvas(new Vector2(1, 0)) - _projection.ScreenToCanvas(Vector2.Zero)).X;
-        var threshold = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(sourceSize.X, 0.0001f);
+        var thresholdX = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(sourceSize.X, 0.0001f);
+        var thresholdY = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(sourceSize.Y, 0.0001f);
         var snapping = !ImGui.GetIO().KeyShift;
 
         if (edge >= 0 && edgePhase is not CanvasPointHandle.DragPhase.None)
@@ -223,7 +260,7 @@ internal sealed partial class SetupOutputView
                 CollectSliceSnapCandidates(setup, slice);
                 var movesX = edge is 1 or 3;
                 Span<float> anchor = [edge switch { 0 => next.Y, 1 => next.Z, 2 => next.W, _ => next.X }];
-                if (SurfaceGeometry.TrySnapOffset(movesX ? _sliceSnapXs : _sliceSnapYs, anchor, threshold,
+                if (SurfaceGeometry.TrySnapOffset(movesX ? _sliceSnapXs : _sliceSnapYs, anchor, movesX ? thresholdX : thresholdY,
                                                   out var snapOffset, out var snapTarget))
                 {
                     switch (edge)
@@ -328,13 +365,14 @@ internal sealed partial class SetupOutputView
                 var size = new Vector2(startUv.Z - startUv.X, startUv.W - startUv.Y);
                 var delta = cursorUv - origin;
 
-                // Same ~14° axis-lock cone as a surface move.
+                // Same axis lock as a region move: directional, but capped at a constant screen budget so
+                // it can't widen with drag distance.
                 var lockX = false;
                 var lockY = false;
                 if (snapping)
                 {
-                    lockX = MathF.Abs(delta.X) > MathF.Abs(delta.Y) * 4;
-                    lockY = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 4;
+                    lockX = MathF.Abs(delta.X) > MathF.Abs(delta.Y) * 4 && MathF.Abs(delta.Y) < thresholdY * 1.5f;
+                    lockY = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 4 && MathF.Abs(delta.X) < thresholdX * 1.5f;
                     if (lockX)
                         delta.Y = 0;
                     else if (lockY)
@@ -350,13 +388,13 @@ internal sealed partial class SetupOutputView
                     CollectSliceSnapCandidates(setup, slice);
                     Span<float> xs = [sliceOrigin.X, sliceOrigin.X + size.X * 0.5f, sliceOrigin.X + size.X];
                     Span<float> ys = [sliceOrigin.Y, sliceOrigin.Y + size.Y * 0.5f, sliceOrigin.Y + size.Y];
-                    if (SurfaceGeometry.TrySnapOffset(_sliceSnapXs, xs, threshold, out var offsetX, out var targetX))
+                    if (SurfaceGeometry.TrySnapOffset(_sliceSnapXs, xs, thresholdX, out var offsetX, out var targetX))
                     {
                         sliceOrigin.X += offsetX;
                         DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: true, targetX);
                     }
 
-                    if (SurfaceGeometry.TrySnapOffset(_sliceSnapYs, ys, threshold, out var offsetY, out var targetY))
+                    if (SurfaceGeometry.TrySnapOffset(_sliceSnapYs, ys, thresholdY, out var offsetY, out var targetY))
                     {
                         sliceOrigin.Y += offsetY;
                         DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: false, targetY);
@@ -512,6 +550,7 @@ internal sealed partial class SetupOutputView
     // Slice-editing state (the rest — _selectedSliceId, the Content-stage framing — lives with the morph in
     // the core partial, which writes it).
     private bool _sliceLabelDragging;
+    private bool _sliceLabelGrabPending; // label pressed on a not-yet-selected slice; the editor starts the move next frame
     private const float MinSliceSize = 0.01f;
     private const string SliceMenuId = "##sliceMenu";
     private readonly Vector2[] _sliceQuadBuffer = new Vector2[4];

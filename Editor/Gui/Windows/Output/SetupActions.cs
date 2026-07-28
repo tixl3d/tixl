@@ -100,8 +100,13 @@ internal static class SetupActions
         {
             var surface = setup.FindSurface(dragId);
             var output = setup.FindOutput(targetId);
-            if (surface != null && output != null && !surface.OutputMappings.Exists(m => m.OutputId == targetId))
+            if (surface != null && output != null
+                // A Layout child rides its parent's pin — a mapping of its own would detach it from the hierarchy.
+                && !(surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
+                && !surface.OutputMappings.Exists(m => m.OutputId == targetId))
+            {
                 surface.OutputMappings.Add(CreateDefaultMapping(output));
+            }
 
             return;
         }
@@ -245,6 +250,10 @@ internal static class SetupActions
                 if (surface == null)
                     return false;
 
+                // A Layout child rides its parent's pin — it can't bind to an output itself.
+                if (surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
+                    return false;
+
                 isBound = surface.OutputMappings.Exists(m => m.OutputId == id);
                 return true;
             }
@@ -321,7 +330,7 @@ internal static class SetupActions
     {
         var copy = CloneSurface(surface);
         var isChild = surface.ParentId != Guid.Empty;
-        copy.Name = isChild ? $"Sub region {CountChildren(setup, surface.ParentId) + 1}" : surface.Name + " copy";
+        copy.Name = isChild ? $"Region {CountChildren(setup, surface.ParentId) + 1}" : surface.Name + " copy";
 
         if (isChild)
         {
@@ -900,7 +909,7 @@ internal static class SetupActions
 
         var region = new Surface
                          {
-                             Name = string.IsNullOrEmpty(slice.Name) ? $"Sub region {CountChildren(setup, parent.Id) + 1}" : slice.Name,
+                             Name = string.IsNullOrEmpty(slice.Name) ? $"Region {CountChildren(setup, parent.Id) + 1}" : slice.Name,
                              Kind = Surface.SurfaceKinds.Layout,
                              ParentId = parent.Id,
                              SizeInMeters = new Vector2(MathF.Max(width, SurfaceGeometry.MinSize),
@@ -1013,11 +1022,11 @@ internal static class SetupActions
         var anchor = SurfaceGeometry.AnchorInSurface(parent);
         var bottomLeft = new Vector2(parentSize.X * 0.1f, parentSize.Y * 0.9f); // surface space runs Y down
 
-        RunUndoable("Add sub-region", setup, () =>
+        RunUndoable("Add region", setup, () =>
                                              {
                                                  var child = new Surface
                                                                  {
-                                                                     Name = $"Sub region {CountChildren(setup, parent.Id) + 1}",
+                                                                     Name = $"Region {CountChildren(setup, parent.Id) + 1}",
                                                                      Kind = Surface.SurfaceKinds.Layout,
                                                                      ParentId = parent.Id,
                                                                      SizeInMeters = size,

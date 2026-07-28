@@ -96,6 +96,8 @@ internal static class OutputSetupHandling
         if (!Setup.TryLoadFromFile(SetupFilePath(metaFolder, setupName), out var setup) || setup == null)
             return false;
 
+        SetupSanitizer.Sanitize(setup); // persisted by the SaveActive below
+
         entry.Setup = setup;
         SaveActive(); // records the new active setup name so the switch survives a restart
         return true;
@@ -228,6 +230,11 @@ internal static class OutputSetupHandling
         {
             setup = Setup.CreateDefault();
             Directory.CreateDirectory(metaFolder);
+            setup.TrySaveToFile(SetupFilePath(metaFolder, setup.Name));
+        }
+        else if (SetupSanitizer.Sanitize(setup))
+        {
+            // Persist the repair right away, so the file on disk stops being broken.
             setup.TrySaveToFile(SetupFilePath(metaFolder, setup.Name));
         }
 

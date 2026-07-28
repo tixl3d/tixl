@@ -280,6 +280,30 @@ internal sealed partial class SetupOutputView
                     framedMax = Vector2.Lerp(framedMax, _sliceFramingTarget.Value.Max, toContent);
                 }
 
+                // Once the view and basis transitions have settled, the framing — the world window this
+                // rectified view renders — stays put across edits and releases: a dragged surface stays
+                // where it was dropped instead of the window re-centering on it. Re-framing comes only from
+                // a basis or mode change; anything else is the user's own pan/zoom. R itself stays live, so
+                // corner edits still update the rectification within the held window.
+                // Held framing is only ever captured *at* the settled state — capturing during a transition
+                // would freeze a half-way window. A post-edit settle ease (same basis) keeps the hold, so
+                // releasing a drag never moves the camera; a basis/mode transition re-derives live.
+                var framingHeld = _morphProgress >= 1f && (_basisMorph >= 1f || _easeKeepsFraming);
+                if (!framingHeld)
+                {
+                    _frozenFramedMin = null;
+                }
+                else if (_frozenFramedMin == null)
+                {
+                    _frozenFramedMin = framedMin;
+                    _frozenFramedMax = framedMax;
+                }
+                else
+                {
+                    framedMin = _frozenFramedMin.Value;
+                    framedMax = _frozenFramedMax;
+                }
+
                 viewMin = Vector2.Lerp(Vector2.Zero, framedMin, straighten);
                 var viewMax = Vector2.Lerp(canvasSize, framedMax, straighten);
                 viewSize = viewMax - viewMin;
@@ -290,6 +314,9 @@ internal sealed partial class SetupOutputView
                 rToOutput = _identity;
             }
         }
+
+        if (basisMapping == null)
+            _frozenFramedMin = null; // left the rectified context — next entry re-derives the framing
 
         var rectifying = _viewMorph > 0.0001f;
         FitToArea(viewSize, EditMode.Output, outputId, keepScope: _framingWasFrozen && !framingFrozen);
@@ -378,6 +405,10 @@ internal sealed partial class SetupOutputView
         // ...and they fade out over stage two rather than being switched off, so nothing pops.
         var handleFade = 1f - toContent;
 
+        // A label grab that never became a drag (released before the move machinery picked it up) must not linger.
+        if (_labelGrabScreen != null && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            _labelGrabScreen = null;
+
         _fenceCandidates.Clear();
         Span<Vector2> labelQuad = stackalloc Vector2[4]; // hoisted: one buffer reused by every surface
         for (var i = 0; i < setup.Surfaces.Count; i++)
@@ -401,7 +432,7 @@ internal sealed partial class SetupOutputView
                     || !SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, carrierMapping, _childQuadBuffer))
                     continue;
 
-                DrawChildRegion(setup, dl, rToView, rToOutput, viewMin, carrier, carrierMapping, immediateParent, surface, editable, handleFade);
+                DrawChildRegion(setup, selection, dl, rToView, rToOutput, viewMin, carrier, carrierMapping, immediateParent, surface, editable, handleFade);
                 continue;
             }
 
@@ -417,7 +448,11 @@ internal sealed partial class SetupOutputView
             ImGui.PushID(surface.Id.GetHashCode());
 
             // A parent recedes while one of its children is the subject, so the child's handles read first.
-            var isSelected = surface.Id == _focusedSurfaceId;
+            // Selection styling covers the whole multi-selection; the *focused* (primary) surface keeps the
+            // exclusive affordances below (edge handles, anchor, isolate).
+            var isFocused = surface.Id == _focusedSurfaceId;
+            var isSelected = isFocused
+                             || (selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, surface.Id) ?? false);
             var emphasis = handleFade * (!isSelected && surface.Id == focusCarrierId ? 0.45f : 1f);
 
             // Still draggable when unselected — the canvas has no click-to-select yet, so gating edits on
@@ -447,7 +482,7 @@ internal sealed partial class SetupOutputView
             var pointerOverLabel = !handleActive && !string.IsNullOrEmpty(surface.Name)
                                    && IsMouseOverLabel(labelQuad, surface.Name);
             // In isolate only the focused frame is editable; the others are locked (they still snap).
-            var lockedByIsolate = _isolate && !isSelected;
+            var lockedByIsolate = _isolate && !isFocused;
             var handlesEditable = editable && !pointerOverLabel && !lockedByIsolate;
             style.Editable = handlesEditable;
 
@@ -498,6 +533,55 @@ internal sealed partial class SetupOutputView
 
             HandleDrag(phase, setup, surface.Id, outputId, mappingData.Quad);
 
+            // The label doubles as the surface's move handle: the press selects it (through the picker, so
+            // stacked labels still cycle), and holding on continues into a whole-quad move — one gesture,
+            // no select-first click. The move rides the corner-drag lifecycle, so undo and the straighten
+            // freeze come along for free.
+            if (phase == CanvasPointHandle.DragPhase.None)
+            {
+                var movePhase = CanvasPointHandle.DragPhase.None;
+                if (_surfaceMoveId == surface.Id)
+                {
+                    movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left)
+                                    ? CanvasPointHandle.DragPhase.Dragging
+                                    : CanvasPointHandle.DragPhase.Completed;
+                }
+                else if (_surfaceMoveId == Guid.Empty && _labelGrabScreen != null
+                         && surface.Id == _focusedSurfaceId
+                         && editable && !lockedByIsolate
+                         && !string.IsNullOrEmpty(surface.Name)
+                         && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
+                         // Below the click threshold a press is a selection click, not a grab — otherwise
+                         // switching surfaces by clicking labels triggers zero-distance "moves".
+                         && (ImGui.GetMousePos() - _labelGrabScreen.Value).Length() > UserSettings.Config.ClickThreshold
+                         && IsPointOverLabel(labelQuad, surface.Name, _labelGrabScreen.Value))
+                {
+                    _labelGrabScreen = null;
+                    _surfaceMoveId = surface.Id;
+                    _surfaceMoveGrabCanvas = _projection.ScreenToCanvas(ImGui.GetMousePos());
+                    movePhase = CanvasPointHandle.DragPhase.Started;
+                }
+
+                if (movePhase == CanvasPointHandle.DragPhase.Started)
+                {
+                    HandleDrag(movePhase, setup, surface.Id, outputId, mappingData.Quad);
+                }
+                else if (movePhase == CanvasPointHandle.DragPhase.Dragging
+                         && _cornerDragOldQuads.TryGetValue(surface.Id, out var preMoveQuad))
+                {
+                    // Rigid in view space; carried through R per corner, so in a rectified view the quad
+                    // warps exactly as if each corner had been dragged by the same screen offset.
+                    var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _surfaceMoveGrabCanvas;
+                    for (var c = 0; c < 4; c++)
+                        mappingData.Quad[c] = rToOutput.TransformPoint(rToView.TransformPoint(preMoveQuad[c]) + moveDelta);
+                }
+                else if (movePhase == CanvasPointHandle.DragPhase.Completed)
+                {
+                    HandleDrag(movePhase, setup, surface.Id, outputId, mappingData.Quad);
+                    _surfaceMoveId = Guid.Empty;
+                }
+            }
+
             // A handle stands in for its frame: hovering one lights the frame (and its sidebar row), and
             // grabbing one selects it — so you can't edit a frame that isn't the selected item. Isolate mode
             // takes selection off the canvas entirely, so it doesn't fire there.
@@ -507,8 +591,8 @@ internal sealed partial class SetupOutputView
             if (phase == CanvasPointHandle.DragPhase.Started && !_isolate)
                 selection?.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
 
-            // Only the selected surface shows its anchor — one origin at a time, or the canvas fills with them.
-            if (isSelected)
+            // Only the focused surface shows its anchor — one origin at a time, or the canvas fills with them.
+            if (isFocused)
                 DrawAnchorMarker(dl, surface, mappingData, rToView, viewMin, handleFade);
 
             // Edge handles belong to the focused surface only — they're contextual, and four extra dots on
@@ -870,6 +954,24 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private Vector2[] BlendBasisTransition(Guid basisId, Vector2[] targetQuad, ref Vector2 targetSize, ref Vector2 targetPivot, bool frozen)
     {
+        // A lifted freeze is the same situation as a basis switch: an edge crop rewrote the quad, size, and
+        // pivot R is built from, and they'd land in one frame — a view jump the user never asked for. Ease
+        // from the frozen state instead, so the rectified view settles onto the edit.
+        if (!frozen && _basisWasFrozen && basisId == _basisTransitionId && _basisHasLast)
+        {
+            for (var i = 0; i < 4; i++)
+                _basisFromQuad[i] = _basisLastQuad[i];
+
+            _basisFromSize = _basisLastSize;
+            _basisFromPivot = _basisLastPivot;
+            _basisMorph = 0f;
+
+            // Same basis: the edit settles *inside* the held framing — the camera must not chase it.
+            _easeKeepsFraming = true;
+        }
+
+        _basisWasFrozen = frozen;
+
         if (basisId != _basisTransitionId)
         {
             if (!frozen && _basisTransitionId != Guid.Empty && basisId != Guid.Empty && _basisHasLast)
@@ -886,6 +988,8 @@ internal sealed partial class SetupOutputView
                 _basisMorph = 1f;
             }
 
+            // A different basis is a different rectified world — the framing re-derives (with the ease).
+            _easeKeepsFraming = false;
             _basisTransitionId = basisId;
         }
 
@@ -1007,7 +1111,8 @@ internal sealed partial class SetupOutputView
     /// thinner than a mapped surface, and without handles, because it isn't independently editable — its shape
     /// comes from the parent's corner pin plus its own rectangle in the parent's space.
     /// </summary>
-    private void DrawChildRegion(Setup setup, ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
+    private void DrawChildRegion(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, Homography rToView,
+                                 Homography rToOutput, Vector2 viewMin,
                                  Surface carrier, Surface.OutputMapping carrierMapping, Surface parent, Surface child,
                                  bool editable, float fade)
     {
@@ -1015,6 +1120,10 @@ internal sealed partial class SetupOutputView
             return;
 
         var isFocused = child.Id == _focusedSurfaceId;
+
+        // Multi-selection styling only — editing and the anchor stay with the focused (primary) region.
+        var isSelected = isFocused
+                         || (selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, child.Id) ?? false);
 
         // The child's quad (already derived into the buffer) carried into the framed canvas.
         var viewQuad = new[]
@@ -1029,15 +1138,15 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < 4; i++)
             screen[i] = _projection.CanvasToScreen(viewQuad[i]);
 
-        var style = CornerPinHandles.Style.ForSurface(child.Name, editable && isFocused, isFocused, fade);
-        var childPulse = isFocused ? 0f : FrameStats.GetPulse(child.Id);
-        if (isFocused)
+        var style = CornerPinHandles.Style.ForSurface(child.Name, editable && isFocused, isSelected, fade);
+        var childPulse = isSelected ? 0f : FrameStats.GetPulse(child.Id);
+        if (isSelected)
             dl.AddQuadFilled(screen[0], screen[1], screen[2], screen[3], UiColors.StatusActivated.Fade(0.12f * fade));
         else if (childPulse > 0.001f)
             dl.AddQuadFilled(screen[0], screen[1], screen[2], screen[3], UiColors.StatusActivated.Fade(childPulse * 0.2f * fade));
 
         // The outline carries the hover highlight, same as a top-level surface.
-        CanvasDraw.QuadOutline(dl, screen, PulseColor(style.EdgeColor, childPulse), isFocused ? 2f : 1f);
+        CanvasDraw.QuadOutline(dl, screen, PulseColor(style.EdgeColor, childPulse), isSelected ? 2f : 1f);
 
         // A region has its own anchor, in its own space — mapped out through the parent's rectangle and pin.
         if (isFocused
@@ -1056,7 +1165,7 @@ internal sealed partial class SetupOutputView
         {
             // Still registered as a pick target — an unselected region has to stay clickable, which is the
             // only way to reach it while its parent is selected.
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, isFocused, fade, childPulse);
+            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, isSelected, fade, childPulse);
             return;
         }
 
@@ -1085,8 +1194,9 @@ internal sealed partial class SetupOutputView
                                 {
                                     SurfaceGeometry.CollectSnapCandidates(setup, parent, child.Id, _snapXs, _snapYs);
                                     Span<float> anchor = [horizontal ? pos.X : pos.Y];
+                                    var thresholds = SnapThresholds(parentProjection, rToView, viewMin, parent, edgeParentOrigin, pos);
                                     if (SurfaceGeometry.TrySnapOffset(horizontal ? _snapXs : _snapYs, anchor,
-                                                                      SnapThreshold(parentProjection, rToView, viewMin, parent, edgeParentOrigin),
+                                                                      horizontal ? thresholds.X : thresholds.Y,
                                                                       out var offset, out var target))
                                     {
                                         if (horizontal)
@@ -1142,6 +1252,16 @@ internal sealed partial class SetupOutputView
                         ? CanvasPointHandle.DragPhase.Dragging
                         : CanvasPointHandle.DragPhase.Completed;
         }
+        else if (_labelMoveSurfaceId == Guid.Empty && _labelGrabScreen != null
+                 && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
+                 // Below the click threshold a press is a selection click, not a grab.
+                 && (ImGui.GetMousePos() - _labelGrabScreen.Value).Length() > UserSettings.Config.ClickThreshold
+                 && IsPointOverLabel(screen, child.Name, _labelGrabScreen.Value))
+        {
+            // The press selected this region through the picker; the held button continues into its move.
+            _labelGrabScreen = null;
+            phase = CanvasPointHandle.DragPhase.Started;
+        }
         else if (_labelMoveSurfaceId == Guid.Empty
                  && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered())
         {
@@ -1183,11 +1303,19 @@ internal sealed partial class SetupOutputView
         var delta = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin) - origin;
         var snapping = !ImGui.GetIO().KeyShift;
 
-        // ~14° cone around each axis.
-        if (snapping)
+        var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var surfaceToOutput);
+        var halfSize = (startMax - startMin) * 0.5f;
+        var thresholds = hasProjection
+                             ? SnapThresholds(surfaceToOutput, rToView, viewMin, parent, parentOrigin, startMin + delta + halfSize)
+                             : Vector2.Zero;
+
+        // Nearly-straight drags flatten onto the axis — but only within a constant screen-space budget
+        // (~1.5× the snap threshold). A plain direction cone widens with drag distance, and on a long
+        // drag it captures from 100px+ away, which reads as violent snapping.
+        if (snapping && hasProjection)
         {
-            var lockX = MathF.Abs(delta.X) > MathF.Abs(delta.Y) * 4;
-            var lockY = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 4;
+            var lockX = MathF.Abs(delta.X) > MathF.Abs(delta.Y) * 4 && MathF.Abs(delta.Y) < thresholds.Y * 1.5f;
+            var lockY = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 4 && MathF.Abs(delta.X) < thresholds.X * 1.5f;
             if (lockX)
                 delta.Y = 0;
             else if (lockY)
@@ -1203,7 +1331,6 @@ internal sealed partial class SetupOutputView
         var newMin = startMin + delta;
         var newMax = startMax + delta;
 
-        var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var surfaceToOutput);
         float? guideX = null;
         float? guideY = null;
 
@@ -1211,11 +1338,10 @@ internal sealed partial class SetupOutputView
         // a corner just land there, since the parent's own edges are candidates.
         if (snapping && hasProjection)
         {
-            var threshold = SnapThreshold(surfaceToOutput, rToView, viewMin, parent, parentOrigin);
             SurfaceGeometry.CollectSnapCandidates(setup, parent, child.Id, _snapXs, _snapYs);
 
             Span<float> anchorsX = [newMin.X, (newMin.X + newMax.X) * 0.5f, newMax.X];
-            if (SurfaceGeometry.TrySnapOffset(_snapXs, anchorsX, threshold, out var offsetX, out var targetX))
+            if (SurfaceGeometry.TrySnapOffset(_snapXs, anchorsX, thresholds.X, out var offsetX, out var targetX))
             {
                 newMin.X += offsetX;
                 newMax.X += offsetX;
@@ -1223,7 +1349,7 @@ internal sealed partial class SetupOutputView
             }
 
             Span<float> anchorsY = [newMin.Y, (newMin.Y + newMax.Y) * 0.5f, newMax.Y];
-            if (SurfaceGeometry.TrySnapOffset(_snapYs, anchorsY, threshold, out var offsetY, out var targetY))
+            if (SurfaceGeometry.TrySnapOffset(_snapYs, anchorsY, thresholds.Y, out var offsetY, out var targetY))
             {
                 newMin.Y += offsetY;
                 newMax.Y += offsetY;
@@ -1256,14 +1382,32 @@ internal sealed partial class SetupOutputView
         return [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)];
     }
 
-    /// <summary>Snap distance in the parent's own units, from a fixed screen distance — so it feels the same
-    /// however far you're zoomed in, and on a surface of any real size.</summary>
-    private float SnapThreshold(Homography surfaceToOutput, Homography rToView, Vector2 viewMin, Surface parent, Vector2 originInCarrier)
+    /// <summary>
+    /// Snap distances in the parent's own units per axis, from a fixed screen distance. Measured with short
+    /// probes around <paramref name="probeInParent"/> (the dragged item), not across the whole parent:
+    /// a rectified or keystoned view scales X and Y differently — a width-derived threshold applied to Y can
+    /// catch from far more than the intended 7px — and under perspective the scale varies across the surface,
+    /// so only a local measurement feels the same everywhere.
+    /// </summary>
+    private Vector2 SnapThresholds(Homography surfaceToOutput, Homography rToView, Vector2 viewMin, Surface parent,
+                                   Vector2 originInCarrier, Vector2 probeInParent)
     {
-        var a = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(originInCarrier)) - viewMin);
-        var b = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(originInCarrier + new Vector2(parent.SizeInMeters.X, 0))) - viewMin);
-        var pixels = Vector2.Distance(a, b);
-        return pixels > 1f ? parent.SizeInMeters.X / pixels * 7 * T3Ui.UiScaleFactor : 0f;
+        var probe = MathF.Max(MathF.Min(parent.SizeInMeters.X, parent.SizeInMeters.Y) * 0.05f, 0.0001f);
+        var origin = ProjectParentPoint(surfaceToOutput, rToView, viewMin, originInCarrier, probeInParent);
+        var alongX = ProjectParentPoint(surfaceToOutput, rToView, viewMin, originInCarrier, probeInParent + new Vector2(probe, 0));
+        var alongY = ProjectParentPoint(surfaceToOutput, rToView, viewMin, originInCarrier, probeInParent + new Vector2(0, probe));
+
+        var wantedPixels = 7 * T3Ui.UiScaleFactor;
+        var pixelsX = Vector2.Distance(origin, alongX);
+        var pixelsY = Vector2.Distance(origin, alongY);
+        return new Vector2(pixelsX > 0.001f ? probe / pixelsX * wantedPixels : 0f,
+                           pixelsY > 0.001f ? probe / pixelsY * wantedPixels : 0f);
+    }
+
+    private Vector2 ProjectParentPoint(Homography surfaceToOutput, Homography rToView, Vector2 viewMin,
+                                       Vector2 originInCarrier, Vector2 pointInParent)
+    {
+        return _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(originInCarrier + pointInParent)) - viewMin);
     }
 
     private void DrawSnapGuide(ImDrawListPtr dl, Homography surfaceToOutput, Homography rToView, Vector2 viewMin,
@@ -1308,9 +1452,13 @@ internal sealed partial class SetupOutputView
     /// over any handle beneath it.</summary>
     private static bool IsMouseOverLabel(ReadOnlySpan<Vector2> screenQuad, string name)
     {
+        return IsPointOverLabel(screenQuad, name, ImGui.GetMousePos());
+    }
+
+    private static bool IsPointOverLabel(ReadOnlySpan<Vector2> screenQuad, string name, Vector2 screenPoint)
+    {
         var (min, max) = CornerPinHandles.GetCenteredLabelRect(screenQuad, name);
-        var mouse = ImGui.GetMousePos();
-        return mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y;
+        return screenPoint.X >= min.X && screenPoint.X <= max.X && screenPoint.Y >= min.Y && screenPoint.Y <= max.Y;
     }
 
     /// <summary>
@@ -1371,8 +1519,17 @@ internal sealed partial class SetupOutputView
             var canPick = !_isolate || hit.Id == _focusedSurfaceId;
 
             // A drag on the selected region's label moves it, so that press mustn't also count as a pick.
-            if (canPick && hit.LeftClicked && _labelMoveSurfaceId == Guid.Empty)
+            if (canPick && hit.LeftClicked && _labelMoveSurfaceId == Guid.Empty && _surfaceMoveId == Guid.Empty)
+            {
                 SelectPicked(selection, hit.Kind, hit.Id);
+
+                // Arm the held-grab: if the button stays down on this surface's label, its move starts next
+                // frame — select-and-drag in one gesture. Plain presses only; a modifier press is a
+                // selection edit, not a grab.
+                var io = ImGui.GetIO();
+                if (hit.Kind == SetupEntitySelection.EntityKind.Surface && !io.KeyCtrl && !io.KeyShift)
+                    _labelGrabScreen = ImGui.GetMousePos();
+            }
 
             if (canPick && hit.MenuRequested)
             {
@@ -1475,9 +1632,14 @@ internal sealed partial class SetupOutputView
             case CanvasPointHandle.DragPhase.Completed:
                 if (_resizeOldState != null)
                 {
-                    UndoRedoStack.Add(new ResizeSurfaceCommand(target.Id, _resizeOldState.Value,
-                                                               new ResizeSurfaceCommand.State(target)));
-                    OutputSetupHandling.SaveActive();
+                    // A click that never moved leaves the state identical — no undo step, no save.
+                    var newState = new ResizeSurfaceCommand.State(target);
+                    if (ResizeStatesDiffer(_resizeOldState.Value, newState))
+                    {
+                        UndoRedoStack.Add(new ResizeSurfaceCommand(target.Id, _resizeOldState.Value, newState));
+                        OutputSetupHandling.SaveActive();
+                    }
+
                     _resizeOldState = null;
                     _edgeDragSurfaceId = Guid.Empty;
                 }
@@ -1610,6 +1772,29 @@ internal sealed partial class SetupOutputView
         }
     }
 
+    private static bool ResizeStatesDiffer(in ResizeSurfaceCommand.State a, in ResizeSurfaceCommand.State b)
+    {
+        if (a.Size != b.Size || a.LocalPosition != b.LocalPosition || a.Pivot != b.Pivot || a.HasPlacement != b.HasPlacement)
+            return true;
+
+        if (a.Quads.Length != b.Quads.Length || a.Annotations.Length != b.Annotations.Length)
+            return true;
+
+        for (var i = 0; i < a.Quads.Length; i++)
+        {
+            if (a.Quads[i].OutputId != b.Quads[i].OutputId || QuadsDiffer(a.Quads[i].Quad, b.Quads[i].Quad))
+                return true;
+        }
+
+        for (var i = 0; i < a.Annotations.Length; i++)
+        {
+            if (a.Annotations[i].P1 != b.Annotations[i].P1 || a.Annotations[i].P2 != b.Annotations[i].P2)
+                return true;
+        }
+
+        return false;
+    }
+
     private static bool QuadsDiffer(Vector2[] a, Vector2[] b)
     {
         for (var i = 0; i < a.Length && i < b.Length; i++)
@@ -1684,8 +1869,13 @@ internal sealed partial class SetupOutputView
     private Guid _basisTransitionId;
     private float _basisMorph = 1f; // 1 = settled
     private bool _basisHasLast;
+    private bool _basisWasFrozen; // last frame's freeze, so a lifted freeze can ease instead of jumping
 
-    // Pre-drag quad snapshot + which surface it belongs to (so R can freeze only when the basis is dragged).
+    // The settled straight framing, held across edits (null = re-derive on the next rectified frame).
+    private Vector2? _frozenFramedMin;
+    private Vector2 _frozenFramedMax;
+    private bool _easeKeepsFraming; // post-edit settle (same basis): ease R, but hold the framing window
+
     // Pre-drag quad snapshots for every surface a corner drag can touch — the grabbed one plus any with
     // selected corners. Non-empty = a corner drag is live; also serves the straighten path's pre-drag basis.
     private readonly Dictionary<Guid, Vector2[]> _cornerDragOldQuads = new();
@@ -1702,6 +1892,14 @@ internal sealed partial class SetupOutputView
     // each surface's click target, and overlapping ones cycle.
     private readonly CanvasItemPicker<SetupEntitySelection.EntityKind> _picker = new();
     private Guid _labelMoveSurfaceId;
+
+    // The held-grab handoff: a plain press on a surface/region label selects it (via the picker, which
+    // cycles stacks); if the button is still down next frame, the move machinery starts from this position.
+    private Vector2? _labelGrabScreen;
+
+    // Whole-quad move of a top-level surface by its label (regions use _labelMoveSurfaceId instead).
+    private Guid _surfaceMoveId;
+    private Vector2 _surfaceMoveGrabCanvas;
     private SetupEntitySelection.EntityKind _menuKind;
     private Guid _menuId;
     private Guid _selectedSliceId;

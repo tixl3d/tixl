@@ -181,12 +181,16 @@ internal sealed class OutputSetupModeView
             _showSetupPanel = !_showSetupPanel;
     }
 
-    /// <summary>The sidebar toggle icon for the output toolbar — filled when open, dimmed when closed.</summary>
+    /// <summary>The sidebar toggle icon for the output toolbar. Only drawn while the panel is closed —
+    /// the open panel's own header carries the collapse icon, and showing the control twice reads as two
+    /// different buttons.</summary>
     public void DrawPanelToggleButton()
     {
-        var state = _showSetupPanel ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default;
-        if (CustomComponents.IconButton(Icon.SidePanelLeft, Vector2.Zero, state))
-            _showSetupPanel = !_showSetupPanel;
+        if (_showSetupPanel)
+            return;
+
+        if (CustomComponents.IconButton(Icon.SidePanelLeft, Vector2.Zero))
+            _showSetupPanel = true;
 
         ImGui.SameLine();
     }

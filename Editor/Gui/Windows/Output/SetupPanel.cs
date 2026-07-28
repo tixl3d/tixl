@@ -172,7 +172,9 @@ internal static class SetupPanel
         if (surface == null)
             return;
 
-        FormInputsNarrow.DrawCardHeader("Surface");
+        // The two roles must never read alike: a plane-root is a Surface, a coplanar child is a Region.
+        var isRegion = surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty;
+        FormInputsNarrow.DrawCardHeader(isRegion ? "Region" : "Surface");
 
         var render = surface.Render;
         if (FormInputsNarrow.DrawCheckbox("Render", ref render, "Skip drawing this surface without removing it."))
