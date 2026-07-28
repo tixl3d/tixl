@@ -1124,7 +1124,9 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// The label doubles as the region's move handle. Free movement, but a nearly-straight drag snaps flat and
+    /// The label doubles as the region's move handle. The label is a plain draw (no ImGui item), so the grab
+    /// is detected by hand — but the lifecycle below is the same snapshot/undo skeleton as every other
+    /// rectangle edit (<see cref="RunResizeDrag"/>). Free movement, but a nearly-straight drag snaps flat and
     /// draws the axis it locked to — placing a region level with its neighbours is the common case.
     /// </summary>
     private void HandleLabelMove(Setup setup, ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
@@ -1134,40 +1136,46 @@ internal sealed partial class SetupOutputView
         if (string.IsNullOrEmpty(child.Name))
             return;
 
-        var isMoving = _labelMoveSurfaceId == child.Id;
-        if (!isMoving)
+        var phase = CanvasPointHandle.DragPhase.None;
+        if (_labelMoveSurfaceId == child.Id)
         {
-            if (_labelMoveSurfaceId != Guid.Empty || !ImGui.IsMouseClicked(ImGuiMouseButton.Left) || ImGui.IsAnyItemHovered())
-                return;
-
+            phase = ImGui.IsMouseDown(ImGuiMouseButton.Left)
+                        ? CanvasPointHandle.DragPhase.Dragging
+                        : CanvasPointHandle.DragPhase.Completed;
+        }
+        else if (_labelMoveSurfaceId == Guid.Empty
+                 && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered())
+        {
             var (min, max) = CornerPinHandles.GetCenteredLabelRect(screen, child.Name);
             var mouse = ImGui.GetMousePos();
-            if (mouse.X < min.X || mouse.X > max.X || mouse.Y < min.Y || mouse.Y > max.Y)
-                return;
-
-            var rect = SurfaceGeometry.ChildRectInParent(parent, child);
-            _labelMoveSurfaceId = child.Id;
-            _childMoveStart = (ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin), rect[0], rect[2]);
-            _resizeOldState = new ResizeSurfaceCommand.State(child);
-            _childMoveAxis = 0;
-            return;
+            if (mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y)
+                phase = CanvasPointHandle.DragPhase.Started;
         }
 
-        if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
-        {
-            if (_resizeOldState != null)
-            {
-                UndoRedoStack.Add(new ResizeSurfaceCommand(child.Id, _resizeOldState.Value, new ResizeSurfaceCommand.State(child)));
-                OutputSetupHandling.SaveActive();
-                _resizeOldState = null;
-            }
-
-            _labelMoveSurfaceId = Guid.Empty;
-            _childMoveStart = null;
-            _childMoveAxis = 0;
+        if (phase == CanvasPointHandle.DragPhase.None)
             return;
-        }
 
+        RunResizeDrag(phase, child,
+                      onDragging: () => ApplyLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child),
+                      onStarted: () =>
+                                 {
+                                     var rect = SurfaceGeometry.ChildRectInParent(parent, child);
+                                     _labelMoveSurfaceId = child.Id;
+                                     _childMoveStart = (ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin), rect[0], rect[2]);
+                                     _childMoveAxis = 0;
+                                 },
+                      onCompleted: () =>
+                                   {
+                                       _labelMoveSurfaceId = Guid.Empty;
+                                       _childMoveStart = null;
+                                       _childMoveAxis = 0;
+                                   });
+    }
+
+    private void ApplyLabelMove(Setup setup, ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
+                                Homography outputToSurface, Surface carrier, Surface.OutputMapping carrierMapping,
+                                Surface parent, Surface child)
+    {
         if (_childMoveStart == null)
             return;
 

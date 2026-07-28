@@ -5,6 +5,8 @@ using T3.Core.Output;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.ProjectHandling;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Vector2 = System.Numerics.Vector2;
@@ -139,6 +141,10 @@ internal sealed partial class SetupOutputView
                 var phase2 = CanvasPointHandle.Draw(ref p2, _projection, style);
                 ImGui.PopID();
 
+                // Pre-drag snapshot before this frame's apply, so the whole drag undoes as one step.
+                if (phase1 == CanvasPointHandle.DragPhase.Started || phase2 == CanvasPointHandle.DragPhase.Started)
+                    _annotationDragStart = (i, annotation.P1, annotation.P2);
+
                 if (phase1 != CanvasPointHandle.DragPhase.None)
                     annotation.P1 = ToSurface(p1);
 
@@ -150,7 +156,15 @@ internal sealed partial class SetupOutputView
                     nextDragIndex = i;
 
                 if (phase1 == CanvasPointHandle.DragPhase.Completed || phase2 == CanvasPointHandle.DragPhase.Completed)
+                {
+                    // Value already applied live during the drag.
+                    if (_annotationDragStart is { } dragStart && dragStart.Index == i)
+                        UndoRedoStack.Add(new ChangeAnnotationCommand(carrier.Id, i, dragStart.P1, dragStart.P2,
+                                                                      annotation.P1, annotation.P2));
+
+                    _annotationDragStart = null;
                     OutputSetupHandling.SaveActive();
+                }
             }
 
             // Measuring is a separate act from aligning: a line is a reference line until double-clicking it
@@ -398,6 +412,7 @@ internal sealed partial class SetupOutputView
     private bool _measureArmed;
     private int _measureDraftIndex = -1;
     private int _measureDragIndex = -1; // endpoint grabbed last frame, so its line can emphasize this frame
+    private (int Index, Vector2 P1, Vector2 P2)? _annotationDragStart; // pre-drag endpoints for the undo step
 
     private const float BlinkRate = 8f;
     private static float _lengthEdit;

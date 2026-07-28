@@ -235,9 +235,15 @@ with an explanatory comment) — the row-callback API design made compliance imp
   canvas entity picks; `SelectionFence` marquee over corners (Output mode, guarded); group corner drag
   across surfaces with MacroCommand undo; plane clears on canvas-view change. Slice-vs-surface snapping
   unified (sibling candidates, ~14° axis lock, guide lines in the slice editor).
-  **Still open from P2.2:** drag-state-machine unification in `SetupOutputView`; the `_focusedSurfaceId`/
-  `_selectedSliceId` selection shadows; routing snapping through `ICanvasPointSnapper` (behavior now
-  matches, but the seam is still bypassed); sub-element selection for slice corners / annotation endpoints.
+- **2026-07-27 (drag unification):** the drag machines now share the snapshot→apply→commit skeleton:
+  surface rectangle edits (edge crop, region edit, label move) all run through `RunResizeDrag` (label move
+  converted from its hand-rolled state machine); slice edits (edge, corner, label move) through a new
+  `RunSliceDrag` with a new `ChangeSliceRectCommand` — slice drags previously **saved the file every
+  mouse-move frame and had no undo**, both fixed; "Match target aspect" is undoable too. Measure endpoint
+  drags commit a new `ChangeAnnotationCommand`. Corner drags keep their group-aware skeleton (`HandleDrag`).
+  **Still open from P2.2:** the `_focusedSurfaceId`/`_selectedSliceId` selection shadows; routing snapping
+  through `ICanvasPointSnapper` (behavior matches, seam still bypassed); sub-element selection for slice
+  corners / annotation endpoints; annotation add/delete undo (goes with P2.3 structural undo).
   Then undo completion (P2.3).
 
 ## Suggested order (revised for the flow-view pivot)

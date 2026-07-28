@@ -6,6 +6,8 @@ using T3.Core.Resource;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.ProjectHandling;
 using Vector2 = System.Numerics.Vector2;
 
@@ -200,6 +202,10 @@ internal sealed partial class SetupOutputView
 
         if (edge >= 0 && edgePhase is not CanvasPointHandle.DragPhase.None)
         {
+            // Capture the pre-drag rect before this frame's apply; the commit runs after it (below).
+            if (edgePhase == CanvasPointHandle.DragPhase.Started)
+                RunSliceDrag(edgePhase, slice);
+
             var inSource = (edgePos - sourceOrigin) / sourceSize;
             var next = uv;
             switch (edge)
@@ -234,6 +240,9 @@ internal sealed partial class SetupOutputView
 
             ApplySliceRect(slice, new Vector4(Math.Clamp(next.X, 0, 1), Math.Clamp(next.Y, 0, 1),
                                            Math.Clamp(next.Z, 0, 1), Math.Clamp(next.W, 0, 1)));
+            if (edgePhase != CanvasPointHandle.DragPhase.Started)
+                RunSliceDrag(edgePhase, slice);
+
             return;
         }
 
@@ -265,6 +274,10 @@ internal sealed partial class SetupOutputView
 
         if (draggedCorner >= 0 && cornerPhase is not CanvasPointHandle.DragPhase.None)
         {
+            // Capture the pre-drag rect before this frame's apply; the commit runs after it (below).
+            if (cornerPhase == CanvasPointHandle.DragPhase.Started)
+                RunSliceDrag(cornerPhase, slice);
+
             var dragged = (cornerPos - sourceOrigin) / sourceSize;
             var currentWidth = MathF.Max(uv.Z - uv.X, 0.0001f);
             var currentHeight = MathF.Max(uv.W - uv.Y, 0.0001f);
@@ -289,6 +302,9 @@ internal sealed partial class SetupOutputView
             var cornerMax = Vector2.Max(fixedCorner, moved);
             ApplySliceRect(slice, new Vector4(Math.Clamp(cornerMin.X, 0, 1), Math.Clamp(cornerMin.Y, 0, 1),
                                            Math.Clamp(cornerMax.X, 0, 1), Math.Clamp(cornerMax.Y, 0, 1)));
+            if (cornerPhase != CanvasPointHandle.DragPhase.Started)
+                RunSliceDrag(cornerPhase, slice);
+
             return;
         }
 
@@ -298,6 +314,7 @@ internal sealed partial class SetupOutputView
             DrawSliceMenu(setup, targetId, slice, uv, min, max);
 
         var cursorUv = (centreInCanvas - sourceOrigin) / sourceSize;
+        RunSliceDrag(movePhase, slice);
         switch (movePhase)
         {
             case CanvasPointHandle.DragPhase.Started:
@@ -413,14 +430,45 @@ internal sealed partial class SetupOutputView
         var minX = Math.Clamp(centreX - width * 0.5f, 0, MathF.Max(1 - width, 0));
         var minY = Math.Clamp(centreY - height * 0.5f, 0, MathF.Max(1 - height, 0));
 
-        ApplySliceRect(slice, new Vector4(minX, minY, minX + width, minY + height));
+        UndoRedoStack.AddAndExecute(new ChangeSliceRectCommand(slice.Id, slice.UvRect,
+                                                               new Vector4(minX, minY, minX + width, minY + height)));
     }
 
-    /// <summary>Slices are setup data now, so an edit is a plain field write that persists with the setup.</summary>
+    /// <summary>Live drag application — a plain field write. Persistence and undo happen once, on the drag's
+    /// Completed phase (<see cref="RunSliceDrag"/>), not per mouse-move frame.</summary>
     private static void ApplySliceRect(Slice slice, Vector4 rect)
     {
         slice.UvRect = rect;
-        OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>
+    /// The one drag lifecycle for slice-rect edits (edge crop, corner scale, label move): snapshot the rect
+    /// on Started, commit a single undoable command + save on Completed — the same skeleton surface edits
+    /// run through (<see cref="RunResizeDrag"/>).
+    /// </summary>
+    private void RunSliceDrag(CanvasPointHandle.DragPhase phase, Slice slice)
+    {
+        switch (phase)
+        {
+            case CanvasPointHandle.DragPhase.Started:
+                _sliceDragOldRect = slice.UvRect;
+                break;
+
+            case CanvasPointHandle.DragPhase.Completed:
+                if (_sliceDragOldRect != null)
+                {
+                    if (_sliceDragOldRect.Value != slice.UvRect)
+                    {
+                        // Value already applied live during the drag.
+                        UndoRedoStack.Add(new ChangeSliceRectCommand(slice.Id, _sliceDragOldRect.Value, slice.UvRect));
+                        OutputSetupHandling.SaveActive();
+                    }
+
+                    _sliceDragOldRect = null;
+                }
+
+                break;
+        }
     }
 
     /// <summary>Snap targets for slice edits, in source UV: the source's bounds and midlines plus every
@@ -475,4 +523,7 @@ internal sealed partial class SetupOutputView
     // The source's own borders and centre, in UV — what a slice snaps against.
     private static readonly List<float> _sliceSnapXs = [];
     private static readonly List<float> _sliceSnapYs = [];
+
+    // Pre-drag rect while any slice edit is live — non-null = a slice drag is active.
+    private System.Numerics.Vector4? _sliceDragOldRect;
 }

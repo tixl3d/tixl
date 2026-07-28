@@ -79,3 +79,17 @@ Ctrl-click to select three entities of mixed kinds, then right-click one of them
 - The per-entity actions (extras, Duplicate, Rename) show dimmed/disabled.
 - The delete entry reads "Delete N" with the count of actually deletable entities
   and removes them all.
+
+## Step: Every canvas drag undoes as one step
+
+**Action:**
+Perform each of these drags, pressing Ctrl-Z once after each: drag a slice's edge, corner,
+and label in the content view; drag a sub-region's label and edge on the output canvas;
+drag a measuring-line endpoint in Straight mode.
+
+**Expected:**
+- Each drag restores completely with a single Ctrl-Z (slice edits and measuring-line moves
+  are newly undoable).
+- The setup file is written once per completed drag, not while dragging (no disk churn
+  during a slice drag).
+- "Match target aspect" from the slice menu is also a single undoable step.
