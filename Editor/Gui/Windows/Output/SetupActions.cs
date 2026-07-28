@@ -59,8 +59,33 @@ internal static class SetupActions
                    };
     }
 
+    /// <summary>
+    /// Wraps a structural setup mutation in one undo step: snapshot the whole setup before, run the edit,
+    /// and push a snapshot command + save only when something actually changed. Setup files are a few KB
+    /// of plain DTOs, so whole-state snapshots are simpler and more robust than per-operation inverses —
+    /// every cascade the edit performs is captured by construction.
+    /// </summary>
+    internal static void RunUndoable(string name, Setup setup, Action mutate)
+    {
+        var oldJson = setup.ToJsonString();
+        mutate();
+        var newJson = setup.ToJsonString();
+        if (newJson == oldJson)
+            return;
+
+        // Already applied by mutate(), so Add rather than AddAndExecute.
+        UndoRedoStack.Add(new SetupSnapshotCommand(name, setup.Id, oldJson, newJson));
+        OutputSetupHandling.SaveActive();
+    }
+
     internal static void ApplyDrop(Setup setup, SetupEntitySelection.EntityKind dragKind, Guid dragId,
                                    SetupEntitySelection.EntityKind targetKind, Guid targetId)
+    {
+        RunUndoable("Connect", setup, () => ApplyDropInternal(setup, dragKind, dragId, targetKind, targetId));
+    }
+
+    private static void ApplyDropInternal(Setup setup, SetupEntitySelection.EntityKind dragKind, Guid dragId,
+                                          SetupEntitySelection.EntityKind targetKind, Guid targetId)
     {
         // A drop means "connect these two" regardless of which one was picked up — dragging an output onto a
         // surface is the same link as dragging the surface onto the output. Normalize so the upstream side is
@@ -76,10 +101,7 @@ internal static class SetupActions
             var surface = setup.FindSurface(dragId);
             var output = setup.FindOutput(targetId);
             if (surface != null && output != null && !surface.OutputMappings.Exists(m => m.OutputId == targetId))
-            {
                 surface.OutputMappings.Add(CreateDefaultMapping(output));
-                OutputSetupHandling.SaveActive();
-            }
 
             return;
         }
@@ -96,16 +118,12 @@ internal static class SetupActions
             if (dragKind == SetupEntitySelection.EntityKind.Slice && setup.FindSlice(dragId) != null)
             {
                 output.SliceId = dragId;
-                OutputSetupHandling.SaveActive();
             }
             else if (dragKind == SetupEntitySelection.EntityKind.ContentSource)
             {
                 var source = setup.FindSourceByChildId(dragId);
                 if (source != null)
-                {
                     output.SliceId = EnsureSlice(setup, source).Id;
-                    OutputSetupHandling.SaveActive();
-                }
             }
 
             return;
@@ -124,8 +142,6 @@ internal static class SetupActions
                     surface.SliceId = slice.Id;
                 else
                     AddRegionForSlice(setup, surface, slice);
-
-                OutputSetupHandling.SaveActive();
             }
         }
 
@@ -134,10 +150,7 @@ internal static class SetupActions
             var source = setup.FindSourceByChildId(dragId);
             var surface = source == null ? null : setup.FindSurface(targetId);
             if (source != null && surface != null)
-            {
                 surface.SliceId = EnsureSlice(setup, source).Id;
-                OutputSetupHandling.SaveActive();
-            }
         }
     }
 
@@ -157,16 +170,17 @@ internal static class SetupActions
 
     internal static void AddSlice(SetupEntitySelection selection, Setup setup, ContentSource source)
     {
-        // Left unnamed: the label is derived from the source, so it stays right when the op is later renamed.
-        var slice = new Slice { SourceId = source.Id };
-
-        setup.Slices.Add(slice);
-        selection.Select(SetupEntitySelection.EntityKind.Slice, slice.Id);
-        OutputSetupHandling.SaveActive();
+        RunUndoable("Add slice", setup, () =>
+                                        {
+                                            // Left unnamed: the label is derived from the source, so it stays right when the op is later renamed.
+                                            var slice = new Slice { SourceId = source.Id };
+                                            setup.Slices.Add(slice);
+                                            selection.Select(SetupEntitySelection.EntityKind.Slice, slice.Id);
+                                        });
     }
 
     /// <summary>Deleting a slice clears it from anything showing it — the reference would mean nothing.</summary>
-    internal static void DeleteSlice(Setup setup, Guid sliceId)
+    private static void DeleteSliceInternal(Setup setup, Guid sliceId)
     {
         foreach (var surface in setup.Surfaces)
         {
@@ -181,7 +195,6 @@ internal static class SetupActions
         }
 
         setup.Slices.RemoveAll(s => s.Id == sliceId);
-        OutputSetupHandling.SaveActive();
     }
 
     /// <summary>
@@ -244,6 +257,12 @@ internal static class SetupActions
     internal static void ToggleInput(Setup setup, SetupEntitySelection.EntityKind kind, Guid id,
                                      SetupEntitySelection.EntityKind sourceKind, Guid sourceId)
     {
+        RunUndoable("Change binding", setup, () => ToggleInputInternal(setup, kind, id, sourceKind, sourceId));
+    }
+
+    private static void ToggleInputInternal(Setup setup, SetupEntitySelection.EntityKind kind, Guid id,
+                                            SetupEntitySelection.EntityKind sourceKind, Guid sourceId)
+    {
         if (!TryDescribeInputToggle(setup, kind, id, sourceKind, sourceId, out var isBound))
             return;
 
@@ -282,8 +301,6 @@ internal static class SetupActions
             else
                 surface.OutputMappings.Add(CreateDefaultMapping(output));
         }
-
-        OutputSetupHandling.SaveActive();
     }
 
     /// <summary>Whether a slice belongs to the given source.</summary>
@@ -300,7 +317,7 @@ internal static class SetupActions
     /// Copies a surface — with its sub-regions — offset a little so it doesn't hide under the original. The
     /// copy gets fresh GUIDs, so content sends still point at the original; the duplicate starts unbound.
     /// </summary>
-    internal static void DuplicateSurface(SetupEntitySelection selection, Setup setup, Surface surface)
+    private static void DuplicateSurface(SetupEntitySelection selection, Setup setup, Surface surface)
     {
         var copy = CloneSurface(surface);
         var isChild = surface.ParentId != Guid.Empty;
@@ -325,7 +342,6 @@ internal static class SetupActions
         DuplicateChildrenOf(setup, surface.Id, copy.Id);
 
         selection.Select(SetupEntitySelection.EntityKind.Surface, copy.Id);
-        OutputSetupHandling.SaveActive();
     }
 
     internal static void AddSurface(SetupEntitySelection selection)
@@ -333,9 +349,12 @@ internal static class SetupActions
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        var surface = new Surface { Name = $"Surface {setup.Surfaces.Count + 1}" };
-        setup.Surfaces.Add(surface);
-        selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
+        RunUndoable("Add surface", setup, () =>
+                                          {
+                                              var surface = new Surface { Name = $"Surface {setup.Surfaces.Count + 1}" };
+                                              setup.Surfaces.Add(surface);
+                                              selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
+                                          });
     }
 
     internal static void AddProp(SetupEntitySelection selection)
@@ -343,9 +362,12 @@ internal static class SetupActions
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        var prop = new Prop();
-        setup.Props.Add(prop);
-        selection.Select(SetupEntitySelection.EntityKind.Prop, prop.Id);
+        RunUndoable("Add prop", setup, () =>
+                                       {
+                                           var prop = new Prop();
+                                           setup.Props.Add(prop);
+                                           selection.Select(SetupEntitySelection.EntityKind.Prop, prop.Id);
+                                       });
     }
 
     internal static void AddOutput(SetupEntitySelection selection)
@@ -353,14 +375,17 @@ internal static class SetupActions
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        var output = new OutputDefinition
-                         {
-                             Name = $"P{CountProjectorOutputs(setup) + 1}",
-                             Kind = OutputDefinition.Kinds.Projector,
-                             CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1200),
-                         };
-        setup.Outputs.Add(output);
-        selection.Select(SetupEntitySelection.EntityKind.Output, output.Id);
+        RunUndoable("Add output", setup, () =>
+                                         {
+                                             var output = new OutputDefinition
+                                                              {
+                                                                  Name = $"P{CountProjectorOutputs(setup) + 1}",
+                                                                  Kind = OutputDefinition.Kinds.Projector,
+                                                                  CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1200),
+                                                              };
+                                             setup.Outputs.Add(output);
+                                             selection.Select(SetupEntitySelection.EntityKind.Output, output.Id);
+                                         });
     }
 
     internal static void AddReferenceImage(SetupEntitySelection selection)
@@ -368,9 +393,12 @@ internal static class SetupActions
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
-        setup.ReferenceImages.Add(image);
-        selection.Select(SetupEntitySelection.EntityKind.ReferenceImage, image.Id);
+        RunUndoable("Add reference image", setup, () =>
+                                                  {
+                                                      var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
+                                                      setup.ReferenceImages.Add(image);
+                                                      selection.Select(SetupEntitySelection.EntityKind.ReferenceImage, image.Id);
+                                                  });
     }
 
     /// <summary>
@@ -416,26 +444,35 @@ internal static class SetupActions
     /// </summary>
     internal static void DeleteSelection(SetupEntitySelection selection, Setup setup)
     {
-        _deleteBuffer.Clear();
-        _deleteBuffer.AddRange(selection.Targets);
+        RunUndoable("Delete selection", setup, () =>
+                                               {
+                                                   _deleteBuffer.Clear();
+                                                   _deleteBuffer.AddRange(selection.Targets);
 
-        foreach (var target in _deleteBuffer)
-            DeleteEntity(setup, target.Kind, target.EntityId);
+                                                   foreach (var target in _deleteBuffer)
+                                                       DeleteEntityInternal(setup, target.Kind, target.EntityId);
 
-        selection.Clear();
-        OutputSetupHandling.SaveActive();
+                                                   selection.Clear();
+                                               });
     }
 
     /// <summary>Renames an entity by kind. A content source has no name of its own — renaming it renames its
-    /// op, which flows back through the sync.</summary>
+    /// op (already undoable as a graph command), which flows back through the sync.</summary>
     internal static void RenameEntity(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, string newName)
+    {
+        if (kind == SetupEntitySelection.EntityKind.ContentSource)
+        {
+            RenameContentSourceOp(id, newName);
+            return;
+        }
+
+        RunUndoable("Rename", setup, () => RenameEntityInternal(setup, kind, id, newName));
+    }
+
+    private static void RenameEntityInternal(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, string newName)
     {
         switch (kind)
         {
-            case SetupEntitySelection.EntityKind.ContentSource:
-                RenameContentSourceOp(id, newName);
-                return;
-
             case SetupEntitySelection.EntityKind.Output:
                 var output = setup.FindOutput(id);
                 if (output == null)
@@ -467,12 +504,7 @@ internal static class SetupActions
 
                 slice.Name = newName;
                 break;
-
-            default:
-                return;
         }
-
-        OutputSetupHandling.SaveActive();
     }
 
     /// <summary>A content source is a graph op (delete the op instead); everything else deletes here.</summary>
@@ -487,19 +519,24 @@ internal static class SetupActions
 
     internal static void DeleteEntity(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
     {
+        RunUndoable("Delete", setup, () => DeleteEntityInternal(setup, kind, id));
+    }
+
+    private static void DeleteEntityInternal(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    {
         switch (kind)
         {
             case SetupEntitySelection.EntityKind.Surface:
-                DeleteSurface(setup, id);
+                DeleteSurfaceSubtree(setup, id);
                 break;
 
             case SetupEntitySelection.EntityKind.Slice:
-                DeleteSlice(setup, id);
+                DeleteSliceInternal(setup, id);
                 break;
 
             case SetupEntitySelection.EntityKind.Output:
                 if (OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
-                    DeleteOutput(setup, machineConfig, id);
+                    DeleteOutputInternal(setup, machineConfig, id);
 
                 break;
 
@@ -512,12 +549,10 @@ internal static class SetupActions
                 }
 
                 setup.ReferenceImages.RemoveAll(r => r.Id == id);
-                OutputSetupHandling.SaveActive();
                 break;
 
             case SetupEntitySelection.EntityKind.Prop:
                 setup.Props.RemoveAll(p => p.Id == id);
-                OutputSetupHandling.SaveActive();
                 break;
         }
     }
@@ -540,6 +575,11 @@ internal static class SetupActions
 
     internal static void DuplicateEntity(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
     {
+        RunUndoable("Duplicate", setup, () => DuplicateEntityInternal(selection, setup, kind, id));
+    }
+
+    private static void DuplicateEntityInternal(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    {
         switch (kind)
         {
             case SetupEntitySelection.EntityKind.Surface:
@@ -547,7 +587,7 @@ internal static class SetupActions
                 if (surface != null)
                     DuplicateSurface(selection, setup, surface);
 
-                return; // DuplicateSurface selects and saves itself.
+                return;
 
             case SetupEntitySelection.EntityKind.Slice:
             {
@@ -606,12 +646,7 @@ internal static class SetupActions
                 selection.Select(SetupEntitySelection.EntityKind.Prop, copy.Id);
                 break;
             }
-
-            default:
-                return;
         }
-
-        OutputSetupHandling.SaveActive();
     }
 
     /// <summary>Clones a setup entity through its own JSON round-trip, so new fields are picked up without
@@ -629,17 +664,35 @@ internal static class SetupActions
         return read(JObject.Parse(sb.ToString()));
     }
 
-    // Deleting a surface takes its sub-regions with it (they're cuts of the parent, meaningless on their own).
-    internal static void DeleteSurface(Setup setup, Guid surfaceId)
+    // Deleting a surface takes its sub-region subtree with it (they're cuts of the parent, meaningless on
+    // their own). Children aren't guaranteed to follow their parent in list order, so sweep until no new
+    // descendant is found.
+    private static void DeleteSurfaceSubtree(Setup setup, Guid rootId)
     {
-        var command = new DeleteSurfaceCommand(setup, surfaceId);
-        if (command.HasSurfaces)
-            UndoRedoStack.AddAndExecute(command);
+        var ids = new HashSet<Guid> { rootId };
+        bool grew;
+        do
+        {
+            grew = false;
+            foreach (var surface in setup.Surfaces)
+            {
+                if (ids.Contains(surface.ParentId) && ids.Add(surface.Id))
+                    grew = true;
+            }
+        }
+        while (grew);
+
+        for (var i = setup.Surfaces.Count - 1; i >= 0; i--)
+        {
+            if (ids.Contains(setup.Surfaces[i].Id))
+                setup.Surfaces.RemoveAt(i);
+        }
     }
 
     // Deleting an output cascades: drop every surface's mapping onto it, unbind the display, and stop
-    // presenting it. Surfaces left without a mapping simply have no output — not lost.
-    internal static void DeleteOutput(Setup setup, MachineConfig machineConfig, Guid outputId)
+    // presenting it. Surfaces left without a mapping simply have no output — not lost. (The display binding
+    // lives in the per-machine config outside the setup file, so an undo restores the output unbound.)
+    private static void DeleteOutputInternal(Setup setup, MachineConfig machineConfig, Guid outputId)
     {
         setup.Outputs.RemoveAll(o => o.Id == outputId);
         foreach (var surface in setup.Surfaces)
@@ -648,8 +701,6 @@ internal static class SetupActions
         machineConfig.Unbind(outputId);
         if (OutputManager.PresentedOutputId == outputId)
             OutputManager.PresentedOutputId = Guid.Empty;
-
-        OutputSetupHandling.SaveActive();
     }
 
     /// <summary>
@@ -962,19 +1013,21 @@ internal static class SetupActions
         var anchor = SurfaceGeometry.AnchorInSurface(parent);
         var bottomLeft = new Vector2(parentSize.X * 0.1f, parentSize.Y * 0.9f); // surface space runs Y down
 
-        var child = new Surface
-                        {
-                            Name = $"Sub region {CountChildren(setup, parent.Id) + 1}",
-                            Kind = Surface.SurfaceKinds.Layout,
-                            ParentId = parent.Id,
-                            SizeInMeters = size,
-                            LocalPosition = new Vector2(bottomLeft.X - anchor.X, anchor.Y - bottomLeft.Y),
-                            PixelsPerMeter = parent.PixelsPerMeter,
-                        };
+        RunUndoable("Add sub-region", setup, () =>
+                                             {
+                                                 var child = new Surface
+                                                                 {
+                                                                     Name = $"Sub region {CountChildren(setup, parent.Id) + 1}",
+                                                                     Kind = Surface.SurfaceKinds.Layout,
+                                                                     ParentId = parent.Id,
+                                                                     SizeInMeters = size,
+                                                                     LocalPosition = new Vector2(bottomLeft.X - anchor.X, anchor.Y - bottomLeft.Y),
+                                                                     PixelsPerMeter = parent.PixelsPerMeter,
+                                                                 };
 
-        setup.Surfaces.Add(child);
-        selection.Select(SetupEntitySelection.EntityKind.Surface, child.Id);
-        OutputSetupHandling.SaveActive();
+                                                 setup.Surfaces.Add(child);
+                                                 selection.Select(SetupEntitySelection.EntityKind.Surface, child.Id);
+                                             });
     }
 
     /// <summary>
@@ -990,8 +1043,7 @@ internal static class SetupActions
         if (surface == null || surface.SliceId == Guid.Empty)
             return;
 
-        surface.SliceId = Guid.Empty;
-        OutputSetupHandling.SaveActive();
+        RunUndoable("Clear content inputs", setup, () => surface.SliceId = Guid.Empty);
     }
 
     private static ISlot? FindTextureOutput(Instance instance)

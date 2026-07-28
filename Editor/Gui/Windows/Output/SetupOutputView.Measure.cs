@@ -59,6 +59,8 @@ internal sealed partial class SetupOutputView
 
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
+                // Snapshot before the draft exists, so the whole create-and-drag undoes as one step.
+                _measureDraftOldJson = ActiveSetup.Current?.ToJsonString();
                 annotations.Add(new LineAnnotation { P1 = start, P2 = start });
                 _measureDraftIndex = annotations.Count - 1;
             }
@@ -84,9 +86,15 @@ internal sealed partial class SetupOutputView
                 }
                 else
                 {
+                    var setup = ActiveSetup.Current;
+                    if (setup != null && _measureDraftOldJson != null)
+                        UndoRedoStack.Add(new SetupSnapshotCommand("Add measuring line", setup.Id,
+                                                                   _measureDraftOldJson, setup.ToJsonString()));
+
                     OutputSetupHandling.SaveActive();
                 }
 
+                _measureDraftOldJson = null;
                 _measureDraftIndex = -1;
                 _measureArmed = false;
             }
@@ -185,8 +193,11 @@ internal sealed partial class SetupOutputView
         {
             if (_annotationToDelete < annotations.Count)
             {
-                annotations.RemoveAt(_annotationToDelete);
-                OutputSetupHandling.SaveActive();
+                var setup = ActiveSetup.Current;
+                if (setup != null)
+                    SetupActions.RunUndoable("Delete measuring line", setup, () => annotations.RemoveAt(_annotationToDelete));
+                else
+                    annotations.RemoveAt(_annotationToDelete);
             }
 
             _annotationToDelete = -1;
@@ -334,7 +345,6 @@ internal sealed partial class SetupOutputView
             surface.Annotations[i].P2 = outputToSurface.TransformPoint(new Vector2(line.Z, line.W));
         }
 
-        OutputSetupHandling.SaveActive();
         return true;
     }
 
@@ -384,7 +394,6 @@ internal sealed partial class SetupOutputView
         var scaleY = countY > 0 ? sumY / countY : sumX / countX;
 
         ScaleSurfaceMetric(setup, surface, new Vector2(scaleX, scaleY));
-        OutputSetupHandling.SaveActive();
         return true;
     }
 
@@ -413,6 +422,7 @@ internal sealed partial class SetupOutputView
     private int _measureDraftIndex = -1;
     private int _measureDragIndex = -1; // endpoint grabbed last frame, so its line can emphasize this frame
     private (int Index, Vector2 P1, Vector2 P2)? _annotationDragStart; // pre-drag endpoints for the undo step
+    private string? _measureDraftOldJson; // setup snapshot from before the draft line, for its undo step
 
     private const float BlinkRate = 8f;
     private static float _lengthEdit;

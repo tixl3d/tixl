@@ -176,21 +176,21 @@ internal static class SetupPanel
 
         var render = surface.Render;
         if (FormInputsNarrow.DrawCheckbox("Render", ref render, "Skip drawing this surface without removing it."))
-        {
-            surface.Render = render;
-            OutputSetupHandling.SaveActive();
-        }
+            SetupActions.RunUndoable("Toggle render", setup, () => surface.Render = render);
 
         // Name is renamed inline in the tree (double-click the row) rather than via a field here.
         var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
         var position = surface.Placement?.Pose.Position ?? Vector3.Zero;
         Span<float> pos = [position.X, position.Y, position.Z];
         var posState = FormInputsNarrow.DrawFloats("Position (m)", pos);
+        BeginFieldUndo(setup, posState);
         if ((posState & InputEditStateFlags.Modified) != 0)
         {
             var placement = surface.Placement ??= new Surface.StagePlacement();
             placement.Pose = new Pose(new Vector3(pos[0], pos[1], pos[2]), placement.Pose.Orientation);
         }
+
+        CommitFieldUndo(setup, "Move surface", posState);
 
         // A Layout child inherits its parent's plane, so it's placed in the parent's local space instead of the stage.
         if (surface.Kind == Surface.SurfaceKinds.Layout)
@@ -198,11 +198,11 @@ internal static class SetupPanel
             Span<float> local = [surface.LocalPosition.X, surface.LocalPosition.Y];
             var localState = FormInputsNarrow.DrawFloats("Position in parent (m)", local,
                                                         "Bottom-left corner, in metres from the parent's anchor (X right, Y up).");
+            BeginFieldUndo(setup, localState);
             if ((localState & InputEditStateFlags.Modified) != 0)
                 surface.LocalPosition = new Vector2(local[0], local[1]);
 
-            if ((localState & InputEditStateFlags.Finished) != 0)
-                OutputSetupHandling.SaveActive();
+            CommitFieldUndo(setup, "Move region", localState);
         }
 
         Span<float> size = [surface.SizeInMeters.X, surface.SizeInMeters.Y];
@@ -215,8 +215,7 @@ internal static class SetupPanel
         if (CustomComponents.IconButton(Icon.Link, Vector2.Zero,
                                         surface.LockAspect ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
         {
-            surface.LockAspect = !surface.LockAspect;
-            OutputSetupHandling.SaveActive();
+            SetupActions.RunUndoable("Lock aspect", setup, () => surface.LockAspect = !surface.LockAspect);
         }
 
         CustomComponents.TooltipForLastItem("Lock aspect ratio", "Resizing keeps the current width-to-height ratio.");
@@ -244,6 +243,7 @@ internal static class SetupPanel
         if ((sizeState & InputEditStateFlags.Finished) != 0 && _resizeOldState != null)
         {
             UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, _resizeOldState.Value, new ResizeSurfaceCommand.State(surface)));
+            OutputSetupHandling.SaveActive();
             _resizeOldState = null;
         }
 
@@ -251,28 +251,28 @@ internal static class SetupPanel
         if (FormInputsNarrow.DrawCheckbox("Show size raster", ref showGrid,
                                           "Projects a real-world grid (no content needed) so you can hand-align the corner-pin to physical wall features."))
         {
-            surface.ShowGrid = showGrid;
-            OutputSetupHandling.SaveActive();
+            SetupActions.RunUndoable("Toggle raster", setup, () => surface.ShowGrid = showGrid);
         }
 
-        var gridCellState = InputEditStateFlags.Nothing;
         if (surface.ShowGrid)
         {
             Span<int> subdivisions = [surface.GridSubdivisions];
-            gridCellState = FormInputsNarrow.DrawInts("Subdivisions / m", subdivisions,
-                                                      "Minor lines per metre; 1 draws metre lines only. They fade out once too dense to resolve.");
+            var gridCellState = FormInputsNarrow.DrawInts("Subdivisions / m", subdivisions,
+                                                          "Minor lines per metre; 1 draws metre lines only. They fade out once too dense to resolve.");
+            BeginFieldUndo(setup, gridCellState);
             if ((gridCellState & InputEditStateFlags.Modified) != 0)
                 surface.GridSubdivisions = Math.Clamp(subdivisions[0], 1, 100);
+
+            CommitFieldUndo(setup, "Change raster", gridCellState);
         }
 
         Span<float> anchor = [pivot.X, pivot.Y];
         var anchorState = FormInputsNarrow.DrawFloats("Anchor (0..1)", anchor);
+        BeginFieldUndo(setup, anchorState);
         if ((anchorState & InputEditStateFlags.Modified) != 0)
             (surface.Placement ??= new Surface.StagePlacement()).Pivot = new Vector2(anchor[0], anchor[1]);
 
-        // Value applied live above; persist once when the drag/edit completes.
-        if (((posState | sizeState | anchorState | gridCellState) & InputEditStateFlags.Finished) != 0)
-            OutputSetupHandling.SaveActive();
+        CommitFieldUndo(setup, "Move anchor", anchorState);
     }
 
     private static void DrawOutputCard(Setup setup, Guid id)
@@ -285,10 +285,7 @@ internal static class SetupPanel
 
         var send = output.Send;
         if (FormInputsNarrow.DrawCheckbox("Send", ref send, "Pause presenting without dropping the display binding."))
-        {
-            output.Send = send;
-            OutputSetupHandling.SaveActive();
-        }
+            SetupActions.RunUndoable("Toggle send", setup, () => output.Send = send);
 
         // Name is renamed inline in the tree (double-click the row).
         // The display binding and the list of feeders are both visible in the tree (row gutter / cross-
@@ -362,26 +359,61 @@ internal static class SetupPanel
         var heightUv = MathF.Max(uv.W - uv.Y, MinSliceSize);
 
         Span<int> position = [(int)MathF.Round(uv.X * texW), (int)MathF.Round(uv.Y * texH)];
-        if ((FormInputsNarrow.DrawInts("Position (px)", position) & InputEditStateFlags.Modified) != 0)
+        var positionState = FormInputsNarrow.DrawInts("Position (px)", position);
+        BeginFieldUndo(setup, positionState);
+        if ((positionState & InputEditStateFlags.Modified) != 0)
         {
             var nx = Math.Clamp(position[0] / (float)texW, 0f, 1f - widthUv);
             var ny = Math.Clamp(position[1] / (float)texH, 0f, 1f - heightUv);
             slice.UvRect = new Vector4(nx, ny, nx + widthUv, ny + heightUv);
-            OutputSetupHandling.SaveActive();
         }
 
+        CommitFieldUndo(setup, "Move slice", positionState);
+
         Span<int> size = [(int)MathF.Round(widthUv * texW), (int)MathF.Round(heightUv * texH)];
-        if ((FormInputsNarrow.DrawInts("Size (px)", size) & InputEditStateFlags.Modified) != 0)
+        var sizePxState = FormInputsNarrow.DrawInts("Size (px)", size);
+        BeginFieldUndo(setup, sizePxState);
+        if ((sizePxState & InputEditStateFlags.Modified) != 0)
         {
             var nw = Math.Clamp(size[0] / (float)texW, MinSliceSize, 1f - uv.X);
             var nh = Math.Clamp(size[1] / (float)texH, MinSliceSize, 1f - uv.Y);
             slice.UvRect = new Vector4(uv.X, uv.Y, uv.X + nw, uv.Y + nh);
-            OutputSetupHandling.SaveActive();
         }
+
+        CommitFieldUndo(setup, "Resize slice", sizePxState);
     }
 
     /// <summary>Smallest slice fraction — mirrors <c>SetupOutputView.MinSliceSize</c>.</summary>
     private const float MinSliceSize = 0.01f;
+
+    /// <summary>
+    /// Snapshot-based undo for the card's continuous drag-fields. Call Begin right after the widget with its
+    /// state flags and BEFORE applying the Modified value; call Commit after applying. The pre-edit setup is
+    /// captured on the gesture's first event and committed as one undo step + a single save when the edit
+    /// finishes — a whole drag (or typed entry) is one step, with no file writes while dragging.
+    /// </summary>
+    private static void BeginFieldUndo(Setup setup, InputEditStateFlags state)
+    {
+        if ((state & InputEditStateFlags.Started) != 0)
+            _fieldEditOldJson = setup.ToJsonString();
+        else if ((state & InputEditStateFlags.Modified) != 0)
+            _fieldEditOldJson ??= setup.ToJsonString();
+    }
+
+    private static void CommitFieldUndo(Setup setup, string name, InputEditStateFlags state)
+    {
+        if ((state & InputEditStateFlags.Finished) == 0 || _fieldEditOldJson == null)
+            return;
+
+        var newJson = setup.ToJsonString();
+        if (newJson != _fieldEditOldJson)
+        {
+            UndoRedoStack.Add(new SetupSnapshotCommand(name, setup.Id, _fieldEditOldJson, newJson));
+            OutputSetupHandling.SaveActive();
+        }
+
+        _fieldEditOldJson = null;
+    }
 
     // Fills _referenced with the rows related to the currently-hovered one, and which gutter to light on each:
     // upstream producers (a shown source/slice, a mapped surface) get their trailing output gutter; downstream
@@ -1181,6 +1213,9 @@ internal static class SetupPanel
 
     private const string MeasuredSizePopupId = "##measuredSize";
     private static Vector2 _measuredEdit;
+
+    // Pre-edit setup snapshot while a card drag-field gesture is live (see BeginFieldUndo/CommitFieldUndo).
+    private static string? _fieldEditOldJson;
 
     // Cross-highlight: the row hovered this frame (committed at end of Draw), and the entities it references.
     private static SetupEntitySelection.EntityKind _hoveredKind;

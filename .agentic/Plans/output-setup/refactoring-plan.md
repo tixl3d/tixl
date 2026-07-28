@@ -241,10 +241,23 @@ with an explanatory comment) — the row-callback API design made compliance imp
   `RunSliceDrag` with a new `ChangeSliceRectCommand` — slice drags previously **saved the file every
   mouse-move frame and had no undo**, both fixed; "Match target aspect" is undoable too. Measure endpoint
   drags commit a new `ChangeAnnotationCommand`. Corner drags keep their group-aware skeleton (`HandleDrag`).
-  **Still open from P2.2:** the `_focusedSurfaceId`/`_selectedSliceId` selection shadows; routing snapping
-  through `ICanvasPointSnapper` (behavior matches, seam still bypassed); sub-element selection for slice
-  corners / annotation endpoints; annotation add/delete undo (goes with P2.3 structural undo).
-  Then undo completion (P2.3).
+- **2026-07-28 (undo completion, P2.3):** every structural setup mutation is now one undo step via
+  `SetupSnapshotCommand` (whole-setup JSON snapshots, restored in place so the live `Setup` reference
+  survives) wrapped through `SetupActions.RunUndoable` — covers add/delete/duplicate for every kind
+  (incl. multi-delete as one step), drag-drop connects, gutter bind toggles, renames, clear-content,
+  sub-regions, "+ surface" mapping, measuring-line add/delete, and Straighten/Apply-lengths (both were
+  save-only before). No-op edits (identical before/after JSON) push nothing. `DeleteSurfaceCommand`
+  deleted — subsumed by snapshots. Known limits, documented in the command: display bindings live in the
+  per-machine file, so undoing an output delete restores it unbound.
+- **2026-07-28 (card field undo):** the property-card fields are undoable too — one-shot toggles
+  (Render/Send/Show-raster/Lock-aspect) via `RunUndoable`; continuous drag-fields (position, anchor,
+  raster subdivisions, slice px position/size) via `BeginFieldUndo`/`CommitFieldUndo` in SetupPanel, which
+  snapshot on the gesture's first `InputEditStateFlags` event and commit one step + one save on Finished —
+  slice px fields previously saved per mouse-move frame. Size (m) keeps its `ResizeSurfaceCommand` path.
+  The Content card's Update toggle stays op-side (graph state, not setup data). Setup undo coverage is
+  now complete except op-side edits, which have their own graph commands.
+  **Still open from P2.2:** the `_focusedSurfaceId`/`_selectedSliceId` selection shadows; the bypassed
+  `ICanvasPointSnapper` seam; sub-element selection for slice corners / annotation endpoints.
 
 ## Suggested order (revised for the flow-view pivot)
 

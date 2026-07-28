@@ -93,3 +93,32 @@ drag a measuring-line endpoint in Straight mode.
 - The setup file is written once per completed drag, not while dragging (no disk churn
   during a slice drag).
 - "Match target aspect" from the slice menu is also a single undoable step.
+
+## Step: Structural edits undo as single steps
+
+**Action:**
+Perform each of these, pressing Ctrl-Z once after each: add a surface; duplicate an output;
+drag a content send onto a surface (the connect); click a surface's in-gutter arrow with a
+slice selected (the bind toggle); delete three multi-selected entities at once; draw a new
+measuring line; click "Straighten" with traced lines; rename a slice.
+
+**Expected:**
+- Each action reverts completely with one Ctrl-Z — including the multi-delete (all three
+  return) and the measuring line (created and dragged out, gone again as one step).
+- Ctrl-Y re-applies each.
+- Undoing an output deletion restores the output but not its display binding (bindings are
+  per-machine, outside the setup file) — re-bind via the context menu.
+- A drop that changes nothing (re-dropping a slice on the surface already showing it) adds
+  no undo step.
+
+## Step: Property-card fields undo as single steps
+
+**Action:**
+With a surface selected, in its card: toggle Render, drag the Anchor field, drag a slice's
+Position (px) field for a while, and toggle an output's Send. Press Ctrl-Z once after each.
+
+**Expected:**
+- Each toggle and each complete field drag reverts with a single Ctrl-Z — a long drag is
+  one step, not one per mouse-move.
+- The setup file is written once per completed field gesture, not while dragging.
+- Size (m) still undoes as one step including the re-projected corner pins.

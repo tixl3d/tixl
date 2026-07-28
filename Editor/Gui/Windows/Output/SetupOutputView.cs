@@ -687,7 +687,7 @@ internal sealed partial class SetupOutputView
             ImGui.SameLine();
             ImGui.BeginDisabled(!canStraighten);
             if (ImGui.SmallButton("Straighten") && canStraighten)
-                TryStraightenFromLines(straightCarrier, outputId);
+                SetupActions.RunUndoable("Straighten from lines", setup, () => TryStraightenFromLines(straightCarrier, outputId));
 
             ImGui.EndDisabled();
             if (!canStraighten && ImGui.IsItemHovered())
@@ -697,7 +697,7 @@ internal sealed partial class SetupOutputView
             ImGui.SameLine();
             ImGui.BeginDisabled(!canApply);
             if (ImGui.SmallButton("Apply lengths") && canApply)
-                TryApplyLengths(setup, straightCarrier);
+                SetupActions.RunUndoable("Apply lengths", setup, () => TryApplyLengths(setup, straightCarrier));
 
             ImGui.EndDisabled();
             if (!canApply && ImGui.IsItemHovered())
@@ -723,8 +723,7 @@ internal sealed partial class SetupOutputView
             var label = string.IsNullOrEmpty(surface.Name) ? "untitled" : surface.Name;
             if (ImGui.SmallButton("+ " + label))
             {
-                AddMapping(surface, output, outputId);
-                OutputSetupHandling.SaveActive();
+                SetupActions.RunUndoable("Map surface", setup, () => AddMapping(surface, output, outputId));
             }
 
             CustomComponents.TooltipForLastItem("Map this surface onto the output",
