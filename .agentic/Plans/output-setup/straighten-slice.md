@@ -1,4 +1,9 @@
-# Straighten interaction — slice plan
+# Straighten interaction — slice plan (⚠️ HISTORICAL — thin slice landed 2026-07-22)
+
+> **Status (2026-07-29):** the thin slice shipped (grid + size + the Original↔Straight morph, which
+> generalizes into Phase C's camera/space model). Its "next slices" list lives on in
+> [`long-term-features.md`](long-term-features.md) §1. Kept for the locked gesture decisions
+> (crop = plain edge drag, Ctrl = scale; sub-regions = child Layout surfaces) and the morph rationale.
 
 Goal: place axis-aligned rect surfaces on a projected wall **without a reference photo**, by
 projecting a real-world calibration raster and hand-aligning the corner-pin to physical features.

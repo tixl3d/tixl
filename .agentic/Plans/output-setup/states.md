@@ -1,6 +1,13 @@
-# Output Setup — Row States
+# Output Setup — Entity States
 
-The per-row visual states for the sidebar tree, across all four row types (Image / Slice / Surface / Output).
+The visual states for setup entities, across all types (Content / Slice / Surface / Output).
+
+> **Partially superseded (2026-07-29).** The **state-token table below is live** and transfers
+> verbatim to Flow-Outliner **Items** and Board **Cards** (glossary in
+> [`ui-restructuring-plan.md`](ui-restructuring-plan.md)). The **row anatomy / gutter grammar**
+> section is **dead** — in/out gutter glyphs were replaced by real connection lines, and the Output
+> row's "device label" is now an **endpoint** binding shown on its own Item. Read "row" as "Item",
+> and ignore gutter references except as history.
 
 ![Output setup panel node states](images/2026-07-21%20output%20setup%20panel%20node%20states.png)
 

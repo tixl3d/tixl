@@ -1,4 +1,10 @@
-# Output Setup — Implementation Plan
+# Output Setup — Implementation Plan (⚠️ HISTORICAL — phases 1–3b, the sidebar build)
+
+> **⚠️ Status (2026-07-29): this plan's phases are done or superseded.** It records how the branch's
+> as-built state came to be (phases 1–3b landed). The *current* plan is
+> [`ui-restructuring-plan.md`](ui-restructuring-plan.md) (UI) plus
+> [`refactoring-plan.md`](refactoring-plan.md) (debt, with the live progress log). Kept for the
+> "Already built" baseline inventory and the deviation notes, which explain present-day code shapes.
 
 Dependency-ordered phases for building the [output-settings spec](output-settings-spec.md). Each phase is
 **shippable** (build green, app runs, something works) and **testable**. This is a **migration**, not a

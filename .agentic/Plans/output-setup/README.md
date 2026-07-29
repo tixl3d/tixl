@@ -1,30 +1,55 @@
-# Output Setup — Implementation Spec
+# Output Setup — Plan Folder
 
-In-depth spec for the projection-mapping **Output Settings** sidebar and its data model. Goal: surface gaps
-and inconsistencies *before* implementation. Written as a set of focused docs rather than one file.
+Design and implementation docs for the projection-mapping **output setup**: the venue model (surfaces,
+outputs, bindings), its editing UI (Board + Flow Outliner), and the long-term scope (calibration,
+multi-machine, stage lighting). Written as focused docs rather than one file.
 
-## Documents
+**Terminology is defined once**, in the glossary at the top of
+[`ui-restructuring-plan.md`](ui-restructuring-plan.md) — Board, Stage, Flow Outliner, Entity, Card,
+Item, Output, Endpoint, Route/Mapping/Binding, Modifier. Older docs predate it; read them through it.
 
-| Doc | Covers | Status |
-|---|---|---|
-| [`output-settings-spec.md`](output-settings-spec.md) | The sidebar UI — annotated mockup + numbered callouts (sections, rows, menus, drag-drop, styling). | drafting (2–3 more passes) |
-| [`data-model.md`](data-model.md) | Entities & classes, as-built vs target, gaps/contradictions. All model decisions **settled**. | grounded in code |
-| [`implementation-plan.md`](implementation-plan.md) | Dependency-ordered, shippable phases (migration, not greenfield) + first-cut slice. | drafted |
-| [`selection.md`](selection.md) | Selection & sub-element editing — two-plane model, address form, staging. | drafted |
-| [`states.md`](states.md) | Per-row state matrix (Default/Selected/+Selected/Hovered/Referenced/Dragged/Drop-Target/Unbound/Unused) + tokens. | complete |
-| [`canvas-interaction.md`](canvas-interaction.md) | On-canvas editing — contexts, tools, selection, manipulation, snapping, rulers, visual language. | drafted |
+## Active — build from these
 
-`images/` holds the annotated mockups (relative-linked so the spec is portable — the source PNGs were in
-Typora's cache, which is fragile).
+| Doc | Covers |
+|---|---|
+| [`ui-restructuring-plan.md`](ui-restructuring-plan.md) | **Start here.** Glossary + the UI phases: properties → Parameter window (A), Flow Outliner (B), unified Board/Stage canvas + metric grid (C). |
+| [`data-model.md`](data-model.md) | Entities & classes, as-built vs target, all model decisions (§4) with their revision history. Grounded in `Core/Output/`. |
+| [`refactoring-plan.md`](refactoring-plan.md) | Code-debt review (P0–P4) **and the live progress log** of what has landed on the branch. |
+| [`selection.md`](selection.md) | Two-plane selection (entity / sub-element), address form. |
+| [`canvas-interaction.md`](canvas-interaction.md) | On-canvas editing — tools, manipulation, snapping, rulers, visual language. |
+| [`states.md`](states.md) | State-token matrix (Default/Selected/Hovered/Referenced/Dragged/Drop-Target/Unbound/Unused). Tokens live; gutter anatomy superseded. |
+| [`long-term-features.md`](long-term-features.md) | The rolling backlog / next-major-steps list. Review periodically to prioritize. |
+
+## Reference — consult when the question comes up
+
+| Doc | Covers |
+|---|---|
+| [`binding-examples.md`](binding-examples.md) | **Output vs. binding, made concrete** — the storage-layering table plus scenarios S1–S7 (device change, venue swap, multi-machine) and virtual displays. |
+| [`use-case-flows.md`](use-case-flows.md) | Eight end-to-end click flows (2nd display → touring rig) + the cross-cutting harvest (readiness panel, Identify, test patterns, the three doors). |
+
+## Long-term scope — not scheduled
+
+| Doc | Covers |
+|---|---|
+| [`multi-machine.md`](multi-machine.md) | Render clients / boygrouping — machine model, stages, sync primitives, enablers in current work. |
+| [`camera-calibration.md`](camera-calibration.md) | Camera-assisted calibration — structured light, reference-point pose, drift check, latency. |
+| [`Plan_StageExtension.md`](../Plan_StageExtension.md) | Lighting fixtures, 3D stage models, setup-level reference points; GDTF/MVR + BlenderDMX previz bridge. (In `Plans/` root — broader than output setup.) |
+
+## Historical — do not implement from these
+
+| Doc | Why it's kept |
+|---|---|
+| [`output-settings-spec.md`](output-settings-spec.md) | The dead sidebar's annotated mockup. Other docs cite its **callout numbers**; callouts 10–15 transfer to the Phase A cards. |
+| [`implementation-plan.md`](implementation-plan.md) | Phases 1–3b (how the branch's as-built state came to be) + the "already built" baseline inventory. |
+| [`straighten-slice.md`](straighten-slice.md) | Landed thin slice; locked gesture decisions and the Original↔Straight morph rationale. |
+
+`images/` holds the annotated mockups (relative-linked so the docs stay portable — the source PNGs
+were in Typora's cache, which is fragile).
 
 ## Conventions
-- **Design source of truth** for the *concept* model: the design-session decisions, mirrored in
-  `dev/research/projectionMapping/README.md`. This folder is the *implementation* refinement of that.
-- **Undo:** everything except selection/hover is undoable (see the spec header).
-- **Grounding:** `data-model.md` cites the actual `Core/Output/` classes; keep it in sync when the code moves.
-
-## Reading order for implementation
-1. `implementation-plan.md` — the phases and where to start.
-2. `data-model.md` — the entity model (§4 decisions all settled 2026-07-21).
-3. `selection.md` — the two-plane selection model (build its address form + split first).
-4. `output-settings-spec.md` — the UI, with `states.md` (row states) + `canvas-interaction.md` (canvas behavior).
+- **Concept source of truth:** the design-session decisions mirrored in
+  `dev/research/projectionMapping/README.md`. This folder is the *implementation* refinement.
+- **Undo:** everything except selection/hover is undoable.
+- **Grounding:** `data-model.md` cites real classes — keep it in sync when the code moves.
+- **Superseded content is marked, not deleted**, when other docs cite it (callout numbers, decision
+  history). New decisions are dated inline so revisions stay auditable.

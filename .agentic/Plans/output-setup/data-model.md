@@ -95,7 +95,14 @@ per surface is already expressible; earlier notes described it as singular, whic
   - `Mode`: `CornerPin` (manual quad) **or** `Calibrated` (inherit the output's solved projector camera)
   - `Warp`: optional lattice — resolution (e.g. 2×2), points w/ positions+tangents, `Linear|Hermite`;
     **resample-on-resolution-change** (don't lose the existing definition)
-  - `Mask`: optional (soft-edge feather / arbitrary)
+  - `Mask`: optional (soft-edge feather / arbitrary), with a **space tag** (2026-07-29):
+    *surface-space* masks for blend ramps — the band is authored once in wall coordinates and shared
+    (paired) across the two mappings so the ramps sum to unity on the wall regardless of per-projector
+    pixel density/keystone; *output-space* masks for frustum-relative uses (spill blocking). Blend
+    profiles are gamma-aware (sum in light, not signal; adjustable, ~2.2 default).
+    **Output-level masks too (2026-07-29):** a whole-canvas mask lives on the `OutputDefinition`
+    (same category as whole-canvas trim) — needed so the direct content→output pipe can be masked
+    without materializing a surface/mapping ("ceiling spill" on a flow-1 setup).
   - `CornerColors`: optional per-corner color (lift/gain or multiply, barycentric-interpolated)
 - **Regions need no mapping of their own.** A region is a sub-rect of the surface's content canvas; it rides
   the surface's mapping(s), differing only in content (its slice). The **hard-split wall** (left→ProjA,
@@ -130,11 +137,40 @@ the physical situation changes" — targeting is **not** re-done per venue. So:
 
 </details>
 
-### 2.5 Direct-to-output (surfaceless pipe) — 🟡 half-present
+### 2.5 Direct-to-output (surfaceless pipe) — 🟡 half-present · **REVISED 2026-07-29: transport lives on the binding, not the output**
 The full-frame path exists in `OutputManager` (`_fullscreenNdc`), and `OutputDefinition.Kind` already
-distinguishes `Default/Format/Projector/Display`. Missing: **`NDI`/`Spout` kinds** (spec callout 24) and the
-model-level statement that *these kinds are direct-only* (no surfaces). Target-path picker must filter by
-kind (a plug-only NDI output never offers surface mapping).
+distinguishes `Default/Format/Projector/Display`.
+
+<details><summary>Superseded: NDI/Spout as output kinds</summary>
+Earlier direction: add **`NDI`/`Spout` kinds** (spec callout 24) with the model-level statement that
+*these kinds are direct-only* (no surfaces); target-path picker filters by kind.
+</details>
+
+**Decision (2026-07-29, from the overview sketch):** an Output is a purely **logical pixel canvas**;
+the *transport* (physical connector, Spout stream, NDI sender) is a **binding kind** in the per-machine
+file — `Spout "Spout1"` sits next to `Display 2` as a peer binding target. Consequences:
+- `OutputDefinition.Kind` loses transport meaning (reduces to canvas semantics); no NDI/Spout kinds.
+- Any output can carry mappings regardless of transport (a Spout output composites surfaces like a
+  projector); "direct-only" stops being a kind property.
+- Transport is machine-scoped automatically — venue-portable setups, per-machine plugs (what
+  multi-machine needs; see `multi-machine.md` §4).
+- **Outputs are auto-created and visually merged when trivial** ("keep the entity, kill its
+  visibility"): binding content/a surface to a plug materializes the output silently, display-named
+  after its binding (`@ Display 2`) until renamed; the outliner shows one merged pill while
+  output↔binding is 1:1 and uncalibrated, and splits the columns only when compositing, calibration,
+  an unbound output, or a second machine forces the distinction. Default names are role-based, never
+  transport-copies (no `Spout 1 → Spout 1`).
+- **Resolution follows the TiXL-wide `0,0` auto convention, resolved backwards**: default
+  `CanvasResolution = 0,0` resolves from the bound display's mode; slices/sources at auto resolve from
+  their downstream consumers (**max over consumers** on fan-out, rendered once); the resolved value
+  reaches the op graph as the context's requested resolution (all-auto + 4K display ⇒ ops render 4K).
+  Unbound + all-auto falls back to the project default. UI: auto shows the resolved value plainly
+  (muted); a lock icon marks an active override; typing pins the stage, clearing re-links.
+- **Quad storage consequence:** `OutputMapping.Quad` is authored in output px, and auto resolution
+  makes the canvas size changeable at bind time. Store the **authored canvas resolution alongside the
+  quads** and rescale proportionally when the resolved resolution changes at the same aspect; on an
+  *aspect* change don't silently rescale — the physical optics changed, so flag the mapping as stale
+  calibration (readiness surface) instead. (Cheapest now — "no migration on this branch" still holds.)
 
 ### 2.6 Selection model — 🟡 too narrow · **plan in [`selection.md`](selection.md)** (4.5: do not defer)
 `SetupEntitySelection` is single kind+id over `{ReferenceImage, Surface, Prop, Output}`. The spec needs
@@ -147,7 +183,12 @@ points). Agreed this can't be deferred. Plan: **two selection planes that never 
   (first = primary). Selecting an entity populates the canvas plane for it; selecting sub-elements never
   scrambles the entity set. Full design in [`selection.md`](selection.md).
 
-### 2.7 Output ↔ machine display binding — ✅ model ready, 🟡 UI missing
+### 2.7 Output ↔ machine display binding — ✅ model ready, 🟡 UI missing · **virtual displays added 2026-07-29**
+The display list gains **virtual displays** that always exist (`Editor Display` = under the editor's
+top-left corner; `2nd Display` = first non-editor display, per-machine overridable) — the 4.2
+"Default Audio Input" pattern applied verbatim: no new binding kind, a binding still points at a
+display; virtual names resolve in machine-wide settings before OS enumeration. Examples ship
+runnable. Details + resolution-timing rules in [`binding-examples.md`](binding-examples.md).
 `DeviceBinding`/`MachineConfig` fully model "which connector on which computer" (name-first, index-fallback,
 per-machine, gitignored). The spec's callout 24 side-note ("an output needs to be bound to a display and this
 should be indicated") is a **UI gap only** — surface the binding state on the Output row, and offer bind in
@@ -213,9 +254,10 @@ reorder Surface·Region·Slice·Output·ReferenceImage·Prop, and re-parenting o
 2. **Surface tree = flat list + `ParentId`** (nested via parent pointers). ✅ (§2.2)
 3. **Physical vs Layout is an explicit `Kind` field**, chosen at creation (callout 22) — not inferred from a
    pose. ✅ (§2.2)
-4. **`SendToOutput = { Texture, TargetId:InputSlot<Guid>, SourceRect, Color }`** — one send-op per target
-   (model a); content op-side, resolves against `ActiveSetup` (like `UseProjectorCam`). **No back-compat
-   migration on this branch.** ✅ (§2.4)
+4. **`SendToOutput = { Texture, Update, Color }`** — no target param on the op; routing is
+   `Surface.SliceId` / `OutputDefinition.SliceId` in the Setup (re-revised 2026-07-27 together with
+   decision 1 — the earlier op-side `TargetId` shape is superseded, see §2.4). **No back-compat
+   migration on this branch.** ✅ (§2.1/§2.4)
 5. **Selection = two planes (entity / sub-element), one address form; not deferred** → [`selection.md`](selection.md). ✅ (§2.6)
 
 Remaining low-stakes sub-choices (decide while building, not blocking): mapping storage surface-side vs join

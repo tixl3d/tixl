@@ -30,6 +30,10 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
 
 ### General
 
+- Add a **point annotation** kind next to line annotations (position + label, string-discriminated,
+  same `CanvasPointHandle` + undo skeleton as line endpoints). Independently useful for manual survey
+  points/measurement anchors now; the enabler for camera-assisted calibration later (see
+  `camera-calibration.md` §4.1).
 - Regression: selection a [SendToOutput] op no longer selects the item
 - Selecting an operator should open the settings side panel
 - probably replace / retire Screen manager

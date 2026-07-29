@@ -31,6 +31,13 @@ None of it is schema-breaking; the entity model itself needs no migration-forcin
 
 ## Revision (2026-07-27): sidebar → flow-view pivot
 
+> **Update (2026-07-29):** the pivot is now fully designed in
+> [`ui-restructuring-plan.md`](ui-restructuring-plan.md) (three phases + glossary). Where this section
+> speculates ("property cards likely survive as an inspector next to the flow view"), that plan
+> decides: cards move to the **Parameter window**, `FormInputsNarrow` is **deleted** (see P4.5 below).
+> The extraction guidance below (`SetupActions`, `SetupRelations`, `EntityItem`, shared selection)
+> all still holds and is mostly done — see Progress.
+
 After user tests, the tree sidebar is expected to be partially **rewritten as a graph-like flow view**
 (source → Slice → Surface → Region → Mapping → Output → Device, connection lines à la MagGraph but custom —
 no parameter handling needed). Canvas editing stays essential. This changes what's worth polishing:
@@ -203,9 +210,10 @@ with an explanatory comment) — the row-callback API design made compliance imp
    orphaning the doc.
 4. **`StateButton` grows `NeedsAttention`**; the Isolate toggle stops hand-rolling 4× `PushStyleColor`
    (`SetupOutputView.cs:564-573` — `StateButton` is used 10 lines below).
-5. `FormInputsNarrow`: keep (the narrow-sidebar layout gap is real, `Span`-based value edit composition is
-   right), but fix #2/#4 above and replace `DrawCardHeader`/`DrawSmallText` bodies with `StylizedText`.
-   Note the comment-only `RightMargin = 6` ↔ `Indent(6*scale)` coupling with SetupPanel.
+5. ~~`FormInputsNarrow`: keep~~ — **reversed 2026-07-29: delete it.** Properties move to the Parameter
+   window at full width (`ui-restructuring-plan.md` Phase A), so the narrow-sidebar layout gap that
+   justified it no longer exists; its only consumer (`SetupPanel`) dies with Phase B. Items #2 and #5
+   of this list are therefore obsolete — the checkbox lives on in `FormInputs.DrawCheckbox`.
 6. **Comment debris sweep:** stacked/orphaned `<summary>` blocks at `SetupOutputView.cs:1182-1208`,
    `SetupPanel.cs:824, 1030, 1561`, `OutputManager.cs:524-526`, `SurfaceGeometry.cs:145-153`. Member
    ordering in `SetupPanel` (public/private interleaved).
