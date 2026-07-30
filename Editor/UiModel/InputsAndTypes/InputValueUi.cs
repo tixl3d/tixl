@@ -76,6 +76,9 @@ public abstract class InputValueUi<T> : IInputUi
     /// <summary>
     /// Wraps the implementation of an parameter control to handle <see cref="InputEditStateFlags"/>
     /// </summary>
+    /// <param name="input">Null when <paramref name="readOnly"/> is set: a connected parameter is
+    /// driven by its source and has no <see cref="Symbol.Child.Input"/> to read a default flag from.
+    /// Implementations must not dereference it in the read-only branch.</param>
     protected abstract InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref T? value, bool readOnly);
 
     protected abstract void DrawReadOnlyControl(string name, ref T? value);

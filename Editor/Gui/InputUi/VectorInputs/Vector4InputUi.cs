@@ -48,6 +48,13 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
     {
         if (UseVec4Control == Vec4Controls.AdsrEnvelope)
         {
+            if (readOnly)
+            {
+                var tempEnvelope = float4Value;
+                AdsrEnvelopeInputUi.DrawAdsrControl(ref tempEnvelope, cloneIfModified: false);
+                return InputEditStateFlags.Nothing;
+            }
+
             return AdsrEnvelopeInputUi.DrawAdsrControl(ref float4Value, input.IsDefault);
         }
         
