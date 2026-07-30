@@ -337,67 +337,38 @@ internal static class ProgramWindows
         }
         catch (SharpDX.SharpDXException e)
         {
+            var reason = _device.DeviceRemovedReason;
             string description;
-            var result = _device.DeviceRemovedReason;
-            if (result == Result.Abort)
+            if (reason.Code == SharpDX.DXGI.ResultCode.DeviceHung.Code)
             {
-                description = Result.Abort.Description;
+                description = "device hung - the driver detected invalid GPU commands or a shader exceeded the TDR time limit";
             }
-            else if (result == Result.AccessDenied)
+            else if (reason.Code == SharpDX.DXGI.ResultCode.DeviceReset.Code)
             {
-                description = Result.AccessDenied.Description;
+                description = "device reset - the GPU was reset (e.g. driver update or TDR recovery)";
             }
-            else if (result == Result.Fail)
+            else if (reason.Code == SharpDX.DXGI.ResultCode.DeviceRemoved.Code)
             {
-                description = Result.Fail.Description;
+                description = "device removed - the GPU was physically removed, disabled, or the driver was upgraded";
             }
-            else if (result == Result.Handle)
+            else if (reason.Code == SharpDX.DXGI.ResultCode.DriverInternalError.Code)
             {
-                description = Result.Handle.Description;
+                description = "driver internal error";
             }
-            else if (result == Result.InvalidArg)
+            else if (reason.Code == SharpDX.DXGI.ResultCode.InvalidCall.Code)
             {
-                description = Result.InvalidArg.Description;
+                description = "invalid API call";
             }
-            else if (result == Result.NoInterface)
+            else if (reason.Code == Result.OutOfMemory.Code)
             {
-                description = Result.NoInterface.Description;
-            }
-            else if (result == Result.NotImplemented)
-            {
-                description = Result.NotImplemented.Description;
-            }
-            else if (result == Result.OutOfMemory)
-            {
-                description = Result.OutOfMemory.Description;
-            }
-            else if (result == Result.InvalidPointer)
-            {
-                description = Result.InvalidPointer.Description;
-            }
-            else if (result == Result.UnexpectedFailure)
-            {
-                description = Result.UnexpectedFailure.Description;
-            }
-            else if (result == Result.WaitAbandoned)
-            {
-                description = Result.WaitAbandoned.Description;
-            }
-            else if (result == Result.WaitTimeout)
-            {
-                description = Result.WaitTimeout.Description;
-            }
-            else if (result == Result.Pending)
-            {
-                description = Result.Pending.Description;
+                description = "out of GPU memory";
             }
             else
             {
-                description = "unknown reason";
+                description = reason.ToString();
             }
 
-            var resultCode = result.ToString();
-            throw (new ApplicationException($"Graphics card suspended ({resultCode}: {description}): {e.Message}"));
+            throw new ApplicationException($"Graphics device lost ({reason}: {description}): {e.Message}");
         }
     }
 
