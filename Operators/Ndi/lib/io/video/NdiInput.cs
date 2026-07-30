@@ -12,6 +12,114 @@ namespace Lib.io.video;
 [Guid("7567c3b0-9d91-40d2-899d-3a95b481d023")]
 public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropdownHolder
 {
+    /// <summary>
+    /// Discovers NDI source names on the network. Replaces NewTek.NDI.Finder, whose
+    /// Source.Name setter throws on names without the standard "MACHINE (source)" shape —
+    /// an unhandled exception on its internal thread that would kill the whole process.
+    /// </summary>
+    private sealed class NdiSourceFinder : IDisposable
+    {
+        public NdiSourceFinder(bool showLocalSources)
+        {
+            var createSettings = new NDIlib.find_create_t
+                                     {
+                                         show_local_sources = showLocalSources,
+                                         p_groups = IntPtr.Zero,
+                                         p_extra_ips = IntPtr.Zero
+                                     };
+
+            _findInstancePtr = NDIlib.find_create_v2(ref createSettings);
+            if (_findInstancePtr == IntPtr.Zero)
+            {
+                Log.Warning("Failed to create NDI find instance");
+                return;
+            }
+
+            _findThread = new Thread(FindThreadProc)
+                              {
+                                  IsBackground = true,
+                                  Name = "NdiFindThread"
+                              };
+            _findThread.Start();
+        }
+
+        /// <summary>Snapshot of the currently known source names.</summary>
+        public IReadOnlyList<string> GetSourceNames()
+        {
+            lock (_lock)
+            {
+                return _sourceNames.ToArray();
+            }
+        }
+
+        public bool HasSource(string name)
+        {
+            lock (_lock)
+            {
+                return _sourceNames.Contains(name);
+            }
+        }
+
+        private void FindThreadProc()
+        {
+            try
+            {
+                var sourceStructSize = Marshal.SizeOf(typeof(NDIlib.source_t));
+                while (!_exitThread)
+                {
+                    if (!NDIlib.find_wait_for_sources(_findInstancePtr, 500))
+                        continue;
+
+                    uint sourceCount = 0;
+                    var sourcesPtr = NDIlib.find_get_current_sources(_findInstancePtr, ref sourceCount);
+
+                    lock (_lock)
+                    {
+                        _sourceNames.Clear();
+                        for (var index = 0; index < sourceCount; index++)
+                        {
+                            var sourceT = Marshal.PtrToStructure<NDIlib.source_t>(IntPtr.Add(sourcesPtr, index * sourceStructSize));
+                            var name = UTF.Utf8ToString(sourceT.p_ndi_name);
+                            if (!string.IsNullOrEmpty(name))
+                            {
+                                _sourceNames.Add(name);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // An unhandled exception on a background thread would kill the process
+                Log.Warning("NDI source discovery failed: " + e.Message);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            _exitThread = true;
+            _findThread?.Join();
+            _findThread = null;
+
+            if (_findInstancePtr != IntPtr.Zero)
+            {
+                NDIlib.find_destroy(_findInstancePtr);
+                _findInstancePtr = IntPtr.Zero;
+            }
+        }
+
+        private IntPtr _findInstancePtr;
+        private Thread? _findThread;
+        private volatile bool _exitThread;
+        private bool _disposed;
+        private readonly List<string> _sourceNames = [];
+        private readonly Lock _lock = new();
+    }
+
     [Output(Guid = "85F1AF38-074E-475D-94F5-F48079979509", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Texture2D?> Texture = new();
 
@@ -19,9 +127,9 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     {
         InitializeNdi();
 
-        // Note that this example does see local sources (new Finder(true))
+        // Note that this example does see local sources (showLocalSources: true)
         // This is for ease of testing, but normally is not needed in released products.
-        _ndiInputFinder = new Finder(true);
+        _ndiInputFinder = new NdiSourceFinder(showLocalSources: true);
         Texture.UpdateAction += Update;
     }
 
@@ -108,7 +216,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
         if (string.IsNullOrEmpty(sourceName))
             return;
 
-        var sourceExists = _ndiInputFinder.Sources.Any(s => s.Name == sourceName);
+        var sourceExists = _ndiInputFinder.HasSource(sourceName);
         if (!sourceExists)
         {
             if (sourceName == "0")
@@ -471,7 +579,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     #endregion
 
     private static bool _initialized;
-    private readonly Finder _ndiInputFinder;
+    private readonly NdiSourceFinder _ndiInputFinder;
 
     // A pointer to our unmanaged NDI receiver instance
     private IntPtr _receiveInstancePtr = IntPtr.Zero;
@@ -534,7 +642,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
             return PlaceholderText;
 
         // Check if the current value actually exists in available sources
-        var sourceExists = _ndiInputFinder.Sources.Any(s => s.Name == currentValue);
+        var sourceExists = _ndiInputFinder.HasSource(currentValue);
         if (!sourceExists)
             return PlaceholderText;
 
@@ -553,9 +661,9 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
         yield return PlaceholderText;
 
         // Add all available NDI sources
-        foreach (var s in _ndiInputFinder.Sources)
+        foreach (var name in _ndiInputFinder.GetSourceNames())
         {
-            yield return s.Name;
+            yield return name;
         }
     }
 
