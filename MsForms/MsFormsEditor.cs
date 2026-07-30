@@ -15,14 +15,36 @@ public class MsFormsEditor : MsForms, IEditorSystemUiService
     {
         if (string.IsNullOrEmpty(text))
             return;
-        
+
         try
         {
-            Clipboard.SetText(text, TextDataFormat.UnicodeText);
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            {
+                Clipboard.SetText(text, TextDataFormat.UnicodeText);
+            }
+            else
+            {
+                // Clipboard requires STA; crash reporting can call this from background threads.
+                // An unhandled exception on a raw thread kills the process, so catch inside the thread.
+                var staThread = new Thread(() =>
+                                           {
+                                               try
+                                               {
+                                                   Clipboard.SetText(text, TextDataFormat.UnicodeText);
+                                               }
+                                               catch
+                                               {
+                                                   // Losing the clipboard copy is acceptable
+                                               }
+                                           });
+                staThread.SetApartmentState(ApartmentState.STA);
+                staThread.Start();
+                staThread.Join();
+            }
         }
         catch (System.Runtime.InteropServices.ExternalException)
         {
-            // TODO: should log this 
+            // TODO: should log this
         }
     }
 
