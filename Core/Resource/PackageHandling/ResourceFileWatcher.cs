@@ -216,8 +216,25 @@ public sealed class ResourceFileWatcher : IDisposable
         if(CoreSettings.Config.LogFileEvents)
             Log.Error($"FileEvent(error): {e.GetException()}");
 
+        // Runs on a thread-pool thread - an escaping exception would kill the process.
         DisposeFileWatcher(ref _fsWatcher);
-        _fsWatcher = CreateFsWatcher();
+        try
+        {
+            if (Directory.Exists(_watchedDirectory))
+            {
+                _fsWatcher = CreateFsWatcher();
+            }
+            else
+            {
+                // The watched folder was deleted or renamed (e.g. the user removed the project
+                // while it was loaded). Recreating it would be wrong - stop watching instead.
+                Log.Warning($"Watched directory '{_watchedDirectory}' no longer exists - stopping file watcher.");
+            }
+        }
+        catch (Exception exception)
+        {
+            Log.Warning($"Failed to restart file watcher for '{_watchedDirectory}': {exception.Message}");
+        }
     }
 
     private FileSystemWatcher CreateFsWatcher()
