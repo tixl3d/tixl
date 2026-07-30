@@ -125,7 +125,15 @@ internal static class CrashReporting
 
             if (json != null)
             {
-                EditorUi.Instance.SetClipboardText(json);
+                try
+                {
+                    EditorUi.Instance.SetClipboardText(json);
+                }
+                catch (Exception e)
+                {
+                    // A clipboard failure must not prevent sending the actual crash report
+                    Log.Warning($"Failed to copy crash report to clipboard: {e.Message}");
+                }
             }
 
             var sendingEnabled = result == confirmation;
