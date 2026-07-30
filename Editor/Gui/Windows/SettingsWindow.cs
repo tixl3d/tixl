@@ -1,5 +1,6 @@
 using System.IO;
 using ImGuiNET;
+using T3.Core.DataTypes.Vector;
 using T3.IoServices;
 using T3.Core.IO;
 using T3.Core.Settings;
@@ -306,20 +307,35 @@ internal sealed partial class SettingsWindow : Window
 
                     FormInputs.AddSectionSubHeader("Project Settings");
                     var selectedProjectDirectory = string.Empty;
-                    var projectDirectories = UserSettings.Config.ProjectDirectories ?? new List<string>();
-                    changed |= FormInputs.AddEditableListBox(ref selectedProjectDirectory,
-                                                             projectDirectories,
-                                                             "Project Directories",
-                                                             Directory.Exists,
-                                                             "Folder does not exist",
-                                                             """
-                                                             List of top-level directories that are scanned for projects.
+                    var projectDirectories = UserSettings.Config.ProjectDirectories ??= new List<string>();
+                    var projectDirectoriesChanged = FormInputs.AddEditableListBox(ref selectedProjectDirectory,
+                                                                                  projectDirectories,
+                                                                                  "Project Directories",
+                                                                                  Directory.Exists,
+                                                                                  "Folder does not exist",
+                                                                                  """
+                                                                                  List of top-level directories that are scanned for projects.
 
-                                                             This can be useful to manage your projects on multiple external drivers or repositories. 
+                                                                                  This can be useful to manage your projects on multiple external drives or repositories.
 
-                                                             Changes require a restart.
-                                                             """
-                                                            );
+                                                                                  Changes require a restart.
+                                                                                  """
+                                                                                 );
+                    if (projectDirectoriesChanged)
+                    {
+                        changed = true;
+                        _projectDirectoriesRequireRestart = true;
+                    }
+
+                    if (_projectDirectoriesRequireRestart)
+                    {
+                        FormInputs.AddVerticalSpace();
+                        FormInputs.SetIndentToLeft();
+                        if (CustomComponents.DrawCtaButton("Restart Editor", Icon.None, UiColors.ForegroundFull, UiColors.StatusActivated, Color.Transparent))
+                            EditorRestart.TryRestart();
+                        CustomComponents.TooltipForLastItem("Restart TiXL to rescan the project directories.");
+                        FormInputs.SetIndentToParameters();
+                    }
 
                     FormInputs.AddVerticalSpace();
                     FormInputs.SetIndentToLeft();
@@ -619,4 +635,6 @@ internal sealed partial class SettingsWindow : Window
     {
         return new List<Window>();
     }
+
+    private static bool _projectDirectoriesRequireRestart;
 }
