@@ -459,12 +459,9 @@ internal static class FormInputs
                     if (hasWarning)
                     {
                         AddIcon(Icon.Warning);
-                        if (ImGui.IsItemHovered())
-                        {
-                            ImGui.BeginTooltip();
-                            ImGui.TextWrapped(warningText ?? "This entry may cause issues.");
-                            ImGui.EndTooltip();
-                        }
+                        // TextWrapped inside a raw auto-sizing tooltip wraps at zero width (one character
+                        // per line) — the styled helper sets a proper wrap position.
+                        CustomComponents.TooltipForLastItem(warningText ?? "This entry may cause issues.");
 
                         ImGui.SameLine();
                     }
