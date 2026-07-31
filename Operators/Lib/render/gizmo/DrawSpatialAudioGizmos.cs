@@ -2,7 +2,7 @@ namespace Lib.render.gizmo;
 
 /// <summary>
 /// Draws gizmos for all spatial audio players in the current composition.
-/// Iterates through all SpatialAudioPlayer instances and visualizes their source positions,
+/// Iterates through all PlaySpatialAudioSample instances and visualizes their source positions,
 /// listener positions, attenuation ranges, and directional cones.
 /// </summary>
 [Guid("b53e6425-f40a-449c-846c-b4e0b8306a43")]

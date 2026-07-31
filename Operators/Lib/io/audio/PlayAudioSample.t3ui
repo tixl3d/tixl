@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "65e95f77-4743-437f-ab31-f34b831d28d7"/*AudioPlayer*/,
+  "Id": "65e95f77-4743-437f-ab31-f34b831d28d7"/*PlayAudioSample*/,
   "Description": "An audio player using BASS audio library. Features include:\n\n- [Playback Control]: Independent play, pause, and stop functionality with seek support\n- [Stereo Panning]: Position audio in the stereo field from left to right\n- [ADSR Envelope]: Optional amplitude envelope for dynamic volume shaping\n- [Speed Control]: Playback speed multiplier (affects pitch)",
   "InputUis": [
     {

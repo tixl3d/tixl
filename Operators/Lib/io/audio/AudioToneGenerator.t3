@@ -16,7 +16,7 @@
     },
     {
       "Id": "5a7e9f2c-8d4b-4c1f-9a5e-3b2d6f7c8a4e"/*WaveformType*/,
-      "DefaultValue": 2
+      "DefaultValue": 0
     },
     {
       "Id": "8f4a2e9c-7d3b-4e1f-8c5a-9b2d6f7c3a4e"/*Frequency*/,
@@ -25,15 +25,15 @@
     {
       "Id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"/*Envelope*/,
       "DefaultValue": {
-        "X": 1.0,
-        "Y": 1.0,
-        "Z": 1.0,
-        "W": 1.0
+        "X": 0.01,
+        "Y": 0.1,
+        "Z": 0.7,
+        "W": 0.3
       }
     },
     {
       "Id": "c0645e37-db4e-4658-9d65-96478851f6f6"/*Volume*/,
-      "DefaultValue": 0.0
+      "DefaultValue": 0.8
     },
     {
       "Id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a"/*TriggerMode*/,

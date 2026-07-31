@@ -2630,28 +2630,6 @@
       "Outputs": []
     },
     {
-      "Id": "85c70305-6bcb-4751-8081-528a4ba14fdf"/*PlayAudioClip*/,
-      "SymbolId": "c2b2758a-5b3e-465a-87b7-c6a13d3fba48",
-      "InputValues": [
-        {
-          "Id": "7abb80b8-5ea3-48f3-9f28-19daca9b8648"/*TimeInSecs*/,
-          "Type": "System.Single",
-          "Value": 3200.0
-        },
-        {
-          "Id": "989c84c4-f085-4839-89fd-bcf0f33a04e8"/*IsLooping*/,
-          "Type": "System.Boolean",
-          "Value": true
-        },
-        {
-          "Id": "e0c927f9-5528-49c5-b457-5aea51f51628"/*Path*/,
-          "Type": "System.String",
-          "Value": "C:\\Users\\pixtur\\Music\\Max Cooper - All Night Long [Phonox, London].mp3"
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "89e88d78-d6c3-429b-a7a8-1061ce48d156"/*DirectionalBlur*/,
       "IsBypassed": true,
       "SymbolId": "1192ae86-b174-4b58-9cc6-38afb666ce35",

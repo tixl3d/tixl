@@ -189,7 +189,7 @@
       "Outputs": []
     },
     {
-      "Id": "1732c27d-296c-4653-aa4c-36330437fd16"/*SpatialAudioPlayer*/,
+      "Id": "1732c27d-296c-4653-aa4c-36330437fd16"/*PlaySpatialAudioSample*/,
       "SymbolId": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f",
       "InputValues": [
         {
@@ -254,7 +254,7 @@
       "Outputs": []
     },
     {
-      "Id": "27374ba9-2136-4833-8c52-a24a27068def"/*AudioPlayer*/,
+      "Id": "27374ba9-2136-4833-8c52-a24a27068def"/*PlayAudioSample*/,
       "SymbolId": "65e95f77-4743-437f-ab31-f34b831d28d7",
       "InputValues": [
         {
@@ -654,7 +654,7 @@
       "Outputs": []
     },
     {
-      "Id": "5db4da1e-801f-42e6-85b7-28e71b3a59c0"/*AudioPlayer*/,
+      "Id": "5db4da1e-801f-42e6-85b7-28e71b3a59c0"/*PlayAudioSample*/,
       "SymbolId": "65e95f77-4743-437f-ab31-f34b831d28d7",
       "InputValues": [
         {
@@ -900,7 +900,7 @@
       "Outputs": []
     },
     {
-      "Id": "9a384a77-89fc-4dfd-b097-e110f35a00ea"/*SpatialAudioPlayer*/,
+      "Id": "9a384a77-89fc-4dfd-b097-e110f35a00ea"/*PlaySpatialAudioSample*/,
       "SymbolId": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f",
       "InputValues": [
         {
@@ -976,7 +976,7 @@
       "Outputs": []
     },
     {
-      "Id": "9c770b7d-356d-499a-9f0a-bca3f40a0776"/*AudioPlayer*/,
+      "Id": "9c770b7d-356d-499a-9f0a-bca3f40a0776"/*PlayAudioSample*/,
       "SymbolId": "65e95f77-4743-437f-ab31-f34b831d28d7",
       "InputValues": [
         {

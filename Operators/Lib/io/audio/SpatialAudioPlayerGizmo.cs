@@ -1,9 +1,9 @@
 ﻿namespace Lib.io.audio;
 
 /// <summary>
-/// A debug visualization composite operator for SpatialAudioPlayer.
+/// A debug visualization composite operator for PlaySpatialAudioSample.
 /// The composite graph uses the input slots directly for visualization.
-/// When embedded in SpatialAudioPlayer, the inputs are wired from the parent's inputs.
+/// When embedded in PlaySpatialAudioSample, the inputs are wired from the parent's inputs.
 /// </summary>
 [Guid("b26e6624-4017-46b5-970d-1525d90fafad")]
 internal sealed class SpatialAudioPlayerGizmo : Instance<SpatialAudioPlayerGizmo>

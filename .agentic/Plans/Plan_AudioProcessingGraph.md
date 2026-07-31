@@ -14,9 +14,9 @@ Three usage tiers, all on one substrate:
 2. **Working** — a clip with AutoPlay off and nothing collecting it is silently placed. (opt-in)
 3. **Full control** — route/group/mix/duck through operators, keyframe any parameter. (explicit reference graph)
 
-## Implementation status (resume here — updated 2026-07-16, G4b landed + hardened)
+## Implementation status (resume here — updated 2026-07-31, G6-lite cleanup landed)
 
-**State: G1–G4 complete and user-tested on real hardware.** The real ops exist and work: `[CombineAudio]` (combinator), `[AudioBus]` (root/reconciler), `[AudioClip]` graph integration. All work is **uncommitted on branch `feat/refactor-audio-processing`** (user commits). Core + Lib build clean.
+**State: G1–G4 complete and user-tested on real hardware; spikes retired + taxonomy cleanup done.** The real ops exist and work: `[CombineAudio]` (combinator), `[AudioBus]` (root/reconciler), `[AudioClip]` graph integration. All work is **uncommitted on branch `feat/refactor-audio-processing`** (user commits). Core + Lib build clean.
 
 Spike validation (R1 collection / R2 live BASS routing / join + animated params) all ✅ — details in git history and the G-step notes below.
 
@@ -30,11 +30,14 @@ Spike validation (R1 collection / R2 live BASS routing / join + animated params)
 
 **Files touched (uncommitted):** `Core/DataTypes/AudioGraphNode.cs` (+`ExternallyManagedChannel`), `Core/Audio/{AudioEngine,SoundtrackClipStream,TimelineAudioClip,AudioGraphCollector}.cs`, `Core/Audio/AudioBusRegistry.cs` (new), `Operators/Lib/io/audio/{AudioClip,AudioBus}.{cs,t3ui}`. (`_AudioFileSpike.{cs,t3,t3ui}` — throwaway G4a file source — is already committed.)
 
-**Next (agreed direction — "1 then 2"):**
-1. **Retire spikes + taxonomy cleanup (G6-lite):** delete `_AudioRootSpike`/`_AudioGroupSpike` (superseded by `[AudioBus]`/`[CombineAudio]`); graduate `_AudioSourceSpike` → fixed real `[AudioToneGenerator]` (fixes + integrates haas' broken op); decide `_AudioFileSpike` fate (delete vs graduate to `[PlayAudioFile]` loose looping source); renames per taxonomy section; remove `[PlayAudioClip]`.
-2. **G5 `[AudioLevel]` + `[Duck]`** — metered-float path; also the foundation for FFT-as-graph-tap (→ "Retire IsMainSoundtrack" §3).
+**G6-lite — spikes retired + taxonomy cleanup (done 2026-07-31):**
+- All four spikes deleted (`_AudioSourceSpike`/`_AudioGroupSpike`/`_AudioRootSpike`/`_AudioFileSpike` + `.t3`/`.t3ui`); `_AudioFileSpike` was not graduated — a loose looping file source can come later as `[PlayAudioFile]` if wanted.
+- `[AudioToneGenerator]` rebuilt as a real graph source: unrouted decode stream on a new `AudioReference` output (`7c8f3a2e-0001-4e1f-8a5c-6b2d9f7e4c3a`, `DirtyFlagTrigger.Always` like `[AudioClip]`), volume/mute moved onto `AudioGraphNode.Gain` so bus/group folds compose (the stream renders waveform × ADSR only). Kept: waveforms, ADSR trigger/gate, `IsPlaying`/`GetLevel`/`Result` outputs. Fixed broken defaults (Volume 0→0.8, sensible ADSR, Sine default). Param application is frame-keyed so multi-output evaluation doesn't double-run trigger edge detection.
+- **Decision (2026-07-31, live test): a tone generator is graph-only — no loose auto-play.** It deliberately does *not* implement `IAudioSource`: unlike `[AudioClip]` (which sounds by being on the timeline), it has no AutoPlay and no meaningful use without animated parameters, so an unwired instance stays silent and breaking its connection silences it immediately (was: the release tail handed off to the implicit default bus — heard as a glitch). After an evaluation gap the envelope resets instead of firing a phantom trigger edge on rewire. Narrows open question 11: implicit audibility is for timeline-presence sources, not procedural ones.
+- Renames (GUID-safe): `AudioPlayer` → `[PlayAudioSample]`, `SpatialAudioPlayer` → `[PlaySpatialAudioSample]` (files, classes, `.t3`/`.t3ui` name comments, AudioPlaybackExample annotations). `SpatialAudioPlayerGizmo` / `GetAllSpatialAudioPlayers` keep their names.
+- `[PlayAudioClip]` hard-deleted; its one in-repo instance (VJDeadlineAnimals) removed; the Audio asset type's graph drop-op now points at `[PlayAudioSample]` (`AssetHandling.cs`).
 
-**Throwaway, delete in step 1:** `_AudioSourceSpike` / `_AudioGroupSpike` / `_AudioRootSpike` / `_AudioFileSpike` (+ `.t3`/`.t3ui`).
+**Next: G5 `[AudioLevel]` + `[Duck]`** — metered-float path; also the foundation for FFT-as-graph-tap (→ "Retire IsMainSoundtrack" §3).
 
 ## Graduation steps (spike → real ops)
 
@@ -55,16 +58,16 @@ Naming rule: **verb+`Audio` for operations** (transform/combine references), **`
 
 - **Sources** (emit `AudioReference`):
   - `AudioClip` — keep.
-  - `AudioPlayer` → **`PlayAudioSample`** (haas' sampler).
-  - `SpatialAudioPlayer` → **`PlaySpatialAudioSample`** (`Direct` routing kind — HW-3D, bypasses the bus).
-  - `AudioToneGenerator` — fix (currently broken) + integrate as a source (≈ the `_AudioSourceSpike` role).
+  - `AudioPlayer` → **`PlayAudioSample`** ✅ (haas' sampler; rename done, `AudioReference` output still pending — it plays via the engine's operator-stream path, not the graph).
+  - `SpatialAudioPlayer` → **`PlaySpatialAudioSample`** ✅ (rename done; `Direct` routing kind — HW-3D, bypasses the bus — still pending).
+  - `AudioToneGenerator` ✅ — fixed + integrated as a graph source (took over the `_AudioSourceSpike` role).
 - **Combinators** (fold references):
   - **`CombineAudio`** ✅ (was `AudioGroup` → `GroupAudio`) — combine sources + volume fold.
   - **`BlendAudio`** (new) — crossfade N inputs by one float index (like `BlendScenes`); weights the two adjacent inputs internally. A weight-*list* **`MixAudio`** is the later general case (reuses the same per-child weighting).
   - later: `MixAudio`, `AudioReverb` / effects, `Duck`.
 - **Output:** tier-1 is *implicit* (no op → no "why is it silent / where's the player?" confusion). The tier-3 explicit bus = **`AudioBus`** (replaces the `AudioClipPlayer` role — it collects *all* sources, not just clips, and isn't required to play them). Optional; multiple allowed; `AutoCollectSources` **exclusive** (one bus auto-collects, so no double-collection). Verify the implicit path covers nested-comp + export before finalising (the historical reason `AudioClipPlayer` existed).
 - **Analysis:** `AudioReaction` — **keep the name** (×30 uses); extend with an optional `AudioReference` input to analyse a specific source/bus instead of only the global mix.
-- **Remove:** `PlayAudioClip` (6 uses, all experimental — confirmed safe to hard-delete).
+- **Remove:** `PlayAudioClip` ✅ (hard-deleted; asset-drop mapping moved to `PlayAudioSample`).
 
 ## Architectural decisions (locked in)
 

@@ -1190,13 +1190,6 @@
       }
     },
     {
-      "ChildId": "85c70305-6bcb-4751-8081-528a4ba14fdf"/*PlayAudioClip*/,
-      "Position": {
-        "X": 3973.662,
-        "Y": 6345.493
-      }
-    },
-    {
       "ChildId": "89e88d78-d6c3-429b-a7a8-1061ce48d156"/*DirectionalBlur*/,
       "Position": {
         "X": 5646.139,
