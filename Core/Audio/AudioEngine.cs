@@ -283,6 +283,11 @@ public static class AudioEngine
             // clip into ExportAudioFrame (which drives FFT for the rendered frames).
             if (playback.IsRenderingToFile)
             {
+                // Except graph-routed clips: they stay in their bus submix during export (the export mixer
+                // skips them), so their seek/pause sync must keep running or they'd stay paused and silent.
+                if (clipStream.ResourceHandle.Clip.IsRoutedToGraph)
+                    clipStream.UpdateSoundtrackTime(playback);
+
                 if (!handledMainSoundtrack && clipStream.ResourceHandle.Clip.IsMainSoundtrack)
                 {
                     handledMainSoundtrack = true;

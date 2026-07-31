@@ -356,12 +356,11 @@ internal static class RenderProcess
                     break;
                 }
                 case RenderSettings.RenderModes.ImageSequence:
-                    // Process audio for this frame to drive animations
-                    var audioFrameFloat = AudioRendering.GetFullMixDownBuffer(1.0 / session.Settings.FrameRate);
-
-                    // Update audio metering for UI/graph
+                    // Drive registered audio ops (buses) before pulling the mix so routing/params apply
+                    // to this frame's audio; the mix then feeds the analysis that drives animations.
                     double localFxTime = session.FrameIndex / session.Settings.FrameRate;
-                    AudioRendering.EvaluateAllAudioMeteringOutputs(localFxTime, audioFrameFloat);
+                    AudioRendering.EvaluateAllAudioMeteringOutputs(localFxTime);
+                    AudioRendering.GetFullMixDownBuffer(1.0 / session.Settings.FrameRate);
                     savingSuccessful = TrySaveImageFrameAndAdvance(mainOutputTexture);
                     break;
             }
@@ -472,6 +471,11 @@ internal static class RenderProcess
         double localFxTime = session.FrameIndex / session.Settings.FrameRate;
         Log.Gated.VideoRender($"Requested recording from {0.0000:F4} to {(session.FrameCount / session.Settings.FrameRate):F4} seconds");
         Log.Gated.VideoRender($"Actually recording from {(session.FrameIndex / session.Settings.FrameRate):F4} to {((session.FrameIndex + 1) / session.Settings.FrameRate):F4} seconds due to frame raster");
+
+        // Drive registered audio ops (buses) BEFORE pulling the mix, so their routing, animated params
+        // and trigger edges apply to the audio of this frame — not the next one.
+        AudioRendering.EvaluateAllAudioMeteringOutputs(localFxTime);
+
         var audioFrameFloat = AudioRendering.GetFullMixDownBuffer(1.0 / session.Settings.FrameRate);
 
         // Safety: ensure audioFrameFloat is valid and sized
@@ -487,9 +491,6 @@ internal static class RenderProcess
         // Convert float[] to byte[] for the writer
         var audioFrame = new byte[audioFrameFloat.Length * sizeof(float)];
         Buffer.BlockCopy(audioFrameFloat, 0, audioFrame, 0, audioFrame.Length);
-
-        // Force metering outputs to update for UI/graph
-        AudioRendering.EvaluateAllAudioMeteringOutputs(localFxTime, audioFrameFloat);
         return audioFrame;
     }
 

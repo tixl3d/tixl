@@ -17,8 +17,12 @@ namespace T3.Core.Audio;
 /// </summary>
 public static class AudioRendering
 {
+    /// <summary>True while a video/image-sequence export is capturing audio.</summary>
+    public static bool IsRecording => _isRecording;
+
     private static bool _isRecording;
     private static readonly ExportState _exportState = new();
+    private static readonly List<IAudioExportSource> _exportEvaluationSources = new();
     private static int _frameCount;
 
     // Reusable buffers to reduce per-frame allocations during export
@@ -50,7 +54,18 @@ public static class AudioRendering
         _frameCount = 0;
 
         _exportState.SaveState();
-        AudioExportSourceRegistry.Clear();
+
+        // Snapshot which audio ops (buses) were organically evaluated when export starts — those get
+        // force-evaluated every exported frame so graph audio keeps flowing even though export only
+        // evaluates the exported op-chain. Ops that were already silent/stale stay out, matching live.
+        _exportEvaluationSources.Clear();
+        foreach (var source in AudioExportSourceRegistry.Sources)
+        {
+            if (source.IsActiveForExport)
+                _exportEvaluationSources.Add(source);
+        }
+
+        Log.Gated.AudioRender($"[AudioRendering] Export evaluation sources: {_exportEvaluationSources.Count} of {AudioExportSourceRegistry.Sources.Count} registered");
 
         // Reset audio analysis state for clean export - ensures both modes start from same state
         AudioAnalysisContext.Default.Reset();
@@ -82,6 +97,12 @@ public static class AudioRendering
         // Remove soundtrack streams from live mixer and add to export mixer
         foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
         {
+            // A graph-routed clip stays in its bus submix: the graph owns its routing, gain, ducking and FX,
+            // and its audio reaches the export through the OperatorMixer read. Stealing it here would strip
+            // the graph processing from the exported audio and strand it in the SoundtrackMixer afterwards.
+            if (handle.Clip.IsRoutedToGraph)
+                continue;
+
             BassMix.MixerRemoveChannel(clipStream.StreamHandle);
             
             // Reset stream attributes for export
@@ -115,8 +136,11 @@ public static class AudioRendering
         Log.Gated.AudioRender($"[AudioRendering] EndRecording: Exported {_frameCount} frames");
 
         // Remove soundtrack streams from export mixer and re-add to live mixer
-        foreach (var (_, clipStream) in AudioEngine.SoundtrackClipStreams)
+        foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
         {
+            if (handle.Clip.IsRoutedToGraph)
+                continue; // stayed in its bus submix — see PrepareRecording
+
             if (_exportMixerInitialized)
             {
                 BassMix.MixerRemoveChannel(clipStream.StreamHandle);
@@ -208,6 +232,10 @@ public static class AudioRendering
         foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
         {
             var clip = handle.Clip;
+            if (clip.IsRoutedToGraph)
+                continue; // graph-owned: bus applies gain, engine syncs position — don't fight either
+
+
             double clipStart = Playback.Current.SecondsFromBars(clip.TimeRange.Start);
             double elapsedInClip = currentTime - clipStart;
             double targetSourcePos = clip.SourceOffsetSecs + elapsedInClip;
@@ -367,7 +395,7 @@ public static class AudioRendering
     {
         var context = new EvaluationContext { LocalFxTime = localFxTime };
 
-        foreach (var source in AudioExportSourceRegistry.Sources)
+        foreach (var source in _exportEvaluationSources)
         {
             if (source is not Instance operatorInstance) continue;
 

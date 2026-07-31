@@ -33,7 +33,8 @@ public static class AudioGraphCollector
 
         // Transport gating: loose sources follow the transport too — stopped playback means silence,
         // giving stop=quiet as the natural off-switch for implicitly playing audio.
-        var transportStopped = (Playback.Current?.PlaybackSpeed ?? 0) == 0;
+        // Render-export steps time with PlaybackSpeed 0, so recording counts as running.
+        var transportStopped = (Playback.Current?.PlaybackSpeed ?? 0) == 0 && !AudioRendering.IsRecording;
         BassMix.ChannelFlags(_defaultBus, transportStopped ? BassFlags.MixerChanPause : 0, BassFlags.MixerChanPause);
 
         // Ensure each loose source's channel (from static inputs) and build the desired set.

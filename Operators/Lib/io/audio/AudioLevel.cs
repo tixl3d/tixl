@@ -41,17 +41,16 @@ namespace Lib.io.audio
             _node.Collect(_collected, 1f);
 
             // A channel only meters while some mixer is pulling it (buffered); unrouted or unbuffered
-            // channels report -1 and are skipped. Gain is folded in so the value approximates what's audible.
+            // channels fail the call and are skipped. Gain is folded in so the value approximates what's
+            // audible. The buffer-inspecting Ex variant is required: the plain ChannelGetLevel only sees
+            // data taken since the last call and mostly reads 0 between the device's coarse pulls.
             var maxLevel = 0f;
             for (var i = 0; i < _collected.Count; i++)
             {
-                var levelData = BassMix.ChannelGetLevel(_collected[i].Leaf.SourceChannel);
-                if (levelData == -1)
+                if (BassMix.ChannelGetLevel(_collected[i].Leaf.SourceChannel, _levelPair, 0.05f, 0) == -1)
                     continue;
 
-                var left = (levelData & 0xFFFF) / 32768f;
-                var right = ((levelData >> 16) & 0xFFFF) / 32768f;
-                var level = Math.Max(left, right) * _collected[i].Gain;
+                var level = Math.Max(_levelPair[0], _levelPair[1]) * _collected[i].Gain;
                 if (level > maxLevel)
                     maxLevel = level;
             }
@@ -61,6 +60,7 @@ namespace Lib.io.audio
 
         private readonly AudioGraphNode _node;
         private readonly List<AudioGraphNode.CollectedSource> _collected = new();
+        private readonly float[] _levelPair = new float[2];
 
         [Input(Guid = "d4f21c80-0003-4c8a-9f31-0ab1cd2e0200")]
         public readonly MultiInputSlot<AudioGraphNode> Input = new();

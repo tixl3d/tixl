@@ -14,7 +14,7 @@ namespace Lib.io.audio
     /// so it is evaluated each frame.
     /// </summary>
     [Guid("b7e0d240-1e42-4c8a-9f31-0ab1cd2e0100")]
-    internal sealed class AudioBus : Instance<AudioBus>
+    internal sealed class AudioBus : Instance<AudioBus>, IAudioExportSource
     {
         [Output(Guid = "b7e0d240-0001-4c8a-9f31-0ab1cd2e0100", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
         public readonly Slot<Command> Result = new();
@@ -28,27 +28,39 @@ namespace Lib.io.audio
             Level.UpdateAction += UpdateLevel;
         }
 
-        // Meters the whole submix (post source gains, pre master Volume) — "react to what you hear" for this
-        // bus. Only meaningful while the bus is evaluated; a paused/stale submix reports its last level or 0.
+        // Reports the level measured during Update. BassMix.ChannelGetLevel consumes the data window since
+        // the last call, so the submix must be measured exactly once per frame — a second reader would
+        // steal the window and read ~0. Only meaningful while the bus is evaluated.
         private void UpdateLevel(EvaluationContext context)
         {
-            if (_submix == 0)
-            {
-                Level.Value = 0;
-                return;
-            }
-
-            var levelData = BassMix.ChannelGetLevel(_submix);
-            if (levelData == -1)
-                return;
-
-            var left = (levelData & 0xFFFF) / 32768f;
-            var right = ((levelData >> 16) & 0xFFFF) / 32768f;
-            Level.Value = Math.Min(Math.Max(left, right), 1f);
+            Level.Value = _measuredLevel;
         }
+
+        // Single measurement point for the submix level (post source gains, pre master Volume) — see UpdateLevel.
+        // Uses the buffer-inspecting Ex variant: the plain ChannelGetLevel only sees data taken since the last
+        // call, and the device pulls the mixer chain in coarse chunks, so per-frame calls mostly read 0.
+        private void MeasureLevel()
+        {
+            if (_lastLevelFrame == Playback.FrameCount)
+                return;
+
+            _lastLevelFrame = Playback.FrameCount;
+
+            if (BassMix.ChannelGetLevel(_submix, _levelPair, 0.05f, 0) == -1)
+                return;
+
+            _measuredLevel = Math.Min(Math.Max(_levelPair[0], _levelPair[1]), 1f);
+        }
+
+        // Render-export only evaluates the exported op-chain — register so a bus that was live (e.g.
+        // driven by a pinned view) keeps being evaluated per exported frame instead of going stale-silent.
+        bool IAudioExportSource.IsActiveForExport => Playback.FrameCount - _lastEvaluationFrame <= 10;
 
         private void Update(EvaluationContext context)
         {
+            _lastEvaluationFrame = Playback.FrameCount;
+            AudioExportSourceRegistry.Register(this);
+
             EnsureSubmix();
             if (_submix == 0)
                 return;
@@ -101,7 +113,10 @@ namespace Lib.io.audio
             var changed = false;
             foreach (var (ch, target) in _desiredTargets)
             {
-                if (_routedTargets.TryGetValue(ch, out var current) && current == target)
+                // Trust BASS, not our bookkeeping: another subsystem (engine reclaim, export) may have moved
+                // the channel elsewhere since we routed it — re-add whenever it isn't actually in the target.
+                if (_routedTargets.TryGetValue(ch, out var current) && current == target
+                    && BassMix.ChannelGetMixer(ch) == target)
                     continue;
 
                 // A clip channel lives in the SoundtrackMixer (engine-owned) — a BASS channel can only be in one
@@ -139,8 +154,11 @@ namespace Lib.io.audio
 
             // Transport gating: graph audio follows the transport. While stopped (PlaybackSpeed == 0) the
             // submix pauses — which also stops pulling generator streams — matching soundtrack-clip behaviour.
-            var transportStopped = context.Playback.PlaybackSpeed == 0;
+            // Render-export steps time with PlaybackSpeed 0, so recording counts as running.
+            var transportStopped = context.Playback.PlaybackSpeed == 0 && !AudioRendering.IsRecording;
             BassMix.ChannelFlags(_submix, transportStopped ? BassFlags.MixerChanPause : 0, BassFlags.MixerChanPause);
+
+            MeasureLevel();
 
             if (!changed)
                 return;
@@ -244,6 +262,8 @@ namespace Lib.io.audio
 
         ~AudioBus()
         {
+            AudioExportSourceRegistry.Unregister(this);
+
             foreach (var group in _fxGroups.Values)
                 Bass.StreamFree(group.Submix);
 
@@ -269,6 +289,10 @@ namespace Lib.io.audio
         private readonly List<AudioGraphNode> _fxGroupsToRetire = new();
         private readonly List<(int Submix, double FreeAfter)> _pendingFrees = new();
         private int _submix;
+        private int _lastEvaluationFrame = -100;
+        private float _measuredLevel;
+        private int _lastLevelFrame = -1;
+        private readonly float[] _levelPair = new float[2];
 
         [Input(Guid = "b7e0d240-0002-4c8a-9f31-0ab1cd2e0100")]
         public readonly MultiInputSlot<AudioGraphNode> Input = new();

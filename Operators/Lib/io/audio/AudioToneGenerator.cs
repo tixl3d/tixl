@@ -225,13 +225,12 @@ namespace Lib.io.audio
                 if (!Adsr.IsActive)
                     return 0f;
 
-                var level = BassMix.ChannelGetLevel(StreamHandle);
-                if (level == -1)
+                // Buffer-inspecting Ex variant — the plain ChannelGetLevel only sees data taken since the
+                // last call and mostly reads 0 between the device's coarse pulls.
+                if (BassMix.ChannelGetLevel(StreamHandle, _levelPair, 0.05f, 0) == -1)
                     return _lastLevel;
 
-                var left = (level & 0xFFFF) / 32768f;
-                var right = ((level >> 16) & 0xFFFF) / 32768f;
-                _lastLevel = Math.Min(Math.Max(left, right), 1f);
+                _lastLevel = Math.Min(Math.Max(_levelPair[0], _levelPair[1]), 1f);
                 return _lastLevel;
             }
 
@@ -314,6 +313,7 @@ namespace Lib.io.audio
             private double _phase;
             private float[] _sampleBuffer = [];
             private float _lastLevel;
+            private readonly float[] _levelPair = new float[2];
             private readonly Random _noiseRng = new();
             private double _pinkB0, _pinkB1, _pinkB2;
         }

@@ -158,7 +158,8 @@ internal sealed class SoundtrackClipStream
     /// </summary>
     internal void UpdateSoundtrackTime(Playback playback)
     {
-        if (playback.PlaybackSpeed == 0)
+        // Render-export steps time with PlaybackSpeed 0, so recording counts as running.
+        if (playback.PlaybackSpeed == 0 && !AudioRendering.IsRecording)
         {
             BassMix.ChannelFlags(StreamHandle, BassFlags.MixerChanPause, BassFlags.MixerChanPause);
             return;
