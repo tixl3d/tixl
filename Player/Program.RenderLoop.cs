@@ -29,6 +29,12 @@ internal static partial class Program
             AudioEngine.UseSoundtrackClip(handle, timeInSecs);
         }
 
+        // Op-provided audio registers itself each frame, like in the editor: [AudioClip] ops with AutoPlay
+        // (the canonical soundtrack form — the settings list is migration-source-only) and loose audio-graph
+        // sources playing through the implicit default bus.
+        AudioClipCollector.RegisterAutoPlayClips(_project, _playback.TimeInBars, timeInSecs);
+        AudioGraphCollector.CollectLooseSources(_project);
+
         // End-of-timeline check is driven by the main soundtrack only.
         if (_soundtrackHandle != null)
         {

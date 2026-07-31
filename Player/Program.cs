@@ -257,6 +257,16 @@ internal static partial class Program
                         _soundtrackHandle = handle;
                 }
 
+                // Migrated projects carry the soundtrack as an [AudioClip] op instead of a settings-list
+                // entry — the union in TryGetMainSoundtrack finds an op-flagged clip among the project's
+                // children. Needed for stream preload and the end-of-timeline check; per-frame playback
+                // registration comes from AudioClipCollector in the render loop.
+                if (_soundtrackHandle == null && playbackSettings.TryGetMainSoundtrack(_project, out var opSoundtrack))
+                {
+                    _soundtrackHandle = opSoundtrack;
+                    _allSoundtrackHandles.Add(opSoundtrack);
+                }
+
                 if (_soundtrackHandle != null)
                 {
                     if (_soundtrackHandle.TryGetFileResource(out var file))
