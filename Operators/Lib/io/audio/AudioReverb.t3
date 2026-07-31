@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "f2b43ea0-1e42-4c8a-9f31-0ab1cd2e0400"/*AudioReverb*/,
+  "Inputs": [
+    {
+      "Id": "f2b43ea0-0002-4c8a-9f31-0ab1cd2e0400"/*Input*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f2b43ea0-0003-4c8a-9f31-0ab1cd2e0400"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "f2b43ea0-0004-4c8a-9f31-0ab1cd2e0400"/*Mix*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "f2b43ea0-0005-4c8a-9f31-0ab1cd2e0400"/*Time*/,
+      "DefaultValue": 1.2
+    },
+    {
+      "Id": "f2b43ea0-0006-4c8a-9f31-0ab1cd2e0400"/*HighFreqRatio*/,
+      "DefaultValue": 0.3
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

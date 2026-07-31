@@ -1,6 +1,7 @@
 #nullable enable
 using ManagedBass;
 using ManagedBass.Mix;
+using T3.Core.Animation;
 using T3.Core.Audio;
 
 namespace Lib.io.audio
@@ -62,7 +63,9 @@ namespace Lib.io.audio
                 inputs[i]?.GetValue(context)?.Collect(_collected, 1f);
             Input.DirtyFlag.Clear();
 
-            _desired.Clear();
+            // Realise FX-declaring nodes as nested submixes under the bus and resolve each source's target
+            // mixer (its FX group's submix, or the bus itself when routed dry).
+            _desiredTargets.Clear();
             _externallyManaged.Clear();
             for (var i = 0; i < _collected.Count; i++)
             {
@@ -74,42 +77,61 @@ namespace Lib.io.audio
                 if (ch == 0)
                     continue;
 
-                _desired.Add(ch);
+                var target = _submix;
+                if (src.FxNode != null)
+                {
+                    var group = EnsureFxGroup(src.FxNode);
+                    if (group != null)
+                    {
+                        group.LastAliveFrame = Playback.FrameCount;
+                        target = group.Submix;
+                    }
+                }
+
+                _desiredTargets[ch] = target;
                 if (src.Leaf.ExternallyManagedChannel)
                     _externallyManaged.Add(ch);
                 Bass.ChannelSetAttribute(ch, ChannelAttribute.Volume, src.Gain);
             }
 
+            // Push current FX parameters and retire groups whose FX node vanished from the collection —
+            // with a short gain fade so an effect tail isn't truncated.
+            RefreshAndRetireFxGroups();
+
             var changed = false;
-            foreach (var ch in _desired)
+            foreach (var (ch, target) in _desiredTargets)
             {
-                if (_routed.Contains(ch))
+                if (_routedTargets.TryGetValue(ch, out var current) && current == target)
                     continue;
 
                 // A clip channel lives in the SoundtrackMixer (engine-owned) — a BASS channel can only be in one
                 // mixer, so pull it out first, and add it un-buffered: MixerChanBuffer latency would break the
                 // engine's per-frame seek/resync of the clip position.
                 var externallyManaged = _externallyManaged.Contains(ch);
-                if (externallyManaged)
+                if (externallyManaged || _routedTargets.ContainsKey(ch))
                     BassMix.MixerRemoveChannel(ch);
 
                 var flags = externallyManaged ? BassFlags.Default : BassFlags.MixerChanBuffer;
-                if (BassMix.MixerAddChannel(_submix, ch, flags))
+                if (BassMix.MixerAddChannel(target, ch, flags))
                 {
-                    _routed.Add(ch);
+                    _routedTargets[ch] = target;
                     changed = true;
+                }
+                else
+                {
+                    _routedTargets.Remove(ch);
                 }
             }
 
             _toRemove.Clear();
-            foreach (var ch in _routed)
-                if (!_desired.Contains(ch))
+            foreach (var ch in _routedTargets.Keys)
+                if (!_desiredTargets.ContainsKey(ch))
                     _toRemove.Add(ch);
 
             for (var i = 0; i < _toRemove.Count; i++)
             {
                 BassMix.MixerRemoveChannel(_toRemove[i]);
-                _routed.Remove(_toRemove[i]);
+                _routedTargets.Remove(_toRemove[i]);
                 changed = true;
             }
 
@@ -123,8 +145,78 @@ namespace Lib.io.audio
             if (!changed)
                 return;
 
-            var labels = string.Join(", ", _collected.ConvertAll(c => $"{c.Leaf}×{c.Gain:0.00}"));
-            Log.Debug($"[AudioBus] routing {_routed.Count} channel(s): {labels}", this);
+            var labels = string.Join(", ", _collected.ConvertAll(c => c.FxNode == null ? $"{c.Leaf}×{c.Gain:0.00}" : $"{c.Leaf}×{c.Gain:0.00}→{c.FxNode}"));
+            Log.Debug($"[AudioBus] routing {_routedTargets.Count} channel(s): {labels}", this);
+        }
+
+        // One nested submix per FX-declaring node currently flowing into this bus.
+        private sealed class FxGroup
+        {
+            public int Submix;
+            public int LastAliveFrame;
+        }
+
+        private FxGroup? EnsureFxGroup(AudioGraphNode fxNode)
+        {
+            if (_fxGroups.TryGetValue(fxNode, out var group))
+                return group;
+
+            var submix = BassMix.CreateMixerStream(AudioConfig.MixerFrequency, 2, BassFlags.MixerNonStop | BassFlags.Decode | BassFlags.Float);
+            if (submix == 0)
+            {
+                Log.Warning($"[AudioBus] failed to create FX submix: {Bass.LastError}", this);
+                return null;
+            }
+
+            if (!BassMix.MixerAddChannel(_submix, submix, BassFlags.MixerChanBuffer))
+            {
+                Log.Error($"[AudioBus] failed to add FX submix to bus: {Bass.LastError}", this);
+                Bass.StreamFree(submix);
+                return null;
+            }
+
+            group = new FxGroup { Submix = submix, LastAliveFrame = Playback.FrameCount };
+            _fxGroups.Add(fxNode, group);
+            fxNode.FxInsert?.Apply(submix);
+            return group;
+        }
+
+        private void RefreshAndRetireFxGroups()
+        {
+            _fxGroupsToRetire.Clear();
+            foreach (var (fxNode, group) in _fxGroups)
+            {
+                if (group.LastAliveFrame == Playback.FrameCount)
+                {
+                    fxNode.FxInsert?.UpdateParams(group.Submix);
+                }
+                else
+                {
+                    _fxGroupsToRetire.Add(fxNode);
+                }
+            }
+
+            for (var i = 0; i < _fxGroupsToRetire.Count; i++)
+            {
+                var fxNode = _fxGroupsToRetire[i];
+                var group = _fxGroups[fxNode];
+                _fxGroups.Remove(fxNode);
+                fxNode.FxInsert?.Remove(group.Submix);
+
+                // Fade instead of truncating so a reverb/echo tail rings out before the submix is freed.
+                Bass.ChannelSlideAttribute(group.Submix, ChannelAttribute.Volume, 0f, FxRetireFadeMs);
+                _pendingFrees.Add((group.Submix, Playback.RunTimeInSecs + FxRetireFadeMs / 1000.0 + 0.1));
+            }
+
+            for (var i = _pendingFrees.Count - 1; i >= 0; i--)
+            {
+                if (Playback.RunTimeInSecs < _pendingFrees[i].FreeAfter)
+                    continue;
+
+                BassMix.MixerRemoveChannel(_pendingFrees[i].Submix);
+                Bass.StreamFree(_pendingFrees[i].Submix);
+                _pendingFrees.RemoveAt(i);
+            }
         }
 
         private void EnsureSubmix()
@@ -152,6 +244,12 @@ namespace Lib.io.audio
 
         ~AudioBus()
         {
+            foreach (var group in _fxGroups.Values)
+                Bass.StreamFree(group.Submix);
+
+            for (var i = 0; i < _pendingFrees.Count; i++)
+                Bass.StreamFree(_pendingFrees[i].Submix);
+
             if (_submix != 0)
             {
                 AudioBusRegistry.Unregister(_submix);
@@ -160,11 +258,16 @@ namespace Lib.io.audio
             }
         }
 
+        private const int FxRetireFadeMs = 400;
+
         private readonly List<AudioGraphNode.CollectedSource> _collected = new();
-        private readonly HashSet<int> _desired = new();
+        private readonly Dictionary<int, int> _desiredTargets = new();  // channel → target mixer
         private readonly HashSet<int> _externallyManaged = new();
-        private readonly HashSet<int> _routed = new();
+        private readonly Dictionary<int, int> _routedTargets = new();   // channel → mixer it sits in
         private readonly List<int> _toRemove = new();
+        private readonly Dictionary<AudioGraphNode, FxGroup> _fxGroups = new();
+        private readonly List<AudioGraphNode> _fxGroupsToRetire = new();
+        private readonly List<(int Submix, double FreeAfter)> _pendingFrees = new();
         private int _submix;
 
         [Input(Guid = "b7e0d240-0002-4c8a-9f31-0ab1cd2e0100")]

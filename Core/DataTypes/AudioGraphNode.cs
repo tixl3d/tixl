@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using T3.Core.Animation;
 using T3.Core.Operator;
@@ -39,6 +40,25 @@ public sealed class AudioGraphNode
     /// <summary>Per-node gain the root applies to this source's channel when routing it.</summary>
     public float Gain = 1f;
 
+    /// <summary>Combinator only: declares an FX insert the routing bus realises as a nested submix carrying
+    /// this node's collected sources. The wire stays BASS-agnostic — the declaring op applies and updates the
+    /// actual effect through the callbacks. Null = no insert.</summary>
+    public AudioFxInsert? FxInsert;
+
+    /// <summary>Callbacks a routing bus invokes on the nested submix realising an <see cref="FxInsert"/>.
+    /// All receive the submix channel handle. Created once per op; must not allocate per frame.</summary>
+    public sealed class AudioFxInsert
+    {
+        /// <summary>Called once when the nested submix is created — set the effect on the channel.</summary>
+        public required Action<int> Apply;
+
+        /// <summary>Called every frame while realised — push current parameter values to the effect.</summary>
+        public required Action<int> UpdateParams;
+
+        /// <summary>Called when the submix is retired, before it is freed — drop cached per-submix state.</summary>
+        public required Action<int> Remove;
+    }
+
     /// <summary>Populated each traversal from the connected input nodes; empty for a leaf source.</summary>
     public readonly List<AudioGraphNode> InputNodes = new();
 
@@ -77,27 +97,30 @@ public sealed class AudioGraphNode
     }
 
     /// <summary>A leaf source reached by the root's collection, paired with its effective gain
-    /// (product of ancestor combinator gains × its own gain).</summary>
-    public readonly record struct CollectedSource(AudioGraphNode Leaf, float Gain);
+    /// (product of ancestor combinator gains × its own gain) and the FX node it flows through
+    /// (the outermost ancestor declaring an <see cref="FxInsert"/>; null = routed dry).</summary>
+    public readonly record struct CollectedSource(AudioGraphNode Leaf, float Gain, AudioGraphNode? FxNode = null);
 
     /// <summary>
     /// Collects reachable leaf sources (depth-first) with effective gain. A combinator folds its own
     /// <see cref="Gain"/> (e.g. a group volume) into all descendants; a leaf contributes its channel at
-    /// the accumulated gain. Leaves without a channel are skipped.
+    /// the accumulated gain. Leaves without a channel are skipped. Sources under an FX-declaring node are
+    /// tagged with the outermost such ancestor (nested inserts are not realised yet).
     /// </summary>
-    public void Collect(List<CollectedSource> results, float gainSoFar)
+    public void Collect(List<CollectedSource> results, float gainSoFar, AudioGraphNode? fxNode = null)
     {
         var gain = gainSoFar * Gain;
+        fxNode ??= FxInsert != null ? this : null;
 
         if (InputNodes.Count == 0)
         {
             if (SourceChannel != 0)
-                results.Add(new CollectedSource(this, gain));
+                results.Add(new CollectedSource(this, gain, fxNode));
             return;
         }
 
         for (var i = 0; i < InputNodes.Count; i++)
-            InputNodes[i].Collect(results, gain);
+            InputNodes[i].Collect(results, gain, fxNode);
     }
 
     public override string ToString() => SourceLabel ?? _instance.Symbol.Name;
