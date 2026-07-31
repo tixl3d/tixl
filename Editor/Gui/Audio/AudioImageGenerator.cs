@@ -16,7 +16,7 @@ namespace T3.Editor.Gui.Audio;
 
 internal static class AudioImageGenerator
 {
-    public static bool TryGenerateSoundSpectrumAndVolume(TimelineAudioClip clip, IResourceConsumer? instance, [NotNullWhen(true)] out string? imagePathAbsolute)
+    public static bool TryGenerateClipImage(TimelineAudioClip clip, IResourceConsumer? instance, AudioClipStyle style, [NotNullWhen(true)] out string? imagePathAbsolute)
     {
         var relativePath = clip.AssetPath;
         if (relativePath == null)
@@ -25,7 +25,7 @@ internal static class AudioImageGenerator
             imagePathAbsolute = null;
             return false;
         }
-            
+
         if (!AssetRegistry.TryResolveAddress(relativePath, instance, out var soundFilePathAbsolute, out _))
         {
             Log.Error($"Could not get absolute path for audio clip: {relativePath}");
@@ -35,7 +35,13 @@ internal static class AudioImageGenerator
 
         // Cache waveform images in a per-user temp folder instead of next to the audio file -
         // they are fully derived/temporary and shouldn't pollute the user's project assets.
-        var imageVariantSuffix = UserSettings.Config.ExpandSpectrumVisualizerVertically ? ".10.waveform.png" : ".waveform.png";
+        // (The ".waveform" suffix for the spectrum style is historical — it keeps existing caches valid.)
+        var imageVariantSuffix = style switch
+                                     {
+                                         AudioClipStyle.Waveform => ".amplitude.png",
+                                         AudioClipStyle.VolumeLevel => ".level.png",
+                                         _ => UserSettings.Config.ExpandSpectrumVisualizerVertically ? ".10.waveform.png" : ".waveform.png",
+                                     };
         imagePathAbsolute = GetWaveformImageCachePath(soundFilePathAbsolute, imageVariantSuffix);
 
         if (File.Exists(imagePathAbsolute))
@@ -69,6 +75,8 @@ internal static class AudioImageGenerator
 
         try
         {
+            if (style != AudioClipStyle.Spectrum)
+                return GenerateAmplitudeImage(stream, style, ref imagePathAbsolute);
             var streamLength = Bass.ChannelGetLength(stream);
 
             const double samplingResolution = 1.0 / 100;
@@ -177,6 +185,110 @@ internal static class AudioImageGenerator
         {
             // Always free the offline analysis stream
             AudioMixerManager.FreeOfflineAnalysisStream(stream);
+        }
+    }
+
+    /// <summary>
+    /// Renders an amplitude-based image (peak waveform or RMS volume envelope) by sequentially decoding
+    /// the stream in ~10 ms columns. White-on-transparent so renderers can tint it to the theme.
+    /// </summary>
+    private static bool GenerateAmplitudeImage(int stream, AudioClipStyle style, ref string? imagePathAbsolute)
+    {
+        var streamLength = Bass.ChannelGetLength(stream);
+
+        const double samplingResolution = 1.0 / 100;
+        var sampleLength = Bass.ChannelSeconds2Bytes(stream, samplingResolution);
+        var numSamples = sampleLength > 0 ? streamLength / sampleLength : 0;
+        if (numSamples < 1)
+        {
+            if (streamLength <= 0)
+            {
+                Log.Warning("Audio file is empty or unreadable for amplitude image");
+                imagePathAbsolute = null;
+                return false;
+            }
+
+            numSamples = 1;
+        }
+
+        const int maxSamples = 16384; // 4k texture size limit
+        if (numSamples > maxSamples)
+        {
+            sampleLength = (long)(sampleLength * numSamples / (double)maxSamples) + 100;
+            numSamples = streamLength / sampleLength;
+        }
+
+        var columns = (int)numSamples;
+        var peaks = new float[columns];
+        var rms = new float[columns];
+        var sampleBuffer = new float[sampleLength / sizeof(float) + 1];
+
+        Bass.ChannelSetPosition(stream, 0);
+        for (var column = 0; column < columns; column++)
+        {
+            // The offline stream decodes as 32-bit float (BassFlags.Float), so a plain byte count reads floats.
+            var bytesRead = Bass.ChannelGetData(stream, sampleBuffer, (int)sampleLength);
+            if (bytesRead <= 0)
+                break;
+
+            var floatCount = Math.Min(bytesRead / sizeof(float), sampleBuffer.Length);
+            var peak = 0f;
+            var sumOfSquares = 0.0;
+            for (var i = 0; i < floatCount; i++)
+            {
+                var sample = Math.Abs(sampleBuffer[i]);
+                if (sample > peak)
+                    peak = sample;
+
+                sumOfSquares += sample * sample;
+            }
+
+            peaks[column] = Math.Min(peak, 1f);
+            rms[column] = floatCount > 0 ? Math.Min((float)Math.Sqrt(sumOfSquares / floatCount), 1f) : 0f;
+        }
+
+        var image = new Bitmap(columns, ImageHeight);
+        var solid = Color.FromArgb(230, 255, 255, 255);
+        var soft = Color.FromArgb(90, 255, 255, 255);
+
+        if (style == AudioClipStyle.Waveform)
+        {
+            // Symmetric peak waveform around the vertical center, with the softer RMS band inside.
+            const int center = ImageHeight / 2;
+            const int halfHeight = ImageHeight / 2 - 1;
+            for (var column = 0; column < columns; column++)
+            {
+                var peakRows = (int)(peaks[column] * halfHeight);
+                var rmsRows = (int)(rms[column] * halfHeight);
+                for (var row = -peakRows; row <= peakRows; row++)
+                    image.SetPixel(column, center + row, Math.Abs(row) <= rmsRows ? solid : soft);
+            }
+        }
+        else
+        {
+            // Volume-level envelope: a bottom-filled RMS curve, lightly smoothed across columns.
+            for (var column = 0; column < columns; column++)
+            {
+                var left = rms[Math.Max(column - 1, 0)];
+                var right = rms[Math.Min(column + 1, columns - 1)];
+                var level = (left + rms[column] * 2 + right) * 0.25f;
+
+                var rows = (int)(level * (ImageHeight - 2));
+                for (var row = 0; row < rows; row++)
+                    image.SetPixel(column, ImageHeight - 1 - row, row >= rows - 2 ? solid : soft);
+            }
+        }
+
+        try
+        {
+            image.Save(imagePathAbsolute!);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.Error(e.Message);
+            imagePathAbsolute = null;
+            return false;
         }
     }
 

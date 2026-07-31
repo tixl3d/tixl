@@ -44,7 +44,8 @@ internal static class AudioClipBodyRenderer
         if (bodyWidth < 3 || bodyHeight < 4)
             return;
 
-        if (!TryGetWaveformSrv(path, instance, out var srv))
+        var style = provider.GetResourceHandle().Clip.Style;
+        if (!TryGetWaveformSrv(path, instance, style, out var srv))
             return;
 
         drawList.PushClipRect(bodyMin, bodyMax, true);
@@ -101,11 +102,11 @@ internal static class AudioClipBodyRenderer
     /// (Cached) shader-resource view of the file's waveform image. First call per asset kicks off a
     /// background generation via <see cref="AudioImageFactory"/>; later calls return the loaded SRV.
     /// </summary>
-    private static bool TryGetWaveformSrv(string assetPath, Instance owner, [NotNullWhen(true)] out ShaderResourceView? srv)
+    private static bool TryGetWaveformSrv(string assetPath, Instance owner, AudioClipStyle style, [NotNullWhen(true)] out ShaderResourceView? srv)
     {
         srv = null;
         var handle = new AudioClipResourceHandle(new TimelineAudioClip { AssetPath = assetPath }, owner);
-        if (!AudioImageFactory.TryGetOrCreateImagePathForClip(handle, out var imagePath))
+        if (!AudioImageFactory.TryGetOrCreateImagePathForClip(handle, style, out var imagePath))
             return false;
 
         if (_imageCache.TryGetValue(imagePath, out var entry))

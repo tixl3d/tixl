@@ -55,6 +55,25 @@ public sealed class CompositionSettings
             return true;
         }
 
+        // Union with op-provided clips: an [AudioClip] whose Display is BackgroundImage flags its clip as
+        // main soundtrack. Keeps background waveform / FFT / export working for projects whose soundtrack
+        // is an op rather than a settings-list entry (the settings list is migration-source-only).
+        if (instance is Operator.Instance settingsOwner)
+        {
+            foreach (var child in settingsOwner.Children.Values)
+            {
+                if (child is not IAudioClipProvider provider)
+                    continue;
+
+                var handle = provider.GetResourceHandle();
+                if (handle.Clip.IsMainSoundtrack)
+                {
+                    soundtrack = handle;
+                    return true;
+                }
+            }
+        }
+
         soundtrack = null;
         return false;
     }

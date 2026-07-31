@@ -51,7 +51,19 @@ Spike validation (R1 collection / R2 live BASS routing / join + animated params)
 - `[AudioReverb]` + bus `Level` user-tested ✅ (committed). Note: DX8 reverb decay is hard-capped at 3 s (`fReverbTime` ≤ 3000 ms) — longer tails need the BASS_FX backend swap.
 - `[AudioEcho]` (Mix/Delay/Feedback/PingPong → DX8 echo; delay ≤ 2 s is a DX8 cap) and `[AudioCompressor]` (linear Threshold like the meter ops → dB, Ratio, Attack/Release secs, MakeupGainDb) landed 2026-07-31 — same insert mechanism, needs live test.
 
-**Next:** live-test echo/compressor, then `Direct`/spatial realization (graph-integrating `[PlaySpatialAudioSample]`/`[PlayAudioSample]`), nested FX chains, or start Phase B (settings-list migration + Display/Style).
+**Phase B started (2026-07-31) — decision: FX-op family is sufficient for now; more effects later.**
+
+**B1 — Display/Style + main-soundtrack union (landed, needs live test):**
+- `AudioClipDisplay { Clip, BackgroundImage }` + `AudioClipStyle { Spectrum, Waveform, VolumeLevel }` enums in `Core/Audio/TimelineAudioClip.cs`, with transient `Display`/`Style` fields on the clip (op-synced, not serialized). `Style` currently defaults to `Spectrum` since that's the only renderer; revisit the default when the waveform renderer lands (open question 4).
+- `[AudioClip]` gained `Display`/`Style` inputs; **`Display = BackgroundImage` doubles as the main-soundtrack designation** (`_clip.IsMainSoundtrack` sync). This *is* the op-side flag the union needs — no separate settings-Guid yet (the §Retire-IsMainSoundtrack (2) Guid-in-settings + context-menu design remains the fuller follow-up).
+- `CompositionSettings.TryGetMainSoundtrack` unions the settings list with op-provided clips (scans the settings owner's children for `IAudioClipProvider` whose clip flags main). All four call sites (timeline background, export, render timing, settings window) get it for free.
+- Known gap: the union only reaches ops in a composition whose settings are `Enabled` (the `FindCompositionSettings` walk-up). A background-image clip in a project that never enabled project settings won't show — fold into the B2/§Retire design.
+
+**B3 — Style renderers (landed 2026-07-31, needs live test; editor restart required — Editor-assembly change):**
+- `AudioImageGenerator.TryGenerateClipImage(clip, instance, style, out path)` dispatches per style: `Spectrum` = the existing FFT path (cache suffix `.waveform.png` kept so old caches stay valid); `Waveform` = symmetric peak columns with a softer RMS band inside (`.amplitude.png`); `VolumeLevel` = bottom-filled, lightly smoothed RMS envelope (`.level.png`). Amplitude scan decodes sequentially in ~10 ms columns (offline stream is `BassFlags.Float`, plain byte counts). Both new styles render white-on-transparent so the renderers' theme tint applies.
+- `AudioImageFactory` caches per `(assetPath, style)`; `TimeLineImage` (background) and `AudioClipBodyRenderer` (clip body) pass the clip's synced `Style` through — style switches load a different cached image.
+
+**Next: B2 — migrate `Playback.AudioClips` → visible `[AudioClip]` ops on save** (reuse `RecordingSession`'s insertion pattern: `AddSymbolChildCommand` + `InitClipTimeClip` + `ChangeInputValueCommand`; former main gets `Display = BackgroundImage`; clear migrated entries).
 
 ## Graduation steps (spike → real ops)
 

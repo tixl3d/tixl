@@ -123,6 +123,15 @@ public sealed class TimelineAudioClip
     /// </summary>
     public double LengthInSeconds;
 
+    /// <summary>How an op-provided clip is drawn on the timeline: an ordinary clip block, or the
+    /// full-timeline-width background image behind the tracks (what the main soundtrack renders as).
+    /// Transient — the [AudioClip] op syncs it from its Display input each frame.</summary>
+    public AudioClipDisplay Display = AudioClipDisplay.Clip;
+
+    /// <summary>How the clip's audio content is visualised (clip body / background image).
+    /// Transient — the [AudioClip] op syncs it from its Style input each frame.</summary>
+    public AudioClipStyle Style = AudioClipStyle.Spectrum;
+
     /// <summary>
     /// Transient (not serialized): set each frame by the [AudioClip] op when its <c>AudioReference</c> output is
     /// wired into the audio-processing graph. While true, the graph owns this clip's channel — it moves it out of
@@ -258,4 +267,28 @@ public sealed class TimelineAudioClip
         writer.WriteEndObject();
     }
     #endregion
+}
+
+/// <summary>How an audio clip is drawn on the timeline.</summary>
+public enum AudioClipDisplay
+{
+    /// <summary>An ordinary timeline clip block.</summary>
+    Clip = 0,
+
+    /// <summary>The full-timeline-width background image behind the tracks — the main-soundtrack look.
+    /// Also designates the clip as the project's main soundtrack (FFT / export).</summary>
+    BackgroundImage = 1,
+}
+
+/// <summary>How an audio clip's content is visualised in its clip body or background image.</summary>
+public enum AudioClipStyle
+{
+    /// <summary>FFT spectrogram (the only renderer available today).</summary>
+    Spectrum = 0,
+
+    /// <summary>Amplitude waveform (renderer pending).</summary>
+    Waveform = 1,
+
+    /// <summary>Filled volume-level envelope (renderer pending).</summary>
+    VolumeLevel = 2,
 }

@@ -52,7 +52,8 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         // When the op is actually evaluated (wired / driven by a player), sync from the live context
         // so animated Volume / Mute take effect. The AutoPlay registrar covers the unwired case via
         // GetResourceHandle() reading static input values.
-        SyncClip(context.Playback, Path.GetValue(context), Volume.GetValue(context), Mute.GetValue(context));
+        SyncClip(context.Playback, Path.GetValue(context), Volume.GetValue(context), Mute.GetValue(context),
+                 Display.GetValue(context), Style.GetValue(context));
         RefreshGraphRouting();
 
         TimeSlot.DirtyFlag.Clear();
@@ -108,7 +109,8 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
     {
         // Registrar path: no EvaluationContext, so read static input values. Animated inputs on an
         // unwired clip aren't evaluated
-        SyncClip(Playback.Current, Path.TypedInputValue.Value, Volume.TypedInputValue.Value, Mute.TypedInputValue.Value);
+        SyncClip(Playback.Current, Path.TypedInputValue.Value, Volume.TypedInputValue.Value, Mute.TypedInputValue.Value,
+                 Display.TypedInputValue.Value, Style.TypedInputValue.Value);
         RefreshGraphRouting();
         return _handle ??= new AudioClipResourceHandle(_clip, this);
     }
@@ -120,11 +122,17 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
     private bool IsManaged => Playback.FrameCount - _lastManagedFrame <= ManagedFrameSlack;
     private const int ManagedFrameSlack = 2;
 
-    private void SyncClip(Playback? playback, string? path, float volume, bool mute)
+    private void SyncClip(Playback? playback, string? path, float volume, bool mute, int display, int style)
     {
         _clip.AssetPath = path ?? string.Empty;
         _clip.Volume = volume;
         _clip.IsMuted = mute;
+
+        // Display = BackgroundImage doubles as the main-soundtrack designation (timeline background,
+        // FFT routing, export) — see CompositionSettings.TryGetMainSoundtrack's op-clip union.
+        _clip.Display = (AudioClipDisplay)display;
+        _clip.Style = (AudioClipStyle)style;
+        _clip.IsMainSoundtrack = _clip.Display == AudioClipDisplay.BackgroundImage;
 
         var timeClip = TimeSlot.TimeClip;
         _clip.TimeRange = timeClip.TimeRange;
@@ -167,7 +175,7 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         return "Not played — enable AutoPlay or add an [AudioClipPlayer] that collects this clip.";
     }
 
-    private readonly TimelineAudioClip _clip = new() { IsMainSoundtrack = false };
+    private readonly TimelineAudioClip _clip = new();
     private readonly AudioGraphNode _node;
     private AudioClipResourceHandle? _handle;
     private int _lastManagedFrame;
@@ -187,4 +195,10 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
 
     [Input(Guid = "260b61ae-7605-4f06-a3fb-793ae5a23646")]
     public readonly InputSlot<bool> AutoPlay = new();
+
+    [Input(Guid = "8f2e6b10-4c5d-4e8f-9a1b-2c3d4e5f6a70", MappedType = typeof(AudioClipDisplay))]
+    public readonly InputSlot<int> Display = new();
+
+    [Input(Guid = "9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80", MappedType = typeof(AudioClipStyle))]
+    public readonly InputSlot<int> Style = new();
 }

@@ -42,7 +42,8 @@ internal sealed class TimeLineImage
 
     private static void UpdateSoundTexture(AudioClipResourceHandle soundtrackHandle)
     {
-        if (!AudioImageFactory.TryGetOrCreateImagePathForClip(soundtrackHandle, out var imagePath))
+        // A different Style yields a different cache path, so style switches reload the texture.
+        if (!AudioImageFactory.TryGetOrCreateImagePathForClip(soundtrackHandle, soundtrackHandle.Clip.Style, out var imagePath))
         {
             _loadedImagePath = null;
             return;
