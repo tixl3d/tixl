@@ -37,7 +37,13 @@ Spike validation (R1 collection / R2 live BASS routing / join + animated params)
 - Renames (GUID-safe): `AudioPlayer` → `[PlayAudioSample]`, `SpatialAudioPlayer` → `[PlaySpatialAudioSample]` (files, classes, `.t3`/`.t3ui` name comments, AudioPlaybackExample annotations). `SpatialAudioPlayerGizmo` / `GetAllSpatialAudioPlayers` keep their names.
 - `[PlayAudioClip]` hard-deleted; its one in-repo instance (VJDeadlineAnimals) removed; the Audio asset type's graph drop-op now points at `[PlayAudioSample]` (`AssetHandling.cs`).
 
-**Next: G5 `[AudioLevel]` + `[Duck]`** — metered-float path; also the foundation for FFT-as-graph-tap (→ "Retire IsMainSoundtrack" §3).
+**G5 metered-float path — `[AudioLevel]` + `[Duck]` landed 2026-07-31 (needs live test):**
+- `[AudioLevel]` — pass-through tap (combinator node, gain 1) + a `Level` float output (`DirtyFlagTrigger.Always`): collects its leaves and meters each channel via `BassMix.ChannelGetLevel` (non-destructive; only meters while a buffered mixer is pulling the channel — unrouted or unbuffered/externally-managed channels report −1 and are skipped), takes the max × collected gain. Insert between sources and a bus, or branch into it.
+- `[DuckAudioLevel]` (né `Duck`) — level → smoothed gain (float-only op, keeps the reference graph a pure tree per §Ducking): reduction ramps from `Threshold` to full scale × `Amount`, response curve shaped by a `GainAndBias` knee; exponential smoothing with separate Attack (duck) / Release (recover) time constants on `Playback.RunTimeInSecs`. Wire its `Gain` into a `[CombineAudio]`/`[AudioBus]` Volume. User-tested ✅.
+- `[AudioBus]` `Level` output ✅ — meters the whole submix via `BassMix.ChannelGetLevel` (post source gains, pre master Volume): the "react to what you hear" tap the FFT-retirement §3 default wants.
+- Still open in G5: group-as-submix + FX inserts, `Direct`/spatial realization, multi-send split streams, FFT-as-graph-tap (→ "Retire IsMainSoundtrack" §3). Known limitation: `[AudioLevel]` can't meter a graph-routed `[AudioClip]` (its channel is added un-buffered) — but the bus `Level` output covers metering a bus that contains clips.
+
+**Next:** pick the next G5 increment — FX inserts (reverb on a bus) or `Direct`/spatial realization.
 
 ## Graduation steps (spike → real ops)
 

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b7e0d240-1e42-4c8a-9f31-0ab1cd2e0100"/*AudioBus*/,
-  "Description": "Output of the audio processing graph. Collects the audio sources wired into it (recursively, through [CombineAudio]s) and routes them into a bus under the operator mixer, with a master Volume.\n\nWire Result into your render command chain so it is evaluated each frame. (Basic playback of unwired sources will become implicit — this op is for explicit routing / mixing.)",
+  "Description": "Output of the audio processing graph. Collects the audio sources wired into it (recursively, through [CombineAudio]s) and routes them into a bus under the operator mixer, with a master Volume.\n\nWire Result into your render command chain so it is evaluated each frame. The Level output meters the bus's summed signal (before the master Volume) for reactive control — e.g. wire it through a [DuckAudioLevel] into another bus's Volume.",
   "InputUis": [
     {
       "InputId": "b7e0d240-0002-4c8a-9f31-0ab1cd2e0100"/*Input*/,
@@ -28,6 +28,13 @@
       "Position": {
         "X": 300.0,
         "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "b7e0d240-0004-4c8a-9f31-0ab1cd2e0100"/*Level*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
       }
     }
   ]

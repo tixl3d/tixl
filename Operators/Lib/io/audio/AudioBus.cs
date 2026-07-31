@@ -18,9 +18,32 @@ namespace Lib.io.audio
         [Output(Guid = "b7e0d240-0001-4c8a-9f31-0ab1cd2e0100", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
         public readonly Slot<Command> Result = new();
 
+        [Output(Guid = "b7e0d240-0004-4c8a-9f31-0ab1cd2e0100", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
+        public readonly Slot<float> Level = new();
+
         public AudioBus()
         {
             Result.UpdateAction += Update;
+            Level.UpdateAction += UpdateLevel;
+        }
+
+        // Meters the whole submix (post source gains, pre master Volume) — "react to what you hear" for this
+        // bus. Only meaningful while the bus is evaluated; a paused/stale submix reports its last level or 0.
+        private void UpdateLevel(EvaluationContext context)
+        {
+            if (_submix == 0)
+            {
+                Level.Value = 0;
+                return;
+            }
+
+            var levelData = BassMix.ChannelGetLevel(_submix);
+            if (levelData == -1)
+                return;
+
+            var left = (levelData & 0xFFFF) / 32768f;
+            var right = ((levelData >> 16) & 0xFFFF) / 32768f;
+            Level.Value = Math.Min(Math.Max(left, right), 1f);
         }
 
         private void Update(EvaluationContext context)
