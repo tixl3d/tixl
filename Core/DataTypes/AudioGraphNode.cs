@@ -97,30 +97,55 @@ public sealed class AudioGraphNode
     }
 
     /// <summary>A leaf source reached by the root's collection, paired with its effective gain
-    /// (product of ancestor combinator gains × its own gain) and the FX node it flows through
-    /// (the outermost ancestor declaring an <see cref="FxInsert"/>; null = routed dry).</summary>
+    /// (product of ancestor combinator gains × its own gain) and the FX node it flows into
+    /// (the *nearest* ancestor declaring an <see cref="FxInsert"/>; null = routed dry).</summary>
     public readonly record struct CollectedSource(AudioGraphNode Leaf, float Gain, AudioGraphNode? FxNode = null);
+
+    /// <summary>An FX-declaring node encountered during collection, with the FX node enclosing it
+    /// (null = it feeds the bus directly). Emitted parent-before-child, so a realiser can create the
+    /// nested submix chain in list order.</summary>
+    public readonly record struct FxEdge(AudioGraphNode Fx, AudioGraphNode? Parent);
 
     /// <summary>
     /// Collects reachable leaf sources (depth-first) with effective gain. A combinator folds its own
     /// <see cref="Gain"/> (e.g. a group volume) into all descendants; a leaf contributes its channel at
-    /// the accumulated gain. Leaves without a channel are skipped. Sources under an FX-declaring node are
-    /// tagged with the outermost such ancestor (nested inserts are not realised yet).
+    /// the accumulated gain. Leaves without a channel are skipped. Each source is tagged with its nearest
+    /// FX-declaring ancestor, and the FX nesting structure is reported through <paramref name="fxEdges"/>
+    /// so chained inserts (echo into reverb) realise as nested submixes.
     /// </summary>
-    public void Collect(List<CollectedSource> results, float gainSoFar, AudioGraphNode? fxNode = null)
+    public void Collect(List<CollectedSource> results, float gainSoFar, List<FxEdge>? fxEdges = null, AudioGraphNode? enclosingFx = null)
     {
         var gain = gainSoFar * Gain;
-        fxNode ??= FxInsert != null ? this : null;
+
+        var fx = enclosingFx;
+        if (FxInsert != null)
+        {
+            fx = this;
+            if (fxEdges != null && !ContainsFx(fxEdges, this))
+                fxEdges.Add(new FxEdge(this, enclosingFx));
+        }
 
         if (InputNodes.Count == 0)
         {
             if (SourceChannel != 0)
-                results.Add(new CollectedSource(this, gain, fxNode));
+                results.Add(new CollectedSource(this, gain, fx));
             return;
         }
 
         for (var i = 0; i < InputNodes.Count; i++)
-            InputNodes[i].Collect(results, gain, fxNode);
+            InputNodes[i].Collect(results, gain, fxEdges, fx);
+    }
+
+    // A node reached via two paths keeps its first-seen enclosure (diamonds are rare; first wins).
+    private static bool ContainsFx(List<FxEdge> fxEdges, AudioGraphNode fx)
+    {
+        for (var i = 0; i < fxEdges.Count; i++)
+        {
+            if (ReferenceEquals(fxEdges[i].Fx, fx))
+                return true;
+        }
+
+        return false;
     }
 
     public override string ToString() => SourceLabel ?? _instance.Symbol.Name;

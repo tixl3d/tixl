@@ -108,16 +108,28 @@ public static class PlaybackUtils
     }
 
     /// <summary>
-    /// Scans the current composition path and its parents for a soundtrack
+    /// Scans the current composition path and its parents for a soundtrack. Each level is asked for a
+    /// main soundtrack directly (settings-list entries and op-flagged [AudioClip]s alike) — an op-provided
+    /// soundtrack must be found in whichever composition holds it, independent of where (or whether)
+    /// project settings are enabled.
     /// </summary>
     internal static bool TryFindingSoundtrack([NotNullWhen(true)] out AudioClipResourceHandle? soundtrack,
                                               out IResourceConsumer? composition)
     {
-        var settings = FindCompositionSettings(out composition);
-        if (composition != null)
-            return settings.TryGetMainSoundtrack(composition, out soundtrack);
+        var instance = ProjectView.Focused?.CompositionInstance;
+        while (instance != null)
+        {
+            if (instance.Symbol.CompositionSettings.TryGetMainSoundtrack(instance, out soundtrack))
+            {
+                composition = instance;
+                return true;
+            }
+
+            instance = instance.Parent;
+        }
 
         soundtrack = null;
+        composition = null;
         return false;
     }
 

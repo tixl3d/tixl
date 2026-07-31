@@ -20,7 +20,7 @@ internal static class AudioImageFactory
             return false;
 
         var cacheKey = $"{audioClip.AssetPath}#{(int)style}";
-        if (_loadingClips.ContainsKey(cacheKey))
+        if (_loadingClips.ContainsKey(cacheKey) || _failedClips.ContainsKey(cacheKey))
         {
             imagePath = null;
             return false;
@@ -51,8 +51,11 @@ internal static class AudioImageFactory
                          }
                          else
                          {
+                             // Remember the failure — the renderers ask every frame, and retrying a missing /
+                             // unreadable file each frame floods the log. ResetImageCache clears this.
                              Log.Error($"Failed to create sound image for {audioClip.AssetPath}", handle.Owner);
                              _imageForAudioFiles.TryRemove(cacheKey, out _);
+                             _failedClips.TryAdd(cacheKey, true);
                          }
                      }
                      catch (Exception e)
@@ -61,6 +64,7 @@ internal static class AudioImageFactory
                          // _loadingClips forever — permanently blocking regeneration with no log line.
                          Log.Error($"Sound image generation threw for {audioClip.AssetPath}: {e}", handle.Owner);
                          _imageForAudioFiles.TryRemove(cacheKey, out _);
+                         _failedClips.TryAdd(cacheKey, true);
                      }
                      finally
                      {
@@ -74,10 +78,12 @@ internal static class AudioImageFactory
     public static void ResetImageCache()
     {
         _imageForAudioFiles.Clear();
+        _failedClips.Clear();
     }
 
-    
+
     // TODO: should be a hashset, but there is no ConcurrentHashset -_-
     private static readonly ConcurrentDictionary<string, bool> _loadingClips = new();
+    private static readonly ConcurrentDictionary<string, bool> _failedClips = new();
     private static readonly ConcurrentDictionary<string, string> _imageForAudioFiles = new();
 }

@@ -40,24 +40,23 @@ public sealed class CompositionSettings
 
     public bool TryGetMainSoundtrack(IResourceConsumer? instance, [NotNullWhen(true)] out AudioClipResourceHandle? soundtrack)
     {
-        if (!Enabled)
+        if (Enabled)
         {
-            soundtrack = null;
-            return false;
-        }
+            foreach (var clip in Playback.AudioClips)
+            {
+                if (!clip.IsMainSoundtrack)
+                    continue;
 
-        foreach (var clip in Playback.AudioClips)
-        {
-            if (!clip.IsMainSoundtrack)
-                continue;
-
-            soundtrack = clip.GetResourceHandle(instance);
-            return true;
+                soundtrack = clip.GetResourceHandle(instance);
+                return true;
+            }
         }
 
         // Union with op-provided clips: an [AudioClip] whose Display is BackgroundImage flags its clip as
         // main soundtrack. Keeps background waveform / FFT / export working for projects whose soundtrack
         // is an op rather than a settings-list entry (the settings list is migration-source-only).
+        // Deliberately not gated on Enabled — the op is graph content and exists regardless of whether
+        // the composition ever opened its project settings.
         if (instance is Operator.Instance settingsOwner)
         {
             foreach (var child in settingsOwner.Children.Values)

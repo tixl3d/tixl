@@ -146,9 +146,26 @@ internal static class LegacyAudioClipMigration
 
     private static void SetInput(Symbol symbol, Symbol.Child child, Guid inputId, InputValue value)
     {
-        // The command handles value assignment, instance invalidation and modified-flagging; it is executed
-        // directly and never pushed to the undo stack — a save-time migration isn't an undoable user edit.
-        new ChangeInputValueCommand(symbol, child.Id, child.Inputs[inputId], value).Do();
+        // Runs at startup, before any Playback exists — ChangeInputValueCommand reads Playback.Current in
+        // its constructor, so assign directly and invalidate already-created instances ourselves.
+        var input = child.Inputs[inputId];
+        input.IsDefault = false;
+        input.Value.Assign(value);
+
+        foreach (var parentInstance in symbol.InstancesOfSelf)
+        {
+            if (!parentInstance.Children.TryGetChildInstance(child.Id, out var childInstance))
+                continue;
+
+            foreach (var slot in childInstance.Inputs)
+            {
+                if (slot.Id != inputId)
+                    continue;
+
+                slot.DirtyFlag.ForceInvalidate();
+                break;
+            }
+        }
     }
 
     private static bool TryGetClipDurationSecs(Symbol symbol, TimelineAudioClip clip, out double durationSecs)
