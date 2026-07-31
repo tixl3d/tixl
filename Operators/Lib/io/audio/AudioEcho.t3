@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "a7c54fb0-1e42-4c8a-9f31-0ab1cd2e0500"/*AudioEcho*/,
+  "Inputs": [
+    {
+      "Id": "a7c54fb0-0002-4c8a-9f31-0ab1cd2e0500"/*Input*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a7c54fb0-0003-4c8a-9f31-0ab1cd2e0500"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "a7c54fb0-0004-4c8a-9f31-0ab1cd2e0500"/*Mix*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "a7c54fb0-0005-4c8a-9f31-0ab1cd2e0500"/*Delay*/,
+      "DefaultValue": 0.3
+    },
+    {
+      "Id": "a7c54fb0-0006-4c8a-9f31-0ab1cd2e0500"/*Feedback*/,
+      "DefaultValue": 0.4
+    },
+    {
+      "Id": "a7c54fb0-0007-4c8a-9f31-0ab1cd2e0500"/*PingPong*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

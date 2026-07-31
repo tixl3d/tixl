@@ -48,7 +48,10 @@ Spike validation (R1 collection / R2 live BASS routing / join + animated params)
 - Perf note (discussed 2026-07-31): don't gate bus reconciliation on the composition's `VersionCounter` — channel handles change without structural edits (clip streams follow the playhead, lazy stream creation, hot reload) and the graph can span composition boundaries; the per-frame diff is what self-heals those. If reconciliation ever profiles hot, the designated lever is `StructureHash`/`ChangedFlags` computed in the traversal (incl. channel handles), per the ShaderGraphNode pattern.
 - Still open in G5: `Direct`/spatial realization, multi-send split streams, nested FX-in-FX chains, FFT-as-graph-tap (→ "Retire IsMainSoundtrack" §3). Known limitation: `[AudioLevel]` can't meter a graph-routed `[AudioClip]` (its channel is added un-buffered) — but the bus `Level` output covers metering a bus that contains clips.
 
-**Next:** live-test bus `Level` + `[AudioReverb]` (tone → reverb → bus; unwire mid-tail to hear the fade), then `Direct`/spatial realization or further FX ops (echo/compressor reuse the same insert mechanism).
+- `[AudioReverb]` + bus `Level` user-tested ✅ (committed). Note: DX8 reverb decay is hard-capped at 3 s (`fReverbTime` ≤ 3000 ms) — longer tails need the BASS_FX backend swap.
+- `[AudioEcho]` (Mix/Delay/Feedback/PingPong → DX8 echo; delay ≤ 2 s is a DX8 cap) and `[AudioCompressor]` (linear Threshold like the meter ops → dB, Ratio, Attack/Release secs, MakeupGainDb) landed 2026-07-31 — same insert mechanism, needs live test.
+
+**Next:** live-test echo/compressor, then `Direct`/spatial realization (graph-integrating `[PlaySpatialAudioSample]`/`[PlayAudioSample]`), nested FX chains, or start Phase B (settings-list migration + Display/Style).
 
 ## Graduation steps (spike → real ops)
 
