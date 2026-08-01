@@ -48,7 +48,7 @@ namespace Lib.io.audio
         // Bus-side callbacks — invoked per realised submix (a node can be realised by more than one bus).
         private void ApplyFx(int submix)
         {
-            var fxHandle = Bass.ChannelSetFX(submix, EffectType.DXCompressor, 0);
+            var fxHandle = Bass.ChannelSetFX(submix, NativeDx8Compressor, 0);
             if (fxHandle == 0)
             {
                 Log.Warning($"[AudioCompressor] failed to set compressor: {Bass.LastError}", this);
@@ -69,6 +69,10 @@ namespace Lib.io.audio
         {
             _fxHandles.Remove(submix); // freeing the submix frees the effect with it
         }
+
+        // ManagedBass's EffectType misnumbers the DX8 effects (its DXCompressor=4 is natively FLANGER).
+        // BASS_FX_DX8_COMPRESSOR is 1.
+        private const EffectType NativeDx8Compressor = (EffectType)1;
 
         private readonly AudioGraphNode _node;
         private readonly DXCompressorParameters _parameters = new();

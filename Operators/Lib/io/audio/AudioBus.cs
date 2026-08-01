@@ -70,13 +70,27 @@ namespace Lib.io.audio
             AudioBusRegistry.MarkAlive(_submix);
 
             _collected.Clear();
+            _fxEdges.Clear();
             var inputs = Input.GetCollectedTypedInputs(true);
             for (var i = 0; i < inputs.Count; i++)
-                inputs[i]?.GetValue(context)?.Collect(_collected, 1f);
+                inputs[i]?.GetValue(context)?.Collect(_collected, 1f, _fxEdges);
             Input.DirtyFlag.Clear();
 
-            // Realise FX-declaring nodes as nested submixes under the bus and resolve each source's target
-            // mixer (its FX group's submix, or the bus itself when routed dry).
+            // Realise the FX nesting as a chain of nested submixes. Edges arrive parent-before-child, so
+            // an enclosing FX group's submix exists before its inner groups need it as their parent.
+            for (var i = 0; i < _fxEdges.Count; i++)
+            {
+                var edge = _fxEdges[i];
+                var parentMixer = _submix;
+                if (edge.Parent != null && _fxGroups.TryGetValue(edge.Parent, out var parentGroup))
+                    parentMixer = parentGroup.Submix;
+
+                var group = EnsureFxGroup(edge.Fx, parentMixer);
+                if (group != null)
+                    group.LastAliveFrame = Playback.FrameCount;
+            }
+
+            // Resolve each source's target mixer: its nearest FX group's submix, or the bus when routed dry.
             _desiredTargets.Clear();
             _externallyManaged.Clear();
             for (var i = 0; i < _collected.Count; i++)
@@ -90,15 +104,8 @@ namespace Lib.io.audio
                     continue;
 
                 var target = _submix;
-                if (src.FxNode != null)
-                {
-                    var group = EnsureFxGroup(src.FxNode);
-                    if (group != null)
-                    {
-                        group.LastAliveFrame = Playback.FrameCount;
-                        target = group.Submix;
-                    }
-                }
+                if (src.FxNode != null && _fxGroups.TryGetValue(src.FxNode, out var group))
+                    target = group.Submix;
 
                 _desiredTargets[ch] = target;
                 if (src.Leaf.ExternallyManagedChannel)
@@ -119,11 +126,12 @@ namespace Lib.io.audio
                     && BassMix.ChannelGetMixer(ch) == target)
                     continue;
 
-                // A clip channel lives in the SoundtrackMixer (engine-owned) — a BASS channel can only be in one
-                // mixer, so pull it out first, and add it un-buffered: MixerChanBuffer latency would break the
-                // engine's per-frame seek/resync of the clip position.
+                // A BASS channel can only be in one mixer — pull it out of wherever it currently sits
+                // (the engine's SoundtrackMixer for clip channels, or another bus's submix after a
+                // pin/rewire handoff) before adding. Clip channels are added un-buffered: MixerChanBuffer
+                // latency would break the engine's per-frame seek/resync of the clip position.
                 var externallyManaged = _externallyManaged.Contains(ch);
-                if (externallyManaged || _routedTargets.ContainsKey(ch))
+                if (BassMix.ChannelGetMixer(ch) != 0)
                     BassMix.MixerRemoveChannel(ch);
 
                 var flags = externallyManaged ? BassFlags.Default : BassFlags.MixerChanBuffer;
@@ -134,6 +142,7 @@ namespace Lib.io.audio
                 }
                 else
                 {
+                    Log.Warning($"[AudioBus] failed to route channel {ch}: {Bass.LastError}", this);
                     _routedTargets.Remove(ch);
                 }
             }
@@ -167,17 +176,31 @@ namespace Lib.io.audio
             Log.Debug($"[AudioBus] routing {_routedTargets.Count} channel(s): {labels}", this);
         }
 
-        // One nested submix per FX-declaring node currently flowing into this bus.
+        // One nested submix per FX-declaring node currently flowing into this bus. ParentMixer is the
+        // submix of the enclosing FX group (or the bus submix) — chained inserts nest.
         private sealed class FxGroup
         {
             public int Submix;
+            public int ParentMixer;
             public int LastAliveFrame;
         }
 
-        private FxGroup? EnsureFxGroup(AudioGraphNode fxNode)
+        private FxGroup? EnsureFxGroup(AudioGraphNode fxNode, int parentMixer)
         {
             if (_fxGroups.TryGetValue(fxNode, out var group))
+            {
+                // Rewiring can change what encloses this insert — move the submix to its new parent.
+                if (group.ParentMixer != parentMixer)
+                {
+                    BassMix.MixerRemoveChannel(group.Submix);
+                    if (BassMix.MixerAddChannel(parentMixer, group.Submix, BassFlags.MixerChanBuffer))
+                        group.ParentMixer = parentMixer;
+                    else
+                        Log.Warning($"[AudioBus] failed to re-parent FX submix: {Bass.LastError}", this);
+                }
+
                 return group;
+            }
 
             var submix = BassMix.CreateMixerStream(AudioConfig.MixerFrequency, 2, BassFlags.MixerNonStop | BassFlags.Decode | BassFlags.Float);
             if (submix == 0)
@@ -186,14 +209,14 @@ namespace Lib.io.audio
                 return null;
             }
 
-            if (!BassMix.MixerAddChannel(_submix, submix, BassFlags.MixerChanBuffer))
+            if (!BassMix.MixerAddChannel(parentMixer, submix, BassFlags.MixerChanBuffer))
             {
                 Log.Error($"[AudioBus] failed to add FX submix to bus: {Bass.LastError}", this);
                 Bass.StreamFree(submix);
                 return null;
             }
 
-            group = new FxGroup { Submix = submix, LastAliveFrame = Playback.FrameCount };
+            group = new FxGroup { Submix = submix, ParentMixer = parentMixer, LastAliveFrame = Playback.FrameCount };
             _fxGroups.Add(fxNode, group);
             fxNode.FxInsert?.Apply(submix);
             return group;
@@ -286,6 +309,7 @@ namespace Lib.io.audio
         private readonly Dictionary<int, int> _routedTargets = new();   // channel → mixer it sits in
         private readonly List<int> _toRemove = new();
         private readonly Dictionary<AudioGraphNode, FxGroup> _fxGroups = new();
+        private readonly List<AudioGraphNode.FxEdge> _fxEdges = new();
         private readonly List<AudioGraphNode> _fxGroupsToRetire = new();
         private readonly List<(int Submix, double FreeAfter)> _pendingFrees = new();
         private int _submix;

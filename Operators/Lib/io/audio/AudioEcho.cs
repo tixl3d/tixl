@@ -1,6 +1,5 @@
 #nullable enable
 using ManagedBass;
-using ManagedBass.DirectX8;
 
 namespace Lib.io.audio
 {
@@ -35,19 +34,41 @@ namespace Lib.io.audio
             _node.Gain = Volume.GetValue(context);
 
             var delayMs = Math.Clamp(Delay.GetValue(context), 0.001f, 2f) * 1000f;
-            _parameters.fWetDryMix = Math.Clamp(Mix.GetValue(context), 0f, 1f) * 100f;
-            _parameters.fFeedback = Math.Clamp(Feedback.GetValue(context), 0f, 0.99f) * 100f;
-            _parameters.fLeftDelay = delayMs;
-            _parameters.fRightDelay = delayMs;
-            _parameters.lPanDelay = PingPong.GetValue(context);
+            _parameters.WetDryMix = Math.Clamp(Mix.GetValue(context), 0f, 1f) * 100f;
+            _parameters.Feedback = Math.Clamp(Feedback.GetValue(context), 0f, 0.99f) * 100f;
+            _parameters.LeftDelay = delayMs;
+            _parameters.RightDelay = delayMs;
+            _parameters.PanDelay = PingPong.GetValue(context) ? 1 : 0;
 
             _node.Update(context);
+        }
+
+        // ManagedBass's DXEchoParameters class fails FXSetParameters with an "illegal parameter" error even
+        // for spec-default values (verified by probing), so the parameters are pushed as a raw native struct
+        // matching the DirectX DSFXEcho layout instead.
+        [StructLayout(LayoutKind.Sequential)]
+        private struct EchoParamsNative
+        {
+            public float WetDryMix;   // 0..100
+            public float Feedback;    // 0..100
+            public float LeftDelay;   // 1..2000 ms
+            public float RightDelay;  // 1..2000 ms
+            public int PanDelay;      // BOOL: swap repeats between channels
+        }
+
+        private bool PushParams(int fxHandle)
+        {
+            if (_nativeParamsPtr == IntPtr.Zero)
+                _nativeParamsPtr = Marshal.AllocHGlobal(Marshal.SizeOf<EchoParamsNative>());
+
+            Marshal.StructureToPtr(_parameters, _nativeParamsPtr, false);
+            return Bass.FXSetParameters(fxHandle, _nativeParamsPtr);
         }
 
         // Bus-side callbacks — invoked per realised submix (a node can be realised by more than one bus).
         private void ApplyFx(int submix)
         {
-            var fxHandle = Bass.ChannelSetFX(submix, EffectType.DXEcho, 0);
+            var fxHandle = Bass.ChannelSetFX(submix, NativeDx8Echo, 0);
             if (fxHandle == 0)
             {
                 Log.Warning($"[AudioEcho] failed to set echo: {Bass.LastError}", this);
@@ -55,13 +76,14 @@ namespace Lib.io.audio
             }
 
             _fxHandles[submix] = fxHandle;
-            Bass.FXSetParameters(fxHandle, _parameters);
+            if (!PushParams(fxHandle))
+                Log.Warning($"[AudioEcho] failed to set echo parameters: {Bass.LastError}", this);
         }
 
         private void UpdateFxParams(int submix)
         {
             if (_fxHandles.TryGetValue(submix, out var fxHandle))
-                Bass.FXSetParameters(fxHandle, _parameters);
+                PushParams(fxHandle);
         }
 
         private void RemoveFx(int submix)
@@ -69,8 +91,19 @@ namespace Lib.io.audio
             _fxHandles.Remove(submix); // freeing the submix frees the effect with it
         }
 
+        ~AudioEcho()
+        {
+            if (_nativeParamsPtr != IntPtr.Zero)
+                Marshal.FreeHGlobal(_nativeParamsPtr);
+        }
+
+        // ManagedBass's EffectType misnumbers the DX8 effects (its DXEcho=2 is natively DISTORTION —
+        // verified by reading back distortion defaults from the created effect). BASS_FX_DX8_ECHO is 3.
+        private const EffectType NativeDx8Echo = (EffectType)3;
+
         private readonly AudioGraphNode _node;
-        private readonly DXEchoParameters _parameters = new();
+        private EchoParamsNative _parameters;
+        private IntPtr _nativeParamsPtr;
         private readonly Dictionary<int, int> _fxHandles = new(); // submix → fx handle
 
         [Input(Guid = "a7c54fb0-0002-4c8a-9f31-0ab1cd2e0500")]
