@@ -24,19 +24,39 @@ internal sealed class TimeLineImage
 
         var size = ImGui.GetWindowSize();
         var yMin = ImGui.GetWindowPos().Y;
-        
-            
-        // BPM lives on Playback now (post Phase B). Same math as before, just sourced from there.
+
+        // BPM lives on Playback now (post Phase B).
         var bpm = (float)TimeLineCanvas.Current.Playback.Bpm;
-        var songDurationInBars = (float)(clip.LengthInSeconds * bpm / 240);
+        var barsPerSecond = bpm / 240f;
+        var songDurationInBars = (float)(clip.LengthInSeconds * barsPerSecond);
+        if (songDurationInBars <= 0)
+            return;
+
+        // Show exactly the audible window: start at the clip's source offset and clamp to its trimmed
+        // end (End <= Start means "play until the content runs out"). The image UVs map the same window,
+        // so a trimmed or offset clip's background stays aligned with what is actually heard.
+        var sourceOffsetBars = (float)(clip.SourceOffsetSecs * barsPerSecond);
+        var availableBars = songDurationInBars - sourceOffsetBars;
+        var hasClipEnd = clip.TimeRange.End > clip.TimeRange.Start;
+        var visibleBars = hasClipEnd
+                              ? Math.Min(clip.TimeRange.End - clip.TimeRange.Start, availableBars)
+                              : availableBars;
+        if (visibleBars <= 0)
+            return;
+
         var xMin = TimeLineCanvas.Current.TransformX(clip.TimeRange.Start);
-        var xMax = TimeLineCanvas.Current.TransformX(songDurationInBars + clip.TimeRange.Start);
-            
+        var xMax = TimeLineCanvas.Current.TransformX(clip.TimeRange.Start + visibleBars);
+
+        var u0 = sourceOffsetBars / songDurationInBars;
+        var u1 = (sourceOffsetBars + visibleBars) / songDurationInBars;
+
         if (_srv is { IsDisposed: false })
         {
-            drawList.AddImage((IntPtr)_srv, 
-                              new Vector2(xMin, yMin), 
-                              new Vector2(xMax, yMin + size.Y));
+            drawList.AddImage((IntPtr)_srv,
+                              new Vector2(xMin, yMin),
+                              new Vector2(xMax, yMin + size.Y),
+                              new Vector2(u0, 0),
+                              new Vector2(u1, 1));
         }
     }
 
