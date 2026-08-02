@@ -61,6 +61,26 @@ namespace Lib.io.audio
             _lastEvaluationFrame = Playback.FrameCount;
             AudioExportSourceRegistry.Register(this);
 
+            // A device change tears down BASS entirely — every cached mixer handle is dead. Drop all
+            // routing state so the submix and FX groups rebuild from scratch (inserts re-Apply on the
+            // new submixes); without this the reconciler retries dead handles every frame.
+            if (_mixerGeneration != AudioMixerManager.ResetGeneration)
+            {
+                _mixerGeneration = AudioMixerManager.ResetGeneration;
+                if (_submix != 0)
+                {
+                    AudioBusRegistry.Unregister(_submix);
+                    _submix = 0;
+                }
+
+                foreach (var (fxNode, group) in _fxGroups)
+                    fxNode.FxInsert?.Remove(group.Submix);
+
+                _fxGroups.Clear();
+                _routedTargets.Clear();
+                _pendingFrees.Clear();
+            }
+
             EnsureSubmix();
             if (_submix == 0)
                 return;
@@ -328,6 +348,7 @@ namespace Lib.io.audio
         private readonly List<AudioGraphNode> _fxGroupsToRetire = new();
         private readonly List<(int Submix, double FreeAfter)> _pendingFrees = new();
         private int _submix;
+        private int _mixerGeneration;
         private int _lastEvaluationFrame = -100;
         private float _measuredLevel;
         private int _lastLevelFrame = -1;
