@@ -76,6 +76,9 @@ namespace Lib.io.audio
                 inputs[i]?.GetValue(context)?.Collect(_collected, 1f, _fxEdges);
             Input.DirtyFlag.Clear();
 
+            if (AutoCollectClips.GetValue(context))
+                CollectLooseClips(context);
+
             // Realise the FX nesting as a chain of nested submixes. Edges arrive parent-before-child, so
             // an enclosing FX group's submix exists before its inner groups need it as their parent.
             for (var i = 0; i < _fxEdges.Count; i++)
@@ -110,6 +113,7 @@ namespace Lib.io.audio
                 _desiredTargets[ch] = target;
                 if (src.Leaf.ExternallyManagedChannel)
                     _externallyManaged.Add(ch);
+                src.Leaf.LastCollectedFrame = Playback.FrameCount;
                 Bass.ChannelSetAttribute(ch, ChannelAttribute.Volume, src.Gain);
             }
 
@@ -174,6 +178,16 @@ namespace Lib.io.audio
 
             var labels = string.Join(", ", _collected.ConvertAll(c => c.FxNode == null ? $"{c.Leaf}×{c.Gain:0.00}" : $"{c.Leaf}×{c.Gain:0.00}→{c.FxNode}"));
             Log.Debug($"[AudioBus] routing {_routedTargets.Count} channel(s): {labels}", this);
+        }
+
+        // Auto-collect: [AudioClip] siblings whose AudioReference isn't wired anywhere route through this
+        // bus as if they were — evaluating their reference output doubles as the playback heartbeat.
+        // Only one op per composition should auto-collect (two would contend for the same channels).
+        private void CollectLooseClips(EvaluationContext context)
+        {
+            var looseOutputs = _looseClipScanner.GetLooseClipOutputs(Parent);
+            for (var i = 0; i < looseOutputs.Count; i++)
+                looseOutputs[i].GetValue(context)?.Collect(_collected, 1f, _fxEdges);
         }
 
         // One nested submix per FX-declaring node currently flowing into this bus. ParentMixer is the
@@ -308,6 +322,7 @@ namespace Lib.io.audio
         private readonly HashSet<int> _externallyManaged = new();
         private readonly Dictionary<int, int> _routedTargets = new();   // channel → mixer it sits in
         private readonly List<int> _toRemove = new();
+        private readonly LooseAudioClipScanner _looseClipScanner = new();
         private readonly Dictionary<AudioGraphNode, FxGroup> _fxGroups = new();
         private readonly List<AudioGraphNode.FxEdge> _fxEdges = new();
         private readonly List<AudioGraphNode> _fxGroupsToRetire = new();
@@ -323,5 +338,8 @@ namespace Lib.io.audio
 
         [Input(Guid = "b7e0d240-0003-4c8a-9f31-0ab1cd2e0100")]
         public readonly InputSlot<float> Volume = new();
+
+        [Input(Guid = "b7e0d240-0005-4c8a-9f31-0ab1cd2e0100")]
+        public readonly InputSlot<bool> AutoCollectClips = new();
     }
 }

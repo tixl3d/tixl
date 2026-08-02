@@ -50,6 +50,10 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
 
     public TimeClipInteractions OpClips { get; }
 
+    /// <summary>All op time clips of the current composition (refreshed each frame) — e.g. so playback
+    /// jump actions can treat clip starts/ends as jump targets.</summary>
+    internal IEnumerable<TimeClip> AllTimeClips => _context.ClipSelection.CompositionTimeClips.Values;
+
     public void Draw(Instance compositionOp, Playback playback, ValueSnapHandler snapHandler)
     {
         _drawList = ImGui.GetWindowDrawList();

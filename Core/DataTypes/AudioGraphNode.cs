@@ -40,6 +40,10 @@ public sealed class AudioGraphNode
     /// <summary>Per-node gain the root applies to this source's channel when routing it.</summary>
     public float Gain = 1f;
 
+    /// <summary>Stamped by a routing bus each frame it collects this leaf. Lets a source op detect that it
+    /// is graph-routed even without a direct wire (an auto-collected clip), so it hands its channel over.</summary>
+    public int LastCollectedFrame = -100;
+
     /// <summary>Combinator only: declares an FX insert the routing bus realises as a nested submix carrying
     /// this node's collected sources. The wire stays BASS-agnostic — the declaring op applies and updates the
     /// actual effect through the callbacks. Null = no insert.</summary>

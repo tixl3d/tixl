@@ -100,11 +100,15 @@ internal static class TimeClipItem
 
         // Media clips render slightly translucent and solidify on hover — together with the
         // footage-extent outline this links the clip body to its available source range.
+        // Muted audio clips fade further so the silence is visible at a glance.
+        var isClipHovered = ImGui.IsMouseHoveringRect(position, itemRectMax);
         var mediaHoverFade = 1f;
         if (isAudioClip || isVideoClip)
         {
-            var isHoveredForFill = ImGui.IsMouseHoveringRect(position, itemRectMax);
-            mediaHoverFade = isHoveredForFill ? 1f : 0.6f;
+            mediaHoverFade = isClipHovered ? 1f : 0.6f;
+
+            if (clipInstance is IAudioClipProvider audioProvider && audioProvider.GetResourceHandle().Clip.IsMuted)
+                mediaHoverFade *= 0.4f;
         }
 
         var innerColor = Color.Mix(UiColors.BackgroundFull,randomColor,0.5f).Fade(0.8f * fadeIfNotConnected * fadeIfInActive * mediaHoverFade);
@@ -134,10 +138,10 @@ internal static class TimeClipItem
                 if (!string.IsNullOrEmpty(path))
                 {
                     var fileName = System.IO.Path.GetFileNameWithoutExtension(path);
-                    // A renamed op keeps its custom name visible alongside the file it
-                    // references, e.g. "Song 1 (rec-004)"; an unnamed op shows just the file.
+                    // A renamed op shows just its custom name in quotes (the file it references moves to
+                    // the tooltip); an unnamed op shows the filename.
                     nameSource = symbolChildUi.SymbolChild.HasCustomName
-                                     ? $"{symbolChildUi.SymbolChild.Name} ({fileName})"
+                                     ? $"\"{symbolChildUi.SymbolChild.Name}\""
                                      : fileName;
                 }
             }
@@ -159,7 +163,12 @@ internal static class TimeClipItem
             if (needsClipping)
                 ImGui.PushClipRect(position, itemRectMax - new Vector2(3, 0), true);
 
-            attr.DrawList.AddText(labelPos, isSelected ? UiColors.Selection : randomColor.Fade(fadeIfNotConnected), label);
+            // Mixing the type color toward the foreground keeps labels readable on the tinted bodies;
+            // hover brightens further, and selection keeps its distinct color.
+            var labelColor = isSelected
+                                 ? UiColors.Selection
+                                 : Color.Mix(randomColor, UiColors.ForegroundFull, isClipHovered ? 0.9f : 0.7f).Fade(fadeIfNotConnected);
+            attr.DrawList.AddText(labelPos, labelColor, label);
 
             if (needsClipping)
                 ImGui.PopClipRect();
@@ -227,6 +236,15 @@ internal static class TimeClipItem
                 }
 
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+
+                // The referenced asset — renamed clips no longer show it in their label.
+                if (clipInstance is T3.Core.Operator.Interfaces.IDescriptiveFilename tooltipFile)
+                {
+                    var assetPath = tooltipFile.SourcePathSlot.TypedInputValue.Value;
+                    if (!string.IsNullOrEmpty(assetPath))
+                        ImGui.TextUnformatted(System.IO.Path.GetFileName(assetPath));
+                }
+
                 ImGui.TextUnformatted($"Visible: {timeClip.TimeRange.Start:0.00} ... {timeClip.TimeRange.End:0.00}");
                 if (timeRemapped)
                 {
@@ -354,15 +372,17 @@ internal static class TimeClipItem
     /// </summary>
     private static void HandleDragging(ClipDrawingAttributes attr, TimeClip timeClip, bool isSelected, bool wasClicked, HandleDragMode mode)
     {
-        if (ImGui.IsItemHovered())
+        var isDeactivated = ImGui.IsItemDeactivated();
+        var isActive = ImGui.IsItemActive();
+
+        // Keep the cursor stable through the whole drag: during a trim the mouse regularly outruns the
+        // narrow handle rect, and hover-only cursor setting made it flicker between resize and arrow.
+        if (ImGui.IsItemHovered() || isActive)
         {
             ImGui.SetMouseCursor(mode == HandleDragMode.Body
                                      ? ImGuiMouseCursor.Hand
                                      : ImGuiMouseCursor.ResizeEW);
         }
-        
-        var isDeactivated = ImGui.IsItemDeactivated();
-        var isActive = ImGui.IsItemActive();
         if (!isActive && !isDeactivated )
             return;
         

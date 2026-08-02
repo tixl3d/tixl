@@ -79,9 +79,10 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         _node.Update(context);
     }
 
-    // The clip hands its channel to the graph only while its AudioReference is actually wired into a bus.
-    // Deterministic (a connection query), so it's safe to call from whichever per-frame hook runs first.
-    private void RefreshGraphRouting() => _clip.IsRoutedToGraph = IsAudioReferenceWired();
+    // The clip hands its channel to the graph while its AudioReference is wired into a bus, or while a bus
+    // auto-collects it (detected via the node's collected-frame stamp; 2-frame slack covers update order).
+    private void RefreshGraphRouting() =>
+        _clip.IsRoutedToGraph = IsAudioReferenceWired() || Playback.FrameCount - _node.LastCollectedFrame <= 2;
 
     private bool IsAudioReferenceWired()
     {

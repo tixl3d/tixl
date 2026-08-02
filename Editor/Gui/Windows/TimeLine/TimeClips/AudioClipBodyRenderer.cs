@@ -49,6 +49,9 @@ internal static class AudioClipBodyRenderer
         if (!TryGetWaveformSrv(path, instance, style, out var srv))
             return;
 
+        // Muted clips fade their waveform too, matching the faded clip body.
+        var contentFade = clipData.IsMuted ? 0.3f : 1f;
+
         drawList.PushClipRect(bodyMin, bodyMax, true);
 
         // The body maps linearly to the clip's source window [SourceRange.Start, SourceRange.End]
@@ -94,7 +97,7 @@ internal static class AudioClipBodyRenderer
                                           new Vector2(segmentEndX, bodyMax.Y),
                                           new Vector2(u0, 0),
                                           new Vector2(u0 + (u1 - u0) * visibleFraction, 1),
-                                          UiColors.ForegroundFull.Fade(1f));
+                                          UiColors.ForegroundFull.Fade(contentFade));
 
                         if (segmentStartX > bodyMin.X)
                         {
@@ -120,7 +123,7 @@ internal static class AudioClipBodyRenderer
                                   new Vector2(bodyMin.X + x0 * bodyWidth + 1, bodyMin.Y + 1),
                                   new Vector2(bodyMin.X + x1 * bodyWidth - 1, bodyMax.Y - 1),
                                   new Vector2(u0, 0), new Vector2(u1, 1),
-                                  UiColors.ForegroundFull.Fade(1f));
+                                  UiColors.ForegroundFull.Fade(contentFade));
                 drawn = true;
             }
         }
@@ -131,7 +134,7 @@ internal static class AudioClipBodyRenderer
                               bodyMin + new Vector2(1, 1),
                               bodyMax - new Vector2(1, 1),
                               Vector2.Zero, Vector2.One,
-                              UiColors.ForegroundFull.Fade(0.5f));
+                              UiColors.ForegroundFull.Fade(0.5f * contentFade));
         }
 
         drawList.PopClipRect();

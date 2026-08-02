@@ -9,6 +9,10 @@
     {
       "Id": "b7e0d240-0003-4c8a-9f31-0ab1cd2e0100"/*Volume*/,
       "DefaultValue": 1.0
+    },
+    {
+      "Id": "b7e0d240-0005-4c8a-9f31-0ab1cd2e0100"/*AutoCollectClips*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],
