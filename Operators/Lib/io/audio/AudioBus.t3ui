@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "b7e0d240-1e42-4c8a-9f31-0ab1cd2e0100"/*AudioBus*/,
+  "Description": "Output of the audio processing graph. Collects the audio sources wired into it (recursively, through [CombineAudio]s) and routes them into a bus under the operator mixer, with a master Volume.\n\nWire Result into your render command chain so it is evaluated each frame. The Level output meters the bus's summed signal (before the master Volume) for reactive control — e.g. wire it through a [DuckAudioLevel] into another bus's Volume.\n\nWith AutoCollectClips enabled, [AudioClip]s in the same composition whose AudioReference isn't wired anywhere also route through this bus — no wiring needed. Only one bus per composition should auto-collect.",
+  "InputUis": [
+    {
+      "InputId": "b7e0d240-0002-4c8a-9f31-0ab1cd2e0100"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "b7e0d240-0003-4c8a-9f31-0ab1cd2e0100"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "b7e0d240-0005-4c8a-9f31-0ab1cd2e0100"/*AutoCollectClips*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Also routes [AudioClip]s of this composition whose AudioReference isn't wired anywhere through this bus. Only one bus per composition should auto-collect."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b7e0d240-0001-4c8a-9f31-0ab1cd2e0100"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "b7e0d240-0004-4c8a-9f31-0ab1cd2e0100"/*Level*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

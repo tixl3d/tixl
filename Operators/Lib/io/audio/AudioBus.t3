@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "b7e0d240-1e42-4c8a-9f31-0ab1cd2e0100"/*AudioBus*/,
+  "Inputs": [
+    {
+      "Id": "b7e0d240-0002-4c8a-9f31-0ab1cd2e0100"/*Input*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b7e0d240-0003-4c8a-9f31-0ab1cd2e0100"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "b7e0d240-0005-4c8a-9f31-0ab1cd2e0100"/*AutoCollectClips*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

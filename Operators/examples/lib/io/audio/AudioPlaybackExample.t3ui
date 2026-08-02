@@ -53,7 +53,7 @@
       }
     },
     {
-      "ChildId": "1732c27d-296c-4653-aa4c-36330437fd16"/*SpatialAudioPlayer*/,
+      "ChildId": "1732c27d-296c-4653-aa4c-36330437fd16"/*PlaySpatialAudioSample*/,
       "SectionId": "bd18fc69-48d9-41bb-8cf1-1e4250d89800",
       "Position": {
         "X": 1695.2926,
@@ -61,7 +61,7 @@
       }
     },
     {
-      "ChildId": "27374ba9-2136-4833-8c52-a24a27068def"/*AudioPlayer*/,
+      "ChildId": "27374ba9-2136-4833-8c52-a24a27068def"/*PlayAudioSample*/,
       "SectionId": "07d4ade6-c122-4d42-9404-b37fa2685d76",
       "Position": {
         "X": 1276.0958,
@@ -163,6 +163,13 @@
       }
     },
     {
+      "ChildId": "4f305a9e-d48b-4775-8cf4-cbfed592c467"/*AudioClip*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    },
+    {
       "ChildId": "5087c3ba-17d3-44b1-b72e-2e967bade57a"/*PlaybackFFT*/,
       "SectionId": "d4937a55-6592-41ac-970c-13ff0c74ff66",
       "Position": {
@@ -203,7 +210,7 @@
       }
     },
     {
-      "ChildId": "5db4da1e-801f-42e6-85b7-28e71b3a59c0"/*AudioPlayer*/,
+      "ChildId": "5db4da1e-801f-42e6-85b7-28e71b3a59c0"/*PlayAudioSample*/,
       "SectionId": "07d4ade6-c122-4d42-9404-b37fa2685d76",
       "Position": {
         "X": 1276.0958,
@@ -298,7 +305,7 @@
       }
     },
     {
-      "ChildId": "9a384a77-89fc-4dfd-b097-e110f35a00ea"/*SpatialAudioPlayer*/,
+      "ChildId": "9a384a77-89fc-4dfd-b097-e110f35a00ea"/*PlaySpatialAudioSample*/,
       "SectionId": "bd18fc69-48d9-41bb-8cf1-1e4250d89800",
       "Position": {
         "X": 1695.2925,
@@ -314,7 +321,7 @@
       }
     },
     {
-      "ChildId": "9c770b7d-356d-499a-9f0a-bca3f40a0776"/*AudioPlayer*/,
+      "ChildId": "9c770b7d-356d-499a-9f0a-bca3f40a0776"/*PlayAudioSample*/,
       "SectionId": "07d4ade6-c122-4d42-9404-b37fa2685d76",
       "Position": {
         "X": 1276.0958,
@@ -494,7 +501,7 @@
     },
     {
       "Id": "0e403d24-923c-4b02-b36f-88f6fcbbf782",
-      "Title": "[AudioPlayer] is a fully featured audio player.",
+      "Title": "[PlayAudioSample] is a fully featured audio player.",
       "Label": "Overview",
       "Color": {
         "X": 0.6,
@@ -513,7 +520,7 @@
     },
     {
       "Id": "1ddc25b2-2224-42b1-8c9a-f0fd196fe972",
-      "Title": "The ADSR Envelope operator is a frame-based version of the envelope\nfrom the AudioPLayer and AudioToneGenerator\n\nIt will cause stepping on audio operators, but perfect for video!",
+      "Title": "The ADSR Envelope operator is a frame-based version of the envelope\nfrom the PlayAudioSample and AudioToneGenerator\n\nIt will cause stepping on audio operators, but perfect for video!",
       "Label": "ADSR Envelope",
       "Color": {
         "X": 0.6,
@@ -587,7 +594,7 @@
     },
     {
       "Id": "fec0ae18-fde0-4d2b-bb6f-262b39dc7067",
-      "Title": "[SpatialAudioPlayer] converts samples to Mono to\nenable hardware accelerated spatial/3D audio\npositioning and effects,  (including dopplar!)",
+      "Title": "[PlaySpatialAudioSample] converts samples to Mono to\nenable hardware accelerated spatial/3D audio\npositioning and effects,  (including dopplar!)",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -603,5 +610,39 @@
         "Y": 136.13824
       }
     }
-  ]
+  ],
+  "Settings": {
+    "RenderExport": {
+  "TimeReference": "Bars",
+  "StartInBars": 0.0,
+  "EndInBars": 8.0,
+  "FrameRate": 60.0,
+  "OverrideMotionBlurSamples": -1,
+  "RenderMode": "Video",
+  "VideoCodec": "H264",
+  "Bitrate": 25000000,
+  "AutoIncrementVersionNumber": true,
+  "CreateSubFolder": true,
+  "AutoIncrementSubFolder": true,
+  "ExportAudio": true,
+  "FileFormat": "Png",
+  "TimeRange": "Custom",
+  "ContinuousClock": "Realtime",
+  "ContinuousFrameRate": "FixedFps",
+  "ResolutionFactor": 1.0,
+  "VideoFilePath": "./Render/render-v01.mp4",
+  "SequenceFilePath": "./ImageSequence/",
+  "SequenceFileName": "v01",
+  "SequencePrefix": "render"
+},
+    "Timeline": {
+  "ScaleX": 90.57164,
+  "ScrollX": -2.0073452,
+  "Mode": "DopeView",
+  "TimelineHeight": 442,
+  "InlineDataClipEditEnabled": false,
+  "DetailsAreaHeight": 215.0,
+  "InlineDataClipStripHeight": null
+}
+  }
 }

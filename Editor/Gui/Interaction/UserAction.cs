@@ -44,6 +44,7 @@ internal enum UserActions
     InsertKeyframeWithIncrement,
     ToggleAnimationPinning,
     SplitSelectedOrHoveredClips,
+    SelectFollowingClips,
 
     // Graph
     PinToOutputWindow,

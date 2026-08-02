@@ -460,6 +460,9 @@ public partial class SymbolPackage
         RegisterType(typeof(ShaderGraphNode), "ShaderGraphNode",
                      () => new InputValue<ShaderGraphNode>());
 
+        RegisterType(typeof(AudioGraphNode), "AudioGraphNode",
+                     () => new InputValue<AudioGraphNode>());
+
         RegisterType(typeof(SceneSetup), nameof(SceneSetup),
                      InputDefaultValueCreator<SceneSetup>,
                      (writer, obj) =>

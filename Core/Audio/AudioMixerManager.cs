@@ -43,6 +43,14 @@ public static class AudioMixerManager
     public static int OperatorMixerHandle => _operatorMixerHandle;
     internal static int SoundtrackMixerHandle => _soundtrackMixerHandle;
     public static bool IsInitialized => _initialized;
+
+    /// <summary>
+    /// Bumped on every <see cref="Shutdown"/> (e.g. an audio-device change frees ALL BASS handles).
+    /// Anything caching mixer/stream handles across frames must compare against this and rebuild
+    /// its handles when the generation changed — the cached ints are dead after a teardown.
+    /// </summary>
+    public static int ResetGeneration => _resetGeneration;
+    private static int _resetGeneration;
     
     public static void Initialize()
     {
@@ -342,6 +350,7 @@ public static class AudioMixerManager
             
             Bass.Free();
 
+            _resetGeneration++;
             _initialized = false;
             _initializationFailed = false; // Reset so initialization can be retried after device change
             Log.Gated.Audio("[AudioMixer] Audio mixer system shut down.");

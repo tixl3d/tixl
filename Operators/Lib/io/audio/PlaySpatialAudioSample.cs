@@ -11,7 +11,7 @@ namespace Lib.io.audio
     /// Supports sound positioning, listener orientation, distance-based attenuation, and directional sound cones.
     /// </summary>
     [Guid("8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f")]
-    internal sealed class SpatialAudioPlayer : Instance<SpatialAudioPlayer>, ITransformable, ISpatialAudioPropertiesProvider
+    internal sealed class PlaySpatialAudioSample : Instance<PlaySpatialAudioSample>, ITransformable, ISpatialAudioPropertiesProvider
     {
         #region ITransformable Implementation
         
@@ -134,9 +134,9 @@ namespace Lib.io.audio
         public string CurrentFilePath { get; private set; } = string.Empty;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SpatialAudioPlayer"/> class.
+        /// Initializes a new instance of the <see cref="PlaySpatialAudioSample"/> class.
         /// </summary>
-        public SpatialAudioPlayer()
+        public PlaySpatialAudioSample()
         {
             Result.TransformableOp = this;
             Result.UpdateAction += UpdatePlayback;
@@ -151,7 +151,7 @@ namespace Lib.io.audio
                 return;
 
             _operatorId = AudioPlayerUtils.ComputeInstanceGuid(InstancePath);
-            Log.Gated.Audio($"[SpatialAudioPlayer] Initialized: {_operatorId}");
+            Log.Gated.Audio($"[PlaySpatialAudioSample] Initialized: {_operatorId}");
         }
 
         private void UpdateStatus(EvaluationContext context)
@@ -273,7 +273,7 @@ namespace Lib.io.audio
         /// <summary>
         /// Finalizer that unregisters the operator from the audio engine.
         /// </summary>
-        ~SpatialAudioPlayer()
+        ~PlaySpatialAudioSample()
         {
             if (_operatorId != Guid.Empty)
                 AudioEngine.UnregisterOperator(_operatorId);

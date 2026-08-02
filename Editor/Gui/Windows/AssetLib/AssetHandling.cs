@@ -78,7 +78,7 @@ internal static class AssetHandling
                                        FileExtensionRegistry.GetUniqueId("ogg"),
                                    ])
                                    {
-                                       PrimaryOperators = [new Guid("c2b2758a-5b3e-465a-87b7-c6a13d3fba48")], // PlayAudioClip (graph)
+                                       PrimaryOperators = [new Guid("65e95f77-4743-437f-ab31-f34b831d28d7")], // PlayAudioSample (graph)
                                        TimelineClipOperator = new Guid("f0008b50-091d-4e9f-91eb-baa212acfa20"), // AudioClip (timeline)
                                        RecordingFolder = "audio",
                                        Color = UiColors.ColorForValues,

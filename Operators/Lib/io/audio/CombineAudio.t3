@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "a5d10c30-1e42-4c8a-9f31-0ab1cd2e0100"/*CombineAudio*/,
+  "Inputs": [
+    {
+      "Id": "a5d10c30-0002-4c8a-9f31-0ab1cd2e0100"/*Input*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a5d10c30-0003-4c8a-9f31-0ab1cd2e0100"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "a5d10c30-0004-4c8a-9f31-0ab1cd2e0100"/*AutoCollectClips*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

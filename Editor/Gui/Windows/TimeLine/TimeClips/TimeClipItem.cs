@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Resource.Assets;
@@ -71,7 +72,20 @@ internal static class TimeClipItem
         var itemRectMax = position + clipSize - new Vector2(1, 0);
 
         var rounding = 4.5f;
-        var randomColor = DrawUtils.RandomColorForHash(timeClip.Id.GetHashCode());
+
+        // Live Instance for this clip — drives the clip color, the body renderers below and the
+        // filename label further down. Missing = null; all consumers handle.
+        attr.CompositionOp.Children.TryGetChildInstance(timeClip.Id, out var clipInstance);
+
+        // Media clips share their type color (audio-graph / texture) instead of a per-clip random hue,
+        // keeping audio and video clip styling aligned.
+        var isAudioClip = clipInstance is IAudioClipProvider;
+        var isVideoClip = clipInstance != null && clipInstance.Symbol.Id == _videoClipSymbolId;
+        var randomColor = isAudioClip
+                              ? UiColors.ColorForAudioGraph
+                              : isVideoClip
+                                  ? UiColors.ColorForTextures
+                                  : DrawUtils.RandomColorForHash(timeClip.Id.GetHashCode());
 
         var timeRemapped = timeClip.TimeRange != timeClip.SourceRange;
         var timeStretched = Math.Abs(timeClip.TimeRange.Duration - timeClip.SourceRange.Duration) > 0.001;
@@ -83,12 +97,22 @@ internal static class TimeClipItem
         var fadeIfInActive = (isConnected && isWithinPlaybackTime) ? 1 : 0.8f;
         
         var fadeIfNotConnected = isConnected ? 1f : 0.4f;
-        var innerColor = Color.Mix(UiColors.BackgroundFull,randomColor,0.5f).Fade(0.8f * fadeIfNotConnected * fadeIfInActive);
-        attr.DrawList.AddRectFilled(position, itemRectMax, innerColor, rounding);
 
-        // Live Instance for this clip — used both for the DataClip tick overlay below and
-        // for the filename label further down. Missing = null; both consumers handle.
-        attr.CompositionOp.Children.TryGetChildInstance(timeClip.Id, out var clipInstance);
+        // Media clips render slightly translucent and solidify on hover — together with the
+        // footage-extent outline this links the clip body to its available source range.
+        // Muted audio clips fade further so the silence is visible at a glance.
+        var isClipHovered = ImGui.IsMouseHoveringRect(position, itemRectMax);
+        var mediaHoverFade = 1f;
+        if (isAudioClip || isVideoClip)
+        {
+            mediaHoverFade = isClipHovered ? 1f : 0.6f;
+
+            if (clipInstance is IAudioClipProvider audioProvider && audioProvider.GetResourceHandle().Clip.IsMuted)
+                mediaHoverFade *= 0.4f;
+        }
+
+        var innerColor = Color.Mix(UiColors.BackgroundFull,randomColor,0.5f).Fade(0.8f * fadeIfNotConnected * fadeIfInActive * mediaHoverFade);
+        attr.DrawList.AddRectFilled(position, itemRectMax, innerColor, rounding);
 
         // Per-event tick overlay for ops that publish a DataClip; waveform for [AudioClip] ops.
         // Each no-ops for op kinds it doesn't handle.
@@ -114,10 +138,10 @@ internal static class TimeClipItem
                 if (!string.IsNullOrEmpty(path))
                 {
                     var fileName = System.IO.Path.GetFileNameWithoutExtension(path);
-                    // A renamed op keeps its custom name visible alongside the file it
-                    // references, e.g. "Song 1 (rec-004)"; an unnamed op shows just the file.
+                    // A renamed op shows just its custom name in quotes (the file it references moves to
+                    // the tooltip); an unnamed op shows the filename.
                     nameSource = symbolChildUi.SymbolChild.HasCustomName
-                                     ? $"{symbolChildUi.SymbolChild.Name} ({fileName})"
+                                     ? $"\"{symbolChildUi.SymbolChild.Name}\""
                                      : fileName;
                 }
             }
@@ -139,7 +163,12 @@ internal static class TimeClipItem
             if (needsClipping)
                 ImGui.PushClipRect(position, itemRectMax - new Vector2(3, 0), true);
 
-            attr.DrawList.AddText(labelPos, isSelected ? UiColors.Selection : randomColor.Fade(fadeIfNotConnected), label);
+            // Mixing the type color toward the foreground keeps labels readable on the tinted bodies;
+            // hover brightens further, and selection keeps its distinct color.
+            var labelColor = isSelected
+                                 ? UiColors.Selection
+                                 : Color.Mix(randomColor, UiColors.ForegroundFull, isClipHovered ? 0.9f : 0.7f).Fade(fadeIfNotConnected);
+            attr.DrawList.AddText(labelPos, labelColor, label);
 
             if (needsClipping)
                 ImGui.PopClipRect();
@@ -207,6 +236,15 @@ internal static class TimeClipItem
                 }
 
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+
+                // The referenced asset — renamed clips no longer show it in their label.
+                if (clipInstance is T3.Core.Operator.Interfaces.IDescriptiveFilename tooltipFile)
+                {
+                    var assetPath = tooltipFile.SourcePathSlot.TypedInputValue.Value;
+                    if (!string.IsNullOrEmpty(assetPath))
+                        ImGui.TextUnformatted(System.IO.Path.GetFileName(assetPath));
+                }
+
                 ImGui.TextUnformatted($"Visible: {timeClip.TimeRange.Start:0.00} ... {timeClip.TimeRange.End:0.00}");
                 if (timeRemapped)
                 {
@@ -334,15 +372,17 @@ internal static class TimeClipItem
     /// </summary>
     private static void HandleDragging(ClipDrawingAttributes attr, TimeClip timeClip, bool isSelected, bool wasClicked, HandleDragMode mode)
     {
-        if (ImGui.IsItemHovered())
+        var isDeactivated = ImGui.IsItemDeactivated();
+        var isActive = ImGui.IsItemActive();
+
+        // Keep the cursor stable through the whole drag: during a trim the mouse regularly outruns the
+        // narrow handle rect, and hover-only cursor setting made it flicker between resize and arrow.
+        if (ImGui.IsItemHovered() || isActive)
         {
             ImGui.SetMouseCursor(mode == HandleDragMode.Body
                                      ? ImGuiMouseCursor.Hand
                                      : ImGuiMouseCursor.ResizeEW);
         }
-        
-        var isDeactivated = ImGui.IsItemDeactivated();
-        var isActive = ImGui.IsItemActive();
         if (!isActive && !isDeactivated )
             return;
         
@@ -512,8 +552,8 @@ internal static class TimeClipItem
                               UiColors.ForegroundFull.Fade(0.3f), 4.5f);
     }
 
-    /// <summary>Full source length of a video clip in bars, or false (with -1) for non-video / unknown-duration
-    /// clips. Duration is resolved through the per-asset <see cref="VideoClipDurationCache"/> (probed once).</summary>
+    /// <summary>Full source length of a video or audio clip in bars, or false (with -1) for other /
+    /// unknown-duration clips. Duration is resolved through the per-asset duration caches (probed once).</summary>
     private static bool TryGetVideoFootageBars(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance? clipInstance, out float footageBars)
     {
         footageBars = -1f;
@@ -521,9 +561,25 @@ internal static class TimeClipItem
             return false;
 
         var path = describedFile.SourcePathSlot.TypedInputValue.Value;
-        if (string.IsNullOrEmpty(path)
-            || !AssetType.TryGetForFilePath(path, out var assetType, out _) || assetType.Name != "Video"
-            || !VideoClipDurationCache.TryGetDurationSecs(path, clipInstance, out var fullDurationSecs) || fullDurationSecs <= 0)
+        if (string.IsNullOrEmpty(path) || !AssetType.TryGetForFilePath(path, out var assetType, out _))
+            return false;
+
+        double fullDurationSecs;
+        switch (assetType.Name)
+        {
+            case "Video":
+                if (!VideoClipDurationCache.TryGetDurationSecs(path, clipInstance, out fullDurationSecs))
+                    return false;
+                break;
+            case "Audio":
+                if (!AudioClipDurationCache.TryGetDurationSecs(path, clipInstance, out fullDurationSecs))
+                    return false;
+                break;
+            default:
+                return false;
+        }
+
+        if (fullDurationSecs <= 0)
             return false;
 
         footageBars = (float)attr.LayerContext.TimeCanvas.Playback.BarsFromSeconds(fullDurationSecs);
@@ -564,6 +620,9 @@ internal static class TimeClipItem
         public double AnchorTime;
         public void CheckForSnap(ref SnapResult snapResult) => snapResult.TryToImproveWithAnchorValue(AnchorTime);
     }
+
+    // [VideoClip] — media clips get their type color instead of the per-clip random hue.
+    private static readonly Guid _videoClipSymbolId = new("04c1a6dc-3042-48a8-81d2-0a5a162016dc");
 
     private const float HandleWidth = 7;
     private static float _timeWithinDraggedClip;

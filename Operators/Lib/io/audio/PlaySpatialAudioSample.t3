@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f"/*SpatialAudioPlayer*/,
+  "Id": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f"/*PlaySpatialAudioSample*/,
   "Inputs": [
     {
       "Id": "159c7342-a8c8-4ffb-8a69-da3ffa0d3b71"/*ListenerPosition*/,

@@ -1,0 +1,36 @@
+{
+  "FormatVersion": 3,
+  "Id": "b8d65fc0-1e42-4c8a-9f31-0ab1cd2e0600"/*AudioCompressor*/,
+  "Inputs": [
+    {
+      "Id": "b8d65fc0-0002-4c8a-9f31-0ab1cd2e0600"/*Input*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b8d65fc0-0003-4c8a-9f31-0ab1cd2e0600"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "b8d65fc0-0004-4c8a-9f31-0ab1cd2e0600"/*Threshold*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "b8d65fc0-0005-4c8a-9f31-0ab1cd2e0600"/*Ratio*/,
+      "DefaultValue": 4.0
+    },
+    {
+      "Id": "b8d65fc0-0006-4c8a-9f31-0ab1cd2e0600"/*Attack*/,
+      "DefaultValue": 0.01
+    },
+    {
+      "Id": "b8d65fc0-0007-4c8a-9f31-0ab1cd2e0600"/*Release*/,
+      "DefaultValue": 0.2
+    },
+    {
+      "Id": "b8d65fc0-0008-4c8a-9f31-0ab1cd2e0600"/*MakeupGainDb*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,35 @@
+{
+  "FormatVersion": 3,
+  "Id": "e8a32d90-1e42-4c8a-9f31-0ab1cd2e0300"/*DuckAudioLevel*/,
+  "Inputs": [
+    {
+      "Id": "1fa75271-73c7-47d3-b536-1bfcc134ff73"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
+    },
+    {
+      "Id": "e8a32d90-0002-4c8a-9f31-0ab1cd2e0300"/*Level*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "e8a32d90-0003-4c8a-9f31-0ab1cd2e0300"/*Threshold*/,
+      "DefaultValue": 0.05
+    },
+    {
+      "Id": "e8a32d90-0004-4c8a-9f31-0ab1cd2e0300"/*Amount*/,
+      "DefaultValue": 0.8
+    },
+    {
+      "Id": "e8a32d90-0005-4c8a-9f31-0ab1cd2e0300"/*Attack*/,
+      "DefaultValue": 0.05
+    },
+    {
+      "Id": "e8a32d90-0006-4c8a-9f31-0ab1cd2e0300"/*Release*/,
+      "DefaultValue": 0.4
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

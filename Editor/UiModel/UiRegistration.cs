@@ -92,6 +92,9 @@ internal static class UiRegistration
         RegisterTypesToProperty(UiProperties.ShaderGraph,
                                 typeof(ShaderGraphNode));
         
+        RegisterTypesToProperty(UiProperties.AudioGraph,
+                                typeof(AudioGraphNode));
+
                                 // set colors of input and output UIs
         
                                 // system types

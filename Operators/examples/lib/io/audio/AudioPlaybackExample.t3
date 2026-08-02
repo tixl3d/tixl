@@ -189,7 +189,7 @@
       "Outputs": []
     },
     {
-      "Id": "1732c27d-296c-4653-aa4c-36330437fd16"/*SpatialAudioPlayer*/,
+      "Id": "1732c27d-296c-4653-aa4c-36330437fd16"/*PlaySpatialAudioSample*/,
       "SymbolId": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f",
       "InputValues": [
         {
@@ -254,7 +254,7 @@
       "Outputs": []
     },
     {
-      "Id": "27374ba9-2136-4833-8c52-a24a27068def"/*AudioPlayer*/,
+      "Id": "27374ba9-2136-4833-8c52-a24a27068def"/*PlayAudioSample*/,
       "SymbolId": "65e95f77-4743-437f-ab31-f34b831d28d7",
       "InputValues": [
         {
@@ -572,6 +572,51 @@
       "Outputs": []
     },
     {
+      "Id": "4f305a9e-d48b-4775-8cf4-cbfed592c467"/*AudioClip*/,
+      "SymbolId": "f0008b50-091d-4e9f-91eb-baa212acfa20",
+      "InputValues": [
+        {
+          "Id": "260b61ae-7605-4f06-a3fb-793ae5a23646"/*AutoPlay*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
+          "Id": "625951af-5f99-4171-b5b0-c97413121f56"/*Path*/,
+          "Type": "System.String",
+          "Value": "Examples:user/still/proj-there/soundtrack/partial.mp3"
+        },
+        {
+          "Id": "8f2e6b10-4c5d-4e8f-9a1b-2c3d4e5f6a70"/*Display*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
+          "Id": "9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80"/*Style*/,
+          "Type": "System.Int32",
+          "Value": 1
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "5fb7a174-9ab2-4688-89a0-7fbcbf831dcf"/*AudioClip*/,
+          "OutputData": {
+            "Type": "T3.Core.Animation.TimeClip",
+            "TimeClip": {
+              "TimeRange": {
+                "Start": 0.0,
+                "End": 191.994
+              },
+              "SourceRange": {
+                "Start": 0.0,
+                "End": 191.994
+              },
+              "LayerIndex": 0
+            }
+          }
+        }
+      ]
+    },
+    {
       "Id": "5087c3ba-17d3-44b1-b72e-2e967bade57a"/*PlaybackFFT*/,
       "SymbolId": "cda108a1-db4f-4a0a-ae4d-d50e9aade467",
       "InputValues": [
@@ -654,7 +699,7 @@
       "Outputs": []
     },
     {
-      "Id": "5db4da1e-801f-42e6-85b7-28e71b3a59c0"/*AudioPlayer*/,
+      "Id": "5db4da1e-801f-42e6-85b7-28e71b3a59c0"/*PlayAudioSample*/,
       "SymbolId": "65e95f77-4743-437f-ab31-f34b831d28d7",
       "InputValues": [
         {
@@ -900,7 +945,7 @@
       "Outputs": []
     },
     {
-      "Id": "9a384a77-89fc-4dfd-b097-e110f35a00ea"/*SpatialAudioPlayer*/,
+      "Id": "9a384a77-89fc-4dfd-b097-e110f35a00ea"/*PlaySpatialAudioSample*/,
       "SymbolId": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f",
       "InputValues": [
         {
@@ -976,7 +1021,7 @@
       "Outputs": []
     },
     {
-      "Id": "9c770b7d-356d-499a-9f0a-bca3f40a0776"/*AudioPlayer*/,
+      "Id": "9c770b7d-356d-499a-9f0a-bca3f40a0776"/*PlayAudioSample*/,
       "SymbolId": "65e95f77-4743-437f-ab31-f34b831d28d7",
       "InputValues": [
         {
@@ -1683,18 +1728,7 @@
       "AudioGainFactor": 1.0,
       "AudioInputDeviceName": "",
       "EnableAudioBeatLocking": "False",
-      "BeatLockAudioOffsetSec": "0",
-      "AudioClips": [
-        {
-          "Id": "c24b9d08-4a1d-4cef-aa38-ec9e62a37638",
-          "AssetPath": "Examples:user/still/proj-there/soundtrack/partial.mp3",
-          "TimeRange": {
-            "Start": 0.0,
-            "End": 0.0
-          },
-          "IsMainSoundtrack": true
-        }
-      ]
+      "BeatLockAudioOffsetSec": "0"
     },
     "Audio": {
       "SoundtrackMute": false,

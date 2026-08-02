@@ -60,6 +60,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool ShowTitleAndDescription = true;
         public bool ShowToolbar = true;
         public bool ShowTimeline = true;
+        public bool TimelineFollowsPlayback = true;
         public bool ShowMiniMap = false;
         public bool ShowInteractionOverlay = false;
         public float LayerHeight = 18;

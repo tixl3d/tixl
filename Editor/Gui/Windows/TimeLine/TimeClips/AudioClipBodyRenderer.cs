@@ -44,8 +44,13 @@ internal static class AudioClipBodyRenderer
         if (bodyWidth < 3 || bodyHeight < 4)
             return;
 
-        if (!TryGetWaveformSrv(path, instance, out var srv))
+        var clipData = provider.GetResourceHandle().Clip;
+        var style = clipData.Style;
+        if (!TryGetWaveformSrv(path, instance, style, out var srv))
             return;
+
+        // Muted clips fade their waveform too, matching the faded clip body.
+        var contentFade = clipData.IsMuted ? 0.3f : 1f;
 
         drawList.PushClipRect(bodyMin, bodyMax, true);
 
@@ -69,7 +74,45 @@ internal static class AudioClipBodyRenderer
             var visibleStartSecs = Math.Max(sourceStartSecs, 0.0);
             var visibleEndSecs = Math.Min(sourceEndSecs, lengthSecs);
 
-            if (sourceSpanSecs > 0.0001 && visibleEndSecs > visibleStartSecs)
+            // Looping clip: tile the *valid* source window (clamped to the file's content — end-trims
+            // extend SourceRange past it, and the engine loops only the real content) across the body,
+            // marking each repeat with a border line.
+            var timeSpanSecs = playback.SecondsFromBars(timeClip.TimeRange.End) - playback.SecondsFromBars(timeClip.TimeRange.Start);
+            var loopSpanSecs = visibleEndSecs - visibleStartSecs;
+            if (clipData.IsLooping && loopSpanSecs > 0.0001 && timeSpanSecs > 0.0001)
+            {
+                var u0 = (float)(visibleStartSecs / lengthSecs);
+                var u1 = (float)(visibleEndSecs / lengthSecs);
+                var segmentWidth = (float)(loopSpanSecs / timeSpanSecs) * bodyWidth;
+                if (segmentWidth > 2)
+                {
+                    var borderColor = UiColors.BackgroundFull.Fade(0.6f);
+                    var segmentStartX = bodyMin.X;
+                    while (segmentStartX < bodyMax.X)
+                    {
+                        var segmentEndX = Math.Min(segmentStartX + segmentWidth, bodyMax.X);
+                        var visibleFraction = (segmentEndX - segmentStartX) / segmentWidth;
+                        drawList.AddImage((IntPtr)srv,
+                                          new Vector2(segmentStartX, bodyMin.Y),
+                                          new Vector2(segmentEndX, bodyMax.Y),
+                                          new Vector2(u0, 0),
+                                          new Vector2(u0 + (u1 - u0) * visibleFraction, 1),
+                                          UiColors.ForegroundFull.Fade(contentFade));
+
+                        if (segmentStartX > bodyMin.X)
+                        {
+                            drawList.AddLine(new Vector2(segmentStartX, bodyMin.Y),
+                                             new Vector2(segmentStartX, bodyMax.Y),
+                                             borderColor, 1);
+                        }
+
+                        segmentStartX += segmentWidth;
+                    }
+
+                    drawn = true;
+                }
+            }
+            else if (sourceSpanSecs > 0.0001 && visibleEndSecs > visibleStartSecs)
             {
                 var x0 = (float)((visibleStartSecs - sourceStartSecs) / sourceSpanSecs);
                 var x1 = (float)((visibleEndSecs - sourceStartSecs) / sourceSpanSecs);
@@ -80,7 +123,7 @@ internal static class AudioClipBodyRenderer
                                   new Vector2(bodyMin.X + x0 * bodyWidth + 1, bodyMin.Y + 1),
                                   new Vector2(bodyMin.X + x1 * bodyWidth - 1, bodyMax.Y - 1),
                                   new Vector2(u0, 0), new Vector2(u1, 1),
-                                  UiColors.ForegroundFull.Fade(1f));
+                                  UiColors.ForegroundFull.Fade(contentFade));
                 drawn = true;
             }
         }
@@ -91,7 +134,7 @@ internal static class AudioClipBodyRenderer
                               bodyMin + new Vector2(1, 1),
                               bodyMax - new Vector2(1, 1),
                               Vector2.Zero, Vector2.One,
-                              UiColors.ForegroundFull.Fade(0.5f));
+                              UiColors.ForegroundFull.Fade(0.5f * contentFade));
         }
 
         drawList.PopClipRect();
@@ -101,11 +144,11 @@ internal static class AudioClipBodyRenderer
     /// (Cached) shader-resource view of the file's waveform image. First call per asset kicks off a
     /// background generation via <see cref="AudioImageFactory"/>; later calls return the loaded SRV.
     /// </summary>
-    private static bool TryGetWaveformSrv(string assetPath, Instance owner, [NotNullWhen(true)] out ShaderResourceView? srv)
+    private static bool TryGetWaveformSrv(string assetPath, Instance owner, AudioClipStyle style, [NotNullWhen(true)] out ShaderResourceView? srv)
     {
         srv = null;
         var handle = new AudioClipResourceHandle(new TimelineAudioClip { AssetPath = assetPath }, owner);
-        if (!AudioImageFactory.TryGetOrCreateImagePathForClip(handle, out var imagePath))
+        if (!AudioImageFactory.TryGetOrCreateImagePathForClip(handle, style, out var imagePath))
             return false;
 
         if (_imageCache.TryGetValue(imagePath, out var entry))

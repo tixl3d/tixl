@@ -1285,7 +1285,7 @@ internal static class FormInputs
                                                                         HardLineBreaks = true,
                                                                     });
 
-    private static bool AppendResetButton(bool hasReset, string? id)
+    internal static bool AppendResetButton(bool hasReset, string? id)
     {
         if (!hasReset)
             return false;

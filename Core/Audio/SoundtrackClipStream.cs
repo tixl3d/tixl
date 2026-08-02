@@ -119,9 +119,11 @@ internal sealed class SoundtrackClipStream
         // The SoundtrackMixer feeds into the GlobalMixer for output
         // Note: We do NOT use MixerChanBuffer for soundtracks because we need accurate
         // position tracking for sync. The buffer would introduce latency that's hard to compensate.
-        if (AudioMixerManager.SoundtrackMixerHandle != 0)
+        // Skip when the clip is already graph-routed: the [AudioBus] owns its mixer membership, and adding it
+        // here would blip it at full volume through the SoundtrackMixer for the frame before the bus grabs it.
+        if (AudioMixerManager.SoundtrackMixerHandle != 0 && !handle.Clip.IsRoutedToGraph)
         {
-            if (!BassMix.MixerAddChannel(AudioMixerManager.SoundtrackMixerHandle, streamHandle, 
+            if (!BassMix.MixerAddChannel(AudioMixerManager.SoundtrackMixerHandle, streamHandle,
                     BassFlags.MixerChanPause))
             {
                 Log.Warning($"Failed to add soundtrack to mixer: {Bass.LastError}. Audio may not play correctly.");
@@ -156,13 +158,27 @@ internal sealed class SoundtrackClipStream
     /// </summary>
     internal void UpdateSoundtrackTime(Playback playback)
     {
-        if (playback.PlaybackSpeed == 0)
+        // Render-export steps time with PlaybackSpeed 0, so recording counts as running.
+        if (playback.PlaybackSpeed == 0 && !AudioRendering.IsRecording)
         {
             BassMix.ChannelFlags(StreamHandle, BassFlags.MixerChanPause, BassFlags.MixerChanPause);
             return;
         }
 
         var clip = ResourceHandle.Clip;
+
+        // Graph hand-off: while the clip's AudioReference is wired into a bus, the graph moves this channel out
+        // of the SoundtrackMixer into its submix and owns its level. When it stops being routed, reclaim it into
+        // the SoundtrackMixer — but only once the bus has actually released it (a channel lives in exactly one
+        // mixer). Checking real membership every frame instead of a one-shot transition avoids racing the bus,
+        // whose removal can run later in the same frame. Position-sync (below) is a per-channel BASS op and
+        // works in whichever mixer holds the channel.
+        if (!clip.IsRoutedToGraph
+            && AudioMixerManager.SoundtrackMixerHandle != 0
+            && BassMix.ChannelGetMixer(StreamHandle) == 0)
+        {
+            BassMix.MixerAddChannel(AudioMixerManager.SoundtrackMixerHandle, StreamHandle, BassFlags.MixerChanPause);
+        }
 
         // Elapsed seconds since the clip's TimeRange.Start on the timeline.
         // (TargetTime is set externally to the current playback time-in-seconds.)
@@ -176,11 +192,25 @@ internal sealed class SoundtrackClipStream
                                 ? clip.SourceOffsetSecs + clip.SourceDurationSecs
                                 : clip.LengthInSeconds;
 
+        // Looping: wrap the target position back into the valid source window (clamped to the file's
+        // content — a start-extension into negative source time doesn't widen the loop) for as long as
+        // the clip lasts. The wrap makes the drift exceed the resync threshold, so the seek happens on
+        // the next check.
+        var loopStartSecs = Math.Max(clip.SourceOffsetSecs, 0);
+        var loopLengthSecs = Math.Min(sourceEndSecs, clip.LengthInSeconds) - loopStartSecs;
+        if (clip.IsLooping && loopLengthSecs > 0.01 && elapsedInClipSecs >= 0)
+        {
+            targetSourcePosSecs = loopStartSecs + elapsedInClipSecs % loopLengthSecs;
+        }
+
         // Optional TimeRange.End bound: skip when End <= Start (the "no explicit end" sentinel).
         var hasClipEnd = clip.TimeRange.End > clip.TimeRange.Start;
         var clipEndSecs = hasClipEnd ? playback.SecondsFromBars(clip.TimeRange.End) : double.PositiveInfinity;
 
+        // targetSourcePos < 0 = the clip was start-extended before the file's content begins: stay
+        // muted until the playhead reaches valid source time instead of starting the audio early.
         var isOutOfBounds = elapsedInClipSecs < 0
+                            || targetSourcePosSecs < 0
                             || targetSourcePosSecs >= sourceEndSecs
                             || (hasClipEnd && TargetTime >= clipEndSecs);
         
@@ -207,15 +237,19 @@ internal sealed class SoundtrackClipStream
         var currentPosInSec = Bass.ChannelBytes2Seconds(StreamHandle, currentStreamBufferPos) - AudioSyncingOffset;
         var soundDelta = (currentPosInSec - targetSourcePosSecs) * playback.PlaybackSpeed;
 
-        // Set volume on the stream
+        // Set volume on the stream — unless the graph owns this clip's level (routed into a bus), in which case
+        // the [AudioBus] applies the per-source gain and setting it here too would fight that every frame.
         var audio = CompositionSettings.Current.Audio;
-        Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume,
-                                 clip.Volume
-                                 * audio.SoundtrackVolume
-                                 * CoreSettings.Config.AppVolume
-                                 * (clip.IsMuted ? 0f:1f)
-                                 * (audio.SoundtrackMute ? 0f:1f)
-                                 * (CoreSettings.Config.AppMute ? 0f:1f));
+        if (!clip.IsRoutedToGraph)
+        {
+            Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume,
+                                     clip.Volume
+                                     * audio.SoundtrackVolume
+                                     * CoreSettings.Config.AppVolume
+                                     * (clip.IsMuted ? 0f:1f)
+                                     * (audio.SoundtrackMute ? 0f:1f)
+                                     * (CoreSettings.Config.AppMute ? 0f:1f));
+        }
 
         // We may not fall behind or skip ahead in playback
         var maxSoundDelta = audio.AudioResyncThreshold * Math.Abs(playback.PlaybackSpeed);

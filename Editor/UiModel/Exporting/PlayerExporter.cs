@@ -67,7 +67,14 @@ internal static partial class PlayerExporter
         else
         {
             const string yes = "Yes";
-            var choice = BlockingWindow.Instance.ShowMessageBox("No defined soundtrack found. Continue with export?", "No soundtrack", yes,
+            var choice = BlockingWindow.Instance.ShowMessageBox("""
+                                                                No main soundtrack found.
+
+                                                                The exported executable uses the main soundtrack for its runtime duration (when to end or loop) and for audio analysis. To define one, set the Display parameter of an [AudioClip] inside the exported operator to 'Background image'.
+
+                                                                Continue export without a soundtrack?
+                                                                """,
+                                                                "No soundtrack", yes,
                                                                 "No, cancel export");
 
             if (choice != yes)

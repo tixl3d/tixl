@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -130,6 +131,15 @@ internal sealed class TimeClipInteractions
                 SplitClipsAtTime(compositionOp);
             }
 
+            if (ImGui.MenuItem("Select following clips", UserActions.SelectFollowingClips.ListShortcuts())
+                && _playback != null)
+            {
+                // The playhead anchor is exact (e.g. right after a cut) — a frame of tolerance suffices.
+                SelectClipsStartingAfter(_playback.TimeInBars, _playback.BarsFromSeconds(1 / 30.0));
+            }
+
+            DrawMainSoundtrackMenuItem(compositionOp);
+
             // Only offered when the selection includes a DataClip op - the inline pane has nothing to show otherwise.
             if (InlineDataClipArea.HasSelectedDataClipInstance(_context.TimeCanvas, compositionOp))
             {
@@ -149,6 +159,141 @@ internal sealed class TimeClipInteractions
             _contextMenuIsOpen = false;
         }
         ImGui.PopStyleVar(2);
+    }
+
+    /// <summary>
+    /// "Set as main soundtrack" for a single selected [AudioClip]: sets its Display to BackgroundImage
+    /// (timeline background, FFT routing, export duration) and clears the designation from any other
+    /// audio clip — one main soundtrack per composition. Toggles off when the clip already is it.
+    /// </summary>
+    private void DrawMainSoundtrackMenuItem(Instance compositionOp)
+    {
+        if (_context.ClipSelection.Count != 1)
+            return;
+
+        Guid selectedId = default;
+        foreach (var id in _context.ClipSelection.SelectedClipsIds)
+        {
+            selectedId = id;
+            break;
+        }
+
+        if (!compositionOp.Children.TryGetChildInstance(selectedId, out var instance)
+            || instance is not IAudioClipProvider provider)
+            return;
+
+        var isMain = provider.GetResourceHandle().Clip.IsMainSoundtrack;
+        if (ImGui.MenuItem(isMain ? "Unset main soundtrack" : "Set as main soundtrack"))
+        {
+            SetMainSoundtrackClip(compositionOp, selectedId, enable: !isMain);
+        }
+    }
+
+    private static void SetMainSoundtrackClip(Instance compositionOp, Guid clipChildId, bool enable)
+    {
+        var symbol = compositionOp.Symbol;
+        var commands = new List<ICommand>();
+
+        foreach (var (childId, child) in symbol.Children)
+        {
+            // The Display input identifies [AudioClip] ops; all others are cleared so only one clip
+            // carries the designation.
+            if (!child.Inputs.TryGetValue(LegacyAudioClipMigration.DisplayInputId, out var displayInput))
+                continue;
+
+            var targetValue = childId == clipChildId && enable
+                                  ? (int)AudioClipDisplay.BackgroundImage
+                                  : (int)AudioClipDisplay.Clip;
+
+            var currentValue = (displayInput.Value as InputValue<int>)?.Value ?? 0;
+            if (currentValue == targetValue)
+                continue;
+
+            var command = new ChangeInputValueCommand(symbol, childId, displayInput, new InputValue<int>(targetValue));
+            command.Do();
+            commands.Add(command);
+        }
+
+        if (commands.Count == 0)
+            return;
+
+        UndoRedoStack.Add(new MacroCommand("Set main soundtrack", commands));
+        compositionOp.GetSymbolUi().FlagAsModified();
+    }
+
+    /// <summary>
+    /// The split's new op is placed directly below the original, where it can land exactly on whatever
+    /// sat there — nearly invisible. Push covered ops downward instead, cascading so a pushed op doesn't
+    /// just cover the next one. Pushes move in whole MagGraph grid rows, so snapped stacks (e.g. clips
+    /// feeding a multi-input) keep their alignment and stay magnetically connected.
+    /// </summary>
+    private void PushDownOpsOverlappedBy(SymbolUi compositionUi, SymbolUi.Child insertedChildUi, List<ICommand> commands)
+    {
+        var moved = new List<(SymbolUi.Child ChildUi, Vector2 OriginalPos)>();
+        var handled = new HashSet<Guid> { insertedChildUi.Id };
+        var movers = new Queue<SymbolUi.Child>();
+        movers.Enqueue(insertedChildUi);
+
+        while (movers.Count > 0)
+        {
+            var mover = movers.Dequeue();
+            var moverRect = ImRect.RectWithSize(mover.PosOnCanvas, mover.Size);
+
+            foreach (var other in compositionUi.ChildUis.Values)
+            {
+                if (handled.Contains(other.Id))
+                    continue;
+
+                var otherRect = ImRect.RectWithSize(other.PosOnCanvas, other.Size);
+                if (!moverRect.Overlaps(otherRect))
+                    continue;
+
+                var gridSteps = Math.Max(1, (int)Math.Ceiling((moverRect.Max.Y - otherRect.Min.Y) / MagGraphItem.GridSize.Y));
+
+                handled.Add(other.Id);
+                moved.Add((other, other.PosOnCanvas));
+                other.PosOnCanvas = new Vector2(other.PosOnCanvas.X, other.PosOnCanvas.Y + gridSteps * MagGraphItem.GridSize.Y);
+                movers.Enqueue(other);
+            }
+        }
+
+        if (moved.Count == 0)
+            return;
+
+        // The command snapshots current positions as its undo baseline — briefly revert to the originals,
+        // snapshot, then re-apply the pushed positions and store them as the redo state.
+        var selectables = new List<ISelectableCanvasObject>(moved.Count);
+        var pushedPositions = new List<Vector2>(moved.Count);
+        foreach (var (childUi, originalPos) in moved)
+        {
+            selectables.Add(childUi);
+            pushedPositions.Add(childUi.PosOnCanvas);
+            childUi.PosOnCanvas = originalPos;
+        }
+
+        var moveCommand = new ModifyCanvasElementsCommand(compositionUi.Symbol.Id, selectables, _context.TimeCanvas.NodeSelection);
+        for (var i = 0; i < moved.Count; i++)
+            moved[i].ChildUi.PosOnCanvas = pushedPositions[i];
+
+        moveCommand.StoreCurrentValues();
+        commands.Add(moveCommand);
+    }
+
+    /// <summary>
+    /// Selects every clip (on all layers) that starts at or after the given time — for ripple edits:
+    /// select everything downstream, then drag to open or close a gap. The tolerance includes clips
+    /// starting *at* (or shortly before) the anchor, so right after a cut the new right half is part of
+    /// the selection even when the mouse sits a bit past the cut.
+    /// </summary>
+    public void SelectClipsStartingAfter(double timeInBars, double toleranceInBars)
+    {
+        var selection = _context.ClipSelection;
+        selection.Clear();
+        foreach (var clip in selection.CompositionTimeClips.Values)
+        {
+            if (clip.TimeRange.Start >= timeInBars - toleranceInBars)
+                selection.AddSelection(clip);
+        }
     }
 
     public void DeleteSelectedClips(Instance compositionOp)
@@ -226,6 +371,8 @@ internal sealed class TimeClipInteractions
             renameCommand.Do();
             commands.Add(renameCommand);
 
+            PushDownOpsOverlappedBy(compositionSymbolUi, newSymbolUiChild, commands);
+
             // Capture the new clip's just-copied TimeRange/SourceRange as the undo state, then mutate to
             // the "second half" ranges and store those as the redo state.
             var adjustNewClipCommand = new MoveTimeClipsCommand(compositionOp, [newTimeClip]);
@@ -244,27 +391,12 @@ internal sealed class TimeClipInteractions
 
             commands.Add(adjustFirstClipCommand);
 
-            // Copy connection of original clip
+            // Copy the original clip's connections into multi-inputs, so the new half stays wired the
+            // same way — regardless of which output carried the connection (an [AudioClip]'s
+            // AudioReference into a bus just as much as a TimeClip command into a group).
             {
-                Symbol.Child.Output? timeClipOutput = null;
-                foreach (var o in symbolChildUi.SymbolChild.Outputs.Values)
-                {
-                    if (o.OutputData is TimeClip tc && tc == clip)
-                    {
-                        timeClipOutput = o;
-                        break;
-                    }
-                }
-
-                if (timeClipOutput == null)
-                {
-                    Log.Warning($"Can't find timeclip output for {symbolChildUi}?");
-                    continue;
-                }
-
                 var connections = compositionOp.Symbol.Connections
-                                               .Where(c => c.SourceParentOrChildId == symbolChildUi.Id
-                                                           && c.SourceSlotId == timeClipOutput.OutputDefinition.Id)
+                                               .Where(c => c.SourceParentOrChildId == symbolChildUi.Id)
                                                .ToList();
 
                 foreach (var c in connections)

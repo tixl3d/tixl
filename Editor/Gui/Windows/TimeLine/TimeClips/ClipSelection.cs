@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.Operator;
+using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -62,8 +64,24 @@ internal sealed class ClipSelection
         _compositionOp = compositionOp;
         CompositionTimeClips.Clear();
 
+        // The effective main soundtrack renders as the timeline background instead of a clip block —
+        // exclude it here so drawing, selection, split and boundary jumps all ignore it. Only the clip
+        // the lookup actually resolves is hidden; a flagged-but-losing clip stays visible as a hint
+        // that multiple clips claim the designation. Switch Display back to Clip to edit placement.
+        var hiddenSoundtrackClipId = Guid.Empty;
+        if (PlaybackUtils.TryFindingSoundtrack(out var soundtrackHandle, out _)
+            && soundtrackHandle.Clip.Display == AudioClipDisplay.BackgroundImage
+            && soundtrackHandle.Owner is IAudioClipProvider and Instance soundtrackOp
+            && soundtrackOp.Parent == compositionOp)
+        {
+            hiddenSoundtrackClipId = soundtrackOp.SymbolChildId;
+        }
+
         foreach (var s2 in Structure.GetAllTimeClips(compositionOp))
         {
+            if (s2.Id == hiddenSoundtrackClipId)
+                continue;
+
             CompositionTimeClips[s2.Id] = s2;
         }
         

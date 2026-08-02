@@ -186,4 +186,7 @@ public static class UiColors
 
     [T3Style.Hint(Description = "Base color for shader-graph data.")]
     public static Color ColorForShaderGraph = new(0.82f, 0.26f, 0.7f, 1.000f);
+    
+    [T3Style.Hint(Description = "Base color for audio-graph data.")]
+    public static Color ColorForAudioGraph = new(0.3f, 0.4f, 0.75f, 1.000f);
 }

@@ -99,6 +99,10 @@ internal static partial class ProjectSetup
         // Needs registered symbols to resolve which project owns each variation file
         VariationsMigration.MigrateLegacyVariationsToPackageMeta();
 
+        // Needs the [AudioClip] symbol registered (Lib). In-memory only — persists via the regular
+        // save machinery once the user saves the flagged symbols.
+        LegacyAudioClipMigration.MigrateLegacyClipsToOps();
+
         // Initialize resources and shader linting
         Log.Info("Initializing package resources...");
         foreach (var package in allPackages)
