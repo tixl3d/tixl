@@ -208,12 +208,13 @@ internal static class LegacyAudioClipMigration
         }
     }
 
-    // [AudioClip] symbol + input ids (Operators/Lib/io/audio/AudioClip)
-    private static readonly Guid AudioClipSymbolId = new("f0008b50-091d-4e9f-91eb-baa212acfa20");
-    private static readonly Guid PathInputId = new("625951af-5f99-4171-b5b0-c97413121f56");
+    // [AudioClip] symbol + input ids (Operators/Lib/io/audio/AudioClip). Shared with the settings UI,
+    // which edits op-provided soundtracks through these inputs.
+    internal static readonly Guid AudioClipSymbolId = new("f0008b50-091d-4e9f-91eb-baa212acfa20");
+    internal static readonly Guid PathInputId = new("625951af-5f99-4171-b5b0-c97413121f56");
     private static readonly Guid VolumeInputId = new("06b8b927-ec47-4392-bb67-b9a140cc852b");
     private static readonly Guid MuteInputId = new("4ad8fba6-6e13-4698-b3c6-bd5c808724ab");
     private static readonly Guid AutoPlayInputId = new("260b61ae-7605-4f06-a3fb-793ae5a23646");
-    private static readonly Guid DisplayInputId = new("8f2e6b10-4c5d-4e8f-9a1b-2c3d4e5f6a70");
+    internal static readonly Guid DisplayInputId = new("8f2e6b10-4c5d-4e8f-9a1b-2c3d4e5f6a70");
     private static readonly Guid StyleInputId = new("9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80");
 }

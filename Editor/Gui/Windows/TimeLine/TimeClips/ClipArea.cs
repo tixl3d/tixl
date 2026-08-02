@@ -69,9 +69,13 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         }
         ImGui.EndGroup();
 
-        // Files / assets dropped onto the clip area become the matching timeline-clip op (AudioClip,
-        // VideoClip, LoadDataClip, …) at the drop time / layer — see AssetType.TimelineClipOperator.
-        TimelineClipDrop.Handle(compositionOp, _context.TimeCanvas, _minScreenPos.Y, _minLayerIndex);
+        // Files / assets dropped anywhere on the timeline become the matching timeline-clip op (AudioClip,
+        // VideoClip, LoadDataClip, …) at the drop time / layer — see AssetType.TimelineClipOperator. The
+        // drop zone is the whole timeline window, not just the drawn rows, so drops on empty space or the
+        // background image land here instead of leaking to the graph's file-drop handler.
+        var windowPos = ImGui.GetWindowPos();
+        var dropRegion = new ImRect(windowPos, windowPos + ImGui.GetWindowSize());
+        TimelineClipDrop.Handle(compositionOp, _context.TimeCanvas, _minScreenPos.Y, _minLayerIndex, dropRegion, _maxLayerIndex);
 
         // Layer-area height drag handle. Only meaningful when there is at least one op clip to size.
         if (_context.ClipSelection.AllClipIds.Count > 0)

@@ -243,13 +243,17 @@ a short segment to a video file via the export window.
 ## Step: Legacy project migration
 
 **Action:**
-Open an older example project that was saved before the audio-clip rework. Many of the
-bundled examples fit this — try `Operators/Examples/user/still/synchotron/` or similar.
+Start the editor with an editable project whose soundtrack was saved before the
+audio-clip rework (a settings-based soundtrack, not an [AudioClip] op). Open its
+main composition.
 
 **Expected:**
-- The project loads with no warnings about its audio.
-- The soundtrack plays just as it did before.
-- Saving and reopening the project works — the audio clip keeps its settings and still
-  plays.
-- If the old project set its tempo on the clip itself, that tempo now lives in the
-  project's Playback settings and the soundtrack plays at the right speed.
+- The console shows a "Migrated legacy soundtrack entry(s) to visible [AudioClip]
+  op(s)" line for the project at startup.
+- An [AudioClip] op now exists in the composition; the former main soundtrack has
+  `Display` set to `BackgroundImage` and still renders behind the timeline.
+- The soundtrack plays just as it did before, at the right tempo.
+- Saving, closing and reopening keeps everything working; the saved project file no
+  longer carries the old settings-based clip list.
+- Opening a *read-only* package (e.g. bundled Examples from an install) does not get
+  migrated — it keeps playing via the legacy path.

@@ -11,6 +11,7 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Settings;
 using T3.Core.Video;
@@ -21,6 +22,8 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -573,6 +576,21 @@ internal sealed class ProjectSettingsWindow : Window
 
     #endregion
 
+    /// <summary>Sets an input on the [AudioClip] op that provides the current main soundtrack — undoable,
+    /// like any parameter edit. The clip data follows on the op's next sync.</summary>
+    private static void TrySetSoundtrackOpInput(Instance soundtrackOp, Guid inputId, InputValue value)
+    {
+        var parent = soundtrackOp.Parent;
+        if (parent == null || !parent.Symbol.Children.TryGetValue(soundtrackOp.SymbolChildId, out var symbolChild))
+        {
+            Log.Warning("Can't find the soundtrack op to edit.");
+            return;
+        }
+
+        UndoRedoStack.AddAndExecute(new ChangeInputValueCommand(parent.Symbol, soundtrackOp.SymbolChildId,
+                                                                symbolChild.Inputs[inputId], value));
+    }
+
     #region Playback settings
 
     private static bool DrawPlaybackSettings(Instance composition, CompositionSettings settings,
@@ -637,13 +655,23 @@ internal sealed class ProjectSettingsWindow : Window
                         ref _tempSoundtrackFilepathForEdit,
                         showAssetFolderToggle: false);
 
+                    // An op-provided soundtrack (an [AudioClip] with Display = BackgroundImage) is owned by
+                    // its op: the handle's clip is re-synced from the op's inputs every frame, so direct
+                    // clip mutations would silently revert. Edit the op's inputs instead.
+                    var soundtrackOp = soundtrackHandle.Owner as IAudioClipProvider as Instance;
+
                     var filepathModified = (editResult & InputEditStateFlags.Modified) != 0;
                     if (filepathModified)
                     {
-                        // Push the picker's value back onto the clip. TryToApplyFilePath validates
-                        // via AssetRegistry and clears AssetPath if the path doesn't resolve.
-                        if (!string.IsNullOrEmpty(_tempSoundtrackFilepathForEdit))
+                        if (soundtrackOp != null)
                         {
+                            TrySetSoundtrackOpInput(soundtrackOp, LegacyAudioClipMigration.PathInputId,
+                                                    new InputValue<string>(_tempSoundtrackFilepathForEdit ?? string.Empty));
+                        }
+                        else if (!string.IsNullOrEmpty(_tempSoundtrackFilepathForEdit))
+                        {
+                            // Push the picker's value back onto the clip. TryToApplyFilePath validates
+                            // via AssetRegistry and clears AssetPath if the path doesn't resolve.
                             if (compositionWithSettings != null)
                                 soundtrackHandle.TryToApplyFilePath(_tempSoundtrackFilepathForEdit, compositionWithSettings);
                         }
@@ -666,7 +694,18 @@ internal sealed class ProjectSettingsWindow : Window
                     ImGui.SameLine();
                     if (ImGui.Button("Remove"))
                     {
-                        playback.AudioClips.Remove(soundtrackHandle.Clip);
+                        if (soundtrackOp != null)
+                        {
+                            // Un-designate: set the op's Display back to Clip. The op (and its audio) stays;
+                            // it just stops being the main soundtrack.
+                            TrySetSoundtrackOpInput(soundtrackOp, LegacyAudioClipMigration.DisplayInputId,
+                                                    new InputValue<int>((int)AudioClipDisplay.Clip));
+                        }
+                        else
+                        {
+                            playback.AudioClips.Remove(soundtrackHandle.Clip);
+                        }
+
                         modified = true;
                     }
 
@@ -698,7 +737,19 @@ internal sealed class ProjectSettingsWindow : Window
                             "Offsets the start of the soundtrack on the timeline, in bars.",
                             0))
                     {
-                        soundtrackHandle.Clip.TimeRange.Start = soundtrackStart;
+                        if (soundtrackOp is IAudioClipProvider { TimeClip: { } timeClip })
+                        {
+                            // Op-provided: move the whole clip on its own TimeClip (the handle's copy is
+                            // re-synced from it each frame). Preserve the clip length.
+                            var delta = soundtrackStart - timeClip.TimeRange.Start;
+                            timeClip.TimeRange = new TimeRange(timeClip.TimeRange.Start + delta, timeClip.TimeRange.End + delta);
+                            soundtrackOp.Parent?.GetSymbolUi().FlagAsModified();
+                        }
+                        else
+                        {
+                            soundtrackHandle.Clip.TimeRange.Start = soundtrackStart;
+                        }
+
                         modified = true;
                     }
 
