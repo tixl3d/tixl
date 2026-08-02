@@ -53,7 +53,7 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         // so animated Volume / Mute take effect. The AutoPlay registrar covers the unwired case via
         // GetResourceHandle() reading static input values.
         SyncClip(context.Playback, Path.GetValue(context), Volume.GetValue(context), Mute.GetValue(context),
-                 Display.GetValue(context), Style.GetValue(context));
+                 Display.GetValue(context), Style.GetValue(context), Loop.GetValue(context));
         RefreshGraphRouting();
 
         TimeSlot.DirtyFlag.Clear();
@@ -110,7 +110,7 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         // Registrar path: no EvaluationContext, so read static input values. Animated inputs on an
         // unwired clip aren't evaluated
         SyncClip(Playback.Current, Path.TypedInputValue.Value, Volume.TypedInputValue.Value, Mute.TypedInputValue.Value,
-                 Display.TypedInputValue.Value, Style.TypedInputValue.Value);
+                 Display.TypedInputValue.Value, Style.TypedInputValue.Value, Loop.TypedInputValue.Value);
         RefreshGraphRouting();
         return _handle ??= new AudioClipResourceHandle(_clip, this);
     }
@@ -122,11 +122,12 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
     private bool IsManaged => Playback.FrameCount - _lastManagedFrame <= ManagedFrameSlack;
     private const int ManagedFrameSlack = 2;
 
-    private void SyncClip(Playback? playback, string? path, float volume, bool mute, int display, int style)
+    private void SyncClip(Playback? playback, string? path, float volume, bool mute, int display, int style, bool loop)
     {
         _clip.AssetPath = path ?? string.Empty;
         _clip.Volume = volume;
         _clip.IsMuted = mute;
+        _clip.IsLooping = loop;
 
         // Display = BackgroundImage doubles as the main-soundtrack designation (timeline background,
         // FFT routing, export) — see CompositionSettings.TryGetMainSoundtrack's op-clip union.
@@ -139,9 +140,12 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         _clip.LayerIndex = timeClip.LayerIndex;
 
         // Source trim: SourceRange is file-time in bars; the engine seeks in seconds → map via BPM.
-        // Interim mapping — refine when start-handle source trim editing lands.
+        // The source window's duration doubles as the loop length when Loop is on.
         if (playback != null)
+        {
             _clip.SourceOffsetSecs = playback.SecondsFromBars(timeClip.SourceRange.Start);
+            _clip.SourceDurationSecs = Math.Max(0, playback.SecondsFromBars(timeClip.SourceRange.End - timeClip.SourceRange.Start));
+        }
 
         _syncedClip = true;
     }
@@ -201,4 +205,7 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
 
     [Input(Guid = "9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80", MappedType = typeof(AudioClipStyle))]
     public readonly InputSlot<int> Style = new();
+
+    [Input(Guid = "6c5d9e40-7f8a-4b1c-8d2e-3f4a5b6c7d90")]
+    public readonly InputSlot<bool> Loop = new();
 }

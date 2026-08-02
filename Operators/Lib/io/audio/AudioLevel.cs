@@ -5,11 +5,13 @@ namespace Lib.io.audio
 {
     /// <summary>
     /// A level-meter tap for the audio graph: passes the wired sources through unchanged and outputs their
-    /// combined last-frame <see cref="Level"/> as a float for reactive control (e.g. driving a [Duck] or
-    /// visuals). Insert it between sources and an [AudioBus], or branch a source into it.
+    /// combined last-frame <see cref="Level"/> as a float for reactive control (e.g. driving a
+    /// [DuckAudioLevel] or visuals). Insert it between sources and an [AudioBus], or branch a source into it.
     ///
-    /// Metering reads the level BASS measured when the routing mixer last pulled the channel, so it is one
-    /// frame behind the audible signal — inherent to metering and fine for ducking/reactive use.
+    /// The tap declares an (effect-less) insert, so the routing bus realises it as its own submix — that's
+    /// what makes metering reliable for every source type, including engine-owned [AudioClip] channels that
+    /// can't be metered individually. The measured level trails the audible signal by roughly a frame —
+    /// inherent to metering and fine for ducking/reactive use.
     /// </summary>
     [Guid("d4f21c80-1e42-4c8a-9f31-0ab1cd2e0200")]
     internal sealed class AudioLevel : Instance<AudioLevel>
@@ -22,7 +24,15 @@ namespace Lib.io.audio
 
         public AudioLevel()
         {
-            _node = new AudioGraphNode(this, Input);
+            _node = new AudioGraphNode(this, Input)
+                        {
+                            FxInsert = new AudioGraphNode.AudioFxInsert
+                                           {
+                                               Apply = submix => _submixes.Add(submix),
+                                               UpdateParams = _ => { },
+                                               Remove = submix => _submixes.Remove(submix),
+                                           }
+                        };
             Result.Value = _node;
             Result.UpdateAction += UpdatePassThrough;
             Level.UpdateAction += UpdateLevel;
@@ -37,28 +47,47 @@ namespace Lib.io.audio
         {
             _node.Update(context);
 
-            _collected.Clear();
-            _node.Collect(_collected, 1f);
-
-            // A channel only meters while some mixer is pulling it (buffered); unrouted or unbuffered
-            // channels fail the call and are skipped. Gain is folded in so the value approximates what's
-            // audible. The buffer-inspecting Ex variant is required: the plain ChannelGetLevel only sees
-            // data taken since the last call and mostly reads 0 between the device's coarse pulls.
+            // Inline usage (source → AudioLevel → bus): meter the realised submix(es) — post per-source
+            // gains, and reliable for every source type including engine-owned [AudioClip] channels.
+            // The buffer-inspecting Ex variant is required: the plain ChannelGetLevel only sees data taken
+            // since its last call and mostly reads 0 between the device's coarse pulls.
             var maxLevel = 0f;
-            for (var i = 0; i < _collected.Count; i++)
+            if (_submixes.Count > 0)
             {
-                if (BassMix.ChannelGetLevel(_collected[i].Leaf.SourceChannel, _levelPair, 0.05f, 0) == -1)
-                    continue;
+                foreach (var submix in _submixes)
+                {
+                    if (BassMix.ChannelGetLevel(submix, _levelPair, 0.05f, 0) == -1)
+                        continue;
 
-                var level = Math.Max(_levelPair[0], _levelPair[1]) * _collected[i].Gain;
-                if (level > maxLevel)
-                    maxLevel = level;
+                    var level = Math.Max(_levelPair[0], _levelPair[1]);
+                    if (level > maxLevel)
+                        maxLevel = level;
+                }
+            }
+            else
+            {
+                // Side-branch usage (tap not wired into a bus): no submix is realised, so meter the leaf
+                // channels directly. Works for buffered graph-owned sources (tones etc.); engine-owned
+                // [AudioClip] channels are un-buffered and can't be metered this way — wire the tap inline
+                // for those.
+                _collected.Clear();
+                _node.Collect(_collected, 1f);
+                for (var i = 0; i < _collected.Count; i++)
+                {
+                    if (BassMix.ChannelGetLevel(_collected[i].Leaf.SourceChannel, _levelPair, 0.05f, 0) == -1)
+                        continue;
+
+                    var level = Math.Max(_levelPair[0], _levelPair[1]) * _collected[i].Gain;
+                    if (level > maxLevel)
+                        maxLevel = level;
+                }
             }
 
             Level.Value = Math.Min(maxLevel, 1f);
         }
 
         private readonly AudioGraphNode _node;
+        private readonly HashSet<int> _submixes = new(); // realised by the routing bus(es)
         private readonly List<AudioGraphNode.CollectedSource> _collected = new();
         private readonly float[] _levelPair = new float[2];
 

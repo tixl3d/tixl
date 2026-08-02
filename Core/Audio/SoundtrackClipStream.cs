@@ -192,11 +192,25 @@ internal sealed class SoundtrackClipStream
                                 ? clip.SourceOffsetSecs + clip.SourceDurationSecs
                                 : clip.LengthInSeconds;
 
+        // Looping: wrap the target position back into the valid source window (clamped to the file's
+        // content — a start-extension into negative source time doesn't widen the loop) for as long as
+        // the clip lasts. The wrap makes the drift exceed the resync threshold, so the seek happens on
+        // the next check.
+        var loopStartSecs = Math.Max(clip.SourceOffsetSecs, 0);
+        var loopLengthSecs = Math.Min(sourceEndSecs, clip.LengthInSeconds) - loopStartSecs;
+        if (clip.IsLooping && loopLengthSecs > 0.01 && elapsedInClipSecs >= 0)
+        {
+            targetSourcePosSecs = loopStartSecs + elapsedInClipSecs % loopLengthSecs;
+        }
+
         // Optional TimeRange.End bound: skip when End <= Start (the "no explicit end" sentinel).
         var hasClipEnd = clip.TimeRange.End > clip.TimeRange.Start;
         var clipEndSecs = hasClipEnd ? playback.SecondsFromBars(clip.TimeRange.End) : double.PositiveInfinity;
 
+        // targetSourcePos < 0 = the clip was start-extended before the file's content begins: stay
+        // muted until the playhead reaches valid source time instead of starting the audio early.
         var isOutOfBounds = elapsedInClipSecs < 0
+                            || targetSourcePosSecs < 0
                             || targetSourcePosSecs >= sourceEndSecs
                             || (hasClipEnd && TargetTime >= clipEndSecs);
         

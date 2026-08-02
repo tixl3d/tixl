@@ -72,6 +72,7 @@ internal static class ClipTimingEditor
                 clip.SourceRange.End = clip.SourceRange.Start + clipDuration * (_combinedSpeedPercentage / 100);
             }
         }
+        ImGui.PopID();
     }
 
     private enum Ranges

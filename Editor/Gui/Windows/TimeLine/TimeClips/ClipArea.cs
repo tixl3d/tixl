@@ -102,6 +102,10 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         if (UserActions.SplitSelectedOrHoveredClips.Triggered())
             OpClips.SplitClipsAtTime(compositionOp);
 
+        // Ripple-edit selection: everything starting at/after the mouse position's time, on all layers.
+        if (UserActions.SelectFollowingClips.Triggered())
+            OpClips.SelectClipsStartingAfter(_context.TimeCanvas.InverseTransformX(ImGui.GetMousePos().X));
+
         if (UserActions.DeleteSelection.Triggered())
         {
             OpClips.DeleteSelectedClips(compositionOp);

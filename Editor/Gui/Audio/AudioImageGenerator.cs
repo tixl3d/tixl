@@ -38,8 +38,8 @@ internal static class AudioImageGenerator
         // (The ".waveform" suffix for the spectrum style is historical — it keeps existing caches valid.)
         var imageVariantSuffix = style switch
                                      {
-                                         AudioClipStyle.Waveform => ".amplitude.png",
-                                         AudioClipStyle.VolumeLevel => ".level.png",
+                                         AudioClipStyle.Waveform => ".peaks.png",
+                                         AudioClipStyle.VolumeLevel => ".loudness.png",
                                          _ => UserSettings.Config.ExpandSpectrumVisualizerVertically ? ".10.waveform.png" : ".waveform.png",
                                      };
         imagePathAbsolute = GetWaveformImageCachePath(soundFilePathAbsolute, imageVariantSuffix);
@@ -253,25 +253,35 @@ internal static class AudioImageGenerator
 
         if (style == AudioClipStyle.Waveform)
         {
-            // Symmetric peak waveform around the vertical center, with the softer RMS band inside.
+            // Single symmetric peak silhouette around the vertical center — one clean shape that stays
+            // readable at small clip heights (a separate RMS band read as visual noise there).
             const int center = ImageHeight / 2;
             const int halfHeight = ImageHeight / 2 - 1;
             for (var column = 0; column < columns; column++)
             {
                 var peakRows = (int)(peaks[column] * halfHeight);
-                var rmsRows = (int)(rms[column] * halfHeight);
                 for (var row = -peakRows; row <= peakRows; row++)
-                    image.SetPixel(column, center + row, Math.Abs(row) <= rmsRows ? solid : soft);
+                    image.SetPixel(column, center + row, solid);
             }
         }
         else
         {
-            // Volume-level envelope: a bottom-filled RMS curve, lightly smoothed across columns.
+            // Volume-level envelope: a bottom-filled RMS curve, lightly smoothed across columns and
+            // normalized to the file's loudest moment — raw RMS of even normalized audio only reaches
+            // ~10-30% of full scale, which read as a barely-visible sliver.
+            var maxRms = 0f;
+            for (var column = 0; column < columns; column++)
+            {
+                if (rms[column] > maxRms)
+                    maxRms = rms[column];
+            }
+
+            var normalize = maxRms > 0.001f ? 1f / maxRms : 1f;
             for (var column = 0; column < columns; column++)
             {
                 var left = rms[Math.Max(column - 1, 0)];
                 var right = rms[Math.Min(column + 1, columns - 1)];
-                var level = (left + rms[column] * 2 + right) * 0.25f;
+                var level = Math.Min((left + rms[column] * 2 + right) * 0.25f * normalize, 1f);
 
                 var rows = (int)(level * (ImageHeight - 2));
                 for (var row = 0; row < rows; row++)

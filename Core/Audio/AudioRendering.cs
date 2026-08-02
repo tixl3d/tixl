@@ -243,8 +243,17 @@ public static class AudioRendering
                                    ? clip.SourceOffsetSecs + clip.SourceDurationSecs
                                    : clip.LengthInSeconds;
 
-            // Check if clip is active at this time
-            bool isActive = elapsedInClip >= 0 && targetSourcePos < sourceEnd;
+            // Looping clips wrap back into their valid source window for as long as the clip lasts.
+            var loopStart = Math.Max(clip.SourceOffsetSecs, 0);
+            var loopLength = Math.Min(sourceEnd, clip.LengthInSeconds) - loopStart;
+            if (clip.IsLooping && loopLength > 0.01 && elapsedInClip >= 0)
+                targetSourcePos = loopStart + elapsedInClip % loopLength;
+
+            // Check if clip is active at this time (negative source position = start-extended before
+            // the file's content — stays silent until the playhead reaches valid source time).
+            bool isActive = elapsedInClip >= 0 && targetSourcePos >= 0 && targetSourcePos < sourceEnd;
+            if (clip.IsLooping && clip.TimeRange.End > clip.TimeRange.Start)
+                isActive &= currentTime < Playback.Current.SecondsFromBars(clip.TimeRange.End);
 
             if (isActive)
             {

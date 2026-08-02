@@ -44,7 +44,8 @@ internal static class AudioClipBodyRenderer
         if (bodyWidth < 3 || bodyHeight < 4)
             return;
 
-        var style = provider.GetResourceHandle().Clip.Style;
+        var clipData = provider.GetResourceHandle().Clip;
+        var style = clipData.Style;
         if (!TryGetWaveformSrv(path, instance, style, out var srv))
             return;
 
@@ -70,7 +71,45 @@ internal static class AudioClipBodyRenderer
             var visibleStartSecs = Math.Max(sourceStartSecs, 0.0);
             var visibleEndSecs = Math.Min(sourceEndSecs, lengthSecs);
 
-            if (sourceSpanSecs > 0.0001 && visibleEndSecs > visibleStartSecs)
+            // Looping clip: tile the *valid* source window (clamped to the file's content — end-trims
+            // extend SourceRange past it, and the engine loops only the real content) across the body,
+            // marking each repeat with a border line.
+            var timeSpanSecs = playback.SecondsFromBars(timeClip.TimeRange.End) - playback.SecondsFromBars(timeClip.TimeRange.Start);
+            var loopSpanSecs = visibleEndSecs - visibleStartSecs;
+            if (clipData.IsLooping && loopSpanSecs > 0.0001 && timeSpanSecs > 0.0001)
+            {
+                var u0 = (float)(visibleStartSecs / lengthSecs);
+                var u1 = (float)(visibleEndSecs / lengthSecs);
+                var segmentWidth = (float)(loopSpanSecs / timeSpanSecs) * bodyWidth;
+                if (segmentWidth > 2)
+                {
+                    var borderColor = UiColors.BackgroundFull.Fade(0.6f);
+                    var segmentStartX = bodyMin.X;
+                    while (segmentStartX < bodyMax.X)
+                    {
+                        var segmentEndX = Math.Min(segmentStartX + segmentWidth, bodyMax.X);
+                        var visibleFraction = (segmentEndX - segmentStartX) / segmentWidth;
+                        drawList.AddImage((IntPtr)srv,
+                                          new Vector2(segmentStartX, bodyMin.Y),
+                                          new Vector2(segmentEndX, bodyMax.Y),
+                                          new Vector2(u0, 0),
+                                          new Vector2(u0 + (u1 - u0) * visibleFraction, 1),
+                                          UiColors.ForegroundFull.Fade(1f));
+
+                        if (segmentStartX > bodyMin.X)
+                        {
+                            drawList.AddLine(new Vector2(segmentStartX, bodyMin.Y),
+                                             new Vector2(segmentStartX, bodyMax.Y),
+                                             borderColor, 1);
+                        }
+
+                        segmentStartX += segmentWidth;
+                    }
+
+                    drawn = true;
+                }
+            }
+            else if (sourceSpanSecs > 0.0001 && visibleEndSecs > visibleStartSecs)
             {
                 var x0 = (float)((visibleStartSecs - sourceStartSecs) / sourceSpanSecs);
                 var x1 = (float)((visibleEndSecs - sourceStartSecs) / sourceSpanSecs);

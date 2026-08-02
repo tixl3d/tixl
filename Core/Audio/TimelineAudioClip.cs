@@ -132,6 +132,11 @@ public sealed class TimelineAudioClip
     /// Transient — the [AudioClip] op syncs it from its Style input each frame.</summary>
     public AudioClipStyle Style = AudioClipStyle.Spectrum;
 
+    /// <summary>When true the clip repeats its source window (<see cref="SourceOffsetSecs"/> +
+    /// <see cref="SourceDurationSecs"/>) for as long as its <see cref="TimeRange"/> lasts.
+    /// Transient — the [AudioClip] op syncs it from its Loop input each frame.</summary>
+    public bool IsLooping;
+
     /// <summary>
     /// Transient (not serialized): set each frame by the [AudioClip] op when its <c>AudioReference</c> output is
     /// wired into the audio-processing graph. While true, the graph owns this clip's channel — it moves it out of

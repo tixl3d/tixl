@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Resource.Assets;
@@ -71,7 +72,20 @@ internal static class TimeClipItem
         var itemRectMax = position + clipSize - new Vector2(1, 0);
 
         var rounding = 4.5f;
-        var randomColor = DrawUtils.RandomColorForHash(timeClip.Id.GetHashCode());
+
+        // Live Instance for this clip — drives the clip color, the body renderers below and the
+        // filename label further down. Missing = null; all consumers handle.
+        attr.CompositionOp.Children.TryGetChildInstance(timeClip.Id, out var clipInstance);
+
+        // Media clips share their type color (audio-graph / texture) instead of a per-clip random hue,
+        // keeping audio and video clip styling aligned.
+        var isAudioClip = clipInstance is IAudioClipProvider;
+        var isVideoClip = clipInstance != null && clipInstance.Symbol.Id == _videoClipSymbolId;
+        var randomColor = isAudioClip
+                              ? UiColors.ColorForAudioGraph
+                              : isVideoClip
+                                  ? UiColors.ColorForTextures
+                                  : DrawUtils.RandomColorForHash(timeClip.Id.GetHashCode());
 
         var timeRemapped = timeClip.TimeRange != timeClip.SourceRange;
         var timeStretched = Math.Abs(timeClip.TimeRange.Duration - timeClip.SourceRange.Duration) > 0.001;
@@ -83,12 +97,18 @@ internal static class TimeClipItem
         var fadeIfInActive = (isConnected && isWithinPlaybackTime) ? 1 : 0.8f;
         
         var fadeIfNotConnected = isConnected ? 1f : 0.4f;
-        var innerColor = Color.Mix(UiColors.BackgroundFull,randomColor,0.5f).Fade(0.8f * fadeIfNotConnected * fadeIfInActive);
-        attr.DrawList.AddRectFilled(position, itemRectMax, innerColor, rounding);
 
-        // Live Instance for this clip — used both for the DataClip tick overlay below and
-        // for the filename label further down. Missing = null; both consumers handle.
-        attr.CompositionOp.Children.TryGetChildInstance(timeClip.Id, out var clipInstance);
+        // Media clips render slightly translucent and solidify on hover — together with the
+        // footage-extent outline this links the clip body to its available source range.
+        var mediaHoverFade = 1f;
+        if (isAudioClip || isVideoClip)
+        {
+            var isHoveredForFill = ImGui.IsMouseHoveringRect(position, itemRectMax);
+            mediaHoverFade = isHoveredForFill ? 1f : 0.6f;
+        }
+
+        var innerColor = Color.Mix(UiColors.BackgroundFull,randomColor,0.5f).Fade(0.8f * fadeIfNotConnected * fadeIfInActive * mediaHoverFade);
+        attr.DrawList.AddRectFilled(position, itemRectMax, innerColor, rounding);
 
         // Per-event tick overlay for ops that publish a DataClip; waveform for [AudioClip] ops.
         // Each no-ops for op kinds it doesn't handle.
@@ -512,8 +532,8 @@ internal static class TimeClipItem
                               UiColors.ForegroundFull.Fade(0.3f), 4.5f);
     }
 
-    /// <summary>Full source length of a video clip in bars, or false (with -1) for non-video / unknown-duration
-    /// clips. Duration is resolved through the per-asset <see cref="VideoClipDurationCache"/> (probed once).</summary>
+    /// <summary>Full source length of a video or audio clip in bars, or false (with -1) for other /
+    /// unknown-duration clips. Duration is resolved through the per-asset duration caches (probed once).</summary>
     private static bool TryGetVideoFootageBars(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance? clipInstance, out float footageBars)
     {
         footageBars = -1f;
@@ -521,9 +541,25 @@ internal static class TimeClipItem
             return false;
 
         var path = describedFile.SourcePathSlot.TypedInputValue.Value;
-        if (string.IsNullOrEmpty(path)
-            || !AssetType.TryGetForFilePath(path, out var assetType, out _) || assetType.Name != "Video"
-            || !VideoClipDurationCache.TryGetDurationSecs(path, clipInstance, out var fullDurationSecs) || fullDurationSecs <= 0)
+        if (string.IsNullOrEmpty(path) || !AssetType.TryGetForFilePath(path, out var assetType, out _))
+            return false;
+
+        double fullDurationSecs;
+        switch (assetType.Name)
+        {
+            case "Video":
+                if (!VideoClipDurationCache.TryGetDurationSecs(path, clipInstance, out fullDurationSecs))
+                    return false;
+                break;
+            case "Audio":
+                if (!AudioClipDurationCache.TryGetDurationSecs(path, clipInstance, out fullDurationSecs))
+                    return false;
+                break;
+            default:
+                return false;
+        }
+
+        if (fullDurationSecs <= 0)
             return false;
 
         footageBars = (float)attr.LayerContext.TimeCanvas.Playback.BarsFromSeconds(fullDurationSecs);
@@ -564,6 +600,9 @@ internal static class TimeClipItem
         public double AnchorTime;
         public void CheckForSnap(ref SnapResult snapResult) => snapResult.TryToImproveWithAnchorValue(AnchorTime);
     }
+
+    // [VideoClip] — media clips get their type color instead of the per-clip random hue.
+    private static readonly Guid _videoClipSymbolId = new("04c1a6dc-3042-48a8-81d2-0a5a162016dc");
 
     private const float HandleWidth = 7;
     private static float _timeWithinDraggedClip;
