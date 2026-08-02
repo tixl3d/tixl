@@ -130,11 +130,11 @@ internal sealed class TimeClipInteractions
                 SplitClipsAtTime(compositionOp);
             }
 
-            // From the menu the anchor is the playback time; the keyboard shortcut uses the mouse position.
             if (ImGui.MenuItem("Select following clips", UserActions.SelectFollowingClips.ListShortcuts())
                 && _playback != null)
             {
-                SelectClipsStartingAfter(_playback.TimeInBars);
+                // The playhead anchor is exact (e.g. right after a cut) — a frame of tolerance suffices.
+                SelectClipsStartingAfter(_playback.TimeInBars, _playback.BarsFromSeconds(1 / 30.0));
             }
 
             // Only offered when the selection includes a DataClip op - the inline pane has nothing to show otherwise.
@@ -218,14 +218,12 @@ internal sealed class TimeClipInteractions
 
     /// <summary>
     /// Selects every clip (on all layers) that starts at or after the given time — for ripple edits:
-    /// select everything downstream, then drag to open or close a gap. A frame-sized tolerance includes
-    /// clips starting *at* the anchor, so right after a cut the new right half is part of the selection
-    /// even when the mouse sits a hair past the cut.
+    /// select everything downstream, then drag to open or close a gap. The tolerance includes clips
+    /// starting *at* (or shortly before) the anchor, so right after a cut the new right half is part of
+    /// the selection even when the mouse sits a bit past the cut.
     /// </summary>
-    public void SelectClipsStartingAfter(double timeInBars)
+    public void SelectClipsStartingAfter(double timeInBars, double toleranceInBars)
     {
-        var toleranceInBars = _playback != null ? _playback.BarsFromSeconds(1 / 30.0) : 0.05;
-
         var selection = _context.ClipSelection;
         selection.Clear();
         foreach (var clip in selection.CompositionTimeClips.Values)

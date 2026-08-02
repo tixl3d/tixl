@@ -79,7 +79,11 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         // background image land here instead of leaking to the graph's file-drop handler.
         var windowPos = ImGui.GetWindowPos();
         var dropRegion = new ImRect(windowPos, windowPos + ImGui.GetWindowSize());
-        TimelineClipDrop.Handle(compositionOp, _context.TimeCanvas, _minScreenPos.Y, _minLayerIndex, dropRegion, _maxLayerIndex);
+
+        // The layer rows render half a layer-height below the group's top (see DrawAllLayers) — pass the
+        // actual row origin, or drops land one lane off.
+        var layerRowsTopY = _minScreenPos.Y + LayerHeight * 0.5f;
+        TimelineClipDrop.Handle(compositionOp, _context.TimeCanvas, layerRowsTopY, _minLayerIndex, dropRegion, _maxLayerIndex);
 
         // Layer-area height drag handle. Only meaningful when there is at least one op clip to size.
         if (_context.ClipSelection.AllClipIds.Count > 0)
@@ -106,9 +110,15 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         if (UserActions.SplitSelectedOrHoveredClips.Triggered())
             OpClips.SplitClipsAtTime(compositionOp);
 
-        // Ripple-edit selection: everything starting at/after the mouse position's time, on all layers.
+        // Ripple-edit selection: everything starting at/after the playback time, on all layers — the
+        // same anchor as the context-menu action, so shortcut and menu behave identically. (An earlier
+        // mouse-position anchor proved confusing next to the menu variant.)
         if (UserActions.SelectFollowingClips.Triggered())
-            OpClips.SelectClipsStartingAfter(_context.TimeCanvas.InverseTransformX(ImGui.GetMousePos().X));
+        {
+            var playback = _context.TimeCanvas.Playback;
+            if (playback != null)
+                OpClips.SelectClipsStartingAfter(playback.TimeInBars, playback.BarsFromSeconds(1 / 30.0));
+        }
 
         if (UserActions.DeleteSelection.Triggered())
         {

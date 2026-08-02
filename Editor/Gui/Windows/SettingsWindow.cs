@@ -217,6 +217,11 @@ internal sealed partial class SettingsWindow : Window
                                                       "After the playback is halted, the time will reset to the moment when the playback began. This feature proves beneficial for iteratively reviewing animations without requiring manual rewinding.",
                                                       UserSettings.Defaults.ResetTimeAfterPlayback);
 
+                    changed |= FormInputs.AddCheckBox("Follow playback time",
+                                                      ref UserSettings.Config.TimelineFollowsPlayback,
+                                                      "While playing, the timeline scrolls along once the time marker approaches the view's edge, keeping it visible.",
+                                                      UserSettings.Defaults.TimelineFollowsPlayback);
+
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Output");
 

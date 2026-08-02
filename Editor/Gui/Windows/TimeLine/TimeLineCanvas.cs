@@ -104,6 +104,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         var keepScale = T3Ui.UiScaleFactor;
 
         ScrollToTimeAfterStopped();
+        KeepPlayheadInView();
 
         var modeChanged = UpdateMode();
         SyncInlineCurveEditorRegistration();
@@ -136,6 +137,12 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
         void DrawCanvasContent(InteractionState interactionState)
         {
+            // Panning hands view control to the user: follow-playback scrolling stays suspended until
+            // playback is (re)started, which re-arms it. Zooming deliberately does NOT suspend — changing
+            // the zoom level while the view keeps tracking the playhead is a common way to adjust context.
+            if (interactionState.UserPannedCanvas)
+                _followPlaybackSuspended = true;
+
             // Cross-view hover state is rebuilt each frame by whichever renderer's hit-test
             // sets it. Stale values would leak hover fade to the next frame on mouse-exit.
             HoveredParameterHash = null;
@@ -461,8 +468,27 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 }
             }
 
+            // Clip starts and ends are jump targets too — stepping through cuts with . and ,
+            foreach (var clip in ClipArea.AllTimeClips)
+            {
+                if (clip.TimeRange.Start > time && clip.TimeRange.Start < bestNextTime)
+                {
+                    foundNext = true;
+                    bestNextTime = clip.TimeRange.Start;
+                }
+
+                if (clip.TimeRange.End > time && clip.TimeRange.End < bestNextTime)
+                {
+                    foundNext = true;
+                    bestNextTime = clip.TimeRange.End;
+                }
+            }
+
             if (foundNext)
+            {
                 Playback.TimeInBars = bestNextTime;
+                CenterCurrentTimeIfNotVisible();
+            }
         }
 
         if (UserActionRegistry.WasActionQueued(UserActions.PlaybackJumpToPreviousKeyframe))
@@ -484,8 +510,27 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 }
             }
 
+            // Clip starts and ends are jump targets too — stepping through cuts with . and ,
+            foreach (var clip in ClipArea.AllTimeClips)
+            {
+                if (clip.TimeRange.Start < time && clip.TimeRange.Start > bestPreviousTime)
+                {
+                    foundNext = true;
+                    bestPreviousTime = clip.TimeRange.Start;
+                }
+
+                if (clip.TimeRange.End < time && clip.TimeRange.End > bestPreviousTime)
+                {
+                    foundNext = true;
+                    bestPreviousTime = clip.TimeRange.End;
+                }
+            }
+
             if (foundNext)
+            {
                 Playback.TimeInBars = bestPreviousTime;
+                CenterCurrentTimeIfNotVisible();
+            }
         }
     }
 
@@ -523,27 +568,69 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         ImGui.SetCursorPos(Vector2.Zero);
     }
 
+    /// <summary>
+    /// While playing, keeps the time marker inside the middle 60% of the view: once it crosses the
+    /// 20%-padding edge in the playback direction, the canvas scrolls along (ScrollTarget smoothing
+    /// makes it glide). Panning or zooming suspends the follow (user-controlled view) until playback
+    /// is started again.
+    /// </summary>
+    private void KeepPlayheadInView()
+    {
+        if (!UserSettings.Config.TimelineFollowsPlayback || _followPlaybackSuspended)
+            return;
+
+        if (Math.Abs(Playback.PlaybackSpeed) < 0.01f)
+            return;
+
+        var markerX = TransformX((float)Playback.TimeInBars);
+        var leftEdge = WindowPos.X + WindowSize.X * 0.2f;
+        var rightEdge = WindowPos.X + WindowSize.X * 0.8f;
+
+        if (markerX > rightEdge)
+        {
+            ScrollTarget.X += InverseTransformDirection(new Vector2(markerX - rightEdge, 0)).X;
+        }
+        else if (markerX < leftEdge && Playback.PlaybackSpeed < 0)
+        {
+            ScrollTarget.X -= InverseTransformDirection(new Vector2(leftEdge - markerX, 0)).X;
+        }
+    }
+
     private void ScrollToTimeAfterStopped()
     {
         var isPlaying = Math.Abs(Playback.PlaybackSpeed) > 0.01f;
         var wasPlaying = Math.Abs(_lastPlaybackSpeed) > 0.01f;
 
+        // Starting playback (space, transport icon, hotkeys — any stop→play transition) re-arms the
+        // follow-playback scrolling that a manual pan/zoom suspended.
+        if (isPlaying && !wasPlaying)
+        {
+            _followPlaybackSuspended = false;
+        }
+
         if (!isPlaying && wasPlaying)
         {
-            if (!IsCurrentTimeVisible())
-            {
-                // assume we are not scrolling, what screen position would the playhead be at?
-                var oldScroll = Scroll;
-                Scroll = new Vector2(0, Scroll.Y);
-                var posScreen = TransformX((float)Playback.TimeInBars);
-                // position that playhead in the center of the window
-                ScrollTarget.X = InverseTransformX(posScreen - WindowSize.X * 0.5f);
-                // restore old state of scrolling
-                Scroll = oldScroll;
-            }
+            CenterCurrentTimeIfNotVisible();
         }
 
         _lastPlaybackSpeed = Playback.PlaybackSpeed;
+    }
+
+    /// <summary>Scrolls the view so the current playback time sits centered — only when it isn't visible,
+    /// so it never disturbs a view the user framed deliberately.</summary>
+    private void CenterCurrentTimeIfNotVisible()
+    {
+        if (IsCurrentTimeVisible())
+            return;
+
+        // assume we are not scrolling, what screen position would the playhead be at?
+        var oldScroll = Scroll;
+        Scroll = new Vector2(0, Scroll.Y);
+        var posScreen = TransformX((float)Playback.TimeInBars);
+        // position that playhead in the center of the window
+        ScrollTarget.X = InverseTransformX(posScreen - WindowSize.X * 0.5f);
+        // restore old state of scrolling
+        Scroll = oldScroll;
     }
 
     private bool IsCurrentTimeVisible()
@@ -905,6 +992,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly NodeSelection _nodeSelection;
 
     private double _lastPlaybackSpeed;
+    private bool _followPlaybackSuspended;
     private readonly List<AnimationParameter> _pinnedParams = new(20);
     private readonly List<AnimationParameter> _curvesForSelection = new(64);
     private readonly SelectionFence _selectionFence = new();
