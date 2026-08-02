@@ -69,6 +69,19 @@ Swap the reverb for an [AudioEcho]. Trigger a short tone and adjust `Delay`,
   how many repeats are heard.
 - With `PingPong` on, repeats alternate between left and right.
 
+## Step: Compressor insert
+
+**Action:**
+Route a loud triggered tone through an [AudioCompressor] into the bus. Set
+`Threshold` around 0.2 and `Ratio` around 10, then trigger the tone; afterwards
+raise `MakeupGainDb`.
+
+**Expected:**
+- The tone's sustain audibly flattens compared to the un-compressed signal.
+- Raising `MakeupGainDb` brings the compressed signal's loudness back up
+  ("breathing" on the tail is normal at strong settings).
+- `Attack` and `Release` change how quickly the compression clamps and lets go.
+
 ## Step: Chained effects
 
 **Action:**

@@ -13,6 +13,7 @@ using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
+using T3.Core.Resource.Assets;
 using T3.Core.Settings;
 using T3.Core.Video;
 using T3.Editor.Gui.Audio;
@@ -24,6 +25,7 @@ using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -576,6 +578,65 @@ internal sealed class ProjectSettingsWindow : Window
 
     #endregion
 
+    /// <summary>
+    /// "Add soundtrack" creates a visible [AudioClip] op flagged as main soundtrack (AutoPlay on,
+    /// Display = BackgroundImage) — one undoable action; the panel's file picker then fills its Path.
+    /// </summary>
+    private static void CreateSoundtrackOp(Instance composition)
+    {
+        var symbolUi = composition.GetSymbolUi();
+        var commands = new List<ICommand>();
+
+        var addCommand = new AddSymbolChildCommand(symbolUi.Symbol, LegacyAudioClipMigration.AudioClipSymbolId)
+                             {
+                                 PosOnCanvas = GraphUtils.FindFreePosition(symbolUi, new Vector2(0, 200), SymbolUi.Child.DefaultOpSize),
+                             };
+        addCommand.Do();
+        commands.Add(addCommand);
+
+        if (symbolUi.Symbol.Children.TryGetValue(addCommand.AddedChildId, out var child))
+        {
+            var autoPlayCommand = new ChangeInputValueCommand(symbolUi.Symbol, child.Id,
+                                                              child.Inputs[LegacyAudioClipMigration.AutoPlayInputId],
+                                                              new InputValue<bool>(true));
+            autoPlayCommand.Do();
+            commands.Add(autoPlayCommand);
+
+            var displayCommand = new ChangeInputValueCommand(symbolUi.Symbol, child.Id,
+                                                             child.Inputs[LegacyAudioClipMigration.DisplayInputId],
+                                                             new InputValue<int>((int)AudioClipDisplay.BackgroundImage));
+            displayCommand.Do();
+            commands.Add(displayCommand);
+        }
+
+        UndoRedoStack.Add(new MacroCommand("Add soundtrack", commands));
+        symbolUi.FlagAsModified();
+        ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children);
+    }
+
+    /// <summary>After the first file is assigned, size the fresh soundtrack clip to the file's duration —
+    /// a zero-length clip would be invisible in the timeline lanes and impossible to drag.</summary>
+    private static void InitSoundtrackClipRangeIfNeeded(Instance soundtrackOp, string? path)
+    {
+        if (string.IsNullOrEmpty(path) || soundtrackOp is not IAudioClipProvider { TimeClip: { } timeClip })
+            return;
+
+        if (timeClip.TimeRange.End > timeClip.TimeRange.Start)
+            return;
+
+        if (!AssetRegistry.TryResolveAddress(path, soundtrackOp, out var absolutePath, out _))
+            return;
+
+        var durationSecs = AudioMixerManager.TryProbeAudioDurationSecs(absolutePath);
+        if (durationSecs <= 0)
+            return;
+
+        var durationBars = (float)Playback.Current.BarsFromSeconds(durationSecs);
+        timeClip.TimeRange = new TimeRange(0, durationBars);
+        timeClip.SourceRange = new TimeRange(0, durationBars);
+        soundtrackOp.Parent?.GetSymbolUi().FlagAsModified();
+    }
+
     /// <summary>Sets an input on the [AudioClip] op that provides the current main soundtrack — undoable,
     /// like any parameter edit. The clip data follows on the op's next sync.</summary>
     private static void TrySetSoundtrackOpInput(Instance soundtrackOp, Guid inputId, InputValue value)
@@ -618,11 +679,13 @@ internal sealed class ProjectSettingsWindow : Window
                 {
                     if (ImGui.Button("Add soundtrack to composition"))
                     {
+                        // Creates a visible [AudioClip] op flagged as main soundtrack (Display =
+                        // BackgroundImage) — the settings-list is migration-source-only. The picker
+                        // below then edits the op's Path input.
+                        if (compositionWithSettings is Instance settingsComposition)
+                            CreateSoundtrackOp(settingsComposition);
+
                         modified = true;
-                        playback.AudioClips.Add(new TimelineAudioClip()
-                        {
-                            IsMainSoundtrack = true,
-                        });
                         _tempSoundtrackFilepathForEdit = string.Empty;
                     }
                 }
@@ -667,6 +730,7 @@ internal sealed class ProjectSettingsWindow : Window
                         {
                             TrySetSoundtrackOpInput(soundtrackOp, LegacyAudioClipMigration.PathInputId,
                                                     new InputValue<string>(_tempSoundtrackFilepathForEdit ?? string.Empty));
+                            InitSoundtrackClipRangeIfNeeded(soundtrackOp, _tempSoundtrackFilepathForEdit);
                         }
                         else if (!string.IsNullOrEmpty(_tempSoundtrackFilepathForEdit))
                         {

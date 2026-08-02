@@ -703,15 +703,17 @@ internal static class SymbolUiJson
 
     private static void WriteSettings(SymbolUi symbolUi, JsonTextWriter writer)
     {
-        // RenderSettings, OutputWindowStates and TimelineState are only meaningful for symbols
-        // the user marked as a playback root via "Specify settings for ..." in the Composition
-        // Settings window. On every other symbol the editor still keeps in-memory state while
-        // the user navigates or renders, but writing it would pollute the .t3ui of sub-ops the
-        // user never intentionally configured.
+        // RenderSettings and TimelineState are only meaningful for symbols the user marked as a
+        // playback root via "Specify settings for ..." in the Composition Settings window. On every
+        // other symbol the editor still keeps in-memory state while the user navigates or renders,
+        // but writing it would pollute the .t3ui of sub-ops the user never intentionally configured.
+        // OutputWindowStates are exempt: they're only ever assigned to a project's root symbol (see
+        // OutputWindow.SyncStateWithProject), and coupling them to Enabled silently dropped pinning
+        // for projects that never opened their settings (audio works without them now).
         var isComposition = symbolUi.Symbol.CompositionSettings.Enabled;
         var hasRenderSettings = symbolUi.RenderSettings != null && isComposition;
         var hasRecordingSettings = symbolUi.RecordingSettings is { } rec && !rec.IsAtDefault();
-        var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 } && isComposition;
+        var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
         var hasTimelineState = symbolUi.TimelineState != null && isComposition;
         var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
 

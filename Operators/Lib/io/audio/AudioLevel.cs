@@ -14,7 +14,7 @@ namespace Lib.io.audio
     /// inherent to metering and fine for ducking/reactive use.
     /// </summary>
     [Guid("d4f21c80-1e42-4c8a-9f31-0ab1cd2e0200")]
-    internal sealed class AudioLevel : Instance<AudioLevel>
+    internal sealed class AudioLevel : Instance<AudioLevel>, IStatusProvider
     {
         [Output(Guid = "d4f21c80-0001-4c8a-9f31-0ab1cd2e0200")]
         public readonly Slot<AudioGraphNode> Result = new();
@@ -84,6 +84,28 @@ namespace Lib.io.audio
             }
 
             Level.Value = Math.Min(maxLevel, 1f);
+        }
+
+        // A side-branch tap can meter generator sources, but engine-owned [AudioClip] channels are
+        // un-buffered and silently read 0 there — a trap that cost real debugging time; warn instead.
+        IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() =>
+            _submixes.Count == 0 && HasUnmeterableClipLeaf()
+                ? IStatusProvider.StatusLevel.Warning
+                : IStatusProvider.StatusLevel.Success;
+
+        string IStatusProvider.GetStatusMessage() =>
+            "As a side branch this tap can't meter timeline [AudioClip]s — their Level reads 0.\n"
+            + "Wire it inline: source → AudioLevel → bus (directly or through combines/effects).";
+
+        private bool HasUnmeterableClipLeaf()
+        {
+            for (var i = 0; i < _collected.Count; i++)
+            {
+                if (_collected[i].Leaf.ExternallyManagedChannel)
+                    return true;
+            }
+
+            return false;
         }
 
         private readonly AudioGraphNode _node;

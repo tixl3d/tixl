@@ -161,6 +161,44 @@ Grab the clip's right edge and drag it to the left.
   you can't drag it longer, but you can freely shrink it, and once it drops below its
   natural length the limit tightens up again.
 
+## Step: Loop a clip's source range
+
+**Action:**
+Select an audio clip, enable its `Loop` parameter, then drag the clip's end handle
+well past the audio file's length.
+
+**Expected:**
+- The audio repeats seamlessly for as long as the clip lasts — in playback and in a
+  rendered video.
+- The clip body shows the waveform tiled per repetition, with a subtle vertical line
+  at each loop border.
+- Trimming the clip's start changes where each repetition begins.
+
+## Step: Footage extent while trimming
+
+**Action:**
+Hover an audio clip, then drag its start or end handle slowly.
+
+**Expected:**
+- A thin outline appears showing the full extent of the audio file on the timeline.
+- The mouse cursor stays a steady resize cursor for the whole drag — no flicker.
+- The trim snaps when a handle reaches the file's first or last moment.
+- Dragging the start before the file's beginning leaves that stretch silent during
+  playback (the audio doesn't start early).
+
+## Step: Set as main soundtrack via context menu
+
+**Action:**
+Right-click a single selected audio clip and choose "Set as main soundtrack".
+
+**Expected:**
+- The clip's `Display` switches to `BackgroundImage`: its image renders behind the
+  timeline and audio-reactive ops respond to it.
+- Any other clip that previously was the main soundtrack loses the designation.
+- The menu item reads "Unset main soundtrack" for the current main clip, and choosing
+  it reverts the clip to a normal block.
+- Undo reverts the whole designation change at once.
+
 ## Step: Delete and undo
 
 **Action:**

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -137,6 +138,8 @@ internal sealed class TimeClipInteractions
                 SelectClipsStartingAfter(_playback.TimeInBars, _playback.BarsFromSeconds(1 / 30.0));
             }
 
+            DrawMainSoundtrackMenuItem(compositionOp);
+
             // Only offered when the selection includes a DataClip op - the inline pane has nothing to show otherwise.
             if (InlineDataClipArea.HasSelectedDataClipInstance(_context.TimeCanvas, compositionOp))
             {
@@ -156,6 +159,66 @@ internal sealed class TimeClipInteractions
             _contextMenuIsOpen = false;
         }
         ImGui.PopStyleVar(2);
+    }
+
+    /// <summary>
+    /// "Set as main soundtrack" for a single selected [AudioClip]: sets its Display to BackgroundImage
+    /// (timeline background, FFT routing, export duration) and clears the designation from any other
+    /// audio clip — one main soundtrack per composition. Toggles off when the clip already is it.
+    /// </summary>
+    private void DrawMainSoundtrackMenuItem(Instance compositionOp)
+    {
+        if (_context.ClipSelection.Count != 1)
+            return;
+
+        Guid selectedId = default;
+        foreach (var id in _context.ClipSelection.SelectedClipsIds)
+        {
+            selectedId = id;
+            break;
+        }
+
+        if (!compositionOp.Children.TryGetChildInstance(selectedId, out var instance)
+            || instance is not IAudioClipProvider provider)
+            return;
+
+        var isMain = provider.GetResourceHandle().Clip.IsMainSoundtrack;
+        if (ImGui.MenuItem(isMain ? "Unset main soundtrack" : "Set as main soundtrack"))
+        {
+            SetMainSoundtrackClip(compositionOp, selectedId, enable: !isMain);
+        }
+    }
+
+    private static void SetMainSoundtrackClip(Instance compositionOp, Guid clipChildId, bool enable)
+    {
+        var symbol = compositionOp.Symbol;
+        var commands = new List<ICommand>();
+
+        foreach (var (childId, child) in symbol.Children)
+        {
+            // The Display input identifies [AudioClip] ops; all others are cleared so only one clip
+            // carries the designation.
+            if (!child.Inputs.TryGetValue(LegacyAudioClipMigration.DisplayInputId, out var displayInput))
+                continue;
+
+            var targetValue = childId == clipChildId && enable
+                                  ? (int)AudioClipDisplay.BackgroundImage
+                                  : (int)AudioClipDisplay.Clip;
+
+            var currentValue = (displayInput.Value as InputValue<int>)?.Value ?? 0;
+            if (currentValue == targetValue)
+                continue;
+
+            var command = new ChangeInputValueCommand(symbol, childId, displayInput, new InputValue<int>(targetValue));
+            command.Do();
+            commands.Add(command);
+        }
+
+        if (commands.Count == 0)
+            return;
+
+        UndoRedoStack.Add(new MacroCommand("Set main soundtrack", commands));
+        compositionOp.GetSymbolUi().FlagAsModified();
     }
 
     /// <summary>

@@ -38,9 +38,14 @@ internal static partial class Program
         // End-of-timeline check is driven by the main soundtrack only.
         if (_soundtrackHandle != null)
         {
-            // Clip TimeRange.Start is in bars; convert to seconds for the end-of-clip comparison.
-            var clipStartSecs = _playback.SecondsFromBars(_soundtrackHandle.Clip.TimeRange.Start);
-            if (timeInSecs >= _soundtrackHandle.Clip.LengthInSeconds + clipStartSecs)
+            // An explicitly trimmed clip end wins over the file's length — the demo ends where the
+            // soundtrack was trimmed to, not where the source file happens to stop.
+            var clip = _soundtrackHandle.Clip;
+            var clipStartSecs = _playback.SecondsFromBars(clip.TimeRange.Start);
+            var endInSecs = clip.TimeRange.End > clip.TimeRange.Start
+                                ? _playback.SecondsFromBars(clip.TimeRange.End)
+                                : clip.LengthInSeconds + clipStartSecs;
+            if (timeInSecs >= endInSecs)
             {
                 if (_resolvedOptions.Loop)
                 {
