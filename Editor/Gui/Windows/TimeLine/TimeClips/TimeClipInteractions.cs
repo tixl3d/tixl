@@ -130,6 +130,13 @@ internal sealed class TimeClipInteractions
                 SplitClipsAtTime(compositionOp);
             }
 
+            // From the menu the anchor is the playback time; the keyboard shortcut uses the mouse position.
+            if (ImGui.MenuItem("Select following clips", UserActions.SelectFollowingClips.ListShortcuts())
+                && _playback != null)
+            {
+                SelectClipsStartingAfter(_playback.TimeInBars);
+            }
+
             // Only offered when the selection includes a DataClip op - the inline pane has nothing to show otherwise.
             if (InlineDataClipArea.HasSelectedDataClipInstance(_context.TimeCanvas, compositionOp))
             {
@@ -149,6 +156,21 @@ internal sealed class TimeClipInteractions
             _contextMenuIsOpen = false;
         }
         ImGui.PopStyleVar(2);
+    }
+
+    /// <summary>
+    /// Selects every clip (on all layers) that starts at or after the given time — for ripple edits:
+    /// select everything downstream, then drag to open or close a gap.
+    /// </summary>
+    public void SelectClipsStartingAfter(double timeInBars)
+    {
+        var selection = _context.ClipSelection;
+        selection.Clear();
+        foreach (var clip in selection.CompositionTimeClips.Values)
+        {
+            if (clip.TimeRange.Start >= timeInBars - 0.001f)
+                selection.AddSelection(clip);
+        }
     }
 
     public void DeleteSelectedClips(Instance compositionOp)
