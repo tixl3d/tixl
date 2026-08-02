@@ -137,6 +137,32 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         _clip.IsMainSoundtrack = _clip.Display == AudioClipDisplay.BackgroundImage;
 
         var timeClip = TimeSlot.TimeClip;
+
+        // A clip created without a known duration (e.g. via the settings window's Create Soundtrack)
+        // carries the End <= Start sentinel. Once the engine knows the file's length, size the clip to
+        // its content so it becomes a visible, draggable block.
+        if (timeClip.TimeRange.End <= timeClip.TimeRange.Start && _clip.LengthInSeconds > 0 && playback != null)
+        {
+            var durationBars = (float)playback.BarsFromSeconds(_clip.LengthInSeconds);
+            timeClip.TimeRange = new TimeRange(timeClip.TimeRange.Start, timeClip.TimeRange.Start + durationBars);
+            timeClip.SourceRange = new TimeRange(0, durationBars);
+        }
+
+        // Background mode: the main soundtrack always spans its full source content — trims don't
+        // apply, and the timeline hides its clip block. Switch Display back to Clip to edit placement.
+        if (_clip.Display == AudioClipDisplay.BackgroundImage && _clip.LengthInSeconds > 0 && playback != null)
+        {
+            var durationBars = (float)playback.BarsFromSeconds(_clip.LengthInSeconds);
+            var start = timeClip.TimeRange.Start;
+            if (Math.Abs(timeClip.TimeRange.End - (start + durationBars)) > 0.0001f
+                || Math.Abs(timeClip.SourceRange.Start) > 0.0001f
+                || Math.Abs(timeClip.SourceRange.End - durationBars) > 0.0001f)
+            {
+                timeClip.TimeRange = new TimeRange(start, start + durationBars);
+                timeClip.SourceRange = new TimeRange(0, durationBars);
+            }
+        }
+
         _clip.TimeRange = timeClip.TimeRange;
         _clip.LayerIndex = timeClip.LayerIndex;
 

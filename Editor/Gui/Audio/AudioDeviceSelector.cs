@@ -25,19 +25,26 @@ internal static class AudioDeviceSelector
     internal static bool DrawProjectDeviceCombo(string id, ref string projectDeviceName)
     {
         var changed = false;
-        var label = string.IsNullOrEmpty(projectDeviceName) ? DefaultDeviceLabel : projectDeviceName;
+        var isDefault = string.IsNullOrEmpty(projectDeviceName);
+        var label = isDefault ? DefaultDeviceLabel : projectDeviceName;
 
+        PushComboStyle(isDefault);
         if (ImGui.BeginCombo(id, label, ImGuiComboFlags.HeightLarge))
         {
-            if (ImGui.Selectable(DefaultDeviceLabel, string.IsNullOrEmpty(projectDeviceName), ImGuiSelectableFlags.NoAutoClosePopups))
+            // The muted default-value tint only applies to the closed preview — list rows stay readable.
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
+            if (ImGui.Selectable(DefaultDeviceLabel, isDefault, ImGuiSelectableFlags.NoAutoClosePopups))
             {
                 projectDeviceName = string.Empty;
                 changed = true;
             }
 
             changed |= DrawDeviceRows(ref projectDeviceName);
+            ImGui.PopStyleColor();
             ImGui.EndCombo();
         }
+
+        PopComboStyle();
 
         if (changed)
             AudioEngine.OnAudioDeviceChanged();
@@ -51,14 +58,20 @@ internal static class AudioDeviceSelector
     internal static bool DrawLocalDefaultDeviceCombo(string id)
     {
         var current = CoreSettings.Config.LocalAudioInputDeviceName ?? string.Empty;
-        var label = string.IsNullOrEmpty(current) ? "(none selected)" : current;
+        var isUnset = string.IsNullOrEmpty(current);
+        var label = isUnset ? "(none selected)" : current;
         var changed = false;
 
+        PushComboStyle(isUnset);
         if (ImGui.BeginCombo(id, label, ImGuiComboFlags.HeightLarge))
         {
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
             changed |= DrawDeviceRows(ref current);
+            ImGui.PopStyleColor();
             ImGui.EndCombo();
         }
+
+        PopComboStyle();
 
         if (changed)
         {
@@ -68,6 +81,21 @@ internal static class AudioDeviceSelector
         }
 
         return changed;
+    }
+
+    // Matches FormInputs.DrawEnumDropdown's look (rounded button-style frame, muted text while at
+    // the default value) so the device combos read like the other settings inputs.
+    private static void PushComboStyle(bool isDefaultValue)
+    {
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.Text, isDefaultValue ? UiColors.TextMuted.Rgba : UiColors.ForegroundFull.Rgba);
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 5);
+    }
+
+    private static void PopComboStyle()
+    {
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor(2);
     }
 
     private static bool DrawDeviceRows(ref string selectedName)

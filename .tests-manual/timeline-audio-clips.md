@@ -193,10 +193,14 @@ Right-click a single selected audio clip and choose "Set as main soundtrack".
 
 **Expected:**
 - The clip's `Display` switches to `BackgroundImage`: its image renders behind the
-  timeline and audio-reactive ops respond to it.
+  timeline (immediately, without playing the clip first) and audio-reactive ops
+  respond to it.
+- The clip's block disappears from the timeline layers — the background image is its
+  only representation. It extends to the full source duration, ignoring any trim.
 - Any other clip that previously was the main soundtrack loses the designation.
-- The menu item reads "Unset main soundtrack" for the current main clip, and choosing
-  it reverts the clip to a normal block.
+- To reposition or un-designate the soundtrack, set its `Display` parameter back to
+  `Clip` (find the op via the graph or Project Settings → Audio → "Select and focus
+  Main Soundtrack"): the block reappears as a normal clip.
 - Undo reverts the whole designation change at once.
 
 ## Step: Delete and undo

@@ -5,6 +5,7 @@ using T3.Core.Audio;
 using T3.Core.DataTypes;
 using T3.Core.Resource;
 using T3.Editor.Gui.Audio;
+using T3.Editor.Gui.Windows.TimeLine.TimeClips;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
@@ -28,7 +29,16 @@ internal sealed class TimeLineImage
         // BPM lives on Playback now (post Phase B).
         var bpm = (float)TimeLineCanvas.Current.Playback.Bpm;
         var barsPerSecond = bpm / 240f;
-        var songDurationInBars = (float)(clip.LengthInSeconds * barsPerSecond);
+
+        // An op-provided clip only gets LengthInSeconds once its stream loads (first playback) —
+        // fall back to the probed duration so the background shows without playing the clip first.
+        var lengthInSeconds = clip.LengthInSeconds;
+        if (lengthInSeconds <= 0 && soundTrackHandle.Owner != null && !string.IsNullOrEmpty(clip.AssetPath))
+        {
+            AudioClipDurationCache.TryGetDurationSecs(clip.AssetPath, soundTrackHandle.Owner, out lengthInSeconds);
+        }
+
+        var songDurationInBars = (float)(lengthInSeconds * barsPerSecond);
         if (songDurationInBars <= 0)
             return;
 
@@ -37,7 +47,11 @@ internal sealed class TimeLineImage
         // so a trimmed or offset clip's background stays aligned with what is actually heard.
         var sourceOffsetBars = (float)(clip.SourceOffsetSecs * barsPerSecond);
         var availableBars = songDurationInBars - sourceOffsetBars;
-        var hasClipEnd = clip.TimeRange.End > clip.TimeRange.Start;
+
+        // An op clip in background mode always shows its full source content — its TimeRange may
+        // still hold a stale trim until the op's auto-extend has run (needs the stream loaded once).
+        var hasClipEnd = clip.Display != AudioClipDisplay.BackgroundImage
+                         && clip.TimeRange.End > clip.TimeRange.Start;
         var visibleBars = hasClipEnd
                               ? Math.Min(clip.TimeRange.End - clip.TimeRange.Start, availableBars)
                               : availableBars;

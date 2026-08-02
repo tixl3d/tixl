@@ -216,5 +216,5 @@ internal static class LegacyAudioClipMigration
     private static readonly Guid MuteInputId = new("4ad8fba6-6e13-4698-b3c6-bd5c808724ab");
     internal static readonly Guid AutoPlayInputId = new("260b61ae-7605-4f06-a3fb-793ae5a23646");
     internal static readonly Guid DisplayInputId = new("8f2e6b10-4c5d-4e8f-9a1b-2c3d4e5f6a70");
-    private static readonly Guid StyleInputId = new("9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80");
+    internal static readonly Guid StyleInputId = new("9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80");
 }

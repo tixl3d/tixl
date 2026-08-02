@@ -65,8 +65,11 @@ public static class AudioClipCollector
             return;
 
         // Exclusive end matches TimeClipSlot's own range test, so adjacent clips sharing a cut
-        // boundary don't both register on that frame.
-        if (timeInBars < timeClip.TimeRange.Start || timeInBars >= timeClip.TimeRange.End)
+        // boundary don't both register on that frame. End <= Start is the "no explicit end yet"
+        // sentinel (e.g. a freshly created soundtrack before its file length is known) — such clips
+        // play from Start so their stream loads, which lets the op size the clip to the content.
+        var hasExplicitEnd = timeClip.TimeRange.End > timeClip.TimeRange.Start;
+        if (timeInBars < timeClip.TimeRange.Start || (hasExplicitEnd && timeInBars >= timeClip.TimeRange.End))
             return;
 
         AudioEngine.UseSoundtrackClip(provider.GetResourceHandle(), timeInSecs);
