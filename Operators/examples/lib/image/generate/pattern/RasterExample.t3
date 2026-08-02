@@ -440,7 +440,7 @@
       "AudioClips": [
         {
           "Id": "493bd395-c0c5-4b62-aa71-53a3cb33206b",
-          "AssetPath": "user\\wake\\proj-synchotron\\soundtrack\\synthjam.mp3",
+          "AssetPath": "user/wake/proj-synchotron/soundtrack/synthjam.mp3",
           "TimeRange": {
             "Start": 0.0,
             "End": 0.0

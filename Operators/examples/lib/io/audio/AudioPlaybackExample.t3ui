@@ -163,6 +163,13 @@
       }
     },
     {
+      "ChildId": "4f305a9e-d48b-4775-8cf4-cbfed592c467"/*AudioClip*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    },
+    {
       "ChildId": "5087c3ba-17d3-44b1-b72e-2e967bade57a"/*PlaybackFFT*/,
       "SectionId": "d4937a55-6592-41ac-970c-13ff0c74ff66",
       "Position": {

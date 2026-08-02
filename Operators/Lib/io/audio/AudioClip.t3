@@ -27,12 +27,12 @@
       "DefaultValue": 0
     },
     {
-      "Id": "9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80"/*Style*/,
-      "DefaultValue": 0
-    },
-    {
       "Id": "97948c5e-10d5-4e18-824e-aea17eb4eb2a"/*Command*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80"/*Style*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

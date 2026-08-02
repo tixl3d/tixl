@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "e8a32d90-1e42-4c8a-9f31-0ab1cd2e0300"/*Duck*/,
+  "Id": "e8a32d90-1e42-4c8a-9f31-0ab1cd2e0300"/*DuckAudioLevel*/,
   "Description": "Converts a level signal into a smoothed ducking gain.\n\nWhile Level (wire it from an [AudioLevel] tap) exceeds Threshold, Gain dips toward 1 − Amount with the Attack ramp and recovers to 1 with the Release ramp. Wire Gain into the Volume of a [CombineAudio] or [AudioBus] to duck one signal under another — e.g. music under a voice-over.\n\nTips\nThe metered level trails the audible signal by about a frame; for ducking this is inaudible.",
   "InputUis": [
     {

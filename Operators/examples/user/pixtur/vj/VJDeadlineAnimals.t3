@@ -6414,7 +6414,7 @@
       "AudioClips": [
         {
           "Id": "9cfc02ca-81d9-4c00-8f93-dc78277de96b",
-          "AssetPath": "Resources\\user\\still\\proj-fc2\\soundtrack\\fc2_11b.mp3",
+          "AssetPath": "Resources/user/still/proj-fc2/soundtrack/fc2_11b.mp3",
           "TimeRange": {
             "Start": 0.0,
             "End": 0.0

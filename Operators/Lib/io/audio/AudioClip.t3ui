@@ -56,19 +56,19 @@
       "Description": "Clip: an ordinary timeline block. Background image: renders full-timeline-width behind the tracks and designates this clip as the project's main soundtrack (FFT / export)."
     },
     {
+      "InputId": "97948c5e-10d5-4e18-824e-aea17eb4eb2a"/*Command*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
       "InputId": "9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80"/*Style*/,
       "Position": {
         "X": -200.0,
         "Y": 270.0
       },
       "Description": "How the audio content is visualised. Spectrum is the FFT spectrogram; Waveform and Volume level are planned."
-    },
-    {
-      "InputId": "97948c5e-10d5-4e18-824e-aea17eb4eb2a"/*Command*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      }
     }
   ],
   "SymbolChildUis": [],

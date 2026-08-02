@@ -1,6 +1,5 @@
 {
-  "FormatVersion": 2,
-  "TixlVersion": "4.2.0.2",
+  "FormatVersion": 3,
   "Id": "54af403f-a4bd-4ef0-95df-2201c0d3ba56"/*Vec2JitterOffset*/,
   "Description": "Sub-pixel jitter offset in pixels, range [-0.5, 0.5], from a Halton(2,3) sequence.\n\nsampleCount 8 or 16 are typical. Predictable and repeating, per your spec.",
   "InputUis": [
@@ -14,101 +13,11 @@
       "Description": "Defines the seed for the randomness. Two exactly identical copies of the operator with different seeds always create different results."
     },
     {
-      "InputId": "2676f340-5ce6-4329-a713-75c621ca929a"/*OverrideTime*/,
+      "InputId": "0a421d3c-0a72-429b-b028-32b4eff26877"/*SampleCount*/,
       "Position": {
         "X": -2.7436478,
-        "Y": -144.5552
-      },
-      "Description": "Input for a value to override the time",
-      "Scale": 0.01
-    },
-    {
-      "InputId": "2d151574-fc7b-4e51-8744-f10871ff7d68"/*RangeMax*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": 80.44479
-      },
-      "Description": "Defines the highest value of the noise.",
-      "Scale": 0.01
-    },
-    {
-      "InputId": "50dd59c5-4a17-4839-91ad-1b4b9f8c89f6"/*BiasAndGain*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": 170.4448
-      },
-      "Description": "Defines bias and gain, which can be used to weight the ranges (both in terms of time and intensity) in which the values are most likely to fluctuate",
-      "AddPadding": "True",
-      "Min": 0.0,
-      "Max": 1.0,
-      "Scale": 0.01,
-      "ClampMin": true,
-      "ClampMax": true,
-      "UseVec2Control": "BiasAndGain"
-    },
-    {
-      "InputId": "6774397c-b8da-4977-9a67-5983bbe4f48c"/*AmplitudeXY*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": 125.44479
-      },
-      "GroupTitle": "Amplitude",
-      "Description": "Multiplier for the intensity of the highest and lowest value split for each value",
-      "Scale": 0.01
-    },
-    {
-      "InputId": "853e0833-5fa2-4e8e-8a0d-fbcfedad69de"/*Offset*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": 200.4448
-      },
-      "Scale": 0.01,
-      "UseVec2Control": "Position"
-    },
-    {
-      "InputId": "858ed4c5-a0eb-4bd0-968d-abcb7da82753"/*Octaves*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": -9.555206
-      },
-      "Description": "Defines the number of octaves or the level of detail and variation of the noise over time."
-    },
-    {
-      "InputId": "be069202-6cfd-4c39-a59e-1d8398874790"/*Frequency*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": -54.555206
-      },
-      "GroupTitle": "Complexity",
-      "Description": "Defines the frequency. A high frequency generates more variation per time unit.",
-      "Scale": 0.01
-    },
-    {
-      "InputId": "dcfcf232-0bcd-4856-bbd0-a343490ffe37"/*Amplitude*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": 125.44479
-      },
-      "Description": "Multiplier for the intensity of the highest and lowest value.",
-      "Scale": 0.01
-    },
-    {
-      "InputId": "f0a2ba87-91f8-4fd7-a08b-321ff21752c0"/*Phase*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": -69.55521
-      },
-      "Scale": 0.01
-    },
-    {
-      "InputId": "f51c9bb7-8852-4176-b65f-067e4a23bd7b"/*RangeMin*/,
-      "Position": {
-        "X": -2.7436478,
-        "Y": 35.444794
-      },
-      "GroupTitle": "Output Range",
-      "Description": "Defines the lowest value of the noise.",
-      "Scale": 0.01
+        "Y": -24.555206
+      }
     }
   ],
   "SymbolChildUis": [],
