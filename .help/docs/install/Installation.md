@@ -11,6 +11,12 @@ Download the [latest release](https://github.com/tixl3d/tixl/releases) and run t
 
 The installer bundles all required dependencies, including .NET and Windows Graphics Tools. Start the installer, dismiss the untrusted-source warning, and proceed.
 
+## Sync tools and the projects folder
+
+By default, TiXL stores projects in your Documents folder. On many Windows machines, sync tools like OneDrive manage that folder without users being aware of it. Syncing can lock project files while TiXL reads or saves them, which makes projects fail to load — they then appear as "Broken" in the project list.
+
+When TiXL detects this, it shows a **Could not load Project** dialog after startup. The suggested fix moves the affected project folders to a location outside the synced folders (for example `C:\TiXL\`) and restarts the editor. You can also move a projects folder manually and add its new location under *Settings → Projects → Project Directories*.
+
 ## Non-Windows systems
 
 A native port to Linux and macOS is in progress. Until then you can run TiXL under a translation layer:

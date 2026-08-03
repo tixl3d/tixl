@@ -109,6 +109,7 @@ public static partial class T3Ui
         _searchDialog.Draw();
         NewProjectDialog.Draw();
         RestoreBackupDialog.Draw();
+        _couldNotLoadProjectDialog.Draw();
         CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
         AboutDialog.Draw();
@@ -127,6 +128,13 @@ public static partial class T3Ui
             {
                 UserSettings.Config.UserName = Environment.UserName;
                 _userNameDialog.ShowNextFrame();
+            }
+            else if (!_blockedProjectsChecked && !IsAnyPopupOpen)
+            {
+                // Waits for the startup dialogs above to close, then warns once per launch about
+                // projects a sync tool blocked from loading.
+                _blockedProjectsChecked = true;
+                _couldNotLoadProjectDialog.ShowIfProjectsBlocked();
             }
         }
 
@@ -176,6 +184,7 @@ public static partial class T3Ui
     }
 
     private static bool _versionWelcomeChecked;
+    private static bool _blockedProjectsChecked;
 
     private static void UpdateModifiedProjects()
     {

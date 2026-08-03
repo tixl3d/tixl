@@ -71,7 +71,8 @@ internal static partial class ProjectSetup
 
             BrokenProjects.Add(new BrokenProjectInfo(failed.fileInfo, failed.csProjFile,
                                                      failed.failureReason ?? "The project could not be loaded.",
-                                                     failed.hint));
+                                                     failed.hint,
+                                                     failed.likelySyncConflict));
         }
 
         // Phase 1: Initial Startup Migration
@@ -192,7 +193,8 @@ internal static partial class ProjectSetup
         CsProjectFile? csProjFile,
         bool success,
         string? failureReason = null,
-        string? hint = null);
+        string? hint = null,
+        bool likelySyncConflict = false);
 
     /// <summary>
     /// Load each project file and its associated assembly
@@ -208,8 +210,13 @@ internal static partial class ProjectSetup
                                   if (!CsProjectFile.TryLoad(fileInfo, out var loadInfo))
                                   {
                                       Log.Error($"Failed to load project at \"{fileInfo.FullName}\":\n{loadInfo.Error}");
+                                      var likelySyncConflict = SyncToolConflicts.IsLikelySyncConflict(loadInfo.Exception, fileInfo.DirectoryName);
                                       return new ProjectLoadInfo(fileInfo, null, false,
-                                                                 "The project file could not be read.", loadInfo.Error);
+                                                                 likelySyncConflict
+                                                                     ? "TiXL was not allowed to read the project file."
+                                                                     : "The project file could not be read.",
+                                                                 loadInfo.Error,
+                                                                 likelySyncConflict);
                                   }
                                   
                                   var csProjFile = loadInfo.CsProjectFile!;
