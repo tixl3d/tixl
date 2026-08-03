@@ -111,14 +111,18 @@ internal sealed class CsProjectFile
     public readonly struct CsProjectLoadInfo
     {
         public readonly string? Error;
+
+        /// <summary>The exception that aborted the load, when there was one — lets callers classify the failure (e.g. access denied).</summary>
+        public readonly Exception? Exception;
         public readonly CsProjectFile? CsProjectFile;
         public readonly bool NeedsUpgrade;
         public readonly bool NeedsRecompile;
         public readonly List<string> Warnings = [];
 
-        internal CsProjectLoadInfo(CsProjectFile? file, string? error)
+        internal CsProjectLoadInfo(CsProjectFile? file, string? error, Exception? exception = null)
         {
             Error = error;
+            Exception = exception;
             CsProjectFile = file;
 
             if (file == null)
@@ -298,7 +302,7 @@ internal sealed class CsProjectFile
         catch (Exception e)
         {
             var error = $"Failed to open project file at \"{filePath}\":\n{e}";
-            loadInfo = new CsProjectLoadInfo(null, error);
+            loadInfo = new CsProjectLoadInfo(null, error, e);
             success = false;
         }
 

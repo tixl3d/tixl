@@ -340,7 +340,8 @@ internal static partial class ProjectSetup
     /// rebuilt on each startup from the load results. <see cref="ProjectFile"/> is null when the
     /// .csproj itself could not be parsed.
     /// </summary>
-    internal sealed record BrokenProjectInfo(FileInfo FileInfo, CsProjectFile? ProjectFile, string Reason, string? Hint)
+    internal sealed record BrokenProjectInfo(FileInfo FileInfo, CsProjectFile? ProjectFile, string Reason, string? Hint,
+                                             bool LikelySyncConflict = false)
     {
         public string Name => ProjectFile?.Name ?? Path.GetFileNameWithoutExtension(FileInfo.FullName);
         public string Folder => ProjectFile?.Directory ?? FileInfo.DirectoryName ?? string.Empty;
