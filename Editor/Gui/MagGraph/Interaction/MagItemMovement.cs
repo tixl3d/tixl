@@ -390,7 +390,7 @@ internal sealed partial class MagItemMovement
         if (_connectionsToDraggedItems.Count == 0)
             return false;
 
-        NodeActions.DisconnectDraggedNodes(context.CompositionInstance, DraggedItems.Select(i => i.Selectable).ToList());
+        NodeActions.DisconnectNodes(context.CompositionInstance, DraggedItems.Select(i => i.Selectable).ToList());
 
         // foreach (var c in _borderConnections)
         // {

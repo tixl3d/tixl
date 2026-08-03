@@ -90,7 +90,7 @@ internal sealed class SelectableNodeMovement(IGraphView graphView, Func<Instance
             {
                 _moveCommand.StoreCurrentValues();
                 UndoRedoStack.Add(_moveCommand);
-                NodeActions.DisconnectDraggedNodes(getCompositionOp(), _draggedNodes);
+                NodeActions.DisconnectNodes(getCompositionOp(), _draggedNodes);
             }
             HandleNodeDragging(node);
         }

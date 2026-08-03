@@ -55,6 +55,7 @@ internal enum UserActions
     LayoutSelection,
     ToggleDisabled,
     ToggleBypassed,
+    Disconnect,
     AddSection,
     AddComment,
     RenameChild,

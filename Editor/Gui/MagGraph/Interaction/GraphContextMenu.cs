@@ -36,7 +36,7 @@ internal static class GraphContextMenu
     {
         Undo = 1,
         SelectMenu, SelectCustomOps, SelectConnected, SelectConnectedInputs,
-        Disabled, Bypassed, ControlSnapshots, Rename, AddComment, AlignLeft,
+        Disabled, Bypassed, Disconnect, ControlSnapshots, Rename, AddComment, AlignLeft,
         DisplayMenu, DisplaySmall, DisplayResizable, DisplayExpanded, DisplayBackground, DisplayPin,
         GenerateProxy,
         Copy, Duplicate, Paste, Delete, RenameOutput,
@@ -94,6 +94,20 @@ internal static class GraphContextMenu
                                               reserveIconColumn: false, state: allSelectedBypassed ? emphasized : muted))
             {
                 NodeActions.ToggleBypassedForSelectedElements(nodeSelection);
+            }
+
+            var selectedIds = new HashSet<Guid>(selectedChildUis.Select(c => c.Id));
+            var canDisconnect = selectedChildUis.Exists(c => context.Layout.Items.TryGetValue(c.Id, out var item)
+                                                             && (Array.Exists(item.InputLines, l => l.ConnectionIn != null
+                                                                                                    && !selectedIds.Contains(l.ConnectionIn.SourceItem.Id))
+                                                                 || Array.Exists(item.OutputLines, l => l.ConnectionsOut.Exists(o => !selectedIds.Contains(o.TargetItem.Id)))));
+
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.Disconnect, Icon.None, "Disconnect",
+                                              UserActions.Disconnect.ListShortcuts(), isChecked: false, isEnabled: canDisconnect,
+                                              reserveIconColumn: false, state: muted))
+            {
+                NodeActions.DisconnectNodes(context.CompositionInstance, nodeSelection.Selection.ToList());
+                context.Layout.FlagStructureAsChanged();
             }
 
             if (canModify)
