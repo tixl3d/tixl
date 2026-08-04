@@ -6,7 +6,7 @@ CsProjectFile and ProjectXML.cs
 -->
 <Project>
   <PropertyGroup>
-    <TixlVersion>4.2.0.5</TixlVersion>
+    <TixlVersion>4.2.1.0</TixlVersion>
     <TixlNetFrameworkVersion>net10.0-windows</TixlNetFrameworkVersion>
     <TixlNetCoreFrameworkVersion>net10.0</TixlNetCoreFrameworkVersion>
     <TixlIsDotNetFramework>false</TixlIsDotNetFramework>

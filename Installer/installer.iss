@@ -4,8 +4,8 @@
 ; Build complete release before packaging (publish Player + build Editor)
 #expr Exec("powershell", "-ExecutionPolicy Bypass -File build-release.ps1", ".", 1, SW_SHOW)
 
-#define MyAppVersion "4.2.0.5"
-#define MyAppName "TiXL-v4.2.0.5"
+#define MyAppVersion "4.2.1"
+#define MyAppName "TiXL-v4.2.1"
 #define MyAppPublisher "TiXL Community"
 #define MyAppURL "https://tixl.app//"
 #define MyAppExeName "TiXL.exe"
