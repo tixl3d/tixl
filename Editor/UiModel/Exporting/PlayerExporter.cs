@@ -550,7 +550,7 @@ internal static partial class PlayerExporter
             "Processing.NDI.Lib.x64.dll",
             "OpenGL.Net.dll",
             "OpenCvSharp.Extensions.dll",
-             "OpenCvSharpExtern.dll",
+            "OpenCvSharpExtern.dll",
             "opencv_videoio_ffmpeg4110_64.dll",
             "DirectShowLib.dll",
             "cvextern.dll",
@@ -562,6 +562,7 @@ internal static partial class PlayerExporter
             new Guid("9412d0f4-dab8-4145-9719-10395e154fa7"), // NdiOutput
         ], [
             "NDILibDotNet6.dll",
+            "Processing.NDI.Lib.x64.dll",
         ]),
         
         // Unsplash
