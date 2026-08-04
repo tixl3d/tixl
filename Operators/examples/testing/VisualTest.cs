@@ -124,6 +124,7 @@ internal sealed class VisualTest : Instance<VisualTest>
             
             context.LocalTime = time;
             context.LocalFxTime = time;
+            Playback.FrameCount++;
             context.RequestedResolution = _defaultResolution;
 
             DirtyFlag.GlobalInvalidationTick++;
