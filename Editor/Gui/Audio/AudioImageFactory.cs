@@ -90,7 +90,6 @@ internal static class AudioImageFactory
 
     // TODO: should be a hashset, but there is no ConcurrentHashset -_-
     private static readonly ConcurrentDictionary<string, bool> _loadingClips = new();
-    private static readonly ConcurrentDictionary<string, bool> _failedClips = new();
     private static readonly ConcurrentDictionary<string, string> _imageForAudioFiles = new();
 
     // Paths whose waveform generation failed permanently (empty/unreadable file). Guards against
