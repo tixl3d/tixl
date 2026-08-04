@@ -24,7 +24,7 @@
         <PackageReference Include="SharpDX.Desktop" Version="4.2.0">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
-        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.5" />
+        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.10" />
     </ItemGroup>
 
     <!--This

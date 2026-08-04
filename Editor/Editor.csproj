@@ -56,21 +56,21 @@
     <!-- ======================= Nuget References =========================== -->
     <ItemGroup>
         <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
-        <PackageReference Include="Microsoft.Build" Version="17.9.5" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.9.0-2.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.0-2.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.0-2.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.9.0-2.final" />
+        <PackageReference Include="Microsoft.Build" Version="18.8.2" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="5.6.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.6.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="5.6.0" />
         <PackageReference Include="MSDF-Sharp" Version="1.0.2" />
         <PackageReference Include="Rug.Osc" Version="1.2.5">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
-        <PackageReference Include="Sentry" Version="4.1.1" />
+        <PackageReference Include="Sentry" Version="6.8.0" />
         <PackageReference Include="SharpDX.Desktop" Version="4.2.0">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
-        <PackageReference Include="System.Management" Version="10.0.5" />
-        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.5" />
+        <PackageReference Include="System.Management" Version="10.0.10" />
+        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.10" />
     </ItemGroup>
     <!-- ===============================//======================================= -->
 
