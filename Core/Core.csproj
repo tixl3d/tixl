@@ -28,14 +28,14 @@
         <PackageReference Include="ManagedBass.Flac" Version="4.0.2" />
         <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
         <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.7.0-1.final" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.5" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="5.6.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.10" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-        <PackageReference Include="NuGet.Configuration" Version="6.13.2" />
-        <PackageReference Include="Microsoft.NETCore.Platforms" Version="1.1.1" />
-        <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
-        <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
-        <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+        <PackageReference Include="NuGet.Configuration" Version="7.6.0" />
+        <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
+        <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
+        <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
+        <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
         <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
         <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
         <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />

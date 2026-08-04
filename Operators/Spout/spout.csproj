@@ -96,7 +96,7 @@
     <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CppSharp.Runtime" Version="1.1.5.3168" />
+    <PackageReference Include="CppSharp.Runtime" Version="1.1.84.17100" />
     <PackageReference Include="OpenGL.Net" Version="0.8.4">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>

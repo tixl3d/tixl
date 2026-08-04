@@ -106,7 +106,7 @@
          NOT Sdcb.FFmpeg.runtime.windows-x64 (GPL, rejected by FfmpegLibrary's guardrail). Pinned to 20250329
          (newest avcodec-61); 20250330 bumped to avcodec-62, which the Sdcb 7.0.0 bindings don't match. -->
     <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
-    <PackageReference Include="FFmpeg.LGPL" Version="20250329.1.0" />
+    <PackageReference Include="FFmpeg.LGPL" Version="20260804.1.0" />
   </ItemGroup>
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />

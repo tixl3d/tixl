@@ -109,15 +109,15 @@
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.10" />
     <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
     <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
-    <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
     <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
-    <PackageReference Include="Svg" Version="3.4.7" />
+    <PackageReference Include="Svg" Version="3.4.8" />
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively to other projects).
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from

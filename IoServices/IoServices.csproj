@@ -19,8 +19,8 @@
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
     <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
-    <PackageReference Include="System.IO.Ports" Version="10.0.5" />
-    <PackageReference Include="System.Management" Version="10.0.5" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.10" />
+    <PackageReference Include="System.Management" Version="10.0.10" />
   </ItemGroup>
 
   <ItemGroup>
