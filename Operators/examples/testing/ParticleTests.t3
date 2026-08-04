@@ -38,7 +38,12 @@
         {
           "Id": "38392c86-4a1b-4b6f-ac32-26920a73e1e2"/*EmitVelocity*/,
           "Type": "System.Single",
-          "Value": 0.0
+          "Value": 0.13
+        },
+        {
+          "Id": "4ca2f43a-ed90-4388-ae6f-2687e85db5a6"/*LifeTime*/,
+          "Type": "System.Single",
+          "Value": 112.0
         },
         {
           "Id": "9642f5c6-5ad2-4d35-a5ed-a3fde10817ae"/*Speed*/,
@@ -52,7 +57,13 @@
       "Id": "3266f682-840d-4c9f-9250-2888775d9c45"/*Framerate Speed*/,
       "SymbolId": "f92a1144-55d9-4d8e-bfa6-f80665800e25",
       "Name": "Framerate Speed",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "adfe6fe4-7fa7-4f1c-9d66-1cbf9b383ba1"/*WarmUpStepCount*/,
+          "Type": "System.Int32",
+          "Value": 10
+        }
+      ],
       "Outputs": []
     },
     {
@@ -95,9 +106,15 @@
       "Outputs": []
     },
     {
-      "Id": "4c53bf41-16fb-4fd1-85ad-632a197f1bf0"/*HasTimeChanged*/,
+      "Id": "3f264983-bdc4-47eb-af87-2952fb18df48"/*HasTimeChanged*/,
       "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
+          "Type": "System.Int32",
+          "Value": 0
+        }
+      ],
       "Outputs": []
     },
     {
@@ -137,26 +154,7 @@
     {
       "Id": "63f9c403-6ce5-471b-8b41-eaa9eb5e4e16"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
-      "InputValues": [
-        {
-          "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
-          "Type": "System.Numerics.Vector3",
-          "Value": {
-            "X": 1.4276351,
-            "Y": -0.51382196,
-            "Z": 1.9268938
-          }
-        },
-        {
-          "Id": "a7acb25c-d60c-43a6-b1df-2cd5c6e183f3"/*Target*/,
-          "Type": "System.Numerics.Vector3",
-          "Value": {
-            "X": 0.046971902,
-            "Y": -0.777876,
-            "Z": -0.03574485
-          }
-        }
-      ],
+      "InputValues": [],
       "Outputs": []
     },
     {
@@ -166,7 +164,7 @@
         {
           "Id": "e27a97ce-3d0f-41a9-93c3-a1691f4029aa"/*Amount*/,
           "Type": "System.Single",
-          "Value": 10.0
+          "Value": 0.1
         }
       ],
       "Outputs": []
@@ -263,7 +261,7 @@
       "TargetSlotId": "c41d9633-1397-4602-a5f8-7808c3d63108"
     },
     {
-      "SourceParentOrChildId": "4c53bf41-16fb-4fd1-85ad-632a197f1bf0",
+      "SourceParentOrChildId": "3f264983-bdc4-47eb-af87-2952fb18df48",
       "SourceSlotId": "4883b1ec-16c1-422f-8db6-c74c3d48e5be",
       "TargetParentOrChildId": "10189b0c-6d7b-40e6-b414-9a939133a128",
       "TargetSlotId": "c6bdbb07-6996-4e5b-a058-37c9cbeca6fe"
