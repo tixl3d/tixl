@@ -232,10 +232,14 @@ internal sealed class SoundtrackClipStream
             BassMix.ChannelFlags(StreamHandle, 0, BassFlags.MixerChanPause); // Unpause
         }
 
+        // Export steps time with PlaybackSpeed 0 — sync as if playing at 1× speed, otherwise the
+        // speed-scaled drift and threshold both collapse to 0 and clips never reseek into the render range.
+        var effectiveSpeed = AudioRendering.IsRecording ? 1.0 : playback.PlaybackSpeed;
+
         // Get the current playback position from the mixer
         var currentStreamBufferPos = BassMix.ChannelGetPosition(StreamHandle);
         var currentPosInSec = Bass.ChannelBytes2Seconds(StreamHandle, currentStreamBufferPos) - AudioSyncingOffset;
-        var soundDelta = (currentPosInSec - targetSourcePosSecs) * playback.PlaybackSpeed;
+        var soundDelta = (currentPosInSec - targetSourcePosSecs) * effectiveSpeed;
 
         // Set volume on the stream — unless the graph owns this clip's level (routed into a bus), in which case
         // the [AudioBus] applies the per-source gain and setting it here too would fight that every frame.
@@ -252,12 +256,12 @@ internal sealed class SoundtrackClipStream
         }
 
         // We may not fall behind or skip ahead in playback
-        var maxSoundDelta = audio.AudioResyncThreshold * Math.Abs(playback.PlaybackSpeed);
+        var maxSoundDelta = audio.AudioResyncThreshold * Math.Abs(effectiveSpeed);
         if (Math.Abs(soundDelta) <= maxSoundDelta)
             return;
 
         // Resync
-        var resyncOffset = AudioTriggerDelayOffset * playback.PlaybackSpeed + AudioSyncingOffset;
+        var resyncOffset = AudioTriggerDelayOffset * effectiveSpeed + AudioSyncingOffset;
         var newStreamPos = Bass.ChannelSeconds2Bytes(StreamHandle, targetSourcePosSecs + resyncOffset);
         BassMix.ChannelSetPosition(StreamHandle, newStreamPos, PositionFlags.Bytes | PositionFlags.MixerReset);
     }

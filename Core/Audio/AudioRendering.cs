@@ -34,6 +34,11 @@ public static class AudioRendering
     private static int _exportMixerHandle;
     private static bool _exportMixerInitialized;
 
+    // Max deviation between a clip stream's source position and the timeline target before the export
+    // reseeks it. Roughly half a frame at 30 fps — large enough to let contiguous frames read
+    // sequentially despite per-frame sample rounding, small enough to stay inaudible.
+    private const double ExportResyncThresholdSecs = 0.015;
+
     /// <summary>
     /// Ensures the buffer has at least the required capacity, reallocating if necessary.
     /// Clears the buffer up to the required length before returning.
@@ -257,10 +262,21 @@ public static class AudioRendering
 
             if (isActive)
             {
-                // Position the stream at the correct time in the source file
-                long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, targetSourcePos);
-                Bass.ChannelSetPosition(clipStream.StreamHandle, targetBytes);
-                
+                // Keep the stream at the correct source-file time. Mixer sources must be seeked through
+                // BASSmix (a plain Bass.ChannelSetPosition is ignored for plugged channels, which made
+                // clips play from their beginning when the render range didn't start at 0). Contiguous
+                // frames read sequentially, so only reseek when the position actually drifted
+                // (activation, render-range start, loop wrap).
+                var currentBytes = BassMix.ChannelGetPosition(clipStream.StreamHandle);
+                var currentPosSecs = Bass.ChannelBytes2Seconds(clipStream.StreamHandle, currentBytes);
+                if (Math.Abs(currentPosSecs - targetSourcePos) > ExportResyncThresholdSecs)
+                {
+                    long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, targetSourcePos);
+                    BassMix.ChannelSetPosition(clipStream.StreamHandle, targetBytes,
+                                               PositionFlags.Bytes | PositionFlags.MixerReset);
+                }
+
+
                 // Apply volume: clip.Volume * SoundtrackVolume * AppVolume
                 float effectiveVolume = handle.Clip.Volume
                                         * CompositionSettings.Current.Audio.SoundtrackVolume
