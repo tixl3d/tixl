@@ -167,6 +167,13 @@ If a composition contains any time clips, the timeline shows a **Time Clip Area*
 
 The active clip is highlighted during playback.
 
+### Video clip thumbnails
+
+Video clips show small frame thumbnails when the layer is tall enough and the clip wide enough:
+
+- The **left and right edges** of the clip body show the source frames at the clip's in- and out-point. These are cached on disk, so they reappear instantly on the next start.
+- **Hovering** a video clip shows the frame under the mouse in the tooltip, so you can find a moment in the footage without scrubbing the playhead. These previews are decoded in the background — on footage with large keyframe intervals they can lag slightly behind the mouse (a generated proxy makes them much faster).
+
 ### Time clips need to be connected
 
 > [!NOTE]

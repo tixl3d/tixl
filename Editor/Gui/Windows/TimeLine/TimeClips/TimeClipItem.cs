@@ -121,6 +121,10 @@ internal static class TimeClipItem
             DataClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax,
                                          attr.LayerRect.Min.X, attr.LayerRect.Max.X, attr.DrawList);
             AudioClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax, attr.DrawList);
+
+            if (isVideoClip)
+                DrawVideoClipThumbnails(ref attr, timeClip, clipInstance, position, itemRectMax,
+                                        fadeIfNotConnected * mediaHoverFade, rounding);
         }
 
         if (isSelected)
@@ -228,6 +232,9 @@ internal static class TimeClipItem
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4,4));
             ImGui.BeginTooltip();
             {
+                if (isVideoClip && clipInstance != null)
+                    DrawHoverThumbnailInTooltip(ref attr, timeClip, clipInstance);
+
                 ImGui.PushFont(Fonts.FontSmall);
                 ImGui.TextUnformatted(symbolChildUi.SymbolChild.ReadableName);
                 if (!isConnected)
@@ -523,6 +530,97 @@ internal static class TimeClipItem
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
         }
     }
+
+    /// <summary>
+    /// Draws thumbnails of the source's first and last visible frame inside the clip body. These are
+    /// disk-cached per (asset, time) and only requested when the layer is tall and the clip wide enough.
+    /// </summary>
+    private static void DrawVideoClipThumbnails(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance clipInstance,
+                                                Vector2 position, Vector2 itemRectMax, float fade, float rounding)
+    {
+        var height = itemRectMax.Y - position.Y - 2;
+        if (height < 16 * T3Ui.UiScaleFactor)
+            return;
+
+        var thumbWidth = height * UiHelpers.Thumbnails.ThumbnailManager.AspectRatio;
+        var clipWidth = itemRectMax.X - position.X;
+        if (clipWidth < thumbWidth * 2.2f)
+            return;
+
+        if (clipInstance is not T3.Core.Operator.Interfaces.IDescriptiveFilename descriptive)
+            return;
+
+        var assetPath = descriptive.SourcePathSlot.TypedInputValue.Value;
+        if (string.IsNullOrEmpty(assetPath))
+            return;
+
+        if (!VideoClipDurationCache.TryGetDurationSecs(assetPath, clipInstance, out var durationSecs))
+            return;
+
+        var atlasSrv = UiHelpers.Thumbnails.ThumbnailManager.AtlasSrv;
+        if (atlasSrv == null)
+            return;
+
+        // While a drag/trim is running SourceRange changes every frame — don't flood the decode queue with
+        // requests for transient times; already-ready thumbnails still draw.
+        var allowRequest = attr.MoveClipsCommand == null;
+
+        var playback = attr.LayerContext.TimeCanvas.Playback;
+        var startSecs = QuantizeThumbnailTime(Math.Clamp(playback.SecondsFromBars(timeClip.SourceRange.Start), 0, durationSecs));
+        var endSecs = QuantizeThumbnailTime(Math.Clamp(playback.SecondsFromBars(timeClip.SourceRange.End), 0, durationSecs));
+
+        var tint = Color.White.Fade(fade);
+        var top = position.Y + 1;
+
+        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, startSecs, persistent: true, allowRequest, out var startRect))
+        {
+            attr.DrawList.AddImageRounded(atlasSrv.NativePointer,
+                                          new Vector2(position.X + 1, top),
+                                          new Vector2(position.X + 1 + thumbWidth, top + height),
+                                          startRect.UvMin, startRect.UvMax, tint, rounding, ImDrawFlags.RoundCornersLeft);
+        }
+
+        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, endSecs, persistent: true, allowRequest, out var endRect))
+        {
+            attr.DrawList.AddImageRounded(atlasSrv.NativePointer,
+                                          new Vector2(itemRectMax.X - 1 - thumbWidth, top),
+                                          new Vector2(itemRectMax.X - 1, top + height),
+                                          endRect.UvMin, endRect.UvMax, tint, rounding, ImDrawFlags.RoundCornersRight);
+        }
+    }
+
+    /// <summary>
+    /// Shows the source frame under the mouse inside the hover tooltip. Session-only (never written to disk);
+    /// requests are quantized to a quarter-second grid and processed latest-wins, so scrubbing along a clip
+    /// keeps at most one GOP decode in flight.
+    /// </summary>
+    private static void DrawHoverThumbnailInTooltip(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance clipInstance)
+    {
+        if (clipInstance is not T3.Core.Operator.Interfaces.IDescriptiveFilename descriptive)
+            return;
+
+        var assetPath = descriptive.SourcePathSlot.TypedInputValue.Value;
+        if (string.IsNullOrEmpty(assetPath) || timeClip.TimeRange.Duration <= 0.0001f)
+            return;
+
+        var mouseBars = attr.LayerContext.TimeCanvas.InverseTransformX(ImGui.GetIO().MousePos.X);
+        var normalized = (mouseBars - timeClip.TimeRange.Start) / timeClip.TimeRange.Duration;
+        var sourceBars = timeClip.SourceRange.Start + normalized * timeClip.SourceRange.Duration;
+        var sourceSecs = attr.LayerContext.TimeCanvas.Playback.SecondsFromBars(sourceBars);
+
+        if (VideoClipDurationCache.TryGetDurationSecs(assetPath, clipInstance, out var durationSecs))
+            sourceSecs = Math.Clamp(sourceSecs, 0, durationSecs);
+        else if (sourceSecs < 0)
+            sourceSecs = 0;
+
+        var quantized = Math.Round(sourceSecs * 4) / 4;
+        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, quantized, persistent: false, allowRequest: true, out var rect))
+        {
+            UiHelpers.Thumbnails.ThumbnailManager.AsImguiImage(rect, 90 * T3Ui.UiScaleFactor);
+        }
+    }
+
+    private static double QuantizeThumbnailTime(double seconds) => Math.Round(seconds * 10) / 10;
 
     /// <summary>
     /// Outlines the clip's full available source footage on the timeline. The footage maps through the same

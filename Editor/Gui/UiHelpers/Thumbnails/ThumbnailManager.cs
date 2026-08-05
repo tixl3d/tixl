@@ -149,6 +149,56 @@ internal static class ThumbnailManager
 
         return _fallback;
     }
+
+    /// <summary>State of a thumbnail that was pushed via <see cref="PushSlotTexture"/>: the caller owns
+    /// generation, so <see cref="PushedState.Missing"/> (never pushed, or LRU-evicted from the atlas) means
+    /// "generate and push again".</summary>
+    internal enum PushedState { Missing, Pending, Ready }
+
+    /// <summary>
+    /// Looks up an externally pushed thumbnail without triggering any load. Returns <see cref="PushedState.Ready"/>
+    /// with the atlas rect, <see cref="PushedState.Pending"/> while an upload is queued, or
+    /// <see cref="PushedState.Missing"/> when the slot was never filled or has been evicted.
+    /// </summary>
+    internal static PushedState GetPushedThumbnail(Guid guid, out ThumbnailRect rect)
+    {
+        rect = _fallback;
+        if (!_slots.TryGetValue(guid, out var slot))
+            return PushedState.Missing;
+
+        switch (slot.State)
+        {
+            case LoadingState.Ready when slot.X != -1:
+                slot.LastUsed = DateTime.Now;
+                rect = GetRectFromSlot(slot);
+                return PushedState.Ready;
+            case LoadingState.Loading:
+                return PushedState.Pending;
+            default:
+                return PushedState.Missing;
+        }
+    }
+
+    /// <summary>
+    /// Queues a slot-sized (<see cref="SlotWidth"/>×<see cref="SlotHeight"/>) texture for atlas upload under
+    /// <paramref name="guid"/>; the texture is consumed (disposed after the copy). Callable from a worker
+    /// thread — same threading as <see cref="RequestAsyncLoad"/>'s continuation.
+    /// </summary>
+    internal static void PushSlotTexture(Guid guid, SharpDX.Direct3D11.Texture2D texture)
+    {
+        if (!_slots.TryGetValue(guid, out var slot))
+        {
+            slot = new ThumbnailSlot { Guid = guid };
+            _slots[guid] = slot;
+        }
+
+        slot.State = LoadingState.Loading;
+        var targetSlot = AssignAtlasSlot(guid);
+        lock (_uploadQueue)
+        {
+            _uploadQueue.Enqueue(new PendingUpload(guid, texture, targetSlot));
+        }
+    }
     #endregion
 
     #region Background Operations
@@ -209,7 +259,7 @@ internal static class ThumbnailManager
         }
     }
 
-    private static async Task<SharpDX.Direct3D11.Texture2D?> LoadTextureViaWic(string path)
+    internal static async Task<SharpDX.Direct3D11.Texture2D?> LoadTextureViaWic(string path)
     {
         return await Task.Run(async () =>
         {
