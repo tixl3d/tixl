@@ -34,13 +34,17 @@ public static class ResourcePackageManager
     /// </summary>
     public static void RaiseFileWatchingEvents()
     {
-        // Dispatched to main thread
+        // Dispatched to main thread. Iterate over a copy: event handlers may create or dispose
+        // watchers (e.g. mounting/unmounting linked asset folders), which mutates _fileWatchers.
         lock (_fileWatchers)
         {
-            foreach (var fileWatcher in _fileWatchers)
-            {
-                fileWatcher.RaiseQueuedFileChanges();
-            }
+            _dispatchBuffer.Clear();
+            _dispatchBuffer.AddRange(_fileWatchers);
+        }
+
+        foreach (var fileWatcher in _dispatchBuffer)
+        {
+            fileWatcher.RaiseQueuedFileChanges();
         }
     }
 
@@ -57,4 +61,5 @@ public static class ResourcePackageManager
     }
 
     private static readonly List<ResourceFileWatcher> _fileWatchers = [];
+    private static readonly List<ResourceFileWatcher> _dispatchBuffer = [];
 }

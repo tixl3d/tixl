@@ -32,6 +32,15 @@ public sealed class Asset
 
     public bool IsDirectory;
 
+    /// <summary> Set for assets below a linked external folder (see <see cref="AssetLinkFolder"/>); Empty for regular assets. </summary>
+    public Guid FolderLinkMountId;
+
+    /// <summary> True for the virtual root folder of a linked external folder. </summary>
+    public bool IsLinkMountRoot;
+
+    /// <summary> True when a link mount's target folder could not be found on this machine. </summary>
+    public bool LinkTargetMissing;
+
     // Added to support folder structure in UI without re-parsing
     public string[] PathParts { get; internal init; } = [];
 

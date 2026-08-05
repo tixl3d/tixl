@@ -7,6 +7,8 @@ nav:
   - Timeline.md
   - PresetsAndSnapshots.md
   - KeyboardShortcuts.md
+  # Assets
+  - ImportingAssets.md
   # Working with graphs
   - FaqBuildingContent.md
   # Connecting inputs

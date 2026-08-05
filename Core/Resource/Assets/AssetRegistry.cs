@@ -117,9 +117,19 @@ public static class AssetRegistry
 
             resourcePackage = package;
             absolutePath = $"{package.AssetsFolder}/{localPath}";
-            return isFolder
-                       ? Directory.Exists(absolutePath)
-                       : File.Exists(absolutePath);
+            if (isFolder ? Directory.Exists(absolutePath) : File.Exists(absolutePath))
+                return true;
+
+            // The path may live below a linked external folder mounted into this package
+            if (AssetLinkFolders.TryGetAbsolutePathInMount(package, localPath, out var mountedPath))
+            {
+                absolutePath = mountedPath;
+                return isFolder
+                           ? Directory.Exists(absolutePath)
+                           : File.Exists(absolutePath);
+            }
+
+            return false;
         }
 
         return false;
@@ -156,6 +166,15 @@ public static class AssetRegistry
             }
         }
 
+        if (AssetLinkFolders.TryGetMountForAbsolutePath(absolutePath, out var mount, out var mountRelativePart))
+        {
+            var dirSuffix = isFolder ? "/" : string.Empty;
+            var separator = mountRelativePart.Length == 0 ? string.Empty : "/";
+            relativeAddress = $"{mount.Package.Name}{PackageSeparator}{mount.VirtualDir}{separator}{mountRelativePart}{dirSuffix}";
+            matchingPackage = mount.Package;
+            return true;
+        }
+
         relativeAddress = null;
         matchingPackage = null;
         return false;
@@ -174,6 +193,10 @@ public static class AssetRegistry
         foreach (var fileInfo in di.EnumerateFiles("*.*", SearchOption.AllDirectories))
         {
             if (FileLocations.IgnoredFiles.Contains(fileInfo.Name))
+                continue;
+
+            // Link marker files define virtual folders and are mounted below, not listed as assets
+            if (AssetLinkFolders.HasLinkExtension(fileInfo.Name))
                 continue;
 
             var asset = RegisterPackageEntry(fileInfo, package, false);
@@ -195,7 +218,7 @@ public static class AssetRegistry
             RegisterPackageEntry(new FileInfo(dirInfo.FullName), package, true);
         }
 
-        //Log.Debug($"{packageAlias}: Registered {_assetsByAddress.Count(a => a.Value.PackageId == packageId)} assets (including directories).");
+        AssetLinkFolders.MountAllForPackage(package);
     }
 
     public static Asset RegisterPackageEntry(FileSystemInfo info, IResourcePackage package, bool isDirectory)
@@ -242,6 +265,83 @@ public static class AssetRegistry
         return asset;
     }
 
+    /// <summary>
+    /// Registers a file or folder below a linked external folder under its virtual package address
+    /// (e.g. <c>Project:Footage/clip.mp4</c>) while <see cref="Asset.FullPath"/> keeps pointing at
+    /// the real external location.
+    /// </summary>
+    internal static Asset RegisterLinkedEntry(FileSystemInfo info, AssetLinkFolder mount, string virtualRelativePath, bool isDirectory, bool isMountRoot = false)
+    {
+        var package = mount.Package;
+        var dirSuffix = isDirectory ? "/" : string.Empty;
+        var address = $"{package.Name}{PackageSeparator}{virtualRelativePath}{dirSuffix}";
+
+        var parts = virtualRelativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var pathParts = new List<string>(parts.Length + 1) { package.Name };
+        var partCount = isDirectory ? parts.Length : parts.Length - 1;
+        for (var i = 0; i < partCount; i++)
+        {
+            pathParts.Add(parts[i]);
+        }
+
+        AssetType.TryGetForFilePath(info.Name, out var assetType, out var extensionId);
+
+        var asset = new Asset(address)
+                        {
+                            PackageId = package.Id,
+                            FileSystemInfo = info,
+                            AssetType = assetType,
+                            IsDirectory = isDirectory,
+                            FullPath = info.FullName.ToForwardSlashes(),
+                            PathParts = pathParts.ToArray(),
+                            ExtensionId = extensionId,
+                            Package = package,
+                            FolderLinkMountId = mount.Id,
+                            IsLinkMountRoot = isMountRoot,
+                            LinkTargetMissing = isMountRoot && !mount.IsResolved,
+                        };
+
+        _assetsByAddress[address] = asset;
+
+        if (!isDirectory)
+        {
+            var list = _assetsMatchingFilenames.GetOrAdd(info.Name, _ => []);
+            lock (list)
+            {
+                if (!list.Contains(asset)) list.Add(asset);
+            }
+        }
+
+        return asset;
+    }
+
+    /// <summary>
+    /// Drops all assets of a link mount from the registry. Operator references are kept:
+    /// <see cref="Asset.Id"/> derives from the address, so a remount under the same address
+    /// re-binds them automatically.
+    /// </summary>
+    internal static void RemoveAssetsForLinkMount(Guid mountId)
+    {
+        foreach (var asset in _assetsByAddress.Values)
+        {
+            if (asset.FolderLinkMountId != mountId)
+                continue;
+
+            _assetsByAddress.TryRemove(asset.Address, out _);
+
+            if (asset.IsDirectory || asset.FileSystemInfo == null)
+                continue;
+
+            if (_assetsMatchingFilenames.TryGetValue(asset.FileSystemInfo.Name, out var list))
+            {
+                lock (list)
+                {
+                    list.Remove(asset);
+                }
+            }
+        }
+    }
+
     public static Asset GetOrRegisterExternalFileAsset(string absolutePath)
     {
         // 1. Normalize the path to ensure consistent IDs
@@ -284,6 +384,8 @@ public static class AssetRegistry
     
     internal static void UnregisterPackage(Guid packageId)
     {
+        AssetLinkFolders.RemoveMountsForPackage(packageId);
+
         var addressesToRemove = _assetsByAddress.Values
                                                 .Where(a => a.PackageId == packageId)
                                                 .ToList();
@@ -368,9 +470,17 @@ public static class AssetRegistry
             return null;
         }
 
-        // Register new address
+        // Register new address - paths below a linked folder need their virtual mount address
         FileSystemInfo info = isDir ? new DirectoryInfo(newPath) : new FileInfo(newPath);
-        var newAsset = RegisterPackageEntry(info, package, isDir);
+        Asset newAsset;
+        if (AssetLinkFolders.TryGetMountForAbsolutePath(newPath.ToForwardSlashes(), out var mount, out var mountRelativePart))
+        {
+            newAsset = RegisterLinkedEntry(info, mount, $"{mount.VirtualDir}/{mountRelativePart}", isDir);
+        }
+        else
+        {
+            newAsset = RegisterPackageEntry(info, package, isDir);
+        }
 
         ResourceFileWatcher.FileStateChangeCounter++;    
         

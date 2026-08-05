@@ -170,6 +170,12 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         
         _resourceFileWatcher.FileCreated += (_, path) =>
                                             {
+                                                if (AssetLinkFolders.HasLinkExtension(path))
+                                                {
+                                                    AssetLinkFolders.TryMount(path, this);
+                                                    return;
+                                                }
+
                                                 var isDirectory = Directory.Exists(path);
 
                                                 FileSystemInfo info = isDirectory
@@ -180,13 +186,30 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
                                                 ResourceFileWatcher.FileStateChangeCounter++;
                                             };
 
-        _resourceFileWatcher.FileRenamed += (oldPath, newPath) => 
+        _resourceFileWatcher.FileRenamed += (oldPath, newPath) =>
                                             {
+                                                var wasLink = AssetLinkFolders.HasLinkExtension(oldPath);
+                                                var isLink = AssetLinkFolders.HasLinkExtension(newPath);
+                                                if (wasLink || isLink)
+                                                {
+                                                    if (wasLink)
+                                                        AssetLinkFolders.UnmountLinkFile(oldPath);
+                                                    if (isLink)
+                                                        AssetLinkFolders.TryMount(newPath, this);
+                                                    return;
+                                                }
+
                                                 AssetRegistry.UpdateMovedAsset(oldPath, newPath);
                                             };
 
-        _resourceFileWatcher.FileDeleted += (_, path) => 
+        _resourceFileWatcher.FileDeleted += (_, path) =>
                                             {
+                                                if (AssetLinkFolders.HasLinkExtension(path))
+                                                {
+                                                    AssetLinkFolders.UnmountLinkFile(path);
+                                                    return;
+                                                }
+
                                                 AssetRegistry.UnregisterAbsoluteFilePath(path, this);
                                             };
     }

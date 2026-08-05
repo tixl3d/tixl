@@ -120,8 +120,13 @@ internal sealed partial class AssetLibrary
             // Prepare drawing
             ImGui.SetNextItemWidth(10);
 
+            var isLinkMountRoot = folder.Asset is { IsLinkMountRoot: true };
+            var linkTargetMissing = isLinkMountRoot && folder.Asset!.LinkTargetMissing;
+
             var textMutedRgba = (isFiltering && !hasMatches) ? UiColors.TextMuted : UiColors.Text;
             textMutedRgba = textMutedRgba.Fade(isCurrentCompositionPackage ? 1 : 0.8f);
+            if (linkTargetMissing)
+                textMutedRgba = textMutedRgba.Fade(0.4f);
 
             ImGui.PushStyleColor(ImGuiCol.Text, textMutedRgba.Rgba);
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Color.Transparent.Rgba);
@@ -144,6 +149,31 @@ internal sealed partial class AssetLibrary
             ImGui.PopStyleColor(3);
 
             CustomComponents.DrawHoverHighlightOnLastItem();
+
+            if (isLinkMountRoot)
+            {
+                if (ImGui.IsItemHovered())
+                {
+                    CustomComponents.TooltipForLastItem(linkTargetMissing
+                                                            ? $"Linked folder not found:\n{folder.AbsolutePath}"
+                                                            : $"Linked to {folder.AbsolutePath}");
+                }
+
+                // Draw-list only: an ImGui item here would steal the context menu and
+                // drop handling from the tree node row.
+                var itemMin = ImGui.GetItemRectMin();
+                var iconPos = new Vector2(itemMin.X
+                                          + ImGui.GetFontSize()
+                                          + ImGui.CalcTextSize(folder.Name).X
+                                          + 6 * T3Ui.UiScaleFactor,
+                                          itemMin.Y + (ImGui.GetItemRectSize().Y - Icons.FontSize) * 0.5f);
+                Icons.DrawIconAtScreenPosition(Icon.Link,
+                                               iconPos,
+                                               ImGui.GetWindowDrawList(),
+                                               linkTargetMissing
+                                                   ? UiColors.StatusAttention
+                                                   : UiColors.StatusAutomated.Fade(0.8f));
+            }
 
             CustomComponents.DrawSearchMatchUnderline(_state.SearchString, folderName,
                                                       ImGui.GetItemRectMin()
@@ -179,7 +209,15 @@ internal sealed partial class AssetLibrary
                     _state.RenameBuffer = folder.Name;
                 }
 
-                if (ImGui.MenuItem("Delete folder"))
+                if (folder.Asset is { IsLinkMountRoot: true })
+                {
+                    // Only the .tixlLink marker is deleted - the external folder stays untouched
+                    if (ImGui.MenuItem("Remove link"))
+                    {
+                        RemoveFolderLink(folder.Asset);
+                    }
+                }
+                else if (ImGui.MenuItem("Delete folder"))
                 {
                     try
                     {
