@@ -136,6 +136,12 @@ internal sealed class KeyframeEditorGroup
     // Mutations -------------------------------------------------------------
     //
 
+    public void UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)
+    {
+        for (var i = 0; i < _editors.Count; i++)
+            _editors[i].UpdateDragStretchCommand(scaleU, scaleV, originU, originV);
+    }
+
     public void SelectAllKeyframes()
     {
         for (var i = 0; i < _editors.Count; i++)

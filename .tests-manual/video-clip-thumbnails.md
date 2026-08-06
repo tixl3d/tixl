@@ -21,10 +21,32 @@ Make the timeline layers reasonably tall (drag the layer-height handle up if nee
 at a video clip that is at least a few thumbnail-widths wide.
 
 **Expected:**
-- After a moment, a small video frame appears at the left edge of the clip (the clip's in-point frame)
-  and another at the right edge (the out-point frame).
+- After a moment, a video frame appears at the left edge of the clip (the clip's in-point frame)
+  and another at the right edge (the out-point frame), with subtly rounded corners.
+- On flat layers the title sits vertically centered between the two thumbnails; on layers taller than
+  about two small-text rows the title moves into its own row above them.
 - The editor does not stutter while the thumbnails are generated.
-- Very narrow clips or very flat layers show no thumbnails.
+
+## Step: Behavior on narrow clips
+
+**Action:**
+Zoom the timeline out (or trim a clip short) so a video clip becomes narrower than two thumbnails,
+then narrower than the title.
+
+**Expected:**
+- The end thumbnail slides behind the start thumbnail and fades out as the overlap grows.
+- Long titles are shortened with ".." instead of being cut off hard; as the clip gets very narrow the
+  title fades out entirely.
+
+## Step: No dimming of unconnected media clips
+
+**Action:**
+Disconnect a video or audio clip from its consumer and move the mouse off it, then hover it.
+
+**Expected:**
+- The clip does not dim when unconnected — thumbnails and waveforms stay readable.
+- The clip renders slightly translucent when not hovered and fully solid on hover or selection.
+- The tooltip still shows the "(Not connected?)" hint.
 
 ## Step: Previewing the frame under the mouse
 
@@ -45,6 +67,42 @@ Trim the clip's start handle to a different position and release the mouse.
 **Expected:**
 - While dragging, the UI stays smooth.
 - After releasing, the left thumbnail updates to the new in-point frame after a moment.
+
+## Step: Source region appears in the ruler
+
+**Action:**
+Hover a video or audio clip, then select it (single selection) and move the mouse away.
+
+**Expected:**
+- While hovered — and while it is the only selected clip — a translucent region appears in the ruler
+  behind the selection-range line, spanning the clip's full source footage.
+- No footage outline is drawn around the clip body anymore.
+- Media clips show no remap indicator line at their bottom edge and no remap source curves into the ruler.
+
+## Step: Slipping footage via the source region
+
+**Action:**
+With a trimmed video clip selected (so the region extends past the white selection-range line), drag the
+part of the region left or right of the white line horizontally. Then press `Ctrl + Z`.
+
+**Expected:**
+- The cursor becomes a pointer over the draggable region parts.
+- Dragging slides the footage under the clip (thumbnails update after release); the clip itself does not
+  move and its speed is unchanged.
+- The region's edges snap to other clips and the playhead while dragging; `Shift` bypasses snapping.
+- Undo restores the previous slip position.
+
+## Step: Selection-range handles trim clips instead of stretching
+
+**Action:**
+Select a video clip together with some keyframes, then drag the selection-range start handle to the right
+past the clip's start, and back again.
+
+**Expected:**
+- The clip's start edge is trimmed at the handle position — its content does not change speed.
+- Dragging the handle back restores the clip's original extent during the same drag.
+- Keyframes in the selection still stretch proportionally as before.
+- Undo reverts both the trim and the keyframe stretch in one step.
 
 ## Step: Start/end thumbnails persist across restarts
 

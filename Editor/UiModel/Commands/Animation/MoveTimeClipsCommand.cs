@@ -49,6 +49,25 @@ internal sealed class MoveTimeClipsCommand : ICommand
     }
         
 
+    /// <summary>The clip's ranges as captured at drag start. Lets drag handlers compute absolute updates
+    /// from the originals instead of accumulating increments (e.g. trims that restore when dragged back).</summary>
+    internal bool TryGetOriginalRanges(Guid clipId, out TimeRange timeRange, out TimeRange sourceRange)
+    {
+        for (var i = 0; i < _entries.Length; i++)
+        {
+            if (_entries[i].Id != clipId)
+                continue;
+
+            timeRange = _entries[i].TimeRangeOrg.Clone();
+            sourceRange = _entries[i].SourceRangeOrg.Clone();
+            return true;
+        }
+
+        timeRange = default;
+        sourceRange = default;
+        return false;
+    }
+
     internal void StoreCurrentValues()
     {
         if (!TryGetCompositionOp(out var compositionOp))

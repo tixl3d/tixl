@@ -554,6 +554,43 @@ internal sealed class TimeClipInteractions
         }
     }
 
+    /// <summary>
+    /// Selection-range edge drags trim the selected clips at the dragged boundary instead of stretching
+    /// them: edges are clamped relative to their drag-start values (so dragging back restores them) and
+    /// the source range follows at the clip's rate, preserving playback speed. Clips fully inside the
+    /// boundary stay untouched.
+    /// </summary>
+    public void TrimSelectedClipsToBoundary(double boundaryU, bool isStart)
+    {
+        if (_moveClipsCommand == null)
+            return;
+
+        foreach (var clipId in _context.ClipSelection.SelectedClipsIds)
+        {
+            if (!_context.ClipSelection.CompositionTimeClips.TryGetValue(clipId, out var clip))
+                continue;
+
+            if (!_moveClipsCommand.TryGetOriginalRanges(clipId, out var orgTime, out var orgSource))
+                continue;
+
+            var timelineDuration = orgTime.Duration;
+            var rate = Math.Abs(timelineDuration) < 0.0001 ? 1.0 : orgSource.Duration / (double)timelineDuration;
+
+            if (isStart)
+            {
+                var newStart = (float)Math.Min(Math.Max(orgTime.Start, boundaryU), orgTime.End - MinDuration);
+                clip.TimeRange.Start = newStart;
+                clip.SourceRange.Start = (float)(orgSource.Start + (newStart - orgTime.Start) * rate);
+            }
+            else
+            {
+                var newEnd = (float)Math.Max(Math.Min(orgTime.End, boundaryU), orgTime.Start + MinDuration);
+                clip.TimeRange.End = newEnd;
+                clip.SourceRange.End = (float)(orgSource.End + (newEnd - orgTime.End) * rate);
+            }
+        }
+    }
+
     public void CompleteDragCommand()
     {
         if (_moveClipsCommand == null)

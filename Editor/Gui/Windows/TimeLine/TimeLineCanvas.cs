@@ -84,6 +84,16 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     public NodeSelection NodeSelection => _nodeSelection;
 
+    /// <summary>
+    /// Selection-range edge drag: keyframes stretch about the fixed end, while time clips are trimmed to
+    /// the dragged boundary instead of stretched — their speed and source mapping stay intact.
+    /// </summary>
+    public void UpdateSelectionRangeEdgeDrag(double scaleU, double originU, double boundaryU, bool isStart)
+    {
+        KeyframeEditors.UpdateDragStretchCommand(scaleU, 1, originU, 0);
+        ClipArea.TrimSelectedClipsToBoundary(boundaryU, isStart);
+    }
+
     private int RulerHeight => (int)(28 * T3Ui.UiScaleFactor);
     private int SummaryHeight => (int)(11 * T3Ui.UiScaleFactor);
 

@@ -174,6 +174,14 @@ Video clips show small frame thumbnails when the layer is tall enough and the cl
 - The **left and right edges** of the clip body show the source frames at the clip's in- and out-point. These are cached on disk, so they reappear instantly on the next start.
 - **Hovering** a video clip shows the frame under the mouse in the tooltip, so you can find a moment in the footage without scrubbing the playhead. These previews are decoded in the background — on footage with large keyframe intervals they can lag slightly behind the mouse (a generated proxy makes them much faster).
 
+### Source region and slipping footage
+
+Hovering or selecting a video or audio clip shows its full source footage as a **source region** in the ruler, behind the selection-range indicator. The region maps the media's first and last frame onto the timeline, so head/tail slack — or a clip reading past its footage — is visible at a glance.
+
+Dragging the region (outside the white selection-range line) **slips** the clip: the footage slides under the clip's fixed timeline window without changing its position or speed. While dragging, the region's start and end snap to other clips, the playhead, and similar time anchors; hold `Shift` to bypass snapping.
+
+Dragging the **selection-range start/end handles** trims selected clips at the boundary (preserving their speed and source mapping) while keyframes are still stretched proportionally.
+
 ### Time clips need to be connected
 
 > [!NOTE]

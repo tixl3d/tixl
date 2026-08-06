@@ -33,17 +33,24 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
         _snapExclusions = [this];
         _handles = new TimeWarpHandleSet();
         _warpDrag = new TimeWarpDrag(canvas, _handles);
+        _sourceRegion = new SourceRegionIndicator(canvas, snapHandler);
     }
 
     public void Draw(Instance composition, ImDrawListPtr drawList)
     {
         _lastComposition = composition;
-        if (!ComputeRange(out var rulerPos, out var rulerSize, out var scale))
-            return;
+        var hasRange = ComputeRange(out var rulerPos, out var rulerSize, out var scale);
 
-        var xStart = _canvas.TransformX(_range.Start);
-        var xEnd = _canvas.TransformX(_range.End);
-        var lineY = rulerPos.Y + rulerSize.Y - 4 * scale;
+        var xStart = hasRange ? _canvas.TransformX(_range.Start) : 0;
+        var xEnd = hasRange ? _canvas.TransformX(_range.End) : 0;
+        // 5px instead of 4: 1px of breathing room between the bar and the source region behind it.
+        var lineY = rulerPos.Y + rulerSize.Y - 5 * scale;
+
+        // The media-clip source region draws (and slip-drags) even without a selection range.
+        _sourceRegion.Draw(composition, drawList, hasRange, xStart, xEnd, lineY, rulerPos, rulerSize, scale);
+
+        if (!hasRange)
+            return;
         var leftClamped = MathF.Max(xStart, rulerPos.X);
         var rightClamped = MathF.Min(xEnd, rulerPos.X + rulerSize.X);
 
@@ -341,7 +348,8 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
                 return;
 
             var dScale = (u - origin) / denom;
-            _canvas.UpdateDragStretchCommand(scaleU: dScale, scaleV: 1, originU: origin, originV: 0);
+            // Keyframes stretch about the fixed end; time clips are trimmed at the dragged boundary instead.
+            _canvas.UpdateSelectionRangeEdgeDrag(dScale, origin, u, isStart);
             _lastDragU = u;
         }
         else if (ImGui.IsItemDeactivated())
@@ -595,6 +603,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
     private readonly IValueSnapAttractor[] _snapExclusions;
     private readonly TimeWarpHandleSet _handles;
     private readonly TimeWarpDrag _warpDrag;
+    private readonly SourceRegionIndicator _sourceRegion;
 
     private DragMode _currentDragMode = DragMode.None;
     private bool _autoSelectKeyframesOnDrag;

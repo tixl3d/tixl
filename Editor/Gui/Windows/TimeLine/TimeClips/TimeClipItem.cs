@@ -98,24 +98,22 @@ internal static class TimeClipItem
         
         var fadeIfNotConnected = isConnected ? 1f : 0.4f;
 
-        // Media clips render slightly translucent and solidify on hover — together with the
-        // footage-extent outline this links the clip body to its available source range.
-        // Muted audio clips fade further so the silence is visible at a glance.
+        // Media clips carry visual content (thumbnails, waveforms), so they never fade for connection or
+        // activity state — dimming made the content hard to read. Their opacity only responds to
+        // hover/selection (0.8 → 1). Muted audio still fades as a status indication.
         var isClipHovered = ImGui.IsMouseHoveringRect(position, itemRectMax);
-        var mediaHoverFade = 1f;
-        if (isAudioClip || isVideoClip)
-        {
-            mediaHoverFade = isClipHovered ? 1f : 0.6f;
+        var isMediaClip = isAudioClip || isVideoClip;
+        var mediaFade = isClipHovered || isSelected ? 1f : 0.8f;
+        if (isMediaClip && clipInstance is IAudioClipProvider audioProvider && audioProvider.GetResourceHandle().Clip.IsMuted)
+            mediaFade *= 0.4f;
 
-            if (clipInstance is IAudioClipProvider audioProvider && audioProvider.GetResourceHandle().Clip.IsMuted)
-                mediaHoverFade *= 0.4f;
-        }
-
-        var innerColor = Color.Mix(UiColors.BackgroundFull,randomColor,0.5f).Fade(0.8f * fadeIfNotConnected * fadeIfInActive * mediaHoverFade);
+        var innerColor = Color.Mix(UiColors.BackgroundFull, randomColor, 0.5f)
+                              .Fade(isMediaClip ? mediaFade : 0.8f * fadeIfNotConnected * fadeIfInActive);
         attr.DrawList.AddRectFilled(position, itemRectMax, innerColor, rounding);
 
         // Per-event tick overlay for ops that publish a DataClip; waveform for [AudioClip] ops.
         // Each no-ops for op kinds it doesn't handle.
+        var thumbLayout = default(VideoThumbLayout);
         if (clipInstance != null)
         {
             DataClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax,
@@ -123,8 +121,8 @@ internal static class TimeClipItem
             AudioClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax, attr.DrawList);
 
             if (isVideoClip)
-                DrawVideoClipThumbnails(ref attr, timeClip, clipInstance, position, itemRectMax,
-                                        fadeIfNotConnected * mediaHoverFade, rounding);
+                thumbLayout = DrawVideoClipThumbnails(ref attr, timeClip, clipInstance, position, itemRectMax,
+                                                      mediaFade, innerColor);
         }
 
         if (isSelected)
@@ -158,29 +156,54 @@ internal static class TimeClipItem
             var labelSize = ImGui.CalcTextSize(label);
 
             // Keep the title readable when the clip starts off the left edge of the view: pin the text to the
-            // visible area's left edge, but never push it past the clip's own right edge.
-            var labelMaxX = itemRectMax.X - 3;
-            var labelX = Math.Min(Math.Max(position.X + 4, attr.LayerRect.Min.X + 4), labelMaxX);
-            var labelPos = new Vector2(labelX, position.Y + 1);
+            // visible area's left edge, but never push it past the clip's own right edge. When single-row
+            // thumbnails are visible, the label sits between them, vertically centered.
+            var labelMaxX = thumbLayout.HasThumbnails && !thumbLayout.TwoRows ? thumbLayout.LabelMaxX : itemRectMax.X - 3;
+            var labelMinX = thumbLayout.HasThumbnails && !thumbLayout.TwoRows ? thumbLayout.LabelMinX : position.X + 4;
+            var labelX = Math.Min(Math.Max(labelMinX, attr.LayerRect.Min.X + 4), labelMaxX);
+            var labelY = thumbLayout.HasThumbnails && !thumbLayout.TwoRows
+                             ? position.Y + (clipSize.Y - labelSize.Y) * 0.5f
+                             : position.Y + 1;
+            var labelPos = new Vector2(labelX, labelY);
 
-            var needsClipping = labelPos.X + labelSize.X > labelMaxX;
-            if (needsClipping)
-                ImGui.PushClipRect(position, itemRectMax - new Vector2(3, 0), true);
+            // Narrow media clips fade their title out instead of hard-clipping it: full opacity above 4×
+            // the small-font height, gone below 2×.
+            var labelAlpha = isMediaClip
+                                 ? Math.Clamp((clipWidth / Fonts.FontSmall.FontSize - 2) / 2f, 0f, 1f)
+                                 : fadeIfNotConnected;
 
-            // Mixing the type color toward the foreground keeps labels readable on the tinted bodies;
-            // hover brightens further, and selection keeps its distinct color.
-            var labelColor = isSelected
-                                 ? UiColors.Selection
-                                 : Color.Mix(randomColor, UiColors.ForegroundFull, isClipHovered ? 0.9f : 0.7f).Fade(fadeIfNotConnected);
-            attr.DrawList.AddText(labelPos, labelColor, label);
+            if (labelAlpha > 0.01f)
+            {
+                // Mixing the type color toward the foreground keeps labels readable on the tinted bodies;
+                // hover brightens further, and selection keeps its distinct color.
+                var labelColor = isSelected
+                                     ? UiColors.Selection.Fade(labelAlpha)
+                                     : Color.Mix(randomColor, UiColors.ForegroundFull, isClipHovered ? 0.9f : 0.7f).Fade(labelAlpha);
 
-            if (needsClipping)
-                ImGui.PopClipRect();
+                if (isVideoClip)
+                {
+                    // Video clips truncate with an ellipsis instead of hard-clipping at the edge.
+                    attr.DrawList.AddText(labelPos, labelColor, TruncateLabel(label, labelSize.X, labelMaxX - labelX));
+                }
+                else
+                {
+                    var needsClipping = labelPos.X + labelSize.X > labelMaxX;
+                    if (needsClipping)
+                        ImGui.PushClipRect(position, itemRectMax - new Vector2(3, 0), true);
+
+                    attr.DrawList.AddText(labelPos, labelColor, label);
+
+                    if (needsClipping)
+                        ImGui.PopClipRect();
+                }
+            }
 
             ImGui.PopFont();
         }
 
-        // Stretch indicators
+        // Stretch indicators — media clips skip them: their thumbnails/waveform already show the content,
+        // and a time-remap is the norm for them, not a state worth flagging.
+        if (!isMediaClip)
         {
             if (timeStretched)
             {
@@ -192,12 +215,12 @@ internal static class TimeClipItem
             {
                 attr.DrawList.AddRectFilled(position + new Vector2(2, clipSize.Y - 3),
                                             position + new Vector2(clipSize.X - 3, clipSize.Y - 1),
-                                            UiColors.ForegroundFull.Fade(0.3f* fadeIfNotConnected));
+                                            UiColors.ForegroundFull.Fade(0.3f * fadeIfNotConnected));
             }
         }
 
-        // Draw stretch indicators
-        if (isSelected && timeRemapped && attr.LayerContext.ClipSelection.Count == 1)
+        // Remap source curves into the ruler — hidden for media clips (too distracting next to their content).
+        if (!isMediaClip && isSelected && timeRemapped && attr.LayerContext.ClipSelection.Count == 1)
         {
             var estimatedRulerHeight = 40;
             var verticalOffset = ImGui.GetWindowPos().Y  + estimatedRulerHeight - position.Y - ClipArea.LayerHeight;
@@ -334,13 +357,20 @@ internal static class TimeClipItem
 
         HandleDragging(attr, timeClip, isSelected, false, HandleDragMode.End);
 
-        // Footage extent stays visible while hovering or while any drag of this clip is active (body move or
-        // either trim handle). IsItemActive holds through the whole drag even when the mouse leaves the clip,
-        // so the frame doesn't flicker as the pointer outruns the clip — and that's when it's most useful.
+        // The footage extent renders as a source region in the ruler (see SourceRegionIndicator), not as an
+        // on-clip outline — that was hard to read against neighboring clips. Publish while hovering or while
+        // any drag of this clip is active (IsItemActive holds even when the mouse outruns the clip), and for
+        // the single selected media clip.
         if ((bodyHovered || bodyActive || startHandleActive || endHandleActive)
             && TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var hoverFootageBars))
         {
-            DrawSourceFootageExtent(ref attr, timeClip, position, itemRectMax, hoverFootageBars);
+            MediaClipSourceRegion.PublishHovered(timeClip, hoverFootageBars);
+        }
+
+        if (isSelected && isMediaClip && attr.LayerContext.ClipSelection.Count == 1
+            && TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var selectedFootageBars))
+        {
+            MediaClipSourceRegion.PublishSelected(timeClip, selectedFootageBars);
         }
 
         if (aHandleClicked)
@@ -531,35 +561,45 @@ internal static class TimeClipItem
         }
     }
 
-    /// <summary>
-    /// Draws thumbnails of the source's first and last visible frame inside the clip body. These are
-    /// disk-cached per (asset, time) and only requested when the layer is tall and the clip wide enough.
-    /// </summary>
-    private static void DrawVideoClipThumbnails(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance clipInstance,
-                                                Vector2 position, Vector2 itemRectMax, float fade, float rounding)
-    {
-        var height = itemRectMax.Y - position.Y - 2;
-        if (height < 16 * T3Ui.UiScaleFactor)
-            return;
+    /// <summary>How the in/out-point thumbnails were laid out, so the label can flow around them:
+    /// single-row mode centers the title between the thumbnails, two-row mode keeps it in its own
+    /// top row above them.</summary>
+    private readonly record struct VideoThumbLayout(bool HasThumbnails, bool TwoRows, float LabelMinX, float LabelMaxX);
 
-        var thumbWidth = height * UiHelpers.Thumbnails.ThumbnailManager.AspectRatio;
-        var clipWidth = itemRectMax.X - position.X;
-        if (clipWidth < thumbWidth * 2.2f)
-            return;
+    /// <summary>
+    /// Draws thumbnails of the source's first and last visible frame inside the clip body. Flat layers show
+    /// them at full clip height with the label between them; on layers taller than two small-text rows the
+    /// label gets its own top row and the thumbnails fill the rest. When the clip is too narrow for both,
+    /// the end thumbnail is drawn first (behind) and fades out with growing overlap.
+    /// </summary>
+    private static VideoThumbLayout DrawVideoClipThumbnails(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance clipInstance,
+                                                            Vector2 position, Vector2 itemRectMax, float fade, Color bodyColor)
+    {
+        var clipHeight = itemRectMax.Y - position.Y;
+        var twoRows = clipHeight > 2f * Fonts.FontSmall.FontSize;
+        var thumbTop = twoRows ? position.Y + Fonts.FontSmall.FontSize + 2 : position.Y + 1;
+        var thumbHeight = itemRectMax.Y - 1 - thumbTop;
+        if (thumbHeight < 8 * T3Ui.UiScaleFactor)
+            return default;
+
+        var thumbWidth = thumbHeight * UiHelpers.Thumbnails.ThumbnailManager.AspectRatio;
+        var innerWidth = itemRectMax.X - position.X - 2;
+        if (innerWidth < thumbWidth * 0.3f)
+            return default;
 
         if (clipInstance is not T3.Core.Operator.Interfaces.IDescriptiveFilename descriptive)
-            return;
+            return default;
 
         var assetPath = descriptive.SourcePathSlot.TypedInputValue.Value;
         if (string.IsNullOrEmpty(assetPath))
-            return;
+            return default;
 
         if (!VideoClipDurationCache.TryGetDurationSecs(assetPath, clipInstance, out var durationSecs))
-            return;
+            return default;
 
         var atlasSrv = UiHelpers.Thumbnails.ThumbnailManager.AtlasSrv;
         if (atlasSrv == null)
-            return;
+            return default;
 
         // While a drag/trim is running SourceRange changes every frame — don't flood the decode queue with
         // requests for transient times; already-ready thumbnails still draw.
@@ -569,24 +609,73 @@ internal static class TimeClipItem
         var startSecs = QuantizeThumbnailTime(Math.Clamp(playback.SecondsFromBars(timeClip.SourceRange.Start), 0, durationSecs));
         var endSecs = QuantizeThumbnailTime(Math.Clamp(playback.SecondsFromBars(timeClip.SourceRange.End), 0, durationSecs));
 
-        var tint = Color.White.Fade(fade);
-        var top = position.Y + 1;
+        var startMin = new Vector2(position.X + 1, thumbTop);
+        var endMin = new Vector2(itemRectMax.X - 1 - thumbWidth, thumbTop);
+        var thumbSize = new Vector2(thumbWidth, thumbHeight);
 
-        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, startSecs, persistent: true, allowRequest, out var startRect))
-        {
-            attr.DrawList.AddImageRounded(atlasSrv.NativePointer,
-                                          new Vector2(position.X + 1, top),
-                                          new Vector2(position.X + 1 + thumbWidth, top + height),
-                                          startRect.UvMin, startRect.UvMax, tint, rounding, ImDrawFlags.RoundCornersLeft);
-        }
+        // Once the clip is narrower than two thumbnails they overlap; the end thumbnail (drawn behind)
+        // fades from 1 down to 0.2 as the overlap approaches a full thumbnail width.
+        var overlap = 2 * thumbWidth - innerWidth;
+        var endFade = overlap <= 0 ? 1f : 1f - 0.8f * Math.Clamp(overlap / thumbWidth, 0f, 1f);
+
+        var drewStart = false;
+        var drewEnd = false;
+
+        attr.DrawList.PushClipRect(position, itemRectMax, true);
 
         if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, endSecs, persistent: true, allowRequest, out var endRect))
         {
-            attr.DrawList.AddImageRounded(atlasSrv.NativePointer,
-                                          new Vector2(itemRectMax.X - 1 - thumbWidth, top),
-                                          new Vector2(itemRectMax.X - 1, top + height),
-                                          endRect.UvMin, endRect.UvMax, tint, rounding, ImDrawFlags.RoundCornersRight);
+            attr.DrawList.AddImage(atlasSrv.NativePointer, endMin, endMin + thumbSize,
+                                   endRect.UvMin, endRect.UvMax, Color.White.Fade(fade * endFade));
+            DrawThumbnailBorder(attr.DrawList, endMin, endMin + thumbSize, bodyColor);
+            drewEnd = true;
         }
+
+        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, startSecs, persistent: true, allowRequest, out var startRect))
+        {
+            attr.DrawList.AddImage(atlasSrv.NativePointer, startMin, startMin + thumbSize,
+                                   startRect.UvMin, startRect.UvMax, Color.White.Fade(fade));
+            DrawThumbnailBorder(attr.DrawList, startMin, startMin + thumbSize, bodyColor);
+            drewStart = true;
+        }
+
+        attr.DrawList.PopClipRect();
+
+        if (!drewStart && !drewEnd)
+            return default;
+
+        return new VideoThumbLayout(true, twoRows,
+                                    drewStart ? startMin.X + thumbWidth + 3 : position.X + 4,
+                                    drewEnd ? endMin.X - 3 : itemRectMax.X - 3);
+    }
+
+    // Fakes rounded thumbnail corners: a 2px stroke in the clip's body color with a 3px radius over the
+    // square image covers the corner pixels.
+    private static void DrawThumbnailBorder(ImDrawListPtr drawList, Vector2 min, Vector2 max, Color bodyColor)
+    {
+        drawList.AddRect(min, max, bodyColor, 3 * T3Ui.UiScaleFactor, ImDrawFlags.RoundCornersAll, 2 * T3Ui.UiScaleFactor);
+    }
+
+    /// <summary>Shortens the label with a trailing ".." when it doesn't fit. Only allocates for
+    /// clips whose title actually overflows.</summary>
+    private static string TruncateLabel(string label, float fullWidth, float maxWidth)
+    {
+        if (fullWidth <= maxWidth || label.Length == 0)
+            return label;
+
+        var ellipsisWidth = ImGui.CalcTextSize("..").X;
+        var low = 0;
+        var high = label.Length - 1;
+        while (low < high)
+        {
+            var mid = (low + high + 1) / 2;
+            if (ImGui.CalcTextSize(label[..mid]).X + ellipsisWidth <= maxWidth)
+                low = mid;
+            else
+                high = mid - 1;
+        }
+
+        return low <= 0 ? string.Empty : label[..low] + "..";
     }
 
     /// <summary>
@@ -621,34 +710,6 @@ internal static class TimeClipItem
     }
 
     private static double QuantizeThumbnailTime(double seconds) => Math.Round(seconds * 10) / 10;
-
-    /// <summary>
-    /// Outlines the clip's full available source footage on the timeline. The footage maps through the same
-    /// linear source→screen relation as the clip's in/out points, so the frame extending past the clip means
-    /// unused head/tail to slip into, and the clip extending past the frame means it reads beyond the media.
-    /// </summary>
-    private static void DrawSourceFootageExtent(ref ClipDrawingAttributes attr, TimeClip timeClip,
-                                                Vector2 position, Vector2 itemRectMax, float fullDurationBars)
-    {
-        var rate = timeClip.Speed;
-        if (Math.Abs(rate) < 1e-6)
-            return;
-
-        // Transform the footage boundary *times* directly. They're invariant under a slip-trim (which preserves
-        // speed), so the frame stays rock-steady while dragging a handle — unlike scaling from the clip's live
-        // pixel width, which amplifies per-frame edge rounding into visible jitter.
-        var footageStartTime = timeClip.TimeRange.Start - timeClip.SourceRange.Start / rate;
-        var footageEndTime = timeClip.TimeRange.Start + (fullDurationBars - timeClip.SourceRange.Start) / rate;
-
-        var xStart = attr.LayerContext.TimeCanvas.TransformX((float)footageStartTime) + 1;
-        var xEnd = attr.LayerContext.TimeCanvas.TransformX((float)footageEndTime) + 1;
-
-        // The frame's left/right edges are the media's first/last frame: when an edge sits inside the clip,
-        // the clip is reading past the footage (looping/freezing); when it sits outside, there's slack to slip.
-        attr.DrawList.AddRect(new Vector2(Math.Min(xStart, xEnd), position.Y),
-                              new Vector2(Math.Max(xStart, xEnd), itemRectMax.Y),
-                              UiColors.ForegroundFull.Fade(0.3f), 4.5f);
-    }
 
     /// <summary>Full source length of a video or audio clip in bars, or false (with -1) for other /
     /// unknown-duration clips. Duration is resolved through the per-asset duration caches (probed once).</summary>

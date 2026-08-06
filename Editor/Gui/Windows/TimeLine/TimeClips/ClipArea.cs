@@ -202,6 +202,9 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     void ITimeObjectManipulation.UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)
         => OpClips.UpdateDragStretchCommand(scaleU, scaleV, originU, originV);
 
+    public void TrimSelectedClipsToBoundary(double boundaryU, bool isStart)
+        => OpClips.TrimSelectedClipsToBoundary(boundaryU, isStart);
+
     void ITimeObjectManipulation.CompleteDragCommand() => OpClips.CompleteDragCommand();
 
     void ITimeObjectManipulation.DeleteSelectedElements(Instance instance)
