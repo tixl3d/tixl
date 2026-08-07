@@ -349,7 +349,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
 
             var dScale = (u - origin) / denom;
             // Keyframes stretch about the fixed end; time clips are trimmed at the dragged boundary instead.
-            _canvas.UpdateSelectionRangeEdgeDrag(dScale, origin, u, isStart);
+            _canvas.UpdateSelectionRangeEdgeDrag(dScale, origin, u, _edgeDragOrigU, isStart);
             _lastDragU = u;
         }
         else if (ImGui.IsItemDeactivated())
@@ -397,6 +397,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
         }
 
         _lastDragU = originalU;
+        _edgeDragOrigU = originalU;
     }
 
     private void HandleMiddleDrag(in Guid compositionSymbolId)
@@ -609,6 +610,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
     private bool _autoSelectKeyframesOnDrag;
     private bool _lastHadKeyframeSelection;
     private double _lastDragU;
+    private double _edgeDragOrigU;
     private TimeRange _range;
     private Instance? _lastComposition;
 

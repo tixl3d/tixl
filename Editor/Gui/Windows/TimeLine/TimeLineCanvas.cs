@@ -88,10 +88,10 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     /// Selection-range edge drag: keyframes stretch about the fixed end, while time clips are trimmed to
     /// the dragged boundary instead of stretched — their speed and source mapping stay intact.
     /// </summary>
-    public void UpdateSelectionRangeEdgeDrag(double scaleU, double originU, double boundaryU, bool isStart)
+    public void UpdateSelectionRangeEdgeDrag(double scaleU, double originU, double boundaryU, double origBoundaryU, bool isStart)
     {
         KeyframeEditors.UpdateDragStretchCommand(scaleU, 1, originU, 0);
-        ClipArea.TrimSelectedClipsToBoundary(boundaryU, isStart);
+        ClipArea.TrimSelectedClipsToBoundary(boundaryU, origBoundaryU, isStart);
     }
 
     private int RulerHeight => (int)(28 * T3Ui.UiScaleFactor);
@@ -226,6 +226,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                                              | ImGuiWindowFlags.NoScrollWithMouse);
                             var dopeContentStartY = ImGui.GetCursorScreenPos().Y;
                             ClipArea.Draw(compositionOp, Playback, SnapHandlerForU);
+                            _currentTimeMarker.DrawLineInCurrentWindow(Playback.TimeInBars, this);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
 
                             // Dope-local fence — outer fence is suppressed while the
@@ -259,6 +260,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                         else
                         {
                             ClipArea.Draw(compositionOp, Playback, SnapHandlerForU);
+                            _currentTimeMarker.DrawLineInCurrentWindow(Playback.TimeInBars, this);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
                         }
                         break;

@@ -576,7 +576,7 @@ internal static class TimeClipItem
                                                             Vector2 position, Vector2 itemRectMax, float fade, Color bodyColor)
     {
         var clipHeight = itemRectMax.Y - position.Y;
-        var twoRows = clipHeight > 2f * Fonts.FontSmall.FontSize;
+        var twoRows = clipHeight > 3f * Fonts.FontSmall.FontSize;
         var thumbTop = twoRows ? position.Y + Fonts.FontSmall.FontSize + 2 : position.Y + 1;
         var thumbHeight = itemRectMax.Y - 1 - thumbTop;
         if (thumbHeight < 8 * T3Ui.UiScaleFactor)

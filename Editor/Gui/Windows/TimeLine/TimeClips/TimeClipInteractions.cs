@@ -556,11 +556,12 @@ internal sealed class TimeClipInteractions
 
     /// <summary>
     /// Selection-range edge drags trim the selected clips at the dragged boundary instead of stretching
-    /// them: edges are clamped relative to their drag-start values (so dragging back restores them) and
-    /// the source range follows at the clip's rate, preserving playback speed. Clips fully inside the
-    /// boundary stay untouched.
+    /// them: edges follow the boundary (relative to their drag-start values, so dragging back restores
+    /// them) and the source range follows at the clip's rate, preserving playback speed. Clips whose edge
+    /// sat at the drag-start boundary (<paramref name="origBoundaryU"/>) extend outward with the handle;
+    /// inner clips only get shortened once the boundary passes them.
     /// </summary>
-    public void TrimSelectedClipsToBoundary(double boundaryU, bool isStart)
+    public void TrimSelectedClipsToBoundary(double boundaryU, double origBoundaryU, bool isStart)
     {
         if (_moveClipsCommand == null)
             return;
@@ -578,13 +579,17 @@ internal sealed class TimeClipInteractions
 
             if (isStart)
             {
-                var newStart = (float)Math.Min(Math.Max(orgTime.Start, boundaryU), orgTime.End - MinDuration);
+                var followsHandle = Math.Abs(orgTime.Start - origBoundaryU) < 0.001;
+                var target = followsHandle ? boundaryU : Math.Max(orgTime.Start, boundaryU);
+                var newStart = (float)Math.Min(target, orgTime.End - MinDuration);
                 clip.TimeRange.Start = newStart;
                 clip.SourceRange.Start = (float)(orgSource.Start + (newStart - orgTime.Start) * rate);
             }
             else
             {
-                var newEnd = (float)Math.Max(Math.Min(orgTime.End, boundaryU), orgTime.Start + MinDuration);
+                var followsHandle = Math.Abs(orgTime.End - origBoundaryU) < 0.001;
+                var target = followsHandle ? boundaryU : Math.Min(orgTime.End, boundaryU);
+                var newEnd = (float)Math.Max(target, orgTime.Start + MinDuration);
                 clip.TimeRange.End = newEnd;
                 clip.SourceRange.End = (float)(orgSource.End + (newEnd - orgTime.End) * rate);
             }
