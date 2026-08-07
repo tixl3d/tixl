@@ -58,6 +58,8 @@ internal sealed partial class AssetLibrary
             DrawAssetToolsPopup();
         }
 
+        DrawDeleteConfirmationDialog();
+
         ImGui.BeginChild("scrolling", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.IndentSpacing, 10);
@@ -217,22 +219,9 @@ internal sealed partial class AssetLibrary
                         RemoveFolderLink(folder.Asset);
                     }
                 }
-                else if (ImGui.MenuItem("Delete folder"))
+                else if (ImGui.MenuItem("Delete folder...") && folder.Asset != null)
                 {
-                    try
-                    {
-                        if (Directory.Exists(folder.AbsolutePath))
-                        {
-                            Log.Debug("Deleting " + folder.Address);
-                            Directory.Delete(folder.AbsolutePath);
-                        }
-
-                        AssetRegistry.RemoveObsoleteAsset(folder.Asset);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warning($"Can't remove folder {folder.AbsolutePath} ({e.Message}");
-                    }
+                    RequestDeleteAssets(folder.Asset);
                 }
             });
 
@@ -454,6 +443,14 @@ internal sealed partial class AssetLibrary
                             Log.Warning($"Failed to get directory for {folder} {e.Message}");
                         }
                     }
+                }
+
+                ImGui.Separator();
+                var selectedCount = _state.Selection.IsSelected(asset.Id) ? _state.Selection.SelectedKeys.Count : 1;
+                var deleteLabel = selectedCount > 1 ? $"Delete {selectedCount} selected..." : "Delete file...";
+                if (ImGui.MenuItem(deleteLabel))
+                {
+                    RequestDeleteAssets(asset);
                 }
             },
                                                 title: asset.FileSystemInfo?.Name,

@@ -17,11 +17,14 @@ internal sealed partial class AssetLibrary
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6) * T3Ui.UiScaleFactor);
         if (ImGui.BeginPopupContextWindow(SettingsPopUpId))
         {
-            CustomComponents.DrawMenuItem(_deleteFileButtonId, "Delete file", null, false, false);
-            CustomComponents.TooltipForLastItem("Not implemented yet :-(");
-
-            var isValidFile = _state.ActiveAsset is { IsDirectory: false, FileSystemInfo: not null }; 
+            var isValidFile = _state.ActiveAsset is { IsDirectory: false, FileSystemInfo: not null };
             var absolutePath = _state.ActiveAsset?.FileSystemInfo?.FullName;
+
+            if (CustomComponents.DrawMenuItem(_deleteFileButtonId, "Delete file...", null, false, isValidFile)
+                && _state.ActiveAsset != null)
+            {
+                RequestDeleteAssets(_state.ActiveAsset);
+            }
             
             if (CustomComponents.DrawMenuItem(_openExternallyId, "Open externally",
                                               null,
