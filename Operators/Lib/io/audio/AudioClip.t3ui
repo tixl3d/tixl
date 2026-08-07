@@ -37,7 +37,7 @@
       "Description": "Path to the audio file (.wav / .mp3 / .ogg).",
       "AddPadding": "True",
       "Usage": "FilePath",
-      "FileFilter": "mp3,wav,ogg,aiff"
+      "FileFilter": "mp3, wav, ogg, flac, aiff, aif, m4a, aac, wma"
     },
     {
       "InputId": "6c5d9e40-7f8a-4b1c-8d2e-3f4a5b6c7d90"/*Loop*/,

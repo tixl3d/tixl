@@ -10,9 +10,9 @@
         "X": 51.512096,
         "Y": 46.995968
       },
-      "Description": "Path to the videofile",
+      "Description": "Path to the video file.",
       "Usage": "FilePath",
-      "FileFilter": "mp4, webm, mpeg, m4v, mkv"
+      "FileFilter": "mp4, mov, webm, mpg, mpeg, m4v, mkv, avi, wmv, flv, ts, m2ts, mts, mxf, ogv"
     },
     {
       "InputId": "21b5671b-862f-4cea-a355-fa019996c936"/*Loop*/,
@@ -20,7 +20,7 @@
         "X": 51.512096,
         "Y": 226.99597
       },
-      "Description": "When activated, the video is repeated endlessly",
+      "Description": "Repeats the video endlessly. When off, playback holds on the last frame after the video ends.",
       "AddPadding": "True"
     },
     {
@@ -28,7 +28,8 @@
       "Position": {
         "X": 51.512096,
         "Y": 346.99597
-      }
+      },
+      "Description": "Selects the decode strategy:\n\nFast Seeking (default): decodes on the CPU and caches recent frames in RAM. Scrubbing back, looping and reverse playback are instant, and the GPU stays free for rendering. Higher CPU load on large frames.\n\nPlayback Performance: decodes on the GPU (D3D11VA) and keeps the frames there — the decoded surface is converted straight to the output texture by a compute shader, with no GPU→CPU read-back (zero-copy). Smoothest playback for large / 4K long-GOP footage, but random seeks re-decode from the previous keyframe. Automatically falls back to software decode when the codec has no GPU decoder (e.g. ProRes, HAP) or the driver rejects it."
     },
     {
       "InputId": "2fecfbb4-f7d9-4c53-95ae-b64ccbb6fbad"/*Volume*/,
@@ -36,7 +37,7 @@
         "X": 51.512096,
         "Y": 91.99597
       },
-      "Description": "Defines the volume of the sound output",
+      "Description": "Audio volume of the video's sound track.\n\nNot yet routed to the audio engine — video audio is silent in this version.",
       "AddPadding": "True"
     },
     {
@@ -45,14 +46,15 @@
         "X": 51.512096,
         "Y": 181.99597
       },
-      "Description": "Defines whether the video is shifted forwards or backwards in time"
+      "Description": "When connected, overrides the playback time with a custom time in seconds — e.g. to offset, scrub or drive the video procedurally. When not connected, the video follows the timeline."
     },
     {
       "InputId": "b62c208c-3735-4130-87de-8c03c8a9b5fa"/*IsPreciseAtPlayback*/,
       "Position": {
         "X": 51.512096,
         "Y": 271.99597
-      }
+      },
+      "Description": "No longer used — playback is frame-exact by default. Kept for compatibility with older projects."
     },
     {
       "InputId": "e9c15b3f-8c4a-411d-b9b3-795d64d6bd20"/*ResyncThreshold*/,
@@ -60,7 +62,7 @@
         "X": 51.512096,
         "Y": 136.99597
       },
-      "Description": "Threshold for timing resyncing"
+      "Description": "No longer used — timing is frame-exact now. Kept for compatibility with older projects."
     }
   ],
   "SymbolChildUis": [],

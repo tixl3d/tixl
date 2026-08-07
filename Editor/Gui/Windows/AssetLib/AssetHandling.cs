@@ -56,6 +56,8 @@ internal static class AssetHandling
                                    });
 
         AssetType.RegisterType(Images);
+        // Extensions match what the bundled FFmpeg build (LGPL, 7.x) demuxes and decodes:
+        // H.264/HEVC/AV1/VP8/VP9/MPEG-2/4/VC-1 plus the editing codecs (ProRes, DNxHD, HAP, CineForm, FFV1).
         AssetType.RegisterType(new AssetType("Video", [
                                        FileExtensionRegistry.GetUniqueId("mp4"),
                                        FileExtensionRegistry.GetUniqueId("mov"),
@@ -64,6 +66,14 @@ internal static class AssetHandling
                                        FileExtensionRegistry.GetUniqueId("m4v"),
                                        FileExtensionRegistry.GetUniqueId("mkv"),
                                        FileExtensionRegistry.GetUniqueId("avi"),
+                                       FileExtensionRegistry.GetUniqueId("webm"),
+                                       FileExtensionRegistry.GetUniqueId("wmv"),
+                                       FileExtensionRegistry.GetUniqueId("flv"),
+                                       FileExtensionRegistry.GetUniqueId("ts"),
+                                       FileExtensionRegistry.GetUniqueId("m2ts"),
+                                       FileExtensionRegistry.GetUniqueId("mts"),
+                                       FileExtensionRegistry.GetUniqueId("mxf"),
+                                       FileExtensionRegistry.GetUniqueId("ogv"),
                                    ])
                                    {
                                        PrimaryOperators = [new Guid("914fb032-d7eb-414b-9e09-2bdd7049e049")], // PlayVideo
@@ -72,10 +82,19 @@ internal static class AssetHandling
                                        IconId = (uint)Icon.FileVideo,
                                        Subfolders = ["videos", "video", "media"],
                                    });
+        // Audio plays through BASS (not FFmpeg): wav/mp3/ogg/aiff natively, flac via the bundled
+        // bassflac plugin, aac/m4a/wma through the Media Foundation fallback on Windows.
+        // Opus stays out — it would need the bassopus plugin, which isn't shipped.
         AssetType.RegisterType(new AssetType("Audio", [
                                        FileExtensionRegistry.GetUniqueId("wav"),
                                        FileExtensionRegistry.GetUniqueId("mp3"),
                                        FileExtensionRegistry.GetUniqueId("ogg"),
+                                       FileExtensionRegistry.GetUniqueId("flac"),
+                                       FileExtensionRegistry.GetUniqueId("aiff"),
+                                       FileExtensionRegistry.GetUniqueId("aif"),
+                                       FileExtensionRegistry.GetUniqueId("m4a"),
+                                       FileExtensionRegistry.GetUniqueId("aac"),
+                                       FileExtensionRegistry.GetUniqueId("wma"),
                                    ])
                                    {
                                        PrimaryOperators = [new Guid("65e95f77-4743-437f-ab31-f34b831d28d7")], // PlayAudioSample (graph)

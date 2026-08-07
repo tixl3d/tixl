@@ -31,7 +31,7 @@
       },
       "Description": "Path to the audio file to play",
       "Usage": "FilePath",
-      "FileFilter": "mp3, wav, ogg, flac"
+      "FileFilter": "mp3, wav, ogg, flac, aiff, aif, m4a, aac, wma"
     },
     {
       "InputId": "53d1622e-b1d5-4b1c-acd0-ebceb7064043"/*Panning*/,

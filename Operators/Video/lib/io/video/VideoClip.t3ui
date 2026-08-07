@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "04c1a6dc-3042-48a8-81d2-0a5a162016dc"/*VideoClip*/,
-  "Description": "Implementation to load and play video files with similar options like a [TimeClip]\n\nAlso see [PlayVideo] and [PlayVideoExample] for an operator with more options",
+  "Description": "Plays a video file as a clip on the timeline, decoded with FFmpeg.\n\nThe clip's position on the timeline defines when the video plays; trimming and slipping the clip remaps its source range like in a video editor. A [VideoClipPlayer] composites all video clips of a composition — wired into its input or auto-collected — using each clip's Color and BlendMode, with lower layers drawn on top.\n\nOptimize For selects the decode strategy: Fast Seeking (the default) decodes in software with a RAM frame cache for instant scrubbing; Playback Performance decodes zero-copy on the GPU for the smoothest playback of large or 4K footage.\n\nAlso see [PlayVideo] for timeline-independent playback.\n\nAKA: video, movie, footage, clip, mp4, mkv",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,14 +9,16 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Optional sub-graph that is evaluated while the clip is active."
     },
     {
       "InputId": "27f02af3-06f3-4cb2-8731-2e8777634275"/*BlendMode*/,
       "Position": {
         "X": -200.0,
         "Y": 285.0
-      }
+      },
+      "Description": "Blend mode used when a [VideoClipPlayer] composites this clip over the layers below."
     },
     {
       "InputId": "28f27625-37fe-409a-b6c1-d4eabf6c1eb8"/*Volume*/,
@@ -24,7 +26,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Defines the volume of the sound output",
+      "Description": "Audio volume of the video's sound track.\n\nNot yet routed to the audio engine — video audio is silent in this version.",
       "AddPadding": "True"
     },
     {
@@ -33,9 +35,10 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Path to the video file",
+      "Description": "Path to the video file.",
       "AddPadding": "True",
-      "Usage": "FilePath"
+      "Usage": "FilePath",
+      "FileFilter": "mp4, mov, webm, mpg, mpeg, m4v, mkv, avi, wmv, flv, ts, m2ts, mts, mxf, ogv"
     },
     {
       "InputId": "5eb10090-ae6a-4ae7-9fbd-5bd9ffd13b1b"/*ResyncThreshold*/,
@@ -43,7 +46,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Threshold for timing resyncing"
+      "Description": "No longer used — timing is frame-exact now. Kept for compatibility with older projects."
     },
     {
       "InputId": "7fb1d490-6c9b-4380-b88c-800d44c16475"/*Color*/,
@@ -51,6 +54,7 @@
         "X": -200.0,
         "Y": 210.0
       },
+      "Description": "Tint and opacity used when a [VideoClipPlayer] composites this clip (alpha = opacity).",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true
@@ -60,7 +64,8 @@
       "Position": {
         "X": -200.0,
         "Y": 360.0
-      }
+      },
+      "Description": "Selects the decode strategy:\n\nFast Seeking (default): decodes on the CPU and caches recent frames in RAM. Scrubbing back, looping and reverse playback are instant, and the GPU stays free for rendering. Higher CPU load on large frames.\n\nPlayback Performance: decodes on the GPU (D3D11VA) and keeps the frames there — the decoded surface is converted straight to the output texture by a compute shader, with no GPU→CPU read-back (zero-copy). Smoothest playback for large / 4K long-GOP footage, but random seeks re-decode from the previous keyframe. Automatically falls back to software decode when the codec has no GPU decoder (e.g. ProRes, HAP) or the driver rejects it."
     }
   ],
   "SymbolChildUis": [],

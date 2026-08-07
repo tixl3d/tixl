@@ -27,7 +27,7 @@
       },
       "Description": "Path to the audio file to play",
       "Usage": "FilePath",
-      "FileFilter": "mp3, wav, ogg, flac"
+      "FileFilter": "mp3, wav, ogg, flac, aiff, aif, m4a, aac, wma"
     },
     {
       "InputId": "3cf1b579-a1f2-4e9f-a54a-0e9e3580a6bf"/*SourceRotation*/,
