@@ -212,7 +212,7 @@ internal sealed class SoundtrackClipStream
         var isOutOfBounds = elapsedInClipSecs < 0
                             || targetSourcePosSecs < 0
                             || targetSourcePosSecs >= sourceEndSecs
-                            || (hasClipEnd && TargetTime >= clipEndSecs);
+                            //|| (hasClipEnd && TargetTime >= clipEndSecs);
         
         // Check if paused in mixer
         var flags = BassMix.ChannelFlags(StreamHandle, 0, 0);
