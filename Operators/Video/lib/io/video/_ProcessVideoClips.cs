@@ -56,10 +56,17 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
             if (instance != null)
                 _seenChildIds.Add(instance.SymbolChildId);
 
-            var provider = instance as IVideoClipProvider;
+            // Follow the wired texture chain upstream to the originating clip op, so image effects inserted
+            // between a [VideoClip] and this player keep the clip's time-gating and per-clip params — the
+            // drawn texture stays the wired (post-effect) one.
+            var clipSource = FindUpstreamClipSource(instance);
+            if (clipSource != null)
+                _seenChildIds.Add(clipSource.SymbolChildId); // the underlying clip must not auto-collect a second time
+
+            var provider = clipSource as IVideoClipProvider;
             provider?.MarkManaged(); // mark before classifying, so an inactive-but-managed clip doesn't hint
 
-            var state = ClassifyClip(instance, localTime, out var layerIndex);
+            var state = ClassifyClip(clipSource, localTime, out var layerIndex);
             if (state == ClipState.Upcoming)
                 slot.GetValue(context);
             else if (state == ClipState.Active)
@@ -147,6 +154,53 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
             pos--;
         _activeEntries.Insert(pos, entry);
     }
+
+    /// <summary>
+    /// Walks the wired texture chain upstream (first connected texture input each hop, depth-limited) and
+    /// returns the first instance that is a clip — has an <see cref="ITimeClipProvider"/> output or implements
+    /// <see cref="IVideoClipProvider"/>. Returns the wired instance itself when it is already a clip, or null
+    /// when the chain holds no clip (e.g. a plain image source).
+    /// </summary>
+    private static Instance? FindUpstreamClipSource(Instance? instance)
+    {
+        for (var depth = 0; instance != null && depth < MaxUpstreamSearchDepth; depth++)
+        {
+            if (instance is IVideoClipProvider || HasTimeClipOutput(instance))
+                return instance;
+
+            Instance? next = null;
+            var inputs = instance.Inputs;
+            for (var i = 0; i < inputs.Count; i++)
+            {
+                if (inputs[i] is not InputSlot<Texture2D> textureInput)
+                    continue;
+
+                if (textureInput.TryGetFirstConnection(out var source))
+                {
+                    next = source.Parent;
+                    break;
+                }
+            }
+
+            instance = next;
+        }
+
+        return null;
+    }
+
+    private static bool HasTimeClipOutput(Instance instance)
+    {
+        var outputs = instance.Outputs;
+        for (var i = 0; i < outputs.Count; i++)
+        {
+            if (outputs[i] is ITimeClipProvider)
+                return true;
+        }
+
+        return false;
+    }
+
+    private const int MaxUpstreamSearchDepth = 8;
 
     // A VideoClip exposes its TimeClip via a TimeClipSlot output (ITimeClipProvider). Classifies the clip at
     // localTime and (out) its layer index. Exclusive end matches TimeClipSlot's own range test so adjacent
