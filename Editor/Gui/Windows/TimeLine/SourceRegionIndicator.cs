@@ -60,13 +60,10 @@ internal sealed class SourceRegionIndicator
 
         var top = lineY - 3 * scale;
         var bottom = lineY + 4 * scale;
-        drawList.AddRectFilled(new Vector2(left, top), new Vector2(right, bottom),
-                               UiColors.BackgroundFull.Fade(0.5f), 2 * scale);
-        drawList.AddRect(new Vector2(left, top), new Vector2(right, bottom),
-                         UiColors.ForegroundFull.Fade(0.25f), 2 * scale);
 
         // Slip-drag zones: the region parts left and right of the selection range — or the whole region
-        // when no range is shown.
+        // when no range is shown. Emitted before drawing so the outline can respond to hover.
+        _anyZoneHovered = false;
         if (hasRange)
         {
             EmitSlipButton("##SourceRegionLeft", left, MathF.Min(rangeStartX, right), top, bottom, clip, footageBars, composition);
@@ -76,6 +73,12 @@ internal sealed class SourceRegionIndicator
         {
             EmitSlipButton("##SourceRegion", left, right, top, bottom, clip, footageBars, composition);
         }
+
+        var outlineFade = _anyZoneHovered || _dragClip != null ? 0.25f : 0.125f;
+        drawList.AddRectFilled(new Vector2(left, top), new Vector2(right, bottom),
+                               UiColors.BackgroundFull.Fade(0.5f), 2 * scale);
+        drawList.AddRect(new Vector2(left, top), new Vector2(right, bottom),
+                         UiColors.ForegroundFull.Fade(outlineFade), 2 * scale);
     }
 
     private void EmitSlipButton(string id, float xMin, float xMax, float top, float bottom,
@@ -90,7 +93,10 @@ internal sealed class SourceRegionIndicator
         ImGui.InvisibleButton(id, new Vector2(width, bottom - top));
 
         if (ImGui.IsItemHovered())
+        {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            _anyZoneHovered = true;
+        }
 
         if (ImGui.IsItemActivated())
             StartDrag(clip, footageBars, composition);
@@ -173,6 +179,7 @@ internal sealed class SourceRegionIndicator
     private double _origFootageStart;
     private double _origFootageEnd;
     private double _pressU;
+    private bool _anyZoneHovered;
     private MoveTimeClipsCommand? _command;
     private readonly TimeClip[] _scratchClipList = new TimeClip[1];
 }

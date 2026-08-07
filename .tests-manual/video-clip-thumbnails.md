@@ -104,6 +104,26 @@ past the clip's start, and back again.
 - Keyframes in the selection still stretch proportionally as before.
 - Undo reverts both the trim and the keyframe stretch in one step.
 
+## Step: Source region responds to hover
+
+**Action:**
+Move the mouse over the draggable part of the ruler source region, then away from it.
+
+**Expected:**
+- The region's outline brightens while a draggable part is hovered (or while dragging) and dims otherwise.
+
+## Step: Auto-collect indicator lines in the graph
+
+**Action:**
+In the graph, place a [VideoClipPlayer] with AutoCollect enabled next to unwired [VideoClip] ops.
+Hover and select the clips and the player. Then wire one clip into the player's input.
+
+**Expected:**
+- A faint texture-colored curve connects each unwired (auto-collected) [VideoClip] to the player.
+- The curve brightens while either the clip or the player is hovered or selected.
+- A clip that is wired into the player (directly or through an inserted effect) shows no curve.
+- Disabling AutoCollect removes all curves.
+
 ## Step: Start/end thumbnails persist across restarts
 
 **Action:**
