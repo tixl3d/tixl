@@ -100,7 +100,9 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
                 var layerCount = (_maxLayerIndex - _minLayerIndex + 1).Clamp(1, 999999);
                 var mouseDeltaY = ImGui.GetMousePos().Y - _mouseYOnDragStart;
                 var heightDelta = mouseDeltaY / layerCount;
-                UserSettings.Config.LayerHeight = (_layerHeightOnDragStart + heightDelta).Clamp(4, 50);
+                // Must clamp to the same bounds as the LayerHeight getter: a stored value above the display
+                // max creates a dead zone where shrink drags don't respond until they fall below it again.
+                UserSettings.Config.LayerHeight = (_layerHeightOnDragStart + heightDelta).Clamp(4, MaxLayerHeight);
             }
         }
     }
@@ -202,8 +204,8 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     void ITimeObjectManipulation.UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)
         => OpClips.UpdateDragStretchCommand(scaleU, scaleV, originU, originV);
 
-    public void TrimSelectedClipsToBoundary(double boundaryU, bool isStart)
-        => OpClips.TrimSelectedClipsToBoundary(boundaryU, isStart);
+    public void TrimSelectedClipsToBoundary(double boundaryU, double origBoundaryU, bool isStart)
+        => OpClips.TrimSelectedClipsToBoundary(boundaryU, origBoundaryU, isStart);
 
     void ITimeObjectManipulation.CompleteDragCommand() => OpClips.CompleteDragCommand();
 
@@ -225,7 +227,8 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     // Frame state
     // ---------------------------------------------------------------------------
 
-    internal static float LayerHeight => UserSettings.Config.LayerHeight.Clamp(4, 40);
+    internal static float LayerHeight => UserSettings.Config.LayerHeight.Clamp(4, MaxLayerHeight);
+    private const float MaxLayerHeight = 60;
 
     private readonly LayerContext _context;
 
