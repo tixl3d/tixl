@@ -211,7 +211,7 @@ internal sealed class SoundtrackClipStream
         // muted until the playhead reaches valid source time instead of starting the audio early.
         var isOutOfBounds = elapsedInClipSecs < 0
                             || targetSourcePosSecs < 0
-                            || targetSourcePosSecs >= sourceEndSecs
+                            || targetSourcePosSecs >= sourceEndSecs;
                             //|| (hasClipEnd && TargetTime >= clipEndSecs);
         
         // Check if paused in mixer
