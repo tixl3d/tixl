@@ -77,6 +77,11 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 SelectedKeyframes.Clear();
                 foreach (var p in AnimationParameters)
                 {
+                    // Increment-tapping (step markers) only makes sense on scalar parameters — spraying
+                    // +1 keys onto every visible vector (e.g. a Color fade) wrecks their animation.
+                    if (p.Curves.Length != 1)
+                        continue;
+
                     InsertNewKeyframe(p, (float)Animator.GetLocalAnimationTime(p.Instance, TimeLineCanvas.Playback.TimeInBars), false, 1);
                 }
             }

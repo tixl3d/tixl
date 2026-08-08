@@ -143,7 +143,7 @@ The fullscreen **Curve** mode still exists for cases where you want the entire t
 
 ### Inserting animation increments
 
-Press `Shift + C` to insert a keyframe whose value is incremented by 1 relative to the previous one. This is useful for tapping **step markers** while a soundtrack plays:
+Press `Shift + C` to insert a keyframe whose value is incremented by 1 relative to the previous one. This only affects **scalar** parameters — vector parameters (colors, positions) shown in the dope sheet are skipped, so tapping markers can't disturb their animations. This is useful for tapping **step markers** while a soundtrack plays:
 
 1. Add a soundtrack to your project.
 2. Press `Home` to jump to the start.
