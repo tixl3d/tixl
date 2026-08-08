@@ -509,8 +509,12 @@ internal sealed class TimeClipInteractions
 
             if (dragInside)
             {
-                clip.SourceRange.Start += (float)dt;
-                clip.SourceRange.End += (float)dt;
+                // Slip is direct manipulation: the footage follows the mouse (dragging right reveals
+                // earlier source), matching the SourceRegionIndicator's drag. Scaled by Speed so the
+                // content tracks the cursor 1:1 on stretched clips.
+                var slip = (float)dt * clip.Speed;
+                clip.SourceRange.Start -= slip;
+                clip.SourceRange.End -= slip;
             }
             else if (clip.UsedForRegionMapping ^ toggleLinkMode)
             {

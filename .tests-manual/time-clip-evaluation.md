@@ -28,17 +28,20 @@ Drop a video file onto the timeline's clip area so a `[VideoClip]` is created, a
 - The video plays exactly along the clip's extent, starting at its first frame.
 - Scrubbing shows the matching frames; no offset from before.
 
-## Step: Slipped clip shows slipped footage through both outputs
+## Step: Slipping shifts footage, thumbnails, and region consistently
 
 **Action:**
-Drag inside the clip body with `Ctrl + Alt` (slip) to shift the source region by a second or two.
-Scrub across the clip while it's composited by the player. Then also wire the clip's **time-clip
-output** into a `[Group]` and pin that group's output — compare a few frames at the same playhead
-positions.
+1. Park the playtime mid-clip and note the frame shown in the output.
+2. Drag inside the clip body with `Ctrl + Alt` (slip) toward the **right**, by about a bar.
+3. Check the output, the clip's edge thumbnails, and the source region indicator in the ruler.
 
 **Expected:**
-- Both consumers show the *same* frame at the same playhead position.
-- The footage is shifted by the slipped amount in both cases.
+- The footage follows the mouse: after slipping right, the output at the parked playtime shows an
+  **earlier** frame of the video.
+- The clip's left/right edge thumbnails update to the new in/out frames.
+- The source region in the ruler moved right by the dragged amount — content, thumbnails, and
+  region all tell the same story.
+- `Ctrl + Z` restores the original frame at the parked playtime.
 
 ## Step: Animated parameter travels with the clip
 

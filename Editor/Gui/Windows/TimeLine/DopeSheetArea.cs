@@ -106,6 +106,13 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             for (var index = 0; index < animationParameters.Count; index++)
             {
                 var parameter = animationParameters[index];
+
+                // The clip area draws (and deletes) before the dope sheet in the same frame, so the
+                // parameter list can hold ops removed moments ago until it's rebuilt next frame —
+                // dereferencing their dead SymbolChild would throw.
+                if (!compositionOp.Children.TryGetChildInstance(parameter.ChildUi.Id, out _))
+                    continue;
+
                 _currentAnimationParameter = parameter;
                 ImGui.PushID(index);
                 DrawProperty(parameter, compositionSymbolChildId, drawList, compositionOp);

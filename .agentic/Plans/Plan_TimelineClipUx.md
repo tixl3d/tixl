@@ -427,6 +427,33 @@ band above the SRI, idle outline 0.125→0.17, snapping reduced to clip-boundary
    [`Plan_TimeClipEvaluation.md`](Plan_TimeClipEvaluation.md) open question #2 is a "time is overridden here"
    badge in the dope sheet; that badge is this plan's work if accepted.
 
+## Follow-up design: single-output media clips? (2026-08-09, open)
+
+The two-output shape of media clips (`TimeClipSlot<Command>` + `Slot<Texture2D>`) is historic
+(command-flow scene timelines), not a type-system necessity — `TimeClipSlot<Texture2D>` is legal and used
+elsewhere (`[MidiClip]`'s `Dict<float>`). The only substantive difference the second output encodes is the
+**gate**: `TimeClipSlot` skips evaluation outside `TimeRange`, while the texture path must stay pullable
+out-of-range (decoder preroll, first/last-frame clamp) — which is exactly why Evaluation Phase 1 made
+sibling outputs "remap without gate".
+
+Candidate simplification: give `TimeClipSlot` an opt-out of the out-of-range gate (`EvaluateOutsideRange`:
+remap only — the op keeps doing its own source-range clamping, as `VideoClip` already does). Then
+`[VideoClip]` collapses to a single `TimeClipSlot<Texture2D>` and drops the vestigial Command in/out;
+Combine-as-time-clip of texture selections emits **one** output (revising Phase B's "two-output shape");
+`ITextureClipProvider` (Phase C) simplifies. Surfaced by user confusion in testing: "what does a time-clip
+output of a texture op even mean?" — the current shape invites meaningless wiring.
+
+**Migration assessment (2026-08-09): effectively none.** `[VideoClip]` shipped this cycle; known usage is
+~2 placements the user can recreate — stale `.t3` output entries load with a warning and a default
+placement. `[AudioClip]` is explicitly **excluded**: it has real usage, and
+[`Plan_TimelineAudioClips.md`](Plan_TimelineAudioClips.md) supersedes the op with first-class timeline
+audio clips anyway — reshaping a to-be-deleted op is waste. Downstream consumers are unaffected by the
+`VideoClip` change: timeline discovery and the player classify by scanning outputs for `ITimeClipProvider`,
+and `TimeClipSlot<Texture2D>` *is a* `Slot<Texture2D>` for wiring/interface purposes.
+
+**Sequencing: do this before Phase C locks `ITextureClipProvider`.** The window where it costs nothing is
+now.
+
 ## Documentation
 
 - [`.help/docs/using/Timeline.md`](../../.help/docs/using/Timeline.md) — new section on the Global/Local

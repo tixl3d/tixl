@@ -62,13 +62,23 @@ internal sealed class SourceRegionIndicator
         var top = lineY - 9 * scale;
         var bottom = rulerPos.Y + rulerSize.Y;
 
-        // Slip-drag zones: the region parts left and right of the selection range — or the whole region
-        // when no range is shown. Emitted before drawing so the outline can respond to hover.
+        // Slip-drag zones: left and right of the selection range, plus the strip above the SRI's hit
+        // band — or the whole region when no range is shown. Emitted before drawing so the outline can
+        // respond to hover.
         _anyZoneHovered = false;
-        if (hasRange)
+        if (_dragClip != null && _dragZoneId != null)
         {
+            // While dragging, keep ONE stable button alive under the id the drag started with: the zone
+            // rects move (and can collapse below the min width) as the slip changes SourceRange — e.g.
+            // the moment a boundary snaps — and a skipped emit drops ImGui's active id, cancelling the drag.
+            EmitSlipButton(_dragZoneId, left, MathF.Max(right, left + 4), top, bottom, clip, footageBars, composition);
+        }
+        else if (hasRange)
+        {
+            var sriHitTop = lineY - 2 * scale;
             EmitSlipButton("##SourceRegionLeft", left, MathF.Min(rangeStartX, right), top, bottom, clip, footageBars, composition);
             EmitSlipButton("##SourceRegionRight", MathF.Max(rangeEndX, left), right, top, bottom, clip, footageBars, composition);
+            EmitSlipButton("##SourceRegionTop", MathF.Max(rangeStartX, left), MathF.Min(rangeEndX, right), top, sriHitTop, clip, footageBars, composition);
         }
         else
         {
@@ -100,7 +110,10 @@ internal sealed class SourceRegionIndicator
         }
 
         if (ImGui.IsItemActivated())
+        {
+            _dragZoneId = id;
             StartDrag(clip, footageBars, composition);
+        }
 
         if (_dragClip == clip && ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
             UpdateDrag(clip);
@@ -159,12 +172,14 @@ internal sealed class SourceRegionIndicator
         }
 
         _dragClip = null;
+        _dragZoneId = null;
     }
 
     private readonly TimeLineCanvas _canvas;
 
     // Drag-scoped state; the TimeClip reference only lives for the duration of one slip drag.
     private TimeClip? _dragClip;
+    private string? _dragZoneId;
     private double _dragFootageBars;
     private float _dragRate;
     private float _origSourceStart;
