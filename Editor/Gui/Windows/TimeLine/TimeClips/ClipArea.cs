@@ -170,6 +170,18 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
 
     public float LastHeight { get; private set; }
 
+    /// <summary>
+    /// A fence entirely outside the clip lanes (e.g. over the dope-sheet rows below) must not touch
+    /// the clip selection: the dispatcher's Replace-clear would deselect the op whose animated
+    /// parameters are the very rows being fenced — they'd vanish mid-drag.
+    /// </summary>
+    public bool ParticipatesInFence(ImRect screenArea)
+    {
+        var lanesTop = _minScreenPos.Y + LayerHeight * 0.5f;
+        var lanesBottom = lanesTop + LastHeight;
+        return screenArea.Max.Y >= lanesTop && screenArea.Min.Y <= lanesBottom;
+    }
+
     public void UpdateSelectionForArea(ImRect screenArea, SelectionFence.SelectModes selectMode)
     {
         OpClips.UpdateSelectionForArea(screenArea, selectMode, _minScreenPos, _minLayerIndex);
