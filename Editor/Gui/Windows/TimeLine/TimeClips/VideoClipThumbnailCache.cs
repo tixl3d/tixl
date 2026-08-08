@@ -260,10 +260,21 @@ internal static class VideoClipThumbnailCache
             using var frame = new BitmapFrameEncode(encoder);
             frame.Initialize();
             frame.SetSize(SlotWidth, SlotHeight);
-            var pixelFormat = PixelFormat.Format32bppRGBA;
+
+            // The PNG encoder has no native RGBA format: asking for one makes WIC silently substitute BGRA and
+            // label our bytes with the wrong channel order, so red and blue come back swapped on reload.
+            var pixelFormat = PixelFormat.Format32bppBGRA;
             frame.SetPixelFormat(ref pixelFormat);
 
-            var handle = GCHandle.Alloc(rgba, GCHandleType.Pinned);
+            for (var i = 0; i < rgba.Length; i += 4)
+            {
+                _bgraBuffer[i + 0] = rgba[i + 2];
+                _bgraBuffer[i + 1] = rgba[i + 1];
+                _bgraBuffer[i + 2] = rgba[i + 0];
+                _bgraBuffer[i + 3] = rgba[i + 3];
+            }
+
+            var handle = GCHandle.Alloc(_bgraBuffer, GCHandleType.Pinned);
             try
             {
                 frame.WritePixels(SlotHeight, new SharpDX.DataRectangle(handle.AddrOfPinnedObject(), SlotWidth * 4));
@@ -322,10 +333,13 @@ internal static class VideoClipThumbnailCache
     private static Guid DeriveGuid(in PathInfo pathInfo, long timeMs)
     {
         var hash = System.Security.Cryptography.MD5.HashData(
-            System.Text.Encoding.UTF8.GetBytes($"{pathInfo.AbsolutePath}|{pathInfo.WriteTimeTicks}|{timeMs}"));
+            System.Text.Encoding.UTF8.GetBytes($"{CacheVersion}|{pathInfo.AbsolutePath}|{pathInfo.WriteTimeTicks}|{timeMs}"));
         return new Guid(hash);
     }
     #endregion
+
+    // Bump to discard on-disk thumbnails written by an earlier, incompatible encoding.
+    private const int CacheVersion = 2;
 
     private const int SlotWidth = ThumbnailManager.SlotWidth;
     private const int SlotHeight = ThumbnailManager.SlotHeight;
@@ -357,4 +371,5 @@ internal static class VideoClipThumbnailCache
     private static IVideoThumbnailReader? _reader;
     private static string? _readerPath;
     private static readonly byte[] _rgbaBuffer = new byte[SlotWidth * SlotHeight * 4];
+    private static readonly byte[] _bgraBuffer = new byte[SlotWidth * SlotHeight * 4];
 }
