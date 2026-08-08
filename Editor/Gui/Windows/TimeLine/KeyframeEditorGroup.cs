@@ -172,6 +172,32 @@ internal sealed class KeyframeEditorGroup
             _editors[i].RemoveFromKeyframeSelection(keys);
     }
 
+    public IEnumerable<(VDefinition Def, TimeLineCanvas.ParamTimeMapping Mapping)> EnumerateKeyframesWithMapping(bool selectedOnly)
+    {
+        for (var i = 0; i < _editors.Count; i++)
+            foreach (var pair in _editors[i].EnumerateKeyframesWithMapping(selectedOnly))
+                yield return pair;
+    }
+
+    /// <summary>
+    /// Shifts keys by a playback-time delta, scaling into each key's own curve time via the
+    /// parallel <paramref name="mappings"/> list (captured when the drag set was built). Applies
+    /// exactly once per key — see <see cref="ApplyKeyframeTimeOffset"/> for the shared-instance rationale.
+    /// </summary>
+    public void ApplyKeyframePlaybackTimeOffset(IReadOnlyList<VDefinition> keys,
+                                                IReadOnlyList<TimeLineCanvas.ParamTimeMapping> mappings,
+                                                double deltaGlobal)
+    {
+        for (var i = 0; i < keys.Count; i++)
+        {
+            var rate = mappings[i].Rate;
+            keys[i].U += Math.Abs(rate) < 1e-9 ? deltaGlobal : deltaGlobal / rate;
+        }
+
+        for (var i = 0; i < _editors.Count; i++)
+            _editors[i].RebuildCurves();
+    }
+
     public void ApplyKeyframeTimeOffset(IReadOnlyList<VDefinition> keys, double deltaU)
     {
         // Editors share the same VDefinition instances via SharedSelectedKeyframes, so the U

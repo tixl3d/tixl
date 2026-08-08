@@ -20,10 +20,9 @@ All times below are **playback time** (the ruler / playhead position), because t
 observe. The point of every step: a value change made at playback time *t* must also *play back* at
 time *t* — no matter how the clip is stretched or slipped.
 
-> **Known limitation until the timeline's Global/Local display mode lands:** inside a stretched or
-> slipped clip, the dope sheet draws keys at their raw curve time, which is *not* the playback time.
-> A key can therefore sit visually away from the playhead and still play at the correct moment.
-> Judge these tests by playback, not by the dope sheet.
+> The dope sheet, keyset strip, and selection range draw keyframes at their **playback position** —
+> a key inside a stretched or slipped clip appears where it takes effect, under the playhead, and
+> moves on screen when the clip is stretched or slipped.
 
 ## Step: Setup — a clip with identity mapping
 
@@ -60,6 +59,7 @@ time *t* — no matter how the clip is stretched or slipped.
 **Expected:**
 - The fade-out now happens between playback time **2 and 4** — the animation stretched with the
   content (bars 1–2 of content now occupy bars 2–4 of the timeline).
+- The dope sheet shows the two Color keys at bars **2 and 4** — they moved with the stretch.
 
 ## Step: Edit a value mid-clip — the change plays back at the same time
 
@@ -72,6 +72,7 @@ time *t* — no matter how the clip is stretched or slipped.
 - During playback, the video becomes visible again exactly at bar **6** — the bar where you made
   the edit. (Before this fix, the key was written at content-time 6 and played at bar 12, outside
   the clip.)
+- The new key is drawn at bar **6**, directly under the playhead.
 - `Ctrl + Z` removes that key again.
 
 ## Step: Keyframe indicator agrees with playback
@@ -108,9 +109,9 @@ time *t* — no matter how the clip is stretched or slipped.
    `Shift + C` once. Move to bar `5`, press `Shift + C` again.
 
 **Expected:**
-- The **Volume** row shows new keyframes at bars **1.5** and **2.5** — the dope sheet draws raw
-  curve time, and at 50% speed playback bars 3 and 5 map to content bars 1.5 and 2.5. (That the
-  positions differ from the playhead is exactly the raw-time display limitation noted above.)
+- The **Volume** row shows new keyframes drawn at bars **3** and **5** — exactly where you pressed
+  `Shift + C`. (Internally they are stored at content bars 1.5 and 2.5; select one and check
+  *Clip Times* if curious.)
 - The **Color** row gets **no** new keyframes — `Shift + C` skips vector parameters.
 
 ## Step: Slipped clip
@@ -119,9 +120,10 @@ time *t* — no matter how the clip is stretched or slipped.
 > content 2 → 2, content 3 → 4.
 
 **Action:**
-1. Check the **Color** row in the dope sheet: it should hold exactly the two fade keys at (raw)
-   bars `1` and `2`. If the key from the mid-clip-edit step (content bar 3) or other extras are
-   still present, delete them — or apply the formula above to your keys instead.
+1. Check the **Color** row in the dope sheet: it should hold exactly two fade keys, drawn at bars
+   `2` and `4` (their playback positions while the clip is stretched — content bars 1 and 2). If
+   the key from the mid-clip-edit step or other extras are still present, delete them — or apply
+   the formula above to your keys instead.
 2. Select the clip, open **Edit Clip Times**, and set Source Start to `1`, Source End to `5`
    (Clip Start/End stay 0/8) — the content is slipped by one bar.
 3. Play bars 0–6.

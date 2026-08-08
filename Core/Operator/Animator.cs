@@ -30,6 +30,9 @@ public sealed class Animator : SymbolExtension
         List<Guid> childrenToCopyFrom,
         Dictionary<Guid, Guid> oldToNewIdDict)
     {
+        // Collect first, insert after: when copying within one composition (e.g. splitting a clip),
+        // targetAnimator is THIS animator — inserting while enumerating throws EnumFailedVersion.
+        var pendingCopies = new List<(Guid NewChildId, Guid InputId, List<Curve> Curves)>();
         foreach (var (oldChildId, inputDict) in _curvesByChildAndInput)
         {
             if (!childrenToCopyFrom.Contains(oldChildId))
@@ -42,15 +45,20 @@ public sealed class Animator : SymbolExtension
             {
                 if (curves.Length == 0)
                     continue;
-                
-                var cloned = new Curve[curves.Length];
+
+                var cloned = new List<Curve>(curves.Length);
                 for (var i = 0; i < curves.Length; i++)
                 {
-                    cloned[i] = curves[i].TypedClone();
+                    cloned.Add(curves[i].TypedClone());
                 }
 
-                targetAnimator.AddCurvesToInput(cloned.ToList(), newChildId, inputId);
+                pendingCopies.Add((newChildId, inputId, cloned));
             }
+        }
+
+        foreach (var (newChildId, inputId, curves) in pendingCopies)
+        {
+            targetAnimator.AddCurvesToInput(curves, newChildId, inputId);
         }
     }
 

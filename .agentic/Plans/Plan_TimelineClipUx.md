@@ -112,9 +112,21 @@ cross-fade — it stacks clips with per-clip `Color` and `BlendMode`, one `DrawS
   Today's behaviour is neither: the canvas is in source time but the playhead is drawn at `t`, which is why
   keys and playhead disagree inside a remapped clip.
 
-- **One mapping for the whole dope sheet, not per row.** Every parameter in the current composition shares the
-  clip you entered through. Per-row mappings are only needed to show the insides of a clip *without entering
-  it* — explicitly out of scope here.
+- **Per-row mappings are the primary case, not the exception.** (Revised 2026-08-08 — the original "one
+  mapping for the whole dope sheet" assumption was disproved by the 4.3 test sessions.) The dominant
+  misalignment is *clip ops' own animated parameters viewed from the parent composition* — e.g. a
+  `[VideoClip]`'s `Color` fade: its curves live in the clip's source time while the surrounding canvas is in
+  parent time, and two clips on one timeline have two different mappings. The per-instance resolver pair
+  (`Animator.GetLocalAnimationTime` / `GetGlobalAnimationTime`, built in
+  [`Plan_TimeClipEvaluation.md`](Plan_TimeClipEvaluation.md) Phase 2) composes the full chain per row and
+  covers both this case and the entered-nested-clip case with one code path — `,`/`.` navigation, the
+  keyframe indicator, and insertion already use it. Phase A therefore splits:
+  - **A1 — per-row alignment (no toggle):** `DopeSheetArea` draws each row's keys at
+    `GetGlobalAnimationTime(p.Instance, key.U)` and inverts drag / fence / snap / SRI through
+    `GetLocalAnimationTime`. In the parent view there is nothing to toggle — correct is correct. This
+    removes the "keys draw at raw curve time" caveat from the 4.3 test sets.
+  - **A2 — the Global/Local toggle** for *entered* clip compositions (ruler rebasing, soundtrack, damped
+    framing, `TimelineState` persistence) — the remainder of the original Phase A design below.
 
 - **Editing inverts through the same mapping.** Dragging a key at screen x → `t` → `u` via
   `LocalBarsToSourceBars`. Key insertion uses the same call, so the toggle and
@@ -197,6 +209,43 @@ dope-sheet interaction code and routing it through one helper.
 
 **Interaction risk:** this changes what the ruler means. Worth a design round-trip on the visuals before
 implementation — see Open questions #1.
+
+**A1 status: code done (2026-08-08), pending in-editor verify** — as built:
+
+- `TimeLineCanvas.ParamTimeMapping` — per-parameter affine snapshot (`global = offset + rate·u`, built from
+  the composed resolvers, identity fast-path, degenerate-rate guard). Built per row per frame; the ~2×
+  chain-walk per parameter is negligible.
+- **Converted to playback space:** `DopeSheetArea` row drawing (keyframe icons, constant-value labels,
+  curve polylines via a local-space visible window + rate-scaled sample density, 4-component gradients,
+  hover-insert preview, click-sets-playhead, FrameStats before/after), fence selection (per-row local
+  window, min/max-swapped for negative rates), key dragging (drag origin + per-row `dt / rate` in
+  `UpdateDragCommand`), stretch + selection/all-keys time ranges (base methods made virtual, overridden —
+  so the SRI operates in playback space), the snap attractor, `TimeSelectionArea` (bucket positions,
+  cluster drag via parallel per-key mappings, cache hash includes the mapping so clip drags refresh dots),
+  and `TimeWarpDrag` (snapshots playback positions, writes back through each key's mapping; clip retiming
+  unchanged).
+- New pipes: `AnimationParameterEditing.EnumerateKeyframesWithMapping`,
+  `KeyframeEditorGroup.EnumerateKeyframesWithMapping` + `ApplyKeyframePlaybackTimeOffset`.
+- **Still raw (documented, deferred):** the fullscreen **Curve** mode and the inline curve pane
+  (internally consistent, but their SRI union can drift when open over a remapped row), keyframe
+  copy/paste offsets, `Duplicate`, and `ViewAllOrSelectedKeys` framing bounds. These follow the same
+  recipe when picked up.
+- Manual test set: [`timeline-clip-time-display.md`](../../.tests-manual/timeline-clip-time-display.md);
+  the raw-time caveats in `time-clip-keyframe-insertion.md` were replaced with playback-position
+  expectations (step 6 now asserts keys draw at bars 3/5, not 1.5/2.5).
+- **Found in first blind test (2026-08-08), fixed:**
+  - *Fence dead strip:* `ParticipatesInFence` used `LastHeight`, which carries ~5 px bottom padding —
+    a fence in that strip cleared the clip selection (rows vanished) without being able to select
+    anything. Now uses the exact drawn-lane rect (`_lanesScreenTop/Bottom`, reset to an empty band when
+    no clips exist).
+  - *Clip-drag snap jitter:* keyframe snap anchors are published in playback time, so keys riding on a
+    dragged clip moved **with** the drag — the clip snapped toward its own keys, oscillating 0–6 px.
+    While `TimeClipInteractions.IsDraggingClips`, the dope sheet's snap attractor now skips parameters
+    whose instance chain contains a selected clip.
+  - *Splitting an animated clip threw* `EnumFailedVersion` — `Animator.CopyAnimationsTo` inserts into
+    the dict it enumerates when source and target animator are the same object (copy within one
+    composition). Pre-existing; surfaced because animating clip params is now the natural workflow.
+    Fixed by collect-then-insert (Core).
 
 ### Phase B — Make `Combine as time clip` real
 
@@ -314,6 +363,25 @@ implementation — see Open questions #1.
 - Undo of the insert-transition command restores the two clips untouched.
 
 **Effort:** ~2–3 days, most of it in claiming and the insert command.
+
+## Follow-up design: splitting clips vs. keyframes (2026-08-08)
+
+Splitting an animated clip copies the **full** curve set onto both halves. That is the correct data model,
+not a bug: each half's `SourceRange` gates what is sampled, keys outside a half's window still shape the
+interpolation approaching the cut, and playback across the split is bit-identical with zero curve
+modification. Truly *splitting* the curves is not feasible in the current key model — spline segments can't
+be subdivided exactly with angle+tension tangents, and key insertion recomputes neighbor tangents.
+
+The real problem is presentation: dead keys (outside the clip's source window) are drawn full-strength and
+are editable, which reads as waste/confusion.
+
+**Decided (2026-08-08): the one meaningful offering is an explicit "Remove Unused Keyframes" action** on
+the clip context menu, applying to the selected clips (or all when none selected), **disabled when there is
+nothing to remove**. It deletes keys strictly outside the source window but keeps one boundary key beyond
+each edge so the interpolation into the window is preserved; undoable; never done silently by the split.
+Display treatments (dimming out-of-window keys, selection exclusion) were considered and dropped.
+
+**Deferred** — bundle with a future clip/curve tools pass alongside rebuild/optimize-curve, quantize, etc.
 
 ## Open questions
 

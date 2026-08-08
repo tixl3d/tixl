@@ -34,6 +34,10 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
     private TimeLineCanvas.AnimationParameter? _currentAnimationParameter;
 
+    // Curve-time ↔ playback-time mapping of the row currently being drawn (set at the top of
+    // DrawProperty; valid for the per-row draw/interaction helpers called from there).
+    private TimeLineCanvas.ParamTimeMapping _currentParamMapping;
+
     public void Draw(Instance compositionOp, List<TimeLineCanvas.AnimationParameter> animationParameters)
     {
         MouseClickChangedSelection = false;
@@ -82,7 +86,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                     if (p.Curves.Length != 1)
                         continue;
 
-                    InsertNewKeyframe(p, (float)Animator.GetLocalAnimationTime(p.Instance, TimeLineCanvas.Playback.TimeInBars), false, 1);
+                    InsertNewKeyframe(p, (float)Animator.GetLocalAnimationTime(p.Instance, TimeLineCanvas.Playback.TimeInBars), increment: 1);
                 }
             }
 
@@ -117,14 +121,18 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     private void DrawProperty(TimeLineCanvas.AnimationParameter parameter, Guid compositionSymbolChildId, ImDrawListPtr drawList, Instance compositionOp)
     {
         Debug.Assert(TimeLineCanvas.Current != null);
-        
+
+        // Curves live in the op's local time; the canvas is in playback time. Everything this row draws
+        // or hit-tests converts through this mapping so keys sit where they take effect during playback.
+        _currentParamMapping = parameter.BuildTimeMapping();
+
         var min = ImGui.GetCursorScreenPos();
         var max = min + new Vector2(ImGui.GetContentRegionAvail().X, LayerHeight);
         drawList.AddRectFilled(new Vector2(min.X, max.Y),
                                new Vector2(max.X, max.Y + 1), UiColors.BackgroundFull.Fade(0.3f));
 
         var mousePos = ImGui.GetMousePos();
-        var mouseTime = TimeLineCanvas.InverseTransformX(mousePos.X);
+        var mouseTime = _currentParamMapping.ToLocal(TimeLineCanvas.InverseTransformX(mousePos.X));
         var layerArea = new ImRect(min, max);
         var layerHovered = ImGui.IsWindowHovered() && layerArea.Contains(mousePos);
 
@@ -365,7 +373,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                     {
                         foreach (var k in curve.GetVDefinitions())
                         {
-                            var x = TimeLineCanvas.Current.TransformX((float)k.U);
+                            var x = TimeLineCanvas.Current.TransformX((float)_currentParamMapping.ToGlobal(k.U));
                             var isNotVisible = x < min.X || x > max.X;
                             if (isNotVisible)
                             {
@@ -405,11 +413,11 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         // Draw curves and gradients...
         if (parameter.Curves.Length == 4)
         {
-            DrawCurveGradient(parameter, layerArea, drawList);
+            DrawCurveGradient(parameter, layerArea, drawList, _currentParamMapping);
         }
         else
         {
-            DrawCurveLines(parameter, layerArea, drawList); 
+            DrawCurveLines(parameter, layerArea, drawList, _currentParamMapping);
         }
 
         HandleCreateNewKeyframes(parameter, layerArea);
@@ -458,7 +466,10 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             {
                 TimeLineCanvas.Current.ClearSelection();
 
-                InsertNewKeyframe(parameter, hoverTime, setPlaybackTime: true);
+                // hoverTime is playback time (snapped against the shared timeline anchors); the key itself
+                // is written in the row's local time.
+                InsertNewKeyframe(parameter, (float)_currentParamMapping.ToLocal(hoverTime));
+                TimeLineCanvas.Current.Playback.TimeInBars = hoverTime;
                 changed = true;
             }
         }
@@ -474,7 +485,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         return changed;
     }
 
-    private void InsertNewKeyframe(TimeLineCanvas.AnimationParameter parameter, float time, bool setPlaybackTime = false, float increment = 0)
+    private void InsertNewKeyframe(TimeLineCanvas.AnimationParameter parameter, float time, float increment = 0)
     {
         Debug.Assert(TimeLineCanvas.Current != null);
 
@@ -485,9 +496,6 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         {
             SelectedKeyframes.Add(k);
         }
-
-        if (setPlaybackTime)
-            TimeLineCanvas.Current.Playback.TimeInBars = time;
     }
 
     internal static readonly Color GrayCurveColor = new(0.8f, 1f, 1.0f, 0.3f);
@@ -564,16 +572,23 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         ];
 
 
-    private static void DrawCurveLines(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea, ImDrawListPtr drawList)
+    private static void DrawCurveLines(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea, ImDrawListPtr drawList,
+                                       in TimeLineCanvas.ParamTimeMapping mapping)
     {
         Debug.Assert(TimeLineCanvas.Current != null);
 
         const float padding = 2;
         var curveIndex = 0;
         var canvas = TimeLineCanvas.Current;
-        var visibleStartU = canvas.InverseTransformPositionFloat(canvas.WindowPos).X;
-        var visibleEndU = canvas.InverseTransformPositionFloat(canvas.WindowPos + new Vector2(canvas.WindowSize.X, 0)).X;
-        var screenScaleX = (double)canvas.Scale.X;
+        // The sample cache works in curve-local time; convert the visible window (and the screen scale,
+        // which drives sample density) through the row's mapping. A negative rate flips the bounds.
+        var visibleStartGlobal = canvas.InverseTransformPositionFloat(canvas.WindowPos).X;
+        var visibleEndGlobal = canvas.InverseTransformPositionFloat(canvas.WindowPos + new Vector2(canvas.WindowSize.X, 0)).X;
+        var localA = mapping.ToLocal(visibleStartGlobal);
+        var localB = mapping.ToLocal(visibleEndGlobal);
+        var visibleStartU = Math.Min(localA, localB);
+        var visibleEndU = Math.Max(localA, localB);
+        var screenScaleX = (double)canvas.Scale.X * Math.Abs(mapping.Rate);
 
         var minValue = float.PositiveInfinity;
         var maxValue = float.NegativeInfinity;
@@ -623,9 +638,9 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
             // Always draw 3 segments: dimmed pre, full body, dimmed post
             // Use -/+Infinity for outer bounds to include all cached pre/post points beyond visible edges
-            DrawDopeSheetPolyline(cache.GetPointsInRange(double.NegativeInfinity, firstKeyU), canvas, drawList, parameter, layerArea, padding, outsideColor);
-            DrawDopeSheetPolyline(cache.GetPointsInRange(firstKeyU, lastKeyU), canvas, drawList, parameter, layerArea, padding, bodyColor);
-            DrawDopeSheetPolyline(cache.GetPointsInRange(lastKeyU, double.PositiveInfinity), canvas, drawList, parameter, layerArea, padding, outsideColor);
+            DrawDopeSheetPolyline(cache.GetPointsInRange(double.NegativeInfinity, firstKeyU), canvas, drawList, parameter, layerArea, padding, outsideColor, mapping);
+            DrawDopeSheetPolyline(cache.GetPointsInRange(firstKeyU, lastKeyU), canvas, drawList, parameter, layerArea, padding, bodyColor, mapping);
+            DrawDopeSheetPolyline(cache.GetPointsInRange(lastKeyU, double.PositiveInfinity), canvas, drawList, parameter, layerArea, padding, outsideColor, mapping);
 
             curveIndex++;
         }
@@ -635,7 +650,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
     private static void DrawDopeSheetPolyline(ReadOnlySpan<Vector2> points, TimeLineCanvas canvas,
                                                 ImDrawListPtr drawList, TimeLineCanvas.AnimationParameter parameter,
-                                                ImRect layerArea, float padding, Color color)
+                                                ImRect layerArea, float padding, Color color,
+                                                in TimeLineCanvas.ParamTimeMapping mapping)
     {
         var pointCount = Math.Min(points.Length, TimelineCurveEditor.MaxPolylinePoints);
         if (pointCount < 2)
@@ -649,7 +665,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         for (var i = 0; i < pointCount; i++)
         {
             var p = points[i];
-            var screenX = canvas.TransformX(p.X);
+            var screenX = canvas.TransformX((float)mapping.ToGlobal(p.X));
             var screenY = isFlatRange
                               ? centerY
                               : ((float)p.Y).RemapAndClamp(parameter.DampedMaxValue,
@@ -662,7 +678,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         drawList.AddPolyline(ref buf[0], pointCount, color, ImDrawFlags.None, 0.5f);
     }
 
-    private static void DrawCurveGradient(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea, ImDrawListPtr drawList)
+    private static void DrawCurveGradient(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea, ImDrawListPtr drawList,
+                                          in TimeLineCanvas.ParamTimeMapping mapping)
     {
         Debug.Assert(TimeLineCanvas.Current != null);
 
@@ -681,7 +698,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         var index = 0;
         foreach (var vDef in points)
         {
-            times[index] = TimeLineCanvas.Current.TransformX((float)vDef.U);
+            times[index] = TimeLineCanvas.Current.TransformX((float)mapping.ToGlobal(vDef.U));
             colors[index] = new Color(
                                       (float)vDef.Value,
                                       (float)curves[1].GetSampledValue(vDef.U),
@@ -708,25 +725,25 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         Debug.Assert(TimeLineCanvas.Current != null);
         Debug.Assert(_currentAnimationParameter != null);
 
-        var vDefU = (float)vDef.U;
-        if (vDefU < Playback.Current.TimeInBars)
+        var vDefGlobalU = (float)_currentParamMapping.ToGlobal(vDef.U);
+        if (vDefGlobalU < Playback.Current.TimeInBars)
         {
             FrameStats.Current.HasKeyframesBeforeCurrentTime = true;
         }
 
-        if (vDefU > Playback.Current.TimeInBars)
+        if (vDefGlobalU > Playback.Current.TimeInBars)
         {
             FrameStats.Current.HasKeyframesAfterCurrentTime = true;
         }
 
         var posOnScreen = new Vector2(
-                                      TimeLineCanvas.Current.TransformX(vDefU) - KeyframeIconWidth * T3Ui.UiScaleFactor / 2 + 1,
+                                      TimeLineCanvas.Current.TransformX(vDefGlobalU) - KeyframeIconWidth * T3Ui.UiScaleFactor / 2 + 1,
                                       layerArea.Min.Y);
 
         if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Constant)
         {
             var availableSpace = nextVDef != null
-                                     ? TimeLineCanvas.Current.TransformX((float)nextVDef.U) - posOnScreen.X
+                                     ? TimeLineCanvas.Current.TransformX((float)_currentParamMapping.ToGlobal(nextVDef.U)) - posOnScreen.X
                                      : 9999;
 
             if (availableSpace > 30)
@@ -798,7 +815,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
                     if (Math.Abs(TimeLineCanvas.Playback.PlaybackSpeed) < 0.001f)
                     {
-                        TimeLineCanvas.Current.Playback.TimeInBars = vDef.U;
+                        TimeLineCanvas.Current.Playback.TimeInBars = _currentParamMapping.ToGlobal(vDef.U);
                     }
                 }
 
@@ -942,7 +959,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             }
         }
 
-        TimeLineCanvas.Current.UpdateDragCommand(newDragTime - vDef.U, 0);
+        // dt is a playback-time delta; UpdateDragCommand scales it into each row's local time.
+        TimeLineCanvas.Current.UpdateDragCommand(newDragTime - _currentParamMapping.ToGlobal(vDef.U), 0);
     }
 
     private bool UpdateSelectionOnClickOrDrag(VDefinition vDef, bool isSelected)
@@ -1010,8 +1028,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             _clickedKeyframeHash = 0;
         }
 
-        var startTime = TimeLineCanvas.Current.InverseTransformX(screenArea.Min.X);
-        var endTime = TimeLineCanvas.Current.InverseTransformX(screenArea.Max.X);
+        var startTimeGlobal = TimeLineCanvas.Current.InverseTransformX(screenArea.Min.X);
+        var endTimeGlobal = TimeLineCanvas.Current.InverseTransformX(screenArea.Max.X);
 
         var layerMinIndex = (screenArea.Min.Y - _minScreenPos.Y) / LayerHeight - 1;
         var layerMaxIndex = (screenArea.Max.Y - _minScreenPos.Y) / LayerHeight;
@@ -1021,6 +1039,13 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         {
             if (index >= layerMinIndex && index <= layerMaxIndex)
             {
+                // The fence is in playback time; each row's keys live in its own local time.
+                var mapping = parameter.BuildTimeMapping();
+                var localA = mapping.ToLocal(startTimeGlobal);
+                var localB = mapping.ToLocal(endTimeGlobal);
+                var startTime = Math.Min(localA, localB);
+                var endTime = Math.Max(localA, localB);
+
                 foreach (var c in parameter.Curves)
                 {
                     var keysCount = c.Keys.Count;
@@ -1063,9 +1088,20 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
     void ITimeObjectManipulation.UpdateDragCommand(double dt, double dv)
     {
-        foreach (var vDefinition in SelectedKeyframes)
+        // dt is a playback-time delta; a key inside a stretched clip must move by dt / rate in curve
+        // time to travel dt on screen. Iterate per parameter so each row gets its own scale.
+        foreach (var parameter in AnimationParameters)
         {
-            vDefinition.U += dt;
+            var mapping = parameter.BuildTimeMapping();
+            var localDt = Math.Abs(mapping.Rate) < 1e-9 ? dt : dt / mapping.Rate;
+            foreach (var curve in parameter.Curves)
+            {
+                foreach (var vDefinition in curve.GetVDefinitions())
+                {
+                    if (SelectedKeyframes.Contains(vDefinition))
+                        vDefinition.U += localDt;
+                }
+            }
         }
 
         RebuildCurveTables();
@@ -1089,6 +1125,66 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         _changeKeyframesCommand = null;
     }
 
+    /// <summary>Stretch is defined in playback time; each key converts through its row's mapping.</summary>
+    public override void UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)
+    {
+        foreach (var parameter in AnimationParameters)
+        {
+            var mapping = parameter.BuildTimeMapping();
+            foreach (var curve in parameter.Curves)
+            {
+                foreach (var vDefinition in curve.GetVDefinitions())
+                {
+                    if (!SelectedKeyframes.Contains(vDefinition))
+                        continue;
+
+                    var globalU = mapping.ToGlobal(vDefinition.U);
+                    vDefinition.U = mapping.ToLocal(originU + (globalU - originU) * scaleU);
+                }
+            }
+        }
+
+        RebuildCurveTables();
+    }
+
+    /// <summary>Selection extent in playback time — the SRI and range overlays operate there.</summary>
+    public override TimeRange GetSelectionTimeRange()
+    {
+        var timeRange = TimeRange.Undefined;
+        foreach (var parameter in AnimationParameters)
+        {
+            var mapping = parameter.BuildTimeMapping();
+            foreach (var curve in parameter.Curves)
+            {
+                foreach (var vDefinition in curve.GetVDefinitions())
+                {
+                    if (SelectedKeyframes.Contains(vDefinition))
+                        timeRange.Unite((float)mapping.ToGlobal(vDefinition.U));
+                }
+            }
+        }
+
+        return timeRange;
+    }
+
+    public override TimeRange GetAllKeyframesTimeRange()
+    {
+        var range = TimeRange.Undefined;
+        foreach (var parameter in AnimationParameters)
+        {
+            var mapping = parameter.BuildTimeMapping();
+            foreach (var curve in parameter.Curves)
+            {
+                foreach (var vDefinition in curve.GetVDefinitions())
+                {
+                    range.Unite((float)mapping.ToGlobal(vDefinition.U));
+                }
+            }
+        }
+
+        return range;
+    }
+
     void ITimeObjectManipulation.DeleteSelectedElements(Instance compositionOp)
     {
         AnimationOperations
@@ -1104,19 +1200,55 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     /// </summary>
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)
     {
-        foreach (var vDefinition in GetAllKeyframes())
+        // While a clip drag is in flight, keys riding on the dragged (selected) clips move with them in
+        // playback time — using them as anchors would make the clip chase its own keys and jitter.
+        var excludeDraggedClipParams = TimeClips.TimeClipInteractions.IsDraggingClips;
+        if (excludeDraggedClipParams)
         {
-            if (SelectedKeyframes.Contains(vDefinition))
-                continue;
-
-            if (_draggedKeyframe == vDefinition)
-                continue;
-
-            if (ExternalDragSnapExclusions != null && ContainsRef(ExternalDragSnapExclusions, vDefinition))
-                continue;
-
-            snapResult.TryToImproveWithAnchorValue(vDefinition.U);
+            _draggedClipIds.Clear();
+            foreach (var clip in TimeLineCanvas.ClipArea.EnumerateSelectedClips())
+            {
+                _draggedClipIds.Add(clip.Id);
+            }
         }
+
+        // Anchors are published in playback time — the space drags and the playhead operate in.
+        foreach (var parameter in AnimationParameters)
+        {
+            if (excludeDraggedClipParams && IsInstanceUnderAnyClip(parameter.Instance, _draggedClipIds))
+                continue;
+
+            var mapping = parameter.BuildTimeMapping();
+            foreach (var curve in parameter.Curves)
+            {
+                foreach (var vDefinition in curve.GetVDefinitions())
+                {
+                    if (SelectedKeyframes.Contains(vDefinition))
+                        continue;
+
+                    if (_draggedKeyframe == vDefinition)
+                        continue;
+
+                    if (ExternalDragSnapExclusions != null && ContainsRef(ExternalDragSnapExclusions, vDefinition))
+                        continue;
+
+                    snapResult.TryToImproveWithAnchorValue(mapping.ToGlobal(vDefinition.U));
+                }
+            }
+        }
+    }
+
+    private static bool IsInstanceUnderAnyClip(Instance? instance, HashSet<Guid> clipChildIds)
+    {
+        while (instance != null)
+        {
+            if (clipChildIds.Contains(instance.SymbolChildId))
+                return true;
+
+            instance = instance.Parent;
+        }
+
+        return false;
     }
 
     private static bool ContainsRef(IReadOnlyList<VDefinition> list, VDefinition target)
@@ -1137,6 +1269,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     internal IReadOnlyList<VDefinition>? ExternalDragSnapExclusions { get; set; }
 
     private VDefinition? _draggedKeyframe; // ignore snapping to self
+    private readonly HashSet<Guid> _draggedClipIds = new(8);
     private const float KeyframeIconWidth = 10;
     private Vector2 _minScreenPos;
     private static ChangeKeyframesCommand? _changeKeyframesCommand;

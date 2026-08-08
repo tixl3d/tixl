@@ -790,6 +790,11 @@ internal sealed class TimeClipInteractions
     private bool _contextMenuIsOpen;
     private int _lastOpVersion = -1;
 
+    /// <summary>True while a clip move/trim drag is in flight. Keyframes riding on the dragged clips move
+    /// with them in playback time, so snap attractors must not use them as anchors — the clip would chase
+    /// its own keys and jitter.</summary>
+    internal static bool IsDraggingClips => _moveClipsCommand != null;
+
     private static MoveTimeClipsCommand? _moveClipsCommand;
 
     private static readonly int _selectFollowingClipsId = nameof(_selectFollowingClipsId).GetHashCode();

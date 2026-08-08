@@ -1037,10 +1037,52 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         public required IInputSlot Input;
         public required Instance Instance;
         public required SymbolUi.Child ChildUi;
-        
+
         public required int Hash;
         public float DampedMinValue;
         public float DampedMaxValue;
+
+        /// <summary>
+        /// Snapshot of the affine curve-time ↔ playback-time relation for this parameter (composed from the
+        /// enclosing time clips). Rebuild per frame/use — clip drags change it continuously.
+        /// </summary>
+        public ParamTimeMapping BuildTimeMapping() => ParamTimeMapping.For(Instance);
+    }
+
+    /// <summary>
+    /// An animated parameter's curves live in the op's local time (see <see cref="Animator.GetLocalAnimationTime"/>);
+    /// the timeline canvas is in playback time. This caches the composed affine relation
+    /// (<c>global = GlobalAtLocalZero + Rate · localU</c>) so per-key conversions don't re-walk the instance chain.
+    /// </summary>
+    public readonly struct ParamTimeMapping
+    {
+        public static ParamTimeMapping For(Instance instance)
+        {
+            var globalAtZero = Animator.GetGlobalAnimationTime(instance, 0);
+            var rate = Animator.GetGlobalAnimationTime(instance, 1) - globalAtZero;
+            return new ParamTimeMapping(globalAtZero, rate);
+        }
+
+        /// <summary>True when no enclosing clip remaps — the common case; lets callers skip conversions.</summary>
+        public bool IsIdentity => GlobalAtLocalZero == 0 && Rate == 1;
+
+        public double ToGlobal(double localU) => GlobalAtLocalZero + Rate * localU;
+
+        public double ToLocal(double globalTime) => Math.Abs(Rate) < MinRate
+                                                        ? GlobalAtLocalZero
+                                                        : (globalTime - GlobalAtLocalZero) / Rate;
+
+        public readonly double GlobalAtLocalZero;
+        public readonly double Rate;
+
+        private ParamTimeMapping(double globalAtLocalZero, double rate)
+        {
+            GlobalAtLocalZero = globalAtLocalZero;
+            Rate = rate;
+        }
+
+        // A clip with ~zero source duration produces a degenerate rate; treat as unmappable rather than divide.
+        private const double MinRate = 1e-9;
     }
     
     internal sealed class TimelineHeight

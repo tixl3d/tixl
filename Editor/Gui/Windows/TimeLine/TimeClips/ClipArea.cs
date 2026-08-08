@@ -134,6 +134,8 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         if (opClips.Count == 0)
         {
             LastHeight = 0;
+            _lanesScreenTop = float.MaxValue;   // empty band — no lanes drawn, no fence participation
+            _lanesScreenBottom = float.MinValue;
             return;
         }
 
@@ -149,6 +151,8 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         var max = min + new Vector2(ImGui.GetContentRegionAvail().X,
                                     LayerHeight * (_maxLayerIndex - _minLayerIndex + 1) + 1);
         LastHeight = max.Y - min.Y + 5;
+        _lanesScreenTop = min.Y;
+        _lanesScreenBottom = max.Y;
         _drawList.AddRectFilled(new Vector2(min.X, max.Y - 2),
                                 new Vector2(max.X, max.Y), UiColors.GridLines.Fade(0.6f));
 
@@ -177,9 +181,9 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     /// </summary>
     public bool ParticipatesInFence(ImRect screenArea)
     {
-        var lanesTop = _minScreenPos.Y + LayerHeight * 0.5f;
-        var lanesBottom = lanesTop + LastHeight;
-        return screenArea.Max.Y >= lanesTop && screenArea.Min.Y <= lanesBottom;
+        // Exact drawn-lane rect — LastHeight carries extra bottom padding, and a fence inside that
+        // dead strip would clear the clip selection without being able to select anything.
+        return screenArea.Max.Y >= _lanesScreenTop && screenArea.Min.Y <= _lanesScreenBottom;
     }
 
     public void UpdateSelectionForArea(ImRect screenArea, SelectionFence.SelectModes selectMode)
@@ -247,6 +251,8 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     private int _minLayerIndex = int.MaxValue;
     private int _maxLayerIndex = int.MinValue;
     private Vector2 _minScreenPos;
+    private float _lanesScreenTop;
+    private float _lanesScreenBottom;
     private ImDrawListPtr _drawList;
 
     private static float _layerHeightOnDragStart;

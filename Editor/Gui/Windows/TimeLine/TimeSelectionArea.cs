@@ -118,7 +118,7 @@ internal sealed class TimeSelectionArea
                 // The anchor key (first in _draggingKeys) tracks with the mouse using this fixed grab offset.
                 // Snapping targets the anchor's would-be U, matching the dope sheet's behavior.
                 var mouseU = _canvas.InverseTransformX(ImGui.GetMousePos().X);
-                _dragGrabOffset = mouseU - _draggingKeys[0].U;
+                _dragGrabOffset = mouseU - _draggingMappings[0].ToGlobal(_draggingKeys[0].U);
                 _isDragging = true;
                 // Tell DSA's snap attractor to skip the bucket's own keys for this drag — the
                 // bucket carries the whole set, not just the selected ones, so unselected siblings
@@ -164,9 +164,10 @@ internal sealed class TimeSelectionArea
                 desiredAnchorU = (float)snappedValue;
             }
 
-            var du = desiredAnchorU - _draggingKeys[0].U;
+            // du is a playback-time delta; each key scales it into its own curve time.
+            var du = desiredAnchorU - _draggingMappings[0].ToGlobal(_draggingKeys[0].U);
             if (du != 0)
-                editors.ApplyKeyframeTimeOffset(_draggingKeys, du);
+                editors.ApplyKeyframePlaybackTimeOffset(_draggingKeys, _draggingMappings, du);
         }
 
         if (isItemDeactivated)
@@ -213,6 +214,7 @@ internal sealed class TimeSelectionArea
             _canvas.DopeSheetArea.ExternalDragSnapExclusions = null;
             _draggingKeys.Clear();
             _draggingCurves.Clear();
+            _draggingMappings.Clear();
         }
 
         // Icon render
@@ -325,11 +327,13 @@ internal sealed class TimeSelectionArea
     {
         _draggingKeys.Clear();
         _draggingCurves.Clear();
+        _draggingMappings.Clear();
         var bucket = _cachedBuckets[bucketIndex];
         for (var i = 0; i < bucket.KeyCount; i++)
         {
             var rk = _rawKeys[bucket.FirstKeyIndex + i];
             _draggingKeys.Add(rk.Def);
+            _draggingMappings.Add(rk.Mapping);
             var already = false;
             for (var c = 0; c < _draggingCurves.Count; c++)
             {
@@ -360,6 +364,12 @@ internal sealed class TimeSelectionArea
             hash = hash * 31 + p.Hash;
             for (var ci = 0; ci < p.Curves.Length; ci++)
                 hash = hash * 31 + p.Curves[ci].ChangeCount;
+
+            // Dragging an enclosing time clip moves keys' playback positions without touching the
+            // curves — the mapping must contribute, or the strip shows stale dot positions.
+            var mapping = p.BuildTimeMapping();
+            hash = hash * 31 + mapping.GlobalAtLocalZero.GetHashCode();
+            hash = hash * 31 + mapping.Rate.GetHashCode();
         }
         hash = hash * 31 + editors.AggregateSelectionChangeCounter;
         return hash;
@@ -381,6 +391,8 @@ internal sealed class TimeSelectionArea
         for (var pi = 0; pi < animationParameters.Count; pi++)
         {
             var param = animationParameters[pi];
+            // Keys live in the parameter's curve time; the strip (like the ruler) is in playback time.
+            var mapping = param.BuildTimeMapping();
             for (var ci = 0; ci < param.Curves.Length; ci++)
             {
                 var curve = param.Curves[ci];
@@ -388,7 +400,7 @@ internal sealed class TimeSelectionArea
                 for (var ki = 0; ki < defs.Count; ki++)
                 {
                     var def = defs[ki];
-                    var x = _canvas.TransformX((float)def.U);
+                    var x = _canvas.TransformX((float)mapping.ToGlobal(def.U));
                     if (x < minScreenX - cullPad || x > maxScreenX + cullPad)
                         continue;
 
@@ -398,6 +410,7 @@ internal sealed class TimeSelectionArea
                                          IsSelected = editors.IsKeyframeSelectedInAny(def),
                                          Def = def,
                                          Curve = curve,
+                                         Mapping = mapping,
                                      });
                 }
             }
@@ -465,6 +478,7 @@ internal sealed class TimeSelectionArea
         public bool IsSelected;
         public VDefinition Def;
         public Curve Curve;
+        public TimeLineCanvas.ParamTimeMapping Mapping;
     }
 
     private struct Bucket
@@ -486,6 +500,7 @@ internal sealed class TimeSelectionArea
     private readonly List<VDefinition> _preFenceSnapshot = new(64);
     private readonly List<VDefinition> _draggingKeys = new(32);
     private readonly List<Curve> _draggingCurves = new(8);
+    private readonly List<TimeLineCanvas.ParamTimeMapping> _draggingMappings = new(32);
     private int _cachedStateHash;
     private bool _isPressed;
     private bool _isDragging;

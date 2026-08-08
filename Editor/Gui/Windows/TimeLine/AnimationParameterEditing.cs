@@ -55,7 +55,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
         TimeLineCanvas.DeleteSelectedElements(composition);
     }
 
-    public TimeRange GetSelectionTimeRange()
+    public virtual TimeRange GetSelectionTimeRange()
     {
         var timeRange = TimeRange.Undefined;
         foreach (var s in SelectedKeyframes)
@@ -66,7 +66,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
         return timeRange;
     }
 
-    public void UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)
+    public virtual void UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)
     {
         foreach (var vDefinition in SelectedKeyframes)
         {
@@ -112,6 +112,28 @@ internal abstract class AnimationParameterEditing : CurveEditing
     public IEnumerable<VDefinition> EnumerateSelectedKeyframes() => SelectedKeyframes;
     public IEnumerable<VDefinition> EnumerateAllKeyframes() => GetAllKeyframes();
 
+    /// <summary>
+    /// Enumerates keyframes together with their parameter's curve-time ↔ playback-time mapping, so
+    /// aggregate consumers (keyset strip, time warp) can position and move keys in playback space.
+    /// </summary>
+    public IEnumerable<(VDefinition Def, TimeLineCanvas.ParamTimeMapping Mapping)> EnumerateKeyframesWithMapping(bool selectedOnly)
+    {
+        foreach (var param in AnimationParameters)
+        {
+            var mapping = param.BuildTimeMapping();
+            foreach (var curve in param.Curves)
+            {
+                foreach (var def in curve.GetVDefinitions())
+                {
+                    if (selectedOnly && !SelectedKeyframes.Contains(def))
+                        continue;
+
+                    yield return (def, mapping);
+                }
+            }
+        }
+    }
+
     public void CopyAllCurvesTo(List<Curve> buffer)
     {
         buffer.Clear();
@@ -126,7 +148,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
             buffer.Add(v);
     }
 
-    public TimeRange GetAllKeyframesTimeRange()
+    public virtual TimeRange GetAllKeyframesTimeRange()
     {
         var range = TimeRange.Undefined;
         foreach (var v in GetAllKeyframes())
