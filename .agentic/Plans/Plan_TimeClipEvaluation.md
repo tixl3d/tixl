@@ -229,7 +229,8 @@ small.
 **Effort:** ~1 day. The resolver is shared with [`Plan_TimelineClipUx.md`](Plan_TimelineClipUx.md) Phase A —
 build it here, consume it there.
 
-**Status: code done (2026-08-08), pending in-editor verify** — as built:
+**Status: DONE — verified in-editor 2026-08-08** (guided test set passed 8/8, including the follow-up
+fixes below found during the run). As built:
 
 - The resolver is **`Animator.GetLocalAnimationTime(Instance?, double)`** in Core — no breadcrumb needed:
   the `Instance.Parent` chain *is* the clip path. It recurses to the root and applies each ancestor's
@@ -246,6 +247,35 @@ build it here, consume it there.
     time, so the dot lights up when the playhead actually crosses a key inside a remapped clip
   - `DopeSheetArea` — `InsertKeyframe` / `InsertKeyframeWithIncrement` (`Shift+C`) per-parameter via
     `p.Instance`
+- **Found in testing (2026-08-08), fixed — two follow-ups:**
+  - **`,` / `.` keyframe navigation jumped to raw curve time.** Inside a stretched clip that parked the
+    playhead where the indicator (correctly) saw no key — mixed time spaces made the toggle untestable.
+    Now: `TimeClip.MapSourceToTimeline` (inverse map) + `Animator.GetGlobalAnimationTime` (composed inverse,
+    mirror recursion of `GetLocalAnimationTime`); `TimeLineCanvas.HandleDeferredActions` searches each
+    parameter's curves in its local time and compares/jumps in playback time. Clip starts/ends unchanged.
+  - **Exact-equality key lookup breaks under remapping.** `map(playhead)` lands fractionally off the key's
+    quantized U when clip ranges aren't exact (float ranges, drag snap) — the indicator missed the key and
+    the toggle inserted a near-duplicate. `InputValueUi.DrawAnimatedParameter` now finds a key within
+    ~1/100 bar of playback time (tolerance transformed into local space so it follows the clip rate) and
+    removes *that* key rather than the mapped time. Exact behaviour for identity clips is unchanged.
+- **Adjacent fix (same test session):** a Replace-mode selection fence *anywhere* in the timeline body
+    began with `ClipSelection.Clear()` — fencing keyframes below a selected clip deselected that clip, and
+    since dope-sheet rows are derived from the node selection, the rows (and the keys being fenced)
+    vanished mid-drag. First attempt gated only `ClipArea.UpdateSelectionForArea`, which was insufficient:
+    the dispatcher (`AnimationCanvas.UpdateSelectionForArea`) issues the Replace-clear via a separate
+    rect-less `ClearSelection()` call on *all* manipulators. Final shape: `ITimeObjectManipulation` gained
+    `ParticipatesInFence(ImRect)` (default-true DIM); the dispatcher clears/updates only participating
+    manipulators; `ClipArea` participates only when the fence intersects the clip lanes.
+- **Slider edits on an existing key inside a remapped clip** could insert a fractionally-offset duplicate
+    instead of updating the key (`ChangeInputValueCommand` captured `_animationTime` by exact mapping).
+    Now snapped at construction via `Animator.SnapToExistingKeyTime` + the shared
+    `Animator.GetLocalTimeTolerance` (~1/100 bar of playback, transformed to local space) — same tolerance
+    the keyframe indicator uses. Side effect (deliberate): even without clips, an edit within 0.01 bars of
+    an existing key now updates that key instead of creating a near-duplicate.
+- **Adjacent fix from the same test session (not clip-related):** `Shift+C`
+    (`InsertKeyframeWithIncrement`) sprayed +1 keys onto *every* visible dope-sheet parameter, wrecking
+    vector animations (e.g. a Color fade). Now scalar-only (`Curves.Length == 1`); plain insert-keyframe is
+    unchanged. `.help/docs/using/Timeline.md` updated.
 - **Deliberately left at global time:** `SymbolVariationPool` (snapshot/variation blending),
   `SnapshotControlView`, `RecordingSession`, `TimelineClipDrop`, `ProjectSettingsWindow`, `ChangeSymbol`,
   `NodeActions` — these blend or initialize values and mostly guard on non-animated inputs; snapshot-blending

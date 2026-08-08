@@ -58,6 +58,20 @@ public sealed class TimeClip : IOutputData
         return pos + SourceRange.Start;
     }
 
+    /// <summary>
+    /// Inverse of <see cref="MapTimelineToSource"/>: maps a source time (bars) to its position on the
+    /// parent timeline. Used to place source-time data (e.g. keyframes) at the playback time it takes effect.
+    /// </summary>
+    public double MapSourceToTimeline(double sourceBars)
+    {
+        var pos = sourceBars - SourceRange.Start;
+        var sourceDuration = SourceRange.End - SourceRange.Start;
+        if (Math.Abs(sourceDuration) > 0.0001f)
+            pos *= (TimeRange.End - TimeRange.Start) / sourceDuration;
+
+        return pos + TimeRange.Start;
+    }
+
     public bool MakeConform()
     {
         var neededFix = false;

@@ -330,10 +330,23 @@ public abstract class InputValueUi<T> : IInputUi
         InputEditStateFlags DrawAnimatedParameter(Curve curve)
         {
             // Curves are sampled in the op's local time, so the indicator and toggle must query/insert there.
-            var animationTime = Animator.GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
-            var hasKeyframeAtCurrentTime = curve.HasVAt(animationTime);
-            var hasKeyframeBefore = curve.HasKeyBefore(animationTime);
-            var hasKeyframeAfter = curve.HasKeyAfter(animationTime);
+            var playbackTime = Playback.Current.TimeInBars;
+            var animationTime = Animator.GetLocalAnimationTime(inputSlot.Parent, playbackTime);
+
+            // Exact-equality lookup fails once a time clip remaps: the clip's float ranges make map(playhead)
+            // land fractionally off the key's quantized U. Treat a key within ~1/100 bar of playback time as
+            // "at" the playhead (tolerance transformed into local space, so it follows the clip's rate).
+            var tolerance = Animator.GetLocalTimeTolerance(inputSlot.Parent, playbackTime);
+            var keyTimeAtPlayhead = animationTime;
+            var hasKeyframeAtCurrentTime = false;
+            if (curve.TryGetPreviousKey(animationTime + tolerance, out var nearKey) && nearKey.U >= animationTime - tolerance)
+            {
+                hasKeyframeAtCurrentTime = true;
+                keyTimeAtPlayhead = nearKey.U;
+            }
+
+            var hasKeyframeBefore = curve.HasKeyBefore(animationTime - tolerance);
+            var hasKeyframeAfter = curve.HasKeyAfter(animationTime + tolerance);
 
             var iconIndex = 0;
             const int leftBit = 1 << 0;
@@ -351,7 +364,8 @@ public abstract class InputValueUi<T> : IInputUi
                 {
                     if (hasKeyframeAtCurrentTime)
                     {
-                        AnimationOperations.RemoveKeyframeFromCurves(curves, animationTime);
+                        // Remove the key actually found near the playhead, not the (fractionally off) mapped time.
+                        AnimationOperations.RemoveKeyframeFromCurves(curves, keyTimeAtPlayhead);
                     }
                     else
                     {

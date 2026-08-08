@@ -86,6 +86,70 @@ public sealed class Animator : SymbolExtension
         return time;
     }
 
+    /// <summary>
+    /// Inverse of <see cref="GetLocalAnimationTime"/>: maps a local animation time (e.g. a keyframe's U)
+    /// of <paramref name="instance"/> back to the global playback time it takes effect at.
+    /// </summary>
+    public static double GetGlobalAnimationTime(Instance? instance, double localTimeInBars)
+    {
+        if (instance == null)
+            return localTimeInBars;
+
+        var time = localTimeInBars;
+        var outputs = instance.Outputs;
+        for (var i = 0; i < outputs.Count; i++)
+        {
+            if (outputs[i] is ITimeClipProvider clipProvider)
+            {
+                time = clipProvider.TimeClip.MapSourceToTimeline(time);
+                break;
+            }
+        }
+
+        return GetGlobalAnimationTime(instance.Parent, time);
+    }
+
+    /// <summary>
+    /// The local-time window that corresponds to ~1/100 bar of playback time at <paramref name="instance"/> —
+    /// the tolerance for treating a key as "at" the playhead. Exact-equality lookups fail once a time clip
+    /// remaps: the clip's float ranges make the mapped playhead land fractionally off a key's quantized U.
+    /// </summary>
+    public static double GetLocalTimeTolerance(Instance? instance, double globalTimeInBars)
+    {
+        var localTime = GetLocalAnimationTime(instance, globalTimeInBars);
+        var localTimeShifted = GetLocalAnimationTime(instance, globalTimeInBars + 0.01);
+        return Math.Max(0.0001, Math.Abs(localTimeShifted - localTime));
+    }
+
+    /// <summary>
+    /// If any curve of the given input has a key within <paramref name="tolerance"/> of
+    /// <paramref name="localTime"/>, returns that key's exact time — so edits update the existing key
+    /// instead of inserting a fractionally-offset duplicate next to it.
+    /// </summary>
+    public double SnapToExistingKeyTime(Guid childId, Guid inputId, double localTime, double tolerance)
+    {
+        if (!_curvesByChildAndInput.TryGetValue(childId, out var inputDict)
+            || !inputDict.TryGetValue(inputId, out var curves))
+            return localTime;
+
+        var bestTime = localTime;
+        var bestDistance = tolerance;
+        foreach (var curve in curves)
+        {
+            if (!curve.TryGetPreviousKey(localTime + tolerance, out var key))
+                continue;
+
+            var distance = Math.Abs(key.U - localTime);
+            if (distance > bestDistance)
+                continue;
+
+            bestDistance = distance;
+            bestTime = key.U;
+        }
+
+        return bestTime;
+    }
+
     public Curve[]? AddOrRestoreCurvesToInput(IInputSlot inputSlot, Curve[]? originalCurves)
     {
         switch (inputSlot)

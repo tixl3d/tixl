@@ -173,6 +173,14 @@ user picks.
 
 **Explicitly not in scope:** per-row mappings, showing a clip's interior from outside, non-affine retiming.
 
+**Design principle (from 4.3 test sessions): row stability.** Dope-sheet rows are a live projection of the
+node selection, so any interaction that mutates selection mid-gesture can remove the very rows being
+operated on (found concretely: a Replace-fence cleared the clip selection and the keyframe rows vanished
+mid-drag — spot-fixed by lane-gating the clip fence). Phase A work must uphold: *an interaction in progress
+never removes the rows it operates on.* Candidate mechanism: freeze the parameter list while a fence/drag
+gesture is active, or keep rows alive while any of their keyframes are selected. The "Keep animated
+parameters visible" pin is the existing user-side workaround.
+
 **Testable outcome:**
 
 - Enter a clip with `SourceRange != TimeRange`. In `Global`, keys sit under the playhead at the moment they

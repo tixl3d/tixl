@@ -469,14 +469,20 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             var time = Playback.TimeInBars + 0.001f;
             foreach (var next in _selectedAnimationParameters)
             {
+                // Curves live in the op's local time — search there, then compare candidates at the
+                // playback time the key takes effect, so jumps land where playback reads the key.
+                var localTime = Animator.GetLocalAnimationTime(next.Instance, time);
                 foreach (var curve in next.Curves)
                 {
-                    if (!curve.TryGetNextKey(time, out var key)
-                        || key.U > bestNextTime)
+                    if (!curve.TryGetNextKey(localTime, out var key))
+                        continue;
+
+                    var keyPlaybackTime = Animator.GetGlobalAnimationTime(next.Instance, key.U);
+                    if (keyPlaybackTime <= time || keyPlaybackTime > bestNextTime)
                         continue;
 
                     foundNext = true;
-                    bestNextTime = key.U;
+                    bestNextTime = keyPlaybackTime;
                 }
             }
 
@@ -511,14 +517,18 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             var time = Playback.TimeInBars - 0.001f;
             foreach (var next in _selectedAnimationParameters)
             {
+                var localTime = Animator.GetLocalAnimationTime(next.Instance, time);
                 foreach (var curve in next.Curves)
                 {
-                    if (!curve.TryGetPreviousKey(time, out var key)
-                        || key.U < bestPreviousTime)
+                    if (!curve.TryGetPreviousKey(localTime, out var key))
+                        continue;
+
+                    var keyPlaybackTime = Animator.GetGlobalAnimationTime(next.Instance, key.U);
+                    if (keyPlaybackTime >= time || keyPlaybackTime < bestPreviousTime)
                         continue;
 
                     foundNext = true;
-                    bestPreviousTime = key.U;
+                    bestPreviousTime = keyPlaybackTime;
                 }
             }
 

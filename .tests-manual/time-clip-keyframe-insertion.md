@@ -76,38 +76,59 @@ time *t* — no matter how the clip is stretched or slipped.
 
 ## Step: Keyframe indicator agrees with playback
 
+> Note: re-inserting via the indicator is **not** an undo — inserting always captures the *currently
+> sampled* value, which after the removal is the value interpolated from the remaining keys. Use
+> `Ctrl + Z` to actually restore the removed key.
+
 **Action:**
 1. Move the playtime to bar `2` (where the fade-out starts during playback).
 2. Look at the keyframe indicator left of the **Color** parameter in the Parameter Window.
-3. Click the indicator once (removes the key), play bars 0–5, then click it again (re-inserts).
+3. Click the indicator once (removes the key) and play bars 0–5.
+4. Click the indicator again (inserts a new key), and check the new key's value.
+5. Press `Ctrl + Z` twice (undo insert, undo remove) and play bars 0–5.
 
 **Expected:**
 - At bar 2 the indicator shows "on a keyframe" (filled center).
 - After removing: the fade start is gone during playback; the indicator shows no key at bar 2.
-- After re-inserting: the fade is back between bars 2 and 4.
+- After re-inserting: a key exists at bar 2 again, but with the **current interpolated value** (the
+  color the fade had there after removal) — the original fade shape is *not* restored.
+- After the two undos: the original fade between bars 2 and 4 plays again.
 
-## Step: `Shift + C` step markers inside the stretched clip
+## Step: `Shift + C` inserts scalar step markers in local time
+
+> `Shift + C` only affects **scalar** parameters — vector parameters like Color are skipped, so
+> tapping step markers can't wreck a visible fade animation. Note the displayed *value* of Volume
+> never updates (nothing evaluates it yet — video audio is backlog); this step verifies the
+> keyframe **positions** in the dope sheet instead.
 
 **Action:**
-1. Animate a second float parameter on the clip: `Alt + click` the **Volume** input in the
-   Parameter Window, then set its keyframe interpolation to **Constant** via the keyframe's
-   context menu in the dope sheet.
-2. Play from bar 0 and press `Shift + C` at bars ~3 and ~5 (watch the ruler).
-3. Replay bars 0–6 and watch the Volume value in the Parameter Window.
+1. Keep the Color fade from the earlier steps visible in the dope sheet.
+2. `Alt + click` the **Volume** input in the Parameter Window to animate it.
+3. Move the playtime to bar `3` (clip still stretched to bars 0–8, source 0–4) and press
+   `Shift + C` once. Move to bar `5`, press `Shift + C` again.
 
 **Expected:**
-- The value increments exactly when the playhead passes the bars where you pressed `Shift + C`.
+- The **Volume** row shows new keyframes at bars **1.5** and **2.5** — the dope sheet draws raw
+  curve time, and at 50% speed playback bars 3 and 5 map to content bars 1.5 and 2.5. (That the
+  positions differ from the playhead is exactly the raw-time display limitation noted above.)
+- The **Color** row gets **no** new keyframes — `Shift + C` skips vector parameters.
 
 ## Step: Slipped clip
 
+> With this slip a Color key at content bar `u` plays at bar `(u − 1) × 2`: content 1 → 0,
+> content 2 → 2, content 3 → 4.
+
 **Action:**
-1. Select the clip, open **Edit Clip Times**, and set Source Start to `1`, Source End to `5`
+1. Check the **Color** row in the dope sheet: it should hold exactly the two fade keys at (raw)
+   bars `1` and `2`. If the key from the mid-clip-edit step (content bar 3) or other extras are
+   still present, delete them — or apply the formula above to your keys instead.
+2. Select the clip, open **Edit Clip Times**, and set Source Start to `1`, Source End to `5`
    (Clip Start/End stay 0/8) — the content is slipped by one bar.
-2. Play bars 0–6.
+3. Play bars 0–6.
 
 **Expected:**
-- The fade-out now plays between bars **0 and 2** (content bars 1–2, which the slip moved one bar
-  earlier; at 50% speed that is playback bars 0–2).
+- With the two keys at content bars 1 and 2, the fade-out now plays between bars **0 and 2**.
+  (If you kept the content-bar-3 key, the animation extends to bar **4**.)
 - Move the playtime to bar `2`: the keyframe indicator shows "on a keyframe".
 
 ## Step: Composition opened without a parent path

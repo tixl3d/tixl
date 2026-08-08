@@ -23,9 +23,14 @@ public sealed class ChangeInputValueCommand : ICommand
         _animationTime = Animator.GetLocalAnimationTime(childInstance, Playback.Current.TimeInBars);
         OriginalValue = input.Value.Clone();
         _newValue = newValue == null ? input.Value.Clone() : newValue.Clone();
-            
+
         if (_wasAnimated)
         {
+            // Snap to a key sitting at (or within a hair of) the playhead, so the edit updates that key
+            // instead of inserting a fractionally-offset duplicate — exact time hits are unreliable once
+            // a time clip remaps the playhead into curve time.
+            var tolerance = Animator.GetLocalTimeTolerance(childInstance, Playback.Current.TimeInBars);
+            _animationTime = composition.Animator.SnapToExistingKeyTime(_childId, _inputId, _animationTime, tolerance);
             _originalKeyframes = composition.Animator.GetTimeKeys(_childId, _inputId, _animationTime).ToList();
         }
     }
