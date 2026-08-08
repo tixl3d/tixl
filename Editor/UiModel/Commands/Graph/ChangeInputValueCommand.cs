@@ -9,7 +9,10 @@ public sealed class ChangeInputValueCommand : ICommand
     public string Name => "Change Input Value";
     public bool IsUndoable => true;
 
-    public ChangeInputValueCommand(Symbol composition, Guid symbolChildId, Symbol.Child.Input input, InputValue newValue)
+    /// <param name="childInstance">The edited op's instance, when the caller has one. Used to insert
+    /// keys in the op's local time (composing enclosing time-clip remaps); without it keys land at the
+    /// global playback time, which is wrong inside a remapped clip.</param>
+    public ChangeInputValueCommand(Symbol composition, Guid symbolChildId, Symbol.Child.Input input, InputValue newValue, Instance childInstance = null)
     {
         _inputParentSymbolId = composition.Id;
 
@@ -17,7 +20,7 @@ public sealed class ChangeInputValueCommand : ICommand
         _inputId = input.InputDefinition.Id;
         _wasAnimated = composition.Animator.IsAnimated(_childId, _inputId);
         _wasDefault = input.IsDefault;
-        _animationTime = Playback.Current.TimeInBars;
+        _animationTime = Animator.GetLocalAnimationTime(childInstance, Playback.Current.TimeInBars);
         OriginalValue = input.Value.Clone();
         _newValue = newValue == null ? input.Value.Clone() : newValue.Clone();
             

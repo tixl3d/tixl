@@ -20,11 +20,12 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
         Upcoming,
     }
 
-    private readonly struct ClipEntry(Slot<Texture2D> textureSlot, IVideoClipProvider provider, int layerIndex)
+    private readonly struct ClipEntry(Slot<Texture2D> textureSlot, IVideoClipProvider provider, T3.Core.Animation.TimeClip timeClip)
     {
         public readonly Slot<Texture2D> TextureSlot = textureSlot;
         public readonly IVideoClipProvider Provider = provider; // null for a plain wired texture (no per-clip params)
-        public readonly int LayerIndex = layerIndex;
+        public readonly T3.Core.Animation.TimeClip TimeClip = timeClip; // null for a plain wired texture
+        public readonly int LayerIndex = timeClip?.LayerIndex ?? 0;
     }
 
     [Output(Guid = "4022374f-2022-466d-9787-a7c47fe45737")]
@@ -66,11 +67,11 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
             var provider = clipSource as IVideoClipProvider;
             provider?.MarkManaged(); // mark before classifying, so an inactive-but-managed clip doesn't hint
 
-            var state = ClassifyClip(clipSource, localTime, out var layerIndex);
+            var state = ClassifyClip(clipSource, localTime, out var timeClip);
             if (state == ClipState.Upcoming)
                 slot.GetValue(context);
             else if (state == ClipState.Active)
-                InsertActive(new ClipEntry(slot, provider, layerIndex));
+                InsertActive(new ClipEntry(slot, provider, timeClip));
         }
 
         // Auto-collected sibling [VideoClip]s in the same composition (unwired), if enabled. Force-evaluating
@@ -104,11 +105,11 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
 
                 provider.MarkManaged();
 
-                var state = ClassifyClip(child, localTime, out var layerIndex);
+                var state = ClassifyClip(child, localTime, out var timeClip);
                 if (state == ClipState.Upcoming)
                     provider.TextureOutput.GetValue(context);
                 else if (state == ClipState.Active)
-                    InsertActive(new ClipEntry(provider.TextureOutput, provider, layerIndex));
+                    InsertActive(new ClipEntry(provider.TextureOutput, provider, timeClip));
             }
         }
 
@@ -125,8 +126,27 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
                 continue;
 
             // A wired texture that isn't a [VideoClip] (no provider) keeps the white / Normal defaults.
-            var color = entry.Provider?.ColorInput.GetValue(context) ?? Vector4.One;
-            var blendMode = entry.Provider?.BlendModeInput.GetValue(context) ?? 0;
+            // Per-clip params are the clip's *inputs*, pulled here with the player's context — so animated
+            // values (e.g. a Color fade) must be sampled in the clip's local time, like everything the clip
+            // evaluates itself. Remap around the pulls, mirroring TimeClipSlot.
+            var color = Vector4.One;
+            var blendMode = 0;
+            if (entry.Provider != null)
+            {
+                var prevTime = context.LocalTime;
+                var prevFxTime = context.LocalFxTime;
+                if (entry.TimeClip != null)
+                {
+                    context.LocalTime = entry.TimeClip.MapTimelineToSource(prevTime);
+                    context.LocalFxTime = entry.TimeClip.MapTimelineToSource(prevFxTime);
+                }
+
+                color = entry.Provider.ColorInput.GetValue(context);
+                blendMode = entry.Provider.BlendModeInput.GetValue(context);
+
+                context.LocalTime = prevTime;
+                context.LocalFxTime = prevFxTime;
+            }
 
             context.ForegroundColor = baseForeground * color;
             context.IntVariables[BlendModeVariableName] = blendMode;
@@ -203,13 +223,14 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
     private const int MaxUpstreamSearchDepth = 8;
 
     // A VideoClip exposes its TimeClip via a TimeClipSlot output (ITimeClipProvider). Classifies the clip at
-    // localTime and (out) its layer index. Exclusive end matches TimeClipSlot's own range test so adjacent
-    // clips sharing a cut boundary never both draw on that frame. Upcoming = within PrerollSeconds before the
-    // clip's start, so its decoder can be warmed ahead of the cut. A wired texture without a TimeClip (e.g. a
-    // plain image) has no range, so it is always active and sits on layer 0.
-    private static ClipState ClassifyClip(Instance clipInstance, double localTime, out int layerIndex)
+    // localTime and (out) its TimeClip, which the caller needs for layer ordering and for remapping the
+    // per-clip param pulls into clip-local time. Exclusive end matches TimeClipSlot's own range test so
+    // adjacent clips sharing a cut boundary never both draw on that frame. Upcoming = within PrerollSeconds
+    // before the clip's start, so its decoder can be warmed ahead of the cut. A wired texture without a
+    // TimeClip (e.g. a plain image) has no range, so it is always active with a null clip (layer 0).
+    private static ClipState ClassifyClip(Instance clipInstance, double localTime, out T3.Core.Animation.TimeClip timeClip)
     {
-        layerIndex = 0;
+        timeClip = null;
         if (clipInstance == null)
             return ClipState.Active;
 
@@ -218,9 +239,8 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
         {
             if (outputs[i] is ITimeClipProvider clipProvider)
             {
-                var clip = clipProvider.TimeClip;
-                layerIndex = clip.LayerIndex;
-                var range = clip.TimeRange;
+                timeClip = clipProvider.TimeClip;
+                var range = timeClip.TimeRange;
                 if (localTime >= range.Start && localTime < range.End)
                     return ClipState.Active;
                 if (localTime >= range.Start - PrerollSeconds && localTime < range.Start)

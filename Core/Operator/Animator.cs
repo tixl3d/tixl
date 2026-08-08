@@ -60,6 +60,32 @@ public sealed class Animator : SymbolExtension
             _curvesByChildAndInput.Remove(childId);
     }
 
+    /// <summary>
+    /// Converts the global playback time into the local time an animated input of <paramref name="instance"/>
+    /// is sampled at, by composing the time-clip remaps of the instance and its ancestors (outermost first).
+    /// Keys must be inserted in this space — curves are read at <c>context.LocalTime</c>, which arrives
+    /// remapped. Identity when no enclosing clip remaps (including instances without a parent path).
+    /// </summary>
+    public static double GetLocalAnimationTime(Instance? instance, double globalTimeInBars)
+    {
+        if (instance == null)
+            return globalTimeInBars;
+
+        var time = GetLocalAnimationTime(instance.Parent, globalTimeInBars);
+
+        var outputs = instance.Outputs;
+        for (var i = 0; i < outputs.Count; i++)
+        {
+            if (outputs[i] is ITimeClipProvider clipProvider)
+            {
+                time = clipProvider.TimeClip.MapTimelineToSource(time);
+                break;
+            }
+        }
+
+        return time;
+    }
+
     public Curve[]? AddOrRestoreCurvesToInput(IInputSlot inputSlot, Curve[]? originalCurves)
     {
         switch (inputSlot)
@@ -98,7 +124,7 @@ public sealed class Animator : SymbolExtension
     {
         var childId = inputSlot.Parent.SymbolChildId;
         var inputId = inputSlot.Id;
-        var now = Playback.Current.TimeInBars;
+        var now = GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
 
         var curves = originalCurves ?? new Curve[values.Length];
         if (curves.Length != values.Length)
@@ -129,7 +155,7 @@ public sealed class Animator : SymbolExtension
     {
         var childId = inputSlot.Parent.SymbolChildId;
         var inputId = inputSlot.Id;
-        var now = Playback.Current.TimeInBars;
+        var now = GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
 
         var curves = originalCurves ?? new Curve[values.Length];
         if (curves.Length != values.Length)
@@ -487,8 +513,8 @@ public sealed class Animator : SymbolExtension
         {
             if (!animator.TryGetCurvesForInputSlot(inputSlot, out var curves))
                 return;
-                
-            var time = Playback.Current.TimeInBars;
+
+            var time = GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
             for (var i = 0; i < 3; i++)
             {
                 var vDef = curves[i].GetV(time) ?? new VDefinition { U = time };
@@ -514,8 +540,8 @@ public sealed class Animator : SymbolExtension
                      .Animator
                      .TryGetCurvesForInputSlot(inputSlot, out var curves))
         {
-            var firstCurve = curves[0]; 
-            var time = Playback.Current.TimeInBars;
+            var firstCurve = curves[0];
+            var time = GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
             var vDef = firstCurve.GetV(time) ?? new VDefinition { U = time };
             vDef.Value = value;
             firstCurve.AddOrUpdateV(time, vDef);

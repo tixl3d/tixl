@@ -215,6 +215,26 @@ implementation — see Open questions #1.
 
 **Effort:** ~1 day.
 
+**Status: code done (2026-08-08), pending in-editor verify** — as built:
+
+- `Combine.CombineAsNewType` honours `shouldBeTimeClip`: the **first `Command`-typed output** becomes the
+  `TimeClipSlot` (falling back to the first output of any type), matching the slot-string emission of
+  `InputsAndOutputs.AddOutputToSymbol`. Other outputs stay plain `Slot<>` — the two-output shape
+  (`TimeClipSlot<Command>` + `Slot<Texture2D>`) falls out naturally when the selection has both connection
+  kinds, and Evaluation Phase 1 remaps the sibling outputs.
+- A selection with **no outgoing connections** gets a default unconnected `TimeClipSlot<Command> Output`,
+  so the combined symbol can still appear on the timeline instead of silently producing a non-clip.
+- Dialog: tooltip on the checkbox explaining what a time clip means (it previously did nothing and said
+  nothing).
+- Clip range init is the `TimeClip` ctor default (`TimeRange = SourceRange = [playhead, +4 bars]`, i.e.
+  identity mapping). **Undo note:** combining already clears the undo stack (pre-existing; symbol/assembly
+  creation can't be cleanly undone) — the "undo restores the pre-combine graph" outcome above is therefore
+  not achievable and was wrong in the draft; verify the hint text in the dialog covers it.
+- **Deferred polish:** initialize the clip's ranges from the copied keyframes' extent instead of
+  playhead+4, so combining an already-animated selection produces a clip that plays its animation without
+  manual range adjustment.
+- Builds green (Editor).
+
 ### Phase C — Generalize the compositor to texture clips
 
 **Goal:** anything that yields a texture on the timeline composites through one path.

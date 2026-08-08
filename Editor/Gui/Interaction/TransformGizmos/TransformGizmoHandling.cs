@@ -379,7 +379,8 @@ internal static class TransformGizmoHandling
         _inputCommandInFlight = new ChangeInputValueCommand(_instance.Parent.Symbol,
                                                             _instance.SymbolChildId,
                                                             _transformable.ScaleInput.Input,
-                                                            _transformable.ScaleInput.Input.Value);
+                                                            _transformable.ScaleInput.Input.Value,
+                                                            _instance);
 
         _draggedTransformable = _transformable;
         _dragInteractionWindowId = ImGui.GetID("");
@@ -635,7 +636,8 @@ internal static class TransformGizmoHandling
             _inputCommandInFlight = new ChangeInputValueCommand(_instance.Parent.Symbol,
                                                                      _instance.SymbolChildId,
                                                                      _transformable.TranslationInput.Input,
-                                                                     _transformable.TranslationInput.Input.Value);
+                                                                     _transformable.TranslationInput.Input.Value,
+                                                                     _instance);
         }
 
         _draggedTransformable = _transformable;
@@ -931,7 +933,8 @@ internal static class TransformGizmoHandling
                                                                _instance.Parent.Symbol,
                                                                _instance.SymbolChildId,
                                                                _transformable.RotationInput.Input,
-                                                               _transformable.RotationInput.Input.Value);
+                                                               _transformable.RotationInput.Input.Value,
+                                                               _instance);
 
         _draggedTransformable = _transformable;
         _dragInteractionWindowId = ImGui.GetID("");

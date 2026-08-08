@@ -66,7 +66,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 symbolUi.FlagAsModified();
                 foreach (var p in AnimationParameters)
                 {
-                    InsertNewKeyframe(p, (float)TimeLineCanvas.Playback.TimeInBars);
+                    // Curves are sampled in each op's local time — insert where playback will read.
+                    InsertNewKeyframe(p, (float)Animator.GetLocalAnimationTime(p.Instance, TimeLineCanvas.Playback.TimeInBars));
                 }
             }
 
@@ -76,7 +77,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 SelectedKeyframes.Clear();
                 foreach (var p in AnimationParameters)
                 {
-                    InsertNewKeyframe(p, (float)TimeLineCanvas.Playback.TimeInBars, false, 1);
+                    InsertNewKeyframe(p, (float)Animator.GetLocalAnimationTime(p.Instance, TimeLineCanvas.Playback.TimeInBars), false, 1);
                 }
             }
 

@@ -43,6 +43,11 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                 ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60));
 
                 ImGui.Checkbox("Combine as time clip", ref _shouldBeTimeClip);
+                CustomComponents.TooltipForLastItem("""
+                                                    The new symbol appears as a clip on the timeline: it only
+                                                    evaluates while the playhead is inside its clip range, and
+                                                    keyframe animations inside it travel with the clip.
+                                                    """);
 
                 FormInputs.AddHint("Combining creates a new operator and can't be undone — this clears the undo history.");
 

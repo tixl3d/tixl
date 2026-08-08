@@ -195,6 +195,13 @@ small.
   `LoadHFCS` (example) initializes identity ranges and its `Rotation` output is *fixed* by the sibling remap.
 - Builds green: Core, Video, Io, Lib, Editor (Release).
 - Manual test set added: [`time-clip-evaluation.md`](../../.tests-manual/time-clip-evaluation.md).
+- **Found in testing (2026-08-08), fixed:** a third evaluation path existed — `_ProcessVideoClips` pulls a
+  clip's `ColorInput` / `BlendModeInput` **input slots directly with the player's context**, bypassing both
+  the gated clip slot and the wrapped sibling outputs, so animated per-clip params sampled global time
+  (pre-existing; Phase 2's local-time insertion made it visible). The player now remaps
+  `LocalTime`/`LocalFxTime` around those pulls using the clip's `TimeClip` (which `ClassifyClip` already
+  resolved). **Rule for reviewers:** any consumer that reaches into a *foreign* clip's slots with its own
+  context must remap the same way — a future transition op reading its sources' params is the next candidate.
 - **Open:** in-editor run-through of that test set; release-note line for the `Wake.t3`-class behaviour shift.
 
 ### Phase 2 — Keyframe writes go through the clip mapping
@@ -221,6 +228,35 @@ small.
 
 **Effort:** ~1 day. The resolver is shared with [`Plan_TimelineClipUx.md`](Plan_TimelineClipUx.md) Phase A —
 build it here, consume it there.
+
+**Status: code done (2026-08-08), pending in-editor verify** — as built:
+
+- The resolver is **`Animator.GetLocalAnimationTime(Instance?, double)`** in Core — no breadcrumb needed:
+  the `Instance.Parent` chain *is* the clip path. It recurses to the root and applies each ancestor's
+  `ITimeClipProvider` output mapping outermost-first, **including the op's own clip** (matches evaluation:
+  an op's animated inputs are read inside its own remap). Identity for instances without a parent path,
+  which resolves the "opened from the Symbol Browser" rule for free.
+- Routed sites (all had a concrete instance available):
+  - `Animator.AddCurvesForFloatVector` / `AddCurvesForIntVector` (first-key insertion)
+  - `Animator.UpdateVector3InputValue` / `UpdateFloatInputValue` (gizmo/camera writes)
+  - `ChangeInputValueCommand` — new optional `Instance childInstance` ctor param (construction-time only,
+    not stored, per the command Guid rules); wired at `ParameterWindow.HandleInputEditState` (the main
+    slider path), `TransformGizmoHandling` (×3), `GradientUi` / `GradientSliderUi` (×4)
+  - `InputValueUi.DrawAnimatedParameter` — the keyframe-toggle indicator now *queries and inserts* at local
+    time, so the dot lights up when the playhead actually crosses a key inside a remapped clip
+  - `DopeSheetArea` — `InsertKeyframe` / `InsertKeyframeWithIncrement` (`Shift+C`) per-parameter via
+    `p.Instance`
+- **Deliberately left at global time:** `SymbolVariationPool` (snapshot/variation blending),
+  `SnapshotControlView`, `RecordingSession`, `TimelineClipDrop`, `ProjectSettingsWindow`, `ChangeSymbol`,
+  `NodeActions` — these blend or initialize values and mostly guard on non-animated inputs; snapshot-blending
+  an animated parameter *inside* a remapped clip remains at global time (pre-existing semantics, revisit with
+  Phase 3 if it bites).
+- Builds green: Core, Editor, Lib.
+- Manual test set added: [`time-clip-keyframe-insertion.md`](../../.tests-manual/time-clip-keyframe-insertion.md).
+- **Open:** in-editor verify; the `.help/docs/using/Timeline.md` warning-note removal is deferred until
+  Phase A lands (until the dope sheet *displays* in local time, inserted keys can sit visually away from the
+  playhead inside a remapped clip even though they play correctly — removing the warning now would be
+  premature).
 
 ### Phase 3 — Per-curve time space (`Local` | `Global`)
 

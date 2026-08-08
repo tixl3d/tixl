@@ -71,7 +71,7 @@ internal static class GradientSliderUi
         {
             _inputSlotForActiveCommand = inputSlot;
             _inputValueCommandInFlight =
-                new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value);
+                new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value, instance);
         }
 
         if (editState.HasFlag(InputEditStateFlags.Modified))
@@ -87,7 +87,7 @@ internal static class GradientSliderUi
             if (_inputValueCommandInFlight == null || _inputSlotForActiveCommand != inputSlot)
             {
                 _inputValueCommandInFlight =
-                    new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value);
+                    new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value, instance);
                 _inputSlotForActiveCommand = inputSlot;
             }
 

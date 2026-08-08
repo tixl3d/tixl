@@ -1,4 +1,5 @@
 using System.Text;
+using T3.Core.DataTypes;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
@@ -80,12 +81,30 @@ internal static class Combine
                                  where child.Id == con.SourceParentOrChildId
                                  from output in child.Symbol.OutputDefinitions
                                  where output.Id == con.SourceSlotId
-                                 select (child, output, con)).ToList().Distinct();
+                                 select (child, output, con)).ToList().Distinct().ToArray();
+
+        // As a time clip, one output becomes the TimeClipSlot that places the symbol on the timeline —
+        // prefer the first Command output (the usual render flow), else the first output of any type.
+        var timeClipOutputIndex = -1;
+        if (shouldBeTimeClip && outputsToGenerate.Length > 0)
+        {
+            timeClipOutputIndex = 0;
+            for (var i = 0; i < outputsToGenerate.Length; i++)
+            {
+                if (outputsToGenerate[i].output.ValueType != typeof(Command))
+                    continue;
+
+                timeClipOutputIndex = i;
+                break;
+            }
+        }
+
         var connectionsToNewOutputs = new List<Symbol.Connection>(outputConnections.Length);
         int outputNameCounter = 2;
         var outputNameHashSet = new HashSet<string>();
-        foreach (var (child, output, origConnection) in outputsToGenerate)
+        for (var outputIndex = 0; outputIndex < outputsToGenerate.Length; outputIndex++)
         {
+            var (child, output, origConnection) = outputsToGenerate[outputIndex];
             var outputValueType = output.ValueType;
             if (TypeNameRegistry.Entries.TryGetValue(outputValueType, out var typeName))
             {
@@ -96,7 +115,7 @@ internal static class Combine
                 outputStringBuilder.AppendLine(attributeString);
                 var newOutputName = outputNameHashSet.Contains(output.Name) ? (output.Name + outputNameCounter++) : output.Name;
                 outputNameHashSet.Add(newOutputName);
-                var slotString = "Slot<" + typeName + ">";
+                var slotString = (outputIndex == timeClipOutputIndex ? "TimeClipSlot<" : "Slot<") + typeName + ">";
                 var outputString = "        public readonly " + slotString + " " + newOutputName + " = new " + slotString + "();";
                 outputStringBuilder.AppendLine(outputString);
                 outputStringBuilder.AppendLine("");
@@ -109,6 +128,16 @@ internal static class Combine
             {
                 Log.Error($"Error, no registered name found for typename: {output.ValueType.Name}");
             }
+        }
+
+        // A time clip without any outgoing connection would produce a symbol that can't appear on the
+        // timeline — give it a default Command clip slot the user can wire up later.
+        if (shouldBeTimeClip && timeClipOutputIndex == -1)
+        {
+            usingStringBuilder.AppendLine("using T3.Core.DataTypes;");
+            outputStringBuilder.AppendLine("        [Output(Guid = \"" + Guid.NewGuid() + "\")]");
+            outputStringBuilder.AppendLine("        public readonly TimeClipSlot<Command> Output = new TimeClipSlot<Command>();");
+            outputStringBuilder.AppendLine("");
         }
 
         usingStringBuilder.AppendLine("using T3.Core.Operator;");

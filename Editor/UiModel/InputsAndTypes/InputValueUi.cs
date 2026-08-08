@@ -329,9 +329,11 @@ public abstract class InputValueUi<T> : IInputUi
 
         InputEditStateFlags DrawAnimatedParameter(Curve curve)
         {
-            var hasKeyframeAtCurrentTime = curve.HasVAt(Playback.Current.TimeInBars);
-            var hasKeyframeBefore = curve.HasKeyBefore(Playback.Current.TimeInBars);
-            var hasKeyframeAfter = curve.HasKeyAfter(Playback.Current.TimeInBars);
+            // Curves are sampled in the op's local time, so the indicator and toggle must query/insert there.
+            var animationTime = Animator.GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
+            var hasKeyframeAtCurrentTime = curve.HasVAt(animationTime);
+            var hasKeyframeBefore = curve.HasKeyBefore(animationTime);
+            var hasKeyframeAfter = curve.HasKeyAfter(animationTime);
 
             var iconIndex = 0;
             const int leftBit = 1 << 0;
@@ -349,11 +351,11 @@ public abstract class InputValueUi<T> : IInputUi
                 {
                     if (hasKeyframeAtCurrentTime)
                     {
-                        AnimationOperations.RemoveKeyframeFromCurves(curves, Playback.Current.TimeInBars);
+                        AnimationOperations.RemoveKeyframeFromCurves(curves, animationTime);
                     }
                     else
                     {
-                        AnimationOperations.InsertKeyframeToCurves(curves, Playback.Current.TimeInBars);
+                        AnimationOperations.InsertKeyframeToCurves(curves, animationTime);
                     }
                 }
             }
@@ -510,7 +512,7 @@ public abstract class InputValueUi<T> : IInputUi
                                                                new List<ICommand>
                                                                    {
                                                                        new ChangeInputValueCommand(compositionSymbol, symbolChildUi.Id, input,
-                                                                                                   inputSlot.Input.Value),
+                                                                                                   inputSlot.Input.Value, inputSlot.Parent),
                                                                        new AddAnimationCommand(animator, inputSlot),
                                                                    });
                          UndoRedoStack.AddAndExecute(animateCommand);
@@ -792,7 +794,7 @@ internal static class InputArea
                                                new List<ICommand>()
                                                    {
                                                        new ChangeInputValueCommand(compositionUi.Symbol, symbolChildUi.SymbolChild.Id, input,
-                                                                                   inputSlot.Input.Value),
+                                                                                   inputSlot.Input.Value, inputSlot.Parent),
                                                        new AddAnimationCommand(compositionUi.Symbol.Animator, inputSlot),
                                                    });
 
