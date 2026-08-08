@@ -3,7 +3,6 @@ using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
-using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.TimeLine.TimeClips;
@@ -20,10 +19,9 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// </summary>
 internal sealed class SourceRegionIndicator
 {
-    public SourceRegionIndicator(TimeLineCanvas canvas, ValueSnapHandler snapHandler)
+    public SourceRegionIndicator(TimeLineCanvas canvas)
     {
         _canvas = canvas;
-        _snapHandler = snapHandler;
     }
 
     public void Draw(Instance composition, ImDrawListPtr drawList, bool hasRange,
@@ -58,8 +56,11 @@ internal sealed class SourceRegionIndicator
         if (right - left < 1)
             return;
 
-        var top = lineY - 3 * scale;
-        var bottom = lineY + 4 * scale;
+        // Taller than the SRI's hit band so the region stays grabbable above the selection range,
+        // and flush with the ruler's bottom edge — a gap there makes the mouse cursor flicker
+        // through ruler/region/keyset states while moving vertically.
+        var top = lineY - 9 * scale;
+        var bottom = rulerPos.Y + rulerSize.Y;
 
         // Slip-drag zones: the region parts left and right of the selection range — or the whole region
         // when no range is shown. Emitted before drawing so the outline can respond to hover.
@@ -74,7 +75,7 @@ internal sealed class SourceRegionIndicator
             EmitSlipButton("##SourceRegion", left, right, top, bottom, clip, footageBars, composition);
         }
 
-        var outlineFade = _anyZoneHovered || _dragClip != null ? 0.25f : 0.125f;
+        var outlineFade = _anyZoneHovered || _dragClip != null ? 0.25f : 0.17f;
         drawList.AddRectFilled(new Vector2(left, top), new Vector2(right, bottom),
                                UiColors.BackgroundFull.Fade(0.5f), 2 * scale);
         drawList.AddRect(new Vector2(left, top), new Vector2(right, bottom),
@@ -129,26 +130,19 @@ internal sealed class SourceRegionIndicator
         var u = _canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
         var d = (double)u - _pressU;
 
-        // Snap the moved footage boundaries to time anchors (other clips, playhead, …); the stronger
-        // snap wins, Shift bypasses.
+        // Slipping only snaps to the clip's own boundaries — footage start onto clip start (source
+        // begins at 0) and footage end onto clip end. Raster / other-element anchors proved unhelpful
+        // for slides: the content has no meaningful relation to them. Shift bypasses.
         if (!ImGui.GetIO().KeyShift)
         {
-            var bestDelta = 0.0;
-            var hasSnap = false;
-            if (_snapHandler.TryCheckForSnapping(_origFootageStart + d, out var snappedStart, _canvas.Scale.X))
-            {
-                bestDelta = snappedStart - (_origFootageStart + d);
-                hasSnap = true;
-            }
-
-            if (_snapHandler.TryCheckForSnapping(_origFootageEnd + d, out var snappedEnd, _canvas.Scale.X))
-            {
-                var delta = snappedEnd - (_origFootageEnd + d);
-                if (!hasSnap || Math.Abs(delta) < Math.Abs(bestDelta))
-                    bestDelta = delta;
-            }
-
-            d += bestDelta;
+            var thresholdBars = 6 * T3Ui.UiScaleFactor / _canvas.Scale.X;
+            var deltaToClipStart = clip.TimeRange.Start - (_origFootageStart + d);
+            var deltaToClipEnd = clip.TimeRange.End - (_origFootageEnd + d);
+            var bestDelta = Math.Abs(deltaToClipStart) <= Math.Abs(deltaToClipEnd)
+                                ? deltaToClipStart
+                                : deltaToClipEnd;
+            if (Math.Abs(bestDelta) < thresholdBars)
+                d += bestDelta;
         }
 
         clip.SourceRange.Start = (float)(_origSourceStart - d * _dragRate);
@@ -168,7 +162,6 @@ internal sealed class SourceRegionIndicator
     }
 
     private readonly TimeLineCanvas _canvas;
-    private readonly ValueSnapHandler _snapHandler;
 
     // Drag-scoped state; the TimeClip reference only lives for the duration of one slip drag.
     private TimeClip? _dragClip;

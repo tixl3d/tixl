@@ -13,7 +13,7 @@ using T3.Editor.UiModel.Selection;
 namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
-/// Thin strip below the timeline ruler that shows a baked icon for every keyframe
+/// The KeySet strip: a thin band below the timeline ruler showing a baked icon for every keyframe
 /// (or cluster of keyframes within sub-pixel distance) across the visible parameters.
 ///
 /// Click: replace the keyframe selection with the clicked cluster's keys.
@@ -28,9 +28,9 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// The bucket layout itself is cached and only rebuilt when the view (scale/scroll), the
 /// animation parameters, curve contents, or the keyframe selection change.
 /// </summary>
-internal sealed class TimeSelectionArea
+internal sealed class KeySetStrip
 {
-    public TimeSelectionArea(TimeLineCanvas canvas)
+    public KeySetStrip(TimeLineCanvas canvas)
     {
         _canvas = canvas;
     }
@@ -61,7 +61,7 @@ internal sealed class TimeSelectionArea
         // Stable ID means ImGui's active-item tracking persists across bucket rebuilds, so a
         // drag that crosses another cluster's position doesn't get cancelled.
         ImGui.SetCursorScreenPos(windowPos);
-        ImGui.InvisibleButton("##saStrip", windowSize);
+        ImGui.InvisibleButton("##keySetStrip", windowSize);
 
         var isItemHovered = ImGui.IsItemHovered();
         var isItemActive = ImGui.IsItemActive();

@@ -40,7 +40,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         _timelineCurveEditArea = new TimelineCurveEditor(this, SnapHandlerForU, SnapHandlerForV);
         _timeSelectionRange = new TimeSelectionRange(this, SnapHandlerForU);
         _selectionRangeIndicator = new SelectionRangeIndicator(this, SnapHandlerForU);
-        _timeSelectionArea = new TimeSelectionArea(this);
+        _keySetStrip = new KeySetStrip(this);
         ClipArea = new ClipArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
         _curveEditCanvas = new InlineCurveArea(this, _timelineCurveEditArea, _horizontalRaster);
         _inlineDataClipArea = new InlineDataClipArea(this);
@@ -71,7 +71,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     /// <summary>
     /// Every currently-active animation-parameter editor on the timeline. Today this is always
     /// a single editor (DopeSheetArea in DopeView mode, TimelineCurveEditor in CurveEditor mode);
-    /// future split-view will expose both simultaneously. Cross-mode components (SRI, TimeSelectionArea,
+    /// future split-view will expose both simultaneously. Cross-mode components (SRI, KeySetStrip,
     /// TimeWarpDrag) aggregate through <see cref="KeyframeEditors"/> so they don't need to pick one.
     /// </summary>
     public readonly KeyframeEditorGroup KeyframeEditors;
@@ -94,8 +94,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         ClipArea.TrimSelectedClipsToBoundary(boundaryU, origBoundaryU, isStart);
     }
 
-    private int RulerHeight => (int)(28 * T3Ui.UiScaleFactor);
-    private int SummaryHeight => (int)(11 * T3Ui.UiScaleFactor);
+    private int RulerHeight => (int)(33 * T3Ui.UiScaleFactor);
+    private int KeySetStripHeight => (int)(11 * T3Ui.UiScaleFactor);
 
     public void Draw(ProjectView projectView, Playback playback)
     {
@@ -176,11 +176,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             }
 
 
-            // Selection Area (summary strip below ruler)
+            // KeySet strip (keyframe-cluster indicators below the ruler)
             {
                 ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.GridLines.Fade(0.20f).Rgba);
-                ImGui.BeginChild("##selectionArea", new Vector2(0,SummaryHeight));
-                _timeSelectionArea.Draw(compositionOp, _selectedAnimationParameters, KeyframeEditors, ImGui.GetWindowDrawList());
+                ImGui.BeginChild("##keySetStrip", new Vector2(0,KeySetStripHeight));
+                _keySetStrip.Draw(compositionOp, _selectedAnimationParameters, KeyframeEditors, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
                 ImGui.PopStyleColor();
             }
@@ -1008,7 +1008,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly CurrentTimeMarker _currentTimeMarker = new();
     private readonly TimeSelectionRange _timeSelectionRange;
     private readonly SelectionRangeIndicator _selectionRangeIndicator;
-    private readonly TimeSelectionArea _timeSelectionArea;
+    private readonly KeySetStrip _keySetStrip;
     private readonly IValueSnapAttractor[] _selectionDragSnapExclusions;
     private readonly List<AnimationParameterEditing> _activeKeyframeEditors = new(2);
     private readonly NodeSelection _nodeSelection;

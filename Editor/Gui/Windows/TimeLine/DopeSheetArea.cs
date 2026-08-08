@@ -1262,7 +1262,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     }
 
     /// <summary>
-    /// Keyframes for an external drag (e.g. a <see cref="TimeSelectionArea"/> bucket drag) that
+    /// Keyframes for an external drag (e.g. a <see cref="KeySetStrip"/> bucket drag) that
     /// should not contribute snap anchors. Generalises <see cref="_draggedKeyframe"/> for callers
     /// that move several keys at once. Caller sets on drag start, clears on drag end.
     /// </summary>

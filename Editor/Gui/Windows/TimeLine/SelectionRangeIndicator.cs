@@ -33,7 +33,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
         _snapExclusions = [this];
         _handles = new TimeWarpHandleSet();
         _warpDrag = new TimeWarpDrag(canvas, _handles);
-        _sourceRegion = new SourceRegionIndicator(canvas, snapHandler);
+        _sourceRegion = new SourceRegionIndicator(canvas);
     }
 
     public void Draw(Instance composition, ImDrawListPtr drawList)

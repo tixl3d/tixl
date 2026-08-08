@@ -383,7 +383,26 @@ Display treatments (dimming out-of-window keys, selection exclusion) were consid
 
 **Deferred** — bundle with a future clip/curve tools pass alongside rebuild/optimize-curve, quantize, etc.
 
-## Open questions
+## Follow-up design: SourceRegionIndicator placement (2026-08-08, open)
+
+The footage/source region in the ruler (slip-drag, clip-boundary-only snapping) is working well and is a
+distinctive UI concept — **manual tests and `.help/` docs are deliberately deferred** until its interaction
+settles; more UX ideas are expected.
+
+Ideas considered:
+
+- **Move it into the keyset strip — REJECTED (2026-08-08):** the strip already carries dot-click /
+  cluster-drag / **fence selection** in a ~10 px band; adding slip-drag zones would recreate the
+  hit-competition just resolved in the ruler. The rename happened anyway: `TimeSelectionArea` →
+  **`KeySetStrip`** (file, class, ImGui ids, cross-references), and the docs now call it the
+  "keyset strip" (individual dots remain "keyset indicators").
+- **Dedicated thin lane between strip and clip lanes**, shown only while a media clip is hovered/selected —
+  still open; no hit competition, tightest adjacency, but a conditional row that must appear/disappear
+  smoothly.
+
+Recent tweaks already applied: flush with ruler bottom (cursor-flicker fix), ruler 28→33 px, taller grab
+band above the SRI, idle outline 0.125→0.17, snapping reduced to clip-boundary alignment only
+(nearest-wins, `Shift` bypasses).
 
 1. **Visuals for the mode toggle.** This changes the meaning of the ruler, which is exactly the kind of
    discontinuity that reads as a glitch. Worth sketching before implementation: is it a two-state toggle in

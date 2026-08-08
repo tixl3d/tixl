@@ -102,7 +102,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
 
     //
     // Selection helpers — shared by DopeSheetArea and TimelineCurveEditor so the timeline's
-    // SelectionRangeIndicator / TimeSelectionArea can operate in either mode.
+    // SelectionRangeIndicator / KeySetStrip can operate in either mode.
     //
 
     public bool IsKeyframeSelected(VDefinition v) => SelectedKeyframes.Contains(v);

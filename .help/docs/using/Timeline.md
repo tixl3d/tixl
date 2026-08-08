@@ -37,9 +37,9 @@ Dragging timeline elements snaps to the bar raster by default. Zoom in for finer
 
 ## Selecting timeline elements
 
-Keyframes and time clips can be selected in a few ways. The selection drives both the **selection range indicator** (above the timeline) and the **keyset indicators** (the strip just below the ruler).
+Keyframes and time clips can be selected in a few ways. The selection drives both the **selection range indicator** (above the timeline) and the **keyset strip** (just below the ruler).
 
-### Keyset indicators (the strip below the ruler)
+### The keyset strip (below the ruler)
 
 Every visible keyframe — or cluster of nearby keyframes — is represented by a small dot in the strip directly below the ruler:
 
