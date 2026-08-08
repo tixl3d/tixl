@@ -48,19 +48,10 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
             return;
         }
 
-        // Map the timeline position into the clip's source time, applying the per-clip playback rate.
-        var timeRange = TimeSlot.TimeClip.TimeRange;
+        // LocalTime already arrives remapped into source time (bars) — every output of a clip-shaped
+        // op gets the TimeClip's remap, extrapolated outside the clip so pre-roll pulls still work.
         var sourceRange = TimeSlot.TimeClip.SourceRange;
-
-        var barsInSeconds = context.LocalTime - timeRange.Start;
-        if (timeRange.End != timeRange.Start)
-        {
-            var rate = (sourceRange.End - sourceRange.Start) / (timeRange.End - timeRange.Start);
-            barsInSeconds *= rate;
-        }
-
-        barsInSeconds += sourceRange.Start;
-        var sourceTimeInSecs = context.Playback.SecondsFromBars(barsInSeconds);
+        var sourceTimeInSecs = context.Playback.SecondsFromBars(context.LocalTime);
 
         // Clamp to the clip's source range so times outside the clip resolve to its first/last frame; the
         // controller additionally clamps to the video's real duration.
@@ -76,8 +67,11 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
 
         // During export, make the renderer wait for this clip's exact frame — but only while it's actually
         // active. The player also pulls clips ahead of their cut to pre-warm the decoder, and those must not
-        // stall export waiting for a frame that isn't on screen yet.
-        if (context.Playback.IsRenderingToFile && context.LocalTime >= timeRange.Start && context.LocalTime < timeRange.End)
+        // stall export waiting for a frame that isn't on screen yet. In source time "active" means inside
+        // SourceRange (min/max so a reversed clip still gates).
+        var isActive = context.LocalTime >= Math.Min(sourceRange.Start, sourceRange.End)
+                       && context.LocalTime < Math.Max(sourceRange.Start, sourceRange.End);
+        if (context.Playback.IsRenderingToFile && isActive)
             Playback.OpNotReady |= !result.IsReady;
 
         Texture.DirtyFlag.Clear();

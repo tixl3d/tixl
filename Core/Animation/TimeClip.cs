@@ -44,6 +44,20 @@ public sealed class TimeClip : IOutputData
     [JsonIgnore]
     public float Speed => MathF.Abs(TimeRange.Duration) < 0.001f ? 1 : SourceRange.Duration / TimeRange.Duration;
 
+    /// <summary>
+    /// Maps a time on the parent timeline (bars) into the clip's source time (bars).
+    /// Affine and unbounded — callers clamp or gate as needed.
+    /// </summary>
+    public double MapTimelineToSource(double timelineBars)
+    {
+        var pos = timelineBars - TimeRange.Start;
+        var duration = TimeRange.End - TimeRange.Start;
+        if (Math.Abs(duration) > 0.0001f)
+            pos *= (SourceRange.End - SourceRange.Start) / duration;
+
+        return pos + SourceRange.Start;
+    }
+
     public bool MakeConform()
     {
         var neededFix = false;

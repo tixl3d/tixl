@@ -16,7 +16,16 @@ using T3.Core.Utils;
 
 namespace T3.Core.Operator.Slots;
 
-public class Slot<T> : ISlot
+/// <summary>
+/// Lets instantiation code hand a child's <see cref="Animation.TimeClip"/> to its non-clip output
+/// slots without knowing the slot's generic type. See <see cref="TimeClipSlot{T}"/>.
+/// </summary>
+internal interface ITimeClipRemapTarget
+{
+    void SetTimeClipForOutputRemap(Animation.TimeClip timeClip);
+}
+
+public class Slot<T> : ISlot, ITimeClipRemapTarget
 {
     public Guid Id;
     private readonly Type _valueType;
@@ -162,10 +171,47 @@ public class Slot<T> : ISlot
         if (_dirtyFlag.IsDirty || _valueIsCommand)
         {
             OpUpdateCounter.CountUp();
-            UpdateAction?.Invoke(context);
+            _effectiveUpdateAction?.Invoke(context);
             _dirtyFlag.Clear();
             _dirtyFlag.SetUpdated();
         }
+    }
+
+    void ITimeClipRemapTarget.SetTimeClipForOutputRemap(Animation.TimeClip timeClip)
+    {
+        _timeClipForOutputRemap = timeClip;
+        RebuildEffectiveUpdateAction();
+    }
+
+    /// <summary>
+    /// A time clip remaps time for the whole operator, so sibling outputs of a <see cref="TimeClipSlot{T}"/>
+    /// get the same source-time remap — but without the out-of-range gate, so consumers can pre-roll
+    /// content slightly outside the clip (e.g. warming a video decoder before the cut).
+    /// The wrap is baked into <see cref="_effectiveUpdateAction"/> here, at assignment time, so
+    /// <see cref="Update"/> stays a single delegate invocation for every slot.
+    /// </summary>
+    private void RebuildEffectiveUpdateAction()
+    {
+        var action = _updateAction;
+        if (_timeClipForOutputRemap == null || action == null)
+        {
+            _effectiveUpdateAction = action;
+            return;
+        }
+
+        var timeClip = _timeClipForOutputRemap;
+        _effectiveUpdateAction = context =>
+                                 {
+                                     var prevTime = context.LocalTime;
+                                     var prevFxTime = context.LocalFxTime;
+                                     context.LocalTime = timeClip.MapTimelineToSource(prevTime);
+                                     context.LocalFxTime = timeClip.MapTimelineToSource(prevFxTime);
+
+                                     action(context);
+
+                                     context.LocalTime = prevTime;
+                                     context.LocalFxTime = prevFxTime;
+                                 };
     }
 
     public void ConnectedUpdate(EvaluationContext context)
@@ -330,7 +376,15 @@ public class Slot<T> : ISlot
     DirtyFlag ISlot.DirtyFlag => DirtyFlag;
 
     // todo - this should be an action list or event? ordered execution can be important
-    public virtual Action<EvaluationContext>? UpdateAction { get; set; }
+    public virtual Action<EvaluationContext>? UpdateAction
+    {
+        get => _updateAction;
+        set
+        {
+            _updateAction = value;
+            RebuildEffectiveUpdateAction();
+        }
+    }
 
     protected Action<EvaluationContext>? _keepOriginalUpdateAction;
     private DirtyFlagTrigger _keepDirtyFlagTrigger;
@@ -345,6 +399,13 @@ public class Slot<T> : ISlot
     private bool _valueIsCommand;
     private protected bool HasInvalidationOverride;
     private bool _parentIsICompoundWithUpdate;
+    private Animation.TimeClip? _timeClipForOutputRemap;
+    private Action<EvaluationContext>? _updateAction;
+
+    /// <summary>What <see cref="Update"/> actually invokes: <see cref="_updateAction"/>, wrapped with the
+    /// sibling-output time remap when <see cref="_timeClipForOutputRemap"/> is set. Rebuilt on assignment,
+    /// never per frame.</summary>
+    private Action<EvaluationContext>? _effectiveUpdateAction;
 
     public override string ToString()
     {

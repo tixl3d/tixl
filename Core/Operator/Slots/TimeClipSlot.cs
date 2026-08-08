@@ -1,10 +1,8 @@
 using System;
-using System.Linq;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
-using T3.Core.Utils;
 
 // ReSharper disable ForCanBeConvertedToForeach
 
@@ -66,15 +64,12 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
             return;
         }
 
-        // TODO: Setting local time should flag time accessors as dirty 
+        // TODO: Setting local time should flag time accessors as dirty
         var prevTime = context.LocalTime;
         var prevFxTime = context.LocalFxTime;
-        
-        context.LocalTime = prevTime.Remap(TimeClip.TimeRange.Start, TimeClip.TimeRange.End,
-                                           TimeClip.SourceRange.Start, TimeClip.SourceRange.End);
-        
-        context.LocalFxTime = prevFxTime.Remap(TimeClip.TimeRange.Start, TimeClip.TimeRange.End,
-                                               TimeClip.SourceRange.Start, TimeClip.SourceRange.End);
+
+        context.LocalTime = TimeClip.MapTimelineToSource(prevTime);
+        context.LocalFxTime = TimeClip.MapTimelineToSource(prevFxTime);
 
         if (_baseUpdateAction == null)
         {
@@ -104,8 +99,10 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
     {
         set
         {
+            // A null assignment (e.g. RestoreUpdateAction after a recompile) must clear the wrapper too —
+            // keeping it would leave a slot that warns "invalid time clip update action" every frame.
             _baseUpdateAction = value;
-            base.UpdateAction = UpdateWithTimeRangeCheck;
+            base.UpdateAction = value == null ? null : UpdateWithTimeRangeCheck;
         }
     }
 

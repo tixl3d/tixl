@@ -592,6 +592,8 @@ public partial class Symbol
                     outputSlot.IsDisabled = symbolChildOutput.IsDisabled;
                 }
 
+                ApplyTimeClipRemapToSiblingOutputs(childOutputs);
+
                 return true;
 
                 bool TryInstantiate([NotNullWhen(true)] out Instance? instance,
@@ -979,6 +981,42 @@ public partial class Symbol
                 {
                     instance.DisposePackage(null);
                 }
+            }
+        }
+
+        /// <summary>
+        /// A time clip remaps time for the whole operator: sibling outputs of a <see cref="TimeClipSlot{T}"/>
+        /// get the same source-time remap as the clip slot itself, so an op's timing doesn't depend on which
+        /// of its outputs a consumer pulls. Unlike the clip slot, siblings are not gated to the clip's
+        /// TimeRange — consumers pre-roll content slightly outside it (e.g. warming a video decoder).
+        /// </summary>
+        private void ApplyTimeClipRemapToSiblingOutputs(List<ISlot> childOutputs)
+        {
+            Animation.TimeClip? timeClip = null;
+            foreach (var slot in childOutputs)
+            {
+                if (slot is not ITimeClipProvider clipProvider)
+                    continue;
+
+                if (timeClip != null)
+                {
+                    Log.Warning($"{Symbol.Name} declares more than one TimeClip output - using the first for time remapping");
+                    break;
+                }
+
+                timeClip = clipProvider.TimeClip;
+            }
+
+            if (timeClip == null)
+                return;
+
+            foreach (var slot in childOutputs)
+            {
+                if (slot is ITimeClipProvider)
+                    continue;
+
+                if (slot is ITimeClipRemapTarget remapTarget)
+                    remapTarget.SetTimeClipForOutputRemap(timeClip);
             }
         }
     }

@@ -45,20 +45,10 @@ internal sealed class MidiClip : Instance<MidiClip>
 
             _printLogMessages = PrintLogMessages.GetValue(context);
 
-            // Get scaled time range of clip
-            var timeRange = Values.TimeClip.TimeRange;
+            // LocalTime already arrives remapped into the clip's source time (bars) — every output of a
+            // clip-shaped op gets the TimeClip's remap, so no manual TimeRange→SourceRange math here.
             var sourceRange = Values.TimeClip.SourceRange;
-
-            // Get the time we should be at in the MIDI file according to the timeClip
-            var bars = context.LocalTime - timeRange.Start;
-            if (Math.Abs(timeRange.End - timeRange.Start) > 0.0001f)
-            {
-                var rate = (sourceRange.End - sourceRange.Start)
-                           / (timeRange.End - timeRange.Start);
-                bars *= rate;
-            }
-
-            bars += sourceRange.Start;
+            var bars = context.LocalTime;
 
             // For now: brute-force rewind if we run backwards in time
             if (bars < _lastTimeInBars)
