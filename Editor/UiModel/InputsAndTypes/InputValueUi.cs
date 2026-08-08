@@ -178,16 +178,24 @@ public abstract class InputValueUi<T> : IInputUi
 
                 InputArea.DrawConnectedMultiInputHeader(name, ParameterNameWidth);
 
-                if (ImGui.BeginPopupContextItem("##parameterOptions", 0))
-                {
-                    if (ParameterWindow.IsAnyInstanceVisible() && ImGui.MenuItem("Rename input"))
-                        ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
-                    
-                    if (ImGui.MenuItem("Parameters settings"))
-                        editState = InputEditStateFlags.ShowOptions;
+                // Opens on left-click (unlike the other parameter menus) because the multi-input header
+                // has no other click action of its own.
+                CustomComponents.ContextMenuForItem(() =>
+                                                    {
+                                                        CustomComponents.DrawMenuGroupLabel("Symbol");
 
-                    ImGui.EndPopup();
-                }
+                                                        if (CustomComponents.DrawMenuItem(_renameItemId, Icon.None, "Rename...",
+                                                                                          isEnabled: ParameterWindow.IsAnyInstanceVisible()))
+                                                        {
+                                                            ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol,
+                                                                                                           input.InputDefinition.Id);
+                                                        }
+
+                                                        if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
+                                                            editState = InputEditStateFlags.ShowOptions;
+                                                    },
+                                                    id: "##parameterOptions",
+                                                    flags: ImGuiPopupFlags.MouseButtonLeft);
 
                 var multiInput = (MultiInputSlot<T>)typedInputSlot;
                 var allInputs = multiInput.GetCollectedTypedInputs();
@@ -247,26 +255,15 @@ public abstract class InputValueUi<T> : IInputUi
 
                 CustomComponents.ContextMenuForItem(() =>
                                                     {
-                                                        if (ImGui.MenuItem("Set as default", !input.IsDefault))
-                                                        {
-                                                            UndoRedoStack.AddAndExecute(new SetInputDefaultCommand(compositionSymbol, symbolChildUi.Id, input));
-                                                        }
+                                                        CustomComponents.DrawMenuGroupLabel("Parameter");
 
-                                                        if (ImGui.MenuItem("Reset to default", !input.IsDefault))
-                                                        {
-                                                            UndoRedoStack.AddAndExecute(new ResetInputToDefault(compositionSymbol, symbolChildUi.Id,
-                                                                                            input));
-                                                        }
-
-                                                        //var graphWindow = ProjectEditing.Components;
-                                                        //var nodeSelection = components.NodeSelection;
-                                                        //var structure = components.Structure;
-                                                        if (ImGui.MenuItem("Extract as connection operator"))
+                                                        if (CustomComponents.DrawMenuItem(_extractItemId, Icon.ExtractInput, "Extract"))
                                                         {
                                                             ProjectView.Focused?.GraphView.ExtractAsConnectedOperator(typedInputSlot, symbolChildUi, input);
                                                         }
 
-                                                        if (ImGui.MenuItem("Publish as Input", null, false, false))
+                                                        if (CustomComponents.DrawMenuItem(_publishAsInputItemId, Icon.None, "Publish as Input",
+                                                                                          isEnabled: false))
                                                         {
                                                             InputArea.PublishAsInput(nodeSelection, inputSlot, symbolChildUi, input);
                                                         }
@@ -276,14 +273,30 @@ public abstract class InputValueUi<T> : IInputUi
 
                                                         InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
 
-                                                        if (ParameterWindow.IsAnyInstanceVisible() && ImGui.MenuItem("Rename input"))
+                                                        CustomComponents.SeparatorLine();
+                                                        CustomComponents.DrawMenuGroupLabel("Symbol");
+
+                                                        if (CustomComponents.DrawMenuItem(_setAsDefaultItemId, Icon.Pin, "Set as Default",
+                                                                                          isEnabled: !input.IsDefault))
+                                                        {
+                                                            UndoRedoStack.AddAndExecute(new SetInputDefaultCommand(compositionSymbol, symbolChildUi.Id, input));
+                                                        }
+
+                                                        if (CustomComponents.DrawMenuItem(_resetItemId, Icon.Reset, "Reset to Default",
+                                                                                          isEnabled: !input.IsDefault))
+                                                        {
+                                                            UndoRedoStack.AddAndExecute(new ResetInputToDefault(compositionSymbol, symbolChildUi.Id,
+                                                                                            input));
+                                                        }
+
+                                                        if (CustomComponents.DrawMenuItem(_renameItemId, Icon.None, "Rename...",
+                                                                                          isEnabled: ParameterWindow.IsAnyInstanceVisible()))
                                                         {
                                                             ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                                                         }
-                                                        
-                                                        if (ImGui.MenuItem("Parameters settings"))
+
+                                                        if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                                                             editState = InputEditStateFlags.ShowOptions;
-                                                     
                                                     });
 
                 ImGui.PopStyleVar();
@@ -384,19 +397,23 @@ public abstract class InputValueUi<T> : IInputUi
             CustomComponents.ContextMenuForItem
                 (() =>
                  {
-                     if (ImGui.MenuItem("Jump To Previous Keyframe", hasKeyframeBefore))
+                     CustomComponents.DrawMenuGroupLabel("Animation");
+
+                     if (CustomComponents.DrawMenuItem(_jumpToPreviousKeyframeItemId, Icon.None, "Jump to Previous Keyframe",
+                                                       isEnabled: hasKeyframeBefore))
                      {
                          UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
                      }
 
-                     if (ImGui.MenuItem("Jump To Next Keyframe", hasKeyframeBefore))
+                     if (CustomComponents.DrawMenuItem(_jumpToNextKeyframeItemId, Icon.None, "Jump to Next Keyframe",
+                                                       isEnabled: hasKeyframeAfter))
                      {
                          UserActionRegistry.QueueAction(UserActions.PlaybackJumpToNextKeyframe);
                      }
 
                      if (hasKeyframeAtCurrentTime)
                      {
-                         if (ImGui.MenuItem("Remove keyframe")
+                         if (CustomComponents.DrawMenuItem(_removeKeyframeItemId, Icon.AddKeyframe, "Remove Keyframe")
                              && animator.TryGetCurvesForInputSlot(inputSlot, out var curves))
                          {
                              AnimationOperations.RemoveKeyframeFromCurves(curves,
@@ -405,7 +422,7 @@ public abstract class InputValueUi<T> : IInputUi
                      }
                      else
                      {
-                         if (ImGui.MenuItem("Insert keyframe")
+                         if (CustomComponents.DrawMenuItem(_insertKeyframeItemId, Icon.AddKeyframe, "Insert Keyframe")
                              && animator.TryGetCurvesForInputSlot(inputSlot, out var curves))
                          {
                              AnimationOperations.InsertKeyframeToCurves(curves,
@@ -413,19 +430,21 @@ public abstract class InputValueUi<T> : IInputUi
                          }
                      }
 
-                     ImGui.Separator();
-
-                     if (ImGui.MenuItem("Remove Animation"))
+                     if (CustomComponents.DrawMenuItem(_removeAnimationItemId, Icon.Reset, "Remove Animation"))
                      {
                          UndoRedoStack.AddAndExecute(new RemoveAnimationsCommand(animator, new[] { inputSlot }));
                      }
 
-                     if (ParameterWindow.IsAnyInstanceVisible() && ImGui.MenuItem("Rename input"))
+                     CustomComponents.SeparatorLine();
+                     CustomComponents.DrawMenuGroupLabel("Symbol");
+
+                     if (CustomComponents.DrawMenuItem(_renameItemId, Icon.None, "Rename...",
+                                                       isEnabled: ParameterWindow.IsAnyInstanceVisible()))
                      {
                          ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                      }
 
-                     if (ImGui.MenuItem("Parameters settings"))
+                     if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                          editState = InputEditStateFlags.ShowOptions;
                  });
             ImGui.PopStyleVar();
@@ -532,7 +551,7 @@ public abstract class InputValueUi<T> : IInputUi
                          UndoRedoStack.AddAndExecute(animateCommand);
                      }
 
-                     if (CustomComponents.DrawMenuItem(_createConnectedItemId, Icon.AddOpToInput, "Create connected"))
+                     if (CustomComponents.DrawMenuItem(_createConnectedItemId, Icon.AddOpToInput, "Create Connected"))
                      {
                          ProjectView.Focused?.GraphView.CreatePlaceHolderConnectedToInput(symbolChildUi, input.InputDefinition);
                      }
@@ -552,7 +571,7 @@ public abstract class InputValueUi<T> : IInputUi
 
                      if (InputArea.IsSnapshotControllable(symbolChildUi, input))
                      {
-                         CustomComponents.DrawMenuGroupLabel("Snapshot control");
+                         CustomComponents.DrawMenuGroupLabel("Snapshot Control");
                          InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
                          SnapshotControlView.DrawSnapshotActionMenuItems(compositionSymbol, symbolChildUi, input, reserveCheckmarkColumn: true);
                      }
@@ -670,6 +689,12 @@ public abstract class InputValueUi<T> : IInputUi
     private static readonly int _setAsDefaultItemId = "setParamAsDefault".GetHashCode();
     private static readonly int _renameItemId = "renameParam".GetHashCode();
     private static readonly int _inputSettingsItemId = "paramInputSettings".GetHashCode();
+    private static readonly int _publishAsInputItemId = "publishAsInput".GetHashCode();
+    private static readonly int _jumpToPreviousKeyframeItemId = "jumpToPreviousKeyframe".GetHashCode();
+    private static readonly int _jumpToNextKeyframeItemId = "jumpToNextKeyframe".GetHashCode();
+    private static readonly int _removeKeyframeItemId = "removeKeyframe".GetHashCode();
+    private static readonly int _insertKeyframeItemId = "insertKeyframe".GetHashCode();
+    private static readonly int _removeAnimationItemId = "removeAnimation".GetHashCode();
 
     private void DrawInputTooltipAndResetIcon(Symbol.Child.Input input,
                                               SkillQuestParameterHint.Hint? skillQuestHint = null)

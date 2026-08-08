@@ -439,7 +439,7 @@ internal sealed class SnapshotControlView
             if (CustomComponents.DrawMenuItem(_renameActionId, Icon.None, "Rename", isEnabled: selectedSnapshot != null, reserveCheckmarkColumn: false))
                 StartRenaming(selectedSnapshot!);
 
-            if (CustomComponents.DrawMenuItem(_updateThumbnailActionId, Icon.Refresh, "Update thumbnail", isEnabled: selectedSnapshot != null, reserveCheckmarkColumn: false))
+            if (CustomComponents.DrawMenuItem(_updateThumbnailActionId, Icon.Refresh, "Update Thumbnail", isEnabled: selectedSnapshot != null, reserveCheckmarkColumn: false))
                 VariationThumbnailRenderer.RequestRender(pool, composition, selectedSnapshot!.Id, toFile: true);
 
             CustomComponents.SeparatorLine();
@@ -959,7 +959,7 @@ internal sealed class SnapshotControlView
 
             // Composition inputs (childKey == Guid.Empty) live in a different owner; their toggle
             // isn't reachable through this child-ui, so the action is offered for ops only.
-            if (CustomComponents.DrawMenuItem(_paramDisableId, Icon.None, "Disable Snapshot control", isEnabled: childKey != Guid.Empty, reserveCheckmarkColumn: false))
+            if (CustomComponents.DrawMenuItem(_paramDisableId, Icon.None, "Disable Snapshot Control", isEnabled: childKey != Guid.Empty, reserveCheckmarkColumn: false))
             {
                 VariationHandling.ToggleParameterSnapshotControl(compositionSymbolUi, symbolChildUi, inputSlot.Input, enable: false);
                 _modificationCheck.Invalidate();
@@ -992,7 +992,7 @@ internal sealed class SnapshotControlView
         var differsFromActive = SnapshotValueDiffers(ctx.ActiveSnapshot, ctx.ChildKey, inputId, value, input.DefaultValue);
         var acted = false;
 
-        if (CustomComponents.DrawMenuItem(_writeToSnapshotItemId, Icon.Apply, "Write to snapshot", null, isEnabled: differsFromActive,
+        if (CustomComponents.DrawMenuItem(_writeToSnapshotItemId, Icon.Apply, "Write to Snapshot", null, isEnabled: differsFromActive,
                 reserveCheckmarkColumn: reserveCheckmarkColumn))
         {
             VariationHandling.ApplyParameterToVariations(ctx.Pool, new[] { ctx.ActiveSnapshot }, ctx.ChildKey, inputId, value,
@@ -1013,7 +1013,7 @@ internal sealed class SnapshotControlView
             }
         }
 
-        if (CustomComponents.DrawMenuItem(_writeToAllSnapshotsItemId, Icon.None, "Write to all snapshots", null, isEnabled: differsFromAny,
+        if (CustomComponents.DrawMenuItem(_writeToAllSnapshotsItemId, Icon.None, "Write to All Snapshots", null, isEnabled: differsFromAny,
                 reserveCheckmarkColumn: reserveCheckmarkColumn))
         {
             VariationHandling.ApplyParameterToVariations(ctx.Pool, ctx.Pool.AllVariations, ctx.ChildKey, inputId, value,

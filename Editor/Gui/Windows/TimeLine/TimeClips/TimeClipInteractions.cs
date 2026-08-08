@@ -12,6 +12,7 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.MagGraph.Model;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -94,63 +95,68 @@ internal sealed class TimeClipInteractions
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6, 6));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6));
+        ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 6);
         if (ImGui.BeginPopupContextWindow("windows_context_menu"))
         {
             _contextMenuIsOpen = true;
-            if (ImGui.MenuItem("Delete", UserActions.DeleteSelection.ListShortcuts(), false, _context.ClipSelection.Count > 0))
-            {
-                DeleteSelectedClips(compositionOp);
-            }
 
-            if (ImGui.MenuItem("Clear Time Stretch", null, false, _context.ClipSelection.Count > 0))
-            {
-                var selectedClips = _context.ClipSelection.GetAllOrSelectedClips().ToList();
-                var moveTimeClipCommand = new MoveTimeClipsCommand(compositionOp, selectedClips);
-                // Reset stretch only — keep the user's source-side trim. The source slice
-                // continues to start at its existing SourceRange.Start (so the event sitting
-                // at the trimmed-in edge stays put), and the End is pulled to match the
-                // timeline duration so the rate becomes 1. Pinning SourceRange.Start to 0
-                // here would silently undo the trim and snap content the user had pushed
-                // off-screen back into view.
-                foreach (var clip in selectedClips)
-                    clip.SourceRange.End = clip.SourceRange.Start + clip.TimeRange.Duration;
-
-                moveTimeClipCommand.StoreCurrentValues();
-                UndoRedoStack.AddAndExecute(moveTimeClipCommand);
-                // Keep the selection — the user is mid-edit on these clips and the next
-                // action (Edit clip times, Cut, drag) is almost always still on them.
-            }
-
-            if (ImGui.MenuItem("Edit clip times", null, false, _context.ClipSelection.Count > 0))
-            {
-                ClipTimingEditor.TimeClipEditorRequested = true;
-            }
-
-            if (ImGui.MenuItem("Cut at time", UserActions.SplitSelectedOrHoveredClips.ListShortcuts()))
-            {
-                SplitClipsAtTime(compositionOp);
-            }
-
-            if (ImGui.MenuItem("Select following clips", UserActions.SelectFollowingClips.ListShortcuts())
+            // Ordered by how often the action follows a right-click, destructive last.
+            if (DrawClipMenuItem(_selectFollowingClipsId, "Select Following Clips", UserActions.SelectFollowingClips.ListShortcuts())
                 && _playback != null)
             {
                 // The playhead anchor is exact (e.g. right after a cut) — a frame of tolerance suffices.
                 SelectClipsStartingAfter(_playback.TimeInBars, _playback.BarsFromSeconds(1 / 30.0));
             }
 
-            DrawMainSoundtrackMenuItem(compositionOp);
+            if (DrawClipMenuItem(_cutAtTimeId, "Cut at Time", UserActions.SplitSelectedOrHoveredClips.ListShortcuts()))
+            {
+                SplitClipsAtTime(compositionOp);
+            }
+
+            if (DrawClipMenuItem(_editClipTimesId, "Edit Clip Times"))
+            {
+                ClipTimingEditor.TimeClipEditorRequested = true;
+            }
+
+            if (DrawClipMenuItem(_clearTimeStretchId, "Clear Time Stretch"))
+            {
+                ClearTimeStretchOfSelectedClips(compositionOp);
+            }
+
+            if (DrawClipMenuItem(_deleteClipsId, "Delete", UserActions.DeleteSelection.ListShortcuts()))
+            {
+                DeleteSelectedClips(compositionOp);
+            }
 
             // Only offered when the selection includes a DataClip op - the inline pane has nothing to show otherwise.
-            if (InlineDataClipArea.HasSelectedDataClipInstance(_context.TimeCanvas, compositionOp))
+            var hasClipDataItem = InlineDataClipArea.HasSelectedDataClipInstance(_context.TimeCanvas, compositionOp);
+            var hasSoundtrackItem = TryGetSelectedAudioClip(compositionOp, out var audioClipId, out var audioProvider);
+
+            if (hasClipDataItem || hasSoundtrackItem)
+            {
+                CustomComponents.SeparatorLine();
+            }
+
+            if (hasSoundtrackItem)
+            {
+                var isMain = audioProvider!.GetResourceHandle().Clip.IsMainSoundtrack;
+                if (DrawClipMenuItem(_mainSoundtrackId, isMain ? "Unset Main Soundtrack" : "Set as Main Soundtrack"))
+                {
+                    SetMainSoundtrackClip(compositionOp, audioClipId, enable: !isMain);
+                }
+            }
+
+            if (hasClipDataItem)
             {
                 var showClipData = _context.TimeCanvas.InlineDataClipEditEnabled;
-                if (ImGui.MenuItem("Show Clip Data", null, showClipData))
+                if (DrawClipMenuItem(_showClipDataId, "Show Clip Data", null, showClipData))
                 {
                     _context.TimeCanvas.InlineDataClipEditEnabled = !showClipData;
                 }
             }
 
-            ImGui.Separator();
+            // The keyframe editor appends its own items into this popup.
+            CustomComponents.SeparatorLine();
 
             ImGui.EndPopup();
         }
@@ -158,37 +164,67 @@ internal sealed class TimeClipInteractions
         {
             _contextMenuIsOpen = false;
         }
-        ImGui.PopStyleVar(2);
+        ImGui.PopStyleVar(3);
     }
 
     /// <summary>
-    /// "Set as main soundtrack" for a single selected [AudioClip]: sets its Display to BackgroundImage
-    /// (timeline background, FFT routing, export duration) and clears the designation from any other
-    /// audio clip — one main soundtrack per composition. Toggles off when the clip already is it.
+    /// This menu has no icons, so the icon column stays unreserved — matching the keyframe items that the
+    /// curve editor appends into the same popup.
     /// </summary>
-    private void DrawMainSoundtrackMenuItem(Instance compositionOp)
+    private static bool DrawClipMenuItem(int id, string label, string? keyboardShortCut = null, bool isChecked = false)
     {
-        if (_context.ClipSelection.Count != 1)
-            return;
+        return CustomComponents.DrawMenuItem(id, label, keyboardShortCut, isChecked, reserveIconColumn: false);
+    }
 
-        Guid selectedId = default;
+    private void ClearTimeStretchOfSelectedClips(Instance compositionOp)
+    {
+        var selectedClips = _context.ClipSelection.GetAllOrSelectedClips().ToList();
+        var moveTimeClipCommand = new MoveTimeClipsCommand(compositionOp, selectedClips);
+        // Reset stretch only — keep the user's source-side trim. The source slice
+        // continues to start at its existing SourceRange.Start (so the event sitting
+        // at the trimmed-in edge stays put), and the End is pulled to match the
+        // timeline duration so the rate becomes 1. Pinning SourceRange.Start to 0
+        // here would silently undo the trim and snap content the user had pushed
+        // off-screen back into view.
+        foreach (var clip in selectedClips)
+            clip.SourceRange.End = clip.SourceRange.Start + clip.TimeRange.Duration;
+
+        moveTimeClipCommand.StoreCurrentValues();
+        UndoRedoStack.AddAndExecute(moveTimeClipCommand);
+        // Keep the selection — the user is mid-edit on these clips and the next
+        // action (Edit Clip Times, Cut, drag) is almost always still on them.
+    }
+
+    /// <summary>
+    /// The "Main Soundtrack" toggle only applies to a single selected [AudioClip], so the row is
+    /// omitted entirely for any other selection.
+    /// </summary>
+    private bool TryGetSelectedAudioClip(Instance compositionOp, out Guid clipId, out IAudioClipProvider? provider)
+    {
+        clipId = default;
+        provider = null;
+
+        if (_context.ClipSelection.Count != 1)
+            return false;
+
         foreach (var id in _context.ClipSelection.SelectedClipsIds)
         {
-            selectedId = id;
+            clipId = id;
             break;
         }
 
-        if (!compositionOp.Children.TryGetChildInstance(selectedId, out var instance)
-            || instance is not IAudioClipProvider provider)
-            return;
+        if (!compositionOp.Children.TryGetChildInstance(clipId, out var instance)
+            || instance is not IAudioClipProvider audioClipProvider)
+            return false;
 
-        var isMain = provider.GetResourceHandle().Clip.IsMainSoundtrack;
-        if (ImGui.MenuItem(isMain ? "Unset main soundtrack" : "Set as main soundtrack"))
-        {
-            SetMainSoundtrackClip(compositionOp, selectedId, enable: !isMain);
-        }
+        provider = audioClipProvider;
+        return true;
     }
 
+    /// <summary>
+    /// Sets the clip's Display to BackgroundImage — which drives the timeline background, FFT routing and
+    /// the export duration — and clears the designation from every other audio clip.
+    /// </summary>
     private static void SetMainSoundtrackClip(Instance compositionOp, Guid clipChildId, bool enable)
     {
         var symbol = compositionOp.Symbol;
@@ -755,4 +791,12 @@ internal sealed class TimeClipInteractions
     private int _lastOpVersion = -1;
 
     private static MoveTimeClipsCommand? _moveClipsCommand;
+
+    private static readonly int _selectFollowingClipsId = nameof(_selectFollowingClipsId).GetHashCode();
+    private static readonly int _cutAtTimeId = nameof(_cutAtTimeId).GetHashCode();
+    private static readonly int _editClipTimesId = nameof(_editClipTimesId).GetHashCode();
+    private static readonly int _clearTimeStretchId = nameof(_clearTimeStretchId).GetHashCode();
+    private static readonly int _deleteClipsId = nameof(_deleteClipsId).GetHashCode();
+    private static readonly int _mainSoundtrackId = nameof(_mainSoundtrackId).GetHashCode();
+    private static readonly int _showClipDataId = nameof(_showClipDataId).GetHashCode();
 }

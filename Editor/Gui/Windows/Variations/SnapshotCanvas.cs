@@ -43,10 +43,12 @@ internal sealed class SnapshotCanvas : VariationBaseCanvas
 
         var nodeSelection = components.NodeSelection;
 
-        if (ImGui.MenuItem("Select affected Operators",
-                           "",
-                           false,
-                           oneOrMoreSelected))
+        if (CustomComponents.DrawMenuItem(_selectAffectedOperatorsId,
+                                          "Select Affected Operators",
+                                          null,
+                                          false,
+                                          oneOrMoreSelected,
+                                          reserveIconColumn: false))
         {
             nodeSelection.Clear();
 
@@ -70,10 +72,12 @@ internal sealed class SnapshotCanvas : VariationBaseCanvas
             FitViewToSelectionHandling.FitViewToSelection();
         }
 
-        if (ImGui.MenuItem("Remove selected Ops from Variations",
-                           "",
-                           false,
-                           oneOrMoreSelected))
+        if (CustomComponents.DrawMenuItem(_removeSelectedOpsId,
+                                          "Remove Selected Ops from Variations",
+                                          null,
+                                          false,
+                                          oneOrMoreSelected,
+                                          reserveIconColumn: false))
         {
             var selectedInstances = nodeSelection.GetSelectedInstances().ToList();
             var selectedThumbnails = new List<Variation>();
@@ -104,4 +108,7 @@ internal sealed class SnapshotCanvas : VariationBaseCanvas
         TriggerThumbnailSave();
         VariationThumbnail.VariationForRenaming = newVariation;
     }
+
+    private static readonly int _selectAffectedOperatorsId = nameof(_selectAffectedOperatorsId).GetHashCode();
+    private static readonly int _removeSelectedOpsId = nameof(_removeSelectedOpsId).GetHashCode();
 }

@@ -19,7 +19,7 @@ Splitting a clip (`Shift+X` at the playhead) keeps both halves playing seamlessl
 
 One clip can be designated the **main soundtrack**. It renders as the full-width image behind the timeline, drives audio-reactive operators, and defines the duration of exported executables.
 
-To designate it, right-click an audio clip and choose **Set as main soundtrack**, or use **Create Soundtrack** in Project Settings → Audio. Technically the designation is just the clip's **Display** parameter set to **Background Image** — so it travels with the operator, not with any hidden project state.
+To designate it, right-click an audio clip and choose **Set as Main Soundtrack**, or use **Create Soundtrack** in Project Settings → Audio. Technically the designation is just the clip's **Display** parameter set to **Background Image** — so it travels with the operator, not with any hidden project state.
 
 The main soundtrack always spans its full source content, and its clip block is hidden from the timeline layers: the background image is its representation. To reposition it on the timeline or turn it back into a regular clip, set the operator's **Display** parameter back to **Clip** — Project Settings → Audio → **Select and focus Main Soundtrack** jumps you to the operator.
 

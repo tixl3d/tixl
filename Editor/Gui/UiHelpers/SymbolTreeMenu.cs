@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Windows.SymbolLib;
 
 namespace T3.Editor.Gui.UiHelpers;
@@ -24,7 +25,8 @@ internal static class SymbolTreeMenu
         else
         {
             ImGui.PushID(subtree.Name);
-            if (ImGui.BeginMenu(subtree.Name))
+            // The namespace name is the only stable key here, and it already scopes the ImGui id above.
+            if (CustomComponents.DrawSubMenu(subtree.Name.GetHashCode(), subtree.Name))
             {
                 DrawContent(subtree);
 

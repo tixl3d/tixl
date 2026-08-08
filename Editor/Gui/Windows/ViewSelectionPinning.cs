@@ -105,7 +105,7 @@ internal sealed class ViewSelectionPinning
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6, 6));
             if (_isPinned)
             {
-                if (ImGui.MenuItem("Unpin view"))
+                if (CustomComponents.DrawMenuItem(_unpinViewId, "Unpin View", reserveIconColumn: false))
                 {
                     Unpin();
                 }
@@ -115,7 +115,8 @@ internal sealed class ViewSelectionPinning
                     var instanceSelectedInGraph = _pinnedProjectView!.NodeSelection.GetFirstSelectedInstance();
                     if (instanceSelectedInGraph != pinnedOrSelectedInstance)
                     {
-                        if (ImGui.MenuItem("Pin Selection to View", UserActions.PinToOutputWindow.ListShortcuts()))
+                        if (CustomComponents.DrawMenuItem(_pinSelectionToViewId, "Pin Selection to View",
+                                                          UserActions.PinToOutputWindow.ListShortcuts(), reserveIconColumn: false))
                         {
                             PinSelectionToView(canvas);
                         }
@@ -124,7 +125,8 @@ internal sealed class ViewSelectionPinning
             }
             else
             {
-                if (ImGui.MenuItem("Pin Selection to View", UserActions.PinToOutputWindow.ListShortcuts()))
+                if (CustomComponents.DrawMenuItem(_pinSelectionToViewId, "Pin Selection to View",
+                                                  UserActions.PinToOutputWindow.ListShortcuts(), reserveIconColumn: false))
                 {
                     PinSelectionToView(canvas);
                 }
@@ -132,14 +134,14 @@ internal sealed class ViewSelectionPinning
 
             if (pinnedEvaluationInstance != null)
             {
-                if (ImGui.MenuItem("Unpin start operator"))
+                if (CustomComponents.DrawMenuItem(_unpinStartOperatorId, "Unpin Start Operator", reserveIconColumn: false))
                 {
                     _pinnedEvaluationInstancePath = [];
                 }
             }
             else
             {
-                if (ImGui.MenuItem("Pin as start operator"))
+                if (CustomComponents.DrawMenuItem(_pinAsStartOperatorId, "Pin as Start Operator", reserveIconColumn: false))
                 {
                     PinSelectionAsEvaluationStart(nodeSelection.GetFirstSelectedInstance());
                 }
@@ -147,7 +149,7 @@ internal sealed class ViewSelectionPinning
 
             if (ProjectView.Focused != null)
             {
-                if (ImGui.MenuItem("Show in Graph"))
+                if (CustomComponents.DrawMenuItem(_showInGraphId, "Show in Graph", reserveIconColumn: false))
                 {
                     var parentInstance = pinnedOrSelectedInstance.Parent;
                     var parentSymbolUi = parentInstance?.GetSymbolUi();
@@ -162,7 +164,7 @@ internal sealed class ViewSelectionPinning
 
             if (pinnedOrSelectedInstance.Outputs.Count > 1)
             {
-                if (ImGui.BeginMenu("Show Output..."))
+                if (CustomComponents.DrawSubMenu(_showOutputId, "Show Output"))
                 {
                     var isDefaultOutput = _selectedOutputId == Guid.Empty;
 
@@ -172,9 +174,10 @@ internal sealed class ViewSelectionPinning
                         var isSelected = outputIndex == 0 && isDefaultOutput
                                          || output.Id == _selectedOutputId;
                         
-                        if(CustomComponents.DrawMenuItem(outputIndex+10, 
+                        if(CustomComponents.DrawMenuItem(_showOutputItemBaseId + outputIndex,
                                                        output.ToString(),
-                                                       isChecked:isSelected
+                                                       isChecked:isSelected,
+                                                       reserveIconColumn: false
                                                        ))
                         {
                             _selectedOutputId = outputIndex == 0 ? Guid.Empty : output.Id;
@@ -185,8 +188,8 @@ internal sealed class ViewSelectionPinning
                 }
             }
 
-            ImGui.Separator();
-            ImGui.MenuItem("Show hovered outputs", false);
+            CustomComponents.SeparatorLine();
+            CustomComponents.DrawMenuItem(_showHoveredOutputsId, "Show Hovered Outputs", isEnabled: false, reserveIconColumn: false);
             ImGui.PopStyleVar();
             ImGui.EndCombo();
         }
@@ -335,4 +338,13 @@ internal sealed class ViewSelectionPinning
 
         return outputs[0];
     }
+
+    private static readonly int _unpinViewId = nameof(_unpinViewId).GetHashCode();
+    private static readonly int _pinSelectionToViewId = nameof(_pinSelectionToViewId).GetHashCode();
+    private static readonly int _unpinStartOperatorId = nameof(_unpinStartOperatorId).GetHashCode();
+    private static readonly int _pinAsStartOperatorId = nameof(_pinAsStartOperatorId).GetHashCode();
+    private static readonly int _showInGraphId = nameof(_showInGraphId).GetHashCode();
+    private static readonly int _showOutputId = nameof(_showOutputId).GetHashCode();
+    private static readonly int _showOutputItemBaseId = nameof(_showOutputItemBaseId).GetHashCode();
+    private static readonly int _showHoveredOutputsId = nameof(_showHoveredOutputsId).GetHashCode();
 }

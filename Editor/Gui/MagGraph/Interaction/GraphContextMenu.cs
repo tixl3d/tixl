@@ -76,8 +76,8 @@ internal static class GraphContextMenu
             CustomComponents.SeparatorLine();
 
             var selectionLabel = oneOpSelected
-                                     ? $"{selectedChildUis[0].SymbolChild.ReadableName}..."
-                                     : $"{selectedChildUis.Count} selected items...";
+                                     ? selectedChildUis[0].SymbolChild.ReadableName
+                                     : $"{selectedChildUis.Count} Selected Items";
             CustomComponents.DrawMenuGroupLabel(selectionLabel);
 
             var allSelectedDisabled = selectedChildUis.TrueForAll(c => c.SymbolChild.IsDisabled);
@@ -128,7 +128,7 @@ internal static class GraphContextMenu
                 context.StateMachine.SetState(GraphStates.RenameChild, context);
             }
 
-            if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddComment, Icon.None, "Add Comment",
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddComment, Icon.None, "Add Comment...",
                                               UserActions.AddComment.ListShortcuts(), isChecked: false, isEnabled: oneOpSelected,
                                               reserveIconColumn: false, state: muted))
             {
@@ -136,7 +136,7 @@ internal static class GraphContextMenu
             }
 
             var canAlign = context.StateMachine.CurrentState == GraphStates.Default && selectedChildUis.Count > 1;
-            if (CustomComponents.DrawMenuItem((int)MenuItemIds.AlignLeft, Icon.None, "Align select left",
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.AlignLeft, Icon.None, "Align Select Left",
                                               UserActions.AlignSelectionLeft.ListShortcuts(), isChecked: false, isEnabled: canAlign,
                                               reserveIconColumn: false, state: muted))
             {
@@ -158,10 +158,10 @@ internal static class GraphContextMenu
                                  : (ProxyGenerationService.JobState?)null;
             var (proxyLabel, proxyBusy) = proxyState switch
                                               {
-                                                  ProxyGenerationService.JobState.Queued     => ("Proxy queued…", true),
-                                                  ProxyGenerationService.JobState.Generating  => ($"Generating proxy… {status.Progress * 100:0}%", true),
-                                                  ProxyGenerationService.JobState.Done         => ("Regenerate proxy", false),
-                                                  _                                            => ("Generate proxy video", false),
+                                                  ProxyGenerationService.JobState.Queued     => ("Proxy Queued...", true),
+                                                  ProxyGenerationService.JobState.Generating  => ($"Generating Proxy... {status.Progress * 100:0}%", true),
+                                                  ProxyGenerationService.JobState.Done         => ("Regenerate Proxy", false),
+                                                  _                                            => ("Generate Proxy Video", false),
                                               };
             // Block generation (but not the busy/queued states) when the target drive is low on space.
             var hasDisk = ProxyGenerationService.HasEnoughFreeDisk(proxySource, out var proxyFreeBytes, out var proxyReqBytes);
@@ -179,7 +179,7 @@ internal static class GraphContextMenu
         }
 
         // ----- Select / clipboard / duplication ----------------------------
-        if (CustomComponents.DrawSubMenu((int)MenuItemIds.SelectMenu, "Select..."))
+        if (CustomComponents.DrawSubMenu((int)MenuItemIds.SelectMenu, "Select"))
         {
             if (CustomComponents.DrawMenuItem((int)MenuItemIds.SelectCustomOps, Icon.None, "Custom Operators",
                                               reserveCheckmarkColumn: false, reserveIconColumn: false))
@@ -217,7 +217,7 @@ internal static class GraphContextMenu
                 }
             }
 
-            if (CustomComponents.DrawMenuItem((int)MenuItemIds.SelectConnected, Icon.None, "Select connected",
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.SelectConnected, Icon.None, "Select Connected",
                                               isEnabled: someOpsSelected, reserveCheckmarkColumn: false, reserveIconColumn: false))
             {
                 var connectedIds = new HashSet<Guid>();
@@ -247,7 +247,7 @@ internal static class GraphContextMenu
                 }
             }
 
-            if (CustomComponents.DrawMenuItem((int)MenuItemIds.SelectConnectedInputs, Icon.None, "Select connected inputs",
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.SelectConnectedInputs, Icon.None, "Select Connected Inputs",
                                               isEnabled: someOpsSelected, reserveCheckmarkColumn: false, reserveIconColumn: false))
             {
                 var connectedIds = new HashSet<Guid>();
@@ -318,7 +318,7 @@ internal static class GraphContextMenu
         DrawEditMoreSubMenu(context, nodeSelection, selectedChildUis, oneOpSelected, someOpsSelected, isSaving);
 
         if (canModify && selectedOutputUis.Count == 1
-            && CustomComponents.DrawMenuItem((int)MenuItemIds.RenameOutput, Icon.None, "Rename output",
+            && CustomComponents.DrawMenuItem((int)MenuItemIds.RenameOutput, Icon.None, "Rename Output...",
                                              reserveIconColumn: false, state: muted))
         {
             context.RenameOutputDialog.ShowNextFrame(compositionSymbolUi.Symbol, selectedOutputUis[0].Id);
@@ -327,7 +327,7 @@ internal static class GraphContextMenu
         CustomComponents.SeparatorLine();
 
         // ----- Add ----------------------------------------------------------
-        CustomComponents.DrawMenuGroupLabel("Add...");
+        CustomComponents.DrawMenuGroupLabel("Add");
 
         if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddNode, Icon.None, "Operator",
                                           "TAB", reserveIconColumn: false, state: muted))
@@ -346,14 +346,14 @@ internal static class GraphContextMenu
 
         if (canModify)
         {
-            if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddInput, Icon.None, "Input Parameter",
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddInput, Icon.None, "Input Parameter...",
                                               reserveIconColumn: false, state: muted))
             {
                 var posOnCanvas = context.View.InverseTransformPositionFloat(CustomComponents.ScreenPosOnOpeningContextMenu);
                 context.AddInputDialog.ShowNextFrame(posOnCanvas);
             }
 
-            if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddOutput, Icon.None, "Output",
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddOutput, Icon.None, "Output...",
                                               reserveIconColumn: false, state: muted))
             {
                 var posOnCanvas = context.View.InverseTransformPositionFloat(CustomComponents.ScreenPosOnOpeningContextMenu);
@@ -379,7 +379,7 @@ internal static class GraphContextMenu
         const CustomComponents.ButtonStates emphasized = CustomComponents.ButtonStates.Emphasized;
         const CustomComponents.ButtonStates muted = CustomComponents.ButtonStates.Default;
 
-        if (!CustomComponents.DrawSubMenu((int)MenuItemIds.DisplayMenu, "Display..."))
+        if (!CustomComponents.DrawSubMenu((int)MenuItemIds.DisplayMenu, "Display"))
             return;
 
         var isSmall = selectedChildUis.Any(child => child.Style == SymbolUi.Child.Styles.Default);
@@ -420,7 +420,7 @@ internal static class GraphContextMenu
         var isImage = oneOpSelected
                       && selectedChildUis[0].SymbolChild.Symbol.OutputDefinitions.Count > 0
                       && selectedChildUis[0].SymbolChild.Symbol.OutputDefinitions[0].ValueType == typeof(Texture2D);
-        if (CustomComponents.DrawMenuItem((int)MenuItemIds.DisplayBackground, Icon.None, "Set image as graph background",
+        if (CustomComponents.DrawMenuItem((int)MenuItemIds.DisplayBackground, Icon.None, "Set Image as Graph Background",
                                           UserActions.DisplayImageAsBackground.ListShortcuts(), isChecked: false, isEnabled: isImage,
                                           reserveIconColumn: false, state: muted))
         {
@@ -428,7 +428,7 @@ internal static class GraphContextMenu
             ProjectView.Focused.SetBackgroundOutput(instance);
         }
 
-        if (CustomComponents.DrawMenuItem((int)MenuItemIds.DisplayPin, Icon.None, "Pin to output",
+        if (CustomComponents.DrawMenuItem((int)MenuItemIds.DisplayPin, Icon.None, "Pin to Output",
                                           isChecked: false, isEnabled: oneOpSelected, reserveIconColumn: false, state: muted))
         {
             if (ProjectView.Focused != null)
@@ -443,7 +443,7 @@ internal static class GraphContextMenu
     {
         const CustomComponents.ButtonStates muted = CustomComponents.ButtonStates.Default;
 
-        if (!CustomComponents.DrawSubMenu((int)MenuItemIds.MoreMenu, "more..."))
+        if (!CustomComponents.DrawSubMenu((int)MenuItemIds.MoreMenu, "More"))
             return;
 
         // Copy variants. Keyframes and Dependencies are placeholders until the backing actions exist.
@@ -485,7 +485,7 @@ internal static class GraphContextMenu
         if (!symbolPackage.IsReadOnly)
         {
             CustomComponents.SeparatorLine();
-            if (CustomComponents.DrawSubMenu((int)MenuItemIds.OpenFolderMenu, "Open folder...", reserveCheckmarkColumn: false))
+            if (CustomComponents.DrawSubMenu((int)MenuItemIds.OpenFolderMenu, "Open Folder", reserveCheckmarkColumn: false))
             {
                 if (CustomComponents.DrawMenuItem((int)MenuItemIds.OpenProjectFolder, Icon.None, "Project",
                                                   reserveCheckmarkColumn: false, reserveIconColumn: false))
@@ -511,11 +511,11 @@ internal static class GraphContextMenu
     {
         const CustomComponents.ButtonStates muted = CustomComponents.ButtonStates.Default;
 
-        if (!CustomComponents.DrawSubMenu((int)MenuItemIds.SymbolDefMenu, "Symbol Definition...", isEnabled: !isSaving))
+        if (!CustomComponents.DrawSubMenu((int)MenuItemIds.SymbolDefMenu, "Symbol Definition", isEnabled: !isSaving))
             return;
 
         var canRename = oneOpSelected && !selectedChildUis[0].SymbolChild.Symbol.SymbolPackage.IsReadOnly;
-        if (CustomComponents.DrawMenuItem((int)MenuItemIds.RenameSymbol, Icon.None, "Rename Symbol",
+        if (CustomComponents.DrawMenuItem((int)MenuItemIds.RenameSymbol, Icon.None, "Rename Symbol...",
                                           isChecked: false, isEnabled: canRename, reserveCheckmarkColumn: false, reserveIconColumn: false,
                                           state: muted))
         {
@@ -523,7 +523,7 @@ internal static class GraphContextMenu
             context.SymbolNameForDialogEdits = selectedChildUis[0].SymbolChild.Symbol.Name;
         }
 
-        if (CustomComponents.DrawMenuItem((int)MenuItemIds.DuplicateAsNewType, Icon.None, "Duplicate as new Type",
+        if (CustomComponents.DrawMenuItem((int)MenuItemIds.DuplicateAsNewType, Icon.None, "Duplicate as New Type...",
                                           isChecked: false, isEnabled: oneOpSelected, reserveCheckmarkColumn: false, reserveIconColumn: false,
                                           state: muted))
         {
@@ -533,7 +533,7 @@ internal static class GraphContextMenu
             context.DuplicateSymbolDialog.ShowNextFrame();
         }
 
-        if (CustomComponents.DrawMenuItem((int)MenuItemIds.CombineIntoNewType, Icon.None, "Combine into new Type",
+        if (CustomComponents.DrawMenuItem((int)MenuItemIds.CombineIntoNewType, Icon.None, "Combine into New Type...",
                                           isChecked: false, isEnabled: someOpsSelected, reserveCheckmarkColumn: false, reserveIconColumn: false,
                                           state: muted))
         {

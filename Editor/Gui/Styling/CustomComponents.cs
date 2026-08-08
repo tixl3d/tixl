@@ -105,14 +105,15 @@ internal static partial class CustomComponents
         ImGui.SetCursorPosX(0);
         var p = ImGui.GetCursorScreenPos();
 
-        //var p = ImGui.GetCursorStartPos() + ImGui.GetWindowPos() + new Vector2(1,1);
         ImGui.GetWindowDrawList()
              .AddRectFilled(p,
                             p + new Vector2(ImGui.GetWindowSize().X, 1), UiColors.ForegroundFull.Fade(0.1f));
 
-        FormInputs.AddVerticalSpace(5);
+        // Restore the indent BEFORE the trailing space: the space is a Dummy, and submitting an item is
+        // what clears ImGui's "cursor was moved manually" flag. Ending on a bare SetCursorPos would trip
+        // the extend-parent-boundaries assert whenever a separator is the last thing drawn in a window.
         ImGui.SetCursorPosX(x);
-        
+        FormInputs.AddVerticalSpace(5);
     }
 
     /// <summary>
@@ -311,7 +312,7 @@ internal static partial class CustomComponents
         var symbolPackage = symbol.SymbolPackage;
         var project = symbolPackage as EditableSymbolProject;
         var enabled = project != null;
-        if (ImGui.MenuItem("Open C# code", enabled))
+        if (DrawMenuItem(_openCSharpCodeId, "Open C# Code", isEnabled: enabled, reserveIconColumn: false))
         {
             if (!project!.TryOpenCSharpInEditor(symbol))
             {
@@ -404,4 +405,6 @@ internal static partial class CustomComponents
             return false;
         }, triggerWidth);
     }
+
+    private static readonly int _openCSharpCodeId = nameof(_openCSharpCodeId).GetHashCode();
 }

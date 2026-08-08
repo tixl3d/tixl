@@ -398,7 +398,7 @@ internal sealed class SymbolLibrary : Window
             // Context menu for namespace node
             CustomComponents.ContextMenuForItem(() =>
                                                 {
-                                                    if (ImGui.MenuItem("Rename Namespace"))
+                                                    if (CustomComponents.DrawMenuItem(_renameNamespaceId, "Rename Namespace...", reserveIconColumn: false))
                                                     {
                                                         _subtreeNodeToRename = subtree;
                                                         _renameNamespaceDialog.ShowNextFrame();
@@ -855,10 +855,10 @@ internal sealed class SymbolLibrary : Window
                                                                    // Existing symbol-specific menu
                                                                    CustomComponents.DrawSymbolCodeContextMenuItem(symbol);
 
-                                                                   ImGui.Separator();
+                                                                   CustomComponents.SeparatorLine();
 
                                                                    // Delete symbol menu entry
-                                                                   if (ImGui.MenuItem("Delete Symbol"))
+                                                                   if (CustomComponents.DrawMenuItem(_deleteSymbolId, "Delete Symbol", reserveIconColumn: false))
                                                                    {
                                                                        _symbolToDelete = symbol;
                                                                        _deleteSymbolDialog.ShowNextFrame();
@@ -1091,4 +1091,7 @@ internal sealed class SymbolLibrary : Window
 
         return false;
     }
+
+    private static readonly int _renameNamespaceId = nameof(_renameNamespaceId).GetHashCode();
+    private static readonly int _deleteSymbolId = nameof(_deleteSymbolId).GetHashCode();
 }

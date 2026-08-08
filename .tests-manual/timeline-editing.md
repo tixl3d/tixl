@@ -50,7 +50,7 @@ With the timeline paused, press `.` and `,` repeatedly.
 
 **Action:**
 Cut a clip at the playhead (`Ctrl+X`), then press `Ctrl+Shift+A` (or right-click →
-"Select following clips").
+"Select Following Clips").
 
 **Expected:**
 - Every clip starting at or after the playhead is selected on all layers —
@@ -82,3 +82,33 @@ timeline.
   appears in the hover tooltip instead.
 - Labels are readable at rest, brighten slightly on hover, and use the selection
   color when selected.
+
+## Step: Clip context menu order and styling
+
+**Action:**
+Select exactly one non-audio clip (e.g. a [Layer] op) in the timeline, park the
+playhead inside it, and right-click the clip.
+
+**Expected:**
+- The rows appear in this order, top to bottom: **Select Following Clips**,
+  **Cut at Time**, **Edit Clip Times**, **Clear Time Stretch**, **Delete**.
+- Every label is Title Case, and the labels all start on the same x-position —
+  including the keyframe rows further down (**Paste Keyframes**, **View All**).
+- Shortcuts are right-aligned and dimmed: `Ctrl+Shift+A` on Select Following
+  Clips, `Ctrl+X` on Cut at Time, `Delete` on Delete.
+- Rows highlight with a rounded background on hover; disabled rows (e.g. **Paste
+  Keyframes** with an empty clipboard) stay dim and show no hover highlight.
+- Because this clip is neither an audio clip nor a data clip, there is exactly
+  one separator between **Delete** and the keyframe rows — no empty gap with two
+  separator lines stacked.
+
+## Step: Contextual clip rows appear only when they apply
+
+**Action:**
+Right-click a single selected [AudioClip] that is *not* the main soundtrack.
+Then right-click a clip of any other type.
+
+**Expected:**
+- For the audio clip, a **Set as Main Soundtrack** row appears below a separator,
+  under **Delete**.
+- For the other clip, that row is absent and no leftover separator remains.

@@ -186,10 +186,10 @@ Hover an audio clip, then drag its start or end handle slowly.
 - Dragging the start before the file's beginning leaves that stretch silent during
   playback (the audio doesn't start early).
 
-## Step: Set as main soundtrack via context menu
+## Step: Set as Main Soundtrack via context menu
 
 **Action:**
-Right-click a single selected audio clip and choose "Set as main soundtrack".
+Right-click a single selected audio clip and choose "Set as Main Soundtrack".
 
 **Expected:**
 - The clip's `Display` switches to `BackgroundImage`: its image renders behind the

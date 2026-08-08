@@ -20,13 +20,13 @@ internal sealed partial class AssetLibrary
             var isValidFile = _state.ActiveAsset is { IsDirectory: false, FileSystemInfo: not null };
             var absolutePath = _state.ActiveAsset?.FileSystemInfo?.FullName;
 
-            if (CustomComponents.DrawMenuItem(_deleteFileButtonId, "Delete file...", null, false, isValidFile)
+            if (CustomComponents.DrawMenuItem(_deleteFileButtonId, "Delete File...", null, false, isValidFile)
                 && _state.ActiveAsset != null)
             {
                 RequestDeleteAssets(_state.ActiveAsset);
             }
             
-            if (CustomComponents.DrawMenuItem(_openExternallyId, "Open externally",
+            if (CustomComponents.DrawMenuItem(_openExternallyId, "Open Externally",
                                               null,
                                               false,
                                               isValidFile))

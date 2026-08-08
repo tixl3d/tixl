@@ -243,7 +243,7 @@ internal sealed class SnapshotControllerGrid
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * T3Ui.UiScaleFactor);
         if (ImGui.BeginPopup(SettingsPopupId))
         {
-            CustomComponents.DrawMenuItem(_showThumbnailsItemId, "Show thumbnails", ref _showThumbnails, reserveIconColumn: false);
+            CustomComponents.DrawMenuItem(_showThumbnailsItemId, "Show Thumbnails", ref _showThumbnails, reserveIconColumn: false);
             ImGui.EndPopup();
         }
 

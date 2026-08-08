@@ -107,7 +107,7 @@ While playback is running through the clip, drag the playhead backward over the 
 ## Step: Cutting a clip preserves event timing on both halves
 
 **Action:**
-With the data clip selected and [SimulateIoData] still wired in, position the playhead somewhere inside the clip and pick **Cut at time** from the clip context menu (or use the shortcut). Move the playhead through both halves and watch how the recording replays.
+With the data clip selected and [SimulateIoData] still wired in, position the playhead somewhere inside the clip and pick **Cut at Time** from the clip context menu (or use the shortcut). Move the playhead through both halves and watch how the recording replays.
 
 **Expected:**
 - The data clip splits into two clips, both still playing back the same recording.

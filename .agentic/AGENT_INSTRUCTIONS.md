@@ -223,6 +223,47 @@ from the theme: wrong padding, no checkmark column, mismatched fonts).
   reads only static state — a capturing lambda allocates a closure each frame.
   Reach for a lambda only when the menu genuinely needs per-instance locals.
 
+### Menu and command labels
+
+**TiXL uses Title Case for every clickable command label** — menu items, submenu headers, menu bar
+entries, buttons, and context-menu rows. This follows the tradition of the tools TiXL users have open
+next to it (After Effects, Resolve, Blender, Unity) and Apple's HIG. It deliberately differs from
+Microsoft's modern sentence-case guidance and from web-era tools like Figma; consistency within TiXL
+matters more than matching any single external vendor.
+
+Style guides disagree on the details (see [Title case](https://en.wikipedia.org/wiki/Title_case) for a
+comparison). TiXL follows the **lowercase-short-prepositions** variant used by Chicago, MLA and Apple —
+**not** AP/APA, which capitalize four-letter prepositions. The two differ only on `with`, `from`, `into`
+and `over`; we write `Sync with Selection`, not `Sync With Selection`.
+
+The rule, so short words don't become a judgement call:
+
+- Capitalize the **first and last word**, always.
+- Capitalize nouns, verbs, adjectives, adverbs, and pronouns — including short ones (`Is`, `Be`, `Set`).
+- **Lowercase** articles (`a`, `an`, `the`), coordinating conjunctions (`and`, `but`, `or`, `nor`),
+  and prepositions of **four letters or fewer** (`at`, `by`, `in`, `of`, `on`, `to`, `as`, `for`,
+  `from`, `with`, `into`, `over`) — unless they are the first or last word.
+- Prepositions of **five letters or more** are capitalized: `Under`, `Above`, `Between`, `Through`.
+- A particle in a phrasal verb is part of the verb, so it **is** capitalized: `Set Up`, `Clean Up`,
+  `Zoom In`. Contrast `Cut at Time` (preposition) with `Pin to Output` (preposition).
+
+Examples: `Cut at Time`, `Clear Time Stretch`, `Select Following Clips`, `Reset to Default`,
+`Combine into New Type...`, `Open in Explorer`, `Sync with Selection`, `Set as Main Soundtrack`.
+
+Two related conventions:
+
+- **Trailing `...` means "this needs more input"** — the command opens a dialog, popup, or picker
+  rather than acting immediately. `Rename...` opens a dialog; `Rename` renames inline. Do **not** put
+  `...` on submenu headers (the chevron already says there's more) or on section labels.
+- Use three periods (`...`), **not** the single-character ellipsis `…`. The font atlas only rasterises
+  a fixed glyph range, and `…` is outside it.
+
+Section headers (`DrawMenuGroupLabel`, `HintLabel`) are labels too, so they also use Title Case —
+just without the trailing `...`: `Interpolation`, `UI Elements`, `Input Settings`.
+
+Actual prose keeps sentence case: tooltips, help text, warnings, confirmation questions, and
+parameter descriptions are sentences, not commands.
+
 ### Tool icons
 
 `CustomComponents.IconButton` is the one canonical tool icon. Don't hand-roll

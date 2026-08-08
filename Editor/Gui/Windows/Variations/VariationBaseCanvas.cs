@@ -401,39 +401,47 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
                                                                 var oneOrMoreSelected = CanvasElementSelection.SelectedElements.Count > 0;
                                                                 var oneSelected = CanvasElementSelection.SelectedElements.Count == 1;
 
-                                                                if (ImGui.MenuItem("Delete selected",
-                                                                                   "Del", // We should use the correct assigned short cut, but "Del or Backspace" is too long for layout
-                                                                                   false,
-                                                                                   oneOrMoreSelected))
+                                                                if (CustomComponents.DrawMenuItem(_deleteSelectedId,
+                                                                                                  "Delete Selected",
+                                                                                                  "Del", // We should use the correct assigned short cut, but "Del or Backspace" is too long for layout
+                                                                                                  false,
+                                                                                                  oneOrMoreSelected,
+                                                                                                  reserveIconColumn: false))
                                                                 {
                                                                     DeleteSelectedElements();
                                                                 }
 
-                                                                if (ImGui.MenuItem("Rename",
-                                                                                   "",
-                                                                                   false,
-                                                                                   oneSelected))
+                                                                if (CustomComponents.DrawMenuItem(_renameVariationId,
+                                                                                                  "Rename",
+                                                                                                  null,
+                                                                                                  false,
+                                                                                                  oneSelected,
+                                                                                                  reserveIconColumn: false))
                                                                 {
                                                                     VariationThumbnail.VariationForRenaming =
                                                                         CanvasElementSelection.SelectedElements[0] as Variation;
                                                                 }
 
-                                                                if (ImGui.MenuItem("Update thumbnails",
-                                                                                   ""))
+                                                                if (CustomComponents.DrawMenuItem(_updateThumbnailsId,
+                                                                                                  "Update Thumbnails",
+                                                                                                  reserveIconColumn: false))
                                                                 {
                                                                     _rerenderRequested = true;
                                                                     _rerenderToFileRequested = true;
                                                                     TriggerThumbnailUpdate();
                                                                 }
 
-                                                                ImGui.Separator();
+                                                                CustomComponents.SeparatorLine();
                                                                 var liveThumbnails = UserSettings.Config.VariationLiveThumbnails;
-                                                                if (ImGui.MenuItem("Live Render Previews", "", ref liveThumbnails, true))
+                                                                if (CustomComponents.DrawMenuItem(_liveRenderPreviewsId, "Live Render Previews", ref liveThumbnails,
+                                                                                                  reserveIconColumn: false))
                                                                 {
                                                                     EnableLiveThumbnails(liveThumbnails);
                                                                 }
 
-                                                                ImGui.MenuItem("Preview on Hover", "", ref UserSettings.Config.VariationHoverPreview, true);
+                                                                CustomComponents.DrawMenuItem(_previewOnHoverId, "Preview on Hover",
+                                                                                              ref UserSettings.Config.VariationHoverPreview,
+                                                                                              reserveIconColumn: false);
 
                                                                 DrawAdditionalContextMenuContent(instance);
                                                             }, ref _contextMenuIsOpen);
@@ -871,6 +879,12 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     internal readonly CanvasElementSelection CanvasElementSelection = new();
     private Instance? _currentRenderInstance;
     private readonly SelectionFence _selectionFence = new();
+
+    private static readonly int _deleteSelectedId = nameof(_deleteSelectedId).GetHashCode();
+    private static readonly int _renameVariationId = nameof(_renameVariationId).GetHashCode();
+    private static readonly int _updateThumbnailsId = nameof(_updateThumbnailsId).GetHashCode();
+    private static readonly int _liveRenderPreviewsId = nameof(_liveRenderPreviewsId).GetHashCode();
+    private static readonly int _previewOnHoverId = nameof(_previewOnHoverId).GetHashCode();
 }
 
 
