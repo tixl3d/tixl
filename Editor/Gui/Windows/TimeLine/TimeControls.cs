@@ -376,7 +376,7 @@ internal static class TimeControls
             ImGui.SameLine();
         }
 
-        if (settings.Playback.Syncing == CompositionSettings.SyncModes.Tapping)
+        if (settings.Playback.UsesBeatTapping)
         {
             var bpm = BeatTiming.Bpm;
             if (SingleValueEdit.Draw(ref bpm, new Vector2(StandardWidth, ControlSize.Y), min: 1, max: 360, clampMin: true, clampMax: true, scale: 0.01f, format: "{0:0.0 BPM}") ==

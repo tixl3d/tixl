@@ -127,6 +127,13 @@ public sealed class CompositionSettings
         public AudioSources AudioSource;
         public SyncModes Syncing;
 
+        /// <summary>
+        /// True when the clock is driven by manual beat tapping rather than by the timeline. Both fields have to
+        /// agree: <see cref="Syncing"/> can hold a stale <see cref="SyncModes.Tapping"/> because the project
+        /// settings only expose it for <see cref="AudioSources.ExternalDevice"/>.
+        /// </summary>
+        public bool UsesBeatTapping => AudioSource == AudioSources.ExternalDevice && Syncing == SyncModes.Tapping;
+
         public string AudioInputDeviceName = string.Empty;
         public float AudioGainFactor = 1;
         public float AudioDecayFactor = 0.9f;

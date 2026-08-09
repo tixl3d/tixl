@@ -932,20 +932,17 @@ internal sealed class ProjectSettingsWindow : Window
         if (playback.AudioSource == CompositionSettings.AudioSources.ProjectSoundTrack)
         {
             Playback.Current = T3Ui.DefaultTimelinePlayback;
+            Playback.Current.Bpm = playback.Bpm;
 
-            if (playback.AudioClips.Count > 0)
-            {
-                // The settings loader already migrated any legacy per-clip BPM into playback.Bpm.
-                Playback.Current.Bpm = playback.Bpm;
-                if (Playback.Current.Settings != null)
-                    Playback.Current.Settings.Playback.Syncing = CompositionSettings.SyncModes.Timeline;
-            }
+            // Animation hides the Sync Mode selector, so a Tapping value left over from Live/Interactive
+            // would be unreachable. Normalize it here rather than leaving the settings self-contradictory.
+            playback.Syncing = CompositionSettings.SyncModes.Timeline;
 
             UserSettings.Config.ShowTimeline = true;
         }
         else
         {
-            if (playback.Syncing == CompositionSettings.SyncModes.Tapping)
+            if (playback.UsesBeatTapping)
             {
                 Playback.Current = T3Ui.DefaultBeatTimingPlayback;
                 UserSettings.Config.ShowTimeline = false;

@@ -47,12 +47,11 @@ public static class PlaybackUtils
         // default bus, so basic audio plays without an [AudioBus] op. Wired sources go through their bus.
         AudioGraphCollector.CollectLooseSources(ProjectView.Focused?.CompositionInstance);
 
-        if (settings.Playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice
-            && settings.Playback.Syncing == CompositionSettings.SyncModes.Tapping)
+        if (settings.Playback.UsesBeatTapping)
         {
             Playback.Current = T3Ui.DefaultBeatTimingPlayback;
 
-            if (Playback.Current.Settings is { Playback.Syncing: CompositionSettings.SyncModes.Tapping })
+            if (Playback.Current.Settings is { Playback.UsesBeatTapping: true })
             {
                 if (TapProvider != null)
                 {
