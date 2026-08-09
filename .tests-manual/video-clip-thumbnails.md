@@ -48,16 +48,16 @@ Disconnect a video or audio clip from its consumer and move the mouse off it, th
 - The clip renders slightly translucent when not hovered and fully solid on hover or selection.
 - The tooltip still shows the "(Not connected?)" hint.
 
-## Step: Previewing the frame under the mouse
+## Step: Thumbnails stay bounded while working with clips
 
 **Action:**
-Hover the body of a video clip and slowly move the mouse along it.
+Open Windows > Utilities > Thumbnails and note the "Atlas cells used" counter. Then hover, drag and
+scrub along several video clips for a while and check the counter again.
 
 **Expected:**
-- The tooltip shows a thumbnail of the video frame near the hovered position, above the usual text info.
-- Moving along the clip updates the thumbnail (quantized to roughly quarter-second steps; it may lag
-  slightly behind the mouse on long-GOP footage).
-- Scrubbing quickly back and forth never freezes or stutters the timeline.
+- The counter grows by roughly two cells per distinct clip in/out point and then stops — hovering and
+  scrubbing add nothing, and dragging a clip along the timeline adds nothing.
+- It never approaches its cap during normal editing.
 
 ## Step: Thumbnails follow a trim
 

@@ -16,14 +16,16 @@ using T3.Editor.Gui.UiHelpers.Thumbnails;
 namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 
 /// <summary>
-/// Provides small video-frame thumbnails for timeline clips: persistent ones at a clip's source in/out points
-/// (cached as PNGs under the Tmp thumbnails folder, keyed by asset path + write time + frame time) and
-/// session-only ones for the position under the mouse while hovering.
+/// Provides small video-frame thumbnails for timeline clips at a clip's source in/out points, cached as PNGs
+/// under the Tmp thumbnails folder (keyed by asset path + write time + frame time) and drawn from the shared
+/// <see cref="ThumbnailManager"/> atlas.
+///
+/// Deliberately limited to the in/out points: a preview that follows the mouse continuously cannot be keyed by
+/// time without filling the atlas with near-duplicates nothing ever looks at twice. Skimming needs its own
+/// dedicated texture, not this cache.
 ///
 /// All decoding runs on one low-priority worker that owns a single <see cref="IVideoThumbnailReader"/> —
 /// completely separate from the playback engine's frame caches, so thumbnails never evict playback frames.
-/// Hover requests are latest-wins (scrubbing along a clip only ever keeps one decode in flight), and results
-/// land in the shared <see cref="ThumbnailManager"/> atlas.
 /// </summary>
 internal static class VideoClipThumbnailCache
 {
@@ -33,24 +35,17 @@ internal static class VideoClipThumbnailCache
     /// <paramref name="sourceSeconds"/> themselves; the millisecond-rounded time is the cache key.
     /// </summary>
     public static bool TryGetThumbnail(string assetPath, IResourceConsumer owner, double sourceSeconds,
-                                       bool persistent, bool allowRequest, out ThumbnailManager.ThumbnailRect rect)
+                                       bool allowRequest, out ThumbnailManager.ThumbnailRect rect)
     {
         rect = default;
 
-        if (!_pathInfos.TryGetValue(assetPath, out var pathInfo))
-        {
-            if (allowRequest)
-                StartResolvingPathInfo(assetPath, owner);
-            return false;
-        }
-
-        if (pathInfo.AbsolutePath == null)
+        if (!TryGetPathInfo(assetPath, owner, allowRequest, out var pathInfo))
             return false;
 
         var timeMs = (long)Math.Round(Math.Max(0, sourceSeconds) * 1000);
         var key = new ThumbKey(assetPath, timeMs);
         if (!_entries.TryGetValue(key, out var entry))
-            entry = CreateEntry(key, pathInfo, timeMs, persistent);
+            entry = CreateEntry(key, pathInfo, timeMs);
 
         switch (entry.State)
         {
@@ -65,7 +60,7 @@ internal static class VideoClipThumbnailCache
                     case ThumbnailManager.PushedState.Pending:
                         return false;
                     default:
-                        // Evicted from the atlas — regenerate (persistent ones reload from their PNG).
+                        // Evicted from the atlas — regenerate (reloads from the PNG).
                         entry.State = EntryState.New;
                         break;
                 }
@@ -76,7 +71,7 @@ internal static class VideoClipThumbnailCache
         if (entry.State == EntryState.New && allowRequest)
         {
             entry.State = EntryState.Queued;
-            EnqueueRequest(new Request(entry, pathInfo.AbsolutePath, sourceSeconds, persistent));
+            EnqueueRequest(new Request(entry, pathInfo.AbsolutePath!, sourceSeconds));
         }
 
         return false;
@@ -86,22 +81,7 @@ internal static class VideoClipThumbnailCache
     private static void EnqueueRequest(in Request request)
     {
         EnsureWorkerRunning();
-
-        if (request.Persistent)
-        {
-            _persistentQueue.Enqueue(request);
-        }
-        else
-        {
-            lock (_hoverLock)
-            {
-                // Latest-wins: a superseded hover request is dropped, so its entry must become requestable again.
-                if (_pendingHover is { } dropped && dropped.Entry.State == EntryState.Queued)
-                    dropped.Entry.State = EntryState.New;
-                _pendingHover = request;
-            }
-        }
-
+        _requestQueue.Enqueue(request);
         _workSignal.Release();
     }
 
@@ -110,7 +90,7 @@ internal static class VideoClipThumbnailCache
         if (_worker != null)
             return;
 
-        lock (_hoverLock)
+        lock (_workerLock)
         {
             _worker ??= Task.Factory.StartNew(WorkerLoop, CancellationToken.None,
                                               TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -124,7 +104,7 @@ internal static class VideoClipThumbnailCache
             // Idle timeout: release the decoder session (and its file handle) when no requests arrive for a while.
             if (!_workSignal.Wait(2000))
             {
-                if (_pendingHover == null && _persistentQueue.IsEmpty)
+                if (_requestQueue.IsEmpty)
                 {
                     _reader?.Dispose();
                     _reader = null;
@@ -134,26 +114,10 @@ internal static class VideoClipThumbnailCache
                 continue;
             }
 
-            while (TryTakeNextRequest(out var request))
+            while (_requestQueue.TryDequeue(out var request))
                 ProcessRequest(request);
         }
         // ReSharper disable once FunctionNeverReturns — lives for the editor session.
-    }
-
-    private static bool TryTakeNextRequest(out Request request)
-    {
-        // Hover first: it's what the user is looking at right now.
-        lock (_hoverLock)
-        {
-            if (_pendingHover is { } hover)
-            {
-                _pendingHover = null;
-                request = hover;
-                return true;
-            }
-        }
-
-        return _persistentQueue.TryDequeue(out request);
     }
 
     private static void ProcessRequest(in Request request)
@@ -161,9 +125,8 @@ internal static class VideoClipThumbnailCache
         var entry = request.Entry;
         try
         {
-            var pngPath = request.Persistent ? GetPngPath(entry.ThumbGuid) : null;
-
-            if (pngPath != null && File.Exists(pngPath))
+            var pngPath = GetPngPath(entry.ThumbGuid);
+            if (File.Exists(pngPath))
             {
                 var loaded = ThumbnailManager.LoadTextureViaWic(pngPath).GetAwaiter().GetResult();
                 if (loaded != null)
@@ -181,8 +144,7 @@ internal static class VideoClipThumbnailCache
                 return;
             }
 
-            if (pngPath != null)
-                TryWritePng(pngPath, _rgbaBuffer);
+            TryWritePng(pngPath, _rgbaBuffer);
 
             ThumbnailManager.PushSlotTexture(entry.ThumbGuid, CreateSlotTexture(_rgbaBuffer));
             entry.State = EntryState.Pushed;
@@ -295,6 +257,19 @@ internal static class VideoClipThumbnailCache
     #endregion
 
     #region Path resolution and keying
+    /// <summary>Resolves the asset once per session; false while the resolve is still pending or it failed.</summary>
+    private static bool TryGetPathInfo(string assetPath, IResourceConsumer owner, bool allowRequest, out PathInfo pathInfo)
+    {
+        if (!_pathInfos.TryGetValue(assetPath, out pathInfo))
+        {
+            if (allowRequest)
+                StartResolvingPathInfo(assetPath, owner);
+            return false;
+        }
+
+        return pathInfo.AbsolutePath != null;
+    }
+
     private static void StartResolvingPathInfo(string assetPath, IResourceConsumer owner)
     {
         if (!_resolving.TryAdd(assetPath, true))
@@ -327,23 +302,12 @@ internal static class VideoClipThumbnailCache
                  });
     }
 
-    /// <summary>
-    /// Hover thumbnails follow the mouse, so a purely content-derived key would give every quarter second of
-    /// every video its own permanent atlas slot — scrubbing one long clip is enough to flush the whole atlas.
-    /// They recycle the guid of the oldest hover entry instead, keeping their atlas footprint fixed.
-    /// </summary>
-    private static Entry CreateEntry(in ThumbKey key, in PathInfo pathInfo, long timeMs, bool persistent)
+    private static Entry CreateEntry(in ThumbKey key, in PathInfo pathInfo, long timeMs)
     {
+        if (ThumbnailManager.EnableLogging)
+            Log.Debug($"VideoThumb key: t={timeMs}ms {key.AssetPath}");
+
         var entry = new Entry { ThumbGuid = DeriveGuid(pathInfo, timeMs) };
-
-        if (!persistent)
-        {
-            if (_hoverKeyRing.Count >= HoverRingSize && _entries.Remove(_hoverKeyRing.Dequeue(), out var recycled))
-                entry.ThumbGuid = recycled.ThumbGuid;
-
-            _hoverKeyRing.Enqueue(key);
-        }
-
         _entries[key] = entry;
         return entry;
     }
@@ -359,9 +323,6 @@ internal static class VideoClipThumbnailCache
     // Bump to discard on-disk thumbnails written by an earlier, incompatible encoding.
     private const int CacheVersion = 2;
 
-    // Roughly six seconds of quarter-second scrubbing stays cached before guids get recycled.
-    private const int HoverRingSize = 24;
-
     private const int SlotWidth = ThumbnailManager.SlotWidth;
     private const int SlotHeight = ThumbnailManager.SlotHeight;
 
@@ -375,17 +336,15 @@ internal static class VideoClipThumbnailCache
 
     private readonly record struct ThumbKey(string AssetPath, long TimeMs);
     private readonly record struct PathInfo(string? AbsolutePath, long WriteTimeTicks);
-    private readonly record struct Request(Entry Entry, string AbsolutePath, double Seconds, bool Persistent);
+    private readonly record struct Request(Entry Entry, string AbsolutePath, double Seconds);
 
     // _entries is draw-thread-only; the worker touches entries only through the volatile State field.
     private static readonly Dictionary<ThumbKey, Entry> _entries = new();
-    private static readonly Queue<ThumbKey> _hoverKeyRing = new();
     private static readonly ConcurrentDictionary<string, PathInfo> _pathInfos = new();
     private static readonly ConcurrentDictionary<string, bool> _resolving = new();
 
-    private static readonly ConcurrentQueue<Request> _persistentQueue = new();
-    private static readonly object _hoverLock = new();
-    private static Request? _pendingHover;
+    private static readonly ConcurrentQueue<Request> _requestQueue = new();
+    private static readonly object _workerLock = new();
     private static readonly SemaphoreSlim _workSignal = new(0);
     private static Task? _worker;
 

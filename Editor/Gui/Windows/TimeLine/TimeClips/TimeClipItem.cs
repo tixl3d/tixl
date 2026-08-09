@@ -262,9 +262,6 @@ internal static class TimeClipItem
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4,4));
             ImGui.BeginTooltip();
             {
-                if (isVideoClip && clipInstance != null)
-                    DrawHoverThumbnailInTooltip(ref attr, timeClip, clipInstance);
-
                 ImGui.PushFont(Fonts.FontSmall);
                 ImGui.TextUnformatted(symbolChildUi.SymbolChild.ReadableName);
                 if (!isConnected)
@@ -630,7 +627,7 @@ internal static class TimeClipItem
 
         attr.DrawList.PushClipRect(position, itemRectMax, true);
 
-        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, endSecs, persistent: true, allowRequest, out var endRect))
+        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, endSecs, allowRequest, out var endRect))
         {
             attr.DrawList.AddImage(atlasSrv.NativePointer, endMin, endMin + thumbSize,
                                    endRect.UvMin, endRect.UvMax, Color.White.Fade(fade * endFade));
@@ -638,7 +635,7 @@ internal static class TimeClipItem
             drewEnd = true;
         }
 
-        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, startSecs, persistent: true, allowRequest, out var startRect))
+        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, startSecs, allowRequest, out var startRect))
         {
             attr.DrawList.AddImage(atlasSrv.NativePointer, startMin, startMin + thumbSize,
                                    startRect.UvMin, startRect.UvMax, Color.White.Fade(fade));
@@ -683,37 +680,6 @@ internal static class TimeClipItem
         }
 
         return low <= 0 ? string.Empty : label[..low] + "..";
-    }
-
-    /// <summary>
-    /// Shows the source frame under the mouse inside the hover tooltip. Session-only (never written to disk);
-    /// requests are quantized to a quarter-second grid and processed latest-wins, so scrubbing along a clip
-    /// keeps at most one GOP decode in flight.
-    /// </summary>
-    private static void DrawHoverThumbnailInTooltip(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance clipInstance)
-    {
-        if (clipInstance is not T3.Core.Operator.Interfaces.IDescriptiveFilename descriptive)
-            return;
-
-        var assetPath = descriptive.SourcePathSlot.TypedInputValue.Value;
-        if (string.IsNullOrEmpty(assetPath) || timeClip.TimeRange.Duration <= 0.0001f)
-            return;
-
-        var mouseBars = attr.LayerContext.TimeCanvas.InverseTransformX(ImGui.GetIO().MousePos.X);
-        var normalized = (mouseBars - timeClip.TimeRange.Start) / timeClip.TimeRange.Duration;
-        var sourceBars = timeClip.SourceRange.Start + normalized * timeClip.SourceRange.Duration;
-        var sourceSecs = attr.LayerContext.TimeCanvas.Playback.SecondsFromBars(sourceBars);
-
-        if (VideoClipDurationCache.TryGetDurationSecs(assetPath, clipInstance, out var durationSecs))
-            sourceSecs = Math.Clamp(sourceSecs, 0, durationSecs);
-        else if (sourceSecs < 0)
-            sourceSecs = 0;
-
-        var quantized = Math.Round(sourceSecs * 4) / 4;
-        if (VideoClipThumbnailCache.TryGetThumbnail(assetPath, clipInstance, quantized, persistent: false, allowRequest: true, out var rect))
-        {
-            UiHelpers.Thumbnails.ThumbnailManager.AsImguiImage(rect, 90 * T3Ui.UiScaleFactor);
-        }
     }
 
     private static double QuantizeThumbnailTime(double seconds) => Math.Round(seconds * 10) / 10;
