@@ -71,6 +71,44 @@ feeding a bus). In the timeline, split the upper clip at the playhead.
   feeds the same [AudioBus]).
 - A single undo reverts the split including all pushed positions.
 
+## Step: Split only renames renamed clips
+
+**Action:**
+Split an op that still carries its symbol name (e.g. an [AudioClip] labelled
+`AudioClip`). Then rename another op to `Voice Over` and split that one too.
+
+**Expected:**
+- The first split's new op has **no** custom name — both halves still show
+  `AudioClip`, and its title is not shown in quotes in the graph.
+- The second split's new op is named `Voice Over2`.
+
+## Step: Duplicate clips from the timeline
+
+**Action:**
+Click the timeline window so it has focus, select one clip (or two on different
+layers), and press `Ctrl+D`. Repeat via right-click → **Duplicate**.
+
+**Expected:**
+- One copy per selected clip appears at exactly the same start and end time, on
+  the next free layer — never stacked on top of the original.
+- The selection moves to the copies; the originals are deselected. With two clips
+  selected, **both** copies end up selected.
+- In the graph, each new op sits directly below its original, and any op that sat
+  there is pushed down by whole grid rows.
+- The copies keep the originals' connections into multi-inputs.
+- A single undo removes all copies and restores the pushed positions.
+
+## Step: Ctrl+D does not collide with keyframe duplication
+
+**Action:**
+In the dope sheet, select a few keyframes with no clip selected and press
+`Ctrl+D`. Then select a clip (which clears the keyframe selection) and press
+`Ctrl+D` again.
+
+**Expected:**
+- The first press duplicates the keyframes only — no new clip op is created.
+- The second press duplicates the clip only.
+
 ## Step: Renamed clip labels
 
 **Action:**
@@ -91,11 +129,12 @@ playhead inside it, and right-click the clip.
 
 **Expected:**
 - The rows appear in this order, top to bottom: **Select Following Clips**,
-  **Cut at Time**, **Edit Clip Times**, **Clear Time Stretch**, **Delete**.
+  **Cut at Time**, **Duplicate**, **Edit Clip Times**, **Clear Time Stretch**,
+  **Delete**.
 - Every label is Title Case, and the labels all start on the same x-position —
   including the keyframe rows further down (**Paste Keyframes**, **View All**).
 - Shortcuts are right-aligned and dimmed: `Ctrl+Shift+A` on Select Following
-  Clips, `Ctrl+X` on Cut at Time, `Delete` on Delete.
+  Clips, `Ctrl+X` on Cut at Time, `Ctrl+D` on Duplicate, `Delete` on Delete.
 - Rows highlight with a rounded background on hover; disabled rows (e.g. **Paste
   Keyframes** with an empty clipboard) stay dim and show no hover highlight.
 - Because this clip is neither an audio clip nor a data clip, there is exactly

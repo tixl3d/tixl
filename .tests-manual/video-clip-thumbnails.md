@@ -124,6 +124,18 @@ Hover and select the clips and the player. Then wire one clip into the player's 
 - A clip that is wired into the player (directly or through an inserted effect) shows no curve.
 - Disabling AutoCollect removes all curves.
 
+## Step: Playhead past the end of the footage
+
+**Action:**
+Take a clip of long, high-resolution footage (4K, long-GOP), drag its end handle well past the end of the
+available footage, and park the playhead in that extended part. Watch the editor's CPU usage for ~10 s,
+then scrub around inside the extended part.
+
+**Expected:**
+- The clip shows the footage's last frame, held.
+- CPU usage stays at idle levels — the frame is decoded once, not re-decoded every frame.
+- Scrubbing back into the real footage picks up normally.
+
 ## Step: Start/end thumbnails persist across restarts
 
 **Action:**

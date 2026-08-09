@@ -1,5 +1,6 @@
 #nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.Audio;
@@ -111,6 +112,11 @@ internal sealed class TimeClipInteractions
             if (DrawClipMenuItem(_cutAtTimeId, "Cut at Time", UserActions.SplitSelectedOrHoveredClips.ListShortcuts()))
             {
                 SplitClipsAtTime(compositionOp);
+            }
+
+            if (DrawClipMenuItem(_duplicateClipsId, "Duplicate", UserActions.Duplicate.ListShortcuts()))
+            {
+                DuplicateSelectedClips(compositionOp);
             }
 
             if (DrawClipMenuItem(_editClipTimesId, "Edit Clip Times"))
@@ -352,6 +358,108 @@ internal sealed class TimeClipInteractions
         ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children);
     }
 
+    /// <summary>
+    /// Copies a clip's op within its composition: the new node lands one grid row below the original
+    /// (pushing whatever it would cover further down) and repeats the original's multi-input connections,
+    /// so the copy is wired the same way. The copy starts out with the original's time and source ranges;
+    /// callers that need different ones adjust them through their own <see cref="MoveTimeClipsCommand"/>.
+    /// </summary>
+    private bool TryCopyClipOp(Instance compositionOp, TimeClip clip, List<ICommand> commands,
+                               [NotNullWhen(true)] out TimeClip? newTimeClip)
+    {
+        newTimeClip = null;
+
+        var compositionSymbolUi = compositionOp.GetSymbolUi();
+        if (!compositionSymbolUi.ChildUis.TryGetValue(clip.Id, out var symbolChildUi))
+            return false;
+
+        var newPos = symbolChildUi.PosOnCanvas;
+        newPos.Y += MagGraphItem.GridSize.Y;
+
+        // Pass an empty section list (not null) so the command does not fall back
+        // to cloning every section in the composition.
+        var copyCommand = new CopySymbolChildrenCommand(compositionSymbolUi,
+                                                        [symbolChildUi],
+                                                        [],
+                                                        compositionSymbolUi,
+                                                        newPos);
+        copyCommand.Do();
+        commands.Add(copyCommand);
+
+        var newChildId = copyCommand.OldToNewChildIds[clip.Id];
+        if (!compositionOp.Children.TryGetChildInstance(newChildId, out var newInstance))
+            return false;
+
+        newTimeClip = newInstance.Outputs.OfType<ITimeClipProvider>().Single().TimeClip;
+        var newSymbolChildUi = compositionSymbolUi.ChildUis[newChildId];
+
+        // Only ops the user actually named get an incremented copy name — an unnamed op keeps showing its
+        // symbol name, and turning that into "Layer2" would fake a rename the user never made.
+        if (symbolChildUi.SymbolChild.HasCustomName)
+        {
+            var renameCommand = new ChangeSymbolChildNameCommand(newSymbolChildUi, compositionSymbolUi.Symbol)
+                                    {
+                                        NewName = symbolChildUi.SymbolChild.Name.AppendOrIncrementVersionNumber()
+                                    };
+            renameCommand.Do();
+            commands.Add(renameCommand);
+        }
+
+        PushDownOpsOverlappedBy(compositionSymbolUi, newSymbolChildUi, commands);
+
+        // Repeat the original clip's connections into multi-inputs, so the copy stays wired the same way —
+        // regardless of which output carried the connection (an [AudioClip]'s AudioReference into a bus
+        // just as much as a TimeClip command into a group).
+        var connections = compositionOp.Symbol.Connections
+                                       .Where(c => c.SourceParentOrChildId == symbolChildUi.Id)
+                                       .ToList();
+
+        foreach (var c in connections)
+        {
+            if (!compositionOp.Symbol.Children.TryGetValue(c.TargetParentOrChildId, out var targetOp))
+                continue;
+
+            if (!targetOp.Inputs.TryGetValue(c.TargetSlotId, out var targetInput) || !targetInput.IsMultiInput)
+                continue;
+
+            var addConnectionCommand = new AddConnectionCommand(compositionOp.Symbol,
+                                                                new Symbol.Connection(newInstance.SymbolChildId,
+                                                                                      c.SourceSlotId,
+                                                                                      c.TargetParentOrChildId,
+                                                                                      c.TargetSlotId),
+                                                                compositionOp.Symbol.GetMultiInputIndexFor(c) + 1);
+            addConnectionCommand.Do();
+            commands.Add(addConnectionCommand);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Duplicates the selected clips in place: the copies keep the original time and source ranges, and the
+    /// overlap pass in <see cref="DrawClips"/> moves them onto a free layer.
+    /// </summary>
+    public void DuplicateSelectedClips(Instance compositionOp)
+    {
+        var commands = new List<ICommand>();
+        var newClips = new List<TimeClip>();
+
+        // Materialized because copying adds children to the composition while we iterate the selection.
+        foreach (var clip in _context.ClipSelection.GetSelectedClips().ToList())
+        {
+            if (TryCopyClipOp(compositionOp, clip, commands, out var newTimeClip))
+                newClips.Add(newTimeClip);
+        }
+
+        if (commands.Count == 0)
+            return;
+
+        UndoRedoStack.Add(new MacroCommand("Duplicate clips", commands));
+
+        SelectClips(newClips);
+        ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
+    }
+
     public void SplitClipsAtTime(Instance compositionOp)
     {
         Debug.Assert(_playback != null);
@@ -360,7 +468,7 @@ internal sealed class TimeClipInteractions
         var newClips = new List<TimeClip>();
 
         var commands = new List<ICommand>();
-        foreach (var clip in _context.ClipSelection.GetAllOrSelectedClips())
+        foreach (var clip in _context.ClipSelection.GetAllOrSelectedClips().ToList())
         {
             if (!clip.TimeRange.Contains(timeInBars))
                 return;
@@ -372,47 +480,17 @@ internal sealed class TimeClipInteractions
                 continue;
             }
 
-            var compositionSymbolUi = compositionOp.GetSymbolUi();
-            var symbolChildUi = compositionSymbolUi.ChildUis[clip.Id];
-
-            var originalName = symbolChildUi.SymbolChild.ReadableName;
-            var newPos = symbolChildUi.PosOnCanvas;
-            newPos.Y += MagGraphItem.GridSize.Y;
-            // Pass an empty section list (not null) so the command does not fall back
-            // to cloning every section in the composition.
-            var cmd = new CopySymbolChildrenCommand(compositionSymbolUi,
-                                                    [symbolChildUi],
-                                                    [],
-                                                    compositionSymbolUi,
-                                                    newPos);
-            commands.Add(cmd);
-            cmd.Do();
-
-            // Set new end to the original time clip
             var orgTimeRangeEnd = clip.TimeRange.End;
             var originalSourceDuration = clip.SourceRange.Duration;
-            var normalizedCutPosition = ((float)_playback.TimeInBars - clip.TimeRange.Start) / clip.TimeRange.Duration;
+            var normalizedCutPosition = ((float)timeInBars - clip.TimeRange.Start) / clip.TimeRange.Duration;
 
-            // Apply new time range to newly added instance
-            var newChildId = cmd.OldToNewChildIds[clip.Id];
-            var newInstance = compositionOp.Children[newChildId];
-            var newTimeClip = newInstance.Outputs.OfType<ITimeClipProvider>().Single().TimeClip;
-
-            var newSymbolUiChild = compositionSymbolUi.ChildUis[newChildId];
-            var newName = originalName.AppendOrIncrementVersionNumber();
-            var renameCommand = new ChangeSymbolChildNameCommand(newSymbolUiChild, compositionSymbolUi.Symbol)
-                                    {
-                                        NewName = newName
-                                    };
-            renameCommand.Do();
-            commands.Add(renameCommand);
-
-            PushDownOpsOverlappedBy(compositionSymbolUi, newSymbolUiChild, commands);
+            if (!TryCopyClipOp(compositionOp, clip, commands, out var newTimeClip))
+                continue;
 
             // Capture the new clip's just-copied TimeRange/SourceRange as the undo state, then mutate to
             // the "second half" ranges and store those as the redo state.
             var adjustNewClipCommand = new MoveTimeClipsCommand(compositionOp, [newTimeClip]);
-            newTimeClip.TimeRange = new TimeRange((float)_playback.TimeInBars, orgTimeRangeEnd);
+            newTimeClip.TimeRange = new TimeRange((float)timeInBars, orgTimeRangeEnd);
             newTimeClip.SourceRange.Start = newTimeClip.SourceRange.Start + originalSourceDuration * normalizedCutPosition;
             newTimeClip.SourceRange.End = clip.SourceRange.End;
             adjustNewClipCommand.StoreCurrentValues();
@@ -421,38 +499,11 @@ internal sealed class TimeClipInteractions
 
             // Adjust first clip end time
             var adjustFirstClipCommand = new MoveTimeClipsCommand(compositionOp, [clip]);
-            clip.TimeRange.End = (float)_playback.TimeInBars;
+            clip.TimeRange.End = (float)timeInBars;
             clip.SourceRange.Duration = originalSourceDuration * normalizedCutPosition;
             adjustFirstClipCommand.StoreCurrentValues();
 
             commands.Add(adjustFirstClipCommand);
-
-            // Copy the original clip's connections into multi-inputs, so the new half stays wired the
-            // same way — regardless of which output carried the connection (an [AudioClip]'s
-            // AudioReference into a bus just as much as a TimeClip command into a group).
-            {
-                var connections = compositionOp.Symbol.Connections
-                                               .Where(c => c.SourceParentOrChildId == symbolChildUi.Id)
-                                               .ToList();
-
-                foreach (var c in connections)
-                {
-                    if (!compositionOp.Symbol.Children.TryGetValue(c.TargetParentOrChildId, out var targetOp))
-                        continue;
-
-                    if (!targetOp.Inputs.TryGetValue(c.TargetSlotId, out var targetInput) || !targetInput.IsMultiInput)
-                        continue;
-
-                    var addConnectionCommand = new AddConnectionCommand(compositionOp.Symbol,
-                                                                        new Symbol.Connection(newInstance.SymbolChildId,
-                                                                                              c.SourceSlotId,
-                                                                                              c.TargetParentOrChildId,
-                                                                                              c.TargetSlotId),
-                                                                        compositionOp.Symbol.GetMultiInputIndexFor(c) + 1);
-                    addConnectionCommand.Do();
-                    commands.Add(addConnectionCommand);
-                }
-            }
         }
 
         if (commands.Count == 0)
@@ -464,11 +515,15 @@ internal sealed class TimeClipInteractions
         var macroCommands = new MacroCommand("split clip", commands);
         UndoRedoStack.Add(macroCommands);
 
-        _context.ClipSelection.Clear();
-        foreach (var t in newClips)
-            _context.ClipSelection.Select(t);
-
+        SelectClips(newClips);
         ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Connections);
+    }
+
+    private void SelectClips(List<TimeClip> clips)
+    {
+        _context.ClipSelection.Clear();
+        foreach (var clip in clips)
+            _context.ClipSelection.AddSelection(clip);
     }
 
     // ---------------------------------------------------------------------------
@@ -803,6 +858,7 @@ internal sealed class TimeClipInteractions
 
     private static readonly int _selectFollowingClipsId = nameof(_selectFollowingClipsId).GetHashCode();
     private static readonly int _cutAtTimeId = nameof(_cutAtTimeId).GetHashCode();
+    private static readonly int _duplicateClipsId = nameof(_duplicateClipsId).GetHashCode();
     private static readonly int _editClipTimesId = nameof(_editClipTimesId).GetHashCode();
     private static readonly int _clearTimeStretchId = nameof(_clearTimeStretchId).GetHashCode();
     private static readonly int _deleteClipsId = nameof(_deleteClipsId).GetHashCode();

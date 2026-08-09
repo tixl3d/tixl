@@ -113,6 +113,12 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         if (UserActions.SplitSelectedOrHoveredClips.Triggered())
             OpClips.SplitClipsAtTime(compositionOp);
 
+        // Only with clips selected — otherwise the same shortcut is the dope sheet's "duplicate keyframes".
+        if (UserActions.Duplicate.Triggered() && _context.ClipSelection.Count > 0)
+        {
+            OpClips.DuplicateSelectedClips(compositionOp);
+        }
+
         // Ripple-edit selection: everything starting at/after the playback time, on all layers — the
         // same anchor as the context-menu action, so shortcut and menu behave identically. (An earlier
         // mouse-position anchor proved confusing next to the menu variant.)
