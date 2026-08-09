@@ -24,15 +24,8 @@ namespace Lib.io.audio
 
         public AudioLevel()
         {
-            _node = new AudioGraphNode(this, Input)
-                        {
-                            FxInsert = new AudioGraphNode.AudioFxInsert
-                                           {
-                                               Apply = submix => _submixes.Add(submix),
-                                               UpdateParams = _ => { },
-                                               Remove = submix => _submixes.Remove(submix),
-                                           }
-                        };
+            _node = new AudioGraphNode(this, Input);
+            _node.DeclareAnalysisTap();
             Result.Value = _node;
             Result.UpdateAction += UpdatePassThrough;
             Level.UpdateAction += UpdateLevel;
@@ -52,9 +45,9 @@ namespace Lib.io.audio
             // The buffer-inspecting Ex variant is required: the plain ChannelGetLevel only sees data taken
             // since its last call and mostly reads 0 between the device's coarse pulls.
             var maxLevel = 0f;
-            if (_submixes.Count > 0)
+            if (_node.RealisedSubmixes.Count > 0)
             {
-                foreach (var submix in _submixes)
+                foreach (var submix in _node.RealisedSubmixes)
                 {
                     if (BassMix.ChannelGetLevel(submix, _levelPair, 0.05f, 0) == -1)
                         continue;
@@ -89,7 +82,7 @@ namespace Lib.io.audio
         // A side-branch tap can meter generator sources, but engine-owned [AudioClip] channels are
         // un-buffered and silently read 0 there — a trap that cost real debugging time; warn instead.
         IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() =>
-            _submixes.Count == 0 && HasUnmeterableClipLeaf()
+            _node.RealisedSubmixes.Count == 0 && _node.HasExternallyManagedLeaf()
                 ? IStatusProvider.StatusLevel.Warning
                 : IStatusProvider.StatusLevel.Success;
 
@@ -97,19 +90,7 @@ namespace Lib.io.audio
             "As a side branch this tap can't meter timeline [AudioClip]s — their Level reads 0.\n"
             + "Wire it inline: source → AudioLevel → bus (directly or through combines/effects).";
 
-        private bool HasUnmeterableClipLeaf()
-        {
-            for (var i = 0; i < _collected.Count; i++)
-            {
-                if (_collected[i].Leaf.ExternallyManagedChannel)
-                    return true;
-            }
-
-            return false;
-        }
-
         private readonly AudioGraphNode _node;
-        private readonly HashSet<int> _submixes = new(); // realised by the routing bus(es)
         private readonly List<AudioGraphNode.CollectedSource> _collected = new();
         private readonly float[] _levelPair = new float[2];
 

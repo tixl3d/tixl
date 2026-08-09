@@ -167,7 +167,7 @@ public sealed class AudioAnalysisContext
     /// <summary>
     /// Creates a new audio analysis context with freshly allocated buffers.
     /// </summary>
-    private AudioAnalysisContext()
+    internal AudioAnalysisContext()
     {
         _frequencyBandHistories = new Queue<float>[AudioConfig.FrequencyBandCount];
         for (var i = 0; i < AudioConfig.FrequencyBandCount; i++)

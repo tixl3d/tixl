@@ -1,180 +1,313 @@
-# Video Audio Playback (FFmpeg → BASS)
+# Video Audio Playback (FFmpeg → BASS → audio graph)
 
-**Status:** In progress — Phase 1 starting (picked up 2026-06-21). Extends the FFmpeg video work
+**Status:** Phase 1 in progress. Rewritten 2026-08-09 against the audio processing graph
+([`Plan_AudioProcessingGraph.md`](Plan_AudioProcessingGraph.md)), which landed after this plan was first
+written and changes the *routing* half of it substantially. Extends the FFmpeg video work
 ([`Plan_FfmpegVideo.md`](archive/Plan_FfmpegVideo.md), [`Plan_VideoZeroCopyDecode.md`](archive/Plan_VideoZeroCopyDecode.md)),
 which decode the **video** track but leave **audio silent** — the `Volume` inputs on `[PlayVideo]` /
 `[VideoClip]` are no-op placeholders (see the "Audio is silent in this milestone" comments in
 `PlayVideo.cs` / `VideoClip.cs`).
 
-## Reconciliation with current code (2026-06-21)
-
-A fresh read of the codebase confirms the design holds and sharpens three points:
-
-- **Export already muxes audio.** The render loop pulls a deterministic per-frame mix
-  (`AudioRendering.GetFullMixDownBuffer(1/fps)` → `VideoFileEncoder.WriteAudioSamples`, interleaved **float /
-  48 kHz / stereo**) and the soundtrack + operator mixers already feed it. So Phase 3 is *lighter than written*:
-  once a video's audio is a push stream on a mixer the export reads, the only new work is feeding **exactly the
-  frame's time-slice** deterministically (no live buffer-ahead). The encoder needs no changes.
-- **The decode worker is seek-to-target, not a continuous stream.** `VideoPlaybackController.DecodeTo` seeks to
-  the requested frame and decodes forward, caching the GOP; forward 1× play stays sequential but a scrub/seek
-  re-seeks. **Implication:** the audio packet buffer is owned by the controller and must **flush on every
-  `SeekToKeyframeBefore`** — audio decode and the video seek logic are coupled, so they're built together (not as
-  an isolated session method). This is exactly why Phase 1 mutes on seek/scrub.
-- **The resampler is new code.** Nothing in the repo uses `swr_*` yet (`VideoFileEncoder` deinterleaves by hand at
-  the mix rate). The audio decode path is the first `SwrContext` user — target interleaved float / 48 kHz / stereo
-  via `Sdcb.FFmpeg.Raw` (`ffmpeg.swr_alloc_set_opts2` / `swr_init` / `swr_convert`, `av_channel_layout_default`).
-
-### Phase 1 implementation breakdown (file-level)
-
-1. **`VideoServices/VideoDecoderSession.cs`** — optional audio stream. In `TryOpen`/ctor, find the best audio
-   stream (none is fine); open an audio `CodecContext`; build a `SwrContext` to interleaved float/48k/stereo.
-   In `TryReadNextFrame`'s packet loop, route audio packets (`StreamIndex == _audioStreamIndex`) → decode →
-   `swr_convert` → enqueue `(sourceSeconds, float[])` chunks. Add `HasAudio`, `FlushAudio()` (clear queue, on
-   seek), and `bool TryDequeueAudio(out chunk)`. `FlushDecoder`/`SeekToKeyframeBefore` also flush audio + the swr.
-2. **`VideoServices/VideoPlaybackController.cs`** — drain decoded audio chunks under `_lock`; expose them to the
-   engine client. Flush the audio queue whenever the worker seeks (discontinuity) so stale audio never plays.
-3. **`Core/Audio/VideoAudioStream.cs` (new)** — a BASS **push** stream
-   (`Bass.CreateStream(48000, 2, BassFlags.Float, StreamProcedureType.Push)`) on `OperatorMixer`, fed via
-   `Bass.StreamPutData`. Parallel to `OperatorAudioStreamBase` (push ≠ seekable file): reuses mixer routing, the
-   `MixerChanPause` stale flag, per-stream `Volume`, `ChannelGetLevel`. The **feeder** tops it up to ~50–100 ms
-   from the controller's drained PCM; flush+mute on seek/scrub/speed≠1.
-4. **`Core/Audio/AudioEngine.cs`** — `UseVideoAudio(Guid id, …, float volume)` entry point + stale-token
-   reaping (mirror operator-audio: paused next frame when `Update` stops calling it).
-5. **`Operators/Video/lib/io/video/PlayVideo.cs`** — call `UseVideoAudio` each `Update`, drive `Volume`; remove
-   the "audio is silent" stub comment.
-
 ## Goal
 
-Decode a video file's audio track with FFmpeg and route it through TiXL's existing BASS audio engine so that:
+Decode a video file's audio track with FFmpeg and expose it as an ordinary **audio-graph source**, so that:
 
-1. It plays **in sync with the timeline** (the timeline is the master clock; audio follows).
-2. It is summed into `GlobalMixer`, so `[AnalyzeAudio]` / `[AudioFrequencies]` react to it **for free**.
-3. It is captured **deterministically** during render-to-file.
-4. The `Volume` inputs finally do something.
+1. It plays **in sync with the timeline** (the timeline is master; audio follows).
+2. `Volume` finally does something.
+3. It routes, groups, mixes, ducks and takes FX inserts through `[AudioBus]` / `[CombineAudio]` /
+   `[AudioReverb]` / `[DuckAudioLevel]` — the same machinery every other audio source uses, with no
+   video-specific plumbing.
+4. It is captured **deterministically** during render-to-file.
 
-**Non-goals (initially):** pitch-correct variable-speed audio, audio scrubbing, multi-track / channel selection,
-surround downmix choices. These are Phase 4 / deferred.
+**Non-goals (initially):** pitch-correct variable-speed audio, audio scrubbing, multi-track / channel
+selection, surround downmix choices. Phase 4 / deferred.
 
-## Why not "just let BASS open the file"
+## What the audio graph changes (read this before the old sections)
 
-BASS can open some containers directly (`Bass.CreateStream(path, …)`, the way `[AudioClip]` /
-`OperatorAudioStreamBase.TryLoadStreamCore` does), which would reuse all existing machinery with almost no new
-code. **Rejected on codec coverage:** the target content (e.g. the Silo / Foundation Web-DLs) is **E-AC-3 /
-DDP5.1**, which stock BASS does not decode → silent. FFmpeg already has the file open for video and decodes every
-codec. So the chosen approach is: **FFmpeg decodes the audio; we push PCM into a BASS push stream.**
+The original plan predates `AudioGraphNode`. It designed a bespoke path: a new `AudioEngine.UseVideoAudio`
+entry point, a per-op stale token, and a hard-coded mixer choice (`[PlayVideo]` → `OperatorMixer`,
+`[VideoClip]` → `SoundtrackMixer`). **All of that is superseded.** The graph already solves routing,
+lifecycle, transport gating, group gain, FX and metering — the video side only has to produce **one BASS
+channel handle** and hand it to a node.
+
+Locked-in decisions:
+
+- **D1 — Second output, `Slot<AudioGraphNode>`.** `[VideoClip]` and `[PlayVideo]` each gain an
+  `AudioReference` output and implement `IAudioSource` (`Core/Audio/IAudioSource.cs`). Unwired → the
+  implicit default bus (`AudioGraphCollector.CollectLooseSources`); wired → the `[AudioBus]` owns
+  membership and gain. One path, no mixer choice baked into the op. **Keep `Texture` as the *first*
+  output** — it is the default connection target; `AudioReference` is appended second.
+- **D2 — `Volume` becomes the node's `Gain`, not a stream attribute.** `node.Gain = Volume` (folded by
+  combinator gains during collection, applied by the realiser). Matches `[AudioClip]` and
+  `[AudioToneGenerator]`.
+- **D3 — `ExternallyManagedChannel = true`.** The decode side owns the push stream's lifetime and its
+  feed position; the graph owns membership + gain only. So the bus routes it **without**
+  `MixerChanBuffer` and never frees it. Known consequence (same as `[AudioClip]`): an `[AudioLevel]`
+  side-branch tap can't meter it — meter the bus, or wire the tap inline so it realises its own submix.
+- **D4 — The *texture* path owns time and feeding; the audio output only publishes channel + gain.**
+  A bus evaluating `AudioReference` supplies an `EvaluationContext` whose `LocalTime` is **not** remapped
+  through the `TimeClip` (that remap happens inside `TimeClipSlot`), so it cannot drive the feeder.
+  Rule: **drawn = audible.** A `[VideoClip]` no `[VideoClipPlayer]` evaluates is silent — which is right;
+  a video with no picture should have no sound. Unlike `[AudioClip]`, no bus-as-heartbeat is needed.
+- **D5 — Preroll must stay silent.** `_ProcessVideoClips` pulls `Upcoming` clips ~0.5 s before their cut
+  to warm the decoder. Gate the feeder on `Active`, not on "was evaluated this frame".
+- **D6 — A separate audio decode session, on the *original* path.** See below — this is the biggest
+  departure from the first draft.
+
+## D6 in full: why audio gets its own demuxer
+
+The first draft had the audio decode ride along inside `VideoDecoderSession` / `VideoPlaybackController`,
+flushing its queue on every `SeekToKeyframeBefore`. Re-reading the controller kills that:
+
+- `ProcessLatestRequest` **returns early on a cache hit** and when the target hasn't changed. During
+  smooth playback (and every scrub back into cached territory) no demuxing happens at all — audio would
+  starve exactly when playback is going well.
+- The zero-copy path has no `VideoFrameCache` and hands GPU surfaces across threads under `_lock`;
+  interleaving an audio queue into that handshake adds risk for no gain.
+- **Proxies have no audio track** (`ProxyTranscoder` sets `ExportAudio = false`), and
+  `VideoPlaybackEngine.ResolveEffectivePath` silently substitutes a proxy for preview. Coupled audio
+  would be silent whenever proxy preview is on — a confusing, invisible failure.
+
+So: **`AudioDecoderSession`** is its own `FormatContext` + audio `CodecContext` + `SwrContext`, opened on
+the **original** path (never the proxy), with the video stream set to `AVDISCARD_ALL`. It owns its own
+seek and flush, driven by the requested playhead. Cost: the file is opened twice and its bytes read twice
+(the OS page cache absorbs most of that, since both readers walk the same offsets); video packets are
+discarded at the demuxer, so there is no second decode. Worth it for a path that behaves the same under
+caching, zero-copy, proxies and export.
 
 ## Architecture
 
 ### Clock model
-The timeline (`Playback.TimeInBars` → `Playback.SecondsFromBars`, `Core/Animation/Playback.cs`) is master; audio
-**follows**. This is the opposite of a normal media player (audio-is-master). The video path already maps timeline
-time → source PTS (`TimeToFrameMapper`); audio reuses the same mapped time, so a frame and its audio share one clock.
+The timeline (`Playback.TimeInBars` → `SecondsFromBars`) is master; audio **follows**. This is the opposite
+of a normal media player. The video path already maps timeline → source seconds (`[VideoClip]` clamps into
+`SourceRange`, `TimeToFrameMapper.ResolvePlaybackSeconds` loops/clamps); audio is handed the **same mapped
+seconds**, so a frame and its audio share one clock.
 
-### Project boundaries (keep BASS in Core, FFmpeg in T3.Video)
-- **T3.Video** (FFmpeg side): the decode worker (`VideoPlaybackController` / `VideoDecoderSession`) already owns
-  the demuxer. Extend it to also decode the **audio** stream and resample with **libswresample** to interleaved
-  **float, 48 kHz, stereo** PCM tagged with PTS. Sdcb.FFmpeg exposes the raw resampler (`SwrContext`,
-  `swr_alloc_set_opts2`, `swr_init`, `swr_convert` in `Sdcb.FFmpeg.Raw`).
-- **Core/Audio** (BASS side): a new **push-stream** owner that registers on a mixer and the stale token, and is
-  fed the PCM. BASS push stream = `Bass.CreateStream(48000, 2, BassFlags.Float, StreamProcedureType.Push)` fed via
-  `Bass.StreamPutData(handle, buffer, bytes)`, added to a mixer with `BassMix.MixerAddChannel`.
-- PCM crosses **T3.Video → Core** (the correct dependency direction; Core is referenced by T3.Video). The engines
-  **cooperate via the PCM hand-off; they are not merged.**
+### Project boundaries (BASS in Core, FFmpeg in VideoServices)
+- **VideoServices** (FFmpeg side) owns `AudioDecoderSession` and the feeder that drives it.
+- **Core/Audio** (BASS side) owns `VideoAudioStream` — the push stream. `VideoServices` references `Core`,
+  so PCM crosses in the correct direction and BASS stays out of the FFmpeg assembly.
+- The channel handle travels back to the operator through a **separate** engine entry point,
+  `IVideoPlaybackEngine.RequestAudio(streamId, absolutePath, sourceSeconds, loop) → channel`, not through
+  `VideoFrameResult`. Keeping it separate is what lets a caller pull frames while staying silent — which is
+  exactly the preroll case (D5) and the export case — and it mirrors D6's decoupling instead of fighting it.
+  The op stays an FFmpeg-free Core client either way.
 
 ### Push stream ≠ file stream (why a new type)
-`OperatorAudioStreamBase` (`Core/Audio/OperatorAudioStreamBase.cs`) and `SoundtrackClipStream` are **seekable
-file/decode streams**: created from a path, seeked by byte position (`ChannelSetPosition` / `ChannelSeconds2Bytes`),
-speed via frequency, exported via `ChannelGetData`. A **push stream is not seekable** — it is controlled entirely by
-*what is fed and when*. So video audio needs a **new `VideoAudioStream`** type, **parallel to** (not a subclass of)
-`OperatorAudioStreamBase`. It **reuses**: mixer routing, the `MixerChanPause` stale/pause flag, the per-stream
-`Volume` channel attribute, and `BassMix.ChannelGetLevel` metering. It **replaces**: load / seek / position with a
-*feeder*.
+`OperatorAudioStreamBase` and `SoundtrackClipStream` are **seekable file/decode streams**: created from a
+path, seeked by byte position, exported via `ChannelGetData`. A **push stream is not seekable** — it is
+controlled entirely by *what is fed and when*. So video audio needs a new `VideoAudioStream`, **parallel
+to** (not a subclass of) `OperatorAudioStreamBase`. It reuses the per-stream `Volume` attribute and mixer
+membership; it replaces load / seek / position with a *feeder*.
 
-### What is reused for free
-- **Lifecycle — "silence when not updated" (the hen/egg problem, already solved).** The AudioEngine has a per-frame
-  keep-alive token (`LastUpdatedFrameId` + `SetStale`, reaped in `AudioEngine.CompleteFrame`). Stale operator
-  streams (not touched this frame) are auto-paused. `[PlayVideo]` / `[VideoClip]` call a `UseVideoAudio(id, time,
-  volume)` each `Update()`; a clip whose `Update` stops being called (playhead moves off it, op deleted/bypassed)
-  is paused on the next frame, exactly as a stale `[AudioPlayer]` is, with an `UnregisterOperator`-equivalent on
-  dispose. **No new lifecycle mechanism is invented.**
-- **Analysis.** Route free-floating `[PlayVideo]` audio into `OperatorMixer` and timeline `[VideoClip]` audio into
-  `SoundtrackMixer` (both defined in `AudioMixerManager`); both feed `GlobalMixer`, off which
-  `AudioAnalysisContext.Default` reads its FFT (`AudioEngine.UpdateFftBufferFromSoundtrack`). So `[AnalyzeAudio]` /
-  `[AudioFrequencies]` pick up video audio with **zero extra wiring**.
+### Why not "just let BASS open the file"
+BASS can open some containers directly, which would reuse existing machinery with almost no new code.
+**Rejected on codec coverage:** target content (e.g. the Silo / Foundation Web-DLs) is **E-AC-3 / DDP5.1**,
+which stock BASS does not decode → silent. FFmpeg already decodes every codec we care about.
 
-## The hard part: feeding a push stream in sync (the feeder)
+### Lifecycle — what the graph already gives us
+No new stale-token mechanism (the first draft's step 4 is deleted):
 
-A push stream plays whatever it is fed at 48 kHz wall-clock. Sync = keep the push buffer holding ~50–100 ms of
-audio starting at the current playhead.
+- **Op not evaluated** → `RequestFrame` stops being called → the engine's `IdleTimeoutMs` eviction disposes
+  the controller, and the feeder stops. Feeding also stops immediately when the op stops requesting, so
+  the push stream underruns to silence within a buffer length.
+- **Bus not evaluated** → `AudioBusRegistry` pauses its submix (2-frame slack).
+- **Transport stopped** → `PlaybackSpeed == 0` pauses explicit buses and the implicit default bus.
+- **Op disposed** → `ReleaseStream(streamId)` already runs in `Dispose`; it frees the audio stream too.
 
-- **Forward 1× play:** the worker decodes audio frames in PTS order from the playhead; the feeder tops the push
-  buffer up to the target fill. BASS plays it out in wall-clock, which equals the timeline at 1×. Clean.
-- **Drift correction:** compare fed-audio position vs playhead. Small drift rides (imperceptible); larger drift
-  (a seek) → **flush the push buffer and refill** from the new playhead.
-- **Pause:** stop feeding + `MixerChanPause`. **Resume:** refill from the playhead.
-- **Scrub:** flush and **mute** (audio scrubbing is rarely wanted; revisit with grain playback later).
-- **Speed ≠ 1×:** initially **mute** (a raw push would play at the wrong pitch). Later: FFmpeg `atempo` or BASS_FX
-  tempo.
-- **Underrun:** if decode falls behind, BASS underruns → brief silence (acceptable; audio decode is far lighter than
-  the already-realtime video decode).
+## The feeder (the load-bearing new work)
 
-## Export (deterministic)
+A push stream plays whatever it is fed, at 48 kHz wall-clock. Sync = keep the push buffer holding
+~50–100 ms of audio starting at the current playhead.
 
-Render-to-file is a **non-realtime, per-frame mixdown** (`AudioRendering.GetFullMixDownBuffer`, called per export
-frame). A live "buffer-ahead" push stream does not fit that directly. For each export frame's slice
-`[t, t+frameDur]`, the feeder must supply **exactly that slice's PCM** (decode audio for the slice, push, mix down) —
-a distinct, deterministic, time-sliced feeding mode vs the live buffer-ahead mode. This is its own phase.
+- **Forward 1× play:** decode audio in PTS order from the playhead; top the push buffer up to the target
+  fill. BASS plays it out in wall-clock, which equals the timeline at 1×.
+- **Drift correction:** compare fed-audio position against the requested time. Small drift rides
+  (imperceptible); a jump (seek/scrub) → **flush and refill** from the new playhead.
+- **Pause / out of range / preroll:** stop feeding; the buffer drains to silence.
+- **Scrub:** flush and mute. (Audio scrubbing is rarely wanted; revisit with grain playback.)
+- **Speed ≠ 1×:** mute initially — a raw push would play at the wrong pitch. Later: `atempo` or BASS_FX.
+- **Underrun:** brief silence. Acceptable; audio decode is far lighter than the already-realtime video decode.
 
-Once this Phase 3 lands, the video's audio is summed into the export mixdown like any other source, so the
-**encode milestone** ([`Plan_FfmpegEncode.md`](archive/Plan_FfmpegEncode.md)) encodes it **for free** — that writer
-consumes the same `GetFullMixDownBuffer` PCM the MF path does, and audio never forces the GPL build (native
-AAC/FLAC are LGPL). The encoder choice (MF vs FFmpeg) is orthogonal to the audio *routing* designed here.
+## Export
+
+Render-to-file is a **non-realtime, per-frame mixdown** (`AudioRendering.GetFullMixDownBuffer`, called per
+export frame), and the encoder already muxes whatever that returns — so nothing changes on the encoder side.
+Two things are needed:
+
+1. **Deterministic time-sliced feeding.** For each export frame's slice `[t, t+frameDur]` the feeder must
+   supply *exactly* that slice's PCM instead of buffering ahead. This is the distinct export feeding mode.
+2. **Nothing else** — a graph-routed source reaches the export mixdown through its bus, which the export
+   path already force-evaluates (`AudioRendering.PrepareRecording` snapshots live buses). That was the
+   hard part and it is already solved for `[AudioClip]`.
 
 ## Phases
 
-1. **MVP — `[PlayVideo]` audio, forward 1× only.** FFmpeg decodes + resamples the audio track in the existing
-   worker; a new `Core/Audio/VideoAudioStream` push stream is registered on `OperatorMixer` and fed; `[PlayVideo]`
-   calls `UseVideoAudio` each frame and drives `Volume`. Mute on scrub / seek / speed≠1.
-   *Verify: audio plays in sync at 1×; `[AnalyzeAudio]` reacts; stops within a frame when the op is deleted or
-   bypassed; E-AC-3 / AAC / AC-3 all produce sound.*
-2. **`[VideoClip]` on the timeline.** Route to `SoundtrackMixer`; map timeline→source time via the clip's
-   `TimeRange` / `SourceRange` (already computed for the video texture); pause when the playhead is outside the clip
-   (mirror `SoundtrackClipStream`'s bounds check).
-   *Verify: a video clip plays its audio only within its cut; trimming / scaling maps correctly.*
-3. **Deterministic export.** Time-sliced feeding into the export mixdown.
+1. **Decode + resample (VideoServices only).** `AudioDecoderSession`: open the best audio stream, discard
+   video, resample to interleaved float / 48 kHz / stereo, expose `HasAudio`, `SeekTo(seconds)`,
+   `TryDecodeChunk(out pcm, out startSeconds)`, `Flush()`.
+   *Verify: unit tests — round-trip a `VideoFileEncoder`-produced sine through the session and assert
+   format, chunk continuity and frequency; the checked-in samples (no audio track) report `HasAudio` false.*
+2. ✅ **Push stream + feeder** (landed 2026-08-09, unverified by ear — nothing calls it until Phase 3).
+   `Core/Audio/VideoAudioStream` — a decode-mode BASS push stream that never joins a mixer itself (the graph
+   places it) and reports `IsInvalidated` off `AudioMixerManager.ResetGeneration`.
+   `VideoServices/VideoAudioTrack` — a per-stream worker holding an `AudioDecoderSession` plus the push
+   stream, topping the queue up to ~200 ms and re-seeking when the queue's front drifts >120 ms from the
+   requested time. `IVideoPlaybackEngine.RequestAudio` plumbed; the engine's stream entry owns the track and
+   disposes it on eviction/release.
+   **Audibility rule:** the track plays only while the requested time advances forward by 0 < Δ ≤ 0.25 s per
+   tick. Stopped, reversed, scrubbed, looped-around and fast-forwarded playback all fail that test and flush
+   to silence — which covers "mute on scrub / seek / speed ≠ 1×" with one condition instead of four flags.
+   Not calling `RequestAudio` for ~100 ms also mutes, so preroll and export need no extra gating.
+   **Two defects found in live test (fixed 2026-08-09):** (a) the worker ticks faster than the operator posts
+   requests, so an unchanged time was read as "playhead stopped" and flushed the queue between every pair of
+   rendered frames — the step is now judged only when the time actually changes, with a wall-clock timeout for
+   a genuine stop; (b) the queue length swings by tens of milliseconds as the mixer pulls in chunks, and
+   thresholding it raw at 120 ms resynced ~8×/s on the swing itself — drift is now exponentially smoothed and
+   the threshold widened to 300 ms, since steady playback should need no resync at all (the step gate already
+   catches every jump). The diagnostic line reports the smoothed `drift`, which is also the measurement needed
+   for the constant-offset item below.
+   **Adjacent Core fix:** `AudioGraphCollector` never invalidated its static `_defaultBus` on a device change,
+   so after switching the audio device the dead handle was reused forever and *all* loose graph audio stayed
+   silent until restart — not just video. Now checks `AudioMixerManager.ResetGeneration`, per the rule the
+   graph plan already states.
+3. ✅ **`[PlayVideo]` in the graph** (landed + **live-tested 2026-08-09**: audible, and
+   `PlayVideo → [AudioReverb] → [AudioBus]` applies the insert — video audio is a graph source like any
+   other). New `AudioReference` output (`12473a41-5839-4b9b-9c79-2541fe8b630b`, `DirtyFlagTrigger.Always`,
+   appended last so `Texture` stays the default connection); implements `IAudioSource` with a no-op
+   `EnsureChannelFromStaticInputs` (the channel comes from the evaluated texture path, never from static
+   inputs). `Volume` → `node.Gain`; `Volume <= 0` or rendering-to-file requests no audio at all, so a video
+   used purely as a texture decodes nothing.
+   *Verify: `.tests-manual/video-audio-playback.md`.*
+4. ✅ **`[VideoClip]` on the timeline** (landed 2026-08-09, **needs live test**). Same shape as Phase 3:
+   `AudioReference` output (`d9da88fb-a5ac-451f-8727-a8ce126432d8`) + `IAudioSource`. The audio request is
+   gated on the clip being **active** — the existing `isActive` test (inside `SourceRange` in source time,
+   min/max so a reversed clip still gates) was already computed for the export stall and now gates audio too,
+   so the player's pre-roll pulls stay silent (D5). Time comes from the same `clampedTime` the frame request
+   uses, so picture and sound share one clock.
+   *Verify: `.tests-manual/video-audio-playback.md`.*
+5. **Deterministic export.** Time-sliced feeding mode.
    *Verify: the rendered file's audio is frame-aligned and identical across two renders of the same range.*
-4. **Polish.** Variable-speed (`atempo`), scrub grains, A/V drift telemetry, multi-track / channel selection,
-   surround downmix.
+6. **Polish.** Variable speed (`atempo`), scrub grains, A/V drift telemetry, multi-track / channel
+   selection, surround downmix.
 
-## Risks / open questions
+## Open questions
 
-- **Sync precision** — the feeder's fill target vs perceptible A/V offset needs tuning (the existing
-  `AudioSyncingOffset = -2/60 s` hints at the ballpark TiXL already accepts).
-- **Push-stream flush semantics** — confirm the exact ManagedBass call to clear a push stream's buffered data on a
-  seek (re-create vs position reset vs an `End` marker). Load-bearing for the drift/seek path.
-- **Threading** — audio decode + feed on the video worker vs a dedicated audio thread; BASS calls must be safe from
-  the calling thread. The AudioEngine is driven from the eval thread today (`CompleteFrame`); decide where the
-  per-frame feed tick lives.
-- **Resampler cost** — `swr_convert` per audio frame on the worker (cheap, but confirm under the 4-stream case).
-- **Multiple concurrent video-audio streams** (the 4-clip stress case) — N push streams on the mixer is fine, but
-  feeder CPU and demuxer audio decode add up; the existing `MaxLiveStreams` cap applies.
-- **Decision (proposed yes):** free-floating `[PlayVideo]` → `OperatorMixer`, timeline `[VideoClip]` →
-  `SoundtrackMixer`, matching the existing export routing split. Alternative: one dedicated video mixer.
+- **Back-compat loudness (decided 2026-08-09: leave both at 1.0).** Both ops already default `Volume` to
+  **1.0**, so switching audio on makes every existing project's videos audible at once. Accepted — "video
+  plays its sound" is the least surprising behaviour and silent-by-default reads as a bug. Needs a release
+  note.
+- **Proxy regeneration.** Audio always reads the original file, so a proxy that goes stale never affects
+  audio — but it does mean proxy preview no longer removes all I/O on the original. Acceptable?
+- **Multi-send.** Two buses collecting the same video source steal its channel from each other per frame
+  (the documented graph-wide limitation until split streams land). Same for video; no extra work here.
+- **Thread/IO cost scales per stream, and that is accepted.** Each audible source adds a feeder thread and a
+  second demuxer on top of the video decode thread the engine already spends per stream. At the observed
+  concurrency (`VideoPlaybackEngine`: "mostly 0-3 streams, rarely >7") that is a handful of threads and a
+  handful of extra read passes — not worth a shared feeder pool or decoder dedup. Note that `_streamId` is
+  per op instance, so two clips of the same file at different times are correctly independent; dedup would
+  have to key on (file, time) and would essentially never hit. Revisit only if a real project shows dozens of
+  simultaneously *audible* videos. Cheap mitigation that is worth doing anyway: a source with `Volume <= 0`
+  requests no audio at all, so a video used purely as a texture costs nothing.
+- **Fixed A/V offset from mixer-side buffering.** The feeder measures what is audible as
+  *fed − queued*, which accounts for the push queue but not for the buffering the mixer adds when the graph
+  routes the channel (`AudioGraphCollector` adds loose sources with `MixerChanBuffer`, and BASS's own device
+  buffer sits below that). The result is a small *constant* lateness — below the resync threshold, so it never
+  churns, but it is never corrected either. Measure it once audio is audible and fold it into the resync
+  target as an offset, next to the existing `AudioSyncingOffset = -2/60 s`. Phase 4 tuning.
+- **Loop seams.** A loop wrap fails the forward-step test, so it mutes for a tick and then re-seeks: an
+  audible gap at every wrap of a looping `[PlayVideo]`. Fixable by unwrapping the step against the duration
+  and pre-decoding across the seam. Phase 6.
+- **Audio-only use is not supported, by design (confirmed in live test, accepted by the user).** Wiring just
+  `AudioReference` into a bus, without the `Texture` output going anywhere, is silent — the texture path is
+  what drives the feeder (D4), so an unevaluated op requests nothing. For `[VideoClip]` this is structural:
+  the timeline→source remap lives inside `TimeClipSlot` and only happens on the texture output. For
+  `[PlayVideo]` it could be lifted (it has no TimeClip; the reference path could compute its own time), but
+  only correctly at the top level — inside a time-remapped subgraph the audio path would bypass a remap the
+  texture path would have applied. Not worth the asymmetry for now. **Worth doing instead:** an
+  `IStatusProvider` warning when `AudioReference` is wired but the op hasn't been evaluated for a few frames,
+  so the silence explains itself rather than reading as a bug. Same pattern as the `[AudioLevel]` side-branch
+  hint.
+- *Resolved in Phase 2:* the resampler targets `AudioConfig.MixerFrequency` (not a hard-coded 48 kHz), and
+  the feeder runs on a dedicated worker per stream — the whole point of D6 is decoupling from the video
+  worker's cadence.
 
 ## Manual test
 
-Add `.tests-manual/video-audio-playback.md` alongside Phase 1 (sync at 1×, `[AnalyzeAudio]` reacts, stops when the
-op is removed, E-AC-3 clip is audible).
+Add `.tests-manual/video-audio-playback.md` alongside Phase 3 (sync at 1×, routing into an `[AudioBus]`,
+group volume + reverb apply, `[AnalyzeAudio]` reacts, silence when the op is removed or the transport stops,
+an E-AC-3 clip is audible), and extend it in Phase 4 with clip-range gating and trimming.
+
+## Review handoff (batch of 2026-08-09)
+
+The whole batch is **staged, uncommitted** — `git diff --cached` is the review diff. It spans two plans: the
+video-audio work below, plus the `[AudioReaction]` graph tap and the tap helpers on `AudioGraphNode`, which
+belong to [`Plan_AudioProcessingGraph.md`](Plan_AudioProcessingGraph.md).
+
+**What is in the batch, by concern:**
+
+| Concern | Files |
+|---|---|
+| FFmpeg audio decode + resample (new) | `VideoServices/AudioDecoderSession.cs`, `VideoServices.Tests/AudioDecoderSessionTests.cs` |
+| BASS push stream + feeder (new) | `Core/Audio/VideoAudioStream.cs`, `VideoServices/VideoAudioTrack.cs` |
+| Engine plumbing | `VideoServices/VideoPlaybackEngine.cs`, `Core/Video/VideoPlayback.cs` (`RequestAudio`) |
+| Operators | `Operators/Video/lib/io/video/{PlayVideo,VideoClip}.{cs,t3ui}` |
+| Audio-graph tap (belongs to the graph plan) | `Core/DataTypes/AudioGraphNode.cs`, `Core/Audio/ChannelAudioAnalysis.cs`, `Core/Audio/AudioAnalysisContext.cs`, `Operators/Lib/io/audio/{AudioReaction,AudioLevel}.cs`, `AudioReaction.t3ui` |
+| Pre-existing bug fixed in passing | `Core/Audio/AudioGraphCollector.cs` (device-change handle invalidation) |
+| Docs | `.tests-manual/video-audio-playback.md`, both plans, `.help/release-notes/v4.3.md` |
+
+**Verification status — read this before assuming anything is proven:**
+
+- *Automated (64/64 in `VideoServices.Tests`):* **`AudioDecoderSession` only.** Open / no-audio-track /
+  missing-file, a 440 Hz tone round-tripped through encode→decode at 48 kHz, resampling to 44.1 kHz, and seek
+  anchoring. **Nothing else in the batch has automated coverage.**
+- *Live-tested by hand, 14/14 pass (2026-08-09):* `.tests-manual/video-audio-playback.md` — playback and sync
+  over a minute, audio-reactive ops, volume including 0, transport stop, scrub/reverse/2× silence,
+  un-evaluating, audio-without-picture, bus routing, reverb + grouping, a silent-track file, timeline clip
+  in/out, source trim, two-clip handover, proxy preview.
+- *Written but not yet run:* the two newest steps — animated volume, and `[AudioReaction]` following one source.
+- *Not verified at all:* **export** (Phase 5 not started — video audio is deliberately silent in rendered files
+  today); **device-change rebuild** on both new paths (`VideoAudioStream.IsInvalidated` →
+  `DropAfterDeviceChange`, and the new `AudioGraphCollector` reset); the **`[AudioLevel]` refactor** onto the
+  node helpers (behaviour-preserving by construction, but that op was working before and is now on new code);
+  **`[AudioReaction]` in wired mode**, including whether it works in Live Interactive mode.
+
+**Where the reviewer's attention is best spent** — the places reasoning replaced measurement:
+
+1. **`VideoAudioTrack` threading.** Fields are partitioned into "request state, under `_lock`" and
+   "worker-thread only" **by comment, not by structure**. Verify nothing worker-only is touched from `Request`
+   or `Channel`, and that `_channel` is the only field genuinely crossing threads.
+2. **`Dispose` vs. the worker.** Cancel → `_wake.Set()` → `Join(2 s)` → free BASS handles. If the join ever
+   times out, the worker can still touch freed handles. (Same shape as the existing
+   `VideoPlaybackController.Dispose`, so it's a precedent question, not a novel one.)
+3. **Span lifetime.** `AudioDecoderSession.TryDecodeChunk` hands out a `ReadOnlySpan<float>` into a reused
+   buffer, valid only until the next call. Enforced by xmldoc alone.
+4. **The FFmpeg interop.** `swr_convert` output sizing via `swr_get_delay` + `av_rescale_rnd`; reading
+   `raw->extended_data`; the `swr_free` paths in `TryOpen`'s failure branches (double-free / leak); the
+   `swr_init` re-initialisation on seek.
+5. **`VideoAudioStream.Dispose` calls `MixerRemoveChannel`** while the graph may still believe it holds that
+   channel — confirm the bus's per-frame reconciliation self-heals rather than logging forever.
+6. **Widened Core surface.** `AudioAnalysisContext`'s ctor went private → internal; `ChannelAudioAnalysis` and
+   four `AudioGraphNode` members are new public API. Check none is broader than its actual callers need.
+7. **`[AudioReaction]` back-compat.** ~30 existing instances; the unwired path must behave exactly as before.
+
+**Open measurements / decisions:**
+
+- The steady-state `drift=` value from the gated diagnostics (Settings → "Show Audio Logs"). Expected to be a
+  small constant lateness from mixer-side buffering the feeder can't see; once known it becomes a fixed offset
+  on the resync target. Unmeasured so far.
+- Whether a *wired* `[AudioReaction]` analyses correctly in Live Interactive mode (nothing in the submix path
+  consults `AudioSource`, so it should — untested).
 
 ## Key files
 
 | Concern | File |
 |---|---|
-| BASS init + the three mixers (Global / Operator / Soundtrack) | `Core/Audio/AudioMixerManager.cs` |
-| Stale token, `CompleteFrame`, operator-audio entry points | `Core/Audio/AudioEngine.cs` |
-| File-stream base (the *contrast* — push stream is parallel) | `Core/Audio/OperatorAudioStreamBase.cs` |
-| Timeline clip stream + bounds-pause pattern | `Core/Audio/SoundtrackClipStream.cs` |
-| FFT analysis off `GlobalMixer` | `Core/Audio/AudioAnalysis.cs`, `AudioAnalysisContext.cs` |
+| The wire value (leaf: channel + gain + externally-managed flag) | `Core/DataTypes/AudioGraphNode.cs` |
+| Loose-source collection into the implicit default bus | `Core/Audio/AudioGraphCollector.cs`, `IAudioSource.cs` |
+| Explicit routing / FX / metering realiser | `Operators/Lib/io/audio/AudioBus.cs` |
+| BASS init + the three mixers | `Core/Audio/AudioMixerManager.cs` |
 | Deterministic export mixdown | `Core/Audio/AudioRendering.cs` |
-| FFmpeg demuxer/decoder to extend for audio | `Video/VideoDecoderSession.cs`, `VideoPlaybackController.cs` |
-| Operators that drive it | `Operators/Lib/io/video/PlayVideo.cs`, `VideoClip.cs` |
+| FFmpeg demuxer/decoder (the *video* one — audio gets its own) | `VideoServices/VideoDecoderSession.cs`, `VideoPlaybackController.cs` |
+| Proxy substitution (why audio reads the original path) | `VideoServices/VideoPlaybackEngine.cs`, `ProxyTranscoder.cs` |
+| Operators that drive it | `Operators/Video/lib/io/video/PlayVideo.cs`, `VideoClip.cs`, `_ProcessVideoClips.cs` |

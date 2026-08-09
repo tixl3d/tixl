@@ -21,6 +21,15 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
     {
         public readonly VideoPlaybackController Controller = controller;
         public long LastRequestMs;
+
+        /// <summary>Created on the first audio request; a video-only stream never allocates one.</summary>
+        public VideoAudioTrack? Audio;
+
+        public void Dispose()
+        {
+            Controller.Dispose();
+            Audio?.Dispose();
+        }
     }
 
     /// <summary>The singleton; creating it also publishes it to <see cref="VideoPlayback.Engine"/>.</summary>
@@ -30,13 +39,7 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
                                          bool renderingToFile, VideoPlaybackOptimization optimization)
     {
         var now = Environment.TickCount64;
-        if (!_streams.TryGetValue(streamId, out var stream))
-        {
-            stream = new Stream(new VideoPlaybackController()) { LastRequestMs = now };
-            _streams[streamId] = stream;
-            RedistributeBudget();
-        }
-
+        var stream = GetOrCreateStream(streamId, now);
         stream.LastRequestMs = now;
         EvictStaleStreams(now);
 
@@ -47,13 +50,34 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
                                     controller.IsReady, controller.ErrorMessage);
     }
 
+    public int RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop)
+    {
+        var stream = GetOrCreateStream(streamId, Environment.TickCount64);
+
+        // Deliberately not ResolveEffectivePath: proxies are video-only, so audio always reads the source.
+        var track = stream.Audio ??= new VideoAudioTrack();
+        track.Request(absolutePath, sourceSeconds, loop);
+        return track.Channel;
+    }
+
     public void ReleaseStream(Guid streamId)
     {
         if (!_streams.Remove(streamId, out var stream))
             return;
 
-        stream.Controller.Dispose();
+        stream.Dispose();
         RedistributeBudget();
+    }
+
+    private Stream GetOrCreateStream(Guid streamId, long now)
+    {
+        if (_streams.TryGetValue(streamId, out var stream))
+            return stream;
+
+        stream = new Stream(new VideoPlaybackController()) { LastRequestMs = now };
+        _streams[streamId] = stream;
+        RedistributeBudget();
+        return stream;
     }
 
     // Frees streams the graph no longer drives: any idle past the timeout, plus — when above the live cap —
@@ -66,7 +90,7 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
         var evictedAny = false;
         while (TryFindEvictable(now, out var evictId))
         {
-            _streams[evictId].Controller.Dispose();
+            _streams[evictId].Dispose();
             _streams.Remove(evictId);
             evictedAny = true;
         }

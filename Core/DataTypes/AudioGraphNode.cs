@@ -100,6 +100,71 @@ public sealed class AudioGraphNode
         _multiInput.DirtyFlag.Clear();
     }
 
+    /// <summary>
+    /// Turns this node into an analysis/metering tap: it declares an insert that applies no effect, purely so a
+    /// routing bus realises the sources below it as their own buffered submix. That submix is the only place an
+    /// engine-owned channel (an [AudioClip], a video's audio) can be metered or analysed — those are routed
+    /// un-buffered, so reading them individually silently returns nothing.
+    /// </summary>
+    public void DeclareAnalysisTap()
+    {
+        FxInsert = new AudioFxInsert
+                       {
+                           Apply = submix => _realisedSubmixes.Add(submix),
+                           UpdateParams = _ => { },
+                           Remove = submix => _realisedSubmixes.Remove(submix),
+                       };
+    }
+
+    /// <summary>Submixes a routing bus realised for this node's insert; empty while the tap is only a side
+    /// branch. More than one means several buses collected it.</summary>
+    public IReadOnlyCollection<int> RealisedSubmixes => _realisedSubmixes;
+
+    /// <summary>
+    /// The channel a tap should read: the realised submix when wired inline (post source gains, works for every
+    /// source type), else a single graph-owned leaf as the side-branch fallback. False when nothing is readable
+    /// — including a side branch on engine-owned sources, which <see cref="HasExternallyManagedLeaf"/> detects
+    /// so the op can say so rather than silently reporting zero.
+    /// </summary>
+    public bool TryGetAnalysisChannel(out int channel)
+    {
+        foreach (var submix in _realisedSubmixes)
+        {
+            channel = submix;
+            return true;
+        }
+
+        CollectForAnalysis();
+        if (_analysisScratch.Count == 1 && !_analysisScratch[0].Leaf.ExternallyManagedChannel)
+        {
+            channel = _analysisScratch[0].Leaf.SourceChannel;
+            return channel != 0;
+        }
+
+        channel = 0;
+        return false;
+    }
+
+    /// <summary>True when a reachable leaf's channel belongs to another subsystem, so a side-branch tap on it
+    /// reads as silence. Drives the misconfiguration warning on tap operators.</summary>
+    public bool HasExternallyManagedLeaf()
+    {
+        CollectForAnalysis();
+        for (var i = 0; i < _analysisScratch.Count; i++)
+        {
+            if (_analysisScratch[i].Leaf.ExternallyManagedChannel)
+                return true;
+        }
+
+        return false;
+    }
+
+    private void CollectForAnalysis()
+    {
+        _analysisScratch.Clear();
+        Collect(_analysisScratch, 1f);
+    }
+
     /// <summary>A leaf source reached by the root's collection, paired with its effective gain
     /// (product of ancestor combinator gains × its own gain) and the FX node it flows into
     /// (the *nearest* ancestor declaring an <see cref="FxInsert"/>; null = routed dry).</summary>
@@ -156,5 +221,7 @@ public sealed class AudioGraphNode
 
     private readonly Instance _instance;
     private readonly MultiInputSlot<AudioGraphNode>? _multiInput;
+    private readonly HashSet<int> _realisedSubmixes = new();
+    private readonly List<CollectedSource> _analysisScratch = new();
     private int _lastUpdateFrame = -1;
 }

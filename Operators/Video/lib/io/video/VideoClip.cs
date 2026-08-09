@@ -1,4 +1,5 @@
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Resource.Assets;
 using T3.Core.Utils;
@@ -23,18 +24,32 @@ internal interface IVideoClipProvider
 }
 
 [Guid("04c1a6dc-3042-48a8-81d2-0a5a162016dc")]
-internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoClipProvider, IContentTimeClip, IDescriptiveFilename
+internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoClipProvider, IContentTimeClip, IDescriptiveFilename, IAudioSource
 {
-    // The single output is both the frame and the timeline placement: a TimeClipSlot carries the
+    // The texture output is both the frame and the timeline placement: a TimeClipSlot carries the
     // TimeClip data, with the out-of-range gate disabled so the player can pre-roll the decoder and
     // out-of-range pulls resolve to the clamped first/last frame.
     [Output(Guid = "eb954aeb-535b-4b22-ac49-858f71bdaac4", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly TimeClipSlot<Texture2D> Texture = new();
 
+    /// <summary>
+    /// AudioReference for the audio-processing graph. Wire it into an [AudioBus] (directly or through a
+    /// [CombineAudio]) to route this clip's sound through the graph, so group volume, FX inserts and ducking
+    /// apply to it. Left unwired it plays through the implicit default bus.
+    /// </summary>
+    [Output(Guid = "d9da88fb-a5ac-451f-8727-a8ce126432d8", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
+    public readonly Slot<AudioGraphNode> AudioReference = new();
+
     public VideoClip()
     {
         Texture.EvaluateOutsideRange = true;
         Texture.UpdateAction += Update;
+
+        // The decode side owns the stream's lifetime and feed position; the graph only decides which mixer it
+        // joins and at what gain.
+        _node = new AudioGraphNode(this) { ExternallyManagedChannel = true };
+        AudioReference.Value = _node;
+        AudioReference.UpdateAction += UpdateAudioReference;
     }
 
     private void Update(EvaluationContext context)
@@ -64,12 +79,14 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
         _statusMessage = result.ErrorMessage;
         Texture.Value = result.Texture;
 
-        // During export, make the renderer wait for this clip's exact frame — but only while it's actually
-        // active. The player also pulls clips ahead of their cut to pre-warm the decoder, and those must not
-        // stall export waiting for a frame that isn't on screen yet. In source time "active" means inside
-        // SourceRange (min/max so a reversed clip still gates).
+        // "Active" means inside SourceRange in source time (min/max so a reversed clip still gates). The player
+        // also pulls clips ahead of their cut to pre-warm the decoder; those pulls must neither be heard nor
+        // stall export waiting for a frame that isn't on screen yet.
         var isActive = context.LocalTime >= Math.Min(sourceRange.Start, sourceRange.End)
                        && context.LocalTime < Math.Max(sourceRange.Start, sourceRange.End);
+
+        UpdateAudioTrack(context, absolutePath, clampedTime, isActive);
+
         if (context.Playback.IsRenderingToFile && isActive)
             Playback.OpNotReady |= !result.IsReady;
 
@@ -100,6 +117,14 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
         return IsManagedByAPlayer ? null : "Not drawn by any [VideoClipPlayer] — wire it into one or enable the player's AutoCollect.";
     }
 
+    Slot<AudioGraphNode> IAudioSource.AudioReferenceOutput => AudioReference;
+
+    // Nothing to do: the channel is created by the evaluated texture path, never from static inputs. A clip
+    // no player draws has no picture, and so should have no sound either.
+    void IAudioSource.EnsureChannelFromStaticInputs()
+    {
+    }
+
     Slot<Texture2D> IVideoClipProvider.TextureOutput => Texture;
     InputSlot<Vector4> IVideoClipProvider.ColorInput => Color;
     InputSlot<int> IVideoClipProvider.BlendModeInput => BlendMode;
@@ -114,7 +139,31 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
     private bool IsManagedByAPlayer => Playback.FrameCount - _lastManagedFrame <= ManagedFrameSlack;
     private const int ManagedFrameSlack = 2;
 
+    // Sound follows the picture: the texture path owns the source time, so it also drives the audio track.
+    // Not requesting for a few frames mutes the track, which is what keeps pre-roll and un-drawn clips silent.
+    private void UpdateAudioTrack(EvaluationContext context, string absolutePath, double sourceTime, bool isActive)
+    {
+        var volume = Volume.GetValue(context);
+        _node.Gain = volume;
+
+        // Export takes its audio from the deterministic mixdown, not from the live feeder; and a silenced
+        // source should cost no decoding at all, so a video used purely as a texture stays free.
+        var wantsAudio = isActive && volume > 0 && !context.Playback.IsRenderingToFile;
+        _node.SourceChannel = wantsAudio
+                                  ? VideoPlaybackEngine.Instance.RequestAudio(_streamId, absolutePath, sourceTime, loop: false)
+                                  : 0;
+    }
+
+    // Off the render path: a bus evaluating this output supplies no meaningful source time, so the node only
+    // republishes the channel and gain the texture path already established.
+    private void UpdateAudioReference(EvaluationContext context)
+    {
+        _node.Update(context);
+        AudioReference.DirtyFlag.Clear();
+    }
+
     private readonly Guid _streamId = Guid.NewGuid();
+    private readonly AudioGraphNode _node;
     private string _statusMessage;
     private int _lastManagedFrame;
 
@@ -122,7 +171,6 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
     [Input(Guid = "31721e18-556b-452b-a8aa-18dbd44af74d")]
     public readonly InputSlot<string> Path = new();
 
-    // Audio is silent in this milestone (BASS routing is backlog); kept for graph compatibility.
     [Input(Guid = "28f27625-37fe-409a-b6c1-d4eabf6c1eb8")]
     public readonly InputSlot<float> Volume = new();
 

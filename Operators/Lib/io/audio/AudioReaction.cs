@@ -5,10 +5,18 @@ using T3.Core.Utils;
 namespace Lib.io.audio;
 
 [Guid("03477b9a-860e-4887-81c3-5fe51621122c")]
-public sealed class AudioReaction : Instance<AudioReaction>
+public sealed class AudioReaction : Instance<AudioReaction>, IStatusProvider
 {
     [Output(Guid = "E1749C60-41F0-4E8F-9317-909EF31EEEF1", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<float> Level = new();
+
+    /// <summary>
+    /// Pass-through for the audio graph. Insert this op between sources and an [AudioBus] to react to just
+    /// those sources instead of everything audible; leave both this and <see cref="Source"/> unconnected to
+    /// analyse the final mix as before.
+    /// </summary>
+    [Output(Guid = "06eb7729-85d5-4499-8ae7-dd666b824749")]
+    public readonly Slot<AudioGraphNode> Result = new();
 
     [Output(Guid = "8CA411D4-10CE-4B90-AEBA-3E405EBECBA3", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<bool> WasHit = new();
@@ -21,6 +29,11 @@ public sealed class AudioReaction : Instance<AudioReaction>
         Level.UpdateAction += Update;
         WasHit.UpdateAction += Update;
         HitCount.UpdateAction += Update;
+
+        _node = new AudioGraphNode(this, Source);
+        _node.DeclareAnalysisTap();
+        Result.Value = _node;
+        Result.UpdateAction += context => _node.Update(context);
     }
 
     private double _lastEvalTime;
@@ -60,13 +73,15 @@ public sealed class AudioReaction : Instance<AudioReaction>
 
         var mode = (InputModes)InputBand.GetValue(context).Clamp(0, Enum.GetNames(typeof(InputModes)).Length - 1);
 
+        var sourceAnalysis = UpdateSourceAnalysis(context);
+
         var bins2 = mode switch
                         {
-                            InputModes.RawFft                => AudioAnalysis.FftGainBuffer,
-                            InputModes.NormalizedFft         => AudioAnalysis.FftNormalizedBuffer,
-                            InputModes.FrequencyBands        => AudioAnalysis.FrequencyBands,
-                            InputModes.FrequencyBandsPeaks   => AudioAnalysis.FrequencyBandPeaks,
-                            InputModes.FrequencyBandsAttacks => AudioAnalysis.FrequencyBandAttacks,
+                            InputModes.RawFft                => sourceAnalysis?.FftGain ?? AudioAnalysis.FftGainBuffer,
+                            InputModes.NormalizedFft         => sourceAnalysis?.FftNormalized ?? AudioAnalysis.FftNormalizedBuffer,
+                            InputModes.FrequencyBands        => sourceAnalysis?.FrequencyBands ?? AudioAnalysis.FrequencyBands,
+                            InputModes.FrequencyBandsPeaks   => sourceAnalysis?.FrequencyBandPeaks ?? AudioAnalysis.FrequencyBandPeaks,
+                            InputModes.FrequencyBandsAttacks => sourceAnalysis?.FrequencyBandAttacks ?? AudioAnalysis.FrequencyBandAttacks,
                             _                                => null
                         };
 
@@ -170,7 +185,37 @@ public sealed class AudioReaction : Instance<AudioReaction>
         Level.DirtyFlag.Clear();
     }
 
-    public float Sum { get; private set; }   
+    /// <summary>
+    /// Returns the per-source analysis when this op is wired into the graph, or null to analyse the global mix
+    /// (the unwired default, and what every existing instance keeps doing).
+    /// </summary>
+    private ChannelAudioAnalysis UpdateSourceAnalysis(EvaluationContext context)
+    {
+        if (!Source.HasInputConnections)
+            return null;
+
+        _node.Update(context);
+        _node.TryGetAnalysisChannel(out var channel);
+
+        _sourceAnalysis ??= new ChannelAudioAnalysis();
+        _sourceAnalysis.Update(channel);
+        return _sourceAnalysis;
+    }
+
+    // Same trap [AudioLevel] documents: a side-branch tap silently reads zero for engine-owned channels.
+    IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()
+        => Source.HasInputConnections && _node.RealisedSubmixes.Count == 0 && _node.HasExternallyManagedLeaf()
+               ? IStatusProvider.StatusLevel.Warning
+               : IStatusProvider.StatusLevel.Success;
+
+    string IStatusProvider.GetStatusMessage()
+        => "As a side branch this can't analyse timeline clips or video audio — they read as silence.\n"
+           + "Wire it inline: source → AudioReaction → bus (directly or through combines/effects).";
+
+    private readonly AudioGraphNode _node;
+    private ChannelAudioAnalysis _sourceAnalysis;
+
+    public float Sum { get; private set; }
     public float SumFactor { get; private set; }
     private bool _reset;
     private int _hitCount;
@@ -229,6 +274,10 @@ public sealed class AudioReaction : Instance<AudioReaction>
 
         [Input(Guid = "D138C961-B163-428A-9479-2130F1E46314")]
         public readonly InputSlot<bool> Reset = new InputSlot<bool>();
+
+        /// <summary>Optional: analyse only these sources instead of the final mix. See <see cref="Result"/>.</summary>
+        [Input(Guid = "9f56d158-101d-4fbc-bc63-a67b9e923dbd")]
+        public readonly MultiInputSlot<AudioGraphNode> Source = new();
         
     private static readonly List<float> _emptyList = new();
     public double PlaybackTimeInSecs =>

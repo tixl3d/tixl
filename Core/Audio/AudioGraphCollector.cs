@@ -23,6 +23,15 @@ public static class AudioGraphCollector
         if (composition == null)
             return;
 
+        // A device change frees every BASS handle, so the cached bus and routing set are dead ints. Without
+        // this the non-zero _defaultBus is reused forever and loose graph audio stays silent until restart.
+        if (_resetGeneration != AudioMixerManager.ResetGeneration)
+        {
+            _resetGeneration = AudioMixerManager.ResetGeneration;
+            _defaultBus = 0;
+            _routed.Clear();
+        }
+
         RebuildLooseListIfChanged(composition);
 
         if (_looseSources.Count == 0 && _routed.Count == 0)
@@ -142,4 +151,5 @@ public static class AudioGraphCollector
     private static readonly HashSet<int> _routed = new();
     private static readonly List<int> _toRemove = new();
     private static int _defaultBus;
+    private static int _resetGeneration = -1;
 }

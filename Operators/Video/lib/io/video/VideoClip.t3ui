@@ -19,7 +19,9 @@
         "Y": 90.0
       },
       "Description": "Audio volume of the video's sound track.\n\nNot yet routed to the audio engine — video audio is silent in this version.",
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "Min": 0.0,
+      "ClampMin": true
     },
     {
       "InputId": "31721e18-556b-452b-a8aa-18dbd44af74d"/*Path*/,
@@ -67,6 +69,13 @@
       "Position": {
         "X": 300.0,
         "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "d9da88fb-a5ac-451f-8727-a8ce126432d8"/*AudioReference*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
       }
     }
   ]
