@@ -79,15 +79,15 @@ namespace Lib.io.audio
             Level.Value = Math.Min(maxLevel, 1f);
         }
 
-        // A side-branch tap can meter generator sources, but engine-owned [AudioClip] channels are
-        // un-buffered and silently read 0 there — a trap that cost real debugging time; warn instead.
+        // A side-branch tap can meter generator sources, but engine-owned channels ([AudioClip], video audio)
+        // are un-buffered and silently read 0 there — a trap that cost real debugging time; warn instead.
         IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() =>
             _node.RealisedSubmixes.Count == 0 && _node.HasExternallyManagedLeaf()
                 ? IStatusProvider.StatusLevel.Warning
                 : IStatusProvider.StatusLevel.Success;
 
         string IStatusProvider.GetStatusMessage() =>
-            "As a side branch this tap can't meter timeline [AudioClip]s — their Level reads 0.\n"
+            "As a side branch this tap can't meter timeline clips or video audio — their Level reads 0.\n"
             + "Wire it inline: source → AudioLevel → bus (directly or through combines/effects).";
 
         private readonly AudioGraphNode _node;

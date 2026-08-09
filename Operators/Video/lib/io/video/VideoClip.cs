@@ -146,8 +146,9 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
         var volume = Volume.GetValue(context);
         _node.Gain = volume;
 
-        // Export takes its audio from the deterministic mixdown, not from the live feeder; and a silenced
-        // source should cost no decoding at all, so a video used purely as a texture stays free.
+        // Export mutes the live feeder — a deterministic export mixdown for video audio doesn't exist yet, so
+        // rendered files carry no video audio. A silenced source should also cost no decoding at all, so a
+        // video used purely as a texture stays free.
         var wantsAudio = isActive && volume > 0 && !context.Playback.IsRenderingToFile;
         _node.SourceChannel = wantsAudio
                                   ? VideoPlaybackEngine.Instance.RequestAudio(_streamId, absolutePath, sourceTime, loop: false)

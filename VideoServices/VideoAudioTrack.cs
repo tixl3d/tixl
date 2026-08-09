@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using T3.Core.Audio;
 using T3.Core.Logging;
+using T3.Core.Utils;
 
 namespace T3.VideoServices;
 
@@ -42,10 +43,19 @@ internal sealed class VideoAudioTrack : IDisposable
     {
         _cancellation.Cancel();
         _wake.Set();
-        _worker?.Join(TimeSpan.FromSeconds(2));
+        if (_worker != null && !_worker.Join(TimeSpan.FromSeconds(2)))
+        {
+            // Stuck in a blocking decode/IO call. Leaking its resources is safer than disposing them under
+            // its feet — the thread is background, so it can't keep the process alive.
+            Log.Warning("[VideoAudio] The worker did not exit in time; leaving its resources behind.");
+            return;
+        }
 
-        // The worker has exited, so its resources can be released without racing it.
-        _stream?.Dispose();
+        // The worker has exited, so its resources can be released without racing it. After a device change
+        // the stream's handle is already dead — freeing it again would act on a handle BASS has since re-issued.
+        if (_stream is { IsInvalidated: false })
+            _stream.Dispose();
+
         _session?.Dispose();
         _wake.Dispose();
         _cancellation.Dispose();
@@ -131,6 +141,11 @@ internal sealed class VideoAudioTrack : IDisposable
             _lastTarget = target;
             _lastTargetChangeMs = now;
 
+            // A looped target wraps duration→0 while still moving forward; unwrap it so the seam doesn't read
+            // as a jump — the audio TopUp pre-fed across the seam then plays through instead of being flushed.
+            if (loop && step < 0 && _session.DurationSeconds > 0)
+                step += _session.DurationSeconds;
+
             // Consecutive well-behaved steps, so a scrub (a jump per frame) never accumulates enough to feed a
             // grain before the next jump flushes it. Normal playback qualifies within a frame or two.
             var normalPlayback = !double.IsNaN(step) && step > 0 && step <= MaxForwardStepSeconds;
@@ -152,6 +167,15 @@ internal sealed class VideoAudioTrack : IDisposable
         // a smoothed estimate — comparing the raw value against a tight threshold resyncs on the swing itself,
         // which flushes the queue several times a second and shreds the audio.
         var drift = _fedSeconds - _stream!.BufferedSeconds - target;
+
+        // Around the loop seam the fed position wraps to 0 before the target does; compare on the circle so
+        // that moment doesn't read as a full-duration offset and force a resync right at the seam.
+        if (loop && _session.DurationSeconds > 0)
+        {
+            var duration = _session.DurationSeconds;
+            drift = MathUtils.Fmod(drift + duration * 0.5, duration) - duration * 0.5;
+        }
+
         _smoothedDrift = double.IsNaN(_smoothedDrift) ? drift : _smoothedDrift + (drift - _smoothedDrift) * DriftSmoothing;
 
         if (double.IsNaN(_fedSeconds) || Math.Abs(_smoothedDrift) > ResyncThresholdSeconds)
