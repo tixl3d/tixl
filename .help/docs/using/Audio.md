@@ -36,6 +36,17 @@ With **AutoCollectClips** enabled on a bus or a group, unwired sibling audio cli
 
 The bus must be evaluated to play — wire it into your render chain or pin it to an output view.
 
+## Video audio
+
+Videos play their sound: both [PlayVideo] and a [VideoClip] on the timeline decode their file's audio track and play it in sync with the picture. The **Volume** parameter scales it, and at 0 the audio track isn't decoded at all — a video used purely as a texture costs nothing extra. Like every audio source, both operators have an **AudioReference** output: wire it into an [AudioBus] or [CombineAudio] to give video sound a group volume, effects or ducking; left unwired it simply plays.
+
+Sound follows the picture:
+
+- A [PlayVideo] that nothing renders is silent; a [VideoClip] is audible only inside its cut, and trimming or slipping the clip moves its sound along with the frames.
+- Audio plays during normal forward playback. Scrubbing, reverse and other playback speeds are silent — pitch-corrected audio for those is planned.
+- Preview proxies carry no audio track, so sound always comes from the original file, proxy preview or not.
+- Video audio is not yet included in rendered video files or executables (see [Export](#export)).
+
 ## Metering and ducking
 
 An [AudioLevel] tap measures the signal at the point where it sits in the chain — wire it **inline** (source → tap → bus), not as a side branch, so it can meter timeline clips. Its level output drives anything: lamp brightness, scale, or a [DuckAudioLevel], which lowers one signal while another is loud — the classic voice-over-over-music setup:
@@ -51,9 +62,13 @@ An [AudioLevel] tap measures the signal at the point where it sits in the chain 
 - **Animation** projects analyze the **main soundtrack**, frame-accurately — also while rendering videos, so exported reactivity matches playback.
 - **Live / Interactive** projects analyze the **audio input device** configured in Project Settings → Audio, with **Gain** to adjust varying input levels and **Decay** to shape how quickly reactions fall off.
 
+To react to one source instead of the whole mix, insert the [AudioReaction] into the graph: wire the source's **AudioReference** into its **Source** input and its **Result** onward into the bus. Wired inline like this it analyzes only what flows through it — for example a video's sound while music plays alongside. As a dead-end side branch it can't analyze timeline clips or video audio; the operator warns when it's wired that way.
+
 ## Export
 
 What you hear is what you get: timeline clips and everything routed through the audio graph — including group volumes, effects and ducking — render into exported videos and executables. The main soundtrack defines an executable's play duration.
+
+The exception for now is **video audio**: it plays live in the editor but is not yet part of the deterministic export mixdown, so rendered files and executables don't carry it.
 
 ## See also
 
