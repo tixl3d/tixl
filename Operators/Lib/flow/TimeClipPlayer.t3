@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "fb61e317-4b12-46c6-85d1-5925ccce09cd"/*TimeClipPlayer*/,
+  "Inputs": [
+    {
+      "Id": "3e7347b1-642c-4719-8e89-d7281b916753"/*AutoCollect*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "6e16649b-b2a0-473a-980e-090dbc8ab294"/*Clips*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

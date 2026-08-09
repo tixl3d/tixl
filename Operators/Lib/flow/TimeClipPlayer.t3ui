@@ -1,0 +1,34 @@
+{
+  "FormatVersion": 3,
+  "Id": "fb61e317-4b12-46c6-85d1-5925ccce09cd"/*TimeClipPlayer*/,
+  "Description": "Renders timeline Command time clips. With AutoCollect on (default) it executes every unwired time clip in the same composition — no wiring needed. You can also wire specific clip outputs into it for explicit control.\n\nClips on upper timeline rows draw on top of lower rows. Each clip still respects its own time range and time remapping. Wiring a clip into any consumer removes it from auto-collection — the consumer takes over.\n\nTips\nUse only one auto-collecting [TimeClipPlayer] per composition, wired into your render chain (e.g. via a [Group]).",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "3e7347b1-642c-4719-8e89-d7281b916753"/*AutoCollect*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "When on (default), execute every sibling time clip whose clip output is not connected."
+    },
+    {
+      "InputId": "6e16649b-b2a0-473a-980e-090dbc8ab294"/*Clips*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Optional: wire specific time-clip outputs here to render them in this order, before any auto-collected clips."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "2c8581cc-c72e-4fe7-b251-80c2874d15b3"/*Output*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
