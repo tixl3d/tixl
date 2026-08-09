@@ -311,7 +311,7 @@ internal static partial class ProjectSetup
             // Add Built-in packages as projects
             if (includeBuiltInAsProjects)
             {
-                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(Path.Combine(_t3ParentDirectory, FileLocations.OperatorsSubFolder))
+                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(BuiltInOperatorDirectory)
                                                                                     .Where(path =>
                                                                                            {
                                                                                                var subDir = Path.GetFileName(path);
@@ -324,6 +324,12 @@ internal static partial class ProjectSetup
         }
     }
 
+
+    /// <summary>
+    /// Source folder of the operator packages shipped with TiXL. Release builds load these as read-only
+    /// packages; debug builds compile them as regular projects, so this is the only way to tell them apart.
+    /// </summary>
+    internal static string BuiltInOperatorDirectory => Path.GetFullPath(Path.Combine(_t3ParentDirectory, FileLocations.OperatorsSubFolder));
 
     private static readonly string _coreOperatorDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder);
     private static readonly string _t3ParentDirectory = Path.Combine(FileLocations.StartFolder, "..", "..", "..", "..");

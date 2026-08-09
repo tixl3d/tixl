@@ -22,6 +22,13 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     public override string DisplayName { get; }
 
     /// <summary>
+    /// True for the operator packages shipped with TiXL (Lib, Types, Examples, ...). Release builds load these
+    /// as read-only packages, but debug builds compile them as regular projects — they still must not be
+    /// offered as a destination when the user creates new symbols.
+    /// </summary>
+    public bool IsBuiltIn { get; }
+
+    /// <summary>
     /// Create a new <see cref="EditableSymbolProject"/> using the given <see cref="CsProjectFile"/>.
     /// </summary>
     public EditableSymbolProject(CsProjectFile csProjectFile) : 
@@ -33,6 +40,8 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         _csFileWatcher = new CodeFileWatcher(this, OnFileChanged, OnCodeFileRenamed);
         _csFileWatcher.EnableRaisingEvents = true;
         DisplayName = $"{csProjectFile.Name} ({CsProjectFile.RootNamespace})";
+        IsBuiltIn = Path.GetFullPath(csProjectFile.Directory)
+                        .StartsWith(ProjectSetup.BuiltInOperatorDirectory, StringComparison.OrdinalIgnoreCase);
         SymbolUpdated += OnSymbolUpdated;
         SymbolRemoved += OnSymbolRemoved;
         InitializeAssets();

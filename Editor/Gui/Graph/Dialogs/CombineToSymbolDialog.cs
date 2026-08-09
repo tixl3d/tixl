@@ -22,11 +22,16 @@ internal sealed class CombineToSymbolDialog : ModalDialog
             var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToList();
             var selectedSections = projectView.NodeSelection.GetSelectedNodes<Section>().ToList();
 
-            if (_projectToCopyTo == null)
+            // Default to the project the ops are already in, rather than keeping the last used one
+            if (ImGui.IsWindowAppearing() || _projectToCopyTo == null)
             {
-                EditableSymbolProject.TryGetEditableProjectOfNamespace(nameSpace, out _projectToCopyTo);
+                _projectToCopyTo = projectView.InstView?.Symbol.SymbolPackage as EditableSymbolProject;
+                if (_projectToCopyTo == null)
+                {
+                    EditableSymbolProject.TryGetEditableProjectOfNamespace(nameSpace, out _projectToCopyTo);
+                }
             }
-            
+
             _ = SymbolModificationInputs.DrawProjectDropdown(ref nameSpace, ref _projectToCopyTo);
 
             if (_projectToCopyTo != null)

@@ -62,7 +62,7 @@ internal static class SymbolModificationInputs
                                                                                  .Select(x => x.Symbol)
                                                                                  .Select(i => i.Namespace)
                                                                                  .Distinct()
-                                                                                 .OrderBy(i => i),
+                                                                                 .OrderBy(i => i, StringComparer.OrdinalIgnoreCase),
                                                                "Sub.Category",
                                                                isNamespaceCorrect ? null : "Namespace not correct",
                                                                """
