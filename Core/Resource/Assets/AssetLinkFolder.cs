@@ -46,8 +46,15 @@ public static class AssetLinkFolders
     private sealed class LinkFileContent
     {
         public Guid Id = Guid.NewGuid();
-        public string? Target;
+
+        /// <summary> Absolute candidates, most recently linked first. </summary>
+        public List<string>? Targets;
+
         public string? TargetRelative;
+
+        /// <summary> Back-compat: single absolute target written before <see cref="Targets"/> existed. </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string? Target;
     }
 
     public const string Extension = ".tixlLink";
@@ -70,7 +77,7 @@ public static class AssetLinkFolders
         var content = new LinkFileContent
                           {
                               Id = Guid.NewGuid(),
-                              Target = Path.GetFullPath(targetFolder).ToForwardSlashes(),
+                              Targets = [Path.GetFullPath(targetFolder).ToForwardSlashes()],
                               TargetRelative = Path.GetRelativePath(package.Folder, targetFolder).ToForwardSlashes(),
                           };
 
@@ -346,35 +353,180 @@ public static class AssetLinkFolders
             }
         }
 
-        if (!string.IsNullOrEmpty(content.Target))
+        // Every machine that relinked the folder keeps its path here, so moving the project back
+        // and forth between them only needs one relink per machine.
+        var firstCandidate = string.Empty;
+        if (content.Targets != null)
         {
-            var absolute = content.Target.ToForwardSlashes();
-            targetRoot = absolute;
-            return Directory.Exists(absolute);
+            foreach (var candidate in content.Targets)
+            {
+                if (string.IsNullOrEmpty(candidate))
+                    continue;
+
+                var absolute = candidate.ToForwardSlashes();
+                if (Directory.Exists(absolute))
+                {
+                    targetRoot = absolute;
+                    return true;
+                }
+
+                if (firstCandidate.Length == 0)
+                    firstCandidate = absolute;
+            }
         }
 
-        targetRoot = string.Empty;
+        if (!string.IsNullOrEmpty(content.Target))
+        {
+            var legacy = content.Target.ToForwardSlashes();
+            if (Directory.Exists(legacy))
+            {
+                targetRoot = legacy;
+                return true;
+            }
+
+            if (firstCandidate.Length == 0)
+                firstCandidate = legacy;
+        }
+
+        // Unresolved mounts keep the recorded path so the UI can show what's missing
+        targetRoot = firstCandidate;
         return false;
+    }
+
+    /// <summary>
+    /// Points an existing mount at <paramref name="newTargetFolder"/> and remounts it. The previous
+    /// target is kept as a fallback candidate, so the link keeps resolving on the other machine too.
+    /// </summary>
+    public static bool TryRelink(AssetLinkFolder mount, string newTargetFolder, [NotNullWhen(false)] out string? error)
+    {
+        var package = mount.Package;
+        error = GetProblemForNewTarget(newTargetFolder, package, out var target);
+        if (error != null)
+            return false;
+
+        var linkFilePath = mount.LinkFilePath;
+        LinkFileContent? content;
+        try
+        {
+            content = JsonConvert.DeserializeObject<LinkFileContent>(File.ReadAllText(linkFilePath));
+        }
+        catch (Exception e)
+        {
+            error = $"Can't read the link file: {e.Message}";
+            return false;
+        }
+
+        content ??= new LinkFileContent { Id = mount.Id };
+        content.Targets = BuildTargetCandidates(content, target);
+        content.Target = null;
+        content.TargetRelative = Path.GetRelativePath(package.Folder, target).ToForwardSlashes();
+
+        try
+        {
+            File.WriteAllText(linkFilePath, JsonConvert.SerializeObject(content, Formatting.Indented));
+        }
+        catch (Exception e)
+        {
+            error = $"Can't write the link file: {e.Message}";
+            return false;
+        }
+
+        UnmountLinkFile(linkFilePath);
+        TryMount(linkFilePath, package);
+        return true;
+    }
+
+    /// <summary> Returns why <paramref name="folderPath"/> can't be linked, or null if it can. </summary>
+    public static string? GetRelinkProblem(AssetLinkFolder mount, string folderPath)
+    {
+        return GetProblemForNewTarget(folderPath, mount.Package, out _);
+    }
+
+    private static string? GetProblemForNewTarget(string folderPath, IResourcePackage package, out string target)
+    {
+        if (!TryNormalizeTarget(folderPath, out target))
+            return "This is not a valid folder path.";
+
+        if (!Directory.Exists(target))
+            return "This folder doesn't exist.";
+
+        return GetTargetProblem(target, package);
+    }
+
+    private static bool TryNormalizeTarget(string folderPath, out string target)
+    {
+        target = string.Empty;
+        if (string.IsNullOrWhiteSpace(folderPath))
+            return false;
+
+        try
+        {
+            // Explorer's "Copy as path" wraps the path in quotes
+            target = Path.GetFullPath(folderPath.Trim().Trim('"')).ToForwardSlashes().TrimEnd('/');
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
+        return target.Length > 0;
+    }
+
+    private static List<string> BuildTargetCandidates(LinkFileContent content, string newTarget)
+    {
+        var candidates = new List<string> { newTarget };
+
+        if (content.Targets != null)
+        {
+            foreach (var previous in content.Targets)
+            {
+                AppendCandidate(candidates, previous);
+            }
+        }
+
+        AppendCandidate(candidates, content.Target);
+        return candidates;
+    }
+
+    private static void AppendCandidate(List<string> candidates, string? candidate)
+    {
+        if (string.IsNullOrWhiteSpace(candidate) || candidates.Count >= MaxTargetCandidates)
+            return;
+
+        var normalized = candidate.ToForwardSlashes().TrimEnd('/');
+        foreach (var existing in candidates)
+        {
+            if (string.Equals(existing, normalized, StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        candidates.Add(normalized);
     }
 
     private static bool IsValidTarget(string targetRoot, IResourcePackage package, string linkFilePath)
     {
+        var problem = GetTargetProblem(targetRoot, package);
+        if (problem == null)
+            return true;
+
+        Log.Warning($"Refusing link {linkFilePath} -> {targetRoot}: {problem}");
+        return false;
+    }
+
+    private static string? GetTargetProblem(string targetRoot, IResourcePackage package)
+    {
         var assetsFolder = package.AssetsFolder;
 
         if (assetsFolder.StartsWith(targetRoot, StringComparison.OrdinalIgnoreCase))
-        {
-            Log.Warning($"Refusing link {linkFilePath}: target {targetRoot} contains the project's assets folder");
-            return false;
-        }
+            return "This folder contains the project's assets folder.";
 
         if (targetRoot.StartsWith(assetsFolder, StringComparison.OrdinalIgnoreCase))
-        {
-            Log.Warning($"Refusing link {linkFilePath}: target {targetRoot} is already inside the assets folder");
-            return false;
-        }
+            return "This folder is already inside the project's assets folder.";
 
-        return true;
+        return null;
     }
+
+    private const int MaxTargetCandidates = 4;
 
     private static readonly List<AssetLinkFolder> _mounts = [];
 }

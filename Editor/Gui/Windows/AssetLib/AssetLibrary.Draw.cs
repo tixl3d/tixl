@@ -59,6 +59,7 @@ internal sealed partial class AssetLibrary
         }
 
         DrawDeleteConfirmationDialog();
+        DrawRelinkFolderDialog();
 
         ImGui.BeginChild("scrolling", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
@@ -157,7 +158,7 @@ internal sealed partial class AssetLibrary
                 if (ImGui.IsItemHovered())
                 {
                     CustomComponents.TooltipForLastItem(linkTargetMissing
-                                                            ? $"Linked folder not found:\n{folder.AbsolutePath}"
+                                                            ? $"Linked folder not found:\n{folder.AbsolutePath}\n\nRight-click to relink it."
                                                             : $"Linked to {folder.AbsolutePath}");
                 }
 
@@ -213,6 +214,11 @@ internal sealed partial class AssetLibrary
 
                 if (folder.Asset is { IsLinkMountRoot: true })
                 {
+                    if (CustomComponents.DrawMenuItem(_relinkFolderId, "Relink...", reserveIconColumn: false))
+                    {
+                        RequestRelinkFolder(folder.Asset);
+                    }
+
                     // Only the .tixlLink marker is deleted - the external folder stays untouched
                     if (CustomComponents.DrawMenuItem(_removeFolderLinkId, "Remove Link", reserveIconColumn: false))
                     {
@@ -668,6 +674,7 @@ internal sealed partial class AssetLibrary
     private static readonly int _openFolderInExplorerId = nameof(_openFolderInExplorerId).GetHashCode();
     private static readonly int _createSubFolderId = nameof(_createSubFolderId).GetHashCode();
     private static readonly int _renameFolderId = nameof(_renameFolderId).GetHashCode();
+    private static readonly int _relinkFolderId = nameof(_relinkFolderId).GetHashCode();
     private static readonly int _removeFolderLinkId = nameof(_removeFolderLinkId).GetHashCode();
     private static readonly int _deleteFolderId = nameof(_deleteFolderId).GetHashCode();
     private static readonly int _editExternallyId = nameof(_editExternallyId).GetHashCode();

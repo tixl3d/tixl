@@ -79,5 +79,26 @@ Link the folder again, close TiXL, rename the *source* folder in Explorer, and r
 
 **Expected:**
 - The project loads normally.
-- The linked folder shows up grayed out with a magenta link icon; its tooltip explains that the target was not found.
+- The linked folder shows up grayed out with a magenta link icon; its tooltip explains that the target was not found and says to right-click to relink it.
 - Restoring the source folder's original name and restarting shows the linked content again.
+
+## Step: Relinking to the renamed folder
+
+**Action:**
+With the source folder still renamed and the linked folder grayed out, right-click the linked folder and choose **Relink...**. In Explorer, right-click the renamed source folder, choose **Copy as path**, then paste it into the dialog's *Folder* field (replacing the pre-filled old path) and press **Relink**.
+
+**Expected:**
+- The dialog opens pre-filled with the old, missing path.
+- While the field holds a non-existent path, a warning "This folder doesn't exist." is shown and the **Relink** button is disabled.
+- After pasting the valid path (the surrounding quotes from *Copy as path* are accepted), the warning disappears and **Relink** becomes clickable.
+- On **Relink** the dialog closes, the folder is no longer grayed out, the link icon turns blue, and its files are listed again.
+- Pointing the dialog at a folder *inside* the project's own `Assets/` folder shows "This folder is already inside the project's assets folder." and keeps **Relink** disabled.
+
+## Step: Both paths keep working
+
+**Action:**
+Close TiXL, rename the source folder back to its original name in Explorer, and restart TiXL.
+
+**Expected:**
+- The linked folder resolves immediately and is **not** grayed out — no second relink is needed, because the `.tixlLink` file lists both paths.
+- Opening the `.tixlLink` file in a text editor shows a `Targets` list with the most recently relinked path first.

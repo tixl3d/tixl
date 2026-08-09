@@ -20,6 +20,14 @@ Because the files stay in their original location:
 
 To remove a link, right-click the linked folder in the Assets window and choose **Remove link** — this only deletes the `.tixlLink` file and never touches the linked content. Renaming a linked folder in the Assets window renames the link, not the source folder.
 
+### Relinking a moved folder
+
+If the linked folder is missing — the usual reason is opening the project on a second machine where a synced folder sits under a different path — right-click it in the Assets window and choose **Relink...**. Paste the new location into the dialog and confirm.
+
+The quickest way to get the path: in the Windows Explorer right-click the folder, choose **Copy as path** (or press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>), then paste it into the dialog.
+
+The link file remembers the previous locations as well, so a folder that was relinked once on each machine keeps resolving on all of them — you only pay for the relink the first time.
+
 > [!NOTE]
 > If the project lives in a synced folder (OneDrive, Dropbox, ...), the small link file syncs along with it, but the linked media does not. Keep that in mind when opening the project on another machine.
 

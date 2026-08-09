@@ -57,10 +57,12 @@ ExternalFile drag. Options:
   `StatusAttention` + tooltip when the target is missing).
 - Context menu on a mount root: "Remove link" deletes only the `.tixlLink` file.
   Rename renames the link file, never the external folder.
+- "Relink..." opens a modal that takes a pasted folder path (Explorer's "Copy as
+  path"), validates it live, then rewrites and remounts the link file. The link
+  file keeps a `Targets` list of absolute candidates, most recently linked first,
+  so a project moved between machines only needs one relink per machine.
 
 ## Deferred / follow-ups
-
-- **Relink dialog** for unresolved mounts (edit the `.tixlLink` in place for now).
 - **Collect assets on export**: exported executables do not bundle linked
   external files yet — needs a consolidate step in the export pipeline.
 - Proxy generation writing into mounts must resolve output paths through the
