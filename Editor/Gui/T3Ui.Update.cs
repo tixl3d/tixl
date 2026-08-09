@@ -51,6 +51,14 @@ public static partial class T3Ui
             PlaybackUtils.UpdatePlaybackAndSyncing();
             AudioEngine.CompleteFrame(Playback.Current, Playback.LastFrameDuration);
         }
+        else if (ProjectView.Focused != null)
+        {
+            // Routing still has to happen while rendering. A source that isn't wired into an [AudioBus] reaches
+            // the mix only through the implicit default bus, so without this it would be decoded and fed but
+            // never routed — silent in the rendered file while audible live. (The collector's own transport
+            // gate already treats recording as running, so it expects to be called here.)
+            AudioGraphCollector.CollectLooseSources(ProjectView.Focused.CompositionInstance);
+        }
 
         ScreenshotWriter.Update();
         RenderProcess.Update();

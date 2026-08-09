@@ -104,15 +104,16 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider, IAudioSo
     // Not requesting for a few frames mutes the track, which is what makes an un-evaluated video silent.
     private void UpdateAudioTrack(EvaluationContext context, string absolutePath, double requestedTime, bool loop)
     {
+        _lastAudioRequestFrame = Playback.FrameCount;
+
         var volume = Volume.GetValue(context);
         _node.Gain = volume;
 
-        // Export mutes the live feeder — a deterministic export mixdown for video audio doesn't exist yet, so
-        // rendered files carry no video audio. A silenced source should also cost no decoding at all, so a
-        // video used purely as a texture stays free.
-        var wantsAudio = volume > 0 && !context.Playback.IsRenderingToFile;
-        _node.SourceChannel = wantsAudio
-                                  ? VideoPlaybackEngine.Instance.RequestAudio(_streamId, absolutePath, requestedTime, loop)
+        // A silenced source should cost no decoding at all, so a video used purely as a texture stays free.
+        // While rendering, the engine feeds deterministically instead of against the wall clock.
+        _node.SourceChannel = volume > 0
+                                  ? VideoPlaybackEngine.Instance.RequestAudio(_streamId, absolutePath, requestedTime,
+                                                                              loop, context.Playback.IsRenderingToFile)
                                   : 0;
     }
 
@@ -120,12 +121,21 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider, IAudioSo
     // republishes the channel and gain the texture path already established.
     private void UpdateAudioReference(EvaluationContext context)
     {
+        // Once the texture path stops running, the engine eventually evicts the stream and frees the channel.
+        // Keep advertising it and a routing bus retries a dead handle every frame, forever.
+        if (Playback.FrameCount - _lastAudioRequestFrame > AudioRequestFrameSlack)
+            _node.SourceChannel = 0;
+
         _node.Update(context);
         AudioReference.DirtyFlag.Clear();
     }
 
+    // The bus may evaluate this output before the texture path runs in the same frame, so allow a frame of lead.
+    private const int AudioRequestFrameSlack = 2;
+
     private readonly Guid _streamId = Guid.NewGuid();
     private readonly AudioGraphNode _node;
+    private int _lastAudioRequestFrame = int.MinValue / 2;
     private string? _statusMessage;
 
     // Input parameters

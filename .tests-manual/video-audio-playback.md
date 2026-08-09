@@ -208,6 +208,77 @@ the second at 5–10 seconds. Play from 0.
 - The handover happens at 5 seconds, within a frame — no overlap where both are
   heard, and no gap longer than a frame.
 
+## Step: Rendered video carries the audio
+
+**Action:**
+Place a video clip with speech at 0–10 seconds on the timeline, leaving its
+`AudioReference` unwired. Render the range 0–10 seconds to a file, then play the
+result in an external player.
+
+**Expected:**
+- The rendered file has an audio track, and it is the video's own sound.
+- Picture and sound line up: a word spoken at 5 seconds in the editor is at
+  5 seconds in the rendered file.
+- The sound starts at the clip's cut, not before it.
+
+## Step: Rendered audio survives the graph
+
+**Action:**
+Wire the same clip's `AudioReference` through an `[AudioReverb]` into an
+`[AudioBus]`, set the bus `Volume` to 0.5, and render the same range again.
+
+**Expected:**
+- The rendered file has the reverb on it and is quieter — the graph's gain and
+  effects are baked into the render, not bypassed.
+- Setting `Volume` to 0 on the clip renders a silent audio track rather than a
+  full-level one.
+
+## Step: A render starts clean
+
+**Action:**
+With an `[AudioReverb]` in the chain, play in the editor until the sound is
+clearly audible, stop, and immediately render a range that begins on silence
+(for example a second before the clip's cut).
+
+**Expected:**
+- The rendered file starts in silence. No reverb tail, echo, or fragment of what
+  was last played in the editor fades out over the first second.
+
+## Step: Auto-collect picks up video clips
+
+**Action:**
+Add a `[CombineAudio]` with `Auto Collect Clips` enabled, and wire its output
+through an `[AudioReverb]` into an `[AudioBus]`. Put two video clips with sound
+on the timeline and leave their `AudioReference` outputs **unconnected**.
+
+**Expected:**
+- Both clips are audible through the group: the `[CombineAudio]` `Volume` scales
+  them together and the reverb applies to both, with no manual wiring.
+- Wiring one clip's `AudioReference` explicitly somewhere else removes it from
+  the auto-collected group — an explicit connection wins.
+- No routing warnings repeat in the log; the clip is claimed by one collector
+  only, not fought over by the group and the implicit bus.
+
+## Step: Two renders of the same range are identical
+
+**Action:**
+Render the same range twice to two different files, without changing anything in
+between. Compare the two files (byte comparison is fine, or extract the audio
+tracks and compare).
+
+**Expected:**
+- The audio is identical between the two renders. Export must not depend on
+  timing, machine load, or how long the render took.
+
+## Step: Live playback still works after a render
+
+**Action:**
+Immediately after a render finishes, press play in the editor.
+
+**Expected:**
+- Live audio resumes within about a second, in sync, with no stuck silence and
+  no leftover stuttering from the export feeding mode.
+
 ## Step: Proxy preview keeps the sound
 
 **Action:**

@@ -58,9 +58,12 @@ public interface IVideoPlaybackEngine
     /// <paramref name="absolutePath"/> must be the original file: a preview proxy carries no audio track.
     /// <para>Separate from <see cref="RequestFrame"/> on purpose. Audio decodes on its own demuxer and its own
     /// cadence, and callers must be able to keep pulling frames while staying silent — a timeline clip
-    /// pre-rolls its decoder before its cut, and export doesn't feed live audio at all.</para>
+    /// pre-rolls its decoder before its cut.</para>
+    /// <para><paramref name="renderingToFile"/> switches to deterministic feeding: the audio is decoded
+    /// synchronously before this call returns, advancing one exported frame per call rather than with the wall
+    /// clock, so the caller can pull a repeatable mixdown straight afterwards.</para>
     /// </summary>
-    int RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop);
+    int RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop, bool renderingToFile);
 
     /// <summary>Releases the stream's decoder, cache and audio track. Call when the owning operator is disposed.</summary>
     void ReleaseStream(Guid streamId);

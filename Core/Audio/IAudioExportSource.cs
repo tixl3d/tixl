@@ -12,5 +12,12 @@ namespace T3.Core.Audio
         /// <summary>True while the op was organically evaluated within the last few frames — the snapshot
         /// taken at export start uses this to only keep sources that were actually live.</summary>
         bool IsActiveForExport { get; }
+
+        /// <summary>
+        /// Called once when a render begins, so the source can drop whatever live playback left behind — an
+        /// effect's tail, buffered samples — before the first frame is mixed down. Without it a render opens
+        /// with a fading remnant of what was last heard in the editor, which also makes it unrepeatable.
+        /// </summary>
+        void ResetForExport();
     }
 }

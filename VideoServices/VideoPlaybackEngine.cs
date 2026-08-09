@@ -50,12 +50,15 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
                                     controller.IsReady, controller.ErrorMessage);
     }
 
-    public int RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop)
+    public int RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop, bool renderingToFile)
     {
         var stream = GetOrCreateStream(streamId, Environment.TickCount64);
 
         // Deliberately not ResolveEffectivePath: proxies are video-only, so audio always reads the source.
         var track = stream.Audio ??= new VideoAudioTrack();
+        if (renderingToFile)
+            return track.RequestForExport(absolutePath, sourceSeconds, loop);
+
         track.Request(absolutePath, sourceSeconds, loop);
         return track.Channel;
     }

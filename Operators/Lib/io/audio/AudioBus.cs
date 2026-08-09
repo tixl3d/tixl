@@ -56,6 +56,22 @@ namespace Lib.io.audio
         // driven by a pinned view) keeps being evaluated per exported frame instead of going stale-silent.
         bool IAudioExportSource.IsActiveForExport => Playback.FrameCount - _lastEvaluationFrame <= 10;
 
+        // Effects carry their own tail: a reverb or echo still ringing from live playback would fade out over
+        // the first exported frames, and would differ between two renders of the same range. FXReset clears an
+        // effect's internal state; passing the channel resets every effect on it, so the bus doesn't need to
+        // know what the FX ops applied.
+        void IAudioExportSource.ResetForExport()
+        {
+            foreach (var (_, group) in _fxGroups)
+            {
+                if (group.Submix != 0)
+                    Bass.FXReset(group.Submix);
+            }
+
+            if (_submix != 0)
+                Bass.FXReset(_submix);
+        }
+
         private void Update(EvaluationContext context)
         {
             _lastEvaluationFrame = Playback.FrameCount;

@@ -57,6 +57,12 @@ public static class AudioGraphCollector
             if (node == null || node.SourceChannel == 0 || node.Routing == AudioGraphNode.RoutingKind.Direct)
                 continue;
 
+            // An auto-collecting [AudioBus] / [CombineAudio] stamps every leaf it takes. Leaving those to the
+            // implicit bus as well would have the two adding the same channel to different mixers every frame,
+            // stealing it back and forth. An explicit collector wins.
+            if (Playback.FrameCount - node.LastCollectedFrame <= CollectedFrameSlack)
+                continue;
+
             _desired.Add(node.SourceChannel);
             Bass.ChannelSetAttribute(node.SourceChannel, ChannelAttribute.Volume, node.Gain);
         }
@@ -143,6 +149,9 @@ public static class AudioGraphCollector
 
         return true;
     }
+
+    // The bus stamps during its own evaluation, which may run after this collector in a frame.
+    private const int CollectedFrameSlack = 2;
 
     private static Instance? _cachedComposition;
     private static int _cachedStructureVersion = -1;

@@ -7,10 +7,13 @@ using T3.Core.Operator.Slots;
 namespace T3.Core.Audio;
 
 /// <summary>
-/// Finds the [AudioClip]s of a composition whose <c>AudioReference</c> output isn't wired anywhere —
-/// the set an auto-collecting op ([AudioBus] / [CombineAudio]) routes implicitly. Any outgoing
-/// connection on the reference output excludes a clip: an explicit wire is the single source of truth
-/// for its routing. The scan is rebuilt only when the composition's connection structure changes.
+/// Finds the audio sources of a composition whose <c>AudioReference</c> output isn't wired anywhere —
+/// the set an auto-collecting op ([AudioBus] / [CombineAudio]) routes implicitly. That covers timeline
+/// [AudioClip]s and any op exposing a graph source, so a [VideoClip]'s or [PlayVideo]'s sound joins the
+/// group on the same terms. Any outgoing connection on the reference output excludes a source: an explicit
+/// wire is the single source of truth for its routing. Ops that deliberately stay graph-only (the tone
+/// generator) implement neither interface and are never swept up.
+/// The scan is rebuilt only when the composition's connection structure changes.
 /// Sibling of <see cref="AudioClipCollector"/> / <see cref="AudioGraphCollector"/> — one instance per
 /// auto-collecting op.
 /// </summary>
@@ -35,7 +38,7 @@ public sealed class LooseAudioClipScanner
         var connections = composition.Symbol.Connections;
         foreach (var child in composition.Children.Values)
         {
-            if (child is not IAudioClipProvider)
+            if (child is not (IAudioClipProvider or IAudioSource))
                 continue;
 
             Slot<AudioGraphNode>? referenceOutput = null;

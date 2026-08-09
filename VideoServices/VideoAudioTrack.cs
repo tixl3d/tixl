@@ -39,6 +39,47 @@ internal sealed class VideoAudioTrack : IDisposable
         _wake.Set();
     }
 
+    /// <summary>
+    /// Export counterpart of <see cref="Request"/>: decodes and queues this frame's audio <b>synchronously, on
+    /// the calling thread</b>, before the render loop pulls the mixdown. Nothing here advances with the wall
+    /// clock — the queue moves one exported frame per call — so two renders of the same range produce
+    /// identical audio. Returns the channel for the graph to route, as <see cref="Request"/> does.
+    /// </summary>
+    public int RequestForExport(string absolutePath, double sourceSeconds, bool loop)
+    {
+        lock (_workLock)
+        {
+            // Also tells the worker to keep its hands off: it self-clears once export stops calling.
+            var now = Environment.TickCount64;
+            var renderStarting = now - _lastExportRequestMs > ExportModeHoldMs;
+            _lastExportRequestMs = now;
+
+            if (!EnsureSource(absolutePath))
+                return 0;
+
+            var target = TimeToFrameMapper.ResolvePlaybackSeconds(sourceSeconds, _session!.DurationSeconds, loop);
+
+            // The exported frame's duration is exactly the step between two requests, so nothing has to thread
+            // the render fps through the operator API. The first frame has no previous step to measure.
+            var step = target - _lastTarget;
+            var frameSeconds = step > 0 && step <= MaxForwardStepSeconds ? step : DefaultExportFrameSeconds;
+            _lastTarget = target;
+
+            // Re-seek only on a real discontinuity — the first exported frame, or a cut — never on drift:
+            // there is no clock to drift against, and a spurious re-seek would make the render non-repeatable.
+            // The queue still holds live playback audio when a render begins; without dropping it, the first
+            // exported frames would carry a remnant of whatever was last heard in the editor.
+            var queued = _stream!.BufferedSeconds;
+            if (renderStarting || double.IsNaN(_fedSeconds) || Math.Abs(_fedSeconds - queued - target) > frameSeconds * 2)
+                Resync(target);
+
+            // One frame's worth is enough: the mixdown pulls exactly that much per frame, so the queue neither
+            // starves nor grows.
+            TopUp(loop, frameSeconds);
+            return _stream.Channel;
+        }
+    }
+
     public void Dispose()
     {
         _cancellation.Cancel();
@@ -51,12 +92,19 @@ internal sealed class VideoAudioTrack : IDisposable
             return;
         }
 
-        // The worker has exited, so its resources can be released without racing it. After a device change
-        // the stream's handle is already dead — freeing it again would act on a handle BASS has since re-issued.
-        if (_stream is { IsInvalidated: false })
-            _stream.Dispose();
+        // The worker has exited, but the evaluation thread can still be inside RequestForExport, so take the
+        // same lock it holds. After a device change the stream's handle is already dead — freeing it again
+        // would act on a handle BASS has since re-issued.
+        lock (_workLock)
+        {
+            if (_stream is { IsInvalidated: false })
+                _stream.Dispose();
 
-        _session?.Dispose();
+            _session?.Dispose();
+            _stream = null;
+            _session = null;
+        }
+
         _wake.Dispose();
         _cancellation.Dispose();
     }
@@ -83,7 +131,10 @@ internal sealed class VideoAudioTrack : IDisposable
             try
             {
                 Tick();
-                LogDiagnostics();
+                lock (_workLock)
+                {
+                    LogDiagnostics();
+                }
             }
             catch (Exception e)
             {
@@ -110,26 +161,30 @@ internal sealed class VideoAudioTrack : IDisposable
         if (url == null)
             return;
 
-        if (_stream is { IsInvalidated: true })
-            DropAfterDeviceChange();
+        lock (_workLock)
+        {
+            TickCore(url, requestedSeconds, loop, lastRequestMs);
+        }
+    }
 
-        // Reopen when the mixer's rate moved out from under the resampler (device change): the push stream
-        // declares the rate of the data fed into it, so a session resampling to a different rate would be
-        // played back at the wrong pitch rather than merely re-resampled.
-        if (url != _workerUrl || _sessionSampleRate != AudioConfig.MixerFrequency)
-            OpenSource(url);
-
-        if (_session == null || !EnsureStream())
+    private void TickCore(string url, double requestedSeconds, bool loop, long lastRequestMs)
+    {
+        // While export is driving this track it owns the session and the queue outright; a wall-clock tick
+        // interleaved with it would flush or refill mid-render and make the output non-repeatable.
+        if (Environment.TickCount64 - _lastExportRequestMs < ExportModeHoldMs)
             return;
 
-        // The operator stopped asking — not evaluated, outside its clip range, or exporting.
+        if (!EnsureSource(url))
+            return;
+
+        // The operator stopped asking — not evaluated, or outside its clip range.
         if (Environment.TickCount64 - lastRequestMs > SilenceAfterIdleMs)
         {
             StopFeeding();
             return;
         }
 
-        var target = TimeToFrameMapper.ResolvePlaybackSeconds(requestedSeconds, _session.DurationSeconds, loop);
+        var target = TimeToFrameMapper.ResolvePlaybackSeconds(requestedSeconds, _session!.DurationSeconds, loop);
         var now = Environment.TickCount64;
 
         // The worker ticks faster than the operator posts requests, so an unchanged time means "no new frame
@@ -181,15 +236,30 @@ internal sealed class VideoAudioTrack : IDisposable
         if (double.IsNaN(_fedSeconds) || Math.Abs(_smoothedDrift) > ResyncThresholdSeconds)
             Resync(target);
 
-        TopUp(loop);
+        TopUp(loop, TargetFillSeconds);
     }
 
-    private void TopUp(bool loop)
+    // Opens the source and push stream for this url, rebuilding both when a device change invalidated them:
+    // the push stream declares the rate of the data fed into it, so a session resampling to a different rate
+    // would be played back at the wrong pitch rather than merely re-resampled.
+    /// <summary>True once both <see cref="_session"/> and <see cref="_stream"/> are usable for this url.</summary>
+    private bool EnsureSource(string url)
+    {
+        if (_stream is { IsInvalidated: true })
+            DropAfterDeviceChange();
+
+        if (url != _workerUrl || _sessionSampleRate != AudioConfig.MixerFrequency)
+            OpenSource(url);
+
+        return _session != null && EnsureStream();
+    }
+
+    private void TopUp(bool loop, double targetFillSeconds)
     {
         var stream = _stream!;
         var floatsPerSecond = (double)(stream.SampleRate * VideoAudioStream.Channels);
 
-        for (var i = 0; i < MaxChunksPerTick && stream.BufferedSeconds < TargetFillSeconds; i++)
+        for (var i = 0; i < MaxChunksPerTick && stream.BufferedSeconds < targetFillSeconds; i++)
         {
             if (!_session!.TryDecodeChunk(out var chunk, out var chunkStart))
             {
@@ -352,7 +422,18 @@ internal sealed class VideoAudioTrack : IDisposable
     // Bounds the work one tick can do, so a pathological source can't monopolize the worker.
     private const int MaxChunksPerTick = 64;
 
+    // How long after an export request the worker keeps out of the way. Long enough to bridge a slow exported
+    // frame, short enough that live playback resumes promptly once the render ends.
+    private const int ExportModeHoldMs = 500;
+
+    // Only used for the very first exported frame, before a step between two requests can be measured.
+    private const double DefaultExportFrameSeconds = 1 / 30.0;
+
     private readonly object _lock = new();
+
+    // Guards the decode session, the push stream and the feed position — shared between the worker thread and
+    // the evaluation thread, which drives them directly during export.
+    private readonly object _workLock = new();
     private readonly AutoResetEvent _wake = new(false);
     private readonly CancellationTokenSource _cancellation = new();
     private Thread? _worker;
@@ -365,7 +446,9 @@ internal sealed class VideoAudioTrack : IDisposable
 
     private int _channel;
 
-    // Worker-thread only.
+    private long _lastExportRequestMs = long.MinValue / 2;
+
+    // Guarded by _workLock: the worker thread during playback, the evaluation thread during export.
     private AudioDecoderSession? _session;
     private VideoAudioStream? _stream;
     private string? _workerUrl;

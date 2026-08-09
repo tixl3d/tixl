@@ -186,8 +186,25 @@ Two things are needed:
    so the player's pre-roll pulls stay silent (D5). Time comes from the same `clampedTime` the frame request
    uses, so picture and sound share one clock.
    *Verify: `.tests-manual/video-audio-playback.md`.*
-5. **Deterministic export.** Time-sliced feeding mode.
-   *Verify: the rendered file's audio is frame-aligned and identical across two renders of the same range.*
+5. ✅ **Deterministic export** (landed 2026-08-09, **needs live test**). `RequestAudio` gained a
+   `renderingToFile` flag; when set, `VideoAudioTrack.RequestForExport` decodes and queues **synchronously on
+   the calling thread** before returning, so the mixdown pull that follows sees the right PCM. Nothing in that
+   path consults the wall clock: the queue advances exactly one exported frame per call, and the frame's
+   duration is taken from the step between two requests (so no render fps has to be threaded through the
+   operator API). Re-seeks happen only on a genuine discontinuity — the first frame or a cut — never on drift,
+   because a spurious re-seek would make the render non-repeatable. The feed target is one frame's worth: the
+   mixdown pulls exactly that per frame, so the queue neither starves nor grows.
+   **Threading:** a new `_workLock` guards the session, the push stream and the feed position. The worker keeps
+   out of the way for 500 ms after any export request (a timestamp, not a mode flag, so it self-clears), and
+   `Dispose` takes the same lock — the evaluation thread can now be inside the track, which the "worker exited,
+   so nothing races us" reasoning no longer covers.
+   **Adjacent Editor fix:** `AudioGraphCollector.CollectLooseSources` was skipped entirely while rendering, so
+   a source not wired into an `[AudioBus]` was decoded and fed but never routed — silent in the rendered file
+   while audible live. It now runs during export too. This affected *every* loose graph source (a plain
+   `[AudioToneGenerator]` as well), not just video; the collector's own transport gate already exempted
+   recording, so it was written expecting this call.
+   *Verify: `.tests-manual/video-audio-playback.md` export steps — audio present in the rendered file, wired
+   and unwired, and byte-identical across two renders of the same range.*
 6. **Polish.** Variable speed (`atempo`), scrub grains, A/V drift telemetry, multi-track / channel
    selection, surround downmix.
 
@@ -218,6 +235,15 @@ Two things are needed:
 - **Loop seams.** A loop wrap fails the forward-step test, so it mutes for a tick and then re-seeks: an
   audible gap at every wrap of a looping `[PlayVideo]`. Fixable by unwrapping the step against the duration
   and pre-decoding across the seam. Phase 6.
+- **Stale-channel invalidation (fixed 2026-08-09, found in live test).** `node.SourceChannel` was only ever
+  written by the *texture* path. When an operator stopped being evaluated — a `[VideoClip]` well outside its
+  cut, a disconnected `[PlayVideo]` — the engine evicted its stream after the 5 s idle timeout and freed the
+  channel, but the node kept advertising the dead handle. The routing bus evaluates `AudioReference` every
+  frame (`DirtyFlagTrigger.Always`), so it retried a freed handle forever: `[AudioBus] failed to route channel
+  <negative handle>: Handle`, once per frame, permanently. The per-frame reconciliation can't self-heal this —
+  nothing else ever clears the field. Both ops now stamp the frame in `UpdateAudioTrack` and clear
+  `SourceChannel` from the reference path after a 2-frame gap, which is the same "drawn = audible" rule the
+  feeder already enforces, applied to the wire value rather than the feed.
 - **Audio-only use is not supported, by design (confirmed in live test, accepted by the user).** Wiring just
   `AudioReference` into a bus, without the `Texture` output going anywhere, is silent — the texture path is
   what drives the feeder (D4), so an unevaluated op requests nothing. For `[VideoClip]` this is structural:

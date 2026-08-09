@@ -72,6 +72,11 @@ public static class AudioRendering
 
         Log.Gated.AudioRender($"[AudioRendering] Export evaluation sources: {_exportEvaluationSources.Count} of {AudioExportSourceRegistry.Sources.Count} registered");
 
+        // Clear what live playback left ringing (effect tails, buffered samples) so the render doesn't open
+        // with a remnant of what was last heard — and so two renders of the same range match.
+        foreach (var source in _exportEvaluationSources)
+            source.ResetForExport();
+
         // Reset audio analysis state for clean export - ensures both modes start from same state
         AudioAnalysisContext.Default.Reset();
         WaveFormProcessing.ResetExportBuffer();
