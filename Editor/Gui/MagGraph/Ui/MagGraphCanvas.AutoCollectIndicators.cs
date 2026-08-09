@@ -49,7 +49,7 @@ internal sealed partial class MagGraphView
             CollectWiredClipIds(player);
 
             var targetOnScreen = TransformPosition(player.DampedPosOnCanvas
-                                                   + new Vector2(player.Size.X * 0.5f, 0));
+                                                   + new Vector2(0, player.Size.Y * 0.5f));
 
             var playerHighlighted = _context.ActiveItem == player || _context.Selector.IsSelected(player);
 
@@ -60,7 +60,7 @@ internal sealed partial class MagGraphView
                     continue;
 
                 var sourceOnScreen = TransformPosition(clip.DampedPosOnCanvas
-                                                       + new Vector2(clip.Size.X * 0.5f, clip.Size.Y));
+                                                       + new Vector2(clip.Size.X, clip.Size.Y * 0.5f));
 
                 var highlighted = playerHighlighted
                                   || _context.ActiveItem == clip
@@ -69,11 +69,11 @@ internal sealed partial class MagGraphView
                 var color = typeColor.Fade((highlighted ? 0.6f : 0.2f) * _context.GraphOpacity);
                 var d = Vector2.Distance(sourceOnScreen, targetOnScreen) / 2;
                 drawList.AddBezierCubic(sourceOnScreen,
-                                        sourceOnScreen + new Vector2(0, d),
-                                        targetOnScreen - new Vector2(0, d),
+                                        sourceOnScreen + new Vector2(d, 0),
+                                        targetOnScreen - new Vector2(d, 0),
                                         targetOnScreen,
                                         color,
-                                        1.5f);
+                                        1.1f);
             }
         }
     }
