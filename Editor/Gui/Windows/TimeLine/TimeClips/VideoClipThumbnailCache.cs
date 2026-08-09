@@ -50,10 +50,7 @@ internal static class VideoClipThumbnailCache
         var timeMs = (long)Math.Round(Math.Max(0, sourceSeconds) * 1000);
         var key = new ThumbKey(assetPath, timeMs);
         if (!_entries.TryGetValue(key, out var entry))
-        {
-            entry = new Entry { ThumbGuid = DeriveGuid(pathInfo, timeMs) };
-            _entries[key] = entry;
-        }
+            entry = CreateEntry(key, pathInfo, timeMs, persistent);
 
         switch (entry.State)
         {
@@ -330,6 +327,27 @@ internal static class VideoClipThumbnailCache
                  });
     }
 
+    /// <summary>
+    /// Hover thumbnails follow the mouse, so a purely content-derived key would give every quarter second of
+    /// every video its own permanent atlas slot — scrubbing one long clip is enough to flush the whole atlas.
+    /// They recycle the guid of the oldest hover entry instead, keeping their atlas footprint fixed.
+    /// </summary>
+    private static Entry CreateEntry(in ThumbKey key, in PathInfo pathInfo, long timeMs, bool persistent)
+    {
+        var entry = new Entry { ThumbGuid = DeriveGuid(pathInfo, timeMs) };
+
+        if (!persistent)
+        {
+            if (_hoverKeyRing.Count >= HoverRingSize && _entries.Remove(_hoverKeyRing.Dequeue(), out var recycled))
+                entry.ThumbGuid = recycled.ThumbGuid;
+
+            _hoverKeyRing.Enqueue(key);
+        }
+
+        _entries[key] = entry;
+        return entry;
+    }
+
     private static Guid DeriveGuid(in PathInfo pathInfo, long timeMs)
     {
         var hash = System.Security.Cryptography.MD5.HashData(
@@ -340,6 +358,9 @@ internal static class VideoClipThumbnailCache
 
     // Bump to discard on-disk thumbnails written by an earlier, incompatible encoding.
     private const int CacheVersion = 2;
+
+    // Roughly six seconds of quarter-second scrubbing stays cached before guids get recycled.
+    private const int HoverRingSize = 24;
 
     private const int SlotWidth = ThumbnailManager.SlotWidth;
     private const int SlotHeight = ThumbnailManager.SlotHeight;
@@ -358,6 +379,7 @@ internal static class VideoClipThumbnailCache
 
     // _entries is draw-thread-only; the worker touches entries only through the volatile State field.
     private static readonly Dictionary<ThumbKey, Entry> _entries = new();
+    private static readonly Queue<ThumbKey> _hoverKeyRing = new();
     private static readonly ConcurrentDictionary<string, PathInfo> _pathInfos = new();
     private static readonly ConcurrentDictionary<string, bool> _resolving = new();
 

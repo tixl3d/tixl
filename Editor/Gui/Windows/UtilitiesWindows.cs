@@ -158,6 +158,9 @@ internal sealed class UtilitiesWindow : Window
                         ThumbnailManager.Reset();
                     }
 
+                    ImGui.Text($"{ThumbnailManager.AtlasSlotCount}/{ThumbnailManager.MaxAtlasSlotCount} atlas cells used"
+                               + $"  ({ThumbnailManager.KnownThumbnailCount} thumbnails known)");
+
                     if (ThumbnailManager.AtlasSrv != null)
                     {
                         ImGui.Image(ThumbnailManager.AtlasSrv.NativePointer, new Vector2(1024));

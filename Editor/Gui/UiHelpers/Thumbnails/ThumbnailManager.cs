@@ -315,18 +315,26 @@ internal static class ThumbnailManager
         // Evict volatile GPU slot if at capacity
         if (_atlasLru.Count >= MaxSlots)
         {
-            var oldest = _atlasLru.OrderBy(s => s.LastUsed).First();
+            var oldest = _atlasLru[0];
+            for (var i = 1; i < _atlasLru.Count; i++)
+            {
+                if (_atlasLru[i].LastUsed < oldest.LastUsed)
+                    oldest = _atlasLru[i];
+            }
+
+            _freeCells.Push(oldest.X + oldest.Y * Columns);
             oldest.X = -1;
             oldest.Y = -1;
             oldest.State = LoadingState.NotLoaded;
             _atlasLru.Remove(oldest);
         }
 
-        // Find visual index
-        int index = _atlasLru.Count;
-        slot.X = index % 23;
-        slot.Y = index / 23;
-        
+        // Cells must be recycled explicitly: deriving the index from the LRU count made every slot
+        // assigned after the first eviction land on the same cell, so new thumbnails overwrote each other.
+        var cellIndex = _freeCells.Count > 0 ? _freeCells.Pop() : _nextUnusedCell++;
+        slot.X = cellIndex % Columns;
+        slot.Y = cellIndex / Columns;
+
         slot.LastUsed = DateTime.Now;
         _atlasLru.Add(slot);
         return slot;
@@ -489,11 +497,21 @@ internal static class ThumbnailManager
             slot.State = LoadingState.NotLoaded;
     }
 
+    /// <summary>Number of thumbnails currently holding an atlas cell, and the cap they are evicted at.</summary>
+    internal static int AtlasSlotCount => _atlasLru.Count;
+
+    internal static int MaxAtlasSlotCount => MaxSlots;
+
+    /// <summary>Total known thumbnails, including those evicted from the atlas.</summary>
+    internal static int KnownThumbnailCount => _slots.Count;
+
     public static void Reset()
     {
         Initialize();
         _slots.Clear();
         _atlasLru.Clear();
+        _freeCells.Clear();
+        _nextUnusedCell = 0;
         lock (_uploadQueue)
         {
             _uploadQueue.Clear();
@@ -503,12 +521,15 @@ internal static class ThumbnailManager
     private const int AtlasSize = 4096, Padding = 2, MaxSlots = 500;
     public const int SlotWidth = 178;
     public const int  SlotHeight = 133;
-    public const float AspectRatio = (float)SlotWidth / SlotHeight; 
-    
+    public const float AspectRatio = (float)SlotWidth / SlotHeight;
+    private const int Columns = AtlasSize / SlotWidth;
+
     private static SharpDX.Direct3D11.Texture2D? _atlas;
     internal static ShaderResourceView? AtlasSrv { get; private set; }
     private static readonly Dictionary<Guid, ThumbnailSlot> _slots = new();
-    private static readonly List<ThumbnailSlot> _atlasLru = new(); 
+    private static readonly List<ThumbnailSlot> _atlasLru = new();
+    private static readonly Stack<int> _freeCells = new();
+    private static int _nextUnusedCell;
     private static readonly Queue<PendingUpload> _uploadQueue = new();
     private static readonly ThumbnailRect _fallback = new(Vector2.Zero, Vector2.Zero, false);
     private static bool _initialized;
