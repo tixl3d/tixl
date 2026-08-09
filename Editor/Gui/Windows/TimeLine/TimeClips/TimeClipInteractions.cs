@@ -129,6 +129,13 @@ internal sealed class TimeClipInteractions
                 ClearTimeStretchOfSelectedClips(compositionOp);
             }
 
+            // Only offered when a selected clip's symbol declares an authored source extent.
+            if (AnySelectedClipHasSourceExtent(compositionOp)
+                && DrawClipMenuItem(_resetSourceToExtentId, "Reset Source to Extent"))
+            {
+                ResetSourceToExtentOfSelectedClips(compositionOp);
+            }
+
             if (DrawClipMenuItem(_deleteClipsId, "Delete", UserActions.DeleteSelection.ListShortcuts()))
             {
                 DeleteSelectedClips(compositionOp);
@@ -180,6 +187,58 @@ internal sealed class TimeClipInteractions
     private static bool DrawClipMenuItem(int id, string label, string? keyboardShortCut = null, bool isChecked = false)
     {
         return CustomComponents.DrawMenuItem(id, label, keyboardShortCut, isChecked, reserveIconColumn: false);
+    }
+
+    private bool AnySelectedClipHasSourceExtent(Instance compositionOp)
+    {
+        foreach (var clip in _context.ClipSelection.GetAllOrSelectedClips())
+        {
+            if (TryGetSourceExtentForClip(compositionOp, clip, out _))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Snaps the selected clips' SourceRange back to their symbol's authored source extent
+    /// (<see cref="TimelineState.SourceExtent"/>) — the recovery path for instances placed before
+    /// the extent was authored, whose SourceRange points far outside the content.
+    /// </summary>
+    private void ResetSourceToExtentOfSelectedClips(Instance compositionOp)
+    {
+        var selectedClips = _context.ClipSelection.GetAllOrSelectedClips().ToList();
+        var moveTimeClipCommand = new MoveTimeClipsCommand(compositionOp, selectedClips);
+
+        var anyChanged = false;
+        foreach (var clip in selectedClips)
+        {
+            if (!TryGetSourceExtentForClip(compositionOp, clip, out var extent))
+                continue;
+
+            clip.SourceRange = extent;
+            anyChanged = true;
+        }
+
+        if (anyChanged)
+        {
+            moveTimeClipCommand.StoreCurrentValues();
+            UndoRedoStack.AddAndExecute(moveTimeClipCommand);
+        }
+    }
+
+    private static bool TryGetSourceExtentForClip(Instance compositionOp, TimeClip clip, out TimeRange extent)
+    {
+        extent = default;
+        if (!compositionOp.Children.TryGetChildInstance(clip.Id, out var instance))
+            return false;
+
+        if (instance.Symbol.GetSymbolUi()?.TimelineState?.SourceExtent is not { } authoredExtent
+            || authoredExtent.Duration <= 0)
+            return false;
+
+        extent = authoredExtent;
+        return true;
     }
 
     private void ClearTimeStretchOfSelectedClips(Instance compositionOp)
@@ -861,6 +920,7 @@ internal sealed class TimeClipInteractions
     private static readonly int _duplicateClipsId = nameof(_duplicateClipsId).GetHashCode();
     private static readonly int _editClipTimesId = nameof(_editClipTimesId).GetHashCode();
     private static readonly int _clearTimeStretchId = nameof(_clearTimeStretchId).GetHashCode();
+    private static readonly int _resetSourceToExtentId = nameof(_resetSourceToExtentId).GetHashCode();
     private static readonly int _deleteClipsId = nameof(_deleteClipsId).GetHashCode();
     private static readonly int _mainSoundtrackId = nameof(_mainSoundtrackId).GetHashCode();
     private static readonly int _showClipDataId = nameof(_showClipDataId).GetHashCode();

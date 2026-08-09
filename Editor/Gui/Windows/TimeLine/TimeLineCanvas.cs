@@ -40,6 +40,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         _timelineCurveEditArea = new TimelineCurveEditor(this, SnapHandlerForU, SnapHandlerForV);
         _timeSelectionRange = new TimeSelectionRange(this, SnapHandlerForU);
         _selectionRangeIndicator = new SelectionRangeIndicator(this, SnapHandlerForU);
+        _sourceExtentEditor = new SourceExtentEditor(this);
         _keySetStrip = new KeySetStrip(this);
         ClipArea = new ClipArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
         _curveEditCanvas = new InlineCurveArea(this, _timelineCurveEditArea, _horizontalRaster);
@@ -53,6 +54,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         SnapHandlerForU.AddSnapAttractor(_currentTimeMarker);
         SnapHandlerForU.AddSnapAttractor(ClipArea);
         SnapHandlerForU.AddSnapAttractor(_selectionRangeIndicator);
+        SnapHandlerForU.AddSnapAttractor(_sourceExtentEditor);
         _selectionDragSnapExclusions = [_selectionRangeIndicator];
 
         KeyframeEditors = new KeyframeEditorGroup(_activeKeyframeEditors);
@@ -171,6 +173,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             {
                 ImGui.BeginChild("##ruler", new Vector2(0,RulerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
                 DrawTimeRuler(interactionState.MouseState.Position.X);
+                _sourceExtentEditor.Draw(compositionOp, ImGui.GetWindowDrawList());
                 _selectionRangeIndicator.Draw(compositionOp, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
             }
@@ -288,7 +291,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 }
                 else if (compositionTimeClip != null)
                 {
-                    _clipRange.Draw(this, compositionTimeClip, Drawlist, SnapHandlerForU);
+                    _clipRange.Draw(this, compositionTimeClip, Drawlist);
                 }
 
                 // When the details pane is up, the top-pane child already handles its
@@ -1006,6 +1009,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly CurrentTimeMarker _currentTimeMarker = new();
     private readonly TimeSelectionRange _timeSelectionRange;
     private readonly SelectionRangeIndicator _selectionRangeIndicator;
+    private readonly SourceExtentEditor _sourceExtentEditor;
     private readonly KeySetStrip _keySetStrip;
     private readonly IValueSnapAttractor[] _selectionDragSnapExclusions;
     private readonly List<AnimationParameterEditing> _activeKeyframeEditors = new(2);

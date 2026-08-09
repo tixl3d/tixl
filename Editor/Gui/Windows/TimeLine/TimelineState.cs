@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
+using T3.Core.Animation;
+
 namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
@@ -41,6 +43,32 @@ internal sealed class TimelineState
     /// collapse to nothing or eat the whole timeline.
     /// </summary>
     public float DetailsAreaHeight = 200f;
+
+    /// <summary>
+    /// Authored span of the symbol's meaningful content in bars ("this transition covers 0..8").
+    /// Editor-only metadata consumed when the symbol is used as a time clip: default SourceRange
+    /// for new clip instances and footage extent in the parent timeline. Null when never authored —
+    /// consumers fall back to a derived range. Stored as two floats so the JSON stays free of
+    /// TimeRange's computed properties.
+    /// </summary>
+    [JsonIgnore]
+    public TimeRange? SourceExtent
+    {
+        get => SourceExtentStart.HasValue && SourceExtentEnd.HasValue
+                   ? new TimeRange(SourceExtentStart.Value, SourceExtentEnd.Value)
+                   : null;
+        set
+        {
+            SourceExtentStart = value?.Start;
+            SourceExtentEnd = value?.End;
+        }
+    }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public float? SourceExtentStart;
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public float? SourceExtentEnd;
 
     /// <summary>
     /// Back-compat alias for <see cref="DetailsAreaHeight"/>. Older .t3ui files persisted

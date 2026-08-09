@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.Animation;
 using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.Styling;
@@ -7,20 +7,21 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
+/// <summary>
+/// Visualizes the mapped time area within a <see cref="TimeClip"/> content by shading everything
+/// outside the entered clip instance's SourceRange. Pure display — the range is edited from the
+/// parent timeline (slip drag in the ruler) or via the symbol's authored source extent
+/// (<see cref="SourceExtentEditor"/>); the former in-place Alt-drag manipulation had no undo.
+/// The range boundaries stay registered as snap anchors.
+/// </summary>
 internal sealed class ClipRange : IValueSnapAttractor
 {
-    /// <summary>
-    /// Visualizes the mapped time area within a <see cref="TimeClip"/> content  
-    /// </summary>
-    public void Draw(TimeLineCanvas canvas, TimeClip timeClip, ImDrawListPtr drawlist, ValueSnapHandler snapHandler)
+    public void Draw(TimeLineCanvas canvas, TimeClip timeClip, ImDrawListPtr drawlist)
     {
         if (timeClip == null)
             return;
 
         _timeClip = timeClip;
-
-        ImGui.PushStyleColor(ImGuiCol.Button, _timeRangeMarkerColor.Rgba);
-        var manipulationEnabled = ImGui.GetIO().KeyAlt;
 
         // Range start
         {
@@ -41,29 +42,6 @@ internal sealed class ClipRange : IValueSnapAttractor
 
             // Line
             drawlist.AddRectFilled(rangeStartPos, rangeStartPos + new Vector2(1, 9999), _timeRangeShadowColor);
-
-            if (manipulationEnabled)
-            {
-                SetCursorToBottom(
-                                  xRangeStart - _timeRangeHandleSize.X,
-                                  _timeRangeHandleSize.Y);
-
-                ImGui.Button("##StartPos", _timeRangeHandleSize);
-
-                if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
-                {
-                    var newTime = canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
-                    if (snapHandler.TryCheckForSnapping(newTime, out var snappedTime, canvas.Scale.X, 
-                                                            [(IValueSnapAttractor)this]))
-                    {
-                        newTime = (float)snappedTime;
-                    }
-                    var delta = newTime - timeClip.SourceRange.Start;
-                    var speed = timeClip.TimeRange.Duration / timeClip.SourceRange.Duration;
-                    timeClip.SourceRange.Start = newTime;
-                    timeClip.TimeRange.Start += delta * speed;
-                }
-            }
         }
 
         // Range end
@@ -81,63 +59,29 @@ internal sealed class ClipRange : IValueSnapAttractor
 
             // Shadow
             drawlist.AddRectFilled(
-                                   rangeEndPos + new Vector2(1,0),
+                                   rangeEndPos + new Vector2(1, 0),
                                    rangeEndPos + _timeRangeShadowSize,
                                    _timeRangeShadowColor);
 
             // Line
             drawlist.AddRectFilled(rangeEndPos, rangeEndPos + new Vector2(1, 9999), _timeRangeShadowColor);
-
-            if (manipulationEnabled)
-            {
-                SetCursorToBottom(
-                                  rangeEndX,
-                                  _timeRangeHandleSize.Y);
-
-                ImGui.Button("##EndPos", _timeRangeHandleSize);
-
-                if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
-                {
-                    var newTime = canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
-                    if (snapHandler.TryCheckForSnapping(newTime, out var snappedTime, canvas.Scale.X, [this]))
-                    {
-                        newTime = (float)snappedTime;
-                    }
-                    
-                    var delta = newTime - timeClip.SourceRange.End;
-                    var speed = timeClip.TimeRange.Duration / timeClip.SourceRange.Duration;
-                    timeClip.SourceRange.End = newTime;
-                    timeClip.TimeRange.End += delta * speed;
-                }
-            }
         }
-
-        ImGui.PopStyleColor();
     }
 
-    private static void SetCursorToBottom(float xInScreen, float paddingFromBottom)
-    {
-        var maxY = ImGui.GetWindowPos().Y + ImGui.GetWindowSize().Y;
-        ImGui.SetCursorScreenPos(new Vector2(xInScreen, maxY - paddingFromBottom));
-    }
-
-    private static readonly Vector2 _timeRangeHandleSize = new(10, 20);
     private static readonly Vector2 _timeRangeShadowSize = new(1, 9999);
     private static readonly Color _timeRangeShadowColor = UiColors.StatusAnimated.Fade(0.2f);
     private static readonly Color _timeRangeOutsideColor = UiColors.StatusAnimated.Fade(0.1f);
-    private static readonly Color _timeRangeMarkerColor = UiColors.StatusAnimated.Fade(0.5f);
 
-    //private static Playback _playback;
     private static TimeClip _timeClip;
-    
+
     #region implement snapping interface -----------------------------------
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)
     {
         if (_timeClip == null)
             return;
 
-        snapResult.TryToImproveWithAnchorValue( _timeClip.SourceRange.Start);
-        snapResult.TryToImproveWithAnchorValue( _timeClip.SourceRange.End);
+        snapResult.TryToImproveWithAnchorValue(_timeClip.SourceRange.Start);
+        snapResult.TryToImproveWithAnchorValue(_timeClip.SourceRange.End);
     }
     #endregion
 }

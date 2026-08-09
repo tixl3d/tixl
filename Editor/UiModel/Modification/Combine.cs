@@ -215,6 +215,11 @@ internal static class Combine
 
         copyCmd.OldToNewChildIds.ToList().ForEach(x => oldToNewIdMap.Add(x.Key, x.Value));
 
+        // A combined time clip is born with its authored source extent set to the union of the copied
+        // content (keyframes and nested clips), so its first placement on a timeline is correctly sized.
+        if (shouldBeTimeClip)
+            InitSourceExtentFromContent(newSymbolUi);
+
         var selectedChildrenIds = (from child in selectedChildUis select child.Id).ToList();
         parentCompositionSymbol.Animator.RemoveAnimationsFromInstances(selectedChildrenIds);
 
@@ -313,5 +318,45 @@ internal static class Combine
         }
 
         return new ImRect(min, max);
+    }
+
+    /// <summary>
+    /// Sets the new symbol's authored source extent (<see cref="Gui.Windows.TimeLine.TimelineState.SourceExtent"/>)
+    /// to the union of the copied content: all keyframes and all nested time clips. Skipped when the
+    /// content has no time span (e.g. static ops only).
+    /// </summary>
+    private static void InitSourceExtentFromContent(SymbolUi newSymbolUi)
+    {
+        var range = T3.Core.Animation.TimeRange.Undefined;
+        var symbol = newSymbolUi.Symbol;
+
+        foreach (var child in symbol.Children.Values)
+        {
+            foreach (var inputDef in child.Symbol.InputDefinitions)
+            {
+                if (!symbol.Animator.TryGetCurvesForChildInput(child.Id, inputDef.Id, out var curves))
+                    continue;
+
+                foreach (var curve in curves)
+                {
+                    foreach (var vDefinition in curve.GetVDefinitions())
+                    {
+                        range.Unite((float)vDefinition.U);
+                    }
+                }
+            }
+
+            foreach (var output in child.Outputs.Values)
+            {
+                if (output.OutputData is T3.Core.Animation.TimeClip timeClip)
+                    range.Unite(timeClip.TimeRange);
+            }
+        }
+
+        if (!range.IsValid || range.Duration <= 0)
+            return;
+
+        newSymbolUi.TimelineState ??= new Gui.Windows.TimeLine.TimelineState();
+        newSymbolUi.TimelineState.SourceExtent = range;
     }
 }

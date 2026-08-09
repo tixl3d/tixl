@@ -182,10 +182,20 @@ Dragging the region (outside the white selection-range line) **slips** the clip:
 
 Dragging the **selection-range start/end handles** trims selected clips at the boundary (preserving their speed and source mapping) while keyframes are still stretched proportionally.
 
+### Authored source extent
+
+Combined time-clip operators can declare which span of their content is meaningful — their **source extent** (e.g. "this transition covers bars 2 to 8"). Inside the symbol, the extent shows as a dark band at the bottom of the ruler with a slim handle at each end. Drag a handle to adjust it; the usual snapping applies (`Shift` bypasses) and the edit is undoable. Without an authored extent the band previews a derived range (the entered clip's source range, or the span of all keyframes) — dragging a handle turns that into the authored value.
+
+When such an operator is placed on a timeline, the extent behaves like media footage: newly created clips start with the extent as their source range, the clip tooltip shows a `Footage:` line (with a warning when the clip reads past the extent), and hovering or selecting the clip shows the source region in the ruler for slip-editing.
+
+**Combine into New Type...** with *Combine as time clip* initializes the extent to the span of the combined keyframes and clips. Changing the extent later never retimes clips already placed on a timeline.
+
 ### Time clips need to be connected
 
+`[TimeClipPlayer]` removes the wiring requirement for Command clips: with **AutoCollect** on (the default) it executes every sibling time clip whose clip output is unconnected — like `[VideoClipPlayer]` does for video and `[AudioClipPlayer]` for audio. Wire one `[TimeClipPlayer]` into your render chain (e.g. via a `[Group]`) and drop clips freely; clips on upper timeline rows draw on top. Wiring a clip into any consumer removes it from auto-collection. The graph view draws faint command-colored lines from auto-collected clips to the player.
+
 > [!NOTE]
-> Clips not connected to a consumer never render unless they're pinned to the output window. TiXL fades unconnected clips and shows a "Not Connected?" warning on their tooltip:
+> Without such a player, clips not connected to a consumer never render unless they're pinned to the output window. TiXL fades unconnected clips and shows a "Not Connected?" warning on their tooltip:
 
 ![Inactive clip warning](/images/Animation/image-7.png)
 

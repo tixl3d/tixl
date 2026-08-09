@@ -31,23 +31,23 @@ internal sealed class SourceRegionIndicator
         // While a slip drag runs the mouse leaves the clip, so the published hover info vanishes —
         // keep showing the dragged clip until release.
         TimeClip? clip;
-        double footageBars;
+        TimeRange contentExtent;
         if (_dragClip != null)
         {
             clip = _dragClip;
-            footageBars = _dragFootageBars;
+            contentExtent = _dragContentExtent;
         }
-        else if (!MediaClipSourceRegion.TryGetCurrent(out clip, out footageBars))
+        else if (!MediaClipSourceRegion.TryGetCurrent(out clip, out contentExtent))
         {
             return;
         }
 
         var rate = clip.Speed;
-        if (Math.Abs(rate) < 1e-6 || footageBars <= 0)
+        if (Math.Abs(rate) < 1e-6 || contentExtent.Duration <= 0)
             return;
 
-        var footageStart = clip.TimeRange.Start - clip.SourceRange.Start / rate;
-        var footageEnd = clip.TimeRange.Start + ((float)footageBars - clip.SourceRange.Start) / rate;
+        var footageStart = clip.TimeRange.Start + (contentExtent.Start - clip.SourceRange.Start) / rate;
+        var footageEnd = clip.TimeRange.Start + (contentExtent.End - clip.SourceRange.Start) / rate;
         if (footageEnd < footageStart)
             (footageStart, footageEnd) = (footageEnd, footageStart);
 
@@ -71,18 +71,18 @@ internal sealed class SourceRegionIndicator
             // While dragging, keep ONE stable button alive under the id the drag started with: the zone
             // rects move (and can collapse below the min width) as the slip changes SourceRange — e.g.
             // the moment a boundary snaps — and a skipped emit drops ImGui's active id, cancelling the drag.
-            EmitSlipButton(_dragZoneId, left, MathF.Max(right, left + 4), top, bottom, clip, footageBars, composition);
+            EmitSlipButton(_dragZoneId, left, MathF.Max(right, left + 4), top, bottom, clip, contentExtent, composition);
         }
         else if (hasRange)
         {
             var sriHitTop = lineY - 2 * scale;
-            EmitSlipButton("##SourceRegionLeft", left, MathF.Min(rangeStartX, right), top, bottom, clip, footageBars, composition);
-            EmitSlipButton("##SourceRegionRight", MathF.Max(rangeEndX, left), right, top, bottom, clip, footageBars, composition);
-            EmitSlipButton("##SourceRegionTop", MathF.Max(rangeStartX, left), MathF.Min(rangeEndX, right), top, sriHitTop, clip, footageBars, composition);
+            EmitSlipButton("##SourceRegionLeft", left, MathF.Min(rangeStartX, right), top, bottom, clip, contentExtent, composition);
+            EmitSlipButton("##SourceRegionRight", MathF.Max(rangeEndX, left), right, top, bottom, clip, contentExtent, composition);
+            EmitSlipButton("##SourceRegionTop", MathF.Max(rangeStartX, left), MathF.Min(rangeEndX, right), top, sriHitTop, clip, contentExtent, composition);
         }
         else
         {
-            EmitSlipButton("##SourceRegion", left, right, top, bottom, clip, footageBars, composition);
+            EmitSlipButton("##SourceRegion", left, right, top, bottom, clip, contentExtent, composition);
         }
 
         var outlineFade = _anyZoneHovered || _dragClip != null ? 0.25f : 0.17f;
@@ -93,7 +93,7 @@ internal sealed class SourceRegionIndicator
     }
 
     private void EmitSlipButton(string id, float xMin, float xMax, float top, float bottom,
-                                TimeClip clip, double footageBars, Instance composition)
+                                TimeClip clip, TimeRange contentExtent, Instance composition)
     {
         var width = xMax - xMin;
         if (width < 2)
@@ -112,7 +112,7 @@ internal sealed class SourceRegionIndicator
         if (ImGui.IsItemActivated())
         {
             _dragZoneId = id;
-            StartDrag(clip, footageBars, composition);
+            StartDrag(clip, contentExtent, composition);
         }
 
         if (_dragClip == clip && ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
@@ -122,15 +122,15 @@ internal sealed class SourceRegionIndicator
             CompleteDrag();
     }
 
-    private void StartDrag(TimeClip clip, double footageBars, Instance composition)
+    private void StartDrag(TimeClip clip, TimeRange contentExtent, Instance composition)
     {
         _dragClip = clip;
-        _dragFootageBars = footageBars;
+        _dragContentExtent = contentExtent;
         _dragRate = clip.Speed;
         _origSourceStart = clip.SourceRange.Start;
         _origSourceEnd = clip.SourceRange.End;
-        _origFootageStart = clip.TimeRange.Start - _origSourceStart / _dragRate;
-        _origFootageEnd = clip.TimeRange.Start + ((float)footageBars - _origSourceStart) / _dragRate;
+        _origFootageStart = clip.TimeRange.Start + (contentExtent.Start - _origSourceStart) / _dragRate;
+        _origFootageEnd = clip.TimeRange.Start + (contentExtent.End - _origSourceStart) / _dragRate;
         _pressU = _canvas.InverseTransformX(ImGui.GetIO().MousePos.X);
 
         _scratchClipList[0] = clip;
@@ -144,7 +144,7 @@ internal sealed class SourceRegionIndicator
         var d = (double)u - _pressU;
 
         // Slipping only snaps to the clip's own boundaries — footage start onto clip start (source
-        // begins at 0) and footage end onto clip end. Raster / other-element anchors proved unhelpful
+        // begins at the content extent's start) and footage end onto clip end. Raster / other-element anchors proved unhelpful
         // for slides: the content has no meaningful relation to them. Shift bypasses.
         if (!ImGui.GetIO().KeyShift)
         {
@@ -180,7 +180,7 @@ internal sealed class SourceRegionIndicator
     // Drag-scoped state; the TimeClip reference only lives for the duration of one slip drag.
     private TimeClip? _dragClip;
     private string? _dragZoneId;
-    private double _dragFootageBars;
+    private TimeRange _dragContentExtent;
     private float _dragRate;
     private float _origSourceStart;
     private float _origSourceEnd;

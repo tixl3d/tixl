@@ -257,7 +257,7 @@ internal static class TimeClipItem
 
         if (bodyHovered)
         {
-            TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var footageBars);
+            var hasContentExtent = TryGetContentExtent(ref attr, timeClip, clipInstance, out var contentExtent);
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4,4));
             ImGui.BeginTooltip();
@@ -285,12 +285,13 @@ internal static class TimeClipItem
                     ImGui.TextUnformatted($"Source {timeClip.SourceRange.Start:0.00} ... {timeClip.SourceRange.End:0.00}");
                 }
 
-                if (footageBars > 0)
+                if (hasContentExtent)
                 {
-                    var readsPastFootage = timeClip.SourceRange.Start < -0.001f || timeClip.SourceRange.End > footageBars + 0.001f;
+                    var readsPastFootage = timeClip.SourceRange.Start < contentExtent.Start - 0.001f
+                                           || timeClip.SourceRange.End > contentExtent.End + 0.001f;
                     ImGui.TextUnformatted(readsPastFootage
-                                              ? $"Footage: 0.00 ... {footageBars:0.00} (reads past end — loops/freezes)"
-                                              : $"Footage: 0.00 ... {footageBars:0.00}");
+                                              ? $"Footage: {contentExtent.Start:0.00} ... {contentExtent.End:0.00} (reads past end — loops/freezes)"
+                                              : $"Footage: {contentExtent.Start:0.00} ... {contentExtent.End:0.00}");
                 }
 
                 if (timeStretched)
@@ -366,15 +367,15 @@ internal static class TimeClipItem
         // any drag of this clip is active (IsItemActive holds even when the mouse outruns the clip), and for
         // the single selected media clip.
         if ((bodyHovered || bodyActive || startHandleActive || endHandleActive)
-            && TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var hoverFootageBars))
+            && TryGetContentExtent(ref attr, timeClip, clipInstance, out var hoverExtent))
         {
-            MediaClipSourceRegion.PublishHovered(timeClip, hoverFootageBars);
+            MediaClipSourceRegion.PublishHovered(timeClip, hoverExtent);
         }
 
-        if (isSelected && isMediaClip && attr.LayerContext.ClipSelection.Count == 1
-            && TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var selectedFootageBars))
+        if (isSelected && attr.LayerContext.ClipSelection.Count == 1
+            && TryGetContentExtent(ref attr, timeClip, clipInstance, out var selectedExtent))
         {
-            MediaClipSourceRegion.PublishSelected(timeClip, selectedFootageBars);
+            MediaClipSourceRegion.PublishSelected(timeClip, selectedExtent);
         }
 
         if (aHandleClicked)
@@ -684,6 +685,28 @@ internal static class TimeClipItem
 
     private static double QuantizeThumbnailTime(double seconds) => Math.Round(seconds * 10) / 10;
 
+    /// <summary>Source-time span of the clip's content, if known: media footage (0-based, from the
+    /// per-asset duration caches) or the clip symbol's authored source extent
+    /// (<see cref="TimelineState.SourceExtent"/>, may start non-zero). False for clips without either.</summary>
+    private static bool TryGetContentExtent(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance? clipInstance, out TimeRange contentExtent)
+    {
+        if (TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var footageBars))
+        {
+            contentExtent = new TimeRange(0, footageBars);
+            return true;
+        }
+
+        if (clipInstance?.Symbol.GetSymbolUi()?.TimelineState?.SourceExtent is { } authoredExtent
+            && authoredExtent.Duration > 0)
+        {
+            contentExtent = authoredExtent;
+            return true;
+        }
+
+        contentExtent = default;
+        return false;
+    }
+
     /// <summary>Full source length of a video or audio clip in bars, or false (with -1) for other /
     /// unknown-duration clips. Duration is resolved through the per-asset duration caches (probed once).</summary>
     private static bool TryGetVideoFootageBars(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance? clipInstance, out float footageBars)
@@ -727,15 +750,15 @@ internal static class TimeClipItem
         footageStartTime = 0;
         footageEndTime = 0;
         if (!attr.CompositionOp.Children.TryGetChildInstance(timeClip.Id, out var clipInstance)
-            || !TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var footageBars))
+            || !TryGetContentExtent(ref attr, timeClip, clipInstance, out var contentExtent))
             return false;
 
         var rate = timeClip.Speed;
         if (Math.Abs(rate) < 1e-6)
             return false;
 
-        footageStartTime = timeClip.TimeRange.Start - timeClip.SourceRange.Start / rate;
-        footageEndTime = timeClip.TimeRange.Start + (footageBars - timeClip.SourceRange.Start) / rate;
+        footageStartTime = timeClip.TimeRange.Start + (contentExtent.Start - timeClip.SourceRange.Start) / rate;
+        footageEndTime = timeClip.TimeRange.Start + (contentExtent.End - timeClip.SourceRange.Start) / rate;
         return true;
     }
 
