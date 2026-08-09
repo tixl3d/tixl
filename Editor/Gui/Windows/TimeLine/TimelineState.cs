@@ -18,8 +18,15 @@ internal sealed class TimelineState
     [JsonConverter(typeof(StringEnumConverter))]
     public TimeLineCanvas.Modes Mode = TimeLineCanvas.Modes.DopeView;
 
-    // Layout
-    public int TimelineHeight = -1; // -1 = auto-computed
+    /// <summary>
+    /// Height of the timeline below the graph, or -1 for the auto-computed height. Unlike the rest
+    /// of this class it is project-wide window layout, so only the root symbol's copy is ever
+    /// written — see <see cref="TimeLineCanvas.TimelineHeight"/>.
+    /// </summary>
+    public int TimelineHeight = -1;
+
+    /// <summary>True when the user resized the graph/timeline splitter, so this state is worth saving.</summary>
+    internal bool HasCustomHeight => TimelineHeight > 0;
 
     // Inline DataClip edit area — toggled via the AudioFile icon next to the Record button
     // on the timeline toolbar. When on AND a TimeClip with a DataClip output is selected,

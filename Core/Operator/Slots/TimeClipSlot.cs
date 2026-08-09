@@ -42,6 +42,13 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
 {
     public TimeClip TimeClip { get; private set; }
 
+    /// <summary>
+    /// Opts out of the out-of-range gate: the slot then always evaluates and only remaps time. For media
+    /// clips whose content must stay pullable outside the clip window (decoder preroll, first/last-frame
+    /// clamp) — the op is responsible for clamping to its source range.
+    /// </summary>
+    public bool EvaluateOutsideRange;
+
     public TimeClipSlot()
     {
         HasInvalidationOverride = true;
@@ -58,7 +65,8 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
 
     private void UpdateWithTimeRangeCheck(EvaluationContext context)
     {
-        if ((context.LocalTime < TimeClip.TimeRange.Start) || (context.LocalTime >= TimeClip.TimeRange.End))
+        if (!EvaluateOutsideRange
+            && ((context.LocalTime < TimeClip.TimeRange.Start) || (context.LocalTime >= TimeClip.TimeRange.End)))
         {
             LastUpdateStatus = CoreSettings.Config.TimeClipSuspending ? UpdateStates.Suspended : UpdateStates.Active;
             return;

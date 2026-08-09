@@ -3,10 +3,6 @@
   "Id": "04c1a6dc-3042-48a8-81d2-0a5a162016dc"/*VideoClip*/,
   "Inputs": [
     {
-      "Id": "10c311ee-6426-463a-a1fe-cfac6de04224"/*Command*/,
-      "DefaultValue": null
-    },
-    {
       "Id": "27f02af3-06f3-4cb2-8731-2e8777634275"/*BlendMode*/,
       "DefaultValue": 0
     },

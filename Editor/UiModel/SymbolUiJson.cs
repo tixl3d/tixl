@@ -710,11 +710,13 @@ internal static class SymbolUiJson
         // OutputWindowStates are exempt: they're only ever assigned to a project's root symbol (see
         // OutputWindow.SyncStateWithProject), and coupling them to Enabled silently dropped pinning
         // for projects that never opened their settings (audio works without them now).
+        // A custom TimelineHeight is exempt for the same reason: it is project-wide window layout and
+        // only ever written to the root symbol (see TimeLineCanvas.TimelineHeight).
         var isComposition = symbolUi.Symbol.CompositionSettings.Enabled;
         var hasRenderSettings = symbolUi.RenderSettings != null && isComposition;
         var hasRecordingSettings = symbolUi.RecordingSettings is { } rec && !rec.IsAtDefault();
         var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
-        var hasTimelineState = symbolUi.TimelineState != null && isComposition;
+        var hasTimelineState = symbolUi.TimelineState is { } timeline && (isComposition || timeline.HasCustomHeight);
         var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
 
         if (!hasRenderSettings && !hasRecordingSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)

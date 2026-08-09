@@ -166,7 +166,7 @@ internal sealed class GraphWindow : Windows.Window
 
         if (UserSettings.Config.ShowTimeline)
         {
-            ProjectView.TimeLineCanvas.FoldingHeight.DrawSplit(out windowContentHeight);
+            ProjectView.TimeLineCanvas.FoldingHeight.DrawSplit(ProjectView, out windowContentHeight);
         }
 
         //ImageBackgroundFading.HandleImageBackgroundFading(ProjectView.GraphImageBackground, out var backgroundImageOpacity);

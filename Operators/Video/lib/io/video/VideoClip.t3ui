@@ -5,14 +5,6 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "10c311ee-6426-463a-a1fe-cfac6de04224"/*Command*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      },
-      "Description": "Optional sub-graph that is evaluated while the clip is active."
-    },
-    {
       "InputId": "27f02af3-06f3-4cb2-8731-2e8777634275"/*BlendMode*/,
       "Position": {
         "X": -200.0,
@@ -75,13 +67,6 @@
       "Position": {
         "X": 300.0,
         "Y": 200.0
-      }
-    },
-    {
-      "OutputId": "30357595-0893-47f8-8bca-22dd77275768"/*TimeSlot*/,
-      "Position": {
-        "X": 300.0,
-        "Y": 300.0
       }
     }
   ]

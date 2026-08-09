@@ -803,7 +803,6 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         state.ScaleX = Scale.X;
         state.ScrollX = Scroll.X;
         state.Mode = Mode;
-        state.TimelineHeight = FoldingHeight._customTimeLineHeight;
         state.InlineDataClipEditEnabled = InlineDataClipEditEnabled;
         state.DetailsAreaHeight = DetailsAreaHeight;
     }
@@ -815,7 +814,6 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         ScrollTarget = new Vector2(state.ScrollX, ScrollTarget.Y);
         Scroll = new Vector2(state.ScrollX, Scroll.Y);
         Mode = state.Mode;
-        FoldingHeight._customTimeLineHeight = state.TimelineHeight;
         InlineDataClipEditEnabled = state.InlineDataClipEditEnabled;
         DetailsAreaHeight = state.DetailsAreaHeight;
     }
@@ -1085,6 +1083,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         private const double MinRate = 1e-9;
     }
     
+    /// <summary>
+    /// Height of the timeline below the graph. Unlike the rest of <see cref="TimelineState"/> this is
+    /// project-global window layout, so it is persisted on the project's root symbol rather than on the
+    /// composition the user happened to be inside while dragging the splitter.
+    /// </summary>
     internal sealed class TimelineHeight
     {
         public TimelineHeight(TimeLineCanvas timeline)
@@ -1092,22 +1095,59 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             _timeline = timeline;
         }
 
-        public void DrawSplit(out int newContentHeight)
+        public void DrawSplit(ProjectView projectView, out int newContentHeight)
         {
-            var currentTimelineHeight = _timeline.FoldingHeight.CurrentHeight;
+            SyncWithProject(projectView);
+
+            var currentTimelineHeight = CurrentHeight;
             if (CustomComponents.SplitFromBottom(ref currentTimelineHeight))
             {
                 _customTimeLineHeight = (int)currentTimelineHeight;
+                _changedByDrag = true;
+            }
+            else if (_changedByDrag && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            {
+                _changedByDrag = false;
+                SaveToProject();
             }
 
             newContentHeight = (int)ImGui.GetWindowHeight() - (int)currentTimelineHeight -
-                               4; // Hack that also depends on when a window-title is being rendered            
+                               4; // Hack that also depends on when a window-title is being rendered
         }
 
-        private const int UseComputedHeight = -1;
-        internal int _customTimeLineHeight = UseComputedHeight;
-        private readonly TimeLineCanvas _timeline;
+        public void Toggle()
+        {
+            _customTimeLineHeight = UsingCustomTimelineHeight ? UseComputedHeight : 200;
+            SaveToProject();
+        }
+
         public bool UsingCustomTimelineHeight => _customTimeLineHeight > UseComputedHeight;
+
+        private void SyncWithProject(ProjectView projectView)
+        {
+            var symbolUi = projectView.RootInstance.Symbol.GetSymbolUi();
+            if (symbolUi.Symbol.Id == _lastSyncedSymbolId)
+                return;
+
+            _lastSyncedSymbolId = symbolUi.Symbol.Id;
+            _lastSyncedSymbolUi = symbolUi;
+            _changedByDrag = false;
+            _customTimeLineHeight = symbolUi.TimelineState?.TimelineHeight ?? UseComputedHeight;
+        }
+
+        private void SaveToProject()
+        {
+            var symbolUi = _lastSyncedSymbolUi;
+            if (symbolUi == null || symbolUi.ReadOnly)
+                return;
+
+            symbolUi.TimelineState ??= new TimelineState();
+            if (symbolUi.TimelineState.TimelineHeight == _customTimeLineHeight)
+                return;
+
+            symbolUi.TimelineState.TimelineHeight = _customTimeLineHeight;
+            symbolUi.FlagAsModified();
+        }
 
         private float CurrentHeight => UsingCustomTimelineHeight ? _customTimeLineHeight : ComputedTimelineHeight;
 
@@ -1116,10 +1156,12 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                                                 + TimeLineDragHeight
                                                 + 10, 200 * T3Ui.UiScaleFactor);
 
-        public void Toggle()
-        {
-            _customTimeLineHeight = UsingCustomTimelineHeight ? UseComputedHeight : 200;
-        }
+        private const int UseComputedHeight = -1;
+        private int _customTimeLineHeight = UseComputedHeight;
+        private bool _changedByDrag;
+        private Guid _lastSyncedSymbolId;
+        private SymbolUi? _lastSyncedSymbolUi;
+        private readonly TimeLineCanvas _timeline;
     }
 }
 

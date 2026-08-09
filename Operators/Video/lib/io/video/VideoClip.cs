@@ -9,7 +9,8 @@ namespace Lib.io.video;
 
 /// <summary>
 /// Implemented by [VideoClip] so the [VideoClipPlayer] compositor ([_ProcessVideoClips]) can read each clip's
-/// per-clip compositing params. The clip's TimeClip / LayerIndex come from its TimeClipSlot output instead.
+/// per-clip compositing params. The clip's TimeClip / LayerIndex come from the same output — the texture
+/// output IS the time-clip slot.
 /// </summary>
 internal interface IVideoClipProvider
 {
@@ -24,22 +25,20 @@ internal interface IVideoClipProvider
 [Guid("04c1a6dc-3042-48a8-81d2-0a5a162016dc")]
 internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoClipProvider, IContentTimeClip, IDescriptiveFilename
 {
+    // The single output is both the frame and the timeline placement: a TimeClipSlot carries the
+    // TimeClip data, with the out-of-range gate disabled so the player can pre-roll the decoder and
+    // out-of-range pulls resolve to the clamped first/last frame.
     [Output(Guid = "eb954aeb-535b-4b22-ac49-858f71bdaac4", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<Texture2D> Texture = new();
-
-    [Output(Guid = "30357595-0893-47F8-8BCA-22DD77275768", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
-    public readonly TimeClipSlot<Command> TimeSlot = new();
+    public readonly TimeClipSlot<Texture2D> Texture = new();
 
     public VideoClip()
     {
+        Texture.EvaluateOutsideRange = true;
         Texture.UpdateAction += Update;
-        TimeSlot.UpdateAction += Update;
     }
 
     private void Update(EvaluationContext context)
     {
-        Command.GetValue(context);
-
         var relativePath = Path.GetValue(context);
         if (!AssetRegistry.TryResolveAddress(relativePath, this, out var absolutePath, out _))
         {
@@ -48,9 +47,9 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
             return;
         }
 
-        // LocalTime already arrives remapped into source time (bars) — every output of a clip-shaped
-        // op gets the TimeClip's remap, extrapolated outside the clip so pre-roll pulls still work.
-        var sourceRange = TimeSlot.TimeClip.SourceRange;
+        // LocalTime already arrives remapped into source time (bars) — the clip slot remaps without
+        // gating (EvaluateOutsideRange), extrapolated outside the clip so pre-roll pulls still work.
+        var sourceRange = Texture.TimeClip.SourceRange;
         var sourceTimeInSecs = context.Playback.SecondsFromBars(context.LocalTime);
 
         // Clamp to the clip's source range so times outside the clip resolve to its first/last frame; the
@@ -120,9 +119,6 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
     private int _lastManagedFrame;
 
     // Input parameters
-    [Input(Guid = "10c311ee-6426-463a-a1fe-cfac6de04224")]
-    public readonly InputSlot<Command> Command = new();
-
     [Input(Guid = "31721e18-556b-452b-a8aa-18dbd44af74d")]
     public readonly InputSlot<string> Path = new();
 
