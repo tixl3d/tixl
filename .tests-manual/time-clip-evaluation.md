@@ -84,15 +84,14 @@ through the result around the cut.
 **Expected:**
 - The exported frames match the editor preview; the cut lands on the same frame; the fade matches.
 
-## Step: MidiClip timing is identical through all outputs
+## Step: _MidiClip_Old timing is identical through all outputs
 
-> This step deliberately uses the **older `[MidiClip]`** op (outputs channel values directly) — it is
-> the one that had the double-remap bug in its `Values` output. Do **not** use `[LoadMidiFile]` (the
-> newer DataClip-based op) here; it was never affected. That both ops exist is known overlap, pending
-> a deprecation decision.
+> This step deliberately uses the retired **`[_MidiClip_Old]`** op (outputs channel values directly,
+> tagged obsolete) — it is the one that had the double-remap bug in its `Values` output. The current
+> `[MidiClip]` (DataClip-based, formerly `[LoadMidiFile]`) was never affected.
 
 **Action:**
-(Skip if no .mid file at hand.) Create a `[MidiClip]` with a MIDI file, wire its `Values` output into
+(Skip if no .mid file at hand.) Create a `[_MidiClip_Old]` with a MIDI file, wire its `Values` output into
 any consumer (e.g. a `[Value]` reading one channel), and note when its first events fire during
 playback. Stretch the clip to 50% speed (`Alt`-drag the end handle to double its length).
 

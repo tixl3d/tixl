@@ -1,232 +1,98 @@
-using NAudio.Midi;
+#nullable enable
 
+using T3.Core.Animation;
+using T3.Core.DataTypes.DataSet;
+using T3.IoServices;
+using T3CoreDataClip = T3.Core.DataTypes.DataSet.DataClip;
 
 namespace Lib.io.midi;
 
-[Guid("a3ceb788-4055-4556-961b-63b7221f93e7")]
-internal sealed class MidiClip : Instance<MidiClip>
+/// <summary>
+/// Loads a standard MIDI file (<c>.mid</c> / <c>.midi</c>) and presents it as a
+/// timeline-bound <see cref="T3CoreDataClip"/>, converted to the same channel conventions
+/// as live MIDI recording. Owns the <see cref="Resource{T}"/> load +
+/// <see cref="T3.Core.Animation.TimeClip"/> placement, then publishes the result as a
+/// single <see cref="T3CoreDataClip"/> output — downstream ops (e.g. <c>SimulateIoData</c>)
+/// consume it exactly like a recorded <c>.data</c> clip.
+/// </summary>
+/// <remarks>
+/// Parsing flows through the shared <see cref="MidiFileToDataSet"/> cache, so multiple
+/// <c>MidiClip</c> ops referencing the same file share one converted
+/// <see cref="DataSet"/>. The <c>Resource&lt;DataSet&gt;</c> wrapper additionally gives
+/// file-watch invalidation when the source file changes.
+/// </remarks>
+[Guid("b4766419-8bca-4fa0-a398-e6af90ef8971")]
+internal sealed class MidiClip : Instance<MidiClip>, IStatusProvider, IDescriptiveFilename
 {
-    [Output(Guid = "04BFDF5C-7D05-469A-89BE-525F27186F69", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly TimeClipSlot<Dict<float>> Values = new();
-
-    [Output(Guid = "C08C4B81-65B0-4FC3-AF46-F06E72838F9D")]
-    public readonly Slot<List<string>> ChannelNames = new();
-
-    [Output(Guid = "AADD9189-0086-42D6-AC45-D694270C0252")]
-    public readonly Slot<float> DeltaTicksPerQuarterNote = new();
+    [Output(Guid = "a668ec72-17a6-443d-9a85-04d9c37ec9d3", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly TimeClipSlot<T3CoreDataClip?> Clip = new();
 
     public MidiClip()
     {
-        _initialized = false;
-        Values.UpdateAction += Update;
-        ChannelNames.UpdateAction += Update;
-        DeltaTicksPerQuarterNote.UpdateAction += Update;
+        _dataSetResource = new Resource<DataSet>(FilePath, TryLoad);
+        _dataSetResource.AddDependentSlots(Clip);
+        Clip.UpdateAction += Update;
     }
 
-    protected override void Dispose(bool isDisposing)
+    private bool TryLoad(FileResource file,
+                         DataSet? currentValue,
+                         [NotNullWhen(true)] out DataSet? newValue,
+                         [NotNullWhen(false)] out string? failureReason)
     {
-        //if (!isDisposing)
-        //    return;
+        // The converter cache keys by (path, last-write timestamp), so a changed file
+        // re-converts while unchanged files are shared across all MidiClip instances.
+        if (!MidiFileToDataSet.TryGet(file.AbsolutePath, out var loaded, out var reason))
+        {
+            newValue = null;
+            failureReason = reason;
+            _errorMessageForStatus = reason;
+            return false;
+        }
+
+        newValue = loaded;
+        failureReason = null;
+        _errorMessageForStatus = string.Empty;
+        return true;
     }
 
     private void Update(EvaluationContext context)
     {
-        try
+        var dataSet = _dataSetResource.GetValue(context);
+        if (dataSet == null)
         {
-            if (!_initialized || Filename.DirtyFlag.IsDirty)
-            {
-                SetupMidiFile(context);
-                _channelNames = _channels.Keys.ToList();
-                ChannelNames.Value = _channelNames;
-            }
-
-            if (_midiEventCollection == null) 
-                return;
-
-            _printLogMessages = PrintLogMessages.GetValue(context);
-
-            // LocalTime already arrives remapped into the clip's source time (bars) — every output of a
-            // clip-shaped op gets the TimeClip's remap, so no manual TimeRange→SourceRange math here.
-            var sourceRange = Values.TimeClip.SourceRange;
-            var bars = context.LocalTime;
-
-            // For now: brute-force rewind if we run backwards in time
-            if (bars < _lastTimeInBars)
-                ClearTracks();
-
-            _lastTimeInBars = bars;
-
-            // Include past events in our response
-            var minRange = Math.Min(sourceRange.Start, sourceRange.End);
-            var someTrackChanged = false;
-            if (bars >= minRange &&
-                bars < minRange + Math.Abs(sourceRange.Duration))
-            {
-                for (var trackIndex = 0; trackIndex < _midiFile.Tracks; trackIndex++)
-                {
-                    someTrackChanged |= UpdateTrack(trackIndex, bars);
-                }
-            }
-
-            if (someTrackChanged)
-                Values.Value = _channels;
-        }
-            
-        catch (Exception e)
-        {
-            Log.Debug("Updating MidiClip failed:" + e.Message, this);
-        }
-    }
-
-        
-    private List<string> _channelNames = new();
-
-    private void SetupMidiFile(EvaluationContext context)
-    {
-        var filename = Filename.GetValue(context);
-        if (string.IsNullOrEmpty(filename))
-            return;
-
-        if (!TryGetFilePath(filename, out var filePath))
-        {
-            Log.Error($"Could not find file: {filename}", this);
+            Clip.Value = null;
             return;
         }
-            
-        // Initialize MIDI file reading, then read all parameters from file
-        const bool noStrictMode = false;
-        _midiFile = new MidiFile(filePath, noStrictMode);
-        _deltaTicksPerQuarterNote = _midiFile.DeltaTicksPerQuarterNote;
-        _midiEventCollection = _midiFile.Events;
-        ClearTracks();
-            
-        _timeSignature = _midiFile.Events[0].OfType<TimeSignatureEvent>().FirstOrDefault();
 
-        // Update slots
-        DeltaTicksPerQuarterNote.Value = (int)_deltaTicksPerQuarterNote;    // conversion to int is probably bad
+        // SourceRange is in file-time (bars), TimeRange in timeline-time (bars) — the same
+        // identity-mapping convention as LoadDataClip / PlayVideoClip, so split, trim and
+        // body-drag math stay consistent across clip types.
+        var timeRange = Clip.TimeClip.TimeRange;
+        var sourceRange = Clip.TimeClip.SourceRange;
+        var mapping = new TimeRangeMapping(timeRange, sourceRange, context.Playback.Bpm);
 
-        _initialized = true;
+        Clip.Value = new T3CoreDataClip
+                         {
+                             Set = dataSet,
+                             Mapping = mapping,
+                         };
+        Clip.DirtyFlag.Clear();
     }
 
-    private void ClearTracks()
-    {
-        _lastTrackEventIndices = Repeat(-1, _midiFile.Tracks).ToList();
+    IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()
+        => string.IsNullOrEmpty(_errorMessageForStatus)
+               ? IStatusProvider.StatusLevel.Success
+               : IStatusProvider.StatusLevel.Warning;
 
-        foreach (var k in _channels.Keys)
-        {
-            _channels[k] = 0;
-        }
-    }
-        
-    private bool UpdateTrack(int trackIndex, double time)
-    {
-        if (trackIndex >= _lastTrackEventIndices.Count ||
-            trackIndex >= _midiFile.Events[trackIndex].Count) 
-            return false;
+    string IStatusProvider.GetStatusMessage() => _errorMessageForStatus;
 
-        var events = _midiFile.Events[trackIndex];
-            
-        var lastEventIndex = _lastTrackEventIndices[trackIndex];
-        if (lastEventIndex + 1 >= events.Count) 
-            return false;
+    public IEnumerable<string> FileFilter => _fileFilter;
+    public InputSlot<string> SourcePathSlot => FilePath;
+    private static readonly string[] _fileFilter = ["*.mid", "*.midi"];
 
-        var valuesChanged = false;
-        var timeInTicks = (long)(time * 4 * _deltaTicksPerQuarterNote);
-        var nextEventIndex = lastEventIndex + 1;
-        while (nextEventIndex < events.Count
-               && timeInTicks >= events[nextEventIndex].AbsoluteTime)
-        {
-            if (_printLogMessages)
-            {
-                Log.Debug(TimeToBarsBeatsTicks(events[nextEventIndex].AbsoluteTime, _deltaTicksPerQuarterNote, _timeSignature));
-            }
+    [Input(Guid = "10c6978a-5910-4949-8382-95834dd1b4d1")]
+    public readonly InputSlot<string> FilePath = new();
 
-            switch (events[nextEventIndex])
-            {
-                case NoteOnEvent noteOnEvent:
-                {
-                    var channel = noteOnEvent.Channel;
-                    var name = noteOnEvent.NoteName;
-                    var value = noteOnEvent.Velocity / 127f;
-                    var key = $"/channel{channel}/{name}";
-                    _channels[key] = value;
-                    valuesChanged = true;
-
-                    if (_printLogMessages)
-                        Log.Debug(key + "=" + value);
-                    break;
-                }
-                case NoteEvent noteEvent:
-                {
-                    var channel = noteEvent.Channel;
-                    var name = noteEvent.NoteName;
-                    const float value = 0.0f;
-                    var key = $"/channel{channel}/{name}";
-                    _channels[key] = value;
-                    valuesChanged = true;
-
-                    if (_printLogMessages)
-                        Log.Debug(key + "=" + value);
-                    break;
-                }
-                case ControlChangeEvent controlChangeEvent:
-                {
-                    var channel = controlChangeEvent.Channel;
-                    var controller = (int)controlChangeEvent.Controller;
-                    var value = controlChangeEvent.ControllerValue / 127f;
-                    var key = $"/channel{channel}/controller{controller}";
-                    _channels[key] = value;
-                    valuesChanged = true;
-
-                    if (_printLogMessages)
-                        Log.Debug($"{key}={value}", this);
-                        
-                    break;
-                }
-            }
-
-            lastEventIndex = nextEventIndex;
-            nextEventIndex = lastEventIndex + 1;
-        }
-
-        _lastTrackEventIndices[trackIndex] = lastEventIndex;
-        return valuesChanged;
-    }
-
-    /**
-     * From https://github.com/naudio/NAudio/blob/master/Docs/MidiFile.md
-     */
-    private static string TimeToBarsBeatsTicks(long eventTime, double ticksPerQuarterNote, TimeSignatureEvent timeSignature)
-    {
-        var beatsPerBar = timeSignature?.Numerator ?? 4;
-        var ticksPerBar = timeSignature == null
-                              ? ticksPerQuarterNote * 4
-                              : (timeSignature.Numerator * ticksPerQuarterNote * 4) / (1 << timeSignature.Denominator);
-        var ticksPerBeat = ticksPerBar / beatsPerBar;
-        var bar = (eventTime / ticksPerBar);
-        var beat = ((eventTime % ticksPerBar) / ticksPerBeat);
-        var tick = eventTime % ticksPerBeat;
-        return string.Format($"{bar}:{beat}:{tick}");
-    }
-
-    // The MIDI file input
-    private bool _initialized = false;
-    private MidiFile _midiFile = null;
-    private MidiEventCollection _midiEventCollection = null;
-    private double _deltaTicksPerQuarterNote = 500000.0 / 60;
-
-    // Output data
-    private readonly Dict<float> _channels = new(0f);
-
-    // Parsing the file
-    private TimeSignatureEvent _timeSignature = null;
-    private double _lastTimeInBars = 0f;
-    private List<int> _lastTrackEventIndices = null;
-    private bool _printLogMessages = false;
-
-    [Input(Guid = "31FE831F-C3BE-4AE3-884B-D2FC4F1754A4")]
-    public readonly InputSlot<string> Filename = new();
-
-    [Input(Guid = "8B88C669-7351-4332-9294-9A06A46F45A1")]
-    public readonly InputSlot<bool> PrintLogMessages = new();
+    private readonly Resource<DataSet> _dataSetResource;
+    private string _errorMessageForStatus = string.Empty;
 }

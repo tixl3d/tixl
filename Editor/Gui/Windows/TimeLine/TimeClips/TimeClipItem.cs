@@ -129,7 +129,7 @@ internal static class TimeClipItem
             attr.DrawList.AddRect(position, itemRectMax, UiColors.Selection, rounding);
 
 
-        // Label — for ops that load from a file (LoadDataClip, future MidiClip etc.), use
+        // Label — for ops that load from a file (LoadDataClip, MidiClip etc.), use
         // the loaded filename instead of the op's symbol name so the user can tell which
         // recording a clip references without opening the parameter window.
         if(ClipArea.LayerHeight > Fonts.FontSmall.FontSize){

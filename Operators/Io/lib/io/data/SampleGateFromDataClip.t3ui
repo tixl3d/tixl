@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "b1bce1f1-dab9-4b0f-bd2c-b7f564858675"/*SampleGateFromDataClip*/,
-  "Description": "Samples a note channel of a DataClip at the current time: Gate is true while a note interval is active, Velocity carries its raw velocity (0-127).\n\nUse it to trigger visuals from notes in a [LoadMidiFile] or recorded [LoadDataClip] without setting up [SimulateIoData] and [MidiInput]. Pick an interval channel (N…) — for CC curves and other tick channels use [SampleFloatFromDataClip].\n\nWasHit is true for the frame in which a note starts - it fires even when a short note falls entirely between two frames, or a retrigger keeps Gate continuously true.\n\nThe sample time follows the playhead through the clip's timeline placement. Enable UseTimeOverride to sample at an explicit source time in seconds instead.",
+  "Description": "Samples a note channel of a DataClip at the current time: Gate is true while a note interval is active, Velocity carries its raw velocity (0-127).\n\nUse it to trigger visuals from notes in a [MidiClip] or recorded [LoadDataClip] without setting up [SimulateIoData] and [MidiInput]. Pick an interval channel (N…) — for CC curves and other tick channels use [SampleFloatFromDataClip].\n\nWasHit is true for the frame in which a note starts - it fires even when a short note falls entirely between two frames, or a retrigger keeps Gate continuously true.\n\nThe sample time follows the playhead through the clip's timeline placement. Enable UseTimeOverride to sample at an explicit source time in seconds instead.",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -27,7 +27,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "The DataClip to sample, e.g. from [LoadMidiFile] or [LoadDataClip]."
+      "Description": "The DataClip to sample, e.g. from [MidiClip] or [LoadDataClip]."
     },
     {
       "InputId": "96c0b232-6bdb-4bc2-bfc9-12e53db38c31"/*Channel*/,

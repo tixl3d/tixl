@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "a3ceb788-4055-4556-961b-63b7221f93e7"/*_MidiClip_Old*/,
+  "Inputs": [
+    {
+      "Id": "31fe831f-c3be-4ae3-884b-d2fc4f1754a4"/*Filename*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "8b88c669-7351-4332-9294-9a06a46f45a1"/*PrintLogMessages*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

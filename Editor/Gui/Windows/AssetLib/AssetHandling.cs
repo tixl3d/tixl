@@ -130,8 +130,8 @@ internal static class AssetHandling
                                    ])
                                    {
                                        PrimaryOperators =
-                                               [new Guid("b4766419-8bca-4fa0-a398-e6af90ef8971")], // LoadMidiFile
-                                       TimelineClipOperator = new Guid("b4766419-8bca-4fa0-a398-e6af90ef8971"), // LoadMidiFile
+                                               [new Guid("b4766419-8bca-4fa0-a398-e6af90ef8971")], // MidiClip
+                                       TimelineClipOperator = new Guid("b4766419-8bca-4fa0-a398-e6af90ef8971"), // MidiClip
                                        Color = UiColors.ColorForCommands,
                                        IconId = (uint)Icon.FileAudio,
                                        Subfolders = ["midi", "music"],

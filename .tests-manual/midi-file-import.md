@@ -12,7 +12,7 @@ prerequisites:
 ---
 
 MIDI files can be dropped into a project like audio or video. The file becomes a
-[LoadMidiFile] clip on the [ui:Timeline|timeline], holding the file's notes and controller
+[MidiClip] clip on the [ui:Timeline|timeline], holding the file's notes and controller
 moves as data channels. Replaying it through a [SimulateIoData] op drives [MidiInput]
 operators exactly as if the file were played on a connected device — the file name takes
 the place of the device name.
@@ -26,13 +26,13 @@ timeline's clip area.
 **Expected:**
 - While dragging, a clip-sized preview rectangle follows the mouse; its width matches the
   file's real duration (a 30-second file is wider than a 5-second one), not a fixed size.
-- On drop, a **[LoadMidiFile]** clip appears at the drop position with the file's duration.
+- On drop, a **[MidiClip]** clip appears at the drop position with the file's duration.
 - The clip can be dragged, trimmed, and split like an audio or video clip.
 
 ## Step: Inspect the converted channels
 
 **Action:**
-Select the [LoadMidiFile] op and pin its `Clip` output in the [ui:OutputWindow|Output Window].
+Select the [MidiClip] op and pin its `Clip` output in the [ui:OutputWindow|Output Window].
 
 **Expected:**
 - One row per note and controller used in the file. Held notes show as bars spanning
@@ -59,7 +59,7 @@ the clip.
 Drag the same `.mid` file onto the graph background (not the timeline).
 
 **Expected:**
-- A [LoadMidiFile] op is created with its `FilePath` set to the imported asset.
+- A [MidiClip] op is created with its `FilePath` set to the imported asset.
 
 ## Step: Sample a CC curve directly
 

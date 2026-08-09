@@ -1,0 +1,50 @@
+{
+  "FormatVersion": 3,
+  "Id": "a3ceb788-4055-4556-961b-63b7221f93e7"/*_MidiClip_Old*/,
+  "Description": "Obsolete — please use [MidiClip] instead.\n\n[MidiClip] loads the file as a timeline-bound DataClip; sample values with [SampleFloatFromDataClip] and note gates with [SampleGateFromDataClip]. This older version outputs raw channel values as a Dict and will be removed in a future version.",
+  "SymbolTags": "4096",
+  "InputUis": [
+    {
+      "InputId": "31fe831f-c3be-4ae3-884b-d2fc4f1754a4"/*Filename*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Defines the storage location of the midi",
+      "Usage": "FilePath",
+      "FileFilter": "mid,midi"
+    },
+    {
+      "InputId": "8b88c669-7351-4332-9294-9a06a46f45a1"/*PrintLogMessages*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Enables / disables output of the midi information into the Console window"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "aadd9189-0086-42d6-ac45-d694270c0252"/*DeltaTicksPerQuarterNote*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "04bfdf5c-7d05-469a-89be-525f27186f69"/*Values*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "c08c4b81-65b0-4fc3-af46-f06e72838f9d"/*ChannelNames*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      }
+    }
+  ]
+}

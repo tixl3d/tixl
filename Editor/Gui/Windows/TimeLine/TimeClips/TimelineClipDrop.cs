@@ -237,7 +237,7 @@ internal static class TimelineClipDrop
 
     /// <summary>
     /// Duration of a .mid/.midi file in seconds, or 0 for non-MIDI paths. The converter caches by
-    /// (path, last-write), so the parse cost is paid once and shared with the LoadMidiFile op the
+    /// (path, last-write), so the parse cost is paid once and shared with the MidiClip op the
     /// drop creates.
     /// </summary>
     private static double TryProbeMidiDurationSecs(string absolutePath)
