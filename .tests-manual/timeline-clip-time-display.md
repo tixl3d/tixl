@@ -17,15 +17,28 @@ time-warp all operate in **playback time**: a keyframe inside a stretched or sli
 where it takes effect, sits under the playhead, and drags/fences land where the mouse is — per row,
 so two clips with different stretches coexist on one timeline.
 
-**Setup for all steps:** a `[VideoClip]` with Clip Start/End `0/8` and Source Start/End `0/4`
-(50% speed — set via **Edit Clip Times**), with two **Color** keys at content bars 1 and 2
-(alpha 1 → 0), i.e. a fade-out playing between bars **2 and 4**. Keep the clip selected so its
-rows show.
+## Step: Setup — a stretched clip with a two-key fade
+
+**Action:**
+1. Move the playtime to the start of the timeline (`Home`).
+2. Drag a video file into the timeline's clip area at bar 0, so a `[VideoClip]` is created.
+3. Select the clip and open **Edit Clip Times** from its context menu. Set Clip Start/End to
+   `0` / `4` and verify Source Start/End show the same (100% speed).
+4. Move the playtime to bar `1` and `Alt + click` the **Color** input in the Parameter Window —
+   a dope-sheet row labeled **VideoClip.Color** appears below the clip lanes ("the Color row").
+5. Move the playtime to bar `2` and set Color's alpha to `0`.
+6. Now stretch: drag the clip's end handle to bar `8` while holding `Alt` (the label shows 50.0%).
+   Edit Clip Times should now read Clip `0/8`, Source `0/4`.
+7. Keep the clip selected for all following steps, so its rows stay visible.
+
+**Expected:**
+- A fade-out plays between bars **2 and 4** (the two keys at content bars 1 and 2, stretched).
 
 ## Step: Keys draw at playback positions
 
 **Action:**
-Look at the Color row and the keyset strip below the ruler.
+Look at the **VideoClip.Color** dope-sheet row and the keyset strip (the dot band directly below
+the ruler).
 
 **Expected:**
 - The two keys are drawn at bars **2 and 4** — under where the fade audibly/visibly happens.
@@ -89,12 +102,12 @@ Drag the strip dot at bar 2 to bar `3`.
 ## Step: Snapping across differently-mapped rows
 
 **Action:**
-Drag the `[Value]` key at bar 3 slowly toward the clip row's key at bar 3... (first restore state
-with `Ctrl + Z` if needed so keys differ) — drag any unclipped key toward a clipped key's drawn
-position.
+1. Press `Ctrl + Z` until the two rows' keys sit at different positions again.
+2. Slowly drag one `[Value]` key toward a **VideoClip.Color** key's drawn position.
 
 **Expected:**
-- The dragged key snaps when the two keys visually align on screen.
+- The dragged key snaps exactly when the two keys visually align on screen — even though one lives
+  in plain time and the other inside the 50% clip.
 
 ## Step: Regression — identity clips unchanged
 
