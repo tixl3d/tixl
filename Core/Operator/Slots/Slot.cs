@@ -88,14 +88,31 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
             //Log.Warning("Already disabled or bypassed");
             return false;
         }
-            
+
         _keepOriginalUpdateAction = UpdateAction;
         _keepDirtyFlagTrigger = _dirtyFlag.Trigger;
+        StashValueForBypass();
         UpdateAction = ByPassUpdate;
         _dirtyFlag.Invalidate();
         _targetInputForBypass = targetSlot;
         return true;
     }
+
+    /// <summary>
+    /// Remembers the slot's own value before <see cref="ByPassUpdate"/> replaces it with the upstream one.
+    /// Most slots recompute their value from the restored update action and never need this — but a slot whose
+    /// value is a constant object assigned once in the operator's constructor (the graph-node types) has
+    /// nothing to recompute it from, so without the stash un-bypassing would leave it pointing at its upstream
+    /// neighbour forever, silently detaching the operator from its own node.
+    /// </summary>
+    protected void StashValueForBypass()
+    {
+        _valueBeforeBypass = Value;
+        _hasValueBeforeBypass = true;
+    }
+
+    private T _valueBeforeBypass = default!;
+    private bool _hasValueBeforeBypass;
 
     internal void OverrideWithAnimationAction(Action<EvaluationContext> newAction)
     {
@@ -112,6 +129,15 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
         
     public virtual void RestoreUpdateAction()
     {
+        // Symmetric to the stash in TrySetBypassToInput — see StashValueForBypass for why the value has to be
+        // put back rather than left to the update action to recompute.
+        if (_hasValueBeforeBypass)
+        {
+            Value = _valueBeforeBypass;
+            _valueBeforeBypass = default!;
+            _hasValueBeforeBypass = false;
+        }
+
         // This will happen when operators are recompiled and output slots are InputConnections[0]
         if (_keepOriginalUpdateAction == null)
         {

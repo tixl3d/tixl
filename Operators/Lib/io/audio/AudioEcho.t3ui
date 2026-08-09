@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "a7c54fb0-1e42-4c8a-9f31-0ab1cd2e0500"/*AudioEcho*/,
-  "Description": "Adds an echo/delay to the audio flowing through it.\n\nEverything wired into Input shares the effect: the routing [AudioBus] gives this node its own submix with a DX8 echo insert. Volume folds into the contained sources like a [CombineAudio]. Unwiring fades the echo tail out instead of cutting it.\n\nMix blends the wet signal in (0 = dry), Delay is the echo time in seconds, Feedback controls how much each repeat feeds back (higher = more repeats), and PingPong alternates the repeats between left and right.",
+  "Description": "Adds an echo/delay to the audio flowing through it.\n\nEverything wired into Input shares the effect: the routing [AudioBus] gives this node its own submix with a DX8 echo insert. Volume folds into the contained sources like a [CombineAudio]. Unwiring fades the echo tail out instead of cutting it.\n\nMix blends the wet signal in (0 = dry), Delay is the echo time in seconds, Feedback controls how much each repeat feeds back (higher = more repeats), and PingPong alternates the repeats between left and right.\n\nLike every node in the audio graph, this is only heard once the chain reaches an [AudioBus] that is itself being evaluated — pinned to an output window, or wired into the render chain. A chain that ends nowhere is silent.",
   "InputUis": [
     {
       "InputId": "a7c54fb0-0002-4c8a-9f31-0ab1cd2e0500"/*Input*/,

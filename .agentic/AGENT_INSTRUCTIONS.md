@@ -66,10 +66,17 @@ Also:
 
 ### Operator descriptions
 
-An operator's Description field (edited in the TiXL editor) is the source for both the editor's help panel and
-the generated `.help/docs/operators/**` page — so write descriptions **in the editor**, not in the generated
-`.md` (hand-edits to the `.md` are overwritten on regeneration). Follow the description conventions from the
-wiki ([dev.OperatorConventions](https://github.com/tixl3d/tixl/wiki/dev.OperatorConventions)):
+An operator's Description lives in its `.t3ui` and is the source for both the editor's help panel and the
+generated `.help/docs/operators/**` page. **Never edit the generated `.md`** — it is overwritten on regeneration.
+
+Descriptions may be written either in the TiXL editor or directly in the `.t3ui`; both write the same field.
+The one hard constraint is **the editor must not be running with that symbol loaded while the file is
+hand-edited** — it holds symbols in memory and rewrites the `.t3ui` on save, silently discarding on-disk
+changes. So close the editor first, or restart it right after the edit and before anything that could trigger
+a save. The same applies to any other hand-edit of `.t3` / `.t3ui` / operator `.csproj` files.
+
+Follow the description conventions from the wiki
+([dev.OperatorConventions](https://github.com/tixl3d/tixl/wiki/dev.OperatorConventions)):
 
 - **The first line is a one-line summary** that conveys what the operator does and nothing more, followed by a
   **blank line** before any further detail. Descriptions render as Markdown, so the summary needs that

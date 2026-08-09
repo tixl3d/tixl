@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "04c1a6dc-3042-48a8-81d2-0a5a162016dc"/*VideoClip*/,
-  "Description": "Plays a video file as a clip on the timeline, decoded with FFmpeg.\n\nThe clip's position on the timeline defines when the video plays; trimming and slipping the clip remaps its source range like in a video editor. A [VideoClipPlayer] composites all video clips of a composition — wired into its input or auto-collected — using each clip's Color and BlendMode, with lower layers drawn on top.\n\nOptimize For selects the decode strategy: Fast Seeking (the default) decodes in software with a RAM frame cache for instant scrubbing; Playback Performance decodes zero-copy on the GPU for the smoothest playback of large or 4K footage.\n\nAlso see [PlayVideo] for timeline-independent playback.\n\nAKA: video, movie, footage, clip, mp4, mkv",
+  "Description": "Plays a video file as a clip on the timeline, decoded with FFmpeg.\n\nThe clip's position on the timeline defines when the video plays; trimming and slipping the clip remaps its source range like in a video editor. A [VideoClipPlayer] composites all video clips of a composition — wired into its input or auto-collected — using each clip's Color and BlendMode, with lower layers drawn on top.\n\nOptimize For selects the decode strategy: Fast Seeking (the default) decodes in software with a RAM frame cache for instant scrubbing; Playback Performance decodes zero-copy on the GPU for the smoothest playback of large or 4K footage.\n\nAlso see [PlayVideo] for timeline-independent playback.\n\nThe video's audio track plays too, at Volume. AudioReference exposes it to the audio graph: wire it into an [AudioBus], directly or through a [CombineAudio], to apply group volume, effect inserts and ducking — or leave it unwired and the sound simply plays. Sound follows the picture, so an operator nothing draws stays silent, and Volume 0 skips decoding the audio altogether.\n\nAKA: video, movie, footage, clip, mp4, mkv",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Audio volume of the video's sound track.\n\nNot yet routed to the audio engine — video audio is silent in this version.",
+      "Description": "Volume of the video's own sound track.\n\nAt 0 the audio track isn't decoded at all, so a video used purely as a texture costs nothing.",
       "AddPadding": "True",
       "Min": 0.0,
       "ClampMin": true

@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "b8d65fc0-1e42-4c8a-9f31-0ab1cd2e0600"/*AudioCompressor*/,
-  "Description": "Adds a compressor to the audio flowing through it, evening out dynamics.\n\nEverything wired into Input shares the effect: the routing [AudioBus] gives this node its own submix with a DX8 compressor insert. Volume folds into the contained sources like a [CombineAudio].\n\nThreshold is the linear level (like the meter ops) above which compression kicks in, Ratio how strongly levels above it are reduced, Attack/Release the reaction times in seconds, and MakeupGainDb boosts the compressed result back up.",
+  "Description": "Adds a compressor to the audio flowing through it, evening out dynamics.\n\nEverything wired into Input shares the effect: the routing [AudioBus] gives this node its own submix with a DX8 compressor insert. Volume folds into the contained sources like a [CombineAudio].\n\nThreshold is the linear level (like the meter ops) above which compression kicks in, Ratio how strongly levels above it are reduced, Attack/Release the reaction times in seconds, and MakeupGainDb boosts the compressed result back up.\n\nLike every node in the audio graph, this is only heard once the chain reaches an [AudioBus] that is itself being evaluated — pinned to an output window, or wired into the render chain. A chain that ends nowhere is silent.",
   "InputUis": [
     {
       "InputId": "b8d65fc0-0002-4c8a-9f31-0ab1cd2e0600"/*Input*/,
