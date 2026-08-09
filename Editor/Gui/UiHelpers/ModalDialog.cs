@@ -91,9 +91,37 @@ public abstract class ModalDialog
         ImGui.PopStyleVar();
     }
 
+    /// <summary>
+    /// Padded modal for dialogs drawn from static code that can't subclass <see cref="ModalDialog"/>.
+    /// The global style has zero window padding, so a plain <see cref="ImGui.BeginPopupModal(string)"/>
+    /// renders its content flush against the frame. Pair with <see cref="EndStaticDialog"/> when it
+    /// returns true; on false everything is already unwound.
+    /// </summary>
+    internal static bool BeginStaticDialog(string title, ref bool isOpen, ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(DefaultPadding, DefaultPadding) * T3Ui.UiScaleFactor);
+        if (!ImGui.BeginPopupModal(title, ref isOpen, flags))
+        {
+            ImGui.PopStyleVar();
+            return false;
+        }
+
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, DefaultItemSpacing * T3Ui.UiScaleFactor);
+        return true;
+    }
+
+    internal static void EndStaticDialog()
+    {
+        ImGui.PopStyleVar(2);
+        ImGui.EndPopup();
+    }
+
     private bool _shouldShowNextFrame;
     protected Vector2 DialogSize = new(500, 350);
-    protected Vector2 ItemSpacing = new(4, 10);
-    protected float Padding = 20;
+    protected Vector2 ItemSpacing = DefaultItemSpacing;
+    protected float Padding = DefaultPadding;
     protected ImGuiWindowFlags Flags = ImGuiWindowFlags.None;
+
+    private const float DefaultPadding = 20;
+    private static readonly Vector2 DefaultItemSpacing = new(4, 10);
 }

@@ -26,6 +26,9 @@ internal static partial class CustomComponents
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6));
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6, 6));
         ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 6);
+        // Menu rows measure themselves with GetFrameHeight, so a caller that lowered FramePadding for its
+        // own content (e.g. the asset library's tree rows) would otherwise squash the whole menu.
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, T3Style.DefaultFramePadding);
 
         if (ImGui.BeginPopupContextItem(id, flags))
         {
@@ -46,7 +49,7 @@ internal static partial class CustomComponents
             ImGui.EndPopup();
         }
 
-        ImGui.PopStyleVar(3);
+        ImGui.PopStyleVar(4);
     }
 
     /// <summary>
@@ -255,6 +258,7 @@ internal static partial class CustomComponents
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6, 6));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6));
         ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 6);
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, T3Style.DefaultFramePadding);
 
         if (ImGui.BeginPopupContextWindow("windows_context_menu"))
         {
@@ -272,7 +276,7 @@ internal static partial class CustomComponents
             contextMenuIsOpen = false;
         }
 
-        ImGui.PopStyleVar(3);
+        ImGui.PopStyleVar(4);
     }
 
     public static bool DrawMultilineTextEdit(ref string value)

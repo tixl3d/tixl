@@ -5,6 +5,7 @@ using ImGuiNET;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.Windows.AssetLib;
 
@@ -77,7 +78,7 @@ internal sealed partial class AssetLibrary
         if (!_deleteDialogOpen)
             return;
 
-        if (!ImGui.BeginPopupModal(DeleteDialogId, ref _deleteDialogOpen, ImGuiWindowFlags.AlwaysAutoResize))
+        if (!ModalDialog.BeginStaticDialog(DeleteDialogId, ref _deleteDialogOpen))
             return;
 
         ImGui.TextUnformatted(BuildDeleteSummary());
@@ -104,7 +105,7 @@ internal sealed partial class AssetLibrary
             ImGui.CloseCurrentPopup();
         }
 
-        ImGui.EndPopup();
+        ModalDialog.EndStaticDialog();
     }
 
     private static string BuildDeleteSummary()

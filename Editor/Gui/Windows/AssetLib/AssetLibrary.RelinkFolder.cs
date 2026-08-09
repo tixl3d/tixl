@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.Windows.AssetLib;
 
@@ -40,7 +41,7 @@ internal sealed partial class AssetLibrary
         if (!_relinkDialogOpen)
             return;
 
-        if (!ImGui.BeginPopupModal(RelinkDialogId, ref _relinkDialogOpen, ImGuiWindowFlags.AlwaysAutoResize))
+        if (!ModalDialog.BeginStaticDialog(RelinkDialogId, ref _relinkDialogOpen))
             return;
 
         // The mount is gone if its package was unloaded while the dialog was open
@@ -48,7 +49,7 @@ internal sealed partial class AssetLibrary
         {
             _relinkDialogOpen = false;
             ImGui.CloseCurrentPopup();
-            ImGui.EndPopup();
+            ModalDialog.EndStaticDialog();
             return;
         }
 
@@ -105,7 +106,7 @@ internal sealed partial class AssetLibrary
             ImGui.CloseCurrentPopup();
         }
 
-        ImGui.EndPopup();
+        ModalDialog.EndStaticDialog();
     }
 
     private static Guid _relinkMountId;
