@@ -122,6 +122,10 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
         if (isDisabled)
         {
             _keepOriginalUpdateAction = _baseUpdateAction;
+            // Must be stashed like the base disable path does: RestoreUpdateAction writes it back on
+            // re-enable, and without the stash it wipes the trigger (e.g. Animated) — the slot then
+            // never re-evaluates after re-enabling.
+            _keepDirtyFlagTrigger = _dirtyFlag.Trigger;
             base.UpdateAction = EmptyAction;
             DirtyFlag.Invalidate();
         }

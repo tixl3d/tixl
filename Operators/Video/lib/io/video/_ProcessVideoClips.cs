@@ -239,6 +239,11 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
         {
             if (outputs[i] is ITimeClipProvider clipProvider)
             {
+                // A disabled clip reads as "not there" — like outside its range — instead of
+                // compositing its frozen last frame.
+                if (clipProvider is Slot<Texture2D> { IsDisabled: true })
+                    return ClipState.Inactive;
+
                 timeClip = clipProvider.TimeClip;
                 var range = timeClip.TimeRange;
                 if (localTime >= range.Start && localTime < range.End)

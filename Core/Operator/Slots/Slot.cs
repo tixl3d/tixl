@@ -387,7 +387,7 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
     }
 
     protected Action<EvaluationContext>? _keepOriginalUpdateAction;
-    private DirtyFlagTrigger _keepDirtyFlagTrigger;
+    private protected DirtyFlagTrigger _keepDirtyFlagTrigger;
     protected Slot<T>? _targetInputForBypass;
         
     private bool _isInputSlot;

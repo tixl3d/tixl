@@ -11,6 +11,7 @@ using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -125,6 +126,12 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         if (UserActions.DeleteSelection.Triggered())
         {
             OpClips.DeleteSelectedClips(compositionOp);
+        }
+
+        // Clip selection projects onto the node selection, so the graph's disable action applies directly.
+        if (UserActions.ToggleDisabled.Triggered() && _context.ClipSelection.Count > 0)
+        {
+            NodeActions.ToggleDisabledForSelectedElements(_context.TimeCanvas.NodeSelection);
         }
     }
 

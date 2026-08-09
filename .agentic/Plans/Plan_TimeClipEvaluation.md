@@ -175,7 +175,9 @@ small.
 
 **Risk:** highest in the plan. It is a `Core` change on the evaluation path. Land it alone, not bundled.
 
-**Status: code done (2026-08-08), pending in-editor verify** — as built:
+**Status: DONE — verified in-editor 2026-08-09** (guided set `time-clip-evaluation.md` passed 8/8, after
+the fixes found during the run: export-wait predicate, slip inversion, disable/re-enable trigger wipe).
+As built:
 
 - **Zero cost in `Slot<T>.Update`** (the inner loop): the hot path invokes a precomputed
   `_effectiveUpdateAction` — the same single field-load + null-check + delegate call as before the feature.

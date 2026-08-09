@@ -465,6 +465,15 @@ now.
   `Slot<Texture2D>` for wiring and `IVideoClipProvider`.
 - Builds green: Core, Video, Lib, Io, Editor. Existing placements referencing the removed output load
   with a warning and a default placement (accepted — see migration assessment).
+- **Found in testing (2026-08-09), fixed — disable/re-enable:**
+  - *Re-enable dead:* `TimeClipSlot.SetDisabled` (and `TransformCallbackSlot`'s) stashed the update
+    action but not the dirty-flag trigger; the base `RestoreUpdateAction` then "restored" the never-set
+    field, wiping `DirtyFlagTrigger.Animated` so the slot never re-evaluated. Latent forever; armed by
+    the texture output becoming the TimeClipSlot. Both overrides now stash the trigger
+    (`_keepDirtyFlagTrigger` widened to `private protected`).
+  - *Disable froze the frame instead of hiding the clip:* the player composited the stale `Value`.
+    `_ProcessVideoClips.ClassifyClip` now treats a disabled clip slot as `Inactive` — disabled reads
+    like out-of-range.
 
 ## Documentation
 

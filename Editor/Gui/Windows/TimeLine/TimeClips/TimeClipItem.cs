@@ -125,6 +125,13 @@ internal static class TimeClipItem
                                                       mediaFade, innerColor);
         }
 
+        // Disabled indicator — same X cross the graph draws on disabled ops.
+        if (symbolChildUi.SymbolChild.IsDisabled)
+        {
+            DrawUtils.DrawOverlayLine(attr.DrawList, 1, Vector2.Zero, Vector2.One, position, itemRectMax);
+            DrawUtils.DrawOverlayLine(attr.DrawList, 1, new Vector2(1, 0), new Vector2(0, 1), position, itemRectMax);
+        }
+
         if (isSelected)
             attr.DrawList.AddRect(position, itemRectMax, UiColors.Selection, rounding);
 
