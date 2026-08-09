@@ -151,7 +151,12 @@ public sealed class VideoPlaybackController : IDisposable
                         TimeToFrameMapper.ResolvePlaybackSeconds(requestedSeconds, _duration, loop),
                         _streamStartPts, _timeBaseNum, _timeBaseDen, _frameRate);
 
-                    if (_lastUploadedTarget == target || (_hasPendingFrame && _pendingTarget == target))
+                    // Both publish paths satisfy the wait: the software path flags _hasPendingFrame, the
+                    // zero-copy path _hasPendingGpuFrame. Ignoring the latter made every new frame ride
+                    // out the full timeout in zero-copy exports.
+                    if (_lastUploadedTarget == target
+                        || (_hasPendingFrame && _pendingTarget == target)
+                        || (_hasPendingGpuFrame && _pendingTarget == target))
                         return;
                 }
             }

@@ -454,6 +454,18 @@ and `TimeClipSlot<Texture2D>` *is a* `Slot<Texture2D>` for wiring/interface purp
 **Sequencing: do this before Phase C locks `ITextureClipProvider`.** The window where it costs nothing is
 now.
 
+**Status: DONE (2026-08-09)** — as built:
+
+- `TimeClipSlot<T>.EvaluateOutsideRange` (Core): opts out of the out-of-range gate; the slot always
+  evaluates and only remaps. The op keeps clamping to its source range itself.
+- `[VideoClip]` is now a **single-output op**: `Texture` is a `TimeClipSlot<Texture2D>` (Guid kept,
+  `DirtyFlagTrigger.Animated`, `EvaluateOutsideRange = true`). The `TimeSlot` output and the vestigial
+  `Command` input were removed from `.cs` / `.t3` / `.t3ui`. No consumer changes were needed: discovery
+  and the player scan outputs for `ITimeClipProvider`, and `TimeClipSlot<Texture2D>` *is a*
+  `Slot<Texture2D>` for wiring and `IVideoClipProvider`.
+- Builds green: Core, Video, Lib, Io, Editor. Existing placements referencing the removed output load
+  with a warning and a default placement (accepted — see migration assessment).
+
 ## Documentation
 
 - [`.help/docs/using/Timeline.md`](../../.help/docs/using/Timeline.md) — new section on the Global/Local

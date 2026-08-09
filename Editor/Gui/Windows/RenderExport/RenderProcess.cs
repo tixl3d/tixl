@@ -330,7 +330,9 @@ internal static class RenderProcess
             session.RenderToFileResolution = currentResolution;
         }
 
-        if (session.VideoWriter == null)
+        // Image sequences are written by the ScreenshotWriter — creating an FFmpeg writer would fail here
+        // because the sequence target path is a filename stem without a container extension.
+        if (settings.RenderMode == RenderSettings.RenderModes.Video && session.VideoWriter == null)
         {
             if (!TryInitVideoWriterWithFinalResolution(session))
                 return;
@@ -662,24 +664,28 @@ internal static class RenderProcess
         }
         else
         {
-            ScreenshotWriter.StartSavingToFile(texture, GetSequenceFilePath(), session.Settings.FileFormat);
+            ScreenshotWriter.StartSavingToFile(texture, GetSequenceFilePath(session), session.Settings.FileFormat);
         }
 
         session.FrameIndex++;
     }
 
-    private static string GetSequenceFilePath()
+    /// <summary>
+    /// The frame file for the session's current frame index. The prefix comes from the session's target path so
+    /// an auto-incremented version is honored and later edits to the settings can't rename mid-render.
+    /// </summary>
+    private static string GetSequenceFilePath(ExportSession session)
     {
-        var prefix = RenderPaths.SanitizeFilename(RenderSettings.Current.SequencePrefix);
-        return Path.Combine(_activeExportSession!.TargetDirectory,
-                            $"{prefix}_{_activeExportSession.FrameIndex:0000}.{_activeExportSession.Settings.FileFormat.ToString().ToLower()}");
+        var prefix = RenderPaths.SanitizeFilename(Path.GetFileName(session.TargetFilePath));
+        return Path.Combine(session.TargetDirectory,
+                            $"{prefix}_{session.FrameIndex:0000}.{session.Settings.FileFormat.ToString().ToLower()}");
     }
 
     private static bool TrySaveImageFrameAndAdvance(Texture2D mainOutputTexture)
     {
         try
         {
-            if (!ScreenshotWriter.StartSavingToFile(mainOutputTexture, GetSequenceFilePath(), _activeExportSession!.Settings.FileFormat))
+            if (!ScreenshotWriter.StartSavingToFile(mainOutputTexture, GetSequenceFilePath(_activeExportSession!), _activeExportSession!.Settings.FileFormat))
                 return false;
 
             _activeExportSession.FrameIndex++;

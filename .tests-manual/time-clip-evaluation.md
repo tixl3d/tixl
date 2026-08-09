@@ -86,14 +86,20 @@ through the result around the cut.
 
 ## Step: MidiClip timing is identical through all outputs
 
+> This step deliberately uses the **older `[MidiClip]`** op (outputs channel values directly) — it is
+> the one that had the double-remap bug in its `Values` output. Do **not** use `[LoadMidiFile]` (the
+> newer DataClip-based op) here; it was never affected. That both ops exist is known overlap, pending
+> a deprecation decision.
+
 **Action:**
-(Skip if no .mid file at hand.) Create a `[MidiClip]` with a MIDI file, note when its first events
-fire during playback. Slip/stretch the clip so `SourceRange != TimeRange`, and compare the event
-timing consumed through `Values` against the clip's position on the timeline.
+(Skip if no .mid file at hand.) Create a `[MidiClip]` with a MIDI file, wire its `Values` output into
+any consumer (e.g. a `[Value]` reading one channel), and note when its first events fire during
+playback. Stretch the clip to 50% speed (`Alt`-drag the end handle to double its length).
 
 **Expected:**
-- Events fire when the playhead crosses their position inside the clip — the clip's stretch is
-  applied exactly once (previously the `Values` output applied it twice).
+- Events fire when the playhead crosses their position inside the clip — at 50% speed an event that
+  fired at 1 bar into the clip now fires 2 bars in. The stretch is applied exactly **once**
+  (previously the `Values` output applied it twice, so events drifted at double rate).
 
 ## Step: Disable / re-enable a clip (regression)
 

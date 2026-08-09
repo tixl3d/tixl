@@ -202,7 +202,14 @@ small.
   `LocalTime`/`LocalFxTime` around those pulls using the clip's `TimeClip` (which `ClassifyClip` already
   resolved). **Rule for reviewers:** any consumer that reaches into a *foreign* clip's slots with its own
   context must remap the same way — a future transition op reading its sources' params is the next candidate.
-- **Open:** in-editor run-through of that test set; release-note line for the `Wake.t3`-class behaviour shift.
+- **Found during the test-set run (2026-08-09), fixed:** export of video clips crawled at 1–3 s/frame.
+  Log probes showed every new-frame request riding out the full 5 s export wait timeout and then reporting
+  `ready=True`. Root cause was latent in `VideoServices` (not this plan's changes):
+  `VideoPlaybackController.WaitForRequestedFrame`'s predicate accepted only the software publish flag
+  (`_hasPendingFrame`) — the zero-copy path publishes via `_hasPendingGpuFrame`, which the wait never
+  checked, so it always timed out. Predicate now accepts both; export requests measure 0–4 ms.
+- **Open:** in-editor run-through of that test set; release-note line for the `Wake.t3`-class behaviour shift
+  and the flipped `Ctrl+Alt` slip direction.
 
 ### Phase 2 — Keyframe writes go through the clip mapping
 
