@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "914fb032-d7eb-414b-9e09-2bdd7049e049"/*PlayVideo*/,
-  "Description": "Plays a video file as a texture, decoded with FFmpeg.\n\nThe playback time follows the timeline. Connect [OverrideTimeInSecs] to offset or scrub the video independently, and enable Loop to repeat past the end (otherwise it holds on the last frame). The Duration output reports the clip length in seconds, and HasCompleted turns on once non-looping playback passes the end.\n\nOptimize For selects the decode strategy. Fast Seeking (the default) decodes in software and keeps a frame cache, so scrubbing back and forth and looping stay snappy and HD playback is smooth. Playback Performance decodes on the GPU with no read-back for the smoothest playback of large or 4K footage, at the cost of slower random seeks. Both fall back to software automatically when the codec or GPU profile is unsupported.\n\nAlso see [PlayVideoClip] for placing a video as a timeline clip.\n\nAKA: video, movie, footage, mp4, mkv",
+  "Description": "Plays a video file as a texture, decoded with FFmpeg.\n\nThe playback time follows the timeline. Connect [OverrideTimeInSecs] to offset or scrub the video independently, and enable Loop to repeat past the end (otherwise it holds on the last frame). The Duration output reports the clip length in seconds, and HasCompleted turns on once non-looping playback passes the end.\n\nOptimize For selects the decode strategy. Fast Seeking (the default) decodes in software and keeps a frame cache, so scrubbing back and forth and looping stay snappy and HD playback is smooth. Playback Performance decodes on the GPU with no read-back for the smoothest playback of large or 4K footage, at the cost of slower random seeks. Both fall back to software automatically when the codec or GPU profile is unsupported.\n\nAlso see [PlayVideoClip] for placing a video as a timeline clip.\n\nThe video's audio track plays too, at Volume. AudioReference exposes it to the audio graph: wire it into an [AudioBus], directly or through a [CombineAudio], to apply group volume, effect inserts and ducking — or leave it unwired and the sound simply plays. Sound follows the picture, so an operator nothing draws stays silent, and Volume 0 skips decoding the audio altogether.\n\nAKA: video, movie, footage, mp4, mkv",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -37,7 +37,7 @@
         "X": 51.512096,
         "Y": 91.99597
       },
-      "Description": "Audio volume of the video's sound track.\n\nNot yet routed to the audio engine — video audio is silent in this version.",
+      "Description": "Volume of the video's own sound track.\n\nAt 0 the audio track isn't decoded at all, so a video used purely as a texture costs nothing.",
       "AddPadding": "True",
       "Min": 0.0,
       "ClampMin": true

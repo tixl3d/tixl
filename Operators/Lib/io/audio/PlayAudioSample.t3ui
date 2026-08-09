@@ -1,7 +1,7 @@
-{
+﻿{
   "FormatVersion": 3,
   "Id": "65e95f77-4743-437f-ab31-f34b831d28d7"/*PlayAudioSample*/,
-  "Description": "An audio player using BASS audio library. Features include:\n\n- [Playback Control]: Independent play, pause, and stop functionality with seek support\n- [Stereo Panning]: Position audio in the stereo field from left to right\n- [ADSR Envelope]: Optional amplitude envelope for dynamic volume shaping\n- [Speed Control]: Playback speed multiplier (affects pitch)",
+  "Description": "Plays an audio file as a triggered sample, with an optional ADSR envelope.\n\nAudioReference is the primary output: wire it into an [AudioBus], directly or through a [CombineAudio], and the sampler becomes an ordinary source in the audio graph — group volume, effect inserts and ducking all apply to it, and Volume (envelope included) is folded in as its gain. Evaluating that output is also what drives playback, so no other connection is needed.\n\nLeft unwired, the sampler plays through the operator mixer as before; Result must then be routed into a command chain so the operator is evaluated. Panning and Speed always stay with the player — the graph has no equivalent for them.\n\nPlayAudio triggers the sample and StopAudio ends it. With UseEnvelope on, the Envelope vector is attack, decay, sustain and release. Speed changes pitch along with tempo.",
   "InputUis": [
     {
       "InputId": "1a3f4b7c-12d3-4a5b-9c7d-8e1f2a3b4c5d"/*Mute*/,
@@ -143,6 +143,13 @@
       "Position": {
         "X": 300.0,
         "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "894b7295-067f-40fe-b8d3-0b279ec0c791"/*AudioReference*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
       }
     },
     {

@@ -1,3 +1,4 @@
+using T3.Core.Animation;
 using T3.Core.Audio;
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -45,6 +46,16 @@ namespace Lib.io.audio
         [Input(Guid = "3dbcbbe6-a8b4-4b83-a2c0-e22b24b91b42")]
         public readonly InputSlot<Vector4> Envelope = new();
 
+        /// <summary>
+        /// The sampler's audio, as a node in the audio-processing graph — the primary output, since routing the
+        /// sound is what this operator is for. Wire it into an [AudioBus] (directly or through a [CombineAudio])
+        /// and group volume, effect inserts and ducking all apply; evaluating it is also what drives playback,
+        /// so nothing else has to be connected. Left unwired the sampler plays through the operator mixer
+        /// exactly as before, driven by <see cref="Result"/>.
+        /// </summary>
+        [Output(Guid = "894b7295-067f-40fe-b8d3-0b279ec0c791", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
+        public readonly Slot<AudioGraphNode> AudioReference = new();
+
         [Output(Guid = "2433f838-a8ba-4f3a-809e-2d41c404bb84")]
         public readonly Slot<Command> Result = new();
 
@@ -57,14 +68,56 @@ namespace Lib.io.audio
         private Guid _operatorId;
         private bool _wasPausedLastFrame;
         private bool _previousPlayTrigger;
+        private int _lastPlaybackFrame = int.MinValue / 2;
         private readonly AdsrCalculator _calculator = new();
+        private readonly AudioGraphNode _node;
 
         public PlayAudioSample()
         {
             Result.UpdateAction += UpdatePlayback;
             IsPlaying.UpdateAction += UpdateStatus;
             GetLevel.UpdateAction += UpdateStatus;
+
+            // The engine owns the stream's lifetime, triggers and position; routed into a bus, the graph owns
+            // only its mixer membership and gain. Un-buffered, so a trigger stays as responsive as before.
+            _node = new AudioGraphNode(this) { ExternallyManagedChannel = true };
+            AudioReference.Value = _node;
+            AudioReference.UpdateAction += UpdateAudioReference;
         }
+
+        // Wired into the graph, or auto-collected by a bus/combine (which stamps the node) — either way the
+        // graph has taken the channel, and the engine must stand down from level and mixer membership.
+        private bool IsRoutedToGraph()
+            => IsAudioReferenceWired() || Playback.FrameCount - _node.LastCollectedFrame <= GraphFrameSlack;
+
+        private bool IsAudioReferenceWired()
+        {
+            var connections = Parent?.Symbol.Connections;
+            if (connections == null)
+                return false;
+
+            for (var i = 0; i < connections.Count; i++)
+            {
+                var c = connections[i];
+                if (c.SourceParentOrChildId == SymbolChildId && c.SourceSlotId == AudioReference.Id)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // Evaluation by a bus is itself the drive: wiring the sampler into the graph is enough to play it,
+        // without also routing Result into a command chain. Unlike a video, a sampler has no picture whose
+        // absence would justify silence — the audio is the whole point of the operator.
+        private void UpdateAudioReference(EvaluationContext context)
+        {
+            UpdatePlayback(context);
+            _node.Update(context);
+            AudioReference.DirtyFlag.Clear();
+        }
+
+        // A bus may evaluate the reference output before the playback path runs in the same frame.
+        private const int GraphFrameSlack = 2;
 
         private void EnsureOperatorId()
         {
@@ -84,6 +137,12 @@ namespace Lib.io.audio
 
         private void UpdatePlayback(EvaluationContext context)
         {
+            // Both Result and AudioReference drive this, so it can be reached twice in one frame. Running twice
+            // would consume the same PlayAudio edge twice and desync the envelope's attack/release triggers.
+            if (_lastPlaybackFrame == Playback.FrameCount)
+                return;
+
+            _lastPlaybackFrame = Playback.FrameCount;
             EnsureOperatorId();
 
             string filePath = AudioFile.GetValue(context);
@@ -148,6 +207,8 @@ namespace Lib.io.audio
             }
             _wasPausedLastFrame = shouldPause;
 
+            var routedToGraph = IsRoutedToGraph();
+
             AudioEngine.UpdateStereoOperatorPlayback(
                 operatorId: _operatorId,
                 filePath: filePath,
@@ -157,7 +218,13 @@ namespace Lib.io.audio
                 mute: mute,
                 panning: panning,
                 speed: speed,
-                seek: seek);
+                seek: seek,
+                routedToGraph: routedToGraph);
+
+            // The graph applies the level the engine just stood down from, envelope included, so a group
+            // volume or a duck scales the sampler the same way it scales any other source.
+            _node.Gain = mute ? 0f : envelopeModulatedVolume;
+            _node.SourceChannel = AudioEngine.TryGetOperatorChannel(_operatorId, out var channel) ? channel : 0;
 
             IsPlaying.Value = AudioEngine.IsOperatorStreamPlaying(_operatorId);
             GetLevel.Value = AudioEngine.GetOperatorLevel(_operatorId);

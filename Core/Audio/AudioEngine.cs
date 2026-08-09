@@ -530,9 +530,30 @@ public static class AudioEngine
     /// playback has no effect until the next play trigger. This allows setting the seek position 
     /// and triggering play in the same frame for predictable behavior.
     /// </param>
+    /// <summary>
+    /// Exposes an operator stream's live BASS channel so the audio-processing graph (an [AudioBus]) can route
+    /// it. The stream is created lazily on the first playback update, so this returns false until then.
+    /// </summary>
+    public static bool TryGetOperatorChannel(Guid operatorId, out int channel)
+    {
+        if (_stereoOperatorStates.TryGetValue(operatorId, out var state) && state.Stream is { StreamHandle: not 0 })
+        {
+            channel = state.Stream.StreamHandle;
+            return true;
+        }
+
+        channel = 0;
+        return false;
+    }
+
+    /// <param name="routedToGraph">
+    /// True while an [AudioBus] has taken this stream: the graph then owns its mixer membership and its level,
+    /// so the engine stops writing volume (they share the same channel attribute) and stops reclaiming the
+    /// channel into the operator mixer. Everything else — triggers, panning, speed, seeking — stays here.
+    /// </param>
     public static void UpdateStereoOperatorPlayback(
         Guid operatorId, string filePath, bool shouldPlay, bool shouldStop,
-        float volume, bool mute, float panning, float speed = 1.0f, float seek = 0f)
+        float volume, bool mute, float panning, float speed = 1.0f, float seek = 0f, bool routedToGraph = false)
     {
         EnsureFrameTokenCurrent();
         
@@ -550,6 +571,14 @@ public static class AudioEngine
             return;
 
         if (state.Stream == null) return;
+
+        state.Stream.GraphOwnsVolume = routedToGraph;
+
+        // Un-routing (unwired, or the bus deleted) leaves the channel in no mixer at all, so take it back.
+        // Checking real membership every frame rather than a one-shot transition avoids racing the bus, whose
+        // own removal can run later in the same frame.
+        if (!routedToGraph)
+            state.Stream.ReclaimMixerMembership(AudioMixerManager.OperatorMixerHandle);
 
         // Store the pending seek position - will be applied on next play trigger
         if (seek >= 0f && seek <= 1f)
