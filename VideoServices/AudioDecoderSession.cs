@@ -277,9 +277,21 @@ public sealed class AudioDecoderSession : IDisposable
         _timeBaseDen = timeBase.Den;
         _streamStartPts = audioStream.StartTime != NoPts ? audioStream.StartTime : 0;
 
-        DurationSeconds = audioStream.Duration != NoPts && timeBase.Den != 0
-                              ? audioStream.Duration * timeBase.Num / (double)timeBase.Den
-                              : 0;
+        DurationSeconds = ComputeDurationSeconds(formatContext, audioStream, timeBase);
+    }
+
+    // Some containers (notably Matroska) report duration only on the container, not per stream. Without the
+    // fallback the feeder resolves every request to 0 and the track never plays.
+    private static double ComputeDurationSeconds(FormatContext formatContext, MediaStream audioStream, AVRational timeBase)
+    {
+        if (audioStream.Duration != NoPts && timeBase.Den != 0)
+            return audioStream.Duration * timeBase.Num / (double)timeBase.Den;
+
+        // FormatContext.Duration is in AV_TIME_BASE (microsecond) units.
+        if (formatContext.Duration > 0)
+            return formatContext.Duration / (double)ffmpeg.AV_TIME_BASE;
+
+        return 0;
     }
 
     private static readonly long NoPts = ffmpeg.AV_NOPTS_VALUE;
