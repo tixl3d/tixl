@@ -150,14 +150,19 @@ public static class ThemeHandling
     /// <param name="theme"></param>
     private static void ApplyTheme(ColorTheme theme)
     {
+        // Themes saved before a color was added don't define it. Falling back to the factory value keeps
+        // switching themes symmetric — otherwise the previously applied theme's color lingers.
         var colorFields = typeof(UiColors).GetFields();
         foreach (var colorField in colorFields)
         {
             if (colorField.GetValue(ColorThemeEditor.Dummy) is not Color)
                 continue;
 
-            if (!theme.Colors.TryGetValue(colorField.Name, out var colorValue))
+            if (!theme.Colors.TryGetValue(colorField.Name, out var colorValue)
+                && !FactoryTheme.Colors.TryGetValue(colorField.Name, out colorValue))
+            {
                 continue;
+            }
 
             colorField.SetValue(ColorThemeEditor.Dummy, new Color(colorValue));
         }
@@ -168,12 +173,10 @@ public static class ThemeHandling
             if (varField.GetValue(ColorThemeEditor.Dummy) is not ColorVariation)
                 continue;
 
-            if (!theme.Variations.TryGetValue(varField.Name, out var variation))
+            if (!TryGetVariation(theme, varField.Name, out var variation)
+                && !TryGetVariation(FactoryTheme, varField.Name, out variation))
             {
-                // Back-compat: themes saved before the annotation->section rename
-                var legacyName = varField.Name.Replace("Section", "Annotation");
-                if (legacyName == varField.Name || !theme.Variations.TryGetValue(legacyName, out variation))
-                    continue;
+                continue;
             }
 
             varField.SetValue(ColorThemeEditor.Dummy, variation.Clone());
@@ -181,6 +184,18 @@ public static class ThemeHandling
 
         FrameStats.Current.UiColorsChanged = true;
         T3Style.Apply();
+    }
+
+    /// <summary>
+    /// Looks up a variation, also accepting the key used by themes saved before annotations became sections.
+    /// </summary>
+    private static bool TryGetVariation(ColorTheme theme, string fieldName, out ColorVariation variation)
+    {
+        if (theme.Variations.TryGetValue(fieldName, out variation))
+            return true;
+
+        var legacyName = fieldName.Replace("Section", "Annotation");
+        return legacyName != fieldName && theme.Variations.TryGetValue(legacyName, out variation);
     }
 
     private static string GetThemeFilepath(ColorTheme theme)

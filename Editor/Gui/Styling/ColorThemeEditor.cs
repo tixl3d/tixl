@@ -98,24 +98,21 @@ internal static class ColorThemeEditor
         FormInputs.AddSectionHeader("Colors");
         foreach (var f in colorFields)
         {
-            var isChanged = false;
             ImGui.PushID(f.Name);
             if (f.GetValue(_currentTheme) is not Color color)
                 continue;
 
             ImGui.AlignTextToFramePadding();
 
-            if (!_currentThemeWithoutChanges.Colors.TryGetValue(f.Name, out var defaultColor))
+            // Themes saved before this color was added lack its key. Reverting to the factory value is the
+            // useful behavior there; falling back to the current value would make the button a no-op.
+            if (!_currentThemeWithoutChanges.Colors.TryGetValue(f.Name, out var defaultColor)
+                && !ThemeHandling.FactoryTheme.Colors.TryGetValue(f.Name, out defaultColor))
             {
                 defaultColor = color;
-                isChanged = true;
-            }
-            else
-            {
-                if (color != defaultColor)
-                    isChanged = true;
             }
 
+            var isChanged = color != defaultColor;
             _somethingChanged |= isChanged;
 
             var hint = string.Empty;
@@ -169,6 +166,7 @@ internal static class ColorThemeEditor
                 ImGui.SameLine();
                 if (FloatingIconButton(Icon.Revert, Vector2.Zero))
                 {
+                    FrameStats.Current.UiColorsChanged = true;
                     SetColor(f, defaultColor);
                     T3Style.Apply();
                 }
