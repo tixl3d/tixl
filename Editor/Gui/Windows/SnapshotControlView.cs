@@ -181,18 +181,8 @@ internal sealed class SnapshotControlView
 
         CollectSnapshots(pool);
 
-        if (_snapshots.Count == 0)
-        {
-            if (CustomComponents.EmptyWindowMessage(
-                    "No snapshots yet.\nSnapshots capture the parameters of all\noperators enabled for snapshots.",
-                    "Create snapshot"))
-            {
-                CreateAndRenameSnapshot(pool, composition);
-            }
-
-            return;
-        }
-
+        // Without any snapshot the view still lists the controlled parameters — they are useful
+        // (and editable) on their own; only the snapshot-relative actions are unavailable.
         var selectedSnapshot = GetDisplayedSnapshot(pool, composition);
         var isModified = selectedSnapshot != null && _modificationCheck.IsModified(composition, selectedSnapshot);
 
@@ -404,9 +394,12 @@ internal sealed class SnapshotControlView
             if (DrawBarButton(Icon.Apply, canWrite, "Write the current values into the snapshot"))
                 WriteSnapshot(pool, composition, selectedSnapshot!);
 
-            // Always available; emphasized when the active snapshot has unsaved changes.
+            // Always available; emphasized when the active snapshot has unsaved changes — and
+            // before the first snapshot exists, where it's the only way forward.
             ImGui.SameLine(0, spacing + addButtonGap);
-            var createState = isModified ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Default;
+            var createState = isModified || _snapshots.Count == 0
+                                  ? CustomComponents.ButtonStates.Emphasized
+                                  : CustomComponents.ButtonStates.Default;
             if (DrawBarButton(Icon.Plus, true, "Create new snapshot from current values", createState))
                 CreateAndRenameSnapshot(pool, composition);
 
@@ -498,20 +491,19 @@ internal sealed class SnapshotControlView
 
     private void DrawOpList(Instance composition, Variation? selectedSnapshot)
     {
-        if (selectedSnapshot == null)
-        {
-            CustomComponents.EmptyWindowMessage("Select a snapshot\nto view and edit its parameters.");
-            return;
-        }
+        if (selectedSnapshot != null)
+            CollectStaleChildIds(composition, selectedSnapshot);
+        else
+            _staleChildIds.Clear();
 
-
-        CollectStaleChildIds(composition, selectedSnapshot);
         UpdateDisplayRows(composition);
 
         var compositionUi = composition.GetSymbolUi();
 
         // Composition inputs captured under the Guid.Empty key
-        if (selectedSnapshot.ParameterSetsForChildIds.ContainsKey(Guid.Empty)
+        var compositionInputsShown = false;
+        if (selectedSnapshot != null
+            && selectedSnapshot.ParameterSetsForChildIds.ContainsKey(Guid.Empty)
             && composition.Parent != null)
         {
             var parentUi = composition.Parent.GetSymbolUi();
@@ -523,7 +515,14 @@ internal sealed class SnapshotControlView
                     selectedSnapshot, childKey: Guid.Empty);
                 EndBlock(Guid.Empty);
                 FormInputs.AddVerticalSpace(5);
+                compositionInputsShown = true;
             }
+        }
+
+        if (_displayRows.Count == 0 && _staleChildIds.Count == 0 && !compositionInputsShown)
+        {
+            CustomComponents.EmptyWindowMessage("No operators are controlled by snapshots.\nSelect operators in the graph and use\n\"Control with Snapshots\" from their context menu.");
+            return;
         }
 
         // Ops enabled for snapshots, grouped by their enclosing section frames
@@ -546,10 +545,11 @@ internal sealed class SnapshotControlView
             }
         }
 
-        DrawStaleEntries(composition, selectedSnapshot);
+        if (selectedSnapshot != null)
+            DrawStaleEntries(composition, selectedSnapshot);
     }
 
-    private void DrawOpBlock(Instance composition, SymbolUi compositionUi, Variation selectedSnapshot,
+    private void DrawOpBlock(Instance composition, SymbolUi compositionUi, Variation? selectedSnapshot,
         SymbolUi.Child childUi, Instance instance)
     {
         var typeColor = instance.Outputs.Count > 0
@@ -594,7 +594,7 @@ internal sealed class SnapshotControlView
     /// graph. Right-side tools: center the frame in the graph and revert the group's ops
     /// to the snapshot.
     /// </summary>
-    private void DrawSectionGroupHeader(Instance composition, Variation selectedSnapshot, DisplayRow row, int headerIndex)
+    private void DrawSectionGroupHeader(Instance composition, Variation? selectedSnapshot, DisplayRow row, int headerIndex)
     {
         var section = row.Section;
         var groupId = section?.Id ?? Guid.Empty;
@@ -642,10 +642,10 @@ internal sealed class SnapshotControlView
             ImGui.SameLine();
         }
 
-        var groupModified = IsGroupModified(headerIndex, row.GroupEndIndex);
+        var groupModified = selectedSnapshot != null && IsGroupModified(headerIndex, row.GroupEndIndex);
         if (DrawBarButton(Icon.Reset, groupModified, "Revert this group to the snapshot", CustomComponents.ButtonStates.Default))
         {
-            RevertGroupToSnapshot(composition, selectedSnapshot, headerIndex, row.GroupEndIndex);
+            RevertGroupToSnapshot(composition, selectedSnapshot!, headerIndex, row.GroupEndIndex);
         }
 
         if (toggleClicked && !_collapsedGroupIds.Add(groupId))
@@ -856,12 +856,14 @@ internal sealed class SnapshotControlView
     /// controlled inputs — the blendable ones a snapshot write would capture. Rows are
     /// highlighted when they no longer match the snapshot; clicking the parameter name
     /// reverts to the snapshot value (see <see cref="TryResetParameterToSnapshot"/>).
+    /// Without a snapshot the rows stay editable and fall back to the default-based
+    /// highlighting and reset.
     /// </summary>
     private void DrawControlledParameters(Instance instance,
         SymbolUi symbolUi,
         SymbolUi.Child symbolChildUi,
         SymbolUi compositionSymbolUi,
-        Variation snapshot,
+        Variation? snapshot,
         Guid childKey,
         bool onlyEnabledInputs = false)
     {
@@ -874,7 +876,7 @@ internal sealed class SnapshotControlView
 
         // Context for the parameter menus (right-click + per-row) so they can offer snapshot writes.
         var menuPool = VariationHandling.ActivePoolForSnapshots;
-        _activeSnapshotMenuContext = menuPool != null
+        _activeSnapshotMenuContext = menuPool != null && snapshot != null
             ? new SnapshotMenuContext(menuPool, snapshot, childKey)
             : null;
 
@@ -892,12 +894,13 @@ internal sealed class SnapshotControlView
             if (onlyEnabledInputs && !symbolChildUi.IsInputEnabledForSnapshots(inputSlot.Id))
                 continue;
 
-            var isMismatch = _modificationCheck.IsInputModified(childKey, inputSlot.Id);
-
             ImGui.PushID(inputSlot.Id.GetHashCode());
 
-            // In this view highlighting means "differs from the snapshot", not "non-default"
-            InputArea.DimHighlightOverride = !isMismatch;
+            // In this view highlighting means "differs from the snapshot", not "non-default" —
+            // without a snapshot there is no reference, so the regular highlighting applies.
+            if (snapshot != null)
+                InputArea.DimHighlightOverride = !_modificationCheck.IsInputModified(childKey, inputSlot.Id);
+
             var editState = inputUi.DrawParameterEdit(inputSlot, compositionSymbolUi, symbolChildUi,
                 hideNonEssentials: false, skipIfDefault: false);
             InputArea.DimHighlightOverride = null;
@@ -1304,17 +1307,21 @@ internal sealed class SnapshotControlView
         var selectedId = selectedSnapshot?.Id ?? Guid.Empty;
         var title = selectedSnapshot?.Title;
         var activationIndex = selectedSnapshot?.ActivationIndex ?? int.MinValue;
-        if (selectedId == _lastLabelVariationId && title == _lastLabelTitle && activationIndex == _lastLabelActivationIndex)
+        if (selectedId == _lastLabelVariationId && title == _lastLabelTitle && activationIndex == _lastLabelActivationIndex
+            && _snapshots.Count == _lastLabelSnapshotCount)
+        {
             return;
+        }
 
         _lastLabelVariationId = selectedId;
         _lastLabelTitle = title;
         _lastLabelActivationIndex = activationIndex;
+        _lastLabelSnapshotCount = _snapshots.Count;
 
         if (selectedSnapshot == null)
         {
             _indexLabel = "-";
-            _selectedSnapshotLabel = "Select snapshot...";
+            _selectedSnapshotLabel = _snapshots.Count == 0 ? "No Snapshots" : "Select snapshot...";
         }
         else
         {
@@ -1385,6 +1392,7 @@ internal sealed class SnapshotControlView
     private Guid _lastLabelVariationId = Guid.NewGuid(); // force initial label update
     private string? _lastLabelTitle;
     private int _lastLabelActivationIndex = int.MinValue;
+    private int _lastLabelSnapshotCount = -1;
     private string _indexLabel = "-";
     private string _selectedSnapshotLabel = "Select snapshot...";
 

@@ -19,25 +19,38 @@ When nothing is selected in the graph, the [ui:ParameterWindow|Parameter window]
 **Action:**
 In the [ui:Graph|Graph] window:
 1. Add two operators with adjustable parameters (e.g. `[Blob]` and `[RadialGradient]`).
-2. Right-click each one and choose "Enable for snapshots" from the context menu.
+2. Right-click each one and choose "Control with Snapshots" from the context menu.
 3. Click on the empty graph background so nothing is selected.
 
 **Expected:**
-- The Parameter window shows the snapshot control view with a message that no snapshots exist yet and a "Create snapshot" button.
+- The Parameter window shows the snapshot control view with a selector bar at the
+  top: a zero-padded index button, a snapshot dropdown, prev/next arrows, a write
+  button, an add (+) button, and an actions (…) menu.
+- Although no snapshot exists yet, both operators are already listed below the bar
+  with their controlled parameters in rounded panels, ordered by their vertical
+  position in the graph, and the values can be dragged and edited as usual.
+- Without a snapshot to compare against, rows highlight like in the regular
+  parameter view (bright = non-default value).
+- The index button reads "-" and the dropdown "No Snapshots"; the prev/next
+  arrows, the write button and the actions (…) menu are disabled, while the
+  add (+) button is emphasized.
+- Undoing both context-menu toggles (`Ctrl+Z`) leaves no controlled operator: the
+  list is then replaced by a "No operators are controlled by snapshots." message.
+  Redo (`Ctrl+Y`) brings the two operators back.
 
 ## Step: Creating the first snapshot
 
 **Action:**
-1. Click the "Create snapshot" button in the Parameter window.
+1. Click the add (+) button at the right end of the selector bar.
 
 **Expected:**
-- A selector bar appears at the top: a zero-padded index button, a snapshot
-  dropdown, prev/next arrows, a write button, an add (+) button, and an actions
-  (…) menu (holding Revert / Rename / Update thumbnail / Remove).
 - A text field is focused immediately so the snapshot can be named; typing a
   name and pressing Enter (or clicking away) stores it.
-- The new snapshot is the active one.
-- Below the bar, both enabled operators are listed with their captured parameters in rounded panels, ordered by their vertical position in the graph.
+- The new snapshot is the active one; the index button shows its zero-padded
+  controller index and the actions (…) menu becomes available (holding Revert /
+  Rename / Update thumbnail / Remove).
+- The operator list keeps showing the same parameters, now compared against the
+  snapshot (all rows muted, since the values match it).
 - The [ui:VariationWindow|Variations window] shows a new snapshot thumbnail.
 
 ## Step: Controller-index grid
@@ -100,7 +113,8 @@ Open the actions (…) menu in the selector bar and choose "Rename". Also try
 - A new snapshot is created from the current values, becomes active, and its
   name field is focused for immediate renaming.
 - The + button is always enabled; it is emphasized (brighter) when the active
-  snapshot has unsaved changes and muted (default) when the values match it.
+  snapshot has unsaved changes (and while no snapshot exists yet) and muted
+  (default) when the values match it.
 - The new snapshot is inserted **right behind the previously active one** — it
   takes the next free controller index after that one, and since the list is
   ordered by controller index, it appears directly after the active in the picker
