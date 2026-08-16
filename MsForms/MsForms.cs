@@ -32,6 +32,28 @@ public class MsForms : ICoreSystemUiService
         Process.Start(startInfo);
     }
 
+    void ICoreSystemUiService.RevealInFileBrowser(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new Exception("Path is empty");
+        }
+
+        // Explorer rejects forward slashes, which reach us from paths assembled in msbuild properties.
+        var nativePath = Path.GetFullPath(path);
+
+        // "/select," expects a file - handing it a folder would open that folder's parent instead.
+        var arguments = File.Exists(nativePath)
+                            ? $"/select,\"{nativePath}\""
+                            : $"\"{nativePath}\"";
+
+        Process.Start(new ProcessStartInfo
+                          {
+                              FileName = "explorer",
+                              Arguments = arguments,
+                          });
+    }
+
     void ICoreSystemUiService.ExitApplication()
     {
         if (System.Windows.Forms.Application.MessageLoop)
