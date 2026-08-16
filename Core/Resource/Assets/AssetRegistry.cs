@@ -316,6 +316,21 @@ public static class AssetRegistry
     }
 
     /// <summary>
+    /// Registers a file that was just written into a package's asset tree. Files below one of the
+    /// package's linked folders need their virtual mount address, since their real path is external.
+    /// </summary>
+    public static Asset RegisterNewFile(FileInfo fileInfo, IResourcePackage package)
+    {
+        if (AssetLinkFolders.TryGetMountForAbsolutePath(fileInfo.FullName.ToForwardSlashes(), out var mount, out var relativePart)
+            && relativePart.Length > 0)
+        {
+            return RegisterLinkedEntry(fileInfo, mount, $"{mount.VirtualDir}/{relativePart}", isDirectory: false);
+        }
+
+        return RegisterPackageEntry(fileInfo, package, isDirectory: false);
+    }
+
+    /// <summary>
     /// Drops all assets of a link mount from the registry. Operator references are kept:
     /// <see cref="Asset.Id"/> derives from the address, so a remount under the same address
     /// re-binds them automatically.

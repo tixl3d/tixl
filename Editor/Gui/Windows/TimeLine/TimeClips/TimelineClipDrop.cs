@@ -78,7 +78,7 @@ internal static class TimelineClipDrop
         {
             if (!AssetType.TryGetForFilePath(path, out var assetType, out _) || assetType.TimelineClipOperator is not { } fileOpId)
                 continue;
-            if (!FileImport.TryImportDroppedFile(path, package, subfolder: null, out var asset))
+            if (!FileImport.TryImportDroppedFile(path, package, destinationFolder: null, out var asset))
             {
                 Log.Warning($"Failed to import dropped file: {path}");
                 continue;

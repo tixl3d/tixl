@@ -54,6 +54,43 @@ Drop the folder again and choose **Link folder without copying**.
 - The link file itself is not listed as an asset in the Assets window.
 - Files inside the linked folder can be dragged onto the graph like any other asset (e.g. an image creates an image operator that displays correctly).
 
+## Step: Dropping a file out of the linked folder
+
+**Action:**
+With the folder still linked (from the previous step), open the *source* folder's subfolder in
+Windows Explorer and drag one image file from there onto an empty area of the graph window. Hold
+still over the graph for a moment before releasing.
+
+**Expected:**
+- While hovering, the label under the cursor reads "Reference files from linked folder..." — not "Import files to..." followed by the project's `Assets/` path.
+- On release, an image operator is created and displays the image.
+- The Console window logs `Created ... with <ProjectName>:<FolderName>/<Subfolder>/<FileName>` — the linked address, not an absolute `C:/...` path.
+- No copy of the file appears in the project's `Assets/` folder on disk, and the Assets window shows the file only once, inside the linked folder.
+
+## Step: Dropping files onto a folder in the Assets window
+
+**Action:**
+Pick an image file that is *not* in any linked folder (e.g. on the Desktop). In the Assets window,
+expand the project until a nested folder is visible — one at least two levels below the project node,
+such as `images/portraits`; if none exists, right-click `images`, choose **Create Sub Folder**, and
+rename the resulting "New folder" to `portraits`.
+Drag the image from Explorer onto that nested folder row and release.
+
+**Expected:**
+- While hovering the row, the tooltip reads "Import files to here...".
+- The file appears under `images/portraits` in the Assets window, and on disk at `Assets/images/portraits/<FileName>` — *not* at `Assets/portraits/<FileName>` and not at `Assets/images/<FileName>`.
+- Repeating the drop onto the *project* root row puts the next copy directly in `Assets/`, not in `Assets/<ProjectName>/`.
+
+## Step: Dropping files onto the linked folder
+
+**Action:**
+Drag the same non-linked image from Explorer onto the linked folder's row in the Assets window.
+
+**Expected:**
+- The tooltip reads "Import files to here...".
+- The file is copied into the *external* source folder on disk and shows up under the linked folder in the Assets window.
+- No `Assets/<FolderName>/` directory is created in the project next to the `.tixlLink` file.
+
 ## Step: External changes to the linked folder
 
 **Action:**

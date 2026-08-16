@@ -125,10 +125,12 @@ internal static class DropHandling
         if (result == DragAndDropHandling.DragInteractionResult.Hovering)
         {
             var dl = ImGui.GetForegroundDrawList();
-            ReadOnlySpan<char> label = $"""
-                                        Import files to...
-                                        {packageResourcesFolder}
-                                        """;
+            ReadOnlySpan<char> label = data != null && FileImport.AreAllPathsInLinkedFolders(data)
+                                           ? "Reference files from linked folder..."
+                                           : $"""
+                                              Import files to...
+                                              {packageResourcesFolder}
+                                              """;
             var labelSize = ImGui.CalcTextSize(label);
             var mousePos = ImGui.GetMousePos() + new Vector2(-30, -40);
             var area = ImRect.RectWithSize(mousePos, labelSize);

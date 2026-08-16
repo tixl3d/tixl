@@ -343,8 +343,11 @@ internal static class RecordingSession
         // Import into the type's RecordingFolder (audio / dataclips) — the same folder NextIndexScanDirs
         // reads, so storage + index-scan stay driven by the one AssetType field.
         var subfolder = AssetType.TryGetForFilePath(absolutePath, out var assetType, out _) ? assetType.RecordingFolder : null;
+        var destinationFolder = string.IsNullOrEmpty(subfolder)
+                                    ? null
+                                    : System.IO.Path.Combine(package.AssetsFolder, subfolder);
 
-        if (!FileImport.TryImportDroppedFile(absolutePath, package, subfolder, out var asset))
+        if (!FileImport.TryImportDroppedFile(absolutePath, package, destinationFolder, out var asset))
         {
             Log.Warning($"RecordingSession: failed to import {absolutePath} into project Assets; clip will reference the original absolute path.");
             return null;

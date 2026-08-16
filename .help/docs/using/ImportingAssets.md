@@ -6,7 +6,7 @@ Dropping a **single folder** from your file manager onto the TiXL window opens t
 - **Copy files sorted by type** — copies the files into the standard subfolders for their type (`images/`, `video/`, `audio/`, ...).
 - **Link folder without copying** — the folder shows up in the Assets window but stays where it is on disk.
 
-Dropping individual files works as before: they are copied into the project and can be dropped straight onto the graph or timeline.
+Dropping individual files copies them into the project, and they can be dropped straight onto the graph or timeline. The one exception is files that already sit inside a linked folder — see below.
 
 ## Linked folders
 
@@ -17,6 +17,12 @@ Because the files stay in their original location:
 - **Deleting files inside the linked folder deletes the originals.**
 - New files created there by TiXL (for example proxies) also appear in the source folder.
 - The link only resolves on machines where the target folder exists. On other machines the folder shows up grayed out with a warning icon; the project itself still loads fine.
+
+### Dropping files from a linked folder
+
+Dragging a file that lives below a linked folder — straight from Windows Explorer onto the graph, the timeline, or the Assets window — does **not** copy it. TiXL recognises that the file is already reachable through the link and references it under its linked address, for example `MyProject:Footage/Clips/example.mp4` for a folder linked as `Footage`. The drag indicator says *Reference files from linked folder...* instead of naming a target folder.
+
+If you do want a copy inside the project, copy the file into the `Assets/` folder in Explorer first, or use the folder import dialog's copy options.
 
 To remove a link, right-click the linked folder in the Assets window and choose **Remove link** — this only deletes the `.tixlLink` file and never touches the linked content. Renaming a linked folder in the Assets window renames the link, not the source folder.
 

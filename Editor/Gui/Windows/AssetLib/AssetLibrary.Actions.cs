@@ -136,14 +136,19 @@ internal sealed partial class AssetLibrary
         }
     }
     
-        private static void HandleDropFilesIntoFolder(AssetFolder folder)
+    private static void HandleDropFilesIntoFolder(AssetFolder folder)
     {
-        var dropFilesResult = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.ExternalFile, out var data, () =>
-                                                                          {
-                                                                              CustomComponents.BeginTooltip();
-                                                                              ImGui.TextUnformatted("Import files to here...");
-                                                                              CustomComponents.EndTooltip();
-                                                                          });
+        var dropFilesResult = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.ExternalFile, out var data);
+
+        if (dropFilesResult == DragAndDropHandling.DragInteractionResult.Hovering && data != null)
+        {
+            CustomComponents.BeginTooltip();
+            ImGui.TextUnformatted(FileImport.AreAllPathsInLinkedFolders(data)
+                                      ? "Reference files from linked folder..."
+                                      : "Import files to here...");
+            CustomComponents.EndTooltip();
+            return;
+        }
 
         if (dropFilesResult != DragAndDropHandling.DragInteractionResult.Dropped || data == null)
             return;
@@ -154,10 +159,19 @@ internal sealed partial class AssetLibrary
             return;
         }
 
+        // Files land in the hovered folder itself, which for a linked folder is its external target
+        // rather than a directory below Assets/. A folder that vanished from disk (unresolved link)
+        // must not be recreated by the import.
+        if (!Directory.Exists(folder.AbsolutePath))
+        {
+            Log.Warning($"Can't import into missing folder {folder}");
+            return;
+        }
+
         var filePaths = data.Split("|");
         foreach (var path in filePaths)
         {
-            FileImport.TryImportDroppedFile(path, package, folder.Name, out _);
+            FileImport.TryImportDroppedFile(path, package, folder.AbsolutePath, out _);
         }
     }
 
@@ -178,6 +192,13 @@ internal sealed partial class AssetLibrary
 
     private static void MoveAssetsToFolder(AssetFolder folder, string data)
     {
+        // An empty or unresolved folder path would move the files relative to the working directory
+        if (!Directory.Exists(folder.AbsolutePath))
+        {
+            Log.Warning($"Can't move assets into missing folder {folder}");
+            return;
+        }
+
         var assetAddresses = data.Split("|");
         foreach (var address in assetAddresses)
         {
