@@ -169,7 +169,7 @@ internal sealed partial class MagGraphView
             // Draw special overlays
             if (_context.StateMachine.CurrentState == GraphStates.RenameChild)
             {
-                RenamingOperator.Draw(_projectView);
+                RenamingOperator.Draw(_projectView, MagGraphItem.Width);
                 if (!RenamingOperator.IsOpen)
                 {
                     _context.StateMachine.SetState(GraphStates.Default, _context);

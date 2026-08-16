@@ -199,7 +199,7 @@ internal static partial class CustomComponents
         if (wasNull)
             value = string.Empty;
 
-        ImGui.SetNextItemWidth(width - FormInputs.ParameterSpacing - (notEmpty ? ImGui.GetFrameHeight() : 0));
+        ImGui.SetNextItemWidth(width - FormInputs.ParameterSpacing - (notEmpty && showClear ? ImGui.GetFrameHeight() : 0));
 
         var modified = ImGui.InputText("##", ref value, 1000, inputFlags);
         if (!modified && wasNull)
