@@ -125,6 +125,18 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         ImGui.EndGroup();
     }
 
+    /// <summary>
+    /// Widest parameter header (pin + curve icons + name label) in screen px. "View All" reserves this
+    /// as left padding so keyframes at the content start aren't hidden behind the header overlay.
+    /// </summary>
+    internal float GetMaxHeaderWidth()
+    {
+        if (AnimationParameters.Count == 0)
+            return 0;
+
+        return 120 * T3Ui.UiScaleFactor;
+    }
+
     private void DrawProperty(TimeLineCanvas.AnimationParameter parameter, Guid compositionSymbolChildId, ImDrawListPtr drawList, Instance compositionOp)
     {
         Debug.Assert(TimeLineCanvas.Current != null);
@@ -189,7 +201,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             }
 
             // Backdrop so keyframes drawn on channel 0 don't bleed through the header
-            drawList.AddRectFilled(headerMin, headerMin + new Vector2(reservedWidth, rowHeight), UiColors.BackgroundFull.Fade(0.8f));
+            drawList.AddRectFilled(headerMin+new Vector2(0,1), headerMin + new Vector2(reservedWidth, rowHeight), UiColors.EditorBackground.Fade(1.5f));
 
             // --- Pin toggle ---
             ImGui.SetCursorScreenPos(headerMin);

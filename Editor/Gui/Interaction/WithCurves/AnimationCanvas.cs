@@ -15,7 +15,9 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
 {
     protected AnimationCanvas()
     {
-        ScrollTarget = new Vector2(-2.5f, 0.0f);
+        // Start with time 0 well right of the left edge — the dope sheet's parameter headers
+        // overlay that edge and would otherwise cover keyframes at the content start.
+        ScrollTarget = new Vector2(-3f, 0.0f);
         ScaleTarget = new Vector2(80, -1);
     }
 

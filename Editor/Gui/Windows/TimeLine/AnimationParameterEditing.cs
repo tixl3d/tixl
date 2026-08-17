@@ -79,6 +79,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
     protected override void ViewAllOrSelectedKeys(bool alsoChangeTimeRange = false)
     {
         var hasSomeKeys = TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds);
+        var extraPaddingLeft = 0f;
         if (this is DopeSheetArea dopeSheet)
         {
             if (dopeSheet.TimeLineCanvas.ClipArea.TryGetBounds(out var clipBounds, !hasSomeKeys))
@@ -93,11 +94,16 @@ internal abstract class AnimationParameterEditing : CurveEditing
                     bounds = clipBounds;
                 }
             }
+
+            // The parameter headers overlay the left edge of the dope sheet — reserve their width
+            // so keyframes at the content start stay visible after the fit.
+            extraPaddingLeft = dopeSheet.GetMaxHeaderWidth();
         }
 
         // useStoredWindowSize: this also runs from the timeline context-menu "View All" (inside a popup), where
         // the live ImGui window is the menu, not the canvas — using the canvas's own size keeps the fit correct.
-        TimeLineCanvas.Current?.SetScopeToCanvasArea(bounds, flipY: true, 300, 50, useStoredWindowSize: true);
+        TimeLineCanvas.Current?.SetScopeToCanvasArea(bounds, flipY: true, 300, 50, useStoredWindowSize: true,
+                                                     extraPaddingLeft: extraPaddingLeft);
     }
 
     //
