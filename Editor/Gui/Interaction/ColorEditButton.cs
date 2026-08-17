@@ -57,12 +57,14 @@ public static class ColorEditButton
             edited |= InputEditStateFlags.Started;
             _rightClickedItemId = ImGui.GetID(string.Empty);
             _previousColor = color;
+            _scaledDragOffset = 0;
         }
-            
+
         else if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
         {
             edited |= InputEditStateFlags.Started;
             _previousColor = color;
+            _scaledDragOffset = 0;
         }
 
         if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
@@ -93,8 +95,9 @@ public static class ColorEditButton
             if (MathF.Abs(ImGui.GetMouseDragDelta().Y) > UserSettings.Config.ClickThreshold / 2f)
                 _modifiedSlider = true;
 
-            color.W = (_previousColor.W - ImGui.GetMouseDragDelta().Y * DragFactor/ Height).Clamp(0, 1);
-                
+            AccumulateScaledDrag();
+            color.W = (_previousColor.W - _scaledDragOffset / Height).Clamp(0, 1);
+
             if(_modifiedSlider)
                 edited |= InputEditStateFlags.Modified;
         }
@@ -115,7 +118,8 @@ public static class ColorEditButton
                 _modifiedSlider = true;
             }
 
-            var newBrightness = (previousHsb.Z - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Y * DragFactor/ Height).Clamp(0, 1);
+            AccumulateScaledDrag();
+            var newBrightness = (previousHsb.Z - _scaledDragOffset / Height).Clamp(0, 1);
             color = Color.ColorFromHsl(previousHsb.X, previousHsb.Y, newBrightness, _previousColor.W).Rgba;
             if(_modifiedSlider)
                 edited |= InputEditStateFlags.Modified;
@@ -150,8 +154,27 @@ public static class ColorEditButton
         drawList.AddRectFilled(pCenter, pCenter + new Vector2(barWidth + 15, 1), UiColors.BackgroundFull);
     }
 
+    /// <summary>
+    /// Accumulates the vertical mouse movement scaled by the current precision factor, so
+    /// toggling SHIFT mid-drag changes sensitivity without jumping the value.
+    /// </summary>
+    private static void AccumulateScaledDrag()
+    {
+        var precisionMode = ImGui.GetIO().KeyShift;
+        _scaledDragOffset += ImGui.GetIO().MouseDelta.Y * (precisionMode ? PrecisionDragFactor : 1f);
+
+        if (precisionMode)
+        {
+            ImGui.PushFont(Fonts.FontSmall);
+            ImGui.GetForegroundDrawList().AddText(ImGui.GetMousePos() + new Vector2(10, 10) * T3Ui.UiScaleFactor,
+                                                  UiColors.Gray, "×0.1");
+            ImGui.PopFont();
+        }
+    }
+
     private static int Height => (int)(200 * T3Ui.UiScaleFactor);
-    private static float DragFactor = ImGui.GetIO().KeyShift ? 0.5f : 1f;
+    private const float PrecisionDragFactor = 0.1f;
+    private static float _scaledDragOffset;
     private static uint _rightClickedItemId;
     private static Vector4 _previousColor;
 }
