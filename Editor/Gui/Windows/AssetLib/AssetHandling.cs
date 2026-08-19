@@ -16,7 +16,6 @@ internal static class AssetHandling
                                              FileExtensionRegistry.GetUniqueId("jpeg"),
                                              FileExtensionRegistry.GetUniqueId("bmp"),
                                              FileExtensionRegistry.GetUniqueId("tga"),
-                                             FileExtensionRegistry.GetUniqueId("gif"),
                                              FileExtensionRegistry.GetUniqueId("dds"),
                                              FileExtensionRegistry.GetUniqueId("tiff"),
                                          ])
@@ -74,6 +73,7 @@ internal static class AssetHandling
                                        FileExtensionRegistry.GetUniqueId("mts"),
                                        FileExtensionRegistry.GetUniqueId("mxf"),
                                        FileExtensionRegistry.GetUniqueId("ogv"),
+                                       FileExtensionRegistry.GetUniqueId("gif"),
                                    ])
                                    {
                                        PrimaryOperators = [new Guid("914fb032-d7eb-414b-9e09-2bdd7049e049")], // PlayVideo
