@@ -191,7 +191,10 @@ public sealed class ShaderGraphNode
             cac.ContextIdStack.Add("");
         }
         
-        nodeOp.AddDefinitions(cac);
+        if (cac.TryMarkDefinitionsAdded(this))
+        {
+            nodeOp.AddDefinitions(cac);
+        }
 
         if (nodeOp.TryBuildCustomCode(cac))
         {
