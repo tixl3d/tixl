@@ -11,6 +11,8 @@ Settings live on a composition and are inherited by everything inside it. The ch
 
 Because all timing in TiXL runs in musical bars rather than seconds, the **BPM** rate controls the animation speed of the whole project — getting it right keeps procedural animation locked to the beat. **Timeline Display** chooses whether the [ui:Timeline|timeline] ruler reads in bars, seconds, or frames.
 
+**On BPM Change** decides what a BPM edit does to the composition's clips and keyframes. **Stretch with Beat** (the default) leaves them on their bars, so everything plays faster or slower with the beat. **Keep Seconds** rescales the clip positions, keyframes and loop range of this composition so they stay at the same seconds — only the grid moves; use it when the BPM was simply measured wrong or when the composition is a narrative edit rather than a musical one. Nested compositions are never rescaled (they may be used elsewhere), and video/audio trims are in seconds in either mode, so the content itself never shifts. A BPM edit is one undo step either way.
+
 In Live / Interactive mode, **Sync Mode** picks the clock source:
 
 - **Timeline** — the project still runs on its own timeline at a fixed BPM-rate.

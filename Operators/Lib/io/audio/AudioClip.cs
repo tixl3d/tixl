@@ -136,43 +136,41 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         _clip.Style = (AudioClipStyle)style;
         _clip.IsMainSoundtrack = _clip.Display == AudioClipDisplay.BackgroundImage;
 
+        // TimeRange is timeline placement in bars; SourceRange is file time in seconds (content clip).
         var timeClip = TimeSlot.TimeClip;
+        var lengthSecs = (float)_clip.LengthInSeconds;
 
         // A clip created without a known duration (e.g. via the settings window's Create Soundtrack)
         // carries the End <= Start sentinel. Once the engine knows the file's length, size the clip to
         // its content so it becomes a visible, draggable block.
-        if (timeClip.TimeRange.End <= timeClip.TimeRange.Start && _clip.LengthInSeconds > 0 && playback != null)
+        if (timeClip.TimeRange.End <= timeClip.TimeRange.Start && lengthSecs > 0 && playback != null)
         {
-            var durationBars = (float)playback.BarsFromSeconds(_clip.LengthInSeconds);
-            timeClip.TimeRange = new TimeRange(timeClip.TimeRange.Start, timeClip.TimeRange.Start + durationBars);
-            timeClip.SourceRange = new TimeRange(0, durationBars);
+            var timelineBars = (float)playback.BarsFromSeconds(lengthSecs);
+            timeClip.TimeRange = new TimeRange(timeClip.TimeRange.Start, timeClip.TimeRange.Start + timelineBars);
+            timeClip.SourceRange = new TimeRange(0, lengthSecs);
         }
 
         // Background mode: the main soundtrack always spans its full source content — trims don't
         // apply, and the timeline hides its clip block. Switch Display back to Clip to edit placement.
-        if (_clip.Display == AudioClipDisplay.BackgroundImage && _clip.LengthInSeconds > 0 && playback != null)
+        if (_clip.Display == AudioClipDisplay.BackgroundImage && lengthSecs > 0 && playback != null)
         {
-            var durationBars = (float)playback.BarsFromSeconds(_clip.LengthInSeconds);
+            var timelineBars = (float)playback.BarsFromSeconds(lengthSecs);
             var start = timeClip.TimeRange.Start;
-            if (Math.Abs(timeClip.TimeRange.End - (start + durationBars)) > 0.0001f
+            if (Math.Abs(timeClip.TimeRange.End - (start + timelineBars)) > 0.0001f
                 || Math.Abs(timeClip.SourceRange.Start) > 0.0001f
-                || Math.Abs(timeClip.SourceRange.End - durationBars) > 0.0001f)
+                || Math.Abs(timeClip.SourceRange.End - lengthSecs) > 0.0001f)
             {
-                timeClip.TimeRange = new TimeRange(start, start + durationBars);
-                timeClip.SourceRange = new TimeRange(0, durationBars);
+                timeClip.TimeRange = new TimeRange(start, start + timelineBars);
+                timeClip.SourceRange = new TimeRange(0, lengthSecs);
             }
         }
 
         _clip.TimeRange = timeClip.TimeRange;
         _clip.LayerIndex = timeClip.LayerIndex;
 
-        // Source trim: SourceRange is file-time in bars; the engine seeks in seconds → map via BPM.
-        // The source window's duration doubles as the loop length when Loop is on.
-        if (playback != null)
-        {
-            _clip.SourceOffsetSecs = playback.SecondsFromBars(timeClip.SourceRange.Start);
-            _clip.SourceDurationSecs = Math.Max(0, playback.SecondsFromBars(timeClip.SourceRange.End - timeClip.SourceRange.Start));
-        }
+        // Source trim; the source window's duration doubles as the loop length when Loop is on.
+        _clip.SourceOffsetSecs = timeClip.SourceRange.Start;
+        _clip.SourceDurationSecs = Math.Max(0, timeClip.SourceRange.End - timeClip.SourceRange.Start);
 
         _syncedClip = true;
     }

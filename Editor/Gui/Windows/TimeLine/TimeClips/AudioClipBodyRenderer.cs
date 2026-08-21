@@ -68,8 +68,8 @@ internal static class AudioClipBodyRenderer
         var drawn = false;
         if (lengthSecs > 0.0001 && playback != null)
         {
-            var sourceStartSecs = playback.SecondsFromBars(timeClip.SourceRange.Start);
-            var sourceEndSecs = playback.SecondsFromBars(timeClip.SourceRange.End);
+            var sourceStartSecs = timeClip.SourceToSeconds(timeClip.SourceRange.Start, playback.Bpm);
+            var sourceEndSecs = timeClip.SourceToSeconds(timeClip.SourceRange.End, playback.Bpm);
             var sourceSpanSecs = sourceEndSecs - sourceStartSecs;
             var visibleStartSecs = Math.Max(sourceStartSecs, 0.0);
             var visibleEndSecs = Math.Min(sourceEndSecs, lengthSecs);

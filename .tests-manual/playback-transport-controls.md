@@ -43,6 +43,20 @@ Reopen the composition settings, set **Project Setup** to **Live Interactive**, 
 - The record button is dimmed. Hovering it says recording needs a timeline playhead and
   names the two settings that restore it.
 
+## Step: Entering tapping mode keeps the project's BPM
+
+**Action:**
+Set **Project Setup** back to **Animation**, set **BPM** to 128 and close the settings window.
+Reopen the settings, set **Project Setup** to **Live Interactive** and **Sync Mode** to **Tapping**.
+Close the settings window and read the BPM value field in the toolbar. Save the project (Ctrl+S),
+close it, and reopen it.
+
+**Expected:**
+- The toolbar BPM field reads 128 immediately — not 60 and not 120.
+- The reopened project still reads 128 in the toolbar and in the settings' **Default BPM-Rate**
+  field. (Regression under test: an untouched tap clock used to overwrite the project BPM with 60.)
+- Tapping the **Sync** button a few times still refines the BPM from there.
+
 ## Step: Switching back to Animation restores the transport controls
 
 **Action:**

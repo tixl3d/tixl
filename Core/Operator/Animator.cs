@@ -440,6 +440,21 @@ public sealed class Animator : SymbolExtension
         return TryGetCurvesForChildInput(inputSlot.Parent.SymbolChildId, inputSlot.Id, out curves);
     }
 
+    /// <summary>Retimes all keys of all animated inputs of one child by <paramref name="factor"/>.</summary>
+    public void ScaleKeyTimesOfChild(Guid childId, double factor)
+    {
+        if (!_curvesByChildAndInput.TryGetValue(childId, out var inputDict))
+            return;
+
+        foreach (var curves in inputDict.Values)
+        {
+            foreach (var curve in curves)
+            {
+                curve.ScaleKeyTimes(factor);
+            }
+        }
+    }
+
     public IEnumerable<VDefinition?> GetTimeKeys(Guid childId, Guid inputId, double time)
     {
         if (!TryGetCurvesForChildInput(childId, inputId, out var curves))

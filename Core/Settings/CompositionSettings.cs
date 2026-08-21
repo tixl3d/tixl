@@ -91,6 +91,17 @@ public sealed class CompositionSettings
         Tapping,
     }
 
+    /// <summary>
+    /// What a BPM edit does to the composition's bar-timed content (clip placement, keyframes, loop range):
+    /// <see cref="StretchWithBeat"/> leaves the bar values alone so everything plays faster or slower with the beat;
+    /// <see cref="KeepSeconds"/> rescales them so everything stays at the same seconds and only the grid moves.
+    /// </summary>
+    public enum BpmChangeModes
+    {
+        StretchWithBeat,
+        KeepSeconds,
+    }
+
     #endregion
 
     #region Nested config classes
@@ -123,6 +134,7 @@ public sealed class CompositionSettings
     public sealed class PlaybackConfig
     {
         public float Bpm = 120;
+        public BpmChangeModes OnBpmChange;
         public List<TimelineAudioClip> AudioClips { get; internal init; } = [];
         public AudioSources AudioSource;
         public SyncModes Syncing;
@@ -163,6 +175,7 @@ public sealed class CompositionSettings
             writer.WriteStartObject();
             {
                 writer.WriteValue(nameof(PlaybackConfig.Bpm), Playback.Bpm);
+                writer.WriteValue(nameof(PlaybackConfig.OnBpmChange), Playback.OnBpmChange);
                 writer.WriteValue(nameof(PlaybackConfig.AudioSource), Playback.AudioSource);
                 writer.WriteValue(nameof(PlaybackConfig.Syncing), Playback.Syncing);
                 writer.WriteValue(nameof(PlaybackConfig.AudioDecayFactor), Playback.AudioDecayFactor);
@@ -260,6 +273,7 @@ public sealed class CompositionSettings
                                       {
                                           AudioClips = clips,
                                           Bpm = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.Bpm), 120f),
+                                          OnBpmChange = JsonUtils.ReadEnum<BpmChangeModes>(playbackToken, nameof(PlaybackConfig.OnBpmChange)),
                                           AudioSource = JsonUtils.ReadEnum<AudioSources>(playbackToken, nameof(PlaybackConfig.AudioSource)),
                                           Syncing = JsonUtils.ReadEnum<SyncModes>(playbackToken, nameof(PlaybackConfig.Syncing)),
                                           AudioDecayFactor = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.AudioDecayFactor), 0.5f),

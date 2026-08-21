@@ -88,7 +88,9 @@ internal static class TimeClipItem
                                   : DrawUtils.RandomColorForHash(timeClip.Id.GetHashCode());
 
         var timeRemapped = timeClip.TimeRange != timeClip.SourceRange;
-        var timeStretched = Math.Abs(timeClip.TimeRange.Duration - timeClip.SourceRange.Duration) > 0.001;
+        var playbackSpeed = timeClip.GetPlaybackSpeed(attr.LayerContext.TimeCanvas.Playback.Bpm);
+        var timeStretched = Math.Abs(playbackSpeed - 1) > 0.001;
+        var showsSpeed = timeStretched;
 
         // Body and outline
         var isConnected = attr.CompositionSymbolUi.Symbol.Connections.Any(c => c.SourceParentOrChildId == timeClip.Id);
@@ -155,8 +157,8 @@ internal static class TimeClipItem
                 }
             }
 
-            var label = timeStretched
-                            ? nameSource + $" ({timeClip.Speed*100:0.0}%)"
+            var label = showsSpeed
+                            ? nameSource + $" ({playbackSpeed*100:0.0}%)"
                             : nameSource;
 
             ImGui.PushFont(Fonts.FontSmall);
@@ -294,9 +296,9 @@ internal static class TimeClipItem
                                               : $"Footage: {contentExtent.Start:0.00} ... {contentExtent.End:0.00}");
                 }
 
-                if (timeStretched)
+                if (showsSpeed)
                 {
-                    ImGui.TextUnformatted($"Speed: {timeClip.Speed*100:0.0}%");
+                    ImGui.TextUnformatted($"Speed: {playbackSpeed*100:0.0}%");
                 }
 
                 ImGui.PopStyleColor();
@@ -610,9 +612,9 @@ internal static class TimeClipItem
         // requests for transient times; already-ready thumbnails still draw.
         var allowRequest = attr.MoveClipsCommand == null;
 
-        var playback = attr.LayerContext.TimeCanvas.Playback;
-        var startSecs = QuantizeThumbnailTime(Math.Clamp(playback.SecondsFromBars(timeClip.SourceRange.Start), 0, durationSecs));
-        var endSecs = QuantizeThumbnailTime(Math.Clamp(playback.SecondsFromBars(timeClip.SourceRange.End), 0, durationSecs));
+        var playbackBpm = attr.LayerContext.TimeCanvas.Playback.Bpm;
+        var startSecs = QuantizeThumbnailTime(Math.Clamp(timeClip.SourceToSeconds(timeClip.SourceRange.Start, playbackBpm), 0, durationSecs));
+        var endSecs = QuantizeThumbnailTime(Math.Clamp(timeClip.SourceToSeconds(timeClip.SourceRange.End, playbackBpm), 0, durationSecs));
 
         var startMin = new Vector2(position.X + 1, thumbTop);
         var endMin = new Vector2(itemRectMax.X - 1 - thumbWidth, thumbTop);
@@ -737,7 +739,7 @@ internal static class TimeClipItem
         if (fullDurationSecs <= 0)
             return false;
 
-        footageBars = (float)attr.LayerContext.TimeCanvas.Playback.BarsFromSeconds(fullDurationSecs);
+        footageBars = (float)timeClip.SecondsToSource(fullDurationSecs, attr.LayerContext.TimeCanvas.Playback.Bpm);
         return true;
     }
 

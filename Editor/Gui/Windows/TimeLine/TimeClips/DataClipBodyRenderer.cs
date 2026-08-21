@@ -501,7 +501,7 @@ internal static class DataClipBodyRenderer
         if (playback == null)
             return false;
 
-        mapping = new TimeRangeMapping(timeClip.TimeRange, timeClip.SourceRange, playback.Bpm);
+        mapping = timeClip.ToMapping(playback);
         return true;
     }
 

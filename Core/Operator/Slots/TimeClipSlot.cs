@@ -31,10 +31,12 @@ internal interface IOutputDataUser<T> : IOutputDataUser
 public interface IPreventingTimeRemap;
 
 /// <summary>
-/// Marks a clip whose <see cref="TimeClip.SourceRange"/> is <b>content-time</b> — anchored at the source's start
-/// (0), not the placement position. The editor uses this at creation to default SourceRange to <c>[0, duration]</c>
-/// instead of the generic <c>SourceRange = TimeRange</c> (which is right only for region-mapping clips). Implemented
-/// by media clips like [VideoClip]. (Future: pair with an instance-side AvailableSourceRange the editor can snap to.)
+/// Marks a clip whose <see cref="TimeClip.SourceRange"/> is <b>content-time in seconds</b> — anchored at the source's
+/// start (0), not the placement position, and independent of the project BPM. The slot sets
+/// <see cref="TimeClip.SourceUnit"/> to seconds for these, so the op's local time (and its keyframes) run in seconds;
+/// the editor defaults their SourceRange to <c>[0, duration]</c> at creation instead of the generic
+/// <c>SourceRange = TimeRange</c> (which is right only for region-mapping clips). Implemented by wall-clock media
+/// clips like [VideoClip] and [AudioClip].
 /// </summary>
 public interface IContentTimeClip;
 
@@ -59,6 +61,43 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
         TimeClip = data as TimeClip ?? new TimeClip();
         TimeClip.Id = Parent.SymbolChildId;
         TimeClip.UsedForRegionMapping = Parent is not IPreventingTimeRemap;
+
+        var sourceUnit = Parent is IContentTimeClip ? ClipTimeUnits.Seconds : ClipTimeUnits.Bars;
+        if (TimeClip.NeedsSourceUnitConversion)
+        {
+            // Files written before the unit existed hold media source ranges (and the op's keyframes,
+            // which live in the same source space) in bars — convert once with the project's BPM. The
+            // TimeClip object is shared by all instances of the symbol child, so the flag guards against
+            // converting again for the next instance.
+            if (sourceUnit == ClipTimeUnits.Seconds)
+            {
+                var secondsPerBar = 240.0 / FindCompositionBpm(Parent);
+                TimeClip.SourceRange = new TimeRange((float)(TimeClip.SourceRange.Start * secondsPerBar),
+                                                     (float)(TimeClip.SourceRange.End * secondsPerBar));
+                Parent.Parent?.Symbol.Animator.ScaleKeyTimesOfChild(Parent.SymbolChildId, secondsPerBar);
+                Log.Debug($"Converted source range of {Parent} to seconds", Parent);
+            }
+
+            TimeClip.NeedsSourceUnitConversion = false;
+        }
+
+        TimeClip.SourceUnit = sourceUnit;
+    }
+
+    /// <summary>BPM of the nearest enclosing composition with its own settings, else the current playback's.</summary>
+    private static double FindCompositionBpm(Instance instance)
+    {
+        while (instance != null)
+        {
+            var settings = instance.Symbol.CompositionSettings;
+            if (settings.Enabled && settings.Playback.Bpm > 0)
+                return settings.Playback.Bpm;
+
+            instance = instance.Parent;
+        }
+
+        var bpm = Playback.Current?.Bpm ?? 120;
+        return bpm > 0 ? bpm : 120;
     }
 
     public UpdateStates LastUpdateStatus;

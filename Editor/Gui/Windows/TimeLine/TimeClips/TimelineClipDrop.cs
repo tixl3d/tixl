@@ -157,7 +157,14 @@ internal static class TimelineClipDrop
         if (!compositionOp.Symbol.Children.TryGetValue(childId, out var symbolChild))
             return;
 
-        var durationBars = ProbeDurationBars(assetFullPath, playback);
+        var durationSecs = ProbeDurationSecs(assetFullPath);
+        var durationBars = durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
+
+        // Content clips (video, audio) keep their source range in seconds; other clip ops in bars.
+        var isContentClip = typeof(IContentTimeClip).IsAssignableFrom(symbolChild.Symbol.InstanceType);
+        var sourceDuration = isContentClip
+                                 ? (durationSecs > 0 ? (float)durationSecs : (float)playback.SecondsFromBars(durationBars))
+                                 : durationBars;
 
         // Init the op's TimeClip output data in place. AddSymbolChildCommand.Undo removes the child
         // outright, so this mutation doesn't need its own undo entry.
@@ -166,7 +173,7 @@ internal static class TimelineClipDrop
             if (output.OutputData is TimeClip tc)
             {
                 tc.TimeRange = new TimeRange(startBars, startBars + durationBars);
-                tc.SourceRange = new TimeRange(0f, durationBars);
+                tc.SourceRange = new TimeRange(0f, sourceDuration);
                 tc.LayerIndex = layer;
                 break;
             }
@@ -213,10 +220,10 @@ internal static class TimelineClipDrop
     }
 
     /// <summary>
-    /// Initial clip length in bars. Audio, video and MIDI are probed for their real duration so the clip
-    /// matches the file; types with no probe (e.g. data) default to a placeholder.
+    /// Real duration of the dropped file in seconds — audio, video and MIDI are probed; types with no
+    /// probe (e.g. data) return 0 so the caller falls back to a placeholder length.
     /// </summary>
-    private static float ProbeDurationBars(string absolutePath, Playback playback)
+    private static double ProbeDurationSecs(string absolutePath)
     {
         // MIDI goes first: the audio probe logs a FileFormat warning for non-audio files.
         var durationSecs = TryProbeMidiDurationSecs(absolutePath);
@@ -232,7 +239,7 @@ internal static class TimelineClipDrop
             durationSecs = videoSecs;
         }
 
-        return durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
+        return durationSecs;
     }
 
     /// <summary>

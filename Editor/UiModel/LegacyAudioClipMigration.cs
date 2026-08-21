@@ -112,16 +112,17 @@ internal static class LegacyAudioClipMigration
             return false;
         }
 
-        // TimeRange is timeline placement; SourceRange is file-time in bars, anchored at the source offset,
-        // mapping the body 1:1 onto the used slice of the file.
+        // TimeRange is timeline placement in bars; SourceRange is file-time in seconds, anchored at the source
+        // offset, mapping the body 1:1 onto the used slice of the file.
         foreach (var output in child.Outputs.Values)
         {
             if (output.OutputData is not TimeClip timeClip)
                 continue;
 
-            var sourceStartBars = (float)(clip.SourceOffsetSecs * barsPerSecond);
+            var sourceStartSecs = (float)clip.SourceOffsetSecs;
+            var audibleSecs = (float)((timeRange.End - timeRange.Start) / barsPerSecond);
             timeClip.TimeRange = timeRange;
-            timeClip.SourceRange = new TimeRange(sourceStartBars, sourceStartBars + (timeRange.End - timeRange.Start));
+            timeClip.SourceRange = new TimeRange(sourceStartSecs, sourceStartSecs + audibleSecs);
             timeClip.LayerIndex = clip.LayerIndex;
             break;
         }

@@ -250,9 +250,16 @@ internal sealed class TimeClipInteractions
         // at the trimmed-in edge stays put), and the End is pulled to match the
         // timeline duration so the rate becomes 1. Pinning SourceRange.Start to 0
         // here would silently undo the trim and snap content the user had pushed
-        // off-screen back into view.
+        // off-screen back into view. The source duration is expressed in the clip's source unit
+        // (seconds for media clips), so go through seconds.
+        var playback = Playback.Current;
         foreach (var clip in selectedClips)
-            clip.SourceRange.End = clip.SourceRange.Start + clip.TimeRange.Duration;
+        {
+            var sourceDuration = playback != null
+                                     ? (float)clip.SecondsToSource(playback.SecondsFromBars(clip.TimeRange.Duration), playback.Bpm)
+                                     : clip.TimeRange.Duration;
+            clip.SourceRange.End = clip.SourceRange.Start + sourceDuration;
+        }
 
         moveTimeClipCommand.StoreCurrentValues();
         UndoRedoStack.AddAndExecute(moveTimeClipCommand);

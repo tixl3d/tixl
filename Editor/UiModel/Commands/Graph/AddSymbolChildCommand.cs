@@ -48,7 +48,7 @@ public sealed class AddSymbolChildCommand : ICommand
     }
 
     // Content clips (e.g. [VideoClip]) play from the start of their source, so their SourceRange is content-time
-    // (0-based), not the placement position the generic TimeClip default uses. Symbols with an authored source
+    // (0-based seconds), not the placement position the generic TimeClip default uses. Symbols with an authored source
     // extent (TimelineState.SourceExtent) start with that extent and its duration instead. Set on the new child's
     // persisted TimeClip here — editor-side — so it serializes and undoes together with the add (mirrors RecordingSession).
     private void InitContentClipSourceRange(Symbol composition)
@@ -72,7 +72,12 @@ public sealed class AddSymbolChildCommand : ICommand
                 }
                 else
                 {
-                    timeClip.SourceRange = new T3.Core.Animation.TimeRange(0f, timeClip.TimeRange.Duration);
+                    // Content clips keep their source range in seconds.
+                    var playback = T3.Core.Animation.Playback.Current;
+                    var sourceDuration = playback != null
+                                             ? (float)playback.SecondsFromBars(timeClip.TimeRange.Duration)
+                                             : timeClip.TimeRange.Duration;
+                    timeClip.SourceRange = new T3.Core.Animation.TimeRange(0f, sourceDuration);
                 }
                 break;
             }

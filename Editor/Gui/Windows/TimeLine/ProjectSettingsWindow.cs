@@ -25,6 +25,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Animation;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -831,20 +832,45 @@ internal sealed class ProjectSettingsWindow : Window
             {
                 // Soundtrack management and analysis settings live in the "Audio" category — the Timing
                 // panel keeps only what defines the project's clock.
-                var bpm = (float)playback.Bpm;
-                if (FormInputs.AddFloat("BPM",
-                        ref bpm,
-                        0,
-                        1000,
-                        0.02f,
-                        true, true,
-                        "In T3 animation units are in bars.\nThe BPM rate controls the animation speed of your project.",
-                        120))
+                var bpm = playback.Bpm;
+                var bpmEditState = FormInputs.AddFloatWithEditState("BPM",
+                                                                    ref bpm,
+                                                                    0,
+                                                                    1000,
+                                                                    0.02f,
+                                                                    true, true,
+                                                                    "In T3 animation units are in bars.\nThe BPM rate controls the animation speed of your project.",
+                                                                    120);
+                if ((bpmEditState & InputEditStateFlags.Modified) != InputEditStateFlags.Nothing)
                 {
-                    Playback.Current.Bpm = bpm;
-                    playback.Bpm = bpm;
+                    if (compositionWithSettings != null)
+                    {
+                        // One command per drag: created on the first change with the pre-edit BPM, re-applied
+                        // while dragging (absolute, from snapshots) and pushed on release as a single undo step.
+                        _bpmCommand ??= new ChangeBpmCommand(compositionWithSettings.Symbol.Id, playback.Bpm,
+                                                             playback.OnBpmChange == CompositionSettings.BpmChangeModes.KeepSeconds);
+                        _bpmCommand.Apply(bpm);
+                    }
+                    else
+                    {
+                        Playback.Current.Bpm = bpm;
+                        playback.Bpm = bpm;
+                    }
+
                     modified = true;
                 }
+
+                if ((bpmEditState & InputEditStateFlags.Finished) != InputEditStateFlags.Nothing && _bpmCommand != null)
+                {
+                    UndoRedoStack.Add(_bpmCommand);
+                    _bpmCommand = null;
+                }
+
+                modified |= FormInputs.AddSegmentedButtonWithLabel(ref playback.OnBpmChange, "On BPM Change");
+                FormInputs.SetIndentToParameters();
+                FormInputs.AddHint(playback.OnBpmChange == CompositionSettings.BpmChangeModes.StretchWithBeat
+                                       ? "Clips and keyframes stay on their bars and play faster or slower."
+                                       : "Clips and keyframes stay at the same seconds; only the grid changes.");
 
                 FormInputs.AddEnumDropdown(ref UserSettings.Config.TimeDisplayMode, "Timeline Display");
 
@@ -961,6 +987,7 @@ internal sealed class ProjectSettingsWindow : Window
     #endregion
 
     private static float _smoothedLevel;
+    private static ChangeBpmCommand? _bpmCommand;
 
     private const string SoundtrackHint = """
                                           Soundtracks are defined by [AudioClip] operators on the timeline.

@@ -62,15 +62,15 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
             return;
         }
 
-        // LocalTime already arrives remapped into source time (bars) — the clip slot remaps without
-        // gating (EvaluateOutsideRange), extrapolated outside the clip so pre-roll pulls still work.
+        // LocalTime already arrives remapped into source time — seconds, as this is a content clip — the clip
+        // slot remaps without gating (EvaluateOutsideRange), extrapolated outside the clip so pre-roll pulls still work.
         var sourceRange = Texture.TimeClip.SourceRange;
-        var sourceTimeInSecs = context.Playback.SecondsFromBars(context.LocalTime);
+        var sourceTimeInSecs = context.LocalTime;
 
         // Clamp to the clip's source range so times outside the clip resolve to its first/last frame; the
         // controller additionally clamps to the video's real duration.
-        var sourceStart = context.Playback.SecondsFromBars(sourceRange.Start);
-        var sourceEnd = context.Playback.SecondsFromBars(sourceRange.End);
+        var sourceStart = (double)sourceRange.Start;
+        var sourceEnd = (double)sourceRange.End;
         var clampedTime = Math.Clamp(sourceTimeInSecs, Math.Min(sourceStart, sourceEnd), Math.Max(sourceStart, sourceEnd));
 
         var result = VideoPlaybackEngine.Instance.RequestFrame(_streamId, absolutePath, clampedTime,

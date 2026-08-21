@@ -270,6 +270,8 @@ In addition to op-backed time clips, the timeline also hosts two clip types that
 
 Both types share the timeline with op-backed clips: same drag, trim, snap, and selection behavior across all three. Selecting a clip of one type clears selection on the other types unless you hold `Shift` or `Ctrl`.
 
+Audio and video content is wall-clock media, so its source trims are remembered in seconds: changing the project's BPM keeps the clip on the same bars, and the audio or footage still starts at the same moment of the file. Video adjusts its playback speed to fit the clip; audio keeps its native speed and pitch, so the clip block may run longer or shorter than the sound it plays. Keyframes on the clip's own parameters stay with the content as well. Op-backed clips that remap nested compositions keep everything in bars, as before.
+
 #### Editing audio clips
 
 Click an audio clip to select it. The **Parameter window** then shows an inspector with:

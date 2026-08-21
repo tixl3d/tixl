@@ -154,6 +154,24 @@ internal static class FormInputs
         string? tooltip = null,
         float defaultValue = float.NaN)
     {
+        var result = AddFloatWithEditState(label, ref value, min, max, scale, clampMin, clampMax, tooltip, defaultValue);
+        return (result & InputEditStateFlags.Modified) != InputEditStateFlags.Nothing;
+    }
+
+    /// <summary>
+    /// Like <see cref="AddFloat"/> but returns the full edit state, so callers can tell a drag in progress
+    /// (<see cref="InputEditStateFlags.Modified"/>) from its completion (<see cref="InputEditStateFlags.Finished"/>).
+    /// </summary>
+    public static InputEditStateFlags AddFloatWithEditState(string label,
+        ref float value,
+        float min = float.NegativeInfinity,
+        float max = float.PositiveInfinity,
+        float scale = 0.01f,
+        bool clampMin = false,
+        bool clampMax = false,
+        string? tooltip = null,
+        float defaultValue = float.NaN)
+    {
         var hasReset = !float.IsNaN(defaultValue);
         var isDefault = hasReset && Math.Abs(value - defaultValue) < 0.0001f;
         if (isDefault)
@@ -182,8 +200,7 @@ internal static class FormInputs
             ImGui.PopStyleVar();
         }
 
-        var modified = (result & InputEditStateFlags.Modified) != InputEditStateFlags.Nothing;
-        return modified;
+        return result;
     }
 
     /// <param name="itemLabel">Optional display-name formatter for each enum value (e.g. "HapQ" → "Hap Q").
