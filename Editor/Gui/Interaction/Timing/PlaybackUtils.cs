@@ -49,6 +49,13 @@ public static class PlaybackUtils
 
         if (settings.Playback.UsesBeatTapping)
         {
+            // Seed the tap clock from the project BPM when entering tapping mode — otherwise the
+            // BeatTiming default leaks back into the settings via the write-back below.
+            if (Playback.Current is not BeatTimingPlayback)
+            {
+                BeatTiming.SetBpmRate(settings.Playback.Bpm);
+            }
+
             Playback.Current = T3Ui.DefaultBeatTimingPlayback;
 
             if (Playback.Current.Settings is { Playback.UsesBeatTapping: true })
