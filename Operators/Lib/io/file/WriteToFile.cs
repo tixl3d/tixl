@@ -1,3 +1,6 @@
+using T3.Core.Resource.Assets;
+using T3.Core.Stats;
+
 namespace Lib.io.file;
 
 [Guid("0db15e2d-b457-44d7-bb58-ace0a0708073")]
@@ -18,36 +21,44 @@ internal sealed class WriteToFile : Instance<WriteToFile>
     {
         var content = Content.GetValue(context);
         var filepath = Filepath.GetValue(context);
-        if (content != _lastContent)
+
+        if (content != _lastContent || filepath != _lastFilepath)
         {
-            Log.Debug("Writing file " + filepath);
-            try
-            {
-                File.WriteAllText(filepath, content);
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Failed to write file {filepath}:" + e.Message);
-            }
-                
             _lastContent = content;
-        }
-        else
-        {
-            Log.Debug("Just updating???", this);
+            _lastFilepath = filepath;
+            TryWrite(filepath, content);
         }
 
-        Result.Value = Content.GetValue(context);
+        Result.Value = content;
         OutFilepath.Value = filepath;    // Forward so it can be triggered
     }
 
-    private string _lastContent;
-        
-        
+    private void TryWrite(string filepath, string content)
+    {
+        if (!AssetRegistry.TryResolveAddressForWriting(filepath, this, out var absolutePath, out var failureReason))
+        {
+            this.LogErrorState(failureReason);
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
+            File.WriteAllText(absolutePath, content ?? string.Empty);
+            this.ClearErrorState();
+        }
+        catch (Exception e)
+        {
+            this.LogErrorState($"Failed to write file {absolutePath}: {e.Message}");
+        }
+    }
+
     [Input(Guid = "a12d0e5c-a0f9-4d3c-8ab6-827fb618c021")]
     public readonly InputSlot<string> Content = new();
-        
+
     [Input(Guid = "DB4B08DA-9993-453A-A957-679637CDFD08")]
     public readonly InputSlot<string> Filepath = new();
 
+    private string _lastContent;
+    private string _lastFilepath;
 }

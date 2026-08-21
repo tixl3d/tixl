@@ -74,7 +74,7 @@
         "Y": 675.0
       },
       "Description": "The path to the file for saving or loading the camera calibration data (as a .json file).",
-      "Usage": "FilePath"
+      "Usage": "OutputFilePath"
     },
     {
       "InputId": "d6e0f5b4-2f9d-4d7f-1e4f-5e2f6f0d8c5f"/*DisplayResolution*/,

@@ -181,6 +181,7 @@ internal static class ConformAssetPaths
         switch (stringUi.Usage)
         {
             case StringInputUi.UsageType.FilePath:
+            case StringInputUi.UsageType.OutputFilePath: // Output files only migrate / get references if they already exist
             {
                 if (TryMigrateFilterString(stringUi.FileFilter, out var migratedFilter))
                 {

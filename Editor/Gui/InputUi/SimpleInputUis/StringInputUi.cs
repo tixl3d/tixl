@@ -28,6 +28,11 @@ public sealed class StringInputUi : InputValueUi<string>
         DirectoryPath,
         Multiline,
         CustomDropdown,
+
+        /// <summary>
+        /// A file the operator writes. Not an asset dependency: it may not exist yet and is never bundled on export.
+        /// </summary>
+        OutputFilePath,
     }
 
     public UsageType Usage { get; private set; } = UsageType.Default;
@@ -78,6 +83,24 @@ public sealed class StringInputUi : InputValueUi<string>
                             CoreUi.Instance.OpenWithDefaultApplication(absolutePath);
                         }
                         //OpenFileManager(FileOperations.FilePickerTypes.File, _searchResourceConsumer.AvailableResourcePackages, new string[0], isFolder: false, async: true);
+                    }
+                }
+
+                NormalizePathSeparators(inputEditStateFlags, ref value);
+                break;
+            case UsageType.OutputFilePath:
+                inputEditStateFlags = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, FileFilter, ref value, isOutputPath: true);
+                ImGui.SameLine();
+                if (ImGui.Button("Open"))
+                {
+                    // Written files register as assets once they exist, so the read resolver is enough here
+                    if (AssetRegistry.TryResolveAddress(value, FilePickingUi.SearchResourceConsumer, out var absolutePath, out _))
+                    {
+                        CoreUi.Instance.OpenWithDefaultApplication(absolutePath);
+                    }
+                    else
+                    {
+                        Log.Warning($"File '{value}' hasn't been written yet");
                     }
                 }
 
@@ -208,7 +231,7 @@ public sealed class StringInputUi : InputValueUi<string>
         }
 
         
-        if (Usage == UsageType.FilePath)
+        if (Usage is UsageType.FilePath or UsageType.OutputFilePath)
         {
             FormInputs.DrawFieldSetHeader("File Filter");
             

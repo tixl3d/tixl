@@ -4,6 +4,7 @@ using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using SharpDX;
 using SharpDX.Direct3D11;
+using T3.Core.Resource.Assets;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 using Size = OpenCvSharp.Size;
@@ -407,7 +408,8 @@ namespace Lib.io.video
             var loadValue = Load.GetValue(context);
             if (loadValue && !_loadTriggered)
             {
-                if (LoadCalibrationData(FilePath.GetValue(context), out _cameraMatrix, out _distCoeffs))
+                if (TryGetFilePath(FilePath.GetValue(context), out var loadPath)
+                    && LoadCalibrationData(loadPath, out _cameraMatrix, out _distCoeffs))
                 {
                     _isCalibrated = true;
                     bool allZeroDistortion = _distCoeffs.All(coeff => Math.Abs(coeff) < 1e-6);
@@ -436,11 +438,18 @@ namespace Lib.io.video
             return corners.ToArray();
         }
 
-        private void SaveCalibrationData(string filepath)
+        private void SaveCalibrationData(string address)
         {
-            if (!_isCalibrated || string.IsNullOrWhiteSpace(filepath)) return;
+            if (!_isCalibrated) return;
+            if (!AssetRegistry.TryResolveAddressForWriting(address, this, out var filepath, out var failureReason))
+            {
+                Log.Error($"[Calibrator] Can't save calibration: {failureReason}", this);
+                return;
+            }
+
             try
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(filepath)!);
                 var lines = new List<string> { "CameraMatrix" };
                 for (var r = 0; r < 3; r++) lines.Add($"{_cameraMatrix[r, 0]},{_cameraMatrix[r, 1]},{_cameraMatrix[r, 2]}");
                 lines.Add("DistortionCoeffs");

@@ -102,6 +102,7 @@ internal static class SymbolAnalysis
                     {
                         case StringInputUi.UsageType.FilePath:
                         case StringInputUi.UsageType.DirectoryPath:
+                        case StringInputUi.UsageType.OutputFilePath:
                         {
                             var assetPackageNameIndex = pathValue.IndexOf(':');
                             if (assetPackageNameIndex < 1)

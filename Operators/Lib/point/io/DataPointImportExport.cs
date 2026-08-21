@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text.Json;
 using SharpDX;
 using SharpDX.Direct3D11;
+using T3.Core.Resource.Assets;
 using T3.Core.Utils;
 
 namespace Lib.point.io;
@@ -72,13 +73,9 @@ public sealed class DataPointImportExport : Instance<DataPointImportExport>
             return;
         }
 
-        var resolvedPath = Path.IsPathRooted(importPath)
-                               ? importPath
-                               : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, importPath);
-
-        if (!File.Exists(resolvedPath))
+        if (!TryGetFilePath(importPath, out var resolvedPath))
         {
-            Log.Warning($"Import file does not exist: {resolvedPath}", this);
+            Log.Warning($"Import file does not exist: {importPath}", this);
             // Do not update _lastImportedFilePath on non-existence to allow autoload retry when the path is corrected.
             return;
         }
@@ -109,9 +106,11 @@ public sealed class DataPointImportExport : Instance<DataPointImportExport>
             return;
         }
 
-        var resolvedPath = Path.IsPathRooted(exportPath)
-                               ? exportPath
-                               : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, exportPath);
+        if (!AssetRegistry.TryResolveAddressForWriting(exportPath, this, out var resolvedPath, out var failureReason))
+        {
+            Log.Warning($"Can't export: {failureReason}", this);
+            return;
+        }
 
         // Prefer the incoming buffer if the user has connected one,
         // otherwise fall back to the data we imported internally.
@@ -125,6 +124,7 @@ public sealed class DataPointImportExport : Instance<DataPointImportExport>
 
         try
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(resolvedPath)!);
             await SaveToJsonAsync(resolvedPath, pointsToExport);
             Log.Debug($"Successfully exported {pointsToExport.Count} points to '{resolvedPath}'.", this);
         }

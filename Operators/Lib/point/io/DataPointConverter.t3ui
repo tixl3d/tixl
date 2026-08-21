@@ -22,7 +22,7 @@
       },
       "GroupTitle": "Export Settings",
       "Description": "The path where the converted point data will be saved when you trigger the export. Supports .csv and .json.",
-      "Usage": "FilePath"
+      "Usage": "OutputFilePath"
     },
     {
       "InputId": "3c4d5e6f-7a8b-4c1d-8e9f-3a4b5c6d7e8f"/*Convert*/,

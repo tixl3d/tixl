@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System.Globalization;
 using System.Text.Json;
+using T3.Core.Resource.Assets;
 using T3.Core.Utils;
 
 namespace Lib.point.io;
@@ -95,13 +96,9 @@ public sealed class DataPointConverter : Instance<DataPointConverter>
             return;
         }
 
-        var resolvedFilePath = Path.IsPathRooted(filePath)
-                                   ? filePath
-                                   : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
-
-        if (!File.Exists(resolvedFilePath))
+        if (!TryGetFilePath(filePath, out var resolvedFilePath))
         {
-            Log.Warning($"File does not exist: {resolvedFilePath}", this);
+            Log.Warning($"File does not exist: {filePath}", this);
             return;
         }
 
@@ -143,12 +140,15 @@ public sealed class DataPointConverter : Instance<DataPointConverter>
             return;
         }
 
-        var resolvedFilePath = Path.IsPathRooted(filePath)
-                                   ? filePath
-                                   : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
+        if (!AssetRegistry.TryResolveAddressForWriting(filePath, this, out var resolvedFilePath, out var failureReason))
+        {
+            Log.Warning($"Can't export: {failureReason}", this);
+            return;
+        }
 
         try
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(resolvedFilePath)!);
             var ext = Path.GetExtension(resolvedFilePath).ToLowerInvariant();
             Log.Debug($"Starting export to '{resolvedFilePath}'...", this);
 

@@ -135,6 +135,76 @@ public static class AssetRegistry
         return false;
     }
 
+    /// <summary>
+    /// Resolves an address to an absolute path for <b>writing</b>: the target does not have to exist yet.
+    /// Accepts legacy absolute paths and package addresses into packages the consumer can see that are not
+    /// read-only (project packages and their linked folders). The caller creates missing directories.
+    /// </summary>
+    public static bool TryResolveAddressForWriting(string? address,
+                                                   IResourceConsumer? consumer,
+                                                   out string absolutePath,
+                                                   out string failureReason)
+    {
+        absolutePath = string.Empty;
+        failureReason = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            failureReason = "No file path set";
+            return false;
+        }
+
+        address.ToForwardSlashesUnsafe();
+        var projectSeparator = address.IndexOf(PackageSeparator);
+
+        // Legacy windows absolute paths (e.g. C:/...)
+        if (projectSeparator == 1)
+        {
+            absolutePath = address;
+            return true;
+        }
+
+        if (projectSeparator == -1)
+        {
+            failureReason = $"'{address}' is not a package address (expected Project:folder/file.ext)";
+            return false;
+        }
+
+        var span = address.AsSpan();
+        var packageName = span[..projectSeparator];
+        var localPath = span[(projectSeparator + 1)..];
+        if (localPath.IsEmpty || localPath.EndsWith("/"))
+        {
+            failureReason = $"'{address}' has no file name";
+            return false;
+        }
+
+        var packages = consumer?.AvailableResourcePackages ?? ResourcePackageManager.SharedResourcePackages;
+        foreach (var package in packages)
+        {
+            if (!package.Name.AsSpan().Equals(packageName, StringComparison.Ordinal))
+                continue;
+
+            if (AssetLinkFolders.TryGetAbsolutePathInMount(package, localPath, out var mountedPath))
+            {
+                absolutePath = mountedPath;
+                return true;
+            }
+
+            if (package.IsReadOnly)
+            {
+                failureReason = $"Package '{package.Name}' is read-only. Write into a project or a linked folder instead.";
+                return false;
+            }
+
+            absolutePath = $"{package.AssetsFolder}/{localPath}";
+            return true;
+        }
+
+        failureReason = $"Unknown package '{packageName}' in '{address}'";
+        return false;
+    }
+
     public static bool TryToGetAssetFromFilepath(string absolutePath, bool isFolder, [NotNullWhen(true)] out Asset? asset)
     {
         asset = null;
