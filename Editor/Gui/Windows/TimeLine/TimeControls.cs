@@ -1,4 +1,4 @@
-using ImGuiNET;
+﻿using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.DataTypes.DataSet;
@@ -41,7 +41,7 @@ internal static class TimeControls
             UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
 
         if (UserActions.PlaybackJumpToStartTime.Triggered())
-            playback.TimeInBars = playback.IsLooping ? playback.LoopRange.Start : 0;
+            JumpToStartTime(playback);
 
         if (UserActions.PlaybackJumpToPreviousKeyframe.Triggered())
             UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
@@ -428,7 +428,7 @@ internal static class TimeControls
                 || UserActions.PlaybackJumpToStartTime.Triggered()
                )
             {
-                playback.TimeInBars = playback.IsLooping ? playback.LoopRange.Start : 0;
+                JumpToStartTime(playback);
             }
 
             CustomComponents.TooltipForLastItem("Jump to beginning",
@@ -637,6 +637,16 @@ internal static class TimeControls
 
        
         ImGui.SameLine();
+    }
+
+    /// <summary>
+    /// Moves the playhead to the loop start (or 0) and asks the timeline to reveal it, so the jump
+    /// doesn't leave the playhead outside a view scrolled somewhere else.
+    /// </summary>
+    private static void JumpToStartTime(Playback playback)
+    {
+        playback.TimeInBars = playback.IsLooping ? playback.LoopRange.Start : 0;
+        UserActionRegistry.QueueAction(UserActions.PlaybackJumpToStartTime);
     }
 
     private static double _lastPlaybackStartTime;

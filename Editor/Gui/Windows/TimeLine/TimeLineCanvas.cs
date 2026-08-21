@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -465,6 +465,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     private void HandleDeferredActions()
     {
+        if (UserActionRegistry.WasActionQueued(UserActions.PlaybackJumpToStartTime))
+        {
+            CenterCurrentTimeIfNotVisible();
+        }
+
         if (UserActionRegistry.WasActionQueued(UserActions.PlaybackJumpToNextKeyframe))
         {
             var bestNextTime = double.PositiveInfinity;
