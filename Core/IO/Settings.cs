@@ -57,7 +57,15 @@ public class Settings<T> where T  : class, new()
         if (_instance == null || SaveDisabled || _preserveFileOnDisk)
             return;
 
+        _instance.OnBeforeSave();
         JsonUtils.TrySaveJson(Config, _instance._filePath);
+    }
+
+    /// <summary>
+    /// Called before the config is serialized, so derived settings can normalize their data.
+    /// </summary>
+    protected virtual void OnBeforeSave()
+    {
     }
 
     private static Settings<T>? _instance;

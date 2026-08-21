@@ -1,4 +1,5 @@
 #nullable enable
+using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using T3.Core.Animation;
@@ -19,6 +20,33 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 {
     internal UserSettings(bool saveOnQuit) : base("userSettings.json", saveOnQuit: saveOnQuit)
     {
+        RemoveDuplicateProjectDirectories();
+    }
+
+    protected override void OnBeforeSave()
+    {
+        RemoveDuplicateProjectDirectories();
+    }
+
+    /// Duplicated entries make project loading fail on the next start, so they are stripped on load and save.
+    private static void RemoveDuplicateProjectDirectories()
+    {
+        var directories = Config.ProjectDirectories;
+        if (directories == null || directories.Count < 2)
+            return;
+
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var keptCount = 0;
+        for (var index = 0; index < directories.Count; index++)
+        {
+            var path = directories[index].Trim().TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (!seen.Add(path))
+                continue;
+
+            directories[keptCount++] = directories[index];
+        }
+
+        directories.RemoveRange(keptCount, directories.Count - keptCount);
     }
 
     /// <summary>
