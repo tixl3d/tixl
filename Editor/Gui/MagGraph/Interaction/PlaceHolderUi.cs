@@ -43,6 +43,8 @@ internal static class PlaceHolderUi
         _placeholderItem = placeholderItem;
         _connectionOrientation = connectionOrientation;
 
+        ScrollToShowPlaceholder(context, placeholderItem, connectionOrientation);
+
         WindowContentExtend.GetLastAndReset();
         SymbolBrowsing.Reset();
 
@@ -106,6 +108,25 @@ internal static class PlaceHolderUi
     //     }
     // }
     
+    /// <summary>
+    /// Scrolls the canvas so the placeholder and the space its results list will occupy are on screen.
+    /// </summary>
+    private static void ScrollToShowPlaceholder(GraphUiContext context, MagGraphItem placeholderItem, MagGraphItem.Directions orientation)
+    {
+        var area = placeholderItem.Area;
+        var popUpSizeOnCanvas = ResultsPopUpSize / context.View.Scale;
+        if (orientation == MagGraphItem.Directions.Vertical)
+        {
+            area.Max.X += popUpSizeOnCanvas.X;
+        }
+        else
+        {
+            area.Max.Y += popUpSizeOnCanvas.Y;
+        }
+
+        context.View.ScrollToMakeAreaVisible(area, screenPadding: 20 * T3Ui.UiScaleFactor);
+    }
+
     private static UiResults DrawSearchInput(GraphUiContext context, ImDrawListPtr drawList)
     {
         var uiResult = UiResults.None;
@@ -230,7 +251,7 @@ internal static class PlaceHolderUi
     {
         var result = UiResults.None;
 
-        var popUpSize = new Vector2(150, 235) * T3Ui.UiScaleFactor;
+        var popUpSize = ResultsPopUpSize;
         var windowSize = ImGui.GetWindowSize();
         var windowPos = ImGui.GetWindowPos();
 
@@ -503,6 +524,7 @@ internal static class PlaceHolderUi
 
     // Cached row height for clipper
     private static float _rowHeight = 0;
+    private static Vector2 ResultsPopUpSize => new Vector2(150, 235) * T3Ui.UiScaleFactor;
 
     [Flags]
     internal enum UiResults

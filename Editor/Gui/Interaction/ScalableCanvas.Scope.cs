@@ -128,6 +128,37 @@ public partial class ScalableCanvas
         ScrollTarget.Y = area.Max.Y + padding;
     }
 
+    /// <summary>
+    /// Shifts the scroll target (keeping the zoom) by the minimal amount required to bring the canvas area,
+    /// padded by <paramref name="screenPadding"/> px, into view. No-op if it is already visible.
+    /// </summary>
+    internal void ScrollToMakeAreaVisible(ImRect areaOnCanvas, float screenPadding = 0)
+    {
+        var visibleMin = ScrollTarget;
+        var visibleMax = ScrollTarget + WindowSize / ScaleTarget;
+
+        var padding = new Vector2(screenPadding, screenPadding) / ScaleTarget;
+        var areaMin = areaOnCanvas.Min - padding;
+        var areaMax = areaOnCanvas.Max + padding;
+
+        var shift = Vector2.Zero;
+        // Area larger than view: align to the min edge.
+        if (areaMin.X < visibleMin.X)
+            shift.X = areaMin.X - visibleMin.X;
+        else if (areaMax.X > visibleMax.X)
+            shift.X = MathF.Min(areaMax.X - visibleMax.X, areaMin.X - visibleMin.X);
+
+        if (areaMin.Y < visibleMin.Y)
+            shift.Y = areaMin.Y - visibleMin.Y;
+        else if (areaMax.Y > visibleMax.Y)
+            shift.Y = MathF.Min(areaMax.Y - visibleMax.Y, areaMin.Y - visibleMin.Y);
+
+        if (float.IsNaN(shift.X) || float.IsNaN(shift.Y) || float.IsInfinity(shift.X) || float.IsInfinity(shift.Y))
+            return;
+
+        ScrollTarget += shift;
+    }
+
     internal ImRect GetVisibleCanvasArea()
     {
         UpdateWindowRect();
