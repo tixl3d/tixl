@@ -30,22 +30,15 @@ internal sealed class ConsoleLogWindow : Window, ILogWriter
             _colorForLogLevel = UpdateLogLevelColors();
 
         CustomComponents.ToggleIconButton(ref _shouldScrollToBottom, Icon.ScrollLog, Vector2.Zero);
-        //CustomComponents.ToggleButton("Scroll", ref _shouldScrollToBottom, Vector2.Zero);
+        CustomComponents.TooltipForLastItem("Keep scrolling to the latest messages.");
         ImGui.SameLine();
 
-        //ImGui.SetNextWindowSize(new Vector2(500, 400), ImGuiCond.FirstUseEver);
-        if(CustomComponents.IconButton(Icon.ClearLog, Vector2.Zero))
-        //if (ImGui.Button("Clear"))
+        if (CustomComponents.AttentionIconButton(Icon.ClearLog, Vector2.Zero))
         {
-            lock (_logEntries)
-            {
-                _logEntries.Clear();
-            }
-
-            _shouldScrollToBottom = true;
-
-            Log.Info("Console cleared!");
+            ClearLog();
         }
+
+        CustomComponents.TooltipForLastItem("Clear log");
 
         ImGui.SameLine();
 
@@ -336,6 +329,29 @@ internal sealed class ConsoleLogWindow : Window, ILogWriter
                        { ILogEntry.EntryLevel.Warning, UiColors.StatusWarning },
                        { ILogEntry.EntryLevel.Error, UiColors.StatusError },
                    };
+    }
+
+    /// <summary>
+    /// Opens the console and pins it to the bottom. Used when clicking the status message in the app
+    /// title bar: that message is the last entry, so it has to be the one in view.
+    /// </summary>
+    internal void RevealLatestEntries()
+    {
+        Config.Visible = true;
+        _shouldScrollToBottom = true;
+        RequestWindowFocus();
+    }
+
+    internal void ClearLog()
+    {
+        lock (_logEntries)
+        {
+            _logEntries.Clear();
+        }
+
+        _shouldScrollToBottom = true;
+
+        Log.Info("Console cleared!");
     }
 
     public void ProcessEntry(ILogEntry entry)

@@ -12,52 +12,56 @@ internal sealed class StatusErrorLine : ILogWriter
 {
     internal void Draw()
     {
+        var hasEntries = false;
+        var isMessageHovered = false;
+
         lock (_logEntries)
         {
             if (_logEntries.Count == 0)
             {
                 ImGui.TextUnformatted("Log empty");
-                return;
             }
-
-            var lastEntry = _logEntries[^1];
-            var color = ConsoleLogWindow.GetColorForLogLevel(lastEntry.Level)
-                                        .Fade(((float)lastEntry.SecondsAgo).RemapAndClamp(0, 1.5f, 1, 0.4f));
-
-            ImGui.PushFont(Fonts.FontBold);
-
-            var firstLine = lastEntry.Message.AsSpan();
-            var newlineIndex = firstLine.IndexOf('\n');
-            
-            if (newlineIndex >= 0)
-                firstLine = firstLine[..newlineIndex];
-
-            const int maxLength = 100;
-            if (firstLine.Length > maxLength)
-                firstLine = firstLine[..maxLength];
-
-            if (firstLine.Length == 0)
-                return;
-            
-            var width = ImGui.CalcTextSize(firstLine).X;
-            
-            // var logMessage = lastEntry.Message;
-            // if (lastEntry.Level == ILogEntry.EntryLevel.Error)
-            // {
-            //     logMessage = DX11ShaderCompiler.ExtractMeaningfulShaderErrorMessage(logMessage);
-            // }
-            
-            var availableSpace = ImGui.GetWindowSize().X;
-            ImGui.SetCursorPosX(availableSpace - width);
-
-            ImGui.TextColored(color, firstLine);
-            if (ImGui.IsItemClicked())
+            else
             {
-                _logEntries.Clear();
+                var lastEntry = _logEntries[^1];
+                var color = ConsoleLogWindow.GetColorForLogLevel(lastEntry.Level)
+                                            .Fade(((float)lastEntry.SecondsAgo).RemapAndClamp(0, 1.5f, 1, 0.4f));
+
+                var firstLine = lastEntry.Message.AsSpan();
+                var newlineIndex = firstLine.IndexOf('\n');
+
+                if (newlineIndex >= 0)
+                    firstLine = firstLine[..newlineIndex];
+
+                const int maxLength = 100;
+                if (firstLine.Length > maxLength)
+                    firstLine = firstLine[..maxLength];
+
+                hasEntries = firstLine.Length > 0;
+                if (hasEntries)
+                {
+                    ImGui.PushFont(Fonts.FontBold);
+                    var width = ImGui.CalcTextSize(firstLine).X;
+
+                    // Keep room for the clear button at the right edge.
+                    var availableSpace = ImGui.GetWindowSize().X;
+                    ImGui.SetCursorPosX(availableSpace - width - ImGui.GetFrameHeight());
+
+                    ImGui.TextColored(color, firstLine);
+                    ImGui.PopFont();
+
+                    // Clicking a message must not destroy it: reveal it in the console instead.
+                    if (ImGui.IsItemClicked())
+                    {
+                        Program.ConsoleLogWindow.RevealLatestEntries();
+                    }
+
+                    isMessageHovered = ImGui.IsItemHovered();
+                }
             }
         }
 
-        if (ImGui.IsItemHovered())
+        if (isMessageHovered)
         {
             ImGui.BeginTooltip();
             {
@@ -72,7 +76,21 @@ internal sealed class StatusErrorLine : ILogWriter
             ImGui.EndTooltip();
         }
 
-        ImGui.PopFont();
+        if (!hasEntries)
+            return;
+
+        ImGui.SameLine(0, 0);
+        if (CustomComponents.AttentionIconButton(Icon.ClearLog, Vector2.Zero))
+        {
+            lock (_logEntries)
+            {
+                _logEntries.Clear();
+            }
+
+            Program.ConsoleLogWindow.ClearLog();
+        }
+
+        CustomComponents.TooltipForLastItem("Clear log");
     }
 
     public void Dispose()
