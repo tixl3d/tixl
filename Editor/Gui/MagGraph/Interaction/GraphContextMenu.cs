@@ -36,7 +36,7 @@ internal static class GraphContextMenu
     {
         Undo = 1,
         SelectMenu, SelectCustomOps, SelectConnected, SelectConnectedInputs,
-        Disabled, Bypassed, Disconnect, ControlSnapshots, Rename, AddComment, AlignLeft,
+        Disabled, Bypassed, Disconnect, ControlSnapshots, Rename, AddComment, AlignLeft, LayoutInputs,
         DisplayMenu, DisplaySmall, DisplayResizable, DisplayExpanded, DisplayBackground, DisplayPin,
         GenerateProxy,
         Copy, Duplicate, Paste, Delete, RenameOutput,
@@ -141,6 +141,14 @@ internal static class GraphContextMenu
                                               reserveIconColumn: false, state: muted))
             {
                 Modifications.AlignSelectionToLeft(context);
+            }
+
+            var canLayout = context.StateMachine.CurrentState == GraphStates.Default && selectedChildUis.Count > 0;
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.LayoutInputs, Icon.None, "Layout Inputs",
+                                              UserActions.LayoutSelection.ListShortcuts(), isChecked: false, isEnabled: canLayout,
+                                              reserveIconColumn: false, state: muted))
+            {
+                TreeLayouting.LayoutInputsOfSelection(context);
             }
 
             DrawDisplayAsSubMenu(context, nodeSelection, selectedChildUis, oneOpSelected, someOpsSelected);

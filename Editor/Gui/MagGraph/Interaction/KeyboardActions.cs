@@ -141,10 +141,13 @@ internal static class KeyboardActions
             context.Layout.FlagStructureAsChanged();
         }
 
-        // if (KeyboardBinding.Triggered(UserActions.LayoutSelection))
-        // {
-        //     _nodeGraphLayouting.ArrangeOps(compositionOp);
-        // }
+        if (!T3Ui.IsCurrentlySaving
+            && UserActions.LayoutSelection.Triggered()
+            && nodeSelection.Selection.Count > 0
+            && context.StateMachine.CurrentState == GraphStates.Default)
+        {
+            TreeLayouting.LayoutInputsOfSelection(context);
+        }
 
         if (!T3Ui.IsCurrentlySaving && UserActions.AddSection.Triggered())
         {
