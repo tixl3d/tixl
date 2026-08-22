@@ -29,6 +29,7 @@ using T3.Core.SystemUi;
 using Device = SharpDX.Direct3D11.Device;
 using Resource = SharpDX.Direct3D11.Resource;
 using SharpDX.Windows;
+using System.Windows.Forms;
 using SilkWindows;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.Utils;
@@ -140,13 +141,22 @@ internal static partial class Program
 
             var windowHandle = _renderForm.Handle;
 
+            // "Fullscreen" is a borderless window covering the screen. DXGI exclusive fullscreen is
+            // avoided on purpose: it silently drops to windowed on focus loss (Alt+Tab), requires
+            // ResizeBuffers after every mode change and minimizes the window, which led to
+            // DXGI_ERROR_INVALID_CALL crashes. Flip-model swap chains get direct scan-out anyway.
+            if (!_resolvedOptions.Windowed)
+            {
+                SetBorderlessFullScreen(true);
+            }
+
             // SwapChain description
             var desc = new SwapChainDescription
                            {
                                BufferCount = 3,
-                               ModeDescription = new ModeDescription(resolution.Width, resolution.Height,
+                               ModeDescription = new ModeDescription(_renderForm.ClientSize.Width, _renderForm.ClientSize.Height,
                                                                      new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                               IsWindowed = _resolvedOptions.Windowed,
+                               IsWindowed = true,
                                OutputHandle = windowHandle,
                                SampleDescription = new SampleDescription(1, 0),
                                SwapEffect = SwapEffect.FlipDiscard,
@@ -171,12 +181,8 @@ internal static partial class Program
             ResourceManager.Init(_device);
             _deviceContext = _device.ImmediateContext;
 
-            var cursor = CoreUi.Instance.Cursor;
-
-            if (_swapChain.IsFullScreen)
-            {
-                cursor.SetVisible(false);
-            }
+            CoreUi.Instance.Cursor.SetVisible(!_isFullScreen);
+            _backBufferSize = _renderForm.ClientSize;
 
             // Ign ore all windows events
             var factory = _swapChain.GetParent<Factory>();
@@ -422,13 +428,60 @@ internal static partial class Program
         }
     }
 
+    /// <summary>
+    /// Toggles between the normal window and a borderless window covering the screen the window is on.
+    /// The swap chain follows the new client size on the next frame (see <see cref="EnsureBackBufferSize"/>).
+    /// </summary>
+    private static void SetBorderlessFullScreen(bool enable)
+    {
+        if (enable == _isFullScreen)
+            return;
+
+        _isFullScreen = enable;
+        if (enable)
+        {
+            _windowedBounds = _renderForm.Bounds;
+            _windowedBorderStyle = _renderForm.FormBorderStyle;
+            _renderForm.WindowState = FormWindowState.Normal;
+            _renderForm.FormBorderStyle = FormBorderStyle.None;
+            _renderForm.Bounds = Screen.FromControl(_renderForm).Bounds;
+        }
+        else
+        {
+            _renderForm.FormBorderStyle = _windowedBorderStyle;
+            _renderForm.Bounds = _windowedBounds;
+        }
+
+        CoreUi.Instance.Cursor.SetVisible(!enable);
+    }
+
+    /// <summary>
+    /// Resizes the swap chain when the window's client size changed (fullscreen toggle, DPI change).
+    /// Called once per frame before rendering.
+    /// </summary>
+    private static void EnsureBackBufferSize()
+    {
+        var clientSize = _renderForm.ClientSize;
+        if (clientSize == _backBufferSize || clientSize.Width == 0 || clientSize.Height == 0)
+            return;
+
+        RebuildBackBuffer(_renderForm, _device, ref _renderView, ref _backBuffer, _swapChain);
+    }
+
     private static void RebuildBackBuffer(RenderForm form, Device device, ref RenderTargetView rtv, ref SharpDX.Direct3D11.Texture2D buffer, SwapChain swapChain)
     {
+        // ResizeBuffers requires that no reference to the back buffer survives - including a
+        // binding on the output merger. A still-bound RTV leaves the pipeline in undefined
+        // state which can escalate to DXGI_ERROR_DEVICE_HUNG on the next Present.
+        device.ImmediateContext.OutputMerger.SetTargets((RenderTargetView)null);
         rtv.Dispose();
         buffer.Dispose();
-        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, SwapChainFlags.AllowModeSwitch);
+
+        // Preserve the swap chain's existing flags across the resize.
+        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, swapChain.Description.Flags);
         buffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(swapChain, 0);
         rtv = new RenderTargetView(device, buffer);
+        _backBufferSize = form.ClientSize;
     }
 
     private static bool TryResolveOptions(string[] args, ExportSettings exportSettings, out Options resolvedOptions)
@@ -496,6 +549,11 @@ internal static partial class Program
     private static RenderForm _renderForm;
     private static Texture2D _outputTexture;
     private static ShaderResourceView _outputTextureSrv;
+    private static bool _loggedNullOutput;
+    private static bool _isFullScreen;
+    private static Size _backBufferSize;
+    private static Rectangle _windowedBounds;
+    private static FormBorderStyle _windowedBorderStyle;
     private static RasterizerState _rasterizerState;
     private static Resource<VertexShader> _fullScreenVertexShaderResource;
     private static Resource<PixelShader> _fullScreenPixelShaderResource;

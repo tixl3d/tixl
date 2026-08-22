@@ -23,11 +23,9 @@ internal static partial class Program
     private static void OnRenderFormOnKeyUp(object _, KeyEventArgs keyArgs)
     {
         var coreUi = CoreUi.Instance;
-        if (_resolvedOptions.Windowed && keyArgs is { Alt: true, KeyCode: Keys.Enter })
+        if (keyArgs is { Alt: true, KeyCode: Keys.Enter })
         {
-            _swapChain.IsFullScreen = !_swapChain.IsFullScreen;
-            RebuildBackBuffer(_renderForm, _device, ref _renderView, ref _backBuffer, _swapChain);
-            coreUi.Cursor.SetVisible(!_swapChain.IsFullScreen);
+            SetBorderlessFullScreen(!_isFullScreen);
         }
 
         var currentPlayback = Playback.Current;
