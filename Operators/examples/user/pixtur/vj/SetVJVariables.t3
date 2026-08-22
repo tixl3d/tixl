@@ -242,6 +242,11 @@
           "Value": 0.0
         },
         {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
           "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
           "Type": "System.Int32",
           "Value": 14
@@ -484,6 +489,11 @@
           }
         },
         {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
           "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
           "Type": "System.Int32",
           "Value": 20
@@ -520,6 +530,11 @@
           "Id": "ca3ce08d-6a19-4ad5-9435-08b050753311"/*Damping*/,
           "Type": "System.Single",
           "Value": 0.0
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 64.0
         },
         {
           "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
@@ -619,6 +634,11 @@
           "Value": 0.0
         },
         {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 0.0
+        },
+        {
           "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
           "Type": "System.Int32",
           "Value": 7
@@ -710,6 +730,11 @@
           "Id": "ca3ce08d-6a19-4ad5-9435-08b050753311"/*Damping*/,
           "Type": "System.Single",
           "Value": 0.0
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 73.0
         },
         {
           "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
@@ -839,6 +864,11 @@
             "X": 0.0,
             "Y": 1.2
           }
+        },
+        {
+          "Id": "ddbe4c30-74d7-41bc-a062-e19152de1080"/*LastKnownControllerValue*/,
+          "Type": "System.Single",
+          "Value": 76.0
         },
         {
           "Id": "df81b7b3-f39e-4e5d-8b97-f29dd576a76d"/*Control*/,
