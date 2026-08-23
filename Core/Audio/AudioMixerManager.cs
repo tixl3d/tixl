@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using ManagedBass;
 using ManagedBass.Mix;
-using ManagedBass.Wasapi;
 using T3.Core.Logging;
 using T3.Core.Settings;
 
@@ -583,50 +582,32 @@ public static class AudioMixerManager
     }
 
     /// <summary>
-    /// Queries WASAPI to get the default output device's configured sample rate.
-    /// This works before BASS is initialized.
+    /// Queries the default output device's sample rate with a throwaway BASS init: BASS reports the device's
+    /// output rate in its info, while enumerating WASAPI endpoints (the previous approach) blocks for seconds on
+    /// machines with many or disconnected devices.
     /// </summary>
     /// <returns>The device sample rate in Hz, or 0 if it couldn't be determined.</returns>
     private static int GetDefaultOutputSampleRate()
     {
         try
         {
-            // Enumerate WASAPI devices to find the default output's loopback
-            // Loopback devices represent the output and have the correct MixFrequency
-            var deviceCount = BassWasapi.DeviceCount;
-            
-            for (var i = 0; i < deviceCount; i++)
+            if (!Bass.Init(-1, 48000, DeviceInitFlags.Default, IntPtr.Zero))
             {
-                var info = BassWasapi.GetDeviceInfo(i);
-                
-                // Look for enabled loopback device (represents system output)
-                if (info.IsEnabled && info.IsLoopback && !info.IsInput)
-                {
-                    var sampleRate = info.MixFrequency;
-                    Log.Debug($"[AudioMixer] Found default output device: '{info.Name}' at {sampleRate}Hz");
-                    return sampleRate;
-                }
+                Log.Debug($"[AudioMixer] Probe init failed: {Bass.LastError}");
+                return 0;
             }
-            
-            // Fallback: try to find any enabled loopback device
-            for (var i = 0; i < deviceCount; i++)
-            {
-                var info = BassWasapi.GetDeviceInfo(i);
-                if (info.IsEnabled && info.IsLoopback)
-                {
-                    var sampleRate = info.MixFrequency;
-                    Log.Debug($"[AudioMixer] Found loopback device: '{info.Name}' at {sampleRate}Hz");
-                    return sampleRate;
-                }
-            }
-            
-            Log.Debug("[AudioMixer] Could not find default output device sample rate from WASAPI");
+
+            Bass.GetInfo(out var info);
+            Bass.Free();
+            var sampleRate = info.SampleRate;
+            Log.Debug($"[AudioMixer] Default output device runs at {sampleRate}Hz");
+            return sampleRate;
         }
         catch (Exception ex)
         {
-            Log.Debug($"[AudioMixer] Failed to query WASAPI device sample rate: {ex.Message}");
+            Log.Debug($"[AudioMixer] Failed to query device sample rate: {ex.Message}");
         }
-        
+
         return 0; // Couldn't determine
     }
 
