@@ -10,4 +10,4 @@ Defaults for projects exported as standalone executables.
 - **Strip Unused Operators** — ship only operators connected to the exported output (plus auto-playing audio ops) and the libraries they need. Disable if an export misses content.
 - **Enable Playback Control** — viewers can skip through time with the cursor keys and pause with space.
 
-The main soundtrack's length defines the exported duration. Exporting itself happens via File → Export as Executable.
+The main soundtrack's length defines the exported duration. `Export` at the bottom of the panel exports the current composition (it must sit inside a parent composition and have a Texture2D output); the folder icon opens the last export. File → Export as Executable does the same for the selected operator.

@@ -443,20 +443,7 @@ internal static class AppMenuBar
             var canExport = exportView?.CompositionInstance != null && exportChildUis is { Count: 1 };
             if (MenuItem("Export as Executable", isEnabled: canExport))
             {
-                var exportChild = exportChildUis![0];
-                var exportName = exportChild.SymbolChild.ReadableName;
-                switch (PlayerExporter.TryExportInstance(exportView!.CompositionInstance!, exportChild, out var reason, out var exportDir))
-                {
-                    case false:
-                        Log.Error(reason);
-                        BlockingWindow.Instance.ShowMessageBox(reason, $"Failed to export {exportName}");
-                        break;
-                    default:
-                        Log.Info(reason);
-                        BlockingWindow.Instance.ShowMessageBox(reason, $"Exported {exportName} successfully!");
-                        CoreUi.Instance.OpenWithDefaultApplication(exportDir);
-                        break;
-                }
+                PlayerExporter.ExportAndReport(exportView!.CompositionInstance!, exportChildUis![0]);
             }
 
             ImGui.EndMenu();

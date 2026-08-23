@@ -26,6 +26,33 @@ namespace T3.Editor.UiModel.Exporting;
 /// </summary>
 internal static partial class PlayerExporter
 {
+    /// <summary>
+    /// Exports and reports the outcome to the user (message box, log, export folder opened on success).
+    /// </summary>
+    public static void ExportAndReport(Instance composition, SymbolUi.Child childUi)
+    {
+        var exportName = childUi.SymbolChild.ReadableName;
+        if (TryExportInstance(composition, childUi, out var reason, out var exportDir))
+        {
+            Log.Info(reason);
+            BlockingWindow.Instance.ShowMessageBox(reason, $"Exported {exportName} successfully!");
+            CoreUi.Instance.OpenWithDefaultApplication(exportDir);
+        }
+        else
+        {
+            Log.Error(reason);
+            BlockingWindow.Instance.ShowMessageBox(reason, $"Failed to export {exportName}");
+        }
+    }
+
+    /// <summary>
+    /// Where <see cref="TryExportInstance"/> writes the export of the given child.
+    /// </summary>
+    public static string GetExportDirectory(Instance composition, SymbolUi.Child childUi)
+    {
+        return Path.Combine(composition.Symbol.SymbolPackage.Folder, FileLocations.ExportSubFolder, childUi.SymbolChild.ReadableName);
+    }
+
     public static bool TryExportInstance(Instance composition, SymbolUi.Child childUi, out string reason, out string exportDir)
     {
         T3Ui.Save(false);
@@ -99,8 +126,7 @@ internal static partial class PlayerExporter
 
         exportData.PrintInfo();
 
-        var package = composition.Symbol.SymbolPackage;
-        exportDir = Path.Combine(package.Folder, FileLocations.ExportSubFolder, childUi.SymbolChild.ReadableName);
+        exportDir = GetExportDirectory(composition, childUi);
 
         if (!TryRemoveExistingExportDir(out reason, exportDir))
             return false;

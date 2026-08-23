@@ -28,7 +28,7 @@ Open `Project Settings` for the operator you will export and switch to the `Exec
 ## Step: Export and start with the dialog
 
 **Action:**
-Select the operator and run `Export as Executable`. When the success message appears, open the export folder and double-click `Player.exe`.
+Press the `Export` button at the bottom of the `Executable` panel (it is disabled with a hint when the composition is the project root or has no Texture2D output; `File → Export as Executable` with the operator selected does the same). When the success message appears, the export folder opens; the folder icon next to `Export` opens it again later. Double-click `Player.exe`.
 
 **Expected:**
 - No console window opens.

@@ -14,6 +14,8 @@ using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
+using T3.Core.SystemUi;
+using T3.Core.DataTypes;
 using T3.Core.Video;
 using T3.Editor.Gui.Audio;
 using T3.Editor.Gui.Help;
@@ -27,6 +29,7 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;
 using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.Exporting;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
@@ -187,7 +190,7 @@ internal sealed class ProjectSettingsWindow : Window
                     modified |= DrawRecordingSettings(composition);
                     break;
                 case Categories.Executable:
-                    modified |= DrawRenderingSettings(settings);
+                    modified |= DrawRenderingSettings(composition, settings);
                     break;
             }
 
@@ -713,7 +716,7 @@ internal sealed class ProjectSettingsWindow : Window
         return modified;
     }
 
-    private static bool DrawRenderingSettings(CompositionSettings settings)
+    private static bool DrawRenderingSettings(Instance composition, CompositionSettings settings)
     {
         var modified = false;
         var export = settings.Export;
@@ -766,7 +769,67 @@ internal sealed class ProjectSettingsWindow : Window
                                            "Only ship operators connected to the exported output (plus auto-playing audio ops)\nand the libraries they need. Disable if the exported executable misses content.",
                                            defaults.StripUnusedOperators);
 
+        FormInputs.AddVerticalSpace(3);
+        DrawExportButtons(composition);
+
         return modified;
+    }
+
+    /// <summary>
+    /// Right-aligned "open export folder" icon and Export button, mirroring the Render window's footer.
+    /// Exporting needs the parent composition (the exported op is one of its children), so the root op can't export.
+    /// </summary>
+    private static void DrawExportButtons(Instance composition)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var parent = composition.Parent;
+        SymbolUi.Child? childUi = null;
+        string? blockedReason = null;
+        if (parent == null)
+        {
+            blockedReason = "Open the parent of this operator to export it.";
+        }
+        else if (composition.Outputs.FirstOrDefault()?.ValueType != typeof(Texture2D))
+        {
+            blockedReason = "Only operators with a Texture2D output can be exported.";
+        }
+        else if (!parent.GetSymbolUi().ChildUis.TryGetValue(composition.SymbolChildId, out childUi))
+        {
+            blockedReason = "Can't resolve the operator in its parent.";
+        }
+
+        var canExport = blockedReason == null && childUi != null;
+        var exportDir = canExport ? PlayerExporter.GetExportDirectory(parent!, childUi!) : null;
+        var canOpen = exportDir != null && Directory.Exists(exportDir);
+
+        var iconSize = ImGui.GetFrameHeight();
+        var ctaSize = CustomComponents.GetCtaButtonSize("Export");
+        CustomComponents.RightAlign(iconSize + 8 * scale + ctaSize.X);
+
+        if (CustomComponents.IconButton(Icon.FolderOpen, new Vector2(iconSize, iconSize),
+                                        canOpen ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled)
+            && canOpen)
+        {
+            CoreUi.Instance.OpenWithDefaultApplication(exportDir!);
+        }
+
+        CustomComponents.TooltipForLastItem("Open export folder", exportDir ?? "No export yet");
+
+        ImGui.SameLine(0, 8 * scale);
+
+        if (!canExport)
+            ImGui.BeginDisabled();
+
+        if (CustomComponents.DrawCtaButton("Export", Icon.None, CustomComponents.ButtonStates.Activated) && canExport)
+        {
+            PlayerExporter.ExportAndReport(parent!, childUi!);
+        }
+
+        if (!canExport)
+        {
+            ImGui.EndDisabled();
+            CustomComponents.TooltipForLastItem(blockedReason!);
+        }
     }
 
 
