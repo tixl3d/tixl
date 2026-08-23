@@ -28,7 +28,7 @@ Open `Project Settings` for the operator you will export and switch to the `Exec
 ## Step: Export and start with the dialog
 
 **Action:**
-Press the `Export` button at the bottom of the `Executable` panel (it is disabled with a hint when the composition is the project root or has no Texture2D output; `File → Export as Executable` with the operator selected does the same). When the success message appears, the export folder opens; the folder icon next to `Export` opens it again later. Double-click `Player.exe`.
+Press the `Export` button at the bottom of the `Executable` panel (it is disabled with a hint when the composition is the project root or has no Texture2D output; `File → Export as Executable` with the operator selected does the same). When the success message appears, the export folder opens; the folder icon next to `Export` opens it again later. The executable is named `My Demo.exe` (after the `Title` setting; without a title it stays `Player.exe`). Double-click it.
 
 **Expected:**
 - No console window opens.
@@ -61,7 +61,7 @@ Pick the secondary display (or keep the primary one on a single-display setup), 
 ## Step: Last choice is remembered, Quit cancels
 
 **Action:**
-Start `Player.exe` again. Then press `Quit` (or `Esc`) in the dialog.
+Start `My Demo.exe` again. Then press `Quit` (or `Esc`) in the dialog.
 
 **Expected:**
 - The dialog opens with the display, resolution and checkboxes from the previous run.
@@ -73,17 +73,17 @@ Start `Player.exe` again. Then press `Quit` (or `Esc`) in the dialog.
 From a terminal in the export folder run:
 
 ```
-Player.exe --no-dialog --windowed --width 800 --height 450 --display 1
+"My Demo.exe" --no-dialog --windowed --width 800 --height 450 --display 1
 ```
 
 **Expected:**
 - No dialog appears; an 800 x 450 window opens centered on display 1 (the first entry of the dialog's list).
-- Run `Player.exe --help`: a message box lists `--display`, `--width`, `--height`, `--windowed`, `--fullscreen`, `--show-logs`, `--loop`, `--novsync`, `--no-dialog`, `--dialog` and `--reset`.
+- Run `"My Demo.exe" --help`: a message box lists `--display`, `--width`, `--height`, `--windowed`, `--fullscreen`, `--show-logs`, `--loop`, `--novsync`, `--no-dialog`, `--dialog` and `--reset`.
 
 ## Step: Show logs opens a console
 
 **Action:**
-Run `Player.exe --no-dialog --show-logs`.
+Run `"My Demo.exe" --no-dialog --show-logs`.
 
 **Expected:**
 - A console window opens next to the content window and shows the startup log (`Starting <title> ...`, `Startup options: ...`, operator loading messages).
@@ -91,7 +91,7 @@ Run `Player.exe --no-dialog --show-logs`.
 ## Step: Project can skip the dialog
 
 **Action:**
-Back in the editor, enable `Skip Startup Dialog` in the `Executable` settings, export again and double-click `Player.exe`. Then run `Player.exe --dialog` from a terminal.
+Back in the editor, enable `Skip Startup Dialog` in the `Executable` settings, export again and double-click `My Demo.exe`. Then run `"My Demo.exe" --dialog` from a terminal.
 
 **Expected:**
 - The first start opens directly with the project's resolution and window mode, no dialog.

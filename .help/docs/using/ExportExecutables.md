@@ -82,7 +82,7 @@ Switches override the remembered and project settings, so a batch file can enfor
 Player.exe --no-dialog --windowed --width 1280 --height 720 --display 2
 ```
 
-You can rename the executable (e.g. to a Demo title). It will also use the `ProjectSettings.json` to determine the correct soundtrack or audio input source.
+The executable is automatically named after the project's `Title` setting (falling back to `Player.exe`); renaming it manually is also fine.
 
 ## Advanced inputs / customization
 
@@ -105,6 +105,6 @@ In these cases you have to add the files manually to the `Export/Resources/` fol
 ## Looking for problems
 Here are some things you can try when starting the `player.exe` doesn't yield the expected results.
 
-Look into the `Log/` directory and scan the log files for problems. 
+Look into the `.temp/Log/` directory next to the executable and scan the log files for problems. 
 
 

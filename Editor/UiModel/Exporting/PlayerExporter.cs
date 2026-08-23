@@ -164,8 +164,15 @@ internal static partial class PlayerExporter
         if (!TryCopyDirectory(playerDirectory, exportDir, out reason, report, shouldExcludeFile: dependencyFilter.ShouldExcludeFile))
             return false;
 
-        if (!TryExportSettings(exportDir, symbol, exportConfig, out reason))
+        var title = string.IsNullOrWhiteSpace(exportConfig.Title) ? symbol.Name : exportConfig.Title.Trim();
+        var author = string.IsNullOrWhiteSpace(exportConfig.Author)
+                         ? symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty
+                         : exportConfig.Author.Trim();
+
+        if (!TryExportSettings(exportDir, symbol, exportConfig, title, author, out reason))
             return false;
+
+        RenamePlayerExecutable(exportDir, title);
 
         // Ship the bytecode of every shader the editor compiled for the exported graph, so the player starts warm
         var seededShaders = ShaderCompiler.ExportCacheEntries(exportData.CollectedInstances,
@@ -591,21 +598,49 @@ internal static partial class PlayerExporter
         }
     }
 
-    private static bool TryExportSettings(string exportDir, Symbol symbol, CompositionSettings.ExportConfig exportConfig, out string reason)
+    /// <summary>
+    /// Renames the copied Player.exe after the export title. Safe because the apphost carries the
+    /// path to Player.dll baked in at build time - only the .exe gets a new name.
+    /// </summary>
+    private static void RenamePlayerExecutable(string exportDir, string title)
+    {
+        var exeName = string.Join("_", title.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
+        if (string.IsNullOrEmpty(exeName) || exeName.Equals("Player", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var sourcePath = Path.Combine(exportDir, "Player.exe");
+        var targetPath = Path.Combine(exportDir, exeName + ".exe");
+        try
+        {
+            File.Move(sourcePath, targetPath, overwrite: true);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Failed to rename Player.exe to {exeName}.exe: {e.Message}");
+        }
+    }
+
+    private static bool TryExportSettings(string exportDir, Symbol symbol, CompositionSettings.ExportConfig exportConfig, string title, string author,
+                                          out string reason)
     {
         reason = string.Empty;
 
-        var title = string.IsNullOrWhiteSpace(exportConfig.Title) ? symbol.Name : exportConfig.Title.Trim();
-        var author = string.IsNullOrWhiteSpace(exportConfig.Author)
-                         ? symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty
-                         : exportConfig.Author.Trim();
+        // Fresh defaults instead of the editor's live config: everything else in ConfigData is machine-specific
+        // (input device names, MIDI capture limits) or debug state (log flags, mute/volume, DX debug) that must
+        // not leak into an export running on someone else's machine.
+        var configData = new CoreSettings.ConfigData
+                             {
+                                 DefaultOscPort = CoreSettings.Config.DefaultOscPort,
+                                 TimeClipSuspending = CoreSettings.Config.TimeClipSuspending,
+                             };
+
         var exportSettings = new ExportSettings(OperatorId: symbol.Id,
                                                 ApplicationTitle: title,
                                                 Author: author,
                                                 BuildId: Guid.NewGuid(),
                                                 EditorVersion: Program.VersionText,
                                                 Export: exportConfig,
-                                                ConfigData: CoreSettings.Config);
+                                                ConfigData: configData);
 
         if (JsonUtils.TrySaveJson(exportSettings, Path.Combine(exportDir, ExportSettings.FileName)))
             return true;

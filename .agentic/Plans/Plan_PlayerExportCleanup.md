@@ -1,6 +1,6 @@
 # Player & Export Cleanup
 
-**Status:** In progress — 2026-08-23. Phases 0 (incl. prune), 1, 3, 4, 5 landed (uncommitted); Phase 2 remainder (background image, exe rename, ConfigData trim) open.
+**Status:** In progress — 2026-08-23. Phases 0 (incl. prune), 1, 3, 4, 5 landed; Phase 2 ConfigData trim landed. Remaining: background/header image (deferred). Exe rename landed: exporter renames Player.exe after the sanitized title (apphost keeps its baked-in Player.dll path, so only the .exe moves).
 Covers the exported-executable pipeline (`Editor/UiModel/Exporting/PlayerExporter*.cs`) and the standalone
 `Player/` app, which have grown hotfix-by-hotfix.
 
@@ -216,8 +216,9 @@ binaries). Open: dialog header image (waits for Phase 2's `BackgroundImage`).
   it. Migration: old `exportSettings.json` without `Defaults` keeps working for one version (player falls
   back to `WindowMode`).
 - Background image exported as an asset; `Player.exe` rename.
-- Trim `ConfigData` baked into the export to what the player actually reads (audio device, OSC port, log
-  flags) — audit `CoreSettings.Config` uses in Core at runtime.
+- ~~Trim `ConfigData` baked into the export~~ — done: the exporter writes fresh defaults and copies only
+  `DefaultOscPort` and `TimeClipSuspending`; machine-specific fields (input device, MIDI limits) and debug
+  state (log flags, mute/volume, DX debug, beat-sync profiling) no longer leak into exports.
 
 ### Phase 3 — Export stripping (D4) (landed, uncommitted)
 
@@ -281,8 +282,8 @@ may assume the main thread. `LoadingScreen` draws with Direct2D/DirectWrite onto
 ## Open questions
 
 1. ~~D1: Silk or WinForms?~~ Decided: Silk.
-2. D5 exe rename: fine with renaming the four apphost files, or keep `Player.exe` and only set the window
-   title/icon? (Rename is cosmetic for end users but affects crash-log paths and Sentry grouping.)
+2. ~~D5 exe rename~~ Decided and landed: rename the .exe only (the apphost carries the Player.dll path
+   baked in, so the siblings keep their names).
 3. D4: is "auto-collected" the full list (AudioClip AutoPlay, loose audio sources)? Any other collectors
    the player's render loop depends on (MIDI/OSC inputs without output connection, `SetVar`-style ops)?
 4. D7: shader-cache seed — per-export size is typically a few MB; OK to always ship, or opt-in in the
