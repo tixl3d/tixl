@@ -122,6 +122,10 @@ internal static partial class ProjectXml
         propertyGroup.AddProperty(PropertyType.PackageId.GetItemName(), packageId.ToString());
         propertyGroup.AddProperty(PropertyType.AssemblyName.GetItemName(), UnevaluatedVariable(GetItemName(PropertyType.RootNamespace)));
         propertyGroup.AddProperty("DefaultItemExcludes", @"$(DefaultItemExcludes);Export\**;bin\**;obj\**;.temp\**;.meta\**;Assets\**;Screenshots\**;Render\**");
+
+        // Analyzers roughly double compile time and run on every hot-reload compile; Release builds keep them.
+        var runAnalyzers = propertyGroup.AddProperty("RunAnalyzers", "false");
+        runAnalyzers.Condition = "'$(Configuration)' == 'Debug'";
     }
 
     private static void AddDefaultReferenceGroup(this ProjectRootElement project)

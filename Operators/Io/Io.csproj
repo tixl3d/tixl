@@ -19,6 +19,8 @@
     <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
     <PackageId>fcf9c228-c779-4a14-9395-35324763470e</PackageId>
     <IsArchived>false</IsArchived>
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <!-- Operator global usings — mirrors Lib so the moved IO operators compile unchanged. -->
   <ItemGroup>

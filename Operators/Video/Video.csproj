@@ -19,6 +19,8 @@
     <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
     <PackageId>eb0ba418-08c9-444a-ba70-6abc7b5b1d47</PackageId>
     <IsArchived>false</IsArchived>
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <!-- Operator global usings — mirrors Lib so the FFmpeg video operators compile unchanged when moved here. -->
   <ItemGroup>

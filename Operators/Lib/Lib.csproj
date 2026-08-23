@@ -23,6 +23,8 @@
     <PackageId>55612b33-e330-4730-a981-c2227b4cc904</PackageId>
     <IsArchived>false</IsArchived>
     <!-- Set the output path based on the version and release mode -->
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />

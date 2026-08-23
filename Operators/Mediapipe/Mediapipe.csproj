@@ -18,6 +18,8 @@
     <RootNamespace>Mediapipe</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <IsArchived>false</IsArchived>
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>$(NoWarn);0108;9084;NU1900;CS8981</NoWarn>

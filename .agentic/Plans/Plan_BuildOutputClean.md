@@ -230,3 +230,14 @@ Replaced by a `PackageResourceConsumer` (the symbol's package + shared packages,
 instance exposes). Migrations phase 3.9 s → 0.0 s, identical outcomes (the 9 stale-path clips still defer).
 Warm startup now **8.0 s** (`projects 0.5s, symbols 6.6s [contexts 3.4s, types 2.1s, uis 0.5s], migrations 0.0s`).
 Biggest remaining item: `contexts` (19 sequential `GenerateLoadContext`, 1.5 s of it the 568 MB shadow copy).
+
+### Landed 2026-08-23 (hot-reload compile)
+- `Compiler.TryCompile` passes `--no-dependencies` for **Debug** builds (the editor's hot-reload/startup
+  compiles): no reference-graph walk, and packages compile against the DLLs the running editor has loaded.
+  Release/export builds keep the walk so Core & co. get built in Release when needed.
+- `RunAnalyzers=false` for Debug in all repo operator csprojs and in `ProjectXml.AddDefaultPropertyGroup`
+  (new user projects). Deliberately in the csproj, not as a build flag — a flag-only property would make
+  Rider and the editor invalidate each other's `CoreCompileInputs.cache`. IDE inspections are unaffected;
+  Release builds keep analyzers.
+- Measured (single-file Lib edit, editor-style command): 7.9 s → **5.8 s wall, Csc 5.1 → 3.4 s**; the
+  19–25 s dependency-cascade case (post-commit / Core-edit) is structurally gone in the editor's builds.

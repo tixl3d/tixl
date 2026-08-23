@@ -18,6 +18,8 @@
     <NoWarn>$(NoWarn);NU1900</NoWarn>
     <PackageId>ed3b1b0d-af67-4d4a-b951-ade0bc11c249</PackageId>
     <IsArchived>false</IsArchived>
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />
