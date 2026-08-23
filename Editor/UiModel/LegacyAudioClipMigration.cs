@@ -1,4 +1,6 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.Audio;
@@ -81,6 +83,17 @@ internal static class LegacyAudioClipMigration
             return true; // nothing worth keeping — just drop the entry
 
         var symbol = symbolUi.Symbol;
+
+        // Settings-list clips predate package-qualified asset addresses; translate the pre-Assets-rename
+        // forms ("Resources/<path>" or a bare relative path) so the created op resolves and plays again.
+        var assetPath = clip.AssetPath;
+        string? absolutePath = null;
+        if (TryResolveClipPath(symbol, assetPath, out var canonicalAddress, out var resolvedPath))
+        {
+            assetPath = canonicalAddress;
+            absolutePath = resolvedPath;
+        }
+
         var barsPerSecond = settings.Playback.Bpm / 240.0;
 
         // The op registrar only plays a clip while the playhead is inside its TimeRange, so the legacy
@@ -88,7 +101,7 @@ internal static class LegacyAudioClipMigration
         var timeRange = clip.TimeRange;
         if (timeRange.End <= timeRange.Start)
         {
-            if (!TryGetClipDurationSecs(symbol, clip, out var durationSecs))
+            if (!TryGetClipDurationSecs(clip, absolutePath, out var durationSecs))
             {
                 // Leave the entry in the settings list — legacy playback keeps working; retried next save.
                 // Debug, not Warning: with a permanently unresolvable path this repeats on every start,
@@ -105,7 +118,9 @@ internal static class LegacyAudioClipMigration
 
         var addCommand = new AddSymbolChildCommand(symbol, AudioClipSymbolId)
                              {
-                                 PosOnCanvas = GraphUtils.FindFreePosition(symbolUi, new Vector2(0, 200), SymbolUi.Child.DefaultOpSize),
+                                 PosOnCanvas = GraphUtils.FindFreePosition(symbolUi,
+                                                                           GraphUtils.GetPositionBelowExistingChildren(symbolUi, new Vector2(0, 200)),
+                                                                           SymbolUi.Child.DefaultOpSize),
                              };
         addCommand.Do();
         var childId = addCommand.AddedChildId;
@@ -131,7 +146,7 @@ internal static class LegacyAudioClipMigration
             break;
         }
 
-        SetInput(symbol, child, PathInputId, new InputValue<string>(clip.AssetPath));
+        SetInput(symbol, child, PathInputId, new InputValue<string>(assetPath));
         SetInput(symbol, child, AutoPlayInputId, new InputValue<bool>(true));
 
         if (Math.Abs(clip.Volume - 1f) > 0.001f)
@@ -173,17 +188,78 @@ internal static class LegacyAudioClipMigration
         }
     }
 
-    private static bool TryGetClipDurationSecs(Symbol symbol, TimelineAudioClip clip, out double durationSecs)
+    /// <summary>
+    /// Resolves a clip's stored path to an absolute file plus its canonical "Package:path" address.
+    /// The asset registry handles current addresses; legacy entries stored "Resources/path" (or a bare
+    /// relative path), which stopped resolving with the Resources-to-Assets rename - for those, the
+    /// packages visible to the composition are searched by relative path.
+    /// </summary>
+    private static bool TryResolveClipPath(Symbol symbol, string address,
+                                           [NotNullWhen(true)] out string? canonicalAddress,
+                                           [NotNullWhen(true)] out string? absolutePath)
+    {
+        canonicalAddress = null;
+        absolutePath = null;
+
+        if (string.IsNullOrEmpty(address))
+            return false;
+
+        var consumer = new PackageResourceConsumer(symbol.SymbolPackage);
+        if (AssetRegistry.TryResolveAddress(address, consumer, out var resolved, out _))
+        {
+            canonicalAddress = address;
+            absolutePath = resolved;
+            return true;
+        }
+
+        const string legacyPrefix = "Resources/";
+        var relativePath = address.Replace('\\', '/');
+        if (relativePath.StartsWith(legacyPrefix, StringComparison.OrdinalIgnoreCase))
+            relativePath = relativePath[legacyPrefix.Length..];
+
+        foreach (var package in consumer.AvailableResourcePackages)
+        {
+            var candidate = $"{package.AssetsFolder}/{relativePath}";
+            if (!File.Exists(candidate))
+                continue;
+
+            canonicalAddress = $"{package.Name}{AssetRegistry.PackageSeparator}{relativePath}";
+            absolutePath = candidate;
+            return true;
+        }
+
+        // Last resort for manually reorganised projects: the exact filename inside the symbol's own
+        // package. Only a unique match counts - a name that exists twice never silently picks a file.
+        var fileName = Path.GetFileName(relativePath);
+        var ownPackage = symbol.SymbolPackage;
+        if (string.IsNullOrEmpty(fileName) || !Directory.Exists(ownPackage.AssetsFolder))
+            return false;
+
+        string? uniqueMatch = null;
+        foreach (var candidate in Directory.EnumerateFiles(ownPackage.AssetsFolder, fileName, SearchOption.AllDirectories))
+        {
+            if (uniqueMatch != null)
+                return false; // ambiguous - don't guess
+
+            uniqueMatch = candidate;
+        }
+
+        if (uniqueMatch == null)
+            return false;
+
+        var packageRelativePath = Path.GetRelativePath(ownPackage.AssetsFolder, uniqueMatch).Replace('\\', '/');
+        canonicalAddress = $"{ownPackage.Name}{AssetRegistry.PackageSeparator}{packageRelativePath}";
+        absolutePath = uniqueMatch;
+        return true;
+    }
+
+    private static bool TryGetClipDurationSecs(TimelineAudioClip clip, string? absolutePath, out double durationSecs)
     {
         durationSecs = clip.LengthInSeconds;
         if (durationSecs > 0)
             return true;
 
-        // Asset resolution only needs the symbol's package plus the shared ones - exactly what a parentless
-        // instance would expose. Creating that instance here would build the whole composition at startup,
-        // for every symbol still carrying a legacy clip, on every start until the project is saved.
-        var consumer = new PackageResourceConsumer(symbol.SymbolPackage);
-        if (!AssetRegistry.TryResolveAddress(clip.AssetPath, consumer, out var absolutePath, out _))
+        if (absolutePath == null)
             return false;
 
         var stream = AudioMixerManager.CreateOfflineAnalysisStream(absolutePath);

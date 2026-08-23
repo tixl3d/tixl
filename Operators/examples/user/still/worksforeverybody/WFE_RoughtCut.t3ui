@@ -68,6 +68,13 @@
       }
     },
     {
+      "ChildId": "216bcefd-eceb-4f90-8de6-ffa3019d5a04"/*AudioClip*/,
+      "Position": {
+        "X": 3120.0525,
+        "Y": 570.4348
+      }
+    },
+    {
       "ChildId": "21e9d680-43b6-430f-9334-81a721e85ad4"/*Interactions*/,
       "SectionId": "fbf1dfa3-8f38-4b7f-88c7-6c65bab61280",
       "Position": {

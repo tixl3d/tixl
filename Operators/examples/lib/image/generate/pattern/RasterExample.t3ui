@@ -75,6 +75,13 @@
       }
     },
     {
+      "ChildId": "8959b83e-13e0-4ae5-af9c-7ca6452d048c"/*AudioClip*/,
+      "Position": {
+        "X": -287.87857,
+        "Y": 1189.4266
+      }
+    },
+    {
       "ChildId": "94e759d7-d9bb-4ffd-b182-2fffe3612ac0"/*_AnimValueOld*/,
       "Position": {
         "X": 100.0,

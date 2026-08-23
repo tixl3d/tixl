@@ -20,6 +20,7 @@ using T3.Core.Video;
 using T3.Editor.Gui.Audio;
 using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
@@ -846,7 +847,7 @@ internal sealed class ProjectSettingsWindow : Window
 
         var addCommand = new AddSymbolChildCommand(symbolUi.Symbol, LegacyAudioClipMigration.AudioClipSymbolId)
                              {
-                                 PosOnCanvas = GraphUtils.FindFreePosition(symbolUi, new Vector2(0, 200), SymbolUi.Child.DefaultOpSize),
+                                 PosOnCanvas = FindPositionForNewSoundtrackOp(symbolUi),
                              };
         addCommand.Do();
         commands.Add(addCommand);
@@ -880,6 +881,25 @@ internal sealed class ProjectSettingsWindow : Window
         {
             SelectSoundtrackOp(newInstance);
         }
+    }
+
+    /// <summary>
+    /// Canvas position for the new soundtrack op: below the existing ops, re-centred on the visible
+    /// canvas when that anchor is off-screen - an op created from the settings window should appear
+    /// where the user is looking, not at a fixed coordinate outside the project bounds.
+    /// </summary>
+    private static Vector2 FindPositionForNewSoundtrackOp(SymbolUi symbolUi)
+    {
+        var preferred = GraphUtils.GetPositionBelowExistingChildren(symbolUi, new Vector2(0, 200));
+
+        if (ProjectView.Focused?.GraphView is ScalableCanvas canvas)
+        {
+            var visible = canvas.GetVisibleCanvasArea();
+            if (visible.GetWidth() > 0 && visible.GetHeight() > 0 && !visible.Contains(preferred))
+                preferred = visible.GetCenter();
+        }
+
+        return GraphUtils.FindFreePosition(symbolUi, preferred, SymbolUi.Child.DefaultOpSize);
     }
 
     /// <summary>Selects the soundtrack [AudioClip] op and centers the graph view on it.</summary>

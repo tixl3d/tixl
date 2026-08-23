@@ -331,6 +331,13 @@
       }
     },
     {
+      "ChildId": "3ec17266-c2a9-454d-ac4e-35befd474e27"/*AudioClip*/,
+      "Position": {
+        "X": 1407.624,
+        "Y": 13201.75
+      }
+    },
+    {
       "ChildId": "42e9be8a-66ff-4b8a-9b46-5befd80cf847"/*PolarTransformPoints*/,
       "SectionId": "36d67941-507e-49f8-bac2-27e7f3b28ac0",
       "Position": {
@@ -1755,7 +1762,7 @@
 },
     "Timeline": {
   "ScaleX": 36.39872,
-  "ScrollX": -1.892954,
+  "ScrollX": 55.069065,
   "Mode": "DopeView",
   "TimelineHeight": 335,
   "InlineDataClipEditEnabled": false,

@@ -37,6 +37,27 @@ internal static partial class GraphUtils
         return candidate;
     }
 
+    /// <summary>
+    /// Anchor for ops created without a mouse position: directly below the bounding box of the existing
+    /// children, so the new op lands inside the project's populated canvas region. A fixed coordinate
+    /// like (0, 200) can be arbitrarily far outside the bounds of a composition whose ops live elsewhere.
+    /// </summary>
+    public static Vector2 GetPositionBelowExistingChildren(SymbolUi symbolUi, Vector2 fallback)
+    {
+        const float spacingY = 80f;
+        var minX = float.PositiveInfinity;
+        var maxY = float.NegativeInfinity;
+        foreach (var childUi in symbolUi.ChildUis.Values)
+        {
+            minX = MathF.Min(minX, childUi.PosOnCanvas.X);
+            maxY = MathF.Max(maxY, childUi.PosOnCanvas.Y + childUi.Size.Y);
+        }
+
+        return float.IsNegativeInfinity(maxY)
+                   ? fallback
+                   : new Vector2(minX, maxY + spacingY);
+    }
+
     private static bool OverlapsAnyChild(SymbolUi symbolUi, Vector2 pos, Vector2 size, float margin)
     {
         foreach (var childUi in symbolUi.ChildUis.Values)

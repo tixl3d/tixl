@@ -139,6 +139,13 @@
       }
     },
     {
+      "ChildId": "d81f41a4-4b0b-4da4-aa72-eba01b80fa13"/*AudioClip*/,
+      "Position": {
+        "X": 730.4121,
+        "Y": 1063.4053
+      }
+    },
+    {
       "ChildId": "d8d31d18-69b1-4228-99b6-25738d8ec53c"/*Small Spot Light*/,
       "Position": {
         "X": 1536.1562,
