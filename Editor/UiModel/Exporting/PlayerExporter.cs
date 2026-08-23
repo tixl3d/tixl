@@ -459,19 +459,24 @@ internal static partial class PlayerExporter
         reason = string.Empty;
 
         // Update project settings
+        // The exported op's own settings win over inherited ones: they are what the Executable panel edits.
+        var exportConfig = symbol.CompositionSettings?.Export ?? CompositionSettings.Current.Export;
+        var title = string.IsNullOrWhiteSpace(exportConfig.Title) ? symbol.Name : exportConfig.Title.Trim();
+        var author = string.IsNullOrWhiteSpace(exportConfig.Author)
+                         ? symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty
+                         : exportConfig.Author.Trim();
         var exportSettings = new ExportSettings(OperatorId: symbol.Id,
-                                                ApplicationTitle: symbol.Name,
-                                                WindowMode: CompositionSettings.Current.Export.DefaultWindowMode,
-                                                ConfigData: CoreSettings.Config,
-                                                Author: symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty, // todo - actual author name
+                                                ApplicationTitle: title,
+                                                Author: author,
                                                 BuildId: Guid.NewGuid(),
-                                                EditorVersion: Program.VersionText);
+                                                EditorVersion: Program.VersionText,
+                                                Export: exportConfig,
+                                                ConfigData: CoreSettings.Config);
 
-        const string exportSettingsFile = "exportSettings.json";
-        if (JsonUtils.TrySaveJson(exportSettings, Path.Combine(exportDir, exportSettingsFile)))
+        if (JsonUtils.TrySaveJson(exportSettings, Path.Combine(exportDir, ExportSettings.FileName)))
             return true;
 
-        reason = $"Failed to save export settings to {exportSettingsFile}";
+        reason = $"Failed to save export settings to {ExportSettings.FileName}";
         return false;
     }
 

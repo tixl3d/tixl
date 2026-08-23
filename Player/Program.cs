@@ -6,9 +6,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
-using CommandLine;
-using CommandLine.Text;
 using ManagedBass;
 using Newtonsoft.Json;
 using SharpDX.Direct3D;
@@ -50,30 +49,6 @@ namespace T3.Player;
 /// </summary>
 internal static partial class Program
 {
-    /// <summary>
-    /// Defines command line switches for exported playback.
-    /// </summary>
-    private class Options
-    {
-        [Option(Default = false, Required = false, HelpText = "Disable vsync")]
-        public bool NoVsync { get; set; }
-
-        [Option(Default = 1920, Required = false, HelpText = "Defines the width")]
-        public int Width { get; set; }
-
-        [Option(Default = 1080, Required = false, HelpText = "Defines the height")]
-        public int Height { get; set; }
-
-        [Option(Default = false, Required = false, HelpText = "Run in windowed mode")]
-        public bool Windowed { get; set; }
-
-        [Option(Default = false, Required = false, HelpText = "Loops the demo")]
-        public bool Loop { get; set; }
-
-        [Option(Default = true, Required = false, HelpText = "Show log messages.")]
-        public bool Logging { get; set; }
-    }
-
     [STAThread]
     private static void Main(string[] args)
     {
@@ -81,10 +56,12 @@ internal static partial class Program
         T3.Core.Diagnostics.AssemblyLoadDiagnostics.Install();
 
         CoreUi.Instance = new MsForms.MsForms();
-        BlockingWindow.Instance = new SilkWindowProvider();
-            
-        var settingsPath = Path.Combine(FileLocations.StartFolder, "exportSettings.json");
-        if (!JsonUtils.TryLoadingJson(settingsPath, out ExportSettings exportSettings))
+        var silkWindows = new SilkWindowProvider();
+        BlockingWindow.Instance = silkWindows;
+        TrySetDialogFonts(silkWindows);
+
+        var settingsPath = Path.Combine(FileLocations.StartFolder, ExportSettings.FileName);
+        if (!JsonUtils.TryLoadingJson(settingsPath, out ExportSettings exportSettings) || exportSettings.Export == null)
         {
             var message = $"Failed to load export settings from \"{settingsPath}\". Exiting!";
             Log.Error(message);
@@ -92,33 +69,66 @@ internal static partial class Program
             return;
         }
 
-        CoreSettings.Config = exportSettings!.ConfigData;
-            
-        var logDirectory = Path.Combine(Core.Settings.FileLocations.SettingsDirectory, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
-        var fileWriter = FileWriter.CreateDefault(logDirectory, out var logPath);
+        CoreSettings.Config = exportSettings.ConfigData;
+
+        var playerDataDirectory = ResolvePlayerDataDirectory(exportSettings);
+        var fileWriter = FileWriter.CreateDefault(playerDataDirectory, out var logPath);
         try
         {
-            Log.AddWriter(new ConsoleWriter());
             Log.AddWriter(fileWriter);
 
-            if (!TryResolveOptions(args, exportSettings!, out _resolvedOptions))
+            if (!PlayerStartupOptions.TryParseCommandLine(args, exportSettings.ApplicationTitle, exportSettings.Author, out var commandLine, out var helpText))
+            {
+                BlockingWindow.Instance.ShowMessageBox(helpText, exportSettings.ApplicationTitle);
                 return;
-                
+            }
+
+            var lastUsedPath = Path.Combine(playerDataDirectory, "playerSettings.json");
+            _startupOptions = PlayerStartupOptions.Resolve(exportSettings, commandLine, lastUsedPath);
+            var displays = silkWindows.GetDisplays();
+
+            var showDialog = commandLine.ForceDialog || (!commandLine.NoDialog && !exportSettings.Export.SkipStartupDialog);
+            if (showDialog)
+            {
+                var dialog = new PlayerStartupDialog(exportSettings.ApplicationTitle, exportSettings.Author, displays, _startupOptions);
+                var primary = _startupOptions.ResolveDisplay(displays);
+                var dialogSize = new Vector2(520, 330);
+                var dialogOptions = new SimpleWindowOptions(dialogSize, 60, true, false, true,
+                                                            new Vector2(primary.Bounds.X + (primary.Bounds.Width - dialogSize.X) / 2,
+                                                                        primary.Bounds.Y + (primary.Bounds.Height - dialogSize.Y) / 2));
+                var result = silkWindows.Show(exportSettings.ApplicationTitle, dialog, dialogOptions);
+                if (result == null)
+                {
+                    Log.Info("Startup cancelled.");
+                    return;
+                }
+
+                _startupOptions = result;
+                _startupOptions.SaveAsLastUsed(lastUsedPath);
+            }
+
+            if (_startupOptions.ShowLogs)
+            {
+                ConsoleWindow.Show();
+                Log.AddWriter(new ConsoleWriter());
+            }
+
+            var display = _startupOptions.ResolveDisplay(displays);
+
             Log.Info($"Starting {exportSettings.ApplicationTitle} with id {exportSettings.OperatorId} by {exportSettings.Author}.");
             Log.Info($"Build: {exportSettings.BuildId}, Editor: {exportSettings.EditorVersion}");
-                
-            ShaderCompiler.ShaderCacheSubdirectory = Path.Combine("Player", 
-                                                                  exportSettings.EditorVersion, 
+            Log.Info($"Startup options: {_startupOptions} on {display}");
+
+            // No BuildId in the path: the cache is keyed by shader content, so it stays valid across re-exports.
+            ShaderCompiler.ShaderCacheSubdirectory = Path.Combine("Player",
                                                                   exportSettings.Author,
-                                                                  exportSettings.ApplicationTitle, 
-                                                                  exportSettings.OperatorId.ToString(), 
-                                                                  exportSettings.BuildId.ToString());
+                                                                  exportSettings.ApplicationTitle,
+                                                                  exportSettings.OperatorId.ToString());
 
-            var resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
-            _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
-            Log.Debug($": {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
+            var resolution = new Int2(_startupOptions.Width, _startupOptions.Height);
+            _vsyncInterval = Convert.ToInt16(_startupOptions.VSync);
 
-            var iconPath = Path.Combine(SharedResources.EditorResourcesDirectory,  SharedResources.EditorResourcesDirectory,"images", "t3.ico");
+            var iconPath = Path.Combine(SharedResources.EditorResourcesDirectory, "images", "t3.ico");
             var gotIcon = File.Exists(iconPath);
 
             Icon icon;
@@ -132,12 +142,18 @@ internal static partial class Program
                 icon = new Icon(iconPath);
             }
 
-            _renderForm = new RenderForm(exportSettings!.ApplicationTitle)
+            _renderForm = new RenderForm(exportSettings.ApplicationTitle)
                               {
                                   ClientSize = new Size(resolution.X, resolution.Y),
                                   AllowUserResizing = false,
                                   Icon = icon,
+                                  StartPosition = FormStartPosition.Manual,
                               };
+
+            // Center on the chosen display; borderless fullscreen then covers that display.
+            var displayBounds = display.Bounds;
+            _renderForm.Location = new Point(displayBounds.X + Math.Max(0, (displayBounds.Width - _renderForm.Width) / 2),
+                                             displayBounds.Y + Math.Max(0, (displayBounds.Height - _renderForm.Height) / 2));
 
             var windowHandle = _renderForm.Handle;
 
@@ -145,7 +161,7 @@ internal static partial class Program
             // avoided on purpose: it silently drops to windowed on focus loss (Alt+Tab), requires
             // ResizeBuffers after every mode change and minimizes the window, which led to
             // DXGI_ERROR_INVALID_CALL crashes. Flip-model swap chains get direct scan-out anyway.
-            if (!_resolvedOptions.Windowed)
+            if (_startupOptions.Fullscreen)
             {
                 SetBorderlessFullScreen(true);
             }
@@ -245,7 +261,7 @@ internal static partial class Program
 
             var prerenderRequired = false;
 
-            _resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
+            _resolution = resolution;
 
             // Init wasapi input if required
             if (playbackSettings is { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
@@ -484,43 +500,60 @@ internal static partial class Program
         _backBufferSize = form.ClientSize;
     }
 
-    private static bool TryResolveOptions(string[] args, ExportSettings exportSettings, out Options resolvedOptions)
+    /// <summary>
+    /// Logs and remembered settings live in a .temp folder next to the executable, where users look for them.
+    /// Falls back to the roaming app-data folder when the export location is read-only.
+    /// </summary>
+    private static string ResolvePlayerDataDirectory(ExportSettings exportSettings)
     {
-        var parser = new Parser(config =>
-                                {
-                                    config.HelpWriter = null;
-                                    config.AutoVersion = false;
-                                });
-        var parserResult = parser.ParseArguments<Options>(args);
-        var helpText = HelpText.AutoBuild(parserResult,
-                                          h =>
-                                          {
-                                              h.AdditionalNewLineAfterOption = false;
-
-                                              // Todo: This should use information from the main operator
-                                              h.Heading = exportSettings.ApplicationTitle;
-
-                                              h.Copyright = exportSettings.Author;
-                                              h.AutoVersion = false;
-                                              return h;
-                                          },
-                                          e => e);
-
-        Options parsedOptions = null;
-        parserResult.WithParsed(o => { parsedOptions = o; })
-                    .WithNotParsed(_ => { Log.Debug(helpText); });
-
-        resolvedOptions = parsedOptions;
-        if (resolvedOptions == null)
-            return false;
-            
-        // use windowed status _only_ when explicitly set, the Options struct doesn't know about this
-        if (!args.Any(s => "--windowed".Contains(s)))
+        var localDirectory = Path.Combine(FileLocations.StartFolder, ".temp");
+        try
         {
-            parsedOptions.Windowed = exportSettings.WindowMode == WindowMode.Windowed;
+            Directory.CreateDirectory(localDirectory);
+            var probePath = Path.Combine(localDirectory, ".write-test");
+            File.WriteAllText(probePath, string.Empty);
+            File.Delete(probePath);
+            return localDirectory;
+        }
+        catch (Exception)
+        {
+            return Path.Combine(FileLocations.SettingsDirectory, "Player", exportSettings.Author, exportSettings.ApplicationTitle);
+        }
+    }
+
+    /// <summary>
+    /// Uses the editor's UI fonts for the startup dialog and message boxes when the export ships them.
+    /// </summary>
+    private static void TrySetDialogFonts(SilkWindowProvider silkWindows)
+    {
+        var fontDirectory = Path.Combine(SharedResources.EditorResourcesDirectory, "fonts");
+        var regularPath = Path.Combine(fontDirectory, "Inter-Regular.ttf");
+        var boldPath = Path.Combine(fontDirectory, "Inter-SemiBold.ttf");
+        var lightPath = Path.Combine(fontDirectory, "Inter-Light.ttf");
+        if (!File.Exists(regularPath) || !File.Exists(boldPath) || !File.Exists(lightPath))
+            return;
+
+        silkWindows.SetFonts(new FontPack(new TtfFont(regularPath, 18),
+                                          new TtfFont(boldPath, 18),
+                                          new TtfFont(regularPath, 14),
+                                          new TtfFont(lightPath, 30)));
+    }
+
+    /// <summary>
+    /// The player is a windowed application; a console is only attached when log output was requested.
+    /// </summary>
+    private static class ConsoleWindow
+    {
+        public static void Show()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            AllocConsole();
         }
 
-        return true;
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool AllocConsole();
     }
 
     private readonly struct PackageLoadInfo(
@@ -545,7 +578,7 @@ internal static partial class Program
     // and preload semantics.
     private static readonly List<AudioClipResourceHandle> _allSoundtrackHandles = new();
     private static DeviceContext _deviceContext;
-    private static Options _resolvedOptions;
+    private static PlayerStartupOptions _startupOptions;
     private static RenderForm _renderForm;
     private static Texture2D _outputTexture;
     private static ShaderResourceView _outputTextureSrv;

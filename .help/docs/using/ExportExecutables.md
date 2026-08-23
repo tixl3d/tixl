@@ -42,27 +42,36 @@ Then...
 
 ## Running the executable
 
-The executable `Player.exe` is a stand alone application that handles operator loading, pre-initialization and audio playback. It comes with a number of command line arguments:
+The executable `Player.exe` is a stand alone application that handles operator loading, pre-initialization and audio playback.
+
+### Startup dialog
+
+On start, the player opens a small dialog asking for the display, the resolution (the native modes of that display, or a custom size), fullscreen and whether to show log messages in a console window. The defaults come from the project's `Executable` settings (`Preferred Width` / `Height`, `Window Mode`, `Show Log Messages`); the last choice is remembered per executable. Enable `Skip Startup Dialog` in the project settings to start directly with the project defaults — useful for installations. `Title` and `Author` in the same panel set the window title and the dialog header.
+
+The player writes its log files and the remembered startup choice to a `.temp/` folder next to the executable (falling back to the user's app-data folder when that location is read-only).
+
+### Command line arguments
 
 ```
-c:\Users\pixtur\dev\tooll\t3\Export>player.exe --help
-Debug: still::partial - v0.1
-Copyright (c) 2021 lucid & pixtur
-
-  --novsync     (Default: false) Disable vsync
-  --width       (Default: 1920) Defines the width
-  --height      (Default: 1080) Defines the height
-  --windowed    (Default: false) Run in windowed mode
-  --loop        (Default: false) Loops the demo
-  --logging     (Default: true) Show log messages.
-  --help        Display this help screen.
+  --display N    Display to use (1-based, as listed in the startup dialog)
+  --width N      Render width in pixels
+  --height N     Render height in pixels
+  --windowed     Run in a window
+  --fullscreen   Run borderless fullscreen on the selected display
+  --show-logs    Open a console window with log messages
+  --loop         Restart playback at the end of the timeline
+  --novsync      Disable vsync
+  --no-dialog    Skip the startup dialog and start with the resolved settings
+  --dialog       Show the startup dialog even if the project disables it
+  --reset        Forget the previously used startup settings
+  --help         Display this help screen
 ```
 
-You can use this to create a batch file to enforce a certain resolution or run in windowed mode:
+Switches override the remembered and project settings, so a batch file can enforce a setup:
 
 `player-windowed.bat`:
 ```
-Player.exe --width 1280 --height 720 --windowed true
+Player.exe --no-dialog --windowed --width 1280 --height 720 --display 2
 ```
 
 You can rename the executable (e.g. to a Demo title). It will also use the `ProjectSettings.json` to determine the correct soundtrack or audio input source.

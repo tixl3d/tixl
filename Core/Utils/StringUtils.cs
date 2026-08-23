@@ -678,7 +678,28 @@ public static class StringUtils
     }
 
     /// <summary>
-    
+    /// 64-bit FNV-1a hash that is stable across processes and versions, unlike <see cref="string.GetHashCode()"/>.
+    /// Chain calls by passing the previous result as <paramref name="hash"/> to hash several strings into one value.
+    /// </summary>
+    public static ulong ComputeStableHash(this string text, ulong hash = Fnv1aOffsetBasis)
+    {
+        const ulong fnvPrime = 1099511628211UL;
+        foreach (var c in text)
+        {
+            hash ^= c;
+            hash *= fnvPrime;
+        }
+
+        // Terminator so "ab"+"c" and "a"+"bc" hash differently when chained
+        hash ^= 0xFFFF;
+        hash *= fnvPrime;
+        return hash;
+    }
+
+    public const ulong Fnv1aOffsetBasis = 14695981039346656037UL;
+
+    /// <summary>
+    /// Deterministic Guid derived from a string (MD5).
     /// </summary>
     public static Guid GenerateGuidFromString(this string name)
     {

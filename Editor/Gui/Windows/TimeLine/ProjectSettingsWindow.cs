@@ -722,6 +722,16 @@ internal sealed class ProjectSettingsWindow : Window
         CustomComponents.HelpText("These settings apply when exporting as executable.");
         FormInputs.AddVerticalSpace();
 
+        modified |= FormInputs.AddStringInput("Title", ref export.Title,
+                                              placeHolder: "Operator name",
+                                              tooltip: "Window title of the exported executable.",
+                                              defaultValue: defaults.Title);
+        modified |= FormInputs.AddStringInput("Author", ref export.Author,
+                                              placeHolder: "Package name",
+                                              tooltip: "Shown in the startup dialog.",
+                                              defaultValue: defaults.Author);
+        FormInputs.AddVerticalSpace();
+
         modified |= FormInputs.AddEnumDropdown(ref export.DefaultWindowMode,
             "Window Mode",
             "The default window mode when running the exported executable.",
@@ -731,6 +741,24 @@ internal sealed class ProjectSettingsWindow : Window
             ref export.EnablePlaybackControlWithKeyboard,
             "Users can use cursor left/right to skip through time\nand space key to pause playback\nof exported executable.",
             defaults.EnablePlaybackControlWithKeyboard);
+
+        FormInputs.AddVerticalSpace();
+        modified |= FormInputs.AddInt("Preferred Width", ref export.PreferredWidth, 16, 16384, 1,
+                                      "Render resolution the executable starts with.\nThe startup dialog offers the display's native modes instead.",
+                                      defaults.PreferredWidth);
+        modified |= FormInputs.AddInt("Preferred Height", ref export.PreferredHeight, 16, 16384, 1,
+                                      null, defaults.PreferredHeight);
+
+        FormInputs.AddVerticalSpace();
+        modified |= FormInputs.AddCheckBox("Skip Startup Dialog",
+                                           ref export.SkipStartupDialog,
+                                           "Start the executable directly with the settings above\ninstead of asking for display, resolution and window mode.\nUsers can still force the dialog with --dialog.",
+                                           defaults.SkipStartupDialog);
+
+        modified |= FormInputs.AddCheckBox("Show Log Messages",
+                                           ref export.ShowLogs,
+                                           "Open a console window with log output next to the executable.",
+                                           defaults.ShowLogs);
 
         return modified;
     }

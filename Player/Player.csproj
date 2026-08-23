@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ApplicationIcon>..\EditorResources\images\t3.ico</ApplicationIcon>
         <RootNamespace>T3.Player</RootNamespace>

@@ -37,8 +37,7 @@ public abstract partial class ShaderCompiler
         if (string.IsNullOrWhiteSpace(args.EntryPoint))
             args.EntryPoint = "main";
 
-        var hashCombination = new ULongFromTwoInts(args.SourceCode.GetHashCode(), args.EntryPoint.GetHashCode());
-        var hash = hashCombination.Value;
+        var hash = ComputeStableHash(args.SourceCode, args.EntryPoint, typeof(TShader).Name);
         bool success = false;
         byte[]? compiledBlob;
 

@@ -44,7 +44,20 @@ public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
     }
 }
 
+/// <summary>
+/// Written by the editor next to an exported Player.exe and read by the player on startup.
+/// <paramref name="Export"/> carries the project's startup defaults (window mode, resolution, dialog...).
+/// </summary>
 [Serializable]
-public record ExportSettings(Guid OperatorId, string ApplicationTitle, WindowMode WindowMode, CoreSettings.ConfigData ConfigData, string Author, Guid BuildId, string EditorVersion);
+public record ExportSettings(Guid OperatorId,
+                             string ApplicationTitle,
+                             string Author,
+                             Guid BuildId,
+                             string EditorVersion,
+                             Settings.CompositionSettings.ExportConfig Export,
+                             CoreSettings.ConfigData ConfigData)
+{
+    public const string FileName = "exportSettings.json";
+}
 
 public enum WindowMode { Windowed, Fullscreen }

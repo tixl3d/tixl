@@ -7,7 +7,7 @@ using SilkWindows.OpenGL;
 namespace SilkWindows;
 
 //https://github.com/dotnet/Silk.NET/blob/main/examples/CSharp/OpenGL%20Tutorials/Tutorial%201.1%20-%20Hello%20Window/Program.cs
-public sealed class SilkWindowProvider : IImguiWindowProvider, IMessageBoxProvider
+public sealed class SilkWindowProvider : IImguiWindowProvider, IMessageBoxProvider, IDisplayProvider
 {
     public object ContextLock { get; } = new();
     
@@ -71,6 +71,48 @@ public sealed class SilkWindowProvider : IImguiWindowProvider, IMessageBoxProvid
         Console.WriteLine("Completed window run");
     }
     
+    public IReadOnlyList<DisplayInfo> GetDisplays()
+    {
+        var result = new List<DisplayInfo>();
+        var mainMonitor = Silk.NET.Windowing.Monitor.GetMainMonitor(null);
+        foreach (var monitor in Silk.NET.Windowing.Monitor.GetMonitors(null))
+        {
+            var bounds = monitor.Bounds;
+            var currentRes = monitor.VideoMode.Resolution ?? new Vector2D<int>(bounds.Size.X, bounds.Size.Y);
+            var current = new DisplayMode(currentRes.X, currentRes.Y, monitor.VideoMode.RefreshRate ?? 0);
+
+            // One entry per resolution, keeping the highest refresh rate
+            var modesByResolution = new Dictionary<(int, int), DisplayMode>();
+            foreach (var videoMode in monitor.GetAllVideoModes())
+            {
+                if (videoMode.Resolution is not { } resolution)
+                    continue;
+
+                var res = (resolution.X, resolution.Y);
+                var refreshRate = videoMode.RefreshRate ?? 0;
+                if (!modesByResolution.TryGetValue(res, out var existing) || existing.RefreshRate < refreshRate)
+                    modesByResolution[res] = new DisplayMode(resolution.X, resolution.Y, refreshRate);
+            }
+
+            if (modesByResolution.Count == 0)
+                modesByResolution[(current.Width, current.Height)] = current;
+
+            var modes = modesByResolution.Values
+                                         .OrderByDescending(m => m.Width * m.Height)
+                                         .ThenByDescending(m => m.Width)
+                                         .ToList();
+
+            result.Add(new DisplayInfo(monitor.Index,
+                                       monitor.Name,
+                                       new System.Drawing.Rectangle(bounds.Origin.X, bounds.Origin.Y, bounds.Size.X, bounds.Size.Y),
+                                       monitor.Index == mainMonitor.Index,
+                                       current,
+                                       modes));
+        }
+
+        return result;
+    }
+    
     private static WindowOptions ConstructWindowOptions(in SimpleWindowOptions? options, string title)
     {
         var fullOptions = DefaultOptions;
@@ -82,6 +124,8 @@ public sealed class SilkWindowProvider : IImguiWindowProvider, IMessageBoxProvid
             fullOptions.VSync = val.Vsync;
             fullOptions.WindowBorder = val.IsResizable ? WindowBorder.Resizable : WindowBorder.Fixed;
             fullOptions.TopMost = val.AlwaysOnTop;
+            if (val.Position.HasValue)
+                fullOptions.Position = val.Position.Value.ToVector2DInt();
         }
         
         fullOptions.Title = title;

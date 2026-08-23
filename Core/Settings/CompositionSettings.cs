@@ -115,10 +115,22 @@ public sealed class CompositionSettings
         public float AudioResyncThreshold = 0.04f;
     }
 
+    /// <summary>
+    /// Defaults baked into an exported executable. The player lets the user override them on startup
+    /// unless <see cref="SkipStartupDialog"/> is set.
+    /// </summary>
     public sealed class ExportConfig
     {
+        /// <summary>Window title of the executable; empty uses the exported operator's name.</summary>
+        public string Title = string.Empty;
+        /// <summary>Shown in the startup dialog and used for log/cache folders; empty uses the package name.</summary>
+        public string Author = string.Empty;
         public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
         public bool EnablePlaybackControlWithKeyboard = true;
+        public int PreferredWidth = 1920;
+        public int PreferredHeight = 1080;
+        public bool ShowLogs = false;
+        public bool SkipStartupDialog = false;
     }
 
     /// <summary>Preview-proxy preferences for this project: how seek-proxies are transcoded and whether the engine
@@ -213,8 +225,14 @@ public sealed class CompositionSettings
             writer.WritePropertyName("Export");
             writer.WriteStartObject();
             {
+                writer.WriteObject(nameof(ExportConfig.Title), Export.Title);
+                writer.WriteObject(nameof(ExportConfig.Author), Export.Author);
                 writer.WriteValue(nameof(ExportConfig.DefaultWindowMode), Export.DefaultWindowMode);
                 writer.WriteValue(nameof(ExportConfig.EnablePlaybackControlWithKeyboard), Export.EnablePlaybackControlWithKeyboard);
+                writer.WriteValue(nameof(ExportConfig.PreferredWidth), Export.PreferredWidth);
+                writer.WriteValue(nameof(ExportConfig.PreferredHeight), Export.PreferredHeight);
+                writer.WriteValue(nameof(ExportConfig.ShowLogs), Export.ShowLogs);
+                writer.WriteValue(nameof(ExportConfig.SkipStartupDialog), Export.SkipStartupDialog);
             }
             writer.WriteEndObject();
 
@@ -295,8 +313,14 @@ public sealed class CompositionSettings
                            Export = exportToken != null
                                ? new ExportConfig
                                  {
+                                     Title = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.Title), string.Empty) ?? string.Empty,
+                                     Author = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.Author), string.Empty) ?? string.Empty,
                                      DefaultWindowMode = JsonUtils.ReadEnum<WindowMode>(exportToken, nameof(ExportConfig.DefaultWindowMode)),
                                      EnablePlaybackControlWithKeyboard = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.EnablePlaybackControlWithKeyboard), Defaults.Export.EnablePlaybackControlWithKeyboard),
+                                     PreferredWidth = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.PreferredWidth), Defaults.Export.PreferredWidth),
+                                     PreferredHeight = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.PreferredHeight), Defaults.Export.PreferredHeight),
+                                     ShowLogs = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.ShowLogs), Defaults.Export.ShowLogs),
+                                     SkipStartupDialog = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.SkipStartupDialog), Defaults.Export.SkipStartupDialog),
                                  }
                                : new ExportConfig(),
                            Proxy = proxyToken != null

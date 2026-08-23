@@ -48,7 +48,7 @@ internal static partial class Program
                                 : clip.LengthInSeconds + clipStartSecs;
             if (timeInSecs >= endInSecs)
             {
-                if (_resolvedOptions.Loop)
+                if (_startupOptions.Loop)
                 {
                     _playback.TimeInSecs = 0.0;
                 }

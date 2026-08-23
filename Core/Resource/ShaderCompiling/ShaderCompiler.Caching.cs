@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using T3.Core.Logging;
 using T3.Core.Settings;
 using T3.Core.SystemUi;
+using T3.Core.Utils;
 
 namespace T3.Core.Resource.ShaderCompiling;
 
@@ -131,21 +131,19 @@ public abstract partial class ShaderCompiler
         return Path.Combine(_shaderCacheDirectory, hashCode + FileExtension);
     }
 
+    /// <summary>
+    /// Cache key for a compilation. Must be stable across processes: string.GetHashCode() is randomized
+    /// per process and would make the on-disk cache miss on every launch.
+    /// </summary>
+    private static ulong ComputeStableHash(string sourceCode, string entryPoint, string shaderTypeName)
+    {
+        var hash = sourceCode.ComputeStableHash();
+        hash = entryPoint.ComputeStableHash(hash);
+        return shaderTypeName.ComputeStableHash(hash);
+    }
+
     private static readonly Dictionary<byte[], ulong> _shaderBytecodeHashes = new();
     private static readonly Dictionary<ulong, byte[]> _shaderBytecodeCache = new();
-    
-    [StructLayout(LayoutKind.Explicit)]
-    private readonly struct ULongFromTwoInts(int a, int b)
-    {
-        [FieldOffset(0)]
-        public readonly ulong Value = 0;
-        
-        [FieldOffset(0)]
-        public readonly int A = a;
-        
-        [FieldOffset(4)]
-        public readonly int B = b;
-    }
     
     private static readonly object _shaderCacheLock = new();
     private static readonly string _shaderCacheRootPath = Path.Combine(FileLocations.TempFolder, "Cache");
