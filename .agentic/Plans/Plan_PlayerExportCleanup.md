@@ -1,6 +1,6 @@
 # Player & Export Cleanup
 
-**Status:** In progress — 2026-08-23. Phases 0, 1, 3, 5 landed (uncommitted); Phase 2 remainder (background image, exe rename, ConfigData trim), Phase 0 follow-up (cache prune) and Phase 4 (shader seed) open.
+**Status:** In progress — 2026-08-23. Phases 0 (incl. prune), 1, 3, 4, 5 landed (uncommitted); Phase 2 remainder (background image, exe rename, ConfigData trim) open.
 Covers the exported-executable pipeline (`Editor/UiModel/Exporting/PlayerExporter*.cs`) and the standalone
 `Player/` app, which have grown hotfix-by-hotfix.
 
@@ -47,6 +47,10 @@ Read these first; the plan references them throughout.
   different values. Effect: every editor and player start recompiles every shader and writes a fresh set of
   files, so the cache only grows (1.8 GB / 36k files in `TiXL\Tmp\Cache` on the dev machine) and
   precompiled shaders could never be shipped. Fixed in Phase 0.
+- **Audio init blocked for 2.5 s** in `AudioMixerManager.GetDefaultOutputSampleRate()`: it enumerated every
+  WASAPI endpoint via `BassWasapi.GetDeviceInfo` (slow with disconnected / Bluetooth devices). Replaced by a
+  throwaway `Bass.Init` + `Bass.GetInfo().SampleRate` (~80 ms). Affects editor start-up as well.
+- **Source-based shader ops never used the cache** (`forceRecompile: true` in `IShaderOperator`); fixed.
 - `Player/Options.cs` is dead code (the real `Options` is nested in `Program`).
 - `Program.cs:117` builds the icon path as `Path.Combine(EditorResourcesDirectory, EditorResourcesDirectory, …)`
   (harmless because `Path.Combine` drops the first absolute segment, but wrong).
@@ -240,7 +244,20 @@ native folder resolved by `TixlAssemblyLoadContext`; and the self-contained .NET
 - Export report logged (what was shipped / dropped and why) — reuses the `LoadReport` shape.
 - Tests: export a small project and a `Lib`-heavy one, verify size drop and that both run.
 
-### Phase 4 — Precompiled shader seed (D7)
+### Phase 4 — Precompiled shader seed (D7) (landed, uncommitted)
+
+Done, simpler than planned: no export-time warm-up pass. `ShaderCompiler` records which `IResourceConsumer`
+each cached shader belongs to (`ConditionalWeakTable`), and the exporter writes the bytecode of every shader
+owned by a collected instance (plus owner-less shared shaders) to `<export>/ShaderCache/`
+(`ShaderCompiler.ExportCacheEntries`). The player sets `ShaderCacheSeedDirectory` to that folder (read-only,
+consulted first) and keeps its writable cache in `<export>/.temp/ShaderCache/` (`ShaderCacheRootPath`).
+Caveat: only shaders the editor actually compiled/loaded in the session are seeded — view the op once before
+exporting. Also fixed on the way: source-based shader ops (`IShaderOperator`, i.e. [PixelShader]/[ComputeShader]
+from code — the SDF shader graph) passed `forceRecompile: true` and never used the cache; a 5.5 s generated SDF
+shader recompiled on every launch.
+
+Phase 0 follow-up also landed: `ShaderCompiler.PruneCache(30 days)` at editor and player start, touch-on-hit.
+
 
 - Move `PreloadShadersAndResources` to Core (`ShaderWarmup`), run it in the exporter, copy touched cache
   files, seed-directory lookup in `ShaderCompiler`, report shader hit/miss counts in `LoadReport`.

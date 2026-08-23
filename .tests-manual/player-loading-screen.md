@@ -41,7 +41,7 @@ Start `Player.exe`, let it finish loading, then quit with `Esc`. Open `.temp/Log
 **Expected:**
 - The log contains a block starting with `Loaded in <n>s: <p> packages, <s> symbols, <i> instances, <c> shaders compiled, <k> from cache, <a> asset files (<mb> MB)` followed by one indented line per stage (`Load operators`, `Create instances`, `Prepare audio`, `Warm up shaders`) with seconds.
 - `loadReport.json` holds the same numbers.
-- On the second start, `from cache` is close to the total shader count and `Warm up shaders` takes noticeably less time.
+- Already on the first start, `from cache` is close to the total shader count when the export folder contains `ShaderCache/` with entries (the editor had compiled the shaders before exporting); `Warm up shaders` then takes well under a second for graphs without heavy resources.
 
 ## Step: Window mode switch during playback still works
 

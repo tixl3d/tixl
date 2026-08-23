@@ -26,6 +26,9 @@ internal static partial class PlayerExporter
         /** Symbols shipped with the export */
         public IEnumerable<Symbol> Symbols => _symbols;
 
+        /** Instances reached from the exported output; their compiled shaders seed the export's cache */
+        public IEnumerable<Instance> CollectedInstances => _collectedInstances;
+
         /** Packages including used assets */
         public readonly HashSet<IResourcePackage> AssetPackages = [];
 

@@ -119,11 +119,11 @@ internal static partial class Program
             Log.Info($"Build: {exportSettings.BuildId}, Editor: {exportSettings.EditorVersion}");
             Log.Info($"Startup options: {_startupOptions} on {display}");
 
-            // No BuildId in the path: the cache is keyed by shader content, so it stays valid across re-exports.
-            ShaderCompiler.ShaderCacheSubdirectory = Path.Combine("Player",
-                                                                  exportSettings.Author,
-                                                                  exportSettings.ApplicationTitle,
-                                                                  exportSettings.OperatorId.ToString());
+            // Writable cache next to the executable; precompiled entries shipped with the export are read first.
+            ShaderCompiler.ShaderCacheRootPath = playerDataDirectory;
+            ShaderCompiler.ShaderCacheSubdirectory = FileLocations.ShaderCacheSubFolder;
+            ShaderCompiler.ShaderCacheSeedDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.ShaderCacheSubFolder);
+            ShaderCompiler.PruneCache(TimeSpan.FromDays(30));
 
             var resolution = new Int2(_startupOptions.Width, _startupOptions.Height);
             _vsyncInterval = Convert.ToInt16(_startupOptions.VSync);

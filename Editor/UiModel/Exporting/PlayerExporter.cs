@@ -17,6 +17,7 @@ using T3.Editor.Gui;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.Interaction.Timing;
 using T3.Serialization;
+using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Editor.UiModel.Exporting;
 
@@ -165,6 +166,11 @@ internal static partial class PlayerExporter
 
         if (!TryExportSettings(exportDir, symbol, exportConfig, out reason))
             return false;
+
+        // Ship the bytecode of every shader the editor compiled for the exported graph, so the player starts warm
+        var seededShaders = ShaderCompiler.ExportCacheEntries(exportData.CollectedInstances,
+                                                              Path.Combine(exportDir, FileLocations.ShaderCacheSubFolder));
+        Log.Info($"Exported {seededShaders} precompiled shaders.");
 
         Log.Info($"Export copied {report.CopiedCount} files ({FormatBytes(report.CopiedBytes)}), " +
                  $"skipped {report.SkippedCount} files ({FormatBytes(report.SkippedBytes)}).");

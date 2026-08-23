@@ -151,6 +151,7 @@ internal static class Program
 
         CultureInfo.CurrentCulture = new CultureInfo("en-US");
         ShaderCompiler.ShaderCacheSubdirectory = $"Editor_{VersionText}";
+        ShaderCompiler.PruneCache(TimeSpan.FromDays(30));
 
         // ReSharper disable once UnusedVariable
         var userSettings = new UserSettings(saveOnQuit: true);

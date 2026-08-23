@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using T3.Core.Logging;
 using T3.Core.Settings;
@@ -74,10 +75,108 @@ public abstract partial class ShaderCompiler
         BlockingWindow.Instance.ShowMessageBox(finalMessage, title);
     }
 
+    /// <summary>
+    /// Removes cache files that have not been used for <paramref name="maxAge"/>. Files are touched on every
+    /// disk hit, so the age reflects last use. Locked files are skipped.
+    /// </summary>
+    public static void PruneCache(TimeSpan maxAge)
+    {
+        if (!_diskCachingEnabled || string.IsNullOrEmpty(_shaderCacheDirectory) || !Directory.Exists(_shaderCacheDirectory))
+            return;
+
+        var threshold = DateTime.UtcNow - maxAge;
+        var removed = 0;
+        long removedBytes = 0;
+        lock (_shaderCacheLock)
+        {
+            foreach (var file in Directory.EnumerateFiles(_shaderCacheDirectory, $"*{FileExtension}", SearchOption.TopDirectoryOnly))
+            {
+                try
+                {
+                    var info = new FileInfo(file);
+                    if (info.LastWriteTimeUtc >= threshold)
+                        continue;
+
+                    var length = info.Length;
+                    info.Delete();
+                    removed++;
+                    removedBytes += length;
+                }
+                catch (Exception)
+                {
+                    // In use or no permission - try again next start
+                }
+            }
+        }
+
+        if (removed > 0)
+            Log.Debug($"Removed {removed} shader cache entries ({removedBytes / (1024.0 * 1024.0):0.0} MB) unused for {maxAge.TotalDays:0} days");
+    }
+
+    /// <summary>
+    /// Copies the cached bytecode of every shader compiled for one of <paramref name="owners"/> (plus shaders without
+    /// an owner, like the shared fullscreen shaders) into <paramref name="targetDirectory"/>, so an exported player
+    /// can start with a warm cache. Returns the number of written files.
+    /// </summary>
+    public static int ExportCacheEntries(IEnumerable<IResourceConsumer> owners, string targetDirectory)
+    {
+        var hashes = new HashSet<ulong>();
+        lock (_shaderCacheLock)
+        {
+            hashes.UnionWith(_ownerlessHashes);
+            foreach (var owner in owners)
+            {
+                if (_hashesByOwner.TryGetValue(owner, out var ownerHashes))
+                    hashes.UnionWith(ownerHashes);
+            }
+        }
+
+        if (hashes.Count == 0)
+            return 0;
+
+        Directory.CreateDirectory(targetDirectory);
+        var written = 0;
+        foreach (var hash in hashes)
+        {
+            byte[]? bytecode;
+            lock (_shaderCacheLock)
+            {
+                if (!_shaderBytecodeCache.TryGetValue(hash, out bytecode) && !TryLoadBytecodeFromDisk(hash, out bytecode))
+                    continue;
+            }
+
+            try
+            {
+                File.WriteAllBytes(Path.Combine(targetDirectory, hash + FileExtension), bytecode);
+                written++;
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Failed to export shader cache entry {hash}: {e.Message}");
+            }
+        }
+
+        return written;
+    }
+
     private static void CacheSuccessfulCompilation(byte[]? oldBytecode, ulong hash, byte[] newBytecode)
     {
         CacheShaderInMemory(oldBytecode, hash, newBytecode);
         SaveBytecodeToDisk(hash, newBytecode);
+    }
+
+    /// <summary>Remembers which consumer a shader belongs to so its cache entry can travel with an export.</summary>
+    private static void RecordCacheOwner(ulong hash, IResourceConsumer? owner)
+    {
+        if (owner == null)
+        {
+            _ownerlessHashes.Add(hash);
+            return;
+        }
+
+        var hashes = _hashesByOwner.GetOrCreateValue(owner);
+        if (!hashes.Contains(hash))
+            hashes.Add(hash);
     }
 
     private static void SaveBytecodeToDisk(ulong hash, byte[] byteCode)
@@ -99,6 +198,17 @@ public abstract partial class ShaderCompiler
             return false;
         }
         
+        // A seed directory (shipped with an export) is consulted first and never written to
+        if (_shaderCacheSeedDirectory != null)
+        {
+            var seedPath = Path.Combine(_shaderCacheSeedDirectory, hash + FileExtension);
+            if (File.Exists(seedPath))
+            {
+                bytecode = File.ReadAllBytes(seedPath);
+                return true;
+            }
+        }
+
         var path = GetPathForShaderCache(hash);
         var file = new FileInfo(path);
         if (!file.Exists)
@@ -108,6 +218,16 @@ public abstract partial class ShaderCompiler
         }
 
         bytecode = File.ReadAllBytes(path);
+        try
+        {
+            // Touch so PruneCache measures last use, not creation
+            file.LastWriteTimeUtc = DateTime.UtcNow;
+        }
+        catch (Exception)
+        {
+            // Read-only location - fine
+        }
+
         return true;
     }
 
@@ -146,8 +266,35 @@ public abstract partial class ShaderCompiler
     private static readonly Dictionary<ulong, byte[]> _shaderBytecodeCache = new();
     
     private static readonly object _shaderCacheLock = new();
-    private static readonly string _shaderCacheRootPath = Path.Combine(FileLocations.TempFolder, "Cache");
+    private static string _shaderCacheRootPath = Path.Combine(FileLocations.TempFolder, "Cache");
     private static string _shaderCacheDirectory = string.Empty;
+    private static string? _shaderCacheSeedDirectory;
+    private static readonly HashSet<ulong> _ownerlessHashes = [];
+    private static readonly ConditionalWeakTable<IResourceConsumer, List<ulong>> _hashesByOwner = new();
+
+    /// <summary>
+    /// Root folder of the on-disk cache. Must be set before <see cref="ShaderCacheSubdirectory"/>; the default is
+    /// the app's temp folder.
+    /// </summary>
+    public static string ShaderCacheRootPath
+    {
+        set
+        {
+            if (!string.IsNullOrEmpty(_shaderCacheDirectory))
+                throw new InvalidOperationException("Shader cache root must be set before the subdirectory.");
+
+            _shaderCacheRootPath = value;
+        }
+    }
+
+    /// <summary>
+    /// Optional read-only folder of precompiled entries (e.g. shipped with an exported player), consulted before
+    /// the writable cache.
+    /// </summary>
+    public static string? ShaderCacheSeedDirectory
+    {
+        set => _shaderCacheSeedDirectory = value != null && Directory.Exists(value) ? value : null;
+    }
 
     public static string ShaderCacheSubdirectory
     {

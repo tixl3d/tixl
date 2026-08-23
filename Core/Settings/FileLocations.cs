@@ -17,6 +17,8 @@ public static class FileLocations
     public const string ThemeSubFolder = "Themes";
     public const string RenderSubFolder = "RenderOutput";
     public const string ExportSubFolder = "Export";
+    /// <summary>Precompiled shader bytecode shipped with an export and read-only seeded into the player cache.</summary>
+    public const string ShaderCacheSubFolder = "ShaderCache";
     public const string KeyBindingSubFolder = "KeyBindings";
     private const string TestsSubFolder = "Tests";
 

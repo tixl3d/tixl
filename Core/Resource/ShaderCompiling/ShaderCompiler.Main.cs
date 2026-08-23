@@ -50,6 +50,7 @@ public abstract partial class ShaderCompiler
                 {
                     success = true;
                     Interlocked.Increment(ref _cachedShaderCount);
+                    RecordCacheOwner(hash, args.Owner);
                 }
                 else
                 {
@@ -62,6 +63,7 @@ public abstract partial class ShaderCompiler
                         success = true;
                         Interlocked.Increment(ref _compiledShaderCount);
                         CacheSuccessfulCompilation(args.OldBytecode, hash, compiledBlob);
+                        RecordCacheOwner(hash, args.Owner);
                         reason = $"{timer.Elapsed.TotalMilliseconds:0.0}ms";
                     }
                 }

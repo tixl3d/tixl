@@ -54,6 +54,10 @@ The player writes its log files and the remembered startup choice to a `.temp/` 
 
 After the dialog the player shows a dark loading screen with a progress bar and the latest log line while it loads the operator packages, creates the graph and warms up shaders. `Esc` cancels. When loading completes, the log (and `.temp/loadReport.json`) contains a short report: package / symbol / instance counts, shaders compiled vs. loaded from cache, asset size and the duration of each stage — handy when an export starts slowly.
 
+### Precompiled shaders
+
+The export ships the bytecode of every shader the editor has compiled for the exported operator in `ShaderCache/`, so the first start of the executable does not recompile them. View the operator once in the editor before exporting so its shaders are compiled. The player keeps its own cache in `.temp/ShaderCache/`.
+
 ### Command line arguments
 
 ```
