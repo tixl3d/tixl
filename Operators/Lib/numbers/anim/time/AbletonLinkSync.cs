@@ -4,6 +4,7 @@ using T3.Core.Utils;
 namespace Lib.numbers.anim.time;
 
 [Guid("31ab98ec-5e79-4667-9a85-2fb168f41fa1")]
+[ExportDependencies("AbletonLink.deps.json", "AbletonLinkDLL.dll", "AbletonLink.dll")]
 internal sealed class AbletonLinkSync : Instance<AbletonLinkSync>, IStatusProvider
 {
     [Output(Guid = "e1cfd42c-81fa-4820-91df-f1bad27b3a7f", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]

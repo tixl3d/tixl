@@ -50,6 +50,7 @@ internal class GestureRecognitionResultPacket
 }
 
 [Guid("A1B2C3D4-E5F6-4798-89AB-CDEF12345683")]
+[ExportDependencies("mediapipe_c.dll", "OpenCvSharpExtern.dll", "Emgu.CV.dll", "cvextern.dll", "OpenGL.Net.dll", "CppSharp.Runtime.dll", "Google.Protobuf.dll")]
 public class GestureRecognition : Instance<GestureRecognition>
 {
     [Output(Guid = "B2C3D4E5-F6A7-489A-9B0C-DEF123456784", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]

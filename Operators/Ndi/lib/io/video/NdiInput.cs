@@ -10,6 +10,7 @@ using T3.Core.Utils;
 namespace Lib.io.video;
 
 [Guid("7567c3b0-9d91-40d2-899d-3a95b481d023")]
+[ExportDependencies("NDILibDotNet6.dll", "Processing.NDI.Lib.x64.dll")]
 public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropdownHolder
 {
     /// <summary>

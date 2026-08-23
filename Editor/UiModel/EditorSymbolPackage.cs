@@ -288,6 +288,18 @@ internal class EditorSymbolPackage : SymbolPackage
         }
     }
 
+    public bool TryGetSymbolFilePath(Symbol symbol, [NotNullWhen(true)] out string? path)
+    {
+        if (_filePathHandlers.TryGetValue(symbol.Id, out var filePathInfo))
+        {
+            path = filePathInfo.SymbolFilePath;
+            return path != null;
+        }
+
+        path = null;
+        return false;
+    }
+
     public bool TryGetSourceCodePath(Symbol symbol, out string? path)
     {
         if (_filePathHandlers.TryGetValue(symbol.Id, out var filePathInfo))

@@ -47,7 +47,15 @@ internal static partial class Program
 
         if (keyArgs.KeyCode == Keys.Escape)
         {
-            coreUi.ExitApplication();
+            if (_isLoading)
+            {
+                // The loading sequence checks this between steps and shuts down cleanly
+                _loadCancelled = true;
+            }
+            else
+            {
+                coreUi.ExitApplication();
+            }
         }
     }
 

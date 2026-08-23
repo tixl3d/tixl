@@ -1,6 +1,6 @@
 # Player & Export Cleanup
 
-**Status:** Draft — 2026-08-23. Design plus one landed prerequisite (stable shader-cache key, see Phase 0).
+**Status:** In progress — 2026-08-23. Phases 0, 1, 3, 5 landed (uncommitted); Phase 2 remainder (background image, exe rename, ConfigData trim), Phase 0 follow-up (cache prune) and Phase 4 (shader seed) open.
 Covers the exported-executable pipeline (`Editor/UiModel/Exporting/PlayerExporter*.cs`) and the standalone
 `Player/` app, which have grown hotfix-by-hotfix.
 
@@ -215,7 +215,24 @@ binaries). Open: dialog header image (waits for Phase 2's `BackgroundImage`).
 - Trim `ConfigData` baked into the export to what the player actually reads (audio device, OSC port, log
   flags) — audit `CoreSettings.Config` uses in Core at runtime.
 
-### Phase 3 — Export stripping (D4)
+### Phase 3 — Export stripping (D4) (landed, uncommitted)
+
+Done: reachability pass + root-level auto-collected audio ops (`IAudioClipProvider`, `IAudioSource`);
+`.t3` files of shipped symbols are rewritten with unreachable children/connections/animations removed
+(`SymbolJson.TryWriteFilteredSymbolFile`, unit-tested) so unused ops are neither parsed nor instantiated;
+`[ExportDependencies("file", "av*.dll")]` attribute (Core) replaces the GUID table — declared on the Lib webcam /
+AbletonLink / SwiftCam ops, Io Artnet + Video2DPointScanner, Ndi, unsplash, Mediapipe ops; files declared by any
+loaded op are shipped only when an exported op declares them (`DependencyFileFilter`), applied to package dirs
+and the Player dir; `runtimes/<rid>` other than win-x64/win dropped; copy summary (files / MB shipped and
+skipped) logged. `ExportConfig.StripUnusedOperators` (default on) is the escape hatch. Manual test set:
+`.tests-manual/player-export-stripping.md`. Deliberately not done: pruning managed DLLs by reference closure
+(low gain, high risk with reflection-loaded assemblies) and `EditorResources` pruning (1 MB of fonts/images the
+dialog uses anyway).
+
+Known remaining weight: `OpenCvSharpExtern.dll` (66 MB) and the FFmpeg DLLs are copied into *every* package
+build output because `Core` references OpenCvSharp4.Windows — dedup across packages would need a shared
+native folder resolved by `TixlAssemblyLoadContext`; and the self-contained .NET runtime itself.
+
 
 - Reachability pass, auto-collected set, `.t3` pruning, managed-reference closure, `[NativeDependencies]`
   attribute + migration of the GUID table to `Lib` ops, `EditorResources` pruned to what the player loads
@@ -228,7 +245,17 @@ binaries). Open: dialog header image (waits for Phase 2's `BackgroundImage`).
 - Move `PreloadShadersAndResources` to Core (`ShaderWarmup`), run it in the exporter, copy touched cache
   files, seed-directory lookup in `ShaderCompiler`, report shader hit/miss counts in `LoadReport`.
 
-### Phase 5 — Loading screen, cancel, and status report (D6)
+### Phase 5 — Loading screen, cancel, and status report (D6) (landed, uncommitted)
+
+Done, with one deviation from D6: loading stays on the **main thread** and is split into steps
+(`PumpLoadingScreen` between packages / instance creation / preload samples) instead of a worker thread — the
+immediate context is used by the preload evaluation, so a worker would have needed a context lock, and ops
+may assume the main thread. `LoadingScreen` draws with Direct2D/DirectWrite onto the swap-chain back buffer
+(device now created with `BgraSupport`; releases its render target before `ResizeBuffers`). Esc sets
+`_loadCancelled`, checked between steps. `LastLogLineWriter` (first line only) feeds the bottom line;
+`ShaderCompiler` logs `Compiling X @entry...` before compiling and counts compiled vs. cached shaders;
+`PlayerLoadReport` logs/saves the summary. Manual test set: `.tests-manual/player-loading-screen.md`.
+
 
 - Worker-thread loading with `PlayerLoadProgress`, DX11 loading-screen drawer, last-log-line overlay,
   Esc cancel, "next step" log phrasing (`Loading package Lib…`, `Compiling 12/40 shaders…`), `LoadReport`.

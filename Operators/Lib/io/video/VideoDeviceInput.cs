@@ -9,6 +9,7 @@ using FormatType = DirectShowLib.FormatType;
 namespace Lib.io.video;
 
 [Guid("cd5a182e-254b-4e65-820b-ff754122614c")]
+[ExportDependencies("OpenCvSharpExtern.dll", "DirectShowLib.dll")]
 public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolder
 {
     // Output slots

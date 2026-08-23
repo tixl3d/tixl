@@ -11,6 +11,7 @@ using T3.Core.Logging;
 namespace Lib.io.dmx;
 
 [Guid("fc03dcd0-6f2f-4507-be06-1ed105607489")]
+[ExportDependencies("ArtNet.dll")]
 internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICustomDropdownHolder
 {
     private const int ArtNetPort = 6454;

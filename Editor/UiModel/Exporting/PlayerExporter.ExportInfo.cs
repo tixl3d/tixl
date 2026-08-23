@@ -12,21 +12,24 @@ namespace T3.Editor.UiModel.Exporting;
 
 internal static partial class PlayerExporter
 {
-    private sealed class ExportData
+    /// <summary>
+    /// Everything collected for one export: the instances reached from the output, the symbols and packages they
+    /// belong to, and the asset files they reference.
+    /// </summary>
+    private sealed class ExportData(Symbol rootSymbol)
     {
         public IReadOnlyCollection<AssetExportItem> ExportItems => _exportItems;
-        
-        private readonly HashSet<Symbol> _symbols = [];
-        private readonly HashSet<Instance> _collectedInstances = [];
-        
+
         /** Packages with code */
         public IEnumerable<SymbolPackage> SymbolPackages => _symbolPackages.Keys;
-        private readonly Dictionary<SymbolPackage, List<Symbol>> _symbolPackages = new();
+
+        /** Symbols shipped with the export */
+        public IEnumerable<Symbol> Symbols => _symbols;
 
         /** Packages including used assets */
         public readonly HashSet<IResourcePackage> AssetPackages = [];
-        
-        private readonly HashSet<AssetExportItem> _exportItems = [];
+
+        public bool StripsUnusedOperators { get; private set; }
 
         public bool TryAddInstance(Instance instance) => _collectedInstances.Add(instance);
 
@@ -36,29 +39,50 @@ internal static partial class PlayerExporter
         }
 
         /// <summary>
-        /// Collect <see cref="Symbol"/> and its <see cref="SymbolPackage"/>. 
+        /// Derives the shipped symbols from the collected instances. When stripping, only symbols of reached instances
+        /// are shipped and each symbol remembers which of its children were reached; otherwise the complete static
+        /// child graph of the root symbol is shipped, as it would be instantiated.
         /// </summary>
-        public bool TryAddSymbol(Symbol symbol)
+        public void FinishCollection(bool stripUnusedOperators)
         {
-            Console.WriteLine("Including symbol: " + symbol.Name);
-            if(!_symbols.Add(symbol))
-                return false;
-            
-            var package = symbol.SymbolPackage;
-            if (!_symbolPackages.TryGetValue(package, out var symbols))
-            {
-                symbols = [];
-                _symbolPackages.Add(package, symbols);
-            }
-            
-            symbols.Add(symbol);
+            StripsUnusedOperators = stripUnusedOperators;
+            _symbols.Clear();
+            _symbolPackages.Clear();
+            _reachableChildIds.Clear();
 
-            foreach(var child in symbol.Children.Values)
+            if (!stripUnusedOperators)
             {
-                TryAddSymbol(child.Symbol);
+                AddSymbolWithChildren(rootSymbol);
+                return;
             }
 
-            return true;
+            AddSymbol(rootSymbol);
+            foreach (var instance in _collectedInstances)
+            {
+                AddSymbol(instance.Symbol);
+
+                var parent = instance.Parent;
+                if (parent == null)
+                    continue;
+
+                if (!_reachableChildIds.TryGetValue(parent.Symbol.Id, out var childIds))
+                {
+                    childIds = [];
+                    _reachableChildIds.Add(parent.Symbol.Id, childIds);
+                }
+
+                childIds.Add(instance.SymbolChildId);
+            }
+        }
+
+        public IEnumerable<Symbol> GetSymbolsOfPackage(SymbolPackage package)
+        {
+            return _symbolPackages.TryGetValue(package, out var symbols) ? symbols : [];
+        }
+
+        public IReadOnlySet<Guid> GetReachableChildIds(Symbol symbol)
+        {
+            return _reachableChildIds.TryGetValue(symbol.Id, out var childIds) ? childIds : _noChildIds;
         }
 
         public void PrintInfo()
@@ -83,9 +107,9 @@ internal static partial class PlayerExporter
             {
                 var absolutePathPng = asset.FullPath.Replace(".fnt", ".png");
                 var relativePathInResourceFolderPng = relativePathInResourceFolder.Replace(".fnt", ".png");
-                
+
                 TryAddExportAsset(new AssetExportItem(asset.Package.RootNamespace,
-                                                      relativePathInResourceFolderPng, 
+                                                      relativePathInResourceFolderPng,
                                                       absolutePathPng));
             }
 
@@ -97,10 +121,10 @@ internal static partial class PlayerExporter
                 {
                     if (!ShaderCompiler.TryResolveSharedIncludeAsset(includePath, out var includeAsset))
                         continue;
-                    
+
                     var relativePathInResourceFolder2 = Path.GetRelativePath(includeAsset.Package.AssetsFolder, includeAsset.FullPath);
-                    TryAddExportAsset(new AssetExportItem(includeAsset.Package.RootNamespace, 
-                                                          relativePathInResourceFolder2, 
+                    TryAddExportAsset(new AssetExportItem(includeAsset.Package.RootNamespace,
+                                                          relativePathInResourceFolder2,
                                                           includeAsset.FullPath));
                 }
             }
@@ -110,19 +134,41 @@ internal static partial class PlayerExporter
             return true;
         }
 
-        public bool ContainsSymbolId(Guid symbolId)
+        private void AddSymbolWithChildren(Symbol symbol)
         {
-            foreach (var symbol in _symbols)
+            if (!AddSymbol(symbol))
+                return;
+
+            foreach (var child in symbol.Children.Values)
             {
-                if (symbol.Id == symbolId)
-                    return true;
+                AddSymbolWithChildren(child.Symbol);
+            }
+        }
+
+        private bool AddSymbol(Symbol symbol)
+        {
+            if (!_symbols.Add(symbol))
+                return false;
+
+            var package = symbol.SymbolPackage;
+            if (!_symbolPackages.TryGetValue(package, out var symbols))
+            {
+                symbols = [];
+                _symbolPackages.Add(package, symbols);
             }
 
-            return false;
+            symbols.Add(symbol);
+            return true;
         }
+
+        private static readonly HashSet<Guid> _noChildIds = [];
+        private readonly HashSet<Symbol> _symbols = [];
+        private readonly HashSet<Instance> _collectedInstances = [];
+        private readonly Dictionary<SymbolPackage, List<Symbol>> _symbolPackages = new();
+        private readonly Dictionary<Guid, HashSet<Guid>> _reachableChildIds = new();
+        private readonly HashSet<AssetExportItem> _exportItems = [];
     }
-    
-    
+
     private sealed class AssetExportItem(string? packageRootNamespace, string relativePathInResourcesFolder, string absolutePath)
     {
         private readonly string? _packageRootNamespace = packageRootNamespace;
@@ -139,7 +185,6 @@ internal static partial class PlayerExporter
 
         private bool TryCopyTo(string exportDir, ref int successCount)
         {
-            //var targetPath = Path.Combine(exportDir, resourcePath.RelativePath);
             var targetPath = GetTargetPathDir(exportDir);
             var success = TryCopyFile(_absolutePath, targetPath);
 
@@ -175,6 +220,41 @@ internal static partial class PlayerExporter
                .ForAll(item => item.TryCopyTo(exportDir, ref successInt));
 
             return Convert.ToBoolean(successInt);
+        }
+    }
+
+    /// <summary>
+    /// Counts what a copy pass shipped and skipped, for the export summary.
+    /// </summary>
+    private sealed class CopyReport
+    {
+        public int CopiedCount { get; private set; }
+        public long CopiedBytes { get; private set; }
+        public int SkippedCount { get; private set; }
+        public long SkippedBytes { get; private set; }
+
+        public void Copy(string path)
+        {
+            CopiedCount++;
+            CopiedBytes += GetLength(path);
+        }
+
+        public void Skip(string path)
+        {
+            SkippedCount++;
+            SkippedBytes += GetLength(path);
+        }
+
+        private static long GetLength(string path)
+        {
+            try
+            {
+                return new FileInfo(path).Length;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
         }
     }
 }

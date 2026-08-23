@@ -12,6 +12,7 @@ using Utilities = T3.Core.Utils.Utilities;
 namespace Lib.io.ptz
 {
     [Guid("8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c")]
+    [ExportDependencies("OpenCvSharpExtern.dll")]
     public class OnvifCamera : Instance<OnvifCamera>, IStatusProvider, ICustomDropdownHolder
     {
         [Output(Guid = "e5d0c2f1-4b3a-4829-9c5d-1e6f7a8b9c0d", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]

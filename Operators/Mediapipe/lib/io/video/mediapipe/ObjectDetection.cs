@@ -47,6 +47,7 @@ internal class ObjectDetectionResultPacket
 }
 
 [Guid("12345678-90ab-cdef-1234-567890abcdef")]
+[ExportDependencies("mediapipe_c.dll", "OpenCvSharpExtern.dll", "Emgu.CV.dll", "cvextern.dll", "OpenGL.Net.dll", "CppSharp.Runtime.dll", "Google.Protobuf.dll")]
 public class ObjectDetection : Instance<ObjectDetection>
 {
     [Output(Guid = "bcdef123-4567-890a-bcde-f1234567890a", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]

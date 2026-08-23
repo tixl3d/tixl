@@ -11,6 +11,7 @@ using Rectangle = System.Drawing.Rectangle;
 namespace Lib.io.dmx.helpers;
 
 [Guid("2470272f-5e56-448f-803d-15c5231353ff")]
+[ExportDependencies("OpenCvSharpExtern.dll")]
 internal sealed class Video2DPointScanner : Instance<Video2DPointScanner>
 {
     private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true, IncludeFields = true };

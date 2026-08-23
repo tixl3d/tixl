@@ -7,6 +7,7 @@ using System.Diagnostics;
 namespace Lib.io.dmx.obsolete;
 
 [Guid("faa3e182-96e6-45e7-b037-fb2acd88825b")]
+[ExportDependencies("ArtNet.dll")]
 internal sealed class ArtnetPixelOutput : Instance<ArtnetPixelOutput>, IStatusProvider
 {
     [Output(Guid = "28e5a0a6-6dee-4771-b3ea-5c95862b34f8")]

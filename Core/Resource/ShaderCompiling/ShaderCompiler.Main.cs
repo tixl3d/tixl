@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -48,19 +49,21 @@ public abstract partial class ShaderCompiler
                 if (!forceRecompile && TryLoadCached(hash, out compiledBlob, out reason))
                 {
                     success = true;
-                    //reason = "loaded from cache";
+                    Interlocked.Increment(ref _cachedShaderCount);
                 }
                 else
                 {
+                    // Logged before compiling so a hanging or slow shader is identifiable from the log tail
+                    Log.Debug($"Compiling {args.Name} @{args.EntryPoint}...");
                     Stopwatch timer = Stopwatch.StartNew();
                     if (Instance.CompileShaderFromSource<TShader>(args, out compiledBlob, out reason))
                     {
                         timer.Stop();
                         success = true;
+                        Interlocked.Increment(ref _compiledShaderCount);
                         CacheSuccessfulCompilation(args.OldBytecode, hash, compiledBlob);
                         reason = $"{timer.Elapsed.TotalMilliseconds:0.0}ms";
                     }
-                        
                 }
             }
         }
@@ -176,6 +179,15 @@ public abstract partial class ShaderCompiler
         IResourceConsumer? Owner, 
         byte[]? OldBytecode);
     
+    /// <summary>Shaders compiled from source since startup (excludes cache hits).</summary>
+    public static int CompiledShaderCount => _compiledShaderCount;
+
+    /// <summary>Shaders served from the in-memory or on-disk cache since startup.</summary>
+    public static int CachedShaderCount => _cachedShaderCount;
+
+    private static int _compiledShaderCount;
+    private static int _cachedShaderCount;
+
     public record struct ShaderCompilationArgs(
         string SourceCode, 
         string EntryPoint, 

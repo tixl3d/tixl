@@ -6,6 +6,7 @@ using SharpDX.Direct3D11;
 namespace Lib.io.video;
 
 [Guid("9412d0f4-dab8-4145-9719-10395e154fa7")]
+[ExportDependencies("NDILibDotNet6.dll", "Processing.NDI.Lib.x64.dll")]
 public sealed class NdiOutput : Instance<NdiOutput>, IStatusProvider
 {
     [Output(Guid = "3c0ae0e5-a2af-4437-b7fa-8ad300cb8b8b", DirtyFlagTrigger = DirtyFlagTrigger.Always)]

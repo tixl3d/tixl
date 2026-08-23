@@ -8,6 +8,7 @@ using System.Threading;
 namespace Lib.io.dmx
 {
     [Guid("98efc7c8-cafd-45ee-8746-14f37e9f59f8")]
+    [ExportDependencies("ArtNet.dll")]
     internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, ICustomDropdownHolder, IDisposable
     {
         private const int ArtNetPort = 6454;

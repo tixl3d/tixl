@@ -34,6 +34,7 @@ namespace Lib.io.video.mediapipe
     }
 
     [Guid("9b2c3d4e-5f6a-4798-89ab-cdef12345678")]
+    [ExportDependencies("mediapipe_c.dll", "OpenCvSharpExtern.dll", "Emgu.CV.dll", "cvextern.dll", "OpenGL.Net.dll", "CppSharp.Runtime.dll", "Google.Protobuf.dll")]
     public class FaceLandmarkDetection : Instance<FaceLandmarkDetection>
     {
         [Output(Guid = "a1b2c3d4-e5f6-4798-89ab-cdef12345679", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]

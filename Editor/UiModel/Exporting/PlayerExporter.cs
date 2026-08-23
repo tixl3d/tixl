@@ -1,9 +1,11 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using T3.Core.Audio;
 using T3.Core.Compilation;
 using T3.Core.DataTypes;
 using T3.Core.IO;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
@@ -18,13 +20,16 @@ using T3.Serialization;
 
 namespace T3.Editor.UiModel.Exporting;
 
+/// <summary>
+/// Builds a standalone player folder for one operator: the reachable part of its graph, the assets it references,
+/// the operator packages (pruned to what those operators need) and the player runtime.
+/// </summary>
 internal static partial class PlayerExporter
 {
     public static bool TryExportInstance(Instance composition, SymbolUi.Child childUi, out string reason, out string exportDir)
     {
         T3Ui.Save(false);
 
-        // Collect all ops and types
         var exportedInstance = composition.Children[childUi.SymbolChild.Id];
         var symbol = exportedInstance.Symbol;
         Log.Info($"Exporting {symbol.Name}...");
@@ -37,24 +42,14 @@ internal static partial class PlayerExporter
             return false;
         }
 
-        // Traverse starting at output and collect everything
-        var exportData = new ExportData();
-        exportData.TryAddSymbol(symbol);
+        // The exported op's own settings win over inherited ones: they are what the Executable panel edits.
+        var exportConfig = symbol.CompositionSettings?.Export ?? CompositionSettings.Current.Export;
+        var exportData = new ExportData(symbol);
 
-        var package = composition.Symbol.SymbolPackage;
-        exportDir = Path.Combine(package.Folder, FileLocations.ExportSubFolder, childUi.SymbolChild.ReadableName);
-
-        if (!TryRemoveExistingExportDir(out reason, exportDir))
-            return false;
-
-        Directory.CreateDirectory(exportDir);
-
-        var operatorDir = Path.Combine(exportDir, FileLocations.OperatorsSubFolder);
-        Directory.CreateDirectory(operatorDir);
-
-        // Copy assemblies into export dir. Get symbol packages directly used by the exported symbols
-        if (!TryExportSymbolPackages(out reason, exportData, operatorDir))
-            return false;
+        // Traverse starting at output and collect everything that can evaluate in the player
+        RecursivelyCollectExportData(output, exportData);
+        CollectAutoCollectedOps(exportedInstance, exportData);
+        exportData.FinishCollection(exportConfig.StripUnusedOperators);
 
         // Get soundtrack or show warning message
         if (TryFindSoundtrack(exportedInstance, symbol, out var address))
@@ -80,6 +75,7 @@ internal static partial class PlayerExporter
             if (choice != yes)
             {
                 reason = $"Failed to find soundTrack for [{symbol.Name}] - export cancelled, see log for details";
+                exportDir = string.Empty;
                 return false;
             }
         }
@@ -91,9 +87,9 @@ internal static partial class PlayerExporter
                          "Lib:pbr/BRDF-LookUp.dds",
                      ])
         {
-            if (AssetRegistry.TryGetAsset(shared, out var soundtrackAsset))
+            if (AssetRegistry.TryGetAsset(shared, out var sharedAsset))
             {
-                exportData.TryAddSharedAsset(soundtrackAsset);
+                exportData.TryAddSharedAsset(sharedAsset);
             }
             else
             {
@@ -101,9 +97,25 @@ internal static partial class PlayerExporter
             }
         }
 
-        // Collect used assets
-        RecursivelyCollectExportData(output, exportData);
         exportData.PrintInfo();
+
+        var package = composition.Symbol.SymbolPackage;
+        exportDir = Path.Combine(package.Folder, FileLocations.ExportSubFolder, childUi.SymbolChild.ReadableName);
+
+        if (!TryRemoveExistingExportDir(out reason, exportDir))
+            return false;
+
+        Directory.CreateDirectory(exportDir);
+
+        var operatorDir = Path.Combine(exportDir, FileLocations.OperatorsSubFolder);
+        Directory.CreateDirectory(operatorDir);
+
+        var report = new CopyReport();
+        var dependencyFilter = new DependencyFileFilter(exportData);
+
+        // Copy assemblies into export dir. Get symbol packages directly used by the exported symbols
+        if (!TryExportSymbolPackages(out reason, exportData, operatorDir, dependencyFilter, report))
+            return false;
 
         if (!AssetExportItem.TryCopyItems(exportData.ExportItems, exportDir))
         {
@@ -117,38 +129,48 @@ internal static partial class PlayerExporter
         // Copy shared assets
         var editorResourcesTargetDir = Path.Combine(exportDir, FileLocations.EditorResourcesSubfolder);
         Directory.CreateDirectory(editorResourcesTargetDir);
-        if (!TryCopyDirectory(SharedResources.EditorResourcesDirectory, editorResourcesTargetDir, out reason))
+        if (!TryCopyDirectory(SharedResources.EditorResourcesDirectory, editorResourcesTargetDir, out reason, report))
             return false;
 
-        // Exclude optional dependency files that are not required by any exported symbol.
-        var excludedDependencyFiles = GetUnusedMappedDependencyFiles(exportData);
+        // Copy the player runtime without the optional dependencies no exported operator declares
         var playerDirectory = Path.Combine(FileLocations.StartFolder, "Player");
-        if (!TryCopyDirectory(playerDirectory,
-                              exportDir,
-                              out reason,
-                              excludeFiles: excludedDependencyFiles))
+        if (!TryCopyDirectory(playerDirectory, exportDir, out reason, report, shouldExcludeFile: dependencyFilter.ShouldExcludeFile))
             return false;
 
-        if (!TryExportSettings(exportDir, symbol, out reason))
+        if (!TryExportSettings(exportDir, symbol, exportConfig, out reason))
             return false;
+
+        Log.Info($"Export copied {report.CopiedCount} files ({FormatBytes(report.CopiedBytes)}), " +
+                 $"skipped {report.SkippedCount} files ({FormatBytes(report.SkippedBytes)}).");
+        if (dependencyFilter.ExcludedPatterns.Count > 0)
+        {
+            Log.Debug("Skipped optional dependencies: " + string.Join(", ", dependencyFilter.ExcludedPatterns));
+        }
 
         reason = "Exported successfully to " + exportDir;
         return true;
     }
 
     /// <summary>
-    /// Compile EditableProjects and copy read only projects.  
+    /// Compile EditableProjects and copy read only projects, pruned to the symbols and dependencies in use.
     /// </summary>
-    private static bool TryExportSymbolPackages(out string reason, ExportData exportData, string operatorDir)
+    private static bool TryExportSymbolPackages(out string reason, ExportData exportData, string operatorDir,
+                                                DependencyFileFilter dependencyFilter, CopyReport report)
     {
-        string[] excludeSubdirectories =
-            [
-                ".git",
-                FileLocations.SymbolUiSubFolder,
-                FileLocations.SourceCodeSubFolder,
-                FileLocations.ExportSubFolder,
-                FileLocations.AssetsSubfolder, // Assets are filtered by referencing address and copied separately 
-            ];
+        var excludeSubdirectories = new List<string>
+                                        {
+                                            ".git",
+                                            FileLocations.SymbolUiSubFolder,
+                                            FileLocations.SourceCodeSubFolder,
+                                            FileLocations.ExportSubFolder,
+                                            FileLocations.AssetsSubfolder, // Assets are filtered by referencing address and copied separately
+                                        };
+
+        // Stripped exports rewrite the symbol files instead of copying them
+        if (exportData.StripsUnusedOperators)
+            excludeSubdirectories.Add(FileLocations.ReleaseSymbolsSubfolder);
+
+        var excludeSubdirectoryArray = excludeSubdirectories.ToArray();
 
         foreach (var package in exportData.SymbolPackages)
         {
@@ -157,6 +179,7 @@ internal static partial class PlayerExporter
             var targetDirectory = Path.Combine(operatorDir, packageName);
             Directory.CreateDirectory(targetDirectory);
 
+            string sourceDir;
             if (package is EditableSymbolProject project)
             {
                 project.SaveModifiedSymbols();
@@ -166,21 +189,21 @@ internal static partial class PlayerExporter
                     return false;
                 }
 
-                // Copy the resulting directory into the target directory
-                var sourceDir = project.CsProjectFile.GetBuildTargetDirectory(CsProjectFile.PlayerBuildMode);
-
-                // Copy contents recursively into the target directory
-                if (!TryCopyDirectory(sourceDir, targetDirectory, out reason, excludeSubdirectories))
-                    return false;
+                sourceDir = project.CsProjectFile.GetBuildTargetDirectory(CsProjectFile.PlayerBuildMode);
             }
             else
             {
-                // Copy full directory into target directory recursively, maintaining folder layout
-                var directoryToCopy = package.AssemblyInformation.Directory;
-
-                if (!TryCopyDirectory(directoryToCopy, targetDirectory, out reason, excludeSubdirectories))
-                    return false;
+                sourceDir = package.AssemblyInformation.Directory;
             }
+
+            if (!TryCopyDirectory(sourceDir, targetDirectory, out reason, report, excludeSubdirectoryArray,
+                                  relativePath => dependencyFilter.ShouldExcludeFile(relativePath)
+                                                  || IsForeignRuntimeFile(relativePath)
+                                                  || IsNestedExportFile(relativePath)))
+                return false;
+
+            if (exportData.StripsUnusedOperators && !TryWriteStrippedSymbolFiles(package, exportData, targetDirectory, out reason))
+                return false;
         }
 
         reason = string.Empty;
@@ -188,8 +211,61 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
+    /// Writes the package's used symbols with unreachable children removed into the export's Symbols folder.
+    /// </summary>
+    private static bool TryWriteStrippedSymbolFiles(SymbolPackage package, ExportData exportData, string targetDirectory, out string reason)
+    {
+        reason = string.Empty;
+        if (package is not EditorSymbolPackage editorPackage)
+        {
+            reason = $"Can't locate symbol files of package {package.Name}";
+            return false;
+        }
+
+        var symbolsTargetDir = Path.Combine(targetDirectory, FileLocations.ReleaseSymbolsSubfolder);
+        var removedChildren = 0;
+        foreach (var symbol in exportData.GetSymbolsOfPackage(package))
+        {
+            if (!editorPackage.TryGetSymbolFilePath(symbol, out var sourcePath))
+            {
+                reason = $"Can't locate symbol file of [{symbol.Name}] in package {package.Name}";
+                return false;
+            }
+
+            var relativePath = Path.GetRelativePath(package.Folder, sourcePath);
+            if (relativePath.StartsWith("..", StringComparison.Ordinal))
+            {
+                relativePath = symbol.Id + SymbolPackage.SymbolExtension;
+            }
+            else if (relativePath.StartsWith(FileLocations.ReleaseSymbolsSubfolder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            {
+                relativePath = relativePath[(FileLocations.ReleaseSymbolsSubfolder.Length + 1)..];
+            }
+
+            var targetPath = Path.Combine(symbolsTargetDir, relativePath);
+            var keptChildren = exportData.GetReachableChildIds(symbol);
+            if (!SymbolJson.TryWriteFilteredSymbolFile(sourcePath, targetPath, keptChildren, out var removedCount))
+            {
+                reason = $"Failed to write symbol file for [{symbol.Name}]";
+                return false;
+            }
+
+            if (removedCount > 0)
+            {
+                removedChildren += removedCount;
+                Log.Debug($"  [{symbol.Name}]: stripped {removedCount} unused child operators");
+            }
+        }
+
+        if (removedChildren > 0)
+            Log.Info($"{package.Name}: stripped {removedChildren} unused child operators");
+
+        return true;
+    }
+
+    /// <summary>
     /// If only Assets but no Symbols are used from a package, we still need to copy its OperatorPackage.json file,
-    /// so the player can register these assets on startup. 
+    /// so the player can register these assets on startup.
     /// </summary>
     private static bool TryExportAssetsOnlyPackages(ExportData exportData, string operatorDir, out string reason)
     {
@@ -214,10 +290,40 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
-    /// Recursively copies a directory to a target directory, excluding specified subfolders, files, and file extensions.
+    /// Projects created before the csproj excluded the Export folder copy earlier exports into their build output
+    /// (Symbols/Export/..., SourceCode/Export/...), which would register every symbol twice in the player.
     /// </summary>
-    private static bool TryCopyDirectory(string directoryToCopy, string targetDirectory, out string reason, string[]? excludeSubFolders = null,
-                                         string[]? excludeFiles = null, string[]? excludeFileExtensions = null)
+    private static bool IsNestedExportFile(string relativePath)
+    {
+        var exportSegment = Path.DirectorySeparatorChar + FileLocations.ExportSubFolder + Path.DirectorySeparatorChar;
+        return relativePath.Contains(exportSegment, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// The player runs on win-x64 only; native libraries for other runtime identifiers are dead weight.
+    /// </summary>
+    private static bool IsForeignRuntimeFile(string relativePath)
+    {
+        const string runtimesFolder = "runtimes";
+        if (!relativePath.StartsWith(runtimesFolder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            && !relativePath.StartsWith(runtimesFolder + Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var ridStart = runtimesFolder.Length + 1;
+        var ridEnd = relativePath.IndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar], ridStart);
+        if (ridEnd < 0)
+            return false;
+
+        var rid = relativePath.AsSpan(ridStart, ridEnd - ridStart);
+        return !rid.Equals("win-x64", StringComparison.OrdinalIgnoreCase)
+               && !rid.Equals("win", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Recursively copies a directory to a target directory, excluding specified subfolders and files.
+    /// </summary>
+    private static bool TryCopyDirectory(string directoryToCopy, string targetDirectory, out string reason, CopyReport report,
+                                         string[]? excludeSubFolders = null, Func<string, bool>? shouldExcludeFile = null)
     {
         try
         {
@@ -242,30 +348,15 @@ internal static partial class PlayerExporter
                                           .SelectMany(subDir => Directory.EnumerateFiles(subDir, "*", SearchOption.AllDirectories));
 
             var files = rootFiles.Concat(subfolderFiles);
-            var shouldExcludeFiles = excludeFiles != null;
-            var shouldExcludeFileExtensions = excludeFileExtensions != null;
             foreach (var file in files)
             {
-                if (shouldExcludeFiles && excludeFiles!.Contains(Path.GetFileName(file)))
-                    continue;
-
-                bool shouldSkipBasedOnExtension = false;
-                if (shouldExcludeFileExtensions)
+                var relativePath = Path.GetRelativePath(directoryToCopy, file);
+                if (shouldExcludeFile != null && shouldExcludeFile(relativePath))
                 {
-                    foreach (var extension in excludeFileExtensions!)
-                    {
-                        if (file.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
-                        {
-                            shouldSkipBasedOnExtension = true;
-                            break;
-                        }
-                    }
+                    report.Skip(file);
+                    continue;
                 }
 
-                if (shouldSkipBasedOnExtension)
-                    continue;
-
-                var relativePath = Path.GetRelativePath(directoryToCopy, file);
                 var targetPath = Path.Combine(targetDirectory, relativePath);
                 var targetDir = Path.GetDirectoryName(targetPath);
                 if (targetDir == null)
@@ -276,6 +367,7 @@ internal static partial class PlayerExporter
 
                 Directory.CreateDirectory(targetDir);
                 File.Copy(file, targetPath, true);
+                report.Copy(file);
             }
         }
         catch (Exception e)
@@ -353,6 +445,28 @@ internal static partial class PlayerExporter
         }
     }
 
+    /// <summary>
+    /// The player's render loop evaluates some direct children of the exported op without an output connection:
+    /// auto-playing audio clips (<see cref="AudioClipCollector"/>) and loose audio sources
+    /// (<see cref="AudioGraphCollector"/>). Include them and whatever feeds them.
+    /// </summary>
+    private static void CollectAutoCollectedOps(Instance exportedInstance, ExportData exportData)
+    {
+        foreach (var child in exportedInstance.Children.Values)
+        {
+            if (child is not (IAudioClipProvider or IAudioSource))
+                continue;
+
+            foreach (var childOutput in child.Outputs)
+            {
+                RecursivelyCollectExportData(childOutput, exportData);
+            }
+
+            // Ops without outputs are still collected
+            exportData.TryAddInstance(child);
+        }
+    }
+
     private static bool TryFindSoundtrack(Instance instance, Symbol symbol,
                                           [NotNullWhen(true)] out string? address)
     {
@@ -419,20 +533,11 @@ internal static partial class PlayerExporter
             }
             case StringInputUi.UsageType.DirectoryPath:
             {
-                //var relativeDirectory = stringValue.Value;
-                //var isFolder = relativeDirectory.EndsWith('/');
-
                 if (!AssetRegistry.TryResolveAddress(address, parent, out var absoluteDirectory, out var package, isFolder: true))
                 {
                     Log.Warning($" Directory '{address}' was not found in any resource folder");
                     break;
                 }
-
-                // if (package == null)
-                // {
-                //     Log.Warning($"Directory '{address}' can't be exported without a package");
-                //     break;
-                // }
 
                 Log.Debug($"Export all files in folder {absoluteDirectory}...");
                 foreach (var absolutePath in Directory.EnumerateFiles(absoluteDirectory, "*", SearchOption.AllDirectories))
@@ -454,13 +559,10 @@ internal static partial class PlayerExporter
         }
     }
 
-    private static bool TryExportSettings(string exportDir, Symbol symbol, out string reason)
+    private static bool TryExportSettings(string exportDir, Symbol symbol, CompositionSettings.ExportConfig exportConfig, out string reason)
     {
         reason = string.Empty;
 
-        // Update project settings
-        // The exported op's own settings win over inherited ones: they are what the Executable panel edits.
-        var exportConfig = symbol.CompositionSettings?.Export ?? CompositionSettings.Current.Export;
         var title = string.IsNullOrWhiteSpace(exportConfig.Title) ? symbol.Name : exportConfig.Title.Trim();
         var author = string.IsNullOrWhiteSpace(exportConfig.Author)
                          ? symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty
@@ -499,99 +601,10 @@ internal static partial class PlayerExporter
         return true;
     }
 
-    private static string[] GetUnusedMappedDependencyFiles(ExportData exportData)
+    private static string FormatBytes(long bytes)
     {
-        var requiredFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var allMappedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var definition in _dependencyDefinitions)
-        {
-            foreach (var filename in definition.Filenames)
-            {
-                allMappedFiles.Add(filename);
-            }
-
-            var isRequired = false;
-            foreach (var symbolId in definition.SymbolIds)
-            {
-                if (!exportData.ContainsSymbolId(symbolId))
-                    continue;
-
-                isRequired = true;
-                break;
-            }
-
-            if (!isRequired)
-                continue;
-
-            foreach (var filename in definition.Filenames)
-            {
-                requiredFiles.Add(filename);
-            }
-        }
-
-        allMappedFiles.ExceptWith(requiredFiles);
-        return allMappedFiles.ToArray();
+        return bytes >= 1024 * 1024
+                   ? $"{bytes / (1024.0 * 1024.0):0.0} MB"
+                   : $"{bytes / 1024.0:0.0} KB";
     }
-
-    private sealed record OpDependencyDefinition(List<Guid> SymbolIds, List<string> Filenames);
-
-    private static readonly List<OpDependencyDefinition> _dependencyDefinitions =
-    [
-        new([new Guid("31ab98ec-5e79-4667-9a85-2fb168f41fa1")], [
-            "AbletonLink.deps.json",
-            "AbletonLinkDLL.dll",
-            "AbletonLink.dll",
-        ]),
-        // Things related to webcams and MediaPipe
-        new([
-            new Guid("cd5a182e-254b-4e65-820b-ff754122614c"), // VideoDeviceInput
-            new Guid("A1B2C3D4-E5F6-4798-89AB-CDEF12345679"), // MediaPipeFaceDetection
-            new Guid("9b2c3d4e-5f6a-4798-89ab-cdef12345678"), // FaceLandmark
-            new Guid("4567890a-bcde-f123-4567-890abcdef123"), // HandLandmark
-            new Guid("23456789-0abc-def1-2345-67890abcdef1"), // Image Segmentation
-            new Guid("12345678-90ab-cdef-1234-567890abcdef"), // Object Detection 
-            new Guid("34567890-abcd-ef12-3456-7890abcdef12"), // PoseLandmarkDetection  
-            new Guid("8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c"), // OnvifCamera
-            new Guid("7b4d3c2a-5b16-4b2a-8f3a-7e8c9d0b1a2b"), // CameraCalibrartor  
-            // VideoStreamInput decodes via FFmpeg (the LGPL build shipped with the Video operator package, to
-            // which it has now moved), so it no longer needs the OpenCV DLLs.
-        ], [
-            "mediapipe_c.dll",
-            "Emgu.CV.dll",
-            "Processing.NDI.Lib.x64.dll",
-            "OpenGL.Net.dll",
-            "OpenCvSharp.Extensions.dll",
-            "OpenCvSharpExtern.dll",
-            "opencv_videoio_ffmpeg4110_64.dll",
-            "DirectShowLib.dll",
-            "cvextern.dll",
-        ]),
-
-        // NDI
-        new([
-            new Guid("7567c3b0-9d91-40d2-899d-3a95b481d023"), // NdiInput
-            new Guid("9412d0f4-dab8-4145-9719-10395e154fa7"), // NdiOutput
-        ], [
-            "NDILibDotNet6.dll",
-            "Processing.NDI.Lib.x64.dll",
-        ]),
-        
-        // Unsplash
-        new([
-            new Guid("89162b9f-75f5-4d32-9d28-8259cf47cf58"), 
-        ], [
-            "Unsplasharp.dll",
-        ]),
-
-        
-        new([
-            new Guid("fc03dcd0-6f2f-4507-be06-1ed105607489"), //ArtnetInput
-            new Guid("98efc7c8-cafd-45ee-8746-14f37e9f59f8"), //ArtnetOutput
-            new Guid("faa3e182-96e6-45e7-b037-fb2acd88825b"), //ArtnetPixelOutput
-        ], [
-            "ArtNet.dll",
-        ]),
-    ];
 }
-

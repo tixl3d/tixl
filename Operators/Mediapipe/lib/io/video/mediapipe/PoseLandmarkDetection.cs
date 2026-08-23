@@ -31,6 +31,7 @@ internal class PoseLandmarkDetectionResultPacket
 }
 
 [Guid("34567890-abcd-ef12-3456-7890abcdef12")]
+[ExportDependencies("mediapipe_c.dll", "OpenCvSharpExtern.dll", "Emgu.CV.dll", "cvextern.dll", "OpenGL.Net.dll", "CppSharp.Runtime.dll", "Google.Protobuf.dll")]
 public class PoseLandmarkDetection : Instance<PoseLandmarkDetection>
 {
     [Output(Guid = "cdef1234-5678-90ab-cdef-1234567890ab", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]

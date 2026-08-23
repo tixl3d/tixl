@@ -4,6 +4,7 @@ using Unsplasharp.Models;
 namespace t3.unsplash;
 
 [Guid("89162b9f-75f5-4d32-9d28-8259cf47cf58")]
+[ExportDependencies("Unsplasharp.dll")]
 public class UnsplashAPI : Instance<UnsplashAPI>
 {
     [Output(Guid = "487C1FE8-5B7C-43FB-855D-CC2B3CA70566")]

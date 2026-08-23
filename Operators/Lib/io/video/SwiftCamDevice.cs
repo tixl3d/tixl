@@ -17,6 +17,7 @@ namespace Lib.io.video;
 /// (or pointed at via the TIXL_SWIFTCAM_DLL environment variable).
 /// </summary>
 [Guid("5ea3d627-e44b-4531-9f06-4503a1a4dd0e")]
+[ExportDependencies("swiftcam.dll", "libusb-1.0.dll")]
 public class SwiftCamDevice : Instance<SwiftCamDevice>, ICustomDropdownHolder, IStatusProvider
 {
     [Output(Guid = "5f1552ab-e9e5-49ac-b2f1-3019becf6f96", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]

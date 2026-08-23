@@ -191,7 +191,8 @@ internal static partial class Program
 #if DEBUG || FORCE_D3D_DEBUG
             var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
 #else
-                var deviceCreationFlags = DeviceCreationFlags.None;
+            // BgraSupport is required for the Direct2D loading screen
+            var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
 #endif
             Device.CreateWithSwapChain(DriverType.Hardware, deviceCreationFlags, desc, out _device, out _swapChain);
             ResourceManager.Init(_device);
@@ -221,7 +222,21 @@ internal static partial class Program
             _fullScreenPixelShaderResource = SharedResources.FullScreenPixelShaderResource;
             _fullScreenVertexShaderResource = SharedResources.FullScreenVertexShaderResource;
 
-            LoadOperators();
+            // Loading runs in steps on this thread; the loading screen is redrawn between them.
+            var loadReport = new PlayerLoadReport();
+            _lastLogLine = new LastLogLineWriter();
+            Log.AddWriter(_lastLogLine);
+            _loadingScreen = new LoadingScreen(exportSettings.ApplicationTitle);
+            _isLoading = true;
+            _renderForm.Show();
+            PumpLoadingScreen("Loading operators...", LoadProgressOperatorsStart);
+
+            loadReport.BeginStage("Load operators");
+            if (!LoadOperators(loadReport))
+            {
+                CloseApplication(false, "Loading cancelled.");
+                return;
+            }
 
             if(!SymbolRegistry.TryGetSymbol(exportSettings.OperatorId, out var demoSymbol))
             {
@@ -250,12 +265,21 @@ internal static partial class Program
                             };
 
             // Create instance of project op, all children are create automatically
+            loadReport.BeginStage("Create instances");
+            if (!PumpLoadingScreen("Creating operators...", LoadProgressInstance))
+            {
+                CloseApplication(false, "Loading cancelled.");
+                return;
+            }
 
             if (!demoSymbol.TryGetParentlessInstance(out _project))
             {
                 CloseApplication(true, $"Failed to create instance of project op {demoSymbol}");
                 return;
             }
+
+            loadReport.InstanceCount = CountInstances(_project);
+            loadReport.BeginStage("Prepare audio");
                 
             _evalContext = new EvaluationContext();
 
@@ -355,11 +379,33 @@ internal static partial class Program
             // TODO - implement proper shader pre-compilation as an option to instance instantiation
             // move this to core?
             // Sample some frames to preload all shaders and resources
+            loadReport.BeginStage("Warm up shaders");
             if (prerenderRequired)
             {
-                PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext, _textureOutput, _swapChain,
-                                           _renderView);
+                if (!PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext, _textureOutput,
+                                                _renderView))
+                {
+                    CloseApplication(false, "Loading cancelled.");
+                    return;
+                }
             }
+            else if (!PumpLoadingScreen("Warming up shaders...", LoadProgressPreloadStart))
+            {
+                CloseApplication(false, "Loading cancelled.");
+                return;
+            }
+
+            PumpLoadingScreen("Starting...", LoadProgressPreloadEnd);
+            loadReport.ShadersCompiled = ShaderCompiler.CompiledShaderCount;
+            loadReport.ShadersFromCache = ShaderCompiler.CachedShaderCount;
+            loadReport.CountAssets(Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder), FileLocations.AssetsSubfolder);
+            loadReport.Complete();
+            loadReport.LogAndSave(Path.Combine(playerDataDirectory, "loadReport.json"));
+
+            _isLoading = false;
+            Log.RemoveWriter(_lastLogLine);
+            _loadingScreen.Dispose();
+            _loadingScreen = null;
 
             // Start playback           
             _playback.Update();
@@ -396,6 +442,8 @@ internal static partial class Program
         void CloseApplication(bool error, string message)
         {
             CoreUi.Instance.Cursor.SetVisible(true);
+            _loadingScreen?.Dispose();
+            _loadingScreen = null;
             ShaderCompiler.Shutdown();
             bool openLogs = false;
                 
@@ -490,6 +538,7 @@ internal static partial class Program
         // binding on the output merger. A still-bound RTV leaves the pipeline in undefined
         // state which can escalate to DXGI_ERROR_DEVICE_HUNG on the next Present.
         device.ImmediateContext.OutputMerger.SetTargets((RenderTargetView)null);
+        _loadingScreen?.ReleaseBackBufferResources();
         rtv.Dispose();
         buffer.Dispose();
 

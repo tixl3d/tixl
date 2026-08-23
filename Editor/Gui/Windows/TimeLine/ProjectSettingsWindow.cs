@@ -760,6 +760,12 @@ internal sealed class ProjectSettingsWindow : Window
                                            "Open a console window with log output next to the executable.",
                                            defaults.ShowLogs);
 
+        FormInputs.AddVerticalSpace();
+        modified |= FormInputs.AddCheckBox("Strip Unused Operators",
+                                           ref export.StripUnusedOperators,
+                                           "Only ship operators connected to the exported output (plus auto-playing audio ops)\nand the libraries they need. Disable if the exported executable misses content.",
+                                           defaults.StripUnusedOperators);
+
         return modified;
     }
 

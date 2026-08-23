@@ -131,6 +131,8 @@ public sealed class CompositionSettings
         public int PreferredHeight = 1080;
         public bool ShowLogs = false;
         public bool SkipStartupDialog = false;
+        /// <summary>Ship only operators reachable from the exported output (plus auto-playing audio ops).</summary>
+        public bool StripUnusedOperators = true;
     }
 
     /// <summary>Preview-proxy preferences for this project: how seek-proxies are transcoded and whether the engine
@@ -233,6 +235,7 @@ public sealed class CompositionSettings
                 writer.WriteValue(nameof(ExportConfig.PreferredHeight), Export.PreferredHeight);
                 writer.WriteValue(nameof(ExportConfig.ShowLogs), Export.ShowLogs);
                 writer.WriteValue(nameof(ExportConfig.SkipStartupDialog), Export.SkipStartupDialog);
+                writer.WriteValue(nameof(ExportConfig.StripUnusedOperators), Export.StripUnusedOperators);
             }
             writer.WriteEndObject();
 
@@ -321,6 +324,7 @@ public sealed class CompositionSettings
                                      PreferredHeight = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.PreferredHeight), Defaults.Export.PreferredHeight),
                                      ShowLogs = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.ShowLogs), Defaults.Export.ShowLogs),
                                      SkipStartupDialog = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.SkipStartupDialog), Defaults.Export.SkipStartupDialog),
+                                     StripUnusedOperators = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.StripUnusedOperators), Defaults.Export.StripUnusedOperators),
                                  }
                                : new ExportConfig(),
                            Proxy = proxyToken != null

@@ -11,7 +11,7 @@ Most of the initial flow didn’t change with some exceptions:
 With v4.0.6 (2025-09-15)…
 
 * the executable will be created in a folder called `T3Export\`. This location will change in the future.
-* the exported executable might contain more resources than necessary. If you’re concerned about file size, you can remove around 100 MB of unnecessary DLLs and media content. We will address this in an upcoming release.
+* the export only ships the operators reachable from the exported output (plus auto-playing audio ops), the assets they reference and the optional libraries they declare. If an export misses content, disable `Strip Unused Operators` in `Project Settings` → `Executable` and export again.
 
 ---
 
@@ -49,6 +49,10 @@ The executable `Player.exe` is a stand alone application that handles operator l
 On start, the player opens a small dialog asking for the display, the resolution (the native modes of that display, or a custom size), fullscreen and whether to show log messages in a console window. The defaults come from the project's `Executable` settings (`Preferred Width` / `Height`, `Window Mode`, `Show Log Messages`); the last choice is remembered per executable. Enable `Skip Startup Dialog` in the project settings to start directly with the project defaults — useful for installations. `Title` and `Author` in the same panel set the window title and the dialog header.
 
 The player writes its log files and the remembered startup choice to a `.temp/` folder next to the executable (falling back to the user's app-data folder when that location is read-only).
+
+### Loading screen
+
+After the dialog the player shows a dark loading screen with a progress bar and the latest log line while it loads the operator packages, creates the graph and warms up shaders. `Esc` cancels. When loading completes, the log (and `.temp/loadReport.json`) contains a short report: package / symbol / instance counts, shaders compiled vs. loaded from cache, asset size and the duration of each stage — handy when an export starts slowly.
 
 ### Command line arguments
 
