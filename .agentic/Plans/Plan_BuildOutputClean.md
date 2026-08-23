@@ -153,3 +153,80 @@ both faster and more consistent. Needs a check that a fresh clone still builds C
 4. Editor-side evidence → `-p:TixlCleanOutput=true`; `--no-dependencies` in `Compiler.TryCompile`.
 5. Manual test set: fresh clone, csproj reference removed, obj deleted, bin deleted, editor-running build
    in the other configuration, player export.
+
+---
+
+## Addendum (2026-08-23, later): editor startup — the part that actually matters for the Debug round-trip
+
+The user's target: Rider Run → project list in < 15 s (was 72 s on the notebook, ~47 s of it inside the
+editor on a cold run, 21–25 s warm). The build-clean work above is a Release/export concern; Debug startup
+was dominated by something else.
+
+### Instrumentation added (permanent, Debug-level log lines)
+- `SymbolPackage.LoadSymbols`: ` Loaded <pkg>: N types in Xms, M symbol files in Yms`
+- `EditorSymbolPackage.LoadUiFiles`: ` Loaded N symbol UIs for <pkg> in Xms`
+- `ProjectSetup.UpdateSymbolPackagesInternal`: `>> Updated N symbol packages in Xs (contexts, symbols, children, uis, source, register)`
+- `ProjectSetup.LoadAll`: `>> Total load time: Xs (projects, asset migration+ui types, symbols, migrations, resources; shadow copies MB in s)` — no longer `#if DEBUG`
+- `TixlAssemblyLoadContext.Load`: `Resolving assembly 'X' took Nms` for anything > 100 ms
+- `AssemblyInformation.ShadowCopyStats` (bytes / ms) fed by the load context
+
+### Finding
+`AssemblyTreeNode.TryFindUnreferenced` answered "do you have assembly X?" by scanning the node's whole
+folder with `AssemblyName.GetAssemblyName` on **every** `.dll` — including 300+ MB of natives — under the
+global resolution lock. Editable packages are shadow-copied to a fresh folder on every start, so every
+first open pays a real-time AV scan (measured: 78 files / 336 MB, first pass 5.03 s, second pass 0.03 s).
+Log before the fix (warm): `Default: Scanned Editor\bin\Debug: 88 found in 3502ms` (7 packages waiting on
+'Core'), `Video: 61 in 3829ms`, `Io: 70 in 2495ms`, `Lib: 92 in 3120ms`, `Mediapipe: Resolving
+'Google.Protobuf' took 10721ms` (pure waiting). Symbol phase 12–24 s; `Startup took 21–47 s`.
+
+### Fix (landed in working tree, `Core/Compilation/AssemblyTreeNode.cs`)
+Lookup by file name first (like default .NET probing), open only the matching file, keep the exact
+full-name check and the resolution order. Result, same machine, warm: symbol phase 12.1 s → 2.7 s,
+Lib type scan 3.4 s → 0.87 s, **`Startup took 13.0s`**, 0 errors, identical type counts per package.
+Known semantic difference: an assembly whose file name differs from its assembly name is no longer found
+by this path (standard .NET doesn't find those either; NuGet/package fallbacks are unchanged).
+
+### Remaining startup budget (warm, 13 s) and next slices
+| Phase | Now | Idea |
+|---|---|---|
+| pre-load (device, UI init) | ~1.5 s | — |
+| projects (csproj parse, compile check) | 0.6 s | — |
+| contexts (19× `GenerateLoadContext`, sequential, incl. 0.9 s shadow copy) | 2.7 s | parallelize per package; skip `runtimes/**` natives in the shadow copy (loaded from `MainDirectory` anyway) or key shadow dirs by source mtime so AV/copy costs vanish across restarts |
+| types + symbol files | 2.7 s | fine; Lib json read 0.7 s could be parallel |
+| `LegacyAudioClipMigration` | 3.9 s | it `TryGetParentlessInstance`s every symbol with legacy clips (instantiates whole compositions) just to resolve an asset path, fails for 9 stale `Resources/...` paths, and re-probes every start — skip unresolvable paths / resolve via package, or run when the project is opened |
+| post-load (examples index, midi, …) | ~2 s | — |
+| Rider build + launch | unmeasured (user: ~25–45 s) | see main plan; also `ClearBuildOutput` runs for every operator package Rider builds as a dependency of Editor |
+
+Noise to clean up while there: `CsProjectLoadInfo` logs "needs to be compiled" for archived projects
+(ArtNet) before `LoadProjects` checks `IsArchived`.
+
+### Rider side (from `%LocalAppData%\JetBrains\Rider2026.1\log\SolutionBuilder`, 2026-08-23)
+
+| Rider build | Elapsed | What it was |
+|---|---|---|
+| 17:11, 19:10-ish Release | 35–49 s | 7.8k–13k copy/hardlink ops: `CopyTixlOperators` wipe+recopy (plan item 1) |
+| 19:10 | 34 s, 0 compiles | `dotnet restore` downloading the NuGet vulnerability DB (`vulnerability.update.json 20 s`, `index.json 12 s`) |
+| 17:56 | 40 s, **all 20 projects** compiled | first build after a commit: the SDK embeds the git SHA in every `InformationalVersion`, so HEAD moving regenerates every AssemblyInfo.cs |
+| 17:58, 19:11, 19:43 | 37–64 s | genuine Core / Lib edits; Lib alone is ~18 s of csc, Examples + TiXL follow |
+
+CLI and Rider pass identical csc arguments (checked for Logging, 395 args) — no CoreCompileInputs ping-pong
+between the editor's runtime `dotnet build` and Rider.
+
+Landed in `Directory.Build.props`: `NuGetAudit=false` (warnings were already suppressed), and
+`IncludeSourceRevisionInInformationalVersion=false` for everything except Editor (which opts back in for the
+About dialog; `RuntimeAssemblies` strips the `+sha` anyway). `Compiler.TryCompile` passes `-p:NuGetAudit=false`
+to its restore as well. Verified: after one full recompile, a second `dotnet build t3.sln` compiles nothing;
+`Editor.AssemblyInfo.cs` still carries the SHA, `Core`/`Logging` don't.
+
+Still open on the Rider side: the ~16 s between "Build succeeded" and the editor's first log line (Rider's
+launch / debugger attach — ask whether the user runs with F5 or Ctrl+F5; the 17:56 start under Rider took
+47 s vs 25 s standalone for the same binaries), and Lib's 18 s csc (check `RunAnalyzers=false` for Debug
+operator packages).
+
+### Update: `LegacyAudioClipMigration` (landed)
+`TryGetClipDurationSecs` created a parentless instance of every symbol still carrying a legacy clip — i.e.
+instantiated whole compositions at startup — only to get a resource context for `AssetRegistry.TryResolveAddress`.
+Replaced by a `PackageResourceConsumer` (the symbol's package + shared packages, exactly what a parentless
+instance exposes). Migrations phase 3.9 s → 0.0 s, identical outcomes (the 9 stale-path clips still defer).
+Warm startup now **8.0 s** (`projects 0.5s, symbols 6.6s [contexts 3.4s, types 2.1s, uis 0.5s], migrations 0.0s`).
+Biggest remaining item: `contexts` (19 sequential `GenerateLoadContext`, 1.5 s of it the 568 MB shadow copy).

@@ -5,5 +5,13 @@
     <!-- NU1603: transitive package version resolved to higher version (harmless) -->
     <!-- NU1901/NU1902/NU1903: vulnerability warnings in transitive System.Security.Cryptography.Xml 10.0.0 (ships with Windows desktop SDK, no fixed version available) -->
     <NoWarn>$(NoWarn);NU1603;NU1901;NU1902;NU1903</NoWarn>
+    <!-- Restore runs a NuGet vulnerability audit that downloads the advisory database from api.nuget.org.
+         The advisories are suppressed above anyway, so its only effect is a network round-trip on every
+         restore - measured at 32 s on a slow connection, blocking Rider's build and the editor's runtime compiles. -->
+    <NuGetAudit>false</NuGetAudit>
+    <!-- The SDK embeds the git commit into every assembly's InformationalVersion, so each commit regenerates
+         AssemblyInfo.cs in every project and forces a full solution recompile (~40 s). Only the Editor shows
+         the hash (About dialog) and opts back in in Editor.csproj. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>

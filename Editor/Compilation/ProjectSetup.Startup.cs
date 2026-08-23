@@ -43,9 +43,9 @@ internal static partial class ProjectSetup
             
         #if DEBUG
         isDebugBuild = true;
-        System.Diagnostics.Stopwatch totalStopwatch = new();
-        totalStopwatch.Start();
         #endif
+
+        var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         if (!isDebugBuild)
         {
@@ -58,6 +58,7 @@ internal static partial class ProjectSetup
 
         // Load projects
         LoadProjects(csProjFiles, forceRecompile, out var failedProjects);
+        var projectsMs = totalStopwatch.ElapsedMilliseconds;
 
         // Keep projects that failed to load visible and recoverable instead of silently dropping them
         // — a single broken project shouldn't just vanish from the Hub.
@@ -89,10 +90,12 @@ internal static partial class ProjectSetup
         
         // Register UI types
         UiRegistration.RegisterUiTypes();
+        var uiTypesMs = totalStopwatch.ElapsedMilliseconds;
 
         var allPackages = _activePackages.ToArray();
         // Update all symbol packages
         UpdateSymbolPackages(allPackages);
+        var symbolsMs = totalStopwatch.ElapsedMilliseconds;
 
         WarnAboutUnresolvedChildren(allPackages);
         WarnAboutCorruptedSymbolFiles(allPackages);
@@ -103,6 +106,7 @@ internal static partial class ProjectSetup
         // Needs the [AudioClip] symbol registered (Lib). In-memory only — persists via the regular
         // save machinery once the user saves the flagged symbols.
         LegacyAudioClipMigration.MigrateLegacyClipsToOps();
+        var migrationsMs = totalStopwatch.ElapsedMilliseconds;
 
         // Initialize resources and shader linting
         Log.Info("Initializing package resources...");
@@ -110,6 +114,7 @@ internal static partial class ProjectSetup
         {
             InitializePackageResources(package);
         }
+        var resourcesMs = totalStopwatch.ElapsedMilliseconds;
         
         // FIXME: This needs to be properly handled.
         //ShaderLinter.AddPackage(SharedResources.ResourcePackage, ResourceManager.SharedShaderPackages);
@@ -124,10 +129,12 @@ internal static partial class ProjectSetup
             }
         }
 
-        #if DEBUG
         totalStopwatch.Stop();
-        Log.Debug($">> Total load time: {totalStopwatch.ElapsedMilliseconds/1000:0.0}s");
-        #endif
+        var shadowCopy = AssemblyInformation.ShadowCopyStats;
+        Log.Debug($">> Total load time: {totalStopwatch.ElapsedMilliseconds/1000.0:0.0}s "
+                  + $"(projects {projectsMs/1000.0:0.0}s, asset migration+ui types {(uiTypesMs - projectsMs)/1000.0:0.0}s, symbols {(symbolsMs - uiTypesMs)/1000.0:0.0}s, "
+                  + $"migrations {(migrationsMs - symbolsMs)/1000.0:0.0}s, resources {(resourcesMs - migrationsMs)/1000.0:0.0}s; "
+                  + $"shadow copies {shadowCopy.Bytes/(1024.0*1024.0):0} MB in {shadowCopy.Milliseconds/1000.0:0.0}s)");
     }
 
     /// <summary>

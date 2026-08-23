@@ -176,7 +176,9 @@ internal static class Compiler
         
         if (nugetRestore)
         {
-            var (restoreOutput, restoreExitCode) = RunCommand($"dotnet restore \"{projectFile.FullPath}\" --nologo", projectFile.Directory);
+            // NuGetAudit=false: the audit downloads the advisory database on every restore (tens of seconds on a
+            // slow connection) and its warnings never reach the user from here anyway.
+            var (restoreOutput, restoreExitCode) = RunCommand($"dotnet restore \"{projectFile.FullPath}\" --nologo -p:NuGetAudit=false", projectFile.Directory);
             output = restoreOutput;
             if (restoreExitCode != 0)
             {

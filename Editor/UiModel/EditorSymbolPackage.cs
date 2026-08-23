@@ -1,5 +1,6 @@
 #nullable enable
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
@@ -89,6 +90,7 @@ internal class EditorSymbolPackage : SymbolPackage
                             out SymbolUi[] preExistingSymbolUis)
     {
         NeedsAssemblyLoad = false;
+        var stopwatch = Stopwatch.StartNew();
         var newSymbols = newlyReadSymbols.ToDictionary(result => result.Id, symbol => symbol);
         var newSymbolsWithoutUis = new ConcurrentDictionary<Guid, Symbol>(newSymbols);
         preExistingSymbolUis = SymbolUiDict.Values.ToArray();
@@ -127,6 +129,7 @@ internal class EditorSymbolPackage : SymbolPackage
         if (newSymbolsWithoutUis.Count == 0)
         {
             newlyReadSymbolUis = newlyReadSymbolUiList.ToArray();
+            LogUiLoadTime(newlyReadSymbolUis.Length);
             return;
         }
 
@@ -145,7 +148,14 @@ internal class EditorSymbolPackage : SymbolPackage
         }
 
         newlyReadSymbolUis = newlyReadSymbolUiList.ToArray();
+        LogUiLoadTime(newlyReadSymbolUis.Length);
         return;
+
+        void LogUiLoadTime(int count)
+        {
+            if (count > 0)
+                Log.Debug($" Loaded {count} symbol UIs for {AssemblyInformation.Name} in {stopwatch.ElapsedMilliseconds}ms");
+        }
 
         JsonFileResult<SymbolUi>? TryReadSymbolUiFile(string filePath)
         {

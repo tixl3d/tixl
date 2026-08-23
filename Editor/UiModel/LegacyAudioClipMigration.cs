@@ -2,8 +2,10 @@
 using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
 using T3.Editor.UiModel.Commands.Graph;
@@ -175,19 +177,11 @@ internal static class LegacyAudioClipMigration
         if (durationSecs > 0)
             return true;
 
-        // Asset resolution needs an instance for package context; at startup none may exist yet, so
-        // create the parentless one on demand (only for symbols that actually carry legacy clips).
-        Instance? instance = null;
-        foreach (var instanceOfSelf in symbol.InstancesOfSelf)
-        {
-            instance = instanceOfSelf;
-            break;
-        }
-
-        if (instance == null && !symbol.TryGetParentlessInstance(out instance))
-            return false;
-
-        if (!AssetRegistry.TryResolveAddress(clip.AssetPath, instance, out var absolutePath, out _))
+        // Asset resolution only needs the symbol's package plus the shared ones - exactly what a parentless
+        // instance would expose. Creating that instance here would build the whole composition at startup,
+        // for every symbol still carrying a legacy clip, on every start until the project is saved.
+        var consumer = new PackageResourceConsumer(symbol.SymbolPackage);
+        if (!AssetRegistry.TryResolveAddress(clip.AssetPath, consumer, out var absolutePath, out _))
             return false;
 
         var stream = AudioMixerManager.CreateOfflineAnalysisStream(absolutePath);
@@ -206,6 +200,32 @@ internal static class LegacyAudioClipMigration
         finally
         {
             AudioMixerManager.FreeOfflineAnalysisStream(stream);
+        }
+    }
+
+    /// <summary>Resource context of a symbol without an instance: its own package and all shared packages.</summary>
+    private sealed class PackageResourceConsumer : IResourceConsumer
+    {
+        public PackageResourceConsumer(SymbolPackage package)
+        {
+            Package = package;
+            var packages = new List<IResourcePackage> { package };
+            foreach (var other in SymbolPackage.AllPackages)
+            {
+                if (other.IsSharingResources && other != package)
+                    packages.Add(other);
+            }
+
+            AvailableResourcePackages = packages;
+        }
+
+        public IReadOnlyList<IResourcePackage> AvailableResourcePackages { get; }
+        public SymbolPackage? Package { get; }
+
+        public event Action<IResourceConsumer>? Disposing
+        {
+            add { }
+            remove { }
         }
     }
 

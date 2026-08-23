@@ -207,6 +207,7 @@ internal static partial class ProjectSetup
             package.AssemblyInformation.GenerateLoadContext();
         }
 
+        var contextsMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Loading symbols...");
         if (parallel)
         {
@@ -230,11 +231,13 @@ internal static partial class ProjectSetup
             }
         }
 
+        var symbolsMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Applying children...");
         loadedSymbols
            .AsParallel()
            .ForAll(pair => SymbolPackage.ApplySymbolChildren(pair.Value));
 
+        var childrenMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Loading symbol UIs...");
         ConcurrentDictionary<EditorSymbolPackage, SymbolUiLoadInfo> loadedSymbolUis = new();
         packages
@@ -246,17 +249,22 @@ internal static partial class ProjectSetup
                        loadedSymbolUis.TryAdd(package, new SymbolUiLoadInfo(newlyReadUis, preExisting));
                    });
 
+        var uisMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Locating Source code files...");
         loadedSymbolUis
            .AsParallel()
            .ForAll(pair => { pair.Key.LocateSourceCodeFiles(); });
 
+        var sourceMs = stopWatch.ElapsedMilliseconds;
         foreach (var (symbolPackage, symbolUis) in loadedSymbolUis)
         {
             symbolPackage.RegisterUiSymbols(symbolUis.NewlyLoaded, symbolUis.PreExisting);
         }
-        
-        Log.Debug($">> Updated {packages.Length} symbol packages in {stopWatch.ElapsedMilliseconds/1000:0.0}s");
+
+        var totalMs = stopWatch.ElapsedMilliseconds;
+        Log.Debug($">> Updated {packages.Length} symbol packages in {totalMs/1000.0:0.0}s "
+                  + $"(contexts {contextsMs/1000.0:0.0}s, symbols {(symbolsMs - contextsMs)/1000.0:0.0}s, children {(childrenMs - symbolsMs)/1000.0:0.0}s, "
+                  + $"uis {(uisMs - childrenMs)/1000.0:0.0}s, source {(sourceMs - uisMs)/1000.0:0.0}s, register {(totalMs - sourceMs)/1000.0:0.0}s)");
 
         var needingReload = _activePackages.Where(x => x.NeedsAssemblyLoad).ToArray();
         if (needingReload.Length > 0)
