@@ -259,7 +259,9 @@ internal sealed class CsProjectFile
                 NeedsRecompile = true;
             }
 
-            if (!NeedsRecompile)
+            // Archived projects are listed but never compiled or loaded, so checking their build output
+            // would only produce a misleading "needs to be compiled" warning on every start.
+            if (!NeedsRecompile && !file.IsArchived)
             {
                 var versionInfoDirectory = file.GetBuildTargetDirectory();
                 if (!AssemblyInformation.TryLoadReleaseInfo(versionInfoDirectory, out var releaseInfo))

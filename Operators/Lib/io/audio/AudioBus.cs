@@ -212,8 +212,11 @@ namespace Lib.io.audio
             if (!changed)
                 return;
 
+            if (!Log.Gated.AudioEnabled)
+                return;
+
             var labels = string.Join(", ", _collected.ConvertAll(c => c.FxNode == null ? $"{c.Leaf}×{c.Gain:0.00}" : $"{c.Leaf}×{c.Gain:0.00}→{c.FxNode}"));
-            Log.Debug($"[AudioBus] routing {_routedTargets.Count} channel(s): {labels}", this);
+            Log.Gated.Audio($"[AudioBus] routing {_routedTargets.Count} channel(s): {labels}");
         }
 
         // Auto-collect: [AudioClip] siblings whose AudioReference isn't wired anywhere route through this

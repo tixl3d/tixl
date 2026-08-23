@@ -456,9 +456,12 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        // Resolution walks every loaded context's reference tree and, on first touch, scans whole
-        // directories for DLLs — both serialized by locks. Surface the slow ones so startup stalls
-        // are attributable from the log instead of looking like unexplained silence.
+        // Resolution can stall behind the global locks (directory scans, AV on fresh files). Surface
+        // slow resolutions when loading details are requested, so such stalls are attributable from
+        // the log instead of looking like unexplained silence.
+        if (!CoreSettings.Config.LogAssemblyLoadingDetails)
+            return LoadCore(assemblyName);
+
         var stopwatch = Stopwatch.StartNew();
         var result = LoadCore(assemblyName);
         if (stopwatch.ElapsedMilliseconds > 100)

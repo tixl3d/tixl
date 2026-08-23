@@ -153,7 +153,7 @@ internal class EditorSymbolPackage : SymbolPackage
 
         void LogUiLoadTime(int count)
         {
-            if (count > 0)
+            if (count > 0 && CoreSettings.Config.LogAssemblyLoadingDetails)
                 Log.Debug($" Loaded {count} symbol UIs for {AssemblyInformation.Name} in {stopwatch.ElapsedMilliseconds}ms");
         }
 

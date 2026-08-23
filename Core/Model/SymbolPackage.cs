@@ -191,7 +191,9 @@ public abstract partial class SymbolPackage : IResourcePackage
     /// <param name="allNewSymbols">All new symbols, including those for which a json file was not found</param>
     public void LoadSymbols(bool parallel, out List<SymbolJson.SymbolReadResult> newlyRead, out List<Symbol> allNewSymbols)
     {
-        Log.Debug($" Loading {AssemblyInformation.Name}...");
+        if (CoreSettings.Config.LogAssemblyLoadingDetails)
+            Log.Debug($" Loading {AssemblyInformation.Name}...");
+
         var stopwatch = Stopwatch.StartNew();
 
         if (!AssemblyInformation.TryLoadTypes())
@@ -321,8 +323,11 @@ public abstract partial class SymbolPackage : IResourcePackage
 
         // Startup-cost breakdown per package: the type scan resolves the package's dependency tree, the
         // file reads are symbol-count bound. Keeps the two separable in the log when startup is slow.
-        Log.Debug($" Loaded {AssemblyInformation.Name}: {AssemblyInformation.OperatorTypeInfo.Count} types in {typeLoadMs}ms, "
-                  + $"{symbolFileCount} symbol files in {stopwatch.ElapsedMilliseconds - typeLoadMs}ms");
+        if (CoreSettings.Config.LogAssemblyLoadingDetails)
+        {
+            Log.Debug($" Loaded {AssemblyInformation.Name}: {AssemblyInformation.OperatorTypeInfo.Count} types in {typeLoadMs}ms, "
+                      + $"{symbolFileCount} symbol files in {stopwatch.ElapsedMilliseconds - typeLoadMs}ms");
+        }
         OnSymbolsLoaded();
         return;
 

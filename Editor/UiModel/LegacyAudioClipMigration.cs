@@ -91,7 +91,9 @@ internal static class LegacyAudioClipMigration
             if (!TryGetClipDurationSecs(symbol, clip, out var durationSecs))
             {
                 // Leave the entry in the settings list — legacy playback keeps working; retried next save.
-                Log.Warning($"{symbol.Name}: Can't determine duration of '{clip.AssetPath}' — soundtrack migration deferred.");
+                // Debug, not Warning: with a permanently unresolvable path this repeats on every start,
+                // and there is nothing the user needs to act on.
+                Log.Debug($"{symbol.Name}: Can't determine duration of '{clip.AssetPath}' — soundtrack migration deferred.");
                 return false;
             }
 
