@@ -54,14 +54,6 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     private readonly string _shadowCopyDirectory;
     private readonly bool _shouldCopyBinaries;
 
-    /// <summary>
-    /// Process-wide shadow-copy cost, for the startup timing summary: editable packages copy their whole
-    /// binary folder (including native runtimes) before loading, which is invisible in per-phase timings.
-    /// </summary>
-    internal static long ShadowCopiedBytes => Interlocked.Read(ref _shadowCopiedBytes);
-    internal static long ShadowCopyMilliseconds => Interlocked.Read(ref _shadowCopyMilliseconds);
-    private static long _shadowCopiedBytes;
-    private static long _shadowCopyMilliseconds;
 
     static TixlAssemblyLoadContext()
     {
@@ -225,7 +217,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
                 CopyFilesInDirectory(tixlCtx.MainDirectory, dir, shadowCopyDirectory, true);
             }
 
-            Interlocked.Add(ref _shadowCopyMilliseconds, copyStopwatch.ElapsedMilliseconds);
+            ShadowCopyStatistics.AddMilliseconds(copyStopwatch.ElapsedMilliseconds);
         }
 
         // replace path with the shadow copy directory
@@ -257,7 +249,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
 
                 var newPath = Path.Combine(newDirectory, Path.GetFileName(file));
                 File.Copy(file, newPath, true);
-                Interlocked.Add(ref _shadowCopiedBytes, new FileInfo(newPath).Length);
+                ShadowCopyStatistics.AddBytes(new FileInfo(newPath).Length);
             }
 
             if (!recursive)

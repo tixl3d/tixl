@@ -76,7 +76,6 @@ public sealed partial class AssemblyInformation
                                                    }
                                                });
 
-        var assemblyLocation = assembly.Location;
         shouldShareResources = nonOperatorTypes
                               .Where(type =>
                                      {
@@ -88,14 +87,12 @@ public sealed partial class AssemblyInformation
 
                                          try
                                          {
-                                             var obj = Activator.CreateInstanceFrom(
-                                                                                    assemblyFile: assemblyLocation,
-                                                                                    typeName: type.FullName!,
-                                                                                    ignoreCase: false,
-                                                                                    bindingAttr: ConstructorBindingFlags,
-                                                                                    binder: null, args: null, culture: null, activationAttributes: null);
-                                             var unwrapped = obj?.Unwrap();
-                                             if (unwrapped is IShareResources shareable)
+                                             // Instantiate the already-loaded type directly. CreateInstanceFrom(file, ...) re-loaded the
+                                             // assembly from disk into the default LoadFrom context - a duplicate copy at startup, and
+                                             // after a hot reload that load failed ("assembly with same name is already loaded"),
+                                             // silently turning resource sharing off for the package until the next editor restart.
+                                             var obj = Activator.CreateInstance(type, ConstructorBindingFlags, binder: null, args: null, culture: null);
+                                             if (obj is IShareResources shareable)
                                              {
                                                  return shareable.ShouldShareResources;
                                              }

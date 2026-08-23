@@ -241,3 +241,11 @@ Biggest remaining item: `contexts` (19 sequential `GenerateLoadContext`, 1.5 s o
   Release builds keep analyzers.
 - Measured (single-file Lib edit, editor-style command): 7.9 s → **5.8 s wall, Csc 5.1 → 3.4 s**; the
   19–25 s dependency-cascade case (post-commit / Core-edit) is structurally gone in the editor's builds.
+- Fixed pre-existing hot-reload bug (log-archive hits back to July 21): `AssemblyInformation.TypeInfoExtraction`
+  used `Activator.CreateInstanceFrom(file, ...)` to probe `IShareResources`, re-loading the package DLL into
+  the default LoadFrom context — duplicate assembly at startup, and after a reload the load failed
+  ("assembly with same name is already loaded"), silently disabling resource sharing until restart. Now
+  instantiates the already-loaded type. Shadow-copy counters moved to `ShadowCopyStatistics` so the timing
+  summary can't trigger `TixlAssemblyLoadContext`'s heavy cctor (crashed with a clean-looking stack when a
+  dependency DLL was missing from a gutted install).
+- Verified end-to-end: startup 9.0 s; real Lib hot reload = 6.9 s compile + 1.5 s reload, 0 shareable-resource errors.
