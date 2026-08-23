@@ -18,6 +18,10 @@ public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
 
         public string LimitMidiDeviceCapture = null;
 
+        // Escape hatch: revert to pre-4.3 per-process shadow copies (fresh copy of every editable
+        // package on each editor start) in case the shared content-keyed cache misbehaves.
+        public bool UseProcessScopedShadowCopies = false;
+
         // Logging
         public bool LogCompilationDetails = false;
         public bool LogAssemblyLoadingDetails = false;

@@ -249,3 +249,23 @@ Biggest remaining item: `contexts` (19 sequential `GenerateLoadContext`, 1.5 s o
   summary can't trigger `TixlAssemblyLoadContext`'s heavy cctor (crashed with a clean-looking stack when a
   dependency DLL was missing from a gutted install).
 - Verified end-to-end: startup 9.0 s; real Lib hot reload = 6.9 s compile + 1.5 s reload, 0 shareable-resource errors.
+
+### Landed 2026-08-24: content-keyed shadow-copy cache
+`TixlAssemblyLoadContext` now places shadow copies in `ShadowCopy/<package>/<fingerprint>` (fingerprint =
+SHA256 over relative path + size + mtime of every copied file — a stat-walk, no file opens). Existing
+folder → reuse, nothing copied, AV cache stays warm. Guards: copy goes to `*.staging-<pid>` then atomic
+`Directory.Move` (a fingerprint folder is either complete or absent); cleanup renames to `*.trash-<pid>`
+before deleting (a locked folder is skipped cleanly, never left half-deleted under its real name); keeps
+the 3 newest fingerprints per package (reuse refreshes mtime); legacy per-pid folders and dead-process
+staging/trash leftovers are removed. Escape hatch: `CoreSettings.UseProcessScopedShadowCopies` restores
+the old per-process behaviour (also the automatic fallback if fingerprinting throws).
+
+Fixed in passing: `LoadAssembly` remapped *every* path into the shadow dir, including candidates already
+discovered inside it — the resulting `..`-relative path only resolved correctly because the old per-pid
+layout happened to have the same folder depth as `bin/`. Now only paths inside the package folder are
+remapped.
+
+Verified: warm start `shadow copies 0 MB in 0.0s`, startup 5–8 s, 0 errors; hot reload creates a new
+fingerprint folder while the mapped old one stays; planted dead-pid staging/trash dirs and surplus
+fingerprints are cleaned on start. Not live-tested (covered by design): two editors starting
+concurrently, kill mid-copy.
