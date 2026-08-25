@@ -27,11 +27,15 @@ internal static class KeyboardActions
         var nodeSelection = context.Selector;
         if (!T3Ui.IsCurrentlySaving && UserActions.Duplicate.Triggered())
         {
-            NodeActions.CopySelectedNodesToClipboard(nodeSelection, compositionOp);
-            NodeActions.PasteClipboard(nodeSelection, context.View, compositionOp);
-            context.Layout.FlagStructureAsChanged();
+            // Only paste if something was actually copied - otherwise duplicating an
+            // input node would paste stale clipboard content.
+            if (NodeActions.CopySelectedNodesToClipboard(nodeSelection, compositionOp))
+            {
+                NodeActions.PasteClipboard(nodeSelection, context.View, compositionOp);
+                context.Layout.FlagStructureAsChanged();
 
-            result |= ChangeSymbol.SymbolModificationResults.StructureChanged;
+                result |= ChangeSymbol.SymbolModificationResults.StructureChanged;
+            }
         }
 
         if (!T3Ui.IsCurrentlySaving && UserActions.DuplicateWithConnections.Triggered())
