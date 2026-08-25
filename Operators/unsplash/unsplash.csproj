@@ -122,7 +122,7 @@
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
     <Operators Include="Types" Version="1.0.0" ResourcesOnly="False" />
   </ItemGroup>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <!-- Clear previous files in the export folder -->
     <RemoveDir Directories="bin/$(Configuration)" />
   </Target>

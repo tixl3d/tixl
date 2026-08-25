@@ -134,7 +134,7 @@
     <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <RemoveDir Directories="bin/$(Configuration)" />
   </Target>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">

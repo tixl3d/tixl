@@ -244,8 +244,10 @@
     </Target>
 
 
-    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-        <!-- Clear previous files in the export folder -->
+    <!-- Release-only: read-only packages and exports are loaded from bin, so Release output must be exactly
+         what the build produces. Debug reads symbols from source and profits from incremental builds;
+         cleaning it also gutted the output folder of a running editor. -->
+    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
         <RemoveDir Directories="bin/$(Configuration)" />
     </Target>
 

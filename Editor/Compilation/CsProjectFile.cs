@@ -239,7 +239,7 @@ internal sealed class CsProjectFile
 
             if (csProjContents.AddCleanBuildTarget())
             {
-                Warnings.Add($"Added clean build target to {file.FullPath}");
+                Warnings.Add($"Added or updated Release-only clean build target in {file.FullPath}");
             }
 
             // 5. Finalize changes and trigger recompile if necessary

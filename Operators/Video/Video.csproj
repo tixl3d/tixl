@@ -129,7 +129,7 @@
     <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <ItemGroup>
       <_StaleBuildOutput Include="bin/$(Configuration)/**/*" Exclude="bin/$(Configuration)/**/av*.dll;bin/$(Configuration)/**/sw*.dll;bin/$(Configuration)/**/postproc*.dll" />
     </ItemGroup>

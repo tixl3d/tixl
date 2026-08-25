@@ -120,7 +120,7 @@
     <Operators Include="Video" Version="1.0.0" ResourcesOnly="False" />
     <Operators Include="Io" Version="1.0.0" ResourcesOnly="False" />
   </ItemGroup>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <!-- Clear previous files in the export folder -->
     <RemoveDir Directories="bin/$(Configuration)" />
   </Target>

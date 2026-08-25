@@ -185,24 +185,34 @@ internal static partial class ProjectXml
         item.AddMetadata(nameof(OperatorPackageReference.ResourcesOnly), resourcesOnly.ToString(), true);
     }
 
+    /// <summary>
+    /// Ensures the project has a Release-only clean-build target. Release output must contain exactly what
+    /// the build produces (read-only packages and exports are loaded from bin), while Debug reads symbols
+    /// from source and profits from incremental builds - and cleaning Debug gutted the output of a running
+    /// editor. Existing unconditional targets from older projects are migrated to the Release-only form.
+    /// </summary>
     internal static bool AddCleanBuildTarget(this ProjectRootElement project)
     {
-        // find existing target
         const string targetName = "ClearBuildOutput";
+        const string releaseOnlyCondition = "'$(Configuration)' == 'Release'";
         var target = project.Targets.FirstOrDefault(x => x.Name == targetName);
         if (target != null)
         {
-            return false;
+            if (!string.IsNullOrWhiteSpace(target.Condition))
+                return false;
+
+            target.Condition = releaseOnlyCondition;
+            return true;
         }
 
         // create new target
         target = project.AddTarget(targetName);
         target.BeforeTargets = "BeforeBuild";
+        target.Condition = releaseOnlyCondition;
         target.AddTask("RemoveDir").SetParameter("Directories", "bin/$(Configuration)");
         return true;
         /*
-<Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-<!-- Clear previous files in the export folder -->
+<Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
 <RemoveDir Directories="bin/$(Configuration)"/>
 </Target>  */
     }

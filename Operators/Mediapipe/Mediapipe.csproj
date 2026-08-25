@@ -148,7 +148,7 @@
   <ItemGroup>
     <Folder Include="Vendor\" />
   </ItemGroup>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <!-- Clear previous files in the export folder -->
     <RemoveDir Directories="bin/$(Configuration)" />
   </Target>

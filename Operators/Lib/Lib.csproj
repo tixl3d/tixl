@@ -9,9 +9,9 @@
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
-    <VersionPrefix>1.670.999</VersionPrefix>
+    <VersionPrefix>1.672.1000</VersionPrefix>
     <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
-    <EditorVersion>4.2.0</EditorVersion>
+    <EditorVersion>4.3.0</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -141,10 +141,10 @@
   <ItemGroup>
     <Folder Include="io\video\" />
   </ItemGroup>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-    <!-- Clear previous build output, but keep the FFmpeg native DLLs. A running editor with a video playing has
-         them loaded, and native libraries can't be unloaded, so a blunt RemoveDir fails with "access denied" and
-         breaks rebuild / hot-reload. These DLLs come from NuGet and don't change between builds; a stale one is
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+    <!-- Clear previous build output, but keep the FFmpeg native DLLs. A running Release editor with a video
+         playing has them loaded, and native libraries can't be unloaded, so a blunt RemoveDir fails with
+         "access denied". These DLLs come from NuGet and don't change between builds; a stale one is
          refreshed by restarting the editor. ContinueOnError so any other transiently-locked file can't fail the build. -->
     <ItemGroup>
       <_StaleBuildOutput Include="bin/$(Configuration)/**/*" Exclude="bin/$(Configuration)/**/av*.dll;bin/$(Configuration)/**/sw*.dll;bin/$(Configuration)/**/postproc*.dll" />
