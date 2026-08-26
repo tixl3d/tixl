@@ -1,0 +1,589 @@
+{
+  "FormatVersion": 3,
+  "Id": "6d84debe-0ebb-4d8e-a774-f00d5daa056c"/*EditSkillQuest*/,
+  "Description": "pixtur's workspace for EditSkillQuest.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "10cf9c69-7196-48e4-9f17-66d2cfeb0fc5"/*R01f_SimpleTransformations*/,
+      "SectionId": "511dc64c-d551-482f-be4b-365b19c0edf7",
+      "Position": {
+        "X": -1418.6649,
+        "Y": -4863.18
+      }
+    },
+    {
+      "ChildId": "191acabf-5de7-4299-9697-6191a8529cf8"/*I02b_GradientRotate*/,
+      "Position": {
+        "X": -1928.124,
+        "Y": -5024.3804
+      }
+    },
+    {
+      "ChildId": "1eaeb328-d2e2-4dee-ada6-7de66119df45"/*M01a_BasicMath01*/,
+      "Position": {
+        "X": -2407.421,
+        "Y": -5121.413
+      }
+    },
+    {
+      "ChildId": "24018f40-25cd-4b35-9e53-0ef8103eecf4"/*I02m_Vignette*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -3989.378
+      }
+    },
+    {
+      "ChildId": "30f59493-890e-4324-8e2d-a81a71cc5e36"/*I02k_GainAndBiasControl*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4189.378
+      }
+    },
+    {
+      "ChildId": "32ed15a0-dcd5-4b99-82d9-ce7abcd237b4"/*B01a_Connection1*/,
+      "Position": {
+        "X": -2630.255,
+        "Y": -5124.2246
+      }
+    },
+    {
+      "ChildId": "34fdbcbe-f7fa-4194-adac-7dbcc895e0ba"/*X04x_Template*/,
+      "SectionId": "83d3bbd8-0f64-4851-989d-0926554cc40c",
+      "Position": {
+        "X": -578.66583,
+        "Y": -5069.754
+      }
+    },
+    {
+      "ChildId": "453bdab6-80bc-4dd8-aae0-f171159dec63"/*I02g_CleanupGradient*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4702.9004
+      }
+    },
+    {
+      "ChildId": "4d7dea34-b300-422e-95f0-1eb4af5530b2"/*B01c_DragFromStack*/,
+      "Position": {
+        "X": -2630.255,
+        "Y": -4992.9297
+      }
+    },
+    {
+      "ChildId": "51c00e0c-a517-4cdf-8a7d-2a0bdc6ad402"/*I02l_InvertBlend*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4289.378
+      }
+    },
+    {
+      "ChildId": "59d75e22-53e3-4998-a678-ee739d46ef95"/*I02a_WidthAndScale*/,
+      "Position": {
+        "X": -1928.124,
+        "Y": -5092.333
+      }
+    },
+    {
+      "ChildId": "62d90d07-faf9-4e06-abd5-b3c40834ce44"/*I01b_DarkSun*/,
+      "Position": {
+        "X": -2162.6812,
+        "Y": -5032.359
+      }
+    },
+    {
+      "ChildId": "6548d730-162d-421e-bad3-230c381df742"/*I02o_RadialPattern*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -3819.721
+      }
+    },
+    {
+      "ChildId": "778821e3-93ae-4e75-8530-e90af48cd34e"/*R01d_Stacking*/,
+      "SectionId": "511dc64c-d551-482f-be4b-365b19c0edf7",
+      "Position": {
+        "X": -1416.9083,
+        "Y": -5049.054
+      }
+    },
+    {
+      "ChildId": "83cf85ba-cbee-47b7-b0cf-f47d5421060b"/*B01e_SpeedItUp*/,
+      "Position": {
+        "X": -2630.255,
+        "Y": -4841.8633
+      }
+    },
+    {
+      "ChildId": "8412bf74-9587-4f79-98be-97d2ec902e4c"/*R01b_Transform*/,
+      "SectionId": "511dc64c-d551-482f-be4b-365b19c0edf7",
+      "Position": {
+        "X": -1418.6649,
+        "Y": -5104.8906
+      }
+    },
+    {
+      "ChildId": "849ce061-2600-44a4-8f3c-eeb373521203"/*M01b_MultiplyValues*/,
+      "Position": {
+        "X": -2407.421,
+        "Y": -5013.41
+      }
+    },
+    {
+      "ChildId": "8559edd5-4a42-44f6-adf4-17ba01372b08"/*I02j_ChainOverlay*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4489.378
+      }
+    },
+    {
+      "ChildId": "8f627023-f255-4a4c-aa54-0c7609a67c01"/*R01a_MovingThings*/,
+      "SectionId": "511dc64c-d551-482f-be4b-365b19c0edf7",
+      "Position": {
+        "X": -1416.9083,
+        "Y": -5156.4614
+      }
+    },
+    {
+      "ChildId": "91c169df-aa66-4dd0-b82e-04d8167d0087"/*I02c_GradientOffset*/,
+      "Position": {
+        "X": -1928.124,
+        "Y": -4952.491
+      }
+    },
+    {
+      "ChildId": "957b39bb-636b-4417-b7d3-f8bf30f408fe"/*I02k_BlendMode*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4389.378
+      }
+    },
+    {
+      "ChildId": "972407f3-c689-4766-8bbf-e404e71dead0"/*B01b_RearrangeStacks*/,
+      "Position": {
+        "X": -2630.255,
+        "Y": -5066.4287
+      }
+    },
+    {
+      "ChildId": "97ce2964-c2d1-4e40-88eb-387b0fa7ff70"/*Me01a_DrawingMeshes*/,
+      "SectionId": "ceca186c-98d8-408f-8311-be22bf3e9875",
+      "Position": {
+        "X": -1025.7037,
+        "Y": -5163.207
+      }
+    },
+    {
+      "ChildId": "9c56413b-6f13-445d-bd19-2afb0704bdcd"/*I02i_Flip*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4589.378
+      }
+    },
+    {
+      "ChildId": "a43e3153-86c5-4712-a0e5-37f4c93acd73"/*I02d_GradientRepeat*/,
+      "Position": {
+        "X": -1928.124,
+        "Y": -4885.663
+      }
+    },
+    {
+      "ChildId": "a5b9d2f1-5450-411d-bb87-6bd4a70f5be7"/*I02l_Dot*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4089.378
+      }
+    },
+    {
+      "ChildId": "a739d892-dc00-4bbd-9004-d1f7fd485ea4"/*I20a_Swimming*/,
+      "Position": {
+        "X": -1625.4661,
+        "Y": -5106.585
+      }
+    },
+    {
+      "ChildId": "aad3f47d-1d9c-44f2-89d1-1389677b055f"/*B01d_ConnectingValues*/,
+      "Position": {
+        "X": -2630.255,
+        "Y": -4920.5586
+      }
+    },
+    {
+      "ChildId": "ac9a04bd-1c3c-4581-9de4-0253a5909131"/*R01e_Instancing*/,
+      "SectionId": "511dc64c-d551-482f-be4b-365b19c0edf7",
+      "Position": {
+        "X": -1418.6649,
+        "Y": -4993.2124
+      }
+    },
+    {
+      "ChildId": "b317685a-3be4-4696-9d65-2a7ca254d948"/*R01f_TransformOrder*/,
+      "SectionId": "511dc64c-d551-482f-be4b-365b19c0edf7",
+      "Position": {
+        "X": -1418.6649,
+        "Y": -4930.111
+      }
+    },
+    {
+      "ChildId": "b770f09c-d887-4bc2-9f75-afef34245d8d"/*I02h_InterpolationMadness*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4640.829
+      }
+    },
+    {
+      "ChildId": "b9ae8065-bd27-4f41-b067-b745fd17a28a"/*M01d_Modulo*/,
+      "Position": {
+        "X": -2407.421,
+        "Y": -4821.8467
+      }
+    },
+    {
+      "ChildId": "be291cd9-e47f-442b-a8a4-1bdc9f0204db"/*I02e_ImageLevels*/,
+      "Position": {
+        "X": -1928.1239,
+        "Y": -4827.2324
+      }
+    },
+    {
+      "ChildId": "bf909801-0900-472a-93db-ed459ab8f86a"/*I20b_Kalaidos*/,
+      "Position": {
+        "X": -1625.4661,
+        "Y": -5042.065
+      }
+    },
+    {
+      "ChildId": "cbd6b065-5b7b-42e9-948a-6a3403a2401d"/*I01a_WelcomeImage*/,
+      "Position": {
+        "X": -2159.8716,
+        "Y": -5093.6265
+      }
+    },
+    {
+      "ChildId": "cd0f8d42-b655-4836-8ecf-07a00a631437"/*I02f_Interpolation*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -4764.488
+      }
+    },
+    {
+      "ChildId": "dcf2d596-d501-486d-ae38-8f491f312571"/*M01c_Sine*/,
+      "Position": {
+        "X": -2407.421,
+        "Y": -4921.8467
+      }
+    },
+    {
+      "ChildId": "e1e18cad-7d8f-4d36-bb42-77b1211e4803"/*I02n_Polar*/,
+      "Position": {
+        "X": -1928.1238,
+        "Y": -3919.721
+      }
+    },
+    {
+      "ChildId": "f4524d35-be33-4da9-b790-a9d0ed3b626e"/*R04a_From3dTo2d*/,
+      "SectionId": "83d3bbd8-0f64-4851-989d-0926554cc40c",
+      "Position": {
+        "X": -578.66583,
+        "Y": -5169.754
+      }
+    },
+    {
+      "ChildId": "fca28ea5-5569-445b-a1b9-9f9325cc3903"/*R03a_CameraControl*/,
+      "SectionId": "5b246ad8-5d7d-4744-8874-959952dff8fd",
+      "Position": {
+        "X": -803.268,
+        "Y": -5169.369
+      }
+    },
+    {
+      "ChildId": "fd48acf9-bc98-48d0-a2ba-1adee89b38b0"/*M01e_SinModulo*/,
+      "Position": {
+        "X": -2407.421,
+        "Y": -4721.8467
+      }
+    }
+  ],
+  "OutputUis": [],
+  "Sections": [
+    {
+      "Id": "2d7232fa-f978-4fc6-85e3-59a9d71ba414",
+      "Label": "Meshes",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1080.8673,
+        "Y": -5266.2783
+      },
+      "Size": {
+        "X": 1241.2291,
+        "Y": 714.5762
+      }
+    },
+    {
+      "Id": "511dc64c-d551-482f-be4b-365b19c0edf7",
+      "Label": "Moving Things",
+      "ParentSectionId": "9c25cc79-7257-45a9-8719-e64fe5469482",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1438.9551,
+        "Y": -5209.297
+      },
+      "Size": {
+        "X": 210.0,
+        "Y": 508.29785
+      }
+    },
+    {
+      "Id": "5b246ad8-5d7d-4744-8874-959952dff8fd",
+      "Label": "Camera Control",
+      "ParentSectionId": "2d7232fa-f978-4fc6-85e3-59a9d71ba414",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -828.388,
+        "Y": -5209.296
+      },
+      "Size": {
+        "X": 213.38953,
+        "Y": 379.2964
+      }
+    },
+    {
+      "Id": "83d3bbd8-0f64-4851-989d-0926554cc40c",
+      "Label": "Rendering Basics",
+      "ParentSectionId": "2d7232fa-f978-4fc6-85e3-59a9d71ba414",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -587.17554,
+        "Y": -5209.296
+      },
+      "Size": {
+        "X": 202.17554,
+        "Y": 379.2964
+      }
+    },
+    {
+      "Id": "9c25cc79-7257-45a9-8719-e64fe5469482",
+      "Label": "Rendering",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1460.0,
+        "Y": -5266.2783
+      },
+      "Size": {
+        "X": 330.0,
+        "Y": 714.5762
+      }
+    },
+    {
+      "Id": "ceca186c-98d8-408f-8311-be22bf3e9875",
+      "Label": "Drawing Mehes",
+      "ParentSectionId": "2d7232fa-f978-4fc6-85e3-59a9d71ba414",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1056.4089,
+        "Y": -5209.2964
+      },
+      "Size": {
+        "X": 216.40894,
+        "Y": 379.2964
+      }
+    }
+  ],
+  "Settings": {
+    "OutputWindows": [
+      {
+  "ShowGizmos": "On",
+  "TransformGizmoMode": "Move",
+  "BackgroundColor": [
+    0.1,
+    0.1,
+    0.1,
+    1.0
+  ],
+  "CameraControlMode": "AutoUseFirstCam",
+  "CameraPosition": [
+    5.287225,
+    8.133457,
+    8.924483
+  ],
+  "CameraTarget": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "CameraRoll": 0.0,
+  "CameraSpeed": 1.0,
+  "ResolutionTitle": "Fill",
+  "ResolutionWidth": 0,
+  "ResolutionHeight": 0,
+  "ResolutionUseAsAspectRatio": true,
+  "IsPinned": true,
+  "PinnedInstancePath": [
+    "a59bbd1c-48a4-efc9-1b19-d8dce82c16e0",
+    "a739d892-dc00-4bbd-9004-d1f7fd485ea4"
+  ],
+  "PinnedOutputId": "00000000-0000-0000-0000-000000000000"
+}
+    ],
+    "Timeline": {
+  "ScaleX": 165.88824,
+  "ScrollX": 41.26272,
+  "Mode": "DopeView",
+  "TimelineHeight": 200,
+  "InlineDataClipEditEnabled": false,
+  "DetailsAreaHeight": 200.0,
+  "InlineDataClipStripHeight": null
+},
+    "WindowLayout": "[Window][DockSpaceViewport_11111111]\nPos=0,26\nSize=1920,1054\nCollapsed=0\n\n[Window][Graph View##1]\nPos=201,26\nSize=2109,1391\nCollapsed=0\nDockId=0x00000010,0\n\n[Window][Parameters]\nPos=1661,710\nSize=442,568\nCollapsed=0\nDockId=0x00000005,0\n\n[Window][Variations]\nPos=2839,669\nSize=601,748\nCollapsed=0\nDockId=0x0000000A,0\n\n[Window][Output View##0]\nPos=2312,26\nSize=1128,641\nCollapsed=0\nDockId=0x00000007,0\n\n[Window][Debug##Default]\nPos=60,60\nSize=400,400\nCollapsed=0\n\n[Window][Explore Variations]\nPos=810,306\nSize=768,283\nCollapsed=0\n\n[Window][Console]\nPos=1336,1004\nSize=584,76\nCollapsed=0\nDockId=0x00000006,0\n\n[Window][Output View##1]\nPos=0,26\nSize=2304,712\nCollapsed=0\n\n[Window][Symbol Library]\nPos=0,26\nSize=199,787\nCollapsed=0\nDockId=0x0000000D,0\n\n[Window][Render as Video]\nPos=2105,710\nSize=455,568\nCollapsed=0\nDockId=0x00000006,1\n\n[Window][##typeAheadSearchPopup]\nPos=1665,745\nSize=450,300\nCollapsed=0\n\n[Window][Combine into symbol]\nPos=1030,545\nSize=500,350\nCollapsed=0\n\n[Window][Parameters##98]\nPos=0,576\nSize=323,864\nCollapsed=0\n\n[Window][Add output]\nPos=1030,595\nSize=500,250\nCollapsed=0\n\n[Window][Duplicate as new symbol]\nPos=1495,637\nSize=600,400\nCollapsed=0\n\n[Window][Output View##97]\nPos=0,26\nSize=1728,927\nCollapsed=0\n\n[Window][Output View##98]\nPos=0,26\nSize=2304,593\nCollapsed=0\n\n[Window][Parameters##1]\nPos=2312,669\nSize=525,748\nCollapsed=0\nDockId=0x00000009,0\n\n[Window][Render To File]\nPos=1336,536\nSize=584,423\nCollapsed=0\nDockId=0x00000006,1\n\n[Window][Add parameter input]\nPos=1030,533\nSize=500,350\nCollapsed=0\n\n[Window][Variation Explorer]\nPos=0,26\nSize=1315,1414\nCollapsed=0\n\n[Window][Dear ImGui Demo]\nPos=650,46\nSize=550,680\nCollapsed=0\n\n[Window][Search]\nPos=710,390\nSize=500,300\nCollapsed=0\n\n[Window][##CurvePopup]\nPos=1164,199\nSize=500,400\nCollapsed=0\n\n[Window][Settings]\nPos=60,60\nSize=550,681\nCollapsed=0\n\n[Window][Output View##99]\nPos=763,26\nSize=1157,948\nCollapsed=0\n\n[Window][Rename symbol]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit description]\nPos=410,190\nSize=1100,700\nCollapsed=0\n\n[Window][Rename input]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit comment]\nPos=710,315\nSize=500,450\nCollapsed=0\n\n[Window][Output View##100]\nSize=550,448\nCollapsed=0\n\n[Window][WindowOverViewport_11111111]\nPos=0,26\nSize=3440,1391\nCollapsed=0\n\n[Window][Assets]\nPos=0,815\nSize=199,602\nCollapsed=0\nDockId=0x0000000E,0\n\n[Window][Output View##101]\nPos=1821,26\nSize=739,1272\nCollapsed=0\n\n[Window][ProgressionPopup]\nPos=930,578\nSize=700,260\nCollapsed=0\n\n[Window][Skill Quest Overview]\nPos=880,408\nSize=800,600\nCollapsed=0\n\n[Window][###ExitDialog]\nPos=1070,620\nSize=420,200\nCollapsed=0\n\n[Window][Editor Feature Tests]\nPos=389,265\nSize=588,457\nCollapsed=0\n\n[Window][Welcome to the TiXL Alpha]\nPos=60,60\nSize=680,480\nCollapsed=0\n\n[Window][Composition Settings]\nPos=705,117\nSize=553,453\nCollapsed=0\n\n[Window][Help]\nPos=2839,669\nSize=601,748\nCollapsed=0\nDockId=0x0000000A,1\n\n[Window][Edit username]\nPos=1420,558\nSize=600,300\nCollapsed=0\n\n[Window][Welcome to TiXL]\nPos=661,258\nSize=680,480\nCollapsed=0\n\n[Window][Create new project]\nPos=1445,542\nSize=550,333\nCollapsed=0\n\n[Window][Guided Feature Tests]\nPos=302,148\nSize=837,449\nCollapsed=0\n\n[Window][    TiXL Loves You! <3]\nPos=962,324\nSize=550,550\nCollapsed=0\n\n[Window][Edit output resolution]\nPos=1030,533\nSize=500,350\nCollapsed=0\n\n[Window][Screen Manager]\nPos=60,60\nSize=550,450\nCollapsed=0\n\n[Window][IO Events]\nPos=153,182\nSize=951,450\nCollapsed=0\n\n[Window][Import Folder]\nPos=1445,422\nSize=550,572\nCollapsed=0\n\n[Window][Utilities]\nPos=60,60\nSize=1278,392\nCollapsed=0\n\n[Window][Edit tour points]\nPos=201,26\nSize=491,1391\nCollapsed=0\nDockId=0x0000000F,0\n\n[Window][Relink folder]\nPos=937,628\nSize=447,163\nCollapsed=0\n\n[Window][Delete assets?]\nPos=773,456\nSize=373,168\nCollapsed=0\n\n[Window][Share project]\nPos=1445,538\nSize=550,340\nCollapsed=0\n\n[Window][Edit skill map]\nPos=289,1030\nSize=1832,897\nCollapsed=0\n\n[Docking][Data]\nDockSpace         ID=0x08BD597D Window=0x1BBC0F80 Pos=0,26 Size=3440,1391 Split=X Selected=0x8995E68A\n  DockNode        ID=0x0000000B Parent=0x08BD597D SizeRef=199,1391 Split=Y Selected=0x42C24103\n    DockNode      ID=0x0000000D Parent=0x0000000B SizeRef=549,787 HiddenTabBar=1 Selected=0xD41FC2E2\n    DockNode      ID=0x0000000E Parent=0x0000000B SizeRef=549,602 HiddenTabBar=1 Selected=0x42C24103\n  DockNode        ID=0x0000000C Parent=0x08BD597D SizeRef=3140,1391 Split=X\n    DockNode      ID=0x00000003 Parent=0x0000000C SizeRef=2010,1391 Split=X Selected=0x8995E68A\n      DockNode    ID=0x0000000F Parent=0x00000003 SizeRef=491,1391 Selected=0x0B9EE625\n      DockNode    ID=0x00000010 Parent=0x00000003 SizeRef=1616,1391 CentralNode=1 HiddenTabBar=1 Selected=0x8995E68A\n    DockNode      ID=0x00000004 Parent=0x0000000C SizeRef=1128,1391 Split=Y Selected=0xC9567BC1\n      DockNode    ID=0x00000007 Parent=0x00000004 SizeRef=916,641 HiddenTabBar=1 Selected=0xC9567BC1\n      DockNode    ID=0x00000008 Parent=0x00000004 SizeRef=916,748 Split=X Selected=0x35577784\n        DockNode  ID=0x00000009 Parent=0x00000008 SizeRef=525,446 HiddenTabBar=1 Selected=0x35577784\n        DockNode  ID=0x0000000A Parent=0x00000008 SizeRef=601,446 Selected=0xB9CD16A2\nDockSpace         ID=0x7C6B3D9B Pos=0,26 Size=1953,1101 CentralNode=1 HiddenTabBar=1 Selected=0xF7A0F8A9\nDockSpace         ID=0x8B93E3BD Pos=0,26 Size=1920,1054 Split=X Selected=0x1F46795C\n  DockNode        ID=0x00000001 Parent=0x8B93E3BD SizeRef=824,1391 CentralNode=1 Selected=0xF7A0F8A9\n  DockNode        ID=0x00000002 Parent=0x8B93E3BD SizeRef=916,1391 Split=X Selected=0x9CE63BF6\n    DockNode      ID=0x00000005 Parent=0x00000002 SizeRef=442,365 Selected=0x9CE63BF6\n    DockNode      ID=0x00000006 Parent=0x00000002 SizeRef=455,365 Selected=0x3BC11B9B\n\n",
+    "WindowLayoutImGuiVersion": "1.91.6",
+    "WindowVisibility": {
+      "Variations": true,
+      "Output View##0": true,
+      "Output View##1": false,
+      "Output View##2": false,
+      "Output View##3": false,
+      "Output View##4": false,
+      "Output View##5": false,
+      "Output View##6": false,
+      "Output View##7": false,
+      "Output View##8": false,
+      "Output View##9": false,
+      "Output View##10": false,
+      "Output View##11": false,
+      "Output View##12": false,
+      "Output View##13": false,
+      "Output View##14": false,
+      "Output View##15": false,
+      "Output View##16": false,
+      "Output View##17": false,
+      "Output View##18": false,
+      "Output View##19": false,
+      "Output View##20": false,
+      "Output View##21": false,
+      "Output View##22": false,
+      "Output View##23": false,
+      "Output View##24": false,
+      "Output View##25": false,
+      "Output View##26": false,
+      "Output View##27": false,
+      "Output View##28": false,
+      "Output View##29": false,
+      "Output View##30": false,
+      "Output View##31": false,
+      "Output View##32": false,
+      "Output View##33": false,
+      "Output View##34": false,
+      "Output View##35": false,
+      "Output View##36": false,
+      "Output View##37": false,
+      "Output View##38": false,
+      "Output View##39": false,
+      "Output View##40": false,
+      "Output View##41": false,
+      "Output View##42": false,
+      "Output View##43": false,
+      "Output View##44": false,
+      "Output View##45": false,
+      "Output View##46": false,
+      "Output View##47": false,
+      "Output View##48": false,
+      "Output View##49": false,
+      "Output View##50": false,
+      "Output View##51": false,
+      "Output View##52": false,
+      "Output View##53": false,
+      "Output View##54": false,
+      "Output View##55": false,
+      "Output View##56": false,
+      "Output View##57": false,
+      "Output View##58": false,
+      "Output View##59": false,
+      "Output View##60": false,
+      "Output View##61": false,
+      "Output View##62": false,
+      "Output View##63": false,
+      "Output View##64": false,
+      "Output View##65": false,
+      "Output View##66": false,
+      "Output View##67": false,
+      "Output View##68": false,
+      "Output View##69": false,
+      "Output View##70": false,
+      "Output View##71": false,
+      "Output View##72": false,
+      "Output View##73": false,
+      "Output View##74": false,
+      "Output View##75": false,
+      "Output View##76": false,
+      "Output View##77": false,
+      "Output View##78": false,
+      "Output View##79": false,
+      "Output View##80": false,
+      "Output View##81": false,
+      "Output View##82": false,
+      "Output View##83": false,
+      "Output View##84": false,
+      "Output View##85": false,
+      "Output View##86": false,
+      "Output View##87": false,
+      "Output View##88": false,
+      "Output View##89": false,
+      "Output View##90": false,
+      "Output View##91": false,
+      "Output View##92": false,
+      "Output View##93": false,
+      "Output View##94": false,
+      "Output View##95": false,
+      "Output View##96": false,
+      "Output View##97": false,
+      "Output View##98": false,
+      "Output View##99": false,
+      "Output View##100": false,
+      "Graph View##0": false,
+      "Graph View##1": true,
+      "Parameters##1": true,
+      "Symbol Library": true,
+      "Assets": true,
+      "Variation Explorer": false,
+      "Render To File": false,
+      "IO Events": false,
+      "Performance": false,
+      "Help": true,
+      "Console": false,
+      "Utilities": false,
+      "Guided Feature Tests": false,
+      "Settings": false,
+      "Composition Settings": false,
+      "Screen Manager": false,
+      "Welcome to the TiXL Alpha": false
+    }
+  }
+}
