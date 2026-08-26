@@ -218,7 +218,7 @@
         <!-- Define the package build directory based on the version found
             This should match the OutputPath defined by the project -->
         <PropertyGroup>
-            <PackageBuildDirectory>$(SourceDir)/bin/$(Configuration)/$(TixlNetFrameworkVersion)</PackageBuildDirectory>
+            <PackageBuildDirectory>$(SourceDir)/.temp/bin/$(Configuration)/$(TixlNetFrameworkVersion)</PackageBuildDirectory>
         </PropertyGroup>
 
         <Message Importance="high" Text="Path for $(PackageName): $(PackageBuildDirectory)" />

@@ -245,6 +245,11 @@ internal static partial class ProjectSetup
                                       return new ProjectLoadInfo(fileInfo, csProjFile, true); // Mark as success but don't process further
                                   }
                                   
+                                  // Bring the project to the current format before anything reads or
+                                  // writes build output - the compile below must already target the
+                                  // migrated paths, and file watchers aren't attached yet.
+                                  Migrations.ProjectFormatMigration.MigrateIfNeeded(csProjFile);
+
                                   var needsCompile = forceRecompile || loadInfo.NeedsRecompile || !Directory.Exists(csProjFile.GetBuildTargetDirectory());
 
                                   if (needsCompile && !csProjFile.TryRecompile(true, out var failureLog))
@@ -267,10 +272,6 @@ internal static partial class ProjectSetup
         {
             if (projectInfo is { csProjFile: not null, success: true }&& !projectInfo.csProjFile.IsArchived)
             {
-                // Move legacy root-level operator files into Symbols/ before the project's file
-                // watchers attach and symbol discovery runs - discovery only looks there.
-                Migrations.ProjectFormatMigration.MigrateIfNeeded(projectInfo.csProjFile);
-
                 var project = new EditableSymbolProject(projectInfo.csProjFile);
                 AddToLoadedPackages(project);
             }

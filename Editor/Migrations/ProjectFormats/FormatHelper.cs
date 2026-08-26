@@ -19,6 +19,9 @@ internal enum ProjectFormat
 
     /// <summary>Operator files live in the Symbols/ folder; discovery is limited to it.</summary>
     V2 = 2,
+
+    /// <summary>Build output (bin/, obj/) lives under .temp/, rooted by a generated Directory.Build.props.</summary>
+    V3 = 3,
 }
 
 /// <summary>
@@ -29,7 +32,7 @@ internal enum ProjectFormat
 /// </summary>
 internal static partial class FormatHelper
 {
-    public const ProjectFormat Current = ProjectFormat.V2;
+    public const ProjectFormat Current = ProjectFormat.V3;
 
     public static ProjectFormat GuessFormatForDirectory(string projectFolder)
     {
@@ -47,7 +50,11 @@ internal static partial class FormatHelper
         if (Directory.Exists(symbolsFolder)
             && Directory.EnumerateFiles(symbolsFolder, "*" + T3.Core.Model.SymbolPackage.SymbolExtension, SearchOption.AllDirectories).Any())
         {
-            return ProjectFormat.V2;
+            // V2 and V3 share the Symbols layout; the props file rooting build output marks V3
+            var propsText = ReadTextSafely(Path.Combine(projectFolder, Compilation.ProjectXml.BuildPropsFileName));
+            return propsText != null && propsText.Contains("BaseOutputPath", StringComparison.OrdinalIgnoreCase)
+                       ? ProjectFormat.V3
+                       : ProjectFormat.V2;
         }
 
         foreach (var path in V1.Layout.EnumerateFilesOutsideContentFolders(projectFolder))

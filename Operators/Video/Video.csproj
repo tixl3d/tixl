@@ -132,7 +132,7 @@
   </Target>
   <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <ItemGroup>
-      <_StaleBuildOutput Include="bin/$(Configuration)/**/*" Exclude="bin/$(Configuration)/**/av*.dll;bin/$(Configuration)/**/sw*.dll;bin/$(Configuration)/**/postproc*.dll" />
+      <_StaleBuildOutput Include="$(BaseOutputPath)$(Configuration)/**/*" Exclude="$(BaseOutputPath)$(Configuration)/**/av*.dll;$(BaseOutputPath)$(Configuration)/**/sw*.dll;$(BaseOutputPath)$(Configuration)/**/postproc*.dll" />
     </ItemGroup>
     <Delete Files="@(_StaleBuildOutput)" ContinueOnError="true" />
   </Target>

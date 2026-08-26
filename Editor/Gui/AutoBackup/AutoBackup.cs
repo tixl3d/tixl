@@ -280,6 +280,12 @@ internal static class AutoBackup
             yield return filepath;
         }
 
+        // Roots the build output under .temp (project format V3) - regenerable, but a backup
+        // should restore to a working project without editor intervention
+        var buildPropsPath = Path.Combine(projectFolder, ProjectXml.BuildPropsFileName);
+        if (File.Exists(buildPropsPath))
+            yield return buildPropsPath;
+
         foreach (var subdirectory in ProjectLayout.ContentSubdirectories)
         {
             var subdirectoryPath = Path.Combine(projectFolder, subdirectory);
@@ -495,6 +501,10 @@ internal static class AutoBackup
 
     private static void DeleteBuildArtifacts(string projectFolder)
     {
+        // Format-V3 locations plus the root-level ones older restores may bring back.
+        // Never .temp itself - it holds the backups.
+        TryDeleteRecursively(Path.Combine(projectFolder, FileLocations.TempSubfolder, "bin"));
+        TryDeleteRecursively(Path.Combine(projectFolder, FileLocations.TempSubfolder, "obj"));
         TryDeleteRecursively(Path.Combine(projectFolder, "bin"));
         TryDeleteRecursively(Path.Combine(projectFolder, "obj"));
     }
@@ -880,7 +890,7 @@ internal static class AutoBackup
 
     private static readonly HashSet<string> _minimalBackupExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".csproj", ".cs", ".t3", ".t3ui", ".hlsl", ".json", ".txt"
+        ".csproj", ".props", ".cs", ".t3", ".t3ui", ".hlsl", ".json", ".txt"
     };
 
     private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();

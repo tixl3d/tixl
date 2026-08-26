@@ -125,6 +125,31 @@ internal sealed class CsProjectFile
         }
     }
 
+    /// <summary>
+    /// Format V2 -> V3: points the ClearBuildOutput target at the property-based output directory,
+    /// so it follows wherever Directory.Build.props roots the build. Saved by the format stamping.
+    /// </summary>
+    public void MigrateCleanBuildTargetToBaseOutputPath()
+    {
+        foreach (var target in _projectRootElement.Targets)
+        {
+            if (target.Name != "ClearBuildOutput")
+                continue;
+
+            foreach (var task in target.Tasks)
+            {
+                if (task.Name != "RemoveDir")
+                    continue;
+
+                var directories = task.GetParameter("Directories").Replace('\\', '/');
+                if (directories == "bin/$(Configuration)")
+                {
+                    task.SetParameter("Directories", ProjectXml.CleanBuildDirectory);
+                }
+            }
+        }
+    }
+
     private void RemoveProperty(string propertyName)
     {
         foreach (var property in _projectRootElement.Properties)
@@ -158,9 +183,11 @@ internal sealed class CsProjectFile
             _projectRootElement.SetOrAddProperty(PropertyType.TargetFramework, newFramework);
         }
 
+        // Build output lives under .temp/ (project format V3); the Directory.Build.props written by
+        // ProjectXml.WriteBuildOutputProps is what makes MSBuild agree with these paths.
         var dir = Directory;
-        _releaseRootDirectory = Path.Combine(dir, "bin", "Release");
-        _debugRootDirectory = Path.Combine(dir, "bin", "Debug");
+        _releaseRootDirectory = Path.Combine(dir, FileLocations.TempSubfolder, "bin", "Release");
+        _debugRootDirectory = Path.Combine(dir, FileLocations.TempSubfolder, "bin", "Debug");
     }
 
     /// <summary>
@@ -512,6 +539,8 @@ internal sealed class CsProjectFile
         var homeGuidString = homeId.ToString();
 
         var projRoot = ProjectXml.CreateNewProjectRootElement(nameSpace, homeId, packageId);
+
+        ProjectXml.WriteBuildOutputProps(destinationDirectory);
 
         // Operator files live in the Symbols folder - the only place symbol discovery looks
         var symbolsDirectory = Path.Combine(destinationDirectory, FileLocations.SymbolsSubfolder);

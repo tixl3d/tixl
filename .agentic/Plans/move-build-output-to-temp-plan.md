@@ -1,5 +1,22 @@
 # Move Build Output (bin/, obj/) into .temp/ — Plan
 
+**Implemented 2026-08-26** as chain step `Editor/Migrations/Steps/To3_BuildOutputToTemp.cs`
+(project format V3). Key learnings vs. the original draft below:
+
+- The SDK only auto-excludes the *configured* output paths from the compile glob, so stale
+  root-level `bin/obj` from format V2 entered the build as duplicate sources. Both generated
+  props files therefore append `bin/**;obj/**` to `DefaultItemExcludes`, and the step deletes
+  the stale folders (tolerantly — the running editor's shadow copies leave them unlocked).
+- Migration now runs *before* the startup compile (inside the parallel project-load pass) —
+  otherwise the first compile targets root bin/ and the step deletes fresh output.
+- Repo: `Operators/Directory.Build.props` (chains up to the root props it shadows) covers all
+  built-in packages; their `ClearBuildOutput`/`_StaleBuildOutput` targets and Editor.csproj's
+  `CopyTixlOpProject` now use `$(BaseOutputPath)`/`.temp/bin`. Editor/Core keep their normal bin.
+- Backups and share exports include the root `Directory.Build.props`, so unpacked projects
+  build correctly without editor intervention.
+
+Original plan for reference:
+
 Drafted 2026-08-26, follow-up to the Symbols-folder restructuring. Goal: a project root that
 contains *only* the canonical content — `<name>.csproj`, `Symbols/`, `Assets/`, `dependencies/`,
 `.meta/` — plus a single `.temp/` for all transient state (backups today; build output after this).

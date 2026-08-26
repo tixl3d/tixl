@@ -159,6 +159,9 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     
     public const string SymbolUiSubFolder = "SymbolUis";
     public const string SourceCodeSubFolder = "SourceCode";
+
+    /** Per-project transient state: backups, and (since project format V3) the bin/obj build output */
+    public const string TempSubfolder = ".temp";
     
     /** Folder with the packages both in editor and in exported projects */
     public const string OperatorsSubFolder = "Operators";

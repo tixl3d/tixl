@@ -125,7 +125,7 @@
   </ItemGroup>
   <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <!-- Clear previous files in the export folder -->
-    <RemoveDir Directories="bin/$(Configuration)" />
+    <RemoveDir Directories="$(BaseOutputPath)$(Configuration)" />
   </Target>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
     <ItemGroup Label="Define json structure of referenced operator packages">

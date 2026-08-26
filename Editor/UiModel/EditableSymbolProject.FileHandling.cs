@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using Newtonsoft.Json;
 using T3.Core.Model;
+using T3.Core.Settings;
 using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Editor.Compilation;
@@ -308,7 +309,9 @@ internal sealed partial class EditableSymbolProject
         return relativeName.StartsWith(@"bin\", StringComparison.OrdinalIgnoreCase)
                || relativeName.StartsWith("bin/", StringComparison.OrdinalIgnoreCase)
                || relativeName.StartsWith(@"obj\", StringComparison.OrdinalIgnoreCase)
-               || relativeName.StartsWith("obj/", StringComparison.OrdinalIgnoreCase);
+               || relativeName.StartsWith("obj/", StringComparison.OrdinalIgnoreCase)
+               || relativeName.StartsWith(FileLocations.TempSubfolder + '\\', StringComparison.OrdinalIgnoreCase)
+               || relativeName.StartsWith(FileLocations.TempSubfolder + '/', StringComparison.OrdinalIgnoreCase);
     }
 
     public override void LocateSourceCodeFiles()

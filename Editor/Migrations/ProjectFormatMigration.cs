@@ -21,6 +21,7 @@ internal static class ProjectFormatMigration
     private static readonly ProjectMigrationStep[] _steps =
         [
             new Steps.To2_SymbolsFolder(),
+            new Steps.To3_BuildOutputToTemp(),
         ];
 
     public static void MigrateIfNeeded(CsProjectFile csProjectFile)

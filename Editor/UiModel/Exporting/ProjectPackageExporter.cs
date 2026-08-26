@@ -422,11 +422,18 @@ internal static class ProjectPackageExporter
         var projectFolder = Path.GetFullPath(project.Folder);
         var files = new List<(string, string)>();
 
-        // Root level: only the project file(s)
+        // Root level: the project file(s) and the build-output props, so an unpacked project
+        // builds into .temp without editor intervention
         foreach (var path in Directory.EnumerateFiles(projectFolder, "*.csproj", SearchOption.TopDirectoryOnly))
         {
             var fullPath = Path.GetFullPath(path);
             files.Add((fullPath, Path.GetRelativePath(projectFolder, fullPath)));
+        }
+
+        var buildPropsPath = Path.Combine(projectFolder, T3.Editor.Compilation.ProjectXml.BuildPropsFileName);
+        if (File.Exists(buildPropsPath))
+        {
+            files.Add((Path.GetFullPath(buildPropsPath), T3.Editor.Compilation.ProjectXml.BuildPropsFileName));
         }
 
         foreach (var subdirectory in IncludedSubdirectories)

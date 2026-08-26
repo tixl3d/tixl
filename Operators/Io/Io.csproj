@@ -136,7 +136,7 @@
     <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
   <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
-    <RemoveDir Directories="bin/$(Configuration)" />
+    <RemoveDir Directories="$(BaseOutputPath)$(Configuration)" />
   </Target>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
     <ItemGroup Label="Define json structure of referenced operator packages">
