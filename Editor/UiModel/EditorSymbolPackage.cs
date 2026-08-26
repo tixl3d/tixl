@@ -322,6 +322,18 @@ internal class EditorSymbolPackage : SymbolPackage
         return false;
     }
 
+    public bool TryGetSymbolUiFilePath(Symbol symbol, [NotNullWhen(true)] out string? path)
+    {
+        if (_filePathHandlers.TryGetValue(symbol.Id, out var filePathInfo))
+        {
+            path = filePathInfo.UiFilePath;
+            return path != null;
+        }
+
+        path = null;
+        return false;
+    }
+
     public void InitializeShaderLinting(IReadOnlyList<IResourcePackage> sharedShaderPackages)
     {
         ShaderLinter.AddPackage(this, sharedShaderPackages);
