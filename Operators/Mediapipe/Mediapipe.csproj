@@ -15,6 +15,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);0108;9084;NU1900</NoWarn>
     <PackageId>fe98a538-31e2-47dc-82a4-62c2e1c29649</PackageId>
+    <ProjectStructureVersion>2</ProjectStructureVersion>
     <RootNamespace>Mediapipe</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <IsArchived>false</IsArchived>
@@ -127,9 +128,9 @@
        propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
-    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
-    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
-    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageSymbols Include="Symbols/**/*.t3" Exclude="bin/**" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" Exclude="bin/**" />
+    <PackageSourceCode Include="Symbols/**/*.cs" Exclude="bin/**;obj/**" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">

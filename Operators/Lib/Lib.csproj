@@ -5,6 +5,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectStructureVersion>2</ProjectStructureVersion>
     <RootNamespace>Lib</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
@@ -126,9 +127,9 @@
        propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
-    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
-    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
-    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageSymbols Include="Symbols/**/*.t3" Exclude="bin/**" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" Exclude="bin/**" />
+    <PackageSourceCode Include="Symbols/**/*.cs" Exclude="bin/**;obj/**" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
@@ -139,7 +140,7 @@
     <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
   <ItemGroup>
-    <Folder Include="io\video\" />
+    <Folder Include="Symbols\io\video\" />
   </ItemGroup>
   <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <!-- Clear previous build output, but keep the FFmpeg native DLLs. A running Release editor with a video

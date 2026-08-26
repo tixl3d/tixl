@@ -4,6 +4,7 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ProjectStructureVersion>2</ProjectStructureVersion>
     <RootNamespace>Types</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
@@ -102,9 +103,9 @@
        propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
-    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
-    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
-    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageSymbols Include="Symbols/**/*.t3" Exclude="bin/**" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" Exclude="bin/**" />
+    <PackageSourceCode Include="Symbols/**/*.cs" Exclude="bin/**;obj/**" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
