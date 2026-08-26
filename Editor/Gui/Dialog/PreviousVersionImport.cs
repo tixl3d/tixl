@@ -205,7 +205,8 @@ internal static partial class PreviousVersionImport
                && Directory.EnumerateFileSystemEntries(path).Any();
     }
 
-    private static readonly HashSet<string> _projectExcludedDirs = new(StringComparer.OrdinalIgnoreCase) { "bin", "obj", ".temp" };
+    private static readonly HashSet<string> _projectExcludedDirs =
+        new(UiModel.ProjectLayout.GeneratedStateDirectories, StringComparer.OrdinalIgnoreCase);
 
     [GeneratedRegex(@"^TiXL(\d+)\.(\d+)(?:-(.+))?$", RegexOptions.IgnoreCase)]
     private static partial Regex FolderNamePattern();

@@ -23,17 +23,10 @@ namespace T3.Editor.UiModel.Exporting;
 internal static class ProjectPackageExporter
 {
     /// <summary>
-    /// The subdirectories (relative to the project root) that make up a shareable project; everything
-    /// else (bin, obj, .git, .temp backups, exports, stray user files) stays local. The only root-level
-    /// files shipped are the csproj(s). Import uses the same list to clean a target directory.
+    /// A shared package contains the root csproj(s) plus the <see cref="ProjectLayout.ContentSubdirectories"/>;
+    /// everything else stays local. Import uses the same allowlist to clean a target directory.
     /// </summary>
-    public static readonly string[] IncludedSubdirectories =
-        [
-            FileLocations.SymbolsSubfolder,
-            FileLocations.AssetsSubfolder,
-            FileLocations.DependenciesFolder,
-            FileLocations.MetaSubFolder,
-        ];
+    public static readonly string[] IncludedSubdirectories = ProjectLayout.ContentSubdirectories;
 
     /// <summary>
     /// What a share export would contain: the manifest dependencies, detected cross-project references

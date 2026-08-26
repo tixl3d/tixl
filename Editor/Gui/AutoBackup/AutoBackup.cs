@@ -77,7 +77,10 @@ internal static class AutoBackup
         // can't produce an inconsistent snapshot (same reason as CreateBackupCallback).
         lock (ProjectSetup.SymbolDataLock)
         {
-            if (!TryWriteBackupZip(projectFolder, pendingZipPath, minimal: true))
+            // Pinned snapshots always sweep conservatively - they're taken at recovery and upgrade
+            // boundaries (broken projects, restores, structure migrations) where the project may
+            // keep operator files outside the current layout
+            if (!TryWriteBackupZip(projectFolder, pendingZipPath, minimal: true, conservativeSweep: true))
             {
                 DeleteFile(pendingZipPath);
                 return false;
@@ -187,12 +190,12 @@ internal static class AutoBackup
         }
     }
 
-    private static bool TryWriteBackupZip(string projectFolder, string zipFilePath, bool minimal)
+    private static bool TryWriteBackupZip(string projectFolder, string zipFilePath, bool minimal, bool conservativeSweep = false)
     {
         try
         {
             using var archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create);
-            foreach (var filepath in EnumerateProjectFiles(projectFolder))
+            foreach (var filepath in EnumerateProjectFiles(projectFolder, conservativeSweep))
             {
                 var fileInfo = new FileInfo(filepath);
                 var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
@@ -259,36 +262,75 @@ internal static class AutoBackup
         }
     }
 
-    private static IEnumerable<string> EnumerateProjectFiles(string projectFolder)
+    /// <summary>
+    /// The files a backup covers: the root csproj(s) plus everything under the
+    /// <see cref="ProjectLayout.ContentSubdirectories"/> allowlist. A <paramref name="conservativeSweep"/>
+    /// additionally walks the rest of the project tree (excluding only generated state). Safety
+    /// snapshots use it because they run at recovery and upgrade boundaries - a broken or not-yet-
+    /// migrated project may keep operator files outside the current layout, and those must never be
+    /// missing from the one snapshot taken before a destructive step.
+    /// </summary>
+    private static IEnumerable<string> EnumerateProjectFiles(string projectFolder, bool conservativeSweep)
     {
         if (!Directory.Exists(projectFolder))
+            yield break;
+
+        foreach (var filepath in Directory.EnumerateFiles(projectFolder, "*.csproj", SearchOption.TopDirectoryOnly))
+        {
+            yield return filepath;
+        }
+
+        foreach (var subdirectory in ProjectLayout.ContentSubdirectories)
+        {
+            var subdirectoryPath = Path.Combine(projectFolder, subdirectory);
+            if (!Directory.Exists(subdirectoryPath))
+                continue;
+
+            foreach (var filepath in Directory.EnumerateFiles(subdirectoryPath, "*", SearchOption.AllDirectories))
+            {
+                // Skip files that external tooling rewrites independently of the user's edits
+                // (e.g. Assets/shadertoolsconfig.json). Otherwise their mtime churn defeats
+                // dedup and we accumulate identical zips.
+                if (FileLocations.IgnoredFiles.Contains(Path.GetFileName(filepath)))
+                    continue;
+
+                yield return filepath;
+            }
+        }
+
+        if (!conservativeSweep)
             yield break;
 
         foreach (var filepath in Directory.EnumerateFiles(projectFolder, "*", SearchOption.AllDirectories))
         {
             var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
-            if (IsPathExcluded(relativePath))
+            var firstSeparator = relativePath.IndexOfAny(_pathSeparators);
+            if (firstSeparator < 0)
+                continue; // root files: only the csprojs already yielded above belong in a backup
+
+            var topDirectory = relativePath[..firstSeparator];
+            if (IsAllowlistedOrGeneratedDirectory(topDirectory))
                 continue;
-            // Skip files that external tooling rewrites independently of the user's edits
-            // (e.g. Assets/shadertoolsconfig.json). Otherwise their mtime churn defeats
-            // dedup and we accumulate identical zips.
-            if (FileLocations.IgnoredFiles.Contains(Path.GetFileName(filepath)))
-                continue;
+
             yield return filepath;
         }
     }
 
-    private static bool IsPathExcluded(string relativePath)
+    /// <summary>Top-level folders the conservative sweep skips: already covered by the allowlist, or generated state.</summary>
+    private static bool IsAllowlistedOrGeneratedDirectory(string topDirectory)
     {
-        var parts = relativePath.Split(_pathSeparators);
-        for (var i = 0; i < parts.Length; i++)
+        foreach (var subdirectory in ProjectLayout.ContentSubdirectories)
         {
-            for (var e = 0; e < _excludedDirs.Length; e++)
-            {
-                if (string.Equals(parts[i], _excludedDirs[e], StringComparison.OrdinalIgnoreCase))
-                    return true;
-            }
+            if (string.Equals(topDirectory, subdirectory, StringComparison.OrdinalIgnoreCase))
+                return true;
         }
+
+        foreach (var generated in ProjectLayout.GeneratedStateDirectories)
+        {
+            if (string.Equals(topDirectory, generated, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
         return false;
     }
 
@@ -493,9 +535,10 @@ internal static class AutoBackup
     /// </summary>
     private static bool ClearGraphFilesBeforeRestore(string projectFolder)
     {
-        // Collect first — deleting while enumerating the directory is unsafe.
+        // Collect first — deleting while enumerating the directory is unsafe. The conservative
+        // sweep also clears graph files outside the current layout (e.g. from an older backup).
         var toDelete = new List<string>();
-        foreach (var filepath in EnumerateProjectFiles(projectFolder))
+        foreach (var filepath in EnumerateProjectFiles(projectFolder, conservativeSweep: true))
         {
             var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
             if (IsMinimalBackupFile(Path.GetExtension(filepath), relativePath))
@@ -850,9 +893,6 @@ internal static class AutoBackup
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly char[] _pathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
-
-    private static readonly string[] _excludedDirs =
-        { "bin", "obj", ".git", ".temp", "Render", "Export", "ImageSequence", "Screenshots" };
 
     // Relative-path prefixes (OS separator). ".meta/" data (variations) is kept even in minimal
     // backups; ".meta/Thumbnails/" is regenerable and kept only in full backups.

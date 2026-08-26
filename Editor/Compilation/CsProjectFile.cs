@@ -102,6 +102,9 @@ internal sealed class CsProjectFile
                 continue;
 
             item.Include = FileLocations.SymbolsSubfolder + '/' + include;
+
+            // The old root-level glob needed bin/obj excluded; rooted in Symbols/ they can't match anymore
+            item.Exclude = string.Empty;
         }
 
         _projectRootElement.SetOrAddProperty(PropertyType.ProjectStructureVersion, ProjectXml.CurrentProjectStructureVersion);

@@ -371,17 +371,6 @@ internal static partial class ProjectXml
     private static readonly Condition _releaseConfigCondition = new(ConditionVarName: "Configuration", RequiredValue: "Release", IfEqual: true);
     private const string IncludeAllStr = "**/*";
 
-    private static readonly string[] _excludeFoldersFromOutput =
-            [
-                CreateIncludePath(args: ["bin", IncludeAllStr]), 
-                CreateIncludePath(args: ["obj", IncludeAllStr]),
-                CreateIncludePath("Export", IncludeAllStr),      
-                CreateIncludePath("Screenshots", IncludeAllStr), 
-                CreateIncludePath("Render", IncludeAllStr),
-                CreateIncludePath(".meta", IncludeAllStr),
-                CreateIncludePath(".temp", IncludeAllStr),
-            ];
-
     private const string FileIncludeFmt = IncludeAllStr + @"{0}";
     internal const string DependenciesFolder = FileLocations.DependenciesFolder;
 
@@ -392,20 +381,18 @@ internal static partial class ProjectXml
     private static readonly ContentInclude.Group[] _defaultContent =
         [
             new ContentInclude.Group(Condition: null, Content: new ContentInclude(include: CreateIncludePath(args: [".", DependenciesFolder, IncludeAllStr]))),
+            // No Exclude needed: bin/obj/Export/... live at the project root, outside both the
+            // Assets and Symbols folders these includes are rooted in
             new ContentInclude.Group(Condition: _releaseConfigCondition, Content:
                 [
                     new ContentInclude(include: CreateIncludePath(args: [FileLocations.AssetsSubfolder, IncludeAllStr]),
-                                       linkDirectory: FileLocations.AssetsSubfolder,
-                                       exclude: _excludeFoldersFromOutput),
+                                       linkDirectory: FileLocations.AssetsSubfolder),
                     new ContentInclude(include: CreateSymbolsIncludePath(SymbolPackage.SymbolExtension),
-                                       linkDirectory: FileLocations.SymbolsSubfolder,
-                                       exclude: _excludeFoldersFromOutput),
+                                       linkDirectory: FileLocations.SymbolsSubfolder),
                     new ContentInclude(include: CreateSymbolsIncludePath(EditorSymbolPackage.SymbolUiExtension),
-                                       linkDirectory: FileLocations.SymbolUiSubFolder,
-                                       exclude: _excludeFoldersFromOutput),
+                                       linkDirectory: FileLocations.SymbolUiSubFolder),
                     new ContentInclude(include: CreateSymbolsIncludePath(EditorSymbolPackage.SourceCodeExtension),
-                                       linkDirectory: FileLocations.SourceCodeSubFolder,
-                                       exclude: _excludeFoldersFromOutput)
+                                       linkDirectory: FileLocations.SourceCodeSubFolder)
                 ])
         ];
 

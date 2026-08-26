@@ -102,10 +102,10 @@
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
        propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
-    <PackageSymbols Include="Symbols/**/*.t3" Exclude="bin/**" />
-    <PackageSymbolUis Include="Symbols/**/*.t3ui" Exclude="bin/**" />
-    <PackageSourceCode Include="Symbols/**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageAssets Include="Assets/**/*" />
+    <PackageSymbols Include="Symbols/**/*.t3" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" />
+    <PackageSourceCode Include="Symbols/**/*.cs" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">

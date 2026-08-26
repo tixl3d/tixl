@@ -108,9 +108,14 @@ Context-menu action on the project list. Self-contained; useful the day it lands
 - [x] Export dialog: destination folder, both opt-in toggles with computed gains
       (tree-shake reachability from home symbol; unreferenced-asset scan incl. fnt→png and
       hlsl includes). Zero-gain toggles are hidden.
-- [x] Ignore list `ProjectPackageExporter.ExcludedSubdirectories` (bin, obj, .git, Export) —
-      public so import reuses it.
-- Manual test set: `.tests-manual/share-project-export.md`
+- [x] ~~Ignore list~~ Superseded by the Symbols-folder restructuring (2026-08-26): all projects
+      now keep operator files in `Symbols/`, so export/import use an *allowlist* instead —
+      `ProjectPackageExporter.IncludedSubdirectories` (Symbols, Assets, dependencies, .meta)
+      plus the root csproj. Legacy projects are migrated silently on load with a pinned backup
+      (`Editor/Migrations/v4_3/ProjectStructure.cs`); the repo's built-in packages were migrated
+      in the same change. Symbol discovery is limited to `Symbols/` by design.
+- Manual test sets: `.tests-manual/share-project-export.md`,
+  `.tests-manual/symbols-folder-migration.md`
 
 ### Acceptance
 - Export a real project → unzip **by hand** into a clean install's project folder →

@@ -81,20 +81,12 @@ internal static partial class ProjectStructure
     }
 
     /// <summary>
-    /// Directories that are not symbol locations: the target folder itself, assets and other
-    /// non-operator content, and generated state. Deliberately NOT skipping media folders like
-    /// Render/ or Screenshots/ - a namespace may use those names (Lib's "render" does), and they
-    /// contain no operator files anyway.
+    /// Directories that are not legacy symbol locations: the current-layout content folders
+    /// (including the Symbols target itself) and generated state. Media folders like Render/ are
+    /// deliberately swept - a namespace may use those names (Lib's "render" does).
     /// </summary>
     private static readonly string[] _skippedSubdirectories =
-        [
-            FileLocations.SymbolsSubfolder,
-            FileLocations.AssetsSubfolder,
-            FileLocations.DependenciesFolder,
-            FileLocations.ExportSubFolder,
-            FileLocations.MetaSubFolder,
-            ".temp", ".git", "bin", "obj",
-        ];
+        [.. UiModel.ProjectLayout.ContentSubdirectories, .. UiModel.ProjectLayout.GeneratedStateDirectories];
 
     private static bool IsInSkippedSubdirectory(string relativePath)
     {

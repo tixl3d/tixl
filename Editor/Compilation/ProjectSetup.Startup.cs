@@ -282,8 +282,11 @@ internal static partial class ProjectSetup
 
     private static FileInfo[] FindCsProjFiles(bool includeBuiltInAsProjects)
     {
+        // A csproj under an Export path segment is part of a player export, not a project of its own
+        var exportSegment = Path.DirectorySeparatorChar + FileLocations.ExportSubFolder + Path.DirectorySeparatorChar;
         return GetProjectDirectories(includeBuiltInAsProjects)
               .SelectMany(dir => Directory.EnumerateFiles(dir, "*.csproj", SearchOption.AllDirectories))
+              .Where(path => !path.Contains(exportSegment, StringComparison.OrdinalIgnoreCase))
               .Select(x => new FileInfo(x))
               .ToArray();
         
@@ -316,10 +319,13 @@ internal static partial class ProjectSetup
                 }
             }
 
+            // Skip project folders literally named "Export" - a plain Contains() would also drop
+            // any project whose path merely contains the word (e.g. a user folder "ExportTools").
             var projectSearchDirectories = topDirectories
                                           .Where(Directory.Exists)
                                           .SelectMany(Directory.EnumerateDirectories)
-                                              .Where(dirName => !dirName.Contains(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase));
+                                              .Where(dirName => !Path.GetFileName(dirName)
+                                                                     .Equals(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase));
 
             // Add Built-in packages as projects
             if (includeBuiltInAsProjects)
