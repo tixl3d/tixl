@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "bc1ce5e3-7e5a-4629-906c-d245b69119ec"/*M06g_RotatingaVector*/,
+  "Description": "Rotating a Vector",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1f75d047-14a5-48cf-ab77-f75b9c443a89"/*Text*/,
+      "SectionId": "32e27292-4022-446d-a740-1762926e226e",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "21234397-0719-493d-a865-bcb0417f5a03"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "b52caefe-24f6-4889-bc21-f39bc9cf64e4"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "94fa7209-7192-481d-980c-5775331ce271"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "32e27292-4022-446d-a740-1762926e226e",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "8080fdbc-ef5b-4b95-ba03-2a9c85fae2e0",
+      "Description": "Sometimes positions are constructed intentionally.\nIn this case, a vector is rotated around a random axis to create structured motion."
+    },
+    {
+      "Id": "f06319e8-59fa-480c-a995-726bd42d9b06",
+      "Description": "Solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

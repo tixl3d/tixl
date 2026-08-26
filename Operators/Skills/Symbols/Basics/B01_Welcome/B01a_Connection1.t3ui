@@ -61,6 +61,7 @@
   "TourPoints": [
     {
       "Id": "7e6bc27a-5dd8-4df5-a5b7-84ae7d15d279",
+      "ChildId": "346a5eef-0135-4d15-9841-1a82bba84fc7",
       "Description": "These early levels introduce the basics of working with TiXL's node graph."
     },
     {
@@ -70,13 +71,13 @@
     },
     {
       "Id": "6566d948-3ee6-4a80-827d-ad3f414d53db",
+      "ChildId": "346a5eef-0135-4d15-9841-1a82bba84fc7",
       "Description": "Tip: If stuck, expand the Solution to see how it was built."
     },
     {
       "Id": "7cf2cc9a-cc99-4be4-b209-735cb12e62dc",
       "ChildId": "346a5eef-0135-4d15-9841-1a82bba84fc7",
-      "Description": "Start by learning how to connect operators.\nDrag a connection from [RoundedRect] to [ImageQuiz].",
-      "Style": "CallToAction"
+      "Description": "Start by learning how to connect operators.\nDrag a connection from [RoundedRect] to [ImageQuiz]."
     }
   ],
   "Settings": {

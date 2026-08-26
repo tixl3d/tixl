@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "86ae85a5-f147-4349-855b-4817b825a1a1"/*M02c_AngleStepsRevisited*/,
+  "Description": "Angle Steps (Revisited)",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "426a3c14-49f4-4006-986e-d7a1b11eff69"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "9f2ec1b8-f105-4913-b3fe-f3fdb735a944"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "f61bb2f8-24e7-440f-b904-5a6b81dbf8ed"/*Text*/,
+      "SectionId": "6007aec8-a97e-4134-89e3-2391f28a2a39",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a007e490-7681-4083-a50f-96c711b151c1"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "6007aec8-a97e-4134-89e3-2391f28a2a39",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "5384a1fc-dbcc-4db1-9dc1-9b9d8eb2d548",
+      "Description": "The previous example was a bit artificial.\nRounding floating-point values is common enough that TiXL provides dedicated operators for it."
+    },
+    {
+      "Id": "c837f435-b733-4e1c-99c3-f6c2ea7aefe7",
+      "Description": "The [Floor] operator converts a float to an integer and back.\nIt keeps the whole-number part and removes everything after the decimal point."
+    },
+    {
+      "Id": "54897807-d6b2-4075-b6f3-c1b148da2e33",
+      "Description": "Solve the previous example again, this time using [Floor].",
+      "Style": "CallToAction"
+    }
+  ]
+}

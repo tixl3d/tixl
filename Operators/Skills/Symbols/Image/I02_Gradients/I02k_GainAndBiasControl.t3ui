@@ -87,28 +87,28 @@
     },
     {
       "Id": "d8166de5-0ee0-4806-b52a-7296b2612e2d",
-      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268",
+      "ChildId": "0bd5039f-31b2-448c-821a-6c65db49696d",
       "InputId": "1c70e502-90cc-4285-92ca-ec3d200967eb",
       "Description": "Everything is already connected. \nSelect the LinearGradient operator and focus only on GainAndBias.\nNext to the parameter is a small graph showing a straight diagonal line.",
       "Style": "InfoFor"
     },
     {
       "Id": "efb4e974-8d00-403c-8ad4-22330c4197c6",
-      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268",
+      "ChildId": "0bd5039f-31b2-448c-821a-6c65db49696d",
       "InputId": "1c70e502-90cc-4285-92ca-ec3d200967eb",
       "Description": "Drag the graph vertically to shift the bias toward the left or right side of the gradient.",
       "Style": "InfoFor"
     },
     {
       "Id": "da2a7e4b-81bf-4065-aa38-4b0a4689f04a",
-      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268",
+      "ChildId": "0bd5039f-31b2-448c-821a-6c65db49696d",
       "InputId": "1c70e502-90cc-4285-92ca-ec3d200967eb",
       "Description": "Drag the graph horizontally to adjust contrast: lower on the left, higher on the right.",
       "Style": "CallToAction"
     },
     {
       "Id": "cc0cbb0a-29b3-4133-abe8-f6b56cfb5a54",
-      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268",
+      "ChildId": "0bd5039f-31b2-448c-821a-6c65db49696d",
       "InputId": "1c70e502-90cc-4285-92ca-ec3d200967eb",
       "Description": "Combine both directions and find the setting that matches the goal.",
       "Style": "CallToAction"

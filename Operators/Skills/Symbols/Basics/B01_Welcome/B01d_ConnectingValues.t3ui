@@ -77,18 +77,16 @@
     {
       "Id": "f9dee287-741b-4ab3-8284-430e9f1a80c2",
       "ChildId": "de17e3f3-f79c-4648-9689-27d7187dc711",
-      "Description": "When an operator is selected, its parameters appear in the Parameter Window.\nSelect the [RoundedRect].",
-      "Style": "CallToAction"
+      "Description": "When an operator is selected, its parameters appear in the Parameter Window."
     },
     {
       "Id": "fde63fef-b90a-442c-9d55-fe2a6e031ddd",
       "ChildId": "de17e3f3-f79c-4648-9689-27d7187dc711",
-      "InputId": "d2401798-593b-4cc3-85d8-3570ddec1f2a",
-      "Description": "Notice how the Scale parameter is highlighted?\nThis means it was changed from its default value.\nClick the parameter name \"Scale\" to reset it.",
-      "Style": "CallToAction"
+      "Description": "Notice how the Scale parameter is highlighted.\nThis means it was changed from its default value.\nClick the parameter name \"Scale\" to reset it."
     },
     {
       "Id": "a8d5aa9b-41e7-4b1c-81e8-ba7d409c9d25",
+      "ChildId": "de17e3f3-f79c-4648-9689-27d7187dc711",
       "Description": "Static values are fine, but animation is better.\nThe Rotate parameter looks like a good candidate."
     },
     {
@@ -99,19 +97,16 @@
     {
       "Id": "31809f42-97f7-4c1a-94f1-e68c079630bb",
       "ChildId": "66fd6534-b49a-4f18-99ad-1e293e46b6a9",
-      "Description": "Drag a connection from the [Time] output.\nSee the blinking dot on [RoundedRect]?\nThat means it has hidden parameters, like Rotate, that accept numeric input.",
-      "Style": "CallToAction"
+      "Description": "Drag a connection from the [Time] output.\nSee the blinking dot on [RoundedRect]?\nThat means it has hidden parameters, like Rotate, that accept numeric input."
     },
     {
       "Id": "ae0d4672-9ad7-416b-bbba-d3a860208789",
       "ChildId": "de17e3f3-f79c-4648-9689-27d7187dc711",
-      "Description": "Drop the connection on [RoundedRect] and choose Rotate from the popup.",
-      "Style": "CallToAction"
+      "Description": "Drop the connection on [RoundedRect] and choose Rotate from the popup."
     },
     {
       "Id": "7d0f771c-e91c-4761-b39f-c76d64edd4a3",
-      "Description": "Finally, snap to the connected input to keep the graph tidy.",
-      "Style": "CallToAction"
+      "Description": "Snap to the connected input to keep the graph tidy."
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "40f7a388-3125-458c-9b57-e2daeea60b9f"/*I01b_DarkSun*/,
-  "Description": "Stacking",
+  "Description": "The Dark Sun",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -89,22 +89,8 @@
   ],
   "TourPoints": [
     {
-      "Id": "bec805ac-a242-42ee-b876-de6682c30e5f",
-      "Description": "Many image operators also have an image input.\nThis is indicated by the dark purple triangles on the left and on the top."
-    },
-    {
-      "Id": "9b4fc4f3-c59a-47bc-922f-ec87d24db52e",
-      "Description": "These operators can be connected or \"stacked\", so that the second operator is rendered onto the connected on."
-    },
-    {
-      "Id": "eb80e170-5efc-4981-af75-61be7c689dea",
-      "Description": "Stack these ops in the right order to reproduce the example below.",
-      "Style": "CallToAction"
-    },
-    {
-      "Id": "e10afd03-f039-4bb7-af03-743ccbf4d958",
-      "Description": "You can rearrange the ops in a snapped stack to change the order.",
-      "Style": "Tip"
+      "Id": "a06441fb-8ca6-4f61-97c0-f51f92f9deda",
+      "Description": "This tour is still under construction."
     }
   ]
 }

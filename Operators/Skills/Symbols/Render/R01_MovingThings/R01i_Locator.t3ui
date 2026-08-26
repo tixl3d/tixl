@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "975ed32d-eedc-4208-a217-924231d339bd"/*R01i_Locator*/,
+  "Description": "Locator",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "13fd15de-1db3-4d00-93f9-c6bf1af054a2"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "4ac465e0-db52-4fdb-bbc5-d025441be67e"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "f1211cc5-9ac4-4b25-904e-465638870451"/*Text*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "067d2930-bc89-4507-a582-eec3d6e26b2b"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "72286f44-8dec-4b70-b3a3-c927f3e93753",
+      "Description": "Sometimes it is useful to know the final world-space position after a sequence of transformations.\nThe [Locator] operator is connected like a drawable object.\nInstead of rendering geometry, it stores the current position."
+    },
+    {
+      "Id": "19ec9865-545f-472e-a123-1eb2895c785c",
+      "Description": "The second output provides this position.\nTo access it, open the additional output indicated by the small triangle in the bottom-right corner and drag out the position output."
+    },
+    {
+      "Id": "0a8c28d3-d0a5-4481-b6fe-1ff86a7eec09",
+      "Description": "The [Text] operator only supports x and y positioning.\nA separate [Transform] operator is therefore required."
+    },
+    {
+      "Id": "e0dd9684-0101-4c75-81bc-f548dae74dde",
+      "Description": "Recreate the challenge using the given operators.",
+      "Style": "CallToAction"
+    }
+  ]
+}

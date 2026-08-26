@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "f8935a0d-bd26-448b-84a3-d0347e47ac1d"/*R04c_ZBuffer*/,
+  "Description": "Z-Buffer",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "59657416-a074-4f34-b691-37df2798faf8"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "717c4d62-416c-4eb9-9d8c-87f103de9d22"/*Text*/,
+      "SectionId": "8e4ecddb-8e90-437f-a44c-2db26aead2b3",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "e25023e4-aef0-490b-98f5-6d4e49fa8bc1"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "26a79101-5247-46f8-81ed-84a0a7dc3705"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "8e4ecddb-8e90-437f-a44c-2db26aead2b3",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "8f8f8bf6-42d2-495f-8adc-030abff879aa",
+      "Description": "In computer graphics, an algorithm called the Z-buffer is used to ensure that distant objects are not drawn in front of objects that are closer to the camera.\nThe [RenderTarget] operator automatically provides a depth buffer for this purpose.\nEach draw operator has parameters that control how it interacts with depth."
+    },
+    {
+      "Id": "829fdcc3-df02-45da-8c48-b850d88b5a41",
+      "Description": "Operators are still drawn in the order they are connected.\nDepth testing determines whether a fragment is visible."
+    },
+    {
+      "Id": "943acfd2-3117-4ad8-b87e-bdf4a80f8231",
+      "Description": "In this playful example, the orange torus should appear in front."
+    },
+    {
+      "Id": "a3f481b6-cb6e-4eb7-8712-1bf06be32e91",
+      "Description": "Solve the challenge.",
+      "Style": "CallToAction"
+    }
+  ]
+}

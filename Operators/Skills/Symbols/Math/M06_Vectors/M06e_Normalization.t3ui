@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "eb855258-4821-40f6-8ff8-ec71a808a0d4"/*M06e_Normalization*/,
+  "Description": "Normalization",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "998bc92a-5c90-40f0-9430-a84539c814f7"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "b217d89d-9dc9-4138-a4ab-461df4aa85b2"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "b4926a90-aeb1-4ed1-afd8-d6629fc4ff9b"/*Text*/,
+      "SectionId": "7c2f5208-711b-4cf1-a1e0-b8aa71241358",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "0dbce40e-92f7-42eb-8662-a56c00430b03"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "7c2f5208-711b-4cf1-a1e0-b8aa71241358",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "9efc20a7-60be-449b-8dde-89713aca239b",
+      "Description": "Normalization converts a vector into a direction with a length of one.\nThis is a very common operation in computer graphics."
+    },
+    {
+      "Id": "a46f553b-70b8-465e-957a-d1602d9e72c3",
+      "Description": "Here, normalizing random vectors causes all points to lie on the surface of a sphere."
+    },
+    {
+      "Id": "6c9a09ec-55d4-4af3-bec1-8609683d1fcb",
+      "Description": "Solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

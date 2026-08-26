@@ -1,0 +1,83 @@
+{
+  "FormatVersion": 3,
+  "Id": "bddff4d6-e874-47bb-8a09-a336997dddeb"/*Me01b_CombiningMeshes*/,
+  "Description": "Combining Meshes",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "9ceb12b7-664c-4688-9912-2835875b3dca"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "aedaa497-85b0-4e45-b3ea-22d66971195d"/*Text*/,
+      "SectionId": "e0b059af-1121-4484-9fe0-4baf692ed358",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "e14c99ff-473a-4a25-afe0-3a2651b1dc91"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "faf687b7-e828-46c9-b2f3-8b4cc63d0b88"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "e0b059af-1121-4484-9fe0-4baf692ed358",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "b7ef0638-eddb-4ef7-b086-724ac8b32cae",
+      "Description": "Continuing from the previous example, you might wonder why TiXL uses this approach.\nIt may sound less efficient at first, and in some cases it is."
+    },
+    {
+      "Id": "25fc897a-2904-4f60-afe8-f2bb0fbbaeef",
+      "Description": "However, this is a deliberate trade-off that is faster in most real-world scenarios.\nGraphics cards struggle with drawing many small objects, where “small” means very few polygons.\nIt is much faster to draw a single object with millions of faces than to draw a thousand cubes with twelve faces each."
+    },
+    {
+      "Id": "6c0c731b-337c-41eb-8c7e-4cb7e1c11d40",
+      "Description": "Each draw operation comes with overhead.\nThese operations are called draw calls.\nIf you exceed a few thousand draw calls per frame, performance will drop significantly, regardless of how powerful the GPU is."
+    },
+    {
+      "Id": "3e324fc4-e2c1-478f-8b73-1c8101d8bf87",
+      "Description": "There are many techniques to render complex scenes with few draw calls.\nCombining many small meshes into a single larger mesh is one of them."
+    },
+    {
+      "Id": "cdcd6cb5-8593-46f4-b36a-a4b42f312a85",
+      "Description": "Build the example.\nSome operators already have their parameters set correctly.",
+      "Style": "CallToAction"
+    }
+  ]
+}

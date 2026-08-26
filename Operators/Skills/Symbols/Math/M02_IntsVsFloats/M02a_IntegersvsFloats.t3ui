@@ -1,0 +1,80 @@
+{
+  "FormatVersion": 3,
+  "Id": "fcb4acbb-86cf-4518-96e9-f15d4575ee8f"/*M02a_IntegersvsFloats*/,
+  "Description": "Integers vs Floats",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "299fa52b-70f3-4fd2-aeda-04e59aa10ed0"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "ad554b63-2002-4551-8ed1-c3ed6f502c58"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "f1374291-dc56-44ab-bfe7-3bb41b8d6d8f"/*Text*/,
+      "SectionId": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "190e4531-e597-4fe0-a343-4a2ba9349340"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "e6c23f9a-10b0-4f31-9608-4fd8354ef828",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "e10fc4fe-c421-4798-979c-05ad7f5b4f72",
+      "Description": "For computers, values are not all the same. They come in different formats.\nIn TiXL, three numeric types are commonly used.\nFloating-point values are used for most parameters: time, radius, strength, positions, and animation inputs.   While their precision or range may differ depending on the parameter, internally they all behave the same.\nInteger values are different. They can only change in steps of one.   They are used for counts, indices, and many mode or selection parameters."
+    },
+    {
+      "Id": "88f41e89-2d30-4428-b64a-1605e6362af7",
+      "Description": "To convert between these types, use the [FloatToInt] and [IntToFloat] operators.\nAutomatic conversion might be convenient, and may exist in the future, but for now these operators make the conversion explicit."
+    },
+    {
+      "Id": "6589a380-d47d-4a30-97d0-d6715bb83479",
+      "Description": "The [FloatToInt] operator does **not** round.\nEverything after the decimal point is removed. Period.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "b3afb16a-46fe-4c8d-a865-ea044440a582",
+      "Description": "Let’s start with a small example.\nUse time (a floating-point value) to control which text is shown.\nComplete the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "1486f333-6a72-4be7-a707-32dee4ea72b4"/*M06d_ScalingVectors*/,
+  "Description": "Scaling Vectors",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2a1785e0-0948-4b49-9128-0562265d0469"/*Text*/,
+      "SectionId": "00cdb682-f4b1-4555-810b-d60858e13c6e",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "393e0665-f76c-4227-bf6e-0aebae62ddef"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "ac71e33f-10f7-437f-8fc2-bdc852c0a372"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ada14b42-9cb0-47eb-ba34-afb2dfb9ebf4"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "00cdb682-f4b1-4555-810b-d60858e13c6e",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "7b407290-2b77-494b-8f7e-399e37f12b3e",
+      "Description": "Scaling a vector changes its magnitude.\nIn this example, the random position oscillates between small and large values."
+    },
+    {
+      "Id": "8cbb56be-19b8-49cb-8c04-10deefc0d765",
+      "Description": "Solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "bf67074b-b2a2-4231-b1fc-6abd38e159aa"/*I02h_InterpolationMadness*/,
-  "Description": "",
+  "Description": "I02h_InterpolationMadness",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -92,8 +92,8 @@
     },
     {
       "Id": "eccbdf32-bf52-4ded-b869-58eea05d9cb0",
-      "ChildId": "caa36c77-ac62-4cb3-8b47-9689a1d2319f",
-      "Description": "Select the [LinearGradient] operator.\n\nThen adjust the position of the middle gradient step to resolve the clamping.",
+      "ChildId": "77576ab9-7784-45f3-be45-259e2b58605f",
+      "Description": "Select the [LinearGradient] operator.\nThen adjust the position of the middle gradient step to resolve the clamping.",
       "Style": "CallToAction"
     }
   ]

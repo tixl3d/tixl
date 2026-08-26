@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "a636e064-8ff1-4736-95e6-5c99e35b09f0"/*R07e_PickvsSwitch*/,
+  "Description": "Pick vs. Switch",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "54a3ba08-3b9e-4683-875d-76435ede2532"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "a3e24df6-76b0-435f-8f21-a3ac95690a11"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "f99ef1ae-88db-46b3-ba69-e025b272d1f8"/*Text*/,
+      "SectionId": "cc4cdd96-0e93-4c7b-96f8-bd65bd66771d",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "828c6a1e-3c68-4d5e-b206-8622b1e12870"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "cc4cdd96-0e93-4c7b-96f8-bd65bd66771d",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "2aa47106-7fbe-460d-9ff9-ed5bc300b22e",
+      "Description": "There are other operators that switch between values such as images, numbers, or meshes.\nThese operators are called [Pick...] instead of [Switch]."
+    },
+    {
+      "Id": "67a12bba-0c63-4b44-b114-576e5c16abd4",
+      "Description": "This distinction is intentional.\nCommand operators are the only operator type in TiXL that can become undefined or inactive.\nMost other operators keep their last valid value.\nFor example, a [LinearGradient] remains a valid texture in memory even if it is no longer updated or used."
+    },
+    {
+      "Id": "042b4705-9fcc-4f03-8e2f-c9a4b5f791e1",
+      "Description": "Enough theory.\nPick some images and reproduce the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

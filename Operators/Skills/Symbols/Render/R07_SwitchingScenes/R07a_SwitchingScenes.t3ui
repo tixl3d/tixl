@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "a401f4a5-ccc4-4218-a433-6b854adc6fa7"/*R07a_SwitchingScenes*/,
+  "Description": "Switching Scenes",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "209d436f-6b06-477c-b566-a7b6a1f5eef1"/*Text*/,
+      "SectionId": "6a2111f1-f08f-4f87-b3fc-614c0ad6203a",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "3924ea87-1e06-4fdb-a8b6-787b4bda0a58"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "7fecc2ca-9b8d-4383-983f-3c8e9b8c56fa"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "80dc5397-7f16-4581-b58c-7843c5272ab9"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "6a2111f1-f08f-4f87-b3fc-614c0ad6203a",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "ec40ae26-c980-424a-8340-7ac438d88db2",
+      "Description": "For complex projects or setups, it can be necessary to switch between different materials, objects, cameras, or entire scenes.\nAll of these are command operators and share the same connection type.\nThis allows a single operator to switch between them."
+    },
+    {
+      "Id": "6bc61753-e47c-423d-8c6f-ee11fbcdc251",
+      "Description": "You can think of this operator like a fork in a track.\nYou can choose either the left or the right path.\nThe [Switch] operator works the same way, but because it supports multiple inputs, it can switch between many branches."
+    },
+    {
+      "Id": "59ea8fcc-6062-41ad-99e4-3e9c42191a0d",
+      "Description": "The active branch is controlled by the Index parameter.\nLike all index parameters in TiXL, it starts counting at 0 and wraps around if the value exceeds the number of connected inputs."
+    },
+    {
+      "Id": "fc857955-feeb-440d-963d-e43675b7cd32",
+      "Description": "This is a simple example.\nReconnect the operators to match the reference.",
+      "Style": "CallToAction"
+    }
+  ]
+}

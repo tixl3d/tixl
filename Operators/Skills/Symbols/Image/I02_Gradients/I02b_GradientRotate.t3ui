@@ -67,7 +67,6 @@
     {
       "Id": "59b09a02-ecbe-4f85-87e2-3bcaffedf926",
       "ChildId": "25d53d5e-d143-4687-9fdf-7a314b46775d",
-      "InputId": "8169be8f-cb35-4900-b462-f2139b412d59",
       "Description": "Select the gradient. Use the rotate icons on the right side of the parameter to rotate by 45 degrees.\nHold Ctrl or Alt for finer control.",
       "Style": "InfoFor"
     },

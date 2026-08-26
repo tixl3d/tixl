@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "4f25fbc7-e5c1-470e-940a-b6f2e3c2afc6"/*R01h_Repeating*/,
+  "Description": "Repeating",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4fe259d8-6184-451e-9915-0384680b6971"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "7ce6b4c3-cd63-4774-b559-1044737965d0"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "9b4dde76-ede4-45d1-869f-462d719bb43e"/*Text*/,
+      "SectionId": "caada1fa-b1b2-4901-ad43-a6027552e246",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ae157c00-9149-42f2-a8c5-8af2f135c7ef"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "caada1fa-b1b2-4901-ad43-a6027552e246",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "892cc7e4-c6cc-4637-9acb-4f64f2f63265",
+      "Description": "The [RepeatTransform] operator draws its input multiple times.\nThis can be useful, but it can become slow when used excessively.\nEfficient ways to render hundreds or millions of instances are covered later."
+    },
+    {
+      "Id": "3317148b-fe90-4080-8dc9-3462026ac58a",
+      "Description": "Recreate the challenge using the given operators.",
+      "Style": "CallToAction"
+    }
+  ]
+}

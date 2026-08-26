@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "06de71db-842d-4f73-971c-ce9dd6437aea"/*R03d_CameraZoom*/,
+  "Description": "Camera Zoom",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "a4ce0b77-bc6e-4088-a3a7-6120614888a1"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "c3863151-7f10-4142-a814-c427b5cc8135"/*Text*/,
+      "SectionId": "61ceb7d0-06cc-4b20-a74b-8daef4635e92",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "e3736cfa-b452-4aa5-b791-4058ad8f68ea"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1081da99-5e88-4d71-9233-2c4acd5953f9"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "61ceb7d0-06cc-4b20-a74b-8daef4635e92",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "b41eeb0b-016a-425c-a273-0aa9c0259f91",
+      "Description": "The [Camera] operator is the main camera operator in TiXL.\nIt defines a camera by setting a view position and a target."
+    },
+    {
+      "Id": "7d9b9569-ca26-4599-b6b2-79c80f6785b8",
+      "Description": "In this example, animate the FieldOfView parameter to zoom into the image.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -83,8 +83,7 @@
     {
       "Id": "97092ce7-e7fd-4776-b8b6-898e9e762f4f",
       "ChildId": "c3bb7cb9-ceef-43dd-b533-464b1f27201e",
-      "Description": "Sometimes an operator needs to leave a stack.\nThat bright orange [Blob] is a bit much.\nRemove it by long-pressing and dragging it out of the stack.",
-      "Style": "CallToAction"
+      "Description": "Sometimes an operator needs to leave a stack.\nThat bright orange [Blob] is a bit much.\nRemove it by long-pressing and dragging it out of the stack."
     }
   ]
 }

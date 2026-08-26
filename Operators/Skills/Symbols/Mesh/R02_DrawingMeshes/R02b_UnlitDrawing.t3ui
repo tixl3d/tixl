@@ -1,0 +1,84 @@
+{
+  "FormatVersion": 3,
+  "Id": "02f5c918-9680-4891-8d78-a1bc2a705b6b"/*R02b_UnlitDrawing*/,
+  "Description": "Unlit Drawing",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "aa46325e-77e8-4e0c-a2d2-36577c54d75d"/*Text*/,
+      "SectionId": "cd73ffa7-f01f-4897-a469-3525bdceedf0",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "e3cff63b-a724-4017-8cb6-f81614abdef4"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "fb0d8290-b058-4a84-826f-aa6b0eae608b"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "312f5d4a-85d6-4bc7-bc17-f966c89d1135"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "cd73ffa7-f01f-4897-a469-3525bdceedf0",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "7454d165-3412-43d8-8f47-fd5b0eb31392",
+      "Description": "[DrawMesh] applies default material and lighting automatically.\nHow to change materials and lighting is covered in later topics."
+    },
+    {
+      "Id": "8bbcd296-e353-47e5-adaa-c3ad708d2728",
+      "Description": "Sometimes you do not want any shading at all.\nFor example, when drawing an image directly onto a surface, shading can be distracting.\nIn earlier topics, [Layer2D] was used for this purpose.\nAn even simpler option for meshes is [DrawMeshUnlit]."
+    },
+    {
+      "Id": "c73d8edc-408b-454f-85bf-95a87173b563",
+      "Description": "Like all draw operators, it includes a Color parameter that is multiplied with the result."
+    },
+    {
+      "Id": "cec3d797-1ac6-4eb0-a895-5056571ae7b5",
+      "Description": "You do not need to adjust any parameters for this example.",
+      "Style": "Tip"
+    },
+    {
+      "Id": "d3db9572-0bd1-49f6-8a5e-5479deaa4b14",
+      "Description": "Connect the operators and recreate the challenge.",
+      "Style": "CallToAction"
+    }
+  ]
+}

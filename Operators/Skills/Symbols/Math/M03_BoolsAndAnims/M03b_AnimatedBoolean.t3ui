@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "54e472c5-2df2-46e6-9aec-d1609b7c5efd"/*M03b_AnimatedBoolean*/,
+  "Description": "Animated Boolean",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "317b4378-aa20-4759-adeb-04e8a9a9263a"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "45e609ed-e7bf-4d01-ad50-2f37ddad6afb"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "638793b4-33bf-4b6f-b2ff-372d3b289a89"/*Text*/,
+      "SectionId": "2157f764-6cad-422f-b35a-e7f5b6954450",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a638d2e8-7877-4a99-b083-763f09bf0ade"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "2157f764-6cad-422f-b35a-e7f5b6954450",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "2cb33a5e-1661-47b2-8458-9c768e61f848",
+      "Description": "In this example, the [AnimBool] operator generates a boolean value that turns true for a single frame at the beginning of a bar.\nThis kind of signal is useful for events and rhythmic logic."
+    },
+    {
+      "Id": "34342cff-9ff7-44c4-98c0-4c71c9a1e3fb",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -270,7 +270,7 @@
   "TourPoints": [
     {
       "Id": "ab4ef431-56ac-45f7-850f-ac40100d8592",
-      "ChildId": "2a64dd57-f0fc-44a0-a9a4-8ac9923a95f6",
+      "ChildId": "2e1c7d09-b079-41ce-8045-5b28570cd402",
       "Description": "When drawing multiple instances using [Transform] operators, each branch can be thought of as a sequence of events.\nExamples include “move right,” “rotate,” “scale,” and finally “draw.”\nEach operator is applied in the current local coordinate system."
     },
     {

@@ -89,7 +89,7 @@
       "Id": "056a87da-273f-4b32-9ed5-56aa749bda2f",
       "ChildId": "2fd29ba5-810b-4b07-a952-8bb39c957b65",
       "InputId": "e47e9e63-9c94-4c29-9555-2452fa498d57",
-      "Description": "Select a gradient step to open the Color picker. \nThen use the opacity slider at the bottom. \nAdjust the opacity of the gradient's color steps to complete the challenge.\n",
+      "Description": "Select a gradient step to open the Color picker. \nThen use the opacity slider at the bottom. \nAdjust the opacity of the gradient's color steps to complete the challenge.",
       "Style": "CallToAction"
     }
   ]

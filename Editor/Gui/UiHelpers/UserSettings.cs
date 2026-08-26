@@ -168,6 +168,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         public bool ShowSkillQuestInHub = true;
 
+        /// <summary>Checkout of the skillquest content repository. Empty = auto-discover a "skillquest" folder next to the TiXL checkout.</summary>
+        public string SkillQuestRepositoryPath = string.Empty;
+
         // Asset Lib
         public bool SyncWithOperatorSelection = true;
         public bool ScrollAssetLibToActive = true;

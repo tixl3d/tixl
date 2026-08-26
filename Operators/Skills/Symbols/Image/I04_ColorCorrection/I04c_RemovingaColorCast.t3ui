@@ -1,0 +1,88 @@
+{
+  "FormatVersion": 3,
+  "Id": "17822f0d-0b11-4aaf-88c7-9597f643e23c"/*I04c_RemovingaColorCast*/,
+  "Description": "Removing a Color Cast",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "09453e50-5213-4354-834e-f22b8c87ac95"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "3bb826cf-0083-4272-b4bc-cc6268bd2fb1"/*Text*/,
+      "SectionId": "812c04cd-37ef-4475-ae3f-499d873f572d",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "90ac6f41-ca6d-4df5-98a6-76aad71f53e6"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6d2af960-5478-48e5-8463-ede877920d41"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "812c04cd-37ef-4475-ae3f-499d873f572d",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "5b7efef1-c0d2-4481-9d48-e6447a2b124f",
+      "Description": "In this level, the image has a visible blue color cast.\nIn the waveform, the blue curve sits higher than the red and green curves."
+    },
+    {
+      "Id": "91a3cf85-5ba2-466a-a319-98b4f988d9b4",
+      "Description": "[ColorGrade] is the appropriate tool for this task.\nIt is already present in the graph. Select it."
+    },
+    {
+      "Id": "96e629d5-8399-4f6f-86cd-0fa6f465e0e4",
+      "Description": "Open the color picker for the Gain parameter.\nPure gray has no effect.\nMoving away from gray introduces a color shift.\nTo counter a blue cast, move slightly toward the complementary color: yellow."
+    },
+    {
+      "Id": "bc4e67e3-46a7-4487-b335-96a67c751cc2",
+      "Description": "Hold the Shift key for finer control.",
+      "Style": "Tip"
+    },
+    {
+      "Id": "4d14e08d-8794-436e-ab9b-b22151b89484",
+      "Description": "TiXL’s color picker is tuned for grading work.\nIt emphasizes usable, desaturated colors and keeps highly saturated colors near the edges."
+    },
+    {
+      "Id": "46d56a84-d22c-4ba7-81e0-3cfa6db363a7",
+      "Description": "Balance the waveform curves to remove the color cast.",
+      "Style": "CallToAction"
+    }
+  ]
+}

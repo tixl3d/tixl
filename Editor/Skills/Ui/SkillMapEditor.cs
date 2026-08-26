@@ -63,6 +63,15 @@ internal static class SkillMapEditor
                     SkillMapData.Save();
                 }
 
+                ImGui.SameLine();
+                if (CustomComponents.StateButton("Sync Levels", CustomComponents.ButtonStates.Default))
+                {
+                    SkillQuestStructureSync.SyncFromRepository();
+                }
+
+                CustomComponents.TooltipForLastItem("Sync level structure from the skillquest content repository",
+                                                    "Builds category/topic sections in EditSkillQuest, creates stub levels for new markdown headings and applies tour points.");
+
                 if (ImGui.IsWindowAppearing())
                 {
                     if (_selectedTopics.Count == 0)

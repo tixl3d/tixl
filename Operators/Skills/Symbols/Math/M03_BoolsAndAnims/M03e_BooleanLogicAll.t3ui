@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "b3fe4803-fa91-45c4-ac77-e827edd78d76"/*M03e_BooleanLogicAll*/,
+  "Description": "Boolean Logic: All",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "084b6ff5-2123-49f8-9718-ec90879caf1a"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "7cfe1e43-1206-4190-80ac-f6c53f635731"/*Text*/,
+      "SectionId": "e30d47ac-3bc1-430e-8be0-120a8aca00d6",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "fb24fc4f-88f5-49af-801c-d93a410e83dd"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "670d5621-8ef5-4d25-91e5-2964c4d5e7e3"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "e30d47ac-3bc1-430e-8be0-120a8aca00d6",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "87d640c0-51e0-4af2-83f2-a6132cb1f770",
+      "Description": "As projects grow, chaining many [And] operators can become cumbersome."
+    },
+    {
+      "Id": "21f10ea6-c726-4881-a3e3-3b9796f2dfa9",
+      "Description": "Unless you need to animate individual inputs, you can use the [All] operator instead.\nIt accepts multiple inputs and returns true only if all connected inputs are true."
+    },
+    {
+      "Id": "5b7834cc-74ce-49ea-a3f9-7e19f2e224b2",
+      "Description": "Replace the chain of [And] operators with [All] and recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}
