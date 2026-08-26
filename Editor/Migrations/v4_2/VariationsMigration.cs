@@ -1,9 +1,10 @@
 #nullable enable
 using System.IO;
 using T3.Core.Settings;
+using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.UiModel;
 
-namespace T3.Editor.Gui.Interaction.Variations.Model;
+namespace T3.Editor.Migrations.v4_2;
 
 /// <summary>
 /// Moves variation files from the pre-4.2 locations into the owning project's

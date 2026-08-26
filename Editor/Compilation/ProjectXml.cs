@@ -121,6 +121,7 @@ internal static partial class ProjectXml
         propertyGroup.AddProperty(PropertyType.HomeGuid.GetItemName(), homeGuid.ToString());
         propertyGroup.AddProperty(PropertyType.PackageId.GetItemName(), packageId.ToString());
         propertyGroup.AddProperty(PropertyType.AssemblyName.GetItemName(), UnevaluatedVariable(GetItemName(PropertyType.RootNamespace)));
+        propertyGroup.AddProperty(PropertyType.ProjectStructureVersion.GetItemName(), CurrentProjectStructureVersion);
         propertyGroup.AddProperty("DefaultItemExcludes", @"$(DefaultItemExcludes);Export\**;bin\**;obj\**;.temp\**;.meta\**;Assets\**;Screenshots\**;Render\**");
 
         // Analyzers roughly double compile time and run on every hot-reload compile; Release builds keep them.
@@ -306,6 +307,12 @@ internal static partial class ProjectXml
     }
     #endregion Target Framework
 
+    /// <summary>
+    /// Version "2" marks projects whose operator files live in the Symbols folder; projects without the
+    /// property use the legacy root-level layout and are migrated on load (see <see cref="Migrations.v4_3.ProjectStructure"/>).
+    /// </summary>
+    public const string CurrentProjectStructureVersion = "2";
+
     public static string UnevaluatedVariable(string variableName) => $"$({variableName})";
     public static string UnevaluatedIterator(string variableName) => $"@({variableName})";
 
@@ -378,6 +385,10 @@ internal static partial class ProjectXml
     private const string FileIncludeFmt = IncludeAllStr + @"{0}";
     internal const string DependenciesFolder = FileLocations.DependenciesFolder;
 
+    /// <summary>Operator files live in the project's Symbols folder; the release output re-links them by extension.</summary>
+    private static string CreateSymbolsIncludePath(string fileExtension)
+        => CreateIncludePath(FileLocations.SymbolsSubfolder, string.Format(FileIncludeFmt, fileExtension));
+
     private static readonly ContentInclude.Group[] _defaultContent =
         [
             new ContentInclude.Group(Condition: null, Content: new ContentInclude(include: CreateIncludePath(args: [".", DependenciesFolder, IncludeAllStr]))),
@@ -386,13 +397,13 @@ internal static partial class ProjectXml
                     new ContentInclude(include: CreateIncludePath(args: [FileLocations.AssetsSubfolder, IncludeAllStr]),
                                        linkDirectory: FileLocations.AssetsSubfolder,
                                        exclude: _excludeFoldersFromOutput),
-                    new ContentInclude(include: string.Format(format: FileIncludeFmt, arg0: SymbolPackage.SymbolExtension),
-                                       linkDirectory: FileLocations.ReleaseSymbolsSubfolder,
+                    new ContentInclude(include: CreateSymbolsIncludePath(SymbolPackage.SymbolExtension),
+                                       linkDirectory: FileLocations.SymbolsSubfolder,
                                        exclude: _excludeFoldersFromOutput),
-                    new ContentInclude(include: string.Format(format: FileIncludeFmt, arg0: EditorSymbolPackage.SymbolUiExtension),
+                    new ContentInclude(include: CreateSymbolsIncludePath(EditorSymbolPackage.SymbolUiExtension),
                                        linkDirectory: FileLocations.SymbolUiSubFolder,
                                        exclude: _excludeFoldersFromOutput),
-                    new ContentInclude(include: string.Format(format: FileIncludeFmt, arg0: EditorSymbolPackage.SourceCodeExtension),
+                    new ContentInclude(include: CreateSymbolsIncludePath(EditorSymbolPackage.SourceCodeExtension),
                                        linkDirectory: FileLocations.SourceCodeSubFolder,
                                        exclude: _excludeFoldersFromOutput)
                 ])
@@ -498,6 +509,7 @@ internal enum PropertyType
     Deterministic, 
     OutputPath,
     IsArchived,
+    ProjectStructureVersion,
 }
 
 internal enum ItemType

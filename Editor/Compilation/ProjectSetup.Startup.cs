@@ -9,6 +9,8 @@ using T3.Core.Settings;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Migrations.v4_2;
+using T3.Editor.Migrations.v4_3;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Compilation;
@@ -264,6 +266,10 @@ internal static partial class ProjectSetup
         {
             if (projectInfo is { csProjFile: not null, success: true }&& !projectInfo.csProjFile.IsArchived)
             {
+                // Move legacy root-level operator files into Symbols/ before the project's file
+                // watchers attach and symbol discovery runs - discovery only looks there.
+                ProjectStructure.MigrateIfNeeded(projectInfo.csProjFile);
+
                 var project = new EditableSymbolProject(projectInfo.csProjFile);
                 AddToLoadedPackages(project);
             }

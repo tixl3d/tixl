@@ -2,6 +2,7 @@
 using System.IO;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Settings;
 
 namespace T3.Editor.UiModel;
 
@@ -127,13 +128,16 @@ internal sealed class SymbolPathHandler
     }
 
     /// <summary>
-    /// Maps a namespace to the folder its symbol files live in. Pure path math — unlike the writing
-    /// paths, this does not create the folder, so callers must handle a folder that isn't there yet.
+    /// Maps a namespace to the folder its symbol files live in: the project's Symbols folder plus the
+    /// sub-namespace path. Pure path math — unlike the writing paths, this does not create the folder,
+    /// so callers must handle a folder that isn't there yet.
     /// </summary>
     public static string GetDirectoryForNamespace(string? @namespace, string? rootNamespace, string projectFolder)
     {
         @namespace ??= string.Empty;
         rootNamespace ??= string.Empty;
+
+        var symbolsFolder = Path.Combine(projectFolder, FileLocations.SymbolsSubfolder);
 
         // Strip the root-namespace prefix (case-insensitive — csproj RootNamespace casing may differ from
         // the operators' namespace). Length-strip, not String.Replace, to drop only the prefix.
@@ -142,10 +146,10 @@ internal sealed class SymbolPathHandler
                                   : @namespace;
 
         if (string.IsNullOrWhiteSpace(symbolNamespace) || symbolNamespace == rootNamespace)
-            return projectFolder;
+            return symbolsFolder;
 
         var namespaceParts = symbolNamespace.Split('.').Where(x => x.Length > 0);
-        var subfolders = new[] { projectFolder }.Concat(namespaceParts).ToArray();
+        var subfolders = new[] { symbolsFolder }.Concat(namespaceParts).ToArray();
         return Path.Combine(subfolders);
     }
 

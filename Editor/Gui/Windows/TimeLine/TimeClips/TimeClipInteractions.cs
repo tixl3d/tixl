@@ -15,6 +15,7 @@ using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Migrations.v4_3;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;

@@ -10,10 +10,11 @@ using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Helpers;
 
-namespace T3.Editor.UiModel;
+namespace T3.Editor.Migrations.v4_3;
 
 /// <summary>
 /// Migrates a composition's legacy settings-list audio clips (<c>CompositionSettings.Playback.AudioClips</c>)

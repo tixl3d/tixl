@@ -79,6 +79,35 @@ internal sealed class CsProjectFile
         }
     }
     
+    /// <summary>
+    /// True when the project's operator files live in the Symbols folder (see <see cref="Migrations.v4_3.ProjectStructure"/>).
+    /// Reads without adding the property - a legacy csproj must stay unmarked until it is actually migrated.
+    /// </summary>
+    public bool HasCurrentProjectStructure =>
+        _projectRootElement.GetOrAddProperty(PropertyType.ProjectStructureVersion) == ProjectXml.CurrentProjectStructureVersion;
+
+    /// <summary>
+    /// Rewrites the release content includes for operator files (.t3/.t3ui/.cs) to the Symbols folder,
+    /// stamps the structure version, and saves. Called after the files were physically moved.
+    /// </summary>
+    public void MarkStructureMigratedToSymbolsFolder()
+    {
+        foreach (var item in _projectRootElement.Items)
+        {
+            if (item.ItemType != ItemType.Content.GetItemName())
+                continue;
+
+            var include = item.Include.Replace('\\', '/');
+            if (include is not ("**/*.t3" or "**/*.t3ui" or "**/*.cs"))
+                continue;
+
+            item.Include = FileLocations.SymbolsSubfolder + '/' + include;
+        }
+
+        _projectRootElement.SetOrAddProperty(PropertyType.ProjectStructureVersion, ProjectXml.CurrentProjectStructureVersion);
+        UpdateLastModifiedDate(); // This saves the file
+    }
+
     public DateTime CreatedAt => _fileInfo.CreationTimeUtc;
     public DateTime ModifiedAt => _fileInfo.LastWriteTimeUtc;
 
@@ -455,6 +484,10 @@ internal sealed class CsProjectFile
 
         var projRoot = ProjectXml.CreateNewProjectRootElement(nameSpace, homeId, packageId);
 
+        // Operator files live in the Symbols folder - the only place symbol discovery looks
+        var symbolsDirectory = Path.Combine(destinationDirectory, FileLocations.SymbolsSubfolder);
+        System.IO.Directory.CreateDirectory(symbolsDirectory);
+
         foreach (var file in files)
         {
             var text = File.ReadAllText(file)
@@ -464,7 +497,7 @@ internal sealed class CsProjectFile
                            .Replace(usernamePlaceholder, username)
                            .Replace(shareResourcesPlaceholder, shouldShareResources);
 
-            var destinationFilePath = Path.Combine(destinationDirectory, Path.GetFileName(file))
+            var destinationFilePath = Path.Combine(symbolsDirectory, Path.GetFileName(file))
                                           .Replace(projectNamePlaceholder, projectName)
                                           .Replace(guidPlaceholder, homeGuidString);
 

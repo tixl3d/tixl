@@ -11,6 +11,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.StartupCheck;
+using T3.Editor.Migrations.v4_2;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Thumbnails;

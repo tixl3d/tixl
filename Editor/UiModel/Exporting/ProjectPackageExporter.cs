@@ -23,10 +23,17 @@ namespace T3.Editor.UiModel.Exporting;
 internal static class ProjectPackageExporter
 {
     /// <summary>
-    /// Subdirectories (relative to the project root) that never belong into a shared package.
-    /// .temp holds the project's auto-backups. Import uses the same list to clean a target directory.
+    /// The subdirectories (relative to the project root) that make up a shareable project; everything
+    /// else (bin, obj, .git, .temp backups, exports, stray user files) stays local. The only root-level
+    /// files shipped are the csproj(s). Import uses the same list to clean a target directory.
     /// </summary>
-    public static readonly string[] ExcludedSubdirectories = ["bin", "obj", ".git", ".temp", FileLocations.ExportSubFolder];
+    public static readonly string[] IncludedSubdirectories =
+        [
+            FileLocations.SymbolsSubfolder,
+            FileLocations.AssetsSubfolder,
+            FileLocations.DependenciesFolder,
+            FileLocations.MetaSubFolder,
+        ];
 
     /// <summary>
     /// What a share export would contain: the manifest dependencies, detected cross-project references
@@ -422,28 +429,35 @@ internal static class ProjectPackageExporter
         var projectFolder = Path.GetFullPath(project.Folder);
         var files = new List<(string, string)>();
 
-        foreach (var path in Directory.EnumerateFiles(projectFolder, "*", SearchOption.AllDirectories))
+        // Root level: only the project file(s)
+        foreach (var path in Directory.EnumerateFiles(projectFolder, "*.csproj", SearchOption.TopDirectoryOnly))
         {
             var fullPath = Path.GetFullPath(path);
-            var relativePath = Path.GetRelativePath(projectFolder, fullPath);
+            files.Add((fullPath, Path.GetRelativePath(projectFolder, fullPath)));
+        }
 
-            if (IsInExcludedSubdirectory(relativePath))
+        foreach (var subdirectory in IncludedSubdirectories)
+        {
+            var subdirectoryPath = Path.Combine(projectFolder, subdirectory);
+            if (!Directory.Exists(subdirectoryPath))
                 continue;
 
-            var fileName = Path.GetFileName(relativePath);
-            if (FileLocations.IgnoredFiles.Contains(fileName))
-                continue;
+            foreach (var path in Directory.EnumerateFiles(subdirectoryPath, "*", SearchOption.AllDirectories))
+            {
+                var fullPath = Path.GetFullPath(path);
+                var fileName = Path.GetFileName(fullPath);
 
-            if (fileName.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase))
-                continue;
+                if (FileLocations.IgnoredFiles.Contains(fileName))
+                    continue;
 
-            if (IsGeneratedSidecarFile(fileName))
-                continue;
+                if (IsGeneratedSidecarFile(fileName))
+                    continue;
 
-            if (excludedFiles.Contains(fullPath))
-                continue;
+                if (excludedFiles.Contains(fullPath))
+                    continue;
 
-            files.Add((fullPath, relativePath));
+                files.Add((fullPath, Path.GetRelativePath(projectFolder, fullPath)));
+            }
         }
 
         return files;
@@ -457,18 +471,6 @@ internal static class ProjectPackageExporter
     {
         return fileName.EndsWith(VideoPlayback.ProxySuffix, StringComparison.OrdinalIgnoreCase)
                || fileName.EndsWith(".waveform.png", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool IsInExcludedSubdirectory(string relativePath)
-    {
-        foreach (var excluded in ExcludedSubdirectories)
-        {
-            if (relativePath.StartsWith(excluded + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-                || relativePath.StartsWith(excluded + Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return false;
     }
 
     private static string BuildNuspec(Analysis analysis, Dictionary<string, Version> dependencies)
