@@ -84,7 +84,8 @@ internal sealed class SkillMapCanvas : HexCanvas
 
         GetTopicColorAndStateFade(topic, out var typeColor, out var unlockProgressFade);
         var isHoveredFade = isHovered ? 1f : 0.9f;
-        dl.AddNgonRotated(posOnScreen, radius * 0.95f, typeColor.Fade(isHoveredFade * unlockProgressFade));
+        var isUndefinedFade = string.IsNullOrEmpty(topic.Namespace) ? 0.4f : 1;
+        dl.AddNgonRotated(posOnScreen, radius * 0.95f, typeColor.Fade(isHoveredFade * unlockProgressFade * isUndefinedFade));
 
         var isSelected = selection.Contains(topic);
         if (isSelected)
@@ -101,7 +102,7 @@ internal sealed class SkillMapCanvas : HexCanvas
             
             var targetPos = MapCoordsToScreenPos(targetTopic.MapCoordinate);
             var isLocked = targetTopic.ProgressionState is QuestTopic.ProgressStates.Locked or QuestTopic.ProgressStates.Upcoming;
-            var lockedFade = isLocked ? 0.5f : 1;
+            var lockedFade = isLocked ? 0.6f : 1;
             var delta = posOnScreen - targetPos;
             var direction = Vector2.Normalize(delta);
             var angle = -MathF.Atan2(delta.X, delta.Y) - MathF.PI / 2;
