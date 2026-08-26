@@ -17,7 +17,7 @@ using T3.Editor.Gui;
 using T3.Editor.Gui.Interaction.Camera;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.StartupCheck;
-using T3.Editor.Migrations.v4_2;
+using T3.Editor.Migrations.AssetPaths;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;

@@ -162,7 +162,7 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     /// <summary>
     /// Operator files are discovered only inside the project's Symbols folder. Everything else in the
     /// project directory (helper code, assets, docs) is deliberately ignored by symbol discovery;
-    /// <see cref="Migrations.v4_3.ProjectStructure"/> moves legacy root-level layouts here on load.
+    /// <see cref="Migrations.Steps.To2_SymbolsFolder"/> moves format-V1 root-level layouts here on load.
     /// </summary>
     private IEnumerable<string> FindFilesOfType(string fileExtension)
     {

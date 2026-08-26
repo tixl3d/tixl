@@ -14,7 +14,7 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Helpers;
 
-namespace T3.Editor.Migrations.v4_3;
+namespace T3.Editor.Migrations.AudioClips;
 
 /// <summary>
 /// Migrates a composition's legacy settings-list audio clips (<c>CompositionSettings.Playback.AudioClips</c>)
@@ -26,12 +26,12 @@ namespace T3.Editor.Migrations.v4_3;
 /// carries the main-soundtrack designation) and <c>Style = Waveform</c>. Migrated entries are removed from
 /// the settings list; the ops are the single source of truth afterwards.
 /// </summary>
-internal static class LegacyAudioClipMigration
+internal static class AudioClipsToOps
 {
     /// <summary>Migrates the symbols of all editable projects that still carry settings-list clips.
     /// Read-only packages are left untouched — they can't persist the change, and mutating them would
     /// alter their playback behaviour per launch without a trace on disk.</summary>
-    internal static void MigrateLegacyClipsToOps()
+    internal static void MigrateSettingsClipsToOps()
     {
         foreach (var project in EditableSymbolProject.AllProjects)
         {

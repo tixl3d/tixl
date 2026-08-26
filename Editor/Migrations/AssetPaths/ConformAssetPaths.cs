@@ -12,7 +12,7 @@ using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
 
-namespace T3.Editor.Migrations.v4_2;
+namespace T3.Editor.Migrations.AssetPaths;
 
 internal static class ConformAssetPaths
 {

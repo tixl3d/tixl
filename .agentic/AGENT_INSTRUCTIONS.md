@@ -421,6 +421,34 @@ These comments help the next reviewer (or the same agent on the next turn) under
 
 When picking up a feature mid-phase, treat existing transitional comments as a working state of the prior author's thinking — don't aggressively prune them until the feature is being wrapped up.
 
+## Version-Anchored Naming for Formats, Layouts, and Migrations
+
+Never use relative terms — "legacy", "old", "new", "previous", "modern" — in identifiers, file
+names, or comments that describe a project/file format, disk layout, or serialized shape. Such
+terms are anchored to the moment of writing and lose their meaning at the next format change:
+after two changes there are two different "legacies", and nobody knows which one a name refers to.
+
+- **Name superseded formats by their own version counter** where one exists. Project disk formats
+  are keyed by the csproj's `ProjectFormatVersion` (`ProjectFormat` enum: 1 = root-level operator
+  files, pre-4.3; 2 = `Symbols/` folder). Each format version is a namespace nesting its specific
+  types and helpers: `Editor/Migrations/ProjectFormats/V1/Layout.cs` etc. Comments say
+  "format-V1", not "the old layout".
+- **Where no format counter exists, anchor to the TiXL version boundary**: "projects saved before
+  4.3", `PreV4_3...` — never "older projects".
+- **Project-format migrations are an ordered chain of incremental steps** (Rails-style):
+  `Editor/Migrations/Steps/To<N>_<Name>.cs`, each a `ProjectMigrationStep` carrying its target
+  format, the TiXL version it ships with, and an idempotent `Apply`. `ProjectFormatMigration`
+  walks a project from its stamped (or `FormatHelper`-sniffed) format to `FormatHelper.Current`,
+  pinning one backup first. Shipped steps are frozen history — never edit them; add the next step.
+  Symbol-data migrations that predate the counter (asset paths, variations, audio clips) live in
+  their subject folders outside the chain and are content-gated.
+  Code specific to superseded formats belongs in the `Migrations` namespace, not in steady-state
+  classes — steady-state code should reference it explicitly (greppable, deletable as a unit).
+- **Exception — deliberately moving targets.** Names like `CurrentProjectStructureVersion` or
+  `HasCurrentProjectStructure` are fine: they are *supposed* to track the running editor and
+  change meaning with each release. The rule targets frozen artifacts (a superseded layout, a
+  migration, a backup file), which must carry version-anchored names forever.
+
 ## Interface stability for new features
 
 Before locking in a data format, wire type, or operator parameter set — typically right before a feature ships — pause and audit. Once data lands on user disks and ops land in user projects, every shape change carries migration cost. Optional extension points are cheap today; forced migrations are expensive forever.

@@ -206,7 +206,7 @@ internal static partial class PreviousVersionImport
     }
 
     private static readonly HashSet<string> _projectExcludedDirs =
-        new(UiModel.ProjectLayout.GeneratedStateDirectories, StringComparer.OrdinalIgnoreCase);
+        new(Migrations.ProjectFormats.V1.Layout.GeneratedStateDirectories, StringComparer.OrdinalIgnoreCase);
 
     [GeneratedRegex(@"^TiXL(\d+)\.(\d+)(?:-(.+))?$", RegexOptions.IgnoreCase)]
     private static partial Regex FolderNamePattern();

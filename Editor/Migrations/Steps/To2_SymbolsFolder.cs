@@ -3,45 +3,29 @@ using System.IO;
 using System.Text.RegularExpressions;
 using T3.Core.Settings;
 using T3.Editor.Compilation;
+using T3.Editor.Migrations.ProjectFormats;
 
-namespace T3.Editor.Migrations.v4_3;
+namespace T3.Editor.Migrations.Steps;
 
 /// <summary>
-/// One-way migration of a project directory to the Symbols-folder structure: all operator files
-/// (.t3/.t3ui and their C# sources) move from their legacy root-level namespace directories into
-/// <c>Symbols/</c>, which is the only place symbol discovery looks. Runs silently on load, after a
-/// pinned backup. Built-in packages are skipped - their layout is maintained in the repository.
+/// Format V1 -> V2: all operator files (.t3/.t3ui and their C# sources) move from their root-level
+/// V1 namespace directories into <c>Symbols/</c>, which is the only place symbol discovery looks,
+/// and the csproj's release content includes are rooted there.
 /// </summary>
-internal static partial class ProjectStructure
+internal sealed partial class To2_SymbolsFolder : ProjectMigrationStep
 {
-    public static void MigrateIfNeeded(CsProjectFile csProjectFile)
+    public override ProjectFormat TargetFormat => ProjectFormat.V2;
+    public override Version ShipsWithEditorVersion => new(4, 3, 0);
+    public override string Description => "Move operator files into the Symbols folder";
+
+    public override void Apply(CsProjectFile csProjectFile)
     {
-        if (csProjectFile.HasCurrentProjectStructure)
-            return;
-
         var projectFolder = Path.GetFullPath(csProjectFile.Directory);
-        if (projectFolder.StartsWith(ProjectSetup.BuiltInOperatorDirectory, StringComparison.OrdinalIgnoreCase))
-            return;
+        var movedCount = MoveOperatorFilesIntoSymbolsFolder(projectFolder);
+        RemoveEmptiedDirectories(projectFolder);
+        csProjectFile.MigrateContentIncludesToSymbolsFolder();
 
-        try
-        {
-            if (Gui.AutoBackup.AutoBackup.CreatePinnedBackup(projectFolder, "preSymbolsFolder", out var backupPath))
-            {
-                Log.Info($"Created backup before project structure migration: {backupPath}");
-            }
-
-            var movedCount = MoveOperatorFilesIntoSymbolsFolder(projectFolder);
-            RemoveEmptiedDirectories(projectFolder);
-            csProjectFile.MarkStructureMigratedToSymbolsFolder();
-
-            Log.Info($"Migrated project \"{csProjectFile.Name}\" to the Symbols folder structure ({movedCount} files moved).");
-        }
-        catch (Exception e)
-        {
-            // Leave the project un-stamped so the next start retries; partially moved files are
-            // picked up again (moves are idempotent) and the backup preserves the original state.
-            Log.Error($"Failed to migrate project \"{csProjectFile.Name}\" to the Symbols folder structure: {e}");
-        }
+        Log.Info($"Moved {movedCount} operator files of \"{csProjectFile.Name}\" into the Symbols folder.");
     }
 
     private static int MoveOperatorFilesIntoSymbolsFolder(string projectFolder)
@@ -80,24 +64,13 @@ internal static partial class ProjectStructure
         return movedCount;
     }
 
-    /// <summary>
-    /// Directories that are not legacy symbol locations: the current-layout content folders
-    /// (including the Symbols target itself) and generated state. Media folders like Render/ are
-    /// deliberately swept - a namespace may use those names (Lib's "render" does).
-    /// </summary>
-    private static readonly string[] _skippedSubdirectories =
-        [.. UiModel.ProjectLayout.ContentSubdirectories, .. UiModel.ProjectLayout.GeneratedStateDirectories];
-
     private static bool IsInSkippedSubdirectory(string relativePath)
     {
-        foreach (var skipped in _skippedSubdirectories)
-        {
-            if (relativePath.StartsWith(skipped + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-                || relativePath.StartsWith(skipped + Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
+        var firstSeparator = relativePath.IndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar]);
+        if (firstSeparator < 0)
+            return false; // root-level files (V1 kept the home symbol there) are migration candidates
 
-        return false;
+        return ProjectFormats.V1.Layout.IsContentOrGeneratedDirectory(relativePath[..firstSeparator]);
     }
 
     /// <summary>
@@ -125,7 +98,7 @@ internal static partial class ProjectStructure
         }
         catch (Exception e)
         {
-            Log.Warning($"Can't inspect {path} during project structure migration: {e.Message}");
+            Log.Warning($"Can't inspect {path} during project format migration: {e.Message}");
             return false;
         }
     }

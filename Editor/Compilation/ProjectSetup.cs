@@ -10,7 +10,7 @@ using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
 using T3.Editor.Gui.UiHelpers;
-using T3.Editor.Migrations.v4_3;
+using T3.Editor.Migrations;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Compilation;
@@ -299,7 +299,7 @@ internal static partial class ProjectSetup
             ArchivedProjects.RemoveAll(p => p.ProjectFile == projectFile);
 
             // 2. Initialize the project - archived projects may still use the legacy file layout
-            ProjectStructure.MigrateIfNeeded(projectFile);
+            Migrations.ProjectFormatMigration.MigrateIfNeeded(projectFile);
             var newProject = new EditableSymbolProject(projectFile);
     
             // 3. Register Assets (Missing from your current implementation)

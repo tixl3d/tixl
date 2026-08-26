@@ -9,8 +9,9 @@ using T3.Core.Settings;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
-using T3.Editor.Migrations.v4_2;
-using T3.Editor.Migrations.v4_3;
+using T3.Editor.Migrations.AssetPaths;
+using T3.Editor.Migrations.Variations;
+using T3.Editor.Migrations.AudioClips;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Compilation;
@@ -103,11 +104,11 @@ internal static partial class ProjectSetup
         WarnAboutCorruptedSymbolFiles(allPackages);
 
         // Needs registered symbols to resolve which project owns each variation file
-        VariationsMigration.MigrateLegacyVariationsToPackageMeta();
+        VariationsMigration.MigrateVariationsToPackageMeta();
 
         // Needs the [AudioClip] symbol registered (Lib). In-memory only — persists via the regular
         // save machinery once the user saves the flagged symbols.
-        LegacyAudioClipMigration.MigrateLegacyClipsToOps();
+        AudioClipsToOps.MigrateSettingsClipsToOps();
         var migrationsMs = totalStopwatch.ElapsedMilliseconds;
 
         // Initialize resources and shader linting
@@ -268,7 +269,7 @@ internal static partial class ProjectSetup
             {
                 // Move legacy root-level operator files into Symbols/ before the project's file
                 // watchers attach and symbol discovery runs - discovery only looks there.
-                ProjectStructure.MigrateIfNeeded(projectInfo.csProjFile);
+                Migrations.ProjectFormatMigration.MigrateIfNeeded(projectInfo.csProjFile);
 
                 var project = new EditableSymbolProject(projectInfo.csProjFile);
                 AddToLoadedPackages(project);

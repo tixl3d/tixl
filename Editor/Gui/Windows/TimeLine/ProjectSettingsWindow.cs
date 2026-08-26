@@ -26,7 +26,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.RenderExport;
-using T3.Editor.Migrations.v4_3;
+using T3.Editor.Migrations.AudioClips;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;
@@ -846,7 +846,7 @@ internal sealed class ProjectSettingsWindow : Window
         var symbolUi = composition.GetSymbolUi();
         var commands = new List<ICommand>();
 
-        var addCommand = new AddSymbolChildCommand(symbolUi.Symbol, LegacyAudioClipMigration.AudioClipSymbolId)
+        var addCommand = new AddSymbolChildCommand(symbolUi.Symbol, AudioClipsToOps.AudioClipSymbolId)
                              {
                                  PosOnCanvas = FindPositionForNewSoundtrackOp(symbolUi),
                              };
@@ -856,19 +856,19 @@ internal sealed class ProjectSettingsWindow : Window
         if (symbolUi.Symbol.Children.TryGetValue(addCommand.AddedChildId, out var child))
         {
             var autoPlayCommand = new ChangeInputValueCommand(symbolUi.Symbol, child.Id,
-                                                              child.Inputs[LegacyAudioClipMigration.AutoPlayInputId],
+                                                              child.Inputs[AudioClipsToOps.AutoPlayInputId],
                                                               new InputValue<bool>(true));
             autoPlayCommand.Do();
             commands.Add(autoPlayCommand);
 
             var displayCommand = new ChangeInputValueCommand(symbolUi.Symbol, child.Id,
-                                                             child.Inputs[LegacyAudioClipMigration.DisplayInputId],
+                                                             child.Inputs[AudioClipsToOps.DisplayInputId],
                                                              new InputValue<int>((int)AudioClipDisplay.BackgroundImage));
             displayCommand.Do();
             commands.Add(displayCommand);
 
             var styleCommand = new ChangeInputValueCommand(symbolUi.Symbol, child.Id,
-                                                           child.Inputs[LegacyAudioClipMigration.StyleInputId],
+                                                           child.Inputs[AudioClipsToOps.StyleInputId],
                                                            new InputValue<int>((int)AudioClipStyle.Waveform));
             styleCommand.Do();
             commands.Add(styleCommand);

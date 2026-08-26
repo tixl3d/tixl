@@ -4,7 +4,7 @@ using T3.Core.Settings;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.UiModel;
 
-namespace T3.Editor.Migrations.v4_2;
+namespace T3.Editor.Migrations.Variations;
 
 /// <summary>
 /// Moves variation files from the pre-4.2 locations into the owning project's
@@ -17,7 +17,7 @@ namespace T3.Editor.Migrations.v4_2;
 internal static class VariationsMigration
 {
     /// <summary>Requires all symbol packages to be loaded so symbol ids can be resolved.</summary>
-    internal static void MigrateLegacyVariationsToPackageMeta()
+    internal static void MigrateVariationsToPackageMeta()
     {
         MigrateFolder(Path.Combine(FileLocations.SettingsDirectory, SymbolVariationPool.UserOverlaySubFolder));
         MigrateFolder(Path.Combine(FileLocations.DefaultsSourcePath, SymbolVariationPool.UserOverlaySubFolder));

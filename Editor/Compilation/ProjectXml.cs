@@ -121,7 +121,8 @@ internal static partial class ProjectXml
         propertyGroup.AddProperty(PropertyType.HomeGuid.GetItemName(), homeGuid.ToString());
         propertyGroup.AddProperty(PropertyType.PackageId.GetItemName(), packageId.ToString());
         propertyGroup.AddProperty(PropertyType.AssemblyName.GetItemName(), UnevaluatedVariable(GetItemName(PropertyType.RootNamespace)));
-        propertyGroup.AddProperty(PropertyType.ProjectStructureVersion.GetItemName(), CurrentProjectStructureVersion);
+        propertyGroup.AddProperty(PropertyType.ProjectFormatVersion.GetItemName(),
+                                  ((int)Migrations.ProjectFormats.FormatHelper.Current).ToString());
         propertyGroup.AddProperty("DefaultItemExcludes", @"$(DefaultItemExcludes);Export\**;bin\**;obj\**;.temp\**;.meta\**;Assets\**;Screenshots\**;Render\**");
 
         // Analyzers roughly double compile time and run on every hot-reload compile; Release builds keep them.
@@ -307,12 +308,6 @@ internal static partial class ProjectXml
     }
     #endregion Target Framework
 
-    /// <summary>
-    /// Version "2" marks projects whose operator files live in the Symbols folder; projects without the
-    /// property use the legacy root-level layout and are migrated on load (see <see cref="Migrations.v4_3.ProjectStructure"/>).
-    /// </summary>
-    public const string CurrentProjectStructureVersion = "2";
-
     public static string UnevaluatedVariable(string variableName) => $"$({variableName})";
     public static string UnevaluatedIterator(string variableName) => $"@({variableName})";
 
@@ -496,7 +491,7 @@ internal enum PropertyType
     Deterministic, 
     OutputPath,
     IsArchived,
-    ProjectStructureVersion,
+    ProjectFormatVersion,
 }
 
 internal enum ItemType

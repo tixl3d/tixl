@@ -74,8 +74,8 @@ for `MSBuildProjectExtensionsPath` (same reason as above). Use a `Directory.Buil
 
 ## 3. Migration (user projects)
 
-New migration `Editor/Migrations/v4_x/BuildOutputLocation.cs`, same load-time slot as the
-Symbols migration, gated by bumping `ProjectXml.CurrentProjectStructureVersion` to "3":
+New chain step `Editor/Migrations/Steps/To3_BuildOutputToTemp.cs` (add `V3` to the `ProjectFormat`
+enum and bump `FormatHelper.Current`); the `ProjectFormatMigration` runner applies it in order:
 
 1. Write `Directory.Build.props` (skip if user already has one — then merge or warn, decide).
 2. Delete stale root `bin/` and `obj/` — with tolerance: a running editor may hold loaded

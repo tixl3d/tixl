@@ -54,7 +54,7 @@ Restart the editor.
 
 **Expected:**
 - The project loads normally with no further migration log lines.
-- The csproj contains `<ProjectStructureVersion>2</ProjectStructureVersion>` and
+- The csproj contains `<ProjectFormatVersion>2</ProjectFormatVersion>` and
   its Release content includes start with `Symbols/`.
 
 ## Step: Editing after migration

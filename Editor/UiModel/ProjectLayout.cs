@@ -18,15 +18,4 @@ internal static class ProjectLayout
             FileLocations.DependenciesFolder,
             FileLocations.MetaSubFolder,
         ];
-
-    /// <summary>
-    /// Generated or derived state that is never project content: build output, version control,
-    /// backups/temp, and player exports. Conservative sweeps over legacy layouts skip these; media
-    /// output folders (Render, Screenshots) are deliberately not listed - a legacy project may keep
-    /// a namespace of the same name at its root.
-    /// </summary>
-    public static readonly string[] GeneratedStateDirectories =
-        [
-            "bin", "obj", ".git", ".temp", FileLocations.ExportSubFolder,
-        ];
 }

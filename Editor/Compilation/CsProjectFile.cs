@@ -80,17 +80,34 @@ internal sealed class CsProjectFile
     }
     
     /// <summary>
-    /// True when the project's operator files live in the Symbols folder (see <see cref="Migrations.v4_3.ProjectStructure"/>).
-    /// Reads without adding the property - a legacy csproj must stay unmarked until it is actually migrated.
+    /// The project's on-disk format from the csproj marker, or Unknown when unmarked. Reads without
+    /// adding the property - an unmarked csproj must stay unmarked until it is actually migrated
+    /// (see <see cref="Migrations.ProjectFormatMigration"/>, which sniffs unmarked projects).
     /// </summary>
-    public bool HasCurrentProjectStructure =>
-        _projectRootElement.GetOrAddProperty(PropertyType.ProjectStructureVersion) == ProjectXml.CurrentProjectStructureVersion;
+    public Migrations.ProjectFormats.ProjectFormat ProjectFormat
+    {
+        get
+        {
+            var value = _projectRootElement.GetOrAddProperty(PropertyType.ProjectFormatVersion);
+            return int.TryParse(value, out var version)
+                       ? (Migrations.ProjectFormats.ProjectFormat)version
+                       : Migrations.ProjectFormats.ProjectFormat.Unknown;
+        }
+    }
+
+    /// <summary>Stamps the format marker (removing the pre-release marker name) and saves.</summary>
+    public void SetProjectFormat(Migrations.ProjectFormats.ProjectFormat format)
+    {
+        _projectRootElement.SetOrAddProperty(PropertyType.ProjectFormatVersion, ((int)format).ToString());
+        RemoveProperty("ProjectStructureVersion");
+        UpdateLastModifiedDate(); // This saves the file
+    }
 
     /// <summary>
-    /// Rewrites the release content includes for operator files (.t3/.t3ui/.cs) to the Symbols folder,
-    /// stamps the structure version, and saves. Called after the files were physically moved.
+    /// Format V1 -> V2: rewrites the release content includes for operator files (.t3/.t3ui/.cs) to
+    /// the Symbols folder. Saved by the format stamping that follows in the migration step.
     /// </summary>
-    public void MarkStructureMigratedToSymbolsFolder()
+    public void MigrateContentIncludesToSymbolsFolder()
     {
         foreach (var item in _projectRootElement.Items)
         {
@@ -103,12 +120,21 @@ internal sealed class CsProjectFile
 
             item.Include = FileLocations.SymbolsSubfolder + '/' + include;
 
-            // The old root-level glob needed bin/obj excluded; rooted in Symbols/ they can't match anymore
+            // The V1 root-level glob needed bin/obj excluded; rooted in Symbols/ they can't match anymore
             item.Exclude = string.Empty;
         }
+    }
 
-        _projectRootElement.SetOrAddProperty(PropertyType.ProjectStructureVersion, ProjectXml.CurrentProjectStructureVersion);
-        UpdateLastModifiedDate(); // This saves the file
+    private void RemoveProperty(string propertyName)
+    {
+        foreach (var property in _projectRootElement.Properties)
+        {
+            if (property.Name != propertyName)
+                continue;
+
+            property.Parent.RemoveChild(property);
+            return;
+        }
     }
 
     public DateTime CreatedAt => _fileInfo.CreationTimeUtc;

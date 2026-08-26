@@ -301,37 +301,10 @@ internal static class AutoBackup
         if (!conservativeSweep)
             yield break;
 
-        foreach (var filepath in Directory.EnumerateFiles(projectFolder, "*", SearchOption.AllDirectories))
+        foreach (var filepath in Migrations.ProjectFormats.V1.Layout.EnumerateFilesOutsideContentFolders(projectFolder))
         {
-            var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
-            var firstSeparator = relativePath.IndexOfAny(_pathSeparators);
-            if (firstSeparator < 0)
-                continue; // root files: only the csprojs already yielded above belong in a backup
-
-            var topDirectory = relativePath[..firstSeparator];
-            if (IsAllowlistedOrGeneratedDirectory(topDirectory))
-                continue;
-
             yield return filepath;
         }
-    }
-
-    /// <summary>Top-level folders the conservative sweep skips: already covered by the allowlist, or generated state.</summary>
-    private static bool IsAllowlistedOrGeneratedDirectory(string topDirectory)
-    {
-        foreach (var subdirectory in ProjectLayout.ContentSubdirectories)
-        {
-            if (string.Equals(topDirectory, subdirectory, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        foreach (var generated in ProjectLayout.GeneratedStateDirectories)
-        {
-            if (string.Equals(topDirectory, generated, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return false;
     }
 
     /// <summary>
@@ -892,7 +865,6 @@ internal static class AutoBackup
         @"^#(\d{5})-(\d{4})_(\d{2})_(\d{2})-(\d{2})_(\d{2})_(\d{2})_(\d{3})(-minimal)?(-keep-[A-Za-z0-9.]+)?\.zip$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly char[] _pathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
 
     // Relative-path prefixes (OS separator). ".meta/" data (variations) is kept even in minimal
     // backups; ".meta/Thumbnails/" is regenerable and kept only in full backups.
