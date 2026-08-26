@@ -109,7 +109,9 @@ internal static class TourInteraction
                                                                       typeWriterProgress).ToString();
 
                 EnsureMarkdownView();
-                _markdown.Draw(textToRender);
+                _markdown.Draw(textToRender,
+                               onOperatorRef: static op => MarkdownOperatorLinks.HandleOperatorRef(op),
+                               operatorColor: MarkdownOperatorLinks.GetOperatorColor);
             }
 
             if (typeWriterProgress >= 1 && !isDotHovered)
