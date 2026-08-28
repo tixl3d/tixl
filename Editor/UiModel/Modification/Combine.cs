@@ -2,7 +2,10 @@ using System.Text;
 using T3.Core.DataTypes;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 using T3.Core.SystemUi;
+using T3.Editor.Gui.Interaction.Variations;
+using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.SystemUi;
 using T3.Editor.UiModel.Commands;
@@ -220,6 +223,8 @@ internal static class Combine
         if (shouldBeTimeClip)
             InitSourceExtentFromContent(newSymbolUi);
 
+        MoveSnapshotsToNewSymbol(parentCompositionSymbol.Id, newSymbol.Id, oldToNewIdMap);
+
         var selectedChildrenIds = (from child in selectedChildUis select child.Id).ToList();
         parentCompositionSymbol.Animator.RemoveAnimationsFromInstances(selectedChildrenIds);
 
@@ -288,6 +293,8 @@ internal static class Combine
             deleteSectionCommand.Do();
         }
 
+        RemoveUnusedSnapshotsFromParent(parentCompositionSymbol);
+
         // Creating a new symbol/assembly can't be cleanly undone (undoing the children delete would
         // orphan the new operator), so drop the history rather than leave it inconsistent.
         UndoRedoStack.Clear();
@@ -318,6 +325,105 @@ internal static class Combine
         }
 
         return new ImRect(min, max);
+    }
+
+    /// <summary>
+    /// Moves the parent composition's snapshot data for the combined children into the new symbol's
+    /// variation pool. Parameter sets are re-keyed from the old child ids to the copied children's new
+    /// ids; variation ids, titles and activation indices are kept so the moved snapshots stay
+    /// recognizable next to their originals. Pruning the parent's now-dangling entries is left to
+    /// <see cref="RemoveUnusedSnapshotsFromParent"/>, which runs after the originals are deleted.
+    /// </summary>
+    private static void MoveSnapshotsToNewSymbol(Guid parentSymbolId, Guid newSymbolId, Dictionary<Guid, Guid> oldToNewIdMap)
+    {
+        // Only user variations can move — a combinable composition lives in an editable project,
+        // so read-only package defaults don't apply here.
+        var parentPool = VariationHandling.GetOrLoadVariations(parentSymbolId);
+        if (parentPool.UserVariations.Count == 0)
+            return;
+
+        var newPool = VariationHandling.GetOrLoadVariations(newSymbolId);
+        var movedAny = false;
+
+        foreach (var variation in parentPool.UserVariations)
+        {
+            // Collect the moved parameter sets from a clone so the values don't stay shared between pools.
+            var movedVariation = variation.Clone();
+            var movedSets = new Dictionary<Guid, Dictionary<Guid, InputValue>>();
+            foreach (var (childId, parameterSet) in movedVariation.ParameterSetsForChildIds)
+            {
+                if (oldToNewIdMap.TryGetValue(childId, out var newChildId))
+                {
+                    movedSets[newChildId] = parameterSet;
+                }
+            }
+
+            if (movedSets.Count == 0)
+                continue;
+
+            movedVariation.ParameterSetsForChildIds = movedSets;
+            newPool.AddUserVariation(movedVariation);
+            movedAny = true;
+        }
+
+        if (movedAny)
+            newPool.SaveVariationsToFile();
+    }
+
+    /// <summary>
+    /// Strips snapshot entries that reference children no longer present in the parent composition and
+    /// removes snapshots that end up with no entries at all. Catches both the children just replaced by
+    /// the combine and entries that were already stale from earlier deletions. Presets (keyed by
+    /// Guid.Empty for the composition's own inputs) are untouched. Must run after the combined
+    /// originals were deleted from the parent.
+    /// </summary>
+    private static void RemoveUnusedSnapshotsFromParent(Symbol parentSymbol)
+    {
+        var parentPool = VariationHandling.GetOrLoadVariations(parentSymbol.Id);
+        List<Variation> unusedVariations = null;
+        var poolModified = false;
+
+        foreach (var variation in parentPool.UserVariations)
+        {
+            List<Guid> danglingChildIds = null;
+            foreach (var childId in variation.ParameterSetsForChildIds.Keys)
+            {
+                if (childId == Guid.Empty || parentSymbol.Children.ContainsKey(childId))
+                    continue;
+
+                danglingChildIds ??= [];
+                danglingChildIds.Add(childId);
+            }
+
+            if (danglingChildIds == null)
+                continue;
+
+            foreach (var childId in danglingChildIds)
+            {
+                variation.ParameterSetsForChildIds.Remove(childId);
+            }
+
+            poolModified = true;
+
+            if (variation.ParameterSetsForChildIds.Count == 0)
+            {
+                unusedVariations ??= [];
+                unusedVariations.Add(variation);
+            }
+        }
+
+        if (!poolModified)
+            return;
+
+        if (unusedVariations != null)
+        {
+            foreach (var variation in unusedVariations)
+            {
+                parentPool.RemoveUserVariation(variation);
+            }
+        }
+
+        parentPool.SaveVariationsToFile();
     }
 
     /// <summary>
