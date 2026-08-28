@@ -33,14 +33,16 @@ namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 /// </summary>
 internal static class TimelineClipDrop
 {
-    public static void Handle(Instance compositionOp, TimeLineCanvas timeCanvas, float layerTopY, int minLayerIndex)
+    public static void Handle(Instance compositionOp, TimeLineCanvas timeCanvas, float layerTopY, int minLayerIndex,
+                              ImRect dropRegion, int maxLayerIndex)
     {
-        // AssetLibrary drag — payload is an asset address; already imported.
-        var assetResult = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.FileAsset, out var address);
+        // AssetLibrary drag — payload is an asset address; already imported. The drop zone is the whole
+        // timeline region (not just the drawn layer rows), so files land as clips wherever they're dropped.
+        var assetResult = DragAndDropHandling.TryHandleDropOnRect(DragAndDropHandling.DragTypes.FileAsset, dropRegion, out var address);
         if (assetResult == DragAndDropHandling.DragInteractionResult.Dropped && !string.IsNullOrEmpty(address))
         {
             if (AssetRegistry.TryGetAsset(address, out var asset) && asset.AssetType.TimelineClipOperator is { } opId
-                && TryComputeDrop(timeCanvas, layerTopY, minLayerIndex, out var dropBars, out var dropLayer, out var playback))
+                && TryComputeDrop(timeCanvas, layerTopY, minLayerIndex, maxLayerIndex, out var dropBars, out var dropLayer, out var playback))
             {
                 var macro = new MacroCommand("Drop timeline clip");
                 CreateClipOp(compositionOp, macro, opId, asset.Address, asset.FullPath, dropBars, dropLayer, playback);
@@ -52,12 +54,12 @@ internal static class TimelineClipDrop
         // While dragging over the timeline, preview where the clip will land and how long it will be.
         if (assetResult == DragAndDropHandling.DragInteractionResult.Hovering && !string.IsNullOrEmpty(address))
         {
-            DrawDropPreview(compositionOp, timeCanvas, layerTopY, minLayerIndex, address);
+            DrawDropPreview(compositionOp, timeCanvas, layerTopY, minLayerIndex, maxLayerIndex, address);
             return;
         }
 
         // External OS-file drag — import each (only files whose type is timeline-droppable).
-        var fileResult = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.ExternalFile, out var data);
+        var fileResult = DragAndDropHandling.TryHandleDropOnRect(DragAndDropHandling.DragTypes.ExternalFile, dropRegion, out var data);
         if (fileResult != DragAndDropHandling.DragInteractionResult.Dropped || string.IsNullOrEmpty(data))
             return;
 
@@ -67,7 +69,7 @@ internal static class TimelineClipDrop
             Log.Warning("Cannot resolve composition's resource package for timeline clip drop.");
             return;
         }
-        if (!TryComputeDrop(timeCanvas, layerTopY, minLayerIndex, out var bars, out var layer, out var pb))
+        if (!TryComputeDrop(timeCanvas, layerTopY, minLayerIndex, maxLayerIndex, out var bars, out var layer, out var pb))
             return;
 
         var fileMacro = new MacroCommand("Drop timeline clips");
@@ -76,7 +78,7 @@ internal static class TimelineClipDrop
         {
             if (!AssetType.TryGetForFilePath(path, out var assetType, out _) || assetType.TimelineClipOperator is not { } fileOpId)
                 continue;
-            if (!FileImport.TryImportDroppedFile(path, package, subfolder: null, out var asset))
+            if (!FileImport.TryImportDroppedFile(path, package, destinationFolder: null, out var asset))
             {
                 Log.Warning($"Failed to import dropped file: {path}");
                 continue;
@@ -97,10 +99,10 @@ internal static class TimelineClipDrop
     /// the asset's real duration (audio/video probed once via the async caches, others a placeholder). Mirrors
     /// what <see cref="CreateClipOp"/> initialises so the drag previews the actual result.
     /// </summary>
-    private static void DrawDropPreview(Instance compositionOp, TimeLineCanvas timeCanvas, float layerTopY, int minLayerIndex, string address)
+    private static void DrawDropPreview(Instance compositionOp, TimeLineCanvas timeCanvas, float layerTopY, int minLayerIndex, int maxLayerIndex, string address)
     {
         if (!AssetRegistry.TryGetAsset(address, out var asset) || asset.AssetType.TimelineClipOperator is null
-            || !TryComputeDrop(timeCanvas, layerTopY, minLayerIndex, out var dropBars, out var dropLayer, out var playback))
+            || !TryComputeDrop(timeCanvas, layerTopY, minLayerIndex, maxLayerIndex, out var dropBars, out var dropLayer, out var playback))
             return;
 
         // Probe via the async per-asset caches so the drag never blocks on a file open; until the probe lands
@@ -155,7 +157,14 @@ internal static class TimelineClipDrop
         if (!compositionOp.Symbol.Children.TryGetValue(childId, out var symbolChild))
             return;
 
-        var durationBars = ProbeDurationBars(assetFullPath, playback);
+        var durationSecs = ProbeDurationSecs(assetFullPath);
+        var durationBars = durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
+
+        // Content clips (video, audio) keep their source range in seconds; other clip ops in bars.
+        var isContentClip = typeof(IContentTimeClip).IsAssignableFrom(symbolChild.Symbol.InstanceType);
+        var sourceDuration = isContentClip
+                                 ? (durationSecs > 0 ? (float)durationSecs : (float)playback.SecondsFromBars(durationBars))
+                                 : durationBars;
 
         // Init the op's TimeClip output data in place. AddSymbolChildCommand.Undo removes the child
         // outright, so this mutation doesn't need its own undo entry.
@@ -164,7 +173,7 @@ internal static class TimelineClipDrop
             if (output.OutputData is TimeClip tc)
             {
                 tc.TimeRange = new TimeRange(startBars, startBars + durationBars);
-                tc.SourceRange = new TimeRange(0f, durationBars);
+                tc.SourceRange = new TimeRange(0f, sourceDuration);
                 tc.LayerIndex = layer;
                 break;
             }
@@ -185,7 +194,7 @@ internal static class TimelineClipDrop
         }
     }
 
-    private static bool TryComputeDrop(TimeLineCanvas timeCanvas, float layerTopY, int minLayerIndex,
+    private static bool TryComputeDrop(TimeLineCanvas timeCanvas, float layerTopY, int minLayerIndex, int maxLayerIndex,
                                        out float dropBars, out int dropLayer, out Playback playback)
     {
         dropBars = 0;
@@ -202,14 +211,19 @@ internal static class TimelineClipDrop
         dropLayer = minLayerIndex == int.MaxValue
                         ? 0
                         : minLayerIndex + (int)Math.Round((mousePos.Y - layerTopY - ClipArea.LayerHeight * 0.5f) / ClipArea.LayerHeight);
+
+        // The drop zone spans the whole timeline, so a drop far below the rows would compute a distant
+        // layer — clamp to just below the existing ones instead.
+        if (maxLayerIndex != int.MinValue && minLayerIndex != int.MaxValue)
+            dropLayer = Math.Clamp(dropLayer, minLayerIndex - 1, maxLayerIndex + 1);
         return true;
     }
 
     /// <summary>
-    /// Initial clip length in bars. Audio, video and MIDI are probed for their real duration so the clip
-    /// matches the file; types with no probe (e.g. data) default to a placeholder.
+    /// Real duration of the dropped file in seconds — audio, video and MIDI are probed; types with no
+    /// probe (e.g. data) return 0 so the caller falls back to a placeholder length.
     /// </summary>
-    private static float ProbeDurationBars(string absolutePath, Playback playback)
+    private static double ProbeDurationSecs(string absolutePath)
     {
         // MIDI goes first: the audio probe logs a FileFormat warning for non-audio files.
         var durationSecs = TryProbeMidiDurationSecs(absolutePath);
@@ -225,12 +239,12 @@ internal static class TimelineClipDrop
             durationSecs = videoSecs;
         }
 
-        return durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
+        return durationSecs;
     }
 
     /// <summary>
     /// Duration of a .mid/.midi file in seconds, or 0 for non-MIDI paths. The converter caches by
-    /// (path, last-write), so the parse cost is paid once and shared with the LoadMidiFile op the
+    /// (path, last-write), so the parse cost is paid once and shared with the MidiClip op the
     /// drop creates.
     /// </summary>
     private static double TryProbeMidiDurationSecs(string absolutePath)

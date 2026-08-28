@@ -1,0 +1,94 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "b8d65fc0-1e42-4c8a-9f31-0ab1cd2e0600"/*AudioCompressor*/,
+  "Description": "Adds a compressor to the audio flowing through it, evening out dynamics.\n\nEverything wired into Input shares the effect: the routing [AudioBus] gives this node its own submix with a DX8 compressor insert. Volume folds into the contained sources like a [CombineAudio].\n\nThreshold is the linear level (like the meter ops) above which compression kicks in, Ratio how strongly levels above it are reduced, Attack/Release the reaction times in seconds, and MakeupGainDb boosts the compressed result back up.\n\nLike every node in the audio graph, this is only heard once the chain reaches an [AudioBus] that is itself being evaluated — pinned to an output window, or wired into the render chain. A chain that ends nowhere is silent.",
+  "InputUis": [
+    {
+      "InputId": "b8d65fc0-0002-4c8a-9f31-0ab1cd2e0600"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "b8d65fc0-0003-4c8a-9f31-0ab1cd2e0600"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "b8d65fc0-0004-4c8a-9f31-0ab1cd2e0600"/*Threshold*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "b8d65fc0-0005-4c8a-9f31-0ab1cd2e0600"/*Ratio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Min": 1.0,
+      "Max": 100.0,
+      "Scale": 0.1,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "b8d65fc0-0006-4c8a-9f31-0ab1cd2e0600"/*Attack*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Min": 0.0001,
+      "Max": 0.5,
+      "Scale": 0.0001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "b8d65fc0-0007-4c8a-9f31-0ab1cd2e0600"/*Release*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Min": 0.05,
+      "Max": 3.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "b8d65fc0-0008-4c8a-9f31-0ab1cd2e0600"/*MakeupGainDb*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      },
+      "Min": -60.0,
+      "Max": 60.0,
+      "Scale": 0.1,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b8d65fc0-0001-4c8a-9f31-0ab1cd2e0600"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

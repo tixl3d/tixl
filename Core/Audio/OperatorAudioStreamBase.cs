@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.IO;
 using System.Linq;
@@ -82,6 +82,30 @@ public abstract class OperatorAudioStreamBase
     /// Indicates whether the stream is muted by user request.
     /// </summary>
     private bool IsUserMuted;
+
+    /// <summary>
+    /// Set while an [AudioBus] owns this stream's level — i.e. it is routed into the audio processing graph,
+    /// which applies the per-source gain itself. The engine must then leave <c>ChannelAttribute.Volume</c>
+    /// alone; writing it too would have the two fighting over the same attribute every frame.
+    /// </summary>
+    internal bool GraphOwnsVolume;
+
+    /// <summary>
+    /// Re-joins <paramref name="mixerHandle"/> if nothing holds this channel any more — which happens when the
+    /// graph routed it into a bus submix and then stopped (unwired, or the bus was deleted). Restores the
+    /// paused flag to match the stream's own state rather than assuming silence.
+    /// </summary>
+    internal void ReclaimMixerMembership(int mixerHandle)
+    {
+        if (mixerHandle == 0 || StreamHandle == 0 || BassMix.ChannelGetMixer(StreamHandle) != 0)
+            return;
+
+        if (!BassMix.MixerAddChannel(mixerHandle, StreamHandle, BassFlags.MixerChanBuffer))
+            return;
+
+        if (!IsPlaying || IsPaused)
+            BassMix.ChannelFlags(StreamHandle, BassFlags.MixerChanPause, BassFlags.MixerChanPause);
+    }
 
     /// <summary>
     /// The audio level during export, if available.
@@ -168,7 +192,7 @@ public abstract class OperatorAudioStreamBase
         IsPaused = false;
         
         // Restore volume (PrepareForExport sets it to 0, and SetStale needs IsPlaying=true)
-        if (!IsUserMuted)
+        if (!IsUserMuted && !GraphOwnsVolume)
         {
             Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume, CurrentVolume);
         }
@@ -241,7 +265,7 @@ public abstract class OperatorAudioStreamBase
             // Un-pause the stream when it becomes non-stale
             BassMix.ChannelFlags(StreamHandle, 0, BassFlags.MixerChanPause);
             
-            if (IsPlaying && !IsPaused && !IsUserMuted)
+            if (IsPlaying && !IsPaused && !IsUserMuted && !GraphOwnsVolume)
             {
                 Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume, CurrentVolume);
             }
@@ -258,7 +282,7 @@ public abstract class OperatorAudioStreamBase
         CurrentVolume = volume;
         IsUserMuted = mute;
 
-        if (!IsPlaying) return;
+        if (!IsPlaying || GraphOwnsVolume) return;
 
         float finalVolume = (!mute && !IsStaleStopped) ? volume : 0.0f;
         Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume, finalVolume);
@@ -300,7 +324,7 @@ public abstract class OperatorAudioStreamBase
         BassMix.ChannelSetPosition(StreamHandle, resetPosition, PositionFlags.Bytes | PositionFlags.MixerReset);
         BassMix.ChannelFlags(StreamHandle, 0, BassFlags.MixerChanPause);
 
-        if (!IsUserMuted)
+        if (!IsUserMuted && !GraphOwnsVolume)
             Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume, CurrentVolume);
 
         IsPlaying = true;

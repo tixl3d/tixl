@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "7379a5ac-f864-4386-84bf-4a5c50882a7f"/*Me01d_MergedVertices*/,
+  "Description": "Merged Vertices",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "09171212-3a52-464a-b4e7-91a0118ab9ea"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "293298ad-eccf-4a21-8bb5-536b8d459a30"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "cbb9644f-028a-4576-aa24-9f7da7209267"/*Text*/,
+      "SectionId": "6f01bb95-5250-4132-a018-47845317fef8",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ef39869b-c4b2-4f36-8491-58904fa249c9"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "6f01bb95-5250-4132-a018-47845317fef8",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "474bdb6e-7ec4-408b-97f7-bfcc6ffcee27",
+      "Description": "For best performance, TiXL reuses vertices whenever possible.\nVertices that occupy the same position are shared between faces."
+    },
+    {
+      "Id": "ba8ad31b-d76c-46ca-be47-2e5544f05c3f",
+      "Description": "In this plane, a [Scatter] effect is applied.\nIt does not behave as expected because vertices between adjacent faces are shared.\nSince the vertices are the same, gaps cannot form between faces."
+    },
+    {
+      "Id": "ca3f9e3b-f21e-4cc7-bf58-32ca9a8c5e6e",
+      "Description": "To fix this, the [SplitVertices] operator can be used."
+    },
+    {
+      "Id": "9526e2b1-4219-4342-a8ae-9ec02a08a6d8",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

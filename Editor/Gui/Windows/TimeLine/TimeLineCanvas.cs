@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -40,7 +40,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         _timelineCurveEditArea = new TimelineCurveEditor(this, SnapHandlerForU, SnapHandlerForV);
         _timeSelectionRange = new TimeSelectionRange(this, SnapHandlerForU);
         _selectionRangeIndicator = new SelectionRangeIndicator(this, SnapHandlerForU);
-        _timeSelectionArea = new TimeSelectionArea(this);
+        _sourceExtentEditor = new SourceExtentEditor(this);
+        _keySetStrip = new KeySetStrip(this);
         ClipArea = new ClipArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
         _curveEditCanvas = new InlineCurveArea(this, _timelineCurveEditArea, _horizontalRaster);
         _inlineDataClipArea = new InlineDataClipArea(this);
@@ -53,6 +54,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         SnapHandlerForU.AddSnapAttractor(_currentTimeMarker);
         SnapHandlerForU.AddSnapAttractor(ClipArea);
         SnapHandlerForU.AddSnapAttractor(_selectionRangeIndicator);
+        SnapHandlerForU.AddSnapAttractor(_sourceExtentEditor);
         _selectionDragSnapExclusions = [_selectionRangeIndicator];
 
         KeyframeEditors = new KeyframeEditorGroup(_activeKeyframeEditors);
@@ -71,7 +73,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     /// <summary>
     /// Every currently-active animation-parameter editor on the timeline. Today this is always
     /// a single editor (DopeSheetArea in DopeView mode, TimelineCurveEditor in CurveEditor mode);
-    /// future split-view will expose both simultaneously. Cross-mode components (SRI, TimeSelectionArea,
+    /// future split-view will expose both simultaneously. Cross-mode components (SRI, KeySetStrip,
     /// TimeWarpDrag) aggregate through <see cref="KeyframeEditors"/> so they don't need to pick one.
     /// </summary>
     public readonly KeyframeEditorGroup KeyframeEditors;
@@ -84,8 +86,18 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     public NodeSelection NodeSelection => _nodeSelection;
 
-    private int RulerHeight => (int)(28 * T3Ui.UiScaleFactor);
-    private int SummaryHeight => (int)(11 * T3Ui.UiScaleFactor);
+    /// <summary>
+    /// Selection-range edge drag: keyframes stretch about the fixed end, while time clips are trimmed to
+    /// the dragged boundary instead of stretched — their speed and source mapping stay intact.
+    /// </summary>
+    public void UpdateSelectionRangeEdgeDrag(double scaleU, double originU, double boundaryU, double origBoundaryU, bool isStart)
+    {
+        KeyframeEditors.UpdateDragStretchCommand(scaleU, 1, originU, 0);
+        ClipArea.TrimSelectedClipsToBoundary(boundaryU, origBoundaryU, isStart);
+    }
+
+    private int RulerHeight => (int)(33 * T3Ui.UiScaleFactor);
+    private int KeySetStripHeight => (int)(11 * T3Ui.UiScaleFactor);
 
     public void Draw(ProjectView projectView, Playback playback)
     {
@@ -104,6 +116,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         var keepScale = T3Ui.UiScaleFactor;
 
         ScrollToTimeAfterStopped();
+        KeepPlayheadInView();
 
         var modeChanged = UpdateMode();
         SyncInlineCurveEditorRegistration();
@@ -136,6 +149,12 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
         void DrawCanvasContent(InteractionState interactionState)
         {
+            // Panning hands view control to the user: follow-playback scrolling stays suspended until
+            // playback is (re)started, which re-arms it. Zooming deliberately does NOT suspend — changing
+            // the zoom level while the view keeps tracking the playhead is a common way to adjust context.
+            if (interactionState.UserPannedCanvas)
+                _followPlaybackSuspended = true;
+
             // Cross-view hover state is rebuilt each frame by whichever renderer's hit-test
             // sets it. Stale values would leak hover fade to the next frame on mouse-exit.
             HoveredParameterHash = null;
@@ -154,16 +173,17 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             {
                 ImGui.BeginChild("##ruler", new Vector2(0,RulerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
                 DrawTimeRuler(interactionState.MouseState.Position.X);
+                _sourceExtentEditor.Draw(compositionOp, ImGui.GetWindowDrawList());
                 _selectionRangeIndicator.Draw(compositionOp, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
             }
 
 
-            // Selection Area (summary strip below ruler)
+            // KeySet strip (keyframe-cluster indicators below the ruler)
             {
                 ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.GridLines.Fade(0.20f).Rgba);
-                ImGui.BeginChild("##selectionArea", new Vector2(0,SummaryHeight));
-                _timeSelectionArea.Draw(compositionOp, _selectedAnimationParameters, KeyframeEditors, ImGui.GetWindowDrawList());
+                ImGui.BeginChild("##keySetStrip", new Vector2(0,KeySetStripHeight));
+                _keySetStrip.Draw(compositionOp, _selectedAnimationParameters, KeyframeEditors, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
                 ImGui.PopStyleColor();
             }
@@ -209,6 +229,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                                              | ImGuiWindowFlags.NoScrollWithMouse);
                             var dopeContentStartY = ImGui.GetCursorScreenPos().Y;
                             ClipArea.Draw(compositionOp, Playback, SnapHandlerForU);
+                            _currentTimeMarker.DrawLineInCurrentWindow(Playback.TimeInBars, this);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
 
                             // Dope-local fence — outer fence is suppressed while the
@@ -242,6 +263,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                         else
                         {
                             ClipArea.Draw(compositionOp, Playback, SnapHandlerForU);
+                            _currentTimeMarker.DrawLineInCurrentWindow(Playback.TimeInBars, this);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
                         }
                         break;
@@ -269,7 +291,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 }
                 else if (compositionTimeClip != null)
                 {
-                    _clipRange.Draw(this, compositionTimeClip, Drawlist, SnapHandlerForU);
+                    _clipRange.Draw(this, compositionTimeClip, Drawlist);
                 }
 
                 // When the details pane is up, the top-pane child already handles its
@@ -443,6 +465,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     private void HandleDeferredActions()
     {
+        if (UserActionRegistry.WasActionQueued(UserActions.PlaybackJumpToStartTime))
+        {
+            CenterCurrentTimeIfNotVisible();
+        }
+
         if (UserActionRegistry.WasActionQueued(UserActions.PlaybackJumpToNextKeyframe))
         {
             var bestNextTime = double.PositiveInfinity;
@@ -450,19 +477,44 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             var time = Playback.TimeInBars + 0.001f;
             foreach (var next in _selectedAnimationParameters)
             {
+                // Curves live in the op's local time — search there, then compare candidates at the
+                // playback time the key takes effect, so jumps land where playback reads the key.
+                var localTime = Animator.GetLocalAnimationTime(next.Instance, time);
                 foreach (var curve in next.Curves)
                 {
-                    if (!curve.TryGetNextKey(time, out var key)
-                        || key.U > bestNextTime)
+                    if (!curve.TryGetNextKey(localTime, out var key))
+                        continue;
+
+                    var keyPlaybackTime = Animator.GetGlobalAnimationTime(next.Instance, key.U);
+                    if (keyPlaybackTime <= time || keyPlaybackTime > bestNextTime)
                         continue;
 
                     foundNext = true;
-                    bestNextTime = key.U;
+                    bestNextTime = keyPlaybackTime;
+                }
+            }
+
+            // Clip starts and ends are jump targets too — stepping through cuts with . and ,
+            foreach (var clip in ClipArea.AllTimeClips)
+            {
+                if (clip.TimeRange.Start > time && clip.TimeRange.Start < bestNextTime)
+                {
+                    foundNext = true;
+                    bestNextTime = clip.TimeRange.Start;
+                }
+
+                if (clip.TimeRange.End > time && clip.TimeRange.End < bestNextTime)
+                {
+                    foundNext = true;
+                    bestNextTime = clip.TimeRange.End;
                 }
             }
 
             if (foundNext)
+            {
                 Playback.TimeInBars = bestNextTime;
+                CenterCurrentTimeIfNotVisible();
+            }
         }
 
         if (UserActionRegistry.WasActionQueued(UserActions.PlaybackJumpToPreviousKeyframe))
@@ -473,19 +525,42 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             var time = Playback.TimeInBars - 0.001f;
             foreach (var next in _selectedAnimationParameters)
             {
+                var localTime = Animator.GetLocalAnimationTime(next.Instance, time);
                 foreach (var curve in next.Curves)
                 {
-                    if (!curve.TryGetPreviousKey(time, out var key)
-                        || key.U < bestPreviousTime)
+                    if (!curve.TryGetPreviousKey(localTime, out var key))
+                        continue;
+
+                    var keyPlaybackTime = Animator.GetGlobalAnimationTime(next.Instance, key.U);
+                    if (keyPlaybackTime >= time || keyPlaybackTime < bestPreviousTime)
                         continue;
 
                     foundNext = true;
-                    bestPreviousTime = key.U;
+                    bestPreviousTime = keyPlaybackTime;
+                }
+            }
+
+            // Clip starts and ends are jump targets too — stepping through cuts with . and ,
+            foreach (var clip in ClipArea.AllTimeClips)
+            {
+                if (clip.TimeRange.Start < time && clip.TimeRange.Start > bestPreviousTime)
+                {
+                    foundNext = true;
+                    bestPreviousTime = clip.TimeRange.Start;
+                }
+
+                if (clip.TimeRange.End < time && clip.TimeRange.End > bestPreviousTime)
+                {
+                    foundNext = true;
+                    bestPreviousTime = clip.TimeRange.End;
                 }
             }
 
             if (foundNext)
+            {
                 Playback.TimeInBars = bestPreviousTime;
+                CenterCurrentTimeIfNotVisible();
+            }
         }
     }
 
@@ -523,27 +598,69 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         ImGui.SetCursorPos(Vector2.Zero);
     }
 
+    /// <summary>
+    /// While playing, keeps the time marker inside the middle 60% of the view: once it crosses the
+    /// 20%-padding edge in the playback direction, the canvas scrolls along (ScrollTarget smoothing
+    /// makes it glide). Panning or zooming suspends the follow (user-controlled view) until playback
+    /// is started again.
+    /// </summary>
+    private void KeepPlayheadInView()
+    {
+        if (!UserSettings.Config.TimelineFollowsPlayback || _followPlaybackSuspended)
+            return;
+
+        if (Math.Abs(Playback.PlaybackSpeed) < 0.01f)
+            return;
+
+        var markerX = TransformX((float)Playback.TimeInBars);
+        var leftEdge = WindowPos.X + WindowSize.X * 0.2f;
+        var rightEdge = WindowPos.X + WindowSize.X * 0.8f;
+
+        if (markerX > rightEdge)
+        {
+            ScrollTarget.X += InverseTransformDirection(new Vector2(markerX - rightEdge, 0)).X;
+        }
+        else if (markerX < leftEdge && Playback.PlaybackSpeed < 0)
+        {
+            ScrollTarget.X -= InverseTransformDirection(new Vector2(leftEdge - markerX, 0)).X;
+        }
+    }
+
     private void ScrollToTimeAfterStopped()
     {
         var isPlaying = Math.Abs(Playback.PlaybackSpeed) > 0.01f;
         var wasPlaying = Math.Abs(_lastPlaybackSpeed) > 0.01f;
 
+        // Starting playback (space, transport icon, hotkeys — any stop→play transition) re-arms the
+        // follow-playback scrolling that a manual pan/zoom suspended.
+        if (isPlaying && !wasPlaying)
+        {
+            _followPlaybackSuspended = false;
+        }
+
         if (!isPlaying && wasPlaying)
         {
-            if (!IsCurrentTimeVisible())
-            {
-                // assume we are not scrolling, what screen position would the playhead be at?
-                var oldScroll = Scroll;
-                Scroll = new Vector2(0, Scroll.Y);
-                var posScreen = TransformX((float)Playback.TimeInBars);
-                // position that playhead in the center of the window
-                ScrollTarget.X = InverseTransformX(posScreen - WindowSize.X * 0.5f);
-                // restore old state of scrolling
-                Scroll = oldScroll;
-            }
+            CenterCurrentTimeIfNotVisible();
         }
 
         _lastPlaybackSpeed = Playback.PlaybackSpeed;
+    }
+
+    /// <summary>Scrolls the view so the current playback time sits centered — only when it isn't visible,
+    /// so it never disturbs a view the user framed deliberately.</summary>
+    private void CenterCurrentTimeIfNotVisible()
+    {
+        if (IsCurrentTimeVisible())
+            return;
+
+        // assume we are not scrolling, what screen position would the playhead be at?
+        var oldScroll = Scroll;
+        Scroll = new Vector2(0, Scroll.Y);
+        var posScreen = TransformX((float)Playback.TimeInBars);
+        // position that playhead in the center of the window
+        ScrollTarget.X = InverseTransformX(posScreen - WindowSize.X * 0.5f);
+        // restore old state of scrolling
+        Scroll = oldScroll;
     }
 
     private bool IsCurrentTimeVisible()
@@ -694,7 +811,6 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         state.ScaleX = Scale.X;
         state.ScrollX = Scroll.X;
         state.Mode = Mode;
-        state.TimelineHeight = FoldingHeight._customTimeLineHeight;
         state.InlineDataClipEditEnabled = InlineDataClipEditEnabled;
         state.DetailsAreaHeight = DetailsAreaHeight;
     }
@@ -706,7 +822,6 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         ScrollTarget = new Vector2(state.ScrollX, ScrollTarget.Y);
         Scroll = new Vector2(state.ScrollX, Scroll.Y);
         Mode = state.Mode;
-        FoldingHeight._customTimeLineHeight = state.TimelineHeight;
         InlineDataClipEditEnabled = state.InlineDataClipEditEnabled;
         DetailsAreaHeight = state.DetailsAreaHeight;
     }
@@ -899,12 +1014,14 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly CurrentTimeMarker _currentTimeMarker = new();
     private readonly TimeSelectionRange _timeSelectionRange;
     private readonly SelectionRangeIndicator _selectionRangeIndicator;
-    private readonly TimeSelectionArea _timeSelectionArea;
+    private readonly SourceExtentEditor _sourceExtentEditor;
+    private readonly KeySetStrip _keySetStrip;
     private readonly IValueSnapAttractor[] _selectionDragSnapExclusions;
     private readonly List<AnimationParameterEditing> _activeKeyframeEditors = new(2);
     private readonly NodeSelection _nodeSelection;
 
     private double _lastPlaybackSpeed;
+    private bool _followPlaybackSuspended;
     private readonly List<AnimationParameter> _pinnedParams = new(20);
     private readonly List<AnimationParameter> _curvesForSelection = new(64);
     private readonly SelectionFence _selectionFence = new();
@@ -927,12 +1044,59 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         public required IInputSlot Input;
         public required Instance Instance;
         public required SymbolUi.Child ChildUi;
-        
+
         public required int Hash;
         public float DampedMinValue;
         public float DampedMaxValue;
+
+        /// <summary>
+        /// Snapshot of the affine curve-time ↔ playback-time relation for this parameter (composed from the
+        /// enclosing time clips). Rebuild per frame/use — clip drags change it continuously.
+        /// </summary>
+        public ParamTimeMapping BuildTimeMapping() => ParamTimeMapping.For(Instance);
+    }
+
+    /// <summary>
+    /// An animated parameter's curves live in the op's local time (see <see cref="Animator.GetLocalAnimationTime"/>);
+    /// the timeline canvas is in playback time. This caches the composed affine relation
+    /// (<c>global = GlobalAtLocalZero + Rate · localU</c>) so per-key conversions don't re-walk the instance chain.
+    /// </summary>
+    public readonly struct ParamTimeMapping
+    {
+        public static ParamTimeMapping For(Instance instance)
+        {
+            var globalAtZero = Animator.GetGlobalAnimationTime(instance, 0);
+            var rate = Animator.GetGlobalAnimationTime(instance, 1) - globalAtZero;
+            return new ParamTimeMapping(globalAtZero, rate);
+        }
+
+        /// <summary>True when no enclosing clip remaps — the common case; lets callers skip conversions.</summary>
+        public bool IsIdentity => GlobalAtLocalZero == 0 && Rate == 1;
+
+        public double ToGlobal(double localU) => GlobalAtLocalZero + Rate * localU;
+
+        public double ToLocal(double globalTime) => Math.Abs(Rate) < MinRate
+                                                        ? GlobalAtLocalZero
+                                                        : (globalTime - GlobalAtLocalZero) / Rate;
+
+        public readonly double GlobalAtLocalZero;
+        public readonly double Rate;
+
+        private ParamTimeMapping(double globalAtLocalZero, double rate)
+        {
+            GlobalAtLocalZero = globalAtLocalZero;
+            Rate = rate;
+        }
+
+        // A clip with ~zero source duration produces a degenerate rate; treat as unmappable rather than divide.
+        private const double MinRate = 1e-9;
     }
     
+    /// <summary>
+    /// Height of the timeline below the graph. Unlike the rest of <see cref="TimelineState"/> this is
+    /// project-global window layout, so it is persisted on the project's root symbol rather than on the
+    /// composition the user happened to be inside while dragging the splitter.
+    /// </summary>
     internal sealed class TimelineHeight
     {
         public TimelineHeight(TimeLineCanvas timeline)
@@ -940,22 +1104,59 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             _timeline = timeline;
         }
 
-        public void DrawSplit(out int newContentHeight)
+        public void DrawSplit(ProjectView projectView, out int newContentHeight)
         {
-            var currentTimelineHeight = _timeline.FoldingHeight.CurrentHeight;
+            SyncWithProject(projectView);
+
+            var currentTimelineHeight = CurrentHeight;
             if (CustomComponents.SplitFromBottom(ref currentTimelineHeight))
             {
                 _customTimeLineHeight = (int)currentTimelineHeight;
+                _changedByDrag = true;
+            }
+            else if (_changedByDrag && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            {
+                _changedByDrag = false;
+                SaveToProject();
             }
 
             newContentHeight = (int)ImGui.GetWindowHeight() - (int)currentTimelineHeight -
-                               4; // Hack that also depends on when a window-title is being rendered            
+                               4; // Hack that also depends on when a window-title is being rendered
         }
 
-        private const int UseComputedHeight = -1;
-        internal int _customTimeLineHeight = UseComputedHeight;
-        private readonly TimeLineCanvas _timeline;
+        public void Toggle()
+        {
+            _customTimeLineHeight = UsingCustomTimelineHeight ? UseComputedHeight : 200;
+            SaveToProject();
+        }
+
         public bool UsingCustomTimelineHeight => _customTimeLineHeight > UseComputedHeight;
+
+        private void SyncWithProject(ProjectView projectView)
+        {
+            var symbolUi = projectView.RootInstance.Symbol.GetSymbolUi();
+            if (symbolUi.Symbol.Id == _lastSyncedSymbolId)
+                return;
+
+            _lastSyncedSymbolId = symbolUi.Symbol.Id;
+            _lastSyncedSymbolUi = symbolUi;
+            _changedByDrag = false;
+            _customTimeLineHeight = symbolUi.TimelineState?.TimelineHeight ?? UseComputedHeight;
+        }
+
+        private void SaveToProject()
+        {
+            var symbolUi = _lastSyncedSymbolUi;
+            if (symbolUi == null || symbolUi.ReadOnly)
+                return;
+
+            symbolUi.TimelineState ??= new TimelineState();
+            if (symbolUi.TimelineState.TimelineHeight == _customTimeLineHeight)
+                return;
+
+            symbolUi.TimelineState.TimelineHeight = _customTimeLineHeight;
+            symbolUi.FlagAsModified();
+        }
 
         private float CurrentHeight => UsingCustomTimelineHeight ? _customTimeLineHeight : ComputedTimelineHeight;
 
@@ -964,10 +1165,12 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                                                 + TimeLineDragHeight
                                                 + 10, 200 * T3Ui.UiScaleFactor);
 
-        public void Toggle()
-        {
-            _customTimeLineHeight = UsingCustomTimelineHeight ? UseComputedHeight : 200;
-        }
+        private const int UseComputedHeight = -1;
+        private int _customTimeLineHeight = UseComputedHeight;
+        private bool _changedByDrag;
+        private Guid _lastSyncedSymbolId;
+        private SymbolUi? _lastSyncedSymbolUi;
+        private readonly TimeLineCanvas _timeline;
     }
 }
 

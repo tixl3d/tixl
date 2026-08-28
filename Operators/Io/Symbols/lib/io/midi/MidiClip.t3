@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "b4766419-8bca-4fa0-a398-e6af90ef8971"/*MidiClip*/,
+  "Inputs": [
+    {
+      "Id": "10c6978a-5910-4949-8382-95834dd1b4d1"/*FilePath*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

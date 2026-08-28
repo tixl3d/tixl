@@ -1,0 +1,83 @@
+{
+  "FormatVersion": 3,
+  "Id": "6780c35c-d96c-46fb-8535-52ea79e39175"/*Me01c_ATemple*/,
+  "Description": "A Temple",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0f4f8063-9943-4cd2-a0c2-c0e80e2bce0a"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "6d2f149b-a4db-4429-96a7-cf3e8527d1d1"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "800dbe44-0d88-42eb-92e0-c3bdb5069257"/*Text*/,
+      "SectionId": "54623507-6230-468b-b335-57f6d1e2c011",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "56ebd22b-0e55-4389-b2c7-024186e5b6ad"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "54623507-6230-468b-b335-57f6d1e2c011",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "d0699b90-4b94-44d6-a5c0-2cdc0cb0867b",
+      "Description": "Starting from small building blocks, very complex geometry can be created by repeating and combining them step by step."
+    },
+    {
+      "Id": "846e3bd7-4b4e-40d5-8694-96431bca6f7c",
+      "Description": "Meshes are not just instructions but buffers that store computed results.\nTiXL only recreates and updates these buffers when one of their parameters changes."
+    },
+    {
+      "Id": "fd751d06-5ad0-47e0-a48b-8127ef515022",
+      "Description": "This behavior is called caching.\nWhen operators in the graph fade slightly, they are cached.\nThe more of your graph is cached, the faster TiXL can render the scene."
+    },
+    {
+      "Id": "e3bb6826-df2d-4af5-b751-2eb367673d9a",
+      "Description": "In this example, [RadialRepeatMesh] and [GridRepeatMesh] are used to construct a small building."
+    },
+    {
+      "Id": "f53011fc-9342-4a7b-9646-0a41bb416393",
+      "Description": "Figure out how to repeat the beveled cubes to form columns and walls.",
+      "Style": "CallToAction"
+    }
+  ]
+}

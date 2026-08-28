@@ -11,6 +11,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.StartupCheck;
+using T3.Editor.Migrations.AssetPaths;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
@@ -234,7 +235,7 @@ internal static class AppMenuBar
                 T3Ui.CreateFromTemplateDialog.ShowNextFrame();
             }
 
-            if (BeginSubMenu("Recent Projects...", !T3Ui.IsCurrentlySaving && EditableSymbolProject.AllProjects.Any(x => x.HasHome)))
+            if (BeginSubMenu("Recent Projects", !T3Ui.IsCurrentlySaving && EditableSymbolProject.AllProjects.Any(x => x.HasHome)))
             {
                 foreach (var package in EditableSymbolProject.AllProjects)
                 {
@@ -261,7 +262,7 @@ internal static class AppMenuBar
             {
                 //ImGui.Separator();
 
-                if (BeginSubMenu("Open Project in..."))
+                if (BeginSubMenu("Open Project in"))
                 {
                     if (MenuItem("File Explorer"))
                     {
@@ -324,21 +325,21 @@ internal static class AppMenuBar
 
                 CustomComponents.SeparatorLine();
 
-                if (MenuItem("Fix asset paths"))
+                if (MenuItem("Fix Asset Paths"))
                     ConformAssetPaths.ConformAllPaths();
 
-                if (MenuItem("Check symbol dependencies"))
+                if (MenuItem("Check Symbol Dependencies"))
                 {
                     SymbolAnalysis.LogInvalidSymbolDependencies();
                     SymbolAnalysis.LogInvalidAssetReference();
                 }
 
-                if (BeginSubMenu("Clear shader cache"))
+                if (BeginSubMenu("Clear Shader Cache"))
                 {
-                    if (MenuItem("Editor only"))
+                    if (MenuItem("Editor Only"))
                         ShaderCompiler.DeleteShaderCache(all: false);
 
-                    if (MenuItem("All editor and player versions"))
+                    if (MenuItem("All Editor and Player Versions"))
                         ShaderCompiler.DeleteShaderCache(all: true);
 
                     ImGui.EndMenu();
@@ -443,20 +444,7 @@ internal static class AppMenuBar
             var canExport = exportView?.CompositionInstance != null && exportChildUis is { Count: 1 };
             if (MenuItem("Export as Executable", isEnabled: canExport))
             {
-                var exportChild = exportChildUis![0];
-                var exportName = exportChild.SymbolChild.ReadableName;
-                switch (PlayerExporter.TryExportInstance(exportView!.CompositionInstance!, exportChild, out var reason, out var exportDir))
-                {
-                    case false:
-                        Log.Error(reason);
-                        BlockingWindow.Instance.ShowMessageBox(reason, $"Failed to export {exportName}");
-                        break;
-                    default:
-                        Log.Info(reason);
-                        BlockingWindow.Instance.ShowMessageBox(reason, $"Exported {exportName} successfully!");
-                        CoreUi.Instance.OpenWithDefaultApplication(exportDir);
-                        break;
-                }
+                PlayerExporter.ExportAndReport(exportView!.CompositionInstance!, exportChildUis![0]);
             }
 
             ImGui.EndMenu();
@@ -466,7 +454,7 @@ internal static class AppMenuBar
         {
             UserSettings.Config.ShowMainMenu = true;
 
-            CustomComponents.DrawMenuGroupLabel("UI Elements...");
+            CustomComponents.DrawMenuGroupLabel("UI Elements");
             MenuItemToggle("Main Menu", ref UserSettings.Config.ShowMainMenu);
             MenuItemToggle("Graph Title", ref UserSettings.Config.ShowTitleAndDescription);
             MenuItemToggle("Graph Minimap", ref UserSettings.Config.ShowMiniMap);
@@ -605,7 +593,7 @@ internal static class AppMenuBar
 
             new("Discord Community", "https://discord.com/invite/YmSyQdeH3S",
                 "Join a friendly and welcoming community of enthusiasts. Ask questions, Learn from each other, share or just hang out."),
-            new("Meet Up (every 2nd week)", "https://discord.com/invite/WX94pzKj?event=1359348185914544312",
+            new("Meet Up (Every 2nd Week)", "https://discord.com/invite/WX94pzKj?event=1359348185914544312",
                 "We meet every 2nd week to share our screens answer questions and hang out."),
         ];
 

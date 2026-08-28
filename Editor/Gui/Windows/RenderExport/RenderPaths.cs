@@ -1,7 +1,9 @@
 ﻿#nullable enable
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using T3.Core.Settings;
+using T3.Core.Video;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -9,8 +11,6 @@ namespace T3.Editor.Gui.Windows.RenderExport;
 
 internal static partial class RenderPaths
 {
-    private static readonly Regex _matchFileVersionPattern = FileVersionPatternRegex();
-
     public static string ResolveProjectRelativePath(string path)
     {
         var project = ProjectView.Focused?.OpenedProject;
@@ -30,7 +30,9 @@ internal static partial class RenderPaths
         var settings = RenderSettings.Current;
         if (mode == RenderSettings.RenderModes.Video)
         {
-            var targetPath = ResolveProjectRelativePath(RenderSettings.Current.VideoFilePath ?? string.Empty);
+            // The container must match the codec, whatever extension the stored path carries.
+            var targetPath = WithCodecExtension(ResolveProjectRelativePath(RenderSettings.Current.VideoFilePath ?? string.Empty),
+                                                settings.VideoCodec);
             if (settings.AutoIncrementVersionNumber)
             {
                 if (!IsFilenameIncrementable(targetPath))
@@ -169,6 +171,24 @@ internal static partial class RenderPaths
             filename = filename.Replace(c.ToString(), "_");
 
         return filename.Trim();
+    }
+
+    /// <summary>Replaces (or appends) the path's video extension with the one the codec's container requires,
+    /// e.g. render-v01.mp4 → render-v01.mov for HAP. Leaves non-video extensions alone.</summary>
+    public static string WithCodecExtension(string? path, VideoExportCodec codec)
+    {
+        path ??= string.Empty;
+        var extension = codec.GetFileExtension();
+        if (path.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+            return path;
+
+        foreach (var known in _videoExtensions)
+        {
+            if (path.EndsWith(known, StringComparison.OrdinalIgnoreCase))
+                return path[..^known.Length] + extension;
+        }
+
+        return path + extension;
     }
 
     public static bool IsFilenameIncrementable(string? path = null)
@@ -316,6 +336,15 @@ internal static partial class RenderPaths
 
         return directory == null ? newFilename : Path.Combine(directory, newFilename);
     }
+
+    private static readonly Regex _matchFileVersionPattern = FileVersionPatternRegex();
+
+    // The containers the export can write — derived from the codec list, so GetFileExtension() stays the one
+    // place that defines a codec's container.
+    private static readonly string[] _videoExtensions = Enum.GetValues<VideoExportCodec>()
+                                                            .Select(c => c.GetFileExtension())
+                                                            .Distinct()
+                                                            .ToArray();
 
     [GeneratedRegex(@"(?:^|[\s_\-.])v(\d{2,4})(?=$|[\s_\-.])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex FileVersionPatternRegex();

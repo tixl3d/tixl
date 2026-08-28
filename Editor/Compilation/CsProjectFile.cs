@@ -79,6 +79,89 @@ internal sealed class CsProjectFile
         }
     }
     
+    /// <summary>
+    /// The project's on-disk format from the csproj marker, or Unknown when unmarked. Reads without
+    /// adding the property - an unmarked csproj must stay unmarked until it is actually migrated
+    /// (see <see cref="Migrations.ProjectFormatMigration"/>, which sniffs unmarked projects).
+    /// </summary>
+    public Migrations.ProjectFormats.ProjectFormat ProjectFormat
+    {
+        get
+        {
+            var value = _projectRootElement.GetOrAddProperty(PropertyType.ProjectFormatVersion);
+            return int.TryParse(value, out var version)
+                       ? (Migrations.ProjectFormats.ProjectFormat)version
+                       : Migrations.ProjectFormats.ProjectFormat.Unknown;
+        }
+    }
+
+    /// <summary>Stamps the format marker (removing the pre-release marker name) and saves.</summary>
+    public void SetProjectFormat(Migrations.ProjectFormats.ProjectFormat format)
+    {
+        _projectRootElement.SetOrAddProperty(PropertyType.ProjectFormatVersion, ((int)format).ToString());
+        RemoveProperty("ProjectStructureVersion");
+        UpdateLastModifiedDate(); // This saves the file
+    }
+
+    /// <summary>
+    /// Format V1 -> V2: rewrites the release content includes for operator files (.t3/.t3ui/.cs) to
+    /// the Symbols folder. Saved by the format stamping that follows in the migration step.
+    /// </summary>
+    public void MigrateContentIncludesToSymbolsFolder()
+    {
+        foreach (var item in _projectRootElement.Items)
+        {
+            if (item.ItemType != ItemType.Content.GetItemName())
+                continue;
+
+            var include = item.Include.Replace('\\', '/');
+            if (include is not ("**/*.t3" or "**/*.t3ui" or "**/*.cs"))
+                continue;
+
+            item.Include = FileLocations.SymbolsSubfolder + '/' + include;
+
+            // The V1 root-level glob needed bin/obj excluded; rooted in Symbols/ they can't match anymore
+            item.Exclude = string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Format V2 -> V3: points the ClearBuildOutput target at the property-based output directory,
+    /// so it follows wherever Directory.Build.props roots the build. Saved by the format stamping.
+    /// </summary>
+    public void MigrateCleanBuildTargetToBaseOutputPath()
+    {
+        foreach (var target in _projectRootElement.Targets)
+        {
+            if (target.Name != "ClearBuildOutput")
+                continue;
+
+            foreach (var task in target.Tasks)
+            {
+                if (task.Name != "RemoveDir")
+                    continue;
+
+                var directories = task.GetParameter("Directories").Replace('\\', '/');
+                if (directories == "bin/$(Configuration)")
+                {
+                    task.SetParameter("Directories", ProjectXml.CleanBuildDirectory);
+                }
+            }
+        }
+    }
+
+    private void RemoveProperty(string propertyName)
+    {
+        foreach (var property in _projectRootElement.Properties)
+        {
+            if (property.Name != propertyName)
+                continue;
+
+            property.Parent.RemoveChild(property);
+            return;
+        }
+    }
+
     public DateTime CreatedAt => _fileInfo.CreationTimeUtc;
     public DateTime ModifiedAt => _fileInfo.LastWriteTimeUtc;
 
@@ -100,9 +183,11 @@ internal sealed class CsProjectFile
             _projectRootElement.SetOrAddProperty(PropertyType.TargetFramework, newFramework);
         }
 
+        // Build output lives under .temp/ (project format V3); the Directory.Build.props written by
+        // ProjectXml.WriteBuildOutputProps is what makes MSBuild agree with these paths.
         var dir = Directory;
-        _releaseRootDirectory = Path.Combine(dir, "bin", "Release");
-        _debugRootDirectory = Path.Combine(dir, "bin", "Debug");
+        _releaseRootDirectory = Path.Combine(dir, FileLocations.TempSubfolder, "bin", "Release");
+        _debugRootDirectory = Path.Combine(dir, FileLocations.TempSubfolder, "bin", "Debug");
     }
 
     /// <summary>
@@ -111,14 +196,18 @@ internal sealed class CsProjectFile
     public readonly struct CsProjectLoadInfo
     {
         public readonly string? Error;
+
+        /// <summary>The exception that aborted the load, when there was one — lets callers classify the failure (e.g. access denied).</summary>
+        public readonly Exception? Exception;
         public readonly CsProjectFile? CsProjectFile;
         public readonly bool NeedsUpgrade;
         public readonly bool NeedsRecompile;
         public readonly List<string> Warnings = [];
 
-        internal CsProjectLoadInfo(CsProjectFile? file, string? error)
+        internal CsProjectLoadInfo(CsProjectFile? file, string? error, Exception? exception = null)
         {
             Error = error;
+            Exception = exception;
             CsProjectFile = file;
 
             if (file == null)
@@ -235,7 +324,7 @@ internal sealed class CsProjectFile
 
             if (csProjContents.AddCleanBuildTarget())
             {
-                Warnings.Add($"Added clean build target to {file.FullPath}");
+                Warnings.Add($"Added or updated Release-only clean build target in {file.FullPath}");
             }
 
             // 5. Finalize changes and trigger recompile if necessary
@@ -255,7 +344,9 @@ internal sealed class CsProjectFile
                 NeedsRecompile = true;
             }
 
-            if (!NeedsRecompile)
+            // Archived projects are listed but never compiled or loaded, so checking their build output
+            // would only produce a misleading "needs to be compiled" warning on every start.
+            if (!NeedsRecompile && !file.IsArchived)
             {
                 var versionInfoDirectory = file.GetBuildTargetDirectory();
                 if (!AssemblyInformation.TryLoadReleaseInfo(versionInfoDirectory, out var releaseInfo))
@@ -298,7 +389,7 @@ internal sealed class CsProjectFile
         catch (Exception e)
         {
             var error = $"Failed to open project file at \"{filePath}\":\n{e}";
-            loadInfo = new CsProjectLoadInfo(null, error);
+            loadInfo = new CsProjectLoadInfo(null, error, e);
             success = false;
         }
 
@@ -449,6 +540,12 @@ internal sealed class CsProjectFile
 
         var projRoot = ProjectXml.CreateNewProjectRootElement(nameSpace, homeId, packageId);
 
+        ProjectXml.WriteBuildOutputProps(destinationDirectory);
+
+        // Operator files live in the Symbols folder - the only place symbol discovery looks
+        var symbolsDirectory = Path.Combine(destinationDirectory, FileLocations.SymbolsSubfolder);
+        System.IO.Directory.CreateDirectory(symbolsDirectory);
+
         foreach (var file in files)
         {
             var text = File.ReadAllText(file)
@@ -458,7 +555,7 @@ internal sealed class CsProjectFile
                            .Replace(usernamePlaceholder, username)
                            .Replace(shareResourcesPlaceholder, shouldShareResources);
 
-            var destinationFilePath = Path.Combine(destinationDirectory, Path.GetFileName(file))
+            var destinationFilePath = Path.Combine(symbolsDirectory, Path.GetFileName(file))
                                           .Replace(projectNamePlaceholder, projectName)
                                           .Replace(guidPlaceholder, homeGuidString);
 

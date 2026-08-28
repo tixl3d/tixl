@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -20,7 +22,29 @@ namespace T3.Player;
 
 internal static partial class Program
 {
-    private static void LoadOperators()
+    /// <summary>
+    /// Redraws the loading screen, processes window messages and returns false once the user cancelled.
+    /// Loading runs on the main thread in steps; callers pump between steps so the window stays responsive.
+    /// </summary>
+    private static bool PumpLoadingScreen(string status, float progress)
+    {
+        Application.DoEvents();
+        if (_renderForm == null || _renderForm.IsDisposed)
+            _loadCancelled = true;
+
+        if (_loadCancelled)
+            return false;
+
+        if (_loadingScreen == null)
+            return true;
+
+        EnsureBackBufferSize();
+        _loadingScreen.Draw(_backBuffer, _backBufferSize.Width, _backBufferSize.Height, status, progress, _lastLogLine?.Text, false);
+        _swapChain.Present(1, PresentFlags.None);
+        return true;
+    }
+
+    private static bool LoadOperators(PlayerLoadReport report)
     {
         var searchDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder);
         Log.Info($"Loading operators from \"{searchDirectory}\"...");
@@ -32,68 +56,90 @@ internal static partial class Program
                                               var assetsOnlyPath = !File.Exists(releaseInfoPath);
                                               if (assetsOnlyPath)
                                                   return null;
-                                              
+
                                               var assemblyInformation = new AssemblyInformation(packageDir);
                                               Log.Debug($"Searching for dlls in {packageDir}...");
-                                              return assemblyInformation; 
+                                              return assemblyInformation;
                                           })
                                   .Where(x => x != null)
                                   .ToArray();
-        
+
         Log.Debug($"Finished loading {assemblies.Length} operator assemblies. Loading symbols...");
-        var packageLoadInfo = assemblies
-                             //.AsParallel()
-                             .Select(assemblyInfo =>
-                                     {
-                                         var symbolPackage = new PlayerSymbolPackage(assemblyInfo);
-                                         symbolPackage.LoadSymbols(false, out var newSymbolsWithFiles, out _);
-                                         return new PackageLoadInfo(symbolPackage, newSymbolsWithFiles);
-                                     })
-                             .ToArray();
+        report.PackageCount = assemblies.Length;
+
+        var packageLoadInfo = new List<PackageLoadInfo>(assemblies.Length);
+        for (var index = 0; index < assemblies.Length; index++)
+        {
+            var assemblyInfo = assemblies[index];
+            var packageName = Path.GetFileName(assemblyInfo.Directory);
+            var progress = LoadProgressOperatorsStart + (LoadProgressOperatorsEnd - LoadProgressOperatorsStart) * index / assemblies.Length;
+            if (!PumpLoadingScreen($"Loading {packageName} ({index + 1}/{assemblies.Length})", progress))
+                return false;
+
+            Log.Info($"Loading package {packageName}...");
+            var symbolPackage = new PlayerSymbolPackage(assemblyInfo);
+            symbolPackage.LoadSymbols(false, out var newSymbolsWithFiles, out _);
+            packageLoadInfo.Add(new PackageLoadInfo(symbolPackage, newSymbolsWithFiles));
+            report.SymbolCount += symbolPackage.Symbols.Count;
+        }
+
+        if (!PumpLoadingScreen("Connecting operators...", LoadProgressOperatorsEnd))
+            return false;
 
         packageLoadInfo
            .AsParallel()
            .ForAll(packageInfo => SymbolPackage.ApplySymbolChildren(packageInfo.NewlyLoadedSymbols));
+
+        return true;
     }
-    
-    private static void PreloadShadersAndResources(double durationSecs,
+
+    private static int CountInstances(Instance instance)
+    {
+        var count = 1;
+        foreach (var child in instance.Children.Values)
+        {
+            count += CountInstances(child);
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// Steps through the timeline so every shader compiles and every resource loads before playback starts.
+    /// Frames are evaluated but not shown; the loading screen is drawn over them instead.
+    /// </summary>
+    private static bool PreloadShadersAndResources(double durationSecs,
                                                    Int2 resolution,
                                                    Playback playback,
                                                    DeviceContext deviceContext,
                                                    EvaluationContext context,
                                                    Slot<Texture2D> textureOutput,
-                                                   SwapChain swapChain,
                                                    RenderTargetView renderView)
     {
         var previousSpeed = playback.PlaybackSpeed;
         var originalTime = playback.TimeInSecs;
-        var wasWindowVisible = _renderForm?.Visible ?? true;
         var audio = CompositionSettings.Current.Audio;
         var previousSoundtrackMute = audio.SoundtrackMute;
         var previousGlobalMute = CoreSettings.Config.AppMute;
-        var hideDisplayDuringPreload = true;
-        var muteAudioDuringPreload = true;
         const double subFrameWarmOffsetInSecs = 1.0 / 60.0;
+        const double sampleStepInSecs = 2.0;
 
-        if (muteAudioDuringPreload)
-        {
-            audio.SoundtrackMute = true;
-            AudioEngine.SetSoundtrackMute(true);
-            AudioEngine.SetGlobalMute(true);
-        }
-
-        if (hideDisplayDuringPreload && _renderForm != null)
-        {
-            _renderForm.Visible = false;
-        }
+        audio.SoundtrackMute = true;
+        AudioEngine.SetSoundtrackMute(true);
+        AudioEngine.SetGlobalMute(true);
 
         playback.PlaybackSpeed = 0;
         var reportedTextureInitFailure = false;
+        var completed = false;
 
         try
         {
-            for (double timeInSecs = 0; timeInSecs < durationSecs; timeInSecs += 2.0)
+            for (double timeInSecs = 0; timeInSecs < durationSecs; timeInSecs += sampleStepInSecs)
             {
+                var progress = LoadProgressPreloadStart + (LoadProgressPreloadEnd - LoadProgressPreloadStart) * (float)(timeInSecs / durationSecs);
+                if (!PumpLoadingScreen($"Warming up shaders and resources ({timeInSecs:0}s / {durationSecs:0}s)", progress))
+                    return false;
+
                 var barsAtSample = playback.BarsFromSeconds(timeInSecs);
                 Log.Info($"Pre-evaluate at: {timeInSecs:0.00}s / {barsAtSample:0.00} bars");
 
@@ -111,34 +157,24 @@ internal static partial class Program
                 }
 
                 Thread.Sleep(20);
-                if (hideDisplayDuringPreload)
-                {
-                    // Ensure GPU work gets submitted even when preload frames are not presented.
-                    deviceContext.Flush();
-                }
-                else
-                {
-                    swapChain.Present(1, PresentFlags.None);
-                }
+
+                // Ensure GPU work gets submitted even when preload frames are not presented.
+                deviceContext.Flush();
             }
+
+            completed = true;
         }
         finally
         {
             playback.PlaybackSpeed = previousSpeed;
             playback.TimeInSecs = originalTime;
 
-            if (muteAudioDuringPreload)
-            {
-                AudioEngine.SetGlobalMute(previousGlobalMute);
-                audio.SoundtrackMute = previousSoundtrackMute;
-                AudioEngine.SetSoundtrackMute(previousSoundtrackMute);
-            }
-
-            if (hideDisplayDuringPreload && _renderForm != null)
-            {
-                _renderForm.Visible = wasWindowVisible;
-            }
+            AudioEngine.SetGlobalMute(previousGlobalMute);
+            audio.SoundtrackMute = previousSoundtrackMute;
+            AudioEngine.SetSoundtrackMute(previousSoundtrackMute);
         }
+
+        return completed;
 
         bool PreloadSampleAtTime(double sampleTimeInSecs)
         {
@@ -159,4 +195,16 @@ internal static partial class Program
             return EvaluateAndDrawOutput(context, resolution, textureOutput, deviceContext, renderView);
         }
     }
+
+    // Progress bar fractions of the loading stages
+    private const float LoadProgressOperatorsStart = 0.05f;
+    private const float LoadProgressOperatorsEnd = 0.5f;
+    private const float LoadProgressInstance = 0.55f;
+    private const float LoadProgressPreloadStart = 0.6f;
+    private const float LoadProgressPreloadEnd = 1f;
+
+    private static LoadingScreen _loadingScreen;
+    private static LastLogLineWriter _lastLogLine;
+    private static bool _isLoading;
+    private static bool _loadCancelled;
 }

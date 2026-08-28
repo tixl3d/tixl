@@ -1,0 +1,77 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "a7c54fb0-1e42-4c8a-9f31-0ab1cd2e0500"/*AudioEcho*/,
+  "Description": "Adds an echo/delay to the audio flowing through it.\n\nEverything wired into Input shares the effect: the routing [AudioBus] gives this node its own submix with a DX8 echo insert. Volume folds into the contained sources like a [CombineAudio]. Unwiring fades the echo tail out instead of cutting it.\n\nMix blends the wet signal in (0 = dry), Delay is the echo time in seconds, Feedback controls how much each repeat feeds back (higher = more repeats), and PingPong alternates the repeats between left and right.\n\nLike every node in the audio graph, this is only heard once the chain reaches an [AudioBus] that is itself being evaluated — pinned to an output window, or wired into the render chain. A chain that ends nowhere is silent.",
+  "InputUis": [
+    {
+      "InputId": "a7c54fb0-0002-4c8a-9f31-0ab1cd2e0500"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "a7c54fb0-0003-4c8a-9f31-0ab1cd2e0500"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "a7c54fb0-0004-4c8a-9f31-0ab1cd2e0500"/*Mix*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "a7c54fb0-0005-4c8a-9f31-0ab1cd2e0500"/*Delay*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Min": 0.001,
+      "Max": 2.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "a7c54fb0-0006-4c8a-9f31-0ab1cd2e0500"/*Feedback*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Min": 0.0,
+      "Max": 0.99,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "a7c54fb0-0007-4c8a-9f31-0ab1cd2e0500"/*PingPong*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a7c54fb0-0001-4c8a-9f31-0ab1cd2e0500"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,237 @@
+{
+  "FormatVersion": 3,
+  "Id": "93ce5fa6-b055-47e7-bd6f-5c5f7eb5362f"/*R01d_Stacking*/,
+  "Description": "Stacking Transforms",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "08c8e65f-fdc9-4034-9d93-a25e6079e78e"/*AnimVec3*/,
+      "Position": {
+        "X": 1658.3193,
+        "Y": 1680.6395
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "0e873115-ec00-4431-b1ac-95dabc95c4c8"/*TorusMesh*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1623.1345
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1ebfe527-83e4-4050-975a-7699eca3d3bc"/*DrawMeshUnlit*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1442.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "2724db5f-f91b-4d86-97d3-39e27cd155d9"/*Transform*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1512.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "33f3eb59-970c-4c39-ad0f-7d8a8bdd21e1"/*Transform*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1041.5554,
+        "Y": 2385.912
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "4430806e-0e8f-46e1-b6b8-0b84d9f9117e"/*AnimVec3*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 901.5552,
+        "Y": 2420.912
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "55c1fc22-2b88-4dce-b8db-f260f9634c27"/*Group*/,
+      "Position": {
+        "X": 1295.9714,
+        "Y": 1589.4633
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "568fc7da-04c0-4294-987f-bbcb9f659c76"/*TorusMesh*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1407.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "57221a66-796b-4e21-9247-3ad4c92355ba"/*DrawMesh*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1041.5554,
+        "Y": 2350.912
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "5ce95e9b-d0bd-4e21-9c5d-fec276ecf322"/*DrawMesh*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1658.1345
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "6a4e3ff8-5d8a-4377-a11a-d70a1b57fdef"/*Transform*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1693.1345
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "6e37a450-11dd-4487-8b2c-63cf33e159f4"/*AnimVec3*/,
+      "Position": {
+        "X": 980.0613,
+        "Y": 1547.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "76263585-9279-49a1-b848-6c421deebad6"/*Transform*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1532.5525,
+        "Y": 2252.4272
+      }
+    },
+    {
+      "ChildId": "78061b79-2905-43cf-b885-fe3a424d2cf8"/*DrawQuiz*/,
+      "Position": {
+        "X": 1901.468,
+        "Y": 1745.4009
+      }
+    },
+    {
+      "ChildId": "7d67f3e9-2ee4-4f6e-8f4b-80016630fd99"/*AnimVec3*/,
+      "Position": {
+        "X": 980.0613,
+        "Y": 1728.1345
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "94435c84-9f2e-4b97-a8df-a0d0f8253de1"/*Group*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1217.4656,
+        "Y": 2282.2407
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a2928de2-fd93-4c13-859e-9eb3cd6925bb"/*Transform*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1041.5554,
+        "Y": 2205.2534
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a5891a6c-6408-48ab-b69f-9c6822449893"/*TorusMesh*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1041.5554,
+        "Y": 2315.912
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "bfa25d01-fc41-4b95-9028-bf2a0b92ca0d"/*AnimVec3*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 901.5552,
+        "Y": 2240.2534
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c725e0af-f586-4588-be7e-d8af58630b4d"/*Transform*/,
+      "Position": {
+        "X": 1658.3195,
+        "Y": 1739.2395
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "d45e4ffb-a419-4cee-984a-ecb59d7fd0a4"/*AnimVec3*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1408.55,
+        "Y": 2360.8208
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "d60be6a5-e5d3-4fbd-a407-c82bbc49208c"/*TorusMesh*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1041.5554,
+        "Y": 2100.2534
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ee671c0a-0ac2-492b-ab1d-06181f326ef7"/*DrawMeshUnlit*/,
+      "SectionId": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Position": {
+        "X": 1041.5554,
+        "Y": 2135.2534
+      },
+      "SnapshotGroupIndex": "1"
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2cc138cf-420f-412a-94df-6d3c7378882d"/*ColorBuffer*/,
+      "Position": {
+        "X": 1901.468,
+        "Y": 1815.4009
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "d12d00c8-3275-4dba-abbd-9b722f03eea6",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 781.43884,
+        "Y": 1927.2062
+      },
+      "Size": {
+        "X": 1062.5436,
+        "Y": 824.0137
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "9cf71d5f-1951-40a4-aedc-f4949fd5ed4b",
+      "Description": "You can combine an animated transform with another transform to offset it further, for example by moving it to the left."
+    }
+  ]
+}

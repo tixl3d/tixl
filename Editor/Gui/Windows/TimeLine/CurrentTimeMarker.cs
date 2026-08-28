@@ -19,6 +19,20 @@ internal sealed class CurrentTimeMarker: IValueSnapAttractor
         Icons.DrawIconAtScreenPosition(Icon.CurrentTimeMarkerHandle, p+ new Vector2(-4,y-1));
     }
 
+    /// <summary>
+    /// Draws just the vertical line into the current (child) window's draw list. Called between the clip
+    /// area and the dope sheet so the playhead renders above timeline clips but below keyframes.
+    /// </summary>
+    public void DrawLineInCurrentWindow(double timeInBars, TimeLineCanvas timelineCanvas)
+    {
+        var x = timelineCanvas.TransformX((float)timeInBars);
+        var drawList = ImGui.GetWindowDrawList();
+        var top = ImGui.GetWindowPos().Y;
+        var bottom = top + ImGui.GetWindowHeight() + 1;
+        drawList.AddRectFilled(new Vector2(x - 1, top), new Vector2(x + 2, bottom), UiColors.BackgroundFull.Fade(0.2f));
+        drawList.AddRectFilled(new Vector2(x, top), new Vector2(x + 1, bottom), UiColors.StatusAnimated);
+    }
+
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)
     {
         snapResult.TryToImproveWithAnchorValue(_currentTimeInBars);

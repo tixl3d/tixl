@@ -6,9 +6,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
-using CommandLine;
-using CommandLine.Text;
 using ManagedBass;
 using Newtonsoft.Json;
 using SharpDX.Direct3D;
@@ -29,6 +28,7 @@ using T3.Core.SystemUi;
 using Device = SharpDX.Direct3D11.Device;
 using Resource = SharpDX.Direct3D11.Resource;
 using SharpDX.Windows;
+using System.Windows.Forms;
 using SilkWindows;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.Utils;
@@ -49,30 +49,6 @@ namespace T3.Player;
 /// </summary>
 internal static partial class Program
 {
-    /// <summary>
-    /// Defines command line switches for exported playback.
-    /// </summary>
-    private class Options
-    {
-        [Option(Default = false, Required = false, HelpText = "Disable vsync")]
-        public bool NoVsync { get; set; }
-
-        [Option(Default = 1920, Required = false, HelpText = "Defines the width")]
-        public int Width { get; set; }
-
-        [Option(Default = 1080, Required = false, HelpText = "Defines the height")]
-        public int Height { get; set; }
-
-        [Option(Default = false, Required = false, HelpText = "Run in windowed mode")]
-        public bool Windowed { get; set; }
-
-        [Option(Default = false, Required = false, HelpText = "Loops the demo")]
-        public bool Loop { get; set; }
-
-        [Option(Default = true, Required = false, HelpText = "Show log messages.")]
-        public bool Logging { get; set; }
-    }
-
     [STAThread]
     private static void Main(string[] args)
     {
@@ -80,10 +56,12 @@ internal static partial class Program
         T3.Core.Diagnostics.AssemblyLoadDiagnostics.Install();
 
         CoreUi.Instance = new MsForms.MsForms();
-        BlockingWindow.Instance = new SilkWindowProvider();
-            
-        var settingsPath = Path.Combine(FileLocations.StartFolder, "exportSettings.json");
-        if (!JsonUtils.TryLoadingJson(settingsPath, out ExportSettings exportSettings))
+        var silkWindows = new SilkWindowProvider();
+        BlockingWindow.Instance = silkWindows;
+        TrySetDialogFonts(silkWindows);
+
+        var settingsPath = Path.Combine(FileLocations.StartFolder, ExportSettings.FileName);
+        if (!JsonUtils.TryLoadingJson(settingsPath, out ExportSettings exportSettings) || exportSettings.Export == null)
         {
             var message = $"Failed to load export settings from \"{settingsPath}\". Exiting!";
             Log.Error(message);
@@ -91,33 +69,66 @@ internal static partial class Program
             return;
         }
 
-        CoreSettings.Config = exportSettings!.ConfigData;
-            
-        var logDirectory = Path.Combine(Core.Settings.FileLocations.SettingsDirectory, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
-        var fileWriter = FileWriter.CreateDefault(logDirectory, out var logPath);
+        CoreSettings.Config = exportSettings.ConfigData;
+
+        var playerDataDirectory = ResolvePlayerDataDirectory(exportSettings);
+        var fileWriter = FileWriter.CreateDefault(playerDataDirectory, out var logPath);
         try
         {
-            Log.AddWriter(new ConsoleWriter());
             Log.AddWriter(fileWriter);
 
-            if (!TryResolveOptions(args, exportSettings!, out _resolvedOptions))
+            if (!PlayerStartupOptions.TryParseCommandLine(args, exportSettings.ApplicationTitle, exportSettings.Author, out var commandLine, out var helpText))
+            {
+                BlockingWindow.Instance.ShowMessageBox(helpText, exportSettings.ApplicationTitle);
                 return;
-                
+            }
+
+            var lastUsedPath = Path.Combine(playerDataDirectory, "playerSettings.json");
+            _startupOptions = PlayerStartupOptions.Resolve(exportSettings, commandLine, lastUsedPath);
+            var displays = silkWindows.GetDisplays();
+
+            var showDialog = commandLine.ForceDialog || (!commandLine.NoDialog && !exportSettings.Export.SkipStartupDialog);
+            if (showDialog)
+            {
+                var dialog = new PlayerStartupDialog(exportSettings.ApplicationTitle, exportSettings.Author, displays, _startupOptions);
+                var primary = _startupOptions.ResolveDisplay(displays);
+                var dialogSize = new Vector2(520, 330);
+                var dialogOptions = new SimpleWindowOptions(dialogSize, 60, true, false, true,
+                                                            new Vector2(primary.Bounds.X + (primary.Bounds.Width - dialogSize.X) / 2,
+                                                                        primary.Bounds.Y + (primary.Bounds.Height - dialogSize.Y) / 2));
+                var result = silkWindows.Show(exportSettings.ApplicationTitle, dialog, dialogOptions);
+                if (result == null)
+                {
+                    Log.Info("Startup cancelled.");
+                    return;
+                }
+
+                _startupOptions = result;
+                _startupOptions.SaveAsLastUsed(lastUsedPath);
+            }
+
+            if (_startupOptions.ShowLogs)
+            {
+                ConsoleWindow.Show();
+                Log.AddWriter(new ConsoleWriter());
+            }
+
+            var display = _startupOptions.ResolveDisplay(displays);
+
             Log.Info($"Starting {exportSettings.ApplicationTitle} with id {exportSettings.OperatorId} by {exportSettings.Author}.");
             Log.Info($"Build: {exportSettings.BuildId}, Editor: {exportSettings.EditorVersion}");
-                
-            ShaderCompiler.ShaderCacheSubdirectory = Path.Combine("Player", 
-                                                                  exportSettings.EditorVersion, 
-                                                                  exportSettings.Author,
-                                                                  exportSettings.ApplicationTitle, 
-                                                                  exportSettings.OperatorId.ToString(), 
-                                                                  exportSettings.BuildId.ToString());
+            Log.Info($"Startup options: {_startupOptions} on {display}");
 
-            var resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
-            _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
-            Log.Debug($": {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
+            // Writable cache next to the executable; precompiled entries shipped with the export are read first.
+            ShaderCompiler.ShaderCacheRootPath = playerDataDirectory;
+            ShaderCompiler.ShaderCacheSubdirectory = FileLocations.ShaderCacheSubFolder;
+            ShaderCompiler.ShaderCacheSeedDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.ShaderCacheSubFolder);
+            ShaderCompiler.PruneCache(TimeSpan.FromDays(30));
 
-            var iconPath = Path.Combine(SharedResources.EditorResourcesDirectory,  SharedResources.EditorResourcesDirectory,"images", "t3.ico");
+            var resolution = new Int2(_startupOptions.Width, _startupOptions.Height);
+            _vsyncInterval = Convert.ToInt16(_startupOptions.VSync);
+
+            var iconPath = Path.Combine(SharedResources.EditorResourcesDirectory, "images", "t3.ico");
             var gotIcon = File.Exists(iconPath);
 
             Icon icon;
@@ -131,22 +142,37 @@ internal static partial class Program
                 icon = new Icon(iconPath);
             }
 
-            _renderForm = new RenderForm(exportSettings!.ApplicationTitle)
+            _renderForm = new RenderForm(exportSettings.ApplicationTitle)
                               {
                                   ClientSize = new Size(resolution.X, resolution.Y),
                                   AllowUserResizing = false,
                                   Icon = icon,
+                                  StartPosition = FormStartPosition.Manual,
                               };
 
+            // Center on the chosen display; borderless fullscreen then covers that display.
+            var displayBounds = display.Bounds;
+            _renderForm.Location = new Point(displayBounds.X + Math.Max(0, (displayBounds.Width - _renderForm.Width) / 2),
+                                             displayBounds.Y + Math.Max(0, (displayBounds.Height - _renderForm.Height) / 2));
+
             var windowHandle = _renderForm.Handle;
+
+            // "Fullscreen" is a borderless window covering the screen. DXGI exclusive fullscreen is
+            // avoided on purpose: it silently drops to windowed on focus loss (Alt+Tab), requires
+            // ResizeBuffers after every mode change and minimizes the window, which led to
+            // DXGI_ERROR_INVALID_CALL crashes. Flip-model swap chains get direct scan-out anyway.
+            if (_startupOptions.Fullscreen)
+            {
+                SetBorderlessFullScreen(true);
+            }
 
             // SwapChain description
             var desc = new SwapChainDescription
                            {
                                BufferCount = 3,
-                               ModeDescription = new ModeDescription(resolution.Width, resolution.Height,
+                               ModeDescription = new ModeDescription(_renderForm.ClientSize.Width, _renderForm.ClientSize.Height,
                                                                      new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                               IsWindowed = _resolvedOptions.Windowed,
+                               IsWindowed = true,
                                OutputHandle = windowHandle,
                                SampleDescription = new SampleDescription(1, 0),
                                SwapEffect = SwapEffect.FlipDiscard,
@@ -165,18 +191,15 @@ internal static partial class Program
 #if DEBUG || FORCE_D3D_DEBUG
             var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
 #else
-                var deviceCreationFlags = DeviceCreationFlags.None;
+            // BgraSupport is required for the Direct2D loading screen
+            var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
 #endif
             Device.CreateWithSwapChain(DriverType.Hardware, deviceCreationFlags, desc, out _device, out _swapChain);
             ResourceManager.Init(_device);
             _deviceContext = _device.ImmediateContext;
 
-            var cursor = CoreUi.Instance.Cursor;
-
-            if (_swapChain.IsFullScreen)
-            {
-                cursor.SetVisible(false);
-            }
+            CoreUi.Instance.Cursor.SetVisible(!_isFullScreen);
+            _backBufferSize = _renderForm.ClientSize;
 
             // Ign ore all windows events
             var factory = _swapChain.GetParent<Factory>();
@@ -199,7 +222,21 @@ internal static partial class Program
             _fullScreenPixelShaderResource = SharedResources.FullScreenPixelShaderResource;
             _fullScreenVertexShaderResource = SharedResources.FullScreenVertexShaderResource;
 
-            LoadOperators();
+            // Loading runs in steps on this thread; the loading screen is redrawn between them.
+            var loadReport = new PlayerLoadReport();
+            _lastLogLine = new LastLogLineWriter();
+            Log.AddWriter(_lastLogLine);
+            _loadingScreen = new LoadingScreen(exportSettings.ApplicationTitle);
+            _isLoading = true;
+            _renderForm.Show();
+            PumpLoadingScreen("Loading operators...", LoadProgressOperatorsStart);
+
+            loadReport.BeginStage("Load operators");
+            if (!LoadOperators(loadReport))
+            {
+                CloseApplication(false, "Loading cancelled.");
+                return;
+            }
 
             if(!SymbolRegistry.TryGetSymbol(exportSettings.OperatorId, out var demoSymbol))
             {
@@ -228,18 +265,27 @@ internal static partial class Program
                             };
 
             // Create instance of project op, all children are create automatically
+            loadReport.BeginStage("Create instances");
+            if (!PumpLoadingScreen("Creating operators...", LoadProgressInstance))
+            {
+                CloseApplication(false, "Loading cancelled.");
+                return;
+            }
 
             if (!demoSymbol.TryGetParentlessInstance(out _project))
             {
                 CloseApplication(true, $"Failed to create instance of project op {demoSymbol}");
                 return;
             }
+
+            loadReport.InstanceCount = CountInstances(_project);
+            loadReport.BeginStage("Prepare audio");
                 
             _evalContext = new EvaluationContext();
 
             var prerenderRequired = false;
 
-            _resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
+            _resolution = resolution;
 
             // Init wasapi input if required
             if (playbackSettings is { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
@@ -255,6 +301,16 @@ internal static partial class Program
                     _allSoundtrackHandles.Add(handle);
                     if (clip.IsMainSoundtrack && _soundtrackHandle == null)
                         _soundtrackHandle = handle;
+                }
+
+                // Migrated projects carry the soundtrack as an [AudioClip] op instead of a settings-list
+                // entry — the union in TryGetMainSoundtrack finds an op-flagged clip among the project's
+                // children. Needed for stream preload and the end-of-timeline check; per-frame playback
+                // registration comes from AudioClipCollector in the render loop.
+                if (_soundtrackHandle == null && playbackSettings.TryGetMainSoundtrack(_project, out var opSoundtrack))
+                {
+                    _soundtrackHandle = opSoundtrack;
+                    _allSoundtrackHandles.Add(opSoundtrack);
                 }
 
                 if (_soundtrackHandle != null)
@@ -323,11 +379,33 @@ internal static partial class Program
             // TODO - implement proper shader pre-compilation as an option to instance instantiation
             // move this to core?
             // Sample some frames to preload all shaders and resources
+            loadReport.BeginStage("Warm up shaders");
             if (prerenderRequired)
             {
-                PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext, _textureOutput, _swapChain,
-                                           _renderView);
+                if (!PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext, _textureOutput,
+                                                _renderView))
+                {
+                    CloseApplication(false, "Loading cancelled.");
+                    return;
+                }
             }
+            else if (!PumpLoadingScreen("Warming up shaders...", LoadProgressPreloadStart))
+            {
+                CloseApplication(false, "Loading cancelled.");
+                return;
+            }
+
+            PumpLoadingScreen("Starting...", LoadProgressPreloadEnd);
+            loadReport.ShadersCompiled = ShaderCompiler.CompiledShaderCount;
+            loadReport.ShadersFromCache = ShaderCompiler.CachedShaderCount;
+            loadReport.CountAssets(Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder), FileLocations.AssetsSubfolder);
+            loadReport.Complete();
+            loadReport.LogAndSave(Path.Combine(playerDataDirectory, "loadReport.json"));
+
+            _isLoading = false;
+            Log.RemoveWriter(_lastLogLine);
+            _loadingScreen.Dispose();
+            _loadingScreen = null;
 
             // Start playback           
             _playback.Update();
@@ -364,6 +442,8 @@ internal static partial class Program
         void CloseApplication(bool error, string message)
         {
             CoreUi.Instance.Cursor.SetVisible(true);
+            _loadingScreen?.Dispose();
+            _loadingScreen = null;
             ShaderCompiler.Shutdown();
             bool openLogs = false;
                 
@@ -412,52 +492,117 @@ internal static partial class Program
         }
     }
 
-    private static void RebuildBackBuffer(RenderForm form, Device device, ref RenderTargetView rtv, ref SharpDX.Direct3D11.Texture2D buffer, SwapChain swapChain)
+    /// <summary>
+    /// Toggles between the normal window and a borderless window covering the screen the window is on.
+    /// The swap chain follows the new client size on the next frame (see <see cref="EnsureBackBufferSize"/>).
+    /// </summary>
+    private static void SetBorderlessFullScreen(bool enable)
     {
-        rtv.Dispose();
-        buffer.Dispose();
-        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, SwapChainFlags.AllowModeSwitch);
-        buffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(swapChain, 0);
-        rtv = new RenderTargetView(device, buffer);
-    }
+        if (enable == _isFullScreen)
+            return;
 
-    private static bool TryResolveOptions(string[] args, ExportSettings exportSettings, out Options resolvedOptions)
-    {
-        var parser = new Parser(config =>
-                                {
-                                    config.HelpWriter = null;
-                                    config.AutoVersion = false;
-                                });
-        var parserResult = parser.ParseArguments<Options>(args);
-        var helpText = HelpText.AutoBuild(parserResult,
-                                          h =>
-                                          {
-                                              h.AdditionalNewLineAfterOption = false;
-
-                                              // Todo: This should use information from the main operator
-                                              h.Heading = exportSettings.ApplicationTitle;
-
-                                              h.Copyright = exportSettings.Author;
-                                              h.AutoVersion = false;
-                                              return h;
-                                          },
-                                          e => e);
-
-        Options parsedOptions = null;
-        parserResult.WithParsed(o => { parsedOptions = o; })
-                    .WithNotParsed(_ => { Log.Debug(helpText); });
-
-        resolvedOptions = parsedOptions;
-        if (resolvedOptions == null)
-            return false;
-            
-        // use windowed status _only_ when explicitly set, the Options struct doesn't know about this
-        if (!args.Any(s => "--windowed".Contains(s)))
+        _isFullScreen = enable;
+        if (enable)
         {
-            parsedOptions.Windowed = exportSettings.WindowMode == WindowMode.Windowed;
+            _windowedBounds = _renderForm.Bounds;
+            _windowedBorderStyle = _renderForm.FormBorderStyle;
+            _renderForm.WindowState = FormWindowState.Normal;
+            _renderForm.FormBorderStyle = FormBorderStyle.None;
+            _renderForm.Bounds = Screen.FromControl(_renderForm).Bounds;
+        }
+        else
+        {
+            _renderForm.FormBorderStyle = _windowedBorderStyle;
+            _renderForm.Bounds = _windowedBounds;
         }
 
-        return true;
+        CoreUi.Instance.Cursor.SetVisible(!enable);
+    }
+
+    /// <summary>
+    /// Resizes the swap chain when the window's client size changed (fullscreen toggle, DPI change).
+    /// Called once per frame before rendering.
+    /// </summary>
+    private static void EnsureBackBufferSize()
+    {
+        var clientSize = _renderForm.ClientSize;
+        if (clientSize == _backBufferSize || clientSize.Width == 0 || clientSize.Height == 0)
+            return;
+
+        RebuildBackBuffer(_renderForm, _device, ref _renderView, ref _backBuffer, _swapChain);
+    }
+
+    private static void RebuildBackBuffer(RenderForm form, Device device, ref RenderTargetView rtv, ref SharpDX.Direct3D11.Texture2D buffer, SwapChain swapChain)
+    {
+        // ResizeBuffers requires that no reference to the back buffer survives - including a
+        // binding on the output merger. A still-bound RTV leaves the pipeline in undefined
+        // state which can escalate to DXGI_ERROR_DEVICE_HUNG on the next Present.
+        device.ImmediateContext.OutputMerger.SetTargets((RenderTargetView)null);
+        _loadingScreen?.ReleaseBackBufferResources();
+        rtv.Dispose();
+        buffer.Dispose();
+
+        // Preserve the swap chain's existing flags across the resize.
+        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, swapChain.Description.Flags);
+        buffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(swapChain, 0);
+        rtv = new RenderTargetView(device, buffer);
+        _backBufferSize = form.ClientSize;
+    }
+
+    /// <summary>
+    /// Logs and remembered settings live in a .temp folder next to the executable, where users look for them.
+    /// Falls back to the roaming app-data folder when the export location is read-only.
+    /// </summary>
+    private static string ResolvePlayerDataDirectory(ExportSettings exportSettings)
+    {
+        var localDirectory = Path.Combine(FileLocations.StartFolder, ".temp");
+        try
+        {
+            Directory.CreateDirectory(localDirectory);
+            var probePath = Path.Combine(localDirectory, ".write-test");
+            File.WriteAllText(probePath, string.Empty);
+            File.Delete(probePath);
+            return localDirectory;
+        }
+        catch (Exception)
+        {
+            return Path.Combine(FileLocations.SettingsDirectory, "Player", exportSettings.Author, exportSettings.ApplicationTitle);
+        }
+    }
+
+    /// <summary>
+    /// Uses the editor's UI fonts for the startup dialog and message boxes when the export ships them.
+    /// </summary>
+    private static void TrySetDialogFonts(SilkWindowProvider silkWindows)
+    {
+        var fontDirectory = Path.Combine(SharedResources.EditorResourcesDirectory, "fonts");
+        var regularPath = Path.Combine(fontDirectory, "Inter-Regular.ttf");
+        var boldPath = Path.Combine(fontDirectory, "Inter-SemiBold.ttf");
+        var lightPath = Path.Combine(fontDirectory, "Inter-Light.ttf");
+        if (!File.Exists(regularPath) || !File.Exists(boldPath) || !File.Exists(lightPath))
+            return;
+
+        silkWindows.SetFonts(new FontPack(new TtfFont(regularPath, 18),
+                                          new TtfFont(boldPath, 18),
+                                          new TtfFont(regularPath, 14),
+                                          new TtfFont(lightPath, 30)));
+    }
+
+    /// <summary>
+    /// The player is a windowed application; a console is only attached when log output was requested.
+    /// </summary>
+    private static class ConsoleWindow
+    {
+        public static void Show()
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            AllocConsole();
+        }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool AllocConsole();
     }
 
     private readonly struct PackageLoadInfo(
@@ -482,10 +627,15 @@ internal static partial class Program
     // and preload semantics.
     private static readonly List<AudioClipResourceHandle> _allSoundtrackHandles = new();
     private static DeviceContext _deviceContext;
-    private static Options _resolvedOptions;
+    private static PlayerStartupOptions _startupOptions;
     private static RenderForm _renderForm;
     private static Texture2D _outputTexture;
     private static ShaderResourceView _outputTextureSrv;
+    private static bool _loggedNullOutput;
+    private static bool _isFullScreen;
+    private static Size _backBufferSize;
+    private static Rectangle _windowedBounds;
+    private static FormBorderStyle _windowedBorderStyle;
     private static RasterizerState _rasterizerState;
     private static Resource<VertexShader> _fullScreenVertexShaderResource;
     private static Resource<PixelShader> _fullScreenPixelShaderResource;

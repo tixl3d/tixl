@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "58a78fdc-149a-45a2-8e95-fc7f6fec66df"/*Me01e_UVs*/,
+  "Description": "UVs",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3b927d01-fca4-49db-bc76-92debfbe506b"/*Text*/,
+      "SectionId": "1985e608-7b86-42df-b588-d9ad38feed73",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "da028c91-2840-47c8-b13b-89e4424ed789"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "e5c84000-33ac-4f66-816a-6cedae8e1b77"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "16e741f5-f197-4fe4-a14a-c85e003e2ed8"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "1985e608-7b86-42df-b588-d9ad38feed73",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "16a5440d-e8bf-4df1-80e1-9e0c9bb0bf3a",
+      "Description": "Applying an image to a mesh is called texturing.\nTo define how the image maps onto the mesh, each vertex stores image coordinates in its U and V attributes."
+    },
+    {
+      "Id": "9199529c-b3ac-4f44-9335-58564047ca93",
+      "Description": "Most generated or imported meshes already contain a UV set, even if it is not actively used.\nIn some cases, it is useful to modify these coordinates."
+    },
+    {
+      "Id": "1fc5222c-e5ef-4af7-b312-37fcb8a9151b",
+      "Description": "In this example, a new UV coordinate system is projected onto a [Torus] mesh."
+    },
+    {
+      "Id": "4927c158-2d8e-48a4-be2d-7ea2fd9d14bd",
+      "Description": "Reproduce the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

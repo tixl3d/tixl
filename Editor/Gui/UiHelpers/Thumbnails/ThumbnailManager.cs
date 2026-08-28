@@ -149,6 +149,56 @@ internal static class ThumbnailManager
 
         return _fallback;
     }
+
+    /// <summary>State of a thumbnail that was pushed via <see cref="PushSlotTexture"/>: the caller owns
+    /// generation, so <see cref="PushedState.Missing"/> (never pushed, or LRU-evicted from the atlas) means
+    /// "generate and push again".</summary>
+    internal enum PushedState { Missing, Pending, Ready }
+
+    /// <summary>
+    /// Looks up an externally pushed thumbnail without triggering any load. Returns <see cref="PushedState.Ready"/>
+    /// with the atlas rect, <see cref="PushedState.Pending"/> while an upload is queued, or
+    /// <see cref="PushedState.Missing"/> when the slot was never filled or has been evicted.
+    /// </summary>
+    internal static PushedState GetPushedThumbnail(Guid guid, out ThumbnailRect rect)
+    {
+        rect = _fallback;
+        if (!_slots.TryGetValue(guid, out var slot))
+            return PushedState.Missing;
+
+        switch (slot.State)
+        {
+            case LoadingState.Ready when slot.X != -1:
+                slot.LastUsed = DateTime.Now;
+                rect = GetRectFromSlot(slot);
+                return PushedState.Ready;
+            case LoadingState.Loading:
+                return PushedState.Pending;
+            default:
+                return PushedState.Missing;
+        }
+    }
+
+    /// <summary>
+    /// Queues a slot-sized (<see cref="SlotWidth"/>×<see cref="SlotHeight"/>) texture for atlas upload under
+    /// <paramref name="guid"/>; the texture is consumed (disposed after the copy). Callable from a worker
+    /// thread — same threading as <see cref="RequestAsyncLoad"/>'s continuation.
+    /// </summary>
+    internal static void PushSlotTexture(Guid guid, SharpDX.Direct3D11.Texture2D texture)
+    {
+        if (!_slots.TryGetValue(guid, out var slot))
+        {
+            slot = new ThumbnailSlot { Guid = guid };
+            _slots[guid] = slot;
+        }
+
+        slot.State = LoadingState.Loading;
+        var targetSlot = AssignAtlasSlot(guid);
+        lock (_uploadQueue)
+        {
+            _uploadQueue.Enqueue(new PendingUpload(guid, texture, targetSlot));
+        }
+    }
     #endregion
 
     #region Background Operations
@@ -209,7 +259,7 @@ internal static class ThumbnailManager
         }
     }
 
-    private static async Task<SharpDX.Direct3D11.Texture2D?> LoadTextureViaWic(string path)
+    internal static async Task<SharpDX.Direct3D11.Texture2D?> LoadTextureViaWic(string path)
     {
         return await Task.Run(async () =>
         {
@@ -265,18 +315,26 @@ internal static class ThumbnailManager
         // Evict volatile GPU slot if at capacity
         if (_atlasLru.Count >= MaxSlots)
         {
-            var oldest = _atlasLru.OrderBy(s => s.LastUsed).First();
+            var oldest = _atlasLru[0];
+            for (var i = 1; i < _atlasLru.Count; i++)
+            {
+                if (_atlasLru[i].LastUsed < oldest.LastUsed)
+                    oldest = _atlasLru[i];
+            }
+
+            _freeCells.Push(oldest.X + oldest.Y * Columns);
             oldest.X = -1;
             oldest.Y = -1;
             oldest.State = LoadingState.NotLoaded;
             _atlasLru.Remove(oldest);
         }
 
-        // Find visual index
-        int index = _atlasLru.Count;
-        slot.X = index % 23;
-        slot.Y = index / 23;
-        
+        // Cells must be recycled explicitly: deriving the index from the LRU count made every slot
+        // assigned after the first eviction land on the same cell, so new thumbnails overwrote each other.
+        var cellIndex = _freeCells.Count > 0 ? _freeCells.Pop() : _nextUnusedCell++;
+        slot.X = cellIndex % Columns;
+        slot.Y = cellIndex / Columns;
+
         slot.LastUsed = DateTime.Now;
         _atlasLru.Add(slot);
         return slot;
@@ -439,11 +497,21 @@ internal static class ThumbnailManager
             slot.State = LoadingState.NotLoaded;
     }
 
+    /// <summary>Number of thumbnails currently holding an atlas cell, and the cap they are evicted at.</summary>
+    internal static int AtlasSlotCount => _atlasLru.Count;
+
+    internal static int MaxAtlasSlotCount => MaxSlots;
+
+    /// <summary>Total known thumbnails, including those evicted from the atlas.</summary>
+    internal static int KnownThumbnailCount => _slots.Count;
+
     public static void Reset()
     {
         Initialize();
         _slots.Clear();
         _atlasLru.Clear();
+        _freeCells.Clear();
+        _nextUnusedCell = 0;
         lock (_uploadQueue)
         {
             _uploadQueue.Clear();
@@ -453,12 +521,15 @@ internal static class ThumbnailManager
     private const int AtlasSize = 4096, Padding = 2, MaxSlots = 500;
     public const int SlotWidth = 178;
     public const int  SlotHeight = 133;
-    public const float AspectRatio = (float)SlotWidth / SlotHeight; 
-    
+    public const float AspectRatio = (float)SlotWidth / SlotHeight;
+    private const int Columns = AtlasSize / SlotWidth;
+
     private static SharpDX.Direct3D11.Texture2D? _atlas;
     internal static ShaderResourceView? AtlasSrv { get; private set; }
     private static readonly Dictionary<Guid, ThumbnailSlot> _slots = new();
-    private static readonly List<ThumbnailSlot> _atlasLru = new(); 
+    private static readonly List<ThumbnailSlot> _atlasLru = new();
+    private static readonly Stack<int> _freeCells = new();
+    private static int _nextUnusedCell;
     private static readonly Queue<PendingUpload> _uploadQueue = new();
     private static readonly ThumbnailRect _fallback = new(Vector2.Zero, Vector2.Zero, false);
     private static bool _initialized;

@@ -18,6 +18,7 @@ internal static partial class Program
     // todo - share this function with the editor ? is that possible? it could have delegate arguments
     private static void RenderCallback()
     {
+        EnsureBackBufferSize();
         WasapiAudioInput.StartFrame(_playback.Settings);
         _playback.Update();
 
@@ -29,14 +30,25 @@ internal static partial class Program
             AudioEngine.UseSoundtrackClip(handle, timeInSecs);
         }
 
+        // Op-provided audio registers itself each frame, like in the editor: [AudioClip] ops with AutoPlay
+        // (the canonical soundtrack form — the settings list is migration-source-only) and loose audio-graph
+        // sources playing through the implicit default bus.
+        AudioClipCollector.RegisterAutoPlayClips(_project, _playback.TimeInBars, timeInSecs);
+        AudioGraphCollector.CollectLooseSources(_project);
+
         // End-of-timeline check is driven by the main soundtrack only.
         if (_soundtrackHandle != null)
         {
-            // Clip TimeRange.Start is in bars; convert to seconds for the end-of-clip comparison.
-            var clipStartSecs = _playback.SecondsFromBars(_soundtrackHandle.Clip.TimeRange.Start);
-            if (timeInSecs >= _soundtrackHandle.Clip.LengthInSeconds + clipStartSecs)
+            // An explicitly trimmed clip end wins over the file's length — the demo ends where the
+            // soundtrack was trimmed to, not where the source file happens to stop.
+            var clip = _soundtrackHandle.Clip;
+            var clipStartSecs = _playback.SecondsFromBars(clip.TimeRange.Start);
+            var endInSecs = clip.TimeRange.End > clip.TimeRange.Start
+                                ? _playback.SecondsFromBars(clip.TimeRange.End)
+                                : clip.LengthInSeconds + clipStartSecs;
+            if (timeInSecs >= endInSecs)
             {
-                if (_resolvedOptions.Loop)
+                if (_startupOptions.Loop)
                 {
                     _playback.TimeInSecs = 0.0;
                 }
@@ -70,8 +82,14 @@ internal static partial class Program
                                               DeviceContext deviceContext,
                                               RenderTargetView renderView)
     {
-        deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, resolution.Width, resolution.Height, 0.0f, 1.0f));
+        // The output is rendered at the requested resolution and stretched onto the back buffer,
+        // whose size follows the window (borderless fullscreen may differ from the requested size).
+        deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _backBufferSize.Width, _backBufferSize.Height, 0.0f, 1.0f));
         deviceContext.OutputMerger.SetTargets(renderView);
+
+        // Clear before evaluating: with a flip-model swap chain an un-drawn back buffer is undefined
+        // (typically white), which hides the fact that the output produced nothing.
+        deviceContext.ClearRenderTargetView(renderView, new Color(0.45f, 0.55f, 0.6f, 1.0f));
 
         evalContext.Reset();
         evalContext.RequestedResolution = resolution;
@@ -85,6 +103,11 @@ internal static partial class Program
         var outputTexture = textureOutput.GetValue(evalContext);
         if (outputTexture == null)
         {
+            if (!_loggedNullOutput)
+            {
+                _loggedNullOutput = true;
+                Log.Warning("Output texture is null - nothing to draw.");
+            }
             return false;
         }
 
@@ -100,7 +123,6 @@ internal static partial class Program
         pixelShader.SetShaderResource(0, _outputTextureSrv);
 
         deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-        deviceContext.ClearRenderTargetView(renderView, new Color(0.45f, 0.55f, 0.6f, 1.0f));
         deviceContext.Draw(3, 0);
         pixelShader.SetShaderResource(0, null);
         return true;

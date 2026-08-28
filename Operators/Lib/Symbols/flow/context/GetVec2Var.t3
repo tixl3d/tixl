@@ -1,0 +1,19 @@
+{
+  "FormatVersion": 3,
+  "Id": "411d3dd4-778b-4012-a19f-05d855fa1baf"/*GetVec2Var*/,
+  "Inputs": [
+    {
+      "Id": "05d0cc68-4f6b-4e03-871c-4de0e6ea0b24"/*VariableName*/,
+      "DefaultValue": "pos"
+    },
+    {
+      "Id": "82944208-d8dc-4da4-8d17-8b9036c551b0"/*FallbackDefault*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

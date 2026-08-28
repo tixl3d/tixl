@@ -66,35 +66,36 @@ internal static class KeyframeCopyAndPasting
             return false;
         }
 
-        if (TryPasteToSameChildren(animParams, dt, MatchType.SameSymbolChildInput, out  newKeyframes))
-            return  true;
-        
-        if (TryPasteToSameChildren(animParams, dt, MatchType.SameSymbolInput, out  newKeyframes))
-            return true;
+        var pairs = CollectMatches(animParams, MatchType.SameSymbolChildInput);
+        if (pairs.Count == 0)
+        {
+            pairs = CollectMatches(animParams, MatchType.SameSymbolInput);
+        }
 
-        if (TryPasteToSameChildren(animParams, dt, MatchType.SameIndex, out  newKeyframes))
-            return true;
+        if (pairs.Count == 0)
+        {
+            // Cross-parameter paste: index matching keeps components aligned (Y stays Y),
+            // but can't map a vector onto several scalar parameters. Distributing the copied
+            // curves over the target curves in order can — prefer whichever transfers more.
+            var indexPairs = CollectMatches(animParams, MatchType.SameIndex);
+            var distributedPairs = CollectDistributed(animParams);
+            pairs = distributedPairs.Count > indexPairs.Count ? distributedPairs : indexPairs;
+        }
 
-        return false;
+        return TryExecutePaste(pairs, dt, out newKeyframes);
     }
 
-    private static bool TryPasteToSameChildren(List<TimeLineCanvas.AnimationParameter> parm, double dt, KeyframeCopyAndPasting.MatchType matchType, out HashSet<VDefinition> newKeyframes)
+    private static List<PastePair> CollectMatches(List<TimeLineCanvas.AnimationParameter> animParams, MatchType matchType)
     {
-        newKeyframes = [];
-        
-        if (_copiedCurvesWithDetails == null || _copiedCurvesWithDetails.Count == 0)
-            return false;
-
-        var commands = new List<ICommand>();
+        var pairs = new List<PastePair>();
+        if (_copiedCurvesWithDetails == null)
+            return pairs;
 
         var used = new bool[_copiedCurvesWithDetails.Count];
-        
-        foreach (var animParam in parm)
+
+        foreach (var animParam in animParams)
         {
             var curveIndex = 0;
-            if (!animParam.Curves.Any())
-                continue;
-            
             foreach (var curve in animParam.Curves)
             {
                 for (var copyPartIndex = 0; copyPartIndex < _copiedCurvesWithDetails.Count; copyPartIndex++)
@@ -108,15 +109,7 @@ internal static class KeyframeCopyAndPasting
                         continue;
 
                     used[copyPartIndex] = true;
-
-                    foreach (var k in copy.Curve.Keys)
-                    {
-                        var newKey = k.Clone();
-                        newKey.U += dt;
-                        newKeyframes.Add(newKey);
-                        commands.Add(new AddKeyframesCommand(curve, newKey));
-                    }
-
+                    pairs.Add(new PastePair(copy.Curve, curve));
                     break;
                 }
 
@@ -124,15 +117,55 @@ internal static class KeyframeCopyAndPasting
             }
         }
 
+        return pairs;
+    }
+
+    private static List<PastePair> CollectDistributed(List<TimeLineCanvas.AnimationParameter> animParams)
+    {
+        var pairs = new List<PastePair>();
+        if (_copiedCurvesWithDetails == null)
+            return pairs;
+
+        var copyIndex = 0;
+        foreach (var animParam in animParams)
+        {
+            foreach (var curve in animParam.Curves)
+            {
+                if (copyIndex >= _copiedCurvesWithDetails.Count)
+                    return pairs;
+
+                pairs.Add(new PastePair(_copiedCurvesWithDetails[copyIndex].Curve, curve));
+                copyIndex++;
+            }
+        }
+
+        return pairs;
+    }
+
+    private static bool TryExecutePaste(List<PastePair> pairs, double dt, out HashSet<VDefinition> newKeyframes)
+    {
+        newKeyframes = [];
+
+        var commands = new List<ICommand>();
+        foreach (var pair in pairs)
+        {
+            foreach (var k in pair.SourceCurve.Keys)
+            {
+                var newKey = k.Clone();
+                newKey.U += dt;
+                newKeyframes.Add(newKey);
+                commands.Add(new AddKeyframesCommand(pair.TargetCurve, newKey));
+            }
+        }
+
         if (commands.Count == 0)
             return false;
-        
+
         UndoRedoStack.AddAndExecute(new MacroCommand("Paste keyframes", commands));
         return true;
     }
 
-    
-    
+
     private static MatchType Compare(KeyframeCopyAndPasting.CurveWithDetails copied, TimeLineCanvas.AnimationParameter param, int curveIndex)
     {
         var symbolChildMatches = param.Instance.SymbolChild.Id == copied.ChildId;
@@ -150,6 +183,8 @@ internal static class KeyframeCopyAndPasting
 
         return MatchType.None;
     }
+
+    private readonly record struct PastePair(Curve SourceCurve, Curve TargetCurve);
 
     private enum MatchType
     {

@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
@@ -47,31 +48,33 @@ internal static class GraphBookmarkNavigation
             return;
         }
 
-        if (ImGui.BeginMenu("Open Bookmark in Graph"))
+        if (CustomComponents.DrawSubMenu(_openBookmarkMenuId, "Open Bookmark in Graph"))
         {
             for (var index = 0; index < _loadBookmarkActions.Length; index++)
             {
                 var action = _loadBookmarkActions[index];
                 var shortcuts = action.ListShortcuts();
                 var isAvailable = DoesBookmarkExist(index);
-                if (ImGui.MenuItem(action.ToString(), shortcuts, false, enabled: isAvailable))
+                if (CustomComponents.DrawMenuItem(_loadBookmarkItemBaseId + index, action.ToString(), shortcuts,
+                                                  isEnabled: isAvailable, reserveIconColumn: false))
                 {
                     LoadBookmark(components, index);
                 }
             }
 
             ImGui.EndMenu();
-                
+
         }
 
-        if (ImGui.BeginMenu("Save Bookmark"))
+        if (CustomComponents.DrawSubMenu(_saveBookmarkMenuId, "Save Bookmark"))
         {
             for (var index = 0; index < _saveBookmarkActions.Length; index++)
             {
                 var action = _saveBookmarkActions[index];
                 var shortcuts = action.ListShortcuts();
-                    
-                if (ImGui.MenuItem(action.ToString(), shortcuts))
+
+                if (CustomComponents.DrawMenuItem(_saveBookmarkItemBaseId + index, action.ToString(), shortcuts,
+                                                  reserveIconColumn: false))
                 {
                     SaveBookmark(components, index);
                 }
@@ -173,6 +176,11 @@ internal static class GraphBookmarkNavigation
     }
         
     private static int _lastInteractionFrame;
+
+    private static readonly int _openBookmarkMenuId = nameof(_openBookmarkMenuId).GetHashCode();
+    private static readonly int _saveBookmarkMenuId = nameof(_saveBookmarkMenuId).GetHashCode();
+    private static readonly int _loadBookmarkItemBaseId = nameof(_loadBookmarkItemBaseId).GetHashCode();
+    private static readonly int _saveBookmarkItemBaseId = nameof(_saveBookmarkItemBaseId).GetHashCode();
 }
 
 // todo - include Project in this

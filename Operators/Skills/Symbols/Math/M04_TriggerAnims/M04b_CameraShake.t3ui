@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "c24dd182-0c86-4e0f-9222-b2d12c892aa3"/*M04b_CameraShake*/,
+  "Description": "Camera Shake",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4a6961d6-9f64-479f-946e-1102df6cd4a2"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "8ceed4d0-55fc-4cee-9840-13d5d3e28685"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "9564c668-d845-430e-b5b5-e831ed1eaf4e"/*Text*/,
+      "SectionId": "09e7a782-b97c-40a0-8217-60950f8bc913",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "9dc29f39-e2cf-4d03-8fbe-7ac123d41cbb"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "09e7a782-b97c-40a0-8217-60950f8bc913",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "b1677930-1d79-4cb3-8574-159724b545e5",
+      "Description": "Build a small camera shake effect.\nAll parameters are already set. Connect the operators correctly to solve the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

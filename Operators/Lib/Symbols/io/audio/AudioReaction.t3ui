@@ -1,0 +1,131 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "03477b9a-860e-4887-81c3-5fe51621122c"/*AudioReaction*/,
+  "Description": "Derives reactive values — level, hits, counts — from audio, for driving animation.\n\nBy default it analyses the final mix, so it reacts to whatever is audible with no wiring. Note that in Live Interactive projects the analysis comes from the audio input device instead of the mix.\n\nTo react to one source rather than everything, insert it into the audio graph: wire sources into Source and route Result on into an [AudioBus]. It then analyses just those sources and passes them through unchanged. Wiring Source while leaving Result unconnected cannot work for timeline clips or video audio — the operator warns when that happens.\n\nInputBand selects what is measured (raw or normalized FFT, frequency bands, their peaks or attacks), and WindowCenter, WindowWidth and WindowEdge narrow it to part of the spectrum. Output picks what Level carries: a pulse per hit, time since the last hit, a hit count, the windowed level, or an accumulating total.",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "02f71a92-d5c8-4dd7-af5f-da12330f60eb"/*Threshold*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Min": 0.01,
+      "Max": 3.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "1139b245-76b4-4f51-a263-ee1a1371073f"/*Bias*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 405.0
+      }
+    },
+    {
+      "InputId": "1d3a1132-e8b9-4c04-99bf-80f6f1530309"/*WindowWidth*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Min": 0.01,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "44409811-1a0f-4be6-83ea-b2f040ebf08b"/*InputBand*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Input"
+    },
+    {
+      "InputId": "80294096-ae64-471a-bcf1-622684e06d56"/*Output*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "GroupTitle": "Output"
+    },
+    {
+      "InputId": "aece14b8-88e0-4817-8204-b79159db8102"/*MinTimeBetweenHits*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 405.0
+      },
+      "Min": 0.001,
+      "Max": 100.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "b1c43d3b-f425-4d62-9d48-07ccb5d08707"/*Amplitude*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "d138c961-b163-428a-9479-2130f1e46314"/*Reset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "f3d7c7fd-4280-4fb4-9f9a-c39b28d1a72b"/*WindowCenter*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f920a79d-c946-4a78-9e68-f64fc3c4a696"/*WindowEdge*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Min": 0.01,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e1749c60-41f0-4e8f-9317-909ef31eeef1"/*Level*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "8ca411d4-10ce-4b90-aeba-3e405ebecba3"/*WasHit*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "829fe194-4b8a-4d54-bde1-a0e023a9a198"/*HitCount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "06eb7729-85d5-4499-8ae7-dd666b824749"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}

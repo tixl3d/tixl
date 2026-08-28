@@ -1,7 +1,9 @@
 #nullable enable
 
+using System.IO;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
@@ -154,10 +156,12 @@ internal sealed class SymbolLibrary : Window
             // Show filtered or full tree depending on filter/search state
             if (_libraryFiltering.AnyFilterActive)
             {
+                UpdatePathToFocusedSymbol(FilteredTree);
                 DrawNode(FilteredTree);
             }
             else if (string.IsNullOrEmpty(_filter.SearchString))
             {
+                UpdatePathToFocusedSymbol(_treeNode);
                 DrawNode(_treeNode);
             }
             else if (_filter.SearchString.Contains('?'))
@@ -256,13 +260,93 @@ internal sealed class SymbolLibrary : Window
     // Set by Reveal() and the aim icon: the symbol item scrolls itself into view once, then clears this.
     private Guid? _scrollToSymbolId;
 
+    // Nodes leading to the highlighted symbol. Rebuilt once per frame and shared by the aim icon and
+    // the expand-on-click: a symbol id can be held by more than one node (two packages registering the
+    // same id), and two independent lookups would disagree on which one to point at.
+    private static readonly List<NamespaceTreeNode> _pathToFocusedSymbol = [];
+
     /// <summary>
-    /// Checks if a <see cref="NamespaceTreeNode"/> is in the path to a symbol, returning the path if found.
+    /// Collects the nodes leading to the symbol the tree should highlight or expand to. Prefers the node
+    /// matching the symbol's registered namespace, so a stray duplicate elsewhere can't win.
     /// </summary>
-    private static bool IsInPathToSymbol(NamespaceTreeNode node, Guid symbolId, out List<NamespaceTreeNode> path)
+    private void UpdatePathToFocusedSymbol(NamespaceTreeNode root)
     {
-        path = new List<NamespaceTreeNode>();
-        return FindPathRecursive(node, symbolId, path);
+        _pathToFocusedSymbol.Clear();
+
+        var focusedId = _expandToSymbolTriggered && _expandToSymbolTargetId.HasValue
+                            ? _expandToSymbolTargetId
+                            : _lastSelectedSymbolId;
+
+        if (focusedId.HasValue && !TryFindPathByNamespace(root, focusedId.Value, _pathToFocusedSymbol))
+        {
+            if (FindPathRecursive(root, focusedId.Value, _pathToFocusedSymbol))
+            {
+                // FindPathRecursive collects on the way out, so it yields the holder first.
+                _pathToFocusedSymbol.Reverse();
+            }
+            else
+            {
+                _pathToFocusedSymbol.Clear();
+            }
+        }
+
+        // A target that isn't reachable, or sits in the root node that draws no tree node, would never
+        // clear the trigger while drawing - and a stuck trigger forces every path node open each frame.
+        if (_pathToFocusedSymbol.Count <= 1)
+        {
+            _expandToSymbolTriggered = false;
+            _expandToSymbolTargetId = null;
+        }
+    }
+
+    /// <summary>
+    /// Walks straight down the symbol's registered namespace and verifies the reached node holds it.
+    /// </summary>
+    private static bool TryFindPathByNamespace(NamespaceTreeNode root, Guid symbolId, List<NamespaceTreeNode> path)
+    {
+        if (!SymbolUiRegistry.TryGetSymbolUi(symbolId, out var symbolUi))
+            return false;
+
+        var nameSpace = symbolUi.Symbol.Namespace;
+        if (string.IsNullOrEmpty(nameSpace))
+            return false;
+
+        var node = root;
+        path.Add(node);
+
+        foreach (var part in nameSpace.Split('.'))
+        {
+            if (part.Length == 0)
+                continue;
+
+            NamespaceTreeNode? match = null;
+            foreach (var child in node.Children)
+            {
+                if (child.Name != part)
+                    continue;
+
+                match = child;
+                break;
+            }
+
+            if (match == null)
+            {
+                path.Clear();
+                return false;
+            }
+
+            node = match;
+            path.Add(node);
+        }
+
+        foreach (var symbol in node.Symbols)
+        {
+            if (symbol.Id == symbolId)
+                return true;
+        }
+
+        path.Clear();
+        return false;
     }
 
     /// <summary>
@@ -312,15 +396,12 @@ internal sealed class SymbolLibrary : Window
 
             // --- Aim icon logic for tree nodes ---
             var selectedSymbolId = _lastSelectedSymbolId;
-            var containsSelected = selectedSymbolId != null && ContainsSymbolRecursive(subtree, selectedSymbolId.Value);
+            var containsSelected = _pathToFocusedSymbol.Contains(subtree);
 
             // Expand all nodes in the path to the target symbol if triggered
-            if (_expandToSymbolTriggered && _expandToSymbolTargetId.HasValue)
+            if (_expandToSymbolTriggered && containsSelected)
             {
-                if (IsInPathToSymbol(subtree, _expandToSymbolTargetId.Value, out var path) && path.Contains(subtree))
-                {
-                    ImGui.SetNextItemOpen(true, ImGuiCond.Always);
-                }
+                ImGui.SetNextItemOpen(true, ImGuiCond.Always);
             }
 
             _treeHandler.UpdateForNode(subtree.Id);
@@ -370,7 +451,10 @@ internal sealed class SymbolLibrary : Window
                 var clicked = ImGui.InvisibleButton("Reveal", new Vector2(h));
                 if (ImGui.IsItemHovered())
                 {
-                    CustomComponents.TooltipForLastItem("Reveal selected operator");
+                    var isComposition = ProjectView.Focused?.CompositionInstance?.Symbol.Id == selectedSymbolId;
+                    CustomComponents.TooltipForLastItem(isComposition
+                                                            ? "Reveal current composition"
+                                                            : "Reveal selected operator");
                 }
 
                 // Animate aim icon
@@ -380,13 +464,8 @@ internal sealed class SymbolLibrary : Window
                 var color = UiColors.StatusActivated.Fade(blinkFade);
                 Icons.DrawIconOnLastItem(Icon.Aim, color);
 
-                // Optionally, scroll to item if just selected
-                if (_expandToSymbolTriggered && selectedSymbolId.HasValue)
-                {
-                    ImGui.SetScrollHereY();
-                }
-
-                // Set expand trigger if clicked
+                // Set expand trigger if clicked. The symbol row scrolls itself into view via
+                // _scrollToSymbolId once the path is expanded.
                 if (clicked && selectedSymbolId.HasValue)
                 {
                     _expandToSymbolTriggered = true;
@@ -398,10 +477,27 @@ internal sealed class SymbolLibrary : Window
             // Context menu for namespace node
             CustomComponents.ContextMenuForItem(() =>
                                                 {
-                                                    if (ImGui.MenuItem("Rename Namespace"))
+                                                    if (CustomComponents.DrawMenuItem(_renameNamespaceId, "Rename Namespace...", reserveIconColumn: false))
                                                     {
                                                         _subtreeNodeToRename = subtree;
                                                         _renameNamespaceDialog.ShowNextFrame();
+                                                    }
+
+                                                    // Nodes above a project root (e.g. the "user" row) group several projects
+                                                    // and don't map to a folder of their own.
+                                                    var mapsToFolder = subtree.FolderType is NamespaceTreeNode.SymbolFolderTypes.Project
+                                                                           or NamespaceTreeNode.SymbolFolderTypes.ProjectSubNamespace;
+                                                    var symbolInNamespace = mapsToFolder ? TryFindFirstSymbolRecursive(subtree) : null;
+
+                                                    if (CustomComponents.DrawMenuItem(_revealNamespaceInExplorerId,
+                                                                                      isProject ? "Reveal Project in Explorer" : "Reveal Namespace in Explorer",
+                                                                                      isEnabled: symbolInNamespace != null,
+                                                                                      reserveIconColumn: false))
+                                                    {
+                                                        var package = symbolInNamespace!.SymbolPackage;
+                                                        RevealInExplorer(SymbolPathHandler.GetDirectoryForNamespace(subtree.Namespace,
+                                                                                   package.RootNamespace,
+                                                                                   package.Folder));
                                                     }
                                                 });
 
@@ -411,15 +507,11 @@ internal sealed class SymbolLibrary : Window
             {
                 _treeHandler.NoFolderOpen = false;
 
-                // Reset expand trigger after expanding and target is visible
-                if (_expandToSymbolTriggered && _expandToSymbolTargetId.HasValue && ContainsSymbolRecursive(subtree, _expandToSymbolTargetId.Value))
+                // The deepest node of the path is open, so the target row is about to be drawn.
+                if (_expandToSymbolTriggered && _pathToFocusedSymbol.Count > 0 && _pathToFocusedSymbol[^1] == subtree)
                 {
-                    // If this is the last node in the path, reset
-                    if (subtree.Symbols.Any(s => s.Id == _expandToSymbolTargetId.Value))
-                    {
-                        _expandToSymbolTriggered = false;
-                        _expandToSymbolTargetId = null;
-                    }
+                    _expandToSymbolTriggered = false;
+                    _expandToSymbolTargetId = null;
                 }
 
                 HandleDroppingSymbol(subtree);
@@ -443,26 +535,6 @@ internal sealed class SymbolLibrary : Window
 
             ImGui.PopID();
         }
-    }
-
-    /// <summary>
-    /// Checks if a <see cref="NamespaceTreeNode"/> contains a symbol with the given ID, recursively.
-    /// </summary>
-    private static bool ContainsSymbolRecursive(NamespaceTreeNode node, Guid symbolId)
-    {
-        foreach (var s in node.Symbols)
-        {
-            if (s.Id == symbolId)
-                return true;
-        }
-
-        foreach (var child in node.Children)
-        {
-            if (ContainsSymbolRecursive(child, symbolId))
-                return true;
-        }
-
-        return false;
     }
 
     /// <summary>
@@ -694,17 +766,36 @@ internal sealed class SymbolLibrary : Window
         }
     }
 
+    /// <summary>
+    /// The symbol the library highlights: the single selected operator, or - with nothing selected -
+    /// the current composition, so the graph's own symbol can be located too.
+    /// </summary>
     private static Guid? TryGetSingleSelectedSymbolId()
     {
-        var nodeSelection = ProjectView.Focused?.NodeSelection;
+        var projectView = ProjectView.Focused;
+        var nodeSelection = projectView?.NodeSelection;
         if (nodeSelection == null)
             return null;
 
-        var selectedChildUis = nodeSelection.GetSelectedChildUis().ToList();
-        if (selectedChildUis.Count != 1)
-            return null;
+        // Iterate instead of GetSelectedChildUis().ToList() - this runs every frame.
+        SymbolUi.Child? singleSelectedChildUi = null;
+        var selectedChildCount = 0;
+        foreach (var node in nodeSelection.Selection)
+        {
+            if (node is not SymbolUi.Child childUi)
+                continue;
 
-        return selectedChildUis[0].SymbolChild?.Symbol.Id;
+            selectedChildCount++;
+            if (selectedChildCount > 1)
+                return null;
+
+            singleSelectedChildUi = childUi;
+        }
+
+        if (singleSelectedChildUi != null)
+            return singleSelectedChildUi.SymbolChild?.Symbol.Id;
+
+        return projectView?.CompositionInstance?.Symbol.Id;
     }
 
     // Helper for clamping float/double values between 0 and 1
@@ -855,10 +946,22 @@ internal sealed class SymbolLibrary : Window
                                                                    // Existing symbol-specific menu
                                                                    CustomComponents.DrawSymbolCodeContextMenuItem(symbol);
 
-                                                                   ImGui.Separator();
+                                                                   if (CustomComponents.DrawMenuItem(_revealSymbolInExplorerId, "Reveal Symbol in Explorer",
+                                                                                                     reserveIconColumn: false))
+                                                                   {
+                                                                       RevealInExplorer(GetFileOfSymbol(symbol));
+                                                                   }
+
+                                                                   if (CustomComponents.DrawMenuItem(_revealProjectInExplorerId, "Reveal Project in Explorer",
+                                                                                                     reserveIconColumn: false))
+                                                                   {
+                                                                       RevealInExplorer(symbol.SymbolPackage.Folder);
+                                                                   }
+
+                                                                   CustomComponents.SeparatorLine();
 
                                                                    // Delete symbol menu entry
-                                                                   if (ImGui.MenuItem("Delete Symbol"))
+                                                                   if (CustomComponents.DrawMenuItem(_deleteSymbolId, "Delete Symbol", reserveIconColumn: false))
                                                                    {
                                                                        _symbolToDelete = symbol;
                                                                        _deleteSymbolDialog.ShowNextFrame();
@@ -1091,4 +1194,66 @@ internal sealed class SymbolLibrary : Window
 
         return false;
     }
+
+    /// <summary>
+    /// The file to select when revealing a symbol: its C# source, or the <c>.t3</c> operator file
+    /// for packages that ship without sources.
+    /// </summary>
+    private static string GetFileOfSymbol(Symbol symbol)
+    {
+        var package = symbol.SymbolPackage;
+        if (package is EditorSymbolPackage editorPackage
+            && editorPackage.TryGetSourceCodePath(symbol, out var sourceCodePath)
+            && !string.IsNullOrEmpty(sourceCodePath))
+        {
+            return sourceCodePath;
+        }
+
+        var folder = SymbolPathHandler.GetDirectoryForNamespace(symbol.Namespace, package.RootNamespace, package.Folder);
+        return Path.Combine(folder, symbol.Name + SymbolPackage.SymbolExtension);
+    }
+
+    private static Symbol? TryFindFirstSymbolRecursive(NamespaceTreeNode node)
+    {
+        if (node.Symbols.Count > 0)
+            return node.Symbols[0];
+
+        foreach (var child in node.Children)
+        {
+            var symbol = TryFindFirstSymbolRecursive(child);
+            if (symbol != null)
+                return symbol;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Reveals a file or folder, falling back to the containing folder when the file itself is gone
+    /// (an operator can be in memory before its files are written).
+    /// </summary>
+    private static void RevealInExplorer(string path)
+    {
+        if (!string.IsNullOrEmpty(path) && (File.Exists(path) || Directory.Exists(path)))
+        {
+            CoreUi.Instance.RevealInFileBrowser(path);
+            return;
+        }
+
+        var folder = string.IsNullOrEmpty(path) ? null : Path.GetDirectoryName(path);
+        if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+        {
+            Log.Warning($"Can't reveal missing path '{path}'");
+            return;
+        }
+
+        CoreUi.Instance.RevealInFileBrowser(folder);
+    }
+
+
+    private static readonly int _renameNamespaceId = nameof(_renameNamespaceId).GetHashCode();
+    private static readonly int _deleteSymbolId = nameof(_deleteSymbolId).GetHashCode();
+    private static readonly int _revealSymbolInExplorerId = nameof(_revealSymbolInExplorerId).GetHashCode();
+    private static readonly int _revealProjectInExplorerId = nameof(_revealProjectInExplorerId).GetHashCode();
+    private static readonly int _revealNamespaceInExplorerId = nameof(_revealNamespaceInExplorerId).GetHashCode();
 }

@@ -127,7 +127,7 @@ public static class GradientEditor
 
         CustomComponents.ContextMenuForItem(() =>
                                             {
-                                                if (ImGui.MenuItem("Reverse"))
+                                                if (CustomComponents.DrawMenuItem(_reverseId, "Reverse", reserveIconColumn: false))
                                                 {
                                                     foreach (var s in gradientForEditing.Steps)
                                                     {
@@ -141,7 +141,8 @@ public static class GradientEditor
                                                 var isHold = gradientForEditing.Interpolation == Gradient.Interpolations.Hold;
                                                 var stepCount = gradientForEditing.Steps.Count;
                                                 var canDistribute = stepCount >= 2 || (stepCount == 1 && !isHold);
-                                                if (ImGui.MenuItem("Distribute evenly", canDistribute))
+                                                if (CustomComponents.DrawMenuItem(_distributeEvenlyId, "Distribute Evenly", isEnabled: canDistribute,
+                                                                                  reserveIconColumn: false))
                                                 {
                                                     var steps = gradientForEditing.Steps;
                                                     if (isHold)
@@ -171,7 +172,7 @@ public static class GradientEditor
                                                     editResult = InputEditStateFlags.ModifiedAndFinished;
                                                 }
 
-                                                if (ImGui.BeginMenu("Gradient presets..."))
+                                                if (CustomComponents.DrawSubMenu(_gradientPresetsId, "Gradient Presets"))
                                                 {
                                                     var foregroundDrawList = ImGui.GetForegroundDrawList();
 
@@ -204,7 +205,7 @@ public static class GradientEditor
                                                         ImGui.PopID();
                                                     }
 
-                                                    if (ImGui.MenuItem("Save"))
+                                                    if (CustomComponents.DrawMenuItem(_savePresetId, "Save", reserveIconColumn: false))
                                                     {
                                                         GradientPresets.Presets.Add(gradientForEditing.TypedClone());
                                                         GradientPresets.Save();
@@ -213,12 +214,13 @@ public static class GradientEditor
                                                     ImGui.EndMenu();
                                                 }
 
-                                                if (ImGui.BeginMenu("Interpolation..."))
+                                                if (CustomComponents.DrawSubMenu(_interpolationId, "Interpolation"))
                                                 {
                                                     foreach (Gradient.Interpolations value in Enum.GetValues(typeof(Gradient.Interpolations)))
                                                     {
                                                         var isSelected = gradientForEditing.Interpolation == value;
-                                                        if (ImGui.MenuItem(value.ToString(), "", isSelected))
+                                                        if (CustomComponents.DrawMenuItem(_interpolationId + 1 + (int)value, value.ToString(), null, isSelected,
+                                                                                          reserveIconColumn: false))
                                                         {
                                                             gradientForEditing.Interpolation = value;
                                                             editResult = InputEditStateFlags.ModifiedAndFinished;
@@ -506,4 +508,12 @@ public static class GradientEditor
     private const float RequiredHeightForHandles = 20;
     private const int MinInsertHeight = 15;
     public static Vector2 StepHandleSize => new Vector2(9, 15) * T3Ui.UiScaleFactor;
+
+    private static readonly int _reverseId = nameof(_reverseId).GetHashCode();
+    private static readonly int _distributeEvenlyId = nameof(_distributeEvenlyId).GetHashCode();
+    private static readonly int _gradientPresetsId = nameof(_gradientPresetsId).GetHashCode();
+    private static readonly int _savePresetId = nameof(_savePresetId).GetHashCode();
+
+    // The rows inside this submenu derive their ids by offsetting the submenu's own id.
+    private static readonly int _interpolationId = nameof(_interpolationId).GetHashCode();
 }

@@ -50,6 +50,15 @@ public sealed class CodeAssembleContext
         ContextIdStack.RemoveAt(ContextIdStack.Count - 1);
     }
 
+    /**
+     * A node reachable through several paths is traversed once per path, but
+     * its instance-specific definitions must only be emitted once.
+     */
+    internal bool TryMarkDefinitionsAdded(ShaderGraphNode node)
+    {
+        return _nodesWithDefinitions.Add(node);
+    }
+
     public void AppendCall(string code)
     {
         Calls.Append(new string('\t', (IndentCount + 1)));
@@ -89,6 +98,7 @@ public sealed class CodeAssembleContext
 
     private readonly Stack<StringBuilder> _subMethodCalls = new();
     private int _subMethodCallsLenght;
+    private readonly HashSet<ShaderGraphNode> _nodesWithDefinitions = new();
 
 
     //public Stack<ShaderGraphNode> NodeStack = [];
@@ -102,6 +112,7 @@ public sealed class CodeAssembleContext
         Definitions.Clear();
         Calls.Clear();
         _subMethodCalls.Clear();
+        _nodesWithDefinitions.Clear();
         ContextIdStack.Clear();
 
         IndentCount = 0;

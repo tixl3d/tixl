@@ -9,6 +9,9 @@ using T3.Core.Settings;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Migrations.AssetPaths;
+using T3.Editor.Migrations.Variations;
+using T3.Editor.Migrations.AudioClips;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Compilation;
@@ -43,9 +46,9 @@ internal static partial class ProjectSetup
             
         #if DEBUG
         isDebugBuild = true;
-        System.Diagnostics.Stopwatch totalStopwatch = new();
-        totalStopwatch.Start();
         #endif
+
+        var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         if (!isDebugBuild)
         {
@@ -58,6 +61,7 @@ internal static partial class ProjectSetup
 
         // Load projects
         LoadProjects(csProjFiles, forceRecompile, out var failedProjects);
+        var projectsMs = totalStopwatch.ElapsedMilliseconds;
 
         // Keep projects that failed to load visible and recoverable instead of silently dropping them
         // — a single broken project shouldn't just vanish from the Hub.
@@ -71,7 +75,8 @@ internal static partial class ProjectSetup
 
             BrokenProjects.Add(new BrokenProjectInfo(failed.fileInfo, failed.csProjFile,
                                                      failed.failureReason ?? "The project could not be loaded.",
-                                                     failed.hint));
+                                                     failed.hint,
+                                                     failed.likelySyncConflict));
         }
 
         // Phase 1: Initial Startup Migration
@@ -88,16 +93,23 @@ internal static partial class ProjectSetup
         
         // Register UI types
         UiRegistration.RegisterUiTypes();
+        var uiTypesMs = totalStopwatch.ElapsedMilliseconds;
 
         var allPackages = _activePackages.ToArray();
         // Update all symbol packages
         UpdateSymbolPackages(allPackages);
+        var symbolsMs = totalStopwatch.ElapsedMilliseconds;
 
         WarnAboutUnresolvedChildren(allPackages);
         WarnAboutCorruptedSymbolFiles(allPackages);
 
         // Needs registered symbols to resolve which project owns each variation file
-        VariationsMigration.MigrateLegacyVariationsToPackageMeta();
+        VariationsMigration.MigrateVariationsToPackageMeta();
+
+        // Needs the [AudioClip] symbol registered (Lib). In-memory only — persists via the regular
+        // save machinery once the user saves the flagged symbols.
+        AudioClipsToOps.MigrateSettingsClipsToOps();
+        var migrationsMs = totalStopwatch.ElapsedMilliseconds;
 
         // Initialize resources and shader linting
         Log.Info("Initializing package resources...");
@@ -105,6 +117,7 @@ internal static partial class ProjectSetup
         {
             InitializePackageResources(package);
         }
+        var resourcesMs = totalStopwatch.ElapsedMilliseconds;
         
         // FIXME: This needs to be properly handled.
         //ShaderLinter.AddPackage(SharedResources.ResourcePackage, ResourceManager.SharedShaderPackages);
@@ -119,10 +132,12 @@ internal static partial class ProjectSetup
             }
         }
 
-        #if DEBUG
         totalStopwatch.Stop();
-        Log.Debug($">> Total load time: {totalStopwatch.ElapsedMilliseconds/1000:0.0}s");
-        #endif
+        var shadowCopy = AssemblyInformation.ShadowCopyStats;
+        Log.Debug($">> Total load time: {totalStopwatch.ElapsedMilliseconds/1000.0:0.0}s "
+                  + $"(projects {projectsMs/1000.0:0.0}s, asset migration+ui types {(uiTypesMs - projectsMs)/1000.0:0.0}s, symbols {(symbolsMs - uiTypesMs)/1000.0:0.0}s, "
+                  + $"migrations {(migrationsMs - symbolsMs)/1000.0:0.0}s, resources {(resourcesMs - migrationsMs)/1000.0:0.0}s; "
+                  + $"shadow copies {shadowCopy.Bytes/(1024.0*1024.0):0} MB in {shadowCopy.Milliseconds/1000.0:0.0}s)");
     }
 
     /// <summary>
@@ -192,7 +207,8 @@ internal static partial class ProjectSetup
         CsProjectFile? csProjFile,
         bool success,
         string? failureReason = null,
-        string? hint = null);
+        string? hint = null,
+        bool likelySyncConflict = false);
 
     /// <summary>
     /// Load each project file and its associated assembly
@@ -208,8 +224,13 @@ internal static partial class ProjectSetup
                                   if (!CsProjectFile.TryLoad(fileInfo, out var loadInfo))
                                   {
                                       Log.Error($"Failed to load project at \"{fileInfo.FullName}\":\n{loadInfo.Error}");
+                                      var likelySyncConflict = SyncToolConflicts.IsLikelySyncConflict(loadInfo.Exception, fileInfo.DirectoryName);
                                       return new ProjectLoadInfo(fileInfo, null, false,
-                                                                 "The project file could not be read.", loadInfo.Error);
+                                                                 likelySyncConflict
+                                                                     ? "TiXL was not allowed to read the project file."
+                                                                     : "The project file could not be read.",
+                                                                 loadInfo.Error,
+                                                                 likelySyncConflict);
                                   }
                                   
                                   var csProjFile = loadInfo.CsProjectFile!;
@@ -224,6 +245,11 @@ internal static partial class ProjectSetup
                                       return new ProjectLoadInfo(fileInfo, csProjFile, true); // Mark as success but don't process further
                                   }
                                   
+                                  // Bring the project to the current format before anything reads or
+                                  // writes build output - the compile below must already target the
+                                  // migrated paths, and file watchers aren't attached yet.
+                                  Migrations.ProjectFormatMigration.MigrateIfNeeded(csProjFile);
+
                                   var needsCompile = forceRecompile || loadInfo.NeedsRecompile || !Directory.Exists(csProjFile.GetBuildTargetDirectory());
 
                                   if (needsCompile && !csProjFile.TryRecompile(true, out var failureLog))
@@ -258,8 +284,11 @@ internal static partial class ProjectSetup
 
     private static FileInfo[] FindCsProjFiles(bool includeBuiltInAsProjects)
     {
+        // A csproj under an Export path segment is part of a player export, not a project of its own
+        var exportSegment = Path.DirectorySeparatorChar + FileLocations.ExportSubFolder + Path.DirectorySeparatorChar;
         return GetProjectDirectories(includeBuiltInAsProjects)
               .SelectMany(dir => Directory.EnumerateFiles(dir, "*.csproj", SearchOption.AllDirectories))
+              .Where(path => !path.Contains(exportSegment, StringComparison.OrdinalIgnoreCase))
               .Select(x => new FileInfo(x))
               .ToArray();
         
@@ -292,15 +321,18 @@ internal static partial class ProjectSetup
                 }
             }
 
+            // Skip project folders literally named "Export" - a plain Contains() would also drop
+            // any project whose path merely contains the word (e.g. a user folder "ExportTools").
             var projectSearchDirectories = topDirectories
                                           .Where(Directory.Exists)
                                           .SelectMany(Directory.EnumerateDirectories)
-                                              .Where(dirName => !dirName.Contains(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase));
+                                              .Where(dirName => !Path.GetFileName(dirName)
+                                                                     .Equals(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase));
 
             // Add Built-in packages as projects
             if (includeBuiltInAsProjects)
             {
-                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(Path.Combine(_t3ParentDirectory, FileLocations.OperatorsSubFolder))
+                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(BuiltInOperatorDirectory)
                                                                                     .Where(path =>
                                                                                            {
                                                                                                var subDir = Path.GetFileName(path);
@@ -313,6 +345,12 @@ internal static partial class ProjectSetup
         }
     }
 
+
+    /// <summary>
+    /// Source folder of the operator packages shipped with TiXL. Release builds load these as read-only
+    /// packages; debug builds compile them as regular projects, so this is the only way to tell them apart.
+    /// </summary>
+    internal static string BuiltInOperatorDirectory => Path.GetFullPath(Path.Combine(_t3ParentDirectory, FileLocations.OperatorsSubFolder));
 
     private static readonly string _coreOperatorDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder);
     private static readonly string _t3ParentDirectory = Path.Combine(FileLocations.StartFolder, "..", "..", "..", "..");

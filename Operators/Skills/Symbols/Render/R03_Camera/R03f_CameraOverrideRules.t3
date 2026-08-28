@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "b8ff7779-3de5-4930-b9a7-26f1b3436479"/*R03f_CameraOverrideRules*/,
+  "Inputs": [],
+  "Children": [
+    {
+      "Id": "3edf3b8f-30e3-4907-832f-4d8b48e9a814"/*Text*/,
+      "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "InputValues": [
+        {
+          "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
+          "Type": "System.String",
+          "Value": "Task"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "bba920ec-d95a-4965-b4e6-069475d8cf79"/*Text*/,
+      "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "InputValues": [
+        {
+          "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
+          "Type": "System.String",
+          "Value": "Solution"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "fe90109e-8296-431b-9d3e-4e0e6458f9f8"/*DrawQuiz*/,
+      "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
+      "InputValues": [],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "fe90109e-8296-431b-9d3e-4e0e6458f9f8",
+      "SourceSlotId": "63a74fd8-a6e7-4d6f-b63d-179d7ff8ca4f",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "8c7e5903-ce7e-45e7-b9e8-d3a33247be27"
+    },
+    {
+      "SourceParentOrChildId": "bba920ec-d95a-4965-b4e6-069475d8cf79",
+      "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
+      "TargetParentOrChildId": "fe90109e-8296-431b-9d3e-4e0e6458f9f8",
+      "TargetSlotId": "8f4f0caa-b710-47c1-94dd-346f03fac3c8"
+    },
+    {
+      "SourceParentOrChildId": "3edf3b8f-30e3-4907-832f-4d8b48e9a814",
+      "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
+      "TargetParentOrChildId": "fe90109e-8296-431b-9d3e-4e0e6458f9f8",
+      "TargetSlotId": "a6f445ac-1be1-4921-baee-cf2caf5a6a90"
+    }
+  ]
+}

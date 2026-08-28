@@ -1,0 +1,83 @@
+{
+  "FormatVersion": 3,
+  "Id": "e8a32d90-1e42-4c8a-9f31-0ab1cd2e0300"/*DuckAudioLevel*/,
+  "Description": "Converts a level signal into a smoothed ducking gain.\n\nWhile Level (wire it from an [AudioLevel] tap) exceeds Threshold, Gain dips toward 1 − Amount with the Attack ramp and recovers to 1 with the Release ramp. Wire Gain into the Volume of a [CombineAudio] or [AudioBus] to duck one signal under another — e.g. music under a voice-over.\n\nTips\nThe metered level trails the audible signal by about a frame; for ducking this is inaudible.",
+  "InputUis": [
+    {
+      "InputId": "1fa75271-73c7-47d3-b536-1bfcc134ff73"/*GainAndBias*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 255.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "GainAndBias"
+    },
+    {
+      "InputId": "e8a32d90-0002-4c8a-9f31-0ab1cd2e0300"/*Level*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "e8a32d90-0003-4c8a-9f31-0ab1cd2e0300"/*Threshold*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "e8a32d90-0004-4c8a-9f31-0ab1cd2e0300"/*Amount*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "e8a32d90-0005-4c8a-9f31-0ab1cd2e0300"/*Attack*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Min": 0.001,
+      "Max": 2.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "e8a32d90-0006-4c8a-9f31-0ab1cd2e0300"/*Release*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Min": 0.001,
+      "Max": 5.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e8a32d90-0001-4c8a-9f31-0ab1cd2e0300"/*Gain*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

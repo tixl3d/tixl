@@ -15,7 +15,9 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
 {
     protected AnimationCanvas()
     {
-        ScrollTarget = new Vector2(-2.5f, 0.0f);
+        // Start with time 0 well right of the left edge — the dope sheet's parameter headers
+        // overlay that edge and would otherwise cover keyframes at the content start.
+        ScrollTarget = new Vector2(-3f, 0.0f);
         ScaleTarget = new Vector2(80, -1);
     }
 
@@ -133,15 +135,23 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
         // and TimelineCurveEditor in the inline-pane layout), each one's own
         // "clear on Replace" wipes out the previous manipulator's additions, so only the last
         // dispatched editor's hits survive. Clear once up front, then dispatch as Add.
+        // Only manipulators the fence actually concerns are cleared/updated — the clip lanes
+        // opt out when the fence is entirely over the keyframe rows (see ParticipatesInFence).
         if (selectMode == SelectionFence.SelectModes.Replace)
         {
-            ClearSelection();
+            foreach (var sh in TimeObjectManipulators)
+            {
+                if (sh.ParticipatesInFence(screenArea))
+                    sh.ClearSelection();
+            }
+
             selectMode = SelectionFence.SelectModes.Add;
         }
 
         foreach (var sh in TimeObjectManipulators)
         {
-            sh.UpdateSelectionForArea(screenArea, selectMode);
+            if (sh.ParticipatesInFence(screenArea))
+                sh.UpdateSelectionForArea(screenArea, selectMode);
         }
     }
 

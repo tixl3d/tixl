@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "130f351c-159b-4259-9c97-605ffe6d535c"/*M03a_BooleanValues*/,
+  "Description": "Boolean Values",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "046ec7d9-108b-44ba-af0b-46e6ab9bc851"/*Text*/,
+      "SectionId": "f59da28d-5400-4822-b7cd-f8c6908fc5c6",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "81f35510-4969-4e32-a3b1-52b4a00b3cf7"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "ccbdf520-d1df-448c-90ce-d4862987c178"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "7d433093-c2fe-44cc-bded-827b7f64f0c7"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "f59da28d-5400-4822-b7cd-f8c6908fc5c6",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "39e2bae8-4653-429e-9684-96f6e814ef23",
+      "Description": "Booleans, or “bools”, are numbers with only two possible values.\nThey can be zero (false) or one (true). A boolean represents a single bit."
+    },
+    {
+      "Id": "58398d03-7394-4b81-a64e-9ddde6f03d6a",
+      "Description": "In TiXL, booleans are important because they are used by parameters that enable or disable things, such as checkboxes.\nThey are also used to drive trigger-like behavior. Triggers are covered in the next topic."
+    },
+    {
+      "Id": "c285ac7d-e167-4dc2-bc9d-c2f7f2ba2db7",
+      "Description": "Define a boolean value using the [Bool] operator.\nYou can toggle it directly in the graph. To move the operator without toggling it, use the drag handle on the left edge.",
+      "Style": "CallToAction"
+    }
+  ]
+}

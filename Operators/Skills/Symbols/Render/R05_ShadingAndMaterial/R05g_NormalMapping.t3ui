@@ -1,0 +1,83 @@
+{
+  "FormatVersion": 3,
+  "Id": "c65e8c85-816b-456c-98fb-5c851802e8d6"/*R05g_NormalMapping*/,
+  "Description": "Normal Mapping",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "19890bfa-f31a-47ae-8e25-a162cffc3b54"/*Text*/,
+      "SectionId": "28cd95dc-0a78-4f0b-b768-ede8a77a028a",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "5989edf9-b989-41aa-84c1-2cea825f1b93"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "e9ee45c4-8797-4fa4-ae30-a9caeb0b6ff8"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2b67ef9e-c4ad-45d9-8bd8-f853f41fe2b4"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "28cd95dc-0a78-4f0b-b768-ede8a77a028a",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "c2f2ef5e-2e9d-4cf3-9247-7b384e9001d0",
+      "Description": "Raymarched SDFs will be covered in detail later.\nSince they use the same material and lighting system, they can be used here to demonstrate normal mapping."
+    },
+    {
+      "Id": "d9e34f7c-ce78-4d1c-937e-822c6a40b130",
+      "Description": "Normal maps store surface curvature information in their color channels.\nThey are commonly used to add fine surface detail without increasing geometry complexity."
+    },
+    {
+      "Id": "6b3bf149-2288-4837-b61c-8fb147462b59",
+      "Description": "Normal map formats vary.\nThe [NormalMap] operator converts a grayscale height map into a normal map."
+    },
+    {
+      "Id": "d5146857-296e-4f05-91b2-7c541d71c9ee",
+      "Description": "In this example, a [FractalNoise] operator is animated to drive the normal map.\nThe noise must be seamless to avoid visible artifacts where the pattern wraps."
+    },
+    {
+      "Id": "b73f9804-0a7c-4354-a2cc-132460d8a188",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

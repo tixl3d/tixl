@@ -222,6 +222,11 @@ public sealed class VideoFileEncoder : IDisposable
                 Buffer.MemoryCopy(src + (long)y * sourceStride, dest + (long)y * destStride, destStride, rowBytes);
         }
 
+        // SendFrame only takes a *reference* to the frame's buffer, and the encoder's worker threads keep reading
+        // it after the call returns. Scaling into the same buffer for the next frame would overwrite slices the
+        // encoder is still consuming — a torn picture mixing two frames. Clones only while the buffer is shared.
+        ffmpeg.av_frame_make_writable(_encoderFrame);
+
         ScaleSourceFrame();
         _encoderFrame.Pts = _nextVideoPts++;
         _videoCodecContext.SendFrame(_encoderFrame);

@@ -17,6 +17,7 @@ using T3.Editor.Gui;
 using T3.Editor.Gui.Interaction.Camera;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.StartupCheck;
+using T3.Editor.Migrations.AssetPaths;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
@@ -151,6 +152,7 @@ internal static class Program
 
         CultureInfo.CurrentCulture = new CultureInfo("en-US");
         ShaderCompiler.ShaderCacheSubdirectory = $"Editor_{VersionText}";
+        ShaderCompiler.PruneCache(TimeSpan.FromDays(30));
 
         // ReSharper disable once UnusedVariable
         var userSettings = new UserSettings(saveOnQuit: true);

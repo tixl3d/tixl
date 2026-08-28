@@ -49,6 +49,9 @@ public sealed partial class AssemblyInformation
 
     public bool IsLoaded => _loadContext != null;
 
+    /// <summary>Total bytes and milliseconds spent shadow-copying editable packages in this process.</summary>
+    public static (long Bytes, long Milliseconds) ShadowCopyStats => (ShadowCopyStatistics.Bytes, ShadowCopyStatistics.Milliseconds);
+
     /// <summary>
     /// True if the package has an OperatorPackage.json but no compiled assembly DLL beside it (e.g. an
     /// asset-only package exported to the Player). Such packages still need to be registered as

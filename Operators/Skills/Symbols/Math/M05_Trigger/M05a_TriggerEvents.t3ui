@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "ce6dadc1-ace3-49a2-84b8-453d70688dbb"/*M05a_TriggerEvents*/,
+  "Description": "Trigger Events",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "365c5de5-26a6-48a5-8c79-ac7b48eaa8af"/*Text*/,
+      "SectionId": "d0097b67-fc8b-419c-88a7-0db71b63e027",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "8259f8ab-5915-43bd-bcdc-ecece24e76a0"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "d72d1221-d868-49c0-bcdd-0f2da50f9b98"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "8a8080a1-aa17-47b2-a112-b690ac7ad2a5"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "d0097b67-fc8b-419c-88a7-0db71b63e027",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "ed92e9f6-e408-4baf-8f06-e88b6a3c854c",
+      "Description": "Earlier, trigger events were mentioned.\nInternally, trigger parameters are just boolean values: true or false."
+    },
+    {
+      "Id": "15165cf5-b7a9-411a-a618-7c61c49ad925",
+      "Description": "What makes them special is how they are used.\nIn TiXL, triggers usually describe booleans that are true for a single frame, or parameters that only react when the value changes from false to true."
+    },
+    {
+      "Id": "f80274a4-5529-468e-96df-618ceedeef45",
+      "Description": "Many animation operators provide a [WasHit] output.\nIt becomes true whenever a new cycle starts and is a common trigger source."
+    },
+    {
+      "Id": "00582c72-3489-4ad4-b0e8-1fe8604daa9e",
+      "Description": "In this example, a value is constantly incremented, counting frames.\nReset the counter at the beginning of each bar.",
+      "Style": "CallToAction"
+    }
+  ]
+}

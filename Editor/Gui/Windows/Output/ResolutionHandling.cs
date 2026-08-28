@@ -34,7 +34,7 @@ internal static class ResolutionHandling
 
                 CustomComponents.ContextMenuForItem(() =>
                                                     {
-                                                        if (ImGui.MenuItem("Remove"))
+                                                        if (CustomComponents.DrawMenuItem(_removeResolutionId, "Remove", reserveIconColumn: false))
                                                         {
                                                             _resolutions.Remove(resolution);
                                                             Save();
@@ -184,6 +184,7 @@ internal static class ResolutionHandling
     }
 
     private static Resolution _resolutionForEdit = new("untitled", 256, 256);
+    private static readonly int _removeResolutionId = nameof(_removeResolutionId).GetHashCode();
 
     public sealed class Resolution
     {

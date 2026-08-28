@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "d4f21c80-1e42-4c8a-9f31-0ab1cd2e0200"/*AudioLevel*/,
+  "Inputs": [
+    {
+      "Id": "d4f21c80-0003-4c8a-9f31-0ab1cd2e0200"/*Input*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

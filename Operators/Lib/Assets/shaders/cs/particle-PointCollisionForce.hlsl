@@ -78,7 +78,7 @@ void DispersePoints(uint3 DTid : SV_DispatchThreadID, uint GI: SV_GroupIndex)
                 float r2 = particles[otherIndex].Radius;
 
                 float3 pToO = pos - otherPos;
-                float centerDistance = length(pToO);
+                float centerDistance = length(pToO) + 0.0001;
                 if(centerDistance < 0.0001) 
                 {
                     pToO = hash41u(gi).xyz * float3(1,1,0) * 0.01;

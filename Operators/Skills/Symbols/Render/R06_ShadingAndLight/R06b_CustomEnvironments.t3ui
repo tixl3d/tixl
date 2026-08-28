@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "9c27c938-5bf5-4d64-8673-17b5152ba227"/*R06b_CustomEnvironments*/,
+  "Description": "Custom Environments",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4e47e005-77a9-496e-aeeb-0cad21da6bd5"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "e0c1d9ec-7a2b-458b-9497-6d93822567fa"/*Text*/,
+      "SectionId": "2f7263bf-b443-4b92-ae20-71a9f8bc9ca1",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "eae90e0e-84a2-47db-9abe-32857774a8f3"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a093657d-fc68-4984-a2ce-01cdd7e1705a"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "2f7263bf-b443-4b92-ae20-71a9f8bc9ca1",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "af7ed505-1eeb-4ff4-8ea5-69b2afe820a5",
+      "Description": "A texture can be connected to [SetEnvironment].\nIt accepts either a CubeMap or an HDR environment texture."
+    },
+    {
+      "Id": "3dc6cd9a-6246-4a88-9d75-479dff2f8b89",
+      "Description": "In this example, a custom environment is created by cycling a [LinearGradient]."
+    },
+    {
+      "Id": "d92e05d0-146d-47ba-b3a4-3126b461d093",
+      "Description": "All parameters are already set.\nConnect the operators to recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

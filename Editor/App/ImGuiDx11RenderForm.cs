@@ -107,6 +107,15 @@ internal class ImGuiDx11RenderForm : RenderForm
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
             var files = (string[]) e.Data.GetData(DataFormats.FileDrop)!;
+
+            // A single dropped folder opens the import dialog instead of the per-file drop zones
+            if (files.Length == 1 && System.IO.Directory.Exists(files[0]))
+            {
+                DragAndDropHandling.CancelExternalDrag();
+                Gui.Windows.AssetLib.FolderImportDialog.ShowForFolder(files[0]);
+                return;
+            }
+
             FilesDropped?.Invoke(files, pos);
             DragAndDropHandling.CompleteExternalDrop(DragAndDropHandling.DragTypes.ExternalFile,
                 string.Join("|", files));

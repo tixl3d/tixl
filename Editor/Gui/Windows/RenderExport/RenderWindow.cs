@@ -650,6 +650,11 @@ internal sealed class RenderWindow : Window
                                                codec => CodecDisplayName(codec),
                                                codec => DropdownEstimateSuffix(codec, estRes, estFrames, estDuration, estBitrate, estSamples));
 
+        // The container follows the codec (HAP/ProRes need .mov, FFV1 .mkv); re-sync the path here too, since the
+        // Output Target section (which also syncs it) may never be drawn before the user hits Render.
+        if (modified)
+            s.VideoFilePath = RenderPaths.WithCodecExtension(s.VideoFilePath, s.VideoCodec);
+
         DrawCodecAvailabilityHint(s.VideoCodec);
 
         // Continuous capture leans on a hardware encoder to keep realtime pace; warn (but allow) otherwise.
@@ -740,18 +745,7 @@ internal sealed class RenderWindow : Window
         }
 
         // Keep the filename's extension in sync with the chosen codec's container.
-        var videoExtension = s.VideoCodec.GetFileExtension();
-        if (filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
-            || filename.EndsWith(".mov", StringComparison.OrdinalIgnoreCase)
-            || filename.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
-        {
-            filename = filename[..^4];
-        }
-
-        if (!filename.EndsWith(videoExtension, StringComparison.OrdinalIgnoreCase))
-            filename += videoExtension;
-
-        s.VideoFilePath = Path.Combine(directory, filename);
+        s.VideoFilePath = RenderPaths.WithCodecExtension(Path.Combine(directory, filename), s.VideoCodec);
 
         RenderProcess.TryGetRenderResolution(s, out var estRes);
         var estFrames = RenderTiming.ComputeFrameCount(s);

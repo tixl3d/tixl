@@ -1,5 +1,4 @@
 #nullable enable
-using System.Diagnostics;
 using System.Threading.Tasks;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
@@ -255,31 +254,8 @@ internal sealed class WelcomeAlphaWindow : WelcomeWindowBase
     private static void DrawRestartEditorButton(string tooltip)
     {
         if (CustomComponents.DrawCtaButton("Restart Editor", Icon.None, UiColors.ForegroundFull, UiColors.StatusActivated, Color.Transparent))
-            RestartEditor();
+            EditorRestart.TryRestart();
         CustomComponents.TooltipForLastItem(tooltip);
-    }
-
-    /// <summary>Launches a fresh editor process and exits this one. Settings are saved by the process-exit handler.</summary>
-    private static void RestartEditor()
-    {
-        var exePath = Environment.ProcessPath;
-        if (string.IsNullOrEmpty(exePath))
-        {
-            Log.Warning("Could not restart: the executable path is unknown.");
-            return;
-        }
-
-        try
-        {
-            Process.Start(exePath);
-        }
-        catch (Exception e)
-        {
-            Log.Warning($"Could not restart the editor: {e.Message}");
-            return;
-        }
-
-        Environment.Exit(0);
     }
 
     private void DrawTestFeaturesTab()

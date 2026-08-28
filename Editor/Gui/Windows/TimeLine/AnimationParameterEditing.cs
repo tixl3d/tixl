@@ -55,7 +55,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
         TimeLineCanvas.DeleteSelectedElements(composition);
     }
 
-    public TimeRange GetSelectionTimeRange()
+    public virtual TimeRange GetSelectionTimeRange()
     {
         var timeRange = TimeRange.Undefined;
         foreach (var s in SelectedKeyframes)
@@ -66,7 +66,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
         return timeRange;
     }
 
-    public void UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)
+    public virtual void UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)
     {
         foreach (var vDefinition in SelectedKeyframes)
         {
@@ -79,6 +79,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
     protected override void ViewAllOrSelectedKeys(bool alsoChangeTimeRange = false)
     {
         var hasSomeKeys = TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds);
+        var extraPaddingLeft = 0f;
         if (this is DopeSheetArea dopeSheet)
         {
             if (dopeSheet.TimeLineCanvas.ClipArea.TryGetBounds(out var clipBounds, !hasSomeKeys))
@@ -93,16 +94,21 @@ internal abstract class AnimationParameterEditing : CurveEditing
                     bounds = clipBounds;
                 }
             }
+
+            // The parameter headers overlay the left edge of the dope sheet — reserve their width
+            // so keyframes at the content start stay visible after the fit.
+            extraPaddingLeft = dopeSheet.GetMaxHeaderWidth();
         }
 
         // useStoredWindowSize: this also runs from the timeline context-menu "View All" (inside a popup), where
         // the live ImGui window is the menu, not the canvas — using the canvas's own size keeps the fit correct.
-        TimeLineCanvas.Current?.SetScopeToCanvasArea(bounds, flipY: true, 300, 50, useStoredWindowSize: true);
+        TimeLineCanvas.Current?.SetScopeToCanvasArea(bounds, flipY: true, 300, 50, useStoredWindowSize: true,
+                                                     extraPaddingLeft: extraPaddingLeft);
     }
 
     //
     // Selection helpers — shared by DopeSheetArea and TimelineCurveEditor so the timeline's
-    // SelectionRangeIndicator / TimeSelectionArea can operate in either mode.
+    // SelectionRangeIndicator / KeySetStrip can operate in either mode.
     //
 
     public bool IsKeyframeSelected(VDefinition v) => SelectedKeyframes.Contains(v);
@@ -111,6 +117,28 @@ internal abstract class AnimationParameterEditing : CurveEditing
 
     public IEnumerable<VDefinition> EnumerateSelectedKeyframes() => SelectedKeyframes;
     public IEnumerable<VDefinition> EnumerateAllKeyframes() => GetAllKeyframes();
+
+    /// <summary>
+    /// Enumerates keyframes together with their parameter's curve-time ↔ playback-time mapping, so
+    /// aggregate consumers (keyset strip, time warp) can position and move keys in playback space.
+    /// </summary>
+    public IEnumerable<(VDefinition Def, TimeLineCanvas.ParamTimeMapping Mapping)> EnumerateKeyframesWithMapping(bool selectedOnly)
+    {
+        foreach (var param in AnimationParameters)
+        {
+            var mapping = param.BuildTimeMapping();
+            foreach (var curve in param.Curves)
+            {
+                foreach (var def in curve.GetVDefinitions())
+                {
+                    if (selectedOnly && !SelectedKeyframes.Contains(def))
+                        continue;
+
+                    yield return (def, mapping);
+                }
+            }
+        }
+    }
 
     public void CopyAllCurvesTo(List<Curve> buffer)
     {
@@ -126,7 +154,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
             buffer.Add(v);
     }
 
-    public TimeRange GetAllKeyframesTimeRange()
+    public virtual TimeRange GetAllKeyframesTimeRange()
     {
         var range = TimeRange.Undefined;
         foreach (var v in GetAllKeyframes())

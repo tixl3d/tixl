@@ -1,0 +1,107 @@
+{
+  "FormatVersion": 3,
+  "Id": "7c8f3a2e-9d4b-4e1f-8a5c-6b2d9f7e4c3a"/*AudioToneGenerator*/,
+  "Description": "Generates a tone (sine, square, saw, triangle or noise) with an ADSR envelope as an audio-graph source.\n\nWire AudioReference into an [AudioBus] (directly or through a [CombineAudio]) to route and mix it — it only sounds while connected to an evaluated bus. A pulse on Trigger plays the tone for Duration; in Gate mode the tone sounds while Trigger is true.",
+  "InputUis": [
+    {
+      "InputId": "1a3f4b7c-12d3-4a5b-9c7d-8e1f2a3b4c5d"/*Mute*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 250.0
+      }
+    },
+    {
+      "InputId": "2c9f4e7a-3d8b-4a1f-9e5c-6b2d7f8c4a3e"/*Duration*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 100.0
+      },
+      "Min": 0.01,
+      "Max": 10.0,
+      "Scale": 0.01,
+      "ClampMin": true
+    },
+    {
+      "InputId": "3e9a7f2c-4d8b-4c1f-9e5a-2b7d6f8c4a5e"/*Trigger*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "5a7e9f2c-8d4b-4c1f-9a5e-3b2d6f7c8a4e"/*WaveformType*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "8f4a2e9c-7d3b-4e1f-8c5a-9b2d6f7c3a4e"/*Frequency*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 50.0
+      },
+      "Min": 20.0,
+      "Max": 20000.0,
+      "Scale": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"/*Envelope*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "UseVec4Control": "AdsrEnvelope"
+    },
+    {
+      "InputId": "c0645e37-db4e-4658-9d65-96478851f6f6"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 175.0
+      }
+    },
+    {
+      "InputId": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a"/*TriggerMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7c8f3a2e-0001-4e1f-8a5c-6b2d9f7e4c3a"/*AudioReference*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "b7e2c1a4-5d3f-4e8a-9c2f-1e4b7a6c3d8f"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "960aa0a3-89b4-4eff-8b52-36ff6965cf8f"/*IsPlaying*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "b09d215a-bcf0-479a-a649-56f9c698ecb1"/*GetLevel*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}

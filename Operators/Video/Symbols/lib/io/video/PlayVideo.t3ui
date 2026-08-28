@@ -1,0 +1,108 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "914fb032-d7eb-414b-9e09-2bdd7049e049"/*PlayVideo*/,
+  "Description": "Plays a video file as a texture, decoded with FFmpeg.\n\nThe playback time follows the timeline. Connect [OverrideTimeInSecs] to offset or scrub the video independently, and enable Loop to repeat past the end (otherwise it holds on the last frame). The Duration output reports the clip length in seconds, and HasCompleted turns on once non-looping playback passes the end.\n\nOptimize For selects the decode strategy. Fast Seeking (the default) decodes in software and keeps a frame cache, so scrubbing back and forth and looping stay snappy and HD playback is smooth. Playback Performance decodes on the GPU with no read-back for the smoothest playback of large or 4K footage, at the cost of slower random seeks. Both fall back to software automatically when the codec or GPU profile is unsupported.\n\nAlso see [PlayVideoClip] for placing a video as a timeline clip.\n\nThe video's audio track plays too, at Volume. AudioReference exposes it to the audio graph: wire it into an [AudioBus], directly or through a [CombineAudio], to apply group volume, effect inserts and ducking — or leave it unwired and the sound simply plays. Sound follows the picture, so an operator nothing draws stays silent, and Volume 0 skips decoding the audio altogether.\n\nAKA: video, movie, footage, mp4, mkv",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "0e255347-08bc-4363-9ffa-ab863a1cea8e"/*Path*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 46.995968
+      },
+      "Description": "Path to the video file.",
+      "Usage": "FilePath",
+      "FileFilter": "mp4, mov, webm, mpg, mpeg, m4v, mkv, avi, wmv, flv, ts, m2ts, mts, mxf, ogv"
+    },
+    {
+      "InputId": "21b5671b-862f-4cea-a355-fa019996c936"/*Loop*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 226.99597
+      },
+      "Description": "Repeats the video endlessly. When off, playback holds on the last frame after the video ends.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "28c8b698-1897-4f8c-b9e7-85a983dfa654"/*OptimizeFor*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 346.99597
+      },
+      "Description": "Selects the decode strategy:\n\nFast Seeking (default): decodes on the CPU and caches recent frames in RAM. Scrubbing back, looping and reverse playback are instant, and the GPU stays free for rendering. Higher CPU load on large frames.\n\nPlayback Performance: decodes on the GPU (D3D11VA) and keeps the frames there — the decoded surface is converted straight to the output texture by a compute shader, with no GPU→CPU read-back (zero-copy). Smoothest playback for large / 4K long-GOP footage, but random seeks re-decode from the previous keyframe. Automatically falls back to software decode when the codec has no GPU decoder (e.g. ProRes, HAP) or the driver rejects it."
+    },
+    {
+      "InputId": "2fecfbb4-f7d9-4c53-95ae-b64ccbb6fbad"/*Volume*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 91.99597
+      },
+      "Description": "Volume of the video's own sound track.\n\nAt 0 the audio track isn't decoded at all, so a video used purely as a texture costs nothing.",
+      "AddPadding": "True",
+      "Min": 0.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "48e62a3c-a903-4a9b-a44a-148c6c07ac1e"/*OverrideTimeInSecs*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 181.99597
+      },
+      "Description": "When connected, overrides the playback time with a custom time in seconds — e.g. to offset, scrub or drive the video procedurally. When not connected, the video follows the timeline."
+    },
+    {
+      "InputId": "b62c208c-3735-4130-87de-8c03c8a9b5fa"/*IsPreciseAtPlayback*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 271.99597
+      },
+      "Description": "No longer used — playback is frame-exact by default. Kept for compatibility with older projects."
+    },
+    {
+      "InputId": "e9c15b3f-8c4a-411d-b9b3-795d64d6bd20"/*ResyncThreshold*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 136.99597
+      },
+      "Description": "No longer used — timing is frame-exact now. Kept for compatibility with older projects."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fa56b47f-1b16-45d5-80cd-32c5a872acf4"/*Texture*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "2f16be73-226b-47e7-b7ee-bf4f3738fa13"/*Duration*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "c89ea3ae-82ff-4791-b755-7b7d9eddf8a7"/*HasCompleted*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "732fc715-a8b5-438f-a607-ee1b8b080c04"/*UpdateCount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "12473a41-5839-4b9b-9c79-2541fe8b630b"/*AudioReference*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}

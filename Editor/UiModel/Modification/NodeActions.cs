@@ -213,17 +213,19 @@ internal static class NodeActions
     }
 
     #region Copy and paste
-    public static void CopySelectedNodesToClipboard(NodeSelection nodeSelection, Instance composition)
+    /// <returns>False if the selection contained nothing copyable (e.g. only input nodes) and the clipboard was left untouched.</returns>
+    public static bool CopySelectedNodesToClipboard(NodeSelection nodeSelection, Instance composition)
     {
         var selectedChildren = nodeSelection.GetSelectedNodes<SymbolUi.Child>().ToList();
         var selectedSections = nodeSelection.GetSelectedNodes<Section>().ToList();
         if (selectedChildren.Count + selectedSections.Count == 0)
-            return;
+            return false;
 
         if (!GraphOperations.TryCopyNodesAsJson(composition, selectedChildren, selectedSections, out var resultJsonString))
-            return;
+            return false;
 
         EditorUi.Instance.SetClipboardText(resultJsonString);
+        return true;
     }
 
     // todo - better encapsulate this in SymbolJson
@@ -538,13 +540,42 @@ internal static class NodeActions
         }
     }
 
-    public static void DisconnectDraggedNodes(Instance compositionOp, List<ISelectableCanvasObject> draggedNodes)
+    public static void DisconnectNodes(Instance compositionOp, List<ISelectableCanvasObject> nodes)
     {
+        Log.Info($"Disconnecting {nodes.Count} nodes from their inputs and outputs");
         var removeCommands = new List<ICommand>();
         var inputConnections = new List<(Symbol.Connection connection, Type connectionType, bool isMultiIndex, int multiInputIndex)>();
         var outputConnections = new List<(Symbol.Connection connection, Type connectionType, bool isMultiIndex, int multiInputIndex)>();
-        foreach (var node in draggedNodes)
+        foreach (var node in nodes)
         {
+            // Symbol input/output nodes are not SymbolUi.Children - collect their
+            // connections directly so they can be shaken off or disconnected too.
+            if (node is IInputUi inputUi)
+            {
+                foreach (var connection in compositionOp.Symbol.Connections.FindAll(c => c.IsConnectedToSymbolInput
+                                                                                         && c.SourceSlotId == inputUi.Id
+                                                                                         && nodes.All(c2 => c2.Id != c.TargetParentOrChildId)))
+                {
+                    var isMultiInput = compositionOp.Symbol.IsTargetMultiInput(connection);
+                    var multiInputIndex = isMultiInput ? compositionOp.Symbol.GetMultiInputIndexFor(connection) : 0;
+                    outputConnections.Add((connection, inputUi.Type, isMultiInput, multiInputIndex));
+                }
+
+                continue;
+            }
+
+            if (node is IOutputUi outputUi)
+            {
+                foreach (var connection in compositionOp.Symbol.Connections.FindAll(c => c.IsConnectedToSymbolOutput
+                                                                                         && c.TargetSlotId == outputUi.Id
+                                                                                         && nodes.All(c2 => c2.Id != c.SourceParentOrChildId)))
+                {
+                    inputConnections.Add((connection, outputUi.Type, false, 0));
+                }
+
+                continue;
+            }
+
             if (node is not SymbolUi.Child childUi)
                 continue;
 
@@ -557,7 +588,7 @@ internal static class NodeActions
             // Get all input connections and
             // relative index if they have multi-index inputs
             var connectionsToInput = instance.Parent.Symbol.Connections.FindAll(c => c.TargetParentOrChildId == instance.SymbolChildId
-                                                                                     && draggedNodes.All(c2 => c2.Id != c.SourceParentOrChildId));                
+                                                                                     && nodes.All(c2 => c2.Id != c.SourceParentOrChildId));                
             var inConnectionInputIndex = 0;
             foreach (var connectionToInput in connectionsToInput)
             {
@@ -573,7 +604,7 @@ internal static class NodeActions
             // Get all output connections and
             // relative index if they have multi-index inputs
             var connectionsToOutput = instance.Parent.Symbol.Connections.FindAll(c => c.SourceParentOrChildId == instance.SymbolChildId
-                                                                                      && draggedNodes.All(c2 => c2.Id != c.TargetParentOrChildId));
+                                                                                      && nodes.All(c2 => c2.Id != c.TargetParentOrChildId));
             var outConnectionInputIndex = 0;
             foreach (var connectionToOutput in connectionsToOutput)
             {
@@ -647,7 +678,7 @@ internal static class NodeActions
 
         if (removeCommands.Count > 0)
         {
-            var macro = new MacroCommand("Shake off connections", removeCommands);
+            var macro = new MacroCommand("Disconnect nodes", removeCommands);
             UndoRedoStack.AddAndExecute(macro);
         }
     }

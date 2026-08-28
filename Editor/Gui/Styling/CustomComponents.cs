@@ -105,14 +105,15 @@ internal static partial class CustomComponents
         ImGui.SetCursorPosX(0);
         var p = ImGui.GetCursorScreenPos();
 
-        //var p = ImGui.GetCursorStartPos() + ImGui.GetWindowPos() + new Vector2(1,1);
         ImGui.GetWindowDrawList()
              .AddRectFilled(p,
                             p + new Vector2(ImGui.GetWindowSize().X, 1), UiColors.ForegroundFull.Fade(0.1f));
 
-        FormInputs.AddVerticalSpace(5);
+        // Restore the indent BEFORE the trailing space: the space is a Dummy, and submitting an item is
+        // what clears ImGui's "cursor was moved manually" flag. Ending on a bare SetCursorPos would trip
+        // the extend-parent-boundaries assert whenever a separator is the last thing drawn in a window.
         ImGui.SetCursorPosX(x);
-        
+        FormInputs.AddVerticalSpace(5);
     }
 
     /// <summary>
@@ -198,7 +199,7 @@ internal static partial class CustomComponents
         if (wasNull)
             value = string.Empty;
 
-        ImGui.SetNextItemWidth(width - FormInputs.ParameterSpacing - (notEmpty ? ImGui.GetFrameHeight() : 0));
+        ImGui.SetNextItemWidth(width - FormInputs.ParameterSpacing - (notEmpty && showClear ? ImGui.GetFrameHeight() : 0));
 
         var modified = ImGui.InputText("##", ref value, 1000, inputFlags);
         if (!modified && wasNull)
@@ -297,13 +298,59 @@ internal static partial class CustomComponents
         }
     }
 
+    /// <summary>
+    /// Lists the writable projects alphabetically, followed by a disabled section for the built-in packages —
+    /// those are only editable in debug builds and are never a valid destination for new symbols.
+    /// </summary>
     internal static bool DrawProjectDropdown(ref EditableSymbolProject selectedValue)
     {
-        return FormInputs.AddDropdown(ref selectedValue,
-                                      EditableSymbolProject.AllProjects.OrderBy(x => x.DisplayName),
-                                      "Project",
-                                      x => x.DisplayName,
-                                      "Project to edit symbols in.");
+        const string tooltip = "Project to edit symbols in.";
+        FormInputs.DrawInputLabel("Project");
+
+        var inputSize = FormInputs.GetAvailableInputSize(tooltip, false, true);
+        ImGui.SetNextItemWidth(inputSize.X);
+
+        var modified = false;
+        if (ImGui.BeginCombo("##SelectProject", selectedValue?.DisplayName ?? "please select", ImGuiComboFlags.HeightLarge))
+        {
+            _projectsForDropdown.Clear();
+            _projectsForDropdown.AddRange(EditableSymbolProject.AllProjects);
+            _projectsForDropdown.Sort(_projectDropdownOrder);
+
+            var drewReadOnlyLabel = false;
+            foreach (var project in _projectsForDropdown)
+            {
+                // Keep a built-in selectable while it's the active one, so debug builds can still
+                // edit inside Lib once they are already there.
+                if (project.IsBuiltIn && project != selectedValue)
+                {
+                    if (!drewReadOnlyLabel)
+                    {
+                        drewReadOnlyLabel = true;
+                        FormInputs.AddVerticalSpace(2);
+                        StylizedText("Read Only", Fonts.FontSmall, UiColors.TextMuted);
+                    }
+
+                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+                    ImGui.Selectable(project.DisplayName, false, ImGuiSelectableFlags.Disabled);
+                    ImGui.PopStyleColor();
+                    continue;
+                }
+
+                var isSelected = project == selectedValue;
+                if (!ImGui.Selectable(project.DisplayName, isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
+                    continue;
+
+                ImGui.CloseCurrentPopup();
+                selectedValue = project;
+                modified = true;
+            }
+
+            ImGui.EndCombo();
+        }
+
+        FormInputs.AppendTooltip(tooltip);
+        return modified;
     }
 
     public static void DrawSymbolCodeContextMenuItem(Symbol symbol)
@@ -311,7 +358,7 @@ internal static partial class CustomComponents
         var symbolPackage = symbol.SymbolPackage;
         var project = symbolPackage as EditableSymbolProject;
         var enabled = project != null;
-        if (ImGui.MenuItem("Open C# code", enabled))
+        if (DrawMenuItem(_openCSharpCodeId, "Open C# Code", isEnabled: enabled, reserveIconColumn: false))
         {
             if (!project!.TryOpenCSharpInEditor(symbol))
             {
@@ -404,4 +451,13 @@ internal static partial class CustomComponents
             return false;
         }, triggerWidth);
     }
+
+    private static readonly int _openCSharpCodeId = nameof(_openCSharpCodeId).GetHashCode();
+
+    private static readonly List<EditableSymbolProject> _projectsForDropdown = [];
+
+    private static readonly Comparison<EditableSymbolProject> _projectDropdownOrder
+        = (a, b) => a.IsBuiltIn != b.IsBuiltIn
+                        ? a.IsBuiltIn.CompareTo(b.IsBuiltIn)
+                        : string.Compare(a.DisplayName, b.DisplayName, StringComparison.OrdinalIgnoreCase);
 }

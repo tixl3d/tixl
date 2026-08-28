@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "11488449-9d39-4242-bbd7-9069fa71eb61"/*R01g_Spreading*/,
+  "Description": "Spreading",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "06e78c9a-d700-494e-8346-c294c1d6e69e"/*Text*/,
+      "SectionId": "554b036a-9411-4acb-ba53-d591644f090a",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "a8d6a9f2-584e-4d50-b3e7-201a5ca6c74f"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "f1b0b349-c527-481f-b8da-19df310028fd"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c12ae506-f005-4f2e-8530-4e0f74ac7444"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "554b036a-9411-4acb-ba53-d591644f090a",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "c2212559-9381-4a83-8a58-ffaf5fe46444",
+      "Description": "Sometimes it is useful to arrange multiple instances in space.\nThe [Spread] operator can help with this."
+    },
+    {
+      "Id": "4f8ccde4-40f4-4a7e-bf58-83e99cd7c1ba",
+      "Description": "Recreate the challenge using the given operators.",
+      "Style": "CallToAction"
+    }
+  ]
+}

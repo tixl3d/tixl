@@ -1,0 +1,139 @@
+{
+  "FormatVersion": 3,
+  "Id": "effe072f-a15a-468c-8af2-53de5ec33378"/*Me01a_DrawingMeshes*/,
+  "Description": "Drawing Meshes (Intro)",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "06526111-337a-42ec-a2f5-ac82fb92cf27"/*DrawSphere*/,
+      "Position": {
+        "X": 1423.1134,
+        "Y": 1776.7373
+      }
+    },
+    {
+      "ChildId": "2c839e8e-44cf-4ed7-9088-f158a91b7da6"/*Vector3*/,
+      "SectionId": "96ad37ec-2119-42ef-9886-3a53afda6cde",
+      "Position": {
+        "X": 1273.8973,
+        "Y": 2110.2126
+      }
+    },
+    {
+      "ChildId": "523226c0-535f-460f-9c25-c23dd4e95e72"/*Distance*/,
+      "Position": {
+        "X": 1186.4082,
+        "Y": 1816.0571
+      }
+    },
+    {
+      "ChildId": "81bd9845-dbbc-4825-97a0-7e90ac314935"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "8fd29e08-20be-4602-acf8-24756d1beaba"/*AnimValue*/,
+      "Position": {
+        "X": 1192.6763,
+        "Y": 1671.7372
+      }
+    },
+    {
+      "ChildId": "8fdd4c15-06d3-4e89-870d-3732d5914d92"/*AnimValue*/,
+      "SectionId": "96ad37ec-2119-42ef-9886-3a53afda6cde",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2145.2126
+      }
+    },
+    {
+      "ChildId": "9679365d-3216-4b2f-8ca1-e47d5c2559e8"/*AnimValue*/,
+      "Position": {
+        "X": 1192.6763,
+        "Y": 1749.7174
+      }
+    },
+    {
+      "ChildId": "b127b546-f4b3-4c82-9a6c-3a3d620e5385"/*Distance*/,
+      "SectionId": "96ad37ec-2119-42ef-9886-3a53afda6cde",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2180.2126
+      }
+    },
+    {
+      "ChildId": "d61b6b12-f122-4feb-9bc0-d1ac1b13ad1e"/*Vector3*/,
+      "Position": {
+        "X": 1423.1135,
+        "Y": 1673.5281
+      }
+    },
+    {
+      "ChildId": "d880b4af-8bcd-4b26-a024-789026344248"/*DrawSphere*/,
+      "SectionId": "96ad37ec-2119-42ef-9886-3a53afda6cde",
+      "Position": {
+        "X": 1273.8973,
+        "Y": 2215.2126
+      }
+    },
+    {
+      "ChildId": "df08c469-0217-4d24-977a-37a715cffb2a"/*AnimValue*/,
+      "SectionId": "96ad37ec-2119-42ef-9886-3a53afda6cde",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2110.2126
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e77402d9-51c6-4fd7-a3f3-ef690a285894"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "96ad37ec-2119-42ef-9886-3a53afda6cde",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1032.0138,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 479.67932,
+        "Y": 287.2168
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "0b481be8-d514-4d08-93b2-2fb8569dcd09",
+      "Description": "In computer graphics, positions are defined using three values along the x, y, and z axes.\nIn TiXL's coordinate system, x points to the right, y points upward, and z points toward the camera.\nYou can use the thumb, index finger, and middle finger of your right hand to remember their orientation."
+    },
+    {
+      "Id": "5877e222-25d7-4fd9-a066-582bd7dc25a6",
+      "Description": "Other software may use different coordinate systems.\nFor example, some CAD applications use x and y as the ground plane.\nWith TiXL's default camera, the position (0, 0, 0) is centered on the screen, so an object that is 2 units tall touches both the top and bottom edges of the view."
+    },
+    {
+      "Id": "aba8a6b7-6427-427c-b77c-8030c3d8b3f8",
+      "Description": "We can use [AnimValue] and [Vector3] to build a simple animation.\nBoth operators will be covered in more detail later."
+    },
+    {
+      "Id": "fc1ec450-aed0-4509-af71-73ad498691e5",
+      "Description": "Connect the operator to the [Vector3] to create the reference animation.",
+      "Style": "CallToAction"
+    }
+  ]
+}

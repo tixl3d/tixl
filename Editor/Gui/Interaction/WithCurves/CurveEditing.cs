@@ -106,53 +106,52 @@ internal abstract class CurveEditing
 
             var modes = selectedInterpolations as VDefinition.KeyInterpolation[] ?? selectedInterpolations.ToArray();
 
-            bool changed = false;
-            if (SelectedKeyframes.Count > 0)
+            var hasSelection = SelectedKeyframes.Count > 0;
+            var changed = false;
+            if (hasSelection)
             {
-                CustomComponents.HintLabel("Interpolation...");
+                CustomComponents.DrawMenuGroupLabel("Interpolation");
 
-                if (ImGui.MenuItem("Linear", null, modes.Contains(VDefinition.KeyInterpolation.Linear)))
+                if (DrawKeyframeMenuItem(_linearId, "Linear", modes.Contains(VDefinition.KeyInterpolation.Linear)))
                 {
                     OnLinear();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                
-                if (ImGui.MenuItem("Smooth (Clamped)", null, modes.Contains(VDefinition.KeyInterpolation.Smooth)))
+                if (DrawKeyframeMenuItem(_smoothClampedId, "Smooth (Clamped)", modes.Contains(VDefinition.KeyInterpolation.Smooth)))
                 {
                     OnSmooth();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Smooth", null, modes.Contains(VDefinition.KeyInterpolation.Cubic)))
+                if (DrawKeyframeMenuItem(_smoothId, "Smooth", modes.Contains(VDefinition.KeyInterpolation.Cubic)))
                 {
                     OnCubic();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Horizontal", null, modes.Contains(VDefinition.KeyInterpolation.Horizontal)))
+                if (DrawKeyframeMenuItem(_horizontalId, "Horizontal", modes.Contains(VDefinition.KeyInterpolation.Horizontal)))
                 {
                     OnHorizontal();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Constant", null, modes.Contains(VDefinition.KeyInterpolation.Constant)))
+                if (DrawKeyframeMenuItem(_constantId, "Constant", modes.Contains(VDefinition.KeyInterpolation.Constant)))
                 {
                     OnConstant();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-
-                ImGui.Separator();
+                CustomComponents.SeparatorLine();
 
                 {
                     var allMirrored = GetSelectedOrAllPoints().All(v => !v.BrokenTangents);
-                    if (ImGui.MenuItem("Mirror Tangents", null, allMirrored))
+                    if (DrawKeyframeMenuItem(_mirrorTangentsId, "Mirror Tangents", allMirrored))
                     {
                         ForSelectedOrAllPointsDo((vDef) =>
                                                  {
@@ -170,7 +169,7 @@ internal abstract class CurveEditing
 
                 {
                     var anyWeighted = GetSelectedOrAllPoints().Any(v => v.Weighted);
-                    if (ImGui.MenuItem("Weighted Tensions", null, anyWeighted))
+                    if (DrawKeyframeMenuItem(_weightedTensionsId, "Weighted Tensions", anyWeighted))
                     {
                         ForSelectedOrAllPointsDo((vDef) =>
                                                  {
@@ -185,15 +184,15 @@ internal abstract class CurveEditing
                     }
                 }
 
-                ImGui.Separator();
+                CustomComponents.SeparatorLine();
 
-                if (ImGui.BeginMenu("Before curve...", SelectedKeyframes.Count > 0))
+                if (CustomComponents.DrawSubMenu(_beforeCurveId, "Before Curve"))
                 {
-                    foreach (CurveUtils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(CurveUtils.OutsideCurveBehavior)))
+                    for (var index = 0; index < OutsideCurveBehaviors.Length; index++)
                     {
-                        if (ImGui.MenuItem(mapping.ToString(), null))
+                        if (DrawKeyframeMenuItem(_beforeCurveId + 1 + index, OutsideCurveBehaviorLabels[index], false))
                         {
-                            ApplyPreCurveMapping(mapping);
+                            ApplyPreCurveMapping(OutsideCurveBehaviors[index]);
                             changed = true;
                         }
                     }
@@ -201,13 +200,13 @@ internal abstract class CurveEditing
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("After curve...", SelectedKeyframes.Count > 0))
+                if (CustomComponents.DrawSubMenu(_afterCurveId, "After Curve"))
                 {
-                    foreach (CurveUtils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(CurveUtils.OutsideCurveBehavior)))
+                    for (var index = 0; index < OutsideCurveBehaviors.Length; index++)
                     {
-                        if (ImGui.MenuItem(mapping.ToString(), null))
+                        if (DrawKeyframeMenuItem(_afterCurveId + 1 + index, OutsideCurveBehaviorLabels[index], false))
                         {
-                            ApplyPostCurveMapping(mapping);
+                            ApplyPostCurveMapping(OutsideCurveBehaviors[index]);
                             changed = true;
                         }
                     }
@@ -215,36 +214,40 @@ internal abstract class CurveEditing
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.MenuItem("Copy keyframes", SelectedKeyframes.Count > 0))
+                CustomComponents.SeparatorLine();
+
+                if (DrawKeyframeMenuItem(_copyKeyframesId, "Copy Keyframes", false))
                 {
                     CopySelectedKeyframes();
                     changed = true;
                 }
+
+                if (DrawKeyframeMenuItem(_duplicateKeyframesId, "Duplicate Keyframes", false, TimeLineCanvas.Current != null))
+                {
+                    DuplicateSelectedKeyframes();
+                    changed = true;
+                }
             }
-            
-            if (ImGui.MenuItem("Paste keyframes", "", false,KeyframeCopyAndPasting.HasValidClipboard))
+
+            if (DrawKeyframeMenuItem(_pasteKeyframesId, "Paste Keyframes", false, KeyframeCopyAndPasting.HasValidClipboard))
             {
                 PasteKeyframes();
                 changed = true;
             }
-            
-            if (SelectedKeyframes.Count > 0)
-            {
-                if (ImGui.MenuItem("Delete keyframes", SelectedKeyframes.Count > 0))
-                {
-                    DeleteSelectedKeyframes(composition);
-                    changed = true;
-                }
 
-                if (ImGui.MenuItem("Space Evenly", SelectedKeyframes.Count > 2))
+            if (hasSelection)
+            {
+                CustomComponents.SeparatorLine();
+
+                if (DrawKeyframeMenuItem(_spaceEvenlyId, "Space Evenly", false, SelectedKeyframes.Count > 2))
                 {
                     EvenlySpaceKeyframes();
                     changed = true;
                 }
-                
-                if (ImGui.BeginMenu("Set Sequential Values", enabled:SelectedKeyframes.Count>1))
+
+                if (CustomComponents.DrawSubMenu(_sequentialValuesId, "Set Sequential Values", SelectedKeyframes.Count > 1))
                 {
-                    if (ImGui.MenuItem("Start at 0"))
+                    if (DrawKeyframeMenuItem(_startAtZeroId, "Start at 0", false))
                     {
                         var value = 0;
                         ForSelectedOrAllPointsDo((vDef) =>
@@ -255,8 +258,8 @@ internal abstract class CurveEditing
 
                         changed = true;
                     }
-                    
-                    if (ImGui.MenuItem("Start at First"))
+
+                    if (DrawKeyframeMenuItem(_startAtFirstId, "Start at First", false))
                     {
                         var selectedOrAllPoints = GetSelectedOrAllPoints().OrderBy(v => v.U).ToList();
                         if (selectedOrAllPoints.Count > 0)
@@ -268,30 +271,44 @@ internal abstract class CurveEditing
                                                          value++;
                                                      });
                         }
+
                         changed = true;
                     }
-                    
+
                     ImGui.EndMenu();
                 }
-                
 
-                if (TimeLineCanvas.Current != null && ImGui.MenuItem("Duplicate keyframes", SelectedKeyframes.Count > 0))
+                if (DrawKeyframeMenuItem(_deleteKeyframesId, "Delete Keyframes", false))
                 {
-                    DuplicateSelectedKeyframes();
+                    DeleteSelectedKeyframes(composition);
                     changed = true;
                 }
             }
-            
 
-            
-            if (ImGui.MenuItem(SelectedKeyframes.Count > 0 ? "View Selected" : "View All", UserActions.FocusSelection.ListShortcuts()))
+            CustomComponents.SeparatorLine();
+
+            if (CustomComponents.DrawMenuItem(_viewKeyframesId,
+                                              hasSelection ? "View Selected" : "View All",
+                                              UserActions.FocusSelection.ListShortcuts(),
+                                              reserveIconColumn: false))
+            {
                 ViewAllOrSelectedKeys();
+            }
 
             if (changed)
             {
                 composition.GetSymbolUi().FlagAsModified();
             }
         }
+    }
+
+    /// <summary>
+    /// This menu has no icons, so the icon column stays unreserved and rows line up with
+    /// <see cref="CustomComponents.DrawMenuGroupLabel"/>.
+    /// </summary>
+    private static bool DrawKeyframeMenuItem(int id, string label, bool isChecked, bool isEnabled = true)
+    {
+        return CustomComponents.DrawMenuItem(id, label, null, isChecked, isEnabled, reserveIconColumn: false);
     }
 
     private void UpdateAllTangents()
@@ -545,4 +562,37 @@ internal abstract class CurveEditing
 
         return foundOneOrMoreKeys;
     }
+
+    // Parallel arrays instead of Enum.GetValues + ToString(): the menu redraws every frame while open,
+    // and enum-to-string allocates. The labels also need spacing that the enum names don't carry.
+    private static readonly CurveUtils.OutsideCurveBehavior[] OutsideCurveBehaviors =
+        [
+            CurveUtils.OutsideCurveBehavior.Constant,
+            CurveUtils.OutsideCurveBehavior.Cycle,
+            CurveUtils.OutsideCurveBehavior.CycleWithOffset,
+            CurveUtils.OutsideCurveBehavior.Oscillate,
+        ];
+
+    private static readonly string[] OutsideCurveBehaviorLabels = ["Constant", "Cycle", "Cycle with Offset", "Oscillate"];
+
+    private static readonly int _linearId = nameof(_linearId).GetHashCode();
+    private static readonly int _smoothClampedId = nameof(_smoothClampedId).GetHashCode();
+    private static readonly int _smoothId = nameof(_smoothId).GetHashCode();
+    private static readonly int _horizontalId = nameof(_horizontalId).GetHashCode();
+    private static readonly int _constantId = nameof(_constantId).GetHashCode();
+    private static readonly int _mirrorTangentsId = nameof(_mirrorTangentsId).GetHashCode();
+    private static readonly int _weightedTensionsId = nameof(_weightedTensionsId).GetHashCode();
+    private static readonly int _copyKeyframesId = nameof(_copyKeyframesId).GetHashCode();
+    private static readonly int _duplicateKeyframesId = nameof(_duplicateKeyframesId).GetHashCode();
+    private static readonly int _pasteKeyframesId = nameof(_pasteKeyframesId).GetHashCode();
+    private static readonly int _spaceEvenlyId = nameof(_spaceEvenlyId).GetHashCode();
+    private static readonly int _startAtZeroId = nameof(_startAtZeroId).GetHashCode();
+    private static readonly int _startAtFirstId = nameof(_startAtFirstId).GetHashCode();
+    private static readonly int _deleteKeyframesId = nameof(_deleteKeyframesId).GetHashCode();
+    private static readonly int _viewKeyframesId = nameof(_viewKeyframesId).GetHashCode();
+    private static readonly int _sequentialValuesId = nameof(_sequentialValuesId).GetHashCode();
+
+    // The rows inside these submenus derive their ids by offsetting the submenu's own id.
+    private static readonly int _beforeCurveId = nameof(_beforeCurveId).GetHashCode();
+    private static readonly int _afterCurveId = nameof(_afterCurveId).GetHashCode();
 }

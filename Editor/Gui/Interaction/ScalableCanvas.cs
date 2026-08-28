@@ -271,6 +271,7 @@ public partial class ScalableCanvas
             var parentScaleTarget = Parent?.ScaleTarget ?? Vector2.One;
             ScrollTarget -= TransformPanDelta(mouseState.Delta) / (parentScaleTarget * ScaleTarget);
             _draggedCanvas = this;
+            panned = true;
         }
 
         var preventZoom = (flags & T3Ui.EditingFlags.PreventZoomWithMouseWheel) != 0;
@@ -280,6 +281,9 @@ public partial class ScalableCanvas
             {
                 if (isDirectlyHovered)
                 {
+                    if (Math.Abs(ImGui.GetIO().MouseWheel) > 0.001f || Math.Abs(ImGui.GetIO().MouseWheelH) > 0.001f)
+                        panned = true;
+
                     ScrollTarget += new Vector2(ImGui.GetIO().MouseWheelH * 220,
                                                 -ImGui.GetIO().MouseWheel * 220) / ScaleTarget;
                     //MouseWheelPanning.Delta * new Vector2(-1,1) / ScaleTarget;

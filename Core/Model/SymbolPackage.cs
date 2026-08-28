@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -51,7 +52,7 @@ public abstract partial class SymbolPackage : IResourcePackage
     {
         get
         {
-            var dir = Path.Combine(Folder, FileLocations.ReleaseSymbolsSubfolder);
+            var dir = Path.Combine(Folder, FileLocations.SymbolsSubfolder);
             if (!Directory.Exists(dir))
                 return [];
             
@@ -190,7 +191,10 @@ public abstract partial class SymbolPackage : IResourcePackage
     /// <param name="allNewSymbols">All new symbols, including those for which a json file was not found</param>
     public void LoadSymbols(bool parallel, out List<SymbolJson.SymbolReadResult> newlyRead, out List<Symbol> allNewSymbols)
     {
-        Log.Debug($" Loading {AssemblyInformation.Name}...");
+        if (CoreSettings.Config.LogAssemblyLoadingDetails)
+            Log.Debug($" Loading {AssemblyInformation.Name}...");
+
+        var stopwatch = Stopwatch.StartNew();
 
         if (!AssemblyInformation.TryLoadTypes())
         {
@@ -201,6 +205,8 @@ public abstract partial class SymbolPackage : IResourcePackage
             return;
         }
 
+        var typeLoadMs = stopwatch.ElapsedMilliseconds;
+        var symbolFileCount = 0;
         IDictionary<Guid, Type> newTypes;
 
         // Computed by set difference up front: LoadTypes may run in parallel, and removing from a
@@ -273,6 +279,7 @@ public abstract partial class SymbolPackage : IResourcePackage
                              .Where(symbolReadResult => symbolReadResult.Result.Symbol is not null)
                              .ToArray();
 
+            symbolFileCount = symbolsRead.Length;
             if (CoreSettings.Config.LogCompilationDetails)
                 Log.Debug($"{AssemblyInformation.Name}: Registering loaded symbols...");
 
@@ -314,6 +321,13 @@ public abstract partial class SymbolPackage : IResourcePackage
             SymbolAdded?.Invoke(null, symbol);
         }
 
+        // Startup-cost breakdown per package: the type scan resolves the package's dependency tree, the
+        // file reads are symbol-count bound. Keeps the two separable in the log when startup is slow.
+        if (CoreSettings.Config.LogAssemblyLoadingDetails)
+        {
+            Log.Debug($" Loaded {AssemblyInformation.Name}: {AssemblyInformation.OperatorTypeInfo.Count} types in {typeLoadMs}ms, "
+                      + $"{symbolFileCount} symbol files in {stopwatch.ElapsedMilliseconds - typeLoadMs}ms");
+        }
         OnSymbolsLoaded();
         return;
 

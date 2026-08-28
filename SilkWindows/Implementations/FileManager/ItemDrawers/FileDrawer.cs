@@ -74,12 +74,12 @@ internal class FileDrawer : FileSystemDrawer
     
     protected override void DrawContextMenuContents(ImFonts fonts)
     {
-        if (ImGui.MenuItem("Open in system file manager"))
+        if (ImGui.MenuItem("Open in System File Manager"))
         {
             FileManager.ShowInSystemFileManager(this);
         }
         
-        if (ImGui.MenuItem("Open in external editor"))
+        if (ImGui.MenuItem("Open in External Editor"))
         {
             FileManager.DoubleClicked(this, true);
         }

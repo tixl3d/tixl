@@ -1,5 +1,6 @@
 using System.IO;
 using ImGuiNET;
+using T3.Core.DataTypes.Vector;
 using T3.IoServices;
 using T3.Core.IO;
 using T3.Core.Settings;
@@ -217,6 +218,11 @@ internal sealed partial class SettingsWindow : Window
                                                       "After the playback is halted, the time will reset to the moment when the playback began. This feature proves beneficial for iteratively reviewing animations without requiring manual rewinding.",
                                                       UserSettings.Defaults.ResetTimeAfterPlayback);
 
+                    changed |= FormInputs.AddCheckBox("Follow playback time",
+                                                      ref UserSettings.Config.TimelineFollowsPlayback,
+                                                      "While playing, the timeline scrolls along once the time marker approaches the view's edge, keeping it visible.",
+                                                      UserSettings.Defaults.TimelineFollowsPlayback);
+
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Output");
 
@@ -306,20 +312,35 @@ internal sealed partial class SettingsWindow : Window
 
                     FormInputs.AddSectionSubHeader("Project Settings");
                     var selectedProjectDirectory = string.Empty;
-                    var projectDirectories = UserSettings.Config.ProjectDirectories ?? new List<string>();
-                    changed |= FormInputs.AddEditableListBox(ref selectedProjectDirectory,
-                                                             projectDirectories,
-                                                             "Project Directories",
-                                                             Directory.Exists,
-                                                             "Folder does not exist",
-                                                             """
-                                                             List of top-level directories that are scanned for projects.
+                    var projectDirectories = UserSettings.Config.ProjectDirectories ??= new List<string>();
+                    var projectDirectoriesChanged = FormInputs.AddEditableListBox(ref selectedProjectDirectory,
+                                                                                  projectDirectories,
+                                                                                  "Project Directories",
+                                                                                  Directory.Exists,
+                                                                                  "Folder does not exist",
+                                                                                  """
+                                                                                  List of top-level directories that are scanned for projects.
 
-                                                             This can be useful to manage your projects on multiple external drivers or repositories. 
+                                                                                  This can be useful to manage your projects on multiple external drives or repositories.
 
-                                                             Changes require a restart.
-                                                             """
-                                                            );
+                                                                                  Changes require a restart.
+                                                                                  """
+                                                                                 );
+                    if (projectDirectoriesChanged)
+                    {
+                        changed = true;
+                        _projectDirectoriesRequireRestart = true;
+                    }
+
+                    if (_projectDirectoriesRequireRestart)
+                    {
+                        FormInputs.AddVerticalSpace();
+                        FormInputs.SetIndentToLeft();
+                        if (CustomComponents.DrawCtaButton("Restart Editor", Icon.None, UiColors.ForegroundFull, UiColors.StatusActivated, Color.Transparent))
+                            EditorRestart.TryRestart();
+                        CustomComponents.TooltipForLastItem("Restart TiXL to rescan the project directories.");
+                        FormInputs.SetIndentToParameters();
+                    }
 
                     FormInputs.AddVerticalSpace();
                     FormInputs.SetIndentToLeft();
@@ -619,4 +640,6 @@ internal sealed partial class SettingsWindow : Window
     {
         return new List<Window>();
     }
+
+    private static bool _projectDirectoriesRequireRestart;
 }

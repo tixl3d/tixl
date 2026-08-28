@@ -27,10 +27,8 @@ internal sealed class AssemblyTreeNode
 
     private readonly Lock _assemblyLock = new();
 
-    internal readonly record struct DllReference(string Path, string Name, AssemblyName AssemblyName);
-
-    private readonly List<DllReference> _unreferencedDlls = [];
-    private bool _collectedUnreferencedDlls;
+    /// <summary>Dll files next to this assembly that are not (yet) loaded; null until first needed.</summary>
+    private List<string>? _unreferencedDllPaths;
 
     private readonly Lock _unreferencedLock = new();
     private readonly DllImportResolver? _nativeResolver;
@@ -59,7 +57,7 @@ internal sealed class AssemblyTreeNode
 
         if (!canSearchDlls)
         {
-            _collectedUnreferencedDlls = true;
+            _unreferencedDllPaths = [];
         }
 
         // if (debug && !node.NameStr.StartsWith("System")) // don't log system assemblies - too much log spam for things that are probably not error-prone
@@ -77,8 +75,6 @@ internal sealed class AssemblyTreeNode
                                                                                    {
                                                                                        "Sdcb.FFmpeg", // locates its native libav* DLLs itself
                                                                                    };
-
-    private DllReference Reference => new(Assembly.Location, NameStr, Name);
 
     // this should only be called externally
     /// <summary>
@@ -99,10 +95,7 @@ internal sealed class AssemblyTreeNode
 
             lock (_unreferencedLock)
             {
-                if (_collectedUnreferencedDlls)
-                {
-                    _ = _unreferencedDlls.Remove(child.Reference);
-                }
+                _unreferencedDllPaths?.Remove(child.Assembly.Location);
             }
 
             _references.Add(child);
@@ -111,36 +104,59 @@ internal sealed class AssemblyTreeNode
         return true;
     }
 
+    /// <summary>
+    /// Looks for a not-yet-loaded assembly file next to this node's assembly (and, for root nodes, in its
+    /// runtime subfolders) and loads it into this node's context. Lookup is by file name, like the default
+    /// .NET probing: opening files to read their assembly name is what the old full-folder scan did, and on
+    /// a fresh shadow copy every first open pays a real-time AV scan - several seconds per package folder,
+    /// serialized behind the resolution locks, which dominated editor startup.
+    /// </summary>
     public bool TryFindUnreferenced(string nameToSearchFor, [NotNullWhen(true)] out AssemblyTreeNode? assembly)
     {
-        // check unreferenced dlls
         lock (_assemblyLock)
         {
             lock (_unreferencedLock)
             {
-                if (!_collectedUnreferencedDlls)
+                _unreferencedDllPaths ??= CollectDllFilePaths();
+
+                var simpleName = GetSimpleName(nameToSearchFor);
+                if (simpleName == null)
                 {
-                    FindUnreferencedDllFiles();
-                    _collectedUnreferencedDlls = true;
+                    assembly = null;
+                    return false;
                 }
 
-                var unreferencedDlls = _unreferencedDlls;
-                for (var index = unreferencedDlls.Count - 1; index >= 0; index--)
+                for (var index = _unreferencedDllPaths.Count - 1; index >= 0; index--)
                 {
-                    var dll = unreferencedDlls[index];
-                    if (dll.Name != nameToSearchFor)
+                    var path = _unreferencedDllPaths[index];
+                    if (!string.Equals(Path.GetFileNameWithoutExtension(path), simpleName, StringComparison.OrdinalIgnoreCase))
                         continue;
 
                     try
                     {
-                        if (!File.Exists(dll.Path))
+                        if (!File.Exists(path))
                         {
-                            Log.Warning($"{_parentName}: Could not find assembly `{dll.Path}`");
+                            Log.Warning($"{_parentName}: Could not find assembly `{path}`");
                             continue;
                         }
 
-                        var newAssembly = TixlAssemblyLoadContext.LoadAssembly(dll.Path, LoadContext);
+                        // A native dll with a matching name throws here - skip it.
+                        AssemblyName fileAssemblyName;
+                        try
+                        {
+                            fileAssemblyName = AssemblyName.GetAssemblyName(path);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        if (fileAssemblyName.GetName() != nameToSearchFor)
+                            continue;
+
+                        var newAssembly = TixlAssemblyLoadContext.LoadAssembly(path, LoadContext);
                         assembly = new AssemblyTreeNode(newAssembly, LoadContext, false, false, _nativeResolver);
+                        _unreferencedDllPaths.Remove(path);
                         AddReferenceTo(assembly);
                         return true;
                     }
@@ -152,57 +168,34 @@ internal sealed class AssemblyTreeNode
             }
         }
 
-        /*lock (_assemblyLock)
-        {
-            // check those of our references
-            foreach (var node in _references)
-            {
-                if (node.LoadContext != LoadContext)
-                    continue;
-
-                // search recursively
-                if (node.TryFindUnreferenced(nameToSearchFor, out assembly))
-                    return true;
-            }
-        }*/
-
         assembly = null;
         return false;
     }
 
-    public bool TryFindExisting(string nameToSearchFor, [NotNullWhen(true)] out AssemblyTreeNode? assembly)
+    private static string? GetSimpleName(string fullName)
     {
-        if (NameStr == nameToSearchFor)
+        try
         {
-            assembly = this;
-            return true;
+            return new AssemblyName(fullName).Name;
         }
-
-        lock (_assemblyLock)
+        catch
         {
-            foreach (var node in _references)
-            {
-                if (node.TryFindExisting(nameToSearchFor, out assembly))
-                    return true;
-            }
+            return null;
         }
-
-        assembly = null;
-        return false;
     }
 
-    void FindUnreferencedDllFiles()
+    /// <summary>
+    /// Lists the dll files this node may load on demand - without opening any of them.
+    /// </summary>
+    private List<string> CollectDllFilePaths()
     {
-        if(_collectedUnreferencedDlls)
-            throw new InvalidOperationException($"{_parentName}: Unreferenced DLLs already collected, cannot collect again.");
-        
-        // locate "not used" dlls in the directory without loading them
+        var result = new List<string>();
         var directory = Path.GetDirectoryName(Assembly.Location);
         var directoryInfo = new DirectoryInfo(directory!);
         if (!directoryInfo.Exists)
         {
             Log.Error($"{_parentName}: Directory does not exist: {directory}");
-            return;
+            return result;
         }
 
         if (!_searchNestedFolders)
@@ -210,7 +203,7 @@ internal sealed class AssemblyTreeNode
             // if we don't search nested folders, we can just check the current directory
             foreach (var file in directoryInfo.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly))
             {
-                CheckAssemblyFileAndAdd(file);
+                AddIfNotSelf(file);
             }
         }
         else
@@ -234,21 +227,21 @@ internal sealed class AssemblyTreeNode
                     // get all files recursively
                     foreach (var file in dir.EnumerateFiles("*.dll", SearchOption.AllDirectories))
                     {
-                        CheckAssemblyFileAndAdd(file);
+                        AddIfNotSelf(file);
                     }
                 }
                 else
                 {
                     if (info.Extension != ".dll")
                         continue;
-                    CheckAssemblyFileAndAdd((FileInfo)info);
+                    AddIfNotSelf((FileInfo)info);
                 }
             }
         }
 
-        return;
+        return result;
 
-        void CheckAssemblyFileAndAdd(FileInfo file)
+        void AddIfNotSelf(FileInfo file)
         {
             try
             {
@@ -260,33 +253,28 @@ internal sealed class AssemblyTreeNode
                 Log.Error($"{_parentName}: Exception getting assembly location: {e}");
             }
 
-            foreach (var dep in _references)
-            {
-                try
-                {
-                    if (file.FullName == dep.Assembly.Location)
-                    {
-                        return;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Log.Error($"{_parentName}: Exception getting assembly location: {e}");
-                }
-            }
-
-            AssemblyName assemblyName;
-            try
-            {
-                assemblyName = AssemblyName.GetAssemblyName(file.FullName);
-            }
-            catch
-            {
-                return;
-            }
-
-            var reference = new DllReference(file.FullName, assemblyName.GetName(), assemblyName);
-            _unreferencedDlls.Add(reference);
+            result.Add(file.FullName);
         }
+    }
+
+    public bool TryFindExisting(string nameToSearchFor, [NotNullWhen(true)] out AssemblyTreeNode? assembly)
+    {
+        if (NameStr == nameToSearchFor)
+        {
+            assembly = this;
+            return true;
+        }
+
+        lock (_assemblyLock)
+        {
+            foreach (var node in _references)
+            {
+                if (node.TryFindExisting(nameToSearchFor, out assembly))
+                    return true;
+            }
+        }
+
+        assembly = null;
+        return false;
     }
 }

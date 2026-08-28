@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ApplicationIcon>..\EditorResources\images\t3.ico</ApplicationIcon>
         <RootNamespace>T3.Player</RootNamespace>
@@ -24,7 +24,7 @@
         <PackageReference Include="SharpDX.Desktop" Version="4.2.0">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
-        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.5" />
+        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.10" />
     </ItemGroup>
 
     <!--This
@@ -51,7 +51,7 @@
         <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
     </ItemGroup>
 
-    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
         <!-- Clear previous files in the export folder -->
         <RemoveDir Directories="bin/$(Configuration)" />
     </Target>

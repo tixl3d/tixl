@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "3d0ab3c6-552c-41fc-a0aa-f2151d0298b3"/*M03c_BooleanLogicAnd*/,
+  "Description": "Boolean Logic: And",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "5b53b136-cca5-41c6-8d6d-1cfc04f571d4"/*Text*/,
+      "SectionId": "3b3c7029-5f04-48e2-96af-8c3fff91a989",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "6cb52737-5bff-4c8b-afaa-a9fd8eed6ce1"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "de111679-6ef7-41ba-b75f-01d390b28f09"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a2d31c39-89b5-404e-a6fc-10e4ce6cee18"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "3b3c7029-5f04-48e2-96af-8c3fff91a989",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "249138c0-50de-47f8-9d02-2e1b254a3b3b",
+      "Description": "The term “boolean” comes from a mathematician who developed a system to describe logic using true and false values.\nOne of the basic operations is “and”.\nThe result is true only when both inputs are true."
+    },
+    {
+      "Id": "a84cce49-afc7-4ccb-80c8-a73b302857fa",
+      "Description": "Combine phases of short flashes with phases of silence using boolean logic.\nSolve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

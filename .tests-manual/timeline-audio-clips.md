@@ -161,6 +161,48 @@ Grab the clip's right edge and drag it to the left.
   you can't drag it longer, but you can freely shrink it, and once it drops below its
   natural length the limit tightens up again.
 
+## Step: Loop a clip's source range
+
+**Action:**
+Select an audio clip, enable its `Loop` parameter, then drag the clip's end handle
+well past the audio file's length.
+
+**Expected:**
+- The audio repeats seamlessly for as long as the clip lasts — in playback and in a
+  rendered video.
+- The clip body shows the waveform tiled per repetition, with a subtle vertical line
+  at each loop border.
+- Trimming the clip's start changes where each repetition begins.
+
+## Step: Footage extent while trimming
+
+**Action:**
+Hover an audio clip, then drag its start or end handle slowly.
+
+**Expected:**
+- A thin outline appears showing the full extent of the audio file on the timeline.
+- The mouse cursor stays a steady resize cursor for the whole drag — no flicker.
+- The trim snaps when a handle reaches the file's first or last moment.
+- Dragging the start before the file's beginning leaves that stretch silent during
+  playback (the audio doesn't start early).
+
+## Step: Set as Main Soundtrack via context menu
+
+**Action:**
+Right-click a single selected audio clip and choose "Set as Main Soundtrack".
+
+**Expected:**
+- The clip's `Display` switches to `BackgroundImage`: its image renders behind the
+  timeline (immediately, without playing the clip first) and audio-reactive ops
+  respond to it.
+- The clip's block disappears from the timeline layers — the background image is its
+  only representation. It extends to the full source duration, ignoring any trim.
+- Any other clip that previously was the main soundtrack loses the designation.
+- To reposition or un-designate the soundtrack, set its `Display` parameter back to
+  `Clip` (find the op via the graph or Project Settings → Audio → "Select and focus
+  Main Soundtrack"): the block reappears as a normal clip.
+- Undo reverts the whole designation change at once.
+
 ## Step: Delete and undo
 
 **Action:**
@@ -243,13 +285,17 @@ a short segment to a video file via the export window.
 ## Step: Legacy project migration
 
 **Action:**
-Open an older example project that was saved before the audio-clip rework. Many of the
-bundled examples fit this — try `Operators/Examples/user/still/synchotron/` or similar.
+Start the editor with an editable project whose soundtrack was saved before the
+audio-clip rework (a settings-based soundtrack, not an [AudioClip] op). Open its
+main composition.
 
 **Expected:**
-- The project loads with no warnings about its audio.
-- The soundtrack plays just as it did before.
-- Saving and reopening the project works — the audio clip keeps its settings and still
-  plays.
-- If the old project set its tempo on the clip itself, that tempo now lives in the
-  project's Playback settings and the soundtrack plays at the right speed.
+- The console shows a "Migrated legacy soundtrack entry(s) to visible [AudioClip]
+  op(s)" line for the project at startup.
+- An [AudioClip] op now exists in the composition; the former main soundtrack has
+  `Display` set to `BackgroundImage` and still renders behind the timeline.
+- The soundtrack plays just as it did before, at the right tempo.
+- Saving, closing and reopening keeps everything working; the saved project file no
+  longer carries the old settings-based clip list.
+- Opening a *read-only* package (e.g. bundled Examples from an install) does not get
+  migrated — it keeps playing via the legacy path.

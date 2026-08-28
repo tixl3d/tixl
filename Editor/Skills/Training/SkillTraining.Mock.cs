@@ -20,6 +20,10 @@ internal static partial class SkillTraining
                                      .OrderBy(c => c.Namespace)
                                      .ThenBy(c => c.Name))
         {
+            // '_'-prefixed namespaces hold editing helpers (templates, EditSkillQuest) - never map topics
+            if (HasUnderscoreSegment(symbol.Namespace))
+                continue;
+
             var startingNewTopic = symbol.Namespace != lastNamespace;
             if (startingNewTopic)
             {
@@ -68,6 +72,17 @@ internal static partial class SkillTraining
                                  });
 
         }
+    }
+
+    private static bool HasUnderscoreSegment(string symbolNamespace)
+    {
+        foreach (var segment in symbolNamespace.Split('.'))
+        {
+            if (segment.StartsWith('_'))
+                return true;
+        }
+
+        return false;
     }
 
     private static string RemovePrefix(string input)

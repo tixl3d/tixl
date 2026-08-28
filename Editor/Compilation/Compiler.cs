@@ -176,7 +176,9 @@ internal static class Compiler
         
         if (nugetRestore)
         {
-            var (restoreOutput, restoreExitCode) = RunCommand($"dotnet restore \"{projectFile.FullPath}\" --nologo", projectFile.Directory);
+            // NuGetAudit=false: the audit downloads the advisory database on every restore (tens of seconds on a
+            // slow connection) and its warnings never reach the user from here anyway.
+            var (restoreOutput, restoreExitCode) = RunCommand($"dotnet restore \"{projectFile.FullPath}\" --nologo -p:NuGetAudit=false", projectFile.Directory);
             output = restoreOutput;
             if (restoreExitCode != 0)
             {
@@ -196,6 +198,16 @@ internal static class Compiler
 
                  .Append(" --nologo ")
                  .Append(" --no-restore"); // Optimization: Skip restore if you already did it
+
+        if (buildMode == BuildMode.Debug)
+        {
+            // Debug builds are the editor's own hot-reload/startup compiles: skip walking the reference
+            // graph. Faster (the walk costs seconds even when nothing changed), and more correct - the
+            // package must compile against the dependency DLLs the running editor has loaded, not against
+            // freshly rebuilt ones it cannot load. Release builds (player export) keep the walk so Core
+            // and friends get built in Release on a machine that only ever built Debug.
+            arguments.Append(" --no-dependencies");
+        }
             
 
         var stopwatch = Stopwatch.StartNew();

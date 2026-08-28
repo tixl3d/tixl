@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,6 +19,7 @@ internal sealed partial class TixlAssemblyLoadContext
     private static readonly Lock _nugetLock = new();
     private static readonly AssemblyLoadContext _nugetContext = new("NuGet", true);
     private static readonly List<AssemblyTreeNode> _loadedNuGetAssemblies = [];
+    private static readonly HashSet<string> _loggedMissingNugetDirectories = [];
 
     // todo - per-project directory, since this walks up the directory provided to find nuget config files
     private static readonly string _nugetDirectory = SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(null, null, null));
@@ -70,6 +72,12 @@ internal sealed partial class TixlAssemblyLoadContext
                 {
                     if (library.Path == null)
                         continue;
+
+                    // Only actual packages live in the global NuGet cache. Runtime packs
+                    // (e.g. microsoft.netcore.app.runtime.win-x64) ship with the .NET runtime
+                    // and would only produce misleading "directory not found" log noise here.
+                    if (!string.Equals(library.Type, "package", StringComparison.OrdinalIgnoreCase))
+                        continue;
                     var assemblyNames = library.GetDefaultAssemblyNames(_dependencyContext);
                     foreach (var libName in assemblyNames)
                     {
@@ -81,7 +89,10 @@ internal sealed partial class TixlAssemblyLoadContext
                             var assemblyBasePath = Path.Combine(_nugetDirectory, assemblyRelativePath);
                             if (!Directory.Exists(assemblyBasePath))
                             {
-                                Log.Debug("Failed to find nuget assembly directory: " + assemblyBasePath);
+                                // Lookups re-walk the library list, so the same missing path would be logged repeatedly.
+                                if (_loggedMissingNugetDirectories.Add(assemblyBasePath))
+                                    Log.Debug("Failed to find nuget assembly directory: " + assemblyBasePath);
+
                                 continue;
                             }
 

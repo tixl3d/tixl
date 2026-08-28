@@ -7,7 +7,6 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.IO;
 using T3.IoServices;
 using T3.Core.Logging;
-using T3.Core.Settings;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
@@ -89,10 +88,10 @@ internal static class TimelineToolbar
 
         var isRecording = RecordingSession.IsActive;
         var playback = Playback.Current;
-        var inTimelineMode = playback?.Settings?.Playback.Syncing == CompositionSettings.SyncModes.Timeline;
+        var inTimelineMode = playback?.Settings?.Playback is { UsesBeatTapping: false };
 
-        // Recording places clips on the timeline at specific TimeRange positions; Tapping
-        // mode has no coherent playhead position to anchor them to, so the action is
+        // Recording places clips on the timeline at specific TimeRange positions; beat
+        // tapping has no coherent playhead position to anchor them to, so the action is
         // disabled there. Don't disable mid-session — let the user stop a session even if
         // they've toggled away from Timeline since.
         var enabled = inTimelineMode || isRecording;
@@ -110,9 +109,9 @@ internal static class TimelineToolbar
             ImGui.BeginTooltip();
             if (!enabled)
             {
-                ImGui.TextUnformatted("Recording is only available in Timeline mode.");
+                ImGui.TextUnformatted("Recording needs a timeline playhead.");
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                ImGui.TextUnformatted("Switch the composition's Syncing to Timeline first.");
+                ImGui.TextUnformatted("In Composition Settings, set Project Setup to Animation\nor Sync Mode to Timeline.");
                 ImGui.PopStyleColor();
             }
             else

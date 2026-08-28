@@ -10,6 +10,7 @@ using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Migrations;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Compilation;
@@ -207,6 +208,7 @@ internal static partial class ProjectSetup
             package.AssemblyInformation.GenerateLoadContext();
         }
 
+        var contextsMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Loading symbols...");
         if (parallel)
         {
@@ -230,11 +232,13 @@ internal static partial class ProjectSetup
             }
         }
 
+        var symbolsMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Applying children...");
         loadedSymbols
            .AsParallel()
            .ForAll(pair => SymbolPackage.ApplySymbolChildren(pair.Value));
 
+        var childrenMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Loading symbol UIs...");
         ConcurrentDictionary<EditorSymbolPackage, SymbolUiLoadInfo> loadedSymbolUis = new();
         packages
@@ -246,17 +250,22 @@ internal static partial class ProjectSetup
                        loadedSymbolUis.TryAdd(package, new SymbolUiLoadInfo(newlyReadUis, preExisting));
                    });
 
+        var uisMs = stopWatch.ElapsedMilliseconds;
         Log.Info("Locating Source code files...");
         loadedSymbolUis
            .AsParallel()
            .ForAll(pair => { pair.Key.LocateSourceCodeFiles(); });
 
+        var sourceMs = stopWatch.ElapsedMilliseconds;
         foreach (var (symbolPackage, symbolUis) in loadedSymbolUis)
         {
             symbolPackage.RegisterUiSymbols(symbolUis.NewlyLoaded, symbolUis.PreExisting);
         }
-        
-        Log.Debug($">> Updated {packages.Length} symbol packages in {stopWatch.ElapsedMilliseconds/1000:0.0}s");
+
+        var totalMs = stopWatch.ElapsedMilliseconds;
+        Log.Debug($">> Updated {packages.Length} symbol packages in {totalMs/1000.0:0.0}s "
+                  + $"(contexts {contextsMs/1000.0:0.0}s, symbols {(symbolsMs - contextsMs)/1000.0:0.0}s, children {(childrenMs - symbolsMs)/1000.0:0.0}s, "
+                  + $"uis {(uisMs - childrenMs)/1000.0:0.0}s, source {(sourceMs - uisMs)/1000.0:0.0}s, register {(totalMs - sourceMs)/1000.0:0.0}s)");
 
         var needingReload = _activePackages.Where(x => x.NeedsAssemblyLoad).ToArray();
         if (needingReload.Length > 0)
@@ -289,7 +298,8 @@ internal static partial class ProjectSetup
             // 1. Remove from archived list
             ArchivedProjects.RemoveAll(p => p.ProjectFile == projectFile);
 
-            // 2. Initialize the project
+            // 2. Initialize the project - archived projects may still use the legacy file layout
+            Migrations.ProjectFormatMigration.MigrateIfNeeded(projectFile);
             var newProject = new EditableSymbolProject(projectFile);
     
             // 3. Register Assets (Missing from your current implementation)
@@ -340,7 +350,8 @@ internal static partial class ProjectSetup
     /// rebuilt on each startup from the load results. <see cref="ProjectFile"/> is null when the
     /// .csproj itself could not be parsed.
     /// </summary>
-    internal sealed record BrokenProjectInfo(FileInfo FileInfo, CsProjectFile? ProjectFile, string Reason, string? Hint)
+    internal sealed record BrokenProjectInfo(FileInfo FileInfo, CsProjectFile? ProjectFile, string Reason, string? Hint,
+                                             bool LikelySyncConflict = false)
     {
         public string Name => ProjectFile?.Name ?? Path.GetFileNameWithoutExtension(FileInfo.FullName);
         public string Folder => ProjectFile?.Directory ?? FileInfo.DirectoryName ?? string.Empty;

@@ -5,6 +5,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectFormatVersion>2</ProjectFormatVersion>
     <RootNamespace>Io</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
@@ -19,6 +20,8 @@
     <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
     <PackageId>fcf9c228-c779-4a14-9395-35324763470e</PackageId>
     <IsArchived>false</IsArchived>
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <!-- Operator global usings — mirrors Lib so the moved IO operators compile unchanged. -->
   <ItemGroup>
@@ -108,10 +111,10 @@
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
     <!-- Video2DPointScanner (dmx helper) uses OpenCV for blob detection. -->
-    <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
   </ItemGroup>
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
@@ -119,10 +122,10 @@
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively). -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
-    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
-    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
-    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageAssets Include="Assets/**/*" />
+    <PackageSymbols Include="Symbols/**/*.t3" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" />
+    <PackageSourceCode Include="Symbols/**/*.cs" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
@@ -132,8 +135,8 @@
     <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-    <RemoveDir Directories="bin/$(Configuration)" />
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+    <RemoveDir Directories="$(BaseOutputPath)$(Configuration)" />
   </Target>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
     <ItemGroup Label="Define json structure of referenced operator packages">

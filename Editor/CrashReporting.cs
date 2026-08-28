@@ -125,7 +125,15 @@ internal static class CrashReporting
 
             if (json != null)
             {
-                EditorUi.Instance.SetClipboardText(json);
+                try
+                {
+                    EditorUi.Instance.SetClipboardText(json);
+                }
+                catch (Exception e)
+                {
+                    // A clipboard failure must not prevent sending the actual crash report
+                    Log.Warning($"Failed to copy crash report to clipboard: {e.Message}");
+                }
             }
 
             var sendingEnabled = result == confirmation;
@@ -175,10 +183,26 @@ internal static class CrashReporting
 
         var exceptionTitle = sentryEvent.Exception.GetType().Name;
 
-        var filepath = Path.Combine(FileWriter.Instance.LogDirectory, $"crash {DateTime.Now:yyyy-MM-dd  HH-mm-ss} - {exceptionTitle}.txt");
+        // Include the event id so concurrent crash events (e.g. several threads failing in the
+        // same second) don't collide on the same filename - the second write would throw inside
+        // the crash handler and suppress the report.
+        var filepath = Path.Combine(FileWriter.Instance.LogDirectory,
+                                    $"crash {DateTime.Now:yyyy-MM-dd  HH-mm-ss} - {exceptionTitle} - {sentryEvent.EventId}.txt");
 
+        try
+        {
+            WriteCrashReportTo(sentryEvent, filepath);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Failed to write crash report file: {e.Message}");
+        }
+    }
+
+    private static void WriteCrashReportTo(SentryEvent sentryEvent, string filepath)
+    {
         using var streamFileWriter = new StreamWriter(filepath);
-        streamFileWriter.WriteLine($"{sentryEvent.Exception.Message}\n{sentryEvent.Exception}");
+        streamFileWriter.WriteLine($"{sentryEvent.Exception?.Message}\n{sentryEvent.Exception}");
 
         using var memoryStream = new MemoryStream();
         using var jsonWriter = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Indented = true });

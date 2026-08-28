@@ -60,6 +60,9 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
     public bool TryProbeDurationSeconds(string sourcePath, out double seconds)
         => VideoMetadata.TryProbeDurationSeconds(sourcePath, out seconds);
 
+    public IVideoThumbnailReader? TryCreateThumbnailReader(string sourcePath, out string? error)
+        => VideoThumbnailReader.TryOpen(sourcePath, out error);
+
     public VideoEncoderAvailability GetAvailability(VideoExportCodec codec)
     {
         if (!FfmpegLibrary.EnsureInitialized())

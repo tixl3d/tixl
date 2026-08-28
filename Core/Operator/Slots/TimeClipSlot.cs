@@ -1,10 +1,8 @@
 using System;
-using System.Linq;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
-using T3.Core.Utils;
 
 // ReSharper disable ForCanBeConvertedToForeach
 
@@ -33,16 +31,25 @@ internal interface IOutputDataUser<T> : IOutputDataUser
 public interface IPreventingTimeRemap;
 
 /// <summary>
-/// Marks a clip whose <see cref="TimeClip.SourceRange"/> is <b>content-time</b> — anchored at the source's start
-/// (0), not the placement position. The editor uses this at creation to default SourceRange to <c>[0, duration]</c>
-/// instead of the generic <c>SourceRange = TimeRange</c> (which is right only for region-mapping clips). Implemented
-/// by media clips like [VideoClip]. (Future: pair with an instance-side AvailableSourceRange the editor can snap to.)
+/// Marks a clip whose <see cref="TimeClip.SourceRange"/> is <b>content-time in seconds</b> — anchored at the source's
+/// start (0), not the placement position, and independent of the project BPM. The slot sets
+/// <see cref="TimeClip.SourceUnit"/> to seconds for these, so the op's local time (and its keyframes) run in seconds;
+/// the editor defaults their SourceRange to <c>[0, duration]</c> at creation instead of the generic
+/// <c>SourceRange = TimeRange</c> (which is right only for region-mapping clips). Implemented by wall-clock media
+/// clips like [VideoClip] and [AudioClip].
 /// </summary>
 public interface IContentTimeClip;
 
 public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUser<TimeClip>
 {
     public TimeClip TimeClip { get; private set; }
+
+    /// <summary>
+    /// Opts out of the out-of-range gate: the slot then always evaluates and only remaps time. For media
+    /// clips whose content must stay pullable outside the clip window (decoder preroll, first/last-frame
+    /// clamp) — the op is responsible for clamping to its source range.
+    /// </summary>
+    public bool EvaluateOutsideRange;
 
     public TimeClipSlot()
     {
@@ -54,27 +61,62 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
         TimeClip = data as TimeClip ?? new TimeClip();
         TimeClip.Id = Parent.SymbolChildId;
         TimeClip.UsedForRegionMapping = Parent is not IPreventingTimeRemap;
+
+        var sourceUnit = Parent is IContentTimeClip ? ClipTimeUnits.Seconds : ClipTimeUnits.Bars;
+        if (TimeClip.NeedsSourceUnitConversion)
+        {
+            // Files written before the unit existed hold media source ranges (and the op's keyframes,
+            // which live in the same source space) in bars — convert once with the project's BPM. The
+            // TimeClip object is shared by all instances of the symbol child, so the flag guards against
+            // converting again for the next instance.
+            if (sourceUnit == ClipTimeUnits.Seconds)
+            {
+                var secondsPerBar = 240.0 / FindCompositionBpm(Parent);
+                TimeClip.SourceRange = new TimeRange((float)(TimeClip.SourceRange.Start * secondsPerBar),
+                                                     (float)(TimeClip.SourceRange.End * secondsPerBar));
+                Parent.Parent?.Symbol.Animator.ScaleKeyTimesOfChild(Parent.SymbolChildId, secondsPerBar);
+                Log.Debug($"Converted source range of {Parent} to seconds", Parent);
+            }
+
+            TimeClip.NeedsSourceUnitConversion = false;
+        }
+
+        TimeClip.SourceUnit = sourceUnit;
+    }
+
+    /// <summary>BPM of the nearest enclosing composition with its own settings, else the current playback's.</summary>
+    private static double FindCompositionBpm(Instance instance)
+    {
+        while (instance != null)
+        {
+            var settings = instance.Symbol.CompositionSettings;
+            if (settings.Enabled && settings.Playback.Bpm > 0)
+                return settings.Playback.Bpm;
+
+            instance = instance.Parent;
+        }
+
+        var bpm = Playback.Current?.Bpm ?? 120;
+        return bpm > 0 ? bpm : 120;
     }
 
     public UpdateStates LastUpdateStatus;
 
     private void UpdateWithTimeRangeCheck(EvaluationContext context)
     {
-        if ((context.LocalTime < TimeClip.TimeRange.Start) || (context.LocalTime >= TimeClip.TimeRange.End))
+        if (!EvaluateOutsideRange
+            && ((context.LocalTime < TimeClip.TimeRange.Start) || (context.LocalTime >= TimeClip.TimeRange.End)))
         {
             LastUpdateStatus = CoreSettings.Config.TimeClipSuspending ? UpdateStates.Suspended : UpdateStates.Active;
             return;
         }
 
-        // TODO: Setting local time should flag time accessors as dirty 
+        // TODO: Setting local time should flag time accessors as dirty
         var prevTime = context.LocalTime;
         var prevFxTime = context.LocalFxTime;
-        
-        context.LocalTime = prevTime.Remap(TimeClip.TimeRange.Start, TimeClip.TimeRange.End,
-                                           TimeClip.SourceRange.Start, TimeClip.SourceRange.End);
-        
-        context.LocalFxTime = prevFxTime.Remap(TimeClip.TimeRange.Start, TimeClip.TimeRange.End,
-                                               TimeClip.SourceRange.Start, TimeClip.SourceRange.End);
+
+        context.LocalTime = TimeClip.MapTimelineToSource(prevTime);
+        context.LocalFxTime = TimeClip.MapTimelineToSource(prevFxTime);
 
         if (_baseUpdateAction == null)
         {
@@ -104,8 +146,10 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
     {
         set
         {
+            // A null assignment (e.g. RestoreUpdateAction after a recompile) must clear the wrapper too —
+            // keeping it would leave a slot that warns "invalid time clip update action" every frame.
             _baseUpdateAction = value;
-            base.UpdateAction = UpdateWithTimeRangeCheck;
+            base.UpdateAction = value == null ? null : UpdateWithTimeRangeCheck;
         }
     }
 
@@ -117,6 +161,10 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
         if (isDisabled)
         {
             _keepOriginalUpdateAction = _baseUpdateAction;
+            // Must be stashed like the base disable path does: RestoreUpdateAction writes it back on
+            // re-enable, and without the stash it wipes the trigger (e.g. Animated) — the slot then
+            // never re-evaluates after re-enabling.
+            _keepDirtyFlagTrigger = _dirtyFlag.Trigger;
             base.UpdateAction = EmptyAction;
             DirtyFlag.Invalidate();
         }

@@ -30,6 +30,9 @@ public sealed class Animator : SymbolExtension
         List<Guid> childrenToCopyFrom,
         Dictionary<Guid, Guid> oldToNewIdDict)
     {
+        // Collect first, insert after: when copying within one composition (e.g. splitting a clip),
+        // targetAnimator is THIS animator — inserting while enumerating throws EnumFailedVersion.
+        var pendingCopies = new List<(Guid NewChildId, Guid InputId, List<Curve> Curves)>();
         foreach (var (oldChildId, inputDict) in _curvesByChildAndInput)
         {
             if (!childrenToCopyFrom.Contains(oldChildId))
@@ -42,15 +45,20 @@ public sealed class Animator : SymbolExtension
             {
                 if (curves.Length == 0)
                     continue;
-                
-                var cloned = new Curve[curves.Length];
+
+                var cloned = new List<Curve>(curves.Length);
                 for (var i = 0; i < curves.Length; i++)
                 {
-                    cloned[i] = curves[i].TypedClone();
+                    cloned.Add(curves[i].TypedClone());
                 }
 
-                targetAnimator.AddCurvesToInput(cloned.ToList(), newChildId, inputId);
+                pendingCopies.Add((newChildId, inputId, cloned));
             }
+        }
+
+        foreach (var (newChildId, inputId, curves) in pendingCopies)
+        {
+            targetAnimator.AddCurvesToInput(curves, newChildId, inputId);
         }
     }
 
@@ -58,6 +66,96 @@ public sealed class Animator : SymbolExtension
     {
         foreach (var childId in instanceIds)
             _curvesByChildAndInput.Remove(childId);
+    }
+
+    /// <summary>
+    /// Converts the global playback time into the local time an animated input of <paramref name="instance"/>
+    /// is sampled at, by composing the time-clip remaps of the instance and its ancestors (outermost first).
+    /// Keys must be inserted in this space — curves are read at <c>context.LocalTime</c>, which arrives
+    /// remapped. Identity when no enclosing clip remaps (including instances without a parent path).
+    /// </summary>
+    public static double GetLocalAnimationTime(Instance? instance, double globalTimeInBars)
+    {
+        if (instance == null)
+            return globalTimeInBars;
+
+        var time = GetLocalAnimationTime(instance.Parent, globalTimeInBars);
+
+        var outputs = instance.Outputs;
+        for (var i = 0; i < outputs.Count; i++)
+        {
+            if (outputs[i] is ITimeClipProvider clipProvider)
+            {
+                time = clipProvider.TimeClip.MapTimelineToSource(time);
+                break;
+            }
+        }
+
+        return time;
+    }
+
+    /// <summary>
+    /// Inverse of <see cref="GetLocalAnimationTime"/>: maps a local animation time (e.g. a keyframe's U)
+    /// of <paramref name="instance"/> back to the global playback time it takes effect at.
+    /// </summary>
+    public static double GetGlobalAnimationTime(Instance? instance, double localTimeInBars)
+    {
+        if (instance == null)
+            return localTimeInBars;
+
+        var time = localTimeInBars;
+        var outputs = instance.Outputs;
+        for (var i = 0; i < outputs.Count; i++)
+        {
+            if (outputs[i] is ITimeClipProvider clipProvider)
+            {
+                time = clipProvider.TimeClip.MapSourceToTimeline(time);
+                break;
+            }
+        }
+
+        return GetGlobalAnimationTime(instance.Parent, time);
+    }
+
+    /// <summary>
+    /// The local-time window that corresponds to ~1/100 bar of playback time at <paramref name="instance"/> —
+    /// the tolerance for treating a key as "at" the playhead. Exact-equality lookups fail once a time clip
+    /// remaps: the clip's float ranges make the mapped playhead land fractionally off a key's quantized U.
+    /// </summary>
+    public static double GetLocalTimeTolerance(Instance? instance, double globalTimeInBars)
+    {
+        var localTime = GetLocalAnimationTime(instance, globalTimeInBars);
+        var localTimeShifted = GetLocalAnimationTime(instance, globalTimeInBars + 0.01);
+        return Math.Max(0.0001, Math.Abs(localTimeShifted - localTime));
+    }
+
+    /// <summary>
+    /// If any curve of the given input has a key within <paramref name="tolerance"/> of
+    /// <paramref name="localTime"/>, returns that key's exact time — so edits update the existing key
+    /// instead of inserting a fractionally-offset duplicate next to it.
+    /// </summary>
+    public double SnapToExistingKeyTime(Guid childId, Guid inputId, double localTime, double tolerance)
+    {
+        if (!_curvesByChildAndInput.TryGetValue(childId, out var inputDict)
+            || !inputDict.TryGetValue(inputId, out var curves))
+            return localTime;
+
+        var bestTime = localTime;
+        var bestDistance = tolerance;
+        foreach (var curve in curves)
+        {
+            if (!curve.TryGetPreviousKey(localTime + tolerance, out var key))
+                continue;
+
+            var distance = Math.Abs(key.U - localTime);
+            if (distance > bestDistance)
+                continue;
+
+            bestDistance = distance;
+            bestTime = key.U;
+        }
+
+        return bestTime;
     }
 
     public Curve[]? AddOrRestoreCurvesToInput(IInputSlot inputSlot, Curve[]? originalCurves)
@@ -98,7 +196,7 @@ public sealed class Animator : SymbolExtension
     {
         var childId = inputSlot.Parent.SymbolChildId;
         var inputId = inputSlot.Id;
-        var now = Playback.Current.TimeInBars;
+        var now = GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
 
         var curves = originalCurves ?? new Curve[values.Length];
         if (curves.Length != values.Length)
@@ -129,7 +227,7 @@ public sealed class Animator : SymbolExtension
     {
         var childId = inputSlot.Parent.SymbolChildId;
         var inputId = inputSlot.Id;
-        var now = Playback.Current.TimeInBars;
+        var now = GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
 
         var curves = originalCurves ?? new Curve[values.Length];
         if (curves.Length != values.Length)
@@ -342,6 +440,21 @@ public sealed class Animator : SymbolExtension
         return TryGetCurvesForChildInput(inputSlot.Parent.SymbolChildId, inputSlot.Id, out curves);
     }
 
+    /// <summary>Retimes all keys of all animated inputs of one child by <paramref name="factor"/>.</summary>
+    public void ScaleKeyTimesOfChild(Guid childId, double factor)
+    {
+        if (!_curvesByChildAndInput.TryGetValue(childId, out var inputDict))
+            return;
+
+        foreach (var curves in inputDict.Values)
+        {
+            foreach (var curve in curves)
+            {
+                curve.ScaleKeyTimes(factor);
+            }
+        }
+    }
+
     public IEnumerable<VDefinition?> GetTimeKeys(Guid childId, Guid inputId, double time)
     {
         if (!TryGetCurvesForChildInput(childId, inputId, out var curves))
@@ -487,8 +600,8 @@ public sealed class Animator : SymbolExtension
         {
             if (!animator.TryGetCurvesForInputSlot(inputSlot, out var curves))
                 return;
-                
-            var time = Playback.Current.TimeInBars;
+
+            var time = GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
             for (var i = 0; i < 3; i++)
             {
                 var vDef = curves[i].GetV(time) ?? new VDefinition { U = time };
@@ -514,8 +627,8 @@ public sealed class Animator : SymbolExtension
                      .Animator
                      .TryGetCurvesForInputSlot(inputSlot, out var curves))
         {
-            var firstCurve = curves[0]; 
-            var time = Playback.Current.TimeInBars;
+            var firstCurve = curves[0];
+            var time = GetLocalAnimationTime(inputSlot.Parent, Playback.Current.TimeInBars);
             var vDef = firstCurve.GetV(time) ?? new VDefinition { U = time };
             vDef.Value = value;
             firstCurve.AddOrUpdateV(time, vDef);

@@ -1,0 +1,83 @@
+{
+  "FormatVersion": 3,
+  "Id": "14e83508-bbd1-44b8-bc8b-9e2a9909d4f3"/*Me01a_TransformingMeshes*/,
+  "Description": "Transforming Meshes",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "5458f60d-40a9-4dc4-a79e-a42d4c62469d"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "7c1cddff-6f4f-4f19-9168-d69cef1a9e18"/*Text*/,
+      "SectionId": "2f43e437-bdbc-4a89-a935-be4f19a10488",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "7fb2b023-c1ac-4517-9119-01e1b5ce03b0"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "03e8d915-b354-4859-ba86-2bacb3e94180"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "2f43e437-bdbc-4a89-a935-be4f19a10488",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "db6ad0fe-6590-439f-b010-b87dee124e27",
+      "Description": "This chapter focuses on generating geometry.\nAs mentioned earlier, each mesh consists of two buffers stored on the GPU.\nOne buffer contains a list of vertices (corner points), and the second contains a list of triangles defined by references to three of these vertices."
+    },
+    {
+      "Id": "c3dddcd8-bc69-42aa-943f-1b94009dec32",
+      "Description": "You may remember the [Transform] operator and how it can be stacked to build increasingly complex transformations.\nThe [TransformMesh] operator looks similar, has the same parameters, and produces the same visual result.\nHowever, it works very differently.\nEach [TransformMesh] creates a **new mesh**."
+    },
+    {
+      "Id": "4867fbf3-6503-44f0-b6c9-e6b6aea96f11",
+      "Description": "Try to guess how many mesh buffers are used in this example.\nKeep a number in mind before continuing."
+    },
+    {
+      "Id": "f84393d1-a7ab-4bf9-91b5-ab4d3ada7f4a",
+      "Description": "It is three.\nThe first buffer contains the original cube.\nThe second buffer contains a rotated copy.\nThe third buffer is a new, larger mesh that combines both.\nThis final buffer is what gets drawn."
+    },
+    {
+      "Id": "ff6b1525-e332-4bfa-898e-7bbca13424d6",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

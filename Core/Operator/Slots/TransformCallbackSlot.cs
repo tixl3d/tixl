@@ -46,6 +46,7 @@ public sealed class TransformCallbackSlot<T> : Slot<T>
             }
                 
             _keepOriginalUpdateAction = _baseUpdateAction;
+            _keepDirtyFlagTrigger = DirtyFlag.Trigger; // restored by RestoreUpdateAction on re-enable
             base.UpdateAction = EmptyAction;
             DirtyFlag.Invalidate();
         }
@@ -66,6 +67,7 @@ public sealed class TransformCallbackSlot<T> : Slot<T>
         }
             
         _keepOriginalUpdateAction = _baseUpdateAction;
+        StashValueForBypass();
         base.UpdateAction = ByPassUpdate;
         DirtyFlag.Invalidate();
         _targetInputForBypass = targetSlot;

@@ -210,15 +210,15 @@ internal sealed partial class MagGraphView
         }
 
         ImGui.PopID();
-        // Todo: We eventually need to handle right clicking to select and open context menu when dragging with right mouse button. 
-        // var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
-        // if (ImGui.IsMouseReleased(ImGuiMouseButton.Right)
-        //     && !wasDraggingRight
-        //     && ImGui.IsItemHovered()
-        //     && !_nodeSelection.IsNodeSelected(item))
-        // {
-        //     item.Select(_nodeSelection);
-        // }
+
+        var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
+        if (ImGui.IsMouseReleased(ImGuiMouseButton.Right)
+            && !wasDraggingRight
+            && isItemHovered
+            && !_context.Selector.IsSelected(item))
+        {
+            item.Select(_context.Selector);
+        }
 
         if ((customUiResult == OpUi.CustomUiResult.None 
              || (customUiResult&OpUi.CustomUiResult.AllowThumbnail) != 0

@@ -25,6 +25,10 @@ public static class T3Style
     public static Vector2 WindowPaddingForWindows = new(0,0);
     public static Vector2 WindowPaddingForMenus = new(5,5);
 
+    /// <summary>The global frame padding. Popups re-push it so their row heights don't inherit a
+    /// local override from whatever window opened them.</summary>
+    public static readonly Vector2 DefaultFramePadding = new(7, 4);
+
     public static void Apply()
     {
         var style = ImGui.GetStyle();
@@ -84,7 +88,7 @@ public static class T3Style
         // directly as the inner content rect (the original ImGui.GetWindowContentRegionMin/Max
         // helpers were removed in 1.91). If this is ever changed, audit those call sites.
         style.WindowPadding = Vector2.Zero;
-        style.FramePadding = new Vector2(7, 4);
+        style.FramePadding = DefaultFramePadding;
         style.ItemSpacing = new Vector2(1, 1.49f);
         style.ItemInnerSpacing = new Vector2(3, 2);
         style.GrabMinSize = 10;

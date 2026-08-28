@@ -1,0 +1,31 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "d4f21c80-1e42-4c8a-9f31-0ab1cd2e0200"/*AudioLevel*/,
+  "Description": "A level-meter tap for the audio graph.\n\nPasses the wired audio sources through unchanged and outputs their combined level as a float for reactive control — e.g. driving a [DuckAudioLevel] or visuals.\n\nWire it inline (source → AudioLevel → [AudioBus]) for reliable metering of every source type, including timeline [AudioClip]s. A side branch (tapping a source without routing through to a bus) can only meter generator-type sources, not timeline clips. The level trails the audible signal by about a frame.\n\nLike every node in the audio graph, this is only heard once the chain reaches an [AudioBus] that is itself being evaluated — pinned to an output window, or wired into the render chain. A chain that ends nowhere is silent.",
+  "InputUis": [
+    {
+      "InputId": "d4f21c80-0003-4c8a-9f31-0ab1cd2e0200"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d4f21c80-0001-4c8a-9f31-0ab1cd2e0200"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "d4f21c80-0002-4c8a-9f31-0ab1cd2e0200"/*Level*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

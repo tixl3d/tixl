@@ -66,10 +66,17 @@ Also:
 
 ### Operator descriptions
 
-An operator's Description field (edited in the TiXL editor) is the source for both the editor's help panel and
-the generated `.help/docs/operators/**` page — so write descriptions **in the editor**, not in the generated
-`.md` (hand-edits to the `.md` are overwritten on regeneration). Follow the description conventions from the
-wiki ([dev.OperatorConventions](https://github.com/tixl3d/tixl/wiki/dev.OperatorConventions)):
+An operator's Description lives in its `.t3ui` and is the source for both the editor's help panel and the
+generated `.help/docs/operators/**` page. **Never edit the generated `.md`** — it is overwritten on regeneration.
+
+Descriptions may be written either in the TiXL editor or directly in the `.t3ui`; both write the same field.
+The one hard constraint is **the editor must not be running with that symbol loaded while the file is
+hand-edited** — it holds symbols in memory and rewrites the `.t3ui` on save, silently discarding on-disk
+changes. So close the editor first, or restart it right after the edit and before anything that could trigger
+a save. The same applies to any other hand-edit of `.t3` / `.t3ui` / operator `.csproj` files.
+
+Follow the description conventions from the wiki
+([dev.OperatorConventions](https://github.com/tixl3d/tixl/wiki/dev.OperatorConventions)):
 
 - **The first line is a one-line summary** that conveys what the operator does and nothing more, followed by a
   **blank line** before any further detail. Descriptions render as Markdown, so the summary needs that
@@ -223,6 +230,47 @@ from the theme: wrong padding, no checkmark column, mismatched fonts).
   reads only static state — a capturing lambda allocates a closure each frame.
   Reach for a lambda only when the menu genuinely needs per-instance locals.
 
+### Menu and command labels
+
+**TiXL uses Title Case for every clickable command label** — menu items, submenu headers, menu bar
+entries, buttons, and context-menu rows. This follows the tradition of the tools TiXL users have open
+next to it (After Effects, Resolve, Blender, Unity) and Apple's HIG. It deliberately differs from
+Microsoft's modern sentence-case guidance and from web-era tools like Figma; consistency within TiXL
+matters more than matching any single external vendor.
+
+Style guides disagree on the details (see [Title case](https://en.wikipedia.org/wiki/Title_case) for a
+comparison). TiXL follows the **lowercase-short-prepositions** variant used by Chicago, MLA and Apple —
+**not** AP/APA, which capitalize four-letter prepositions. The two differ only on `with`, `from`, `into`
+and `over`; we write `Sync with Selection`, not `Sync With Selection`.
+
+The rule, so short words don't become a judgement call:
+
+- Capitalize the **first and last word**, always.
+- Capitalize nouns, verbs, adjectives, adverbs, and pronouns — including short ones (`Is`, `Be`, `Set`).
+- **Lowercase** articles (`a`, `an`, `the`), coordinating conjunctions (`and`, `but`, `or`, `nor`),
+  and prepositions of **four letters or fewer** (`at`, `by`, `in`, `of`, `on`, `to`, `as`, `for`,
+  `from`, `with`, `into`, `over`) — unless they are the first or last word.
+- Prepositions of **five letters or more** are capitalized: `Under`, `Above`, `Between`, `Through`.
+- A particle in a phrasal verb is part of the verb, so it **is** capitalized: `Set Up`, `Clean Up`,
+  `Zoom In`. Contrast `Cut at Time` (preposition) with `Pin to Output` (preposition).
+
+Examples: `Cut at Time`, `Clear Time Stretch`, `Select Following Clips`, `Reset to Default`,
+`Combine into New Type...`, `Open in Explorer`, `Sync with Selection`, `Set as Main Soundtrack`.
+
+Two related conventions:
+
+- **Trailing `...` means "this needs more input"** — the command opens a dialog, popup, or picker
+  rather than acting immediately. `Rename...` opens a dialog; `Rename` renames inline. Do **not** put
+  `...` on submenu headers (the chevron already says there's more) or on section labels.
+- Use three periods (`...`), **not** the single-character ellipsis `…`. The font atlas only rasterises
+  a fixed glyph range, and `…` is outside it.
+
+Section headers (`DrawMenuGroupLabel`, `HintLabel`) are labels too, so they also use Title Case —
+just without the trailing `...`: `Interpolation`, `UI Elements`, `Input Settings`.
+
+Actual prose keeps sentence case: tooltips, help text, warnings, confirmation questions, and
+parameter descriptions are sentences, not commands.
+
 ### Tool icons
 
 `CustomComponents.IconButton` is the one canonical tool icon. Don't hand-roll
@@ -372,6 +420,34 @@ These comments help the next reviewer (or the same agent on the next turn) under
 4. **Back-compat readers** (e.g. JSON migration paths reading old field names) are an exception: keep them, and explain that they're back-compat handlers for old saved data, without naming a phase or plan. The migration is permanent code now, not scaffolding.
 
 When picking up a feature mid-phase, treat existing transitional comments as a working state of the prior author's thinking — don't aggressively prune them until the feature is being wrapped up.
+
+## Version-Anchored Naming for Formats, Layouts, and Migrations
+
+Never use relative terms — "legacy", "old", "new", "previous", "modern" — in identifiers, file
+names, or comments that describe a project/file format, disk layout, or serialized shape. Such
+terms are anchored to the moment of writing and lose their meaning at the next format change:
+after two changes there are two different "legacies", and nobody knows which one a name refers to.
+
+- **Name superseded formats by their own version counter** where one exists. Project disk formats
+  are keyed by the csproj's `ProjectFormatVersion` (`ProjectFormat` enum: 1 = root-level operator
+  files, pre-4.3; 2 = `Symbols/` folder). Each format version is a namespace nesting its specific
+  types and helpers: `Editor/Migrations/ProjectFormats/V1/Layout.cs` etc. Comments say
+  "format-V1", not "the old layout".
+- **Where no format counter exists, anchor to the TiXL version boundary**: "projects saved before
+  4.3", `PreV4_3...` — never "older projects".
+- **Project-format migrations are an ordered chain of incremental steps** (Rails-style):
+  `Editor/Migrations/Steps/To<N>_<Name>.cs`, each a `ProjectMigrationStep` carrying its target
+  format, the TiXL version it ships with, and an idempotent `Apply`. `ProjectFormatMigration`
+  walks a project from its stamped (or `FormatHelper`-sniffed) format to `FormatHelper.Current`,
+  pinning one backup first. Shipped steps are frozen history — never edit them; add the next step.
+  Symbol-data migrations that predate the counter (asset paths, variations, audio clips) live in
+  their subject folders outside the chain and are content-gated.
+  Code specific to superseded formats belongs in the `Migrations` namespace, not in steady-state
+  classes — steady-state code should reference it explicitly (greppable, deletable as a unit).
+- **Exception — deliberately moving targets.** Names like `CurrentProjectStructureVersion` or
+  `HasCurrentProjectStructure` are fine: they are *supposed* to track the running editor and
+  change meaning with each release. The rule targets frozen artifacts (a superseded layout, a
+  migration, a backup file), which must carry version-anchored names forever.
 
 ## Interface stability for new features
 

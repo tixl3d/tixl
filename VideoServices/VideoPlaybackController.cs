@@ -151,7 +151,12 @@ public sealed class VideoPlaybackController : IDisposable
                         TimeToFrameMapper.ResolvePlaybackSeconds(requestedSeconds, _duration, loop),
                         _streamStartPts, _timeBaseNum, _timeBaseDen, _frameRate);
 
-                    if (_lastUploadedTarget == target || (_hasPendingFrame && _pendingTarget == target))
+                    // Both publish paths satisfy the wait: the software path flags _hasPendingFrame, the
+                    // zero-copy path _hasPendingGpuFrame. Ignoring the latter made every new frame ride
+                    // out the full timeout in zero-copy exports.
+                    if (_lastUploadedTarget == target
+                        || (_hasPendingFrame && _pendingTarget == target)
+                        || (_hasPendingGpuFrame && _pendingTarget == target))
                         return;
                 }
             }
@@ -405,7 +410,8 @@ public sealed class VideoPlaybackController : IDisposable
 
     // Decodes forward to the target frame, caching every frame read so the surrounding GOP is available for
     // cheap scrub-back. Seeks to the preceding keyframe first unless the target is a short hop ahead of the
-    // decoder's current position. Returns false if the stream ends before reaching the target.
+    // decoder's current position. A target past the end resolves to the final frame; false means nothing
+    // decoded at all.
     private bool DecodeTo(long target)
     {
         var known = _workerLastDecodedPts != NotSet;
@@ -441,7 +447,10 @@ public sealed class VideoPlaybackController : IDisposable
         if (seeking && reached && firstPts != NotSet && target - firstPts > _workerForwardSeekThreshold)
             _workerForwardSeekThreshold = target - firstPts;
 
-        if (!reached)
+        // A target past the last frame — a clip trimmed beyond its footage, or a container over-reporting its
+        // duration — resolves to the final frame. Reporting failure instead left the target unrecorded, so every
+        // later request re-seeked and re-decoded the whole trailing GOP for as long as the playhead sat there.
+        if (!reached && firstPts == NotSet)
             return false;
 
         _workerLastDecodedPts = decodedPts;

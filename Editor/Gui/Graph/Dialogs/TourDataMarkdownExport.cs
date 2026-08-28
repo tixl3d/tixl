@@ -234,7 +234,7 @@ internal static partial class TourDataMarkdownExport
         return false;
     }
 
-    private static void ApplyTourDataToSymbolUi(TourWithId tour, SymbolUi targetSymbolUi)
+    internal static void ApplyTourDataToSymbolUi(TourWithId tour, SymbolUi targetSymbolUi)
     {
         RealizeTourIds(tour, targetSymbolUi);
         if (!string.IsNullOrEmpty(tour.Title))
@@ -254,7 +254,7 @@ internal static partial class TourDataMarkdownExport
         }
     }
 
-    private static List<TourWithId> GetToursFromMarkdown(string markdown)
+    internal static List<TourWithId> GetToursFromMarkdown(string markdown)
     {
         _tours.Clear();
         var span = markdown.AsSpan();
@@ -474,7 +474,7 @@ internal static partial class TourDataMarkdownExport
         title = line[..idStartIndex].Trim();
     }
 
-    private sealed record TourWithId(string IdString, string Title, List<TourPoint> TourPoints);
+    internal sealed record TourWithId(string IdString, string Title, List<TourPoint> TourPoints);
 
     private static readonly List<TourWithId> _tours = [];
     private static TourWithId? _activeTour;

@@ -39,6 +39,7 @@ internal static class FactoryKeyMap
                 new(UserActions.InsertKeyframeWithIncrement, new KeyCombination(Key.C, shift: true)),
                 new(UserActions.ToggleAnimationPinning, new KeyCombination(Key.K, shift: true)),
                 new(UserActions.SplitSelectedOrHoveredClips, new KeyCombination(Key.X, ctrl: true)),
+                new(UserActions.SelectFollowingClips, new KeyCombination(Key.A, ctrl: true, shift: true)),
                 new(UserActions.SetStartTime, new KeyCombination(Key.B)),
                 new(UserActions.SetEndTime, new KeyCombination(Key.N)),
                 new(UserActions.TapBeatSync, new KeyCombination(Key.Z)),
@@ -47,6 +48,7 @@ internal static class FactoryKeyMap
                 // Graph window actions
                 new(UserActions.ToggleDisabled, new KeyCombination(Key.D, shift: true)),
                 new(UserActions.ToggleBypassed, new KeyCombination(Key.B, shift: true)),
+                new(UserActions.Disconnect, new KeyCombination(Key.D, alt: true)),
                 new(UserActions.PinToOutputWindow, new KeyCombination(Key.P)),
                 new(UserActions.DisplayImageAsBackground, new KeyCombination(Key.P, ctrl: true)),
                 new(UserActions.ClearBackgroundImage, new KeyCombination(Key.P, ctrl: true, shift: true)),

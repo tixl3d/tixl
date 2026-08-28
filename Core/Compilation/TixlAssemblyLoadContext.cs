@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using T3.Core.IO;
 using T3.Core.Logging;
@@ -54,10 +56,10 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     private readonly string _shadowCopyDirectory;
     private readonly bool _shouldCopyBinaries;
 
+
     static TixlAssemblyLoadContext()
     {
         CleanUpStaleShadowCopies();
-        Directory.CreateDirectory(RootShadowCopyDir);
 
         (AssemblyLoadContext Context, (Assembly Assembly, AssemblyName name)[] assemblies)[]? allAssemblies = All
            .Select(ctx => (
@@ -143,8 +145,8 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         }
 
         MainDirectory = directory;
-        _shadowCopyDirectory = Path.Combine(RootShadowCopyDir, Name!, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
         _shouldCopyBinaries = !isReadOnly;
+        _shadowCopyDirectory = _shouldCopyBinaries ? ComputeShadowCopyDirectory(directory, Name!) : string.Empty;
         _dllImportResolver = NativeDllResolver;
 
         var path = Path.Combine(directory, Name!) + ".dll";
@@ -186,75 +188,172 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         }
 
         var shadowCopyDirectory = tixlCtx._shadowCopyDirectory;
-        if (tixlCtx._shouldCopyBinaries && !Directory.Exists(shadowCopyDirectory))
+        if (!Directory.Exists(shadowCopyDirectory))
         {
-            Directory.CreateDirectory(shadowCopyDirectory);
-
-            if (CoreSettings.Config.LogAssemblyLoadingDetails)
-                Log.Debug($"{tixlCtx.Name!}: Created shadow copy directory at {shadowCopyDirectory}");
-
-            // copy all dlls recursively in the main directory to the shadow copy directory
-            // being sure to ignore symbol and resource folders
-            CopyFilesInDirectory(tixlCtx.MainDirectory, tixlCtx.MainDirectory, shadowCopyDirectory, false);
-
-            // now search subfolders, excluding ignored folders
-            foreach (var dir in Directory.EnumerateDirectories(tixlCtx.MainDirectory, "*", SearchOption.TopDirectoryOnly))
+            CreateShadowCopy(tixlCtx.MainDirectory, shadowCopyDirectory);
+        }
+        else
+        {
+            // Keep a reused cache folder young so the startup cleanup retires old fingerprints, not this one.
+            try
             {
-                var directoryName = Path.GetFileName(dir);
-                if (directoryName.StartsWith('.') ||
-                    directoryName.Equals("bin", StringComparison.Ordinal) ||
-                    directoryName.Equals("obj", StringComparison.Ordinal) ||
-                    directoryName.Equals(FileLocations.ReleaseSymbolsSubfolder, StringComparison.Ordinal) ||
-                    directoryName.Equals(FileLocations.SymbolUiSubFolder, StringComparison.Ordinal) ||
-                    directoryName.Equals(FileLocations.AssetsSubfolder, StringComparison.Ordinal) ||
-                    directoryName.Equals(FileLocations.SourceCodeSubFolder, StringComparison.Ordinal))
-                {
-                    continue; // skip hidden, bin, obj and resources folders
-                }
-
-                CopyFilesInDirectory(tixlCtx.MainDirectory, dir, shadowCopyDirectory, true);
+                Directory.SetLastWriteTimeUtc(shadowCopyDirectory, DateTime.UtcNow);
+            }
+            catch (IOException)
+            {
             }
         }
 
-        // replace path with the shadow copy directory
+        // Map the path into the shadow copy - but only for files inside the package folder. Candidates
+        // discovered in the shadow copy itself (unreferenced-dll lookups enumerate the loaded assembly's
+        // own directory) must load as-is: re-mapping them built a ..-relative path that only resolved
+        // correctly by accident while the shadow folder happened to sit at the same depth as bin/.
         var relativePath = Path.GetRelativePath(tixlCtx.MainDirectory, path);
-        path = Path.Combine(shadowCopyDirectory, relativePath);
+        if (!relativePath.StartsWith("..", StringComparison.Ordinal) && !Path.IsPathRooted(relativePath))
+        {
+            path = Path.Combine(shadowCopyDirectory, relativePath);
+        }
 
         if (CoreSettings.Config.LogAssemblyLoadingDetails)
             Log.Debug($"{ctx.Name}: Loading assembly from '{path}'...");
 
         return ctx.LoadFromAssemblyPath(path);
+    }
 
-        static void CopyFilesInDirectory(string rootDirectory, string directory, string shadowCopyDirectory, bool recursive)
+    /// <summary>
+    /// Shadow copies live in per-package folders named by a content fingerprint, so unchanged packages
+    /// reuse the copy of a previous run instead of re-copying (and re-AV-scanning) hundreds of megabytes
+    /// on every editor start. <see cref="CoreSettings.ConfigData.UseProcessScopedShadowCopies"/> restores
+    /// the previous per-process behaviour as an escape hatch, which is also the fallback when the
+    /// fingerprint can't be computed.
+    /// </summary>
+    private static string ComputeShadowCopyDirectory(string mainDirectory, string contextName)
+    {
+        if (!CoreSettings.Config.UseProcessScopedShadowCopies)
         {
-            var newDirectory = directory != rootDirectory
-                                   ? Path.Combine(shadowCopyDirectory, Path.GetRelativePath(rootDirectory, directory))
-                                   : shadowCopyDirectory;
-            Directory.CreateDirectory(newDirectory);
-            foreach (var file in Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly))
+            try
             {
-                if (!file.EndsWith(".dll") &&
-                    !file.EndsWith(".exe") &&
-                    !file.EndsWith(".pdb") &&
-                    !file.EndsWith(".so") &&
-                    !file.EndsWith(".xml") &&
-                    !file.EndsWith(".json"))
-                {
-                    continue;
-                }
-
-                var newPath = Path.Combine(newDirectory, Path.GetFileName(file));
-                File.Copy(file, newPath, true);
+                var fingerprint = ComputeContentFingerprint(mainDirectory);
+                return Path.Combine(ShadowCopyRootFolder, contextName, fingerprint);
             }
-
-            if (!recursive)
-                return;
-
-            foreach (var subDir in Directory.EnumerateDirectories(directory, "*", SearchOption.TopDirectoryOnly))
+            catch (Exception e)
             {
-                CopyFilesInDirectory(rootDirectory, subDir, shadowCopyDirectory, true);
+                Log.Warning($"{contextName}: Falling back to a process-scoped shadow copy: {e.Message}");
             }
         }
+
+        return Path.Combine(RootShadowCopyDir, contextName, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+    }
+
+    /// <summary>
+    /// Stable id for "this exact set of binaries": relative path, size and write time of every file the
+    /// shadow copy would include. Any rebuild rewrites outputs and thus changes it, so an existing folder
+    /// with this name can be trusted as complete and current. Metadata only - no file is opened.
+    /// </summary>
+    private static string ComputeContentFingerprint(string mainDirectory)
+    {
+        var entries = new List<string>();
+        foreach (var (relativePath, file) in EnumerateShadowCopyFiles(mainDirectory))
+        {
+            entries.Add($"{relativePath}|{file.Length}|{file.LastWriteTimeUtc.Ticks}");
+        }
+
+        entries.Sort(StringComparer.Ordinal);
+
+        var builder = new StringBuilder("v1"); // bump to invalidate all cached copies when the layout changes
+        foreach (var entry in entries)
+        {
+            builder.Append('\n').Append(entry);
+        }
+
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(builder.ToString()));
+        return Convert.ToHexString(hash, 0, 8);
+    }
+
+    /// <summary>
+    /// Copies the package binaries into <paramref name="targetDirectory"/> via a process-private staging
+    /// folder and an atomic rename: a fingerprint-named folder therefore either exists complete or not at
+    /// all - a crash mid-copy or two editors starting concurrently can't leave a half-populated cache
+    /// that a later start would trust.
+    /// </summary>
+    private static void CreateShadowCopy(string mainDirectory, string targetDirectory)
+    {
+        var copyStopwatch = Stopwatch.StartNew();
+        var stagingDirectory = $"{targetDirectory}.staging-{Environment.ProcessId}";
+
+        try
+        {
+            if (Directory.Exists(stagingDirectory))
+                Directory.Delete(stagingDirectory, true);
+
+            Directory.CreateDirectory(stagingDirectory);
+
+            foreach (var (relativePath, file) in EnumerateShadowCopyFiles(mainDirectory))
+            {
+                var destination = Path.Combine(stagingDirectory, relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                file.CopyTo(destination, true);
+                ShadowCopyStatistics.AddBytes(file.Length);
+            }
+
+            Directory.Move(stagingDirectory, targetDirectory);
+
+            if (CoreSettings.Config.LogAssemblyLoadingDetails)
+                Log.Debug($"Created shadow copy at {targetDirectory}");
+        }
+        catch (IOException) when (Directory.Exists(targetDirectory))
+        {
+            // another editor instance completed the same fingerprint first - use theirs
+            TryDeleteDirectory(stagingDirectory);
+        }
+
+        ShadowCopyStatistics.AddMilliseconds(copyStopwatch.ElapsedMilliseconds);
+    }
+
+    /// <summary>
+    /// The files a shadow copy consists of: binaries and their sidecars next to the root assembly, plus
+    /// those in subfolders that aren't symbol/asset/source content. Shared by the fingerprint and the copy
+    /// so the two can never disagree.
+    /// </summary>
+    private static IEnumerable<(string RelativePath, FileInfo File)> EnumerateShadowCopyFiles(string mainDirectory)
+    {
+        var mainDirectoryInfo = new DirectoryInfo(mainDirectory);
+        foreach (var file in mainDirectoryInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly))
+        {
+            if (IsShadowCopyFileType(file.Name))
+                yield return (file.Name, file);
+        }
+
+        foreach (var dir in mainDirectoryInfo.EnumerateDirectories("*", SearchOption.TopDirectoryOnly))
+        {
+            var directoryName = dir.Name;
+            if (directoryName.StartsWith('.') ||
+                directoryName.Equals("bin", StringComparison.Ordinal) ||
+                directoryName.Equals("obj", StringComparison.Ordinal) ||
+                directoryName.Equals(FileLocations.SymbolsSubfolder, StringComparison.Ordinal) ||
+                directoryName.Equals(FileLocations.SymbolUiSubFolder, StringComparison.Ordinal) ||
+                directoryName.Equals(FileLocations.AssetsSubfolder, StringComparison.Ordinal) ||
+                directoryName.Equals(FileLocations.SourceCodeSubFolder, StringComparison.Ordinal))
+            {
+                continue; // skip hidden, bin, obj and resources folders
+            }
+
+            foreach (var file in dir.EnumerateFiles("*", SearchOption.AllDirectories))
+            {
+                if (IsShadowCopyFileType(file.Name))
+                    yield return (Path.GetRelativePath(mainDirectory, file.FullName), file);
+            }
+        }
+    }
+
+    private static bool IsShadowCopyFileType(string fileName)
+    {
+        return fileName.EndsWith(".dll") ||
+               fileName.EndsWith(".exe") ||
+               fileName.EndsWith(".pdb") ||
+               fileName.EndsWith(".so") ||
+               fileName.EndsWith(".xml") ||
+               fileName.EndsWith(".json");
     }
 
     // called if Load method returns null - searches other contexts and nuget packages
@@ -356,6 +455,22 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     }
 
     protected override Assembly? Load(AssemblyName assemblyName)
+    {
+        // Resolution can stall behind the global locks (directory scans, AV on fresh files). Surface
+        // slow resolutions when loading details are requested, so such stalls are attributable from
+        // the log instead of looking like unexplained silence.
+        if (!CoreSettings.Config.LogAssemblyLoadingDetails)
+            return LoadCore(assemblyName);
+
+        var stopwatch = Stopwatch.StartNew();
+        var result = LoadCore(assemblyName);
+        if (stopwatch.ElapsedMilliseconds > 100)
+            Log.Debug($"{Name!}: Resolving assembly '{assemblyName.Name}' took {stopwatch.ElapsedMilliseconds}ms ({(result != null ? "found" : "not found")})");
+
+        return result;
+    }
+
+    private Assembly? LoadCore(AssemblyName assemblyName)
     {
         #if DEBUG
         if (_unloaded)
@@ -624,6 +739,8 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     /// clean theirs up, so they pile up across rebuilds. Remove every folder that isn't owned by a still-running
     /// process — those are skipped because their assemblies are loaded and locked.
     /// </summary>
+    private const int KeptShadowCopiesPerPackage = 3;
+
     private static void CleanUpStaleShadowCopies()
     {
         // Runs in the static constructor: any escaping exception would poison the type initializer
@@ -635,29 +752,108 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
                 return;
 
             var currentProcessId = Environment.ProcessId;
-            foreach (var processFolder in Directory.EnumerateDirectories(rootFolder))
+            foreach (var topLevelFolder in Directory.EnumerateDirectories(rootFolder))
             {
-                var folderName = Path.GetFileName(processFolder);
-                if (int.TryParse(folderName, out var processId)
-                    && processId != currentProcessId
-                    && IsProcessRunning(processId))
+                var folderName = Path.GetFileName(topLevelFolder);
+                if (TryCleanUpLeftoverFolder(topLevelFolder, folderName, currentProcessId))
+                    continue;
+
+                if (int.TryParse(folderName, out var processId))
                 {
+                    // per-process layout: pre-content-keyed, or the UseProcessScopedShadowCopies fallback
+                    if (processId != currentProcessId && IsProcessRunning(processId))
+                        continue;
+
+                    RetireDirectory(topLevelFolder);
                     continue;
                 }
 
-                try
-                {
-                    Directory.Delete(processFolder, true);
-                }
-                catch (Exception e)
-                {
-                    Log.Debug($"Failed to delete shadow copy directory {processFolder}: {e.Message}");
-                }
+                CleanUpPackageShadowCopies(topLevelFolder, currentProcessId);
             }
         }
         catch (Exception e)
         {
             Log.Warning($"Failed to clean up stale shadow copies: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Keeps the most recently used <see cref="KeptShadowCopiesPerPackage"/> fingerprint folders of one
+    /// package and retires the rest. Reuse refreshes a folder's write time, so actively used caches stay.
+    /// </summary>
+    private static void CleanUpPackageShadowCopies(string packageFolder, int currentProcessId)
+    {
+        List<(string Path, DateTime LastWriteUtc)> fingerprintFolders = [];
+        foreach (var folder in Directory.EnumerateDirectories(packageFolder))
+        {
+            var name = Path.GetFileName(folder);
+            if (TryCleanUpLeftoverFolder(folder, name, currentProcessId))
+                continue;
+
+            fingerprintFolders.Add((folder, Directory.GetLastWriteTimeUtc(folder)));
+        }
+
+        fingerprintFolders.Sort((a, b) => b.LastWriteUtc.CompareTo(a.LastWriteUtc));
+        for (var index = KeptShadowCopiesPerPackage; index < fingerprintFolders.Count; index++)
+        {
+            RetireDirectory(fingerprintFolders[index].Path);
+        }
+    }
+
+    /// <summary>
+    /// Removes an interrupted copy (*.staging-pid) or an interrupted delete (*.trash-pid) once its owner
+    /// process is gone. Returns true when the folder was one of those, whether or not it could be removed.
+    /// </summary>
+    private static bool TryCleanUpLeftoverFolder(string folder, string folderName, int currentProcessId)
+    {
+        if (!folderName.Contains(".staging-", StringComparison.Ordinal)
+            && !folderName.Contains(".trash-", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var pidPart = folderName[(folderName.LastIndexOf('-') + 1)..];
+        if (int.TryParse(pidPart, out var ownerProcessId)
+            && ownerProcessId != currentProcessId
+            && IsProcessRunning(ownerProcessId))
+        {
+            return true; // its owner is still working with it
+        }
+
+        TryDeleteDirectory(folder);
+        return true;
+    }
+
+    /// <summary>
+    /// Deletes a shadow-copy folder without ever leaving a half-deleted folder under its original name:
+    /// rename first (fails cleanly while any file inside is still mapped by a running editor), then delete
+    /// the renamed folder. An interrupted delete leaves only a *.trash-* folder that is never reused.
+    /// </summary>
+    private static void RetireDirectory(string directory)
+    {
+        var trashPath = $"{directory}.trash-{Environment.ProcessId}";
+        try
+        {
+            Directory.Move(directory, trashPath);
+        }
+        catch (Exception)
+        {
+            return; // still in use (or already retired) - keep it for a later cleanup
+        }
+
+        TryDeleteDirectory(trashPath);
+    }
+
+    private static void TryDeleteDirectory(string directory)
+    {
+        try
+        {
+            if (Directory.Exists(directory))
+                Directory.Delete(directory, true);
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Failed to delete shadow copy directory {directory}: {e.Message}");
         }
     }
 

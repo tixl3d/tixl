@@ -11,7 +11,7 @@ Most of the initial flow didn’t change with some exceptions:
 With v4.0.6 (2025-09-15)…
 
 * the executable will be created in a folder called `T3Export\`. This location will change in the future.
-* the exported executable might contain more resources than necessary. If you’re concerned about file size, you can remove around 100 MB of unnecessary DLLs and media content. We will address this in an upcoming release.
+* the export only ships the operators reachable from the exported output (plus auto-playing audio ops), the assets they reference and the optional libraries they declare. If an export misses content, disable `Strip Unused Operators` in `Project Settings` → `Executable` and export again.
 
 ---
 
@@ -42,30 +42,47 @@ Then...
 
 ## Running the executable
 
-The executable `Player.exe` is a stand alone application that handles operator loading, pre-initialization and audio playback. It comes with a number of command line arguments:
+The executable `Player.exe` is a stand alone application that handles operator loading, pre-initialization and audio playback.
+
+### Startup dialog
+
+On start, the player opens a small dialog asking for the display, the resolution (the native modes of that display, or a custom size), fullscreen and whether to show log messages in a console window. The defaults come from the project's `Executable` settings (`Preferred Width` / `Height`, `Window Mode`, `Show Log Messages`); the last choice is remembered per executable. Enable `Skip Startup Dialog` in the project settings to start directly with the project defaults — useful for installations. `Title` and `Author` in the same panel set the window title and the dialog header.
+
+The player writes its log files and the remembered startup choice to a `.temp/` folder next to the executable (falling back to the user's app-data folder when that location is read-only).
+
+### Loading screen
+
+After the dialog the player shows a dark loading screen with a progress bar and the latest log line while it loads the operator packages, creates the graph and warms up shaders. `Esc` cancels. When loading completes, the log (and `.temp/loadReport.json`) contains a short report: package / symbol / instance counts, shaders compiled vs. loaded from cache, asset size and the duration of each stage — handy when an export starts slowly.
+
+### Precompiled shaders
+
+The export ships the bytecode of every shader the editor has compiled for the exported operator in `ShaderCache/`, so the first start of the executable does not recompile them. View the operator once in the editor before exporting so its shaders are compiled. The player keeps its own cache in `.temp/ShaderCache/`.
+
+### Command line arguments
 
 ```
-c:\Users\pixtur\dev\tooll\t3\Export>player.exe --help
-Debug: still::partial - v0.1
-Copyright (c) 2021 lucid & pixtur
-
-  --novsync     (Default: false) Disable vsync
-  --width       (Default: 1920) Defines the width
-  --height      (Default: 1080) Defines the height
-  --windowed    (Default: false) Run in windowed mode
-  --loop        (Default: false) Loops the demo
-  --logging     (Default: true) Show log messages.
-  --help        Display this help screen.
+  --display N    Display to use (1-based, as listed in the startup dialog)
+  --width N      Render width in pixels
+  --height N     Render height in pixels
+  --windowed     Run in a window
+  --fullscreen   Run borderless fullscreen on the selected display
+  --show-logs    Open a console window with log messages
+  --loop         Restart playback at the end of the timeline
+  --novsync      Disable vsync
+  --no-dialog    Skip the startup dialog and start with the resolved settings
+  --dialog       Show the startup dialog even if the project disables it
+  --reset        Forget the previously used startup settings
+  --help         Display this help screen
 ```
 
-You can use this to create a batch file to enforce a certain resolution or run in windowed mode:
+Switches override the remembered and project settings, so a batch file can enforce a setup:
 
 `player-windowed.bat`:
 ```
-Player.exe --width 1280 --height 720 --windowed true
+Player.exe --no-dialog --windowed --width 1280 --height 720 --display 2
 ```
 
-You can rename the executable (e.g. to a Demo title). It will also use the `ProjectSettings.json` to determine the correct soundtrack or audio input source.
+The executable is automatically named after the project's `Title` setting (falling back to `Player.exe`); renaming it manually is also fine.
 
 ## Advanced inputs / customization
 
@@ -88,6 +105,6 @@ In these cases you have to add the files manually to the `Export/Resources/` fol
 ## Looking for problems
 Here are some things you can try when starting the `player.exe` doesn't yield the expected results.
 
-Look into the `Log/` directory and scan the log files for problems. 
+Look into the `.temp/Log/` directory next to the executable and scan the log files for problems. 
 
 

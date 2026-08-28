@@ -1,0 +1,42 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "a5d10c30-1e42-4c8a-9f31-0ab1cd2e0100"/*CombineAudio*/,
+  "Description": "Combines audio sources into one reference and applies a Volume that folds into every source it contains.\n\nWire audio sources (or nested combines) into the input and route the output into an audio bus. With AutoCollectClips enabled, unwired audio sources of the same composition — [AudioClip]s and the sound of [VideoClip]s and [PlayVideo]s — join the group implicitly — inheriting the group volume, taps and effects like wired sources. Only one op per composition should auto-collect. Part of the audio processing graph.\n\nLike every node in the audio graph, this is only heard once the chain reaches an [AudioBus] that is itself being evaluated — pinned to an output window, or wired into the render chain. A chain that ends nowhere is silent.",
+  "InputUis": [
+    {
+      "InputId": "a5d10c30-0002-4c8a-9f31-0ab1cd2e0100"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "a5d10c30-0003-4c8a-9f31-0ab1cd2e0100"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "a5d10c30-0004-4c8a-9f31-0ab1cd2e0100"/*AutoCollectClips*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Unwired [AudioClip]s of this composition join the group implicitly, inheriting its volume, taps and effects. Only one op per composition should auto-collect."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a5d10c30-0001-4c8a-9f31-0ab1cd2e0100"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

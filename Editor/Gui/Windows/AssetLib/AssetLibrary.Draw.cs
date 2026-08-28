@@ -58,6 +58,9 @@ internal sealed partial class AssetLibrary
             DrawAssetToolsPopup();
         }
 
+        DrawDeleteConfirmationDialog();
+        DrawRelinkFolderDialog();
+
         ImGui.BeginChild("scrolling", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.IndentSpacing, 10);
@@ -120,8 +123,13 @@ internal sealed partial class AssetLibrary
             // Prepare drawing
             ImGui.SetNextItemWidth(10);
 
+            var isLinkMountRoot = folder.Asset is { IsLinkMountRoot: true };
+            var linkTargetMissing = isLinkMountRoot && folder.Asset!.LinkTargetMissing;
+
             var textMutedRgba = (isFiltering && !hasMatches) ? UiColors.TextMuted : UiColors.Text;
             textMutedRgba = textMutedRgba.Fade(isCurrentCompositionPackage ? 1 : 0.8f);
+            if (linkTargetMissing)
+                textMutedRgba = textMutedRgba.Fade(0.4f);
 
             ImGui.PushStyleColor(ImGuiCol.Text, textMutedRgba.Rgba);
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Color.Transparent.Rgba);
@@ -145,6 +153,31 @@ internal sealed partial class AssetLibrary
 
             CustomComponents.DrawHoverHighlightOnLastItem();
 
+            if (isLinkMountRoot)
+            {
+                if (ImGui.IsItemHovered())
+                {
+                    CustomComponents.TooltipForLastItem(linkTargetMissing
+                                                            ? $"Linked folder not found:\n{folder.AbsolutePath}\n\nRight-click to relink it."
+                                                            : $"Linked to {folder.AbsolutePath}");
+                }
+
+                // Draw-list only: an ImGui item here would steal the context menu and
+                // drop handling from the tree node row.
+                var itemMin = ImGui.GetItemRectMin();
+                var iconPos = new Vector2(itemMin.X
+                                          + ImGui.GetFontSize()
+                                          + ImGui.CalcTextSize(folder.Name).X
+                                          + 6 * T3Ui.UiScaleFactor,
+                                          itemMin.Y + (ImGui.GetItemRectSize().Y - Icons.FontSize) * 0.5f);
+                Icons.DrawIconAtScreenPosition(Icon.Link,
+                                               iconPos,
+                                               ImGui.GetWindowDrawList(),
+                                               linkTargetMissing
+                                                   ? UiColors.StatusAttention
+                                                   : UiColors.StatusAutomated.Fade(0.8f));
+            }
+
             CustomComponents.DrawSearchMatchUnderline(_state.SearchString, folderName,
                                                       ImGui.GetItemRectMin()
                                                       + new Vector2(ImGui.GetFontSize(), 0));
@@ -156,7 +189,7 @@ internal sealed partial class AssetLibrary
             CustomComponents.ContextMenuForItem(() =>
             {
                 CustomComponents.StylizedText(folder.Name, Fonts.FontSmall, UiColors.TextMuted);
-                if (ImGui.MenuItem("Open in Explorer"))
+                if (CustomComponents.DrawMenuItem(_openFolderInExplorerId, "Open in Explorer", reserveIconColumn: false))
                 {
                     if (!string.IsNullOrEmpty(_folderForMenu.AbsolutePath))
                     {
@@ -168,33 +201,33 @@ internal sealed partial class AssetLibrary
                     }
                 }
 
-                if (ImGui.MenuItem("Create sub folder"))
+                if (CustomComponents.DrawMenuItem(_createSubFolderId, "Create Sub Folder", reserveIconColumn: false))
                 {
                     CreateSubFolder(folder);
                 }
 
-                if (ImGui.MenuItem("Rename"))
+                if (CustomComponents.DrawMenuItem(_renameFolderId, "Rename", reserveIconColumn: false))
                 {
                     _state.RenamingInProcessId = folder.Asset?.Id ?? Guid.Empty;
                     _state.RenameBuffer = folder.Name;
                 }
 
-                if (ImGui.MenuItem("Delete folder"))
+                if (folder.Asset is { IsLinkMountRoot: true })
                 {
-                    try
+                    if (CustomComponents.DrawMenuItem(_relinkFolderId, "Relink...", reserveIconColumn: false))
                     {
-                        if (Directory.Exists(folder.AbsolutePath))
-                        {
-                            Log.Debug("Deleting " + folder.Address);
-                            Directory.Delete(folder.AbsolutePath);
-                        }
+                        RequestRelinkFolder(folder.Asset);
+                    }
 
-                        AssetRegistry.RemoveObsoleteAsset(folder.Asset);
-                    }
-                    catch (Exception e)
+                    // Only the .tixlLink marker is deleted - the external folder stays untouched
+                    if (CustomComponents.DrawMenuItem(_removeFolderLinkId, "Remove Link", reserveIconColumn: false))
                     {
-                        Log.Warning($"Can't remove folder {folder.AbsolutePath} ({e.Message}");
+                        RemoveFolderLink(folder.Asset);
                     }
+                }
+                else if (CustomComponents.DrawMenuItem(_deleteFolderId, "Delete Folder...", reserveIconColumn: false) && folder.Asset != null)
+                {
+                    RequestDeleteAssets(folder.Asset);
                 }
             });
 
@@ -391,7 +424,7 @@ internal sealed partial class AssetLibrary
 
             CustomComponents.ContextMenuForItem(drawMenuItems: () =>
             {
-                if (ImGui.MenuItem("Edit externally"))
+                if (CustomComponents.DrawMenuItem(_editExternallyId, "Edit Externally", reserveIconColumn: false))
                 {
                     var absolutePath = asset.FullPath;
                     if (!string.IsNullOrEmpty(absolutePath))
@@ -400,7 +433,7 @@ internal sealed partial class AssetLibrary
                     }
                 }
 
-                if (ImGui.MenuItem("Reveal in Explorer"))
+                if (CustomComponents.DrawMenuItem(_revealAssetInExplorerId, "Reveal in Explorer", reserveIconColumn: false))
                 {
                     var absolutePath = asset.FullPath;
 
@@ -416,6 +449,14 @@ internal sealed partial class AssetLibrary
                             Log.Warning($"Failed to get directory for {folder} {e.Message}");
                         }
                     }
+                }
+
+                CustomComponents.SeparatorLine();
+                var selectedCount = _state.Selection.IsSelected(asset.Id) ? _state.Selection.SelectedKeys.Count : 1;
+                var deleteLabel = selectedCount > 1 ? $"Delete {selectedCount} Selected..." : "Delete File...";
+                if (CustomComponents.DrawMenuItem(_deleteAssetsId, deleteLabel, reserveIconColumn: false))
+                {
+                    RequestDeleteAssets(asset);
                 }
             },
                                                 title: asset.FileSystemInfo?.Name,
@@ -629,4 +670,14 @@ internal sealed partial class AssetLibrary
 
         return list.Skip(min).Take(max - min + 1);
     }
+
+    private static readonly int _openFolderInExplorerId = nameof(_openFolderInExplorerId).GetHashCode();
+    private static readonly int _createSubFolderId = nameof(_createSubFolderId).GetHashCode();
+    private static readonly int _renameFolderId = nameof(_renameFolderId).GetHashCode();
+    private static readonly int _relinkFolderId = nameof(_relinkFolderId).GetHashCode();
+    private static readonly int _removeFolderLinkId = nameof(_removeFolderLinkId).GetHashCode();
+    private static readonly int _deleteFolderId = nameof(_deleteFolderId).GetHashCode();
+    private static readonly int _editExternallyId = nameof(_editExternallyId).GetHashCode();
+    private static readonly int _revealAssetInExplorerId = nameof(_revealAssetInExplorerId).GetHashCode();
+    private static readonly int _deleteAssetsId = nameof(_deleteAssetsId).GetHashCode();
 }

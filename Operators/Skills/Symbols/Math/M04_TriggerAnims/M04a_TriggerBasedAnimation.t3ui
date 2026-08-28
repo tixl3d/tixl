@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "c9112fa6-f222-49fd-bc34-388497923fbe"/*M04a_TriggerBasedAnimation*/,
+  "Description": "Trigger-Based Animation",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02552435-90c7-4feb-b565-3839b012ff72"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "5b5ec60f-b325-457c-bd7a-73cd7282eaa9"/*Text*/,
+      "SectionId": "a90dbfcc-9c14-45f2-a2e6-0c56c7897e82",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "8d4dbf81-5cf0-464a-846d-d7e8b16c6c87"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "acfcfd90-8b65-40a7-83cc-0a6e6a94e59b"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "a90dbfcc-9c14-45f2-a2e6-0c56c7897e82",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "4f1e04db-765d-4718-a2e3-e258b3ff9aeb",
+      "Description": "One powerful use of triggers is the [TriggerAnim] operator.\nIt is similar to [AnimValue], but it does not follow time directly. Instead, it reacts to events."
+    },
+    {
+      "Id": "55b55020-d54a-47ca-be1d-f21e4a6a5771",
+      "Description": "In this example, [HasValueChanged] sends a trigger whenever a noisy value increases.\nThis trigger starts an animation, which is then used to sample a color from a gradient."
+    },
+    {
+      "Id": "af29ed66-6c01-4122-b003-84d17216baf3",
+      "Description": "In real projects, trigger signals can come from many sources.\nThey might be audio levels, MIDI input, OSC messages, sensors, or other external events."
+    },
+    {
+      "Id": "5f7229e3-c2d6-41ad-9b80-663c686e41e8",
+      "Description": "Solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

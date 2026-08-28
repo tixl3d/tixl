@@ -51,6 +51,14 @@ public static partial class T3Ui
             PlaybackUtils.UpdatePlaybackAndSyncing();
             AudioEngine.CompleteFrame(Playback.Current, Playback.LastFrameDuration);
         }
+        else if (ProjectView.Focused != null)
+        {
+            // Routing still has to happen while rendering. A source that isn't wired into an [AudioBus] reaches
+            // the mix only through the implicit default bus, so without this it would be decoded and fed but
+            // never routed — silent in the rendered file while audible live. (The collector's own transport
+            // gate already treats recording as running, so it expects to be called here.)
+            AudioGraphCollector.CollectLooseSources(ProjectView.Focused.CompositionInstance);
+        }
 
         ScreenshotWriter.Update();
         RenderProcess.Update();
@@ -108,9 +116,12 @@ public static partial class T3Ui
         ThumbnailManager.Update();
         _searchDialog.Draw();
         NewProjectDialog.Draw();
+        ShareProjectDialog.Draw();
         RestoreBackupDialog.Draw();
+        _couldNotLoadProjectDialog.Draw();
         CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
+        Windows.AssetLib.FolderImportDialog.Instance.Draw();
         AboutDialog.Draw();
         ExitDialog.Draw();
         OperatorHelp.EditDescriptionDialog.Draw();
@@ -127,6 +138,13 @@ public static partial class T3Ui
             {
                 UserSettings.Config.UserName = Environment.UserName;
                 _userNameDialog.ShowNextFrame();
+            }
+            else if (!_blockedProjectsChecked && !IsAnyPopupOpen)
+            {
+                // Waits for the startup dialogs above to close, then warns once per launch about
+                // projects a sync tool blocked from loading.
+                _blockedProjectsChecked = true;
+                _couldNotLoadProjectDialog.ShowIfProjectsBlocked();
             }
         }
 
@@ -176,6 +194,7 @@ public static partial class T3Ui
     }
 
     private static bool _versionWelcomeChecked;
+    private static bool _blockedProjectsChecked;
 
     private static void UpdateModifiedProjects()
     {

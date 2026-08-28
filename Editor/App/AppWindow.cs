@@ -263,21 +263,27 @@ internal sealed class AppWindow
                                       if (Form.ClientSize.Width == 0 || Form.ClientSize.Height == 0)
                                           return;
 
-                                      RebuildBackBuffer(Form, device, ref _renderTargetView, ref _backBufferTexture, ref _swapChain);
+                                      RebuildBackBuffer();
+                                      // Only Main runs the render loop; Viewer has no callback
                                       if (_isResizingRightNow)
-                                          _renderCallback();
+                                          _renderCallback?.Invoke();
                                   };
     }
 
-    private static void RebuildBackBuffer(Form form, Device device, ref RenderTargetView rtv, ref Texture2D buffer, ref SwapChain swapChain)
+    private void RebuildBackBuffer()
     {
-        rtv.Dispose();
-        buffer.Dispose();
+        // ResizeBuffers requires that no reference to the back buffer survives - including a
+        // binding on the output merger. A still-bound RTV leaves the pipeline in undefined
+        // state which can escalate to DXGI_ERROR_DEVICE_HUNG on the next Present.
+        _deviceContext.OutputMerger.SetTargets((RenderTargetView)null);
+        _renderTargetView.Dispose();
+        _backBufferTexture.Dispose();
+
         // Preserve the swap chain's existing flags (in particular FrameLatencyWaitableObject must
         // be carried across resize, otherwise the waitable handle becomes invalid).
-        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, swapChain.Description.Flags);
-        buffer = Resource.FromSwapChain<Texture2D>(swapChain, 0);
-        rtv = new RenderTargetView(device, buffer);
+        _swapChain.ResizeBuffers(3, Form.ClientSize.Width, Form.ClientSize.Height, Format.Unknown, _swapChain.Description.Flags);
+        _backBufferTexture = Resource.FromSwapChain<Texture2D>(_swapChain, 0);
+        _renderTargetView = new RenderTargetView(_device, _backBufferTexture);
     }
 
     /// <summary>

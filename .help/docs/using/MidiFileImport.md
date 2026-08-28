@@ -2,7 +2,7 @@
 
 TiXL can load standard MIDI files (`.mid` / `.midi`) — a track exported from a DAW, a downloaded arrangement, a generated pattern — and use their notes and controller curves to drive visuals, without any hardware attached.
 
-Drop a MIDI file onto the **timeline** and it becomes a `[LoadMidiFile]` clip with the file's real duration. Drop it onto the **graph** to get the operator without timeline placement. Either way the file is converted into the same data-channel format that [live session recording](Recording.md) produces, so everything that works with recorded `.data` clips works with imported MIDI too.
+Drop a MIDI file onto the **timeline** and it becomes a `[MidiClip]` clip with the file's real duration. Drop it onto the **graph** to get the operator without timeline placement. Either way the file is converted into the same data-channel format that [live session recording](Recording.md) produces, so everything that works with recorded `.data` clips works with imported MIDI too.
 
 ## What's in the clip
 
@@ -29,7 +29,7 @@ Two sampler ops read channel values directly at the playhead:
 Both also expose **`WasHit`**, true for one frame whenever an event starts — the reliable trigger signal even when consecutive events carry identical values, or a note falls entirely between two frames.
 
 ```
-LoadMidiFile(track.mid).Clip ─► SampleGateFromDataClip(Ch1/N36).Gate ─► [flash on every kick]
+MidiClip(track.mid).Clip ─► SampleGateFromDataClip(Ch1/N36).Gate ─► [flash on every kick]
 ```
 
 ## Simulating a device
@@ -37,7 +37,7 @@ LoadMidiFile(track.mid).Clip ─► SampleGateFromDataClip(Ch1/N36).Gate ─► 
 Alternatively, replay the file through the MIDI input system — useful when a project is already wired up with `[MidiInput]` ops for a controller:
 
 ```
-LoadMidiFile(track.mid).Clip ─► SimulateIoData.Clips ─► Execute
+MidiClip(track.mid).Clip ─► SimulateIoData.Clips ─► Execute
 ```
 
 `[MidiInput]` ops receive the file's events as if a device named after the file (e.g. `track.mid`) were playing them. Set the op's `Device` parameter to the file name, and channel/controller filters work as with real hardware.

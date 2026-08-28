@@ -151,6 +151,83 @@ public static class SymbolJson
     }
     #endregion
 
+    /// <summary>
+    /// Copies a symbol file keeping only the children in <paramref name="keptChildIds"/> together with the
+    /// connections and animations that reference them. Used when exporting executables so operators that never
+    /// evaluate are neither loaded nor instantiated by the player.
+    /// </summary>
+    public static bool TryWriteFilteredSymbolFile(string sourcePath, string targetPath, IReadOnlySet<Guid> keptChildIds, out int removedChildCount)
+    {
+        removedChildCount = 0;
+        JObject root;
+        try
+        {
+            using var streamReader = new System.IO.StreamReader(sourcePath);
+            using var jsonReader = new JsonTextReader(streamReader);
+            root = JObject.Load(jsonReader, LoadSettings);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to read symbol file '{sourcePath}': {e.Message}");
+            return false;
+        }
+
+        if (root[JsonKeys.Children] is JArray children)
+        {
+            removedChildCount = RemoveWhere(children, child => !IsKept(child[JsonKeys.Id]));
+        }
+
+        if (root[JsonKeys.Connections] is JArray connections)
+        {
+            RemoveWhere(connections, connection => !IsKept(connection[JsonKeys.SourceParentOrChildId])
+                                                   || !IsKept(connection[JsonKeys.TargetParentOrChildId]));
+        }
+
+        if (root[JsonKeys.Animator] is JArray animations)
+        {
+            RemoveWhere(animations, animation => !IsKept(animation["InstanceId"]));
+        }
+
+        try
+        {
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(targetPath)!);
+            using var streamWriter = new System.IO.StreamWriter(targetPath);
+            using var jsonWriter = new JsonTextWriter(streamWriter) { Formatting = Formatting.Indented };
+            root.WriteTo(jsonWriter);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to write symbol file '{targetPath}': {e.Message}");
+            return false;
+        }
+
+        return true;
+
+        // The parent symbol itself is referenced by Guid.Empty in connections and is always kept.
+        bool IsKept(JToken? idToken)
+        {
+            if (idToken == null || !Guid.TryParse(idToken.Value<string>(), out var id))
+                return true;
+
+            return id == Guid.Empty || keptChildIds.Contains(id);
+        }
+
+        static int RemoveWhere(JArray array, Func<JToken, bool> predicate)
+        {
+            var removed = 0;
+            for (var index = array.Count - 1; index >= 0; index--)
+            {
+                if (!predicate(array[index]))
+                    continue;
+
+                array.RemoveAt(index);
+                removed++;
+            }
+
+            return removed;
+        }
+    }
+
     #region reading
     public static bool TryReadAndApplySymbolChildren(SymbolReadResult symbolReadResult)
     {

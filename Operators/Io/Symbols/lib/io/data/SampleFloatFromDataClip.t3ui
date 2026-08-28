@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "c0d57acb-29cc-489b-89b0-f016968f2f4c"/*SampleFloatFromDataClip*/,
+  "Description": "Samples one channel of a DataClip at the current time: the value of the last event at or before the playhead.\n\nUse it to read CC curves, pitch bend, or recorded OSC values directly from a [MidiClip] or [LoadDataClip] output without setting up [SimulateIoData] and [MidiInput]. Values are raw (MIDI CC 0-127); remap downstream if a normalized range is needed.\n\nWasHit is true for the frame in which the playhead crosses an event - useful for triggering because repeated events with identical values are invisible in Result.\n\nThe sample time follows the playhead through the clip's timeline placement. Enable UseTimeOverride to sample at an explicit source time in seconds instead, e.g. for procedural lookups.\n\nFor note on/off states use [SampleGateFromDataClip].",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "10066199-4e20-4f04-af17-5afe359de431"/*DefaultValue*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Value returned before the channel's first event, or when the channel is missing."
+    },
+    {
+      "InputId": "237ae57a-2aba-4a6f-9ed0-049635a1e04c"/*Channel*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "The channel to sample. The dropdown lists all channels of the connected clip.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "5c470e20-fe8e-461e-9333-05e82ff348f0"/*UseTimeOverride*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "Sample at OverrideTime instead of following the playhead."
+    },
+    {
+      "InputId": "61b5ef56-4a32-4026-a0c0-0b0c7b8ee1b1"/*OverrideTime*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Source time in seconds to sample at when UseTimeOverride is enabled."
+    },
+    {
+      "InputId": "b69fbaf8-57f7-4b37-b23f-50e1aa0cd4d5"/*Clip*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The DataClip to sample, e.g. from [MidiClip] or [LoadDataClip]."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "f29fc9be-8689-4894-a3e1-6b60fdbdae55"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "25469a27-04e8-49bb-b685-241d9de90451"/*WasHit*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 45.0
+      }
+    }
+  ]
+}

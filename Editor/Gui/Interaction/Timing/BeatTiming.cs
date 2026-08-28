@@ -213,7 +213,7 @@ internal static class BeatTiming
     private static int BarsPerMeasure { get; set; } = 4;
     private static int BeatsPerBar { get; set; } = 4;
 
-    private static double _beatDuration = 1;
+    private static double _beatDuration = 0.5; // 120 BPM — matches the project default until taps or settings override it
 
     private static double _phaseDelta;
     private static double _measureStartTime;

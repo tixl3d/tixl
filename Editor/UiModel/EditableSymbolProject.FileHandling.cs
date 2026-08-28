@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using Newtonsoft.Json;
 using T3.Core.Model;
+using T3.Core.Settings;
 using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Editor.Compilation;
@@ -275,16 +276,9 @@ internal sealed partial class EditableSymbolProject
     private void OnFileChanged(object sender, FileSystemEventArgs args)
     {
         var name = args.Name;
-        if (name == null)
+        if (name == null || IsGeneratedCodeFile(name))
             return;
 
-        // generated file by dotnet - ignore
-        if (name.EndsWith("AssemblyInfo.cs"))
-            return;
-
-        if (name.StartsWith(@"bin\", StringComparison.Ordinal) || name.StartsWith("bin/", StringComparison.Ordinal))
-            return;
-        
         Log.Info($"{DisplayName}: Code file changed: {name}");
         CodeExternallyModified = true;
         ResourceFileWatcher.FileStateChangeCounter++;
@@ -293,9 +287,31 @@ internal sealed partial class EditableSymbolProject
 
     private void OnCodeFileRenamed(object sender, RenamedEventArgs args)
     {
+        var name = args.Name;
+        if (name == null || IsGeneratedCodeFile(name))
+            return;
+
         Log.Error($"{DisplayName}: File {args.OldFullPath} renamed to {args.FullPath}. Please do not do this while the editor is running.");
         CodeExternallyModified = true;
         //TryRecompile(true); // don't recompile here - we need to make sure this happens on the main thread
+    }
+
+    /// <summary>
+    /// The watcher covers the whole project tree, so compiles firing events for build output
+    /// (bin, obj's generated GlobalUsings/AssemblyAttributes, AssemblyInfo) must not count as
+    /// user edits - they would re-flag the project as externally modified on every build.
+    /// </summary>
+    private static bool IsGeneratedCodeFile(string relativeName)
+    {
+        if (relativeName.EndsWith("AssemblyInfo.cs", StringComparison.Ordinal))
+            return true;
+
+        return relativeName.StartsWith(@"bin\", StringComparison.OrdinalIgnoreCase)
+               || relativeName.StartsWith("bin/", StringComparison.OrdinalIgnoreCase)
+               || relativeName.StartsWith(@"obj\", StringComparison.OrdinalIgnoreCase)
+               || relativeName.StartsWith("obj/", StringComparison.OrdinalIgnoreCase)
+               || relativeName.StartsWith(FileLocations.TempSubfolder + '\\', StringComparison.OrdinalIgnoreCase)
+               || relativeName.StartsWith(FileLocations.TempSubfolder + '/', StringComparison.OrdinalIgnoreCase);
     }
 
     public override void LocateSourceCodeFiles()

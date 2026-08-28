@@ -1,0 +1,91 @@
+{
+  "FormatVersion": 3,
+  "Id": "f0008b50-091d-4e9f-91eb-baa212acfa20"/*AudioClip*/,
+  "Description": "A timeline audio clip as an operator. Drop it on the timeline and it plays through the audio engine while the playhead is inside its time range — with all the standard clip interactions (drag, trim, split, snap, delete).\n\nWith AutoPlay on (default) the clip plays on its own, no [AudioClipPlayer] needed. Turn AutoPlay off to let an [AudioClipPlayer] (wired or AutoCollect) drive it instead.",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "06b8b927-ec47-4392-bb67-b9a140cc852b"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Per-clip playback volume."
+    },
+    {
+      "InputId": "260b61ae-7605-4f06-a3fb-793ae5a23646"/*AutoPlay*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "When on (default) the clip plays itself, no [AudioClipPlayer] required."
+    },
+    {
+      "InputId": "4ad8fba6-6e13-4698-b3c6-bd5c808724ab"/*Mute*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Silences this clip without removing it."
+    },
+    {
+      "InputId": "625951af-5f99-4171-b5b0-c97413121f56"/*Path*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Path to the audio file (.wav / .mp3 / .ogg).",
+      "AddPadding": "True",
+      "Usage": "FilePath",
+      "FileFilter": "mp3, wav, ogg, flac, aiff, aif, m4a, aac, wma"
+    },
+    {
+      "InputId": "6c5d9e40-7f8a-4b1c-8d2e-3f4a5b6c7d90"/*Loop*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 315.0
+      },
+      "Description": "Repeats the clip's source range for as long as the clip lasts on the timeline. Loop borders are indicated in the clip."
+    },
+    {
+      "InputId": "8f2e6b10-4c5d-4e8f-9a1b-2c3d4e5f6a70"/*Display*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Clip: an ordinary timeline block. Background image: renders full-timeline-width behind the tracks and designates this clip as the project's main soundtrack (FFT / export)."
+    },
+    {
+      "InputId": "97948c5e-10d5-4e18-824e-aea17eb4eb2a"/*Command*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "9a3f7c20-5d6e-4f9a-8b2c-3d4e5f6a7b80"/*Style*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      },
+      "Description": "How the audio content is visualised. Spectrum is the FFT spectrogram; Waveform and Volume level are planned."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5fb7a174-9ab2-4688-89a0-7fbcbf831dcf"/*TimeSlot*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "4c9e7a20-3f81-4d5a-b6e2-1a2b3c4d5e6f"/*AudioReference*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

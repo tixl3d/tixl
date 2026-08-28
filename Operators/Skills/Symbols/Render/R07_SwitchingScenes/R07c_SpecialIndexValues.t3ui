@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "2adefd8a-6c32-4e17-ad0b-831d722c4707"/*R07c_SpecialIndexValues*/,
+  "Description": "Special Index Values",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1230239f-3392-4b64-9202-8d688f4fafcc"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "54ce1fff-5a77-4ccc-8071-9a0285ee4229"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "ef4eab06-021d-43ef-a65d-af6e8ba6a58b"/*Text*/,
+      "SectionId": "ec78a7f1-c5a5-44e7-867c-ff0e42d76006",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "260cfa70-0620-4ca6-9e30-a2559c54ae11"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ec78a7f1-c5a5-44e7-867c-ff0e42d76006",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "01cd22ab-9b58-41e8-a2d8-94b9285c9f7b",
+      "Description": "The [Switch] operator supports two special index values.\nIf the index is set to -1, none of the connected branches are active.\nThis effectively disables all connected scenes and can be useful to temporarily turn parts of a project off."
+    },
+    {
+      "Id": "da572827-1dc8-4382-aadb-1c7313b2c568",
+      "Description": "If the index is set to -2, all connected branches are active at the same time."
+    },
+    {
+      "Id": "f99459c0-b734-49af-b198-703177f231e7",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

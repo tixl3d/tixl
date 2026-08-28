@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "1b4e3de2-31c9-4bc8-845d-8335e401944e"/*M04c_CombiningEverything*/,
+  "Description": "Combining Everything",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "42867c8d-423e-486a-9531-84e10efa9794"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "5ea4261c-e90b-4dbc-90ad-3970dfd6ea2d"/*Text*/,
+      "SectionId": "4cf149f7-0270-451c-a355-4032901e0282",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "7abfd76c-f465-46c1-bad0-e31eb10ef5f4"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ec7b6f25-ae94-4870-955e-284155fa55e0"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "4cf149f7-0270-451c-a355-4032901e0282",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "dadb1e22-471b-47dd-9110-27daf20c5b2d",
+      "Description": "This final example combines several ideas into one animation."
+    },
+    {
+      "Id": "41b20e54-8559-4b97-a3ec-65fc978c1923",
+      "Description": "All parameters are already set correctly.\nFigure out how the operators need to be connected.",
+      "Style": "CallToAction"
+    }
+  ]
+}

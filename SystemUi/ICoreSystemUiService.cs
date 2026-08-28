@@ -3,6 +3,14 @@ namespace T3.SystemUi;
 public interface ICoreSystemUiService
 {
     public void OpenWithDefaultApplication(string uri);
+
+    /// <summary>
+    /// Shows <paramref name="path"/> in the platform's file browser: a file is revealed selected
+    /// inside its folder, a folder is opened. Use this instead of <see cref="OpenWithDefaultApplication"/>
+    /// when the user wants to locate something rather than open it.
+    /// </summary>
+    public void RevealInFileBrowser(string path);
+
     public void ExitApplication();
     public void ExitThread();
     

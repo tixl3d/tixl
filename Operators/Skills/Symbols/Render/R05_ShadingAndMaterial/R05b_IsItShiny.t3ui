@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "f2d52d59-c099-476d-83ef-0429f76f9180"/*R05b_IsItShiny*/,
+  "Description": "Is It Shiny?",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4144d3a1-f779-4941-96ff-0ca127d3c584"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "7fdb1684-5414-4349-ae7e-ed0cb14bfa31"/*Text*/,
+      "SectionId": "474eba79-4f16-4734-8098-920bd704a481",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "809d15cb-834a-4cea-bc25-7c32a2051beb"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1494189e-6ccd-4429-bf28-1dc6c12ff11e"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "474eba79-4f16-4734-8098-920bd704a481",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "4520b68a-92c5-4937-8d4c-af59181d7ff1",
+      "Description": "The Metallic parameter defines whether a surface behaves like a metal or a non-metal.\nNon-metallic materials such as plastic or stone show their color through diffuse lighting.\nLight enters the surface and exits tinted by the material color."
+    },
+    {
+      "Id": "dbeef8e2-6018-4a04-a953-9268d5a57d69",
+      "Description": "Metallic materials show their color primarily through reflections.\nThey do not use diffuse lighting in the same way."
+    },
+    {
+      "Id": "251ac7bd-3378-4ded-8001-d958d609d792",
+      "Description": "In theory, the Metallic parameter should be either 0 or 1.\nTiXL does not enforce this rule, allowing intermediate values."
+    },
+    {
+      "Id": "634144b4-931b-4a2f-a06e-f8664319df13",
+      "Description": "Study the reference example and observe the difference.\nRecreate it.",
+      "Style": "CallToAction"
+    }
+  ]
+}

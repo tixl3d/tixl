@@ -50,8 +50,11 @@ public partial class ScalableCanvas
     /// (set during its per-frame update) instead of reading the current ImGui window. Required when this is
     /// invoked from a popup (e.g. a context-menu "View All"), where <c>GetWindowSize()</c> would return the
     /// popup's size and wildly mis-scale the fit.</param>
+    /// <param name="extraPaddingLeft">Additional left-only padding in screen px, on top of the symmetric
+    /// <paramref name="paddingX"/>. Lets callers keep content clear of overlays drawn along the left edge
+    /// (e.g. the dope sheet's parameter headers).</param>
     internal void SetScopeToCanvasArea(ImRect areaOnCanvas, bool flipY = false, float paddingX = 0, float paddingY = 0,
-                                       bool useStoredWindowSize = false)
+                                       bool useStoredWindowSize = false, float extraPaddingLeft = 0)
     {
         if (!useStoredWindowSize)
             WindowSize = ImGui.GetWindowSize();
@@ -62,8 +65,8 @@ public partial class ScalableCanvas
 
         if (areaSize.Y == 0)
             areaSize.Y = 1;
-        
-        var newScale = (WindowSize - new Vector2(paddingX, paddingY));
+
+        var newScale = (WindowSize - new Vector2(paddingX + extraPaddingLeft, paddingY));
         newScale.X = MathF.Max(newScale.X, 20);
         newScale.Y = MathF.Max(newScale.Y, 20);
 
@@ -74,7 +77,7 @@ public partial class ScalableCanvas
             newScale.Y *= -1;
         }
 
-        ScrollTarget = new Vector2(areaOnCanvas.Min.X - (paddingX / newScale.X) / 2,
+        ScrollTarget = new Vector2(areaOnCanvas.Min.X - (paddingX / 2 + extraPaddingLeft) / newScale.X,
                                    areaOnCanvas.Max.Y - (paddingY / newScale.Y) / 2);
 
         ScaleTarget = newScale;
@@ -123,6 +126,37 @@ public partial class ScalableCanvas
         }
 
         ScrollTarget.Y = area.Max.Y + padding;
+    }
+
+    /// <summary>
+    /// Shifts the scroll target (keeping the zoom) by the minimal amount required to bring the canvas area,
+    /// padded by <paramref name="screenPadding"/> px, into view. No-op if it is already visible.
+    /// </summary>
+    internal void ScrollToMakeAreaVisible(ImRect areaOnCanvas, float screenPadding = 0)
+    {
+        var visibleMin = ScrollTarget;
+        var visibleMax = ScrollTarget + WindowSize / ScaleTarget;
+
+        var padding = new Vector2(screenPadding, screenPadding) / ScaleTarget;
+        var areaMin = areaOnCanvas.Min - padding;
+        var areaMax = areaOnCanvas.Max + padding;
+
+        var shift = Vector2.Zero;
+        // Area larger than view: align to the min edge.
+        if (areaMin.X < visibleMin.X)
+            shift.X = areaMin.X - visibleMin.X;
+        else if (areaMax.X > visibleMax.X)
+            shift.X = MathF.Min(areaMax.X - visibleMax.X, areaMin.X - visibleMin.X);
+
+        if (areaMin.Y < visibleMin.Y)
+            shift.Y = areaMin.Y - visibleMin.Y;
+        else if (areaMax.Y > visibleMax.Y)
+            shift.Y = MathF.Min(areaMax.Y - visibleMax.Y, areaMin.Y - visibleMin.Y);
+
+        if (float.IsNaN(shift.X) || float.IsNaN(shift.Y) || float.IsInfinity(shift.X) || float.IsInfinity(shift.Y))
+            return;
+
+        ScrollTarget += shift;
     }
 
     internal ImRect GetVisibleCanvasArea()

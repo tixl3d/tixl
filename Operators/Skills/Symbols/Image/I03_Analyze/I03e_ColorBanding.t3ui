@@ -1,0 +1,80 @@
+{
+  "FormatVersion": 3,
+  "Id": "5011827a-67f5-489c-a8ed-d4354cc4feb5"/*I03e_ColorBanding*/,
+  "Description": "Color Banding",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "412efdaa-860a-443d-918d-b4213f3083fb"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "88c1b9d6-8539-4f83-886d-8027dcf241fe"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "dee2550a-1410-43ad-85e7-ad30f81b05ec"/*Text*/,
+      "SectionId": "ad043960-1fad-486b-bf55-8c39f69510a0",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2ec4a637-d2f4-4991-b8ea-edc8593f23e8"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ad043960-1fad-486b-bf55-8c39f69510a0",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "f0dd028b-6aae-46e4-8957-252560a0d01e",
+      "Description": "Most displays use 8-bit color.\nThat means 256 steps per channel, which is sometimes not enough for smooth gradients."
+    },
+    {
+      "Id": "f8ae908c-c6ae-4d67-8c6f-916f05530737",
+      "Description": "In this example, you can see visible banding.\nThe image itself is smooth. TiXL uses 16-bit color here, so the data has much higher precision than the display.\nThe artifacts come from the display, not from the image."
+    },
+    {
+      "Id": "199c3f2c-0b4e-44cc-ad70-2381b7929fb8",
+      "Description": "Use [ImageLevels] to narrow the curve range and confirm that the image data is smooth.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "395ed094-2c9d-440b-8dbc-dec3367a0b9d",
+      "Description": "Reduce visible banding by inserting a [Grain] operator.",
+      "Style": "CallToAction"
+    }
+  ]
+}

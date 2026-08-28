@@ -42,7 +42,7 @@ internal static class LayoutHandling
 
     public static void DrawMainMenuItems()
     {
-        if (CustomComponents.DrawSubMenu("Load layout".GetHashCode(), "Load layout"))
+        if (CustomComponents.DrawSubMenu("Load Layout".GetHashCode(), "Load Layout"))
         {
             for (int i = 0; i < 10; i++)
             {
@@ -57,7 +57,7 @@ internal static class LayoutHandling
             ImGui.EndMenu();
         }
 
-        if (CustomComponents.DrawSubMenu("Save layouts".GetHashCode(), "Save layouts"))
+        if (CustomComponents.DrawSubMenu("Save Layouts".GetHashCode(), "Save Layouts"))
         {
             for (int i = 0; i < 10; i++)
             {
@@ -71,7 +71,7 @@ internal static class LayoutHandling
             ImGui.EndMenu();
         }
 
-        if (CustomComponents.DrawMenuItem("Save current layout".GetHashCode(), Icon.None, "Save current layout", reserveIconColumn: false))
+        if (CustomComponents.DrawMenuItem("Save Current Layout".GetHashCode(), Icon.None, "Save Current Layout", reserveIconColumn: false))
             SaveLayout(0);
     }
 

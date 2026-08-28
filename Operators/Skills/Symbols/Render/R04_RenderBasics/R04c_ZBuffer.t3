@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "f8935a0d-bd26-448b-84a3-d0347e47ac1d"/*R04c_ZBuffer*/,
+  "Inputs": [],
+  "Children": [
+    {
+      "Id": "59657416-a074-4f34-b691-37df2798faf8"/*Text*/,
+      "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "InputValues": [
+        {
+          "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
+          "Type": "System.String",
+          "Value": "Task"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "717c4d62-416c-4eb9-9d8c-87f103de9d22"/*Text*/,
+      "SymbolId": "fd31d208-12fe-46bf-bfa3-101211f8f497",
+      "InputValues": [
+        {
+          "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
+          "Type": "System.String",
+          "Value": "Solution"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "e25023e4-aef0-490b-98f5-6d4e49fa8bc1"/*DrawQuiz*/,
+      "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
+      "InputValues": [],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "e25023e4-aef0-490b-98f5-6d4e49fa8bc1",
+      "SourceSlotId": "63a74fd8-a6e7-4d6f-b63d-179d7ff8ca4f",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "26a79101-5247-46f8-81ed-84a0a7dc3705"
+    },
+    {
+      "SourceParentOrChildId": "717c4d62-416c-4eb9-9d8c-87f103de9d22",
+      "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
+      "TargetParentOrChildId": "e25023e4-aef0-490b-98f5-6d4e49fa8bc1",
+      "TargetSlotId": "8f4f0caa-b710-47c1-94dd-346f03fac3c8"
+    },
+    {
+      "SourceParentOrChildId": "59657416-a074-4f34-b691-37df2798faf8",
+      "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
+      "TargetParentOrChildId": "e25023e4-aef0-490b-98f5-6d4e49fa8bc1",
+      "TargetSlotId": "a6f445ac-1be1-4921-baee-cf2caf5a6a90"
+    }
+  ]
+}

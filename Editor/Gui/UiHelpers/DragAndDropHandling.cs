@@ -24,6 +24,16 @@ internal static class DragAndDropHandling
             _activeDragType = DragTypes.None;
             _externalDropJustHappened = false;
         }
+
+        // An external drop that no drop zone claimed within a frame is discarded. Without this it stays
+        // armed until the mouse later passes over *any* drop zone, which then fires the stale drop there
+        // (e.g. a file dropped on empty timeline space "landing" in the graph seconds later).
+        if (_externalDropJustHappened && ImGui.GetFrameCount() > _externalDropArmedFrame + 1)
+        {
+            FreeData();
+            _activeDragType = DragTypes.None;
+            _externalDropJustHappened = false;
+        }
     }
 
     internal static void StartExternalDrag(DragTypes type, string data)
@@ -43,6 +53,7 @@ internal static class DragAndDropHandling
     {
         _dataString = data;
         _externalDropJustHappened = true;
+        _externalDropArmedFrame = ImGui.GetFrameCount();
     }
 
     /// <summary>
@@ -173,6 +184,42 @@ internal static class DragAndDropHandling
         return result;
     }
 
+    /// <summary>
+    /// Like <see cref="TryHandleDropOnItem"/> but against an explicit screen rect instead of the last
+    /// ImGui item — for drop zones larger than any single drawn item (e.g. the whole timeline region).
+    /// Internal drags are accepted on mouse release over the rect (no ImGui payload round-trip needed;
+    /// the drag data lives in <see cref="_dataString"/> either way).
+    /// </summary>
+    internal static DragInteractionResult TryHandleDropOnRect(DragTypes dragType, ImRect area, out string? data)
+    {
+        data = string.Empty;
+        if (_activeDragType != dragType)
+            return DragInteractionResult.None;
+
+        if (!IsDragging && !_externalDropJustHappened)
+        {
+            _activeDragType = DragTypes.None;
+            return DragInteractionResult.None;
+        }
+
+        var isHovered = area.Contains(ImGui.GetMousePos());
+        var color = Color.Orange.Fade(isHovered ? 1f : 0.5f);
+        ImGui.GetWindowDrawList().AddRect(area.Min, area.Max, color, 3, ImDrawFlags.None, isHovered ? 2f : 1f);
+
+        if (!isHovered)
+            return DragInteractionResult.None;
+
+        data = _dataString;
+
+        if (_externalDropJustHappened || ImGui.IsMouseReleased(0))
+        {
+            _stopRequested = true;
+            return DragInteractionResult.Dropped;
+        }
+
+        return DragInteractionResult.Hovering;
+    }
+
     internal enum DragInteractionResult
     {
         None,
@@ -221,6 +268,7 @@ internal static class DragAndDropHandling
     private static bool HasData => _dataPtr != IntPtr.Zero;
 
     private static bool _externalDropJustHappened; // New flag
+    private static int _externalDropArmedFrame;
     private static IntPtr _dataPtr = new(0);
     private static string? _dataString;
     private static bool _stopRequested;

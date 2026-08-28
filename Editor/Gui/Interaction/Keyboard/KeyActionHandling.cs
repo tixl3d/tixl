@@ -136,6 +136,7 @@ internal static class KeyActionHandling
         // Graph window actions
         RegisterActionsFlags(UserActions.ToggleDisabled, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.ToggleBypassed, Flags.NeedsWindowFocus);
+        RegisterActionsFlags(UserActions.Disconnect, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.PinToOutputWindow, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ClearBackgroundImage, Flags.NeedsWindowFocus);
 

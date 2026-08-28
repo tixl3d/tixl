@@ -1,0 +1,39 @@
+{
+  "FormatVersion": 3,
+  "Id": "332d7496-09ec-45b7-85b4-0653bb93dd62"/*SetVec2Var*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "861f826a-9e0d-446e-8f80-ad51d7d9a09b"/*SubGraph*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "903c7fc3-dfa4-4a01-8f7d-53a94f8a93ab"/*VariableName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "e8752eec-0036-41db-957c-8a1fe649fcca"/*Vec2Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "bca971ce-39fd-43f8-8516-838149b142ee"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

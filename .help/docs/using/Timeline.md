@@ -37,9 +37,9 @@ Dragging timeline elements snaps to the bar raster by default. Zoom in for finer
 
 ## Selecting timeline elements
 
-Keyframes and time clips can be selected in a few ways. The selection drives both the **selection range indicator** (above the timeline) and the **keyset indicators** (the strip just below the ruler).
+Keyframes and time clips can be selected in a few ways. The selection drives both the **selection range indicator** (above the timeline) and the **keyset strip** (just below the ruler).
 
-### Keyset indicators (the strip below the ruler)
+### The keyset strip (below the ruler)
 
 Every visible keyframe — or cluster of nearby keyframes — is represented by a small dot in the strip directly below the ruler:
 
@@ -143,7 +143,7 @@ The fullscreen **Curve** mode still exists for cases where you want the entire t
 
 ### Inserting animation increments
 
-Press `Shift + C` to insert a keyframe whose value is incremented by 1 relative to the previous one. This is useful for tapping **step markers** while a soundtrack plays:
+Press `Shift + C` to insert a keyframe whose value is incremented by 1 relative to the previous one. This only affects **scalar** parameters — vector parameters (colors, positions) shown in the dope sheet are skipped, so tapping markers can't disturb their animations. This is useful for tapping **step markers** while a soundtrack plays:
 
 1. Add a soundtrack to your project.
 2. Press `Home` to jump to the start.
@@ -167,10 +167,35 @@ If a composition contains any time clips, the timeline shows a **Time Clip Area*
 
 The active clip is highlighted during playback.
 
+### Video clip thumbnails
+
+Video clips show small frame thumbnails when the layer is tall enough and the clip wide enough:
+
+- The **left and right edges** of the clip body show the source frames at the clip's in- and out-point. These are cached on disk, so they reappear instantly on the next start.
+- **Hovering** a video clip shows the frame under the mouse in the tooltip, so you can find a moment in the footage without scrubbing the playhead. These previews are decoded in the background — on footage with large keyframe intervals they can lag slightly behind the mouse (a generated proxy makes them much faster).
+
+### Source region and slipping footage
+
+Hovering or selecting a video or audio clip shows its full source footage as a **source region** in the ruler, behind the selection-range indicator. The region maps the media's first and last frame onto the timeline, so head/tail slack — or a clip reading past its footage — is visible at a glance.
+
+Dragging the region (outside the white selection-range line) **slips** the clip: the footage slides under the clip's fixed timeline window without changing its position or speed. While dragging, the region's start and end snap to other clips, the playhead, and similar time anchors; hold `Shift` to bypass snapping.
+
+Dragging the **selection-range start/end handles** trims selected clips at the boundary (preserving their speed and source mapping) while keyframes are still stretched proportionally.
+
+### Authored source extent
+
+Combined time-clip operators can declare which span of their content is meaningful — their **source extent** (e.g. "this transition covers bars 2 to 8"). Inside the symbol, the extent shows as a dark band at the bottom of the ruler with a slim handle at each end. Drag a handle to adjust it; the usual snapping applies (`Shift` bypasses) and the edit is undoable. Without an authored extent the band previews a derived range (the entered clip's source range, or the span of all keyframes) — dragging a handle turns that into the authored value.
+
+When such an operator is placed on a timeline, the extent behaves like media footage: newly created clips start with the extent as their source range, the clip tooltip shows a `Footage:` line (with a warning when the clip reads past the extent), and hovering or selecting the clip shows the source region in the ruler for slip-editing.
+
+**Combine into New Type...** with *Combine as time clip* initializes the extent to the span of the combined keyframes and clips. Changing the extent later never retimes clips already placed on a timeline.
+
 ### Time clips need to be connected
 
+`[TimeClipPlayer]` removes the wiring requirement for Command clips: with **AutoCollect** on (the default) it executes every sibling time clip whose clip output is unconnected — like `[VideoClipPlayer]` does for video and `[AudioClipPlayer]` for audio. Wire one `[TimeClipPlayer]` into your render chain (e.g. via a `[Group]`) and drop clips freely; clips on upper timeline rows draw on top. Wiring a clip into any consumer removes it from auto-collection. The graph view draws faint command-colored lines from auto-collected clips to the player.
+
 > [!NOTE]
-> Clips not connected to a consumer never render unless they're pinned to the output window. TiXL fades unconnected clips and shows a "Not Connected?" warning on their tooltip:
+> Without such a player, clips not connected to a consumer never render unless they're pinned to the output window. TiXL fades unconnected clips and shows a "Not Connected?" warning on their tooltip:
 
 ![Inactive clip warning](/images/Animation/image-7.png)
 
@@ -244,6 +269,8 @@ In addition to op-backed time clips, the timeline also hosts two clip types that
 - **Data clips** are produced by recording a live session (see [Recording](./Recording.md)) or by dropping a `.data` file. They render with per-event tick marks across the body — sparse recordings show every event, dense ones show a soft fill.
 
 Both types share the timeline with op-backed clips: same drag, trim, snap, and selection behavior across all three. Selecting a clip of one type clears selection on the other types unless you hold `Shift` or `Ctrl`.
+
+Audio and video content is wall-clock media, so its source trims are remembered in seconds: changing the project's BPM keeps the clip on the same bars, and the audio or footage still starts at the same moment of the file. Video adjusts its playback speed to fit the clip; audio keeps its native speed and pitch, so the clip block may run longer or shorter than the sound it plays. Keyframes on the clip's own parameters stay with the content as well. Op-backed clips that remap nested compositions keep everything in bars, as before.
 
 #### Editing audio clips
 

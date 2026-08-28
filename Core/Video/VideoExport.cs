@@ -177,6 +177,26 @@ public interface IVideoEncoderFactory
     /// (and 0) when the file can't be read or carries no usable duration. Used to size a freshly dropped video
     /// timeline clip to its real length.</summary>
     bool TryProbeDurationSeconds(string sourcePath, out double seconds);
+
+    /// <summary>Opens <paramref name="sourcePath"/> for single-frame thumbnail grabs. Returns null and an
+    /// <paramref name="error"/> when the file can't be decoded. The reader owns its own decoder session —
+    /// independent of any playback stream and its frame cache — and must be used from one thread only.</summary>
+    IVideoThumbnailReader? TryCreateThumbnailReader(string sourcePath, out string? error);
+}
+
+/// <summary>
+/// Reads single video frames as small RGBA images for timeline thumbnails. Each read is a blocking
+/// keyframe-seek + decode-forward (up to one GOP of software decode), so callers run it on a background
+/// worker, never on the draw thread.
+/// </summary>
+public interface IVideoThumbnailReader : IDisposable
+{
+    double DurationSeconds { get; }
+
+    /// <summary>Decodes the frame at <paramref name="seconds"/> (clamped to the stream) and writes it
+    /// aspect-fitted and centered into <paramref name="rgbaBuffer"/> (RGBA8, <paramref name="targetWidth"/> ×
+    /// <paramref name="targetHeight"/> pixels, letterbox areas transparent). Returns false on decode failure.</summary>
+    bool TryReadFrame(double seconds, int targetWidth, int targetHeight, byte[] rgbaBuffer);
 }
 
 /// <summary>

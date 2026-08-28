@@ -24,24 +24,31 @@ internal sealed partial class AssetLibrary
 
             if (isValidName)
             {
-                var oldPath = folder.AbsolutePath;
-                var newPath = folder.AbsolutePath.Replace(folder.Name, _state.RenameBuffer);
-                try
+                if (folder.Asset is { IsLinkMountRoot: true })
                 {
-                    if (Directory.Exists(oldPath))
-                    {
-                        Directory.Move(oldPath, newPath);
-                        AssetRegistry.UpdateMovedAsset(oldPath, newPath);
-                        // TODO: update all references?
-                    }
-                    else
-                    {
-                        Log.Warning($"Rename failed: Path doesn't exist: {oldPath}");
-                    }
+                    RenameFolderLink(folder.Asset, _state.RenameBuffer);
                 }
-                catch (IOException ex)
+                else
                 {
-                    Log.Warning($"Rename failed: {ex.Message}");
+                    var oldPath = folder.AbsolutePath;
+                    var newPath = folder.AbsolutePath.Replace(folder.Name, _state.RenameBuffer);
+                    try
+                    {
+                        if (Directory.Exists(oldPath))
+                        {
+                            Directory.Move(oldPath, newPath);
+                            AssetRegistry.UpdateMovedAsset(oldPath, newPath);
+                            // TODO: update all references?
+                        }
+                        else
+                        {
+                            Log.Warning($"Rename failed: Path doesn't exist: {oldPath}");
+                        }
+                    }
+                    catch (IOException ex)
+                    {
+                        Log.Warning($"Rename failed: {ex.Message}");
+                    }
                 }
             }
 
@@ -54,6 +61,57 @@ internal sealed partial class AssetLibrary
         ImGui.SetCursorScreenPos(keepNextPos);
     }
     
+    /// <summary> Renaming a linked folder renames its .tixlLink marker, never the external folder. </summary>
+    private static void RenameFolderLink(Asset mountRootAsset, string newName)
+    {
+        if (!AssetLinkFolders.TryGetMountById(mountRootAsset.FolderLinkMountId, out var mount))
+        {
+            Log.Warning("Can't find link mount for " + mountRootAsset.Address);
+            return;
+        }
+
+        var linkDir = Path.GetDirectoryName(mount.LinkFilePath) ?? string.Empty;
+        var newLinkPath = Path.Combine(linkDir, newName + AssetLinkFolders.Extension);
+        if (File.Exists(newLinkPath))
+        {
+            Log.Warning($"Rename failed: {newLinkPath} already exists");
+            return;
+        }
+
+        try
+        {
+            File.Move(mount.LinkFilePath, newLinkPath);
+            var package = mount.Package;
+            AssetLinkFolders.UnmountLinkFile(mount.LinkFilePath);
+            AssetLinkFolders.TryMount(newLinkPath, package);
+        }
+        catch (IOException ex)
+        {
+            Log.Warning($"Rename failed: {ex.Message}");
+        }
+    }
+
+    /// <summary> Deletes only the .tixlLink marker - the external folder stays untouched. </summary>
+    private static void RemoveFolderLink(Asset mountRootAsset)
+    {
+        if (!AssetLinkFolders.TryGetMountById(mountRootAsset.FolderLinkMountId, out var mount))
+        {
+            Log.Warning("Can't find link mount for " + mountRootAsset.Address);
+            return;
+        }
+
+        try
+        {
+            File.Delete(mount.LinkFilePath);
+        }
+        catch (IOException ex)
+        {
+            Log.Warning($"Can't delete link file {mount.LinkFilePath}: {ex.Message}");
+        }
+
+        AssetLinkFolders.UnmountLinkFile(mount.LinkFilePath);
+    }
+
     private static void CreateSubFolder(AssetFolder folder)
     {
         var parentPath = folder.AbsolutePath;
@@ -78,14 +136,19 @@ internal sealed partial class AssetLibrary
         }
     }
     
-        private static void HandleDropFilesIntoFolder(AssetFolder folder)
+    private static void HandleDropFilesIntoFolder(AssetFolder folder)
     {
-        var dropFilesResult = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.ExternalFile, out var data, () =>
-                                                                          {
-                                                                              CustomComponents.BeginTooltip();
-                                                                              ImGui.TextUnformatted("Import files to here...");
-                                                                              CustomComponents.EndTooltip();
-                                                                          });
+        var dropFilesResult = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.ExternalFile, out var data);
+
+        if (dropFilesResult == DragAndDropHandling.DragInteractionResult.Hovering && data != null)
+        {
+            CustomComponents.BeginTooltip();
+            ImGui.TextUnformatted(FileImport.AreAllPathsInLinkedFolders(data)
+                                      ? "Reference files from linked folder..."
+                                      : "Import files to here...");
+            CustomComponents.EndTooltip();
+            return;
+        }
 
         if (dropFilesResult != DragAndDropHandling.DragInteractionResult.Dropped || data == null)
             return;
@@ -96,10 +159,19 @@ internal sealed partial class AssetLibrary
             return;
         }
 
+        // Files land in the hovered folder itself, which for a linked folder is its external target
+        // rather than a directory below Assets/. A folder that vanished from disk (unresolved link)
+        // must not be recreated by the import.
+        if (!Directory.Exists(folder.AbsolutePath))
+        {
+            Log.Warning($"Can't import into missing folder {folder}");
+            return;
+        }
+
         var filePaths = data.Split("|");
         foreach (var path in filePaths)
         {
-            FileImport.TryImportDroppedFile(path, package, folder.Name, out _);
+            FileImport.TryImportDroppedFile(path, package, folder.AbsolutePath, out _);
         }
     }
 
@@ -120,6 +192,13 @@ internal sealed partial class AssetLibrary
 
     private static void MoveAssetsToFolder(AssetFolder folder, string data)
     {
+        // An empty or unresolved folder path would move the files relative to the working directory
+        if (!Directory.Exists(folder.AbsolutePath))
+        {
+            Log.Warning($"Can't move assets into missing folder {folder}");
+            return;
+        }
+
         var assetAddresses = data.Split("|");
         foreach (var address in assetAddresses)
         {

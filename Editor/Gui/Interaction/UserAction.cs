@@ -44,6 +44,7 @@ internal enum UserActions
     InsertKeyframeWithIncrement,
     ToggleAnimationPinning,
     SplitSelectedOrHoveredClips,
+    SelectFollowingClips,
 
     // Graph
     PinToOutputWindow,
@@ -54,6 +55,7 @@ internal enum UserActions
     LayoutSelection,
     ToggleDisabled,
     ToggleBypassed,
+    Disconnect,
     AddSection,
     AddComment,
     RenameChild,

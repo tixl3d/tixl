@@ -17,8 +17,12 @@ namespace T3.Core.Audio;
 /// </summary>
 public static class AudioRendering
 {
+    /// <summary>True while a video/image-sequence export is capturing audio.</summary>
+    public static bool IsRecording => _isRecording;
+
     private static bool _isRecording;
     private static readonly ExportState _exportState = new();
+    private static readonly List<IAudioExportSource> _exportEvaluationSources = new();
     private static int _frameCount;
 
     // Reusable buffers to reduce per-frame allocations during export
@@ -29,6 +33,11 @@ public static class AudioRendering
     // Export mixer handle - BASS handles resampling and mixing for us
     private static int _exportMixerHandle;
     private static bool _exportMixerInitialized;
+
+    // Max deviation between a clip stream's source position and the timeline target before the export
+    // reseeks it. Roughly half a frame at 30 fps — large enough to let contiguous frames read
+    // sequentially despite per-frame sample rounding, small enough to stay inaudible.
+    private const double ExportResyncThresholdSecs = 0.015;
 
     /// <summary>
     /// Ensures the buffer has at least the required capacity, reallocating if necessary.
@@ -50,7 +59,23 @@ public static class AudioRendering
         _frameCount = 0;
 
         _exportState.SaveState();
-        AudioExportSourceRegistry.Clear();
+
+        // Snapshot which audio ops (buses) were organically evaluated when export starts — those get
+        // force-evaluated every exported frame so graph audio keeps flowing even though export only
+        // evaluates the exported op-chain. Ops that were already silent/stale stay out, matching live.
+        _exportEvaluationSources.Clear();
+        foreach (var source in AudioExportSourceRegistry.Sources)
+        {
+            if (source.IsActiveForExport)
+                _exportEvaluationSources.Add(source);
+        }
+
+        Log.Gated.AudioRender($"[AudioRendering] Export evaluation sources: {_exportEvaluationSources.Count} of {AudioExportSourceRegistry.Sources.Count} registered");
+
+        // Clear what live playback left ringing (effect tails, buffered samples) so the render doesn't open
+        // with a remnant of what was last heard — and so two renders of the same range match.
+        foreach (var source in _exportEvaluationSources)
+            source.ResetForExport();
 
         // Reset audio analysis state for clean export - ensures both modes start from same state
         AudioAnalysisContext.Default.Reset();
@@ -82,6 +107,12 @@ public static class AudioRendering
         // Remove soundtrack streams from live mixer and add to export mixer
         foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
         {
+            // A graph-routed clip stays in its bus submix: the graph owns its routing, gain, ducking and FX,
+            // and its audio reaches the export through the OperatorMixer read. Stealing it here would strip
+            // the graph processing from the exported audio and strand it in the SoundtrackMixer afterwards.
+            if (handle.Clip.IsRoutedToGraph)
+                continue;
+
             BassMix.MixerRemoveChannel(clipStream.StreamHandle);
             
             // Reset stream attributes for export
@@ -115,8 +146,11 @@ public static class AudioRendering
         Log.Gated.AudioRender($"[AudioRendering] EndRecording: Exported {_frameCount} frames");
 
         // Remove soundtrack streams from export mixer and re-add to live mixer
-        foreach (var (_, clipStream) in AudioEngine.SoundtrackClipStreams)
+        foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
         {
+            if (handle.Clip.IsRoutedToGraph)
+                continue; // stayed in its bus submix — see PrepareRecording
+
             if (_exportMixerInitialized)
             {
                 BassMix.MixerRemoveChannel(clipStream.StreamHandle);
@@ -208,6 +242,10 @@ public static class AudioRendering
         foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
         {
             var clip = handle.Clip;
+            if (clip.IsRoutedToGraph)
+                continue; // graph-owned: bus applies gain, engine syncs position — don't fight either
+
+
             double clipStart = Playback.Current.SecondsFromBars(clip.TimeRange.Start);
             double elapsedInClip = currentTime - clipStart;
             double targetSourcePos = clip.SourceOffsetSecs + elapsedInClip;
@@ -215,15 +253,35 @@ public static class AudioRendering
                                    ? clip.SourceOffsetSecs + clip.SourceDurationSecs
                                    : clip.LengthInSeconds;
 
-            // Check if clip is active at this time
-            bool isActive = elapsedInClip >= 0 && targetSourcePos < sourceEnd;
+            // Looping clips wrap back into their valid source window for as long as the clip lasts.
+            var loopStart = Math.Max(clip.SourceOffsetSecs, 0);
+            var loopLength = Math.Min(sourceEnd, clip.LengthInSeconds) - loopStart;
+            if (clip.IsLooping && loopLength > 0.01 && elapsedInClip >= 0)
+                targetSourcePos = loopStart + elapsedInClip % loopLength;
+
+            // Check if clip is active at this time (negative source position = start-extended before
+            // the file's content — stays silent until the playhead reaches valid source time).
+            bool isActive = elapsedInClip >= 0 && targetSourcePos >= 0 && targetSourcePos < sourceEnd;
+            if (clip.IsLooping && clip.TimeRange.End > clip.TimeRange.Start)
+                isActive &= currentTime < Playback.Current.SecondsFromBars(clip.TimeRange.End);
 
             if (isActive)
             {
-                // Position the stream at the correct time in the source file
-                long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, targetSourcePos);
-                Bass.ChannelSetPosition(clipStream.StreamHandle, targetBytes);
-                
+                // Keep the stream at the correct source-file time. Mixer sources must be seeked through
+                // BASSmix (a plain Bass.ChannelSetPosition is ignored for plugged channels, which made
+                // clips play from their beginning when the render range didn't start at 0). Contiguous
+                // frames read sequentially, so only reseek when the position actually drifted
+                // (activation, render-range start, loop wrap).
+                var currentBytes = BassMix.ChannelGetPosition(clipStream.StreamHandle);
+                var currentPosSecs = Bass.ChannelBytes2Seconds(clipStream.StreamHandle, currentBytes);
+                if (Math.Abs(currentPosSecs - targetSourcePos) > ExportResyncThresholdSecs)
+                {
+                    long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, targetSourcePos);
+                    BassMix.ChannelSetPosition(clipStream.StreamHandle, targetBytes,
+                                               PositionFlags.Bytes | PositionFlags.MixerReset);
+                }
+
+
                 // Apply volume: clip.Volume * SoundtrackVolume * AppVolume
                 float effectiveVolume = handle.Clip.Volume
                                         * CompositionSettings.Current.Audio.SoundtrackVolume
@@ -367,7 +425,7 @@ public static class AudioRendering
     {
         var context = new EvaluationContext { LocalFxTime = localFxTime };
 
-        foreach (var source in AudioExportSourceRegistry.Sources)
+        foreach (var source in _exportEvaluationSources)
         {
             if (source is not Instance operatorInstance) continue;
 

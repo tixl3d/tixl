@@ -85,7 +85,8 @@ public interface IShaderCodeOperator<T> where T : AbstractShader
                                                                        Name: debugName,
                                                                        OldBytecode: currentShader?.CompiledBytecode);
         
-        var compiled = ShaderCompiler.TryCompileShaderFromSource(compilationArgs, true, true, out currentShader, out var errorMessage);
+        // The cache key is the full source text, so a hit is always correct - no need to force recompilation.
+        var compiled = ShaderCompiler.TryCompileShaderFromSource(compilationArgs, useCache: true, forceRecompile: false, out currentShader, out var errorMessage);
                 
         shaderSlot.Value = currentShader!;
         shaderSlot.DirtyFlag.Clear();

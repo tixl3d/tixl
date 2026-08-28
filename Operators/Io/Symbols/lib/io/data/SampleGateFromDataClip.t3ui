@@ -1,0 +1,66 @@
+{
+  "FormatVersion": 3,
+  "Id": "b1bce1f1-dab9-4b0f-bd2c-b7f564858675"/*SampleGateFromDataClip*/,
+  "Description": "Samples a note channel of a DataClip at the current time: Gate is true while a note interval is active, Velocity carries its raw velocity (0-127).\n\nUse it to trigger visuals from notes in a [MidiClip] or recorded [LoadDataClip] without setting up [SimulateIoData] and [MidiInput]. Pick an interval channel (N…) — for CC curves and other tick channels use [SampleFloatFromDataClip].\n\nWasHit is true for the frame in which a note starts - it fires even when a short note falls entirely between two frames, or a retrigger keeps Gate continuously true.\n\nThe sample time follows the playhead through the clip's timeline placement. Enable UseTimeOverride to sample at an explicit source time in seconds instead.",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "4289f47e-3f84-4e30-8663-744605374175"/*OverrideTime*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Source time in seconds to sample at when UseTimeOverride is enabled."
+    },
+    {
+      "InputId": "73a53ce1-4e68-41fb-a4d0-e9fc2aac3f20"/*UseTimeOverride*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Sample at OverrideTime instead of following the playhead."
+    },
+    {
+      "InputId": "8f1216bf-c3a6-426c-a861-9038cd2cc448"/*Clip*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The DataClip to sample, e.g. from [MidiClip] or [LoadDataClip]."
+    },
+    {
+      "InputId": "96c0b232-6bdb-4bc2-bfc9-12e53db38c31"/*Channel*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "The note channel to sample (N…). The dropdown lists all channels of the connected clip.",
+      "Usage": "CustomDropdown"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "609ec999-908c-424e-a3cd-6f3527f21e83"/*Gate*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "d242869b-4040-4843-aa78-6baadf103bb2"/*Velocity*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "OutputId": "dfc8a190-259d-450e-9903-04fcd3d31975"/*WasHit*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 90.0
+      }
+    }
+  ]
+}

@@ -152,3 +152,15 @@ remap was deliberately left out — values stay raw; use [Remap] downstream.
   Metadata for display later.
 - Manual test set + `.help/` page to be added with the shipping PR
   (per `.tests-manual/README.md` / docs rules).
+- **`[MidiClip]` vs `[LoadMidiFile]` overlap — RESOLVED 2026-08-09.** The old Dict-based `MidiClip` is
+  retired: renamed **`[_MidiClip_Old]`** (Guid kept), tagged `Obsolete`, description points to the
+  successor. `[LoadMidiFile]` is renamed **`[MidiClip]`** (Guid kept, `AKA: LoadMidiFile` for search) —
+  it *is* a clip, and `[MidiClip]→[SampleFloatFromDataClip]` fully replaces
+  `[_MidiClip_Old]→[SelectFloatFromDict]`. References updated: sibling op descriptions, AssetHandling /
+  TimelineClipDrop comments (Guid refs unchanged), `.help/docs/using/MidiFileImport.md`,
+  `.tests-manual/midi-file-import.md`, `time-clip-evaluation.md` step 7. v4.2 release notes left
+  historical.
+- **Long-term: the Dict flow duplicates DataClip features** (user note 2026-08-09). `Dict<float>` feeds
+  many ops (GameController etc.) so it can't be retired soon. Either provide a `DataClip → Dict`
+  conversion op or unify the two systems. Park until the DataClip editing work (recording plan Phase 3)
+  clarifies the direction.

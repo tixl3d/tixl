@@ -1,0 +1,83 @@
+{
+  "FormatVersion": 3,
+  "Id": "f5045ea4-8080-4f05-94d5-fab87c256251"/*R02d_TransparentTextures*/,
+  "Description": "Transparent Textures",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4421930e-06c0-4470-9542-7224e9100797"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "57ff04fb-5d68-43ce-8666-cba3de147f67"/*Text*/,
+      "SectionId": "88f73836-64a1-44bb-8f1d-b50546ab59bd",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "7a2bbf07-c232-4c63-8c08-0b9d0c3313e4"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e1918bc1-36e8-44ac-8c29-4e00c1f8a9b1"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "88f73836-64a1-44bb-8f1d-b50546ab59bd",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "890c660f-1361-4ecf-8d48-d45acaa3a531",
+      "Description": "Transparency makes rendering more complex.\nOnce transparency is involved, the depth buffer can no longer reliably sort geometry.\nAs a result, distant surfaces may appear in front of closer ones."
+    },
+    {
+      "Id": "55db6cc4-ce58-4f41-bbbd-68801e7a1fb7",
+      "Description": "In this challenge, a transparent Ryoji pattern is applied to a cube.\nThe goal is to see both the outside and the inside faces."
+    },
+    {
+      "Id": "d973a5fd-c7fb-425f-8331-82ba768d38f6",
+      "Description": "To achieve this, two things are required.\nFirst, back-face culling must be disabled so faces pointing away from the camera are still rendered."
+    },
+    {
+      "Id": "d0568d30-89fa-49f4-a97d-bd99c9e33030",
+      "Description": "Second, the alpha cut-off parameter may need adjustment.\nIt defines a threshold at which transparent pixels are treated as holes and discarded."
+    },
+    {
+      "Id": "50f40d36-b414-4785-a6e6-b723c02f6c25",
+      "Description": "Adjust the draw settings and complete the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

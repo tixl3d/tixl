@@ -15,9 +15,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);0108;9084;NU1900</NoWarn>
     <PackageId>fe98a538-31e2-47dc-82a4-62c2e1c29649</PackageId>
+    <ProjectFormatVersion>2</ProjectFormatVersion>
     <RootNamespace>Mediapipe</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <IsArchived>false</IsArchived>
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>$(NoWarn);0108;9084;NU1900;CS8981</NoWarn>
@@ -103,11 +106,11 @@
     <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CppSharp.Runtime" Version="1.1.5.3168" />
+    <PackageReference Include="CppSharp.Runtime" Version="1.1.84.17100" />
     <PackageReference Include="OpenGL.Net" Version="0.8.4">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
-    <PackageReference Include="Google.Protobuf" Version="3.34.1" />
+    <PackageReference Include="Google.Protobuf" Version="3.35.1" />
   </ItemGroup>
   <!-- Native dependencies -->
   <ItemGroup>
@@ -124,10 +127,10 @@
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
        propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
-    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
-    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
-    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageAssets Include="Assets/**/*" />
+    <PackageSymbols Include="Symbols/**/*.t3" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" />
+    <PackageSourceCode Include="Symbols/**/*.cs" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
@@ -146,9 +149,9 @@
   <ItemGroup>
     <Folder Include="Vendor\" />
   </ItemGroup>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <!-- Clear previous files in the export folder -->
-    <RemoveDir Directories="bin/$(Configuration)" />
+    <RemoveDir Directories="$(BaseOutputPath)$(Configuration)" />
   </Target>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
     <ItemGroup Label="Define json structure of referenced operator packages">

@@ -5,13 +5,14 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectFormatVersion>2</ProjectFormatVersion>
     <RootNamespace>Lib</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
-    <VersionPrefix>1.670.999</VersionPrefix>
+    <VersionPrefix>1.672.1000</VersionPrefix>
     <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
-    <EditorVersion>4.2.0</EditorVersion>
+    <EditorVersion>4.3.0</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -23,6 +24,8 @@
     <PackageId>55612b33-e330-4730-a981-c2227b4cc904</PackageId>
     <IsArchived>false</IsArchived>
     <!-- Set the output path based on the version and release mode -->
+    <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />
@@ -109,24 +112,24 @@
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.10" />
     <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
     <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
-    <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
     <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
-    <PackageReference Include="Svg" Version="3.4.7" />
+    <PackageReference Include="Svg" Version="3.4.8" />
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively to other projects).
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
        propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
-    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
-    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
-    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageAssets Include="Assets/**/*" />
+    <PackageSymbols Include="Symbols/**/*.t3" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" />
+    <PackageSourceCode Include="Symbols/**/*.cs" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
@@ -137,15 +140,15 @@
     <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
   <ItemGroup>
-    <Folder Include="io\video\" />
+    <Folder Include="Symbols\io\video\" />
   </ItemGroup>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-    <!-- Clear previous build output, but keep the FFmpeg native DLLs. A running editor with a video playing has
-         them loaded, and native libraries can't be unloaded, so a blunt RemoveDir fails with "access denied" and
-         breaks rebuild / hot-reload. These DLLs come from NuGet and don't change between builds; a stale one is
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+    <!-- Clear previous build output, but keep the FFmpeg native DLLs. A running Release editor with a video
+         playing has them loaded, and native libraries can't be unloaded, so a blunt RemoveDir fails with
+         "access denied". These DLLs come from NuGet and don't change between builds; a stale one is
          refreshed by restarting the editor. ContinueOnError so any other transiently-locked file can't fail the build. -->
     <ItemGroup>
-      <_StaleBuildOutput Include="bin/$(Configuration)/**/*" Exclude="bin/$(Configuration)/**/av*.dll;bin/$(Configuration)/**/sw*.dll;bin/$(Configuration)/**/postproc*.dll" />
+      <_StaleBuildOutput Include="$(BaseOutputPath)$(Configuration)/**/*" Exclude="$(BaseOutputPath)$(Configuration)/**/av*.dll;$(BaseOutputPath)$(Configuration)/**/sw*.dll;$(BaseOutputPath)$(Configuration)/**/postproc*.dll" />
     </ItemGroup>
     <Delete Files="@(_StaleBuildOutput)" ContinueOnError="true" />
   </Target>

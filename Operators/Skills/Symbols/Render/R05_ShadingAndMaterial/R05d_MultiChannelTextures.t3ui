@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "e362db76-d60b-4dc3-8097-6eda71b525e9"/*R05d_MultiChannelTextures*/,
+  "Description": "Multi-Channel Textures",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "75cb7731-4dd5-48f5-873e-eafeed79b6b3"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "76f29e0a-7277-4c39-82da-04df90355bed"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "776c6a27-b364-4a38-9b6a-51fe059c4046"/*Text*/,
+      "SectionId": "8083cb65-e884-4790-9133-4fde64cab556",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1a017204-e719-4d18-b790-93c94d2bea4b"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "8083cb65-e884-4790-9133-4fde64cab556",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "ed8aee91-534b-4803-a958-223c4829449f",
+      "Description": "The roughnessMetallicOcclusion texture parameter is special.\nIt expects a channel-packed texture where each property is stored in a different color channel."
+    },
+    {
+      "Id": "2c70371c-3086-4c51-b55d-71617b40735a",
+      "Description": "The [Combine3Channels] operator can be used to construct such textures."
+    },
+    {
+      "Id": "2cb43f32-0ffa-4b7c-a843-c38b338b2383",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -26,17 +26,21 @@ public readonly struct TimeRangeMapping
     /// <summary>The clip's placement on the timeline (bars).</summary>
     public readonly TimeRange TimeRange;
 
-    /// <summary>The slice of the source content that the clip exposes (bars).</summary>
+    /// <summary>The slice of the source content that the clip exposes (bars, or seconds when <see cref="SourceInSeconds"/>).</summary>
     public readonly TimeRange SourceRange;
 
     /// <summary>BPM at the moment the mapping was built — baked in so consumers don't need <see cref="Playback"/>.</summary>
     public readonly double Bpm;
 
-    public TimeRangeMapping(TimeRange timeRange, TimeRange sourceRange, double bpm)
+    /// <summary>True when <see cref="SourceRange"/> is in seconds (wall-clock media clips); the seconds conversions are then identity.</summary>
+    public readonly bool SourceInSeconds;
+
+    public TimeRangeMapping(TimeRange timeRange, TimeRange sourceRange, double bpm, bool sourceInSeconds = false)
     {
         TimeRange = timeRange;
         SourceRange = sourceRange;
         Bpm = bpm;
+        SourceInSeconds = sourceInSeconds;
     }
 
     /// <summary>
@@ -60,7 +64,7 @@ public readonly struct TimeRangeMapping
     /// <see cref="Bpm"/> captured at mapping construction.
     /// </summary>
     public double LocalBarsToSourceSecs(double localBars)
-        => LocalBarsToSourceBars(localBars) * 240.0 / Bpm;
+        => SourceInSeconds ? LocalBarsToSourceBars(localBars) : LocalBarsToSourceBars(localBars) * 240.0 / Bpm;
 
     /// <summary>
     /// Inverse of <see cref="LocalBarsToSourceBars"/>: maps a source-relative time (bars)
@@ -82,7 +86,7 @@ public readonly struct TimeRangeMapping
     /// Convenience: <see cref="SourceBarsToLocalBars"/> with the input in seconds.
     /// </summary>
     public double SourceSecsToLocalBars(double sourceSecs)
-        => SourceBarsToLocalBars(sourceSecs * Bpm / 240.0);
+        => SourceBarsToLocalBars(SourceInSeconds ? sourceSecs : sourceSecs * Bpm / 240.0);
 
     /// <summary>True if <paramref name="localBars"/> falls inside <see cref="TimeRange"/>.</summary>
     public bool IsActive(double localBars)
@@ -98,5 +102,5 @@ public readonly struct TimeRangeMapping
 public static class TimeRangeMappingExtensions
 {
     public static TimeRangeMapping ToMapping(this TimeClip clip, Playback playback)
-        => new(clip.TimeRange, clip.SourceRange, playback.Bpm);
+        => new(clip.TimeRange, clip.SourceRange, playback.Bpm, clip.SourceUnit == ClipTimeUnits.Seconds);
 }

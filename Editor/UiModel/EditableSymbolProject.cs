@@ -22,6 +22,13 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     public override string DisplayName { get; }
 
     /// <summary>
+    /// True for the operator packages shipped with TiXL (Lib, Types, Examples, ...). Release builds load these
+    /// as read-only packages, but debug builds compile them as regular projects — they still must not be
+    /// offered as a destination when the user creates new symbols.
+    /// </summary>
+    public bool IsBuiltIn { get; }
+
+    /// <summary>
     /// Create a new <see cref="EditableSymbolProject"/> using the given <see cref="CsProjectFile"/>.
     /// </summary>
     public EditableSymbolProject(CsProjectFile csProjectFile) : 
@@ -33,6 +40,8 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         _csFileWatcher = new CodeFileWatcher(this, OnFileChanged, OnCodeFileRenamed);
         _csFileWatcher.EnableRaisingEvents = true;
         DisplayName = $"{csProjectFile.Name} ({CsProjectFile.RootNamespace})";
+        IsBuiltIn = Path.GetFullPath(csProjectFile.Directory)
+                        .StartsWith(ProjectSetup.BuiltInOperatorDirectory, StringComparison.OrdinalIgnoreCase);
         SymbolUpdated += OnSymbolUpdated;
         SymbolRemoved += OnSymbolRemoved;
         InitializeAssets();
@@ -144,23 +153,25 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     }
 
 
-    private static readonly string[] _folderExclusions = ["bin", "obj", "dependencies", FileLocations.ExportSubFolder];
-
     protected override IEnumerable<string> SymbolUiSearchFiles => FindFilesOfType(SymbolUiExtension);
 
     protected override IEnumerable<string> SymbolSearchFiles => FindFilesOfType(SymbolExtension);
-    
+
     protected override IEnumerable<string> SourceCodeSearchFiles => FindFilesOfType(SourceCodeExtension);
 
-    
-    
+    /// <summary>
+    /// Operator files are discovered only inside the project's Symbols folder. Everything else in the
+    /// project directory (helper code, assets, docs) is deliberately ignored by symbol discovery;
+    /// <see cref="Migrations.Steps.To2_SymbolsFolder"/> moves format-V1 root-level layouts here on load.
+    /// </summary>
     private IEnumerable<string> FindFilesOfType(string fileExtension)
     {
-        var directoryInfo = new DirectoryInfo(Folder);
-        return directoryInfo.EnumerateDirectories()
-                        .Where(x => !_folderExclusions.Contains(x.Name))
-                        .SelectMany(x => x.EnumerateFiles($"*{fileExtension}", SearchOption.AllDirectories))
-                        .Concat(directoryInfo.EnumerateFiles($"*{fileExtension}")).Select(x => x.FullName);
+        var symbolsDirectory = new DirectoryInfo(Path.Combine(Folder, FileLocations.SymbolsSubfolder));
+        if (!symbolsDirectory.Exists)
+            return [];
+
+        return symbolsDirectory.EnumerateFiles($"*{fileExtension}", SearchOption.AllDirectories)
+                               .Select(x => x.FullName);
     }
 
     protected override void InitializeAssets()
@@ -170,6 +181,12 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         
         _resourceFileWatcher.FileCreated += (_, path) =>
                                             {
+                                                if (AssetLinkFolders.HasLinkExtension(path))
+                                                {
+                                                    AssetLinkFolders.TryMount(path, this);
+                                                    return;
+                                                }
+
                                                 var isDirectory = Directory.Exists(path);
 
                                                 FileSystemInfo info = isDirectory
@@ -180,13 +197,30 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
                                                 ResourceFileWatcher.FileStateChangeCounter++;
                                             };
 
-        _resourceFileWatcher.FileRenamed += (oldPath, newPath) => 
+        _resourceFileWatcher.FileRenamed += (oldPath, newPath) =>
                                             {
+                                                var wasLink = AssetLinkFolders.HasLinkExtension(oldPath);
+                                                var isLink = AssetLinkFolders.HasLinkExtension(newPath);
+                                                if (wasLink || isLink)
+                                                {
+                                                    if (wasLink)
+                                                        AssetLinkFolders.UnmountLinkFile(oldPath);
+                                                    if (isLink)
+                                                        AssetLinkFolders.TryMount(newPath, this);
+                                                    return;
+                                                }
+
                                                 AssetRegistry.UpdateMovedAsset(oldPath, newPath);
                                             };
 
-        _resourceFileWatcher.FileDeleted += (_, path) => 
+        _resourceFileWatcher.FileDeleted += (_, path) =>
                                             {
+                                                if (AssetLinkFolders.HasLinkExtension(path))
+                                                {
+                                                    AssetLinkFolders.UnmountLinkFile(path);
+                                                    return;
+                                                }
+
                                                 AssetRegistry.UnregisterAbsoluteFilePath(path, this);
                                             };
     }

@@ -198,26 +198,34 @@ internal static class ProjectsPanel
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         if (ImGui.BeginPopupContextItem("windows_context_menu"))
         {
-            if (ImGui.MenuItem("Reveal in Explorer"))
+            if (CustomComponents.DrawMenuItem(_revealInExplorerId, "Reveal in Explorer", reserveIconColumn: false))
             {
                 CoreUi.Instance.OpenWithDefaultApplication(package.Folder);
             }
 
-            if (ImGui.BeginMenu("Restore from backup"))
+            if (package is EditableSymbolProject { IsBuiltIn: false } shareableProject)
+            {
+                if (CustomComponents.DrawMenuItem(_shareProjectId, "Share Project...", reserveIconColumn: false))
+                {
+                    T3Ui.ShareProjectDialog.ShowNextFrame(shareableProject);
+                }
+            }
+
+            if (CustomComponents.DrawSubMenu(_restoreFromBackupId, "Restore from Backup"))
             {
                 DrawRestoreBackupItems(package.DisplayName, package.Folder);
                 ImGui.EndMenu();
             }
 
-            if (ImGui.MenuItem("Unload project", "", false, isOpened))
+            if (CustomComponents.DrawMenuItem(_unloadProjectId, "Unload Project", isEnabled: isOpened, reserveIconColumn: false))
             {
                 if (OpenedProject.TryUnload(package))
                 {
                     Log.Debug($"Project '{package.DisplayName}' unloaded successfully");
                 }
             }
-            
-            if(ImGui.MenuItem("Archive project", "", false))
+
+            if(CustomComponents.DrawMenuItem(_archiveProjectId, "Archive Project", reserveIconColumn: false))
             {
                 if (package is EditableSymbolProject editableProject)
                 {
@@ -293,7 +301,7 @@ internal static class ProjectsPanel
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         if (ImGui.BeginPopupContextItem("windows_context_menu"))
         {
-            if(ImGui.MenuItem("Reactivate project", "", false))
+            if(CustomComponents.DrawMenuItem(_reactivateProjectId, "Reactivate Project", reserveIconColumn: false))
             {
                 ProjectSetup.SetProjectArchived(archivedProject.ProjectFile, false);
             }
@@ -348,13 +356,13 @@ internal static class ProjectsPanel
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         if (ImGui.BeginPopupContextItem("broken_context_menu"))
         {
-            if (ImGui.BeginMenu("Restore from backup"))
+            if (CustomComponents.DrawSubMenu(_restoreBrokenFromBackupId, "Restore from Backup"))
             {
                 DrawRestoreBackupItems(broken.Name, broken.Folder);
                 ImGui.EndMenu();
             }
 
-            if (ImGui.MenuItem("Reveal in Explorer"))
+            if (CustomComponents.DrawMenuItem(_revealBrokenInExplorerId, "Reveal in Explorer", reserveIconColumn: false))
             {
                 CoreUi.Instance.OpenWithDefaultApplication(broken.Folder);
             }
@@ -430,28 +438,31 @@ internal static class ProjectsPanel
 
         if (_backupMenuItems.Count == 0)
         {
-            ImGui.MenuItem("No backups found", "", false, false);
+            CustomComponents.DrawMenuItem(_noBackupsFoundId, "No backups found", isEnabled: false, reserveIconColumn: false);
             return;
         }
 
-        foreach (var (label, backup) in _backupMenuItems)
+        for (var index = 0; index < _backupMenuItems.Count; index++)
         {
+            var (label, backup) = _backupMenuItems[index];
+
             // Pre-restore snapshots are the "before I restored" safety copies — often of the very state
             // being recovered from — so mute them; they're rarely the version to restore *to*.
             var isPreRestore = backup.KeepTag != null && backup.KeepTag.StartsWith("preRestore", StringComparison.Ordinal);
-            if (isPreRestore)
-                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
 
-            if (ImGui.MenuItem(label))
+            if (CustomComponents.DrawMenuItem(_backupItemBaseId + index,
+                                              Icon.None,
+                                              label,
+                                              reserveIconColumn: false,
+                                              state: isPreRestore
+                                                         ? CustomComponents.ButtonStates.Default
+                                                         : CustomComponents.ButtonStates.Emphasized))
             {
                 T3Ui.RestoreBackupDialog.ShowNextFrame(displayName, folder, backup);
             }
 
             if (ImGui.IsItemHovered())
                 DrawBackupTooltip(backup);
-
-            if (isPreRestore)
-                ImGui.PopStyleColor();
         }
     }
 
@@ -621,4 +632,15 @@ internal static class ProjectsPanel
     private static readonly HashSet<string> _contentStatsQueued = new();
     private static string? _backupMenuFolder;
     private static double _backupMenuUpdateTime;
+
+    private static readonly int _revealInExplorerId = nameof(_revealInExplorerId).GetHashCode();
+    private static readonly int _shareProjectId = nameof(_shareProjectId).GetHashCode();
+    private static readonly int _restoreFromBackupId = nameof(_restoreFromBackupId).GetHashCode();
+    private static readonly int _unloadProjectId = nameof(_unloadProjectId).GetHashCode();
+    private static readonly int _archiveProjectId = nameof(_archiveProjectId).GetHashCode();
+    private static readonly int _reactivateProjectId = nameof(_reactivateProjectId).GetHashCode();
+    private static readonly int _restoreBrokenFromBackupId = nameof(_restoreBrokenFromBackupId).GetHashCode();
+    private static readonly int _revealBrokenInExplorerId = nameof(_revealBrokenInExplorerId).GetHashCode();
+    private static readonly int _noBackupsFoundId = nameof(_noBackupsFoundId).GetHashCode();
+    private static readonly int _backupItemBaseId = nameof(_backupItemBaseId).GetHashCode();
 }

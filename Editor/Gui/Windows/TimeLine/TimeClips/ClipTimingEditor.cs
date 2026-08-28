@@ -21,7 +21,7 @@ internal static class ClipTimingEditor
         if (context.ClipSelection.Count == 0)
             return;
         
-        ImGui.SetNextWindowSize(new Vector2(350, 0));
+        ImGui.SetNextWindowSize(new Vector2(380 * T3Ui.UiScaleFactor, 0));
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10,4));
         if (ImGui.BeginPopup((string)TimeEditPopupId))
@@ -40,9 +40,9 @@ internal static class ClipTimingEditor
         _clips.AddRange(context.ClipSelection.GetAllOrSelectedClips());
         
         InitCombinedRanges();
-        var labelWidth = 70 * T3Ui.UiScaleFactor;
+        var labelWidth = LabelWidth * T3Ui.UiScaleFactor;
         var width = 70 * T3Ui.UiScaleFactor;
-        
+
         FormInputs.AddSectionSubHeader("Edit clip timing");
 
         ImGui.NewLine();
@@ -54,9 +54,9 @@ internal static class ClipTimingEditor
 
         ImGui.SameLine(labelWidth + 2*width);
         ImGui.TextUnformatted("End");
-        
-        EditClipTimingRange(Ranges.ClipRange,"Clip",  _combinedTimeRange);
-        EditClipTimingRange(Ranges.SourceRange,"Source",  _combinedSourceRange);
+
+        EditClipTimingRange(Ranges.ClipRange, "Clip (bars)", _combinedTimeRange);
+        EditClipTimingRange(Ranges.SourceRange, SourceRowLabel(), _combinedSourceRange);
         FormInputs.AddVerticalSpace();
 
         ImGui.TextUnformatted("Speed");
@@ -66,12 +66,18 @@ internal static class ClipTimingEditor
         ImGui.PushID(0);
         if (SingleValueEdit.Draw(ref _combinedSpeedPercentage, size, min: 0, max: 999, clampMin: false, clampMax: false, scale: 0.01f, format: "{0:0.0}%") != InputEditStateFlags.Nothing)
         {
+            // The percentage is real-time speed; convert to source units per timeline bar.
+            var playbackBpm = Playback.Current?.Bpm ?? 120;
             foreach (var clip in _clips)
             {
-                var clipDuration = clip.TimeRange.Duration;
-                clip.SourceRange.End = clip.SourceRange.Start + clipDuration * (_combinedSpeedPercentage / 100);
+                var rate = _combinedSpeedPercentage / 100;
+                if (clip.SourceUnit == ClipTimeUnits.Seconds)
+                    rate *= 240f / (float)playbackBpm;
+
+                clip.SourceRange.End = clip.SourceRange.Start + clip.TimeRange.Duration * rate;
             }
         }
+        ImGui.PopID();
     }
 
     private enum Ranges
@@ -85,7 +91,7 @@ internal static class ClipTimingEditor
         ImGui.PushID((int)range);
         
         ImGui.TextUnformatted(label);
-        ImGui.SameLine(70 * T3Ui.UiScaleFactor);
+        ImGui.SameLine(LabelWidth * T3Ui.UiScaleFactor);
         
         var size = new Vector2(70, 0) * T3Ui.UiScaleFactor;
         
@@ -159,13 +165,33 @@ internal static class ClipTimingEditor
         ImGui.PopID();
     }
 
+    /// <summary>Source values are in the clips' source unit — seconds for media clips, bars for the rest.</summary>
+    private static string SourceRowLabel()
+    {
+        var anySeconds = false;
+        var anyBars = false;
+        foreach (var clip in _clips)
+        {
+            if (clip.SourceUnit == ClipTimeUnits.Seconds)
+                anySeconds = true;
+            else
+                anyBars = true;
+        }
+
+        if (anySeconds && anyBars)
+            return "Source (mixed)";
+
+        return anySeconds ? "Source (secs)" : "Source (bars)";
+    }
+
     private static void InitCombinedRanges()
     {
         var isFirst = true;
-        
+        var playbackBpm = Playback.Current?.Bpm ?? 120;
+
         foreach (var clip in _clips)
         {
-            var speed = clip.Speed * 100;
+            var speed = (float)clip.GetPlaybackSpeed(playbackBpm) * 100;
             if (isFirst)
             {
                 _combinedTimeRange.Start = clip.TimeRange.Start;
@@ -187,6 +213,7 @@ internal static class ClipTimingEditor
         }
     }
 
+    private const float LabelWidth = 100;
     private static TimeRange _combinedTimeRange;
     private static TimeRange _combinedSourceRange;
     private static float _combinedSpeedPercentage = 1;

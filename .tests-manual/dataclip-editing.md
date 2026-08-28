@@ -100,7 +100,7 @@ clicking its label. Click **Remove**.
 
 **Action:**
 With at least one Remove command already applied, **Cut** the data clip on the timeline
-(playhead inside the clip → context menu → **Cut at time**). Look at both halves.
+(playhead inside the clip → context menu → **Cut at Time**). Look at both halves.
 
 **Expected:**
 - Neither half brings back the channels you deleted — the new clip from the cut reads the

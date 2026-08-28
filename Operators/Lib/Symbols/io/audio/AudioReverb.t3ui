@@ -1,0 +1,70 @@
+﻿{
+  "FormatVersion": 3,
+  "Id": "f2b43ea0-1e42-4c8a-9f31-0ab1cd2e0400"/*AudioReverb*/,
+  "Description": "Adds a reverb to the audio flowing through it.\n\nEverything wired into Input shares the effect: the routing [AudioBus] gives this node its own submix with a DX8 reverb insert. Volume folds into the contained sources like a [CombineAudio]. Unwiring fades the reverb tail out instead of cutting it.\n\nMix blends the wet signal in (0 = dry), Time is the decay in seconds, HighFreqRatio controls how quickly highs decay relative to lows (lower = darker tail).\n\nLike every node in the audio graph, this is only heard once the chain reaches an [AudioBus] that is itself being evaluated — pinned to an output window, or wired into the render chain. A chain that ends nowhere is silent.",
+  "InputUis": [
+    {
+      "InputId": "f2b43ea0-0002-4c8a-9f31-0ab1cd2e0400"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "f2b43ea0-0003-4c8a-9f31-0ab1cd2e0400"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "f2b43ea0-0004-4c8a-9f31-0ab1cd2e0400"/*Mix*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f2b43ea0-0005-4c8a-9f31-0ab1cd2e0400"/*Time*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Min": 0.001,
+      "Max": 3.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f2b43ea0-0006-4c8a-9f31-0ab1cd2e0400"/*HighFreqRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Min": 0.001,
+      "Max": 0.999,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "f2b43ea0-0001-4c8a-9f31-0ab1cd2e0400"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

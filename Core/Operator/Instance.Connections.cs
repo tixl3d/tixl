@@ -330,6 +330,38 @@ public abstract partial class Instance
                     InvalidateConnected(texture2dInput);
 
                 break;
+            // Both graph-node types are listed in Symbol.Child._bypassableTypes, so the editor offers bypass for
+            // them; without an arm here the switch fell through and the operator kept processing while the UI
+            // showed it bypassed. As with the other multi-input types, a bypassed combinator passes its *first*
+            // input only.
+            case Slot<ShaderGraphNode> shaderNodeOutput when mainInputSlot is Slot<ShaderGraphNode> shaderNodeInput:
+                if (shouldBypass)
+                {
+                    wasByPassed = shaderNodeOutput.TrySetBypassToInput(shaderNodeInput);
+                }
+                else
+                {
+                    shaderNodeOutput.RestoreUpdateAction();
+                }
+
+                if (invalidate)
+                    InvalidateConnected(shaderNodeInput);
+
+                break;
+            case Slot<AudioGraphNode> audioNodeOutput when mainInputSlot is Slot<AudioGraphNode> audioNodeInput:
+                if (shouldBypass)
+                {
+                    wasByPassed = audioNodeOutput.TrySetBypassToInput(audioNodeInput);
+                }
+                else
+                {
+                    audioNodeOutput.RestoreUpdateAction();
+                }
+
+                if (invalidate)
+                    InvalidateConnected(audioNodeInput);
+
+                break;
             case Slot<float> floatOutput when mainInputSlot is Slot<float> floatInput:
                 if (shouldBypass)
                 {

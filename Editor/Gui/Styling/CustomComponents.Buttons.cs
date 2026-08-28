@@ -1,4 +1,4 @@
-using ImGuiNET;
+﻿using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.App;
@@ -172,6 +172,29 @@ internal static partial class CustomComponents
         var isHovered = ImGui.IsItemHovered() && state == ButtonStates.Default;
         
         Icons.DrawIconOnLastItem(icon, isHovered? UiColors.ForegroundFull: GetStateColor(state).Rgba);
+
+        PopToolIconStyle();
+        return clicked;
+    }
+
+    /// <summary>
+    /// A tool icon for destructive actions like clearing the log: quiet while resting, but tinted
+    /// with <see cref="UiColors.StatusAttention"/> on hover so the consequence is obvious before
+    /// the click happens.
+    /// </summary>
+    public static bool AttentionIconButton(Icon icon, Vector2 size)
+    {
+        if (size == Vector2.Zero)
+            size = new Vector2(ImGui.GetFrameHeight());
+
+        PushToolIconStyle(GetRestingIconBackground(isActivated: false));
+
+        ImGui.PushID((int)icon);
+        var clicked = ImGui.Button("##attentionIconBtn", size);
+        ImGui.PopID();
+
+        var iconColor = ImGui.IsItemHovered() ? UiColors.StatusAttention : GetStateColor(ButtonStates.Default);
+        Icons.DrawIconOnLastItem(icon, iconColor.Rgba);
 
         PopToolIconStyle();
         return clicked;

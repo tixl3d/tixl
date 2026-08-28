@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "b4766419-8bca-4fa0-a398-e6af90ef8971"/*MidiClip*/,
+  "Description": "Loads a standard MIDI file (.mid / .midi) and presents it as a timeline-bound DataClip. Appears in the timeline clip area; drag and trim like any other TimeClip.\n\nThe file's tracks are converted into data channels following the MIDI recording conventions: notes become interval events carrying the raw velocity (0-127), control changes, pitch bend and channel pressure become tick events with raw MIDI values. The file name takes the place of the device name, so replaying through [SimulateIoData] drives [MidiInput] operators whose Device is set to the file name.\n\nParsing is shared, so multiple [MidiClip] ops referencing the same file share one converted dataset.\r\n\r\nAKA: LoadMidiFile, midi file, mid",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "10c6978a-5910-4949-8382-95834dd1b4d1"/*FilePath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Path to the .mid or .midi file. Drag-drop a file from the asset library or type a relative project path.",
+      "Usage": "FilePath",
+      "FileFilter": "mid,midi"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a668ec72-17a6-443d-9a85-04d9c37ec9d3"/*Clip*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}

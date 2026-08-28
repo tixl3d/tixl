@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "2613c4cd-aa5a-4c73-876a-d4367236e370"/*M05d_DetectingRandomSteps*/,
+  "Description": "Detecting Random Steps",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2a616e9e-e225-468e-bf7f-20bba49789ab"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "a784b44a-7a59-43ac-998d-7b996de7a456"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "c1f54d14-b968-48bc-a53e-5845fc151d39"/*Text*/,
+      "SectionId": "91961835-326b-4c20-89da-bb0801f0965f",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "62480752-cc15-4c09-988a-d46929cc3de7"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "91961835-326b-4c20-89da-bb0801f0965f",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "522dcb2f-f56d-4e2f-97c8-8ad3218e1543",
+      "Description": "Round a noise value into steps.\nCount every time the rounded value jumps to the next step and solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

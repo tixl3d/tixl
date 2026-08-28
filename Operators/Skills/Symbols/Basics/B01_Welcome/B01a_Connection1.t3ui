@@ -1,0 +1,242 @@
+{
+  "FormatVersion": 3,
+  "Id": "c0065a1d-091a-4fc4-ad36-4430b90d29d4"/*B01a_Connection1*/,
+  "Description": "Where the Path Begins",
+  "SymbolTags": "16",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "08c5f3b7-76ad-4e6d-8536-493c3952510c"/*ImageQuiz*/,
+      "Position": {
+        "X": 1663.0128,
+        "Y": 1991.6981
+      }
+    },
+    {
+      "ChildId": "346a5eef-0135-4d15-9841-1a82bba84fc7"/*RoundedRect*/,
+      "Position": {
+        "X": 1291.7075,
+        "Y": 1938.3384
+      }
+    },
+    {
+      "ChildId": "db2c4eab-f92a-4d5d-a465-dbe30c438daf"/*RoundedRect*/,
+      "SectionId": "0686ad8d-9d20-4ced-8bad-2abff7ce1051",
+      "Position": {
+        "X": 1298.8163,
+        "Y": 2085.988
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "38ba6678-687d-4c6d-821a-ecf2cdea75c5"/*ColorBuffer*/,
+      "Position": {
+        "X": 1663.0128,
+        "Y": 2061.6982
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "0686ad8d-9d20-4ced-8bad-2abff7ce1051",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1286.1572,
+        "Y": 2049.4666
+      },
+      "Size": {
+        "X": 230.0,
+        "Y": 265.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "7e6bc27a-5dd8-4df5-a5b7-84ae7d15d279",
+      "ChildId": "346a5eef-0135-4d15-9841-1a82bba84fc7",
+      "Description": "These early levels introduce the basics of working with TiXL's node graph."
+    },
+    {
+      "Id": "1a5a421e-a96e-4c66-983f-f1286ca06d68",
+      "ChildId": "08c5f3b7-76ad-4e6d-8536-493c3952510c",
+      "Description": "Each level shows the target image at the bottom.\nRecreate it using the available operators and connect them to the [Quiz] operator."
+    },
+    {
+      "Id": "6566d948-3ee6-4a80-827d-ad3f414d53db",
+      "ChildId": "346a5eef-0135-4d15-9841-1a82bba84fc7",
+      "Description": "Tip: If stuck, expand the Solution to see how it was built."
+    },
+    {
+      "Id": "7cf2cc9a-cc99-4be4-b209-735cb12e62dc",
+      "ChildId": "346a5eef-0135-4d15-9841-1a82bba84fc7",
+      "Description": "Start by learning how to connect operators.\nDrag a connection from [RoundedRect] to [ImageQuiz]."
+    }
+  ],
+  "Settings": {
+    "OutputWindows": [
+      {
+  "ShowGizmos": "On",
+  "TransformGizmoMode": "Move",
+  "BackgroundColor": [
+    0.1,
+    0.1,
+    0.1,
+    1.0
+  ],
+  "CameraControlMode": "AutoUseFirstCam",
+  "CameraPosition": [
+    0.0,
+    0.0,
+    2.4142134
+  ],
+  "CameraTarget": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "CameraRoll": 0.0,
+  "CameraSpeed": 1.0,
+  "ResolutionTitle": "Fill",
+  "ResolutionWidth": 0,
+  "ResolutionHeight": 0,
+  "ResolutionUseAsAspectRatio": true,
+  "IsPinned": true,
+  "PinnedInstancePath": [
+    "983001f4-22f2-0c56-c3b1-85b5e0081c58"
+  ],
+  "PinnedOutputId": "00000000-0000-0000-0000-000000000000"
+}
+    ],
+    "WindowLayout": "[Window][DockSpaceViewport_11111111]\nPos=0,26\nSize=1920,1054\nCollapsed=0\n\n[Window][Graph View##1]\nPos=201,26\nSize=2109,1391\nCollapsed=0\nDockId=0x00000003,0\n\n[Window][Parameters]\nPos=1661,710\nSize=442,568\nCollapsed=0\nDockId=0x00000005,0\n\n[Window][Variations]\nPos=2839,669\nSize=601,748\nCollapsed=0\nDockId=0x0000000A,0\n\n[Window][Output View##0]\nPos=2312,26\nSize=1128,641\nCollapsed=0\nDockId=0x00000007,0\n\n[Window][Debug##Default]\nPos=60,60\nSize=400,400\nCollapsed=0\n\n[Window][Explore Variations]\nPos=810,306\nSize=768,283\nCollapsed=0\n\n[Window][Console]\nPos=1336,1004\nSize=584,76\nCollapsed=0\nDockId=0x00000006,0\n\n[Window][Output View##1]\nPos=0,26\nSize=2304,712\nCollapsed=0\n\n[Window][Symbol Library]\nPos=0,26\nSize=199,493\nCollapsed=0\nDockId=0x0000000D,0\n\n[Window][Render as Video]\nPos=2105,710\nSize=455,568\nCollapsed=0\nDockId=0x00000006,1\n\n[Window][##typeAheadSearchPopup]\nPos=1692,821\nSize=450,300\nCollapsed=0\n\n[Window][Combine into symbol]\nPos=1030,545\nSize=500,350\nCollapsed=0\n\n[Window][Parameters##98]\nPos=0,576\nSize=323,864\nCollapsed=0\n\n[Window][Add output]\nPos=1030,595\nSize=500,250\nCollapsed=0\n\n[Window][Duplicate as new symbol]\nPos=1030,580\nSize=500,280\nCollapsed=0\n\n[Window][Output View##97]\nPos=0,26\nSize=1728,927\nCollapsed=0\n\n[Window][Output View##98]\nPos=0,26\nSize=2304,593\nCollapsed=0\n\n[Window][Parameters##1]\nPos=2312,669\nSize=525,748\nCollapsed=0\nDockId=0x00000009,0\n\n[Window][Render To File]\nPos=1336,536\nSize=584,423\nCollapsed=0\nDockId=0x00000006,1\n\n[Window][Add parameter input]\nPos=1030,533\nSize=500,350\nCollapsed=0\n\n[Window][Variation Explorer]\nPos=0,26\nSize=1315,1414\nCollapsed=0\n\n[Window][Dear ImGui Demo]\nPos=650,46\nSize=550,680\nCollapsed=0\n\n[Window][Search]\nPos=710,390\nSize=500,300\nCollapsed=0\n\n[Window][##CurvePopup]\nPos=1164,199\nSize=500,400\nCollapsed=0\n\n[Window][Settings]\nPos=60,60\nSize=550,681\nCollapsed=0\n\n[Window][Output View##99]\nPos=763,26\nSize=1157,948\nCollapsed=0\n\n[Window][Rename symbol]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit description]\nPos=410,190\nSize=1100,700\nCollapsed=0\n\n[Window][Rename input]\nPos=710,365\nSize=500,350\nCollapsed=0\n\n[Window][Edit comment]\nPos=710,315\nSize=500,450\nCollapsed=0\n\n[Window][Output View##100]\nSize=550,448\nCollapsed=0\n\n[Window][WindowOverViewport_11111111]\nPos=0,26\nSize=3440,1391\nCollapsed=0\n\n[Window][Assets]\nPos=0,521\nSize=199,896\nCollapsed=0\nDockId=0x0000000E,0\n\n[Window][Output View##101]\nPos=1821,26\nSize=739,1272\nCollapsed=0\n\n[Window][ProgressionPopup]\nPos=930,578\nSize=700,260\nCollapsed=0\n\n[Window][Skill Quest Overview]\nPos=880,408\nSize=800,600\nCollapsed=0\n\n[Window][###ExitDialog]\nPos=1070,620\nSize=420,200\nCollapsed=0\n\n[Window][Editor Feature Tests]\nPos=389,265\nSize=588,457\nCollapsed=0\n\n[Window][Welcome to the TiXL Alpha]\nPos=60,60\nSize=680,480\nCollapsed=0\n\n[Window][Composition Settings]\nPos=705,117\nSize=553,453\nCollapsed=0\n\n[Window][Help]\nPos=1522,26\nSize=1038,1272\nCollapsed=0\n\n[Window][Edit username]\nPos=1420,558\nSize=600,300\nCollapsed=0\n\n[Window][Welcome to TiXL]\nPos=661,258\nSize=680,480\nCollapsed=0\n\n[Window][Create new project]\nPos=1445,542\nSize=550,333\nCollapsed=0\n\n[Window][Guided Feature Tests]\nPos=302,148\nSize=837,449\nCollapsed=0\n\n[Window][    TiXL Loves You! <3]\nPos=962,324\nSize=550,550\nCollapsed=0\n\n[Window][Edit output resolution]\nPos=1030,533\nSize=500,350\nCollapsed=0\n\n[Window][Screen Manager]\nPos=60,60\nSize=550,450\nCollapsed=0\n\n[Window][IO Events]\nPos=153,182\nSize=951,450\nCollapsed=0\n\n[Window][Import Folder]\nPos=1445,422\nSize=550,572\nCollapsed=0\n\n[Window][Utilities]\nPos=60,60\nSize=1278,392\nCollapsed=0\n\n[Window][Edit tour points]\nPos=60,60\nSize=500,500\nCollapsed=0\n\n[Window][Relink folder]\nPos=937,628\nSize=447,163\nCollapsed=0\n\n[Window][Delete assets?]\nPos=773,456\nSize=373,168\nCollapsed=0\n\n[Docking][Data]\nDockSpace         ID=0x08BD597D Window=0x1BBC0F80 Pos=0,26 Size=3440,1391 Split=X Selected=0x8995E68A\n  DockNode        ID=0x0000000B Parent=0x08BD597D SizeRef=199,1391 Split=Y Selected=0x42C24103\n    DockNode      ID=0x0000000D Parent=0x0000000B SizeRef=549,493 HiddenTabBar=1 Selected=0xD41FC2E2\n    DockNode      ID=0x0000000E Parent=0x0000000B SizeRef=549,896 HiddenTabBar=1 Selected=0x42C24103\n  DockNode        ID=0x0000000C Parent=0x08BD597D SizeRef=3140,1391 Split=X\n    DockNode      ID=0x00000003 Parent=0x0000000C SizeRef=2010,1391 CentralNode=1 HiddenTabBar=1 Selected=0x8995E68A\n    DockNode      ID=0x00000004 Parent=0x0000000C SizeRef=1128,1391 Split=Y Selected=0xC9567BC1\n      DockNode    ID=0x00000007 Parent=0x00000004 SizeRef=916,641 HiddenTabBar=1 Selected=0xC9567BC1\n      DockNode    ID=0x00000008 Parent=0x00000004 SizeRef=916,748 Split=X Selected=0x35577784\n        DockNode  ID=0x00000009 Parent=0x00000008 SizeRef=525,446 HiddenTabBar=1 Selected=0x35577784\n        DockNode  ID=0x0000000A Parent=0x00000008 SizeRef=601,446 HiddenTabBar=1 Selected=0xB9CD16A2\nDockSpace         ID=0x7C6B3D9B Pos=0,26 Size=1953,1101 CentralNode=1 HiddenTabBar=1 Selected=0xF7A0F8A9\nDockSpace         ID=0x8B93E3BD Pos=0,26 Size=1920,1054 Split=X Selected=0x1F46795C\n  DockNode        ID=0x00000001 Parent=0x8B93E3BD SizeRef=824,1391 CentralNode=1 Selected=0xF7A0F8A9\n  DockNode        ID=0x00000002 Parent=0x8B93E3BD SizeRef=916,1391 Split=X Selected=0x9CE63BF6\n    DockNode      ID=0x00000005 Parent=0x00000002 SizeRef=442,365 Selected=0x9CE63BF6\n    DockNode      ID=0x00000006 Parent=0x00000002 SizeRef=455,365 Selected=0x3BC11B9B\n\n",
+    "WindowLayoutImGuiVersion": "1.91.6",
+    "WindowVisibility": {
+      "Variations": true,
+      "Output View##0": true,
+      "Output View##1": false,
+      "Output View##2": false,
+      "Output View##3": false,
+      "Output View##4": false,
+      "Output View##5": false,
+      "Output View##6": false,
+      "Output View##7": false,
+      "Output View##8": false,
+      "Output View##9": false,
+      "Output View##10": false,
+      "Output View##11": false,
+      "Output View##12": false,
+      "Output View##13": false,
+      "Output View##14": false,
+      "Output View##15": false,
+      "Output View##16": false,
+      "Output View##17": false,
+      "Output View##18": false,
+      "Output View##19": false,
+      "Output View##20": false,
+      "Output View##21": false,
+      "Output View##22": false,
+      "Output View##23": false,
+      "Output View##24": false,
+      "Output View##25": false,
+      "Output View##26": false,
+      "Output View##27": false,
+      "Output View##28": false,
+      "Output View##29": false,
+      "Output View##30": false,
+      "Output View##31": false,
+      "Output View##32": false,
+      "Output View##33": false,
+      "Output View##34": false,
+      "Output View##35": false,
+      "Output View##36": false,
+      "Output View##37": false,
+      "Output View##38": false,
+      "Output View##39": false,
+      "Output View##40": false,
+      "Output View##41": false,
+      "Output View##42": false,
+      "Output View##43": false,
+      "Output View##44": false,
+      "Output View##45": false,
+      "Output View##46": false,
+      "Output View##47": false,
+      "Output View##48": false,
+      "Output View##49": false,
+      "Output View##50": false,
+      "Output View##51": false,
+      "Output View##52": false,
+      "Output View##53": false,
+      "Output View##54": false,
+      "Output View##55": false,
+      "Output View##56": false,
+      "Output View##57": false,
+      "Output View##58": false,
+      "Output View##59": false,
+      "Output View##60": false,
+      "Output View##61": false,
+      "Output View##62": false,
+      "Output View##63": false,
+      "Output View##64": false,
+      "Output View##65": false,
+      "Output View##66": false,
+      "Output View##67": false,
+      "Output View##68": false,
+      "Output View##69": false,
+      "Output View##70": false,
+      "Output View##71": false,
+      "Output View##72": false,
+      "Output View##73": false,
+      "Output View##74": false,
+      "Output View##75": false,
+      "Output View##76": false,
+      "Output View##77": false,
+      "Output View##78": false,
+      "Output View##79": false,
+      "Output View##80": false,
+      "Output View##81": false,
+      "Output View##82": false,
+      "Output View##83": false,
+      "Output View##84": false,
+      "Output View##85": false,
+      "Output View##86": false,
+      "Output View##87": false,
+      "Output View##88": false,
+      "Output View##89": false,
+      "Output View##90": false,
+      "Output View##91": false,
+      "Output View##92": false,
+      "Output View##93": false,
+      "Output View##94": false,
+      "Output View##95": false,
+      "Output View##96": false,
+      "Output View##97": false,
+      "Output View##98": false,
+      "Output View##99": false,
+      "Output View##100": false,
+      "Graph View##0": false,
+      "Graph View##1": true,
+      "Parameters##1": true,
+      "Symbol Library": true,
+      "Assets": true,
+      "Variation Explorer": false,
+      "Render To File": false,
+      "IO Events": false,
+      "Performance": false,
+      "Help": false,
+      "Console": false,
+      "Utilities": false,
+      "Guided Feature Tests": false,
+      "Settings": false,
+      "Composition Settings": false,
+      "Screen Manager": false,
+      "Welcome to the TiXL Alpha": false
+    }
+  }
+}

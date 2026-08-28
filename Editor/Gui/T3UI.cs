@@ -117,7 +117,9 @@ public static partial class T3Ui
     internal static readonly AboutDialog AboutDialog = new();
     private static readonly SearchDialog _searchDialog = new();
     internal static readonly NewProjectDialog NewProjectDialog = new();
+    internal static readonly ShareProjectDialog ShareProjectDialog = new();
     internal static readonly RestoreBackupDialog RestoreBackupDialog = new();
+    private static readonly CouldNotLoadProjectDialog _couldNotLoadProjectDialog = new();
     internal static readonly ExitDialog ExitDialog = new();
     private static readonly List<EditableSymbolProject> _modifiedProjects = new();
 

@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Editor.App;
+using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
@@ -20,7 +22,8 @@ internal static class RenamingOperator
 
     private static Guid _nextFocusedInstanceId = Guid.Empty;
 
-    public static void Draw(ProjectView projectView)
+    /// <param name="opWidthOnCanvas">Width of the renamed node in canvas units. Falls back to the childUi size if not given.</param>
+    public static void Draw(ProjectView projectView, float opWidthOnCanvas = 0)
     {
         var justOpened = false;
 
@@ -66,15 +69,18 @@ internal static class RenamingOperator
 
         var symbolChild = symbolChildUi.SymbolChild;
 
-        var positionInScreen = projectView.GraphView.Canvas.TransformPosition(symbolChildUi.PosOnCanvas);
+        var canvas = projectView.GraphView.Canvas;
+        var positionInScreen = canvas.TransformPosition(symbolChildUi.PosOnCanvas);
 
         ImGui.SetCursorScreenPos(positionInScreen + Vector2.One);
-            
+
         var text = symbolChild.Name;
-        if (CustomComponents.DrawInputFieldWithPlaceholder("Untitled", 
+        var fieldWidth = ComputeFieldWidth(text, positionInScreen.X, opWidthOnCanvas > 0 ? opWidthOnCanvas : symbolChildUi.Size.X, canvas);
+
+        if (CustomComponents.DrawInputFieldWithPlaceholder("Untitled",
                                                            ref text,
-                                                           200, 
-                                                           false, 
+                                                           fieldWidth,
+                                                           false,
                                                            ImGuiInputTextFlags.AutoSelectAll))
         {
             symbolChild.Name = text;
@@ -89,6 +95,28 @@ internal static class RenamingOperator
     }
 
     public static bool IsOpen => _focusedInstanceId != Guid.Empty;
-        
+
+    /// <summary>
+    /// Grows with the edited name so long names stay readable, but never gets narrower than the node
+    /// and stops at the right window edge (unless the node itself already reaches beyond it).
+    /// </summary>
+    private static float ComputeFieldWidth(string text, float positionInScreenX, float opWidthOnCanvas, ScalableCanvas canvas)
+    {
+        var opWidthOnScreen = canvas.TransformDirection(new Vector2(opWidthOnCanvas, 0)).X;
+        var minWidth = MathF.Max(MinFieldWidth * T3Ui.UiScaleFactor, opWidthOnScreen);
+
+        var distanceToRightEdge = ImGui.GetWindowPos().X + ImGui.GetWindowWidth() - positionInScreenX - RightEdgePadding * T3Ui.UiScaleFactor;
+        var maxWidth = MathF.Max(minWidth, distanceToRightEdge);
+
+        var textWidth = string.IsNullOrEmpty(text) ? 0 : ImGui.CalcTextSize(text).X;
+        var requiredWidth = textWidth + ImGui.GetStyle().FramePadding.X * 2 + ImGui.GetFontSize();
+
+        // The helper reserves this gutter for form layouts, so add it back to get the requested field width.
+        return Math.Clamp(requiredWidth, minWidth, maxWidth) + FormInputs.ParameterSpacing;
+    }
+
+    private const float MinFieldWidth = 120;
+    private const float RightEdgePadding = 8;
+
     private static Guid _focusedInstanceId;
 }

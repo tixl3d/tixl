@@ -1,0 +1,23 @@
+{
+  "FormatVersion": 3,
+  "Id": "332d7496-09ec-45b7-85b4-0653bb93dd62"/*SetVec2Var*/,
+  "Inputs": [
+    {
+      "Id": "861f826a-9e0d-446e-8f80-ad51d7d9a09b"/*SubGraph*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "903c7fc3-dfa4-4a01-8f7d-53a94f8a93ab"/*VariableName*/,
+      "DefaultValue": "pos"
+    },
+    {
+      "Id": "e8752eec-0036-41db-957c-8a1fe649fcca"/*Vec2Value*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

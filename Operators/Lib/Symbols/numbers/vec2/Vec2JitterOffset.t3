@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "54af403f-a4bd-4ef0-95df-2201c0d3ba56"/*Vec2JitterOffset*/,
+  "Inputs": [
+    {
+      "Id": "0763898d-5f9b-44eb-9a7f-9e0ec62222ef"/*Seed*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "0a421d3c-0a72-429b-b028-32b4eff26877"/*SampleCount*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

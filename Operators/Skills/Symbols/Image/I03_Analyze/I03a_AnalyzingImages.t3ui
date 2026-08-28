@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "ed9e9727-22bb-4ac8-85b0-6cab1c2f3338"/*I03a_AnalyzingImages*/,
+  "Description": "Analyzing Images",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1b5775db-491d-4b25-8ed8-976ea05cf57c"/*Text*/,
+      "SectionId": "7b530688-1b9b-489c-bddf-a300b96f9bcb",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "797196f5-7f64-4511-a0b0-5e7177478973"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "e8a5b4db-2296-4c5e-8520-04f73167834d"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b0843cbe-bebb-4062-8fa3-289d89f582fe"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "7b530688-1b9b-489c-bddf-a300b96f9bcb",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "94c56f2b-58e3-499e-a9ef-dac7a605293f",
+      "Description": "As projects grow, trial and error is often no longer enough.\nSometimes an image looks wrong. Sometimes an effect behaves in an unexpected way.\nIn these cases you need information. Understanding that information is the key to fixing the problem."
+    },
+    {
+      "Id": "0d395c52-76f4-4be7-834f-25cc37db8b8f",
+      "Description": "One of the most useful tools for this is [ImageLevels].\nIt samples a line through the image and maps the brightness of all color channels onto a graph."
+    },
+    {
+      "Id": "5b3079fb-9af1-44ca-a11c-5a36c15aad21",
+      "Description": "In this example, the curves sometimes merge into a single line.\nThis happens where the image becomes grayscale, because all color channels have the same value."
+    },
+    {
+      "Id": "ced50e20-8f51-4b8e-b6ef-e8f2a42e474c",
+      "Description": "Adjust the gradient settings to reproduce the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

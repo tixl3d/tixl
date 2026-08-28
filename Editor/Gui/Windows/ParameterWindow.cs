@@ -835,7 +835,7 @@ internal sealed class ParameterWindow : Window
         {
             _inputSlotForActiveCommand = inputSlot;
             _inputValueCommandInFlight =
-                new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value);
+                new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value, instance);
         }
 
         if ((editState & InputEditStateFlags.Modified) != 0)
@@ -843,7 +843,7 @@ internal sealed class ParameterWindow : Window
             if (_inputValueCommandInFlight == null || _inputSlotForActiveCommand != inputSlot)
             {
                 _inputValueCommandInFlight =
-                    new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value);
+                    new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value, instance);
                 _inputSlotForActiveCommand = inputSlot;
             }
 

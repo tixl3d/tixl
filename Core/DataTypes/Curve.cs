@@ -284,6 +284,24 @@ public sealed class Curve : IEditableInputType
         ChangeCount++;
     }
 
+    /// <summary>Multiplies every key's time by <paramref name="factor"/> — e.g. to retime a curve into another time unit.</summary>
+    public void ScaleKeyTimes(double factor)
+    {
+        var keys = new List<VDefinition>(_state.Table.Values);
+        BeginBatchEdit();
+        foreach (var key in keys)
+        {
+            RemoveKeyframeAt(key.U);
+        }
+
+        foreach (var key in keys)
+        {
+            AddOrUpdateV(key.U * factor, key);
+        }
+
+        EndBatchEdit();
+    }
+
     private int _batchEditDepth;
 
 

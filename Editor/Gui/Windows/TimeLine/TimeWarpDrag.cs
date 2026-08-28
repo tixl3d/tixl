@@ -57,16 +57,17 @@ internal sealed class TimeWarpDrag
 
         // Snapshot keyframes that are in the affected range (or all, for pure translation),
         // aggregated across every active keyframe editor (DopeSheet + CurveEditor when split).
+        // The warp geometry (handles, boundaries) is in playback time; keys live in their row's
+        // curve time — snapshot each key's playback position and write back through its mapping.
         var editors = _canvas.KeyframeEditors;
-        var source = useAllKeyframes
-                         ? editors.EnumerateAllKeyframes()
-                         : editors.EnumerateAllSelectedKeyframes();
-        foreach (var def in source)
+        foreach (var (def, mapping) in editors.EnumerateKeyframesWithMapping(selectedOnly: !useAllKeyframes))
         {
-            if (!pureTranslation && !InsideAffectedRange(def.U))
+            var globalU = mapping.ToGlobal(def.U);
+            if (!pureTranslation && !InsideAffectedRange(globalU))
                 continue;
             _keys.Add(def);
-            _keyOrigU.Add(def.U);
+            _keyOrigU.Add(globalU);
+            _keyMappings.Add(mapping);
         }
 
         if (_keys.Count > 0)
@@ -104,7 +105,7 @@ internal sealed class TimeWarpDrag
         {
             var du = currentU - _origHandleU;
             for (var i = 0; i < _keys.Count; i++)
-                _keys[i].U = _keyOrigU[i] + du;
+                _keys[i].U = _keyMappings[i].ToLocal(_keyOrigU[i] + du);
 
             for (var i = 0; i < _clips.Count; i++)
             {
@@ -124,7 +125,7 @@ internal sealed class TimeWarpDrag
         }
 
         for (var i = 0; i < _keys.Count; i++)
-            _keys[i].U = RemapPiecewise(_keyOrigU[i], currentU);
+            _keys[i].U = _keyMappings[i].ToLocal(RemapPiecewise(_keyOrigU[i], currentU));
 
         for (var i = 0; i < _clips.Count; i++)
         {
@@ -234,6 +235,7 @@ internal sealed class TimeWarpDrag
     {
         _keys.Clear();
         _keyOrigU.Clear();
+        _keyMappings.Clear();
         _clips.Clear();
         _clipOrigStart.Clear();
         _clipOrigEnd.Clear();
@@ -258,7 +260,8 @@ internal sealed class TimeWarpDrag
     private bool _pureTranslation;
 
     private readonly List<VDefinition> _keys = new(64);
-    private readonly List<double> _keyOrigU = new(64);
+    private readonly List<double> _keyOrigU = new(64); // playback-time positions at drag start
+    private readonly List<TimeLineCanvas.ParamTimeMapping> _keyMappings = new(64);
     private readonly List<TimeClip> _clips = new(16);
     private readonly List<float> _clipOrigStart = new(16);
     private readonly List<float> _clipOrigEnd = new(16);

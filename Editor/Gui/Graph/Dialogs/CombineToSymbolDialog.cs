@@ -22,11 +22,16 @@ internal sealed class CombineToSymbolDialog : ModalDialog
             var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToList();
             var selectedSections = projectView.NodeSelection.GetSelectedNodes<Section>().ToList();
 
-            if (_projectToCopyTo == null)
+            // Default to the project the ops are already in, rather than keeping the last used one
+            if (ImGui.IsWindowAppearing() || _projectToCopyTo == null)
             {
-                EditableSymbolProject.TryGetEditableProjectOfNamespace(nameSpace, out _projectToCopyTo);
+                _projectToCopyTo = projectView.InstView?.Symbol.SymbolPackage as EditableSymbolProject;
+                if (_projectToCopyTo == null)
+                {
+                    EditableSymbolProject.TryGetEditableProjectOfNamespace(nameSpace, out _projectToCopyTo);
+                }
             }
-            
+
             _ = SymbolModificationInputs.DrawProjectDropdown(ref nameSpace, ref _projectToCopyTo);
 
             if (_projectToCopyTo != null)
@@ -43,6 +48,11 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                 ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60));
 
                 ImGui.Checkbox("Combine as time clip", ref _shouldBeTimeClip);
+                CustomComponents.TooltipForLastItem("""
+                                                    The new symbol appears as a clip on the timeline: it only
+                                                    evaluates while the playhead is inside its clip range, and
+                                                    keyframe animations inside it travel with the clip.
+                                                    """);
 
                 FormInputs.AddHint("Combining creates a new operator and can't be undone — this clears the undo history.");
 

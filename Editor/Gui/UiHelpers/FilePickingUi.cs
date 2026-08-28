@@ -18,8 +18,9 @@ internal static class FilePickingUi
 {
     public static InputEditStateFlags DrawTypeAheadSearch(FileOperations.FilePickerTypes pickMode, 
                                                           string? fileFilter, 
-                                                          ref string? filterAndSelectedPath, 
-                                                          bool showAssetFolderToggle = true)
+                                                          ref string? filterAndSelectedPath,
+                                                          bool showAssetFolderToggle = true,
+                                                          bool isOutputPath = false)
     {
         ImGui.SetNextItemWidth(-70 * T3Ui.UiScaleFactor);
 
@@ -34,9 +35,15 @@ internal static class FilePickingUi
 
         var pickFolder = pickMode == FileOperations.FilePickerTypes.Folder;
 
-        var hasWarning = !AssetRegistry.TryResolveAddress(filterAndSelectedPath, SearchResourceConsumer, out _, out _, pickFolder);
+        // Output targets are written by the operator, so a missing file is the expected state; only an unwritable address is a problem.
+        var writeFailure = string.Empty;
+        var hasWarning = isOutputPath
+                             ? !AssetRegistry.TryResolveAddressForWriting(filterAndSelectedPath, SearchResourceConsumer, out _, out writeFailure)
+                             : !AssetRegistry.TryResolveAddress(filterAndSelectedPath, SearchResourceConsumer, out _, out _, pickFolder);
         var warningLabel = pickMode switch
                                {
+                                   _ when isOutputPath && hasWarning                      => "Can't write here:\n",
+                                   _ when isOutputPath                                    => string.Empty,
                                    FileOperations.FilePickerTypes.File when hasWarning   => "File doesn't exist:\n",
                                    FileOperations.FilePickerTypes.Folder when hasWarning => "Directory doesn't exist:\n",
                                    _                                                      => string.Empty
@@ -59,11 +66,14 @@ internal static class FilePickingUi
         if (warningLabel != string.Empty)
             ImGui.PopStyleColor();
 
+        var showWriteFailure = isOutputPath && hasWarning && writeFailure.Length > 0;
         if (ImGui.IsItemHovered() && filterAndSelectedPath != null && filterAndSelectedPath.Length > 0 &&
-            ImGui.CalcTextSize(filterAndSelectedPath).X > ImGui.GetItemRectSize().X)
+            (showWriteFailure || ImGui.CalcTextSize(filterAndSelectedPath).X > ImGui.GetItemRectSize().X))
         {
             ImGui.BeginTooltip();
             ImGui.TextUnformatted(warningLabel + filterAndSelectedPath);
+            if (showWriteFailure)
+                ImGui.TextUnformatted(writeFailure);
             ImGui.EndTooltip();
         }
 

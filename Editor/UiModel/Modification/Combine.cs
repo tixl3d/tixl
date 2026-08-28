@@ -1,7 +1,11 @@
 using System.Text;
+using T3.Core.DataTypes;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 using T3.Core.SystemUi;
+using T3.Editor.Gui.Interaction.Variations;
+using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.SystemUi;
 using T3.Editor.UiModel.Commands;
@@ -80,12 +84,30 @@ internal static class Combine
                                  where child.Id == con.SourceParentOrChildId
                                  from output in child.Symbol.OutputDefinitions
                                  where output.Id == con.SourceSlotId
-                                 select (child, output, con)).ToList().Distinct();
+                                 select (child, output, con)).ToList().Distinct().ToArray();
+
+        // As a time clip, one output becomes the TimeClipSlot that places the symbol on the timeline —
+        // prefer the first Command output (the usual render flow), else the first output of any type.
+        var timeClipOutputIndex = -1;
+        if (shouldBeTimeClip && outputsToGenerate.Length > 0)
+        {
+            timeClipOutputIndex = 0;
+            for (var i = 0; i < outputsToGenerate.Length; i++)
+            {
+                if (outputsToGenerate[i].output.ValueType != typeof(Command))
+                    continue;
+
+                timeClipOutputIndex = i;
+                break;
+            }
+        }
+
         var connectionsToNewOutputs = new List<Symbol.Connection>(outputConnections.Length);
         int outputNameCounter = 2;
         var outputNameHashSet = new HashSet<string>();
-        foreach (var (child, output, origConnection) in outputsToGenerate)
+        for (var outputIndex = 0; outputIndex < outputsToGenerate.Length; outputIndex++)
         {
+            var (child, output, origConnection) = outputsToGenerate[outputIndex];
             var outputValueType = output.ValueType;
             if (TypeNameRegistry.Entries.TryGetValue(outputValueType, out var typeName))
             {
@@ -96,7 +118,7 @@ internal static class Combine
                 outputStringBuilder.AppendLine(attributeString);
                 var newOutputName = outputNameHashSet.Contains(output.Name) ? (output.Name + outputNameCounter++) : output.Name;
                 outputNameHashSet.Add(newOutputName);
-                var slotString = "Slot<" + typeName + ">";
+                var slotString = (outputIndex == timeClipOutputIndex ? "TimeClipSlot<" : "Slot<") + typeName + ">";
                 var outputString = "        public readonly " + slotString + " " + newOutputName + " = new " + slotString + "();";
                 outputStringBuilder.AppendLine(outputString);
                 outputStringBuilder.AppendLine("");
@@ -109,6 +131,16 @@ internal static class Combine
             {
                 Log.Error($"Error, no registered name found for typename: {output.ValueType.Name}");
             }
+        }
+
+        // A time clip without any outgoing connection would produce a symbol that can't appear on the
+        // timeline — give it a default Command clip slot the user can wire up later.
+        if (shouldBeTimeClip && timeClipOutputIndex == -1)
+        {
+            usingStringBuilder.AppendLine("using T3.Core.DataTypes;");
+            outputStringBuilder.AppendLine("        [Output(Guid = \"" + Guid.NewGuid() + "\")]");
+            outputStringBuilder.AppendLine("        public readonly TimeClipSlot<Command> Output = new TimeClipSlot<Command>();");
+            outputStringBuilder.AppendLine("");
         }
 
         usingStringBuilder.AppendLine("using T3.Core.Operator;");
@@ -186,6 +218,13 @@ internal static class Combine
 
         copyCmd.OldToNewChildIds.ToList().ForEach(x => oldToNewIdMap.Add(x.Key, x.Value));
 
+        // A combined time clip is born with its authored source extent set to the union of the copied
+        // content (keyframes and nested clips), so its first placement on a timeline is correctly sized.
+        if (shouldBeTimeClip)
+            InitSourceExtentFromContent(newSymbolUi);
+
+        MoveSnapshotsToNewSymbol(parentCompositionSymbol.Id, newSymbol.Id, oldToNewIdMap);
+
         var selectedChildrenIds = (from child in selectedChildUis select child.Id).ToList();
         parentCompositionSymbol.Animator.RemoveAnimationsFromInstances(selectedChildrenIds);
 
@@ -254,6 +293,8 @@ internal static class Combine
             deleteSectionCommand.Do();
         }
 
+        RemoveUnusedSnapshotsFromParent(parentCompositionSymbol);
+
         // Creating a new symbol/assembly can't be cleanly undone (undoing the children delete would
         // orphan the new operator), so drop the history rather than leave it inconsistent.
         UndoRedoStack.Clear();
@@ -284,5 +325,144 @@ internal static class Combine
         }
 
         return new ImRect(min, max);
+    }
+
+    /// <summary>
+    /// Moves the parent composition's snapshot data for the combined children into the new symbol's
+    /// variation pool. Parameter sets are re-keyed from the old child ids to the copied children's new
+    /// ids; variation ids, titles and activation indices are kept so the moved snapshots stay
+    /// recognizable next to their originals. Pruning the parent's now-dangling entries is left to
+    /// <see cref="RemoveUnusedSnapshotsFromParent"/>, which runs after the originals are deleted.
+    /// </summary>
+    private static void MoveSnapshotsToNewSymbol(Guid parentSymbolId, Guid newSymbolId, Dictionary<Guid, Guid> oldToNewIdMap)
+    {
+        // Only user variations can move — a combinable composition lives in an editable project,
+        // so read-only package defaults don't apply here.
+        var parentPool = VariationHandling.GetOrLoadVariations(parentSymbolId);
+        if (parentPool.UserVariations.Count == 0)
+            return;
+
+        var newPool = VariationHandling.GetOrLoadVariations(newSymbolId);
+        var movedAny = false;
+
+        foreach (var variation in parentPool.UserVariations)
+        {
+            // Collect the moved parameter sets from a clone so the values don't stay shared between pools.
+            var movedVariation = variation.Clone();
+            var movedSets = new Dictionary<Guid, Dictionary<Guid, InputValue>>();
+            foreach (var (childId, parameterSet) in movedVariation.ParameterSetsForChildIds)
+            {
+                if (oldToNewIdMap.TryGetValue(childId, out var newChildId))
+                {
+                    movedSets[newChildId] = parameterSet;
+                }
+            }
+
+            if (movedSets.Count == 0)
+                continue;
+
+            movedVariation.ParameterSetsForChildIds = movedSets;
+            newPool.AddUserVariation(movedVariation);
+            movedAny = true;
+        }
+
+        if (movedAny)
+            newPool.SaveVariationsToFile();
+    }
+
+    /// <summary>
+    /// Strips snapshot entries that reference children no longer present in the parent composition and
+    /// removes snapshots that end up with no entries at all. Catches both the children just replaced by
+    /// the combine and entries that were already stale from earlier deletions. Presets (keyed by
+    /// Guid.Empty for the composition's own inputs) are untouched. Must run after the combined
+    /// originals were deleted from the parent.
+    /// </summary>
+    private static void RemoveUnusedSnapshotsFromParent(Symbol parentSymbol)
+    {
+        var parentPool = VariationHandling.GetOrLoadVariations(parentSymbol.Id);
+        List<Variation> unusedVariations = null;
+        var poolModified = false;
+
+        foreach (var variation in parentPool.UserVariations)
+        {
+            List<Guid> danglingChildIds = null;
+            foreach (var childId in variation.ParameterSetsForChildIds.Keys)
+            {
+                if (childId == Guid.Empty || parentSymbol.Children.ContainsKey(childId))
+                    continue;
+
+                danglingChildIds ??= [];
+                danglingChildIds.Add(childId);
+            }
+
+            if (danglingChildIds == null)
+                continue;
+
+            foreach (var childId in danglingChildIds)
+            {
+                variation.ParameterSetsForChildIds.Remove(childId);
+            }
+
+            poolModified = true;
+
+            if (variation.ParameterSetsForChildIds.Count == 0)
+            {
+                unusedVariations ??= [];
+                unusedVariations.Add(variation);
+            }
+        }
+
+        if (!poolModified)
+            return;
+
+        if (unusedVariations != null)
+        {
+            foreach (var variation in unusedVariations)
+            {
+                parentPool.RemoveUserVariation(variation);
+            }
+        }
+
+        parentPool.SaveVariationsToFile();
+    }
+
+    /// <summary>
+    /// Sets the new symbol's authored source extent (<see cref="Gui.Windows.TimeLine.TimelineState.SourceExtent"/>)
+    /// to the union of the copied content: all keyframes and all nested time clips. Skipped when the
+    /// content has no time span (e.g. static ops only).
+    /// </summary>
+    private static void InitSourceExtentFromContent(SymbolUi newSymbolUi)
+    {
+        var range = T3.Core.Animation.TimeRange.Undefined;
+        var symbol = newSymbolUi.Symbol;
+
+        foreach (var child in symbol.Children.Values)
+        {
+            foreach (var inputDef in child.Symbol.InputDefinitions)
+            {
+                if (!symbol.Animator.TryGetCurvesForChildInput(child.Id, inputDef.Id, out var curves))
+                    continue;
+
+                foreach (var curve in curves)
+                {
+                    foreach (var vDefinition in curve.GetVDefinitions())
+                    {
+                        range.Unite((float)vDefinition.U);
+                    }
+                }
+            }
+
+            foreach (var output in child.Outputs.Values)
+            {
+                if (output.OutputData is T3.Core.Animation.TimeClip timeClip)
+                    range.Unite(timeClip.TimeRange);
+            }
+        }
+
+        if (!range.IsValid || range.Duration <= 0)
+            return;
+
+        newSymbolUi.TimelineState ??= new Gui.Windows.TimeLine.TimelineState();
+        newSymbolUi.TimelineState.SourceExtent = range;
     }
 }
