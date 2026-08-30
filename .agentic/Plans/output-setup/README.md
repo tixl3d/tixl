@@ -13,9 +13,10 @@ Item, Output, Endpoint, Route/Mapping/Binding, Modifier. Older docs predate it; 
 | Doc | Covers |
 |---|---|
 | [`ui-restructuring-plan.md`](ui-restructuring-plan.md) | **Start here.** Glossary + the UI phases: properties → Parameter window (A), Flow Outliner (B), unified Board/Stage canvas + metric grid (C). |
-| [`data-model.md`](data-model.md) | Entities & classes, as-built vs target, all model decisions (§4) with their revision history. Grounded in `Core/Output/`. |
+| [`data-model.md`](data-model.md) | Entities & classes, as-built vs target, all model decisions (§4) with their revision history, spaces & units conventions (§5). Grounded in `Core/Output/`. |
 | [`refactoring-plan.md`](refactoring-plan.md) | Code-debt review (P0–P4) **and the live progress log** of what has landed on the branch. |
-| [`selection.md`](selection.md) | Two-plane selection (entity / sub-element), address form. |
+| [`selection.md`](selection.md) | Two-plane selection (entity / sub-element), address form; shared across windows + per-window pinning (2026-08-29). |
+| [`shared-selection-slice.md`](shared-selection-slice.md) | **Next implementation slice**: concrete steps for sharing the selection + the entity pin, grounded in the as-built code. |
 | [`canvas-interaction.md`](canvas-interaction.md) | On-canvas editing — tools, manipulation, snapping, rulers, visual language. |
 | [`states.md`](states.md) | State-token matrix (Default/Selected/Hovered/Referenced/Dragged/Drop-Target/Unbound/Unused). Tokens live; gutter anatomy superseded. |
 | [`long-term-features.md`](long-term-features.md) | The rolling backlog / next-major-steps list. Review periodically to prioritize. |
@@ -25,7 +26,7 @@ Item, Output, Endpoint, Route/Mapping/Binding, Modifier. Older docs predate it; 
 | Doc | Covers |
 |---|---|
 | [`binding-examples.md`](binding-examples.md) | **Output vs. binding, made concrete** — the storage-layering table plus scenarios S1–S7 (device change, venue swap, multi-machine) and virtual displays. |
-| [`use-case-flows.md`](use-case-flows.md) | Eight end-to-end click flows (2nd display → touring rig) + the cross-cutting harvest (readiness panel, Identify, test patterns, the three doors). |
+| [`use-case-flows.md`](use-case-flows.md) | Nine end-to-end click flows (2nd display → touring rig, output packing) + the cross-cutting harvest (readiness panel, Identify, test patterns, the three doors). |
 
 ## Long-term scope — not scheduled
 

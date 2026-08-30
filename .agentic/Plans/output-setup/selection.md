@@ -18,6 +18,29 @@ selection sets:
 You never hold "2 surfaces + 3 corners" in one set. That single rule is what makes shift-add, box-select,
 arrow-nudge, and drag behave predictably.
 
+## Selection scope across windows (2026-08-29)
+
+The entity plane is **one shared instance across all output windows** (and the graph / Parameter
+window) — not per-window as first built. Rationale: the Parameter window needs exactly one inspected
+item with no "which window feeds me" rule; cross-window highlight sync comes free; and the one-window
+case (the common one) is indistinguishable from before.
+
+What made per-window selection necessary was that selection also decided *what a window displays*.
+That coupling is removed instead of kept: a window **follows** the shared selection by default, and
+can be **pinned** to an entity/output via its breadcrumb — it then keeps showing the pinned target
+while selection roams (calibrate on projector A while clicking around B's entities). **Pinning ships
+in the same slice as the sharing** — sharing without pinning makes a second output window useless.
+
+Consequences:
+- `SetupEntitySelection` becomes one shared instance; windows hold only their pin state
+  (kind + id, cleared via the breadcrumb).
+- The **sub-element plane is shared too**: it is populated from the selected entity, so it follows
+  the selection, not the window. A pinned window showing a different canvas simply has no selected
+  handles to draw. Its clear rule reads "the *selected* entity's canvas context changed" — not "this
+  window switched views".
+- The graph-selection invariant (an op selection clears/replaces the entity selection) is unchanged;
+  it now applies to the one shared set.
+
 ## One address form
 
 Both planes address targets the same way:
@@ -63,8 +86,10 @@ readonly struct SelectionTarget {
 ## Mapping to existing code
 
 - `SetupEntitySelection` → the **entity plane**: change `SelectedKind/Id` to an **ordered `List<SelectionTarget>`**;
-  add `Slice` + `ContentSource` to `EntityKind`; keep `TryResolve` (drop stale targets against the setup).
-- New **`CanvasSelection`** (per output window, next to the view) → the sub-element plane; same `List<SelectionTarget>`.
+  add `Slice` + `ContentSource` to `EntityKind`; keep `TryResolve` (drop stale targets against the setup);
+  **one shared instance** (scope decision above — windows keep only a pin).
+- New **`CanvasSelection`** (shared, like the entity plane — scope decision above) → the sub-element
+  plane; same `List<SelectionTarget>`.
 - `Interaction/CanvasEditing/CanvasPointHandle` already owns a handle's hit-test + drag; extend it to (a)
   report a `SelectionTarget`, (b) render a selected state, (c) join box-select. `CornerPinHandles` /
   future `AnnotationLineHandles` / lattice handles feed their targets into `CanvasSelection`.

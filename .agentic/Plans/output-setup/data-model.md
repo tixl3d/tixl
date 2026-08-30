@@ -59,6 +59,13 @@ slice; sources keyed by the op's `SymbolChildId`), and after review this is **bl
   edge, fix when multi-instancing sends becomes a real use case).
 - The flow-view connection lines render this model: ContentSource → Slice → Surface/Output edges are all
   setup data; only the source↔op link crosses into the live graph.
+- **Slice-fills-region invariant (2026-08-31):** a slice always fills the surface/region showing it —
+  there is *no* third "image transform inside the container". The pair *(slice rect, region rect)*
+  fully determines placement; every crop and pan is a co-edit of those two rects
+  (`canvas-interaction.md` §Edge dragging, synchronized crop). A surface is thereby a Figma-frame-like
+  container *behaviorally*, without a second parameterization that would break slice sharing and the
+  source-side view. **Copy-on-write:** cropping a slice with other consumers forks a private slice —
+  shared edits happen on the content card, where shared-ness is visible.
 
 <details><summary>Superseded 07-22 decision (op-side), kept for history</summary>
 The mockup shows `Atlas → {Poster Left, Poster Right, Unused}` — **named slices under a content source**,
@@ -103,6 +110,8 @@ per surface is already expressible; earlier notes described it as singular, whic
     **Output-level masks too (2026-07-29):** a whole-canvas mask lives on the `OutputDefinition`
     (same category as whole-canvas trim) — needed so the direct content→output pipe can be masked
     without materializing a surface/mapping ("ceiling spill" on a flow-1 setup).
+    **Mask payload (2026-08-31):** single-channel alpha + tint color — or better an **SDF**, so
+    feather/blur becomes a cheap distance offset instead of a blur pass.
   - `CornerColors`: optional per-corner color (lift/gain or multiply, barycentric-interpolated)
 - **Regions need no mapping of their own.** A region is a sub-rect of the surface's content canvas; it rides
   the surface's mapping(s), differing only in content (its slice). The **hard-split wall** (left→ProjA,
@@ -172,6 +181,28 @@ file — `Spout "Spout1"` sits next to `Display 2` as a peer binding target. Con
   *aspect* change don't silently rescale — the physical optics changed, so flag the mapping as stale
   calibration (readiness surface) instead. (Cheapest now — "no migration on this branch" still holds.)
 
+**Patches — the direct pipe grows plural (2026-08-31):** the single `Output.SliceId` full-frame pipe
+generalizes to **`OutputDefinition.Patches[] = { SliceId, Quad, Name }`** — N canvas regions, each
+fed by one source slice. One concept covers the whole surface-less ladder:
+- **Rung 0** — full-frame pipe = one implicit full-canvas patch (as built).
+- **Rung 0.5** — *keystone without a surface*: one patch with a warped quad ("how the image is
+  projected within the output"). Serves the sofa-projector case with zero new concepts.
+- **Packing** — N axis-aligned patches tiling the canvas (TV wall / 4×4 split matrix / LED
+  processor). "Split 2×2 / 4×4" helpers + matrix presets make it a 30-second job.
+- **Promotion** — when a surface-only feature is reached for (real size, raster, straighten,
+  compositing *in meters*), "Use on Surface" materializes the surface and the patch quad transfers
+  **verbatim** to `OutputMapping.Quad` — same numbers, nothing moves on the wall, no convert moment.
+- **One home at a time (hard rule):** a route's quad lives on the patch **or** on a mapping, never
+  both — promotion clears the patch. Renderer and file readers treat them as mutually exclusive.
+- **Aspect policy:** slice↔patch mismatch defaults to **stretch** + a readiness hint (same pattern
+  as the corner-pin aspect guard). **Overlap allowed** (free PIP); painter's order = list order;
+  reorder UI deferred.
+- **The boundary, restated:** *patches model the canvas (pixels); surfaces model the room (meters,
+  poses, calibration).* Pixel-space compositing never needs a surface; real-world geometry always
+  does. (Replaces the earlier "compositing forces surfaces" instinct.)
+- Naming: **Patch** (AV patching vocabulary; *Tile* recorded as the alternative). Never "slice" —
+  one name per end of the pipe.
+
 ### 2.6 Selection model — 🟡 too narrow · **plan in [`selection.md`](selection.md)** (4.5: do not defer)
 `SetupEntitySelection` is single kind+id over `{ReferenceImage, Surface, Prop, Output}`. The spec needs
 Slice/ContentSource kinds, multi-select, and **sub-element addressing** (corners, annotation lines, lattice
@@ -203,6 +234,30 @@ Spec callout 25.4 wants a *Reference Image Canvas* where several images (photos,
 **meters**. Today `ReferenceImage` has `MetersPerPixel` (a per-image scale) but **no canvas placement**
 (position/rotation/scale of each image on a shared m-canvas), and no `AnnotationLine`-on-canvas that isn't
 attached to a surface's `ReferenceBinding`. Needs a placement per reference image + free annotations.
+
+### 2.10 Reference jig — derived slices from a traced photo (2026-08-31)
+
+For arrangements whose slice rects encode physical reality (TV wall behind a split matrix): the
+middle construct is a **Surface with `Render` off**, reused as a pure derivation jig — straightened
+reference photo as backdrop, screens traced as Layout regions, all existing machinery. What it adds
+over eyeballing sixteen UV rects: **bezel-correct gaps** (skipped source pixels — what makes the
+image read as continuous), true per-screen aspect + proportional scale, absolute scale via
+`MetersPerPixel`, re-editability (retrace → regenerate), venue portability (re-photograph at the
+next venue; routing and patches survive).
+
+- **Content footprint** — a rect in jig space stating how the source image spans the arrangement;
+  the one authoring decision a photo can't make. Default: a content-aspect rect fitted around the
+  traced bounding box. Derivation is a rect transform:
+  `sliceUV = (regionRect − footprint.min) / footprint.size` (clip + readiness hint outside).
+- **"Generate slices from regions"** — one undoable command; derived slices carry a link badge; an
+  explicit "Update slices from regions" re-derives (live sync only if regeneration ever itches).
+  Direct edits on a derived slice detach the link.
+- **What the jig cannot derive: patches.** Matrix wiring is cabling, not geometry — slice→patch
+  routing stays manual, made fast by **Identify** (click a patch → its screen shows a number).
+- On the board the jig sits in the flow as an **authoring dependency, not a render step** — dashed
+  derivation wires; the render path (slice → patch) stays solid. If the venue later swaps the matrix
+  for a projector: flip `Render` on, add a mapping — the jig is already a traced surface (the
+  ladder again).
 
 ---
 
@@ -245,7 +300,7 @@ reorder Surface·Region·Slice·Output·ReferenceImage·Prop, and re-parenting o
 
 ---
 
-## 4. Decisions — **all settled** (2026-07-21, №1 re-revised 2026-07-27)
+## 4. Decisions — **all settled** (2026-07-21, №1 re-revised 2026-07-27, №6–7 added 2026-08-29, №8–9 added 2026-08-31)
 
 1. **Content and routing are SETUP-side** (re-revised 2026-07-27, reversing the 07-22 op-side call — see
    §2.1 for rationale and accepted costs): `Setup.ContentSources` + `Setup.Slices`; `Surface.SliceId` /
@@ -259,6 +314,48 @@ reorder Surface·Region·Slice·Output·ReferenceImage·Prop, and re-parenting o
    decision 1 — the earlier op-side `TargetId` shape is superseded, see §2.4). **No back-compat
    migration on this branch.** ✅ (§2.1/§2.4)
 5. **Selection = two planes (entity / sub-element), one address form; not deferred** → [`selection.md`](selection.md). ✅ (§2.6)
+6. **Spaces & units are fixed** (2026-08-29): everything measured in **meters is Y-up** (floor at
+   y = 0); everything measured in **pixels/UV stays Y-down**. Surface-local space is normalized to
+   Y-up in the same pass as the anchor change. ✅ (§5)
+7. **Anchors are signed centered** (2026-08-29): range −1..1, center `(0,0)`, Y-up (bottom-center =
+   `(0,−1)`); the term is **Anchor** — `Pivot` is deprecated (implies rotation-center only).
+   Conversion from the as-built `StagePlacement.Pivot` (unsigned 0..1, bottom-left):
+   `pivot01 = (anchor + 1) / 2` with the Y flip; no back-compat migration on this branch. ✅ (§5)
+8. **Output-side Patches; pixels-vs-meters boundary** (2026-08-31): the direct pipe generalizes to
+   `OutputDefinition.Patches[] = { SliceId, Quad, Name }` — surface-less keystone (one warped patch)
+   and output packing (N rects) in one concept. Quad promotion to a mapping is verbatim and
+   exclusive (one home at a time). *Patches model the canvas; surfaces model the room.* ✅ (§2.5)
+9. **Reference jig pattern** (2026-08-31): physically-derived slice sets come from a `Render`-off
+   surface used as a tracing jig (photo backdrop + Layout regions + content footprint) with a
+   generate/update command — an authoring dependency, never a render step. ✅ (§2.10)
 
 Remaining low-stakes sub-choices (decide while building, not blocking): mapping storage surface-side vs join
 table (§2.3); Prop templates (§2.8); reference-image m-canvas placement (§2.9).
+
+---
+
+## 5. Spaces & units (2026-08-29)
+
+The rule that ends every "which way is Y here": **meters ⇒ Y-up** (physical space — nobody reasons
+about a wall upside-down; matches the 3D stage pose and camera conventions), **pixels/UV ⇒ Y-down**
+(the universal image convention — fighting it would make every texture interaction a sign bug).
+
+| Space | Unit | Origin | Y | Used for |
+|---|---|---|---|---|
+| **Board / Stage** | m | floor line = y 0 | **up** | card placement (`CanvasPlacement`), `StagePlacement.Pose`, props, guide lines |
+| **Surface-local** | m | surface **anchor** | **up** *(target — see caveat)* | annotations, calibration raster, child-region rects, `LocalPosition` |
+| **Slice / texture UV** | 0..1 | top-left | down | `OutputMapping.SourceQuad`, slice rects |
+| **Output canvas** | px | top-left | down | `OutputMapping.Quad`, `CanvasResolution`, binding display modes |
+| **Reference image** | px (+ `MetersPerPixel`) | top-left | down | `ReferenceBinding.Quad`, trace annotations |
+
+- **Anchors: signed centered, −1..1, Y-up** — center `(0,0)`, bottom-center `(0,−1)`, corners
+  `(±1,±1)`. The important cases are round numbers; mirroring is a sign change; the floor-standing
+  default composes as anchor `(0,−1)` + position `(x, 0)`. One convention for **all** frame kinds
+  (surfaces, content cards, outputs) — no per-kind variants. Term: **Anchor** (decision №7); a
+  separate rotation center can become its own property later if a flow ever needs one.
+- **As-built caveat:** surface-local is currently **Y-down from the top-left**, and
+  `StagePlacement.Pivot` is unsigned 0..1 from the bottom-left — the mismatch flips Y at several
+  boundaries today (`LocalPosition`, child-rect math, annotation endpoints) and is a standing source
+  of sign bugs. Both normalize in **one coordinated pass** together with the signed-anchor change —
+  one review of all the geometry instead of two half-conventions coexisting. Until that pass lands,
+  any code comment touching these values states which convention it is in.

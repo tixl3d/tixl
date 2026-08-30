@@ -88,6 +88,20 @@ Hard-won from the HTML prototype; the crop-vs-scale distinction is subtle, so it
   parallelogram/shear. Plain = constrained (perpendicular, straight); `Ctrl` = unconstrained.
   - *Alt reading not chosen:* `Ctrl` = pure proportional scale (opposite edge anchored) with parallelogram as
     a separate `Alt`/`Shift` mode. Leaning against — one modifier, parallelogram as "just unconstrained drag".
+- **Content cards have no edge handles in v1 (2026-08-29):** on the board, a content card's corners
+  scale its px-per-m *presentation* only (ui-restructuring §C.1); its edges stay reserved, because
+  edge-dragging *content* means cutting a slice (UV sub-rect) — that arrives with slice editing, not
+  v1. Keeps the grammar to one meaning per handle type: **corners = scale, edges = crop/slice**.
+- **Synchronized crop on content-bearing surfaces/regions (2026-08-31):** a plain edge drag co-edits
+  the rect *and* the slice UV — **the pixels on the wall stay put**, the window over them shrinks
+  (Figma-frame feel). This completes "a crop never moves anything on the wall" for content, which
+  the raster and annotations already obey. The *stretch* variant (extent changes, content re-fits)
+  moves to the scale gizmo / a modifier, where "I'm distorting" is explicit.
+  - **Pan:** modifier + body-drag inside a region slides the slice UV under the fixed window — same
+    invariant (slice fills region), no extra state.
+  - **Shared slices fork on crop (copy-on-write):** cropping a slice that feeds other
+    surfaces/outputs forks a private slice for this surface — local intent wins; the shared edit
+    stays reachable on the content card, where shared-ness is visible.
 
 ---
 
@@ -101,12 +115,29 @@ for point handles; add edge + gizmo handles as new composers next to `CornerPinH
 | move body | entity position (Layout px / Physical m) | translate |
 | drag corner | the relevant quad corner (`OutputMapping.Quad`, `Slice.SourceRect`, `ReferenceBinding.Quad`) | per-context; free warp |
 | drag edge (plain) | that edge's two corners along the normal | **crop**; straight mode axis-aligns — see §Edge dragging |
+| drag edge (plain, content-bearing surface/region) | region rect **and** slice UV together | **synchronized crop** — wall pixels stay put (§Edge dragging) |
+| modifier + body-drag inside a region | slice UV only | **pan** the source under the fixed window |
 | drag edge (`Ctrl`) | that edge's two corners by the full delta | **parallelogram/shear** *(provisional)* |
+| drag patch rect / corners | `OutputDefinition.Patches[i].Quad` | axis-aligned tile by default; warped quad = surface-less keystone (data-model §2.5) |
+| drag ghost-frame corner (board, mapped surface) | `OutputMapping.Quad` | inverse-side edit of the same quad as the Output camera (ui-restructuring §C.2b) |
 | scale gizmo | uniform/again-axis scale about the pivot | `StagePlacement.Pivot` is the anchor |
 | rotate gizmo | orientation about pivot | Physical: the pose; Layout: 2D angle |
 
 Which quad a corner-drag writes depends on the canvas (output canvas → mapping quad; content canvas → slice
 rect; reference canvas → trace quad) — the canvas owns that binding, the handle stays generic.
+
+**Patch editing (2026-08-31):** patches drag/snap as rects *inside the output card* (px rulers,
+tile-to-tile + grid snapping); "Split 2×2 / 4×4" context actions seed matrix layouts. **Warp**
+attaches in the quad context — an "Add warp" context action on the selected patch/mapping quad
+(modifier stack, ui-restructuring §A.3) — never a global tool.
+
+**Rotation is deferred (2026-08-29):** the corner pin absorbs projective distortion, so the
+single-projector flows gain nothing from it, while it complicates every axis-aligned interaction
+(edge crop, snapping, floor alignment). The data model keeps `Pose.Orientation`. When a real flow
+pulls it in, the dominant case is **90° steps** (portrait surfaces) — a rotation-field property with
+step buttons (ui-restructuring §A.3) before any gizmo. Mind the entity split: a portrait-mounted
+*projector* is output-level rotation of the mapping; a portrait *surface/banner* is stage-space
+surface rotation.
 
 ---
 
@@ -150,6 +181,7 @@ One consistent scheme so Images / Slices / Surfaces / Outputs / annotations are 
 |---|---|
 | Reference image | the photo/plan bitmap itself |
 | Slice | dashed sub-rect on the *source image* (it's a source cut) |
+| Patch | labeled sub-rect inside its *output card* (a canvas cut — the mirror of Slice) |
 | Surface | filled quad + faint grid, entity color; corners as handles |
 | Region (Layout child) | nested rect inside its surface, lighter |
 | Output | its frame outline (rare on the 2D canvas; mostly the 3D stage) |
@@ -159,6 +191,20 @@ One consistent scheme so Images / Slices / Surfaces / Outputs / annotations are 
 **Center label** — each item shows its **name at its center**, styled by the same state tokens as the sidebar
 rows (Default / Hover / Selected / Referenced / …). It is the on-canvas twin of the tree row, so selection and
 cross-highlight read identically in both places.
+
+**Container & handle grammar (2026-08-31, from the board sketches):**
+- **Outer strokes for containers, inner outlines for children** — a card's border is a stroke; its
+  sub-rects (slices, patches, regions) are thinner inner outlines. Nesting reads at a glance.
+- **Handle shapes carry meaning:** **round handles = projection/perspective** (mapping and patch
+  quads, calibration); **square handles = axis-aligned crop/scale**. Never mixed on one object.
+- **Handles tint by the entity's type color** (`states.md` tokens) — the handle itself says what it
+  edits.
+- **Frame captions show the selection's nesting path** (`Send1 › Slice 2`) while a child is
+  selected — the caption is the breadcrumb's on-canvas twin.
+- **Slice badge on cropped regions (2026-08-31):** once a region's slice is no longer full-frame it
+  carries a small slice indicator; hovering cross-highlights the dashed slice rect on the content
+  card — "this is a window onto that" without opening anything. Distinct from dashed *derivation
+  wires* (jig): a crop is direct editing, no link semantics.
 
 ---
 
@@ -173,7 +219,12 @@ cross-highlight read identically in both places.
 4. **Gizmo set** — confirm scale is corner+side (8-handle) or L/R only (prototype). Rotate: outside-corner
    hover ring (Figma) vs a dedicated handle.
 5. **Snap toggles** — which attractors are on by default, and the modifier to suspend snapping (Figma: hold a
-   key). 
+   key).
+6. **Inner-content selection & handle exposure on cards** (2026-08-31 train notes) — how a card
+   reveals its children's handles: click-again deep select (Figma; leaning), hotkey reveal
+   (`Alt`/`Ctrl`), or an explicit action. Against always-on handles: they expose inner content,
+   collide with card resizing, and distortion is irrelevant for most use-cases. Same decision as
+   ui-restructuring open question 7 — settle once, apply to both.
 
 ## 9. Code map
 - `Interaction/CanvasEditing/`: `CanvasPointHandle` (points), `CornerPinHandles` (quad). **New composers:**

@@ -1,11 +1,19 @@
 # Output Setup — Use-Case Click Flows (divergent exploration, 2026-07-29)
 
-Eight end-to-end flows across the long-term scope, from trivial to touring rig. Coarse granularity;
+Nine end-to-end flows across the long-term scope, from trivial to touring rig. Coarse granularity;
 **the point is mining potentials and gaps, not specification** — each flow ends with the ideas it
 surfaced (💡). Cross-cutting harvest at the end. Assumes the target design: flow outliner strip,
 properties in the Parameter window, unified canvas ([`ui-restructuring-plan.md`](ui-restructuring-plan.md)),
 plus the long-term docs ([`camera-calibration.md`](camera-calibration.md),
 [`multi-machine.md`](multi-machine.md), [`Plan_StageExtension.md`](../Plan_StageExtension.md)).
+
+**Flow priority (2026-08-29):** the first *concrete* click-flow spec (drafted separately by pixtur,
+in progress) is **live-first** — projector plugged in and lit, the flow you'd demo. Prep-at-home /
+venue-swap flows (Flow 5 territory) come after; the Setup↔MachineConfig split already carries them,
+so live-first creates no design debt. Two behaviors settled with it: the **first `SendToOutput`
+auto-connects full-frame to the first output** (zero-config path — Flow 1's premise made explicit),
+and the auto-created routing must be **visible** (flow edge, not silent magic), or users never form
+the routing model that multi-output setups need.
 
 ---
 
@@ -58,6 +66,10 @@ plus the long-term docs ([`camera-calibration.md`](camera-calibration.md),
   squished" before the user knows to ask.
 - Idea: press-and-hold a corner handle → magnifier inset around the physical corner (using output
   self-view), for one-person calibration at distance.
+- **2026-08-31:** the first keystone no longer *requires* the surface — the direct pipe's **patch
+  quad** (data-model §2.5) covers corner-pin-by-eye. Flow 2's "+ Surface" now enters at "sets Size
+  to the wall's real proportions" — the first *meters* feature — and the patch quad promotes
+  verbatim.
 
 ## Flow 3 — Gallery window from a phone photo (~22 steps)
 
@@ -268,6 +280,35 @@ node, camera on FOH. New venue every night.*
   warning badge on the edge that crosses machines, with "route via NDI" as the offered fix.
 - Venue-to-venue duplication ("start from closest venue") suggests setups want lightweight lineage
   metadata (duplicated-from, date) — nearly free, helps tours.
+
+## Flow 9 — Output packing: TV wall behind a split matrix (~18 steps, added 2026-08-31)
+
+*Particle sim rendered high-res; shown on an arrangement of old TVs driven by a 4×4 HDMI split
+matrix. The output is one 4K display; the physical layout is irregular.*
+
+- Send op exists, direct-piped to `2nd Display (4K)` (Flow 1 state).
+- Output card context menu → **Split 4×4** — sixteen **patches** tile the canvas (data-model §2.5);
+  each maps to one matrix input.
+- Photographs the (dark) TV arrangement; drags the photo in → **reference jig**: a `Render`-off
+  surface with the straightened photo as backdrop (data-model §2.10).
+- Traces each TV as a region over the photo; the **content footprint** defaults to a content-aspect
+  rect around the traced bounding box, nudged to taste.
+- **Generate slices from regions** — sixteen source slices, bezel-correct, named after their
+  regions, linked (dashed derivation wires on the board).
+- Routes slices → patches with **Identify**: click a patch, that TV shows its number, drop the
+  matching slice on it. Sixteen screens in ~a minute instead of cable archaeology.
+- Checks the wall; one TV was re-hung — nudges its traced region, **Update slices from regions**;
+  done.
+
+💡 **Potentials**
+- **The jig is the venue-portability story for pixel installs**: next venue = new photo, retrace,
+  regenerate — routing and patches survive untouched.
+- Matrix **presets** (`4×4 @ 480p`) next to the surface size presets — same discoverability pattern.
+- Aspect-mismatch readiness hint per route (slice 16:9 → patch 4:3) — the packing twin of the
+  corner-pin aspect guard.
+- Patch overlap = free PIP; painter's order = list order (reorder UI only when a flow demands it).
+- Identify gets its strongest justification yet (harvest §B) — here it's not a convenience, it *is*
+  the cabling workflow.
 
 ---
 

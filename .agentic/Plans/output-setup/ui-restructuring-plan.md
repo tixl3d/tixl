@@ -39,6 +39,10 @@ entity's outliner representation, never the model object — see Representations
   a Spout/NDI sender, later an Art-Net node. *(replaces: "Device" — too hardware-flavored for
   Spout/NDI; "Endpoint" matches the WASAPI vocabulary the audio abstraction already uses)*
 - **Virtual display** — an always-existing display endpoint (`2nd Display`, `Editor Display`).
+- **Patch** (2026-08-31) — an output-side canvas region on the direct pipe:
+  `{ SliceId, Quad, Name }`; an axis-aligned rect = packing tile, a warped quad = surface-less
+  keystone (data-model §2.5). *(leaning "Patch"; "Tile" recorded as the alternative — never "slice",
+  one name per end of the pipe)*
 
 **Relations** (all drawn as **Connections** — the view-level word for any line)
 - **Route** — slice → surface/output content assignment.
@@ -46,6 +50,8 @@ entity's outliner representation, never the model object — see Representations
 - **Binding** — the output → endpoint assignment, per machine. **Reserved for exactly this** — a
   Binding is *one kind* of connection, never the generic word for a line (collision resolved in
   favor of `DeviceBinding`/`binding-examples.md` usage).
+- **Derivation wire** (2026-08-31) — a **dashed** connection for authoring dependencies (reference
+  jig → derived slices, data-model §2.10); solid wires are always the render path.
 
 **Representations & modifiers**
 - **Card** — an entity's canvas representation on Board/Stage (ContentCard, SurfaceCard,
@@ -61,17 +67,21 @@ entity's outliner representation, never the model object — see Representations
 
 ## Phase A — Properties → Parameter window
 
-### A.1 Selection context published for other windows
+### A.1 One shared selection + per-window pinning (revised 2026-08-29)
 
-`SetupEntitySelection` is per-OutputWindow; the Parameter window needs to know *which* one to show.
+Supersedes the per-window model with an `ActiveEntitySelection` last-focused-wins indirection:
+selection is now **one shared `SetupEntitySelection` across all output windows** — full decision and
+consequences in [`selection.md`](selection.md) §Selection scope. The Parameter window reads it
+directly; there is no "which window feeds me" rule to implement.
 
-- Add a static `OutputSetupHandling.ActiveEntitySelection { get; }` published by the output window that
-  last received focus/interaction (set in `OutputSetupModeView` while its window is focused or an
-  interaction happens; cleared when the window closes). Store the *window id + selection reference*,
-  not copies.
+- What per-window selection actually provided — *each window deciding what it displays* — becomes an
+  explicit per-window **pin**: a window follows the shared selection by default; pinned (via its
+  breadcrumb) it stays on its target while selection roams. **Pinning lands in the same slice as the
+  sharing** — without it, a second output window is useless.
 - No conflict resolution is needed against graph selection: `OutputSetupModeView.TryDrawEditingView`
   already enforces the invariant that a graph op selection clears (or replaces, for sinks) the entity
   selection — so "entity selection non-empty" already implies the graph has nothing better to show.
+  This invariant now applies to the one shared set.
 
 ### A.2 Parameter window hook
 
@@ -108,6 +118,14 @@ Port the card bodies out of `SetupPanel` (`DrawSurfaceCard`, `DrawOutputCard`, `
 - The card set is per `EntityKind`; the upcoming mapping stack (warp/mask/corner colors, data-model
   §2.3) lands here later as collapsible groups — the Parameter window has the vertical room the side
   panel never had. Leave a `// mapping sections land here` seam only in the plan, not in code.
+- **Property fields are authored in code — no InputUi settings layer (2026-08-29):** the per-input
+  configuration (e.g. marking an input as a Rotation field) exists because op inputs are generic;
+  setup-entity cards are hand-written, so a future surface Rotation property simply *always* renders
+  as a rotation field with 90° step buttons. (Rotation itself stays deferred —
+  `canvas-interaction.md` §4.)
+- **Surface size presets (2026-08-29):** the surface card gets a presets dropdown (27"/54" display
+  16:9, common wall sizes) that writes Size — teaches that surfaces are screens as much as
+  projection walls.
 - **Modifiers are verbs, not entities (2026-07-29):** masks/warp/color are never added via a column
   `+` — they attach to the *selected* thing, via a canvas context-menu verb ("Add mask…" → draw mode
   in the matching camera view) and a "+ modifier" row on the entity's card. The selection context
@@ -266,6 +284,14 @@ entity kinds live in, with the current views becoming *focus modes* of that scen
   meter proportions; pixel entities (content, outputs) at a default m/px and free-scalable.** Items
   at real scale carry a quiet *true-scale* state; free-scaling drops it — future measuring/annotation
   tools trust only true-scale items (per-item rule, no global "is this board physical?" switch).
+- **Free-scaling a pixel entity is board presentation only (2026-08-29):** resizing a content/output
+  card changes its board px-per-m and nothing else — never resolution, routing, or projection. It's
+  the one card whose handles edit nothing physical; the card should say so (tooltip/status). Content
+  cards get **no edge handles** in v1 — edges on content mean *slicing*, reserved for slice editing
+  (`canvas-interaction.md` §Edge dragging).
+- **Axes & anchors (2026-08-29):** board/stage space is **meters, Y-up, floor at y = 0**; anchors are
+  **signed centered** (−1..1, center `(0,0)`, bottom-center `(0,−1)`). Full conventions table:
+  [`data-model.md`](data-model.md) §5.
 - Live thumbnails on cards ride the existing once-per-frame sink invalidation guard — no double
   content evaluation.
 - **Resolution badges follow the `0,0`-auto convention** (data-model §2.5): auto shows the resolved
@@ -279,6 +305,19 @@ entity kinds live in, with the current views becoming *focus modes* of that scen
   Extension: blend photo ↔ live content on hover/playback.
 - **Slices draw as labeled sub-rects inside their content card**; slice edges start at the rect, not
   at an abstract row.
+- **Patches draw as labeled sub-rects inside their output card** (2026-08-31) — the mirror of
+  slices-in-content. A warped patch shows its quad against the straight canvas rect: the visual that
+  teaches "the canvas vs. what lands on it" without UI copy. Reference jigs sit on the board with
+  **dashed derivation wires** (glossary); the render path stays solid.
+- **Projector ghost frame on mapped surfaces (2026-08-31):** a surface card stays rectified by
+  definition, so its mapping's distortion is shown as the *dual*: the output canvas pushed through
+  the inverse mapping, drawn as a light warped outline around the straight surface, labeled with the
+  output (`→ Display 2`). Its corners are live handles — dragging edits the same
+  `OutputMapping.Quad` as the Output camera's surface-quad handles, just from the other end. Shown
+  only while the surface (or its mapping) is selected/hovered, per the wires-on-selection rule
+  above; its shape alone answers "why does the wall look distorted". This reuses the existing
+  Straight-mode machinery (output frame warped around the rectified surface) at neutral placement —
+  and it is the mapping's visual body until `EntityKind.Mapping` becomes selectable (Phase B.4).
 - **Wires on the canvas: selection/hover path only** — the highlighted chain and the breadcrumb are
   the same object in two forms. (The outliner strip always shows all edges; the canvas never does.)
 - **Card label grammar:** name + muted metadata — `4.3×3.2m` (surfaces), `1080p` + binding arrow
@@ -290,7 +329,10 @@ entity kinds live in, with the current views becoming *focus modes* of that scen
   that physical entities align to, and **prop figures** (the existing `Prop`/Person entity) rendered
   at true scale inside/beside surfaces — "everything physical links up": floor line, props, surface
   meter sizes, and reference photos agree, so the board doubles as a sanity check of the venue's
-  proportions.
+  proportions. **Timing (2026-08-29):** the prop figure appears once the **first surface** exists —
+  before that it answers a question nobody asked; from then on it makes the floor-line/meters premise
+  self-explanatory. New physical surfaces seed **bottom-aligned to the floor line**, anchor
+  bottom-center.
 
 ### C.2 Space participation & fading
 
@@ -361,8 +403,9 @@ the entities (Miro-like; deliberately not in C's scope).
 - **Docs & tests (repo rules):** each phase updates the manual test set (`.tests-manual/` —
   output-setup walkthrough: re-script property editing via Parameter window in A, outliner
   interactions in B, space switching/fading in C) and the `.help/` output-setup page in the same PR.
-- **Multi-window:** outliner + canvas stay per-window instances; only `ActiveEntitySelection` (A.1) is
-  global, last-focused-wins.
+- **Multi-window (revised 2026-08-29):** outliner + canvas stay per-window instances; **selection is
+  one shared instance** (A.1 / `selection.md` §Selection scope) and each window carries only a pin
+  (follow selection ↔ stay on a pinned entity).
 - **Refactoring-plan reconciliation:** P2.4 (OutputManager split) unaffected — still before Player
   support. P3 canvas allocation items fold into C. P4 items 2/5 die with `FormInputsNarrow`; item 1
   (`DrawInlineGlyph`) already done; the round-trip serialization tests extend to `CanvasPlacement`.
@@ -387,6 +430,15 @@ the entities (Miro-like; deliberately not in C's scope).
    (`ITransformGizmoProvider`), eventually binding graph-side 3D scenes to venue reality.
 6. **C.5:** fold target for surfaces mapped to multiple outputs / multiple stage instances (primary +
    ghosts — decide before the fold transition is built).
+7. **Board (2026-08-31 train notes):** how the output card exposes its patch/mapping handles —
+   always visible (makes the mapping evident) vs hidden (exposes inner content, collides with card
+   resizing, and distortion is irrelevant for most cases). Candidates: reveal on hotkey
+   (`Alt`/`Ctrl`), Figma-style click-again deep select, or an explicit "perspective transform"
+   action. Leaning: click-again deep select with the hotkey as accelerator — same decision as
+   `canvas-interaction.md` open question 6; settle once.
+8. **Warp entry point (2026-08-31):** bezier/lattice warp belongs to the *quad context* — likely a
+   context action ("Add warp") on the selected patch/mapping quad, landing in the modifier stack
+   (A.3). Settle when warp ships.
 
 ## Order
 
