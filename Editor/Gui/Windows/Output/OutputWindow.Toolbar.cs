@@ -28,6 +28,7 @@ internal sealed partial class OutputWindow
     private void DrawOutputMenuExtras()
     {
         _setupMode.DrawSetupPanelMenuItem();
+        _setupMode.DrawPinMenuItem();
     }
 
     private void DrawToolbar(Type? drawnType)
@@ -45,6 +46,7 @@ internal sealed partial class OutputWindow
         CustomComponents.PushToolbarIconBackground();
 
         _setupMode.DrawPanelToggleButton();
+        _setupMode.DrawPinIndicator();
         Pinning.DrawPinning(_drawOutputMenuExtras);
         ImGui.SameLine();
 

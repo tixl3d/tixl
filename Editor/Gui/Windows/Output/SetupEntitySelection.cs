@@ -29,10 +29,12 @@ internal readonly record struct SelectionTarget(
     int Index = -1);
 
 /// <summary>
-/// Which setup entities an output window has selected — its "entity plane" (whole entities, not
-/// sub-elements). Ordered: element 0 is the primary (drives the shown entity view). Single-click replaces,
-/// ctrl/shift extend. Entities are referenced by kind + GUID, resolved against the active setup on use —
-/// never by cached object reference. One instance per OutputWindow.
+/// Which setup entities are selected — the "entity plane" (whole entities, not sub-elements).
+/// Ordered: element 0 is the primary (drives the shown entity view). Single-click replaces,
+/// ctrl/shift extend. Entities are referenced by kind + GUID, resolved against the active setup on
+/// use — never by cached object reference. One instance shared by all output windows
+/// (<see cref="T3.Editor.UiModel.ProjectHandling.OutputSetupHandling.EntitySelection"/>); a window
+/// that shouldn't follow it keeps a per-window pin instead (see <see cref="OutputSetupModeView"/>).
 /// </summary>
 internal sealed class SetupEntitySelection
 {
@@ -89,8 +91,14 @@ internal sealed class SetupEntitySelection
 
     private static bool ExistsInSetup(Setup setup, SelectionTarget target)
     {
-        var id = target.EntityId;
-        switch (target.Kind)
+        return Exists(setup, target.Kind, target.EntityId);
+    }
+
+    /// <summary>Whether an entity reference still resolves against the setup — shared with the
+    /// per-window pin, which validates the same way the selection prunes.</summary>
+    internal static bool Exists(Setup setup, EntityKind kind, Guid id)
+    {
+        switch (kind)
         {
             case EntityKind.ReferenceImage:
                 foreach (var e in setup.ReferenceImages)

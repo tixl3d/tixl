@@ -15,6 +15,15 @@ namespace T3.Editor.UiModel.ProjectHandling;
 internal static class OutputSetupHandling
 {
     /// <summary>
+    /// The one entity selection shared by all output windows (and, later, the Parameter window).
+    /// Windows follow it by default; a window that should keep showing something else carries a
+    /// per-window pin instead (<see cref="Gui.Windows.Output.OutputSetupModeView"/>). Targets resolve
+    /// lazily against the active setup, so no clearing is needed on project or setup switches —
+    /// stale targets prune themselves.
+    /// </summary>
+    public static readonly Gui.Windows.Output.SetupEntitySelection EntitySelection = new();
+
+    /// <summary>
     /// Publishes the focused project's setup to <see cref="ActiveSetup"/> once per frame — operators only
     /// reference Core and resolve GUIDs against it. Publication must not depend on any window being open or
     /// any UI code happening to query the setup, so this runs from the frame loop, not from a getter.

@@ -12,7 +12,10 @@ namespace T3.Editor.Gui.Windows.Output;
 /// The output-editing side of an output window. There is no explicit Operator/Setup mode — the window
 /// follows focus: a focused <see cref="IOutputSink"/> (SendToOutput) op shows its output's editing
 /// canvas, and a picked panel entity shows that entity. Selecting any op in the graph drops a panel
-/// edit (graph selection wins). Owns the side panel and the window's entity selection. One per OutputWindow.
+/// edit (graph selection wins). Owns the side panel; the entity selection is the one instance shared
+/// by all output windows (<see cref="OutputSetupHandling.EntitySelection"/>) — what stays per window
+/// is the <b>pin</b>: a pinned window keeps showing its target while the selection roams elsewhere.
+/// One per OutputWindow.
 /// </summary>
 internal sealed class OutputSetupModeView
 {
@@ -75,6 +78,8 @@ internal sealed class OutputSetupModeView
         {
             // One shared selection: focusing a SendToOutput in the graph selects its CONTENT row; a later
             // sidebar pick (a surface/output) simply replaces it — so we never show two selected rows.
+            // With several output windows each runs this transition on the same frame — the writes are
+            // identical, so the repetition is harmless.
             if (selectedInGraph is IOutputSink)
                 _entitySelection.Select(SetupEntitySelection.EntityKind.ContentSource, focusedId);
             else
@@ -233,7 +238,85 @@ internal sealed class OutputSetupModeView
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return false;
 
+        // A pinned window ignores the shared selection for what it *shows* (highlights still follow).
+        // A pin whose entity is gone silently reverts to following — same pruning rule the selection uses.
+        if (_pinnedKind != SetupEntitySelection.EntityKind.None)
+        {
+            if (SetupEntitySelection.Exists(setup, _pinnedKind, _pinnedId))
+            {
+                kind = _pinnedKind;
+                id = _pinnedId;
+                return true;
+            }
+
+            ClearPin();
+        }
+
         return _entitySelection.TryResolve(setup, out kind, out id);
+    }
+
+    /// <summary>Pin menu entry for the breadcrumb: pins the currently shown entity, or releases the pin.</summary>
+    public void DrawPinMenuItem()
+    {
+        if (_pinnedKind != SetupEntitySelection.EntityKind.None)
+        {
+            if (CustomComponents.DrawMenuItem(_pinViewMenuId, $"Unpin view ({PinnedEntityName()})", isChecked: true))
+                ClearPin();
+
+            return;
+        }
+
+        if (!TryGetShownEntity(out var kind, out var id) || kind == SetupEntitySelection.EntityKind.None)
+        {
+            CustomComponents.DrawMenuItem(_pinViewMenuId, "Pin view", isEnabled: false);
+            return;
+        }
+
+        if (CustomComponents.DrawMenuItem(_pinViewMenuId, $"Pin view to {SetupActions.NameForEntity(kind, id)}"))
+        {
+            _pinnedKind = kind;
+            _pinnedId = id;
+        }
+    }
+
+    /// <summary>Toolbar indicator, drawn only while pinned — the visible reminder that this window
+    /// won't follow the selection. Clicking releases the pin.</summary>
+    public void DrawPinIndicator()
+    {
+        if (_pinnedKind == SetupEntitySelection.EntityKind.None)
+            return;
+
+        if (CustomComponents.IconButton(Icon.Pin, Vector2.Zero, CustomComponents.ButtonStates.Activated))
+            ClearPin();
+
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem($"Pinned to {PinnedEntityName()}", "This window keeps showing it while the selection moves. Click to unpin.");
+
+        ImGui.SameLine();
+    }
+
+    public void SaveStateTo(OutputWindowState state)
+    {
+        state.PinnedEntityKind = _pinnedKind;
+        state.PinnedEntityId = _pinnedId;
+    }
+
+    public void LoadStateFrom(OutputWindowState state)
+    {
+        // Restored blindly; the per-frame Exists check reverts a pin whose entity is gone.
+        _pinnedKind = state.PinnedEntityKind;
+        _pinnedId = state.PinnedEntityId;
+    }
+
+    private void ClearPin()
+    {
+        _pinnedKind = SetupEntitySelection.EntityKind.None;
+        _pinnedId = Guid.Empty;
+    }
+
+    private string PinnedEntityName()
+    {
+        return SetupActions.NameForEntity(_pinnedKind, _pinnedId);
     }
 
     private bool _showSetupPanel;
@@ -241,10 +324,15 @@ internal sealed class OutputSetupModeView
     private Action? _collapsePanel; // cached so the side-panel draw doesn't allocate a closure each frame
     private Guid _lastFocusedId;
 
+    // The per-window pin: None = follow the shared selection (persisted via OutputWindowState).
+    private SetupEntitySelection.EntityKind _pinnedKind;
+    private Guid _pinnedId;
+    private static readonly int _pinViewMenuId = nameof(_pinViewMenuId).GetHashCode();
+
     private const float DefaultPanelWidth = 240;
     private const float MinPanelWidth = 180;
     private const float MaxPanelWidth = 520;
-    private readonly SetupEntitySelection _entitySelection = new();
+    private readonly SetupEntitySelection _entitySelection = OutputSetupHandling.EntitySelection;
     public OutputSetupModeView()
     {
         // One EntityItem per window: the panel rows and the canvas menus share its rename/menu state,

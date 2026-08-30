@@ -810,6 +810,46 @@ internal static class SetupActions
         return FindSinkInstance(contentChildId) is { } instance ? SinkName(instance) : null;
     }
 
+    /// <summary>A display name for any entity kind — pin labels, tooltips. Resolves against the
+    /// active setup; falls back to the kind's name when the entity (or its name) is gone.</summary>
+    internal static string NameForEntity(SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return kind.ToString();
+
+        switch (kind)
+        {
+            case SetupEntitySelection.EntityKind.Surface:
+                return FallbackIfEmpty(setup.FindSurface(id)?.Name, "Surface");
+
+            case SetupEntitySelection.EntityKind.Output:
+                return FallbackIfEmpty(setup.FindOutput(id)?.Name, "Output");
+
+            case SetupEntitySelection.EntityKind.ReferenceImage:
+                return FallbackIfEmpty(setup.FindReferenceImage(id)?.Name, "Reference Image");
+
+            case SetupEntitySelection.EntityKind.Slice:
+            {
+                var slice = setup.FindSlice(id);
+                return slice == null ? "Slice" : SliceLabel(setup, slice);
+            }
+
+            case SetupEntitySelection.EntityKind.ContentSource:
+                return TryGetContentName(id) ?? "Content";
+
+            case SetupEntitySelection.EntityKind.Prop:
+                return FallbackIfEmpty(setup.FindProp(id)?.Kind, "Prop");
+
+            default:
+                return kind.ToString();
+        }
+    }
+
+    private static string FallbackIfEmpty(string? name, string fallback)
+    {
+        return string.IsNullOrEmpty(name) ? fallback : name;
+    }
+
     /// <summary>
     /// A slice's display name: a name the user typed if there is one, otherwise a default derived from its
     /// source. Unnamed sources give "Slice N"; a renamed source gives "{name}.N", so naming the op renames

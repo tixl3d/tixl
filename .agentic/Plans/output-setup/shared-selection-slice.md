@@ -1,4 +1,4 @@
-# Slice: Shared selection + per-window pinning (drafted 2026-08-31)
+# Slice: Shared selection + per-window pinning (drafted 2026-08-31 · implemented 2026-08-31, awaiting user testing)
 
 Implements the 2026-08-29 scope decision ([`selection.md`](selection.md) §Selection scope,
 [`ui-restructuring-plan.md`](ui-restructuring-plan.md) §A.1): **one `SetupEntitySelection` shared

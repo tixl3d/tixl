@@ -129,6 +129,7 @@ internal sealed partial class OutputWindow : Window
                     ImGui.SetCursorPos(ImGui.GetCursorStartPos());
                     CustomComponents.PushToolbarIconBackground();
                     _setupMode.DrawPanelToggleButton();
+                    _setupMode.DrawPinIndicator();
                     Pinning.DrawPinning(_drawOutputMenuExtras);
                     CustomComponents.PopToolbarIconBackground();
                 }

@@ -47,6 +47,12 @@ internal sealed class OutputWindowState
     public Guid[] PinnedInstancePath = [];
     public Guid PinnedOutputId = Guid.Empty;
 
+    // Setup-entity pin (the setup-editing view's pin; orthogonal to the op-instance pin above)
+    [JsonConverter(typeof(StringEnumConverter))]
+    public SetupEntitySelection.EntityKind PinnedEntityKind = SetupEntitySelection.EntityKind.None;
+
+    public Guid PinnedEntityId = Guid.Empty;
+
     /// <summary>
     /// Camera control modes — mirrors CameraSelectionHandling.ControlModes
     /// but as a public enum for serialization.

@@ -140,6 +140,7 @@ internal sealed partial class OutputWindow
 
         _camSelectionHandling.SaveStateTo(state);
         Pinning.SaveStateTo(state);
+        _setupMode.SaveStateTo(state);
     }
 
     private void SaveStateTo(OutputWindowState state)
@@ -156,6 +157,7 @@ internal sealed partial class OutputWindow
 
         _camSelectionHandling.SaveStateTo(state);
         Pinning.SaveStateTo(state);
+        _setupMode.SaveStateTo(state);
     }
 
     private void LoadStateFrom(OutputWindowState state)
@@ -178,6 +180,7 @@ internal sealed partial class OutputWindow
 
         _camSelectionHandling.LoadStateFrom(state);
         Pinning.LoadStateFrom(state);
+        _setupMode.LoadStateFrom(state);
     }
 
     private Guid _lastSyncedSymbolId;
