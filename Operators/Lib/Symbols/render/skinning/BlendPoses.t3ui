@@ -1,0 +1,45 @@
+{
+  "FormatVersion": 3,
+  "Id": "4a7e9c25-83d1-4b6f-95c0-e2f8a61d37b4"/*BlendPoses*/,
+  "Description": "Blends two poses joint by joint - positions and scales linearly, orientations with slerp.\n\nAn optional WeightMask pose scales the blend factor per joint with its F1 value, e.g. to blend only the upper body toward the second pose.",
+  "InputUis": [
+    {
+      "InputId": "5c82d1f7-940b-4e6a-a3d8-16fb27c95e40"/*PoseA*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "71f4c8d9-25ae-4b63-90e7-3dc5f81b42a9"/*Blend*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "ad60be52-17c9-4f38-b654-90e2c73a8f15"/*WeightMask*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "e3a95b18-6d72-4c04-bf59-8a41d0c7263f"/*PoseB*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "9f1b6e83-2c47-4da5-b380-71e5c92a04d6"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

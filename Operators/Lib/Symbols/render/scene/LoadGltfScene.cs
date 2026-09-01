@@ -970,6 +970,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         vertexBufferData = Array.Empty<PbrVertex>();
         indexBufferData = Array.Empty<Int3>();
 
+        Vector3[]? normals = null;
         Vector4[]? tangents = null;
 
         // Convert vertices
@@ -992,7 +993,6 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             var positions = positionAccessor.AsVector3Array();
 
             // Collect normals
-            Vector3[]? normals = null;
             if (vertexAccessors.TryGetValue("NORMAL", out var normalAccess))
             {
                 normals = normalAccess.AsVector3Array().ToArray();
@@ -1063,7 +1063,8 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             if (indexBufferData.Length != faceCount)
                 indexBufferData = new Int3[faceCount];
 
-            // Without authored tangents, accumulate per-triangle tangents on all three corners and average afterwards
+            // Without authored normals/tangents, accumulate per-triangle results on all three corners and average afterwards
+            var normalSums = normals == null ? new Vector3[vertexBufferData.Length] : null;
             var tangentSums = tangents == null ? new Vector3[vertexBufferData.Length] : null;
             var bitangentSums = tangents == null ? new Vector3[vertexBufferData.Length] : null;
 
@@ -1073,7 +1074,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                 indexBufferData[faceIndex] = new Int3(a, b, c);
                 faceIndex++;
 
-                if (tangentSums == null || bitangentSums == null)
+                if (normalSums == null && tangentSums == null)
                     continue;
 
                 // Calc TBN space
@@ -1083,6 +1084,18 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
                 // check for degenerated triangle
                 if (p1 == p2 || p1 == p3 || p2 == p3) continue;
+
+                if (normalSums != null)
+                {
+                    // Cross product length is proportional to the triangle area -> area-weighted smooth normals
+                    var faceNormal = Vector3.Cross(p2 - p1, p3 - p1);
+                    normalSums[a] += faceNormal;
+                    normalSums[b] += faceNormal;
+                    normalSums[c] += faceNormal;
+                }
+
+                if (tangentSums == null || bitangentSums == null)
+                    continue;
 
                 var uv1 = vertexBufferData[a].Texcoord;
                 var uv2 = vertexBufferData[b].Texcoord;
@@ -1119,6 +1132,18 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                 bitangentSums[a] += tDir;
                 bitangentSums[b] += tDir;
                 bitangentSums[c] += tDir;
+            }
+
+            if (normalSums != null)
+            {
+                for (var vertexIndex = 0; vertexIndex < vertexBufferData.Length; vertexIndex++)
+                {
+                    var normalSum = normalSums[vertexIndex];
+                    if (normalSum.LengthSquared() < 1e-10f)
+                        continue; // keep default normal
+
+                    vertexBufferData[vertexIndex].Normal = Vector3.Normalize(normalSum);
+                }
             }
 
             if (tangentSums != null && bitangentSums != null)

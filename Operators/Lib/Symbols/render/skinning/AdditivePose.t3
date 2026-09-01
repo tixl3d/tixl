@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "6b3f8d92-a541-4c78-b0e6-29d7c14f85a3"/*AdditivePose*/,
+  "Inputs": [
+    {
+      "Id": "04c7f2e9-8b35-4d61-a9f0-57e3d18c46b2"/*Setup*/,
+      "DefaultValue": {
+        "SceneSetup": {
+          "NodeSettings": []
+        }
+      }
+    },
+    {
+      "Id": "38e6c0a4-d19b-4572-9fe8-b25a41c6d793"/*BasePose*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5df03a86-27c4-4b91-8e35-fa1608d92c47"/*Weight*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "92b5e731-4f0c-48a6-bd27-c690f5a3e814"/*SkeletonIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f90d54b7-6a28-4e13-85cf-1c74b09e62d8"/*Additive*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
