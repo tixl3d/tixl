@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SharpGLTF.Animations;
 using T3.Core.Logging;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils.Geometry;
@@ -54,6 +55,29 @@ public class SceneSetup : IEditableInputType, IDisposable
     }
 
     public readonly List<SceneSkeleton> Skeletons = new();
+
+    /// <summary>
+    /// An animation clip extracted from the source file, targeting joints of the <see cref="Skeletons"/>.
+    /// Curve samplers are created once at load with isolated memory; sampling them per frame is cheap.
+    /// Times are in seconds.
+    /// </summary>
+    public sealed class SceneAnimClip
+    {
+        public string Name;
+        public float Duration;
+        public readonly List<JointAnimChannel> Channels = new();
+    }
+
+    public sealed class JointAnimChannel
+    {
+        public int SkeletonIndex;
+        public int JointIndex;
+        public ICurveSampler<Vector3> TranslationSampler;
+        public ICurveSampler<Quaternion> RotationSampler;
+        public ICurveSampler<Vector3> ScaleSampler;
+    }
+
+    public readonly List<SceneAnimClip> AnimationClips = new();
     
     /// <summary>
     /// Holds information required for building a T3 PbrMaterial.

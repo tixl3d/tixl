@@ -1,6 +1,7 @@
 #nullable enable
 using SharpDX.Direct3D11;
 using SharpDX.WIC;
+using SharpGLTF.Animations;
 using SharpGLTF.Schema2;
 using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
@@ -180,6 +181,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
         _skinWeightsForPrimitives.Clear();
         _skeletonIndicesForSkins.Clear();
+        _jointIndicesForNodes.Clear();
 
         foreach (var pointBuffer in _skeletonPointBuffers)
         {
@@ -205,6 +207,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             sceneSetup.RootNodes.Clear();
             sceneSetup.RootNodes.Add(rootNode);
             sceneSetup.GenerateSceneDrawDispatches();
+            ExtractAnimationClips(model, sceneSetup);
         }
         catch (Exception e)
         {
@@ -966,7 +969,9 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     {
         vertexBufferData = Array.Empty<PbrVertex>();
         indexBufferData = Array.Empty<Int3>();
-            
+
+        Vector4[]? tangents = null;
+
         // Convert vertices
         {
             // TODO: Iterate over all primitives
@@ -1004,6 +1009,15 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             {
                 texCoords2 = texAccess2.AsVector2Array().ToArray();
             }
+
+            // Authored tangents (float4 - w encodes the bitangent handedness)
+            if (vertexAccessors.TryGetValue("TANGENT", out var tangentAccess))
+            {
+                tangents = tangentAccess.AsVector4Array().ToArray();
+                if (tangents.Length != verticesCount)
+                    tangents = null;
+            }
+
             // Write vertex buffer
             for (var vertexIndex = 0; vertexIndex < positions.Count; vertexIndex++)
             {
@@ -1023,8 +1037,16 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                                                                        : new Vector2(texCoords2[vertexIndex].X,
                                                                                      1 - texCoords2[vertexIndex].Y),
                                                         ColorRgb = Vector3.One,
-                    Selection = 1,
+                                                        Selection = 1,
                                                     };
+
+                if (tangents != null)
+                {
+                    var tangent4 = tangents[vertexIndex];
+                    var tangent = new Vector3(tangent4.X, tangent4.Y, tangent4.Z);
+                    vertexBufferData[vertexIndex].Tangent = tangent;
+                    vertexBufferData[vertexIndex].Bitangent = Vector3.Cross(vertexBufferData[vertexIndex].Normal, tangent) * tangent4.W;
+                }
             }
             
             if (verticesCount == 0)
@@ -1041,11 +1063,18 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             if (indexBufferData.Length != faceCount)
                 indexBufferData = new Int3[faceCount];
 
+            // Without authored tangents, accumulate per-triangle tangents on all three corners and average afterwards
+            var tangentSums = tangents == null ? new Vector3[vertexBufferData.Length] : null;
+            var bitangentSums = tangents == null ? new Vector3[vertexBufferData.Length] : null;
+
             var faceIndex = 0;
             foreach (var (a, b, c) in indices)
             {
                 indexBufferData[faceIndex] = new Int3(a, b, c);
                 faceIndex++;
+
+                if (tangentSums == null || bitangentSums == null)
+                    continue;
 
                 // Calc TBN space
                 var p1 = vertexBufferData[a].Position;
@@ -1062,18 +1091,12 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                 // check for degenerated triangle
                 if (uv1 == uv2 || uv1 == uv3 || uv2 == uv3) continue;
 
-                var n1 = vertexBufferData[a].Normal;
-                var n2 = vertexBufferData[b].Normal;
-                var n3 = vertexBufferData[c].Normal;
-
                 // Taken from https://github.com/vpenades/SharpGLTF/blob/master/examples/SharpGLTF.Runtime.MonoGame/NormalTangentFactories.cs
                 var s = p2 - p1;
                 var t = p3 - p1;
 
                 var sUv = uv2 - uv1;
                 var tUv = uv3 - uv1;
-                //var tUv =  uv1 - uv3;
-                //tUv.Y = 1 - tUv.Y; 
 
                 var sx = sUv.X;
                 var tx = tUv.X;
@@ -1090,14 +1113,37 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                 if (!sDir._IsFinite()) continue;
                 if (!tDir._IsFinite()) continue;
 
-                // Ill-fated attempt with brute force 
-                // sDir =  Vector3.Cross(n1, Vector3.UnitY);
-                // tDir =  Vector3.Cross(n1, sDir);
+                tangentSums[a] += sDir;
+                tangentSums[b] += sDir;
+                tangentSums[c] += sDir;
+                bitangentSums[a] += tDir;
+                bitangentSums[b] += tDir;
+                bitangentSums[c] += tDir;
+            }
 
-                // Todo: Sadly this fill add significant artifacts to complex meshes
+            if (tangentSums != null && bitangentSums != null)
+            {
+                for (var vertexIndex = 0; vertexIndex < vertexBufferData.Length; vertexIndex++)
+                {
+                    var tangentSum = tangentSums[vertexIndex];
+                    if (tangentSum.LengthSquared() < 1e-10f)
+                        continue; // keep default tangent frame
 
-                vertexBufferData[a].Tangent = Vector3.Normalize(sDir);
-                vertexBufferData[a].Bitangent = Vector3.Normalize(tDir);
+                    // Gram-Schmidt orthogonalize against the normal
+                    var normal = vertexBufferData[vertexIndex].Normal;
+                    var tangent = tangentSum - normal * Vector3.Dot(normal, tangentSum);
+                    if (tangent.LengthSquared() < 1e-10f)
+                        continue;
+
+                    tangent = Vector3.Normalize(tangent);
+                    vertexBufferData[vertexIndex].Tangent = tangent;
+
+                    var bitangent = Vector3.Cross(normal, tangent);
+                    if (Vector3.Dot(bitangent, bitangentSums[vertexIndex]) < 0)
+                        bitangent = -bitangent;
+
+                    vertexBufferData[vertexIndex].Bitangent = bitangent;
+                }
             }
 
             if (faceCount == 0)
@@ -1133,6 +1179,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         if (_skeletonIndicesForSkins.TryGetValue(skin, out var existingIndex))
             return existingIndex;
 
+        var skeletonIndex = sceneSetup.Skeletons.Count;
         var jointCount = skin.JointsCount;
         var skeleton = new SceneSetup.SceneSkeleton
                            {
@@ -1145,7 +1192,9 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         var jointIndicesForNodes = new Dictionary<Node, int>(jointCount);
         for (var jointIndex = 0; jointIndex < jointCount; jointIndex++)
         {
-            jointIndicesForNodes[skin.GetJoint(jointIndex).Joint] = jointIndex;
+            var jointNodeForIndex = skin.GetJoint(jointIndex).Joint;
+            jointIndicesForNodes[jointNodeForIndex] = jointIndex;
+            _jointIndicesForNodes[jointNodeForIndex] = (skeletonIndex, jointIndex);
         }
 
         var restPosePoints = new Point[jointCount];
@@ -1192,10 +1241,66 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
         sceneSetup.Skeletons.Add(skeleton);
         _skeletonPointBuffers.Add(pointBuffer); // kept parallel to sceneSetup.Skeletons
+        _skeletonIndicesForSkins[skin] = skeletonIndex;
+        return skeletonIndex;
+    }
 
-        var newIndex = sceneSetup.Skeletons.Count - 1;
-        _skeletonIndicesForSkins[skin] = newIndex;
-        return newIndex;
+    /// <summary>
+    /// Converts glTF animations into per-joint curve samplers. Channels targeting nodes
+    /// that aren't skeleton joints (rigid node animation) are not supported yet and skipped.
+    /// </summary>
+    private void ExtractAnimationClips(ModelRoot model, SceneSetup sceneSetup)
+    {
+        var clipIndex = 0;
+        foreach (var animation in model.LogicalAnimations)
+        {
+            var clip = new SceneSetup.SceneAnimClip
+                           {
+                               Name = string.IsNullOrEmpty(animation.Name) ? $"Clip {clipIndex}" : animation.Name,
+                               Duration = animation.Duration,
+                           };
+
+            _jointChannelsForClip.Clear();
+            foreach (var channel in animation.Channels)
+            {
+                var targetNode = channel.TargetNode;
+                if (targetNode == null || !_jointIndicesForNodes.TryGetValue(targetNode, out var jointRef))
+                    continue;
+
+                if (!_jointChannelsForClip.TryGetValue(jointRef, out var jointChannel))
+                {
+                    jointChannel = new SceneSetup.JointAnimChannel
+                                       {
+                                           SkeletonIndex = jointRef.SkeletonIndex,
+                                           JointIndex = jointRef.JointIndex,
+                                       };
+                    _jointChannelsForClip[jointRef] = jointChannel;
+                    clip.Channels.Add(jointChannel);
+                }
+
+                switch (channel.TargetNodePath)
+                {
+                    case PropertyPath.translation:
+                        jointChannel.TranslationSampler = channel.GetTranslationSampler()?.CreateCurveSampler(true);
+                        break;
+
+                    case PropertyPath.rotation:
+                        jointChannel.RotationSampler = channel.GetRotationSampler()?.CreateCurveSampler(true);
+                        break;
+
+                    case PropertyPath.scale:
+                        jointChannel.ScaleSampler = channel.GetScaleSampler()?.CreateCurveSampler(true);
+                        break;
+                }
+            }
+
+            if (clip.Channels.Count > 0)
+            {
+                sceneSetup.AnimationClips.Add(clip);
+            }
+
+            clipIndex++;
+        }
     }
 
     private static bool TryCreateSkinWeightsBuffer(MeshPrimitive meshPrimitive, [NotNullWhen(true)] out BufferWithViews? weightsBuffer, out string message)
@@ -1265,6 +1370,8 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     private readonly Dictionary<MeshPrimitive, BufferWithViews> _skinWeightsForPrimitives = new();
     private readonly Dictionary<Skin, int> _skeletonIndicesForSkins = new();
     private readonly List<BufferWithViews> _skeletonPointBuffers = new();
+    private readonly Dictionary<Node, (int SkeletonIndex, int JointIndex)> _jointIndicesForNodes = new();
+    private readonly Dictionary<(int SkeletonIndex, int JointIndex), SceneSetup.JointAnimChannel> _jointChannelsForClip = new();
     
     private bool _combineBuffer;
     private float _offsetRoughness;
