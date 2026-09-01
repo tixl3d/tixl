@@ -128,7 +128,7 @@ internal sealed class _DispatchSceneDraws : Instance<_DispatchSceneDraws>
 
             if (resourcesMissing)
             {
-                Log.Debug($"Skipping draw call for {dispatch.Material.Name} because we're missing some resources",this);
+                Log.Debug($"Skipping draw call for {dispatch.Material?.Name} because we're missing some resources",this);
                 continue;
             }
 

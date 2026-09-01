@@ -249,19 +249,21 @@ public class SceneSetup : IEditableInputType, IDisposable
     
     public void Dispose(bool isDisposing)
     {
-        if (isDisposing)
+        if (!isDisposing)
             return;
-        
+
+        // Dispatches can share MeshBuffers and PbrMaterial instances; their Dispose implementations are idempotent.
         foreach (var dispatch in Dispatches)
         {
-            dispatch.MeshBuffers.IndicesBuffer.Dispose();
-            dispatch.MeshBuffers.VertexBuffer.Dispose();
-            
+            dispatch.MeshBuffers?.Dispose();
+
             if (dispatch.Material != null)
             {
                 dispatch.Material.Dispose();
                 dispatch.Material = null;
             }
         }
+
+        Dispatches.Clear();
     }
 }

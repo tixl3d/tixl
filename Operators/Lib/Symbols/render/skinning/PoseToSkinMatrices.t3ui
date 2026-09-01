@@ -1,0 +1,38 @@
+{
+  "FormatVersion": 3,
+  "Id": "7b8ec5a6-2d94-4c1f-b0e3-98a4d17f6c25"/*PoseToSkinMatrices*/,
+  "Description": "Converts a skeleton pose into a buffer of skinning matrices for [SkinMesh].\n\nThe skeleton is taken from the Setup of a [LoadGltfScene] with a rigged model. The optional Pose input expects one point per joint with joint-local position, orientation and scale. Without a pose, the rest pose is used, which reproduces the bind pose.",
+  "InputUis": [
+    {
+      "InputId": "4f2b6d90-83c7-49ae-b512-e96a05d3f174"/*Pose*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "9d43f8a1-6e05-472b-8cd9-1b52a7e64c88"/*Setup*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "a17c3e58-04bd-4e92-9f66-7d80b25c41a9"/*SkeletonIndex*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5e1a9c34-b872-4d6f-a05e-3c7d28f491b6"/*SkinMatrices*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

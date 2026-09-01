@@ -144,6 +144,20 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
         ResultSetup.Value?.Dispose();
 
+        foreach (var weightsBuffer in _skinWeightsForPrimitives.Values)
+        {
+            weightsBuffer.Dispose();
+        }
+
+        _skinWeightsForPrimitives.Clear();
+
+        foreach (var pointBuffer in _skeletonPointBuffers)
+        {
+            pointBuffer.Dispose();
+        }
+
+        _skeletonPointBuffers.Clear();
+
         Log.Debug("Destroying LoadGltfScene");
     }
 
