@@ -26,13 +26,21 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     [Output(Guid = "F33EC4C1-F07B-46B3-BEC7-34E91B8312EF")]
     public readonly Slot<PbrMaterial> Material = new();
 
+    [Output(Guid = "E7A2C34B-8F91-4D26-A6F3-59B1C0D8E442")]
+    public readonly Slot<BufferWithViews> SkinWeights = new();
+
+    [Output(Guid = "3C9E5A17-64D2-4F8B-9A3E-D07F16B82C55")]
+    public readonly Slot<BufferWithViews> SkeletonPoints = new();
+
     public LoadGltfScene()
     {
         _resource = new Resource<SceneSetup>(Path, OnFileChanged);
-        _resource.AddDependentSlots(ResultSetup, Mesh, Material);        
-        
+        _resource.AddDependentSlots(ResultSetup, Mesh, Material, SkinWeights, SkeletonPoints);
+
         ResultSetup.UpdateAction += Update;
         Mesh.UpdateAction += Update;
+        SkinWeights.UpdateAction += Update;
+        SkeletonPoints.UpdateAction += Update;
     }
 
     private bool OnFileChanged(FileResource file, 
@@ -105,8 +113,14 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         {
             var dispatchCount = ResultSetup.Value.Dispatches.Count;
             var index = meshChildIndex.Mod(dispatchCount);
-            Mesh.Value = ResultSetup.Value.Dispatches[index].MeshBuffers;
-            Material.Value = ResultSetup.Value.Dispatches[index].Material;
+            var dispatch = ResultSetup.Value.Dispatches[index];
+            Mesh.Value = dispatch.MeshBuffers;
+            Material.Value = dispatch.Material;
+            SkinWeights.Value = dispatch.SkinWeights;
+
+            // Fall back to the first skeleton so an unskinned dispatch selection still shows the rig
+            var skeletonIndex = dispatch.SkeletonIndex >= 0 ? dispatch.SkeletonIndex : 0;
+            SkeletonPoints.Value = (skeletonIndex < _skeletonPointBuffers.Count ? _skeletonPointBuffers[skeletonIndex] : null)!;
         }
 
         if (materialNeedsUpdate && ResultSetup?.Value?.Dispatches != null && ResultSetup.Value.Dispatches.Count > 0)
@@ -144,6 +158,21 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
         _sceneMaterialsByName.Clear();
         _meshBuffersForPrimitives.Clear();
+
+        foreach (var weightsBuffer in _skinWeightsForPrimitives.Values)
+        {
+            weightsBuffer.Dispose();
+        }
+
+        _skinWeightsForPrimitives.Clear();
+        _skeletonIndicesForSkins.Clear();
+
+        foreach (var pointBuffer in _skeletonPointBuffers)
+        {
+            pointBuffer.Dispose();
+        }
+
+        _skeletonPointBuffers.Clear();
         sceneSetup = new SceneSetup();
 
         if (!TryGetFilePath(path, out var fullPath))
@@ -155,9 +184,9 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         try
         {
             var model = ModelRoot.Load(fullPath);
-            var rootNode = _combineBuffer 
+            var rootNode = _combineBuffer
                                ? ConvertToNodeStructureIntoChunks(model.DefaultScene)
-                               : ConvertToNodeStructure(model.DefaultScene);
+                               : ConvertToNodeStructure(model.DefaultScene, sceneSetup);
 
             sceneSetup.RootNodes.Clear();
             sceneSetup.RootNodes.Add(rootNode);
@@ -172,14 +201,14 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         return true;
     }
 
-    private SceneSetup.SceneNode ConvertToNodeStructure(Scene modelDefaultScene)
+    private SceneSetup.SceneNode ConvertToNodeStructure(Scene modelDefaultScene, SceneSetup sceneSetup)
     {
         var rootNode = new SceneSetup.SceneNode()
                            {
                                Name = modelDefaultScene.Name
                            };
-        
-        ParseChildren(modelDefaultScene.VisualChildren, rootNode);
+
+        ParseChildren(modelDefaultScene.VisualChildren, rootNode, sceneSetup);
         return rootNode;
     }
 
@@ -432,7 +461,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     }
     
     
-    private void ParseChildren(IEnumerable<Node?> visualChildren, SceneSetup.SceneNode parentNode)
+    private void ParseChildren(IEnumerable<Node?> visualChildren, SceneSetup.SceneNode parentNode, SceneSetup sceneSetup)
     {
         foreach (var child in visualChildren)
         {
@@ -463,11 +492,27 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
             if (child.Mesh != null)
             {
+                var skeletonIndex = child.Skin != null ? GetOrCreateSkeleton(child.Skin, sceneSetup) : -1;
+
                 var meshIndex = 0;
                 foreach (var meshPrimitive in child.Mesh.Primitives)
                 {
                     if(meshPrimitive == null)
                         continue;
+
+                    BufferWithViews? skinWeights = null;
+                    if (skeletonIndex >= 0 && !_skinWeightsForPrimitives.TryGetValue(meshPrimitive, out skinWeights))
+                    {
+                        if (TryCreateSkinWeightsBuffer(meshPrimitive, out skinWeights, out var weightsError))
+                        {
+                            _skinWeightsForPrimitives[meshPrimitive] = skinWeights;
+                        }
+                        else
+                        {
+                            Log.Warning($"Skipping skin weights for {child.Name}: {weightsError}", this);
+                            skinWeights = null;
+                        }
+                    }
 
                     if (!_meshBuffersForPrimitives.TryGetValue(meshPrimitive, out var meshBuffers))
                     {
@@ -494,6 +539,8 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                     {
                         structureNode.MeshBuffers = meshBuffers;
                         structureNode.Material = materialDef;
+                        structureNode.SkinWeights = skinWeights;
+                        structureNode.SkeletonIndex = skinWeights != null ? skeletonIndex : -1;
                         useStructureNodeForMesh = false;
                         continue;
                     }
@@ -506,12 +553,14 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                                            Transform = transform,
                                            CombinedTransform = child.WorldMatrix,
                                            Material = materialDef,
+                                           SkinWeights = skinWeights,
+                                           SkeletonIndex = skinWeights != null ? skeletonIndex : -1,
                                        };
                     parentNode.ChildNodes.Add(meshNode);
                 }
             }
 
-            ParseChildren(child.VisualChildren, structureNode);
+            ParseChildren(child.VisualChildren, structureNode, sceneSetup);
         }
     }
     
@@ -1049,9 +1098,159 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     }
     #endregion
 
+    #region Skinning extraction
+    /// <summary>
+    /// Per-vertex joint influences matching the layout consumed by the skinning compute shader.
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, Size = Stride)]
+    public struct SkinWeightDef
+    {
+        [FieldOffset(0)]
+        public Int4 JointIndices;
+
+        [FieldOffset(16)]
+        public Vector4 Weights;
+
+        internal const int Stride = 32;
+    }
+
+    private int GetOrCreateSkeleton(Skin skin, SceneSetup sceneSetup)
+    {
+        if (_skeletonIndicesForSkins.TryGetValue(skin, out var existingIndex))
+            return existingIndex;
+
+        var jointCount = skin.JointsCount;
+        var skeleton = new SceneSetup.SceneSkeleton
+                           {
+                               JointNames = new string[jointCount],
+                               ParentIndices = new int[jointCount],
+                               RestLocalTransforms = new SceneSetup.Transform[jointCount],
+                               InverseBindMatrices = new Matrix4x4[jointCount],
+                           };
+
+        var jointIndicesForNodes = new Dictionary<Node, int>(jointCount);
+        for (var jointIndex = 0; jointIndex < jointCount; jointIndex++)
+        {
+            jointIndicesForNodes[skin.GetJoint(jointIndex).Joint] = jointIndex;
+        }
+
+        var restPosePoints = new Point[jointCount];
+        for (var jointIndex = 0; jointIndex < jointCount; jointIndex++)
+        {
+            var (jointNode, inverseBindMatrix) = skin.GetJoint(jointIndex);
+            var t = jointNode.LocalTransform.GetDecomposed();
+
+            skeleton.JointNames[jointIndex] = jointNode.Name;
+            skeleton.InverseBindMatrices[jointIndex] = inverseBindMatrix;
+            skeleton.RestLocalTransforms[jointIndex] = new SceneSetup.Transform
+                                                           {
+                                                               Translation = t.Translation,
+                                                               Rotation = t.Rotation,
+                                                               Scale = t.Scale,
+                                                           };
+            skeleton.ParentIndices[jointIndex] = jointNode.VisualParent != null
+                                                 && jointIndicesForNodes.TryGetValue(jointNode.VisualParent, out var parentIndex)
+                                                     ? parentIndex
+                                                     : -1;
+
+            if (!Matrix4x4.Decompose(jointNode.WorldMatrix, out var worldScale, out var worldRotation, out var worldTranslation))
+            {
+                worldRotation = Quaternion.Identity;
+                worldTranslation = jointNode.WorldMatrix.Translation;
+            }
+
+            // Rest pose in object space for visualization; parent index rides in F2 so F1 keeps its width semantic
+            restPosePoints[jointIndex] = new Point
+                                             {
+                                                 Position = worldTranslation,
+                                                 Orientation = worldRotation,
+                                                 Scale = Vector3.One,
+                                                 Color = Vector4.One,
+                                                 F1 = 1,
+                                                 F2 = skeleton.ParentIndices[jointIndex],
+                                             };
+        }
+
+        var pointBuffer = new BufferWithViews();
+        ResourceManager.SetupStructuredBuffer(restPosePoints, Point.Stride * jointCount, Point.Stride, ref pointBuffer.Buffer);
+        ResourceManager.CreateStructuredBufferSrv(pointBuffer.Buffer, ref pointBuffer.Srv);
+        ResourceManager.CreateStructuredBufferUav(pointBuffer.Buffer, UnorderedAccessViewBufferFlags.None, ref pointBuffer.Uav);
+
+        sceneSetup.Skeletons.Add(skeleton);
+        _skeletonPointBuffers.Add(pointBuffer); // kept parallel to sceneSetup.Skeletons
+
+        var newIndex = sceneSetup.Skeletons.Count - 1;
+        _skeletonIndicesForSkins[skin] = newIndex;
+        return newIndex;
+    }
+
+    private static bool TryCreateSkinWeightsBuffer(MeshPrimitive meshPrimitive, [NotNullWhen(true)] out BufferWithViews? weightsBuffer, out string message)
+    {
+        weightsBuffer = null;
+
+        var vertexAccessors = meshPrimitive.VertexAccessors;
+        if (!vertexAccessors.TryGetValue("JOINTS_0", out var jointsAccessor)
+            || !vertexAccessors.TryGetValue("WEIGHTS_0", out var weightsAccessor))
+        {
+            message = "Primitive of skinned mesh has no JOINTS_0/WEIGHTS_0 attributes";
+            return false;
+        }
+
+        try
+        {
+            var joints = jointsAccessor.AsVector4Array();
+            var weights = weightsAccessor.AsVector4Array();
+            var count = Math.Min(joints.Count, weights.Count);
+            if (count == 0)
+            {
+                message = "Skin attributes are empty";
+                return false;
+            }
+
+            var weightData = new SkinWeightDef[count];
+            for (var vertexIndex = 0; vertexIndex < count; vertexIndex++)
+            {
+                var jointIndices = joints[vertexIndex];
+                var weight = weights[vertexIndex];
+
+                var weightSum = weight.X + weight.Y + weight.Z + weight.W;
+                if (weightSum > 0.0001f)
+                {
+                    weight /= weightSum;
+                }
+
+                weightData[vertexIndex] = new SkinWeightDef
+                                              {
+                                                  JointIndices = new Int4((int)jointIndices.X,
+                                                                          (int)jointIndices.Y,
+                                                                          (int)jointIndices.Z,
+                                                                          (int)jointIndices.W),
+                                                  Weights = weight,
+                                              };
+            }
+
+            weightsBuffer = new BufferWithViews();
+            ResourceManager.SetupStructuredBuffer(weightData, SkinWeightDef.Stride * count, SkinWeightDef.Stride, ref weightsBuffer.Buffer);
+            ResourceManager.CreateStructuredBufferSrv(weightsBuffer.Buffer, ref weightsBuffer.Srv);
+            ResourceManager.CreateStructuredBufferUav(weightsBuffer.Buffer, UnorderedAccessViewBufferFlags.None, ref weightsBuffer.Uav);
+
+            message = string.Empty;
+            return true;
+        }
+        catch (Exception e)
+        {
+            message = $"Failed to read skin attributes: {e.Message}";
+            return false;
+        }
+    }
+    #endregion
+
     private readonly Dictionary<string, SceneSetup.SceneMaterial> _sceneMaterialsByName = new();
     private readonly Dictionary<MeshPrimitive, MeshBuffers> _meshBuffersForPrimitives = new();
     private readonly Dictionary<MeshPrimitive, int> _chunkDefIndicesForPrimitives = new();
+    private readonly Dictionary<MeshPrimitive, BufferWithViews> _skinWeightsForPrimitives = new();
+    private readonly Dictionary<Skin, int> _skeletonIndicesForSkins = new();
+    private readonly List<BufferWithViews> _skeletonPointBuffers = new();
     
     private bool _combineBuffer;
     private float _offsetRoughness;

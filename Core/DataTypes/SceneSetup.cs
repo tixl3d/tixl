@@ -37,7 +37,23 @@ public class SceneSetup : IEditableInputType, IDisposable
         public int MeshChunkIndex;
         public MeshBuffers MeshBuffers;
         public SceneMaterial Material;
+        public BufferWithViews SkinWeights;
+        public int SkeletonIndex = -1;
     }
+
+    /// <summary>
+    /// Joint hierarchy and bind data extracted from a skin.
+    /// Joint transforms are in joint-local space; object space is derived by walking <see cref="ParentIndices"/>.
+    /// </summary>
+    public sealed class SceneSkeleton
+    {
+        public string[] JointNames;
+        public int[] ParentIndices;   // -1 marks a root joint
+        public Transform[] RestLocalTransforms;
+        public Matrix4x4[] InverseBindMatrices;
+    }
+
+    public readonly List<SceneSkeleton> Skeletons = new();
     
     /// <summary>
     /// Holds information required for building a T3 PbrMaterial.
@@ -118,6 +134,8 @@ public class SceneSetup : IEditableInputType, IDisposable
                                       CombinedTransform = node.CombinedTransform,
                                       ChunkIndex = node.MeshChunkIndex,
                                       Scale = node.Transform.Scale,
+                                      SkinWeights = node.SkinWeights,
+                                      SkeletonIndex = node.SkeletonIndex,
                                   };
             
             Dispatches.Add(newDispatch);
@@ -141,6 +159,8 @@ public class SceneSetup : IEditableInputType, IDisposable
         public Matrix4x4 CombinedTransform;
         public int ChunkIndex;
         public Vector3 Scale;
+        public BufferWithViews SkinWeights;
+        public int SkeletonIndex = -1;
     }
     
     public readonly List<SceneDrawDispatch> Dispatches = new();
