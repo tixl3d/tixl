@@ -96,7 +96,7 @@ psInput vsMain(uint id: SV_VertexID)
     Point pointA = Points[indexPair.x];
     Point pointB = Points[indexPair.y];
 
-    if(isnan(pointA.FX1) || isnan(pointB.FX1) || isnan(pointA.Scale.x) || isnan(pointB.Scale.x))
+    if(IsSeparator(pointA) || IsSeparator(pointB))
     {
         output.position = 0;
         return output;

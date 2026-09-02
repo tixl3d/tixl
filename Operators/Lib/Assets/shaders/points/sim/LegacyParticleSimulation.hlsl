@@ -43,7 +43,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     if(Reset > 0.5)
     {
-        CollectedPoints[gi].FX1 =  NAN;
+        CollectedPoints[gi].Scale = NAN;
         return;
     }
 
@@ -73,11 +73,11 @@ void main(uint3 i : SV_DispatchThreadID)
         {
             float age = CollectedPoints[gi].FX1;
 
-            if(!isnan(age)) 
-            {    
+            if(!IsSeparator(CollectedPoints[gi]))
+            {
                 if(age <= 0)
                 {
-                    CollectedPoints[gi].FX1 = NAN; // Flag non-initialized points
+                    CollectedPoints[gi].Scale = NAN; // Flag non-initialized points
                 }
                 else if(age < MaxAge)
                 {

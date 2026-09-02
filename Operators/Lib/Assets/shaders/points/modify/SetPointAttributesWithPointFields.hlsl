@@ -89,7 +89,7 @@ float3 fmod(float3 x, float3 y)
     for (int fieldIndex = 0; fieldIndex < FieldCount; fieldIndex++)
     {
         float w = FieldPoints[fieldIndex].FX1;
-        if (isnan(w) || isnan(FieldPoints[fieldIndex].Scale.x) || w < 0.0001)
+        if (IsSeparator(FieldPoints[fieldIndex]) || !(w > 0.0001)) // !(>) also skips NaN width
             continue;
 
         usedCount++;

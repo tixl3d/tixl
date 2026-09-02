@@ -93,8 +93,6 @@ void main(uint3 i : SV_DispatchThreadID)
 
         float4 attributes = GrowthMap.SampleLevel(texSampler, float2(age,1-w), 0);
         float d = saturate(attributes.r - 0.05);
-        if(d < 0.001)
-            d = NAN;
 
         float4 rotation = qMul(A.Rotation, B.Rotation);
 
@@ -108,7 +106,7 @@ void main(uint3 i : SV_DispatchThreadID)
         ResultPoints[i.x].Position = pLocal * Length + B.Position + offset;
 
         ResultPoints[i.x].FX1 = d * Width;
-        ResultPoints[i.x].Scale = 1;
+        ResultPoints[i.x].Scale = d < 0.001 ? NAN : 1; // not yet grown -> separator
         ResultPoints[i.x].Rotation = newRotation;
     }
 }

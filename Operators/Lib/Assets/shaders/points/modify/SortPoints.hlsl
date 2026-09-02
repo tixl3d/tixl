@@ -72,7 +72,7 @@ uint2 GetSwapPairBitonic(uint i, uint ip, uint TotalCount){
 
 float c2k(Point c){
     float3 p=c.Position.xyz;
-    if(isnan(c.Scale.x)){ return -1; }
+    if(IsSeparator(c)){ return -1; }
     float k=length(c.Position.xyz-CameraToWorld[3].xyz);
     // float k=-mul(float4(c.Position.xyz,1),WorldToCamera).z;//viewspace z
     if(Ascending>0)k=-k;

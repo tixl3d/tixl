@@ -40,7 +40,7 @@ float3 SamplePosAtF(float f)
         return pos;
 
     float w1 = SourcePoints[index].FX1;
-    if (isnan(SourcePoints[index].Scale.x * SourcePoints[index + 1].Scale.x))
+    if (IsSeparator(SourcePoints[index]) || IsSeparator(SourcePoints[index + 1]))
     {
         return pos;
     }
@@ -102,9 +102,6 @@ inline float4 SampleRotationAtF(float f)
         minPos += SamplePosAtF(f - d);
         maxPos += SamplePosAtF(f + d);
     }
-
-    if (sampledCount == 0)
-        sumF1 = NAN;
 
     float3 pos = sumPos / sampledCount;
     ResultPoints[i.x].Position = pos;

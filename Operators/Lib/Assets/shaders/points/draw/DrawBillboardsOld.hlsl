@@ -106,7 +106,7 @@ psInput vsMain(uint id : SV_VertexID)
     // corner =  ApplyPointOrientaiton > 0.5 ? qRotateVec3(corner, p.rotation )
     //                                     : corner; // flipping rotation to match default radial billboards
 
-    float hideUndefinedPoints = (isnan(p.FX1) || isnan(p.Scale.x)) ? 0 : 1;
+    float hideUndefinedPoints = IsSeparator(p) ? 0 : 1;
     quadPosInCamera.xy += corner * Scale * (ScaleRandomly * scatter.y + 1) * tooCloseFactor * sizeFromW * hideUndefinedPoints;
 
     output.position = mul(quadPosInCamera, CameraToClipSpace);

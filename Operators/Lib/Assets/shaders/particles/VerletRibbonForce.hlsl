@@ -48,7 +48,7 @@ RWStructuredBuffer<UpdateCountAttr> UpdateCount : register(u2);
 
 inline bool IsPinned(uint index)
 {
-    return index == 0 || isnan(ReferencePoints[index-1].Scale.x);
+    return index == 0 || IsSeparator(ReferencePoints[index-1]);
 }
 
 
@@ -114,7 +114,7 @@ void constraints(uint3 i : SV_DispatchThreadID)
     uint indexB = index  + ((UpdateCount[0].Count +1) % 2);
 
     
-    if( isnan( ReferencePoints[indexA].Scale.x * ReferencePoints[indexB].Scale.x))
+    if( IsSeparator(ReferencePoints[indexA]) || IsSeparator(ReferencePoints[indexB]))
         return;
 
     bool read1 = (UpdateCount[0].Count % 2) == 0;

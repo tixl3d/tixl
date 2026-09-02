@@ -25,4 +25,12 @@ struct Particle
     float3 Velocity;
     float BirthTime;
 };
+
+// A point with NaN Scale.x is a separator: it is never drawn, and line-style
+// draws (lines, tubes, ribbons) break their strip at it. This is the only
+// NaN convention for points — all other fields are plain values.
+inline bool IsSeparator(Point p)
+{
+    return isnan(p.Scale.x);
+}
 #endif

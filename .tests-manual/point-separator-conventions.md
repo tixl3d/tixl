@@ -11,8 +11,8 @@ prerequisites:
 
 Verifies that NaN separators in point lists (written by `Point.Separator()` and
 point generators) break line-style rendering consistently across draw operators.
-All separator producers and consumers use one convention (`Scale.x` = NaN); a
-NaN width (`FX1`) additionally hides individual points in width-based draw ops.
+There is exactly one convention: a point with `Scale.x` = NaN is a separator —
+never drawn, and line strips break at it (`IsSeparator()` in `shared/point.hlsl`).
 
 ## Step: Contour breaks in DrawLines
 
@@ -54,12 +54,22 @@ enabled, and a `[DrawLines]`.
 - When points wrap around the volume edge, the line breaks there instead of
   streaking across the whole volume.
 
-## Step: Sprite hiding via NaN width still works
+## Step: Separators are hidden in per-point draws
 
 **Action:**
-Add a `[TextSprites]` operator with a multi-word text and connect it to
-`[DrawBillBoards]`.
+Connect the `[LoadSvg]` points from the first step to a `[DrawBillBoards]`
+operator.
 
 **Expected:**
-- Only visible glyphs render; no billboard quads appear at whitespace
-  positions or at the origin.
+- Billboards appear only at contour points.
+- No stray billboard renders at the origin or between shapes (separator
+  points are not drawn).
+
+## Step: Empty text draws nothing
+
+**Action:**
+Add a `[TextSprites]` operator, clear its Text input to an empty string, and
+connect it to `[DrawBillBoards]`.
+
+**Expected:**
+- Nothing renders; no single billboard appears at the origin.

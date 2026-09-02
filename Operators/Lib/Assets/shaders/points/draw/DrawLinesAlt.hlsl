@@ -189,11 +189,11 @@ psInput vsMain(uint id : SV_VertexID)
     float3 normalB = normalize(cross(directionB, float3(0, 0, 1)));
 
     // Handle edge cases for normals
-    if (isnan(pointAA.Scale.x) || isinf(pointAA.Scale.x) || any(isnan(normalA)))
+    if (IsSeparator(pointAA) || isinf(pointAA.Scale.x) || any(isnan(normalA)))
     {
         normalA = normal;
     }
-    if (isnan(pointBB.Scale.x) || isinf(pointBB.Scale.x) || any(isnan(normalB)))
+    if (IsSeparator(pointBB) || isinf(pointBB.Scale.x) || any(isnan(normalB)))
     {
         normalB = normal;
     }

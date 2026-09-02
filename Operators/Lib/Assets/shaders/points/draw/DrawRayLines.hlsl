@@ -83,7 +83,7 @@ psInput vsMain(uint id : SV_VertexID)
     Point pointA = Points[particleId];
     Point pointB = Points[particleId + 1];
 
-    if (isnan(pointA.Scale.x) || isnan(pointB.Scale.x))
+    if (IsSeparator(pointA) || IsSeparator(pointB))
     {
         output.position = 0;
         return output;

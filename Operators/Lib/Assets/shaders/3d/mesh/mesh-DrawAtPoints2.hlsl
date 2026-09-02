@@ -225,7 +225,7 @@ psInput vsMain(uint id : SV_VertexID)
     // Scale and stretch
     float scaleFxU = GetUFromMode(ScaleDistribution, pointId, f, normalizedScatter, pW, output.fog);
     float scaleFromCurve = SizeOverW.SampleLevel(clampedSampler, float2(scaleFxU, 0), 0).r;
-    float hideUndefinedPoints = (isnan(pW) || isnan(_p.Scale.x)) ? 0 : (UseWFoScale > 0.5 ? max(pW, 0) : 1 );
+    float hideUndefinedPoints = IsSeparator(_p) ? 0 : (UseWFoScale > 0.5 ? max(pW, 0) : 1 );
     
     float r= (RandomScale * scatterForScale.y *adjustedRandomize + 1);
     r = LimitScale(r);

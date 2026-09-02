@@ -33,7 +33,7 @@ void CountBuckets(uint3 id : SV_DispatchThreadID)
     if (
         //dot(pos - CameraPos, ViewDir) < 0 // hidden
     //|| 
-    isnan(GPoints[id.x].Scale.x))  // dead
+    IsSeparator(GPoints[id.x]))  // dead
     {
         BucketIndices[id.x] = 0xFFFFFFFF;
         return;

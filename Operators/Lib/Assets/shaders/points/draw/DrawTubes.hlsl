@@ -116,8 +116,8 @@ psInput vsMain(uint id: SV_VertexID)
     float4 pointRotation = p.Rotation;
 
     float WidthFactor = UseWAsWeight > 0.5 ? p.FX1 : 1;
-    if (isnan(p.Scale.x) || isnan(p.FX1))
-        WidthFactor = NAN; // Hide separators and undefined points by collapsing the segment
+    if (IsSeparator(p))
+        WidthFactor = NAN; // Collapse the segment at separators
     
     float fRing = (sideIndex + (cornerFactors.y / 2 + 0.5)) / SideCount;
     float spinRad = fRing * Tau;

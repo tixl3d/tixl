@@ -59,7 +59,7 @@ inline float GetDistance(float3 p3)
 
     Point p = SourcePoints[i.x];
 
-    if (isnan(p.Scale.x))
+    if (IsSeparator(p))
     {
         ResultPoints[i.x] = p;
         return;

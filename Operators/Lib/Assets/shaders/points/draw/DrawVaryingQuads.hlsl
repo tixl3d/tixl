@@ -88,7 +88,7 @@ psInput vsMain(uint id
     // ApplyPointOrientaiton > 0.5 ? p.rotation : ;
 
     float4 rotation = qMul(pRotation, qFromAngleAxis(Rotate / 180 * PI, RotateAxis));
-    float sizeFromW = (isnan(p.FX1) || isnan(p.Scale.x)) ? 0 : SizeOverW.SampleLevel(texSampler, float2(p.FX1 * WMappingScale, 0), 0);
+    float sizeFromW = IsSeparator(p) ? 0 : SizeOverW.SampleLevel(texSampler, float2(p.FX1 * WMappingScale, 0), 0);
 
     axis = qRotateVec3(axis, rotation) * Size * sizeFromW;
     float3 pInObject = p.Position + axis;

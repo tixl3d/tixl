@@ -83,7 +83,7 @@ static const float NoisePhase = 0;
 
     Point p = SourcePoints[i.x];
 
-    if (isnan(p.Scale.x))
+    if (IsSeparator(p))
     {
         ResultPoints[i.x] = p;
         return;

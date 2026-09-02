@@ -105,8 +105,8 @@ psInput vsMain(uint id: SV_VertexID)
     float3 side = float3(cos(spinRad), 0, sin(spinRad)) * cornerFactors.y;
 
     float WidthFactor = UseWAsWeight > 0.5 ? p.FX1 : 1;
-    if (isnan(p.Scale.x) || isnan(p.FX1))
-        WidthFactor = NAN; // Hide separators and undefined points by collapsing the segment
+    if (IsSeparator(p))
+        WidthFactor = NAN; // Collapse the segment at separators
     float3 widthV = qRotateVec3(side, p.Rotation) * Width * WidthFactor;
     float3 pInObject = p.Position + widthV;
 

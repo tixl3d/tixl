@@ -277,15 +277,7 @@ internal sealed class TextSprites : Instance<TextSprites>
                                                              
                                                  } };
         
-    private readonly Point[] _nonPoints = { new()
-                                                {
-                                                    Position = Vector3.Zero,
-                                                    F1= float.NaN,
-                                                    Orientation =  Quaternion.Identity,
-                                                    Color = Vector4.One,
-                                                    F2 = 1,
-                                                    Scale = Vector3.One,
-                                                } };
+    private readonly Point[] _nonPoints = { Point.Separator() };
 
     private void OffsetLineCharacters(float offset, int currentLineCharacterCount, int outputIndex)
     {

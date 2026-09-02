@@ -79,7 +79,7 @@ RWStructuredBuffer<int3> TriangleIndices : register(u1);
     v.ColorRGB = railPoint.Color.rgb * shapePoint.Color.rgb;
 
     Vertices[vertexIndex] = v;
-    if (isnan(railPoint.Scale.x) || isnan(shapePoint.Scale.x))
+    if (IsSeparator(railPoint) || IsSeparator(shapePoint))
         Vertices[vertexIndex].Position = float3(0, 0, 0);
 
     // Write face indices
@@ -88,10 +88,10 @@ RWStructuredBuffer<int3> TriangleIndices : register(u1);
         int faceIndex = 2 * (rowIndex + columnIndex * (rows - 1));
 
         if (
-            isnan(railPoint.Scale.x) ||                   //
-            isnan(RailPoints[columnIndex + 1].Scale.x) || //
-            isnan(shapePoint.Scale.x) ||                  //
-            isnan(ShapePoints[rowIndex + 1].Scale.x))
+            IsSeparator(railPoint) ||                   //
+            IsSeparator(RailPoints[columnIndex + 1]) || //
+            IsSeparator(shapePoint) ||                  //
+            IsSeparator(ShapePoints[rowIndex + 1]))
         {
             if (columnIndex < columns - 1 && rowIndex < rows - 1)
             {
@@ -99,7 +99,7 @@ RWStructuredBuffer<int3> TriangleIndices : register(u1);
                 TriangleIndices[faceIndex + 1] = int3(0, 0, 0);
                 TriangleIndices[faceIndex + 1] = int3(0, 0, 0);
             }
-            if (isnan(railPoint.Scale.x) || isnan(shapePoint.Scale.x))
+            if (IsSeparator(railPoint) || IsSeparator(shapePoint))
                 Vertices[vertexIndex].Position = float3(0, 0, 0);
             return;
         }
