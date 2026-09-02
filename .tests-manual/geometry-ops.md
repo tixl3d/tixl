@@ -52,6 +52,16 @@ Set `Segments` to 1 and `Roundness` to 0, then enable `FlatShading`.
 - With `FlatShading` enabled, every face reads as a hard plane (no smooth gradients
   across the bevel strips).
 
+## Step: Round corners
+
+**Action:**
+Set `Segments` to 4 and `Roundness` to 1, then enable `RoundCorners`.
+
+**Expected:**
+- Corners change from a flat fan into a spherical patch: the edge profile
+  continues through the corner in concentric rings.
+- No spikes at the corners, even when `Width` is dragged up to the clamp.
+
 ## Step: Transforming before the bevel
 
 **Action:**

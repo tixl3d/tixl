@@ -294,11 +294,30 @@ unmodified buffers between geometries. Docs:
 - Milestone: `CubeGeometry -> BevelGeometry -> GeometryToMeshBuffers -> DrawMesh`,
   animated bevel width, flat frame times.
 
-### Phase 2 — Delegate fields (validation slice) ⬜
+### Phase 2 — Delegate fields (validation slice) 🔶 (core implemented + verified 2026-09-02)
 
 Pulled forward (maintainer decision, 2026-09): the delegate connection types are
 the riskiest architectural bet in the plan and deserve validation right after the
 attribute system exists, before the curve/text pipeline builds on settled ground.
+
+Done: `Core/DataTypes/Geometry/Fields.cs` — `FieldSample` struct, the three
+delegate signatures, wrapper slot types `ScalarField`/`VectorField`/`RemapCurve`
+(callable + reserved `DescriptionNode`), registration + `ColorForCpuFields`
+(yellow-green). Ops: `DistanceToPointsField` (StructuredList&lt;Point&gt; snapshot,
+separator-aware via `Point.IsSeparator`, brute force with a spatial-grid note),
+`GainAndBiasCurve` (Schlick), `RemapFieldValues` (field∘curve composition),
+`ColorFromField` (corner Color attribute — note: NO built-in mesh shader consumes
+`PbrVertex.ColorRgb` today, flagged as renderer follow-up below), and
+`DisplaceGeometry` (points along accumulated Newell normals by field×amount;
+drops the Normal attribute since displacement invalidates it). Milestone verified
+by protocol screenshot: beveled cube organically deformed by distance-to-ring-
+points through the composed field chain; both test gates green.
+
+Still open in this phase: `CustomScalarField` (Roslyn snippet op — the v1 of the
+VEX direction), `NoiseField`, and the `SelectGeometry` Field mode (lands with
+`SelectGeometry` itself in Phase 5). Renderer follow-up surfaced: making
+`DrawMesh` multiply vertex `ColorRgb` (default 1 ⇒ visually safe, suite-guarded)
+would activate `ColorFromField` and glTF vertex colors — maintainer decision.
 
 - Core: named delegate types doubling as slot types — `ScalarField(in
   FieldSample) -> float`, `RemapCurve(float) -> float`, `VectorField(in

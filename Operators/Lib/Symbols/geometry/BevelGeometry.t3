@@ -21,6 +21,10 @@
     {
       "Id": "c86a32c2-feeb-4c05-b2c0-cf54076247bb"/*FlatShading*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "3f8b1c4d-92e6-4a17-b5d0-6a4c8e2f7d19"/*RoundCorners*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],

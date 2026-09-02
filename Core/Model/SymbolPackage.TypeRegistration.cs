@@ -451,6 +451,15 @@ public partial class SymbolPackage
         RegisterType(typeof(MeshGeometry), "MeshGeometry",
                      () => new InputValue<MeshGeometry>(null));
 
+        RegisterType(typeof(ScalarField), "ScalarField",
+                     () => new InputValue<ScalarField>(null));
+
+        RegisterType(typeof(VectorField), "VectorField",
+                     () => new InputValue<VectorField>(null));
+
+        RegisterType(typeof(RemapCurve), "RemapCurve",
+                     () => new InputValue<RemapCurve>(null));
+
         RegisterType(typeof(DataSet), "DataSet",
                      () => new InputValue<DataSet>());
 

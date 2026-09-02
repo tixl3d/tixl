@@ -38,6 +38,13 @@
         "X": 0.0,
         "Y": 180.0
       }
+    },
+    {
+      "InputId": "3f8b1c4d-92e6-4a17-b5d0-6a4c8e2f7d19"/*RoundCorners*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      }
     }
   ],
   "SymbolChildUis": [],

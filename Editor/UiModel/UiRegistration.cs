@@ -92,6 +92,11 @@ internal static class UiRegistration
         RegisterTypesToProperty(UiProperties.CpuGeometry,
                                 typeof(MeshGeometry));
 
+        RegisterTypesToProperty(UiProperties.CpuFields,
+                                typeof(ScalarField),
+                                typeof(VectorField),
+                                typeof(RemapCurve));
+
         RegisterTypesToProperty(UiProperties.ShaderGraph,
                                 typeof(ShaderGraphNode));
         

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "54a9af60-51e7-48d0-8afc-aad5ef2d2be6"/*DistanceToPointsField*/,
+  "Description": "Produces a ScalarField measuring the distance to the closest point of a point list.\n\nCombine with [RemapFieldValues] and consume with [DisplaceGeometry] or [ColorFromField].",
+  "InputUis": [
+    {
+      "InputId": "cacffef9-8573-4098-bb12-1b2ddcce77de"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "09a8e3a2-47c1-4e39-bd0a-1b26f926d082"/*Field*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

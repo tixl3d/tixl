@@ -1,0 +1,33 @@
+{
+  "FormatVersion": 3,
+  "Id": "f29bd702-4ebf-4bd2-9416-884c72fbc769"/*RemapFieldValues*/,
+  "Description": "Composes a ScalarField with a RemapCurve: evaluates the field, then remaps its value (e.g. with [GainAndBiasCurve]).",
+  "InputUis": [
+    {
+      "InputId": "72d1fc6b-fddc-4011-a6d3-b78cbff5a4ce"/*Field*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "0454c682-e307-4455-861b-00c40b3d3dfc"/*Curve*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5f1f2a83-cacc-4e72-8a4c-171a6f62fe1a"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
