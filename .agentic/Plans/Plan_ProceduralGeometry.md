@@ -204,10 +204,34 @@ verification loop; the protocol lets bevel/fracture iterations run autonomously
 (dispatch -> pumpFrames -> screenshot -> log/metrics) and makes the
 `GeometryToMeshBuffers` buffer-reuse contract assertable via `getMetrics`.
 
-### Phase 1 — Mesh core + cube/bevel slice ⬜
+### Phase 1 — Mesh core + cube/bevel slice 🔶 (foundation implemented + verified 2026-09-02)
 
 Zero new dependencies — retires the attribute/topology/compile risks before fonts
 and tessellation enter.
+
+Done so far (protocol-verified: CubeGeometry -> GeometryToMeshBuffers -> DrawMesh
+renders correctly, Size changes propagate, integration tests green):
+
+- Core: `Core/DataTypes/Geometry/` — `MeshGeometry` (CSR topology:
+  `FaceCornerOffsets` (FaceCount+1) + `CornerPointIndices` instead of the planned
+  offsets+counts pair — same information, no redundancy to keep consistent),
+  `GeometryPart` record struct, lazy cached `EdgeTopology` (unique edges w/ face
+  adjacency + per-corner edge indices), `GeometryAttributes`/`GeometryAttribute<T>`
+  (typed dense buffers per `AttributeDomain`, incl. reserved curve domains),
+  `GeometryAttributeNames` consts. Sharing convention documented on the class:
+  ops never mutate inputs, they build into their own reused output instance.
+- Registration: `MeshGeometry` graph type (TypeRegistration) + distinct type color
+  `UiColors.ColorForCpuGeometry` (teal-green) via `UiProperties.CpuGeometry`.
+- Ops in `Operators/Lib/Symbols/geometry/`: `CubeGeometry` (6 quad N-gons,
+  8 shared points, 24 corners with hard-edge normals + per-face UVs, CCW-from-
+  outside winding — verified visually), `GeometryToMeshBuffers` (fan triangulation
+  for convex faces, corner-attribute resolution with Newell face-normal fallback,
+  per-face TBN via `MeshUtils.CalcTBNSpace` with degenerate-UV fallback, buffer
+  reuse via `SetupBufferWithViews`).
+
+Still open in this phase: `BevelGeometry` (iterate in `_agentTests` via `reload`,
+promote to Lib when good), `TransformGeometry`, `TriangulateGeometry` (explicit op;
+compile already triangulates), milestone with animated bevel width.
 
 - Core: `MeshGeometry` (incl. part table), `GeometryAttributes`, derived edge
   topology (lazy, cached), slot-type registration + type color + output-window

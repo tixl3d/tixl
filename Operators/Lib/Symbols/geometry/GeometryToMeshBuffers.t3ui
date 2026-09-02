@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "4fea8c0e-cb7f-41fe-a410-df1d3886bf98"/*GeometryToMeshBuffers*/,
+  "Description": "Compiles CPU-side procedural geometry into GPU mesh buffers for rendering with [DrawMesh].\n\nTriangulates N-gon faces, resolves corner attributes (normals, UVs, colors) into packed vertices, and computes the tangent basis. Buffers are reused and only re-uploaded when the input geometry changes.",
+  "InputUis": [
+    {
+      "InputId": "57469ea6-f0c5-4e8d-a53c-40e8ac495bc3"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4bf00eb5-a39c-4567-a81e-46c2276d1418"/*Buffers*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

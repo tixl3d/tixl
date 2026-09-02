@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "85c19291-2bc1-4271-88f9-f1b50696da1b"/*CubeGeometry*/,
+  "Inputs": [
+    {
+      "Id": "d5c13c76-103e-4264-8056-88a33a9f0e99"/*Size*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "4fea8c0e-cb7f-41fe-a410-df1d3886bf98"/*GeometryToMeshBuffers*/,
+  "Inputs": [
+    {
+      "Id": "57469ea6-f0c5-4e8d-a53c-40e8ac495bc3"/*Geometry*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
