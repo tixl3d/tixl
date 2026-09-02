@@ -5,6 +5,7 @@
   "InputUis": [
     {
       "InputId": "3b7f2ac9-e650-48d2-b12a-94c8607df3e6"/*SkinMatrices*/,
+      "Relevancy": "Required",
       "Position": {
         "X": 0.0,
         "Y": 90.0
@@ -12,6 +13,7 @@
     },
     {
       "InputId": "62e91c07-84fa-4d3b-a45c-08d7f9126b3e"/*Mesh*/,
+      "Relevancy": "Required",
       "Position": {
         "X": 0.0,
         "Y": 0.0
@@ -19,6 +21,7 @@
     },
     {
       "InputId": "d94a70b6-1f28-45c1-83b7-6ea0d5429c15"/*SkinWeights*/,
+      "Relevancy": "Required",
       "Position": {
         "X": 0.0,
         "Y": 45.0

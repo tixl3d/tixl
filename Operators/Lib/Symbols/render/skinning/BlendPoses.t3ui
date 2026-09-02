@@ -5,6 +5,7 @@
   "InputUis": [
     {
       "InputId": "5c82d1f7-940b-4e6a-a3d8-16fb27c95e40"/*PoseA*/,
+      "Relevancy": "Required",
       "Position": {
         "X": 0.0,
         "Y": 0.0
@@ -26,6 +27,7 @@
     },
     {
       "InputId": "e3a95b18-6d72-4c04-bf59-8a41d0c7263f"/*PoseB*/,
+      "Relevancy": "Required",
       "Position": {
         "X": 0.0,
         "Y": 45.0
