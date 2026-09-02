@@ -204,7 +204,7 @@ verification loop; the protocol lets bevel/fracture iterations run autonomously
 (dispatch -> pumpFrames -> screenshot -> log/metrics) and makes the
 `GeometryToMeshBuffers` buffer-reuse contract assertable via `getMetrics`.
 
-### Phase 1 — Mesh core + cube/bevel slice 🔶 (foundation implemented + verified 2026-09-02)
+### Phase 1 — Mesh core + cube/bevel slice ✅ (completed 2026-09-02)
 
 Zero new dependencies — retires the attribute/topology/compile risks before fonts
 and tessellation enter.
@@ -250,9 +250,30 @@ paying off exactly as intended).
   out of `_agentTests`, reload the playground - its compiled assembly still
   carries the symbol and makes name lookups ambiguous.
 
-Still open in this phase (small): `TransformGeometry`, `TriangulateGeometry`
-(compile already triangulates), then the phase wrap-up (help page + manual test
-set + retrospective).
+**Phase complete (2026-09-02)**: `TransformGeometry` (shared-topology output,
+normals rotated with inverse-scale correction for non-uniform scaling) and
+`TriangulateGeometry` (fan, corner-attribute remap, part-range remap) shipped and
+verified in a full protocol-driven chain (Cube -> Transform -> Triangulate ->
+Bevel -> Compile -> Draw). Pleasant emergent behavior: beveling triangulated
+geometry works — coplanar edges produce flat invisible strips, so only real
+corners bevel. `GeometryAttributes.Add(attribute)` added for reference-sharing
+unmodified buffers between geometries. Docs:
+`.help/docs/using/ProceduralGeometry.md` + `.tests-manual/geometry-ops.md`.
+
+**Phase 1 retrospective** (overlaps + low-hanging fruit):
+
+- *Overlap*: the per-point-normal-map trick in `BevelGeometry` (points carry the
+  normal, corners read from points) will recur in `CurvesToMesh` bevels (Phase 5)
+  and any smooth-shaded generator — consider promoting a shared helper when the
+  second user appears, not before. The attribute reference-sharing pattern
+  (`Attributes.Add`) is what `SelectGeometry`/`SetGeometryAttribute` (Phase 5)
+  will build on.
+- *Low-hanging fruit now cheap*: `CylinderGeometry`/`SphereGeometry` are ~1h each
+  (CubeGeometry is the template); a `WireframeGeometry` debug view via
+  `EdgeTopology` -> `Point[]` line list would aid every future geometry op;
+  `BevelGeometry` per-edge selection needs only the Phase 5 selection attribute
+  plus a filter in its edge loop. Bevel-quality polish (extreme-width nicks)
+  deferred to "bevel v2" in Phase 7+.
 
 - Core: `MeshGeometry` (incl. part table), `GeometryAttributes`, derived edge
   topology (lazy, cached), slot-type registration + type color + output-window

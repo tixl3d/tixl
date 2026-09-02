@@ -108,6 +108,16 @@ public sealed class GeometryAttributes : IEnumerable<GeometryAttribute>
         return false;
     }
 
+    /// <summary>
+    /// Adds an existing attribute, typically to share an unmodified buffer with another
+    /// geometry (buffers flowing through the graph are immutable by convention).
+    /// </summary>
+    public void Add(GeometryAttribute attribute)
+    {
+        Remove(attribute.Name, attribute.Domain);
+        _attributes.Add(attribute);
+    }
+
     public void Remove(string name, AttributeDomain domain)
     {
         _attributes.RemoveAll(a => a.Domain == domain && string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase));
