@@ -167,10 +167,8 @@ inline float LinearStep(float min, float max, float t)
         p.FX2 = result;
         break;
     }
-    // p.Selected = result;
     //  if (SetW)
     //  {
-    //      p.W = result;
     //  }
 
     ResultPoints[i.x] = p;

@@ -72,10 +72,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                 for (int i = 0; i < originalPointArray.Length; i++)
                 {
                     var point = originalPointArray[i];
-                    var scaleNaN = point.Scale;
-
-                    // Check for NaN in Scale
-                    if (float.IsNaN(scaleNaN.X) || float.IsNaN(scaleNaN.Y) || float.IsNaN(scaleNaN.Z))
+                    if (Point.IsSeparator(point))
                     {
                         invalidCount++;
                         continue;
@@ -247,9 +244,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                         for (int i = 0; i < extraPointArray.Length; i++)
                         {
                             var point = extraPointArray[i];
-
-                            // Skip points with NaN values
-                            if (float.IsNaN(point.Scale.X) || float.IsNaN(point.Scale.Y) || float.IsNaN(point.Scale.Z))
+                            if (Point.IsSeparator(point))
                                 continue;
 
                             var pointPos2D = new Vector2(point.Position.X, point.Position.Y);

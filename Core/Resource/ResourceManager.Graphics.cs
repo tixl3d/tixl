@@ -210,6 +210,18 @@ public static partial class ResourceManager
         SetupStructuredBuffer(bufferData, sizeInBytes, stride, ref buffer);
     }
 
+    /// <summary>
+    /// Uploads the complete array into a structured buffer and (re)creates its SRV and UAV.
+    /// Replaces the recurring SetupStructuredBuffer + CreateStructuredBufferSrv + CreateStructuredBufferUav idiom.
+    /// </summary>
+    public static void SetupBufferWithViews<T>(T[] bufferData, ref T3.Core.DataTypes.BufferWithViews? bufferWithViews) where T : struct
+    {
+        bufferWithViews ??= new T3.Core.DataTypes.BufferWithViews();
+        SetupStructuredBuffer(bufferData, ref bufferWithViews.Buffer);
+        CreateStructuredBufferSrv(bufferWithViews.Buffer, ref bufferWithViews.Srv);
+        CreateStructuredBufferUav(bufferWithViews.Buffer, UnorderedAccessViewBufferFlags.None, ref bufferWithViews.Uav);
+    }
+
     public static void CreateBufferUav<T>(Buffer? buffer, Format format, ref UnorderedAccessView? uav)
     {
         if (buffer == null)

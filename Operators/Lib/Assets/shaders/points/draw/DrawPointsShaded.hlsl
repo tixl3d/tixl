@@ -162,7 +162,6 @@ psInput vsMain(uint id : SV_VertexID)
     float tooCloseFactor = saturate(-posInCamera.z / FadeNearest - 1);
     output.color.a *= tooCloseFactor;
 
-    // float sizeFactor = UseWForSize > 0.5 ? pointDef.W : 1;
     float sizeFactor = ScaleFactorMode == 0
                            ? 1
                        : (ScaleFactorMode == 1) ? pointDef.FX1

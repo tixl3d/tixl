@@ -102,7 +102,6 @@ psInput vsMain(uint id: SV_VertexID)
     float2 uvMax = uvMin + 1.0/atlasSize;
 
     // float textureUx = sprite.TextureIndex;
-    // float textureUy = GetUFromMode(TextureAtlasMode, pointId, f, normalizedScatter.wxyz, p.W, output.fog); 
     
     // int textureCelX =  textureUx * atlasSize.x;
     // int textureCelY =  textureUy * atlasSize.y;

@@ -66,7 +66,6 @@ float3 RotatePointAroundAxis(float3 In, float3 Axis, float Rotation)
     ResultPoints[index].Position = lerp(Center, Center + Direction * LengthFactor, f);
 
     // float f = (float)(index)/steps;
-    // ResultPoints[index].W = W + WOffset * (float)(index)/steps;
 
     float4 rot2 = 0;
     if (OrientationMode < 0.5)
