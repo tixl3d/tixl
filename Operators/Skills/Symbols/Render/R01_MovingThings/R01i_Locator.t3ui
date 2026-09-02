@@ -5,10 +5,51 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "13fd15de-1db3-4d00-93f9-c6bf1af054a2"/*Text*/,
+      "ChildId": "03991257-6892-4f10-ad3d-baa994535437"/*DrawMesh*/,
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 648.46234,
+        "Y": 1591.5786
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "15b66631-9bb6-471f-9d19-6cc1c48daa6e"/*TorusMesh*/,
+      "Position": {
+        "X": 508.46234,
+        "Y": 1591.5786
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1b541488-98e8-4fc0-9cee-902221a6f6e4"/*TorusMesh*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 267.2192,
+        "Y": 2416.832
+      }
+    },
+    {
+      "ChildId": "2076dbac-7209-4f29-b098-b8930356308b"/*DrawLines*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 700.5519,
+        "Y": 2691.0898
+      }
+    },
+    {
+      "ChildId": "25183e0d-8042-4baf-b1d1-629882fa7141"/*DrawMesh*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 407.2192,
+        "Y": 2416.832
+      }
+    },
+    {
+      "ChildId": "3f679e38-5b5a-4f10-a2ec-1f30610f1001"/*PointTrail*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 700.5519,
+        "Y": 2656.0898
       }
     },
     {
@@ -19,11 +60,115 @@
       }
     },
     {
-      "ChildId": "f1211cc5-9ac4-4b25-904e-465638870451"/*Text*/,
+      "ChildId": "63c75da7-b7df-4aa7-b8cd-d9deed3895d3"/*Point*/,
+      "Position": {
+        "X": 941.79504,
+        "Y": 1795.836
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "682ecc79-8a19-4345-b536-56e20fd488ee"/*Locator*/,
+      "Position": {
+        "X": 627.3542,
+        "Y": 1431.2349
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "6bbd290d-350d-453e-957f-3117863cf28e"/*Group*/,
+      "Position": {
+        "X": 1281.6665,
+        "Y": 1561.4089
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "754b496b-c273-4adf-b44b-f9568089e537"/*Locator*/,
       "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 470.74557,
+        "Y": 2276.2202
+      }
+    },
+    {
+      "ChildId": "7de9ed5b-fb2a-40e7-8fc5-d58d1fa96f0a"/*Transform*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 700.5519,
+        "Y": 2423.8955
+      }
+    },
+    {
+      "ChildId": "97acbcae-f243-4c81-9fb4-c255839ca4e7"/*PerlinNoise3*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 330.7457,
+        "Y": 2276.2202
+      }
+    },
+    {
+      "ChildId": "a149525f-417e-4805-84ce-94243f595ac9"/*DrawLines*/,
+      "Position": {
+        "X": 941.79504,
+        "Y": 1865.836
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a5bc7abe-375a-4ce0-a740-da5b73c4e720"/*PerlinNoise3*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 407.2192,
+        "Y": 2470.6528
+      }
+    },
+    {
+      "ChildId": "a87ac12a-539b-4d33-b7dd-e1ba162c46bd"/*PerlinNoise3*/,
+      "Position": {
+        "X": 648.4623,
+        "Y": 1645.3994
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ae9b2159-148d-4697-9210-2925172b7d48"/*Group*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 937.001,
+        "Y": 2384.7114
+      }
+    },
+    {
+      "ChildId": "b4bef0b8-a424-4997-aaa8-44335ac41b9a"/*PointTrail*/,
+      "Position": {
+        "X": 941.79504,
+        "Y": 1830.836
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "bf31d0cf-0d40-4717-a28d-513fcbd996cd"/*Transform*/,
+      "Position": {
+        "X": 904.52576,
+        "Y": 1591.8661
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "defe6c47-3e0e-4065-9085-a3d4e3d46cf5"/*PerlinNoise3*/,
+      "Position": {
+        "X": 487.35413,
+        "Y": 1431.2349
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f827b354-7b3e-4fdf-9e74-9865d6b3cf84"/*Point*/,
+      "SectionId": "ada09879-3c7f-41ee-92cf-ec907da380eb",
+      "Position": {
+        "X": 700.5519,
+        "Y": 2621.0898
       }
     }
   ],
@@ -48,12 +193,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 58.29161,
+        "Y": 2096.2593
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 1318.6094,
+        "Y": 748.25305
       }
     }
   ],
@@ -64,15 +209,11 @@
     },
     {
       "Id": "19ec9865-545f-472e-a123-1eb2895c785c",
-      "Description": "The second output provides this position.\nTo access it, open the additional output indicated by the small triangle in the bottom-right corner and drag out the position output."
-    },
-    {
-      "Id": "0a8c28d3-d0a5-4481-b6fe-1ff86a7eec09",
-      "Description": "The [Text] operator only supports x and y positioning.\nA separate [Transform] operator is therefore required."
+      "Description": "The second output of the [Locator] provides this position.\nTo access it, open the additional output indicated by the small triangle in the bottom-right corner. Click it and drag out the position output."
     },
     {
       "Id": "e0dd9684-0101-4c75-81bc-f548dae74dde",
-      "Description": "Recreate the challenge using the given operators.",
+      "Description": "Recreate the challenge only by adding new connections to the given operators.",
       "Style": "CallToAction"
     }
   ]

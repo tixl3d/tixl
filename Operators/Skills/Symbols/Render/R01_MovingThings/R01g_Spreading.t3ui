@@ -5,25 +5,122 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "06e78c9a-d700-494e-8346-c294c1d6e69e"/*Text*/,
+      "ChildId": "07dfb136-0e2a-4145-a6c5-2ad03881827d"/*Transform*/,
+      "Position": {
+        "X": 1048.6919,
+        "Y": 1849.6033
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1b833b7f-d87c-421e-a44b-22b110721955"/*LoadObj*/,
       "SectionId": "554b036a-9411-4acb-ba53-d591644f090a",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 738.7186,
+        "Y": 2175.9795
       }
     },
     {
-      "ChildId": "a8d6a9f2-584e-4d50-b3e7-201a5ca6c74f"/*Text*/,
+      "ChildId": "2b5d2455-a6c7-4f93-aa54-dd677ecb9a5d"/*AnimVec3*/,
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 920.4225,
+        "Y": 1693.9083
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "704242c6-43c1-4cc9-ab71-7944bbbd0c55"/*LoadObj*/,
+      "Position": {
+        "X": 662.4988,
+        "Y": 1535.339
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "7df341ea-8203-4004-b6aa-f85dc64a03a0"/*Transform*/,
+      "Position": {
+        "X": 1060.4225,
+        "Y": 1658.9083
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "835aa65e-1c77-459b-802c-bb6f13207515"/*AnimVec3*/,
+      "SectionId": "554b036a-9411-4acb-ba53-d591644f090a",
+      "Position": {
+        "X": 935.00867,
+        "Y": 2456.9048
       }
+    },
+    {
+      "ChildId": "84309d95-8cb8-420b-95a8-4cd89e39f1e5"/*AnimVec3*/,
+      "SectionId": "554b036a-9411-4acb-ba53-d591644f090a",
+      "Position": {
+        "X": 954.3312,
+        "Y": 2314.7915
+      }
+    },
+    {
+      "ChildId": "8e409438-079e-46b2-8809-0037af8b927c"/*Transform*/,
+      "SectionId": "554b036a-9411-4acb-ba53-d591644f090a",
+      "Position": {
+        "X": 1075.009,
+        "Y": 2421.9048
+      }
+    },
+    {
+      "ChildId": "91d969ea-916f-4d72-bcf4-398e9a08b076"/*DrawMesh*/,
+      "SectionId": "554b036a-9411-4acb-ba53-d591644f090a",
+      "Position": {
+        "X": 878.7185,
+        "Y": 2175.9795
+      }
+    },
+    {
+      "ChildId": "bb51c6fa-7de9-4b16-97e6-82db01a96825"/*Transform*/,
+      "SectionId": "554b036a-9411-4acb-ba53-d591644f090a",
+      "Position": {
+        "X": 1094.3315,
+        "Y": 2279.7915
+      }
+    },
+    {
+      "ChildId": "c677351c-873f-46f4-bf5d-ab0171c56f31"/*DrawMesh*/,
+      "Position": {
+        "X": 802.4988,
+        "Y": 1535.339
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c6ce529e-e096-4210-9cb1-76788d5efd36"/*AnimVec3*/,
+      "Position": {
+        "X": 908.6919,
+        "Y": 1884.6033
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "cf457812-a046-44ab-a420-705396c7ea0e"/*SpreadLayout*/,
+      "Position": {
+        "X": 1389.164,
+        "Y": 1740.9846
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "f1b0b349-c527-481f-b8da-19df310028fd"/*DrawQuiz*/,
       "Position": {
-        "X": 1693.2708,
-        "Y": 1786.6185
+        "X": 1756.052,
+        "Y": 1841.299
+      }
+    },
+    {
+      "ChildId": "f50c7cfd-5511-4ec0-b40a-87edc512de01"/*SpreadLayout*/,
+      "SectionId": "554b036a-9411-4acb-ba53-d591644f090a",
+      "Position": {
+        "X": 1422.315,
+        "Y": 2317.1562
       }
     }
   ],
@@ -31,8 +128,8 @@
     {
       "OutputId": "c12ae506-f005-4f2e-8530-4e0f74ac7444"/*ColorBuffer*/,
       "Position": {
-        "X": 1693.2708,
-        "Y": 1856.6185
+        "X": 1756.052,
+        "Y": 1911.299
       }
     }
   ],
@@ -48,23 +145,23 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 703.75543,
+        "Y": 2002.5715
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 965.36017,
+        "Y": 643.8528
       }
     }
   ],
   "TourPoints": [
     {
       "Id": "c2212559-9381-4a83-8a58-ffaf5fe46444",
-      "Description": "Sometimes it is useful to arrange multiple instances in space.\nThe [Spread] operator can help with this."
+      "Description": "Sometimes it is useful to arrange multiple instances in space.\nThe [SpreadLayout] operator can help with this."
     },
     {
       "Id": "4f8ccde4-40f4-4a7e-bf58-83e99cd7c1ba",
-      "Description": "Recreate the challenge using the given operators.",
+      "Description": "Recreate the challenge using the given operators.\nYou don't need to change any parameters.",
       "Style": "CallToAction"
     }
   ]
