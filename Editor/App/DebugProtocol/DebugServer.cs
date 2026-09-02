@@ -17,6 +17,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Compilation;
 using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport;
@@ -270,6 +271,42 @@ internal static class DebugServer
                 _pendingPumps.Add(new PendingPump(context, count));
                 break;
             }
+
+            case "newProject":
+                HandleNewProject(request, context);
+                break;
+
+            case "addOp":
+                HandleAddOp(request, context);
+                break;
+
+            case "connect":
+                HandleConnect(request, context);
+                break;
+
+            case "deleteOp":
+                HandleDeleteOp(request, context);
+                break;
+
+            case "pin":
+                HandlePin(request, context);
+                break;
+
+            case "reload":
+                HandleReload(request, context);
+                break;
+
+            case "undo":
+                if (UndoRedoStack.CanUndo)
+                    UndoRedoStack.Undo();
+                context.SendOk(new JObject { ["canUndo"] = UndoRedoStack.CanUndo, ["canRedo"] = UndoRedoStack.CanRedo });
+                break;
+
+            case "redo":
+                if (UndoRedoStack.CanRedo)
+                    UndoRedoStack.Redo();
+                context.SendOk(new JObject { ["canUndo"] = UndoRedoStack.CanUndo, ["canRedo"] = UndoRedoStack.CanRedo });
+                break;
 
             case "setTime":
             {
@@ -606,7 +643,10 @@ internal static class DebugServer
         {
             foreach (var p in SymbolPackage.AllPackages)
             {
-                if (p is EditorSymbolPackage editorPackage && string.Equals(editorPackage.DisplayName, name, StringComparison.OrdinalIgnoreCase))
+                // Created projects get a "<name> (<namespace>)" display name - accept the short form too.
+                if (p is EditorSymbolPackage editorPackage
+                    && (string.Equals(editorPackage.DisplayName, name, StringComparison.OrdinalIgnoreCase)
+                        || editorPackage.DisplayName.StartsWith(name + " (", StringComparison.OrdinalIgnoreCase)))
                 {
                     package = editorPackage;
                     break;
@@ -826,6 +866,276 @@ internal static class DebugServer
                                              },
                          };
         context.SendOk(result);
+    }
+
+    private static void HandleNewProject(JObject request, RequestContext context)
+    {
+        var name = request["name"]?.Value<string>();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            context.SendError("MISSING_PARAM", "newProject requires a 'name' (namespace, e.g. 'pixtur._agentTests')");
+            return;
+        }
+
+        // Scaffolds files and compiles - blocks the frame loop for the duration.
+        if (!ProjectSetup.TryCreateProject(name, shareResources: true, out var newProject, out var failureLog))
+        {
+            context.SendError("CREATE_FAILED", failureLog ?? "unknown reason");
+            return;
+        }
+
+        Guid homeSymbolId = default;
+        if (newProject.AssemblyInformation.TryGetReleaseInfo(out var releaseInfo))
+            homeSymbolId = releaseInfo.HomeGuid;
+
+        context.SendOk(new JObject
+                           {
+                               ["displayName"] = newProject.DisplayName,
+                               ["homeSymbolId"] = homeSymbolId.ToString(),
+                           });
+    }
+
+    private static bool TryResolveCompositionSymbol(JObject request, RequestContext context, out Symbol symbol)
+    {
+        symbol = null!;
+        var compositionIdText = request["compositionId"]?.Value<string>();
+        if (compositionIdText != null)
+        {
+            if (!Guid.TryParse(compositionIdText, out var compositionId)
+                || !SymbolRegistry.TryGetSymbol(compositionId, out var resolved))
+            {
+                context.SendError("NOT_FOUND", $"Unknown composition '{compositionIdText}'");
+                return false;
+            }
+
+            symbol = resolved;
+            return true;
+        }
+
+        var focused = ProjectView.Focused?.CompositionInstance?.Symbol;
+        if (focused == null)
+        {
+            context.SendError("NO_COMPOSITION", "No composition focused and no compositionId given");
+            return false;
+        }
+
+        symbol = focused;
+        return true;
+    }
+
+    private static void HandleAddOp(JObject request, RequestContext context)
+    {
+        if (!TryResolveCompositionSymbol(request, context, out var compositionSymbol))
+            return;
+
+        Guid symbolIdToAdd = default;
+        if (Guid.TryParse(request["symbolId"]?.Value<string>(), out var parsedId))
+        {
+            symbolIdToAdd = parsedId;
+        }
+        else if (request["symbolName"]?.Value<string>() is { } symbolName)
+        {
+            var matches = new List<Symbol>();
+            foreach (var package in SymbolPackage.AllPackages)
+            {
+                foreach (var candidate in package.Symbols.Values)
+                {
+                    if (string.Equals(candidate.Name, symbolName, StringComparison.OrdinalIgnoreCase))
+                        matches.Add(candidate);
+                }
+            }
+
+            if (matches.Count == 0)
+            {
+                context.SendError("NOT_FOUND", $"No symbol named '{symbolName}'");
+                return;
+            }
+
+            if (matches.Count > 1)
+            {
+                var candidates = new JArray();
+                foreach (var m in matches)
+                {
+                    candidates.Add($"{m.Name} ({m.SymbolPackage.DisplayName}) {m.Id}");
+                }
+
+                context.SendError("AMBIGUOUS", $"Multiple symbols named '{symbolName}': {candidates}");
+                return;
+            }
+
+            symbolIdToAdd = matches[0].Id;
+        }
+
+        if (symbolIdToAdd == default)
+        {
+            context.SendError("MISSING_PARAM", "addOp requires 'symbolId' or 'symbolName'");
+            return;
+        }
+
+        var command = new AddSymbolChildCommand(compositionSymbol, symbolIdToAdd)
+                          {
+                              PosOnCanvas = new Vector2(request["posX"]?.Value<float>() ?? 0,
+                                                        request["posY"]?.Value<float>() ?? 0),
+                          };
+        UndoRedoStack.AddAndExecute(command);
+        context.SendOk(new JObject
+                           {
+                               ["childId"] = command.AddedChildId.ToString(),
+                               ["symbolId"] = symbolIdToAdd.ToString(),
+                           });
+    }
+
+    private static void HandleConnect(JObject request, RequestContext context)
+    {
+        if (!TryResolveCompositionSymbol(request, context, out var compositionSymbol))
+            return;
+
+        if (!Guid.TryParse(request["sourceChildId"]?.Value<string>(), out var sourceChildId)
+            || !compositionSymbol.Children.TryGetValue(sourceChildId, out var sourceChild))
+        {
+            context.SendError("NOT_FOUND", "Unknown or missing sourceChildId");
+            return;
+        }
+
+        if (!Guid.TryParse(request["targetChildId"]?.Value<string>(), out var targetChildId)
+            || !compositionSymbol.Children.TryGetValue(targetChildId, out var targetChild))
+        {
+            context.SendError("NOT_FOUND", "Unknown or missing targetChildId");
+            return;
+        }
+
+        // Output: by guid, by name, or the first one.
+        Guid outputId = default;
+        var sourceOutputText = request["sourceOutput"]?.Value<string>();
+        foreach (var outputDef in sourceChild.Symbol.OutputDefinitions)
+        {
+            if (sourceOutputText == null
+                || string.Equals(outputDef.Name, sourceOutputText, StringComparison.OrdinalIgnoreCase)
+                || (Guid.TryParse(sourceOutputText, out var g) && outputDef.Id == g))
+            {
+                outputId = outputDef.Id;
+                break;
+            }
+        }
+
+        // Input: by guid, by name, or the first one.
+        Guid inputId = default;
+        var targetInputText = request["targetInput"]?.Value<string>();
+        foreach (var inputDef in targetChild.Symbol.InputDefinitions)
+        {
+            if (targetInputText == null
+                || string.Equals(inputDef.Name, targetInputText, StringComparison.OrdinalIgnoreCase)
+                || (Guid.TryParse(targetInputText, out var g) && inputDef.Id == g))
+            {
+                inputId = inputDef.Id;
+                break;
+            }
+        }
+
+        if (outputId == default || inputId == default)
+        {
+            context.SendError("NOT_FOUND", $"Can't resolve output '{sourceOutputText}' or input '{targetInputText}'");
+            return;
+        }
+
+        var compositionInstance = ProjectView.Focused?.CompositionInstance;
+        if (compositionInstance != null
+            && compositionInstance.Symbol.Id == compositionSymbol.Id
+            && compositionInstance.Children.TryGetChildInstance(sourceChildId, out var sourceInstance)
+            && Structure.CheckForCycle(sourceInstance, targetChildId))
+        {
+            context.SendError("CYCLE", "Connection would create a cycle");
+            return;
+        }
+
+        var connection = new Symbol.Connection(sourceChildId, outputId, targetChildId, inputId);
+        var multiInputIndex = request["multiInputIndex"]?.Value<int>() ?? 0;
+        UndoRedoStack.AddAndExecute(new AddConnectionCommand(compositionSymbol, connection, multiInputIndex));
+        context.SendOk(new JObject());
+    }
+
+    private static void HandleDeleteOp(JObject request, RequestContext context)
+    {
+        if (!TryResolveCompositionSymbol(request, context, out var compositionSymbol))
+            return;
+
+        var compositionUi = compositionSymbol.GetSymbolUi();
+        if (!Guid.TryParse(request["childId"]?.Value<string>(), out var childId)
+            || !compositionUi.ChildUis.TryGetValue(childId, out var childUi))
+        {
+            context.SendError("NOT_FOUND", "Unknown or missing childId");
+            return;
+        }
+
+        UndoRedoStack.AddAndExecute(new DeleteSymbolChildrenCommand(compositionUi, [childUi]));
+        context.SendOk(new JObject());
+    }
+
+    private static void HandleReload(JObject request, RequestContext context)
+    {
+        var name = request["project"]?.Value<string>();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            context.SendError("MISSING_PARAM", "reload requires a 'project' (editable project display name)");
+            return;
+        }
+
+        EditableSymbolProject? project = null;
+        foreach (var candidate in EditableSymbolProject.AllProjects)
+        {
+            if (string.Equals(candidate.DisplayName, name, StringComparison.OrdinalIgnoreCase)
+                || candidate.DisplayName.StartsWith(name + " (", StringComparison.OrdinalIgnoreCase))
+            {
+                project = candidate;
+                break;
+            }
+        }
+
+        if (project == null)
+        {
+            context.SendError("NOT_FOUND", $"No editable project '{name}' (built-in packages need an editor restart)");
+            return;
+        }
+
+        // Blocks the frame loop for the duration of the compile - clients need a generous timeout.
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var success = project.TryRecompile(updatePackage: true, out var failureLog);
+        stopwatch.Stop();
+        if (success)
+        {
+            context.SendOk(new JObject { ["durationSeconds"] = Math.Round(stopwatch.Elapsed.TotalSeconds, 1) });
+        }
+        else
+        {
+            context.SendError("COMPILE_FAILED", failureLog ?? "unknown reason");
+        }
+    }
+
+    private static void HandlePin(JObject request, RequestContext context)
+    {
+        var view = ProjectView.Focused;
+        var composition = view?.CompositionInstance;
+        if (view == null || composition == null)
+        {
+            context.SendError("NO_COMPOSITION", "No composition focused");
+            return;
+        }
+
+        if (!Guid.TryParse(request["childId"]?.Value<string>(), out var childId)
+            || !composition.Children.TryGetChildInstance(childId, out var instance))
+        {
+            context.SendError("NOT_FOUND", "Unknown or missing childId");
+            return;
+        }
+
+        if (!OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
+        {
+            context.SendError("NO_OUTPUT", "No visible output window");
+            return;
+        }
+
+        outputWindow.Pinning.PinInstance(instance, view);
+        context.SendOk(new JObject());
     }
 
     private static void RecordMessage(string message)
