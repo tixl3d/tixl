@@ -15,7 +15,7 @@
         {
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
           "Type": "System.Boolean",
-          "Value": false
+          "Value": true
         },
         {
           "Id": "e1989c94-8f51-414a-9ca0-33631875a9df"/*UpdateReferences*/,
@@ -45,6 +45,15 @@
           "Id": "31937a13-1e53-45dd-8e6f-91ca5f3aaa19"/*TriggerTest*/,
           "Type": "System.Boolean",
           "Value": false
+        },
+        {
+          "Id": "8b5f1a2e-4c97-43d1-9e2a-7d6b03f5c481"/*IgnoredTestIds*/,
+          "Type": "System.Collections.Generic.List`1[System.Int32]",
+          "Value": {
+            "Values": [
+              -552115163
+            ]
+          }
         },
         {
           "Id": "e1989c94-8f51-414a-9ca0-33631875a9df"/*UpdateReferences*/,

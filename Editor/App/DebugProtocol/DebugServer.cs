@@ -235,6 +235,27 @@ internal static class DebugServer
                 HandleOpenProject(request, context);
                 break;
 
+            case "select":
+            {
+                var view = ProjectView.Focused;
+                if (view?.CompositionInstance == null)
+                {
+                    context.SendError("NO_COMPOSITION", "No composition focused");
+                    break;
+                }
+
+                if (!Guid.TryParse(request["childId"]?.Value<string>(), out var selectId))
+                {
+                    context.SendError("MISSING_PARAM", "select requires a 'childId'");
+                    break;
+                }
+
+                view.NodeSelection.Clear();
+                view.NodeSelection.TrySelectCompositionChild(view.CompositionInstance, selectId, false);
+                context.SendOk(new JObject());
+                break;
+            }
+
             case "setInput":
                 HandleSetInput(request, context);
                 break;
@@ -615,13 +636,24 @@ internal static class DebugServer
             return;
         }
 
-        if (GraphWindow.GraphWindowInstances.Count == 0)
+        // Prefer the visible graph window - hidden instances can exist while the hub is shown.
+        GraphWindow? graphWindow = null;
+        foreach (var window in GraphWindow.GraphWindowInstances)
+        {
+            if (!window.Config.Visible)
+                continue;
+
+            graphWindow = window;
+            break;
+        }
+
+        graphWindow ??= GraphWindow.GraphWindowInstances.Count > 0 ? GraphWindow.GraphWindowInstances[0] : null;
+        if (graphWindow == null)
         {
             context.SendError("NO_GRAPH_WINDOW", "No graph window available");
             return;
         }
 
-        var graphWindow = GraphWindow.GraphWindowInstances[0];
         if (!graphWindow.TrySetToProject(openedProject, tryRestoreViewArea: false))
         {
             context.SendError("OPEN_FAILED", "Graph window rejected the project");
@@ -630,15 +662,18 @@ internal static class DebugServer
 
         var rootInstance = openedProject.Structure.GetRootInstance();
         var pinOutput = request["pinOutput"]?.Value<bool>() ?? true;
+        var pinned = false;
         if (pinOutput && rootInstance != null && OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
         {
             outputWindow.Pinning.PinInstance(rootInstance, graphWindow.ProjectView);
+            pinned = true;
         }
 
         context.SendOk(new JObject
                            {
                                ["rootSymbolId"] = rootInstance?.Symbol.Id.ToString(),
                                ["rootSymbolName"] = rootInstance?.Symbol.Name,
+                               ["pinnedOutput"] = pinned,
                            });
     }
 
@@ -753,6 +788,24 @@ internal static class DebugServer
         {
             context.SendError("NOT_FOUND", "Instance has no matching output");
             return;
+        }
+
+        // Optional pull for outputs nothing else evaluates (e.g. string results with no view
+        // pulling them). Forces evaluation - IsDirty is visit-based and unreliable outside the
+        // normal traversal. May double-evaluate an op that a visible view already pulls.
+        var update = request["update"]?.Value<bool>() ?? false;
+        if (update)
+        {
+            // Same forced-pull sequence [VisualTest] uses: the tick bump defeats
+            // InvalidateGraph's once-per-tick visited guard, and the graph-wide
+            // invalidation crosses composed-op boundaries (ForceInvalidate alone only
+            // dirties this slot; a forwarded inner slot would return its cached value).
+            DirtyFlag.IncrementGlobalTicks();
+            slot.InvalidateGraph();
+            slot.DirtyFlag.ForceInvalidate();
+            var wasDirty = slot.DirtyFlag.IsDirty;
+            slot.Update(new EvaluationContext());
+            Log.Debug($"debug-server: pulled {instance.Symbol.Name}.{slot.ValueType.Name} dirtyBefore={wasDirty} dirtyAfter={slot.DirtyFlag.IsDirty}");
         }
 
         var result = new JObject
