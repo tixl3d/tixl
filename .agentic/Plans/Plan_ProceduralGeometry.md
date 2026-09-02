@@ -229,9 +229,30 @@ renders correctly, Size changes propagate, integration tests green):
   per-face TBN via `MeshUtils.CalcTBNSpace` with degenerate-UV fallback, buffer
   reuse via `SetupBufferWithViews`).
 
-Still open in this phase: `BevelGeometry` (iterate in `_agentTests` via `reload`,
-promote to Lib when good), `TransformGeometry`, `TriangulateGeometry` (explicit op;
-compile already triangulates), milestone with animated bevel width.
+**Milestone achieved (2026-09-02)**: `CubeGeometry -> BevelGeometry ->
+GeometryToMeshBuffers -> [TransformMesh] -> DrawMesh`, animated bevel width at a
+flat 60fps, all built and iterated over the debug protocol (5 reload cycles at
+~2s each from first render to smooth-shaded result — the precursor investment
+paying off exactly as intended).
+
+- `BevelGeometry` (developed in `_agentTests` via `reload`, promoted to
+  `Operators/Lib/Symbols/geometry/`): inset faces (bisector offset, w/sin(θ/2)),
+  edge strips (quadratic-bezier profile around the inset edge, roundness lerps
+  chamfer<->arc), corner fan patches (face-walk loop around each vertex,
+  Newell-normal orientation fix, centroid-pulled-toward-vertex bulge). Smooth
+  shading via a per-point normal map published as the corner-domain Normal
+  attribute — inset points carry their face normal, so flat faces stay flat and
+  strips blend seamlessly; first real exercise of the attribute pipeline.
+  A `FlatShading` toggle (maintainer request) provides hard faceted normals by
+  simply not publishing the Normal attribute - the compile step's per-face
+  fallback does the rest. v1 limitations (documented): width clamped to 0.35x
+  shortest edge, tiny silhouette nicks at extreme width+roundness. Promotion lesson: after moving an op
+  out of `_agentTests`, reload the playground - its compiled assembly still
+  carries the symbol and makes name lookups ambiguous.
+
+Still open in this phase (small): `TransformGeometry`, `TriangulateGeometry`
+(compile already triangulates), then the phase wrap-up (help page + manual test
+set + retrospective).
 
 - Core: `MeshGeometry` (incl. part table), `GeometryAttributes`, derived edge
   topology (lazy, cached), slot-type registration + type color + output-window
