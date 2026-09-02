@@ -9,7 +9,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "GroupTitle": "Transform All"
     },
     {
       "InputId": "2dae39aa-141c-4fd2-8367-4895df85cceb"/*Rotation*/,
@@ -57,7 +58,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "GroupTitle": "Distribute"
     },
     {
       "InputId": "b89c93b7-2051-4458-9a86-fe51ba2c15d9"/*UniformScale*/,
@@ -71,7 +73,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "GroupTitle": "Additional Options..."
     },
     {
       "InputId": "d730dc2f-0cd4-46eb-b917-ae886a319eeb"/*Scale*/,
