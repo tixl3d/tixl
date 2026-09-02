@@ -30,9 +30,9 @@ cbuffer CallParams : register(b2)
 {
     int CallIndex;
 }
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
-RWStructuredBuffer<uint> IndexBuffer : u1;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
+RWStructuredBuffer<uint> IndexBuffer : register(u1);
 
 uint3 StageCalc3(uint i){
     //inverse of y=x*(x+1)/2

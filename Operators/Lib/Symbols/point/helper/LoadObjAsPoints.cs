@@ -321,12 +321,7 @@ internal sealed class LoadObjAsPoints : Instance<LoadObjAsPoints>
                            F1 = 1
                        });
 
-        points.Add(new Point()
-                       {
-                           F1 = float.NaN
-                       });
-
-            
+        points.Add(Point.Separator());
     }
 
 

@@ -63,7 +63,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<LegacyPoint> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> texture2 : register(t1);
 
 psInput vsMain(uint id: SV_VertexID)
@@ -72,7 +72,7 @@ psInput vsMain(uint id: SV_VertexID)
 
     int quadIndex = id % 6;
     int particleId = id / 6;
-    LegacyPoint pointDef = Points[particleId];
+    Point pointDef = Points[particleId];
 
     float4 aspect = float4(CameraToClipSpace[1][1] / CameraToClipSpace[0][0],1,1,1);
     float3 cornerDef = Corners[quadIndex];
@@ -91,7 +91,7 @@ psInput vsMain(uint id: SV_VertexID)
     float2 centerUv =   (centerInClipspace.xy / centerInClipspace.w + 1) * 0.5;
     centerUv.y = 1- centerUv.y;
 
-    float2 quadSize = pointDef.W * Size * Stretch * (1 + pow( rand, 2) * ScatterStretch) * 0.05;
+    float2 quadSize = pointDef.FX1 * Size * Stretch * (1 + pow( rand, 2) * ScatterStretch) * 0.05;
     quadSize.x *= aspect;
     float4 vertexInClipSpace = centerInClipspace 
                              + float4(cornerDef.xy * quadSize, 0,0);

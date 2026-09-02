@@ -93,7 +93,7 @@ sampler ClampedSampler : register(s1);
 
 static sampler LinearSampler = WrappedSampler;
 
-StructuredBuffer<Point> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 
 Texture2D<float4> BaseColorMap : register(t1);
 Texture2D<float4> EmissiveColorMap : register(t2);

@@ -1,20 +1,10 @@
-// Points are particles share the same structure and stride,
-// But some attributes change their meaning:
-//   W -> Radius
-//   Stretch -> Velocity
-//   Selected -> BirthTime
+// Points and particles share the same structure and stride,
+// but some attributes change their meaning:
+//   FX1 -> Radius
+//   Scale -> Velocity
+//   FX2 -> BirthTime
 #ifndef __POINT__
 #define __POINT__
-
-struct LegacyPoint
-{
-    float3 Position;
-    float W;
-    float4 Rotation;
-    float4 Color;
-    float3 Stretch;
-    float Selected;
-};
 
 struct Point
 {

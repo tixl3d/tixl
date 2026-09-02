@@ -26,7 +26,7 @@ cbuffer Params : register(b0)
     float CutOff2;
 }
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 static const float ToRad = 3.141578 / 180;
 
@@ -62,12 +62,12 @@ static const float ToRad = 3.141578 / 180;
 
     pos += Center;
     ResultPoints[index].Position = pos;
-    ResultPoints[index].W = pow(radius * W + CutOff2, Bias);
+    ResultPoints[index].FX1 = pow(radius * W + CutOff2, Bias);
 
     float4 rot = qFromAngleAxis(OrientationAngle * PI / 180, normalize(OrientationAxis));
     rot = qMul(rot, qFromAngleAxis(ang, float3(0, 0, 1)));
     ResultPoints[index].Rotation = rot;
     ResultPoints[index].Color = 1;
-    ResultPoints[index].Selected = 1;
+    ResultPoints[index].FX2 = 1;
 
 }

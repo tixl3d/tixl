@@ -11,9 +11,9 @@ cbuffer Params : register(b0)
     float Scatter;
 }
 
-StructuredBuffer<Point> PointsA : t0;        // input
-StructuredBuffer<Point> PointsB : t1;        // input
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+StructuredBuffer<Point> PointsA : register(t0);        // input
+StructuredBuffer<Point> PointsB : register(t1);        // input
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 float SmootherStep(float x)
 {

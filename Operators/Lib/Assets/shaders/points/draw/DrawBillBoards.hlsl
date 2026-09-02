@@ -90,7 +90,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<Point> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> SpriteTexture : register(t1);
 Texture2D<float4> FxTexture : register(t2);
 Texture2D<float4> ColorOverW : register(t3);

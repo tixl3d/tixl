@@ -25,12 +25,12 @@ cbuffer Transforms : register(b1)
     float4x4 ObjectToClipSpace;
 };
 
-// struct LegacyPoint {
+// struct Point {
 //     float3 Position;
 //     float W;
 // };
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; 
+RWStructuredBuffer<Point> ResultPoints : register(u0); 
 
 
 
@@ -47,14 +47,14 @@ void main(uint3 i : SV_DispatchThreadID)
 
     ResultPoints.GetDimensions(numStructs, stride);
     if(i.x >= numStructs) {
-        ResultPoints[i.x].W = sqrt(-1) ;
+        ResultPoints[i.x].Scale = NAN;
         return;
     }
 
     float3 p = ResultPoints[i.x].Position - center;
 
     if(isnan( p.x + p.y + p.x)    ) {
-         ResultPoints[i.x].W = 0.010;
+         ResultPoints[i.x].FX1 = 0.010;
          ResultPoints[i.x].Position = center - Size * 0.2; // some not in center
          return;
     }    
@@ -75,14 +75,14 @@ void main(uint3 i : SV_DispatchThreadID)
 
     // Add line break for all wraps
     if(WriteLineBreaks > 0.5 && abs(offsetFactor.x) +abs(offsetFactor.y) + abs(offsetFactor.z) !=0 ) {
-        ResultPoints[i.x].W = sqrt(-1);
+        ResultPoints[i.x].Scale = NAN;
     }
     else 
     {
         float3 distToEdge = halfSize - abs(wrappedP);
         float3 minDist = saturate(distToEdge * 10);
         float minD = minDist.x * minDist.y * minDist.z;
-        ResultPoints[i.x].W = minD;
+        ResultPoints[i.x].FX1 = minD;
     }
 }
 

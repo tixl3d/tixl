@@ -10,8 +10,8 @@ cbuffer Params : register(b0)
 }
 
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;        
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;   
+StructuredBuffer<Point> SourcePoints : register(t0);        
+RWStructuredBuffer<Point> ResultPoints : register(u0);   
 
 static const float PointSpace = 0;
 static const float ObjectSpace = 1;
@@ -26,7 +26,7 @@ void main(uint3 i : SV_DispatchThreadID)
         return;
     }
 
-    LegacyPoint p = SourcePoints[i.x];
+    Point p = SourcePoints[i.x];
 
     float3 pos = p.Position;
     float4 rot = p.Rotation;

@@ -51,10 +51,10 @@ cbuffer Params : register(b1)
 
 
 
-StructuredBuffer<LegacyPoint> Points : t0;
-StructuredBuffer<SpriteDef> InputSprites : t1;
-RWStructuredBuffer<SpriteDef> ResultSprites : u0;    // output1
-//RWStructuredBuffer<SpriteDef> ResultSprites : u0;     // output2
+StructuredBuffer<Point> Points : register(t0);
+StructuredBuffer<SpriteDef> InputSprites : register(t1);
+RWStructuredBuffer<SpriteDef> ResultSprites : register(u0);    // output1
+//RWStructuredBuffer<SpriteDef> ResultSprites : register(u0);     // output2
 
 
 Texture2D<float4> InputTexture : register(t2);
@@ -75,7 +75,7 @@ void main(uint3 i : SV_DispatchThreadID)
     //if(i.x >= spriteCount)
     //    return;
     
-    LegacyPoint P = Points[index];
+    Point P = Points[index];
     float3 pos = P.Position;
     pos -= Center;
     pos.x /= aspectRatio;

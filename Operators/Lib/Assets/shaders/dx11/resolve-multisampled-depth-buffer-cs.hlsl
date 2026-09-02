@@ -1,4 +1,4 @@
-Texture2DMS<float, 4> txMSDepth : t0;
+Texture2DMS<float, 4> txMSDepth : register(t0);
 RWTexture2D<float> outputTexture : register(u0);
 
 [numthreads(16,16,1)]

@@ -23,11 +23,11 @@ cbuffer Params : register(b0)
     float ShadeFlat;
 }
 
-StructuredBuffer<int3> SourceIndices : t0;
-StructuredBuffer<PbrVertex> SourceVertices : t1;
+StructuredBuffer<int3> SourceIndices : register(t0);
+StructuredBuffer<PbrVertex> SourceVertices : register(t1);
 
-RWStructuredBuffer<int3> ResultIndices : u0;
-RWStructuredBuffer<PbrVertex> ResultVertices : u1;
+RWStructuredBuffer<int3> ResultIndices : register(u0);
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u1);
 
 
 [numthreads(64,1,1)]

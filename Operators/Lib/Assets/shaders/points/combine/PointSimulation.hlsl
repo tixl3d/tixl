@@ -2,8 +2,8 @@
 #include "shared/point.hlsl"
 #include "shared/quat-functions.hlsl"
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;         // input
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; 
+StructuredBuffer<Point> SourcePoints : register(t0);         // input
+RWStructuredBuffer<Point> ResultPoints : register(u0); 
 
 
 
@@ -28,8 +28,8 @@ void main(uint3 i : SV_DispatchThreadID)
     if(i.x >= sourcePointcount) 
         return;
 
-    float currentW = ResultPoints[i.x].W;
-    float orgW = SourcePoints[i.x].W;
+    float currentW = ResultPoints[i.x].FX1;
+    float orgW = SourcePoints[i.x].FX1;
 
     if(isnan(orgW) || isnan(currentW) || isnan(ResultPoints[i.x].Position.x)) 
     {
@@ -37,12 +37,12 @@ void main(uint3 i : SV_DispatchThreadID)
         return;
     }
 
-    ResultPoints[i.x].W = lerp( currentW, orgW, MixOriginal );
+    ResultPoints[i.x].FX1 = lerp( currentW, orgW, MixOriginal );
 
     ResultPoints[i.x].Position = lerp(ResultPoints[i.x].Position,  SourcePoints[i.x].Position, MixOriginal);
     ResultPoints[i.x].Color = lerp(ResultPoints[i.x].Color,  SourcePoints[i.x].Color, MixOriginal);
-    ResultPoints[i.x].Stretch = lerp(ResultPoints[i.x].Stretch,  SourcePoints[i.x].Stretch, MixOriginal);
-    ResultPoints[i.x].Selected = lerp(ResultPoints[i.x].Selected,  SourcePoints[i.x].Selected, MixOriginal);
+    ResultPoints[i.x].Scale = lerp(ResultPoints[i.x].Scale,  SourcePoints[i.x].Scale, MixOriginal);
+    ResultPoints[i.x].FX2 = lerp(ResultPoints[i.x].FX2,  SourcePoints[i.x].FX2, MixOriginal);
     ResultPoints[i.x].Rotation = qSlerp(ResultPoints[i.x].Rotation,  SourcePoints[i.x].Rotation, MixOriginal);
 
 }

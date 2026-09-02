@@ -42,7 +42,7 @@ struct psInput
 sampler texSampler : register(s0);
 sampler pointSampler : register(s1);
 
-StructuredBuffer<LegacyPoint> Points : register(t0);
+StructuredBuffer<Point> Points : register(t0);
 Texture2DArray<float4> SpriteTexture : register(t1);
 Texture2D<float4> FxTexture : register(t2);
 Texture3D<float> IndexFromColorLookUp : register(t3);
@@ -73,7 +73,7 @@ psInput vsMain(uint id: SV_VertexID)
     uint pointId = id / 6;
     float3 cornerFactors = Corners[quadIndex];
 
-    LegacyPoint p = Points[pointId]; 
+    Point p = Points[pointId]; 
 
     float f = pointId / (float)particleCount;
     output.texCoord = (cornerFactors.xy * float2(1, -1) * 0.5 + 0.5);
@@ -93,7 +93,7 @@ psInput vsMain(uint id: SV_VertexID)
     lch.x += hash11u(pointId) * 0.1;   // Add some variation to "dither"
     output.arrayIndex = IndexFromColorLookUp.SampleLevel(pointSampler, lch,0);
 
-    float hideUndefinedPoints = isnan(p.W) ? 0 : 1;
+    float hideUndefinedPoints = isnan(p.FX1) ? 0 : 1;
     float computedScale = hideUndefinedPoints * Scale;
 
     float3 axis = ( cornerFactors ) * 0.010;

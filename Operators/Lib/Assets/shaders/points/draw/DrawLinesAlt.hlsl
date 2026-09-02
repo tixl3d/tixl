@@ -64,7 +64,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<Point> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> texture2 : register(t1);
 
 // Helper function to get point with wrapping for closed shapes

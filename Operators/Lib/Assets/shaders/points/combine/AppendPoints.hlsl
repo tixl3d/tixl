@@ -6,14 +6,14 @@ cbuffer Params : register(b0)
     float CountB;
 }
 
-// struct LegacyPoint {
+// struct Point {
 //     float3 Position;
 //     float W;
 // };
 
-StructuredBuffer<LegacyPoint> Points1 : t0;         // input
-StructuredBuffer<LegacyPoint> Points2 : t1;         // input
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+StructuredBuffer<Point> Points1 : register(t0);         // input
+StructuredBuffer<Point> Points2 : register(t1);         // input
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
@@ -22,20 +22,20 @@ void main(uint3 i : SV_DispatchThreadID)
     bool useFirst = (i.x < countA);
 
     if(i.x > CountA + CountB) {
-        ResultPoints[i.x].W = NAN; // NaN
+        ResultPoints[i.x].Scale = NAN;
         return;
     }
 
     if(useFirst) {
         ResultPoints[i.x] = Points1[i.x];
         if(i.x == countA-1) {
-            ResultPoints[i.x].W = NAN;
+            ResultPoints[i.x].Scale = NAN;
         }
     }
     else {
         ResultPoints[i.x] = Points2[i.x - countA];
         if(i.x == countA + uint(CountB + 0.5)) {
-            ResultPoints[i.x].W = NAN;
+            ResultPoints[i.x].Scale = NAN;
         }
     }
 }

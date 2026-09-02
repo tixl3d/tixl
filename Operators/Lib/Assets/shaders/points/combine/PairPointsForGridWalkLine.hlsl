@@ -44,9 +44,9 @@ static const int3 AxisOrders[] =
     int3(2, 0, 1), // 0
 };
  
-StructuredBuffer<Point> StartPoints : t0;
-StructuredBuffer<Point> TargetPoints : t1;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> StartPoints : register(t0);
+StructuredBuffer<Point> TargetPoints : register(t1);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 [numthreads(11,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
@@ -116,7 +116,6 @@ void main(uint3 i : SV_DispatchThreadID)
     float4 next = stepPositions[ min(lineStepIndex + 1, 10)];
 
     float w = 1;
-    const float NaN = sqrt(-1); // 0.1f;//
 
     pos = current.xyz;
     d = current.w;
@@ -141,7 +140,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     // Case B0
     else if(current.w <=0  && next.w < 0) {
-        w = NaN;
+        w = NAN;
         //d =0;
     }
 
@@ -172,7 +171,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     // Case B4
     else if(prev.w > 1 && current.w > 1) {
-        w = NaN;
+        w = NAN;
     }
 
     Point p = A;
@@ -181,9 +180,9 @@ void main(uint3 i : SV_DispatchThreadID)
     p.FX1 =  1-d * w;
 
     if( lineStepIndex == 10)
-        w = NaN; // NaN for divider
+        w = NAN; // divider
 
-    float scaleFactor = isnan(w * d) ? NaN : 1;
+    float scaleFactor = isnan(w * d) ? NAN : 1;
 
     //p.Scale *= scaleFactor;
     p.Scale = 0.5 * scaleFactor;

@@ -20,8 +20,8 @@ cbuffer Params : register(b1)
     int RotationMode;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;   // input
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+StructuredBuffer<Point> SourcePoints : register(t0);   // input
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 // static uint sourceCount;
 static float3 sumPos = 0;

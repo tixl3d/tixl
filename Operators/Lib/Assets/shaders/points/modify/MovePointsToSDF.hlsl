@@ -26,10 +26,10 @@ cbuffer Params : register(b2)
     int AmountFactor;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
-sampler ClampedSampler : s0;
-sampler WrappedSampler: s1;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
+sampler ClampedSampler : register(s0);
+sampler WrappedSampler: register(s1);
 
 
 

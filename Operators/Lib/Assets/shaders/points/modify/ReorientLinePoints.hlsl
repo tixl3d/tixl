@@ -12,8 +12,8 @@ cbuffer Params : register(b0)
     float Flip;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 // Aligns orientation quaternion q so that its +Z forward
 // points towards newForward

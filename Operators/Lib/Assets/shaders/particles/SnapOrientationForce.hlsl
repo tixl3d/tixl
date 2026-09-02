@@ -34,7 +34,7 @@ cbuffer Transforms : register(b2)
     float4x4 ObjectToClipSpace;
 };
 
-RWStructuredBuffer<Particle> Particles : u0; 
+RWStructuredBuffer<Particle> Particles : register(u0); 
 
 // Helper function to get plane coordinates based on space and plane selection
 void GetPlaneCoordinates(float3 v, float spaceAndPlane, out float2 planeCoords, out float remainingAxis)

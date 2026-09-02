@@ -45,8 +45,8 @@ cbuffer Params : register(b0)
    
 }
 
-StructuredBuffer<LegacyPoint> Points : t0;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
+StructuredBuffer<Point> Points : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 Texture2D<float4> inputTexture : register(t1);
 sampler texSampler : register(s0);
@@ -63,7 +63,7 @@ sampler texSampler : register(s0);
     uint index = i.x;
     
 
-    LegacyPoint p = Points[index];
+    Point p = Points[index];
 
     float3 pos = p.Position;
     pos -= Center;
@@ -131,9 +131,9 @@ sampler texSampler : register(s0);
 
     
     float3 stretchOffset = Mode < 0.5 ? stretchFactor
-                               : float3(stretchFactor) * p.Stretch;
+                               : float3(stretchFactor) * p.Scale;
 
-    p.Stretch *= stretchOffset;
+    p.Scale *= stretchOffset;
 
     // Position
     float4 ff = FactorsForPositionAndW[(uint)clamp(L, 0, 5.1)] * (gray * LFactor + LOffset) +
@@ -157,7 +157,7 @@ sampler texSampler : register(s0);
     }
     p.Position = newPos;
 
-    p.W = Mode < 0.5 ? (p.W + ff.w) : (p.W * (1 + ff.w));
+    p.FX1 = Mode < 0.5 ? (p.FX1 + ff.w) : (p.FX1 * (1 + ff.w));
                                     
     ResultPoints[index] = p;
 }

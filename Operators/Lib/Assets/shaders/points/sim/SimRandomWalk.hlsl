@@ -21,7 +21,7 @@ cbuffer Params : register(b0)
 }
 
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; 
+RWStructuredBuffer<Point> ResultPoints : register(u0); 
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
@@ -46,6 +46,6 @@ void main(uint3 i : SV_DispatchThreadID)
     float3 step = qRotateVec3(forward, ResultPoints[i.x].Rotation );
 
     ResultPoints[i.x].Position += step;
-    ResultPoints[i.x].W += 0;
+    ResultPoints[i.x].FX1 += 0;
 }
 

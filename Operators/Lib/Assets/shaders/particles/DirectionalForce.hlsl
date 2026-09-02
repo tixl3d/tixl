@@ -12,7 +12,7 @@ cbuffer Params : register(b0)
     float SpeedFactor;
 }
 
-RWStructuredBuffer<Particle> Particles : u0;
+RWStructuredBuffer<Particle> Particles : register(u0);
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

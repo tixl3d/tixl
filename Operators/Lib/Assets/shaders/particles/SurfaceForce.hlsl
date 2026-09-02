@@ -26,7 +26,7 @@ cbuffer Params : register(b1)
     int VolumeShape;
 }
 
-RWStructuredBuffer<Particle> Particles : u0;
+RWStructuredBuffer<Particle> Particles : register(u0);
 
 static const int VolumeSphere = 0;
 static const int VolumeBox = 1;

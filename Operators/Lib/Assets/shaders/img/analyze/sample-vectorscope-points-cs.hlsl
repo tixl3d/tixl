@@ -6,7 +6,7 @@ cbuffer Params : register(b0)
     float EnlargeCenter;
 }
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 Texture2D<float4> inputTexture : register(t0);
 sampler texSampler : register(s0);
 
@@ -111,5 +111,5 @@ void main(uint3 i : SV_DispatchThreadID)
     //     0 );
 
     ResultPoints[i.x].Rotation = c;
-    ResultPoints[i.x].W = 1;
+    ResultPoints[i.x].FX1 = 1;
 }

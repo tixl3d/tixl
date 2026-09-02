@@ -13,11 +13,11 @@ cbuffer Params : register(b0)
     float UVsDirection;
 }
 
-StructuredBuffer<Point> RailPoints : t0;
-StructuredBuffer<Point> ShapePoints : t1;
+StructuredBuffer<Point> RailPoints : register(t0);
+StructuredBuffer<Point> ShapePoints : register(t1);
 
-RWStructuredBuffer<PbrVertex> Vertices : u0;
-RWStructuredBuffer<int3> TriangleIndices : u1;
+RWStructuredBuffer<PbrVertex> Vertices : register(u0);
+RWStructuredBuffer<int3> TriangleIndices : register(u1);
 
 [numthreads(80, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

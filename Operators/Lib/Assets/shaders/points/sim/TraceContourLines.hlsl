@@ -39,7 +39,7 @@ cbuffer Params : register(b1)
     float ZoneCenter;
 }
 
-RWStructuredBuffer<LegacyPoint> Points : u0;   
+RWStructuredBuffer<Point> Points : register(u0);   
 Texture2D<float4> inputTexture : register(t1);
 sampler texSampler : register(s0);
 static float2 texSize;
@@ -82,11 +82,11 @@ void main(uint3 i : SV_DispatchThreadID)
     texSize = float2(sx,sy);
 
     
-    LegacyPoint P = Points[lineStartIndex];
+    Point P = Points[lineStartIndex];
 
     float3 pos = P.Position;
     float4 rot = P.Rotation;
-    float w = P.W;
+    float w = P.FX1;
 
     // Asign target Zonelevels to points
     int lineCount = pointCount / lineStepCount;
@@ -146,9 +146,10 @@ void main(uint3 i : SV_DispatchThreadID)
 
         Points[index].Rotation = rot;
 
-        Points[index].W = w;
+        Points[index].FX1 = w;
+        Points[index].Scale = 1;
         if(stepIndex == lineStepCount - 1) {
-            Points[index].W = sqrt(-1);
+            Points[index].Scale = NAN;
         }
 
         float3 foreward = qRotateVec3(float3(1,0,0), rot) * Speed / 100 ;

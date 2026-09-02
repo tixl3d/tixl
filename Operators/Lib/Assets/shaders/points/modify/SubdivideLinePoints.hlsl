@@ -9,8 +9,8 @@ cbuffer Params : register(b0)
     float CloseShape;  // 0 = open, 1 = closed
 }
 
-StructuredBuffer<Point> SourcePoints : t0;         // input
-RWStructuredBuffer<Point> ResultPoints : u0;    // output
+StructuredBuffer<Point> SourcePoints : register(t0);         // input
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 // Helper function to check if a point is a separator
 bool IsSeparator(Point p)

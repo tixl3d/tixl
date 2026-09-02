@@ -25,8 +25,8 @@ cbuffer Params : register(b1)
     float3 Size;
 }
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;        
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;   
+StructuredBuffer<Point> SourcePoints : register(t0);        
+RWStructuredBuffer<Point> ResultPoints : register(u0);   
 
 float4 GetBias(float4 x, float bias)
 {

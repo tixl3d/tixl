@@ -27,8 +27,8 @@ cbuffer Transforms : register(b1)
 };
 
 RWTexture2D<float4> ColorOutput  : register(u0); 
-RWStructuredBuffer<uint> IndexBuffer : u1;
-StructuredBuffer<Point> SourcePoints : t0;
+RWStructuredBuffer<uint> IndexBuffer : register(u1);
+StructuredBuffer<Point> SourcePoints : register(t0);
 
 
 float c2k(Point c){

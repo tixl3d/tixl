@@ -22,8 +22,8 @@ cbuffer Params : register(b2)
     int StrengthFactor;
 }
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 sampler ClampedSampler : register(s0);
 
 //=== Additional Resources ==========================================

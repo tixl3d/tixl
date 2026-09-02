@@ -31,10 +31,10 @@ cbuffer IntParams : register(b1)
     int FrameCount;
 }
 
-RWStructuredBuffer<Particle> Particles : u0; 
+RWStructuredBuffer<Particle> Particles : register(u0); 
 
-StructuredBuffer<PbrVertex> Vertices: t0;
-StructuredBuffer<int3> Indices: t1;
+StructuredBuffer<PbrVertex> Vertices: register(t0);
+StructuredBuffer<int3> Indices: register(t1);
 
 
 
