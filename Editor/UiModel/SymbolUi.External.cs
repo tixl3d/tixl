@@ -78,6 +78,7 @@ public sealed partial class SymbolUi
     internal void BumpVersionCounter()
     {
         VersionCounter++;
+        GlobalVersionCounter++;
         // Forward to the Core Symbol so operators can cache per-frame child scans and rebuild only when
         // the symbol changes (the Player has no SymbolUi, but its graph is static so the mirror stays 0).
         Symbol.VersionCounter = VersionCounter;
@@ -87,6 +88,12 @@ public sealed partial class SymbolUi
     /// Can be used for invalidating display caching
     /// </summary>
     internal int VersionCounter { get;private set; }
+
+    /// <summary>
+    /// Process-wide monotonic change counter, bumped on every symbol-ui modification.
+    /// Lets external observers (debug protocol clients) cheaply detect "did anything change".
+    /// </summary>
+    internal static int GlobalVersionCounter { get; private set; }
 
     internal SymbolUi CloneForNewSymbol(Symbol newSymbol, Dictionary<Guid, Guid> oldToNewIds = null)
     {

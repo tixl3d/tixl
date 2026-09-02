@@ -2,6 +2,10 @@
 
 Goal: give an external client (Claude via CLI, scripts, eventually a test runner) read and control access to Tixl's live state — commands, graph state, logs, ImGui state, screenshots — over a simple local protocol, with hot reload in the loop. Tests come later as one client of this protocol; they do not shape it.
 
+Sequencing (2026-09-02): a scoped subset (Phases 0, 1, 2 without `getUiState`, 3, 5, 6) is the agreed precursor to `Plan_ProceduralGeometry.md` Phase 1 — the geometry work's verification loop is the payoff. Phases 4 and 7 wait until the geometry phases have lived with the protocol.
+
+Status (2026-09-02): **Phase 0 ✅** — see `tixl-debug-protocol-audit.md` (addressing, command classification, bypasses, infra map; key decisions: socket threads enqueue raw lines and the main-thread pump parses/executes/responds; envelope carries ImGui frame + playback frame + new global `SymbolUi.GlobalVersionCounter`; mutations dispatch commands directly, never UserActions). **Phase 1 ✅ (verified live)** — `Editor/App/DebugProtocol/DebugServer.cs` (+ `DebugLogBuffer.cs`), started via `--debug-server <port>` (`Program.cs`), pumped at the top of `T3Ui.ProcessFrame`; methods: `ping`, `getVersion`, `shutdown` (via `EditorUi.Instance.ExitApplication()` — `Application.Exit()` only triggers the exit dialog). **Phase 2 ✅ (verified live except happy-path getGraphState/screenshot, which need an open project — covered by Phase 3's openProject)** — `getLogTail` (ring buffer `DebugLogRing`, seq-numbered), `getGraphState {compositionId?, includeDefaults?}`, `getContext`, `getStructureVersion`, `getMetrics` (incl. per-process GPU memory via `Adapter3.QueryVideoMemoryInfo` — the leak-detection metric), `screenshot {path}` (async via `ScreenshotWriter`, responds on readback completion). `getUiState` skipped per subset scope.
+
 ## Field validation (2026-09-01)
 
 An agent session verified a resource-leak fix (`SceneSetup.Dispose` had an inverted guard) by driving the editor with synthetic mouse input and screen captures — the exact workflow this protocol replaces. Concrete lessons folded into the phases below:
