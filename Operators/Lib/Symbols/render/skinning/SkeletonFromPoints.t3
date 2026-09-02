@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "9c2e5f70-b813-4d4a-a8c6-1d05e94f72b6"/*SkeletonFromPoints*/,
+  "Inputs": [
+    {
+      "Id": "68c1d4a7-95f0-4832-8ce5-b7304a61e9d2"/*UseF2AsParent*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d05b39e8-42a6-4c17-b8f9-6273c580ad14"/*Points*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

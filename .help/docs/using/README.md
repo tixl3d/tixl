@@ -13,6 +13,9 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 
 ## Working with graphs
 
+- [Character animation](CharacterAnimation.md) — play glTF animation clips, blend and
+  retarget poses, rig procedural geometry to skeletons.
+
 *Still to write:*
 
 - **Essential operators** — the 20 – 30 ops you'll use in almost any project, grouped by purpose (image, 3D, flow, text, IO).

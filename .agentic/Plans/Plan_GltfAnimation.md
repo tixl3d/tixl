@@ -1,7 +1,9 @@
 # Plan: glTF Animation Playback & Skinning
 
-Status: **Phases 0-4 implemented (untested in editor), Phase 5 + wrap-up pending**
-Last update: 2026-09-01
+Status: **Phases 0-4 implemented and verified in the editor (animated Fox.gltf plays
+through the full sample -> matrices -> skin -> draw chain). Phase 5 implemented,
+awaiting editor test. Wrap-up pending.**
+Last update: 2026-09-02
 
 ## Goal
 
@@ -68,16 +70,26 @@ graph inputs), `RetargetPose` (case-insensitive name map, rest-delta rotations,
 opt-in `TranslationScale` for root motion, cached mapping).
 All CPU ops on `Point[]`, allocation-free per frame.
 
-### Phase 5 - Procedural binding ⬜ (next)
-- `SkeletonFromPoints` (points + parent info / chain -> skeleton)
-- `BindToSkeleton` (distance-to-bone envelope weights, k influences, falloff)
-- `SkinPoints` (same kernel on point buffers)
-- Milestone: rig a noise-generated mesh to a spline chain.
+### Phase 5 - Procedural binding ✅ implemented (untested in editor)
+- `SkeletonFromPoints` (CPU): `StructuredList` points (via [PointsToCPU]) -> `SceneSetup`
+  with one skeleton. Chain mode (parent = previous, NaN-scale separators split chains)
+  or `UseF2AsParent` (F2 = parent point index). Feed a *static snapshot* for the rest pose.
+- `PoseFromPoints` (CPU, added beyond original plan): object-space points (same source,
+  continuously updated) -> joint-local pose. This is how a procedural rig animates:
+  rest snapshot -> SkeletonFromPoints; live points -> PoseFromPoints -> PoseToSkinMatrices.
+- `BindToSkeleton` (GPU): envelope weights on the rest pose; accepts a Mesh *or* a point
+  buffer (two shaders, shared `shared/skin-binding.hlsl`). Bone segments joint->avg(children);
+  Radius/FalloffPower/MaxInfluences(1-4); outside all envelopes snaps to nearest bone.
+- `SkinPoints` (GPU): point counterpart of SkinMesh; rotates Position and Rotation by the
+  blended matrix (orthonormalized -> quat); separators/unbound points pass through.
+- Milestone graph (untested): spline -> PointsToCPU(snapshot) -> SkeletonFromPoints;
+  animated spline -> PointsToCPU(continuous) -> PoseFromPoints -> PoseToSkinMatrices;
+  mesh -> BindToSkeleton -> SkinMesh -> draw.
 
-### Wrap-up ⬜
-- `.help/` page for the skinning/animation workflow
-- `.tests-manual/` set (load -> sample -> blend -> skin -> draw)
-- Sweep transitional comments; feature retrospective
+### Wrap-up (in progress)
+- ✅ `.help/docs/using/CharacterAnimation.md` (drafted, review after Phase 5 test)
+- ✅ `.tests-manual/gltf-character-animation.md` (drafted; assumes Fox.glb)
+- ⬜ Sweep transitional comments; feature retrospective
 
 ## Needs verification (first editor test on a rigged asset, e.g. Fox.glb / CesiumMan.glb)
 
@@ -91,7 +103,12 @@ All CPU ops on `Point[]`, allocation-free per frame.
 4. **Node-transform offset**: a model whose skin sits under a transformed node must not
    be double-transformed (skinned draw must bypass the node transform).
 5. New `LoadGltfScene` outputs + `render/skinning` symbols appear after editor restart
-   (hand-authored .t3/.t3ui files).
+   (hand-authored .t3/.t3ui files). ✅ (Phases 1-4 ops confirmed; Phase 5 ops pending)
+6. Phase 5: `BindToSkeleton` on the Fox mesh + its own skeleton should roughly reproduce
+   the authored deformation (envelope quality check). Then the spline-chain milestone.
+7. Phase 5: `SkinPoints` orientation convention (qFromMatrix3Precise/qMul order in
+   `SkinPoints-cs.hlsl`) - check with visibly oriented instances on a rotating joint;
+   if instances counter-rotate, swap the qMul argument order.
 
 ## Fixed along the way
 
