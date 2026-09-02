@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -13,11 +14,15 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Animation;
 using T3.Core.Logging;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.App.DebugProtocol;
@@ -39,6 +44,14 @@ internal static class DebugServer
     public const int ProtocolVersion = 1;
 
     public static bool IsRunning => _listener != null;
+    public static int Port { get; private set; }
+    public static int RequestCount { get; private set; }
+
+    /// <summary>Environment.TickCount64 of the last handled request or sent response — drives the app-bar activity indicator.</summary>
+    public static long LastActivityTicksMs { get; private set; }
+
+    /// <summary>Short "method -> outcome" lines of the most recent requests, oldest first. Main-thread only (indicator tooltip).</summary>
+    public static IReadOnlyList<string> RecentMessages => _recentMessages;
 
     public static void Start(int port)
     {
@@ -58,6 +71,7 @@ internal static class DebugServer
         }
 
         _listener = listener;
+        Port = port;
         Log.AddWriter(DebugLogBuffer.Instance);
         _cancellation = new CancellationTokenSource();
         _ = Task.Run(() => AcceptConnectionsAsync(listener, _cancellation.Token));
@@ -98,6 +112,18 @@ internal static class DebugServer
         if (_listener == null)
             return;
 
+        // Complete pending pumpFrames requests: each call to this method is one frame.
+        for (var i = _pendingPumps.Count - 1; i >= 0; i--)
+        {
+            var pump = _pendingPumps[i];
+            pump.FramesRemaining--;
+            if (pump.FramesRemaining > 0)
+                continue;
+
+            _pendingPumps.RemoveAt(i);
+            pump.Context.SendOk(new JObject());
+        }
+
         while (_requestQueue.TryDequeue(out var request))
         {
             HandleRequestLine(request.Client, request.Line);
@@ -130,7 +156,9 @@ internal static class DebugServer
 
     private static void HandleRequestLine(ClientConnection client, string line)
     {
-        var context = new RequestContext(client, null);
+        RequestCount++;
+        LastActivityTicksMs = Environment.TickCount64;
+
         JObject request;
         try
         {
@@ -138,14 +166,15 @@ internal static class DebugServer
         }
         catch (JsonReaderException e)
         {
-            context.SendError("PARSE_ERROR", e.Message);
+            new RequestContext(client, null, null).SendError("PARSE_ERROR", e.Message);
             return;
         }
 
-        context = new RequestContext(client, request["id"]);
+        var method = request["method"]?.Value<string>();
+        var context = new RequestContext(client, request["id"], method);
         try
         {
-            ExecuteMethod(request["method"]?.Value<string>(), request, context);
+            ExecuteMethod(method, request, context);
         }
         catch (Exception e)
         {
@@ -201,6 +230,53 @@ internal static class DebugServer
             case "screenshot":
                 HandleScreenshot(request, context);
                 break;
+
+            case "openProject":
+                HandleOpenProject(request, context);
+                break;
+
+            case "setInput":
+                HandleSetInput(request, context);
+                break;
+
+            case "getOutput":
+                HandleGetOutput(request, context);
+                break;
+
+            case "pumpFrames":
+            {
+                var count = Math.Clamp(request["count"]?.Value<int>() ?? 1, 1, 100000);
+                _pendingPumps.Add(new PendingPump(context, count));
+                break;
+            }
+
+            case "setTime":
+            {
+                var playback = Playback.Current;
+                if (request["timeInBars"] is { } bars)
+                    playback.TimeInBars = bars.Value<double>();
+                else if (request["timeInSecs"] is { } secs)
+                    playback.TimeInSecs = secs.Value<double>();
+
+                context.SendOk(new JObject
+                                   {
+                                       ["timeInBars"] = playback.TimeInBars,
+                                       ["timeInSecs"] = playback.TimeInSecs,
+                                   });
+                break;
+            }
+
+            case "setPlayback":
+            {
+                var playback = Playback.Current;
+                if (request["speed"] is { } speed)
+                    playback.PlaybackSpeed = speed.Value<double>();
+                else if (request["playing"] is { } playing)
+                    playback.PlaybackSpeed = playing.Value<bool>() ? 1 : 0;
+
+                context.SendOk(new JObject { ["playbackSpeed"] = playback.PlaybackSpeed });
+                break;
+            }
 
             case null:
                 context.SendError("MISSING_METHOD", "Request has no 'method' field");
@@ -471,6 +547,242 @@ internal static class DebugServer
         }
     }
 
+    private static void HandleOpenProject(JObject request, RequestContext context)
+    {
+        var name = request["name"]?.Value<string>();
+        var symbolIdText = request["symbolId"]?.Value<string>();
+
+        EditorSymbolPackage? package = null;
+        Guid homeSymbolId = default;
+        var useExplicitHome = false;
+
+        if (symbolIdText != null)
+        {
+            if (!Guid.TryParse(symbolIdText, out homeSymbolId))
+            {
+                context.SendError("INVALID_PARAM", $"symbolId '{symbolIdText}' is not a Guid");
+                return;
+            }
+
+            foreach (var p in SymbolPackage.AllPackages)
+            {
+                if (p is EditorSymbolPackage editorPackage && p.Symbols.ContainsKey(homeSymbolId))
+                {
+                    package = editorPackage;
+                    break;
+                }
+            }
+
+            if (package == null)
+            {
+                context.SendError("NOT_FOUND", $"No package contains symbol {homeSymbolId}");
+                return;
+            }
+
+            useExplicitHome = true;
+        }
+        else if (name != null)
+        {
+            foreach (var p in SymbolPackage.AllPackages)
+            {
+                if (p is EditorSymbolPackage editorPackage && string.Equals(editorPackage.DisplayName, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    package = editorPackage;
+                    break;
+                }
+            }
+
+            if (package == null)
+            {
+                context.SendError("NOT_FOUND", $"No project named '{name}'");
+                return;
+            }
+        }
+        else
+        {
+            context.SendError("MISSING_PARAM", "openProject requires 'name' or 'symbolId'");
+            return;
+        }
+
+        OpenedProject? openedProject;
+        string? failureLog;
+        var created = useExplicitHome
+                          ? OpenedProject.TryCreateWithExplicitHome(package, homeSymbolId, out openedProject, out failureLog)
+                          : OpenedProject.TryCreate(package, out openedProject, out failureLog);
+        if (!created || openedProject == null)
+        {
+            context.SendError("OPEN_FAILED", failureLog ?? "unknown reason");
+            return;
+        }
+
+        if (GraphWindow.GraphWindowInstances.Count == 0)
+        {
+            context.SendError("NO_GRAPH_WINDOW", "No graph window available");
+            return;
+        }
+
+        var graphWindow = GraphWindow.GraphWindowInstances[0];
+        if (!graphWindow.TrySetToProject(openedProject, tryRestoreViewArea: false))
+        {
+            context.SendError("OPEN_FAILED", "Graph window rejected the project");
+            return;
+        }
+
+        var rootInstance = openedProject.Structure.GetRootInstance();
+        var pinOutput = request["pinOutput"]?.Value<bool>() ?? true;
+        if (pinOutput && rootInstance != null && OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
+        {
+            outputWindow.Pinning.PinInstance(rootInstance, graphWindow.ProjectView);
+        }
+
+        context.SendOk(new JObject
+                           {
+                               ["rootSymbolId"] = rootInstance?.Symbol.Id.ToString(),
+                               ["rootSymbolName"] = rootInstance?.Symbol.Name,
+                           });
+    }
+
+    private static void HandleSetInput(JObject request, RequestContext context)
+    {
+        var symbol = ProjectView.Focused?.CompositionInstance?.Symbol;
+        var compositionIdText = request["compositionId"]?.Value<string>();
+        if (compositionIdText != null)
+        {
+            if (!Guid.TryParse(compositionIdText, out var compositionId) || !SymbolRegistry.TryGetSymbol(compositionId, out symbol))
+            {
+                context.SendError("NOT_FOUND", $"Unknown composition '{compositionIdText}'");
+                return;
+            }
+        }
+
+        if (symbol == null)
+        {
+            context.SendError("NO_COMPOSITION", "No composition focused and no compositionId given");
+            return;
+        }
+
+        if (!Guid.TryParse(request["childId"]?.Value<string>(), out var childId)
+            || !symbol.Children.TryGetValue(childId, out var child))
+        {
+            context.SendError("NOT_FOUND", "Unknown or missing childId");
+            return;
+        }
+
+        Symbol.Child.Input? input = null;
+        if (Guid.TryParse(request["inputId"]?.Value<string>(), out var inputId))
+        {
+            child.Inputs.TryGetValue(inputId, out input);
+        }
+        else if (request["inputName"]?.Value<string>() is { } inputName)
+        {
+            foreach (var candidate in child.Inputs.Values)
+            {
+                if (string.Equals(candidate.Name, inputName, StringComparison.OrdinalIgnoreCase))
+                {
+                    input = candidate;
+                    break;
+                }
+            }
+        }
+
+        if (input == null)
+        {
+            context.SendError("NOT_FOUND", "Unknown input - give 'inputId' or 'inputName'");
+            return;
+        }
+
+        var valueToken = request["value"];
+        if (valueToken == null)
+        {
+            context.SendError("MISSING_PARAM", "setInput requires 'value'");
+            return;
+        }
+
+        var newValue = input.Value.Clone();
+        try
+        {
+            newValue.SetValueFromJson(valueToken);
+        }
+        catch (Exception e)
+        {
+            context.SendError("INVALID_PARAM", $"Can't read value as {input.DefaultValue.ValueType.Name}: {e.Message}");
+            return;
+        }
+
+        UndoRedoStack.AddAndExecute(new ChangeInputValueCommand(symbol, childId, input, newValue));
+        context.SendOk(new JObject { ["input"] = input.Name });
+    }
+
+    private static void HandleGetOutput(JObject request, RequestContext context)
+    {
+        Instance? instance = null;
+        var view = ProjectView.Focused;
+        if (Guid.TryParse(request["childId"]?.Value<string>(), out var childId))
+        {
+            view?.CompositionInstance?.Children.TryGetChildInstance(childId, out instance);
+        }
+        else
+        {
+            instance = view?.RootInstance;
+        }
+
+        if (instance == null)
+        {
+            context.SendError("NOT_FOUND", "No matching instance (open a project, or give a childId within the focused composition)");
+            return;
+        }
+
+        ISlot? slot = null;
+        if (Guid.TryParse(request["outputId"]?.Value<string>(), out var outputId))
+        {
+            foreach (var candidate in instance.Outputs)
+            {
+                if (candidate.Id == outputId)
+                {
+                    slot = candidate;
+                    break;
+                }
+            }
+        }
+        else if (instance.Outputs.Count > 0)
+        {
+            slot = instance.Outputs[0];
+        }
+
+        if (slot == null)
+        {
+            context.SendError("NOT_FOUND", "Instance has no matching output");
+            return;
+        }
+
+        var result = new JObject
+                         {
+                             ["outputId"] = slot.Id.ToString(),
+                             ["valueType"] = slot.ValueType.Name,
+                             ["value"] = slot switch
+                                             {
+                                                 Slot<string> s  => s.Value,
+                                                 Slot<float> s   => s.Value,
+                                                 Slot<double> s  => s.Value,
+                                                 Slot<int> s     => s.Value,
+                                                 Slot<bool> s    => s.Value,
+                                                 Slot<Vector2> s => new JArray(s.Value.X, s.Value.Y),
+                                                 Slot<Vector3> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z),
+                                                 Slot<Vector4> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z, s.Value.W),
+                                                 _               => JValue.CreateNull(),
+                                             },
+                         };
+        context.SendOk(result);
+    }
+
+    private static void RecordMessage(string message)
+    {
+        if (_recentMessages.Count >= RecentMessageCapacity)
+            _recentMessages.RemoveAt(0);
+
+        _recentMessages.Add(message);
+    }
+
     private static JObject StampEnvelope(JObject response, JToken? id)
     {
         response["id"] = id;
@@ -482,14 +794,16 @@ internal static class DebugServer
 
     private sealed class RequestContext
     {
-        public RequestContext(ClientConnection client, JToken? id)
+        public RequestContext(ClientConnection client, JToken? id, string? method)
         {
             _client = client;
             _id = id;
+            _method = method;
         }
 
         public void SendOk(JObject result)
         {
+            RecordMessage($"{_method ?? "?"} → ok");
             _client.Send(StampEnvelope(new JObject
                                            {
                                                ["ok"] = true,
@@ -499,6 +813,7 @@ internal static class DebugServer
 
         public void SendError(string code, string detail)
         {
+            RecordMessage($"{_method ?? "?"} → {code}");
             _client.Send(StampEnvelope(new JObject
                                            {
                                                ["ok"] = false,
@@ -512,6 +827,19 @@ internal static class DebugServer
 
         private readonly ClientConnection _client;
         private readonly JToken? _id;
+        private readonly string? _method;
+    }
+
+    private sealed class PendingPump
+    {
+        public PendingPump(RequestContext context, int framesRemaining)
+        {
+            Context = context;
+            FramesRemaining = framesRemaining;
+        }
+
+        public readonly RequestContext Context;
+        public int FramesRemaining;
     }
 
     private sealed class ClientConnection
@@ -558,6 +886,7 @@ internal static class DebugServer
 
         public void Send(JObject response)
         {
+            LastActivityTicksMs = Environment.TickCount64;
             try
             {
                 lock (_writeLock)
@@ -590,6 +919,9 @@ internal static class DebugServer
         private readonly object _writeLock = new();
     }
 
+    private const int RecentMessageCapacity = 8;
+    private static readonly List<string> _recentMessages = new(RecentMessageCapacity);
+    private static readonly List<PendingPump> _pendingPumps = new();
     private static TcpListener? _listener;
     private static CancellationTokenSource? _cancellation;
     private static SharpDX.DXGI.Adapter3? _gpuAdapter;

@@ -43,9 +43,10 @@ internal sealed class StatusErrorLine : ILogWriter
                     ImGui.PushFont(Fonts.FontBold);
                     var width = ImGui.CalcTextSize(firstLine).X;
 
-                    // Keep room for the clear button at the right edge.
+                    // Keep room for the clear button (and the debug-server indicator) at the right edge.
+                    var reservedSlots = App.DebugProtocol.DebugServer.IsRunning ? 2f : 1f;
                     var availableSpace = ImGui.GetWindowSize().X;
-                    ImGui.SetCursorPosX(availableSpace - width - ImGui.GetFrameHeight());
+                    ImGui.SetCursorPosX(availableSpace - width - ImGui.GetFrameHeight() * reservedSlots);
 
                     ImGui.TextColored(color, firstLine);
                     ImGui.PopFont();
