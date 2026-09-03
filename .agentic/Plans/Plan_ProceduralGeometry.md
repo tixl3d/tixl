@@ -33,8 +33,8 @@ Following `Plan_GltfAnimation.md`'s "no new connection types" approach:
 - **No `GeometryScene`.** `SceneSetup` already has the node hierarchy, per-node
   transform/material/visibility, and dispatch flattening. If a scene-level authoring
   step is needed later, it evolves `SceneSetup`.
-- **Chunks**: promote `MeshChunkDef` from `LoadGltfScene.cs` into Core (next to
-  `MeshBuffers`) instead of adding a parallel chunk type. Keep the GPU struct lean
+- **Chunks**: promote `MeshChunkDef` from `LoadGltfScene.cs` into Core (`Core/Rendering`,
+  next to `PbrVertex`) instead of adding a parallel chunk type. Keep the GPU struct lean
   (ranges; bounds/material only if culling/picking needs them) — transforms and color
   ride on the `Point[]` side channel, matching `_GetSceneDefinitionPoints` +
   `DrawMeshChunksAtPoints`.
@@ -377,8 +377,35 @@ Also done (user request): `LoadObjGeometry` — own N-gon-preserving OBJ parser
 reused), `o`/`g` groups become parts with centroid pivots, normals/UVs become
 corner attributes, file-watched via `Resource&lt;T&gt;`, `Scale` input.
 
-Still open: `MeshChunkDef` promotion, `GeometryToChunks`, `PlaceGeometryAtPoints`,
-and the full milestone demo through `DrawMeshChunksAtPoints`.
+Done (2026-09-03): `MeshChunkDef` promoted to `Core/Rendering` next to `PbrVertex`
+(GPU-layout structs live there; `Core/DataTypes` is for connection types — layout
+frozen, `LoadGltfScene` uses it). `Lib.Utils.GeometryMeshCompiler` now does the packing for
+both `GeometryToMeshBuffers` and the new `GeometryToChunks`; because a part is a
+contiguous face range and there is one vertex per corner, each part maps to
+contiguous vertex/triangle ranges and the chunk table falls out without
+reordering. `GeometryToChunks` outputs `Buffers` (with `ChunkDefsBuffer`),
+`Points` (CPU pivots, seed index in F2), `GPoints` (uploaded), `ChunkIndices`
+(identity) and `ChunkCount`; vertices are pivot-relative. Verified via protocol:
+chunks render at the CPU mesh's position, `TransformPoints` scale 1.8 on the
+pivots explodes the fracture on the GPU, and the CPU route (`Points` ->
+`ListToBuffer` -> `TransformPoints`) gives the same picture. Noted on the way:
+`ListToBuffer` fed straight into `DrawMeshChunksAtPoints` showed nothing once
+right after its element count changed (1 -> 20) — likely a stale view in that
+op after a buffer resize; not reproduced on retry, not in scope.
+
+`PlaceGeometryAtPoints` (2026-09-03): prototype geometry x CPU point list -> one
+part per point (position/orientation/scale from the point, corner normals
+rotated with inverse-scale correction, point color as part-domain `Color`,
+point index as `SourcePoint` part attribute and part seed index, separators
+skipped, prototype parts flattened, other attributes repeated). Verified:
+40 scattered beveled cubes -> 4560 faces / 3200 points / 40 parts, watertight,
+volume = 40x the prototype's. Editor now also warns when a `.cs` under
+`Symbols/` defines no operator (helpers belong in `Utils/`); the convention is in
+AGENT_INSTRUCTIONS.
+
+Still open: the full milestone demo (density field, animated pivots). A CPU `TransformCPoints` only moves a single point; the CPoints
+family has no whole-list transform yet, so pivot animation currently goes through
+the GPU point ops.
 
 - Promote `MeshChunkDef` to Core.
 - `GeometryToChunks` — one chunk per part into shared buffers; outputs
@@ -620,7 +647,10 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   volume, surface status, attribute table) instead of an empty view. The
   measurement moved to Core as `MeshGeometryStats` (shared with
   `GetGeometryStats`; remeasures only on `Version` change, strings rebuilt only
-  then). Possible follow-ups: a wireframe/preview render, per-part table.
+  then). A per-part table (faces, open edges, volume, seed, pivot; clipped
+  rows, strings cached per change) followed; `MeshGeometryStats.Parts` carries
+  the per-part numbers. Hover-driven views and a wireframe preview were
+  considered and dropped.
 - `ExtrudeFaces`, bevel v2 (miters, colliding bevels, per-edge widths),
   `SubdivideGeometry`, `LatticeDeform`, `SliceGeometryWithPlane` (-> closed
   `CurveGeometry`), curve offsetting, `FitCurves` (polyline -> smooth beziers).
@@ -697,6 +727,12 @@ Recurring pattern: `Point[]` is the universal glue (pose -> selection, seeds ->
 fracture, pivots -> explode); GPU<->CPU crossings stay explicit and cached.
 
 ## Open questions
+
+- `Core/DataTypes` audit (maintainer, 2026-09-03): the folder/namespace is meant for
+  connection types, but holds buffer-element and helper structs too (`Point`,
+  `EmitterCounter`, `Sprite`, `LegacyParticleSystem`, `Shader`). Moving them is a
+  wide mechanical refactor (external operator packages reference
+  `T3.Core.DataTypes.Point`); do it as its own commit.
 
 1. **Font outline library** — decided: **SixLabors.Fonts**. `IGlyphRenderer`
    streams glyph outlines as beziers while `TextRenderer` drives full layout

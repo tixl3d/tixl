@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "c7e3a9f1-5d28-4b64-8a0f-2e9c6b1d7f35"/*GeometryToChunks*/,
+  "Description": "Compiles geometry parts into one mesh buffer with a chunk per part, for instancing with [DrawMeshChunksAtPoints].
+
+Vertices are stored relative to their part's pivot, so moving, rotating or scaling a pivot point transforms the whole chunk on the GPU. Points holds the pivots as CPU points (F2 carries the part's seed index) for further processing with CPoints ops and [ListToBuffer]; GPoints is the same list already uploaded. ChunkIndices maps each point to its chunk. Geometry without parts becomes a single chunk anchored at the origin.
+
+AKA: fracture chunks, mesh parts to instances, explode on GPU",
+  "InputUis": [
+    {
+      "InputId": "7f2c9e4b-d631-4a85-b9e7-0c5d8a3f1b62"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "3a8f1c5e-b2d7-4e90-9c46-d1f5a7e3b082"/*Buffers*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "e6b2d4a8-1f73-4c05-8e9b-a4c7f2d9e516"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "9d4c7f2a-6e18-4b53-a7c0-f3e8b5d1a294"/*GPoints*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "52f8e1b7-c3a9-4d26-b0e4-7a1d9c6f3e58"/*ChunkIndices*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "b1e7c4d3-8a52-4f09-9d6e-c2f5a8b7e143"/*ChunkCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}

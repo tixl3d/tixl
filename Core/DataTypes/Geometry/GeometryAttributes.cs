@@ -32,6 +32,9 @@ public static class GeometryAttributeNames
 
     /// <summary>Face domain, 1 on faces created by a cut (e.g. fracture caps), 0 on original surface.</summary>
     public const string IsCut = "IsCut";
+
+    /// <summary>Part domain, int: index of the point a part was instanced at, so per-point data can be joined back later.</summary>
+    public const string SourcePoint = "SourcePoint";
 }
 
 /// <summary>

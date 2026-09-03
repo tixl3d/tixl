@@ -229,28 +229,6 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         return rootNode;
     }
 
-    
-    // Todo adjust shader implementation new stride
-    [StructLayout(LayoutKind.Explicit, Size = Stride)]
-    // ReSharper disable once MemberCanBePrivate.Global
-    public struct MeshChunkDef
-    {
-        [FieldOffset(0)]
-        public int StartFaceIndex;
-        
-        [FieldOffset(4)]
-        public int FaceCount;
-        
-        [FieldOffset(8)]
-        public int StartVertexIndex;
-        
-        [FieldOffset(12)]
-        public int VertexCount;
-
-        internal const int Stride = 16;
-    }    
-    
-
     /** Flatten all meshes into a single mesh buffer seperated into chunks */
     private SceneSetup.SceneNode ConvertToNodeStructureIntoChunks(Scene modelDefaultScene)
     {

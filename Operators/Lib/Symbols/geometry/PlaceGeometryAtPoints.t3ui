@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "8d5f3a27-b9c4-4e61-a0d2-6f7e1c8b3a95"/*PlaceGeometryAtPoints*/,
+  "Description": "Copies a prototype geometry to every point of a CPU point list, one part per point.
+
+Each point's position, orientation and scale place its copy (UseOrientation / UseScale switch the latter two off). With UseColor the point color becomes a part-domain Color attribute, which [GeometryToMeshBuffers] applies per copy. The index of the source point is stored as the SourcePoint part attribute and as the part's seed index, so per-point data can be joined back later. Separator points are skipped; parts of the prototype are flattened into the copy. Corner normals are rotated with the copy.
+
+Works with any CPU point source ([ScatterPointsInVolume], [LineCPoints], [RadialCPoints], [ReadPointsFromGpu]); pair with [GeometryToChunks] to animate the copies on the GPU afterwards.
+
+AKA: instance, scatter geometry, copy to points, place in slots",
+  "InputUis": [
+    {
+      "InputId": "2c9e7b41-d5a3-4f80-b6e1-8a0f3d7c2e59"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "f1a6d3c8-4e27-4b95-a0d7-c3b9e5f8a162"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "7e3b9f52-a8c1-4d06-9b4e-d6f2a1c7e380"/*UseOrientation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "b4d8e2a7-3f19-4c65-8e0a-1c7f5b9d3a46"/*UseScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "5a1f7c3e-9d62-4b08-a3e5-f0b8d4c6e271"/*UseColor*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4b7e2d90-6c1a-4f58-9e3b-d2a8f5c7e014"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "a9c1e5f3-2d84-4b06-8f7a-1e6d3c9b5a28"/*InstanceCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

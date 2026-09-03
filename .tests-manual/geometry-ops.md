@@ -132,6 +132,36 @@ Select (or pin) the `[VoronoiFracture]` itself, then the `[BevelGeometry]`.
 - For the fracture, a scrollable parts table lists every chunk with face count,
   open edges (highlighted when non-zero), volume, seed index and pivot.
 
+## Step: GPU chunks
+
+**Action:**
+Feed the `[VoronoiFracture]` into a `[GeometryToChunks]`. Connect its `Buffers`
+to `Mesh`, `GPoints` to `GPoints` and `ChunkIndices` to `ChunkIndices` of a
+`[DrawMeshChunksAtPoints]`; pin that op. Then insert a `[TransformPoints]`
+between `GPoints` and the draw op and raise its `Scale` to ~1.8.
+
+**Expected:**
+- Without the transform, the chunk render sits exactly where `[DrawMesh]` shows
+  the fractured cube.
+- With the scale, the chunks fly apart from the cube center while each chunk
+  keeps its shape; the CPU `[ExplodeGeometry]` is no longer needed for this.
+- `ChunkCount` equals the number of fracture seeds.
+
+## Step: Placing geometry at points
+
+**Action:**
+Scale the beveled cube down with a `[TransformGeometry]` (Scale ~0.15), feed it
+into a `[PlaceGeometryAtPoints]` together with a `[ScatterPointsInVolume]`
+(Count 40, Size 2), and render the result through `[GeometryToMeshBuffers]`.
+
+**Expected:**
+- 40 small cubes appear at the scattered positions; the output view shows 40
+  parts and "watertight".
+- Feeding points with orientation and scale (e.g. `[RadialCPoints]`) rotates and
+  scales the copies; `UseOrientation` / `UseScale` off places them axis-aligned
+  at unit size.
+- Colored input points color the copies when `UseColor` is on.
+
 ## Step: Isolating a single chunk
 
 **Action:**

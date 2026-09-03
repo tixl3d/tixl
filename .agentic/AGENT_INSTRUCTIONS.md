@@ -64,6 +64,20 @@ Also:
 - Match existing naming and slot conventions
 - Avoid hidden side effects unless explicitly intended
 
+### Operators vs. helper classes in an operator package
+
+The loader identifies operators **by type, not by folder**: a class is an operator iff it derives
+from `Instance`, and it then needs exactly one `[Guid]` and a matching `.t3`. Every other type in
+the package assembly is ignored, so a helper class can never accidentally become a symbol. Folder
+placement is a packaging convention:
+
+- `Symbols/` holds operators only, each `.cs` beside its `.t3`/`.t3ui`. Its `.cs` files are copied
+  to the shipped `SourceCode/` folder (editor source view); nothing else is.
+- Shared helpers used by several operators go in `<Package>/Utils/` (Lib: `MeshInsideTester`,
+  `GeometryMeshCompiler`, `SvgLoader`), kept `internal`. They compile into the package DLL like any
+  other file and need no registration.
+- A helper used by exactly one operator stays a nested private class of that operator.
+
 ### Operator descriptions
 
 An operator's Description lives in its `.t3ui` and is the source for both the editor's help panel and the

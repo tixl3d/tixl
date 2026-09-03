@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "8d5f3a27-b9c4-4e61-a0d2-6f7e1c8b3a95"/*PlaceGeometryAtPoints*/,
+  "Inputs": [
+    {
+      "Id": "2c9e7b41-d5a3-4f80-b6e1-8a0f3d7c2e59"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f1a6d3c8-4e27-4b95-a0d7-c3b9e5f8a162"/*Points*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "7e3b9f52-a8c1-4d06-9b4e-d6f2a1c7e380"/*UseOrientation*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "b4d8e2a7-3f19-4c65-8e0a-1c7f5b9d3a46"/*UseScale*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "5a1f7c3e-9d62-4b08-a3e5-f0b8d4c6e271"/*UseColor*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
