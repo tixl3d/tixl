@@ -68,7 +68,10 @@ frame**. Setting an input does not run the graph.
    auto-saves. Do experiments in the `_agentTests` playground project (empty, fast to
    load, lives in the user projects folder outside the repo, and being editable it
    hot-reloads via `reload`), never in `Lib` or real user projects.
-5. **Hand-edited files vs. running editor.** Never hand-edit `.t3` / `.t3ui` / operator
+5. **`addOp` can steal the output view.** After adding an op, `screenshot` may fail
+   with `NO_OUTPUT` because the new (non-renderable) op got focused. `pin` a
+   renderable op (e.g. the draw op) to restore the output window.
+6. **Hand-edited files vs. running editor.** Never hand-edit `.t3` / `.t3ui` / operator
    `.csproj` files while the editor has them loaded — it rewrites them on save. Close or
    cycle the editor first.
 

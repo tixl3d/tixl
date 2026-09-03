@@ -1038,6 +1038,17 @@ internal static class DebugServer
             return;
         }
 
+        // A type-mismatched connection can crash evaluation - refuse it here.
+        var resolvedOutput = sourceChild.Symbol.OutputDefinitions.Find(o => o.Id == outputId);
+        var resolvedInput = targetChild.Symbol.InputDefinitions.Find(i => i.Id == inputId);
+        if (resolvedOutput != null && resolvedInput != null
+            && resolvedOutput.ValueType != resolvedInput.DefaultValue.ValueType)
+        {
+            context.SendError("TYPE_MISMATCH",
+                              $"Output '{resolvedOutput.Name}' ({resolvedOutput.ValueType.Name}) doesn't match input '{resolvedInput.Name}' ({resolvedInput.DefaultValue.ValueType.Name})");
+            return;
+        }
+
         var compositionInstance = ProjectView.Focused?.CompositionInstance;
         if (compositionInstance != null
             && compositionInstance.Symbol.Id == compositionSymbol.Id

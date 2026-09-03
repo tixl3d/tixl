@@ -62,6 +62,18 @@ Set `Segments` to 4 and `Roundness` to 1, then enable `RoundCorners`.
   continues through the corner in concentric rings.
 - No spikes at the corners, even when `Width` is dragged up to the clamp.
 
+## Step: Custom scalar field
+
+**Action:**
+Replace the field input of `[DisplaceGeometry]` with a `[CustomScalarField]` and set
+its `Code` to `return Sin(p.X * B) * Sin(p.Y * B) * Sin(p.Z * B) * A;` with `A` = 1
+and `B` = 8.
+
+**Expected:**
+- The mesh shows a regular sine bump pattern; editing `A`/`B` updates it live.
+- Entering invalid code logs a warning in the console (with the snippet line
+  number) and the last working field keeps rendering.
+
 ## Step: Transforming before the bevel
 
 **Action:**

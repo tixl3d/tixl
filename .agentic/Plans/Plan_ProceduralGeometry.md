@@ -309,12 +309,31 @@ separator-aware via `Point.IsSeparator`, brute force with a spatial-grid note),
 `ColorFromField` (corner Color attribute — note: NO built-in mesh shader consumes
 `PbrVertex.ColorRgb` today, flagged as renderer follow-up below), and
 `DisplaceGeometry` (points along accumulated Newell normals by field×amount;
-drops the Normal attribute since displacement invalidates it). Milestone verified
+recomputes smooth corner normals from the displaced shape when the input carried
+a Normal attribute, otherwise stays faceted), and `NoiseField` (3D gradient noise
+fBm, seeded, zero-centered ±Amplitude; verified as displacement source through
+the protocol). Also landed en route: `BevelGeometry` `RoundCorners` (concentric
+ring corner patches on a least-squares-fitted sphere instead of the single-point
+fan), and a `TYPE_MISMATCH` guard in the protocol's `connect` handler (a
+mismatched connection previously crashed the editor). Milestone verified
 by protocol screenshot: beveled cube organically deformed by distance-to-ring-
 points through the composed field chain; both test gates green.
 
-Still open in this phase: `CustomScalarField` (Roslyn snippet op — the v1 of the
-VEX direction), `NoiseField`, and the `SelectGeometry` Field mode (lands with
+Done: `CustomScalarField` — Roslyn snippet op (v1 of the VEX direction): the
+Code input is a method body returning float with `p`, `A`-`D`, `Points`
+(separator-free Vector3[] snapshot) in scope, `System.MathF` and the `FieldCode`
+helpers (`DistanceToClosestPoint`) statically imported. Compiles into a
+collectible AssemblyLoadContext (old one unloaded on recompile), errors are
+logged with snippet-relative line numbers, and the previous working delegate
+stays active while typing. Adds `Microsoft.CodeAnalysis.CSharp` to Lib — see the
+packaging note below. Verified via protocol: sine-product snippet displaces the
+beveled cube; bad code logs a warning and keeps rendering.
+
+Packaging: the op carries `[ExportDependencies("Microsoft.CodeAnalysis.dll",
+"Microsoft.CodeAnalysis.CSharp.dll")]`, so player exports only ship Roslyn when
+an exported graph actually uses `CustomScalarField`.
+
+Still open in this phase: the `SelectGeometry` Field mode (lands with
 `SelectGeometry` itself in Phase 5). Renderer follow-up surfaced: making
 `DrawMesh` multiply vertex `ColorRgb` (default 1 ⇒ visually safe, suite-guarded)
 would activate `ColorFromField` and glTF vertex colors — maintainer decision.
