@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using T3.Core.Utils;
 
 namespace Lib.geometry;
 
@@ -10,7 +11,7 @@ namespace Lib.geometry;
 /// are flat and marked with Selection = 1 for downstream styling.
 /// </summary>
 [Guid("70d8f2b5-3a41-4c96-8e2d-b09c6f5e1a73")]
-internal sealed class VoronoiFracture : Instance<VoronoiFracture>
+internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProvider
 {
     [Output(Guid = "48e5a9c1-d637-4b80-92f4-5c1e8b0d7a26")]
     public readonly Slot<MeshGeometry> Result = new();
@@ -47,11 +48,35 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>
             return;
         }
 
-        Build(source);
+        if (Async.GetValue(context))
+        {
+            var hash = new HashCode();
+            hash.Add(source.Version);
+            hash.Add(source.GetHashCode());
+            foreach (var seed in _seeds)
+            {
+                hash.Add(seed);
+            }
+
+            // The worker gets its own seed copy - _seeds is refilled on the next Update
+            var seeds = _seeds.ToArray();
+            var result = _asyncComputation.Update(context, Result, hash.ToHashCode(),
+                                                  () =>
+                                                  {
+                                                      var target = new MeshGeometry();
+                                                      Build(target, source, seeds);
+                                                      return target;
+                                                  });
+            Result.Value = result ?? source;
+            return;
+        }
+
+        _asyncComputation.WaitForPending();
+        Build(_output, source, _seeds.ToArray());
         Result.Value = _output;
     }
 
-    private void Build(MeshGeometry source)
+    private void Build(MeshGeometry target, MeshGeometry source, Vector3[] seeds)
     {
         var sourceHasNormals = source.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, out var sourceNormals);
 
@@ -79,40 +104,41 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>
         _outFaceOffsets.Add(0);
         var parts = new List<GeometryPart>();
 
-        for (var seedIndex = 0; seedIndex < _seeds.Count; seedIndex++)
+        for (var seedIndex = 0; seedIndex < seeds.Length; seedIndex++)
         {
+            _asyncComputation.ReportProgress(seedIndex / (float)seeds.Length);
             var faceStart = _outFaceOffsets.Count - 1;
-            EmitCell(seedIndex, sourceHasNormals);
+            EmitCell(seeds, seedIndex, sourceHasNormals);
             var faceCount = _outFaceOffsets.Count - 1 - faceStart;
             if (faceCount > 0)
-                parts.Add(new GeometryPart(faceStart, faceCount, _seeds[seedIndex], seedIndex, seedIndex));
+                parts.Add(new GeometryPart(faceStart, faceCount, seeds[seedIndex], seedIndex, seedIndex));
         }
 
-        _output.Positions = _outPositions.ToArray();
-        _output.FaceCornerOffsets = _outFaceOffsets.ToArray();
-        _output.CornerPointIndices = _outCorners.ToArray();
-        _output.Parts = parts.ToArray();
-        _output.Attributes.Clear();
+        target.Positions = _outPositions.ToArray();
+        target.FaceCornerOffsets = _outFaceOffsets.ToArray();
+        target.CornerPointIndices = _outCorners.ToArray();
+        target.Parts = parts.ToArray();
+        target.Attributes.Clear();
 
         if (sourceHasNormals)
         {
-            var normals = _output.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, _outCorners.Count);
+            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, _outCorners.Count);
             for (var c = 0; c < _outCorners.Count; c++)
             {
                 normals.Values[c] = _outNormals[c];
             }
         }
 
-        var selection = _output.Attributes.GetOrCreate<float>(GeometryAttributeNames.Selection, AttributeDomain.Face, _outFaceIsCap.Count);
+        var selection = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.Selection, AttributeDomain.Face, _outFaceIsCap.Count);
         for (var faceIndex = 0; faceIndex < _outFaceIsCap.Count; faceIndex++)
         {
             selection.Values[faceIndex] = _outFaceIsCap[faceIndex] ? 1f : 0f;
         }
 
-        _output.InvalidateTopologyCaches();
+        target.InvalidateTopologyCaches();
     }
 
-    private void EmitCell(int seedIndex, bool withNormals)
+    private void EmitCell(Vector3[] seeds, int seedIndex, bool withNormals)
     {
         // Working copy of the source polygons, clipped plane by plane
         var polygons = new List<Polygon>(_sourcePolygons.Count);
@@ -121,19 +147,19 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>
             polygons.Add(polygon.Clone());
         }
 
-        var seed = _seeds[seedIndex];
-        for (var otherIndex = 0; otherIndex < _seeds.Count; otherIndex++)
+        var seed = seeds[seedIndex];
+        for (var otherIndex = 0; otherIndex < seeds.Length; otherIndex++)
         {
             if (otherIndex == seedIndex || polygons.Count == 0)
                 continue;
 
-            var toOther = _seeds[otherIndex] - seed;
+            var toOther = seeds[otherIndex] - seed;
             var length = toOther.Length();
             if (length < 1e-8f)
                 continue;
 
             var planeNormal = toOther / length;
-            var planeOffset = Vector3.Dot(planeNormal, (seed + _seeds[otherIndex]) * 0.5f);
+            var planeOffset = Vector3.Dot(planeNormal, (seed + seeds[otherIndex]) * 0.5f);
             ClipByPlane(polygons, planeNormal, planeOffset);
         }
 
@@ -355,7 +381,10 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>
     private const float ClipEpsilon = 1e-6f;
     private const float ChainEpsilonSq = 1e-4f * 1e-4f;
 
+    public bool TryGetProgress(out float progress) => _asyncComputation.TryGetUiProgress(out progress);
+
     private readonly MeshGeometry _output = new();
+    private readonly AsyncComputation<MeshGeometry> _asyncComputation = new();
     private readonly List<Vector3> _seeds = [];
     private readonly List<Polygon> _sourcePolygons = [];
     private readonly List<Vertex> _clipScratch = [];
@@ -375,4 +404,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>
 
     [Input(Guid = "84a2f6c0-19db-4e75-93a4-c7e1b8d25f06")]
     public readonly InputSlot<StructuredList> Points = new();
+
+    [Input(Guid = "5e0d8b36-a2c7-4f91-b840-97c3e6d1a528")]
+    public readonly InputSlot<bool> Async = new();
 }

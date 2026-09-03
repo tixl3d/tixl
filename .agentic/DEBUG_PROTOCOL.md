@@ -41,7 +41,7 @@ Read surface: `ping`, `getVersion`, `getStructureVersion`, `getMetrics`, `getCon
 
 Control surface: `openProject` (`name`), `newProject`, `select` (`childId`), `setInput`
 (`childId`, `inputName`, `value`), `addOp`, `connect`, `deleteOp`, `pin`, `pumpFrames`
-(`count`), `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`.
+(`count`), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`.
 
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 
@@ -68,10 +68,14 @@ frame**. Setting an input does not run the graph.
    auto-saves. Do experiments in the `_agentTests` playground project (empty, fast to
    load, lives in the user projects folder outside the repo, and being editable it
    hot-reloads via `reload`), never in `Lib` or real user projects.
-5. **`addOp` can steal the output view.** After adding an op, `screenshot` may fail
+5. **The output camera persists — call `resetView` when screenshots look empty.**
+   The view camera of a project's output window survives sessions; if it was ever
+   dragged away, everything at the origin renders out of frame and screenshots
+   show only the grid. `resetView` reframes the origin.
+6. **`addOp` can steal the output view.** After adding an op, `screenshot` may fail
    with `NO_OUTPUT` because the new (non-renderable) op got focused. `pin` a
    renderable op (e.g. the draw op) to restore the output window.
-6. **Hand-edited files vs. running editor.** Never hand-edit `.t3` / `.t3ui` / operator
+7. **Hand-edited files vs. running editor.** Never hand-edit `.t3` / `.t3ui` / operator
    `.csproj` files while the editor has them loaded — it rewrites them on save. Close or
    cycle the editor first.
 

@@ -292,6 +292,19 @@ internal static class DebugServer
                 HandlePin(request, context);
                 break;
 
+            case "resetView":
+            {
+                if (!OutputWindow.TryGetPrimaryOutputWindow(out var window))
+                {
+                    context.SendError("NO_OUTPUT", "No visible output window");
+                    break;
+                }
+
+                window.ResetView();
+                context.SendOk(new JObject());
+                break;
+            }
+
             case "reload":
                 HandleReload(request, context);
                 break;

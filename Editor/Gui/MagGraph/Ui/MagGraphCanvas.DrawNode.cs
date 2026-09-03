@@ -1101,6 +1101,18 @@ internal sealed partial class MagGraphView
                 
             }
 
+            // Progress bar for long-running background computations (e.g. async geometry ops)
+            if (instance is IProgressProvider progressProvider && progressProvider.TryGetProgress(out var progress))
+            {
+                var barHeight = MathF.Max(2 * T3Ui.UiScaleFactor, 3 * CanvasScale);
+                var barMin = new Vector2(pMinVisible.X, pMaxVisible.Y - barHeight);
+                drawList.AddRectFilled(barMin, pMaxVisible, UiColors.BackgroundFull.Fade(0.6f));
+                drawList.AddRectFilled(barMin,
+                                       new Vector2(pMinVisible.X + (pMaxVisible.X - pMinVisible.X) * progress.Clamp(0f, 1f),
+                                                   pMaxVisible.Y),
+                                       UiColors.StatusAnimated);
+            }
+
             if (UserSettings.Config.ShowOperatorStats)
             {
                 var s = item.Size.Y * 0.15f * CanvasScale;

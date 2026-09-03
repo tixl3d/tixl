@@ -51,6 +51,12 @@ public sealed class EditorFixture : IDisposable
     {
         Client.OpenProject(PlaygroundProject).Require("openProject " + PlaygroundProject);
         Client.PumpFrames(10);
+
+        // The playground's view camera persists across sessions; a dragged-away camera
+        // makes every screenshot-based assertion fail with identical empty frames.
+        Client.Call("resetView", new { });
+        Client.PumpFrames(5);
+
         var state = Client.GetGraphState();
         return (state["children"]!.Count(), state["connections"]!.Count());
     }

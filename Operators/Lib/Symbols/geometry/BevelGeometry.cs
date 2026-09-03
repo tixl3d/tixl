@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using T3.Core.Utils;
 
 namespace Lib.geometry;
 
@@ -10,7 +11,7 @@ namespace Lib.geometry;
 /// shortest edge. General miters/colliding bevels are out of scope.
 /// </summary>
 [Guid("dbaeebea-8d46-416f-9624-867af10d9c07")]
-internal sealed class BevelGeometry : Instance<BevelGeometry>
+internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 {
     [Output(Guid = "48342188-0139-4ea4-943d-a5b5d59b7a4a")]
     public readonly Slot<MeshGeometry> Result = new();
@@ -51,11 +52,26 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>
             return;
         }
 
-        Build(source, width, segments, roundness, flatShading, roundCorners);
+        if (Async.GetValue(context))
+        {
+            var inputsVersion = HashCode.Combine(source.Version, source.GetHashCode(), width, segments, roundness, flatShading, roundCorners);
+            var result = _asyncComputation.Update(context, Result, inputsVersion,
+                                                  () =>
+                                                  {
+                                                      var target = new MeshGeometry();
+                                                      Build(target, source, width, segments, roundness, flatShading, roundCorners);
+                                                      return target;
+                                                  });
+            Result.Value = result ?? source;
+            return;
+        }
+
+        _asyncComputation.WaitForPending();
+        Build(_output, source, width, segments, roundness, flatShading, roundCorners);
         Result.Value = _output;
     }
 
-    private void Build(MeshGeometry source, float width, int segments, float roundness, bool flatShading, bool roundCorners)
+    private void Build(MeshGeometry target, MeshGeometry source, float width, int segments, float roundness, bool flatShading, bool roundCorners)
     {
         var positions = source.Positions;
         var offsets = source.FaceCornerOffsets;
@@ -135,6 +151,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>
 
         for (var edgeIndex = 0; edgeIndex < edges.Edges.Length; edgeIndex++)
         {
+            _asyncComputation.ReportProgress(0.15f + 0.55f * edgeIndex / edges.Edges.Length);
             var edge = edges.Edges[edgeIndex];
             if (edge.Face1 < 0)
                 continue; // boundary edge - nothing to connect
@@ -154,24 +171,25 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>
         }
 
         // --- D: corner fans --------------------------------------------------
+        _asyncComputation.ReportProgress(0.7f);
         BuildCornerFans(source, edgeRings, segments, roundness, roundCorners);
 
         // --- E: publish ------------------------------------------------------
-        _output.Positions = _outPositions.ToArray();
-        _output.FaceCornerOffsets = _outFaceOffsets.ToArray();
-        _output.CornerPointIndices = _outCorners.ToArray();
-        _output.Parts = [];
-        _output.Attributes.Clear();
+        target.Positions = _outPositions.ToArray();
+        target.FaceCornerOffsets = _outFaceOffsets.ToArray();
+        target.CornerPointIndices = _outCorners.ToArray();
+        target.Parts = [];
+        target.Attributes.Clear();
         if (!flatShading)
         {
             // Without the attribute, the compile step falls back to per-face normals - the hard/faceted look.
-            var normals = _output.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, _outCorners.Count);
+            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, _outCorners.Count);
             for (var c = 0; c < _outCorners.Count; c++)
             {
                 normals.Values[c] = _outNormals[_outCorners[c]];
             }
         }
-        _output.InvalidateTopologyCaches();
+        target.InvalidateTopologyCaches();
     }
 
     /// <summary>Points along the bevel profile at one edge end, from Face0's inset point to Face1's.</summary>
@@ -485,7 +503,10 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>
         _outFaceOffsets.Add(_outCorners.Count);
     }
 
+    public bool TryGetProgress(out float progress) => _asyncComputation.TryGetUiProgress(out progress);
+
     private readonly MeshGeometry _output = new();
+    private readonly AsyncComputation<MeshGeometry> _asyncComputation = new();
     private readonly List<Vector3> _outPositions = [];
     private readonly List<Vector3> _outNormals = [];
     private readonly List<int> _outFaceOffsets = [];
@@ -510,4 +531,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>
 
     [Input(Guid = "3f8b1c4d-92e6-4a17-b5d0-6a4c8e2f7d19")]
     public readonly InputSlot<bool> RoundCorners = new();
+
+    [Input(Guid = "8d5c2a97-40e1-4b68-93fd-6b0e8c4a2d75")]
+    public readonly InputSlot<bool> Async = new();
 }

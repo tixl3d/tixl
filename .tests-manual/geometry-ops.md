@@ -86,6 +86,40 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
   (no holes), with smooth beveled outer surfaces and flat cut faces.
 - Changing the scatter `Seed` produces a different, deterministic fracture.
 
+## Step: Async computation
+
+**Action:**
+On a heavy setup (e.g. a fractured OBJ mesh), enable the `Async` parameter on
+`[VoronoiFracture]` (and/or `[BevelGeometry]`), then drag upstream parameters.
+
+**Expected:**
+- The UI keeps its frame rate while dragging; the geometry snaps to the new
+  result shortly after, showing the previous result in between.
+- Switching `Async` off returns to immediate (blocking) updates with identical
+  results.
+- Rendering to a file waits for pending results (no stale frames in the export).
+
+## Step: Centering geometry
+
+**Action:**
+Insert a `[CenterGeometry]` after a `[LoadObjGeometry]` with an off-center mesh
+and set `Pivot` to (0, -0.5, 0).
+
+**Expected:**
+- The mesh moves so its bounding-box bottom center sits on the world origin.
+- Pivot (0,0,0) centers the bounding box; other pivots pick the matching
+  normalized position inside the box.
+
+## Step: Progress bar
+
+**Action:**
+On a heavy async op (e.g. `[VoronoiFracture]` with many seeds on a dense mesh),
+change a parameter so the computation takes more than about half a second.
+
+**Expected:**
+- After ~0.5s an orange progress bar appears at the bottom edge of the op's
+  graph node and fills as the computation proceeds; quick updates show no bar.
+
 ## Step: Loading an OBJ file
 
 **Action:**

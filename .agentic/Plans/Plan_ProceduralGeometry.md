@@ -464,8 +464,31 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   follow the established async-op pattern from [PlayVideo] et al.:
   `if (context.Playback.IsRenderingToFile) Playback.OpNotReady |= !result.IsReady;`
   — the render loop then re-runs the frame until every async op has settled.
-  Prototype on `VoronoiFracture` first — worst cost, simplest contract. Defer actual per-op optimization
-  (spatial grids, parallel-for) until profiles say where.
+  **SHIPPED 2026-09 as `Core/Utils/AsyncComputation<T>`**: ops opt in via an
+  `Async` bool input; the helper runs one job at a time on a worker, keeps
+  publishing the last finished result, drives `DirtyFlagTrigger.Animated`
+  while computing, and sets `Playback.OpNotReady` when rendering to file.
+  Change detection via an `inputsVersion` hash of params +
+  `MeshGeometry.Version` (bumped in `InvalidateTopologyCaches`, since geometry
+  instances are reused). Async jobs build into a fresh `MeshGeometry`; the
+  sync path calls `WaitForPending()` first so a toggle can't race the shared
+  scratch buffers. Wired into `BevelGeometry` and `VoronoiFracture` (default
+  off); roll out to further heavy ops as they land. Known v1 limit: a sync
+  upstream op can mutate the source instance mid-read — the worker catches,
+  logs, and retries on the next version change. Per-op optimization
+  (spatial grids, parallel-for) stays deferred until profiles say where.
+  Progress UI: workers call `AsyncComputation.ReportProgress(0..1)`; ops expose
+  it via `IProgressProvider` (Core interface), and the MagGraph node renderer
+  draws an orange bar at the node's bottom edge once a job runs longer than
+  0.5 s (`TryGetUiProgress` gates the delay). Fracture reports per-seed (its
+  cost is ~seeds x faces, so that's linear); bevel reports coarse stages.
+- `CenterGeometry` (maintainer request): bounding-box centering with a
+  normalized pivot — (0,-0.5,0) puts the bottom center on the origin; part
+  pivots are translated along. For OBJ imports that aren't centered.
+- Debug protocol `resetView`: reframes the output camera on the origin — the
+  persisted view camera of a playground can point away from the origin, which
+  made every screenshot empty and broke the acceptance test; the test fixture
+  now calls it in `OpenPlayground`.
 - `ExtrudeFaces`, bevel v2 (miters, colliding bevels, per-edge widths),
   `SubdivideGeometry`, `LatticeDeform`, `SliceGeometryWithPlane` (-> closed
   `CurveGeometry`), curve offsetting, `FitCurves` (polyline -> smooth beziers).

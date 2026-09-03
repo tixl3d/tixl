@@ -47,7 +47,18 @@ public sealed class MeshGeometry
     /// </summary>
     public EdgeTopology Edges => _edgeTopology ??= EdgeTopology.Build(this);
 
-    public void InvalidateTopologyCaches() => _edgeTopology = null;
+    public void InvalidateTopologyCaches()
+    {
+        _edgeTopology = null;
+        Version++;
+    }
+
+    /// <summary>
+    /// Bumped on every <see cref="InvalidateTopologyCaches"/>. Instances are reused
+    /// across rebuilds, so reference identity can't signal change - consumers that
+    /// cache derived data (e.g. async computations) compare this counter instead.
+    /// </summary>
+    public int Version { get; private set; }
 
     /// <summary>Triangle count after fan-triangulating all N-gons (what the compile step will emit).</summary>
     public int GetTriangleCount()

@@ -4,11 +4,39 @@
   "Description": "Bevels all edges of a MeshGeometry with a uniform width: faces are inset, edges become rounded profile strips, vertices become fan patches. Width is clamped against the shortest edge.",
   "InputUis": [
     {
+      "InputId": "091c932c-a7bb-487e-97c5-093e9838a700"/*Roundness*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "3f8b1c4d-92e6-4a17-b5d0-6a4c8e2f7d19"/*RoundCorners*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      }
+    },
+    {
       "InputId": "46a2c9e2-7b5d-45ce-9955-b1c0b1bb01db"/*Geometry*/,
       "Relevancy": "Required",
       "Position": {
         "X": 0.0,
         "Y": 0.0
+      }
+    },
+    {
+      "InputId": "8d5c2a97-40e1-4b68-93fd-6b0e8c4a2d75"/*Async*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "c86a32c2-feeb-4c05-b2c0-cf54076247bb"/*FlatShading*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
       }
     },
     {
@@ -23,27 +51,6 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
-    },
-    {
-      "InputId": "091c932c-a7bb-487e-97c5-093e9838a700"/*Roundness*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 135.0
-      }
-    },
-    {
-      "InputId": "c86a32c2-feeb-4c05-b2c0-cf54076247bb"/*FlatShading*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 180.0
-      }
-    },
-    {
-      "InputId": "3f8b1c4d-92e6-4a17-b5d0-6a4c8e2f7d19"/*RoundCorners*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 225.0
       }
     }
   ],
