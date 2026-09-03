@@ -288,6 +288,20 @@ public abstract partial class Instance
                     InvalidateConnected(commandInput);
                 break;
 
+            case Slot<MeshGeometry> geometryOutput when mainInputSlot is Slot<MeshGeometry> geometryInput:
+                if (shouldBypass)
+                {
+                    wasByPassed = geometryOutput.TrySetBypassToInput(geometryInput);
+                }
+                else
+                {
+                    geometryOutput.RestoreUpdateAction();
+                }
+
+                if (invalidate)
+                    InvalidateConnected(geometryInput);
+                break;
+
             case Slot<BufferWithViews> bufferOutput when mainInputSlot is Slot<BufferWithViews> bufferInput:
                 if (shouldBypass)
                 {
@@ -450,7 +464,7 @@ public abstract partial class Instance
                 if (connection.ValueType == typeof(string)) // TODO: clarify and comment why whe need this check
                     return;
 
-                connection.DirtyFlag.Invalidate();
+                connection.DirtyFlag.ForceInvalidate(); // past this frame's invalidation pass - see Slot<T>.TrySetBypassToInput
             }
         }
     }

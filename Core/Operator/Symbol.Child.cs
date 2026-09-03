@@ -258,7 +258,8 @@ public partial class Symbol
             typeof(Vector3),
             typeof(string),
             typeof(ShaderGraphNode),
-            typeof(AudioGraphNode)
+            typeof(AudioGraphNode),
+            typeof(MeshGeometry),
         };
 
         private void SetBypassed(bool shouldBypass)

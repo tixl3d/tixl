@@ -544,6 +544,51 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   solid. Fully interior fragments are just the case where that applies to all
   faces. Exposed as `FillInterior` (default on) because it assumes a closed
   solid - open or non-manifold scans can misfire on the inside test.
+  **Status after the 2026-09 stabilization round (parked by maintainer decision
+  - "keep this for later and move on")**: cap construction is now
+  order-independent (clip by all planes first, then per plane: collect the
+  surface edges lying in the plane, chain them, close open chains by walking
+  the plane's exact hull face - a rectangle clipped by box and planes - and
+  use the whole hull face when no surface crosses it and its centroid is
+  inside). The inside test votes over three jittered rays (axis-aligned rays
+  through shared triangle edges flipped the parity). Bugs fixed on the way:
+  the walk skipped the originating chain so it could never close and swept
+  every hull corner into the cap; pass 1 stopped early once the un-capped box
+  hull emptied (dropped ~1/3 of the cell planes); bbox padding put hull edges
+  0.001 off flat faces. Surface is now exact (emitted area == source area,
+  silhouette matches at explode 0). **Remaining defect, measurable via the new
+  `getOutput` MeshGeometry summary**: ~10 boundary edges per part (mostly
+  cut-face edges, `boundaryEdgesOnCuts`), volume within ~1 % of the source -
+  i.e. caps don't share edges exactly with neighbours (T-junctions / near-
+  duplicate vertices along hull walks), which is also what shows as minor
+  triangulation artifacts. Acceptance gate when resumed: `boundaryEdges == 0`
+  and `|volume - sourceVolume| < 1e-4` on cube, beveled cube and the ape scan.
+  Follow-up found via the boundary-edge samples: the per-cell point weld used
+  plain rounding, so near-identical vertices straddling a rounding boundary
+  (e.g. -0.04209502 vs -0.042094983) became separate points - the direct cause
+  of open edges between caps and surface. Replaced by a tolerance weld that
+  checks the neighbouring buckets - boundary edges dropped 1208 -> 777 at 120
+  seeds, but not to zero, and the ~1 % volume error is unchanged, so a second
+  cause remains (likely T-junctions where a cap's hull-walk edge meets several
+  neighbour vertices). Parked here.
+- **Analysis helpers (maintainer request)**: `FilterGeoPartsInBox` keeps or
+  discards parts by their pivot being inside a box (gizmo on Center/Size,
+  `KeptCount` output; part-less geometry counts as one part; attributes
+  remapped per domain) - for slicing a fracture open or culling chunks.
+  `GetGeometryStats` outputs counts, bounds, size, signed volume, boundary
+  edges, evaluation time of the upstream pull, and a text `Report`; stats are
+  cached on `MeshGeometry.Version`. The debug protocol's `getOutput` now also
+  accepts `outputName`.
+- **Maintainer test findings (2026-09)**: `ExplodeGeometry` exploded from the
+  mean part pivot, so filtering parts upstream shifted everything - now
+  `AutoCenter` (default on) or an explicit `Center`. Fracture cap corners added
+  by the hull walk carried a zero normal (black cut walls whenever the input
+  had a Normal attribute) - now the plane normal. Fracture emission drops
+  repeated consecutive corners (a duplicate made one fan triangle degenerate -
+  "missing second triangle" on cut quads). `MeshGeometry` ops with Geometry as
+  first input/output are now **bypassable** (`Symbol.Child._bypassableTypes` +
+  `Instance.SetBypassFor` case) - Bevel, Transform, Displace, Triangulate,
+  Fracture, ColorFaces, Explode, Center, Filter.
   Bug found on the way: `ColorFacesFromAttribute` indexed `Parts[0]` on part-less geometry (the
   unfractured input that flows while an async fracture computes) and the
   unhandled exception **killed the editor** — fixed (implicit part), but note the
@@ -556,6 +601,25 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   persisted view camera of a playground can point away from the origin, which
   made every screenshot empty and broke the acceptance test; the test fixture
   now calls it in `OpenPlayground`.
+- **Bypass toggles were flaky** (maintainer: "doesn't always have an effect",
+  looked like fracture caching). Root cause in Core: `DirtyFlag.Invalidate()`
+  de-duplicates per invalidation tick, and the tick advances in the output
+  window's draw — a bypass toggled from the graph/parameter window (drawn after
+  it) hit an already-visited slot and the invalidation was dropped until some
+  unrelated change dirtied the op. Pure pull-cached ops (geometry) made this
+  visible; command/texture chains re-evaluate anyway. Bypass/restore and
+  `InvalidateConnected` now use `ForceInvalidate()`.
+- `FilterGeometryParts` renamed `FilterGeoPartsInBox` (guid kept); new
+  `FilterGeoPartsByIndex` (`Start`/`Count`, negative Start from the end, Count 0
+  = rest, `PartCount` output). Both share `Lib.Utils.GeometryPartSubset`
+  (face/point compaction + per-domain attribute remap). Isolating one fracture
+  chunk immediately shows the parked cap defect per part (chunk 0 of a 30-seed
+  cube: 13 faces, 16 boundary edges) — the intended handle for finishing it.
+- Idea (maintainer, 2026-09-03): `GetGeometryStats`-style summary as the
+  default output-window view when a geometry op is selected (instead of an
+  empty/black view). Would need a `MeshGeometry` output UI in the editor
+  (`OutputUi` registration by type) drawing the stats text and possibly a wire
+  preview. Not started.
 - `ExtrudeFaces`, bevel v2 (miters, colliding bevels, per-edge widths),
   `SubdivideGeometry`, `LatticeDeform`, `SliceGeometryWithPlane` (-> closed
   `CurveGeometry`), curve offsetting, `FitCurves` (polyline -> smooth beziers).

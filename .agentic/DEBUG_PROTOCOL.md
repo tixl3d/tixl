@@ -50,6 +50,13 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 - `shutdown` is fire-and-forget — the response may never arrive.
 - `getOutput` with a forced update only works for simple leaf evaluation and can
   double-evaluate; prefer the select-then-read pattern below.
+- `getOutput` picks the output by `outputId` (guid), `outputName`, or defaults to the
+  first output. Pass `update: true` to force a pull for outputs nothing displays.
+- `getOutput` on a `MeshGeometry` slot returns a numeric summary instead of the
+  data: point/face/corner/part counts, bounds, `boundaryEdges` /
+  `nonManifoldEdges` (0/0 = watertight), signed `volume` (parts of a fracture
+  must sum to the input's volume) and the attribute list. Use it to validate
+  geometry ops without screenshots.
 
 ## Evaluation model (the part everyone trips over)
 
