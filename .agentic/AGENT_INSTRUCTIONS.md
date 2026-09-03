@@ -341,6 +341,16 @@ later.
 
 TiXL is the current product (v4.x). Tooll3 (v3.x) is the legacy predecessor — a large portion of v4 is a rewrite. Don't write new docs or features targeting Tooll3; treat remaining Tooll3 references in code as historical and prefer removing them over updating them unless there's a concrete migration use case.
 
+## Driving the Editor Programmatically (Debug Protocol)
+
+The editor has a TCP debug bridge for agents and scripts: launch it with
+`--debug-server <port>`, then build graphs, set parameters, take screenshots, hot-reload,
+and run the visual reference test suite over JSON lines — no UI interaction needed.
+**Read [`DEBUG_PROTOCOL.md`](DEBUG_PROTOCOL.md) before using it**; it documents the
+methods, the pull-based evaluation model (select-to-evaluate, trigger flanks), wire
+formats, and the auto-save pitfalls. Use the `_agentTests` playground project for
+experiments, never `Lib` or user projects.
+
 ## Debugging Runtime Behavior with Log Probes
 
 The editor supports hot reload, so adding temporary `Log.Debug(...)` / `Log.Info(...)` lines to test hypotheses is cheap and **welcome**. For non-trivial runtime bugs — UI timing, layout/frame-order interactions, state flowing through multiple canvases or editors — don't guess fixes from static code reading. Instead:

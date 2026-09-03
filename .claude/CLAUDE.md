@@ -6,6 +6,7 @@
 
 - `.agentic/AGENT_INSTRUCTIONS.md` -- coding conventions, performance rules, operator guidelines, style and formatting.
 - `.agentic/SOLUTION_OVERVIEW.md` -- architecture map, dependency flow, task-oriented navigation
+- `.agentic/DEBUG_PROTOCOL.md` -- TCP debug bridge for driving the editor (graphs, params, screenshots, visual tests)
 - `.agentic/Plans/` -- implementation plans for upcoming work (automatic tests, undo/redo coverage, timeline refactoring)
 - `.tests-manual/` -- manual test sets (step-by-step walkthroughs for humans). See [`.tests-manual/README.md`](../.tests-manual/README.md) for format and process.
 
