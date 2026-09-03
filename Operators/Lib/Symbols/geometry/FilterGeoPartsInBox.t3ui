@@ -1,0 +1,53 @@
+{
+  "FormatVersion": 3,
+  "Id": "b81f6c2d-4a93-4e07-9d5e-3c7a0f1b8e64"/*FilterGeoPartsInBox*/,
+  "Description": "Keeps or discards the parts of a MeshGeometry by whether their pivot lies inside a box volume.\n\nUse it to isolate a slice of fracture chunks for inspection, or to cull chunks outside an area. Geometry without parts counts as one part. KeptCount reports how many parts passed. The box shows a transform gizmo when the op is selected.\n\nAKA: discard chunks, hide parts, cull, slice",
+  "InputUis": [
+    {
+      "InputId": "0c5e8a72-6d14-4f9b-a3e7-b18d2c6f0459"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d9a2f6b1-3e58-4c07-8f4d-52c0e7a9b136"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "6b4e0d97-a25c-4f83-91c6-e7d3a8f2b504"/*Size*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "f27c1e58-8b0d-4a96-b5f3-04e9d6c1a782"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "2e7c9a54-d106-4b38-8f1a-c5d3e0b7a921"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "7a3d5f80-1c62-4e9b-b0d4-96e8a2c1f375"/*KeptCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

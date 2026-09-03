@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "b81f6c2d-4a93-4e07-9d5e-3c7a0f1b8e64"/*FilterGeoPartsInBox*/,
+  "Inputs": [
+    {
+      "Id": "0c5e8a72-6d14-4f9b-a3e7-b18d2c6f0459"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d9a2f6b1-3e58-4c07-8f4d-52c0e7a9b136"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "6b4e0d97-a25c-4f83-91c6-e7d3a8f2b504"/*Size*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "f27c1e58-8b0d-4a96-b5f3-04e9d6c1a782"/*Mode*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
