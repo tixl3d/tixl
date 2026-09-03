@@ -86,6 +86,18 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
   (no holes), with smooth beveled outer surfaces and flat cut faces.
 - Changing the scatter `Seed` produces a different, deterministic fracture.
 
+## Step: Coloring fracture cuts per chunk
+
+**Action:**
+Insert a `[ColorFromAttribute]` between `[VoronoiFracture]` and
+`[ExplodeGeometry]`. Feed its `Colors` from a `[ColorsToList]` with three
+distinct colors, set `Source` to PartSeedIndex and keep `OnlySelected` on.
+
+**Expected:**
+- Each chunk's cut faces show one palette color (cycling through the list);
+  the original beveled surface keeps its material color.
+- With `OnlySelected` off, whole chunks take their palette color.
+
 ## Step: Async computation
 
 **Action:**
@@ -95,6 +107,9 @@ On a heavy setup (e.g. a fractured OBJ mesh), enable the `Async` parameter on
 **Expected:**
 - The UI keeps its frame rate while dragging; the geometry snaps to the new
   result shortly after, showing the previous result in between.
+- Changing a parameter while a long computation is still running restarts it
+  with the new values right away (e.g. lowering the seed count of a slow
+  fracture doesn't wait for the slow result first).
 - Switching `Async` off returns to immediate (blocking) updates with identical
   results.
 - Rendering to a file waits for pending results (no stale frames in the export).

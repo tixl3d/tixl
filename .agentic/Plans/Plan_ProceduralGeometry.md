@@ -488,6 +488,22 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   draws an orange bar at the node's bottom edge once a job runs longer than
   0.5 s (`TryGetUiProgress` gates the delay). Fracture reports per-seed (its
   cost is ~seeds x faces, so that's linear); bevel reports coarse stages.
+- **Attribute-domain stress test (2026-09) — passed.** Use case: color the cut
+  faces of each fracture chunk from a `ColorList`. Landed: face-domain `IsCut`
+  on fracture caps (`Selection` mirrors it), `GeometryPart.Seed` renamed
+  `SeedIndex`, face→corner and part→corner **Color promotion** in
+  `GeometryToMeshBuffers`, and `ColorFromAttribute` (index source: part index /
+  part seed index / named face attribute; palette wrap repeat or clamp;
+  OnlySelected masks by face Selection; preserves upstream corner colors).
+  Correction to an earlier note: `mesh-Draw.hlsl` already multiplies
+  `PbrVertex.ColorRGB` into albedo — no shader change was needed. Only
+  `DrawMesh`/`DrawUnlit`/custom draw honor vertex color; `DrawWithShadows` and
+  the instanced drawers ignore it (follow-up if needed). Edge-domain "WasCut"
+  deliberately NOT stored: derivable from `IsCut` adjacency, and edge indices
+  are lazily derived so stored edge attributes would risk going stale.
+  Open architectural point: per-part data beyond `GeometryPart`'s fixed record
+  should go into part-domain `GeometryAttributes` (length = Parts.Length) — the
+  promotion path in the compile step already handles that domain.
 - `CenterGeometry` (maintainer request): bounding-box centering with a
   normalized pivot — (0,-0.5,0) puts the bottom center on the origin; part
   pivots are translated along. For OBJ imports that aren't centered.

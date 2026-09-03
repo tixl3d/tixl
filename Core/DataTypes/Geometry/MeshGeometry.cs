@@ -78,7 +78,8 @@ public sealed class MeshGeometry
 }
 
 /// <summary>A semantic piece of a <see cref="MeshGeometry"/>: a contiguous face range with placement metadata.</summary>
-public readonly record struct GeometryPart(int FaceStart, int FaceCount, Vector3 Pivot, int Id, int Seed);
+/// <param name="SeedIndex">Index of the generating element (e.g. the fracture seed point) - lets consumers map parts back to their source.</param>
+public readonly record struct GeometryPart(int FaceStart, int FaceCount, Vector3 Pivot, int Id, int SeedIndex);
 
 /// <summary>
 /// Unique edges of a mesh with face adjacency, derived lazily from the N-gon topology.

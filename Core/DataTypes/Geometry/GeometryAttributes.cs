@@ -29,6 +29,9 @@ public static class GeometryAttributeNames
     public const string TexCoord2 = "TexCoord2";
     public const string Color = "Color";
     public const string Selection = "Selection";
+
+    /// <summary>Face domain, 1 on faces created by a cut (e.g. fracture caps), 0 on original surface.</summary>
+    public const string IsCut = "IsCut";
 }
 
 /// <summary>
