@@ -894,11 +894,11 @@ internal static class DebugServer
         var update = request["update"]?.Value<bool>() ?? false;
         if (update)
         {
-            // Same forced-pull sequence [VisualTest] uses: the tick bump defeats
-            // InvalidateGraph's once-per-tick visited guard, and the graph-wide
-            // invalidation crosses composed-op boundaries (ForceInvalidate alone only
-            // dirties this slot; a forwarded inner slot would return its cached value).
-            DirtyFlag.IncrementGlobalTicks();
+            // Same forced-pull sequence the output window uses: a new invalidation tick
+            // defeats InvalidateGraph's once-per-tick visited guard, so the walk reaches
+            // upstream inputs changed since the last frame (ForceInvalidate alone only
+            // dirties this slot; a consumer would keep its cached input values).
+            DirtyFlag.GlobalInvalidationTick++;
             slot.InvalidateGraph();
             slot.DirtyFlag.ForceInvalidate();
             var wasDirty = slot.DirtyFlag.IsDirty;
@@ -920,7 +920,7 @@ internal static class DebugServer
                                                  Slot<Vector2> s => new JArray(s.Value.X, s.Value.Y),
                                                  Slot<Vector3> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z),
                                                  Slot<Vector4> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z, s.Value.W),
-                                                 Slot<T3.Core.DataTypes.MeshGeometry> s => DescribeGeometry(s.Value),
+                                                 Slot<T3.Core.DataTypes.MeshGeometry> s => DescribeGeometry(s.Value, request["dumpObj"]?.Value<string>()),
                                                  _               => JValue.CreateNull(),
                                              },
                          };
@@ -932,7 +932,7 @@ internal static class DebugServer
     /// screenshots: counts, bounds, watertightness and signed volume (positive for
     /// outward-facing closed solids; a fracture's parts must sum to the input volume).
     /// </summary>
-    private static JToken DescribeGeometry(T3.Core.DataTypes.MeshGeometry? geometry)
+    private static JToken DescribeGeometry(T3.Core.DataTypes.MeshGeometry? geometry, string? dumpObjPath = null)
     {
         if (geometry == null)
             return JValue.CreateNull();
@@ -940,6 +940,9 @@ internal static class DebugServer
         var positions = geometry.Positions;
         var offsets = geometry.FaceCornerOffsets;
         var corners = geometry.CornerPointIndices;
+
+        if (!string.IsNullOrEmpty(dumpObjPath))
+            DumpGeometryObj(geometry, dumpObjPath);
 
         var min = new Vector3(float.MaxValue);
         var max = new Vector3(float.MinValue);
@@ -1024,6 +1027,56 @@ internal static class DebugServer
                        ["volume"] = volume,
                        ["attributes"] = attributes,
                    };
+    }
+
+    /// <summary>
+    /// Writes the geometry as OBJ for offline analysis: one object per part, faces in
+    /// original corner order (N-gons kept), IsCut faces preceded by a "# cut" comment.
+    /// </summary>
+    private static void DumpGeometryObj(T3.Core.DataTypes.MeshGeometry geometry, string path)
+    {
+        var positions = geometry.Positions;
+        var offsets = geometry.FaceCornerOffsets;
+        var corners = geometry.CornerPointIndices;
+        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsCut, T3.Core.DataTypes.AttributeDomain.Face, out var isCut);
+
+        var sb = new StringBuilder();
+        var culture = System.Globalization.CultureInfo.InvariantCulture;
+        foreach (var p in positions)
+        {
+            sb.Append("v ").Append(p.X.ToString("R", culture)).Append(' ')
+              .Append(p.Y.ToString("R", culture)).Append(' ')
+              .Append(p.Z.ToString("R", culture)).Append('\n');
+        }
+
+        var parts = geometry.Parts;
+        var partIndex = 0;
+        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
+        {
+            while (partIndex < parts.Length && faceIndex >= parts[partIndex].FaceStart + parts[partIndex].FaceCount)
+                partIndex++;
+
+            if (partIndex < parts.Length && faceIndex == parts[partIndex].FaceStart)
+            {
+                var pivot = parts[partIndex].Pivot;
+                sb.Append("o part_").Append(partIndex).Append(" # seed ").Append(parts[partIndex].SeedIndex)
+                  .Append(" pivot ").Append(pivot.X.ToString("R", culture)).Append(' ')
+                  .Append(pivot.Y.ToString("R", culture)).Append(' ').Append(pivot.Z.ToString("R", culture)).Append('\n');
+            }
+
+            if (isCut != null && isCut.Values[faceIndex] > 0.5f)
+                sb.Append("# cut\n");
+
+            sb.Append('f');
+            for (var c = offsets[faceIndex]; c < offsets[faceIndex + 1]; c++)
+            {
+                sb.Append(' ').Append(corners[c] + 1);
+            }
+
+            sb.Append('\n');
+        }
+
+        File.WriteAllText(path, sb.ToString());
     }
 
     private static void HandleNewProject(JObject request, RequestContext context)

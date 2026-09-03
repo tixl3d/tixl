@@ -84,6 +84,9 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
 **Expected:**
 - The cube breaks into chunks that separate with Distance; each chunk is closed
   (no holes), with smooth beveled outer surfaces and flat cut faces.
+- Selecting the `[VoronoiFracture]` shows "watertight" in the output view and
+  a dash in every row of the parts table's open-edges column; the volume equals
+  the beveled cube's. This holds up to hundreds of seeds.
 - Changing the scatter `Seed` produces a different, deterministic fracture.
 - With many seeds (hundreds) and a large Distance, fully interior fragments
   (all faces cut, no original surface) are present in the exploded cloud — the

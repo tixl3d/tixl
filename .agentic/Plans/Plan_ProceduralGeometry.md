@@ -30,9 +30,11 @@ Following `Plan_GltfAnimation.md`'s "no new connection types" approach:
   or `SpaceSet` types. Every existing point op (scatter, grid, noise, repeat) becomes
   a slot/space generator for free. Limitation: no shear in a space — acceptable,
   CGA-style split/repeat doesn't need it.
-- **No `GeometryScene`.** `SceneSetup` already has the node hierarchy, per-node
-  transform/material/visibility, and dispatch flattening. If a scene-level authoring
-  step is needed later, it evolves `SceneSetup`.
+- **No `GeometryScene`.** Geometry stays shape-only (flat parts). Hierarchy,
+  materials and names live on the scene layer — see `Plan_SceneDocument.md` for
+  the format-neutral `SceneDocument`, the derived draw setup, and the
+  `PickGeometryFromScene` / `GeometryToScene` bridge (superseding the earlier
+  "it evolves `SceneSetup`" note).
 - **Chunks**: promote `MeshChunkDef` from `LoadGltfScene.cs` into Core (`Core/Rendering`,
   next to `PbrVertex`) instead of adding a parallel chunk type. Keep the GPU struct lean
   (ranges; bounds/material only if culling/picking needs them) — transforms and color
@@ -480,6 +482,19 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
 
 ### Phase 7+ — Deferred (own plans when picked up) ⬜
 
+- **Scene document** (maintainer discussion 2026-09-03, own plan:
+  `Plan_SceneDocument.md`): a format-neutral `SceneDocument` as the result of
+  loading glTF/FBX/USD (nodes, meshes as `MeshGeometry`, materials as data,
+  skins, clips, cameras, lights); `SceneSetup` becomes the derived draw setup
+  with node settings as a non-connectable editable parameter of
+  `SceneToDrawSetup`; `PickGeometryFromScene` / `GeometryToScene` bridge to the
+  geometry ops. Geometry-side helpers that fall out: `FilterGeoPartsByAttribute`,
+  `MergeGeometry`, skin weights as point attributes emitted by
+  `GeometryToMeshBuffers`. Design rule kept here: parts are shape only
+  (disjoint face ranges with pivot/ids/attributes) — hierarchy, materials and
+  names live on the scene layer and are joined back through `Node` / `Material`
+  / `SourcePoint` part attributes.
+
 - **Non-blocking evaluation for slow geometry ops** (maintainer request 2026-09):
   Release-mode fracture/bevel on real meshes stalls the UI frame. Sketch: an op
   opts into async evaluation — Update kicks the compute onto a worker with an
@@ -598,6 +613,38 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   seeds, but not to zero, and the ~1 % volume error is unchanged, so a second
   cause remains (likely T-junctions where a cap's hull-walk edge meets several
   neighbour vertices). Parked here.
+  **Resolved (2026-09-03), gate met**: 0 boundary edges, 0 non-manifold edges
+  and `|volume - source| < 1e-4` across 13 configurations (12..1500 seeds,
+  bevel 0..0.15, seed clusters 0.15..3.0 wide, plain cube), probed per part via
+  `FilterGeoPartsByIndex` + `getOutput` (script pattern: `frac_probe.py` in the
+  session scratchpad, plus an OBJ dump `getOutput dumpObj:<path>` analysed
+  offline). Causes, in the order found:
+  1. Every probe until then had fractured the *unbeveled* cube: `getOutput`
+     bumped the stats tick instead of `GlobalInvalidationTick`, so its
+     `InvalidateGraph` stopped at already-visited slots and consumers kept
+     cached inputs; and `AsyncComputation` results landing inside an Update
+     left no dirty signal for consumers that didn't pull in that exact frame
+     (now: one-frame settle, trigger released by `WaitForPending(slot)`).
+  2. The real cap defect: chain points held only segment starts, so an open
+     chain's end vertex was never emitted - the cap jumped from the last start
+     to the first hull corner, leaving one unmatched surface edge per hand-off.
+  3. Degenerate Voronoi vertices (four cells meeting near a point) produce
+     corner duplicates and slivers far above float precision; weld and chain
+     tolerances are now relative to the mesh extent (weld 0.1 %, chain = weld,
+     hull/merge = weld) and the weld buckets chain multiple points.
+  4. A plane grazing the surface at a vertex has no usable cut segment; such
+     faces (and any cut-less face bordering an emitted cap) are closed by an
+     order-independent adjacency pass; edges on a plane coming from both
+     adjacent surface polygons cancel (interior, not a cut).
+  5. Two chains that failed to link (shared vertex computed twice, > chain
+     tolerance) each walked the whole hull and built the same cap twice, which
+     also made the divergence volume negative for that cell: chain starts
+     within weld distance of the walk position are taken directly, and identical
+     faces are dropped at emission.
+  6. Safety net for what is left: boundary loops bounded entirely by cap edges
+     (or tiny loops of any kind, < 8 x weld) are filled; loops touching surface
+     edges stay open so open input meshes keep their border (camera-gizmo OBJ:
+     8 boundary edges in, 16 out, volume unchanged).
 - **Analysis helpers (maintainer request)**: `FilterGeoPartsInBox` keeps or
   discards parts by their pivot being inside a box (gizmo on Center/Size,
   `KeptCount` output; part-less geometry counts as one part; attributes

@@ -56,7 +56,17 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   data: point/face/corner/part counts, bounds, `boundaryEdges` /
   `nonManifoldEdges` (0/0 = watertight), signed `volume` (parts of a fracture
   must sum to the input's volume) and the attribute list. Use it to validate
-  geometry ops without screenshots.
+  geometry ops without screenshots. Add `dumpObj: "<path>"` to also write the
+  geometry as OBJ (one object per part, `# cut` before IsCut faces) for offline
+  analysis of exactly which edges are open.
+- `getOutput update:true` starts a fresh invalidation tick before pulling, so
+  upstream changes propagate through the chain. Ops upstream with `Async` on
+  still return their *previous* result while a job runs - set `Async` false on
+  the whole chain when a probe must read a deterministic value right away.
+- Rebuilding `Lib` right after a `shutdown`: the editor can rewrite operator
+  `.cs` files on exit, which leaves them older than the previous DLL and makes
+  MSBuild skip the compile. `touch` the edited files before building, and check
+  that the built DLL actually changed.
 
 ## Evaluation model (the part everyone trips over)
 

@@ -42,12 +42,15 @@ public sealed class AsyncComputation<T> where T : class
         if (_runningTask is { IsCompleted: false } && _runningVersion != inputsVersion)
             _cancellation?.Cancel();
 
+        _resultJustLanded = false;
+
         if (_runningTask is { IsCompleted: true })
         {
             if (_runningTask.IsCompletedSuccessfully)
             {
                 _latestResult = _runningTask.Result;
                 _computedVersion = _runningVersion;
+                _resultJustLanded = true;
             }
             else if (_runningTask.IsCanceled || _cancellation is { IsCancellationRequested: true })
             {
@@ -77,7 +80,13 @@ public sealed class AsyncComputation<T> where T : class
         }
 
         var isComputing = _runningTask != null;
-        resultSlot.DirtyFlag.Trigger = isComputing ? DirtyFlagTrigger.Animated : DirtyFlagTrigger.None;
+
+        // A result lands inside an Update, whose dirty flag is cleared right after - so a
+        // consumer that didn't pull this op in exactly that evaluation would never see the
+        // new value. Staying dirty for one more evaluation gives the invalidation pass a
+        // chance to propagate the change before the trigger is released.
+        var keepDirty = isComputing || _resultJustLanded;
+        resultSlot.DirtyFlag.Trigger = keepDirty ? DirtyFlagTrigger.Animated : DirtyFlagTrigger.None;
         if (isComputing && context.Playback.IsRenderingToFile)
             Playback.OpNotReady = true;
 
@@ -88,10 +97,13 @@ public sealed class AsyncComputation<T> where T : class
     /// Cancels a pending computation and blocks until it has exited. Call before
     /// computing synchronously (e.g. when the op's Async parameter was just switched
     /// off), so the worker can't race the synchronous computation on shared scratch
-    /// buffers.
+    /// buffers. Also releases the slot's compute trigger, which would otherwise keep
+    /// the op re-evaluating every frame.
     /// </summary>
-    public void WaitForPending()
+    public void WaitForPending(Slot<T> resultSlot)
     {
+        resultSlot.DirtyFlag.Trigger = DirtyFlagTrigger.None;
+        _resultJustLanded = false;
         if (_runningTask == null)
             return;
 
@@ -138,6 +150,7 @@ public sealed class AsyncComputation<T> where T : class
     private T? _latestResult;
     private int _computedVersion = -1;
     private int _runningVersion;
+    private bool _resultJustLanded;
     private volatile float _progress;
     private long _jobStartTime;
 }

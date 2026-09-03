@@ -67,7 +67,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
             return;
         }
 
-        _asyncComputation.WaitForPending();
+        _asyncComputation.WaitForPending(Result);
         Build(_output, source, width, segments, roundness, flatShading, roundCorners, CancellationToken.None);
         Result.Value = _output;
     }
