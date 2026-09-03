@@ -74,6 +74,29 @@ and `B` = 8.
 - Entering invalid code logs a warning in the console (with the snippet line
   number) and the last working field keeps rendering.
 
+## Step: Voronoi fracture
+
+**Action:**
+Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
+`[ScatterPointsInVolume]` (Count ~12), then through an `[ExplodeGeometry]`
+(Distance ~0.3) into the `[GeometryToMeshBuffers]`.
+
+**Expected:**
+- The cube breaks into chunks that separate with Distance; each chunk is closed
+  (no holes), with smooth beveled outer surfaces and flat cut faces.
+- Changing the scatter `Seed` produces a different, deterministic fracture.
+
+## Step: Loading an OBJ file
+
+**Action:**
+Replace the `[CubeGeometry]` with a `[LoadObjGeometry]` pointing at
+`Lib:meshes/camera-gizmo.obj` and set `Scale` to ~6.
+
+**Expected:**
+- The mesh renders with its original smooth/hard shading (normals from the file).
+- Editing and re-saving the OBJ file reloads it automatically.
+- Downstream geometry ops (bevel, fracture, explode) work on the loaded mesh.
+
 ## Step: Transforming before the bevel
 
 **Action:**

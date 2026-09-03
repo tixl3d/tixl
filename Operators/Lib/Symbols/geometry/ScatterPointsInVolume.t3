@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "9a51e3c7-4d08-4b62-bf35-1c7a8e9d0f46"/*ScatterPointsInVolume*/,
+  "Inputs": [
+    {
+      "Id": "e17d4a92-6b58-4c03-a9f1-84c5d2e7b360"/*Count*/,
+      "DefaultValue": 100
+    },
+    {
+      "Id": "3f82c6b1-9e07-45da-b824-56a1f9d3c708"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "a94b0e58-27c3-4f61-90ad-c8e52b7f1d39"/*Size*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "58c1f7a3-b2d9-4e06-85cb-7f4a90e6d221"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c6a35d18-40fb-4972-bde6-19f8c2a7e054"/*Density*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "12e9b8c4-75a0-4d36-9f82-3dc6e1b0a597"/*Seed*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

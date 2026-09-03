@@ -1,0 +1,33 @@
+{
+  "FormatVersion": 3,
+  "Id": "70d8f2b5-3a41-4c96-8e2d-b09c6f5e1a73"/*VoronoiFracture*/,
+  "Description": "Fractures a MeshGeometry into Voronoi cells around seed points.\n\nEach cell becomes one part (pivot at its seed), built by clipping the mesh against the bisector planes between seeds and capping the cuts. Surface corners keep their interpolated normals; cap faces are flat and carry a Selection attribute of 1 for downstream styling. Use [ScatterPointsInVolume] to generate seeds.\n\nAKA: shatter, break, cells, destruction",
+  "InputUis": [
+    {
+      "InputId": "31c7e9d4-85f2-4a60-b1c8-6d0a5e3f9b27"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "84a2f6c0-19db-4e75-93a4-c7e1b8d25f06"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "48e5a9c1-d637-4b80-92f4-5c1e8b0d7a26"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

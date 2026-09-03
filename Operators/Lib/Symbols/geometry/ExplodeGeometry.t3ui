@@ -1,0 +1,39 @@
+{
+  "FormatVersion": 3,
+  "Id": "c4f81d6a-95e2-4b37-a0d8-7e3b2c9f5061"/*ExplodeGeometry*/,
+  "Description": "Separates the parts of a MeshGeometry visually.\n\nEach part shrinks toward its pivot by Shrink and moves outward from the geometry center by Distance. Combine with [VoronoiFracture] to reveal the fracture cells. Points shared between parts move with the last part touching them.\n\nAKA: separate parts, spread",
+  "InputUis": [
+    {
+      "InputId": "b7a03e58-c1f9-4d24-8b6a-52e0d9c7f183"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "60d2c9b4-8e57-4a01-bf3d-94a6e1c8d725"/*Distance*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "f3958a26-1d70-4c4b-a8e2-c65b0d493f17"/*Shrink*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "1e9c5b70-a4d8-4f26-b3e9-08d7a2c6f154"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -359,7 +359,26 @@ would activate `ColorFromField` and glTF vertex colors — maintainer decision.
 - Milestone: beveled cube colored / selection-weighted by
   `Points -> CustomScalarField{ DistanceToClosestPoint() } -> ScalarField`.
 
-### Phase 3 — Chunks, parts & fracture demo ⬜
+### Phase 3 — Chunks, parts & fracture demo 🔶
+
+Done: `ScatterPointsInVolume` (deterministic PCG-seeded box/mesh-volume scatter,
+ray-parity inside test, optional ScalarField density via rejection sampling),
+`VoronoiFracture` (bisector-plane clipping per seed with Sutherland-Hodgman,
+epsilon-chained cap loops — exact quantized keys broke on float rounding —,
+interpolated corner normals so beveled surfaces stay smooth, flat caps with
+face-domain Selection = 1, one part per cell with the seed as pivot), and
+`ExplodeGeometry` (shrink parts toward pivots + push from center; the quick CPU
+way to reveal parts until chunks land). Verified via protocol: beveled cube →
+scatter → fracture → explode shows watertight chunks with smooth outsides and
+flat caps.
+
+Also done (user request): `LoadObjGeometry` — own N-gon-preserving OBJ parser
+(quads stay quads for beveling; `ObjMesh` triangulates on load, so it wasn't
+reused), `o`/`g` groups become parts with centroid pivots, normals/UVs become
+corner attributes, file-watched via `Resource&lt;T&gt;`, `Scale` input.
+
+Still open: `MeshChunkDef` promotion, `GeometryToChunks`, `PlaceGeometryAtPoints`,
+and the full milestone demo through `DrawMeshChunksAtPoints`.
 
 - Promote `MeshChunkDef` to Core.
 - `GeometryToChunks` — one chunk per part into shared buffers; outputs
