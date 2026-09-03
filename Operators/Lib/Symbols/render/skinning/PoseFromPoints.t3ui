@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ba64d1e8-30c7-4f92-8517-f6a29c08d5b3"/*PoseFromPoints*/,
-  "Description": "Converts object-space points (e.g. an animated spline read back with [PointsToCPU]) into a joint-local pose for the given skeleton.\n\nThis is the animation source for rigs built with [SkeletonFromPoints]: the points must come from the same source and in the same order the skeleton was built from. Missing joints keep their rest transform.",
+  "Description": "Converts object-space points (e.g. an animated spline read back with [ReadPointsFromGpu]) into a joint-local pose for the given skeleton.\n\nThis is the animation source for rigs built with [SkeletonFromPoints]: the points must come from the same source and in the same order the skeleton was built from. Missing joints keep their rest transform.",
   "InputUis": [
     {
       "InputId": "4d90b2f6-e7a3-4c58-b1d0-63f2a85c07e9"/*SkeletonIndex*/,

@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "69020cd2-de9a-4150-bac5-b547301e7bc8"/*TransformCpuPointExample*/,
+  "Id": "69020cd2-de9a-4150-bac5-b547301e7bc8"/*TransformCPointsExample*/,
   "Inputs": [],
   "Children": [
     {
@@ -220,7 +220,7 @@
       "Outputs": []
     },
     {
-      "Id": "94487d1d-e5ce-419f-8620-1558cef22c96"/*TransformCpuPoint*/,
+      "Id": "94487d1d-e5ce-419f-8620-1558cef22c96"/*TransformCPoints*/,
       "SymbolId": "5f2df291-4667-474e-9e84-3b64d4cc0555",
       "InputValues": [
         {
@@ -322,7 +322,7 @@
       "Outputs": []
     },
     {
-      "Id": "f9ea9fa6-8564-4e9f-8047-c3e5a3550a32"/*TransformCpuPoint*/,
+      "Id": "f9ea9fa6-8564-4e9f-8047-c3e5a3550a32"/*TransformCPoints*/,
       "SymbolId": "5f2df291-4667-474e-9e84-3b64d4cc0555",
       "InputValues": [
         {

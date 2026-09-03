@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
-  "Id": "69020cd2-de9a-4150-bac5-b547301e7bc8"/*TransformCpuPointExample*/,
-  "Description": "Illustrates how to use [TransformCpuPoint] to implement an interactive camera control.\n\nThis is different from Tooll's CameraInteraction because it would work for exported executables.",
+  "Id": "69020cd2-de9a-4150-bac5-b547301e7bc8"/*TransformCPointsExample*/,
+  "Description": "Illustrates how to use [TransformCPoints] to implement an interactive camera control.\n\nThis is different from Tooll's CameraInteraction because it would work for exported executables.",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -145,7 +145,7 @@
       }
     },
     {
-      "ChildId": "94487d1d-e5ce-419f-8620-1558cef22c96"/*TransformCpuPoint*/,
+      "ChildId": "94487d1d-e5ce-419f-8620-1558cef22c96"/*TransformCPoints*/,
       "Position": {
         "X": 1498.9097,
         "Y": 249.19379
@@ -215,7 +215,7 @@
       }
     },
     {
-      "ChildId": "f9ea9fa6-8564-4e9f-8047-c3e5a3550a32"/*TransformCpuPoint*/,
+      "ChildId": "f9ea9fa6-8564-4e9f-8047-c3e5a3550a32"/*TransformCPoints*/,
       "Position": {
         "X": 1350.0,
         "Y": 166.0

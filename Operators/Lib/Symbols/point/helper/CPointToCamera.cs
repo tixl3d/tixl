@@ -6,14 +6,14 @@ using Utilities = T3.Core.Utils.Utilities;
 namespace Lib.point.helper;
 
 [Guid("0cfc80fc-7b98-4cf7-982f-1aa42697bb76")]
-internal sealed class CpuPointToCamera : Instance<CpuPointToCamera>
+internal sealed class CPointToCamera : Instance<CPointToCamera>
 ,ICamera,ICameraPropertiesProvider
 {
     [Output(Guid = "A94FD64D-14D7-479F-BA9F-2BFD161CC80A")]
     public readonly Slot<Object> CamReference = new();
     
     
-    public CpuPointToCamera()
+    public CPointToCamera()
     {
         CamReference.UpdateAction += Update;
     }

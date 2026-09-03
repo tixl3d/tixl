@@ -3,7 +3,7 @@
 namespace Lib.render.skinning;
 
 /// <summary>
-/// Builds a skeleton from a CPU point list, e.g. a spline chain read back with [PointsToCPU].
+/// Builds a skeleton from a CPU point list, e.g. a spline chain read back with [ReadPointsFromGpu].
 /// The points define the rest pose in object space; separator points (NaN scale) split chains.
 /// The resulting setup feeds [PoseToSkinMatrices], [BindToSkeleton] and [PoseFromPoints].
 /// </summary>
@@ -27,7 +27,7 @@ internal sealed class SkeletonFromPoints : Instance<SkeletonFromPoints>, IStatus
 
         if (pointList is not StructuredList<Point> { NumElements: > 0 } typedList)
         {
-            _lastErrorMessage = "Connect a CPU point list, e.g. via [PointsToCPU]";
+            _lastErrorMessage = "Connect a CPU point list, e.g. via [ReadPointsFromGpu]";
             Setup.Value = null;
             return;
         }

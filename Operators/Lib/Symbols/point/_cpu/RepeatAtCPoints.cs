@@ -2,12 +2,12 @@
 namespace Lib.point._cpu;
 
 [Guid("478522e1-5683-4db1-a7dc-db59838eca2a")]
-internal sealed class RepeatAtPointsCpu : Instance<RepeatAtPointsCpu>
+internal sealed class RepeatAtCPoints : Instance<RepeatAtCPoints>
 {
     [Output(Guid = "0e874f9d-352c-435f-a6d2-d7c8d01e2205")]
     public readonly Slot<StructuredList> ResultList = new();
 
-    public RepeatAtPointsCpu()
+    public RepeatAtCPoints()
     {
         ResultList.UpdateAction += Update;
     }

@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "a5f4552f-7e25-43a5-bb14-21ab836fa0b3"/*PointsToCPU*/,
+  "Id": "a5f4552f-7e25-43a5-bb14-21ab836fa0b3"/*ReadPointsFromGpu*/,
   "Inputs": [
     {
       "Id": "41cc1bbc-2726-4980-93d8-010ea01e3f48"/*StartIndex*/,

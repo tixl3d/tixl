@@ -4,7 +4,7 @@ using T3.Core.Utils;
 namespace Lib.point._cpu;
 
 [Guid("5f2df291-4667-474e-9e84-3b64d4cc0555")]
-internal sealed class TransformCpuPoint : Instance<TransformCpuPoint>
+internal sealed class TransformCPoints : Instance<TransformCPoints>
 {
     [Output(Guid = "fe7ab3fe-5a9f-45b1-ae8d-5a78d6822501")]
     public readonly Slot<StructuredList> ResultPoint = new();
@@ -16,7 +16,7 @@ internal sealed class TransformCpuPoint : Instance<TransformCpuPoint>
     // [Output(Guid = "71325a3c-64fc-4775-91de-a55f397cefa8")]
     // public readonly Slot<int> Length = new Slot<int>();
     //
-    public TransformCpuPoint()
+    public TransformCPoints()
     {
         ResultPoint.UpdateAction += Update;
         Position.UpdateAction += Update;

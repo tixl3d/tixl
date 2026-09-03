@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
-  "Id": "478522e1-5683-4db1-a7dc-db59838eca2a"/*RepeatAtPointsCpu*/,
-  "Description": "",
+  "Id": "478522e1-5683-4db1-a7dc-db59838eca2a"/*RepeatAtCPoints*/,
+  "Description": "\n\nAKA: RepeatAtPointsCpu, cpu points",
   "InputUis": [
     {
       "InputId": "26ea6e28-e093-484c-9635-5c4ac0efdfb7"/*DestinationsPoints*/,

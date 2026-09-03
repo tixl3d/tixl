@@ -4,15 +4,22 @@ using T3.Core.Utils;
 namespace Lib.geometry;
 
 [Guid("634da8e3-0772-4f5a-816b-35b492e50938")]
-internal sealed class TransformGeometry : Instance<TransformGeometry>
+internal sealed class TransformGeometry : Instance<TransformGeometry>, ITransformable
 {
     [Output(Guid = "895d2fd4-c40f-4200-89af-395253275b0a")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly TransformCallbackSlot<MeshGeometry> Result = new();
 
     public TransformGeometry()
     {
+        Result.TransformableOp = this;
         Result.UpdateAction = Update;
     }
+
+    IInputSlot ITransformable.TranslationInput => Translation;
+    IInputSlot ITransformable.RotationInput => Rotation;
+    IInputSlot ITransformable.ScaleInput => Scale;
+
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
 
     private void Update(EvaluationContext context)
     {

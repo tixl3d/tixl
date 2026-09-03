@@ -3,12 +3,12 @@ using T3.Core.Utils;
 namespace Lib.point._cpu;
 
 [Guid("a38626d8-3145-4aa9-820f-ca16b3411985")]
-internal sealed class RadialPointsCpu : Instance<RadialPointsCpu>
+internal sealed class RadialCPoints : Instance<RadialCPoints>
 {
     [Output(Guid = "F270E4C2-3E5A-4F3E-B474-09E9291999E1")]
     public readonly Slot<StructuredList> ResultList = new();
 
-    public RadialPointsCpu()
+    public RadialCPoints()
     {
         ResultList.UpdateAction += Update;
     }

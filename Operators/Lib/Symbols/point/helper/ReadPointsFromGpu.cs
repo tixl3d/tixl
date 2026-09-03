@@ -6,12 +6,12 @@ using Utilities = T3.Core.Utils.Utilities;
 namespace Lib.point.helper;
 
 [Guid("a5f4552f-7e25-43a5-bb14-21ab836fa0b3")]
-internal sealed class PointsToCPU : Instance<PointsToCPU>
+internal sealed class ReadPointsFromGpu : Instance<ReadPointsFromGpu>
 {
     [Output(Guid = "71EF183F-E387-4382-8488-FEC2DC27B1F1")]
     public readonly Slot<StructuredList> Output = new();
 
-    public PointsToCPU()
+    public ReadPointsFromGpu()
     {
         Output.UpdateAction += Update;
     }

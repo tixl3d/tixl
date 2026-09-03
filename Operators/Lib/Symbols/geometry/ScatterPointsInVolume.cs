@@ -6,15 +6,22 @@ namespace Lib.geometry;
 /// (values clamped to 0..1), so dense and sparse regions can be sculpted.
 /// </summary>
 [Guid("9a51e3c7-4d08-4b62-bf35-1c7a8e9d0f46")]
-internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>
+internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>, ITransformable
 {
     [Output(Guid = "5c0b7d29-8ae4-4f13-96d7-e2a94c6b8503")]
-    public readonly Slot<StructuredList> ResultList = new();
+    public readonly TransformCallbackSlot<StructuredList> ResultList = new();
 
     public ScatterPointsInVolume()
     {
+        ResultList.TransformableOp = this;
         ResultList.UpdateAction = Update;
     }
+
+    IInputSlot ITransformable.TranslationInput => Center;
+    IInputSlot ITransformable.RotationInput => null;
+    IInputSlot ITransformable.ScaleInput => Size;
+
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
 
     private void Update(EvaluationContext context)
     {

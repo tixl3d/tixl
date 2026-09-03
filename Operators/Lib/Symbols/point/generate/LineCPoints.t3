@@ -1,0 +1,106 @@
+{
+  "FormatVersion": 3,
+  "Id": "796a5efb-2ccf-4cae-b01c-d3f20a070181"/*LineCPoints*/,
+  "Inputs": [
+    {
+      "Id": "759bfaac-13dd-478a-a4db-fe52b94cdaec"/*Count*/,
+      "DefaultValue": 100
+    },
+    {
+      "Id": "1d1e40c2-5f68-4b0e-a7c3-89d2e6b4f051"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "7b3f9a80-42cd-4e17-95b6-e04c8d2a6f39"/*Direction*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "c92e5d14-6a08-4b73-8f2e-0d7b1c4a9e56"/*Length*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "38a6c0f5-d791-4e28-b45a-16e9d2c7b083"/*Pivot*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "e50b7d28-93a4-4c61-af07-25c8b6e1d394"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
+    },
+    {
+      "Id": "94d1e6a3-07b8-4f52-9c3e-b72a0d5c8f16"/*Scale*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "6fc2b795-e148-4d03-8a6b-d09e3c5a7f24"/*F1*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "a83d5f60-24c9-4b17-96d0-4e7b8c2f1a58"/*F2*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "50e9c3b7-861a-4f45-b2d8-79c0e4d6a132"/*ColorA*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "d27a4e91-b350-4c86-8e1f-63b9d0c5a247"/*ColorB*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "0b8e6d43-97f2-4a15-bc60-e58a1c3d9f72"/*Orientation*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "f14c8a59-30d6-4e92-a7b4-8c25e0d1b963"/*Twist*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "27d0b5e8-c463-4f19-90a2-5f8e6b3c1d47"/*OrientationAxis*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "b96e2c07-58ad-4d31-8f5c-01d7a4e9c625"/*OrientationAngle*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "43f7a1d2-e685-4c08-b9e3-72c5d8a0f316"/*AddSeparator*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

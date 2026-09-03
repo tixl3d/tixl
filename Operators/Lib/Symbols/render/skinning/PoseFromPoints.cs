@@ -4,7 +4,7 @@ using T3.Core.Utils;
 namespace Lib.render.skinning;
 
 /// <summary>
-/// Converts object-space points (e.g. an animated spline read back with [PointsToCPU])
+/// Converts object-space points (e.g. an animated spline read back with [ReadPointsFromGpu])
 /// into a joint-local pose for the given skeleton - the animation source for rigs built
 /// with [SkeletonFromPoints]. Points must come in the same order the skeleton was built from.
 /// </summary>

@@ -453,6 +453,19 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
 
 ### Phase 7+ — Deferred (own plans when picked up) ⬜
 
+- **Non-blocking evaluation for slow geometry ops** (maintainer request 2026-09):
+  Release-mode fracture/bevel on real meshes stalls the UI frame. Sketch: an op
+  opts into async evaluation — Update kicks the compute onto a worker with an
+  immutable snapshot of its inputs, keeps returning the last finished result
+  (plus an IStatusProvider "computing..." hint), and swaps in the new geometry
+  when the worker lands. Immutable-by-convention geometry flow makes the
+  snapshot cheap; the hard part is invalidation races (a newer param change
+  canceling an in-flight job). For deterministic frames (visual tests, exports),
+  follow the established async-op pattern from [PlayVideo] et al.:
+  `if (context.Playback.IsRenderingToFile) Playback.OpNotReady |= !result.IsReady;`
+  — the render loop then re-runs the frame until every async op has settled.
+  Prototype on `VoronoiFracture` first — worst cost, simplest contract. Defer actual per-op optimization
+  (spatial grids, parallel-for) until profiles say where.
 - `ExtrudeFaces`, bevel v2 (miters, colliding bevels, per-edge widths),
   `SubdivideGeometry`, `LatticeDeform`, `SliceGeometryWithPlane` (-> closed
   `CurveGeometry`), curve offsetting, `FitCurves` (polyline -> smooth beziers).

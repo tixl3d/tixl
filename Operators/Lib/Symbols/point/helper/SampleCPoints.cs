@@ -4,12 +4,12 @@ using T3.Core.Utils.Splines;
 namespace Lib.point.helper;
 
 [Guid("6f65e325-21cc-4bc5-9aea-4a691476e3bf")]
-internal sealed class SampleCpuPoints : Instance<SampleCpuPoints>
+internal sealed class SampleCPoints : Instance<SampleCPoints>
 {
     [Output(Guid = "4EC76FD1-A89E-4FE4-AF6D-E0F2D2DAAA1C")]
     public readonly Slot<StructuredList> ResultPoint = new();
 
-    public SampleCpuPoints()
+    public SampleCPoints()
     {
         ResultPoint.UpdateAction += Update;
         ResultPoint.Value = _result;

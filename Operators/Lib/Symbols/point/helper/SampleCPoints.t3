@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "6f65e325-21cc-4bc5-9aea-4a691476e3bf"/*SampleCpuPoints*/,
+  "Id": "6f65e325-21cc-4bc5-9aea-4a691476e3bf"/*SampleCPoints*/,
   "Inputs": [
     {
       "Id": "1bd99405-7fe5-4712-9ef2-6e66b8d41aeb"/*TangentScale*/,
