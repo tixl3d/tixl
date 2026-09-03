@@ -118,6 +118,20 @@ the fracture output and look at its `Report`.
 - The report lists point/face/triangle/part counts, size, bounds, volume,
   boundary edges (0 = watertight) and the evaluation time.
 
+## Step: Geometry output view
+
+**Action:**
+Select (or pin) the `[VoronoiFracture]` itself, then the `[BevelGeometry]`.
+
+**Expected:**
+- The output window shows a stats view instead of an empty view: a headline
+  with face and part counts, then points, triangles, size, bounds, volume, a
+  surface line and the attribute list (name, type, domain).
+- The surface line reads "watertight" in green for the beveled cube and lists
+  boundary edges in the attention color for an open mesh.
+- For the fracture, a scrollable parts table lists every chunk with face count,
+  open edges (highlighted when non-zero), volume, seed index and pivot.
+
 ## Step: Isolating a single chunk
 
 **Action:**

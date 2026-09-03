@@ -98,50 +98,7 @@ internal sealed class GetGeometryStats : Instance<GetGeometryStats>
 
     private void Measure(MeshGeometry geometry)
     {
-        var positions = geometry.Positions;
-        var offsets = geometry.FaceCornerOffsets;
-        var corners = geometry.CornerPointIndices;
-
-        var min = new Vector3(float.MaxValue);
-        var max = new Vector3(float.MinValue);
-        foreach (var p in positions)
-        {
-            min = Vector3.Min(min, p);
-            max = Vector3.Max(max, p);
-        }
-
-        if (positions.Length == 0)
-            min = max = Vector3.Zero;
-
-        _edgeUse.Clear();
-        var volume = 0.0;
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
-        {
-            var start = offsets[faceIndex];
-            var end = offsets[faceIndex + 1];
-            for (var c = start; c < end; c++)
-            {
-                var next = c + 1 == end ? start : c + 1;
-                var a = corners[c];
-                var b = corners[next];
-                var key = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a;
-                _edgeUse[key] = _edgeUse.GetValueOrDefault(key) + 1;
-            }
-
-            // Divergence theorem over the fan triangles - positive for outward-facing closed solids
-            var p0 = positions[corners[start]];
-            for (var c = start + 2; c < end; c++)
-            {
-                volume += Vector3.Dot(p0, Vector3.Cross(positions[corners[c - 1]], positions[corners[c]])) / 6.0;
-            }
-        }
-
-        var boundaryEdges = 0;
-        foreach (var use in _edgeUse.Values)
-        {
-            if (use == 1)
-                boundaryEdges++;
-        }
+        _stats.Measure(geometry);
 
         _attributeParts.Clear();
         foreach (var attribute in geometry.Attributes)
@@ -151,18 +108,18 @@ internal sealed class GetGeometryStats : Instance<GetGeometryStats>
 
         _attributeSummary = _attributeParts.Count == 0 ? "none" : string.Join(", ", _attributeParts);
 
-        PointCount.Value = geometry.PointCount;
-        FaceCount.Value = geometry.FaceCount;
-        TriangleCount.Value = geometry.GetTriangleCount();
-        PartCount.Value = geometry.Parts.Length;
-        BoundsMin.Value = min;
-        BoundsMax.Value = max;
-        Size.Value = max - min;
-        Volume.Value = (float)volume;
-        BoundaryEdges.Value = boundaryEdges;
+        PointCount.Value = _stats.PointCount;
+        FaceCount.Value = _stats.FaceCount;
+        TriangleCount.Value = _stats.TriangleCount;
+        PartCount.Value = _stats.PartCount;
+        BoundsMin.Value = _stats.BoundsMin;
+        BoundsMax.Value = _stats.BoundsMax;
+        Size.Value = _stats.Size;
+        Volume.Value = _stats.Volume;
+        BoundaryEdges.Value = _stats.BoundaryEdges;
     }
 
-    private readonly Dictionary<long, int> _edgeUse = [];
+    private readonly MeshGeometryStats _stats = new();
     private readonly List<string> _attributeParts = [];
     private string _attributeSummary = "none";
     private MeshGeometry? _lastGeometry;

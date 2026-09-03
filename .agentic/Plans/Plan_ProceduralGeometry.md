@@ -615,11 +615,12 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   (face/point compaction + per-domain attribute remap). Isolating one fracture
   chunk immediately shows the parked cap defect per part (chunk 0 of a 30-seed
   cube: 13 faces, 16 boundary edges) — the intended handle for finishing it.
-- Idea (maintainer, 2026-09-03): `GetGeometryStats`-style summary as the
-  default output-window view when a geometry op is selected (instead of an
-  empty/black view). Would need a `MeshGeometry` output UI in the editor
-  (`OutputUi` registration by type) drawing the stats text and possibly a wire
-  preview. Not started.
+- **Geometry output view** (maintainer request, 2026-09-03): selecting a
+  geometry op now shows `MeshGeometryOutputUi` (headline, counts, size, bounds,
+  volume, surface status, attribute table) instead of an empty view. The
+  measurement moved to Core as `MeshGeometryStats` (shared with
+  `GetGeometryStats`; remeasures only on `Version` change, strings rebuilt only
+  then). Possible follow-ups: a wireframe/preview render, per-part table.
 - `ExtrudeFaces`, bevel v2 (miters, colliding bevels, per-edge widths),
   `SubdivideGeometry`, `LatticeDeform`, `SliceGeometryWithPlane` (-> closed
   `CurveGeometry`), curve offsetting, `FitCurves` (polyline -> smooth beziers).
