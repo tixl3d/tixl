@@ -35,6 +35,18 @@ internal sealed class GeometryToMeshBuffers : Instance<GeometryToMeshBuffers>
         geometry.Attributes.TryGet<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Corner, out var cornerUvs);
         geometry.Attributes.TryGet<Vector4>(GeometryAttributeNames.Color, AttributeDomain.Corner, out var cornerColors);
 
+        // Coarser color domains are promoted to corners here: face color, else part color
+        GeometryAttribute<Vector4>? faceColors = null;
+        GeometryAttribute<Vector4>? partColors = null;
+        if (cornerColors == null
+            && !geometry.Attributes.TryGet(GeometryAttributeNames.Color, AttributeDomain.Face, out faceColors))
+        {
+            geometry.Attributes.TryGet(GeometryAttributeNames.Color, AttributeDomain.Part, out partColors);
+        }
+
+        if (partColors != null)
+            BuildFaceToPartMap(geometry);
+
         var positions = geometry.Positions;
         var offsets = geometry.FaceCornerOffsets;
         var cornerPoints = geometry.CornerPointIndices;
@@ -62,11 +74,17 @@ internal sealed class GeometryToMeshBuffers : Instance<GeometryToMeshBuffers>
 
             faceNormal = faceNormal.LengthSquared() > 1e-10f ? Vector3.Normalize(faceNormal) : Vector3.UnitY;
 
+            var faceColor = Vector4.One;
+            if (faceColors != null)
+                faceColor = faceColors.Values[faceIndex];
+            else if (partColors != null)
+                faceColor = _faceToPart[faceIndex] >= 0 ? partColors.Values[_faceToPart[faceIndex]] : Vector4.One;
+
             for (var c = start; c < end; c++)
             {
                 var normal = cornerNormals != null ? cornerNormals.Values[c] : faceNormal;
                 var uv = cornerUvs != null ? cornerUvs.Values[c] : Vector2.Zero;
-                var color = cornerColors != null ? cornerColors.Values[c] : Vector4.One;
+                var color = cornerColors != null ? cornerColors.Values[c] : faceColor;
 
                 _vertexData[c] = new PbrVertex
                                      {
@@ -115,8 +133,27 @@ internal sealed class GeometryToMeshBuffers : Instance<GeometryToMeshBuffers>
         Buffers.Value = _data;
     }
 
+    private void BuildFaceToPartMap(MeshGeometry geometry)
+    {
+        if (_faceToPart.Length != geometry.FaceCount)
+            _faceToPart = new int[geometry.FaceCount];
+        Array.Fill(_faceToPart, -1);
+
+        var parts = geometry.Parts;
+        for (var partIndex = 0; partIndex < parts.Length; partIndex++)
+        {
+            var part = parts[partIndex];
+            var end = Math.Min(part.FaceStart + part.FaceCount, geometry.FaceCount);
+            for (var faceIndex = part.FaceStart; faceIndex < end; faceIndex++)
+            {
+                _faceToPart[faceIndex] = partIndex;
+            }
+        }
+    }
+
     private PbrVertex[] _vertexData = [];
     private Int3[] _indexData = [];
+    private int[] _faceToPart = [];
     private BufferWithViews _vertexBufferWithViews;
     private BufferWithViews _indexBufferWithViews;
     private readonly MeshBuffers _data = new();

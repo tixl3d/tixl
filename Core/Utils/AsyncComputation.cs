@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using T3.Core.Animation;
 using T3.Core.Logging;
@@ -16,12 +17,15 @@ namespace T3.Core.Utils;
 ///
 /// Usage per frame from an op's Update:
 /// <code>
-/// var result = _asyncComputation.Update(context, Result, inputsVersion, () => ComputeNewResult());
+/// var result = _asyncComputation.Update(context, Result, inputsVersion, token => ComputeNewResult(token));
 /// Result.Value = result ?? fallback;
 /// </code>
 /// <c>inputsVersion</c> must change whenever any input changes (combine parameter
 /// values and content-version counters of input data). The compute function must
-/// only touch data captured for it - never live op state shared with other frames.
+/// only touch data captured for it - never live op state shared with other frames -
+/// and should call <c>token.ThrowIfCancellationRequested()</c> in its main loops:
+/// when the inputs change again mid-computation the job is cancelled, so the newer
+/// inputs don't have to wait for a result nobody wants anymore.
 /// </summary>
 public sealed class AsyncComputation<T> where T : class
 {
@@ -32,23 +36,34 @@ public sealed class AsyncComputation<T> where T : class
     /// maintains the slot's update trigger and the export handshake. Returns the
     /// latest finished result - null until the first one lands.
     /// </summary>
-    public T? Update(EvaluationContext context, Slot<T> resultSlot, int inputsVersion, Func<T> compute)
+    public T? Update(EvaluationContext context, Slot<T> resultSlot, int inputsVersion, Func<CancellationToken, T> compute)
     {
+        // Newer inputs supersede the running job - ask it to stop early
+        if (_runningTask is { IsCompleted: false } && _runningVersion != inputsVersion)
+            _cancellation?.Cancel();
+
         if (_runningTask is { IsCompleted: true })
         {
             if (_runningTask.IsCompletedSuccessfully)
             {
                 _latestResult = _runningTask.Result;
+                _computedVersion = _runningVersion;
+            }
+            else if (_runningTask.IsCanceled || _cancellation is { IsCancellationRequested: true })
+            {
+                // Superseded - _computedVersion stays stale so the newer inputs start right away
             }
             else
             {
                 // Inputs may have been mutated mid-read by an upstream op; a later
                 // version change retries, so don't spin on the same failed inputs.
                 Log.Warning($"Async computation failed: {_runningTask.Exception?.InnerException?.Message}");
+                _computedVersion = _runningVersion;
             }
 
-            _computedVersion = _runningVersion;
             _runningTask = null;
+            _cancellation?.Dispose();
+            _cancellation = null;
         }
 
         if (_runningTask == null && _computedVersion != inputsVersion)
@@ -56,7 +71,9 @@ public sealed class AsyncComputation<T> where T : class
             _runningVersion = inputsVersion;
             _progress = 0;
             _jobStartTime = System.Diagnostics.Stopwatch.GetTimestamp();
-            _runningTask = Task.Run(compute);
+            _cancellation = new CancellationTokenSource();
+            var token = _cancellation.Token;
+            _runningTask = Task.Run(() => compute(token), token);
         }
 
         var isComputing = _runningTask != null;
@@ -68,19 +85,24 @@ public sealed class AsyncComputation<T> where T : class
     }
 
     /// <summary>
-    /// Blocks until a pending computation is finished. Call before computing
-    /// synchronously (e.g. when the op's Async parameter was just switched off), so
-    /// the worker can't race the synchronous computation on shared scratch buffers.
+    /// Cancels a pending computation and blocks until it has exited. Call before
+    /// computing synchronously (e.g. when the op's Async parameter was just switched
+    /// off), so the worker can't race the synchronous computation on shared scratch
+    /// buffers.
     /// </summary>
     public void WaitForPending()
     {
+        if (_runningTask == null)
+            return;
+
         try
         {
-            _runningTask?.Wait();
+            _cancellation?.Cancel();
+            _runningTask.Wait();
         }
         catch (AggregateException)
         {
-            // Collected and logged by the next Update
+            // Cancelled or failed - either way it has exited; collected by the next Update
         }
     }
 
@@ -112,6 +134,7 @@ public sealed class AsyncComputation<T> where T : class
     private const double UiProgressDelay = 0.5;
 
     private Task<T>? _runningTask;
+    private CancellationTokenSource? _cancellation;
     private T? _latestResult;
     private int _computedVersion = -1;
     private int _runningVersion;

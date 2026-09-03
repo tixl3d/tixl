@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using T3.Core.Utils;
 
 namespace Lib.geometry;
@@ -61,10 +62,10 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             // The worker gets its own seed copy - _seeds is refilled on the next Update
             var seeds = _seeds.ToArray();
             var result = _asyncComputation.Update(context, Result, hash.ToHashCode(),
-                                                  () =>
+                                                  token =>
                                                   {
                                                       var target = new MeshGeometry();
-                                                      Build(target, source, seeds);
+                                                      Build(target, source, seeds, token);
                                                       return target;
                                                   });
             Result.Value = result ?? source;
@@ -72,11 +73,11 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         }
 
         _asyncComputation.WaitForPending();
-        Build(_output, source, _seeds.ToArray());
+        Build(_output, source, _seeds.ToArray(), CancellationToken.None);
         Result.Value = _output;
     }
 
-    private void Build(MeshGeometry target, MeshGeometry source, Vector3[] seeds)
+    private void Build(MeshGeometry target, MeshGeometry source, Vector3[] seeds, CancellationToken token)
     {
         var sourceHasNormals = source.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, out var sourceNormals);
 
@@ -106,6 +107,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
         for (var seedIndex = 0; seedIndex < seeds.Length; seedIndex++)
         {
+            token.ThrowIfCancellationRequested();
             _asyncComputation.ReportProgress(seedIndex / (float)seeds.Length);
             var faceStart = _outFaceOffsets.Count - 1;
             EmitCell(seeds, seedIndex, sourceHasNormals);
@@ -129,10 +131,14 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             }
         }
 
+        // IsCut is the lasting mark; Selection mirrors it so downstream ops act on the cuts by default
+        var isCut = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsCut, AttributeDomain.Face, _outFaceIsCap.Count);
         var selection = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.Selection, AttributeDomain.Face, _outFaceIsCap.Count);
         for (var faceIndex = 0; faceIndex < _outFaceIsCap.Count; faceIndex++)
         {
-            selection.Values[faceIndex] = _outFaceIsCap[faceIndex] ? 1f : 0f;
+            var value = _outFaceIsCap[faceIndex] ? 1f : 0f;
+            isCut.Values[faceIndex] = value;
+            selection.Values[faceIndex] = value;
         }
 
         target.InvalidateTopologyCaches();

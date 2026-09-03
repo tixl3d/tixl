@@ -477,6 +477,12 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   upstream op can mutate the source instance mid-read — the worker catches,
   logs, and retries on the next version change. Per-op optimization
   (spatial grids, parallel-for) stays deferred until profiles say where.
+  Cancellation: when the inputs version changes while a job runs, the helper
+  cancels it (compute gets a `CancellationToken`; ops call
+  `ThrowIfCancellationRequested()` in their main loops) and starts the newer
+  inputs as soon as the old worker has exited — "too slow, lower the
+  resolution" no longer waits for the doomed job. `WaitForPending()` cancels
+  too. Cancelled jobs are discarded silently; failures still log.
   Progress UI: workers call `AsyncComputation.ReportProgress(0..1)`; ops expose
   it via `IProgressProvider` (Core interface), and the MagGraph node renderer
   draws an orange bar at the node's bottom edge once a job runs longer than

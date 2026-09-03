@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using T3.Core.Utils;
 
 namespace Lib.geometry;
@@ -56,10 +57,10 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         {
             var inputsVersion = HashCode.Combine(source.Version, source.GetHashCode(), width, segments, roundness, flatShading, roundCorners);
             var result = _asyncComputation.Update(context, Result, inputsVersion,
-                                                  () =>
+                                                  token =>
                                                   {
                                                       var target = new MeshGeometry();
-                                                      Build(target, source, width, segments, roundness, flatShading, roundCorners);
+                                                      Build(target, source, width, segments, roundness, flatShading, roundCorners, token);
                                                       return target;
                                                   });
             Result.Value = result ?? source;
@@ -67,11 +68,12 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         }
 
         _asyncComputation.WaitForPending();
-        Build(_output, source, width, segments, roundness, flatShading, roundCorners);
+        Build(_output, source, width, segments, roundness, flatShading, roundCorners, CancellationToken.None);
         Result.Value = _output;
     }
 
-    private void Build(MeshGeometry target, MeshGeometry source, float width, int segments, float roundness, bool flatShading, bool roundCorners)
+    private void Build(MeshGeometry target, MeshGeometry source, float width, int segments, float roundness, bool flatShading, bool roundCorners,
+                       CancellationToken token)
     {
         var positions = source.Positions;
         var offsets = source.FaceCornerOffsets;
@@ -151,6 +153,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
         for (var edgeIndex = 0; edgeIndex < edges.Edges.Length; edgeIndex++)
         {
+            token.ThrowIfCancellationRequested();
             _asyncComputation.ReportProgress(0.15f + 0.55f * edgeIndex / edges.Edges.Length);
             var edge = edges.Edges[edgeIndex];
             if (edge.Face1 < 0)
@@ -171,6 +174,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
         }
 
         // --- D: corner fans --------------------------------------------------
+        token.ThrowIfCancellationRequested();
         _asyncComputation.ReportProgress(0.7f);
         BuildCornerFans(source, edgeRings, segments, roundness, roundCorners);
 
