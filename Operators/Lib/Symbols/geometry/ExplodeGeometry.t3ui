@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c4f81d6a-95e2-4b37-a0d8-7e3b2c9f5061"/*ExplodeGeometry*/,
-  "Description": "Separates the parts of a MeshGeometry visually.\n\nEach part shrinks toward its pivot by Shrink and moves outward from the geometry center by Distance. Combine with [VoronoiFracture] to reveal the fracture cells. Points shared between parts move with the last part touching them.\n\nAKA: separate parts, spread",
+  "Description": "Separates the parts of a MeshGeometry visually.\n\nEach part shrinks toward its pivot by Shrink and moves outward from the geometry center by Distance. Combine with [VoronoiFracture] to reveal the fracture cells. Points shared between parts move with the last part touching them. AutoCenter explodes from the mean part pivot - which shifts when parts are filtered upstream; disable it and set Center to keep the remaining parts in place.\n\nAKA: separate parts, spread",
   "InputUis": [
     {
       "InputId": "b7a03e58-c1f9-4d24-8b6a-52e0d9c7f183"/*Geometry*/,
@@ -23,6 +23,20 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
+      }
+    },
+    {
+      "InputId": "a7c2e9d4-5b18-4f06-93ea-0d6c1b8f2a57"/*AutoCenter*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "3e8b0f61-c4a9-4d27-b5f0-72d9e1a6c483"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
       }
     }
   ],

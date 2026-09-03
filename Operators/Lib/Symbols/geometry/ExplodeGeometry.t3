@@ -13,6 +13,18 @@
     {
       "Id": "f3958a26-1d70-4c4b-a8e2-c65b0d493f17"/*Shrink*/,
       "DefaultValue": 0.0
+    },
+    {
+      "Id": "a7c2e9d4-5b18-4f06-93ea-0d6c1b8f2a57"/*AutoCenter*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "3e8b0f61-c4a9-4d27-b5f0-72d9e1a6c483"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
     }
   ],
   "Children": [],

@@ -23,6 +23,8 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
         var source = Geometry.GetValue(context);
         var distance = Distance.GetValue(context);
         var shrink = Math.Clamp(Shrink.GetValue(context), 0f, 1f);
+        var autoCenter = AutoCenter.GetValue(context);
+        var explicitCenter = Center.GetValue(context);
 
         if (source == null || source.Parts.Length == 0 || (distance == 0 && shrink == 0))
         {
@@ -35,13 +37,19 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
             _output.Positions = new Vector3[positions.Length];
         Array.Copy(positions, _output.Positions, positions.Length);
 
-        var center = Vector3.Zero;
-        foreach (var part in source.Parts)
+        // AutoCenter follows the mean pivot - which moves whenever parts are filtered
+        // upstream; an explicit Center keeps the remaining parts where they were.
+        var center = explicitCenter;
+        if (autoCenter)
         {
-            center += part.Pivot;
-        }
+            center = Vector3.Zero;
+            foreach (var part in source.Parts)
+            {
+                center += part.Pivot;
+            }
 
-        center /= source.Parts.Length;
+            center /= source.Parts.Length;
+        }
 
         var offsets = source.FaceCornerOffsets;
         var corners = source.CornerPointIndices;
@@ -84,4 +92,10 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
 
     [Input(Guid = "f3958a26-1d70-4c4b-a8e2-c65b0d493f17")]
     public readonly InputSlot<float> Shrink = new();
+
+    [Input(Guid = "a7c2e9d4-5b18-4f06-93ea-0d6c1b8f2a57")]
+    public readonly InputSlot<bool> AutoCenter = new();
+
+    [Input(Guid = "3e8b0f61-c4a9-4d27-b5f0-72d9e1a6c483")]
+    public readonly InputSlot<Vector3> Center = new();
 }
