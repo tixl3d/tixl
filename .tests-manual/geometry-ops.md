@@ -85,18 +85,60 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
 - The cube breaks into chunks that separate with Distance; each chunk is closed
   (no holes), with smooth beveled outer surfaces and flat cut faces.
 - Changing the scatter `Seed` produces a different, deterministic fracture.
+- With many seeds (hundreds) and a large Distance, fully interior fragments
+  (all faces cut, no original surface) are present in the exploded cloud — the
+  solid's inside is not hollow.
+- Shrink the scatter `Size` to a small cluster inside the cube: the large outer
+  chunks still have closed cut faces toward the cluster. Disabling
+  `FillInterior` reproduces the old dark gaps (expected for that setting, which
+  exists for open or non-manifold meshes).
 
 ## Step: Coloring fracture cuts per chunk
 
 **Action:**
-Insert a `[ColorFromAttribute]` between `[VoronoiFracture]` and
+Insert a `[ColorFacesFromAttribute]` between `[VoronoiFracture]` and
 `[ExplodeGeometry]`. Feed its `Colors` from a `[ColorsToList]` with three
-distinct colors, set `Source` to PartSeedIndex and keep `OnlySelected` on.
+distinct colors, set `Attribute` to "Part Seed Index" and keep `OnlySelected` on.
 
 **Expected:**
 - Each chunk's cut faces show one palette color (cycling through the list);
   the original beveled surface keeps its material color.
 - With `OnlySelected` off, whole chunks take their palette color.
+
+## Step: Slicing chunks and reading stats
+
+**Action:**
+Insert a `[FilterGeoPartsInBox]` after the `[VoronoiFracture]` and shrink its
+`Size.Y` to a thin slab through the cluster; then add a `[GetGeometryStats]` on
+the fracture output and look at its `Report`.
+
+**Expected:**
+- Only chunks whose pivot lies in the slab remain (`KeptCount` shows how many);
+  `Mode` = KeepOutside shows the complement. The box has a gizmo when selected.
+- The report lists point/face/triangle/part counts, size, bounds, volume,
+  boundary edges (0 = watertight) and the evaluation time.
+
+## Step: Isolating a single chunk
+
+**Action:**
+Replace the `[FilterGeoPartsInBox]` with a `[FilterGeoPartsByIndex]` (`Start` 0,
+`Count` 1) and step `Start` up with the arrow keys.
+
+**Expected:**
+- Exactly one chunk renders at a time and each step shows the next one;
+  `PartCount` reports the total number of chunks.
+- `Count` 0 shows everything from `Start` on; a negative `Start` counts from the end.
+
+## Step: Bypassing geometry modifiers
+
+**Action:**
+Select the `[BevelGeometry]` and toggle its bypass (parameter window button or
+the graph shortcut) several times, with the output window showing the fractured
+result.
+
+**Expected:**
+- Every toggle takes effect on the next frame: bevels vanish and return, and the
+  downstream fracture recomputes each time (the chunk count changes).
 
 ## Step: Async computation
 

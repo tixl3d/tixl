@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+using Lib.Utils;
 using T3.Core.Utils;
 
 namespace Lib.geometry;
@@ -9,7 +11,10 @@ namespace Lib.geometry;
 /// Fractures a MeshGeometry into Voronoi cells around seed points: one part per
 /// cell, built by clipping the mesh against the bisector planes between seeds and
 /// capping the cuts. Surface corners keep their interpolated normals; cap faces
-/// are flat and marked with Selection = 1 for downstream styling.
+/// are flat and marked with IsCut = 1 (mirrored into Selection) for downstream styling.
+/// Cells are computed in parallel; per cell only the planes that can actually reach
+/// the cell are applied (nearest seeds first, stop once the bisector lies beyond the
+/// cell's bounding radius).
 /// </summary>
 [Guid("70d8f2b5-3a41-4c96-8e2d-b09c6f5e1a73")]
 internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProvider
@@ -49,11 +54,13 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             return;
         }
 
+        var fillInterior = FillInterior.GetValue(context);
         if (Async.GetValue(context))
         {
             var hash = new HashCode();
             hash.Add(source.Version);
             hash.Add(source.GetHashCode());
+            hash.Add(fillInterior);
             foreach (var seed in _seeds)
             {
                 hash.Add(seed);
@@ -65,7 +72,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                                                   token =>
                                                   {
                                                       var target = new MeshGeometry();
-                                                      Build(target, source, seeds, token);
+                                                      Build(target, source, seeds, fillInterior, token);
                                                       return target;
                                                   });
             Result.Value = result ?? source;
@@ -73,152 +80,278 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         }
 
         _asyncComputation.WaitForPending();
-        Build(_output, source, _seeds.ToArray(), CancellationToken.None);
+        Build(_output, source, _seeds.ToArray(), fillInterior, CancellationToken.None);
         Result.Value = _output;
     }
 
-    private void Build(MeshGeometry target, MeshGeometry source, Vector3[] seeds, CancellationToken token)
+    private void Build(MeshGeometry target, MeshGeometry source, Vector3[] seeds, bool fillInterior, CancellationToken token)
     {
         var sourceHasNormals = source.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, out var sourceNormals);
 
-        // Source faces as clip-ready polygons
-        _sourcePolygons.Clear();
-        var offsets = source.FaceCornerOffsets;
-        var corners = source.CornerPointIndices;
-        for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+        // Source faces as clip-ready polygons plus a uniform grid, shared read-only by all cells
+        var sourceIndex = new SourceIndex(source, sourceHasNormals ? sourceNormals : null);
+
+        // Decides whether a cell that no surface crosses is solid interior (emit its hull) or empty space
+        var insideTester = new MeshInsideTester(source);
+        // One cell per seed, computed in parallel with per-thread scratch
+        var cells = new CellResult[seeds.Length];
+        var completed = 0;
+        var options = new ParallelOptions { CancellationToken = token };
+        Parallel.For(0, seeds.Length, options,
+                     () => new CellBuilder(),
+                     (seedIndex, _, builder) =>
+                     {
+                         cells[seedIndex] = builder.BuildCell(sourceIndex, insideTester, seeds, seedIndex, sourceHasNormals, fillInterior);
+                         var done = Interlocked.Increment(ref completed);
+                         _asyncComputation.ReportProgress(done / (float)seeds.Length);
+                         return builder;
+                     },
+                     _ => { });
+
+        token.ThrowIfCancellationRequested();
+        // Concatenate in seed order so the result is deterministic
+        var totalPoints = 0;
+        var totalCorners = 0;
+        var totalFaces = 0;
+        foreach (var cell in cells)
         {
-            var polygon = new Polygon { IsCap = false };
-            for (var c = offsets[faceIndex]; c < offsets[faceIndex + 1]; c++)
+            totalPoints += cell.Positions.Length;
+            totalCorners += cell.Corners.Length;
+            totalFaces += cell.FaceOffsets.Length - 1;
+        }
+
+        var positions = new Vector3[totalPoints];
+        var cornerIndices = new int[totalCorners];
+        var faceOffsets = new int[totalFaces + 1];
+        var cornerNormals = new Vector3[totalCorners];
+        var isCut = new float[totalFaces];
+        var parts = new List<GeometryPart>(seeds.Length);
+
+        var pointBase = 0;
+        var cornerBase = 0;
+        var faceBase = 0;
+        for (var seedIndex = 0; seedIndex < cells.Length; seedIndex++)
+        {
+            var cell = cells[seedIndex];
+            var cellFaces = cell.FaceOffsets.Length - 1;
+            if (cellFaces > 0)
+                parts.Add(new GeometryPart(faceBase, cellFaces, seeds[seedIndex], seedIndex, seedIndex));
+
+            Array.Copy(cell.Positions, 0, positions, pointBase, cell.Positions.Length);
+            for (var c = 0; c < cell.Corners.Length; c++)
             {
-                var normal = sourceHasNormals ? sourceNormals!.Values[c] : Vector3.Zero;
-                polygon.Vertices.Add(new Vertex(source.Positions[corners[c]], normal));
+                cornerIndices[cornerBase + c] = cell.Corners[c] + pointBase;
+                cornerNormals[cornerBase + c] = cell.Normals[c];
             }
 
-            _sourcePolygons.Add(polygon);
+            for (var f = 0; f < cellFaces; f++)
+            {
+                faceOffsets[faceBase + f + 1] = cell.FaceOffsets[f + 1] + cornerBase;
+                isCut[faceBase + f] = cell.IsCap[f] ? 1f : 0f;
+            }
+
+            pointBase += cell.Positions.Length;
+            cornerBase += cell.Corners.Length;
+            faceBase += cellFaces;
         }
 
-        _outPositions.Clear();
-        _outNormals.Clear();
-        _outFaceOffsets.Clear();
-        _outCorners.Clear();
-        _outFaceIsCap.Clear();
-        _outFaceOffsets.Add(0);
-        var parts = new List<GeometryPart>();
-
-        for (var seedIndex = 0; seedIndex < seeds.Length; seedIndex++)
-        {
-            token.ThrowIfCancellationRequested();
-            _asyncComputation.ReportProgress(seedIndex / (float)seeds.Length);
-            var faceStart = _outFaceOffsets.Count - 1;
-            EmitCell(seeds, seedIndex, sourceHasNormals);
-            var faceCount = _outFaceOffsets.Count - 1 - faceStart;
-            if (faceCount > 0)
-                parts.Add(new GeometryPart(faceStart, faceCount, seeds[seedIndex], seedIndex, seedIndex));
-        }
-
-        target.Positions = _outPositions.ToArray();
-        target.FaceCornerOffsets = _outFaceOffsets.ToArray();
-        target.CornerPointIndices = _outCorners.ToArray();
+        target.Positions = positions;
+        target.FaceCornerOffsets = faceOffsets;
+        target.CornerPointIndices = cornerIndices;
         target.Parts = parts.ToArray();
         target.Attributes.Clear();
 
         if (sourceHasNormals)
         {
-            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, _outCorners.Count);
-            for (var c = 0; c < _outCorners.Count; c++)
-            {
-                normals.Values[c] = _outNormals[c];
-            }
+            var normals = target.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, totalCorners);
+            Array.Copy(cornerNormals, normals.Values, totalCorners);
         }
 
         // IsCut is the lasting mark; Selection mirrors it so downstream ops act on the cuts by default
-        var isCut = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsCut, AttributeDomain.Face, _outFaceIsCap.Count);
-        var selection = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.Selection, AttributeDomain.Face, _outFaceIsCap.Count);
-        for (var faceIndex = 0; faceIndex < _outFaceIsCap.Count; faceIndex++)
-        {
-            var value = _outFaceIsCap[faceIndex] ? 1f : 0f;
-            isCut.Values[faceIndex] = value;
-            selection.Values[faceIndex] = value;
-        }
+        var isCutAttribute = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsCut, AttributeDomain.Face, totalFaces);
+        var selection = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.Selection, AttributeDomain.Face, totalFaces);
+        Array.Copy(isCut, isCutAttribute.Values, totalFaces);
+        Array.Copy(isCut, selection.Values, totalFaces);
 
         target.InvalidateTopologyCaches();
     }
 
-    private void EmitCell(Vector3[] seeds, int seedIndex, bool withNormals)
+    /// <summary>Output of one cell, in cell-local indices.</summary>
+    private readonly record struct CellResult(Vector3[] Positions, int[] Corners, Vector3[] Normals, int[] FaceOffsets, bool[] IsCap);
+
+    /// <summary>
+    /// Per-thread clipping state. Everything a cell needs lives here, so cells can be
+    /// built concurrently without touching op-level buffers.
+    /// </summary>
+    private sealed class CellBuilder
     {
-        // Working copy of the source polygons, clipped plane by plane
-        var polygons = new List<Polygon>(_sourcePolygons.Count);
-        foreach (var polygon in _sourcePolygons)
+        public CellResult BuildCell(SourceIndex source, MeshInsideTester insideTester, Vector3[] seeds, int seedIndex, bool withNormals,
+                                    bool fillInterior)
         {
-            polygons.Add(polygon.Clone());
-        }
+            var seed = seeds[seedIndex];
 
-        var seed = seeds[seedIndex];
-        for (var otherIndex = 0; otherIndex < seeds.Length; otherIndex++)
-        {
-            if (otherIndex == seedIndex || polygons.Count == 0)
-                continue;
-
-            var toOther = seeds[otherIndex] - seed;
-            var length = toOther.Length();
-            if (length < 1e-8f)
-                continue;
-
-            var planeNormal = toOther / length;
-            var planeOffset = Vector3.Dot(planeNormal, (seed + seeds[otherIndex]) * 0.5f);
-            ClipByPlane(polygons, planeNormal, planeOffset);
-        }
-
-        // Emit with per-cell point dedup so each chunk is watertight
-        _cellPointLookup.Clear();
-        foreach (var polygon in polygons)
-        {
-            if (polygon.Vertices.Count < 3)
-                continue;
-
-            foreach (var vertex in polygon.Vertices)
+            // Nearest seeds first: once a bisector is farther than the cell's bounding
+            // radius, no remaining plane can touch the cell.
+            if (_order.Length < seeds.Length)
             {
-                _outCorners.Add(GetOrAddCellPoint(vertex.Position));
-                _outNormals.Add(withNormals ? vertex.Normal : Vector3.Zero);
+                _order = new int[seeds.Length];
+                _distances = new float[seeds.Length];
             }
 
-            _outFaceOffsets.Add(_outCorners.Count);
-            _outFaceIsCap.Add(polygon.IsCap);
+            for (var i = 0; i < seeds.Length; i++)
+            {
+                _order[i] = i;
+                _distances[i] = Vector3.DistanceSquared(seeds[i], seed);
+            }
+
+            Array.Sort(_distances, _order, 0, seeds.Length);
+
+            // Pass 1: the cell as a convex hull, starting from the mesh bounding box (6 quads).
+            // Cheap, and it yields the planes that matter plus a tight AABB for the cell.
+            _polygonPool.ReturnAll(_polygons);
+            source.AddBoundsBox(_polygons, _polygonPool);
+            _planes.Clear();
+            var boundingRadius = ComputeBoundingRadius(seed);
+            for (var rank = 0; rank < seeds.Length && _polygons.Count > 0; rank++)
+            {
+                var otherIndex = _order[rank];
+                if (otherIndex == seedIndex)
+                    continue;
+
+                var length = MathF.Sqrt(_distances[rank]);
+                if (length < 1e-8f)
+                    continue;
+
+                if (length * 0.5f > boundingRadius)
+                    break;
+
+                var planeNormal = (seeds[otherIndex] - seed) / length;
+                var planeOffset = Vector3.Dot(planeNormal, (seed + seeds[otherIndex]) * 0.5f);
+                if (ClipByPlane(planeNormal, planeOffset))
+                {
+                    // A plane that doesn't touch the hull can't touch the mesh cell inside it.
+                    // Its exact face keeps the hull closed (bounds and radius stay right).
+                    _planes.Add((planeNormal, planeOffset));
+                    var face = BuildHullFace(source, _planes.Count - 1);
+                    if (face != null)
+                        _polygons.Add(face);
+
+                    boundingRadius = ComputeBoundingRadius(seed);
+                }
+            }
+
+            ComputeBounds(out var cellMin, out var cellMax);
+
+            // The hull faces on cell planes are the boundary the surface cuts get closed against
+            _polygonPool.ReturnAll(_hull);
+            for (var i = _polygons.Count - 1; i >= 0; i--)
+            {
+                var polygon = _polygons[i];
+                if (polygon.PlaneIndex >= 0 && polygon.Vertices.Count >= 3)
+                {
+                    _hull.Add(polygon);
+                    _polygons.RemoveAt(i);
+                }
+            }
+
+            _polygonPool.ReturnAll(_polygons);
+
+            // Pass 2: source polygons in the hull region. Fully inside -> kept by reference,
+            // straddling -> cloned and clipped, outside -> dropped before any copy is made.
+            _kept.Clear();
+            source.CollectCandidates(cellMin, cellMax, _planes, _kept, _polygons, _polygonPool, ref _stamp, ref _stamps);
+
+            // Clip the surface by all planes first - caps are derived afterwards from the
+            // final cut edges, so their construction doesn't depend on the plane order.
+            for (var planeIndex = 0; planeIndex < _planes.Count; planeIndex++)
+            {
+                var (planeNormal, planeOffset) = _planes[planeIndex];
+                ClipByPlane(planeNormal, planeOffset);
+            }
+
+            var surfaceCount = _polygons.Count;
+            for (var planeIndex = 0; planeIndex < _planes.Count; planeIndex++)
+            {
+                var (planeNormal, planeOffset) = _planes[planeIndex];
+                Polygon? hullFace = null;
+                foreach (var candidate in _hull)
+                {
+                    if (candidate.PlaneIndex == planeIndex && candidate.Vertices.Count >= 3)
+                    {
+                        hullFace = candidate;
+                        break;
+                    }
+                }
+
+                CollectPlaneSegments(planeNormal, planeOffset, surfaceCount);
+                BuildCapsForPlane(planeNormal, planeIndex, hullFace, fillInterior, insideTester);
+            }
+
+            _polygonPool.ReturnAll(_hull);
+
+            // Emit with per-cell point dedup so each chunk is watertight
+            _pointLookup.Clear();
+            _positions.Clear();
+            _corners.Clear();
+            _normals.Clear();
+            _faceOffsets.Clear();
+            _isCap.Clear();
+            _faceOffsets.Add(0);
+            EmitPolygons(_kept, withNormals);
+            EmitPolygons(_polygons, withNormals);
+
+            return new CellResult(_positions.ToArray(), _corners.ToArray(), _normals.ToArray(), _faceOffsets.ToArray(), _isCap.ToArray());
         }
-    }
 
-    /// <summary>Keeps the half-space dot(n, x) &lt;= offset; cut openings get capped.</summary>
-    private void ClipByPlane(List<Polygon> polygons, Vector3 planeNormal, float planeOffset)
-    {
-        _cutSegments.Clear();
-        var anyClipped = false;
-
-        for (var polygonIndex = polygons.Count - 1; polygonIndex >= 0; polygonIndex--)
+        /// <summary>
+        /// The cell's face on one plane: a rectangle spanning the mesh bounds, clipped by the
+        /// bounding box and all other cell planes. Null if nothing remains.
+        /// </summary>
+        private Polygon? BuildHullFace(SourceIndex source, int planeIndex)
         {
-            var polygon = polygons[polygonIndex];
+            var (normal, offset) = _planes[planeIndex];
+            var center = normal * offset;
+            var tangent = Vector3.Normalize(Vector3.Cross(normal, MathF.Abs(normal.Y) < 0.9f ? Vector3.UnitY : Vector3.UnitX));
+            var bitangent = Vector3.Cross(normal, tangent);
+            var extent = Vector3.Distance(source.Min, source.Max) + Vector3.Distance(center, (source.Min + source.Max) * 0.5f);
+
+            var face = _polygonPool.Rent();
+            face.IsCap = true;
+            face.PlaneIndex = planeIndex;
+            face.Vertices.Add(new Vertex(center - tangent * extent - bitangent * extent, normal));
+            face.Vertices.Add(new Vertex(center + tangent * extent - bitangent * extent, normal));
+            face.Vertices.Add(new Vertex(center + tangent * extent + bitangent * extent, normal));
+            face.Vertices.Add(new Vertex(center - tangent * extent + bitangent * extent, normal));
+            if (Vector3.Dot(NewellNormal(face), normal) < 0)
+                face.Vertices.Reverse();
+
+            // Bounding box as six half-spaces, then the other planes
+            var min = source.Min;
+            var max = source.Max;
+            var ok = ClipPolygon(face, -Vector3.UnitX, -min.X) && ClipPolygon(face, Vector3.UnitX, max.X)
+                     && ClipPolygon(face, -Vector3.UnitY, -min.Y) && ClipPolygon(face, Vector3.UnitY, max.Y)
+                     && ClipPolygon(face, -Vector3.UnitZ, -min.Z) && ClipPolygon(face, Vector3.UnitZ, max.Z);
+            for (var other = 0; ok && other < _planes.Count; other++)
+            {
+                if (other == planeIndex)
+                    continue;
+
+                var (n, d) = _planes[other];
+                ok = ClipPolygon(face, n, d);
+            }
+
+            if (ok && face.Vertices.Count >= 3)
+                return face;
+
+            _polygonPool.Return(face);
+            return null;
+        }
+
+        /// <summary>Sutherland-Hodgman of a single polygon against dot(n, x) &lt;= offset. False if nothing remains.</summary>
+        private bool ClipPolygon(Polygon polygon, Vector3 planeNormal, float planeOffset)
+        {
             var vertices = polygon.Vertices;
-            var allInside = true;
-            var allOutside = true;
-            foreach (var vertex in vertices)
-            {
-                if (Vector3.Dot(planeNormal, vertex.Position) - planeOffset > ClipEpsilon)
-                    allInside = false;
-                else
-                    allOutside = false;
-            }
-
-            if (allInside)
-                continue;
-
-            anyClipped = true;
-            if (allOutside)
-            {
-                polygons.RemoveAt(polygonIndex);
-                continue;
-            }
-
             _clipScratch.Clear();
-            Vertex? firstCut = null;
             for (var i = 0; i < vertices.Count; i++)
             {
                 var current = vertices[i];
@@ -227,137 +360,823 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                 var nextDistance = Vector3.Dot(planeNormal, next.Position) - planeOffset;
                 var currentInside = currentDistance <= ClipEpsilon;
                 var nextInside = nextDistance <= ClipEpsilon;
-
                 if (currentInside)
                     _clipScratch.Add(current);
 
-                if (currentInside == nextInside)
+                if (currentInside != nextInside)
+                    _clipScratch.Add(Vertex.Lerp(current, next, currentDistance / (currentDistance - nextDistance)));
+            }
+
+            vertices.Clear();
+            vertices.AddRange(_clipScratch);
+            return vertices.Count >= 3;
+        }
+
+        private static Vector3 Centroid(Polygon polygon)
+        {
+            var sum = Vector3.Zero;
+            foreach (var vertex in polygon.Vertices)
+            {
+                sum += vertex.Position;
+            }
+
+            return sum / polygon.Vertices.Count;
+        }
+
+        private void EmitPolygons(List<Polygon> polygons, bool withNormals)
+        {
+            foreach (var polygon in polygons)
+            {
+                if (polygon.Vertices.Count < 3)
                     continue;
 
-                var t = currentDistance / (currentDistance - nextDistance);
-                var cut = Vertex.Lerp(current, next, t);
-                _clipScratch.Add(cut);
-                if (currentInside)
+                // Welding can collapse neighbouring corners onto one point; a repeated corner
+                // would leave a degenerate fan triangle (half the face missing), so skip it.
+                var cornerStart = _corners.Count;
+                foreach (var vertex in polygon.Vertices)
                 {
-                    firstCut = cut; // leaving the kept side: segment starts here
-                }
-                else if (firstCut.HasValue)
-                {
-                    _cutSegments.Add((firstCut.Value, cut));
-                    firstCut = null;
-                }
-                else
-                {
-                    firstCut = cut; // loop started outside; pair up at the wrap-around exit
-                    _pendingEntry = cut;
-                    _hasPendingEntry = true;
-                }
-            }
+                    var pointId = GetOrAddPoint(vertex.Position);
+                    if (_corners.Count > cornerStart && _corners[^1] == pointId)
+                        continue;
 
-            // A polygon that started outside pairs its first entry with the last exit
-            if (_hasPendingEntry && firstCut.HasValue && !firstCut.Value.Equals(_pendingEntry))
-                _cutSegments.Add((firstCut.Value, _pendingEntry));
-            _hasPendingEntry = false;
+                    _corners.Add(pointId);
+                    _normals.Add(withNormals ? vertex.Normal : Vector3.Zero);
+                }
 
-            if (_clipScratch.Count < 3)
-            {
-                polygons.RemoveAt(polygonIndex);
-            }
-            else
-            {
-                vertices.Clear();
-                vertices.AddRange(_clipScratch);
+                while (_corners.Count - cornerStart > 1 && _corners[^1] == _corners[cornerStart])
+                {
+                    _corners.RemoveAt(_corners.Count - 1);
+                    _normals.RemoveAt(_normals.Count - 1);
+                }
+
+                if (_corners.Count - cornerStart < 3)
+                {
+                    _corners.RemoveRange(cornerStart, _corners.Count - cornerStart);
+                    _normals.RemoveRange(cornerStart, _normals.Count - cornerStart);
+                    continue;
+                }
+
+                _faceOffsets.Add(_corners.Count);
+                _isCap.Add(polygon.IsCap);
             }
         }
 
-        if (!anyClipped || _cutSegments.Count < 3)
-            return;
-
-        BuildCaps(polygons, planeNormal);
-    }
-
-    /// <summary>Chains the cut segments into loops and emits flat cap polygons.</summary>
-    private void BuildCaps(List<Polygon> polygons, Vector3 planeNormal)
-    {
-        // Segments are oriented exit->entry along the kept surface. Cut points from
-        // different faces only match within float error, so chain by nearest endpoint.
-        var segmentCount = _cutSegments.Count;
-        if (_segmentUsed.Length < segmentCount)
-            _segmentUsed = new bool[segmentCount];
-        Array.Clear(_segmentUsed, 0, segmentCount);
-
-        for (var startIndex = 0; startIndex < segmentCount; startIndex++)
+        private void ComputeBounds(out Vector3 min, out Vector3 max)
         {
-            if (_segmentUsed[startIndex])
-                continue;
-
-            var cap = new Polygon { IsCap = true };
-            var currentIndex = startIndex;
-            for (var guard = 0; guard <= segmentCount; guard++)
+            min = new Vector3(float.MaxValue);
+            max = new Vector3(float.MinValue);
+            foreach (var polygon in _polygons)
             {
-                _segmentUsed[currentIndex] = true;
-                var segment = _cutSegments[currentIndex];
-                cap.Vertices.Add(new Vertex(segment.From.Position, planeNormal));
-
-                var nextIndex = -1;
-                var bestDistanceSq = ChainEpsilonSq;
-                for (var candidate = 0; candidate < segmentCount; candidate++)
+                foreach (var vertex in polygon.Vertices)
                 {
-                    if (_segmentUsed[candidate])
+                    min = Vector3.Min(min, vertex.Position);
+                    max = Vector3.Max(max, vertex.Position);
+                }
+            }
+        }
+
+        private float ComputeBoundingRadius(Vector3 seed)
+        {
+            var maxSq = 0f;
+            foreach (var polygon in _polygons)
+            {
+                foreach (var vertex in polygon.Vertices)
+                {
+                    var d = Vector3.DistanceSquared(vertex.Position, seed);
+                    if (d > maxSq)
+                        maxSq = d;
+                }
+            }
+
+            return MathF.Sqrt(maxSq);
+        }
+
+        /// <summary>
+        /// Clips every polygon in _polygons to the half-space dot(n, x) &lt;= offset. Returns
+        /// whether anything changed. Caps are not built here - they're derived afterwards
+        /// from the final cut edges (see BuildCapsForPlane).
+        /// </summary>
+        private bool ClipByPlane(Vector3 planeNormal, float planeOffset)
+        {
+            _cutSegments.Clear();
+            var anyClipped = false;
+
+            for (var polygonIndex = _polygons.Count - 1; polygonIndex >= 0; polygonIndex--)
+            {
+                var polygon = _polygons[polygonIndex];
+                var vertices = polygon.Vertices;
+                var allInside = true;
+                var allOutside = true;
+                foreach (var vertex in vertices)
+                {
+                    if (Vector3.Dot(planeNormal, vertex.Position) - planeOffset > ClipEpsilon)
+                        allInside = false;
+                    else
+                        allOutside = false;
+                }
+
+                if (allInside)
+                    continue;
+
+                anyClipped = true;
+                if (allOutside)
+                {
+                    _polygonPool.Return(polygon);
+                    _polygons.RemoveAt(polygonIndex);
+                    continue;
+                }
+
+                _clipScratch.Clear();
+                Vertex? firstCut = null;
+                var hasPendingEntry = false;
+                var pendingEntry = default(Vertex);
+                for (var i = 0; i < vertices.Count; i++)
+                {
+                    var current = vertices[i];
+                    var next = vertices[(i + 1) % vertices.Count];
+                    var currentDistance = Vector3.Dot(planeNormal, current.Position) - planeOffset;
+                    var nextDistance = Vector3.Dot(planeNormal, next.Position) - planeOffset;
+                    var currentInside = currentDistance <= ClipEpsilon;
+                    var nextInside = nextDistance <= ClipEpsilon;
+
+                    if (currentInside)
+                        _clipScratch.Add(current);
+
+                    if (currentInside == nextInside)
                         continue;
 
-                    var distanceSq = Vector3.DistanceSquared(segment.To.Position, _cutSegments[candidate].From.Position);
-                    if (distanceSq < bestDistanceSq)
+                    var t = currentDistance / (currentDistance - nextDistance);
+                    var cut = Vertex.Lerp(current, next, t);
+                    _clipScratch.Add(cut);
+                    if (currentInside)
                     {
-                        bestDistanceSq = distanceSq;
-                        nextIndex = candidate;
+                        firstCut = cut; // leaving the kept side: segment starts here
+                    }
+                    else if (firstCut.HasValue)
+                    {
+                        _cutSegments.Add((firstCut.Value, cut));
+                        firstCut = null;
+                    }
+                    else
+                    {
+                        firstCut = cut; // loop started outside; pair up at the wrap-around exit
+                        pendingEntry = cut;
+                        hasPendingEntry = true;
                     }
                 }
 
-                if (nextIndex < 0)
-                    break; // loop closed back to the start (or broke off)
+                // A polygon that started outside pairs its first entry with the last exit
+                if (hasPendingEntry && firstCut.HasValue && !firstCut.Value.Equals(pendingEntry))
+                    _cutSegments.Add((firstCut.Value, pendingEntry));
 
-                currentIndex = nextIndex;
+                if (_clipScratch.Count < 3)
+                {
+                    _polygonPool.Return(polygon);
+                    _polygons.RemoveAt(polygonIndex);
+                }
+                else
+                {
+                    vertices.Clear();
+                    vertices.AddRange(_clipScratch);
+                }
             }
 
-            if (cap.Vertices.Count < 3)
-                continue;
+            return anyClipped;
+        }
 
-            // Orient the cap outward (along the clip plane normal)
-            var newell = Vector3.Zero;
-            for (var i = 0; i < cap.Vertices.Count; i++)
+        /// <summary>
+        /// Gathers the edges of the (fully clipped) surface polygons that lie in the plane,
+        /// reversed so they run in the cap's winding, into _cutSegments.
+        /// </summary>
+        private void CollectPlaneSegments(Vector3 planeNormal, float planeOffset, int surfaceCount)
+        {
+            _cutSegments.Clear();
+            for (var polygonIndex = 0; polygonIndex < surfaceCount; polygonIndex++)
             {
-                var p0 = cap.Vertices[i].Position;
-                var p1 = cap.Vertices[(i + 1) % cap.Vertices.Count].Position;
-                newell += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
+                var vertices = _polygons[polygonIndex].Vertices;
+                var count = vertices.Count;
+                for (var i = 0; i < count; i++)
+                {
+                    var a = vertices[i];
+                    var b = vertices[(i + 1) % count];
+                    if (MathF.Abs(Vector3.Dot(planeNormal, a.Position) - planeOffset) > OnPlaneEpsilon
+                        || MathF.Abs(Vector3.Dot(planeNormal, b.Position) - planeOffset) > OnPlaneEpsilon)
+                        continue;
+
+                    if (Vector3.DistanceSquared(a.Position, b.Position) < DegenerateEpsilonSq)
+                        continue;
+
+                    _cutSegments.Add((b, a));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Builds the cap(s) of one plane from the cut segments. Closed chains become caps
+        /// directly; open chains are closed by walking along the plane's convex hull face,
+        /// which is where the cap is bounded by other planes rather than by the surface.
+        /// Without any segment the whole hull face is the cap if it lies inside the solid.
+        /// </summary>
+        private void BuildCapsForPlane(Vector3 planeNormal, int planeIndex, Polygon? hullFace, bool fillInterior,
+                                       MeshInsideTester insideTester)
+        {
+            if (_cutSegments.Count == 0)
+            {
+                if (fillInterior && hullFace != null && insideTester.IsInside(Centroid(hullFace)))
+                {
+                    var cap = _polygonPool.Rent(hullFace);
+                    cap.IsCap = true;
+                    _polygons.Add(cap);
+
+                }
+
+                return;
+            }
+
+            // Chain segments into runs
+            var segmentCount = _cutSegments.Count;
+            if (_segmentUsed.Length < segmentCount)
+                _segmentUsed = new bool[segmentCount];
+            Array.Clear(_segmentUsed, 0, segmentCount);
+
+            _chains.Clear();
+            for (var startIndex = 0; startIndex < segmentCount; startIndex++)
+            {
+                if (_segmentUsed[startIndex])
+                    continue;
+
+                var chain = new Chain();
+                var currentIndex = startIndex;
+                for (var guard = 0; guard <= segmentCount; guard++)
+                {
+                    _segmentUsed[currentIndex] = true;
+                    var segment = _cutSegments[currentIndex];
+                    chain.Points.Add(segment.From.Position);
+                    chain.End = segment.To.Position;
+
+                    var nextIndex = -1;
+                    var bestDistanceSq = ChainEpsilonSq;
+                    for (var candidate = 0; candidate < segmentCount; candidate++)
+                    {
+                        if (_segmentUsed[candidate])
+                            continue;
+
+                        var distanceSq = Vector3.DistanceSquared(segment.To.Position, _cutSegments[candidate].From.Position);
+                        if (distanceSq < bestDistanceSq)
+                        {
+                            bestDistanceSq = distanceSq;
+                            nextIndex = candidate;
+                        }
+                    }
+
+                    if (nextIndex < 0)
+                        break;
+
+                    currentIndex = nextIndex;
+                }
+
+                chain.IsClosed = Vector3.DistanceSquared(chain.End, chain.Points[0]) < ChainEpsilonSq;
+                _chains.Add(chain);
+            }
+
+            // Hull face oriented like the cap (counter-clockwise about the plane normal)
+            var canWalkHull = fillInterior && hullFace != null;
+            if (canWalkHull)
+            {
+                _hullLoop.Clear();
+                foreach (var vertex in hullFace!.Vertices)
+                {
+                    _hullLoop.Add(vertex.Position);
+                }
+
+                if (Vector3.Dot(NewellNormal(_hullLoop), planeNormal) < 0)
+                    _hullLoop.Reverse();
+            }
+
+            foreach (var chain in _chains)
+            {
+                chain.StartOnHull = canWalkHull && IsOnHullBoundary(chain.Points[0]);
+                chain.EndOnHull = canWalkHull && IsOnHullBoundary(chain.End);
+            }
+
+            // Second pass: stitch broken surface chains. A chain end that is not on the hull
+            // boundary can only continue on another chain's start that isn't either, so
+            // pair those by proximity - regardless of the strict chaining tolerance.
+            for (var i = 0; i < _chains.Count; i++)
+            {
+                var chain = _chains[i];
+                if (chain.Consumed || chain.IsClosed)
+                    continue;
+
+                for (var guard = 0; guard < _chains.Count; guard++)
+                {
+                    if (chain.EndOnHull)
+                        break;
+
+                    Chain? best = null;
+                    var bestDistanceSq = float.MaxValue;
+                    foreach (var other in _chains)
+                    {
+                        if (other == chain || other.Consumed || other.IsClosed || other.StartOnHull)
+                            continue;
+
+                        var distanceSq = Vector3.DistanceSquared(chain.End, other.Points[0]);
+                        if (distanceSq < bestDistanceSq)
+                        {
+                            bestDistanceSq = distanceSq;
+                            best = other;
+                        }
+                    }
+
+                    if (best == null)
+                        break;
+
+                    chain.Points.AddRange(best.Points);
+                    chain.End = best.End;
+                    chain.EndOnHull = best.EndOnHull;
+                    best.Consumed = true;
+                    best.Points.Clear();
+                }
+
+                chain.IsClosed = Vector3.DistanceSquared(chain.End, chain.Points[0]) < MergeEpsilonSq;
+            }
+
+            foreach (var chain in _chains)
+            {
+                if (chain.Consumed)
+                    continue;
+
+                chain.Consumed = true;
+                var cap = _polygonPool.Rent();
+                cap.IsCap = true;
+                cap.PlaneIndex = planeIndex;
+                foreach (var p in chain.Points)
+                {
+                    cap.Vertices.Add(new Vertex(p, planeNormal));
+                }
+
+                if (!chain.IsClosed && canWalkHull && chain.EndOnHull)
+                {
+                    _walkNormal = planeNormal;
+                    // Walk the hull boundary from this chain's end to the next chain start,
+                    // merging chains until the loop returns to where it began.
+                    var current = chain;
+                    for (var guard = 0; guard < _chains.Count + 1; guard++)
+                    {
+                        var next = WalkHullToNextChain(current.End, cap, chain);
+                        if (next == null || next == chain)
+                            break;
+
+                        next.Consumed = true;
+                        foreach (var p in next.Points)
+                        {
+                            cap.Vertices.Add(new Vertex(p, planeNormal));
+                        }
+
+                        current = next;
+                        if (current.IsClosed)
+                            break;
+                    }
+                }
+
+                if (cap.Vertices.Count < 3)
+                {
+                    _polygonPool.Return(cap);
+                    continue;
+                }
+
+                if (Vector3.Dot(NewellNormal(cap), planeNormal) < 0)
+                    cap.Vertices.Reverse();
+
+                _polygons.Add(cap);
+            }
+        }
+
+        /// <summary>
+        /// From a point on the hull boundary, walks forward along the hull loop (adding the
+        /// hull corners passed) until reaching the start of an unconsumed chain, which is
+        /// returned. Returns null if the hull can't be walked.
+        /// </summary>
+        private Chain? WalkHullToNextChain(Vector3 from, Polygon cap, Chain origin)
+        {
+            var hullCount = _hullLoop.Count;
+            if (hullCount < 3)
+                return null;
+
+            FindHullEdge(from, out var edgeIndex, out var edgeT);
+            for (var step = 0; step <= hullCount; step++)
+            {
+                // The nearest chain start ahead on the current edge. The originating chain
+                // is a valid target too - reaching its start is what closes the loop.
+                Chain? best = null;
+                var bestT = float.MaxValue;
+                foreach (var candidate in _chains)
+                {
+                    if ((candidate.Consumed && candidate != origin) || !candidate.StartOnHull)
+                        continue;
+
+                    FindHullEdge(candidate.Points[0], out var candidateEdge, out var candidateT);
+                    if (candidateEdge != edgeIndex || candidateT + 1e-5f < edgeT)
+                        continue;
+
+                    if (candidateT < bestT)
+                    {
+                        bestT = candidateT;
+                        best = candidate;
+                    }
+                }
+
+                if (best != null)
+                    return best;
+
+                // Otherwise continue around the hull corner
+                edgeIndex = (edgeIndex + 1) % hullCount;
+                edgeT = 0;
+                cap.Vertices.Add(new Vertex(_hullLoop[edgeIndex], _walkNormal));
+            }
+
+            return null;
+        }
+
+        private bool IsOnHullBoundary(Vector3 point)
+        {
+            FindHullEdge(point, out var edgeIndex, out var t);
+            var a = _hullLoop[edgeIndex];
+            var b = _hullLoop[(edgeIndex + 1) % _hullLoop.Count];
+            return Vector3.DistanceSquared(point, a + (b - a) * t) < HullEpsilonSq;
+        }
+
+        /// <summary>Nearest hull edge to a point, with the parametric position along it.</summary>
+        private void FindHullEdge(Vector3 point, out int edgeIndex, out float t)
+        {
+            edgeIndex = 0;
+            t = 0;
+            var bestDistanceSq = float.MaxValue;
+            var hullCount = _hullLoop.Count;
+            for (var i = 0; i < hullCount; i++)
+            {
+                var a = _hullLoop[i];
+                var b = _hullLoop[(i + 1) % hullCount];
+                var ab = b - a;
+                var lengthSq = ab.LengthSquared();
+                var candidateT = lengthSq > 1e-12f ? Math.Clamp(Vector3.Dot(point - a, ab) / lengthSq, 0f, 1f) : 0f;
+                var distanceSq = Vector3.DistanceSquared(point, a + ab * candidateT);
+                if (distanceSq < bestDistanceSq)
+                {
+                    bestDistanceSq = distanceSq;
+                    edgeIndex = i;
+                    t = candidateT;
+                }
+            }
+        }
+
+        private static Vector3 NewellNormal(List<Vector3> loop)
+        {
+            var normal = Vector3.Zero;
+            for (var i = 0; i < loop.Count; i++)
+            {
+                var p0 = loop[i];
+                var p1 = loop[(i + 1) % loop.Count];
+                normal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
                                       (p0.Z - p1.Z) * (p0.X + p1.X),
                                       (p0.X - p1.X) * (p0.Y + p1.Y));
             }
 
-            if (Vector3.Dot(newell, planeNormal) < 0)
-                cap.Vertices.Reverse();
-
-            polygons.Add(cap);
+            return normal;
         }
-    }
 
-    private int GetOrAddCellPoint(Vector3 position)
-    {
-        var key = Quantize(position);
-        if (_cellPointLookup.TryGetValue(key, out var pointId))
+        private static Vector3 NewellNormal(Polygon polygon)
+        {
+            var normal = Vector3.Zero;
+            var count = polygon.Vertices.Count;
+            for (var i = 0; i < count; i++)
+            {
+                var p0 = polygon.Vertices[i].Position;
+                var p1 = polygon.Vertices[(i + 1) % count].Position;
+                normal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
+                                      (p0.Z - p1.Z) * (p0.X + p1.X),
+                                      (p0.X - p1.X) * (p0.Y + p1.Y));
+            }
+
+            return normal;
+        }
+
+        private sealed class Chain
+        {
+            public readonly List<Vector3> Points = [];
+            public Vector3 End;
+            public bool IsClosed;
+            public bool Consumed;
+            public bool StartOnHull;
+            public bool EndOnHull;
+        }
+
+        /// <summary>
+        /// Merges positions within WeldEpsilon. Plain rounding split near-identical
+        /// vertices that straddled a rounding boundary, which left open edges between
+        /// caps and the surface - so the neighbouring buckets are checked too.
+        /// </summary>
+        private int GetOrAddPoint(Vector3 position)
+        {
+            var (kx, ky, kz) = Quantize(position);
+            for (var dz = -1; dz <= 1; dz++)
+            for (var dy = -1; dy <= 1; dy++)
+            for (var dx = -1; dx <= 1; dx++)
+            {
+                if (_pointLookup.TryGetValue((kx + dx, ky + dy, kz + dz), out var existing)
+                    && Vector3.DistanceSquared(_positions[existing], position) < WeldEpsilonSq)
+                    return existing;
+            }
+
+            var pointId = _positions.Count;
+            _positions.Add(position);
+            _pointLookup.TryAdd((kx, ky, kz), pointId);
             return pointId;
+        }
 
-        pointId = _outPositions.Count;
-        _outPositions.Add(position);
-        _cellPointLookup.Add(key, pointId);
-        return pointId;
+        private static (int, int, int) Quantize(Vector3 position)
+        {
+            return ((int)MathF.Floor(position.X * WeldGridScale),
+                    (int)MathF.Floor(position.Y * WeldGridScale),
+                    (int)MathF.Floor(position.Z * WeldGridScale));
+        }
+
+        private readonly List<Chain> _chains = [];
+        private readonly List<Vector3> _hullLoop = [];
+        private Vector3 _walkNormal;
+        private readonly PolygonPool _polygonPool = new();
+        private readonly List<Polygon> _polygons = [];
+        private readonly List<(Vector3 Normal, float Offset)> _planes = [];
+        private readonly List<Polygon> _kept = []; // source polygons by reference - never returned to the pool
+        private readonly List<Polygon> _hull = [];
+        private int _stamp;
+        private int[] _stamps = [];
+        private readonly List<Vertex> _clipScratch = [];
+        private readonly List<(Vertex From, Vertex To)> _cutSegments = [];
+        private readonly Dictionary<(int, int, int), int> _pointLookup = [];
+        private bool[] _segmentUsed = [];
+        private int[] _order = [];
+        private float[] _distances = [];
+        private readonly List<Vector3> _positions = [];
+        private readonly List<int> _corners = [];
+        private readonly List<Vector3> _normals = [];
+        private readonly List<int> _faceOffsets = [];
+        private readonly List<bool> _isCap = [];
     }
 
-    private static (int, int, int) Quantize(Vector3 position)
+    /// <summary>
+    /// Read-only view of the source mesh for the cell builders: clip-ready polygons, their
+    /// AABBs, the mesh bounds, and a uniform grid so a cell only touches the polygons in
+    /// its region instead of the whole mesh.
+    /// </summary>
+    private sealed class SourceIndex
     {
-        return ((int)MathF.Round(position.X * 100000f),
-                (int)MathF.Round(position.Y * 100000f),
-                (int)MathF.Round(position.Z * 100000f));
+        public SourceIndex(MeshGeometry source, GeometryAttribute<Vector3>? cornerNormals)
+        {
+            var offsets = source.FaceCornerOffsets;
+            var corners = source.CornerPointIndices;
+            _polygons = new Polygon[source.FaceCount];
+            _polygonMin = new Vector3[source.FaceCount];
+            _polygonMax = new Vector3[source.FaceCount];
+            Min = new Vector3(float.MaxValue);
+            Max = new Vector3(float.MinValue);
+
+            for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+            {
+                var polygon = new Polygon { IsCap = false };
+                var min = new Vector3(float.MaxValue);
+                var max = new Vector3(float.MinValue);
+                for (var c = offsets[faceIndex]; c < offsets[faceIndex + 1]; c++)
+                {
+                    var position = source.Positions[corners[c]];
+                    var normal = cornerNormals != null ? cornerNormals.Values[c] : Vector3.Zero;
+                    polygon.Vertices.Add(new Vertex(position, normal));
+                    min = Vector3.Min(min, position);
+                    max = Vector3.Max(max, position);
+                }
+
+                _polygons[faceIndex] = polygon;
+                _polygonMin[faceIndex] = min;
+                _polygonMax[faceIndex] = max;
+                Min = Vector3.Min(Min, min);
+                Max = Vector3.Max(Max, max);
+            }
+
+            // Slightly padded bounds so the hull box strictly contains every vertex
+            // Only a hair of padding: hull edges must coincide with flat faces lying in the
+            // bounding-box planes, otherwise cut chains ending there sit "almost" on the hull
+            // and the walk inserts near-duplicate box corners (hairline slivers, open edges).
+            var padding = new Vector3(1e-6f);
+            Min -= padding;
+            Max += padding;
+
+            // Uniform grid: roughly one cell per few polygons along each axis
+            var extent = Max - Min;
+            var resolution = Math.Clamp((int)MathF.Ceiling(MathF.Cbrt(source.FaceCount / 4f)), 1, 64);
+            _gridResolution = resolution;
+            _cellSize = new Vector3(MathF.Max(extent.X, 1e-6f) / resolution,
+                                    MathF.Max(extent.Y, 1e-6f) / resolution,
+                                    MathF.Max(extent.Z, 1e-6f) / resolution);
+
+            var cellLists = new List<int>[resolution * resolution * resolution];
+            for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
+            {
+                ToGrid(_polygonMin[faceIndex], out var x0, out var y0, out var z0);
+                ToGrid(_polygonMax[faceIndex], out var x1, out var y1, out var z1);
+                for (var z = z0; z <= z1; z++)
+                for (var y = y0; y <= y1; y++)
+                for (var x = x0; x <= x1; x++)
+                {
+                    var cell = (z * resolution + y) * resolution + x;
+                    (cellLists[cell] ??= []).Add(faceIndex);
+                }
+            }
+
+            // Flatten into CSR for allocation-free lookup
+            _gridOffsets = new int[cellLists.Length + 1];
+            for (var i = 0; i < cellLists.Length; i++)
+            {
+                _gridOffsets[i + 1] = _gridOffsets[i] + (cellLists[i]?.Count ?? 0);
+            }
+
+            _gridEntries = new int[_gridOffsets[^1]];
+            for (var i = 0; i < cellLists.Length; i++)
+            {
+                cellLists[i]?.CopyTo(_gridEntries, _gridOffsets[i]);
+            }
+        }
+
+        public Vector3 Min { get; }
+        public Vector3 Max { get; }
+        public int PolygonCount => _polygons.Length;
+
+        /// <summary>The padded mesh bounding box as six outward-facing quads - the seed for a cell hull.</summary>
+        public void AddBoundsBox(List<Polygon> target, PolygonPool pool)
+        {
+            var min = Min;
+            var max = Max;
+            Span<Vector3> c = stackalloc Vector3[8];
+            c[0] = new Vector3(min.X, min.Y, min.Z);
+            c[1] = new Vector3(max.X, min.Y, min.Z);
+            c[2] = new Vector3(max.X, max.Y, min.Z);
+            c[3] = new Vector3(min.X, max.Y, min.Z);
+            c[4] = new Vector3(min.X, min.Y, max.Z);
+            c[5] = new Vector3(max.X, min.Y, max.Z);
+            c[6] = new Vector3(max.X, max.Y, max.Z);
+            c[7] = new Vector3(min.X, max.Y, max.Z);
+            AddQuad(target, pool, c[0], c[3], c[2], c[1]); // -Z
+            AddQuad(target, pool, c[4], c[5], c[6], c[7]); // +Z
+            AddQuad(target, pool, c[0], c[1], c[5], c[4]); // -Y
+            AddQuad(target, pool, c[3], c[7], c[6], c[2]); // +Y
+            AddQuad(target, pool, c[0], c[4], c[7], c[3]); // -X
+            AddQuad(target, pool, c[1], c[2], c[6], c[5]); // +X
+        }
+
+        private static void AddQuad(List<Polygon> target, PolygonPool pool, Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        {
+            var polygon = pool.Rent();
+            polygon.Vertices.Add(new Vertex(a, Vector3.Zero));
+            polygon.Vertices.Add(new Vertex(b, Vector3.Zero));
+            polygon.Vertices.Add(new Vertex(c, Vector3.Zero));
+            polygon.Vertices.Add(new Vertex(d, Vector3.Zero));
+            target.Add(polygon);
+        }
+
+        /// <summary>
+        /// Sorts the source polygons of the cell region into <paramref name="kept"/> (entirely
+        /// inside every plane, referenced without copying) and <paramref name="toClip"/>
+        /// (straddling at least one plane, rented copies). Grid cells and polygons that lie
+        /// outside any plane are rejected by their AABB before a single vertex is touched.
+        /// </summary>
+        public void CollectCandidates(Vector3 boxMin, Vector3 boxMax, List<(Vector3 Normal, float Offset)> planes,
+                                      List<Polygon> kept, List<Polygon> toClip, PolygonPool pool,
+                                      ref int stamp, ref int[] stamps)
+        {
+            if (stamps.Length < _polygons.Length)
+                stamps = new int[_polygons.Length];
+
+            stamp++;
+            ToGrid(boxMin, out var x0, out var y0, out var z0);
+            ToGrid(boxMax, out var x1, out var y1, out var z1);
+            for (var z = z0; z <= z1; z++)
+            for (var y = y0; y <= y1; y++)
+            for (var x = x0; x <= x1; x++)
+            {
+                var cell = (z * _gridResolution + y) * _gridResolution + x;
+                if (_gridOffsets[cell + 1] == _gridOffsets[cell])
+                    continue; // empty cells are the majority of a boundary cell's AABB - skip before any plane math
+
+                var gridMin = Min + new Vector3(x * _cellSize.X, y * _cellSize.Y, z * _cellSize.Z);
+                var gridMax = gridMin + _cellSize;
+                if (IsBoxOutsideAnyPlane(gridMin, gridMax, planes))
+                    continue;
+
+                for (var e = _gridOffsets[cell]; e < _gridOffsets[cell + 1]; e++)
+                {
+                    var faceIndex = _gridEntries[e];
+                    if (stamps[faceIndex] == stamp)
+                        continue;
+
+                    stamps[faceIndex] = stamp;
+                    var pMin = _polygonMin[faceIndex];
+                    var pMax = _polygonMax[faceIndex];
+                    if (pMax.X < boxMin.X || pMin.X > boxMax.X
+                        || pMax.Y < boxMin.Y || pMin.Y > boxMax.Y
+                        || pMax.Z < boxMin.Z || pMin.Z > boxMax.Z)
+                        continue;
+
+                    if (IsBoxOutsideAnyPlane(pMin, pMax, planes))
+                        continue;
+
+                    var polygon = _polygons[faceIndex];
+                    if (IsPolygonInsideAllPlanes(polygon, planes))
+                        kept.Add(polygon);
+                    else
+                        toClip.Add(pool.Rent(polygon));
+                }
+            }
+        }
+
+        /// <summary>Conservative box-vs-halfspace test using the box corner nearest to each plane.</summary>
+        private static bool IsBoxOutsideAnyPlane(Vector3 min, Vector3 max, List<(Vector3 Normal, float Offset)> planes)
+        {
+            foreach (var (n, offset) in planes)
+            {
+                var nearest = new Vector3(n.X > 0 ? min.X : max.X,
+                                          n.Y > 0 ? min.Y : max.Y,
+                                          n.Z > 0 ? min.Z : max.Z);
+                if (Vector3.Dot(n, nearest) - offset > ClipEpsilon)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsPolygonInsideAllPlanes(Polygon polygon, List<(Vector3 Normal, float Offset)> planes)
+        {
+            foreach (var (n, offset) in planes)
+            {
+                foreach (var vertex in polygon.Vertices)
+                {
+                    if (Vector3.Dot(n, vertex.Position) - offset > ClipEpsilon)
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void ToGrid(Vector3 position, out int x, out int y, out int z)
+        {
+            var local = position - Min;
+            x = Math.Clamp((int)(local.X / _cellSize.X), 0, _gridResolution - 1);
+            y = Math.Clamp((int)(local.Y / _cellSize.Y), 0, _gridResolution - 1);
+            z = Math.Clamp((int)(local.Z / _cellSize.Z), 0, _gridResolution - 1);
+        }
+
+        private readonly Polygon[] _polygons;
+        private readonly Vector3[] _polygonMin;
+        private readonly Vector3[] _polygonMax;
+        private readonly int _gridResolution;
+        private readonly Vector3 _cellSize;
+        private readonly int[] _gridOffsets;
+        private readonly int[] _gridEntries;
+    }
+
+    /// <summary>Recycles polygon objects across cells - cloning the whole mesh per cell otherwise dominates GC.</summary>
+    private sealed class PolygonPool
+    {
+        public Polygon Rent()
+        {
+            if (_free.Count == 0)
+                return new Polygon();
+
+            var polygon = _free[^1];
+            _free.RemoveAt(_free.Count - 1);
+            polygon.Vertices.Clear();
+            polygon.IsCap = false;
+            polygon.PlaneIndex = -1;
+            return polygon;
+        }
+
+        public Polygon Rent(Polygon template)
+        {
+            var polygon = Rent();
+            polygon.IsCap = template.IsCap;
+            polygon.PlaneIndex = template.PlaneIndex;
+            polygon.Vertices.AddRange(template.Vertices);
+            return polygon;
+        }
+
+        public void Return(Polygon polygon) => _free.Add(polygon);
+
+        public void ReturnAll(List<Polygon> polygons)
+        {
+            _free.AddRange(polygons);
+            polygons.Clear();
+        }
+
+        private readonly List<Polygon> _free = [];
     }
 
     private readonly record struct Vertex(Vector3 Position, Vector3 Normal)
@@ -375,35 +1194,23 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
     {
         public readonly List<Vertex> Vertices = [];
         public bool IsCap;
-
-        public Polygon Clone()
-        {
-            var clone = new Polygon { IsCap = IsCap };
-            clone.Vertices.AddRange(Vertices);
-            return clone;
-        }
+        public int PlaneIndex = -1; // for caps: which cell plane created them; -1 for surface and box faces
     }
 
     private const float ClipEpsilon = 1e-6f;
+    private const float OnPlaneEpsilon = 1e-5f;
+    private const float WeldGridScale = 100000f; // bucket size 1e-5 - neighbours cover a full WeldEpsilon around a point
+    private const float WeldEpsilonSq = 1e-5f * 1e-5f;
+    private const float DegenerateEpsilonSq = 1e-7f * 1e-7f;
     private const float ChainEpsilonSq = 1e-4f * 1e-4f;
+    private const float MergeEpsilonSq = 1e-3f * 1e-3f;
+    private const float HullEpsilonSq = 1e-3f * 1e-3f;
 
     public bool TryGetProgress(out float progress) => _asyncComputation.TryGetUiProgress(out progress);
 
     private readonly MeshGeometry _output = new();
     private readonly AsyncComputation<MeshGeometry> _asyncComputation = new();
     private readonly List<Vector3> _seeds = [];
-    private readonly List<Polygon> _sourcePolygons = [];
-    private readonly List<Vertex> _clipScratch = [];
-    private readonly List<(Vertex From, Vertex To)> _cutSegments = [];
-    private readonly Dictionary<(int, int, int), int> _cellPointLookup = [];
-    private bool[] _segmentUsed = [];
-    private readonly List<Vector3> _outPositions = [];
-    private readonly List<Vector3> _outNormals = [];
-    private readonly List<int> _outFaceOffsets = [];
-    private readonly List<int> _outCorners = [];
-    private readonly List<bool> _outFaceIsCap = [];
-    private Vertex _pendingEntry;
-    private bool _hasPendingEntry;
 
     [Input(Guid = "31c7e9d4-85f2-4a60-b1c8-6d0a5e3f9b27")]
     public readonly InputSlot<MeshGeometry> Geometry = new();
@@ -413,4 +1220,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
     [Input(Guid = "5e0d8b36-a2c7-4f91-b840-97c3e6d1a528")]
     public readonly InputSlot<bool> Async = new();
+
+    [Input(Guid = "7c4e1b90-52d8-4a36-9f1e-b8d0a6c3e574")]
+    public readonly InputSlot<bool> FillInterior = new();
 }

@@ -13,6 +13,10 @@
     {
       "Id": "84a2f6c0-19db-4e75-93a4-c7e1b8d25f06"/*Points*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "7c4e1b90-52d8-4a36-9f1e-b8d0a6c3e574"/*FillInterior*/,
+      "DefaultValue": true
     }
   ],
   "Children": [],

@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "5f2a7c19-83d4-4e6b-a0c8-b7e1d9f3a256"/*ColorFromAttribute*/,
+  "Id": "5f2a7c19-83d4-4e6b-a0c8-b7e1d9f3a256"/*ColorFacesFromAttribute*/,
   "Inputs": [
     {
       "Id": "9d3b6e58-1c47-4fa2-b8e0-73a5c9d2f614"/*Geometry*/,
@@ -11,12 +11,8 @@
       "DefaultValue": null
     },
     {
-      "Id": "4b7f1d83-a952-4c60-9e2d-c1a8f6b5e037"/*Source*/,
-      "DefaultValue": 1
-    },
-    {
-      "Id": "a6c48e21-3d9f-4b75-8f0a-2e7d1c9b5348"/*AttributeName*/,
-      "DefaultValue": "IsCut"
+      "Id": "a6c48e21-3d9f-4b75-8f0a-2e7d1c9b5348"/*Attribute*/,
+      "DefaultValue": "Part Seed Index"
     },
     {
       "Id": "17e0d5a9-b4c2-4f83-96b7-d3f8a1e6c452"/*Wrap*/,

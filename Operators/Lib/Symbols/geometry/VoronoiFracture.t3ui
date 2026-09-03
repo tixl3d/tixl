@@ -1,7 +1,9 @@
 {
   "FormatVersion": 3,
   "Id": "70d8f2b5-3a41-4c96-8e2d-b09c6f5e1a73"/*VoronoiFracture*/,
-  "Description": "Fractures a MeshGeometry into Voronoi cells around seed points.\n\nEach cell becomes one part (pivot at its seed), built by clipping the mesh against the bisector planes between seeds and capping the cuts. Surface corners keep their interpolated normals; cap faces are flat and carry a Selection attribute of 1 for downstream styling. Use [ScatterPointsInVolume] to generate seeds.\n\nAKA: shatter, break, cells, destruction",
+  "Description": "Fractures a MeshGeometry into Voronoi cells around seed points.\n\nEach cell becomes one part (pivot at its seed), built by clipping the mesh against the bisector planes between seeds and capping the cuts. Surface corners keep their interpolated normals; cap faces are flat and carry a Selection attribute of 1 for downstream styling. Use [ScatterPointsInVolume] to generate seeds.
+
+FillInterior treats the mesh as a closed solid: cut faces that run through the inside without touching the surface (and fully interior fragments) are filled in. Disable it for open or non-manifold meshes where the inside test misfires.\n\nAKA: shatter, break, cells, destruction",
   "InputUis": [
     {
       "InputId": "31c7e9d4-85f2-4a60-b1c8-6d0a5e3f9b27"/*Geometry*/,
@@ -24,6 +26,13 @@
       "Position": {
         "X": 0.0,
         "Y": 45.0
+      }
+    },
+    {
+      "InputId": "7c4e1b90-52d8-4a36-9f1e-b8d0a6c3e574"/*FillInterior*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
       }
     }
   ],

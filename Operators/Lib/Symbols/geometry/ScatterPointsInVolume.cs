@@ -1,3 +1,5 @@
+using Lib.Utils;
+
 namespace Lib.geometry;
 
 /// <summary>
@@ -34,15 +36,20 @@ internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>, I
 
         var boundsMin = center - size * 0.5f;
         var boundsMax = center + size * 0.5f;
+        MeshInsideTester? insideTester = null;
         if (geometry != null && geometry.Positions.Length > 0)
         {
-            boundsMin = new Vector3(float.MaxValue);
-            boundsMax = new Vector3(float.MinValue);
-            foreach (var p in geometry.Positions)
+            // Rebuild the ray grid only when the mesh actually changed
+            if (_insideTester == null || _insideTesterGeometry != geometry || _insideTesterVersion != geometry.Version)
             {
-                boundsMin = Vector3.Min(boundsMin, p);
-                boundsMax = Vector3.Max(boundsMax, p);
+                _insideTester = new MeshInsideTester(geometry);
+                _insideTesterGeometry = geometry;
+                _insideTesterVersion = geometry.Version;
             }
+
+            insideTester = _insideTester;
+            boundsMin = insideTester.Min;
+            boundsMax = insideTester.Max;
         }
 
         var extent = boundsMax - boundsMin;
@@ -58,7 +65,7 @@ internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>, I
                                                    NextFloat(ref rngState) * extent.Y,
                                                    NextFloat(ref rngState) * extent.Z);
 
-            if (geometry != null && !IsInsideMesh(geometry, position))
+            if (insideTester != null && !insideTester.IsInside(position))
                 continue;
 
             if (density != null)
@@ -91,65 +98,6 @@ internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>, I
             _pointList.SetLength(count);
     }
 
-    /// <summary>Ray-parity test along +X against the fan-triangulated faces.</summary>
-    private static bool IsInsideMesh(MeshGeometry geometry, Vector3 position)
-    {
-        var positions = geometry.Positions;
-        var offsets = geometry.FaceCornerOffsets;
-        var corners = geometry.CornerPointIndices;
-        var crossings = 0;
-
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
-        {
-            var start = offsets[faceIndex];
-            var end = offsets[faceIndex + 1];
-            for (var c = start + 2; c < end; c++)
-            {
-                if (RayIntersectsTriangle(position,
-                                          positions[corners[start]],
-                                          positions[corners[c - 1]],
-                                          positions[corners[c]]))
-                {
-                    crossings++;
-                }
-            }
-        }
-
-        return (crossings & 1) == 1;
-    }
-
-    /// <summary>Möller-Trumbore for a ray along +X.</summary>
-    private static bool RayIntersectsTriangle(Vector3 origin, Vector3 a, Vector3 b, Vector3 c)
-    {
-        var edge1 = b - a;
-        var edge2 = c - a;
-
-        // rayDir = (1,0,0): cross(rayDir, edge2) = (0, -edge2.Z, edge2.Y)
-        var px = 0f;
-        var py = -edge2.Z;
-        var pz = edge2.Y;
-        var det = edge1.X * px + edge1.Y * py + edge1.Z * pz;
-        if (MathF.Abs(det) < 1e-10f)
-            return false;
-
-        var invDet = 1f / det;
-        var t = origin - a;
-        var u = (t.X * px + t.Y * py + t.Z * pz) * invDet;
-        if (u < 0f || u > 1f)
-            return false;
-
-        // q = cross(t, edge1)
-        var qx = t.Y * edge1.Z - t.Z * edge1.Y;
-        var qy = t.Z * edge1.X - t.X * edge1.Z;
-        var qz = t.X * edge1.Y - t.Y * edge1.X;
-        var v = qx * invDet; // dot(rayDir, q) with rayDir = (1,0,0)
-        if (v < 0f || u + v > 1f)
-            return false;
-
-        var distance = (edge2.X * qx + edge2.Y * qy + edge2.Z * qz) * invDet;
-        return distance > 1e-8f;
-    }
-
     private static float NextFloat(ref uint state)
     {
         // PCG-style output permutation on an LCG state
@@ -160,6 +108,9 @@ internal sealed class ScatterPointsInVolume : Instance<ScatterPointsInVolume>, I
     }
 
     private readonly StructuredList<Point> _pointList = new(16);
+    private MeshInsideTester? _insideTester;
+    private MeshGeometry? _insideTesterGeometry;
+    private int _insideTesterVersion;
 
     [Input(Guid = "e17d4a92-6b58-4c03-a9f1-84c5d2e7b360")]
     public readonly InputSlot<int> Count = new();

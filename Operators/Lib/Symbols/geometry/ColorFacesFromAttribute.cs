@@ -5,18 +5,19 @@ using T3.Core.Utils;
 namespace Lib.geometry;
 
 /// <summary>
-/// Colors faces from an integer-like attribute by picking from a color list: the
-/// part index or seed index (one color per fracture chunk), or a named face
-/// attribute. Only selected faces are touched by default, so cut faces of a
-/// fracture can be tinted per chunk while the original surface keeps its color.
+/// Colors faces by picking from a color list with an integer-like attribute as
+/// index: the part index or seed index (one color per fracture chunk), or any face
+/// attribute of the incoming geometry - the Attribute dropdown lists what's there.
+/// Only selected faces are touched by default, so the cut faces of a fracture can be
+/// tinted per chunk while the original surface keeps its color.
 /// </summary>
 [Guid("5f2a7c19-83d4-4e6b-a0c8-b7e1d9f3a256")]
-internal sealed class ColorFromAttribute : Instance<ColorFromAttribute>
+internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute>, ICustomDropdownHolder
 {
     [Output(Guid = "c81e4b70-2f95-4d3a-96b1-e0d7a5c2f849")]
     public readonly Slot<MeshGeometry> Result = new();
 
-    public ColorFromAttribute()
+    public ColorFacesFromAttribute()
     {
         Result.UpdateAction = Update;
     }
@@ -25,11 +26,11 @@ internal sealed class ColorFromAttribute : Instance<ColorFromAttribute>
     {
         var source = Geometry.GetValue(context);
         var colors = Colors.GetValue(context);
-        var attributeSource = (Sources)Source.GetValue(context).Clamp(0, 2);
-        var attributeName = AttributeName.GetValue(context);
+        var attributeName = Attribute.GetValue(context);
         var wrap = (WrapModes)Wrap.GetValue(context).Clamp(0, 1);
         var onlySelected = OnlySelected.GetValue(context);
 
+        _lastSource = source;
         if (source == null || source.FaceCount == 0 || colors == null || colors.Count == 0)
         {
             Result.Value = source;
@@ -50,11 +51,14 @@ internal sealed class ColorFromAttribute : Instance<ColorFromAttribute>
         if (onlySelected)
             source.Attributes.TryGet(GeometryAttributeNames.Selection, AttributeDomain.Face, out selection);
 
+        var usePartIndex = attributeName == PartIndexOption;
+        var usePartSeed = attributeName == PartSeedIndexOption;
         GeometryAttribute<float>? faceValues = null;
-        if (attributeSource == Sources.FaceAttribute)
+        if (!usePartIndex && !usePartSeed)
             source.Attributes.TryGet(attributeName, AttributeDomain.Face, out faceValues);
 
-        BuildFaceToPart(source);
+        if (usePartIndex || usePartSeed)
+            BuildFaceToPart(source);
 
         for (var faceIndex = 0; faceIndex < source.FaceCount; faceIndex++)
         {
@@ -62,18 +66,17 @@ internal sealed class ColorFromAttribute : Instance<ColorFromAttribute>
                 continue;
 
             int index;
-            switch (attributeSource)
+            if (usePartIndex)
+                index = _faceToPart[faceIndex];
+            else if (usePartSeed)
             {
-                case Sources.PartIndex:
-                    index = _faceToPart[faceIndex];
-                    break;
-                case Sources.PartSeedIndex:
-                    index = _faceToPart[faceIndex] >= 0 ? source.Parts[_faceToPart[faceIndex]].SeedIndex : -1;
-                    break;
-                default:
-                    index = faceValues != null ? (int)MathF.Round(faceValues.Values[faceIndex]) : -1;
-                    break;
+                // Geometry without parts (e.g. the unfractured input while an async
+                // fracture is still computing) counts as one implicit part with seed 0
+                var partIndex = _faceToPart[faceIndex];
+                index = source.Parts.Length == 0 ? 0 : partIndex >= 0 ? source.Parts[partIndex].SeedIndex : -1;
             }
+            else
+                index = faceValues != null ? (int)MathF.Round(faceValues.Values[faceIndex]) : -1;
 
             if (index < 0)
                 continue;
@@ -129,12 +132,31 @@ internal sealed class ColorFromAttribute : Instance<ColorFromAttribute>
         }
     }
 
-    private enum Sources
+    #region ICustomDropdownHolder - lists the face attributes of the last evaluated input
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => Attribute.Value;
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
     {
-        PartIndex,
-        PartSeedIndex,
-        FaceAttribute,
+        yield return PartIndexOption;
+        yield return PartSeedIndexOption;
+        if (_lastSource == null)
+            yield break;
+
+        foreach (var attribute in _lastSource.Attributes)
+        {
+            if (attribute.Domain == AttributeDomain.Face)
+                yield return attribute.Name;
+        }
     }
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
+    {
+        if (inputId != Attribute.Input.InputDefinition.Id || selected == null)
+            return;
+
+        Attribute.SetTypedInputValue(selected);
+    }
+    #endregion
 
     private enum WrapModes
     {
@@ -142,9 +164,13 @@ internal sealed class ColorFromAttribute : Instance<ColorFromAttribute>
         Clamp,
     }
 
+    private const string PartIndexOption = "Part Index";
+    private const string PartSeedIndexOption = "Part Seed Index";
+
     private readonly MeshGeometry _output = new();
     private readonly List<GeometryAttribute> _shared = [];
     private int[] _faceToPart = [];
+    private MeshGeometry? _lastSource;
 
     [Input(Guid = "9d3b6e58-1c47-4fa2-b8e0-73a5c9d2f614")]
     public readonly InputSlot<MeshGeometry> Geometry = new();
@@ -152,11 +178,8 @@ internal sealed class ColorFromAttribute : Instance<ColorFromAttribute>
     [Input(Guid = "e2a95c07-6b38-4d1f-a4c6-58f0b7e3d921")]
     public readonly InputSlot<List<Vector4>> Colors = new();
 
-    [Input(Guid = "4b7f1d83-a952-4c60-9e2d-c1a8f6b5e037", MappedType = typeof(Sources))]
-    public readonly InputSlot<int> Source = new();
-
     [Input(Guid = "a6c48e21-3d9f-4b75-8f0a-2e7d1c9b5348")]
-    public readonly InputSlot<string> AttributeName = new();
+    public readonly InputSlot<string> Attribute = new();
 
     [Input(Guid = "17e0d5a9-b4c2-4f83-96b7-d3f8a1e6c452", MappedType = typeof(WrapModes))]
     public readonly InputSlot<int> Wrap = new();

@@ -292,6 +292,30 @@ internal static class DebugServer
                 HandlePin(request, context);
                 break;
 
+            case "setBypass":
+            {
+                if (!TryResolveCompositionSymbol(request, context, out var compositionSymbol))
+                    break;
+
+                if (!Guid.TryParse(request["childId"]?.Value<string>(), out var bypassChildId)
+                    || !compositionSymbol.Children.TryGetValue(bypassChildId, out var bypassChild))
+                {
+                    context.SendError("NOT_FOUND", "Unknown or missing childId");
+                    break;
+                }
+
+                if (!bypassChild.IsBypassable())
+                {
+                    context.SendError("NOT_BYPASSABLE", $"[{bypassChild.Symbol.Name}] can't be bypassed (first input and output must share a bypassable type)");
+                    break;
+                }
+
+                var bypassed = request["bypassed"]?.Value<bool>() ?? true;
+                UndoRedoStack.AddAndExecute(new ChangeInstanceBypassedCommand(bypassChild, bypassed));
+                context.SendOk(new JObject { ["bypassed"] = bypassChild.IsBypassed });
+                break;
+            }
+
             case "resetView":
             {
                 if (!OutputWindow.TryGetPrimaryOutputWindow(out var window))
@@ -820,7 +844,9 @@ internal static class DebugServer
             return;
         }
 
+        // Output by guid, by name, or the first one
         ISlot? slot = null;
+        var outputName = request["outputName"]?.Value<string>();
         if (Guid.TryParse(request["outputId"]?.Value<string>(), out var outputId))
         {
             foreach (var candidate in instance.Outputs)
@@ -830,6 +856,25 @@ internal static class DebugServer
                     slot = candidate;
                     break;
                 }
+            }
+        }
+        else if (!string.IsNullOrEmpty(outputName))
+        {
+            foreach (var definition in instance.Symbol.OutputDefinitions)
+            {
+                if (!string.Equals(definition.Name, outputName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                foreach (var candidate in instance.Outputs)
+                {
+                    if (candidate.Id == definition.Id)
+                    {
+                        slot = candidate;
+                        break;
+                    }
+                }
+
+                break;
             }
         }
         else if (instance.Outputs.Count > 0)
@@ -875,10 +920,110 @@ internal static class DebugServer
                                                  Slot<Vector2> s => new JArray(s.Value.X, s.Value.Y),
                                                  Slot<Vector3> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z),
                                                  Slot<Vector4> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z, s.Value.W),
+                                                 Slot<T3.Core.DataTypes.MeshGeometry> s => DescribeGeometry(s.Value),
                                                  _               => JValue.CreateNull(),
                                              },
                          };
         context.SendOk(result);
+    }
+
+    /// <summary>
+    /// Numeric summary of a MeshGeometry so agents can validate geometry ops without
+    /// screenshots: counts, bounds, watertightness and signed volume (positive for
+    /// outward-facing closed solids; a fracture's parts must sum to the input volume).
+    /// </summary>
+    private static JToken DescribeGeometry(T3.Core.DataTypes.MeshGeometry? geometry)
+    {
+        if (geometry == null)
+            return JValue.CreateNull();
+
+        var positions = geometry.Positions;
+        var offsets = geometry.FaceCornerOffsets;
+        var corners = geometry.CornerPointIndices;
+
+        var min = new Vector3(float.MaxValue);
+        var max = new Vector3(float.MinValue);
+        foreach (var p in positions)
+        {
+            min = Vector3.Min(min, p);
+            max = Vector3.Max(max, p);
+        }
+
+        var edgeUse = new Dictionary<(int, int), int>();
+        var edgeOnCut = new Dictionary<(int, int), bool>();
+        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsCut, T3.Core.DataTypes.AttributeDomain.Face, out var isCut);
+        var volume = 0.0;
+        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
+        {
+            var start = offsets[faceIndex];
+            var end = offsets[faceIndex + 1];
+            var faceIsCut = isCut != null && isCut.Values[faceIndex] > 0.5f;
+            for (var c = start; c < end; c++)
+            {
+                var next = c + 1 == end ? start : c + 1;
+                var a = corners[c];
+                var b = corners[next];
+                var key = a < b ? (a, b) : (b, a);
+                edgeUse[key] = edgeUse.GetValueOrDefault(key) + 1;
+                edgeOnCut[key] = faceIsCut;
+            }
+
+            // Divergence theorem over the fan triangles
+            var p0 = positions[corners[start]];
+            for (var c = start + 2; c < end; c++)
+            {
+                var p1 = positions[corners[c - 1]];
+                var p2 = positions[corners[c]];
+                volume += Vector3.Dot(p0, Vector3.Cross(p1, p2)) / 6.0;
+            }
+        }
+
+        var boundaryEdges = 0;
+        var boundaryEdgesOnCuts = 0;
+        var nonManifoldEdges = 0;
+        var boundarySamples = new JArray();
+        foreach (var (key, use) in edgeUse)
+        {
+            if (use == 1)
+            {
+                boundaryEdges++;
+                if (edgeOnCut[key])
+                    boundaryEdgesOnCuts++;
+
+                if (boundarySamples.Count < 6)
+                {
+                    var a = positions[key.Item1];
+                    var b = positions[key.Item2];
+                    boundarySamples.Add(new JArray(a.X, a.Y, a.Z, b.X, b.Y, b.Z, edgeOnCut[key] ? "cut" : "surface"));
+                }
+            }
+            else if (use > 2)
+            {
+                nonManifoldEdges++;
+            }
+        }
+
+        var attributes = new JArray();
+        foreach (var attribute in geometry.Attributes)
+        {
+            attributes.Add($"{attribute.Name}@{attribute.Domain}");
+        }
+
+        return new JObject
+                   {
+                       ["pointCount"] = geometry.PointCount,
+                       ["faceCount"] = geometry.FaceCount,
+                       ["cornerCount"] = geometry.CornerCount,
+                       ["partCount"] = geometry.Parts.Length,
+                       ["boundsMin"] = new JArray(min.X, min.Y, min.Z),
+                       ["boundsMax"] = new JArray(max.X, max.Y, max.Z),
+                       ["boundaryEdges"] = boundaryEdges,
+                       ["boundaryEdgesOnCuts"] = boundaryEdgesOnCuts,
+                       ["boundaryEdgeSamples"] = boundarySamples,
+                       ["nonManifoldEdges"] = nonManifoldEdges,
+                       ["volume"] = volume,
+                       ["attributes"] = attributes,
+                   };
     }
 
     private static void HandleNewProject(JObject request, RequestContext context)

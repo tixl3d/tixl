@@ -114,7 +114,7 @@ A selection is a named `float` attribute (0..1) on a domain — precedent:
 - Selection flows *with* the geometry through one connection; no index-list type to
   keep in sync with topology changes.
 - Soft selection (falloff, volume gradients) is free; ops treat the value as a weight.
-- Modify ops (`ExtrudeFaces`, `TransformGeometry`, `ColorFromAttribute`, ...) take an
+- Modify ops (`ExtrudeFaces`, `TransformGeometry`, `ColorFacesFromAttribute`, ...) take an
   optional selection (default: everything). Ops that create elements set the selection
   on the new elements (e.g. extrude selects the new cap faces) so chains compose.
 - Deterministic randomness: random selection hashes
@@ -431,7 +431,7 @@ and the full milestone demo through `DrawMeshChunksAtPoints`.
     in **one op** (bevel needs boundary adjacency that separate Fill/Extrude ops would
     lose; depth 0 = flat fill). One part per input contour group (per glyph).
   - `CombineGeometry` (concatenates parts; naming matches
-    `CombineMeshes`/`CombineSDF`), `SetGeometryAttribute`, `ColorFromAttribute`
+    `CombineMeshes`/`CombineSDF`), `SetGeometryAttribute`, `ColorFacesFromAttribute`
     (attribute -> palette/gradient; works on `CurveGeometry` and `MeshGeometry`,
     e.g. `characterIndex % palette.Count`, contour height -> gradient),
     `SelectGeometry` (see above).
@@ -492,7 +492,7 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   faces of each fracture chunk from a `ColorList`. Landed: face-domain `IsCut`
   on fracture caps (`Selection` mirrors it), `GeometryPart.Seed` renamed
   `SeedIndex`, face→corner and part→corner **Color promotion** in
-  `GeometryToMeshBuffers`, and `ColorFromAttribute` (index source: part index /
+  `GeometryToMeshBuffers`, and `ColorFacesFromAttribute` (index source: part index /
   part seed index / named face attribute; palette wrap repeat or clamp;
   OnlySelected masks by face Selection; preserves upstream corner colors).
   Correction to an earlier note: `mesh-Draw.hlsl` already multiplies
@@ -504,6 +504,51 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   Open architectural point: per-part data beyond `GeometryPart`'s fixed record
   should go into part-domain `GeometryAttributes` (length = Parts.Length) — the
   promotion path in the compile step already handles that domain.
+- **Follow-ups on the stress test (2026-09)**: op renamed `ColorFacesFromAttribute`
+  (it writes per-face colors); its `Attribute` input is an `ICustomDropdownHolder`
+  listing "Part Index", "Part Seed Index" and every face attribute of the last
+  evaluated input (`Usage: CustomDropdown` in the `.t3ui`). **Fracture speedups**:
+  cells built in parallel (`Parallel.For` with a per-thread `CellBuilder` holding
+  all scratch), exact plane culling (other seeds sorted by distance; stop once the
+  bisector distance exceeds the cell's bounding radius), pooled polygons. Sync
+  timings on the beveled cube (Debug build): 50 seeds 27 ms, 200 → 50 ms, 800 →
+  117 ms, 2000 → 217 ms — near-linear where it was quadratic.
+  **Round two on a real scan (ape.obj, 51k faces, seeds inside the volume)**: the
+  first parallel version still took 37 s for 1600 seeds. Two fixes: (1) the cell
+  is computed hull-first — the mesh bounding box (6 quads) is clipped by the
+  culled planes, giving the effective plane list and a tight cell AABB; source
+  polygons then come from a uniform grid over that AABB, skipping empty grid
+  cells and grid cells/polygons outside any plane; fully-inside polygons are
+  kept by reference, only straddling ones are cloned and clipped. Per the phase
+  profile the fracture itself then costs ~70 ms at 400 seeds. (2) The dominant
+  cost turned out to be `ScatterPointsInVolume`'s inside test — a ray-parity
+  test against *all* triangles per candidate (~50 attempts per seed): now a 2D
+  YZ grid over the fan-triangulated mesh, rebuilt only when `MeshGeometry.Version`
+  changes. Whole-frame result (scatter + fracture + colorize + explode + upload,
+  Debug): 60 seeds 200 ms, 400 → 356 ms, 1600 → 218 ms, 5000 → 517 ms; was 1.4 s /
+  10 s / 37 s. Lesson recorded: profile the *chain* before optimizing one op.
+  **Interior fragments** (maintainer spotted them missing): a cell no surface
+  crosses produced no cut segments and therefore no caps - fully interior
+  fragments silently vanished. Now the hull from pass 1 (bounding box clipped
+  by the bisectors) is kept; if pass 2 yields no mesh polygons and the seed is
+  inside the solid (`MeshInsideTester`, the YZ-grid ray-parity test shared with
+  `ScatterPointsInVolume` via `Lib/Utils`), the hull is emitted as the fragment
+  with every face marked IsCut. Seeds in empty space still yield nothing.
+  Generalized right after (maintainer: "chunks outside the point cluster don't
+  work"): caps were only ever chained from *surface* cut edges, so a plane that
+  runs through solid interior without touching the surface (typical for the
+  planes between seeds of a small cluster inside a big mesh) got no cap, and
+  every later plane that would have chained along it broke too. Now every cap
+  polygon carries its plane index; for a plane whose clip produced no cap, the
+  corresponding hull face is used as the cap if its centroid is inside the
+  solid. Fully interior fragments are just the case where that applies to all
+  faces. Exposed as `FillInterior` (default on) because it assumes a closed
+  solid - open or non-manifold scans can misfire on the inside test.
+  Bug found on the way: `ColorFacesFromAttribute` indexed `Parts[0]` on part-less geometry (the
+  unfractured input that flows while an async fracture computes) and the
+  unhandled exception **killed the editor** — fixed (implicit part), but note the
+  general fragility: an exception in any op's Update terminates the process; a
+  try/catch-with-status at the slot evaluation level would be worth its cost.
 - `CenterGeometry` (maintainer request): bounding-box centering with a
   normalized pivot — (0,-0.5,0) puts the bottom center on the origin; part
   pivots are translated along. For OBJ imports that aren't centered.
