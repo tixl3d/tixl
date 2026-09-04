@@ -27,7 +27,8 @@ internal static class SetupActions
 {
     /// <summary>
     /// Whether the two kinds form a routing connection at all — the drop matrix, direction-agnostic.
-    /// Connectable pairs: surface↔output, slice↔output, source↔output, slice↔surface, source↔surface.
+    /// Connectable pairs: surface↔output, slice↔output, source↔output, slice↔surface, source↔surface,
+    /// slice↔patch, source↔patch.
     /// </summary>
     internal static bool CanConnect(SetupEntitySelection.EntityKind a, SetupEntitySelection.EntityKind b)
     {
@@ -42,6 +43,8 @@ internal static class SetupActions
                                                                       or SetupEntitySelection.EntityKind.ContentSource,
                        SetupEntitySelection.EntityKind.Surface => a is SetupEntitySelection.EntityKind.Slice
                                                                        or SetupEntitySelection.EntityKind.ContentSource,
+                       SetupEntitySelection.EntityKind.Patch => a is SetupEntitySelection.EntityKind.Slice
+                                                                     or SetupEntitySelection.EntityKind.ContentSource,
                        _ => false,
                    };
     }
@@ -54,6 +57,7 @@ internal static class SetupActions
                        SetupEntitySelection.EntityKind.ContentSource => 0,
                        SetupEntitySelection.EntityKind.Slice => 1,
                        SetupEntitySelection.EntityKind.Surface => 2,
+                       SetupEntitySelection.EntityKind.Patch => 3,
                        SetupEntitySelection.EntityKind.Output => 3,
                        _ => -1,
                    };
@@ -111,24 +115,37 @@ internal static class SetupActions
             return;
         }
 
-        // Dropping a source or slice straight onto an output shows it full-frame (the direct path, no surface
-        // or corner-pin) — an output names a slice through OutputDefinition.SliceId.
-        if (targetKind == SetupEntitySelection.EntityKind.Output
-            && dragKind is SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.ContentSource)
+        // Dropping a source or slice straight onto an output shows it full-frame: the direct pipe, as a new
+        // full-canvas patch (no surface, no corner pin). Dropped onto a patch, it re-feeds that patch.
+        if (dragKind is SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.ContentSource
+            && targetKind is SetupEntitySelection.EntityKind.Output or SetupEntitySelection.EntityKind.Patch)
         {
-            var output = setup.FindOutput(targetId);
-            if (output == null)
-                return;
-
+            var sliceId = Guid.Empty;
             if (dragKind == SetupEntitySelection.EntityKind.Slice && setup.FindSlice(dragId) != null)
             {
-                output.SliceId = dragId;
+                sliceId = dragId;
             }
             else if (dragKind == SetupEntitySelection.EntityKind.ContentSource)
             {
                 var source = setup.FindSourceByChildId(dragId);
                 if (source != null)
-                    output.SliceId = EnsureSlice(setup, source).Id;
+                    sliceId = EnsureSlice(setup, source).Id;
+            }
+
+            if (sliceId == Guid.Empty)
+                return;
+
+            if (targetKind == SetupEntitySelection.EntityKind.Patch)
+            {
+                var patch = setup.FindPatch(targetId, out _);
+                if (patch != null)
+                    patch.SliceId = sliceId;
+            }
+            else
+            {
+                var output = setup.FindOutput(targetId);
+                if (output != null)
+                    AddPatchInternal(output, sliceId);
             }
 
             return;
@@ -195,11 +212,59 @@ internal static class SetupActions
 
         foreach (var output in setup.Outputs)
         {
-            if (output.SliceId == sliceId)
-                output.SliceId = Guid.Empty;
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId == sliceId)
+                    patch.SliceId = Guid.Empty; // the patch keeps its place on the canvas, just unfed
+            }
         }
 
         setup.Slices.RemoveAll(s => s.Id == sliceId);
+    }
+
+    /// <summary>Whether any patch on the output shows this slice.</summary>
+    internal static bool OutputShowsSlice(OutputDefinition output, Guid sliceId)
+    {
+        if (sliceId == Guid.Empty)
+            return false;
+
+        foreach (var patch in output.Patches)
+        {
+            if (patch.SliceId == sliceId)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Whether any patch on the output shows a slice of this source.</summary>
+    internal static bool OutputShowsSource(Setup setup, OutputDefinition output, Guid sourceId)
+    {
+        foreach (var patch in output.Patches)
+        {
+            if (IsSliceOf(setup, patch.SliceId, sourceId))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Adds an unfed full-canvas patch to an output — the direct pipe waiting for content.</summary>
+    internal static void AddPatch(SetupEntitySelection selection, Setup setup, OutputDefinition output)
+    {
+        RunUndoable("Add patch", setup, () =>
+                                        {
+                                            var patch = AddPatchInternal(output, Guid.Empty);
+                                            selection.Select(SetupEntitySelection.EntityKind.Patch, patch.Id);
+                                        });
+    }
+
+    private static OutputDefinition.Patch AddPatchInternal(OutputDefinition output, Guid sliceId)
+    {
+        // Left unnamed: the label is derived from its position (see PatchLabel).
+        var patch = new OutputDefinition.Patch { SliceId = sliceId, Quad = output.FullCanvasQuad() };
+        output.Patches.Add(patch);
+        return patch;
     }
 
     /// <summary>
@@ -243,6 +308,27 @@ internal static class SetupActions
 
             case SetupEntitySelection.EntityKind.Output:
             {
+                var output = setup.FindOutput(id);
+                if (output == null)
+                    return false;
+
+                // A slice or source binds through the direct pipe: a full-canvas patch showing it.
+                if (sourceKind == SetupEntitySelection.EntityKind.Slice)
+                {
+                    isBound = OutputShowsSlice(output, sourceId);
+                    return setup.FindSlice(sourceId) != null;
+                }
+
+                if (sourceKind == SetupEntitySelection.EntityKind.ContentSource)
+                {
+                    var source = setup.FindSourceByChildId(sourceId);
+                    if (source == null)
+                        return false;
+
+                    isBound = OutputShowsSource(setup, output, source.Id);
+                    return true;
+                }
+
                 if (sourceKind != SetupEntitySelection.EntityKind.Surface)
                     return false;
 
@@ -256,6 +342,31 @@ internal static class SetupActions
 
                 isBound = surface.OutputMappings.Exists(m => m.OutputId == id);
                 return true;
+            }
+
+            case SetupEntitySelection.EntityKind.Patch:
+            {
+                var patch = setup.FindPatch(id, out _);
+                if (patch == null)
+                    return false;
+
+                if (sourceKind == SetupEntitySelection.EntityKind.Slice)
+                {
+                    isBound = patch.SliceId == sourceId;
+                    return setup.FindSlice(sourceId) != null;
+                }
+
+                if (sourceKind == SetupEntitySelection.EntityKind.ContentSource)
+                {
+                    var source = setup.FindSourceByChildId(sourceId);
+                    if (source == null)
+                        return false;
+
+                    isBound = IsSliceOf(setup, patch.SliceId, source.Id);
+                    return true;
+                }
+
+                return false;
             }
 
             default:
@@ -296,6 +407,59 @@ internal static class SetupActions
                     return;
 
                 surface.SliceId = EnsureSlice(setup, source).Id;
+            }
+        }
+        else if (kind == SetupEntitySelection.EntityKind.Patch)
+        {
+            var patch = setup.FindPatch(id, out _);
+            if (patch == null)
+                return;
+
+            if (isBound)
+            {
+                patch.SliceId = Guid.Empty;
+            }
+            else if (sourceKind == SetupEntitySelection.EntityKind.Slice)
+            {
+                patch.SliceId = sourceId;
+            }
+            else
+            {
+                var source = setup.FindSourceByChildId(sourceId);
+                if (source == null)
+                    return;
+
+                patch.SliceId = EnsureSlice(setup, source).Id;
+            }
+        }
+        else if (sourceKind is SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.ContentSource)
+        {
+            // Toggling content on an output: unbound adds a full-canvas patch; bound drops every patch showing it.
+            var output = setup.FindOutput(id);
+            if (output == null)
+                return;
+
+            var sliceId = sourceId;
+            var sourceOfChild = sourceKind == SetupEntitySelection.EntityKind.ContentSource ? setup.FindSourceByChildId(sourceId) : null;
+            if (sourceKind == SetupEntitySelection.EntityKind.ContentSource)
+            {
+                if (sourceOfChild == null)
+                    return;
+
+                sliceId = EnsureSlice(setup, sourceOfChild).Id;
+            }
+
+            if (!isBound)
+            {
+                AddPatchInternal(output, sliceId);
+            }
+            else if (sourceOfChild != null)
+            {
+                output.Patches.RemoveAll(p => IsSliceOf(setup, p.SliceId, sourceOfChild.Id));
+            }
+            else
+            {
+                output.Patches.RemoveAll(p => p.SliceId == sliceId);
             }
         }
         else
@@ -513,6 +677,14 @@ internal static class SetupActions
 
                 slice.Name = newName;
                 break;
+
+            case SetupEntitySelection.EntityKind.Patch:
+                var patch = setup.FindPatch(id, out _);
+                if (patch == null)
+                    return;
+
+                patch.Name = newName;
+                break;
         }
     }
 
@@ -523,7 +695,8 @@ internal static class SetupActions
                     or SetupEntitySelection.EntityKind.Slice
                     or SetupEntitySelection.EntityKind.Output
                     or SetupEntitySelection.EntityKind.ReferenceImage
-                    or SetupEntitySelection.EntityKind.Prop;
+                    or SetupEntitySelection.EntityKind.Prop
+                    or SetupEntitySelection.EntityKind.Patch;
     }
 
     internal static void DeleteEntity(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
@@ -563,6 +736,12 @@ internal static class SetupActions
             case SetupEntitySelection.EntityKind.Prop:
                 setup.Props.RemoveAll(p => p.Id == id);
                 break;
+
+            case SetupEntitySelection.EntityKind.Patch:
+                if (setup.FindPatch(id, out var owner) != null)
+                    owner!.Patches.RemoveAll(p => p.Id == id);
+
+                break;
         }
     }
 
@@ -573,7 +752,8 @@ internal static class SetupActions
                     or SetupEntitySelection.EntityKind.Slice
                     or SetupEntitySelection.EntityKind.Output
                     or SetupEntitySelection.EntityKind.ReferenceImage
-                    or SetupEntitySelection.EntityKind.Prop;
+                    or SetupEntitySelection.EntityKind.Prop
+                    or SetupEntitySelection.EntityKind.Patch;
     }
 
     /// <summary>A prop has no name to rename; a content source renames its op.</summary>
@@ -653,6 +833,23 @@ internal static class SetupActions
                 copy.Id = Guid.NewGuid();
                 setup.Props.Add(copy);
                 selection.Select(SetupEntitySelection.EntityKind.Prop, copy.Id);
+                break;
+            }
+
+            case SetupEntitySelection.EntityKind.Patch:
+            {
+                var patch = setup.FindPatch(id, out var owner);
+                var copy = patch == null ? null : CloneViaJson(patch.WriteToJson, OutputDefinition.Patch.ReadFromJson);
+                if (copy == null || owner == null)
+                    return;
+
+                // Same place on the canvas: the copy is meant to be re-fed or moved, not hidden under the original.
+                copy.Id = Guid.NewGuid();
+                if (!string.IsNullOrEmpty(copy.Name))
+                    copy.Name += " copy";
+
+                owner.Patches.Add(copy);
+                selection.Select(SetupEntitySelection.EntityKind.Patch, copy.Id);
                 break;
             }
         }
@@ -840,9 +1037,33 @@ internal static class SetupActions
             case SetupEntitySelection.EntityKind.Prop:
                 return FallbackIfEmpty(setup.FindProp(id)?.Kind, "Prop");
 
+            case SetupEntitySelection.EntityKind.Patch:
+            {
+                var patch = setup.FindPatch(id, out var owner);
+                return patch == null || owner == null ? "Patch" : PatchLabel(owner, patch);
+            }
+
             default:
                 return kind.ToString();
         }
+    }
+
+    /// <summary>A patch's display name: the typed name, else "Patch N" by its position on the output.</summary>
+    internal static string PatchLabel(OutputDefinition output, OutputDefinition.Patch patch)
+    {
+        if (!string.IsNullOrEmpty(patch.Name))
+            return patch.Name;
+
+        var ordinal = 1;
+        foreach (var other in output.Patches)
+        {
+            if (other.Id == patch.Id)
+                break;
+
+            ordinal++;
+        }
+
+        return $"Patch {ordinal}";
     }
 
     private static string FallbackIfEmpty(string? name, string fallback)

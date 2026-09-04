@@ -64,6 +64,9 @@ internal static class SetupParameterView
             case SetupEntitySelection.EntityKind.Prop:
                 DrawPropCard(setup, id);
                 break;
+            case SetupEntitySelection.EntityKind.Patch:
+                DrawPatchCard(setup, id);
+                break;
         }
 
         if (selection.Count > 1)
@@ -142,6 +145,7 @@ internal static class SetupParameterView
                                         SetupEntitySelection.EntityKind.ContentSource => (Icon.FileImage, "Content"),
                                         SetupEntitySelection.EntityKind.ReferenceImage => (Icon.FileImage, "Reference Image"),
                                         SetupEntitySelection.EntityKind.Prop => (Icon.Grid, "Prop"),
+                                        SetupEntitySelection.EntityKind.Patch => (Icon.Patch, "Patch"),
                                         _ => (Icon.Grid, kind.ToString()),
                                     };
 
@@ -385,6 +389,63 @@ internal static class SetupParameterView
         CommitFieldUndo(setup, "Resize slice", sizePxState);
     }
 
+    /// <summary>
+    /// A patch is a rectangle of output pixels fed by one slice. Axis-aligned patches edit as position + size;
+    /// a warped quad (surface-less keystone) is shown by its corners until the canvas editor lands.
+    /// </summary>
+    private static void DrawPatchCard(Setup setup, Guid id)
+    {
+        var patch = setup.FindPatch(id, out var output);
+        if (patch == null || output == null)
+            return;
+
+        var slice = setup.FindSlice(patch.SliceId);
+        FormInputs.ApplyIndent();
+        CustomComponents.StylizedText(slice == null
+                                          ? "Nothing routed yet — drop a slice or content onto this patch."
+                                          : $"Shows {SetupActions.SliceLabel(setup, slice)} on {output.Name}",
+                                      Fonts.FontSmall, UiColors.TextMuted);
+
+        if (patch.Quad.Length < 4)
+            return;
+
+        var quad = patch.Quad;
+        var isAxisAligned = MathF.Abs(quad[0].Y - quad[1].Y) < 0.001f && MathF.Abs(quad[2].Y - quad[3].Y) < 0.001f
+                            && MathF.Abs(quad[0].X - quad[3].X) < 0.001f && MathF.Abs(quad[1].X - quad[2].X) < 0.001f;
+        if (!isAxisAligned)
+        {
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText("Warped quad — edit its corners on the output canvas.", Fonts.FontSmall, UiColors.TextMuted);
+            return;
+        }
+
+        Span<int> position = [(int)MathF.Round(quad[0].X), (int)MathF.Round(quad[0].Y)];
+        var positionState = DrawIntsRow("Position (px)", position, "Top-left corner on the output canvas.");
+        BeginFieldUndo(setup, positionState);
+        if ((positionState & InputEditStateFlags.Modified) != 0)
+        {
+            var delta = new Vector2(position[0], position[1]) - quad[0];
+            for (var i = 0; i < 4; i++)
+                quad[i] += delta;
+        }
+
+        CommitFieldUndo(setup, "Move patch", positionState);
+
+        Span<int> size = [(int)MathF.Round(quad[1].X - quad[0].X), (int)MathF.Round(quad[3].Y - quad[0].Y)];
+        var sizeState = DrawIntsRow("Size (px)", size);
+        BeginFieldUndo(setup, sizeState);
+        if ((sizeState & InputEditStateFlags.Modified) != 0)
+        {
+            var w = MathF.Max(size[0], 1);
+            var h = MathF.Max(size[1], 1);
+            quad[1] = new Vector2(quad[0].X + w, quad[0].Y);
+            quad[2] = new Vector2(quad[0].X + w, quad[0].Y + h);
+            quad[3] = new Vector2(quad[0].X, quad[0].Y + h);
+        }
+
+        CommitFieldUndo(setup, "Resize patch", sizeState);
+    }
+
     private static void DrawReferenceImageCard(Setup setup, Guid id)
     {
         var image = setup.FindReferenceImage(id);
@@ -608,9 +669,12 @@ internal static class SetupParameterView
 
         foreach (var output in setup.Outputs)
         {
-            var slice = setup.FindSlice(output.SliceId);
-            if (slice != null && slice.SourceId == sourceId)
-                count++;
+            foreach (var patch in output.Patches)
+            {
+                var slice = setup.FindSlice(patch.SliceId);
+                if (slice != null && slice.SourceId == sourceId)
+                    count++;
+            }
         }
 
         return count;

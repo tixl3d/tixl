@@ -1,0 +1,85 @@
+---
+id: output-setup-patches
+title: Output Setup — Patches (the direct pipe)
+scope: output-window
+tags: [projection-mapping]
+added: 2026-09-05
+added-in-version: 4.3
+prerequisites:
+  - A writable project is open whose active setup is empty (a freshly created project
+    works — it starts with "Setup 1" and no content, surfaces, or outputs).
+  - Three windows are visible - the graph window, the Parameter window, and one output
+    window with its setup panel open (toolbar - leftmost panel icon).
+  - A LoadImage op (any image) exists in the graph.
+---
+
+Covers the first Patches slice: an output's direct pipe is a list of **patches**, each a
+rectangle of output pixels fed by one slice. Patches composite underneath any surfaces
+mapped to the same output. Canvas editing of patch quads, Split helpers and "Use on
+Surface" are not part of this slice.
+
+## Step: Build the test setup
+
+**Action:**
+1. Connect the LoadImage op to a new **SendToOutput** op (`+` on **CONTENT** creates one
+   to the right of a selected texture op).
+2. Click `+` on **OUTPUTS**.
+
+**Expected:**
+- A "SendToOutput" row under CONTENT and a **"P1"** row under OUTPUTS, with no chevron on
+  P1 (it has no patches yet).
+
+## Step: Dropping content on an output creates a full-canvas patch
+
+**Action:**
+Drag the "SendToOutput" CONTENT row onto the "P1" row.
+
+**Expected:**
+- P1 gains a chevron and one child row **"Patch 1"** with the status "Slice 1".
+- The output view of P1 shows the image full-frame.
+- The Parameter window (after clicking "Patch 1") shows a **Patch** card: the line
+  "Shows Slice 1 on P1", **Position (px)** 0 × 0 and **Size (px)** 1920 × 1080.
+
+## Step: Patch geometry edits from the card
+
+**Action:**
+With "Patch 1" selected, set **Size (px)** to 960 × 540, then **Position (px)** to
+480 × 270. Press Ctrl+Z twice.
+
+**Expected:**
+- After the size edit the image occupies the top-left quarter of P1's canvas; after the
+  position edit it sits centred.
+- Each Ctrl+Z reverts exactly one of the two edits.
+
+## Step: A second patch, added empty and fed by the gutter toggle
+
+**Action:**
+1. Right-click "P1" → **Add Patch**.
+2. Click the "Slice 1" row under the SendToOutput content.
+3. Click the input arrow in the left gutter of the new "Patch 2" row.
+
+**Expected:**
+- After 1: "Patch 2" appears dimmed under P1 with no status; its card says nothing is
+  routed yet.
+- After 3: the arrow lights up, "Patch 2" reads "Slice 1" and is no longer dimmed.
+  Clicking the arrow again unfeeds it.
+
+## Step: Patches sit under surfaces
+
+**Action:**
+1. Click `+` on **SURFACES**, then drag "Surface 1" onto "P1".
+2. Drag the "SendToOutput" row onto "Surface 1".
+
+**Expected:**
+- P1's output view shows the corner-pinned surface drawn **over** the full-frame patch
+  image, not replacing it.
+
+## Step: Deleting the slice unfeeds, deleting the patch removes
+
+**Action:**
+1. Right-click "Slice 1" → **Delete**.
+2. Right-click "Patch 1" → **Delete**.
+
+**Expected:**
+- After 1: both patch rows stay but turn dimmed; the output view shows only the surface.
+- After 2: only "Patch 2" remains under P1. One Ctrl+Z brings "Patch 1" back.

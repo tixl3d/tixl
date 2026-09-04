@@ -80,6 +80,8 @@ internal sealed class SetupPanel
 
                 var binding = machineConfig.TryGetBinding(output.Id);
                 var status = binding == null ? null : $"Display {binding.DisplayIndex + 1}";
+                var hasPatches = output.Patches.Count > 0;
+                var isExpanded = !_collapsedOutputs.Contains(output.Id);
                 var args = new EntityItem.Args
                                {
                                    Kind = SetupEntitySelection.EntityKind.Output,
@@ -87,11 +89,24 @@ internal sealed class SetupPanel
                                    Name = output.Name,
                                    Status = status,
                                    LeadingIcon = Icon.Projector,
+                                   IsExpanded = hasPatches ? isExpanded : null,
+                                   ReserveExpander = true,
                                    // A paused output (Send off) reads the same as a non-rendering surface.
                                    Muted = !output.Send,
                                    StrikeLeadingIcon = !output.Send,
                                };
-                DrawRow(selection, setup, ref args);
+                if (DrawRow(selection, setup, ref args) == EntityItem.ItemAction.ToggleExpanded)
+                {
+                    if (!_collapsedOutputs.Add(output.Id))
+                        _collapsedOutputs.Remove(output.Id);
+                }
+
+                if (!hasPatches || !isExpanded)
+                    continue;
+
+                // Patches under their output, like regions under a surface: the direct pipe's canvas cuts.
+                for (var p = 0; p < output.Patches.Count; p++)
+                    DrawPatchRow(selection, setup, output, output.Patches[p]);
             }
         }
 
@@ -165,7 +180,19 @@ internal sealed class SetupPanel
 
                 var output = setup.FindOutput(_hoveredId);
                 if (output != null)
-                    AddSourceOfSlice(setup, output.SliceId); // or a full-frame slice shown directly
+                {
+                    foreach (var patch in output.Patches)
+                        AddSourceOfSlice(setup, patch.SliceId); // the feeds on the direct pipe
+                }
+
+                break;
+            }
+            case SetupEntitySelection.EntityKind.Patch:
+            {
+                var patch = setup.FindPatch(_hoveredId, out _);
+                if (patch != null)
+                    AddSourceOfSlice(setup, patch.SliceId);
+
                 break;
             }
             case SetupEntitySelection.EntityKind.ContentSource:
@@ -239,8 +266,11 @@ internal sealed class SetupPanel
 
         foreach (var output in setup.Outputs)
         {
-            if (SetupActions.IsSliceOf(setup, output.SliceId, sourceId))
-                _referenced.Add((SetupEntitySelection.EntityKind.Output, output.Id, true));
+            foreach (var patch in output.Patches)
+            {
+                if (SetupActions.IsSliceOf(setup, patch.SliceId, sourceId))
+                    _referenced.Add((SetupEntitySelection.EntityKind.Patch, patch.Id, true));
+            }
         }
     }
 
@@ -255,8 +285,11 @@ internal sealed class SetupPanel
 
         foreach (var output in setup.Outputs)
         {
-            if (output.SliceId == sliceId)
-                _referenced.Add((SetupEntitySelection.EntityKind.Output, output.Id, true));
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId == sliceId)
+                    _referenced.Add((SetupEntitySelection.EntityKind.Patch, patch.Id, true));
+            }
         }
     }
 
@@ -300,7 +333,11 @@ internal sealed class SetupPanel
 
             case SetupEntitySelection.EntityKind.Output:
                 var output = setup.FindOutput(_primaryId);
-                return output != null && kind == SetupEntitySelection.EntityKind.Slice && output.SliceId == id;
+                return output != null && kind == SetupEntitySelection.EntityKind.Slice && SetupActions.OutputShowsSlice(output, id);
+
+            case SetupEntitySelection.EntityKind.Patch:
+                var patch = setup.FindPatch(_primaryId, out _);
+                return patch != null && kind == SetupEntitySelection.EntityKind.Slice && patch.SliceId == id;
 
             case SetupEntitySelection.EntityKind.Slice:
                 var slice = setup.FindSlice(_primaryId);
@@ -406,8 +443,35 @@ internal sealed class SetupPanel
         if (count > 0)
             return (Icon.Grid, CountSuffix(count));
 
-        // Or an output showing the slice full-frame (the direct path).
-        return setup.Outputs.Exists(o => o.SliceId == slice.Id) ? (Icon.Projector, null) : (null, null);
+        // Or patches showing the slice on the direct pipe.
+        var patches = 0;
+        foreach (var output in setup.Outputs)
+        {
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId == slice.Id)
+                    patches++;
+            }
+        }
+
+        return patches > 0 ? (Icon.Projector, CountSuffix(patches)) : (null, null);
+    }
+
+    /// <summary>A patch under its output: what feeds it as the status; unfed patches step back.</summary>
+    private void DrawPatchRow(SetupEntitySelection selection, Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
+    {
+        var slice = setup.FindSlice(patch.SliceId);
+        var args = new EntityItem.Args
+                       {
+                           Kind = SetupEntitySelection.EntityKind.Patch,
+                           Id = patch.Id,
+                           Name = SetupActions.PatchLabel(output, patch),
+                           Status = slice == null ? null : SetupActions.SliceLabel(setup, slice),
+                           LeadingIcon = Icon.Patch,
+                           Depth = 1,
+                           Muted = slice == null,
+                       };
+        DrawRow(selection, setup, ref args);
     }
 
     /// <summary>"×N" once there's more than one target; nothing for a single one.</summary>
@@ -684,6 +748,7 @@ internal sealed class SetupPanel
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
     private readonly HashSet<Guid> _collapsedSurfaces = [];
     private readonly HashSet<Guid> _collapsedSources = [];
+    private readonly HashSet<Guid> _collapsedOutputs = [];
     private readonly EntityItem _entityItem;
     private SetupEntitySelection.EntityKind _primaryKind;
     private Guid _primaryId;

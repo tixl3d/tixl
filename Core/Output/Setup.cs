@@ -90,6 +90,28 @@ public sealed class Setup
         return null;
     }
 
+    /// <summary>A patch by id, with the output that owns it.</summary>
+    public OutputDefinition.Patch? FindPatch(Guid id, out OutputDefinition? owner)
+    {
+        owner = null;
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var output in Outputs)
+        {
+            foreach (var patch in output.Patches)
+            {
+                if (patch.Id != id)
+                    continue;
+
+                owner = output;
+                return patch;
+            }
+        }
+
+        return null;
+    }
+
     public Slice? FindSlice(Guid id)
     {
         if (id == Guid.Empty)

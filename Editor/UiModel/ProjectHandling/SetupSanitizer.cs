@@ -78,6 +78,21 @@ internal static class SetupSanitizer
             }
         }
 
+        foreach (var output in setup.Outputs)
+        {
+            var width = Math.Max(1, output.CanvasResolution.Width);
+            var height = Math.Max(1, output.CanvasResolution.Height);
+            foreach (var patch in output.Patches)
+            {
+                if (QuadIsUsable(patch.Quad, width, height))
+                    continue;
+
+                Log.Warning($"Setup repair: a patch on output '{output.Name}' had a corrupted quad — reset to the full canvas.");
+                patch.Quad = output.FullCanvasQuad();
+                changed = true;
+            }
+        }
+
         return changed;
     }
 

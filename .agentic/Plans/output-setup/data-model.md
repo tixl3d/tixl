@@ -202,6 +202,12 @@ fed by one source slice. One concept covers the whole surface-less ladder:
   does. (Replaces the earlier "compositing forces surfaces" instinct.)
 - Naming: **Patch** (AV patching vocabulary; *Tile* recorded as the alternative). Never "slice" —
   one name per end of the pipe.
+- **Slice 1 landed (2026-09-05):** `OutputDefinition.Patches[] = { Id, Name, SliceId, Quad }` replaced
+  `Output.SliceId` (no legacy read — internal preview). Drops/gutter toggles onto an output create a
+  full-canvas patch; onto a patch they re-feed it. Renderer composites patches **under** the surfaces
+  mapped to the same output (decided 2026-09-05), list order among patches. Panel rows under the output,
+  `EntityKind.Patch`, card with px position/size for axis-aligned quads. Deleting a slice leaves its
+  patches unfed. Next: canvas quad editing (round handles), Split helpers, Use on Surface.
 
 ### 2.6 Selection model — 🟡 too narrow · **plan in [`selection.md`](selection.md)** (4.5: do not defer)
 `SetupEntitySelection` is single kind+id over `{ReferenceImage, Surface, Prop, Output}`. The spec needs

@@ -341,6 +341,7 @@ internal static class Icons
             new(Icon.RoundingSE, slotIndex: 158),
             new(Icon.RoundingSW, slotIndex: 159),
             new(Icon.ChevronUpDown, slotIndex: 160),
+            new(Icon.Patch, slotIndex: 161),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -519,5 +520,6 @@ public enum Icon
     RoundingSE,
     RoundingSW,
     Mapping,
-    ChevronUpDown
+    ChevronUpDown,
+    Patch
 }

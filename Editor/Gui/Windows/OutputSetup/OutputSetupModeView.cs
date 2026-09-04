@@ -111,6 +111,8 @@ internal sealed class OutputSetupModeView
                 _outputView.DrawSourceCanvas(entityId, _entitySelection);
             else if (entityKind == SetupEntitySelection.EntityKind.Slice && TryGetSliceSource(entityId, out var sliceChildId))
                 _outputView.DrawSourceCanvas(sliceChildId, _entitySelection, entityId);
+            else if (entityKind == SetupEntitySelection.EntityKind.Patch && TryGetPatchOutput(entityId, out var patchOutputId))
+                _outputView.Draw(patchOutputId, selection: _entitySelection); // a patch lives on its output's canvas
             else
                 // Kinds without a canvas of their own (props, unplaced reference images): properties live
                 // in the Parameter window now; the output area just says where to look. Phase C gives
@@ -152,7 +154,7 @@ internal sealed class OutputSetupModeView
 
             foreach (var output in setup.Outputs)
             {
-                if (output.SliceId == slice.Id)
+                if (SetupActions.OutputShowsSlice(output, slice.Id))
                 {
                     outputId = output.Id;
                     return true;
@@ -167,6 +169,16 @@ internal sealed class OutputSetupModeView
         }
 
         return false;
+    }
+
+    private static bool TryGetPatchOutput(Guid patchId, out Guid outputId)
+    {
+        outputId = Guid.Empty;
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _) || setup.FindPatch(patchId, out var owner) == null)
+            return false;
+
+        outputId = owner!.Id;
+        return true;
     }
 
     /// <summary>The op supplying a slice's source, so selecting a slice can open the canvas it lives on.</summary>

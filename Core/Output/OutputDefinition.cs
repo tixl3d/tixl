@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Numerics;
 using T3.Core.DataTypes.Vector;
 using T3.Serialization;
 
@@ -101,6 +102,50 @@ public sealed class OutputDefinition
         }
     }
 
+    /// <summary>
+    /// A region of the output canvas fed by one <see cref="Slice"/>, bypassing surfaces: the direct pipe.
+    /// Patches model the canvas in pixels — a full-frame feed, a split matrix, a picture-in-picture, or a
+    /// surface-less keystone (a warped quad) — where surfaces model the room in metres. A route's quad lives
+    /// on a patch <em>or</em> on a surface's mapping, never both.
+    /// </summary>
+    public sealed class Patch
+    {
+        public Guid Id = Guid.NewGuid();
+
+        /// <summary>Empty = labelled by position ("Patch N"), so the default reads right after reordering.</summary>
+        public string Name = string.Empty;
+
+        /// <summary>The slice shown here; <see cref="Guid.Empty"/> while nothing is routed yet.</summary>
+        public Guid SliceId;
+
+        /// <summary>Where the slice lands on the canvas, in output pixels: TL, TR, BR, BL. Axis-aligned for
+        /// tiles; a warped quad is a keystone without a surface.</summary>
+        public Vector2[] Quad = [];
+
+        public void WriteToJson(JsonTextWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteObject("Id", Id);
+            if (!string.IsNullOrEmpty(Name))
+                writer.WriteString("Name", Name);
+
+            writer.WriteObject("SliceId", SliceId);
+            writer.WriteQuad("Quad", Quad);
+            writer.WriteEndObject();
+        }
+
+        public static Patch ReadFromJson(JToken token)
+        {
+            return new Patch
+                       {
+                           Id = OutputJson.ReadGuid(token["Id"]),
+                           Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
+                           SliceId = OutputJson.ReadGuid(token["SliceId"]),
+                           Quad = OutputJson.ReadQuad(token["Quad"]),
+                       };
+        }
+    }
+
     public Guid Id = Guid.NewGuid();
     public string Name = string.Empty;
     public string Kind = Kinds.Display;
@@ -110,10 +155,16 @@ public sealed class OutputDefinition
     /// <summary>Pause presenting to this output without dropping its device binding (e.g. mute an NDI feed).</summary>
     public bool Send = true;
 
-    /// <summary>A <see cref="Slice"/> shown full-frame on this output, bypassing surfaces — the content was
-    /// already rendered through the projector's camera, so it maps 1:1 and needs no corner pin.
-    /// <see cref="Guid.Empty"/> for none.</summary>
-    public Guid SliceId;
+    /// <summary>Canvas regions on the direct pipe, composited in list order underneath the surfaces mapped here.</summary>
+    public List<Patch> Patches = [];
+
+    /// <summary>The whole canvas as a TL, TR, BR, BL pixel quad — the rung-0 patch, and the reset shape.</summary>
+    public Vector2[] FullCanvasQuad()
+    {
+        float w = Math.Max(1, CanvasResolution.Width);
+        float h = Math.Max(1, CanvasResolution.Height);
+        return [Vector2.Zero, new Vector2(w, 0), new Vector2(w, h), new Vector2(0, h)];
+    }
 
     public void WriteToJson(JsonTextWriter writer)
     {
@@ -123,7 +174,16 @@ public sealed class OutputDefinition
         writer.WriteString("Kind", Kind);
         writer.WriteInt2("CanvasResolution", CanvasResolution);
         writer.WriteValue("Send", Send);
-        writer.WriteObject("SliceId", SliceId);
+        if (Patches.Count > 0)
+        {
+            writer.WritePropertyName("Patches");
+            writer.WriteStartArray();
+            foreach (var patch in Patches)
+                patch.WriteToJson(writer);
+
+            writer.WriteEndArray();
+        }
+
         if (Camera != null)
         {
             writer.WritePropertyName("Camera");
@@ -142,7 +202,7 @@ public sealed class OutputDefinition
                              Kind = token.ReadValueSafe("Kind", Kinds.Display) ?? Kinds.Display,
                              CanvasResolution = OutputJson.ReadInt2(token["CanvasResolution"], new Int2(1920, 1080)),
                              Send = token.ReadValueSafe("Send", true),
-                              SliceId = OutputJson.ReadGuid(token["SliceId"]),
+                             Patches = token.ReadListSafe("Patches", Patch.ReadFromJson),
                          };
 
         if (token["Camera"] is JObject cameraToken)

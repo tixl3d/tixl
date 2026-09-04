@@ -128,11 +128,17 @@ internal static class OutputManager
                 return content;
         }
 
-        if (!TryResolveSliceContent(setup, output.SliceId, out var directSend, out _) || directSend == null)
-            return null;
+        foreach (var patch in output.Patches)
+        {
+            if (!TryResolveSliceContent(setup, patch.SliceId, out var directSend, out _) || directSend == null)
+                continue;
 
-        var direct = directSend.GetContent(_context);
-        return direct is { IsDisposed: false } ? direct : null;
+            var direct = directSend.GetContent(_context);
+            if (direct is { IsDisposed: false })
+                return direct;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -176,6 +182,24 @@ internal static class OutputManager
         _drawItems.Clear();
         _overlayLines.Clear();
         _overlayQuads.Clear();
+        // Patches first: they are the canvas layer (pixels), and the surfaces (the room) composite over them.
+        // Painter's order among patches is list order.
+        foreach (var patch in output.Patches)
+        {
+            if (patch.Quad.Length < 4 || !TryResolveSliceContent(setup, patch.SliceId, out var patchSend, out var patchRect))
+                continue;
+
+            var content = patchSend!.GetContent(_context);
+            if (content is not { IsDisposed: false })
+                continue;
+
+            var srv = SrvManager.GetSrvForTexture(content);
+            if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(patch.Quad, output.CanvasResolution, out var patchHomography))
+                continue;
+
+            _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend.GetColor(_context), Vector4.Zero, Vector4.Zero, Vector4.Zero));
+        }
+
         foreach (var surface in setup.Surfaces)
         {
             if (!surface.Render)
@@ -241,20 +265,6 @@ internal static class OutputManager
                     if (ReferenceEquals(carrier, surface))
                         CollectAnnotationOverlay(surface, mapping);
                 }
-            }
-        }
-
-        // The output can also name a slice directly, shown full-frame (Shape 2: the content was rendered
-        // through the projector camera, so it already maps 1:1 to the output; no corner-pin warp).
-        if (_drawItems.Count == 0 && TryResolveSliceContent(setup, output.SliceId, out var directSend, out var directRect))
-        {
-            var content = directSend!.GetContent(_context);
-            if (content is { IsDisposed: false })
-            {
-                var srv = SrvManager.GetSrvForTexture(content);
-                if (srv is { IsDisposed: false })
-                    _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), directRect, directSend.GetColor(_context),
-                                                Vector4.Zero, Vector4.Zero, Vector4.Zero));
             }
         }
 

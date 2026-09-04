@@ -78,10 +78,12 @@ internal sealed class EntityItem
 
         var fade = args.Muted ? 0.45f : 1f;
 
-        // Rows that consume something own a left in-gutter (surfaces take content, outputs take surfaces).
-        // The column is reserved whether or not a toggle is currently shown, so nothing shifts sideways when
-        // the selection changes.
-        var hasInputGutter = args.Kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.Output;
+        // Rows that consume something own a left in-gutter (surfaces and patches take content, outputs take
+        // surfaces or content). The column is reserved whether or not a toggle is currently shown, so nothing
+        // shifts sideways when the selection changes.
+        var hasInputGutter = args.Kind is SetupEntitySelection.EntityKind.Surface
+                                 or SetupEntitySelection.EntityKind.Output
+                                 or SetupEntitySelection.EntityKind.Patch;
         var gutterWidth = hasInputGutter ? Icons.FontSize + 4 * scale : 0;
 
         ImGui.PushID(args.Id.GetHashCode());
@@ -432,7 +434,13 @@ internal sealed class EntityItem
         {
             case SetupEntitySelection.EntityKind.Output:
                 var output = setup.FindOutput(id);
-                if (output is not { Kind: OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display })
+                if (output == null)
+                    break;
+
+                if (CustomComponents.DrawMenuItem(7, "Add Patch"))
+                    SetupActions.AddPatch(selection, setup, output);
+
+                if (output.Kind is not (OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display))
                     break;
 
                 if (CustomComponents.DrawSubMenu(4, "Bind to display")

@@ -52,6 +52,12 @@ public class SetupSerializationTests
         var projector = restored.Outputs[1];
         Assert.Equal(OutputDefinition.Kinds.Projector, projector.Kind);
         Assert.Equal(new Int2(1920, 1200), projector.CanvasResolution);
+        var patch = Assert.Single(projector.Patches);
+        Assert.Equal(setup.Outputs[1].Patches[0].Id, patch.Id);
+        Assert.Equal(setup.Outputs[1].Patches[0].SliceId, patch.SliceId);
+        Assert.Equal("left half", patch.Name);
+        Assert.Equal(new Vector2(960, 0), patch.Quad[1]);
+        Assert.Equal(new Vector2(0, 1200), patch.Quad[3]);
         Assert.NotNull(projector.Camera);
         Assert.NotNull(projector.Camera!.Pose);
         Assert.NotNull(projector.Camera.Lens);
@@ -179,6 +185,12 @@ public class SetupSerializationTests
                                                  ResidualPx = 0.4f,
                                              },
                             };
+        projector.Patches.Add(new OutputDefinition.Patch
+                                  {
+                                      Name = "left half",
+                                      SliceId = Guid.NewGuid(),
+                                      Quad = [Vector2.Zero, new Vector2(960, 0), new Vector2(960, 1200), new Vector2(0, 1200)],
+                                  });
 
         var setup = Setup.CreateDefault("studio");
         setup.ReferenceImages.Add(image);

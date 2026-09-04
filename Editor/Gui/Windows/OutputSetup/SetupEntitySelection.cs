@@ -47,6 +47,7 @@ internal sealed class SetupEntitySelection
         Output,
         Slice,
         ContentSource,
+        Patch,
     }
 
     /// <summary>Replace the selection with a single entity. A pick: takes over the Parameter window.</summary>
@@ -169,6 +170,9 @@ internal sealed class SetupEntitySelection
                 }
 
                 return false;
+
+            case EntityKind.Patch:
+                return setup.FindPatch(id, out _) != null;
 
             case EntityKind.ContentSource:
                 // Content rows are addressed by the op's SymbolChildId, not ContentSource.Id. A freshly

@@ -349,6 +349,13 @@ with an explanatory comment) — the row-callback API design made compliance imp
   Region creation, snapping, edge drags, the raster origin and the Straight framing (`AnchoredRect`) all
   converted; inventory + rationale in `anchor-yup-pass.md`. No legacy conversion (internal preview).
   Not yet user-tested.
+- **2026-09-05 (Patches, slice 1):** `OutputDefinition.Patches[]` replaces the single direct `SliceId`
+  (data-model §2.5). Model + JSON + round-trip test; `Setup.FindPatch`; renderer draws patches under
+  surfaces; `EntityKind.Patch` with rows under their output (collapsible), input-gutter bind toggle,
+  drop routing (output → new full-canvas patch, patch → re-feed), "Add Patch" on the output menu,
+  Duplicate/Rename/Delete, sanitizer quad repair, Parameter-window card (px position/size). Icon is a
+  `Icon.Patch` (atlas slot 161, added by the user). Manual test `output-setup-patches.md`. Not yet
+  user-tested.
 
 ## Suggested order (revised for the flow-view pivot)
 
