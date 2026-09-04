@@ -1,0 +1,36 @@
+{
+  "FormatVersion": 3,
+  "Id": "5f2df291-4667-474e-9e84-3b64d4cc0555"/*TransformCPoint*/,
+  "Inputs": [
+    {
+      "Id": "3e7ba85d-48d0-413e-99c7-9a8742c2653e"/*Rotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "95b26a7e-2360-4830-b605-da1bd8ae882a"/*Translation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "a5e1fdf0-ce29-4370-a91a-ad41e04bde4e"/*Space*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "bbbeba31-df6b-4f5f-8d00-71adb5e6f9c6"/*Lists2*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e8cadc7e-d45f-43f7-9c85-040da77a3af7"/*Incremental*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -153,6 +153,9 @@ between `GPoints` and the draw op and raise its `Scale` to ~1.8.
   the chunk draw (vertex colors are used, multiplied with the point color).
 - Dragging the `[TransformPoints]` scale is as smooth as `[DrawMesh]`; changing
   the seed count re-fits the draw table without a visible hitch.
+- Routing `Points` through `[TransformCPoints]` and `[ListToBuffer]` instead of
+  `GPoints` through `[TransformPoints]` gives the same picture for the same
+  Scale and Rotation values.
 
 ## Step: Placing geometry at points
 

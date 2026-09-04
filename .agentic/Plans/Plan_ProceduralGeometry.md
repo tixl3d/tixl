@@ -424,9 +424,12 @@ attempt likely failed because `IndirectBuffer` creates the args buffer without
 raw/structured flags, so no UAV can be created to write the args from a compute
 shader, and `DrawInstancedIndirect` flushed the queue every frame (removed).
 
-Still open: the full milestone demo (density field, animated pivots). A CPU `TransformCPoints` only moves a single point; the CPoints
-family has no whole-list transform yet, so pivot animation currently goes through
-the GPU point ops.
+`TransformCPoints` (2026-09-04): transforms a whole CPU point list (stretch/scale
+about a pivot, rotation, translation, object or point space, orientations follow,
+gizmo); the former single-point op keeps its guid as `TransformCPoint`. Verified
+pixel-identical to the GPU `TransformPoints` on the chunk chain.
+
+Still open: the full milestone demo (density field, animated pivots).
 
 - Promote `MeshChunkDef` to Core.
 - `GeometryToChunks` — one chunk per part into shared buffers; outputs

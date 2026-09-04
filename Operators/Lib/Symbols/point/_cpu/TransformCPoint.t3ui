@@ -1,0 +1,59 @@
+{
+  "FormatVersion": 3,
+  "Id": "5f2df291-4667-474e-9e84-3b64d4cc0555"/*TransformCPoint*/,
+  "Description": "Transforms a single point on the CPU, optionally incrementally - for camera animations or other interactive effects. Use [TransformCPoints] to transform a whole point list.\n\nAKA: TransformCpuPoint, cpu points",
+  "InputUis": [
+    {
+      "InputId": "3e7ba85d-48d0-413e-99c7-9a8742c2653e"/*Rotation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "95b26a7e-2360-4830-b605-da1bd8ae882a"/*Translation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "a5e1fdf0-ce29-4370-a91a-ad41e04bde4e"/*Space*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "bbbeba31-df6b-4f5f-8d00-71adb5e6f9c6"/*Lists2*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "e8cadc7e-d45f-43f7-9c85-040da77a3af7"/*Incremental*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fe7ab3fe-5a9f-45b1-ae8d-5a78d6822501"/*ResultPoint*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "b1ee31b8-5d02-4b05-8f52-051180fa9a4d"/*Position*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}
