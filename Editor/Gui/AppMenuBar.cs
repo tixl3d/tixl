@@ -95,16 +95,28 @@ internal static class AppMenuBar
         ImGui.SameLine();
         ImGui.SetCursorPosX(ImGui.GetWindowWidth() - ImGui.GetFrameHeight());
 
-        // Flash on protocol traffic, decaying to a dim resting state.
+        // Flash on protocol traffic, decaying to a dim resting state. Green once the
+        // agent reports "ready": the editor is free to use without interfering with it.
         var msSinceActivity = Environment.TickCount64 - App.DebugProtocol.DebugServer.LastActivityTicksMs;
         var flash = Math.Clamp(1f - msSinceActivity / 400f, 0f, 1f);
-        var color = UiColors.StatusAttention.Fade(0.4f + 0.6f * flash);
+        var isReady = App.DebugProtocol.DebugServer.AgentState == "ready";
+        var color = isReady
+                        ? UiColors.StatusControlled.Fade(0.8f + 0.2f * flash)
+                        : UiColors.StatusAttention.Fade(0.4f + 0.6f * flash);
         CustomComponents.IconButton(Icon.IO, Vector2.Zero, color);
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
             ImGui.TextUnformatted($"Debug server listening on 127.0.0.1:{App.DebugProtocol.DebugServer.Port}"
                                   + $" — {App.DebugProtocol.DebugServer.RequestCount} requests handled");
+            var agentState = App.DebugProtocol.DebugServer.AgentState;
+            if (!string.IsNullOrEmpty(agentState))
+            {
+                ImGui.TextUnformatted(isReady ? "Agent: ready - safe to test" : "Agent: busy - changes may interfere");
+                var note = App.DebugProtocol.DebugServer.AgentNote;
+                if (!string.IsNullOrEmpty(note))
+                    ImGui.TextUnformatted(note);
+            }
 
             var messages = App.DebugProtocol.DebugServer.RecentMessages;
             if (messages.Count > 0)
