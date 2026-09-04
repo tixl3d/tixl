@@ -35,6 +35,22 @@ public static class GeometryAttributeNames
 
     /// <summary>Part domain, int: index of the point a part was instanced at, so per-point data can be joined back later.</summary>
     public const string SourcePoint = "SourcePoint";
+
+    /// <summary>Face domain, 1 on extrusion walls and bevels ([CurvesToMesh]), 0 on caps.</summary>
+    public const string IsSide = "IsSide";
+}
+
+/// <summary>Attribute names produced by text layout ([TextToCurves]); all on the Part (glyph) domain.</summary>
+public static class CurveAttributeNames
+{
+    public const string CodePoint = "CodePoint";
+    public const string GlyphId = "GlyphId";
+    public const string CharIndex = "CharIndex";
+    public const string WordIndex = "WordIndex";
+    public const string LineIndex = "LineIndex";
+
+    /// <summary>float: the glyph's layout width in scene units.</summary>
+    public const string Advance = "Advance";
 }
 
 /// <summary>

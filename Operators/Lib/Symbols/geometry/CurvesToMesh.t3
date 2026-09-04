@@ -1,0 +1,17 @@
+{
+  "FormatVersion": 3,
+  "Id": "b6e3f8d1-4a27-4c95-9d0e-7f2c5a1b8e63"/*CurvesToMesh*/,
+  "Inputs": [
+    { "Id": "4a7e2c9f-6d15-4b83-a0e6-9c3f8b1d5e27"/*Curves*/, "DefaultValue": null },
+    { "Id": "c1f5b8e3-2a94-4d67-8e0b-7d3a9f6c2b14"/*Depth*/, "DefaultValue": 0.2 },
+    { "Id": "9e3a7d1c-5b48-4f26-b9c0-1a6e4d8f3c72"/*Bevel*/, "DefaultValue": 0.0 },
+    { "Id": "2b8d5f7a-e319-4c60-a5d8-6f0c3e9a1b48"/*BevelSegments*/, "DefaultValue": 3 },
+    { "Id": "7d4c1a9e-8f52-4b37-9e6a-3c1b5d7f2a80"/*Tolerance*/, "DefaultValue": 0.002 },
+    { "Id": "e5b2d8c4-1a76-4f93-b0d5-8c4e7a2f9b16"/*Front*/, "DefaultValue": true },
+    { "Id": "3f9c6e2b-d485-4a10-8b7e-5d2a1c8f4e63"/*Back*/, "DefaultValue": true },
+    { "Id": "a8e1c4f7-2b93-4d58-9a6c-0e5d3b7f1c29"/*Sides*/, "DefaultValue": true },
+    { "Id": "6c2f9b5e-7d31-4a84-b1e0-4f8c2a6d9e75"/*EvenOdd*/, "DefaultValue": false }
+  ],
+  "Children": [],
+  "Connections": []
+}

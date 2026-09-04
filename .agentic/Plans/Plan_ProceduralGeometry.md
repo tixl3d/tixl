@@ -455,7 +455,34 @@ Still open: the full milestone demo (density field, animated pivots).
   ("cell size from distance to closest point") -> `GeometryToChunks` ->
   displaced pivots -> `DrawMeshChunksAtPoints` explode.
 
-### Phase 4 — Curve foundation ⬜
+### Phase 4 — Curve foundation 🔶 (started 2026-09-04)
+
+Done: `CurveGeometry` in Core (anchors + absolute in/out handles, CSR contour
+offsets, closed flags, `CurvePart` table, `Flatten` with a chord tolerance,
+`Version`), registered as CPU-geometry wire type, input type and bypassable.
+`Font` asset type (ttf/otf/ttc, primary op `TextToCurves`, subfolder `fonts`).
+`TextToCurves` on SixLabors.Fonts **2.1.3** (`IGlyphRenderer` collector: quadratics
+raised to cubics, y flipped, one part per glyph with pivot at the glyph origin,
+part attributes CodePoint/GlyphId/CharIndex/WordIndex/LineIndex/Advance found by
+walking the source text; whitespace advances only; Size = em in scene units,
+LineSpacing, Alignment, Kerning; font via `Resource<T>` so edits hot-reload;
+default `Lib:fonts/Inter-Variable.ttf`, the editor's Inter).
+`CurvesToPoints` (separator-delimited polylines, part/contour Color -> point
+color, F2 = part index, CloseLoops). Milestone reached: text renders through
+`ListToBuffer -> DrawLines`.
+
+SixLabors.Fonts is **pinned to 2.1.3** (`<SixLaborsFontsVersion>` in `Lib.csproj`;
+the 3.x code paths stay behind `SIXLABORS_FONTS_V3`). 3.x brings variable fonts
+(`FontFamily.CreateFont(size, FontVariation[])`, axes via
+`FontMetrics.TryGetVariationAxes`) but validates a signed license key at build
+time (`sixlabors.lic` in the workspace or `$(SixLaborsLicenseKey)`): Debug builds
+only warn, **Release builds fail** without it. The open-source key was requested
+from SixLabors on 2026-09-04; once it arrives, add the file and set the version
+to 3.1.0 — `TextToCurves` already exposes `Weight` plus a generic `Axis`/`AxisValue`
+pair, which static fonts and 2.x ignore. The default font is
+`Lib:fonts/Inter-Variable.ttf` (wght 100..900, opsz 14..32). Per-glyph axis
+instantiation (`SetFontAxis`) needs 3.x and is still open.
+
 
 - Core: `CurveGeometry`.
 - De-static-cache `BezierPointSpline` (`_lengthList` is not thread-safe); reuse
@@ -480,7 +507,22 @@ Still open: the full milestone demo (density field, animated pivots).
     land in `Point.Color` / `F1` / `F2` (default: color attribute -> Color).
 - Milestone: SVG and text render via `CurvesToPoints -> DrawLines` with per-glyph colors.
 
-### Phase 5 — Text slice ⬜
+### Phase 5 — Text slice 🔶 (started 2026-09-04)
+
+Done: `CurvesToMesh` on **LibTessDotNet 1.1.15**. Contours are flattened, then
+resolved through the fill rule *before* any geometry is built (`Tess` with
+`ElementType.BoundaryContours`), so overlapping strokes (Inter's X, bold variable
+instances) become one outline and walls never run through the solid; loops are
+then oriented by nesting parity (outer CCW, holes CW). Caps and walls share one
+point ring per profile step, welded by position, so the solid closes without a
+post-weld; mitered insets (clamped at 2x) drive the bevel rings, with smooth
+profile normals on bevels and flat normals on straight walls. Verified via the
+bridge for `"TiXL Xg8&@"`: extruded and beveled (bevel <= 0.01 at size 0.6) are
+watertight (0 boundary / 0 non-manifold, positive volume); even-odd yields the
+expected pinch edges where resolved lobes touch. Known limit (documented in the
+op): a bevel larger than half the thinnest stroke folds the inset outline and
+opens the mesh — no medial-axis clamp yet. Face attribute `IsSide` marks walls
+and bevels; curve part attributes carry over per glyph.
 
 - New dependency: **LibTessDotNet** (managed, permissive) for constrained
   triangulation with holes/fill rules — `DelaunatorSharp` is unconstrained and can't

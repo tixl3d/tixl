@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "b6e3f8d1-4a27-4c95-9d0e-7f2c5a1b8e63"/*CurvesToMesh*/,
+  "Description": "Fills closed curves into a mesh and optionally extrudes them with a bevel - the way from [TextToCurves] to solid 3D text.
+
+Depth 0 gives a flat fill; with Depth, front and back caps are joined by walls, and Bevel rounds (or with BevelSegments 1 chamfers) the edges. Overlapping and nested contours are resolved by the fill rule (non-zero by default, EvenOdd as option), so variable-font overlaps disappear. One mesh part per curve part (glyph), with the curve's part attributes carried over for [ColorFacesFromAttribute] and [GeometryToChunks]; the face attribute IsSide marks walls and bevels. Tolerance is the flattening precision. Keep Bevel below half of the thinnest stroke: a larger bevel folds the inset outline over itself and opens the mesh.
+
+AKA: extrude text, 3d text, fill curves, tessellate",
+  "InputUis": [
+    { "InputId": "4a7e2c9f-6d15-4b83-a0e6-9c3f8b1d5e27"/*Curves*/, "Relevancy": "Required", "Position": { "X": 0.0, "Y": 0.0 } },
+    { "InputId": "c1f5b8e3-2a94-4d67-8e0b-7d3a9f6c2b14"/*Depth*/, "Position": { "X": 0.0, "Y": 45.0 } },
+    { "InputId": "9e3a7d1c-5b48-4f26-b9c0-1a6e4d8f3c72"/*Bevel*/, "Position": { "X": 0.0, "Y": 90.0 } },
+    { "InputId": "2b8d5f7a-e319-4c60-a5d8-6f0c3e9a1b48"/*BevelSegments*/, "Position": { "X": 0.0, "Y": 135.0 } },
+    { "InputId": "7d4c1a9e-8f52-4b37-9e6a-3c1b5d7f2a80"/*Tolerance*/, "Position": { "X": 0.0, "Y": 180.0 } },
+    { "InputId": "e5b2d8c4-1a76-4f93-b0d5-8c4e7a2f9b16"/*Front*/, "Position": { "X": 0.0, "Y": 225.0 } },
+    { "InputId": "3f9c6e2b-d485-4a10-8b7e-5d2a1c8f4e63"/*Back*/, "Position": { "X": 0.0, "Y": 270.0 } },
+    { "InputId": "a8e1c4f7-2b93-4d58-9a6c-0e5d3b7f1c29"/*Sides*/, "Position": { "X": 0.0, "Y": 315.0 } },
+    { "InputId": "6c2f9b5e-7d31-4a84-b1e0-4f8c2a6d9e75"/*EvenOdd*/, "Position": { "X": 0.0, "Y": 360.0 } }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    { "OutputId": "1c9a5e7d-3b62-4f08-a4d1-8e6b0c2f7a95"/*Result*/, "Position": { "X": 300.0, "Y": 0.0 } }
+  ]
+}

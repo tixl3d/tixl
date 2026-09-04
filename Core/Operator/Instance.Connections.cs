@@ -302,6 +302,20 @@ public abstract partial class Instance
                     InvalidateConnected(geometryInput);
                 break;
 
+            case Slot<CurveGeometry> curveOutput when mainInputSlot is Slot<CurveGeometry> curveInput:
+                if (shouldBypass)
+                {
+                    wasByPassed = curveOutput.TrySetBypassToInput(curveInput);
+                }
+                else
+                {
+                    curveOutput.RestoreUpdateAction();
+                }
+
+                if (invalidate)
+                    InvalidateConnected(curveInput);
+                break;
+
             case Slot<BufferWithViews> bufferOutput when mainInputSlot is Slot<BufferWithViews> bufferInput:
                 if (shouldBypass)
                 {

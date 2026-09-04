@@ -1,0 +1,18 @@
+{
+  "FormatVersion": 3,
+  "Id": "6a1d8c3f-2b57-4e90-a4f6-c8e2d5b7f019"/*CurvesToPoints*/,
+  "Description": "Flattens curves into a CPU point list, one polyline per contour, separated by separator points.
+
+This is the bridge from curve geometry to every line and point op ([DrawLines], [ListToBuffer], the CPoints family). Tolerance is the maximum distance between the polyline and the true curve. A Color attribute on the part or contour domain lands in the point color; F2 carries the part index. CloseLoops repeats the first point of closed contours so line strips close.
+
+AKA: flatten curves, curve to line, outline points",
+  "InputUis": [
+    { "InputId": "b7f2d9c4-5a13-4e86-9d0b-3c6e8a1f5d27"/*Curves*/, "Relevancy": "Required", "Position": { "X": 0.0, "Y": 0.0 } },
+    { "InputId": "4e9a6c1b-d872-4f35-b0e8-7a2d5f9c3e61"/*Tolerance*/, "Position": { "X": 0.0, "Y": 45.0 } },
+    { "InputId": "d2c8e5a3-1f64-4b97-8e3a-c5b0d7f4a916"/*CloseLoops*/, "Position": { "X": 0.0, "Y": 90.0 } }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    { "OutputId": "e3c5a7f1-9d24-4b68-8f0e-a1b3c6d9e274"/*Points*/, "Position": { "X": 300.0, "Y": 0.0 } }
+  ]
+}

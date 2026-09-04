@@ -260,3 +260,38 @@ Insert a `[TriangulateGeometry]` directly after `[CubeGeometry]`.
 **Expected:**
 - The rendered result is visually unchanged — triangulating before beveling adds
   no visible seams (flat edges between coplanar triangles produce no bevels).
+
+## Step: Text as lines
+
+**Action:**
+In a new graph add `[TextToCurves]` (default text "TiXL", font
+`Lib:fonts/Inter-Variable.ttf`), connect it to `[CurvesToPoints]`, then
+`[ListToBuffer]` and `[DrawLines]`.
+
+**Expected:**
+- The word renders as outlines, one closed loop per contour (the i-dot and the
+  counter of the letters are separate loops).
+- Changing `Text`, `Size`, `Alignment` or `LineSpacing` updates immediately;
+  the geometry output view lists one part per glyph with CodePoint/CharIndex
+  attributes.
+- Picking a different font file in the `Path` asset picker (Font asset type,
+  `fonts` subfolder) swaps the outlines.
+
+## Step: Text as solid mesh
+
+**Action:**
+Replace `[CurvesToPoints]` and the line ops with `[CurvesToMesh]` ->
+`[GeometryToMeshBuffers]` -> `[DrawMesh]`. Set `Text` to `TiXL Xg8&@`.
+
+**Expected:**
+- With `Depth` 0 the text is a flat fill with correct holes (g, 8, @) and the
+  overlapping strokes of the X fill as one solid.
+- With `Depth` 0.2 the geometry output view reports 0 boundary and 0
+  non-manifold edges and a positive volume; walls are flat shaded.
+- `Bevel` 0.01 rounds the edges smoothly; `BevelSegments` 1 gives a chamfer.
+  A bevel much larger than the stroke width (e.g. 0.05 on "T") visibly folds the
+  outline — this is the documented limit, not a bug.
+- `EvenOdd` turns the X's overlap into a hole; front/back/side flags remove the
+  respective faces.
+- `[ColorFacesFromAttribute]` with the part-index option colors each letter
+  differently; the `IsSide` face attribute separates walls from caps.

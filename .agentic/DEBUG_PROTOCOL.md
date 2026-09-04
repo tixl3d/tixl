@@ -68,6 +68,17 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   MSBuild skip the compile. `touch` the edited files before building, and check
   that the built DLL actually changed.
 
+## Hand-over and blocking dialogs
+
+- `setAgentState` (`state`: `busy` | `ready` | `""`, optional `note`) drives the bridge
+  icon in the app bar: magenta while an agent works, **green when it reports `ready`**.
+  Send `ready` with a one-line note at the end of every verification round, before
+  handing back to the user; any later request flips it to `busy` automatically.
+- A modal message box (e.g. "can't create Input Definition for <Type>" when an op uses
+  a Core type that isn't registered in `SymbolPackage.TypeRegistration.cs`) blocks the
+  main thread, and with it the whole bridge: requests queue until the user closes it.
+  There is no protocol call to dismiss it - register the type, or ask the user.
+
 ## Evaluation model (the part everyone trips over)
 
 The editor is pull-based: **an operator only evaluates when something displays it each

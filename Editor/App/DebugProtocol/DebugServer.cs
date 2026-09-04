@@ -54,6 +54,14 @@ internal static class DebugServer
     /// <summary>Short "method -> outcome" lines of the most recent requests, oldest first. Main-thread only (indicator tooltip).</summary>
     public static IReadOnlyList<string> RecentMessages => _recentMessages;
 
+    /// <summary>
+    /// What the connected agent says it is doing: "busy" while it drives the editor,
+    /// "ready" once it hands over for the user to test. Any request other than
+    /// setAgentState flips it back to busy, so a stale "ready" can't linger.
+    /// </summary>
+    public static string AgentState { get; private set; } = "";
+    public static string AgentNote { get; private set; } = "";
+
     public static void Start(int port)
     {
         if (_listener != null)
@@ -172,6 +180,9 @@ internal static class DebugServer
         }
 
         var method = request["method"]?.Value<string>();
+        if (method != "setAgentState" && method != "ping" && AgentState == "ready")
+            AgentState = "busy";
+
         var context = new RequestContext(client, request["id"], method);
         try
         {
@@ -190,6 +201,21 @@ internal static class DebugServer
             case "ping":
                 context.SendOk(new JObject());
                 break;
+
+            case "setAgentState":
+            {
+                var state = request["state"]?.Value<string>() ?? "";
+                if (state != "busy" && state != "ready" && state != "")
+                {
+                    context.SendError("INVALID_PARAM", "state must be 'busy', 'ready' or ''");
+                    break;
+                }
+
+                AgentState = state;
+                AgentNote = request["note"]?.Value<string>() ?? "";
+                context.SendOk(new JObject { ["state"] = AgentState });
+                break;
+            }
 
             case "getVersion":
                 context.SendOk(new JObject

@@ -27,6 +27,12 @@
     <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
+  <!-- SixLabors.Fonts 3.x adds variable-font axes but validates a signed license key at build time
+       (Release fails without sixlabors.lic). Switch to 3.1.0 once the open-source key is in the repo. -->
+  <PropertyGroup>
+    <SixLaborsFontsVersion>2.1.3</SixLaborsFontsVersion>
+    <DefineConstants Condition="$(SixLaborsFontsVersion.StartsWith('3.'))">$(DefineConstants);SIXLABORS_FONTS_V3</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />
     <Using Include="System.Numerics" />
@@ -122,6 +128,8 @@
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
     <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
     <PackageReference Include="Svg" Version="3.4.8" />
+    <PackageReference Include="SixLabors.Fonts" Version="$(SixLaborsFontsVersion)" />
+    <PackageReference Include="LibTessDotNet" Version="1.1.15" />
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively to other projects).
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from

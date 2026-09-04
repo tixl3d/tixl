@@ -90,7 +90,8 @@ internal static class UiRegistration
                                 typeof(SharpDX.Direct3D.PrimitiveTopology));
         
         RegisterTypesToProperty(UiProperties.CpuGeometry,
-                                typeof(MeshGeometry));
+                                typeof(MeshGeometry),
+                                typeof(CurveGeometry));
 
         RegisterTypesToProperty(UiProperties.CpuFields,
                                 typeof(ScalarField),
