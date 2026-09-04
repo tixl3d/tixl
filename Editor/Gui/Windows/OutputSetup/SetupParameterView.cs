@@ -188,7 +188,6 @@ internal static class SetupParameterView
         if (FormInputs.AddCheckBox("Render", ref render, "Skip drawing this surface without removing it."))
             SetupActions.RunUndoable("Toggle render", setup, () => surface.Render = render);
 
-        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
         var position = surface.Placement?.Pose.Position ?? Vector3.Zero;
         Span<float> pos = [position.X, position.Y, position.Z];
         var posState = DrawFloatsRow("Position (m)", pos);
@@ -275,11 +274,12 @@ internal static class SetupParameterView
             CommitFieldUndo(setup, "Change raster", gridCellState);
         }
 
-        Span<float> anchor = [pivot.X, pivot.Y];
-        var anchorState = DrawFloatsRow("Anchor (0..1)", anchor);
+        Span<float> anchor = [surface.Anchor.X, surface.Anchor.Y];
+        var anchorState = DrawFloatsRow("Anchor (-1..1)", anchor,
+                                        "Origin of the metre raster and of child regions: (0,0) is the centre, (0,-1) the bottom-centre, (±1,±1) the corners.");
         BeginFieldUndo(setup, anchorState);
         if ((anchorState & InputEditStateFlags.Modified) != 0)
-            (surface.Placement ??= new Surface.StagePlacement()).Pivot = new Vector2(anchor[0], anchor[1]);
+            surface.Anchor = new Vector2(anchor[0], anchor[1]);
 
         CommitFieldUndo(setup, "Move anchor", anchorState);
     }

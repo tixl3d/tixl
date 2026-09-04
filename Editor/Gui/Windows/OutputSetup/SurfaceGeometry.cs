@@ -8,22 +8,35 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// Surface-space geometry, shared by the Size (m) fields and the canvas edge handles. A surface's corner-pin
 /// quad is the projective image of its rectangle, so resizing means: recover that projection from the current
 /// quad, then re-project the new rectangle. The projector's own view never moves — only the surface's
-/// footprint changes shape. Surface space has its origin at the surface's top-left with Y growing down, so it
-/// matches the quad's TL, TR, BR, BL winding.
+/// footprint changes shape.
+/// <para><b>Surface space</b> is metres, Y up, with the origin at the surface's <see cref="Surface.Anchor"/>.
+/// Everything a surface owns is stored in it — measuring lines, child regions, the metre raster — so a crop
+/// that changes the footprint leaves all of them where they are: only the rectangle's bounds move, never the
+/// origin. Quads are handed out in the projector's winding, TL, TR, BR, BL; bounds as (min, max).</para>
 /// </summary>
 internal static class SurfaceGeometry
 {
     /// <summary>Smallest edge length we allow, so a crop can't collapse a surface to nothing.</summary>
     public const float MinSize = 0.01f;
 
-    public static Vector2[] RectForSize(Vector2 size)
+    /// <summary>The surface's own rectangle in its space, as a TL, TR, BR, BL quad — the frame the corner pin maps.</summary>
+    public static Vector2[] LocalRect(Surface surface)
     {
-        return [Vector2.Zero, new Vector2(size.X, 0), new Vector2(size.X, size.Y), new Vector2(0, size.Y)];
+        LocalBounds(surface, out var min, out var max);
+        return RectFromBounds(min, max);
     }
 
+    /// <summary>The surface's own rectangle in its space: bottom-left and top-right, in metres from the anchor.</summary>
+    public static void LocalBounds(Surface surface, out Vector2 min, out Vector2 max)
+    {
+        min = -surface.AnchorInMeters;
+        max = min + surface.SizeInMeters;
+    }
+
+    /// <summary>TL, TR, BR, BL from Y-up bounds.</summary>
     public static Vector2[] RectFromBounds(Vector2 min, Vector2 max)
     {
-        return [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)];
+        return [new Vector2(min.X, max.Y), max, new Vector2(max.X, min.Y), min];
     }
 
     /// <summary>The projection carrying the surface's own space into this mapping's output pixels.</summary>
@@ -32,7 +45,7 @@ internal static class SurfaceGeometry
         surfaceToOutput = default;
         var size = surface.SizeInMeters;
         return size.X > 0.0001f && size.Y > 0.0001f && mapping.Quad.Length >= 4
-               && Homography.TryComputeQuadToQuad(RectForSize(size), mapping.Quad, out surfaceToOutput);
+               && Homography.TryComputeQuadToQuad(LocalRect(surface), mapping.Quad, out surfaceToOutput);
     }
 
     /// <summary>The inverse — output pixels back into the surface's own space.</summary>
@@ -41,57 +54,31 @@ internal static class SurfaceGeometry
         outputToSurface = default;
         var size = surface.SizeInMeters;
         return size.X > 0.0001f && size.Y > 0.0001f && mapping.Quad.Length >= 4
-               && Homography.TryComputeQuadToQuad(mapping.Quad, RectForSize(size), out outputToSurface);
+               && Homography.TryComputeQuadToQuad(mapping.Quad, LocalRect(surface), out outputToSurface);
     }
 
     /// <summary>
-    /// Adopts <paramref name="newRect"/> — expressed in the surface's *current* space — as the surface's
-    /// rectangle. Every mapping's quad is re-projected through its own recovered projection, so what the
-    /// projector shows stays put while the surface's footprint changes.
+    /// Adopts new bounds — expressed in the surface's *current* space — as the surface's rectangle. Every
+    /// mapping's quad is re-projected through its own recovered projection, so what the projector shows stays
+    /// put while the footprint changes. The origin does not move: the anchor's normalized position is re-derived
+    /// from where the origin now sits inside the new rectangle, and everything stored in surface space
+    /// (measuring lines, regions, the raster) keeps its coordinates.
     /// </summary>
-    /// <param name="pinAnnotations">When the origin moves (a crop/resize), re-base the measuring lines by the
-    /// same offset so they stay on their physical features next to the grid. A stretch keeps the surface's own
-    /// space, so it passes false and leaves them where they are.</param>
-    public static void ApplyRect(Surface surface, Vector2[] newRect, bool pinAnnotations = true)
+    public static void ApplyBounds(Surface surface, Vector2 min, Vector2 max)
     {
-        var oldSize = surface.SizeInMeters;
-        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
-
-        // Where the anchor sits in the current frame, so it can be held at the same physical point below.
-        var anchor = new Vector2(pivot.X * oldSize.X, oldSize.Y - pivot.Y * oldSize.Y);
-
+        var corners = RectFromBounds(min, max);
         foreach (var mapping in surface.OutputMappings)
         {
             if (!TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
                 continue;
 
             for (var i = 0; i < 4; i++)
-                mapping.Quad[i] = surfaceToOutput.TransformPoint(newRect[i]);
+                mapping.Quad[i] = surfaceToOutput.TransformPoint(corners[i]);
         }
 
-        var min = newRect[0];
-        var max = newRect[2];
         var newSize = new Vector2(MathF.Max(max.X - min.X, MinSize), MathF.Max(max.Y - min.Y, MinSize));
         surface.SizeInMeters = newSize;
-
-        // The rectangle's own origin just moved, so counter-move the anchor to keep it — and with it the metre
-        // raster and everything measured against it — pinned to the same physical point on the wall. A crop
-        // must never shift the surface's local content space, only shrink the window onto it.
-        var newPivot = new Vector2((anchor.X - min.X) / newSize.X, (max.Y - anchor.Y) / newSize.Y);
-        if (MathF.Abs(newPivot.X - pivot.X) > 0.0001f || MathF.Abs(newPivot.Y - pivot.Y) > 0.0001f)
-            (surface.Placement ??= new Surface.StagePlacement()).Pivot = newPivot;
-
-        // Measuring lines are stored from the top-left origin, so the same origin shift has to travel to them —
-        // otherwise cropping the top/left edge slides them off the features they mark. The grid follows the
-        // (counter-moved) pivot, so this is what keeps the two aligned.
-        if (pinAnnotations && (min.X != 0 || min.Y != 0))
-        {
-            foreach (var annotation in surface.Annotations)
-            {
-                annotation.P1 -= min;
-                annotation.P2 -= min;
-            }
-        }
+        surface.Anchor = new Vector2(-2 * min.X / newSize.X - 1, -2 * min.Y / newSize.Y - 1);
     }
 
     /// <summary>
@@ -121,50 +108,27 @@ internal static class SurfaceGeometry
         return null;
     }
 
-    /// <summary>The anchor's position in a surface's own space (origin top-left, Y down).</summary>
-    public static Vector2 AnchorInSurface(Surface surface)
+    /// <summary>A Layout child's rectangle in its parent's space — its stored bottom-left plus its size.</summary>
+    public static void ChildBounds(Surface child, out Vector2 min, out Vector2 max)
     {
-        var size = surface.SizeInMeters;
-        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
-        return new Vector2(pivot.X * size.X, size.Y - pivot.Y * size.Y);
+        min = child.LocalPosition;
+        max = min + child.SizeInMeters;
     }
 
-    /// <summary>
-    /// A Layout child's rectangle expressed in its parent's space. The child stores its bottom-left in meters
-    /// from the parent's anchor (X right, Y up), so this is where that lands with the parent's Y-down frame.
-    /// </summary>
-    public static Vector2[] ChildRectInParent(Surface parent, Surface child)
+    /// <summary>Writes a child's rectangle back from bounds in the parent's space — the inverse of <see cref="ChildBounds"/>.</summary>
+    public static void SetChildBounds(Surface child, Vector2 min, Vector2 max)
     {
-        var anchor = AnchorInSurface(parent);
-        var bottomLeft = anchor + new Vector2(child.LocalPosition.X, -child.LocalPosition.Y);
-        var size = child.SizeInMeters;
-        return RectFromBounds(new Vector2(bottomLeft.X, bottomLeft.Y - size.Y),
-                              new Vector2(bottomLeft.X + size.X, bottomLeft.Y));
-    }
-
-    /// <summary>
-    /// A Layout child has no corner pin of its own — it rides its parent's, so its quad is derived by pushing
-    /// its rectangle through the parent's projection for that output.
-    /// </summary>
-    /// <summary>
-    /// Writes a child's rectangle back, given bounds in the parent's space — the inverse of
-    /// <see cref="ChildRectInParent"/>. Position is stored relative to the parent's anchor, so it survives the
-    /// parent being cropped.
-    /// </summary>
-    public static void SetChildRect(Surface parent, Surface child, Vector2 min, Vector2 max)
-    {
-        var size = new Vector2(MathF.Max(max.X - min.X, MinSize), MathF.Max(max.Y - min.Y, MinSize));
-        var anchor = AnchorInSurface(parent);
-
-        child.SizeInMeters = size;
-        child.LocalPosition = new Vector2(min.X - anchor.X, anchor.Y - (min.Y + size.Y));
+        child.SizeInMeters = new Vector2(MathF.Max(max.X - min.X, MinSize), MathF.Max(max.Y - min.Y, MinSize));
+        child.LocalPosition = min;
     }
 
     /// <summary>
     /// A descendant's rectangle in its <paramref name="carrier"/>'s space, composed down the whole chain — so
     /// regions can nest arbitrarily deep, not just one level. Every level is metres on the same plane, so each
-    /// step is a plain translation by the parent's origin. <paramref name="parentOrigin"/> is the immediate
-    /// parent's origin in carrier space, which is what converts a cursor back into the space edits live in.
+    /// step is a plain translation: a child's coordinates are measured from its parent's anchor, and that anchor
+    /// sits at the parent's bottom-left plus its own anchor offset. <paramref name="parentOrigin"/> is the
+    /// immediate parent's origin (anchor) in carrier space — what converts a cursor back into the space edits
+    /// live in.
     /// </summary>
     public static bool TryGetDescendantRect(Setup setup, Surface carrier, Surface child,
                                             out Vector2 min, out Vector2 max, out Vector2 parentOrigin)
@@ -192,18 +156,16 @@ internal static class SurfaceGeometry
         if (_chainScratch.Count == 0 || _chainScratch[^1].ParentId != carrier.Id)
             return false;
 
-        var offset = Vector2.Zero;
-        var parent = carrier;
+        var origin = Vector2.Zero; // the carrier's own origin is its anchor, which is (0,0) in carrier space
         for (var i = _chainScratch.Count - 1; i >= 0; i--)
         {
             var current = _chainScratch[i];
-            var rect = ChildRectInParent(parent, current);
-            parentOrigin = offset;
-            min = offset + rect[0];
-            max = offset + rect[2];
+            ChildBounds(current, out var localMin, out var localMax);
+            parentOrigin = origin;
+            min = origin + localMin;
+            max = origin + localMax;
 
-            offset = min; // this level's space origin, for the level below
-            parent = current;
+            origin = min + current.AnchorInMeters; // this level's own origin, for the level below
         }
 
         return true;
@@ -217,15 +179,12 @@ internal static class SurfaceGeometry
             || !TryGetDescendantRect(setup, carrier, child, out var min, out var max, out _))
             return false;
 
-        quad[0] = surfaceToOutput.TransformPoint(min);
-        quad[1] = surfaceToOutput.TransformPoint(new Vector2(max.X, min.Y));
-        quad[2] = surfaceToOutput.TransformPoint(max);
-        quad[3] = surfaceToOutput.TransformPoint(new Vector2(min.X, max.Y));
+        quad[0] = surfaceToOutput.TransformPoint(new Vector2(min.X, max.Y));
+        quad[1] = surfaceToOutput.TransformPoint(max);
+        quad[2] = surfaceToOutput.TransformPoint(new Vector2(max.X, min.Y));
+        quad[3] = surfaceToOutput.TransformPoint(min);
         return true;
     }
-
-    // Ancestor chain scratch — the editor is single-threaded, and this runs inside the per-frame draw.
-    private static readonly List<Surface> _chainScratch = [];
 
     /// <summary>
     /// Coordinates worth snapping to, in the parent's space: the parent's own edges and centre, plus every
@@ -238,13 +197,8 @@ internal static class SurfaceGeometry
         xs.Clear();
         ys.Clear();
 
-        var size = parent.SizeInMeters;
-        xs.Add(0);
-        xs.Add(size.X * 0.5f);
-        xs.Add(size.X);
-        ys.Add(0);
-        ys.Add(size.Y * 0.5f);
-        ys.Add(size.Y);
+        LocalBounds(parent, out var parentMin, out var parentMax);
+        AddEdgesAndCentre(xs, ys, parentMin, parentMax);
 
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
@@ -252,13 +206,8 @@ internal static class SurfaceGeometry
             if (sibling.ParentId != parent.Id || sibling.Id == excludeId)
                 continue;
 
-            var rect = ChildRectInParent(parent, sibling);
-            xs.Add(rect[0].X);
-            xs.Add((rect[0].X + rect[2].X) * 0.5f);
-            xs.Add(rect[2].X);
-            ys.Add(rect[0].Y);
-            ys.Add((rect[0].Y + rect[2].Y) * 0.5f);
-            ys.Add(rect[2].Y);
+            ChildBounds(sibling, out var min, out var max);
+            AddEdgesAndCentre(xs, ys, min, max);
         }
     }
 
@@ -293,7 +242,7 @@ internal static class SurfaceGeometry
         return found;
     }
 
-    /// <summary>Resizes keeping the pivot anchored, so editing one dimension extends rather than recentres.</summary>
+    /// <summary>Resizes keeping the anchor in place, so editing one dimension extends rather than recentres.</summary>
     public static void ResizeAnchored(Surface surface, Vector2 newSize)
     {
         var oldSize = surface.SizeInMeters;
@@ -304,11 +253,10 @@ internal static class SurfaceGeometry
             return;
         }
 
-        // Pivot is normalized from the surface's bottom-left, while surface space runs Y down.
-        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
-        var minX = pivot.X * oldSize.X - pivot.X * newSize.X;
-        var maxY = oldSize.Y - pivot.Y * oldSize.Y + pivot.Y * newSize.Y;
-        ApplyRect(surface, RectFromBounds(new Vector2(minX, maxY - newSize.Y), new Vector2(minX + newSize.X, maxY)));
+        // The anchor keeps its normalized place in the rectangle, and it is the origin — so the new bounds are
+        // the new size laid out around the same origin.
+        var min = -(surface.Anchor + Vector2.One) * 0.5f * newSize;
+        ApplyBounds(surface, min, min + newSize);
     }
 
     /// <summary>
@@ -326,29 +274,37 @@ internal static class SurfaceGeometry
         if (size.X <= 0.0001f || size.Y <= 0.0001f)
             return;
 
-        var pivot = surface.Placement?.Pivot;
-
-        var min = Vector2.Zero;
-        var max = size;
+        var anchor = surface.Anchor;
+        LocalBounds(surface, out var min, out var max);
         switch (edge)
         {
-            case 0: min.Y = MathF.Min(surfacePos.Y, max.Y - MinSize); break;
+            case 0: max.Y = MathF.Max(surfacePos.Y, min.Y + MinSize); break;
             case 1: max.X = MathF.Max(surfacePos.X, min.X + MinSize); break;
-            case 2: max.Y = MathF.Max(surfacePos.Y, min.Y + MinSize); break;
+            case 2: min.Y = MathF.Min(surfacePos.Y, max.Y - MinSize); break;
             default: min.X = MathF.Min(surfacePos.X, max.X - MinSize); break;
         }
 
-        // A stretch restores the surface's own space below, so its annotations must stay put (pinAnnotations:
-        // false); a crop re-bases the space, so they ride the origin shift.
-        ApplyRect(surface, RectFromBounds(min, max), pinAnnotations: !keepDimensions);
+        ApplyBounds(surface, min, max);
 
         if (!keepDimensions)
             return;
 
-        // A stretch keeps the declared rectangle, so its normalization has to come back untouched too — only
-        // the mapping onto the wall changed, not the surface's own space.
+        // A stretch keeps the declared rectangle, so its space has to come back untouched too — only the
+        // mapping onto the wall changed.
         surface.SizeInMeters = size;
-        if (pivot.HasValue && surface.Placement != null)
-            surface.Placement.Pivot = pivot.Value;
+        surface.Anchor = anchor;
     }
+
+    private static void AddEdgesAndCentre(List<float> xs, List<float> ys, Vector2 min, Vector2 max)
+    {
+        xs.Add(min.X);
+        xs.Add((min.X + max.X) * 0.5f);
+        xs.Add(max.X);
+        ys.Add(min.Y);
+        ys.Add((min.Y + max.Y) * 0.5f);
+        ys.Add(max.Y);
+    }
+
+    // Ancestor chain scratch — the editor is single-threaded, and this runs inside the per-frame draw.
+    private static readonly List<Surface> _chainScratch = [];
 }

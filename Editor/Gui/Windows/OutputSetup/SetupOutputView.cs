@@ -157,7 +157,7 @@ internal sealed partial class SetupOutputView
             // R depends on both — leaving either live makes the drag run away.
             var basisQuad = basisMapping.Quad;
             var basisSize = basis!.SizeInMeters;
-            var pivot = basis.Placement?.Pivot ?? Vector2.Zero;
+            var anchor = basis.Anchor;
             if (_dragSurfaceId == basisId && _cornerDragOldQuads.TryGetValue(basisId, out var preDragQuad))
             {
                 basisQuad = preDragQuad;
@@ -169,24 +169,24 @@ internal sealed partial class SetupOutputView
                 if (_resizeOldState.Value.TryGetQuad(outputId, out var frozenQuad) && frozenQuad.Length >= 4)
                     basisQuad = frozenQuad;
 
-                // The pivot counter-moves on every crop, and R is built from it — leaving it live feeds that
+                // The anchor is re-derived on every crop, and R is built from it — leaving it live feeds that
                 // correction straight back into the drag, which runs away when the dragged edge is the anchor's.
                 basisSize = _resizeOldState.Value.Size;
-                pivot = _resizeOldState.Value.Pivot;
+                anchor = _resizeOldState.Value.Anchor;
             }
 
             // Selecting a different surface while rectified moves the basis; ease it so the whole scene turns
             // toward the new selection instead of snapping there.
-            basisQuad = BlendBasisTransition(basisId, basisQuad, ref basisSize, ref pivot, framingFrozen);
+            basisQuad = BlendBasisTransition(basisId, basisQuad, ref basisSize, ref anchor, framingFrozen);
 
             Bounds(basisQuad, out var quadMin, out var quadMax);
 
             // Straightening lands on the surface's real content canvas (metres × px/m) — so Size (m) is what
-            // gives the rectangle its aspect. Anchored at the pivot, so changing a dimension extends the rect
+            // gives the rectangle its aspect. Anchored at the anchor, so changing a dimension extends the rect
             // from there rather than recentring it.
             var straightSize = new Vector2(MathF.Max(basisSize.X, 0.001f),
                                            MathF.Max(basisSize.Y, 0.001f)) * MathF.Max(basis.PixelsPerMeter, 1f);
-            var stageTarget = AnchoredRect(quadMin, quadMax, pivot, straightSize);
+            var stageTarget = AnchoredRect(quadMin, quadMax, anchor, straightSize);
 
             // Stage two restretches to the content's own aspect (the composite holds the source already fitted
             // to the surface, so this un-squeezes it) and then keeps going, expanding to the *whole* source
@@ -209,7 +209,7 @@ internal sealed partial class SetupOutputView
 
                 Bounds(stageTarget, out var straightMin, out var straightMax);
                 var width = straightMax.X - straightMin.X;
-                Bounds(AnchoredRect(straightMin, straightMax, pivot, new Vector2(width, width / aspect)),
+                Bounds(AnchoredRect(straightMin, straightMax, anchor, new Vector2(width, width / aspect)),
                        out var sliceMin, out var sliceMax);
 
                 // Grow the slice out to the whole source it was cut from, leaving the slice itself in place.
@@ -953,10 +953,10 @@ internal sealed partial class SetupOutputView
     /// private buffer so the stored quad is never touched, and only between two real surfaces — entering or
     /// leaving the rectified view snaps (there's nothing to turn from), as does an active edit.
     /// </summary>
-    private Vector2[] BlendBasisTransition(Guid basisId, Vector2[] targetQuad, ref Vector2 targetSize, ref Vector2 targetPivot, bool frozen)
+    private Vector2[] BlendBasisTransition(Guid basisId, Vector2[] targetQuad, ref Vector2 targetSize, ref Vector2 targetAnchor, bool frozen)
     {
         // A lifted freeze is the same situation as a basis switch: an edge crop rewrote the quad, size, and
-        // pivot R is built from, and they'd land in one frame — a view jump the user never asked for. Ease
+        // anchor R is built from, and they'd land in one frame — a view jump the user never asked for. Ease
         // from the frozen state instead, so the rectified view settles onto the edit.
         if (!frozen && _basisWasFrozen && basisId == _basisTransitionId && _basisHasLast)
         {
@@ -964,7 +964,7 @@ internal sealed partial class SetupOutputView
                 _basisFromQuad[i] = _basisLastQuad[i];
 
             _basisFromSize = _basisLastSize;
-            _basisFromPivot = _basisLastPivot;
+            _basisFromAnchor = _basisLastAnchor;
             _basisMorph = 0f;
 
             // Same basis: the edit settles *inside* the held framing — the camera must not chase it.
@@ -981,7 +981,7 @@ internal sealed partial class SetupOutputView
                     _basisFromQuad[i] = _basisLastQuad[i];
 
                 _basisFromSize = _basisLastSize;
-                _basisFromPivot = _basisLastPivot;
+                _basisFromAnchor = _basisLastAnchor;
                 _basisMorph = 0f;
             }
             else
@@ -1004,7 +1004,7 @@ internal sealed partial class SetupOutputView
                 _basisBlendQuad[i] = Vector2.Lerp(_basisFromQuad[i], targetQuad[i], t);
 
             targetSize = Vector2.Lerp(_basisFromSize, targetSize, t);
-            targetPivot = Vector2.Lerp(_basisFromPivot, targetPivot, t);
+            targetAnchor = Vector2.Lerp(_basisFromAnchor, targetAnchor, t);
             resultQuad = _basisBlendQuad;
         }
 
@@ -1013,7 +1013,7 @@ internal sealed partial class SetupOutputView
             _basisLastQuad[i] = resultQuad[i];
 
         _basisLastSize = targetSize;
-        _basisLastPivot = targetPivot;
+        _basisLastAnchor = targetAnchor;
         _basisHasLast = true;
         return resultQuad;
     }
@@ -1154,7 +1154,7 @@ internal sealed partial class SetupOutputView
             && SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var carrierToOutput)
             && SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out var rectMin, out _, out _))
         {
-            var anchorInCarrier = rectMin + SurfaceGeometry.AnchorInSurface(child);
+            var anchorInCarrier = rectMin + child.AnchorInMeters;
             DrawAnchorGlyph(dl, _projection.CanvasToScreen(rToView.TransformPoint(carrierToOutput.TransformPoint(anchorInCarrier)) - viewMin), fade);
         }
 
@@ -1209,18 +1209,16 @@ internal sealed partial class SetupOutputView
                                     }
                                 }
 
-                                var rect = SurfaceGeometry.ChildRectInParent(parent, child);
-                                var min = rect[0];
-                                var max = rect[2];
-                                switch (edge)
+                                SurfaceGeometry.ChildBounds(child, out var min, out var max);
+                                switch (edge) // 0 = top … 3 = left in screen winding; parent space is Y-up
                                 {
-                                    case 0: min.Y = MathF.Min(pos.Y, max.Y - SurfaceGeometry.MinSize); break;
+                                    case 0: max.Y = MathF.Max(pos.Y, min.Y + SurfaceGeometry.MinSize); break;
                                     case 1: max.X = MathF.Max(pos.X, min.X + SurfaceGeometry.MinSize); break;
-                                    case 2: max.Y = MathF.Max(pos.Y, min.Y + SurfaceGeometry.MinSize); break;
+                                    case 2: min.Y = MathF.Min(pos.Y, max.Y - SurfaceGeometry.MinSize); break;
                                     default: min.X = MathF.Min(pos.X, max.X - SurfaceGeometry.MinSize); break;
                                 }
 
-                                SurfaceGeometry.SetChildRect(parent, child, min, max);
+                                SurfaceGeometry.SetChildBounds(child, min, max);
 
                                 if (guide.HasValue && hasProjection)
                                     DrawSnapGuide(dl, parentProjection, rToView, viewMin, parent, horizontal, guide.Value, edgeParentOrigin);
@@ -1279,9 +1277,9 @@ internal sealed partial class SetupOutputView
                       onDragging: () => ApplyLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child),
                       onStarted: () =>
                                  {
-                                     var rect = SurfaceGeometry.ChildRectInParent(parent, child);
+                                     SurfaceGeometry.ChildBounds(child, out var startMin, out var startMax);
                                      _labelMoveSurfaceId = child.Id;
-                                     _childMoveStart = (ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin), rect[0], rect[2]);
+                                     _childMoveStart = (ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin), startMin, startMax);
                                      _childMoveAxis = 0;
                                  },
                       onCompleted: () =>
@@ -1358,7 +1356,7 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        SurfaceGeometry.SetChildRect(parent, child, newMin, newMax);
+        SurfaceGeometry.SetChildBounds(child, newMin, newMax);
 
         if (!hasProjection)
             return;
@@ -1373,8 +1371,8 @@ internal sealed partial class SetupOutputView
             return;
 
         // The locked movement axis, drawn across the parent so it reads as a guide rather than a stub.
-        var rectNow = SurfaceGeometry.ChildRectInParent(parent, child);
-        var mid = (rectNow[0] + rectNow[2]) * 0.5f;
+        SurfaceGeometry.ChildBounds(child, out var minNow, out var maxNow);
+        var mid = (minNow + maxNow) * 0.5f;
         DrawSnapGuide(dl, surfaceToOutput, rToView, viewMin, parent, _childMoveAxis == 2, _childMoveAxis == 1 ? mid.Y : mid.X, parentOrigin);
     }
 
@@ -1414,10 +1412,12 @@ internal sealed partial class SetupOutputView
     private void DrawSnapGuide(ImDrawListPtr dl, Homography surfaceToOutput, Homography rToView, Vector2 viewMin,
                                Surface parent, bool vertical, float coordinate, Vector2 originInCarrier)
     {
-        // Coordinates are in the parent's space; the projection expects the carrier's, so step across.
+        // Coordinates are in the parent's space; the projection expects the carrier's, so step across. The
+        // guide overshoots the parent by its own size on both ends.
         var size = parent.SizeInMeters;
-        var from = originInCarrier + (vertical ? new Vector2(coordinate, -size.Y) : new Vector2(-size.X, coordinate));
-        var to = originInCarrier + (vertical ? new Vector2(coordinate, size.Y * 2) : new Vector2(size.X * 2, coordinate));
+        SurfaceGeometry.LocalBounds(parent, out var parentMin, out var parentMax);
+        var from = originInCarrier + (vertical ? new Vector2(coordinate, parentMin.Y - size.Y) : new Vector2(parentMin.X - size.X, coordinate));
+        var to = originInCarrier + (vertical ? new Vector2(coordinate, parentMax.Y + size.Y) : new Vector2(parentMax.X + size.X, coordinate));
 
         var a = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(from)) - viewMin);
         var b = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(to)) - viewMin);
@@ -1661,12 +1661,8 @@ internal sealed partial class SetupOutputView
         if (fade <= 0.01f || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
             return;
 
-        // Pivot is normalized from the surface's bottom-left; surface space runs Y down.
-        var size = surface.SizeInMeters;
-        var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
-        var anchorInSurface = new Vector2(pivot.X * size.X, size.Y - pivot.Y * size.Y);
-
-        DrawAnchorGlyph(dl, _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(anchorInSurface)) - viewMin), fade);
+        // The anchor is the origin of surface space.
+        DrawAnchorGlyph(dl, _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(Vector2.Zero)) - viewMin), fade);
     }
 
     // Deliberately not the corner marker's orange (StatusAnimated) — an anchor and a winding cue are unrelated.
@@ -1775,21 +1771,15 @@ internal sealed partial class SetupOutputView
 
     private static bool ResizeStatesDiffer(in ResizeSurfaceCommand.State a, in ResizeSurfaceCommand.State b)
     {
-        if (a.Size != b.Size || a.LocalPosition != b.LocalPosition || a.Pivot != b.Pivot || a.HasPlacement != b.HasPlacement)
+        if (a.Size != b.Size || a.LocalPosition != b.LocalPosition || a.Anchor != b.Anchor)
             return true;
 
-        if (a.Quads.Length != b.Quads.Length || a.Annotations.Length != b.Annotations.Length)
+        if (a.Quads.Length != b.Quads.Length)
             return true;
 
         for (var i = 0; i < a.Quads.Length; i++)
         {
             if (a.Quads[i].OutputId != b.Quads[i].OutputId || QuadsDiffer(a.Quads[i].Quad, b.Quads[i].Quad))
-                return true;
-        }
-
-        for (var i = 0; i < a.Annotations.Length; i++)
-        {
-            if (a.Annotations[i].P1 != b.Annotations[i].P1 || a.Annotations[i].P2 != b.Annotations[i].P2)
                 return true;
         }
 
@@ -1809,17 +1799,18 @@ internal sealed partial class SetupOutputView
 
     /// <summary>
     /// An axis-aligned rect of <paramref name="size"/> placed so its anchor coincides with the same anchor of
-    /// the reference box — so resizing extends the rect from the anchor instead of recentring it. The pivot is
-    /// normalized from the surface's bottom-left, while canvas Y grows downward. Returns TL, TR, BR, BL.
+    /// the reference box — so resizing extends the rect from the anchor instead of recentring it. The anchor
+    /// is signed and Y-up, while canvas Y grows downward. Returns TL, TR, BR, BL.
     /// </summary>
-    private static Vector2[] AnchoredRect(Vector2 refMin, Vector2 refMax, Vector2 pivot, Vector2 size)
+    private static Vector2[] AnchoredRect(Vector2 refMin, Vector2 refMax, Vector2 anchor, Vector2 size)
     {
-        var anchorX = refMin.X + pivot.X * (refMax.X - refMin.X);
-        var anchorY = refMax.Y - pivot.Y * (refMax.Y - refMin.Y);
+        var t = (anchor + Vector2.One) * 0.5f;
+        var anchorX = refMin.X + t.X * (refMax.X - refMin.X);
+        var anchorY = refMax.Y - t.Y * (refMax.Y - refMin.Y);
 
-        var minX = anchorX - pivot.X * size.X;
+        var minX = anchorX - t.X * size.X;
         var maxX = minX + size.X;
-        var maxY = anchorY + pivot.Y * size.Y;
+        var maxY = anchorY + t.Y * size.Y;
         var minY = maxY - size.Y;
 
         return [new Vector2(minX, minY), new Vector2(maxX, minY), new Vector2(maxX, maxY), new Vector2(minX, maxY)];
@@ -1862,12 +1853,12 @@ internal sealed partial class SetupOutputView
     // Canvas scale/offset at the moment the morph started, so the framing eases from the user's view.
     private CanvasScope _morphFromScope;
 
-    // Basis transition: eases the rectify basis (quad/size/pivot) from the previously focused surface to the
+    // Basis transition: eases the rectify basis (quad/size/anchor) from the previously focused surface to the
     // newly selected one, so switching selection in a rectified view turns the scene rather than snapping.
     private readonly Vector2[] _basisFromQuad = new Vector2[4];
     private readonly Vector2[] _basisLastQuad = new Vector2[4];
     private readonly Vector2[] _basisBlendQuad = new Vector2[4];
-    private Vector2 _basisFromSize, _basisLastSize, _basisFromPivot, _basisLastPivot;
+    private Vector2 _basisFromSize, _basisLastSize, _basisFromAnchor, _basisLastAnchor;
     private Guid _basisTransitionId;
     private float _basisMorph = 1f; // 1 = settled
     private bool _basisHasLast;

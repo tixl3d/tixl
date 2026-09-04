@@ -42,7 +42,7 @@ Click the "Surface 1" row.
   editable **Name** field reading "Surface 1".
 - Below: **Render** checkbox (on), **Position (m)** (3 fields, all 0),
   **Size (m)** (1 × 1) with the lock-aspect and measure icons,
-  **Show size raster** (off), **Anchor (0..1)** (0 × 0).
+  **Show size raster** (off), **Anchor (-1..1)** (0 × -1, the bottom-centre).
 - The setup panel itself shows **no** properties card at its bottom anymore.
 
 ## Step: Picking takes the window and deselects the other side

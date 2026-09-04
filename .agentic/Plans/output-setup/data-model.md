@@ -353,9 +353,7 @@ about a wall upside-down; matches the 3D stage pose and camera conventions), **p
   default composes as anchor `(0,−1)` + position `(x, 0)`. One convention for **all** frame kinds
   (surfaces, content cards, outputs) — no per-kind variants. Term: **Anchor** (decision №7); a
   separate rotation center can become its own property later if a flow ever needs one.
-- **As-built caveat:** surface-local is currently **Y-down from the top-left**, and
-  `StagePlacement.Pivot` is unsigned 0..1 from the bottom-left — the mismatch flips Y at several
-  boundaries today (`LocalPosition`, child-rect math, annotation endpoints) and is a standing source
-  of sign bugs. Both normalize in **one coordinated pass** together with the signed-anchor change —
-  one review of all the geometry instead of two half-conventions coexisting. Until that pass lands,
-  any code comment touching these values states which convention it is in.
+- **Landed 2026-09-05** (inventory and site list in [`anchor-yup-pass.md`](anchor-yup-pass.md)):
+  `Surface.Anchor` (signed, default bottom-centre `(0,−1)`) replaced `StagePlacement.Pivot`; surface-local
+  space is Y-up with its **origin at the anchor**, so a crop never moves annotations or child regions.
+  No legacy conversion — the format was internal-preview only.

@@ -199,12 +199,12 @@ internal static class OutputManager
             var color = hasContent ? sink!.GetColor(_context) : Vector4.One;
             var sourceRect = hasContent ? resolvedRect : _fullSourceRect;
 
-            // Metres spanned by the surface, and the origin (its anchor) in source UV — the pivot is
-            // normalized from the bottom-left while V runs downward.
+            // Metres spanned by the surface, and the origin (its anchor) in source UV — the anchor is signed
+            // and Y-up while V runs downward from the top.
             var metres = new Vector2(Math.Clamp(surface.SizeInMeters.X, 0.01f, 1000f),
                                      Math.Clamp(surface.SizeInMeters.Y, 0.01f, 1000f));
-            var pivot = surface.Placement?.Pivot ?? Vector2.Zero;
-            var gridOrigin = new Vector4(pivot.X, 1f - pivot.Y,
+            var anchor01 = (surface.Anchor + Vector2.One) * 0.5f;
+            var gridOrigin = new Vector4(anchor01.X, 1f - anchor01.Y,
                                          Math.Clamp(surface.GridSubdivisions, 1, 100), _gridMinorOpacity);
 
             foreach (var mapping in carrier.OutputMappings)

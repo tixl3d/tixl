@@ -342,6 +342,13 @@ with an explanatory comment) — the row-callback API design made compliance imp
   `OutputManager`, `ContentSourceSync`, `SurfaceGeometry`, `ReferenceImageView`. `Windows/Output/` keeps
   only the output window itself (window, toolbar, state, camera, resolution). The Phase B outliner and
   Phase C board land in the new folder.
+- **2026-09-05 (anchor / Y-up pass):** `Surface.Anchor` (signed −1..1, Y-up, default bottom-centre)
+  replaces `StagePlacement.Pivot`; surface-local space is now Y-up with the origin at the anchor.
+  `SurfaceGeometry` rewritten around `LocalRect`/`LocalBounds`/`ApplyBounds`/`ChildBounds`: a crop re-derives
+  the anchor so the origin never moves, which deleted the annotation counter-move and its undo snapshot.
+  Region creation, snapping, edge drags, the raster origin and the Straight framing (`AnchoredRect`) all
+  converted; inventory + rationale in `anchor-yup-pass.md`. No legacy conversion (internal preview).
+  Not yet user-tested.
 
 ## Suggested order (revised for the flow-view pivot)
 

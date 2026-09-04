@@ -35,10 +35,10 @@ internal static class SetupSanitizer
                 changed = true;
             }
 
-            if (surface.Placement != null && !IsFinite(surface.Placement.Pivot))
+            if (!IsFinite(surface.Anchor))
             {
-                Log.Warning($"Setup repair: surface '{surface.Name}' had an invalid anchor — reset to the bottom-left.");
-                surface.Placement.Pivot = Vector2.Zero;
+                Log.Warning($"Setup repair: surface '{surface.Name}' had an invalid anchor — reset to the bottom-centre.");
+                surface.Anchor = Surface.DefaultAnchor;
                 changed = true;
             }
 

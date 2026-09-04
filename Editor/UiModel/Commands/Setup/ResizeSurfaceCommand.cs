@@ -38,10 +38,9 @@ internal sealed class ResizeSurfaceCommand : ICommand
             // A Layout child's rectangle is size + where it sits in its parent, so both travel together.
             LocalPosition = surface.LocalPosition;
 
-            // The pivot belongs to the rectangle: resizing counter-moves it to hold the anchor in place, so it
-            // has to travel with the snapshot — both for undo and to re-base a live drag.
-            HasPlacement = surface.Placement != null;
-            Pivot = surface.Placement?.Pivot ?? Vector2.Zero;
+            // The anchor belongs to the rectangle: a crop re-derives it so the origin stays put, so it has to
+            // travel with the snapshot — both for undo and to re-base a live drag.
+            Anchor = surface.Anchor;
 
             Quads = new (Guid, Vector2[])[surface.OutputMappings.Count];
             for (var i = 0; i < surface.OutputMappings.Count; i++)
@@ -49,20 +48,12 @@ internal sealed class ResizeSurfaceCommand : ICommand
                 var mapping = surface.OutputMappings[i];
                 Quads[i] = (mapping.OutputId, (Vector2[])mapping.Quad.Clone());
             }
-
-            // A crop re-bases the surface's own frame, which shifts the measuring lines with it. Snapshotting
-            // them keeps the live re-base (restore-then-apply each frame) from compounding, and lets a crop undo.
-            Annotations = new (Vector2, Vector2)[surface.Annotations.Count];
-            for (var i = 0; i < surface.Annotations.Count; i++)
-                Annotations[i] = (surface.Annotations[i].P1, surface.Annotations[i].P2);
         }
 
         public readonly Vector2 Size;
         public readonly Vector2 LocalPosition;
-        public readonly Vector2 Pivot;
-        public readonly bool HasPlacement;
+        public readonly Vector2 Anchor;
         public readonly (Guid OutputId, Vector2[] Quad)[] Quads;
-        public readonly (Vector2 P1, Vector2 P2)[] Annotations;
 
         public bool TryGetQuad(Guid outputId, out Vector2[] quad)
         {
@@ -81,31 +72,20 @@ internal sealed class ResizeSurfaceCommand : ICommand
 
         /// <summary>
         /// Puts the snapshot back onto the surface. Besides undo, a live edge drag re-bases from this every
-        /// frame: cropping rewrites the surface's own coordinate frame, so editing the live rectangle
-        /// incrementally would feed back on itself.
+        /// frame: cropping rewrites the surface's bounds, so editing the live rectangle incrementally would
+        /// feed back on itself.
         /// </summary>
         public void Restore(Surface surface)
         {
             surface.SizeInMeters = Size;
             surface.LocalPosition = LocalPosition;
-
-            if (!HasPlacement)
-                surface.Placement = null; // it can only have appeared via the anchor counter-move
-            else if (surface.Placement != null)
-                surface.Placement.Pivot = Pivot;
+            surface.Anchor = Anchor;
 
             foreach (var (outputId, quad) in Quads)
             {
                 var mapping = surface.OutputMappings.Find(m => m.OutputId == outputId);
                 if (mapping != null && mapping.Quad.Length >= 4 && quad.Length >= 4)
                     Array.Copy(quad, mapping.Quad, 4);
-            }
-
-            // Measuring lines ride the frame; restore them from the same snapshot (count is stable across a crop).
-            for (var i = 0; i < Annotations.Length && i < surface.Annotations.Count; i++)
-            {
-                surface.Annotations[i].P1 = Annotations[i].P1;
-                surface.Annotations[i].P2 = Annotations[i].P2;
             }
         }
     }

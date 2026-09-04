@@ -325,7 +325,7 @@ internal sealed partial class SetupOutputView
         var rectify = Homography.Multiply(outputToSurface, surfaceToOutput);
         if (rectify.TryInvert(out var inverse))
         {
-            var rect = SurfaceGeometry.RectForSize(surface.SizeInMeters);
+            var rect = SurfaceGeometry.LocalRect(surface);
             foreach (var other in surface.OutputMappings)
             {
                 if (ReferenceEquals(other, mapping) || !SurfaceGeometry.TryGetSurfaceToOutput(surface, other, out var otherToOutput))

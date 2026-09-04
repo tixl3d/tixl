@@ -6,9 +6,10 @@ using T3.Serialization;
 namespace T3.Core.Output;
 
 /// <summary>
-/// Measuring/annotation primitive on reference images (first of a planned annotation family —
-/// the Kind discriminator keeps room for points, markers, text). Endpoints are in
-/// reference-image pixels; an optional physical length turns the line into a measurement.
+/// Measuring/annotation primitive (first of a planned annotation family — the Kind discriminator keeps
+/// room for points, markers, text). Endpoints are in the owner's space: reference-image pixels on a
+/// <see cref="ReferenceBinding"/>, surface metres on a <see cref="Surface"/>. An optional physical length
+/// turns the line into a measurement.
 /// </summary>
 public sealed class LineAnnotation
 {

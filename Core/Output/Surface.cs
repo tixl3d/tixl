@@ -99,22 +99,18 @@ public sealed class Surface
     }
 
     /// <summary>
-    /// L3 upgrade: placement in the stage. Position is the world position of the pivot;
+    /// L3 upgrade: placement in the stage. Position is the world position of the <see cref="Anchor"/>;
     /// axis-aligned presets are editing rigs over the pose, not a storage format.
     /// </summary>
     public sealed class StagePlacement
     {
         public Pose Pose = Pose.Identity;
 
-        /// <summary>Placement/scaling anchor, normalized [0..1] from the surface's bottom-left.</summary>
-        public Vector2 Pivot;
-
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
             writer.WriteVector3("Position", Pose.Position);
             writer.WriteQuaternion("Orientation", Pose.Orientation);
-            writer.WriteVector2("Pivot", Pivot);
             writer.WriteEndObject();
         }
 
@@ -124,7 +120,6 @@ public sealed class Surface
                        {
                            Pose = new Pose(OutputJson.ReadVector3(token["Position"]),
                                            OutputJson.ReadQuaternion(token["Orientation"])),
-                           Pivot = OutputJson.ReadVector2(token["Pivot"]),
                        };
         }
     }
@@ -156,12 +151,25 @@ public sealed class Surface
     /// <summary>Physical size in meters. Defines the ContentCanvas aspect.</summary>
     public Vector2 SizeInMeters = new(1, 1);
 
+    /// <summary>
+    /// The surface's anchor, signed and centred: (0,0) is the centre, (0,−1) the bottom-centre, (±1,±1) the
+    /// corners, Y up. It is the origin of the surface's own space — measuring lines, child regions and the
+    /// metre raster are all measured from it — and the point a stage placement positions.
+    /// </summary>
+    public Vector2 Anchor = DefaultAnchor;
+
+    /// <summary>Bottom-centre: a surface stands on the floor line by default.</summary>
+    public static readonly Vector2 DefaultAnchor = new(0, -1);
+
+    /// <summary>Where the anchor sits in metres from the surface's bottom-left corner.</summary>
+    public Vector2 AnchorInMeters => (Anchor + Vector2.One) * 0.5f * SizeInMeters;
+
     /// <summary>When set, resizing keeps the current width/height ratio: editing one dimension solves the other.</summary>
     public bool LockAspect;
 
     /// <summary>Projects a real-world calibration raster over this surface (no content needed) so its
     /// corner-pin can be hand-aligned to physical wall features. Major lines are one meter apart and start at
-    /// the <see cref="StagePlacement.Pivot"/>, so the raster doubles as a ruler you can match to marks on the wall.</summary>
+    /// the <see cref="Anchor"/>, so the raster doubles as a ruler you can match to marks on the wall.</summary>
     public bool ShowGrid;
 
     /// <summary>Minor raster lines per meter; 1 draws meter lines only. They fade out once too dense to resolve.</summary>
@@ -174,7 +182,7 @@ public sealed class Surface
     public float PixelsPerMeter = 400;
 
     /// <summary>
-    /// Measuring lines in <b>surface space</b> (meters, origin top-left, Y down) — drawn across features of
+    /// Measuring lines in <b>surface space</b> (meters, origin at the <see cref="Anchor"/>, Y up) — drawn across features of
     /// the projected raster that were measured for real. Distinct from <see cref="ReferenceBinding.Annotations"/>,
     /// which live in reference-photo pixels: these say how big this surface actually is, and "apply lengths"
     /// re-meters the surface from them without moving anything on the wall.
@@ -197,6 +205,7 @@ public sealed class Surface
         writer.WriteValue("Render", Render);
         writer.WriteObject("SliceId", SliceId);
         writer.WriteVector2("SizeInMeters", SizeInMeters);
+        writer.WriteVector2("Anchor", Anchor);
         writer.WriteValue("LockAspect", LockAspect);
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
         writer.WriteValue("ShowGrid", ShowGrid);
@@ -247,6 +256,7 @@ public sealed class Surface
                               Render = token.ReadValueSafe("Render", true),
                               SliceId = OutputJson.ReadGuid(token["SliceId"]),
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
+                              Anchor = OutputJson.ReadVector2(token["Anchor"], DefaultAnchor),
                               LockAspect = token.ReadValueSafe("LockAspect", false),
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               ShowGrid = token.ReadValueSafe("ShowGrid", false),

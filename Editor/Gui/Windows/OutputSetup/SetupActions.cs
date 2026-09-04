@@ -943,9 +943,9 @@ internal static class SetupActions
             width = height * aspect;
         }
 
-        // Centre it: surface space runs Y down, so the bottom edge is below the middle.
-        var anchor = SurfaceGeometry.AnchorInSurface(parent);
-        var bottomLeft = new Vector2(parentSize.X * 0.5f - width * 0.5f, parentSize.Y * 0.5f + height * 0.5f);
+        // Centred in the parent, expressed from the parent's anchor like every child position.
+        var bottomLeft = new Vector2(parentSize.X * 0.5f - width * 0.5f, parentSize.Y * 0.5f - height * 0.5f)
+                         - parent.AnchorInMeters;
 
         var region = new Surface
                          {
@@ -954,7 +954,7 @@ internal static class SetupActions
                              ParentId = parent.Id,
                              SizeInMeters = new Vector2(MathF.Max(width, SurfaceGeometry.MinSize),
                                                         MathF.Max(height, SurfaceGeometry.MinSize)),
-                             LocalPosition = new Vector2(bottomLeft.X - anchor.X, anchor.Y - bottomLeft.Y),
+                             LocalPosition = bottomLeft,
                              PixelsPerMeter = parent.PixelsPerMeter,
                              SliceId = slice.Id,
                          };
@@ -1022,6 +1022,7 @@ internal static class SetupActions
                            ParentId = source.ParentId,
                            Render = source.Render,
                            SizeInMeters = source.SizeInMeters,
+                           Anchor = source.Anchor,
                            LockAspect = source.LockAspect,
                            LocalPosition = source.LocalPosition,
                            PixelsPerMeter = source.PixelsPerMeter,
@@ -1040,7 +1041,7 @@ internal static class SetupActions
         }
 
         if (source.Placement != null)
-            copy.Placement = new Surface.StagePlacement { Pose = source.Placement.Pose, Pivot = source.Placement.Pivot };
+            copy.Placement = new Surface.StagePlacement { Pose = source.Placement.Pose };
 
         return copy;
     }
@@ -1057,10 +1058,9 @@ internal static class SetupActions
                                MathF.Max(parentSize.Y * 0.3f, SurfaceGeometry.MinSize));
 
         // Land inside the parent rather than at its anchor: cropping an edge past the anchor legitimately
-        // pushes the pivot outside [0..1], and a child sitting on it would then start outside the parent —
+        // pushes it outside the rectangle, and a child sitting on it would then start outside the parent —
         // where extrapolating through a keystoned projection sends it a very long way off.
-        var anchor = SurfaceGeometry.AnchorInSurface(parent);
-        var bottomLeft = new Vector2(parentSize.X * 0.1f, parentSize.Y * 0.9f); // surface space runs Y down
+        var bottomLeft = new Vector2(parentSize.X * 0.1f, parentSize.Y * 0.1f) - parent.AnchorInMeters;
 
         RunUndoable("Add region", setup, () =>
                                              {
@@ -1070,7 +1070,7 @@ internal static class SetupActions
                                                                      Kind = Surface.SurfaceKinds.Layout,
                                                                      ParentId = parent.Id,
                                                                      SizeInMeters = size,
-                                                                     LocalPosition = new Vector2(bottomLeft.X - anchor.X, anchor.Y - bottomLeft.Y),
+                                                                     LocalPosition = bottomLeft,
                                                                      PixelsPerMeter = parent.PixelsPerMeter,
                                                                  };
 

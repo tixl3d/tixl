@@ -45,7 +45,7 @@ public class SetupSerializationTests
 
         Assert.NotNull(surface.Placement);
         Assert.Equal(new Vector3(0.5f, 0, 1), surface.Placement!.Pose.Position);
-        Assert.Equal(new Vector2(0.5f, 0), surface.Placement.Pivot);
+        Assert.Equal(new Vector2(0.4f, 1), surface.Anchor);
 
         Assert.Equal(2, restored.Outputs.Count);
         Assert.Equal(OutputDefinition.Kinds.Default, restored.Outputs[0].Kind);
@@ -77,6 +77,16 @@ public class SetupSerializationTests
         Assert.Equal(setup.Outputs[0].Id, duplicate.Outputs[0].Id);
         Assert.Equal(setup.Outputs[1].Id, duplicate.Outputs[1].Id);
         Assert.Equal(setup.ReferenceImages[0].Id, duplicate.ReferenceImages[0].Id);
+    }
+
+    [Fact]
+    public void SurfaceWithoutAnchor_ReadsBottomCentre()
+    {
+        var setup = Setup.ReadFromJson(JObject.Parse("""{ "Version": 1, "Name": "s", "Surfaces": [ { "Name": "wall", "SizeInMeters": [4, 2] } ] }"""));
+
+        var surface = Assert.Single(setup!.Surfaces);
+        Assert.Equal(Surface.DefaultAnchor, surface.Anchor);
+        Assert.Equal(new Vector2(2, 0), surface.AnchorInMeters);
     }
 
     [Fact]
@@ -213,10 +223,10 @@ public class SetupSerializationTests
                                                                }
                                                        ],
                                                    },
+                                   Anchor = new Vector2(0.4f, 1),
                                    Placement = new Surface.StagePlacement
                                                    {
                                                        Pose = new Pose(new Vector3(0.5f, 0, 1), Quaternion.Identity),
-                                                       Pivot = new Vector2(0.5f, 0),
                                                    },
                                });
         setup.Props.Add(new Prop { Position = new Vector3(1.5f, 0, 1.2f), HeightInMeters = 1.70f });
