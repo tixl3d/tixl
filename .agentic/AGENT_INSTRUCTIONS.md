@@ -362,8 +362,15 @@ The editor has a TCP debug bridge for agents and scripts: launch it with
 and run the visual reference test suite over JSON lines — no UI interaction needed.
 **Read [`DEBUG_PROTOCOL.md`](DEBUG_PROTOCOL.md) before using it**; it documents the
 methods, the pull-based evaluation model (select-to-evaluate, trigger flanks), wire
-formats, and the auto-save pitfalls. Use the `_agentTests` playground project for
-experiments, never `Lib` or user projects.
+formats, and the auto-save pitfalls.
+
+**Every experiment goes in the `_agentTests` project.** Make `openProject` with
+`_agentTests` the first bridge call of any probe session, before `addOp`. Never build
+probe graphs in `Lib`, never in a user project, and **never in `playground`** — that
+one looks empty and inviting but is the maintainer's own scratch graph, so ops left
+there are clutter in a graph someone is working in. `_agentTests` already exists; do
+not create a new project for this. Leave probe chains in place when you are done (the
+editor stays open for the maintainer to reuse) and say which project they are in.
 
 ## Debugging Runtime Behavior with Log Probes
 

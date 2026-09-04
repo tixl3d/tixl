@@ -34,7 +34,7 @@ Three layers, three types, one direction of flow:
 | Layer | Type | Holds | Produced by | Consumed by |
 |---|---|---|---|---|
 | Description | `SceneDocument` (new) | everything a scene file describes: nodes, meshes as `MeshGeometry`, materials as data, skins, clips, cameras, lights | loaders (`LoadGltfScene`, later FBX/USD) | picker/getter ops, `SceneToDrawSetup` |
-| Shape | `MeshGeometry` (exists) | topology + attributes; parts = primitives | `PickGeometryFromScene`, generators, modifiers | geometry ops, `GeometryToMeshBuffers`, `GeometryToChunks`, `GeometryToScene` |
+| Shape | `MeshGeometry` (exists) | topology + attributes; parts = primitives | `PickGeometryFromScene`, generators, modifiers | geometry ops, `GeometryToMesh`, `GeometryToMeshChunks`, `GeometryToScene` |
 | Draw | `SceneSetup` (exists; conceptually `SceneDrawSetup`) | dispatches, GPU buffers, `PbrMaterial` objects, applied node settings | `SceneToDrawSetup`, `GeometryToScene`, `LoadGltfScene` (derived, for compatibility) | `DrawScene`, `_GetSceneDefinitionPoints` |
 
 Rules:
@@ -104,7 +104,7 @@ value type (`GeometryAttribute<Int4>` — `Int4` exists in Core).
 - `Mesh`, `Material`, `SkinWeights`, `SkeletonPoints`, `MeshChildIndex`,
   `CombineBuffer`, `OffsetRoughness/Metallic` stay for compatibility, marked as
   superseded in the description. `CombineBuffer` becomes irrelevant once
-  `GeometryToChunks` exists on the document side; keep it honoring the flag.
+  `GeometryToMeshChunks` exists on the document side; keep it honoring the flag.
 - File watching stays on `Resource<SceneDocument>` (today `Resource<SceneSetup>`).
 - Later, name-only rename to `LoadGltf` (guid unchanged, symbol rename = no
   migration).
@@ -157,7 +157,7 @@ precedence when connected. When all shipped example graphs are switched, the
 `SceneSetup` copies of skeletons and clips can be dropped in a later cleanup.
 
 `SkinMesh` / `BindToSkeleton` work on `MeshBuffers` + weight buffers today.
-`GeometryToMeshBuffers` gains emission of the skin-weight side buffer from the
+`GeometryToMesh` gains emission of the skin-weight side buffer from the
 `JointIndices`/`JointWeights` point attributes (second output), so a picked,
 beveled, skinned mesh still skins. That closes the "procedural meshes stay
 skinnable" contract from the geometry plan.
@@ -182,7 +182,7 @@ existing part-subset code with a different predicate / direction.
 ### Phase B — Picking and rebuilding
 
 4. `PickGeometryFromScene`, `GeometryToScene`, `SceneToDrawSetup`.
-5. `GeometryToMeshBuffers` skin-weight output; skinning ops' optional `Scene` input.
+5. `GeometryToMesh` skin-weight output; skinning ops' optional `Scene` input.
 6. Accept: car-style file → pick wheels by name → fracture → merge with body →
    `GeometryToScene` → `DrawScene` shows original materials on the untouched
    parts; a picked skinned mesh through `SkinMesh` still deforms.

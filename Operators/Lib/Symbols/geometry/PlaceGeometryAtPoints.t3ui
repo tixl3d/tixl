@@ -3,9 +3,9 @@
   "Id": "8d5f3a27-b9c4-4e61-a0d2-6f7e1c8b3a95"/*PlaceGeometryAtPoints*/,
   "Description": "Copies a prototype geometry to every point of a CPU point list, one part per point.
 
-Each point's position, orientation and scale place its copy (UseOrientation / UseScale switch the latter two off). With UseColor the point color becomes a part-domain Color attribute, which [GeometryToMeshBuffers] applies per copy. The index of the source point is stored as the SourcePoint part attribute and as the part's seed index, so per-point data can be joined back later. Separator points are skipped; parts of the prototype are flattened into the copy. Corner normals are rotated with the copy.
+Each point's position, orientation and scale place its copy (UseOrientation / UseScale switch the latter two off). With UseColor the point color becomes a part-domain Color attribute, which [GeometryToMesh] applies per copy. The index of the source point is stored as the SourcePoint part attribute and as the part's seed index, so per-point data can be joined back later. Separator points are skipped; parts of the prototype are flattened into the copy. Corner normals are rotated with the copy.
 
-Works with any CPU point source ([ScatterPointsInVolume], [LineCPoints], [RadialCPoints], [ReadPointsFromGpu]); pair with [GeometryToChunks] to animate the copies on the GPU afterwards.
+Works with any CPU point source ([ScatterPointsInVolume], [LineCPoints], [RadialCPoints], [ReadPointsFromGpu]); pair with [GeometryToMeshChunks] to animate the copies on the GPU afterwards.
 
 AKA: instance, scatter geometry, copy to points, place in slots",
   "InputUis": [

@@ -474,6 +474,28 @@ internal static class DebugServer
             result["selectedChildren"] = selection;
         }
 
+        // What the output window shows - pinned, or following the selection - so a
+        // conversation can refer to "this state" and the reader can find it.
+        if (OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
+        {
+            var pinning = outputWindow.Pinning;
+            var outputJson = new JObject { ["isPinned"] = pinning.IsPinned };
+            if (pinning.TryGetPinnedOrSelectedInstance(out var shownInstance, out var shownView))
+            {
+                outputJson["childId"] = shownInstance.SymbolChildId.ToString();
+                outputJson["symbolName"] = shownInstance.Symbol.Name;
+                outputJson["path"] = new JArray(shownView.Structure.GetReadableInstancePath(shownInstance.InstancePath));
+                if (pinning.TryGetPinnedEvaluationInstance(shownView.Structure, out var evaluationStart)
+                    && evaluationStart != shownInstance)
+                {
+                    outputJson["evaluationStartChildId"] = evaluationStart.SymbolChildId.ToString();
+                    outputJson["evaluationStartSymbolName"] = evaluationStart.Symbol.Name;
+                }
+            }
+
+            result["outputView"] = outputJson;
+        }
+
         context.SendOk(result);
     }
 
@@ -506,6 +528,7 @@ internal static class DebugServer
         }
 
         var includeDefaults = request["includeDefaults"]?.Value<bool>() ?? false;
+        var symbolUi = symbol.GetSymbolUi();
 
         var children = new JArray();
         foreach (var (childId, child) in symbol.Children)
@@ -538,6 +561,12 @@ internal static class DebugServer
                 childJson["isBypassed"] = true;
             if (child.IsDisabled)
                 childJson["isDisabled"] = true;
+            if (symbolUi.ChildUis.TryGetValue(childId, out var childUi))
+            {
+                childJson["posX"] = childUi.PosOnCanvas.X;
+                childJson["posY"] = childUi.PosOnCanvas.Y;
+            }
+
             childJson["inputs"] = inputs;
 
             children.Add(childJson);
@@ -1209,10 +1238,17 @@ internal static class DebugServer
             return;
         }
 
+        // Scripts that pass no position used to pile every op onto the origin, on top of
+        // whatever the previous probe left there. Without coordinates, start a fresh row
+        // below the lowest existing op instead.
+        var posX = request["posX"]?.Value<float>();
+        var posY = request["posY"]?.Value<float>();
+        var position = posX.HasValue || posY.HasValue
+                           ? new Vector2(posX ?? 0, posY ?? 0)
+                           : FindFreeRow(compositionSymbol);
         var command = new AddSymbolChildCommand(compositionSymbol, symbolIdToAdd)
                           {
-                              PosOnCanvas = new Vector2(request["posX"]?.Value<float>() ?? 0,
-                                                        request["posY"]?.Value<float>() ?? 0),
+                              PosOnCanvas = position,
                           };
         UndoRedoStack.AddAndExecute(command);
         context.SendOk(new JObject
@@ -1221,6 +1257,26 @@ internal static class DebugServer
                                ["symbolId"] = symbolIdToAdd.ToString(),
                            });
     }
+
+    /// <summary>Left edge of the graph, one row's height below its lowest op.</summary>
+    private static Vector2 FindFreeRow(Symbol compositionSymbol)
+    {
+        var childUis = compositionSymbol.GetSymbolUi().ChildUis;
+        if (childUis.Count == 0)
+            return Vector2.Zero;
+
+        var minX = float.MaxValue;
+        var maxBottom = float.MinValue;
+        foreach (var childUi in childUis.Values)
+        {
+            minX = MathF.Min(minX, childUi.PosOnCanvas.X);
+            maxBottom = MathF.Max(maxBottom, childUi.PosOnCanvas.Y + childUi.Size.Y);
+        }
+
+        return new Vector2(minX, maxBottom + FreeRowGap);
+    }
+
+    private const float FreeRowGap = 200;
 
     private static void HandleConnect(JObject request, RequestContext context)
     {

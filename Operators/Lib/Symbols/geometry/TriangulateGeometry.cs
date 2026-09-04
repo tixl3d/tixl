@@ -5,7 +5,7 @@ namespace Lib.geometry;
 /// <summary>
 /// Converts all N-gon faces into triangles (fan triangulation, assuming convex faces),
 /// remapping corner attributes and part face-ranges. Rendering does this implicitly in
-/// [GeometryToMeshBuffers]; use this op when downstream geometry ops need triangles.
+/// [GeometryToMesh]; use this op when downstream geometry ops need triangles.
 /// </summary>
 [Guid("593590aa-b2c6-42d7-b9c5-ce205ee4266d")]
 internal sealed class TriangulateGeometry : Instance<TriangulateGeometry>

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "85c19291-2bc1-4271-88f9-f1b50696da1b"/*CubeGeometry*/,
-  "Description": "Generates a cube as CPU-side procedural geometry: six quad faces with hard-edge corner normals and per-face UVs.\n\nUse [GeometryToMeshBuffers] to compile the geometry for rendering with [DrawMesh].",
+  "Description": "Generates a cube as CPU-side procedural geometry: six quad faces with hard-edge corner normals and per-face UVs.\n\nUse [GeometryToMesh] to compile the geometry for rendering with [DrawMesh].",
   "InputUis": [
     {
       "InputId": "d5c13c76-103e-4264-8056-88a33a9f0e99"/*Size*/,

@@ -8,7 +8,7 @@ namespace T3.Core.DataTypes;
 /// CPU-side procedural mesh: N-gon faces over shared points, with typed attributes
 /// per domain and an optional part table. This is the flexible authoring format -
 /// triangulation and packing into <see cref="MeshBuffers"/> happen late, in the
-/// compile step ([GeometryToMeshBuffers]).
+/// compile step ([GeometryToMesh]).
 ///
 /// Topology is CSR-style: face f uses corners FaceCornerOffsets[f] .. FaceCornerOffsets[f+1],
 /// and each corner indexes a point via CornerPointIndices. Arrays are authoritative

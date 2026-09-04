@@ -54,6 +54,8 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             return;
         }
 
+        var sourceIsClosed = UpdateSourceStats(source);
+
         var fillInterior = FillInterior.GetValue(context);
         if (Async.GetValue(context))
         {
@@ -61,6 +63,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             hash.Add(source.Version);
             hash.Add(source.GetHashCode());
             hash.Add(fillInterior);
+            hash.Add(sourceIsClosed);
             foreach (var seed in _seeds)
             {
                 hash.Add(seed);
@@ -72,7 +75,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                                                   token =>
                                                   {
                                                       var target = new MeshGeometry();
-                                                      Build(target, source, seeds, fillInterior, token);
+                                                      Build(target, source, seeds, fillInterior, sourceIsClosed, token);
                                                       return target;
                                                   });
             Result.Value = result ?? source;
@@ -80,11 +83,35 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         }
 
         _asyncComputation.WaitForPending(Result);
-        Build(_output, source, _seeds.ToArray(), fillInterior, CancellationToken.None);
+        Build(_output, source, _seeds.ToArray(), fillInterior, sourceIsClosed, CancellationToken.None);
         Result.Value = _output;
     }
 
-    private void Build(MeshGeometry target, MeshGeometry source, Vector3[] seeds, bool fillInterior, CancellationToken token)
+    /// <summary>
+    /// Cutting a cell out of a solid needs a closed surface to tell inside from outside.
+    /// Many scanned or sculpted meshes are open shells, and the fracture then produces
+    /// unclosed chunks that are hard to tell from a bug in this operator - so say it once
+    /// per input version instead. The answer also decides how far the chunks may be patched:
+    /// out of a closed solid every chunk must come out closed, so any gap left is this
+    /// operator's own doing and gets filled; out of an open shell a gap may be the input's,
+    /// and filling it would invent surface that was never there.
+    /// </summary>
+    private bool UpdateSourceStats(MeshGeometry source)
+    {
+        var changed = _sourceStats.UpdateIfChanged(source);
+        var isClosed = _sourceStats.BoundaryEdges == 0 && _sourceStats.NonManifoldEdges == 0;
+        if (changed && !isClosed)
+        {
+            Log.Warning($"VoronoiFracture: the input mesh is not a closed solid "
+                        + $"({_sourceStats.BoundaryEdges} open edges, {_sourceStats.NonManifoldEdges} non-manifold). "
+                        + "Chunks will have holes where the surface is missing.", this);
+        }
+
+        return isClosed;
+    }
+
+    private void Build(MeshGeometry target, MeshGeometry source, Vector3[] seeds, bool fillInterior, bool sourceIsClosed,
+                       CancellationToken token)
     {
         var sourceHasNormals = source.Attributes.TryGet<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, out var sourceNormals);
 
@@ -101,7 +128,8 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                      () => new CellBuilder(),
                      (seedIndex, _, builder) =>
                      {
-                         cells[seedIndex] = builder.BuildCell(sourceIndex, insideTester, seeds, seedIndex, sourceHasNormals, fillInterior);
+                         cells[seedIndex] = builder.BuildCell(sourceIndex, insideTester, seeds, seedIndex, sourceHasNormals, fillInterior,
+                                                             sourceIsClosed);
                          var done = Interlocked.Increment(ref completed);
                          _asyncComputation.ReportProgress(done / (float)seeds.Length);
                          return builder;
@@ -186,6 +214,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
     private sealed class CellBuilder
     {
         public CellResult BuildCell(SourceIndex source, MeshInsideTester insideTester, Vector3[] seeds, int seedIndex, bool withNormals,
+                                   bool sourceIsClosed,
                                     bool fillInterior)
         {
             var seed = seeds[seedIndex];
@@ -197,6 +226,16 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             _chainEpsilonSq = _weldEpsilonSq;
             _mergeEpsilonSq = _weldEpsilonSq;
             _hullEpsilonSq = _weldEpsilonSq;
+            // Bridging gaps between cut chains is a repair for numerical drift, so it may span
+            // a few weld tolerances but never a real distance: a plane through a concave shape
+            // cuts several disjoint loops, and joining those to each other destroys the cap.
+            _stitchEpsilonSq = _weldEpsilonSq * StitchToleranceFactor * StitchToleranceFactor;
+            // Plane tolerances stay at float-noise scale (welding is three orders coarser and
+            // would reclassify real geometry), but they scale with the mesh so a large model
+            // does not fall below them. The collector is the looser of the two so that a point
+            // the clipper placed on the plane is still recognised as lying in it.
+            _planeEpsilon = source.Extent * ClipToleranceFactor;
+            _onPlaneEpsilon = source.Extent * OnPlaneToleranceFactor;
 
             // Nearest seeds first: once a bisector is farther than the cell's bounding
             // radius, no remaining plane can touch the cell.
@@ -267,7 +306,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             // Pass 2: source polygons in the hull region. Fully inside -> kept by reference,
             // straddling -> cloned and clipped, outside -> dropped before any copy is made.
             _kept.Clear();
-            source.CollectCandidates(cellMin, cellMax, _planes, _kept, _polygons, _polygonPool, ref _stamp, ref _stamps);
+            source.CollectCandidates(cellMin, cellMax, _planes, _planeEpsilon, _kept, _polygons, _polygonPool, ref _stamp, ref _stamps);
 
             // Clip the surface by all planes first - caps are derived afterwards from the
             // final cut edges, so their construction doesn't depend on the plane order.
@@ -314,7 +353,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             EmitPolygons(_kept, withNormals);
             EmitPolygons(_polygons, withNormals);
             RemoveDuplicateFaces();
-            FillCapHoles(withNormals);
+            FillCapHoles(withNormals, sourceIsClosed);
 
             return new CellResult(_positions.ToArray(), _corners.ToArray(), _normals.ToArray(), _faceOffsets.ToArray(), _isCap.ToArray());
         }
@@ -374,18 +413,29 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                 var next = vertices[(i + 1) % vertices.Count];
                 var currentDistance = Vector3.Dot(planeNormal, current.Position) - planeOffset;
                 var nextDistance = Vector3.Dot(planeNormal, next.Position) - planeOffset;
-                var currentInside = currentDistance <= ClipEpsilon;
-                var nextInside = nextDistance <= ClipEpsilon;
-                if (currentInside)
+                if (currentDistance <= _planeEpsilon)
                     _clipScratch.Add(current);
 
-                if (currentInside != nextInside)
-                    _clipScratch.Add(Vertex.Lerp(current, next, currentDistance / (currentDistance - nextDistance)));
+                if (StrictlyCrosses(currentDistance, nextDistance, _planeEpsilon))
+                    _clipScratch.Add(Vertex.Lerp(current, next, CrossingFraction(currentDistance, nextDistance)));
             }
 
             vertices.Clear();
             vertices.AddRange(_clipScratch);
             return vertices.Count >= 3;
+        }
+
+        /// <summary>True only when the edge passes from one side of the plane to the other without
+        /// either end lying within the tolerance of it.</summary>
+        private static bool StrictlyCrosses(float currentDistance, float nextDistance, float epsilon)
+        {
+            return (currentDistance < -epsilon && nextDistance > epsilon)
+                   || (currentDistance > epsilon && nextDistance < -epsilon);
+        }
+
+        private static float CrossingFraction(float currentDistance, float nextDistance)
+        {
+            return Math.Clamp(currentDistance / (currentDistance - nextDistance), 0f, 1f);
         }
 
         private static Vector3 Centroid(Polygon polygon)
@@ -505,7 +555,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         /// are the real boundary of an open input mesh and stay open - unless every edge is
         /// tiny, which is a degenerate corner at the surface, not a mesh border.
         /// </summary>
-        private void FillCapHoles(bool withNormals)
+        private void FillCapHoles(bool withNormals, bool sourceIsClosed)
         {
             var faceCount = _faceOffsets.Count - 1;
             _edgeUse.Clear();
@@ -588,7 +638,10 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                     isTiny &= Vector3.DistanceSquared(p0, p1) < tinyLimitSq;
                 }
 
-                if (usesSurfaceEdge && !isTiny)
+                // A loop running along surface edges is normally left alone: it may be a hole the
+                // input already had, and a flat patch there would invent surface. Out of a closed
+                // solid there is no such hole, so the gap is ours to close.
+                if (usesSurfaceEdge && !isTiny && !sourceIsClosed)
                     continue;
 
                 var normal = Vector3.Zero;
@@ -663,7 +716,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                 var allOutside = true;
                 foreach (var vertex in vertices)
                 {
-                    if (Vector3.Dot(planeNormal, vertex.Position) - planeOffset > ClipEpsilon)
+                    if (Vector3.Dot(planeNormal, vertex.Position) - planeOffset > _planeEpsilon)
                         allInside = false;
                     else
                         allOutside = false;
@@ -690,17 +743,18 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                     var next = vertices[(i + 1) % vertices.Count];
                     var currentDistance = Vector3.Dot(planeNormal, current.Position) - planeOffset;
                     var nextDistance = Vector3.Dot(planeNormal, next.Position) - planeOffset;
-                    var currentInside = currentDistance <= ClipEpsilon;
-                    var nextInside = nextDistance <= ClipEpsilon;
+                    var currentInside = currentDistance <= _planeEpsilon;
 
                     if (currentInside)
                         _clipScratch.Add(current);
 
-                    if (currentInside == nextInside)
+                    // A vertex on the plane is the crossing point itself; adding a lerped one
+                    // beside it is what used to leave slivers, and with both distances inside
+                    // the epsilon the fraction could even fall outside the edge entirely.
+                    if (!StrictlyCrosses(currentDistance, nextDistance, _planeEpsilon))
                         continue;
 
-                    var t = currentDistance / (currentDistance - nextDistance);
-                    var cut = Vertex.Lerp(current, next, t);
+                    var cut = Vertex.Lerp(current, next, CrossingFraction(currentDistance, nextDistance));
                     _clipScratch.Add(cut);
                     if (currentInside)
                     {
@@ -788,8 +842,8 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             {
                 var a = vertices[i];
                 var b = vertices[(i + 1) % count];
-                if (MathF.Abs(Vector3.Dot(planeNormal, a.Position) - planeOffset) > OnPlaneEpsilon
-                    || MathF.Abs(Vector3.Dot(planeNormal, b.Position) - planeOffset) > OnPlaneEpsilon)
+                if (MathF.Abs(Vector3.Dot(planeNormal, a.Position) - planeOffset) > _onPlaneEpsilon
+                    || MathF.Abs(Vector3.Dot(planeNormal, b.Position) - planeOffset) > _onPlaneEpsilon)
                     continue;
 
                 if (Vector3.DistanceSquared(a.Position, b.Position) < DegenerateEpsilonSq)
@@ -873,6 +927,33 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                     currentIndex = nextIndex;
                 }
 
+                // The walk started at an arbitrary segment, so a loop may have been split into
+                // the part after it and the part before it. Extend backwards as well, or the
+                // two halves end up as separate chains that only merge by luck of the order.
+                for (var guard = 0; guard <= segmentCount; guard++)
+                {
+                    var previousIndex = -1;
+                    var bestDistanceSq = _chainEpsilonSq;
+                    for (var candidate = 0; candidate < segmentCount; candidate++)
+                    {
+                        if (_segmentUsed[candidate])
+                            continue;
+
+                        var distanceSq = Vector3.DistanceSquared(_cutSegments[candidate].To.Position, chain.Points[0]);
+                        if (distanceSq < bestDistanceSq)
+                        {
+                            bestDistanceSq = distanceSq;
+                            previousIndex = candidate;
+                        }
+                    }
+
+                    if (previousIndex < 0)
+                        break;
+
+                    _segmentUsed[previousIndex] = true;
+                    chain.Points.Insert(0, _cutSegments[previousIndex].From.Position);
+                }
+
                 chain.IsClosed = Vector3.DistanceSquared(chain.End, chain.Points[0]) < _chainEpsilonSq;
                 _chains.Add(chain);
             }
@@ -898,8 +979,8 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             }
 
             // Second pass: stitch broken surface chains. A chain end that is not on the hull
-            // boundary can only continue on another chain's start that isn't either, so
-            // pair those by proximity - regardless of the strict chaining tolerance.
+            // boundary continues on another chain's start that isn't either, so pair those by
+            // proximity - looser than the strict chaining tolerance, but still bounded.
             for (var i = 0; i < _chains.Count; i++)
             {
                 var chain = _chains[i];
@@ -912,7 +993,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                         break;
 
                     Chain? best = null;
-                    var bestDistanceSq = float.MaxValue;
+                    var bestDistanceSq = _stitchEpsilonSq;
                     foreach (var other in _chains)
                     {
                         if (other == chain || other.Consumed || other.IsClosed || other.StartOnHull)
@@ -950,7 +1031,8 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                 cap.PlaneIndex = planeIndex;
                 AppendChain(cap, chain, planeNormal);
 
-                if (!chain.IsClosed && canWalkHull && chain.EndOnHull)
+                var closed = chain.IsClosed;
+                if (!closed && canWalkHull && chain.EndOnHull)
                 {
                     _walkNormal = planeNormal;
                     // Walk the hull boundary from this chain's end to the next chain start,
@@ -958,19 +1040,36 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                     var current = chain;
                     for (var guard = 0; guard < _chains.Count + 1; guard++)
                     {
-                        var next = WalkHullToNextChain(current.End, cap, chain);
-                        if (next == null || next == chain)
+                        var next = WalkHullToNextChain(current.End, cap, chain, insideTester);
+                        if (next == null)
                             break;
+
+                        if (next == chain)
+                        {
+                            closed = true;
+                            break;
+                        }
 
                         next.Consumed = true;
                         AppendChain(cap, next, planeNormal);
                         current = next;
                         if (current.IsClosed)
+                        {
+                            closed = true;
                             break;
+                        }
                     }
                 }
 
-                if (cap.Vertices.Count < 3)
+                // An open chain with both ends on the hull closes with a straight edge back to
+                // its start. Along one hull edge that is the true boundary. When the walk gave up
+                // because the hull leaves the solid, the edge crosses the empty part of a concave
+                // cross section and the face is misshapen - but skipping it does not help: the
+                // hole filler then patches the same gap with a fan that looks worse. The real cap
+                // here is the hull face intersected with the cross section (a tessellation job).
+                closed |= chain.StartOnHull && chain.EndOnHull;
+
+                if (!closed || cap.Vertices.Count < 3 || IsSliver(cap))
                 {
                     _polygonPool.Return(cap);
                     continue;
@@ -1058,13 +1157,14 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         /// hull corners passed) until reaching the start of an unconsumed chain, which is
         /// returned. Returns null if the hull can't be walked.
         /// </summary>
-        private Chain? WalkHullToNextChain(Vector3 from, Polygon cap, Chain origin)
+        private Chain? WalkHullToNextChain(Vector3 from, Polygon cap, Chain origin, MeshInsideTester insideTester)
         {
             var hullCount = _hullLoop.Count;
             if (hullCount < 3)
                 return null;
 
             FindHullEdge(from, out var edgeIndex, out var edgeT);
+            var position = from;
             for (var step = 0; step <= hullCount; step++)
             {
                 // The nearest chain start ahead on the current edge. The originating chain
@@ -1096,10 +1196,18 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                 if (best != null)
                     return best;
 
-                // Otherwise continue around the hull corner
+                // Otherwise continue around the hull corner - but the hull only bounds the cap
+                // where it runs through solid material. On a concave cross section the cap is
+                // several disjoint regions, and walking out of the solid to find a chain start
+                // is what used to fuse them into one polygon spanning the whole model.
+                var corner = _hullLoop[(edgeIndex + 1) % hullCount];
+                if (!insideTester.IsInside((position + corner) * 0.5f))
+                    return null;
+
                 edgeIndex = (edgeIndex + 1) % hullCount;
                 edgeT = 0;
-                cap.Vertices.Add(new Vertex(_hullLoop[edgeIndex], _walkNormal));
+                position = corner;
+                cap.Vertices.Add(new Vertex(corner, _walkNormal));
             }
 
             return null;
@@ -1135,6 +1243,19 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                     t = candidateT;
                 }
             }
+        }
+
+        /// <summary>A cap thinner than the weld tolerance across its whole length is a line,
+        /// not a face - typically a chain running along a hull edge on a plane the surface lies in.</summary>
+        private bool IsSliver(Polygon cap)
+        {
+            var perimeter = 0f;
+            var vertices = cap.Vertices;
+            for (var i = 0; i < vertices.Count; i++)
+                perimeter += Vector3.Distance(vertices[i].Position, vertices[(i + 1) % vertices.Count].Position);
+
+            var area = NewellNormal(cap).Length() * 0.5f;
+            return area < perimeter * _weldEpsilon * 0.5f;
         }
 
         private static Vector3 NewellNormal(List<Vector3> loop)
@@ -1220,6 +1341,9 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
         private bool[] _planeCapped = [];
         private float _weldEpsilon;
+        private float _planeEpsilon;
+        private float _onPlaneEpsilon;
+        private float _stitchEpsilonSq;
         private float _chainEpsilonSq;
         private float _mergeEpsilonSq;
         private float _hullEpsilonSq;
@@ -1381,7 +1505,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         /// (straddling at least one plane, rented copies). Grid cells and polygons that lie
         /// outside any plane are rejected by their AABB before a single vertex is touched.
         /// </summary>
-        public void CollectCandidates(Vector3 boxMin, Vector3 boxMax, List<(Vector3 Normal, float Offset)> planes,
+        public void CollectCandidates(Vector3 boxMin, Vector3 boxMax, List<(Vector3 Normal, float Offset)> planes, float planeEpsilon,
                                       List<Polygon> kept, List<Polygon> toClip, PolygonPool pool,
                                       ref int stamp, ref int[] stamps)
         {
@@ -1401,7 +1525,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
 
                 var gridMin = Min + new Vector3(x * _cellSize.X, y * _cellSize.Y, z * _cellSize.Z);
                 var gridMax = gridMin + _cellSize;
-                if (IsBoxOutsideAnyPlane(gridMin, gridMax, planes))
+                if (IsBoxOutsideAnyPlane(gridMin, gridMax, planes, planeEpsilon))
                     continue;
 
                 for (var e = _gridOffsets[cell]; e < _gridOffsets[cell + 1]; e++)
@@ -1418,11 +1542,11 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                         || pMax.Z < boxMin.Z || pMin.Z > boxMax.Z)
                         continue;
 
-                    if (IsBoxOutsideAnyPlane(pMin, pMax, planes))
+                    if (IsBoxOutsideAnyPlane(pMin, pMax, planes, planeEpsilon))
                         continue;
 
                     var polygon = _polygons[faceIndex];
-                    if (IsPolygonInsideAllPlanes(polygon, planes))
+                    if (IsPolygonInsideAllPlanes(polygon, planes, planeEpsilon))
                         kept.Add(polygon);
                     else
                         toClip.Add(pool.Rent(polygon));
@@ -1431,27 +1555,27 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         }
 
         /// <summary>Conservative box-vs-halfspace test using the box corner nearest to each plane.</summary>
-        private static bool IsBoxOutsideAnyPlane(Vector3 min, Vector3 max, List<(Vector3 Normal, float Offset)> planes)
+        private static bool IsBoxOutsideAnyPlane(Vector3 min, Vector3 max, List<(Vector3 Normal, float Offset)> planes, float planeEpsilon)
         {
             foreach (var (n, offset) in planes)
             {
                 var nearest = new Vector3(n.X > 0 ? min.X : max.X,
                                           n.Y > 0 ? min.Y : max.Y,
                                           n.Z > 0 ? min.Z : max.Z);
-                if (Vector3.Dot(n, nearest) - offset > ClipEpsilon)
+                if (Vector3.Dot(n, nearest) - offset > planeEpsilon)
                     return true;
             }
 
             return false;
         }
 
-        private static bool IsPolygonInsideAllPlanes(Polygon polygon, List<(Vector3 Normal, float Offset)> planes)
+        private static bool IsPolygonInsideAllPlanes(Polygon polygon, List<(Vector3 Normal, float Offset)> planes, float planeEpsilon)
         {
             foreach (var (n, offset) in planes)
             {
                 foreach (var vertex in polygon.Vertices)
                 {
-                    if (Vector3.Dot(n, vertex.Position) - offset > ClipEpsilon)
+                    if (Vector3.Dot(n, vertex.Position) - offset > planeEpsilon)
                         return false;
                 }
             }
@@ -1530,8 +1654,9 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         public int PlaneIndex = -1; // for caps: which cell plane created them; -1 for surface and box faces
     }
 
-    private const float ClipEpsilon = 1e-6f;
-    private const float OnPlaneEpsilon = 1e-5f;
+    private const float ClipToleranceFactor = 1e-6f; // of the mesh extent; below this a vertex counts as lying in the plane
+    private const float OnPlaneToleranceFactor = 1e-5f; // of the mesh extent; edges within this are cut boundaries
+    private const float StitchToleranceFactor = 8f; // of the weld tolerance; the largest gap between cut chains that is still drift
     private const float WeldToleranceFactor = 1e-3f; // of the mesh extent; slivers below that merge
     private const float DegenerateEpsilonSq = 1e-7f * 1e-7f;
 
@@ -1540,6 +1665,7 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
     private readonly MeshGeometry _output = new();
     private readonly AsyncComputation<MeshGeometry> _asyncComputation = new();
     private readonly List<Vector3> _seeds = [];
+    private readonly MeshGeometryStats _sourceStats = new();
 
     [Input(Guid = "31c7e9d4-85f2-4a60-b1c8-6d0a5e3f9b27")]
     public readonly InputSlot<MeshGeometry> Geometry = new();

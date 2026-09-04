@@ -8,11 +8,11 @@ Last update: 2026-09-02
 Add a CPU-side procedural geometry layer: editable curve and N-gon mesh types with
 flexible attributes and selections, compiled late into the existing GPU
 `MeshBuffers`/chunk/point infrastructure. First vertical slice (zero new
-dependencies): `CubeGeometry -> BevelGeometry -> GeometryToMeshBuffers -> DrawMesh`.
+dependencies): `CubeGeometry -> BevelGeometry -> GeometryToMesh -> DrawMesh`.
 Early architecture validation: delegate field connections + the fracture demo
 (beveled cube -> Voronoi fracture with field-driven cell density -> chunk explode).
 Headline milestone: 3D text
-(`String -> TextToCurves -> CurvesToMesh -> GeometryToMeshBuffers -> DrawMesh`).
+(`String -> TextToCurves -> CurvesToGeometry -> GeometryToMesh -> DrawMesh`).
 Longer-term: shape-grammar-style generation (spaces, parts, deterministic randomness).
 
 Origin: external design discussion (ChatGPT summary, 2026-09) evaluated against the
@@ -69,7 +69,7 @@ they are the last-mile interchange with the existing GPU point ecosystem, the wa
   risks the NaN separator convention).
 - A point cloud with rich attributes = `MeshGeometry` with zero faces. No `PointGeometry`
   type.
-- `GeometryToPoints` / `CurvesToPoints` / `GeometryToChunks` project explicitly:
+- `GeometryToPoints` / `CurvesToPoints` / `GeometryToMeshChunks` project explicitly:
   parameters choose which attributes land in `Color`/`F1`/`F2`. Data loss at this
   boundary is a per-op choice, never a design constraint upstream.
 - GPU ops needing more than the Point struct use sidecar buffers sharing the point
@@ -188,7 +188,7 @@ Done, working-tree only (uncommitted):
   iterator.
 - **`ResourceManager.SetupBufferWithViews<T>(T[], ref BufferWithViews?)`** —
   replaces the buffer+SRV+UAV triple-call idiom; adopted in `CubeMesh` and
-  `TorusMesh` (each drops two raw `Buffer` fields). `GeometryToMeshBuffers`
+  `TorusMesh` (each drops two raw `Buffer` fields). `GeometryToMesh`
   (Phase 1) builds on it.
 - **Dead code removed**: `ParticlePoint` struct incl. unused `Separator()`
   (`Core/DataTypes/ParticleSystem.cs`) — the last C# type with the legacy
@@ -204,14 +204,14 @@ protocol (audit, transport, read surface minus `getUiState`, dispatch basics,
 CLI, reload). Rationale: the geometry phases' bottleneck is the in-editor
 verification loop; the protocol lets bevel/fracture iterations run autonomously
 (dispatch -> pumpFrames -> screenshot -> log/metrics) and makes the
-`GeometryToMeshBuffers` buffer-reuse contract assertable via `getMetrics`.
+`GeometryToMesh` buffer-reuse contract assertable via `getMetrics`.
 
 ### Phase 1 — Mesh core + cube/bevel slice ✅ (completed 2026-09-02)
 
 Zero new dependencies — retires the attribute/topology/compile risks before fonts
 and tessellation enter.
 
-Done so far (protocol-verified: CubeGeometry -> GeometryToMeshBuffers -> DrawMesh
+Done so far (protocol-verified: CubeGeometry -> GeometryToMesh -> DrawMesh
 renders correctly, Size changes propagate, integration tests green):
 
 - Core: `Core/DataTypes/Geometry/` — `MeshGeometry` (CSR topology:
@@ -226,13 +226,13 @@ renders correctly, Size changes propagate, integration tests green):
   `UiColors.ColorForCpuGeometry` (teal-green) via `UiProperties.CpuGeometry`.
 - Ops in `Operators/Lib/Symbols/geometry/`: `CubeGeometry` (6 quad N-gons,
   8 shared points, 24 corners with hard-edge normals + per-face UVs, CCW-from-
-  outside winding — verified visually), `GeometryToMeshBuffers` (fan triangulation
+  outside winding — verified visually), `GeometryToMesh` (fan triangulation
   for convex faces, corner-attribute resolution with Newell face-normal fallback,
   per-face TBN via `MeshUtils.CalcTBNSpace` with degenerate-UV fallback, buffer
   reuse via `SetupBufferWithViews`).
 
 **Milestone achieved (2026-09-02)**: `CubeGeometry -> BevelGeometry ->
-GeometryToMeshBuffers -> [TransformMesh] -> DrawMesh`, animated bevel width at a
+GeometryToMesh -> [TransformMesh] -> DrawMesh`, animated bevel width at a
 flat 60fps, all built and iterated over the debug protocol (5 reload cycles at
 ~2s each from first render to smooth-shaded result — the precursor investment
 paying off exactly as intended).
@@ -265,7 +265,7 @@ unmodified buffers between geometries. Docs:
 **Phase 1 retrospective** (overlaps + low-hanging fruit):
 
 - *Overlap*: the per-point-normal-map trick in `BevelGeometry` (points carry the
-  normal, corners read from points) will recur in `CurvesToMesh` bevels (Phase 5)
+  normal, corners read from points) will recur in `CurvesToGeometry` bevels (Phase 5)
   and any smooth-shaded generator — consider promoting a shared helper when the
   second user appears, not before. The attribute reference-sharing pattern
   (`Attributes.Add`) is what `SelectGeometry`/`SetGeometryAttribute` (Phase 5)
@@ -290,10 +290,10 @@ unmodified buffers between geometries. Docs:
     patches as fans. General miter/colliding-bevel handling is explicitly out of
     scope for v1.
   - `TransformGeometry`, `TriangulateGeometry` (explicit; also implicit at compile).
-  - `GeometryToMeshBuffers` — compile: triangulate N-gons, corner normals with
+  - `GeometryToMesh` — compile: triangulate N-gons, corner normals with
     hard-edge policy, TBN, pack `PbrVertex[]` + `Int3[]`; reuse GPU buffers, only
     re-upload changed streams (precedent: `SkinMesh` shares index/chunk buffers).
-- Milestone: `CubeGeometry -> BevelGeometry -> GeometryToMeshBuffers -> DrawMesh`,
+- Milestone: `CubeGeometry -> BevelGeometry -> GeometryToMesh -> DrawMesh`,
   animated bevel width, flat frame times.
 
 ### Phase 2 — Delegate fields (validation slice) 🔶 (core implemented + verified 2026-09-02)
@@ -374,6 +374,74 @@ way to reveal parts until chunks land). Verified via protocol: beveled cube →
 scatter → fracture → explode shows watertight chunks with smooth outsides and
 flat caps.
 
+Concave-input hardening (2026-09-04, after the user saw glitchy chunks on text
+and on `female-dancing.obj`). The cell builder assumed a cut plane meets the solid
+in a single loop, which holds for a cube and fails for a letter or a figure, where
+one plane cuts several disjoint loops:
+
+- **Hull walking now tests the solid.** Closing an open cut chain by walking the
+  cell's hull face stopped at the first chain start ahead, wherever it was, fusing
+  unrelated loops into caps of 30+ corners spanning the whole model and adding
+  volume. A hull arc only bounds the cap where it runs *inside* the solid, so the
+  walk now checks the arc midpoint against `MeshInsideTester` and gives up instead
+  of jumping. This removed the giant caps and the volume error (was +7.6% on `Xg8`,
+  +18% on thin text).
+- **Chain stitching is bounded.** The repair pass that bridges chains broken by
+  numerical drift searched with `float.MaxValue`, so it could join loops at any
+  distance. Capped at 8x the weld tolerance (`StitchToleranceFactor`).
+- **Hole filling knows whether the input was closed.** A leftover boundary loop
+  touching a surface edge used to be left alone unless every edge was tiny, since a
+  patch might invent surface the input never had. Out of a *closed* solid every chunk
+  must come out closed, so there the gap is the algorithm's own and gets filled.
+- **The op warns when the input is not a closed solid** (`MeshGeometryStats`, once
+  per input version). `female-dancing.obj` has 75 open and 44 non-manifold edges,
+  `monkey.obj` 42 open — fracturing those cannot produce closed chunks, and the
+  warning says so rather than leaving it looking like a bug here.
+- **Plane tolerances are relative and three-way.** `ClipEpsilon`/`OnPlaneEpsilon`
+  were absolute (1e-6 / 1e-5) while welding was 1e-3 of the extent; both now scale
+  with the mesh, a vertex within tolerance counts as lying *in* the plane instead of
+  spawning a second point beside it, and the crossing fraction is clamped so it can
+  never land outside the edge. Measured neutral on the suites — a latent hazard, not
+  the cause of the glitches.
+
+Second round (same day, on the maintainer's test graph: `TextToCurves "X" ->
+CurvesToGeometry -> VoronoiFracture` with 100 `RadialCPoints` seeds on a circle,
+i.e. wedge cells only ~0.002 wide where they cross the glyph):
+
+- **Chaining is bidirectional.** The first pass walked forward from an arbitrary
+  segment, so one loop split into a head and a tail that only merged by luck of the
+  order (a 69-segment plane came out as 18 chains). Chains now also extend backwards.
+- **Zero-area caps are rejected** (`IsSliver`: area below weld tolerance x perimeter).
+  A plane that coincides with the glyph's front face collects that face's boundary
+  edges as "cut" segments lying on the hull edge; the walk closes them in zero steps
+  into a collinear triangle sitting on the surface.
+- A trial that dropped every chain ending in mid-air fixed the X but cost the ring
+  (chains with both ends on the hull close correctly along the hull edge); reverted.
+
+Result on that graph at the default orientation: boundary 158 -> 0, non-manifold
+316 -> 0, volume within 0.04%. A 36-orientation sweep of the seed axis (the
+maintainer's suggestion; `sweep_axis.py` in the session scratchpad, golden-angle
+spiral) leaves **3 outliers of 36**, all with exact volume: thin slabs between two
+nearly coincident planes whose single cut chain runs from hull point A to hull point
+B across a concave section. The hull walk correctly refuses to leave the solid, and
+the fallback then closes the chain with a straight edge through empty space; the two
+mirrored caps cancel in volume but overlap the surface. **This fallback is the last
+wrong assumption, and it is not patchable**: the cap on such a plane is the hull face
+intersected with the solid's cross section (possibly several regions, possibly with
+holes). The honest fix is to build caps with the tessellator already in Lib
+(LibTessDotNet, `WindingRule.AbsGeqTwo` on hull loop + cut loops), replacing the
+hull-walk heuristic. The same mechanism is behind the remaining `ring-bevelled.obj`
+failures at oversized scatter (`n=40 s=2.52`: 15 boundary edges, 12.7% volume).
+
+Measured with a bridge-driven suite (cube x seed count x scatter size x bevel, text
+x depth x seed count, and loaded meshes), scoring boundary edges, non-manifold edges,
+volume against the source and bounds growth: cube and text went from 4 of 30 broken
+to **0 of 30**; the closed `ring-bevelled.obj` from 4 of 4 to 2 of 4 (boundary edges
+26 -> 4). Known remainder: one chunk of that ring loses a single cap quad, which is
+the whole of its 3.7% volume error — the directed loop walk in `FillCapHoles` drops a
+cycle when two boundary edges share an endpoint. Open-shell inputs are out of scope
+by construction and now carry the warning.
+
 Also done (user request): `LoadObjGeometry` — own N-gon-preserving OBJ parser
 (quads stay quads for beveling; `ObjMesh` triangulates on load, so it wasn't
 reused), `o`/`g` groups become parts with centroid pivots, normals/UVs become
@@ -382,10 +450,10 @@ corner attributes, file-watched via `Resource&lt;T&gt;`, `Scale` input.
 Done (2026-09-03): `MeshChunkDef` promoted to `Core/Rendering` next to `PbrVertex`
 (GPU-layout structs live there; `Core/DataTypes` is for connection types — layout
 frozen, `LoadGltfScene` uses it). `Lib.Utils.GeometryMeshCompiler` now does the packing for
-both `GeometryToMeshBuffers` and the new `GeometryToChunks`; because a part is a
+both `GeometryToMesh` and the new `GeometryToMeshChunks`; because a part is a
 contiguous face range and there is one vertex per corner, each part maps to
 contiguous vertex/triangle ranges and the chunk table falls out without
-reordering. `GeometryToChunks` outputs `Buffers` (with `ChunkDefsBuffer`),
+reordering. `GeometryToMeshChunks` outputs `Buffers` (with `ChunkDefsBuffer`),
 `Points` (CPU pivots, seed index in F2), `GPoints` (uploaded), `ChunkIndices`
 (identity) and `ChunkCount`; vertices are pivot-relative. Verified via protocol:
 chunks render at the CPU mesh's position, `TransformPoints` scale 1.8 on the
@@ -440,7 +508,7 @@ pixel-identical to the GPU `TransformPoints` on the chunk chain.
 Still open: the full milestone demo (density field, animated pivots).
 
 - Promote `MeshChunkDef` to Core.
-- `GeometryToChunks` — one chunk per part into shared buffers; outputs
+- `GeometryToMeshChunks` — one chunk per part into shared buffers; outputs
   `MeshBuffers` (with `ChunkDefsBuffer`) + `Point[]` pivots + chunk-index buffer
   -> existing `DrawMeshChunksAtPoints` unchanged.
 - `PlaceGeometryAtPoints` — CPU instancing: prototype geometry + `Point[]` ->
@@ -452,7 +520,7 @@ Still open: the full milestone demo (density field, animated pivots).
   C# — no native boolean kernel. Interior faces come out selected.
 - Milestone (demo): `CubeGeometry -> BevelGeometry -> VoronoiFracture` with
   seeds from `ScatterPointsInVolume`, density from `DistanceToPointsField`
-  ("cell size from distance to closest point") -> `GeometryToChunks` ->
+  ("cell size from distance to closest point") -> `GeometryToMeshChunks` ->
   displaced pivots -> `DrawMeshChunksAtPoints` explode.
 
 ### Phase 4 — Curve foundation 🔶 (started 2026-09-04)
@@ -498,7 +566,7 @@ instantiation (`SetFontAxis`) needs 3.x and is still open.
     part selection weight; re-instantiates affected outlines. Layout toggle: frozen
     (default — animating axes doesn't reflow the line) vs re-layout with new advances.
     Enables e.g. `String -> TextToCurves -> SelectGeometry(Gradient) -> SetFontAxis
-    -> CurvesToMesh` for a weight ramp across extruded text.
+    -> CurvesToGeometry` for a weight ramp across extruded text.
   - `CurveFromPoints` — through-points constructor (subsumes `SplinePoints` sampling).
   - `TransformCurves`, `ResampleCurves` (arc-length even), `CombineCurves`,
     `SetCurveAttribute`.
@@ -509,7 +577,7 @@ instantiation (`SetFontAxis`) needs 3.x and is still open.
 
 ### Phase 5 — Text slice 🔶 (started 2026-09-04)
 
-Done: `CurvesToMesh` on **LibTessDotNet 1.1.15**. Contours are flattened, then
+Done: `CurvesToGeometry` on **LibTessDotNet 1.1.15**. Contours are flattened, then
 resolved through the fill rule *before* any geometry is built (`Tess` with
 `ElementType.BoundaryContours`), so overlapping strokes (Inter's X, bold variable
 instances) become one outline and walls never run through the solid; loops are
@@ -523,12 +591,20 @@ expected pinch edges where resolved lobes touch. Known limit (documented in the
 op): a bevel larger than half the thinnest stroke folds the inset outline and
 opens the mesh — no medial-axis clamp yet. Face attribute `IsSide` marks walls
 and bevels; curve part attributes carry over per glyph.
+`Weight` (faux bold/light) offsets the resolved outline with the same mitered
+inset used for bevels, then reruns the non-zero boundary pass to drop inverted
+corner loops and collapsed counters (offset-then-union). Verified closed from
+-0.01 to +0.03 at size 0.6; larger values pinch where counters close.
+Walls and bevels are smooth shaded from the outline corner normals, splitting
+where a corner is sharper than `SmoothAngle` (default 40 deg), so coarsely
+flattened round strokes look round while stems keep crisp arrises; `FlatShading`
+forces per-facet normals.
 
 - New dependency: **LibTessDotNet** (managed, permissive) for constrained
   triangulation with holes/fill rules — `DelaunatorSharp` is unconstrained and can't
   fill concave glyphs.
 - Ops:
-  - `CurvesToMesh` — fill + depth + bevel size/subdivisions + front/back/side flags
+  - `CurvesToGeometry` — fill + depth + bevel size/subdivisions + front/back/side flags
     in **one op** (bevel needs boundary adjacency that separate Fill/Extrude ops would
     lose; depth 0 = flat fill). One part per input contour group (per glyph).
   - `CombineGeometry` (concatenates parts; naming matches
@@ -536,9 +612,9 @@ and bevels; curve part attributes carry over per glyph.
     (attribute -> palette/gradient; works on `CurveGeometry` and `MeshGeometry`,
     e.g. `characterIndex % palette.Count`, contour height -> gradient),
     `SelectGeometry` (see above).
-- Milestone: `String -> TextToCurves -> CurvesToMesh -> ColorFromAttribute ->
-  GeometryToMeshBuffers -> DrawMesh`, animated text, flat frame times; plus
-  per-glyph chunks via `GeometryToChunks` (scale/color per character via points).
+- Milestone: `String -> TextToCurves -> CurvesToGeometry -> ColorFromAttribute ->
+  GeometryToMesh -> DrawMesh`, animated text, flat frame times; plus
+  per-glyph chunks via `GeometryToMeshChunks` (scale/color per character via points).
 
 ### Phase 6 — Spaces & grammar-lite (affine only) ⬜
 
@@ -562,7 +638,7 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   `SceneToDrawSetup`; `PickGeometryFromScene` / `GeometryToScene` bridge to the
   geometry ops. Geometry-side helpers that fall out: `FilterGeoPartsByAttribute`,
   `MergeGeometry`, skin weights as point attributes emitted by
-  `GeometryToMeshBuffers`. Design rule kept here: parts are shape only
+  `GeometryToMesh`. Design rule kept here: parts are shape only
   (disjoint face ranges with pivot/ids/attributes) — hierarchy, materials and
   names live on the scene layer and are joined back through `Node` / `Material`
   / `SourcePoint` part attributes.
@@ -606,7 +682,7 @@ Spaces are oriented boxes = `Point` (Scale = extents, F1/F2 = id/seed).
   faces of each fracture chunk from a `ColorList`. Landed: face-domain `IsCut`
   on fracture caps (`Selection` mirrors it), `GeometryPart.Seed` renamed
   `SeedIndex`, face→corner and part→corner **Color promotion** in
-  `GeometryToMeshBuffers`, and `ColorFacesFromAttribute` (index source: part index /
+  `GeometryToMesh`, and `ColorFacesFromAttribute` (index source: part index /
   part seed index / named face attribute; palette wrap repeat or clamp;
   OnlySelected masks by face Selection; preserves upstream corner colors).
   Correction to an earlier note: `mesh-Draw.hlsl` already multiplies
@@ -838,7 +914,7 @@ Worked through 2026-09-02; each maps onto planned ops without new concepts:
    ColorFromAttribute(height -> gradient) -> ResampleCurves(even) -> CurvesToPoints
    -> DrawLines`. Exercises readback bridge, curve attributes, flatten mapping.
 3. **Torus fracture + explode**: `TorusGeometry + seed points -> VoronoiFracture ->
-   GeometryToChunks -> displace pivot points -> DrawMeshChunksAtPoints`. Exercises
+   GeometryToMeshChunks -> displace pivot points -> DrawMeshChunksAtPoints`. Exercises
    parts->chunks, seeds-as-points control, per-frame animation without touching
    geometry.
 

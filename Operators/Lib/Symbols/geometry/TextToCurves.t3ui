@@ -3,7 +3,7 @@
   "Id": "e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37"/*TextToCurves*/,
   "Description": "Lays out text with a TrueType or OpenType font and outputs the glyph outlines as curves.
 
-Each glyph becomes one part (pivot at its origin) of closed cubic-bezier contours, with part attributes CodePoint, GlyphId, CharIndex, WordIndex, LineIndex and Advance for selection and styling downstream. Size is the em height in scene units. Weight drives a variable font's wght axis (Inter Variable: 100..900); Axis and AxisValue set one more axis by its four-letter tag (e.g. opsz). Static fonts ignore them. Whitespace advances the layout but produces no geometry. Flatten with [CurvesToPoints] to draw as lines, or fill with [CurvesToMesh].
+Each glyph becomes one part (pivot at its origin) of closed cubic-bezier contours, with part attributes CodePoint, GlyphId, CharIndex, WordIndex, LineIndex and Advance for selection and styling downstream. Size is the em height in scene units. Weight drives a variable font's wght axis (Inter Variable: 100..900); Axis and AxisValue set one more axis by its four-letter tag (e.g. opsz). Static fonts ignore them. Whitespace advances the layout but produces no geometry. Flatten with [CurvesToPoints] to draw as lines, or fill with [CurvesToGeometry].
 
 AKA: font outlines, 3d text, typography, glyphs",
   "InputUis": [

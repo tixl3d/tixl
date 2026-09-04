@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "593590aa-b2c6-42d7-b9c5-ce205ee4266d"/*TriangulateGeometry*/,
-  "Description": "Converts all N-gon faces of a geometry into triangles (fan triangulation for convex faces), remapping corner attributes and part ranges.\n\nRendering triangulates implicitly in [GeometryToMeshBuffers] - use this op when downstream geometry operations need triangles explicitly.",
+  "Description": "Converts all N-gon faces of a geometry into triangles (fan triangulation for convex faces), remapping corner attributes and part ranges.\n\nRendering triangulates implicitly in [GeometryToMesh] - use this op when downstream geometry operations need triangles explicitly.",
   "InputUis": [
     {
       "InputId": "424f42c4-18f0-412a-a725-230700d5f1a6"/*Geometry*/,

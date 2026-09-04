@@ -17,7 +17,7 @@ compiling geometry for rendering.
 ## Step: Building the basic chain
 
 **Action:**
-Add `[CubeGeometry]`, `[GeometryToMeshBuffers]` and `[DrawMesh]` and connect them
+Add `[CubeGeometry]`, `[GeometryToMesh]` and `[DrawMesh]` and connect them
 in that order. Pin the `[DrawMesh]` output.
 
 **Expected:**
@@ -27,7 +27,7 @@ in that order. Pin the `[DrawMesh]` output.
 ## Step: Beveling
 
 **Action:**
-Insert a `[BevelGeometry]` between `[CubeGeometry]` and `[GeometryToMeshBuffers]`.
+Insert a `[BevelGeometry]` between `[CubeGeometry]` and `[GeometryToMesh]`.
 
 **Expected:**
 - All twelve edges and eight corners show smooth rounded bevels.
@@ -79,7 +79,7 @@ and `B` = 8.
 **Action:**
 Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
 `[ScatterPointsInVolume]` (Count ~12), then through an `[ExplodeGeometry]`
-(Distance ~0.3) into the `[GeometryToMeshBuffers]`.
+(Distance ~0.3) into the `[GeometryToMesh]`.
 
 **Expected:**
 - The cube breaks into chunks that separate with Distance; each chunk is closed
@@ -95,6 +95,46 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
   chunks still have closed cut faces toward the cluster. Disabling
   `FillInterior` reproduces the old dark gaps (expected for that setting, which
   exists for open or non-manifold meshes).
+
+## Step: Fracturing a concave shape
+
+**Action:**
+Feed a concave solid into `[VoronoiFracture]` instead of the cube: either
+`[TextToCurves]` -> `[CurvesToGeometry]` (text `Xg8`, Depth 0.2) or
+`Lib:meshes/ring-bevelled.obj` via `[LoadObjGeometry]`. Scatter 10 to 40 seeds
+across it and pin the fracture's output.
+
+**Expected:**
+- The geometry output view reports 0 boundary edges and the same volume as the
+  input (a plane cuts such a shape in several separate loops, and each has to
+  become its own cap).
+- No chunk shows a huge flat face spanning the whole model.
+- Isolating single chunks with `[FilterGeoPartsByIndex]` shows closed pieces.
+
+## Step: Sweeping the seed orientation
+
+**Action:**
+Feed `[VoronoiFracture]` (input: `[TextToCurves]` text `X` -> `[CurvesToGeometry]`)
+with 100 seeds from `[RadialCPoints]`, radius 1, and animate the `Axis` with a
+`[PerlinNoise]` so the ring of seeds tumbles through the glyph.
+
+**Expected:**
+- At most orientations the geometry output view reports 0 boundary edges.
+- Known limit: a few orientations put two seeds so close that their cell is a
+  hair-thin slab; the cap of such a slab across the concave X shows overlapping
+  faces (boundary edges, exact volume). This is the open item noted in the plan,
+  not a regression to report.
+
+## Step: Fracturing an open mesh
+
+**Action:**
+Point `[LoadObjGeometry]` at `examples:meshes/low-poly-people/female-dancing.obj`
+and fracture it.
+
+**Expected:**
+- A warning appears in the log naming the number of open and non-manifold edges
+  in the input, and it appears once per input change rather than every frame.
+- The chunks have holes; this follows from the input, not from the operator.
 
 ## Step: Coloring fracture cuts per chunk
 
@@ -138,7 +178,7 @@ Select (or pin) the `[VoronoiFracture]` itself, then the `[BevelGeometry]`.
 ## Step: GPU chunks
 
 **Action:**
-Feed the `[VoronoiFracture]` into a `[GeometryToChunks]`. Connect its `Buffers`
+Feed the `[VoronoiFracture]` into a `[GeometryToMeshChunks]`. Connect its `Buffers`
 to `Mesh`, `GPoints` to `GPoints` and `ChunkIndices` to `ChunkIndices` of a
 `[DrawMeshChunksAtPoints]`; pin that op. Then insert a `[TransformPoints]`
 between `GPoints` and the draw op and raise its `Scale` to ~1.8.
@@ -162,7 +202,7 @@ between `GPoints` and the draw op and raise its `Scale` to ~1.8.
 **Action:**
 Scale the beveled cube down with a `[TransformGeometry]` (Scale ~0.15), feed it
 into a `[PlaceGeometryAtPoints]` together with a `[ScatterPointsInVolume]`
-(Count 40, Size 2), and render the result through `[GeometryToMeshBuffers]`.
+(Count 40, Size 2), and render the result through `[GeometryToMesh]`.
 
 **Expected:**
 - 40 small cubes appear at the scattered positions; the output view shows 40
@@ -280,8 +320,8 @@ In a new graph add `[TextToCurves]` (default text "TiXL", font
 ## Step: Text as solid mesh
 
 **Action:**
-Replace `[CurvesToPoints]` and the line ops with `[CurvesToMesh]` ->
-`[GeometryToMeshBuffers]` -> `[DrawMesh]`. Set `Text` to `TiXL Xg8&@`.
+Replace `[CurvesToPoints]` and the line ops with `[CurvesToGeometry]` ->
+`[GeometryToMesh]` -> `[DrawMesh]`. Set `Text` to `TiXL Xg8&@`.
 
 **Expected:**
 - With `Depth` 0 the text is a flat fill with correct holes (g, 8, @) and the
@@ -291,6 +331,13 @@ Replace `[CurvesToPoints]` and the line ops with `[CurvesToMesh]` ->
 - `Bevel` 0.01 rounds the edges smoothly; `BevelSegments` 1 gives a chamfer.
   A bevel much larger than the stroke width (e.g. 0.05 on "T") visibly folds the
   outline — this is the documented limit, not a bug.
+- With a coarse `Tolerance` (0.03) the round sides of o and 8 still shade
+  smoothly while the corners of T and X stay hard; lowering `SmoothAngle` below
+  the outline's corner angles makes the round sides facet too.
+- `FlatShading` facets every wall and bevel; caps are unaffected.
+- `Weight` 0.03 gives a faux bold (sharp corners, counters shrink evenly),
+  -0.01 a lighter cut; both stay closed (0 boundary edges). Beyond about 0.05
+  thin counters close up, which is expected.
 - `EvenOdd` turns the X's overlap into a hole; front/back/side flags remove the
   respective faces.
 - `[ColorFacesFromAttribute]` with the part-index option colors each letter

@@ -45,6 +45,12 @@ Control surface: `openProject` (`name`), `newProject`, `select` (`childId`), `se
 
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 
+- **Start from what the user is looking at.** `getContext` returns the focused
+  composition, `selectedChildren` (ids + names) and `outputView` (the op the output
+  window shows, whether it is pinned, and the evaluation-start op if that differs).
+  When the user says "this looks broken", read that first and probe those ids -
+  don't rebuild the chain from a screenshot description.
+
 - `reload` works on **editable projects only** (synchronous recompile; MSBuild errors come
   back in a `COMPILE_FAILED` detail). Built-in packages like `Lib` need an editor restart.
 - `shutdown` is fire-and-forget — the response may never arrive.
@@ -93,17 +99,25 @@ frame**. Setting an input does not run the graph.
    frames: set `false`, pump, set `true`, pump. Setting `true` on an already-true input
    does nothing.
 4. **Auto-save landmine.** `setInput` on symbols marks projects modified and the editor
-   auto-saves. Do experiments in the `_agentTests` playground project (empty, fast to
+   auto-saves. Do experiments in the **`_agentTests`** project (empty, fast to
    load, lives in the user projects folder outside the repo, and being editable it
-   hot-reloads via `reload`), never in `Lib` or real user projects.
+   hot-reloads via `reload`), never in `Lib`, never in `playground`, never in a real
+   user project. `playground` is the user's own scratch graph - probe chains left
+   there are the agent's clutter in a graph someone is working in.
 5. **The output camera persists — call `resetView` when screenshots look empty.**
    The view camera of a project's output window survives sessions; if it was ever
    dragged away, everything at the origin renders out of frame and screenshots
    show only the grid. `resetView` reframes the origin.
-6. **`addOp` can steal the output view.** After adding an op, `screenshot` may fail
+6. **Don't stack ops.** `addOp` without `posX`/`posY` starts a new row below the lowest
+   op already in the graph (left-aligned, 200 px gap); `getGraphState` reports each
+   child's `posX`/`posY`. Lay a chain out along that row with explicit `posX` steps
+   from the returned position, and never reuse fixed coordinates across probe runs —
+   the previous run's ops are still there, and a stack of ops on one spot is
+   unreadable for the person reviewing the graph.
+7. **`addOp` can steal the output view.** After adding an op, `screenshot` may fail
    with `NO_OUTPUT` because the new (non-renderable) op got focused. `pin` a
    renderable op (e.g. the draw op) to restore the output window.
-7. **Hand-edited files vs. running editor.** Never hand-edit `.t3` / `.t3ui` / operator
+8. **Hand-edited files vs. running editor.** Never hand-edit `.t3` / `.t3ui` / operator
    `.csproj` files while the editor has them loaded — it rewrites them on save. Close or
    cycle the editor first.
 

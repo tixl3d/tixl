@@ -14,12 +14,12 @@ namespace Lib.geometry;
 /// </summary>
 [Guid("b6e3f8d1-4a27-4c95-9d0e-7f2c5a1b8e63")]
 [ExportDependencies("LibTessDotNet.dll")]
-internal sealed class CurvesToMesh : Instance<CurvesToMesh>
+internal sealed class CurvesToGeometry : Instance<CurvesToGeometry>
 {
     [Output(Guid = "1c9a5e7d-3b62-4f08-a4d1-8e6b0c2f7a95")]
     public readonly Slot<MeshGeometry?> Result = new();
 
-    public CurvesToMesh()
+    public CurvesToGeometry()
     {
         Result.UpdateAction = Update;
     }
@@ -35,6 +35,9 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
         var back = Back.GetValue(context);
         var sides = Sides.GetValue(context);
         var windingRule = EvenOdd.GetValue(context) ? WindingRule.EvenOdd : WindingRule.NonZero;
+        var weight = Weight.GetValue(context);
+        var flatShading = FlatShading.GetValue(context);
+        var smoothAngle = Math.Clamp(SmoothAngle.GetValue(context), 0f, 180f);
 
         if (curves == null || curves.ContourCount == 0)
         {
@@ -55,7 +58,7 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
             var pivot = parts.Length > 0 ? parts[partIndex].Pivot : Vector3.Zero;
             var id = parts.Length > 0 ? parts[partIndex].Id : 0;
             var seed = parts.Length > 0 ? parts[partIndex].SeedIndex : 0;
-            _builder.BuildPart(curves, contourStart, contourEnd, tolerance, depth, bevel, bevelSegments, front, back, sides, windingRule,
+            _builder.BuildPart(curves, contourStart, contourEnd, tolerance, depth, bevel, bevelSegments, weight, flatShading, smoothAngle, front, back, sides, windingRule,
                                pivot, id, seed);
         }
 
@@ -122,7 +125,8 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
         }
 
         public void BuildPart(CurveGeometry curves, int contourStart, int contourEnd, float tolerance, float depth, float bevel, int bevelSegments,
-                              bool front, bool back, bool sides, WindingRule windingRule, Vector3 pivot, int id, int seed)
+                              float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides, WindingRule windingRule,
+                              Vector3 pivot, int id, int seed)
         {
             var faceStart = _faceOffsets.Count - 1;
 
@@ -161,6 +165,19 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
 
             OrientLoops();
 
+            // Faux bold: offset the resolved outline outwards (or inwards for a lighter look).
+            // The offset folds at concave corners and can invert counters; a second pass through
+            // the fill rule drops those inverted loops, the same trick polygon offsetters use.
+            if (MathF.Abs(weight) > 1e-6f)
+            {
+                OffsetLoops(-weight);
+                ResolveOverlaps(WindingRule.NonZero);
+                if (_loops.Count == 0)
+                    return;
+
+                OrientLoops();
+            }
+
             var hasWalls = sides && depth > 0;
             var profile = BuildProfile(depth, bevel, bevelSegments, hasWalls);
             BuildRings(profile);
@@ -173,7 +190,7 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
                 AddCap(ringIndex: profile.Count - 1, windingRule, flip: true);
 
             if (hasWalls)
-                AddWalls(profile);
+                AddWalls(profile, flatShading, MathF.Cos(smoothAngle * MathF.PI / 180f));
 
             var faceCount = _faceOffsets.Count - 1 - faceStart;
             if (faceCount > 0)
@@ -212,6 +229,19 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
             }
 
             return _profile;
+        }
+
+        private void OffsetLoops(float inset)
+        {
+            foreach (var loop in _loops)
+            {
+                _scratch2.Clear();
+                for (var i = 0; i < loop.Count; i++)
+                    _scratch2.Add(InsetPoint(loop, i, inset));
+
+                loop.Clear();
+                loop.AddRange(_scratch2);
+            }
         }
 
         private void ResolveOverlaps(WindingRule windingRule)
@@ -307,7 +337,7 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
         /// <summary>Loop vertex moved inwards (to the left of the travel direction) by the inset, mitered with a clamp.</summary>
         private static Vector2 InsetPoint(List<Vector2> loop, int index, float inset)
         {
-            if (inset <= 0)
+            if (inset == 0)
                 return loop[index];
 
             var count = loop.Count;
@@ -419,7 +449,7 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
             return AddPoint(new Vector3(vertex.Position.X, vertex.Position.Y, vertex.Position.Z));
         }
 
-        private void AddWalls(List<(float Inset, float Z)> profile)
+        private void AddWalls(List<(float Inset, float Z)> profile, bool flatShading, float smoothCos)
         {
             for (var l = 0; l < _loops.Count; l++)
             {
@@ -429,7 +459,6 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
                 var ringCount = profile.Count;
                 for (var r = 0; r < ringCount - 1; r++)
                 {
-                    var isBevel = MathF.Abs(profile[r].Inset - profile[r + 1].Inset) > 1e-7f;
                     for (var i = 0; i < count; i++)
                     {
                         var next = (i + 1) % count;
@@ -448,14 +477,14 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
                             continue;
 
                         normal = Vector3.Normalize(normal);
-                        // Bevel rings share smooth normals across the profile; straight walls stay flat
-                        if (isBevel)
+                        // Smooth shading follows the outline (hard at sharp corners) and the bevel profile
+                        if (flatShading)
                         {
-                            AddQuadSmooth(a, d, c, b, loop, i, next, profile, r, ringCount);
+                            AddFace(a, d, c, b, normal, isSide: true);
                         }
                         else
                         {
-                            AddFace(a, d, c, b, normal, isSide: true);
+                            AddQuadSmooth(a, d, c, b, loop, i, next, profile, r, ringCount, smoothCos);
                         }
                     }
                 }
@@ -464,17 +493,23 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
 
         /// <summary>Quad a (ring r, i) -> d (ring r+1, i) -> c (ring r+1, next) -> b (ring r, next) with smooth normals from the profile slope.</summary>
         private void AddQuadSmooth(int a, int d, int c, int b, List<Vector2> loop, int i, int next, List<(float Inset, float Z)> profile, int r,
-                                   int ringCount)
+                                   int ringCount, float smoothCos)
         {
-            _corners.Add(a); _normals.Add(ProfileNormal(loop, i, profile, r, ringCount));
-            _corners.Add(d); _normals.Add(ProfileNormal(loop, i, profile, r + 1, ringCount));
-            _corners.Add(c); _normals.Add(ProfileNormal(loop, next, profile, r + 1, ringCount));
-            _corners.Add(b); _normals.Add(ProfileNormal(loop, next, profile, r, ringCount));
+            // Outline normals at both ends of segment i; a corner sharper than the smooth angle keeps the segment's own normal
+            var startOutward = CornerOutward(loop, i, segment: i, smoothCos);
+            var endOutward = CornerOutward(loop, next, segment: i, smoothCos);
+            _corners.Add(a); _normals.Add(ProfileNormal(startOutward, profile, r, ringCount));
+            _corners.Add(d); _normals.Add(ProfileNormal(startOutward, profile, r + 1, ringCount));
+            _corners.Add(c); _normals.Add(ProfileNormal(endOutward, profile, r + 1, ringCount));
+            _corners.Add(b); _normals.Add(ProfileNormal(endOutward, profile, r, ringCount));
             _faceOffsets.Add(_corners.Count);
             _isSide.Add(1);
         }
 
-        private static Vector3 ProfileNormal(List<Vector2> loop, int index, List<(float Inset, float Z)> profile, int r, int ringCount)
+        /// <summary>Outward 2D normal of the outline at vertex index as seen from the given segment (index to index+1, or the one
+        /// before). Averaged with the neighbour segment when the corner is flatter than the smooth angle, otherwise the segment's
+        /// own normal so sharp corners shade hard.</summary>
+        private static Vector2 CornerOutward(List<Vector2> loop, int index, int segment, float smoothCos)
         {
             var count = loop.Count;
             var previous = loop[(index - 1 + count) % count];
@@ -482,10 +517,17 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
             var next = loop[(index + 1) % count];
             var d0 = Vector2.Normalize(current - previous);
             var d1 = Vector2.Normalize(next - current);
-            var outward = Vector2.Normalize(new Vector2(d0.Y, -d0.X) + new Vector2(d1.Y, -d1.X));
-            if (float.IsNaN(outward.X))
-                outward = new Vector2(d0.Y, -d0.X);
+            var own = segment == index ? d1 : d0;
+            var ownOutward = new Vector2(own.Y, -own.X);
+            if (Vector2.Dot(d0, d1) < smoothCos)
+                return ownOutward;
 
+            var outward = Vector2.Normalize(new Vector2(d0.Y, -d0.X) + new Vector2(d1.Y, -d1.X));
+            return float.IsNaN(outward.X) ? ownOutward : outward;
+        }
+
+        private static Vector3 ProfileNormal(Vector2 outward, List<(float Inset, float Z)> profile, int r, int ringCount)
+        {
             // Slope of the profile around ring r: average of the neighbouring profile segments
             var before = Math.Max(r - 1, 0);
             var after = Math.Min(r + 1, ringCount - 1);
@@ -527,6 +569,7 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
 
         private readonly List<List<Vector2>> _loops = [];
         private readonly List<Vector3> _scratch = [];
+        private readonly List<Vector2> _scratch2 = [];
         private readonly List<(float Inset, float Z)> _profile = [];
         private readonly List<int[]> _loopRings = [];
         private readonly Dictionary<(int Ring, long X, long Y), int> _ringPointLookup = [];
@@ -549,6 +592,15 @@ internal sealed class CurvesToMesh : Instance<CurvesToMesh>
 
     [Input(Guid = "2b8d5f7a-e319-4c60-a5d8-6f0c3e9a1b48")]
     public readonly InputSlot<int> BevelSegments = new();
+
+    [Input(Guid = "5c0e9b3d-7a41-4f28-b6d3-2e8f1a4c7d95")]
+    public readonly InputSlot<float> Weight = new();
+
+    [Input(Guid = "8d4b2e6f-1c93-4a57-9f0e-6b3d5c8a2e41")]
+    public readonly InputSlot<bool> FlatShading = new();
+
+    [Input(Guid = "1f7a3c5e-9b62-4d18-a4c7-3e0f8b6d2a59")]
+    public readonly InputSlot<float> SmoothAngle = new();
 
     [Input(Guid = "7d4c1a9e-8f52-4b37-9e6a-3c1b5d7f2a80")]
     public readonly InputSlot<float> Tolerance = new();

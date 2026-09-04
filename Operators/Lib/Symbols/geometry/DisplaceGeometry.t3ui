@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "155cdda5-b4f0-4a9b-8ee5-fc4047bb7751"/*DisplaceGeometry*/,
-  "Description": "Displaces geometry points along their normals by a ScalarField sampled at each point, scaled by Amount.\n\nThe Normal attribute is dropped so the displaced surface gets correct faceted normals from [GeometryToMeshBuffers].",
+  "Description": "Displaces geometry points along their normals by a ScalarField sampled at each point, scaled by Amount.\n\nThe Normal attribute is dropped so the displaced surface gets correct faceted normals from [GeometryToMesh].",
   "InputUis": [
     {
       "InputId": "a235cfd2-f2bd-4a0a-91e1-0cbcce9e2961"/*Geometry*/,

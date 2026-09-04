@@ -6,17 +6,17 @@ TiXL can generate and modify meshes on the CPU before they are turned into GPU b
 
 Most mesh operators in TiXL work on **MeshBuffers** — packed GPU vertex and index buffers that are fast to draw but hard to restructure. The geometry operators work on a different type, **MeshGeometry**: a CPU-side format with faces that can have any number of corners, shared points, and flexible attributes. This makes modeling operations like beveling possible.
 
-The two worlds connect through [GeometryToMeshBuffers], which triangulates the geometry and packs it for rendering. Wires carrying CPU geometry appear in a teal-green color, distinct from the red of GPU mesh buffers.
+The two worlds connect through [GeometryToMesh], which triangulates the geometry and packs it for rendering. Wires carrying CPU geometry appear in a teal-green color, distinct from the red of GPU mesh buffers.
 
 ## The basic chain
 
 ```
-[CubeGeometry] -> [BevelGeometry] -> [GeometryToMeshBuffers] -> [DrawMesh]
+[CubeGeometry] -> [BevelGeometry] -> [GeometryToMesh] -> [DrawMesh]
 ```
 
 - **[CubeGeometry]** generates a box as procedural geometry, with hard edges and per-face UVs. The `Size` parameter sets its dimensions.
 - **[BevelGeometry]** rounds all edges. See below.
-- **[GeometryToMeshBuffers]** compiles the result for rendering. Connect its output to any operator that accepts a mesh, such as [DrawMesh] or [TransformMesh].
+- **[GeometryToMesh]** compiles the result for rendering. Connect its output to any operator that accepts a mesh, such as [DrawMesh] or [TransformMesh].
 
 ## Beveling
 

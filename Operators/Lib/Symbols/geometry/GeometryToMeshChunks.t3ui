@@ -1,6 +1,6 @@
 {
   "FormatVersion": 3,
-  "Id": "c7e3a9f1-5d28-4b64-8a0f-2e9c6b1d7f35"/*GeometryToChunks*/,
+  "Id": "c7e3a9f1-5d28-4b64-8a0f-2e9c6b1d7f35"/*GeometryToMeshChunks*/,
   "Description": "Compiles geometry parts into one mesh buffer with a chunk per part, for instancing with [DrawMeshChunksAtPoints].
 
 Vertices are stored relative to their part's pivot, so moving, rotating or scaling a pivot point transforms the whole chunk on the GPU. Points holds the pivots as CPU points (F2 carries the part's seed index) for further processing with CPoints ops and [ListToBuffer]; GPoints is the same list already uploaded. ChunkIndices maps each point to its chunk. Geometry without parts becomes a single chunk anchored at the origin.

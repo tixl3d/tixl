@@ -211,6 +211,8 @@ internal sealed class ViewSelectionPinning
                                             : [];
     }
 
+    public bool IsPinned => _isPinned;
+
     public bool TryGetPinnedOrSelectedInstance([NotNullWhen(true)] out Instance? instance, [NotNullWhen(true)] out ProjectView? components)
     {
         var focusedComponents = ProjectView.Focused;

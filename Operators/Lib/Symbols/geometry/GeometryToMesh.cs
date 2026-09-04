@@ -3,12 +3,12 @@ using Lib.Utils;
 namespace Lib.geometry;
 
 [Guid("4fea8c0e-cb7f-41fe-a410-df1d3886bf98")]
-internal sealed class GeometryToMeshBuffers : Instance<GeometryToMeshBuffers>
+internal sealed class GeometryToMesh : Instance<GeometryToMesh>
 {
     [Output(Guid = "4bf00eb5-a39c-4567-a81e-46c2276d1418")]
     public readonly Slot<MeshBuffers> Buffers = new();
 
-    public GeometryToMeshBuffers()
+    public GeometryToMesh()
     {
         Buffers.UpdateAction = Update;
     }
