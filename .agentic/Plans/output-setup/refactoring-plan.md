@@ -354,8 +354,19 @@ with an explanatory comment) — the row-callback API design made compliance imp
   surfaces; `EntityKind.Patch` with rows under their output (collapsible), input-gutter bind toggle,
   drop routing (output → new full-canvas patch, patch → re-feed), "Add Patch" on the output menu,
   Duplicate/Rename/Delete, sanitizer quad repair, Parameter-window card (px position/size). Icon is a
-  `Icon.Patch` (atlas slot 161, added by the user). Manual test `output-setup-patches.md`. Not yet
-  user-tested.
+  `Icon.Patch` (atlas slot 161, added by the user). Manual test `output-setup-patches.md`. User-tested.
+- **2026-09-05 (Patches, slice 2):** canvas editing in `SetupOutputView.DrawPatches` (corner/edge/label
+  gestures on one snapshot skeleton `RunPatchQuadDrag` + `ChangePatchQuadCommand`; snapping to canvas and
+  sibling patches), `SetupActions.SplitOutput` and `PromotePatchToSurface`, menu entries on output and
+  patch. Manual test extended. User-tested.
+- **2026-09-05 (P2.2 leftovers):** the selection shadows reviewed. `_selectedSliceId` (written from the
+  pick handler *and* the draw parameter) is now a local of `DrawSourceCanvas`; `_focusedSurfaceId` is
+  `_shownSurfaceId` — not a copy of the selection but the window's shown surface (selection or pin),
+  set at the top of every `Draw` and documented as frame-scoped; `SetupPanel._primaryKind/Id` stays as a
+  once-per-frame resolve (its comment says why). `ICanvasPointSnapper` deleted with its
+  `CanvasPointHandle.Draw` parameter: nothing implemented it and every snap runs after the handle, in the
+  edit's own space (parent metres, output px) rather than canvas space, so the seam could not have fit.
+  Still open from P2.2: patch corners (and slice corners / annotation endpoints) in the sub-element plane.
 
 ## Suggested order (revised for the flow-view pivot)
 

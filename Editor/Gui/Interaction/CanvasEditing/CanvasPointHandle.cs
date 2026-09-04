@@ -56,10 +56,11 @@ internal static class CanvasPointHandle
     }
 
     /// <summary>
-    /// Draws one handle and processes its drag. <paramref name="posInCanvas"/> is mutated in place
-    /// while dragging (after the optional snap). Returns the drag phase for the caller's undo logic.
+    /// Draws one handle and processes its drag. <paramref name="posInCanvas"/> is mutated in place while
+    /// dragging; snapping is the caller's job afterwards, in whatever space its edit lives in. Returns the
+    /// drag phase for the caller's undo logic.
     /// </summary>
-    public static DragPhase Draw(ref Vector2 posInCanvas, ICanvasProjection projection, in Style style, ICanvasPointSnapper? snapper = null)
+    public static DragPhase Draw(ref Vector2 posInCanvas, ICanvasProjection projection, in Style style)
     {
         var dl = ImGui.GetWindowDrawList();
         var screen = projection.CanvasToScreen(posInCanvas);
@@ -86,11 +87,7 @@ internal static class CanvasPointHandle
             }
             else if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left, 0f))
             {
-                var candidate = projection.ScreenToCanvas(ImGui.GetMousePos() - _grabOffset);
-                if (snapper != null)
-                    candidate = snapper.TrySnap(candidate, projection);
-
-                posInCanvas = candidate;
+                posInCanvas = projection.ScreenToCanvas(ImGui.GetMousePos() - _grabOffset);
                 screen = projection.CanvasToScreen(posInCanvas);
                 phase = DragPhase.Dragging;
             }

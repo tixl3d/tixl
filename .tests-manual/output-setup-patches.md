@@ -13,10 +13,10 @@ prerequisites:
   - A LoadImage op (any image) exists in the graph.
 ---
 
-Covers the first Patches slice: an output's direct pipe is a list of **patches**, each a
-rectangle of output pixels fed by one slice. Patches composite underneath any surfaces
-mapped to the same output. Canvas editing of patch quads, Split helpers and "Use on
-Surface" are not part of this slice.
+Covers Patches: an output's direct pipe is a list of **patches**, each a rectangle of
+output pixels fed by one slice. Patches composite underneath any surfaces mapped to the
+same output. The second half covers editing patches on the output canvas, the Split
+helpers, and promoting a patch to a surface.
 
 ## Step: Build the test setup
 
@@ -73,6 +73,50 @@ With "Patch 1" selected, set **Size (px)** to 960 × 540, then **Position (px)**
 **Expected:**
 - P1's output view shows the corner-pinned surface drawn **over** the full-frame patch
   image, not replacing it.
+
+## Step: Patch handles on the output canvas
+
+**Action:**
+1. Click "P1" in the setup panel so the output window shows its canvas, then click the
+   "Patch 1" label on the canvas.
+2. Drag the patch's top-right corner inward by about a third of the canvas.
+3. Drag the right-edge handle (square, mid-edge) left; then hold Shift and drag it
+   again.
+4. Drag the "Patch 1" label toward the canvas' bottom-left corner until it stops.
+5. Press Ctrl+Z three times.
+
+**Expected:**
+- After 1: "Patch 1" is selected in the panel; the canvas shows its frame with round
+  corner handles and, as the selected patch, square edge handles.
+- After 2: the image keystones (the corner moves freely, the other three stay).
+- After 3: the first drag moves only that edge, and it clicks onto the canvas centre
+  line when close; with Shift held there is no snapping.
+- After 4: the whole patch moves and snaps flush into the canvas corner.
+- Each Ctrl+Z reverts one gesture: the move, the edge crop, then the corner.
+
+## Step: Split into a 2×2 matrix
+
+**Action:**
+Right-click "P1" → **Split into 2×2**. Then drag the second tile's left-edge handle to
+the right by a little and release.
+
+**Expected:**
+- P1 now has four rows "Patch 1" … "Patch 4", each fed by "Slice 1"; the canvas shows
+  the image four times in a 2×2 grid, and the first tile is selected.
+- Before the edge drag the tiles share their edges exactly; dragging the second tile's
+  left edge opens a gap and, when dragged back, snaps shut against the first tile.
+
+## Step: Use on Surface
+
+**Action:**
+Right-click "Patch 1" (in the panel or on its canvas label) → **Use on Surface**.
+
+**Expected:**
+- "Patch 1" disappears from P1 and a new surface row appears under SURFACES, selected,
+  mapped to P1 and fed by "Slice 1".
+- Nothing moves on the canvas: the surface's corner pin sits exactly where the patch
+  was, now with the surface's anchor marker and its edge handles.
+- The surface card shows Size (m) 1 × 0.625 (the tile's aspect).
 
 ## Step: Deleting the slice unfeeds, deleting the patch removes
 

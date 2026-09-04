@@ -1048,6 +1048,82 @@ internal static class SetupActions
         }
     }
 
+    /// <summary>
+    /// Replaces the output's patches with a columns × rows grid of tiles covering the canvas — the split-matrix
+    /// and TV-wall case. Every tile is fed by what the first patch showed, so a full-frame feed becomes N copies
+    /// ready to be re-routed one by one.
+    /// </summary>
+    internal static void SplitOutput(SetupEntitySelection selection, Setup setup, OutputDefinition output, int columns, int rows)
+    {
+        RunUndoable($"Split {columns}×{rows}", setup, () =>
+                                                       {
+                                                           var feed = output.Patches.Count > 0 ? output.Patches[0].SliceId : Guid.Empty;
+                                                           output.Patches.Clear();
+
+                                                           float w = Math.Max(1, output.CanvasResolution.Width);
+                                                           float h = Math.Max(1, output.CanvasResolution.Height);
+                                                           var cell = new Vector2(w / columns, h / rows);
+                                                           for (var row = 0; row < rows; row++)
+                                                           {
+                                                               for (var column = 0; column < columns; column++)
+                                                               {
+                                                                   var min = new Vector2(column * cell.X, row * cell.Y);
+                                                                   var max = min + cell;
+                                                                   output.Patches.Add(new OutputDefinition.Patch
+                                                                                          {
+                                                                                              SliceId = feed,
+                                                                                              Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)],
+                                                                                          });
+                                                               }
+                                                           }
+
+                                                           selection.Select(SetupEntitySelection.EntityKind.Patch, output.Patches[0].Id);
+                                                       });
+    }
+
+    /// <summary>
+    /// "Use on Surface": materializes a surface for a patch when a surface-only feature is reached for (real
+    /// size, raster, straightening). The quad transfers verbatim onto the surface's mapping — same numbers,
+    /// nothing moves on the wall — and the patch goes, since a route's quad has one home at a time.
+    /// </summary>
+    internal static void PromotePatchToSurface(SetupEntitySelection selection, Setup setup, Guid patchId)
+    {
+        var patch = setup.FindPatch(patchId, out var output);
+        if (patch == null || output == null || patch.Quad.Length < 4)
+            return;
+
+        RunUndoable("Use on surface", setup, () =>
+                                             {
+                                                 var min = patch.Quad[0];
+                                                 var max = patch.Quad[0];
+                                                 foreach (var corner in patch.Quad)
+                                                 {
+                                                     min = Vector2.Min(min, corner);
+                                                     max = Vector2.Max(max, corner);
+                                                 }
+
+                                                 // A metre of width, the height by the quad's aspect: the physical size is unknown until
+                                                 // measured, and the content density follows from the pixels the patch already covered.
+                                                 var widthPx = MathF.Max(max.X - min.X, 1);
+                                                 var heightPx = MathF.Max(max.Y - min.Y, 1);
+                                                 var surface = new Surface
+                                                                   {
+                                                                       Name = string.IsNullOrEmpty(patch.Name) ? $"Surface {setup.Surfaces.Count + 1}" : patch.Name,
+                                                                       SizeInMeters = new Vector2(1, heightPx / widthPx),
+                                                                       PixelsPerMeter = widthPx,
+                                                                       SliceId = patch.SliceId,
+                                                                       OutputMappings =
+                                                                       [
+                                                                           new Surface.OutputMapping { OutputId = output.Id, Quad = (Vector2[])patch.Quad.Clone() },
+                                                                       ],
+                                                                   };
+
+                                                 setup.Surfaces.Add(surface);
+                                                 output.Patches.RemoveAll(p => p.Id == patchId);
+                                                 selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
+                                             });
+    }
+
     /// <summary>A patch's display name: the typed name, else "Patch N" by its position on the output.</summary>
     internal static string PatchLabel(OutputDefinition output, OutputDefinition.Patch patch)
     {

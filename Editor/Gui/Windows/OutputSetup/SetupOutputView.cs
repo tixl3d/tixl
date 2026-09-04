@@ -42,7 +42,9 @@ internal sealed partial class SetupOutputView
         _projection = new ScalableCanvasProjection(_canvas);
     }
 
-    public void Draw(Guid outputId, Guid focusedSurfaceId = default, SetupEntitySelection? selection = null)
+    /// <param name="shownSurfaceId">The surface this window is showing — the selection primary, or the pin —
+    /// which gets the exclusive affordances (edge handles, anchor, the rectify basis).</param>
+    public void Draw(Guid outputId, Guid shownSurfaceId = default, SetupEntitySelection? selection = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -51,7 +53,7 @@ internal sealed partial class SetupOutputView
         if (output == null)
             return;
 
-        _focusedSurfaceId = focusedSurfaceId;
+        _shownSurfaceId = shownSurfaceId;
 
         DrawHeader(setup, output, outputId);
         DrawCameraEditor(output);
@@ -67,7 +69,7 @@ internal sealed partial class SetupOutputView
         // finish): the visual midpoint lands at 75% of the duration.
         // A Layout child straightens against its parent — that's the space it lives in — so the basis is
         // whichever surface up the chain actually carries the corner pin.
-        var hasFocusBasis = SurfaceGeometry.FindCarrier(setup, _focusedSurfaceId, outputId) != null;
+        var hasFocusBasis = SurfaceGeometry.FindCarrier(setup, _shownSurfaceId, outputId) != null;
 
         var target = !hasFocusBasis
                          ? 0f
@@ -133,7 +135,7 @@ internal sealed partial class SetupOutputView
         // Rectify basis = the focused surface. Freeze it while it is the one being dragged, so the transform
         // doesn't chase its own edit; otherwise the live quad keeps R settled and current.
         // Whose space the focus lives in: itself, or the parent when a Layout child is selected.
-        var focusCarrier = SurfaceGeometry.FindCarrier(setup, _focusedSurfaceId, outputId);
+        var focusCarrier = SurfaceGeometry.FindCarrier(setup, _shownSurfaceId, outputId);
         var focusCarrierId = focusCarrier?.Id ?? Guid.Empty;
 
         var basis = _viewMorph > 0.0001f ? focusCarrier : null;
@@ -410,6 +412,9 @@ internal sealed partial class SetupOutputView
         if (_labelGrabScreen != null && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
             _labelGrabScreen = null;
 
+        // Patches sit under the surfaces in the composite, so their frames go first and the surfaces draw over them.
+        DrawPatches(setup, output, selection, dl, rToView, rToOutput, viewMin, canvasSize, editable, handleFade, hasContent);
+
         _fenceCandidates.Clear();
         Span<Vector2> labelQuad = stackalloc Vector2[4]; // hoisted: one buffer reused by every surface
         for (var i = 0; i < setup.Surfaces.Count; i++)
@@ -451,7 +456,7 @@ internal sealed partial class SetupOutputView
             // A parent recedes while one of its children is the subject, so the child's handles read first.
             // Selection styling covers the whole multi-selection; the *focused* (primary) surface keeps the
             // exclusive affordances below (edge handles, anchor, isolate).
-            var isFocused = surface.Id == _focusedSurfaceId;
+            var isFocused = surface.Id == _shownSurfaceId;
             var isSelected = isFocused
                              || (selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, surface.Id) ?? false);
             var emphasis = handleFade * (!isSelected && surface.Id == focusCarrierId ? 0.45f : 1f);
@@ -548,7 +553,7 @@ internal sealed partial class SetupOutputView
                                     : CanvasPointHandle.DragPhase.Completed;
                 }
                 else if (_surfaceMoveId == Guid.Empty && _labelGrabScreen != null
-                         && surface.Id == _focusedSurfaceId
+                         && surface.Id == _shownSurfaceId
                          && editable && !lockedByIsolate
                          && !string.IsNullOrEmpty(surface.Name)
                          && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
@@ -598,7 +603,7 @@ internal sealed partial class SetupOutputView
 
             // Edge handles belong to the focused surface only — they're contextual, and four extra dots on
             // every quad would drown the canvas. A corner moves freely (perspective); an edge crops.
-            if (handlesEditable && surface.Id == _focusedSurfaceId)
+            if (handlesEditable && surface.Id == _shownSurfaceId)
             {
                 var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
                 if (edge >= 0)
@@ -631,6 +636,287 @@ internal sealed partial class SetupOutputView
 
         DrawSliceEditor(setup, dl, focusCarrierId, viewMin, toContent);
         ResolvePicking(setup, selection);
+    }
+
+    /// <summary>
+    /// The output's patches: rectangles (or keystone quads) of canvas pixels on the direct pipe. Corners drag
+    /// freely — a warped patch is a surface-less keystone; the selected patch's edges crop axis-aligned and its
+    /// label moves it whole. Every edit snaps to the canvas edges and to the other patches, so tiles butt up.
+    /// </summary>
+    private void DrawPatches(Setup setup, OutputDefinition output, SetupEntitySelection? selection, ImDrawListPtr dl,
+                             Homography rToView, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize,
+                             bool editable, float fade, bool hasContent)
+    {
+        if (output.Patches.Count == 0 || fade <= 0.01f)
+            return;
+
+        var focusedPatchId = selection != null && selection.Targets.Count > 0
+                             && selection.Targets[0].Kind == SetupEntitySelection.EntityKind.Patch
+                                 ? selection.Targets[0].EntityId
+                                 : Guid.Empty;
+
+        Span<Vector2> screen = stackalloc Vector2[4];
+        for (var i = 0; i < output.Patches.Count; i++)
+        {
+            var patch = output.Patches[i];
+            if (patch.Quad.Length < 4)
+                continue;
+
+            for (var c = 0; c < 4; c++)
+            {
+                _patchViewQuad[c] = rToView.TransformPoint(patch.Quad[c]) - viewMin;
+                screen[c] = _projection.CanvasToScreen(_patchViewQuad[c]);
+            }
+
+            ImGui.PushID(patch.Id.GetHashCode());
+
+            var label = SetupActions.PatchLabel(output, patch);
+            var isFocused = patch.Id == focusedPatchId;
+            var isSelected = isFocused || (selection?.IsSelected(SetupEntitySelection.EntityKind.Patch, patch.Id) ?? false);
+            var pulse = isSelected ? 0f : FrameStats.GetPulse(patch.Id);
+
+            var style = CornerPinHandles.Style.ForSurface(null, editable, isSelected, fade);
+            style.DrawChecker = !hasContent;
+            style.EdgeColor = PulseColor(style.EdgeColor, pulse);
+
+            // Same label-over-handle rule as surfaces: the label is the grab area, so handles under it yield.
+            var handleActive = _dragPatchId == patch.Id;
+            var pointerOverLabel = !handleActive && IsMouseOverLabel(screen, label);
+            style.Editable = editable && !pointerOverLabel && !_isolate;
+
+            var phase = CornerPinHandles.Draw(_patchViewQuad, _projection, style, out var draggedCorner, out var cornerHovered);
+            if (phase != CanvasPointHandle.DragPhase.None)
+            {
+                for (var c = 0; c < 4; c++)
+                    patch.Quad[c] = rToOutput.TransformPoint(_patchViewQuad[c] + viewMin);
+
+                if (phase == CanvasPointHandle.DragPhase.Dragging && draggedCorner >= 0 && !ImGui.GetIO().KeyShift)
+                {
+                    CollectPatchSnapCandidates(output, patch.Id, canvasSize);
+                    var threshold = PatchSnapThreshold();
+                    ref var corner = ref patch.Quad[draggedCorner];
+                    Span<float> x = [corner.X];
+                    if (SurfaceGeometry.TrySnapOffset(_snapXs, x, threshold, out var offsetX, out _))
+                        corner.X += offsetX;
+
+                    Span<float> y = [corner.Y];
+                    if (SurfaceGeometry.TrySnapOffset(_snapYs, y, threshold, out var offsetY, out _))
+                        corner.Y += offsetY;
+                }
+            }
+
+            RunPatchQuadDrag(phase, patch);
+
+            // The label doubles as the move handle — the press selects (through the picker), holding on moves.
+            if (phase == CanvasPointHandle.DragPhase.None)
+                HandlePatchMove(output, patch, isFocused, editable && !_isolate, label, screen, rToView, rToOutput, viewMin, canvasSize);
+
+            if (cornerHovered || phase != CanvasPointHandle.DragPhase.None)
+                FrameStats.PulseItemWithId(patch.Id);
+
+            if (phase == CanvasPointHandle.DragPhase.Started && !_isolate)
+                selection?.Select(SetupEntitySelection.EntityKind.Patch, patch.Id);
+
+            // Edge handles for the focused patch only: an edge crops the tile, keeping the opposite edge put.
+            if (style.Editable && isFocused)
+            {
+                var edgePhase = CornerPinHandles.DrawEdgeHandles(_patchViewQuad, _projection, style, out var edge, out var edgePos);
+                if (edge >= 0)
+                    HandlePatchEdgeDrag(edgePhase, output, patch, edge, edgePos, rToOutput, viewMin, canvasSize);
+            }
+
+            ImGui.PopID();
+            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, screen, patch.Id, label, isSelected, fade, pulse);
+        }
+    }
+
+    /// <summary>The snapshot → live edit → one undo step skeleton shared by every patch gesture.</summary>
+    private void RunPatchQuadDrag(CanvasPointHandle.DragPhase phase, OutputDefinition.Patch patch)
+    {
+        switch (phase)
+        {
+            case CanvasPointHandle.DragPhase.Started:
+                Array.Copy(patch.Quad, _patchOldQuad, 4);
+                _dragPatchId = patch.Id;
+                break;
+
+            case CanvasPointHandle.DragPhase.Completed:
+                if (_dragPatchId == patch.Id)
+                {
+                    if (QuadsDiffer(_patchOldQuad, patch.Quad))
+                    {
+                        UndoRedoStack.Add(new ChangePatchQuadCommand(patch.Id, _patchOldQuad, patch.Quad));
+                        OutputSetupHandling.SaveActive();
+                    }
+
+                    _dragPatchId = Guid.Empty;
+                }
+
+                break;
+        }
+    }
+
+    private void HandlePatchMove(OutputDefinition output, OutputDefinition.Patch patch, bool isFocused, bool editable, string label,
+                                 ReadOnlySpan<Vector2> screen, Homography rToView, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize)
+    {
+        var movePhase = CanvasPointHandle.DragPhase.None;
+        if (_patchMoveId == patch.Id)
+        {
+            movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left)
+                            ? CanvasPointHandle.DragPhase.Dragging
+                            : CanvasPointHandle.DragPhase.Completed;
+        }
+        else if (_patchMoveId == Guid.Empty && _labelGrabScreen != null && isFocused && editable
+                 && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
+                 && (ImGui.GetMousePos() - _labelGrabScreen.Value).Length() > UserSettings.Config.ClickThreshold
+                 && IsPointOverLabel(screen, label, _labelGrabScreen.Value))
+        {
+            _labelGrabScreen = null;
+            _patchMoveId = patch.Id;
+            _patchMoveGrabCanvas = _projection.ScreenToCanvas(ImGui.GetMousePos());
+            movePhase = CanvasPointHandle.DragPhase.Started;
+        }
+
+        switch (movePhase)
+        {
+            case CanvasPointHandle.DragPhase.Started:
+                RunPatchQuadDrag(movePhase, patch);
+                break;
+
+            case CanvasPointHandle.DragPhase.Dragging when _dragPatchId == patch.Id:
+            {
+                // Rigid in view space, carried through R per corner — the same rule as a surface move.
+                var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _patchMoveGrabCanvas;
+                for (var c = 0; c < 4; c++)
+                    patch.Quad[c] = rToOutput.TransformPoint(rToView.TransformPoint(_patchOldQuad[c]) + moveDelta);
+
+                if (!ImGui.GetIO().KeyShift)
+                {
+                    CollectPatchSnapCandidates(output, patch.Id, canvasSize);
+                    var threshold = PatchSnapThreshold();
+                    QuadBounds(patch.Quad, out var min, out var max);
+                    Span<float> xs = [min.X, (min.X + max.X) * 0.5f, max.X];
+                    Span<float> ys = [min.Y, (min.Y + max.Y) * 0.5f, max.Y];
+                    var offset = Vector2.Zero;
+                    if (SurfaceGeometry.TrySnapOffset(_snapXs, xs, threshold, out var offsetX, out _))
+                        offset.X = offsetX;
+
+                    if (SurfaceGeometry.TrySnapOffset(_snapYs, ys, threshold, out var offsetY, out _))
+                        offset.Y = offsetY;
+
+                    for (var c = 0; c < 4; c++)
+                        patch.Quad[c] += offset;
+                }
+
+                break;
+            }
+
+            case CanvasPointHandle.DragPhase.Completed:
+                RunPatchQuadDrag(movePhase, patch);
+                _patchMoveId = Guid.Empty;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// An edge drag on a patch moves that edge along its normal (a crop for a tile); with Ctrl the edge slides
+    /// by the full delta (a shear). Re-based from the pre-drag quad each frame, so the edit doesn't compound.
+    /// </summary>
+    private void HandlePatchEdgeDrag(CanvasPointHandle.DragPhase phase, OutputDefinition output, OutputDefinition.Patch patch,
+                                     int edge, Vector2 viewPos, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize)
+    {
+        if (phase == CanvasPointHandle.DragPhase.Started)
+            RunPatchQuadDrag(phase, patch);
+
+        if (phase == CanvasPointHandle.DragPhase.Dragging && _dragPatchId == patch.Id)
+        {
+            var e0 = edge;
+            var e1 = (edge + 1) % 4;
+            var pos = rToOutput.TransformPoint(viewPos + viewMin);
+            var midpoint = (_patchOldQuad[e0] + _patchOldQuad[e1]) * 0.5f;
+            var delta = pos - midpoint;
+
+            if (!ImGui.GetIO().KeyCtrl)
+            {
+                var along = _patchOldQuad[e1] - _patchOldQuad[e0];
+                var normal = new Vector2(-along.Y, along.X);
+                if (normal.LengthSquared() > 0.0001f)
+                {
+                    normal = Vector2.Normalize(normal);
+                    delta = normal * Vector2.Dot(delta, normal);
+                }
+            }
+
+            Array.Copy(_patchOldQuad, patch.Quad, 4);
+            patch.Quad[e0] += delta;
+            patch.Quad[e1] += delta;
+
+            // An axis-aligned edge snaps its coordinate to the canvas edges and the neighbouring tiles.
+            var horizontal = edge is 0 or 2;
+            var aligned = horizontal
+                              ? MathF.Abs(patch.Quad[e0].Y - patch.Quad[e1].Y) < 0.001f
+                              : MathF.Abs(patch.Quad[e0].X - patch.Quad[e1].X) < 0.001f;
+            if (aligned && !ImGui.GetIO().KeyShift)
+            {
+                CollectPatchSnapCandidates(output, patch.Id, canvasSize);
+                Span<float> coordinate = [horizontal ? patch.Quad[e0].Y : patch.Quad[e0].X];
+                if (SurfaceGeometry.TrySnapOffset(horizontal ? _snapYs : _snapXs, coordinate, PatchSnapThreshold(), out var offset, out _))
+                {
+                    var shift = horizontal ? new Vector2(0, offset) : new Vector2(offset, 0);
+                    patch.Quad[e0] += shift;
+                    patch.Quad[e1] += shift;
+                }
+            }
+        }
+
+        if (phase == CanvasPointHandle.DragPhase.Completed)
+            RunPatchQuadDrag(phase, patch);
+    }
+
+    /// <summary>Canvas edges and centre plus every other patch's bounds — what a patch edit snaps to, in output px.</summary>
+    private void CollectPatchSnapCandidates(OutputDefinition output, Guid excludeId, Vector2 canvasSize)
+    {
+        _snapXs.Clear();
+        _snapYs.Clear();
+        _snapXs.Add(0);
+        _snapXs.Add(canvasSize.X * 0.5f);
+        _snapXs.Add(canvasSize.X);
+        _snapYs.Add(0);
+        _snapYs.Add(canvasSize.Y * 0.5f);
+        _snapYs.Add(canvasSize.Y);
+
+        foreach (var other in output.Patches)
+        {
+            if (other.Id == excludeId || other.Quad.Length < 4)
+                continue;
+
+            QuadBounds(other.Quad, out var min, out var max);
+            _snapXs.Add(min.X);
+            _snapXs.Add((min.X + max.X) * 0.5f);
+            _snapXs.Add(max.X);
+            _snapYs.Add(min.Y);
+            _snapYs.Add((min.Y + max.Y) * 0.5f);
+            _snapYs.Add(max.Y);
+        }
+    }
+
+    /// <summary>A constant screen distance expressed in output pixels at the current zoom.</summary>
+    private float PatchSnapThreshold()
+    {
+        var a = _projection.CanvasToScreen(Vector2.Zero);
+        var b = _projection.CanvasToScreen(new Vector2(1, 0));
+        var screenPerCanvas = Vector2.Distance(a, b);
+        return screenPerCanvas > 0.0001f ? 7 * T3Ui.UiScaleFactor / screenPerCanvas : 0f;
+    }
+
+    private static void QuadBounds(Vector2[] quad, out Vector2 min, out Vector2 max)
+    {
+        min = max = quad[0];
+        for (var i = 1; i < quad.Length; i++)
+        {
+            min = Vector2.Min(min, quad[i]);
+            max = Vector2.Max(max, quad[i]);
+        }
     }
 
     private void UpdateCornerFence()
@@ -708,7 +994,7 @@ internal sealed partial class SetupOutputView
         // usable when the focused entity resolves to one mapped to this output (for a Layout child, its
         // parent); calibration only for a projector/display. Those segments show disabled rather than
         // vanishing, so the toolbar keeps its shape.
-        var straightCarrier = SurfaceGeometry.FindCarrier(setup, _focusedSurfaceId, outputId);
+        var straightCarrier = SurfaceGeometry.FindCarrier(setup, _shownSurfaceId, outputId);
         var canCalibrate = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
         FormInputs.SegmentedButton(ref _editMode,
                                    isItemDisabled: mode => mode switch
@@ -1120,7 +1406,7 @@ internal sealed partial class SetupOutputView
         if (fade <= 0.01f)
             return;
 
-        var isFocused = child.Id == _focusedSurfaceId;
+        var isFocused = child.Id == _shownSurfaceId;
 
         // Multi-selection styling only — editing and the anchor stay with the focused (primary) region.
         var isSelected = isFocused
@@ -1517,7 +1803,7 @@ internal sealed partial class SetupOutputView
 
             // Isolate takes selection off the canvas: only the focused frame's label still acts (so it can move
             // and its menu opens); the others are inert until picked in the sidebar. (Slices aren't isolated.)
-            var canPick = !_isolate || hit.Id == _focusedSurfaceId;
+            var canPick = !_isolate || hit.Id == _shownSurfaceId;
 
             // A drag on the selected region's label moves it, so that press mustn't also count as a pick.
             if (canPick && hit.LeftClicked && _labelMoveSurfaceId == Guid.Empty && _surfaceMoveId == Guid.Empty)
@@ -1528,7 +1814,7 @@ internal sealed partial class SetupOutputView
                 // frame — select-and-drag in one gesture. Plain presses only; a modifier press is a
                 // selection edit, not a grab.
                 var io = ImGui.GetIO();
-                if (hit.Kind == SetupEntitySelection.EntityKind.Surface && !io.KeyCtrl && !io.KeyShift)
+                if (hit.Kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.Patch && !io.KeyCtrl && !io.KeyShift)
                     _labelGrabScreen = ImGui.GetMousePos();
             }
 
@@ -1574,9 +1860,6 @@ internal sealed partial class SetupOutputView
                 selection.Select(kind, id);
         }
 
-        // The atlas view tracks its edited slice locally too, so keep it in step with the selection.
-        if (kind == SetupEntitySelection.EntityKind.Slice)
-            _selectedSliceId = id;
     }
 
     private void DrawPickMenu(Setup setup, SetupEntitySelection? selection)
@@ -1840,7 +2123,7 @@ internal sealed partial class SetupOutputView
     private readonly EntityItem _entityItem;
     private EditMode _editMode = EditMode.Output;
     private bool _isolate;
-    private Guid _focusedSurfaceId;
+    private Guid _shownSurfaceId; // frame-scoped: what the caller passed to this Draw, never read across frames
     private (Guid, EditMode, Vector2) _fitKey;
 
     // View morph position: 0 = Original (projector space), 1 = Straight (focused surface rectified),
@@ -1893,9 +2176,15 @@ internal sealed partial class SetupOutputView
     // Whole-quad move of a top-level surface by its label (regions use _labelMoveSurfaceId instead).
     private Guid _surfaceMoveId;
     private Vector2 _surfaceMoveGrabCanvas;
+
+    // Patch gestures: the quad in view space (reused per patch), the pre-drag snapshot, and whose it is.
+    private readonly Vector2[] _patchViewQuad = new Vector2[4];
+    private readonly Vector2[] _patchOldQuad = new Vector2[4];
+    private Guid _dragPatchId;
+    private Guid _patchMoveId;
+    private Vector2 _patchMoveGrabCanvas;
     private SetupEntitySelection.EntityKind _menuKind;
     private Guid _menuId;
-    private Guid _selectedSliceId;
 
     // Where the focused target's slice sits once the view has zoomed fully out onto the source, in view units.
     private (Vector2 Min, Vector2 Max)? _sliceRectInView;

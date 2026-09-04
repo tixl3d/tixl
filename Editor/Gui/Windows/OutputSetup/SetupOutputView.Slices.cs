@@ -40,9 +40,6 @@ internal sealed partial class SetupOutputView
             return;
         }
 
-        // Only a selected *slice* is framed. Selecting the source itself (no slice id) frames nothing, rather
-        // than leaving whichever slice was last selected still drawn as selected.
-        _selectedSliceId = selectedSliceId;
 
         var canvasTop = ImGui.GetCursorScreenPos();
         _canvas.UpdateCanvas(out _);
@@ -75,7 +72,7 @@ internal sealed partial class SetupOutputView
             if (slice.SourceId != source.Id)
                 continue;
 
-            if (slice.Id == _selectedSliceId)
+            if (slice.Id == selectedSliceId)
             {
                 selected = slice;
                 continue;
@@ -547,8 +544,7 @@ internal sealed partial class SetupOutputView
         dl.AddLine(a, b, UiColors.StatusAnimated.Fade(0.6f), 1 * T3Ui.UiScaleFactor);
     }
 
-    // Slice-editing state (the rest — _selectedSliceId, the Content-stage framing — lives with the morph in
-    // the core partial, which writes it).
+    // Slice-editing state (the Content-stage framing lives with the morph in the core partial, which writes it).
     private bool _sliceLabelDragging;
     private bool _sliceLabelGrabPending; // label pressed on a not-yet-selected slice; the editor starts the move next frame
     private const float MinSliceSize = 0.01f;

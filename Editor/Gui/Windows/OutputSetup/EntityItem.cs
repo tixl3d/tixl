@@ -440,6 +440,12 @@ internal sealed class EntityItem
                 if (CustomComponents.DrawMenuItem(7, "Add Patch"))
                     SetupActions.AddPatch(selection, setup, output);
 
+                if (CustomComponents.DrawMenuItem(10, "Split into 2×2"))
+                    SetupActions.SplitOutput(selection, setup, output, 2, 2);
+
+                if (CustomComponents.DrawMenuItem(11, "Split into 4×4"))
+                    SetupActions.SplitOutput(selection, setup, output, 4, 4);
+
                 if (output.Kind is not (OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display))
                     break;
 
@@ -457,6 +463,14 @@ internal sealed class EntityItem
                 if (source != null && CustomComponents.DrawMenuItem(8, "Add slice"))
                     SetupActions.AddSlice(selection, setup, source);
 
+                break;
+
+            case SetupEntitySelection.EntityKind.Patch:
+                if (CustomComponents.DrawMenuItem(12, "Use on Surface"))
+                    SetupActions.PromotePatchToSurface(selection, setup, id);
+
+                CustomComponents.TooltipForLastItem("Turns this patch into a surface with a corner pin.",
+                                                    "The quad stays exactly where it is; the surface adds real size, raster and straightening.");
                 break;
 
             case SetupEntitySelection.EntityKind.Surface:

@@ -207,7 +207,13 @@ fed by one source slice. One concept covers the whole surface-less ladder:
   full-canvas patch; onto a patch they re-feed it. Renderer composites patches **under** the surfaces
   mapped to the same output (decided 2026-09-05), list order among patches. Panel rows under the output,
   `EntityKind.Patch`, card with px position/size for axis-aligned quads. Deleting a slice leaves its
-  patches unfed. Next: canvas quad editing (round handles), Split helpers, Use on Surface.
+  patches unfed. **Slice 2 landed (2026-09-05):** patch quads edit on the output canvas (round corner
+  handles = free keystone; square edge handles on the selected patch = crop along the normal, Ctrl =
+  shear; label = whole move; everything snaps to the canvas edges/centre and the other patches' bounds,
+  Shift suspends), one `ChangePatchQuadCommand` per gesture; "Split into 2×2 / 4×4" on the output menu
+  (replaces the patches with a grid fed like the first one); "Use on Surface" on a patch (quad moves
+  verbatim onto a new surface's mapping, patch removed). Patch corners are not in the sub-element
+  selection plane yet (no fence, no group drag).
 
 ### 2.6 Selection model — 🟡 too narrow · **plan in [`selection.md`](selection.md)** (4.5: do not defer)
 `SetupEntitySelection` is single kind+id over `{ReferenceImage, Surface, Prop, Output}`. The spec needs
