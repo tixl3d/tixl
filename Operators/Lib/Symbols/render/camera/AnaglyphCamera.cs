@@ -25,6 +25,12 @@ namespace Lib.render.camera{
         [Input(Guid = "11afcfc5-7013-43f6-a050-3183aba2cb5f")]
         public readonly InputSlot<Object> CamReference = new InputSlot<Object>();
 
+        [Input(Guid = "7f4aebda-bbfc-4b84-b66c-430705e5eba9")]
+        public readonly InputSlot<float> FOV = new InputSlot<float>();
+
+        [Input(Guid = "dc5c49ad-73e0-4dea-9a15-d08544e1f04b")]
+        public readonly InputSlot<float> FocusDistance = new InputSlot<float>();
+
     }
 }
 
