@@ -14,6 +14,9 @@ internal sealed class BlobTrackOverlay : Instance<BlobTrackOverlay>
     [Input(Guid = "D789C43E-8838-42C0-B21C-3FD9F2ECC436")]
     public readonly InputSlot<Texture2D> Image = new();
 
+    [Input(Guid = "5E6F7081-9293-4A84-B9C0-D1E2F3A4B5C7")]
+    public readonly InputSlot<bool> ImageEnabled = new(true);
+
     [Input(Guid = "8B03FDC4-D0E6-4D1B-A9D2-17FAD5D75DDE")]
     public readonly InputSlot<BufferWithViews> BlobData = new();
 

@@ -60,6 +60,14 @@
       }
     },
     {
+      "InputId": "5E6F7081-9293-4A84-B9C0-D1E2F3A4B5C7"/*ImageEnabled*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 135.0
+      },
+      "Description": "Toggles drawing of the Image quad. When off (with no image needed), the render target background shows ClearColor with only boxes and labels drawn."
+    },
+    {
       "InputId": "8B03FDC4-D0E6-4D1B-A9D2-17FAD5D75DDE"/*BlobData*/,
       "Position": {
         "X": -820.0,
@@ -100,6 +108,11 @@
       "Id": "33333333-3333-3333-3333-333333333333"/*DrawQuad*/,
       "PosX": 100.0,
       "PosY": 120.0
+    },
+    {
+      "Id": "A1A2A3A4-A5A6-4A7A-8A9A-0B1B2B3B4B5B"/*DrawImageGate*/,
+      "PosX": 100.0,
+      "PosY": 70.0
     },
     {
       "Id": "44444444-4444-4444-4444-444444444444"/*DrawLines*/,
