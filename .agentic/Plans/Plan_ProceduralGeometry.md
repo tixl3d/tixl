@@ -424,6 +424,14 @@ attempt likely failed because `IndirectBuffer` creates the args buffer without
 raw/structured flags, so no UAV can be created to write the args from a compute
 shader, and `DrawInstancedIndirect` flushed the queue every frame (removed).
 
+View-recreation sweep (2026-09-04): instead of touching the ~200 call sites of
+`CreateStructuredBufferSrv` / `CreateStructuredBufferUav` / `CreateBufferUav<T>`,
+the Core helpers themselves now keep an existing view when it is alive, belongs
+to the same buffer (`view.Resource` pointer) and describes the same element
+count, format and flags. Producers can re-run as often as they like; a consumer
+holding the view keeps a valid one. Validated with the render examples and the
+visual reference suite.
+
 `TransformCPoints` (2026-09-04): transforms a whole CPU point list (stretch/scale
 about a pivot, rotation, translation, object or point space, orientations follow,
 gizmo); the former single-point op keeps its guid as `TransformCPoint`. Verified
