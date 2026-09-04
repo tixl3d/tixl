@@ -116,8 +116,8 @@ internal static class SetupParameterView
         var source = setup.FindSourceByChildId(instance.SymbolChildId);
         if (source != null)
         {
-            var slices = SetupActions.CountSlicesOfSource(setup, source.Id);
-            var consumers = CountConsumersOfSource(setup, source.Id);
+            var slices = SetupRelations.CountSlicesOfSource(setup, source.Id);
+            var consumers = SetupRelations.CountConsumersOfSource(setup, source.Id);
             FormInputs.ApplyIndent();
             CustomComponents.StylizedText(consumers == 0
                                               ? $"{slices} slice{(slices == 1 ? "" : "s")}, nothing shows them yet"
@@ -655,29 +655,6 @@ internal static class SetupParameterView
         }
 
         return new T3.Core.DataTypes.Vector.Int2(1920, 1080);
-    }
-
-    private static int CountConsumersOfSource(Setup setup, Guid sourceId)
-    {
-        var count = 0;
-        foreach (var surface in setup.Surfaces)
-        {
-            var slice = setup.FindSlice(surface.SliceId);
-            if (slice != null && slice.SourceId == sourceId)
-                count++;
-        }
-
-        foreach (var output in setup.Outputs)
-        {
-            foreach (var patch in output.Patches)
-            {
-                var slice = setup.FindSlice(patch.SliceId);
-                if (slice != null && slice.SourceId == sourceId)
-                    count++;
-            }
-        }
-
-        return count;
     }
 
     private static bool IsRegion(Setup setup, Guid id)

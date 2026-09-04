@@ -367,6 +367,14 @@ with an explanatory comment) — the row-callback API design made compliance imp
   `CanvasPointHandle.Draw` parameter: nothing implemented it and every snap runs after the handle, in the
   edit's own space (parent metres, output px) rather than canvas space, so the seam could not have fit.
   Still open from P2.2: patch corners (and slice corners / annotation endpoints) in the sub-element plane.
+- **2026-09-05 (Phase B.1 — `SetupRelations`):** the routing graph is one queryable unit
+  (`Editor/Gui/Windows/OutputSetup/SetupRelations.cs`): `CollectRelated` (both directions, into a caller
+  buffer, `Relation{Kind, Id, IsConsumer}`), `IsDirectSourceOf`, the walks `TryGetSurfaceOutput` /
+  `TryGetSendOutput` / `TryGetSliceSource` / `TryGetPatchOutput` (out of `OutputSetupModeView`), and the
+  predicates/counts `IsSliceOf`, `IsMappedTo`, `OutputShowsSlice/Source`, `CountSlicesOfSource`,
+  `CountConsumersOfSource`, `CountChildren` (out of `SetupActions`/`SetupParameterView`). The panel keeps
+  only its hover buffer and gutter lookups. No structure-version cache yet — the queries are loop-based
+  into reused lists; B.6 caching lands with the outliner that needs it.
 
 ## Suggested order (revised for the flow-view pivot)
 

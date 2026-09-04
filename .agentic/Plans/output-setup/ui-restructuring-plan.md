@@ -154,7 +154,7 @@ property editing happens in the Parameter window.
 
 ## Phase B — Flow Outliner (bottom strip)
 
-### B.1 Prerequisite extraction
+### B.1 Prerequisite extraction — ✅ done 2026-09-05 (`SetupRelations`, see refactoring-plan progress)
 
 - **`SetupRelations` (new):** move `ComputeReferenced`, `AddOutputsOfSurface`, `AddSourceOfSlice`,
   `AddConsumersOfSource/Slice`, the `IsHover*Highlighted`/`IsSourceOfPrimary` logic and the parent-walk

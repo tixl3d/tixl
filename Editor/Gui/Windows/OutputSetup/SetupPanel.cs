@@ -57,7 +57,10 @@ internal sealed class SetupPanel
 
         // Relationship highlights follow last frame's hover (committed at the end of Draw), so related rows can
         // light their gutters before they're drawn this frame — a 1-frame lag that's imperceptible.
-        ComputeReferenced(setup);
+        if (_hoveredKind != SetupEntitySelection.EntityKind.None)
+            SetupRelations.CollectRelated(setup, _hoveredKind, _hoveredId, _referenced);
+        else
+            _referenced.Clear();
 
         DrawSetupSwitcher(setup, selection, onCollapse);
         FormInputs.AddVerticalSpace(4);
@@ -145,159 +148,11 @@ internal sealed class SetupPanel
         _hoveredId = _pendingHoveredId;
     }
 
-    // Fills _referenced with the rows related to the currently-hovered one, and which gutter to light on each:
-    // upstream producers (a shown source/slice, a mapped surface) get their trailing output gutter; downstream
-    // consumers (a surface/output that shows the hovered feed) get their left input arrow. So a hover traces the
-    // content → slice → surface → output chain in both directions without lighting whole rows.
-    private void ComputeReferenced(Setup setup)
-    {
-        _referenced.Clear();
-        if (_hoveredKind == SetupEntitySelection.EntityKind.None)
-            return;
-
-        switch (_hoveredKind)
-        {
-            case SetupEntitySelection.EntityKind.Surface:
-            {
-                var surface = setup.FindSurface(_hoveredId);
-                if (surface == null)
-                    break;
-
-                AddOutputsOfSurface(setup, surface); // where it goes → consumers' input arrow
-                AddSourceOfSlice(setup, surface.SliceId); // what feeds it → producers' trailing gutter
-                break;
-            }
-            case SetupEntitySelection.EntityKind.Output:
-            {
-                foreach (var surface in setup.Surfaces)
-                {
-                    if (!surface.OutputMappings.Exists(m => m.OutputId == _hoveredId))
-                        continue;
-
-                    _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, false));
-                    AddSourceOfSlice(setup, surface.SliceId); // the feed behind each mapped surface
-                }
-
-                var output = setup.FindOutput(_hoveredId);
-                if (output != null)
-                {
-                    foreach (var patch in output.Patches)
-                        AddSourceOfSlice(setup, patch.SliceId); // the feeds on the direct pipe
-                }
-
-                break;
-            }
-            case SetupEntitySelection.EntityKind.Patch:
-            {
-                var patch = setup.FindPatch(_hoveredId, out _);
-                if (patch != null)
-                    AddSourceOfSlice(setup, patch.SliceId);
-
-                break;
-            }
-            case SetupEntitySelection.EntityKind.ContentSource:
-            {
-                var source = setup.FindSourceByChildId(_hoveredId);
-                if (source != null)
-                    AddConsumersOfSource(setup, source.Id);
-                break;
-            }
-            case SetupEntitySelection.EntityKind.Slice:
-            {
-                AddConsumersOfSlice(setup, _hoveredId);
-                break;
-            }
-            case SetupEntitySelection.EntityKind.ReferenceImage:
-            {
-                foreach (var surface in setup.Surfaces)
-                {
-                    if (surface.Reference != null && surface.Reference.ImageId == _hoveredId)
-                        _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, true));
-                }
-
-                break;
-            }
-        }
-    }
-
-    /// <summary>The outputs a surface reaches — its own mappings, or a coplanar child's nearest mapped ancestor.
-    /// Marked as consumers (input arrow), since they sit downstream of the surface.</summary>
-    private void AddOutputsOfSurface(Setup setup, Surface? surface)
-    {
-        for (var guard = 0; surface != null && guard < 16; guard++)
-        {
-            if (surface.OutputMappings.Count > 0)
-            {
-                foreach (var mapping in surface.OutputMappings)
-                    _referenced.Add((SetupEntitySelection.EntityKind.Output, mapping.OutputId, true));
-
-                return;
-            }
-
-            if (surface.ParentId == Guid.Empty)
-                return;
-
-            var parentId = surface.ParentId;
-            surface = setup.FindSurface(parentId);
-        }
-    }
-
-    /// <summary>The slice and its content source feeding a surface/output — producers (trailing gutter).</summary>
-    private void AddSourceOfSlice(Setup setup, Guid sliceId)
-    {
-        if (sliceId == Guid.Empty)
-            return;
-
-        _referenced.Add((SetupEntitySelection.EntityKind.Slice, sliceId, false));
-        var slice = setup.FindSlice(sliceId);
-        var source = slice == null ? null : setup.FindSource(slice.SourceId);
-        if (source != null)
-            _referenced.Add((SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId, false));
-    }
-
-    /// <summary>Surfaces and outputs showing any slice of this source — consumers, lit on their input arrow.</summary>
-    private void AddConsumersOfSource(Setup setup, Guid sourceId)
-    {
-        foreach (var surface in setup.Surfaces)
-        {
-            if (SetupActions.IsSliceOf(setup, surface.SliceId, sourceId))
-                _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, true));
-        }
-
-        foreach (var output in setup.Outputs)
-        {
-            foreach (var patch in output.Patches)
-            {
-                if (SetupActions.IsSliceOf(setup, patch.SliceId, sourceId))
-                    _referenced.Add((SetupEntitySelection.EntityKind.Patch, patch.Id, true));
-            }
-        }
-    }
-
-    /// <summary>Surfaces and outputs showing this exact slice — consumers, lit on their input arrow.</summary>
-    private void AddConsumersOfSlice(Setup setup, Guid sliceId)
-    {
-        foreach (var surface in setup.Surfaces)
-        {
-            if (surface.SliceId == sliceId)
-                _referenced.Add((SetupEntitySelection.EntityKind.Surface, surface.Id, true));
-        }
-
-        foreach (var output in setup.Outputs)
-        {
-            foreach (var patch in output.Patches)
-            {
-                if (patch.SliceId == sliceId)
-                    _referenced.Add((SetupEntitySelection.EntityKind.Patch, patch.Id, true));
-            }
-        }
-    }
-
     private bool IsHoverInputHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
     {
         for (var i = 0; i < _referenced.Count; i++)
         {
-            if (_referenced[i].onInput && _referenced[i].kind == kind && _referenced[i].id == id)
+            if (_referenced[i].IsConsumer && _referenced[i].Kind == kind && _referenced[i].Id == id)
                 return true;
         }
 
@@ -308,45 +163,11 @@ internal sealed class SetupPanel
     {
         for (var i = 0; i < _referenced.Count; i++)
         {
-            if (!_referenced[i].onInput && _referenced[i].kind == kind && _referenced[i].id == id)
+            if (!_referenced[i].IsConsumer && _referenced[i].Kind == kind && _referenced[i].Id == id)
                 return true;
         }
 
         return false;
-    }
-
-    /// <summary>
-    /// Whether <paramref name="kind"/>/<paramref name="id"/> is the immediate <em>source</em> feeding the
-    /// primary-selected entity — the slice a selected surface (or output) shows, or the content source a
-    /// selected slice belongs to. Used to point the "→|" source marker at that row.
-    /// </summary>
-    private bool IsSourceOfPrimary(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
-    {
-        if (id == Guid.Empty)
-            return false;
-
-        switch (_primaryKind)
-        {
-            case SetupEntitySelection.EntityKind.Surface:
-                var surface = setup.FindSurface(_primaryId);
-                return surface != null && kind == SetupEntitySelection.EntityKind.Slice && surface.SliceId == id;
-
-            case SetupEntitySelection.EntityKind.Output:
-                var output = setup.FindOutput(_primaryId);
-                return output != null && kind == SetupEntitySelection.EntityKind.Slice && SetupActions.OutputShowsSlice(output, id);
-
-            case SetupEntitySelection.EntityKind.Patch:
-                var patch = setup.FindPatch(_primaryId, out _);
-                return patch != null && kind == SetupEntitySelection.EntityKind.Slice && patch.SliceId == id;
-
-            case SetupEntitySelection.EntityKind.Slice:
-                var slice = setup.FindSlice(_primaryId);
-                var source = slice == null ? null : setup.FindSource(slice.SourceId);
-                return source != null && kind == SetupEntitySelection.EntityKind.ContentSource && source.SymbolChildId == id;
-
-            default:
-                return false;
-        }
     }
 
     private void DrawContentSends(SetupEntitySelection selection, Setup setup)
@@ -370,7 +191,7 @@ internal sealed class SetupPanel
 
             var childId = instance.SymbolChildId;
             var source = setup.FindSourceByChildId(childId);
-            var sliceCount = source == null ? 0 : SetupActions.CountSlicesOfSource(setup, source.Id);
+            var sliceCount = source == null ? 0 : SetupRelations.CountSlicesOfSource(setup, source.Id);
             var expanded = !_collapsedSources.Contains(childId);
 
             var (icon, text) = DescribeSourceGutter(setup, childId);
@@ -517,7 +338,7 @@ internal sealed class SetupPanel
         var count = 0;
         foreach (var surface in setup.Surfaces)
         {
-            if (SetupActions.IsSliceOf(setup, surface.SliceId, source.Id))
+            if (SetupRelations.IsSliceOf(setup, surface.SliceId, source.Id))
                 count++;
         }
 
@@ -538,7 +359,7 @@ internal sealed class SetupPanel
     private void DrawSurfaceRow(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
     {
         var surfaceId = surface.Id;
-        var hasChildren = SetupActions.CountChildren(setup, surfaceId) > 0;
+        var hasChildren = SetupRelations.CountChildren(setup, surfaceId) > 0;
         var isExpanded = !_collapsedSurfaces.Contains(surfaceId);
 
         var (outputIcon, outputText) = DescribeSurfaceOutputGutter(setup, surface);
@@ -712,7 +533,9 @@ internal sealed class SetupPanel
         args.PrimaryKind = _primaryKind;
         args.PrimaryId = _primaryId;
         args.HighlightInputArrow = IsHoverInputHighlighted(args.Kind, args.Id);
-        args.HighlightTrailing = IsSourceOfPrimary(setup, args.Kind, args.Id) || IsHoverTrailingHighlighted(args.Kind, args.Id);
+        // The "→|" source marker points at what feeds the primary; the hover trace brightens producers the same way.
+        args.HighlightTrailing = SetupRelations.IsDirectSourceOf(setup, _primaryKind, _primaryId, args.Kind, args.Id)
+                                 || IsHoverTrailingHighlighted(args.Kind, args.Id);
 
         var action = _entityItem.DrawRow(selection, setup, in args, out var hovered);
         if (hovered)
@@ -758,6 +581,6 @@ internal sealed class SetupPanel
     private Guid _hoveredId;
     private SetupEntitySelection.EntityKind _pendingHoveredKind;
     private Guid _pendingHoveredId;
-    // Rows related to the hovered one; onInput = light the left input arrow (consumer) vs the trailing gutter (producer).
-    private readonly List<(SetupEntitySelection.EntityKind kind, Guid id, bool onInput)> _referenced = [];
+    // Rows related to the hovered one: consumers light their left input arrow, producers their trailing gutter.
+    private readonly List<SetupRelations.Relation> _referenced = [];
 }

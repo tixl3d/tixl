@@ -222,33 +222,6 @@ internal static class SetupActions
         setup.Slices.RemoveAll(s => s.Id == sliceId);
     }
 
-    /// <summary>Whether any patch on the output shows this slice.</summary>
-    internal static bool OutputShowsSlice(OutputDefinition output, Guid sliceId)
-    {
-        if (sliceId == Guid.Empty)
-            return false;
-
-        foreach (var patch in output.Patches)
-        {
-            if (patch.SliceId == sliceId)
-                return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>Whether any patch on the output shows a slice of this source.</summary>
-    internal static bool OutputShowsSource(Setup setup, OutputDefinition output, Guid sourceId)
-    {
-        foreach (var patch in output.Patches)
-        {
-            if (IsSliceOf(setup, patch.SliceId, sourceId))
-                return true;
-        }
-
-        return false;
-    }
-
     /// <summary>Adds an unfed full-canvas patch to an output — the direct pipe waiting for content.</summary>
     internal static void AddPatch(SetupEntitySelection selection, Setup setup, OutputDefinition output)
     {
@@ -299,7 +272,7 @@ internal static class SetupActions
                     if (source == null)
                         return false;
 
-                    isBound = IsSliceOf(setup, surface.SliceId, source.Id);
+                    isBound = SetupRelations.IsSliceOf(setup, surface.SliceId, source.Id);
                     return true;
                 }
 
@@ -315,7 +288,7 @@ internal static class SetupActions
                 // A slice or source binds through the direct pipe: a full-canvas patch showing it.
                 if (sourceKind == SetupEntitySelection.EntityKind.Slice)
                 {
-                    isBound = OutputShowsSlice(output, sourceId);
+                    isBound = SetupRelations.OutputShowsSlice(output, sourceId);
                     return setup.FindSlice(sourceId) != null;
                 }
 
@@ -325,7 +298,7 @@ internal static class SetupActions
                     if (source == null)
                         return false;
 
-                    isBound = OutputShowsSource(setup, output, source.Id);
+                    isBound = SetupRelations.OutputShowsSource(setup, output, source.Id);
                     return true;
                 }
 
@@ -362,7 +335,7 @@ internal static class SetupActions
                     if (source == null)
                         return false;
 
-                    isBound = IsSliceOf(setup, patch.SliceId, source.Id);
+                    isBound = SetupRelations.IsSliceOf(setup, patch.SliceId, source.Id);
                     return true;
                 }
 
@@ -455,7 +428,7 @@ internal static class SetupActions
             }
             else if (sourceOfChild != null)
             {
-                output.Patches.RemoveAll(p => IsSliceOf(setup, p.SliceId, sourceOfChild.Id));
+                output.Patches.RemoveAll(p => SetupRelations.IsSliceOf(setup, p.SliceId, sourceOfChild.Id));
             }
             else
             {
@@ -476,16 +449,6 @@ internal static class SetupActions
         }
     }
 
-    /// <summary>Whether a slice belongs to the given source.</summary>
-    internal static bool IsSliceOf(Setup setup, Guid sliceId, Guid sourceId)
-    {
-        if (sliceId == Guid.Empty)
-            return false;
-
-        var slice = setup.FindSlice(sliceId);
-        return slice != null && slice.SourceId == sourceId;
-    }
-
     /// <summary>
     /// Copies a surface — with its sub-regions — offset a little so it doesn't hide under the original. The
     /// copy gets fresh GUIDs, so content sends still point at the original; the duplicate starts unbound.
@@ -494,7 +457,7 @@ internal static class SetupActions
     {
         var copy = CloneSurface(surface);
         var isChild = surface.ParentId != Guid.Empty;
-        copy.Name = isChild ? $"Region {CountChildren(setup, surface.ParentId) + 1}" : surface.Name + " copy";
+        copy.Name = isChild ? $"Region {SetupRelations.CountChildren(setup, surface.ParentId) + 1}" : surface.Name + " copy";
 
         if (isChild)
         {
@@ -925,30 +888,6 @@ internal static class SetupActions
         return count;
     }
 
-    internal static int CountSlicesOfSource(Setup setup, Guid sourceId)
-    {
-        var count = 0;
-        for (var i = 0; i < setup.Slices.Count; i++)
-        {
-            if (setup.Slices[i].SourceId == sourceId)
-                count++;
-        }
-
-        return count;
-    }
-
-    internal static int CountChildren(Setup setup, Guid parentId)
-    {
-        var count = 0;
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            if (setup.Surfaces[i].ParentId == parentId)
-                count++;
-        }
-
-        return count;
-    }
-
     internal static string SendName(Instance instance)
     {
         var parent = instance.Parent;
@@ -1246,7 +1185,7 @@ internal static class SetupActions
 
         var region = new Surface
                          {
-                             Name = string.IsNullOrEmpty(slice.Name) ? $"Region {CountChildren(setup, parent.Id) + 1}" : slice.Name,
+                             Name = string.IsNullOrEmpty(slice.Name) ? $"Region {SetupRelations.CountChildren(setup, parent.Id) + 1}" : slice.Name,
                              Kind = Surface.SurfaceKinds.Layout,
                              ParentId = parent.Id,
                              SizeInMeters = new Vector2(MathF.Max(width, SurfaceGeometry.MinSize),
@@ -1363,7 +1302,7 @@ internal static class SetupActions
                                              {
                                                  var child = new Surface
                                                                  {
-                                                                     Name = $"Region {CountChildren(setup, parent.Id) + 1}",
+                                                                     Name = $"Region {SetupRelations.CountChildren(setup, parent.Id) + 1}",
                                                                      Kind = Surface.SurfaceKinds.Layout,
                                                                      ParentId = parent.Id,
                                                                      SizeInMeters = size,

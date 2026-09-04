@@ -96,22 +96,22 @@ internal sealed class OutputSetupModeView
         _lastFocusedId = focusedId;
         _graphOwnedInspection = graphOwnsInspection;
 
-        if (TryGetShownEntity(out var entityKind, out var entityId))
+        if (TryGetShownEntity(out var entityKind, out var entityId) && OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
         {
             if (entityKind == SetupEntitySelection.EntityKind.Output)
                 // Pass the selection so a surface label on the canvas can still be clicked to select it, even
                 // though the shown entity is the output itself (no surface focused).
                 _outputView.Draw(entityId, selection: _entitySelection);
-            else if (entityKind == SetupEntitySelection.EntityKind.Surface && TryGetSurfaceOutput(entityId, out var surfaceOutputId))
+            else if (entityKind == SetupEntitySelection.EntityKind.Surface && SetupRelations.TryGetSurfaceOutput(setup, entityId, out var surfaceOutputId))
                 _outputView.Draw(surfaceOutputId, entityId, _entitySelection); // labels on the canvas can re-pick
             else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage)
                 _referenceImageView.Draw(entityId);
             else if (entityKind == SetupEntitySelection.EntityKind.ContentSource)
                 // Slices live on the source, so selecting content opens it with every slice laid out on it.
                 _outputView.DrawSourceCanvas(entityId, _entitySelection);
-            else if (entityKind == SetupEntitySelection.EntityKind.Slice && TryGetSliceSource(entityId, out var sliceChildId))
+            else if (entityKind == SetupEntitySelection.EntityKind.Slice && SetupRelations.TryGetSliceSource(setup, entityId, out var sliceChildId))
                 _outputView.DrawSourceCanvas(sliceChildId, _entitySelection, entityId);
-            else if (entityKind == SetupEntitySelection.EntityKind.Patch && TryGetPatchOutput(entityId, out var patchOutputId))
+            else if (entityKind == SetupEntitySelection.EntityKind.Patch && SetupRelations.TryGetPatchOutput(setup, entityId, out var patchOutputId))
                 _outputView.Draw(patchOutputId, selection: _entitySelection); // a patch lives on its output's canvas
             else
                 // Kinds without a canvas of their own (props, unplaced reference images): properties live
@@ -121,7 +121,9 @@ internal sealed class OutputSetupModeView
         }
         else
         {
-            if (focusedInstance is not IOutputSink || !TryGetSendOutput(focusedInstance, out var sendOutputId))
+            if (focusedInstance is not IOutputSink
+                || !OutputSetupHandling.TryGetActiveSetup(out var activeSetup, out _)
+                || !SetupRelations.TryGetSendOutput(activeSetup, focusedInstance.SymbolChildId, out var sendOutputId))
                 return false;
 
             // Pass the selection here too: with nothing selected in the setup panel (e.g. after ctrl-clicking the
@@ -130,70 +132,6 @@ internal sealed class OutputSetupModeView
             _outputView.Draw(sendOutputId, selection: _entitySelection);
         }
 
-        return true;
-    }
-
-    /// <summary>
-    /// The output a focused send's editing view should show: the first output reached by anything displaying
-    /// one of its slices — a surface's mapping, or an output showing it full-frame.
-    /// </summary>
-    private static bool TryGetSendOutput(Instance instance, out Guid outputId)
-    {
-        outputId = Guid.Empty;
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return false;
-
-        var source = setup.FindSourceByChildId(instance.SymbolChildId);
-        if (source == null)
-            return false;
-
-        foreach (var slice in setup.Slices)
-        {
-            if (slice.SourceId != source.Id)
-                continue;
-
-            foreach (var output in setup.Outputs)
-            {
-                if (SetupActions.OutputShowsSlice(output, slice.Id))
-                {
-                    outputId = output.Id;
-                    return true;
-                }
-            }
-
-            foreach (var surface in setup.Surfaces)
-            {
-                if (surface.SliceId == slice.Id && TryGetSurfaceOutput(surface.Id, out outputId))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static bool TryGetPatchOutput(Guid patchId, out Guid outputId)
-    {
-        outputId = Guid.Empty;
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _) || setup.FindPatch(patchId, out var owner) == null)
-            return false;
-
-        outputId = owner!.Id;
-        return true;
-    }
-
-    /// <summary>The op supplying a slice's source, so selecting a slice can open the canvas it lives on.</summary>
-    private static bool TryGetSliceSource(Guid sliceId, out Guid symbolChildId)
-    {
-        symbolChildId = Guid.Empty;
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return false;
-
-        var slice = setup.FindSlice(sliceId);
-        var source = slice == null ? null : setup.FindSource(slice.SourceId);
-        if (source == null)
-            return false;
-
-        symbolChildId = source.SymbolChildId;
         return true;
     }
 
@@ -216,36 +154,6 @@ internal sealed class OutputSetupModeView
             _showSetupPanel = true;
 
         ImGui.SameLine();
-    }
-
-    /// <summary>
-    /// The output a selected surface should be shown on — its first mapping's output. A Layout child carries
-    /// no mapping of its own; it's shown wherever its parent is mapped, so walk up to the surface that
-    /// actually holds the corner pin rather than reporting the child as unmapped.
-    /// </summary>
-    private static bool TryGetSurfaceOutput(Guid surfaceId, out Guid outputId)
-    {
-        outputId = Guid.Empty;
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return false;
-
-        var surface = setup.FindSurface(surfaceId);
-        for (var guard = 0; surface != null && guard < 16; guard++)
-        {
-            if (surface.OutputMappings.Count > 0)
-            {
-                outputId = surface.OutputMappings[0].OutputId;
-                return true;
-            }
-
-            if (surface.ParentId == Guid.Empty)
-                break;
-
-            var parentId = surface.ParentId;
-            surface = setup.FindSurface(parentId);
-        }
-
-        return false;
     }
 
     private bool TryGetShownEntity(out SetupEntitySelection.EntityKind kind, out Guid id)
