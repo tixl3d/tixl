@@ -405,6 +405,25 @@ volume = 40x the prototype's. Editor now also warns when a `.cs` under
 `Symbols/` defines no operator (helpers belong in `Utils/`); the convention is in
 AGENT_INSTRUCTIONS.
 
+`DrawMeshChunksAtPoints` rework (2026-09-04, maintainer found it slow): the
+per-frame chain (chunk-size compute, prefix scan, staging-buffer readback of the
+face total, per-face compute, draw with the read-back count) is replaced by
+`_BuildChunkDrawData`, a code op that builds the per-face table on the CPU
+only when the structure changes (point count, chunk-index buffer, chunk defs;
+two small readbacks at that moment) and hands `Draw` the vertex count directly.
+The vertex shader now looks up face indices itself (`FaceIndices` at t10,
+`DrawData` = point + face index) and multiplies vertex color into the point
+color, which is what made per-chunk colors work. `UpdateDrawData` (default now
+off) only forces a per-frame rebuild for GPU-changing chunk indices. Found on
+the way and fixed in Core: `SetupBufferWithViews` recreated SRV/UAV on every
+upload, so any consumer that had no reason to re-pull kept a disposed view -
+invisible while everything re-evaluated every frame, fatal once anything
+caches. Views are now kept while the buffer object is unchanged. Indirect draw
+was not needed in the end (the count is CPU-known); the maintainer's earlier
+attempt likely failed because `IndirectBuffer` creates the args buffer without
+raw/structured flags, so no UAV can be created to write the args from a compute
+shader, and `DrawInstancedIndirect` flushed the queue every frame (removed).
+
 Still open: the full milestone demo (density field, animated pivots). A CPU `TransformCPoints` only moves a single point; the CPoints
 family has no whole-list transform yet, so pivot animation currently goes through
 the GPU point ops.

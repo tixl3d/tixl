@@ -211,13 +211,25 @@ public static partial class ResourceManager
     }
 
     /// <summary>
-    /// Uploads the complete array into a structured buffer and (re)creates its SRV and UAV.
+    /// Uploads the complete array into a structured buffer and creates its SRV and UAV.
     /// Replaces the recurring SetupStructuredBuffer + CreateStructuredBufferSrv + CreateStructuredBufferUav idiom.
+    /// The views are kept while the buffer object stays the same (data-only updates):
+    /// consumers cache view objects until their inputs change, so recreating views on
+    /// every upload would hand them disposed views whenever the producer re-ran without
+    /// its consumers noticing.
     /// </summary>
     public static void SetupBufferWithViews<T>(T[] bufferData, ref T3.Core.DataTypes.BufferWithViews? bufferWithViews) where T : struct
     {
         bufferWithViews ??= new T3.Core.DataTypes.BufferWithViews();
+        var previousBuffer = bufferWithViews.Buffer;
         SetupStructuredBuffer(bufferData, ref bufferWithViews.Buffer);
+
+        var viewsValid = ReferenceEquals(previousBuffer, bufferWithViews.Buffer)
+                         && bufferWithViews.Srv is { IsDisposed: false }
+                         && bufferWithViews.Uav is { IsDisposed: false };
+        if (viewsValid)
+            return;
+
         CreateStructuredBufferSrv(bufferWithViews.Buffer, ref bufferWithViews.Srv);
         CreateStructuredBufferUav(bufferWithViews.Buffer, UnorderedAccessViewBufferFlags.None, ref bufferWithViews.Uav);
     }

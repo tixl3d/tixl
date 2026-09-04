@@ -3,23 +3,23 @@
   "Id": "f68c9e5a-2d17-4b84-a3c6-8e0f5b7d21a9"/*CustomScalarField*/,
   "Inputs": [
     {
+      "Id": "2c7e5a91-b3d8-4f04-96c1-7a0e4d8b2f53"/*B*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024"/*Code*/,
       "DefaultValue": "return p.Length() - A;"
+    },
+    {
+      "Id": "7a3c8d54-91e6-4b27-a0f8-5d2b9c4e6138"/*D*/,
+      "DefaultValue": 0.0
     },
     {
       "Id": "8b4d1f63-27a9-4c58-b0d2-e5f8a3c61970"/*A*/,
       "DefaultValue": 0.5
     },
     {
-      "Id": "2c7e5a91-b3d8-4f04-96c1-7a0e4d8b2f53"/*B*/,
-      "DefaultValue": 0.0
-    },
-    {
       "Id": "d19f6b28-4e73-4a05-8c9d-3b6f1e0a7c42"/*C*/,
-      "DefaultValue": 0.0
-    },
-    {
-      "Id": "7a3c8d54-91e6-4b27-a0f8-5d2b9c4e6138"/*D*/,
       "DefaultValue": 0.0
     },
     {

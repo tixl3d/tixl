@@ -149,6 +149,10 @@ between `GPoints` and the draw op and raise its `Scale` to ~1.8.
 - With the scale, the chunks fly apart from the cube center while each chunk
   keeps its shape; the CPU `[ExplodeGeometry]` is no longer needed for this.
 - `ChunkCount` equals the number of fracture seeds.
+- With a `[ColorFacesFromAttribute]` upstream, every chunk keeps its color in
+  the chunk draw (vertex colors are used, multiplied with the point color).
+- Dragging the `[TransformPoints]` scale is as smooth as `[DrawMesh]`; changing
+  the seed count re-fits the draw table without a visible hitch.
 
 ## Step: Placing geometry at points
 

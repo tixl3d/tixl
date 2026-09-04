@@ -4,12 +4,26 @@
   "Description": "Compiles a C# snippet into a ScalarField.\n\nThe snippet is the body of a method returning float. In scope: the sample position `p` (Vector3), the float parameters `A`-`D`, the optional point positions `Points` (Vector3[], separator-free), all System.MathF functions (Sin, Sqrt, ...), and helpers like DistanceToClosestPoint(p, Points). Compile errors are logged and the previous working field stays active while typing.\n\nAKA: vex, code, expression, snippet",
   "InputUis": [
     {
+      "InputId": "2c7e5a91-b3d8-4f04-96c1-7a0e4d8b2f53"/*B*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
       "InputId": "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024"/*Code*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
       },
       "Usage": "Multiline"
+    },
+    {
+      "InputId": "7a3c8d54-91e6-4b27-a0f8-5d2b9c4e6138"/*D*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      }
     },
     {
       "InputId": "8b4d1f63-27a9-4c58-b0d2-e5f8a3c61970"/*A*/,
@@ -19,24 +33,10 @@
       }
     },
     {
-      "InputId": "2c7e5a91-b3d8-4f04-96c1-7a0e4d8b2f53"/*B*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 90.0
-      }
-    },
-    {
       "InputId": "d19f6b28-4e73-4a05-8c9d-3b6f1e0a7c42"/*C*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
-      }
-    },
-    {
-      "InputId": "7a3c8d54-91e6-4b27-a0f8-5d2b9c4e6138"/*D*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 180.0
       }
     },
     {
