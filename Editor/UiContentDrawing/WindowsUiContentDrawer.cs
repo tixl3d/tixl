@@ -7,6 +7,7 @@ using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.Operator.Slots;
 using T3.Core.Rendering;
 using T3.Core.Resource;

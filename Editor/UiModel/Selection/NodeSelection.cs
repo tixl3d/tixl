@@ -36,6 +36,7 @@ internal sealed class NodeSelection : ISelection
         TransformGizmoHandling.ClearSelectedTransformables();
         Selection.Clear();
         ChangeCounter++;
+        GlobalSelectionHandling.ReleaseInspection(GlobalSelectionHandling.InspectionTargets.GraphNode);
     }
 
     /// <summary>
@@ -48,6 +49,7 @@ internal sealed class NodeSelection : ISelection
         _childUiInstanceIdPaths.Clear();
         _selectedCompositionPath = instance.InstancePath;
         ChangeCounter++;
+        GlobalSelectionHandling.ClaimInspection(GlobalSelectionHandling.InspectionTargets.GraphNode);
     }
 
     /// <summary>
@@ -85,6 +87,7 @@ internal sealed class NodeSelection : ISelection
 
         Selection.Add(node);
         ChangeCounter++;
+        GlobalSelectionHandling.ClaimInspection(GlobalSelectionHandling.InspectionTargets.GraphNode);
     }
 
     public bool TrySelectCompositionChild(Instance compositionOp, Guid id, bool add=true)

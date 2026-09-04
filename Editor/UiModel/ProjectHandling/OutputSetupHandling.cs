@@ -1,5 +1,6 @@
 #nullable enable
 using System.IO;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.Output;
 
 namespace T3.Editor.UiModel.ProjectHandling;
@@ -17,11 +18,11 @@ internal static class OutputSetupHandling
     /// <summary>
     /// The one entity selection shared by all output windows (and, later, the Parameter window).
     /// Windows follow it by default; a window that should keep showing something else carries a
-    /// per-window pin instead (<see cref="Gui.Windows.Output.OutputSetupModeView"/>). Targets resolve
+    /// per-window pin instead (<see cref="OutputSetupModeView"/>). Targets resolve
     /// lazily against the active setup, so no clearing is needed on project or setup switches —
     /// stale targets prune themselves.
     /// </summary>
-    public static readonly Gui.Windows.Output.SetupEntitySelection EntitySelection = new();
+    public static readonly SetupEntitySelection EntitySelection = new();
 
     /// <summary>
     /// Publishes the focused project's setup to <see cref="ActiveSetup"/> once per frame — operators only

@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
@@ -101,7 +102,7 @@ internal sealed partial class OutputWindow : Window
         SyncCopyFieldsToState();
 
         Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
-        _setupMode.DrawSidePanel();
+        _setupMode.DrawSetupPanel();
 
         ImGui.BeginChild("##content",
                          new Vector2(0, ImGui.GetWindowHeight()),
@@ -127,7 +128,7 @@ internal sealed partial class OutputWindow : Window
 
             if (_setupMode.TryDrawEditingView(drawnInstance, EvaluationContext))
             {
-                // Output-editing view (focused sink or picked panel entity) was drawn — give it the
+                // Output-editing view (focused send op or picked panel entity) was drawn — give it the
                 // breadcrumb so the setup panel and op selection stay reachable while editing.
                 if (!SkillTraining.IsInPlayMode)
                 {

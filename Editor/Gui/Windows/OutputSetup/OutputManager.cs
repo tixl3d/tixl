@@ -25,13 +25,13 @@ using Vector2 = System.Numerics.Vector2;
 using Vector4 = System.Numerics.Vector4;
 using Matrix4x4 = System.Numerics.Matrix4x4;
 
-namespace T3.Editor.Gui.Windows.Output;
+namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Composites the content bound to a setup output. Walking the active setup's surfaces, it pulls each
 /// surface's content from the registered <see cref="IOutputSink"/> (SendToOutput), corner-pin warps the
 /// surface's source slice into the output's own render target, and returns the composite texture. The
-/// sinks never draw — the drawing lives here, in one place. Content is pulled once per sink (cached), so
+/// send ops never draw — the drawing lives here, in one place. Content is pulled once per send op (cached), so
 /// several surfaces slicing one image cost a single upstream evaluation.
 /// </summary>
 internal static class OutputManager
@@ -85,7 +85,7 @@ internal static class OutputManager
 
         PresentedOutputId = boundOutput.Id;
 
-        // RenderOutput returns null when there's nothing to composite (no active sink for this
+        // RenderOutput returns null when there's nothing to composite (no active send op for this
         // output, empty target list, paused update). Assigning null trips the Texture2D→SharpDX
         // implicit conversion (dereferences TextureObject) — keep the last presented frame instead.
         var composite = RenderOutput(boundOutput.Id);
@@ -120,25 +120,25 @@ internal static class OutputManager
 
         foreach (var surface in setup.Surfaces)
         {
-            if (!TryResolveSurfaceContent(setup, surface, out var surfaceSink, out _) || surfaceSink == null)
+            if (!TryResolveSurfaceContent(setup, surface, out var surfaceSend, out _) || surfaceSend == null)
                 continue;
 
-            var content = surfaceSink.GetContent(_context);
+            var content = surfaceSend.GetContent(_context);
             if (content is { IsDisposed: false })
                 return content;
         }
 
-        if (!TryResolveSliceContent(setup, output.SliceId, out var directSink, out _) || directSink == null)
+        if (!TryResolveSliceContent(setup, output.SliceId, out var directSend, out _) || directSend == null)
             return null;
 
-        var direct = directSink.GetContent(_context);
+        var direct = directSend.GetContent(_context);
         return direct is { IsDisposed: false } ? direct : null;
     }
 
     /// <summary>
     /// Content is pulled manually, outside the normal output path, so the same graph invalidation must run —
     /// but only once per frame: presentation, the setup canvas, and the content preview can all pull in one
-    /// frame, and every extra tick re-evaluates each sink's whole upstream graph.
+    /// frame, and every extra tick re-evaluates each send op's whole upstream graph.
     /// </summary>
     private static void InvalidateContentOncePerFrame(EvaluationContext context)
     {
@@ -246,14 +246,14 @@ internal static class OutputManager
 
         // The output can also name a slice directly, shown full-frame (Shape 2: the content was rendered
         // through the projector camera, so it already maps 1:1 to the output; no corner-pin warp).
-        if (_drawItems.Count == 0 && TryResolveSliceContent(setup, output.SliceId, out var directSink, out var directRect))
+        if (_drawItems.Count == 0 && TryResolveSliceContent(setup, output.SliceId, out var directSend, out var directRect))
         {
-            var content = directSink!.GetContent(_context);
+            var content = directSend!.GetContent(_context);
             if (content is { IsDisposed: false })
             {
                 var srv = SrvManager.GetSrvForTexture(content);
                 if (srv is { IsDisposed: false })
-                    _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), directRect, directSink.GetColor(_context),
+                    _drawItems.Add(new DrawItem(srv, _fullscreenNdc.ToMatrix4x4(), directRect, directSend.GetColor(_context),
                                                 Vector4.Zero, Vector4.Zero, Vector4.Zero));
             }
         }
@@ -530,13 +530,13 @@ internal static class OutputManager
         return target.Texture;
     }
 
-    /// <summary>The first sink whose target is <paramref name="targetId"/> — a surface (mapped) or an output
+    /// <summary>The first send op whose target is <paramref name="targetId"/> — a surface (mapped) or an output
     /// (the direct full-frame path).</summary>
     /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>
     public static bool TryGetSourceContent(Guid symbolChildId, out IOutputSink? sink, out Texture2D? content)
     {
         content = null;
-        sink = FindSinkByChildId(symbolChildId);
+        sink = FindSendByChildId(symbolChildId);
         if (sink == null || _context == null)
             return false;
 
@@ -590,7 +590,7 @@ internal static class OutputManager
     }
 
     /// <summary>
-    /// A slice's live sink and its uv rect: <c>Slice → SourceId → ContentSource → SymbolChildId → op</c>.
+    /// A slice's live send op and its uv rect: <c>Slice → SourceId → ContentSource → SymbolChildId → op</c>.
     /// Routing is setup data, so it survives the op being re-instantiated.
     /// </summary>
     private static bool TryResolveSliceContent(Setup setup, Guid sliceId, out IOutputSink? sink, out Vector4 sourceRect)
@@ -605,7 +605,7 @@ internal static class OutputManager
         if (source == null)
             return false;
 
-        sink = FindSinkByChildId(source.SymbolChildId);
+        sink = FindSendByChildId(source.SymbolChildId);
         sourceRect = slice!.UvRect;
         return sink != null;
     }
@@ -615,7 +615,7 @@ internal static class OutputManager
         return TryResolveSliceContent(setup, surface.SliceId, out sink, out sourceRect);
     }
 
-    private static IOutputSink? FindSinkByChildId(Guid childId)
+    private static IOutputSink? FindSendByChildId(Guid childId)
     {
         foreach (var sink in OutputSinkRegistry.Sinks)
         {

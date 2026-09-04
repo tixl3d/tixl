@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 

@@ -16,7 +16,7 @@ using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
-namespace T3.Editor.Gui.Windows.Output;
+namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Entity mutations, graph glue, and shared labels/menus for output setups. These operations are shared
@@ -415,7 +415,7 @@ internal static class SetupActions
     /// texture-outputting op is selected it lands to its right and is wired straight in, so the feed shows up in
     /// the setup at once (the CONTENT row appears next frame, once <see cref="ContentSourceSync"/> adopts it).
     /// </summary>
-    internal static void AddContentSink(SetupEntitySelection selection)
+    internal static void AddContentSend(SetupEntitySelection selection)
     {
         var projectView = ProjectView.Focused;
         var composition = projectView?.CompositionInstance;
@@ -423,10 +423,10 @@ internal static class SetupActions
             return;
 
         if (!composition.Symbol.TryGetSymbolUi(out var compositionUi)
-            || !SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out var sinkSymbolUi))
+            || !SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out var sendSymbolUi))
             return;
 
-        // A selected texture op becomes the feed: place the sink to its right and wire it up.
+        // A selected texture op becomes the feed: place the send op to its right and wire it up.
         var selected = projectView.NodeSelection.GetSelectedInstanceWithoutComposition();
         var sourceSlot = selected == null ? null : FindTextureOutput(selected);
         var selectedUi = selected?.GetChildUi();
@@ -434,7 +434,7 @@ internal static class SetupActions
                       ? selectedUi.PosOnCanvas + new Vector2(selectedUi.Size.X + 40, 0)
                       : Vector2.Zero;
 
-        var newChildUi = GraphOperations.AddSymbolChild(sinkSymbolUi.Symbol, compositionUi, pos);
+        var newChildUi = GraphOperations.AddSymbolChild(sendSymbolUi.Symbol, compositionUi, pos);
 
         if (sourceSlot != null && selectedUi != null)
         {
@@ -752,7 +752,7 @@ internal static class SetupActions
         return count;
     }
 
-    internal static string SinkName(Instance instance)
+    internal static string SendName(Instance instance)
     {
         var parent = instance.Parent;
         if (parent != null && parent.Symbol.Children.TryGetValue(instance.SymbolChildId, out var child))
@@ -761,7 +761,7 @@ internal static class SetupActions
         return "content";
     }
 
-    internal static Instance? FindSinkInstance(Guid childId)
+    internal static Instance? FindSendInstance(Guid childId)
     {
         var sinks = OutputSinkRegistry.Sinks;
         for (var i = 0; i < sinks.Count; i++)
@@ -780,7 +780,7 @@ internal static class SetupActions
     /// </summary>
     internal static void RenameContentSourceOp(Guid childId, string newName)
     {
-        var parent = FindSinkInstance(childId)?.Parent;
+        var parent = FindSendInstance(childId)?.Parent;
         var parentSymbolUi = parent?.GetSymbolUi();
         if (parentSymbolUi == null || !parentSymbolUi.ChildUis.TryGetValue(childId, out var childUi))
             return;
@@ -792,7 +792,7 @@ internal static class SetupActions
     // the sync (the graph → sidebar highlight is handled by the highlighted-content id).
     internal static void RevealContentOpInGraph(Guid childId)
     {
-        var instance = FindSinkInstance(childId);
+        var instance = FindSendInstance(childId);
         var parentSymbolUi = instance?.Parent?.GetSymbolUi();
         if (instance == null || parentSymbolUi == null || ProjectView.Focused == null)
             return;
@@ -807,7 +807,7 @@ internal static class SetupActions
     /// <summary>Display name of a content send, for labelling its slice on the source canvas.</summary>
     internal static string? TryGetContentName(Guid contentChildId)
     {
-        return FindSinkInstance(contentChildId) is { } instance ? SinkName(instance) : null;
+        return FindSendInstance(contentChildId) is { } instance ? SendName(instance) : null;
     }
 
     /// <summary>A display name for any entity kind — pin labels, tooltips. Resolves against the

@@ -14,7 +14,7 @@ using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using Vector2 = System.Numerics.Vector2;
 
-namespace T3.Editor.Gui.Windows.Output;
+namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Interactive editor for a selected output, in two modes: the Output canvas (corner-pin each surface's
@@ -24,7 +24,7 @@ namespace T3.Editor.Gui.Windows.Output;
 /// </summary>
 internal sealed partial class SetupOutputView
 {
-    // Declaration order is the tab order in the segmented control — source-to-sink: lay out content, rectify
+    // Declaration order is the tab order in the segmented control — source-to-send: lay out content, rectify
     // the surface, view the projector composite, calibrate the projector. The morph axis and every switch key
     // off the enum values, not their order, so this is a purely visual arrangement.
     private enum EditMode

@@ -1,4 +1,5 @@
 
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.DataTypes.Vector;
@@ -124,7 +125,7 @@ internal static class UiRegistration
         RegisterIOType(typeof(List<string>), () => new StringListInputUi(), () => new StringListOutputUi());
         RegisterIOType(typeof(List<Vector4>), () => new ColorListInputUi(), () => new ColorListOutputUi());
         RegisterIOType(typeof(List<Guid>), () => new GuidListInputUi());
-        T3.Editor.Gui.Windows.Output.SetupPanel.RegisterGuidListHooks();
+        T3.Editor.Gui.Windows.OutputSetup.SetupParameterView.RegisterGuidListHooks();
         
         // t3 core types
         RegisterIOType(typeof(Curve), () => new CurveInputUi());

@@ -13,7 +13,7 @@ using Texture2D = T3.Core.DataTypes.Texture2D;
 using Int2 = T3.Core.DataTypes.Vector.Int2;
 using Vector2 = System.Numerics.Vector2;
 
-namespace T3.Editor.Gui.Windows.Output;
+namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Shows a reference photo/plan on a pan/zoom canvas — the base for the reference-image workflow

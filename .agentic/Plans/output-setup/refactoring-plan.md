@@ -291,6 +291,57 @@ with an explanatory comment) — the row-callback API design made compliance imp
   then round-trip tests for the newest serialized fields, then the P4 hygiene batch.
   **Still open from P2.2:** the `_focusedSurfaceId`/`_selectedSliceId` selection shadows; the bypassed
   `ICanvasPointSnapper` seam; sub-element selection for slice corners / annotation endpoints.
+- **2026-09-04 (shared selection + pinning):** `SetupEntitySelection` is one shared instance
+  (`OutputSetupHandling.EntitySelection`); windows follow it and carry only a per-window **entity pin**
+  (breadcrumb menu + toolbar indicator, persisted via `OutputWindowState.PinnedEntityKind/Id`, stale pins
+  self-revert). Also fixed in passing: the breadcrumb's `drawExtraMenuItems` callback was never invoked.
+  User-tested. Slice doc: `shared-selection-slice.md`.
+- **2026-09-04 (Phase A — properties → Parameter window):** new `SetupParameterView` draws the selected
+  entity's card in the Parameter window; arbitration by recency via `GlobalSelectionHandling` version counters
+  (`NodeSelection.LastChangeStamp` vs `SetupEntitySelection.LastChangeStamp` — most recent pick wins; a
+  selected SendToOutput whose ContentSource is the primary keeps op parameters and gets the setup side
+  appended inside the parameters area: resolution + slice/target summary). Cards rewritten on `FormInputs`
+  conventions (label column, capped field width, hairline-gap vector rows); editable Name field commits
+  one undoable rename on blur; ref-image and prop kinds gained cards (prop height editable). Removed:
+  `SetupPanel`'s properties footer + card methods + field-undo helpers (moved), `DrawEntityCard`
+  (output-area fallback now an empty-state pointer), **`FormInputsNarrow` deleted** — P4 items 2/5
+  obsolete as planned. Guid-list hooks moved to `SetupParameterView`. Verified via the debug bridge
+  (sink extras render below op params; shared selection mirrors across two windows).
+- **2026-09-04 (REWORK AGREED, not yet done) — replace the recency arbitration:** the version-counter
+  mechanism (`GlobalSelectionHandling.NextVersion` + `LastChangeVersion` on both selections) is a
+  bolt-on judged sub-par: it lets the graph node *stay visibly selected* while the Parameter window
+  shows an entity — violating the "never two selected things" principle — and `SetSelection` draws
+  three version numbers per click (Clear + AddSelection + SetSelection all stamp). **Agreed
+  replacement: an explicit inspection target** — one slot on `GlobalSelectionHandling` saying what
+  the Parameter window shows, set directly at pick time by both systems, cleared by whoever owns it;
+  gives the graph a hook to visually deselect when an entity takes over. Rework scope: delete the
+  stamping from `NodeSelection` + `SetupEntitySelection`, add the target slot, rewire
+  `SetupParameterView.TryDraw`, fold the near-duplicate `DrawFloatsRow`/`DrawIntsRow`, stop
+  shadowing FormInputs' width const (`MaxFieldWidth = 280`). Everything else from Phase A
+  (cards, port, removals, sink extras) stands and is user-tested.
+- **2026-09-04 (rework done — explicit inspection target):** the version counters are gone.
+  `GlobalSelectionHandling` now holds one slot, `InspectionTarget` (None / GraphNode / SetupEntity), that
+  says what the Parameter window shows. A pick **claims** it (`NodeSelection.AddSelection` /
+  `SetSelectionToComposition`; `SetupEntitySelection.Select/Add/Toggle`) and claiming **clears the other
+  system's selection** — so the graph node visibly deselects when an entity takes over, and vice versa:
+  never two selected things. Owners **release** on `Clear` (and `SetupParameterView` releases when the
+  primary no longer resolves). The graph→CONTENT-row mirror in `OutputSetupModeView` uses a new
+  `SetupEntitySelection.Mirror` (sets without claiming) and runs only while the graph owns the inspection
+  (`_graphOwnedInspection` tracks the ownership flip, so a background click right after an entity pick
+  still closes the panel). `SetupParameterView.TryDraw()` takes no argument anymore and the ContentSource
+  mirror special-case is gone (an entity claim empties the graph selection, so it can't occur). Also:
+  `DrawFloatsRow`/`DrawIntsRow` share `BeginValuesRow`/`EndValuesRow`; `FormInputs.MaxNumberInputWidth`
+  is `internal` and used directly. Manual test `output-setup-parameter-window.md` step "Picking takes the
+  window" rewritten for the new behavior. Not yet user-tested.
+- **2026-09-04 (vocabulary):** "sink" stays only on the Core API (`IOutputSink`, `OutputSinkRegistry`);
+  Editor members and comments say **send op** (`DrawSendExtras`, `FindSendInstance`, `AddContentSend`,
+  `TryGetSendOutput`, …), and the output window's panel is the **setup panel** everywhere (`DrawSetupPanel`,
+  no more "sidebar"/"side panel").
+- **2026-09-05 (folder split):** the projection-mapping UI moved to `Editor/Gui/Windows/OutputSetup/`
+  (namespace `T3.Editor.Gui.Windows.OutputSetup`): `Setup*`, `EntityItem`, `OutputSetupModeView`,
+  `OutputManager`, `ContentSourceSync`, `SurfaceGeometry`, `ReferenceImageView`. `Windows/Output/` keeps
+  only the output window itself (window, toolbar, state, camera, resolution). The Phase B outliner and
+  Phase C board land in the new folder.
 
 ## Suggested order (revised for the flow-view pivot)
 

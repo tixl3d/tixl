@@ -2,7 +2,7 @@
 using T3.Core.Output;
 using Vector2 = System.Numerics.Vector2;
 
-namespace T3.Editor.Gui.Windows.Output;
+namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Surface-space geometry, shared by the Size (m) fields and the canvas edge handles. A surface's corner-pin

@@ -12,13 +12,13 @@ prerequisites:
 ---
 
 Covers the uniform context-menu verbs across all setup entities, the parity between
-sidebar-row menus and canvas frame-label menus, and direction-agnostic drag
+panel-row menus and canvas frame-label menus, and direction-agnostic drag
 connections.
 
 ## Step: Every entity kind offers the same core verbs
 
 **Action:**
-In the setup sidebar, right-click one row of each kind: a content send, a slice, a
+In the setup panel, right-click one row of each kind: a content send, a slice, a
 surface, an output, a reference image, and a prop.
 
 **Expected:**
@@ -41,22 +41,22 @@ Use the menu's Duplicate on a slice, an output, a reference image, and a prop.
 - A duplicated output starts with no display binding and no surface mappings — those
   stay with the original.
 
-## Step: Canvas frame-label menu matches the sidebar menu
+## Step: Canvas frame-label menu matches the panel menu
 
 **Action:**
 On the output canvas, right-click a surface's center label; compare against
-right-clicking the same surface's sidebar row. Repeat for a slice label in the
+right-clicking the same surface's panel row. Repeat for a slice label in the
 content view.
 
 **Expected:**
 - Both menus show identical items in identical order.
 - Choosing **Rename** from the canvas menu opens the inline rename field on the
-  sidebar row.
+  panel row.
 
 ## Step: Drag connections work in both directions
 
 **Action:**
-In the sidebar, drag a *surface row* onto an *output row*. Undo the mapping (or use
+In the setup panel, drag a *surface row* onto an *output row*. Undo the mapping (or use
 a second output), then drag the *output row* onto the *surface row*.
 
 **Expected:**

@@ -66,7 +66,7 @@ Click the entry for the second display.
 In the Output Window toolbar, click `View` and enable "Show Setup Panel".
 
 **Expected:**
-- A sidebar appears on the left with sections REFERENCE IMAGES, SURFACES, PROPS,
+- The setup panel appears on the left with sections REFERENCE IMAGES, SURFACES, PROPS,
   OUTPUTS — each with a `+` button.
 - The panel title is a dropdown showing the active setup's name (e.g. "Setup 1").
 - The OUTPUTS section lists the Default output; bound outputs show their display,

@@ -11,7 +11,7 @@ using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.ProjectHandling;
 using Vector2 = System.Numerics.Vector2;
 
-namespace T3.Editor.Gui.Windows.Output;
+namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Slice editing for <see cref="SetupOutputView"/>: the flat source/atlas canvas where a send's slices are

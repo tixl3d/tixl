@@ -1,4 +1,5 @@
 using ImGuiNET;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 using T3.Core.Settings;

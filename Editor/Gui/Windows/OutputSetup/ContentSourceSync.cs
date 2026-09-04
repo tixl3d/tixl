@@ -5,13 +5,13 @@ using T3.Core.Output;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Windows.Output;
+namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Keeps the setup's <see cref="ContentSource"/> list 1:1 with the ops that supply pixels.
 /// <para>Bound to the op's <b>SymbolChild</b> — the durable graph entity — not to a live instance. Instances
 /// come and go with hot-reloads and with whichever part of the graph happens to be instantiated, so "no live
-/// sink" only means "no pixels this frame". A source is removed only once its child is confirmed *gone* from
+/// send op" only means "no pixels this frame". A source is removed only once its child is confirmed *gone* from
 /// a symbol we can actually see, which is what makes deleting the op cascade to its slices and to every
 /// surface showing them.</para>
 /// </summary>

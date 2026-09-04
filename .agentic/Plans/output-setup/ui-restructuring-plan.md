@@ -78,18 +78,20 @@ directly; there is no "which window feeds me" rule to implement.
   explicit per-window **pin**: a window follows the shared selection by default; pinned (via its
   breadcrumb) it stays on its target while selection roams. **Pinning lands in the same slice as the
   sharing** — without it, a second output window is useless.
-- No conflict resolution is needed against graph selection: `OutputSetupModeView.TryDrawEditingView`
-  already enforces the invariant that a graph op selection clears (or replaces, for sinks) the entity
-  selection — so "entity selection non-empty" already implies the graph has nothing better to show.
-  This invariant now applies to the one shared set.
+- Conflict resolution against the graph selection is an explicit **inspection target**
+  (`GlobalSelectionHandling.InspectionTarget`, 2026-09-04): whichever system the user picked in last
+  owns the Parameter window, and claiming it clears the other system's selection — never two selected
+  things. `OutputSetupModeView.TryDrawEditingView` keeps only the sink→CONTENT-row mirror (a
+  non-claiming `Mirror`), guarded on the graph owning the inspection.
 
 ### A.2 Parameter window hook
 
 Extend the fallback chain in `ParameterWindow.DrawContent` (same pattern as
 `DrawSettingsForSelectedSections`):
 
-1. instance/input selected → op parameters (unchanged),
-2. **setup entity selection non-empty → new `SetupParameterView.Draw(selection)`**,
+1. **inspection target is the setup entity → `SetupParameterView.TryDraw()`** (checked first: an
+   entity claim empties the graph selection, which would otherwise fall back to the composition),
+2. instance/input selected → op parameters (unchanged),
 3. sections, 4. snapshots (unchanged).
 
 Special case — primary is a `ContentSource`: that selection mirrors a focused `SendToOutput` op, and
@@ -101,7 +103,7 @@ describe the same thing.
 Multi-select: draw the primary's card plus a muted "`+N` more selected" line. Batch editing is out of
 scope (note as future).
 
-### A.3 `SetupParameterView` (new, `Editor/Gui/Windows/Output/`)
+### A.3 `SetupParameterView` (new, `Editor/Gui/Windows/OutputSetup/`)
 
 Port the card bodies out of `SetupPanel` (`DrawSurfaceCard`, `DrawOutputCard`, `DrawContentCard`,
 `DrawSliceCard`, `DrawEntityCard` for ref-images/props, `DrawMeasuredSizePopup`, `ApplyMeasuredSize`,
@@ -163,10 +165,13 @@ property editing happens in the Parameter window.
 
 ### B.2 Layout & hosting
 
+- **Window layout (confirmed 2026-09-04): the output window stacks vertically — Board on top, Flow
+  Outliner below**, separated by one splitter that runs horizontally across the full window width and
+  drags up/down. Nothing docks to the side anymore.
 - New `SetupFlowOutliner` (per window, owned by `OutputSetupModeView`), drawn as a full-width child at
-  the **bottom** of the output window; the canvas gets the remaining height above.
-- Height: drag handle on its top edge (port `DrawPanelSplitter`, horizontal); session state like the
-  old panel width. Collapsible to a slim header bar; the existing `_showSetupPanel` auto-open logic
+  the **bottom** of the output window; the Board gets the remaining height above.
+- Height: the splitter is the outliner's top edge (port `DrawPanelSplitter`, turned 90°); session state
+  like the old panel width. Collapsible to a slim header bar; the existing `_showSetupPanel` auto-open logic
   (focused sink opens it, other op selection closes it) transfers as-is.
 - Header row (left→right): **setup switcher** (port `DrawSetupSwitcher`), the **view-mode segmented
   control** (moves here from the canvas header, per the sketch), the breadcrumb (`Slice 2 → S2 → P1`),
@@ -359,7 +364,7 @@ space's homography chain) or don't (drawn at neutral placement, faded):
 
 ### C.3 Adaptive metric grid
 
-- New `MetricGridRaster` (`Editor/Gui/Windows/Output/` or next to the canvas helpers): reuse the
+- New `MetricGridRaster` (`Editor/Gui/Windows/OutputSetup/` or next to the canvas helpers): reuse the
   **log-blend spacing math** from `StandardValueRaster.TryGetRastersForScale` (X axis) and
   `HorizontalRaster` (Y axis) — two-axis lines + sparse `m` labels, fading between density levels with
   the existing `fadeFactor` scheme. Don't subclass `AbstractTimeRaster` (it's time/BPM-coupled);

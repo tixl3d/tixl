@@ -142,7 +142,7 @@ internal static class FormInputs
 
     // Number fields fill the row on narrow panels but cap here so they don't stretch across a wide settings
     // panel; the value-range indicator stays readable and float/int rows line up. (Unscaled px.)
-    private const float MaxNumberInputWidth = 280f;
+    internal const float MaxNumberInputWidth = 280f;
 
     public static bool AddFloat(string label,
         ref float value,

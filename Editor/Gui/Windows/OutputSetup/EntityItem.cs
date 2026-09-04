@@ -1,15 +1,16 @@
 #nullable enable
 using ImGuiNET;
+using T3.Editor.Gui.Windows.Output;
 using T3.Core.Output;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Windows.Output;
+namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// The one visual for a setup entity: icon, name, inline rename, status, state coloring, context menu,
-/// and drag source. The sidebar lays it out as tree rows; a flow view lays the same item out as node
+/// and drag source. The setup panel lays it out as tree rows; a flow view lays the same item out as node
 /// bodies — the item itself carries no layout beyond the insets the caller passes in.
 /// <para>Deliberately delegate-free: rows draw every frame, so all per-kind behavior (rename, delete,
 /// extra menu items) dispatches through <see cref="SetupActions"/> instead of per-item callbacks.</para>
@@ -380,7 +381,7 @@ internal sealed class EntityItem
     }
 
     /// <summary>
-    /// The one context menu for a setup entity — identical whether opened from a sidebar row or a canvas
+    /// The one context menu for a setup entity — identical whether opened from a setup-panel row or a canvas
     /// label: kind-specific extras first, then the common Duplicate / Rename / Delete verbs wherever the
     /// kind supports them.
     /// </summary>

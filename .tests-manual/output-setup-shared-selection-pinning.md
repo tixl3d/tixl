@@ -68,7 +68,7 @@ graph window.
 
 **Expected:**
 - The selection clears in **both** output windows' panels (no highlighted row).
-- Both setup panels close (the existing auto-close on non-sink focus), including a
+- Both setup panels close (the existing auto-close when the focused op is not a SendToOutput), including a
   pinned window's panel — pinning affects only the shown canvas, not panel
   visibility.
 
