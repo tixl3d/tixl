@@ -1,0 +1,95 @@
+{
+  "FormatVersion": 3,
+  "Id": "3f9d7b21-8e64-4c05-a1b7-d5c2e8f0a693"/*GetGeometryStats*/,
+  "Description": "Measures a MeshGeometry: counts, bounds, signed volume, watertightness and how long pulling the input took.\n\nStats are recomputed only when the geometry changes. Volume is positive for outward-facing closed solids; Boundary edges = 0 means watertight. Report bundles everything as text, e.g. for a text display or the console.\n\nAKA: geometry info, mesh statistics, debug, measure",
+  "InputUis": [
+    {
+      "InputId": "4a8e2c6f-d1b3-4f70-9e5d-b7c0a3f8e214"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a1c4e7f2-5b93-4d60-8e2a-7f0d3b9c1e58"/*Report*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "5d2b8f16-c7a0-4e39-b4d1-2a9e6c0f7b84"/*PointCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 60.0
+      }
+    },
+    {
+      "OutputId": "e8a3c5d9-04f1-4b72-9c6e-b3d7a2f8e015"/*FaceCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "OutputId": "7b6f0a2c-3d85-4e17-a9b4-c1e5d8f2a369"/*TriangleCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "OutputId": "c2d9e4b7-6a18-4f53-8b0c-e7a3f1d5c920"/*PartCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "OutputId": "94e1a6c3-b2d7-4f08-a5e9-0c6b3d8f7a41"/*BoundsMin*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "1f7c3e9a-d5b0-4a64-b8c2-a4e0f6d9b273"/*BoundsMax*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "OutputId": "68b2d0f4-a9e3-4c51-97d6-f2c8e1b5a307"/*Size*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 420.0
+      }
+    },
+    {
+      "OutputId": "d3a5f8c1-2e79-4b06-8f4a-c9e6b0d2a158"/*Volume*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 480.0
+      }
+    },
+    {
+      "OutputId": "0e9b4c7d-f682-4a35-b1d8-5c3a7e2f9d06"/*BoundaryEdges*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 540.0
+      }
+    },
+    {
+      "OutputId": "b5c8e2a0-7d41-4f96-a3b7-e1d9c4f6a825"/*EvaluationMs*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    }
+  ]
+}

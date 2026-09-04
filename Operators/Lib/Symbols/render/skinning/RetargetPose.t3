@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "0f6a3d81-c925-4e57-b3a4-78d1e6f04c92"/*RetargetPose*/,
+  "Inputs": [
+    {
+      "Id": "3b04a6d8-92ef-4c71-85b3-f1d09c24e685"/*TargetSkeletonIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "47b8e296-0d53-4c1a-af67-92e4c8b5d130"/*Pose*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5e19c483-b7a0-4d26-8f34-d9c162e75b08"/*SourceSkeletonIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a2f60d94-8c37-4b52-91de-56b0f3e8a4c7"/*SourceSetup*/,
+      "DefaultValue": {
+        "SceneSetup": {
+          "NodeSettings": []
+        }
+      }
+    },
+    {
+      "Id": "c9d47f12-3a85-4e60-b29c-08e6a1d5f374"/*TargetSetup*/,
+      "DefaultValue": {
+        "SceneSetup": {
+          "NodeSettings": []
+        }
+      }
+    },
+    {
+      "Id": "e67f2b90-14c8-4da3-9605-7a3ce8d1b542"/*TranslationScale*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

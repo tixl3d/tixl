@@ -64,7 +64,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<Point> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> texture2 : register(t1);
 
 // Helper function to get point with wrapping for closed shapes
@@ -189,11 +189,11 @@ psInput vsMain(uint id : SV_VertexID)
     float3 normalB = normalize(cross(directionB, float3(0, 0, 1)));
 
     // Handle edge cases for normals
-    if (isnan(pointAA.Scale.x) || isinf(pointAA.Scale.x) || any(isnan(normalA)))
+    if (IsSeparator(pointAA) || isinf(pointAA.Scale.x) || any(isnan(normalA)))
     {
         normalA = normal;
     }
-    if (isnan(pointBB.Scale.x) || isinf(pointBB.Scale.x) || any(isnan(normalB)))
+    if (IsSeparator(pointBB) || isinf(pointBB.Scale.x) || any(isnan(normalB)))
     {
         normalB = normal;
     }

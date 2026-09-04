@@ -15,8 +15,8 @@ cbuffer Params : register(b1)
     int Resolution;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;        
-RWStructuredBuffer<Point> ResultPoints : u0;    
+StructuredBuffer<Point> SourcePoints : register(t0);        
+RWStructuredBuffer<Point> ResultPoints : register(u0);    
 
 inline int Mod(int val, int repeat)
 {

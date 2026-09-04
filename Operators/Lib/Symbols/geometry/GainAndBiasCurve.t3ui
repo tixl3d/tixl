@@ -1,0 +1,30 @@
+{
+  "FormatVersion": 3,
+  "Id": "aa1c7c11-62e6-4b1d-a7eb-a3fc1347f3c6"/*GainAndBiasCurve*/,
+  "Description": "Produces a RemapCurve applying Schlick gain and bias to a 0..1 value. X is gain, Y is bias; 0.5/0.5 is the identity.\n\nMatches the remapping of GPU ops using GainAndBias parameters, so CPU fields and shaders shape values identically.",
+  "InputUis": [
+    {
+      "InputId": "9a47a81a-bb15-4c2a-962b-0fb9f48afd94"/*GainAndBias*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "GainAndBias"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "6d14a0bb-5232-4e34-9104-329bbc0ad7f5"/*Curve*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

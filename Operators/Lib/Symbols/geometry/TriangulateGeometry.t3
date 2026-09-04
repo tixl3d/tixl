@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "593590aa-b2c6-42d7-b9c5-ce205ee4266d"/*TriangulateGeometry*/,
+  "Inputs": [
+    {
+      "Id": "424f42c4-18f0-412a-a725-230700d5f1a6"/*Geometry*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

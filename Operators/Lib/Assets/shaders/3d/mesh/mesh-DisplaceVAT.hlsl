@@ -27,12 +27,12 @@ cbuffer Transforms : register(b1)
 
 
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;        
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);        
 Texture2D<float4> DisplaceMap : register(t1);
 Texture2D<float4> NormalMap : register(t2);
 
 
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;   
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);   
 
 sampler texSampler : register(s0);
 

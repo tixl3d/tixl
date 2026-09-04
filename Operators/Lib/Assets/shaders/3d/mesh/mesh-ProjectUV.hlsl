@@ -23,9 +23,9 @@ cbuffer Params : register(b1)
 }
 
 
-StructuredBuffer<PbrVertex> Vertices : t0;
+StructuredBuffer<PbrVertex> Vertices : register(t0);
 
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;    // output
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);    // output
 
 
 Texture2D<float4> inputTexture : register(t1);

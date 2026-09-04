@@ -140,16 +140,8 @@ internal sealed class CubeMesh : Instance<CubeMesh>
             }
 
             // Write Data
-            ResourceManager.SetupStructuredBuffer(_vertexBufferData, PbrVertex.Stride * verticesCount, PbrVertex.Stride, ref _vertexBuffer);
-            ResourceManager.CreateStructuredBufferSrv(_vertexBuffer, ref _vertexBufferWithViews.Srv);
-            ResourceManager.CreateStructuredBufferUav(_vertexBuffer, UnorderedAccessViewBufferFlags.None, ref _vertexBufferWithViews.Uav);
-            _vertexBufferWithViews.Buffer = _vertexBuffer;
-
-            const int stride = 3 * 4;
-            ResourceManager.SetupStructuredBuffer(_indexBufferData, stride * faceCount, stride, ref _indexBuffer);
-            ResourceManager.CreateStructuredBufferSrv(_indexBuffer, ref _indexBufferWithViews.Srv);
-            ResourceManager.CreateStructuredBufferUav(_indexBuffer, UnorderedAccessViewBufferFlags.None, ref _indexBufferWithViews.Uav);
-            _indexBufferWithViews.Buffer = _indexBuffer;
+            ResourceManager.SetupBufferWithViews(_vertexBufferData, ref _vertexBufferWithViews);
+            ResourceManager.SetupBufferWithViews(_indexBufferData, ref _indexBufferWithViews);
 
             _data.VertexBuffer = _vertexBufferWithViews;
             _data.IndicesBuffer = _indexBufferWithViews;
@@ -441,13 +433,11 @@ internal sealed class CubeMesh : Instance<CubeMesh>
         }
     }
 
-    private Buffer _vertexBuffer;
     private PbrVertex[] _vertexBufferData = new PbrVertex[0];
-    private readonly BufferWithViews _vertexBufferWithViews = new();
+    private BufferWithViews _vertexBufferWithViews;
 
-    private Buffer _indexBuffer;
     private Int3[] _indexBufferData = new Int3[0];
-    private readonly BufferWithViews _indexBufferWithViews = new();
+    private BufferWithViews _indexBufferWithViews;
 
     private readonly MeshBuffers _data = new();
 

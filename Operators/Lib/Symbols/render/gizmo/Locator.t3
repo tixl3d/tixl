@@ -215,7 +215,13 @@
     {
       "Id": "7bd73815-ffcd-49a6-a2c8-42941897e3dc"/*DrawBillboards*/,
       "SymbolId": "18d3d929-e530-45fa-9131-658368060ae2",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "909bdbcd-620c-479e-b150-cb7adfbfffe8"/*Orientation*/,
+          "Type": "System.Int32",
+          "Value": 0
+        }
+      ],
       "Outputs": []
     },
     {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SharpGLTF.Animations;
 using T3.Core.Logging;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils.Geometry;
@@ -37,7 +38,46 @@ public class SceneSetup : IEditableInputType, IDisposable
         public int MeshChunkIndex;
         public MeshBuffers MeshBuffers;
         public SceneMaterial Material;
+        public BufferWithViews SkinWeights;
+        public int SkeletonIndex = -1;
     }
+
+    /// <summary>
+    /// Joint hierarchy and bind data extracted from a skin.
+    /// Joint transforms are in joint-local space; object space is derived by walking <see cref="ParentIndices"/>.
+    /// </summary>
+    public sealed class SceneSkeleton
+    {
+        public string[] JointNames;
+        public int[] ParentIndices;   // -1 marks a root joint
+        public Transform[] RestLocalTransforms;
+        public Matrix4x4[] InverseBindMatrices;
+    }
+
+    public readonly List<SceneSkeleton> Skeletons = new();
+
+    /// <summary>
+    /// An animation clip extracted from the source file, targeting joints of the <see cref="Skeletons"/>.
+    /// Curve samplers are created once at load with isolated memory; sampling them per frame is cheap.
+    /// Times are in seconds.
+    /// </summary>
+    public sealed class SceneAnimClip
+    {
+        public string Name;
+        public float Duration;
+        public readonly List<JointAnimChannel> Channels = new();
+    }
+
+    public sealed class JointAnimChannel
+    {
+        public int SkeletonIndex;
+        public int JointIndex;
+        public ICurveSampler<Vector3> TranslationSampler;
+        public ICurveSampler<Quaternion> RotationSampler;
+        public ICurveSampler<Vector3> ScaleSampler;
+    }
+
+    public readonly List<SceneAnimClip> AnimationClips = new();
     
     /// <summary>
     /// Holds information required for building a T3 PbrMaterial.
@@ -118,6 +158,8 @@ public class SceneSetup : IEditableInputType, IDisposable
                                       CombinedTransform = node.CombinedTransform,
                                       ChunkIndex = node.MeshChunkIndex,
                                       Scale = node.Transform.Scale,
+                                      SkinWeights = node.SkinWeights,
+                                      SkeletonIndex = node.SkeletonIndex,
                                   };
             
             Dispatches.Add(newDispatch);
@@ -141,6 +183,8 @@ public class SceneSetup : IEditableInputType, IDisposable
         public Matrix4x4 CombinedTransform;
         public int ChunkIndex;
         public Vector3 Scale;
+        public BufferWithViews SkinWeights;
+        public int SkeletonIndex = -1;
     }
     
     public readonly List<SceneDrawDispatch> Dispatches = new();
@@ -229,19 +273,21 @@ public class SceneSetup : IEditableInputType, IDisposable
     
     public void Dispose(bool isDisposing)
     {
-        if (isDisposing)
+        if (!isDisposing)
             return;
-        
+
+        // Dispatches can share MeshBuffers and PbrMaterial instances; their Dispose implementations are idempotent.
         foreach (var dispatch in Dispatches)
         {
-            dispatch.MeshBuffers.IndicesBuffer.Dispose();
-            dispatch.MeshBuffers.VertexBuffer.Dispose();
-            
+            dispatch.MeshBuffers?.Dispose();
+
             if (dispatch.Material != null)
             {
                 dispatch.Material.Dispose();
                 dispatch.Material = null;
             }
         }
+
+        Dispatches.Clear();
     }
 }

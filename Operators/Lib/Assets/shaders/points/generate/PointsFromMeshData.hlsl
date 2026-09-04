@@ -69,13 +69,13 @@ uint wang_hash(in out uint seed)
 }
 
 
-StructuredBuffer<Face> FaceBuffer : t0;
+StructuredBuffer<Face> FaceBuffer : register(t0);
 
 Texture2D<float4> inputTexture : register(t1);
 
-RWStructuredBuffer<LegacyPoint> points : u0;
-// ConsumeStructuredBuffer<ParticleIndex> DeadParticles : u1;
-//RWStructuredBuffer<Face> FaceBuffer : u2;
+RWStructuredBuffer<Point> points : register(u0);
+// ConsumeStructuredBuffer<ParticleIndex> DeadParticles : register(u1);
+//RWStructuredBuffer<Face> FaceBuffer : register(u2);
 
 SamplerState linearSampler : register(s0);
 
@@ -120,9 +120,9 @@ void main(uint3 i : SV_DispatchThreadID)
     float3 pos = f.positions[0] * u + f.positions[1] * v + f.positions[2] * w;
 
     // ParticleIndex pi = DeadParticles.Consume();
-    LegacyPoint newPoint = points[i.x];
+    Point newPoint = points[i.x];
     newPoint.Position = mul(float4(pos.xyz,1), ObjectToWorld);
-    newPoint.W =1;
+    newPoint.FX1 =1;
     newPoint.Rotation = float4(0,0,0,1);
     newPoint.Rotation =  qLookAt(f.normals[0], float3(0,1,0));
     //newPoint.rotation = rot

@@ -27,10 +27,10 @@ cbuffer Params : register(b0)
     float3 Center;
 }
 
-StructuredBuffer<int3> Faces : t0;
-StructuredBuffer<PbrVertex> SourceVertices : t1;
+StructuredBuffer<int3> Faces : register(t0);
+StructuredBuffer<PbrVertex> SourceVertices : register(t1);
 
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 static float3 variationOffset;
 static float4x4 transform;
 static float OffsetDirection = 0.5;

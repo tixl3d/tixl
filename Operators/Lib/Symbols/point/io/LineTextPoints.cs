@@ -586,7 +586,7 @@ internal sealed class LineFont
             var p2Valid = false;
             for (var pointIndex = 0; pointIndex <= points.Length + 2; pointIndex++)
             {
-                p0Valid = pointIndex >= 0 && pointIndex < points.Length  && !float.IsNaN(points[pointIndex].F1);
+                p0Valid = pointIndex >= 0 && pointIndex < points.Length && !Point.IsSeparator(points[pointIndex]);
                 if (p0Valid)
                     p0 = points[pointIndex].Position;
                     

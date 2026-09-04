@@ -1,0 +1,41 @@
+{
+  "FormatVersion": 3,
+  "Id": "d17f4b86-2ea9-4c50-b6d3-90c58a31f7e2"/*SkinPoints*/,
+  "Description": "Deforms a point buffer with skin weights and skinning matrices - the point counterpart of [SkinMesh], so particles and point effects can ride a rig.\n\nGenerate the weights with [BindToSkeleton] (with the same point buffer connected to its Points input). Separator points and points outside every envelope pass through unchanged.",
+  "InputUis": [
+    {
+      "InputId": "05e8a3c1-76b9-4d42-90f6-3ad25c81e7b0"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "3a76c2e9-05d8-4f31-8c40-b9e1d64f52a7"/*SkinMatrices*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "8b3d90f4-c1e6-4a27-b584-67f0a92d3c15"/*SkinWeights*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "49c0d6e2-8f75-4b18-a39c-e2617d80b4f5"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

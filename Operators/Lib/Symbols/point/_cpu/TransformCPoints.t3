@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "a4c8e2d6-7f31-4b95-9e0a-5d3c1b8f7a26"/*TransformCPoints*/,
+  "Inputs": [
+    { "Id": "3b9e6f1d-8c24-4a70-b5d3-e7a2c0f9d418"/*Points*/, "DefaultValue": null },
+    { "Id": "7e2a5c9b-4d16-4f83-a9e0-1b6d8f3c2a57"/*Translation*/, "DefaultValue": { "X": 0.0, "Y": 0.0, "Z": 0.0 } },
+    { "Id": "c5d1a8f3-6e29-4b47-8a2c-d0f7e4b9c163"/*Rotation*/, "DefaultValue": { "X": 0.0, "Y": 0.0, "Z": 0.0 } },
+    { "Id": "9f4b2e7c-1a58-4d03-b6e9-3c8d5a1f7e02"/*Stretch*/, "DefaultValue": { "X": 1.0, "Y": 1.0, "Z": 1.0 } },
+    { "Id": "2d8c6a1e-b3f7-4e95-a0d4-8e1b9c5f3d76"/*Scale*/, "DefaultValue": 1.0 },
+    { "Id": "e6a3d9c2-5f18-4b60-9c7e-a4b2f1d8e305"/*Pivot*/, "DefaultValue": { "X": 0.0, "Y": 0.0, "Z": 0.0 } },
+    { "Id": "5c7f1b4a-9e62-4d28-b8a1-6f0d3e9c2b54"/*Space*/, "DefaultValue": 0 },
+    { "Id": "b8e4c2f6-3a91-4d75-8e0b-c1d5a7f2e938"/*UpdateRotation*/, "DefaultValue": true }
+  ],
+  "Children": [],
+  "Connections": []
+}

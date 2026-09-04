@@ -97,9 +97,9 @@ struct psInput
 sampler texSampler : register(s0);
 sampler clampedSampler : register(s1);
 
-StructuredBuffer<PbrVertex> PbrVertices : t0;
-StructuredBuffer<int3> FaceIndices : t1;
-StructuredBuffer<LegacyPoint> Points : t2;
+StructuredBuffer<PbrVertex> PbrVertices : register(t0);
+StructuredBuffer<int3> FaceIndices : register(t1);
+StructuredBuffer<Point> Points : register(t2);
 
 
 Texture2D<float4> BaseColorMap : register(t3);
@@ -161,11 +161,11 @@ psInput vsMain(uint id : SV_VertexID)
 
     int pointId = id / verticesPerInstance;
 
-    LegacyPoint _p = Points[pointId];
+    Point _p = Points[pointId];
 
     float4 pRotation = normalize(_p.Rotation); 
     float4 pPosition = float4(_p.Position,1);
-    float pW = _p.W;
+    float pW = _p.FX1;
 
     // SETUP SEEDS ----------------------------------------------------------
 
@@ -225,7 +225,7 @@ psInput vsMain(uint id : SV_VertexID)
     // Scale and stretch
     float scaleFxU = GetUFromMode(ScaleDistribution, pointId, f, normalizedScatter, pW, output.fog);
     float scaleFromCurve = SizeOverW.SampleLevel(clampedSampler, float2(scaleFxU, 0), 0).r;
-    float hideUndefinedPoints = isnan(pW) ? 0 : (UseWFoScale > 0.5 ? max(pW, 0) : 1 );
+    float hideUndefinedPoints = IsSeparator(_p) ? 0 : (UseWFoScale > 0.5 ? max(pW, 0) : 1 );
     
     float r= (RandomScale * scatterForScale.y *adjustedRandomize + 1);
     r = LimitScale(r);

@@ -191,9 +191,11 @@ internal sealed class ViewSelectionPinning
             if (drawExtraMenuItems != null)
             {
                 CustomComponents.SeparatorLine();
-                CustomComponents.DrawMenuItem(_showHoveredOutputsId, "Show Hovered Outputs", isEnabled: false, reserveIconColumn: false);
+                drawExtraMenuItems();
             }
 
+            CustomComponents.SeparatorLine();
+            CustomComponents.DrawMenuItem(_showHoveredOutputsId, "Show Hovered Outputs", isEnabled: false, reserveIconColumn: false);
             ImGui.PopStyleVar();
             ImGui.EndCombo();
         }
@@ -214,6 +216,8 @@ internal sealed class ViewSelectionPinning
                                             ? instance.InstancePath
                                             : [];
     }
+
+    public bool IsPinned => _isPinned;
 
     public bool TryGetPinnedOrSelectedInstance([NotNullWhen(true)] out Instance? instance, [NotNullWhen(true)] out ProjectView? components)
     {

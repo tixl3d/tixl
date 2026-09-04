@@ -50,13 +50,13 @@ cbuffer Params : register(b1)
 #define WMODE_ADD 1
 #define WMODE_BLEND 2
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;
-StructuredBuffer<LegacyPoint> FieldPoints : t1;
+StructuredBuffer<Point> SourcePoints : register(t0);
+StructuredBuffer<Point> FieldPoints : register(t1);
 
 Texture2D<float4> CurveImage : register(t2);
 Texture2D<float4> GradientImage : register(t3);
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 sampler texSampler : register(s0);
 
@@ -75,7 +75,7 @@ float3 fmod(float3 x, float3 y)
         return;
     }
 
-    LegacyPoint p = SourcePoints[index];
+    Point p = SourcePoints[index];
 
     float3 totalForce;
     float totalWeight = 0;
@@ -88,8 +88,8 @@ float3 fmod(float3 x, float3 y)
 
     for (int fieldIndex = 0; fieldIndex < FieldCount; fieldIndex++)
     {
-        float w = FieldPoints[fieldIndex].W;
-        if (isnan(w) || w < 0.0001)
+        float w = FieldPoints[fieldIndex].FX1;
+        if (IsSeparator(FieldPoints[fieldIndex]) || !(w > 0.0001)) // !(>) also skips NaN width
             continue;
 
         usedCount++;
@@ -100,7 +100,7 @@ float3 fmod(float3 x, float3 y)
 
         float f = (1 - saturate((len - OffsetRange) / Range)) + noise;
         f = ApplyGainAndBias(f, GainAndBias);
-        f *= p.Selected;
+        f *= p.FX2;
 
         float fw = CurveImage.SampleLevel(texSampler, float2(f, 0.5), 0).r;
         totalW += fw;
@@ -123,7 +123,7 @@ float3 fmod(float3 x, float3 y)
         }
     }
 
-    float selectAmount = Amount * p.Selected;
+    float selectAmount = Amount * p.FX2;
 
     float gMagnitude = length(totalForce) + 0.0001;
 
@@ -169,13 +169,13 @@ float3 fmod(float3 x, float3 y)
     switch (WMode)
     {
     case WMODE_SET:
-        p.W = totalW * wAffect;
+        p.FX1 = totalW * wAffect;
         break;
     case WMODE_ADD:
-        p.W += totalW * wAffect;
+        p.FX1 += totalW * wAffect;
         break;
     case WMODE_BLEND:
-        p.W = lerp(p.W, totalW, totalWeight * wAffect);
+        p.FX1 = lerp(p.FX1, totalW, totalWeight * wAffect);
         break;
     }
 

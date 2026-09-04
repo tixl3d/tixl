@@ -22,8 +22,8 @@ cbuffer IntParams : register(b1)
     int StrengthFactor;
 }
 
-StructuredBuffer<Point> Points1 : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> Points1 : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

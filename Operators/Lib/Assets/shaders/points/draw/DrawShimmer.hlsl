@@ -75,7 +75,7 @@ struct Sprite
 sampler WrappedSampler : register(s0);
 sampler ClampedSampler : register(s1);
 
-StructuredBuffer<Sprite> Sprites : t0;
+StructuredBuffer<Sprite> Sprites : register(t0);
 Texture2D<float4> NoiseImage : register(t1);
 Texture2D<float4> Gradient : register(t2);
 

@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "fdb843e8-d859-451a-989e-f0e7a00f5e5a"/*ReadPointColors*/,
-  "Description": "Reads back the `Color` attribute of a structured Point buffer from GPU to CPU as a `List<Vector4>`.\n\nDesigned for live LED-strip / WLED output: feeds the `Colors` input of [WLedSerialOutput] without the GPU-pipeline stall that [PointsToCPU] causes in continuous mode.\n\nDefault `Async = true` uses a 3-buffer rotation so reads do not block rendering. The data shown is 1-2 frames old, which is invisible for VJ visuals. Set `Async = false` if you need same-frame data and can tolerate the stall.\n\nReuses one internal `List<Vector4>`, so connecting this op into a per-frame chain is allocation-free after warmup.\n\nAKA: pointcolors, readback, gpu-to-cpu, wled, led-strip, points",
+  "Description": "Reads back the `Color` attribute of a structured Point buffer from GPU to CPU as a `List<Vector4>`.\n\nDesigned for live LED-strip / WLED output: feeds the `Colors` input of [WLedSerialOutput] without the GPU-pipeline stall that [ReadPointsFromGpu] causes in continuous mode.\n\nDefault `Async = true` uses a 3-buffer rotation so reads do not block rendering. The data shown is 1-2 frames old, which is invisible for VJ visuals. Set `Async = false` if you need same-frame data and can tolerate the stall.\n\nReuses one internal `List<Vector4>`, so connecting this op into a per-frame chain is allocation-free after warmup.\n\nAKA: pointcolors, readback, gpu-to-cpu, wled, led-strip, points",
   "InputUis": [
     {
       "InputId": "0406e85a-61c4-42ce-a174-8d683d2801b5"/*PointBuffer*/,

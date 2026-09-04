@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "c3d8f6b2-51ae-47c9-8e04-b96d20a15f73"/*SkinMesh*/,
+  "Inputs": [
+    {
+      "Id": "3b7f2ac9-e650-48d2-b12a-94c8607df3e6"/*SkinMatrices*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "62e91c07-84fa-4d3b-a45c-08d7f9126b3e"/*Mesh*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d94a70b6-1f28-45c1-83b7-6ea0d5429c15"/*SkinWeights*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

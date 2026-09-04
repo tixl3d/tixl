@@ -56,8 +56,8 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<PbrVertex> PbrVertices : t0;
-StructuredBuffer<int3> FaceIndices : t1;
+StructuredBuffer<PbrVertex> PbrVertices : register(t0);
+StructuredBuffer<int3> FaceIndices : register(t1);
 
 Texture2D<float4> BaseColorMap : register(t2);
 Texture2D<float4> ShadingGradient : register(t3);

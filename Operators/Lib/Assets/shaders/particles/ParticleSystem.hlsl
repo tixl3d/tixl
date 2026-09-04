@@ -26,9 +26,9 @@ cbuffer IntParams : register(b1)
     int EmitVelocityFactor;
 }
 
-StructuredBuffer<Point> EmitPoints : t0;
-RWStructuredBuffer<Particle> Particles : u0;
-RWStructuredBuffer<Point> ResultPoints : u1;
+StructuredBuffer<Point> EmitPoints : register(t0);
+RWStructuredBuffer<Particle> Particles : register(u0);
+RWStructuredBuffer<Point> ResultPoints : register(u1);
 
 #define W_KEEP_ORIGINAL 0
 #define W_PARTICLE_AGE 1

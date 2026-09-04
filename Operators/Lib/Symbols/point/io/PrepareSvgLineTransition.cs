@@ -57,7 +57,7 @@ internal sealed class PrepareSvgLineTransition : Instance<PrepareSvgLineTransiti
         segments.Clear();
         for (var pointIndex = 0; pointIndex < sourcePoints.NumElements; pointIndex++)
         {
-            if (float.IsNaN(sourcePoints.TypedElements[pointIndex].Scale.X))
+            if (Point.IsSeparator(sourcePoints.TypedElements[pointIndex]))
             {
                 var hasAtLeastTwoPoints = indexWithinSegment > 1;
                 if (hasAtLeastTwoPoints)

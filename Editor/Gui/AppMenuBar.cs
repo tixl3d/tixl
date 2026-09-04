@@ -79,11 +79,60 @@ internal static class AppMenuBar
             }
 
             Program.StatusErrorLine.Draw();
+            DrawDebugServerIndicator();
 
             ImGui.EndMainMenuBar();
         }
 
         ImGui.PopStyleVar(3);
+    }
+
+    private static void DrawDebugServerIndicator()
+    {
+        if (!App.DebugProtocol.DebugServer.IsRunning)
+            return;
+
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetWindowWidth() - ImGui.GetFrameHeight());
+
+        // Flash on protocol traffic, decaying to a dim resting state. Green once the
+        // agent reports "ready": the editor is free to use without interfering with it.
+        var msSinceActivity = Environment.TickCount64 - App.DebugProtocol.DebugServer.LastActivityTicksMs;
+        var flash = Math.Clamp(1f - msSinceActivity / 400f, 0f, 1f);
+        var isReady = App.DebugProtocol.DebugServer.AgentState == "ready";
+        var color = isReady
+                        ? UiColors.StatusControlled.Fade(0.8f + 0.2f * flash)
+                        : UiColors.StatusAttention.Fade(0.4f + 0.6f * flash);
+        CustomComponents.IconButton(Icon.IO, Vector2.Zero, color);
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.TextUnformatted($"Debug server listening on 127.0.0.1:{App.DebugProtocol.DebugServer.Port}"
+                                  + $" — {App.DebugProtocol.DebugServer.RequestCount} requests handled");
+            var agentState = App.DebugProtocol.DebugServer.AgentState;
+            if (!string.IsNullOrEmpty(agentState))
+            {
+                ImGui.TextUnformatted(isReady ? "Agent: ready - safe to test" : "Agent: busy - changes may interfere");
+                var note = App.DebugProtocol.DebugServer.AgentNote;
+                if (!string.IsNullOrEmpty(note))
+                    ImGui.TextUnformatted(note);
+            }
+
+            var messages = App.DebugProtocol.DebugServer.RecentMessages;
+            if (messages.Count > 0)
+            {
+                ImGui.Spacing();
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+                foreach (var message in messages)
+                {
+                    ImGui.TextUnformatted(message);
+                }
+
+                ImGui.PopStyleColor();
+            }
+
+            ImGui.EndTooltip();
+        }
     }
 
     private static void DrawErrorsIndicator()

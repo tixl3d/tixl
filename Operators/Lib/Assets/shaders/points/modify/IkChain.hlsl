@@ -23,14 +23,14 @@ cbuffer Params : register(b1)
 }
 
 // SourcePoints: the rest-pose / original chain (read-only, never changes)
-StructuredBuffer<Point>   SourcePoints : t0;
-StructuredBuffer<Point>   TargetPoints : t1;
+StructuredBuffer<Point>   SourcePoints : register(t0);
+StructuredBuffer<Point>   TargetPoints : register(t1);
 
 // ResultPoints: the live stateful chain - persists across frames.
 //   - chain root      is pinned to SourcePoints[chainStart] each solve
 //   - chain end       is the target/effector (driven externally each frame)
 //   - middle joints   are solved by FABRIK
-RWStructuredBuffer<Point> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

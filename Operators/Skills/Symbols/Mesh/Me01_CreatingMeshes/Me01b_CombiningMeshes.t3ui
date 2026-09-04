@@ -5,6 +5,13 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
+      "ChildId": "2871c4d5-4e37-4997-b9f6-3e79aba46cf1"/*LoadObj*/,
+      "Position": {
+        "X": 756.0369,
+        "Y": 1334.7756
+      }
+    },
+    {
       "ChildId": "9ceb12b7-664c-4688-9912-2835875b3dca"/*DrawQuiz*/,
       "Position": {
         "X": 1693.2708,
@@ -22,8 +29,15 @@
     {
       "ChildId": "e14c99ff-473a-4a25-afe0-3a2651b1dc91"/*Text*/,
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1337.6135,
+        "Y": 1745.1069
+      }
+    },
+    {
+      "ChildId": "e513224e-8431-4b0b-9fc7-a794dc796120"/*CombineMeshes*/,
+      "Position": {
+        "X": 1089.125,
+        "Y": 1487.891
       }
     }
   ],

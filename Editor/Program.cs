@@ -122,20 +122,29 @@ internal static class Program
         CrashReporting.InitializeCrashReporting();
         #endif
 
+        ApplyWindowArgs(args);
+
         Console.WriteLine("Creating SplashScreen");
         ISplashScreen splashScreen = new SplashScreen.SplashScreen();
 
-        var path = Path.Combine(SharedResources.EditorResourcesDirectory,  "images", "t3-SplashScreen.png");
-        splashScreen.Show(path);
+        if (!SkipSplash)
+        {
+            var path = Path.Combine(SharedResources.EditorResourcesDirectory, "images", "t3-SplashScreen.png");
+            splashScreen.Show(path);
+        }
 
         Console.WriteLine("Initializing logging");
-        Log.AddWriter(splashScreen);
+        if (!SkipSplash)
+            Log.AddWriter(splashScreen);
         Log.AddWriter(new ConsoleWriter());
         Log.AddWriter(FileWriter.CreateDefault(FileLocations.SettingsDirectory, out var logPath));
         Log.AddWriter(StatusErrorLine);
         Log.AddWriter(ConsoleLogWindow);
             
         Log.Info($"Starting {FormattedEditorVersion}");
+
+        if (TryGetDebugServerPortArg(args, out var debugServerPort))
+            App.DebugProtocol.DebugServer.Start(debugServerPort);
 
         if (FileLocations.VersionIdOverride != null)
             Log.Info($"Settings folder overridden via '{FileLocations.VersionIdOverrideEnvVar}': {FileLocations.SettingsDirectory}");
@@ -233,13 +242,17 @@ internal static class Program
         T3Ui.InitializeEnvironment();
         SkillTraining.Initialize();
             
-        Log.RemoveWriter(splashScreen);
-            
+        if (!SkipSplash)
+            Log.RemoveWriter(splashScreen);
+
         if(UserSettings.Config.KeepTraceForLogMessages)
             Log.AddWriter(new Profiling.ProfilingLogWriterClass());
-            
-        splashScreen.Close();
-        splashScreen.Dispose();
+
+        if (!SkipSplash)
+        {
+            splashScreen.Close();
+            splashScreen.Dispose();
+        }
 
         // Initialize optional Viewer Windows
         ProgramWindows.InitializeSecondaryViewerWindow("TiXL Viewer", 640, 360);
@@ -256,6 +269,7 @@ internal static class Program
         // ReSharper disable once AccessToDisposedClosure
         ProgramWindows.Main.RunRenderLoop(UiContentContentDrawer.RenderCallback);
         IsShuttingDown = true;
+        App.DebugProtocol.DebugServer.Stop();
 
         try
         {
@@ -279,6 +293,72 @@ internal static class Program
         }
 
         Log.Debug("Shutdown complete");
+    }
+
+    /// <summary>Client-area size requested via <c>--window &lt;w&gt;x&lt;h&gt;</c>; null starts maximized as usual.</summary>
+    internal static System.Drawing.Size? WindowSizeOverride { get; private set; }
+
+    /// <summary>Set via <c>--no-splash</c> — skips showing the splash screen (e.g. for protocol-driven sessions).</summary>
+    internal static bool SkipSplash { get; private set; }
+
+    /// <summary>
+    /// Honors <c>--window=&lt;w&gt;x&lt;h&gt;</c> (or <c>--window &lt;w&gt;x&lt;h&gt;</c>) for a predictable
+    /// non-maximized window, and <c>--no-splash</c>.
+    /// </summary>
+    private static void ApplyWindowArgs(string[] args)
+    {
+        const string windowFlag = "--window";
+        for (var i = 0; i < args.Length; i++)
+        {
+            var arg = args[i];
+            if (arg.Equals("--no-splash", StringComparison.OrdinalIgnoreCase))
+            {
+                SkipSplash = true;
+                continue;
+            }
+
+            string? value = null;
+            if (arg.StartsWith(windowFlag + "=", StringComparison.OrdinalIgnoreCase))
+                value = arg[(windowFlag.Length + 1)..];
+            else if (arg.Equals(windowFlag, StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                value = args[i + 1];
+
+            if (value == null)
+                continue;
+
+            var parts = value.Split('x', 'X');
+            if (parts.Length == 2
+                && int.TryParse(parts[0], out var width) && width > 100
+                && int.TryParse(parts[1], out var height) && height > 100)
+            {
+                WindowSizeOverride = new System.Drawing.Size(width, height);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Honors <c>--debug-server=&lt;port&gt;</c> (or <c>--debug-server &lt;port&gt;</c>): opt-in flag
+    /// starting the local JSON-lines debug server on 127.0.0.1.
+    /// </summary>
+    private static bool TryGetDebugServerPortArg(string[] args, out int port)
+    {
+        const string flag = "--debug-server";
+        port = 0;
+        for (var i = 0; i < args.Length; i++)
+        {
+            var arg = args[i];
+            string? value = null;
+
+            if (arg.StartsWith(flag + "=", StringComparison.OrdinalIgnoreCase))
+                value = arg[(flag.Length + 1)..];
+            else if (arg.Equals(flag, StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                value = args[i + 1];
+
+            if (value != null && int.TryParse(value, out port) && port is > 0 and < 65536)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>

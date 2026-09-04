@@ -17,10 +17,10 @@ cbuffer Params : register(b0)
     float UvSelection;
 }
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;        
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);        
 Texture2D<float4> DisplaceMap : register(t1);
 
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;   
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);   
 
 sampler texSampler : register(s0);
 

@@ -230,7 +230,10 @@ internal static class ProgramWindows
             _factory = swapchain.GetParent<Factory>();
 
             Main.SetDevice(device, _deviceContext, swapchain);
-            Main.InitializeWindow(FormWindowState.Maximized, OnCloseMainWindow, true);
+            var windowState = Program.WindowSizeOverride == null ? FormWindowState.Maximized : FormWindowState.Normal;
+            Main.InitializeWindow(windowState, OnCloseMainWindow, true);
+            if (Program.WindowSizeOverride is { } windowSize)
+                Main.SetSize(windowSize.Width, windowSize.Height);
             _factory.MakeWindowAssociation(Main.HwndHandle, WindowAssociationFlags.IgnoreAll);
         }
         catch (Exception e)

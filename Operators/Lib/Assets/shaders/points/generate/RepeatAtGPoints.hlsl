@@ -27,9 +27,9 @@ cbuffer Params : register(b1)
 #define Mode_Multiplied_F2 7
 
 
-StructuredBuffer<Point> SourcePoints : t0;   // input
-StructuredBuffer<Point> TargetPoints : t1;   // input
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+StructuredBuffer<Point> SourcePoints : register(t0);   // input
+StructuredBuffer<Point> TargetPoints : register(t1);   // input
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

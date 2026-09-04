@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "d25b8f41-6c93-4e07-ba58-1f9e2a7c4d60"/*LoadObjGeometry*/,
+  "Inputs": [
+    {
+      "Id": "4c8f2d90-a7e5-4361-9b0c-e82d6f1a5347"/*Path*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "a1d75e39-08c4-4f82-b5d1-c69e0b3f8724"/*Scale*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

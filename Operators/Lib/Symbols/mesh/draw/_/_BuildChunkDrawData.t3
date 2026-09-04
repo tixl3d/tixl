@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "2d7c4a9e-6b13-4f58-9a0e-c5d1e8f3b726"/*_BuildChunkDrawData*/,
+  "Inputs": [
+    {
+      "Id": "6f2a8d4c-1e97-4b35-a0c6-d8e3b5f7c219"/*GPoints*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b9e4c7a1-5d06-4f83-9c2e-7a1f3d8b6e05"/*Mesh*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "3c8f1b6d-a2e5-4d79-b4a0-9e6c2f5d8a17"/*ChunkIndices*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e7d3a5f9-8c21-4e64-a1b8-5f0d9c3e7b42"/*UpdateEveryFrame*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

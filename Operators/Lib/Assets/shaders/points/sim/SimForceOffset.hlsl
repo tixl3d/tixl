@@ -17,12 +17,12 @@ cbuffer Params : register(b0)
     float ForceDecayRate;
 }
 
-// struct LegacyPoint {
+// struct Point {
 //     float3 Position;
 //     float W;
 // };
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; 
+RWStructuredBuffer<Point> ResultPoints : register(u0); 
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
@@ -41,6 +41,6 @@ void main(uint3 i : SV_DispatchThreadID)
     float3 radialForce = direction / clamp( pow(distance, ForceDecayRate) , 0.02,1000) * RadialForce;
 
     ResultPoints[i.x].Position += (Gravity + radialForce) * effect;
-    ResultPoints[i.x].W += 0;
+    ResultPoints[i.x].FX1 += 0;
 }
 

@@ -39,7 +39,12 @@ internal sealed partial class OutputWindow : Window
         _drawOutputMenuExtras = DrawOutputMenuExtras;
         OutputWindowInstances.Add(this);
     }
-    
+
+    /// <summary>Resets the view camera - used by the debug protocol so agent sessions can reframe the origin.</summary>
+    internal void ResetView()
+    {
+        _camSelectionHandling.ResetView();
+    }
 
     public static bool TryGetPrimaryOutputWindow([NotNullWhen(true)] out OutputWindow? outputWindow)
     {

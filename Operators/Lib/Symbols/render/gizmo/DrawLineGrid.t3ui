@@ -39,8 +39,8 @@
     {
       "InputId": "5e7da35a-6537-4fc1-9f23-faab82c8eeaa"/*Segments*/,
       "Position": {
-        "X": -217.11423,
-        "Y": -252.54782
+        "X": -425.50565,
+        "Y": -277.0069
       }
     },
     {
@@ -225,6 +225,13 @@
       "Position": {
         "X": 83.763,
         "Y": -194.78918
+      }
+    },
+    {
+      "ChildId": "fa2509fd-b5f4-48f9-accb-c2d7d4ee90b7"/*Int2Components*/,
+      "Position": {
+        "X": -243.11322,
+        "Y": -285.08044
       }
     }
   ],

@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "a5f4552f-7e25-43a5-bb14-21ab836fa0b3"/*ReadPointsFromGpu*/,
+  "Inputs": [
+    {
+      "Id": "41cc1bbc-2726-4980-93d8-010ea01e3f48"/*StartIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "63014058-5418-4711-ae57-a9ba8841cb67"/*MaxCount*/,
+      "DefaultValue": 100
+    },
+    {
+      "Id": "77ee7ca9-a2db-4de9-bb9c-21ec4f1bbeaf"/*UpdateContinuously*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "b2a36ab5-5b81-4b72-9f40-9e66d3dcf94b"/*Async*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "eff239da-39e9-41d3-968b-c74723ec2545"/*TriggerUpdate*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "f267534c-59ae-4758-b04a-13b6337bc0eb"/*PointBuffer*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

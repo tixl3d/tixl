@@ -33,8 +33,8 @@ cbuffer IntParams : register(b1)
     int StrengthFactor;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
@@ -90,7 +90,7 @@ RWStructuredBuffer<Point> ResultPoints : u0;
     p.FX1 += biasedA.w * RandomizeF1 * strength;
     p.FX2 += biasedA.r * RandomizeF2 * strength;
 
-    if (ClampColorsEtc && !isnan(p.Scale.x))
+    if (ClampColorsEtc && !IsSeparator(p))
     {
         p.FX1 = max(0, p.FX1);
         p.FX2 = max(0, p.FX2);

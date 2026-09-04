@@ -22,10 +22,10 @@ cbuffer Params : register(b2)
     int EnableBounce;
 }
 
-RWStructuredBuffer<Particle> Particles : u0;
-StructuredBuffer<PbrVertex> Vertices : t0;
-StructuredBuffer<int3> Indices : t1;
-sampler ClampedSampler : s0;
+RWStructuredBuffer<Particle> Particles : register(u0);
+StructuredBuffer<PbrVertex> Vertices : register(t0);
+StructuredBuffer<int3> Indices : register(t1);
+sampler ClampedSampler : register(s0);
 
 //=== Additional Resources ==========================================
 /*{RESOURCES(t6)}*/

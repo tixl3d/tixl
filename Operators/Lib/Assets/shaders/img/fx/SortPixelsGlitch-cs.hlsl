@@ -34,7 +34,7 @@ struct Pixel {
     float4 Color;
 };
 
-RWStructuredBuffer<Pixel> ResultPoints : u0; 
+RWStructuredBuffer<Pixel> ResultPoints : register(u0); 
 
 float2 GetUvFromAddress(int col, int row) {
     return float2( 

@@ -71,10 +71,11 @@ struct psInput
     float4 positionInLightClipSpace : LIGHTCLIPPOS;
 };
 
+// One entry per drawn face: the point placing it and its index into the mesh index buffer
 struct IndicesForDraw
 {
     int PointIndex;
-    int3 VertexIndices;
+    int FaceIndex;
 };
 
 sampler texSampler : register(s0);
@@ -91,6 +92,7 @@ Texture2D<float4> NormalMap : register(t6);
 TextureCube<float4> PrefilteredSpecular : register(t7);
 Texture2D<float4> BRDFLookup : register(t8);
 Texture2D<float> ShadowMap : register(t9);
+StructuredBuffer<int3> FaceIndices : register(t10);
 
 psInput vsMain(uint id : SV_VertexID)
 {
@@ -98,8 +100,9 @@ psInput vsMain(uint id : SV_VertexID)
 
     uint drawFaceIndex = id / 3;
     uint faceVertexIndex = id % 3;
-    uint vertexIndex = DrawData[drawFaceIndex].VertexIndices[faceVertexIndex];
-    uint pointIndex = DrawData[drawFaceIndex].PointIndex;
+    IndicesForDraw drawEntry = DrawData[drawFaceIndex];
+    uint vertexIndex = FaceIndices[drawEntry.FaceIndex][faceVertexIndex];
+    uint pointIndex = drawEntry.PointIndex;
 
     PbrVertex vertex = PbrVertices[vertexIndex];
     float4 posInObject = float4(vertex.Position, 1);
@@ -111,7 +114,7 @@ psInput vsMain(uint id : SV_VertexID)
     posInObject = mul(float4(posInObject.xyz, 1), orientationMatrix);
 
     posInObject += float4(Points[pointIndex].Position, 0);
-    output.color = Points[pointIndex].Color;
+    output.color = Points[pointIndex].Color * float4(vertex.ColorRGB, 1);
 
     float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);
     output.pixelPosition = posInClipSpace;

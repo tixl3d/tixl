@@ -34,8 +34,8 @@ cbuffer Params : register(b1)
 
 
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 
 Texture2D<float4> inputTexture : register(t1);
@@ -44,7 +44,7 @@ sampler texSampler : register(s0);
 [numthreads(256,4,1)]
 void main(uint3 i : SV_DispatchThreadID)
 {
-    LegacyPoint p = SourcePoints[i.x];
+    Point p = SourcePoints[i.x];
 
     float3 pos = p.Position;
     float4 distanceFromCamera = mul(float4(pos, 1), ObjectToCamera);
@@ -52,6 +52,6 @@ void main(uint3 i : SV_DispatchThreadID)
     
     float normalized = (-d - NearRange) / (FarRange-NearRange);
     float4 t = inputTexture.SampleLevel(texSampler, float2(normalized, 0.5), 0); 
-    p.W *= t.r;
+    p.FX1 *= t.r;
     ResultPoints[i.x] = p;
 }

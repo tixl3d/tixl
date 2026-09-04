@@ -15,7 +15,10 @@ Use this file as the default instruction source for work in this repository.
 - `Player/`: exported runtime playback host
 - `Operators/*`: operator packages and effect/content behavior
 
-For detailed architecture and task routing, see `SOLUTION_OVERVIEW.md`.
+For detailed architecture and task routing, see `.agentic/SOLUTION_OVERVIEW.md`.
+For full conventions, see `.agentic/AGENT_INSTRUCTIONS.md`; for driving the running
+editor programmatically (graphs, parameters, screenshots, visual tests), see
+`.agentic/DEBUG_PROTOCOL.md`.
 
 ## Performance Rules (Critical)
 

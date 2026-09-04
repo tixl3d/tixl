@@ -39,16 +39,16 @@ struct UpdateCountAttr
 };
 
 
-StructuredBuffer<LegacyPoint> ReferencePoints : t0;   
+StructuredBuffer<Point> ReferencePoints : register(t0);   
 
-RWStructuredBuffer<Particle> Particles : u0; 
-RWStructuredBuffer<VerletAttr> VerletAttributes : u1; 
-RWStructuredBuffer<UpdateCountAttr> UpdateCount : u2; 
+RWStructuredBuffer<Particle> Particles : register(u0); 
+RWStructuredBuffer<VerletAttr> VerletAttributes : register(u1); 
+RWStructuredBuffer<UpdateCountAttr> UpdateCount : register(u2); 
 
 
 inline bool IsPinned(uint index)
 {
-    return index == 0 || isnan(ReferencePoints[index-1].Stretch.x);
+    return index == 0 || IsSeparator(ReferencePoints[index-1]);
 }
 
 
@@ -114,7 +114,7 @@ void constraints(uint3 i : SV_DispatchThreadID)
     uint indexB = index  + ((UpdateCount[0].Count +1) % 2);
 
     
-    if( isnan( ReferencePoints[indexA].Stretch.x * ReferencePoints[indexB].Stretch.x))
+    if( IsSeparator(ReferencePoints[indexA]) || IsSeparator(ReferencePoints[indexB]))
         return;
 
     bool read1 = (UpdateCount[0].Count % 2) == 0;

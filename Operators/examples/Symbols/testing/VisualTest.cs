@@ -203,8 +203,12 @@ internal sealed class VisualTest : Instance<VisualTest>
             var currentWithCpuAccess = _textureBgraReadAccess.ConvertToCpuReadableBgra(image);
             var deviation = CompareImage(currentWithCpuAccess, referenceImage);
             var failPath = GetReferenceFilepath(_testIndex, "FAIL");
-            
+
             var timeLabel = time == 0 ? string.Empty : $"@{time:0.00}";
+            var testId = ComputeTestId(testName, time);
+            var isIgnored = context.ObjectVariables.TryGetValue(TestIgnoreKey, out var ignoreObj)
+                            && ignoreObj is HashSet<int> ignoredIds
+                            && ignoredIds.Contains(testId);
             if (deviation < _threshold)
             {
                 if (File.Exists(failPath))
@@ -212,12 +216,16 @@ internal sealed class VisualTest : Instance<VisualTest>
                     File.Delete(failPath);
                 }
 
-                testResult.Add($"{testName} {timeLabel}: PASSED");
+                testResult.Add($"{testName} {timeLabel}: PASSED #{testId}");
+            }
+            else if (isIgnored)
+            {
+                testResult.Add($"{testName} {timeLabel}: IGNORED ({deviation:0.00} > {_threshold}) #{testId}");
             }
             else
             {
                 SaveTexture(image, GetReferenceFilepath(_testIndex, "FAIL"));
-                testResult.Add($"{testName} {timeLabel}: FAILED ({deviation:0.00} > {_threshold})");
+                testResult.Add($"{testName} {timeLabel}: FAILED ({deviation:0.00} > {_threshold}) #{testId}");
             }
             
             Utilities.Dispose(ref diffColorImage);
@@ -271,6 +279,16 @@ internal sealed class VisualTest : Instance<VisualTest>
         baseName += ".png";
 
         return Path.Join( FileLocations.TestReferencesFolder, GetCompositionName(), baseName);
+    }
+
+    /// <summary>
+    /// Stable id for one test step, derived from its name and sample time, so it can be
+    /// listed in [ExecuteTests]' IgnoredTestIds parameter to mute known-flaky steps.
+    /// </summary>
+    private static int ComputeTestId(string testName, float time)
+    {
+        var hash = $"{testName}@{time:0.00}".ComputeStableHash();
+        return unchecked((int)hash ^ (int)(hash >> 32));
     }
 
     private string GetCompositionName()
@@ -542,6 +560,7 @@ internal sealed class VisualTest : Instance<VisualTest>
     private const string TestFrameKey = "_TestFrame";
     private const string TestResultKey = "_TestResult";
     private const string TestActionKey = "_TestAction";
+    private const string TestIgnoreKey = "_TestIgnoreIds";
 
     private static readonly TextureBgraReadAccess _textureBgraReadAccess = new(true);
 

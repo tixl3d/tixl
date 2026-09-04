@@ -1,0 +1,140 @@
+{
+  "FormatVersion": 3,
+  "Id": "796a5efb-2ccf-4cae-b01c-d3f20a070181"/*LineCPoints*/,
+  "Description": "CPU twin of [LinePoints]: generates points along a line with the same parameters and math as the GPU op.
+
+Use it where the point list is needed on the CPU - geometry ops, fields, or fracture seeds for [VoronoiFracture].
+
+AKA: line, linear points, cpu points",
+  "InputUis": [
+    {
+      "InputId": "759bfaac-13dd-478a-a4db-fe52b94cdaec"/*Count*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "1d1e40c2-5f68-4b0e-a7c3-89d2e6b4f051"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "7b3f9a80-42cd-4e17-95b6-e04c8d2a6f39"/*Direction*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "c92e5d14-6a08-4b73-8f2e-0d7b1c4a9e56"/*Length*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "38a6c0f5-d791-4e28-b45a-16e9d2c7b083"/*Pivot*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "e50b7d28-93a4-4c61-af07-25c8b6e1d394"/*GainAndBias*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "94d1e6a3-07b8-4f52-9c3e-b72a0d5c8f16"/*Scale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "6fc2b795-e148-4d03-8a6b-d09e3c5a7f24"/*F1*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      }
+    },
+    {
+      "InputId": "a83d5f60-24c9-4b17-96d0-4e7b8c2f1a58"/*F2*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "50e9c3b7-861a-4f45-b2d8-79c0e4d6a132"/*ColorA*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      }
+    },
+    {
+      "InputId": "d27a4e91-b350-4c86-8e1f-63b9d0c5a247"/*ColorB*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      }
+    },
+    {
+      "InputId": "0b8e6d43-97f2-4a15-bc60-e58a1c3d9f72"/*Orientation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 495.0
+      }
+    },
+    {
+      "InputId": "f14c8a59-30d6-4e92-a7b4-8c25e0d1b963"/*Twist*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 540.0
+      }
+    },
+    {
+      "InputId": "27d0b5e8-c463-4f19-90a2-5f8e6b3c1d47"/*OrientationAxis*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 585.0
+      }
+    },
+    {
+      "InputId": "b96e2c07-58ad-4d31-8f5c-01d7a4e9c625"/*OrientationAngle*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 630.0
+      }
+    },
+    {
+      "InputId": "43f7a1d2-e685-4c08-b9e3-72c5d8a0f316"/*AddSeparator*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 675.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c8e35d0a-7b10-42d8-9984-006502195fde"/*PointList*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "a67df589-3c51-49a7-805d-5cc0657d491c"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

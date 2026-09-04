@@ -20,11 +20,11 @@ cbuffer Params : register(b1)
     int StrengthFactor;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
+StructuredBuffer<Point> SourcePoints : register(t0);
 Texture2D<float4> CurveImage : register(t1);
 Texture2D<float4> GradientImage : register(t2);
 
-RWStructuredBuffer<Point> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 sampler ClampedSampler : register(s0);
 
 inline float3 fmod(float3 x, float3 y)

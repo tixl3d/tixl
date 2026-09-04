@@ -4,8 +4,8 @@ cbuffer Params : register(b0)
     int StartVertex;
 }
 
-StructuredBuffer<int3> Indices : t0;
-RWStructuredBuffer<int3> ResultIndices : u0;
+StructuredBuffer<int3> Indices : register(t0);
+RWStructuredBuffer<int3> ResultIndices : register(u0);
 
 
 [numthreads(64,1,1)]

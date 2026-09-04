@@ -25,8 +25,8 @@ cbuffer IntParams : register(b1)
     int CollectCycleIndex;
 }
 
-StructuredBuffer<LegacyPoint> NewPoints : t0;
-RWStructuredBuffer<LegacyPoint> CollectedPoints : u0;
+StructuredBuffer<Point> NewPoints : register(t0);
+RWStructuredBuffer<Point> CollectedPoints : register(u0);
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
@@ -43,7 +43,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     if(Reset > 0.5)
     {
-        CollectedPoints[gi].W =  sqrt(-1);
+        CollectedPoints[gi].Scale = NAN;
         return;
     }
 
@@ -56,7 +56,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
         if(UseAging > 0.5) 
         {
-            CollectedPoints[gi].W = 0.0001;
+            CollectedPoints[gi].FX1 = 0.0001;
         }
 
         if(SetInitialVelocity > 0.5) 
@@ -71,20 +71,20 @@ void main(uint3 i : SV_DispatchThreadID)
     {
         if(UseAging > 0.5 ) 
         {
-            float age = CollectedPoints[gi].W;
+            float age = CollectedPoints[gi].FX1;
 
-            if(!isnan(age)) 
-            {    
+            if(!IsSeparator(CollectedPoints[gi]))
+            {
                 if(age <= 0)
                 {
-                    CollectedPoints[gi].W = sqrt(-1); // Flag non-initialized points
+                    CollectedPoints[gi].Scale = NAN; // Flag non-initialized points
                 }
                 else if(age < MaxAge)
                 {
-                    CollectedPoints[gi].W = age+  DeltaTime * AgingRate;
+                    CollectedPoints[gi].FX1 = age+  DeltaTime * AgingRate;
                 }
                 else if(ClampAtMaxAge) {
-                    CollectedPoints[gi].W = MaxAge;
+                    CollectedPoints[gi].FX1 = MaxAge;
                 }
             }
         }
@@ -92,7 +92,7 @@ void main(uint3 i : SV_DispatchThreadID)
         if(ApplyMovement > 0.5) 
         {
             
-            LegacyPoint p = CollectedPoints[gi];
+            Point p = CollectedPoints[gi];
             float4 rot;
             float v = q_separate_v(p.Rotation, rot);
 

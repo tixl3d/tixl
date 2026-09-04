@@ -20,8 +20,8 @@ cbuffer Transforms : register(b1)
     float4x4 ObjectToClipSpace;
 };
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 
 [numthreads(64, 1, 1)] void main(uint3 i
@@ -34,7 +34,7 @@ RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
         return;
     }
 
-    LegacyPoint p = SourcePoints[i.x];
+    Point p = SourcePoints[i.x];
 
     float4 pInClipSpace = mul(float4(p.Position,1), CameraToWorld);
     pInClipSpace.xyz /= pInClipSpace.w;

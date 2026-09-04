@@ -89,6 +89,15 @@ internal static class UiRegistration
                                 // sharpDX types
                                 typeof(SharpDX.Direct3D.PrimitiveTopology));
         
+        RegisterTypesToProperty(UiProperties.CpuGeometry,
+                                typeof(MeshGeometry),
+                                typeof(CurveGeometry));
+
+        RegisterTypesToProperty(UiProperties.CpuFields,
+                                typeof(ScalarField),
+                                typeof(VectorField),
+                                typeof(RemapCurve));
+
         RegisterTypesToProperty(UiProperties.ShaderGraph,
                                 typeof(ShaderGraphNode));
 
@@ -135,6 +144,7 @@ internal static class UiRegistration
         RegisterIOType(typeof(Command), null, () => new CommandOutputUi());
         RegisterIOType(typeof(BufferWithViews), null, () => new BufferWithViewsOutputUi());
         RegisterIOType(typeof(SceneSetup), () => new SceneSetupInputUi(), () => new SceneSetupOutputUi());
+        RegisterIOType(typeof(MeshGeometry), null, () => new MeshGeometryOutputUi());
 
         return;
 

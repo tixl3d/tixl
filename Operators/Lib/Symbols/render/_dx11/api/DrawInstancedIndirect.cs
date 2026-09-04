@@ -24,13 +24,14 @@ internal sealed class DrawInstancedIndirect: Instance<DrawInstancedIndirect>
         var device = ResourceManager.Device;
         var deviceContext = device.ImmediateContext;
         
-        //// Optional: finish compute shader writes
-        deviceContext.ComputeShader.Set(null);
-        deviceContext.ComputeShader.SetUnorderedAccessViews(0, new UnorderedAccessView[4]);
-        deviceContext.Flush(); 
-        
+        // A compute shader that wrote the args may still have the buffer bound as UAV;
+        // unbind so the indirect read doesn't hazard. No Flush - the immediate context
+        // already orders the dispatch before this draw, and a Flush stalls the queue.
+        deviceContext.ComputeShader.SetUnorderedAccessViews(0, _nullUavs);
         deviceContext.DrawInstancedIndirect(buffer, AlignedByteOffsetForArgs.GetValue(context));
     }
+
+    private static readonly UnorderedAccessView[] _nullUavs = new UnorderedAccessView[4];
 
     [Input(Guid = "6C87816C-DA1D-4429-A1F6-61233AA3D7B1")]
     public readonly InputSlot<Buffer> Buffer = new InputSlot<Buffer>();

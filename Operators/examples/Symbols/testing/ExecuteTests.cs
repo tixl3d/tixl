@@ -89,10 +89,17 @@ internal sealed class ExecuteTests : Instance<ExecuteTests>
             }
 
             context.ObjectVariables[testResultId] = _rootTestResults;
+
+            var ignoredIds = IgnoredTestIds.GetValue(context);
+            context.ObjectVariables["_TestIgnoreIds"] = ignoredIds == null || ignoredIds.Count == 0
+                                                            ? null
+                                                            : new HashSet<int>(ignoredIds);
         }
 
 
-        var testSlots = Tests.CollectedInputs;
+        // Rebuilds the collection when dirty - safer than the raw cached list when
+        // evaluation is driven externally (e.g. debug protocol).
+        var testSlots = Tests.GetCollectedTypedInputs();
 
         // Execute test commands
         while (_testInputIndex < testSlots.Count)
@@ -124,9 +131,15 @@ internal sealed class ExecuteTests : Instance<ExecuteTests>
         _stringBuilder.Clear();
         var countFails = 0;
         var countSuccess = 0;
+        var countIgnored = 0;
         foreach (var line in _rootTestResults)
         {
-            if (line.Contains("FAILED"))
+            if (line.Contains("IGNORED"))
+            {
+                _stringBuilder.AppendLine(line);
+                countIgnored++;
+            }
+            else if (line.Contains("FAILED"))
             {
                 _stringBuilder.AppendLine(line);
                 countFails++;
@@ -141,8 +154,9 @@ internal sealed class ExecuteTests : Instance<ExecuteTests>
 
         var countTotal = countFails + countSuccess;
         var passedLabel = countFails == 0 ? "SUCCESS" : "FAILED";
+        var ignoredLabel = countIgnored == 0 ? string.Empty : $"  ({countIgnored} ignored)";
 
-        _stringBuilder.Insert(0, $"{passedLabel}:   {countSuccess} / {countTotal}  {_stopwatch.ElapsedMilliseconds * 0.001:0.0s}\n\n");
+        _stringBuilder.Insert(0, $"{passedLabel}:   {countSuccess} / {countTotal}{ignoredLabel}  {_stopwatch.ElapsedMilliseconds * 0.001:0.0s}\n\n");
 
         Result.Value = _stringBuilder.ToString();
 
@@ -174,4 +188,7 @@ internal sealed class ExecuteTests : Instance<ExecuteTests>
 
     [Input(Guid = "13D66A6D-75E1-4AB0-805D-A2234B3334A4")]
     public readonly InputSlot<bool> OnlyShowFails = new();
+
+    [Input(Guid = "8B5F1A2E-4C97-43D1-9E2A-7D6B03F5C481")]
+    public readonly InputSlot<List<int>> IgnoredTestIds = new();
 }

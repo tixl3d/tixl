@@ -64,6 +64,20 @@ Also:
 - Match existing naming and slot conventions
 - Avoid hidden side effects unless explicitly intended
 
+### Operators vs. helper classes in an operator package
+
+The loader identifies operators **by type, not by folder**: a class is an operator iff it derives
+from `Instance`, and it then needs exactly one `[Guid]` and a matching `.t3`. Every other type in
+the package assembly is ignored, so a helper class can never accidentally become a symbol. Folder
+placement is a packaging convention:
+
+- `Symbols/` holds operators only, each `.cs` beside its `.t3`/`.t3ui`. Its `.cs` files are copied
+  to the shipped `SourceCode/` folder (editor source view); nothing else is.
+- Shared helpers used by several operators go in `<Package>/Utils/` (Lib: `MeshInsideTester`,
+  `GeometryMeshCompiler`, `SvgLoader`), kept `internal`. They compile into the package DLL like any
+  other file and need no registration.
+- A helper used by exactly one operator stays a nested private class of that operator.
+
 ### Operator descriptions
 
 An operator's Description lives in its `.t3ui` and is the source for both the editor's help panel and the
@@ -340,6 +354,23 @@ later.
 ## TiXL vs. Tooll3
 
 TiXL is the current product (v4.x). Tooll3 (v3.x) is the legacy predecessor — a large portion of v4 is a rewrite. Don't write new docs or features targeting Tooll3; treat remaining Tooll3 references in code as historical and prefer removing them over updating them unless there's a concrete migration use case.
+
+## Driving the Editor Programmatically (Debug Protocol)
+
+The editor has a TCP debug bridge for agents and scripts: launch it with
+`--debug-server <port>`, then build graphs, set parameters, take screenshots, hot-reload,
+and run the visual reference test suite over JSON lines — no UI interaction needed.
+**Read [`DEBUG_PROTOCOL.md`](DEBUG_PROTOCOL.md) before using it**; it documents the
+methods, the pull-based evaluation model (select-to-evaluate, trigger flanks), wire
+formats, and the auto-save pitfalls.
+
+**Every experiment goes in the `_agentTests` project.** Make `openProject` with
+`_agentTests` the first bridge call of any probe session, before `addOp`. Never build
+probe graphs in `Lib`, never in a user project, and **never in `playground`** — that
+one looks empty and inviting but is the maintainer's own scratch graph, so ops left
+there are clutter in a graph someone is working in. `_agentTests` already exists; do
+not create a new project for this. Leave probe chains in place when you are done (the
+editor stays open for the maintainer to reuse) and say which project they are in.
 
 ## Debugging Runtime Behavior with Log Probes
 

@@ -12,8 +12,8 @@ cbuffer Params : register(b0)
     float Flip;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 // Aligns orientation quaternion q so that its +Z forward
 // points towards newForward
@@ -111,19 +111,19 @@ float4 qAlignForward3(float4 q, float3 newForward)
     if (index >= numStructs)
         return;
 
-    if (isnan(SourcePoints[index].Scale.x))
+    if (IsSeparator(SourcePoints[index]))
         return;
 
     // Find neighbours
     uint prevIndex = index;
     uint nextIndex = index;
 
-    if (index > 0 && !isnan(SourcePoints[index - 1].Scale.x))
+    if (index > 0 && !IsSeparator(SourcePoints[index - 1]))
     {
         prevIndex--;
     }
 
-    if (index <= numStructs - 1 && !isnan(SourcePoints[index + 1].Scale.x))
+    if (index <= numStructs - 1 && !IsSeparator(SourcePoints[index + 1]))
     {
         nextIndex++;
     }

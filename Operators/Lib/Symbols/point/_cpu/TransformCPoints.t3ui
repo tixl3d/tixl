@@ -1,0 +1,19 @@
+{
+  "FormatVersion": 3,
+  "Id": "a4c8e2d6-7f31-4b95-9e0a-5d3c1b8f7a26"/*TransformCPoints*/,
+  "Description": "Transforms every point of a CPU point list - the CPU counterpart of [TransformPoints].\n\nStretch and Scale act about the Pivot, then Rotation (degrees) and Translation are applied. In ObjectSpace all points share the transform; in PointSpace the translation happens in each point's own frame and the rotation composes locally. UpdateRotation also rotates the point orientations. Separator points pass through. Shows a transform gizmo when selected. For a single point with incremental updates see [TransformCPoint].\n\nAKA: move points, cpu transform, offset point list",
+  "InputUis": [
+    { "InputId": "3b9e6f1d-8c24-4a70-b5d3-e7a2c0f9d418"/*Points*/, "Relevancy": "Required", "Position": { "X": 0.0, "Y": 0.0 } },
+    { "InputId": "7e2a5c9b-4d16-4f83-a9e0-1b6d8f3c2a57"/*Translation*/, "Position": { "X": 0.0, "Y": 45.0 } },
+    { "InputId": "c5d1a8f3-6e29-4b47-8a2c-d0f7e4b9c163"/*Rotation*/, "Position": { "X": 0.0, "Y": 90.0 } },
+    { "InputId": "9f4b2e7c-1a58-4d03-b6e9-3c8d5a1f7e02"/*Stretch*/, "Position": { "X": 0.0, "Y": 135.0 } },
+    { "InputId": "2d8c6a1e-b3f7-4e95-a0d4-8e1b9c5f3d76"/*Scale*/, "Position": { "X": 0.0, "Y": 180.0 } },
+    { "InputId": "e6a3d9c2-5f18-4b60-9c7e-a4b2f1d8e305"/*Pivot*/, "Position": { "X": 0.0, "Y": 225.0 } },
+    { "InputId": "5c7f1b4a-9e62-4d28-b8a1-6f0d3e9c2b54"/*Space*/, "Position": { "X": 0.0, "Y": 270.0 } },
+    { "InputId": "b8e4c2f6-3a91-4d75-8e0b-c1d5a7f2e938"/*UpdateRotation*/, "Position": { "X": 0.0, "Y": 315.0 } }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    { "OutputId": "d1f7b3a9-2e64-4c08-8b5d-9a0c6e4f2d73"/*Result*/, "Position": { "X": 300.0, "Y": 0.0 } }
+  ]
+}

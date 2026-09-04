@@ -19,13 +19,13 @@ cbuffer Params : register(b1)
     float Distance;
 }
 
-// struct LegacyPoint {
+// struct Point {
 //     float3 Position;
 //     float W;
 // };
 
-StructuredBuffer<LegacyPoint> Points1 : t0;         // input
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+StructuredBuffer<Point> Points1 : register(t0);         // input
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
@@ -33,14 +33,14 @@ void main(uint3 i : SV_DispatchThreadID)
     uint numStructs, stride;
     Points1.GetDimensions(numStructs, stride);
     if(i.x >= numStructs) {
-        ResultPoints[i.x].W = 0 ;
+        ResultPoints[i.x].FX1 = 0 ;
         return;
     }
 
     ResultPoints[i.x].Position = Points1[i.x].Position +  qRotateVec3(Direction * Distance, Points1[i.x].Rotation);
     ResultPoints[i.x].Rotation = Points1[i.x].Rotation;
     ResultPoints[i.x].Color = Points1[i.x].Color;
-    ResultPoints[i.x].Selected = Points1[i.x].Selected;
-    ResultPoints[i.x].W = Points1[i.x].W;
+    ResultPoints[i.x].FX2 = Points1[i.x].FX2;
+    ResultPoints[i.x].FX1 = Points1[i.x].FX1;
 }
 

@@ -59,7 +59,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<LegacyPoint> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> SpriteTexture : register(t1);
 Texture2D<float4> ColorOverW : register(t2);
 Texture2D<float> SizeOverW : register(t3);
@@ -72,7 +72,7 @@ psInput vsMain(uint id : SV_VertexID)
     int particleId = id / 6;
     float3 cornerFactors = Corners[quadIndex];
 
-    LegacyPoint p = Points[particleId];
+    Point p = Points[particleId];
 
     float2 scatter = hash21(particleId) * 2 - 1;
 
@@ -93,7 +93,7 @@ psInput vsMain(uint id : SV_VertexID)
     float4 posInCamera = mul(posInObject, ObjectToCamera);
     float tooCloseFactor = saturate(-posInCamera.z / 0.1 - 1);
 
-    float sizeFromW = SizeOverW.SampleLevel(texSampler, float2(p.W * WMappingScale, 0), 0);
+    float sizeFromW = SizeOverW.SampleLevel(texSampler, float2(p.FX1 * WMappingScale, 0), 0);
     float3 corner = float3(quadPos.xy * 0.010 * Stretch, 0) * float3(1, -1, 1);
 
     float4 rot = qFromAngleAxis((Rotate + RotateRandomly * scatter.x) * 3.141578 / 180, float3(0, 0, 1));
@@ -106,7 +106,7 @@ psInput vsMain(uint id : SV_VertexID)
     // corner =  ApplyPointOrientaiton > 0.5 ? qRotateVec3(corner, p.rotation )
     //                                     : corner; // flipping rotation to match default radial billboards
 
-    float hideUndefinedPoints = isnan(p.W) ? 0 : 1;
+    float hideUndefinedPoints = IsSeparator(p) ? 0 : 1;
     quadPosInCamera.xy += corner * Scale * (ScaleRandomly * scatter.y + 1) * tooCloseFactor * sizeFromW * hideUndefinedPoints;
 
     output.position = mul(quadPosInCamera, CameraToClipSpace);
@@ -120,7 +120,7 @@ psInput vsMain(uint id : SV_VertexID)
     // output.position  = mul(float4(pInObject,1), ObjectToClipSpace);
     // output.texCoord = cornerFactors.xy /2 +0.5;
     float4 colorFromPoint = ((int)UsePointOrientation == 2) ? p.Rotation : 1;
-    output.color = Color * ColorOverW.SampleLevel(texSampler, float2(p.W * WMappingScale, 0), 0) * colorFromPoint;
+    output.color = Color * ColorOverW.SampleLevel(texSampler, float2(p.FX1 * WMappingScale, 0), 0) * colorFromPoint;
 
     // Fog
     // if(FogDistance > 0)

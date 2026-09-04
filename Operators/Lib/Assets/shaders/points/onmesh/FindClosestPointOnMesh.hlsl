@@ -9,11 +9,11 @@ cbuffer Params : register(b0)
 }
 
 
-StructuredBuffer<LegacyPoint> Points : t0;         // input
-StructuredBuffer<PbrVertex> Vertices: t1;
-StructuredBuffer<int3> Indices: t2;
+StructuredBuffer<Point> Points : register(t0);         // input
+StructuredBuffer<PbrVertex> Vertices: register(t1);
+StructuredBuffer<int3> Indices: register(t2);
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 
 
@@ -155,7 +155,7 @@ void main(uint3 i : SV_DispatchThreadID)
     uint pointCount, pointStride;
     Points.GetDimensions(pointCount, pointStride);
     if(i.x >= pointCount) {
-        ResultPoints[i.x].W = 0 ;
+        ResultPoints[i.x].FX1 = 0 ;
         return;
     }
 
@@ -165,7 +165,7 @@ void main(uint3 i : SV_DispatchThreadID)
     uint faceCount, faceStride; 
     Indices.GetDimensions(faceCount, faceStride);
 
-    LegacyPoint p = Points[i.x];
+    Point p = Points[i.x];
     int closestIndex = -1; 
     float closestDistance = 99999;
     float3 pos = p.Position;

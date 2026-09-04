@@ -8,7 +8,7 @@ struct Pixel {
     float4 Color;
 };
 
-StructuredBuffer<Pixel> Pixels : t0;
+StructuredBuffer<Pixel> Pixels : register(t0);
 sampler texSampler : register(s0);
 
 cbuffer ParamConstants : register(b0)

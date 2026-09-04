@@ -17,10 +17,10 @@ cbuffer Params : register(b1)
     int TexCoord2Factor;
 }
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;
-StructuredBuffer<Point> Points : t1;
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);
+StructuredBuffer<Point> Points : register(t1);
 
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 
 [numthreads(16, 16, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

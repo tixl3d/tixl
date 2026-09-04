@@ -178,6 +178,21 @@ internal static class AssetHandling
                                        IconId = (uint)Icon.FileT3Font,
                                        Subfolders = ["fonts", "font"],
                                    });
+        AssetType.RegisterType(new AssetType("Font",
+                                   [
+                                       FileExtensionRegistry.GetUniqueId("ttf"),
+                                       FileExtensionRegistry.GetUniqueId("otf"),
+                                       FileExtensionRegistry.GetUniqueId("ttc"),
+                                   ])
+                                   {
+                                       PrimaryOperators =
+                                           [
+                                               new Guid("e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37"), // TextToCurves
+                                           ],
+                                       Color = UiColors.ColorForCpuGeometry,
+                                       IconId = (uint)Icon.FileT3Font,
+                                       Subfolders = ["fonts", "font"],
+                                   });
         AssetType.RegisterType(new AssetType("Svg",
                                    [
                                        FileExtensionRegistry

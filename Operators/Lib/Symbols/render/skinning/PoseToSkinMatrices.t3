@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "7b8ec5a6-2d94-4c1f-b0e3-98a4d17f6c25"/*PoseToSkinMatrices*/,
+  "Inputs": [
+    {
+      "Id": "4f2b6d90-83c7-49ae-b512-e96a05d3f174"/*Pose*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "9d43f8a1-6e05-472b-8cd9-1b52a7e64c88"/*Setup*/,
+      "DefaultValue": {
+        "SceneSetup": {
+          "NodeSettings": []
+        }
+      }
+    },
+    {
+      "Id": "a17c3e58-04bd-4e92-9f66-7d80b25c41a9"/*SkeletonIndex*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

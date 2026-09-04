@@ -30,9 +30,9 @@ cbuffer CallParams : register(b2)
 {
     int CallIndex;
 }
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
-RWStructuredBuffer<uint> IndexBuffer : u1;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
+RWStructuredBuffer<uint> IndexBuffer : register(u1);
 
 uint3 StageCalc3(uint i){
     //inverse of y=x*(x+1)/2
@@ -72,7 +72,7 @@ uint2 GetSwapPairBitonic(uint i, uint ip, uint TotalCount){
 
 float c2k(Point c){
     float3 p=c.Position.xyz;
-    if(isnan(c.Scale.x)){ return -1; }
+    if(IsSeparator(c)){ return -1; }
     float k=length(c.Position.xyz-CameraToWorld[3].xyz);
     // float k=-mul(float4(c.Position.xyz,1),WorldToCamera).z;//viewspace z
     if(Ascending>0)k=-k;

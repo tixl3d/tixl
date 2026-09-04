@@ -43,7 +43,7 @@ sampler texSampler : register(s0);
 
 Texture2D<float4> FxTexture : register(t0);
 
-RWStructuredBuffer<Particle> Particles : u0;
+RWStructuredBuffer<Particle> Particles : register(u0);
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

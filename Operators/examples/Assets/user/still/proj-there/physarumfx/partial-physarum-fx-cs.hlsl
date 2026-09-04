@@ -46,7 +46,7 @@ sampler texSampler : register(s0);
 Texture2D<float4> FxTexture : register(t0);
 
 RWStructuredBuffer<Breed> Breeds : register(u0); 
-RWStructuredBuffer<LegacyPoint> Points : register(u1); 
+RWStructuredBuffer<Point> Points : register(u1); 
 RWTexture2D<float4> WriteOutput  : register(u2); 
 
 
@@ -150,7 +150,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     
     float3 newPos = (mod((pos  / aspectRatio + 1),2) - 1) * aspectRatio; 
-    Points[i.x].W = length(newPos - pos) > 0.1 ? sqrt(-1) : 1;
+    Points[i.x].FX1 = length(newPos - pos) > 0.1 ? sqrt(-1) : 1;
 
     Points[i.x].Position = pos;
     //Points[i.x].rotation = rotate_angle_axis(-angle, float3(0,0,1));

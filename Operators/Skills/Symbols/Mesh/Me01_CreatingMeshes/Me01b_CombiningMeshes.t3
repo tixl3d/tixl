@@ -4,6 +4,12 @@
   "Inputs": [],
   "Children": [
     {
+      "Id": "2871c4d5-4e37-4997-b9f6-3e79aba46cf1"/*LoadObj*/,
+      "SymbolId": "be52b670-9749-4c0d-89f0-d8b101395227",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "9ceb12b7-664c-4688-9912-2835875b3dca"/*DrawQuiz*/,
       "SymbolId": "16e30ce0-20c9-4677-9837-0200454e05ae",
       "InputValues": [],
@@ -32,6 +38,12 @@
         }
       ],
       "Outputs": []
+    },
+    {
+      "Id": "e513224e-8431-4b0b-9fc7-a794dc796120"/*CombineMeshes*/,
+      "SymbolId": "c276f4eb-f19c-405b-b247-3db159677571",
+      "InputValues": [],
+      "Outputs": []
     }
   ],
   "Connections": [
@@ -52,6 +64,12 @@
       "SourceSlotId": "3f8b20a7-c8b8-45ab-86a1-0efcd927358e",
       "TargetParentOrChildId": "9ceb12b7-664c-4688-9912-2835875b3dca",
       "TargetSlotId": "a6f445ac-1be1-4921-baee-cf2caf5a6a90"
+    },
+    {
+      "SourceParentOrChildId": "2871c4d5-4e37-4997-b9f6-3e79aba46cf1",
+      "SourceSlotId": "1f4e7cac-1f62-4633-b0f3-a3017a026753",
+      "TargetParentOrChildId": "e513224e-8431-4b0b-9fc7-a794dc796120",
+      "TargetSlotId": "815b313e-e661-43db-b788-54cf824c0d8a"
     }
   ]
 }

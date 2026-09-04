@@ -14,8 +14,8 @@ struct PointTransform
     float4 PointColor;
 };
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<PointTransform> Results : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<PointTransform> Results : register(u0);
 
 float3x3 QuaternionToMatrix_RH(float4 q)
 {
