@@ -1,0 +1,134 @@
+{
+  "FormatVersion": 3,
+  "Id": "21529EF6-584F-434B-9D25-1528C68652BB"/*BlobTrackOverlay*/,
+  "Description": "Composites a BlobTrack BlobData buffer as GPU-drawn boxes over an image. Feed the image into 'Image', the BlobTrack BlobData output into 'BlobData'. Set AspectRatio to the image width/height ratio so boxes align with the orthographic image plane.",
+  "InputUis": [
+    {
+      "InputId": "3D1ACA69-F398-4596-A9C4-DEA5833BEB04"/*Scale*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "9152FFDF-DEF3-43D8-B918-895CAF7E91AC"/*AspectRatio*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 630.0
+      }
+    },
+    {
+      "InputId": "AA82C44C-E090-40A9-B37F-8C228EE3F305"/*LineWidth*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 450.0
+      }
+    },
+    {
+      "InputId": "76BFE731-103B-4C00-B874-852FB6AD4A3B"/*Color*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 540.0
+      }
+    },
+    {
+      "InputId": "6F17A0B0-DC12-461A-92B3-342DF6A1BCDC"/*Resolution*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "InputId": "37BED1C9-B7CE-44B0-B1D0-32F17111E020"/*Clear*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 810.0
+      }
+    },
+    {
+      "InputId": "6A9DA377-6403-42E4-AADD-069A15FA26EC"/*ClearColor*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 900.0
+      }
+    },
+    {
+      "InputId": "D789C43E-8838-42C0-B21C-3FD9F2ECC436"/*Image*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "8B03FDC4-D0E6-4D1B-A9D2-17FAD5D75DDE"/*BlobData*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "4E4F5A6B-7C8D-4E9F-A0B1-C2D3E4F5A6B7"/*LabelOffset*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "9D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B4E"/*FontPath*/,
+      "Position": {
+        "X": -820.0,
+        "Y": 360.0
+      },
+      "GroupTitle": "Label",
+      "Description": "Defines which font is used",
+      "Usage": "FilePath",
+      "FileFilter": "fnt"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "Id": "11111111-1111-1111-1111-111111111111"/*RenderTarget*/,
+      "PosX": 700.0,
+      "PosY": 300.0
+    },
+    {
+      "Id": "22222222-2222-2222-2222-222222222222"/*OrthographicCamera*/,
+      "PosX": 400.0,
+      "PosY": 300.0
+    },
+    {
+      "Id": "33333333-3333-3333-3333-333333333333"/*DrawQuad*/,
+      "PosX": 100.0,
+      "PosY": 120.0
+    },
+    {
+      "Id": "44444444-4444-4444-4444-444444444444"/*DrawLines*/,
+      "PosX": 100.0,
+      "PosY": 480.0
+    },
+    {
+      "Id": "55555555-5555-5555-5555-555555555555"/*BlobDataToBoxPoints*/,
+      "PosX": -300.0,
+      "PosY": 300.0
+    },
+    {
+      "Id": "66666666-6666-6666-6666-666666666666"/*Execute*/,
+      "PosX": 400.0,
+      "PosY": 700.0
+    },
+    {
+      "Id": "77777777-7777-7777-7777-777777777777"/*Multiply*/,
+      "PosX": -520.0,
+      "PosY": 500.0
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "728FEF86-E670-4055-99F8-5834F33D4BEC"/*ColorBuffer*/,
+      "Position": {
+        "X": 940.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

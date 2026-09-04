@@ -1,0 +1,94 @@
+{
+  "FormatVersion": 3,
+  "Id": "a3e7b1c4-5d2f-4896-b0e1-9c3f6a8d2e47"/*BlobTrack*/,
+  "Inputs": [
+    {
+      "Id": "b1c2d3e4-f5a6-7890-abcd-ef0123456789"/*Image*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c2d3e4f5-a6b7-8901-bcde-f01234567890"/*Background*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d3e4f5a6-b7c8-9012-cdef-012345678901"/*Threshold*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "e4f5a6b7-c8d9-0123-defa-123456789012"/*MinBlobSize*/,
+      "DefaultValue": 0.001
+    },
+    {
+      "Id": "f5a6b7c8-d9e0-1234-efab-234567890123"/*MaxBlobSize*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "a6b7c8d9-e0f1-2345-fabc-345678901234"/*MaxMoveDistance*/,
+      "DefaultValue": 0.1
+    },
+    {
+      "Id": "b7c8d9e0-f1a2-3456-abcd-456789012345"/*MonoSource*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "c8d9e0f1-a2b3-4567-bcde-567890123456"/*Overlay*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "4eb740e3-d5ba-4ebc-9707-018fb9d8df7e"/*BoundsColor*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 1.0,
+        "Z": 0.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "3737c853-81f0-4fd9-9f82-207c2fe1a856"/*LabelColor*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "1496761b-6455-45a1-a61a-303119b3a1e3"/*BoundsThickness*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "3c39d125-8cb4-4e84-a51d-d1c88721c740"/*LabelSize*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "dc4a0ab8-e412-4640-8ad3-de254039d9b1"/*LabelThickness*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "76d42773-ddbd-497a-8c17-927b09ccc6a9"/*LabelPrefix*/,
+      "DefaultValue": "ID:"
+    },
+    {
+      "Id": "64a3a4f5-420c-414d-80ef-5e0f33bb726f"/*IdFormat*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f4885527-c56f-4040-ad4e-7d5351b19d08"/*LabelContent*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "0b4aeb69-f133-4ade-8708-53245d99e728"/*DetectScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "79ea740c-5c24-4969-b58f-724796d9ade2"/*AntiAlias*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d9e0f1a2-b3c4-5678-cdef-678901234567"/*Reset*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
