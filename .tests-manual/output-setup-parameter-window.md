@@ -91,7 +91,9 @@ With the surface selected, drag the **Size (m)** X field from 1 up to about 3 in
 uninterrupted drag, then press Ctrl+Z once.
 
 **Expected:**
-- During the drag the surface in the output view grows continuously.
+- During the drag the surface's Board card grows continuously while its corner-pin quad on the
+  Output tab and its trace on the photo stay put — the Size field declares how big the wall is,
+  it does not stretch the projection; a measuring line or region on the surface scales with it.
 - The single undo restores X to exactly 1; a second undo affects the *previous*
   edit (the rename, if it was redone — otherwise nothing surface-related), never a
   fragment of the drag.

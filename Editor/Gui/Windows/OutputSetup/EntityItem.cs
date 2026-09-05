@@ -431,6 +431,12 @@ internal sealed class EntityItem
                 if (CustomComponents.DrawMenuItem(11, "Split into 4×4"))
                     SetupActions.SplitOutput(selection, setup, output, 4, 4);
 
+                if (CustomComponents.DrawMenuItem(14, "Clear Inputs", isEnabled: SetupActions.OutputHasInputs(setup, output)))
+                    SetupActions.ClearOutputInputs(setup, output);
+
+                CustomComponents.TooltipForLastItem("Disconnects every surface and patch from this output.",
+                                                    "The surfaces and their content stay; only the routes into this canvas are removed.");
+
                 if (output.Kind is not (OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display))
                     break;
 

@@ -119,4 +119,4 @@ Position (px) field for a while, and toggle an output's Send. Press Ctrl-Z once 
 - Each toggle and each complete field drag reverts with a single Ctrl-Z — a long drag is
   one step, not one per mouse-move.
 - The setup file is written once per completed field gesture, not while dragging.
-- Size (m) still undoes as one step including the re-projected corner pins.
+- Size (m) still undoes as one step, including the measuring lines and regions it scaled.

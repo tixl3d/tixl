@@ -220,7 +220,7 @@ internal static class SetupParameterView
 
         Span<float> size = [surface.SizeInMeters.X, surface.SizeInMeters.Y];
         var sizeState = DrawFloatsRow("Size (m)", size,
-                                      "Resizes the surface's footprint — the corner pin follows, so it covers a different area of the wall.",
+                                      "How big the surface really is. Lines and regions scale with it; the projection and the trace stay where they are.",
                                       reserveRight: 44);
 
         // Locking keeps the current width/height ratio while resizing — the edited axis drives, the other follows.
@@ -244,21 +244,14 @@ internal static class SetupParameterView
 
         CustomComponents.TooltipForLastItem("Set measured dimensions",
                                             "Declares how big this surface really is, without moving the projection.");
-        DrawMeasuredSizePopup(surface);
+        DrawMeasuredSizePopup(setup, surface);
 
-        if ((sizeState & InputEditStateFlags.Started) != 0)
-            _resizeOldState = new ResizeSurfaceCommand.State(surface);
-
+        // A re-metering: lines and regions scale along, nothing moves on the wall. One undo step per gesture.
+        BeginFieldUndo(setup, sizeState);
         if ((sizeState & InputEditStateFlags.Modified) != 0)
-            SurfaceGeometry.ResizeAnchored(surface, ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.LockAspect));
+            SetupActions.RemeterSurface(setup, surface, ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.LockAspect));
 
-        // Resizing re-projects the corner pins, so it has to be undoable as one step.
-        if ((sizeState & InputEditStateFlags.Finished) != 0 && _resizeOldState != null)
-        {
-            UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, _resizeOldState.Value, new ResizeSurfaceCommand.State(surface)));
-            OutputSetupHandling.SaveActive();
-            _resizeOldState = null;
-        }
+        CommitFieldUndo(setup, "Resize surface", sizeState);
 
         var showGrid = surface.ShowGrid;
         if (FormInputs.AddCheckBox("Show size raster", ref showGrid,
@@ -601,7 +594,7 @@ internal static class SetupParameterView
     /// the rect is already aligned on the wall — you're correcting the measurement, not moving the projection.
     /// The declared size drives the calibration raster's density and the straighten hypothesis.
     /// </summary>
-    private static void DrawMeasuredSizePopup(Surface surface)
+    private static void DrawMeasuredSizePopup(Setup setup, Surface surface)
     {
         ImGui.SetNextWindowSize(new Vector2(260 * T3Ui.UiScaleFactor, 0));
         if (!ImGui.BeginPopup(MeasuredSizePopupId))
@@ -621,7 +614,7 @@ internal static class SetupParameterView
         FormInputs.AddVerticalSpace(4);
         if (ImGui.Button("Apply"))
         {
-            ApplyMeasuredSize(surface, _measuredEdit);
+            SetupActions.RunUndoable("Set measured size", setup, () => SetupActions.RemeterSurface(setup, surface, _measuredEdit));
             ImGui.CloseCurrentPopup();
         }
 
@@ -630,18 +623,6 @@ internal static class SetupParameterView
             ImGui.CloseCurrentPopup();
 
         ImGui.EndPopup();
-    }
-
-    private static void ApplyMeasuredSize(Surface surface, Vector2 measured)
-    {
-        var oldState = new ResizeSurfaceCommand.State(surface);
-
-        // Deliberately not SurfaceGeometry.ResizeAnchored: the quads must not move.
-        surface.SizeInMeters = new Vector2(MathF.Max(measured.X, SurfaceGeometry.MinSize),
-                                           MathF.Max(measured.Y, SurfaceGeometry.MinSize));
-
-        UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, oldState, new ResizeSurfaceCommand.State(surface)));
-        OutputSetupHandling.SaveActive();
     }
 
     /// <summary>
@@ -759,9 +740,6 @@ internal static class SetupParameterView
 
     private const string MeasuredSizePopupId = "##measuredSize";
     private static Vector2 _measuredEdit;
-
-    // Pre-edit rectangle snapshot while a Size (m) field is being dragged, so the resize undoes as one step.
-    private static ResizeSurfaceCommand.State? _resizeOldState;
 
     // Pre-edit setup snapshot while a card drag-field gesture is live (see BeginFieldUndo/CommitFieldUndo).
     private static string? _fieldEditOldJson;

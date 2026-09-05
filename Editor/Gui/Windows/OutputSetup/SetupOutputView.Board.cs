@@ -465,7 +465,7 @@ internal sealed partial class SetupOutputView
                 continue;
 
             child.LocalPosition = fixedPoint + (child.LocalPosition - fixedPoint) * increment;
-            ScaleSurfaceMetric(setup, child, increment);
+            SetupActions.ScaleSurfaceMetric(setup, child, increment);
         }
     }
 
@@ -601,19 +601,23 @@ internal sealed partial class SetupOutputView
         DrawEntityLabel(dl, kind, _boardQuad, id, label, isSelected, 0.9f * fade, pulse);
     }
 
-    /// <summary>Regions nest inside their surface at their metre position from the parent's anchor, recursively.</summary>
+    /// <summary>Regions nest inside their surface at their metre position from the parent's anchor, recursively —
+    /// editable in place (corners, edges, label move) while selected.</summary>
     private void DrawBoardRegions(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, Surface parent, Vector2 parentAnchorOnBoard)
     {
-        foreach (var child in setup.Surfaces)
+        for (var i = 0; i < setup.Surfaces.Count; i++)
         {
+            var child = setup.Surfaces[i];
             if (child.ParentId != parent.Id)
                 continue;
 
-            SurfaceGeometry.ChildBounds(child, out var localMin, out var localMax);
-            var min = parentAnchorOnBoard + localMin;
-            var max = parentAnchorOnBoard + localMax;
-            DrawBoardSubRect(setup, selection, dl, SetupEntitySelection.EntityKind.Surface, child.Id, min, max, child.Name);
-            DrawBoardRegions(setup, selection, dl, child, min + child.AnchorInMeters);
+            _regionProjection.View = _boardProjection;
+            _regionProjection.Origin = parentAnchorOnBoard;
+            _regionProjection.UseHomography = false;
+            DrawRegionEditable(setup, dl, parent, child, _regionProjection, selection, _boardLayerFade);
+
+            SurfaceGeometry.ChildBounds(child, out var localMin, out _);
+            DrawBoardRegions(setup, selection, dl, child, parentAnchorOnBoard + localMin + child.AnchorInMeters);
         }
     }
 
@@ -745,6 +749,13 @@ internal sealed partial class SetupOutputView
             _boardFence.Reset();
             return;
         }
+
+        // A fence starts only on the frame the button goes down. A press that began on a card and was handed
+        // to a label pick leaves the button down with no fence — picking it up mid-press would end as an
+        // "empty click" that clears the selection just made.
+        if (_boardFence.State == SelectionFence.States.Inactive
+            && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            return;
 
         switch (_boardFence.UpdateAndDraw(out var selectMode))
         {

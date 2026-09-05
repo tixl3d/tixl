@@ -277,7 +277,24 @@ internal sealed class OutputSetupModeView
         if (kind == SetupEntitySelection.EntityKind.ReferenceImage)
             return id == imageId;
 
-        return kind == SetupEntitySelection.EntityKind.Surface && setup.FindSurface(id)?.Reference?.ImageId == imageId;
+        if (kind != SetupEntitySelection.EntityKind.Surface)
+            return false;
+
+        // A region rides its traced ancestor's photo.
+        var surface = setup.FindSurface(id);
+        for (var guard = 0; surface != null && guard < 16; guard++)
+        {
+            if (surface.Reference != null)
+                return surface.Reference.ImageId == imageId;
+
+            if (surface.ParentId == Guid.Empty)
+                break;
+
+            var parentId = surface.ParentId;
+            surface = setup.FindSurface(parentId);
+        }
+
+        return false;
     }
 
     private bool TryGetShownEntity(out SetupEntitySelection.EntityKind kind, out Guid id)

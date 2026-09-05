@@ -1310,6 +1310,45 @@ internal static class SetupActions
     }
 
     /// <summary>
+    /// Re-meters a surface: everything stored in its metres — the size, the measuring lines, the regions and
+    /// their descendants — scales by <paramref name="scale"/> about the anchor. The projection and the trace
+    /// are untouched: the wall is where it was, only the numbers describing it change.
+    /// </summary>
+    internal static void ScaleSurfaceMetric(Setup setup, Surface surface, Vector2 scale)
+    {
+        surface.SizeInMeters *= scale;
+        foreach (var annotation in surface.Annotations)
+        {
+            annotation.P1 *= scale;
+            annotation.P2 *= scale;
+        }
+
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            var child = setup.Surfaces[i];
+            if (child.ParentId != surface.Id)
+                continue;
+
+            child.LocalPosition *= scale;
+            ScaleSurfaceMetric(setup, child, scale);
+        }
+    }
+
+    /// <summary>Declares a surface's real size — a re-metering (see <see cref="ScaleSurfaceMetric"/>), so lines and regions keep their place on the wall.</summary>
+    internal static void RemeterSurface(Setup setup, Surface surface, Vector2 newSize)
+    {
+        var target = new Vector2(MathF.Max(newSize.X, SurfaceGeometry.MinSize), MathF.Max(newSize.Y, SurfaceGeometry.MinSize));
+        var old = surface.SizeInMeters;
+        if (old.X <= 0.0001f || old.Y <= 0.0001f)
+        {
+            surface.SizeInMeters = target;
+            return;
+        }
+
+        ScaleSurfaceMetric(setup, surface, target / old);
+    }
+
+    /// <summary>
     /// Reshapes the surface so its real-world proportions match the pixels of the slice it shows — the inverse
     /// of the slice's "Match target aspect", for when the wall is what should give. Keeps the width and solves
     /// the height, so it reads as a nudge rather than a jump.
@@ -1424,6 +1463,36 @@ internal static class SetupActions
                                                  setup.Surfaces.Add(child);
                                                  selection.Select(SetupEntitySelection.EntityKind.Surface, child.Id);
                                              });
+    }
+
+    /// <summary>Whether anything feeds the output: a surface mapped onto it, or a patch on its canvas.</summary>
+    internal static bool OutputHasInputs(Setup setup, OutputDefinition output)
+    {
+        if (output.Patches.Count > 0)
+            return true;
+
+        foreach (var surface in setup.Surfaces)
+        {
+            if (SetupRelations.IsMappedTo(surface, output.Id))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Disconnects everything from an output: every surface's mapping onto it and all of its patches go. The
+    /// surfaces, their slices and the output itself stay — only the routes into this canvas are cut.
+    /// </summary>
+    internal static void ClearOutputInputs(Setup setup, OutputDefinition output)
+    {
+        RunUndoable("Clear output inputs", setup, () =>
+                                                  {
+                                                      foreach (var surface in setup.Surfaces)
+                                                          surface.OutputMappings.RemoveAll(m => m.OutputId == output.Id);
+
+                                                      output.Patches.Clear();
+                                                  });
     }
 
     /// <summary>

@@ -53,11 +53,30 @@ internal sealed partial class SetupOutputView
         dl.PopClipRect();
     }
 
-    /// <summary>The image a surface is traced on, if any.</summary>
+    /// <summary>The image a surface is traced on, if any — a region through the traced ancestor it lives in.</summary>
     private static ReferenceImage? TracedImageOf(Setup setup, Guid surfaceId)
     {
-        var binding = setup.FindSurface(surfaceId)?.Reference;
+        var binding = TracedAncestorOf(setup, surfaceId)?.Reference;
         return binding == null ? null : setup.FindReferenceImage(binding.ImageId);
+    }
+
+    /// <summary>The surface itself when traced, else the nearest traced ancestor (a region rides its parent's photo).</summary>
+    private static Surface? TracedAncestorOf(Setup setup, Guid surfaceId)
+    {
+        var surface = setup.FindSurface(surfaceId);
+        for (var guard = 0; surface != null && guard < 16; guard++)
+        {
+            if (surface.Reference != null)
+                return surface;
+
+            if (surface.ParentId == Guid.Empty)
+                break;
+
+            var parentId = surface.ParentId;
+            surface = setup.FindSurface(parentId);
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -77,7 +96,7 @@ internal sealed partial class SetupOutputView
             return;
         }
 
-        var subject = setup.FindSurface(_shownSurfaceId);
+        var subject = TracedAncestorOf(setup, _shownSurfaceId);
         if (subject?.Reference?.ImageId != image.Id)
             subject = null;
 
@@ -208,7 +227,7 @@ internal sealed partial class SetupOutputView
             // rectification), and the measuring lines live on it.
             var settled = _referenceProgress >= 1f && _referenceSubjectProgress >= 1f && _spaceBlend >= 1f && t >= 0.999f;
             if (settled || _referenceEditActive)
-                DrawStraightEdits(setup, dl, subject!, targetMin, targetMax);
+                DrawStraightEdits(setup, dl, subject!, targetMin, targetMax, selection);
 
             return;
         }
@@ -389,7 +408,11 @@ internal sealed partial class SetupOutputView
 
         if (subject.Id != _referenceSubjectId)
         {
-            if (_referenceSubjectId != Guid.Empty && _referenceStraighten > 0.001f)
+            // Only surfaces on the same photo can turn into each other: their quads share a pixel space. Across
+            // photos the new subject snaps (the camera still travels, see EnterSpace).
+            var sameImage = _referenceSubjectImageId == subject.Reference!.ImageId;
+            _referenceSubjectImageId = subject.Reference.ImageId;
+            if (_referenceSubjectId != Guid.Empty && _referenceStraighten > 0.001f && sameImage)
             {
                 Array.Copy(_referenceSubjectQuad, _referenceSubjectFromQuad, 4);
                 _referenceSubjectFromMin = _referenceSubjectLastMin;
@@ -432,7 +455,7 @@ internal sealed partial class SetupOutputView
     /// re-warp; on release nothing moves. One undo step per drag. The surface's measuring lines are drawn and
     /// edited here too, mapped from surface metres onto the rect.
     /// </summary>
-    private void DrawStraightEdits(Setup setup, ImDrawListPtr dl, Surface subject, Vector2 targetMin, Vector2 targetMax)
+    private void DrawStraightEdits(Setup setup, ImDrawListPtr dl, Surface subject, Vector2 targetMin, Vector2 targetMax, SetupEntitySelection? selection)
     {
         var binding = subject.Reference!;
         var rect = RectCorners(targetMin, targetMax);
@@ -500,6 +523,32 @@ internal sealed partial class SetupOutputView
             && Homography.TryComputeQuadToQuad(rect, SurfaceGeometry.LocalRect(subject), out var rectToSurface))
         {
             DrawAnnotations(dl, subject, surfaceToRect, rectToSurface, Vector2.Zero, editable: true, fade: 1f, projected: false);
+            DrawStraightRegions(setup, dl, subject, subject, Vector2.Zero, surfaceToRect, rectToSurface, selection);
+        }
+    }
+
+    /// <summary>
+    /// The regions on the rectified photo, nested recursively: each edits in its parent's space, whose origin is
+    /// given in the subject's (carrier) space, through the rectification into the photo's px.
+    /// </summary>
+    private void DrawStraightRegions(Setup setup, ImDrawListPtr dl, Surface subject, Surface parent, Vector2 parentOriginInSubject,
+                                     in Homography surfaceToRect, in Homography rectToSurface, SetupEntitySelection? selection)
+    {
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            var child = setup.Surfaces[i];
+            if (child.ParentId != parent.Id)
+                continue;
+
+            _regionProjection.View = _projection;
+            _regionProjection.Origin = parentOriginInSubject;
+            _regionProjection.UseHomography = true;
+            _regionProjection.ToView = surfaceToRect;
+            _regionProjection.FromView = rectToSurface;
+            DrawRegionEditable(setup, dl, parent, child, _regionProjection, selection, 1f);
+
+            SurfaceGeometry.ChildBounds(child, out var localMin, out _);
+            DrawStraightRegions(setup, dl, subject, child, parentOriginInSubject + localMin + child.AnchorInMeters, surfaceToRect, rectToSurface, selection);
         }
     }
 
@@ -579,15 +628,15 @@ internal sealed partial class SetupOutputView
         }
 
         // The bitmap loader allocates a full mip chain but fills only level 0 — the coarse levels are garbage
-        // until regenerated. Without this, the oblique straighten warp minifies into the corrupt mips and
-        // bands. Once per load.
-        if (!entry.MipsGenerated)
+        // until regenerated, and the oblique straighten warp minifies into them (ghosts of other content).
+        // The resource can swap its texture object after loading, so this is keyed on the object, not the path.
+        if (!ReferenceEquals(entry.MipsGeneratedFor, texture))
         {
             var srv = SrvManager.GetSrvForTexture(texture);
             if (srv is { IsDisposed: false })
             {
                 ResourceManager.Device.ImmediateContext.GenerateMips(srv);
-                entry.MipsGenerated = true;
+                entry.MipsGeneratedFor = texture;
             }
         }
 
@@ -613,7 +662,7 @@ internal sealed partial class SetupOutputView
     {
         public readonly string Path = path;
         public readonly Resource<Texture2D> Resource = resource;
-        public bool MipsGenerated;
+        public Texture2D? MipsGeneratedFor; // the texture object whose mip chain was filled (held only as long as the resource)
         public bool WarnedMissing;
     }
 
@@ -634,6 +683,7 @@ internal sealed partial class SetupOutputView
 
     // Subject transition: the quad/target in use (eased between surfaces), where the ease started, and its progress.
     private Guid _referenceSubjectId;
+    private Guid _referenceSubjectImageId;
     private float _referenceSubjectProgress = 1f;
     private readonly Vector2[] _referenceSubjectQuad = new Vector2[4];
     private readonly Vector2[] _referenceSubjectFromQuad = new Vector2[4];

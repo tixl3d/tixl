@@ -230,7 +230,8 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 3. Click **+ Line** in the header and drag along a mortar line of the brick wall; repeat for a
    vertical feature (a door frame); click **Straighten**.
 4. Double-click one of the lines, type its real length in metres, **Set**, then **Apply lengths**.
-5. Click the **Board** tab.
+5. Right-click the "Surface 1" item in the SURFACES column and choose **Add region**.
+6. Click the **Board** tab.
 
 **Expected:**
 - After 1: the rectangle itself stays put; while dragging, the photo re-warps live so the
@@ -242,7 +243,14 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   lines come out level and plumb, with the photo easing to the result.
 - After 4: the surface's Size in the Parameter window changes so the measured line reads its
   real length.
-- After 5: on the Board the "Surface 1" card now shows the straightened crop of the photo as
+- After 5: the view stays on the straightened photo; "Region 1" appears as a green rectangle
+  inside the wall, selected, with round corner handles, square edge handles and its anchor
+  crosshair; its item is nested under "Surface 1" in the outliner. Dragging a corner resizes it
+  about the opposite corner, an edge crops it, dragging its name moves it — each snapping to
+  the wall's edges and centre and undoing in one step. The same handles exist for a selected
+  region on the Board's surface card. Clicking a region's name selects it without leaving
+  Straight.
+- After 6: on the Board the "Surface 1" card now shows the straightened crop of the photo as
   its backdrop; its metadata reads the new size. Dragging an edge handle of that card changes
   the metadata while dragging, and the green traced quad on the image card crops along with
   it.

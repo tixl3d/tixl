@@ -125,3 +125,13 @@ Right-click "Patch 1" (in the panel or on its canvas label) → **Use on Surface
 **Expected:**
 - After 1: both patch items stay but turn dimmed; the output view shows only the surface.
 - After 2: only "Patch 2" remains under P1. One Ctrl+Z brings "Patch 1" back.
+
+## Step: Clear Inputs on an output
+
+**Action:**
+Right-click the "P1" item in the OUTPUTS column and choose **Clear Inputs**; then press Ctrl+Z.
+
+**Expected:**
+- Every connection into "P1" disappears: the surface mappings onto it and all of its patches
+  (the patch items under it are gone), while the surfaces and their slices remain. The entry
+  is greyed out on an output that has no inputs. Ctrl+Z restores everything in one step.

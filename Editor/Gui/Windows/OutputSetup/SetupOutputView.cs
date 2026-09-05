@@ -148,6 +148,15 @@ internal sealed partial class SetupOutputView
         // Leaving keeps the fading space's identity and origin: it is still the one being drawn out.
         if (inSpace)
         {
+            // Straight from one space into another (a surface on a different photo): no fold, but the camera
+            // still travels — a transition at full blend.
+            if ((_spaceKind != kind || _spaceId != id) && _spaceTarget >= 1f && _spaceBlend >= 1f)
+            {
+                _spaceFrom = 1f;
+                _spaceProgress = 0f;
+                CaptureTransitionStart();
+            }
+
             _spaceKind = kind;
             _spaceId = id;
         }
@@ -2139,9 +2148,9 @@ internal sealed partial class SetupOutputView
             // and its menu opens); the others are inert until picked in the sidebar. (Slices aren't isolated.)
             var canPick = !_isolate || hit.Id == _shownSurfaceId;
 
-            // A Board press on a selected card keeps the selection for a group drag — unless the pick resolves
-            // to something drawn on that card (a traced quad's label), which wins over the card beneath it.
-            if (_boardGrabOnSelected && hit.Id != _boardGrabId)
+            // A Board press arms the card under the cursor — unless the pick resolves to something drawn on that
+            // card (a region's or traced quad's label), which wins over the card beneath it.
+            if (_boardGrabScreen != null && hit.Id != _boardGrabId)
             {
                 _boardGrabScreen = null;
                 _boardGrabOnSelected = false;

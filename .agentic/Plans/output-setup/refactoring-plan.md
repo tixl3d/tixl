@@ -511,6 +511,34 @@ with an explanatory comment) — the row-callback API design made compliance imp
 - **2026-09-05 (content preview opacity):** `UserSettings.Config.OutputSetupContentPreview` (default 0.65), a
   "content NN%" slider in the canvas header; used by the traced quads on the image card and by the surface
   card (content over its photo fragment).
+- **2026-09-05 (second reference image):** switching Straight subjects across photos never left the space, so
+  the origin jumped to the new card while the subject morph interpolated a quad from the other photo's pixel
+  space (broken warp, "ghosts"). Now a space switch at full blend runs a camera-only transition
+  (`EnterSpace`), and `ResolveStraightSubject` snaps when the new subject lies on a different image
+  (`_referenceSubjectImageId`). Mip generation is keyed on the texture object (`MipsGeneratedFor`), since the
+  resource can swap it after the first frame.
+- **2026-09-05 (Size = re-metering):** the Size (m) field and the measured-size popup no longer re-project the
+  corner pins (`ResizeAnchored`); they call `SetupActions.RemeterSurface` → `ScaleSurfaceMetric` (moved out of
+  the Measure partial): size, lines and regions scale about the anchor, projection and trace untouched —
+  so a traced wall's lines stay on their features. Footprint changes stay with the edge handles (crop) and the
+  Board's scale gestures.
+- **2026-09-05 (regions on the photo):** a region resolves to its traced ancestor (`TracedAncestorOf`), so
+  adding or selecting one keeps the Straight photo view (mode view's `IsInReferenceSpace` walks up too);
+  regions draw on the rectified rect at their metre places with pickable labels (`DrawStraightRegions`).
+  **Region editing landed** (`SetupOutputView.Regions.cs`): `DrawRegionEditable` works in the parent's metre
+  space through a `RegionProjection` (Board card: origin = the parent's anchor on the Board; photo: through the
+  rectification homographies) — corners resize about the opposite corner, edges crop, the label moves, all
+  snapping to parent/siblings, one `RunResizeDrag` step each; the selected region shows its anchor. A label
+  pick on a card cancels the card's own grab. The projector view keeps its corner-pin-bound region editor.
+- **2026-09-05 (small fixes):** slice rows use an index loop (deleting from the row's menu threw during
+  enumeration); a region's own slice previews on the card and the photo; "Clear Inputs" on the output menu
+  (`SetupActions.ClearOutputInputs`: drops every mapping onto the output and all its patches, one undo step).
+- **2026-09-05 (end-to-end projector run — milestone):** trace → straighten → map → project verified by the
+  user on a real projector: "the overall flow works". Noted for later: calibrating the projector is finicky
+  with only the content slice on the wall — candidates: default the size raster on while the Output tab is
+  active, an aim crosshair on the wall for the handle being dragged, edge/anchor guides in the composite.
+  Also: the Board fence starts only on the press frame (a press handed from a card to a label no longer
+  ends as an empty click).
 
 ## Suggested order (revised for the flow-view pivot)
 

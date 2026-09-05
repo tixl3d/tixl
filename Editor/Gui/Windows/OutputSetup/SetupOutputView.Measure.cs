@@ -440,28 +440,8 @@ internal sealed partial class SetupOutputView
         var scaleX = countX > 0 ? sumX / countX : sumY / countY;
         var scaleY = countY > 0 ? sumY / countY : sumX / countX;
 
-        ScaleSurfaceMetric(setup, surface, new Vector2(scaleX, scaleY));
+        SetupActions.ScaleSurfaceMetric(setup, surface, new Vector2(scaleX, scaleY));
         return true;
-    }
-
-    private static void ScaleSurfaceMetric(Setup setup, Surface surface, Vector2 scale)
-    {
-        surface.SizeInMeters *= scale;
-        foreach (var annotation in surface.Annotations)
-        {
-            annotation.P1 *= scale;
-            annotation.P2 *= scale;
-        }
-
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            var child = setup.Surfaces[i];
-            if (child.ParentId != surface.Id)
-                continue;
-
-            child.LocalPosition *= scale;
-            ScaleSurfaceMetric(setup, child, scale);
-        }
     }
 
     // Measure/straighten state.
