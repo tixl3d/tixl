@@ -153,23 +153,25 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     }
 
 
-    private static readonly string[] _folderExclusions = ["bin", "obj", "dependencies", FileLocations.ExportSubFolder];
-
     protected override IEnumerable<string> SymbolUiSearchFiles => FindFilesOfType(SymbolUiExtension);
 
     protected override IEnumerable<string> SymbolSearchFiles => FindFilesOfType(SymbolExtension);
-    
+
     protected override IEnumerable<string> SourceCodeSearchFiles => FindFilesOfType(SourceCodeExtension);
 
-    
-    
+    /// <summary>
+    /// Operator files are discovered only inside the project's Symbols folder. Everything else in the
+    /// project directory (helper code, assets, docs) is deliberately ignored by symbol discovery;
+    /// <see cref="Migrations.Steps.To2_SymbolsFolder"/> moves format-V1 root-level layouts here on load.
+    /// </summary>
     private IEnumerable<string> FindFilesOfType(string fileExtension)
     {
-        var directoryInfo = new DirectoryInfo(Folder);
-        return directoryInfo.EnumerateDirectories()
-                        .Where(x => !_folderExclusions.Contains(x.Name))
-                        .SelectMany(x => x.EnumerateFiles($"*{fileExtension}", SearchOption.AllDirectories))
-                        .Concat(directoryInfo.EnumerateFiles($"*{fileExtension}")).Select(x => x.FullName);
+        var symbolsDirectory = new DirectoryInfo(Path.Combine(Folder, FileLocations.SymbolsSubfolder));
+        if (!symbolsDirectory.Exists)
+            return [];
+
+        return symbolsDirectory.EnumerateFiles($"*{fileExtension}", SearchOption.AllDirectories)
+                               .Select(x => x.FullName);
     }
 
     protected override void InitializeAssets()

@@ -1,0 +1,36 @@
+{
+  "FormatVersion": 3,
+  "Id": "dbaeebea-8d46-416f-9624-867af10d9c07"/*BevelGeometry*/,
+  "Inputs": [
+    {
+      "Id": "091c932c-a7bb-487e-97c5-093e9838a700"/*Roundness*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "3f8b1c4d-92e6-4a17-b5d0-6a4c8e2f7d19"/*RoundCorners*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "46a2c9e2-7b5d-45ce-9955-b1c0b1bb01db"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "8d5c2a97-40e1-4b68-93fd-6b0e8c4a2d75"/*Async*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "c86a32c2-feeb-4c05-b2c0-cf54076247bb"/*FlatShading*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "ce40061f-b853-41be-bbef-0db172bbad7f"/*Width*/,
+      "DefaultValue": 0.1
+    },
+    {
+      "Id": "e9085eac-dc15-4ecf-862d-869e66981418"/*Segments*/,
+      "DefaultValue": 3
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -15,7 +15,7 @@ cbuffer Params : register(b0)
     float Seed;
 }
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; 
+RWStructuredBuffer<Point> ResultPoints : register(u0); 
 
 static const float4 axisAngles[] = 
 {
@@ -34,11 +34,11 @@ void main(uint3 i : SV_DispatchThreadID)
     uint numStructs, stride;
     ResultPoints.GetDimensions(numStructs, stride);
     if(i.x >= numStructs) {
-        ResultPoints[i.x].W = 0 ;
+        ResultPoints[i.x].FX1 = 0 ;
         return;
     }
 
-    LegacyPoint p = ResultPoints[i.x];
+    Point p = ResultPoints[i.x];
     float3 forward = float3(0,0,-1);
     float3 velocity = qRotateVec3(forward, normalize(p.Rotation)) * Speed;
 

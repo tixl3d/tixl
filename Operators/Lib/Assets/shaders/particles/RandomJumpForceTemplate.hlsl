@@ -21,7 +21,7 @@ cbuffer Params : register(b1)
 }
 
 RWStructuredBuffer<Particle>
-    Particles : u0;
+    Particles : register(u0);
 
 sampler ClampedSampler : register(s0);
 

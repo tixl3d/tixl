@@ -1,0 +1,85 @@
+{
+  "FormatVersion": 3,
+  "Id": "21eb13a7-04ad-4ba4-8911-3b254840ffd8"/*R06a_ShadingwithLight*/,
+  "Description": "Shading with Light",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "7e8a927a-186e-4a36-8b5d-a50aa71b6842"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "964b95f2-1190-4c2d-9d8d-23ddd55ecd78"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "9d0ec316-3dc6-4770-a333-e2cf249977e0"/*Text*/,
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "9d469f76-2666-4058-bffc-4987b0dea5b4"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "382a5603-f1bc-46ed-8245-1725293b9b46",
+      "Description": "So far, the default studio lighting has been used in all examples.\nThis setup consists of a 360-degree HDRI texture used for image-based lighting."
+    },
+    {
+      "Id": "97083cf3-7a96-4b2f-b342-53613fd5a6f6",
+      "Description": "To better understand how lighting affects shading, the light will first be turned off."
+    },
+    {
+      "Id": "cea938a6-373f-4795-8902-30a3f8efc9b5",
+      "Description": "The [SetEnvironment] operator provides multiple presets.\nUse the \"black\" preset to disable image-based lighting.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "65ddedd8-f14c-4046-a81c-50cf753c03dc",
+      "Description": "Add a [PointLight] and move it through the scene using 3D Perlin noise.\nUse the same position to draw a [Sphere] as a visual indicator for the light position.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "231867b0-ed9f-4bf9-8708-2df0b9e631bb",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

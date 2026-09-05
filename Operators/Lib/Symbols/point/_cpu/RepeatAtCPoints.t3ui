@@ -1,0 +1,31 @@
+{
+  "FormatVersion": 3,
+  "Id": "478522e1-5683-4db1-a7dc-db59838eca2a"/*RepeatAtCPoints*/,
+  "Description": "\n\nAKA: RepeatAtPointsCpu, cpu points",
+  "InputUis": [
+    {
+      "InputId": "26ea6e28-e093-484c-9635-5c4ac0efdfb7"/*DestinationsPoints*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "6ffec88a-f5b9-4d2f-8b03-a2d3da9c6b8c"/*SourcePoints*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0e874f9d-352c-435f-a6d2-d7c8d01e2205"/*ResultList*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

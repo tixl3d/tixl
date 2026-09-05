@@ -31,6 +31,7 @@ public static partial class T3Ui
     internal static void ProcessFrame()
     {
         Profiling.KeepFrameData();
+        App.DebugProtocol.DebugServer.ProcessMainThreadQueue();
         //ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
         DragAndDropHandling.Update();
         MagGraph.Ui.DropHandling.DrawDragIndicator();
@@ -116,6 +117,7 @@ public static partial class T3Ui
         ThumbnailManager.Update();
         _searchDialog.Draw();
         NewProjectDialog.Draw();
+        ShareProjectDialog.Draw();
         RestoreBackupDialog.Draw();
         _couldNotLoadProjectDialog.Draw();
         CreateFromTemplateDialog.Draw();

@@ -18,13 +18,13 @@ cbuffer Params : register(b0)
     float NoiseDensity;
 }
 
-StructuredBuffer<LegacyPoint> PointsA : t0;
-StructuredBuffer<LegacyPoint> PointsB : t1;
+StructuredBuffer<Point> PointsA : register(t0);
+StructuredBuffer<Point> PointsB : register(t1);
 
 Texture2D<float4> GrowthMap : register(t2);
 sampler texSampler : register(s0);
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 
 float3 GetNoise(float3 pos) 
@@ -73,28 +73,26 @@ void main(uint3 i : SV_DispatchThreadID)
     //uint sourceCount = (uint)(CountA + 0.1);  
     uint sourceIndex = i.x % sourceCount;
     
-    if(sourceIndex == sourceCount-1) 
+    if(sourceIndex == sourceCount-1)
     {
-        ResultPoints[i.x].W = sqrt(-1);
+        ResultPoints[i.x].Scale = NAN;
     }
     else 
     {
         uint targetIndex = (i.x / sourceCount )  % targetPosCount;
-        LegacyPoint A = PointsA[sourceIndex];
-        LegacyPoint B = PointsB[targetIndex];
+        Point A = PointsA[sourceIndex];
+        Point B = PointsB[targetIndex];
 
         //ResultPoints[i.x] = A;
         //return;
 
         float3  pLocal = qRotateVec3(A.Position, B.Rotation);
 
-        float age = B.W;
-        float w = A.W;
+        float age = B.FX1;
+        float w = A.FX1;
 
         float4 attributes = GrowthMap.SampleLevel(texSampler, float2(age,1-w), 0);
         float d = saturate(attributes.r - 0.05);
-        if(d < 0.001)
-            d = sqrt(-1);
 
         float4 rotation = qMul(A.Rotation, B.Rotation);
 
@@ -107,7 +105,8 @@ void main(uint3 i : SV_DispatchThreadID)
 
         ResultPoints[i.x].Position = pLocal * Length + B.Position + offset;
 
-        ResultPoints[i.x].W = d * Width;
+        ResultPoints[i.x].FX1 = d * Width;
+        ResultPoints[i.x].Scale = d < 0.001 ? NAN : 1; // not yet grown -> separator
         ResultPoints[i.x].Rotation = newRotation;
     }
 }

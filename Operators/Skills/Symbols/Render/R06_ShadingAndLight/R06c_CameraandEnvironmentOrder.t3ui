@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "bd866a72-9451-4e85-aa49-1a08b78ec87d"/*R06c_CameraandEnvironmentOrder*/,
+  "Description": "Camera and Environment Order",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1ed05b00-3ef9-4b8d-a5d7-48dc7ea9f3ec"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "2faab14f-d99f-4e42-9e60-ad2defa93a0e"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "620c79fe-c93e-4abf-8133-6a96208f573d"/*Text*/,
+      "SectionId": "3fb12358-f5ad-4aa1-a269-a0f3f37c78a7",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "058e963a-f110-4592-b986-c4417844fb30"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "3fb12358-f5ad-4aa1-a269-a0f3f37c78a7",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "f9dcff71-057e-41d6-9f88-f1e23e4bf47c",
+      "Description": "To see the HDR environment in the background, the camera must be placed after [SetEnvironment].\nThis ensures the camera affects both the scene geometry and the background image."
+    },
+    {
+      "Id": "9f92a99f-4e4b-44de-a7a3-0922d472f3ff",
+      "Description": "Fix the operator order in this example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

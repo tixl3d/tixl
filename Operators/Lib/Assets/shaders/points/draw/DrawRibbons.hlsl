@@ -73,7 +73,7 @@ struct psInput
 sampler texSampler : register(s0);
 sampler clampedSampler : register(s1);
 
-StructuredBuffer<LegacyPoint> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 //Texture2D<float4> texture2 : register(t1);
 
 Texture2D<float4> BaseColorMap : register(t1);
@@ -98,13 +98,15 @@ psInput vsMain(uint id: SV_VertexID)
     float f = (float)(particleId + cornerFactors.x)  / clamp(pointCount - 1, 1,100000);
 
     int offset = cornerFactors.x < 0.5 ? 0 : 1; 
-    LegacyPoint p = Points[particleId+offset];
+    Point p = Points[particleId+offset];
 
     float spinRad = (Spin + Twist *f) * 3.141578/180;
     //float3 side = float3(0, cos(spinRad), sin(spinRad)) * cornerFactors.y;
     float3 side = float3(cos(spinRad), 0, sin(spinRad)) * cornerFactors.y;
 
-    float WidthFactor = UseWAsWeight || isnan(p.W)> 0.5 ? p.W  : 1;
+    float WidthFactor = UseWAsWeight > 0.5 ? p.FX1 : 1;
+    if (IsSeparator(p))
+        WidthFactor = NAN; // Collapse the segment at separators
     float3 widthV = qRotateVec3(side, p.Rotation) * Width * WidthFactor;
     float3 pInObject = p.Position + widthV;
 
@@ -123,7 +125,7 @@ psInput vsMain(uint id: SV_VertexID)
         output.texCoord += TextureRange;
     }
     else  {
-        output.texCoord.x = p.W;
+        output.texCoord.x = p.FX1;
     }
 
     // Pass tangent space basis vectors (for normal mapping).

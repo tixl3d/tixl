@@ -5,8 +5,8 @@ cbuffer Params : register(b0)
     int startIndex;    
 }
 
-StructuredBuffer<LegacyPoint> Points : t0;            // input
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+StructuredBuffer<Point> Points : register(t0);            // input
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 [numthreads(256,1,1)]
 void main(uint3 i : SV_DispatchThreadID)

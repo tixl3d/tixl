@@ -1,0 +1,80 @@
+{
+  "FormatVersion": 3,
+  "Id": "b2945c0d-d964-4407-a0dd-162c72c8994b"/*I04a_ColorCorrection*/,
+  "Description": "Color Correction",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "664bab47-f21e-4785-82da-dd66b1cd1dd0"/*Text*/,
+      "SectionId": "5bccf1c6-5825-4b2e-8265-05cba5333b31",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "6d5ea52d-e451-4792-8447-be36be43932c"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "7ec8956d-bfed-4bee-99ce-3048ef4ed3f2"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e542a456-6ff0-47bb-80f8-9879f248df46"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "5bccf1c6-5825-4b2e-8265-05cba5333b31",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "47b1785a-add0-4a99-9445-933342f18d33",
+      "Description": "In professional design, adjusting and refining colors is called “grading”.\nIt often involves shaping the overall look, but also removing unwanted color tints or visual artifacts.\nPrecise work requires precise measurement."
+    },
+    {
+      "Id": "79a5fdc2-4c86-42e0-bc64-fd2050eb5590",
+      "Description": "The tool for this is called [WaveForm].\nThe name can be misleading at first, but it is widely used in professional software.\nIt works similarly to ImageLevels, but instead of showing a single slice, it overlays slices from the entire image.\nThis allows you to read brightness and color distribution across all columns at once.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "1904fd5f-a12d-43f5-a768-e2e9674682bf",
+      "Description": "In this example, the curves on the left side merge into a single gray line.\nThis shows that parts of the image have reduced saturation, because all color channels share the same value."
+    },
+    {
+      "Id": "973abf3b-8b55-4164-a4d5-d006bd342de0",
+      "Description": "Try to reproduce the image.",
+      "Style": "CallToAction"
+    }
+  ]
+}

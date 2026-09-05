@@ -55,8 +55,8 @@ struct psInput
     float4 color : COLOR;
 };
 
-StructuredBuffer<Point> Points : t0;
-StructuredBuffer<SpriteDef> Sprites : t1;
+StructuredBuffer<Point> Points : register(t0);
+StructuredBuffer<SpriteDef> Sprites : register(t1);
 Texture2D<float4> fontTexture : register(t2);
 sampler texSampler : register(s0);
 

@@ -9,8 +9,8 @@ cbuffer Params : register(b0)
     float OffsetScale;
 }
 
-StructuredBuffer<PbrVertex> Vertices : t0;   // input
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+StructuredBuffer<PbrVertex> Vertices : register(t0);   // input
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 [numthreads(256, 4, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

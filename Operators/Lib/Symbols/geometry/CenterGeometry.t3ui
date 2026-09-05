@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "e93a5c07-4b86-4d21-a7f9-08c6d2e5b134"/*CenterGeometry*/,
+  "Description": "Moves geometry so a normalized pivot inside its bounding box lands on the world origin.\n\nPivot (0,0,0) centers the bounding box; (0,-0.5,0) puts the bottom center on the ground plane. Useful for imported OBJ files that aren't centered.\n\nAKA: align, origin, normalize position",
+  "InputUis": [
+    {
+      "InputId": "27c5b9e1-84f0-4a63-b2d8-59e6c0d4a713"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "b40e7d92-3a58-4c16-9f27-06b8e5c1d349"/*Pivot*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "6b0f8e24-d951-4c73-9ea0-42d7c8a3f516"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "988a3a00-0ad6-467c-99a7-cf82a4e7cdf6"/*M02e_RoundingtoSteps*/,
+  "Description": "Rounding to Steps",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "7162d0ee-a5c4-434a-ab0d-92826b4685c2"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "d74ab73e-4363-436d-8311-fab64c6cce24"/*Text*/,
+      "SectionId": "bf5c26a5-ae06-4358-bd7a-fbdba14b125d",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "d785a49b-46ac-426e-b929-80a10914dd8d"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "84ee6256-7871-4602-b95c-6664ac72301f"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "bf5c26a5-ae06-4358-bd7a-fbdba14b125d",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "cbc216fa-85bd-4ddd-8d6b-262f325c8247",
+      "Description": "Rounding is not limited to whole numbers.\nSometimes you want steps like 0.25, 10, or 100."
+    },
+    {
+      "Id": "1aeacf56-79e5-4cdb-a095-59975fdd0d7c",
+      "Description": "Recreate the example by rounding to a custom step size.",
+      "Style": "CallToAction"
+    }
+  ]
+}

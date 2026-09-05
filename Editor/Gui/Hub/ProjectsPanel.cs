@@ -203,6 +203,14 @@ internal static class ProjectsPanel
                 CoreUi.Instance.OpenWithDefaultApplication(package.Folder);
             }
 
+            if (package is EditableSymbolProject { IsBuiltIn: false } shareableProject)
+            {
+                if (CustomComponents.DrawMenuItem(_shareProjectId, "Share Project...", reserveIconColumn: false))
+                {
+                    T3Ui.ShareProjectDialog.ShowNextFrame(shareableProject);
+                }
+            }
+
             if (CustomComponents.DrawSubMenu(_restoreFromBackupId, "Restore from Backup"))
             {
                 DrawRestoreBackupItems(package.DisplayName, package.Folder);
@@ -626,6 +634,7 @@ internal static class ProjectsPanel
     private static double _backupMenuUpdateTime;
 
     private static readonly int _revealInExplorerId = nameof(_revealInExplorerId).GetHashCode();
+    private static readonly int _shareProjectId = nameof(_shareProjectId).GetHashCode();
     private static readonly int _restoreFromBackupId = nameof(_restoreFromBackupId).GetHashCode();
     private static readonly int _unloadProjectId = nameof(_unloadProjectId).GetHashCode();
     private static readonly int _archiveProjectId = nameof(_archiveProjectId).GetHashCode();

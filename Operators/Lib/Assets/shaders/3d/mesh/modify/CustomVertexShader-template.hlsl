@@ -25,8 +25,8 @@ cbuffer Params : register(b1)
     /*{FLOAT_PARAMS}*/
 }
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;
-StructuredBuffer<int3> SourceIndices : t1;
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);
+StructuredBuffer<int3> SourceIndices : register(t1);
 
 Texture2D<float4> Image : register(t2);
 Texture2D<float4> Gradient : register(t3);
@@ -34,7 +34,7 @@ Texture2D<float4> Gradient : register(t3);
 sampler Sampler : register(s0);
 sampler ClampedSampler : register(s1);
 
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 
 //=== Additional Resources ==========================================
 /*{RESOURCES(t4)}*/

@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "53f827df-47e8-460b-94d4-e924219b8f98"/*R03e_CameraMove*/,
+  "Description": "Camera Move",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "227f9a30-0a6f-435b-8e6c-825d2bcbce0b"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "9ef3012e-90a7-4445-b430-0f21542038ad"/*Text*/,
+      "SectionId": "c8dcad4c-ce93-4062-baff-1d94220831bf",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "ee4d47e0-80fb-4aba-a6c7-43a644a86bf4"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "df49c430-20aa-40d0-bbe8-eae8d126d76a"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "c8dcad4c-ce93-4062-baff-1d94220831bf",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "a66cf199-7b78-45c9-9419-5951be33e8a5",
+      "Description": "In this case, the goal is to keep the moving cube within the camera view."
+    },
+    {
+      "Id": "2323831c-1baa-44cb-8890-cb8198e1e883",
+      "Description": "Connect the operators so the camera follows the cube.\nAll parameters are already set correctly.",
+      "Style": "CallToAction"
+    }
+  ]
+}

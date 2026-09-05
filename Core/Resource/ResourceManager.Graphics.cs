@@ -89,6 +89,11 @@ public static partial class ResourceManager
                 return;
             }
 
+            var elementCount = buffer.Description.SizeInBytes / buffer.Description.StructureByteStride;
+            if (uav != null && !uav.IsDisposed && IsViewOf(uav, buffer)
+                && uav.Description.Buffer.ElementCount == elementCount && uav.Description.Buffer.Flags == bufferFlags)
+                return;
+
             uav?.Dispose();
             var uavDesc = new UnorderedAccessViewDescription
                               {
@@ -97,7 +102,7 @@ public static partial class ResourceManager
                                   Buffer = new UnorderedAccessViewDescription.BufferResource
                                                {
                                                    FirstElement = 0,
-                                                   ElementCount = buffer.Description.SizeInBytes / buffer.Description.StructureByteStride,
+                                                   ElementCount = elementCount,
                                                    Flags = bufferFlags
                                                }
                               };
@@ -107,6 +112,17 @@ public static partial class ResourceManager
         {
             Log.Warning("Failed to create UAV " + e.Message);
         }
+    }
+
+    /// <summary>
+    /// Views are reused while they still describe the given buffer. Consumers cache view
+    /// objects until their inputs change, so recreating a view on every data upload would
+    /// hand them a disposed view whenever the producer re-ran unnoticed.
+    /// </summary>
+    private static bool IsViewOf(ResourceView view, Buffer buffer)
+    {
+        using var resource = view.Resource;
+        return resource.NativePointer == buffer.NativePointer;
     }
 
     public static void CreateStructuredBufferSrv(Buffer? buffer, ref ShaderResourceView? srv)
@@ -122,6 +138,10 @@ public static partial class ResourceManager
                 return;
             }
 
+            var elementCount = buffer.Description.SizeInBytes / buffer.Description.StructureByteStride;
+            if (srv != null && !srv.IsDisposed && IsViewOf(srv, buffer) && srv.Description.BufferEx.ElementCount == elementCount)
+                return;
+
             srv?.Dispose();
             var srvDesc = new ShaderResourceViewDescription
                               {
@@ -130,7 +150,7 @@ public static partial class ResourceManager
                                   BufferEx = new ShaderResourceViewDescription.ExtendedBufferResource
                                                  {
                                                      FirstElement = 0,
-                                                     ElementCount = buffer.Description.SizeInBytes / buffer.Description.StructureByteStride
+                                                     ElementCount = elementCount
                                                  }
                               };
             srv = new ShaderResourceView(Device, buffer, srvDesc);
@@ -210,6 +230,19 @@ public static partial class ResourceManager
         SetupStructuredBuffer(bufferData, sizeInBytes, stride, ref buffer);
     }
 
+    /// <summary>
+    /// Uploads the complete array into a structured buffer and creates its SRV and UAV
+    /// (kept across data-only updates, see <see cref="IsViewOf"/>).
+    /// Replaces the recurring SetupStructuredBuffer + CreateStructuredBufferSrv + CreateStructuredBufferUav idiom.
+    /// </summary>
+    public static void SetupBufferWithViews<T>(T[] bufferData, ref T3.Core.DataTypes.BufferWithViews? bufferWithViews) where T : struct
+    {
+        bufferWithViews ??= new T3.Core.DataTypes.BufferWithViews();
+        SetupStructuredBuffer(bufferData, ref bufferWithViews.Buffer);
+        CreateStructuredBufferSrv(bufferWithViews.Buffer, ref bufferWithViews.Srv);
+        CreateStructuredBufferUav(bufferWithViews.Buffer, UnorderedAccessViewBufferFlags.None, ref bufferWithViews.Uav);
+    }
+
     public static void CreateBufferUav<T>(Buffer? buffer, Format format, ref UnorderedAccessView? uav)
     {
         if (buffer == null)
@@ -221,6 +254,11 @@ public static partial class ResourceManager
             return;
         }
 
+        var elementCount = buffer.Description.SizeInBytes / Marshal.SizeOf<T>();
+        if (uav != null && !uav.IsDisposed && IsViewOf(uav, buffer)
+            && uav.Description.Format == format && uav.Description.Buffer.ElementCount == elementCount)
+            return;
+
         uav?.Dispose();
         var desc = new UnorderedAccessViewDescription
                        {
@@ -229,7 +267,7 @@ public static partial class ResourceManager
                            Buffer = new UnorderedAccessViewDescription.BufferResource
                                         {
                                             FirstElement = 0,
-                                            ElementCount = buffer.Description.SizeInBytes / Marshal.SizeOf<T>(),
+                                            ElementCount = elementCount,
                                             Flags = UnorderedAccessViewBufferFlags.None
                                         }
                        };

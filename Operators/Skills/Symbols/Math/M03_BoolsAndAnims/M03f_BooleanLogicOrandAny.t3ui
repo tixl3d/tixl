@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "1087f2a9-5b45-403c-b074-4c43f50cfbd6"/*M03f_BooleanLogicOrandAny*/,
+  "Description": "Boolean Logic: Or and Any",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "118f7e53-b2dc-47b8-be2a-079de85a3b40"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "6dc78d59-9005-4f23-81e9-8df333dd3b63"/*Text*/,
+      "SectionId": "e56f327f-5f94-4e00-9441-cc5a6ca9ec7b",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "743f8a0b-e214-46ed-917b-d5499f53ba84"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "f5201028-87be-4041-ac0c-19cd82842185"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "e56f327f-5f94-4e00-9441-cc5a6ca9ec7b",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "4269b940-7be2-43a7-ac6a-b09827b1e987",
+      "Description": "The more relaxed siblings of [And] and [All] are [Or] and [Any].\nThey return true if at least one input is true."
+    },
+    {
+      "Id": "da8c22f1-987e-4aea-b246-528bc4a53a68",
+      "Description": "In this example, several sequence animation operators are combined to simulate a rhythm pattern."
+    },
+    {
+      "Id": "f9fee790-9615-4737-b35f-803fd0325238",
+      "Description": "Extend the logic so it works for all parts of the rhythm.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "FormatVersion": 3,
+  "Id": "aa1c7c11-62e6-4b1d-a7eb-a3fc1347f3c6"/*GainAndBiasCurve*/,
+  "Inputs": [
+    {
+      "Id": "9a47a81a-bb15-4c2a-962b-0fb9f48afd94"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

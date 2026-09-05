@@ -16,9 +16,9 @@ cbuffer Params : register(b0)
     float Debug;
 }
 
-StructuredBuffer<Point> PointsA : t0;        // input
-StructuredBuffer<Point> PointsB : t1;        // input
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+StructuredBuffer<Point> PointsA : register(t0);        // input
+StructuredBuffer<Point> PointsB : register(t1);        // input
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 inline float3 Interpolate(float t, float3 pA, float3 tA, float3 tB, float3 pB)
 {

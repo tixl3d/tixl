@@ -28,10 +28,10 @@ cbuffer Params : register(b2)
     int PointCountPerLineReflections;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
-sampler ClampedSampler :s0;
+sampler ClampedSampler : register(s0);
 
 //=== Additional Resources ==========================================
 /*{RESOURCES(t1)}*/
@@ -83,7 +83,7 @@ static const float NoisePhase = 0;
 
     Point p = SourcePoints[sourceIndex];
 
-    // if (isnan(p.Scale.x))
+    // if (IsSeparator(p))
     // {
     //     // Todo Write this properly...
     //     // ResultPoints[sourceIndex] = p;

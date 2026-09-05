@@ -16,8 +16,8 @@ cbuffer IntParams : register(b1)
     int Seed;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 inline int imod2(int val, int repeat) 
 {

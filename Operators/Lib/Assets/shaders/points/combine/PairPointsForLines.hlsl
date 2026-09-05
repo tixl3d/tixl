@@ -9,9 +9,9 @@ cbuffer Params : register(b0)
     float InitWTo01;
 }
 
-StructuredBuffer<Point> PointsA : t0;        // input
-StructuredBuffer<Point> PointsB : t1;        // input
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+StructuredBuffer<Point> PointsA : register(t0);        // input
+StructuredBuffer<Point> PointsB : register(t1);        // input
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

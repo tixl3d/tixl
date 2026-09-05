@@ -5,6 +5,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectFormatVersion>2</ProjectFormatVersion>
     <RootNamespace>Video</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
@@ -116,10 +117,10 @@
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively). -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
-    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
-    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
-    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageAssets Include="Assets/**/*" />
+    <PackageSymbols Include="Symbols/**/*.t3" />
+    <PackageSymbolUis Include="Symbols/**/*.t3ui" />
+    <PackageSourceCode Include="Symbols/**/*.cs" />
     <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
@@ -129,9 +130,9 @@
     <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <ItemGroup>
-      <_StaleBuildOutput Include="bin/$(Configuration)/**/*" Exclude="bin/$(Configuration)/**/av*.dll;bin/$(Configuration)/**/sw*.dll;bin/$(Configuration)/**/postproc*.dll" />
+      <_StaleBuildOutput Include="$(BaseOutputPath)$(Configuration)/**/*" Exclude="$(BaseOutputPath)$(Configuration)/**/av*.dll;$(BaseOutputPath)$(Configuration)/**/sw*.dll;$(BaseOutputPath)$(Configuration)/**/postproc*.dll" />
     </ItemGroup>
     <Delete Files="@(_StaleBuildOutput)" ContinueOnError="true" />
   </Target>

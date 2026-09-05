@@ -33,7 +33,7 @@ cbuffer Params : register(b1)
     int OrientationMode;
 }
 
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 float3 RotatePointAroundAxis(float3 In, float3 Axis, float Rotation)
 {
@@ -66,7 +66,6 @@ float3 RotatePointAroundAxis(float3 In, float3 Axis, float Rotation)
     ResultPoints[index].Position = lerp(Center, Center + Direction * LengthFactor, f);
 
     // float f = (float)(index)/steps;
-    // ResultPoints[index].W = W + WOffset * (float)(index)/steps;
 
     float4 rot2 = 0;
     if (OrientationMode < 0.5)
@@ -93,7 +92,7 @@ float3 RotatePointAroundAxis(float3 In, float3 Axis, float Rotation)
         rot2 = normalize(qFromAngleAxis((OrientationAngle + Twist * f) / 180 * 3.141578, ManualOrientationAxis));
     }
 
-    ResultPoints[index].Scale = (AddSeparator && index == pointCount - 1) ? sqrt(-1) : (PointSize.x + PointSize.y * f1);
+    ResultPoints[index].Scale = (AddSeparator && index == pointCount - 1) ? NAN : (PointSize.x + PointSize.y * f1);
     ResultPoints[index].Rotation = rot2;
     ResultPoints[index].Color = lerp(ColorA, ColorB, f1);
     ResultPoints[index].FX1 = FX1.x + FX1.y * f1;

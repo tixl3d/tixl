@@ -101,6 +101,16 @@ internal sealed class SkillMapData
     {
         Directory.CreateDirectory(FileLocations.ReadOnlySettingsPath);
         JsonUtils.TrySaveJson(Data, SkillMapPath);
+        HasUnsavedChanges = false;
+    }
+
+    /// <summary>Set when editing changes topics or their content; cleared by <see cref="Save"/>.</summary>
+    [Newtonsoft.Json.JsonIgnore]
+    internal static bool HasUnsavedChanges;
+
+    internal static void FlagAsModified()
+    {
+        HasUnsavedChanges = true;
     }
 
     private static string SkillMapPath => Path.Combine(FileLocations.ReadOnlySettingsPath, "SkillMap.json");

@@ -1,0 +1,96 @@
+{
+  "FormatVersion": 3,
+  "Id": "a38626d8-3145-4aa9-820f-ca16b3411985"/*RadialCPoints*/,
+  "Description": "\n\nAKA: RadialPointsCpu, cpu points",
+  "InputUis": [
+    {
+      "InputId": "03a54164-8ef9-4cc8-88f3-55aa5db3640c"/*Offset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "75acdfbd-176b-4e65-bd33-ac10f8373eb2"/*CloseCircle*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      }
+    },
+    {
+      "InputId": "9c26fcad-ef7d-46aa-9a7e-eb853e88e955"/*Radius*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "bce00400-5951-4574-af61-b24ff0ad5e23"/*RadiusOffset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "c02152e3-d643-4e1d-99ca-11ab6bc8a5fb"/*WOffset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 405.0
+      }
+    },
+    {
+      "InputId": "c9341b17-5f56-4112-ba87-fe734b7bf0ba"/*Cycles*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "cb697476-36df-44ae-bd1d-138cc49467c2"/*Count*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d1e78447-e110-4cdf-b761-dff32f05140d"/*Axis*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 315.0
+      }
+    },
+    {
+      "InputId": "d68dcba4-d713-4bc7-a418-85042efc26d3"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "dee89ad4-1516-40d0-a682-98e05a8b7c12"/*W*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "e3736ced-d10d-41f3-92ed-ddfc3edd1bc6"/*StartAngle*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Scale": 1.0
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "f270e4c2-3e5a-4f3e-b474-09e9291999e1"/*ResultList*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

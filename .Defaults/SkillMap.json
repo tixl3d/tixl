@@ -142,8 +142,8 @@
         "6e4d1aee-2cdd-431c-ae5e-028c483ec267",
         "2dec2fcf-3466-4b3b-aee7-07127354d9cd",
         "4d512889-dbed-4b50-97c9-47f077cbf34f",
-        "f15f35fe-a482-45b2-a909-4e88f529e71e",
-        "71d6f1eb-7b02-4635-b840-45082fb9b102"
+        "71d6f1eb-7b02-4635-b840-45082fb9b102",
+        "1bbfc1bc-ea24-40f8-8f6f-1b9ff3be5c3f"
       ],
       "Namespace": "Skills.Math.M01_BasicMath",
       "TopicType": "Numbers",
@@ -192,8 +192,10 @@
         "Y": -10.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
-      "UnlocksTopics": [],
-      "Namespace": null,
+      "UnlocksTopics": [
+        "42bc1ea6-b0c3-47d4-b427-cd9e09389f71"
+      ],
+      "Namespace": "Skills.Math.M02_IntsVsFloats",
       "TopicType": "Numbers",
       "Requirement": "AllInputPaths"
     },
@@ -342,7 +344,7 @@
         "22ca2fc1-417e-49fe-88c1-a5eb4b7711ae",
         "320cb1e3-5713-45aa-92d0-cf4031a3fef3"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Math.M06.Vectors",
       "TopicType": "Numbers",
       "Requirement": "AllInputPaths"
     },
@@ -431,7 +433,8 @@
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [
         "6c3dff36-9aee-4849-bf0b-0d2a13d57956",
-        "a096e1b9-3a73-4271-8f4e-96ed5855b112"
+        "a096e1b9-3a73-4271-8f4e-96ed5855b112",
+        "f5fbbfab-3bd9-4c05-be32-f4af0ec21f35"
       ],
       "Namespace": "Skills.Image.I02_Gradients",
       "TopicType": "Image",
@@ -488,11 +491,11 @@
     },
     {
       "Id": "7f093d8e-9d75-46a0-ac61-4a829b70358d",
-      "Title": "Basic Drawing",
-      "Description": "The essentials of drawing with TiXL",
+      "Title": "Moving Things",
+      "Description": "The essentials of moving things with TiXL",
       "MapCoordinate": {
-        "X": 5.0,
-        "Y": -7.0
+        "X": 2.0,
+        "Y": -5.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [
@@ -564,18 +567,18 @@
     },
     {
       "Id": "f15f35fe-a482-45b2-a909-4e88f529e71e",
-      "Title": "Boolean & Triggers",
+      "Title": "Triggers Events",
       "Description": "",
       "MapCoordinate": {
         "X": 0.0,
-        "Y": -8.0
+        "Y": -7.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [
         "4efe0a8d-4d49-426c-b762-73e730a76e20",
         "50f09b3a-39f0-48a6-bc83-6bc0c1aff185"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Math.M05.BasicMath",
       "TopicType": "Numbers",
       "Requirement": "AllInputPaths"
     },
@@ -585,11 +588,11 @@
       "Description": "",
       "MapCoordinate": {
         "X": 1.0,
-        "Y": -8.0
+        "Y": -7.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
-      "Namespace": null,
+      "Namespace": "Skills.Math.M04.BasicMath",
       "TopicType": "Numbers",
       "Requirement": "AllInputPaths"
     },
@@ -599,7 +602,7 @@
       "Description": "",
       "MapCoordinate": {
         "X": 0.0,
-        "Y": -7.0
+        "Y": -6.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
@@ -648,13 +651,13 @@
         "4c2be92b-b340-4122-a010-14c0bdfa941c",
         "82d5a04b-d556-4bde-a583-596b29142691"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Render.R03_Camera",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
     {
       "Id": "47fa588a-67ff-4972-b42f-7fccc4505793",
-      "Title": "Mesh Primitives",
+      "Title": "Drawing Meshes",
       "Description": "",
       "MapCoordinate": {
         "X": 1.0,
@@ -668,7 +671,7 @@
         "1ad7270b-f246-4e05-ac92-02169a9a8fb5",
         "af08df40-a878-408f-a5b2-e1be361e50e5"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Render.R02_DrawingMeshes",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
@@ -686,7 +689,7 @@
         "e1025d52-5cd7-4c1e-af78-c7cf4ea335ab",
         "6bd3c94c-f01f-4fc4-94e4-8f28442decc6"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Render.R05_ShadingAntMaterials",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
@@ -706,7 +709,7 @@
     },
     {
       "Id": "fc7498f0-9df4-49ca-943a-cf2c94ebf356",
-      "Title": "Combining Meshes",
+      "Title": "Creating Meshes",
       "Description": "",
       "MapCoordinate": {
         "X": 0.0,
@@ -714,7 +717,7 @@
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
-      "Namespace": null,
+      "Namespace": "Skills.Mesh.Me01_CreatingMeshes",
       "TopicType": "Gpu",
       "Requirement": "AllInputPaths"
     },
@@ -1000,7 +1003,7 @@
       "UnlocksTopics": [
         "ad5ea28a-834a-423f-bf39-0f882c34791c"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Render.R07_SwitchingScenes",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
@@ -1157,7 +1160,7 @@
       "UnlocksTopics": [
         "f37f0fa5-2b34-4b82-a379-a32748f77725"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Image.I04_Gradients",
       "TopicType": "Image",
       "Requirement": "AllInputPaths"
     },
@@ -1465,7 +1468,7 @@
     },
     {
       "Id": "de167c62-85e3-4397-a7c1-66bcc3cf54b5",
-      "Title": "Point Lights",
+      "Title": "Shading & Light",
       "Description": "",
       "MapCoordinate": {
         "X": 2.0,
@@ -1475,7 +1478,7 @@
       "UnlocksTopics": [
         "4c2be92b-b340-4122-a010-14c0bdfa941c"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Render.R06_ShadingAndLight",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
@@ -1722,7 +1725,7 @@
       "UnlocksTopics": [
         "e81bac72-c60e-49ca-8880-0be823b60ce8"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Image.I03_AnalyzingImages",
       "TopicType": "Image",
       "Requirement": "AllInputPaths"
     },
@@ -1758,7 +1761,7 @@
     },
     {
       "Id": "82d5a04b-d556-4bde-a583-596b29142691",
-      "Title": "Render To Images",
+      "Title": "Rendering Basics",
       "Description": "",
       "MapCoordinate": {
         "X": 0.0,
@@ -1767,9 +1770,10 @@
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [
         "260eeb3d-28d3-49a4-af45-51a401760102",
-        "aae0bdfa-b86f-4368-8160-7be3d0a8b5ec"
+        "aae0bdfa-b86f-4368-8160-7be3d0a8b5ec",
+        "7f093d8e-9d75-46a0-ac61-4a829b70358d"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Render.R04_RenderBasics",
       "TopicType": "Image",
       "Requirement": "AllInputPaths"
     },
@@ -1817,17 +1821,20 @@
     },
     {
       "Id": "1bbfc1bc-ea24-40f8-8f6f-1b9ff3be5c3f",
-      "Title": "???",
+      "Title": "Boolean & Animations",
       "Description": "",
       "MapCoordinate": {
-        "X": 19.0,
-        "Y": -12.0
+        "X": 1.0,
+        "Y": -8.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
-      "UnlocksTopics": [],
-      "Namespace": "Skills.Math.M01.BasicMath",
+      "UnlocksTopics": [
+        "4efe0a8d-4d49-426c-b762-73e730a76e20",
+        "f15f35fe-a482-45b2-a909-4e88f529e71e"
+      ],
+      "Namespace": "Skills.Math.M03.BasicMath",
       "TopicType": "Numbers",
-      "Requirement": "None"
+      "Requirement": "AllInputPaths"
     },
     {
       "Id": "b6da8847-315a-4e98-b067-e56ed25eac97",
@@ -1858,6 +1865,20 @@
       "Namespace": "Skills.Image.Skills.Image.I20_Puzzles",
       "TopicType": "Image",
       "Requirement": "None"
+    },
+    {
+      "Id": "bb4a66c5-2336-40fa-ab76-dae5ced8bf39",
+      "Title": "New topic120",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 20.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
     }
   ]
 }

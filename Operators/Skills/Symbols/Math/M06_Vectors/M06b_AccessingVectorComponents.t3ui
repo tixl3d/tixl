@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "3975953a-bc99-4f52-a75a-988ed52255b7"/*M06b_AccessingVectorComponents*/,
+  "Description": "Accessing Vector Components",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2b795e52-b2a8-4a89-bcb7-4ea00068e9e6"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "4ce1c067-a5c4-42b4-b860-2f7ecdb79d9d"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "5d208af5-b478-45c5-a286-0d6a073b7ac0"/*Text*/,
+      "SectionId": "ae1300a9-0e7b-46c5-aa58-c5103a367832",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1a850df7-e9ae-428c-93d0-ced021335845"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ae1300a9-0e7b-46c5-aa58-c5103a367832",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "35be34f5-6d62-4491-93ec-ad67c234317e",
+      "Description": "The [Vec3Components] operator allows access to the individual components of a vector."
+    },
+    {
+      "Id": "b32cde84-da57-4481-bcb4-29e64b93d543",
+      "Description": "Position the [Text] operator using the output of [PerlinNoise3].",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "3f9d7b21-8e64-4c05-a1b7-d5c2e8f0a693"/*GetGeometryStats*/,
+  "Inputs": [
+    {
+      "Id": "4a8e2c6f-d1b3-4f70-9e5d-b7c0a3f8e214"/*Geometry*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

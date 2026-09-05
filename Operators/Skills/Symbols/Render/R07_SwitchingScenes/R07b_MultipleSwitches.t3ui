@@ -1,0 +1,70 @@
+{
+  "FormatVersion": 3,
+  "Id": "2d7079c8-9811-4336-8dc8-840a35d37e09"/*R07b_MultipleSwitches*/,
+  "Description": "Multiple Switches",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "9d8ada5c-c87b-47c3-92fc-4a9f03594084"/*Text*/,
+      "SectionId": "9513ca8f-8d9b-48c8-8913-604dd445daa8",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "a27cef7f-2076-459a-9f9e-706554d58c9d"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "bb6b145c-e5bd-43e4-8bfc-13c83706e6b7"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "8b2bba97-96f8-4b64-b750-c35d70d756d1"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "9513ca8f-8d9b-48c8-8913-604dd445daa8",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "e3fa76b1-4489-4e81-aa03-5df351e610d8",
+      "Description": "This example is more complex because a [Switch] is also used to control the [Material]."
+    },
+    {
+      "Id": "56f81ff5-3c47-470c-b0b7-a2c17c765480",
+      "Description": "Notice how inactive parts of the graph fade out.\nThese branches are dormant and do not need to be updated."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "f29bd702-4ebf-4bd2-9416-884c72fbc769"/*RemapFieldValues*/,
+  "Inputs": [
+    {
+      "Id": "72d1fc6b-fddc-4011-a6d3-b78cbff5a4ce"/*Field*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "0454c682-e307-4455-861b-00c40b3d3dfc"/*Curve*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

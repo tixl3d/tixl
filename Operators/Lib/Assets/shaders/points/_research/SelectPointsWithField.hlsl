@@ -32,8 +32,8 @@ cbuffer Params : register(b2)
     int MappingMode;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 sampler ClampedSampler : register(s0);
 
 //=== Additional Resources ==========================================
@@ -92,7 +92,7 @@ inline float fmod(float x, float y)
 
     Point p = SourcePoints[i.x];
 
-    if (isnan(p.Scale.x))
+    if (IsSeparator(p))
     {
         ResultPoints[i.x] = p;
         return;

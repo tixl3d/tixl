@@ -1,0 +1,241 @@
+{
+  "FormatVersion": 3,
+  "Id": "69020cd2-de9a-4150-bac5-b547301e7bc8"/*TransformCPointsExample*/,
+  "Description": "Illustrates how to use [TransformCPoints] to implement an interactive camera control.\n\nThis is different from Tooll's CameraInteraction because it would work for exported executables.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "057ac0f2-f9de-4cca-8fc9-536ab54b0936"/*BoolToFloat*/,
+      "Position": {
+        "X": 150.0,
+        "Y": 269.0
+      }
+    },
+    {
+      "ChildId": "06916b25-98d5-4866-853f-5b00e4264f8b"/*Abs*/,
+      "Position": {
+        "X": 600.0,
+        "Y": 478.0
+      }
+    },
+    {
+      "ChildId": "0fbb11e6-2747-44ae-ae3d-eee66a52ea67"/*q*/,
+      "Position": {
+        "X": 600.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "11d85cf3-751a-403e-a31b-a5235f7e9b8a"/*Point*/,
+      "Position": {
+        "X": 1181.7922,
+        "Y": 23.17279
+      }
+    },
+    {
+      "ChildId": "1dbf82e1-523f-48be-ac32-4a5047bf3d43"/*ScaleVector3*/,
+      "Position": {
+        "X": 1200.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "1ffddd6f-34bf-4e1f-b2a5-ee7d35a44230"/*CubeMesh*/,
+      "Position": {
+        "X": 1348.9097,
+        "Y": -78.74823
+      }
+    },
+    {
+      "ChildId": "283e4977-44ca-4b94-98c8-98168aa43c4c"/*DampVec3*/,
+      "Position": {
+        "X": 1200.0,
+        "Y": 166.0
+      }
+    },
+    {
+      "ChildId": "302a43f9-9747-4445-8be8-ccf42be1868f"/*Vector3*/,
+      "Position": {
+        "X": 900.0,
+        "Y": 166.0
+      }
+    },
+    {
+      "ChildId": "395d1256-0dec-40d5-978b-044688c94d5b"/*Compare*/,
+      "Position": {
+        "X": 750.0,
+        "Y": 478.0
+      }
+    },
+    {
+      "ChildId": "4463665e-ffa8-4887-a36e-bd2fa78d59f6"/*Camera*/,
+      "Position": {
+        "X": 1648.9097,
+        "Y": -141.74823
+      }
+    },
+    {
+      "ChildId": "47eb9a81-91d9-4680-a7bc-167ef29855d8"/*Sum*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 206.0
+      }
+    },
+    {
+      "ChildId": "55c2578c-1130-4951-b408-96bf23a1152f"/*BoolToFloat*/,
+      "Position": {
+        "X": 150.0,
+        "Y": 206.0
+      }
+    },
+    {
+      "ChildId": "5f61edf6-d3ae-4ebc-8085-a1df27e2c98f"/*ScaleVector3*/,
+      "Position": {
+        "X": 1050.0,
+        "Y": 166.0
+      }
+    },
+    {
+      "ChildId": "62b4ab08-bf04-4658-ae10-a7013dfced42"/*_GridPoints_Old*/,
+      "Position": {
+        "X": 1198.9097,
+        "Y": -141.74823
+      }
+    },
+    {
+      "ChildId": "64443450-8c7f-4bd3-85e5-898dceb9ff1b"/*_RandomizePoints_Legacy1*/,
+      "Position": {
+        "X": 1348.9097,
+        "Y": -141.74823
+      }
+    },
+    {
+      "ChildId": "6db026df-132c-4ffe-a9b5-5c4aef96815c"/*BoolToFloat*/,
+      "Position": {
+        "X": 750.0,
+        "Y": 723.0
+      }
+    },
+    {
+      "ChildId": "74b412c4-8f97-416a-bf80-123343235089"/*e*/,
+      "Position": {
+        "X": 600.0,
+        "Y": 723.0
+      }
+    },
+    {
+      "ChildId": "79d4a800-ba43-4826-bfd0-5b86ea7b8578"/*BoolToFloat*/,
+      "Position": {
+        "X": 150.0,
+        "Y": 415.0
+      }
+    },
+    {
+      "ChildId": "7ccc22f7-ba6c-4e2a-8c18-79ea04488180"/*Sum*/,
+      "Position": {
+        "X": 900.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "8e4d0af7-9e72-4bda-83b8-60d6eed89ad6"/*a*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 206.0
+      }
+    },
+    {
+      "ChildId": "94487d1d-e5ce-419f-8620-1558cef22c96"/*TransformCPoints*/,
+      "Position": {
+        "X": 1498.9097,
+        "Y": 249.19379
+      }
+    },
+    {
+      "ChildId": "9be99414-220e-49ea-a3d6-48941d6852a3"/*Sum*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 352.0
+      }
+    },
+    {
+      "ChildId": "9f1ce918-90fa-4dba-8e0b-967a3e91ebd8"/*BoolToFloat*/,
+      "Position": {
+        "X": 150.0,
+        "Y": 352.0
+      }
+    },
+    {
+      "ChildId": "a8122cdc-b666-4ff4-927f-6cff1c10555b"/*Sum*/,
+      "Position": {
+        "X": 450.0,
+        "Y": 478.0
+      }
+    },
+    {
+      "ChildId": "b47c797e-cdbe-48e6-b98e-31cdc74118df"/*d*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 269.0
+      }
+    },
+    {
+      "ChildId": "bd40aa56-1bda-4716-8783-a2f444d56569"/*DrawMeshAtPoints*/,
+      "Position": {
+        "X": 1498.9097,
+        "Y": -141.74823
+      }
+    },
+    {
+      "ChildId": "d2f135ed-0a1b-46e3-b2a5-bfca19948fc4"/*Vector3*/,
+      "Position": {
+        "X": 1050.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "dc5a3e03-2a55-4ee8-8dce-89498cc996ab"/*BoolToFloat*/,
+      "Position": {
+        "X": 750.0,
+        "Y": 660.0
+      }
+    },
+    {
+      "ChildId": "e5809c74-29da-46f8-8c38-4d43d155ec2e"/*w*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 352.0
+      }
+    },
+    {
+      "ChildId": "f61c4046-2a26-4e5b-8741-d2332b27d83b"/*S*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 415.0
+      }
+    },
+    {
+      "ChildId": "f9ea9fa6-8564-4e9f-8047-c3e5a3550a32"/*TransformCPoints*/,
+      "Position": {
+        "X": 1350.0,
+        "Y": 166.0
+      }
+    },
+    {
+      "ChildId": "fd785054-0671-43d0-80c3-1017702b9858"/*TriggerAnim*/,
+      "Position": {
+        "X": 900.0,
+        "Y": 478.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "3a1fe126-01e6-4d55-9abf-7344c195a4fd"/*Output*/,
+      "Position": {
+        "X": 1798.9097,
+        "Y": -141.74823
+      }
+    }
+  ]
+}

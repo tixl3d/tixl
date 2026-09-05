@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "c19a5ea6-cb61-4ceb-88d1-8ba7a90a1963"/*X04x_Template*/,
+  "Description": "Template Title",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1a1d5d6b-012f-4aa3-87ef-53d49ad02509"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "89bb531f-9edb-48fd-9d49-bdac2f9e8a72"/*Text*/,
+      "SectionId": "4db589f4-c981-4365-a4ec-20621470bfed",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "a1d249f9-ec87-4ade-974f-d71c858b8b3f"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4cfbcffd-c767-4db5-87b3-c08815c392a8"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "4db589f4-c981-4365-a4ec-20621470bfed",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "bea9a85e-6ffc-4b2a-a537-01dc5dca2268",
+      "Description": "In computer graphics, positions are defined using three values along the x, y, and z axes.\nIn TiXL's coordinate system, x points to the right, y points upward, and z points toward the camera.\nYou can use the thumb, index finger, and middle finger of your right hand to remember their orientation."
+    },
+    {
+      "Id": "65ca689b-5195-49cf-b32b-9c1487ddd265",
+      "Description": "Other software may use different coordinate systems.\nFor example, some CAD applications use x and y as the ground plane.\nWith TiXL's default camera, the position (0, 0, 0) is centered on the screen, so an object that is 2 units tall touches both the top and bottom edges of the view."
+    },
+    {
+      "Id": "2232adcc-cb96-46a9-9c5b-11c55852d898",
+      "Description": "We can use [AnimValue] and [Vector3] to build a simple animation.\nBoth operators will be covered in more detail later."
+    },
+    {
+      "Id": "ace8409b-4597-4dda-8f07-74c71141fdeb",
+      "Description": "Connect the operator to the [Vector3] to create the reference animation.",
+      "Style": "CallToAction"
+    }
+  ]
+}

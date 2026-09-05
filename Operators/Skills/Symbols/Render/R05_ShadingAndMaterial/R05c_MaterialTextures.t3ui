@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "fdca1fdf-fbae-4844-a6a2-a543f80ceb79"/*R05c_MaterialTextures*/,
+  "Description": "Material Textures",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "29280769-e093-436c-bae5-4c6b55bde1de"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "726e8a21-0708-4f23-b9a1-17077b4e5b3c"/*Text*/,
+      "SectionId": "7e7a0fe1-9caa-4328-812e-31f5646062fb",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "d9db7886-7508-444c-9141-84c4fd6cf3cd"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "3c9b337c-0cc2-40b8-be20-7e3cecdf2e3c"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "7e7a0fe1-9caa-4328-812e-31f5646062fb",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "8a4f6291-1b39-4669-903d-6de0c93334ed",
+      "Description": "So far, only color parameters of [SetMaterial] have been used.\nEach of these parameters also provides a texture input that allows images to be connected."
+    },
+    {
+      "Id": "6d821854-80cb-4e2b-87bb-c818d0b583a7",
+      "Description": "Recreate the color example using texture inputs.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -77,6 +77,23 @@ public sealed class CompositionSettings
         return false;
     }
 
+    /// <summary>
+    /// Deep-copies the settings through their own serialization, so the clone matches what a
+    /// save/load round-trip of the source would produce. Used when duplicating a symbol as a new type.
+    /// </summary>
+    public CompositionSettings Clone()
+    {
+        using var stringWriter = new StringWriter();
+        using (var jsonWriter = new JsonTextWriter(stringWriter))
+        {
+            jsonWriter.WriteStartObject();
+            WriteToJson(jsonWriter);
+            jsonWriter.WriteEndObject();
+        }
+
+        return ReadFromJson(JObject.Parse(stringWriter.ToString())) ?? new CompositionSettings();
+    }
+
     #region Enums
 
     public enum AudioSources

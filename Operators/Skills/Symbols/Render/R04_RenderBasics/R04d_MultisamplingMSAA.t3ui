@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "abb8caef-fba7-457c-9934-613d6476f99f"/*R04d_MultisamplingMSAA*/,
+  "Description": "Multisampling (MSAA)",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "71558559-5d5d-4877-9d97-0cf5a79ff79e"/*Text*/,
+      "SectionId": "91fd358c-6715-4434-8087-61bafb8a27bd",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "7cf119aa-bc27-4ea1-8ca8-fb73c9a9adc8"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "92965e78-61bb-4e9d-8412-f8fd23bcd801"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c05ffcf9-eb72-40c4-b553-d7e4e94c7146"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "91fd358c-6715-4434-8087-61bafb8a27bd",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "051fe0b1-26a6-42e8-85d5-746005682a9d",
+      "Description": "RenderTarget uses multisample anti-aliasing (MSAA) to smooth jagged edges.\nThis instructs the graphics hardware to render edges at a higher effective resolution.\nMSAA is enabled by default."
+    },
+    {
+      "Id": "10222e59-48dc-4868-a802-f7bb9fc89b40",
+      "Description": "Higher quality comes at a performance cost.\nIn most projects this is not an issue, but scenes with dozens or hundreds of RenderTargets can be affected.\nIn some cases, a sharper look may even be preferred."
+    },
+    {
+      "Id": "9c9a6a6d-add9-4812-a9c6-cfcd2f81b878",
+      "Description": "This challenge compares different MSAA modes.\nNotice that MSAA affects mesh edges, but not images or raymarched geometry."
+    },
+    {
+      "Id": "ec6a604e-d6ff-4f59-9b0a-c070995c1ba2",
+      "Description": "Find the correct settings to replicate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

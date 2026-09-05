@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using T3.Core.Operator;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -77,6 +78,7 @@ public sealed partial class SymbolUi
     internal void BumpVersionCounter()
     {
         VersionCounter++;
+        GlobalVersionCounter++;
         // Forward to the Core Symbol so operators can cache per-frame child scans and rebuild only when
         // the symbol changes (the Player has no SymbolUi, but its graph is static so the mirror stays 0).
         Symbol.VersionCounter = VersionCounter;
@@ -86,6 +88,12 @@ public sealed partial class SymbolUi
     /// Can be used for invalidating display caching
     /// </summary>
     internal int VersionCounter { get;private set; }
+
+    /// <summary>
+    /// Process-wide monotonic change counter, bumped on every symbol-ui modification.
+    /// Lets external observers (debug protocol clients) cheaply detect "did anything change".
+    /// </summary>
+    internal static int GlobalVersionCounter { get; private set; }
 
     internal SymbolUi CloneForNewSymbol(Symbol newSymbol, Dictionary<Guid, Guid> oldToNewIds = null)
     {
@@ -127,6 +135,30 @@ public sealed partial class SymbolUi
             tourPoints.Add(tp.Clone());
         }
 
-        return new SymbolUi(newSymbol, _ => [], inputUis, outputUis, [], links, tourPoints, hasIdMap);
+        var newSymbolUi = new SymbolUi(newSymbol, _ => [], inputUis, outputUis, [], links, tourPoints, hasIdMap);
+
+        // Per-symbol editor settings (timeline view, render and recording setup, window layout) travel
+        // with the duplicate. Output-window pinning is deliberately skipped — its pinned instance
+        // paths would still reference the source project's instances.
+        newSymbolUi.RenderSettings = RenderSettings?.Clone();
+        newSymbolUi.RecordingSettings = CloneViaJson(RecordingSettings);
+        newSymbolUi.TimelineState = CloneViaJson(TimelineState);
+        newSymbolUi.WindowLayout = WindowLayout;
+        newSymbolUi.WindowLayoutImGuiVersion = WindowLayoutImGuiVersion;
+        newSymbolUi.WindowVisibility = WindowVisibility == null ? null : new Dictionary<string, bool>(WindowVisibility);
+
+        return newSymbolUi;
+    }
+
+    /// <summary>
+    /// Deep-copies a settings object through the same Newtonsoft serialization that persists it,
+    /// so the clone matches what a save/load round-trip of the source would produce.
+    /// </summary>
+    private static T CloneViaJson<T>(T source) where T : class
+    {
+        if (source == null)
+            return null;
+
+        return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source));
     }
 }

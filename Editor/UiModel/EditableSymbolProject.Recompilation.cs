@@ -224,7 +224,9 @@ internal partial class EditableSymbolProject
         }
     }
 
-    private bool TryRecompile(bool updatePackage, [NotNullWhen(false)] out string? failureLog)
+    // Internal so the debug protocol's reload request can recompile synchronously and
+    // return the failure log; regular reloads go through the file-watcher path.
+    internal bool TryRecompile(bool updatePackage, [NotNullWhen(false)] out string? failureLog)
     {
         lock (ProjectSetup.SymbolDataLock)
         {

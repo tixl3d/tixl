@@ -20,11 +20,11 @@ cbuffer Params : register(b1)
     int StrengthFactor;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
+StructuredBuffer<Point> SourcePoints : register(t0);
 Texture2D<float4> CurveImage : register(t1);
 Texture2D<float4> GradientImage : register(t2);
 
-RWStructuredBuffer<Point> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 sampler ClampedSampler : register(s0);
 
 inline float3 fmod(float3 x, float3 y)
@@ -114,29 +114,6 @@ inline float3 fmod(float3 x, float3 y)
         break;
     }
 
-    // if (MappingMode == MAPPING_NORMAL)
-    // {
-    // }
-    // // What does this even mean?!
-    // else if (MappingMode == MAPPING_FORSTART)
-    // {
-    //     f = f0 / Range - Phase;
-    // }
-    // else if (MappingMode == MAPPING_PINGPONG)
-    // {
-    //     f = fmod((f0 * 2 - 1 - 2 * Phase * Range) / Range, 2);
-    //     f += -1;
-    //     f = abs(f);
-    // }
-    // else if (MappingMode == MAPPING_REPEAT)
-    // {
-    //     f = f0 / Range - 0.5 - Phase;
-    //     f = fmod(f, 1);
-    // }
-    // else
-    // {
-    //     f = p.W;
-    // }
 
     if (WriteTo != 0)
     {
@@ -149,7 +126,7 @@ inline float3 fmod(float3 x, float3 y)
             org = p.FX1;
             break;
         case 2:
-            org = p.FX1;
+            org = p.FX2;
             break;
         }
 

@@ -1,0 +1,15 @@
+<!-- Roots the operator packages' build output under each project's .temp/ folder (project format V3),
+     keeping the project roots content-only. Must live in a props file: BaseIntermediateOutputPath and
+     MSBuildProjectExtensionsPath are consumed before the csproj body is evaluated. -->
+<Project>
+  <!-- This file shadows the repo root Directory.Build.props - chain up to it explicitly -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+  <PropertyGroup>
+    <BaseOutputPath>.temp/bin/</BaseOutputPath>
+    <BaseIntermediateOutputPath>.temp/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>.temp/obj/</MSBuildProjectExtensionsPath>
+    <!-- The SDK only auto-excludes the configured output paths; stale root-level bin/obj from the
+         previous format would otherwise enter the compile glob as duplicate sources -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin/**;obj/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "2b277fb9-2caa-4652-ae05-9f1806c19044"/*R05a_Rendering*/,
+  "Description": "Rendering",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "313b0c88-558d-4bb6-b556-3829eaac012c"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "5453359a-5bb6-4f09-90b8-9d510466676d"/*Text*/,
+      "SectionId": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "616b7f1c-3d56-4487-a247-194f4b3f4d7f"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ffc914f9-7924-45df-b1db-1e225b11907e"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "47ed3048-78c6-4712-bdd1-c3a528412e79",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "659617c9-009e-49ed-82bc-b26e083d8e9e",
+      "Description": "TiXL uses physically based rendering (PBR) for lighting and materials.\nThis model defines material properties such as roughness and metallic, and combines direct lighting with image-based lighting (IBL).\nThis chapter introduces the essential concepts needed to work with materials."
+    },
+    {
+      "Id": "8c59f9ad-f2ba-45d3-ac60-dff6d184ae6a",
+      "Description": "By default, TiXL uses a predefined studio lighting setup.\nThe default material is too rough to clearly show reflections, so a new [Material] operator is added to adjust this."
+    },
+    {
+      "Id": "42def860-9278-4772-bdce-e82e703d9165",
+      "Description": "Add a [Material] operator and adjust its roughness to match the reference.",
+      "Style": "CallToAction"
+    }
+  ]
+}

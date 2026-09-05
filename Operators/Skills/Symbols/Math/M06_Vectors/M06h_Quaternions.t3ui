@@ -1,0 +1,87 @@
+{
+  "FormatVersion": 3,
+  "Id": "7fe107c5-a541-4fd4-9d6a-0fa985b11be8"/*M06h_Quaternions*/,
+  "Description": "Quaternions",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "20d026f8-a90a-498f-b3dc-7addd4fad131"/*Text*/,
+      "SectionId": "89fc42e2-c316-4726-940b-352a1f3f8a92",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "9b0a7d37-d7e2-4069-8b9a-41e32db7a419"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "ca2e6940-93fe-405e-b81a-a5abe92b9b70"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "34a53cb5-d851-466f-bce9-fc650005a4b8"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "89fc42e2-c316-4726-940b-352a1f3f8a92",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "d29866d7-11b5-430d-8708-07138f7f9c96",
+      "Description": "Sooner or later, the term “quaternion” comes up when talking about rotations.\nUnderstanding the math is not required to use them in TiXL."
+    },
+    {
+      "Id": "2b7a6fc7-269a-4c9d-a2b7-56d97f08d3b3",
+      "Description": "A quaternion is a four-component rotation representation: x, y, z, and w.\nIt is useful for defining and blending rotations."
+    },
+    {
+      "Id": "c3dd6d8c-ac5a-42b7-a2db-d82a6bac6a2f",
+      "Description": "TiXL uses quaternions internally in many places.\nMost parameters use simpler representations, such as Euler angles or axis–angle rotations."
+    },
+    {
+      "Id": "5a759ff7-8134-4af1-9050-77b5d9b2afc9",
+      "Description": "One confusing detail is that Vector4 values are often interpreted as colors."
+    },
+    {
+      "Id": "530ce761-9bbf-43cf-a614-f0bffd01c622",
+      "Description": "This example shows a rare case where quaternions are used directly: blending between two rotations."
+    },
+    {
+      "Id": "7f8c195a-83cd-49d9-b695-82fcbe360edd",
+      "Description": "Solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

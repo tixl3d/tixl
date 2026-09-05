@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "54a9af60-51e7-48d0-8afc-aad5ef2d2be6"/*DistanceToPointsField*/,
+  "Inputs": [
+    {
+      "Id": "cacffef9-8573-4098-bb12-1b2ddcce77de"/*Points*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

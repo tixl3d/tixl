@@ -11,9 +11,9 @@ cbuffer Params : register(b0)
     float Scatter;
 }
 
-StructuredBuffer<Point> PointsA : t0;        // input
-StructuredBuffer<Point> PointsB : t1;        // input
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+StructuredBuffer<Point> PointsA : register(t0);        // input
+StructuredBuffer<Point> PointsB : register(t1);        // input
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 float SmootherStep(float x)
 {
@@ -91,7 +91,7 @@ float SmootherStep(float x)
     //float fallOffFromCenter = SmootherStep(1 - abs(f - 0.5) * 2);
     f += (hash11(t) - 0.5) * Scatter * fallOffFromCenter;
 
-    bool noBlend = isnan(A.Scale.x * B.Scale.x);
+    bool noBlend = IsSeparator(A) || IsSeparator(B);
 
 
     f = noBlend ? (f< 0.5 ? 0 : 1) : f;

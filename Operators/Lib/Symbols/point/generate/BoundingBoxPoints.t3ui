@@ -1,0 +1,175 @@
+{
+  "FormatVersion": 3,
+  "Id": "69bd6cd3-85b2-4a6c-9184-ab25045a51aa"/*BoundingBoxPoints*/,
+  "Description": "Generates the bounding box containing the points used as input / Indices : Center - 0, Min - 1, Max - 8.\n\nIn order to access its points' position, use [ReadPointsFromGpu] with [GetPointDataFromList].\n\nIt iterates through the source points, excluding those with invalid W values (-nan(ind)), and calculates the minimum and maximum bounds in each dimension (x, y, z). These bounds define the eight points of the bounding box: the minimum and maximum corners of the box. Additionally, it computes the middle point of the bounding box by averaging the minimum and maximum bounds",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "c6082d55-5e47-404f-96f9-612959cd75ce"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -634.71313,
+        "Y": 738.12384
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "13cc016c-5b16-472a-b798-3e2b0577eb5e"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 256.91046,
+        "Y": 615.377
+      }
+    },
+    {
+      "ChildId": "1705a63d-3d5a-485f-b920-e69f24200db5"/*GetBufferComponents*/,
+      "Position": {
+        "X": 255.17459,
+        "Y": 1002.8549
+      }
+    },
+    {
+      "ChildId": "1e55e4a8-a064-4ada-82c9-5c105033006b"/*ComputeShader*/,
+      "Position": {
+        "X": 29.58841,
+        "Y": 523.88074
+      }
+    },
+    {
+      "ChildId": "3c8730cd-d80f-49c5-93b7-6a56a06cbaea"/*StructuredBufferWithViews*/,
+      "Comment": "Buffer to save min/max boundaries.",
+      "Position": {
+        "X": 73.66431,
+        "Y": 1198.3932
+      }
+    },
+    {
+      "ChildId": "49276ef2-1044-418f-bf6b-3a17bce9d7f1"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 256.91046,
+        "Y": 546.377
+      }
+    },
+    {
+      "ChildId": "6839fe61-1816-4d6e-b93c-11e568b59232"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 942.9977,
+        "Y": 241.24176
+      }
+    },
+    {
+      "ChildId": "712925d4-8b1c-4971-bca3-463cc2242ed3"/*AnimValue*/,
+      "Position": {
+        "X": 10.210083,
+        "Y": 417.04852
+      }
+    },
+    {
+      "ChildId": "73e411c4-790c-4b33-9502-39cf13e6dc24"/*IntsToBuffer*/,
+      "Position": {
+        "X": 268.1373,
+        "Y": 778.54956
+      }
+    },
+    {
+      "ChildId": "76d784dd-bcc1-4415-beb5-c6d963574af1"/*GetBufferComponents*/,
+      "Position": {
+        "X": 223.6643,
+        "Y": 1198.3932
+      }
+    },
+    {
+      "ChildId": "886b599d-19fb-4804-8174-e677bcaf2ffd"/*GetBufferComponents*/,
+      "Position": {
+        "X": -484.7131,
+        "Y": 738.12384
+      }
+    },
+    {
+      "ChildId": "8cdf6a5d-9f5d-473a-8d99-dd94c902198c"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 618.20654,
+        "Y": 584.53235
+      }
+    },
+    {
+      "ChildId": "909dffac-9bbe-44c2-a399-3de82927109b"/*IntValue*/,
+      "Position": {
+        "X": -122.236725,
+        "Y": 661.8712
+      }
+    },
+    {
+      "ChildId": "a5c02770-f651-420c-ad9c-ae95307da3ae"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 579.92633,
+        "Y": 222.72685
+      }
+    },
+    {
+      "ChildId": "ad5f10a7-f918-431c-bb4c-0de95baf3d4d"/*IntValue*/,
+      "Position": {
+        "X": -58.489563,
+        "Y": 1088.842
+      }
+    },
+    {
+      "ChildId": "b11feebb-fde2-46e3-8533-eec0220bc049"/*Execute*/,
+      "Position": {
+        "X": 792.9977,
+        "Y": 241.24176
+      }
+    },
+    {
+      "ChildId": "b2400e5e-8226-4d7a-b210-a97b6e2a1fac"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 372.42142,
+        "Y": 336.44617
+      }
+    },
+    {
+      "ChildId": "bcd6b0ec-98dc-4bef-9796-511f20802d46"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 91.51044,
+        "Y": 1088.842
+      }
+    },
+    {
+      "ChildId": "c56a3435-2a19-45f7-a08d-a7f470cc6db5"/*IntsToBuffer*/,
+      "Position": {
+        "X": 372.42142,
+        "Y": 405.44617
+      }
+    },
+    {
+      "ChildId": "c9c40445-6ba1-4bff-9f02-3c2299ba506b"/*ClampInt*/,
+      "Position": {
+        "X": -272.23672,
+        "Y": 661.8712
+      }
+    },
+    {
+      "ChildId": "ed6b7ab0-bf24-468c-a18e-e88a904e6472"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 372.42142,
+        "Y": 267.44614
+      }
+    },
+    {
+      "ChildId": "f1ca9740-0cba-49af-86c6-3371cee7b85a"/*ComputeShader*/,
+      "Position": {
+        "X": 75.81085,
+        "Y": 190.50887
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "921d43ce-6167-409b-9748-d6f59daa1cde"/*Output*/,
+      "Position": {
+        "X": 1092.9976,
+        "Y": 241.24176
+      }
+    }
+  ]
+}

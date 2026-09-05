@@ -42,5 +42,6 @@ public class MeshBuffers: IDisposable
     {
         VertexBuffer?.Dispose();
         IndicesBuffer?.Dispose();
+        ChunkDefsBuffer?.Dispose();
     }
 }

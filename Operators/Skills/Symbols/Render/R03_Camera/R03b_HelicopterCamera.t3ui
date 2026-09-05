@@ -1,0 +1,74 @@
+{
+  "FormatVersion": 3,
+  "Id": "dcce7259-dbe4-4733-ab8d-511c52ad8773"/*R03b_HelicopterCamera*/,
+  "Description": "Helicopter Camera",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "5fd5672a-b046-4dd5-883e-fd9bdcf08042"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "945871e6-6eaa-4354-a11d-81e447970912"/*Text*/,
+      "SectionId": "235fd8cc-7693-423d-b0f8-d1a52a36d5c6",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "f11b8d34-878b-47c7-8aaf-98e4310c17d8"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b76749a5-26a1-4ced-b2d0-d668e2627b83"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "235fd8cc-7693-423d-b0f8-d1a52a36d5c6",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "73911dbb-d74f-4975-a522-e8d55175ee95",
+      "Description": "So far, the [Transform] operator has been used to move objects.\nAlternatively, the camera itself can be moved to view the scene from different positions and directions."
+    },
+    {
+      "Id": "e0d58f9f-afeb-44ca-9552-98c9b859719a",
+      "Description": "Within SkillQuest, interactive camera controls are disabled to keep things focused.\nCamera movement is therefore controlled entirely through operators."
+    },
+    {
+      "Id": "ae20016f-1963-456d-a386-23f2d461caf1",
+      "Description": "A simple but effective operator for this is [OrbitCamera].\nIt rotates the camera around a center point and provides parameters to control distance and orientation."
+    }
+  ]
+}

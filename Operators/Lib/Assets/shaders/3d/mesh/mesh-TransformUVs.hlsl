@@ -9,8 +9,8 @@ cbuffer Params : register(b0)
     float ToTexCoord2;
 }
 
-StructuredBuffer<PbrVertex> SourceVerts : t0;        
-RWStructuredBuffer<PbrVertex> ResultVerts : u0;   
+StructuredBuffer<PbrVertex> SourceVerts : register(t0);        
+RWStructuredBuffer<PbrVertex> ResultVerts : register(u0);   
 
 
 [numthreads(64,1,1)]

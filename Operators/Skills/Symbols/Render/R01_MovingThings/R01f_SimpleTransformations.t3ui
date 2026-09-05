@@ -1,0 +1,200 @@
+{
+  "FormatVersion": 3,
+  "Id": "511b9fd5-49e5-4506-9162-10a1e3c6e792"/*R01f_SimpleTransformations*/,
+  "Description": "Simpler Transformations",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "071cc412-6318-471a-a1f9-013e31397b5f"/*Rotate - Transform*/,
+      "Position": {
+        "X": 1122.0824,
+        "Y": 1675.2573
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "0e58638b-5333-45e9-8204-fa0b9e72acbe"/*SetMaterial*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1396.9315,
+        "Y": 1949.4624
+      }
+    },
+    {
+      "ChildId": "0f059f72-00e0-4d85-b5b4-fa5e56bf56b7"/*SetMaterial*/,
+      "Position": {
+        "X": 1526.0348,
+        "Y": 1599.8169
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "4349910f-f412-4109-93da-46feff9e5c75"/*SpreadLayout*/,
+      "Position": {
+        "X": 1666.0348,
+        "Y": 1599.8169
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "4a9b05d7-6969-4921-ba0b-5b97d54c64de"/*Rotate - Transform*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1301.3134,
+        "Y": 2117.262
+      }
+    },
+    {
+      "ChildId": "4b7cd9e5-9f74-4e37-a1f3-d59f51fe9a07"/*CubeMesh*/,
+      "Position": {
+        "X": 1122.0824,
+        "Y": 1570.2573
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "5bf3d4ea-1214-49e1-9c4b-a29a6f3e3835"/*DrawQuiz*/,
+      "Position": {
+        "X": 1901.468,
+        "Y": 1745.4009
+      }
+    },
+    {
+      "ChildId": "6e9fda8f-8946-44ee-9e6f-0ed3a889a8f4"/*SetMaterial*/,
+      "Position": {
+        "X": 1122.0824,
+        "Y": 1745.2573
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "8f412490-4766-479a-952f-037128e1d9a1"/*Move - Transform*/,
+      "Position": {
+        "X": 1122.0824,
+        "Y": 1640.2573
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "98ab2041-0d9f-4255-9669-22895d658e93"/*Scale - Transform*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1301.3134,
+        "Y": 2082.262
+      }
+    },
+    {
+      "ChildId": "9b61d450-b6e9-4200-bf8e-1cfa13aa613f"/*Scale - Transform*/,
+      "Position": {
+        "X": 1122.0824,
+        "Y": 1710.2573
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9c2d9b45-c5db-419a-b4bb-6e7fcd545e85"/*Complex - Transform*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1256.9315,
+        "Y": 1949.4624
+      }
+    },
+    {
+      "ChildId": "a7e735dd-d096-44e4-9e36-26124024f821"/*Complex - Transform*/,
+      "Position": {
+        "X": 1386.0348,
+        "Y": 1599.8169
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "bbb9fa33-fbde-4fb7-bf35-b0d5752f9d1f"/*Move - Transform*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1301.3134,
+        "Y": 2152.262
+      }
+    },
+    {
+      "ChildId": "bf5caedf-ff29-4452-abff-69771c416e3d"/*SetMaterial*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1301.3134,
+        "Y": 2187.262
+      }
+    },
+    {
+      "ChildId": "c6c4cd48-f9f5-41f9-b04d-a68f19cd0b5d"/*DrawMesh*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1037.6829,
+        "Y": 2013.6489
+      }
+    },
+    {
+      "ChildId": "f45ffe22-dac1-4eb8-9d98-7e33e1ff0144"/*CubeMesh*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1037.6829,
+        "Y": 1978.649
+      }
+    },
+    {
+      "ChildId": "f622ba31-74f0-47d9-b086-894a4b37555b"/*DrawMesh*/,
+      "Position": {
+        "X": 1122.0824,
+        "Y": 1605.2573
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f8ad2ab8-5e73-4bc1-8349-7f8fc7c5eda0"/*SpreadLayout*/,
+      "SectionId": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Position": {
+        "X": 1624.5178,
+        "Y": 2005.686
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "344d2e54-5048-4414-b1c2-3102b3e19203"/*ColorBuffer*/,
+      "Position": {
+        "X": 1901.468,
+        "Y": 1815.4009
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "b950462e-f2b1-422c-858e-20611e289b84",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1004.6677,
+        "Y": 1893.6506
+      },
+      "Size": {
+        "X": 828.34155,
+        "Y": 410.38745
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "9bae1af3-be97-4a3e-8065-b684eced358f",
+      "Description": "Sometimes it is clearer to use separate operators for rotation, scaling, or offset.\nThe connection order is still important.\nRotating first and then moving produces a different result than moving first and then rotating."
+    },
+    {
+      "Id": "29a5befa-9bb6-4822-af41-b8c42b9fa664",
+      "Description": "Combine the operators in the correct order without changing any parameters.\nTip: you can drag a horizontal slice of an operator stack to reorder it.",
+      "Style": "CallToAction"
+    }
+  ]
+}

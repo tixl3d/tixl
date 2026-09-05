@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "82d64a0f-19cb-4e35-9a70-45f8c2e6b1d3"/*BindToSkeleton*/,
+  "Description": "Generates skin weights for geometry that has none, using distance-to-bone envelopes on the skeleton's rest pose.\n\nConnect either a Mesh or a point buffer - the weights output then feeds [SkinMesh] or [SkinPoints] together with the matrices from [PoseToSkinMatrices]. Radius defines the envelope distance where a bone's influence fades to zero, FalloffPower shapes the falloff, MaxInfluences caps the bones per vertex (1-4). Geometry outside every envelope snaps to the nearest bone.",
+  "InputUis": [
+    {
+      "InputId": "0b94e6c8-d235-4a70-bf16-83c7d90a25e4"/*FalloffPower*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "2c85b0f7-64ad-4193-8e50-d9b3a1c67e04"/*Setup*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "51e0c9d4-a786-4b23-9ef1-30d5b8a2c647"/*Mesh*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "78d21b5e-4c09-4f6a-8b93-a5e0f62c48d1"/*Radius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "96a3f5e1-08c2-4d7b-b365-1ce49d07f8a2"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "a6f083d2-5be7-4c94-8027-1f4d6b9e05c8"/*MaxInfluences*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "ef67a29c-b3d0-4851-92f4-06c8e5d13a7b"/*SkeletonIndex*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e04c728a-63b5-4f19-8dc2-97a1e5f0834b"/*SkinWeights*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

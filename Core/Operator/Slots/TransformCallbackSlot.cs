@@ -69,7 +69,7 @@ public sealed class TransformCallbackSlot<T> : Slot<T>
         _keepOriginalUpdateAction = _baseUpdateAction;
         StashValueForBypass();
         base.UpdateAction = ByPassUpdate;
-        DirtyFlag.Invalidate();
+        DirtyFlag.ForceInvalidate(); // see Slot<T>.TrySetBypassToInput
         _targetInputForBypass = targetSlot;
         return true;
     }

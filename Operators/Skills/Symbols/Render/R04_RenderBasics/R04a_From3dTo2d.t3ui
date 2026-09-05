@@ -1,0 +1,139 @@
+{
+  "FormatVersion": 3,
+  "Id": "3d9d4460-83de-45ef-a60f-314e9bae8e8e"/*R04a_From3dTo2d*/,
+  "Description": "From 3D to 2D",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "18ee8f7e-48d1-42e3-bfa1-bddb07745b8d"/*DrawSphere*/,
+      "Position": {
+        "X": 1423.1134,
+        "Y": 1776.7373
+      }
+    },
+    {
+      "ChildId": "7011c815-68ef-4145-bd20-f7e907f438cb"/*DrawSphere*/,
+      "SectionId": "ba8c7961-2920-4237-9ec5-72b656dec58c",
+      "Position": {
+        "X": 1273.8973,
+        "Y": 2215.2126
+      }
+    },
+    {
+      "ChildId": "78bec12f-1464-4b4e-a959-c5b52c9597c1"/*AnimValue*/,
+      "SectionId": "ba8c7961-2920-4237-9ec5-72b656dec58c",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2110.2126
+      }
+    },
+    {
+      "ChildId": "806357d3-d805-4b2b-9435-78931d8a99aa"/*Vector3*/,
+      "SectionId": "ba8c7961-2920-4237-9ec5-72b656dec58c",
+      "Position": {
+        "X": 1273.8973,
+        "Y": 2110.2126
+      }
+    },
+    {
+      "ChildId": "81b6af8e-7b25-4e67-bed4-7d8c686989aa"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "8a0bc36a-35ef-47c7-ab26-073e329fc074"/*Distance*/,
+      "SectionId": "ba8c7961-2920-4237-9ec5-72b656dec58c",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2180.2126
+      }
+    },
+    {
+      "ChildId": "c1493834-57c0-4515-8cbe-1e610f7f94a7"/*AnimValue*/,
+      "Position": {
+        "X": 1192.6763,
+        "Y": 1749.7174
+      }
+    },
+    {
+      "ChildId": "c7d7e024-60e4-4fa5-bcc2-3c9feed67bc7"/*AnimValue*/,
+      "SectionId": "ba8c7961-2920-4237-9ec5-72b656dec58c",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2145.2126
+      }
+    },
+    {
+      "ChildId": "c80e5ec3-bd88-4e9e-b3ba-1d9b3c198c62"/*Vector3*/,
+      "Position": {
+        "X": 1423.1135,
+        "Y": 1673.5281
+      }
+    },
+    {
+      "ChildId": "e40a4f2d-6810-445f-9f26-6664014afb4b"/*AnimValue*/,
+      "Position": {
+        "X": 1192.6763,
+        "Y": 1671.7372
+      }
+    },
+    {
+      "ChildId": "ec26cbe3-86cd-4d34-b45b-69979d132ac7"/*Distance*/,
+      "Position": {
+        "X": 1186.4082,
+        "Y": 1816.0571
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "616b51c6-704a-4b1a-a640-0eed7d9a6a42"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ba8c7961-2920-4237-9ec5-72b656dec58c",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1032.0138,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 479.67932,
+        "Y": 287.2168
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "75394d1c-d82a-40b9-b5f6-ba345b3dd661",
+      "Description": "In computer graphics, positions are defined using three values along the x, y, and z axes.\nIn TiXL's coordinate system, x points to the right, y points upward, and z points toward the camera.\nYou can use the thumb, index finger, and middle finger of your right hand to remember their orientation."
+    },
+    {
+      "Id": "9778d074-8341-40f9-b6f6-465fe704d98a",
+      "Description": "Other software may use different coordinate systems.\nFor example, some CAD applications use x and y as the ground plane.\nWith TiXL's default camera, the position (0, 0, 0) is centered on the screen, so an object that is 2 units tall touches both the top and bottom edges of the view."
+    },
+    {
+      "Id": "a521c1e7-bea0-4607-8c3e-00dbe3f573b1",
+      "Description": "We can use [AnimValue] and [Vector3] to build a simple animation.\nBoth operators will be covered in more detail later."
+    },
+    {
+      "Id": "4609eb56-b08e-46e0-8005-7b795621f323",
+      "Description": "Connect the operator to the [Vector3] to create the reference animation.",
+      "Style": "CallToAction"
+    }
+  ]
+}

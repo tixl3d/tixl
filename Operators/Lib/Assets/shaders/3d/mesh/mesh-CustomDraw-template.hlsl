@@ -132,8 +132,6 @@ psInput vsMain(uint id
     PbrVertex vertex = PbrVertices[FaceIndices[faceIndex][faceVertexIndex]];
     float4 posInObject = float4(vertex.Position, 1);
 
-    // float resizeFromW = UseWForSize ? Points[instanceIndex].W : 1;
-    // float3 resizeFromStretch = UseStretch ? Points[instanceIndex].Stretch : 1;
 
     float sizeFactor = ScaleFactorMode == 0
                            ? 1

@@ -19,9 +19,9 @@ cbuffer Params : register(b1)
     int RepeatMode;
 }
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;
-StructuredBuffer<LegacyPoint> Points : t1;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+StructuredBuffer<Point> Points : register(t1);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 static float Fraction;
 static float3 PosA;
@@ -71,7 +71,7 @@ inline float4 TransformOrientation(float4 r)
     float weight = 1;
     float3 offset;
 
-    LegacyPoint p = SourcePoints[vertexIndex];
+    Point p = SourcePoints[vertexIndex];
     float3 pos = (p.Position + SourcePivot) / SourceExtend;
     float f = pos[SourceAlignmentAxis];
 

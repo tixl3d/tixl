@@ -32,9 +32,9 @@ cbuffer Params : register(b1)
 
 #define linearstep(a, b, f) saturate(((f) - (a)) / ((b) - (a)))
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;
-StructuredBuffer<uint3> FaceIndices : t1;
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);
+StructuredBuffer<uint3> FaceIndices : register(t1);
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 
 static const float NoisePhase = 0;
 

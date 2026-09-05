@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using System.CodeDom.Compiler;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -176,8 +175,18 @@ internal static partial class GraphUtils
     public static bool IsIdentifierValid(string? className) => !string.IsNullOrWhiteSpace(className)
                                                                && IsIdentifierValidNotEmpty(className);
     
-    private static bool IsIdentifierValidNotEmpty(string className) => IdentifierValidator.Value.IsValidIdentifier(className);
-    public static bool IsValidProjectName(string userName) => IdentifierValidator.Value.IsValidIdentifier(userName);
+    private static bool IsIdentifierValidNotEmpty(string className)
+    {
+        var isEscaped = className.StartsWith('@');
+        var identifier = isEscaped ? className[1..] : className;
+        if (!SyntaxFacts.IsValidIdentifier(identifier))
+            return false;
+
+        // Reserved keywords are only usable as identifiers when @-escaped (e.g. Lib.numbers.@float)
+        return isEscaped || SyntaxFacts.GetKeywordKind(identifier) == SyntaxKind.None;
+    }
+
+    public static bool IsValidProjectName(string userName) => IsIdentifierValid(userName);
 
     public static bool IsNamespaceValid(string namespaceName, bool needsToBeUnique, out string[] namespaceComponents)
     {
@@ -198,7 +207,6 @@ internal static partial class GraphUtils
 
     private static readonly Regex ValidTypeNameSpacePattern = NamespaceRegex();
     private static readonly string[] ReservedWords = new string[] { "value", "Var", "instance", "item", "Input", "slot" };
-    private static readonly Lazy<CodeDomProvider> IdentifierValidator = new(() => CodeDomProvider.CreateProvider("C#"));
 
     [GeneratedRegex(@"^([A-Za-z][A-Za-z\d]*)(\.([A-Za-z_][A-Za-z_\d]*))*$")]
     private static partial Regex NamespaceRegex();

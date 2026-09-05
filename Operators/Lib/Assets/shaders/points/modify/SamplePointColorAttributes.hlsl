@@ -32,7 +32,7 @@ sampler texSampler : register(s0);
     uint index = i.x;
     
 
-    LegacyPoint p = Points[index];
+    Point p = Points[index];
 
     float3 pos = p.Position;
     pos -= Center;

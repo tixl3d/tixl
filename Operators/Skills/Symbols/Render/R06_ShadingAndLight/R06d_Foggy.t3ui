@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "af21d4fd-c99f-4649-8290-b557953b1a09"/*R06d_Foggy*/,
+  "Description": "Foggy",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0d93cd38-6c49-47f4-9333-9b891a5660ed"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "1e2992b1-522b-4541-b2ff-732083461bb6"/*Text*/,
+      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "7bf26c32-2021-4734-a3f5-09d0cf011169"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "01cab103-cc4b-4f23-b661-4bf12d3d14b1"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "dedee5a3-b60b-4fdf-8d29-c6f069100b27",
+      "Description": "A useful shading technique is to add a [SetFog] operator.\nIt can be used to darken or colorize objects based on distance."
+    },
+    {
+      "Id": "c06402e6-a961-4fa4-a17e-c3b0009034de",
+      "Description": "In this example, the far view distance introduces too much visual noise."
+    },
+    {
+      "Id": "4be91145-ee25-48b7-8341-56d7222aea62",
+      "Description": "Find the correct distance to match the reference.",
+      "Style": "CallToAction"
+    }
+  ]
+}

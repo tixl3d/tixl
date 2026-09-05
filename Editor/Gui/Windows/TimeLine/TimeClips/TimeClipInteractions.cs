@@ -15,6 +15,7 @@ using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Migrations.AudioClips;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;
@@ -306,7 +307,7 @@ internal sealed class TimeClipInteractions
         {
             // The Display input identifies [AudioClip] ops; all others are cleared so only one clip
             // carries the designation.
-            if (!child.Inputs.TryGetValue(LegacyAudioClipMigration.DisplayInputId, out var displayInput))
+            if (!child.Inputs.TryGetValue(AudioClipsToOps.DisplayInputId, out var displayInput))
                 continue;
 
             var targetValue = childId == clipChildId && enable

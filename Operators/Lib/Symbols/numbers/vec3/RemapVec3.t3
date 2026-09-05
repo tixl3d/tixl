@@ -1,0 +1,52 @@
+{
+  "FormatVersion": 3,
+  "Id": "dc9c4099-1c84-484d-abee-1d0fb4da6292"/*RemapVec3*/,
+  "Inputs": [
+    {
+      "Id": "07308cd1-fe2c-47b2-a9c3-a8ea2b1f20d5"/*RangeInMax*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "17627c2e-35d6-45eb-a681-42babd4602e6"/*RangeOutMax*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "1eb622b5-4d72-4f25-ab13-6d7413036218"/*RangeOutMin*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "36e8692a-6b24-488b-a1da-2372bd4a074b"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a341c041-a993-4e71-92ef-8239db7327f6"/*Value*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "db864bc9-f34c-49f5-ac38-fba1d4df3f58"/*RangeInMin*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

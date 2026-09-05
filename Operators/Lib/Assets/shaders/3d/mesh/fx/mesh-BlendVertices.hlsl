@@ -12,9 +12,9 @@ cbuffer Params : register(b0)
     float Scatter;
 }
 
-StructuredBuffer<PbrVertex> VerticesA : t0;        // input
-StructuredBuffer<PbrVertex> VerticesB : t1;        // input
-RWStructuredBuffer<PbrVertex> ResultVertices : u0; // output
+StructuredBuffer<PbrVertex> VerticesA : register(t0);        // input
+StructuredBuffer<PbrVertex> VerticesB : register(t1);        // input
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0); // output
 
 [numthreads(64, 1, 1)] void main(uint3 i
                                  : SV_DispatchThreadID)

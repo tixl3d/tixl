@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "50658462-5800-44ce-936f-2bf069a6ca7b"/*I02p_AnalyzeImageLevels*/,
+  "Description": "Analyze: ImageLevels",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "75099f9c-0864-45c9-a64c-8b769a473da8"/*Text*/,
+      "SectionId": "605eb6bf-7e49-473c-b95b-33238c6ded7b",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "89eeb494-96e7-47b5-97c9-18142f3734a6"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "d4d0ab76-2eea-483b-8e50-133690656940"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6f7650cd-dee6-4711-b1df-dbd39e847fd5"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "605eb6bf-7e49-473c-b95b-33238c6ded7b",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "93623ec2-7680-4e16-8e94-4495cc4f27c3",
+      "Description": "Sometimes it is hard to see the actual numeric values behind an image."
+    },
+    {
+      "Id": "d38b11e1-885a-4286-b598-bbdc0b99dcec",
+      "Description": "To help with this, TiXL offers operators for analyzing images.\nIn this example, [ImageLevels] slices an image and visualizes the color values along an intersection line."
+    },
+    {
+      "Id": "d3c9388a-50a8-4a91-b815-9ccb05db7a48",
+      "Description": "Connect [LinearGradient] to [ImageLevels].",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "9ee67562-6793-4357-85c0-87ec5fa1b23b",
+      "Description": "Now a few things become clear:\n- The gradient is linear, with sharp ends. - It does not cover the full width of the image. - It starts at pure black and ends at pure white."
+    }
+  ]
+}

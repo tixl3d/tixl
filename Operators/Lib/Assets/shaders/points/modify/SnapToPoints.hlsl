@@ -11,19 +11,19 @@ cbuffer Params : register(b0)
 }
 
 
-StructuredBuffer<LegacyPoint> Points1 : t0;         // input
-StructuredBuffer<LegacyPoint> Points2 : t1;         // input
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+StructuredBuffer<Point> Points1 : register(t0);         // input
+StructuredBuffer<Point> Points2 : register(t1);         // input
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
 {
-    LegacyPoint A = Points1[i.x];
-    LegacyPoint SnapPoint = Points2[i.x];
+    Point A = Points1[i.x];
+    Point SnapPoint = Points2[i.x];
     float distance = length(A.Position - SnapPoint.Position);
     float blendFactor = smoothstep( BlendFactor + Distance, Distance  , distance ) * MaxAmount;
 
     ResultPoints[i.x].Position =  lerp(A.Position, SnapPoint.Position, blendFactor);
-    ResultPoints[i.x].W = lerp(A.W, SnapPoint.W, BlendFactor);
+    ResultPoints[i.x].FX1 = lerp(A.FX1, SnapPoint.FX1, BlendFactor);
 }
 

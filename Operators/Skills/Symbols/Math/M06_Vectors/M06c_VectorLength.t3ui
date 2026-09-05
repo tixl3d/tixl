@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "bd48b0cc-3f01-4e6d-b583-9dac5af4aa1c"/*M06c_VectorLength*/,
+  "Description": "Vector Length",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0507c435-432d-4dcd-8a87-c36509cecbbb"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "1944f696-6353-40f3-928d-899a18c34bcb"/*Text*/,
+      "SectionId": "d29824c3-0683-4912-b815-d416072d86c1",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "d9af6c92-1e70-4f53-8d3b-3953c23945e5"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "44a6d992-7d70-4bef-b030-630f83da54ee"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "d29824c3-0683-4912-b815-d416072d86c1",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "f9cba407-9b19-4888-9a4c-736fa8a6a592",
+      "Description": "The [Length] operator computes the magnitude of a vector.\nThis is often useful when distance-like behavior is needed."
+    },
+    {
+      "Id": "1ab11278-6c34-4a3e-9e34-140d14f92ba3",
+      "Description": "In this example, draw a circle large enough to touch a random point.\nThe [Vec2ToVec3] operator can be used to add a missing component so connections work correctly."
+    },
+    {
+      "Id": "40a9ba96-c371-4f13-bb08-f9f5de4630c7",
+      "Description": "Solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

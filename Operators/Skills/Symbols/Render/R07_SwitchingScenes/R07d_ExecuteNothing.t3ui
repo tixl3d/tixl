@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "48b03181-6599-486a-8d38-ac2e4d82525b"/*R07d_ExecuteNothing*/,
+  "Description": "Execute Nothing",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "36a94521-970b-4c5d-835b-d1d9c8939833"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "4be8e543-dd60-4f26-8882-6293616e70ce"/*Text*/,
+      "SectionId": "f6ba0a1e-4bc4-4097-ac0e-1f8d99fe3c08",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "c22ee3ef-4776-4445-b6d7-a88a4bb91971"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "72e6ea6e-0e81-4f60-86cc-e00013b1e8c8"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "f6ba0a1e-4bc4-4097-ac0e-1f8d99fe3c08",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "fd5d251c-c407-45e1-9afd-bd45414bf6cf",
+      "Description": "Another way to disable all connected inputs is to use the [Execute] operator.\nBy turning off its IsEnabled parameter, nothing downstream will be executed."
+    },
+    {
+      "Id": "afc1e9f4-f2e6-45c1-9c23-69015233ac51",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

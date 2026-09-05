@@ -1,0 +1,41 @@
+{
+  "FormatVersion": 3,
+  "Id": "d7e8318c-b5d2-4ca1-b228-bb70d6add820"/*ColorFromField*/,
+  "Inputs": [
+    {
+      "Id": "7ff90229-3731-4a5f-adc3-2abab11d3d46"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5c50c45e-dbe4-4f2a-a1fa-863e3d8e2023"/*Field*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "aa992691-1a1c-4c52-9024-341812603d35"/*ColorA*/,
+      "DefaultValue": {
+              "X": 0.0,
+              "Y": 0.0,
+              "Z": 0.0,
+              "W": 1.0
+      }
+    },
+    {
+      "Id": "3f412276-cbc9-4b0d-a5a5-5a02ef1ac230"/*ColorB*/,
+      "DefaultValue": {
+              "X": 1.0,
+              "Y": 1.0,
+              "Z": 1.0,
+              "W": 1.0
+      }
+    },
+    {
+      "Id": "a42f59fa-1d30-4d68-a350-00300f9726c8"/*ValueRange*/,
+      "DefaultValue": {
+              "X": 0.0,
+              "Y": 1.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

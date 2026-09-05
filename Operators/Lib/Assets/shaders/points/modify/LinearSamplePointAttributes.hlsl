@@ -43,8 +43,8 @@ cbuffer IntParams : register(b1)
 }
 
 
-StructuredBuffer<Point> Points : t0;
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+StructuredBuffer<Point> Points : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 Texture2D<float4> inputTexture : register(t1);
 sampler texSampler : register(s0);
@@ -120,7 +120,6 @@ sampler texSampler : register(s0);
     p.Rotation = qSlerp(p.Rotation,  qMul(rot, rot2), strength);
 
     // Stretch
-    //float3 stretch = p.Stretch;
     float3 stretchFactor =float3( 
         (R == 8 ? (c.r * RFactor + ROffset) : 1) *
         (G == 8 ? (c.g * GFactor + GOffset) : 1) *

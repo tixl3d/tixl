@@ -90,7 +90,7 @@ float noise_sum_abs(float3 p)
 
 // CC0 license https://creativecommons.org/share-your-work/public-domain/cc0/
 // From: https://www.shadertoy.com/view/ttdGR8
-////////////////// K.jpg's Smooth Re-oriented 8-LegacyPoint BCC Noise //////////////////
+////////////////// K.jpg's Smooth Re-oriented 8-Point BCC Noise //////////////////
 //////////////////// Output: float4(dF/dx, dF/dy, dF/dz, value) ////////////////////
 
 // Borrowed from Stefan Gustavson's noise code

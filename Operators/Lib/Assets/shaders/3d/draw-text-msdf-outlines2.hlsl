@@ -66,7 +66,7 @@ struct Output
     float4 color : COLOR;
 };
 
-StructuredBuffer<GridEntry> GridEntries : t0;
+StructuredBuffer<GridEntry> GridEntries : register(t0);
 Texture2D<float4> fontTexture : register(t1);
 sampler texSampler : register(s0);
 

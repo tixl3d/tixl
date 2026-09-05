@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "78b2714d-7625-4b3d-a499-faeb45d27b1d"/*M05b_MaximumRandom*/,
+  "Description": "Maximum Random",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4c9568fd-5809-4020-b5c1-d0ff340720b6"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "7115a2d6-1cbe-4f83-a6dc-1f4569373405"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "756d727f-6a7e-4b80-9666-7589939ed473"/*Text*/,
+      "SectionId": "ed7a7c69-232e-4129-8b97-d62fcc2c3344",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "68562c1d-0f69-49f2-9c31-32c3e5e971f6"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ed7a7c69-232e-4129-8b97-d62fcc2c3344",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "d6fcfce5-ea43-4ccd-8c19-fcdd4dfb3736",
+      "Description": "Here, random values are generated continuously.\nUsing the [Keep] operator, the value is updated only when a new maximum is reached."
+    },
+    {
+      "Id": "d17717f9-a1c1-46f2-a59b-b28d6a08f0da",
+      "Description": "Solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

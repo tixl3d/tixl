@@ -37,8 +37,8 @@ cbuffer Params : register(b1)
 
 }
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;        
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;   
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);        
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);   
 
 float3 GetNoise(float3 pos, float3 variation) 
 {

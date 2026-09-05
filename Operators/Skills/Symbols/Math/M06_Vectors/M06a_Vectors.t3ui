@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "55a03e82-39a1-4559-a5af-0ccc0e9c0f81"/*M06a_Vectors*/,
+  "Description": "Vectors",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "6636cf26-fbbf-4bea-bf88-e7170cbe1ad6"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "7f56273d-659d-4b0d-be52-4429dabbeca3"/*Text*/,
+      "SectionId": "f2e58f50-fa7e-47ba-85f6-f889ddbe6007",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "f4b0eae5-8fc8-4a9b-9637-a398049885da"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6dca6c25-936e-4d86-81f7-52657626dd29"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "f2e58f50-fa7e-47ba-85f6-f889ddbe6007",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "bc17aa6c-699f-4343-9e64-1b475862a49c",
+      "Description": "So far, float and integer values were used on their own.\nNow they are combined into vectors.\nA vector is a group of values that belong together."
+    },
+    {
+      "Id": "494aa524-31fb-4fb6-bdb0-e9b7b314a078",
+      "Description": "Depending on context, vector components can represent: - positions (x, y, z) - colors (r, g, b) - sizes (width, height)\nIn TiXL, vectors can have two, three, or four components and can use floating-point or integer values."
+    },
+    {
+      "Id": "829f4cee-2135-4e21-ae31-862bd3e552cd",
+      "Description": "Let’s start by building some vectors."
+    },
+    {
+      "Id": "f00a84e8-ec27-49a5-8d58-3adc3bec3d4b",
+      "Description": "Use [Vector3] to combine a noise value and an animation value.\nUse the result to control the position of a [Text] operator.\nFind the correct parameters to match the goal.",
+      "Style": "CallToAction"
+    }
+  ]
+}

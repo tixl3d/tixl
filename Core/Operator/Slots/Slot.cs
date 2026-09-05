@@ -93,7 +93,10 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
         _keepDirtyFlagTrigger = _dirtyFlag.Trigger;
         StashValueForBypass();
         UpdateAction = ByPassUpdate;
-        _dirtyFlag.Invalidate();
+        // Force: a UI toggle lands after this frame's invalidation pass already visited the slot, and the
+        // per-tick de-duplication would drop a plain Invalidate - the op would keep its stale value until
+        // something else dirtied it.
+        _dirtyFlag.ForceInvalidate();
         _targetInputForBypass = targetSlot;
         return true;
     }
@@ -148,7 +151,7 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
         UpdateAction = _keepOriginalUpdateAction;
         _keepOriginalUpdateAction = null;
         _dirtyFlag.Trigger = _keepDirtyFlagTrigger;
-        _dirtyFlag.Invalidate();
+        _dirtyFlag.ForceInvalidate(); // see TrySetBypassToInput
     }
 
     public bool IsDisabled 

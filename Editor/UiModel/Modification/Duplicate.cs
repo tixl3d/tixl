@@ -76,6 +76,14 @@ internal static class Duplicate
         newSymbolUi.Description = description;
         newSymbolUi.ReadOnly = false;
 
+        // Carry the project settings (soundtrack, BPM, audio mix, export, proxy) over to the
+        // duplicate. Clips get fresh ids so the two symbols never share audio-stream keys.
+        newSymbol.CompositionSettings = sourceSymbol.CompositionSettings.Clone();
+        foreach (var audioClip in newSymbol.CompositionSettings.Playback.AudioClips)
+        {
+            audioClip.Id = Guid.NewGuid();
+        }
+
         project.ReplaceSymbolUi(newSymbolUi);
 
         // Apply content to a new symbol

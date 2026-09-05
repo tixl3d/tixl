@@ -1,0 +1,61 @@
+{
+  "FormatVersion": 3,
+  "Id": "dc9c4099-1c84-484d-abee-1d0fb4da6292"/*RemapVec3*/,
+  "Description": "Remaps an incoming Vec3 from one value range to another. This can be useful for conforming vectors to a range or for inverting components.\n",
+  "InputUis": [
+    {
+      "InputId": "07308cd1-fe2c-47b2-a9c3-a8ea2b1f20d5"/*RangeInMax*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "17627c2e-35d6-45eb-a681-42babd4602e6"/*RangeOutMax*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "InputId": "1eb622b5-4d72-4f25-ab13-6d7413036218"/*RangeOutMin*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "GroupTitle": "Output"
+    },
+    {
+      "InputId": "36e8692a-6b24-488b-a1da-2372bd4a074b"/*Mode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "a341c041-a993-4e71-92ef-8239db7327f6"/*Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "db864bc9-f34c-49f5-ac38-fba1d4df3f58"/*RangeInMin*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "GroupTitle": "Input"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c1ff4f4b-0fdf-484a-848f-17b07b6306d2"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

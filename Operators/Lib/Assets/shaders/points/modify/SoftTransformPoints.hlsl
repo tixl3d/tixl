@@ -33,8 +33,8 @@ cbuffer Params : register(b1)
     int StrengthFactor;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 float sdEllipsoid(float3 p, float3 r)
 {

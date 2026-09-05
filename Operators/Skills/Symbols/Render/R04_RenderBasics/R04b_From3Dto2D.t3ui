@@ -1,0 +1,87 @@
+{
+  "FormatVersion": 3,
+  "Id": "59333bff-6604-4e02-bcc5-05bfc2c68082"/*R04b_From3Dto2D*/,
+  "Description": "From 3D to 2D",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4f5a37da-aae3-494d-80be-11c9b5a461dd"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "5c9b11cb-aba0-4d10-977b-66cb8605c9a6"/*Text*/,
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "7ad4501a-c37c-4f90-9670-b777c738153f"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "91126863-cdc0-40df-9397-205aee5d8c6d"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "571552b7-6ba1-4836-a64f-cb5f46644387",
+      "Description": "The final output of most things you build in TiXL are images.\nThese are sometimes called textures or image buffers.\nYou can explore the SkillQuest topics on working with images to learn about other ways to generate and use them."
+    },
+    {
+      "Id": "8180ac1d-c4a0-4dc4-8c9b-f7c343d42b0b",
+      "Description": "The [RenderTarget] operator is used to render 3D geometry into an image.\nIt is one of the most important operators in TiXL and is used in many projects.\nIt can be helpful to understand how the RenderTarget works internally."
+    },
+    {
+      "Id": "f4502c64-c647-45c5-9aac-8e9c67c29b99",
+      "Description": "You can think of the RenderTarget as a blank canvas.\nAll geometry connected to it (from the left or above) is prepared to be drawn onto this canvas."
+    },
+    {
+      "Id": "246bcc6b-e2e2-468a-a7db-04c651bf6c74",
+      "Description": "At the beginning of each frame, the RenderTarget is cleared with a solid color.\nAfter that, any draw operator (the teal command operators) can render onto it."
+    },
+    {
+      "Id": "a1e4679c-aab8-4fb2-9e6d-3a031371e67b",
+      "Description": "In this example, clearing is disabled."
+    },
+    {
+      "Id": "1181a314-c295-4d06-8349-50e4aff15488",
+      "Description": "Reproduce the challenge.",
+      "Style": "CallToAction"
+    }
+  ]
+}

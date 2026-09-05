@@ -56,8 +56,8 @@ Texture2D<float4> Gradient : register(t0);
 Texture2D<float4> Image : register(t1);
 RWStructuredBuffer<Particle> Particles : register(u0);
 
-sampler ClampedSampler : s0;
-sampler WrappedSampler : s1;
+sampler ClampedSampler : register(s0);
+sampler WrappedSampler : register(s1);
 
 //=== Additional Resources ==========================================
 /*{RESOURCES(t2)}*/

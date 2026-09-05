@@ -21,8 +21,8 @@ cbuffer Params : register(b2)
     int StrengthFactor;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 sampler ClampedSampler : register(s0);
 
 //=== Additional Resources ==========================================
@@ -59,7 +59,7 @@ inline float GetDistance(float3 p3)
 
     Point p = SourcePoints[i.x];
 
-    if (isnan(p.Scale.x))
+    if (IsSeparator(p))
     {
         ResultPoints[i.x] = p;
         return;

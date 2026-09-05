@@ -21,8 +21,8 @@ cbuffer Params : register(b0)
     float UseWAsSelection;
 }
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;        
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;   
+StructuredBuffer<Point> SourcePoints : register(t0);        
+RWStructuredBuffer<Point> ResultPoints : register(u0);   
 
 
 [numthreads(64,1,1)]
@@ -35,7 +35,7 @@ void main(uint3 i : SV_DispatchThreadID)
     //     return;
     // }
     
-    LegacyPoint p = SourcePoints[i.x];
+    Point p = SourcePoints[i.x];
 
 
     int pointId = i.x;
@@ -60,7 +60,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     float4 rot = p.Rotation;
 
-    float amount = Amount * (UseWAsSelection > 0.5 ? p.W : 1);
+    float amount = Amount * (UseWAsSelection > 0.5 ? p.FX1 : 1);
  
     float3 offset = hash4.xyz * RandomizePosition * amount;
 
@@ -79,7 +79,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     p.Rotation = rot;
 
-    p.W += hash4.w *RandomizeW * amount;
+    p.FX1 += hash4.w *RandomizeW * amount;
     ResultPoints[i.x] = p;
 }
 

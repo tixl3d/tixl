@@ -26,15 +26,15 @@ struct FaceProperties {
     float cdf;
 };
 
-StructuredBuffer<PbrVertex> Vertices : t0;
-StructuredBuffer<int3> FaceIndices : t1;
-StructuredBuffer<FaceProperties> CDFs : t2;
-Texture2D<float4> ColorMap : t3;
+StructuredBuffer<PbrVertex> Vertices : register(t0);
+StructuredBuffer<int3> FaceIndices : register(t1);
+StructuredBuffer<FaceProperties> CDFs : register(t2);
+Texture2D<float4> ColorMap : register(t3);
 
 sampler texSampler : register(s0);
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
-RWStructuredBuffer<float4> ResultColors : u1;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
+RWStructuredBuffer<float4> ResultColors : register(u1);
 
 [numthreads(160,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
@@ -88,10 +88,10 @@ void main(uint3 i : SV_DispatchThreadID)
     uint3 fIndices = FaceIndices[faceIndex];
 
     // Compute barycentric coordinates
-    LegacyPoint p;
+    Point p;
 
-    p.Selected = 1;
-    p.Stretch = 1;
+    p.FX2 = 1;
+    p.Scale = 1;
     float xi1Sqrt = sqrt(xi1);
     float u = 1.0 - xi1Sqrt;
     float v = xi2 * xi1Sqrt; 
@@ -116,7 +116,7 @@ void main(uint3 i : SV_DispatchThreadID)
     float3x3 orientationDest= float3x3( tangent,binormal, normal );
 
     p.Rotation = normalize(qFromMatrix3Precise(transpose(orientationDest)));
-    p.W = 1;
+    p.FX1 = 1;
 
 
 

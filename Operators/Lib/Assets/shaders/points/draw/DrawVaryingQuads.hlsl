@@ -58,7 +58,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<LegacyPoint> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> SpriteTexture : register(t1);
 Texture2D<float4> ColorOverW : register(t2);
 Texture2D<float> SizeOverW : register(t3);
@@ -72,7 +72,7 @@ psInput vsMain(uint id
     int particleId = id / 6;
     float3 cornerFactors = Corners[quadIndex];
 
-    LegacyPoint p = Points[particleId];
+    Point p = Points[particleId];
 
     float3 axis = cornerFactors;
     axis.xy = (axis.xy + Offset) * Stretch;
@@ -88,13 +88,13 @@ psInput vsMain(uint id
     // ApplyPointOrientaiton > 0.5 ? p.rotation : ;
 
     float4 rotation = qMul(pRotation, qFromAngleAxis(Rotate / 180 * PI, RotateAxis));
-    float sizeFromW = isnan(p.W) ? 0 : SizeOverW.SampleLevel(texSampler, float2(p.W * WMappingScale, 0), 0);
+    float sizeFromW = IsSeparator(p) ? 0 : SizeOverW.SampleLevel(texSampler, float2(p.FX1 * WMappingScale, 0), 0);
 
     axis = qRotateVec3(axis, rotation) * Size * sizeFromW;
     float3 pInObject = p.Position + axis;
     output.position = mul(float4(pInObject, 1), ObjectToClipSpace);
     output.texCoord = cornerFactors.xy / 2 + 0.5;
-    output.color = Color * ColorOverW.SampleLevel(texSampler, float2(p.W * WMappingScale, 0), 0);
+    output.color = Color * ColorOverW.SampleLevel(texSampler, float2(p.FX1 * WMappingScale, 0), 0);
 
     // Fog
     if (FogDistance > 0)

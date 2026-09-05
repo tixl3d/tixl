@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "155cdda5-b4f0-4a9b-8ee5-fc4047bb7751"/*DisplaceGeometry*/,
+  "Inputs": [
+    {
+      "Id": "a235cfd2-f2bd-4a0a-91e1-0cbcce9e2961"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a90ce84d-ad07-4fe0-8cf8-3e3bd0c0240c"/*Field*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "efd37892-17d1-463e-a4a4-75584127b6e2"/*Amount*/,
+      "DefaultValue": 0.1
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

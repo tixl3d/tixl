@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "e93a5c07-4b86-4d21-a7f9-08c6d2e5b134"/*CenterGeometry*/,
+  "Inputs": [
+    {
+      "Id": "27c5b9e1-84f0-4a63-b2d8-59e6c0d4a713"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b40e7d92-3a58-4c16-9f27-06b8e5c1d349"/*Pivot*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
