@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq; // only for Sum, can be avoided if needed
 using Lib.Utils;
 using T3.Core.Utils;
 
@@ -10,14 +9,12 @@ namespace Lib.geometry;
 /// Splits a MeshGeometry into separate parts based on connected components (loose parts),
 /// and sets the pivot of each new part to its volume centroid.
 /// </summary>
-/// 
 [Guid("EC6F1A69-9D76-4A46-A7A7-2248989EC386")]
 internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
 {
-    
     [Output(Guid = "5FBCE231-EFE4-4C19-957D-72B996F133AD")]
     public readonly Slot<MeshGeometry> Result = new();
-    
+
     [Output(Guid = "417E4FF5-71AA-4AB8-AA0C-A379FFC3FAC4")]
     public readonly Slot<int> PartCount = new();
 
@@ -85,7 +82,9 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         var newCornerIndices = new List<int>();
         var newParts = new List<GeometryPart>();
 
-        // We'll process components sequentially; the new face index order
+        int totalFacesAdded = 0; // running count of faces placed in newParts
+
+        // Process components sequentially; the new face index order
         // follows the order of components and then the order of faces within each component.
         foreach (var comp in components)
         {
@@ -110,7 +109,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
             }
 
             // 3b. Create a part for this component.
-            int faceStartIdx = newParts.Sum(p => p.FaceCount); // total faces already added
+            int faceStartIdx = totalFacesAdded;
             int faceCountComp = comp.Count;
 
             // 3c. Copy the corners of all faces in this component.
@@ -130,6 +129,8 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
                 Id: newParts.Count,        // unique id per part
                 SeedIndex: 0               // not used here
             ));
+
+            totalFacesAdded += faceCountComp;
         }
 
         // 4. Build the output MeshGeometry.
@@ -191,7 +192,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
 
         return centroidSum / (float)totalVolume;
     }
-    
+
     [Input(Guid = "52E9E7CB-C0E3-430C-B182-A5EA2E9C0270")]
     public readonly InputSlot<MeshGeometry> Geometry = new();
 }
