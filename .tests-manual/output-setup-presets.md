@@ -56,7 +56,7 @@ Click the entry for the second display.
 
 **Expected:**
 - The secondary render window opens borderless-fullscreen on that display.
-- The menu row now reads `P1  →  Display 2`.
+- The menu item now reads `P1  →  Display 2`.
 - The project folder contains `.meta/outputs.machine.json` with the binding
   (output GUID, display name, index).
 
@@ -117,4 +117,4 @@ Right-click the bound `P1` entry again and choose "Stop presenting".
 **Expected:**
 - The secondary render window closes.
 - The binding is removed from `.meta/outputs.machine.json`.
-- The menu row shows the plain `P1  ·  …` label again.
+- The menu item shows the plain `P1  ·  …` label again.

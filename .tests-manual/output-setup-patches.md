@@ -24,16 +24,16 @@ helpers, and promoting a patch to a surface.
 2. Click `+` on **OUTPUTS**.
 
 **Expected:**
-- A "SendToOutput" row under CONTENT and a **"P1"** row under OUTPUTS, with no chevron on
+- A "SendToOutput" item under CONTENT and a **"P1"** item under OUTPUTS, with no chevron on
   P1 (it has no patches yet).
 
 ## Step: Dropping content on an output creates a full-canvas patch
 
 **Action:**
-Drag the "SendToOutput" CONTENT row onto the "P1" row.
+Drag the "SendToOutput" CONTENT item onto the "P1" item.
 
 **Expected:**
-- P1 gains a chevron and one child row **"Patch 1"** with the status "Slice 1".
+- P1 gains a chevron and one child item **"Patch 1"** with the status "Slice 1".
 - The output view of P1 shows the image full-frame.
 - The Parameter window (after clicking "Patch 1") shows a **Patch** card: the line
   "Shows Slice 1 on P1", **Position (px)** 0 × 0 and **Size (px)** 1920 × 1080.
@@ -53,8 +53,8 @@ With "Patch 1" selected, set **Size (px)** to 960 × 540, then **Position (px)**
 
 **Action:**
 1. Right-click "P1" → **Add Patch**.
-2. Click the "Slice 1" row under the SendToOutput content.
-3. Click the input arrow in the left gutter of the new "Patch 2" row.
+2. Click the "Slice 1" item under the SendToOutput content.
+3. Click the input arrow in the left gutter of the new "Patch 2" item.
 
 **Expected:**
 - After 1: "Patch 2" appears dimmed under P1 with no status; its card says nothing is
@@ -66,7 +66,7 @@ With "Patch 1" selected, set **Size (px)** to 960 × 540, then **Position (px)**
 
 **Action:**
 1. Click `+` on **SURFACES**, then drag "Surface 1" onto "P1".
-2. Drag the "SendToOutput" row onto "Surface 1".
+2. Drag the "SendToOutput" item onto "Surface 1".
 
 **Expected:**
 - P1's output view shows the corner-pinned surface drawn **over** the full-frame patch
@@ -99,7 +99,7 @@ Right-click "P1" → **Split into 2×2**. Then drag the second tile's left-edge 
 the right by a little and release.
 
 **Expected:**
-- P1 now has four rows "Patch 1" … "Patch 4", each fed by "Slice 1"; the canvas shows
+- P1 now has four items "Patch 1" … "Patch 4", each fed by "Slice 1"; the canvas shows
   the image four times in a 2×2 grid, and the first tile is selected.
 - Before the edge drag the tiles share their edges exactly; dragging the second tile's
   left edge opens a gap and, when dragged back, snaps shut against the first tile.
@@ -110,7 +110,7 @@ the right by a little and release.
 Right-click "Patch 1" (in the panel or on its canvas label) → **Use on Surface**.
 
 **Expected:**
-- "Patch 1" disappears from P1 and a new surface row appears under SURFACES, selected,
+- "Patch 1" disappears from P1 and a new surface item appears under SURFACES, selected,
   mapped to P1 and fed by "Slice 1".
 - Nothing moves on the canvas: the surface's corner pin sits exactly where the patch
   was, now with the surface's anchor marker and its edge handles.
@@ -123,5 +123,5 @@ Right-click "Patch 1" (in the panel or on its canvas label) → **Use on Surface
 2. Right-click "Patch 1" → **Delete**.
 
 **Expected:**
-- After 1: both patch rows stay but turn dimmed; the output view shows only the surface.
+- After 1: both patch items stay but turn dimmed; the output view shows only the surface.
 - After 2: only "Patch 2" remains under P1. One Ctrl+Z brings "Patch 1" back.

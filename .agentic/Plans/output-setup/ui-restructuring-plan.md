@@ -57,7 +57,8 @@ entity's outliner representation, never the model object — see Representations
 - **Card** — an entity's canvas representation on Board/Stage (ContentCard, SurfaceCard,
   OutputCard, ReferenceCard, PropCard).
 - **Item** — an entity's Flow-Outliner representation (drawn by `EntityItem`; nests naturally once
-  hierarchy becomes containment). *(replaces: "pill", "row" — both bake in a flat shape)*
+  hierarchy becomes containment). *(replaces: "pill", "row" — both bake in a flat shape; confirmed
+  2026-09-05: manual tests and UI text say **item**, e.g. "the Surface 1 item in the SURFACES column")*
 - **Modifier** — a verb-attached refinement on a mapping or output: Mask, Warp, ColorCorrection.
   *(replaces: "SubEntity", "Filter" — SubEntity collides with the selection model's* sub-element*)*
 - **Sub-element** — a canvas handle (corner, lattice point, annotation endpoint); the second
@@ -211,7 +212,7 @@ Fixed columns with persistent muted headers + per-column `+` menus (reuse the ex
 - Reference images and props: **side shelf** at the right end (compact rows, no flow edges), not flow
   columns.
 
-### B.4 Edges
+### B.4 Edges — ✅ first version 2026-09-05 (display + hover only; no scroll stubs, no mapping-stack badges yet)
 
 - Edge set (all from setup data, per data-model §2.1): Slice→Surface (`Surface.SliceId`),
   Slice→Output (`OutputDefinition.SliceId`), Surface→Output (`OutputMappings`), Output→Device

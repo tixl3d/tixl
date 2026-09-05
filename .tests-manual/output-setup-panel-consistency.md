@@ -10,13 +10,13 @@ prerequisites:
 ---
 
 Covers the uniform context-menu verbs across all setup entities, the parity between
-panel-row menus and canvas frame-label menus, and direction-agnostic drag
+panel-item menus and canvas frame-label menus, and direction-agnostic drag
 connections.
 
 ## Step: Every entity kind offers the same core verbs
 
 **Action:**
-In the Flow Outliner, right-click one row of each kind: a content send, a slice, a
+In the Flow Outliner, right-click one item of each kind: a content send, a slice, a
 surface, an output, a reference image, and a prop.
 
 **Expected:**
@@ -43,19 +43,19 @@ Use the menu's Duplicate on a slice, an output, a reference image, and a prop.
 
 **Action:**
 On the output canvas, right-click a surface's center label; compare against
-right-clicking the same surface's panel row. Repeat for a slice label in the
+right-clicking the same surface's panel item. Repeat for a slice label in the
 content view.
 
 **Expected:**
 - Both menus show identical items in identical order.
 - Choosing **Rename** from the canvas menu opens the inline rename field on the
-  panel row.
+  panel item.
 
 ## Step: Drag connections work in both directions
 
 **Action:**
-In the Flow Outliner, drag a *surface row* onto an *output row*. Undo the mapping (or use
-a second output), then drag the *output row* onto the *surface row*.
+In the Flow Outliner, drag a *surface item* onto an *output item*. Undo the mapping (or use
+a second output), then drag the *output item* onto the *surface item*.
 
 **Expected:**
 - Both directions create the same surface→output mapping.
@@ -65,8 +65,8 @@ Repeat with the other connectable pairs, in both directions each: slice ↔ surf
 content send ↔ surface, slice ↔ output, content send ↔ output.
 
 **Expected:**
-- Every pair connects identically regardless of which row was picked up.
-- The orange drop indicator only appears over rows that can accept the dragged kind.
+- Every pair connects identically regardless of which item was picked up.
+- The orange drop indicator only appears over items that can accept the dragged kind.
 
 ## Step: Multi-selection menus stay consistent
 

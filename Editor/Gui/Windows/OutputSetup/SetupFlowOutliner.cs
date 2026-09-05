@@ -24,7 +24,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// CONTENT → SURFACES → OUTPUTS → LOCAL BINDINGS as columns, with a shelf for reference images and props
 /// at the right end. Rows are <see cref="EntityItem"/>s (surfaces nest by <see cref="Surface.ParentId"/>,
 /// slices under their source, patches under their output); the relationships between them light up
-/// through the gutters. CONTENT lists the live <see cref="IOutputSink"/> ops, everything else the active
+/// through the gutters and the connections drawn between the columns. CONTENT lists the live <see cref="IOutputSink"/> ops, everything else the active
 /// setup; LOCAL BINDINGS is this machine's inventory of plugs.
 /// </summary>
 internal sealed class SetupFlowOutliner
@@ -123,32 +123,42 @@ internal sealed class SetupFlowOutliner
         ImGui.BeginChild("##outlinerBody", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         var origin = ImGui.GetCursorScreenPos();
         var avail = ImGui.GetContentRegionAvail();
+
+        // Connections and dividers go under the items: split once, items on top, merge at the end. The items stay the
+        // click targets; connections are display-only for now.
+        var dl = ImGui.GetWindowDrawList();
+        dl.ChannelsSplit(2);
+        dl.ChannelsSetCurrent(1);
+        _anchors.Clear();
         var shelfWidth = MathF.Min(ShelfWidth * scale, avail.X * 0.25f);
         var columnWidth = MathF.Max((avail.X - shelfWidth) / 4, 60 * scale);
         var maxY = origin.Y;
 
-        BeginColumn(origin.X, origin.Y, columnWidth);
+        // Items are inset from the column boundaries so the gutters between columns have room for the connections.
+        var gap = ColumnGap * scale;
+
+        BeginColumn(origin.X + gap * 0.5f, origin.Y, columnWidth - gap);
         DrawColumnHeader("CONTENT", "##addContent", selection, SetupActions.AddContentSend);
         DrawContentSends(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
-        BeginColumn(origin.X + columnWidth, origin.Y, columnWidth);
+        BeginColumn(origin.X + columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
         DrawColumnHeader("SURFACES", "##addSurface", selection, SetupActions.AddSurface);
         DrawSurfaces(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
-        BeginColumn(origin.X + 2 * columnWidth, origin.Y, columnWidth);
+        BeginColumn(origin.X + 2 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
         DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput);
         DrawOutputs(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
-        BeginColumn(origin.X + 3 * columnWidth, origin.Y, columnWidth);
+        BeginColumn(origin.X + 3 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
         DrawColumnHeader("LOCAL BINDINGS", null, selection, null);
         DrawLocalBindings(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         // The shelf: kinds outside the flow, stacked as two small groups.
-        BeginColumn(origin.X + 4 * columnWidth, origin.Y, shelfWidth);
+        BeginColumn(origin.X + 4 * columnWidth + gap * 0.5f, origin.Y, shelfWidth - gap);
         DrawColumnHeader("REFERENCE IMAGES", "##addRefImage", selection, SetupActions.AddReferenceImage);
         DrawReferenceImages(selection, setup);
         FormInputs.AddVerticalSpace(6);
@@ -157,7 +167,7 @@ internal sealed class SetupFlowOutliner
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         // Column dividers span the visible body, or the content when it scrolls past it.
-        var dl = ImGui.GetWindowDrawList();
+        dl.ChannelsSetCurrent(0);
         var dividerBottom = MathF.Max(maxY, origin.Y + avail.Y);
         for (var i = 1; i <= 4; i++)
         {
@@ -165,12 +175,136 @@ internal sealed class SetupFlowOutliner
             dl.AddLine(new Vector2(x, origin.Y), new Vector2(x, dividerBottom), UiColors.BackgroundFull, 1 * scale);
         }
 
+        DrawConnections(dl, setup, machineConfig, selection);
+        dl.ChannelsMerge();
+
         // One item at the tallest column's end claims the scroll extent for all of them.
         _columnWidth = 0;
         ImGui.SetCursorScreenPos(new Vector2(origin.X, maxY));
         ImGui.Dummy(Vector2.Zero);
         ImGui.EndChild();
     }
+
+    /// <summary>
+    /// The routing as connections between items: slice → surface, slice → patch, surface → output (one per mapping,
+    /// so a fan-out reads as two lines), output → plug. Blue like every "linked" state; faded at rest, full
+    /// and thicker while either end is hovered or selected. An output nothing presents gets an attention stub.
+    /// Items folded under a collapsed parent attach to that parent.
+    /// </summary>
+    private void DrawConnections(ImDrawListPtr dl, Setup setup, MachineConfig machineConfig, SetupEntitySelection selection)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId != Guid.Empty)
+                DrawConnection(dl, selection, SetupEntitySelection.EntityKind.Slice, surface.SliceId, SetupEntitySelection.EntityKind.Surface, surface.Id, setup);
+
+            foreach (var mapping in surface.OutputMappings)
+                DrawConnection(dl, selection, SetupEntitySelection.EntityKind.Surface, surface.Id, SetupEntitySelection.EntityKind.Output, mapping.OutputId, setup);
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            if (output.Kind == OutputDefinition.Kinds.Default)
+                continue;
+
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId != Guid.Empty)
+                    DrawConnection(dl, selection, SetupEntitySelection.EntityKind.Slice, patch.SliceId, SetupEntitySelection.EntityKind.Patch, patch.Id, setup);
+            }
+
+            var binding = machineConfig.TryGetBinding(output.Id);
+            if (binding != null)
+            {
+                DrawConnection(dl, selection, SetupEntitySelection.EntityKind.Output, output.Id, SetupEntitySelection.EntityKind.None, DisplayRowId(binding.DisplayIndex), setup);
+            }
+            else if (TryGetAnchor(setup, SetupEntitySelection.EntityKind.Output, output.Id, out var anchor))
+            {
+                // Nothing presents this output: a short stub in the attention color, where its plug connection would start.
+                var scale = T3Ui.UiScaleFactor;
+                var from = new Vector2(anchor.Right, anchor.Y);
+                dl.AddLine(from, from + new Vector2(ConnectionStubLength * scale, 0), UiColors.StatusAttention.Fade(0.8f), 2 * scale);
+            }
+        }
+    }
+
+    private void DrawConnection(ImDrawListPtr dl, SetupEntitySelection selection,
+                          SetupEntitySelection.EntityKind fromKind, Guid fromId,
+                          SetupEntitySelection.EntityKind toKind, Guid toId, Setup setup)
+    {
+        if (!TryGetAnchor(setup, fromKind, fromId, out var from) || !TryGetAnchor(setup, toKind, toId, out var to))
+            return;
+
+        var scale = T3Ui.UiScaleFactor;
+        var emphasized = IsEmphasized(selection, fromKind, fromId) || IsEmphasized(selection, toKind, toId);
+        var color = emphasized ? UiColors.StatusAutomated : UiColors.StatusAutomated.Fade(0.35f);
+        var thickness = (emphasized ? 2.5f : 1.5f) * scale;
+
+        var a = new Vector2(from.Right + 2 * scale, from.Y);
+        var b = new Vector2(to.Left - 2 * scale, to.Y);
+        var reach = MathF.Max(24 * scale, MathF.Abs(b.X - a.X) * 0.4f);
+        dl.AddBezierCubic(a, a + new Vector2(reach, 0), b - new Vector2(reach, 0), b, color, thickness);
+    }
+
+    private bool IsEmphasized(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        return (_hoveredKind == kind && _hoveredId == id) || (kind != SetupEntitySelection.EntityKind.None && selection.IsSelected(kind, id));
+    }
+
+    /// <summary>The item's connection attachment, or its nearest drawn parent's when it is folded away.</summary>
+    private bool TryGetAnchor(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, out Anchor anchor)
+    {
+        for (var guard = 0; guard < 8; guard++)
+        {
+            for (var i = 0; i < _anchors.Count; i++)
+            {
+                if (_anchors[i].Kind == kind && _anchors[i].Id == id)
+                {
+                    anchor = _anchors[i];
+                    return true;
+                }
+            }
+
+            // Not drawn — fold up one level and try again.
+            switch (kind)
+            {
+                case SetupEntitySelection.EntityKind.Slice:
+                    var source = setup.FindSource(setup.FindSlice(id)?.SourceId ?? Guid.Empty);
+                    if (source == null)
+                        goto fail;
+
+                    kind = SetupEntitySelection.EntityKind.ContentSource;
+                    id = source.SymbolChildId;
+                    break;
+
+                case SetupEntitySelection.EntityKind.Patch:
+                    if (setup.FindPatch(id, out var owner) == null || owner == null)
+                        goto fail;
+
+                    kind = SetupEntitySelection.EntityKind.Output;
+                    id = owner.Id;
+                    break;
+
+                case SetupEntitySelection.EntityKind.Surface:
+                    var parentId = setup.FindSurface(id)?.ParentId ?? Guid.Empty;
+                    if (parentId == Guid.Empty)
+                        goto fail;
+
+                    id = parentId;
+                    break;
+
+                default:
+                    goto fail;
+            }
+        }
+
+        fail:
+        anchor = default;
+        return false;
+    }
+
+    /// <summary>Where an item's connections attach: its left and right x and its vertical centre, in screen px.</summary>
+    private readonly record struct Anchor(SetupEntitySelection.EntityKind Kind, Guid Id, float Left, float Right, float Y);
 
     /// <summary>Points the cursor at a column's top and tells the rows how wide they are.</summary>
     private void BeginColumn(float x, float y, float width)
@@ -694,6 +828,8 @@ internal sealed class SetupFlowOutliner
                                  || IsHoverTrailingHighlighted(args.Kind, args.Id);
 
         var action = _entityItem.DrawRow(selection, setup, in args, out var hovered);
+        var rect = _entityItem.LastRowRect;
+        _anchors.Add(new Anchor(args.Kind, args.Id, rect.Min.X, rect.Max.X, (rect.Min.Y + rect.Max.Y) * 0.5f));
         if (hovered)
         {
             _pendingHoveredKind = args.Kind;
@@ -737,6 +873,11 @@ internal sealed class SetupFlowOutliner
     private readonly List<SetupRelations.Relation> _breadcrumbScratch = [];
     private readonly System.Text.StringBuilder _breadcrumbBuilder = new();
 
+    // Items drawn this frame, for the connections (cleared per frame; a few dozen entries, searched linearly).
+    private readonly List<Anchor> _anchors = [];
+
+    private const float ConnectionStubLength = 14; // unscaled px
+    private const float ColumnGap = 28; // unscaled px; the gutter the connections run through
     private const float SwitcherWidth = 180; // unscaled px
     private const float ShelfWidth = 200; // unscaled px
 

@@ -71,6 +71,9 @@ internal sealed class EntityItem
         public float ColumnWidth;
     }
 
+    /// <summary>Screen rect of the item drawn last — where the outliner's connections attach.</summary>
+    public (Vector2 Min, Vector2 Max) LastRowRect { get; private set; }
+
     /// <param name="hovered">Reported so the caller can track hover-driven cross-highlights.</param>
     public ItemAction DrawRow(SetupEntitySelection selection, Setup setup, in Args args, out bool hovered)
     {
@@ -101,6 +104,7 @@ internal sealed class EntityItem
         var spanRight = args.ColumnWidth > 0 ? args.ColumnMinX + args.ColumnWidth : windowPos.X + ImGui.GetWindowWidth();
         var rowMin = new Vector2((float)Math.Round(spanLeft + 4 * scale), (float)Math.Round(entryPos.Y));
         var rowMax = new Vector2((float)Math.Round(spanRight - 4 * scale), rowMin.Y + height);
+        LastRowRect = (rowMin, rowMax);
         var dl = ImGui.GetWindowDrawList();
         var isSelected = selection.IsSelected(args.Kind, args.Id);
 

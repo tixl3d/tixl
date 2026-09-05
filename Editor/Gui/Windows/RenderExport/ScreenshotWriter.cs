@@ -43,13 +43,17 @@ internal static class ScreenshotWriter
             _textureBgraReadAccess = new TextureBgraReadAccess();
         
         _useFormats = FileFormats.Png;
+        _forceOpaque = false;
         return _textureBgraReadAccess.InitiateConvertAndReadBack(gpuTexture, saveSampleAfterReadback);        
     }
 
-    internal static bool StartSavingToFile(Texture2D gpuTexture, string filepath, FileFormats format, Action<string?>? onComplete = null, bool logErrors=true)
+    /// <param name="opaque">Write alpha as fully opaque — for a UI back-buffer capture, whose alpha is
+    /// render residue that makes the PNG see-through in viewers.</param>
+    internal static bool StartSavingToFile(Texture2D gpuTexture, string filepath, FileFormats format, Action<string?>? onComplete = null, bool logErrors=true, bool opaque = false)
     {
         _textureBgraReadAccess ??= new TextureBgraReadAccess();
         _useFormats = format;
+        _forceOpaque = opaque;
         
         return _textureBgraReadAccess.InitiateConvertAndReadBack(gpuTexture, request => 
                                                                              {
@@ -119,7 +123,14 @@ internal static class ScreenshotWriter
                 for (var loopY = 0; loopY < height; loopY++)
                 {
                     imageStream.Position = (long)(loopY) * dataBox.RowPitch;
-                    outDataStream.WriteRange(imageStream.ReadRange<byte>(rowStride));
+                    var row = imageStream.ReadRange<byte>(rowStride);
+                    if (_forceOpaque)
+                    {
+                        for (var i = 3; i < row.Length; i += 4)
+                            row[i] = 255;
+                    }
+
+                    outDataStream.WriteRange(row);
                 }
             }
             else
@@ -164,6 +175,7 @@ internal static class ScreenshotWriter
     /// <see cref="_textureBgraReadAccess"/> in core.
     /// </summary>
     private static FileFormats _useFormats = FileFormats.Png;
+    private static bool _forceOpaque;
 
 
 }

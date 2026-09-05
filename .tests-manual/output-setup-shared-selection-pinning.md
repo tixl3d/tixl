@@ -17,16 +17,16 @@ that decouples what a window shows from that selection.
 
 **Action:**
 Place both output windows side by side with their Flow Outliners shown. In window 1's
-panel, click the row "Surface 1".
+panel, click the item "Surface 1".
 
 **Expected:**
-- The row "Surface 1" is highlighted as selected in **both** windows' panels.
+- The item "Surface 1" is highlighted as selected in **both** windows' panels.
 - Both windows switch their canvas to Surface 1's straight view.
 
 ## Step: Pin freezes one window's view
 
 **Action:**
-In window 1, select the projector output row so its output canvas is shown. Open
+In window 1, select the projector output item so its output canvas is shown. Open
 window 1's breadcrumb menu (the pin icon next to the breadcrumb) and choose
 **Pin view to `<output name>`**. Then, in window 2's panel, click "Surface 1", then
 "Surface 2".
@@ -53,7 +53,7 @@ Click the filled pin icon in window 1's toolbar.
 
 **Action:**
 Pin window 1 to "Surface 2" (select it in window 1, breadcrumb → Pin). In window 2,
-right-click the "Surface 2" row and choose **Delete**.
+right-click the "Surface 2" item and choose **Delete**.
 
 **Expected:**
 - Window 1 falls back to following the shared selection — no error, no frozen stale
@@ -66,7 +66,7 @@ Select "Surface 1" in either panel, then click any non-SendToOutput operator in 
 graph window.
 
 **Expected:**
-- The selection clears in **both** output windows' panels (no highlighted row).
+- The selection clears in **both** output windows' panels (no highlighted item).
 - Both outliners close (the existing auto-close when the focused op is not a SendToOutput), including a
   pinned window's panel — pinning affects only the shown canvas, not panel
   visibility.

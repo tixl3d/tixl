@@ -384,8 +384,14 @@ with an explanatory comment) — the row-callback API design made compliance imp
   lists this machine's displays from `Screen.AllScreens`, dimmed while free, showing the bound output's
   name otherwise. Toolbar: "Show Flow Outliner" menu item + `Icon.ViewList` toggle (placeholder glyph for a
   bottom panel). Not done: edges (B.4), merged output/binding pills, collapsed-count badges, per-setup
-  collapse persistence. Manual test `output-setup-flow-outliner.md`; older sets reworded. Not yet
-  user-tested.
+  collapse persistence. Manual test `output-setup-flow-outliner.md`; older sets reworded. User-tested.
+- **2026-09-05 (Phase B.4 — edges):** `SetupFlowOutliner.DrawConnections` draws the routing as bezier links
+  between item anchors (`EntityItem.LastRowRect`, collected per frame into `_anchors`; a folded item attaches
+  to its drawn parent): slice→surface, slice→patch, surface→output per mapping, output→plug; unbound outputs
+  get a `StatusAttention` stub. Colour is `StatusAutomated` (the "linked" status hue), faded at rest, full +
+  thicker while an endpoint is hovered or selected. Drawn in a lower draw-list channel so the items stay on
+  top and clickable. Deferred: clamp/fade stubs for scrolled-out items, mapping-stack badges at the output
+  end, edge hit-testing (needs `EntityKind.Mapping`). Not yet user-tested.
 
 ## Suggested order (revised for the flow-view pivot)
 

@@ -676,7 +676,7 @@ internal static class DebugServer
         {
             ProgramWindows.RequestUiCapture(uiTexture =>
                                             {
-                                                var startedUi = ScreenshotWriter.StartSavingToFile(uiTexture, path, format,
+                                                var startedUi = ScreenshotWriter.StartSavingToFile(uiTexture, path, format, opaque: true,
                                                                                                    onComplete: filename =>
                                                                                                                {
                                                                                                                    uiTexture.Dispose();

@@ -26,14 +26,14 @@ In the Flow Outliner, click the `+` at the right of each column header, in this 
 
 **Expected:**
 - After 1: a **SendToOutput** op appears centered in the graph, and a "SendToOutput"
-  row appears under CONTENT.
-- After 2: a row **"Surface 1"** appears under SURFACES, selected.
-- After 3: a row **"P1"** appears under OUTPUTS, selected.
+  item appears under CONTENT.
+- After 2: a item **"Surface 1"** appears under SURFACES, selected.
+- After 3: a item **"P1"** appears under OUTPUTS, selected.
 
 ## Step: Selecting an entity fills the Parameter window
 
 **Action:**
-Click the "Surface 1" row.
+Click the "Surface 1" item.
 
 **Expected:**
 - The Parameter window shows a card headed by a grid icon + **Surface**, then an
@@ -47,25 +47,25 @@ Click the "Surface 1" row.
 
 **Action:**
 1. Click the SendToOutput op in the graph window.
-2. Click the "Surface 1" row in the outliner.
+2. Click the "Surface 1" item in the outliner.
 3. Click the SendToOutput op in the graph again.
-4. Click the "Surface 1" row again, then click the empty graph background.
+4. Click the "Surface 1" item again, then click the empty graph background.
 
 **Expected:**
 - After 1: the Parameter window shows the op's parameters (Texture, Update, Color), and
-  the "SendToOutput" CONTENT row is highlighted in the outliner.
+  the "SendToOutput" CONTENT item is highlighted in the outliner.
 - After 2: it switches to the Surface card, and the op loses its selection outline in
-  the graph. The CONTENT row is no longer highlighted; only "Surface 1" is.
+  the graph. The CONTENT item is no longer highlighted; only "Surface 1" is.
 - After 3: it switches back to the op's parameters; "Surface 1" is no longer
-  highlighted, the CONTENT row is.
-- After 4: the Parameter window shows the composition (no entity card), no row in the
+  highlighted, the CONTENT item is.
+- After 4: the Parameter window shows the composition (no entity card), no item in the
   outliner is highlighted, and the outliner closes.
 
 ## Step: A selected SendToOutput shows parameters plus the setup side
 
 **Action:**
 With the SendToOutput op still selected in the graph, scroll to the bottom of the
-Parameter window. Then drag the "SendToOutput" CONTENT row onto the "Surface 1" row
+Parameter window. Then drag the "SendToOutput" CONTENT item onto the "Surface 1" item
 and re-select the op in the graph.
 
 **Expected:**
@@ -76,13 +76,13 @@ and re-select the op in the graph.
 ## Step: Renaming through the Name field
 
 **Action:**
-Click the "Surface 1" row. In the card's **Name** field, replace the text with
+Click the "Surface 1" item. In the card's **Name** field, replace the text with
 "Wall Left" and press Tab.
 
 **Expected:**
-- The SURFACES row updates to "Wall Left" when the field loses focus (not per
+- The SURFACES item updates to "Wall Left" when the field loses focus (not per
   keystroke).
-- One Ctrl+Z restores "Surface 1" in both the card and the row.
+- One Ctrl+Z restores "Surface 1" in both the card and the item.
 
 ## Step: Field edits stay single undo steps
 
@@ -99,8 +99,8 @@ uninterrupted drag, then press Ctrl+Z once.
 ## Step: Kinds without a canvas point to the Parameter window
 
 **Action:**
-Click `+` on **PROPS**, then `+` on **REFERENCE IMAGES**. Click the new prop row,
-then the new reference image row.
+Click `+` on **PROPS**, then `+` on **REFERENCE IMAGES**. Click the new prop item,
+then the new reference image item.
 
 **Expected:**
 - For the prop: the output area shows a centered message naming it and pointing to
