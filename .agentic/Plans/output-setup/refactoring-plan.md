@@ -375,6 +375,17 @@ with an explanatory comment) — the row-callback API design made compliance imp
   `CountConsumersOfSource`, `CountChildren` (out of `SetupActions`/`SetupParameterView`). The panel keeps
   only its hover buffer and gutter lookups. No structure-version cache yet — the queries are loop-based
   into reused lists; B.6 caching lands with the outliner that needs it.
+- **2026-09-05 (Phase B.2 + B.3 — the Flow Outliner strip):** `SetupPanel` → `SetupFlowOutliner`: a strip
+  under the canvas (`OutputSetupModeView.DrawOutliner`, `OutlinerReservedHeight`; `OutputWindow` sizes the
+  canvas child to what's left) with a full-width up/down splitter, a header (setup switcher · breadcrumb
+  from `SetupRelations` · collapse chevron) and columns CONTENT / SURFACES / OUTPUTS / LOCAL BINDINGS plus a
+  shelf (REFERENCE IMAGES, PROPS) inside one scrolling child. Rows are the same `EntityItem`s, which learned
+  a column rect (`Args.ColumnMinX/Width`); inventory rows (`EntityKind.None`) are inert. LOCAL BINDINGS
+  lists this machine's displays from `Screen.AllScreens`, dimmed while free, showing the bound output's
+  name otherwise. Toolbar: "Show Flow Outliner" menu item + `Icon.ViewList` toggle (placeholder glyph for a
+  bottom panel). Not done: edges (B.4), merged output/binding pills, collapsed-count badges, per-setup
+  collapse persistence. Manual test `output-setup-flow-outliner.md`; older sets reworded. Not yet
+  user-tested.
 
 ## Suggested order (revised for the flow-view pivot)
 

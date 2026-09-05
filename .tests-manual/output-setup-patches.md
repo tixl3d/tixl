@@ -9,7 +9,7 @@ prerequisites:
   - A writable project is open whose active setup is empty (a freshly created project
     works — it starts with "Setup 1" and no content, surfaces, or outputs).
   - Three windows are visible - the graph window, the Parameter window, and one output
-    window with its setup panel open (toolbar - leftmost panel icon).
+    window with its Flow Outliner shown (it opens with a selected SendToOutput; otherwise the toolbar's list icon).
   - A LoadImage op (any image) exists in the graph.
 ---
 
@@ -77,7 +77,7 @@ With "Patch 1" selected, set **Size (px)** to 960 × 540, then **Position (px)**
 ## Step: Patch handles on the output canvas
 
 **Action:**
-1. Click "P1" in the setup panel so the output window shows its canvas, then click the
+1. Click "P1" in the outliner so the output window shows its canvas, then click the
    "Patch 1" label on the canvas.
 2. Drag the patch's top-right corner inward by about a third of the canvas.
 3. Drag the right-edge handle (square, mid-edge) left; then hold Shift and drag it

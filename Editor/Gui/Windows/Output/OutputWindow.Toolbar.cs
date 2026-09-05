@@ -23,11 +23,11 @@ namespace T3.Editor.Gui.Windows.Output;
 
 internal sealed partial class OutputWindow
 {
-    /// <summary>Output-specific items appended to the breadcrumb menu. Display binding moved into the sidebar's
-    /// OUTPUT rows (right-click → Bind to display); the panel toggle is now the toolbar's SidePanel icon.</summary>
+    /// <summary>Output-specific items appended to the breadcrumb menu. Display binding lives on the outliner's
+    /// OUTPUT rows (right-click → Bind to display); the outliner toggle is the toolbar's list icon.</summary>
     private void DrawOutputMenuExtras()
     {
-        _setupMode.DrawSetupPanelMenuItem();
+        _setupMode.DrawOutlinerMenuItem();
         _setupMode.DrawPinMenuItem();
     }
 
@@ -45,7 +45,7 @@ internal sealed partial class OutputWindow
         // Keep filled backgrounds so the toolbar reads as a continuous bar.
         CustomComponents.PushToolbarIconBackground();
 
-        _setupMode.DrawPanelToggleButton();
+        _setupMode.DrawOutlinerToggleButton();
         _setupMode.DrawPinIndicator();
         Pinning.DrawPinning(_drawOutputMenuExtras);
         ImGui.SameLine();

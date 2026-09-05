@@ -163,7 +163,7 @@ property editing happens in the Parameter window.
   Phase C consume it too. Build it allocation-free: reusable lists, resolved per structure change (see
   B.6), not per frame.
 
-### B.2 Layout & hosting
+### B.2 Layout & hosting — ✅ done 2026-09-05 (view-mode control stays on the canvas until Phase C)
 
 - **Window layout (confirmed 2026-09-04): the output window stacks vertically — Board on top, Flow
   Outliner below**, separated by one splitter that runs horizontally across the full window width and
@@ -178,7 +178,7 @@ property editing happens in the Parameter window.
   right-aligned: settings + collapse icons. Hovering the breadcrumb highlights that path's items and
   edges in the strip.
 
-### B.3 Columns & rows
+### B.3 Columns & rows — ✅ first version 2026-09-05 (no merged pills, no collapse-count badges yet)
 
 Fixed columns with persistent muted headers + per-column `+` menus (reuse the existing add menus):
 

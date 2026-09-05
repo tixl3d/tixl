@@ -20,21 +20,25 @@ using T3.Editor.UiModel.Selection;
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// The output window's setup panel: setup switcher, then one section per entity kind
-/// (CONTENT / SURFACES / OUTPUTS / REFERENCE IMAGES / PROPS). Surfaces form their own tree (nested by
-/// <see cref="Surface.ParentId"/>); the relationships between content, surfaces, and outputs are shown
-/// per row. CONTENT lists the live <see cref="IOutputSink"/> ops, everything else the active setup.
+/// The Flow Outliner: the strip under the output canvas that lays the setup out along its content flow —
+/// CONTENT → SURFACES → OUTPUTS → LOCAL BINDINGS as columns, with a shelf for reference images and props
+/// at the right end. Rows are <see cref="EntityItem"/>s (surfaces nest by <see cref="Surface.ParentId"/>,
+/// slices under their source, patches under their output); the relationships between them light up
+/// through the gutters. CONTENT lists the live <see cref="IOutputSink"/> ops, everything else the active
+/// setup; LOCAL BINDINGS is this machine's inventory of plugs.
 /// </summary>
-internal sealed class SetupPanel
+internal sealed class SetupFlowOutliner
 {
-    /// <summary>One panel per output window, sharing the window's <see cref="EntityItem"/> with its canvas
+    /// <summary>One outliner per output window, sharing the window's <see cref="EntityItem"/> with its canvas
     /// views — so rename state and menus stay per-window instead of bleeding between open windows.</summary>
-    public SetupPanel(EntityItem entityItem)
+    public SetupFlowOutliner(EntityItem entityItem)
     {
         _entityItem = entityItem;
     }
 
-    public void Draw(SetupEntitySelection selection, Action? onCollapse = null)
+    /// <param name="onToggleCollapse">Collapses the strip to its header bar, or expands it again.</param>
+    /// <param name="bodyVisible">False while collapsed: only the header row draws.</param>
+    public void Draw(SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
@@ -62,90 +66,303 @@ internal sealed class SetupPanel
         else
             _referenced.Clear();
 
-        DrawSetupSwitcher(setup, selection, onCollapse);
-        FormInputs.AddVerticalSpace(4);
+        DrawHeader(setup, selection, onToggleCollapse, bodyVisible);
 
-        // CONTENT — live SendToOutput ops (their targeting lives on the op, so they aren't setup entities).
-        if (DrawSection("CONTENT", "##addContent", selection, SetupActions.AddContentSend))
-            DrawContentSends(selection, setup);
-
-        if (DrawSection("SURFACES", "##addSurface", selection, SetupActions.AddSurface))
-            DrawSurfaces(selection, setup);
-
-        if (DrawSection("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput))
-        {
-            for (var i = 0; i < setup.Outputs.Count; i++)
-            {
-                var output = setup.Outputs[i];
-                // The Default output is the editor's internal preview, not something you present or map — hide it.
-                if (output.Kind == OutputDefinition.Kinds.Default)
-                    continue;
-
-                var binding = machineConfig.TryGetBinding(output.Id);
-                var status = binding == null ? null : $"Display {binding.DisplayIndex + 1}";
-                var hasPatches = output.Patches.Count > 0;
-                var isExpanded = !_collapsedOutputs.Contains(output.Id);
-                var args = new EntityItem.Args
-                               {
-                                   Kind = SetupEntitySelection.EntityKind.Output,
-                                   Id = output.Id,
-                                   Name = output.Name,
-                                   Status = status,
-                                   LeadingIcon = Icon.Projector,
-                                   IsExpanded = hasPatches ? isExpanded : null,
-                                   ReserveExpander = true,
-                                   // A paused output (Send off) reads the same as a non-rendering surface.
-                                   Muted = !output.Send,
-                                   StrikeLeadingIcon = !output.Send,
-                               };
-                if (DrawRow(selection, setup, ref args) == EntityItem.ItemAction.ToggleExpanded)
-                {
-                    if (!_collapsedOutputs.Add(output.Id))
-                        _collapsedOutputs.Remove(output.Id);
-                }
-
-                if (!hasPatches || !isExpanded)
-                    continue;
-
-                // Patches under their output, like regions under a surface: the direct pipe's canvas cuts.
-                for (var p = 0; p < output.Patches.Count; p++)
-                    DrawPatchRow(selection, setup, output, output.Patches[p]);
-            }
-        }
-
-        if (DrawSection("REFERENCE IMAGES", "##addRefImage", selection, SetupActions.AddReferenceImage))
-        {
-            for (var i = 0; i < setup.ReferenceImages.Count; i++)
-            {
-                var image = setup.ReferenceImages[i];
-                var args = new EntityItem.Args
-                               {
-                                   Kind = SetupEntitySelection.EntityKind.ReferenceImage,
-                                   Id = image.Id,
-                                   Name = image.Name,
-                               };
-                DrawRow(selection, setup, ref args);
-            }
-        }
-
-        if (DrawSection("PROPS", "##addProp", selection, SetupActions.AddProp))
-        {
-            for (var i = 0; i < setup.Props.Count; i++)
-            {
-                var prop = setup.Props[i];
-                var args = new EntityItem.Args
-                               {
-                                   Kind = SetupEntitySelection.EntityKind.Prop,
-                                   Id = prop.Id,
-                                   Name = prop.Kind,
-                               };
-                DrawRow(selection, setup, ref args);
-            }
-        }
-
+        if (bodyVisible)
+            DrawColumns(setup, machineConfig, selection);
 
         _hoveredKind = _pendingHoveredKind;
         _hoveredId = _pendingHoveredId;
+    }
+
+    /// <summary>Setup switcher · breadcrumb of the primary's path · collapse toggle at the right.</summary>
+    private void DrawHeader(Setup setup, SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var height = ImGui.GetFrameHeight();
+        var rowPos = ImGui.GetCursorScreenPos();
+
+        DrawSetupSwitcher(setup, selection, SwitcherWidth * scale);
+
+        // Breadcrumb: what feeds the primary → the primary → what shows it, refreshed on a change of primary
+        // and every ~half second (renames), never per frame.
+        var frame = ImGui.GetFrameCount();
+        if (_breadcrumbKind != _primaryKind || _breadcrumbId != _primaryId || frame - _breadcrumbFrame > 30)
+        {
+            _breadcrumb = BuildBreadcrumb(setup);
+            _breadcrumbKind = _primaryKind;
+            _breadcrumbId = _primaryId;
+            _breadcrumbFrame = frame;
+        }
+
+        ImGui.SetCursorScreenPos(new Vector2(rowPos.X + (SwitcherWidth + 12) * scale, rowPos.Y));
+        ImGui.AlignTextToFramePadding();
+        CustomComponents.StylizedText(_breadcrumb, Fonts.FontSmall, UiColors.TextMuted);
+
+        if (onToggleCollapse != null)
+        {
+            ImGui.SetCursorScreenPos(new Vector2(rowPos.X + ImGui.GetContentRegionAvail().X - height, rowPos.Y));
+            if (CustomComponents.IconButton(bodyVisible ? Icon.ChevronDown : Icon.ChevronUp, Vector2.Zero))
+                onToggleCollapse();
+
+            CustomComponents.TooltipForLastItem(bodyVisible ? "Collapse the outliner to its header" : "Expand the outliner");
+        }
+
+        ImGui.SetCursorScreenPos(new Vector2(rowPos.X, rowPos.Y + height + 2 * scale));
+        ImGui.Dummy(Vector2.Zero);
+    }
+
+    /// <summary>
+    /// The columns side by side inside one shared vertical scroll region: the four flow columns split the
+    /// width left of the shelf equally. Each column draws its header and rows at its own x; the tallest one
+    /// sets the scroll extent.
+    /// </summary>
+    private void DrawColumns(Setup setup, MachineConfig machineConfig, SetupEntitySelection selection)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        ImGui.BeginChild("##outlinerBody", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+        var origin = ImGui.GetCursorScreenPos();
+        var avail = ImGui.GetContentRegionAvail();
+        var shelfWidth = MathF.Min(ShelfWidth * scale, avail.X * 0.25f);
+        var columnWidth = MathF.Max((avail.X - shelfWidth) / 4, 60 * scale);
+        var maxY = origin.Y;
+
+        BeginColumn(origin.X, origin.Y, columnWidth);
+        DrawColumnHeader("CONTENT", "##addContent", selection, SetupActions.AddContentSend);
+        DrawContentSends(selection, setup);
+        maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
+
+        BeginColumn(origin.X + columnWidth, origin.Y, columnWidth);
+        DrawColumnHeader("SURFACES", "##addSurface", selection, SetupActions.AddSurface);
+        DrawSurfaces(selection, setup);
+        maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
+
+        BeginColumn(origin.X + 2 * columnWidth, origin.Y, columnWidth);
+        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput);
+        DrawOutputs(selection, setup, machineConfig);
+        maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
+
+        BeginColumn(origin.X + 3 * columnWidth, origin.Y, columnWidth);
+        DrawColumnHeader("LOCAL BINDINGS", null, selection, null);
+        DrawLocalBindings(selection, setup, machineConfig);
+        maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
+
+        // The shelf: kinds outside the flow, stacked as two small groups.
+        BeginColumn(origin.X + 4 * columnWidth, origin.Y, shelfWidth);
+        DrawColumnHeader("REFERENCE IMAGES", "##addRefImage", selection, SetupActions.AddReferenceImage);
+        DrawReferenceImages(selection, setup);
+        FormInputs.AddVerticalSpace(6);
+        DrawColumnHeader("PROPS", "##addProp", selection, SetupActions.AddProp);
+        DrawProps(selection, setup);
+        maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
+
+        // Column dividers span the visible body, or the content when it scrolls past it.
+        var dl = ImGui.GetWindowDrawList();
+        var dividerBottom = MathF.Max(maxY, origin.Y + avail.Y);
+        for (var i = 1; i <= 4; i++)
+        {
+            var x = (float)Math.Round(origin.X + i * columnWidth);
+            dl.AddLine(new Vector2(x, origin.Y), new Vector2(x, dividerBottom), UiColors.BackgroundFull, 1 * scale);
+        }
+
+        // One item at the tallest column's end claims the scroll extent for all of them.
+        _columnWidth = 0;
+        ImGui.SetCursorScreenPos(new Vector2(origin.X, maxY));
+        ImGui.Dummy(Vector2.Zero);
+        ImGui.EndChild();
+    }
+
+    /// <summary>Points the cursor at a column's top and tells the rows how wide they are.</summary>
+    private void BeginColumn(float x, float y, float width)
+    {
+        _columnMinX = x;
+        _columnWidth = width;
+        ImGui.SetCursorScreenPos(new Vector2(x, y));
+    }
+
+    /// <summary>A column's persistent muted title with its `+` at the right end (none for the plug inventory).</summary>
+    private void DrawColumnHeader(string title, string? addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection>? onAdd)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        // Anchored on the column's x: a spacer before a second header (the shelf) resets the cursor's x to the window.
+        var pos = new Vector2(_columnMinX, ImGui.GetCursorScreenPos().Y);
+        var height = ImGui.GetFrameHeight();
+
+        ImGui.SetCursorScreenPos(new Vector2(pos.X + 8 * scale, pos.Y));
+        ImGui.AlignTextToFramePadding();
+        CustomComponents.StylizedText(title, Fonts.FontSmall, UiColors.TextMuted);
+
+        if (addButtonId != null && onAdd != null)
+        {
+            ImGui.SetCursorScreenPos(new Vector2(pos.X + _columnWidth - height - 4 * scale, pos.Y));
+            ImGui.PushID(addButtonId);
+            if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
+            {
+                onAdd(selection);
+                OutputSetupHandling.SaveActive();
+            }
+
+            ImGui.PopID();
+        }
+
+        ImGui.SetCursorScreenPos(new Vector2(pos.X, pos.Y + height + 2 * scale));
+        ImGui.Dummy(Vector2.Zero);
+    }
+
+    private void DrawOutputs(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
+    {
+        for (var i = 0; i < setup.Outputs.Count; i++)
+        {
+            var output = setup.Outputs[i];
+            // The Default output is the editor's internal preview, not something you present or map — hide it.
+            if (output.Kind == OutputDefinition.Kinds.Default)
+                continue;
+
+            var binding = machineConfig.TryGetBinding(output.Id);
+            var status = binding == null ? null : DisplayLabel(binding.DisplayIndex);
+            var hasPatches = output.Patches.Count > 0;
+            var isExpanded = !_collapsedOutputs.Contains(output.Id);
+            var args = new EntityItem.Args
+                           {
+                               Kind = SetupEntitySelection.EntityKind.Output,
+                               Id = output.Id,
+                               Name = output.Name,
+                               Status = status,
+                               LeadingIcon = Icon.Projector,
+                               IsExpanded = hasPatches ? isExpanded : null,
+                               ReserveExpander = true,
+                               // A paused output (Send off) reads the same as a non-rendering surface.
+                               Muted = !output.Send,
+                               StrikeLeadingIcon = !output.Send,
+                           };
+            if (DrawRow(selection, setup, ref args) == EntityItem.ItemAction.ToggleExpanded)
+            {
+                if (!_collapsedOutputs.Add(output.Id))
+                    _collapsedOutputs.Remove(output.Id);
+            }
+
+            if (!hasPatches || !isExpanded)
+                continue;
+
+            // Patches under their output, like regions under a surface: the direct pipe's canvas cuts.
+            for (var p = 0; p < output.Patches.Count; p++)
+                DrawPatchRow(selection, setup, output, output.Patches[p]);
+        }
+    }
+
+    /// <summary>
+    /// This machine's plugs — the displays today, streams later — as an inventory: every plug is listed,
+    /// the ones an output is bound to carry that output's name, the free ones recede. Rows are not
+    /// entities (no selection, no menu); binding happens on the output's row.
+    /// </summary>
+    private void DrawLocalBindings(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
+    {
+        var screens = System.Windows.Forms.Screen.AllScreens;
+        for (var i = 0; i < screens.Length; i++)
+        {
+            string? boundTo = null;
+            foreach (var binding in machineConfig.Bindings)
+            {
+                if (binding.DisplayIndex != i)
+                    continue;
+
+                boundTo = setup.FindOutput(binding.OutputId)?.Name;
+                break;
+            }
+
+            var args = new EntityItem.Args
+                           {
+                               Kind = SetupEntitySelection.EntityKind.None,
+                               Id = DisplayRowId(i),
+                               Name = DisplayLabel(i),
+                               Status = boundTo ?? ResolutionLabel(i, screens[i].Bounds.Width, screens[i].Bounds.Height),
+                               LeadingIcon = Icon.PlayOutput,
+                               Muted = boundTo == null,
+                           };
+            DrawRow(selection, setup, ref args);
+        }
+    }
+
+    private void DrawReferenceImages(SetupEntitySelection selection, Setup setup)
+    {
+        for (var i = 0; i < setup.ReferenceImages.Count; i++)
+        {
+            var image = setup.ReferenceImages[i];
+            var args = new EntityItem.Args
+                           {
+                               Kind = SetupEntitySelection.EntityKind.ReferenceImage,
+                               Id = image.Id,
+                               Name = image.Name,
+                           };
+            DrawRow(selection, setup, ref args);
+        }
+    }
+
+    private void DrawProps(SetupEntitySelection selection, Setup setup)
+    {
+        for (var i = 0; i < setup.Props.Count; i++)
+        {
+            var prop = setup.Props[i];
+            var args = new EntityItem.Args
+                           {
+                               Kind = SetupEntitySelection.EntityKind.Prop,
+                               Id = prop.Id,
+                               Name = prop.Kind,
+                           };
+            DrawRow(selection, setup, ref args);
+        }
+    }
+
+    /// <summary>"Local / Display N" — cached per index; the per-frame plug rows must not build strings.</summary>
+    private static string DisplayLabel(int displayIndex)
+    {
+        while (_displayLabels.Count <= displayIndex)
+            _displayLabels.Add($"Local / Display {_displayLabels.Count + 1}");
+
+        return _displayLabels[displayIndex];
+    }
+
+    private static string ResolutionLabel(int displayIndex, int width, int height)
+    {
+        while (_resolutionLabels.Count <= displayIndex)
+            _resolutionLabels.Add(string.Empty);
+
+        // Rebuilt only when the display's mode changed since the last look.
+        var cached = _resolutionLabels[displayIndex];
+        if (cached.Length == 0 || !cached.StartsWith(width.ToString()))
+            _resolutionLabels[displayIndex] = cached = $"{width}×{height}";
+
+        return cached;
+    }
+
+    // A stable per-display row id, so ImGui ids and hover pulses stay put across frames.
+    private static Guid DisplayRowId(int displayIndex) => new(displayIndex + 1, 0x5c4e, 0x4e21, 0, 0, 0, 0, 0, 0, 0, 0);
+
+    /// <summary>"what feeds it → the primary → what shows it", one hop each way, from <see cref="SetupRelations"/>.</summary>
+    private string BuildBreadcrumb(Setup setup)
+    {
+        if (_primaryKind == SetupEntitySelection.EntityKind.None)
+            return string.Empty;
+
+        SetupRelations.CollectRelated(setup, _primaryKind, _primaryId, _breadcrumbScratch);
+        _breadcrumbBuilder.Clear();
+        foreach (var relation in _breadcrumbScratch)
+        {
+            if (relation.IsConsumer)
+                continue;
+
+            _breadcrumbBuilder.Append(SetupActions.NameForEntity(relation.Kind, relation.Id)).Append(" → ");
+        }
+
+        _breadcrumbBuilder.Append(SetupActions.NameForEntity(_primaryKind, _primaryId));
+
+        foreach (var relation in _breadcrumbScratch)
+        {
+            if (relation.IsConsumer)
+                _breadcrumbBuilder.Append(" → ").Append(SetupActions.NameForEntity(relation.Kind, relation.Id));
+        }
+
+        return _breadcrumbBuilder.ToString();
     }
 
     private bool IsHoverInputHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
@@ -405,14 +622,11 @@ internal sealed class SetupPanel
                    : (Icon.Projector, CountSuffix(surface.OutputMappings.Count));
     }
 
-    private void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection, Action? onCollapse)
+    private void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection, float switcherWidth)
     {
         var scale = T3Ui.UiScaleFactor;
         var pos = ImGui.GetCursorScreenPos();
         var height = ImGui.GetFrameHeight();
-        // Leave room on the right for the collapse button so its clicks don't fall through to the switcher.
-        var collapseWidth = onCollapse != null ? height + 2 * scale : 0;
-        var switcherWidth = ImGui.GetContentRegionAvail().X - collapseWidth;
         if (ImGui.InvisibleButton("##setupSwitcher", new Vector2(switcherWidth, height)))
             ImGui.OpenPopup("##setupMenu");
 
@@ -422,15 +636,6 @@ internal sealed class SetupPanel
         CustomComponents.StylizedText(setup.Name, Fonts.FontNormal, UiColors.Text);
         ImGui.SameLine(0, 4 * scale);
         Icons.DrawInlineGlyph(Icon.ChevronDown, UiColors.TextMuted.Rgba);
-
-        if (onCollapse != null)
-        {
-            ImGui.SetCursorScreenPos(new Vector2(pos.X + switcherWidth + 2 * scale, pos.Y));
-            if (CustomComponents.IconButton(Icon.SidePanelLeft, Vector2.Zero))
-                onCollapse();
-
-            CustomComponents.TooltipForLastItem("Hide the setup panel");
-        }
 
         ImGui.SetCursorScreenPos(new Vector2(pos.X, pos.Y + height));
 
@@ -475,61 +680,12 @@ internal sealed class SetupPanel
         }
     }
 
-    // An icon drawn as a font glyph on the current text line — aligns with AlignTextToFramePadding'd text,
-    // unlike DrawAtCursor which adds its own vertical offset.
-    // A collapsible section header: chevron toggle + label. Returns whether the section is expanded.
-    /// <summary>The black divider line + rounded-NW corner notch that tops each section — a shared edge so the
-    /// properties card can reuse the exact look.</summary>
-    private void DrawPanelDivider()
-    {
-        var scale = T3Ui.UiScaleFactor;
-        var dl = ImGui.GetWindowDrawList();
-        var edgeY = (float)Math.Round(ImGui.GetCursorScreenPos().Y);
-        var winMinX = ImGui.GetWindowPos().X;
-        dl.AddLine(new Vector2(winMinX, edgeY), new Vector2(winMinX + ImGui.GetWindowWidth(), edgeY), UiColors.BackgroundFull, 1 * scale);
-        Icons.DrawIconAtScreenPosition(Icon.RoundingNW, new Vector2(winMinX, edgeY), dl, UiColors.BackgroundFull.Fade(0.5f));
-    }
-
-    private bool DrawSectionLabel(string title)
-    {
-        FormInputs.AddVerticalSpace(6);
-        DrawPanelDivider();
-
-        var expanded = _expandedSections.GetValueOrDefault(title, true);
-
-        ImGui.PushID(title);
-        if (CustomComponents.IconButton(expanded ? Icon.ChevronDown : Icon.ChevronRight, new Vector2(ImGui.GetFrameHeight())))
-        {
-            expanded = !expanded;
-            _expandedSections[title] = expanded;
-        }
-
-        ImGui.SameLine(0, 2 * T3Ui.UiScaleFactor);
-        ImGui.AlignTextToFramePadding();
-        CustomComponents.StylizedText(title, Fonts.FontSmall, UiColors.TextMuted);
-        ImGui.PopID();
-        return expanded;
-    }
-
-    private bool DrawSection(string title, string addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection> onAdd)
-    {
-        var expanded = DrawSectionLabel(title);
-        CustomComponents.RightAlign(ImGui.GetFrameHeight());
-        ImGui.PushID(addButtonId);
-        if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
-        {
-            onAdd(selection);
-            OutputSetupHandling.SaveActive();
-        }
-
-        ImGui.PopID();
-        return expanded;
-    }
-
-    /// <summary>Panel-side row wrapper: injects the cross-highlight context every row needs and records
-    /// hover for next frame's referenced-row highlighting.</summary>
+    /// <summary>Outliner-side row wrapper: injects the column rect and the cross-highlight context every row
+    /// needs, and records hover for next frame's referenced-row highlighting.</summary>
     private EntityItem.ItemAction DrawRow(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
     {
+        args.ColumnMinX = _columnMinX;
+        args.ColumnWidth = _columnWidth;
         args.PrimaryKind = _primaryKind;
         args.PrimaryId = _primaryId;
         args.HighlightInputArrow = IsHoverInputHighlighted(args.Kind, args.Id);
@@ -565,8 +721,24 @@ internal sealed class SetupPanel
     }
 
     private static readonly List<string> _availableNames = [];
-    private readonly Dictionary<string, bool> _expandedSections = [];
+    private static readonly List<string> _displayLabels = [];
+    private static readonly List<string> _resolutionLabels = [];
     private static EvaluationContext? _sendContext;
+
+    // The column the rows currently draw into (screen x + width); 0 width = whole window.
+    private float _columnMinX;
+    private float _columnWidth;
+
+    // Header breadcrumb cache — rebuilt on a primary change or every ~half second, not per frame.
+    private string _breadcrumb = string.Empty;
+    private SetupEntitySelection.EntityKind _breadcrumbKind;
+    private Guid _breadcrumbId;
+    private int _breadcrumbFrame;
+    private readonly List<SetupRelations.Relation> _breadcrumbScratch = [];
+    private readonly System.Text.StringBuilder _breadcrumbBuilder = new();
+
+    private const float SwitcherWidth = 180; // unscaled px
+    private const float ShelfWidth = 200; // unscaled px
 
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
     private readonly HashSet<Guid> _collapsedSurfaces = [];

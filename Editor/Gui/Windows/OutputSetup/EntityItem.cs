@@ -64,6 +64,11 @@ internal sealed class EntityItem
 
         /// <summary>Cross-highlight: this item feeds the primary or hovered one (brightens the trailing gutter).</summary>
         public bool HighlightTrailing;
+
+        /// <summary>The column the row spans, in screen px; a zero width means the whole window (the tree layout).</summary>
+        public float ColumnMinX;
+
+        public float ColumnWidth;
     }
 
     /// <param name="hovered">Reported so the caller can track hover-driven cross-highlights.</param>
@@ -92,8 +97,10 @@ internal sealed class EntityItem
         // to avoid a blurry sub-pixel edge.
         var entryPos = ImGui.GetCursorScreenPos();
         var windowPos = ImGui.GetWindowPos();
-        var rowMin = new Vector2((float)Math.Round(windowPos.X + 4 * scale), (float)Math.Round(entryPos.Y));
-        var rowMax = new Vector2((float)Math.Round(windowPos.X + ImGui.GetWindowWidth() - 4 * scale), rowMin.Y + height);
+        var spanLeft = args.ColumnWidth > 0 ? args.ColumnMinX : windowPos.X;
+        var spanRight = args.ColumnWidth > 0 ? args.ColumnMinX + args.ColumnWidth : windowPos.X + ImGui.GetWindowWidth();
+        var rowMin = new Vector2((float)Math.Round(spanLeft + 4 * scale), (float)Math.Round(entryPos.Y));
+        var rowMax = new Vector2((float)Math.Round(spanRight - 4 * scale), rowMin.Y + height);
         var dl = ImGui.GetWindowDrawList();
         var isSelected = selection.IsSelected(args.Kind, args.Id);
 
@@ -142,7 +149,7 @@ internal sealed class EntityItem
         {
             action = ItemAction.ToggleExpanded;
         }
-        else if (clicked)
+        else if (clicked && args.Kind != SetupEntitySelection.EntityKind.None) // inventory rows (plugs) are inert
         {
             var io = ImGui.GetIO();
             if (io.KeyCtrl)
@@ -334,8 +341,13 @@ internal sealed class EntityItem
             }
         }
 
-        // Next row starts a tight 2px below, independent of the content cursor above.
+        // Next row starts a tight 2px below, independent of the content cursor above. Claimed with a zero-height
+        // item (no spacing) rather than a bare cursor set: ImGui asserts on a window whose extent was only ever
+        // extended by SetCursorPos, which is exactly what the last row of the last section would do.
         ImGui.SetCursorScreenPos(new Vector2(entryPos.X, rowMax.Y + 2 * scale));
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
+        ImGui.Dummy(Vector2.Zero);
+        ImGui.PopStyleVar();
         ImGui.PopID();
         return action;
     }

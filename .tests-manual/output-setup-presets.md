@@ -63,10 +63,10 @@ Click the entry for the second display.
 ## Step: Opening the Setup Panel
 
 **Action:**
-In the Output Window toolbar, click `View` and enable "Show Setup Panel".
+In the Output Window toolbar, open the breadcrumb menu and enable "Show Flow Outliner".
 
 **Expected:**
-- The setup panel appears on the left with sections REFERENCE IMAGES, SURFACES, PROPS,
+- The Flow Outliner appears under the canvas with columns CONTENT, SURFACES, OUTPUTS, LOCAL BINDINGS and a shelf with REFERENCE IMAGES and PROPS,
   OUTPUTS — each with a `+` button.
 - The panel title is a dropdown showing the active setup's name (e.g. "Setup 1").
 - The OUTPUTS section lists the Default output; bound outputs show their display,
@@ -84,7 +84,7 @@ the outline.
 - Selecting the Default output opens its editing canvas instead (the output frame; see
   the `corner-pin-editing` set).
 - The new surface was saved to the setup file (check the JSON).
-- With nothing selected yet, the view shows "Select an entity in the setup panel".
+- With nothing selected yet, the view shows "Select an entity in the outliner".
 
 ## Step: Windows browse independently
 

@@ -9,10 +9,10 @@ prerequisites:
   - A writable project is open whose active setup is empty (a freshly created project
     works — it starts with "Setup 1" and no content, surfaces, or outputs).
   - Three windows are visible - the graph window, the Parameter window, and one output
-    window with its setup panel open (toolbar - leftmost panel icon).
+    window with its Flow Outliner shown (it opens with a selected SendToOutput; otherwise the toolbar's list icon).
 ---
 
-Covers Phase A of the UI restructuring: entity properties moved from the setup panel's
+Covers Phase A of the UI restructuring: entity properties moved from the setup outliner's
 footer card into the Parameter window. The last pick — graph op or setup entity — owns
 the window, and picking one deselects the other, so there is never more than one selected
 thing. The first step builds the entities every later step
@@ -21,7 +21,7 @@ refers to, so names match exactly.
 ## Step: Build the test setup
 
 **Action:**
-In the setup panel, click the `+` at the right of each section header, in this order:
+In the Flow Outliner, click the `+` at the right of each column header, in this order:
 1. `+` on **CONTENT**
 2. `+` on **SURFACES**
 3. `+` on **OUTPUTS**
@@ -43,25 +43,25 @@ Click the "Surface 1" row.
 - Below: **Render** checkbox (on), **Position (m)** (3 fields, all 0),
   **Size (m)** (1 × 1) with the lock-aspect and measure icons,
   **Show size raster** (off), **Anchor (-1..1)** (0 × -1, the bottom-centre).
-- The setup panel itself shows **no** properties card at its bottom anymore.
+- The outliner itself shows **no** properties card anymore.
 
 ## Step: Picking takes the window and deselects the other side
 
 **Action:**
 1. Click the SendToOutput op in the graph window.
-2. Click the "Surface 1" row in the setup panel.
+2. Click the "Surface 1" row in the outliner.
 3. Click the SendToOutput op in the graph again.
 4. Click the "Surface 1" row again, then click the empty graph background.
 
 **Expected:**
 - After 1: the Parameter window shows the op's parameters (Texture, Update, Color), and
-  the "SendToOutput" CONTENT row is highlighted in the setup panel.
+  the "SendToOutput" CONTENT row is highlighted in the outliner.
 - After 2: it switches to the Surface card, and the op loses its selection outline in
   the graph. The CONTENT row is no longer highlighted; only "Surface 1" is.
 - After 3: it switches back to the op's parameters; "Surface 1" is no longer
   highlighted, the CONTENT row is.
 - After 4: the Parameter window shows the composition (no entity card), no row in the
-  setup panel is highlighted, and the setup panel closes.
+  outliner is highlighted, and the outliner closes.
 
 ## Step: A selected SendToOutput shows parameters plus the setup side
 

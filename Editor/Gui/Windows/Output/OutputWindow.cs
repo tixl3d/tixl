@@ -102,10 +102,11 @@ internal sealed partial class OutputWindow : Window
         SyncCopyFieldsToState();
 
         Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
-        _setupMode.DrawSetupPanel();
 
+        // The Flow Outliner strip sits under the canvas; the canvas child takes what it leaves.
+        var contentHeight = Math.Max(60 * T3Ui.UiScaleFactor, ImGui.GetContentRegionAvail().Y - _setupMode.OutlinerReservedHeight);
         ImGui.BeginChild("##content",
-                         new Vector2(0, ImGui.GetWindowHeight()),
+                         new Vector2(0, contentHeight),
                          ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoScrollbar |
                          ImGuiWindowFlags.NoMove |
@@ -128,13 +129,13 @@ internal sealed partial class OutputWindow : Window
 
             if (_setupMode.TryDrawEditingView(drawnInstance, EvaluationContext))
             {
-                // Output-editing view (focused send op or picked panel entity) was drawn — give it the
-                // breadcrumb so the setup panel and op selection stay reachable while editing.
+                // Output-editing view (focused send op or picked entity) was drawn — give it the
+                // breadcrumb so the outliner and op selection stay reachable while editing.
                 if (!SkillTraining.IsInPlayMode)
                 {
                     ImGui.SetCursorPos(ImGui.GetCursorStartPos());
                     CustomComponents.PushToolbarIconBackground();
-                    _setupMode.DrawPanelToggleButton();
+                    _setupMode.DrawOutlinerToggleButton();
                     _setupMode.DrawPinIndicator();
                     Pinning.DrawPinning(_drawOutputMenuExtras);
                     CustomComponents.PopToolbarIconBackground();
@@ -192,6 +193,8 @@ internal sealed partial class OutputWindow : Window
             CustomComponents.DrawWindowFocusFrame();
         }
         ImGui.EndChild();
+
+        _setupMode.DrawOutliner();
     }
 
 

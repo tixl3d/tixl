@@ -17,7 +17,7 @@ that decouples what a window shows from that selection.
 ## Step: Selection is shared between output windows
 
 **Action:**
-Place both output windows side by side with their setup panels open. In window 1's
+Place both output windows side by side with their Flow Outliners shown. In window 1's
 panel, click the row "Surface 1".
 
 **Expected:**
@@ -68,7 +68,7 @@ graph window.
 
 **Expected:**
 - The selection clears in **both** output windows' panels (no highlighted row).
-- Both setup panels close (the existing auto-close when the focused op is not a SendToOutput), including a
+- Both outliners close (the existing auto-close when the focused op is not a SendToOutput), including a
   pinned window's panel — pinning affects only the shown canvas, not panel
   visibility.
 

@@ -14,55 +14,68 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// The output-editing side of an output window. There is no explicit Operator/Setup mode — the window
 /// follows focus: a focused <see cref="IOutputSink"/> (SendToOutput) op shows its output's editing
 /// canvas, and a picked panel entity shows that entity. Selecting any op in the graph drops a panel
-/// edit (graph selection wins). Owns the setup panel; the entity selection is the one instance shared
+/// edit (graph selection wins). Owns the Flow Outliner; the entity selection is the one instance shared
 /// by all output windows (<see cref="OutputSetupHandling.EntitySelection"/>) — what stays per window
 /// is the <b>pin</b>: a pinned window keeps showing its target while the selection roams elsewhere.
 /// One per OutputWindow.
 /// </summary>
 internal sealed class OutputSetupModeView
 {
-    /// <summary>Draws the setup panel when enabled. Call first — it splits the window horizontally.</summary>
-    public void DrawSetupPanel()
+    /// <summary>
+    /// The height the outliner strip takes at the bottom of the window (splitter included), so the canvas
+    /// child above it can be sized to what remains. Zero while hidden.
+    /// </summary>
+    public float OutlinerReservedHeight
     {
-        if (!_showSetupPanel)
+        get
+        {
+            if (!_showOutliner)
+                return 0;
+
+            var scale = T3Ui.UiScaleFactor;
+            var header = ImGui.GetFrameHeight() + 6 * scale;
+            return SplitterThickness * scale + (_outlinerCollapsed ? header : _outlinerHeight * scale);
+        }
+    }
+
+    /// <summary>Draws the Flow Outliner strip: a full-width up/down splitter on its top edge, then the header
+    /// and columns. Call after the canvas child, which leaves <see cref="OutlinerReservedHeight"/> free.</summary>
+    public void DrawOutliner()
+    {
+        if (!_showOutliner)
             return;
 
         var scale = T3Ui.UiScaleFactor;
+        DrawOutlinerSplitter(scale);
 
         // Match the settings windows' content-section background so the light hover/selection fills read.
         ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundPopup.Rgba);
-        ImGui.BeginChild("##setupPanel",
-                         new Vector2(_panelWidth * scale, ImGui.GetWindowHeight()),
-                         ImGuiChildFlags.None,
-                         ImGuiWindowFlags.NoBackground);
-        _collapsePanel ??= () => _showSetupPanel = false;
-        _panel.Draw(_entitySelection, _collapsePanel);
+        ImGui.BeginChild("##flowOutliner", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        _toggleOutlinerCollapse ??= () => _outlinerCollapsed = !_outlinerCollapsed;
+        _outliner.Draw(_entitySelection, _toggleOutlinerCollapse, !_outlinerCollapsed);
         ImGui.EndChild();
         ImGui.PopStyleColor();
-
-        DrawPanelSplitter(scale);
     }
 
-    /// <summary>A drag handle on the panel's right edge. Width is per-window session state (not persisted).</summary>
-    private void DrawPanelSplitter(float scale)
+    /// <summary>The drag handle on the strip's top edge. Height is per-window session state (not persisted).</summary>
+    private void DrawOutlinerSplitter(float scale)
     {
-        var thickness = 4 * scale;
-        ImGui.SameLine(0, 0);
+        var thickness = SplitterThickness * scale;
         var p = ImGui.GetCursorScreenPos();
-        ImGui.InvisibleButton("##panelSplitter", new Vector2(thickness, ImGui.GetWindowHeight()));
+        var width = ImGui.GetContentRegionAvail().X;
+        ImGui.InvisibleButton("##outlinerSplitter", new Vector2(width, thickness));
 
         var active = ImGui.IsItemActive();
         var hovered = ImGui.IsItemHovered();
-        if (active || hovered)
-            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+        if ((active || hovered) && !_outlinerCollapsed)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
 
-        if (active)
-            _panelWidth = Math.Clamp(_panelWidth + ImGui.GetIO().MouseDelta.X / scale, MinPanelWidth, MaxPanelWidth);
+        // Dragging the edge up grows the strip.
+        if (active && !_outlinerCollapsed)
+            _outlinerHeight = Math.Clamp(_outlinerHeight - ImGui.GetIO().MouseDelta.Y / scale, MinOutlinerHeight, MaxOutlinerHeight);
 
         var color = active ? UiColors.StatusActivated : (hovered ? UiColors.BackgroundHover : UiColors.BackgroundFull);
-        ImGui.GetWindowDrawList().AddRectFilled(p, p + new Vector2(thickness, ImGui.GetWindowHeight()), color);
-
-        ImGui.SameLine(0, 2 * scale);
+        ImGui.GetWindowDrawList().AddRectFilled(p, p + new Vector2(width, thickness), color);
     }
 
     /// <summary>
@@ -87,10 +100,10 @@ internal sealed class OutputSetupModeView
             if (selectedInGraph is IOutputSink)
                 _entitySelection.Mirror(SetupEntitySelection.EntityKind.ContentSource, focusedId);
 
-            // The panel follows the OE-editing context: a focused SendToOutput opens it (its surfaces/outputs are
+            // The outliner follows the OE-editing context: a focused SendToOutput opens it (its surfaces/outputs are
             // at hand); selecting any other op — or clicking the graph background — closes it. Only on the
             // transition, so it can still be toggled manually while the focus stays put.
-            _showSetupPanel = selectedInGraph is IOutputSink;
+            _showOutliner = selectedInGraph is IOutputSink;
         }
 
         _lastFocusedId = focusedId;
@@ -135,23 +148,23 @@ internal sealed class OutputSetupModeView
         return true;
     }
 
-    /// <summary>The "Show Setup Panel" toggle — hung inside the output window's breadcrumb menu.</summary>
-    public void DrawSetupPanelMenuItem()
+    /// <summary>The "Show Flow Outliner" toggle — hung inside the output window's breadcrumb menu.</summary>
+    public void DrawOutlinerMenuItem()
     {
-        if (CustomComponents.DrawMenuItem(1, "Show Setup Panel", isChecked: _showSetupPanel))
-            _showSetupPanel = !_showSetupPanel;
+        if (CustomComponents.DrawMenuItem(1, "Show Flow Outliner", isChecked: _showOutliner))
+            _showOutliner = !_showOutliner;
     }
 
-    /// <summary>The setup-panel toggle icon for the output toolbar. Only drawn while the panel is closed —
-    /// the open panel's own header carries the collapse icon, and showing the control twice reads as two
+    /// <summary>The outliner toggle icon for the output toolbar. Only drawn while the strip is hidden — the
+    /// open strip's own header carries the collapse icon, and showing the control twice reads as two
     /// different buttons.</summary>
-    public void DrawPanelToggleButton()
+    public void DrawOutlinerToggleButton()
     {
-        if (_showSetupPanel)
+        if (_showOutliner)
             return;
 
-        if (CustomComponents.IconButton(Icon.SidePanelLeft, Vector2.Zero))
-            _showSetupPanel = true;
+        if (CustomComponents.IconButton(Icon.ViewList, Vector2.Zero))
+            _showOutliner = true;
 
         ImGui.SameLine();
     }
@@ -245,9 +258,10 @@ internal sealed class OutputSetupModeView
         return SetupActions.NameForEntity(_pinnedKind, _pinnedId);
     }
 
-    private bool _showSetupPanel;
-    private float _panelWidth = DefaultPanelWidth; // unscaled px; scaled at draw time
-    private Action? _collapsePanel; // cached so the panel draw doesn't allocate a closure each frame
+    private bool _showOutliner;
+    private bool _outlinerCollapsed;
+    private float _outlinerHeight = DefaultOutlinerHeight; // unscaled px; scaled at draw time
+    private Action? _toggleOutlinerCollapse; // cached so the strip draw doesn't allocate a closure each frame
     private Guid _lastFocusedId;
     private bool _graphOwnedInspection;
 
@@ -256,20 +270,21 @@ internal sealed class OutputSetupModeView
     private Guid _pinnedId;
     private static readonly int _pinViewMenuId = nameof(_pinViewMenuId).GetHashCode();
 
-    private const float DefaultPanelWidth = 240;
-    private const float MinPanelWidth = 180;
-    private const float MaxPanelWidth = 520;
+    private const float DefaultOutlinerHeight = 220;
+    private const float MinOutlinerHeight = 90;
+    private const float MaxOutlinerHeight = 600;
+    private const float SplitterThickness = 4;
     private readonly SetupEntitySelection _entitySelection = OutputSetupHandling.EntitySelection;
     public OutputSetupModeView()
     {
-        // One EntityItem per window: the panel rows and the canvas menus share its rename/menu state,
+        // One EntityItem per window: the outliner rows and the canvas menus share its rename/menu state,
         // and separate windows can't bleed into each other.
-        _panel = new SetupPanel(_entityItem);
+        _outliner = new SetupFlowOutliner(_entityItem);
         _outputView = new SetupOutputView(_entityItem);
     }
 
     private readonly EntityItem _entityItem = new();
-    private readonly SetupPanel _panel;
+    private readonly SetupFlowOutliner _outliner;
     private readonly SetupOutputView _outputView;
     private readonly ReferenceImageView _referenceImageView = new();
 }

@@ -18,7 +18,7 @@ connections.
 ## Step: Every entity kind offers the same core verbs
 
 **Action:**
-In the setup panel, right-click one row of each kind: a content send, a slice, a
+In the Flow Outliner, right-click one row of each kind: a content send, a slice, a
 surface, an output, a reference image, and a prop.
 
 **Expected:**
@@ -56,7 +56,7 @@ content view.
 ## Step: Drag connections work in both directions
 
 **Action:**
-In the setup panel, drag a *surface row* onto an *output row*. Undo the mapping (or use
+In the Flow Outliner, drag a *surface row* onto an *output row*. Undo the mapping (or use
 a second output), then drag the *output row* onto the *surface row*.
 
 **Expected:**
