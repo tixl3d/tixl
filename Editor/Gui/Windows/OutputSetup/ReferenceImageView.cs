@@ -28,17 +28,18 @@ internal sealed class ReferenceImageView
         _projection = new ScalableCanvasProjection(_canvas);
     }
 
-    public void Draw(Guid imageId)
+    /// <returns>True when the user asked to go back to the Board.</returns>
+    public bool Draw(Guid imageId)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
+            return false;
 
         var image = setup.FindReferenceImage(imageId);
         if (image == null)
-            return;
+            return false;
 
         var activeSurface = GetSelectedTracedSurface(setup, imageId);
-        DrawHeader(setup, image, imageId, activeSurface != null);
+        var leave = DrawHeader(setup, image, imageId, activeSurface != null);
 
         // Ease the photo→straight transition (no visual jump).
         _straightenT += (_straightenTarget - _straightenT) * Math.Min(1f, ImGui.GetIO().DeltaTime * 8f);
@@ -49,7 +50,7 @@ internal sealed class ReferenceImageView
         if (texture is not { IsDisposed: false })
         {
             CustomComponents.EmptyWindowMessage("Set a photo path above to load a reference image.");
-            return;
+            return leave;
         }
 
         // Keep the stored pixel size in sync — measurements and traces are in these pixels.
@@ -90,7 +91,7 @@ internal sealed class ReferenceImageView
                 dl.AddRect(rMin, rMax, UiColors.ForegroundFull.Fade(0.5f));
             }
 
-            return;
+            return leave;
         }
 
         var min = _projection.CanvasToScreen(Vector2.Zero);
@@ -123,6 +124,8 @@ internal sealed class ReferenceImageView
 
             ImGui.PopID();
         }
+
+        return leave;
     }
 
     // The traced surface the straighten targets: the selected one if valid, else the first traced (which it selects).
@@ -225,8 +228,11 @@ internal sealed class ReferenceImageView
         return [new Vector2(minX, minY), new Vector2(maxX, minY), new Vector2(maxX, maxY), new Vector2(minX, maxY)];
     }
 
-    private void DrawHeader(Setup setup, ReferenceImage image, Guid imageId, bool hasTraced)
+    private bool DrawHeader(Setup setup, ReferenceImage image, Guid imageId, bool hasTraced)
     {
+        var leave = CustomComponents.StateButton("Board", CustomComponents.ButtonStates.Default);
+        ImGui.SameLine(0, 8 * T3Ui.UiScaleFactor);
+        ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText($"{image.Name} · {image.Kind}", Fonts.FontSmall, UiColors.TextMuted);
         ImGui.SetNextItemWidth(-1);
         ImGui.InputTextWithHint("##path", "image file path", ref image.FilePath, 1024);
@@ -286,6 +292,8 @@ internal sealed class ReferenceImageView
 
             ImGui.PopID();
         }
+
+        return leave;
     }
 
     private static Vector2[] DefaultReferenceQuad(ReferenceImage image)

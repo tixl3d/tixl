@@ -277,7 +277,7 @@ Today `OutputSetupModeView` routes each selection kind to a different canvas
 (`SetupOutputView.Draw`/`DrawSourceCanvas`, `ReferenceImageView`). Target: **one scene** that all
 entity kinds live in, with the current views becoming *focus modes* of that scene.
 
-### C.1 Placement model (additive, versioned)
+### C.1 Placement model (additive, versioned) — ✅ v1 2026-09-05 (`CanvasPlacement`, seeded layout, drag, presentation scale; resolution badges/auto convention still open)
 
 - New optional `CanvasPlacement { Position:Vector2(m), Scale:float }` per content source, output,
   reference image — and per root surface for its *neutral* (unwarped) placement. Serialized additively
@@ -362,9 +362,11 @@ space's homography chain) or don't (drawn at neutral placement, faded):
   precursor of the fold — same skeleton, more entities.
 - View switching: segmented control in the strip header (Phase B) + double-click an
   output/surface/source on the canvas or outliner to enter its space; Esc / breadcrumb-root returns to
-  Overview.
+  Overview. **Landed 2026-09-05 as the sticky Board:** a single click (outliner or card) only selects
+  and keeps the Board; double-click on a card enters the space; the tabless canvases (source, reference)
+  carry a Board button back.
 
-### C.3 Adaptive metric grid
+### C.3 Adaptive metric grid — ✅ 2026-09-05 (`MetricGridRaster`, on the timeline rasters' 1→5→10 ladder; grid snapping not yet — and it will join the existing candidate lists, the `ICanvasPointSnapper` seam was deleted in P2.2)
 
 - New `MetricGridRaster` (`Editor/Gui/Windows/OutputSetup/` or next to the canvas helpers): reuse the
   **log-blend spacing math** from `StandardValueRaster.TryGetRastersForScale` (X axis) and
@@ -373,9 +375,10 @@ space's homography chain) or don't (drawn at neutral placement, faded):
   extract or duplicate the ~30 lines of spacing logic.
 - Drawn behind Overview and Straight/Content views (meter or px space respectively — in content space
   the same raster runs in px units). Inside an Output view the output's px raster applies.
-- **Snapping:** route grid snapping through the `ICanvasPointSnapper` seam — this resolves the
-  refactoring-plan question ("route snapping through it in Phase 4 or delete the seam"): it lives.
-  Grid snap is a weak candidate that entity/sibling snaps outrank.
+- **Snapping:** grid lines join the snap-candidate lists the edits already use (`SurfaceGeometry.
+  TrySnapOffset` over caller-owned lists) as a weak candidate that entity/sibling snaps outrank. The
+  `ICanvasPointSnapper` seam was deleted (2026-09-05): every snap runs after the handle, in the edit's own
+  space, so a canvas-space snapper never fit.
 
 ### C.4 Consolidation
 

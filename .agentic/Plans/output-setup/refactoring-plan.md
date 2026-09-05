@@ -403,6 +403,39 @@ with an explanatory comment) — the row-callback API design made compliance imp
   outputs and the derived slice/patch labels only on a tick or a setup switch, and the breadcrumb follows
   the same tick instead of a frame timer. Anchors still come from the draw pass (free, no allocation).
   Not yet user-tested.
+- **2026-09-05 (Phase C.1 + C.3 — Board v1):** `CanvasPlacement { Position (m), PixelsPerMeter }` on
+  `ContentSource`, `OutputDefinition`, `ReferenceImage` and root `Surface` (additive JSON, round-trip test).
+  `SetupOutputView.Board.cs` draws the Board on its own `ScalableCanvas` through a Y-up `BoardProjection`:
+  `MetricGridRaster` (log-blend decades, "n m" labels, floor line), cards per kind (surfaces at true size
+  standing on the floor with regions nested; content/output/reference as pixel cards at a presentation
+  scale with live thumbnails, slices and patches as sub-rects; props as figures), name chip + muted meta
+  (per-structure cache), whole-card pick/drag with one undo step per gesture (`SetupActions.CommitGesture`),
+  a top-right handle scaling pixel cards' px-per-metre only, double-click → the entity's space. Seeded
+  kind-grouped layout persisted once. Entered via `EditMode.Board` (first tab) or as the default when the
+  outliner is shown and nothing focuses a space (`DrawBoardStandalone`). Not done: C.2 fading/morph,
+  C.4 consolidation, grid snapping, resolution badges, photo backdrops on surface cards, ghost frames.
+  Manual test `output-setup-board.md`. User-tested.
+- **2026-09-05 (Board v1 test round):** selecting never leaves the Board — `SetupOutputView.ShowsBoard` gates
+  the per-kind routing in `OutputSetupModeView` (content/slice open their source canvas, a reference image
+  its view, only by double-click; `OpenedReferenceImageId`), and the source canvas / reference view got a
+  **Board** button back. Zoom was clamped by `ScalableCanvas`' px-per-px range: a `BoardCanvas` subclass
+  clamps in px-per-metre instead. `SelectionFence` marquee over the cards (overlap; shift adds, ctrl removes,
+  empty click clears), group drag of every selected card (a plain press on a selected card keeps the set and
+  single-selects on release), **F** frames the selection or everything (`UserActions.FocusSelection`).
+  `MetricGridRaster` adopted the timeline rasters' 1 → 5 → 10 log-blend ladder (same `Density`), so the Board
+  densifies like the curve editor; the drawing stays its own (two axes, Y-up, floor line) — the timeline
+  classes are canvas-scroll, BPM and Y-down coupled, so only the ~10 lines of spacing math transfer.
+  Outliner: kind colours via `SetupColors` (content/slices = texture type colour, surfaces =
+  `StatusControlled`, outputs neutral) on items, column headers and connections; the click-to-bind arrows
+  no longer appear for a *source* primary (which slice would bind was ambiguous and the lit arrows on every
+  consumer read wrong); the unbound-output stub became a muted "unbound" status. Reference-image card in
+  the Parameter window gained the path field (file picker). Open: whether `CanvasPlacement` should leave
+  Core for an editor-side sidecar (view state, like collapse sets) — user question, undecided.
+- **2026-09-05 (Board surface edges):** the selected surface card carries the Straight view's edge handles
+  (`DrawBoardSurfaceEdges` → `RunResizeDrag` + `SurfaceGeometry.DragEdge` with the card's placement as the
+  origin): an edge crops, Ctrl stretches, the corner pin follows, one `ResizeSurfaceCommand` per drag. The
+  fence guard now reads the Board's own gesture state instead of `IsAnyItemActive` (a background press
+  makes the window's move-id active, which vetoed every fence).
 
 ## Suggested order (revised for the flow-view pivot)
 

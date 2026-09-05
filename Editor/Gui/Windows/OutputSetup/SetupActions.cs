@@ -82,6 +82,20 @@ internal static class SetupActions
         OutputSetupHandling.SaveActive();
     }
 
+    /// <summary>
+    /// Closes a continuous gesture (a drag) as one undo step: <paramref name="oldJson"/> is the setup's snapshot
+    /// from the gesture's start; nothing is pushed when the setup came back unchanged.
+    /// </summary>
+    internal static void CommitGesture(Setup setup, string name, string oldJson)
+    {
+        var newJson = setup.ToJsonString();
+        if (newJson == oldJson)
+            return;
+
+        UndoRedoStack.Add(new SetupSnapshotCommand(name, setup.Id, oldJson, newJson));
+        OutputSetupHandling.SaveActive();
+    }
+
     internal static void ApplyDrop(Setup setup, SetupEntitySelection.EntityKind dragKind, Guid dragId,
                                    SetupEntitySelection.EntityKind targetKind, Guid targetId)
     {

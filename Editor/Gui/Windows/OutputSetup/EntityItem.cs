@@ -84,8 +84,9 @@ internal sealed class EntityItem
         // could take it binds or unbinds without dragging. It is reserved for every consumer item while any
         // such source is the primary, so items don't shift relative to each other, and gone otherwise — the
         // connections say what feeds what.
+        // A source is not a bind context: which of its slices would bind is ambiguous, and the arrows lit on
+        // every consumer of any slice read as a claim the connections don't make.
         var bindContext = args.PrimaryKind is SetupEntitySelection.EntityKind.Slice
-                              or SetupEntitySelection.EntityKind.ContentSource
                               or SetupEntitySelection.EntityKind.Surface;
         var hasInputGutter = bindContext
                              && args.Kind is SetupEntitySelection.EntityKind.Surface
@@ -106,6 +107,7 @@ internal sealed class EntityItem
         LastRowRect = (rowMin, rowMax);
         var dl = ImGui.GetWindowDrawList();
         var isSelected = selection.IsSelected(args.Kind, args.Id);
+        var kindColor = SetupColors.ForKind(args.Kind);
 
         // Full-row hit test — a selectable spanning the padded row; its own header background is suppressed
         // so we can draw a rounded one instead.
@@ -197,20 +199,21 @@ internal sealed class EntityItem
         // the row that answers "which item is that frame?".
         var canvasPulse = !isHovered && !isSelected && !menuOpen ? FrameStats.GetPulse(args.Id) : 0;
 
+        // The item wears its kind's colour: a solid pill while selected, a tinted one while hovered.
         if (isSelected)
         {
-            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.3f), rounding);
+            dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(0.6f), rounding);
         }
         else if (isHovered || menuOpen)
         {
-            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.2f), rounding);
-            dl.AddRect(rowMin, rowMax, UiColors.StatusActivated.Fade(0.8f), rounding);
+            dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(0.2f), rounding);
+            dl.AddRect(rowMin, rowMax, kindColor.Fade(0.8f), rounding);
         }
         else if (canvasPulse > 0.001f)
         {
             // Match the mouse-hover look (light fill + outline) so a canvas-driven highlight reads the same.
-            dl.AddRectFilled(rowMin, rowMax, UiColors.StatusActivated.Fade(0.2f), rounding);
-            dl.AddRect(rowMin, rowMax, UiColors.StatusActivated.Fade(0.8f), rounding);
+            dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(0.2f), rounding);
+            dl.AddRect(rowMin, rowMax, kindColor.Fade(0.8f), rounding);
         }
 
         // Content over the background (the selectable is transparent), vertically centered in the fixed row
@@ -246,7 +249,7 @@ internal sealed class EntityItem
         if (args.LeadingIcon.HasValue)
         {
             ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
-            Icons.DrawInlineGlyph(args.LeadingIcon.Value, UiColors.TextMuted.Fade(fade).Rgba);
+            Icons.DrawInlineGlyph(args.LeadingIcon.Value, (isSelected ? UiColors.ForegroundFull : kindColor).Fade(fade).Rgba);
 
             // A disabled (non-rendered) surface is struck through its icon — visible at a glance without
             // stealing the gutter or the name.
@@ -294,7 +297,8 @@ internal sealed class EntityItem
         {
             ImGui.SetCursorScreenPos(new Vector2(contentX, contentY));
             CustomComponents.StylizedText(string.IsNullOrEmpty(args.Name) ? "untitled" : args.Name,
-                                          isSelected ? Fonts.FontBold : Fonts.FontNormal, UiColors.Text.Fade(fade));
+                                          isSelected ? Fonts.FontBold : Fonts.FontNormal,
+                                          (isSelected ? UiColors.ForegroundFull : UiColors.Text).Fade(fade));
         }
 
         // Right-aligned status text, small and muted (FontSmall is shorter than the row's baseline — centre it on its own height).

@@ -31,6 +31,9 @@ public sealed class ReferenceImage
     /// <summary>Scale for plans; ignored for photos (their scale comes from annotations).</summary>
     public float MetersPerPixel;
 
+    /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
+    public CanvasPlacement? BoardPlacement;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -43,20 +46,30 @@ public sealed class ReferenceImage
         if (MetersPerPixel > 0)
             writer.WriteValue("MetersPerPixel", MetersPerPixel);
 
+        if (BoardPlacement != null)
+        {
+            writer.WritePropertyName("BoardPlacement");
+            BoardPlacement.WriteToJson(writer);
+        }
+
         writer.WriteEndObject();
     }
 
     public static ReferenceImage ReadFromJson(JToken token)
     {
-        return new ReferenceImage
-                   {
-                       Id = OutputJson.ReadGuid(token["Id"]),
-                       Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
-                       Kind = token.ReadValueSafe("Kind", Kinds.Photo) ?? Kinds.Photo,
-                       FilePath = token.ReadValueSafe("FilePath", string.Empty) ?? string.Empty,
-                       Width = token.ReadValueSafe("Width", 0),
-                       Height = token.ReadValueSafe("Height", 0),
-                       MetersPerPixel = token.ReadValueSafe("MetersPerPixel", 0f),
-                   };
+        var image = new ReferenceImage
+                        {
+                            Id = OutputJson.ReadGuid(token["Id"]),
+                            Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
+                            Kind = token.ReadValueSafe("Kind", Kinds.Photo) ?? Kinds.Photo,
+                            FilePath = token.ReadValueSafe("FilePath", string.Empty) ?? string.Empty,
+                            Width = token.ReadValueSafe("Width", 0),
+                            Height = token.ReadValueSafe("Height", 0),
+                            MetersPerPixel = token.ReadValueSafe("MetersPerPixel", 0f),
+                        };
+        if (token["BoardPlacement"] is JObject placement)
+            image.BoardPlacement = CanvasPlacement.ReadFromJson(placement);
+
+        return image;
     }
 }

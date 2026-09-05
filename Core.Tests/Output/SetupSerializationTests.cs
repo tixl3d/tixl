@@ -46,12 +46,16 @@ public class SetupSerializationTests
         Assert.NotNull(surface.Placement);
         Assert.Equal(new Vector3(0.5f, 0, 1), surface.Placement!.Pose.Position);
         Assert.Equal(new Vector2(0.4f, 1), surface.Anchor);
+        Assert.NotNull(surface.BoardPlacement);
+        Assert.Equal(new Vector2(1.5f, 0), surface.BoardPlacement!.Position);
 
         Assert.Equal(2, restored.Outputs.Count);
         Assert.Equal(OutputDefinition.Kinds.Default, restored.Outputs[0].Kind);
         var projector = restored.Outputs[1];
         Assert.Equal(OutputDefinition.Kinds.Projector, projector.Kind);
         Assert.Equal(new Int2(1920, 1200), projector.CanvasResolution);
+        Assert.NotNull(projector.BoardPlacement);
+        Assert.Equal(800f, projector.BoardPlacement!.PixelsPerMeter);
         var patch = Assert.Single(projector.Patches);
         Assert.Equal(setup.Outputs[1].Patches[0].Id, patch.Id);
         Assert.Equal(setup.Outputs[1].Patches[0].SliceId, patch.SliceId);
@@ -185,6 +189,7 @@ public class SetupSerializationTests
                                                  ResidualPx = 0.4f,
                                              },
                             };
+        projector.BoardPlacement = new CanvasPlacement { Position = new Vector2(7, 0), PixelsPerMeter = 800 };
         projector.Patches.Add(new OutputDefinition.Patch
                                   {
                                       Name = "left half",
@@ -236,6 +241,7 @@ public class SetupSerializationTests
                                                        ],
                                                    },
                                    Anchor = new Vector2(0.4f, 1),
+                                   BoardPlacement = new CanvasPlacement { Position = new Vector2(1.5f, 0) },
                                    Placement = new Surface.StagePlacement
                                                    {
                                                        Pose = new Pose(new Vector3(0.5f, 0, 1), Quaternion.Identity),

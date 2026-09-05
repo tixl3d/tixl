@@ -33,13 +33,13 @@ internal sealed partial class SetupOutputView
             return;
 
         var source = setup.FindSourceByChildId(contentChildId);
+        DrawBoardReturnHeader(SetupActions.TryGetContentName(contentChildId) ?? "Content");
         if (source == null || !OutputManager.TryGetSourceContent(contentChildId, out _, out var content)
             || content is not { IsDisposed: false })
         {
             CustomComponents.EmptyWindowMessage("No content yet — connect a texture to this\nSendToOutput to lay out its slices.");
             return;
         }
-
 
         var canvasTop = ImGui.GetCursorScreenPos();
         _canvas.UpdateCanvas(out _);

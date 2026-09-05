@@ -7,6 +7,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.InputUi.ListInputs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -452,10 +453,26 @@ internal static class SetupParameterView
         if (image == null)
             return;
 
+        // Save-only, like the reference view's own field: the path is a pointer to an asset, not calibration.
+        string? path = image.FilePath;
+        if (FormInputs.AddFilePicker("Image", ref path, "photo or plan file", null,
+                                     "Project-relative path of the photo or plan.", FileOperations.FilePickerTypes.File)
+            && path != null)
+        {
+            image.FilePath = path;
+            _referencePathDirty = true;
+        }
+
+        if (_referencePathDirty && !ImGui.IsAnyItemActive())
+        {
+            OutputSetupHandling.SaveActive();
+            _referencePathDirty = false;
+        }
+
         FormInputs.ApplyIndent();
-        CustomComponents.StylizedText(string.IsNullOrEmpty(image.FilePath)
-                                          ? "Drop a photo onto the reference canvas, or pick an asset."
-                                          : $"{image.FilePath}  ({image.Width}×{image.Height})",
+        CustomComponents.StylizedText(image.Width > 0
+                                          ? $"{image.Width}×{image.Height} px · double-click its card on the Board to trace and straighten"
+                                          : "No image loaded yet.",
                                       Fonts.FontSmall, UiColors.TextMuted);
     }
 
@@ -749,6 +766,7 @@ internal static class SetupParameterView
     private static string? _fieldEditOldJson;
 
     private static EvaluationContext? _sendContext;
+    private static bool _referencePathDirty;
 
     // Name-field editing state: buffer follows the entity until the field takes focus.
     private static Guid _renameTargetId;

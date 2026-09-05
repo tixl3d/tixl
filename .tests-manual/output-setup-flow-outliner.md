@@ -55,10 +55,10 @@ Click the SendToOutput op in the graph window.
 3. Drag the "SendToOutput" item (CONTENT) onto the "P1" item (OUTPUTS).
 
 **Expected:**
-- After 1: with "Surface 1" hovered, its connections to "Slice 1" and to "P1" turn full blue
-  and thicker. With "SendToOutput" hovered nothing changes on the connections (they attach to
-  its slice, not to it). Items carry no trailing icons or routing text anymore; only a plug's
-  resolution remains as status.
+- After 1: with "Surface 1" hovered, its connections to "Slice 1" and to "P1" turn fully
+  opaque and thicker. With "SendToOutput" hovered nothing changes on the connections (they
+  attach to its slice, not to it). Items carry no trailing icons or routing text anymore; only
+  a plug's resolution and an output's "unbound" remain as status.
 - After 2: "Patch 1" is selected, the Parameter window shows the Patch card, and the header
   breadcrumb reads "Slice 1 → Patch 1"; the context menu offers Use on Surface, Duplicate,
   Rename, Delete.
@@ -73,16 +73,35 @@ Click the SendToOutput op in the graph window.
 4. Right-click "P1" → **Split into 2×2**, then Ctrl+Z.
 
 **Expected:**
-- After 1: faint blue curves run from the right edge of "Slice 1" to the left edge of
-  "Surface 1" and of "Patch 1", from "Surface 1" to "P1", and from "P1" to "Local /
-  Display 1" if it is bound; if it is not, a short magenta stub sticks out of "P1"'s right
-  edge instead. Lines pass under the items, never over them.
-- After 2: the curves touching "Surface 1" turn full blue and thicker while hovered; with
+- After 1: faint curves run from the right edge of "Slice 1" to the left edge of "Surface 1"
+  and of "Patch 1" (in the texture colour, magenta), from "Surface 1" to "P1" (green), and
+  from "P1" to "Local / Display 1" (gray) if it is bound; if it is not, "P1" carries the
+  muted status "unbound" at its right end and no curve. Lines pass under the items, never
+  over them.
+- After 2: the curves touching "Surface 1" turn fully opaque and thicker while hovered; with
   "Slice 1" selected, both of its curves stay emphasized.
 - After 3: while "P1" is collapsed, the curve from "Slice 1" ends at "P1" itself; expanded,
   it ends at "Patch 1" again.
 - After 4: four curves fan out from "Slice 1" to "Patch 1" … "Patch 4", one per tile; the
   undo returns to one.
+
+## Step: Kind colours and the bind arrows
+
+**Action:**
+1. Look at the column headers, then click the "Slice 1" item, then the "Surface 1" item, then
+   the "SendToOutput" item.
+2. With "Slice 1" selected, click the arrow at the left of the "Surface 1" item, then click it
+   again.
+
+**Expected:**
+- After 1: the CONTENT header is tinted magenta, SURFACES green, OUTPUTS gray. A selected
+  content or slice item fills magenta, a selected surface fills green, a selected output
+  fills gray; hovering tints the item in the same colour. With "Slice 1" selected, an arrow
+  appears at the left of every surface, output and patch item, filled on the ones showing
+  that slice ("Surface 1", "Patch 1"). With "Surface 1" selected the arrows sit on the
+  output items only. With "SendToOutput" selected there are **no** arrows at all.
+- After 2: the first click unbinds "Surface 1" from "Slice 1" (its curve disappears, the
+  arrow hollows); the second binds it again.
 
 ## Step: Del deletes the selection
 
@@ -105,5 +124,6 @@ presenting** from the same menu.
 
 **Expected:**
 - While bound, the "Local / Display 1" item is no longer dimmed and shows the output's name
-  as its status instead of the resolution; the output item shows "Local / Display 1".
+  as its status instead of the resolution; the output item's "unbound" status is gone and a
+  gray curve joins the two.
 - After unbinding both revert. Clicking a bindings item selects nothing and opens no menu.

@@ -24,11 +24,12 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal sealed partial class SetupOutputView
 {
-    // Declaration order is the tab order in the segmented control — source-to-send: lay out content, rectify
-    // the surface, view the projector composite, calibrate the projector. The morph axis and every switch key
-    // off the enum values, not their order, so this is a purely visual arrangement.
+    // Declaration order is the tab order in the segmented control — the Board first, then source-to-send:
+    // lay out content, rectify the surface, view the projector composite, calibrate the projector. The morph
+    // axis and every switch key off the enum values, not their order, so this is a purely visual arrangement.
     private enum EditMode
     {
+        Board,
         Content,
         Straight,
         Output,
@@ -40,13 +41,14 @@ internal sealed partial class SetupOutputView
         _entityItem = entityItem;
         _canvas.FillMode = ScalableCanvas.FillModes.FillAvailableContentRegion;
         _projection = new ScalableCanvasProjection(_canvas);
+        _boardProjection = new BoardProjection(_boardCanvas);
     }
 
     /// <param name="shownSurfaceId">The surface this window is showing — the selection primary, or the pin —
     /// which gets the exclusive affordances (edge handles, anchor, the rectify basis).</param>
     public void Draw(Guid outputId, Guid shownSurfaceId = default, SetupEntitySelection? selection = null)
     {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
             return;
 
         var output = setup.FindOutput(outputId);
@@ -56,6 +58,19 @@ internal sealed partial class SetupOutputView
         _shownSurfaceId = shownSurfaceId;
 
         DrawHeader(setup, output, outputId);
+
+        // The Board is a view of the whole setup, not of this output — it just keeps the header's tabs.
+        if (_editMode == EditMode.Board)
+        {
+            var boardTop = ImGui.GetCursorScreenPos();
+            _boardCanvas.UpdateCanvas(out _);
+            var boardList = ImGui.GetWindowDrawList();
+            boardList.PushClipRect(boardTop, ImGui.GetWindowPos() + ImGui.GetWindowSize(), true);
+            DrawBoardCanvas(setup, machineConfig, selection);
+            boardList.PopClipRect();
+            return;
+        }
+
         DrawCameraEditor(output);
 
         // Calibration controls sit above the canvas, so draw them before UpdateCanvas measures the region.
@@ -983,10 +998,18 @@ internal sealed partial class SetupOutputView
         dl.AddRect(min, max, UiColors.ForegroundFull.Fade(0.25f));
     }
 
-    private void DrawHeader(Setup setup, OutputDefinition output, Guid outputId)
+    /// <param name="output">Null while the Board is shown without any output focused.</param>
+    private void DrawHeader(Setup setup, OutputDefinition? output, Guid outputId)
     {
-        CustomComponents.StylizedText($"{output.Name} · {output.CanvasResolution.Width}×{output.CanvasResolution.Height}",
-                                      Fonts.FontSmall, UiColors.TextMuted);
+        if (output != null)
+        {
+            CustomComponents.StylizedText($"{output.Name} · {output.CanvasResolution.Width}×{output.CanvasResolution.Height}",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+        }
+        else
+        {
+            CustomComponents.StylizedText(setup.Name, Fonts.FontSmall, UiColors.TextMuted);
+        }
 
         ImGui.SameLine();
 
@@ -995,18 +1018,22 @@ internal sealed partial class SetupOutputView
         // parent); calibration only for a projector/display. Those segments show disabled rather than
         // vanishing, so the toolbar keeps its shape.
         var straightCarrier = SurfaceGeometry.FindCarrier(setup, _shownSurfaceId, outputId);
-        var canCalibrate = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
+        var canCalibrate = output?.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
+        var hasOutput = output != null;
         FormInputs.SegmentedButton(ref _editMode,
                                    isItemDisabled: mode => mode switch
                                                                {
+                                                                   EditMode.Board => false,
                                                                    EditMode.Straight => straightCarrier == null,
                                                                    EditMode.Calibrate => !canCalibrate,
-                                                                   _ => false,
+                                                                   _ => !hasOutput,
                                                                });
 
         // A disabled segment can't be clicked away, so a mode left selected after its precondition lapses
-        // (focus moved off the surface, output kind changed) is reset here instead.
-        if (straightCarrier == null && _editMode == EditMode.Straight)
+        // (focus moved off the surface, output kind changed, no output at all) is reset here instead.
+        if (!hasOutput)
+            _editMode = EditMode.Board;
+        else if (straightCarrier == null && _editMode == EditMode.Straight)
             _editMode = EditMode.Output;
         else if (!canCalibrate && _editMode == EditMode.Calibrate)
             _editMode = EditMode.Output;
@@ -1805,8 +1832,9 @@ internal sealed partial class SetupOutputView
             // and its menu opens); the others are inert until picked in the sidebar. (Slices aren't isolated.)
             var canPick = !_isolate || hit.Id == _shownSurfaceId;
 
-            // A drag on the selected region's label moves it, so that press mustn't also count as a pick.
-            if (canPick && hit.LeftClicked && _labelMoveSurfaceId == Guid.Empty && _surfaceMoveId == Guid.Empty)
+            // A drag on the selected region's label moves it, so that press mustn't also count as a pick — nor
+            // does a Board press that keeps the selection for a group drag.
+            if (canPick && hit.LeftClicked && _labelMoveSurfaceId == Guid.Empty && _surfaceMoveId == Guid.Empty && !_boardGrabOnSelected)
             {
                 SelectPicked(selection, hit.Kind, hit.Id);
 
@@ -1869,16 +1897,7 @@ internal sealed partial class SetupOutputView
 
         // Same menu as the sidebar row — the shared body keeps the two from drifting apart. Rename opens
         // the sidebar row's inline editor.
-        var name = _menuKind switch
-                       {
-                           SetupEntitySelection.EntityKind.Surface => setup.FindSurface(_menuId)?.Name,
-                           SetupEntitySelection.EntityKind.Slice => setup.FindSlice(_menuId) is { } slice
-                                                                        ? SetupActions.SliceLabel(setup, slice)
-                                                                        : null,
-                           _ => null,
-                       };
-        if (name == null)
-            return;
+        var name = SetupActions.NameForEntity(_menuKind, _menuId);
 
         _entityItem.DrawContextMenuItems(selection, setup, _menuKind, _menuId, name);
     }
@@ -2121,7 +2140,7 @@ internal sealed partial class SetupOutputView
     private readonly ScalableCanvas _canvas = new();
     private readonly ScalableCanvasProjection _projection;
     private readonly EntityItem _entityItem;
-    private EditMode _editMode = EditMode.Output;
+    private EditMode _editMode = EditMode.Board; // the Board is the home view, so a fresh window opens on it
     private bool _isolate;
     private Guid _shownSurfaceId; // frame-scoped: what the caller passed to this Draw, never read across frames
     private (Guid, EditMode, Vector2) _fitKey;

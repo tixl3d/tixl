@@ -158,6 +158,9 @@ public sealed class OutputDefinition
     /// <summary>Canvas regions on the direct pipe, composited in list order underneath the surfaces mapped here.</summary>
     public List<Patch> Patches = [];
 
+    /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
+    public CanvasPlacement? BoardPlacement;
+
     /// <summary>The whole canvas as a TL, TR, BR, BL pixel quad — the rung-0 patch, and the reset shape.</summary>
     public Vector2[] FullCanvasQuad()
     {
@@ -190,6 +193,12 @@ public sealed class OutputDefinition
             Camera.WriteToJson(writer);
         }
 
+        if (BoardPlacement != null)
+        {
+            writer.WritePropertyName("BoardPlacement");
+            BoardPlacement.WriteToJson(writer);
+        }
+
         writer.WriteEndObject();
     }
 
@@ -207,6 +216,9 @@ public sealed class OutputDefinition
 
         if (token["Camera"] is JObject cameraToken)
             output.Camera = ProjectorCamera.ReadFromJson(cameraToken);
+
+        if (token["BoardPlacement"] is JObject placement)
+            output.BoardPlacement = CanvasPlacement.ReadFromJson(placement);
 
         return output;
     }

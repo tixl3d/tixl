@@ -111,33 +111,44 @@ internal sealed class OutputSetupModeView
 
         if (TryGetShownEntity(out var entityKind, out var entityId) && OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
         {
+            // Selecting never leaves the Board: the output-bound kinds draw through the tabbed view (which keeps
+            // the Board while that tab is active), the others enter their own canvas only by double-click.
+            var showsBoard = _outputView.ShowsBoard;
             if (entityKind == SetupEntitySelection.EntityKind.Output)
                 // Pass the selection so a surface label on the canvas can still be clicked to select it, even
                 // though the shown entity is the output itself (no surface focused).
                 _outputView.Draw(entityId, selection: _entitySelection);
             else if (entityKind == SetupEntitySelection.EntityKind.Surface && SetupRelations.TryGetSurfaceOutput(setup, entityId, out var surfaceOutputId))
                 _outputView.Draw(surfaceOutputId, entityId, _entitySelection); // labels on the canvas can re-pick
-            else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage)
-                _referenceImageView.Draw(entityId);
-            else if (entityKind == SetupEntitySelection.EntityKind.ContentSource)
-                // Slices live on the source, so selecting content opens it with every slice laid out on it.
-                _outputView.DrawSourceCanvas(entityId, _entitySelection);
-            else if (entityKind == SetupEntitySelection.EntityKind.Slice && SetupRelations.TryGetSliceSource(setup, entityId, out var sliceChildId))
-                _outputView.DrawSourceCanvas(sliceChildId, _entitySelection, entityId);
             else if (entityKind == SetupEntitySelection.EntityKind.Patch && SetupRelations.TryGetPatchOutput(setup, entityId, out var patchOutputId))
                 _outputView.Draw(patchOutputId, selection: _entitySelection); // a patch lives on its output's canvas
+            else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage && _outputView.OpenedReferenceImageId == entityId)
+            {
+                if (_referenceImageView.Draw(entityId))
+                    _outputView.CloseReferenceImage();
+            }
+            else if (entityKind == SetupEntitySelection.EntityKind.ContentSource && !showsBoard)
+                // Slices live on the source, so entering content opens it with every slice laid out on it.
+                _outputView.DrawSourceCanvas(entityId, _entitySelection);
+            else if (entityKind == SetupEntitySelection.EntityKind.Slice && !showsBoard && SetupRelations.TryGetSliceSource(setup, entityId, out var sliceChildId))
+                _outputView.DrawSourceCanvas(sliceChildId, _entitySelection, entityId);
             else
-                // Kinds without a canvas of their own (props, unplaced reference images): properties live
-                // in the Parameter window now; the output area just says where to look. Phase C gives
-                // every kind a home on the unified board and this case disappears.
-                CustomComponents.EmptyWindowMessage($"{SetupActions.NameForEntity(entityKind, entityId)}\nEdit properties in the Parameter window.");
+                _outputView.DrawBoardStandalone(_entitySelection);
         }
         else
         {
             if (focusedInstance is not IOutputSink
                 || !OutputSetupHandling.TryGetActiveSetup(out var activeSetup, out _)
                 || !SetupRelations.TryGetSendOutput(activeSetup, focusedInstance.SymbolChildId, out var sendOutputId))
-                return false;
+            {
+                // Nothing focuses a space: in the setup context (outliner shown) the Board is the home view;
+                // otherwise the window shows the operator output as always.
+                if (!_showOutliner)
+                    return false;
+
+                _outputView.DrawBoardStandalone(_entitySelection);
+                return true;
+            }
 
             // Pass the selection here too: with nothing selected in the setup panel (e.g. after ctrl-clicking the
             // selected output away) this is the path that draws the canvas, and a frame label still has to be

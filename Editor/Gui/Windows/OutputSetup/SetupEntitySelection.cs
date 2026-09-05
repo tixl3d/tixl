@@ -64,6 +64,16 @@ internal sealed class SetupEntitySelection
         GlobalSelectionHandling.ClaimInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
     }
 
+    /// <summary>Drops an entity from the selection (no-op if absent); an emptied selection lets the inspection go.</summary>
+    public void Remove(EntityKind kind, Guid id)
+    {
+        if (!_targets.Remove(new SelectionTarget(kind, id)))
+            return;
+
+        if (_targets.Count == 0)
+            GlobalSelectionHandling.ReleaseInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
+    }
+
     /// <summary>Toggle an entity's membership.</summary>
     public void Toggle(EntityKind kind, Guid id)
     {

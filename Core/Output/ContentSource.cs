@@ -27,6 +27,9 @@ public sealed class ContentSource
     /// default. Auto-named slices read as "Slice N" until their source is named, then as "{Name}.N".</summary>
     public bool IsRenamed;
 
+    /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
+    public CanvasPlacement? BoardPlacement;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -36,17 +39,27 @@ public sealed class ContentSource
         if (IsRenamed)
             writer.WriteValue("IsRenamed", IsRenamed);
 
+        if (BoardPlacement != null)
+        {
+            writer.WritePropertyName("BoardPlacement");
+            BoardPlacement.WriteToJson(writer);
+        }
+
         writer.WriteEndObject();
     }
 
     public static ContentSource ReadFromJson(JToken token)
     {
-        return new ContentSource
-                   {
-                       Id = OutputJson.ReadGuid(token["Id"]),
-                       SymbolChildId = OutputJson.ReadGuid(token["SymbolChildId"]),
-                       Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
-                       IsRenamed = token.ReadValueSafe("IsRenamed", false),
-                   };
+        var source = new ContentSource
+                         {
+                             Id = OutputJson.ReadGuid(token["Id"]),
+                             SymbolChildId = OutputJson.ReadGuid(token["SymbolChildId"]),
+                             Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
+                             IsRenamed = token.ReadValueSafe("IsRenamed", false),
+                         };
+        if (token["BoardPlacement"] is JObject placement)
+            source.BoardPlacement = CanvasPlacement.ReadFromJson(placement);
+
+        return source;
     }
 }

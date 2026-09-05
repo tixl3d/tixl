@@ -143,17 +143,17 @@ internal sealed class SetupFlowOutliner
         var gap = ColumnGap * scale;
 
         BeginColumn(origin.X + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("CONTENT", "##addContent", selection, SetupActions.AddContentSend);
+        DrawColumnHeader("CONTENT", "##addContent", selection, SetupActions.AddContentSend, SetupEntitySelection.EntityKind.ContentSource);
         DrawContentSends(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("SURFACES", "##addSurface", selection, SetupActions.AddSurface);
+        DrawColumnHeader("SURFACES", "##addSurface", selection, SetupActions.AddSurface, SetupEntitySelection.EntityKind.Surface);
         DrawSurfaces(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + 2 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput);
+        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput, SetupEntitySelection.EntityKind.Output);
         DrawOutputs(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -187,14 +187,19 @@ internal sealed class SetupFlowOutliner
         _columnWidth = 0;
         ImGui.SetCursorScreenPos(new Vector2(origin.X, maxY));
         ImGui.Dummy(Vector2.Zero);
+
+        // A click on empty strip clears the selection — the way back to the Board from any entity's canvas.
+        if (ImGui.IsWindowHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered())
+            selection.Clear();
+
         ImGui.EndChild();
     }
 
     /// <summary>
     /// The routing as connections between items: slice → surface, slice → patch, surface → output (one per mapping,
-    /// so a fan-out reads as two lines), output → plug. Blue like every "linked" state; faded at rest, full
-    /// and thicker while either end is hovered or selected. An output nothing presents gets an attention stub.
-    /// Items folded under a collapsed parent attach to that parent.
+    /// so a fan-out reads as two lines), output → plug. Each carries the colour of the kind it starts from; faded
+    /// at rest, full and thicker while either end is hovered or selected. Items folded under a collapsed parent
+    /// attach to that parent.
     /// </summary>
     private void DrawConnections(ImDrawListPtr dl, Setup setup, MachineConfig machineConfig, SetupEntitySelection selection)
     {
@@ -203,30 +208,18 @@ internal sealed class SetupFlowOutliner
             var c = _connections[i];
             DrawConnection(dl, selection, c.FromKind, c.FromId, c.ToKind, c.ToId, setup);
         }
-
-        // Nothing presents these outputs: a short stub in the attention color, where the plug connection would start.
-        var scale = T3Ui.UiScaleFactor;
-        for (var i = 0; i < _unboundOutputIds.Count; i++)
-        {
-            if (!TryGetAnchor(setup, SetupEntitySelection.EntityKind.Output, _unboundOutputIds[i], out var anchor))
-                continue;
-
-            var from = new Vector2(anchor.Right, anchor.Y);
-            dl.AddLine(from, from + new Vector2(ConnectionStubLength * scale, 0), UiColors.StatusAttention.Fade(0.8f), 2 * scale);
-        }
     }
 
     /// <summary>
-    /// Rebuilds what only changes with the structure: the connection list, the unbound outputs, and the
-    /// derived labels (a slice's or patch's "… N" name depends on list order). Runs on a structure-version
-    /// tick or a setup switch, so the per-frame draw only looks things up.
+    /// Rebuilds what only changes with the structure: the connection list and the derived labels (a slice's
+    /// or patch's "… N" name depends on list order). Runs on a structure-version tick or a setup switch, so
+    /// the per-frame draw only looks things up.
     /// </summary>
     private void RefreshCaches(Setup setup, MachineConfig machineConfig)
     {
         _cacheVersion = OutputSetupHandling.StructureVersion;
         _cacheSetupId = setup.Id;
         _connections.Clear();
-        _unboundOutputIds.Clear();
         _sliceLabels.Clear();
         _patchLabels.Clear();
 
@@ -257,8 +250,6 @@ internal sealed class SetupFlowOutliner
             var binding = machineConfig.TryGetBinding(output.Id);
             if (binding != null)
                 _connections.Add(new Connection(SetupEntitySelection.EntityKind.Output, output.Id, SetupEntitySelection.EntityKind.None, DisplayRowId(binding.DisplayIndex)));
-            else
-                _unboundOutputIds.Add(output.Id);
         }
     }
 
@@ -274,7 +265,8 @@ internal sealed class SetupFlowOutliner
 
         var scale = T3Ui.UiScaleFactor;
         var emphasized = IsEmphasized(selection, fromKind, fromId) || IsEmphasized(selection, toKind, toId);
-        var color = emphasized ? UiColors.StatusAutomated : UiColors.StatusAutomated.Fade(0.35f);
+        var kindColor = SetupColors.ForKind(fromKind);
+        var color = emphasized ? kindColor : kindColor.Fade(0.35f);
         var thickness = (emphasized ? 2.5f : 1.5f) * scale;
 
         var a = new Vector2(from.Right + 2 * scale, from.Y);
@@ -351,8 +343,9 @@ internal sealed class SetupFlowOutliner
         ImGui.SetCursorScreenPos(new Vector2(x, y));
     }
 
-    /// <summary>A column's persistent muted title with its `+` at the right end (none for the plug inventory).</summary>
-    private void DrawColumnHeader(string title, string? addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection>? onAdd)
+    /// <summary>A column's persistent title, tinted in its kind's colour, with its `+` at the right end (none for the plug inventory).</summary>
+    private void DrawColumnHeader(string title, string? addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection>? onAdd,
+                                  SetupEntitySelection.EntityKind kind = SetupEntitySelection.EntityKind.None)
     {
         var scale = T3Ui.UiScaleFactor;
         // Anchored on the column's x: a spacer before a second header (the shelf) resets the cursor's x to the window.
@@ -361,7 +354,8 @@ internal sealed class SetupFlowOutliner
 
         ImGui.SetCursorScreenPos(new Vector2(pos.X + 8 * scale, pos.Y));
         ImGui.AlignTextToFramePadding();
-        CustomComponents.StylizedText(title, Fonts.FontSmall, UiColors.TextMuted);
+        var titleColor = kind == SetupEntitySelection.EntityKind.None ? UiColors.TextMuted : SetupColors.ForKind(kind).Fade(0.8f);
+        CustomComponents.StylizedText(title, Fonts.FontSmall, titleColor);
 
         if (addButtonId != null && onAdd != null)
         {
@@ -396,6 +390,8 @@ internal sealed class SetupFlowOutliner
                                Kind = SetupEntitySelection.EntityKind.Output,
                                Id = output.Id,
                                Name = output.Name,
+                               // Nothing presents it yet — said in words, where the plug connection would otherwise start.
+                               Status = machineConfig.TryGetBinding(output.Id) == null ? "unbound" : null,
                                LeadingIcon = Icon.Projector,
                                IsExpanded = hasPatches ? isExpanded : null,
                                ReserveExpander = true,
@@ -784,7 +780,6 @@ internal sealed class SetupFlowOutliner
     private int _cacheVersion = -1;
     private Guid _cacheSetupId;
     private readonly List<Connection> _connections = [];
-    private readonly List<Guid> _unboundOutputIds = [];
     private readonly Dictionary<Guid, string> _sliceLabels = [];
     private readonly Dictionary<Guid, string> _patchLabels = [];
     private readonly List<SetupRelations.Relation> _breadcrumbScratch = [];
@@ -793,7 +788,6 @@ internal sealed class SetupFlowOutliner
     // Items drawn this frame, for the connections (cleared per frame; a few dozen entries, searched linearly).
     private readonly List<Anchor> _anchors = [];
 
-    private const float ConnectionStubLength = 14; // unscaled px
     private const float ColumnGap = 28; // unscaled px; the gutter the connections run through
     private const float SwitcherWidth = 180; // unscaled px
     private const float ShelfWidth = 200; // unscaled px

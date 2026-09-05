@@ -193,6 +193,9 @@ public sealed class Surface
     public ReferenceBinding? Reference;
     public StagePlacement? Placement;
 
+    /// <summary>A root surface's neutral (unwarped) place on the Board; null until the Board seeded one.</summary>
+    public CanvasPlacement? BoardPlacement;
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -240,6 +243,12 @@ public sealed class Surface
             Placement.WriteToJson(writer);
         }
 
+        if (BoardPlacement != null)
+        {
+            writer.WritePropertyName("BoardPlacement");
+            BoardPlacement.WriteToJson(writer);
+        }
+
         writer.WriteEndObject();
     }
 
@@ -270,6 +279,9 @@ public sealed class Surface
 
         if (token["Placement"] is JObject placementToken)
             surface.Placement = StagePlacement.ReadFromJson(placementToken);
+
+        if (token["BoardPlacement"] is JObject boardToken)
+            surface.BoardPlacement = CanvasPlacement.ReadFromJson(boardToken);
 
         return surface;
     }
