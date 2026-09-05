@@ -6,8 +6,7 @@ tags: [projection-mapping]
 added: 2026-08-31
 added-in-version: 4.3
 prerequisites:
-  - A writable project is open with a setup containing at least one content send
-    (SendToOutput with a texture), one slice, two surfaces, and one projector output.
+  - A writable project is open with a setup containing at least one content send (SendToOutput with a texture), one slice, two surfaces, and one projector output.
   - Two output windows are open (Windows menu → add a second Output window).
 ---
 

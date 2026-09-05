@@ -6,8 +6,7 @@ tags: [user, essential]
 added: 2026-06-24
 added-in-version: 4.2
 prerequisites:
-  - A project is open with a few library operators on the canvas (include one that is discussed in the
-    meet-up videos, e.g. `[SphereSDF]`, `[FastBlur]`, or `[RaymarchField]`).
+  - A project is open with a few library operators on the canvas (include one that is discussed in the meet-up videos, e.g. `[SphereSDF]`, `[FastBlur]`, or `[RaymarchField]`).
 related-help:
   - ../.agentic/Plans/Plan_HelpWindow.md
 ---

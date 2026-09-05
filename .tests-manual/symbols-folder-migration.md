@@ -6,8 +6,7 @@ tags: [projects, migration]
 added: 2026-08-26
 added-in-version: 4.3
 prerequisites:
-  - A user project saved with an older TiXL version, whose operator files still live in
-    namespace folders at the project root (no Symbols/ folder yet).
+  - A user project saved with an older TiXL version, whose operator files still live in namespace folders at the project root (no Symbols/ folder yet).
 ---
 
 Covers the silent one-time migration that moves a project's operator files

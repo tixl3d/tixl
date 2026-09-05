@@ -7,8 +7,7 @@ scope: graph-window
 tags: [user, essential]
 prerequisites:
   - A project you can edit is open in the Graph Window.
-  - A graph you can edit (e.g. a new empty operator) with at least one input
-    node, a few operators, and an output node.
+  - A graph you can edit (e.g. a new empty operator) with at least one input node, a few operators, and an output node.
 related-help:
   - ../.help/using/graph-window.md
 ---

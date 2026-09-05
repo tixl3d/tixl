@@ -6,9 +6,7 @@ tags: [projection-mapping]
 added: 2026-07-27
 added-in-version: 4.3
 prerequisites:
-  - A writable project is open with a setup containing at least one content send
-    (SendToOutput with a texture), one slice, one surface, one projector output,
-    one reference image, and one prop.
+  - A writable project is open with a setup containing at least one content send (SendToOutput with a texture), one slice, one surface, one projector output, one reference image, and one prop.
 ---
 
 Covers the uniform context-menu verbs across all setup entities, the parity between

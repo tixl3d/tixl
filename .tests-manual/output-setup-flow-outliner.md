@@ -6,11 +6,8 @@ tags: [projection-mapping]
 added: 2026-09-05
 added-in-version: 4.3
 prerequisites:
-  - A writable project is open whose active setup has at least one SendToOutput with content,
-    one surface mapped to an output, and one patch (the "Output Setup — Patches" set builds
-    this).
-  - The graph window and one output window are visible; the output window is at least
-    1200 px wide.
+  - A writable project is open whose active setup has at least one SendToOutput with content, one surface mapped to an output, and one patch (the "Output Setup — Patches" set builds this).
+  - The graph window and one output window are visible; the output window is at least 1200 px wide.
 ---
 
 Covers Phase B.2/B.3 of the UI restructuring: the left setup panel is replaced by the
@@ -27,9 +24,9 @@ Click the SendToOutput op in the graph window.
   row (setup name with a chevron, a muted breadcrumb, a collapse chevron at the right) and
   five columns headed **CONTENT · SURFACES · OUTPUTS · LOCAL BINDINGS** and a narrower shelf
   headed **REFERENCE IMAGES** with **PROPS** below it.
-- CONTENT lists the send with its slice indented; SURFACES the surface; OUTPUTS the output
-  with its patch indented; LOCAL BINDINGS one dimmed row per display of this machine,
-  labelled "Local / Display N" with its resolution.
+- The CONTENT column lists the "SendToOutput" row with "Slice 1" indented under it; SURFACES
+  lists "Surface 1"; OUTPUTS lists "P1" with "Patch 1" indented under it; LOCAL BINDINGS one
+  dimmed row per display of this machine, labelled "Local / Display N" with its resolution.
 - Nothing docks to the left of the canvas anymore.
 
 ## Step: Splitter and collapse
@@ -52,18 +49,20 @@ Click the SendToOutput op in the graph window.
 ## Step: Rows behave as the panel rows did
 
 **Action:**
-1. Hover the surface row, then the send row.
-2. Click the patch row, then right-click it.
-3. Drag the send row onto the output row.
+1. Hover the "Surface 1" row in the SURFACES column, then the "SendToOutput" row in the
+   CONTENT column.
+2. Click the "Patch 1" row in the OUTPUTS column, then right-click it.
+3. Drag the "SendToOutput" row (CONTENT) onto the "P1" row (OUTPUTS).
 
 **Expected:**
-- After 1: hovering the surface lights the input arrow of its output and the trailing
-  gutter of its slice and send; hovering the send lights the input arrows of the surface and
-  the patch — the same cross-highlights as before, now across columns.
-- After 2: the patch is selected, the Parameter window shows its card, and the breadcrumb
-  reads the slice feeding it, the patch, and nothing after; the context menu offers Use on
-  Surface, Duplicate, Rename, Delete.
-- After 3: a second patch appears under the output.
+- After 1: with "Surface 1" hovered, the input arrow at the left of "P1" lights up and the
+  trailing gutters of "Slice 1" and "SendToOutput" brighten. With "SendToOutput" hovered, the
+  input arrows of "Surface 1" and "Patch 1" light up. These are the same cross-highlights the
+  old panel showed, now reaching across columns.
+- After 2: "Patch 1" is selected, the Parameter window shows the Patch card, and the header
+  breadcrumb reads "Slice 1 → Patch 1"; the context menu offers Use on Surface, Duplicate,
+  Rename, Delete.
+- After 3: a "Patch 2" row appears under "P1".
 
 ## Step: Bindings column reflects the machine
 
