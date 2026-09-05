@@ -39,8 +39,38 @@ internal sealed class DrawTubes : Instance<DrawTubes>
     [Input(Guid = "c43b1052-2942-43c7-aaf4-56c91dc8e521")]
     public readonly InputSlot<bool> UseWAsWeight = new();
 
+    [Input(Guid = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d")]
+    public readonly InputSlot<bool> UseScale = new();
+
     [Input(Guid = "f8fc2813-2156-4ffd-a546-38214b887e87")]
     public readonly InputSlot<int> Sides = new();
+
+    [Input(Guid = "4876fa78-b008-42d9-83bf-ae0f577d5e5c")]
+    public readonly InputSlot<bool> CapStart = new();
+
+    [Input(Guid = "740ee4c7-ea29-45ee-aebc-59d74627ed31")]
+    public readonly InputSlot<bool> CapEnd = new();
+
+    [Input(Guid = "d4e5f6a7-b8c9-4d1e-2f3a-4b5c6d7e8f90")]
+    public readonly InputSlot<bool> Smooth = new();
+
+    [Input(Guid = "a7b8c9d0-e1f2-4a3b-5c6d-7e8f90123456")]
+    public readonly InputSlot<float> RoundAmount = new();
+
+    [Input(Guid = "b8c9d0e1-f2a3-4b5c-6d7e-8f9012345678")]
+    public readonly InputSlot<int> SubSegments = new();
+
+    [Input(Guid = "a0b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d")]
+    public readonly InputSlot<bool> DistanceScale = new();
+
+    [Input(Guid = "b1c2d3e4-f5a6-4b7c-9d8e-0f1a2b3c4d5e")]
+    public readonly InputSlot<float> ScaleNearDist = new();
+
+    [Input(Guid = "c2d3e4f5-a6b7-4c8d-0e9f-1a2b3c4d5e6f")]
+    public readonly InputSlot<float> ScaleFarDist = new();
+
+    [Input(Guid = "d3e4f5a6-b7c8-4d9e-1f0a-2b3c4d5e6f70")]
+    public readonly InputSlot<float> MinScale = new();
         
     private enum TextureModes
     {

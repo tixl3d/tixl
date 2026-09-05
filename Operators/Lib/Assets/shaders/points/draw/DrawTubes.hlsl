@@ -36,6 +36,16 @@ cbuffer Params : register(b1)
     float TextureMode;
     float2 TextureRange;    
     float UseWAsWeight;
+    float UseScale;
+    float CapStart;
+    float CapEnd;
+    float Smooth;
+    float RoundAmount;
+    float SubSegCount;
+    float DistanceScale;
+    float ScaleNearDist;
+    float ScaleFarDist;
+    float MinScale;
 };
 
 cbuffer FogParams : register(b2)
@@ -74,9 +84,11 @@ struct psInput
     float3 worldPosition : POSITION;
     float3x3 tbnToWorld : TBASIS;    
     float fog:VPOS;
+    float4 color: COLOR;
 };
 
 sampler texSampler : register(s0);
+sampler clampedSampler : register(s1);
 
 StructuredBuffer<Point> Points : register(t0);
 //Texture2D<float4> texture2 : register(t1);
@@ -94,69 +106,241 @@ static const int DrawsPerQuad =6;
 static int DrawsPerStep = DrawsPerQuad * SideCount;
 static const float Tau = 3.141578 * 2;
 
+float3 getTangent(int i, uint pointCount)
+{
+    if (pointCount < 2) return float3(1,0,0);
+    if (i == 0)          return Points[1].Position - Points[0].Position;
+    if (i == (int)pointCount - 1) return Points[i].Position - Points[i-1].Position;
+    return (Points[i+1].Position - Points[i-1].Position) * 0.5;
+}
+
+float3 hermitePos(float3 p0, float3 m0, float3 p1, float3 m1, float t)
+{
+    float t2 = t*t, t3 = t2*t;
+    return (2*t3-3*t2+1)*p0 + (t3-2*t2+t)*m0 + (-2*t3+3*t2)*p1 + (t3-t2)*m1;
+}
+
 psInput vsMain(uint id: SV_VertexID)
 {
     uint pointCount, pointStride;
     Points.GetDimensions(pointCount, pointStride);
 
     psInput output;
-    float discardFactor = 1;
-    int indexInLineStep = id % DrawsPerStep;
-    int cornerIndex = indexInLineStep % DrawsPerQuad;
-    int sideIndex = indexInLineStep / DrawsPerQuad;
+    int subSegs = (Smooth >= 0.5) ? (int)SubSegCount : 1;
+    uint tubeVerts = (pointCount - 1) * (uint)subSegs * DrawsPerStep;
+    uint capVertsPerCap = (SideCount + 1) * 3;
+    uint capVerts = capVertsPerCap * 2;
 
-    int particleId = id / DrawsPerStep;
+    if (id < tubeVerts)
+    {
+        int indexInLineStep = id % DrawsPerStep;
+        int cornerIndex = indexInLineStep % DrawsPerQuad;
+        int sideIndex = indexInLineStep / DrawsPerQuad;
 
-    float3 cornerFactors = Corners[cornerIndex];
-    float f = (float)(particleId + cornerFactors.x)  / clamp(pointCount - 1, 1,100000);
+        int subSegId = id / DrawsPerStep;
+        int sourceSeg = subSegId / subSegs;
+        int subIndex = subSegId % subSegs;
 
-    int offset = cornerFactors.x < 0.5 ? 0 : 1; 
-    Point p = Points[particleId+offset];
+float3 cornerFactors = Corners[cornerIndex];
+        float t = (cornerFactors.x < 0.5 ? (float)subIndex : (float)(subIndex + 1)) / (float)subSegs;
+        float f = ((float)sourceSeg + t) / clamp((float)(pointCount - 1), 1.0, 100000.0);
 
-    float4 pointRotation = p.Rotation;
+        Point p0 = Points[sourceSeg];
+        Point p1 = Points[sourceSeg + 1];
 
-    float WidthFactor = UseWAsWeight > 0.5 ? p.FX1 : 1;
-    if (IsSeparator(p))
-        WidthFactor = NAN; // Collapse the segment at separators
-    
-    float fRing = (sideIndex + (cornerFactors.y / 2 + 0.5)) / SideCount;
-    float spinRad = fRing * Tau;
+float3 pos0 = p0.Position;
+        float3 pos1 = p1.Position;
+        float3 pPos;
+        if (Smooth >= 0.5)
+        {
+            float3 m0 = getTangent(sourceSeg, pointCount);
+            float3 m1 = getTangent(sourceSeg + 1, pointCount);
+            pPos = hermitePos(pos0, m0, pos1, m1, t);
+        }
+        else
+        {
+            pPos = lerp(pos0, pos1, t);
+        }
 
-    float3 side = float3(cos(spinRad), 0, sin(spinRad));
-    float3 radiusOffset = qRotateVec3(side, pointRotation) * Width * WidthFactor;
+        float4 q0 = p0.Rotation;
+        float4 q1 = p1.Rotation;
+        if (dot(q0, q1) < 0) q1 = -q1;
+        float4 pointRotation = normalize(lerp(q0, q1, t));
 
-    float3 pInObject = p.Position + radiusOffset;
-    //float3 normalTwisted =  float3(0, cos(spinRad + 3.141578/2), sin(spinRad + 3.141578/2));
-    //float3 normal = normalize(qRotateVec3(normalTwisted, pointRotation));
-    //float4 normalInScreen = mul(float4(normal,0), ObjectToClipSpace);
+        float w0, w1;
+        if (UseScale >= 0.5)
+        {
+            w0 = isnan(p0.Scale.x) ? 1 : p0.Scale.x;
+            w1 = isnan(p1.Scale.x) ? 1 : p1.Scale.x;
+        }
+        else if (UseWAsWeight >= 0.5)
+        {
+            w0 = isnan(p0.FX1) ? 1 : p0.FX1;
+            w1 = isnan(p1.FX1) ? 1 : p1.FX1;
+        }
+        else
+        {
+            w0 = 1; w1 = 1;
+        }
+        float WidthFactor = lerp(w0, w1, t);
+        WidthFactor *= (1.0 + RoundAmount * sin(3.14159265 * t));
 
+        float distFactor = 1.0;
+        if (DistanceScale >= 0.5)
+        {
+            float4 centerCamPos = mul(float4(pPos, 1), ObjectToCamera);
+            float camDist = -centerCamPos.z;
+            float distT = saturate((camDist - ScaleNearDist) / max(ScaleFarDist - ScaleNearDist, 0.001));
+            distFactor = lerp(1.0, MinScale, distT);
+        }
 
-    output.texCoord = float2( f * (TextureRange.y - TextureRange.x) + TextureRange.x,  
-    fRing);
+        float fRing = (sideIndex + (cornerFactors.y / 2 + 0.5)) / SideCount;
+        float angleOffset = (Spin + Twist * f) * 3.14159265 / 180.0;
+        float spinRad = fRing * Tau + angleOffset;
 
+        float3 side = float3(0, cos(spinRad), sin(spinRad));
+        float3 radiusOffset = qRotateVec3(side, pointRotation) * Width * WidthFactor * distFactor;
 
-    // Pass tangent space basis vectors (for normal mapping).
-    float3x3 TBN = float3x3(
-        normalize(radiusOffset), //  vertex.Bitangent, 
-        normalize(qRotateVec3(float3(1,0,0), pointRotation)), //  vertex.Bitangent, 
-        normalize(qRotateVec3(float3(1,0,0), pointRotation)) //  vertex.Bitangent, 
-        );
-    //TBN = mul(TBN, (float3x3)ObjectToWorld);
-    output.tbnToWorld = TBN;
+        float3 pInObject = pPos + radiusOffset;
 
-    output.worldPosition =  mul(float4(pInObject,0), ObjectToWorld); 
+        output.texCoord = float2( f * (TextureRange.y - TextureRange.x) + TextureRange.x,
+        fRing);
 
-    float4 pInScreen  = mul(float4(pInObject,1), ObjectToClipSpace);
+        float3 tangent = normalize(qRotateVec3(float3(1,0,0), pointRotation));
+        float3 normal = normalize(qRotateVec3(float3(0, cos(spinRad), sin(spinRad)), pointRotation));
+        float3 bitangent = normalize(cross(tangent, normal));
+        float3x3 TBN = float3x3(
+            tangent,
+            bitangent,
+            normal
+            );
+        TBN = mul(TBN, (float3x3)ObjectToWorld);
+        output.tbnToWorld = TBN;
 
-    float3 lightDirection = float3(1.2, 1, -0.1);
-    //float phong = pow(  abs(dot(normal,lightDirection )),1);
-    
-    output.pixelPosition = pInScreen;
+        output.worldPosition =  mul(float4(pInObject,1), ObjectToWorld);
+        output.pixelPosition = mul(float4(pInObject,1), ObjectToClipSpace);
 
-    // Fog
-    float4 posInCamera = mul(float4(pInObject,1), ObjectToCamera);
-    output.fog = pow(saturate(-posInCamera.z/FogDistance), FogBias);
-    return output;    
+        float4 posInCamera = mul(float4(pInObject,1), ObjectToCamera);
+        output.fog = pow(saturate(-posInCamera.z/FogDistance), FogBias);
+        output.color = Color * lerp(p0.Color, p1.Color, t);
+    }
+    else
+    {
+        uint capId = id - tubeVerts;
+        uint capIndex = capId / capVertsPerCap;
+        uint triLocalId = capId % capVertsPerCap;
+        uint triInCap = triLocalId / 3;
+        uint vertInTri = triLocalId % 3;
+
+        Point p;
+        float3 capNormal;
+        bool capEnabled;
+
+        if (capIndex == 1)
+        {
+            p = Points[pointCount - 1];
+            capNormal = -normalize(qRotateVec3(float3(1, 0, 0), p.Rotation));
+            capEnabled = CapEnd >= 0.5;
+        }
+        else
+        {
+            p = Points[0];
+            capNormal = normalize(qRotateVec3(float3(1, 0, 0), p.Rotation));
+            capEnabled = CapStart >= 0.5;
+        }
+
+        float WidthFactor;
+        if (UseScale >= 0.5)
+        {
+            WidthFactor = isnan(p.Scale.x) ? 1 : p.Scale.x;
+        }
+        else if (UseWAsWeight >= 0.5)
+        {
+            WidthFactor = isnan(p.FX1) ? 1 : p.FX1;
+        }
+        else
+        {
+            WidthFactor = 1;
+        }
+        float radius = Width * WidthFactor;
+        if (DistanceScale >= 0.5)
+        {
+            float4 capCamPos = mul(float4(p.Position, 1), ObjectToCamera);
+            float camDist = -capCamPos.z;
+            float distT = saturate((camDist - ScaleNearDist) / max(ScaleFarDist - ScaleNearDist, 0.001));
+            radius *= lerp(1.0, MinScale, distT);
+        }
+
+        uint rimIndex;
+        if (vertInTri == 0)
+        {
+            rimIndex = 0xFFFFFFFF;
+        }
+        else if (vertInTri == 1)
+        {
+            rimIndex = triInCap;
+        }
+        else
+        {
+            rimIndex = triInCap + 1;
+        }
+
+        float3 pInObject;
+        float3 tangent;
+        float3 normal;
+        float3 bitangent;
+        float2 texCoord;
+
+        if (!capEnabled)
+        {
+            pInObject = p.Position;
+            tangent = normalize(qRotateVec3(float3(0, 1, 0), p.Rotation));
+            normal = float3(0, 0, 0);
+            bitangent = normalize(cross(normal, tangent));
+            texCoord = float2(0, 0);
+        }
+        else if (rimIndex == 0xFFFFFFFF)
+        {
+            pInObject = p.Position;
+            tangent = normalize(qRotateVec3(float3(0, 1, 0), p.Rotation));
+            normal = capNormal;
+            bitangent = normalize(cross(normal, tangent));
+            texCoord = float2(0.5, 0.5);
+        }
+        else
+        {
+            float capF = (capIndex == 1) ? 1.0 : 0.0;
+            float capAngleOffset = (Spin + Twist * capF) * 3.14159265 / 180.0;
+            float colF = (float)(rimIndex % (SideCount + 1));
+            float angle = colF / SideCount * Tau + capAngleOffset;
+            float3 dir = float3(0, cos(angle), sin(angle));
+            pInObject = p.Position + qRotateVec3(dir, p.Rotation) * radius;
+
+            tangent = normalize(qRotateVec3(float3(0, -sin(angle), cos(angle)), p.Rotation));
+            normal = capNormal;
+            bitangent = normalize(cross(normal, tangent));
+            texCoord = float2(colF / SideCount, colF / SideCount);
+        }
+
+        output.texCoord = texCoord;
+
+        float3x3 TBN = float3x3(
+            tangent,
+            bitangent,
+            normal
+            );
+        TBN = mul(TBN, (float3x3)ObjectToWorld);
+        output.tbnToWorld = TBN;
+
+        output.worldPosition = mul(float4(pInObject, 1), ObjectToWorld);
+        output.pixelPosition = mul(float4(pInObject, 1), ObjectToClipSpace);
+
+        float4 posInCamera = mul(float4(pInObject, 1), ObjectToCamera);
+        output.fog = pow(saturate(-posInCamera.z / FogDistance), FogBias);
+        output.color = Color * p.Color;
+    }
+
+    return output;
 }
 
 
@@ -164,30 +348,25 @@ float4 psMain(psInput pin) : SV_TARGET
 {
     // Sample input textures to get shading model params.
     float4 albedo = BaseColorMap.Sample(texSampler, pin.texCoord).rgba;
-    float4 roughnessSpecularMetallic = RSMOMap.Sample(texSampler, pin.texCoord);
-    float metalness = roughnessSpecularMetallic.z + Metal;
-    float normalStrength = roughnessSpecularMetallic.y;
-    float roughness = roughnessSpecularMetallic.x + Roughness;
+    float4 roughnessMetallicOcclusion = RSMOMap.Sample(texSampler, pin.texCoord);
+    float roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
+    float metalness = saturate(roughnessMetallicOcclusion.y + Metal);
+    float occlusion = roughnessMetallicOcclusion.z;
 
     // Outgoing light direction (vector from world-space fragment position to the "eye").
     float3 eyePosition =  mul( float4(0,0,0,1), CameraToWorld);
     float3 Lo = normalize(eyePosition - pin.worldPosition);
 
     // Get current fragment's normal and transform to world space.
-    float3 N = lerp(float3(0,0,1),  normalize(2.0 * NormalMap.Sample(texSampler, pin.texCoord).rgb - 1.0), normalStrength);
+    float3 N = normalize(2.0 * NormalMap.Sample(texSampler, pin.texCoord).rgb - 1.0);
 
 
     //return float4(pin.tbnToWorld[0],1);
     N = normalize(mul(N,pin.tbnToWorld));
-    return float4(N.xyz,1);
+    //return float4(N.xyz,1);
 
 
-    float isFrontSide = dot(N, Lo)/10;
-    if( isFrontSide < -0.1)
-        N = -N;
-    
-    // Angle between surface normal and outgoing light direction.
-    float cosLo = max(0.0, dot(N, Lo));
+    float cosLo = abs(dot(N, Lo));
         
     // Specular reflection vector.
     float3 Lr = 2.0 * cosLo * N - Lo;
@@ -199,17 +378,15 @@ float4 psMain(psInput pin) : SV_TARGET
     float3 directLighting = 0.0;
     for(uint i=0; i < ActiveLightCount; ++i)
     {
-        float3 Li =   Lights[i].position - pin.worldPosition; //- Lights[i].direction;
-        float distance = length(Li);
-        float intensity = Lights[i].intensity / (pow(distance,Lights[i].decay) + 0.2);
-        float3 Lradiance = Lights[i].color * intensity; //Lights[i].radiance;
+    float3 Lvec = Lights[i].position - pin.worldPosition;
+    float distance = length(Lvec);
+    float3 L = Lvec / max(distance, 1e-4);
+    float intensity = Lights[i].intensity / (pow(distance/Lights[i].range, Lights[i].decay) + 1);
+    float3 Lradiance = Lights[i].color * intensity;
 
-        // Half-vector between Li and Lo.
-        float3 Lh = normalize(Li + Lo);
-
-        // Calculate angles between surface normal and various light vectors.
-        float cosLi = max(0.0, dot(N, Li));
-        float cosLh = max(0.0, dot(N, Lh));
+    float3 Lh = normalize(L + Lo);
+    float cosLi = max(0.0, dot(N, L));
+    float cosLh = max(0.0, dot(N, Lh));
 
         // Calculate Fresnel term for direct lighting. 
         float3 F  = fresnelSchlick(F0, max(0.0, dot(Lh, Lo)));
@@ -222,7 +399,7 @@ float4 psMain(psInput pin) : SV_TARGET
         // Diffuse scattering happens due to light being refracted multiple times by a dielectric medium.
         // Metals on the other hand either reflect or absorb energy, so diffuse contribution is always zero.
         // To be energy conserving we must scale diffuse BRDF contribution based on Fresnel factor & metalness.
-        float3 kd = lerp(float3(1, 1, 1), float3(0, 0, 0), metalness);
+        float3 kd = lerp(1.0 - F, 0.0, metalness);
         //return float4(F, 1);
 
         // Lambert diffuse BRDF.
@@ -244,7 +421,7 @@ float4 psMain(psInput pin) : SV_TARGET
         //float3 irradiance = 0;// irradianceTexture.Sample(texSampler, N).rgb;
         uint width, height, levels;
         PrefilteredSpecular.GetDimensions(0, width, height, levels);
-        float3 irradiance = PrefilteredSpecular.SampleLevel(texSampler, Lr.xyz, 0.8 * levels).rgb;
+        float3 irradiance = PrefilteredSpecular.SampleLevel(texSampler, N, 0.6 * levels).rgb;
 
         // Calculate Fresnel term for ambient lighting.
         // Since we use pre-filtered cubemap(s) and irradiance is coming from many directions
@@ -268,14 +445,14 @@ float4 psMain(psInput pin) : SV_TARGET
         //return float4(specularIrradiance * 1, 1);
 
         // Split-sum approximation factors for Cook-Torrance specular BRDF.
-        float2 specularBRDF = BRDFLookup.Sample(texSampler, float2(cosLo, roughness)).rg;
+        float2 specularBRDF = BRDFLookup.SampleLevel(clampedSampler, float2(cosLo, roughness), 0).rg;
         //return float4(cosLo, roughness,0,1);
 
         // Total specular IBL contribution.
         float3 specularIBL = (F0 * specularBRDF.x + specularBRDF.y) * specularIrradiance;
 
         // Total ambient lighting contribution.
-        ambientLighting = diffuseIBL + specularIBL;
+        ambientLighting = (diffuseIBL + specularIBL) * occlusion;
     }
 
     // Final fragment color.    
@@ -288,8 +465,8 @@ float4 psMain(psInput pin) : SV_TARGET
     // return lerp(litColor, FogColor, pin.fog)
     //      + float4(EmissiveColorMap.Sample(texSampler, pin.texCoord).rgb * EmissiveColor.rgb, 0);    
 
-    float4 litColor= float4(directLighting + ambientLighting, 1.0) * BaseColor * Color;
-    litColor.rgb = lerp(litColor.rgb, FogColor.rgb, pin.fog);
+    float4 litColor= float4(directLighting + ambientLighting, 1.0) * BaseColor * pin.color;
+    litColor.rgb = lerp(litColor.rgb, FogColor.rgb, pin.fog * FogColor.a);
     litColor += float4(EmissiveColorMap.Sample(texSampler, pin.texCoord).rgb * EmissiveColor.rgb, 0);
     litColor.a *= albedo.a;
     return litColor;
