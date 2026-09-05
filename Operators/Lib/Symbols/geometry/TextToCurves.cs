@@ -1,7 +1,4 @@
 #nullable enable
-using System;
-using System.Collections.Generic;
-using System.IO;
 using SixLabors.Fonts;
 using SixLabors.Fonts.Unicode;
 #if SIXLABORS_FONTS_V3
@@ -44,6 +41,7 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
         var weight = Weight.GetValue(context);
         var axisTag = Axis.GetValue(context)?.Trim() ?? string.Empty;
         var axisValue = AxisValue.GetValue(context);
+        var pivot = Pivot.GetValue(context);
 
         if (!_resource.TryGetValue(context, out var loadedFont))
         {
@@ -80,25 +78,25 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
         var font = loadedFont.Family.CreateFont(size);
 #endif
         var options = new TextOptions(font)
-                          {
-                              Dpi = 72,
-                              LineSpacing = lineSpacing,
-                              KerningMode = kerning ? KerningMode.Standard : KerningMode.None,
-                              HorizontalAlignment = alignment switch
-                                                        {
-                                                            Alignments.Center => HorizontalAlignment.Center,
-                                                            Alignments.Right  => HorizontalAlignment.Right,
-                                                            _                 => HorizontalAlignment.Left,
-                                                        },
-                              TextAlignment = alignment switch
-                                                  {
-                                                      Alignments.Center => TextAlignment.Center,
-                                                      Alignments.Right  => TextAlignment.End,
-                                                      _                 => TextAlignment.Start,
-                                                  },
-                          };
+        {
+            Dpi = 72,
+            LineSpacing = lineSpacing,
+            KerningMode = kerning ? KerningMode.Standard : KerningMode.None,
+            HorizontalAlignment = alignment switch
+            {
+                Alignments.Center => HorizontalAlignment.Center,
+                Alignments.Right  => HorizontalAlignment.Right,
+                _                 => HorizontalAlignment.Left,
+            },
+            TextAlignment = alignment switch
+            {
+                Alignments.Center => TextAlignment.Center,
+                Alignments.Right  => TextAlignment.End,
+                _                 => TextAlignment.Start,
+            },
+        };
 
-        _collector.Begin(text);
+        _collector.Begin(text, pivot);
         try
         {
 #if SIXLABORS_FONTS_V3
@@ -177,9 +175,10 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
     /// </summary>
     private sealed class OutlineCollector : IGlyphRenderer
     {
-        public void Begin(string text)
+        public void Begin(string text, Vector2 pivot)
         {
             _text = text;
+            _pivot = pivot;
             _textCursor = 0;
             _wordIndex = 0;
             _lineIndex = 0;
@@ -275,9 +274,17 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
             if (contourCount == 0)
                 return; // whitespace and control glyphs: layout advances, nothing to draw
 
-            // Pivot at the glyph's origin: left edge on the baseline (bottom of the em box, y flipped)
-            var pivot = new Vector3(_glyphBounds.Left, -_glyphBounds.Bottom, 0);
-            _parts.Add(new CurvePart(_glyphContourStart, contourCount, pivot, _parts.Count, _charIndex));
+            // Calculate pivot based on input PivotPosition value
+            // Bounds are in em units. X is left, Y is bottom of the box.
+            var x = _glyphBounds.Left;
+            var yBottom = -_glyphBounds.Bottom; // Flipped for scene space
+
+            var pivotX = x + _glyphBounds.Width * (_pivot.X + 1f) * 0.5f;
+            var pivotY = yBottom + _glyphBounds.Height * (_pivot.Y + 1f) * 0.5f;
+
+            var finalPivot = new Vector3(pivotX, pivotY, 0);
+
+            _parts.Add(new CurvePart(_glyphContourStart, contourCount, finalPivot, _parts.Count, _charIndex));
             _codePoints.Add(_glyphCodePoint);
             _glyphIds.Add(_glyphId);
             _charIndices.Add(_charIndex);
@@ -412,10 +419,11 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
         private int _lineIndex;
         private int _figureStart;
         private int _glyphContourStart;
-        private FontRectangle _glyphBounds;
+        FontRectangle _glyphBounds;
         private int _glyphCodePoint;
         private int _glyphId;
-
+        private Vector2 _pivot;
+       
         private readonly List<Vector3> _positions = [];
         private readonly List<Vector3> _handlesIn = [];
         private readonly List<Vector3> _handlesOut = [];
@@ -477,4 +485,8 @@ internal sealed class TextToCurves : Instance<TextToCurves>, IDescriptiveFilenam
 
     [Input(Guid = "2e7b4f9c-a1d6-4c38-8b5e-d9f0a3c7e614")]
     public readonly InputSlot<float> AxisValue = new();
+
+    [Input(Guid = "4a7f2b9e-8c31-4d56-a0b2-c7e4f9d1a823")]
+    public readonly InputSlot<Vector2> Pivot = new();
+
 }
