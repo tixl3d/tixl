@@ -7,6 +7,7 @@ cbuffer Params : register(b0)
     float4 GridParams; // xy = metres spanned by the surface, z = line thickness (px), w = grid mode (>0.5)
     float4 GridColor;
     float4 GridOrigin; // xy = raster origin in source UV, z = minor lines per metre, w = minor line opacity
+    float4 Mask;       // xy = centre (output px), z = radius (px), w = enabled (>0.5): only a disc of the layer shows
 }
 
 Texture2D<float4> InputTexture : register(t0);
@@ -79,5 +80,15 @@ float4 psMain(vsOutput input) : SV_TARGET
         return float4(GridColor.rgb, max(major, minor) * GridColor.a);
     }
 
-    return InputTexture.Sample(texSampler, input.texCoord) * Color;
+    float4 color = InputTexture.Sample(texSampler, input.texCoord) * Color;
+
+    // A calibration fragment: the layer fades out beyond a disc around one point, so only the photo right
+    // around the feature reaches the wall.
+    if (Mask.w > 0.5)
+    {
+        float d = distance(input.position.xy, Mask.xy);
+        color.a *= 1 - smoothstep(Mask.z - 2, Mask.z, d);
+    }
+
+    return color;
 }

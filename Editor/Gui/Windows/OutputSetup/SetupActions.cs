@@ -1465,6 +1465,47 @@ internal static class SetupActions
                                              });
     }
 
+    /// <summary>The measuring lines among a surface's annotations (points don't count toward a straighten).</summary>
+    internal static int CountLines(Surface surface)
+    {
+        var count = 0;
+        foreach (var annotation in surface.Annotations)
+        {
+            if (!annotation.IsPoint)
+                count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>The reference points among a surface's annotations.</summary>
+    internal static int CountPoints(Surface surface)
+    {
+        var count = 0;
+        foreach (var annotation in surface.Annotations)
+        {
+            if (annotation.IsPoint)
+                count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>Adds a reference point at a surface-space position, named by its ordinal ("P3").</summary>
+    internal static void AddReferencePoint(Setup setup, Surface surface, Vector2 position)
+    {
+        RunUndoable("Add reference point", setup, () =>
+                                                  {
+                                                      surface.Annotations.Add(new LineAnnotation
+                                                                                  {
+                                                                                      Kind = LineAnnotation.Kinds.Point,
+                                                                                      Name = $"P{CountPoints(surface) + 1}",
+                                                                                      P1 = position,
+                                                                                      P2 = position,
+                                                                                  });
+                                                  });
+    }
+
     /// <summary>Whether anything feeds the output: a surface mapped onto it, or a patch on its canvas.</summary>
     internal static bool OutputHasInputs(Setup setup, OutputDefinition output)
     {

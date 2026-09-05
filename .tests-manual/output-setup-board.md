@@ -255,6 +255,68 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   the metadata while dragging, and the green traced quad on the image card crops along with
   it.
 
+## Step: Reference points on the straightened photo
+
+**Action:**
+1. With "Surface 1" straightened (previous step), click **+ Point** in the header, then click
+   a distinct feature inside the wall (a light switch, a brick corner).
+2. Repeat for three more features, so four points exist; then click **+ Point** and press the
+   **+ Line** button instead of clicking on the photo.
+3. Drag the second point's handle 40 px to the right; then hold Shift and drag it 40 px
+   further right; release; press Ctrl+Z twice.
+4. Right-click the fourth point's handle and choose **Delete**.
+5. Click the **Board** tab; then double-click the "Reference 1" image card.
+
+**Expected:**
+- After 1: the header hint reads "click a feature you can find on the real wall" while armed;
+  the click leaves a green crosshair with a "P1" chip at that spot and the tool disarms (the
+  next click on the photo does nothing).
+- After 2: the points are named P1 to P4 in order; pressing **+ Line** while **+ Point** is
+  armed switches the hint to the line one; only one tool is armed at a time. **Straighten**
+  stays disabled: points don't count as lines.
+- After 3: the plain drag moves P2 by 40 px; the Shift drag moves it by only about 4 px (a
+  tenth). Each Ctrl+Z undoes one drag.
+- After 4: P4 disappears; P1 to P3 keep their names and positions.
+- After 5: on the Board the "Surface 1" card shows the three crosshairs at the same places on
+  its photo backdrop; scaling the card with Ctrl-drag on an edge keeps them on their
+  features. Inside the "Reference 1" image the same three points sit on the green traced
+  quad, at the features they were placed on.
+
+## Step: Calibrating the pin by its reference points
+
+**Action:**
+1. With "Surface 1" carrying three reference points (previous step) and mapped onto "Projector 1",
+   select "Surface 1", click the **Output** tab and click **Project photo** in the header.
+2. Drag the P1 handle on the projector canvas 60 px to the right, release.
+3. Drag the P2 handle 40 px down, release; press Ctrl+Z; press Ctrl+Y.
+4. Drag the P3 handle 30 px left, release; then double-click P3.
+5. Add two more points on the straightened photo (see the previous step), return to **Output**,
+   drag both onto the canvas, then drag the fifth one 30 px further.
+6. Drag the percent field right of **Project photo** from 5% to 15%.
+7. Click **Project photo** again.
+
+**Expected:**
+- After 1: the surface's content stays in the composite; around each point a disc of the
+  straightened photo (about a tenth of the canvas height across) is projected over it, with a
+  dim white crosshair. On the canvas every point shows the same disc under a white handle with
+  its "P1".."P3" chip — also a point whose projection falls outside the projector frame, which
+  has no disc on the wall but keeps its disc on the canvas so you can see which feature it marks.
+- After 2: while dragging, the whole quad shifts so the P1 disc follows the cursor; on release
+  P1 turns green (activated) and stays exactly where it was dropped. P2 and P3 keep riding the
+  pin and moved with it.
+- After 3: with two activated points the quad turns and scales so both sit at their targets;
+  P1 does not move. Ctrl+Z puts the quad back and P2 back to idle (white); Ctrl+Y restores both.
+- After 4: with three activated points the quad shears; P1 and P2 stay put. The double-click
+  turns P3 white again and the quad does not change.
+- After 5: with four activated points the quad keystones and every activated target is hit
+  exactly. With five, the header shows "points miss by up to N px" with N above zero, and the
+  fifth point's disc no longer sits exactly on its crosshair.
+- After 6: the discs grow to three times their radius on the canvas and on the wall alike. Where
+  "Region 1" overlaps a disc, the disc draws over the region's content, on the wall as on the
+  canvas.
+- After 7: the discs and crosshairs leave the composite (unless "Show size raster" is on); the
+  handles and their green/white state stay on the canvas and survive a save and reload.
+
 ## Step: Reference images come from the asset system
 
 **Action:**

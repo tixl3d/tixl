@@ -302,6 +302,11 @@ internal sealed partial class SetupOutputView
                 screenQuad[c] = _projection.CanvasToScreen(binding.Quad[c]);
 
             DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screenQuad, surface.Id, surface.Name, isSelected, fade, pulse);
+
+            // Its reference points, where they sit in the photo.
+            if (SetupActions.CountPoints(surface) > 0
+                && Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(surface), binding.Quad, out var surfaceToPhoto))
+                DrawReferencePointMarks(dl, surface, surfaceToPhoto, _projection, fade);
         }
     }
 
@@ -524,8 +529,107 @@ internal sealed partial class SetupOutputView
         {
             DrawAnnotations(dl, subject, surfaceToRect, rectToSurface, Vector2.Zero, editable: true, fade: 1f, projected: false);
             DrawStraightRegions(setup, dl, subject, subject, Vector2.Zero, surfaceToRect, rectToSurface, selection);
+            DrawReferencePoints(setup, dl, subject, surfaceToRect, rectToSurface);
         }
     }
+
+    /// <summary>
+    /// The surface's reference points on the rectified photo: placed by a click while "+ Point" is armed,
+    /// dragged by their handle (Shift for precision), removed from their right-click menu. Stored in surface
+    /// metres, so they are the same spots the projector will be aimed at.
+    /// </summary>
+    private void DrawReferencePoints(Setup setup, ImDrawListPtr dl, Surface subject, in Homography surfaceToRect, in Homography rectToSurface)
+    {
+        var color = SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface);
+
+        if (_pointArmed && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            var position = rectToSurface.TransformPoint(_projection.ScreenToCanvas(ImGui.GetMousePos()));
+            SetupActions.AddReferencePoint(setup, subject, position);
+            _pointArmed = false;
+        }
+
+        var toDelete = -1;
+        var ordinal = 0;
+        for (var i = 0; i < subject.Annotations.Count; i++)
+        {
+            var point = subject.Annotations[i];
+            if (!point.IsPoint)
+                continue;
+
+            ordinal++;
+            var px = surfaceToRect.TransformPoint(point.P1);
+            ImGui.PushID(i);
+            var style = CanvasPointHandle.Style.Default(UiColors.ForegroundFull, CanvasPointHandle.Shape.Circle, true);
+            style.OutlineColor = color;
+            style.Radius = 6;
+            var phase = CanvasPointHandle.Draw(ref px, _projection, style);
+            var hovered = ImGui.IsItemHovered();
+            ImGui.PopID();
+
+            if (phase == CanvasPointHandle.DragPhase.Started)
+                _boardGestureOldJson = setup.ToJsonString();
+
+            if (phase is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging)
+                point.P1 = point.P2 = rectToSurface.TransformPoint(px);
+            else if (phase == CanvasPointHandle.DragPhase.Completed)
+                CommitBoardGesture(setup, "Move reference point");
+
+            var screen = _projection.CanvasToScreen(px);
+            CanvasDraw.Crosshair(dl, screen, color.Fade(0.8f), 9f, 1f);
+            DrawPointLabel(dl, screen, string.IsNullOrEmpty(point.Name) ? $"P{ordinal}" : point.Name, color);
+
+            if (hovered && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+            {
+                _pointMenuIndex = i;
+                ImGui.OpenPopup(PointMenuId);
+            }
+        }
+
+        if (ImGui.BeginPopup(PointMenuId))
+        {
+            if (CustomComponents.DrawMenuItem(1, "Delete"))
+                toDelete = _pointMenuIndex;
+
+            ImGui.EndPopup();
+        }
+
+        if (toDelete >= 0 && toDelete < subject.Annotations.Count)
+            SetupActions.RunUndoable("Delete reference point", setup, () => subject.Annotations.RemoveAt(toDelete));
+    }
+
+    /// <summary>A point's name chip, offset to the upper right so the crosshair stays readable.</summary>
+    private static void DrawPointLabel(ImDrawListPtr dl, Vector2 screen, string label, T3.Core.DataTypes.Vector.Color color)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        ImGui.PushFont(Fonts.FontSmall);
+        var size = ImGui.CalcTextSize(label);
+        ImGui.PopFont();
+        var min = screen + new Vector2(10, -10) * scale - new Vector2(0, size.Y);
+        var max = min + size + new Vector2(6, 2) * scale;
+        dl.AddRectFilled(min, max, UiColors.BackgroundFull.Fade(0.7f), 3 * scale);
+        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(3, 1) * scale, color, label);
+    }
+
+    /// <summary>Read-only marks for a surface's reference points, through any surface-space → screen mapping.</summary>
+    private static void DrawReferencePointMarks(ImDrawListPtr dl, Surface surface, in Homography surfaceToView, ICanvasProjection view, float fade)
+    {
+        var color = SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface).Fade(0.8f * fade);
+        var ordinal = 0;
+        foreach (var point in surface.Annotations)
+        {
+            if (!point.IsPoint)
+                continue;
+
+            ordinal++;
+            var screen = view.CanvasToScreen(surfaceToView.TransformPoint(point.P1));
+            CanvasDraw.Crosshair(dl, screen, color, 5f, 1f);
+            DrawPointLabel(dl, screen, string.IsNullOrEmpty(point.Name) ? $"P{ordinal}" : point.Name, color);
+        }
+    }
+
+    private const string PointMenuId = "##referencePointMenu";
+    private int _pointMenuIndex = -1;
 
     /// <summary>
     /// The regions on the rectified photo, nested recursively: each edits in its parent's space, whose origin is
@@ -558,7 +662,14 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private bool TryGetTracedFragment(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Vector2 uvMin, out Vector2 uvMax)
     {
+        return TryGetTracedFragment(setup, surface, out srv, out _, out uvMin, out uvMax);
+    }
+
+    private bool TryGetTracedFragment(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Texture2D? warpedTexture,
+                                      out Vector2 uvMin, out Vector2 uvMax)
+    {
         srv = null;
+        warpedTexture = null;
         uvMin = Vector2.Zero;
         uvMax = Vector2.One;
         var binding = surface.Reference;
@@ -580,6 +691,7 @@ internal sealed partial class SetupOutputView
         if (srv is not { IsDisposed: false })
             return false;
 
+        warpedTexture = warped;
         var bboxSize = Vector2.Max(bboxMax - bboxMin, new Vector2(0.001f));
         uvMin = (regionMin - bboxMin) / bboxSize;
         uvMax = (regionMax - bboxMin) / bboxSize;

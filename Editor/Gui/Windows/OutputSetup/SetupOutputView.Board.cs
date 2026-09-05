@@ -214,6 +214,13 @@ internal sealed partial class SetupOutputView
             DrawBoardCard(setup, selection, dl, SetupEntitySelection.EntityKind.Surface, surface.Id, min, max,
                           surface.Name, BoardMeta(surface.Id), fragment, true, uvMin, uvMax);
             DrawBoardRegions(setup, selection, dl, surface, min + surface.AnchorInMeters);
+            if (SetupActions.CountPoints(surface) > 0)
+            {
+                _boardPointProjection.View = _boardProjection;
+                _boardPointProjection.Origin = min + surface.AnchorInMeters;
+                _boardPointProjection.UseHomography = false;
+                DrawReferencePointMarks(dl, surface, Homography.Identity, _boardPointProjection, _boardLayerFade);
+            }
         }
 
         foreach (var output in setup.Outputs)
@@ -1283,6 +1290,7 @@ internal sealed partial class SetupOutputView
     private readonly List<(SetupEntitySelection.EntityKind Kind, Guid Id, ImRect Rect)> _boardFenceCandidates = [];
 
     private float _boardLayerFade = 1f; // 1 on the Board, toward 0 as a space comes in (set per frame)
+    private readonly RegionProjection _boardPointProjection = new();
     private int _boardMetaVersion = -1;
     private readonly Dictionary<Guid, string> _boardMeta = new();
     private EvaluationContext? _boardContext;

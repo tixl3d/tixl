@@ -539,6 +539,32 @@ with an explanatory comment) — the row-callback API design made compliance imp
   active, an aim crosshair on the wall for the handle being dragged, edge/anchor guides in the composite.
   Also: the Board fence starts only on the press frame (a press handed from a card to a label no longer
   ends as an empty click).
+- **2026-09-05 (reference points, slice 1):** `LineAnnotation.Kinds.Point` (P1 = P2 = the spot, surface
+  metres, same `Surface.Annotations` list — scaling, re-metering and JSON come for free). "+ Point" in the
+  header (photo flow only; mutually exclusive with "+ Line") places one by click on the straightened photo;
+  handles drag (Shift = tenth speed), right-click → Delete; one undo step each. Marks on the Board surface
+  card and through the trace on the image card. Line-only paths filter points: `SetupActions.CountLines`
+  gates Straighten, the solver gets `_refineSolveLines`, every annotation is re-expressed after a refine.
+  Next slices: Calibrate mode projecting the rectified photo with the points as fixed targets; solve the
+  mapping on release (exact for 4, residual hint beyond); "Solve from points".
+- **2026-09-06 (reference points, slice 2 — pin calibration, reworked after the first projector test):**
+  Targets are model data: `OutputMapping.PointTargets` (point id → output px; `LineAnnotation.Id` added).
+  A point is *activated* by dragging it on the Output canvas; its target is where it was dropped and never
+  moves on its own; double-click resets it to idle. Only activated points feed the solve
+  (`SolvePinFromTargets`: 1–3 → incremental translate/similarity/affine via `Core/Output/PointPinSolver`,
+  ≥4 → `Homography.TryComputeLeastSquares` from surface metres, residual in the header). "Project photo"
+  no longer replaces the content: `OutputManager.CollectPhotoFragments` projects a disc of the straightened
+  photo (5 % of canvas height radius, `Mask` cbuffer lane + shader) around each point's projection, and the
+  overlay draws activated crosshairs at their targets (bright) and idle ones on the pin (dim). Undo is a
+  JSON gesture per drag. Rejected from the first cut: a global "Solve from points" button and solving from
+  every point regardless of activation (most are outside the projector's frame).
+  Fix after the second test: `RenderWarpedTexture` shares `_shaderParams` and left the new `Mask` lane set,
+  so the straightened photo itself came out masked (no discs anywhere); it now clears it. The canvas draws
+  the discs too (`DrawCanvasPhotoDiscs`: photo warped through the pin once into a keyed target, then
+  `AddImageRounded` cut-outs), for every point — idle ones outside the frame included; on the canvas the discs
+  no longer wait for the toggle. Third test: a child region's content covered the wall discs — fragments are
+  now deferred to after the surface loop (`_pendingFragments`). Disc radius is a user setting
+  (`OutputSetupPhotoDiscRadius`, percent field beside the toggle), shared by wall and canvas.
 
 ## Suggested order (revised for the flow-view pivot)
 

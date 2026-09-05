@@ -113,6 +113,9 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < annotations.Count; i++)
         {
             var annotation = annotations[i];
+            if (annotation.IsPoint)
+                continue; // points have their own drawer
+
             var measured = (annotation.P2 - annotation.P1).Length();
             var isMeasurement = annotation.LengthInMeters > 0;
 
@@ -293,24 +296,18 @@ internal sealed partial class SetupOutputView
     private static bool TryStraightenFromLines(Surface surface, Guid outputId)
     {
         var mapping = surface.OutputMappings.Find(m => m.OutputId == outputId);
-        if (mapping == null || mapping.Quad.Length < 4 || surface.Annotations.Count < MinLinesToStraighten
+        if (mapping == null || mapping.Quad.Length < 4 || SetupActions.CountLines(surface) < MinLinesToStraighten
             || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
         {
             return false;
         }
 
-        // The lines in output pixels: what was actually aimed at physical features, and the one thing that
-        // must not move when the corners do.
-        _refineLines.Clear();
-        foreach (var annotation in surface.Annotations)
-        {
-            var a = surfaceToOutput.TransformPoint(annotation.P1);
-            var b = surfaceToOutput.TransformPoint(annotation.P2);
-            _refineLines.Add(new Vector4(a.X, a.Y, b.X, b.Y));
-        }
+        // Every annotation in output pixels: what was actually aimed at physical features, and the one thing
+        // that must not move when the corners do. Only the lines drive the solve; the points ride along.
+        CollectAnnotationsIn(surface, surfaceToOutput);
 
         Span<Vector2> refined = stackalloc Vector2[4];
-        if (!LineRectifier.TryRefineQuad(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_refineLines),
+        if (!LineRectifier.TryRefineQuad(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_refineSolveLines),
                                          surface.SizeInMeters, mapping.Quad, refined))
         {
             return false;
@@ -358,22 +355,16 @@ internal sealed partial class SetupOutputView
     private static bool TryStraightenTraceFromLines(Surface surface)
     {
         var binding = surface.Reference;
-        if (binding == null || binding.Quad.Length < 4 || surface.Annotations.Count < MinLinesToStraighten
+        if (binding == null || binding.Quad.Length < 4 || SetupActions.CountLines(surface) < MinLinesToStraighten
             || !Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(surface), binding.Quad, out var surfaceToPhoto))
         {
             return false;
         }
 
-        _refineLines.Clear();
-        foreach (var annotation in surface.Annotations)
-        {
-            var a = surfaceToPhoto.TransformPoint(annotation.P1);
-            var b = surfaceToPhoto.TransformPoint(annotation.P2);
-            _refineLines.Add(new Vector4(a.X, a.Y, b.X, b.Y));
-        }
+        CollectAnnotationsIn(surface, surfaceToPhoto);
 
         Span<Vector2> refined = stackalloc Vector2[4];
-        if (!LineRectifier.TryRefineQuad(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_refineLines),
+        if (!LineRectifier.TryRefineQuad(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_refineSolveLines),
                                          surface.SizeInMeters, binding.Quad, refined))
         {
             return false;
@@ -393,6 +384,23 @@ internal sealed partial class SetupOutputView
         }
 
         return true;
+    }
+
+    /// <summary>Every annotation (lines and points) transformed into <paramref name="toSpace"/>, in
+    /// <see cref="_refineLines"/> by index; the lines alone in <see cref="_refineSolveLines"/> for the solver.</summary>
+    private static void CollectAnnotationsIn(Surface surface, in Homography toSpace)
+    {
+        _refineLines.Clear();
+        _refineSolveLines.Clear();
+        foreach (var annotation in surface.Annotations)
+        {
+            var a = toSpace.TransformPoint(annotation.P1);
+            var b = toSpace.TransformPoint(annotation.P2);
+            var line = new Vector4(a.X, a.Y, b.X, b.Y);
+            _refineLines.Add(line);
+            if (!annotation.IsPoint)
+                _refineSolveLines.Add(line);
+        }
     }
 
     /// <summary>Two lines is the least that says anything about the pin; one only pins a single direction.</summary>
@@ -446,6 +454,7 @@ internal sealed partial class SetupOutputView
 
     // Measure/straighten state.
     private bool _measureArmed;
+    private bool _pointArmed; // "+ Point": the next click on the straightened photo places a reference point
     private int _measureDraftIndex = -1;
     private int _measureDragIndex = -1; // endpoint grabbed last frame, so its line can emphasize this frame
     private (int Index, Vector2 P1, Vector2 P2)? _annotationDragStart; // pre-drag endpoints for the undo step
@@ -455,4 +464,5 @@ internal sealed partial class SetupOutputView
     private static float _lengthEdit;
     private static int _annotationToDelete = -1;
     private static readonly List<Vector4> _refineLines = [];
+    private static readonly List<Vector4> _refineSolveLines = [];
 }

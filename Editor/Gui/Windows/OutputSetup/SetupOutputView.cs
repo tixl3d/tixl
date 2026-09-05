@@ -777,7 +777,191 @@ internal sealed partial class SetupOutputView
                             viewMin, editable, handleFade * straighten);
         }
 
+        // The reference points on the plain projector canvas, where they can be walked onto the wall.
+        var pinMapping = focusCarrier?.OutputMappings.Find(m => m.OutputId == outputId);
+        if (_editMode == EditMode.Output && !rectifying && focusCarrier != null && pinMapping != null && pinMapping.Quad.Length >= 4
+            && SetupActions.CountPoints(focusCarrier) > 0)
+        {
+            DrawReferencePointPins(setup, dl, focusCarrier, pinMapping, outputId, canvasSize, editable, handleFade);
+        }
+
         DrawSliceEditor(setup, dl, focusCarrierId, viewMin, toContent);
+    }
+
+    /// <summary>
+    /// The focused surface's reference points as handles on the projector canvas. An idle point rides the pin
+    /// (it shows where the photo's feature currently lands); dragging it activates it — its target is where it
+    /// was dropped, in output pixels, and it never moves again on its own. The pin is re-solved from the
+    /// activated targets alone: exactly as free as they allow (one shifts, two turn and scale, three shear,
+    /// four keystone; beyond four the solve averages and the header reports the miss). Double-click resets a
+    /// point to idle. One undo step per drag or reset.
+    /// </summary>
+    private void DrawReferencePointPins(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping, Guid outputId,
+                                        Vector2 canvasSize, bool editable, float fade)
+    {
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+            return;
+
+        // The discs are always on the canvas — they are what says which feature a point marks; the toggle
+        // only decides whether they also go to the wall.
+        DrawCanvasPhotoDiscs(setup, dl, surface, mapping, surfaceToOutput, canvasSize, fade);
+
+        var green = SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface);
+        var idleStyle = CanvasPointHandle.Style.Default(UiColors.ForegroundFull.Fade(0.6f * fade), CanvasPointHandle.Shape.Circle, editable);
+        idleStyle.OutlineColor = UiColors.ForegroundFull.Fade(0.4f * fade);
+        idleStyle.Radius = 6;
+        var activeStyle = idleStyle;
+        activeStyle.Color = UiColors.ForegroundFull.Fade(fade);
+        activeStyle.OutlineColor = green.Fade(fade);
+        activeStyle.Radius = 7;
+
+        var ordinal = 0;
+        for (var i = 0; i < surface.Annotations.Count; i++)
+        {
+            var point = surface.Annotations[i];
+            if (!point.IsPoint)
+                continue;
+
+            ordinal++;
+            var isActivated = mapping.PointTargets.TryGetValue(point.Id, out var px);
+            if (!isActivated)
+                px = surfaceToOutput.TransformPoint(point.P1);
+
+            ImGui.PushID(i);
+            var phase = CanvasPointHandle.Draw(ref px, _projection, isActivated ? activeStyle : idleStyle);
+            var hovered = ImGui.IsItemHovered();
+            ImGui.PopID();
+
+            if (editable && hovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+                // Back to idle: the pin keeps its shape, the point just stops constraining it.
+                if (isActivated)
+                    SetupActions.RunUndoable("Reset reference point", setup, () => mapping.PointTargets.Remove(point.Id));
+
+                _boardGestureOldJson = null; // the press that became this double-click must not also commit a drag
+            }
+            else if (phase == CanvasPointHandle.DragPhase.Started)
+            {
+                _boardGestureOldJson = setup.ToJsonString();
+            }
+            else if (phase == CanvasPointHandle.DragPhase.Dragging && _boardGestureOldJson != null)
+            {
+                mapping.PointTargets[point.Id] = px;
+                SolvePinFromTargets(surface, mapping);
+            }
+            else if (phase == CanvasPointHandle.DragPhase.Completed)
+            {
+                CommitBoardGesture(setup, "Aim reference point");
+            }
+
+            if (hovered || phase != CanvasPointHandle.DragPhase.None)
+                OutputManager.EmphasizeAnnotation(surface.Id, i);
+
+            var screen = _projection.CanvasToScreen(px);
+            var markColor = isActivated ? green.Fade(0.9f * fade) : UiColors.ForegroundFull.Fade(0.5f * fade);
+            CanvasDraw.Crosshair(dl, screen, markColor, 9f, 1f);
+            DrawPointLabel(dl, screen, string.IsNullOrEmpty(point.Name) ? $"P{ordinal}" : point.Name, markColor);
+        }
+    }
+
+    /// <summary>
+    /// The photo discs as the projector shows them, but on the canvas and for every point — including those
+    /// outside the projector's frame, which is exactly where an idle point tends to be: the disc says which
+    /// feature it marks while it is dragged into the frame. The photo is warped through the pin once, then
+    /// each disc is a round cut-out of that.
+    /// </summary>
+    private void DrawCanvasPhotoDiscs(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping,
+                                      in Homography surfaceToOutput, Vector2 canvasSize, float fade)
+    {
+        if (!TryGetTracedFragment(setup, surface, out _, out var photo, out var uvMin, out var uvMax))
+            return;
+
+        Bounds(mapping.Quad, out var bboxMin, out var bboxMax);
+        var bboxSize = Vector2.Max(bboxMax - bboxMin, new Vector2(1f));
+        var scale = MathF.Min(1f, 2048f / MathF.Max(bboxSize.X, bboxSize.Y));
+        for (var c = 0; c < 4; c++)
+            _canvasDiscQuad[c] = (mapping.Quad[c] - bboxMin) * scale;
+
+        var size = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(bboxSize.X * scale)), Math.Max(1, (int)(bboxSize.Y * scale)));
+        var warped = OutputManager.RenderWarpedTexture(photo, _canvasDiscQuad, size, _canvasDiscKey, new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y));
+        var srv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
+        if (srv is not { IsDisposed: false })
+            return;
+
+        var radius = canvasSize.Y * UserSettings.Config.OutputSetupPhotoDiscRadius;
+        var tint = UiColors.ForegroundFull.Fade(fade);
+        foreach (var point in surface.Annotations)
+        {
+            if (!point.IsPoint)
+                continue;
+
+            var centre = surfaceToOutput.TransformPoint(point.P1);
+            var min = centre - new Vector2(radius);
+            var max = centre + new Vector2(radius);
+            var uv0 = (min - bboxMin) / bboxSize;
+            var uv1 = (max - bboxMin) / bboxSize;
+            var screenMin = _projection.CanvasToScreen(min);
+            var screenMax = _projection.CanvasToScreen(max);
+            dl.AddImageRounded(srv.NativePointer, screenMin, screenMax, uv0, uv1, tint, (screenMax.X - screenMin.X) * 0.5f, ImDrawFlags.RoundCornersAll);
+            dl.AddCircle((screenMin + screenMax) * 0.5f, (screenMax.X - screenMin.X) * 0.5f, UiColors.BackgroundFull.Fade(0.5f * fade), 0, 1f);
+        }
+    }
+
+    /// <summary>
+    /// Re-solves the pin so every activated point projects to its target. Up to three targets the solve is
+    /// incremental — the transform taking the current projections to the targets, applied to the pin; from
+    /// four on it is the (least-squares) homography from surface metres straight to the targets.
+    /// </summary>
+    private void SolvePinFromTargets(Surface surface, Surface.OutputMapping mapping)
+    {
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+            return;
+
+        _pinFrom.Clear();
+        _pinTargets.Clear();
+        _pinSurfacePositions.Clear();
+        foreach (var point in surface.Annotations)
+        {
+            if (!point.IsPoint || !mapping.PointTargets.TryGetValue(point.Id, out var target))
+                continue;
+
+            _pinFrom.Add(surfaceToOutput.TransformPoint(point.P1));
+            _pinTargets.Add(target);
+            _pinSurfacePositions.Add(point.P1);
+        }
+
+        _pinResidualPx = 0;
+        if (_pinTargets.Count == 0)
+            return;
+
+        Span<Vector2> quad = stackalloc Vector2[4];
+        if (_pinTargets.Count >= 4)
+        {
+            if (!Homography.TryComputeLeastSquares(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_pinSurfacePositions),
+                                                   System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_pinTargets), out var surfaceToTargets))
+                return;
+
+            var rect = SurfaceGeometry.LocalRect(surface);
+            for (var c = 0; c < 4; c++)
+            {
+                quad[c] = surfaceToTargets.TransformPoint(rect[c]);
+                if (!float.IsFinite(quad[c].X) || !float.IsFinite(quad[c].Y))
+                    return;
+            }
+
+            for (var i = 0; i < _pinTargets.Count; i++)
+                _pinResidualPx = MathF.Max(_pinResidualPx, (surfaceToTargets.TransformPoint(_pinSurfacePositions[i]) - _pinTargets[i]).Length());
+        }
+        else
+        {
+            mapping.Quad.AsSpan(0, 4).CopyTo(quad);
+            if (!PointPinSolver.TrySolve(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_pinFrom),
+                                         System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_pinTargets), quad, out _))
+                return;
+        }
+
+        for (var c = 0; c < 4; c++)
+            mapping.Quad[c] = quad[c];
     }
 
     /// <summary>
@@ -1207,6 +1391,48 @@ internal sealed partial class SetupOutputView
         if (canIsolate && ImGui.IsItemHovered())
             ImGui.SetTooltip("Lock the canvas to the selected frame.\nOthers stay visible and snap, but change selection in the sidebar.");
 
+        // Calibrating against the photo: the straightened photo is projected in place of the content, and the
+        // reference points become handles on the projector canvas — drag one until its crosshair sits on the
+        // real feature; the pin re-solves so every placed point stays exactly where it was aimed.
+        var photoCarrier = straightCarrier is { Reference: not null } ? straightCarrier : null;
+        if (photoCarrier == null)
+            _projectPhoto = false;
+
+        if (_editMode is EditMode.Output or EditMode.Straight && photoCarrier != null)
+        {
+            ImGui.SameLine();
+            if (CustomComponents.StateButton("Project photo", _projectPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
+                _projectPhoto = !_projectPhoto;
+
+            if (ImGui.IsItemHovered())
+                CustomComponents.TooltipForLastItem("Project the photo", "Projects a disc of the straightened photo around each reference point, with a crosshair. Drag a point on the canvas until the photo's feature lands on the real one; that activates it (green) and the pin is solved through every activated point. Double-click a point to reset it.");
+
+            // The disc size, as a share of the canvas height — small enough to isolate one feature, large enough
+            // to recognise it.
+            ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+            var radiusPercent = UserSettings.Config.OutputSetupPhotoDiscRadius * 100f;
+            ImGui.PushID("photoDiscRadius");
+            var radiusState = SingleValueEdit.Draw(ref radiusPercent, new Vector2(52 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight()),
+                                                   1f, 50f, clampMin: true, clampMax: true, scale: 0.2f, format: "{0:0}%", defaultValue: 5f);
+            ImGui.PopID();
+            if ((radiusState & InputEditStateFlags.Modified) != 0)
+                UserSettings.Config.OutputSetupPhotoDiscRadius = radiusPercent / 100f;
+
+            if (ImGui.IsItemHovered())
+                CustomComponents.TooltipForLastItem("Disc radius", "Radius of the photo disc around each reference point, in percent of the canvas height. Drag, or double-click to type.");
+
+            if (_projectPhoto && _pinResidualPx > 0.5f)
+            {
+                ImGui.SameLine();
+                CustomComponents.StylizedText($"points miss by up to {_pinResidualPx:0.0} px", Fonts.FontSmall, UiColors.TextMuted);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("More than four points over-determine a corner pin; the solve averages them.\nA large miss means a point is misplaced, or the wall isn't flat.");
+            }
+        }
+
+        if (_projectPhoto && photoCarrier != null && TryGetTracedFragment(setup, photoCarrier, out var photoSrv, out var photoUvMin, out var photoUvMax))
+            OutputManager.SetCalibrationPhoto(photoCarrier.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius);
+
         // Measuring only makes sense against the straightened surface — on the projector canvas the
         // lengths would be perspective-foreshortened and mean nothing.
         // The line tool serves both Straight flows: on the photo it refines the trace, on the projector the pin.
@@ -1218,18 +1444,38 @@ internal sealed partial class SetupOutputView
             if (CustomComponents.StateButton("+ Line", _measureArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
                 _measureArmed = !_measureArmed;
 
-            // Nothing else on the canvas says a drag is now expected, and the tool disarms after one
-            // line — so say what to do with it while it is armed.
+            if (_measureArmed)
+                _pointArmed = false;
+
+            // Reference points are placed on the photo — a physical feature the projector will be aimed at.
+            if (tracedForLines != null)
+            {
+                ImGui.SameLine();
+                if (CustomComponents.StateButton("+ Point", _pointArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+                {
+                    _pointArmed = !_pointArmed;
+                    if (_pointArmed)
+                        _measureArmed = false;
+                }
+            }
+
+            // Nothing else on the canvas says a click or drag is now expected, and the tools disarm after
+            // one use — so say what to do with them while armed.
             if (_measureArmed)
             {
                 ImGui.SameLine();
                 CustomComponents.StylizedText("drag along something straight in reality", Fonts.FontSmall, UiColors.StatusAnimated);
             }
+            else if (_pointArmed)
+            {
+                ImGui.SameLine();
+                CustomComponents.StylizedText("click a feature you can find on the real wall", Fonts.FontSmall, UiColors.StatusAnimated);
+            }
 
             // Straighten first (it fixes the keystone but cannot know the aspect), lengths second. Both
             // stay visible and disabled rather than appearing once they happen to qualify — a button that
             // isn't there yet can't explain what it wants.
-            var canStraighten = lineSubject.Annotations.Count >= MinLinesToStraighten;
+            var canStraighten = SetupActions.CountLines(lineSubject) >= MinLinesToStraighten;
             ImGui.SameLine();
             ImGui.BeginDisabled(!canStraighten);
             if (ImGui.SmallButton("Straighten") && canStraighten)
@@ -1257,6 +1503,7 @@ internal sealed partial class SetupOutputView
         else
         {
             _measureArmed = false;
+            _pointArmed = false;
         }
 
         // "+ <surface>" maps a surface onto this output — an Output-canvas action; the Board has no output to map to.
@@ -2465,6 +2712,15 @@ internal sealed partial class SetupOutputView
     private readonly Vector2[] _boardFlyQuad = new Vector2[4];
     private readonly EntityItem _entityItem;
     private EditMode _editMode = EditMode.Board; // the Board is the home view, so a fresh window opens on it
+
+    // Calibrating a pin by its reference points: the projected photo discs, and the solve's scratch lists.
+    private bool _projectPhoto;
+    private float _pinResidualPx;
+    private readonly List<Vector2> _pinTargets = [];
+    private readonly List<Vector2> _pinFrom = [];
+    private readonly List<Vector2> _pinSurfacePositions = [];
+    private readonly Vector2[] _canvasDiscQuad = new Vector2[4];
+    private static readonly Guid _canvasDiscKey = new("6a1f0c2e-7b3d-4e8f-9a0b-1c2d3e4f5a6b");
     private bool _isolate;
     private Guid _shownSurfaceId; // frame-scoped: what the caller passed to this Draw, never read across frames
     private (Guid, EditMode, Vector2) _fitKey;

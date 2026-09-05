@@ -182,6 +182,7 @@ internal static class OutputManager
         _drawItems.Clear();
         _overlayLines.Clear();
         _overlayQuads.Clear();
+        _pendingFragments.Clear();
         // Patches first: they are the canvas layer (pixels), and the surfaces (the room) composite over them.
         // Painter's order among patches is list order.
         foreach (var patch in output.Patches)
@@ -197,7 +198,7 @@ internal static class OutputManager
             if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(patch.Quad, output.CanvasResolution, out var patchHomography))
                 continue;
 
-            _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend.GetColor(_context), Vector4.Zero, Vector4.Zero, Vector4.Zero));
+            _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend.GetColor(_context), Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
         }
 
         foreach (var surface in setup.Surfaces)
@@ -222,6 +223,11 @@ internal static class OutputManager
             var hasContent = srv is { IsDisposed: false };
             var color = hasContent ? sink!.GetColor(_context) : Vector4.One;
             var sourceRect = hasContent ? resolvedRect : _fullSourceRect;
+
+            // While a surface is being calibrated against its photo, a disc of the photo is projected around each
+            // reference point: the wall's own picture, right where the feature is, so it can be walked onto it.
+            var projectsPhoto = _photoSurfaceId == surface.Id && ImGuiNET.ImGui.GetFrameCount() - _photoFrame <= 1
+                                && _photoSrv is { IsDisposed: false };
 
             // Metres spanned by the surface, and the origin (its anchor) in source UV — the anchor is signed
             // and Y-up while V runs downward from the top.
@@ -250,23 +256,30 @@ internal static class OutputManager
                     continue;
 
                 if (hasContent)
-                    _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero, Vector4.Zero));
+                    _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
+
+                // Deferred: a child region's content is composited after its parent, and would cover them.
+                if (projectsPhoto && ReferenceEquals(carrier, surface))
+                    _pendingFragments.Add(new PendingFragment(surface, mapping, homography));
 
                 // Calibration raster after the content, so it composites *over* it and stays readable while
                 // aligning. Emitted with or without content — with none, it's lines on the cleared black.
                 if (surface.ShowGrid)
                 {
                     _drawItems.Add(new DrawItem(null, homography, _fullSourceRect, Vector4.One,
-                                                new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin));
-
-                    // Annotation lines have to reach the wall to be usable at all: you align one by nudging
-                    // it until its *projection* lies along a real feature. They ride the same switch as the
-                    // raster — same calibration session, and neither belongs in a show.
-                    if (ReferenceEquals(carrier, surface))
-                        CollectAnnotationOverlay(surface, mapping);
+                                                new Vector4(metres.X, metres.Y, _gridLineThickness, 1), _gridColor, gridOrigin, Vector4.Zero));
                 }
+
+                // Annotations have to reach the wall to be usable at all: you align a line by nudging it until
+                // its *projection* lies along a real feature, and walk a point onto the feature it marks. They
+                // ride the raster's switch or the projected photo — both calibration sessions, neither a show.
+                if ((surface.ShowGrid || projectsPhoto) && ReferenceEquals(carrier, surface))
+                    CollectAnnotationOverlay(surface, mapping);
             }
         }
+
+        foreach (var pending in _pendingFragments)
+            CollectPhotoFragments(pending.Surface, pending.Mapping, pending.Homography, output.CanvasResolution);
 
         if (_drawItems.Count == 0)
             return null;
@@ -307,6 +320,7 @@ internal static class OutputManager
             _shaderParams.GridParams = item.GridParams;
             _shaderParams.GridColor = item.GridColor;
             _shaderParams.GridOrigin = item.GridOrigin;
+            _shaderParams.Mask = item.Mask;
             SetSourceRect(item.SourceRect);
             ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
             deviceContext.VertexShader.SetConstantBuffer(0, _paramBuffer);
@@ -332,6 +346,42 @@ internal static class OutputManager
         _aimSurfaceId = surfaceId;
         _aimInSurface = inSurface;
         _aimFrame = ImGuiNET.ImGui.GetFrameCount();
+    }
+
+    /// <summary>
+    /// One disc of the straightened photo per reference point, warped through the pin like content would be.
+    /// Centred on the point's *projection* — where the photo's feature lands — so with an over-determined pin
+    /// the gap to the crosshair at its target is the miss, made visible.
+    /// </summary>
+    private static void CollectPhotoFragments(T3.Core.Output.Surface surface, T3.Core.Output.Surface.OutputMapping mapping,
+                                              Matrix4x4 homography, Int2 canvasResolution)
+    {
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+            return;
+
+        var radius = canvasResolution.Height * _photoRadiusOfHeight;
+        foreach (var annotation in surface.Annotations)
+        {
+            if (!annotation.IsPoint)
+                continue;
+
+            var centre = surfaceToOutput.TransformPoint(annotation.P1);
+            _drawItems.Add(new DrawItem(_photoSrv, homography, _photoUv, Vector4.One, Vector4.Zero, Vector4.Zero, Vector4.Zero,
+                                        new Vector4(centre.X, centre.Y, radius, 1)));
+        }
+    }
+
+    /// <summary>
+    /// Projects discs of a surface's straightened photo around its reference points, for calibrating the pin
+    /// against the real wall. Re-stated every frame the calibration view is showing; expires like the aim point.
+    /// </summary>
+    public static void SetCalibrationPhoto(Guid surfaceId, ShaderResourceView srv, Vector2 uvMin, Vector2 uvMax, float radiusOfHeight)
+    {
+        _photoRadiusOfHeight = radiusOfHeight;
+        _photoSurfaceId = surfaceId;
+        _photoSrv = srv;
+        _photoUv = new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y);
+        _photoFrame = ImGuiNET.ImGui.GetFrameCount();
     }
 
     /// <summary>
@@ -379,6 +429,28 @@ internal static class OutputManager
         for (var i = 0; i < surface.Annotations.Count; i++)
         {
             var annotation = surface.Annotations[i];
+            var isEmphasizedPoint = i == emphasizedIndex;
+
+            // A reference point is a crosshair to walk onto its feature; the one being dragged pulses. An
+            // activated point's crosshair stands at its target — where it was aimed, which never moves — while
+            // an idle one just rides the pin, dimmer.
+            if (annotation.IsPoint)
+            {
+                var isActivated = mapping.PointTargets.TryGetValue(annotation.Id, out var p);
+                if (!isActivated)
+                    p = surfaceToOutput.TransformPoint(annotation.P1);
+
+                var arm = (isEmphasizedPoint ? _pointCrosshairSize * 1.5f : _pointCrosshairSize) * 0.5f;
+                var baseColor = isActivated ? _pointColor : _pointColor * new Vector4(0.6f, 0.6f, 0.6f, 1);
+                var pointColor = isEmphasizedPoint ? Vector4.Lerp(baseColor, white, blink) : baseColor;
+                var pointWidth = new Vector4(isEmphasizedPoint ? _aimLineWidth * 2f : _aimLineWidth, 0, 0, 0);
+                _overlayLines.Add(new OverlayLine(new Vector4(p.X - arm, p.Y, p.X + arm, p.Y), pointColor, pointWidth));
+                _overlayLines.Add(new OverlayLine(new Vector4(p.X, p.Y - arm, p.X, p.Y + arm), pointColor, pointWidth));
+                var ring = _annotationMarkerSize * 1.4f;
+                _overlayQuads.Add(new OverlayQuad(new Vector4(p.X, p.Y, ring, ring), Vector4.Lerp(pointColor, white, blink), new Vector4(0, ring * 0.5f, 0, 0)));
+                continue;
+            }
+
             LineRectifier.IsHorizontal(annotation.P1, annotation.P2, out var deviation);
             var color = AlignmentColor(deviation).Rgba;
             var isEmphasized = i == emphasizedIndex;
@@ -498,7 +570,9 @@ internal static class OutputManager
     /// </summary>
     /// <param name="targetKey">Which scratch target to render into; callers that need several warps alive in one
     /// frame (each surface card's photo fragment) pass their own key, the default shares one.</param>
-    public static Texture2D? RenderWarpedTexture(Texture2D? source, Vector2[] destQuad, Int2 targetSize, Guid targetKey = default)
+    /// <param name="sourceRect">The part of <paramref name="source"/> to warp, as UV min/max; the whole texture by default.</param>
+    public static Texture2D? RenderWarpedTexture(Texture2D? source, Vector2[] destQuad, Int2 targetSize, Guid targetKey = default,
+                                                 Vector4? sourceRect = null)
     {
         if (source is not { IsDisposed: false })
             return null;
@@ -532,7 +606,8 @@ internal static class OutputManager
         _shaderParams.Homography = homography;
         _shaderParams.Color = Vector4.One;
         _shaderParams.GridParams = Vector4.Zero; // shared struct — clear any grid mode a prior composite left set
-        SetSourceRect(_fullSourceRect);
+        _shaderParams.Mask = Vector4.Zero; // ...and any fragment disc, or the warp itself comes out masked
+        SetSourceRect(sourceRect ?? _fullSourceRect);
         ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
         deviceContext.VertexShader.SetConstantBuffer(0, _paramBuffer);
         deviceContext.PixelShader.SetConstantBuffer(0, _paramBuffer);
@@ -750,7 +825,7 @@ internal static class OutputManager
 
     // GridParams.w > 0.5 selects the analytic calibration grid (Srv unused); otherwise Srv is warped as content.
     private readonly record struct DrawItem(ShaderResourceView? Srv, Matrix4x4 Homography, Vector4 SourceRect, Vector4 Color,
-                                            Vector4 GridParams, Vector4 GridColor, Vector4 GridOrigin);
+                                            Vector4 GridParams, Vector4 GridColor, Vector4 GridOrigin, Vector4 Mask);
 
     private sealed class Target : IDisposable
     {
@@ -775,6 +850,7 @@ internal static class OutputManager
         public Vector4 GridParams; // xy = metres spanned, z = line thickness px, w = grid mode
         public Vector4 GridColor;
         public Vector4 GridOrigin; // xy = origin UV, z = minor lines per metre, w = minor opacity
+        public Vector4 Mask; // xy = centre px, z = radius px, w = enabled
     }
 
     // Overlay instances. Every member is a float4 so the C# layout and the HLSL structured-buffer packing
@@ -797,6 +873,8 @@ internal static class OutputManager
     private const float _annotationLineWidth = 2.5f;
     private const float _annotationMarkerSize = 11f;
     private const float _aimCrosshairSize = 60f;
+    private const float _pointCrosshairSize = 40f;
+    private static readonly Vector4 _pointColor = new(0.45f, 0.95f, 0.55f, 1); // the surface green, bright enough for a wall
     private const float _aimLineWidth = 1.5f;
     private const float _overlayBlinkRate = 8f; // matches the editor-canvas handles so the two stay in phase
 
@@ -821,6 +899,15 @@ internal static class OutputManager
     private static Resource<T3.Core.DataTypes.PixelShader>? _pixelShaderResource;
     private static ShaderParams _shaderParams;
     private static Buffer? _paramBuffer;
+
+    private static Guid _photoSurfaceId;
+    private static ShaderResourceView? _photoSrv;
+    private static Vector4 _photoUv;
+    private static float _photoRadiusOfHeight = 0.05f;
+    private static readonly List<PendingFragment> _pendingFragments = [];
+
+    private readonly record struct PendingFragment(T3.Core.Output.Surface Surface, T3.Core.Output.Surface.OutputMapping Mapping, Matrix4x4 Homography);
+    private static int _photoFrame = -10;
 
     private static Guid _aimSurfaceId;
     private static Vector2 _aimInSurface;

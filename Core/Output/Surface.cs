@@ -43,23 +43,58 @@ public sealed class Surface
         /// <summary>Corners in OutputCanvas pixels: top-left, top-right, bottom-right, bottom-left of the content canvas.</summary>
         public Vector2[] Quad = new Vector2[4];
 
+        /// <summary>
+        /// Where the surface's reference points were aimed on this output, in canvas pixels, by point id. A
+        /// point with a target is "activated": the pin is solved to project it exactly there, and the target
+        /// never moves unless the user drags it again. Points without one are ignored by the solve — they
+        /// are usually outside the projector's frame.
+        /// </summary>
+        public Dictionary<Guid, Vector2> PointTargets = new();
+
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
             writer.WriteObject("OutputId", OutputId);
             writer.WriteString("Mode", Mode);
             writer.WriteQuad("Quad", Quad);
+            if (PointTargets.Count > 0)
+            {
+                writer.WritePropertyName("PointTargets");
+                writer.WriteStartArray();
+                foreach (var (pointId, pixel) in PointTargets)
+                {
+                    writer.WriteStartObject();
+                    writer.WriteObject("Point", pointId);
+                    writer.WriteVector2("Pixel", pixel);
+                    writer.WriteEndObject();
+                }
+
+                writer.WriteEndArray();
+            }
+
             writer.WriteEndObject();
         }
 
         public static OutputMapping ReadFromJson(JToken token)
         {
-            return new OutputMapping
-                       {
-                           OutputId = OutputJson.ReadGuid(token["OutputId"]),
-                           Mode = token.ReadValueSafe("Mode", Modes.CornerPin) ?? Modes.CornerPin,
-                           Quad = OutputJson.ReadQuad(token["Quad"]),
-                       };
+            var mapping = new OutputMapping
+                              {
+                                  OutputId = OutputJson.ReadGuid(token["OutputId"]),
+                                  Mode = token.ReadValueSafe("Mode", Modes.CornerPin) ?? Modes.CornerPin,
+                                  Quad = OutputJson.ReadQuad(token["Quad"]),
+                              };
+
+            if (token["PointTargets"] is JArray targets)
+            {
+                foreach (var target in targets)
+                {
+                    var pointId = OutputJson.ReadGuid(target["Point"]);
+                    if (pointId != Guid.Empty)
+                        mapping.PointTargets[pointId] = OutputJson.ReadVector2(target["Pixel"]);
+                }
+            }
+
+            return mapping;
         }
     }
 

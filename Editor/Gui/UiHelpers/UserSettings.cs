@@ -132,6 +132,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         /// <summary>Opacity of a surface's content previewed over its photo — on the traced quad and on its Board card.</summary>
         public float OutputSetupContentPreview = 0.65f;
+        public float OutputSetupPhotoDiscRadius = 0.05f; // calibration photo disc around a reference point, share of the canvas height
 
         // Mag Graph
         public bool DisconnectOnUnsnap = true;

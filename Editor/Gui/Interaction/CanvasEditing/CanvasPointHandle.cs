@@ -81,13 +81,17 @@ internal static class CanvasPointHandle
 
             if (ImGui.IsItemActivated())
             {
-                // Grab offset keeps the point from jumping to the cursor on the first drag frame.
-                _grabOffset = ImGui.GetMousePos() - screen;
+                // The drag accumulates mouse deltas from where the point was, so it never jumps to the cursor
+                // and a precision modifier can scale the motion mid-drag.
+                _dragScreen = screen;
                 phase = DragPhase.Started;
             }
             else if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left, 0f))
             {
-                posInCanvas = projection.ScreenToCanvas(ImGui.GetMousePos() - _grabOffset);
+                // Shift: fine positioning — the point moves a tenth of the mouse.
+                var io = ImGui.GetIO();
+                _dragScreen += io.MouseDelta * (io.KeyShift ? PrecisionDragFactor : 1f);
+                posInCanvas = projection.ScreenToCanvas(_dragScreen);
                 screen = projection.CanvasToScreen(posInCanvas);
                 phase = DragPhase.Dragging;
             }
@@ -120,5 +124,8 @@ internal static class CanvasPointHandle
     }
 
     // Only one handle drags at a time, so a single shared grab offset is sufficient.
-    private static Vector2 _grabOffset;
+    /// <summary>Held Shift slows a handle drag to this fraction of the mouse's motion.</summary>
+    public const float PrecisionDragFactor = 0.1f;
+
+    private static Vector2 _dragScreen;
 }

@@ -50,6 +50,71 @@ public struct Homography
             b[i * 2 + 1] = v;
         }
 
+        if (!TrySolve8(a, b, out var hn))
+            return false;
+
+        result = Finish(hn, ns.Forward, nd.Inverse, source);
+        return true;
+    }
+
+    /// <summary>
+    /// The least-squares homography through any number (≥4) of correspondences: the same inhomogeneous
+    /// 8-parameter system as the exact solve, but through its normal equations, so extra pairs are averaged
+    /// rather than refused. Exact for four. Returns false for fewer, or for a degenerate configuration.
+    /// </summary>
+    public static bool TryComputeLeastSquares(ReadOnlySpan<Vector2> source, ReadOnlySpan<Vector2> destination, out Homography result)
+    {
+        result = Identity;
+        if (source.Length < 4 || source.Length != destination.Length)
+            return false;
+
+        var ns = NormalizeTransform(source);
+        var nd = NormalizeTransform(destination);
+
+        // Normal equations AᵀA h = Aᵀb, accumulated row by row so no N×8 matrix is ever built.
+        Span<double> ata = stackalloc double[8 * 8];
+        Span<double> atb = stackalloc double[8];
+        Span<double> row = stackalloc double[8];
+        for (var i = 0; i < source.Length; i++)
+        {
+            var sp = ns.Forward.TransformPoint(source[i]);
+            var dp = nd.Forward.TransformPoint(destination[i]);
+            double x = sp.X, y = sp.Y, u = dp.X, v = dp.Y;
+
+            row.Clear();
+            row[0] = x; row[1] = y; row[2] = 1; row[6] = -u * x; row[7] = -u * y;
+            Accumulate(ata, atb, row, u);
+
+            row.Clear();
+            row[3] = x; row[4] = y; row[5] = 1; row[6] = -v * x; row[7] = -v * y;
+            Accumulate(ata, atb, row, v);
+        }
+
+        if (!TrySolve8(ata, atb, out var hn))
+            return false;
+
+        result = Finish(hn, ns.Forward, nd.Inverse, source);
+        return true;
+    }
+
+    private static void Accumulate(Span<double> ata, Span<double> atb, ReadOnlySpan<double> row, double rhs)
+    {
+        for (var r = 0; r < 8; r++)
+        {
+            if (row[r] == 0)
+                continue;
+
+            for (var c = 0; c < 8; c++)
+                ata[r * 8 + c] += row[r] * row[c];
+
+            atb[r] += row[r] * rhs;
+        }
+    }
+
+    /// <summary>Gauss-Jordan with partial pivoting on an 8×8 system; the solution is the normalized map.</summary>
+    private static bool TrySolve8(Span<double> a, Span<double> b, out Homography hn)
+    {
+        hn = Identity;
         for (var c = 0; c < 8; c++)
         {
             var pivot = c;
@@ -82,19 +147,23 @@ public struct Homography
             }
         }
 
-        var hn = new Homography
-                     {
-                         M11 = b[0] / a[0 * 8 + 0], M12 = b[1] / a[1 * 8 + 1], M13 = b[2] / a[2 * 8 + 2],
-                         M21 = b[3] / a[3 * 8 + 3], M22 = b[4] / a[4 * 8 + 4], M23 = b[5] / a[5 * 8 + 5],
-                         M31 = b[6] / a[6 * 8 + 6], M32 = b[7] / a[7 * 8 + 7], M33 = 1,
-                     };
+        hn = new Homography
+                 {
+                     M11 = b[0] / a[0 * 8 + 0], M12 = b[1] / a[1 * 8 + 1], M13 = b[2] / a[2 * 8 + 2],
+                     M21 = b[3] / a[3 * 8 + 3], M22 = b[4] / a[4 * 8 + 4], M23 = b[5] / a[5 * 8 + 5],
+                     M31 = b[6] / a[6 * 8 + 6], M32 = b[7] / a[7 * 8 + 7], M33 = 1,
+                 };
+        return true;
+    }
 
-        var h = Multiply(nd.Inverse, Multiply(hn, ns.Forward));
+    /// <summary>De-normalizes, fixes the w sign so the sources stay on the positive side, and scales M33 to 1.</summary>
+    private static Homography Finish(in Homography normalized, in Homography sourceForward, in Homography destinationInverse, ReadOnlySpan<Vector2> source)
+    {
+        var h = Multiply(destinationInverse, Multiply(normalized, sourceForward));
 
-        // w-sign fix: keep all four source corners on the positive-w side of the map
         double wSum = 0;
-        for (var i = 0; i < 4; i++)
-            wSum += h.M31 * source[i].X + h.M32 * source[i].Y + h.M33;
+        foreach (var p in source)
+            wSum += h.M31 * p.X + h.M32 * p.Y + h.M33;
 
         if (wSum < 0)
             h = h.Scaled(-1);
@@ -102,8 +171,7 @@ public struct Homography
         if (Math.Abs(h.M33) > 1e-9)
             h = h.Scaled(1.0 / Math.Abs(h.M33));
 
-        result = h;
-        return true;
+        return h;
     }
 
     public static Homography Multiply(in Homography a, in Homography b)
