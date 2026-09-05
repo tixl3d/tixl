@@ -428,6 +428,45 @@ internal static class ProgramWindows
         _deviceContext.CopyResource(Main.BackBufferTexture, _uiCopyTexture);
     }
 
+    /// <summary>
+    /// Captures the main window's next rendered UI frame — the same back-buffer copy the second-display
+    /// mirror makes — for the debug bridge. Served once by <see cref="ServePendingUiCapture"/>, after the
+    /// UI has rendered and before Present. The receiver owns the texture it gets and disposes it when done.
+    /// </summary>
+    public static void RequestUiCapture(Action<T3.Core.DataTypes.Texture2D> onCaptured)
+    {
+        _pendingUiCapture = onCaptured;
+    }
+
+    internal static void ServePendingUiCapture()
+    {
+        var callback = _pendingUiCapture;
+        if (callback == null)
+            return;
+
+        _pendingUiCapture = null;
+
+        // A fresh copy per capture: the wrapper handed out disposes its native texture, so it must not be
+        // the mirror's shared one.
+        var mode = Main.SwapChain.Description.ModeDescription;
+        var copy = new Texture2D(_device, new Texture2DDescription
+                                              {
+                                                  Width = mode.Width,
+                                                  Height = mode.Height,
+                                                  MipLevels = 1,
+                                                  ArraySize = 1,
+                                                  Format = mode.Format,
+                                                  SampleDescription = new SampleDescription(1, 0),
+                                                  Usage = ResourceUsage.Default,
+                                                  BindFlags = BindFlags.ShaderResource,
+                                                  CpuAccessFlags = CpuAccessFlags.None,
+                                                  OptionFlags = ResourceOptionFlags.None,
+                                              });
+        _deviceContext.CopyResource(Main.BackBufferTexture, copy);
+        callback(new T3.Core.DataTypes.Texture2D(copy));
+    }
+
     private static Texture2D _uiCopyTexture;
+    private static Action<T3.Core.DataTypes.Texture2D> _pendingUiCapture;
     public static ShaderResourceView UiCopyTextureSrv { get; private set; }
 }

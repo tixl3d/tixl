@@ -37,7 +37,11 @@ JSON lines over TCP on `127.0.0.1:<port>`. One request per line, one response pe
 ## Methods
 
 Read surface: `ping`, `getVersion`, `getStructureVersion`, `getMetrics`, `getContext`,
-`getLogTail` (`minLevel`, `maxCount`), `getGraphState`, `getOutput`, `screenshot` (`path`).
+`getLogTail` (`minLevel`, `maxCount`), `getGraphState`, `getOutput`, `screenshot` (`path`,
+optional `target`: `output` = the output window's texture, the default; `ui` = the **whole editor
+window as rendered** — windows, panels, canvases — copied from the back buffer on the next frame).
+Use `target: "ui"` to verify UI work; it needs no OS screen grab and doesn't care which window is
+in front (a fullscreen presentation viewer, for instance).
 
 Control surface: `openProject` (`name`), `newProject`, `select` (`childId`), `setInput`
 (`childId`, `inputName`, `value`), `addOp`, `connect`, `deleteOp`, `pin`, `pumpFrames`

@@ -226,6 +226,9 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 // "NewFrame called without Render".
                 try { ImGui.EndFrame(); } catch { /* best-effort cleanup */ }
             }
+
+            // The UI is in the back buffer now and not yet presented — the one moment a whole-window capture is exact.
+            ProgramWindows.ServePendingUiCapture();
         }
 
         T3Metrics.UiRenderingCompleted();
