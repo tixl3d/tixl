@@ -56,7 +56,22 @@ public abstract partial class SymbolPackage : IResourcePackage
             if (!Directory.Exists(dir))
                 return [];
             
-            return Directory.EnumerateFiles(dir, $"*{SymbolExtension}", SearchOption.AllDirectories);
+            return EnumerateSymbolFilesRecursively(new DirectoryInfo(dir));
+        }
+    }
+
+    private static IEnumerable<string> EnumerateSymbolFilesRecursively(DirectoryInfo directory)
+    {
+        foreach (var file in directory.EnumerateFiles($"*{SymbolExtension}"))
+            yield return file.FullName;
+
+        foreach (var subDirectory in directory.EnumerateDirectories())
+        {
+            if (subDirectory.Name.StartsWith('.'))
+                continue;
+
+            foreach (var file in EnumerateSymbolFilesRecursively(subDirectory))
+                yield return file;
         }
     }
 

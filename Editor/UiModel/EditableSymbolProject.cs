@@ -170,8 +170,22 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         if (!symbolsDirectory.Exists)
             return [];
 
-        return symbolsDirectory.EnumerateFiles($"*{fileExtension}", SearchOption.AllDirectories)
-                               .Select(x => x.FullName);
+        return EnumerateOperatorFiles(symbolsDirectory);
+
+        IEnumerable<string> EnumerateOperatorFiles(DirectoryInfo directory)
+        {
+            foreach (var file in directory.EnumerateFiles($"*{fileExtension}"))
+                yield return file.FullName;
+
+            foreach (var subDirectory in directory.EnumerateDirectories())
+            {
+                if (subDirectory.Name.StartsWith('.'))
+                    continue;
+
+                foreach (var nestedFile in EnumerateOperatorFiles(subDirectory))
+                    yield return nestedFile;
+            }
+        }
     }
 
     protected override void InitializeAssets()
