@@ -443,6 +443,52 @@ with an explanatory comment) — the row-callback API design made compliance imp
   point (`SetupActions.AddReferenceImageFromFile`, importing OS files into `Assets/images/reference` via
   `FileImport` unless they already are assets). Styling of Board cards and outliner items deliberately
   deferred (user, 2026-09-05) in favour of riskier work.
+- **2026-09-05 (Phase C.2 — spaces fold out of the Board, v1):** the second `ScalableCanvas` is gone;
+  every space (an output's canvas with its Straight/Content morph, calibration, a source's texture) draws
+  through `SpaceProjection` — space px, origin at the entity's Board card top-left, scaled by the card's
+  px/m — on the Board's canvas. `EnterSpace` drives `_spaceBlend` (0 Board … 1 space, same easing as the
+  morph): the camera eases onto the space's fit (`FitToArea`/`FitScopeWithMargin` now fit the Board camera
+  to the view-px area in metres) and back to the remembered Board view; `DrawBoardLayer` draws the cards
+  the space doesn't own faded by the blend (inert below full opacity) and skips the ones it does
+  (`IsDrawnBySpace`: the space's entity, and for an output the surfaces mapped to it); mapped surfaces'
+  quads lerp from their Board card rect (`TryGetBoardQuadInView`) to R(quad). Handles editable only at
+  blend 1; one `ResolvePicking` per frame at the end of each entry point. Known v1 seams: regions appear
+  only once settled, the reference view is still its own canvas (C.4), the no-basis Content preview draws
+  content px over the output card, `DampScaling` stops easing above scale 1000 (only our own lerps ease
+  there). Not yet user-tested.
+- **2026-09-05 (tracing on the Board — C.4 part):** `ReferenceImageView` deleted. `SetupOutputView.Reference.cs`
+  is the image's space (`DrawReferenceCanvas`, entered by double-click, `OpenedReferenceImageId` kept while the
+  selection stays on the image or a surface traced on it — `OutputSetupModeView.IsInReferenceSpace`): the
+  photo at px through `SpaceProjection`, traced quads as `CornerPinHandles` in image px (one setup-snapshot
+  undo step per drag), Photo/Straight morph ported (`TryRenderStraightened`). The Board draws the traced
+  quads on the image card read-only (`DrawBoardTraces`, surface colour, labels pick the surface). Tracing
+  starts from the image card's menu: `SetupActions.TraceNewSurface` / `TraceSurfaceOnImage`. Texture cache
+  moved to `ReferenceTextureEntry` (mips generated once per load). Also: the header's "+ <surface>" mapping
+  buttons draw only with an output and off the Board (they crashed on the standalone Board). Not yet
+  user-tested.
+- **2026-09-05 (fold camera, measured):** the Board ↔ space transition eases once, not twice: the camera
+  interpolates from the view the user had to the *settled* rect (`GetSettledBoardRect`: output card /
+  surface card + surround) with a geometric zoom and a linear centre (`BlendScopes`), and Straight anchors
+  the rectified rect's **centre** on a straight screen-space line from the output card to the surface card,
+  solving the projection origin through that frame's camera. Measured over the new bridge method
+  `outputSetup` (select entity + tab, no mouse) with the `[fold] metrics` probe: path-over-chord went
+  3.2 → 1.00, chord deviation 51 px → 0, the centre lands on the window centre. Also: Board-side slice
+  editing (the source editor pointed at the content card), the surface's slice previewed on its traced quad
+  (`AddImageQuad`, faded), background pick priority for cards (`CanvasItemPicker.AddTarget(isBackground)`)
+  so labels on cards win, and a label pick cancels the card's group-drag grab. Open: UI screenshots via
+  `screenshot target:"ui"` come back black from a `start`-launched Release editor (window not composited?).
+- **2026-09-05 (Straight = in place on the photo):** user clarified the intent: Straight for a surface traced
+  on a reference image rectifies *that photo in place* (the photo's corners push outward, the traced corners
+  ease into an upright rect with the surface's aspect, labels fade, the camera settles on the rect + surround);
+  the surface's own Board card is not involved. The slide-onto-the-surface-card and the photo ghost in the
+  output space were removed; the output-space Straight stays inside the output card. Routing: `Draw()` /
+  `DrawBoardStandalone` enter the ReferenceImage space for a traced shown surface on the Straight tab
+  (`TracedImageOf`, `DrawReferenceSpaceForShown`); `EnterSpace` keeps a fading space's identity; the Straight
+  tab is enabled for traced surfaces even without an output. Photo ↔ Straight is eased on the morph timing
+  (`_referenceProgress`) and a subject change while straightened eases quad and target from the previous
+  surface's (`ResolveStraightSubject`, `_referenceSubjectProgress`). The projector-camera header is
+  Calibrate-only (it pushed the canvas down at fold start). Measured: still to verify over the bridge with
+  the user's editor (user runs it with `--debug-server 9042`; no auto-launch loops).
 
 ## Suggested order (revised for the flow-view pivot)
 

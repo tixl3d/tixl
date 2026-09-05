@@ -342,6 +342,25 @@ internal static class DebugServer
                 break;
             }
 
+            case "outputSetup":
+            {
+                // Drives the output-setup UI the way clicks would: select an entity by name, enter a mode.
+                if (!OutputWindow.TryGetPrimaryOutputWindow(out var setupWindow))
+                {
+                    context.SendError("NO_OUTPUT", "No visible output window");
+                    break;
+                }
+
+                if (!setupWindow.TryDriveOutputSetup(request["entity"]?.Value<string>(), request["mode"]?.Value<string>(), out var setupError))
+                {
+                    context.SendError("INVALID_PARAM", setupError);
+                    break;
+                }
+
+                context.SendOk(new JObject());
+                break;
+            }
+
             case "resetView":
             {
                 if (!OutputWindow.TryGetPrimaryOutputWindow(out var window))

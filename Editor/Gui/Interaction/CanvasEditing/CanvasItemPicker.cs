@@ -24,9 +24,11 @@ internal sealed class CanvasItemPicker<TKind> where TKind : struct
 {
     public readonly record struct Result(bool HasHit, TKind Kind, Guid Id, bool LeftClicked, bool MenuRequested);
 
-    public void AddTarget(TKind kind, Guid id, Vector2 min, Vector2 max)
+    /// <param name="isBackground">A large area target (a card) that only picks where no foreground target
+    /// (a label, a handle chip) is under the cursor — so a label on a card never cycles to the card.</param>
+    public void AddTarget(TKind kind, Guid id, Vector2 min, Vector2 max, bool isBackground = false)
     {
-        _targets.Add((kind, id, min, max));
+        _targets.Add((kind, id, min, max, isBackground));
     }
 
     /// <summary>Whether <paramref name="id"/> was the top of the stack under the cursor at the last resolve —
@@ -44,14 +46,22 @@ internal sealed class CanvasItemPicker<TKind> where TKind : struct
     public Result Resolve(Guid current)
     {
         _underMouse.Clear();
+        _backgroundUnderMouse.Clear();
         var mouse = ImGui.GetMousePos();
-        foreach (var (kind, id, min, max) in _targets)
+        foreach (var (kind, id, min, max, isBackground) in _targets)
         {
-            if (mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y)
+            if (mouse.X < min.X || mouse.X > max.X || mouse.Y < min.Y || mouse.Y > max.Y)
+                continue;
+
+            if (isBackground)
+                _backgroundUnderMouse.Add((kind, id));
+            else
                 _underMouse.Add((kind, id));
         }
 
         _targets.Clear();
+        if (_underMouse.Count == 0)
+            _underMouse.AddRange(_backgroundUnderMouse);
 
         // Not over any label, or the pointer is busy with a handle/button — nothing to pick.
         if (_underMouse.Count == 0 || ImGui.IsAnyItemHovered())
@@ -74,7 +84,8 @@ internal sealed class CanvasItemPicker<TKind> where TKind : struct
         return new Result(true, pickKind, pickId, leftClicked, menuRequested);
     }
 
-    private readonly List<(TKind Kind, Guid Id, Vector2 Min, Vector2 Max)> _targets = [];
+    private readonly List<(TKind Kind, Guid Id, Vector2 Min, Vector2 Max, bool IsBackground)> _targets = [];
     private readonly List<(TKind Kind, Guid Id)> _underMouse = [];
+    private readonly List<(TKind Kind, Guid Id)> _backgroundUnderMouse = [];
     private Guid _pickedId;
 }

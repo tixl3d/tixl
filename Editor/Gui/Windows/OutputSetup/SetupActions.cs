@@ -602,6 +602,39 @@ internal static class SetupActions
                                                   });
     }
 
+    /// <summary>Traces an existing (untraced) surface on an image: a default quad in the photo's middle to drag onto the wall.</summary>
+    internal static void TraceSurfaceOnImage(SetupEntitySelection selection, Setup setup, Surface surface, ReferenceImage image)
+    {
+        RunUndoable("Trace surface", setup, () =>
+                                            {
+                                                surface.Reference = new Surface.ReferenceBinding { ImageId = image.Id, Quad = DefaultReferenceQuad(image) };
+                                                selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
+                                            });
+    }
+
+    /// <summary>A new surface, traced on the image right away — the "there is a wall in this photo" gesture.</summary>
+    internal static void TraceNewSurface(SetupEntitySelection selection, Setup setup, ReferenceImage image)
+    {
+        RunUndoable("Trace new surface", setup, () =>
+                                                {
+                                                    var surface = new Surface
+                                                                      {
+                                                                          Name = $"Surface {setup.Surfaces.Count + 1}",
+                                                                          Reference = new Surface.ReferenceBinding { ImageId = image.Id, Quad = DefaultReferenceQuad(image) },
+                                                                      };
+                                                    setup.Surfaces.Add(surface);
+                                                    selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
+                                                });
+    }
+
+    private static Vector2[] DefaultReferenceQuad(ReferenceImage image)
+    {
+        float w = Math.Max(1, image.Width);
+        float h = Math.Max(1, image.Height);
+        float x0 = w * 0.25f, x1 = w * 0.75f, y0 = h * 0.25f, y1 = h * 0.75f;
+        return [new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1)];
+    }
+
     internal static void AddReferenceImage(SetupEntitySelection selection)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))

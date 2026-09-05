@@ -29,28 +29,53 @@ internal sealed partial class SetupOutputView
     /// switching to the selected entity's canvas.</summary>
     public bool ShowsBoard => _editMode == EditMode.Board;
 
-    /// <summary>The reference image whose own view was entered from the Board (double-click); Empty while none is.</summary>
+    /// <summary>The reference image whose space was entered from the Board (double-click); Empty while none is.
+    /// Cleared by every other entry point, so leaving it is a matter of showing anything else.</summary>
     public Guid OpenedReferenceImageId { get; private set; }
 
-    public void CloseReferenceImage()
+    /// <summary>Debug-protocol hook: the header tab by name.</summary>
+    public bool TrySetEditMode(string name)
     {
-        OpenedReferenceImageId = Guid.Empty;
+        if (!Enum.TryParse<EditMode>(name, true, out var mode))
+            return false;
+
+        _editMode = mode;
+        return true;
     }
 
-    /// <summary>The Board with no output focused — what the window shows while nothing else claims it.</summary>
-    public void DrawBoardStandalone(SetupEntitySelection? selection)
+    /// <summary>
+    /// The Board with no output focused — what the window shows while nothing else claims it. A shown surface
+    /// traced on a photo can still take the Straight tab: it straightens on that photo, in place.
+    /// </summary>
+    public void DrawBoardStandalone(SetupEntitySelection? selection, Guid shownSurfaceId = default)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
             return;
 
-        _editMode = EditMode.Board;
+        _shownSurfaceId = shownSurfaceId;
+        OpenedReferenceImageId = Guid.Empty;
+        var tracedImage = _editMode == EditMode.Straight ? TracedImageOf(setup, shownSurfaceId) : null;
+        if (tracedImage == null)
+            _editMode = EditMode.Board;
+
         DrawHeader(setup, null, Guid.Empty);
 
         var canvasTop = ImGui.GetCursorScreenPos();
         _boardCanvas.UpdateCanvas(out _);
         var dl = ImGui.GetWindowDrawList();
         dl.PushClipRect(canvasTop, ImGui.GetWindowPos() + ImGui.GetWindowSize(), true);
-        DrawBoardCanvas(setup, machineConfig, selection);
+
+        SeedBoardPlacements(setup);
+        if (tracedImage != null)
+            EnterSpace(setup, SetupEntitySelection.EntityKind.ReferenceImage, tracedImage.Id, true);
+        else
+            EnterSpace(setup, _spaceKind, _spaceId, false); // whatever was open fades back into its card
+
+        DrawBoardLayer(setup, machineConfig, selection);
+        if (_spaceBlend > 0.001f && _spaceKind == SetupEntitySelection.EntityKind.ReferenceImage)
+            DrawReferenceSpaceForShown(setup, selection, straighten: tracedImage != null);
+
+        ResolvePicking(setup, selection);
         dl.PopClipRect();
     }
 
@@ -58,24 +83,29 @@ internal sealed partial class SetupOutputView
     private void DrawBoardReturnHeader(string title)
     {
         if (CustomComponents.StateButton("Board", CustomComponents.ButtonStates.Default))
+        {
             _editMode = EditMode.Board;
+            OpenedReferenceImageId = Guid.Empty;
+        }
 
         ImGui.SameLine(0, 8 * T3Ui.UiScaleFactor);
         ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText(title, Fonts.FontSmall, UiColors.TextMuted);
     }
 
-    private void DrawBoardCanvas(Setup setup, MachineConfig machineConfig, SetupEntitySelection? selection)
+    /// <summary>
+    /// The Board behind every space: grid, cards and their interactions. While a space is in, the cards it
+    /// draws itself are skipped and the rest fade by the blend — at full blend they are gone and inert.
+    /// </summary>
+    private void DrawBoardLayer(Setup setup, MachineConfig machineConfig, SetupEntitySelection? selection)
     {
         var scale = T3Ui.UiScaleFactor;
         var dl = ImGui.GetWindowDrawList();
         var screenMin = _boardCanvas.WindowPos;
         var screenMax = screenMin + _boardCanvas.WindowSize;
+        var onBoard = _spaceBlend <= 0.001f;
+        _boardLayerFade = 1f - _spaceBlend;
 
-        // The Board is on screen, so no reference view is open anymore.
-        OpenedReferenceImageId = Guid.Empty;
-
-        SeedBoardPlacements(setup);
         FitBoardIfNeeded(setup);
 
         var pixelsPerMeter = MathF.Abs(_boardCanvas.Scale.X);
@@ -83,6 +113,13 @@ internal sealed partial class SetupOutputView
 
         if (_boardMetaVersion != OutputSetupHandling.StructureVersion)
             RefreshBoardMeta(setup, machineConfig);
+
+        // Fully inside a space nothing of the Board is left to draw or to click.
+        if (_boardLayerFade <= 0.001f)
+        {
+            _boardFenceCandidates.Clear();
+            return;
+        }
 
         // A press that never became a drag must not linger. A plain press on an already selected card kept
         // the set (for a group drag), so it is the release that selects that card alone.
@@ -101,17 +138,20 @@ internal sealed partial class SetupOutputView
         // Draw order is stacking order: reference images at the back, then content, surfaces, outputs, props.
         foreach (var image in setup.ReferenceImages)
         {
-            if (!TryGetBoardBounds(setup, SetupEntitySelection.EntityKind.ReferenceImage, image.Id, out var min, out var max))
+            if (IsDrawnBySpace(setup, SetupEntitySelection.EntityKind.ReferenceImage, image.Id)
+                || !TryGetBoardBounds(setup, SetupEntitySelection.EntityKind.ReferenceImage, image.Id, out var min, out var max))
                 continue;
 
             var srv = TryGetReferenceSrv(image);
             DrawBoardCard(setup, selection, dl, SetupEntitySelection.EntityKind.ReferenceImage, image.Id, min, max,
                           image.Name, BoardMeta(image.Id), srv, true);
+            DrawBoardTraces(setup, selection, dl, image, min, max);
         }
 
         foreach (var source in setup.ContentSources)
         {
-            if (!TryGetBoardBounds(setup, SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId, out var min, out var max))
+            if (IsDrawnBySpace(setup, SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId)
+                || !TryGetBoardBounds(setup, SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId, out var min, out var max))
                 continue;
 
             var srv = OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content) && content is { IsDisposed: false }
@@ -120,12 +160,36 @@ internal sealed partial class SetupOutputView
             DrawBoardCard(setup, selection, dl, SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId, min, max,
                           source.Name, BoardMeta(source.Id), srv, true);
 
-            // Slices are cuts of the card: sub-rects in the texture's own (Y-down) uv, mapped into the card.
+            // Slices are cuts of the card: sub-rects in the texture's own (Y-down) uv, mapped into the card. The
+            // primary one is edited in place — edges crop, corners scale, the label moves — through the source
+            // space's editor pointed at the card.
             var size = max - min;
+            var textureSize = BoardPixelSize(setup, SetupEntitySelection.EntityKind.ContentSource, source.SymbolChildId);
+            var editableSliceId = _boardLayerFade >= 0.999f && selection != null
+                                  && selection.TryResolve(setup, out var primaryKind, out var primaryId)
+                                  && primaryKind == SetupEntitySelection.EntityKind.Slice
+                                      ? primaryId
+                                      : Guid.Empty;
             foreach (var slice in setup.Slices)
             {
                 if (slice.SourceId != source.Id)
                     continue;
+
+                if (slice.Id == editableSliceId)
+                {
+                    _projection.Origin = new Vector2(min.X, max.Y);
+                    _projection.PixelsPerMeter = textureSize.X / MathF.Max(size.X, 0.0001f);
+                    EditSlice(setup, dl, slice, slice.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
+
+                    // A slice gesture is the slice's, not the card's — the card must not come along.
+                    if (_sliceLabelDragging || _sliceDragOldRect != null)
+                    {
+                        _boardGrabScreen = null;
+                        _boardGrabOnSelected = false;
+                    }
+
+                    continue;
+                }
 
                 var uv = slice.UvRect;
                 var sliceMin = new Vector2(min.X + uv.X * size.X, min.Y + (1 - uv.W) * size.Y);
@@ -137,7 +201,7 @@ internal sealed partial class SetupOutputView
 
         foreach (var surface in setup.Surfaces)
         {
-            if (surface.ParentId != Guid.Empty)
+            if (surface.ParentId != Guid.Empty || IsDrawnBySpace(setup, SetupEntitySelection.EntityKind.Surface, surface.Id))
                 continue;
 
             if (!TryGetBoardBounds(setup, SetupEntitySelection.EntityKind.Surface, surface.Id, out var min, out var max))
@@ -150,7 +214,7 @@ internal sealed partial class SetupOutputView
 
         foreach (var output in setup.Outputs)
         {
-            if (output.Kind == OutputDefinition.Kinds.Default)
+            if (output.Kind == OutputDefinition.Kinds.Default || IsDrawnBySpace(setup, SetupEntitySelection.EntityKind.Output, output.Id))
                 continue;
 
             if (!TryGetBoardBounds(setup, SetupEntitySelection.EntityKind.Output, output.Id, out var min, out var max))
@@ -173,20 +237,23 @@ internal sealed partial class SetupOutputView
 
                 var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.Patch, patch.Id) ?? false;
                 var pulse = isSelected ? 0f : FrameStats.GetPulse(patch.Id);
-                var color = isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(0.5f), pulse);
+                var color = (isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(0.5f), pulse)).Fade(_boardLayerFade);
                 dl.AddQuad(_boardQuad[0], _boardQuad[1], _boardQuad[2], _boardQuad[3], color, (isSelected ? 2f : 1f) * scale);
-                DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, _boardQuad, patch.Id, SetupActions.PatchLabel(output, patch), isSelected, 0.9f, pulse);
+                DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, _boardQuad, patch.Id, SetupActions.PatchLabel(output, patch), isSelected, 0.9f * _boardLayerFade, pulse);
             }
         }
 
         foreach (var prop in setup.Props)
             DrawBoardProp(setup, selection, dl, prop);
 
+        // The Board's own gestures belong to the Board; a fading layer is only looked at.
+        if (!onBoard)
+            return;
+
         HandleBoardDrag(setup, selection);
         HandleBoardFence(selection);
         HandleBoardKeys(setup, selection);
         HandleBoardDrop(setup, selection, dl, screenMin, screenMax);
-        ResolvePicking(setup, selection);
     }
 
     /// <summary>
@@ -236,26 +303,29 @@ internal sealed partial class SetupOutputView
                                string name, string? meta, SharpDX.Direct3D11.ShaderResourceView? srv, bool scalable)
     {
         var scale = T3Ui.UiScaleFactor;
+        var fade = _boardLayerFade;
         var sMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
         var sMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
 
+        // A fading card is only looked at: no hover, no pick, no grab.
+        var interactive = fade >= 0.999f;
         var isSelected = selection?.IsSelected(kind, id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.GetPulse(id);
-        var hovered = ImGui.IsMouseHoveringRect(sMin, sMax) && ImGui.IsWindowHovered();
+        var hovered = interactive && ImGui.IsMouseHoveringRect(sMin, sMax) && ImGui.IsWindowHovered();
         if (hovered)
             FrameStats.PulseItemWithId(id);
 
         if (srv is { IsDisposed: false })
-            dl.AddImage(srv.NativePointer, sMin, sMax);
+            dl.AddImage(srv.NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, UiColors.ForegroundFull.Fade(fade));
         else
-            dl.AddRectFilled(sMin, sMax, UiColors.BackgroundPopup.Fade(0.85f));
+            dl.AddRectFilled(sMin, sMax, UiColors.BackgroundPopup.Fade(0.85f * fade));
 
         if (isSelected)
-            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(0.12f));
+            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(0.12f * fade));
         else if (pulse > 0.001f)
-            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(pulse * 0.2f));
+            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(pulse * 0.2f * fade));
 
-        var outline = isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(hovered ? 0.7f : 0.4f), pulse);
+        var outline = (isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(hovered ? 0.7f : 0.4f), pulse)).Fade(fade);
         dl.AddRect(sMin, sMax, outline, 0, ImDrawFlags.None, (isSelected ? 2f : 1f) * scale);
 
         // Name chip at the card's top-left; metadata muted beside it.
@@ -264,14 +334,17 @@ internal sealed partial class SetupOutputView
         var nameSize = ImGui.CalcTextSize(name);
         var chipMax = labelPos + nameSize + new Vector2(2 * pad, 2 * pad);
         CornerPinHandles.DrawLabelChip(dl, (labelPos, chipMax), name,
-                                       isSelected ? UiColors.ForegroundFull : UiColors.Text.Fade(0.9f),
-                                       isSelected ? UiColors.StatusActivated : UiColors.BackgroundFull.Fade(0.7f));
+                                       (isSelected ? UiColors.ForegroundFull : UiColors.Text.Fade(0.9f)).Fade(fade),
+                                       (isSelected ? UiColors.StatusActivated : UiColors.BackgroundFull.Fade(0.7f)).Fade(fade));
         if (meta != null)
-            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(chipMax.X + pad, labelPos.Y + pad), UiColors.TextMuted, meta);
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(chipMax.X + pad, labelPos.Y + pad), UiColors.TextMuted.Fade(fade), meta);
+
+        if (!interactive)
+            return;
 
         // The whole card is its pick and grab area (the picker cycles stacked cards on repeated clicks), and
         // what the fence catches.
-        _picker.AddTarget(kind, id, sMin, sMax);
+        _picker.AddTarget(kind, id, sMin, sMax, isBackground: true);
         _boardFenceCandidates.Add((kind, id, new ImRect(sMin, sMax)));
         GrabBoardCard(kind, id, hovered, isSelected);
 
@@ -372,24 +445,25 @@ internal sealed partial class SetupOutputView
                                   SetupEntitySelection.EntityKind kind, Guid id, Vector2 min, Vector2 max, string label)
     {
         var scale = T3Ui.UiScaleFactor;
+        var fade = _boardLayerFade;
         var sMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
         var sMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
         var isSelected = selection?.IsSelected(kind, id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.GetPulse(id);
 
         if (isSelected)
-            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(0.12f));
+            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(0.12f * fade));
         else if (pulse > 0.001f)
-            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(pulse * 0.2f));
+            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(pulse * 0.2f * fade));
 
-        dl.AddRect(sMin, sMax, isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(0.45f), pulse),
+        dl.AddRect(sMin, sMax, (isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(0.45f), pulse)).Fade(fade),
                    0, ImDrawFlags.None, (isSelected ? 2f : 1f) * scale);
 
         _boardQuad[0] = sMin;
         _boardQuad[1] = new Vector2(sMax.X, sMin.Y);
         _boardQuad[2] = sMax;
         _boardQuad[3] = new Vector2(sMin.X, sMax.Y);
-        DrawEntityLabel(dl, kind, _boardQuad, id, label, isSelected, 0.9f, pulse);
+        DrawEntityLabel(dl, kind, _boardQuad, id, label, isSelected, 0.9f * fade, pulse);
     }
 
     /// <summary>Regions nest inside their surface at their metre position from the parent's anchor, recursively.</summary>
@@ -412,11 +486,12 @@ internal sealed partial class SetupOutputView
     private void DrawBoardProp(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, Prop prop)
     {
         var scale = T3Ui.UiScaleFactor;
+        var fade = _boardLayerFade;
         var h = MathF.Max(prop.HeightInMeters, 0.1f);
         var foot = new Vector2(prop.Position.X, prop.Position.Y);
         var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.Prop, prop.Id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.GetPulse(prop.Id);
-        var color = isSelected ? UiColors.StatusActivated : PulseColor(UiColors.TextMuted.Fade(0.8f), pulse);
+        var color = (isSelected ? UiColors.StatusActivated : PulseColor(UiColors.TextMuted.Fade(0.8f), pulse)).Fade(fade);
         var thickness = (isSelected ? 2f : 1.5f) * scale;
 
         Vector2 P(float dx, float dy) => _boardProjection.CanvasToScreen(foot + new Vector2(dx * h, dy * h));
@@ -432,17 +507,21 @@ internal sealed partial class SetupOutputView
         PropBounds(prop, out var min, out var max);
         var sMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
         var sMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
-        var hovered = ImGui.IsMouseHoveringRect(sMin, sMax) && ImGui.IsWindowHovered();
+        var interactive = fade >= 0.999f;
+        var hovered = interactive && ImGui.IsMouseHoveringRect(sMin, sMax) && ImGui.IsWindowHovered();
         if (hovered)
             FrameStats.PulseItemWithId(prop.Id);
 
-        _picker.AddTarget(SetupEntitySelection.EntityKind.Prop, prop.Id, sMin, sMax);
-        _boardFenceCandidates.Add((SetupEntitySelection.EntityKind.Prop, prop.Id, new ImRect(sMin, sMax)));
-        GrabBoardCard(SetupEntitySelection.EntityKind.Prop, prop.Id, hovered, isSelected);
-
         var meta = BoardMeta(prop.Id) ?? "";
         dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(sMin.X, sMin.Y - Fonts.FontSmall.FontSize - 2 * scale),
-                   isSelected ? UiColors.StatusActivated : UiColors.TextMuted, meta);
+                   (isSelected ? UiColors.StatusActivated : UiColors.TextMuted).Fade(fade), meta);
+
+        if (!interactive)
+            return;
+
+        _picker.AddTarget(SetupEntitySelection.EntityKind.Prop, prop.Id, sMin, sMax, isBackground: true);
+        _boardFenceCandidates.Add((SetupEntitySelection.EntityKind.Prop, prop.Id, new ImRect(sMin, sMax)));
+        GrabBoardCard(SetupEntitySelection.EntityKind.Prop, prop.Id, hovered, isSelected);
     }
 
     private static void PropBounds(Prop prop, out Vector2 min, out Vector2 max)
@@ -525,7 +604,8 @@ internal sealed partial class SetupOutputView
         // Not IsAnyItemActive: a press on empty window space makes the window's move-id the active item, which
         // would veto every fence. The scale handle is the only other gesture, and it holds the snapshot.
         if (selection == null || _boardDragKind != SetupEntitySelection.EntityKind.None
-            || _boardGrabScreen != null || _boardGestureOldJson != null || _resizeOldState != null)
+            || _boardGrabScreen != null || _boardGestureOldJson != null || _resizeOldState != null
+            || _sliceLabelDragging || _sliceDragOldRect != null)
         {
             _boardFence.Reset();
             return;
@@ -980,33 +1060,6 @@ internal sealed partial class SetupOutputView
 
     private string? BoardMeta(Guid id) => _boardMeta.TryGetValue(id, out var meta) ? meta : null;
 
-    private SharpDX.Direct3D11.ShaderResourceView? TryGetReferenceSrv(ReferenceImage image)
-    {
-        if (string.IsNullOrWhiteSpace(image.FilePath))
-            return null;
-
-        if (!_boardRefTextures.TryGetValue(image.Id, out var entry) || entry.Path != image.FilePath)
-        {
-            entry = (image.FilePath, ResourceManager.CreateTextureResource(image.FilePath, null));
-            _boardRefTextures[image.Id] = entry;
-        }
-
-        var texture = entry.Resource.GetValue(_boardContext!);
-        if (texture is not { IsDisposed: false })
-            return null;
-
-        // The stored pixel size is what traces and measurements are in, and what the card and its metadata
-        // show — keep it in step with the loaded texture (persisted with the next save).
-        if (image.Width != texture.Description.Width || image.Height != texture.Description.Height)
-        {
-            image.Width = texture.Description.Width;
-            image.Height = texture.Description.Height;
-            _boardMetaVersion = -1;
-        }
-
-        return SrvManager.GetSrvForTexture(texture);
-    }
-
     /// <summary>Board metres (Y up) on the pan/zoom canvas, whose y runs down.</summary>
     private sealed class BoardProjection(ScalableCanvas canvas) : ICanvasProjection
     {
@@ -1017,6 +1070,25 @@ internal sealed partial class SetupOutputView
             var p = canvas.InverseTransformPositionFloat(posOnScreen);
             return new Vector2(p.X, -p.Y);
         }
+    }
+
+    /// <summary>
+    /// A space's pixels on the Board: canvas coordinates are the space's px (Y down, origin at its entity's
+    /// card top-left), turned into board metres by the card's scale and then into screen through the Board's
+    /// own projection. Every handle and label of a space draws through this, so a space is a place on the
+    /// Board rather than a canvas of its own.
+    /// </summary>
+    private sealed class SpaceProjection(BoardProjection board) : ICanvasProjection
+    {
+        /// <summary>Board metres of the space's px (0,0): the card's top-left.</summary>
+        public Vector2 Origin;
+
+        public float PixelsPerMeter = DefaultBoardPixelsPerMeter;
+
+        public Vector2 CanvasToBoard(Vector2 px) => new(Origin.X + px.X / PixelsPerMeter, Origin.Y - px.Y / PixelsPerMeter);
+        public Vector2 BoardToCanvas(Vector2 metres) => new((metres.X - Origin.X) * PixelsPerMeter, (Origin.Y - metres.Y) * PixelsPerMeter);
+        public Vector2 CanvasToScreen(Vector2 posInCanvas) => board.CanvasToScreen(CanvasToBoard(posInCanvas));
+        public Vector2 ScreenToCanvas(Vector2 posOnScreen) => BoardToCanvas(board.ScreenToCanvas(posOnScreen));
     }
 
     /// <summary>The Board's canvas scale is screen px per metre, so the stock zoom range (meant for px-per-px
@@ -1056,8 +1128,8 @@ internal sealed partial class SetupOutputView
     private readonly SelectionFence _boardFence = new();
     private readonly List<(SetupEntitySelection.EntityKind Kind, Guid Id, ImRect Rect)> _boardFenceCandidates = [];
 
+    private float _boardLayerFade = 1f; // 1 on the Board, toward 0 as a space comes in (set per frame)
     private int _boardMetaVersion = -1;
     private readonly Dictionary<Guid, string> _boardMeta = new();
-    private readonly Dictionary<Guid, (string Path, Resource<Texture2D> Resource)> _boardRefTextures = new();
     private EvaluationContext? _boardContext;
 }

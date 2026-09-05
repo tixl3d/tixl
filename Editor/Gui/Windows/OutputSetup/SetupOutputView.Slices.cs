@@ -9,6 +9,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.ProjectHandling;
+using Texture2D = T3.Core.DataTypes.Texture2D;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
@@ -29,27 +30,39 @@ internal sealed partial class SetupOutputView
     /// </summary>
     public void DrawSourceCanvas(Guid contentChildId, SetupEntitySelection? selection = null, Guid selectedSliceId = default)
     {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
             return;
 
         var source = setup.FindSourceByChildId(contentChildId);
+        OpenedReferenceImageId = Guid.Empty;
         DrawBoardReturnHeader(SetupActions.TryGetContentName(contentChildId) ?? "Content");
-        if (source == null || !OutputManager.TryGetSourceContent(contentChildId, out _, out var content)
-            || content is not { IsDisposed: false })
-        {
-            CustomComponents.EmptyWindowMessage("No content yet — connect a texture to this\nSendToOutput to lay out its slices.");
-            return;
-        }
 
         var canvasTop = ImGui.GetCursorScreenPos();
-        _canvas.UpdateCanvas(out _);
-
-        var textureSize = new Vector2(Math.Max(1, content.Description.Width), Math.Max(1, content.Description.Height));
-        FitToArea(textureSize, EditMode.Content, contentChildId);
-
+        _boardCanvas.UpdateCanvas(out _);
         var dl = ImGui.GetWindowDrawList();
         // Clip to the region below the toolbar — the canvas draws to the window list and would spill up over it.
         dl.PushClipRect(canvasTop, ImGui.GetWindowPos() + ImGui.GetWindowSize(), true);
+
+        // The source's space is its card: the texture lands exactly where the card's thumbnail was.
+        SeedBoardPlacements(setup);
+        Texture2D? content = null;
+        var hasContent = source != null && OutputManager.TryGetSourceContent(contentChildId, out _, out content) && content is { IsDisposed: false };
+        EnterSpace(setup, SetupEntitySelection.EntityKind.ContentSource, contentChildId, hasContent);
+        DrawBoardLayer(setup, machineConfig, selection);
+
+        if (!hasContent || _spaceBlend <= 0.001f)
+        {
+            if (!hasContent)
+                CustomComponents.EmptyWindowMessage("No content yet — connect a texture to this\nSendToOutput to lay out its slices.");
+
+            ResolvePicking(setup, selection);
+            dl.PopClipRect();
+            return;
+        }
+
+        var textureSize = new Vector2(Math.Max(1, content!.Description.Width), Math.Max(1, content.Description.Height));
+        FitToArea(textureSize, EditMode.Content, contentChildId);
+
         var min = _projection.CanvasToScreen(Vector2.Zero);
         var max = _projection.CanvasToScreen(textureSize);
         dl.AddRectFilled(min, max, UiColors.BackgroundFull.Fade(0.4f));
@@ -69,7 +82,7 @@ internal sealed partial class SetupOutputView
         Slice? selected = null;
         foreach (var slice in setup.Slices)
         {
-            if (slice.SourceId != source.Id)
+            if (slice.SourceId != source!.Id)
                 continue;
 
             if (slice.Id == selectedSliceId)
@@ -119,11 +132,11 @@ internal sealed partial class SetupOutputView
 
         // No scrim here: on an atlas every slice matters equally. No fallback to the first slice either — with
         // the source selected (and no slice), nothing is framed.
-        if (selected != null)
+        if (selected != null && _spaceBlend >= 1f)
             EditSlice(setup, dl, selected, selected.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
 
-        dl.PopClipRect();
         ResolvePicking(setup, selection);
+        dl.PopClipRect();
     }
 
     /// <summary>

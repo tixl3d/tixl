@@ -46,7 +46,13 @@ buffer's alpha is render residue and would make the PNG see-through.
 
 Control surface: `openProject` (`name`), `newProject`, `select` (`childId`), `setInput`
 (`childId`, `inputName`, `value`), `addOp`, `connect`, `deleteOp`, `pin`, `pumpFrames`
-(`count`), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`.
+(`count`), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`,
+`outputSetup` (`entity`: a setup entity's display name to select, e.g. `"Surface 1"`; `mode`: the
+output window's header tab — `Board`, `Content`, `Straight`, `Output`, `Calibrate`; either optional).
+It does what the outliner click and the tab click do, so Board ↔ space folds can be driven without a
+mouse. Every fold logs one `[fold] metrics …` line at Debug level (read it with `getLogTail`): the
+rectified surface's on-screen centre path as mean distance from the window centre, path length over
+the chord (1.00 = a straight line) and the largest deviation from the chord.
 
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 

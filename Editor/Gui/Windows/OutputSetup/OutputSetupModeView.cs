@@ -114,7 +114,11 @@ internal sealed class OutputSetupModeView
             // Selecting never leaves the Board: the output-bound kinds draw through the tabbed view (which keeps
             // the Board while that tab is active), the others enter their own canvas only by double-click.
             var showsBoard = _outputView.ShowsBoard;
-            if (entityKind == SetupEntitySelection.EntityKind.Output)
+            var openedImageId = _outputView.OpenedReferenceImageId;
+            if (openedImageId != Guid.Empty && IsInReferenceSpace(setup, openedImageId, entityKind, entityId))
+                // The image's space stays open while the selection moves between it and the surfaces traced on it.
+                _outputView.DrawReferenceCanvas(openedImageId, _entitySelection);
+            else if (entityKind == SetupEntitySelection.EntityKind.Output)
                 // Pass the selection so a surface label on the canvas can still be clicked to select it, even
                 // though the shown entity is the output itself (no surface focused).
                 _outputView.Draw(entityId, selection: _entitySelection);
@@ -122,16 +126,13 @@ internal sealed class OutputSetupModeView
                 _outputView.Draw(surfaceOutputId, entityId, _entitySelection); // labels on the canvas can re-pick
             else if (entityKind == SetupEntitySelection.EntityKind.Patch && SetupRelations.TryGetPatchOutput(setup, entityId, out var patchOutputId))
                 _outputView.Draw(patchOutputId, selection: _entitySelection); // a patch lives on its output's canvas
-            else if (entityKind == SetupEntitySelection.EntityKind.ReferenceImage && _outputView.OpenedReferenceImageId == entityId)
-            {
-                if (_referenceImageView.Draw(entityId))
-                    _outputView.CloseReferenceImage();
-            }
             else if (entityKind == SetupEntitySelection.EntityKind.ContentSource && !showsBoard)
                 // Slices live on the source, so entering content opens it with every slice laid out on it.
                 _outputView.DrawSourceCanvas(entityId, _entitySelection);
             else if (entityKind == SetupEntitySelection.EntityKind.Slice && !showsBoard && SetupRelations.TryGetSliceSource(setup, entityId, out var sliceChildId))
                 _outputView.DrawSourceCanvas(sliceChildId, _entitySelection, entityId);
+            else if (entityKind == SetupEntitySelection.EntityKind.Surface)
+                _outputView.DrawBoardStandalone(_entitySelection, entityId); // unmapped: the Board, or Straight on its photo
             else
                 _outputView.DrawBoardStandalone(_entitySelection);
         }
@@ -159,6 +160,97 @@ internal sealed class OutputSetupModeView
         return true;
     }
 
+    /// <summary>
+    /// Debug-protocol entry: selects the named entity (any kind, by its display name) and/or enters an edit
+    /// mode (Board, Content, Straight, Output, Calibrate) — what the outliner click and the header tab do.
+    /// </summary>
+    public bool TryDrive(string? entityName, string? mode, out string error)
+    {
+        error = string.Empty;
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+        {
+            error = "No active setup";
+            return false;
+        }
+
+        _showOutliner = true;
+        if (!string.IsNullOrEmpty(entityName))
+        {
+            if (!TryFindEntityByName(setup, entityName, out var kind, out var id))
+            {
+                error = $"No setup entity named '{entityName}'";
+                return false;
+            }
+
+            _entitySelection.Select(kind, id);
+        }
+
+        if (!string.IsNullOrEmpty(mode) && !_outputView.TrySetEditMode(mode))
+        {
+            error = $"Unknown mode '{mode}'";
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryFindEntityByName(Setup setup, string name, out SetupEntitySelection.EntityKind kind, out Guid id)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.Name == name)
+            {
+                kind = SetupEntitySelection.EntityKind.Surface;
+                id = surface.Id;
+                return true;
+            }
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            if (output.Name == name)
+            {
+                kind = SetupEntitySelection.EntityKind.Output;
+                id = output.Id;
+                return true;
+            }
+        }
+
+        foreach (var image in setup.ReferenceImages)
+        {
+            if (image.Name == name)
+            {
+                kind = SetupEntitySelection.EntityKind.ReferenceImage;
+                id = image.Id;
+                return true;
+            }
+        }
+
+        foreach (var source in setup.ContentSources)
+        {
+            if (source.Name == name)
+            {
+                kind = SetupEntitySelection.EntityKind.ContentSource;
+                id = source.SymbolChildId;
+                return true;
+            }
+        }
+
+        foreach (var slice in setup.Slices)
+        {
+            if (SetupActions.SliceLabel(setup, slice) == name)
+            {
+                kind = SetupEntitySelection.EntityKind.Slice;
+                id = slice.Id;
+                return true;
+            }
+        }
+
+        kind = SetupEntitySelection.EntityKind.None;
+        id = Guid.Empty;
+        return false;
+    }
+
     /// <summary>The "Show Flow Outliner" toggle — hung inside the output window's breadcrumb menu.</summary>
     public void DrawOutlinerMenuItem()
     {
@@ -178,6 +270,14 @@ internal sealed class OutputSetupModeView
             _showOutliner = true;
 
         ImGui.SameLine();
+    }
+
+    private static bool IsInReferenceSpace(Setup setup, Guid imageId, SetupEntitySelection.EntityKind kind, Guid id)
+    {
+        if (kind == SetupEntitySelection.EntityKind.ReferenceImage)
+            return id == imageId;
+
+        return kind == SetupEntitySelection.EntityKind.Surface && setup.FindSurface(id)?.Reference?.ImageId == imageId;
     }
 
     private bool TryGetShownEntity(out SetupEntitySelection.EntityKind kind, out Guid id)
@@ -297,5 +397,4 @@ internal sealed class OutputSetupModeView
     private readonly EntityItem _entityItem = new();
     private readonly SetupFlowOutliner _outliner;
     private readonly SetupOutputView _outputView;
-    private readonly ReferenceImageView _referenceImageView = new();
 }

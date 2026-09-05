@@ -135,13 +135,18 @@ its width. Then open the Output tab and check the send's Resolution in the Param
    click its **Board** button.
 
 **Expected:**
-- After 1: the output card opens the Output canvas with the projector composite; the surface
-  card opens the Straight canvas. The Board tab returns to the same Board pan/zoom each time.
-- After 2: the source canvas opens with the slice laid out on the texture; the Board button
-  returns to the Board with the content card selected.
-- After 3: the reference view opens (photo, trace buttons); the Board button returns to the
-  Board, where the image card now shows the photo. The Parameter window's Reference Image
-  card offers the same path field with a file picker.
+- After 1: entering is one continuous move on the same canvas, about half a second: the view
+  zooms onto the output card, the other cards fade out where they are, and "Surface 1" flies
+  from its card into its corner-pin quad inside the output canvas, where its handles become
+  live once it has settled. The Straight canvas rectifies the surface the same way. The Board
+  tab reverses it: the surface flies back to its card, the cards fade in and the view returns
+  to the same Board pan/zoom as before.
+- After 2: the view zooms onto the content card and the texture with the slice takes the
+  card's place, the rest fading; the Board button returns to the Board with the content card
+  selected.
+- After 3: the reference view opens (photo, trace buttons; still its own canvas); the Board
+  button returns to the Board, where the image card now shows the photo. The Parameter
+  window's Reference Image card offers the same path field with a file picker.
 
 ## Step: Reference images come from the asset system
 

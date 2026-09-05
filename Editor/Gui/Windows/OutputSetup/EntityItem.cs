@@ -458,6 +458,27 @@ internal sealed class EntityItem
                                                     "The quad stays exactly where it is; the surface adds real size, raster and straightening.");
                 break;
 
+            case SetupEntitySelection.EntityKind.ReferenceImage:
+                var image = setup.FindReferenceImage(id);
+                if (image == null)
+                    break;
+
+                if (CustomComponents.DrawMenuItem(13, "Trace New Surface"))
+                    SetupActions.TraceNewSurface(selection, setup, image);
+
+                // Every root surface not yet traced anywhere can be traced here.
+                for (var i = 0; i < setup.Surfaces.Count; i++)
+                {
+                    var candidate = setup.Surfaces[i];
+                    if (candidate.Reference != null || candidate.ParentId != Guid.Empty)
+                        continue;
+
+                    if (CustomComponents.DrawMenuItem(100 + i, $"Trace {candidate.Name} Here"))
+                        SetupActions.TraceSurfaceOnImage(selection, setup, candidate, image);
+                }
+
+                break;
+
             case SetupEntitySelection.EntityKind.Surface:
                 var surface = setup.FindSurface(id);
                 if (surface == null)

@@ -41,6 +41,12 @@ internal sealed partial class OutputWindow : Window
         OutputWindowInstances.Add(this);
     }
 
+    /// <summary>Debug-protocol hook: selects a setup entity by name and/or enters an edit mode, as clicks would.</summary>
+    internal bool TryDriveOutputSetup(string? entityName, string? mode, out string error)
+    {
+        return _setupMode.TryDrive(entityName, mode, out error);
+    }
+
     /// <summary>Resets the view camera - used by the debug protocol so agent sessions can reframe the origin.</summary>
     internal void ResetView()
     {

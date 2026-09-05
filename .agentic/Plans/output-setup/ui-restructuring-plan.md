@@ -341,7 +341,7 @@ entity kinds live in, with the current views becoming *focus modes* of that scen
   self-explanatory. New physical surfaces seed **bottom-aligned to the floor line**, anchor
   bottom-center.
 
-### C.2 Space participation & fading
+### C.2 Space participation & fading — ✅ v1 2026-09-05 (one canvas: spaces draw inside their entity's card via `SpaceProjection`; participants fly, the rest fades in place; regions still pop in at settle)
 
 Each view is a *space* with a transform; entities either participate (drawn distorted through that
 space's homography chain) or don't (drawn at neutral placement, faded):
@@ -382,9 +382,11 @@ space's homography chain) or don't (drawn at neutral placement, faded):
 
 ### C.4 Consolidation
 
-- `ReferenceImageView` merges: reference images are placed canvas items; the straighten workflow stays
-  as a focused edit mode on the image. (Its `InputTextWithHint` → `AddFilePicker` fix from P4 rides
-  along.)
+- ✅ 2026-09-05: `ReferenceImageView` merged — the image is a placed card, its space folds out of the
+  Board (`SetupOutputView.Reference.cs`: photo at px inside the card, traced quads with live corner
+  handles, Photo/Straight morph around the selected traced surface), and the Board draws the traced
+  quads on the card read-only. Tracing starts from the image card's menu (Trace New Surface / Trace
+  X Here). The path field is the asset picker.
 - `OutputSetupModeView.TryDrawEditingView` collapses to: publish focus → draw unified canvas with the
   current space + focus. The per-kind routing switch disappears.
 - Selection: canvas picking stays on `CanvasItemPicker` + `SelectionFence`; the sub-element plane
