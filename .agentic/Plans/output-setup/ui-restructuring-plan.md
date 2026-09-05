@@ -239,7 +239,7 @@ Fixed columns with persistent muted headers + per-column `+` menus (reuse the ex
   selectable (`EntityKind.Mapping` — additive) and edges are their click target; v1 edges are
   display + hover only. Note this in `selection.md` when it lands.
 
-### B.5 Interactions (parity checklist with the old tree)
+### B.5 Interactions (parity checklist with the old tree) — ✅ 2026-09-05 (Del key added; click-to-frame on the canvas for off-view items still open)
 
 - Click/ctrl/shift selection through the shared `SetupEntitySelection`; canvas cross-highlight via the
   existing `FrameStats` pulse; click-to-frame on the canvas for off-view entities.
@@ -248,7 +248,7 @@ Fixed columns with persistent muted headers + per-column `+` menus (reuse the ex
 - Context menus/rename/delete/duplicate — already shared via `EntityItem.DrawContextMenuItems`.
 - Del key on outliner focus deletes selection (through `SetupActions`, snapshot-undoable).
 
-### B.6 Performance
+### B.6 Performance — ✅ 2026-09-05 (`OutputSetupHandling.StructureVersion`; connection list + derived labels cached per tick)
 
 The old panel's lesson (refactoring-plan P3) applies doubled — edges are extra per-frame geometry:
 
@@ -262,8 +262,9 @@ The old panel's lesson (refactoring-plan P3) applies doubled — edges are extra
 - `SetupPanel` dies entirely (tree → outliner, cards → Phase A, switcher → strip header). Delete the
   vertical splitter + `_panelWidth` from `OutputSetupModeView`; `DrawSetupPanelMenuItem`/
   `DrawPanelToggleButton` re-target the strip.
-- The gutter in/out reference icons die with the tree (replaced by real edges) — remove the
-  `Describe*Gutter` paths when porting `SetupRelations`.
+- ✅ 2026-09-05: the gutter in/out reference icons, routing statuses and hover-lit arrows are gone
+  (`Describe*Gutter`, `_referenced` deleted) — the connections show the routing. Kept: the click-to-bind
+  arrow, present only while a slice/content/surface is the primary.
 
 **Shippable state after B:** sketch layout achieved — full-width canvas, flow strip below, properties
 in the Parameter window.

@@ -59,12 +59,18 @@ internal sealed class SetupFlowOutliner
         _pendingHoveredKind = SetupEntitySelection.EntityKind.None;
         _pendingHoveredId = Guid.Empty;
 
-        // Relationship highlights follow last frame's hover (committed at the end of Draw), so related rows can
-        // light their gutters before they're drawn this frame — a 1-frame lag that's imperceptible.
-        if (_hoveredKind != SetupEntitySelection.EntityKind.None)
-            SetupRelations.CollectRelated(setup, _hoveredKind, _hoveredId, _referenced);
-        else
-            _referenced.Clear();
+        // Labels and the connection list follow the structure, not the frame.
+        if (_cacheVersion != OutputSetupHandling.StructureVersion || _cacheSetupId != setup.Id)
+            RefreshCaches(setup, machineConfig);
+
+        // Del removes the selection while the strip has focus — the same verb as the items' context menu.
+        if (bodyVisible && selection.Count > 0
+            && ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows)
+            && !ImGui.IsAnyItemActive()
+            && ImGui.IsKeyPressed(ImGuiKey.Delete, false))
+        {
+            SetupActions.DeleteSelection(selection, setup);
+        }
 
         DrawHeader(setup, selection, onToggleCollapse, bodyVisible);
 
@@ -85,14 +91,13 @@ internal sealed class SetupFlowOutliner
         DrawSetupSwitcher(setup, selection, SwitcherWidth * scale);
 
         // Breadcrumb: what feeds the primary → the primary → what shows it, refreshed on a change of primary
-        // and every ~half second (renames), never per frame.
-        var frame = ImGui.GetFrameCount();
-        if (_breadcrumbKind != _primaryKind || _breadcrumbId != _primaryId || frame - _breadcrumbFrame > 30)
+        // or of the structure (renames, re-routing), never per frame.
+        if (_breadcrumbKind != _primaryKind || _breadcrumbId != _primaryId || _breadcrumbVersion != _cacheVersion)
         {
             _breadcrumb = BuildBreadcrumb(setup);
             _breadcrumbKind = _primaryKind;
             _breadcrumbId = _primaryId;
-            _breadcrumbFrame = frame;
+            _breadcrumbVersion = _cacheVersion;
         }
 
         ImGui.SetCursorScreenPos(new Vector2(rowPos.X + (SwitcherWidth + 12) * scale, rowPos.Y));
@@ -193,13 +198,48 @@ internal sealed class SetupFlowOutliner
     /// </summary>
     private void DrawConnections(ImDrawListPtr dl, Setup setup, MachineConfig machineConfig, SetupEntitySelection selection)
     {
+        for (var i = 0; i < _connections.Count; i++)
+        {
+            var c = _connections[i];
+            DrawConnection(dl, selection, c.FromKind, c.FromId, c.ToKind, c.ToId, setup);
+        }
+
+        // Nothing presents these outputs: a short stub in the attention color, where the plug connection would start.
+        var scale = T3Ui.UiScaleFactor;
+        for (var i = 0; i < _unboundOutputIds.Count; i++)
+        {
+            if (!TryGetAnchor(setup, SetupEntitySelection.EntityKind.Output, _unboundOutputIds[i], out var anchor))
+                continue;
+
+            var from = new Vector2(anchor.Right, anchor.Y);
+            dl.AddLine(from, from + new Vector2(ConnectionStubLength * scale, 0), UiColors.StatusAttention.Fade(0.8f), 2 * scale);
+        }
+    }
+
+    /// <summary>
+    /// Rebuilds what only changes with the structure: the connection list, the unbound outputs, and the
+    /// derived labels (a slice's or patch's "… N" name depends on list order). Runs on a structure-version
+    /// tick or a setup switch, so the per-frame draw only looks things up.
+    /// </summary>
+    private void RefreshCaches(Setup setup, MachineConfig machineConfig)
+    {
+        _cacheVersion = OutputSetupHandling.StructureVersion;
+        _cacheSetupId = setup.Id;
+        _connections.Clear();
+        _unboundOutputIds.Clear();
+        _sliceLabels.Clear();
+        _patchLabels.Clear();
+
+        foreach (var slice in setup.Slices)
+            _sliceLabels[slice.Id] = SetupActions.SliceLabel(setup, slice);
+
         foreach (var surface in setup.Surfaces)
         {
             if (surface.SliceId != Guid.Empty)
-                DrawConnection(dl, selection, SetupEntitySelection.EntityKind.Slice, surface.SliceId, SetupEntitySelection.EntityKind.Surface, surface.Id, setup);
+                _connections.Add(new Connection(SetupEntitySelection.EntityKind.Slice, surface.SliceId, SetupEntitySelection.EntityKind.Surface, surface.Id));
 
             foreach (var mapping in surface.OutputMappings)
-                DrawConnection(dl, selection, SetupEntitySelection.EntityKind.Surface, surface.Id, SetupEntitySelection.EntityKind.Output, mapping.OutputId, setup);
+                _connections.Add(new Connection(SetupEntitySelection.EntityKind.Surface, surface.Id, SetupEntitySelection.EntityKind.Output, mapping.OutputId));
         }
 
         foreach (var output in setup.Outputs)
@@ -209,24 +249,21 @@ internal sealed class SetupFlowOutliner
 
             foreach (var patch in output.Patches)
             {
+                _patchLabels[patch.Id] = SetupActions.PatchLabel(output, patch);
                 if (patch.SliceId != Guid.Empty)
-                    DrawConnection(dl, selection, SetupEntitySelection.EntityKind.Slice, patch.SliceId, SetupEntitySelection.EntityKind.Patch, patch.Id, setup);
+                    _connections.Add(new Connection(SetupEntitySelection.EntityKind.Slice, patch.SliceId, SetupEntitySelection.EntityKind.Patch, patch.Id));
             }
 
             var binding = machineConfig.TryGetBinding(output.Id);
             if (binding != null)
-            {
-                DrawConnection(dl, selection, SetupEntitySelection.EntityKind.Output, output.Id, SetupEntitySelection.EntityKind.None, DisplayRowId(binding.DisplayIndex), setup);
-            }
-            else if (TryGetAnchor(setup, SetupEntitySelection.EntityKind.Output, output.Id, out var anchor))
-            {
-                // Nothing presents this output: a short stub in the attention color, where its plug connection would start.
-                var scale = T3Ui.UiScaleFactor;
-                var from = new Vector2(anchor.Right, anchor.Y);
-                dl.AddLine(from, from + new Vector2(ConnectionStubLength * scale, 0), UiColors.StatusAttention.Fade(0.8f), 2 * scale);
-            }
+                _connections.Add(new Connection(SetupEntitySelection.EntityKind.Output, output.Id, SetupEntitySelection.EntityKind.None, DisplayRowId(binding.DisplayIndex)));
+            else
+                _unboundOutputIds.Add(output.Id);
         }
     }
+
+    private readonly record struct Connection(SetupEntitySelection.EntityKind FromKind, Guid FromId,
+                                              SetupEntitySelection.EntityKind ToKind, Guid ToId);
 
     private void DrawConnection(ImDrawListPtr dl, SetupEntitySelection selection,
                           SetupEntitySelection.EntityKind fromKind, Guid fromId,
@@ -352,8 +389,6 @@ internal sealed class SetupFlowOutliner
             if (output.Kind == OutputDefinition.Kinds.Default)
                 continue;
 
-            var binding = machineConfig.TryGetBinding(output.Id);
-            var status = binding == null ? null : DisplayLabel(binding.DisplayIndex);
             var hasPatches = output.Patches.Count > 0;
             var isExpanded = !_collapsedOutputs.Contains(output.Id);
             var args = new EntityItem.Args
@@ -361,7 +396,6 @@ internal sealed class SetupFlowOutliner
                                Kind = SetupEntitySelection.EntityKind.Output,
                                Id = output.Id,
                                Name = output.Name,
-                               Status = status,
                                LeadingIcon = Icon.Projector,
                                IsExpanded = hasPatches ? isExpanded : null,
                                ReserveExpander = true,
@@ -386,8 +420,8 @@ internal sealed class SetupFlowOutliner
 
     /// <summary>
     /// This machine's plugs — the displays today, streams later — as an inventory: every plug is listed,
-    /// the ones an output is bound to carry that output's name, the free ones recede. Rows are not
-    /// entities (no selection, no menu); binding happens on the output's row.
+    /// the bound ones read normal (their connection says which output), the free ones recede. Items are
+    /// not entities (no selection, no menu); binding happens on the output's item.
     /// </summary>
     private void DrawLocalBindings(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
     {
@@ -409,7 +443,7 @@ internal sealed class SetupFlowOutliner
                                Kind = SetupEntitySelection.EntityKind.None,
                                Id = DisplayRowId(i),
                                Name = DisplayLabel(i),
-                               Status = boundTo ?? ResolutionLabel(i, screens[i].Bounds.Width, screens[i].Bounds.Height),
+                               Status = ResolutionLabel(i, screens[i].Bounds.Width, screens[i].Bounds.Height),
                                LeadingIcon = Icon.PlayOutput,
                                Muted = boundTo == null,
                            };
@@ -499,28 +533,6 @@ internal sealed class SetupFlowOutliner
         return _breadcrumbBuilder.ToString();
     }
 
-    private bool IsHoverInputHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
-    {
-        for (var i = 0; i < _referenced.Count; i++)
-        {
-            if (_referenced[i].IsConsumer && _referenced[i].Kind == kind && _referenced[i].Id == id)
-                return true;
-        }
-
-        return false;
-    }
-
-    private bool IsHoverTrailingHighlighted(SetupEntitySelection.EntityKind kind, Guid id)
-    {
-        for (var i = 0; i < _referenced.Count; i++)
-        {
-            if (!_referenced[i].IsConsumer && _referenced[i].Kind == kind && _referenced[i].Id == id)
-                return true;
-        }
-
-        return false;
-    }
-
     private void DrawContentSends(SetupEntitySelection selection, Setup setup)
     {
         var sinks = OutputSinkRegistry.Sinks;
@@ -545,19 +557,16 @@ internal sealed class SetupFlowOutliner
             var sliceCount = source == null ? 0 : SetupRelations.CountSlicesOfSource(setup, source.Id);
             var expanded = !_collapsedSources.Contains(childId);
 
-            var (icon, text) = DescribeSourceGutter(setup, childId);
             var args = new EntityItem.Args
                            {
                                Kind = SetupEntitySelection.EntityKind.ContentSource,
                                Id = childId,
                                Name = SetupActions.SendName(instance),
-                               Status = text,
                                LeadingIcon = Icon.FileImage,
-                               TrailingIcon = icon,
                                IsExpanded = sliceCount > 0 ? expanded : null,
                                ReserveExpander = true,
-                               // No surface shows this source, so it steps back visually.
-                               Muted = icon == null,
+                               // Nothing shows this source, so it steps back visually.
+                               Muted = source == null || SetupRelations.CountConsumersOfSource(setup, source.Id) == 0,
                            };
             if (DrawRow(selection, setup, ref args) == EntityItem.ItemAction.ToggleExpanded)
                 ToggleSourceExpanded(childId);
@@ -575,79 +584,37 @@ internal sealed class SetupFlowOutliner
         }
     }
 
-    /// <summary>
-    /// A slice under its source. The status carries its aspect, flagged when it disagrees with the surface
-    /// showing it — a mismatch means the content lands stretched, which is invisible until it's on the wall.
-    /// A slice nothing shows reads as "unused".
-    /// </summary>
+    /// <summary>A slice under its source. A slice nothing shows reads as "unused".</summary>
     private void DrawSliceRow(SetupEntitySelection selection, Setup setup, Slice slice)
     {
-        var (targetIcon, targetText) = DescribeSliceTargetGutter(setup, slice);
         var args = new EntityItem.Args
                        {
                            Kind = SetupEntitySelection.EntityKind.Slice,
                            Id = slice.Id,
-                           Name = SetupActions.SliceLabel(setup, slice),
-                           Status = targetText,
+                           Name = _sliceLabels.TryGetValue(slice.Id, out var sliceLabel) ? sliceLabel : SetupActions.SliceLabel(setup, slice),
                            LeadingIcon = Icon.Slice,
-                           TrailingIcon = targetIcon,
                            Depth = 1,
-                           // Nothing shows this slice, so it steps back visually.
-                           Muted = targetIcon == null,
+                           Muted = !SetupRelations.IsSliceShown(setup, slice.Id),
                        };
         DrawRow(selection, setup, ref args);
     }
 
     /// <summary>Out-gutter for a slice: the target-type icon plus a count when it feeds more than one. No
     /// label — the fade already says "unused", and where it lands is the icon; a name adds noise.</summary>
-    private (Icon? icon, string? text) DescribeSliceTargetGutter(Setup setup, Slice slice)
-    {
-        if (setup.FindSource(slice.SourceId) == null)
-            return (null, null);
-
-        var count = 0;
-        foreach (var surface in setup.Surfaces)
-        {
-            if (surface.SliceId == slice.Id)
-                count++;
-        }
-
-        if (count > 0)
-            return (Icon.Grid, CountSuffix(count));
-
-        // Or patches showing the slice on the direct pipe.
-        var patches = 0;
-        foreach (var output in setup.Outputs)
-        {
-            foreach (var patch in output.Patches)
-            {
-                if (patch.SliceId == slice.Id)
-                    patches++;
-            }
-        }
-
-        return patches > 0 ? (Icon.Projector, CountSuffix(patches)) : (null, null);
-    }
-
-    /// <summary>A patch under its output: what feeds it as the status; unfed patches step back.</summary>
+    /// <summary>A patch under its output; unfed patches step back.</summary>
     private void DrawPatchRow(SetupEntitySelection selection, Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
     {
-        var slice = setup.FindSlice(patch.SliceId);
         var args = new EntityItem.Args
                        {
                            Kind = SetupEntitySelection.EntityKind.Patch,
                            Id = patch.Id,
-                           Name = SetupActions.PatchLabel(output, patch),
-                           Status = slice == null ? null : SetupActions.SliceLabel(setup, slice),
+                           Name = _patchLabels.TryGetValue(patch.Id, out var patchLabel) ? patchLabel : SetupActions.PatchLabel(output, patch),
                            LeadingIcon = Icon.Patch,
                            Depth = 1,
-                           Muted = slice == null,
+                           Muted = setup.FindSlice(patch.SliceId) == null,
                        };
         DrawRow(selection, setup, ref args);
     }
-
-    /// <summary>"×N" once there's more than one target; nothing for a single one.</summary>
-    private static string? CountSuffix(int count) => count > 1 ? "×" + count : null;
 
     private void ToggleSourceExpanded(Guid childId)
     {
@@ -655,49 +622,7 @@ internal sealed class SetupFlowOutliner
             _collapsedSources.Remove(childId);
     }
 
-    // Out-gutter for a content send: the first target's type icon + short label, "+N" for extra targets.
-    private (Icon? icon, string text) DescribeSendTargetsGutter(Setup setup, IReadOnlyList<Guid> targets)
-    {
-        if (targets.Count == 0)
-            return (null, "unbound");
-
-        var (icon, name) = DescribeSingleTarget(setup, targets[0]);
-        return (icon, targets.Count > 1 ? $"{name} +{targets.Count - 1}" : name);
-    }
-
-    private (Icon? icon, string name) DescribeSingleTarget(Setup setup, Guid targetId)
-    {
-        var surface = setup.FindSurface(targetId);
-        if (surface != null)
-            return (Icon.Grid, SetupActions.SurfaceShortLabel(surface));
-
-        var output = setup.FindOutput(targetId);
-        if (output != null)
-            return (Icon.Projector, string.IsNullOrEmpty(output.Name) ? "output" : SetupActions.Abbreviate(output.Name));
-
-        return (Icon.Grid, "?");
-    }
-
-    /// <summary>Out-gutter for a content row: the surface-target icon plus a count when more than one surface
-    /// shows this source's slices. No label; the fade already reads as "unused".</summary>
-    private (Icon? icon, string? text) DescribeSourceGutter(Setup setup, Guid symbolChildId)
-    {
-        var source = setup.FindSourceByChildId(symbolChildId);
-        if (source == null)
-            return (null, null);
-
-        var count = 0;
-        foreach (var surface in setup.Surfaces)
-        {
-            if (SetupRelations.IsSliceOf(setup, surface.SliceId, source.Id))
-                count++;
-        }
-
-        return count > 0 ? (Icon.Grid, CountSuffix(count)) : (null, null);
-    }
-
-    // Surfaces as a tree: roots first, each followed by its children (nested by ParentId). The mapped
-    // output(s) are shown as the row status until the icon gutters land.
+    // Surfaces as a tree: roots first, each followed by its children (nested by ParentId).
     private void DrawSurfaces(SetupEntitySelection selection, Setup setup)
     {
         for (var i = 0; i < setup.Surfaces.Count; i++)
@@ -713,15 +638,12 @@ internal sealed class SetupFlowOutliner
         var hasChildren = SetupRelations.CountChildren(setup, surfaceId) > 0;
         var isExpanded = !_collapsedSurfaces.Contains(surfaceId);
 
-        var (outputIcon, outputText) = DescribeSurfaceOutputGutter(setup, surface);
         var args = new EntityItem.Args
                        {
                            Kind = SetupEntitySelection.EntityKind.Surface,
                            Id = surface.Id,
                            Name = surface.Name,
-                           Status = outputText,
                            LeadingIcon = Icon.Grid,
-                           TrailingIcon = outputIcon,
                            Depth = depth,
                            IsExpanded = hasChildren ? isExpanded : null,
                            ReserveExpander = true,
@@ -746,14 +668,6 @@ internal sealed class SetupFlowOutliner
     {
         if (!_collapsedSurfaces.Add(surfaceId))
             _collapsedSurfaces.Remove(surfaceId);
-    }
-
-    // Out-gutter for a surface: the projector icon + a count when mapped to more than one output (edge blends).
-    private (Icon? icon, string? text) DescribeSurfaceOutputGutter(Setup setup, Surface surface)
-    {
-        return surface.OutputMappings.Count == 0
-                   ? (null, null)
-                   : (Icon.Projector, CountSuffix(surface.OutputMappings.Count));
     }
 
     private void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection, float switcherWidth)
@@ -814,19 +728,14 @@ internal sealed class SetupFlowOutliner
         }
     }
 
-    /// <summary>Outliner-side row wrapper: injects the column rect and the cross-highlight context every row
-    /// needs, and records hover for next frame's referenced-row highlighting.</summary>
+    /// <summary>Outliner-side item wrapper: injects the column rect and the bind context every item needs,
+    /// records its anchor for the connections, and its hover for their emphasis next frame.</summary>
     private EntityItem.ItemAction DrawRow(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
     {
         args.ColumnMinX = _columnMinX;
         args.ColumnWidth = _columnWidth;
         args.PrimaryKind = _primaryKind;
         args.PrimaryId = _primaryId;
-        args.HighlightInputArrow = IsHoverInputHighlighted(args.Kind, args.Id);
-        // The "→|" source marker points at what feeds the primary; the hover trace brightens producers the same way.
-        args.HighlightTrailing = SetupRelations.IsDirectSourceOf(setup, _primaryKind, _primaryId, args.Kind, args.Id)
-                                 || IsHoverTrailingHighlighted(args.Kind, args.Id);
-
         var action = _entityItem.DrawRow(selection, setup, in args, out var hovered);
         var rect = _entityItem.LastRowRect;
         _anchors.Add(new Anchor(args.Kind, args.Id, rect.Min.X, rect.Max.X, (rect.Min.Y + rect.Max.Y) * 0.5f));
@@ -869,7 +778,15 @@ internal sealed class SetupFlowOutliner
     private string _breadcrumb = string.Empty;
     private SetupEntitySelection.EntityKind _breadcrumbKind;
     private Guid _breadcrumbId;
-    private int _breadcrumbFrame;
+    private int _breadcrumbVersion = -1;
+
+    // Per-structure caches (see RefreshCaches), keyed on the structure version and the setup.
+    private int _cacheVersion = -1;
+    private Guid _cacheSetupId;
+    private readonly List<Connection> _connections = [];
+    private readonly List<Guid> _unboundOutputIds = [];
+    private readonly Dictionary<Guid, string> _sliceLabels = [];
+    private readonly Dictionary<Guid, string> _patchLabels = [];
     private readonly List<SetupRelations.Relation> _breadcrumbScratch = [];
     private readonly System.Text.StringBuilder _breadcrumbBuilder = new();
 
@@ -889,11 +806,9 @@ internal sealed class SetupFlowOutliner
     private SetupEntitySelection.EntityKind _primaryKind;
     private Guid _primaryId;
 
-    // Cross-highlight: the row hovered this frame (committed at end of Draw), and the entities it references.
+    // The item hovered this frame (committed at end of Draw) — its connections draw emphasized next frame.
     private SetupEntitySelection.EntityKind _hoveredKind;
     private Guid _hoveredId;
     private SetupEntitySelection.EntityKind _pendingHoveredKind;
     private Guid _pendingHoveredId;
-    // Rows related to the hovered one: consumers light their left input arrow, producers their trailing gutter.
-    private readonly List<SetupRelations.Relation> _referenced = [];
 }

@@ -33,7 +33,7 @@ helpers, and promoting a patch to a surface.
 Drag the "SendToOutput" CONTENT item onto the "P1" item.
 
 **Expected:**
-- P1 gains a chevron and one child item **"Patch 1"** with the status "Slice 1".
+- P1 gains a chevron and one child item **"Patch 1"**, connected from "Slice 1".
 - The output view of P1 shows the image full-frame.
 - The Parameter window (after clicking "Patch 1") shows a **Patch** card: the line
   "Shows Slice 1 on P1", **Position (px)** 0 × 0 and **Size (px)** 1920 × 1080.
@@ -57,10 +57,10 @@ With "Patch 1" selected, set **Size (px)** to 960 × 540, then **Position (px)**
 3. Click the input arrow in the left gutter of the new "Patch 2" item.
 
 **Expected:**
-- After 1: "Patch 2" appears dimmed under P1 with no status; its card says nothing is
+- After 1: "Patch 2" appears dimmed under P1 with no connection; its card says nothing is
   routed yet.
-- After 3: the arrow lights up, "Patch 2" reads "Slice 1" and is no longer dimmed.
-  Clicking the arrow again unfeeds it.
+- After 3: the arrow lights up, a connection from "Slice 1" reaches "Patch 2" in the outliner,
+  and the item is no longer dimmed. Clicking the arrow again unfeeds it.
 
 ## Step: Patches sit under surfaces
 

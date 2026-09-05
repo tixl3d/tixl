@@ -5,13 +5,13 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// The routing graph of a setup, as queries: for any entity, what feeds it (producers, upstream) and what
-/// shows it (consumers, downstream), along the content → slice → surface/patch → output chain. The setup
-/// panel lights gutters from it, the flow outliner draws its edges from it, and the canvas fading rules
-/// read it. Plain loops into caller-owned buffers — this runs inside per-frame draws.
+/// shows it (consumers, downstream), along the content → slice → surface/patch → output chain. The flow
+/// outliner draws its connections and breadcrumb from it, and the canvas fading rules will read it.
+/// Plain loops into caller-owned buffers — this runs inside per-frame draws.
 /// </summary>
 internal static class SetupRelations
 {
-    /// <summary>One neighbour of an entity: a consumer sits downstream (lights its input side), a producer upstream.</summary>
+    /// <summary>One neighbour of an entity: a consumer sits downstream, a producer upstream.</summary>
     internal readonly record struct Relation(SetupEntitySelection.EntityKind Kind, Guid Id, bool IsConsumer);
 
     /// <summary>Every entity directly related to <paramref name="kind"/>/<paramref name="id"/>, both directions, into <paramref name="into"/>.</summary>
@@ -218,6 +218,27 @@ internal static class SetupRelations
         foreach (var mapping in surface.OutputMappings)
         {
             if (mapping.OutputId == outputId)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Whether any surface or patch shows this slice.</summary>
+    public static bool IsSliceShown(Setup setup, Guid sliceId)
+    {
+        if (sliceId == Guid.Empty)
+            return false;
+
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId == sliceId)
+                return true;
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            if (OutputShowsSlice(output, sliceId))
                 return true;
         }
 

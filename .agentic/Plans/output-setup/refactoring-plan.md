@@ -392,6 +392,17 @@ with an explanatory comment) — the row-callback API design made compliance imp
   thicker while an endpoint is hovered or selected. Drawn in a lower draw-list channel so the items stay on
   top and clickable. Deferred: clamp/fade stubs for scrolled-out items, mapping-stack badges at the output
   end, edge hit-testing (needs `EntityKind.Mapping`). Not yet user-tested.
+- **2026-09-05 (gutters retired, B.7 part):** with connections on screen the item decorations that mirrored
+  the routing went: trailing target icons + "×N" counts, routing name statuses, hover-lit input arrows and
+  the `_referenced` hover trace. `EntityItem.Args` lost `TrailingIcon`/`HighlightInputArrow`/`HighlightTrailing`;
+  `Status` is now only non-routing text (a plug's resolution). The click-to-bind arrow stays and its gutter is
+  reserved only while a bindable source is the primary. Not yet user-tested.
+- **2026-09-05 (B.5 + B.6):** Del on the focused strip deletes the selection (guarded by `IsAnyItemActive`,
+  so a rename field keeps the key). `OutputSetupHandling.StructureVersion` bumps in `SaveActive` — the one
+  funnel for every mutation; `SetupFlowOutliner.RefreshCaches` rebuilds the connection list, the unbound
+  outputs and the derived slice/patch labels only on a tick or a setup switch, and the breadcrumb follows
+  the same tick instead of a frame timer. Anchors still come from the draw pass (free, no allocation).
+  Not yet user-tested.
 
 ## Suggested order (revised for the flow-view pivot)
 

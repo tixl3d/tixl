@@ -33,11 +33,11 @@ internal sealed class EntityItem
         public Guid Id;
         public string Name;
 
-        /// <summary>Small right-aligned text in the trailing gutter (aspect, display binding, …).</summary>
+        /// <summary>Small muted text at the right end (a plug's resolution, an aspect warning) — never
+        /// routing, which the outliner's connections show.</summary>
         public string? Status;
 
         public Icon? LeadingIcon;
-        public Icon? TrailingIcon;
 
         /// <summary>Tree depth; only the content indents — the background stays full width.</summary>
         public int Depth;
@@ -58,12 +58,6 @@ internal sealed class EntityItem
         public SetupEntitySelection.EntityKind PrimaryKind;
 
         public Guid PrimaryId;
-
-        /// <summary>Cross-highlight: this item consumes the hovered feed (lights the input arrow).</summary>
-        public bool HighlightInputArrow;
-
-        /// <summary>Cross-highlight: this item feeds the primary or hovered one (brightens the trailing gutter).</summary>
-        public bool HighlightTrailing;
 
         /// <summary>The column the row spans, in screen px; a zero width means the whole window (the tree layout).</summary>
         public float ColumnMinX;
@@ -86,10 +80,15 @@ internal sealed class EntityItem
 
         var fade = args.Muted ? 0.45f : 1f;
 
-        // Rows that consume something own a left in-gutter (surfaces and patches take content, outputs take
-        // surfaces or content). The column is reserved whether or not a toggle is currently shown, so nothing
-        // shifts sideways when the selection changes.
-        var hasInputGutter = args.Kind is SetupEntitySelection.EntityKind.Surface
+        // The in-gutter exists for one gesture: with a source selected, clicking the arrow on an item that
+        // could take it binds or unbinds without dragging. It is reserved for every consumer item while any
+        // such source is the primary, so items don't shift relative to each other, and gone otherwise — the
+        // connections say what feeds what.
+        var bindContext = args.PrimaryKind is SetupEntitySelection.EntityKind.Slice
+                              or SetupEntitySelection.EntityKind.ContentSource
+                              or SetupEntitySelection.EntityKind.Surface;
+        var hasInputGutter = bindContext
+                             && args.Kind is SetupEntitySelection.EntityKind.Surface
                                  or SetupEntitySelection.EntityKind.Output
                                  or SetupEntitySelection.EntityKind.Patch;
         var gutterWidth = hasInputGutter ? Icons.FontSize + 4 * scale : 0;
@@ -226,12 +225,6 @@ internal sealed class EntityItem
             ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 4 * scale, iconY));
             Icons.DrawInlineGlyph(Icon.ArrowRight, overGutter ? UiColors.ForegroundFull.Rgba : color.Rgba);
         }
-        else if (hasInputGutter && args.HighlightInputArrow)
-        {
-            // This row consumes the hovered feed: point its input arrow back at it (read-only, no bind click).
-            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 4 * scale, iconY));
-            Icons.DrawInlineGlyph(Icon.ArrowRight, UiColors.StatusActivated.Rgba);
-        }
 
         var contentX = rowMin.X + 6 * scale + gutterWidth + indent;
         if (args.IsExpanded.HasValue)
@@ -304,45 +297,17 @@ internal sealed class EntityItem
                                           isSelected ? Fonts.FontBold : Fonts.FontNormal, UiColors.Text.Fade(fade));
         }
 
-        // Right-aligned trailing gutter "→ [count] [target-icon]": arrow, then the ×N count (if any), then the
-        // target type at the very edge. When this row feeds the selected item — or the hovered one — the whole
-        // group is bright StatusActivated so the source reads at a glance; otherwise the gutter is dim.
-        var isSource = args.HighlightTrailing;
-        if (!isRenaming && (isSource || args.TrailingIcon.HasValue || args.Status != null))
+        // Right-aligned status text, small and muted (FontSmall is shorter than the row's baseline — centre it on its own height).
+        if (!isRenaming && args.Status != null)
         {
             ImGui.PushFont(Fonts.FontSmall);
             var smallHeight = ImGui.GetTextLineHeight();
-            var statusWidth = args.Status != null ? ImGui.CalcTextSize(args.Status).X : 0;
+            var statusWidth = ImGui.CalcTextSize(args.Status).X;
             ImGui.PopFont();
 
-            var trailWidth = Icons.FontSize; // the direction arrow
-            if (args.Status != null)
-                trailWidth += statusWidth + 3 * scale;
-            if (args.TrailingIcon.HasValue)
-                trailWidth += Icons.FontSize + 3 * scale;
-
-            var arrowColor = isSource ? UiColors.StatusActivated : UiColors.TextMuted.Fade(0.3f * fade);
-            var textColor = isSource ? UiColors.StatusActivated : UiColors.TextMuted.Fade(fade);
-
-            var trailX = rowMax.X - 6 * scale - trailWidth;
-            ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
-            Icons.DrawInlineGlyph(Icon.ArrowRight, arrowColor.Rgba);
-            trailX = ImGui.GetItemRectMax().X + 3 * scale;
-
-            if (args.Status != null)
-            {
-                // FontSmall is shorter than the row's FontNormal baseline — center it on its own height.
-                var statusY = (float)Math.Round(rowMin.Y + (height - smallHeight) * 0.5f - 1 * scale);
-                ImGui.SetCursorScreenPos(new Vector2(trailX, statusY));
-                CustomComponents.StylizedText(args.Status, Fonts.FontSmall, textColor);
-                trailX += statusWidth + 3 * scale;
-            }
-
-            if (args.TrailingIcon.HasValue)
-            {
-                ImGui.SetCursorScreenPos(new Vector2(trailX, iconY));
-                Icons.DrawInlineGlyph(args.TrailingIcon.Value, textColor.Rgba);
-            }
+            var statusY = (float)Math.Round(rowMin.Y + (height - smallHeight) * 0.5f - 1 * scale);
+            ImGui.SetCursorScreenPos(new Vector2(rowMax.X - 6 * scale - statusWidth, statusY));
+            CustomComponents.StylizedText(args.Status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
         }
 
         // Next row starts a tight 2px below, independent of the content cursor above. Claimed with a zero-height

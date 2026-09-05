@@ -66,8 +66,16 @@ internal static class OutputSetupHandling
     }
 
     /// <summary>Persists the active setup and machine config of the focused project.</summary>
+    /// <summary>
+    /// Bumped on every save of the active setup or machine config — every mutation funnels through
+    /// <see cref="SaveActive"/> (commands, undo, sync, repair). Views key per-structure caches (labels,
+    /// connection lists) on it instead of rebuilding them per frame.
+    /// </summary>
+    public static int StructureVersion { get; private set; }
+
     public static void SaveActive()
     {
+        StructureVersion++;
         if (!TryGetFocusedEntry(out var entry, out var metaFolder))
             return;
 

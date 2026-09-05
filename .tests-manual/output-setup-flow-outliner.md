@@ -55,10 +55,10 @@ Click the SendToOutput op in the graph window.
 3. Drag the "SendToOutput" item (CONTENT) onto the "P1" item (OUTPUTS).
 
 **Expected:**
-- After 1: with "Surface 1" hovered, the input arrow at the left of "P1" lights up and the
-  trailing gutters of "Slice 1" and "SendToOutput" brighten. With "SendToOutput" hovered, the
-  input arrows of "Surface 1" and "Patch 1" light up. These are the same cross-highlights the
-  old panel showed, now reaching across columns.
+- After 1: with "Surface 1" hovered, its connections to "Slice 1" and to "P1" turn full blue
+  and thicker. With "SendToOutput" hovered nothing changes on the connections (they attach to
+  its slice, not to it). Items carry no trailing icons or routing text anymore; only a plug's
+  resolution remains as status.
 - After 2: "Patch 1" is selected, the Parameter window shows the Patch card, and the header
   breadcrumb reads "Slice 1 → Patch 1"; the context menu offers Use on Surface, Duplicate,
   Rename, Delete.
@@ -83,6 +83,19 @@ Click the SendToOutput op in the graph window.
   it ends at "Patch 1" again.
 - After 4: four curves fan out from "Slice 1" to "Patch 1" … "Patch 4", one per tile; the
   undo returns to one.
+
+## Step: Del deletes the selection
+
+**Action:**
+1. Click the "Patch 2" item, then press Del with the mouse still over the strip.
+2. Click "Patch 1", then double-click it to start renaming, press Del while the name field is
+   active, then Escape.
+3. Press Ctrl+Z.
+
+**Expected:**
+- After 1: "Patch 2" is gone from under "P1".
+- After 2: Del only edits the text; "Patch 1" survives.
+- After 3: "Patch 2" is back.
 
 ## Step: Bindings column reflects the machine
 
