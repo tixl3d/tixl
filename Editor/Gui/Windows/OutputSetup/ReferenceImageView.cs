@@ -8,6 +8,7 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Int2 = T3.Core.DataTypes.Vector.Int2;
@@ -234,10 +235,13 @@ internal sealed class ReferenceImageView
         ImGui.SameLine(0, 8 * T3Ui.UiScaleFactor);
         ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText($"{image.Name} · {image.Kind}", Fonts.FontSmall, UiColors.TextMuted);
-        ImGui.SetNextItemWidth(-1);
-        ImGui.InputTextWithHint("##path", "image file path", ref image.FilePath, 1024);
-        if (ImGui.IsItemDeactivatedAfterEdit())
+        string? path = image.FilePath;
+        var pathState = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, SetupActions.ImageFileFilter, ref path);
+        if ((pathState & InputEditStateFlags.Modified) != 0 && path != null && path != image.FilePath)
+        {
+            image.FilePath = path;
             OutputSetupHandling.SaveActive();
+        }
 
         if (hasTraced)
         {

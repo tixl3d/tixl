@@ -453,11 +453,12 @@ internal static class SetupParameterView
         if (image == null)
             return;
 
-        // Save-only, like the reference view's own field: the path is a pointer to an asset, not calibration.
+        // The project's image assets, through the same type-ahead picker the LoadImage op uses. Save-only:
+        // the address is a pointer to an asset, not calibration.
+        FormInputs.DrawInputLabel("Image");
         string? path = image.FilePath;
-        if (FormInputs.AddFilePicker("Image", ref path, "photo or plan file", null,
-                                     "Project-relative path of the photo or plan.", FileOperations.FilePickerTypes.File)
-            && path != null)
+        var pathState = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, SetupActions.ImageFileFilter, ref path);
+        if ((pathState & InputEditStateFlags.Modified) != 0 && path != null && path != image.FilePath)
         {
             image.FilePath = path;
             _referencePathDirty = true;
@@ -472,7 +473,7 @@ internal static class SetupParameterView
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(image.Width > 0
                                           ? $"{image.Width}×{image.Height} px · double-click its card on the Board to trace and straighten"
-                                          : "No image loaded yet.",
+                                          : "No image loaded yet — pick one above, or drop a photo onto the Board.",
                                       Fonts.FontSmall, UiColors.TextMuted);
     }
 

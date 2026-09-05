@@ -143,6 +143,23 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   Board, where the image card now shows the photo. The Parameter window's Reference Image
   card offers the same path field with a file picker.
 
+## Step: Reference images come from the asset system
+
+**Action:**
+1. Drag a JPG from Windows Explorer onto an empty spot of the Board and drop it.
+2. Open the Asset Library, drag one of the project's images onto the Board.
+3. Select the new "Image 1"-style card, and in the Parameter window click into the **Image**
+   field and type part of another image's name.
+
+**Expected:**
+- After 1: while hovering, a chip "Add as reference image" follows the cursor. On drop a new
+  reference image card with the photo appears where it was dropped, selected; the file now
+  exists under the project's Assets/images/reference folder and is listed in the Asset
+  Library. Ctrl+Z removes the card again (the file stays).
+- After 2: a card appears the same way, pointing at the existing asset — no copy is made.
+- After 3: a type-ahead list offers only image assets (png, jpg, ...); picking one swaps the
+  card's photo.
+
 ## Step: Layout persists
 
 **Action:**

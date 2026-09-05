@@ -6,8 +6,12 @@ using Newtonsoft.Json.Linq;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Logging;
 using T3.Core.Output;
+using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
@@ -536,6 +540,66 @@ internal static class SetupActions
                                              setup.Outputs.Add(output);
                                              selection.Select(SetupEntitySelection.EntityKind.Output, output.Id);
                                          });
+    }
+
+    /// <summary>The image asset type's extensions in the picker's comma-separated form, built once.</summary>
+    internal static string ImageFileFilter
+    {
+        get
+        {
+            if (_imageFileFilter != null)
+                return _imageFileFilter;
+
+            var extensions = new List<string>();
+            foreach (var id in AssetHandling.Images.ExtensionIds)
+            {
+                if (FileExtensionRegistry.TryGetExtensionForId(id, out var extension))
+                    extensions.Add(extension.TrimStart('.'));
+            }
+
+            _imageFileFilter = string.Join(',', extensions);
+            return _imageFileFilter;
+        }
+    }
+
+    /// <summary>
+    /// Adds a reference image for an asset — an image dropped from the Asset Library or the OS (the latter
+    /// imported into the project's <c>Assets/images/reference</c> first, unless it is already an asset).
+    /// Placed at <paramref name="boardPosition"/> on the Board and selected.
+    /// </summary>
+    internal static void AddReferenceImageFromFile(SetupEntitySelection selection, Setup setup, string addressOrPath, Vector2 boardPosition)
+    {
+        if (!AssetRegistry.TryGetAsset(addressOrPath, out var asset))
+        {
+            var package = ProjectView.Focused?.OpenedProject.Package;
+            if (package == null)
+                return;
+
+            var destination = Path.Combine(package.AssetsFolder, ReferenceImageFolder);
+            if (!FileImport.TryImportDroppedFile(addressOrPath, package, destination, out asset))
+            {
+                Log.Warning($"Can't import {addressOrPath} as a reference image.");
+                return;
+            }
+        }
+
+        if (asset.AssetType != AssetHandling.Images)
+        {
+            Log.Warning($"{asset.Address} is not an image.");
+            return;
+        }
+
+        RunUndoable("Add reference image", setup, () =>
+                                                  {
+                                                      var image = new ReferenceImage
+                                                                      {
+                                                                          Name = Path.GetFileNameWithoutExtension(asset.Address),
+                                                                          FilePath = asset.Address,
+                                                                          BoardPlacement = new CanvasPlacement { Position = boardPosition },
+                                                                      };
+                                                      setup.ReferenceImages.Add(image);
+                                                      selection.Select(SetupEntitySelection.EntityKind.ReferenceImage, image.Id);
+                                                  });
     }
 
     internal static void AddReferenceImage(SetupEntitySelection selection)
@@ -1369,6 +1433,10 @@ internal static class SetupActions
     }
 
     private static readonly List<SelectionTarget> _deleteBuffer = [];
+    private static string? _imageFileFilter;
+
+    /// <summary>Where dropped photos and plans land inside the project's assets folder.</summary>
+    private const string ReferenceImageFolder = "images/reference";
 
     // Lib SendToOutput op and its texture input — the CONTENT "+" instantiates this and wires a selected feed in.
     private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");

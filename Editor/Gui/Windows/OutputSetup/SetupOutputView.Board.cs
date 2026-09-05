@@ -185,7 +185,49 @@ internal sealed partial class SetupOutputView
         HandleBoardDrag(setup, selection);
         HandleBoardFence(selection);
         HandleBoardKeys(setup, selection);
+        HandleBoardDrop(setup, selection, dl, screenMin, screenMax);
         ResolvePicking(setup, selection);
+    }
+
+    /// <summary>
+    /// The whole Board is a drop zone for images: an asset from the Asset Library, or a file from the OS
+    /// (imported into the project first). Each becomes a reference image card where it was dropped.
+    /// </summary>
+    private void HandleBoardDrop(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, Vector2 screenMin, Vector2 screenMax)
+    {
+        if (selection == null)
+            return;
+
+        var area = new ImRect(screenMin, screenMax);
+        var assetResult = DragAndDropHandling.TryHandleDropOnRect(DragAndDropHandling.DragTypes.FileAsset, area, out var address);
+        var fileResult = DragAndDropHandling.TryHandleDropOnRect(DragAndDropHandling.DragTypes.ExternalFile, area, out var files);
+
+        if (assetResult == DragAndDropHandling.DragInteractionResult.Hovering || fileResult == DragAndDropHandling.DragInteractionResult.Hovering)
+        {
+            var scale = T3Ui.UiScaleFactor;
+            var mouse = ImGui.GetMousePos() + new Vector2(16, 16) * scale;
+            const string label = "Add as reference image";
+            var labelSize = ImGui.CalcTextSize(label);
+            dl.AddRectFilled(mouse - new Vector2(6, 4) * scale, mouse + labelSize + new Vector2(6, 4) * scale, UiColors.BackgroundFull.Fade(0.8f), 4 * scale);
+            dl.AddText(mouse, UiColors.ForegroundFull, label);
+            return;
+        }
+
+        var dropPosition = _boardProjection.ScreenToCanvas(ImGui.GetMousePos());
+        if (assetResult == DragAndDropHandling.DragInteractionResult.Dropped && !string.IsNullOrEmpty(address))
+        {
+            SetupActions.AddReferenceImageFromFile(selection, setup, address, dropPosition);
+            return;
+        }
+
+        if (fileResult != DragAndDropHandling.DragInteractionResult.Dropped || string.IsNullOrEmpty(files))
+            return;
+
+        foreach (var path in files.Split('|'))
+        {
+            SetupActions.AddReferenceImageFromFile(selection, setup, path, dropPosition);
+            dropPosition += new Vector2(0.2f, -0.2f);
+        }
     }
 
     /// <summary>A card: fill or thumbnail, outline by state, name chip with muted metadata, and its pick/grab area.</summary>
@@ -950,7 +992,19 @@ internal sealed partial class SetupOutputView
         }
 
         var texture = entry.Resource.GetValue(_boardContext!);
-        return texture is { IsDisposed: false } ? SrvManager.GetSrvForTexture(texture) : null;
+        if (texture is not { IsDisposed: false })
+            return null;
+
+        // The stored pixel size is what traces and measurements are in, and what the card and its metadata
+        // show — keep it in step with the loaded texture (persisted with the next save).
+        if (image.Width != texture.Description.Width || image.Height != texture.Description.Height)
+        {
+            image.Width = texture.Description.Width;
+            image.Height = texture.Description.Height;
+            _boardMetaVersion = -1;
+        }
+
+        return SrvManager.GetSrvForTexture(texture);
     }
 
     /// <summary>Board metres (Y up) on the pan/zoom canvas, whose y runs down.</summary>

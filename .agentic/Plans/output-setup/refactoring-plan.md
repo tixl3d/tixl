@@ -436,6 +436,13 @@ with an explanatory comment) — the row-callback API design made compliance imp
   origin): an edge crops, Ctrl stretches, the corner pin follows, one `ResizeSurfaceCommand` per drag. The
   fence guard now reads the Board's own gesture state instead of `IsAnyItemActive` (a background press
   makes the window's move-id active, which vetoed every fence).
+- **2026-09-05 (reference images via assets):** the Image field (Parameter window card and reference
+  view) is the LoadImage-style type-ahead asset picker filtered to the image asset type
+  (`SetupActions.ImageFileFilter`); `ReferenceImage.FilePath` holds an asset address. The Board is a drop
+  zone (`HandleBoardDrop`): an Asset Library image or an OS file becomes a reference image card at the drop
+  point (`SetupActions.AddReferenceImageFromFile`, importing OS files into `Assets/images/reference` via
+  `FileImport` unless they already are assets). Styling of Board cards and outliner items deliberately
+  deferred (user, 2026-09-05) in favour of riskier work.
 
 ## Suggested order (revised for the flow-view pivot)
 
