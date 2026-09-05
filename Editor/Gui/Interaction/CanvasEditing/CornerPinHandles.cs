@@ -28,6 +28,9 @@ internal static class CornerPinHandles
         public string? Label;
         public bool Editable;
 
+        /// <summary>Squares read as "crop along the edge"; a caller whose edge drag scales instead shows circles.</summary>
+        public CanvasPointHandle.Shape EdgeHandleShape;
+
         /// <summary>
         /// A surface quad. Blue means "selected" — an unselected surface stays neutral so the two read apart at
         /// a glance. Handles are white with a blue rim when selected, and recede when not.
@@ -53,6 +56,7 @@ internal static class CornerPinHandles
                            DrawChecker = true,
                            Label = label,
                            Editable = editable,
+                           EdgeHandleShape = CanvasPointHandle.Shape.Square,
                        };
         }
     }
@@ -153,7 +157,7 @@ internal static class CornerPinHandles
         {
             ImGui.PushID(i);
             var midpoint = (corners[i] + corners[(i + 1) % 4]) * 0.5f;
-            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Square, style.Editable);
+            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, style.EdgeHandleShape, style.Editable);
             handleStyle.OutlineColor = style.HandleOutlineColor;
             handleStyle.Radius = 4;
 

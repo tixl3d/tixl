@@ -8,6 +8,7 @@ using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -111,7 +112,8 @@ internal sealed partial class SetupOutputView
         var pixelsPerMeter = MathF.Abs(_boardCanvas.Scale.X);
         MetricGridRaster.Draw(dl, _boardProjection, screenMin, screenMax, pixelsPerMeter, _boardDragKind != SetupEntitySelection.EntityKind.None ? 1f : 0.6f);
 
-        if (_boardMetaVersion != OutputSetupHandling.StructureVersion)
+        // A live edge crop changes a size the metadata shows — rebuilt per frame only while one runs.
+        if (_boardMetaVersion != OutputSetupHandling.StructureVersion || _resizeOldState != null)
             RefreshBoardMeta(setup, machineConfig);
 
         // Fully inside a space nothing of the Board is left to draw or to click.
@@ -207,8 +209,10 @@ internal sealed partial class SetupOutputView
             if (!TryGetBoardBounds(setup, SetupEntitySelection.EntityKind.Surface, surface.Id, out var min, out var max))
                 continue;
 
+            // A traced surface wears the straightened crop of its photo — what the wall looks like.
+            TryGetTracedFragment(setup, surface, out var fragment, out var uvMin, out var uvMax);
             DrawBoardCard(setup, selection, dl, SetupEntitySelection.EntityKind.Surface, surface.Id, min, max,
-                          surface.Name, BoardMeta(surface.Id), null, false);
+                          surface.Name, BoardMeta(surface.Id), fragment, true, uvMin, uvMax);
             DrawBoardRegions(setup, selection, dl, surface, min + surface.AnchorInMeters);
         }
 
@@ -300,7 +304,8 @@ internal sealed partial class SetupOutputView
     /// <summary>A card: fill or thumbnail, outline by state, name chip with muted metadata, and its pick/grab area.</summary>
     private void DrawBoardCard(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl,
                                SetupEntitySelection.EntityKind kind, Guid id, Vector2 min, Vector2 max,
-                               string name, string? meta, SharpDX.Direct3D11.ShaderResourceView? srv, bool scalable)
+                               string name, string? meta, SharpDX.Direct3D11.ShaderResourceView? srv, bool scalable,
+                               Vector2 uvMin = default, Vector2? uvMax = null)
     {
         var scale = T3Ui.UiScaleFactor;
         var fade = _boardLayerFade;
@@ -316,9 +321,20 @@ internal sealed partial class SetupOutputView
             FrameStats.PulseItemWithId(id);
 
         if (srv is { IsDisposed: false })
-            dl.AddImage(srv.NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, UiColors.ForegroundFull.Fade(fade));
+            dl.AddImage(srv.NativePointer, sMin, sMax, uvMin, uvMax ?? Vector2.One, UiColors.ForegroundFull.Fade(fade));
         else
             dl.AddRectFilled(sMin, sMax, UiColors.BackgroundPopup.Fade(0.85f * fade));
+
+        // A surface's content over its photo backdrop, at the preview opacity — the same look as on the traced quad.
+        var preview = UserSettings.Config.OutputSetupContentPreview;
+        if (kind == SetupEntitySelection.EntityKind.Surface && preview > 0.01f
+            && OutputManager.TryGetSurfaceSlice(id, out _, out var surfaceContent, out var contentUv) && surfaceContent is { IsDisposed: false })
+        {
+            var contentSrv = SrvManager.GetSrvForTexture(surfaceContent);
+            if (contentSrv is { IsDisposed: false })
+                dl.AddImage(contentSrv.NativePointer, sMin, sMax, new Vector2(contentUv.X, contentUv.Y), new Vector2(contentUv.Z, contentUv.W),
+                            UiColors.ForegroundFull.Fade(preview * fade));
+        }
 
         if (isSelected)
             dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(0.12f * fade));
@@ -365,32 +381,91 @@ internal sealed partial class SetupOutputView
         }
 
         if (kind == SetupEntitySelection.EntityKind.Surface && isSelected && setup.FindSurface(id) is { } surface)
-            DrawBoardSurfaceEdges(surface, min, max);
+            DrawBoardSurfaceEdges(setup, surface, min, max);
 
-        // Presentation scale of a pixel card: a square handle at the top-right corner. It changes only the
-        // card's px-per-metre on the Board — never resolution, routing or projection.
+        // The scale handle at the top-right corner. On a pixel card (square) it is presentation only — the
+        // card's px-per-metre, never resolution, routing or projection. On a surface (circle) it is physical:
+        // the wall grows or shrinks with its aspect kept, everything on it scaling along.
         if (scalable && isSelected)
         {
+            var isSurface = kind == SetupEntitySelection.EntityKind.Surface;
             var corner = new Vector2(max.X, max.Y);
-            var style = CanvasPointHandle.Style.Default(UiColors.ForegroundFull, CanvasPointHandle.Shape.Square, true);
+            var style = CanvasPointHandle.Style.Default(UiColors.ForegroundFull, isSurface ? CanvasPointHandle.Shape.Circle : CanvasPointHandle.Shape.Square, true);
             ImGui.PushID(id.GetHashCode());
             var phase = CanvasPointHandle.Draw(ref corner, _boardProjection, style);
             ImGui.PopID();
             if (phase == CanvasPointHandle.DragPhase.Started)
-                _boardGestureOldJson = setup.ToJsonString();
-
-            if (phase == CanvasPointHandle.DragPhase.Dragging && TryGetPlacement(setup, kind, id, out var placement))
             {
-                var pixelWidth = BoardPixelSize(setup, kind, id).X;
-                var newWidth = MathF.Max(corner.X - min.X, 0.05f);
-                placement.PixelsPerMeter = Math.Clamp(pixelWidth / newWidth, 10f, 100000f);
+                _boardGestureOldJson = setup.ToJsonString();
+                _boardScaleStartWidth = max.X - min.X;
+                _boardScaleApplied = Vector2.One;
+            }
+
+            if (phase == CanvasPointHandle.DragPhase.Dragging)
+            {
+                if (isSurface && setup.FindSurface(id) is { } scaledSurface)
+                {
+                    var factor = MathF.Max(corner.X - min.X, SurfaceGeometry.MinSize) / MathF.Max(_boardScaleStartWidth, SurfaceGeometry.MinSize);
+                    ApplyBoardScale(setup, scaledSurface, new Vector2(factor, factor), fixedCorner: 3);
+                }
+                else if (TryGetPlacement(setup, kind, id, out var placement))
+                {
+                    var pixelWidth = BoardPixelSize(setup, kind, id).X;
+                    var newWidth = MathF.Max(corner.X - min.X, 0.05f);
+                    placement.PixelsPerMeter = Math.Clamp(pixelWidth / newWidth, 10f, 100000f);
+                }
             }
 
             if (phase == CanvasPointHandle.DragPhase.Completed)
-                CommitBoardGesture(setup, "Scale card");
+                CommitBoardGesture(setup, isSurface ? "Scale surface" : "Scale card");
 
             if (ImGui.IsItemHovered())
-                CustomComponents.TooltipForLastItem("Presentation scale", "Changes how big the card is on the Board — nothing about its pixels, routing or projection.");
+            {
+                if (isSurface)
+                    CustomComponents.TooltipForLastItem("Scale", "Changes the surface's real size, aspect kept; regions and lines scale with it.");
+                else
+                    CustomComponents.TooltipForLastItem("Presentation scale", "Changes how big the card is on the Board — nothing about its pixels, routing or projection.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Scales a surface about one of its corners (TL, TR, BR, BL of its own rectangle) by the total
+    /// <paramref name="factor"/> since the gesture began: the footprint, the corner pins (re-projected), the
+    /// measuring lines and the regions all scale together. Applied incrementally, so a live drag never
+    /// compounds and never needs a per-frame restore of the whole subtree.
+    /// </summary>
+    private void ApplyBoardScale(Setup setup, Surface surface, Vector2 factor, int fixedCorner)
+    {
+        var increment = new Vector2(factor.X / MathF.Max(_boardScaleApplied.X, 0.0001f), factor.Y / MathF.Max(_boardScaleApplied.Y, 0.0001f));
+        _boardScaleApplied = factor;
+
+        SurfaceGeometry.LocalBounds(surface, out var min, out var max);
+        var fixedPoint = fixedCorner switch
+                             {
+                                 0 => new Vector2(min.X, max.Y),
+                                 1 => max,
+                                 2 => new Vector2(max.X, min.Y),
+                                 _ => min,
+                             };
+        var newMin = fixedPoint + (min - fixedPoint) * increment;
+        var newMax = fixedPoint + (max - fixedPoint) * increment;
+        SurfaceGeometry.ApplyBounds(surface, newMin, newMax);
+
+        foreach (var annotation in surface.Annotations)
+        {
+            annotation.P1 = fixedPoint + (annotation.P1 - fixedPoint) * increment;
+            annotation.P2 = fixedPoint + (annotation.P2 - fixedPoint) * increment;
+        }
+
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            var child = setup.Surfaces[i];
+            if (child.ParentId != surface.Id)
+                continue;
+
+            child.LocalPosition = fixedPoint + (child.LocalPosition - fixedPoint) * increment;
+            ScaleSurfaceMetric(setup, child, increment);
         }
     }
 
@@ -399,28 +474,88 @@ internal sealed partial class SetupOutputView
     /// stretches instead), the anchor — the card's placement — stays put, and the corner pin follows through
     /// the same <see cref="RunResizeDrag"/> skeleton, one undo step per drag.
     /// </summary>
-    private void DrawBoardSurfaceEdges(Surface surface, Vector2 min, Vector2 max)
+    private void DrawBoardSurfaceEdges(Setup setup, Surface surface, Vector2 min, Vector2 max)
     {
         _boardEdgeQuad[0] = new Vector2(min.X, max.Y);
         _boardEdgeQuad[1] = max;
         _boardEdgeQuad[2] = new Vector2(max.X, min.Y);
         _boardEdgeQuad[3] = min;
 
+        // Plain: an edge crops the footprint (squares). Ctrl: it scales the surface along that axis, aspect free
+        // (circles) — the mode is read at the press and held for the drag.
+        var scaling = _resizeOldState != null ? _boardEdgeScaling : ImGui.GetIO().KeyCtrl;
         ImGui.PushID(surface.Id.GetHashCode());
         var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true);
+        style.EdgeHandleShape = scaling ? CanvasPointHandle.Shape.Circle : CanvasPointHandle.Shape.Square;
         var phase = CornerPinHandles.DrawEdgeHandles(_boardEdgeQuad, _boardProjection, style, out var edge, out var edgePos);
         ImGui.PopID();
         if (edge < 0)
             return;
 
-        RunResizeDrag(phase, surface, () =>
-                                      {
-                                          // Re-based on the pre-drag rectangle, so the edit doesn't compound; the anchor is the
-                                          // origin of surface space and sits at the card's placement.
-                                          _resizeOldState!.Value.Restore(surface);
-                                          var origin = surface.BoardPlacement?.Position ?? Vector2.Zero;
-                                          SurfaceGeometry.DragEdge(surface, edge, edgePos - origin, ImGui.GetIO().KeyCtrl);
-                                      });
+        // The crop rides the setup snapshot rather than the resize command: a traced surface's trace crops along,
+        // and that quad is not part of the resize state.
+        switch (phase)
+        {
+            case CanvasPointHandle.DragPhase.Started:
+                _resizeOldState = new ResizeSurfaceCommand.State(surface);
+                _edgeDragSurfaceId = surface.Id;
+                _boardEdgeScaling = scaling;
+                _boardScaleApplied = Vector2.One;
+                SurfaceGeometry.LocalBounds(surface, out _boardEdgeStartMin, out _boardEdgeStartMax);
+                _boardGestureOldJson = setup.ToJsonString();
+                if (surface.Reference is { Quad.Length: >= 4 })
+                    Array.Copy(surface.Reference.Quad, _boardEdgeOldTrace, 4);
+
+                break;
+
+            case CanvasPointHandle.DragPhase.Dragging when _resizeOldState != null && _boardEdgeScaling:
+            {
+                // Scale along the dragged edge's axis, the opposite edge fixed; the trace is the same wall, so it stays.
+                var origin = surface.BoardPlacement?.Position ?? Vector2.Zero;
+                var pos = edgePos - origin;
+                var startSize = Vector2.Max(_boardEdgeStartMax - _boardEdgeStartMin, new Vector2(SurfaceGeometry.MinSize));
+                var factor = Vector2.One;
+                var fixedCorner = 3;
+                switch (edge)
+                {
+                    case 0: factor.Y = MathF.Max(pos.Y - _boardEdgeStartMin.Y, SurfaceGeometry.MinSize) / startSize.Y; fixedCorner = 3; break;
+                    case 1: factor.X = MathF.Max(pos.X - _boardEdgeStartMin.X, SurfaceGeometry.MinSize) / startSize.X; fixedCorner = 3; break;
+                    case 2: factor.Y = MathF.Max(_boardEdgeStartMax.Y - pos.Y, SurfaceGeometry.MinSize) / startSize.Y; fixedCorner = 1; break;
+                    default: factor.X = MathF.Max(_boardEdgeStartMax.X - pos.X, SurfaceGeometry.MinSize) / startSize.X; fixedCorner = 1; break;
+                }
+
+                ApplyBoardScale(setup, surface, factor, fixedCorner);
+                break;
+            }
+
+            case CanvasPointHandle.DragPhase.Dragging when _resizeOldState != null:
+            {
+                // Re-based on the pre-drag rectangle, so the edit doesn't compound; the anchor is the origin of
+                // surface space and sits at the card's placement.
+                _resizeOldState.Value.Restore(surface);
+                var oldRect = SurfaceGeometry.LocalRect(surface);
+                var origin = surface.BoardPlacement?.Position ?? Vector2.Zero;
+                SurfaceGeometry.DragEdge(surface, edge, edgePos - origin, keepDimensions: false);
+
+                // The trace is the same wall seen in the photo: the cropped rectangle maps through the old
+                // rectangle's projection into the photo, so the traced quad crops with it.
+                if (surface.Reference is { Quad.Length: >= 4 } binding
+                    && Homography.TryComputeQuadToQuad(oldRect, _boardEdgeOldTrace, out var surfaceToPhoto))
+                {
+                    var newRect = SurfaceGeometry.LocalRect(surface);
+                    for (var c = 0; c < 4; c++)
+                        binding.Quad[c] = surfaceToPhoto.TransformPoint(newRect[c]);
+                }
+
+                break;
+            }
+
+            case CanvasPointHandle.DragPhase.Completed:
+                _resizeOldState = null;
+                _edgeDragSurfaceId = Guid.Empty;
+                CommitBoardGesture(setup, _boardEdgeScaling ? "Scale surface" : "Crop surface");
+                break;
+        }
     }
 
     /// <summary>
@@ -1112,6 +1247,14 @@ internal sealed partial class SetupOutputView
     private Guid _boardFittedSetupId;
     private readonly Vector2[] _boardQuad = new Vector2[4];
     private readonly Vector2[] _boardEdgeQuad = new Vector2[4];
+    private readonly Vector2[] _boardEdgeOldTrace = new Vector2[4];
+
+    // Scale gestures (top-right handle, Ctrl + edge): the mode held for the drag, the start bounds, and the
+    // total factor applied so far — the increment per frame is total / applied.
+    private bool _boardEdgeScaling;
+    private Vector2 _boardEdgeStartMin, _boardEdgeStartMax;
+    private float _boardScaleStartWidth;
+    private Vector2 _boardScaleApplied = Vector2.One;
 
     // Press → drag handoff for cards, and the live drag (every selected card, from its start position).
     private Vector2? _boardGrabScreen;

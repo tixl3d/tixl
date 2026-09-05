@@ -103,7 +103,35 @@ zooming in on one corner of it; then zoom all the way out.
 - After 2: the card grows the same way but the metadata stays "1×1 m" (a stretch, not a
   crop); the undo restores it.
 
-## Step: Focus key
+## Step: Content preview opacity
+
+**Action:**
+With a traced surface that shows a slice, drag the "Content" percent field in the canvas header
+down to 0%, then up to 100% (or double-click it and type).
+
+**Expected:**
+- At 0% the traced quad on the image card and the surface card show only the photo; at 100%
+  the slice covers both fully; in between it blends. The value survives a restart.
+
+## Step: Scaling a surface on the Board
+
+**Action:**
+1. Select "Surface 1" on the Board and drag the round handle at its top-right corner outward
+   until the card is about twice as wide; release; Ctrl+Z.
+2. Hold Ctrl, then drag the right edge handle (it turns into a circle) 0.5 m to the right;
+   release; Ctrl+Z.
+3. Without Ctrl, drag the same edge handle (a square) 0.5 m to the right; Ctrl+Z.
+
+**Expected:**
+- After 1: the surface doubles in both dimensions, its aspect kept; a region inside it and any
+  measuring lines scale with it, and on the Output tab its corner-pin quad covers a
+  correspondingly larger area. The metadata reads the new size while dragging. Undo restores
+  everything in one step.
+- After 2: only the width grows; regions and lines stretch along X; the green traced quad on
+  the image card stays where it was (the wall in the photo did not change).
+- After 3: the crop from the earlier step: the width grows, the raster spacing and the
+  regions stay put, and the traced quad on the image card crops along.
+
 
 **Action:**
 1. Select the figure, move the mouse over the Board and press **F** (the Focus Selection key).
@@ -131,8 +159,8 @@ its width. Then open the Output tab and check the send's Resolution in the Param
    the Board tab.
 2. Double-click the content card, then click the **Board** button at the left of the canvas
    header.
-3. Double-click the reference image card, set a path in its header field if none is set, then
-   click its **Board** button.
+3. Double-click the reference image card (pick an image in the Parameter window first if it
+   has none), then click its **Board** button.
 
 **Expected:**
 - After 1: entering is one continuous move on the same canvas, about half a second: the view
@@ -144,9 +172,80 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 - After 2: the view zooms onto the content card and the texture with the slice takes the
   card's place, the rest fading; the Board button returns to the Board with the content card
   selected.
-- After 3: the reference view opens (photo, trace buttons; still its own canvas); the Board
-  button returns to the Board, where the image card now shows the photo. The Parameter
-  window's Reference Image card offers the same path field with a file picker.
+- After 3: the same fold onto the image card: the view zooms onto the photo, the other cards
+  fade. The header reads the image's name and kind. The Board button folds back to the Board,
+  where the image card shows the photo.
+
+## Step: Tracing surfaces on a photo
+
+**Action:**
+1. On the Board, right-click the reference image card and choose **Trace New Surface**.
+2. Double-click the image card. Drag the four round corner handles of the new quad onto the
+   corners of a wall in the photo. Press Ctrl+Z once, then Ctrl+Y.
+3. Click the **Straight** button in the header, then **Photo**.
+4. Click the **Board** button. Right-click the image card again and choose **Trace Surface 1
+   Here** (any untraced surface).
+
+**Expected:**
+- After 1: a new surface "Surface N" appears in the SURFACES column, selected, and a green
+  quad with its name is drawn over the middle of the image card on the Board — with live round
+  corner handles, since the surface is selected (they also show while the image itself is
+  selected, and go away when neither is).
+- After 2: inside the image's space the quad has live corner handles; the first corner drag
+  selects the surface; dropping a corner is one undo step. Ctrl+Z moves the corner back,
+  Ctrl+Y forward. The header shows the surface's name beside the Photo / Straight buttons.
+- After 3: the photo warps over about half a second so the traced quad becomes an upright
+  rectangle with the surface's own aspect (Size in the Parameter window), drawn at full
+  opacity inside a green frame while the rest of the photo dims and the photo's own frame
+  and the label fade; the view settles on that rectangle. Photo eases it back and the
+  handles return.
+- After 4: back on the Board both traced quads sit on the image card in green; clicking a
+  quad's name selects that surface without leaving the Board, and its corners can be dragged
+  right there, one undo step per drag.
+
+## Step: Straight on a traced surface stays on the photo
+
+**Action:**
+1. On the Board select "Surface 1" (traced and mapped to P1) and click the **Straight** tab.
+2. With Straight still active, click the other traced surface's item in the SURFACES column,
+   then "Surface 1" again.
+3. Click the **Board** tab.
+
+**Expected:**
+- After 1: one continuous move of about half a second, entirely on the image card: the view
+  zooms onto the traced quad, the photo warps in place until the quad is an upright rectangle
+  with the surface's aspect, the rest of the photo dims and the label fades. The surface's
+  own card elsewhere on the Board is not involved; no "Projector Camera" header appears
+  (it is on the Calibrate tab only), so nothing shifts at the start.
+- After 2: the scene turns from one rectified wall to the other, the warp and the view easing
+  together rather than cutting, and back.
+- After 3: the photo relaxes back to its unwarped state and the view returns to the Board.
+
+## Step: Editing on the straightened photo
+
+**Action:**
+1. With "Surface 1" straightened (previous step), drag its right edge handle 100 px further
+   right, release; press Ctrl+Z.
+2. Drag its top-right corner handle up by 50 px, release.
+3. Click **+ Line** in the header and drag along a mortar line of the brick wall; repeat for a
+   vertical feature (a door frame); click **Straighten**.
+4. Double-click one of the lines, type its real length in metres, **Set**, then **Apply lengths**.
+5. Click the **Board** tab.
+
+**Expected:**
+- After 1: the rectangle itself stays put; while dragging, the photo re-warps live so the
+  wall's edge is pulled into the frame's edge, and nothing moves on release. Ctrl+Z restores
+  the previous trace in one step.
+- After 2: the same for a corner: dragging pulls the wall's corner into the frame's corner,
+  live; the frame never re-centres.
+- After 3: the lines are drawn in the alignment colours; Straighten refines the trace so both
+  lines come out level and plumb, with the photo easing to the result.
+- After 4: the surface's Size in the Parameter window changes so the measured line reads its
+  real length.
+- After 5: on the Board the "Surface 1" card now shows the straightened crop of the photo as
+  its backdrop; its metadata reads the new size. Dragging an edge handle of that card changes
+  the metadata while dragging, and the green traced quad on the image card crops along with
+  it.
 
 ## Step: Reference images come from the asset system
 

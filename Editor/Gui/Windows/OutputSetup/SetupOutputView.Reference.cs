@@ -167,6 +167,7 @@ internal sealed partial class SetupOutputView
         var t = _referenceStraighten;
         if (hasSubject && t > 0.001f
             && TryRenderStraightened(image, _referenceSubjectQuad, targetMin, targetMax, texture, t,
+                                     image.Id, 4096f,
                                      out var warped, out var bboxMin, out var bboxMax, out var regionMin, out var regionMax)
             && warped is { IsDisposed: false })
         {
@@ -202,6 +203,13 @@ internal sealed partial class SetupOutputView
 
             _probeSurfaceCentre = (screenQuad[0] + screenQuad[2]) * 0.5f;
             SampleTransitionMetrics();
+
+            // Settled: the rectified rect is editable (corners and edges refine the trace through the frozen
+            // rectification), and the measuring lines live on it.
+            var settled = _referenceProgress >= 1f && _referenceSubjectProgress >= 1f && _spaceBlend >= 1f && t >= 0.999f;
+            if (settled || _referenceEditActive)
+                DrawStraightEdits(setup, dl, subject!, targetMin, targetMax);
+
             return;
         }
 
@@ -236,9 +244,10 @@ internal sealed partial class SetupOutputView
             var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, surface.Id) ?? false;
             var pulse = isSelected ? 0f : FrameStats.GetPulse(surface.Id);
 
-            // What the surface shows, laid into its trace — the wall with its content, as it will be. Faded, so
-            // the photo stays the reference; per-triangle, which is close enough for a preview.
-            if (OutputManager.TryGetSurfaceSlice(surface.Id, out _, out var content, out var uv) && content is { IsDisposed: false })
+            // What the surface shows, laid into its trace — the wall with its content, as it will be. At the
+            // preview opacity, so the photo stays the reference; per-triangle, which is close enough for a preview.
+            var preview = UserSettings.Config.OutputSetupContentPreview;
+            if (preview > 0.01f && OutputManager.TryGetSurfaceSlice(surface.Id, out _, out var content, out var uv) && content is { IsDisposed: false })
             {
                 var contentSrv = SrvManager.GetSrvForTexture(content);
                 if (contentSrv is { IsDisposed: false })
@@ -248,7 +257,7 @@ internal sealed partial class SetupOutputView
 
                     dl.AddImageQuad(contentSrv.NativePointer, screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3],
                                     new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.Y), new Vector2(uv.Z, uv.W), new Vector2(uv.X, uv.W),
-                                    UiColors.ForegroundFull.Fade(0.65f * fade));
+                                    UiColors.ForegroundFull.Fade(preview * fade));
                 }
             }
 
@@ -307,6 +316,7 @@ internal sealed partial class SetupOutputView
     /// photo's warped corners in <see cref="_referencePhotoQuad"/>.
     /// </summary>
     private static bool TryRenderStraightened(ReferenceImage image, Vector2[] quad, Vector2 targetMin, Vector2 targetMax, Texture2D texture, float t,
+                                              Guid targetKey, float maxDimension,
                                               out Texture2D? warped, out Vector2 bboxMin, out Vector2 bboxMax, out Vector2 regionMin, out Vector2 regionMax)
     {
         warped = null;
@@ -345,7 +355,7 @@ internal sealed partial class SetupOutputView
 
         var bboxSize = bboxMax - bboxMin;
         var maxDim = Math.Max(bboxSize.X, bboxSize.Y);
-        var renderScale = maxDim > 4096f ? 4096f / maxDim : 1f;
+        var renderScale = maxDim > maxDimension ? maxDimension / maxDim : 1f;
         var rtSize = new Int2(Math.Max(1, (int)(bboxSize.X * renderScale)), Math.Max(1, (int)(bboxSize.Y * renderScale)));
 
         _referenceWarpDest[0] = (dest[0] - bboxMin) * renderScale;
@@ -353,7 +363,7 @@ internal sealed partial class SetupOutputView
         _referenceWarpDest[2] = (dest[2] - bboxMin) * renderScale;
         _referenceWarpDest[3] = (dest[3] - bboxMin) * renderScale;
 
-        warped = OutputManager.RenderWarpedTexture(texture, _referenceWarpDest, rtSize);
+        warped = OutputManager.RenderWarpedTexture(texture, _referenceWarpDest, rtSize, targetKey);
         return warped is { IsDisposed: false };
     }
 
@@ -365,11 +375,20 @@ internal sealed partial class SetupOutputView
     private void ResolveStraightSubject(Surface subject, out Vector2 targetMin, out Vector2 targetMax)
     {
         var quad = subject.Reference!.Quad;
-        StraightTargetBounds(subject, out targetMin, out targetMax);
+
+        // The rect is where the wall was first put upright; refining the trace must not move or re-centre it.
+        // It is re-derived only for a new subject or a changed physical size (which changes its aspect).
+        if (subject.Id != _referenceSubjectId || subject.SizeInMeters != _referenceStickySize)
+        {
+            StraightTargetBounds(subject, out _referenceStickyMin, out _referenceStickyMax);
+            _referenceStickySize = subject.SizeInMeters;
+        }
+
+        targetMin = _referenceStickyMin;
+        targetMax = _referenceStickyMax;
 
         if (subject.Id != _referenceSubjectId)
         {
-            T3.Core.Logging.Log.Debug($"[fold-subject] {_referenceSubjectId} -> {subject.Name} straighten={_referenceStraighten:0.00} target={_referenceStraightenTarget} eases={_referenceSubjectId != Guid.Empty && _referenceStraighten > 0.001f}");
             if (_referenceSubjectId != Guid.Empty && _referenceStraighten > 0.001f)
             {
                 Array.Copy(_referenceSubjectQuad, _referenceSubjectFromQuad, 4);
@@ -404,6 +423,118 @@ internal sealed partial class SetupOutputView
 
         _referenceSubjectLastMin = targetMin;
         _referenceSubjectLastMax = targetMax;
+    }
+
+    /// <summary>
+    /// Handles on the rectified rect. The rect stays fixed and upright; dragging a corner or an edge moves the
+    /// traced quad live so the photo re-warps under it — you pull the wall's corner (or edge) into the frame.
+    /// The mapping from handle to photo is the rectification at press time, so the drag can't chase its own
+    /// re-warp; on release nothing moves. One undo step per drag. The surface's measuring lines are drawn and
+    /// edited here too, mapped from surface metres onto the rect.
+    /// </summary>
+    private void DrawStraightEdits(Setup setup, ImDrawListPtr dl, Surface subject, Vector2 targetMin, Vector2 targetMax)
+    {
+        var binding = subject.Reference!;
+        var rect = RectCorners(targetMin, targetMax);
+        Array.Copy(rect, _referenceRectQuad, 4);
+        if (!_referenceEditActive && !Homography.TryComputeQuadToQuad(rect, binding.Quad, out _referenceEditToPhoto))
+            return;
+
+        ImGui.PushID("straightEdit");
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true);
+        style.DrawChecker = false;
+        style.EdgeColor = SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface);
+        var cornerPhase = CornerPinHandles.Draw(_referenceRectQuad, _projection, style, out var draggedCorner);
+        var edgePhase = CanvasPointHandle.DragPhase.None;
+        var edge = -1;
+        var edgePos = Vector2.Zero;
+        if (cornerPhase == CanvasPointHandle.DragPhase.None)
+            edgePhase = CornerPinHandles.DrawEdgeHandles(_referenceRectQuad, _projection, style, out edge, out edgePos);
+
+        ImGui.PopID();
+
+        // An edge moves along its normal only: a crop of the trace, axis-aligned on the rectified wall.
+        if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhase.None)
+        {
+            switch (edge)
+            {
+                case 0: _referenceRectQuad[0].Y = _referenceRectQuad[1].Y = edgePos.Y; break;
+                case 1: _referenceRectQuad[1].X = _referenceRectQuad[2].X = edgePos.X; break;
+                case 2: _referenceRectQuad[2].Y = _referenceRectQuad[3].Y = edgePos.Y; break;
+                default: _referenceRectQuad[3].X = _referenceRectQuad[0].X = edgePos.X; break;
+            }
+        }
+
+        var phase = cornerPhase != CanvasPointHandle.DragPhase.None ? cornerPhase : edgePhase;
+        if (phase == CanvasPointHandle.DragPhase.Started)
+        {
+            _referenceEditActive = true;
+            _boardGestureOldJson = setup.ToJsonString();
+        }
+
+        // Only a live phase carries a handle position; on the release frame the handles already sit back on the
+        // rect's corners, so applying then would undo the whole drag.
+        if (phase is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging && _referenceEditActive)
+        {
+            // The handle's position through the press-time rectification is where that corner lies in the photo.
+            if (draggedCorner >= 0)
+                binding.Quad[draggedCorner] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[draggedCorner]);
+            else if (edge >= 0)
+            {
+                var a = edge;
+                var b = (edge + 1) % 4;
+                binding.Quad[a] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[a]);
+                binding.Quad[b] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[b]);
+            }
+        }
+
+        if (phase == CanvasPointHandle.DragPhase.Completed)
+        {
+            _referenceEditActive = false;
+            CommitBoardGesture(setup, "Refine trace");
+        }
+
+        // Measuring lines: surface metres ↔ the rectified rect, a plain scale (Y up in metres, down in px).
+        if (!_referenceEditActive
+            && Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(subject), rect, out var surfaceToRect)
+            && Homography.TryComputeQuadToQuad(rect, SurfaceGeometry.LocalRect(subject), out var rectToSurface))
+        {
+            DrawAnnotations(dl, subject, surfaceToRect, rectToSurface, Vector2.Zero, editable: true, fade: 1f, projected: false);
+        }
+    }
+
+    /// <summary>
+    /// The straightened crop of the photo a traced surface stands for, for its Board card: the warp rendered
+    /// small into the surface's own target, and the uv window of the rectified region inside it.
+    /// </summary>
+    private bool TryGetTracedFragment(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Vector2 uvMin, out Vector2 uvMax)
+    {
+        srv = null;
+        uvMin = Vector2.Zero;
+        uvMax = Vector2.One;
+        var binding = surface.Reference;
+        if (binding == null || binding.Quad.Length < 4)
+            return false;
+
+        var image = setup.FindReferenceImage(binding.ImageId);
+        var texture = image == null ? null : TryGetReferenceTexture(image);
+        if (image == null || texture == null)
+            return false;
+
+        StraightTargetBounds(surface, out var targetMin, out var targetMax);
+        if (!TryRenderStraightened(image, binding.Quad, targetMin, targetMax, texture, 1f, surface.Id, 1024f,
+                                   out var warped, out var bboxMin, out var bboxMax, out var regionMin, out var regionMax)
+            || warped is not { IsDisposed: false })
+            return false;
+
+        srv = SrvManager.GetSrvForTexture(warped);
+        if (srv is not { IsDisposed: false })
+            return false;
+
+        var bboxSize = Vector2.Max(bboxMax - bboxMin, new Vector2(0.001f));
+        uvMin = (regionMin - bboxMin) / bboxSize;
+        uvMax = (regionMax - bboxMin) / bboxSize;
+        return true;
     }
 
     /// <summary>
@@ -492,6 +623,14 @@ internal sealed partial class SetupOutputView
     private float _referenceStraighten;
     private float _referenceStraightenFrom;
     private float _referenceProgress = 1f;
+
+    // A live handle drag on the rectified rect: the press-time rect→photo mapping, and the handle positions.
+    private bool _referenceEditActive;
+    private Homography _referenceEditToPhoto;
+    private readonly Vector2[] _referenceRectQuad = new Vector2[4];
+
+    // The rect the subject is put upright into — sticky across trace edits (see ResolveStraightSubject).
+    private Vector2 _referenceStickyMin, _referenceStickyMax, _referenceStickySize;
 
     // Subject transition: the quad/target in use (eased between surfaces), where the ease started, and its progress.
     private Guid _referenceSubjectId;

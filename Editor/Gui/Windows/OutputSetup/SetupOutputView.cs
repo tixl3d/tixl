@@ -10,6 +10,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Setup;
+using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using Vector2 = System.Numerics.Vector2;
@@ -759,8 +760,13 @@ internal sealed partial class SetupOutputView
             _fence.Reset();
         }
 
-        if (basis != null && basisMapping != null)
-            DrawAnnotations(dl, basis, basisMapping, rToView, rToOutput, viewMin, editable, handleFade * straighten);
+        if (basis != null && basisMapping != null
+            && SurfaceGeometry.TryGetSurfaceToOutput(basis, basisMapping, out var basisToOutput)
+            && SurfaceGeometry.TryGetOutputToSurface(basis, basisMapping, out var outputToBasis))
+        {
+            DrawAnnotations(dl, basis, Homography.Multiply(rToView, basisToOutput), Homography.Multiply(outputToBasis, rToOutput),
+                            viewMin, editable, handleFade * straighten);
+        }
 
         DrawSliceEditor(setup, dl, focusCarrierId, viewMin, toContent);
     }
@@ -1159,6 +1165,23 @@ internal sealed partial class SetupOutputView
         if (!canIsolate)
             _isolate = false;
 
+        // How much of the surfaces' content shows over their photos, on the Board and the traced quads: a
+        // drag-edit field in percent, like the parameter fields.
+        ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
+        ImGui.AlignTextToFramePadding();
+        CustomComponents.StylizedText("Content", Fonts.FontSmall, UiColors.TextMuted);
+        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+        var previewPercent = UserSettings.Config.OutputSetupContentPreview * 100f;
+        ImGui.PushID("contentPreview");
+        var previewState = SingleValueEdit.Draw(ref previewPercent, new Vector2(60 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight()),
+                                                0f, 100f, clampMin: true, clampMax: true, scale: 0.5f, format: "{0:0}%", defaultValue: 65f);
+        ImGui.PopID();
+        if ((previewState & InputEditStateFlags.Modified) != 0)
+            UserSettings.Config.OutputSetupContentPreview = previewPercent / 100f;
+
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem("Content preview", "Opacity of each surface's content over its photo — on the traced quads and the surface cards. Drag, or double-click to type.");
+
         ImGui.SameLine();
         ImGui.BeginDisabled(!canIsolate);
         var isoColor = _isolate ? UiColors.StatusAttention : UiColors.BackgroundButton;
@@ -1177,7 +1200,10 @@ internal sealed partial class SetupOutputView
 
         // Measuring only makes sense against the straightened surface — on the projector canvas the
         // lengths would be perspective-foreshortened and mean nothing.
-        if (_editMode == EditMode.Straight && straightCarrier != null)
+        // The line tool serves both Straight flows: on the photo it refines the trace, on the projector the pin.
+        var tracedForLines = _editMode == EditMode.Straight ? TracedImageOf(setup, _shownSurfaceId) : null;
+        var lineSubject = tracedForLines != null ? setup.FindSurface(_shownSurfaceId) : straightCarrier;
+        if (_editMode == EditMode.Straight && lineSubject != null)
         {
             ImGui.SameLine();
             if (CustomComponents.StateButton("+ Line", _measureArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
@@ -1194,21 +1220,26 @@ internal sealed partial class SetupOutputView
             // Straighten first (it fixes the keystone but cannot know the aspect), lengths second. Both
             // stay visible and disabled rather than appearing once they happen to qualify — a button that
             // isn't there yet can't explain what it wants.
-            var canStraighten = straightCarrier.Annotations.Count >= MinLinesToStraighten;
+            var canStraighten = lineSubject.Annotations.Count >= MinLinesToStraighten;
             ImGui.SameLine();
             ImGui.BeginDisabled(!canStraighten);
             if (ImGui.SmallButton("Straighten") && canStraighten)
-                SetupActions.RunUndoable("Straighten from lines", setup, () => TryStraightenFromLines(straightCarrier, outputId));
+            {
+                if (tracedForLines != null)
+                    SetupActions.RunUndoable("Straighten trace from lines", setup, () => TryStraightenTraceFromLines(lineSubject));
+                else
+                    SetupActions.RunUndoable("Straighten from lines", setup, () => TryStraightenFromLines(lineSubject, outputId));
+            }
 
             ImGui.EndDisabled();
             if (!canStraighten && ImGui.IsItemHovered())
                 ImGui.SetTooltip($"Trace at least {MinLinesToStraighten} reference lines along features that are straight in reality.");
 
-            var canApply = straightCarrier.Annotations.Exists(a => a.LengthInMeters > 0);
+            var canApply = lineSubject.Annotations.Exists(a => a.LengthInMeters > 0);
             ImGui.SameLine();
             ImGui.BeginDisabled(!canApply);
             if (ImGui.SmallButton("Apply lengths") && canApply)
-                SetupActions.RunUndoable("Apply lengths", setup, () => TryApplyLengths(setup, straightCarrier));
+                SetupActions.RunUndoable("Apply lengths", setup, () => TryApplyLengths(setup, lineSubject));
 
             ImGui.EndDisabled();
             if (!canApply && ImGui.IsItemHovered())

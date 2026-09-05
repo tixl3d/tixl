@@ -130,6 +130,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool UseTouchPadPanning = false;
         public float PanSpeed = 20;
 
+        /// <summary>Opacity of a surface's content previewed over its photo — on the traced quad and on its Board card.</summary>
+        public float OutputSetupContentPreview = 0.65f;
+
         // Mag Graph
         public bool DisconnectOnUnsnap = true;
         public float MaxCurveRadius = 350;

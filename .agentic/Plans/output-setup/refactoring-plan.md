@@ -489,6 +489,28 @@ with an explanatory comment) — the row-callback API design made compliance imp
   surface's (`ResolveStraightSubject`, `_referenceSubjectProgress`). The projector-camera header is
   Calibrate-only (it pushed the canvas down at fold start). Measured: still to verify over the bridge with
   the user's editor (user runs it with `--debug-server 9042`; no auto-launch loops).
+- **2026-09-05 (photo flow completed, user-tested fold):** the in-place straighten is confirmed straight
+  (`[fold] metrics` 1.00 / 0 px) and switching subjects eases (`ResolveStraightSubject`). Added: corner and
+  edge handles on the rectified rect (`DrawStraightEdits` — the rectification is frozen for the drag and eases
+  to the refined trace on release; edges crop axis-aligned), the measuring-line tool on the photo
+  (`DrawAnnotations` now takes a surface↔view homography pair; `TryStraightenTraceFromLines` refines the
+  trace, Apply lengths unchanged), the surface card's backdrop is the straightened photo crop
+  (`TryGetTracedFragment`, per-surface warp targets via `RenderWarpedTexture(targetKey)` at ≤1024 px), a
+  Board edge crop also crops the trace (through the old rect's projection; the gesture is one setup
+  snapshot), and card metadata refreshes during a drag. Probes trimmed to the metrics line.
+- **2026-09-05 (live trace refinement):** user rejected the freeze-then-ease on release. Now the rectified
+  rect is sticky (`_referenceSticky*`, re-derived only for a new subject or a changed size) and a handle drag
+  moves the trace live through the press-time rect→photo mapping, so the photo re-warps under a fixed frame
+  and release does nothing.
+- **2026-09-05 (surface scaling on the Board):** a round top-right handle scales a surface uniformly about its
+  bottom-left; Ctrl on an edge handle (circles) scales along that axis, aspect free; plain edges crop as
+  before. `ApplyBoardScale` re-projects the pins through `ApplyBounds` and scales lines and regions about the
+  fixed corner, applied incrementally so a live drag never compounds. Scaling leaves a trace alone (same wall);
+  cropping still crops it. `CornerPinHandles.Style.EdgeHandleShape` carries the circle/square look. Measuring
+  lines on the photo no longer thicken while dragged (`DrawAnnotations(projected: false)`).
+- **2026-09-05 (content preview opacity):** `UserSettings.Config.OutputSetupContentPreview` (default 0.65), a
+  "content NN%" slider in the canvas header; used by the traced quads on the image card and by the surface
+  card (content over its photo fragment).
 
 ## Suggested order (revised for the flow-view pivot)
 

@@ -496,7 +496,9 @@ internal static class OutputManager
     /// <paramref name="destQuad"/> (in <paramref name="targetSize"/> pixels). Used by the reference-image
     /// straighten transition; returns the warped texture (reused across calls) or null.
     /// </summary>
-    public static Texture2D? RenderWarpedTexture(Texture2D? source, Vector2[] destQuad, Int2 targetSize)
+    /// <param name="targetKey">Which scratch target to render into; callers that need several warps alive in one
+    /// frame (each surface card's photo fragment) pass their own key, the default shares one.</param>
+    public static Texture2D? RenderWarpedTexture(Texture2D? source, Vector2[] destQuad, Int2 targetSize, Guid targetKey = default)
     {
         if (source is not { IsDisposed: false })
             return null;
@@ -508,7 +510,7 @@ internal static class OutputManager
         if (!TryComputeNdcHomography(destQuad, targetSize, out var homography))
             return null;
 
-        var target = GetOrCreateTarget(_scratchTargetId, targetSize);
+        var target = GetOrCreateTarget(targetKey == Guid.Empty ? _scratchTargetId : targetKey, targetSize);
         if (target == null || !EnsureShaders())
             return null;
 

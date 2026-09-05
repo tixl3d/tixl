@@ -27,20 +27,21 @@ internal sealed partial class SetupOutputView
     /// in surface meters, so they ride the corner pin like everything else — which is what lets the metric
     /// change without anything moving on the wall.
     /// </summary>
-    private void DrawAnnotations(ImDrawListPtr dl, Surface carrier, Surface.OutputMapping carrierMapping,
-                                 Homography rToView, Homography rToOutput, Vector2 viewMin, bool editable, float fade)
+    /// <param name="surfaceToView">Surface metres → the view the canvas draws in (the framed projector view, or the
+    /// rectified photo); <paramref name="viewToSurface"/> is its inverse.</param>
+    /// <param name="projected">True on the projector view, where the lines are also on the wall: the dragged
+    /// one thickens and blinks there so it can be found under the beam; on the photo it stays thin.</param>
+    private void DrawAnnotations(ImDrawListPtr dl, Surface carrier, in Homography surfaceToView, in Homography viewToSurface,
+                                 Vector2 viewMin, bool editable, float fade, bool projected = true)
     {
-        if (fade < 0.01f
-            || !SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var surfaceToOutput)
-            || !SurfaceGeometry.TryGetOutputToSurface(carrier, carrierMapping, out var outputToSurface))
-        {
+        if (fade < 0.01f)
             return;
-        }
 
-        // Surface meters → the framed view the canvas draws in, and back. Local functions called directly,
-        // so they cost nothing per frame.
-        Vector2 ToView(Vector2 inSurface) => rToView.TransformPoint(surfaceToOutput.TransformPoint(inSurface)) - viewMin;
-        Vector2 ToSurface(Vector2 inView) => outputToSurface.TransformPoint(rToOutput.TransformPoint(inView + viewMin));
+        // Local functions called directly, so they cost nothing per frame.
+        var toViewH = surfaceToView;
+        var toSurfaceH = viewToSurface;
+        Vector2 ToView(Vector2 inSurface) => toViewH.TransformPoint(inSurface) - viewMin;
+        Vector2 ToSurface(Vector2 inView) => toSurfaceH.TransformPoint(inView + viewMin);
 
         var canEdit = editable && _viewMorph < 1.5f;
         var annotations = carrier.Annotations;
@@ -55,7 +56,8 @@ internal sealed partial class SetupOutputView
             // Projected so the start point can be found against a real feature before committing to it. The
             // composite for this frame is already rendered, so it lands one frame later — imperceptible for a
             // cursor, and the same lag the hover cross-highlight accepts.
-            OutputManager.SetAimPoint(carrier.Id, start);
+            if (projected)
+                OutputManager.SetAimPoint(carrier.Id, start);
 
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
@@ -128,11 +130,11 @@ internal sealed partial class SetupOutputView
             // alignment colour and thickens, so it's unmistakable under the cursor — in the editor overlay and,
             // via the projected composite, on the wall itself.
             var isDragging = i == _measureDraftIndex || i == _measureDragIndex;
-            if (isDragging)
+            if (isDragging && projected)
                 OutputManager.EmphasizeAnnotation(carrier.Id, i);
 
             var lineColor = isDragging ? Color.Mix(color, white, blink) : color;
-            var lineWidth = (isDragging ? 6f : 2f) * scale;
+            var lineWidth = (isDragging && projected ? 6f : 2f) * scale;
             dl.AddLine(_projection.CanvasToScreen(p1), _projection.CanvasToScreen(p2), lineColor, lineWidth);
 
             if (canEdit && _measureDraftIndex < 0)
@@ -343,6 +345,51 @@ internal sealed partial class SetupOutputView
             var line = _refineLines[i];
             surface.Annotations[i].P1 = outputToSurface.TransformPoint(new Vector2(line.X, line.Y));
             surface.Annotations[i].P2 = outputToSurface.TransformPoint(new Vector2(line.Z, line.W));
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// The photo-side twin of <see cref="TryStraightenFromLines"/>: refines the surface's traced quad until the
+    /// measuring lines come out level and plumb on the rectified photo. The lines mark physical features, so
+    /// they are re-expressed from their unchanged photo positions into the surface's moved space.
+    /// </summary>
+    private static bool TryStraightenTraceFromLines(Surface surface)
+    {
+        var binding = surface.Reference;
+        if (binding == null || binding.Quad.Length < 4 || surface.Annotations.Count < MinLinesToStraighten
+            || !Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(surface), binding.Quad, out var surfaceToPhoto))
+        {
+            return false;
+        }
+
+        _refineLines.Clear();
+        foreach (var annotation in surface.Annotations)
+        {
+            var a = surfaceToPhoto.TransformPoint(annotation.P1);
+            var b = surfaceToPhoto.TransformPoint(annotation.P2);
+            _refineLines.Add(new Vector4(a.X, a.Y, b.X, b.Y));
+        }
+
+        Span<Vector2> refined = stackalloc Vector2[4];
+        if (!LineRectifier.TryRefineQuad(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_refineLines),
+                                         surface.SizeInMeters, binding.Quad, refined))
+        {
+            return false;
+        }
+
+        for (var i = 0; i < 4; i++)
+            binding.Quad[i] = refined[i];
+
+        if (!Homography.TryComputeQuadToQuad(binding.Quad, SurfaceGeometry.LocalRect(surface), out var photoToSurface))
+            return false;
+
+        for (var i = 0; i < surface.Annotations.Count; i++)
+        {
+            var line = _refineLines[i];
+            surface.Annotations[i].P1 = photoToSurface.TransformPoint(new Vector2(line.X, line.Y));
+            surface.Annotations[i].P2 = photoToSurface.TransformPoint(new Vector2(line.Z, line.W));
         }
 
         return true;
