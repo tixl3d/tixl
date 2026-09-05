@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "b8ff7779-3de5-4930-b9a7-26f1b3436479"/*R03f_CameraOverrideRules*/,
+  "Description": "Camera Override Rules",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3edf3b8f-30e3-4907-832f-4d8b48e9a814"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "bba920ec-d95a-4965-b4e6-069475d8cf79"/*Text*/,
+      "SectionId": "4cf34543-eb59-412e-b192-28ad8d8b116f",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "fe90109e-8296-431b-9d3e-4e0e6458f9f8"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "8c7e5903-ce7e-45e7-b9e8-d3a33247be27"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "4cf34543-eb59-412e-b192-28ad8d8b116f",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "abac2e93-b58b-4647-a4cf-9e9bbcbeddc3",
+      "Description": "Like [Transform], a camera only affects its input.\nThis means it applies only to operators connected on its left side."
+    },
+    {
+      "Id": "12d47d7e-b31e-4fc8-b2e2-9463553d6445",
+      "Description": "Unlike [Transform], cameras cannot be combined.\nThe last camera in the chain (furthest to the left) overrides all previous cameras."
+    },
+    {
+      "Id": "9e338934-1a76-440a-80b3-9b4bb4ff5fd2",
+      "Description": "Replicate the example by arranging the camera operators correctly.",
+      "Style": "CallToAction"
+    }
+  ]
+}

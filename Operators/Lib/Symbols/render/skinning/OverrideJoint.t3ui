@@ -1,0 +1,52 @@
+{
+  "FormatVersion": 3,
+  "Id": "1e94b7c3-58f2-4a06-9d81-3b6ac0e527f9"/*OverrideJoint*/,
+  "Description": "Adjusts a single joint of a pose with offsets from graph inputs - e.g. to aim a head or twist a bone procedurally on top of a sampled animation.\n\nThe rotation offset is in degrees and applied in the joint's local frame.",
+  "InputUis": [
+    {
+      "InputId": "29a7d0e5-4c81-4f36-92b8-6d1e50c4a7f3"/*RotationOffset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "6f38d5a1-09e7-4c42-8b96-d472e1f0a583"/*Pose*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "8c50e3b9-16df-4a72-b048-3f9a6d28c1e5"/*TranslationOffset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "b1c86f24-73d9-4058-a6ce-08f5b3d19e67"/*JointIndex*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "d764a1f8-3e92-4b05-8c17-25e0b9f4d6a3"/*ScaleFactor*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7d25a90f-c463-4e18-b57a-92f01c8d63e5"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

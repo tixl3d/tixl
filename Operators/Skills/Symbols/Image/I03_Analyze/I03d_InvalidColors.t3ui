@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "696352f0-e725-4b88-85b5-e5463089fe76"/*I03d_InvalidColors*/,
+  "Description": "Invalid Colors",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "5e7a2fa3-1128-474d-8496-21fe2037ab0e"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "edab6b3d-afa2-4bcb-b40e-bf2690c1c53e"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "ef265e9f-47d8-40e5-80d5-94d40cdbc986"/*Text*/,
+      "SectionId": "75854a3c-cb41-42e7-bbcc-36a2efc16a21",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e604cc9d-af6d-4d6b-89a2-7cc36a413fb6"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "75854a3c-cb41-42e7-bbcc-36a2efc16a21",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "739272d0-35ee-491b-a61f-037e3fc532c2",
+      "Description": "These colors are outside the valid range.\nNegative color values can cause unpredictable results when blending or rendering an image."
+    },
+    {
+      "Id": "b25af50b-f775-4c74-8de5-20691c45e624",
+      "Description": "The alpha channel should always stay between 0 and 1.\nMost image operators clamp alpha automatically, but relying on that can hide problems."
+    },
+    {
+      "Id": "58b8764b-4413-4471-9b00-74b75dacf7e8",
+      "Description": "A simple fix is to add [RemapColors].\nIt samples colors from a gradient in the valid 0–1 range and clamps values outside that range."
+    },
+    {
+      "Id": "d219e752-8964-4b69-ae00-dbddf1f31cd9",
+      "Description": "Fix the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -151,11 +151,17 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     public const string EditorResourcesSubfolder = "EditorResources";
     public const string DependenciesFolder = "dependencies";
     
-    /** This is only used in release builds */
-    public const string ReleaseSymbolsSubfolder = "Symbols";
+    /// <summary>
+    /// Folder holding a package's operator files (.cs/.t3/.t3ui) - both in editable project sources and
+    /// in release package output. Editable-project discovery is limited to this folder by design.
+    /// </summary>
+    public const string SymbolsSubfolder = "Symbols";
     
     public const string SymbolUiSubFolder = "SymbolUis";
     public const string SourceCodeSubFolder = "SourceCode";
+
+    /** Per-project transient state: backups, and (since project format V3) the bin/obj build output */
+    public const string TempSubfolder = ".temp";
     
     /** Folder with the packages both in editor and in exported projects */
     public const string OperatorsSubFolder = "Operators";

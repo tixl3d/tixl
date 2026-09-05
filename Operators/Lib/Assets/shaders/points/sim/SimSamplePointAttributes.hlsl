@@ -52,8 +52,8 @@ cbuffer Params : register(b1)
     float3 Center;
 }
 
-// StructuredBuffer<Point> Points : t0;
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+// StructuredBuffer<Point> Points : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 Texture2D<float4> inputTexture : register(t0);
 sampler texSampler : register(s0);

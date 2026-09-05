@@ -1,0 +1,41 @@
+{
+  "FormatVersion": 3,
+  "Id": "c3d8f6b2-51ae-47c9-8e04-b96d20a15f73"/*SkinMesh*/,
+  "Description": "Deforms a mesh with skin weights and skinning matrices on the GPU.\n\nConnect the Mesh and SkinWeights outputs of a [LoadGltfScene] with a rigged model and the matrices from [PoseToSkinMatrices]. The result is a regular mesh in the standard vertex layout, so it can be rendered and processed like any other mesh.",
+  "InputUis": [
+    {
+      "InputId": "3b7f2ac9-e650-48d2-b12a-94c8607df3e6"/*SkinMatrices*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "62e91c07-84fa-4d3b-a45c-08d7f9126b3e"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d94a70b6-1f28-45c1-83b7-6ea0d5429c15"/*SkinWeights*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8a05e9d4-27c3-4b61-9f88-51e6b3a0c792"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

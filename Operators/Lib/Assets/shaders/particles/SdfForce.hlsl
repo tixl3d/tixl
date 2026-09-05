@@ -29,8 +29,8 @@ cbuffer Params : register(b2)
     uint ParticleCount;
 }
 
-RWStructuredBuffer<Particle> Particles : u0;
-StructuredBuffer<int3> Indices : t1;
+RWStructuredBuffer<Particle> Particles : register(u0);
+StructuredBuffer<int3> Indices : register(t1);
 /*{RESOURCES}*/
 
 //=== Field functions ===============================================

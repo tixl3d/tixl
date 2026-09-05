@@ -9,6 +9,9 @@ using T3.Core.Settings;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Migrations.AssetPaths;
+using T3.Editor.Migrations.Variations;
+using T3.Editor.Migrations.AudioClips;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Compilation;
@@ -101,11 +104,11 @@ internal static partial class ProjectSetup
         WarnAboutCorruptedSymbolFiles(allPackages);
 
         // Needs registered symbols to resolve which project owns each variation file
-        VariationsMigration.MigrateLegacyVariationsToPackageMeta();
+        VariationsMigration.MigrateVariationsToPackageMeta();
 
         // Needs the [AudioClip] symbol registered (Lib). In-memory only — persists via the regular
         // save machinery once the user saves the flagged symbols.
-        LegacyAudioClipMigration.MigrateLegacyClipsToOps();
+        AudioClipsToOps.MigrateSettingsClipsToOps();
         var migrationsMs = totalStopwatch.ElapsedMilliseconds;
 
         // Initialize resources and shader linting
@@ -242,6 +245,11 @@ internal static partial class ProjectSetup
                                       return new ProjectLoadInfo(fileInfo, csProjFile, true); // Mark as success but don't process further
                                   }
                                   
+                                  // Bring the project to the current format before anything reads or
+                                  // writes build output - the compile below must already target the
+                                  // migrated paths, and file watchers aren't attached yet.
+                                  Migrations.ProjectFormatMigration.MigrateIfNeeded(csProjFile);
+
                                   var needsCompile = forceRecompile || loadInfo.NeedsRecompile || !Directory.Exists(csProjFile.GetBuildTargetDirectory());
 
                                   if (needsCompile && !csProjFile.TryRecompile(true, out var failureLog))
@@ -276,8 +284,11 @@ internal static partial class ProjectSetup
 
     private static FileInfo[] FindCsProjFiles(bool includeBuiltInAsProjects)
     {
+        // A csproj under an Export path segment is part of a player export, not a project of its own
+        var exportSegment = Path.DirectorySeparatorChar + FileLocations.ExportSubFolder + Path.DirectorySeparatorChar;
         return GetProjectDirectories(includeBuiltInAsProjects)
               .SelectMany(dir => Directory.EnumerateFiles(dir, "*.csproj", SearchOption.AllDirectories))
+              .Where(path => !path.Contains(exportSegment, StringComparison.OrdinalIgnoreCase))
               .Select(x => new FileInfo(x))
               .ToArray();
         
@@ -310,10 +321,13 @@ internal static partial class ProjectSetup
                 }
             }
 
+            // Skip project folders literally named "Export" - a plain Contains() would also drop
+            // any project whose path merely contains the word (e.g. a user folder "ExportTools").
             var projectSearchDirectories = topDirectories
                                           .Where(Directory.Exists)
                                           .SelectMany(Directory.EnumerateDirectories)
-                                              .Where(dirName => !dirName.Contains(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase));
+                                              .Where(dirName => !Path.GetFileName(dirName)
+                                                                     .Equals(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase));
 
             // Add Built-in packages as projects
             if (includeBuiltInAsProjects)

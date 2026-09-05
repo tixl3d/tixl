@@ -93,7 +93,7 @@ sampler ClampedSampler : register(s1);
 
 static sampler LinearSampler = WrappedSampler;
 
-StructuredBuffer<Point> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 
 Texture2D<float4> BaseColorMap : register(t1);
 Texture2D<float4> EmissiveColorMap : register(t2);
@@ -162,7 +162,6 @@ psInput vsMain(uint id : SV_VertexID)
     float tooCloseFactor = saturate(-posInCamera.z / FadeNearest - 1);
     output.color.a *= tooCloseFactor;
 
-    // float sizeFactor = UseWForSize > 0.5 ? pointDef.W : 1;
     float sizeFactor = ScaleFactorMode == 0
                            ? 1
                        : (ScaleFactorMode == 1) ? pointDef.FX1

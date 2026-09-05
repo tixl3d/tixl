@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "99520f2a-7e6a-4bc2-ae1f-f1e6e3407766"/*R05f_EmittingLight*/,
+  "Description": "Emitting Light",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "17f75760-b58d-44d1-9a47-744bdde052d8"/*Text*/,
+      "SectionId": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "817c532b-f461-47a2-be19-773f82cc5185"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "d84d2d9f-e13f-4b9c-abd3-8a96dfcafbe2"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4a3a0363-5118-46f3-99b0-9affef8493c3"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "706f1fbb-46d7-4e4e-b85d-58ab699533dc",
+      "Description": "Materials can emit light using the emission color and emission texture parameters.\nThe texture and color values are multiplied.\nThe default emission color is black, so emission textures remain invisible until the color brightness is increased."
+    },
+    {
+      "Id": "5f8601ab-d4a2-46fc-8523-0fa82cff9ec8",
+      "Description": "HDR emission values greater than 1 work particularly well when combined with a [Bloom] post-processing effect."
+    },
+    {
+      "Id": "4d002807-9e37-46f7-a8b6-cfce16e25459",
+      "Description": "In this example, the highlight color of [RyojiPattern] is brightened to create a glow effect."
+    },
+    {
+      "Id": "78209e2a-0930-4bc2-b54d-634d447b7455",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

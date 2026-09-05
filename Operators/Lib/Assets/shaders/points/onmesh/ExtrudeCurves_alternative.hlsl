@@ -11,11 +11,11 @@ cbuffer Params : register(b0)
     float Width;
 }
 
-StructuredBuffer<LegacyPoint> RailPoints : t0;
-StructuredBuffer<LegacyPoint> ShapePoints : t1;
+StructuredBuffer<Point> RailPoints : register(t0);
+StructuredBuffer<Point> ShapePoints : register(t1);
 
-RWStructuredBuffer<PbrVertex> Vertices : u0;
-RWStructuredBuffer<int3> TriangleIndices : u1;
+RWStructuredBuffer<PbrVertex> Vertices : register(u0);
+RWStructuredBuffer<int3> TriangleIndices : register(u1);
 
 
 
@@ -45,11 +45,11 @@ void main(uint3 i : SV_DispatchThreadID)
     uint columnIndex = vertexIndex / rows;
 
     PbrVertex v;
-    LegacyPoint railPoint = RailPoints[columnIndex];
-    LegacyPoint shapePoint = ShapePoints[rowIndex];
+    Point railPoint = RailPoints[columnIndex];
+    Point shapePoint = ShapePoints[rowIndex];
 
-    float3 scaleFactor = (UseStretch ? railPoint.Stretch : 1)
-     *  (UseWAsWidth ? railPoint.W : 1) * Width;;
+    float3 scaleFactor = (UseStretch ? railPoint.Scale : 1)
+     *  (UseWAsWidth ? railPoint.FX1 : 1) * Width;;
 
     float4 rotation = normalize(qMul( railPoint.Rotation ,shapePoint.Rotation ));
     float3 position = qRotateVec3(shapePoint.Position * scaleFactor, railPoint.Rotation) + railPoint.Position;
@@ -65,7 +65,7 @@ void main(uint3 i : SV_DispatchThreadID)
     v.__padding =0;
 
     Vertices[vertexIndex] = v;
-    if(isnan(railPoint.W ) || isnan(shapePoint.W) )
+    if(IsSeparator(railPoint) || IsSeparator(shapePoint))
         Vertices[vertexIndex].Position = float3(0,0,0);
     
 
@@ -75,11 +75,11 @@ void main(uint3 i : SV_DispatchThreadID)
         int faceIndex =  2 * (rowIndex + columnIndex * (rows-1));
 
         if(
-            isnan(railPoint.W) 
-            || isnan(RailPoints[columnIndex+1].W) 
-            || isnan(shapePoint.W) 
-            || isnan(ShapePoints[rowIndex+1].W) 
-         ) 
+            IsSeparator(railPoint)
+            || IsSeparator(RailPoints[columnIndex+1])
+            || IsSeparator(shapePoint)
+            || IsSeparator(ShapePoints[rowIndex+1])
+         )
         {
             if (columnIndex < columns - 1 && rowIndex < rows - 1) 
             {
@@ -87,7 +87,7 @@ void main(uint3 i : SV_DispatchThreadID)
                 TriangleIndices[faceIndex + 1] = int4(0, 0, 0, 0);
                 //TriangleIndices[faceIndex + 1] = int4(0, 0, 0, 0); //commented duplicate line
             }
-             if(isnan(railPoint.W ) || isnan(shapePoint.W) )
+             if(IsSeparator(railPoint) || IsSeparator(shapePoint))
                  Vertices[vertexIndex].Position = float3(0,0,0);
             return;
         }        

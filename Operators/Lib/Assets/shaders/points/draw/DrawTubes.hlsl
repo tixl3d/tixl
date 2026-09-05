@@ -90,7 +90,7 @@ struct psInput
 sampler texSampler : register(s0);
 sampler clampedSampler : register(s1);
 
-StructuredBuffer<LegacyPoint> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 //Texture2D<float4> texture2 : register(t1);
 
 Texture2D<float4> BaseColorMap : register(t1);
@@ -141,14 +141,14 @@ psInput vsMain(uint id: SV_VertexID)
         int sourceSeg = subSegId / subSegs;
         int subIndex = subSegId % subSegs;
 
-        float3 cornerFactors = Corners[cornerIndex];
+float3 cornerFactors = Corners[cornerIndex];
         float t = (cornerFactors.x < 0.5 ? (float)subIndex : (float)(subIndex + 1)) / (float)subSegs;
         float f = ((float)sourceSeg + t) / clamp((float)(pointCount - 1), 1.0, 100000.0);
 
-        LegacyPoint p0 = Points[sourceSeg];
-        LegacyPoint p1 = Points[sourceSeg + 1];
+        Point p0 = Points[sourceSeg];
+        Point p1 = Points[sourceSeg + 1];
 
-        float3 pos0 = p0.Position;
+float3 pos0 = p0.Position;
         float3 pos1 = p1.Position;
         float3 pPos;
         if (Smooth >= 0.5)
@@ -170,13 +170,13 @@ psInput vsMain(uint id: SV_VertexID)
         float w0, w1;
         if (UseScale >= 0.5)
         {
-            w0 = isnan(p0.Stretch.x) ? 1 : p0.Stretch.x;
-            w1 = isnan(p1.Stretch.x) ? 1 : p1.Stretch.x;
+            w0 = isnan(p0.Scale.x) ? 1 : p0.Scale.x;
+            w1 = isnan(p1.Scale.x) ? 1 : p1.Scale.x;
         }
         else if (UseWAsWeight >= 0.5)
         {
-            w0 = isnan(p0.W) ? 1 : p0.W;
-            w1 = isnan(p1.W) ? 1 : p1.W;
+            w0 = isnan(p0.FX1) ? 1 : p0.FX1;
+            w1 = isnan(p1.FX1) ? 1 : p1.FX1;
         }
         else
         {
@@ -232,7 +232,7 @@ psInput vsMain(uint id: SV_VertexID)
         uint triInCap = triLocalId / 3;
         uint vertInTri = triLocalId % 3;
 
-        LegacyPoint p;
+        Point p;
         float3 capNormal;
         bool capEnabled;
 
@@ -252,11 +252,11 @@ psInput vsMain(uint id: SV_VertexID)
         float WidthFactor;
         if (UseScale >= 0.5)
         {
-            WidthFactor = isnan(p.Stretch.x) ? 1 : p.Stretch.x;
+            WidthFactor = isnan(p.Scale.x) ? 1 : p.Scale.x;
         }
         else if (UseWAsWeight >= 0.5)
         {
-            WidthFactor = isnan(p.W) ? 1 : p.W;
+            WidthFactor = isnan(p.FX1) ? 1 : p.FX1;
         }
         else
         {

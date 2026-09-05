@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "33a43877-abce-44cb-8504-eb2c5b5bca92"/*R02a_DrawingMeshes*/,
+  "Description": "Drawing Meshes",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "88f552c6-0371-4b18-b6b9-eea51daf284f"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "8becd001-2a04-4d6a-a5ee-677bea9e264e"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "9047c0a1-556b-4676-92f5-81ae24771500"/*Text*/,
+      "SectionId": "3bff2e7f-1339-4fcf-8aa4-4a9ddeeccbf1",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "69f40505-df90-4d47-bfe6-2aa752f84a29"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "3bff2e7f-1339-4fcf-8aa4-4a9ddeeccbf1",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "63603c49-132d-43a3-a1f9-0eb1d8ebfe98",
+      "Description": "In TiXL, geometry made from polygons is called a mesh.\nInternally, a mesh is a collection of triangles. Each triangle is defined by three corners, called vertices."
+    },
+    {
+      "Id": "65018e68-aae7-4378-b07d-b38fed7a618c",
+      "Description": "There are many operators to create and modify meshes.\nIn this topic, the focus is on different ways to draw meshes."
+    },
+    {
+      "Id": "7c5177eb-4c67-4a45-afa1-b780352db8ce",
+      "Description": "Most operators that draw meshes start with the word “Draw”.\nThey use the teal command color, which indicates that they render geometry."
+    },
+    {
+      "Id": "e7b98a48-d708-4f2d-a4c8-02c9c50a0fc4",
+      "Description": "Start simple.\nDraw a [Cube] and a [Torus] mesh.",
+      "Style": "CallToAction"
+    }
+  ]
+}

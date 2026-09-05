@@ -1,0 +1,99 @@
+{
+  "FormatVersion": 3,
+  "Id": "da246c0f-9f68-4ff4-b1aa-8163f15bb0ae"/*I04b_ColorGradeGainGammaLift*/,
+  "Description": "ColorGrade: Gain, Gamma, Lift",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "330cc807-f725-4d93-a95c-3f2d671425fa"/*Text*/,
+      "SectionId": "2a9a40e2-ed26-4bda-bbdf-41834bbaa115",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "938c8632-78dd-415b-ada4-15dfb8341c55"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "c696557b-4775-4bae-972b-18b264b74fc1"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "77f850f0-8df7-42de-b9c0-8d64ce6f8b2e"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "2a9a40e2-ed26-4bda-bbdf-41834bbaa115",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "6dc5c7eb-c146-48c7-ae90-4665e09538a5",
+      "Description": "[ColorGrade] is a powerful operator for adjusting colors.\nIts parameters are closely related to tools used in professional color grading software."
+    },
+    {
+      "Id": "1097e447-0fd7-42d3-8127-f56e4d94047f",
+      "Description": "The core parameters are Gain, Gamma, and Lift.\nThe reference gradient goes from pure black to pure white."
+    },
+    {
+      "Id": "0155668b-b742-4da5-ba61-fbe0032592bc",
+      "Description": "If Gain, Gamma, and Lift are pure gray, they are neutral and have no effect.\nYou can click parameter names to reset them to their defaults."
+    },
+    {
+      "Id": "6d5d1ffe-39ea-472b-b799-41552d451397",
+      "Description": "Adjust Gain by dragging its color thumbnail with the right mouse button.\nIt primarily affects the brightest parts of the image.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "1937a11f-da60-4429-9c9f-3ba57e9eb7b1",
+      "Description": "Adjust Lift in the same way.\nIt primarily affects the darkest parts of the image.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "eec3e374-0c67-4b5a-96a1-0359a772d33e",
+      "Description": "Adjust Gamma to change overall brightness without pushing only highlights or shadows.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "c7a2a8bc-29a4-4ced-aa14-3cbaa2d29b68",
+      "Description": "Dragging the color thumbnail with the left mouse button adjusts the alpha channel.\nThis scales the strength of the effect.",
+      "Style": "Tip"
+    },
+    {
+      "Id": "932062d4-9ce0-4a2e-a72e-b91475cd1249",
+      "Description": "Recreate the challenge at the bottom.",
+      "Style": "CallToAction"
+    }
+  ]
+}

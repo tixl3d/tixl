@@ -1,20 +1,10 @@
-// Points are particles share the same structure and stride,
-// But some attributes change their meaning:
-//   W -> Radius
-//   Stretch -> Velocity
-//   Selected -> BirthTime
+// Points and particles share the same structure and stride,
+// but some attributes change their meaning:
+//   FX1 -> Radius
+//   Scale -> Velocity
+//   FX2 -> BirthTime
 #ifndef __POINT__
 #define __POINT__
-
-struct LegacyPoint
-{
-    float3 Position;
-    float W;
-    float4 Rotation;
-    float4 Color;
-    float3 Stretch;
-    float Selected;
-};
 
 struct Point
 {
@@ -35,4 +25,12 @@ struct Particle
     float3 Velocity;
     float BirthTime;
 };
+
+// A point with NaN Scale.x is a separator: it is never drawn, and line-style
+// draws (lines, tubes, ribbons) break their strip at it. This is the only
+// NaN convention for points — all other fields are plain values.
+inline bool IsSeparator(Point p)
+{
+    return isnan(p.Scale.x);
+}
 #endif

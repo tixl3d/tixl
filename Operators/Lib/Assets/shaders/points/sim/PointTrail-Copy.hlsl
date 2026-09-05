@@ -11,8 +11,8 @@ cbuffer Params : register(b0)
     int WriteLineSeparators;
 }
 
-StructuredBuffer<Point> CyclePoints : t0;   // input
-RWStructuredBuffer<Point> TrailPoints : u0; // output
+StructuredBuffer<Point> CyclePoints : register(t0);   // input
+RWStructuredBuffer<Point> TrailPoints : register(u0); // output
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

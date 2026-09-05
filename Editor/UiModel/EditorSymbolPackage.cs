@@ -288,7 +288,12 @@ internal class EditorSymbolPackage : SymbolPackage
             streamReader.Dispose();
 
             if (guid == Guid.Empty)
+            {
+                if (IsInOperatorFolder(file))
+                    Log.Warning($"{DisplayName}: \"{file}\" defines no operator ([Guid] missing). Shared helper classes belong in the package's Utils/ folder, not in Symbols/.");
+
                 return;
+            }
 
             #if DEBUG
             Interlocked.Increment(ref sourceCodeCount);
@@ -296,6 +301,14 @@ internal class EditorSymbolPackage : SymbolPackage
 
             OnSourceCodeLocated(file, guid);
         }
+    }
+
+    /// <summary>Operators live in Symbols/ (shipped as SourceCode/); helpers elsewhere in the package are fine.</summary>
+    private static bool IsInOperatorFolder(string file)
+    {
+        var normalized = file.Replace('\\', '/');
+        return normalized.Contains('/' + FileLocations.SymbolsSubfolder + '/', StringComparison.Ordinal)
+               || normalized.Contains('/' + FileLocations.SourceCodeSubFolder + '/', StringComparison.Ordinal);
     }
 
     public bool TryGetSymbolFilePath(Symbol symbol, [NotNullWhen(true)] out string? path)
@@ -315,6 +328,18 @@ internal class EditorSymbolPackage : SymbolPackage
         if (_filePathHandlers.TryGetValue(symbol.Id, out var filePathInfo))
         {
             path = filePathInfo.SourceCodePath;
+            return path != null;
+        }
+
+        path = null;
+        return false;
+    }
+
+    public bool TryGetSymbolUiFilePath(Symbol symbol, [NotNullWhen(true)] out string? path)
+    {
+        if (_filePathHandlers.TryGetValue(symbol.Id, out var filePathInfo))
+        {
+            path = filePathInfo.UiFilePath;
             return path != null;
         }
 

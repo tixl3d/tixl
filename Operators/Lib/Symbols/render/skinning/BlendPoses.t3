@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "4a7e9c25-83d1-4b6f-95c0-e2f8a61d37b4"/*BlendPoses*/,
+  "Inputs": [
+    {
+      "Id": "5c82d1f7-940b-4e6a-a3d8-16fb27c95e40"/*PoseA*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "71f4c8d9-25ae-4b63-90e7-3dc5f81b42a9"/*Blend*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "ad60be52-17c9-4f38-b654-90e2c73a8f15"/*WeightMask*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e3a95b18-6d72-4c04-bf59-8a41d0c7263f"/*PoseB*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

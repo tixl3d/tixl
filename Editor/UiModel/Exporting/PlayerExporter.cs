@@ -207,7 +207,7 @@ internal static partial class PlayerExporter
 
         // Stripped exports rewrite the symbol files instead of copying them
         if (exportData.StripsUnusedOperators)
-            excludeSubdirectories.Add(FileLocations.ReleaseSymbolsSubfolder);
+            excludeSubdirectories.Add(FileLocations.SymbolsSubfolder);
 
         var excludeSubdirectoryArray = excludeSubdirectories.ToArray();
 
@@ -261,7 +261,7 @@ internal static partial class PlayerExporter
             return false;
         }
 
-        var symbolsTargetDir = Path.Combine(targetDirectory, FileLocations.ReleaseSymbolsSubfolder);
+        var symbolsTargetDir = Path.Combine(targetDirectory, FileLocations.SymbolsSubfolder);
         var removedChildren = 0;
         foreach (var symbol in exportData.GetSymbolsOfPackage(package))
         {
@@ -276,9 +276,9 @@ internal static partial class PlayerExporter
             {
                 relativePath = symbol.Id + SymbolPackage.SymbolExtension;
             }
-            else if (relativePath.StartsWith(FileLocations.ReleaseSymbolsSubfolder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            else if (relativePath.StartsWith(FileLocations.SymbolsSubfolder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
             {
-                relativePath = relativePath[(FileLocations.ReleaseSymbolsSubfolder.Length + 1)..];
+                relativePath = relativePath[(FileLocations.SymbolsSubfolder.Length + 1)..];
             }
 
             var targetPath = Path.Combine(symbolsTargetDir, relativePath);

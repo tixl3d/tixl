@@ -11,7 +11,7 @@ cbuffer Params : register(b0)
     float Scatter;
 }
 
-RWStructuredBuffer<Point> ResultPoints : u0;    // output
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 static float precision = 0.0001;
 static float phi = PI *  (3. - sqrt(5.));  // golden angle in radians

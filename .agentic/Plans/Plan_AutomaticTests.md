@@ -1,5 +1,14 @@
 # Automatic Test Plan for TiXL
 
+> **Update (2026-09-02):** The debug protocol (`tixl-debug-protocol-plan.md`) changed this
+> plan's economics. The "no headless mode / ImGui coupling" blocker no longer applies to
+> integration tests: they drive a *real* editor over TCP. First xUnit infrastructure landed as
+> `Tests/TiXL.DebugClient` (typed protocol client) + `Tests/Editor.IntegrationTests`
+> (fixture launches or attaches to an editor; the former Python acceptance/visual-suite
+> scripts migrated to facts). This shaves the yak noted below (2026-04-22) — Phases 1-2
+> (pure command/serialization tests, no editor needed) now have a home whenever prioritized.
+> Phases 4-5 are partially superseded by the protocol approach.
+
 ## Analysis Summary
 
 ### Current State

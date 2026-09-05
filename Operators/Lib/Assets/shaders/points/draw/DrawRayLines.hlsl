@@ -60,7 +60,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<Point> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> texture2 : register(t1);
 
 psInput vsMain(uint id : SV_VertexID)
@@ -83,7 +83,7 @@ psInput vsMain(uint id : SV_VertexID)
     Point pointA = Points[particleId];
     Point pointB = Points[particleId + 1];
 
-    if (isnan(pointA.Scale.x) || isnan(pointB.Scale.x))
+    if (IsSeparator(pointA) || IsSeparator(pointB))
     {
         output.position = 0;
         return output;

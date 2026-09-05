@@ -29,7 +29,7 @@ cbuffer Params : register(b1)
     int Tiling;
 }
 
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 static const float2 HexOffsetsAndAngles[] =
     {

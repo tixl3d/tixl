@@ -330,7 +330,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             if (directoryName.StartsWith('.') ||
                 directoryName.Equals("bin", StringComparison.Ordinal) ||
                 directoryName.Equals("obj", StringComparison.Ordinal) ||
-                directoryName.Equals(FileLocations.ReleaseSymbolsSubfolder, StringComparison.Ordinal) ||
+                directoryName.Equals(FileLocations.SymbolsSubfolder, StringComparison.Ordinal) ||
                 directoryName.Equals(FileLocations.SymbolUiSubFolder, StringComparison.Ordinal) ||
                 directoryName.Equals(FileLocations.AssetsSubfolder, StringComparison.Ordinal) ||
                 directoryName.Equals(FileLocations.SourceCodeSubFolder, StringComparison.Ordinal))

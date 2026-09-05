@@ -18,7 +18,7 @@ cbuffer Params : register(b1)
 
 Texture2D<float> CDF : register(t0);
 Texture2D<float4> Image : register(t1);
-RWStructuredBuffer<Point> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 sampler texSampler : register(s0);
 

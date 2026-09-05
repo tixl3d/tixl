@@ -6,8 +6,8 @@ cbuffer Params : register(b0)
     int Length;
 }
 
-StructuredBuffer<Point> Points : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> Points : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 [numthreads(256, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {

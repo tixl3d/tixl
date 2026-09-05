@@ -1,6 +1,7 @@
 #nullable enable
 using System.IO;
 using ImGuiNET;
+using T3.Core.Settings;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -355,7 +356,7 @@ internal sealed class CouldNotLoadProjectDialog : ModalDialog
         }
     }
 
-    /// <summary>Counts with the same bin/obj exclusion as <see cref="CopyDirectoryRecursive"/> so source and copy are comparable.</summary>
+    /// <summary>Counts with the same exclusions as <see cref="CopyDirectoryRecursive"/> so source and copy are comparable.</summary>
     private static int CountFilesRecursive(string folder)
     {
         var count = 0;
@@ -366,17 +367,22 @@ internal sealed class CouldNotLoadProjectDialog : ModalDialog
 
         foreach (var directoryPath in Directory.EnumerateDirectories(folder))
         {
-            var directoryName = Path.GetFileName(directoryPath);
-            if (directoryName.Equals("bin", StringComparison.OrdinalIgnoreCase)
-                || directoryName.Equals("obj", StringComparison.OrdinalIgnoreCase))
-            {
+            if (IsGeneratedStateDirectory(Path.GetFileName(directoryPath)))
                 continue;
-            }
 
             count += CountFilesRecursive(directoryPath);
         }
 
         return count;
+    }
+
+    /// <summary>Build output, backups/temp and version control are not worth carrying into a recovery copy.</summary>
+    private static bool IsGeneratedStateDirectory(string directoryName)
+    {
+        return directoryName.Equals("bin", StringComparison.OrdinalIgnoreCase)
+               || directoryName.Equals("obj", StringComparison.OrdinalIgnoreCase)
+               || directoryName.Equals(FileLocations.TempSubfolder, StringComparison.OrdinalIgnoreCase)
+               || directoryName.Equals(".git", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void CopyDirectoryRecursive(string sourceFolder, string targetFolder)
@@ -390,11 +396,8 @@ internal sealed class CouldNotLoadProjectDialog : ModalDialog
         foreach (var directoryPath in Directory.EnumerateDirectories(sourceFolder))
         {
             var directoryName = Path.GetFileName(directoryPath);
-            if (directoryName.Equals("bin", StringComparison.OrdinalIgnoreCase)
-                || directoryName.Equals("obj", StringComparison.OrdinalIgnoreCase))
-            {
+            if (IsGeneratedStateDirectory(directoryName))
                 continue;
-            }
 
             CopyDirectoryRecursive(directoryPath, Path.Combine(targetFolder, directoryName));
         }

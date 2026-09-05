@@ -178,13 +178,14 @@
       "docFile": "references/topics/ui/SearchWindow.md"
     },
     "ui:Annotations": {
-      "term": "Annotations",
+      "term": "Sections",
       "parent": null,
       "synonyms": [
-        "sections"
+        "annotations",
+        "frames"
       ],
       "classes": [
-        "MagGraphAnnotation"
+        "MagGraphSection"
       ],
       "docFile": "references/topics/ui/Annotations.md"
     },

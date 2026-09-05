@@ -1,6 +1,10 @@
 # Plan: Make the build-output clean step incremental
 
-Status: analysis + proposal (2026-08-23). No code changed yet.
+Status: analysis + proposal (2026-08-23). Interim slice landed 2026-08-25: `ClearBuildOutput` is now
+conditioned on `'$(Configuration)' == 'Release'` in all repo csprojs, and `ProjectXml.AddCleanBuildTarget`
+emits the condition / migrates unconditional targets in user csprojs. Debug builds are incremental and no
+longer gut a running editor's output; Release keeps the wipe, so items 1–2 below (mirror copies, stamp
+guard) remain the path to the Release-build savings.
 
 ## Symptom
 

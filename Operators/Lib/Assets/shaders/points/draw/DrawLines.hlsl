@@ -62,7 +62,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<Point> Points : t0;
+StructuredBuffer<Point> Points : register(t0);
 Texture2D<float4> texture2 : register(t1);
 
 psInput vsMain(uint id : SV_VertexID)
@@ -125,11 +125,11 @@ psInput vsMain(uint id : SV_VertexID)
     float3 normalA = normalize(cross(directionA, float3(0, 0, 1)));
     float3 normalB = normalize(cross(directionB, float3(0, 0, 1)));
 
-    if (isnan(pointAA.Scale.x) || isinf(pointAA.Scale.x))
+    if (IsSeparator(pointAA) || isinf(pointAA.Scale.x))
     {
         normalA = normal;
     }
-    if (isnan(pointBB.Scale.x) || isinf(pointBB.Scale.x))
+    if (IsSeparator(pointBB) || isinf(pointBB.Scale.x))
     {
         normalB = normal;
     }

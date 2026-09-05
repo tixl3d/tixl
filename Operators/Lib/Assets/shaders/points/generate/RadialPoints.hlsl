@@ -32,7 +32,7 @@ cbuffer Params : register(b0)
     float OrientationMode;
 } 
 
-RWStructuredBuffer<Point> ResultPoints : u0; // output
+RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 float3 RotatePointAroundAxis(float3 In, float3 Axis, float Rotation)
 {

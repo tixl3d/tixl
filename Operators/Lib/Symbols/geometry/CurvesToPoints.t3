@@ -1,0 +1,11 @@
+{
+  "FormatVersion": 3,
+  "Id": "6a1d8c3f-2b57-4e90-a4f6-c8e2d5b7f019"/*CurvesToPoints*/,
+  "Inputs": [
+    { "Id": "b7f2d9c4-5a13-4e86-9d0b-3c6e8a1f5d27"/*Curves*/, "DefaultValue": null },
+    { "Id": "4e9a6c1b-d872-4f35-b0e8-7a2d5f9c3e61"/*Tolerance*/, "DefaultValue": 0.002 },
+    { "Id": "d2c8e5a3-1f64-4b97-8e3a-c5b0d7f4a916"/*CloseLoops*/, "DefaultValue": true }
+  ],
+  "Children": [],
+  "Connections": []
+}

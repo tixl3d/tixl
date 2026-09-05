@@ -52,7 +52,7 @@ public abstract partial class SymbolPackage : IResourcePackage
     {
         get
         {
-            var dir = Path.Combine(Folder, FileLocations.ReleaseSymbolsSubfolder);
+            var dir = Path.Combine(Folder, FileLocations.SymbolsSubfolder);
             if (!Directory.Exists(dir))
                 return [];
             

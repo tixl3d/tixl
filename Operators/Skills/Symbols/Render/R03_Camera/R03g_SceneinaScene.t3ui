@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "8b869a9e-1bf6-4291-b310-7ddc0a523e86"/*R03g_SceneinaScene*/,
+  "Description": "Scene in a Scene",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "5579d6dd-a899-4ecb-a07b-587381faa938"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "8a46d895-b469-4722-8dda-b269c0b7c7d2"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "94807d16-5b20-4e50-85bb-9a10d006fddd"/*Text*/,
+      "SectionId": "e750a16d-2f6c-4797-a4a1-225fe4819254",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "18ca5aa4-92e6-4bde-88a3-21127c023020"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "e750a16d-2f6c-4797-a4a1-225fe4819254",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "72108763-bc45-4ca0-a561-7753f69a3bfa",
+      "Description": "[RenderTarget] establishes a new default camera for everything rendered inside it.\nThis keeps scenes cleanly separated."
+    },
+    {
+      "Id": "916e9e6f-7a40-4172-aac4-b1c94fb98362",
+      "Description": "In this example, a secondary scene is rendered and then used as a texture on a cube."
+    },
+    {
+      "Id": "30275776-1216-4728-8049-f58d4af9352a",
+      "Description": "Replicate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "e4a7c15d-9b23-4f68-8d0a-6c2e5b1f7a93"/*FilterGeoPartsByIndex*/,
+  "Inputs": [
+    {
+      "Id": "1d6f8a93-c2b5-4e40-a7d1-59e3b0c8f627"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "8e2c4b70-5f9a-4d16-b3c8-a0d7e1f5c394"/*Start*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "3b9e7d24-6a0f-4c85-9f2e-c1b6d8a4e057"/*Count*/,
+      "DefaultValue": 1
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

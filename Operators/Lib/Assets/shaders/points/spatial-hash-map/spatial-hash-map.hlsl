@@ -6,7 +6,7 @@
 #include "shared/hash-functions.hlsl"
 #include "points/spatial-hash-map/hash-map-settings.hlsl" 
 
-StructuredBuffer<LegacyPoint> _points :register(t0); 
+StructuredBuffer<Point> _points :register(t0); 
 
 RWStructuredBuffer<uint> CellPointIndices :register(u0);   // particleGridBuffer -> IndexToPointBuffer -> CellPointIndices
 RWStructuredBuffer<uint2> PointCellIndices :register(u1);  // particleGridCellBuffer -> PointCellIndices

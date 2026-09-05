@@ -16,11 +16,11 @@ cbuffer Params : register(b0)
     float Phase;
 }
 
-StructuredBuffer<PbrVertex> Vertices: t0;
-StructuredBuffer<int3> Indices: t1;
-//StructuredBuffer<LegacyPoint> SourcePoints : t2;         // input
+StructuredBuffer<PbrVertex> Vertices: register(t0);
+StructuredBuffer<int3> Indices: register(t1);
+//StructuredBuffer<Point> SourcePoints : register(t2);         // input
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 
 float3 closestPointOnTriangle( in float3 p0, in float3 p1, in float3 p2, in float3 sourcePosition )
@@ -186,7 +186,7 @@ void main(uint3 i : SV_DispatchThreadID)
     Indices.GetDimensions(faceCount, faceStride);
 
     float signedPointHash = hash11(i.x % 123.567 * 123.1) * 2-1;
-    LegacyPoint p = ResultPoints[i.x];
+    Point p = ResultPoints[i.x];
 
     float phase = ((Phase + (133.1123 * i.x) ) % 10000) * (1 + signedPointHash * 0.5);
     int phaseId = (int)phase;

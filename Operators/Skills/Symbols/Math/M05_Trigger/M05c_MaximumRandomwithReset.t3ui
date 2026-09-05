@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "8c671ee1-c4da-4209-a00d-4c79b9f1888b"/*M05c_MaximumRandomwithReset*/,
+  "Description": "Maximum Random with Reset",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "6dbbdb31-49d5-489b-ab73-95389df6aff0"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "e3b58149-3809-41f4-a704-8ac4a13b9a50"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "ebea9582-3cf4-4447-b5b5-a56df201f9ce"/*Text*/,
+      "SectionId": "ee16e2a2-b4a9-4a12-bd75-e46f68a9e86a",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "0f366b28-4724-46cd-bd37-3e8fd42334a8"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "ee16e2a2-b4a9-4a12-bd75-e46f68a9e86a",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "534ec8eb-cf35-43a5-a376-30967d240d81",
+      "Description": "Build on the previous solution.\nReset the maximum value at the beginning of each bar.",
+      "Style": "CallToAction"
+    }
+  ]
+}

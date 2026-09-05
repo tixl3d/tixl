@@ -21,7 +21,7 @@ cbuffer Params : register(b1)
     /*{FLOAT_PARAMS}*/
 }
 
-RWStructuredBuffer<Particle> Particles : u0;
+RWStructuredBuffer<Particle> Particles : register(u0);
 
 sampler ClampedSampler : register(s0);
 

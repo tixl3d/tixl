@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "b3e267ad-4c71-45e9-9a05-e9e1d3f6c882"/*NoiseField*/,
+  "Inputs": [
+    {
+      "Id": "c5f19a44-8b0e-4d63-a7d8-2f6b3e9c0a51"/*Frequency*/,
+      "DefaultValue": 2.0
+    },
+    {
+      "Id": "e8a2d1b7-3c94-4f28-b6e0-9d5c7a41f382"/*Octaves*/,
+      "DefaultValue": 3
+    },
+    {
+      "Id": "1b6e4f92-a8d3-45c7-9e21-c4b8d0f7a635"/*Amplitude*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "9f3c8e15-d762-4b09-a4f8-6e1a2c5d9b74"/*Offset*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "4d91b7c3-6f28-4e5a-8c07-b3f9e6a1d258"/*Seed*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

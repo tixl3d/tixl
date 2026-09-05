@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "72376119-cd3b-4a90-ae4c-377aa8383367"/*M03d_BooleanLogicRangeTest*/,
+  "Description": "Boolean Logic: Range Test",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3c4fc157-9131-48c5-9697-a749f642bac8"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "667c6cb6-8556-4480-91dd-83f51b97b7f3"/*Text*/,
+      "SectionId": "16709fe2-cc19-4ab7-abc3-e7f5ef2edb03",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "ddf505f3-6bf5-4da1-8cb4-bee9ea6f3b79"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b171150f-1173-4924-bc81-e1805249c8e1"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "16709fe2-cc19-4ab7-abc3-e7f5ef2edb03",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "6ac88ec8-de36-4bd6-840f-25c77cbb27e4",
+      "Description": "Test whether a noise value is between -0.1 and 0.1.\nFigure out how to solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

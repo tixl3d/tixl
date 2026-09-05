@@ -1,6 +1,6 @@
 #include "shared/point.hlsl"
 #include "shared/quat-functions.hlsl"
-// struct LegacyPoint
+// struct Point
 // {
 //     float3 position;
 //     float size;
@@ -72,8 +72,8 @@ sampler texSampler : register(s0);
 // };
 
 
-StructuredBuffer<LegacyPoint> Points : t0;
-StructuredBuffer<uint2> LinePoints : t1;
+StructuredBuffer<Point> Points : register(t0);
+StructuredBuffer<uint2> LinePoints : register(t1);
 Texture2D<float4> texture2 : register(t2);
 Texture2D<float4> progressTexture : register(t3);
 
@@ -93,10 +93,10 @@ psInput vsMain(uint id: SV_VertexID)
     
     uint2 indexPair = LinePoints[particleId];
     
-    LegacyPoint pointA = Points[indexPair.x];
-    LegacyPoint pointB = Points[indexPair.y];
+    Point pointA = Points[indexPair.x];
+    Point pointB = Points[indexPair.y];
 
-    if(isnan(pointA.W) || isnan(pointB.W) ) 
+    if(IsSeparator(pointA) || IsSeparator(pointB))
     {
         output.position = 0;
         return output;
@@ -105,7 +105,7 @@ psInput vsMain(uint id: SV_VertexID)
     
     float animationProgress = ((CurrentStep - stepIndex + StepCount)  % StepCount) / StepCount;
     float4 progressColor = progressTexture.SampleLevel(texSampler, float2(animationProgress, 0),0);
-    float hide = (indexPair.x== 0 || indexPair.y == 0 || indexPair.x >= pointCount || indexPair.y >= pointCount) ? sqrt(-1) : 1;
+    float hide = (indexPair.x== 0 || indexPair.y == 0 || indexPair.x >= pointCount || indexPair.y >= pointCount) ? NAN : 1;
 
     float4 forward = mul(float4(0,0,-1,0), CameraToWorld);
     //forward.xyz/= forward.w;

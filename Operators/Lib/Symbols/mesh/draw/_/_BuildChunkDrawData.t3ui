@@ -1,0 +1,42 @@
+{
+  "FormatVersion": 3,
+  "Id": "2d7c4a9e-6b13-4f58-9a0e-c5d1e8f3b726"/*_BuildChunkDrawData*/,
+  "Description": "Builds the per-face draw table for [DrawMeshChunksAtPoints]: for every point the faces of the chunk it references.
+
+The table depends only on the structure (point count, ChunkIndices, the mesh's chunk definitions), so it is rebuilt only when one of those changes; the two small structure buffers are read back once at that moment instead of every frame. UpdateEveryFrame forces a rebuild per frame for chunk indices that change on the GPU without changing size - slow, use only when needed.",
+  "InputUis": [
+    {
+      "InputId": "6f2a8d4c-1e97-4b35-a0c6-d8e3b5f7c219"/*GPoints*/,
+      "Relevancy": "Required",
+      "Position": { "X": 0.0, "Y": 0.0 }
+    },
+    {
+      "InputId": "b9e4c7a1-5d06-4f83-9c2e-7a1f3d8b6e05"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": { "X": 0.0, "Y": 45.0 }
+    },
+    {
+      "InputId": "3c8f1b6d-a2e5-4d79-b4a0-9e6c2f5d8a17"/*ChunkIndices*/,
+      "Position": { "X": 0.0, "Y": 90.0 }
+    },
+    {
+      "InputId": "e7d3a5f9-8c21-4e64-a1b8-5f0d9c3e7b42"/*UpdateEveryFrame*/,
+      "Position": { "X": 0.0, "Y": 135.0 }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8e1f5c2a-d743-4b09-a6e8-3f9c0b7d1a54"/*DrawData*/,
+      "Position": { "X": 300.0, "Y": 0.0 }
+    },
+    {
+      "OutputId": "5a9d3e71-c826-4f04-b1d7-e0c4a8f2b693"/*VertexCount*/,
+      "Position": { "X": 300.0, "Y": 100.0 }
+    },
+    {
+      "OutputId": "c3b7f1e5-9a40-4d62-8e5b-2d6f0c1a7e38"/*FaceCount*/,
+      "Position": { "X": 300.0, "Y": 200.0 }
+    }
+  ]
+}

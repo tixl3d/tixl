@@ -17,9 +17,9 @@ cbuffer Params : register(b1)
     int PointCount;
 }
 
-StructuredBuffer<int3> SourceFaces : t0;       
+StructuredBuffer<int3> SourceFaces : register(t0);       
 
-RWStructuredBuffer<int3> ResultFaces : u0;   
+RWStructuredBuffer<int3> ResultFaces : register(u0);   
 
 static float3 variationOffset;
 

@@ -23,10 +23,10 @@ cbuffer Params : register(b1)
     int FaceCount;
 }
 
-RWStructuredBuffer<Particle> Particles : u0; 
+RWStructuredBuffer<Particle> Particles : register(u0); 
 
-StructuredBuffer<PbrVertex> Vertices: t0;
-StructuredBuffer<int3> Indices: t1;
+StructuredBuffer<PbrVertex> Vertices: register(t0);
+StructuredBuffer<int3> Indices: register(t1);
 
 
 float3 closestPointOnTriangle( in float3 p0, in float3 p1, in float3 p2, in float3 sourcePosition )

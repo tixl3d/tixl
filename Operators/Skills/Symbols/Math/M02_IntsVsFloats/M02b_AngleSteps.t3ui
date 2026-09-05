@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "3017bf53-e1fc-4a2b-bffd-0eaa24683547"/*M02b_AngleSteps*/,
+  "Description": "Angle Steps",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "de22ce4a-cca5-4b98-b0b7-c6a26260b1c2"/*Text*/,
+      "SectionId": "09d14dcb-2034-4b2c-9241-710ee910328d",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "e90e7df2-c7d5-4386-a161-ea8e72e8c4b6"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "f52b5514-3de3-4c1b-824b-5548cac3e840"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "239d5290-db3f-4704-ac64-4db5fefe3e74"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "09d14dcb-2034-4b2c-9241-710ee910328d",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "ab7cfe9c-d45e-49b3-8f75-aacbcabac76f",
+      "Description": "In this example, the rotation of a cube should change in steps of exactly 15 degrees.\nThis sounds like a good case for [FloatToInt]."
+    },
+    {
+      "Id": "fb7af4c5-fa49-4d9d-afaf-6a99b562dbf7",
+      "Description": "Complete the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

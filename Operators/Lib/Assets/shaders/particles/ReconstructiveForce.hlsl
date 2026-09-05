@@ -15,8 +15,8 @@ cbuffer Params : register(b0)
     float SpeedFactor;
 }
 
-StructuredBuffer<Point> TargetPoints : t0;
-RWStructuredBuffer<Particle> Particles : u0;
+StructuredBuffer<Point> TargetPoints : register(t0);
+RWStructuredBuffer<Particle> Particles : register(u0);
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
@@ -52,5 +52,4 @@ RWStructuredBuffer<Particle> Particles : u0;
     Particles[gi].Velocity = lerp(velocity, 0, blendFactor);
     Particles[gi].Color = lerp(Particles[gi].Color, TargetPoints[targetPointIndex].Color, blendFactor);
 
-    // Particles[gi].Radius = lerp(Particles[gi].Radius, TargetPoints[targetPointIndex].W, blendFactor);
 }

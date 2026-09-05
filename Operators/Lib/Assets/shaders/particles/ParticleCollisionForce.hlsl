@@ -2,7 +2,7 @@
 #include "shared/quat-functions.hlsl"
 
 RWStructuredBuffer<Particle> Particles : register(u0);
-RWStructuredBuffer<LegacyPoint> ResultPoints : register(u1);
+RWStructuredBuffer<Point> ResultPoints : register(u1);
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)

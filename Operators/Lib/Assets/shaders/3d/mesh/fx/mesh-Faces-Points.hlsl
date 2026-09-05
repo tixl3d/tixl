@@ -29,12 +29,12 @@ cbuffer FloatParams : register(b1)
 
 static const  int CornerCountsForMode[]  = {1,3,5};
 
-StructuredBuffer<int3> Faces : t0;
-StructuredBuffer<PbrVertex> SourceVertices : t1;
-Texture2D<float4> Texture : t2;
+StructuredBuffer<int3> Faces : register(t0);
+StructuredBuffer<PbrVertex> SourceVertices : register(t1);
+Texture2D<float4> Texture : register(t2);
 sampler LinearSampler : register(s0);
 
-RWStructuredBuffer<Point> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 float CalculateTriangleArea(float3 vertexA, float3 vertexB, float3 vertexC)
 {

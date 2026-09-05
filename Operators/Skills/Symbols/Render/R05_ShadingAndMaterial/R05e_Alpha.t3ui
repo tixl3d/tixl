@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "2aeda7da-e0e0-414b-a40f-6ff80554ce32"/*R05e_Alpha*/,
+  "Description": "Alpha",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "4cb8a8ef-7761-4377-bdad-c4df1cb1f324"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "5828a66a-c9c5-4e71-a03e-1113109d8460"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "a3c8b0ab-7553-4ce3-810e-5c91c4fd8f08"/*Text*/,
+      "SectionId": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c75f250d-3218-453e-b894-e1844968b4d4"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "1d174ed9-8d9a-4fec-ac50-71630f7143a0",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "608c6682-15ac-4961-8fb1-fd4e6bf59ffb",
+      "Description": "The base color of a material is called the albedo.\nThe term comes from Latin and refers to lightness, similar to diffuse color.\nIt represents the material color without shading or shadows."
+    },
+    {
+      "Id": "ba142f5c-491d-4e5f-9aca-15d0112c874a",
+      "Description": "The alpha channel of the albedo defines material opacity.\nIn this example, an alpha gradient is animated across the surface."
+    },
+    {
+      "Id": "226bc1d4-a8cb-45dd-b9ce-c73ca1c82323",
+      "Description": "Reproduce the animation.",
+      "Style": "CallToAction"
+    }
+  ]
+}

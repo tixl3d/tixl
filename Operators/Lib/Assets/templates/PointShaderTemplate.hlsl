@@ -8,8 +8,8 @@ cbuffer Params : register(b0)
     float Amount;
 }
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;        
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;   
+StructuredBuffer<Point> SourcePoints : t0;        
+RWStructuredBuffer<Point> ResultPoints : u0;   
 
 [numthreads(64,1,1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -25,7 +25,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     }
 
     // Read to original point
-    LegacyPoint p = SourcePoints[i];  
+    Point p = SourcePoints[i];  
 
     // Here is a meaningless example that offsets the each points position 
     // depending on it's position and the input parameters

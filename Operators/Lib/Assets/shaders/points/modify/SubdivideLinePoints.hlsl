@@ -9,15 +9,8 @@ cbuffer Params : register(b0)
     float CloseShape;  // 0 = open, 1 = closed
 }
 
-StructuredBuffer<Point> SourcePoints : t0;         // input
-RWStructuredBuffer<Point> ResultPoints : u0;    // output
-
-// Helper function to check if a point is a separator
-bool IsSeparator(Point p)
-{
-    // Check if Scale contains NaN values (separator marker)
-    return isnan(p.Scale.x) && isnan(p.Scale.y) && isnan(p.Scale.z);
-}
+StructuredBuffer<Point> SourcePoints : register(t0);         // input
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)

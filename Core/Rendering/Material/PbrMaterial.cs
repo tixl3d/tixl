@@ -102,11 +102,35 @@ public class PbrMaterial: IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        Log.Debug($"Disposing PbrMaterial {Name}...");
-        AlbedoMapSrv?.Dispose();
-        EmissiveMapSrv?.Dispose();
-        RoughnessMetallicOcclusionSrv?.Dispose();
-        NormalSrv?.Dispose();
+        if (!disposing)
+            return;
+
+        DisposeUnlessSharedDefault(ref AlbedoMapSrv);
+        DisposeUnlessSharedDefault(ref EmissiveMapSrv);
+        DisposeUnlessSharedDefault(ref RoughnessMetallicOcclusionSrv);
+        DisposeUnlessSharedDefault(ref NormalSrv);
+
         ParameterBuffer?.Dispose();
+        ParameterBuffer = null;
+    }
+
+    /// <summary>
+    /// The static default SRVs are shared across all materials and must survive individual disposal.
+    /// Nulling the field keeps a second Dispose (e.g. via a material shared by several scene dispatches) harmless.
+    /// </summary>
+    private static void DisposeUnlessSharedDefault(ref ShaderResourceView srv)
+    {
+        if (srv != null
+            && srv != DefaultAlbedoColorSrv
+            && srv != DefaultEmissiveColorSrv
+            && srv != DefaultRoughnessMetallicOcclusionSrv
+            && srv != DefaultNormalSrv
+            && srv != BlackPixelSrv
+            && srv != WhitePixelSrv)
+        {
+            srv.Dispose();
+        }
+
+        srv = null;
     }
 }

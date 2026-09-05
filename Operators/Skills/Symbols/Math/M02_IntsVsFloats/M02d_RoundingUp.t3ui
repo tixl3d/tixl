@@ -1,0 +1,72 @@
+{
+  "FormatVersion": 3,
+  "Id": "6e6e6942-6474-45b4-84c8-3d27f306e9bb"/*M02d_RoundingUp*/,
+  "Description": "Rounding Up",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "6d86b03a-fcac-4a80-adac-9fd0bc00c97d"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "aaaad4c7-2a92-461f-8747-d6d85f12e095"/*Text*/,
+      "SectionId": "3c5b8b36-4f2f-4c5b-8fef-5cccaf5f8de8",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "e1755bd0-43c8-4618-ad6a-25651acdc861"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "fdb201c1-b330-4700-8c3a-9eb7f81da5f8"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "3c5b8b36-4f2f-4c5b-8fef-5cccaf5f8de8",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "78aac9ee-15ef-45d3-99f0-0f0018119590",
+      "Description": "Sometimes it is useful to round up to the next whole number.\nThe [Ceiling] operator does exactly that.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "fd41fbad-62a5-4b90-996e-72145536c019",
+      "Description": "Solve the example using [Ceiling].",
+      "Style": "CallToAction"
+    }
+  ]
+}

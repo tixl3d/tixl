@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "82d64a0f-19cb-4e35-9a70-45f8c2e6b1d3"/*BindToSkeleton*/,
+  "Inputs": [
+    {
+      "Id": "0b94e6c8-d235-4a70-bf16-83c7d90a25e4"/*FalloffPower*/,
+      "DefaultValue": 2.0
+    },
+    {
+      "Id": "2c85b0f7-64ad-4193-8e50-d9b3a1c67e04"/*Setup*/,
+      "DefaultValue": {
+        "SceneSetup": {
+          "NodeSettings": []
+        }
+      }
+    },
+    {
+      "Id": "51e0c9d4-a786-4b23-9ef1-30d5b8a2c647"/*Mesh*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "78d21b5e-4c09-4f6a-8b93-a5e0f62c48d1"/*Radius*/,
+      "DefaultValue": 0.2
+    },
+    {
+      "Id": "96a3f5e1-08c2-4d7b-b365-1ce49d07f8a2"/*Points*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a6f083d2-5be7-4c94-8027-1f4d6b9e05c8"/*MaxInfluences*/,
+      "DefaultValue": 4
+    },
+    {
+      "Id": "ef67a29c-b3d0-4851-92f4-06c8e5d13a7b"/*SkeletonIndex*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

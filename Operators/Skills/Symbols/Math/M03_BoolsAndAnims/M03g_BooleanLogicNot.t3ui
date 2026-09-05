@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "492e4984-66cf-4924-9b7a-87fa23ef0668"/*M03g_BooleanLogicNot*/,
+  "Description": "Boolean Logic: Not",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1bdb845f-cd32-419f-ac1f-313f06743e3c"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "356e77b8-7c9b-4300-8777-c4f74f02679f"/*Text*/,
+      "SectionId": "5590f4d4-2e5c-4100-9326-ccc03873ebc7",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "5cb2b8da-617a-4599-8541-925b07a596d7"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "bd82270e-9d35-4bd0-9ed0-59d11d3a064f"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "5590f4d4-2e5c-4100-9326-ccc03873ebc7",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "e48bc790-3f3e-4e5d-b274-3152bae14fdb",
+      "Description": "Sometimes you need the opposite boolean value.\nUse the [Not] operator to invert the signal and solve the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "666560a3-7857-4acc-bd37-e1e4baff38f8"/*R03c_JumpCuts*/,
+  "Description": "Jump Cuts",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "82f23497-4a8a-431c-b433-9a2312464394"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "c35b5e11-1824-4ecc-b4d7-123f8dd2e7c6"/*Text*/,
+      "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "ebe5314e-6885-4ddd-b4f3-203eb6a244bd"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "af63316d-ec18-4d25-9d3d-dec4e235e932"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "19c14411-60d6-4969-8aa0-5197f884cc86",
+      "Description": "Many [OrbitCamera] parameters come in pairs.\nThe first value defines the base angle, while the second adds a wobble component for secondary motion."
+    },
+    {
+      "Id": "f2efe656-7b5a-44e0-9345-5ff244e58a30",
+      "Description": "This allows the creation of more dynamic orbital flight paths."
+    },
+    {
+      "Id": "303889dd-12b5-4a8b-b904-7f68156a2ca7",
+      "Description": "These parameters are already adjusted in this example.\nControl the random offset so the camera jumps to a new random position on every beat.",
+      "Style": "CallToAction"
+    }
+  ]
+}

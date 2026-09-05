@@ -11,11 +11,11 @@ cbuffer Params : register(b0)
     float Scale;
 }
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;
-StructuredBuffer<LegacyPoint> SourcePoints : t1;
-StructuredBuffer<LegacyPoint> TargetPoints : t2;
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);
+StructuredBuffer<Point> SourcePoints : register(t1);
+StructuredBuffer<Point> TargetPoints : register(t2);
 
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 
 float cross( in float2 a, in float2 b ) { return a.x*b.y - a.y*b.x; }
 

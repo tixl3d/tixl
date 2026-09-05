@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "f1d54e9e-b385-4865-a3bd-6782f9314815"/*I03f_BlurQuality*/,
+  "Description": "Blur Quality",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "b841a2b2-a179-42bd-b22c-602fc1649ef0"/*Text*/,
+      "SectionId": "b9c5119b-99a0-4016-960b-b47a9a6653b5",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "c64b2b9e-df29-4ede-a08c-faf4a7f744d5"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "f018c4e2-ec0e-4750-864e-32ea2af02c44"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "402ec1db-bd1c-41bb-b9dd-912c4ed418c8"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "b9c5119b-99a0-4016-960b-b47a9a6653b5",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "cf2e841a-0e55-4040-96f3-19d04a9f6945",
+      "Description": "This example uses a classic [Blur], but the edges still look rough.\nIncreasing the sample count is not always the best solution."
+    },
+    {
+      "Id": "21c4fb82-d476-4d9a-84d5-4346b220e163",
+      "Description": "Improve edge smoothness without changing the blur sample count.",
+      "Style": "CallToAction"
+    }
+  ]
+}

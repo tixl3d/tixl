@@ -17,8 +17,8 @@ cbuffer Params : register(b0)
     float UseVertexSelection;
 }
 
-StructuredBuffer<PbrVertex> SourceVertices : t0;
-RWStructuredBuffer<PbrVertex> ResultVertices : u0;
+StructuredBuffer<PbrVertex> SourceVertices : register(t0);
+RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 
 static const float NoisePhase = 0;
 

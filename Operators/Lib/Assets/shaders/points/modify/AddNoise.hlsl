@@ -23,8 +23,8 @@ cbuffer Params : register(b1)
     int StrengthMode;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-RWStructuredBuffer<Point> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 float3 GetNoise(float3 pos, float3 variation)
 {

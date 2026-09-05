@@ -21,8 +21,8 @@ cbuffer Params : register(b0)
     float2 Taper2;
 }
 
-StructuredBuffer<PbrVertex> SourceVerts : t0;
-RWStructuredBuffer<PbrVertex> ResultVerts : u0;
+StructuredBuffer<PbrVertex> SourceVerts : register(t0);
+RWStructuredBuffer<PbrVertex> ResultVerts : register(u0);
 
 inline float3 NormalizeToSphere(float3 position, float targetRadius)
 {

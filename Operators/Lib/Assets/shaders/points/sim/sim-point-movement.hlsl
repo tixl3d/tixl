@@ -13,8 +13,8 @@ cbuffer Params : register(b0)
     float WIsWeight;
 }
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 static const float PointSpace = 0;
 static const float ObjectSpace = 1;
@@ -37,8 +37,8 @@ void main(uint3 i : SV_DispatchThreadID)
     if (i.x >= numStructs)
         return;
 
-    LegacyPoint p = SourcePoints[i.x];
-    float w =  WIsWeight >= 0.5 ? p.W *  p.Selected:  p.Selected; 
+    Point p = SourcePoints[i.x];
+    float w =  WIsWeight >= 0.5 ? p.FX1 *  p.FX2:  p.FX2; 
 
     float3 pos = p.Position;
 
@@ -92,13 +92,13 @@ void main(uint3 i : SV_DispatchThreadID)
         pos += p.Position;
         
         // Apply scale to Stretch
-        p.Stretch *= scale;
+        p.Scale *= scale;
     }
 
     p.Position = pos.xyz;
     p.Rotation = newRotation;
 
-    p.W = lerp(p.W, p.W * ScaleW + OffsetW, w);
+    p.FX1 = lerp(p.FX1, p.FX1 * ScaleW + OffsetW, w);
 
     ResultPoints[i.x] = p;
 }

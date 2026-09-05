@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "70d8f2b5-3a41-4c96-8e2d-b09c6f5e1a73"/*VoronoiFracture*/,
+  "Inputs": [
+    {
+      "Id": "31c7e9d4-85f2-4a60-b1c8-6d0a5e3f9b27"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5e0d8b36-a2c7-4f91-b840-97c3e6d1a528"/*Async*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "84a2f6c0-19db-4e75-93a4-c7e1b8d25f06"/*Points*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "7c4e1b90-52d8-4a36-9f1e-b8d0a6c3e574"/*FillInterior*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

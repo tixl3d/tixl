@@ -11,10 +11,10 @@ cbuffer EmitParameter : register(b0)
 };
 
 
-StructuredBuffer<PbrVertex> Vertices : t0;
-StructuredBuffer<int3> FaceIndices : t1;
+StructuredBuffer<PbrVertex> Vertices : register(t0);
+StructuredBuffer<int3> FaceIndices : register(t1);
 
-RWStructuredBuffer<FaceProperties> FaceData : u0;
+RWStructuredBuffer<FaceProperties> FaceData : register(u0);
 
 [numthreads(1,1,1)]
 void main(uint3 i : SV_DispatchThreadID)

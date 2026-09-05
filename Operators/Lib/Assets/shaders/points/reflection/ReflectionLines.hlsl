@@ -11,11 +11,11 @@ cbuffer Params : register(b0)
     float SpreadColorShift;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
-StructuredBuffer<PbrVertex> Vertices : t1;
-StructuredBuffer<int3> Indices : t2;
+StructuredBuffer<Point> SourcePoints : register(t0);
+StructuredBuffer<PbrVertex> Vertices : register(t1);
+StructuredBuffer<int3> Indices : register(t2);
 
-RWStructuredBuffer<Point> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 
 // Casual Moller-Trumbore GPU Ray-Triangle Intersection Routine
 // bool intersectMT(
@@ -94,8 +94,6 @@ bool intersect(
     return ((b[0] >= 0) && (b[1] >= 0) && (b[2] >= 0) && (t >= 0));
 }
 
-static const float NaN = sqrt(-1);
-
 static const int RAY_THREAD_COUNT = 8;
 static const int FACE_THREAD_COUNT = 512 / RAY_THREAD_COUNT;
 
@@ -123,7 +121,7 @@ groupshared float2 BestHitBaryUV[RAY_THREAD_COUNT];
 
     // Write ray start and seperator
     ResultPoints[rayGroupStartIndex + 0] = p;
-    ResultPoints[rayGroupStartIndex + stepCount - 1].Scale = NaN;
+    ResultPoints[rayGroupStartIndex + stepCount - 1].Scale = NAN;
 
     float3 rayOrigin = p.Position;
     float3 rayDirection = qRotateVec3(float3(0, 0, 1), p.Rotation);
@@ -238,6 +236,6 @@ groupshared float2 BestHitBaryUV[RAY_THREAD_COUNT];
         }
 
         GroupMemoryBarrierWithGroupSync();
-        ResultPoints[rayGroupStartIndex + stepCount - 1].Scale = NaN;
+        ResultPoints[rayGroupStartIndex + stepCount - 1].Scale = NAN;
     }
 }

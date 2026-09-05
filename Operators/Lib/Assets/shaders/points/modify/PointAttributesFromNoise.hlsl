@@ -68,8 +68,8 @@ float3 GetNoise(float3 pos, float3 variation)
     return snoiseVec3(noiseLookup);
 }
 
-StructuredBuffer<LegacyPoint> Points : t0;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+StructuredBuffer<Point> Points : register(t0);
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 
 
 Texture2D<float4> remapCurveTexture : register(t1);
@@ -80,7 +80,7 @@ void main(uint3 i : SV_DispatchThreadID)
 {
     uint index = i.x; 
 
-    LegacyPoint P = Points[index];
+    Point P = Points[index];
     float3 pos = P.Position;
     pos -= Center;
     
@@ -110,7 +110,7 @@ void main(uint3 i : SV_DispatchThreadID)
             + Factors[(uint)clamp(B, 0, 5.1)] * (c.b * BFactor + BOffset);
 
     P.Position += float3(ff.xyz);
-    P.W = clamp(P.W + ff.w,0, 10000);
+    P.FX1 = clamp(P.FX1 + ff.w,0, 10000);
     
     
     float4 rot = P.Rotation;

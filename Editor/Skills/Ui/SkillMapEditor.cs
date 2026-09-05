@@ -55,10 +55,22 @@ internal static class SkillMapEditor
             {
                 ImGui.SameLine();
 
-                if (ImGui.Button("Save"))
+                var saveState = SkillMapData.HasUnsavedChanges
+                                    ? CustomComponents.ButtonStates.NeedsAttention
+                                    : CustomComponents.ButtonStates.Default;
+                if (CustomComponents.StateButton("Save", saveState))
                 {
                     SkillMapData.Save();
                 }
+
+                ImGui.SameLine();
+                if (CustomComponents.StateButton("Sync Levels", CustomComponents.ButtonStates.Default))
+                {
+                    SkillQuestStructureSync.SyncFromRepository();
+                }
+
+                CustomComponents.TooltipForLastItem("Sync level structure from the skillquest content repository",
+                                                    "Builds category/topic sections in EditSkillQuest, creates stub levels for new markdown headings and applies tour points.");
 
                 if (ImGui.IsWindowAppearing())
                 {
@@ -125,6 +137,8 @@ internal static class SkillMapEditor
                         {
                             t.Cell += moveCellDelta;
                         }
+
+                        SkillMapData.FlagAsModified();
                     }
                 }
             }
@@ -232,25 +246,23 @@ internal static class SkillMapEditor
 
         FormInputs.DrawFieldSetHeader("Topic");
         ImGui.PushID(topic.Id.GetHashCode());
-        FormInputs.AddStringInput("##Topic", ref topic.Title, autoFocus: autoFocus);
+        var modified = FormInputs.AddStringInput("##Topic", ref topic.Title, autoFocus: autoFocus);
         FormInputs.AddVerticalSpace();
 
-        if (FormInputs.AddEnumDropdown(ref topic.TopicType, "##Type"))
-        {
-        }
+        modified |= FormInputs.AddEnumDropdown(ref topic.TopicType, "##Type");
 
         FormInputs.DrawFieldSetHeader("Requires");
-        if (FormInputs.AddEnumDropdown(ref topic.Requirement, "##Requirements"))
-        {
-        }
+        modified |= FormInputs.AddEnumDropdown(ref topic.Requirement, "##Requirements");
 
-        
         FormInputs.DrawFieldSetHeader("Namespace");
-        FormInputs.AddStringInput("##NameSpace", ref topic.Namespace);
+        modified |= FormInputs.AddStringInput("##NameSpace", ref topic.Namespace);
 
         FormInputs.DrawFieldSetHeader("Description");
         topic.Description ??= string.Empty;
-        CustomComponents.DrawMultilineTextEdit(ref topic.Description);
+        modified |= CustomComponents.DrawMultilineTextEdit(ref topic.Description);
+
+        if (modified)
+            SkillMapData.FlagAsModified();
 
         ImGui.PopID();
     }
@@ -271,11 +283,18 @@ internal static class SkillMapEditor
                                    Id = Guid.NewGuid(),
                                    MapCoordinate = new Vector2(cell.X, cell.Y),
                                    Title = "New topic" + SkillMapData.Data.Topics.Count(),
-                                   ZoneId = activeTopic?.ZoneId ?? Guid.Empty,
+                                   ZoneId = activeTopic?.ZoneId ?? SkillMapData.FallbackZone.Id,
                                    TopicType = _lastType,
                                    ProgressionState = activeTopic?.ProgressionState ?? QuestTopic.ProgressStates.Locked,
                                    Requirement = activeTopic?.Requirement ?? QuestTopic.Requirements.AllInputPaths,
                                };
+
+            SkillMapData.Data.Topics.Add(newTopic);
+            SkillMapData.FlagAsModified();
+
+            // The double-click's second press already armed the fence; without a reset its
+            // release would complete as a click and immediately clear the new selection.
+            _fence.Reset();
 
             _selectedTopics.Clear();
             _selectedTopics.Add(newTopic);
@@ -349,6 +368,8 @@ internal static class SkillMapEditor
                     {
                         activeTopic.UnlocksTopics.Add(topic.Id);
                     }
+
+                    SkillMapData.FlagAsModified();
 
                     if (!ImGui.GetIO().KeyShift)
                     {

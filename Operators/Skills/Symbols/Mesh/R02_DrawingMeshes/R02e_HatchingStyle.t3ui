@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "1e3ff394-1d2d-4318-b50f-2147e001f26c"/*R02e_HatchingStyle*/,
+  "Description": "Hatching Style",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0066cb8d-92cf-4fdf-87c8-f4c7ef30612c"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "9c884e65-0b41-4820-b1e7-320c90d783d3"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "b0a10fe8-9655-49fb-a8e0-a0863523b9e2"/*Text*/,
+      "SectionId": "e4483fdb-3a15-48a7-923c-48d056448839",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ee6f70e7-ee21-4350-ab52-78fa617f81a7"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "e4483fdb-3a15-48a7-923c-48d056448839",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "f01d048c-1157-47b0-96dd-efca38b2c652",
+      "Description": "There are additional operators for drawing meshes with specialized shaders.\nInstancing and field shaders are covered later."
+    },
+    {
+      "Id": "2813f418-fa31-45f6-96a2-55aa1d6ae2f7",
+      "Description": "This example uses a shader that produces a hatching-style look.\nIt is a good example of how drawing operators can define visual style directly."
+    },
+    {
+      "Id": "3aed9001-23d1-4749-ac11-7e6bf2e0d02b",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

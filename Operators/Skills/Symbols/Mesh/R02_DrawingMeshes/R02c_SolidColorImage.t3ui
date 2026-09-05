@@ -1,0 +1,79 @@
+{
+  "FormatVersion": 3,
+  "Id": "ec042dc1-e616-4a60-81ab-91aede4b6e73"/*R02c_SolidColorImage*/,
+  "Description": "Solid Color Image",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "14ca0c55-c0eb-426a-aeba-c66608a13798"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "4c2a722d-d146-4ad3-8568-e9b76f785c6b"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "b435dc83-4b55-4dd1-8efc-97716c49ec1f"/*Text*/,
+      "SectionId": "8b53edb4-f169-4f85-b309-0837dd4e115f",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b58878b0-dff6-4525-b826-b56c43e26c54"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "8b53edb4-f169-4f85-b309-0837dd4e115f",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "f463fe9c-7cf7-4b09-9ed3-74084131d2b1",
+      "Description": "Earlier, [RenderTarget] was introduced as a canvas that is cleared before drawing."
+    },
+    {
+      "Id": "77788c5f-0b68-4363-8c27-715426ae4f41",
+      "Description": "Sometimes a project needs a simple image that contains only a single color."
+    },
+    {
+      "Id": "cb2a8d04-aed6-4e0a-8c2e-4c6bb07c3d80",
+      "Description": "In this example, the [RenderTarget] is set to a size of one pixel.\nMSAA and the depth buffer are disabled to reduce overhead.\nThis setup is intentionally minimal and optimized."
+    },
+    {
+      "Id": "ce78f816-55ad-445e-802d-00b749b929ea",
+      "Description": "Recreate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

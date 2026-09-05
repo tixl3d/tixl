@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "06498c0e-9ed9-49d9-a561-d1dac0cde797"/*M02f_Precision*/,
+  "Description": "Precision",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "09b82559-04f9-4d49-8abb-99abc664606a"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "b7a41111-ea85-4844-8270-d33792298098"/*Text*/,
+      "SectionId": "9a79a08d-4509-4451-b681-607bea5cde95",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "d0e38b83-033f-4986-b09a-a7cef8af84e0"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "0947126c-ae21-439f-9967-da500c71abe6"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "9a79a08d-4509-4451-b681-607bea5cde95",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "1428277b-4866-479c-91cc-b2cde955d441",
+      "Description": "One important warning about floating-point values:\nThey are not infinitely precise.\nInternally, most floating-point numbers are stored using 32 bits. This is a compromise that allows a wide range of values, but not equal precision everywhere.\nSmall values (close to zero) have higher precision.   As values grow larger, the resolution becomes coarser and the steps between representable numbers increase."
+    },
+    {
+      "Id": "a5fb16a8-f2c2-456b-b136-2f45a6ed9c53",
+      "Description": "As an example of how visible this can become, look at the following setup.\nFigure out how many zeros need to be added to the factors to reproduce the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

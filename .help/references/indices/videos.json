@@ -33,6 +33,16 @@
       "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw"
     },
     {
+      "id": "2X8LyBvB8H0",
+      "type": "meetup",
+      "date": "2026-06-29",
+      "title": "TiXL Meetup 2026-06-29 — Particles Deep Dive",
+      "duration": "4:06:34",
+      "summary": "A four-hour community meetup centered on the particle system: why transparent particles get black outlines and how depth sorting works, the ring-buffer internals of [ParticleSystem] and [FilterPoints], particle-trail and branching tricks, plus demos of the upcoming 4.2 help window, snapshots for live performance, MIDI/IO recording, and the new FFmpeg video playback.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=2X8LyBvB8H0"
+    },
+    {
       "id": "4xxhQ1JX-ls",
       "type": "meetup",
       "date": null,
@@ -66,6 +76,16 @@
         "op:Lib.field.render.RaymarchField"
       ],
       "url": "https://www.youtube.com/watch?v=6-8PKxPztl8"
+    },
+    {
+      "id": "7S4aedYxqQE",
+      "type": "tutorial",
+      "date": null,
+      "title": "Let's build a logo animation from scratch",
+      "duration": "0:04:29",
+      "summary": "Silent screen-capture tutorial building a logo animation from scratch — no narration, so no operator mentions could be transcribed.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=7S4aedYxqQE"
     },
     {
       "id": "854OSxXzMDM",
@@ -111,6 +131,16 @@
       "summary": "An unstructured beginner webinar walking through TiXL's evaluation context: how time (in musical bars) and the \"magic\" 0,0 resolution flow backwards from the output, how image operators chain and blend, HDR colours, the gain/bias mapping curve, and a closing live experiment building a particle \"black hole\".",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=_pEhs2jQ3Gg"
+    },
+    {
+      "id": "_x8vm2aS9FI",
+      "type": "tutorial",
+      "date": null,
+      "title": "Combining SelectFaces with ScatterMeshFace effects",
+      "duration": "0:00:29",
+      "summary": "Silent demo combining face selection with mesh-face scattering — no narration, so no operator mentions could be transcribed.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=_x8vm2aS9FI"
     },
     {
       "id": "a5_xCfC_3m4",
@@ -168,6 +198,16 @@
       "url": "https://www.youtube.com/watch?v=cGyCEkCJQUk"
     },
     {
+      "id": "CNvtNwG2Mls",
+      "type": "meetup",
+      "date": "2026-08-24",
+      "title": "TiXL Meetup 2026-08-24 — SDF Text Blending, Particles & Anaglyph",
+      "duration": "4:34:45",
+      "summary": "A four-and-a-half-hour community session that experiments with blending text-based SDFs, walks through the new player-export and shader-caching improvements, builds a text-outline particle emitter with lifetime attribute mapping, dissects an anaglyph stereo camera setup (including live-coding a camera-reference input for [CamPosition]), creates [RemapVec3] on the spot, and presents the upcoming physical-space output-management board.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=CNvtNwG2Mls"
+    },
+    {
       "id": "COd7gkJB0KQ",
       "type": "tutorial",
       "date": "2022-09-10",
@@ -181,6 +221,16 @@
         "op:Lib.numbers.anim.time.GetFrameSpeedFactor"
       ],
       "url": "https://www.youtube.com/watch?v=COd7gkJB0KQ"
+    },
+    {
+      "id": "D4L9dsfNJlU",
+      "type": "tutorial",
+      "date": null,
+      "title": "Depth based color grading (Work in progress)",
+      "duration": "0:00:29",
+      "summary": "Silent work-in-progress demo of depth-based color grading — no narration, so no operator mentions could be transcribed.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=D4L9dsfNJlU"
     },
     {
       "id": "dCX7CcL0ZJs",
@@ -217,6 +267,16 @@
       "url": "https://www.youtube.com/watch?v=DTIl2QmkumE"
     },
     {
+      "id": "dvpmRmqHMj0",
+      "type": "meetup",
+      "date": "2026-07-27",
+      "title": "TiXL Meetup 2026-07-27 — Output Management, Projection Mapping & Custom Point Shaders",
+      "duration": "3:31:03",
+      "summary": "A community meetup where the maintainer previews the new output-management/projection-mapping system for 4.3 (content→surface→output abstraction, calibration, setups), answers point-color questions with deep [CustomPointShader] live-coding, extends [BlendPoints] on stream, and prototypes a drone-show pipeline with particle forces.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0"
+    },
+    {
       "id": "ElW_0uaeiNA",
       "type": "tutorial",
       "date": "2022-07-15",
@@ -229,6 +289,16 @@
         "op:Lib.point.sim.SimNoiseOffset"
       ],
       "url": "https://www.youtube.com/watch?v=ElW_0uaeiNA"
+    },
+    {
+      "id": "F8J8w-JK3hA",
+      "type": "meetup",
+      "date": "2026-08-10",
+      "title": "TiXL Meetup 2026-08-10 — Drone Show Choreography, Video Pipeline & Audio Graph",
+      "duration": "5:32:39",
+      "summary": "A five-and-a-half-hour community meetup that opens with reaction-diffusion feedback experiments, previews the upcoming 4.3 features (asset link files, the node-based audio graph, video editing timeline, FFmpeg playback and HAP export, texture-array frame history), and ends in a long collaborative session building a 100-drone show in TiXL with speed/collision validation and a DDS texture export into Blender.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=F8J8w-JK3hA"
     },
     {
       "id": "f9E7lwUXfBM",
@@ -258,6 +328,16 @@
       "url": "https://www.youtube.com/watch?v=fCz6SbxFPPA"
     },
     {
+      "id": "fFpMpa7qTB4",
+      "type": "meetup",
+      "date": "2026-07-13",
+      "title": "TiXL Meetup 2026-07-13 — Custom Shaders, Custom Draw Mesh & 4.2 Release",
+      "duration": "3:54:55",
+      "summary": "A nearly four-hour community meetup centered on TiXL's custom shader family: fixing the raymarch perspective-shift and [SortPoints] bugs, an extended live exploration of the new custom draw mesh operator (fields, point attributes, lights, image inputs), plus the 4.2 release, the backup/recovery system, and a roadmap discussion covering glTF character animation, reroute nodes, and a future shader graph.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=fFpMpa7qTB4"
+    },
+    {
       "id": "GF0wWpNWkVs",
       "type": "meetup",
       "date": "2026-02-24",
@@ -279,6 +359,16 @@
         "ui:DopeSheet"
       ],
       "url": "https://www.youtube.com/watch?v=hh1tcg4A8bU"
+    },
+    {
+      "id": "iIxSKv_WKoM",
+      "type": "tutorial",
+      "date": null,
+      "title": "Depth based color grading (Work in progress)",
+      "duration": "0:00:29",
+      "summary": "Silent work-in-progress demo of depth-based color grading — no narration, so no operator mentions could be transcribed.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=iIxSKv_WKoM"
     },
     {
       "id": "IJLvPtz0qTg",
@@ -494,6 +584,16 @@
       "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ"
     },
     {
+      "id": "tk6RY-F7uGU",
+      "type": "tutorial",
+      "date": null,
+      "title": "Combining Color Grading with Preset Blending",
+      "duration": "0:00:29",
+      "summary": "Silent demo combining color grading with preset blending — no narration, so no operator mentions could be transcribed.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=tk6RY-F7uGU"
+    },
+    {
       "id": "tZ1Uz6DmL_c",
       "type": "tutorial",
       "date": "2022-07-13",
@@ -504,6 +604,16 @@
         "op:Lib.mesh.draw.DrawMeshAtPoints"
       ],
       "url": "https://www.youtube.com/watch?v=tZ1Uz6DmL_c"
+    },
+    {
+      "id": "U892v26VxTg",
+      "type": "tutorial",
+      "date": null,
+      "title": "SoftTransformPoint effect",
+      "duration": "0:00:29",
+      "summary": "Silent demo clip of the SoftTransformPoints effect — no narration, so no operator mentions could be transcribed.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=U892v26VxTg"
     },
     {
       "id": "VNC-zr-JOjQ",
@@ -534,6 +644,16 @@
       "summary": "A long, exploratory TiXL meet-up: reworking the BubbleZoom magnifier parameters, reviewing the PR workflow, fixing an old feedback logo, dissecting the shadow render pipeline, debugging back-face shading and equirectangular point rendering, walking through custom-shader authoring with RenderDoc, and a deep live experiment building an \"infinite zoom\" scene-transition.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co"
+    },
+    {
+      "id": "YMumISn9zkw",
+      "type": "tutorial",
+      "date": null,
+      "title": "Use Blender to prepare OBJ models for Tooll3",
+      "duration": "0:00:29",
+      "summary": "Silent walkthrough of preparing OBJ models in Blender for import — no narration, so no operator mentions could be transcribed.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=YMumISn9zkw"
     },
     {
       "id": "yy1kKa-wucA",

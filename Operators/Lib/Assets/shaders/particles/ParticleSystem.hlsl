@@ -26,9 +26,9 @@ cbuffer IntParams : register(b1)
     int EmitVelocityFactor;
 }
 
-StructuredBuffer<Point> EmitPoints : t0;
-RWStructuredBuffer<Particle> Particles : u0;
-RWStructuredBuffer<Point> ResultPoints : u1;
+StructuredBuffer<Point> EmitPoints : register(t0);
+RWStructuredBuffer<Particle> Particles : register(u0);
+RWStructuredBuffer<Point> ResultPoints : register(u1);
 
 #define W_KEEP_ORIGINAL 0
 #define W_PARTICLE_AGE 1
@@ -74,6 +74,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
         {
             Particles[(gi - 1) % maxParticleCount].BirthTime = NAN;
             Particles[(gi - 1) % maxParticleCount].Radius = NAN;
+            ResultPoints[(gi - 1) % maxParticleCount].Scale = NAN;
         }
 
         Point emitPoint = EmitPoints[addIndex];
@@ -96,7 +97,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
         ResultPoints[gi].Color = emitPoint.Color;
     }
 
-    if (Particles[gi].BirthTime == NAN)
+    if (isnan(Particles[gi].BirthTime))
         return;
 
     float3 velocity = Particles[gi].Velocity;
@@ -135,7 +136,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
                          : LifeTime;
 
     float normalizedAge = (IsAutoCount && LifeTime < 0) ? 1 : (Time - Particles[gi].BirthTime) / lifeTime;
-    bool tooOld = normalizedAge > 1;
+    bool tooOld = normalizedAge > 1 || isnan(normalizedAge);
 
     if (SetFx1To == W_PARTICLE_AGE)
     {
@@ -148,7 +149,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
 
     if (SetFx2To == W_PARTICLE_AGE)
     {
-        ResultPoints[gi].FX2 = normalizedAge;
+        ResultPoints[gi].FX2 = saturate(normalizedAge);
     }
     else if (SetFx2To == W_PARTICLE_SPEED)
     {

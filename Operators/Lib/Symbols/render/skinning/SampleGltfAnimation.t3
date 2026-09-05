@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "e58d1c9a-4b26-4f83-a071-c2d95b3f68e4"/*SampleGltfAnimation*/,
+  "Inputs": [
+    {
+      "Id": "07d54c92-eab3-4861-b1f5-c8394e60da27"/*OverrideTime*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "2a95cd41-7e68-4c0f-9b83-d15f0a62e837"/*Setup*/,
+      "DefaultValue": {
+        "SceneSetup": {
+          "NodeSettings": []
+        }
+      }
+    },
+    {
+      "Id": "84b0f3e6-1d59-4c27-a9ce-72e8d4b1065f"/*ClipIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "b3861f05-4dc2-49e8-92a7-6ff0e1d8c534"/*Loop*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "f6e21b48-935a-4d70-8c1e-40a7d92c53b1"/*SkeletonIndex*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

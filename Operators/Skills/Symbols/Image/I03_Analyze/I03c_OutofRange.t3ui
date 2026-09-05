@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "7941c133-12a3-4939-ae93-b9bf0c419184"/*I03c_OutofRange*/,
+  "Description": "Out of Range",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "633ced57-d922-4eac-8e7d-f1aac78bca0e"/*Text*/,
+      "SectionId": "9c825c68-d1c9-4a38-915e-80bbd7dbf1e8",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    },
+    {
+      "ChildId": "a25f65fe-97c9-4994-be27-187e56ed126d"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "d85377ba-6f1d-4735-963e-34353f1ee826"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e834deaa-982c-4b15-ad74-182bb628e319"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "9c825c68-d1c9-4a38-915e-80bbd7dbf1e8",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "ef7b2821-c35a-4415-886e-c4cfa7ab1eca",
+      "Description": "Something is wrong with this image.\nBright values are clipped, creating a visible edge where colors reach pure white.\nThis may not be obvious at first glance, but with [ImageLevels] the edge becomes clear immediately."
+    },
+    {
+      "Id": "40310c3c-3bf5-49b2-a5e2-58e30b340700",
+      "Description": "Use [ToneMap] to reduce the maximum brightness.",
+      "Style": "CallToAction"
+    }
+  ]
+}

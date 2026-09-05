@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "e2b7f4a1-3c69-4d58-8a1e-9f6c0d2b5e37"/*TextToCurves*/,
+  "Description": "Lays out text with a TrueType or OpenType font and outputs the glyph outlines as curves.
+
+Each glyph becomes one part (pivot at its origin) of closed cubic-bezier contours, with part attributes CodePoint, GlyphId, CharIndex, WordIndex, LineIndex and Advance for selection and styling downstream. Size is the em height in scene units. Weight drives a variable font's wght axis (Inter Variable: 100..900); Axis and AxisValue set one more axis by its four-letter tag (e.g. opsz). Static fonts ignore them. Whitespace advances the layout but produces no geometry. Flatten with [CurvesToPoints] to draw as lines, or fill with [CurvesToGeometry].
+
+AKA: font outlines, 3d text, typography, glyphs",
+  "InputUis": [
+    { "InputId": "1f8a3c5e-7d92-4b06-a4e1-c6b9d2f7a350"/*Text*/, "Relevancy": "Required", "Position": { "X": 0.0, "Y": 0.0 } },
+    { "InputId": "7c2e9a4b-5f61-4d38-b8a0-e3d5c1f9b724"/*Path*/, "Relevancy": "Required", "Usage": "FilePath", "FileFilter": "ttf;otf;ttc", "Position": { "X": 0.0, "Y": 45.0 } },
+    { "InputId": "a5d1f7c3-8b24-4e69-9c0d-2f4a6e8b1d95"/*Size*/, "Position": { "X": 0.0, "Y": 90.0 } },
+    { "InputId": "3e6b8d2a-c4f9-4a17-b5e3-8d0c7a2f6e41"/*LineSpacing*/, "Position": { "X": 0.0, "Y": 135.0 } },
+    { "InputId": "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67"/*Alignment*/, "Position": { "X": 0.0, "Y": 180.0 } },
+    { "InputId": "6b3f1e9d-a2c5-4d84-8e7b-0f9a4c6d2e13"/*Kerning*/, "Position": { "X": 0.0, "Y": 225.0 } },
+    { "InputId": "f4a9c2e7-6d18-4b53-9e0c-a7b1d5f3c826"/*Weight*/, "Position": { "X": 0.0, "Y": 270.0 }, "Min": 100.0, "Max": 900.0, "Scale": 1.0 },
+    { "InputId": "8c5e1d7a-3f92-4a64-b0d8-6e2c9f4a1b57"/*Axis*/, "Position": { "X": 0.0, "Y": 315.0 } },
+    { "InputId": "2e7b4f9c-a1d6-4c38-8b5e-d9f0a3c7e614"/*AxisValue*/, "Position": { "X": 0.0, "Y": 360.0 } }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    { "OutputId": "5d3f9b27-a8c1-4e60-b2d4-7e9f1c6a3b85"/*Curves*/, "Position": { "X": 300.0, "Y": 0.0 } },
+    { "OutputId": "9a6e2c48-d1b5-4f73-8c0e-3b7d5a2f9e16"/*GlyphCount*/, "Position": { "X": 300.0, "Y": 100.0 } }
+  ]
+}

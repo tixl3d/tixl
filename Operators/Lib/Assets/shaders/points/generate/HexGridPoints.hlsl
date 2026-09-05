@@ -35,7 +35,7 @@ static const float2 HexOffsetsAndAngles[] =
 
 
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
+RWStructuredBuffer<Point> ResultPoints : register(u0);    // output
 static const float ToRad = 3.141578 / 180;
 
 [numthreads(64,4,1)]
@@ -83,7 +83,7 @@ void main(uint3 i : SV_DispatchThreadID)
         float rotZ=  isOdd ? 60 * ToRad : 0;
         pos+= Center;
         ResultPoints[index].Position = pos;
-        ResultPoints[index].W = W;
+        ResultPoints[index].FX1 = W;
 
         ResultPoints[index].Rotation = qFromAngleAxis((OrientationAngle) *PI/180 + rotZ, normalize(OrientationAxis));
 
@@ -110,7 +110,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
         pos+= Center;
         ResultPoints[index].Position = pos;
-        ResultPoints[index].W = W;
+        ResultPoints[index].FX1 = W;
         ResultPoints[index].Rotation = qFromAngleAxis(OrientationAngle*PI/180 + rotDelta, normalize(OrientationAxis));
     }                            
     else {
@@ -119,11 +119,11 @@ void main(uint3 i : SV_DispatchThreadID)
 
         pos+= Center;
         ResultPoints[index].Position = pos;
-        ResultPoints[index].W = W;
+        ResultPoints[index].FX1 = W;
         ResultPoints[index].Rotation = qFromAngleAxis(OrientationAngle*PI/180, normalize(OrientationAxis));
     }
     ResultPoints[index].Color = 1;
-    ResultPoints[index].Selected = 1;
-    ResultPoints[index].Stretch = 1;
+    ResultPoints[index].FX2 = 1;
+    ResultPoints[index].Scale = 1;
 }
 

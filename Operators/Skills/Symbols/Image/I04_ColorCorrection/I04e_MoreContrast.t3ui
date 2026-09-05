@@ -1,0 +1,71 @@
+{
+  "FormatVersion": 3,
+  "Id": "dd1c4895-2ffe-40d3-9d00-f721ccd792bd"/*I04e_MoreContrast*/,
+  "Description": "More Contrast",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0e361c90-3076-49f5-8e64-9efd713126d0"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "3ca69801-5395-403e-92df-7fa7c12d33e6"/*Text*/,
+      "Position": {
+        "X": 1366.8816,
+        "Y": 1568.3276
+      }
+    },
+    {
+      "ChildId": "8c2c212c-7f51-4cef-b67b-77af55a69e3c"/*Text*/,
+      "SectionId": "f3a7070a-5700-49f3-91d4-5ff437e759a8",
+      "Position": {
+        "X": 1244.7633,
+        "Y": 2141.3435
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "9187e40a-c318-4e3e-89b3-37e37b2f24c4"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "f3a7070a-5700-49f3-91d4-5ff437e759a8",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1085.0,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 525.0,
+        "Y": 187.48975
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "96300c46-c750-4b4d-a07f-e84117c99ccf",
+      "Description": "In this final example we use [RemapColors] again.\nIt can also adjust brightness and contrast without editing the gradient itself.\nThe idea is to bias the color before it is sampled from the gradient."
+    },
+    {
+      "Id": "c359e400-53b1-4dac-ab13-e36bee2e228b",
+      "Description": "Adjust bias and gain to complete the challenge.",
+      "Style": "CallToAction"
+    }
+  ]
+}

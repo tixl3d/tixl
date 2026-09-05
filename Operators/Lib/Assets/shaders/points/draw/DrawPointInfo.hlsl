@@ -90,8 +90,8 @@ struct psInput
 
 sampler ClampedSampler : register(s0);
 
-StructuredBuffer<Point> DataPoints : t0;
-StructuredBuffer<Point> OverridePositionPoints : t1;
+StructuredBuffer<Point> DataPoints : register(t0);
+StructuredBuffer<Point> OverridePositionPoints : register(t1);
 
 static const float NanPlaceholder = 999666.666;
 static const int NotAnInt = -2147483647; // almost max neg
