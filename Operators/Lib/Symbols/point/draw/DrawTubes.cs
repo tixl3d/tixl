@@ -75,6 +75,9 @@ internal sealed class DrawTubes : Instance<DrawTubes>
     [Input(Guid = "d3e4f5a6-b7c8-4d9e-1f0a-2b3c4d5e6f70")]
     public readonly InputSlot<float> MinWidthFactor = new();
 
+    [Input(Guid = "e5dbb74c-5762-447b-a365-9ea7f6229204")]
+    public readonly InputSlot<float> TextureScale = new();
+
     private enum TextureModes
     {
         RelativeStartEnd,

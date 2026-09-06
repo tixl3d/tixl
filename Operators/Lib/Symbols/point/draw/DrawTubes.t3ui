@@ -94,7 +94,7 @@
     },
     {
       "InputId": "e1f3945d-1ab8-4e6c-b5ca-c5036ed7d52a"/*TextureRange*/,
-      "Description": "Remaps U along the tube length. UVs are generated procedurally: the side uses cylindrical projection (U along the line, V around the circumference) and end caps use a planar disk fill.",
+      "Description": "Affine remap applied to the procedural U coordinate (default 0..1 = identity). UVs are generated at a constant texel size set by Texture Scale: the side uses cylindrical projection (U along arc length, V around the circumference) and end caps use a planar disk placed adjacent to each tube end.",
       "Position": {
         "X": -224.65475,
         "Y": 453.20538
@@ -201,6 +201,17 @@
       },
       "Min": 0.0,
       "Max": 1.0,
+      "Scale": 0.01
+    },
+    {
+      "InputId": "e5dbb74c-5762-447b-a365-9ea7f6229204"/*TextureScale*/,
+      "Description": "World units per one texture repeat. Sets the texel size for all generated UVs (side and caps) so the pattern stays a constant size along and around the tube. Smaller = denser texture.",
+      "Position": {
+        "X": -228.65521,
+        "Y": 1420.3622
+      },
+      "Min": 0.01,
+      "Max": 10.0,
       "Scale": 0.01
     }
   ],
@@ -526,6 +537,62 @@
       "Position": {
         "X": 10.208252,
         "Y": 1240.3622
+      }
+    },
+    {
+      "ChildId": "13a570d9-9658-4cd3-8711-23d114e71a72"/*SegLengths*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1250.0
+      }
+    },
+    {
+      "ChildId": "cb6d93e1-8633-43e4-8985-bba080e37cd4"/*SegComponents*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1310.0
+      }
+    },
+    {
+      "ChildId": "2767851e-7c4f-4296-8bc2-2068b8c58b0e"/*ArcParams*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1370.0
+      }
+    },
+    {
+      "ChildId": "d7be0bf7-866e-407a-9b58-1ab1de8f61db"/*ArcLengthShader*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1430.0
+      }
+    },
+    {
+      "ChildId": "53479b70-879a-4e00-b5d8-e3fb96d87a92"/*ArcDispatch*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1490.0
+      }
+    },
+    {
+      "ChildId": "fdfca65f-8a7a-4ca2-a3c1-dc90b660f789"/*ArcCS*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1550.0
+      }
+    },
+    {
+      "ChildId": "1763734d-3509-40a2-a1e2-62941ff79125"/*ArcPrefixSum*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1610.0
+      }
+    },
+    {
+      "ChildId": "cb445f5d-b187-4b8f-a7d3-b288f57cc1a1"/*ArcCumComponents*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1670.0
       }
     }
   ],

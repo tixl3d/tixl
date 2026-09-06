@@ -47,6 +47,7 @@ cbuffer Params : register(b1)
     float FadeStartDist;
     float FadeEndDist;
     float MinWidthFactor;
+    float TextureScale;
 };
 
 cbuffer FogParams : register(b2)
@@ -93,6 +94,10 @@ sampler clampedSampler : register(s1);
 
 StructuredBuffer<Point> Points : register(t0);
 //Texture2D<float4> texture2 : register(t1);
+
+// Cumulative arc length (fixed-point millimeters) at each point, from the arc-length
+// pre-pass + exclusive prefix sum. VS-only; bound at t6 by the vertex stage.
+StructuredBuffer<uint> ArcCumMM : register(t6);
 
 Texture2D<float4> BaseColorMap : register(t1);
 Texture2D<float4> EmissiveColorMap : register(t2);
@@ -265,8 +270,25 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
 
         float3 pInObject = pPos + radiusOffset;
 
-        output.texCoord = float2( f * (TextureRange.y - TextureRange.x) + TextureRange.x,
-        fRing);
+        // Physical UVs: constant texel size along the tube (arc length / TextureScale) and
+        // around it (integer repeats of the circumference). Falls back to index-based U when
+        // there are fewer than 2 points or the pre-pass buffer is unavailable.
+        float uCoord;
+        if (pointCount >= 2)
+        {
+            float s0 = (float)ArcCumMM[sourceSeg];
+            float s1 = (float)ArcCumMM[sourceSeg + 1];
+            float arcWorld = (s0 + (s1 - s0) * t) * 0.001;
+            uCoord = arcWorld / max(TextureScale, Epsilon);
+        }
+        else
+        {
+            uCoord = f;
+        }
+        uCoord = uCoord * (TextureRange.y - TextureRange.x) + TextureRange.x;
+
+        float nAround = max(1.0, round(Tau * Width / max(TextureScale, Epsilon)));
+        output.texCoord = float2(uCoord, fRing * nAround);
 
         float3 tangent = normalize(qRotateVec3(float3(1,0,0), pointRotation));
         float3 normalLocal = normalize(float3(0, cos(spinRad) / max(sy, Epsilon), sin(spinRad) / max(sz, Epsilon)));
@@ -354,6 +376,16 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
             radius *= lerp(1.0, MinWidthFactor, distT);
         }
 
+        // Physical-scale planar disk center for this cap, placed adjacent to the tube end so
+        // its texel density matches the body (a seam at the junction is inherent to mixing a
+        // cylindrical side with a planar cap).
+        float capS = max(TextureScale, Epsilon);
+        float nAroundCap = max(1.0, round(Tau * Width / capS));
+        float totalArcWorld = (pointCount >= 2) ? (float)ArcCumMM[pointCount - 1] * 0.001 : 0.0;
+        float2 capCenterUV = (capIndex == 1)
+            ? float2((totalArcWorld + radius) / capS, nAroundCap * 0.5)
+            : float2(-radius / capS, nAroundCap * 0.5);
+
         uint rimIndex;
         if (vertInTri == 0)
         {
@@ -389,7 +421,7 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
             tangent = normalize(qRotateVec3(float3(0, 1, 0), p.Rotation));
             normal = capNormal;
             bitangent = normalize(cross(normal, tangent));
-            texCoord = float2(0.5, 0.5);
+            texCoord = capCenterUV;
         }
         else
         {
@@ -403,7 +435,7 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
             tangent = normalize(qRotateVec3(float3(0, -sin(angle), cos(angle)), p.Rotation));
             normal = capNormal;
             bitangent = normalize(cross(normal, tangent));
-            texCoord = float2(cos(angle), sin(angle)) * 0.5 + 0.5;
+            texCoord = capCenterUV + float2(cos(angle), sin(angle)) * (radius / capS);
         }
 
         output.texCoord = texCoord;

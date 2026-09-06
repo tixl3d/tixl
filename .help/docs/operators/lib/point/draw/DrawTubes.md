@@ -13,7 +13,7 @@ Draws a shaded 3D mesh for connected lines points.
 | **Spin** (Single) | — |
 | **Twist** (Single) | — |
 | **TextureMode** (Int32) | — |
-| **TextureRange** (Vector2) | Remaps U along the tube length. UVs are generated procedurally: the side uses cylindrical projection (U along the line, V around the circumference) and end caps use a planar disk fill. |
+| **TextureRange** (Vector2) | Affine remap applied to the procedural U coordinate (default 0..1 = identity). UVs are generated at a constant texel size set by Texture Scale: the side uses cylindrical projection (U along arc length, V around the circumference) and end caps use a planar disk placed adjacent to each tube end. |
 | **EnableDepthWrite** (Boolean) | — |
 | **BlendMod** (Int32) | — |
 | **Culling** (CullMode) | — |
@@ -30,6 +30,7 @@ Draws a shaded 3D mesh for connected lines points.
 | **FadeStartDist** (Single) | Camera distance at which the width fade starts. The tube is at full width up to this distance. |
 | **FadeEndDist** (Single) | Camera distance at which the width fade reaches its minimum (Min Width Factor x Width). |
 | **MinWidthFactor** (Single) | Multiplier applied to Width at maximum fade distance. 1 = no fade, 0 = fully faded out. |
+| **TextureScale** (Single) | World units per one texture repeat. Sets the texel size for all generated UVs (side and caps) so the pattern stays a constant size along and around the tube. Smaller = denser texture. |
 
 ## Outputs
 | Name | Type |
