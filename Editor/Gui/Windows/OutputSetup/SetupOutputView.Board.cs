@@ -262,7 +262,10 @@ internal sealed partial class SetupOutputView
             return;
 
         HandleBoardDrag(setup, selection);
+        _boardSetupForFence = setup;
         HandleBoardFence(selection);
+        DrawBoardSnapGuides();
+        HandleBoardHierarchyKeys(setup, selection);
         HandleBoardKeys(setup, selection);
         HandleBoardDrop(setup, selection, dl, screenMin, screenMax);
     }
@@ -366,10 +369,15 @@ internal sealed partial class SetupOutputView
             return;
 
         // The whole card is its pick and grab area (the picker cycles stacked cards on repeated clicks), and
-        // what the fence catches.
-        _picker.AddTarget(kind, id, sMin, sMax, isBackground: true);
+        // what the fence catches. A selected surface card hands the pick down to the region under the cursor.
+        var pickId = id;
+        if (kind == SetupEntitySelection.EntityKind.Surface && setup.FindSurface(id) is { } cardSurface)
+            pickId = ResolveBoardPickInCard(setup, selection, cardSurface, min + cardSurface.AnchorInMeters, _boardProjection.ScreenToCanvas(ImGui.GetMousePos()));
+
+        _picker.AddTarget(kind, pickId, sMin, sMax, isBackground: true);
         _boardFenceCandidates.Add((kind, id, new ImRect(sMin, sMax)));
-        GrabBoardCard(kind, id, hovered, isSelected);
+        if (pickId == id)
+            GrabBoardCard(kind, id, hovered, isSelected);
 
         // Double-click enters the card's space: the canvas that edits it.
         if (hovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
@@ -498,6 +506,32 @@ internal sealed partial class SetupOutputView
         ImGui.PopID();
         if (edge < 0)
             return;
+
+        // The dragged edge snaps to the other cards' edges and the floor (Shift drags free) — for a crop and a
+        // scale alike, since both put that edge where the cursor is.
+        if (phase == CanvasPointHandle.DragPhase.Dragging && !ImGui.GetIO().KeyShift)
+        {
+            CollectBoardSnapCandidates(setup, surface.Id, excludeDragItems: false);
+            var threshold = BoardSnapThreshold();
+            if (edge is 1 or 3)
+            {
+                Span<float> x = [edgePos.X];
+                if (SurfaceGeometry.TrySnapOffset(_snapXs, x, threshold, out var offsetX, out var targetX))
+                {
+                    edgePos.X += offsetX;
+                    _boardSnapGuideX = targetX;
+                }
+            }
+            else
+            {
+                Span<float> y = [edgePos.Y];
+                if (SurfaceGeometry.TrySnapOffset(_snapYs, y, threshold, out var offsetY, out var targetY))
+                {
+                    edgePos.Y += offsetY;
+                    _boardSnapGuideY = targetY;
+                }
+            }
+        }
 
         // The crop rides the setup snapshot rather than the resize command: a traced surface's trace crops along,
         // and that quad is not part of the resize state.
@@ -732,6 +766,36 @@ internal sealed partial class SetupOutputView
                 SetBoardPosition(setup, kind, id, start + delta);
             }
 
+            // The moved group's outer edges snap to the other cards' edges and to the floor; Shift drags free.
+            if (!ImGui.GetIO().KeyShift && TryGetDragGroupBounds(setup, out var groupMin, out var groupMax))
+            {
+                CollectBoardSnapCandidates(setup, Guid.Empty, excludeDragItems: true);
+                var threshold = BoardSnapThreshold();
+                var snap = Vector2.Zero;
+                Span<float> xs = [groupMin.X, groupMax.X];
+                if (SurfaceGeometry.TrySnapOffset(_snapXs, xs, threshold, out var offsetX, out var targetX))
+                {
+                    snap.X = offsetX;
+                    _boardSnapGuideX = targetX;
+                }
+
+                Span<float> ys = [groupMin.Y, groupMax.Y];
+                if (SurfaceGeometry.TrySnapOffset(_snapYs, ys, threshold, out var offsetY, out var targetY))
+                {
+                    snap.Y = offsetY;
+                    _boardSnapGuideY = targetY;
+                }
+
+                if (snap != Vector2.Zero)
+                {
+                    for (var i = 0; i < _boardDragItems.Count; i++)
+                    {
+                        var (kind, id, start) = _boardDragItems[i];
+                        SetBoardPosition(setup, kind, id, start + delta + snap);
+                    }
+                }
+            }
+
             return;
         }
 
@@ -739,6 +803,108 @@ internal sealed partial class SetupOutputView
         _boardDragItems.Clear();
         _boardDragKind = SetupEntitySelection.EntityKind.None;
         _boardDragId = Guid.Empty;
+    }
+
+    /// <summary>
+    /// Snap candidates on the Board: every card's left/right edges as x, bottom/top as y, plus the floor line —
+    /// what physical things stand on. The card being edited is left out, as is the whole group of a card drag.
+    /// Regions are not cards here: they snap inside their parent through the region editor.
+    /// </summary>
+    private void CollectBoardSnapCandidates(Setup setup, Guid excludeId, bool excludeDragItems)
+    {
+        _snapXs.Clear();
+        _snapYs.Clear();
+        _snapYs.Add(0f); // the floor
+
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+            AddBoardSnapCandidate(setup, SetupEntitySelection.EntityKind.Surface, setup.Surfaces[i].Id, excludeId, excludeDragItems);
+
+        for (var i = 0; i < setup.ContentSources.Count; i++)
+            AddBoardSnapCandidate(setup, SetupEntitySelection.EntityKind.ContentSource, setup.ContentSources[i].SymbolChildId, excludeId, excludeDragItems);
+
+        for (var i = 0; i < setup.Outputs.Count; i++)
+            AddBoardSnapCandidate(setup, SetupEntitySelection.EntityKind.Output, setup.Outputs[i].Id, excludeId, excludeDragItems);
+
+        for (var i = 0; i < setup.ReferenceImages.Count; i++)
+            AddBoardSnapCandidate(setup, SetupEntitySelection.EntityKind.ReferenceImage, setup.ReferenceImages[i].Id, excludeId, excludeDragItems);
+    }
+
+    private void AddBoardSnapCandidate(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, Guid excludeId, bool excludeDragItems)
+    {
+        if (id == excludeId || (excludeDragItems && IsBoardDragItem(id)))
+            return;
+
+        // Regions live inside their parent's card; only top-level surfaces are cards.
+        if (kind == SetupEntitySelection.EntityKind.Surface && setup.FindSurface(id)?.ParentId != Guid.Empty)
+            return;
+
+        if (!TryGetBoardBounds(setup, kind, id, out var min, out var max))
+            return;
+
+        _snapXs.Add(min.X);
+        _snapXs.Add(max.X);
+        _snapYs.Add(min.Y);
+        _snapYs.Add(max.Y);
+    }
+
+    private bool IsBoardDragItem(Guid id)
+    {
+        for (var i = 0; i < _boardDragItems.Count; i++)
+        {
+            if (_boardDragItems[i].Id == id)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>The bounding box of every card in the live drag, at its current (already moved) position.</summary>
+    private bool TryGetDragGroupBounds(Setup setup, out Vector2 min, out Vector2 max)
+    {
+        var any = false;
+        min = max = Vector2.Zero;
+        for (var i = 0; i < _boardDragItems.Count; i++)
+        {
+            var (kind, id, _) = _boardDragItems[i];
+            if (TryGetBoardBounds(setup, kind, id, out var itemMin, out var itemMax))
+                Include(ref any, ref min, ref max, itemMin, itemMax);
+        }
+
+        return any;
+    }
+
+    /// <summary>A few screen pixels, in Board metres at the current zoom.</summary>
+    private float BoardSnapThreshold()
+    {
+        var origin = _boardProjection.CanvasToScreen(Vector2.Zero);
+        var pixelsPerMetre = Vector2.Distance(origin, _boardProjection.CanvasToScreen(new Vector2(1, 0)));
+        return pixelsPerMetre > 0.001f ? 7 * T3Ui.UiScaleFactor / pixelsPerMetre : 0f;
+    }
+
+    /// <summary>The snapped-to lines across the whole view, for the frame a gesture snapped. Cleared afterwards.</summary>
+    private void DrawBoardSnapGuides()
+    {
+        if (_boardSnapGuideX == null && _boardSnapGuideY == null)
+            return;
+
+        var dl = ImGui.GetWindowDrawList();
+        var windowMin = ImGui.GetWindowPos();
+        var windowMax = windowMin + ImGui.GetWindowSize();
+        var color = UiColors.StatusAnimated.Fade(0.6f);
+        if (_boardSnapGuideX != null)
+        {
+            var x = _boardProjection.CanvasToScreen(new Vector2(_boardSnapGuideX.Value, 0)).X;
+            dl.AddLine(new Vector2(x, windowMin.Y), new Vector2(x, windowMax.Y), color, 1 * T3Ui.UiScaleFactor);
+        }
+
+        if (_boardSnapGuideY != null)
+        {
+            var y = _boardProjection.CanvasToScreen(new Vector2(0, _boardSnapGuideY.Value)).Y;
+            dl.AddLine(new Vector2(windowMin.X, y), new Vector2(windowMax.X, y), color, 1 * T3Ui.UiScaleFactor);
+        }
+
+        _boardSnapGuideX = null;
+        _boardSnapGuideY = null;
     }
 
     /// <summary>
@@ -790,11 +956,151 @@ internal sealed partial class SetupOutputView
             if (!bounds.Overlaps(rect))
                 continue;
 
+            // A container only partly inside the fence offers its children instead; wholly inside, it is the
+            // thing meant. Cards without regions are plain items.
+            if (kind == SetupEntitySelection.EntityKind.Surface && !Contains(bounds, rect)
+                && _boardSetupForFence?.FindSurface(id) is { } container && HasRegions(_boardSetupForFence, container.Id)
+                && TryGetBoardBounds(_boardSetupForFence, kind, id, out var cardMin, out _))
+            {
+                FenceRegions(selection, selectMode, bounds, container, cardMin + container.AnchorInMeters);
+                continue;
+            }
+
             if (selectMode == SelectionFence.SelectModes.Remove)
                 selection.Remove(kind, id);
             else
                 selection.Add(kind, id);
         }
+    }
+
+    /// <summary>The same rule one level down: a region wholly inside (or without regions of its own) is taken; one
+    /// partly inside hands over to its regions.</summary>
+    private void FenceRegions(SetupEntitySelection selection, SelectionFence.SelectModes selectMode, ImRect bounds, Surface parent, Vector2 originOnBoard)
+    {
+        var setup = _boardSetupForFence!;
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            var child = setup.Surfaces[i];
+            if (child.ParentId != parent.Id)
+                continue;
+
+            SurfaceGeometry.ChildBounds(child, out var min, out var max);
+            var rect = new ImRect(_boardProjection.CanvasToScreen(originOnBoard + new Vector2(min.X, max.Y)),
+                                  _boardProjection.CanvasToScreen(originOnBoard + new Vector2(max.X, min.Y)));
+            if (!bounds.Overlaps(rect))
+                continue;
+
+            if (!Contains(bounds, rect) && HasRegions(setup, child.Id))
+            {
+                FenceRegions(selection, selectMode, bounds, child, originOnBoard + min + child.AnchorInMeters);
+                continue;
+            }
+
+            if (selectMode == SelectionFence.SelectModes.Remove)
+                selection.Remove(SetupEntitySelection.EntityKind.Surface, child.Id);
+            else
+                selection.Add(SetupEntitySelection.EntityKind.Surface, child.Id);
+        }
+    }
+
+    private static bool Contains(ImRect outer, ImRect inner)
+    {
+        return outer.Min.X <= inner.Min.X && outer.Min.Y <= inner.Min.Y && outer.Max.X >= inner.Max.X && outer.Max.Y >= inner.Max.Y;
+    }
+
+    private static bool HasRegions(Setup setup, Guid surfaceId)
+    {
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            if (setup.Surfaces[i].ParentId == surfaceId)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// What a click on a surface card picks: the card itself — unless it is selected, in which case the region
+    /// under the cursor, and so on down while each level is selected (the first click selects the container and
+    /// unlocks the next level). Ctrl pushes straight through to the deepest region under the cursor.
+    /// </summary>
+    private Guid ResolveBoardPickInCard(Setup setup, SetupEntitySelection? selection, Surface card, Vector2 originOnBoard, Vector2 pointOnBoard)
+    {
+        var pushThrough = ImGui.GetIO().KeyCtrl;
+        var current = card;
+        var origin = originOnBoard;
+        while (pushThrough || (selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, current.Id) ?? false))
+        {
+            Surface? hit = null;
+            var hitOrigin = Vector2.Zero;
+            for (var i = 0; i < setup.Surfaces.Count; i++)
+            {
+                var child = setup.Surfaces[i];
+                if (child.ParentId != current.Id)
+                    continue;
+
+                SurfaceGeometry.ChildBounds(child, out var min, out var max);
+                var p = pointOnBoard - origin;
+                if (p.X < min.X || p.X > max.X || p.Y < min.Y || p.Y > max.Y)
+                    continue;
+
+                hit = child; // list order is draw order, so the last hit is the one on top
+                hitOrigin = origin + min + child.AnchorInMeters;
+            }
+
+            if (hit == null)
+                break;
+
+            current = hit;
+            origin = hitOrigin;
+        }
+
+        return current.Id;
+    }
+
+    /// <summary>Enter: the selected containers' regions. Escape: their parents — or, with nothing nested selected, nothing at all.</summary>
+    private void HandleBoardHierarchyKeys(Setup setup, SetupEntitySelection? selection)
+    {
+        if (selection == null || !ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) || ImGui.GetIO().WantTextInput)
+            return;
+
+        var enter = ImGui.IsKeyPressed(ImGuiKey.Enter, false);
+        var escape = ImGui.IsKeyPressed(ImGuiKey.Escape, false);
+        if (!enter && !escape)
+            return;
+
+        _hierarchyStep.Clear();
+        for (var t = 0; t < selection.Targets.Count; t++)
+        {
+            var target = selection.Targets[t];
+            if (target.Kind != SetupEntitySelection.EntityKind.Surface)
+                continue;
+
+            if (enter)
+            {
+                for (var i = 0; i < setup.Surfaces.Count; i++)
+                {
+                    if (setup.Surfaces[i].ParentId == target.EntityId && !_hierarchyStep.Contains(setup.Surfaces[i].Id))
+                        _hierarchyStep.Add(setup.Surfaces[i].Id);
+                }
+            }
+            else if (setup.FindSurface(target.EntityId) is { ParentId: var parentId } && parentId != Guid.Empty && !_hierarchyStep.Contains(parentId))
+            {
+                _hierarchyStep.Add(parentId);
+            }
+        }
+
+        if (_hierarchyStep.Count == 0)
+        {
+            if (escape)
+                selection.Clear();
+
+            return;
+        }
+
+        selection.Clear();
+        for (var i = 0; i < _hierarchyStep.Count; i++)
+            selection.Add(SetupEntitySelection.EntityKind.Surface, _hierarchyStep[i]);
     }
 
     /// <summary>The focus key frames the selected cards, or the whole Board when nothing is selected.</summary>
@@ -1290,6 +1596,9 @@ internal sealed partial class SetupOutputView
     private readonly List<(SetupEntitySelection.EntityKind Kind, Guid Id, ImRect Rect)> _boardFenceCandidates = [];
 
     private float _boardLayerFade = 1f; // 1 on the Board, toward 0 as a space comes in (set per frame)
+    private float? _boardSnapGuideX, _boardSnapGuideY; // Board coordinates a gesture snapped to this frame
+    private Setup? _boardSetupForFence; // the fence resolves containers against it (set per frame before the fence runs)
+    private readonly List<Guid> _hierarchyStep = [];
     private readonly RegionProjection _boardPointProjection = new();
     private int _boardMetaVersion = -1;
     private readonly Dictionary<Guid, string> _boardMeta = new();

@@ -141,6 +141,61 @@ down to 0%, then up to 100% (or double-click it and type).
 - After 1: the view eases so the figure fills most of the window.
 - After 2: the view eases back to frame every card.
 
+## Step: Cards snap to each other and to the floor
+
+**Action:**
+1. On the Board, drag the "Wood Wall" card so its left edge comes within a few pixels of the
+   "Brick Wall" card's right edge; hold there, then release.
+2. Drag "Wood Wall" upward by 20 cm, then back down until its bottom edge is a few pixels above
+   the floor line; release.
+3. Hold Shift and repeat step 1; release.
+4. Select "Wood Wall" and drag its right edge handle until it is a few pixels from the left
+   edge of the "Reference 1" image card; release.
+5. Shift-click "Brick Wall" so both walls are selected, and drag the pair so the group's right
+   edge comes within a few pixels of the "Reference 1" card's left edge; release.
+
+**Expected:**
+- After 1: near the edge the card jumps flush against "Brick Wall" and a thin vertical guide
+  line runs across the whole view at that edge; on release the card stays flush, and the guide
+  disappears.
+- After 2: the card jumps onto the floor line with a horizontal guide across the view; the
+  metadata still reads the same size.
+- After 3: with Shift held nothing snaps and no guide appears; the card lands where it is
+  dropped.
+- After 4: the edge jumps onto the image card's left edge with a vertical guide; the surface's
+  width in the metadata changes accordingly. Regions inside the card do not act as targets.
+- After 5: the pair moves together and snaps as one block by its outer edge; the two cards do
+  not snap to each other.
+
+## Step: Selecting into regions
+
+**Action:**
+1. With nothing selected, click inside "Region 1" on the "ApmtWall" card (not on its name chip).
+2. Click the same spot again.
+3. Click empty Board; hold Ctrl and hover over "Region 1", then Ctrl-click it.
+4. With "Region 1" selected, press and drag inside its body (not on the name chip) by 20 cm;
+   release; press Ctrl+Z.
+5. Press Escape; press Enter; press Escape twice.
+6. Drag a fence that covers "Region 1" completely but only part of the "ApmtWall" card.
+7. Drag a fence that covers the whole "ApmtWall" card.
+8. Shift-click the "Brick Wall" card twice.
+
+**Expected:**
+- After 1: the "ApmtWall" card is selected, not the region; the region does not light up on
+  hover before that click.
+- After 2: now "Region 1" is selected (the selected card handed the click down one level).
+- After 3: with Ctrl held the region lights up on hover straight away, and the click selects it
+  without the card being selected first. Ctrl does not toggle on the Board.
+- After 4: the region moves with the drag, snapping to the card's edges and centre like a name
+  chip drag; Ctrl+Z puts it back in one step.
+- After 5: Escape selects the parent "ApmtWall"; Enter selects its regions ("Region 1"); the
+  first Escape returns to "ApmtWall", the second clears the selection.
+- After 6: only "Region 1" is selected: the partly covered card offers its regions instead of
+  itself.
+- After 7: "ApmtWall" itself is selected, not its region.
+- After 8: the first Shift-click adds "Brick Wall" to the selection, the second removes it
+  again.
+
 ## Step: Presentation scale of a pixel card
 
 **Action:**

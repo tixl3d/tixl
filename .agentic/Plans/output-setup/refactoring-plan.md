@@ -565,6 +565,20 @@ with an explanatory comment) — the row-callback API design made compliance imp
   no longer wait for the toggle. Third test: a child region's content covered the wall discs — fragments are
   now deferred to after the surface loop (`_pendingFragments`). Disc radius is a user setting
   (`OutputSetupPhotoDiscRadius`, percent field beside the toggle), shared by wall and canvas.
+- **2026-09-06 (Board snapping):** card drags (the group's outer edges) and surface edge drags (crop and
+  scale) snap to every other top-level card's edges and to the floor line (`CollectBoardSnapCandidates`,
+  `BoardSnapThreshold` = 7 px in metres, guides via `DrawBoardSnapGuides`); Shift drags free. Regions keep
+  snapping inside their parent through the region editor. Later: user guide lines as extra candidates.
+  Skipped by decision: grid snapping and the projector ghost frame (C.2b).
+- **2026-09-06 (Board hierarchy selection, Figma rules):** a surface card's pick target walks the selected
+  chain (`ResolveBoardPickInCard`): the card first, then the region under the cursor once the card is
+  selected, and so on; Ctrl pushes through to the deepest region (hover follows the pick, so it lights up).
+  A region picked that way is dragged by its body (`HandleRegionLabelMove` accepts the body when
+  `_picker.IsPicked`). Fence: a container only partly inside offers its regions, recursively
+  (`FenceRegions`); wholly inside it is taken itself. Enter selects the regions of the selected containers,
+  Escape their parents, then nothing (`HandleBoardHierarchyKeys`). Modifiers: Shift toggles everywhere;
+  Ctrl toggles only off the Board (on it Ctrl is the push-through). Settles ui-restructuring open question 7
+  for cards: click-again deep select with Ctrl as the accelerator.
 
 ## Suggested order (revised for the flow-view pivot)
 

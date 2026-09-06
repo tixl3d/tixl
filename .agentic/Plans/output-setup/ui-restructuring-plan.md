@@ -366,7 +366,7 @@ space's homography chain) or don't (drawn at neutral placement, faded):
   and keeps the Board; double-click on a card enters the space; the tabless canvases (source, reference)
   carry a Board button back.
 
-### C.3 Adaptive metric grid — ✅ 2026-09-05 (`MetricGridRaster`, on the timeline rasters' 1→5→10 ladder; grid snapping not yet — and it will join the existing candidate lists, the `ICanvasPointSnapper` seam was deleted in P2.2)
+### C.3 Adaptive metric grid — ✅ 2026-09-05 (`MetricGridRaster`, on the timeline rasters' 1→5→10 ladder; grid snapping not yet — decided against 2026-09-06, cards snap to edges + floor instead — and it will join the existing candidate lists, the `ICanvasPointSnapper` seam was deleted in P2.2)
 
 - New `MetricGridRaster` (`Editor/Gui/Windows/OutputSetup/` or next to the canvas helpers): reuse the
   **log-blend spacing math** from `StandardValueRaster.TryGetRastersForScale` (X axis) and

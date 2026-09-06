@@ -2449,12 +2449,11 @@ internal sealed partial class SetupOutputView
     {
         if (selection != null)
         {
-            // Same modifiers as the sidebar rows: ctrl toggles, shift adds, plain replaces.
+            // Shift toggles, plain replaces. Ctrl toggles too — except on the Board, where it is the push-through
+            // into nested regions and the click it ends in is a plain pick.
             var io = ImGui.GetIO();
-            if (io.KeyCtrl)
+            if (io.KeyShift || (io.KeyCtrl && _editMode != EditMode.Board))
                 selection.Toggle(kind, id);
-            else if (io.KeyShift)
-                selection.Add(kind, id);
             else
                 selection.Select(kind, id);
         }

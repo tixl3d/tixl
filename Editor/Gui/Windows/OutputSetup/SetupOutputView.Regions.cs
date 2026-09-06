@@ -202,7 +202,10 @@ internal sealed partial class SetupOutputView
         else if (_labelMoveSurfaceId == Guid.Empty && _labelGrabScreen != null
                  && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
                  && (ImGui.GetMousePos() - _labelGrabScreen.Value).Length() > UserSettings.Config.ClickThreshold
-                 && IsPointOverLabel(screen, child.Name, _labelGrabScreen.Value))
+                 // The label, or — where the region itself was what the press picked (its card handed the pick
+                 // down to it) — anywhere on its body.
+                 && (IsPointOverLabel(screen, child.Name, _labelGrabScreen.Value)
+                     || (_picker.IsPicked(child.Id) && IsPointInQuadBounds(screen, _labelGrabScreen.Value))))
         {
             _labelGrabScreen = null;
             phase = CanvasPointHandle.DragPhase.Started;
@@ -250,6 +253,19 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>A constant screen distance (7 px) in the parent's units, per axis.</summary>
+    private static bool IsPointInQuadBounds(ReadOnlySpan<Vector2> screenQuad, Vector2 p)
+    {
+        var min = screenQuad[0];
+        var max = screenQuad[0];
+        for (var i = 1; i < screenQuad.Length; i++)
+        {
+            min = Vector2.Min(min, screenQuad[i]);
+            max = Vector2.Max(max, screenQuad[i]);
+        }
+
+        return p.X >= min.X && p.X <= max.X && p.Y >= min.Y && p.Y <= max.Y;
+    }
+
     private static Vector2 RegionSnapThresholds(RegionProjection projection, Surface parent)
     {
         var probe = MathF.Max(MathF.Min(parent.SizeInMeters.X, parent.SizeInMeters.Y) * 0.05f, 0.0001f);
