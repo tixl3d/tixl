@@ -21,8 +21,8 @@ internal sealed class DrawTubes : Instance<DrawTubes>
     [Input(Guid = "8f609301-338d-45e0-82de-660963ec0174")]
     public readonly InputSlot<float> Twist = new();
 
-    [Input(Guid = "bdf36fc7-cbaf-48f5-ab41-d903036e7d46", MappedType = typeof(TextureModes))]
-    public readonly InputSlot<int> TextureMode = new();
+    [Input(Guid = "7671239b-7934-4f2a-9e01-851516d817e0")]
+    public readonly InputSlot<bool> UseWAsU = new();
 
     [Input(Guid = "e1f3945d-1ab8-4e6c-b5ca-c5036ed7d52a")]
     public readonly InputSlot<Vector2> TextureRange = new();
@@ -77,14 +77,6 @@ internal sealed class DrawTubes : Instance<DrawTubes>
 
     [Input(Guid = "e5dbb74c-5762-447b-a365-9ea7f6229204")]
     public readonly InputSlot<float> TextureScale = new();
-
-    private enum TextureModes
-    {
-        RelativeStartEnd,
-        StartRepeat,
-        Tile,
-        UseW,
-    }
 
     private enum WidthFXs
     {

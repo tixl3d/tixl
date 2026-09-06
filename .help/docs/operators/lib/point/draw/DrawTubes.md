@@ -7,16 +7,16 @@ Draws a shaded 3D mesh for connected lines points.
 ## Input Parameters
 | Name (Relevancy & Type) | Description |
 |---|---|
-| **GPoints** (BufferWithViews Required) | — |
-| **Color** (Vector4) | — |
-| **Width** (Single) | — |
-| **Spin** (Single) | — |
-| **Twist** (Single) | — |
-| **TextureMode** (Int32) | — |
+| **GPoints** (BufferWithViews Required) | The point buffer to draw. Points are connected in order into a tube. |
+| **Color** (Vector4) | Base tint multiplied against each point's color and the shading result. |
+| **Width** (Single) | Base radius of the tube in world units. Per-point Width Factor / Scale multiplies this value. |
+| **Spin** (Single) | Constant rotation of the cross-section around the line direction, in degrees. |
+| **Twist** (Single) | Extra rotation that accumulates along the tube length (degrees) — spirals the cross-section from start to end. |
+| **UseWAsU** (Boolean) | Drive the U texture coordinate from each point's FX1 value (interpolated along the tube) instead of arc length — useful for animating or slicing a texture with per-point data. Off = physical arc-length UVs at a constant texel size. |
 | **TextureRange** (Vector2) | Affine remap applied to the procedural U coordinate (default 0..1 = identity). UVs are generated at a constant texel size set by Texture Scale: the side uses cylindrical projection (U along arc length, V around the circumference) and end caps use a planar disk placed adjacent to each tube end. |
-| **EnableDepthWrite** (Boolean) | — |
-| **BlendMod** (Int32) | — |
-| **Culling** (CullMode) | — |
+| **EnableDepthWrite** (Boolean) | Whether the tube writes to the depth buffer. Disable for additive/transparent tubes that should not occlude. |
+| **BlendMod** (Int32) | Blending mode used when compositing the tube against what is behind it. |
+| **Culling** (CullMode) | Face culling mode (None / Front / Back). Default Back culls back-facing triangles for a solid tube. |
 | **WidthFactor** (Int32) | Selects the point attribute used as a per-point width weight. None = uniform width, F1/F2 = use the point's FX1/FX2 value (NaN falls back to 1). |
 | **UseScale** (Boolean) | Scales the tube from the points' Scale attribute instead of a width weight. With Uniform Scale on, only Scale.x is used as a single factor. |
 | **UniformScale** (Boolean) | On: uses Scale.x as a single uniform width factor.<br/>Off: uses all three axes independently - X stretches or compresses the line along its direction around each point (1 = no change), Y and Z scale the cross-section into an ellipse. |

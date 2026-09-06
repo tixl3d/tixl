@@ -6,6 +6,7 @@
   "InputUis": [
     {
       "InputId": "02f5e531-2579-4eca-8fef-a8586e6534cf"/*Width*/,
+      "Description": "Base radius of the tube in world units. Per-point Width Factor / Scale multiplies this value.",
       "Position": {
         "X": -226.94064,
         "Y": 209.1991
@@ -15,6 +16,7 @@
     {
       "InputId": "0a6a91d1-be44-459a-94cd-49b48d755377"/*GPoints*/,
       "Relevancy": "Required",
+      "Description": "The point buffer to draw. Points are connected in order into a tube.",
       "Position": {
         "X": -226.24692,
         "Y": 43.842525
@@ -22,6 +24,7 @@
     },
     {
       "InputId": "8f609301-338d-45e0-82de-660963ec0174"/*Twist*/,
+      "Description": "Extra rotation that accumulates along the tube length (degrees) — spirals the cross-section from start to end.",
       "Position": {
         "X": -226.94064,
         "Y": 344.1991
@@ -32,6 +35,7 @@
     },
     {
       "InputId": "9a486753-840e-4d53-9627-8a2ed02fd39e"/*Culling*/,
+      "Description": "Face culling mode (None / Front / Back). Default Back culls back-facing triangles for a solid tube.",
       "Position": {
         "X": -228.65521,
         "Y": 706.3835
@@ -39,6 +43,7 @@
     },
     {
       "InputId": "ae484c37-1bf0-4e20-8698-3f7179ab7c24"/*Color*/,
+      "Description": "Base tint multiplied against each point's color and the shading result.",
       "Position": {
         "X": -226.94064,
         "Y": 164.1991
@@ -46,13 +51,15 @@
     },
     {
       "InputId": "b1bffdfb-fc45-4ec1-baac-39a3ef2f065a"/*EnableDepthWrite*/,
+      "Description": "Whether the tube writes to the depth buffer. Disable for additive/transparent tubes that should not occlude.",
       "Position": {
         "X": -228.65521,
         "Y": 616.3835
       }
     },
     {
-      "InputId": "bdf36fc7-cbaf-48f5-ab41-d903036e7d46"/*TextureMode*/,
+      "InputId": "7671239b-7934-4f2a-9e01-851516d817e0"/*UseWAsU*/,
+      "Description": "Drive the U texture coordinate from each point's FX1 value (interpolated along the tube) instead of arc length — useful for animating or slicing a texture with per-point data. Off = physical arc-length UVs at a constant texel size.",
       "Position": {
         "X": -224.65475,
         "Y": 408.20538
@@ -60,6 +67,7 @@
     },
     {
       "InputId": "c3742de6-6720-4a18-a6da-063e05696f9d"/*Spin*/,
+      "Description": "Constant rotation of the cross-section around the line direction, in degrees.",
       "Position": {
         "X": -226.94064,
         "Y": 299.1991
@@ -102,6 +110,7 @@
     },
     {
       "InputId": "ec6a8011-f1da-413b-a9e4-f909859444b5"/*BlendMod*/,
+      "Description": "Blending mode used when compositing the tube against what is behind it.",
       "Position": {
         "X": -228.65521,
         "Y": 661.3835
@@ -243,7 +252,7 @@
       }
     },
     {
-      "ChildId": "127d82d7-9b43-4cdd-a715-4c89d1a8e1bb"/*IntToFloat*/,
+      "ChildId": "0e6ae555-bdc4-45b2-adb0-c7ac153ae8c5"/*BoolToFloat_UseWAsU*/,
       "Position": {
         "X": -94.65464,
         "Y": 408.20538

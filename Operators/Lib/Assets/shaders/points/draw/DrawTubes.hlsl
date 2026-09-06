@@ -33,7 +33,7 @@ cbuffer Params : register(b1)
     float Width;
     float Spin;
     float Twist;
-    float TextureMode;
+    float UseWAsU;
     float2 TextureRange;    
     float WidthFX;
     float UseScale;
@@ -285,6 +285,13 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
         {
             uCoord = f;
         }
+        // UseWAsU: drive U from each point's FX1 (interpolated along the tube) instead of arc length.
+        if (UseWAsU >= 0.5)
+        {
+            float fx0 = isnan(p0.FX1) ? uCoord : p0.FX1;
+            float fx1 = isnan(p1.FX1) ? uCoord : p1.FX1;
+            uCoord = lerp(fx0, fx1, t);
+        }
         uCoord = uCoord * (TextureRange.y - TextureRange.x) + TextureRange.x;
 
         float nAround = max(1.0, round(Tau * Width / max(TextureScale, Epsilon)));
@@ -382,9 +389,10 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
         float capS = max(TextureScale, Epsilon);
         float nAroundCap = max(1.0, round(Tau * Width / capS));
         float totalArcWorld = (pointCount >= 2) ? (float)ArcCumMM[pointCount - 1] * 0.001 : 0.0;
-        float2 capCenterUV = (capIndex == 1)
-            ? float2((totalArcWorld + radius) / capS, nAroundCap * 0.5)
-            : float2(-radius / capS, nAroundCap * 0.5);
+        // UseWAsU: center the disk on the endpoint's FX1 so it aligns with the body in U-space.
+        float capCenterU = (UseWAsU >= 0.5 && !isnan(p.FX1)) ? p.FX1
+            : ((capIndex == 1) ? (totalArcWorld + radius) / capS : -radius / capS);
+        float2 capCenterUV = float2(capCenterU, nAroundCap * 0.5);
 
         uint rimIndex;
         if (vertInTri == 0)
