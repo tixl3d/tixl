@@ -1,0 +1,222 @@
+{
+  "Id": "81d27ec1-2d02-4352-98d2-f2bfb0d726bc"/*PuppetMesh*/,
+  "Description": "Deforms a mesh with weigthed points",
+  "SymbolTags": "192",
+  "InputUis": [
+    {
+      "InputId": "039daa17-44bb-456d-9f29-b86abbf308fe"/*ControlPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -80.35307,
+        "Y": 1085.2584
+      },
+      "Description": "Deformed positions.\nF1 defines the weight.\nF2 defines the influence mode.\nModes:\n0 - Exponential\n1 - Linear\n2 - InverseSquare\n3 - Gaussian\n4 - InverseCubic\n5 - Radius"
+    },
+    {
+      "InputId": "2f4d18c2-2a68-41f0-8e7d-52de359f9d85"/*AnchorPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -80.35307,
+        "Y": 944.6697
+      },
+      "Description": "Rest positions."
+    },
+    {
+      "InputId": "46762c06-6bcc-4fda-8010-73a6881e36be"/*UseVertexSelection*/,
+      "Position": {
+        "X": -80.35306,
+        "Y": 688.1623
+      },
+      "Description": "Defines whether only selected vertices should be affected by the manipulation.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "49b5c5df-17f1-498b-aa57-dca843fba736"/*InfluenceMode*/,
+      "Position": {
+        "X": 59.646927,
+        "Y": 817.1111
+      }
+    },
+    {
+      "InputId": "752ca6e8-e2d6-4439-afa1-7f14d644d3a6"/*WeightStrength*/,
+      "Position": {
+        "X": 59.646942,
+        "Y": 723.1624
+      }
+    },
+    {
+      "InputId": "a96c3b81-609a-498a-96e7-ac829ba29c72"/*ShowWeight*/,
+      "Position": {
+        "X": -80.35307,
+        "Y": 852.1111
+      },
+      "Description": "Use vertex color to visualize the control points' weight."
+    },
+    {
+      "InputId": "bb507680-a293-4c2b-9e73-a9f96bd395bf"/*Strength*/,
+      "Position": {
+        "X": 59.646942,
+        "Y": 758.1624
+      }
+    },
+    {
+      "InputId": "e0aa5992-1893-4126-b6b5-fc90c010e669"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -631.73315,
+        "Y": 980.5197
+      }
+    },
+    {
+      "InputId": "e45eddd4-8a70-400d-9747-a3f35a0f928b"/*GlobalInfluence*/,
+      "Position": {
+        "X": -80.35309,
+        "Y": 887.1111
+      },
+      "Description": "All control points will share the same Influence mode.",
+      "AddPadding": "True"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0ee51985-5d7c-41c9-8e5a-1f26df78cc88"/*GetBufferComponents*/,
+      "Position": {
+        "X": -80.35307,
+        "Y": 979.6697
+      }
+    },
+    {
+      "ChildId": "1cd0b7dd-d883-4e18-93ef-2948b1f6d350"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 494.52402,
+        "Y": 654.6722
+      }
+    },
+    {
+      "ChildId": "1f5e2c7d-bc03-4783-85f8-72ba3340540f"/*GetBufferComponents*/,
+      "Position": {
+        "X": -491.733,
+        "Y": 1050.5197
+      }
+    },
+    {
+      "ChildId": "24d9b72a-e3c1-425f-b1ba-c5cb721a907e"/*BoolToInt*/,
+      "Position": {
+        "X": 59.646927,
+        "Y": 852.1111
+      }
+    },
+    {
+      "ChildId": "27c69c9d-0f47-44d9-b874-f3f57f856ec6"/*_AssembleMeshBuffers*/,
+      "Position": {
+        "X": 698.07605,
+        "Y": 1099.4409
+      }
+    },
+    {
+      "ChildId": "4895fffe-fdba-4e1e-99e2-b630b423db48"/*IntsToBuffer*/,
+      "Position": {
+        "X": 199.64693,
+        "Y": 817.1111
+      }
+    },
+    {
+      "ChildId": "4be80525-8cd9-485d-a080-701bb2d0d6be"/*GetBufferComponents*/,
+      "Position": {
+        "X": -80.35307,
+        "Y": 1120.2584
+      }
+    },
+    {
+      "ChildId": "60b5e180-72f4-47d6-80fe-33c7b1443806"/*BoolToFloat*/,
+      "Position": {
+        "X": 59.646942,
+        "Y": 688.1623
+      }
+    },
+    {
+      "ChildId": "62a427d7-b2db-4832-8637-fbb94533dfa4"/*_MeshBufferComponents*/,
+      "Position": {
+        "X": -491.733,
+        "Y": 980.5197
+      }
+    },
+    {
+      "ChildId": "6fd77569-6c48-49fe-9d7e-25d4a10feb62"/*GetSRVProperties*/,
+      "Position": {
+        "X": -295.121,
+        "Y": 590.1856
+      }
+    },
+    {
+      "ChildId": "71de0869-c1ca-48b2-90e2-0fd480490148"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 108.263535,
+        "Y": 130.72499
+      },
+      "Position": {
+        "X": 199.64694,
+        "Y": 653.1624
+      }
+    },
+    {
+      "ChildId": "7575e4d1-bc47-4ab2-a709-c176f9572dc7"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1.9657593,
+        "Y": 551.6556
+      }
+    },
+    {
+      "ChildId": "83de4fc9-cfc4-4a9a-b29b-935aef1b0814"/*GetBufferComponents*/,
+      "Position": {
+        "X": -120.94858,
+        "Y": 1258.2849
+      }
+    },
+    {
+      "ChildId": "987144cc-5205-494a-a86b-e899e6062f6c"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": -120.94858,
+        "Y": 1188.2849
+      }
+    },
+    {
+      "ChildId": "bb9cabbf-f102-4b4b-9f16-f9e9140eb33f"/*ComputeShader*/,
+      "Position": {
+        "X": -295.121,
+        "Y": 520.1856
+      }
+    },
+    {
+      "ChildId": "bd30ef25-b77b-4ae5-b9cd-e673679234c2"/*BoolToInt*/,
+      "Position": {
+        "X": 59.64691,
+        "Y": 887.1111
+      }
+    },
+    {
+      "ChildId": "c05c37a5-ca5f-4dff-ba17-b52214463fc6"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 494.52405,
+        "Y": 1102.349
+      }
+    },
+    {
+      "ChildId": "f234a2e0-985b-4b3d-a5b3-99df35d35f75"/*PBRVertex.Stride*/,
+      "Position": {
+        "X": -260.94858,
+        "Y": 1223.2849
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "35ce06c8-21ff-497f-817c-797a319a89c4"/*Result*/,
+      "Position": {
+        "X": 838.07605,
+        "Y": 1099.4409
+      }
+    }
+  ]
+}
