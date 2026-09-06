@@ -94,6 +94,7 @@
     },
     {
       "InputId": "e1f3945d-1ab8-4e6c-b5ca-c5036ed7d52a"/*TextureRange*/,
+      "Description": "Remaps U along the tube length. UVs are generated procedurally: the side uses cylindrical projection (U along the line, V around the circumference) and end caps use a planar disk fill.",
       "Position": {
         "X": -224.65475,
         "Y": 453.20538

@@ -403,7 +403,7 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
             tangent = normalize(qRotateVec3(float3(0, -sin(angle), cos(angle)), p.Rotation));
             normal = capNormal;
             bitangent = normalize(cross(normal, tangent));
-            texCoord = float2(colF / SideCount, colF / SideCount);
+            texCoord = float2(cos(angle), sin(angle)) * 0.5 + 0.5;
         }
 
         output.texCoord = texCoord;

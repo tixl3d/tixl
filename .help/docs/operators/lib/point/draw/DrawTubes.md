@@ -13,7 +13,7 @@ Draws a shaded 3D mesh for connected lines points.
 | **Spin** (Single) | — |
 | **Twist** (Single) | — |
 | **TextureMode** (Int32) | — |
-| **TextureRange** (Vector2) | — |
+| **TextureRange** (Vector2) | Remaps U along the tube length. UVs are generated procedurally: the side uses cylindrical projection (U along the line, V around the circumference) and end caps use a planar disk fill. |
 | **EnableDepthWrite** (Boolean) | — |
 | **BlendMod** (Int32) | — |
 | **Culling** (CullMode) | — |
