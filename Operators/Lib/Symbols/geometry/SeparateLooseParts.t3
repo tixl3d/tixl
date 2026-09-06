@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "ec6f1a69-9d76-4a46-a7a7-2248989ec386"/*SeparateLooseParts*/,
+  "Inputs": [
+    {
+      "Id": "52e9e7cb-c0e3-430c-b182-a5ea2e9c0270"/*Geometry*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
