@@ -35,7 +35,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
         }
 
         // 1. Build face adjacency via edge topology.
-        var edgeTopo = source.Edges; // builds lazily
+        var edgeTopo = source.Edges;
         var faceCount = source.FaceCount;
         var adjacency = new List<int>[faceCount];
         for (int i = 0; i < faceCount; i++) adjacency[i] = new List<int>();
@@ -53,7 +53,7 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
 
         // 2. Flood fill to find connected components of faces.
         var visited = new bool[faceCount];
-        var components = new List<List<int>>(); // each list contains original face indices
+        var components = new List<List<int>>();
         for (int f = 0; f < faceCount; f++)
         {
             if (visited[f]) continue;
@@ -77,21 +77,24 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
             components.Add(comp);
         }
 
-        // 3. Build new mesh data (keep all points, reorder faces by component).
+        // 3. Build new topology and mapping arrays.
         var newOffsets = new List<int> { 0 };
         var newCornerIndices = new List<int>();
         var newParts = new List<GeometryPart>();
 
-        int totalFacesAdded = 0; // running count of faces placed in newParts
+        // old → new face index mapping
+        var oldToNewFace = new int[faceCount];
+        // old → new corner index mapping (size = cornerCount, initialized to -1)
+        int cornerCount = source.CornerCount;
+        var oldToNewCorner = new int[cornerCount];
+        for (int i = 0; i < cornerCount; i++) oldToNewCorner[i] = -1;
 
-        // Process components sequentially; the new face index order
-        // follows the order of components and then the order of faces within each component.
+        int totalFacesAdded = 0;
+
         foreach (var comp in components)
         {
-            // 3a. Compute volume centroid for this component.
+            // Compute volume centroid for this component.
             Vector3 pivot = ComputeVolumeCentroid(comp, source);
-
-            // Fallback: if centroid is near zero (degenerate), use average of used points.
             if (pivot.LengthSquared() < 1e-12f)
             {
                 var usedPoints = new HashSet<int>();
@@ -108,42 +111,177 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
                 pivot /= usedPoints.Count;
             }
 
-            // 3b. Create a part for this component.
             int faceStartIdx = totalFacesAdded;
             int faceCountComp = comp.Count;
 
-            // 3c. Copy the corners of all faces in this component.
-            foreach (int f in comp)
+            int newFaceIdx = faceStartIdx;
+            foreach (int oldFace in comp)
             {
-                int start = source.FaceCornerOffsets[f];
-                int end = source.FaceCornerOffsets[f + 1];
-                for (int c = start; c < end; c++)
-                    newCornerIndices.Add(source.CornerPointIndices[c]);
-                newOffsets.Add(newCornerIndices.Count); // cumulative offset
+                oldToNewFace[oldFace] = newFaceIdx++;
+
+                int start = source.FaceCornerOffsets[oldFace];
+                int end = source.FaceCornerOffsets[oldFace + 1];
+                for (int oldCorner = start; oldCorner < end; oldCorner++)
+                {
+                    int newCorner = newCornerIndices.Count;
+                    oldToNewCorner[oldCorner] = newCorner;
+                    newCornerIndices.Add(source.CornerPointIndices[oldCorner]);
+                }
+                newOffsets.Add(newCornerIndices.Count);
             }
 
             newParts.Add(new GeometryPart(
                 FaceStart: faceStartIdx,
                 FaceCount: faceCountComp,
                 Pivot: pivot,
-                Id: newParts.Count,        // unique id per part
-                SeedIndex: 0               // not used here
-            ));
+                Id: newParts.Count,
+                SeedIndex: 0));
 
             totalFacesAdded += faceCountComp;
         }
 
-        // 4. Build the output MeshGeometry.
+        // 4. Build output mesh topology.
         var output = new MeshGeometry
         {
-            Positions = source.Positions,               // keep all points (they're all used)
+            Positions = source.Positions,
             FaceCornerOffsets = newOffsets.ToArray(),
             CornerPointIndices = newCornerIndices.ToArray(),
             Parts = newParts.ToArray()
         };
 
+        // 5. Reorder and preserve attributes.
+        output.Attributes.Clear();
+        foreach (var attr in source.Attributes)
+        {
+            switch (attr.Domain)
+            {
+                case AttributeDomain.Point:
+                    // Point attributes are unchanged – share the same buffer.
+                    output.Attributes.Add(attr);
+                    break;
+
+                case AttributeDomain.Corner:
+                    ReorderCornerAttribute(attr, oldToNewCorner, output.Attributes);
+                    break;
+
+                case AttributeDomain.Face:
+                    ReorderFaceAttribute(attr, oldToNewFace, output.Attributes);
+                    break;
+
+                // Part attributes are invalid after splitting; Edge attributes are recomputed.
+                // Other domains (ControlPoint, Segment, Contour) don't apply to meshes.
+                default:
+                    // Silently drop – they have no meaningful mapping.
+                    break;
+            }
+        }
+
+        output.InvalidateTopologyCaches();
         Result.Value = output;
         PartCount.Value = components.Count;
+    }
+
+ 
+    // Attribute reordering helpers (support common unmanaged types)
+    private static void ReorderCornerAttribute(GeometryAttribute attr, int[] oldToNewCorner, GeometryAttributes target)
+    {
+        int count = oldToNewCorner.Length;
+        if (attr is GeometryAttribute<float> fAttr)
+        {
+            var newVals = new float[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = fAttr.Values[i];
+            var newAttr = new GeometryAttribute<float>(attr.Name, AttributeDomain.Corner, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else if (attr is GeometryAttribute<int> iAttr)
+        {
+            var newVals = new int[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = iAttr.Values[i];
+            var newAttr = new GeometryAttribute<int>(attr.Name, AttributeDomain.Corner, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else if (attr is GeometryAttribute<Vector2> v2Attr)
+        {
+            var newVals = new Vector2[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = v2Attr.Values[i];
+            var newAttr = new GeometryAttribute<Vector2>(attr.Name, AttributeDomain.Corner, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else if (attr is GeometryAttribute<Vector3> v3Attr)
+        {
+            var newVals = new Vector3[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = v3Attr.Values[i];
+            var newAttr = new GeometryAttribute<Vector3>(attr.Name, AttributeDomain.Corner, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else if (attr is GeometryAttribute<Vector4> v4Attr)
+        {
+            var newVals = new Vector4[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewCorner[i]] = v4Attr.Values[i];
+            var newAttr = new GeometryAttribute<Vector4>(attr.Name, AttributeDomain.Corner, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        // Add other types as needed – fallback: copy as‑is (unsafe, but better than dropping)
+        else
+        {
+            // If we cannot reorder, we keep the original (but this will be misaligned).
+            // Usually this never happens because we cover all common types.
+            target.Add(attr);
+        }
+    }
+
+    private static void ReorderFaceAttribute(GeometryAttribute attr, int[] oldToNewFace, GeometryAttributes target)
+    {
+        int count = oldToNewFace.Length;
+        if (attr is GeometryAttribute<float> fAttr)
+        {
+            var newVals = new float[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = fAttr.Values[i];
+            var newAttr = new GeometryAttribute<float>(attr.Name, AttributeDomain.Face, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else if (attr is GeometryAttribute<int> iAttr)
+        {
+            var newVals = new int[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = iAttr.Values[i];
+            var newAttr = new GeometryAttribute<int>(attr.Name, AttributeDomain.Face, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else if (attr is GeometryAttribute<Vector2> v2Attr)
+        {
+            var newVals = new Vector2[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = v2Attr.Values[i];
+            var newAttr = new GeometryAttribute<Vector2>(attr.Name, AttributeDomain.Face, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else if (attr is GeometryAttribute<Vector3> v3Attr)
+        {
+            var newVals = new Vector3[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = v3Attr.Values[i];
+            var newAttr = new GeometryAttribute<Vector3>(attr.Name, AttributeDomain.Face, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else if (attr is GeometryAttribute<Vector4> v4Attr)
+        {
+            var newVals = new Vector4[count];
+            for (int i = 0; i < count; i++) newVals[oldToNewFace[i]] = v4Attr.Values[i];
+            var newAttr = new GeometryAttribute<Vector4>(attr.Name, AttributeDomain.Face, count);
+            Array.Copy(newVals, newAttr.Values, count);
+            target.Add(newAttr);
+        }
+        else
+        {
+            target.Add(attr);
+        }
     }
 
     /// <summary>
@@ -167,7 +305,6 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
             int cornerCount = end - start;
             if (cornerCount < 3) continue;
 
-            // Fan triangulation: v0 = first corner, then triangles (v0, v1, v2), (v0, v2, v3), ...
             int i0 = cornerPoints[start];
             Vector3 v0 = positions[i0];
             for (int k = start + 1; k < end - 1; k++)
@@ -177,7 +314,6 @@ internal sealed class SeparateLooseParts : Instance<SeparateLooseParts>
                 Vector3 v1 = positions[i1];
                 Vector3 v2 = positions[i2];
 
-                // Signed volume of tetrahedron (origin, v0, v1, v2).
                 double vol = Vector3.Dot(v0, Vector3.Cross(v1, v2)) / 6.0;
                 if (Math.Abs(vol) < 1e-15) continue;
 
