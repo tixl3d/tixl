@@ -21,7 +21,7 @@ internal sealed class DrawTubes : Instance<DrawTubes>
     [Input(Guid = "8f609301-338d-45e0-82de-660963ec0174")]
     public readonly InputSlot<float> Twist = new();
 
-    [Input(Guid = "bdf36fc7-cbaf-48f5-ab41-d903036e7d46")]
+    [Input(Guid = "bdf36fc7-cbaf-48f5-ab41-d903036e7d46", MappedType = typeof(TextureModes))]
     public readonly InputSlot<int> TextureMode = new();
 
     [Input(Guid = "e1f3945d-1ab8-4e6c-b5ca-c5036ed7d52a")]
@@ -36,11 +36,14 @@ internal sealed class DrawTubes : Instance<DrawTubes>
     [Input(Guid = "9a486753-840e-4d53-9627-8a2ed02fd39e")]
     public readonly InputSlot<CullMode> Culling = new();
 
-    [Input(Guid = "c43b1052-2942-43c7-aaf4-56c91dc8e521")]
-    public readonly InputSlot<bool> UseWAsWeight = new();
+    [Input(Guid = "c43b1052-2942-43c7-aaf4-56c91dc8e521", MappedType = typeof(WidthFXs))]
+    public readonly InputSlot<int> WidthFactor = new();
 
     [Input(Guid = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d")]
     public readonly InputSlot<bool> UseScale = new();
+
+    [Input(Guid = "03c7aa3c-5c78-4fc7-80d0-93c8eccdf385")]
+    public readonly InputSlot<bool> UniformScale = new();
 
     [Input(Guid = "f8fc2813-2156-4ffd-a546-38214b887e87")]
     public readonly InputSlot<int> Sides = new();
@@ -61,22 +64,29 @@ internal sealed class DrawTubes : Instance<DrawTubes>
     public readonly InputSlot<int> SubSegments = new();
 
     [Input(Guid = "a0b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d")]
-    public readonly InputSlot<bool> DistanceScale = new();
+    public readonly InputSlot<bool> DistanceFade = new();
 
     [Input(Guid = "b1c2d3e4-f5a6-4b7c-9d8e-0f1a2b3c4d5e")]
-    public readonly InputSlot<float> ScaleNearDist = new();
+    public readonly InputSlot<float> FadeStartDist = new();
 
     [Input(Guid = "c2d3e4f5-a6b7-4c8d-0e9f-1a2b3c4d5e6f")]
-    public readonly InputSlot<float> ScaleFarDist = new();
+    public readonly InputSlot<float> FadeEndDist = new();
 
     [Input(Guid = "d3e4f5a6-b7c8-4d9e-1f0a-2b3c4d5e6f70")]
-    public readonly InputSlot<float> MinScale = new();
-        
+    public readonly InputSlot<float> MinWidthFactor = new();
+
     private enum TextureModes
     {
         RelativeStartEnd,
         StartRepeat,
         Tile,
         UseW,
+    }
+
+    private enum WidthFXs
+    {
+        None,
+        F1,
+        F2,
     }
 }

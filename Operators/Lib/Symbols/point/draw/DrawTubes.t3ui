@@ -69,10 +69,27 @@
       "Scale": 1.0
     },
     {
-      "InputId": "c43b1052-2942-43c7-aaf4-56c91dc8e521"/*UseWAsWeight*/,
+      "InputId": "c43b1052-2942-43c7-aaf4-56c91dc8e521"/*WidthFactor*/,
+      "Description": "Selects the point attribute used as a per-point width weight. None = uniform width, F1/F2 = use the point's FX1/FX2 value (NaN falls back to 1).",
       "Position": {
         "X": -228.65521,
         "Y": 751.3835
+      }
+    },
+    {
+      "InputId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"/*UseScale*/,
+      "Description": "Scales the tube from the points' Scale attribute instead of a width weight. With Uniform Scale on, only Scale.x is used as a single factor.",
+      "Position": {
+        "X": -228.65521,
+        "Y": 796.3835
+      }
+    },
+    {
+      "InputId": "03c7aa3c-5c78-4fc7-80d0-93c8eccdf385"/*UniformScale*/,
+      "Description": "On: uses Scale.x as a single uniform width factor.\nOff: uses all three axes independently - X stretches or compresses the line along its direction around each point (1 = no change), Y and Z scale the cross-section into an ellipse.",
+      "Position": {
+        "X": -228.65521,
+        "Y": 841.3835
       }
     },
     {
@@ -91,6 +108,7 @@
     },
     {
       "InputId": "f8fc2813-2156-4ffd-a546-38214b887e87"/*Sides*/,
+      "Description": "Number of sides around the tube cross-section.",
       "Position": {
         "X": -231.56293,
         "Y": 970.3622
@@ -100,6 +118,7 @@
     },
     {
       "InputId": "4876fa78-b008-42d9-83bf-ae0f577d5e5c"/*CapStart*/,
+      "Description": "Draws a flat cap closing the start of the tube.",
       "Position": {
         "X": -228.65521,
         "Y": 1015.3622
@@ -107,6 +126,7 @@
     },
     {
       "InputId": "740ee4c7-ea29-45ee-aebc-59d74627ed31"/*CapEnd*/,
+      "Description": "Draws a flat cap closing the end of the tube.",
       "Position": {
         "X": -228.65521,
         "Y": 1060.3622
@@ -114,6 +134,7 @@
     },
     {
       "InputId": "d4e5f6a7-b8c9-4d1e-2f3a-4b5c6d7e8f90"/*Smooth*/,
+      "Description": "Interpolates the line with a smooth curve instead of straight segments.",
       "Position": {
         "X": -228.65521,
         "Y": 1105.3622
@@ -121,6 +142,7 @@
     },
     {
       "InputId": "a7b8c9d0-e1f2-4a3b-5c6d-7e8f90123456"/*RoundAmount*/,
+      "Description": "Bulges each segment's width in its middle. Positive = rounded joints, negative = pinched.",
       "Position": {
         "X": -228.65521,
         "Y": 1150.3622
@@ -131,6 +153,7 @@
     },
     {
       "InputId": "b8c9d0e1-f2a3-4b5c-6d7e-8f9012345678"/*SubSegments*/,
+      "Description": "Curve subdivisions per segment while Smooth is on. Higher = smoother curves.",
       "Position": {
         "X": -228.65521,
         "Y": 1195.3622
@@ -139,14 +162,16 @@
       "Max": 10
     },
     {
-      "InputId": "a0b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d"/*DistanceScale*/,
+      "InputId": "a0b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d"/*DistanceFade*/,
+      "Description": "Fades the tube width with camera distance: full width up to Fade Start Dist, shrinking to Min Width Factor x Width at Fade End Dist.",
       "Position": {
         "X": -228.65521,
         "Y": 1240.3622
       }
     },
     {
-      "InputId": "b1c2d3e4-f5a6-4b7c-9d8e-0f1a2b3c4d5e"/*ScaleNearDist*/,
+      "InputId": "b1c2d3e4-f5a6-4b7c-9d8e-0f1a2b3c4d5e"/*FadeStartDist*/,
+      "Description": "Camera distance at which the width fade starts. The tube is at full width up to this distance.",
       "Position": {
         "X": -228.65521,
         "Y": 1285.3622
@@ -156,7 +181,8 @@
       "Scale": 0.01
     },
     {
-      "InputId": "c2d3e4f5-a6b7-4c8d-0e9f-1a2b3c4d5e6f"/*ScaleFarDist*/,
+      "InputId": "c2d3e4f5-a6b7-4c8d-0e9f-1a2b3c4d5e6f"/*FadeEndDist*/,
+      "Description": "Camera distance at which the width fade reaches its minimum (Min Width Factor x Width).",
       "Position": {
         "X": -228.65521,
         "Y": 1330.3622
@@ -166,7 +192,8 @@
       "Scale": 0.01
     },
     {
-      "InputId": "d3e4f5a6-b7c8-4d9e-1f0a-2b3c4d5e6f70"/*MinScale*/,
+      "InputId": "d3e4f5a6-b7c8-4d9e-1f0a-2b3c4d5e6f70"/*MinWidthFactor*/,
+      "Description": "Multiplier applied to Width at maximum fade distance. 1 = no fade, 0 = fully faded out.",
       "Position": {
         "X": -228.65521,
         "Y": 1375.3622
@@ -295,10 +322,17 @@
       }
     },
     {
-      "ChildId": "55d6c299-b3a2-4d41-90a9-e234f154f66e"/*BoolToFloat*/,
+      "ChildId": "55d6c299-b3a2-4d41-90a9-e234f154f66e"/*IntToFloat_WidthFX*/,
       "Position": {
         "X": 10.208252,
         "Y": 799.1068
+      }
+    },
+    {
+      "ChildId": "cf2eeaef-972e-46f8-9f0d-55ad759f63b2"/*BoolToFloat_UniformScale*/,
+      "Position": {
+        "X": 10.208252,
+        "Y": 990.1068
       }
     },
     {
