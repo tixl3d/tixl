@@ -295,7 +295,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private static bool TryStraightenFromLines(Surface surface, Guid outputId)
     {
-        var mapping = surface.OutputMappings.Find(m => m.OutputId == outputId);
+        var mapping = surface.FindMapping(outputId);
         if (mapping == null || mapping.Quad.Length < 4 || SetupActions.CountLines(surface) < MinLinesToStraighten
             || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
         {

@@ -179,6 +179,10 @@ down to 0%, then up to 100% (or double-click it and type).
 6. Drag a fence that covers "Region 1" completely but only part of the "ApmtWall" card.
 7. Drag a fence that covers the whole "ApmtWall" card.
 8. Shift-click the "Brick Wall" card twice.
+9. Add a second region to "ApmtWall" and move it so it overlaps "Region 1". Click empty Board,
+   then click three times on the overlap, with a pause between the clicks.
+10. With "Region 1" selected, click exactly on its name chip; then click on the "ApmtWall" name
+    chip at the card's top-left.
 
 **Expected:**
 - After 1: the "ApmtWall" card is selected, not the region; the region does not light up on
@@ -195,6 +199,11 @@ down to 0%, then up to 100% (or double-click it and type).
 - After 7: "ApmtWall" itself is selected, not its region.
 - After 8: the first Shift-click adds "Brick Wall" to the selection, the second removes it
   again.
+- After 9: the first click selects "ApmtWall", the second the region drawn on top (the newer
+  one), the third cycles to "Region 1" underneath; a fourth would return to the top one.
+- After 10: the name chip is not a pick target of its own: the click lands on the frame under
+  it and behaves like any click on that frame (the region stays selected). The card's chip
+  click selects the card like a click anywhere on it.
 
 ## Step: Presentation scale of a pixel card
 
@@ -245,7 +254,10 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 - After 1: a new surface "Surface N" appears in the SURFACES column, selected, and a green
   quad with its name is drawn over the middle of the image card on the Board — with live round
   corner handles, since the surface is selected (they also show while the image itself is
-  selected, and go away when neither is).
+  selected, and go away when neither is). Its card stands on the floor line to the right of
+  the rightmost surface card with a 50 cm gap, and its metadata reads a height of 2.5 m with
+  the width in the quad's aspect. If the photo already carries a traced surface, the size is
+  scaled from that one instead: a second trace of the same quad size reads the same metres.
 - After 2: inside the image's space the quad has live corner handles; the first corner drag
   selects the surface; dropping a corner is one undo step. Ctrl+Z moves the corner back,
   Ctrl+Y forward. The header shows the surface's name beside the Photo / Straight buttons.

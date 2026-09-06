@@ -225,6 +225,20 @@ public sealed class Surface
     public List<LineAnnotation> Annotations = [];
 
     public List<OutputMapping> OutputMappings = [];
+
+    /// <summary>This surface's corner pin onto an output, if any — a plain loop, so per-frame callers don't pay a closure.</summary>
+    public OutputMapping? FindMapping(Guid outputId)
+    {
+        foreach (var mapping in OutputMappings)
+        {
+            if (mapping.OutputId == outputId)
+                return mapping;
+        }
+
+        return null;
+    }
+
+    public bool HasMapping(Guid outputId) => FindMapping(outputId) != null;
     public ReferenceBinding? Reference;
     public StagePlacement? Placement;
 

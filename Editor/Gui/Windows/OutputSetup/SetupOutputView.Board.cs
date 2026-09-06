@@ -1020,9 +1020,11 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// What a click on a surface card picks: the card itself — unless it is selected, in which case the region
+    /// What a click on a surface card picks: the card itself — unless it is selected, in which case a region
     /// under the cursor, and so on down while each level is selected (the first click selects the container and
-    /// unlocks the next level). Ctrl pushes straight through to the deepest region under the cursor.
+    /// unlocks the next level). Among overlapping regions of one level, repeated clicks cycle: the click after
+    /// the selected one goes to the next in draw order — unless the selected one has a region of its own under
+    /// the cursor, which is the deeper level and wins. Ctrl pushes straight through to the deepest, topmost one.
     /// </summary>
     private Guid ResolveBoardPickInCard(Setup setup, SetupEntitySelection? selection, Surface card, Vector2 originOnBoard, Vector2 pointOnBoard)
     {
@@ -1031,31 +1033,78 @@ internal sealed partial class SetupOutputView
         var origin = originOnBoard;
         while (pushThrough || (selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, current.Id) ?? false))
         {
-            Surface? hit = null;
-            var hitOrigin = Vector2.Zero;
+            // The regions of this level under the cursor, in draw order.
+            _pickHits.Clear();
             for (var i = 0; i < setup.Surfaces.Count; i++)
             {
                 var child = setup.Surfaces[i];
-                if (child.ParentId != current.Id)
-                    continue;
-
-                SurfaceGeometry.ChildBounds(child, out var min, out var max);
-                var p = pointOnBoard - origin;
-                if (p.X < min.X || p.X > max.X || p.Y < min.Y || p.Y > max.Y)
-                    continue;
-
-                hit = child; // list order is draw order, so the last hit is the one on top
-                hitOrigin = origin + min + child.AnchorInMeters;
+                if (child.ParentId == current.Id && ContainsInParentSpace(child, pointOnBoard - origin))
+                    _pickHits.Add(child);
             }
 
-            if (hit == null)
+            if (_pickHits.Count == 0)
                 break;
 
-            current = hit;
-            origin = hitOrigin;
+            Surface next;
+            if (pushThrough)
+            {
+                next = _pickHits[^1];
+            }
+            else
+            {
+                var selectedIndex = -1;
+                for (var i = 0; i < _pickHits.Count; i++)
+                {
+                    if (selection!.IsSelected(SetupEntitySelection.EntityKind.Surface, _pickHits[i].Id))
+                        selectedIndex = i;
+                }
+
+                if (selectedIndex < 0)
+                {
+                    next = _pickHits[^1]; // nothing of this level selected yet: the topmost
+                }
+                else
+                {
+                    var selected = _pickHits[selectedIndex];
+                    var selectedOrigin = OriginOf(selected, origin);
+                    if (HasRegionUnder(setup, selected, pointOnBoard - selectedOrigin))
+                        next = selected; // its own region is under the cursor: go deeper
+                    else if (_pickHits.Count == 1)
+                        return selected.Id; // alone and selected: stays
+                    else
+                        return _pickHits[(selectedIndex + 1) % _pickHits.Count].Id; // cycle the stack
+                }
+            }
+
+            origin = OriginOf(next, origin);
+            current = next;
         }
 
         return current.Id;
+    }
+
+    private static bool ContainsInParentSpace(Surface child, Vector2 pointInParent)
+    {
+        SurfaceGeometry.ChildBounds(child, out var min, out var max);
+        return pointInParent.X >= min.X && pointInParent.X <= max.X && pointInParent.Y >= min.Y && pointInParent.Y <= max.Y;
+    }
+
+    /// <summary>A region's own origin (its anchor) on the Board, given its parent's.</summary>
+    private static Vector2 OriginOf(Surface child, Vector2 parentOrigin)
+    {
+        return parentOrigin + child.LocalPosition + child.AnchorInMeters;
+    }
+
+    private static bool HasRegionUnder(Setup setup, Surface parent, Vector2 pointInParent)
+    {
+        for (var i = 0; i < setup.Surfaces.Count; i++)
+        {
+            var child = setup.Surfaces[i];
+            if (child.ParentId == parent.Id && ContainsInParentSpace(child, pointInParent))
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>Enter: the selected containers' regions. Escape: their parents — or, with nothing nested selected, nothing at all.</summary>
@@ -1599,6 +1648,7 @@ internal sealed partial class SetupOutputView
     private float? _boardSnapGuideX, _boardSnapGuideY; // Board coordinates a gesture snapped to this frame
     private Setup? _boardSetupForFence; // the fence resolves containers against it (set per frame before the fence runs)
     private readonly List<Guid> _hierarchyStep = [];
+    private readonly List<Surface> _pickHits = [];
     private readonly RegionProjection _boardPointProjection = new();
     private int _boardMetaVersion = -1;
     private readonly Dictionary<Guid, string> _boardMeta = new();

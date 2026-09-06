@@ -617,8 +617,6 @@ internal static class OutputManager
         return target.Texture;
     }
 
-    /// <summary>The first send op whose target is <paramref name="targetId"/> — a surface (mapped) or an output
-    /// (the direct full-frame path).</summary>
     /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>
     public static bool TryGetSourceContent(Guid symbolChildId, out IOutputSink? sink, out Texture2D? content)
     {

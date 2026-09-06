@@ -579,6 +579,25 @@ with an explanatory comment) — the row-callback API design made compliance imp
   Escape their parents, then nothing (`HandleBoardHierarchyKeys`). Modifiers: Shift toggles everywhere;
   Ctrl toggles only off the Board (on it Ctrl is the push-through). Settles ui-restructuring open question 7
   for cards: click-again deep select with Ctrl as the accelerator.
+  Same day, refined: the region's name chip is display-only (`DrawEntityLabel(pickable: false)`); the frame
+  is the target and the body the grip everywhere regions are drawn flat (off the Board the region rect is a
+  background target of its own). Overlapping regions of one level cycle on repeated clicks, Blender-style,
+  with descent into the selected region's own regions taking precedence. Still label-picked: traced quads on
+  the image card, surfaces/patches on the projector canvas, slices. The user expects further tweaks after
+  comparing with Figma's full behaviour.
+- **2026-09-06 (traced-surface seeding):** `TraceNewSurface` sizes the surface from its trace (bbox aspect,
+  px/m averaged over the photo's other traced surfaces, else 2.5 m high) and places its card on the floor
+  right of the rightmost surface card (`EstimateTracedSize`, `NextFreeBoardX`). Trace-existing keeps the
+  surface's own size. Closes the "seeding/size of traced surfaces" follow-up.
+- **2026-09-06 (clean-up pass 1, mechanical):** `Surface.FindMapping/HasMapping` (loops) replace 12
+  `OutputMappings.Find/Exists` closures across the setup UI; `SetupActions.HasMeasuredLine` replaces the
+  header's `Annotations.Exists`; `CanvasItemPicker` loses its `FindIndex` closure. The four per-frame quad
+  arrays in `DrawOutputCanvas`/`DrawChildRegion` (rectify interpolation, projector outline, warp target,
+  surface-in-view) are reused buffers (P3.5 done). Orphaned `<summary>` blocks removed in
+  `SetupOutputView`, `OutputManager`, `SetupFlowOutliner` (P4.6 for these files done); `_identity` folded
+  into `Homography.Identity`. Left for the next pass: the drag-state-machine unification (P2.2) — six
+  parallel field sets still live in `SetupOutputView` and the Board/Regions partials; the Board's
+  `_boardGestureOldJson` JSON-snapshot gestures could be the skeleton to collapse them onto.
 
 ## Suggested order (revised for the flow-view pivot)
 

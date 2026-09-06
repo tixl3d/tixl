@@ -254,11 +254,11 @@ internal sealed partial class SetupOutputView
         var focusCarrierId = focusCarrier?.Id ?? Guid.Empty;
 
         var basis = _viewMorph > 0.0001f ? focusCarrier : null;
-        var basisMapping = basis?.OutputMappings.Find(m => m.OutputId == outputId);
+        var basisMapping = basis?.FindMapping(outputId);
         var basisId = basis?.Id ?? Guid.Empty;
 
-        var rToView = _identity;
-        var rToOutput = _identity;
+        var rToView = Homography.Identity;
+        var rToOutput = Homography.Identity;
         var viewMin = Vector2.Zero;
         var viewSize = canvasSize;
 
@@ -365,13 +365,9 @@ internal sealed partial class SetupOutputView
                 _sliceSourceTexture = null;
             }
 
-            var interp = new[]
-                             {
-                                 Vector2.Lerp(basisQuad[0], stageTarget[0], straighten),
-                                 Vector2.Lerp(basisQuad[1], stageTarget[1], straighten),
-                                 Vector2.Lerp(basisQuad[2], stageTarget[2], straighten),
-                                 Vector2.Lerp(basisQuad[3], stageTarget[3], straighten),
-                             };
+            var interp = _interpQuad;
+            for (var c = 0; c < 4; c++)
+                interp[c] = Vector2.Lerp(basisQuad[c], stageTarget[c], straighten);
 
             if (Homography.TryComputeQuadToQuad(basisQuad, interp, out rToView)
                 && Homography.TryComputeQuadToQuad(interp, basisQuad, out rToOutput))
@@ -433,8 +429,8 @@ internal sealed partial class SetupOutputView
             }
             else
             {
-                rToView = _identity;
-                rToOutput = _identity;
+                rToView = Homography.Identity;
+                rToOutput = Homography.Identity;
             }
         }
 
@@ -459,13 +455,11 @@ internal sealed partial class SetupOutputView
         // The projector canvas boundary, carried through R like everything else. Drawing it as an axis-aligned
         // rect around the framing window instead would read as a false edge once the view straightens — the
         // framing is just where we render, not where the projector's coverage actually ends.
-        var canvasOutline = new[]
-                                {
-                                    _projection.CanvasToScreen(rToView.TransformPoint(Vector2.Zero) - viewMin),
-                                    _projection.CanvasToScreen(rToView.TransformPoint(new Vector2(canvasSize.X, 0)) - viewMin),
-                                    _projection.CanvasToScreen(rToView.TransformPoint(canvasSize) - viewMin),
-                                    _projection.CanvasToScreen(rToView.TransformPoint(new Vector2(0, canvasSize.Y)) - viewMin),
-                                };
+        var canvasOutline = _canvasOutline;
+        canvasOutline[0] = _projection.CanvasToScreen(rToView.TransformPoint(Vector2.Zero) - viewMin);
+        canvasOutline[1] = _projection.CanvasToScreen(rToView.TransformPoint(new Vector2(canvasSize.X, 0)) - viewMin);
+        canvasOutline[2] = _projection.CanvasToScreen(rToView.TransformPoint(canvasSize) - viewMin);
+        canvasOutline[3] = _projection.CanvasToScreen(rToView.TransformPoint(new Vector2(0, canvasSize.Y)) - viewMin);
 
         dl.AddQuadFilled(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.BackgroundFull.Fade(0.4f));
 
@@ -498,13 +492,11 @@ internal sealed partial class SetupOutputView
                                                                Math.Max(1, (int)(viewSize.Y * renderScale)));
                 var w = canvasSize.X;
                 var h = canvasSize.Y;
-                var dest = new[]
-                               {
-                                   (rToView.TransformPoint(new Vector2(0, 0)) - viewMin) * renderScale,
-                                   (rToView.TransformPoint(new Vector2(w, 0)) - viewMin) * renderScale,
-                                   (rToView.TransformPoint(new Vector2(w, h)) - viewMin) * renderScale,
-                                   (rToView.TransformPoint(new Vector2(0, h)) - viewMin) * renderScale,
-                               };
+                var dest = _warpDestQuad;
+                dest[0] = (rToView.TransformPoint(new Vector2(0, 0)) - viewMin) * renderScale;
+                dest[1] = (rToView.TransformPoint(new Vector2(w, 0)) - viewMin) * renderScale;
+                dest[2] = (rToView.TransformPoint(new Vector2(w, h)) - viewMin) * renderScale;
+                dest[3] = (rToView.TransformPoint(new Vector2(0, h)) - viewMin) * renderScale;
 
                 var warped = OutputManager.RenderWarpedTexture(composite, dest, rtSize);
                 var warpedSrv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
@@ -547,7 +539,7 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             var surface = setup.Surfaces[i];
-            var mappingData = surface.OutputMappings.Find(m => m.OutputId == outputId);
+            var mappingData = surface.FindMapping(outputId);
 
             // A Layout child carries no corner pin — its quad is derived from its parent's, so it follows the
             // parent automatically. Drawn (not handled) until child editing lands, so you can see it do that.
@@ -563,7 +555,7 @@ internal sealed partial class SetupOutputView
                 // The pin lives on some ancestor (possibly several levels up); edits live in the immediate
                 // parent's space, so both are needed.
                 var carrier = SurfaceGeometry.FindCarrier(setup, surface.Id, outputId);
-                var carrierMapping = carrier?.OutputMappings.Find(m => m.OutputId == outputId);
+                var carrierMapping = carrier?.FindMapping(outputId);
                 var immediateParent = setup.FindSurface(surface.ParentId);
                 if (carrier == null || carrierMapping == null || immediateParent == null
                     || !SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, carrierMapping, _childQuadBuffer))
@@ -573,14 +565,11 @@ internal sealed partial class SetupOutputView
                 continue;
             }
 
-            // The quad in view space: R applied, then offset into the framed region.
-            var viewQuad = new[]
-                               {
-                                   rToView.TransformPoint(mappingData.Quad[0]) - viewMin,
-                                   rToView.TransformPoint(mappingData.Quad[1]) - viewMin,
-                                   rToView.TransformPoint(mappingData.Quad[2]) - viewMin,
-                                   rToView.TransformPoint(mappingData.Quad[3]) - viewMin,
-                               };
+            // The quad in view space: R applied, then offset into the framed region. One buffer for every
+            // surface — nothing below keeps it past this iteration.
+            var viewQuad = _viewQuad;
+            for (var c = 0; c < 4; c++)
+                viewQuad[c] = rToView.TransformPoint(mappingData.Quad[c]) - viewMin;
 
             // While the space comes in, the quad flies from the surface's Board card to its mapped place.
             if (_spaceBlend < 1f && TryGetBoardQuadInView(setup, surface.Id, viewMin, _boardFlyQuad))
@@ -778,7 +767,7 @@ internal sealed partial class SetupOutputView
         }
 
         // The reference points on the plain projector canvas, where they can be walked onto the wall.
-        var pinMapping = focusCarrier?.OutputMappings.Find(m => m.OutputId == outputId);
+        var pinMapping = focusCarrier?.FindMapping(outputId);
         if (_editMode == EditMode.Output && !rectifying && focusCarrier != null && pinMapping != null && pinMapping.Quad.Length >= 4
             && SetupActions.CountPoints(focusCarrier) > 0)
         {
@@ -1490,7 +1479,7 @@ internal sealed partial class SetupOutputView
             if (!canStraighten && ImGui.IsItemHovered())
                 ImGui.SetTooltip($"Trace at least {MinLinesToStraighten} reference lines along features that are straight in reality.");
 
-            var canApply = lineSubject.Annotations.Exists(a => a.LengthInMeters > 0);
+            var canApply = SetupActions.HasMeasuredLine(lineSubject);
             ImGui.SameLine();
             ImGui.BeginDisabled(!canApply);
             if (ImGui.SmallButton("Apply lengths") && canApply)
@@ -1513,7 +1502,7 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             var surface = setup.Surfaces[i];
-            if (surface.OutputMappings.Exists(m => m.OutputId == outputId))
+            if (surface.HasMapping(outputId))
                 continue;
 
             // A Layout child rides its parent's corner pin — offering it one of its own would detach it.
@@ -2002,14 +1991,11 @@ internal sealed partial class SetupOutputView
         var isSelected = isFocused
                          || (selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, child.Id) ?? false);
 
-        // The child's quad (already derived into the buffer) carried into the framed canvas.
-        var viewQuad = new[]
-                           {
-                               rToView.TransformPoint(_childQuadBuffer[0]) - viewMin,
-                               rToView.TransformPoint(_childQuadBuffer[1]) - viewMin,
-                               rToView.TransformPoint(_childQuadBuffer[2]) - viewMin,
-                               rToView.TransformPoint(_childQuadBuffer[3]) - viewMin,
-                           };
+        // The child's quad (already derived into the buffer) carried into the framed canvas. Shares the
+        // surface loop's view buffer: a child is drawn and done before its parent's iteration fills it.
+        var viewQuad = _viewQuad;
+        for (var c = 0; c < 4; c++)
+            viewQuad[c] = rToView.TransformPoint(_childQuadBuffer[c]) - viewMin;
 
         Span<Vector2> screen = stackalloc Vector2[4];
         for (var i = 0; i < 4; i++)
@@ -2300,7 +2286,6 @@ internal sealed partial class SetupOutputView
         dl.AddLine(a, b, UiColors.StatusAnimated.Fade(0.6f), 1 * T3Ui.UiScaleFactor);
     }
 
-    /// <summary>The mouse in the parent surface's own space — through the view transform, then the parent's pin.</summary>
     /// <summary>
     /// A point (the cursor by default) in the child's <em>immediate parent's</em> space. The inverse only gets
     /// us into the carrier's space, so for a nested region we still have to step down by the parent's origin —
@@ -2317,14 +2302,6 @@ internal sealed partial class SetupOutputView
                    : inCarrier;
     }
 
-    /// <summary>
-    /// Centre handle that slides the whole region. Free movement, but nearly-axis-aligned drags snap flat and
-    /// draw the axis they locked to — placing a region level with its neighbours is the common case.
-    /// </summary>
-    /// <summary>
-    /// Draws a surface's label chip and registers it as a pick target. The label is the surface's grab area —
-    /// hovering lifts it, clicking selects, and for a selected region dragging it moves the region.
-    /// </summary>
     /// <summary>Whether the cursor is on a surface's centre label chip — its grab area, which takes priority
     /// over any handle beneath it.</summary>
     private static bool IsMouseOverLabel(ReadOnlySpan<Vector2> screenQuad, string name)
@@ -2343,14 +2320,16 @@ internal sealed partial class SetupOutputView
     /// area. Registers the chip with <see cref="_picker"/> so a click can resolve to this entity, and
     /// styles by selection/hover so the same label reads the same in the tree and on the canvas.
     /// </summary>
+    /// <param name="pickable">False where the frame itself is the pick target and the chip only names it and shows its state.</param>
     private void DrawEntityLabel(ImDrawListPtr dl, SetupEntitySelection.EntityKind kind, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected,
-                                 float emphasis, float pulse = 0f)
+                                 float emphasis, float pulse = 0f, bool pickable = true)
     {
         if (string.IsNullOrEmpty(name) || emphasis <= 0.01f)
             return;
 
         var rect = CornerPinHandles.GetCenteredLabelRect(screenQuad, name);
-        _picker.AddTarget(kind, id, rect.Min, rect.Max);
+        if (pickable)
+            _picker.AddTarget(kind, id, rect.Min, rect.Max);
 
         var alpha = (_picker.IsPicked(id) ? 1f : 0.9f) * emphasis;
         var text = (isSelected ? UiColors.ForegroundFull : UiColors.Text).Fade((isSelected ? 1f : 0.7f) * alpha);
@@ -2369,11 +2348,6 @@ internal sealed partial class SetupOutputView
         return pulse <= 0.001f ? baseColor : T3.Core.DataTypes.Vector.Color.Mix(baseColor, UiColors.StatusActivated, pulse);
     }
 
-    /// <summary>
-    /// Resolves clicks on the label chips collected this frame. Overlapping labels cycle: each click picks the
-    /// one after whatever is currently selected, so a stack of regions can be reached without moving anything.
-    /// Also decides which label the next frame draws as hovered.
-    /// </summary>
     /// <summary>
     /// One pick pass for every labeled frame on the canvas — surfaces, regions, slices. Left-click selects the
     /// label under the cursor (cycling through a stack on repeated clicks), right-click opens that entity's
@@ -2581,7 +2555,7 @@ internal sealed partial class SetupOutputView
                     if (target.Part != SubPart.Corner || _cornerDragOldQuads.ContainsKey(target.EntityId))
                         continue;
 
-                    var mapping = setup.FindSurface(target.EntityId)?.OutputMappings.Find(m => m.OutputId == outputId);
+                    var mapping = setup.FindSurface(target.EntityId)?.FindMapping(outputId);
                     if (mapping != null)
                         _cornerDragOldQuads[target.EntityId] = (Vector2[])mapping.Quad.Clone();
                 }
@@ -2596,7 +2570,7 @@ internal sealed partial class SetupOutputView
                     _cornerDragCommands.Clear();
                     foreach (var (id, oldQuad) in _cornerDragOldQuads)
                     {
-                        var mapping = setup.FindSurface(id)?.OutputMappings.Find(m => m.OutputId == outputId);
+                        var mapping = setup.FindSurface(id)?.FindMapping(outputId);
                         if (mapping == null || !QuadsDiffer(oldQuad, mapping.Quad))
                             continue;
 
@@ -2635,7 +2609,7 @@ internal sealed partial class SetupOutputView
             if (target.EntityId == draggedSurfaceId && target.Index == draggedCorner)
                 continue;
 
-            var mapping = setup.FindSurface(target.EntityId)?.OutputMappings.Find(m => m.OutputId == outputId);
+            var mapping = setup.FindSurface(target.EntityId)?.FindMapping(outputId);
             if (mapping != null && target.Index >= 0 && target.Index < mapping.Quad.Length)
                 mapping.Quad[target.Index] += delta;
         }
@@ -2700,7 +2674,11 @@ internal sealed partial class SetupOutputView
 
     // Straight morph: fraction of the focused surface's straightened size kept as surround margin (context).
     private const float _straightSurroundFactor = 0.4f;
-    private static readonly Homography _identity = new() { M11 = 1, M22 = 1, M33 = 1 };
+    // Per-frame quad scratch: the rectify interpolation, the projector outline, the warp target, the surface in view.
+    private readonly Vector2[] _interpQuad = new Vector2[4];
+    private readonly Vector2[] _canvasOutline = new Vector2[4];
+    private readonly Vector2[] _warpDestQuad = new Vector2[4];
+    private readonly Vector2[] _viewQuad = new Vector2[4];
 
     // View morph timing: eased in so it starts slowly and finishes quickly. The exponent solves 0.75^k = 0.5,
     // i.e. the visual midpoint is reached at 75% of the duration.

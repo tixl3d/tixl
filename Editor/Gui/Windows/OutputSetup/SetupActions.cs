@@ -125,7 +125,7 @@ internal static class SetupActions
             if (surface != null && output != null
                 // A Layout child rides its parent's pin — a mapping of its own would detach it from the hierarchy.
                 && !(surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
-                && !surface.OutputMappings.Exists(m => m.OutputId == targetId))
+                && !surface.HasMapping(targetId))
             {
                 surface.OutputMappings.Add(CreateDefaultMapping(output));
             }
@@ -331,7 +331,7 @@ internal static class SetupActions
                 if (surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
                     return false;
 
-                isBound = surface.OutputMappings.Exists(m => m.OutputId == id);
+                isBound = surface.HasMapping(id);
                 return true;
             }
 
@@ -612,19 +612,84 @@ internal static class SetupActions
                                             });
     }
 
-    /// <summary>A new surface, traced on the image right away — the "there is a wall in this photo" gesture.</summary>
+    /// <summary>
+    /// A new surface, traced on the image right away — the "there is a wall in this photo" gesture. It is seeded
+    /// to be plausible rather than default: sized like its trace (metres estimated from the walls already traced
+    /// on this photo, or a wall's height when it is the first), and placed on the floor right of the last card.
+    /// </summary>
     internal static void TraceNewSurface(SetupEntitySelection selection, Setup setup, ReferenceImage image)
     {
         RunUndoable("Trace new surface", setup, () =>
                                                 {
+                                                    var quad = DefaultReferenceQuad(image);
                                                     var surface = new Surface
                                                                       {
                                                                           Name = $"Surface {setup.Surfaces.Count + 1}",
-                                                                          Reference = new Surface.ReferenceBinding { ImageId = image.Id, Quad = DefaultReferenceQuad(image) },
+                                                                          Reference = new Surface.ReferenceBinding { ImageId = image.Id, Quad = quad },
+                                                                          SizeInMeters = EstimateTracedSize(setup, image, quad),
                                                                       };
+                                                    surface.BoardPlacement = new CanvasPlacement { Position = new Vector2(NextFreeBoardX(setup), 0) + surface.AnchorInMeters };
                                                     setup.Surfaces.Add(surface);
                                                     selection.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
                                                 });
+    }
+
+    /// <summary>
+    /// Metres for a traced quad: its bounding box's aspect, at the photo's pixels-per-metre averaged over the
+    /// surfaces already traced on it — or, with none to learn from, a typical wall height.
+    /// </summary>
+    private static Vector2 EstimateTracedSize(Setup setup, ReferenceImage image, Vector2[] quad)
+    {
+        QuadBounds(quad, out var min, out var max);
+        var width = MathF.Max(max.X - min.X, 1f);
+        var height = MathF.Max(max.Y - min.Y, 1f);
+
+        var pixelsPerMetre = 0f;
+        var samples = 0;
+        foreach (var other in setup.Surfaces)
+        {
+            if (other.Reference == null || other.Reference.ImageId != image.Id || other.Reference.Quad.Length < 4 || other.SizeInMeters.X <= 0.01f)
+                continue;
+
+            QuadBounds(other.Reference.Quad, out var otherMin, out var otherMax);
+            pixelsPerMetre += MathF.Max(otherMax.X - otherMin.X, 1f) / other.SizeInMeters.X;
+            samples++;
+        }
+
+        if (samples > 0)
+        {
+            pixelsPerMetre /= samples;
+            return new Vector2(width / pixelsPerMetre, height / pixelsPerMetre);
+        }
+
+        const float typicalWallHeight = 2.5f;
+        return new Vector2(typicalWallHeight * width / height, typicalWallHeight);
+    }
+
+    private static void QuadBounds(Vector2[] quad, out Vector2 min, out Vector2 max)
+    {
+        min = max = quad[0];
+        for (var i = 1; i < quad.Length; i++)
+        {
+            min = Vector2.Min(min, quad[i]);
+            max = Vector2.Max(max, quad[i]);
+        }
+    }
+
+    /// <summary>The x right of every placed surface card, plus a gap — where the next one stands on the floor.</summary>
+    private static float NextFreeBoardX(Setup setup)
+    {
+        const float gap = 0.5f;
+        var right = float.NegativeInfinity;
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.ParentId != Guid.Empty || surface.BoardPlacement == null)
+                continue;
+
+            right = MathF.Max(right, surface.BoardPlacement.Position.X - surface.AnchorInMeters.X + surface.SizeInMeters.X);
+        }
+
+        return float.IsNegativeInfinity(right) ? 0f : right + gap;
     }
 
     private static Vector2[] DefaultReferenceQuad(ReferenceImage image)
@@ -1476,6 +1541,18 @@ internal static class SetupActions
         }
 
         return count;
+    }
+
+    /// <summary>Whether any line carries a real length — what "Apply lengths" needs.</summary>
+    internal static bool HasMeasuredLine(Surface surface)
+    {
+        foreach (var annotation in surface.Annotations)
+        {
+            if (!annotation.IsPoint && annotation.LengthInMeters > 0)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>The reference points among a surface's annotations.</summary>

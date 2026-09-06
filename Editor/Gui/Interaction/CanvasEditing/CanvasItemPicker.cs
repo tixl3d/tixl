@@ -70,7 +70,16 @@ internal sealed class CanvasItemPicker<TKind> where TKind : struct
             return default;
         }
 
-        var index = _underMouse.FindIndex(u => u.Id == current); // -1 (not in stack) → first
+        var index = -1; // -1 (not in stack) → first
+        for (var i = 0; i < _underMouse.Count; i++)
+        {
+            if (_underMouse[i].Id == current)
+            {
+                index = i;
+                break;
+            }
+        }
+
         var (pickKind, pickId) = _underMouse[(index + 1) % _underMouse.Count];
         _pickedId = pickId;
 

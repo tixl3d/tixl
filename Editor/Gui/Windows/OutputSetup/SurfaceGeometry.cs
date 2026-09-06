@@ -95,7 +95,7 @@ internal static class SurfaceGeometry
         var surface = setup.FindSurface(surfaceId);
         for (var guard = 0; surface != null && guard < 16; guard++)
         {
-            if (surface.OutputMappings.Exists(m => m.OutputId == outputId))
+            if (surface.HasMapping(outputId))
                 return surface;
 
             if (surface.ParentId == Guid.Empty)

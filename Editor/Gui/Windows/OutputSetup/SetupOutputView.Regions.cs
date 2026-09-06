@@ -77,18 +77,32 @@ internal sealed partial class SetupOutputView
                                 new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.Y), new Vector2(uv.Z, uv.W), new Vector2(uv.X, uv.W),
                                 UiColors.ForegroundFull.Fade(preview * fade));
         }
+        // The frame is the pick target, not its name chip. On the Board the parent card hands the pick down
+        // (hierarchy rules); anywhere else the region's own rectangle is a background target of its own.
+        var onBoard = ReferenceEquals(projection.View, _boardProjection);
+        if (!onBoard && fade >= 0.999f)
+        {
+            var bMin = screen[0];
+            var bMax = screen[0];
+            for (var c = 1; c < 4; c++)
+            {
+                bMin = Vector2.Min(bMin, screen[c]);
+                bMax = Vector2.Max(bMax, screen[c]);
+            }
+
+            _picker.AddTarget(SetupEntitySelection.EntityKind.Surface, child.Id, bMin, bMax, isBackground: true);
+        }
+
         if (!editable)
         {
             dl.AddQuad(screen[0], screen[1], screen[2], screen[3], color, 1 * scale);
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, isSelected, 0.9f * fade, pulse);
+            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, isSelected, 0.9f * fade, pulse, pickable: false);
             return;
         }
 
-        // The label is the move grip and sits over the middle, where a handle can land under it — the handles
-        // yield while the pointer rests on the label, unless a drag is already live.
+        // The body is the move grip; the handles sit on its outline and take precedence, except while a move is live.
         var moveActive = _labelMoveSurfaceId == child.Id;
-        var pointerOverLabel = !moveActive && !string.IsNullOrEmpty(child.Name) && IsMouseOverLabel(screen, child.Name);
-        var style = CornerPinHandles.Style.ForSurface(null, editable: !pointerOverLabel && !moveActive, selected: true);
+        var style = CornerPinHandles.Style.ForSurface(null, editable: !moveActive, selected: true);
         style.DrawChecker = false;
         style.EdgeColor = color;
 
@@ -181,13 +195,13 @@ internal sealed partial class SetupOutputView
         for (var c = 0; c < 4; c++)
             screen[c] = projection.CanvasToScreen(corners[c]);
 
-        DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, true, fade, pulse);
+        DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, true, fade, pulse, pickable: false);
 
         // The region's own anchor — the origin of its space, what its own children measure from.
         DrawAnchorGlyph(dl, projection.CanvasToScreen(child.LocalPosition + child.AnchorInMeters), fade);
     }
 
-    /// <summary>The label as the region's move grip: the press selected it (through the picker); the held button moves it.</summary>
+    /// <summary>The region's body as its move grip: the press selected it (through the picker); the held button moves it.</summary>
     private void HandleRegionLabelMove(Setup setup, Surface parent, Surface child, RegionProjection projection,
                                        ReadOnlySpan<Vector2> screen, Vector2 thresholds, bool snapping)
     {
@@ -202,10 +216,8 @@ internal sealed partial class SetupOutputView
         else if (_labelMoveSurfaceId == Guid.Empty && _labelGrabScreen != null
                  && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
                  && (ImGui.GetMousePos() - _labelGrabScreen.Value).Length() > UserSettings.Config.ClickThreshold
-                 // The label, or — where the region itself was what the press picked (its card handed the pick
-                 // down to it) — anywhere on its body.
-                 && (IsPointOverLabel(screen, child.Name, _labelGrabScreen.Value)
-                     || (_picker.IsPicked(child.Id) && IsPointInQuadBounds(screen, _labelGrabScreen.Value))))
+                 // Anywhere on its body — but only where the region itself is what the press picked.
+                 && _picker.IsPicked(child.Id) && IsPointInQuadBounds(screen, _labelGrabScreen.Value))
         {
             _labelGrabScreen = null;
             phase = CanvasPointHandle.DragPhase.Started;

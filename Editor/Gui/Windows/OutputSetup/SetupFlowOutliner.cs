@@ -597,8 +597,6 @@ internal sealed class SetupFlowOutliner
         DrawRow(selection, setup, ref args);
     }
 
-    /// <summary>Out-gutter for a slice: the target-type icon plus a count when it feeds more than one. No
-    /// label — the fade already says "unused", and where it lands is the icon; a name adds noise.</summary>
     /// <summary>A patch under its output; unfed patches step back.</summary>
     private void DrawPatchRow(SetupEntitySelection selection, Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
     {
