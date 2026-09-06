@@ -1,0 +1,110 @@
+{
+  "FormatVersion": 3,
+  "Id": "9C4E7D2A-6B1E-4F3C-9A5D-8E2F1A3C5B4D"/*BlobDataToTextBuffer*/,
+  "Description": "Reads a BlobTrack BlobData buffer and produces a single combined native-glyph structured buffer (BufferLayout) plus vertex count, with one label per blob. Consumed by a text render composite in world/ortho space using draw-text-msdf.hlsl and a BMFont atlas.",
+  "InputUis": [
+    {
+      "InputId": "B97C5F9F-76E5-49A8-96A1-9B5E3F2FE2AD"/*BlobData*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "76D42773-DDBD-497A-8C17-927B09CCC6A9"/*LabelPrefix*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "64A3A4F5-420C-414D-80EF-5E0F33BB726F"/*IdFormat*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "F4885527-C56F-4040-AD4E-7D5351B19D08"/*LabelContent*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "3737C853-81F0-4FD9-9F82-207C2FE1A856"/*LabelColor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 275.0
+      }
+    },
+    {
+      "InputId": "3C39D125-8CB4-4E84-A51D-D1C88721C740"/*LabelSize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 320.0
+      }
+    },
+    {
+      "InputId": "9D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B4E"/*FontPath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 370.0
+      },
+      "Usage": "FilePath",
+      "FileFilter": "fnt"
+    },
+    {
+      "InputId": "8D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B4F"/*Spacing*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 415.0
+      }
+    },
+    {
+      "InputId": "7D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B40"/*LineHeight*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 460.0
+      }
+    },
+    {
+      "InputId": "6D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B41"/*Scale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 505.0
+      }
+    },
+    {
+      "InputId": "5D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B42"/*AspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 550.0
+      }
+    },
+    {
+      "InputId": "4E4F5A6B-7C8D-4E9F-A0B1-C2D3E4F5A6B7"/*Offset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 595.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "2B3C4D5E-6F70-4A80-B9C0-D1E2F3A4B5C6"/*Buffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "OutputId": "3C4D5E6F-7081-4B90-A0D1-E2F3A4B5C6D7"/*VertexCount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    }
+  ]
+}
