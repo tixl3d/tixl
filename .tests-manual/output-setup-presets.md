@@ -66,8 +66,7 @@ Click the entry for the second display.
 In the Output Window toolbar, open the breadcrumb menu and enable "Show Flow Outliner".
 
 **Expected:**
-- The Flow Outliner appears under the canvas with columns CONTENT, SURFACES, OUTPUTS, LOCAL BINDINGS and a shelf with REFERENCE IMAGES and PROPS,
-  OUTPUTS — each with a `+` button.
+- The Flow Outliner appears under the canvas with columns CONTENT, SURFACES, OUTPUTS, LOCAL BINDINGS — the first three with a `+` button.
 - The panel title is a dropdown showing the active setup's name (e.g. "Setup 1").
 - The OUTPUTS section lists the Default output; bound outputs show their display,
   unbound ones show "unbound".

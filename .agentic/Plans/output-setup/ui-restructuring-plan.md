@@ -428,10 +428,13 @@ the entities (Miro-like; deliberately not in C's scope).
 2. **B:** DEVICES as a fourth column (sketch) vs binding badges on output rows — column is planned
    (machine-grouped, per `multi-machine.md`); fall back to `Machine / Display` badges on output rows
    if horizontal space proves tight on small windows — the labeling scheme survives either layout.
-3. **B:** where the Calibrate mode control lives once the segmented control moves to the strip.
+3. ~~**B:** where the Calibrate mode control lives once the segmented control moves to the strip.~~ —
+   settled 2026-09-07: the Calibrate tab is gone (point-based pin calibration replaced it); the segmented
+   control lives in the strip's header row.
 4. **C:** default view after opening a setup — Overview vs last-used space (leaning: last-used,
    Overview on first open).
-5. **C:** view-mode consolidation (leaning, 2026-07-29): the segmented control reduces to
+5. **C:** view-mode consolidation — settled 2026-09-07 as **Board | Straight | Output** (Content dropped;
+   a source's space is entered from its card). Original leaning kept for the Stage part: the segmented control reduces to
    **Board | Stage** — *every other view is a camera, not a mode*. Straight = ortho camera facing the
    selected surface (a surface with world orientation *is* an ortho camera definition); Output = the
    projector's frustum camera ("look through Projector 1", reachable by double-clicking the output);

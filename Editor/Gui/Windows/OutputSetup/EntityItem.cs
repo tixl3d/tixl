@@ -199,21 +199,17 @@ internal sealed class EntityItem
         // the row that answers "which item is that frame?".
         var canvasPulse = !isHovered && !isSelected && !menuOpen ? FrameStats.GetPulse(args.Id) : 0;
 
-        // The item wears its kind's colour: a solid pill while selected, a tinted one while hovered.
+        // The item is a pill in its kind's colour, always: solid while selected, a light tint otherwise that
+        // hovering (from here or from the canvas) merely lifts.
         if (isSelected)
         {
             dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(0.6f), rounding);
         }
-        else if (isHovered || menuOpen)
+        else
         {
-            dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(0.2f), rounding);
-            dl.AddRect(rowMin, rowMax, kindColor.Fade(0.8f), rounding);
-        }
-        else if (canvasPulse > 0.001f)
-        {
-            // Match the mouse-hover look (light fill + outline) so a canvas-driven highlight reads the same.
-            dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(0.2f), rounding);
-            dl.AddRect(rowMin, rowMax, kindColor.Fade(0.8f), rounding);
+            var lift = isHovered || menuOpen ? 1f : canvasPulse;
+            dl.AddRectFilled(rowMin, rowMax, kindColor.Fade(0.12f + 0.13f * lift), rounding);
+            dl.AddRect(rowMin, rowMax, kindColor.Fade(0.45f + 0.45f * lift), rounding);
         }
 
         // Content over the background (the selectable is transparent), vertically centered in the fixed row
@@ -298,7 +294,7 @@ internal sealed class EntityItem
             ImGui.SetCursorScreenPos(new Vector2(contentX, contentY));
             CustomComponents.StylizedText(string.IsNullOrEmpty(args.Name) ? "untitled" : args.Name,
                                           isSelected ? Fonts.FontBold : Fonts.FontNormal,
-                                          (isSelected ? UiColors.ForegroundFull : UiColors.Text).Fade(fade));
+                                          (isSelected ? UiColors.ForegroundFull : SetupColors.LabelFor(args.Kind)).Fade(fade));
         }
 
         // Right-aligned status text, small and muted (FontSmall is shorter than the row's baseline — centre it on its own height).

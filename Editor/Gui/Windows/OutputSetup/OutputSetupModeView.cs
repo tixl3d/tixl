@@ -52,7 +52,10 @@ internal sealed class OutputSetupModeView
         ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundPopup.Rgba);
         ImGui.BeginChild("##flowOutliner", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
         _toggleOutlinerCollapse ??= () => _outlinerCollapsed = !_outlinerCollapsed;
-        _outliner.Draw(_entitySelection, _toggleOutlinerCollapse, !_outlinerCollapsed);
+        _drawGrip ??= DrawOutlinerGrip;
+        _drawHostedHeader ??= _outputView.DrawHostedHeader;
+        _drawStripMenuExtras ??= DrawStripMenuExtras;
+        _outliner.Draw(_entitySelection, _toggleOutlinerCollapse, !_outlinerCollapsed, _drawGrip, _drawHostedHeader, _drawStripMenuExtras);
         ImGui.EndChild();
         ImGui.PopStyleColor();
     }
@@ -74,9 +77,49 @@ internal sealed class OutputSetupModeView
         if (active && !_outlinerCollapsed)
             _outlinerHeight = Math.Clamp(_outlinerHeight - ImGui.GetIO().MouseDelta.Y / scale, MinOutlinerHeight, MaxOutlinerHeight);
 
-        var color = active ? UiColors.StatusActivated : (hovered ? UiColors.BackgroundHover : UiColors.BackgroundFull);
+        var color = active || _gripActive ? UiColors.StatusActivated : (hovered || _gripHovered ? UiColors.BackgroundHover : UiColors.BackgroundFull);
         ImGui.GetWindowDrawList().AddRectFilled(p, p + new Vector2(width, thickness), color);
     }
+
+    /// <summary>
+    /// The grip at the strip header's left: the same drag as the splitter edge, but a target you can find — and
+    /// it lights the edge while hovered, so the two read as one control.
+    /// </summary>
+    private void DrawOutlinerGrip()
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var height = ImGui.GetFrameHeight();
+        var width = 12 * scale;
+        var p = ImGui.GetCursorScreenPos();
+        ImGui.InvisibleButton("##outlinerGrip", new Vector2(width, height));
+        _gripActive = ImGui.IsItemActive() && !_outlinerCollapsed;
+        _gripHovered = ImGui.IsItemHovered() && !_outlinerCollapsed;
+        if (_gripActive || _gripHovered)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+
+        if (_gripActive)
+            _outlinerHeight = Math.Clamp(_outlinerHeight - ImGui.GetIO().MouseDelta.Y / scale, MinOutlinerHeight, MaxOutlinerHeight);
+
+        // Two columns of three dots, centred in the control.
+        var dl = ImGui.GetWindowDrawList();
+        var color = (_gripActive ? UiColors.StatusActivated : _gripHovered ? UiColors.Text : UiColors.TextMuted).Fade(0.8f);
+        var centre = p + new Vector2(width, height) * 0.5f;
+        for (var column = -1; column <= 1; column += 2)
+        {
+            for (var row = -1; row <= 1; row++)
+                dl.AddCircleFilled(centre + new Vector2(column * 2.5f, row * 4f) * scale, 1.2f * scale, color);
+        }
+    }
+
+    /// <summary>Window-level entries for the setup menu: the strip's own toggle and the view pin.</summary>
+    private void DrawStripMenuExtras()
+    {
+        DrawOutlinerMenuItem();
+        DrawPinMenuItem();
+    }
+
+    /// <summary>Whether the strip is shown — and with it hosts the canvas' toolbar, so the window's own goes.</summary>
+    public bool HeaderInStrip => _showOutliner;
 
     /// <summary>
     /// Draws an output-editing view if one applies to the current focus, and returns true; returns false
@@ -108,6 +151,7 @@ internal sealed class OutputSetupModeView
 
         _lastFocusedId = focusedId;
         _graphOwnedInspection = graphOwnsInspection;
+        _outputView.HeaderHostedByStrip = _showOutliner;
 
         if (TryGetShownEntity(out var entityKind, out var entityId) && OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
         {
@@ -162,7 +206,7 @@ internal sealed class OutputSetupModeView
 
     /// <summary>
     /// Debug-protocol entry: selects the named entity (any kind, by its display name) and/or enters an edit
-    /// mode (Board, Content, Straight, Output, Calibrate) — what the outliner click and the header tab do.
+    /// mode (Board, Straight, Output) — what the outliner click and the header tab do.
     /// </summary>
     public bool TryDrive(string? entityName, string? mode, out string error)
     {
@@ -403,6 +447,11 @@ internal sealed class OutputSetupModeView
     private const float MaxOutlinerHeight = 600;
     private const float SplitterThickness = 4;
     private readonly SetupEntitySelection _entitySelection = OutputSetupHandling.EntitySelection;
+    private Action? _drawGrip;
+    private Action? _drawHostedHeader;
+    private Action? _drawStripMenuExtras;
+    private bool _gripActive, _gripHovered;
+
     public OutputSetupModeView()
     {
         // One EntityItem per window: the outliner rows and the canvas menus share its rename/menu state,

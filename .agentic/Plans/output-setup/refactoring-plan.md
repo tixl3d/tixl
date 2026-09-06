@@ -598,6 +598,49 @@ with an explanatory comment) — the row-callback API design made compliance imp
   into `Homography.Identity`. Left for the next pass: the drag-state-machine unification (P2.2) — six
   parallel field sets still live in `SetupOutputView` and the Board/Regions partials; the Board's
   `_boardGestureOldJson` JSON-snapshot gestures could be the skeleton to collapse them onto.
+- **2026-09-06 (clean-up pass 2 — drag-state unification, P2.2):** every canvas drag runs on one skeleton
+  (`SetupOutputView.Gesture.cs`): `_gesture` {Kind, HotId, Name, OldJson, Snapshot (the hot surface's
+  `ResizeSurfaceCommand.State`), GrabPoint}, with `BeginGesture` / `EndGesture` (setup-JSON diff →
+  `SetupSnapshotCommand` + one save via `SetupActions.CommitGesture`) / `CancelGesture`, and the phase-driven
+  `RunGesture` that replaced `RunResizeDrag`/`HandleChildEdit`. Folded away: `_cornerDragOldQuads`,
+  `_dragSurfaceId`, `_cornerDragCommands`, `_resizeOldState`, `_edgeDragSurfaceId`, `_surfaceMoveId`,
+  `_surfaceMoveGrabCanvas`, `_labelMoveSurfaceId`, `_childMoveStart`, `_dragPatchId`, `_patchMoveId`,
+  `_patchMoveGrabCanvas`, `_sliceDragOldRect`, `_annotationDragStart`, `_measureDraftOldJson`,
+  `_boardGestureOldJson`, `_referenceEditActive`, `CommitBoardGesture`. Deleted with them:
+  `ChangeOutputMappingQuadCommand`, `ChangePatchQuadCommand`, `ChangeAnnotationCommand` (all drags undo by
+  snapshot now; `ResizeSurfaceCommand` stays for the parameter-window resize, `ChangeSliceRectCommand` for
+  the slice fit action). Kept as handoff flags, not gestures: `_labelGrabScreen`, `_boardGrabScreen`,
+  `_sliceLabelDragging`, `_measureDraftIndex`, `_measureDragIndex`. Known narrowing: the rectified view's
+  basis freeze now covers the hot surface only — a group corner drag whose *basis* is a non-grabbed member no
+  longer freezes (rare; was the only reason for the per-surface old-quad dictionary).
+- **2026-09-07 (fold regression, not the clean-up):** Board→Straight rendered the photo flying in from the
+  second image card. `DrawBoardLayer`'s sub-editors (slice on a content card, traces on each image card) set
+  `_projection.Origin/PixelsPerMeter` for their card and never restored it; the space drawn afterwards used
+  whatever the last card left. Latent since C.2 — surfaced once a second image carried traces and was drawn
+  last. `DrawBoardLayer` now restores `_spaceOrigin/_spacePixelsPerMeter` — placed *before* its "gestures only on the
+  settled Board" early return (the first fix sat after it and never ran during a fold; a per-frame probe of
+  origin vs. spaceOrigin over the bridge showed it).
+  bridge with two-frame screenshots (`scratchpad/fold_fine.py` pattern: outputSetup → pumpFrames 2 →
+  screenshot); the `[fold]` path/chord metric alone did not show it (1.00 for Brick Wall).
+- **2026-09-07 (design pass from the user's paint-over, 30 items):** done in three batches.
+  *Look:* `SetupColors` is the one grammar — content/slices texture-magenta, surfaces/regions the string
+  type's green, reference images the command type's teal, outputs gray; selection is only the 3 px white
+  outline (`SetupColors.Selection`), never a hue; `LabelFor` = `ColorVariations.OperatorLabel` on the hue
+  for card names, canvas chips and outliner rows. Cards: rounded kind-hued frame, name above the top-left
+  (bold when selected), metadata only on hover/selection, chips on `BackgroundFull.Fade(0.3)`. Grid darker
+  than the Board (`BackgroundFull`), pixel-snapped, floor line green, drawn to the clip rect. Point labels
+  centred above. Outliner connections flush with the pills; traced-quad handles only for the selected surface.
+  *Toolbar:* the canvas' header is deferred into the outliner strip's header row while the strip shows
+  (`DeferHeader`/`DrawHostedHeader`; grip · outlined setup switcher with the pin/outliner entries in its menu ·
+  mode tabs · Overlay · Isolate (Output only) · contextual actions · collapse chevron); the window's own
+  toolbar and the 40 px canvas offset go with it. Breadcrumb removed.
+  *Removals:* `EditMode.Content` (the stage-two morph, `DrawContentCanvas`, `DrawSliceEditor` and the pinned
+  slice-framing fields — a content source's space is a card double-click, tracked by `_inSourceSpace`),
+  `EditMode.Calibrate` and the camera/calibration-point editors (Core `ProjectorCamera`/`CalibrationPoint`
+  stay for a later action), the REFERENCE IMAGES / PROPS shelf (Board right-click menu adds surfaces, images,
+  props). Local bindings list a bound-but-detached display as "not attached" so its connection lands.
+  Settles ui-restructuring open questions 3 (no Calibrate control) and 5 (Board | Straight | Output; every
+  other view is a camera entered from a card).
 
 ## Suggested order (revised for the flow-view pivot)
 

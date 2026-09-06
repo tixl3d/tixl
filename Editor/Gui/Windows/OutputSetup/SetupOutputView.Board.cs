@@ -28,7 +28,11 @@ internal sealed partial class SetupOutputView
 {
     /// <summary>Whether the Board is the current view — selection changes then keep showing it rather than
     /// switching to the selected entity's canvas.</summary>
-    public bool ShowsBoard => _editMode == EditMode.Board;
+    public bool ShowsBoard => _editMode == EditMode.Board && !_inSourceSpace;
+
+    // A content source's space (its texture with the slices laid out) is entered from its card and left by
+    // "Board"; it is not one of the tabs, so it rides beside the mode.
+    private bool _inSourceSpace;
 
     /// <summary>The reference image whose space was entered from the Board (double-click); Empty while none is.
     /// Cleared by every other entry point, so leaving it is a matter of showing anything else.</summary>
@@ -59,7 +63,8 @@ internal sealed partial class SetupOutputView
         if (tracedImage == null)
             _editMode = EditMode.Board;
 
-        DrawHeader(setup, null, Guid.Empty);
+        if (!DeferHeader(HeaderKinds.Modes))
+            DrawHeader(setup, null, Guid.Empty);
 
         var canvasTop = ImGui.GetCursorScreenPos();
         _boardCanvas.UpdateCanvas(out _);
@@ -83,9 +88,10 @@ internal sealed partial class SetupOutputView
     /// <summary>Header for the canvases without tabs (the source canvas): the way back to the Board, then the title.</summary>
     private void DrawBoardReturnHeader(string title)
     {
-        if (CustomComponents.StateButton("Board", CustomComponents.ButtonStates.Default))
+        if (CustomComponents.StateButton("Board", CustomComponents.ButtonStates.Emphasized))
         {
             _editMode = EditMode.Board;
+            _inSourceSpace = false;
             OpenedReferenceImageId = Guid.Empty;
         }
 
@@ -102,8 +108,10 @@ internal sealed partial class SetupOutputView
     {
         var scale = T3Ui.UiScaleFactor;
         var dl = ImGui.GetWindowDrawList();
-        var screenMin = _boardCanvas.WindowPos;
-        var screenMax = screenMin + _boardCanvas.WindowSize;
+        // The grid fills whatever is visible of the canvas — the clip the caller set, not the canvas' own
+        // rectangle, which stops short of the toolbar's edge.
+        var screenMin = dl.GetClipRectMin();
+        var screenMax = dl.GetClipRectMax();
         var onBoard = _spaceBlend <= 0.001f;
         _boardLayerFade = 1f - _spaceBlend;
 
@@ -113,7 +121,7 @@ internal sealed partial class SetupOutputView
         MetricGridRaster.Draw(dl, _boardProjection, screenMin, screenMax, pixelsPerMeter, _boardDragKind != SetupEntitySelection.EntityKind.None ? 1f : 0.6f);
 
         // A live edge crop changes a size the metadata shows — rebuilt per frame only while one runs.
-        if (_boardMetaVersion != OutputSetupHandling.StructureVersion || _resizeOldState != null)
+        if (_boardMetaVersion != OutputSetupHandling.StructureVersion || _gesture.Kind == GestureKinds.SurfaceResize)
             RefreshBoardMeta(setup, machineConfig);
 
         // Fully inside a space nothing of the Board is left to draw or to click.
@@ -184,7 +192,7 @@ internal sealed partial class SetupOutputView
                     EditSlice(setup, dl, slice, slice.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
 
                     // A slice gesture is the slice's, not the card's — the card must not come along.
-                    if (_sliceLabelDragging || _sliceDragOldRect != null)
+                    if (_sliceLabelDragging || _gesture.Kind == GestureKinds.Slice)
                     {
                         _boardGrabScreen = null;
                         _boardGrabOnSelected = false;
@@ -248,7 +256,8 @@ internal sealed partial class SetupOutputView
 
                 var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.Patch, patch.Id) ?? false;
                 var pulse = isSelected ? 0f : FrameStats.GetPulse(patch.Id);
-                var color = (isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(0.5f), pulse)).Fade(_boardLayerFade);
+                var patchHue = SetupColors.ForKind(SetupEntitySelection.EntityKind.Patch);
+                var color = (isSelected ? patchHue : PulseColor(patchHue.Fade(0.6f), pulse)).Fade(_boardLayerFade);
                 dl.AddQuad(_boardQuad[0], _boardQuad[1], _boardQuad[2], _boardQuad[3], color, (isSelected ? 2f : 1f) * scale);
                 DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, _boardQuad, patch.Id, SetupActions.PatchLabel(output, patch), isSelected, 0.9f * _boardLayerFade, pulse);
             }
@@ -256,6 +265,14 @@ internal sealed partial class SetupOutputView
 
         foreach (var prop in setup.Props)
             DrawBoardProp(setup, selection, dl, prop);
+
+        // The card sub-editors above (a slice on its content card, the traces on each image card) borrow the
+        // space projection for their own card. The space drawn after the Board layer is the entered one, so
+        // put its origin and scale back — otherwise, while both layers show during a fold, the space renders
+        // where the last card drawn happened to be. Before the gesture gate below: a fold is exactly when
+        // the layer is only looked at.
+        _projection.Origin = _spaceOrigin;
+        _projection.PixelsPerMeter = _spacePixelsPerMeter;
 
         // The Board's own gestures belong to the Board; a fading layer is only looked at.
         if (!onBoard)
@@ -346,24 +363,34 @@ internal sealed partial class SetupOutputView
                             UiColors.ForegroundFull.Fade(preview * fade));
         }
 
+        // The frame is the kind's hue, rounded; hovering lifts it. Selection is the white outline just outside
+        // it — never a hue, so a selected card still says what it is.
+        var kindColor = SetupColors.ForKind(kind);
+        if (pulse > 0.001f)
+            dl.AddRectFilled(sMin, sMax, kindColor.Fade(pulse * 0.15f * fade), 3 * scale);
+
+        var rounding = 3 * scale;
+        dl.AddRect(sMin, sMax, PulseColor(kindColor.Fade(hovered ? 1f : 0.7f), pulse).Fade(fade), rounding, ImDrawFlags.None, 1 * scale);
         if (isSelected)
-            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(0.12f * fade));
-        else if (pulse > 0.001f)
-            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(pulse * 0.2f * fade));
+        {
+            var outset = new Vector2(1.5f * scale);
+            dl.AddRect(sMin - outset, sMax + outset, kindColor.Fade(fade), rounding, ImDrawFlags.None, 3 * scale);
+        }
 
-        var outline = (isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(hovered ? 0.7f : 0.4f), pulse)).Fade(fade);
-        dl.AddRect(sMin, sMax, outline, 0, ImDrawFlags.None, (isSelected ? 2f : 1f) * scale);
-
-        // Name chip at the card's top-left; metadata muted beside it.
+        // Name above the card's top-left, in the kind's label hue (bold while selected) on a faint shade; the
+        // metadata only while hovered or selected — it answers a question, it doesn't label.
         var pad = 4 * scale;
-        var labelPos = sMin + new Vector2(pad, pad);
+        var nameFont = isSelected ? Fonts.FontBold : Fonts.FontSmall;
+        ImGui.PushFont(nameFont);
         var nameSize = ImGui.CalcTextSize(name);
-        var chipMax = labelPos + nameSize + new Vector2(2 * pad, 2 * pad);
-        CornerPinHandles.DrawLabelChip(dl, (labelPos, chipMax), name,
-                                       (isSelected ? UiColors.ForegroundFull : UiColors.Text.Fade(0.9f)).Fade(fade),
-                                       (isSelected ? UiColors.StatusActivated : UiColors.BackgroundFull.Fade(0.7f)).Fade(fade));
-        if (meta != null)
-            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(chipMax.X + pad, labelPos.Y + pad), UiColors.TextMuted.Fade(fade), meta);
+        ImGui.PopFont();
+        var labelMin = new Vector2(sMin.X, sMin.Y - nameSize.Y - 2 * pad);
+        var labelMax = labelMin + nameSize + new Vector2(2 * pad, 2 * pad);
+        dl.AddRectFilled(labelMin, labelMax, UiColors.BackgroundFull.Fade(0.3f * fade), rounding);
+        dl.AddText(nameFont, nameFont.FontSize, labelMin + new Vector2(pad, pad), SetupColors.LabelFor(kind).Fade(fade), name);
+        if (meta != null && (hovered || isSelected))
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(labelMax.X + pad, labelMax.Y - pad - Fonts.FontSmall.FontSize),
+                       UiColors.TextMuted.Fade(0.5f * fade), meta);
 
         if (!interactive)
             return;
@@ -386,10 +413,12 @@ internal sealed partial class SetupOutputView
             if (kind == SetupEntitySelection.EntityKind.ReferenceImage)
                 OpenedReferenceImageId = id;
 
+            if (kind == SetupEntitySelection.EntityKind.ContentSource)
+                _inSourceSpace = true;
+
             _editMode = kind switch
                             {
                                 SetupEntitySelection.EntityKind.Surface => EditMode.Straight,
-                                SetupEntitySelection.EntityKind.ContentSource => EditMode.Content,
                                 SetupEntitySelection.EntityKind.Output => EditMode.Output,
                                 _ => _editMode,
                             };
@@ -411,7 +440,7 @@ internal sealed partial class SetupOutputView
             ImGui.PopID();
             if (phase == CanvasPointHandle.DragPhase.Started)
             {
-                _boardGestureOldJson = setup.ToJsonString();
+                BeginGesture(setup, GestureKinds.BoardScale, isSurface ? "Scale surface" : "Scale card", id);
                 _boardScaleStartWidth = max.X - min.X;
                 _boardScaleApplied = Vector2.One;
             }
@@ -432,7 +461,7 @@ internal sealed partial class SetupOutputView
             }
 
             if (phase == CanvasPointHandle.DragPhase.Completed)
-                CommitBoardGesture(setup, isSurface ? "Scale surface" : "Scale card");
+                EndGesture(setup);
 
             if (ImGui.IsItemHovered())
             {
@@ -487,7 +516,7 @@ internal sealed partial class SetupOutputView
     /// <summary>
     /// The selected surface's edge handles, as on the Straight view: an edge crops the footprint (Ctrl
     /// stretches instead), the anchor — the card's placement — stays put, and the corner pin follows through
-    /// the same <see cref="RunResizeDrag"/> skeleton, one undo step per drag.
+    /// the shared gesture skeleton, one undo step per drag.
     /// </summary>
     private void DrawBoardSurfaceEdges(Setup setup, Surface surface, Vector2 min, Vector2 max)
     {
@@ -498,9 +527,9 @@ internal sealed partial class SetupOutputView
 
         // Plain: an edge crops the footprint (squares). Ctrl: it scales the surface along that axis, aspect free
         // (circles) — the mode is read at the press and held for the drag.
-        var scaling = _resizeOldState != null ? _boardEdgeScaling : ImGui.GetIO().KeyCtrl;
+        var scaling = _gesture.Is(GestureKinds.SurfaceResize, surface.Id) ? _boardEdgeScaling : ImGui.GetIO().KeyCtrl;
         ImGui.PushID(surface.Id.GetHashCode());
-        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true);
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
         style.EdgeHandleShape = scaling ? CanvasPointHandle.Shape.Circle : CanvasPointHandle.Shape.Square;
         var phase = CornerPinHandles.DrawEdgeHandles(_boardEdgeQuad, _boardProjection, style, out var edge, out var edgePos);
         ImGui.PopID();
@@ -538,18 +567,16 @@ internal sealed partial class SetupOutputView
         switch (phase)
         {
             case CanvasPointHandle.DragPhase.Started:
-                _resizeOldState = new ResizeSurfaceCommand.State(surface);
-                _edgeDragSurfaceId = surface.Id;
+                BeginGesture(setup, GestureKinds.SurfaceResize, scaling ? "Scale surface" : "Crop surface", surface.Id, surface);
                 _boardEdgeScaling = scaling;
                 _boardScaleApplied = Vector2.One;
                 SurfaceGeometry.LocalBounds(surface, out _boardEdgeStartMin, out _boardEdgeStartMax);
-                _boardGestureOldJson = setup.ToJsonString();
                 if (surface.Reference is { Quad.Length: >= 4 })
                     Array.Copy(surface.Reference.Quad, _boardEdgeOldTrace, 4);
 
                 break;
 
-            case CanvasPointHandle.DragPhase.Dragging when _resizeOldState != null && _boardEdgeScaling:
+            case CanvasPointHandle.DragPhase.Dragging when _gesture.Is(GestureKinds.SurfaceResize, surface.Id) && _boardEdgeScaling:
             {
                 // Scale along the dragged edge's axis, the opposite edge fixed; the trace is the same wall, so it stays.
                 var origin = surface.BoardPlacement?.Position ?? Vector2.Zero;
@@ -569,11 +596,11 @@ internal sealed partial class SetupOutputView
                 break;
             }
 
-            case CanvasPointHandle.DragPhase.Dragging when _resizeOldState != null:
+            case CanvasPointHandle.DragPhase.Dragging when _gesture.Is(GestureKinds.SurfaceResize, surface.Id):
             {
                 // Re-based on the pre-drag rectangle, so the edit doesn't compound; the anchor is the origin of
                 // surface space and sits at the card's placement.
-                _resizeOldState.Value.Restore(surface);
+                _gesture.Snapshot!.Value.Restore(surface);
                 var oldRect = SurfaceGeometry.LocalRect(surface);
                 var origin = surface.BoardPlacement?.Position ?? Vector2.Zero;
                 SurfaceGeometry.DragEdge(surface, edge, edgePos - origin, keepDimensions: false);
@@ -592,9 +619,7 @@ internal sealed partial class SetupOutputView
             }
 
             case CanvasPointHandle.DragPhase.Completed:
-                _resizeOldState = null;
-                _edgeDragSurfaceId = Guid.Empty;
-                CommitBoardGesture(setup, _boardEdgeScaling ? "Scale surface" : "Crop surface");
+                EndGesture(setup);
                 break;
         }
     }
@@ -627,12 +652,11 @@ internal sealed partial class SetupOutputView
         var isSelected = selection?.IsSelected(kind, id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.GetPulse(id);
 
-        if (isSelected)
-            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(0.12f * fade));
-        else if (pulse > 0.001f)
-            dl.AddRectFilled(sMin, sMax, UiColors.StatusActivated.Fade(pulse * 0.2f * fade));
+        var kindColor = SetupColors.ForKind(kind);
+        if (pulse > 0.001f)
+            dl.AddRectFilled(sMin, sMax, kindColor.Fade(pulse * 0.15f * fade));
 
-        dl.AddRect(sMin, sMax, (isSelected ? UiColors.StatusActivated : PulseColor(UiColors.ForegroundFull.Fade(0.45f), pulse)).Fade(fade),
+        dl.AddRect(sMin, sMax, (isSelected ? kindColor : PulseColor(kindColor.Fade(0.7f), pulse)).Fade(fade),
                    0, ImDrawFlags.None, (isSelected ? 2f : 1f) * scale);
 
         _boardQuad[0] = sMin;
@@ -671,8 +695,8 @@ internal sealed partial class SetupOutputView
         var foot = new Vector2(prop.Position.X, prop.Position.Y);
         var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.Prop, prop.Id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.GetPulse(prop.Id);
-        var color = (isSelected ? UiColors.StatusActivated : PulseColor(UiColors.TextMuted.Fade(0.8f), pulse)).Fade(fade);
-        var thickness = (isSelected ? 2f : 1.5f) * scale;
+        var color = (isSelected ? UiColors.Text : PulseColor(UiColors.TextMuted.Fade(0.8f), pulse)).Fade(fade);
+        var thickness = (isSelected ? 2.5f : 1.5f) * scale;
 
         Vector2 P(float dx, float dy) => _boardProjection.CanvasToScreen(foot + new Vector2(dx * h, dy * h));
 
@@ -694,7 +718,7 @@ internal sealed partial class SetupOutputView
 
         var meta = BoardMeta(prop.Id) ?? "";
         dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(sMin.X, sMin.Y - Fonts.FontSmall.FontSize - 2 * scale),
-                   (isSelected ? UiColors.StatusActivated : UiColors.TextMuted).Fade(fade), meta);
+                   (isSelected ? UiColors.Text : UiColors.TextMuted).Fade(fade), meta);
 
         if (!interactive)
             return;
@@ -754,7 +778,7 @@ internal sealed partial class SetupOutputView
             _boardDragKind = _boardGrabKind;
             _boardDragId = _boardGrabId;
             _boardDragGrabOnBoard = _boardProjection.ScreenToCanvas(ImGui.GetMousePos());
-            _boardGestureOldJson = setup.ToJsonString();
+            BeginGesture(setup, GestureKinds.BoardCard, _boardDragItems.Count > 1 ? "Move cards" : "Move card", _boardDragId);
         }
 
         if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
@@ -799,7 +823,7 @@ internal sealed partial class SetupOutputView
             return;
         }
 
-        CommitBoardGesture(setup, _boardDragItems.Count > 1 ? "Move cards" : "Move card");
+        EndGesture(setup);
         _boardDragItems.Clear();
         _boardDragKind = SetupEntitySelection.EntityKind.None;
         _boardDragId = Guid.Empty;
@@ -916,8 +940,7 @@ internal sealed partial class SetupOutputView
         // Not IsAnyItemActive: a press on empty window space makes the window's move-id the active item, which
         // would veto every fence. The scale handle is the only other gesture, and it holds the snapshot.
         if (selection == null || _boardDragKind != SetupEntitySelection.EntityKind.None
-            || _boardGrabScreen != null || _boardGestureOldJson != null || _resizeOldState != null
-            || _sliceLabelDragging || _sliceDragOldRect != null)
+            || _boardGrabScreen != null || _gesture.IsLive || _sliceLabelDragging)
         {
             _boardFence.Reset();
             return;
@@ -1164,15 +1187,6 @@ internal sealed partial class SetupOutputView
         {
             FitBoard(min, max, instant: false);
         }
-    }
-
-    private void CommitBoardGesture(Setup setup, string name)
-    {
-        if (_boardGestureOldJson == null)
-            return;
-
-        SetupActions.CommitGesture(setup, name, _boardGestureOldJson);
-        _boardGestureOldJson = null;
     }
 
     // ---- placement model -----------------------------------------------------------------------------
@@ -1638,7 +1652,6 @@ internal sealed partial class SetupOutputView
     private Guid _boardDragId;
     private Vector2 _boardDragGrabOnBoard;
     private readonly List<(SetupEntitySelection.EntityKind Kind, Guid Id, Vector2 Start)> _boardDragItems = [];
-    private string? _boardGestureOldJson;
 
     // Marquee over the cards; candidates are collected as the cards draw (cleared per frame).
     private readonly SelectionFence _boardFence = new();

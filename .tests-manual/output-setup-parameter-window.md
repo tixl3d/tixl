@@ -101,8 +101,8 @@ uninterrupted drag, then press Ctrl+Z once.
 ## Step: Kinds without a canvas point to the Parameter window
 
 **Action:**
-Click `+` on **PROPS**, then `+` on **REFERENCE IMAGES**. Click the new prop item,
-then the new reference image item.
+Right-click empty Board and choose **Add Prop**, then again and choose **Add Reference
+Image**. Click the new prop card, then the new image card.
 
 **Expected:**
 - For the prop: the output area shows a centered message naming it and pointing to

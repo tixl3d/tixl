@@ -38,8 +38,13 @@ internal sealed class SetupFlowOutliner
 
     /// <param name="onToggleCollapse">Collapses the strip to its header bar, or expands it again.</param>
     /// <param name="bodyVisible">False while collapsed: only the header row draws.</param>
-    public void Draw(SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible)
+    /// <param name="drawGrip">The strip's resize grip, drawn first in the header row.</param>
+    /// <param name="drawToolbar">The canvas' toolbar (mode switch and its actions), drawn after the setup switcher.</param>
+    /// <param name="drawMenuExtras">Window-level entries appended to the setup menu (outliner toggle, pin).</param>
+    public void Draw(SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible,
+                     Action? drawGrip = null, Action? drawToolbar = null, Action? drawMenuExtras = null)
     {
+        _drawMenuExtras = drawMenuExtras;
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
             CustomComponents.EmptyWindowMessage("No project focused");
@@ -72,7 +77,7 @@ internal sealed class SetupFlowOutliner
             SetupActions.DeleteSelection(selection, setup);
         }
 
-        DrawHeader(setup, selection, onToggleCollapse, bodyVisible);
+        DrawHeader(setup, selection, onToggleCollapse, bodyVisible, drawGrip, drawToolbar);
 
         if (bodyVisible)
             DrawColumns(setup, machineConfig, selection);
@@ -81,39 +86,41 @@ internal sealed class SetupFlowOutliner
         _hoveredId = _pendingHoveredId;
     }
 
-    /// <summary>Setup switcher · breadcrumb of the primary's path · collapse toggle at the right.</summary>
-    private void DrawHeader(Setup setup, SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible)
+    /// <summary>Grip · setup switcher · the canvas' toolbar · collapse toggle at the right — one row that is
+    /// the whole window's toolbar while the strip is shown.</summary>
+    private void DrawHeader(Setup setup, SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible,
+                            Action? drawGrip, Action? drawToolbar)
     {
         var scale = T3Ui.UiScaleFactor;
         var height = ImGui.GetFrameHeight();
         var rowPos = ImGui.GetCursorScreenPos();
+        var rowRight = rowPos.X + ImGui.GetContentRegionAvail().X;
 
-        DrawSetupSwitcher(setup, selection, SwitcherWidth * scale);
-
-        // Breadcrumb: what feeds the primary → the primary → what shows it, refreshed on a change of primary
-        // or of the structure (renames, re-routing), never per frame.
-        if (_breadcrumbKind != _primaryKind || _breadcrumbId != _primaryId || _breadcrumbVersion != _cacheVersion)
+        ImGui.SetCursorScreenPos(new Vector2(rowPos.X + 4 * scale, rowPos.Y + 3 * scale));
+        if (drawGrip != null)
         {
-            _breadcrumb = BuildBreadcrumb(setup);
-            _breadcrumbKind = _primaryKind;
-            _breadcrumbId = _primaryId;
-            _breadcrumbVersion = _cacheVersion;
+            drawGrip();
+            ImGui.SameLine(0, 6 * scale);
         }
 
-        ImGui.SetCursorScreenPos(new Vector2(rowPos.X + (SwitcherWidth + 12) * scale, rowPos.Y));
-        ImGui.AlignTextToFramePadding();
-        CustomComponents.StylizedText(_breadcrumb, Fonts.FontSmall, UiColors.TextMuted);
+        DrawSetupSwitcher(setup, selection);
+
+        if (drawToolbar != null)
+        {
+            ImGui.SameLine(0, 12 * scale);
+            drawToolbar();
+        }
 
         if (onToggleCollapse != null)
         {
-            ImGui.SetCursorScreenPos(new Vector2(rowPos.X + ImGui.GetContentRegionAvail().X - height, rowPos.Y));
+            ImGui.SetCursorScreenPos(new Vector2(rowRight - height, rowPos.Y + 3 * scale));
             if (CustomComponents.IconButton(bodyVisible ? Icon.ChevronDown : Icon.ChevronUp, Vector2.Zero))
                 onToggleCollapse();
 
             CustomComponents.TooltipForLastItem(bodyVisible ? "Collapse the outliner to its header" : "Expand the outliner");
         }
 
-        ImGui.SetCursorScreenPos(new Vector2(rowPos.X, rowPos.Y + height + 2 * scale));
+        ImGui.SetCursorScreenPos(new Vector2(rowPos.X, rowPos.Y + height + 6 * scale));
         ImGui.Dummy(Vector2.Zero);
     }
 
@@ -135,8 +142,7 @@ internal sealed class SetupFlowOutliner
         dl.ChannelsSplit(2);
         dl.ChannelsSetCurrent(1);
         _anchors.Clear();
-        var shelfWidth = MathF.Min(ShelfWidth * scale, avail.X * 0.25f);
-        var columnWidth = MathF.Max((avail.X - shelfWidth) / 4, 60 * scale);
+        var columnWidth = MathF.Max(avail.X / 4, 60 * scale);
         var maxY = origin.Y;
 
         // Items are inset from the column boundaries so the gutters between columns have room for the connections.
@@ -162,19 +168,12 @@ internal sealed class SetupFlowOutliner
         DrawLocalBindings(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
-        // The shelf: kinds outside the flow, stacked as two small groups.
-        BeginColumn(origin.X + 4 * columnWidth + gap * 0.5f, origin.Y, shelfWidth - gap);
-        DrawColumnHeader("REFERENCE IMAGES", "##addRefImage", selection, SetupActions.AddReferenceImage);
-        DrawReferenceImages(selection, setup);
-        FormInputs.AddVerticalSpace(6);
-        DrawColumnHeader("PROPS", "##addProp", selection, SetupActions.AddProp);
-        DrawProps(selection, setup);
-        maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
+        // Reference images and props are Board cards, not flow items: they are added from the Board's own menu.
 
         // Column dividers span the visible body, or the content when it scrolls past it.
         dl.ChannelsSetCurrent(0);
         var dividerBottom = MathF.Max(maxY, origin.Y + avail.Y);
-        for (var i = 1; i <= 4; i++)
+        for (var i = 1; i <= 3; i++)
         {
             var x = (float)Math.Round(origin.X + i * columnWidth);
             dl.AddLine(new Vector2(x, origin.Y), new Vector2(x, dividerBottom), UiColors.BackgroundFull, 1 * scale);
@@ -269,8 +268,9 @@ internal sealed class SetupFlowOutliner
         var color = emphasized ? kindColor : kindColor.Fade(0.35f);
         var thickness = (emphasized ? 2.5f : 1.5f) * scale;
 
-        var a = new Vector2(from.Right + 2 * scale, from.Y);
-        var b = new Vector2(to.Left - 2 * scale, to.Y);
+        // Flush with the items: a connection grows out of one pill and into the next.
+        var a = new Vector2(from.Right, from.Y);
+        var b = new Vector2(to.Left, to.Y);
         var reach = MathF.Max(24 * scale, MathF.Abs(b.X - a.X) * 0.4f);
         dl.AddBezierCubic(a, a + new Vector2(reach, 0), b - new Vector2(reach, 0), b, color, thickness);
     }
@@ -416,8 +416,9 @@ internal sealed class SetupFlowOutliner
 
     /// <summary>
     /// This machine's plugs — the displays today, streams later — as an inventory: every plug is listed,
-    /// the bound ones read normal (their connection says which output), the free ones recede. Items are
-    /// not entities (no selection, no menu); binding happens on the output's item.
+    /// the bound ones read normal (their connection says which output), the free ones recede. A display an
+    /// output is bound to but that isn't attached right now is listed too, so its connection has somewhere
+    /// to land. Items are not entities (no selection, no menu); binding happens on the output's item.
     /// </summary>
     private void DrawLocalBindings(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
     {
@@ -445,39 +446,25 @@ internal sealed class SetupFlowOutliner
                            };
             DrawRow(selection, setup, ref args);
         }
-    }
 
-    private void DrawReferenceImages(SetupEntitySelection selection, Setup setup)
-    {
-        for (var i = 0; i < setup.ReferenceImages.Count; i++)
+        foreach (var binding in machineConfig.Bindings)
         {
-            var image = setup.ReferenceImages[i];
+            if (binding.DisplayIndex < screens.Length || setup.FindOutput(binding.OutputId) == null)
+                continue;
+
             var args = new EntityItem.Args
                            {
-                               Kind = SetupEntitySelection.EntityKind.ReferenceImage,
-                               Id = image.Id,
-                               Name = image.Name,
+                               Kind = SetupEntitySelection.EntityKind.None,
+                               Id = DisplayRowId(binding.DisplayIndex),
+                               Name = DisplayLabel(binding.DisplayIndex),
+                               Status = "not attached",
+                               LeadingIcon = Icon.PlayOutput,
+                               Muted = true,
                            };
             DrawRow(selection, setup, ref args);
         }
     }
 
-    private void DrawProps(SetupEntitySelection selection, Setup setup)
-    {
-        for (var i = 0; i < setup.Props.Count; i++)
-        {
-            var prop = setup.Props[i];
-            var args = new EntityItem.Args
-                           {
-                               Kind = SetupEntitySelection.EntityKind.Prop,
-                               Id = prop.Id,
-                               Name = prop.Kind,
-                           };
-            DrawRow(selection, setup, ref args);
-        }
-    }
-
-    /// <summary>"Local / Display N" — cached per index; the per-frame plug rows must not build strings.</summary>
     private static string DisplayLabel(int displayIndex)
     {
         while (_displayLabels.Count <= displayIndex)
@@ -501,33 +488,6 @@ internal sealed class SetupFlowOutliner
 
     // A stable per-display row id, so ImGui ids and hover pulses stay put across frames.
     private static Guid DisplayRowId(int displayIndex) => new(displayIndex + 1, 0x5c4e, 0x4e21, 0, 0, 0, 0, 0, 0, 0, 0);
-
-    /// <summary>"what feeds it → the primary → what shows it", one hop each way, from <see cref="SetupRelations"/>.</summary>
-    private string BuildBreadcrumb(Setup setup)
-    {
-        if (_primaryKind == SetupEntitySelection.EntityKind.None)
-            return string.Empty;
-
-        SetupRelations.CollectRelated(setup, _primaryKind, _primaryId, _breadcrumbScratch);
-        _breadcrumbBuilder.Clear();
-        foreach (var relation in _breadcrumbScratch)
-        {
-            if (relation.IsConsumer)
-                continue;
-
-            _breadcrumbBuilder.Append(SetupActions.NameForEntity(relation.Kind, relation.Id)).Append(" → ");
-        }
-
-        _breadcrumbBuilder.Append(SetupActions.NameForEntity(_primaryKind, _primaryId));
-
-        foreach (var relation in _breadcrumbScratch)
-        {
-            if (relation.IsConsumer)
-                _breadcrumbBuilder.Append(" → ").Append(SetupActions.NameForEntity(relation.Kind, relation.Id));
-        }
-
-        return _breadcrumbBuilder.ToString();
-    }
 
     private void DrawContentSends(SetupEntitySelection selection, Setup setup)
     {
@@ -666,22 +626,29 @@ internal sealed class SetupFlowOutliner
             _collapsedSurfaces.Remove(surfaceId);
     }
 
-    private void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection, float switcherWidth)
+    /// <summary>The setup's name and its menu, as one outlined control: name and chevron belong together.</summary>
+    private void DrawSetupSwitcher(Setup setup, SetupEntitySelection selection)
     {
         var scale = T3Ui.UiScaleFactor;
         var pos = ImGui.GetCursorScreenPos();
         var height = ImGui.GetFrameHeight();
-        if (ImGui.InvisibleButton("##setupSwitcher", new Vector2(switcherWidth, height)))
+        var width = MathF.Max(60 * scale, ImGui.CalcTextSize(setup.Name).X + Icons.FontSize + 16 * scale);
+        if (ImGui.InvisibleButton("##setupSwitcher", new Vector2(width, height)))
             ImGui.OpenPopup("##setupMenu");
 
+        var hovered = ImGui.IsItemHovered();
+        var dl = ImGui.GetWindowDrawList();
+        dl.AddRect(pos, pos + new Vector2(width, height), (hovered ? UiColors.Text : UiColors.TextMuted).Fade(0.4f), 3 * scale);
+
         // Label + chevron drawn over the button so the chevron sits next to the name (not far-right like a combo).
-        ImGui.SetCursorScreenPos(new Vector2(pos.X + 2 * scale, pos.Y));
+        ImGui.SetCursorScreenPos(new Vector2(pos.X + 6 * scale, pos.Y));
         ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText(setup.Name, Fonts.FontNormal, UiColors.Text);
         ImGui.SameLine(0, 4 * scale);
         Icons.DrawInlineGlyph(Icon.ChevronDown, UiColors.TextMuted.Rgba);
 
-        ImGui.SetCursorScreenPos(new Vector2(pos.X, pos.Y + height));
+        ImGui.SetCursorScreenPos(new Vector2(pos.X + width, pos.Y));
+        ImGui.Dummy(Vector2.Zero); // the row continues to the right of the control
 
         if (ImGui.BeginPopup("##setupMenu"))
         {
@@ -718,6 +685,12 @@ internal sealed class SetupFlowOutliner
             {
                 if (OutputSetupHandling.TryDeleteActive())
                     selection.Clear();
+            }
+
+            if (_drawMenuExtras != null)
+            {
+                CustomComponents.SeparatorLine();
+                _drawMenuExtras();
             }
 
             ImGui.EndPopup();
@@ -771,10 +744,6 @@ internal sealed class SetupFlowOutliner
     private float _columnWidth;
 
     // Header breadcrumb cache — rebuilt on a primary change or every ~half second, not per frame.
-    private string _breadcrumb = string.Empty;
-    private SetupEntitySelection.EntityKind _breadcrumbKind;
-    private Guid _breadcrumbId;
-    private int _breadcrumbVersion = -1;
 
     // Per-structure caches (see RefreshCaches), keyed on the structure version and the setup.
     private int _cacheVersion = -1;
@@ -782,15 +751,13 @@ internal sealed class SetupFlowOutliner
     private readonly List<Connection> _connections = [];
     private readonly Dictionary<Guid, string> _sliceLabels = [];
     private readonly Dictionary<Guid, string> _patchLabels = [];
-    private readonly List<SetupRelations.Relation> _breadcrumbScratch = [];
-    private readonly System.Text.StringBuilder _breadcrumbBuilder = new();
+
+    private Action? _drawMenuExtras;
 
     // Items drawn this frame, for the connections (cleared per frame; a few dozen entries, searched linearly).
     private readonly List<Anchor> _anchors = [];
 
     private const float ColumnGap = 28; // unscaled px; the gutter the connections run through
-    private const float SwitcherWidth = 180; // unscaled px
-    private const float ShelfWidth = 200; // unscaled px
 
     // Surfaces whose children are folded away; expanded is the default, so only collapses are tracked.
     private readonly HashSet<Guid> _collapsedSurfaces = [];

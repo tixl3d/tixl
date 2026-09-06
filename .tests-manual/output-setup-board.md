@@ -21,9 +21,8 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
 **Action:**
 1. Click the SendToOutput op in the graph window (the outliner opens), then click an empty spot
    of the outliner's body so nothing is selected.
-2. Click the "Surface 1" item in the SURFACES column, then the "Image 1" item in the REFERENCE
-   IMAGES shelf, then the "SendToOutput" item in the CONTENT column, then the "Slice 1" item
-   under it.
+2. Click the "Surface 1" item in the SURFACES column, then the "Image 1" card on the Board,
+   then the "SendToOutput" item in the CONTENT column, then the "Slice 1" item under it.
 3. Click the **Straight** tab with "Surface 1" selected, then the **Board** tab.
 
 **Expected:**
@@ -33,12 +32,35 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
   texture and the slice drawn as a labelled sub-rect, "Surface 1" standing on the floor at
   its metre size with "1×1 m" beside its name, the output card at the right with the live
   composite and "Patch 1" drawn inside it, and a stick figure labelled "1.7 m" standing on
-  the floor. The header reads the setup's name and a segmented control whose first tab,
-  **Board**, is active.
+  the floor. The window has no toolbar of its own: the outliner strip's header row carries a
+  grip, the setup's name in an outlined control with a chevron, and the segmented control
+  **Board · Straight · Output** with **Board** active, then the **Overlay** percent field.
+  Cards are outlined in their kind's hue (content magenta, surfaces green, images teal,
+  outputs gray) with their name above the top-left corner; the grid is darker than the
+  Board and the floor line green.
 - After 2: the Board stays on screen for every click; only the highlighted card changes (the
   slice highlights its sub-rect). No "Set a photo path" message appears for the image.
 - After 3: the Straight canvas opens for the surface; the Board tab brings the Board back with
   "Surface 1" highlighted and the same layout as before.
+
+## Step: Selection look and the Board menu
+
+**Action:**
+1. Click the "Surface 1" card; hover the content card without clicking; move the mouse away.
+2. Right-click empty Board and choose **Add Reference Image**; right-click again and choose
+   **Add Prop**.
+3. With the new image selected, click the **Straight** tab, then the **Board** tab.
+
+**Expected:**
+- After 1: the selected card's green frame becomes a 3 px outline just outside the card with
+  rounded corners, still green; its name reads bold in green and its size metadata appears
+  beside the name. The hovered content card brightens its magenta frame and shows its
+  resolution; both go back to muted when the mouse leaves. Nothing turns blue or white
+  anywhere: hover and selection only change the hue's opacity and the line width.
+- After 2: an empty image card and a stick figure appear on the Board and are selected in
+  turn; there is no REFERENCE IMAGES or PROPS column in the strip.
+- After 3: the Straight tab is disabled for an image without a traced surface, so the Board
+  stays; the segmented control keeps its three tabs Board · Straight · Output.
 
 ## Step: Zoom range
 
@@ -282,8 +304,7 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 - After 1: one continuous move of about half a second, entirely on the image card: the view
   zooms onto the traced quad, the photo warps in place until the quad is an upright rectangle
   with the surface's aspect, the rest of the photo dims and the label fades. The surface's
-  own card elsewhere on the Board is not involved; no "Projector Camera" header appears
-  (it is on the Calibrate tab only), so nothing shifts at the start.
+  own card elsewhere on the Board is not involved, and nothing shifts at the start.
 - After 2: the scene turns from one rectified wall to the other, the warp and the view easing
   together rather than cutting, and back.
 - After 3: the photo relaxes back to its unwarped state and the view returns to the Board.

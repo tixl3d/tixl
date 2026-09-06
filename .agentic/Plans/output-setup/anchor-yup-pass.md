@@ -65,7 +65,7 @@ regions stay put by construction instead of being counter-moved (`ApplyRect`'s `
 | Region edge edit L1215–1222 (`case 0: min.Y = …`) | Y-down edge cases | same flip as `DragEdge` |
 | `DrawSnapGuide` L1419 | extends the guide by `±size` in parent space | guide runs across `LocalRect(parent)` bounds ± size |
 | `ToParentSpace` L1434 | `inCarrier − parentOrigin` | unchanged semantically once `TryGetDescendantRect` reports the parent's *anchor origin* |
-| Label-move / `HandleChildEdit` / `RunResizeDrag` | go through `ChildRectInParent`/`SetChildRect` | no direct flips — **verify by test** |
+| Label-move / region edits (`RunGesture`) | go through `ChildRectInParent`/`SetChildRect` | no direct flips — **verify by test** |
 | `SnapThresholds` (per-axis local thresholds) | derives meters-per-pixel from a probe offset | sign-agnostic (uses lengths) — **verify** |
 
 ### `SetupOutputView.Measure.cs`

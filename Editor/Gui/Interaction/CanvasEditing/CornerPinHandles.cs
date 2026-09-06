@@ -31,26 +31,29 @@ internal static class CornerPinHandles
         /// <summary>Squares read as "crop along the edge"; a caller whose edge drag scales instead shows circles.</summary>
         public CanvasPointHandle.Shape EdgeHandleShape;
 
+        /// <summary>Outline width in unscaled px; 0 = the default.</summary>
+        public float EdgeThickness;
+
         /// <summary>
-        /// A surface quad. Blue means "selected" — an unselected surface stays neutral so the two read apart at
-        /// a glance. Handles are white with a blue rim when selected, and recede when not.
+        /// A surface quad in its kind's <paramref name="hue"/>. Selection never changes the hue — the outline gets
+        /// wider and fully opaque, the handles gain a rim in the same hue; unselected the frame recedes.
         /// </summary>
-        public static Style ForSurface(string? label, bool editable, bool selected = false, float emphasis = 1f)
+        public static Style ForSurface(string? label, bool editable, bool selected = false, float emphasis = 1f, Color? hue = null)
         {
+            var frame = hue ?? UiColors.StatusControlled;
             return new Style
                        {
-                           EdgeColor = selected
-                                           ? UiColors.StatusActivated.Fade(emphasis)
-                                           : UiColors.ForegroundFull.Fade(0.4f * emphasis),
+                           EdgeColor = frame.Fade((selected ? 1f : 0.6f) * emphasis),
+                           EdgeThickness = selected ? 3f : 1.5f,
                            HandleColor = UiColors.ForegroundFull.Fade(selected ? emphasis : 0.6f * emphasis),
                            HandleOutlineColor = selected
-                                                    ? UiColors.StatusActivated.Fade(emphasis)
+                                                    ? frame.Fade(emphasis)
                                                     : new Color(0f, 0f, 0f, 0f),
                            LabelColor = selected
                                             ? UiColors.ForegroundFull.Fade(emphasis)
                                             : UiColors.Text.Fade(0.7f * emphasis),
                            LabelBackgroundColor = selected
-                                                      ? UiColors.StatusActivated.Fade(emphasis)
+                                                      ? frame.Fade(emphasis)
                                                       : UiColors.BackgroundFull.Fade(0.6f * emphasis),
                            CheckerColor = UiColors.ForegroundFull.Fade(0.06f * emphasis),
                            DrawChecker = true,
@@ -90,7 +93,7 @@ internal static class CornerPinHandles
         if (style.DrawChecker)
             DrawChecker(dl, corners, projection, style.CheckerColor);
 
-        var edgeThickness = 1.5f * T3Ui.UiScaleFactor;
+        var edgeThickness = (style.EdgeThickness > 0 ? style.EdgeThickness : 1.5f) * T3Ui.UiScaleFactor;
         for (var i = 0; i < 4; i++)
             dl.AddLine(screen[i], screen[(i + 1) % 4], style.EdgeColor, edgeThickness);
 
@@ -106,10 +109,10 @@ internal static class CornerPinHandles
             var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Circle, style.Editable);
             handleStyle.OutlineColor = style.HandleOutlineColor;
 
-            // A selected corner reads as part of the active set: status-colored fill, bright rim, a touch larger.
+            // A selected corner reads as part of the active set: filled in the frame's hue, bright rim, a touch larger.
             if ((selectedCornersMask & (1 << i)) != 0)
             {
-                handleStyle.Color = UiColors.StatusActivated;
+                handleStyle.Color = style.EdgeColor;
                 handleStyle.OutlineColor = UiColors.ForegroundFull;
                 handleStyle.Radius += 1;
             }

@@ -32,7 +32,8 @@ internal sealed partial class SetupOutputView
             return;
 
         var subject = FindStraightenSubject(setup, imageId, selection);
-        DrawReferenceHeader(image, subject);
+        if (!DeferHeader(HeaderKinds.Reference, imageId: imageId, subjectId: subject?.Id ?? Guid.Empty))
+            DrawReferenceHeader(image, subject);
 
         var canvasTop = ImGui.GetCursorScreenPos();
         _boardCanvas.UpdateCanvas(out _);
@@ -197,6 +198,7 @@ internal sealed partial class SetupOutputView
                 // region at full opacity so the focus reads as the straightened wall.
                 var sMin = _projection.CanvasToScreen(bboxMin);
                 var sMax = _projection.CanvasToScreen(bboxMax);
+
                 dl.AddImage(srv.NativePointer, sMin, sMax, Vector2.Zero, Vector2.One, UiColors.ForegroundFull.Fade(1f - 0.8f * t));
 
                 var rMin = _projection.CanvasToScreen(regionMin);
@@ -226,7 +228,7 @@ internal sealed partial class SetupOutputView
             // Settled: the rectified rect is editable (corners and edges refine the trace through the frozen
             // rectification), and the measuring lines live on it.
             var settled = _referenceProgress >= 1f && _referenceSubjectProgress >= 1f && _spaceBlend >= 1f && t >= 0.999f;
-            if (settled || _referenceEditActive)
+            if (settled || _gesture.Kind == GestureKinds.TraceRefine)
                 DrawStraightEdits(setup, dl, subject!, targetMin, targetMax, selection);
 
             return;
@@ -281,19 +283,19 @@ internal sealed partial class SetupOutputView
             }
 
             ImGui.PushID(surface.Id.GetHashCode());
-            var style = CornerPinHandles.Style.ForSurface(null, editable && (isSelected || imageSelected), isSelected, fade);
+            var style = CornerPinHandles.Style.ForSurface(null, editable && isSelected, isSelected, fade, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
             style.DrawChecker = false;
             style.EdgeColor = PulseColor(SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface).Fade(isSelected ? 1f : 0.7f), pulse).Fade(fade);
 
             var phase = CornerPinHandles.Draw(binding.Quad, _projection, style, out _);
             if (phase == CanvasPointHandle.DragPhase.Started)
             {
-                _boardGestureOldJson = setup.ToJsonString();
+                BeginGesture(setup, GestureKinds.TraceCorner, "Trace surface", surface.Id);
                 selection?.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
             }
             else if (phase == CanvasPointHandle.DragPhase.Completed)
             {
-                CommitBoardGesture(setup, "Trace surface");
+                EndGesture(setup);
             }
 
             ImGui.PopID();
@@ -465,11 +467,12 @@ internal sealed partial class SetupOutputView
         var binding = subject.Reference!;
         var rect = RectCorners(targetMin, targetMax);
         Array.Copy(rect, _referenceRectQuad, 4);
-        if (!_referenceEditActive && !Homography.TryComputeQuadToQuad(rect, binding.Quad, out _referenceEditToPhoto))
+        var refining = _gesture.Is(GestureKinds.TraceRefine, subject.Id);
+        if (!refining && !Homography.TryComputeQuadToQuad(rect, binding.Quad, out _referenceEditToPhoto))
             return;
 
         ImGui.PushID("straightEdit");
-        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true);
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
         style.DrawChecker = false;
         style.EdgeColor = SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface);
         var cornerPhase = CornerPinHandles.Draw(_referenceRectQuad, _projection, style, out var draggedCorner);
@@ -496,13 +499,13 @@ internal sealed partial class SetupOutputView
         var phase = cornerPhase != CanvasPointHandle.DragPhase.None ? cornerPhase : edgePhase;
         if (phase == CanvasPointHandle.DragPhase.Started)
         {
-            _referenceEditActive = true;
-            _boardGestureOldJson = setup.ToJsonString();
+            BeginGesture(setup, GestureKinds.TraceRefine, "Refine trace", subject.Id);
+            refining = true;
         }
 
         // Only a live phase carries a handle position; on the release frame the handles already sit back on the
         // rect's corners, so applying then would undo the whole drag.
-        if (phase is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging && _referenceEditActive)
+        if (phase is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging && refining)
         {
             // The handle's position through the press-time rectification is where that corner lies in the photo.
             if (draggedCorner >= 0)
@@ -518,12 +521,12 @@ internal sealed partial class SetupOutputView
 
         if (phase == CanvasPointHandle.DragPhase.Completed)
         {
-            _referenceEditActive = false;
-            CommitBoardGesture(setup, "Refine trace");
+            EndGesture(setup);
+            refining = false;
         }
 
         // Measuring lines: surface metres ↔ the rectified rect, a plain scale (Y up in metres, down in px).
-        if (!_referenceEditActive
+        if (!refining
             && Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(subject), rect, out var surfaceToRect)
             && Homography.TryComputeQuadToQuad(rect, SurfaceGeometry.LocalRect(subject), out var rectToSurface))
         {
@@ -568,12 +571,12 @@ internal sealed partial class SetupOutputView
             ImGui.PopID();
 
             if (phase == CanvasPointHandle.DragPhase.Started)
-                _boardGestureOldJson = setup.ToJsonString();
+                BeginGesture(setup, GestureKinds.ReferencePoint, "Move reference point", subject.Id);
 
             if (phase is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging)
                 point.P1 = point.P2 = rectToSurface.TransformPoint(px);
             else if (phase == CanvasPointHandle.DragPhase.Completed)
-                CommitBoardGesture(setup, "Move reference point");
+                EndGesture(setup);
 
             var screen = _projection.CanvasToScreen(px);
             CanvasDraw.Crosshair(dl, screen, color.Fade(0.8f), 9f, 1f);
@@ -605,7 +608,8 @@ internal sealed partial class SetupOutputView
         ImGui.PushFont(Fonts.FontSmall);
         var size = ImGui.CalcTextSize(label);
         ImGui.PopFont();
-        var min = screen + new Vector2(10, -10) * scale - new Vector2(0, size.Y);
+        // Straight above the mark, centred — an offset to the side reads as belonging to something else.
+        var min = screen + new Vector2(-size.X * 0.5f - 3 * scale, -10 * scale - size.Y);
         var max = min + size + new Vector2(6, 2) * scale;
         dl.AddRectFilled(min, max, UiColors.BackgroundFull.Fade(0.7f), 3 * scale);
         dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(3, 1) * scale, color, label);
@@ -786,7 +790,6 @@ internal sealed partial class SetupOutputView
     private float _referenceProgress = 1f;
 
     // A live handle drag on the rectified rect: the press-time rect→photo mapping, and the handle positions.
-    private bool _referenceEditActive;
     private Homography _referenceEditToPhoto;
     private readonly Vector2[] _referenceRectQuad = new Vector2[4];
 

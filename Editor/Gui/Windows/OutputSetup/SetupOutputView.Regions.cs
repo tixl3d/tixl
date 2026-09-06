@@ -14,7 +14,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// the region lives in its parent's metre space (Y up, origin at the parent's anchor), and a
 /// <see cref="RegionProjection"/> carries that space to the screen. Corners resize about the opposite corner,
 /// edges crop, the label moves the whole rectangle; everything snaps to the parent's and the siblings' edges
-/// and centres, and every gesture is one <see cref="RunResizeDrag"/> step. The projector view keeps its own
+/// and centres, and every gesture is one <see cref="RunGesture"/> step. The projector view keeps its own
 /// region editor, whose handles ride the corner pin.
 /// </summary>
 internal sealed partial class SetupOutputView
@@ -101,8 +101,8 @@ internal sealed partial class SetupOutputView
         }
 
         // The body is the move grip; the handles sit on its outline and take precedence, except while a move is live.
-        var moveActive = _labelMoveSurfaceId == child.Id;
-        var style = CornerPinHandles.Style.ForSurface(null, editable: !moveActive, selected: true);
+        var moveActive = _gesture.Is(GestureKinds.RegionMove, child.Id);
+        var style = CornerPinHandles.Style.ForSurface(null, editable: !moveActive, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
         style.DrawChecker = false;
         style.EdgeColor = color;
 
@@ -123,10 +123,10 @@ internal sealed partial class SetupOutputView
         if (draggedCorner >= 0 && cornerPhase != CanvasPointHandle.DragPhase.None)
         {
             var dragged = _regionQuad[draggedCorner];
-            HandleChildEdit(cornerPhase, parent, child, () =>
+            RunGesture(cornerPhase, setup, GestureKinds.SurfaceResize, "Edit region", child, () =>
                                                         {
                                                             // Re-based on the pre-drag rectangle each frame; the opposite corner stays.
-                                                            _resizeOldState!.Value.Restore(child);
+                                                            _gesture.Snapshot!.Value.Restore(child);
                                                             SurfaceGeometry.ChildBounds(child, out var oldMin, out var oldMax);
                                                             var fixedCorner = draggedCorner switch
                                                                                   {
@@ -155,9 +155,9 @@ internal sealed partial class SetupOutputView
         }
         else if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhase.None)
         {
-            HandleChildEdit(edgePhase, parent, child, () =>
+            RunGesture(edgePhase, setup, GestureKinds.SurfaceResize, "Edit region", child, () =>
                                                       {
-                                                          _resizeOldState!.Value.Restore(child);
+                                                          _gesture.Snapshot!.Value.Restore(child);
                                                           SurfaceGeometry.ChildBounds(child, out var newMin, out var newMax);
                                                           var pos = edgePos;
                                                           var horizontal = edge is 1 or 3;
@@ -209,11 +209,11 @@ internal sealed partial class SetupOutputView
             return;
 
         var phase = CanvasPointHandle.DragPhase.None;
-        if (_labelMoveSurfaceId == child.Id)
+        if (_gesture.Is(GestureKinds.RegionMove, child.Id))
         {
             phase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhase.Dragging : CanvasPointHandle.DragPhase.Completed;
         }
-        else if (_labelMoveSurfaceId == Guid.Empty && _labelGrabScreen != null
+        else if (!_gesture.IsLive && _labelGrabScreen != null
                  && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
                  && (ImGui.GetMousePos() - _labelGrabScreen.Value).Length() > UserSettings.Config.ClickThreshold
                  // Anywhere on its body — but only where the region itself is what the press picked.
@@ -226,15 +226,15 @@ internal sealed partial class SetupOutputView
         if (phase == CanvasPointHandle.DragPhase.None)
             return;
 
-        RunResizeDrag(phase, child,
+        RunGesture(phase, setup, GestureKinds.RegionMove, "Move region", child,
                       onDragging: () =>
                                   {
-                                      if (_childMoveStart == null)
+                                      if (_gesture.Snapshot is not { } start)
                                           return;
 
-                                      var (origin, startMin, startMax) = _childMoveStart.Value;
-                                      var size = startMax - startMin;
-                                      var delta = projection.ScreenToCanvas(ImGui.GetMousePos()) - origin;
+                                      var startMin = start.LocalPosition;
+                                      var size = start.Size;
+                                      var delta = projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
                                       var newMin = startMin + delta;
                                       if (snapping)
                                       {
@@ -248,20 +248,10 @@ internal sealed partial class SetupOutputView
                                               newMin.Y += offsetY;
                                       }
 
-                                      _resizeOldState!.Value.Restore(child);
+                                      _gesture.Snapshot!.Value.Restore(child);
                                       SurfaceGeometry.SetChildBounds(child, newMin, newMin + size);
                                   },
-                      onStarted: () =>
-                                 {
-                                     SurfaceGeometry.ChildBounds(child, out var startMin, out var startMax);
-                                     _labelMoveSurfaceId = child.Id;
-                                     _childMoveStart = (projection.ScreenToCanvas(ImGui.GetMousePos()), startMin, startMax);
-                                 },
-                      onCompleted: () =>
-                                   {
-                                       _labelMoveSurfaceId = Guid.Empty;
-                                       _childMoveStart = null;
-                                   });
+                      onStarted: () => _gesture.GrabPoint = projection.ScreenToCanvas(ImGui.GetMousePos()));
     }
 
     /// <summary>A constant screen distance (7 px) in the parent's units, per axis.</summary>

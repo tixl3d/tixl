@@ -35,7 +35,9 @@ internal sealed partial class SetupOutputView
 
         var source = setup.FindSourceByChildId(contentChildId);
         OpenedReferenceImageId = Guid.Empty;
-        DrawBoardReturnHeader(SetupActions.TryGetContentName(contentChildId) ?? "Content");
+        var title = SetupActions.TryGetContentName(contentChildId) ?? "Content";
+        if (!DeferHeader(HeaderKinds.Return, title: title))
+            DrawBoardReturnHeader(title);
 
         var canvasTop = ImGui.GetCursorScreenPos();
         _boardCanvas.UpdateCanvas(out _);
@@ -61,7 +63,7 @@ internal sealed partial class SetupOutputView
         }
 
         var textureSize = new Vector2(Math.Max(1, content!.Description.Width), Math.Max(1, content.Description.Height));
-        FitToArea(textureSize, EditMode.Content, contentChildId);
+        FitToArea(textureSize, EditMode.Board, contentChildId);
 
         var min = _projection.CanvasToScreen(Vector2.Zero);
         var max = _projection.CanvasToScreen(textureSize);
@@ -97,14 +99,15 @@ internal sealed partial class SetupOutputView
 
             // Hovered from the sidebar: pulse the rect so its row and its frame read as the same thing.
             var slicePulse = FrameStats.GetPulse(slice.Id);
+            var sliceHue = SetupColors.ForKind(SetupEntitySelection.EntityKind.Slice);
             if (slicePulse > 0.001f)
-                dl.AddRectFilled(sliceMin, sliceMax, UiColors.StatusActivated.Fade(slicePulse));
+                dl.AddRectFilled(sliceMin, sliceMax, sliceHue.Fade(slicePulse * 0.2f));
 
             // A multi-selected (non-primary) slice reads selected, like the primary's frame — only editing
             // stays with the primary.
             var isSelected = selection != null && selection.IsSelected(SetupEntitySelection.EntityKind.Slice, slice.Id);
             dl.AddRect(sliceMin, sliceMax,
-                       isSelected ? UiColors.StatusActivated : UiColors.ForegroundFull.Fade(0.4f),
+                       isSelected ? sliceHue : PulseColor(sliceHue.Fade(0.6f), slicePulse),
                        0, ImDrawFlags.None, (isSelected ? 2f : 1f) * T3Ui.UiScaleFactor);
 
             Span<Vector2> corners =
@@ -112,7 +115,7 @@ internal sealed partial class SetupOutputView
             var sliceName = SetupActions.SliceLabel(setup, slice);
             CornerPinHandles.DrawCenteredLabel(dl, corners, sliceName,
                                                isSelected ? UiColors.ForegroundFull : UiColors.Text.Fade(0.7f),
-                                               isSelected ? UiColors.StatusActivated.Fade(0.6f) : UiColors.BackgroundFull.Fade(0.6f));
+                                               isSelected ? sliceHue.Fade(0.6f) : UiColors.BackgroundFull.Fade(0.6f));
             _picker.AddTarget(SetupEntitySelection.EntityKind.Slice, slice.Id, sliceMin, sliceMax);
 
             // Grab-to-move without the select-first click: pressing a slice's label selects it and starts its
@@ -145,17 +148,6 @@ internal sealed partial class SetupOutputView
     /// bounds. Edits go straight to the send's SourceRect. No perspective is involved here: the source is
     /// shown flat, which is exactly why slices are edited at this end and not on the wall.
     /// </summary>
-    private void DrawSliceEditor(Setup setup, ImDrawListPtr dl, Guid targetId, Vector2 viewMin, float toContent)
-    {
-        if (_sliceRectInView == null || toContent < 0.999f || targetId == Guid.Empty)
-            return;
-
-        if (!OutputManager.TryGetSurfaceSlice(targetId, out var slice, out _, out var uv) || slice == null)
-            return;
-
-        EditSlice(setup, dl, slice, uv, _sliceSourceOrigin - viewMin, _sliceSourceSize, targetId, dimOutside: true);
-    }
-
     /// <summary>
     /// The slice as an editable rect on its source, in plain canvas space: edges reshape, corners scale with
     /// the aspect held, the middle moves it, everything snapping to the source's borders and midlines. Shared
@@ -181,7 +173,7 @@ internal sealed partial class SetupOutputView
 
         // No tint inside: the crop now reads from the dimmed surround, and colouring the content would work
         // against judging it.
-        dl.AddRect(min, max, UiColors.StatusActivated, 0, ImDrawFlags.None, 2 * T3Ui.UiScaleFactor);
+        dl.AddRect(min, max, SetupColors.ForKind(SetupEntitySelection.EntityKind.Slice), 0, ImDrawFlags.None, 2 * T3Ui.UiScaleFactor);
 
 
         // Canvas space, like every other handle — the projection subtracts the framing origin itself.
@@ -193,7 +185,7 @@ internal sealed partial class SetupOutputView
         _sliceQuadBuffer[3] = new Vector2(sliceMin.X, sliceMax.Y);
 
         ImGui.PushID("slice");
-        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true);
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
         var edgePhase = CornerPinHandles.DrawEdgeHandles(_sliceQuadBuffer, _projection, style, out var edge, out var edgePos);
 
         // The slice's name label doubles as its move handle, the same as a surface — so there's no separate
@@ -251,7 +243,7 @@ internal sealed partial class SetupOutputView
         {
             // Capture the pre-drag rect before this frame's apply; the commit runs after it (below).
             if (edgePhase == CanvasPointHandle.DragPhase.Started)
-                RunSliceDrag(edgePhase, slice);
+                RunSliceDrag(edgePhase, setup, slice);
 
             var inSource = (edgePos - sourceOrigin) / sourceSize;
             var next = uv;
@@ -288,7 +280,7 @@ internal sealed partial class SetupOutputView
             ApplySliceRect(slice, new Vector4(Math.Clamp(next.X, 0, 1), Math.Clamp(next.Y, 0, 1),
                                            Math.Clamp(next.Z, 0, 1), Math.Clamp(next.W, 0, 1)));
             if (edgePhase != CanvasPointHandle.DragPhase.Started)
-                RunSliceDrag(edgePhase, slice);
+                RunSliceDrag(edgePhase, setup, slice);
 
             return;
         }
@@ -323,7 +315,7 @@ internal sealed partial class SetupOutputView
         {
             // Capture the pre-drag rect before this frame's apply; the commit runs after it (below).
             if (cornerPhase == CanvasPointHandle.DragPhase.Started)
-                RunSliceDrag(cornerPhase, slice);
+                RunSliceDrag(cornerPhase, setup, slice);
 
             var dragged = (cornerPos - sourceOrigin) / sourceSize;
             var currentWidth = MathF.Max(uv.Z - uv.X, 0.0001f);
@@ -350,7 +342,7 @@ internal sealed partial class SetupOutputView
             ApplySliceRect(slice, new Vector4(Math.Clamp(cornerMin.X, 0, 1), Math.Clamp(cornerMin.Y, 0, 1),
                                            Math.Clamp(cornerMax.X, 0, 1), Math.Clamp(cornerMax.Y, 0, 1)));
             if (cornerPhase != CanvasPointHandle.DragPhase.Started)
-                RunSliceDrag(cornerPhase, slice);
+                RunSliceDrag(cornerPhase, setup, slice);
 
             return;
         }
@@ -361,7 +353,7 @@ internal sealed partial class SetupOutputView
             DrawSliceMenu(setup, targetId, slice, uv, min, max);
 
         var cursorUv = (centreInCanvas - sourceOrigin) / sourceSize;
-        RunSliceDrag(movePhase, slice);
+        RunSliceDrag(movePhase, setup, slice);
         switch (movePhase)
         {
             case CanvasPointHandle.DragPhase.Started:
@@ -458,12 +450,13 @@ internal sealed partial class SetupOutputView
     private void MatchSliceToTargetAspect(Setup setup, Guid targetId, Slice slice, Vector4 uv)
     {
         var surface = setup.FindSurface(targetId);
-        if (surface == null || _sliceSourceTexture is not { IsDisposed: false })
+        if (surface == null || !OutputManager.TryGetSurfaceSlice(targetId, out _, out var sourceTexture, out _)
+            || sourceTexture is not { IsDisposed: false })
             return;
 
         var surfaceAspect = surface.SizeInMeters.X / MathF.Max(surface.SizeInMeters.Y, 0.0001f);
-        var textureWidth = MathF.Max(_sliceSourceTexture.Description.Width, 1);
-        var textureHeight = MathF.Max(_sliceSourceTexture.Description.Height, 1);
+        var textureWidth = MathF.Max(sourceTexture.Description.Width, 1);
+        var textureHeight = MathF.Max(sourceTexture.Description.Height, 1);
 
         // Want (width·texW)/(height·texH) == surfaceAspect; keep the width and solve for the height.
         var width = MathF.Max(uv.Z - uv.X, MinSliceSize);
@@ -489,31 +482,18 @@ internal sealed partial class SetupOutputView
         slice.UvRect = rect;
     }
 
-    /// <summary>
-    /// The one drag lifecycle for slice-rect edits (edge crop, corner scale, label move): snapshot the rect
-    /// on Started, commit a single undoable command + save on Completed — the same skeleton surface edits
-    /// run through (<see cref="RunResizeDrag"/>).
-    /// </summary>
-    private void RunSliceDrag(CanvasPointHandle.DragPhase phase, Slice slice)
+    /// <summary>The one drag lifecycle for slice-rect edits (edge crop, corner scale, label move): a gesture like every other.</summary>
+    private void RunSliceDrag(CanvasPointHandle.DragPhase phase, Setup setup, Slice slice)
     {
         switch (phase)
         {
             case CanvasPointHandle.DragPhase.Started:
-                _sliceDragOldRect = slice.UvRect;
+                BeginGesture(setup, GestureKinds.Slice, "Edit slice", slice.Id);
                 break;
 
             case CanvasPointHandle.DragPhase.Completed:
-                if (_sliceDragOldRect != null)
-                {
-                    if (_sliceDragOldRect.Value != slice.UvRect)
-                    {
-                        // Value already applied live during the drag.
-                        UndoRedoStack.Add(new ChangeSliceRectCommand(slice.Id, _sliceDragOldRect.Value, slice.UvRect));
-                        OutputSetupHandling.SaveActive();
-                    }
-
-                    _sliceDragOldRect = null;
-                }
+                if (_gesture.Is(GestureKinds.Slice, slice.Id))
+                    EndGesture(setup);
 
                 break;
         }
@@ -571,7 +551,4 @@ internal sealed partial class SetupOutputView
     // The source's own borders and centre, in UV — what a slice snaps against.
     private static readonly List<float> _sliceSnapXs = [];
     private static readonly List<float> _sliceSnapYs = [];
-
-    // Pre-drag rect while any slice edit is live — non-null = a slice drag is active.
-    private System.Numerics.Vector4? _sliceDragOldRect;
 }

@@ -52,8 +52,9 @@ internal static class MetricGridRaster
             majorSpacing = decade * 100;
         }
 
-        var minorColor = UiColors.ForegroundFull.Fade(0.10f * fade * emphasis);
-        var majorColor = UiColors.ForegroundFull.Fade(0.16f * emphasis);
+        // Darker than the Board, not lighter: the grid recedes behind photos and content instead of competing.
+        var minorColor = UiColors.BackgroundFull.Fade(0.45f * fade * emphasis);
+        var majorColor = UiColors.BackgroundFull.Fade(0.7f * emphasis);
         var labelColor = UiColors.TextMuted.Fade(0.6f * emphasis);
 
         DrawLines(dl, projection, boardMin, boardMax, screenMin, screenMax, minorSpacing, majorSpacing, minorColor, false, labelColor, scale);
@@ -62,8 +63,9 @@ internal static class MetricGridRaster
         // The floor line: what every physical entity stands on.
         if (boardMin.Y <= 0 && boardMax.Y >= 0)
         {
-            var y = projection.CanvasToScreen(Vector2.Zero).Y;
-            dl.AddLine(new Vector2(screenMin.X, y), new Vector2(screenMax.X, y), UiColors.ForegroundFull.Fade(0.35f * emphasis), 1.5f * scale);
+            var y = Snap(projection.CanvasToScreen(Vector2.Zero).Y);
+            dl.AddLine(new Vector2(screenMin.X, y), new Vector2(screenMax.X, y),
+                       SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface).Fade(0.5f * emphasis), 1.5f * scale);
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(screenMin.X + 6 * scale, y - Fonts.FontSmall.FontSize - 2 * scale),
                        labelColor, "Floor (0 m)");
         }
@@ -86,7 +88,7 @@ internal static class MetricGridRaster
             if (skipMultipleOf > 0 && IsMultiple(x, skipMultipleOf))
                 continue;
 
-            var sx = projection.CanvasToScreen(new Vector2(x, 0)).X;
+            var sx = Snap(projection.CanvasToScreen(new Vector2(x, 0)).X);
             dl.AddLine(new Vector2(sx, screenMin.Y), new Vector2(sx, screenMax.Y), color, 1 * scale);
             if (labeled)
                 dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(sx + 3 * scale, screenMax.Y - Fonts.FontSmall.FontSize - 2 * scale), labelColor, MetreLabel(x));
@@ -101,12 +103,15 @@ internal static class MetricGridRaster
             if (MathF.Abs(y) < spacing * 0.01f)
                 continue; // the floor line is drawn on its own
 
-            var sy = projection.CanvasToScreen(new Vector2(0, y)).Y;
+            var sy = Snap(projection.CanvasToScreen(new Vector2(0, y)).Y);
             dl.AddLine(new Vector2(screenMin.X, sy), new Vector2(screenMax.X, sy), color, 1 * scale);
             if (labeled)
                 dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(screenMin.X + 3 * scale, sy - Fonts.FontSmall.FontSize - 1 * scale), labelColor, MetreLabel(y));
         }
     }
+
+    /// <summary>Pixel centre, so a one-pixel line lands on one pixel instead of blurring over two.</summary>
+    private static float Snap(float screen) => MathF.Floor(screen) + 0.5f;
 
     private static bool IsMultiple(float value, float spacing)
     {

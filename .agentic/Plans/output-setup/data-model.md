@@ -210,7 +210,7 @@ fed by one source slice. One concept covers the whole surface-less ladder:
   patches unfed. **Slice 2 landed (2026-09-05):** patch quads edit on the output canvas (round corner
   handles = free keystone; square edge handles on the selected patch = crop along the normal, Ctrl =
   shear; label = whole move; everything snaps to the canvas edges/centre and the other patches' bounds,
-  Shift suspends), one `ChangePatchQuadCommand` per gesture; "Split into 2×2 / 4×4" on the output menu
+  Shift suspends), one undo step (setup snapshot) per gesture; "Split into 2×2 / 4×4" on the output menu
   (replaces the patches with a grid fed like the first one); "Use on Surface" on a patch (quad moves
   verbatim onto a new surface's mapping, patch removed). Patch corners are not in the sub-element
   selection plane yet (no fence, no group drag).

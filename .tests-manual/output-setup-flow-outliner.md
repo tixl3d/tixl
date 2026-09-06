@@ -11,8 +11,8 @@ prerequisites:
 ---
 
 Covers Phase B.2–B.4 of the UI restructuring: the left setup panel is replaced by the
-**Flow Outliner**, a strip under the output canvas with columns along the content flow, a
-shelf for the kinds outside it, and connections drawn between the items along the routing.
+**Flow Outliner**, a strip under the output canvas with columns along the content flow and
+connections drawn between the items along the routing. Its header row is the window's toolbar.
 
 ## Step: The strip opens with the send op
 
@@ -21,9 +21,10 @@ Click the SendToOutput op in the graph window.
 
 **Expected:**
 - A strip appears at the **bottom** of the output window, under the canvas, with a header
-  item (setup name with a chevron, a muted breadcrumb, a collapse chevron at the right) and
-  five columns headed **CONTENT · SURFACES · OUTPUTS · LOCAL BINDINGS** and a narrower shelf
-  headed **REFERENCE IMAGES** with **PROPS** below it.
+  row (a dotted grip, the setup name with a chevron in an outlined control, the canvas'
+  toolbar with **Board · Straight · Output**, a collapse chevron at the right) and four
+  columns headed **CONTENT · SURFACES · OUTPUTS · LOCAL BINDINGS**. The output window's own
+  toolbar is gone while the strip shows.
 - The CONTENT column lists the "SendToOutput" item with "Slice 1" indented under it; SURFACES
   lists "Surface 1"; OUTPUTS lists "P1" with "Patch 1" indented under it; LOCAL BINDINGS one
   dimmed item per display of this machine, labelled "Local / Display N" with its resolution.
@@ -33,18 +34,19 @@ Click the SendToOutput op in the graph window.
 
 **Action:**
 1. Drag the strip's top edge upward by about 100 px, then downward past the middle of the
-   window.
+   window; then drag the dotted grip at the header's left the same way.
 2. Click the chevron at the right end of the header, then click it again.
-3. Open the toolbar's breadcrumb menu and untick **Show Flow Outliner**; then click the
-   list icon at the left of the toolbar.
+3. Open the setup-name menu and untick **Show Flow Outliner**; then click the list icon at
+   the left of the toolbar that reappears.
 
 **Expected:**
 - After 1: the strip grows and the canvas shrinks accordingly; the height stops at a
   minimum (header plus a few items) and a maximum (about two thirds of a 900 px window).
+  The grip resizes the same way, and hovering it lights the strip's top edge.
 - After 2: the strip collapses to its header row and the canvas takes the space; the
   second click restores the previous height.
-- After 3: the strip disappears entirely and the list icon appears in the toolbar; clicking
-  it brings the strip back at its previous height.
+- After 3: the strip disappears entirely, the window's own toolbar returns with the list
+  icon; clicking it brings the strip back at its previous height and the toolbar goes again.
 
 ## Step: Items behave as the panel items did
 
@@ -59,9 +61,8 @@ Click the SendToOutput op in the graph window.
   opaque and thicker. With "SendToOutput" hovered nothing changes on the connections (they
   attach to its slice, not to it). Items carry no trailing icons or routing text anymore; only
   a plug's resolution and an output's "unbound" remain as status.
-- After 2: "Patch 1" is selected, the Parameter window shows the Patch card, and the header
-  breadcrumb reads "Slice 1 → Patch 1"; the context menu offers Use on Surface, Duplicate,
-  Rename, Delete.
+- After 2: "Patch 1" is selected and the Parameter window shows the Patch card; the context
+  menu offers Use on Surface, Duplicate, Rename, Delete.
 - After 3: a "Patch 2" item appears under "P1".
 
 ## Step: Connections follow the routing
@@ -84,6 +85,16 @@ Click the SendToOutput op in the graph window.
   it ends at "Patch 1" again.
 - After 4: four curves fan out from "Slice 1" to "Patch 1" … "Patch 4", one per tile; the
   undo returns to one.
+
+## Step: Pills are always visible
+
+**Action:**
+Look at the strip with nothing selected; hover an item; select it.
+
+**Expected:**
+- Every item is a rounded pill in its kind's hue at rest: a faint fill and a half-opaque
+  outline (content magenta, surfaces green, outputs and plugs gray). Hovering lifts the fill
+  and outline; selecting fills the pill solid. Nothing turns blue.
 
 ## Step: Kind colours and the bind arrows
 

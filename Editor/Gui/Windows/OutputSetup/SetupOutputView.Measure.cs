@@ -59,10 +59,10 @@ internal sealed partial class SetupOutputView
             if (projected)
                 OutputManager.SetAimPoint(carrier.Id, start);
 
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && ActiveSetup.Current is { } draftSetup)
             {
                 // Snapshot before the draft exists, so the whole create-and-drag undoes as one step.
-                _measureDraftOldJson = ActiveSetup.Current?.ToJsonString();
+                BeginGesture(draftSetup, GestureKinds.AnnotationDraft, "Add measuring line", carrier.Id);
                 annotations.Add(new LineAnnotation { P1 = start, P2 = start });
                 _measureDraftIndex = annotations.Count - 1;
             }
@@ -85,18 +85,13 @@ internal sealed partial class SetupOutputView
                 if ((draft.P2 - draft.P1).Length() < 0.001f)
                 {
                     annotations.RemoveAt(_measureDraftIndex);
+                    CancelGesture();
                 }
-                else
+                else if (ActiveSetup.Current is { } setup)
                 {
-                    var setup = ActiveSetup.Current;
-                    if (setup != null && _measureDraftOldJson != null)
-                        UndoRedoStack.Add(new SetupSnapshotCommand("Add measuring line", setup.Id,
-                                                                   _measureDraftOldJson, setup.ToJsonString()));
-
-                    OutputSetupHandling.SaveActive();
+                    EndGesture(setup);
                 }
 
-                _measureDraftOldJson = null;
                 _measureDraftIndex = -1;
                 _measureArmed = false;
             }
@@ -155,8 +150,9 @@ internal sealed partial class SetupOutputView
                 ImGui.PopID();
 
                 // Pre-drag snapshot before this frame's apply, so the whole drag undoes as one step.
-                if (phase1 == CanvasPointHandle.DragPhase.Started || phase2 == CanvasPointHandle.DragPhase.Started)
-                    _annotationDragStart = (i, annotation.P1, annotation.P2);
+                if ((phase1 == CanvasPointHandle.DragPhase.Started || phase2 == CanvasPointHandle.DragPhase.Started)
+                    && ActiveSetup.Current is { } dragSetup)
+                    BeginGesture(dragSetup, GestureKinds.Annotation, "Move measuring line", carrier.Id);
 
                 if (phase1 != CanvasPointHandle.DragPhase.None)
                     annotation.P1 = ToSurface(p1);
@@ -168,16 +164,9 @@ internal sealed partial class SetupOutputView
                     || phase2 is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging)
                     nextDragIndex = i;
 
-                if (phase1 == CanvasPointHandle.DragPhase.Completed || phase2 == CanvasPointHandle.DragPhase.Completed)
-                {
-                    // Value already applied live during the drag.
-                    if (_annotationDragStart is { } dragStart && dragStart.Index == i)
-                        UndoRedoStack.Add(new ChangeAnnotationCommand(carrier.Id, i, dragStart.P1, dragStart.P2,
-                                                                      annotation.P1, annotation.P2));
-
-                    _annotationDragStart = null;
-                    OutputSetupHandling.SaveActive();
-                }
+                if ((phase1 == CanvasPointHandle.DragPhase.Completed || phase2 == CanvasPointHandle.DragPhase.Completed)
+                    && _gesture.Is(GestureKinds.Annotation, carrier.Id) && ActiveSetup.Current is { } doneSetup)
+                    EndGesture(doneSetup); // value already applied live during the drag
             }
 
             // Measuring is a separate act from aligning: a line is a reference line until double-clicking it
@@ -457,8 +446,6 @@ internal sealed partial class SetupOutputView
     private bool _pointArmed; // "+ Point": the next click on the straightened photo places a reference point
     private int _measureDraftIndex = -1;
     private int _measureDragIndex = -1; // endpoint grabbed last frame, so its line can emphasize this frame
-    private (int Index, Vector2 P1, Vector2 P2)? _annotationDragStart; // pre-drag endpoints for the undo step
-    private string? _measureDraftOldJson; // setup snapshot from before the draft line, for its undo step
 
     private const float BlinkRate = 8f;
     private static float _lengthEdit;
