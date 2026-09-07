@@ -24,7 +24,7 @@ AKA: arduino, rs232, uart, com
 | **Separator** (String) | A string used to join the `MessageParts` together. |
 | **SendTrigger** (Boolean) | A trigger to manually send the message. The message is sent when this value changes from 0 to 1. |
 | **SendOnChange** (Boolean) | If enabled, a message is sent automatically whenever the content of `MessageParts` changes. |
-| **AddLineEnding** (Boolean) | If enabled, a carriage return and newline character (<br/>) is appended to the message. This is required by many devices. |
+| **AddLineEnding** (Boolean) | If enabled, a carriage return and newline character (`\r\n`) is appended to the message. This is required by many devices. |
 | **Connect** (Boolean) | Connects or disconnects from the serial port. This is useful to free the port for other applications without deleting the operator. |
 
 ## Outputs

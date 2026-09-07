@@ -1,0 +1,45 @@
+# Line-ending policy: LF everywhere, in the repo and in the working tree.
+# Introduced 2026-08-31 after repeated whole-file merge conflicts caused by CRLF/LF
+# flip-flopping (the old .editorconfig forced crlf while other tools wrote lf).
+# `text=auto` lets git detect text vs binary; `eol=lf` checks text out as LF.
+# Local repos should also set `git config merge.renormalize true` so merges against
+# not-yet-normalized branches don't conflict on endings.
+
+* text=auto eol=lf
+
+# Windows batch files are the one legitimate CRLF exception — cmd.exe has parsing
+# edge cases (goto/labels) with LF-only files. PowerShell is fine with LF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Known binary types — never touch (auto-detection would skip these anyway; explicit for safety)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.dds binary
+*.tga binary
+*.exr binary
+*.hdr binary
+*.ttf binary
+*.otf binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.mp4 binary
+*.webm binary
+*.mov binary
+*.dll binary
+*.exe binary
+*.pdb binary
+*.lib binary
+*.so binary
+*.zip binary
+*.7z binary
+*.obj binary
+*.fbx binary
+*.gltf binary
+*.glb binary
+*.blend binary

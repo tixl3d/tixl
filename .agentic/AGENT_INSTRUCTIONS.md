@@ -125,26 +125,24 @@ Comments live forever. They must earn their place. Anyone reading the file six m
 - **Prefer constructor parameters over public setters** for values needed at construction time. `new Foo(x, y)` is always better than `new Foo { X = x, Y = y }` unless the setter is also used later. Command classes in `Editor/UiModel/Commands/` are a common place this goes wrong — initialize `_newValue` / `_originalValue` in the constructor and keep them `private readonly`.
 - Don't copy an existing class's visibility blindly; if the nearby class exposes something as `public` without a caller, that's a bug to not propagate, not a pattern to match.
 
-## Line Endings (Important for Bulk Edits)
-The repo has **mixed line endings**: most `.cs` files use CRLF, but some are LF.
-There is no `.gitattributes` enforcing a single convention, and `core.autocrlf` is `false`.
+## Line Endings
 
-When writing scripts (Python, sed, etc.) to batch-rewrite many files, this is the
-single biggest source of noisy diffs. Naive read/write loops normalize everything
-to LF and produce a "every line changed" diff that buries the actual logic change.
+**The repo is LF-only** (normalized 2026-08-31). Enforcement is layered:
+- `.gitattributes`: `* text=auto eol=lf` — the index stays LF; text files check out LF.
+- `.editorconfig`: `end_of_line=lf` — editors (Rider) save LF. (It said `crlf` before, which was
+  the root cause of years of CRLF/LF flip-flopping and whole-file merge conflicts.)
+- Local git config: `merge.renormalize=true` — merges against not-yet-normalized branches
+  (e.g. `feat/projection-mapping`) don't conflict on endings. Set it on fresh clones:
+  `git config merge.renormalize true`.
 
-Rules for any bulk-edit script:
-1. **Read in binary mode** (Python: `open(path, 'rb')`) — do NOT use `read_text` or
-   text-mode reads, which silently strip `\r`.
-2. **Detect each file's existing line ending** before writing. If the file contains
-   `\r\n`, write it back with CRLF; otherwise LF. Per-file, not per-repo.
-3. **Write in binary mode** (`open(path, 'wb')`) with the bytes you produced — do
-   NOT pass `newline=''` to a text-mode open and expect it to preserve anything.
-4. After the script runs, sanity-check with `git diff --shortstat` before committing.
-   If the line count is suspiciously high relative to the logic change, you almost
-   certainly munged line endings — fix them in the working tree, then `commit --amend`.
-5. New files you create may use either convention; CRLF is the more common default
-   in this repo, but matching nearby files is preferred.
+Rules:
+1. **Write LF.** New files and bulk-edit scripts emit `\n` only; never CRLF.
+2. Working-tree files that still carry CRLF from before the normalization are harmless —
+   the clean filter hides the difference from git, and they converge to LF as they're saved.
+   Don't run mass rewrites just to flush them.
+3. A literal CR byte that is *content* (not a line ending) breaks normalization for that file —
+   git refuses non-roundtrip conversion. Escape it as text (`\r`) instead of embedding the raw
+   byte (this happened once via an operator Description; see SerialOutput).
 
 ## UI Implementation Guidelines
 
