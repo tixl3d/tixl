@@ -309,7 +309,7 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
         TBN = mul(TBN, (float3x3)ObjectToWorld);
         output.tbnToWorld = TBN;
 
-        output.worldPosition =  mul(float4(pInObject,1), ObjectToWorld);
+        output.worldPosition =  mul(float4(pInObject,1), ObjectToWorld).xyz;
         output.pixelPosition = mul(float4(pInObject,1), ObjectToClipSpace);
 
         float4 posInCamera = mul(float4(pInObject,1), ObjectToCamera);
@@ -456,7 +456,7 @@ float3 pos0 = EffectivePos(sourceSeg, pointCount);
         TBN = mul(TBN, (float3x3)ObjectToWorld);
         output.tbnToWorld = TBN;
 
-        output.worldPosition = mul(float4(pInObject, 1), ObjectToWorld);
+        output.worldPosition = mul(float4(pInObject, 1), ObjectToWorld).xyz;
         output.pixelPosition = mul(float4(pInObject, 1), ObjectToClipSpace);
 
         float4 posInCamera = mul(float4(pInObject, 1), ObjectToCamera);
@@ -478,7 +478,7 @@ float4 psMain(psInput pin) : SV_TARGET
     float occlusion = roughnessMetallicOcclusion.z;
 
     // Outgoing light direction (vector from world-space fragment position to the "eye").
-    float3 eyePosition =  mul( float4(0,0,0,1), CameraToWorld);
+    float3 eyePosition =  mul( float4(0,0,0,1), CameraToWorld).xyz;
     float3 Lo = normalize(eyePosition - pin.worldPosition);
 
     // Get current fragment's normal and transform to world space.
@@ -496,17 +496,17 @@ float4 psMain(psInput pin) : SV_TARGET
     float3 Lr = 2.0 * cosLo * N - Lo;
 
     // Fresnel reflectance at normal incidence (for metals use albedo color).
-    float3 F0 = lerp(Fdielectric, albedo, metalness);
+    float3 F0 = lerp(Fdielectric, albedo.rgb, metalness);
 
     // Direct lighting calculation for analytical lights.
     float3 directLighting = 0.0;
-    for(uint i=0; i < ActiveLightCount; ++i)
+    for(uint i=0; i < (uint)ActiveLightCount; ++i)
     {
     float3 Lvec = Lights[i].position - pin.worldPosition;
     float distance = length(Lvec);
     float3 L = Lvec / max(distance, 1e-4);
     float intensity = Lights[i].intensity / (pow(distance/Lights[i].range, Lights[i].decay) + 1);
-    float3 Lradiance = Lights[i].color * intensity;
+    float3 Lradiance = Lights[i].color.rgb * intensity;
 
     float3 Lh = normalize(L + Lo);
     float cosLi = max(0.0, dot(N, L));
