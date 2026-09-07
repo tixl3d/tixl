@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lib.Utils;
+using LibTessDotNet;
 using T3.Core.Utils;
 
 namespace Lib.geometry;
@@ -17,6 +18,7 @@ namespace Lib.geometry;
 /// cell's bounding radius).
 /// </summary>
 [Guid("70d8f2b5-3a41-4c96-8e2d-b09c6f5e1a73")]
+[ExportDependencies("LibTessDotNet.dll")]
 internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProvider
 {
     [Output(Guid = "48e5a9c1-d637-4b80-92f4-5c1e8b0d7a26")]
@@ -223,13 +225,6 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             _weldEpsilon = source.Extent * WeldToleranceFactor;
             _weldEpsilonSq = _weldEpsilon * _weldEpsilon;
             _weldGridScale = 1f / _weldEpsilon;
-            _chainEpsilonSq = _weldEpsilonSq;
-            _mergeEpsilonSq = _weldEpsilonSq;
-            _hullEpsilonSq = _weldEpsilonSq;
-            // Bridging gaps between cut chains is a repair for numerical drift, so it may span
-            // a few weld tolerances but never a real distance: a plane through a concave shape
-            // cuts several disjoint loops, and joining those to each other destroys the cap.
-            _stitchEpsilonSq = _weldEpsilonSq * StitchToleranceFactor * StitchToleranceFactor;
             // Plane tolerances stay at float-noise scale (welding is three orders coarser and
             // would reclassify real geometry), but they scale with the mesh so a large model
             // does not fall below them. The collector is the looser of the two so that a point
@@ -321,6 +316,26 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                 _planeCapped = new bool[_planes.Count];
             Array.Clear(_planeCapped, 0, _planes.Count);
 
+            // All cuts first: where a cut ends on the edge two planes share, both planes must
+            // subdivide that edge at the same point, or their caps meet in a T-junction.
+            while (_planeSegments.Count < _planes.Count)
+                _planeSegments.Add([]);
+
+            _cellEdgePoints.Clear();
+            for (var planeIndex = 0; planeIndex < _planes.Count; planeIndex++)
+            {
+                var (planeNormal, planeOffset) = _planes[planeIndex];
+                CollectPlaneSegments(planeNormal, planeOffset, surfaceCount);
+                var stored = _planeSegments[planeIndex];
+                stored.Clear();
+                stored.AddRange(_cutSegments);
+                foreach (var (from, to) in _cutSegments)
+                {
+                    AddCellEdgePoint(from.Position);
+                    AddCellEdgePoint(to.Position);
+                }
+            }
+
             for (var planeIndex = 0; planeIndex < _planes.Count; planeIndex++)
             {
                 var (planeNormal, planeOffset) = _planes[planeIndex];
@@ -334,8 +349,9 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                     }
                 }
 
-                CollectPlaneSegments(planeNormal, planeOffset, surfaceCount);
-                BuildCapsForPlane(planeNormal, planeIndex, hullFace, fillInterior, insideTester);
+                _cutSegments.Clear();
+                _cutSegments.AddRange(_planeSegments[planeIndex]);
+                BuildCapsForPlane(planeNormal, planeOffset, planeIndex, hullFace, fillInterior, insideTester);
             }
 
             CloseFacesBorderingCaps(surfaceCount);
@@ -854,234 +870,514 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         }
 
         /// <summary>
-        /// Builds the cap(s) of one plane from the cut segments. Closed chains become caps
-        /// directly; open chains are closed by walking along the plane's convex hull face,
-        /// which is where the cap is bounded by other planes rather than by the surface.
-        /// Without any segment the whole hull face is the cap if it lies inside the solid.
+        /// Builds the cap(s) of one plane: the part of the cell's face on that plane that lies
+        /// inside the solid. The face is tessellated with every cut segment as a constraint (a
+        /// degenerate there-and-back contour; the tessellator never lets an output edge cross
+        /// an input edge), which splits it into regions bounded by cuts and hull edges. Each
+        /// region is kept or dropped by probing the solid just inside the cell at its centroid.
+        /// No chaining, no walking the hull, no assumption about the winding of the cuts: a
+        /// concave cross section that meets the hull in several places yields several regions,
+        /// and a region enclosed by a cut loop becomes a hole by the same probe.
         /// </summary>
-        private void BuildCapsForPlane(Vector3 planeNormal, int planeIndex, Polygon? hullFace, bool fillInterior,
-                                       MeshInsideTester insideTester)
+        private void BuildCapsForPlane(Vector3 planeNormal, float planeOffset, int planeIndex, Polygon? hullFace,
+                                       bool fillInterior, MeshInsideTester insideTester)
         {
-            if (_cutSegments.Count == 0)
-            {
-                if (fillInterior && hullFace != null && insideTester.IsInside(Centroid(hullFace)))
-                {
-                    var cap = _polygonPool.Rent(hullFace);
-                    cap.IsCap = true;
-                    _polygons.Add(cap);
-                    _planeCapped[planeIndex] = true;
-                }
-
+            if (hullFace == null || hullFace.Vertices.Count < 3)
                 return;
-            }
 
-            // A chain shorter than the weld tolerance is a plane grazing the surface at a
-            // vertex: no usable cut, so the face is closed like a cut-less one.
-            if (_cutSegments.Count == 1
-                && Vector3.DistanceSquared(_cutSegments[0].From.Position, _cutSegments[0].To.Position) < _weldEpsilonSq)
-            {
-                _cutSegments.Clear();
-                BuildCapsForPlane(planeNormal, planeIndex, hullFace, fillInterior, insideTester);
+            // A face no surface crosses is solid through or empty; the interior fill decides
+            // whether cells lying entirely inside the solid are wanted at all.
+            if (_cutSegments.Count == 0 && !fillInterior)
                 return;
+
+            _hullLoop.Clear();
+            foreach (var vertex in hullFace.Vertices)
+            {
+                _hullLoop.Add(vertex.Position);
             }
 
-            // Chain segments into runs
-            var segmentCount = _cutSegments.Count;
-            if (_segmentUsed.Length < segmentCount)
-                _segmentUsed = new bool[segmentCount];
-            Array.Clear(_segmentUsed, 0, segmentCount);
+            if (Vector3.Dot(NewellNormal(_hullLoop), planeNormal) < 0)
+                _hullLoop.Reverse();
 
-            _chains.Clear();
-            for (var startIndex = 0; startIndex < segmentCount; startIndex++)
+            // Surface polygons lying in the plane close the cell there themselves. The segment
+            // collector cancels their outline (a neighbour shares every edge, both on the plane),
+            // so those outlines are added as constraints here, and the regions they cover are
+            // recognised and skipped below.
+            _coplanar.Clear();
+            foreach (var polygon in _polygons)
             {
-                if (_segmentUsed[startIndex])
+                if (!polygon.IsCap && LiesInPlane(polygon, planeNormal, planeOffset))
+                    _coplanar.Add(polygon);
+            }
+
+            foreach (var polygon in _kept)
+            {
+                if (LiesInPlane(polygon, planeNormal, planeOffset))
+                    _coplanar.Add(polygon);
+            }
+
+            // Every cut endpoint of any plane that lies on one of this face's edges becomes a
+            // contour vertex, so neighbouring faces split their common edge the same way
+            _hullContour.Clear();
+            for (var i = 0; i < _hullLoop.Count; i++)
+            {
+                var a = _hullLoop[i];
+                var b = _hullLoop[(i + 1) % _hullLoop.Count];
+                _hullContour.Add(new ContourVertex(ToVec3(a)));
+                var ab = b - a;
+                var lengthSq = ab.LengthSquared();
+                if (lengthSq < _weldEpsilonSq)
                     continue;
 
-                var chain = new Chain();
-                var currentIndex = startIndex;
-                for (var guard = 0; guard <= segmentCount; guard++)
+                // Inserted exactly on the edge line: a point a hair off it (a source vertex the
+                // neighbouring plane's cut ends at) would bend the contour into a needle region.
+                // Cut endpoints near a hull edge get the same projection below, so they agree.
+                _edgePoints.Clear();
+                foreach (var point in _cellEdgePoints)
                 {
-                    _segmentUsed[currentIndex] = true;
-                    var segment = _cutSegments[currentIndex];
-                    chain.Points.Add(segment.From.Position);
-                    chain.End = segment.To.Position;
+                    var t = Vector3.Dot(point - a, ab) / lengthSq;
+                    if (t <= 0 || t >= 1)
+                        continue;
 
-                    var nextIndex = -1;
-                    var bestDistanceSq = _chainEpsilonSq;
-                    for (var candidate = 0; candidate < segmentCount; candidate++)
+                    var onEdge = a + ab * t;
+                    if (Vector3.DistanceSquared(point, onEdge) > _weldEpsilonSq)
+                        continue;
+
+                    if (Vector3.DistanceSquared(onEdge, a) < _weldEpsilonSq || Vector3.DistanceSquared(onEdge, b) < _weldEpsilonSq)
+                        continue;
+
+                    _edgePoints.Add((t, onEdge));
+                }
+
+                _edgePoints.Sort((x, y) => x.T.CompareTo(y.T));
+                foreach (var (_, point) in _edgePoints)
+                {
+                    _hullContour.Add(new ContourVertex(ToVec3(point)));
+                }
+            }
+
+            var tess = new Tess();
+            tess.AddContour(_hullContour.ToArray(), ContourOrientation.Original);
+            // A two-vertex contour is discarded as degenerate, so each cut becomes a hair-thin
+            // quad instead: its long edge is honoured by the tessellation, and the quad's own
+            // region is recognised and dropped below. Endpoints on the hull are contour
+            // vertices of the hull (inserted above with identical coordinates), so the quad
+            // seals against it exactly; reaching past the end instead would cross a shallow
+            // hull edge far from the endpoint and leave a stray vertex there.
+            var constraintWidth = _weldEpsilon * 0.1f;
+            _constraints.Clear();
+            foreach (var (from, to) in _cutSegments)
+            {
+                AddConstraint(tess, SnapToHullEdge(from.Position), SnapToHullEdge(to.Position), planeNormal, constraintWidth);
+            }
+
+            foreach (var polygon in _coplanar)
+            {
+                var outline = polygon.Vertices;
+                for (var i = 0; i < outline.Count; i++)
+                {
+                    AddConstraint(tess, outline[i].Position, outline[(i + 1) % outline.Count].Position, planeNormal, constraintWidth);
+                }
+            }
+
+            tess.Tessellate(WindingRule.NonZero, ElementType.Polygons, CapPolygonSize, null, ToVec3(planeNormal));
+
+            // Triangles that touch across an edge that is not a cut belong to the same region
+            // and share one verdict. Probing every triangle on its own fails for the thin ones
+            // hugging a cut: nudged a little into the cell, their centroid is already outside.
+            var vertices = tess.Vertices;
+            var elements = tess.Elements;
+            var triangleCount = tess.ElementCount;
+            _regionOf.Clear();
+            _regionArea.Clear();
+            _regionBest.Clear();
+            _regionBestPerimeter.Clear();
+            for (var t = 0; t < triangleCount; t++)
+            {
+                _regionOf.Add(t);
+                _regionArea.Add(0f);
+                _regionBest.Add(Vector3.Zero);
+                _regionBestPerimeter.Add(0f);
+            }
+
+            _edgeOwner.Clear();
+            for (var t = 0; t < triangleCount; t++)
+            {
+                for (var k = 0; k < 3; k++)
+                {
+                    var a = elements[t * 3 + k];
+                    var b = elements[t * 3 + (k + 1) % 3];
+                    if (a == Tess.Undef || b == Tess.Undef)
+                        continue;
+
+                    var key = a < b ? (a, b) : (b, a);
+                    if (!_edgeOwner.TryGetValue(key, out var other))
                     {
-                        if (_segmentUsed[candidate])
-                            continue;
-
-                        var distanceSq = Vector3.DistanceSquared(segment.To.Position, _cutSegments[candidate].From.Position);
-                        if (distanceSq < bestDistanceSq)
-                        {
-                            bestDistanceSq = distanceSq;
-                            nextIndex = candidate;
-                        }
+                        _edgeOwner[key] = t;
+                        continue;
                     }
 
-                    if (nextIndex < 0)
-                        break;
-
-                    currentIndex = nextIndex;
+                    if (!IsOnCut(vertices[a].Position, vertices[b].Position, constraintWidth * 2))
+                        Union(t, other);
                 }
-
-                // The walk started at an arbitrary segment, so a loop may have been split into
-                // the part after it and the part before it. Extend backwards as well, or the
-                // two halves end up as separate chains that only merge by luck of the order.
-                for (var guard = 0; guard <= segmentCount; guard++)
-                {
-                    var previousIndex = -1;
-                    var bestDistanceSq = _chainEpsilonSq;
-                    for (var candidate = 0; candidate < segmentCount; candidate++)
-                    {
-                        if (_segmentUsed[candidate])
-                            continue;
-
-                        var distanceSq = Vector3.DistanceSquared(_cutSegments[candidate].To.Position, chain.Points[0]);
-                        if (distanceSq < bestDistanceSq)
-                        {
-                            bestDistanceSq = distanceSq;
-                            previousIndex = candidate;
-                        }
-                    }
-
-                    if (previousIndex < 0)
-                        break;
-
-                    _segmentUsed[previousIndex] = true;
-                    chain.Points.Insert(0, _cutSegments[previousIndex].From.Position);
-                }
-
-                chain.IsClosed = Vector3.DistanceSquared(chain.End, chain.Points[0]) < _chainEpsilonSq;
-                _chains.Add(chain);
             }
 
-            // Hull face oriented like the cap (counter-clockwise about the plane normal)
-            var canWalkHull = fillInterior && hullFace != null;
-            if (canWalkHull)
+            // Each region probes the solid at its largest triangle, a little into the cell
+            // (the cell lies on the negative side of its planes)
+            for (var t = 0; t < triangleCount; t++)
             {
-                _hullLoop.Clear();
-                foreach (var vertex in hullFace!.Vertices)
-                {
-                    _hullLoop.Add(vertex.Position);
-                }
-
-                if (Vector3.Dot(NewellNormal(_hullLoop), planeNormal) < 0)
-                    _hullLoop.Reverse();
-            }
-
-            foreach (var chain in _chains)
-            {
-                chain.StartOnHull = canWalkHull && IsOnHullBoundary(chain.Points[0]);
-                chain.EndOnHull = canWalkHull && IsOnHullBoundary(chain.End);
-            }
-
-            // Second pass: stitch broken surface chains. A chain end that is not on the hull
-            // boundary continues on another chain's start that isn't either, so pair those by
-            // proximity - looser than the strict chaining tolerance, but still bounded.
-            for (var i = 0; i < _chains.Count; i++)
-            {
-                var chain = _chains[i];
-                if (chain.Consumed || chain.IsClosed)
+                if (!TryGetTriangle(vertices, elements, t, out var p0, out var p1, out var p2))
                     continue;
 
-                for (var guard = 0; guard < _chains.Count; guard++)
+                var area = Vector3.Cross(p1 - p0, p2 - p0).Length();
+                var region = Find(t);
+                if (area > _regionArea[region])
                 {
-                    if (chain.EndOnHull)
-                        break;
-
-                    Chain? best = null;
-                    var bestDistanceSq = _stitchEpsilonSq;
-                    foreach (var other in _chains)
-                    {
-                        if (other == chain || other.Consumed || other.IsClosed || other.StartOnHull)
-                            continue;
-
-                        var distanceSq = Vector3.DistanceSquared(chain.End, other.Points[0]);
-                        if (distanceSq < bestDistanceSq)
-                        {
-                            bestDistanceSq = distanceSq;
-                            best = other;
-                        }
-                    }
-
-                    if (best == null)
-                        break;
-
-                    chain.Points.AddRange(best.Points);
-                    chain.End = best.End;
-                    chain.EndOnHull = best.EndOnHull;
-                    best.Consumed = true;
-                    best.Points.Clear();
+                    _regionArea[region] = area;
+                    _regionBest[region] = (p0 + p1 + p2) / 3f;
+                    _regionBestPerimeter[region] = Vector3.Distance(p0, p1) + Vector3.Distance(p1, p2) + Vector3.Distance(p2, p0);
                 }
-
-                chain.IsClosed = Vector3.DistanceSquared(chain.End, chain.Points[0]) < _mergeEpsilonSq;
             }
 
-            foreach (var chain in _chains)
+            var probeOffset = planeNormal * (_weldEpsilon * 2);
+            PlaneBasis(planeNormal, out var u, out var v);
+            _regionInside.Clear();
+            for (var t = 0; t < triangleCount; t++)
             {
-                if (chain.Consumed)
+                if (!TryGetTriangle(vertices, elements, t, out var p0, out var p1, out var p2))
                     continue;
 
-                chain.Consumed = true;
-                var cap = _polygonPool.Rent();
-                cap.IsCap = true;
-                cap.PlaneIndex = planeIndex;
-                AppendChain(cap, chain, planeNormal);
+                // Cut endpoints on one line (a plane meeting a flat face along it) give the
+                // tessellator needle triangles with garbage normals; their height is float noise.
+                // Real thin cap triangles are far taller than the constraint width.
+                var normal = Vector3.Cross(p1 - p0, p2 - p0);
+                var perimeter = Vector3.Distance(p0, p1) + Vector3.Distance(p1, p2) + Vector3.Distance(p2, p0);
+                if (normal.Length() < perimeter * constraintWidth || IsInsideConstraintQuad(p0, p1, p2, constraintWidth * 2))
+                    continue;
 
-                var closed = chain.IsClosed;
-                if (!closed && canWalkHull && chain.EndOnHull)
+                var region = Find(t);
+                if (!_regionInside.TryGetValue(region, out var inside))
                 {
-                    _walkNormal = planeNormal;
-                    // Walk the hull boundary from this chain's end to the next chain start,
-                    // merging chains until the loop returns to where it began.
-                    var current = chain;
-                    for (var guard = 0; guard < _chains.Count + 1; guard++)
+                    // A region whose largest triangle is thinner than the weld tolerance is a
+                    // sliver between a hull corner and the surface: its probe lands inside the
+                    // solid by a hair and would claim a face that welding then folds onto the
+                    // surface. Thin triangles inside real regions are unaffected.
+                    var probe = _regionBest[region];
+                    inside = _regionArea[region] >= _regionBestPerimeter[region] * _weldEpsilon * 0.5f
+                             && !IsCoveredByCoplanar(probe, u, v)
+                             && insideTester.IsInside(probe - probeOffset);
+                    _regionInside[region] = inside;
+                }
+
+                if (!inside)
+                    continue;
+
+                if (!_regionTriangles.TryGetValue(region, out var list))
+                {
+                    list = [];
+                    _regionTriangles[region] = list;
+                }
+
+                list.Add(t);
+            }
+
+            // A region is one planar face: emit it as a single polygon so downstream ops
+            // that work per face (bevel, chunk pivots) see the cap the way the old builder
+            // made it, not as a fan of triangles. Regions with holes or pinched outlines
+            // fall back to their triangles.
+            foreach (var (_, triangles) in _regionTriangles)
+            {
+                if (!TryEmitRegionPolygon(vertices, elements, triangles, planeNormal, planeIndex))
+                {
+                    foreach (var t in triangles)
                     {
-                        var next = WalkHullToNextChain(current.End, cap, chain, insideTester);
-                        if (next == null)
-                            break;
-
-                        if (next == chain)
-                        {
-                            closed = true;
-                            break;
-                        }
-
-                        next.Consumed = true;
-                        AppendChain(cap, next, planeNormal);
-                        current = next;
-                        if (current.IsClosed)
-                        {
-                            closed = true;
-                            break;
-                        }
+                        TryGetTriangle(vertices, elements, t, out var p0, out var p1, out var p2);
+                        EmitCap(planeNormal, planeIndex, p0, p1, p2);
                     }
                 }
-
-                // An open chain with both ends on the hull closes with a straight edge back to
-                // its start. Along one hull edge that is the true boundary. When the walk gave up
-                // because the hull leaves the solid, the edge crosses the empty part of a concave
-                // cross section and the face is misshapen - but skipping it does not help: the
-                // hole filler then patches the same gap with a fan that looks worse. The real cap
-                // here is the hull face intersected with the cross section (a tessellation job).
-                closed |= chain.StartOnHull && chain.EndOnHull;
-
-                if (!closed || cap.Vertices.Count < 3 || IsSliver(cap))
-                {
-                    _polygonPool.Return(cap);
-                    continue;
-                }
-
-                if (Vector3.Dot(NewellNormal(cap), planeNormal) < 0)
-                    cap.Vertices.Reverse();
-
-                _polygons.Add(cap);
-                _planeCapped[planeIndex] = true;
             }
+
+            _regionTriangles.Clear();
         }
+
+        private void EmitCap(Vector3 planeNormal, int planeIndex, Vector3 p0, Vector3 p1, Vector3 p2)
+        {
+            var cap = _polygonPool.Rent();
+            cap.IsCap = true;
+            cap.PlaneIndex = planeIndex;
+            if (Vector3.Dot(Vector3.Cross(p1 - p0, p2 - p0), planeNormal) < 0)
+                (p1, p2) = (p2, p1);
+
+            cap.Vertices.Add(new Vertex(p0, planeNormal));
+            cap.Vertices.Add(new Vertex(p1, planeNormal));
+            cap.Vertices.Add(new Vertex(p2, planeNormal));
+            _polygons.Add(cap);
+            _planeCapped[planeIndex] = true;
+        }
+
+        /// <summary>
+        /// Merges a region's triangles into one polygon by chaining its outer edges (edges
+        /// used by exactly one triangle, directed with the cap's winding). Returns false
+        /// when the outline isn't one simple loop - a hole, or a pinch point - so the caller
+        /// keeps the triangles instead.
+        /// </summary>
+        private bool TryEmitRegionPolygon(ContourVertex[] vertices, int[] elements, List<int> triangles, Vector3 planeNormal, int planeIndex)
+        {
+            if (triangles.Count == 1)
+            {
+                TryGetTriangle(vertices, elements, triangles[0], out var q0, out var q1, out var q2);
+                EmitCap(planeNormal, planeIndex, q0, q1, q2);
+                return true;
+            }
+
+            // Directed edges of every triangle, wound with the plane normal; an interior edge
+            // appears once in each direction, an outline edge only once.
+            _directedEdges.Clear();
+            foreach (var t in triangles)
+            {
+                var a = elements[t * 3];
+                var b = elements[t * 3 + 1];
+                var c = elements[t * 3 + 2];
+                var pa = ToVector(vertices[a].Position);
+                var pb = ToVector(vertices[b].Position);
+                var pc = ToVector(vertices[c].Position);
+                if (Vector3.Dot(Vector3.Cross(pb - pa, pc - pa), planeNormal) < 0)
+                    (b, c) = (c, b);
+
+                _directedEdges.Add((a, b));
+                _directedEdges.Add((b, c));
+                _directedEdges.Add((c, a));
+            }
+
+            _nextOnOutline.Clear();
+            foreach (var (a, b) in _directedEdges)
+            {
+                if (_directedEdges.Contains((b, a)))
+                    continue;
+
+                if (!_nextOnOutline.TryAdd(a, b))
+                    return false; // two outline edges leave one vertex: pinched outline
+            }
+
+            if (_nextOnOutline.Count < 3)
+                return false;
+
+            // Walk the outline; one loop must visit every outline vertex, otherwise there are holes
+            var start = -1;
+            foreach (var key in _nextOnOutline.Keys)
+            {
+                start = key;
+                break;
+            }
+
+            var cap = _polygonPool.Rent();
+            cap.IsCap = true;
+            cap.PlaneIndex = planeIndex;
+            var current = start;
+            for (var guard = 0; guard <= _nextOnOutline.Count; guard++)
+            {
+                cap.Vertices.Add(new Vertex(ToVector(vertices[current].Position), planeNormal));
+                current = _nextOnOutline[current];
+                if (current == start)
+                    break;
+            }
+
+            if (cap.Vertices.Count != _nextOnOutline.Count)
+            {
+                _polygonPool.Return(cap);
+                return false;
+            }
+
+            _polygons.Add(cap);
+            _planeCapped[planeIndex] = true;
+            return true;
+        }
+
+        private static Vector3 ToVector(Vec3 v) => new(v.X, v.Y, v.Z);
+
+        /// <summary>A point within the weld tolerance of a hull edge, projected onto it (same arithmetic as the contour insertion).</summary>
+        private Vector3 SnapToHullEdge(Vector3 point)
+        {
+            var count = _hullLoop.Count;
+            for (var i = 0; i < count; i++)
+            {
+                var a = _hullLoop[i];
+                var b = _hullLoop[(i + 1) % count];
+                var ab = b - a;
+                var lengthSq = ab.LengthSquared();
+                if (lengthSq < _weldEpsilonSq)
+                    continue;
+
+                var t = Vector3.Dot(point - a, ab) / lengthSq;
+                if (t <= 0 || t >= 1)
+                    continue;
+
+                var onEdge = a + ab * t;
+                if (Vector3.DistanceSquared(point, onEdge) <= _weldEpsilonSq)
+                    return onEdge;
+            }
+
+            return point;
+        }
+
+        /// <summary>One cut as a hair-thin quad; see BuildCapsForPlane.</summary>
+        private void AddConstraint(Tess tess, Vector3 from, Vector3 to, Vector3 planeNormal, float width)
+        {
+            var along = to - from;
+            if (along.LengthSquared() < DegenerateEpsilonSq)
+                return;
+
+            var direction = Vector3.Normalize(along);
+            _constraints.Add((from, to));
+            // Chamfered at 45 degrees: a perpendicular side edge would cross a hull edge or the
+            // next cut, when those run at a shallow angle, far from the corner - beyond what
+            // welding merges. With the chamfer every such crossing stays within a width or two
+            // of the corner, and the offset corners themselves weld onto the base corners.
+            var side = Vector3.Normalize(Vector3.Cross(planeNormal, direction)) * width;
+            var inset = direction * MathF.Min(width, along.Length() * 0.25f);
+            tess.AddContour([
+                                new ContourVertex(ToVec3(from)),
+                                new ContourVertex(ToVec3(to)),
+                                new ContourVertex(ToVec3(to + side - inset)),
+                                new ContourVertex(ToVec3(from + side + inset)),
+                            ], ContourOrientation.Original);
+        }
+
+        private static bool TryGetTriangle(ContourVertex[] vertices, int[] elements, int t, out Vector3 p0, out Vector3 p1, out Vector3 p2)
+        {
+            var i0 = elements[t * 3];
+            var i1 = elements[t * 3 + 1];
+            var i2 = elements[t * 3 + 2];
+            if (i0 == Tess.Undef || i1 == Tess.Undef || i2 == Tess.Undef)
+            {
+                p0 = p1 = p2 = default;
+                return false;
+            }
+
+            p0 = ToVector3(vertices[i0].Position);
+            p1 = ToVector3(vertices[i1].Position);
+            p2 = ToVector3(vertices[i2].Position);
+            return true;
+        }
+
+        /// <summary>A triangle whose three corners all lie within one constraint quad is the quad itself, not cap.</summary>
+        private bool IsInsideConstraintQuad(Vector3 p0, Vector3 p1, Vector3 p2, float reach)
+        {
+            var reachSq = reach * reach;
+            foreach (var (start, end) in _constraints)
+            {
+                if (DistanceToSegmentSq(p0, start, end) < reachSq
+                    && DistanceToSegmentSq(p1, start, end) < reachSq
+                    && DistanceToSegmentSq(p2, start, end) < reachSq)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>True if both ends of an edge lie on the same cut segment - the edge then separates regions.</summary>
+        private bool IsOnCut(Vec3 a, Vec3 b, float reach)
+        {
+            var pa = ToVector3(a);
+            var pb = ToVector3(b);
+            var reachSq = reach * reach;
+            foreach (var (start, end) in _constraints)
+            {
+                if (DistanceToSegmentSq(pa, start, end) < reachSq
+                    && DistanceToSegmentSq(pb, start, end) < reachSq)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static float DistanceToSegmentSq(Vector3 p, Vector3 a, Vector3 b)
+        {
+            var ab = b - a;
+            var lengthSq = ab.LengthSquared();
+            var t = lengthSq > 1e-20f ? Math.Clamp(Vector3.Dot(p - a, ab) / lengthSq, 0f, 1f) : 0f;
+            return Vector3.DistanceSquared(p, a + ab * t);
+        }
+
+        private int Find(int t)
+        {
+            while (_regionOf[t] != t)
+            {
+                _regionOf[t] = _regionOf[_regionOf[t]];
+                t = _regionOf[t];
+            }
+
+            return t;
+        }
+
+        private void Union(int a, int b)
+        {
+            a = Find(a);
+            b = Find(b);
+            if (a != b)
+                _regionOf[a] = b;
+        }
+
+        private void AddCellEdgePoint(Vector3 position)
+        {
+            foreach (var known in _cellEdgePoints)
+            {
+                if (Vector3.DistanceSquared(known, position) < _weldEpsilonSq)
+                    return;
+            }
+
+            _cellEdgePoints.Add(position);
+        }
+
+        private bool LiesInPlane(Polygon polygon, Vector3 planeNormal, float planeOffset)
+        {
+            foreach (var vertex in polygon.Vertices)
+            {
+                if (MathF.Abs(Vector3.Dot(planeNormal, vertex.Position) - planeOffset) > _onPlaneEpsilon)
+                    return false;
+            }
+
+            return polygon.Vertices.Count >= 3;
+        }
+
+        /// <summary>Crossing-number test of a point against the surface polygons lying in the plane.</summary>
+        private bool IsCoveredByCoplanar(Vector3 point, Vector3 u, Vector3 v)
+        {
+            if (_coplanar.Count == 0)
+                return false;
+
+            var px = Vector3.Dot(point, u);
+            var py = Vector3.Dot(point, v);
+            foreach (var polygon in _coplanar)
+            {
+                var inside = false;
+                var vertices = polygon.Vertices;
+                for (int i = 0, j = vertices.Count - 1; i < vertices.Count; j = i++)
+                {
+                    var ax = Vector3.Dot(vertices[i].Position, u);
+                    var ay = Vector3.Dot(vertices[i].Position, v);
+                    var bx = Vector3.Dot(vertices[j].Position, u);
+                    var by = Vector3.Dot(vertices[j].Position, v);
+                    if (ay > py != by > py && px < (bx - ax) * (py - ay) / (by - ay) + ax)
+                        inside = !inside;
+                }
+
+                if (inside)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static void PlaneBasis(Vector3 normal, out Vector3 u, out Vector3 v)
+        {
+            var helper = MathF.Abs(normal.X) < 0.9f ? Vector3.UnitX : Vector3.UnitY;
+            u = Vector3.Normalize(Vector3.Cross(normal, helper));
+            v = Vector3.Cross(normal, u);
+        }
+
+        private static Vec3 ToVec3(Vector3 p) => new(p.X, p.Y, p.Z);
+        private static Vector3 ToVector3(Vec3 p) => new(p.X, p.Y, p.Z);
 
         /// <summary>
         /// A cell face without any surface cut is solid if it borders a cap: its hull edges
@@ -1137,127 +1433,6 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             return false;
         }
 
-        /// <summary>
-        /// Chain points are segment starts only; an open chain's end is a real cap corner too
-        /// (the hull walk or the implicit closing edge continues from it), so it must be emitted.
-        /// </summary>
-        private static void AppendChain(Polygon cap, Chain chain, Vector3 planeNormal)
-        {
-            foreach (var p in chain.Points)
-            {
-                cap.Vertices.Add(new Vertex(p, planeNormal));
-            }
-
-            if (!chain.IsClosed)
-                cap.Vertices.Add(new Vertex(chain.End, planeNormal));
-        }
-
-        /// <summary>
-        /// From a point on the hull boundary, walks forward along the hull loop (adding the
-        /// hull corners passed) until reaching the start of an unconsumed chain, which is
-        /// returned. Returns null if the hull can't be walked.
-        /// </summary>
-        private Chain? WalkHullToNextChain(Vector3 from, Polygon cap, Chain origin, MeshInsideTester insideTester)
-        {
-            var hullCount = _hullLoop.Count;
-            if (hullCount < 3)
-                return null;
-
-            FindHullEdge(from, out var edgeIndex, out var edgeT);
-            var position = from;
-            for (var step = 0; step <= hullCount; step++)
-            {
-                // The nearest chain start ahead on the current edge. The originating chain
-                // is a valid target too - reaching its start is what closes the loop.
-                Chain? best = null;
-                var bestT = float.MaxValue;
-                foreach (var candidate in _chains)
-                {
-                    if ((candidate.Consumed && candidate != origin) || !candidate.StartOnHull)
-                        continue;
-
-                    // A start within weld distance of the current position is the same point:
-                    // its parametric position may round to slightly behind, and skipping it would
-                    // send the walk once around the whole hull and build a duplicate cap.
-                    if (step == 0 && Vector3.DistanceSquared(candidate.Points[0], from) < _weldEpsilonSq)
-                        return candidate;
-
-                    FindHullEdge(candidate.Points[0], out var candidateEdge, out var candidateT);
-                    if (candidateEdge != edgeIndex || candidateT + 1e-5f < edgeT)
-                        continue;
-
-                    if (candidateT < bestT)
-                    {
-                        bestT = candidateT;
-                        best = candidate;
-                    }
-                }
-
-                if (best != null)
-                    return best;
-
-                // Otherwise continue around the hull corner - but the hull only bounds the cap
-                // where it runs through solid material. On a concave cross section the cap is
-                // several disjoint regions, and walking out of the solid to find a chain start
-                // is what used to fuse them into one polygon spanning the whole model.
-                var corner = _hullLoop[(edgeIndex + 1) % hullCount];
-                if (!insideTester.IsInside((position + corner) * 0.5f))
-                    return null;
-
-                edgeIndex = (edgeIndex + 1) % hullCount;
-                edgeT = 0;
-                position = corner;
-                cap.Vertices.Add(new Vertex(corner, _walkNormal));
-            }
-
-            return null;
-        }
-
-        private bool IsOnHullBoundary(Vector3 point)
-        {
-            FindHullEdge(point, out var edgeIndex, out var t);
-            var a = _hullLoop[edgeIndex];
-            var b = _hullLoop[(edgeIndex + 1) % _hullLoop.Count];
-            return Vector3.DistanceSquared(point, a + (b - a) * t) < _hullEpsilonSq;
-        }
-
-        /// <summary>Nearest hull edge to a point, with the parametric position along it.</summary>
-        private void FindHullEdge(Vector3 point, out int edgeIndex, out float t)
-        {
-            edgeIndex = 0;
-            t = 0;
-            var bestDistanceSq = float.MaxValue;
-            var hullCount = _hullLoop.Count;
-            for (var i = 0; i < hullCount; i++)
-            {
-                var a = _hullLoop[i];
-                var b = _hullLoop[(i + 1) % hullCount];
-                var ab = b - a;
-                var lengthSq = ab.LengthSquared();
-                var candidateT = lengthSq > 1e-12f ? Math.Clamp(Vector3.Dot(point - a, ab) / lengthSq, 0f, 1f) : 0f;
-                var distanceSq = Vector3.DistanceSquared(point, a + ab * candidateT);
-                if (distanceSq < bestDistanceSq)
-                {
-                    bestDistanceSq = distanceSq;
-                    edgeIndex = i;
-                    t = candidateT;
-                }
-            }
-        }
-
-        /// <summary>A cap thinner than the weld tolerance across its whole length is a line,
-        /// not a face - typically a chain running along a hull edge on a plane the surface lies in.</summary>
-        private bool IsSliver(Polygon cap)
-        {
-            var perimeter = 0f;
-            var vertices = cap.Vertices;
-            for (var i = 0; i < vertices.Count; i++)
-                perimeter += Vector3.Distance(vertices[i].Position, vertices[(i + 1) % vertices.Count].Position);
-
-            var area = NewellNormal(cap).Length() * 0.5f;
-            return area < perimeter * _weldEpsilon * 0.5f;
-        }
-
         private static Vector3 NewellNormal(List<Vector3> loop)
         {
             var normal = Vector3.Zero;
@@ -1287,16 +1462,6 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
             }
 
             return normal;
-        }
-
-        private sealed class Chain
-        {
-            public readonly List<Vector3> Points = [];
-            public Vector3 End;
-            public bool IsClosed;
-            public bool Consumed;
-            public bool StartOnHull;
-            public bool EndOnHull;
         }
 
         /// <summary>
@@ -1343,15 +1508,24 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         private float _weldEpsilon;
         private float _planeEpsilon;
         private float _onPlaneEpsilon;
-        private float _stitchEpsilonSq;
-        private float _chainEpsilonSq;
-        private float _mergeEpsilonSq;
-        private float _hullEpsilonSq;
         private float _weldEpsilonSq;
         private float _weldGridScale;
-        private readonly List<Chain> _chains = [];
         private readonly List<Vector3> _hullLoop = [];
-        private Vector3 _walkNormal;
+        private readonly List<Polygon> _coplanar = [];
+        private readonly List<(Vector3 Start, Vector3 End)> _constraints = [];
+        private readonly List<List<(Vertex From, Vertex To)>> _planeSegments = [];
+        private readonly List<Vector3> _cellEdgePoints = [];
+        private readonly List<ContourVertex> _hullContour = [];
+        private readonly List<(float T, Vector3 Position)> _edgePoints = [];
+        private readonly List<int> _regionOf = [];
+        private readonly List<float> _regionArea = [];
+        private readonly List<Vector3> _regionBest = [];
+        private readonly List<float> _regionBestPerimeter = [];
+        private readonly Dictionary<int, List<int>> _regionTriangles = [];
+        private readonly HashSet<(int, int)> _directedEdges = [];
+        private readonly Dictionary<int, int> _nextOnOutline = [];
+        private readonly Dictionary<int, bool> _regionInside = [];
+        private readonly Dictionary<(int, int), int> _edgeOwner = [];
         private readonly PolygonPool _polygonPool = new();
         private readonly List<Polygon> _polygons = [];
         private readonly List<(Vector3 Normal, float Offset)> _planes = [];
@@ -1370,7 +1544,6 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         private readonly HashSet<int> _holeUsed = [];
         private readonly List<int> _holeLoop = [];
         private readonly List<int> _nextInBucket = [];
-        private bool[] _segmentUsed = [];
         private int[] _order = [];
         private float[] _distances = [];
         private readonly List<Vector3> _positions = [];
@@ -1654,9 +1827,9 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
         public int PlaneIndex = -1; // for caps: which cell plane created them; -1 for surface and box faces
     }
 
+    private const int CapPolygonSize = 3; // triangles: merging across a constraint edge would undo the cut
     private const float ClipToleranceFactor = 1e-6f; // of the mesh extent; below this a vertex counts as lying in the plane
     private const float OnPlaneToleranceFactor = 1e-5f; // of the mesh extent; edges within this are cut boundaries
-    private const float StitchToleranceFactor = 8f; // of the weld tolerance; the largest gap between cut chains that is still drift
     private const float WeldToleranceFactor = 1e-3f; // of the mesh extent; slivers below that merge
     private const float DegenerateEpsilonSq = 1e-7f * 1e-7f;
 
