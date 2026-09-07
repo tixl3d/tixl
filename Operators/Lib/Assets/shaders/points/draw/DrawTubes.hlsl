@@ -33,19 +33,21 @@ cbuffer Params : register(b1)
     float Width;
     float Spin;
     float Twist;
-    float TextureMode;
+    float UseWAsU;
     float2 TextureRange;    
-    float UseWAsWeight;
+    float WidthFX;
     float UseScale;
+    float UniformScale;
     float CapStart;
     float CapEnd;
     float Smooth;
     float RoundAmount;
     float SubSegCount;
-    float DistanceScale;
-    float ScaleNearDist;
-    float ScaleFarDist;
-    float MinScale;
+    float DistanceFade;
+    float FadeStartDist;
+    float FadeEndDist;
+    float MinWidthFactor;
+    float TextureScale;
 };
 
 cbuffer FogParams : register(b2)
@@ -93,6 +95,10 @@ sampler clampedSampler : register(s1);
 StructuredBuffer<Point> Points : register(t0);
 //Texture2D<float4> texture2 : register(t1);
 
+// Cumulative arc length (fixed-point millimeters) at each point, from the arc-length
+// pre-pass + exclusive prefix sum. VS-only; bound at t6 by the vertex stage.
+StructuredBuffer<uint> ArcCumMM : register(t6);
+
 Texture2D<float4> BaseColorMap : register(t1);
 Texture2D<float4> EmissiveColorMap : register(t2);
 Texture2D<float4> RSMOMap : register(t3);
@@ -106,12 +112,43 @@ static const int DrawsPerQuad =6;
 static int DrawsPerStep = DrawsPerQuad * SideCount;
 static const float Tau = 3.141578 * 2;
 
+// Redistributes spacing along the line around each point (independent scale mode only).
+// A point with Scale.x > 1 pulls its neighbors apart along the line, < 1 pushes them together.
+float3 LineStretch(int i, uint pointCount)
+{
+    if (pointCount < 2 || UseScale < 0.5 || UniformScale >= 0.5) return float3(0, 0, 0);
+
+    float3 pos = Points[i].Position;
+    float3 disp = 0;
+
+    if (i > 0)
+    {
+        float s = Points[i - 1].Scale.x;
+        s = isnan(s) ? 1 : s;
+        disp += (s - 1.0) * 0.5 * (pos - Points[i - 1].Position);
+    }
+
+    if (i < (int)pointCount - 1)
+    {
+        float s = Points[i + 1].Scale.x;
+        s = isnan(s) ? 1 : s;
+        disp += (s - 1.0) * 0.5 * (pos - Points[i + 1].Position);
+    }
+
+    return disp;
+}
+
+float3 EffectivePos(int i, uint pointCount)
+{
+    return Points[i].Position + LineStretch(i, pointCount);
+}
+
 float3 getTangent(int i, uint pointCount)
 {
     if (pointCount < 2) return float3(1,0,0);
-    if (i == 0)          return Points[1].Position - Points[0].Position;
-    if (i == (int)pointCount - 1) return Points[i].Position - Points[i-1].Position;
-    return (Points[i+1].Position - Points[i-1].Position) * 0.5;
+    if (i == 0)          return EffectivePos(1, pointCount) - EffectivePos(0, pointCount);
+    if (i == (int)pointCount - 1) return EffectivePos(i, pointCount) - EffectivePos(i-1, pointCount);
+    return (EffectivePos(i+1, pointCount) - EffectivePos(i-1, pointCount)) * 0.5;
 }
 
 float3 hermitePos(float3 p0, float3 m0, float3 p1, float3 m1, float t)
@@ -148,8 +185,22 @@ float3 cornerFactors = Corners[cornerIndex];
         Point p0 = Points[sourceSeg];
         Point p1 = Points[sourceSeg + 1];
 
-float3 pos0 = p0.Position;
-        float3 pos1 = p1.Position;
+        bool separator = IsSeparator(p0) || IsSeparator(p1);
+
+        float3 scale0 = p0.Scale;
+        scale0.x = isnan(scale0.x) ? 1 : scale0.x;
+        scale0.y = isnan(scale0.y) ? 1 : scale0.y;
+        scale0.z = isnan(scale0.z) ? 1 : scale0.z;
+        float3 scale1 = p1.Scale;
+        scale1.x = isnan(scale1.x) ? 1 : scale1.x;
+        scale1.y = isnan(scale1.y) ? 1 : scale1.y;
+        scale1.z = isnan(scale1.z) ? 1 : scale1.z;
+        float3 pointScale = lerp(scale0, scale1, t);
+
+        bool independentScale = (UseScale >= 0.5 && UniformScale < 0.5);
+
+float3 pos0 = EffectivePos(sourceSeg, pointCount);
+        float3 pos1 = EffectivePos(sourceSeg + 1, pointCount);
         float3 pPos;
         if (Smooth >= 0.5)
         {
@@ -168,46 +219,87 @@ float3 pos0 = p0.Position;
         float4 pointRotation = normalize(lerp(q0, q1, t));
 
         float w0, w1;
-        if (UseScale >= 0.5)
+        if (UseScale >= 0.5 && UniformScale >= 0.5)
         {
-            w0 = isnan(p0.Scale.x) ? 1 : p0.Scale.x;
-            w1 = isnan(p1.Scale.x) ? 1 : p1.Scale.x;
+            w0 = scale0.x;
+            w1 = scale1.x;
         }
-        else if (UseWAsWeight >= 0.5)
+        else if (WidthFX >= 0.5 && WidthFX < 1.5)
         {
             w0 = isnan(p0.FX1) ? 1 : p0.FX1;
             w1 = isnan(p1.FX1) ? 1 : p1.FX1;
+        }
+        else if (WidthFX >= 1.5)
+        {
+            w0 = isnan(p0.FX2) ? 1 : p0.FX2;
+            w1 = isnan(p1.FX2) ? 1 : p1.FX2;
         }
         else
         {
             w0 = 1; w1 = 1;
         }
         float WidthFactor = lerp(w0, w1, t);
+        if (independentScale)
+        {
+            WidthFactor = 1.0; // Cross-section is scaled per-axis below
+        }
+        if (separator)
+        {
+            WidthFactor = NAN; // Collapse the segment at separators
+        }
         WidthFactor *= (1.0 + RoundAmount * sin(3.14159265 * t));
 
         float distFactor = 1.0;
-        if (DistanceScale >= 0.5)
+        if (DistanceFade >= 0.5)
         {
             float4 centerCamPos = mul(float4(pPos, 1), ObjectToCamera);
             float camDist = -centerCamPos.z;
-            float distT = saturate((camDist - ScaleNearDist) / max(ScaleFarDist - ScaleNearDist, 0.001));
-            distFactor = lerp(1.0, MinScale, distT);
+            float distT = saturate((camDist - FadeStartDist) / max(FadeEndDist - FadeStartDist, 0.001));
+            distFactor = lerp(1.0, MinWidthFactor, distT);
         }
 
         float fRing = (sideIndex + (cornerFactors.y / 2 + 0.5)) / SideCount;
         float angleOffset = (Spin + Twist * f) * 3.14159265 / 180.0;
         float spinRad = fRing * Tau + angleOffset;
 
-        float3 side = float3(0, cos(spinRad), sin(spinRad));
+        float sy = independentScale ? pointScale.y : 1.0;
+        float sz = independentScale ? pointScale.z : 1.0;
+
+        float3 side = float3(0, cos(spinRad) * sy, sin(spinRad) * sz);
         float3 radiusOffset = qRotateVec3(side, pointRotation) * Width * WidthFactor * distFactor;
 
         float3 pInObject = pPos + radiusOffset;
 
-        output.texCoord = float2( f * (TextureRange.y - TextureRange.x) + TextureRange.x,
-        fRing);
+        // Physical UVs: constant texel size along the tube (arc length / TextureScale) and
+        // around it (integer repeats of the circumference). Falls back to index-based U when
+        // there are fewer than 2 points or the pre-pass buffer is unavailable.
+        float uCoord;
+        if (pointCount >= 2)
+        {
+            float s0 = (float)ArcCumMM[sourceSeg];
+            float s1 = (float)ArcCumMM[sourceSeg + 1];
+            float arcWorld = (s0 + (s1 - s0) * t) * 0.001;
+            uCoord = arcWorld / max(TextureScale, Epsilon);
+        }
+        else
+        {
+            uCoord = f;
+        }
+        // UseWAsU: drive U from each point's FX1 (interpolated along the tube) instead of arc length.
+        if (UseWAsU >= 0.5)
+        {
+            float fx0 = isnan(p0.FX1) ? uCoord : p0.FX1;
+            float fx1 = isnan(p1.FX1) ? uCoord : p1.FX1;
+            uCoord = lerp(fx0, fx1, t);
+        }
+        uCoord = uCoord * (TextureRange.y - TextureRange.x) + TextureRange.x;
+
+        float nAround = max(1.0, round(Tau * Width / max(TextureScale, Epsilon)));
+        output.texCoord = float2(uCoord, fRing * nAround);
 
         float3 tangent = normalize(qRotateVec3(float3(1,0,0), pointRotation));
-        float3 normal = normalize(qRotateVec3(float3(0, cos(spinRad), sin(spinRad)), pointRotation));
+        float3 normalLocal = normalize(float3(0, cos(spinRad) / max(sy, Epsilon), sin(spinRad) / max(sz, Epsilon)));
+        float3 normal = normalize(qRotateVec3(normalLocal, pointRotation));
         float3 bitangent = normalize(cross(tangent, normal));
         float3x3 TBN = float3x3(
             tangent,
@@ -217,7 +309,7 @@ float3 pos0 = p0.Position;
         TBN = mul(TBN, (float3x3)ObjectToWorld);
         output.tbnToWorld = TBN;
 
-        output.worldPosition =  mul(float4(pInObject,1), ObjectToWorld);
+        output.worldPosition =  mul(float4(pInObject,1), ObjectToWorld).xyz;
         output.pixelPosition = mul(float4(pInObject,1), ObjectToClipSpace);
 
         float4 posInCamera = mul(float4(pInObject,1), ObjectToCamera);
@@ -236,40 +328,71 @@ float3 pos0 = p0.Position;
         float3 capNormal;
         bool capEnabled;
 
+        // The point rotation's X axis is the line tangent: outward for the end cap, inward for the start cap.
         if (capIndex == 1)
         {
             p = Points[pointCount - 1];
-            capNormal = -normalize(qRotateVec3(float3(1, 0, 0), p.Rotation));
+            capNormal = normalize(qRotateVec3(float3(1, 0, 0), p.Rotation));
             capEnabled = CapEnd >= 0.5;
         }
         else
         {
             p = Points[0];
-            capNormal = normalize(qRotateVec3(float3(1, 0, 0), p.Rotation));
+            capNormal = -normalize(qRotateVec3(float3(1, 0, 0), p.Rotation));
             capEnabled = CapStart >= 0.5;
         }
 
+        bool separator = IsSeparator(p);
+
         float WidthFactor;
-        if (UseScale >= 0.5)
+        if (UseScale >= 0.5 && UniformScale >= 0.5)
         {
             WidthFactor = isnan(p.Scale.x) ? 1 : p.Scale.x;
         }
-        else if (UseWAsWeight >= 0.5)
+        else if (WidthFX >= 0.5 && WidthFX < 1.5)
         {
             WidthFactor = isnan(p.FX1) ? 1 : p.FX1;
+        }
+        else if (WidthFX >= 1.5)
+        {
+            WidthFactor = isnan(p.FX2) ? 1 : p.FX2;
         }
         else
         {
             WidthFactor = 1;
         }
-        float radius = Width * WidthFactor;
-        if (DistanceScale >= 0.5)
+        float sy = 1.0, sz = 1.0;
+        if (UseScale >= 0.5 && UniformScale < 0.5)
         {
-            float4 capCamPos = mul(float4(p.Position, 1), ObjectToCamera);
-            float camDist = -capCamPos.z;
-            float distT = saturate((camDist - ScaleNearDist) / max(ScaleFarDist - ScaleNearDist, 0.001));
-            radius *= lerp(1.0, MinScale, distT);
+            WidthFactor = 1; // Cross-section is scaled per-axis below
+            sy = isnan(p.Scale.y) ? 1 : p.Scale.y;
+            sz = isnan(p.Scale.z) ? 1 : p.Scale.z;
         }
+        if (separator)
+        {
+            WidthFactor = NAN; // Collapse the cap at separators
+        }
+        float radius = Width * WidthFactor;
+        int capPointIndex = (capIndex == 1) ? (int)pointCount - 1 : 0;
+        float3 capCenter = EffectivePos(capPointIndex, pointCount);
+        if (DistanceFade >= 0.5)
+        {
+            float4 capCamPos = mul(float4(capCenter, 1), ObjectToCamera);
+            float camDist = -capCamPos.z;
+            float distT = saturate((camDist - FadeStartDist) / max(FadeEndDist - FadeStartDist, 0.001));
+            radius *= lerp(1.0, MinWidthFactor, distT);
+        }
+
+        // Physical-scale planar disk center for this cap, placed adjacent to the tube end so
+        // its texel density matches the body (a seam at the junction is inherent to mixing a
+        // cylindrical side with a planar cap).
+        float capS = max(TextureScale, Epsilon);
+        float nAroundCap = max(1.0, round(Tau * Width / capS));
+        float totalArcWorld = (pointCount >= 2) ? (float)ArcCumMM[pointCount - 1] * 0.001 : 0.0;
+        // UseWAsU: center the disk on the endpoint's FX1 so it aligns with the body in U-space.
+        float capCenterU = (UseWAsU >= 0.5 && !isnan(p.FX1)) ? p.FX1
+            : ((capIndex == 1) ? (totalArcWorld + radius) / capS : -radius / capS);
+        float2 capCenterUV = float2(capCenterU, nAroundCap * 0.5);
 
         uint rimIndex;
         if (vertInTri == 0)
@@ -278,11 +401,12 @@ float3 pos0 = p0.Position;
         }
         else if (vertInTri == 1)
         {
-            rimIndex = triInCap;
+            // The start cap's winding is flipped so its front faces outward, matching its normal.
+            rimIndex = (capIndex == 0) ? triInCap + 1 : triInCap;
         }
         else
         {
-            rimIndex = triInCap + 1;
+            rimIndex = (capIndex == 0) ? triInCap : triInCap + 1;
         }
 
         float3 pInObject;
@@ -293,7 +417,7 @@ float3 pos0 = p0.Position;
 
         if (!capEnabled)
         {
-            pInObject = p.Position;
+            pInObject = capCenter;
             tangent = normalize(qRotateVec3(float3(0, 1, 0), p.Rotation));
             normal = float3(0, 0, 0);
             bitangent = normalize(cross(normal, tangent));
@@ -301,11 +425,11 @@ float3 pos0 = p0.Position;
         }
         else if (rimIndex == 0xFFFFFFFF)
         {
-            pInObject = p.Position;
+            pInObject = separator ? float3(NAN, NAN, NAN) : capCenter;
             tangent = normalize(qRotateVec3(float3(0, 1, 0), p.Rotation));
             normal = capNormal;
             bitangent = normalize(cross(normal, tangent));
-            texCoord = float2(0.5, 0.5);
+            texCoord = capCenterUV;
         }
         else
         {
@@ -313,13 +437,13 @@ float3 pos0 = p0.Position;
             float capAngleOffset = (Spin + Twist * capF) * 3.14159265 / 180.0;
             float colF = (float)(rimIndex % (SideCount + 1));
             float angle = colF / SideCount * Tau + capAngleOffset;
-            float3 dir = float3(0, cos(angle), sin(angle));
-            pInObject = p.Position + qRotateVec3(dir, p.Rotation) * radius;
+            float3 dir = float3(0, cos(angle) * sy, sin(angle) * sz);
+            pInObject = capCenter + qRotateVec3(dir, p.Rotation) * radius;
 
             tangent = normalize(qRotateVec3(float3(0, -sin(angle), cos(angle)), p.Rotation));
             normal = capNormal;
             bitangent = normalize(cross(normal, tangent));
-            texCoord = float2(colF / SideCount, colF / SideCount);
+            texCoord = capCenterUV + float2(cos(angle), sin(angle)) * (radius / capS);
         }
 
         output.texCoord = texCoord;
@@ -332,7 +456,7 @@ float3 pos0 = p0.Position;
         TBN = mul(TBN, (float3x3)ObjectToWorld);
         output.tbnToWorld = TBN;
 
-        output.worldPosition = mul(float4(pInObject, 1), ObjectToWorld);
+        output.worldPosition = mul(float4(pInObject, 1), ObjectToWorld).xyz;
         output.pixelPosition = mul(float4(pInObject, 1), ObjectToClipSpace);
 
         float4 posInCamera = mul(float4(pInObject, 1), ObjectToCamera);
@@ -354,7 +478,7 @@ float4 psMain(psInput pin) : SV_TARGET
     float occlusion = roughnessMetallicOcclusion.z;
 
     // Outgoing light direction (vector from world-space fragment position to the "eye").
-    float3 eyePosition =  mul( float4(0,0,0,1), CameraToWorld);
+    float3 eyePosition =  mul( float4(0,0,0,1), CameraToWorld).xyz;
     float3 Lo = normalize(eyePosition - pin.worldPosition);
 
     // Get current fragment's normal and transform to world space.
@@ -372,17 +496,17 @@ float4 psMain(psInput pin) : SV_TARGET
     float3 Lr = 2.0 * cosLo * N - Lo;
 
     // Fresnel reflectance at normal incidence (for metals use albedo color).
-    float3 F0 = lerp(Fdielectric, albedo, metalness);
+    float3 F0 = lerp(Fdielectric, albedo.rgb, metalness);
 
     // Direct lighting calculation for analytical lights.
     float3 directLighting = 0.0;
-    for(uint i=0; i < ActiveLightCount; ++i)
+    for(uint i=0; i < (uint)ActiveLightCount; ++i)
     {
     float3 Lvec = Lights[i].position - pin.worldPosition;
     float distance = length(Lvec);
     float3 L = Lvec / max(distance, 1e-4);
     float intensity = Lights[i].intensity / (pow(distance/Lights[i].range, Lights[i].decay) + 1);
-    float3 Lradiance = Lights[i].color * intensity;
+    float3 Lradiance = Lights[i].color.rgb * intensity;
 
     float3 Lh = normalize(L + Lo);
     float cosLi = max(0.0, dot(N, L));
