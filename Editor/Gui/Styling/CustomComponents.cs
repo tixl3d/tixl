@@ -490,7 +490,13 @@ internal static partial class CustomComponents
     /// Custom draw-list rendering (rather than per-option ImGui.Button) so the track and the active pill
     /// share corners and the active label can use a heavier font.
     /// </summary>
-    public static bool SegmentedButton<T>(ref T selectedValue, Func<T, bool>? isItemDisabled = null) where T : struct, Enum
+    /// <summary>
+    /// A pill of mutually exclusive options. <paramref name="isItemDisabled"/> greys an option out without
+    /// removing it, so the control keeps its shape; <paramref name="tooltipForItem"/> is what says *why* — a
+    /// greyed segment that can't explain itself reads as a bug, so give disabled options a tooltip.
+    /// </summary>
+    public static bool SegmentedButton<T>(ref T selectedValue, Func<T, bool>? isItemDisabled = null,
+                                          Func<T, string?>? tooltipForItem = null) where T : struct, Enum
     {
         var scale = T3Ui.UiScaleFactor;
         var h = ImGui.GetFrameHeight();
@@ -533,6 +539,14 @@ internal static partial class CustomComponents
             {
                 selectedValue = value;
                 modified = true;
+            }
+
+            // Tooltips are shown for disabled segments too — that is where they matter most.
+            if (tooltipForItem != null)
+            {
+                var tooltip = tooltipForItem(value);
+                if (!string.IsNullOrEmpty(tooltip))
+                    TooltipForLastItem(tooltip);
             }
 
             var isHovered = !isDisabled && ImGui.IsItemHovered();

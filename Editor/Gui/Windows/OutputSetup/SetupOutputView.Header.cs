@@ -94,6 +94,19 @@ internal sealed partial class SetupOutputView
                                                                              EditMode.Board => false,
                                                                              EditMode.Straight => !canStraight,
                                                                              _ => !canOutput,
+                                                                         },
+                                             tooltipForItem: mode => mode switch
+                                                                         {
+                                                                             EditMode.Board =>
+                                                                                 "Everything at once: content, surfaces and outputs as cards you can arrange and route.",
+                                                                             EditMode.Straight when canStraight =>
+                                                                                 "One surface seen head-on, its keystone taken out, so you can place content on it without fighting the perspective.",
+                                                                             EditMode.Straight =>
+                                                                                 "Needs a surface. Select one that is mapped to an output or traced on a reference photo — straightening rectifies a single surface.",
+                                                                             _ when canOutput =>
+                                                                                 "The output canvas as the projector sees it: patches, mapped surfaces and their handles in its pixels.",
+                                                                             _ =>
+                                                                                 "Needs an output. Select one, or anything routed into one.",
                                                                          }))
         {
             // Picked a camera the selection only leads to: select its subject so the next frame frames it.
