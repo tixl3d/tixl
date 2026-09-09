@@ -40,21 +40,47 @@ internal static class SurfaceGeometry
     }
 
     /// <summary>The projection carrying the surface's own space into this mapping's output pixels.</summary>
-    public static bool TryGetSurfaceToOutput(Surface surface, Surface.OutputMapping mapping, out Homography surfaceToOutput)
+    /// <summary>The pixel size of the canvas a mapping lands on — what its stored 0..1 quad is measured
+    /// against wherever the editor works in output pixels.</summary>
+    public static Vector2 CanvasSizeOf(Setup setup, Guid outputId)
+    {
+        var output = setup.FindOutput(outputId);
+        return output?.CanvasSize ?? new Vector2(1920, 1080);
+    }
+
+    /// <param name="canvasSize">What the mapping's stored 0..1 quad is measured against: the output's pixel
+    /// size to land in canvas pixels (the renderer), or <see cref="Vector2.One"/> to stay in the canvas' own
+    /// normalized space (the editor's canvases, which are framed in it).</param>
+    public static bool TryGetSurfaceToOutput(Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize, out Homography surfaceToOutput)
     {
         surfaceToOutput = default;
         var size = surface.SizeInMeters;
-        return size.X > 0.0001f && size.Y > 0.0001f && mapping.Quad.Length >= 4
-               && Homography.TryComputeQuadToQuad(LocalRect(surface), mapping.Quad, out surfaceToOutput);
+        if (size.X <= 0.0001f || size.Y <= 0.0001f || mapping.Quad.Length < 4)
+            return false;
+
+        return Homography.TryComputeQuadToQuad(LocalRect(surface), ScaledQuad(mapping.Quad, canvasSize), out surfaceToOutput);
     }
 
+    /// <summary>The stored 0..1 quad in the given space; the scratch is reused, so consume it before the next call.</summary>
+    private static Vector2[] ScaledQuad(Vector2[] quad, Vector2 canvasSize)
+    {
+        for (var i = 0; i < 4; i++)
+            _quadScratch[i] = quad[i] * canvasSize;
+
+        return _quadScratch;
+    }
+
+    private static readonly Vector2[] _quadScratch = new Vector2[4];
+
     /// <summary>The inverse — output pixels back into the surface's own space.</summary>
-    public static bool TryGetOutputToSurface(Surface surface, Surface.OutputMapping mapping, out Homography outputToSurface)
+    public static bool TryGetOutputToSurface(Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize, out Homography outputToSurface)
     {
         outputToSurface = default;
         var size = surface.SizeInMeters;
-        return size.X > 0.0001f && size.Y > 0.0001f && mapping.Quad.Length >= 4
-               && Homography.TryComputeQuadToQuad(mapping.Quad, LocalRect(surface), out outputToSurface);
+        if (size.X <= 0.0001f || size.Y <= 0.0001f || mapping.Quad.Length < 4)
+            return false;
+
+        return Homography.TryComputeQuadToQuad(ScaledQuad(mapping.Quad, canvasSize), LocalRect(surface), out outputToSurface);
     }
 
     /// <summary>
@@ -69,7 +95,8 @@ internal static class SurfaceGeometry
         var corners = RectFromBounds(min, max);
         foreach (var mapping in surface.OutputMappings)
         {
-            if (!TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+            // Read and write both in the canvas' normalized space, so no output (and no resolution) is needed.
+            if (!TryGetSurfaceToOutput(surface, mapping, Vector2.One, out var surfaceToOutput))
                 continue;
 
             for (var i = 0; i < 4; i++)
@@ -172,10 +199,11 @@ internal static class SurfaceGeometry
     }
 
     /// <param name="quad">Caller-owned buffer of at least 4 entries — this runs per frame, so it doesn't allocate.</param>
-    public static bool TryGetChildQuad(Setup setup, Surface carrier, Surface child, Surface.OutputMapping carrierMapping, Vector2[] quad)
+    public static bool TryGetChildQuad(Setup setup, Surface carrier, Surface child, Surface.OutputMapping carrierMapping,
+                                       Vector2 canvasSize, Vector2[] quad)
     {
         if (quad.Length < 4
-            || !TryGetSurfaceToOutput(carrier, carrierMapping, out var surfaceToOutput)
+            || !TryGetSurfaceToOutput(carrier, carrierMapping, canvasSize, out var surfaceToOutput)
             || !TryGetDescendantRect(setup, carrier, child, out var min, out var max, out _))
             return false;
 

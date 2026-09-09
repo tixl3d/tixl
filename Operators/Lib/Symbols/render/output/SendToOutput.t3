@@ -18,6 +18,13 @@
     {
       "Id": "9a1c4f7e-2d38-4b6a-8e50-1f7c3d9b0a24"/*Update*/,
       "DefaultValue": true
+    },
+    {
+      "Id": "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17"/*Resolution*/,
+      "DefaultValue": {
+        "X": 0,
+        "Y": 0
+      }
     }
   ],
   "Children": [],

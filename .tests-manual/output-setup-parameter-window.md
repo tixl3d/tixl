@@ -69,9 +69,13 @@ Parameter window. Then drag the "SendToOutput" CONTENT item onto the "Surface 1"
 and re-select the op in the graph.
 
 **Expected:**
-- Before the drag: below the op parameters an **Output Setup** section shows
-  **Resolution (px)** (read-only) and the line "0 slices, nothing shows them yet".
-- After the drag: the line reads **"1 slice → 1 target"**.
+- Before the drag: below the op parameters an **Output Setup** section shows an editable
+  **Resolution (px)** at 0 × 0, a line saying what it currently renders at, and
+  "full frame, nothing shows it yet".
+- After the drag: that last line reads **"full frame → 1 target"**, and the rendering line now
+  reports the bound output's canvas size — 0 × 0 means "follow the output".
+- Typing 1280 × 720 into the field pins it there; clearing both back to 0 returns to following
+  the output.
 
 ## Step: Renaming through the Name field
 

@@ -51,6 +51,13 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
   function, tone-map curve/exposure) would become **project settings**, which is where they belong anyway;
   per-output overrides can come later. Keep the pass's constant buffer growable for this.
 
+- **More than one display per machine (2026-09-09):** `OutputManager.UpdatePresentation` drives the single
+  `ProgramWindows.Viewer` window and takes only the *first* display-bound output; every further one is
+  silently ignored. Streams already run several at once, so this is purely a presentation limit. Turning the
+  viewer into a small list keyed by display index lifts it, and mirroring the same content to two screens
+  falls out for free: the content renders once per frame (later pulls hit the cache) and each extra output
+  only costs its composite blit. Spanning one wide viewer across both screens is the workaround today.
+
 - Setup menu should provide options to rename setup
 - In straight mode selecting different surfaces should have a view transition 
 - Setup menu should have a hover indication (e.g. change font color ForeGroundFull)

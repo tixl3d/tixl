@@ -62,7 +62,7 @@ internal sealed partial class SetupOutputView
 
         // A region has its own anchor, in its own space — mapped out through the parent's rectangle and pin.
         if (isFocused
-            && SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var carrierToOutput)
+            && SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), out var carrierToOutput)
             && SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out var rectMin, out _, out _))
         {
             var anchorInCarrier = rectMin + child.AnchorInMeters;
@@ -72,7 +72,7 @@ internal sealed partial class SetupOutputView
         // Edited in the parent's space: the child has no projection of its own, so the parent's inverse maps
         // handles back into plain rectangle edits. Nothing here changes the parent, so the transform driving
         // this view stays put and the drag can't feed back on itself.
-        var hasInverse = SurfaceGeometry.TryGetOutputToSurface(carrier, carrierMapping, out var outputToSurface);
+        var hasInverse = SurfaceGeometry.TryGetOutputToSurface(carrier, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), out var outputToSurface);
         if (!isFocused || !editable || !hasInverse)
         {
             // Still registered as a pick target — an unselected region has to stay clickable, which is the
@@ -92,7 +92,7 @@ internal sealed partial class SetupOutputView
         var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
         if (edge >= 0)
         {
-            var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var parentProjection);
+            var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), out var parentProjection);
             SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out _, out _, out var edgeParentOrigin);
             RunGesture(edgePhase, setup, GestureKinds.SurfaceResize, "Edit region", child,
                             onStarted: () =>
@@ -236,7 +236,7 @@ internal sealed partial class SetupOutputView
         var delta = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin) - _gesture.GrabPoint;
         var snapping = !ImGui.GetIO().KeyShift;
 
-        var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var surfaceToOutput);
+        var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), out var surfaceToOutput);
         var halfSize = (startMax - startMin) * 0.5f;
         var thresholds = hasProjection
                              ? SnapThresholds(surfaceToOutput, rToView, viewMin, parent, parentOrigin, startMin + delta + halfSize)

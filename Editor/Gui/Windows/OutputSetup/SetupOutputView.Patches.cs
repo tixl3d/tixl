@@ -48,9 +48,12 @@ internal sealed partial class SetupOutputView
             if (patch.Quad.Length < 4 || SetupRelations.IsImplicitPatch(output, patch))
                 continue;
 
+            // Stored as ratios of the canvas; this canvas works in its pixels like the rest of the output view,
+            // so the patch is read into a pixel scratch, edited there, and written back below.
+            LoadPatchPixels(patch, canvasSize);
             for (var c = 0; c < 4; c++)
             {
-                _patchViewQuad[c] = rToView.TransformPoint(patch.Quad[c]) - viewMin;
+                _patchViewQuad[c] = rToView.TransformPoint(_patchPx[c]) - viewMin;
                 screen[c] = _projection.CanvasToScreen(_patchViewQuad[c]);
             }
 
@@ -74,24 +77,26 @@ internal sealed partial class SetupOutputView
             if (phase != CanvasPointHandle.DragPhase.None)
             {
                 for (var c = 0; c < 4; c++)
-                    patch.Quad[c] = rToOutput.TransformPoint(_patchViewQuad[c] + viewMin);
+                    _patchPx[c] = rToOutput.TransformPoint(_patchViewQuad[c] + viewMin);
 
                 if (phase == CanvasPointHandle.DragPhase.Dragging && draggedCorner >= 0 && !ImGui.GetIO().KeyShift)
                 {
                     CollectPatchSnapCandidates(output, patch.Id, canvasSize);
                     var threshold = PatchSnapThreshold();
-                    ref var corner = ref patch.Quad[draggedCorner];
+                    ref var corner = ref _patchPx[draggedCorner];
                     Span<float> x = [corner.X];
-                    if (SurfaceGeometry.TrySnapOffset(_snapXs, x, threshold, out var offsetX, out _))
-                        corner.X += offsetX;
+                    if (SurfaceGeometry.TrySnapOffset(_snapXs, x, threshold, out _, out var targetX))
+                        corner.X = targetX;
 
                     Span<float> y = [corner.Y];
-                    if (SurfaceGeometry.TrySnapOffset(_snapYs, y, threshold, out var offsetY, out _))
-                        corner.Y += offsetY;
+                    if (SurfaceGeometry.TrySnapOffset(_snapYs, y, threshold, out _, out var targetY))
+                        corner.Y = targetY;
                 }
+
+                StorePatchPixels(patch, canvasSize);
             }
 
-            RunPatchQuadDrag(phase, setup, patch);
+            RunPatchQuadDrag(phase, setup, patch, canvasSize);
 
             // The label doubles as the move handle — the press selects (through the picker), holding on moves.
             if (phase == CanvasPointHandle.DragPhase.None)
@@ -117,12 +122,15 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>A patch gesture: the pre-drag quad kept for re-basing, the undo step from the setup snapshot.</summary>
-    private void RunPatchQuadDrag(CanvasPointHandle.DragPhase phase, Setup setup, OutputDefinition.Patch patch, bool move = false)
+    private void RunPatchQuadDrag(CanvasPointHandle.DragPhase phase, Setup setup, OutputDefinition.Patch patch, Vector2 canvasSize,
+                                  bool move = false)
     {
         switch (phase)
         {
             case CanvasPointHandle.DragPhase.Started:
-                Array.Copy(patch.Quad, _patchOldQuad, 4);
+                for (var c = 0; c < 4; c++)
+                    _patchOldQuad[c] = patch.Quad[c] * canvasSize;
+
                 BeginGesture(setup, move ? GestureKinds.PatchMove : GestureKinds.PatchQuad, move ? "Move patch" : "Adjust patch", patch.Id,
                              grabPoint: _projection.ScreenToCanvas(ImGui.GetMousePos()));
                 break;
@@ -157,7 +165,7 @@ internal sealed partial class SetupOutputView
         switch (movePhase)
         {
             case CanvasPointHandle.DragPhase.Started:
-                RunPatchQuadDrag(movePhase, setup, patch, move: true);
+                RunPatchQuadDrag(movePhase, setup, patch, canvasSize, move: true);
                 break;
 
             case CanvasPointHandle.DragPhase.Dragging when _gesture.Is(GestureKinds.PatchMove, patch.Id):
@@ -165,31 +173,42 @@ internal sealed partial class SetupOutputView
                 // Rigid in view space, carried through R per corner — the same rule as a surface move.
                 var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
                 for (var c = 0; c < 4; c++)
-                    patch.Quad[c] = rToOutput.TransformPoint(rToView.TransformPoint(_patchOldQuad[c]) + moveDelta);
+                    _patchPx[c] = rToOutput.TransformPoint(rToView.TransformPoint(_patchOldQuad[c]) + moveDelta);
 
                 if (!ImGui.GetIO().KeyShift)
                 {
                     CollectPatchSnapCandidates(output, patch.Id, canvasSize);
                     var threshold = PatchSnapThreshold();
-                    QuadBounds(patch.Quad, out var min, out var max);
+                    QuadBounds(_patchPx, out var min, out var max);
                     Span<float> xs = [min.X, (min.X + max.X) * 0.5f, max.X];
                     Span<float> ys = [min.Y, (min.Y + max.Y) * 0.5f, max.Y];
+                    // Move the tile by the offset, then pin the edge that caught to the exact coordinate it
+                    // caught on — the shared edge has to be the same float as its neighbour's, not merely close.
                     var offset = Vector2.Zero;
-                    if (SurfaceGeometry.TrySnapOffset(_snapXs, xs, threshold, out var offsetX, out _))
+                    var snappedX = SurfaceGeometry.TrySnapOffset(_snapXs, xs, threshold, out var offsetX, out var targetX);
+                    if (snappedX)
                         offset.X = offsetX;
 
-                    if (SurfaceGeometry.TrySnapOffset(_snapYs, ys, threshold, out var offsetY, out _))
+                    var snappedY = SurfaceGeometry.TrySnapOffset(_snapYs, ys, threshold, out var offsetY, out var targetY);
+                    if (snappedY)
                         offset.Y = offsetY;
 
                     for (var c = 0; c < 4; c++)
-                        patch.Quad[c] += offset;
+                        _patchPx[c] += offset;
+
+                    if (snappedX)
+                        PinAxisToTarget(_patchPx, min.X + offset.X, max.X + offset.X, targetX, horizontal: false);
+
+                    if (snappedY)
+                        PinAxisToTarget(_patchPx, min.Y + offset.Y, max.Y + offset.Y, targetY, horizontal: true);
                 }
 
+                StorePatchPixels(patch, canvasSize);
                 break;
             }
 
             case CanvasPointHandle.DragPhase.Completed:
-                RunPatchQuadDrag(movePhase, setup, patch);
+                RunPatchQuadDrag(movePhase, setup, patch, canvasSize);
                 break;
         }
     }
@@ -202,7 +221,7 @@ internal sealed partial class SetupOutputView
                                      int edge, Vector2 viewPos, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize)
     {
         if (phase == CanvasPointHandle.DragPhase.Started)
-            RunPatchQuadDrag(phase, setup, patch);
+            RunPatchQuadDrag(phase, setup, patch, canvasSize);
 
         if (phase == CanvasPointHandle.DragPhase.Dragging && _gesture.Is(GestureKinds.PatchQuad, patch.Id))
         {
@@ -223,30 +242,42 @@ internal sealed partial class SetupOutputView
                 }
             }
 
-            Array.Copy(_patchOldQuad, patch.Quad, 4);
-            patch.Quad[e0] += delta;
-            patch.Quad[e1] += delta;
+            Array.Copy(_patchOldQuad, _patchPx, 4);
+            _patchPx[e0] += delta;
+            _patchPx[e1] += delta;
 
             // An axis-aligned edge snaps its coordinate to the canvas edges and the neighbouring tiles.
             var horizontal = edge is 0 or 2;
             var aligned = horizontal
-                              ? MathF.Abs(patch.Quad[e0].Y - patch.Quad[e1].Y) < 0.001f
-                              : MathF.Abs(patch.Quad[e0].X - patch.Quad[e1].X) < 0.001f;
+                              ? MathF.Abs(_patchPx[e0].Y - _patchPx[e1].Y) < AlignedEpsilon * canvasSize.Y
+                              : MathF.Abs(_patchPx[e0].X - _patchPx[e1].X) < AlignedEpsilon * canvasSize.X;
             if (aligned && !ImGui.GetIO().KeyShift)
             {
                 CollectPatchSnapCandidates(output, patch.Id, canvasSize);
-                Span<float> coordinate = [horizontal ? patch.Quad[e0].Y : patch.Quad[e0].X];
-                if (SurfaceGeometry.TrySnapOffset(horizontal ? _snapYs : _snapXs, coordinate, PatchSnapThreshold(), out var offset, out _))
+                Span<float> coordinate = [horizontal ? _patchPx[e0].Y : _patchPx[e0].X];
+                if (SurfaceGeometry.TrySnapOffset(horizontal ? _snapYs : _snapXs, coordinate, PatchSnapThreshold(), out _, out var target))
                 {
-                    var shift = horizontal ? new Vector2(0, offset) : new Vector2(offset, 0);
-                    patch.Quad[e0] += shift;
-                    patch.Quad[e1] += shift;
+                    // Assigned, not offset: `pos + (target - pos)` can land a bit short of target, and two tiles
+                    // whose shared edge differs in the last bit either double a row of pixels or leave a gap.
+                    // Identical floats are what lets the rasterizer's top-left fill rule tile them seamlessly.
+                    if (horizontal)
+                    {
+                        _patchPx[e0].Y = target;
+                        _patchPx[e1].Y = target;
+                    }
+                    else
+                    {
+                        _patchPx[e0].X = target;
+                        _patchPx[e1].X = target;
+                    }
                 }
             }
+
+            StorePatchPixels(patch, canvasSize);
         }
 
         if (phase == CanvasPointHandle.DragPhase.Completed)
-            RunPatchQuadDrag(phase, setup, patch);
+            RunPatchQuadDrag(phase, setup, patch, canvasSize);
     }
 
     /// <summary>Canvas edges and centre plus every other patch's bounds — what a patch edit snaps to, in output px.</summary>
@@ -266,7 +297,7 @@ internal sealed partial class SetupOutputView
             if (other.Id == excludeId || other.Quad.Length < 4)
                 continue;
 
-            QuadBounds(other.Quad, out var min, out var max);
+            QuadBounds(ScaleQuad(other.Quad, canvasSize), out var min, out var max);
             _snapXs.Add(min.X);
             _snapXs.Add((min.X + max.X) * 0.5f);
             _snapXs.Add(max.X);
@@ -284,6 +315,57 @@ internal sealed partial class SetupOutputView
         var screenPerCanvas = Vector2.Distance(a, b);
         return screenPerCanvas > 0.0001f ? 7 * T3Ui.UiScaleFactor / screenPerCanvas : 0f;
     }
+
+    /// <summary>
+    /// After a move snapped an axis, sets whichever of the tile's two edges landed on <paramref name="target"/>
+    /// to exactly that value, so it shares a float with the neighbour it caught on rather than merely rounding
+    /// to it. Corners that were on that edge move; the opposite edge stays where the offset put it.
+    /// </summary>
+    private static void PinAxisToTarget(Vector2[] quad, float movedMin, float movedMax, float target, bool horizontal)
+    {
+        var onMin = MathF.Abs(movedMin - target) <= MathF.Abs(movedMax - target);
+        var edgeValue = onMin ? movedMin : movedMax;
+        for (var i = 0; i < 4; i++)
+        {
+            var coordinate = horizontal ? quad[i].Y : quad[i].X;
+            if (MathF.Abs(coordinate - edgeValue) > AlignedEpsilon)
+                continue;
+
+            if (horizontal)
+                quad[i].Y = target;
+            else
+                quad[i].X = target;
+        }
+    }
+
+    private void LoadPatchPixels(OutputDefinition.Patch patch, Vector2 canvasSize)
+    {
+        for (var c = 0; c < 4; c++)
+            _patchPx[c] = patch.Quad[c] * canvasSize;
+    }
+
+    private static void StorePatchPixels(OutputDefinition.Patch patch, Vector2 canvasSize)
+    {
+        for (var c = 0; c < 4; c++)
+            patch.Quad[c] = _patchPx[c] / canvasSize;
+    }
+
+    /// <summary>A stored 0..1 quad in canvas pixels; the scratch is reused, so consume it before the next call.</summary>
+    private static Vector2[] ScaleQuad(Vector2[] quad, Vector2 canvasSize)
+    {
+        for (var c = 0; c < 4; c++)
+            _scaleScratch[c] = quad[c] * canvasSize;
+
+        return _scaleScratch;
+    }
+
+    // The patch being edited, in canvas pixels. Stored quads are ratios; every edit in this file happens here.
+    private static readonly Vector2[] _patchPx = new Vector2[4];
+    private static readonly Vector2[] _scaleScratch = new Vector2[4];
+
+    /// <summary>How close two corners' coordinates must be to count as one axis-aligned edge, as a fraction of
+    /// the canvas — well under a pixel at any sane resolution.</summary>
+    private const float AlignedEpsilon = 0.00002f;
 
     private static void QuadBounds(Vector2[] quad, out Vector2 min, out Vector2 max)
     {

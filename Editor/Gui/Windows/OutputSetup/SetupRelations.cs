@@ -415,11 +415,12 @@ internal static class SetupRelations
         if (patch.Quad.Length < 4)
             return false;
 
-        var full = output.FullCanvasQuad();
-        // A pixel of slack: a quad round-tripped through JSON, or nudged by a drag, is still "the whole canvas".
+        var full = OutputDefinition.FullCanvasQuad();
+        // A thousandth of the canvas of slack: a quad round-tripped through JSON, or nudged by a drag, is
+        // still "the whole canvas".
         for (var i = 0; i < 4; i++)
         {
-            if (Vector2.Distance(patch.Quad[i], full[i]) > 1f)
+            if (Vector2.Distance(patch.Quad[i], full[i]) > 0.001f)
                 return false;
         }
 

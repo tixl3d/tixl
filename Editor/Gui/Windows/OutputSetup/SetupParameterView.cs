@@ -115,7 +115,17 @@ internal static class SetupParameterView
             resolution[1] = content.Description.Height;
         }
 
-        DrawIntsRow("Resolution (px)", resolution, "Comes from the source texture (read-only).", readOnly: true);
+        DrawIntsRow("Rendered (px)", resolution,
+                    "What this content actually rendered at: the canvas of the output it is routed to, unless the op's Resolution is set.",
+                    readOnly: true);
+
+        // Two outputs of different sizes fed by one send: it renders once, so the second shows the first's size.
+        if (OutputContentStats.TryGetSizeConflict(instance.SymbolChildId, out var conflictRendered, out var conflictOther))
+        {
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText($"⚠ also routed to an output of {conflictOther.Width}×{conflictOther.Height} — it shows {conflictRendered.Width}×{conflictRendered.Height}",
+                                          Fonts.FontSmall, UiColors.StatusAttention);
+        }
 
         var source = setup.FindSourceByChildId(instance.SymbolChildId);
         if (source != null)
@@ -305,19 +315,24 @@ internal static class SetupParameterView
         // pixel size of a projector or a stream is decided.
         Span<int> canvas = [output.CanvasResolution.Width, output.CanvasResolution.Height];
         var canvasState = DrawIntsRow("Canvas (px)", canvas,
-                                      "The output's pixel size. Content rendering at 'Fill' resolution follows it, and a stream sends at it.");
+                                      "The output's pixel size, or 0 to take it from whatever is plugged in. Content rendering at 'Fill' follows it, and a stream sends at it.");
         if ((canvasState & InputEditStateFlags.Modified) != 0)
         {
-            var width = Math.Clamp(canvas[0], 1, 16384);
-            var height = Math.Clamp(canvas[1], 1, 16384);
+            // 0 means "follow the plug". Only a render size either way: every quad on this canvas is stored as
+            // a fraction of it, so changing it re-renders without moving a single mapping.
+            var width = Math.Clamp(canvas[0], 0, 16384);
+            var height = Math.Clamp(canvas[1], 0, 16384);
             output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(width, height);
         }
 
         CommitFieldUndo(setup, "Resize canvas", canvasState);
 
         var binding = machineConfig.TryGetBinding(output.Id);
+        var boundTo = binding == null ? "unbound" : Plugs.BindingLabel(machineConfig, binding);
         FormInputs.ApplyIndent();
-        CustomComponents.StylizedText(binding == null ? "unbound" : Plugs.BindingLabel(machineConfig, binding),
+        CustomComponents.StylizedText(output.FollowsPlug
+                                          ? $"following {boundTo} · {output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
+                                          : boundTo,
                                       Fonts.FontSmall, UiColors.TextMuted);
     }
 
@@ -358,11 +373,11 @@ internal static class SetupParameterView
         Span<int> resolution = [0, 0];
         if (boundOutput != null)
         {
-            resolution[0] = boundOutput.CanvasResolution.Width;
-            resolution[1] = boundOutput.CanvasResolution.Height;
+            resolution[0] = boundOutput.ResolvedResolution.Width;
+            resolution[1] = boundOutput.ResolvedResolution.Height;
         }
 
-        DrawIntsRow("Resolution (px)", resolution, "Comes from the canvas of the output bound here (read-only).", readOnly: true);
+        DrawIntsRow("Sends at (px)", resolution, "The canvas of the output bound here (read-only).", readOnly: true);
 
         if ((supported & OutputStreamOptions.FrameRate) != 0)
         {
@@ -404,15 +419,32 @@ internal static class SetupParameterView
         if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this content at its last frame."))
             sink.SetUpdateEnabled(update);
 
-        Span<int> resolution = [1, 1];
-        var content = sink.GetContent(_sendContext);
-        if (content is { IsDisposed: false })
+        // 0×0 means "whatever the output asks for", so the content follows the projector or display it is routed
+        // to; a set value pins it. The line underneath says what that resolves to right now.
+        var requested = sink.GetResolution(_sendContext);
+        Span<int> resolution = [requested.Width, requested.Height];
+        var state = DrawIntsRow("Render at (px)", resolution,
+                                "0 follows the output this content is routed to. Set a size to render at it regardless.");
+        if ((state & InputEditStateFlags.Modified) != 0)
         {
-            resolution[0] = content.Description.Width;
-            resolution[1] = content.Description.Height;
+            sink.SetResolution(new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution[0], 0, 16384),
+                                                                 Math.Clamp(resolution[1], 0, 16384)));
         }
 
-        DrawIntsRow("Resolution (px)", resolution, "Comes from the source texture (read-only).", readOnly: true);
+        var content = sink.GetContent(_sendContext);
+        FormInputs.ApplyIndent();
+        CustomComponents.StylizedText(content is { IsDisposed: false }
+                                          ? $"rendering {content.Description.Width}×{content.Description.Height}"
+                                          : "nothing rendered yet",
+                                      Fonts.FontSmall, UiColors.TextMuted);
+
+        // Two outputs of different sizes fed by one send: it renders once, so the second shows the first's size.
+        if (OutputContentStats.TryGetSizeConflict(instance.SymbolChildId, out var rendered, out var other))
+        {
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText($"⚠ also routed to an output of {other.Width}×{other.Height} — it shows {rendered.Width}×{rendered.Height}",
+                                          Fonts.FontSmall, UiColors.StatusAttention);
+        }
     }
 
     private static void DrawSliceCard(Setup setup, Guid id)
@@ -448,25 +480,29 @@ internal static class SetupParameterView
         var widthUv = MathF.Max(uv.Z - uv.X, MinSliceSize);
         var heightUv = MathF.Max(uv.W - uv.Y, MinSliceSize);
 
-        Span<int> position = [(int)MathF.Round(uv.X * texW), (int)MathF.Round(uv.Y * texH)];
-        var positionState = DrawIntsRow("Position (px)", position);
+        // A slice is a fraction of its source, shown in whichever unit is selected — pixels of that source
+        // while cutting an atlas, ratios when the source's size is not the point.
+        DrawUnitSwitch();
+
+        Span<float> position = [ToUnit(uv.X, texW), ToUnit(uv.Y, texH)];
+        var positionState = DrawRectRow("Position", position);
         BeginFieldUndo(setup, positionState);
         if ((positionState & InputEditStateFlags.Modified) != 0)
         {
-            var nx = Math.Clamp(position[0] / (float)texW, 0f, 1f - widthUv);
-            var ny = Math.Clamp(position[1] / (float)texH, 0f, 1f - heightUv);
+            var nx = Math.Clamp(FromUnit(position[0], texW), 0f, 1f - widthUv);
+            var ny = Math.Clamp(FromUnit(position[1], texH), 0f, 1f - heightUv);
             slice.UvRect = new Vector4(nx, ny, nx + widthUv, ny + heightUv);
         }
 
         CommitFieldUndo(setup, "Move slice", positionState);
 
-        Span<int> size = [(int)MathF.Round(widthUv * texW), (int)MathF.Round(heightUv * texH)];
-        var sizePxState = DrawIntsRow("Size (px)", size);
+        Span<float> size = [ToUnit(widthUv, texW), ToUnit(heightUv, texH)];
+        var sizePxState = DrawRectRow("Size", size);
         BeginFieldUndo(setup, sizePxState);
         if ((sizePxState & InputEditStateFlags.Modified) != 0)
         {
-            var nw = Math.Clamp(size[0] / (float)texW, MinSliceSize, 1f - uv.X);
-            var nh = Math.Clamp(size[1] / (float)texH, MinSliceSize, 1f - uv.Y);
+            var nw = Math.Clamp(FromUnit(size[0], texW), MinSliceSize, 1f - uv.X);
+            var nh = Math.Clamp(FromUnit(size[1], texH), MinSliceSize, 1f - uv.Y);
             slice.UvRect = new Vector4(uv.X, uv.Y, uv.X + nw, uv.Y + nh);
         }
 
@@ -494,8 +530,9 @@ internal static class SetupParameterView
             return;
 
         var quad = patch.Quad;
-        var isAxisAligned = MathF.Abs(quad[0].Y - quad[1].Y) < 0.001f && MathF.Abs(quad[2].Y - quad[3].Y) < 0.001f
-                            && MathF.Abs(quad[0].X - quad[3].X) < 0.001f && MathF.Abs(quad[1].X - quad[2].X) < 0.001f;
+        const float aligned = 0.0001f; // of the canvas
+        var isAxisAligned = MathF.Abs(quad[0].Y - quad[1].Y) < aligned && MathF.Abs(quad[2].Y - quad[3].Y) < aligned
+                            && MathF.Abs(quad[0].X - quad[3].X) < aligned && MathF.Abs(quad[1].X - quad[2].X) < aligned;
         if (!isAxisAligned)
         {
             FormInputs.ApplyIndent();
@@ -503,25 +540,31 @@ internal static class SetupParameterView
             return;
         }
 
-        Span<int> position = [(int)MathF.Round(quad[0].X), (int)MathF.Round(quad[0].Y)];
-        var positionState = DrawIntsRow("Position (px)", position, "Top-left corner on the output canvas.");
+        // Stored as ratios of the canvas; shown in whichever unit is selected. The round trip only touches what
+        // was edited, so a field left alone keeps its stored value bit for bit.
+        DrawUnitSwitch();
+        var canvas = output.CanvasSize;
+
+        Span<float> position = [ToUnit(quad[0].X, canvas.X), ToUnit(quad[0].Y, canvas.Y)];
+        var positionState = DrawRectRow("Position", position, "Top-left corner on the output canvas.");
         BeginFieldUndo(setup, positionState);
         if ((positionState & InputEditStateFlags.Modified) != 0)
         {
-            var delta = new Vector2(position[0], position[1]) - quad[0];
+            var delta = new Vector2(FromUnit(position[0], canvas.X), FromUnit(position[1], canvas.Y)) - quad[0];
             for (var i = 0; i < 4; i++)
                 quad[i] += delta;
         }
 
         CommitFieldUndo(setup, "Move patch", positionState);
 
-        Span<int> size = [(int)MathF.Round(quad[1].X - quad[0].X), (int)MathF.Round(quad[3].Y - quad[0].Y)];
-        var sizeState = DrawIntsRow("Size (px)", size);
+        var covered = quad[2] - quad[0];
+        Span<float> size = [ToUnit(covered.X, canvas.X), ToUnit(covered.Y, canvas.Y)];
+        var sizeState = DrawRectRow("Size", size);
         BeginFieldUndo(setup, sizeState);
         if ((sizeState & InputEditStateFlags.Modified) != 0)
         {
-            var w = MathF.Max(size[0], 1);
-            var h = MathF.Max(size[1], 1);
+            var w = MathF.Max(FromUnit(size[0], canvas.X), 0.0001f);
+            var h = MathF.Max(FromUnit(size[1], canvas.Y), 0.0001f);
             quad[1] = new Vector2(quad[0].X + w, quad[0].Y);
             quad[2] = new Vector2(quad[0].X + w, quad[0].Y + h);
             quad[3] = new Vector2(quad[0].X, quad[0].Y + h);
@@ -602,6 +645,57 @@ internal static class SetupParameterView
     }
 
     /// <summary>Integer counterpart of <see cref="DrawFloatsRow"/>.</summary>
+    /// <summary>
+    /// The unit the rect fields below read in. Quads and slice rects are stored as ratios of what they sit on,
+    /// so pixels are a presentation: handy while aiming at a projector's raster, wrong once the canvas changes
+    /// size. Offered wherever such a rect is edited, and shared by all of them.
+    /// </summary>
+    private static void DrawUnitSwitch()
+    {
+        var units = UserSettings.Config.OutputSetupEditUnits;
+        if (FormInputs.AddSegmentedButtonWithLabel(ref units, "Edit in",
+                                                   "Pixels of the canvas or source this rect sits on, or ratios of it. Stored as ratios either way."))
+        {
+            UserSettings.Config.OutputSetupEditUnits = units;
+        }
+    }
+
+    private static bool EditsInPixels => UserSettings.Config.OutputSetupEditUnits == SetupEditUnits.Pixels;
+
+    /// <summary>A ratio shown in the current unit, against the size of what it sits on.</summary>
+    private static float ToUnit(float ratio, float extent) => EditsInPixels ? ratio * extent : ratio;
+
+    /// <summary>The inverse of <see cref="ToUnit"/>, back to the stored ratio.</summary>
+    private static float FromUnit(float value, float extent) => EditsInPixels ? value / MathF.Max(extent, 1) : value;
+
+    /// <summary>
+    /// A rect field in the selected unit: whole pixels when editing in pixels, ratios with decimals otherwise.
+    /// Kept apart from <see cref="DrawIntsRow"/> because a ratio has no meaningful integer form.
+    /// </summary>
+    private static InputEditStateFlags DrawRectRow(string label, Span<float> values, string? tooltip = null)
+    {
+        var suffix = EditsInPixels ? " (px)" : " (ratio)";
+        var size = BeginValuesRow(label + suffix, tooltip, values.Length, false, 0, out var gap);
+        var result = InputEditStateFlags.Nothing;
+        for (var i = 0; i < values.Length; i++)
+        {
+            if (i > 0)
+                ImGui.SameLine(0, gap);
+
+            ImGui.PushID(i);
+            var v = values[i];
+            result |= SingleValueEdit.Draw(ref v, size, float.NegativeInfinity, float.PositiveInfinity,
+                                           clampMin: false, clampMax: false,
+                                           scale: EditsInPixels ? 1f : 0.001f,
+                                           format: EditsInPixels ? "{0:0}" : "{0:0.0000}");
+            values[i] = EditsInPixels ? MathF.Round(v) : v;
+            ImGui.PopID();
+        }
+
+        EndValuesRow(tooltip, false);
+        return result;
+    }
+
     private static InputEditStateFlags DrawIntsRow(string label, Span<int> values, string? tooltip = null, bool readOnly = false)
     {
         var size = BeginValuesRow(label, tooltip, values.Length, readOnly, 0, out var gap);
@@ -738,7 +832,7 @@ internal static class SetupParameterView
     {
         for (var i = 0; i < setup.Outputs.Count; i++)
         {
-            var r = setup.Outputs[i].CanvasResolution;
+            var r = setup.Outputs[i].ResolvedResolution;
             if (r.Width > 0 && r.Height > 0)
                 return r;
         }

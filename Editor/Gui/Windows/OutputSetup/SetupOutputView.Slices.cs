@@ -240,14 +240,16 @@ internal sealed partial class SetupOutputView
                 var movesX = edge is 1 or 3;
                 Span<float> anchor = [edge switch { 0 => next.Y, 1 => next.Z, 2 => next.W, _ => next.X }];
                 if (SurfaceGeometry.TrySnapOffset(movesX ? _sliceSnapXs : _sliceSnapYs, anchor, movesX ? thresholdX : thresholdY,
-                                                  out var snapOffset, out var snapTarget))
+                                                  out _, out var snapTarget))
                 {
+                    // Assigned, not offset: two slices meeting on an edge have to store the identical value, or
+                    // the sampled source rows on either side overlap by one or skip one.
                     switch (edge)
                     {
-                        case 0: next.Y += snapOffset; break;
-                        case 1: next.Z += snapOffset; break;
-                        case 2: next.W += snapOffset; break;
-                        default: next.X += snapOffset; break;
+                        case 0: next.Y = snapTarget; break;
+                        case 1: next.Z = snapTarget; break;
+                        case 2: next.W = snapTarget; break;
+                        default: next.X = snapTarget; break;
                     }
 
                     DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, movesX, snapTarget);

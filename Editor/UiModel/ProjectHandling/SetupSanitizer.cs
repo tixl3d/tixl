@@ -54,30 +54,26 @@ internal static class SetupSanitizer
 
             foreach (var mapping in surface.OutputMappings)
             {
-                var output = setup.FindOutput(mapping.OutputId);
-                var width = Math.Max(1, output?.CanvasResolution.Width ?? 1920);
-                var height = Math.Max(1, output?.CanvasResolution.Height ?? 1080);
-                if (QuadIsUsable(mapping.Quad, width, height))
+                if (QuadIsUsable(mapping.Quad))
                     continue;
 
+                var output = setup.FindOutput(mapping.OutputId);
                 Log.Warning($"Setup repair: surface '{surface.Name}' had a corrupted corner-pin on output "
                             + $"'{output?.Name ?? mapping.OutputId.ToString()}' — reset to a default centered quad.");
-                mapping.Quad = DefaultQuad(width, height);
+                mapping.Quad = DefaultQuad();
                 changed = true;
             }
         }
 
         foreach (var output in setup.Outputs)
         {
-            var width = Math.Max(1, output.CanvasResolution.Width);
-            var height = Math.Max(1, output.CanvasResolution.Height);
             foreach (var patch in output.Patches)
             {
-                if (QuadIsUsable(patch.Quad, width, height))
+                if (QuadIsUsable(patch.Quad))
                     continue;
 
                 Log.Warning($"Setup repair: a patch on output '{output.Name}' had a corrupted quad — reset to the full canvas.");
-                patch.Quad = output.FullCanvasQuad();
+                patch.Quad = OutputDefinition.FullCanvasQuad();
                 changed = true;
             }
         }
@@ -85,16 +81,17 @@ internal static class SetupSanitizer
         return changed;
     }
 
-    private static bool QuadIsUsable(Vector2[] quad, float width, float height)
+    /// <param name="quad">In the canvas' own 0..1 space, so the bounds below are canvas-sizes, not pixels.</param>
+    private static bool QuadIsUsable(Vector2[] quad)
     {
         if (quad.Length < 4)
             return false;
 
         // Generous overhang: a projector quad legitimately extends past the canvas, but corners further out
-        // than a few canvas sizes make the recovered meters↔pixels projection numerically useless — and every
+        // than a few canvas sizes make the recovered meters↔canvas projection numerically useless — and every
         // edit through it amplifies the damage.
-        var min = new Vector2(-3 * width, -3 * height);
-        var max = new Vector2(4 * width, 4 * height);
+        var min = new Vector2(-3, -3);
+        var max = new Vector2(4, 4);
         for (var i = 0; i < 4; i++)
         {
             if (!IsFinite(quad[i]))
@@ -109,10 +106,10 @@ internal static class SetupSanitizer
         return Homography.TryComputeQuadToQuad(unitRect, quad, out _);
     }
 
-    private static Vector2[] DefaultQuad(float width, float height)
+    /// <summary>A centred fifth-inset rectangle in the canvas' 0..1 space.</summary>
+    private static Vector2[] DefaultQuad()
     {
-        float x0 = width * 0.2f, x1 = width * 0.8f, y0 = height * 0.2f, y1 = height * 0.8f;
-        return [new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1)];
+        return [new Vector2(0.2f, 0.2f), new Vector2(0.8f, 0.2f), new Vector2(0.8f, 0.8f), new Vector2(0.2f, 0.8f)];
     }
 
     private static bool IsFinite(Vector2 v) => float.IsFinite(v.X) && float.IsFinite(v.Y);

@@ -245,7 +245,7 @@ internal sealed partial class SetupOutputView
                 if (tracedForLines != null)
                     SetupActions.RunUndoable("Straighten trace from lines", setup, () => TryStraightenTraceFromLines(lineSubject));
                 else
-                    SetupActions.RunUndoable("Straighten from lines", setup, () => TryStraightenFromLines(lineSubject, outputId));
+                    SetupActions.RunUndoable("Straighten from lines", setup, () => TryStraightenFromLines(setup, lineSubject, outputId));
             }
 
             ImGui.EndDisabled();

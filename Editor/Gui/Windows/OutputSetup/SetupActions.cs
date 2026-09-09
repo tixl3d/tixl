@@ -7,6 +7,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Logging;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Styling;
@@ -318,10 +319,8 @@ internal static class SetupActions
         RunUndoable("Add patch", setup, () =>
                                         {
                                             var patch = AddPatchInternal(output, Guid.Empty);
-                                            var w = Math.Max(1, output.CanvasResolution.Width);
-                                            var h = Math.Max(1, output.CanvasResolution.Height);
-                                            var min = new Vector2(w * 0.25f, h * 0.25f);
-                                            var max = new Vector2(w * 0.75f, h * 0.75f);
+                                            var min = new Vector2(0.25f, 0.25f);
+                                            var max = new Vector2(0.75f, 0.75f);
                                             patch.Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)];
                                             selection.Select(SetupEntitySelection.EntityKind.Patch, patch.Id);
                                         });
@@ -353,7 +352,7 @@ internal static class SetupActions
     private static OutputDefinition.Patch AddPatchInternal(OutputDefinition output, Guid sliceId)
     {
         // Left unnamed: the label is derived from its position (see PatchLabel).
-        var patch = new OutputDefinition.Patch { SliceId = sliceId, Quad = output.FullCanvasQuad() };
+        var patch = new OutputDefinition.Patch { SliceId = sliceId, Quad = OutputDefinition.FullCanvasQuad() };
         output.Patches.Add(patch);
         return patch;
     }
@@ -587,8 +586,9 @@ internal static class SetupActions
             // A root carries its own pins, so nudge those instead.
             foreach (var mapping in copy.OutputMappings)
             {
+                // A nudge of the canvas rather than a pixel count, so it reads the same at any resolution.
                 for (var i = 0; i < mapping.Quad.Length; i++)
-                    mapping.Quad[i] += new Vector2(24, 24);
+                    mapping.Quad[i] += new Vector2(0.0125f, 0.0125f);
             }
         }
 
@@ -1317,15 +1317,16 @@ internal static class SetupActions
                                                            var feed = output.Patches.Count > 0 ? output.Patches[0].SliceId : Guid.Empty;
                                                            output.Patches.Clear();
 
-                                                           float w = Math.Max(1, output.CanvasResolution.Width);
-                                                           float h = Math.Max(1, output.CanvasResolution.Height);
-                                                           var cell = new Vector2(w / columns, h / rows);
+                                                           // Boundaries come from one expression per grid line, so tile n's right edge and
+                                                           // tile n+1's left edge are the *same float* — bit-identical shared edges are what
+                                                           // makes the rasterizer's top-left fill rule tile them with no seam and no overlap.
+                                                           // Deriving max as min + cell would round differently and could cost a pixel row.
                                                            for (var row = 0; row < rows; row++)
                                                            {
                                                                for (var column = 0; column < columns; column++)
                                                                {
-                                                                   var min = new Vector2(column * cell.X, row * cell.Y);
-                                                                   var max = min + cell;
+                                                                   var min = new Vector2(column / (float)columns, row / (float)rows);
+                                                                   var max = new Vector2((column + 1) / (float)columns, (row + 1) / (float)rows);
                                                                    output.Patches.Add(new OutputDefinition.Patch
                                                                                           {
                                                                                               SliceId = feed,
@@ -1376,9 +1377,11 @@ internal static class SetupActions
                                                  }
 
                                                  // A metre of width, the height by the quad's aspect: the physical size is unknown until
-                                                 // measured, and the content density follows from the pixels the patch already covered.
-                                                 var widthPx = MathF.Max(max.X - min.X, 1);
-                                                 var heightPx = MathF.Max(max.Y - min.Y, 1);
+                                                 // measured, and the content density follows from the pixels the patch already covered —
+                                                 // its share of the canvas, taken at the canvas' current size.
+                                                 var covered = (max - min) * output.CanvasSize;
+                                                 var widthPx = MathF.Max(covered.X, 1);
+                                                 var heightPx = MathF.Max(covered.Y, 1);
                                                  var surface = new Surface
                                                                    {
                                                                        Name = string.IsNullOrEmpty(patch.Name) ? $"Surface {setup.Surfaces.Count + 1}" : patch.Name,
@@ -1470,8 +1473,8 @@ internal static class SetupActions
 
     private static Surface.OutputMapping CreateDefaultMapping(OutputDefinition output)
     {
-        float w = Math.Max(1, output.CanvasResolution.Width);
-        float h = Math.Max(1, output.CanvasResolution.Height);
+        float w = Math.Max(1, output.ResolvedResolution.Width);
+        float h = Math.Max(1, output.ResolvedResolution.Height);
         float x0 = w * 0.2f, x1 = w * 0.8f, y0 = h * 0.2f, y1 = h * 0.8f;
         return new Surface.OutputMapping
                    {

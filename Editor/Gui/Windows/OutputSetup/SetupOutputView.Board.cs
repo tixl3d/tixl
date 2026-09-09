@@ -247,16 +247,17 @@ internal sealed partial class SetupOutputView
             DrawBoardCard(setup, selection, dl, SetupEntitySelection.EntityKind.Output, output.Id, min, max,
                           output.Name, BoardMeta(output.Id), srv, true);
 
-            // Patches are cuts of the canvas: their px quads mapped into the card (px run Y-down from the top).
-            var ppm = PixelsPerMeterOf(output.BoardPlacement);
+            // Patches are cuts of the canvas: their 0..1 quads mapped into the card (Y runs down from the top).
             foreach (var patch in output.Patches)
             {
                 // The implicit full-canvas patch is the whole card; its outline would just double the card's.
                 if (patch.Quad.Length < 4 || SetupRelations.IsImplicitPatch(output, patch))
                     continue;
 
+                var cardSize = max - min;
                 for (var c = 0; c < 4; c++)
-                    _boardQuad[c] = _boardProjection.CanvasToScreen(new Vector2(min.X + patch.Quad[c].X / ppm, max.Y - patch.Quad[c].Y / ppm));
+                    _boardQuad[c] = _boardProjection.CanvasToScreen(new Vector2(min.X + patch.Quad[c].X * cardSize.X,
+                                                                               max.Y - patch.Quad[c].Y * cardSize.Y));
 
                 var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.Patch, patch.Id) ?? false;
                 var pulse = isSelected ? 0f : FrameStats.GetPulse(patch.Id);
@@ -1504,7 +1505,7 @@ internal sealed partial class SetupOutputView
                 var output = setup.FindOutput(id);
                 return output == null
                            ? new Vector2(1920, 1080)
-                           : new Vector2(Math.Max(1, output.CanvasResolution.Width), Math.Max(1, output.CanvasResolution.Height));
+                           : output.CanvasSize;
             }
             case SetupEntitySelection.EntityKind.ReferenceImage:
             {
@@ -1592,8 +1593,8 @@ internal sealed partial class SetupOutputView
         {
             var binding = machineConfig.TryGetBinding(output.Id);
             _boardMeta[output.Id] = binding == null
-                                        ? $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height}"
-                                        : $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height} → {Plugs.BindingLabel(machineConfig, binding)}";
+                                        ? $"{output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
+                                        : $"{output.ResolvedResolution.Width}×{output.ResolvedResolution.Height} → {Plugs.BindingLabel(machineConfig, binding)}";
         }
 
         foreach (var source in setup.ContentSources)

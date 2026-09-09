@@ -743,6 +743,47 @@ with an explanatory comment) — the row-callback API design made compliance imp
   target back and forth. Ordering makes this safe: `UpdatePresentation` runs right after `ImGui.NewFrame()`,
   before any window draws.
 
+- **2026-09-09 (send resolution):** `SendToOutput` gained a `Resolution` input (Int2, default 0×0 = inherit).
+  `IOutputSink` carries `GetResolution`/`SetResolution` alongside the Update pair, and `GetContent` overrides
+  `context.RequestedResolution` for the duration of its pull when a size is set — so an auto-sized RenderTarget
+  upstream follows the output the content is routed to, and a chain can be pinned to a fixed size when it
+  shouldn't. The parameter card's Resolution row stopped being a read-only mirror of the texture: it edits the
+  input, with a muted line underneath reporting what it currently resolves to.
+  **Open, and the reason the auto-adjust story isn't finished:** mapping quads, their aimed reference points and
+  patch quads are stored in *canvas pixels*, so the output's canvas is the coordinate system of every mapping.
+  `SetupActions.ResizeOutputCanvas` now scales them all when the canvas changes (editing it silently moved every
+  mapping before), but the real fix is to store those quads normalised (0..1) — three fields, a v1→v2 migration
+  dividing by the stored canvas, and ~95 mostly mechanical references. That would make the canvas purely a render
+  size, let it follow the bound plug live, and delete the scaling pass. Not started; the reference-image trace
+  quad is a different space (photo pixels) and stays as it is.
+
+- **2026-09-09 (normalized canvas quads):** `Surface.OutputMapping.Quad`, its `PointTargets` and
+  `OutputDefinition.Patch.Quad` are stored in the canvas' own 0..1 space instead of canvas pixels. The canvas
+  resolution is now only a render size: changing it moves nothing, so `ResizeOutputCanvas` (which had to rescale
+  every quad) is gone and the Canvas field just writes the number. No migration — pre-4.3 setups are preview
+  data; the sanitizer's bounds check (now ±3 canvas sizes in ratios) resets anything left in pixels.
+  **The split that makes this work:** the model is ratios, every *canvas* is pixels. `SurfaceGeometry`'s
+  projections take the space to land in (`canvasSize`), so the renderer asks for `output.CanvasSize` and each
+  editor canvas asks for the same — framing, grids, snap thresholds and handle sizes are all tuned to pixels and
+  are untouched. Patches are read into a pixel scratch (`_patchPx`), edited, and written back as ratios.
+  `TryComputeNdcHomography` no longer divides by the resolution; a `…FromPixels` variant serves the warp preview.
+  The parameter cards show pixels of whatever a rect sits on (canvas or source texture) with an **Edit in
+  Pixels | Ratios** switch (`UserSettings.OutputSetupEditUnits`), shared by the patch and slice cards.
+  **Edge precision:** split boundaries come from one expression per grid line (`n / (float)columns`) so tile n's
+  right edge is bit-identical to tile n+1's left, and snapping *assigns* the caught coordinate instead of adding
+  an offset (`pos + (target - pos)` can land a bit short). Identical floats are what let the rasterizer's
+  top-left fill rule tile 0..50% and 50..100% as rows 0..499 and 500..999 — no doubled row, no gap.
+  **Verified:** builds clean, a normalized setup round-trips unchanged, all four canvases open without errors.
+  **Then, the payoff:** `OutputDefinition.CanvasResolution` accepts 0×0 = *follow the plug*. `FollowsPlug` says
+  so; `ResolvedResolution` (runtime only, never serialized) carries what it actually renders at, filled once per
+  frame by `OutputSetupHandling.ResolveCanvasResolutions` — the host does it because a binding is machine state
+  the setup file deliberately doesn't know. Renderer, canvases and labels read the resolved value; the Canvas
+  field edits the authored one and reads "following Display 2 · 2560×1440" beneath when it is zero. This is what
+  the normalization was for: the same setup renders 1080p or 1440p depending on what is plugged in, and no
+  mapping moves.
+  **Verified on screen:** with P1 set to 0×0 and bound to a 2560×1440 display, the Board card reads
+  "2560×1440 → Display 2" and composites two touching patches tiling the canvas.
+
 ## Suggested order (revised for the flow-view pivot)
 
 1. **P0** (bug fixes, 1–2 days) — independent of every decision below.

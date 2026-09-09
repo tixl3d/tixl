@@ -196,7 +196,7 @@ internal static class OutputManager
 
         _context ??= new EvaluationContext();
         _context.Reset();
-        _context.RequestedResolution = output.CanvasResolution;
+        _context.RequestedResolution = output.ResolvedResolution;
 
         InvalidateContentOncePerFrame(_context);
 
@@ -263,7 +263,7 @@ internal static class OutputManager
 
         _context ??= new EvaluationContext();
         _context.Reset();
-        _context.RequestedResolution = output.CanvasResolution;
+        _context.RequestedResolution = output.ResolvedResolution;
 
         InvalidateContentOncePerFrame(_context);
 
@@ -285,7 +285,7 @@ internal static class OutputManager
                 continue;
 
             var srv = SrvManager.GetSrvForTexture(content);
-            if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(patch.Quad, output.CanvasResolution, out var patchHomography))
+            if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(patch.Quad, out var patchHomography))
                 continue;
 
             _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend.GetColor(_context), Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
@@ -336,13 +336,13 @@ internal static class OutputManager
                 if (!ReferenceEquals(carrier, surface))
                 {
                     // Buffer is consumed by TryComputeNdcHomography before the next iteration reuses it.
-                    if (!SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, mapping, _childQuadBuffer))
+                    if (!SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, mapping, output.CanvasSize, _childQuadBuffer))
                         continue;
 
                     quad = _childQuadBuffer;
                 }
 
-                if (!TryComputeNdcHomography(quad, output.CanvasResolution, out var homography))
+                if (!TryComputeNdcHomography(quad, out var homography))
                     continue;
 
                 if (hasContent)
@@ -364,12 +364,12 @@ internal static class OutputManager
                 // its *projection* lies along a real feature, and walk a point onto the feature it marks. They
                 // ride the raster's switch or the projected photo — both calibration sessions, neither a show.
                 if ((surface.ShowGrid || projectsPhoto) && ReferenceEquals(carrier, surface))
-                    CollectAnnotationOverlay(surface, mapping);
+                    CollectAnnotationOverlay(surface, mapping, output.CanvasSize);
             }
         }
 
         foreach (var pending in _pendingFragments)
-            CollectPhotoFragments(pending.Surface, pending.Mapping, pending.Homography, output.CanvasResolution);
+            CollectPhotoFragments(pending.Surface, pending.Mapping, pending.Homography, output.ResolvedResolution);
 
         if (_drawItems.Count == 0)
         {
@@ -377,7 +377,7 @@ internal static class OutputManager
             return null;
         }
 
-        var target = GetOrCreateTarget(outputId, output.CanvasResolution);
+        var target = GetOrCreateTarget(outputId, output.ResolvedResolution);
         if (target == null)
             return null;
 
@@ -424,7 +424,7 @@ internal static class OutputManager
 
         deviceContext.PixelShader.SetShaderResource(0, null);
 
-        DrawOverlay(deviceContext, output.CanvasResolution);
+        DrawOverlay(deviceContext, output.ResolvedResolution);
         _compositeFrames[outputId] = (frame, true);
         return target.Texture;
     }
@@ -450,7 +450,9 @@ internal static class OutputManager
     private static void CollectPhotoFragments(T3.Core.Output.Surface surface, T3.Core.Output.Surface.OutputMapping mapping,
                                               Matrix4x4 homography, Int2 canvasResolution)
     {
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+        // The overlay is drawn in canvas pixels, so the projection has to land there too.
+        var canvasSize = new Vector2(Math.Max(1, canvasResolution.Width), Math.Max(1, canvasResolution.Height));
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
             return;
 
         var radius = canvasResolution.Height * _photoRadiusOfHeight;
@@ -495,9 +497,10 @@ internal static class OutputManager
     /// than in the shader is what keeps the projected line an even width — by the time it is drawn, no
     /// perspective is left in it.
     /// </summary>
-    private static void CollectAnnotationOverlay(T3.Core.Output.Surface surface, T3.Core.Output.Surface.OutputMapping mapping)
+    private static void CollectAnnotationOverlay(T3.Core.Output.Surface surface, T3.Core.Output.Surface.OutputMapping mapping,
+                                                 Vector2 canvasSize)
     {
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
             return;
 
         // The frame check covers both staleness (the tool was disarmed) and an output being composited more
@@ -675,7 +678,7 @@ internal static class OutputManager
         if (srv is not { IsDisposed: false })
             return null;
 
-        if (!TryComputeNdcHomography(destQuad, targetSize, out var homography))
+        if (!TryComputeNdcHomographyFromPixels(destQuad, targetSize, out var homography))
             return null;
 
         var target = GetOrCreateTarget(targetKey == Guid.Empty ? _scratchTargetId : targetKey, targetSize);
@@ -735,6 +738,10 @@ internal static class OutputManager
         var content = sink.GetContent(_context!);
         if (content is { IsDisposed: false })
             _pulledContent.Add(content);
+
+        // What this send was asked for, so it can warn when two outputs disagree about its size.
+        if (sink is Instance instance)
+            OutputContentStats.NotePull(instance.SymbolChildId, _context!.RequestedResolution, frame);
 
         return content;
     }
@@ -864,21 +871,34 @@ internal static class OutputManager
         _shaderParams.SourceBrBl = new Vector4(rect.Z, rect.W, rect.X, rect.W);
     }
 
-    // Unit quad → dest quad (output pixels) → NDC, using the output's own canvas resolution.
-    private static bool TryComputeNdcHomography(Vector2[] destQuad, Int2 resolution, out Matrix4x4 matrix)
+    /// <summary>Unit quad → a quad in the canvas' own 0..1 space → NDC. No resolution involved: that is the
+    /// point of storing mappings normalized.</summary>
+    private static bool TryComputeNdcHomography(Vector2[] destQuadNormalized, out Matrix4x4 matrix)
     {
-        if (Homography.TryComputeQuadToQuad(_unitQuad, destQuad, out var unitToPixels))
+        if (Homography.TryComputeQuadToQuad(_unitQuad, destQuadNormalized, out var unitToCanvas))
         {
-            var width = Math.Max(resolution.Width, 1);
-            var height = Math.Max(resolution.Height, 1);
-            var ndcFromPixels = new Homography { M11 = 2.0 / width, M13 = -1, M22 = -2.0 / height, M23 = 1, M33 = 1 };
-            matrix = Homography.Multiply(ndcFromPixels, unitToPixels).ToMatrix4x4();
+            var ndcFromCanvas = new Homography { M11 = 2.0, M13 = -1, M22 = -2.0, M23 = 1, M33 = 1 };
+            matrix = Homography.Multiply(ndcFromCanvas, unitToCanvas).ToMatrix4x4();
             return true;
         }
 
         matrix = Matrix4x4.Identity;
         return false;
     }
+
+    /// <summary>The same for a quad given in pixels of <paramref name="resolution"/> — the warp preview, which
+    /// has no canvas of its own.</summary>
+    private static bool TryComputeNdcHomographyFromPixels(Vector2[] destQuad, Int2 resolution, out Matrix4x4 matrix)
+    {
+        var width = MathF.Max(resolution.Width, 1);
+        var height = MathF.Max(resolution.Height, 1);
+        for (var i = 0; i < 4 && i < destQuad.Length; i++)
+            _ndcScratch[i] = new Vector2(destQuad[i].X / width, destQuad[i].Y / height);
+
+        return TryComputeNdcHomography(_ndcScratch, out matrix);
+    }
+
+    private static readonly Vector2[] _ndcScratch = new Vector2[4];
 
     private static Target? GetOrCreateTarget(Guid outputId, Int2 resolution)
     {

@@ -44,14 +44,20 @@ public sealed class Surface
         public Guid OutputId;
         public string Mode = Modes.CornerPin;
 
-        /// <summary>Corners in OutputCanvas pixels: top-left, top-right, bottom-right, bottom-left of the content canvas.</summary>
+        /// <summary>
+        /// Corners in the output canvas' own 0..1 space (Y down): top-left, top-right, bottom-right,
+        /// bottom-left of the content canvas. Normalized rather than pixels, so the canvas resolution is only
+        /// a render size — changing it (or letting it follow the display that is plugged in) leaves every
+        /// mapping aimed exactly where it was. Editors work in pixels and convert at this boundary; see
+        /// <see cref="OutputDefinition.CanvasSize"/>.
+        /// </summary>
         public Vector2[] Quad = new Vector2[4];
 
         /// <summary>
-        /// Where the surface's reference points were aimed on this output, in canvas pixels, by point id. A
-        /// point with a target is "activated": the pin is solved to project it exactly there, and the target
-        /// never moves unless the user drags it again. Points without one are ignored by the solve — they
-        /// are usually outside the projector's frame.
+        /// Where the surface's reference points were aimed on this output, in the same 0..1 canvas space, by
+        /// point id. A point with a target is "activated": the pin is solved to project it exactly there, and
+        /// the target never moves unless the user drags it again. Points without one are ignored by the
+        /// solve — they are usually outside the projector's frame.
         /// </summary>
         public Dictionary<Guid, Vector2> PointTargets = new();
 

@@ -118,8 +118,9 @@ public sealed class OutputDefinition
         /// <summary>The slice shown here; <see cref="Guid.Empty"/> while nothing is routed yet.</summary>
         public Guid SliceId;
 
-        /// <summary>Where the slice lands on the canvas, in output pixels: TL, TR, BR, BL. Axis-aligned for
-        /// tiles; a warped quad is a keystone without a surface.</summary>
+        /// <summary>Where the slice lands on the canvas, in its 0..1 space (Y down): TL, TR, BR, BL.
+        /// Axis-aligned for tiles; a warped quad is a keystone without a surface. Normalized for the same
+        /// reason a mapping's quad is — see <see cref="Surface.OutputMapping.Quad"/>.</summary>
         public Vector2[] Quad = [];
 
         public void WriteToJson(JsonTextWriter writer)
@@ -149,7 +150,22 @@ public sealed class OutputDefinition
     public Guid Id = Guid.NewGuid();
     public string Name = string.Empty;
     public string Kind = Kinds.Display;
+    /// <summary>
+    /// The canvas' pixel size, or 0×0 to follow whatever plug presents this output — the display's mode, so the
+    /// same setup renders at 1080p or 1440p depending on what is plugged in. Everything mapped onto the canvas
+    /// is stored as a fraction of it, so this is only a render size and changing it moves nothing.
+    /// </summary>
     public Int2 CanvasResolution = new(1920, 1080);
+
+    /// <summary>Whether this canvas takes its size from the plug it is bound to.</summary>
+    public bool FollowsPlug => CanvasResolution.Width <= 0 || CanvasResolution.Height <= 0;
+
+    /// <summary>
+    /// What the canvas actually renders at: <see cref="CanvasResolution"/> when it is set, else the bound
+    /// plug's. Runtime only, never serialized — the binding is machine state the setup deliberately doesn't
+    /// know, so the host resolves this once per frame (see OutputSetupHandling.UpdateFrame).
+    /// </summary>
+    public Int2 ResolvedResolution = new(1920, 1080);
     public ProjectorCamera? Camera;
 
     /// <summary>Pause presenting to this output without dropping its device binding (e.g. mute an NDI feed).</summary>
@@ -161,12 +177,35 @@ public sealed class OutputDefinition
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
     public CanvasPlacement? BoardPlacement;
 
-    /// <summary>The whole canvas as a TL, TR, BR, BL pixel quad — the rung-0 patch, and the reset shape.</summary>
-    public Vector2[] FullCanvasQuad()
+    /// <summary>The whole canvas as a TL, TR, BR, BL quad in its 0..1 space — the rung-0 patch, and the reset shape.</summary>
+    public static Vector2[] FullCanvasQuad()
     {
-        float w = Math.Max(1, CanvasResolution.Width);
-        float h = Math.Max(1, CanvasResolution.Height);
-        return [Vector2.Zero, new Vector2(w, 0), new Vector2(w, h), new Vector2(0, h)];
+        return [Vector2.Zero, new Vector2(1, 0), Vector2.One, new Vector2(0, 1)];
+    }
+
+    /// <summary>The canvas in pixels, floored at 1 — the factor between stored 0..1 quads and what editors drag in.</summary>
+    public Vector2 CanvasSize => new(Math.Max(1, ResolvedResolution.Width), Math.Max(1, ResolvedResolution.Height));
+
+    /// <summary>A stored 0..1 point as canvas pixels.</summary>
+    public Vector2 ToPixels(Vector2 normalized) => normalized * CanvasSize;
+
+    /// <summary>Canvas pixels back into the stored 0..1 space.</summary>
+    public Vector2 ToNormalized(Vector2 pixels) => pixels / CanvasSize;
+
+    /// <summary>Reads a stored quad into <paramref name="into"/> as canvas pixels.</summary>
+    public void ReadQuadInPixels(ReadOnlySpan<Vector2> quad, Span<Vector2> into)
+    {
+        var size = CanvasSize;
+        for (var i = 0; i < 4 && i < quad.Length && i < into.Length; i++)
+            into[i] = quad[i] * size;
+    }
+
+    /// <summary>Writes canvas pixels back into a stored 0..1 quad.</summary>
+    public void WriteQuadFromPixels(ReadOnlySpan<Vector2> pixels, Span<Vector2> quad)
+    {
+        var size = CanvasSize;
+        for (var i = 0; i < 4 && i < pixels.Length && i < quad.Length; i++)
+            quad[i] = pixels[i] / size;
     }
 
     public void WriteToJson(JsonTextWriter writer)

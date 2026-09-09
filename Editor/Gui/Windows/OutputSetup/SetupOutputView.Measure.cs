@@ -282,11 +282,11 @@ internal sealed partial class SetupOutputView
     /// (they mark physical features, and those didn't move); child regions do not (their meters are a design
     /// placement, and it is exactly those meters that just became truthful).
     /// </summary>
-    private static bool TryStraightenFromLines(Surface surface, Guid outputId)
+    private static bool TryStraightenFromLines(Setup setup, Surface surface, Guid outputId)
     {
         var mapping = surface.FindMapping(outputId);
         if (mapping == null || mapping.Quad.Length < 4 || SetupActions.CountLines(surface) < MinLinesToStraighten
-            || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+            || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var surfaceToOutput))
         {
             return false;
         }
@@ -305,7 +305,7 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < 4; i++)
             mapping.Quad[i] = refined[i];
 
-        if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, out var outputToSurface))
+        if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var outputToSurface))
             return false;
 
         // How the surface's own space just moved. Every other projector on this surface has to follow it, or
@@ -316,7 +316,7 @@ internal sealed partial class SetupOutputView
             var rect = SurfaceGeometry.LocalRect(surface);
             foreach (var other in surface.OutputMappings)
             {
-                if (ReferenceEquals(other, mapping) || !SurfaceGeometry.TryGetSurfaceToOutput(surface, other, out var otherToOutput))
+                if (ReferenceEquals(other, mapping) || !SurfaceGeometry.TryGetSurfaceToOutput(surface, other, SurfaceGeometry.CanvasSizeOf(setup, other.OutputId), out var otherToOutput))
                     continue;
 
                 for (var i = 0; i < 4; i++)

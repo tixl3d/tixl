@@ -20,7 +20,7 @@ The strip below the canvas lays the setup out along its content flow, in four co
 
 1. **Content** — every [SendToOutput] op in the graph. Each one is a source of pixels. A **slice** cuts a rectangle out of a source. A source whose single slice is the full frame shows no slice row: that slice *is* the source, so it is folded into it and appears only once you cut, name, or add another.
 2. **Surfaces** — the planes light lands on: a wall, a screen, the face of a set piece. A surface shows one slice and is mapped onto one or more outputs. **Regions** are coplanar children of a surface, arranged in pixels, for poster slots and split layouts.
-3. **Outputs** — the canvases that projectors and displays receive, in pixels. Surfaces are corner-pinned onto them. A **patch** feeds a slice straight onto part of the canvas without a surface, for a plain display or a quick test. As with slices, an output's sole full-canvas patch is folded into the output row; **Add Patch** creates a visible tile.
+3. **Outputs** — the canvases that projectors and displays receive. A canvas has a pixel size, but everything mapped onto it is stored as a fraction of it, so changing that size re-renders at the new resolution without moving a single mapping. Set the size to 0 × 0 and the canvas takes the resolution of whatever is plugged into it, so the same setup renders at 1080p or 1440p depending on the display. Surfaces are corner-pinned onto them. A **patch** feeds a slice straight onto part of the canvas without a surface, for a plain display or a quick test. As with slices, an output's sole full-canvas patch is folded into the output row; **Add Patch** creates a visible tile.
 4. **Local bindings** — this machine's plugs. Attached displays are detected; **+** adds a Spout or NDI sender under a name you choose. A plug whose package isn't loaded is listed but sends nothing.
 
 Lines between the columns show the routing: slice → surface, surface → output, slice → patch, output → plug. Hovering or selecting a row lights up its lines. Rows whose entity isn't in use recede.
@@ -72,7 +72,7 @@ The bindings are also reachable from the output's context menu and from the Outp
 
 ## Content from the graph
 
-[SendToOutput] supplies a texture to the setup. Its **Update** toggle freezes the content at its last frame when off. The op's parameter window shows the texture's resolution and how many slices and targets use it.
+[SendToOutput] supplies a texture to the setup. Its **Update** toggle freezes the content at its last frame when off. Its **Resolution** is 0 × 0 by default, which means "render at whatever the output asks for": an auto-sized [RenderTarget] upstream then follows the projector or display this content is routed to, so the same graph renders at 1080p or at 4K without being edited. Set a size to pin it regardless of where it goes.
 
 [UseProjectorCam] renders its content through an output's projector camera, so 3D geometry aligned to the stage lands correctly on that projector without a corner pin. Wire its result through a [RenderTarget] into a [SendToOutput] bound to the same output.
 

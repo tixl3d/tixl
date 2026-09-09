@@ -215,8 +215,10 @@ internal sealed partial class SetupOutputView
     // framing tightens onto that surface. Blending R and the framing is what makes the views morph.
     private void DrawOutputCanvas(Setup setup, OutputDefinition output, Guid outputId, SetupEntitySelection? selection)
     {
-        var canvasSize = new Vector2(Math.Max(1, output.CanvasResolution.Width),
-                                     Math.Max(1, output.CanvasResolution.Height));
+        // This canvas works in the output's pixels — framing, grids, snap thresholds and handles are all tuned
+        // to that. Mappings and patches are *stored* as ratios of the canvas, so they are scaled into these
+        // pixels on the way in and divided back out on the way to the model.
+        var canvasSize = output.CanvasSize;
 
         var straighten = Math.Clamp(_viewMorph, 0f, 1f);
 
@@ -444,7 +446,7 @@ internal sealed partial class SetupOutputView
                 var carrierMapping = carrier?.FindMapping(outputId);
                 var immediateParent = setup.FindSurface(surface.ParentId);
                 if (carrier == null || carrierMapping == null || immediateParent == null
-                    || !SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, carrierMapping, _childQuadBuffer))
+                    || !SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), _childQuadBuffer))
                     continue;
 
                 DrawChildRegion(setup, selection, dl, rToView, rToOutput, viewMin, carrier, carrierMapping, immediateParent, surface, editable, handleFade);
@@ -608,7 +610,7 @@ internal sealed partial class SetupOutputView
 
             // Only the focused surface shows its anchor — one origin at a time, or the canvas fills with them.
             if (isFocused)
-                DrawAnchorMarker(dl, surface, mappingData, rToView, viewMin, handleFade);
+                DrawAnchorMarker(dl, surface, mappingData, rToView, viewMin, canvasSize, handleFade);
 
             // Edge handles belong to the focused surface only — they're contextual, and four extra dots on
             // every quad would drown the canvas. A corner moves freely (perspective); an edge crops.
@@ -639,8 +641,8 @@ internal sealed partial class SetupOutputView
         }
 
         if (basis != null && basisMapping != null
-            && SurfaceGeometry.TryGetSurfaceToOutput(basis, basisMapping, out var basisToOutput)
-            && SurfaceGeometry.TryGetOutputToSurface(basis, basisMapping, out var outputToBasis))
+            && SurfaceGeometry.TryGetSurfaceToOutput(basis, basisMapping, SurfaceGeometry.CanvasSizeOf(setup, basisMapping.OutputId), out var basisToOutput)
+            && SurfaceGeometry.TryGetOutputToSurface(basis, basisMapping, SurfaceGeometry.CanvasSizeOf(setup, basisMapping.OutputId), out var outputToBasis))
         {
             DrawAnnotations(dl, basis, Homography.Multiply(rToView, basisToOutput), Homography.Multiply(outputToBasis, rToOutput),
                             viewMin, editable, handleFade * straighten);
@@ -666,7 +668,7 @@ internal sealed partial class SetupOutputView
     private void DrawReferencePointPins(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping, Guid outputId,
                                         Vector2 canvasSize, bool editable, float fade)
     {
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var surfaceToOutput))
             return;
 
         // The discs are always on the canvas — they are what says which feature a point marks; the toggle
@@ -714,7 +716,7 @@ internal sealed partial class SetupOutputView
             else if (phase == CanvasPointHandle.DragPhase.Dragging && _gesture.Is(GestureKinds.AimPoint, surface.Id))
             {
                 mapping.PointTargets[point.Id] = px;
-                SolvePinFromTargets(surface, mapping);
+                SolvePinFromTargets(surface, mapping, canvasSize);
             }
             else if (phase == CanvasPointHandle.DragPhase.Completed)
             {
@@ -779,9 +781,9 @@ internal sealed partial class SetupOutputView
     /// incremental — the transform taking the current projections to the targets, applied to the pin; from
     /// four on it is the (least-squares) homography from surface metres straight to the targets.
     /// </summary>
-    private void SolvePinFromTargets(Surface surface, Surface.OutputMapping mapping)
+    private void SolvePinFromTargets(Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize)
     {
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
             return;
 
         _pinFrom.Clear();
@@ -889,8 +891,8 @@ internal sealed partial class SetupOutputView
 
     private static void AddMapping(Surface surface, OutputDefinition output, Guid outputId)
     {
-        var canvasW = Math.Max(1, output.CanvasResolution.Width);
-        var canvasH = Math.Max(1, output.CanvasResolution.Height);
+        var canvasW = Math.Max(1, output.ResolvedResolution.Width);
+        var canvasH = Math.Max(1, output.ResolvedResolution.Height);
 
         var aspect = surface.SizeInMeters.Y > 0.0001f ? surface.SizeInMeters.X / surface.SizeInMeters.Y : 1f;
         var maxW = canvasW * 0.6f;
@@ -922,9 +924,9 @@ internal sealed partial class SetupOutputView
     /// quad's winding.
     /// </summary>
     private void DrawAnchorMarker(ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping,
-                                  Homography rToView, Vector2 viewMin, float fade)
+                                  Homography rToView, Vector2 viewMin, Vector2 canvasSize, float fade)
     {
-        if (fade <= 0.01f || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, out var surfaceToOutput))
+        if (fade <= 0.01f || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
             return;
 
         // The anchor is the origin of surface space.
@@ -960,7 +962,7 @@ internal sealed partial class SetupOutputView
                                    // an incremental edit would compound frame over frame. From the snapshot the cursor maps to
                                    // one absolute edge position, stable however long the drag runs.
                                    _gesture.Snapshot!.Value.Restore(surface);
-                                   if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, out var outputToSurface))
+                                   if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var outputToSurface))
                                        return;
 
                                    SurfaceGeometry.LocalBounds(surface, out var oldMin, out var oldMax);

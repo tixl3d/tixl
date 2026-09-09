@@ -1,6 +1,7 @@
 #nullable enable
 using System.IO;
 using T3.Editor.Gui.Windows.OutputSetup;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 
 namespace T3.Editor.UiModel.ProjectHandling;
@@ -42,6 +43,28 @@ internal static class OutputSetupHandling
         var entry = GetOrLoadEntry(package.Folder);
         ActiveSetup.Current = entry.Setup;
         ActiveSetup.Machine = entry.MachineConfig;
+        ResolveCanvasResolutions(entry.Setup, entry.MachineConfig);
+    }
+
+    /// <summary>
+    /// Fills each output's <see cref="OutputDefinition.ResolvedResolution"/>: its own canvas size, or the size
+    /// of the plug bound to it when that is left at 0×0. Done here rather than in the model because a binding
+    /// is machine state — the setup file stays free of display numbering.
+    /// </summary>
+    private static void ResolveCanvasResolutions(Setup setup, MachineConfig machineConfig)
+    {
+        foreach (var output in setup.Outputs)
+        {
+            if (!output.FollowsPlug)
+            {
+                output.ResolvedResolution = output.CanvasResolution;
+                continue;
+            }
+
+            var plugId = Plugs.BoundPlugId(machineConfig.TryGetBinding(output.Id));
+            var resolution = plugId == Guid.Empty ? new Int2(1920, 1080) : Plugs.PlugResolution(plugId);
+            output.ResolvedResolution = resolution;
+        }
     }
 
     /// <summary>Drops a closed project's cached setup, so reopening reloads from disk.</summary>

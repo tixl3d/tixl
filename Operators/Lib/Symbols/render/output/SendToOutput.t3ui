@@ -24,6 +24,13 @@
         "X": -200.0,
         "Y": 180.0
       }
+    },
+    {
+      "InputId": "3c7f1e58-0a94-4d62-b8f3-2e5d9a0c4b17"/*Resolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
     }
   ],
   "SymbolChildUis": [],
