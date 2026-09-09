@@ -701,6 +701,24 @@ with an explanatory comment) — the row-callback API design made compliance imp
   by a second patch. Consequence: "Add Patch" now seeds a centred quarter-canvas tile, since a full-canvas one
   would be folded away the moment it was created.
 
+- **2026-09-09 (source space was sticky):** `_inSourceSpace` was a bare bool, so once any content card had been
+  double-clicked the flag stayed set and *selecting* another send — from the graph or the strip — swapped the
+  canvas to that other source's space, contradicting "selecting never leaves the Board; a space is entered by
+  double-click". It is now `_sourceSpaceId`: the space belongs to the source it was opened for, and a pick that
+  resolves to any other source (or to a surface, or nothing) leaves it. `OutputSetupModeView` does that check
+  once before its dispatch, via `SourceOfShownEntity`.
+
+- **2026-09-09 (the source canvas is gone):** it was reachable only by double-clicking a content card and left
+  only by a "Board" return bar — a hidden mode whose sticky flag let a later selection swap which source it
+  showed. Restoring it as a fourth tab was tried and reverted once the redundancy was measured: `DrawSourceCanvas`
+  began by calling `DrawBoardLayer` and then redrew the same texture with the same `EditSlice`, so it added a
+  framing preset and nothing else. Straight and Output are different projections; a source's texture is the same
+  flat rectangle the card already shows. Deleted: `DrawSourceCanvas`, the draw-to-cut gesture
+  (`GestureKinds.SliceDraft`, `HandleSliceDraft`), `EditMode.Content`, `_sourceSpaceId` / `ShowsContent` /
+  `ContentSubjectId`. Slices keep their per-slice consumer line and hover linking, moved onto `DrawBoardSubRect`
+  so they show wherever slices are drawn; they are created from the send's "Add slice" (row or card) and copied
+  with the slice's "Duplicate".
+
 ## Suggested order (revised for the flow-view pivot)
 
 1. **P0** (bug fixes, 1–2 days) — independent of every decision below.

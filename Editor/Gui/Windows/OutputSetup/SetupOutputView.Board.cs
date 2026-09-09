@@ -28,11 +28,11 @@ internal sealed partial class SetupOutputView
 {
     /// <summary>Whether the Board is the current view — selection changes then keep showing it rather than
     /// switching to the selected entity's canvas.</summary>
-    public bool ShowsBoard => _editMode == EditMode.Board && !_inSourceSpace;
+    public bool ShowsBoard => _editMode == EditMode.Board;
 
     // A content source's space (its texture with the slices laid out) is entered from its card and left by
     // "Board"; it is not one of the tabs, so it rides beside the mode.
-    private bool _inSourceSpace;
+
 
     /// <summary>The reference image whose space was entered from the Board (double-click); Empty while none is.
     /// Cleared by every other entry point, so leaving it is a matter of showing anything else.</summary>
@@ -91,7 +91,6 @@ internal sealed partial class SetupOutputView
         if (CustomComponents.StateButton("Board", CustomComponents.ButtonStates.Emphasized))
         {
             _editMode = EditMode.Board;
-            _inSourceSpace = false;
             OpenedReferenceImageId = Guid.Empty;
         }
 
@@ -424,9 +423,6 @@ internal sealed partial class SetupOutputView
             if (kind == SetupEntitySelection.EntityKind.ReferenceImage)
                 OpenedReferenceImageId = id;
 
-            if (kind == SetupEntitySelection.EntityKind.ContentSource)
-                _inSourceSpace = true;
-
             _editMode = kind switch
                             {
                                 SetupEntitySelection.EntityKind.Surface => EditMode.Straight,
@@ -683,6 +679,14 @@ internal sealed partial class SetupOutputView
         _boardQuad[2] = sMax;
         _boardQuad[3] = new Vector2(sMin.X, sMax.Y);
         DrawEntityLabel(dl, kind, _boardQuad, id, label, isSelected, 0.9f * fade, pulse);
+
+        // A slice says what shows it, and lights those rows while the cursor is on it.
+        if (kind != SetupEntitySelection.EntityKind.Slice)
+            return;
+
+        DrawSliceConsumers(dl, setup, id, CornerPinHandles.GetCenteredLabelRect(_boardQuad, label), 0.7f * fade);
+        if (ImGui.IsWindowHovered() && IsMouseInRect(sMin, sMax))
+            PulseConsumers(setup, id);
     }
 
     /// <summary>Regions nest inside their surface at their metre position from the parent's anchor, recursively —

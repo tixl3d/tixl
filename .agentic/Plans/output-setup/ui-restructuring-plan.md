@@ -434,7 +434,13 @@ the entities (Miro-like; deliberately not in C's scope).
 4. **C:** default view after opening a setup — Overview vs last-used space (leaning: last-used,
    Overview on first open).
 5. **C:** view-mode consolidation — settled 2026-09-07 as **Board | Straight | Output** (Content dropped;
-   a source's space is entered from its card). Original leaning kept for the Stage part: the segmented control reduces to
+   a source's space is entered from its card); **re-opened and re-confirmed 2026-09-09**. Content was
+   briefly restored as a fourth tab and then dropped again, with the reason sharpened: Straight and Output
+   earn tabs because each is a different *projection* (a rectification, a projector frustum), while a source's
+   texture is the same flat rectangle the Board card already shows — a zoom, not a camera. The source canvas
+   is gone entirely; slices are drawn and edited on the content card (they already were), created from the
+   send's context menu and duplicated from the slice's. What had made the old space feel like a bug was its
+   sticky flag and its own return bar, both removed. Original leaning kept for the Stage part: the segmented control reduces to
    **Board | Stage** — *every other view is a camera, not a mode*. Straight = ortho camera facing the
    selected surface (a surface with world orientation *is* an ortho camera definition); Output = the
    projector's frustum camera ("look through Projector 1", reachable by double-clicking the output);

@@ -69,16 +69,13 @@ internal sealed partial class SetupOutputView
         var straightCarrier = SurfaceGeometry.FindCarrier(setup, _shownSurfaceId, outputId);
         var hasOutput = output != null;
         var hasStraightSubject = straightCarrier != null || TracedImageOf(setup, _shownSurfaceId) != null;
-        if (CustomComponents.SegmentedButton(ref _editMode,
-                                       isItemDisabled: mode => mode switch
-                                                                   {
-                                                                       EditMode.Board => false,
-                                                                       EditMode.Straight => !hasStraightSubject,
-                                                                       _ => !hasOutput,
-                                                                   }))
-        {
-            _inSourceSpace = false; // a tab is a way out of a source's space too
-        }
+        CustomComponents.SegmentedButton(ref _editMode,
+                                         isItemDisabled: mode => mode switch
+                                                                     {
+                                                                         EditMode.Board => false,
+                                                                         EditMode.Straight => !hasStraightSubject,
+                                                                         _ => !hasOutput,
+                                                                     });
 
         // A disabled segment can't be clicked away, so a mode left selected after its precondition lapses
         // (focus moved off the surface, no output at all) is reset here instead.

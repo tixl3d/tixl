@@ -27,7 +27,6 @@ internal sealed partial class SetupOutputView
         PatchQuad,      // a patch's corner or edge
         PatchMove,      // a patch by its label
         Slice,          // a slice rect edit
-        SliceDraft,     // a new slice being drawn on empty source area
         Annotation,     // a measuring line's endpoint
         AnnotationDraft,// a new measuring line being drawn
         BoardCard,      // Board cards moving

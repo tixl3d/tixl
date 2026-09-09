@@ -18,21 +18,22 @@ A setup is saved next to the project in its `.meta` folder and is meant to be sh
 
 The strip below the canvas lays the setup out along its content flow, in four columns:
 
-1. **Content** — every [SendToOutput] op in the graph. Each one is a source of pixels. A **slice** cuts a rectangle out of a source; sources start with one full-frame slice, and the source's context menu adds more.
+1. **Content** — every [SendToOutput] op in the graph. Each one is a source of pixels. A **slice** cuts a rectangle out of a source. A source whose single slice is the full frame shows no slice row: that slice *is* the source, so it is folded into it and appears only once you cut, name, or add another.
 2. **Surfaces** — the planes light lands on: a wall, a screen, the face of a set piece. A surface shows one slice and is mapped onto one or more outputs. **Regions** are coplanar children of a surface, arranged in pixels, for poster slots and split layouts.
-3. **Outputs** — the canvases that projectors and displays receive, in pixels. Surfaces are corner-pinned onto them. A **patch** feeds a slice straight onto part of the canvas without a surface, for a plain display or a quick test.
+3. **Outputs** — the canvases that projectors and displays receive, in pixels. Surfaces are corner-pinned onto them. A **patch** feeds a slice straight onto part of the canvas without a surface, for a plain display or a quick test. As with slices, an output's sole full-canvas patch is folded into the output row; **Add Patch** creates a visible tile.
 4. **Local bindings** — this machine's plugs. Attached displays are detected; **+** adds a Spout or NDI sender under a name you choose. A plug whose package isn't loaded is listed but sends nothing.
 
 Lines between the columns show the routing: slice → surface, surface → output, slice → patch, output → plug. Hovering or selecting a row lights up its lines. Rows whose entity isn't in use recede.
 
 ### Connecting things
 
-Drag a row onto another row to connect them. The direction doesn't matter: dropping a surface onto an output is the same link as dropping the output onto the surface. What connects to what:
+Drag a row onto another row to connect them. The direction doesn't matter: dropping a surface onto an output is the same link as dropping the output onto the surface. One rule covers every pair: a drop connects, dropping what the target already shows changes nothing, and otherwise the target's input is replaced. What connects to what:
 
-- A slice or source onto a surface shows it there. Dropping a second slice onto an occupied surface adds a region for it instead of replacing.
+- A slice or source onto a surface shows it there, replacing whatever it showed. To show a second thing on the same wall, add a region and feed that.
 - A surface onto an output maps it there with a default corner pin.
-- A slice or source onto an output adds a full-canvas patch; onto a patch, it re-feeds that patch.
-- An output onto a plug binds it to that display or stream.
+- A slice or source onto an output fills its canvas. No patch appears in the strip: an output's sole full-canvas patch is folded into the output row, the way a source's full-frame slice is folded into the source.
+- A slice or source onto a patch re-feeds that patch. A surface onto a patch takes the patch's place, pinned to its quad.
+- An output onto a plug binds it to that display or stream. Content or a surface dropped on a plug routes into the output it presents, creating and binding one if the plug is still free.
 
 With a slice or surface selected, every row that could take it shows an arrow in its gutter; clicking the arrow binds or unbinds without dragging. Each row's context menu offers the same connections plus Rename, Duplicate and Delete. `Del` removes the selection while the strip has focus.
 
@@ -42,7 +43,9 @@ With a slice or surface selected, every row that could take it shows an arrow in
 
 The Board shows every entity as a card at its neutral placement, in metres: sources, surfaces, outputs, reference photos and props. It answers "what is in this venue and how big is it". Drag a card by its frame or its name label to move it; the handle at the top-right corner scales it. Selecting a card selects the entity everywhere else; right-click a card or its label for the entity's menu. Right-click empty Board to add a surface, a reference image or a prop.
 
-Double-clicking a card enters its space: a surface opens **Straight**, an output opens **Output**, a source opens its texture to lay out slices. Clicking empty strip or choosing **Board** returns.
+Double-clicking a card opens its tab: a surface opens **Straight**, an output opens **Output**. Choosing **Board**, or clicking empty strip, returns.
+
+A send's card is already its texture seen flat, so slices live there rather than in a view of their own: each is drawn as a labelled sub-rect, with a line naming what shows it, and the selected one is edited in place — edges crop, corners scale with the aspect held, the label moves it, everything snapping to the source's borders and the sibling slices. Add slices from the send's context menu and duplicate them from the slice's.
 
 ### Straight
 

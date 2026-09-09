@@ -1,102 +1,76 @@
 ---
 id: output-setup-slice-space
-title: Output Setup — Slices in the Source Space
+title: Output Setup — Slices on the Content Card
 scope: output-window
 tags: [projection-mapping]
 added: 2026-09-09
 added-in-version: 4.3
 prerequisites:
-  - A writable project is open whose active setup has one SendToOutput showing a recognisable image, "Surface 1" showing "Slice 1" and mapped to output "P1", and a patch "Patch 1" on P1 showing the same slice (the "Output Setup — Patches" set builds this).
+  - A writable project is open whose active setup has one SendToOutput showing a recognisable image, "Surface 1" showing "Slice 1" and mapped to output "P1", and a patch on P1 showing the same slice (the "Output Setup — Patches" set builds this).
   - The graph window and one output window with the Flow Outliner shown are visible.
 related-help:
   - ../.help/docs/using/OutputSetup.md
 ---
 
-Covers the implicit slice (content piped onto a surface with no slice in sight), cutting a slice
-by drawing on the source, and the two-way link between slices and what shows them: hover a slice
-to light its consumers, hover a consumer to light its slice, and read the consumer list under
-every slice label.
+Covers slices where they live: on the send's card on the Board, whose thumbnail is the source
+seen flat. Also the implicit slice (content piped onto a surface with no slice in sight) and the
+two-way link between a slice and what shows it.
 
 ## Step: Content pipes onto a surface without a slice
 
 **Action:**
-1. Start from a source with no slices (delete every slice under "SendToOutput" in the CONTENT
+1. Start from a send with no slices (delete every slice under "SendToOutput" in the CONTENT
    column). Drag the "SendToOutput" row onto "Surface 1", then onto "P1".
-2. Look at the CONTENT column, the Board card and the Parameter window with the content row
-   selected.
-3. Double-click the "SendToOutput" card.
+2. Look at the CONTENT column, the send's Board card, and the Parameter window with the content
+   row selected.
 
 **Expected:**
-- After 1: both connections work — the surface and a new patch show the content.
+- After 1: both connections work — the surface and the output show the content.
 - After 2: no slice row appears under "SendToOutput" and it has no expander; the curves run
-  from the content row itself to "Surface 1" and "Patch 1". The card shows the picture with no
-  inner "Slice 1" frame. The op's Output Setup section reads "full frame → 2 targets".
-- After 3: the source space shows the bare texture with no slice rect.
+  from the content row itself. The card shows the picture with no inner "Slice 1" frame. The
+  op's Output Setup section reads "full frame → 2 targets".
 
-## Step: The implicit slice surfaces when it stops being the whole frame
-
-**Action:**
-1. On the Board, crop "Surface 1" by an edge (plain drag), then Ctrl+Z.
-2. Right-click the "SendToOutput" row → **Add slice**, then Ctrl+Z.
-
-**Expected:**
-- After 1: "Slice 1" (cropped) and "Slice 2" (the full frame the patch keeps) appear as rows —
-  the crop cloned the shared slice; undo folds them away again.
-- After 2: "Slice 1" and "Slice 2" appear as rows, both full-frame; undo folds them away again.
-
-## Step: Entering the source space
+## Step: The slice appears once it stops being the whole frame
 
 **Action:**
-Double-click the "SendToOutput" card on the Board.
+1. Right-click the "SendToOutput" row → **Add slice**, then Ctrl+Z.
+2. Right-click the send's **card** on the Board → **Add slice**.
 
 **Expected:**
-- The view flies into the card: the source texture fills the canvas with "Slice 1" drawn as a
-  rect over it. Under the slice's name label a small muted line reads "→ Surface 1, Patch 1".
+- After 1: "Slice 1" and "Slice 2" appear as rows, both full-frame; the undo folds them away.
+- After 2: the same, reached from the card — the card's menu is the row's menu.
 
-## Step: Drawing a new slice
+## Step: Editing a slice on the card
 
 **Action:**
-1. Press on an empty part of the texture (outside "Slice 1", or shrink it first) and drag a
-   rectangle about a quarter of the texture wide; release.
-2. Press on the texture and release without moving.
-3. Press and drag a rectangle smaller than a few pixels; release.
-4. Ctrl+Z.
+1. Click "Slice 1" in the CONTENT column, then look at the send's card.
+2. Drag the slice's right edge to the left, then a corner, then its name label.
+3. Ctrl+Z three times.
 
 **Expected:**
-- After 1: while dragging, a magenta rect follows the cursor with its size in source pixels
-  beside it, and its moving corner snaps to the texture's edges and midlines and to "Slice 1"'s
-  edges with a guide line. On release a new slice "Slice 2" exists, selected, with the CONTENT
-  column listing it under "SendToOutput" and the line under its label reading "unused".
-- After 2: nothing is created; the selection is unchanged.
-- After 3: nothing is created.
-- After 4: "Slice 2" is gone.
+- After 1: the slice is drawn on the card with handles; the Parameter window shows its Position
+  and Size in source pixels.
+- After 2: the edge crops it, the corner scales it with its aspect held, the label moves it.
+  Each snaps to the source's borders and midlines and to the other slice, drawing a guide line.
+- After 3: each edit is reverted separately.
 
-## Step: Drawing clamps to the texture
+## Step: Duplicating a slice
 
 **Action:**
-Start a drag inside the texture and drag well past its right and bottom edges before releasing.
+Right-click the "Slice 1" label on the card (or its row) → **Duplicate**.
 
 **Expected:**
-- The draft rect stops at the texture's border; the created slice ends exactly there.
+- A second slice with the same rect appears, selected, listed under the send.
 
-## Step: Hover links slices and consumers both ways
+## Step: A slice says where it goes
 
 **Action:**
-1. Hover the "Surface 1" row in the SURFACES column, then the "Patch 1" row in OUTPUTS.
-2. Hover the "Slice 1" rect on the texture.
-3. Select "Slice 1" (click its label) and hover its rect again.
+1. Look under each slice's name label on the card.
+2. Hover the "Surface 1" row in SURFACES, then the patch row under P1.
+3. Hover a slice's rect on the card.
 
 **Expected:**
-- After 1: "Slice 1"'s rect on the texture pulses while either row is hovered.
-- After 2: the "Surface 1" and "Patch 1" rows in the outliner pulse.
-- After 3: the same rows pulse for the selected (editable) slice; the consumer line under its
-  label stays visible.
-
-## Step: The consumer line follows the routing
-
-**Action:**
-Drag "Slice 2" (draw one if needed) from the CONTENT column onto the "P1" row, then look at the
-texture; then delete the new patch and look again.
-
-**Expected:**
-- The line under "Slice 2" changes from "unused" to "→ Patch 2", then back to "unused".
+- After 1: a small muted line reads "→ Surface 1, Patch 1" under the slice they show, and
+  "unused" under one nothing shows.
+- After 2: that slice's rect on the card pulses while either row is hovered.
+- After 3: the rows of everything showing it pulse in the outliner.

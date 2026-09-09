@@ -15,257 +15,13 @@ using Vector2 = System.Numerics.Vector2;
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// Slice editing for <see cref="SetupOutputView"/>: the flat source/atlas canvas where a send's slices are
-/// laid out, and the axis-aligned rect editor (edges crop, corners scale with the aspect held, the label
-/// moves it, everything snapping to the source's own borders). No perspective is involved — which is exactly
-/// why slices are edited here on the flat source rather than warped onto the wall.
+/// Slice editing for <see cref="SetupOutputView"/>: the axis-aligned rect editor (edges crop, corners scale
+/// with the aspect held, the label moves it, everything snapping to the source's own borders), plus what a
+/// slice says about where it goes. Slices are edited on their content card on the Board, whose thumbnail is
+/// already the source seen flat — no perspective, so no separate canvas for them.
 /// </summary>
 internal sealed partial class SetupOutputView
 {
-    /// <summary>
-    /// The source seen flat, with every slice cut from it. Reached by selecting a CONTENT row: a slice belongs
-    /// to the send, not to a surface, so this is where an atlas gets laid out — all the sends sharing this
-    /// texture at once, so overlaps and gaps are visible. No perspective is involved, which is exactly why
-    /// slices are arranged here rather than on the wall.
-    /// </summary>
-    public void DrawSourceCanvas(Guid contentChildId, SetupEntitySelection? selection = null, Guid selectedSliceId = default)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
-            return;
-
-        var source = setup.FindSourceByChildId(contentChildId);
-        OpenedReferenceImageId = Guid.Empty;
-        var title = SetupActions.TryGetContentName(contentChildId) ?? "Content";
-        if (!DeferHeader(HeaderKinds.Return, title: title))
-            DrawBoardReturnHeader(title);
-
-        var canvasTop = ImGui.GetCursorScreenPos();
-        _boardCanvas.UpdateCanvas(out _);
-        var dl = ImGui.GetWindowDrawList();
-        // Clip to the region below the toolbar — the canvas draws to the window list and would spill up over it.
-        dl.PushClipRect(canvasTop, ImGui.GetWindowPos() + ImGui.GetWindowSize(), true);
-
-        // The source's space is its card: the texture lands exactly where the card's thumbnail was.
-        SeedBoardPlacements(setup);
-        Texture2D? content = null;
-        var hasContent = source != null && OutputManager.TryGetSourceContent(contentChildId, out _, out content) && content is { IsDisposed: false };
-        EnterSpace(setup, SetupEntitySelection.EntityKind.ContentSource, contentChildId, hasContent);
-        DrawBoardLayer(setup, machineConfig, selection);
-
-        if (!hasContent || _spaceBlend <= 0.001f)
-        {
-            if (!hasContent)
-                CustomComponents.EmptyWindowMessage("No content yet — connect a texture to this\nSendToOutput to lay out its slices.");
-
-            ResolvePicking(setup, selection);
-            dl.PopClipRect();
-            return;
-        }
-
-        var textureSize = new Vector2(Math.Max(1, content!.Description.Width), Math.Max(1, content.Description.Height));
-        FitToArea(textureSize, EditMode.Board, contentChildId);
-
-        var min = _projection.CanvasToScreen(Vector2.Zero);
-        var max = _projection.CanvasToScreen(textureSize);
-        dl.AddRectFilled(min, max, UiColors.BackgroundFull.Fade(0.4f));
-
-        var srv = SrvManager.GetSrvForTexture(content);
-        if (srv is { IsDisposed: false })
-            dl.AddImage(srv.NativePointer, min, max);
-
-        dl.AddRect(min, max, UiColors.ForegroundFull.Fade(0.25f));
-
-        // A grab that never turned into a drag (released before the editor picked it up) must not linger.
-        if (_sliceLabelGrabPending && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
-            _sliceLabelGrabPending = false;
-
-        // Every slice cut from this source. The primary one is editable; the other selected ones read as
-        // selected (multi-select), and the rest are context you can click.
-        Slice? selected = null;
-        foreach (var slice in setup.Slices)
-        {
-            if (slice.SourceId != source!.Id)
-                continue;
-
-            if (slice.Id == selectedSliceId)
-            {
-                selected = slice;
-                continue;
-            }
-
-            // The implicit full-frame slice is the texture itself — nothing to draw over it.
-            if (SetupRelations.IsImplicitSlice(setup, slice))
-                continue;
-
-            var rect = slice.UvRect;
-            var sliceMin = _projection.CanvasToScreen(new Vector2(rect.X, rect.Y) * textureSize);
-            var sliceMax = _projection.CanvasToScreen(new Vector2(rect.Z, rect.W) * textureSize);
-
-            // Hovered from the sidebar — the slice's own row or any surface/patch showing it — pulses the rect,
-            // so "which slice is that wall showing?" is answered on the texture. Hovering the rect returns the favour.
-            var slicePulse = MathF.Max(FrameStats.GetPulse(slice.Id), ConsumerPulse(setup, slice.Id));
-            if (ImGui.IsWindowHovered() && IsMouseInRect(sliceMin, sliceMax))
-                PulseConsumers(setup, slice.Id);
-
-            var sliceHue = SetupColors.ForKind(SetupEntitySelection.EntityKind.Slice);
-            if (slicePulse > 0.001f)
-                dl.AddRectFilled(sliceMin, sliceMax, sliceHue.Fade(slicePulse * 0.2f));
-
-            // A multi-selected (non-primary) slice reads selected, like the primary's frame — only editing
-            // stays with the primary.
-            var isSelected = selection != null && selection.IsSelected(SetupEntitySelection.EntityKind.Slice, slice.Id);
-            dl.AddRect(sliceMin, sliceMax,
-                       isSelected ? sliceHue : PulseColor(sliceHue.Fade(0.6f), slicePulse),
-                       0, ImDrawFlags.None, (isSelected ? 2f : 1f) * T3Ui.UiScaleFactor);
-
-            Span<Vector2> corners =
-                [sliceMin, new Vector2(sliceMax.X, sliceMin.Y), sliceMax, new Vector2(sliceMin.X, sliceMax.Y)];
-            var sliceName = SetupActions.SliceLabel(setup, slice);
-            CornerPinHandles.DrawCenteredLabel(dl, corners, sliceName,
-                                               isSelected ? UiColors.ForegroundFull : UiColors.Text.Fade(0.7f),
-                                               isSelected ? sliceHue.Fade(0.6f) : UiColors.BackgroundFull.Fade(0.6f));
-            DrawSliceConsumers(dl, setup, slice.Id, CornerPinHandles.GetCenteredLabelRect(corners, sliceName), 0.7f);
-            _picker.AddTarget(SetupEntitySelection.EntityKind.Slice, slice.Id, sliceMin, sliceMax);
-
-            // Grab-to-move without the select-first click: pressing a slice's label selects it and starts its
-            // move in the same gesture — the editor takes over next frame, mouse still held.
-            if (!_sliceLabelDragging && !_sliceLabelGrabPending
-                && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered())
-            {
-                var (labelMin, labelMax) = CornerPinHandles.GetCenteredLabelRect(corners, sliceName);
-                var mouse = ImGui.GetMousePos();
-                if (mouse.X >= labelMin.X && mouse.X <= labelMax.X && mouse.Y >= labelMin.Y && mouse.Y <= labelMax.Y)
-                {
-                    SelectPicked(selection, SetupEntitySelection.EntityKind.Slice, slice.Id);
-                    _sliceLabelGrabPending = true;
-                }
-            }
-        }
-
-        // No scrim here: on an atlas every slice matters equally. No fallback to the first slice either — with
-        // the source selected (and no slice), nothing is framed.
-        if (selected != null && _spaceBlend >= 1f)
-            EditSlice(setup, dl, selected, selected.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
-
-        if (_spaceBlend >= 1f)
-            HandleSliceDraft(setup, selection, dl, source!, textureSize, min, max);
-
-        ResolvePicking(setup, selection);
-        dl.PopClipRect();
-    }
-
-    /// <summary>
-    /// Dragging on empty source area cuts a new slice there — the atlas gesture, instead of adding a full-frame
-    /// slice and shrinking it. Armed by a press that lands on the texture but on no slice; a press that never
-    /// becomes a drag stays a click. The moving corner snaps like every other slice edit.
-    /// </summary>
-    private void HandleSliceDraft(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, ContentSource source,
-                                  Vector2 textureSize, Vector2 sourceMin, Vector2 sourceMax)
-    {
-        var mouse = ImGui.GetMousePos();
-        var drafting = _gesture.Is(GestureKinds.SliceDraft, source.Id);
-
-        if (!drafting && _sliceDraftStart == null
-            && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && !_gesture.IsLive
-            && !_sliceLabelDragging && !_sliceLabelGrabPending
-            && ImGui.IsMouseClicked(ImGuiMouseButton.Left)
-            && IsMouseInRect(sourceMin, sourceMax) && !IsMouseOverAnySlice(setup, source.Id, textureSize))
-        {
-            _sliceDraftStart = _projection.ScreenToCanvas(mouse) / textureSize;
-        }
-
-        if (_sliceDraftStart == null)
-            return;
-
-        if (!ImGui.IsMouseDown(ImGuiMouseButton.Left) && !drafting)
-        {
-            // Released below the drag threshold: it was a click.
-            _sliceDraftStart = null;
-            return;
-        }
-
-        if (!drafting)
-        {
-            if (ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Length() <= UserSettings.Config.ClickThreshold)
-                return;
-
-            BeginGesture(setup, GestureKinds.SliceDraft, "Add slice", source.Id);
-            drafting = true;
-        }
-
-        var start = _sliceDraftStart.Value;
-        var current = _projection.ScreenToCanvas(mouse) / textureSize;
-        if (!ImGui.GetIO().KeyShift)
-        {
-            CollectSliceSnapCandidates(setup, source.Id, Guid.Empty);
-            var perPixel = (_projection.ScreenToCanvas(new Vector2(1, 0)) - _projection.ScreenToCanvas(Vector2.Zero)).X;
-            var thresholdX = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(textureSize.X, 0.0001f);
-            var thresholdY = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(textureSize.Y, 0.0001f);
-            Span<float> x = [current.X];
-            if (SurfaceGeometry.TrySnapOffset(_sliceSnapXs, x, thresholdX, out var offsetX, out var targetX))
-            {
-                current.X += offsetX;
-                DrawSliceSnapGuide(dl, Vector2.Zero, textureSize, vertical: true, targetX);
-            }
-
-            Span<float> y = [current.Y];
-            if (SurfaceGeometry.TrySnapOffset(_sliceSnapYs, y, thresholdY, out var offsetY, out var targetY))
-            {
-                current.Y += offsetY;
-                DrawSliceSnapGuide(dl, Vector2.Zero, textureSize, vertical: false, targetY);
-            }
-        }
-
-        current = Vector2.Clamp(current, Vector2.Zero, Vector2.One);
-        var uvMin = Vector2.Min(start, current);
-        var uvMax = Vector2.Max(start, current);
-
-        var screenMin = _projection.CanvasToScreen(uvMin * textureSize);
-        var screenMax = _projection.CanvasToScreen(uvMax * textureSize);
-        var hue = SetupColors.ForKind(SetupEntitySelection.EntityKind.Slice);
-        dl.AddRectFilled(screenMin, screenMax, hue.Fade(0.12f));
-        dl.AddRect(screenMin, screenMax, hue, 0, ImDrawFlags.None, 1.5f * T3Ui.UiScaleFactor);
-
-        // The cut's size in source pixels, so an atlas can be laid out to numbers.
-        var px = (uvMax - uvMin) * textureSize;
-        _sliceDraftLabel.Clear();
-        _sliceDraftLabel.Append((int)MathF.Round(px.X)).Append('×').Append((int)MathF.Round(px.Y)).Append(" px");
-        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, screenMax + new Vector2(6, 4) * T3Ui.UiScaleFactor,
-                   UiColors.Text.Fade(0.8f), _sliceDraftLabel.ToString());
-
-        if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
-            return;
-
-        _sliceDraftStart = null;
-        if (uvMax.X - uvMin.X < MinSliceSize || uvMax.Y - uvMin.Y < MinSliceSize)
-        {
-            CancelGesture();
-            return;
-        }
-
-        // Unnamed like every added slice: its label derives from the source, so a later op rename follows.
-        var slice = new Slice { SourceId = source.Id, UvRect = new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y) };
-        setup.Slices.Add(slice);
-        EndGesture(setup);
-        selection?.Select(SetupEntitySelection.EntityKind.Slice, slice.Id);
-    }
-
-    private bool IsMouseOverAnySlice(Setup setup, Guid sourceId, Vector2 textureSize)
-    {
-        foreach (var slice in setup.Slices)
-        {
-            if (slice.SourceId != sourceId || SetupRelations.IsImplicitSlice(setup, slice))
-                continue;
-
-            var rect = slice.UvRect;
-            var min = _projection.CanvasToScreen(new Vector2(rect.X, rect.Y) * textureSize);
-            var max = _projection.CanvasToScreen(new Vector2(rect.Z, rect.W) * textureSize);
-            if (IsMouseInRect(min, max))
-                return true;
-        }
-
-        return false;
-    }
 
     private static bool IsMouseInRect(Vector2 min, Vector2 max)
     {
@@ -335,13 +91,13 @@ internal sealed partial class SetupOutputView
         if (_consumerLabels.TryGetValue(sliceId, out var cached))
             return cached;
 
-        _sliceDraftLabel.Clear();
+        _consumerText.Clear();
         foreach (var surface in setup.Surfaces)
         {
             if (surface.SliceId != sliceId)
                 continue;
 
-            _sliceDraftLabel.Append(_sliceDraftLabel.Length == 0 ? "→ " : ", ").Append(surface.Name);
+            _consumerText.Append(_consumerText.Length == 0 ? "→ " : ", ").Append(surface.Name);
         }
 
         foreach (var output in setup.Outputs)
@@ -351,11 +107,11 @@ internal sealed partial class SetupOutputView
                 if (patch.SliceId != sliceId)
                     continue;
 
-                _sliceDraftLabel.Append(_sliceDraftLabel.Length == 0 ? "→ " : ", ").Append(SetupActions.PatchLabel(output, patch));
+                _consumerText.Append(_consumerText.Length == 0 ? "→ " : ", ").Append(SetupActions.PatchLabel(output, patch));
             }
         }
 
-        var label = _sliceDraftLabel.Length == 0 ? "unused" : _sliceDraftLabel.ToString();
+        var label = _consumerText.Length == 0 ? "unused" : _consumerText.ToString();
         _consumerLabels[sliceId] = label;
         return label;
     }
@@ -773,9 +529,7 @@ internal sealed partial class SetupOutputView
     private static readonly List<float> _sliceSnapXs = [];
     private static readonly List<float> _sliceSnapYs = [];
 
-    // Where a draw-to-cut press landed, in source UV; null while nothing is armed.
-    private Vector2? _sliceDraftStart;
-    private readonly System.Text.StringBuilder _sliceDraftLabel = new();
+    private readonly System.Text.StringBuilder _consumerText = new();
     private readonly Dictionary<Guid, string> _consumerLabels = [];
     private int _consumerLabelsVersion = -1;
 }

@@ -176,11 +176,6 @@ internal sealed class OutputSetupModeView
                 _outputView.Draw(surfaceOutputId, entityId, _entitySelection); // labels on the canvas can re-pick
             else if (entityKind == SetupEntitySelection.EntityKind.Patch && SetupRelations.TryGetPatchOutput(setup, entityId, out var patchOutputId))
                 _outputView.Draw(patchOutputId, selection: _entitySelection); // a patch lives on its output's canvas
-            else if (entityKind == SetupEntitySelection.EntityKind.ContentSource && !showsBoard)
-                // Slices live on the source, so entering content opens it with every slice laid out on it.
-                _outputView.DrawSourceCanvas(entityId, _entitySelection);
-            else if (entityKind == SetupEntitySelection.EntityKind.Slice && !showsBoard && SetupRelations.TryGetSliceSource(setup, entityId, out var sliceChildId))
-                _outputView.DrawSourceCanvas(sliceChildId, _entitySelection, entityId);
             else if (entityKind == SetupEntitySelection.EntityKind.Surface)
                 _outputView.DrawBoardStandalone(_entitySelection, entityId); // unmapped: the Board, or Straight on its photo
             else

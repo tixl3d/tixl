@@ -29,8 +29,8 @@ internal sealed partial class SetupOutputView
 {
     // Declaration order is the tab order in the segmented control — the Board first, then the two cameras:
     // the surface seen flat, the projector's composite. The morph axis and every switch key off the enum
-    // values, not their order, so this is a purely visual arrangement. (A content source's space is not a
-    // mode: it is entered from its card and left by "Board" — see _inSourceSpace.)
+    // values, not their order, so this is a purely visual arrangement. A content source has no camera of its
+    // own: its texture is already flat on its Board card, where its slices are drawn and edited.
     private enum EditMode
     {
         Board,
