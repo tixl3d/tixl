@@ -554,7 +554,8 @@ internal sealed class SetupFlowOutliner
 
             var childId = instance.SymbolChildId;
             var source = setup.FindSourceByChildId(childId);
-            var sliceCount = source == null ? 0 : SetupRelations.CountSlicesOfSource(setup, source.Id);
+            // The implicit full-frame slice is the source itself here: no row, its connections start at the source.
+            var sliceCount = source == null ? 0 : SetupRelations.CountListedSlicesOfSource(setup, source.Id);
             var expanded = !_collapsedSources.Contains(childId);
 
             var args = new EntityItem.Args

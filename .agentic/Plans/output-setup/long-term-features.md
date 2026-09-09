@@ -12,7 +12,7 @@ This is the biggest gap between what exists and the workflow *you already wrote*
 
 More importantly it's the **substrate everything else reuses**: annotation-line handles, slice rects, mask outlines and warp lattice points are all draggable canvas points with snapping. Building measurement or masking first means building them on an unfinished editing layer, then reworking. `CanvasPointHandle`/`CornerPinHandles` already prove the pattern — extend it once, benefit four times.
 
-**2. Slices — and note they now have an obvious home**
+**2. Slices — and note they now have an obvious home** — *landed (2026-09-09): the source space with rect editing, snapping, Match target aspect, numeric px editing in the Parameter window; draw-to-cut a new slice; slices and their consumers light each other on hover and every slice names what shows it. Open: rotation (stored, not edited or rendered), "Reset to full source", marking shared slices.*
 
 Worth calling out a synergy from what we just built: **the Content end of the morph is exactly the canvas where slice editing belongs.** You straighten onto a surface, keep pushing to Content, and you're looking at the source with the surface's crop — the natural place to drag a slice rect. `SendToOutput.SourceRect` already exists as a `Vector4` UV, so this is largely UI, not new plumbing. Sub-surfaces and slices are the two halves of "split one render across many targets," so they pair naturally right after (1).
 
@@ -44,6 +44,12 @@ Both are already sketched in the data-model plan as `OutputMapping` growth (`War
 
 
 ## For later:
+
+- **Colour management in the composite pass (2026-09-09):** the corner-pin blit is the last pass before the
+  display/stream, so colour-space conversion and tone mapping belong in that pixel shader — one sample, one
+  write, no extra 16-bit intermediate buffers or copy passes. The parameters (working space, output transfer
+  function, tone-map curve/exposure) would become **project settings**, which is where they belong anyway;
+  per-output overrides can come later. Keep the pass's constant buffer growable for this.
 
 - Setup menu should provide options to rename setup
 - In straight mode selecting different surfaces should have a view transition 

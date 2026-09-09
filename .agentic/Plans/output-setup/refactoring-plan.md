@@ -651,6 +651,19 @@ with an explanatory comment) — the row-callback API design made compliance imp
   Surface body drags on the Board do not pan (Ctrl/Shift are selection there; Alt is free but unused).
   Local bindings also became plugs (displays + Spout/NDI stream senders via `OutputStreamRegistry`) the same week.
 
+- **2026-09-09 (slice space, long-term item 2):** dragging on empty source area cuts a new slice
+  (`GestureKinds.SliceDraft`; snaps to the texture and sibling slices, shows the cut in px, clamps to the
+  texture, a click or a sub-threshold drag creates nothing). Every slice label carries a muted consumer line
+  ("→ Surface 1, Patch 1" / "unused"), cached per `StructureVersion`. Hovering a consumer row pulses the slice
+  on the texture and hovering the slice pulses its consumer rows (`ConsumerPulse` / `PulseConsumers`).
+  `CollectSliceSnapCandidates` now takes (sourceId, excludeSliceId) so the draft can reuse it.
+
+- **2026-09-09 (implicit slice):** a source's only slice, when unnamed and full-frame, is folded into the
+  source (`SetupRelations.TryGetImplicitSlice` / `IsImplicitSlice` / `CountListedSlicesOfSource`): no outliner
+  row (its connections start at the content row), no sub-rect on the Board card, no rect in the source space,
+  and the content card reads "full frame → N targets". Dropping content onto a surface therefore needs no slice
+  in the user's eyes; the slice becomes visible once cut, named, or joined by a second one. The model is unchanged.
+
 ## Suggested order (revised for the flow-view pivot)
 
 1. **P0** (bug fixes, 1–2 days) — independent of every decision below.

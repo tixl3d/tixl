@@ -93,12 +93,20 @@ internal sealed partial class SetupOutputView
                 continue;
             }
 
+            // The implicit full-frame slice is the texture itself — nothing to draw over it.
+            if (SetupRelations.IsImplicitSlice(setup, slice))
+                continue;
+
             var rect = slice.UvRect;
             var sliceMin = _projection.CanvasToScreen(new Vector2(rect.X, rect.Y) * textureSize);
             var sliceMax = _projection.CanvasToScreen(new Vector2(rect.Z, rect.W) * textureSize);
 
-            // Hovered from the sidebar: pulse the rect so its row and its frame read as the same thing.
-            var slicePulse = FrameStats.GetPulse(slice.Id);
+            // Hovered from the sidebar — the slice's own row or any surface/patch showing it — pulses the rect,
+            // so "which slice is that wall showing?" is answered on the texture. Hovering the rect returns the favour.
+            var slicePulse = MathF.Max(FrameStats.GetPulse(slice.Id), ConsumerPulse(setup, slice.Id));
+            if (ImGui.IsWindowHovered() && IsMouseInRect(sliceMin, sliceMax))
+                PulseConsumers(setup, slice.Id);
+
             var sliceHue = SetupColors.ForKind(SetupEntitySelection.EntityKind.Slice);
             if (slicePulse > 0.001f)
                 dl.AddRectFilled(sliceMin, sliceMax, sliceHue.Fade(slicePulse * 0.2f));
@@ -116,6 +124,7 @@ internal sealed partial class SetupOutputView
             CornerPinHandles.DrawCenteredLabel(dl, corners, sliceName,
                                                isSelected ? UiColors.ForegroundFull : UiColors.Text.Fade(0.7f),
                                                isSelected ? sliceHue.Fade(0.6f) : UiColors.BackgroundFull.Fade(0.6f));
+            DrawSliceConsumers(dl, setup, slice.Id, CornerPinHandles.GetCenteredLabelRect(corners, sliceName), 0.7f);
             _picker.AddTarget(SetupEntitySelection.EntityKind.Slice, slice.Id, sliceMin, sliceMax);
 
             // Grab-to-move without the select-first click: pressing a slice's label selects it and starts its
@@ -138,8 +147,217 @@ internal sealed partial class SetupOutputView
         if (selected != null && _spaceBlend >= 1f)
             EditSlice(setup, dl, selected, selected.UvRect, Vector2.Zero, textureSize, Guid.Empty, dimOutside: false);
 
+        if (_spaceBlend >= 1f)
+            HandleSliceDraft(setup, selection, dl, source!, textureSize, min, max);
+
         ResolvePicking(setup, selection);
         dl.PopClipRect();
+    }
+
+    /// <summary>
+    /// Dragging on empty source area cuts a new slice there — the atlas gesture, instead of adding a full-frame
+    /// slice and shrinking it. Armed by a press that lands on the texture but on no slice; a press that never
+    /// becomes a drag stays a click. The moving corner snaps like every other slice edit.
+    /// </summary>
+    private void HandleSliceDraft(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, ContentSource source,
+                                  Vector2 textureSize, Vector2 sourceMin, Vector2 sourceMax)
+    {
+        var mouse = ImGui.GetMousePos();
+        var drafting = _gesture.Is(GestureKinds.SliceDraft, source.Id);
+
+        if (!drafting && _sliceDraftStart == null
+            && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && !_gesture.IsLive
+            && !_sliceLabelDragging && !_sliceLabelGrabPending
+            && ImGui.IsMouseClicked(ImGuiMouseButton.Left)
+            && IsMouseInRect(sourceMin, sourceMax) && !IsMouseOverAnySlice(setup, source.Id, textureSize))
+        {
+            _sliceDraftStart = _projection.ScreenToCanvas(mouse) / textureSize;
+        }
+
+        if (_sliceDraftStart == null)
+            return;
+
+        if (!ImGui.IsMouseDown(ImGuiMouseButton.Left) && !drafting)
+        {
+            // Released below the drag threshold: it was a click.
+            _sliceDraftStart = null;
+            return;
+        }
+
+        if (!drafting)
+        {
+            if (ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Length() <= UserSettings.Config.ClickThreshold)
+                return;
+
+            BeginGesture(setup, GestureKinds.SliceDraft, "Add slice", source.Id);
+            drafting = true;
+        }
+
+        var start = _sliceDraftStart.Value;
+        var current = _projection.ScreenToCanvas(mouse) / textureSize;
+        if (!ImGui.GetIO().KeyShift)
+        {
+            CollectSliceSnapCandidates(setup, source.Id, Guid.Empty);
+            var perPixel = (_projection.ScreenToCanvas(new Vector2(1, 0)) - _projection.ScreenToCanvas(Vector2.Zero)).X;
+            var thresholdX = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(textureSize.X, 0.0001f);
+            var thresholdY = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(textureSize.Y, 0.0001f);
+            Span<float> x = [current.X];
+            if (SurfaceGeometry.TrySnapOffset(_sliceSnapXs, x, thresholdX, out var offsetX, out var targetX))
+            {
+                current.X += offsetX;
+                DrawSliceSnapGuide(dl, Vector2.Zero, textureSize, vertical: true, targetX);
+            }
+
+            Span<float> y = [current.Y];
+            if (SurfaceGeometry.TrySnapOffset(_sliceSnapYs, y, thresholdY, out var offsetY, out var targetY))
+            {
+                current.Y += offsetY;
+                DrawSliceSnapGuide(dl, Vector2.Zero, textureSize, vertical: false, targetY);
+            }
+        }
+
+        current = Vector2.Clamp(current, Vector2.Zero, Vector2.One);
+        var uvMin = Vector2.Min(start, current);
+        var uvMax = Vector2.Max(start, current);
+
+        var screenMin = _projection.CanvasToScreen(uvMin * textureSize);
+        var screenMax = _projection.CanvasToScreen(uvMax * textureSize);
+        var hue = SetupColors.ForKind(SetupEntitySelection.EntityKind.Slice);
+        dl.AddRectFilled(screenMin, screenMax, hue.Fade(0.12f));
+        dl.AddRect(screenMin, screenMax, hue, 0, ImDrawFlags.None, 1.5f * T3Ui.UiScaleFactor);
+
+        // The cut's size in source pixels, so an atlas can be laid out to numbers.
+        var px = (uvMax - uvMin) * textureSize;
+        _sliceDraftLabel.Clear();
+        _sliceDraftLabel.Append((int)MathF.Round(px.X)).Append('×').Append((int)MathF.Round(px.Y)).Append(" px");
+        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, screenMax + new Vector2(6, 4) * T3Ui.UiScaleFactor,
+                   UiColors.Text.Fade(0.8f), _sliceDraftLabel.ToString());
+
+        if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            return;
+
+        _sliceDraftStart = null;
+        if (uvMax.X - uvMin.X < MinSliceSize || uvMax.Y - uvMin.Y < MinSliceSize)
+        {
+            CancelGesture();
+            return;
+        }
+
+        // Unnamed like every added slice: its label derives from the source, so a later op rename follows.
+        var slice = new Slice { SourceId = source.Id, UvRect = new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y) };
+        setup.Slices.Add(slice);
+        EndGesture(setup);
+        selection?.Select(SetupEntitySelection.EntityKind.Slice, slice.Id);
+    }
+
+    private bool IsMouseOverAnySlice(Setup setup, Guid sourceId, Vector2 textureSize)
+    {
+        foreach (var slice in setup.Slices)
+        {
+            if (slice.SourceId != sourceId || SetupRelations.IsImplicitSlice(setup, slice))
+                continue;
+
+            var rect = slice.UvRect;
+            var min = _projection.CanvasToScreen(new Vector2(rect.X, rect.Y) * textureSize);
+            var max = _projection.CanvasToScreen(new Vector2(rect.Z, rect.W) * textureSize);
+            if (IsMouseInRect(min, max))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsMouseInRect(Vector2 min, Vector2 max)
+    {
+        var mouse = ImGui.GetMousePos();
+        return mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y;
+    }
+
+    /// <summary>The strongest sidebar pulse among the surfaces and patches showing this slice.</summary>
+    private static float ConsumerPulse(Setup setup, Guid sliceId)
+    {
+        var pulse = 0f;
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId == sliceId)
+                pulse = MathF.Max(pulse, FrameStats.GetPulse(surface.Id));
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId == sliceId)
+                    pulse = MathF.Max(pulse, FrameStats.GetPulse(patch.Id));
+            }
+        }
+
+        return pulse;
+    }
+
+    /// <summary>Lights the rows of everything showing this slice — the answer to "where does this go?" on hover.</summary>
+    private static void PulseConsumers(Setup setup, Guid sliceId)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId == sliceId)
+                FrameStats.PulseItemWithId(surface.Id);
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId == sliceId)
+                    FrameStats.PulseItemWithId(patch.Id);
+            }
+        }
+    }
+
+    /// <summary>A small line under the slice's label naming what shows it ("→ Left wall, Patch 2"), or "unused".</summary>
+    private void DrawSliceConsumers(ImDrawListPtr dl, Setup setup, Guid sliceId, (Vector2 Min, Vector2 Max) labelRect, float alpha)
+    {
+        var text = ConsumerLabel(setup, sliceId);
+        var scale = T3Ui.UiScaleFactor;
+        var pos = new Vector2(labelRect.Min.X, labelRect.Max.Y + 2 * scale);
+        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, pos, UiColors.TextMuted.Fade(alpha), text);
+    }
+
+    /// <summary>Consumer names per slice, rebuilt only when the setup's structure changes — labels are per frame otherwise.</summary>
+    private string ConsumerLabel(Setup setup, Guid sliceId)
+    {
+        if (_consumerLabelsVersion != OutputSetupHandling.StructureVersion)
+        {
+            _consumerLabels.Clear();
+            _consumerLabelsVersion = OutputSetupHandling.StructureVersion;
+        }
+
+        if (_consumerLabels.TryGetValue(sliceId, out var cached))
+            return cached;
+
+        _sliceDraftLabel.Clear();
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId != sliceId)
+                continue;
+
+            _sliceDraftLabel.Append(_sliceDraftLabel.Length == 0 ? "→ " : ", ").Append(surface.Name);
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId != sliceId)
+                    continue;
+
+                _sliceDraftLabel.Append(_sliceDraftLabel.Length == 0 ? "→ " : ", ").Append(SetupActions.PatchLabel(output, patch));
+            }
+        }
+
+        var label = _sliceDraftLabel.Length == 0 ? "unused" : _sliceDraftLabel.ToString();
+        _consumerLabels[sliceId] = label;
+        return label;
     }
 
     /// <summary>
@@ -197,6 +415,9 @@ internal sealed partial class SetupOutputView
         labelCorners[3] = new Vector2(min.X, max.Y);
         var sliceName = SetupActions.SliceLabel(setup, slice);
         DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Slice, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
+        DrawSliceConsumers(dl, setup, slice.Id, CornerPinHandles.GetCenteredLabelRect(labelCorners, sliceName), 0.9f);
+        if (ImGui.IsWindowHovered() && IsMouseInRect(min, max))
+            PulseConsumers(setup, slice.Id);
 
         // Move is detected by hand rather than an InvisibleButton, so the label stays a plain draw and the
         // frame-label pick pass (which selects and opens the context menu) isn't blocked by a hovered item.
@@ -259,7 +480,7 @@ internal sealed partial class SetupOutputView
             // vocabulary a surface edge snaps to (parent + siblings), so the two feel alike.
             if (snapping)
             {
-                CollectSliceSnapCandidates(setup, slice);
+                CollectSliceSnapCandidates(setup, slice.SourceId, slice.Id);
                 var movesX = edge is 1 or 3;
                 Span<float> anchor = [edge switch { 0 => next.Y, 1 => next.Z, 2 => next.W, _ => next.X }];
                 if (SurfaceGeometry.TrySnapOffset(movesX ? _sliceSnapXs : _sliceSnapYs, anchor, movesX ? thresholdX : thresholdY,
@@ -387,7 +608,7 @@ internal sealed partial class SetupOutputView
                 {
                     // Either edge, or the centre, may catch — whichever is closest wins per axis. Candidates
                     // are the source bounds plus the sibling slices, same as a surface snapping to siblings.
-                    CollectSliceSnapCandidates(setup, slice);
+                    CollectSliceSnapCandidates(setup, slice.SourceId, slice.Id);
                     Span<float> xs = [sliceOrigin.X, sliceOrigin.X + size.X * 0.5f, sliceOrigin.X + size.X];
                     Span<float> ys = [sliceOrigin.Y, sliceOrigin.Y + size.Y * 0.5f, sliceOrigin.Y + size.Y];
                     if (SurfaceGeometry.TrySnapOffset(_sliceSnapXs, xs, thresholdX, out var offsetX, out var targetX))
@@ -501,7 +722,7 @@ internal sealed partial class SetupOutputView
 
     /// <summary>Snap targets for slice edits, in source UV: the source's bounds and midlines plus every
     /// sibling slice's edges and centres — the same vocabulary a surface edit snaps to (parent + siblings).</summary>
-    private static void CollectSliceSnapCandidates(Setup setup, Slice slice)
+    private static void CollectSliceSnapCandidates(Setup setup, Guid sourceId, Guid excludeSliceId)
     {
         _sliceSnapXs.Clear();
         _sliceSnapYs.Clear();
@@ -514,7 +735,7 @@ internal sealed partial class SetupOutputView
 
         foreach (var other in setup.Slices)
         {
-            if (other.Id == slice.Id || other.SourceId != slice.SourceId)
+            if (other.Id == excludeSliceId || other.SourceId != sourceId)
                 continue;
 
             var rect = other.UvRect;
@@ -551,4 +772,10 @@ internal sealed partial class SetupOutputView
     // The source's own borders and centre, in UV — what a slice snaps against.
     private static readonly List<float> _sliceSnapXs = [];
     private static readonly List<float> _sliceSnapYs = [];
+
+    // Where a draw-to-cut press landed, in source UV; null while nothing is armed.
+    private Vector2? _sliceDraftStart;
+    private readonly System.Text.StringBuilder _sliceDraftLabel = new();
+    private readonly Dictionary<Guid, string> _consumerLabels = [];
+    private int _consumerLabelsVersion = -1;
 }

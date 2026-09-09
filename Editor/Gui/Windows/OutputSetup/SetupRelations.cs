@@ -297,6 +297,56 @@ internal static class SetupRelations
         return false;
     }
 
+    /// <summary>
+    /// A source's implicit slice: its only slice, unnamed, uncut and unrotated — the full frame a drop onto a
+    /// surface or output creates. It is the source as far as the user is concerned, so the views fold it into
+    /// the content row/card instead of listing it. It surfaces as a slice of its own the moment it is cut,
+    /// named, or joined by a second slice.
+    /// </summary>
+    public static bool TryGetImplicitSlice(Setup setup, Guid sourceId, out Slice? implicitSlice)
+    {
+        implicitSlice = null;
+        Slice? only = null;
+        for (var i = 0; i < setup.Slices.Count; i++)
+        {
+            var slice = setup.Slices[i];
+            if (slice.SourceId != sourceId)
+                continue;
+
+            if (only != null)
+                return false;
+
+            only = slice;
+        }
+
+        if (only == null || !IsFullFrame(only))
+            return false;
+
+        implicitSlice = only;
+        return true;
+    }
+
+    public static bool IsImplicitSlice(Setup setup, Slice slice)
+    {
+        return TryGetImplicitSlice(setup, slice.SourceId, out var implicitSlice) && implicitSlice!.Id == slice.Id;
+    }
+
+    /// <summary>Slices the views list — the source's implicit full-frame slice is folded into the source.</summary>
+    public static int CountListedSlicesOfSource(Setup setup, Guid sourceId)
+    {
+        return TryGetImplicitSlice(setup, sourceId, out _) ? 0 : CountSlicesOfSource(setup, sourceId);
+    }
+
+    private static bool IsFullFrame(Slice slice)
+    {
+        const float epsilon = 0.0005f;
+        var uv = slice.UvRect;
+        return string.IsNullOrEmpty(slice.Name)
+               && MathF.Abs(slice.Rotation) < epsilon
+               && MathF.Abs(uv.X) < epsilon && MathF.Abs(uv.Y) < epsilon
+               && MathF.Abs(uv.Z - 1f) < epsilon && MathF.Abs(uv.W - 1f) < epsilon;
+    }
+
     public static int CountSlicesOfSource(Setup setup, Guid sourceId)
     {
         var count = 0;

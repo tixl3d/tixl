@@ -201,6 +201,10 @@ internal sealed partial class SetupOutputView
                     continue;
                 }
 
+                // The implicit full-frame slice is the whole card; drawing it would only add a second frame.
+                if (SetupRelations.IsImplicitSlice(setup, slice))
+                    continue;
+
                 var uv = slice.UvRect;
                 var sliceMin = new Vector2(min.X + uv.X * size.X, min.Y + (1 - uv.W) * size.Y);
                 var sliceMax = new Vector2(min.X + uv.Z * size.X, min.Y + (1 - uv.Y) * size.Y);

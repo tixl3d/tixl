@@ -117,12 +117,14 @@ internal static class SetupParameterView
         var source = setup.FindSourceByChildId(instance.SymbolChildId);
         if (source != null)
         {
-            var slices = SetupRelations.CountSlicesOfSource(setup, source.Id);
+            var slices = SetupRelations.CountListedSlicesOfSource(setup, source.Id);
             var consumers = SetupRelations.CountConsumersOfSource(setup, source.Id);
             FormInputs.ApplyIndent();
+            // The implicit full-frame slice reads as the source itself: "full frame", not "1 slice".
+            var what = slices == 0 ? "full frame" : $"{slices} slice{(slices == 1 ? "" : "s")}";
             CustomComponents.StylizedText(consumers == 0
-                                              ? $"{slices} slice{(slices == 1 ? "" : "s")}, nothing shows them yet"
-                                              : $"{slices} slice{(slices == 1 ? "" : "s")} → {consumers} target{(consumers == 1 ? "" : "s")}",
+                                              ? $"{what}, nothing shows it yet"
+                                              : $"{what} → {consumers} target{(consumers == 1 ? "" : "s")}",
                                           Fonts.FontSmall, UiColors.TextMuted);
         }
     }
