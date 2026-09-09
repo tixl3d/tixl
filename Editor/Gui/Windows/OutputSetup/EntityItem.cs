@@ -1,6 +1,5 @@
 #nullable enable
 using ImGuiNET;
-using T3.Editor.Gui.Windows.Output;
 using T3.Core.Output;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -436,16 +435,8 @@ internal sealed class EntityItem
                 CustomComponents.TooltipForLastItem("Disconnects every surface and patch from this output.",
                                                     "The surfaces and their content stay; only the routes into this canvas are removed.");
 
-                if (output.Kind is not (OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display))
-                    break;
-
-                if (CustomComponents.DrawSubMenu(4, "Bind to")
-                    && OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
-                {
-                    ResolutionHandling.DrawBindingMenuItems(output, machineConfig);
-                    ImGui.EndMenu();
-                }
-
+                // No "Bind to" here: an output is bound by dragging it onto a plug, and released from the
+                // plug's own menu. One gesture, in the place that shows what is plugged in.
                 break;
 
             case SetupEntitySelection.EntityKind.Plug:

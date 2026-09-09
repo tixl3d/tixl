@@ -119,6 +119,35 @@ internal sealed class SetupFlowOutliner
         ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height, rowPos.Y + 3 * scale));
         DocumentationButton.Draw(HelpDocId, HelpWikiUrl, new Vector2(height, height));
 
+        // Reference images and props belong to the Board, not to any flow column, so they have no "+" of their
+        // own. This one is theirs — reachable without having to find bare Board to right-click.
+        ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height * 2, rowPos.Y + 3 * scale));
+        if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
+            ImGui.OpenPopup(AddBoardItemMenuId);
+
+        CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, or a prop for scale.");
+
+        if (ImGui.BeginPopup(AddBoardItemMenuId))
+        {
+            if (CustomComponents.DrawMenuItem(1, "Add Reference Image"))
+            {
+                SetupActions.AddReferenceImage(selection);
+                OutputSetupHandling.SaveActive();
+            }
+
+            CustomComponents.TooltipForLastItem("Adds an empty image card; pick its photo in the Parameter window.", "Or drop an image file onto the Board.");
+
+            if (CustomComponents.DrawMenuItem(2, "Add Prop"))
+            {
+                SetupActions.AddProp(selection);
+                OutputSetupHandling.SaveActive();
+            }
+
+            CustomComponents.TooltipForLastItem("A box of known size on the Board — a doorway, a table — to judge the venue against.");
+
+            ImGui.EndPopup();
+        }
+
         if (onToggleCollapse != null)
         {
             ImGui.SetCursorScreenPos(new Vector2(rowRight - height, rowPos.Y + 3 * scale));
@@ -804,6 +833,7 @@ internal sealed class SetupFlowOutliner
     private static readonly List<string> _resolutionLabels = [];
 
     private const string AddPlugMenuId = "##addPlugMenu";
+    private const string AddBoardItemMenuId = "##addBoardItemMenu";
     private const string HelpDocId = "OutputSetup";
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
     private bool _addPlugMenuRequested;

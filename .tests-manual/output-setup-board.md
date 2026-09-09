@@ -62,6 +62,10 @@ never leaves the Board; only a double-click enters an entity's space. Fading bet
 - After 3: the Straight tab is disabled for an image without a traced surface, so the Board
   stays; the segmented control keeps its three tabs Board · Straight · Output.
 
+**Also:** hover each of the three tabs, disabled ones included. Every tab explains itself,
+and a disabled one says what it is missing — Straight wants a surface that is mapped to an
+output or traced on a photo, Output wants an output.
+
 ## Step: Zoom range
 
 **Action:**
@@ -443,6 +447,6 @@ project).
 **Expected:**
 - After 1: hovering the label lifts the card's frame as hovering the card does; the drag
   moves the card with the label, and Ctrl+Z moves it back.
-- After 2: "P1" is selected and its context menu opens (Add Patch, Split…, Bind to, Rename…).
+- After 2: "P1" is selected and its context menu opens (Add Patch, Split…, Rename…).
 - After 3: the click selects "SendToOutput", not the surface card underneath — a label wins
   over cards beneath it.

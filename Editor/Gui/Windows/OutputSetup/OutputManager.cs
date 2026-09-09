@@ -288,7 +288,7 @@ internal static class OutputManager
             if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(patch.Quad, out var patchHomography))
                 continue;
 
-            _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend.GetColor(_context), Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
+            _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend!.GetColor(_context), Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
         }
 
         foreach (var surface in setup.Surfaces)

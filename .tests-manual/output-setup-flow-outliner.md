@@ -48,6 +48,19 @@ Click the SendToOutput op in the graph window.
 - After 3: the strip disappears entirely, the window's own toolbar returns with the list
   icon; clicking it brings the strip back at its previous height and the toolbar goes again.
 
+## Step: The header's "+" adds what the columns don't list
+
+**Action:**
+Click the **+** left of the **?** at the right end of the header, and pick **Add Reference
+Image**; then use it again for **Add Prop**.
+
+**Expected:**
+- The menu offers exactly those two, each with a tooltip saying what it is for.
+- Both land on the Board and are selected in turn, exactly as the Board's own right-click
+  menu does it. No column gains a row — these belong to the Board, which is why they have
+  no column "+" of their own.
+- Ctrl+Z removes each again.
+
 ## Step: Items behave as the panel items did
 
 **Action:**
@@ -135,8 +148,8 @@ Look at the strip with nothing selected; hover an item; select it.
 ## Step: Bindings column reflects the machine
 
 **Action:**
-Right-click the output item → **Bind to** → the first display. Then **Unbind** from the same
-menu.
+Drag the output item onto "Local / Display 1". Then right-click that display item and choose
+**Unbind**.
 
 **Expected:**
 - While bound, the "Local / Display 1" item is no longer dimmed; the output item's "unbound"

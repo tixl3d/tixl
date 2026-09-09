@@ -43,9 +43,15 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < output.Patches.Count; i++)
         {
             var patch = output.Patches[i];
-            // The implicit full-canvas patch sits exactly on the canvas border — drawing it adds an outline and
-            // four handles that say nothing. It appears once it is named, moved, or joined by a second patch.
-            if (patch.Quad.Length < 4 || SetupRelations.IsImplicitPatch(output, patch))
+            if (patch.Quad.Length < 4)
+                continue;
+
+            // The implicit full-canvas patch is folded into the output everywhere else — its outline would only
+            // double the canvas border. On the output canvas its corners are still worth offering: dragging one
+            // keystones a feed that goes straight to the output, without first having to make a patch by hand.
+            // That drag is also what promotes it, since it then no longer covers the full canvas.
+            var isImplicit = SetupRelations.IsImplicitPatch(output, patch);
+            if (isImplicit && _editMode != EditMode.Output)
                 continue;
 
             // Stored as ratios of the canvas; this canvas works in its pixels like the rest of the output view,
@@ -59,7 +65,9 @@ internal sealed partial class SetupOutputView
 
             ImGui.PushID(patch.Id.GetHashCode());
 
-            var label = SetupActions.PatchLabel(output, patch);
+            // No label while it is still the output itself: it would sit over the whole canvas and read as a
+            // second name for it. The label (and the whole-tile move it carries) appears with the promotion.
+            var label = isImplicit ? string.Empty : SetupActions.PatchLabel(output, patch);
             var isFocused = patch.Id == focusedPatchId;
             var isSelected = isFocused || (selection?.IsSelected(SetupEntitySelection.EntityKind.Patch, patch.Id) ?? false);
             var pulse = isSelected ? 0f : FrameStats.GetPulse(patch.Id);
@@ -70,7 +78,7 @@ internal sealed partial class SetupOutputView
 
             // Same label-over-handle rule as surfaces: the label is the grab area, so handles under it yield.
             var handleActive = _gesture.HotId == patch.Id && _gesture.Kind is GestureKinds.PatchQuad or GestureKinds.PatchMove;
-            var pointerOverLabel = !handleActive && IsMouseOverLabel(screen, label);
+            var pointerOverLabel = !handleActive && !isImplicit && IsMouseOverLabel(screen, label);
             style.Editable = editable && !pointerOverLabel && !_isolate;
 
             var phase = CornerPinHandles.Draw(_patchViewQuad, _projection, style, out var draggedCorner, out var cornerHovered);
@@ -99,7 +107,7 @@ internal sealed partial class SetupOutputView
             RunPatchQuadDrag(phase, setup, patch, canvasSize);
 
             // The label doubles as the move handle — the press selects (through the picker), holding on moves.
-            if (phase == CanvasPointHandle.DragPhase.None)
+            if (phase == CanvasPointHandle.DragPhase.None && !isImplicit)
                 HandlePatchMove(setup, output, patch, isFocused, editable && !_isolate, label, screen, rToView, rToOutput, viewMin, canvasSize);
 
             if (cornerHovered || phase != CanvasPointHandle.DragPhase.None)
@@ -117,7 +125,8 @@ internal sealed partial class SetupOutputView
             }
 
             ImGui.PopID();
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, screen, patch.Id, label, isSelected, fade, pulse);
+            if (!isImplicit)
+                DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, screen, patch.Id, label, isSelected, fade, pulse);
         }
     }
 

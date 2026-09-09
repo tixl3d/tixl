@@ -40,6 +40,32 @@ Drag the "SendToOutput" CONTENT item onto the "P1" item.
   source's full-frame slice folds into the source).
 - Dragging the same content onto "P1" again changes nothing.
 
+## Step: The folded patch still has corner handles in Output mode
+
+**Action:**
+1. With "P1" selected, switch the mode segmented button to **Output**.
+2. Drag one corner handle of the canvas a little way inward.
+3. Press Ctrl+Z.
+
+**Expected:**
+- After 1: four corner handles sit on the canvas corners, with no label and no second
+  outline — the folded full-canvas patch offering its keystone without having to be made
+  into a patch first. In Board and Straight it stays invisible as before.
+- After 2: the image keystones, and P1 gains a chevron with one listed patch — the drag
+  promoted it, because it no longer covers the whole canvas. Its label appears with it.
+- After 3: the corner goes back and the patch folds away again.
+
+## Step: The output frame's own context menu
+
+**Action:**
+In **Output** mode, right-click bare canvas (not on a patch, surface or label).
+
+**Expected:**
+- The output's menu opens — the same entries as right-clicking "P1" in the outliner
+  (Add Patch, Split into…, Clear Inputs, Duplicate, Rename, Delete).
+- Right-clicking a patch or a mapped surface still opens *that* entity's menu; the frame
+  only answers where nothing else is under the cursor.
+
 ## Step: Add Patch makes a visible tile
 
 **Action:**

@@ -23,8 +23,8 @@ surface, an output, a reference image, and a prop.
 - Every menu ends with the same core verbs where the kind supports them:
   **Duplicate**, **Rename**, **Delete**.
 - Kind-specific extras come first: *Add slice* (content), *Add sub-region / Adjust
-  aspect to slice / Clear content inputs* (surface), *Bind to display* (projector
-  or display output).
+  aspect to slice / Clear content inputs* (surface), *Add Patch / Split into…* (projector
+  or display output). No menu binds a plug — that is a drag onto the plug row.
 - A prop offers Duplicate and Delete but no Rename (props have no name).
 - A content send offers Rename (renames the op) but no Duplicate/Delete (it *is* a
   graph op — duplicate or delete it in the graph).

@@ -74,18 +74,18 @@ Double-click the "Wall feed" row, rename it to `Wall 2` and press Enter. Check t
 - The row, the Output card status and the outliner curve all read the new name.
 - The receiver lists "Wall 2" and no longer "Wall feed".
 
-## Step: Binding from the menus
+## Step: Binding is a drag, unbinding is the plug's menu
 
 **Action:**
-1. Right-click "P1" → **Bind to**.
-2. Choose **Unbind**, then in the same submenu choose **Send to Spout: Wall 2**.
-3. Right-click the "Wall 2" row.
+1. Right-click "P1".
+2. Drag "P1" onto the "Wall 2" row.
+3. Right-click the "Wall 2" row and choose **Unbind P1**, then drag "P1" back onto it.
 
 **Expected:**
-- After 1: the submenu lists **Fullscreen on Display N (…)** per display, **Send to Spout:
-  Wall 2** (ticked while bound), and **Unbind**.
-- After 2: the curve goes and returns.
-- After 3: the row's menu now also offers **Unbind P1**.
+- After 1: the menu has no "Bind to" submenu — binding is the drag, and the output's own menu
+  stays about the canvas.
+- After 2: a curve joins "P1" and "Wall 2"; the receiver picks the sender up.
+- After 3: the curve goes and returns.
 
 ## Step: Removing a stream plug
 
@@ -99,8 +99,8 @@ Right-click "Wall 2" → **Remove stream**.
 ## Step: A display binding still presents fullscreen
 
 **Action:**
-Drag "P1" onto "Local / Display 2" (or the only display). Then right-click "P1" → **Bind to**
-→ **Unbind**.
+Drag "P1" onto "Local / Display 2" (or the only display). Then right-click that display row and
+choose **Unbind P1**.
 
 **Expected:**
 - P1's composite opens fullscreen on that display; the display row lights up with a curve.

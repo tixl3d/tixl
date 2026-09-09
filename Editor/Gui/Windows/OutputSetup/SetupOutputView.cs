@@ -409,6 +409,15 @@ internal sealed partial class SetupOutputView
 
         dl.AddQuad(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.ForegroundFull.Fade(0.25f));
 
+        // On this canvas the output *is* the frame — the Board's card stands in for it everywhere else, which is
+        // why it had no pick target here and its context menu never opened. Registered as a background target,
+        // so a patch, surface or label under the cursor still wins.
+        if (_editMode == EditMode.Output && !_isolate)
+        {
+            QuadBounds(canvasOutline, out var outlineMin, out var outlineMax);
+            _picker.AddTarget(SetupEntitySelection.EntityKind.Output, outputId, outlineMin, outlineMax, isBackground: true);
+        }
+
         // Corner-pin handles are editable only when the morph has settled (so a mid-animation drag can't fight
         // the moving transform) and the space is fully entered.
         var editable = _morphProgress >= 1f && _spaceBlend >= 1f;
