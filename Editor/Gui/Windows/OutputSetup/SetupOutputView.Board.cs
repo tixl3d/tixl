@@ -574,6 +574,9 @@ internal sealed partial class SetupOutputView
         {
             case CanvasPointHandle.DragPhase.Started:
                 BeginGesture(setup, GestureKinds.SurfaceResize, scaling ? "Scale surface" : "Crop surface", surface.Id, surface);
+                if (!scaling)
+                    BeginContentEdit(setup, surface);
+
                 _boardEdgeScaling = scaling;
                 _boardScaleApplied = Vector2.One;
                 SurfaceGeometry.LocalBounds(surface, out _boardEdgeStartMin, out _boardEdgeStartMax);
@@ -608,8 +611,13 @@ internal sealed partial class SetupOutputView
                 // surface space and sits at the card's placement.
                 _gesture.Snapshot!.Value.Restore(surface);
                 var oldRect = SurfaceGeometry.LocalRect(surface);
+                SurfaceGeometry.LocalBounds(surface, out var oldMin, out var oldMax);
                 var origin = surface.BoardPlacement?.Position ?? Vector2.Zero;
                 SurfaceGeometry.DragEdge(surface, edge, edgePos - origin, keepDimensions: false);
+
+                // The wall's pixels stay put: the slice window shrinks with the rectangle.
+                SurfaceGeometry.LocalBounds(surface, out var newMin, out var newMax);
+                ApplyCropHandling(setup, oldMin, oldMax, newMin, newMax);
 
                 // The trace is the same wall seen in the photo: the cropped rectangle maps through the old
                 // rectangle's projection into the photo, so the traced quad crops with it.

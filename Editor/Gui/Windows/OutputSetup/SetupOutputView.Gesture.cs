@@ -23,6 +23,7 @@ internal sealed partial class SetupOutputView
         SurfaceMove,    // a whole mapping quad by its label
         SurfaceResize,  // an edge crop / scale, or a region's corner/edge edit — the hot surface's rect changes
         RegionMove,     // a region by its body
+        ContentPan,     // the slice UV slid under a region's fixed window (modifier + body drag)
         PatchQuad,      // a patch's corner or edge
         PatchMove,      // a patch by its label
         Slice,          // a slice rect edit
@@ -50,6 +51,14 @@ internal sealed partial class SetupOutputView
         /// <summary>Where the press was, in the edit's own space (a move's grab point).</summary>
         public Vector2 GrabPoint;
 
+        /// <summary>The slice a content-aware edit co-writes (crop, pan) and its UV at the press; empty when the
+        /// rect edit runs alone (nothing shown, or a stretch).</summary>
+        public Guid ContentSliceId;
+
+        public Vector4 ContentUvStart;
+
+        public readonly bool EditsContent => ContentSliceId != Guid.Empty;
+
         public readonly bool IsLive => Kind != GestureKinds.None;
 
         public readonly bool Is(GestureKinds kind, Guid id) => Kind == kind && HotId == id;
@@ -73,6 +82,26 @@ internal sealed partial class SetupOutputView
                            Snapshot = snapshotOf != null ? new ResizeSurfaceCommand.State(snapshotOf) : null,
                            GrabPoint = grabPoint,
                        };
+    }
+
+    /// <summary>
+    /// Arms the live gesture to keep the hot surface's pixels in place: resolves (and if shared, clones) its slice
+    /// and remembers the UV to re-derive from. Call right after <see cref="BeginGesture"/> for a plain crop or a pan.
+    /// </summary>
+    private void BeginContentEdit(Setup setup, Surface surface)
+    {
+        if (CropHandling.TryBegin(setup, surface, out var sliceId, out var uvStart))
+        {
+            _gesture.ContentSliceId = sliceId;
+            _gesture.ContentUvStart = uvStart;
+        }
+    }
+
+    /// <summary>After a re-based rect edit: keeps the pixels where the pre-drag rect showed them.</summary>
+    private void ApplyCropHandling(Setup setup, Vector2 oldMin, Vector2 oldMax, Vector2 newMin, Vector2 newMax)
+    {
+        if (_gesture.EditsContent)
+            CropHandling.ApplyCrop(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, oldMin, oldMax, newMin, newMax);
     }
 
     /// <summary>One undo step for whatever the gesture changed (none for a click that moved nothing), one save.</summary>

@@ -1787,7 +1787,13 @@ internal sealed partial class SetupOutputView
             var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, out var parentProjection);
             SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out _, out _, out var edgeParentOrigin);
             RunGesture(edgePhase, setup, GestureKinds.SurfaceResize, "Edit region", child,
-                            () =>
+                            onStarted: () =>
+                                       {
+                                           _edgeStretch = ImGui.GetIO().KeyCtrl;
+                                           if (!_edgeStretch)
+                                               BeginContentEdit(setup, child);
+                                       },
+                            onDragging: () =>
                             {
                                 var pos = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin, edgePos);
                                 var horizontal = edge is 1 or 3;
@@ -1812,7 +1818,11 @@ internal sealed partial class SetupOutputView
                                     }
                                 }
 
+                                // Re-based on the pre-drag rectangle, so the crop's UV derivation never compounds.
+                                _gesture.Snapshot!.Value.Restore(child);
                                 SurfaceGeometry.ChildBounds(child, out var min, out var max);
+                                var oldMin = min;
+                                var oldMax = max;
                                 switch (edge) // 0 = top … 3 = left in screen winding; parent space is Y-up
                                 {
                                     case 0: max.Y = MathF.Max(pos.Y, min.Y + SurfaceGeometry.MinSize); break;
@@ -1822,6 +1832,7 @@ internal sealed partial class SetupOutputView
                                 }
 
                                 SurfaceGeometry.SetChildBounds(child, min, max);
+                                ApplyCropHandling(setup, oldMin, oldMax, min, max);
 
                                 if (guide.HasValue && hasProjection)
                                     DrawSnapGuide(dl, parentProjection, rToView, viewMin, parent, horizontal, guide.Value, edgeParentOrigin);
@@ -1848,7 +1859,11 @@ internal sealed partial class SetupOutputView
             return;
 
         var phase = CanvasPointHandle.DragPhase.None;
-        if (_gesture.Is(GestureKinds.RegionMove, child.Id))
+        // Alt at the press pans the content under the region instead of moving the region.
+        var panning = _gesture.Is(GestureKinds.ContentPan, child.Id)
+                      || (!_gesture.IsLive && ImGui.GetIO().KeyAlt && child.SliceId != Guid.Empty);
+        var kind = panning ? GestureKinds.ContentPan : GestureKinds.RegionMove;
+        if (_gesture.Is(kind, child.Id))
         {
             phase = ImGui.IsMouseDown(ImGuiMouseButton.Left)
                         ? CanvasPointHandle.DragPhase.Dragging
@@ -1876,12 +1891,26 @@ internal sealed partial class SetupOutputView
         if (phase == CanvasPointHandle.DragPhase.None)
             return;
 
-        RunGesture(phase, setup, GestureKinds.RegionMove, "Move region", child,
-                   onDragging: () => ApplyLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child),
+        RunGesture(phase, setup, kind, panning ? "Pan content" : "Move region", child,
+                   onDragging: () =>
+                               {
+                                   if (panning)
+                                   {
+                                       var delta = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin) - _gesture.GrabPoint;
+                                       if (_gesture.EditsContent)
+                                           CropHandling.ApplyPan(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, delta, child.SizeInMeters);
+                                   }
+                                   else
+                                   {
+                                       ApplyLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child);
+                                   }
+                               },
                    onStarted: () =>
                               {
                                   _gesture.GrabPoint = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin);
                                   _childMoveAxis = 0;
+                                  if (panning)
+                                      BeginContentEdit(setup, child);
                               },
                    onCompleted: () => _childMoveAxis = 0);
     }
@@ -2115,7 +2144,7 @@ internal sealed partial class SetupOutputView
 
             // A drag on the selected region's label moves it, so that press mustn't also count as a pick — nor
             // does a Board press that keeps the selection for a group drag.
-            if (canPick && hit.LeftClicked && _gesture.Kind is not (GestureKinds.RegionMove or GestureKinds.SurfaceMove) && !_boardGrabOnSelected)
+            if (canPick && hit.LeftClicked && _gesture.Kind is not (GestureKinds.RegionMove or GestureKinds.SurfaceMove or GestureKinds.ContentPan) && !_boardGrabOnSelected)
             {
                 SelectPicked(selection, hit.Kind, hit.Id);
 
@@ -2233,27 +2262,41 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// An edge drag crops the surface's rectangle — moving that edge while the opposite one stays put. Ctrl
-    /// stretches instead: same physical rectangle, different area on the projector. The handle is dragged in
-    /// view space, so it's carried back through R into projector pixels and then into the surface's own space,
-    /// where both are a plain rect edit.
+    /// An edge drag crops the surface's rectangle — moving that edge while the opposite one stays put, the
+    /// content's pixels staying where they are on the wall. Ctrl stretches instead: same physical rectangle,
+    /// different area on the projector, content re-fitted. The handle is dragged in view space, so it's carried
+    /// back through R into projector pixels and then into the surface's own space, where both are a plain
+    /// rect edit. The mode is read at the press and held for the drag.
     /// </summary>
     private void HandleEdgeDrag(CanvasPointHandle.DragPhase phase, Setup setup, Surface surface, Surface.OutputMapping mapping,
                                 int edge, Vector2 viewPos, Homography rToOutput, Vector2 viewMin)
     {
-        RunGesture(phase, setup, GestureKinds.SurfaceResize, "Crop surface", surface, () =>
-                                      {
-                                          // Re-base to the pre-drag rectangle first: the crop rewrites the surface's own frame, so
-                                          // an incremental edit would compound frame over frame. From the snapshot the cursor maps to
-                                          // one absolute edge position, stable however long the drag runs.
-                                          _gesture.Snapshot!.Value.Restore(surface);
-                                          if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, out var outputToSurface))
-                                              return;
+        RunGesture(phase, setup, GestureKinds.SurfaceResize, _edgeStretch ? "Stretch surface" : "Crop surface", surface,
+                   onStarted: () =>
+                              {
+                                  _edgeStretch = ImGui.GetIO().KeyCtrl;
+                                  if (!_edgeStretch)
+                                      BeginContentEdit(setup, surface);
+                              },
+                   onDragging: () =>
+                               {
+                                   // Re-base to the pre-drag rectangle first: the crop rewrites the surface's own frame, so
+                                   // an incremental edit would compound frame over frame. From the snapshot the cursor maps to
+                                   // one absolute edge position, stable however long the drag runs.
+                                   _gesture.Snapshot!.Value.Restore(surface);
+                                   if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, out var outputToSurface))
+                                       return;
 
-                                          var surfacePos = outputToSurface.TransformPoint(rToOutput.TransformPoint(viewPos + viewMin));
-                                          SurfaceGeometry.DragEdge(surface, edge, surfacePos, ImGui.GetIO().KeyCtrl);
-                                      });
+                                   SurfaceGeometry.LocalBounds(surface, out var oldMin, out var oldMax);
+                                   var surfacePos = outputToSurface.TransformPoint(rToOutput.TransformPoint(viewPos + viewMin));
+                                   SurfaceGeometry.DragEdge(surface, edge, surfacePos, _edgeStretch);
+                                   SurfaceGeometry.LocalBounds(surface, out var newMin, out var newMax);
+                                   ApplyCropHandling(setup, oldMin, oldMax, newMin, newMax);
+                               });
     }
+
+    // Whether the live edge drag stretches (Ctrl at the press) rather than crops — held for the drag.
+    private bool _edgeStretch;
 
     /// <summary>A corner drag (the grabbed surface, plus any with selected corners riding along) as one gesture.</summary>
     private void HandleDrag(CanvasPointHandle.DragPhase phase, Setup setup, Guid surfaceId, Guid outputId, Vector2[] liveQuad)

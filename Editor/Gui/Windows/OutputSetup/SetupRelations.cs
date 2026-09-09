@@ -245,6 +245,31 @@ internal static class SetupRelations
         return false;
     }
 
+    /// <summary>How many surfaces and patches show this slice — above one, it is shared.</summary>
+    public static int CountConsumersOfSlice(Setup setup, Guid sliceId)
+    {
+        if (sliceId == Guid.Empty)
+            return 0;
+
+        var count = 0;
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId == sliceId)
+                count++;
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId == sliceId)
+                    count++;
+            }
+        }
+
+        return count;
+    }
+
     /// <summary>Whether any patch on the output shows this slice.</summary>
     public static bool OutputShowsSlice(OutputDefinition output, Guid sliceId)
     {

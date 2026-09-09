@@ -1350,6 +1350,19 @@ internal static class SetupActions
     /// A source's first slice, creating a full-frame one if it has none — assigning content needs a slice to
     /// name, and "the whole image" is simply the identity rect.
     /// </summary>
+    /// <summary>
+    /// Gives the surface a private copy of a slice it shares with other consumers, so a local crop leaves the
+    /// others untouched. Called from inside a canvas gesture — the gesture's snapshot makes it undoable.
+    /// </summary>
+    internal static Slice CloneSliceForSurface(Setup setup, Surface surface, Slice shared)
+    {
+        var copy = CloneViaJson(shared.WriteToJson, Slice.ReadFromJson) ?? new Slice { SourceId = shared.SourceId, UvRect = shared.UvRect };
+        copy.Id = Guid.NewGuid();
+        setup.Slices.Add(copy);
+        surface.SliceId = copy.Id;
+        return copy;
+    }
+
     private static Slice EnsureSlice(Setup setup, ContentSource source)
     {
         var existing = setup.Slices.Find(s => s.SourceId == source.Id);

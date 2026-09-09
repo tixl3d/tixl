@@ -101,7 +101,7 @@ internal sealed partial class SetupOutputView
         }
 
         // The body is the move grip; the handles sit on its outline and take precedence, except while a move is live.
-        var moveActive = _gesture.Is(GestureKinds.RegionMove, child.Id);
+        var moveActive = _gesture.Is(GestureKinds.RegionMove, child.Id) || _gesture.Is(GestureKinds.ContentPan, child.Id);
         var style = CornerPinHandles.Style.ForSurface(null, editable: !moveActive, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
         style.DrawChecker = false;
         style.EdgeColor = color;
@@ -155,10 +155,20 @@ internal sealed partial class SetupOutputView
         }
         else if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhase.None)
         {
-            RunGesture(edgePhase, setup, GestureKinds.SurfaceResize, "Edit region", child, () =>
+            RunGesture(edgePhase, setup, GestureKinds.SurfaceResize, "Edit region", child,
+                       onStarted: () =>
+                                  {
+                                      // Plain = crop with the pixels kept in place; Ctrl = stretch, content re-fitted.
+                                      _edgeStretch = ImGui.GetIO().KeyCtrl;
+                                      if (!_edgeStretch)
+                                          BeginContentEdit(setup, child);
+                                  },
+                       onDragging: () =>
                                                       {
                                                           _gesture.Snapshot!.Value.Restore(child);
                                                           SurfaceGeometry.ChildBounds(child, out var newMin, out var newMax);
+                                                          var oldMin = newMin;
+                                                          var oldMax = newMax;
                                                           var pos = edgePos;
                                                           var horizontal = edge is 1 or 3;
                                                           if (snapping)
@@ -184,6 +194,7 @@ internal sealed partial class SetupOutputView
                                                           }
 
                                                           SurfaceGeometry.SetChildBounds(child, newMin, newMax);
+                                                          ApplyCropHandling(setup, oldMin, oldMax, newMin, newMax);
                                                       });
         }
 
@@ -209,7 +220,11 @@ internal sealed partial class SetupOutputView
             return;
 
         var phase = CanvasPointHandle.DragPhase.None;
-        if (_gesture.Is(GestureKinds.RegionMove, child.Id))
+        // Alt at the press pans the content under the region instead of moving the region.
+        var panning = _gesture.Is(GestureKinds.ContentPan, child.Id)
+                      || (!_gesture.IsLive && ImGui.GetIO().KeyAlt && child.SliceId != Guid.Empty);
+        var kind = panning ? GestureKinds.ContentPan : GestureKinds.RegionMove;
+        if (_gesture.Is(kind, child.Id))
         {
             phase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhase.Dragging : CanvasPointHandle.DragPhase.Completed;
         }
@@ -226,7 +241,7 @@ internal sealed partial class SetupOutputView
         if (phase == CanvasPointHandle.DragPhase.None)
             return;
 
-        RunGesture(phase, setup, GestureKinds.RegionMove, "Move region", child,
+        RunGesture(phase, setup, kind, panning ? "Pan content" : "Move region", child,
                       onDragging: () =>
                                   {
                                       if (_gesture.Snapshot is not { } start)
@@ -235,6 +250,14 @@ internal sealed partial class SetupOutputView
                                       var startMin = start.LocalPosition;
                                       var size = start.Size;
                                       var delta = projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
+                                      if (panning)
+                                      {
+                                          if (_gesture.EditsContent)
+                                              CropHandling.ApplyPan(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, delta, size);
+
+                                          return;
+                                      }
+
                                       var newMin = startMin + delta;
                                       if (snapping)
                                       {
@@ -251,7 +274,12 @@ internal sealed partial class SetupOutputView
                                       _gesture.Snapshot!.Value.Restore(child);
                                       SurfaceGeometry.SetChildBounds(child, newMin, newMin + size);
                                   },
-                      onStarted: () => _gesture.GrabPoint = projection.ScreenToCanvas(ImGui.GetMousePos()));
+                      onStarted: () =>
+                                 {
+                                     _gesture.GrabPoint = projection.ScreenToCanvas(ImGui.GetMousePos());
+                                     if (panning)
+                                         BeginContentEdit(setup, child);
+                                 });
     }
 
     /// <summary>A constant screen distance (7 px) in the parent's units, per axis.</summary>

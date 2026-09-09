@@ -6,7 +6,7 @@ When connecting a new display or projector, if have to stop presenting and repre
 
 ## Next major steps
 
-**1. Finish the canvas toolkit first: crop → sub-surfaces → duplicate → snap**
+**1. Finish the canvas toolkit first: crop → sub-surfaces → duplicate → snap** — *landed (2026-09-09): edge crop, regions, Ctrl+D, snapping; synchronized crop, Alt pan and copy-on-write slice clone (see refactoring-plan progress). Open: Alt-drag duplicate, the provisional Ctrl parallelogram.*
 
 This is the biggest gap between what exists and the workflow *you already wrote*. Steps 10–14 of your straighten use case (crop the extent, add sub-regions, duplicate, snap) are all still missing, and the slice we just landed stops right where they'd begin.
 

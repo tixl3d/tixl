@@ -642,6 +642,15 @@ with an explanatory comment) — the row-callback API design made compliance imp
   Settles ui-restructuring open questions 3 (no Calibrate control) and 5 (Board | Straight | Output; every
   other view is a camera entered from a card).
 
+- **2026-09-09 (content-aware crop, canvas-interaction §Edge dragging):** a plain edge drag on a content-bearing
+  surface or region co-edits its slice UV so the wall's pixels stay put (`CropHandling`); Ctrl at the press keeps
+  the stretch (Board scale, Straight `keepDimensions`, region re-fit) — read once, held for the drag. `Alt` +
+  body drag on a region pans the slice under the fixed window (`GestureKinds.ContentPan`, clamped to the
+  source). A slice shared with other consumers is cloned for the surface on the first content edit (`SetupActions.CloneSliceForSurface`,
+  `SetupRelations.CountConsumersOfSlice`); all of it rides the gesture's setup snapshot, so one undo step.
+  Surface body drags on the Board do not pan (Ctrl/Shift are selection there; Alt is free but unused).
+  Local bindings also became plugs (displays + Spout/NDI stream senders via `OutputStreamRegistry`) the same week.
+
 ## Suggested order (revised for the flow-view pivot)
 
 1. **P0** (bug fixes, 1–2 days) — independent of every decision below.
