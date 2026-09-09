@@ -351,7 +351,7 @@ internal sealed class RenderWindow : Window
         if (s.TimeRange == RenderSettings.TimeRanges.Loop && IsLoopRangeEmpty())
             s.TimeRange = RenderSettings.TimeRanges.Custom;
 
-        modified |= FormInputs.SegmentedButton(ref s.TimeRange, 0, IsRangeOptionDisabled);
+        modified |= CustomComponents.SegmentedButton(ref s.TimeRange, IsRangeOptionDisabled);
         FormInputs.AppendTooltip("""
                                  **What time span to render:**
                                  - **Custom** — a start/end you set
@@ -375,7 +375,7 @@ internal sealed class RenderWindow : Window
         {
             // Scale row (now under Range)
             var oldRef = s.TimeReference;
-            if (FormInputs.AddSegmentedButtonWithLabel(ref s.TimeReference, "Scale", 0,
+            if (FormInputs.AddSegmentedButtonWithLabel(ref s.TimeReference, "Scale",
                                                        "The unit for Start and End: musical bars, seconds, or frame numbers."))
             {
                 modified = true;
@@ -463,7 +463,7 @@ internal sealed class RenderWindow : Window
     {
         FormInputs.AddVerticalSpace(5);
 
-        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.ContinuousClock, "Clock", 0,
+        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.ContinuousClock, "Clock",
                                                              """
                                                              - **Realtime** — grabs the live output as you perform (video only, native resolution).
                                                              - **Deterministic** — steps time forward at the target FPS; frame-perfect and records audio.
@@ -603,7 +603,7 @@ internal sealed class RenderWindow : Window
     private bool DrawFormatSection()
     {
         var s = RenderSettings.Current;
-        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.RenderMode, "Render Mode", 0,
+        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.RenderMode, "Render Mode",
                                                              "Render one video file, or a numbered sequence of image files (PNG/JPG).");
         FormInputs.AddVerticalSpace();
 

@@ -579,137 +579,13 @@ internal static class FormInputs
         return modified;
     }
 
-    public static bool AddSegmentedButtonWithLabel<T>(ref T selectedValue, string label, float columnWidth = 0, string? tooltip = null)
+    public static bool AddSegmentedButtonWithLabel<T>(ref T selectedValue, string label, string? tooltip = null)
         where T : struct, Enum
     {
         DrawInputLabel(label);
-        var modified = SegmentedButton(ref selectedValue, columnWidth);
+        var modified = CustomComponents.SegmentedButton(ref selectedValue);
         AppendTooltip(tooltip);
         return modified;
-    }
-
-    public static bool SegmentedButton<T>(ref T selectedValue, float columnWidth = 0, Func<T, bool>? isItemDisabled = null)
-        where T : struct, Enum
-    {
-        if (columnWidth <= 0)
-            return SegmentedButtonPill(ref selectedValue, isItemDisabled);
-
-        // Fixed-width vertical mode (category selectors) keeps the simple per-button look.
-        var modified = false;
-        var selectedValueString = selectedValue.ToString();
-        foreach (var value in Enum.GetValues<T>())
-        {
-            var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(value));
-            var isSelected = selectedValueString == value.ToString();
-            if (DrawSelectButton(name, isSelected, columnWidth))
-            {
-                modified = true;
-                selectedValue = value;
-            }
-        }
-
-        return modified;
-    }
-
-    /// <summary>
-    /// Horizontal segmented control drawn as one rounded track with the active option floating inside it.
-    /// Custom draw-list rendering (rather than per-option ImGui.Button) so the track and the active pill
-    /// share corners and the active label can use a heavier font.
-    /// </summary>
-    private static bool SegmentedButtonPill<T>(ref T selectedValue, Func<T, bool>? isItemDisabled = null) where T : struct, Enum
-    {
-        var scale = T3Ui.UiScaleFactor;
-        var h = ImGui.GetFrameHeight();
-        var segPadding = 14 * scale;
-        var rounding = 4 * scale;
-        var inset = 2 * scale;
-
-        var values = Enum.GetValues<T>();
-        var selectedString = selectedValue.ToString();
-        var dl = ImGui.GetWindowDrawList();
-        var start = ImGui.GetCursorScreenPos();
-
-        var total = 0f;
-        foreach (var value in values)
-        {
-            var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(value));
-            total += ImGui.CalcTextSize(name).X + segPadding * 2;
-        }
-
-        dl.AddRectFilled(start, start + new Vector2(total, h), UiColors.BackgroundInputField, rounding);
-
-        // Scope ids by enum type so two unrelated segmented controls in the same window don't collide.
-        ImGui.PushID(typeof(T).Name);
-
-        var modified = false;
-        var isFirst = true;
-        var x = start.X;
-        foreach (var value in values)
-        {
-            var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(value));
-            var segWidth = ImGui.CalcTextSize(name).X + segPadding * 2;
-            var isSelected = selectedString == value.ToString();
-            var isDisabled = isItemDisabled?.Invoke(value) ?? false;
-
-            if (!isFirst)
-                ImGui.SameLine(0, 0);
-
-            // Disabled options still reserve their slot but ignore clicks and don't highlight on hover.
-            if (ImGui.InvisibleButton(name, new Vector2(segWidth, h)) && !isDisabled)
-            {
-                selectedValue = value;
-                modified = true;
-            }
-
-            var isHovered = !isDisabled && ImGui.IsItemHovered();
-
-            var segMin = new Vector2(x, start.Y);
-            if (isSelected)
-            {
-                dl.AddRectFilled(segMin + new Vector2(inset, inset),
-                                 segMin + new Vector2(segWidth - inset, h - inset),
-                                 UiColors.BackgroundButton, rounding);
-            }
-            else if (isHovered)
-            {
-                dl.AddRectFilled(segMin + new Vector2(inset, inset),
-                                 segMin + new Vector2(segWidth - inset, h - inset),
-                                 UiColors.BackgroundButton.Fade(0.4f), rounding);
-            }
-
-            var font = isSelected ? Fonts.FontBold : Fonts.FontNormal;
-            var textColor = isDisabled
-                                ? UiColors.TextMuted.Fade(0.25f)
-                                : isSelected
-                                    ? UiColors.ForegroundFull
-                                    : (isHovered ? UiColors.Text : UiColors.TextMuted);
-            ImGui.PushFont(font);
-            var textSize = ImGui.CalcTextSize(name);
-            var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
-            dl.AddText(textPos, ImGui.GetColorU32(textColor.Rgba), name);
-            ImGui.PopFont();
-
-            x += segWidth;
-            isFirst = false;
-        }
-
-        ImGui.PopID();
-        return modified;
-    }
-
-    private static bool DrawSelectButton(string name, bool isSelected, float width = 0)
-    {
-        ImGui.PushStyleColor(ImGuiCol.Button,
-            isSelected ? UiColors.BackgroundActive.Fade(0.7f).Rgba : UiColors.BackgroundButton.Rgba);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
-            isSelected ? UiColors.BackgroundActive.Rgba : UiColors.BackgroundButton.Fade(0.7f).Rgba);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive,
-            isSelected ? UiColors.BackgroundActive.Fade(0.7f).Rgba : UiColors.BackgroundButton.Fade(0.7f).Rgba);
-
-        var clicked = ImGui.Button(name, new Vector2(width, 0));
-        ImGui.PopStyleColor(4);
-        return clicked;
     }
 
     private const string NoDefaultString = "_";

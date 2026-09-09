@@ -43,7 +43,7 @@ internal sealed class UtilitiesWindow : Window
         ImGui.BeginChild("categories", new Vector2(160 * T3Ui.UiScaleFactor, -1), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
-            FormInputs.AddSegmentedButtonWithLabel(ref _activeCategory, "", 150 * T3Ui.UiScaleFactor);
+            CustomComponents.SelectButtonColumn(ref _activeCategory, 150 * T3Ui.UiScaleFactor);
             ImGui.PopStyleVar();
         }
         ImGui.EndChild();

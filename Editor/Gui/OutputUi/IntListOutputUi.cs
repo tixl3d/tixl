@@ -63,7 +63,7 @@ internal sealed class IntListOutputUi : OutputUi<List<int>>
                                ? settings
                                : _viewSettingsForId[viewId] = new ViewSettings();
 
-        FormInputs.SegmentedButton(ref viewSettings.ViewStyle);
+        CustomComponents.SegmentedButton(ref viewSettings.ViewStyle);
 
         switch (viewSettings.ViewStyle)
         {

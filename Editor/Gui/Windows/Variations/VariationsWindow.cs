@@ -85,7 +85,7 @@ internal sealed class VariationsWindow : Window
                                  ImGuiChildFlags.None,
                                  ImGuiWindowFlags.NoScrollbar);
                 
-                if (FormInputs.SegmentedButton(ref _interactionMode))
+                if (CustomComponents.SegmentedButton(ref _interactionMode))
                 {
                     // _interactionMode = (InteractionModes)viewModeIndex;
                     //_presetCanvas.RefreshView();
