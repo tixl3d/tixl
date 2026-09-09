@@ -130,11 +130,11 @@ Look at the strip with nothing selected; hover an item; select it.
 ## Step: Bindings column reflects the machine
 
 **Action:**
-Right-click the output item → **Bind to display** → the first display. Then **Stop
-presenting** from the same menu.
+Right-click the output item → **Bind to** → the first display. Then **Unbind** from the same
+menu.
 
 **Expected:**
-- While bound, the "Local / Display 1" item is no longer dimmed and shows the output's name
-  as its status instead of the resolution; the output item's "unbound" status is gone and a
-  gray curve joins the two.
-- After unbinding both revert. Clicking a bindings item selects nothing and opens no menu.
+- While bound, the "Local / Display 1" item is no longer dimmed; the output item's "unbound"
+  status is gone and a gray curve joins the two.
+- After unbinding both revert. Clicking a bindings item selects nothing; right-clicking it
+  opens the plug's own menu (see the "Local Bindings, Streams and Help" set for the rest).

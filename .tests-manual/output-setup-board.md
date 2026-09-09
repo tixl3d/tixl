@@ -430,3 +430,19 @@ project).
 
 **Expected:**
 - The moved card is where it was left; the other setup has its own seeded layout.
+
+## Step: The name label acts for its card
+
+**Action:**
+1. Hover the "Surface 1" name label above its card, then press on the label and drag it 200 px
+   to the right, release.
+2. Right-click the "P1" label above the output card.
+3. Move the "SendToOutput" card so its label lies over the "Surface 1" card, then click the
+   label.
+
+**Expected:**
+- After 1: hovering the label lifts the card's frame as hovering the card does; the drag
+  moves the card with the label, and Ctrl+Z moves it back.
+- After 2: "P1" is selected and its context menu opens (Add Patch, Split…, Bind to, Rename…).
+- After 3: the click selects "SendToOutput", not the surface card underneath — a label wins
+  over cards beneath it.
