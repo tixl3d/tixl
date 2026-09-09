@@ -343,7 +343,19 @@ internal sealed partial class SetupOutputView
         var interactive = fade >= 0.999f;
         var isSelected = selection?.IsSelected(kind, id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.GetPulse(id);
-        var hovered = interactive && ImGui.IsMouseHoveringRect(sMin, sMax) && ImGui.IsWindowHovered();
+
+        // The name label above the card belongs to it: hovering, picking and grabbing work there as on the card.
+        var pad = 4 * scale;
+        var rounding = 3 * scale;
+        var nameFont = isSelected ? Fonts.FontBold : Fonts.FontSmall;
+        ImGui.PushFont(nameFont);
+        var nameSize = ImGui.CalcTextSize(name);
+        ImGui.PopFont();
+        var labelMin = new Vector2(sMin.X, sMin.Y - nameSize.Y - 2 * pad);
+        var labelMax = labelMin + nameSize + new Vector2(2 * pad, 2 * pad);
+
+        var hovered = interactive && ImGui.IsWindowHovered()
+                      && (ImGui.IsMouseHoveringRect(sMin, sMax) || ImGui.IsMouseHoveringRect(labelMin, labelMax));
         if (hovered)
             FrameStats.PulseItemWithId(id);
 
@@ -369,7 +381,6 @@ internal sealed partial class SetupOutputView
         if (pulse > 0.001f)
             dl.AddRectFilled(sMin, sMax, kindColor.Fade(pulse * 0.15f * fade), 3 * scale);
 
-        var rounding = 3 * scale;
         dl.AddRect(sMin, sMax, PulseColor(kindColor.Fade(hovered ? 1f : 0.7f), pulse).Fade(fade), rounding, ImDrawFlags.None, 1 * scale);
         if (isSelected)
         {
@@ -379,13 +390,6 @@ internal sealed partial class SetupOutputView
 
         // Name above the card's top-left, in the kind's label hue (bold while selected) on a faint shade; the
         // metadata only while hovered or selected — it answers a question, it doesn't label.
-        var pad = 4 * scale;
-        var nameFont = isSelected ? Fonts.FontBold : Fonts.FontSmall;
-        ImGui.PushFont(nameFont);
-        var nameSize = ImGui.CalcTextSize(name);
-        ImGui.PopFont();
-        var labelMin = new Vector2(sMin.X, sMin.Y - nameSize.Y - 2 * pad);
-        var labelMax = labelMin + nameSize + new Vector2(2 * pad, 2 * pad);
         dl.AddRectFilled(labelMin, labelMax, UiColors.BackgroundFull.Fade(0.3f * fade), rounding);
         dl.AddText(nameFont, nameFont.FontSize, labelMin + new Vector2(pad, pad), SetupColors.LabelFor(kind).Fade(fade), name);
         if (meta != null && (hovered || isSelected))
@@ -402,6 +406,8 @@ internal sealed partial class SetupOutputView
             pickId = ResolveBoardPickInCard(setup, selection, cardSurface, min + cardSurface.AnchorInMeters, _boardProjection.ScreenToCanvas(ImGui.GetMousePos()));
 
         _picker.AddTarget(kind, pickId, sMin, sMax, isBackground: true);
+        // The label is a foreground target: it wins over any card stacked beneath it.
+        _picker.AddTarget(kind, id, labelMin, labelMax);
         _boardFenceCandidates.Add((kind, id, new ImRect(sMin, sMax)));
         if (pickId == id)
             GrabBoardCard(kind, id, hovered, isSelected);
@@ -1564,7 +1570,7 @@ internal sealed partial class SetupOutputView
             var binding = machineConfig.TryGetBinding(output.Id);
             _boardMeta[output.Id] = binding == null
                                         ? $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height}"
-                                        : $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height} → Display {binding.DisplayIndex + 1}";
+                                        : $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height} → {Plugs.BindingLabel(machineConfig, binding)}";
         }
 
         foreach (var source in setup.ContentSources)

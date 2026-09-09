@@ -10,6 +10,7 @@ using System.Runtime.Loader;
 using System.Threading;
 using T3.Core.IO;
 using T3.Core.Logging;
+using T3.Core.Output;
 using T3.Core.Utils;
 using T3.Serialization;
 
@@ -77,9 +78,20 @@ public sealed partial class AssemblyInformation
     private readonly HashSet<string> _namespaces = [];
 
     internal bool ShouldShareResources;
+
+    // Stream providers this assembly contributed to the OutputStreamRegistry; taken out again on unload.
+    private readonly List<IOutputStreamProvider> _streamProviders = [];
     internal TixlAssemblyLoadContext? LoadContext => _loadContext;
     private TixlAssemblyLoadContext? _loadContext;
     private readonly Lock _assemblyLock = new();
+
+    private void UnregisterStreamProviders()
+    {
+        foreach (var provider in _streamProviders)
+            OutputStreamRegistry.Unregister(provider);
+
+        _streamProviders.Clear();
+    }
 
     public static AssemblyInformation CreateUninitialized()
     {
@@ -187,7 +199,7 @@ public sealed partial class AssemblyInformation
             try
             {
                 var types = rootNode.Assembly.GetTypes();
-                LoadTypes(types, rootNode.Assembly, out ShouldShareResources, _operatorTypeInfo, _namespaces, _types);
+                LoadTypes(types, rootNode.Assembly, out ShouldShareResources, _operatorTypeInfo, _namespaces, _types, _streamProviders);
                 _loadedTypes = true;
                 return true;
             }
@@ -317,6 +329,7 @@ public sealed partial class AssemblyInformation
             _operatorTypeInfo.Clear();
             _types.Clear(); // explicitly dereference all our types
             _namespaces.Clear();
+            UnregisterStreamProviders();
             Log.Debug($"{Name}: Assembly information unloaded");
 
             try

@@ -123,7 +123,7 @@ internal static class ResolutionHandling
             var isBindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
             var label = binding == null
                             ? $"{output.Name}  ·  {output.CanvasResolution.Width}×{output.CanvasResolution.Height}"
-                            : $"{output.Name}  →  Display {binding.DisplayIndex + 1}";
+                            : $"{output.Name}  →  {Plugs.BindingLabel(machineConfig, binding)}";
 
             if (isBindable)
             {
@@ -141,47 +141,35 @@ internal static class ResolutionHandling
         }
     }
 
+    /// <summary>The plugs an output can be bound to: every attached display, then the machine's stream senders.</summary>
     internal static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)
     {
         var screens = System.Windows.Forms.Screen.AllScreens;
         var binding = machineConfig.TryGetBinding(output.Id);
+        var boundPlug = Plugs.BoundPlugId(binding);
         for (var screenIndex = 0; screenIndex < screens.Length; screenIndex++)
         {
             var screen = screens[screenIndex];
-            var isBound = binding != null && binding.DisplayIndex == screenIndex;
+            var plugId = Plugs.DisplayPlugId(screenIndex);
             var label = $"Fullscreen on Display {screenIndex + 1} ({screen.Bounds.Width}×{screen.Bounds.Height})";
-            if (CustomComponents.DrawMenuItem(screenIndex, label, isChecked: isBound))
-            {
-                machineConfig.Bind(new DeviceBinding
-                                       {
-                                           OutputId = output.Id,
-                                           DisplayName = screen.DeviceName,
-                                           DisplayIndex = screenIndex,
-                                       });
-                OutputSetupHandling.SaveActive();
-                PresentOnDisplay(screenIndex, output.Id);
-            }
+            if (CustomComponents.DrawMenuItem(screenIndex, label, isChecked: boundPlug == plugId))
+                Plugs.BindOutput(machineConfig, output.Id, plugId);
+        }
+
+        for (var i = 0; i < machineConfig.Streams.Count; i++)
+        {
+            var stream = machineConfig.Streams[i];
+            var label = $"Send to {stream.Kind}: {stream.Name}";
+            if (CustomComponents.DrawMenuItem(100 + i, label, isChecked: boundPlug == stream.Id, isEnabled: Plugs.IsStreamKindAvailable(stream.Kind)))
+                Plugs.BindOutput(machineConfig, output.Id, stream.Id);
         }
 
         if (binding != null)
         {
             CustomComponents.SeparatorLine();
-            if (CustomComponents.DrawMenuItem(999, "Stop presenting"))
-            {
-                machineConfig.Unbind(output.Id);
-                OutputSetupHandling.SaveActive();
-                WindowManager.ShowSecondaryRenderWindow = false;
-                if (OutputManager.PresentedOutputId == output.Id)
-                    OutputManager.PresentedOutputId = Guid.Empty;
-            }
+            if (CustomComponents.DrawMenuItem(999, "Unbind"))
+                Plugs.UnbindOutput(machineConfig, output.Id);
         }
-    }
-
-    private static void PresentOnDisplay(int screenIndex, Guid outputId)
-    {
-        OutputManager.PresentedOutputId = outputId;
-        WindowManager.ShowSecondaryRenderWindow = true;
-        ProgramWindows.Viewer.SetFullScreen(screenIndex);
     }
 
     private static Resolution _resolutionForEdit = new("untitled", 256, 256);

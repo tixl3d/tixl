@@ -11,10 +11,10 @@ using T3.Serialization;
 namespace T3.Core.Output;
 
 /// <summary>
-/// The machine-specific side of the output pipeline: device bindings and (later) window
-/// placement and sync. Lives next to the setups in the project's .meta/ folder but is
-/// per-computer and meant to be gitignored — a touring show rewrites it on first bind at
-/// each venue while Setup and project never learn about display numbering.
+/// The machine-specific side of the output pipeline: the stream plugs this machine offers, device
+/// bindings and (later) window placement and sync. Lives next to the setups in the project's .meta/
+/// folder but is per-computer and meant to be gitignored — a touring show rewrites it on first bind
+/// at each venue while Setup and project never learn about display numbering.
 /// </summary>
 public sealed class MachineConfig
 {
@@ -22,6 +22,27 @@ public sealed class MachineConfig
     public const string FileName = "outputs.machine.json";
 
     public List<DeviceBinding> Bindings = [];
+
+    /// <summary>Stream senders this machine offers as plugs, next to its displays.</summary>
+    public List<StreamPlug> Streams = [];
+
+    public StreamPlug? FindStream(Guid plugId)
+    {
+        foreach (var stream in Streams)
+        {
+            if (stream.Id == plugId)
+                return stream;
+        }
+
+        return null;
+    }
+
+    /// <summary>Removes a stream plug and every binding into it.</summary>
+    public void RemoveStream(Guid plugId)
+    {
+        Streams.RemoveAll(s => s.Id == plugId);
+        Bindings.RemoveAll(b => b.IsStream && b.PlugId == plugId);
+    }
 
     public DeviceBinding? TryGetBinding(Guid outputId)
     {
@@ -61,6 +82,16 @@ public sealed class MachineConfig
                 binding.WriteToJson(writer);
 
             writer.WriteEndArray();
+            if (Streams.Count > 0)
+            {
+                writer.WritePropertyName("Streams");
+                writer.WriteStartArray();
+                foreach (var stream in Streams)
+                    stream.WriteToJson(writer);
+
+                writer.WriteEndArray();
+            }
+
             writer.WriteEndObject();
             writer.Flush();
         }
@@ -77,6 +108,7 @@ public sealed class MachineConfig
         return new MachineConfig
                    {
                        Bindings = token.ReadListSafe("Bindings", DeviceBinding.ReadFromJson),
+                       Streams = token.ReadListSafe("Streams", StreamPlug.ReadFromJson),
                    };
     }
 

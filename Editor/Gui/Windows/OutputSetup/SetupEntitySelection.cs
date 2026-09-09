@@ -48,6 +48,9 @@ internal sealed class SetupEntitySelection
         Slice,
         ContentSource,
         Patch,
+
+        /// <summary>A local plug (display or stream sender) — an inventory row, never a selection target.</summary>
+        Plug,
     }
 
     /// <summary>Replace the selection with a single entity. A pick: takes over the Parameter window.</summary>

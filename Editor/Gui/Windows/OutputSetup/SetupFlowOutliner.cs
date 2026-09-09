@@ -4,6 +4,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.InputUi.ListInputs;
 using T3.Editor.Gui.Styling;
@@ -34,6 +35,7 @@ internal sealed class SetupFlowOutliner
     public SetupFlowOutliner(EntityItem entityItem)
     {
         _entityItem = entityItem;
+        _requestAddPlugMenu = _ => _addPlugMenuRequested = true;
     }
 
     /// <param name="onToggleCollapse">Collapses the strip to its header bar, or expands it again.</param>
@@ -111,6 +113,12 @@ internal sealed class SetupFlowOutliner
             drawToolbar();
         }
 
+        // Help sits left of the collapse toggle, like the help affordance of the settings panels: hovering
+        // previews the view's overview in the Help window, clicking opens it there.
+        var toggleWidth = onToggleCollapse != null ? height : 0;
+        ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height, rowPos.Y + 3 * scale));
+        DocumentationButton.Draw(HelpDocId, HelpWikiUrl, new Vector2(height, height));
+
         if (onToggleCollapse != null)
         {
             ImGui.SetCursorScreenPos(new Vector2(rowRight - height, rowPos.Y + 3 * scale));
@@ -164,7 +172,7 @@ internal sealed class SetupFlowOutliner
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + 3 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("LOCAL BINDINGS", null, selection, null);
+        DrawColumnHeader("LOCAL BINDINGS", "##addPlug", selection, _requestAddPlugMenu, SetupEntitySelection.EntityKind.Plug);
         DrawLocalBindings(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -248,7 +256,7 @@ internal sealed class SetupFlowOutliner
 
             var binding = machineConfig.TryGetBinding(output.Id);
             if (binding != null)
-                _connections.Add(new Connection(SetupEntitySelection.EntityKind.Output, output.Id, SetupEntitySelection.EntityKind.None, DisplayRowId(binding.DisplayIndex)));
+                _connections.Add(new Connection(SetupEntitySelection.EntityKind.Output, output.Id, SetupEntitySelection.EntityKind.Plug, Plugs.BoundPlugId(binding)));
         }
     }
 
@@ -265,7 +273,8 @@ internal sealed class SetupFlowOutliner
         var scale = T3Ui.UiScaleFactor;
         var emphasized = IsEmphasized(selection, fromKind, fromId) || IsEmphasized(selection, toKind, toId);
         var kindColor = SetupColors.ForKind(fromKind);
-        var color = emphasized ? kindColor : kindColor.Fade(0.35f);
+        // Resting lines must still read against the dark strip; emphasis adds weight, not visibility.
+        var color = emphasized ? kindColor : kindColor.Fade(0.6f);
         var thickness = (emphasized ? 2.5f : 1.5f) * scale;
 
         // Flush with the items: a connection grows out of one pill and into the next.
@@ -364,7 +373,9 @@ internal sealed class SetupFlowOutliner
             if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
             {
                 onAdd(selection);
-                OutputSetupHandling.SaveActive();
+                // The plug "+" only opens a menu; the pick inside it saves for itself.
+                if (kind != SetupEntitySelection.EntityKind.Plug)
+                    OutputSetupHandling.SaveActive();
             }
 
             ImGui.PopID();
@@ -415,62 +426,98 @@ internal sealed class SetupFlowOutliner
     }
 
     /// <summary>
-    /// This machine's plugs — the displays today, streams later — as an inventory: every plug is listed,
-    /// the bound ones read normal (their connection says which output), the free ones recede. A display an
-    /// output is bound to but that isn't attached right now is listed too, so its connection has somewhere
-    /// to land. Items are not entities (no selection, no menu); binding happens on the output's item.
+    /// This machine's plugs — the attached displays and its stream senders — as an inventory: every plug is
+    /// listed, the bound ones read normal (their connection says which output), the free ones recede. A
+    /// display an output is bound to but that isn't attached right now is listed too, so its connection has
+    /// somewhere to land. Plug rows aren't selectable; they take an output by drop and offer their menu.
+    /// The column's "+" adds a stream sender of any kind whose package is loaded.
     /// </summary>
     private void DrawLocalBindings(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
     {
         var screens = System.Windows.Forms.Screen.AllScreens;
         for (var i = 0; i < screens.Length; i++)
         {
-            string? boundTo = null;
-            foreach (var binding in machineConfig.Bindings)
-            {
-                if (binding.DisplayIndex != i)
-                    continue;
-
-                boundTo = setup.FindOutput(binding.OutputId)?.Name;
-                break;
-            }
-
+            var plugId = Plugs.DisplayPlugId(i);
             var args = new EntityItem.Args
                            {
-                               Kind = SetupEntitySelection.EntityKind.None,
-                               Id = DisplayRowId(i),
-                               Name = DisplayLabel(i),
+                               Kind = SetupEntitySelection.EntityKind.Plug,
+                               Id = plugId,
+                               Name = Plugs.DisplayLabel(i),
                                Status = ResolutionLabel(i, screens[i].Bounds.Width, screens[i].Bounds.Height),
                                LeadingIcon = Icon.PlayOutput,
-                               Muted = boundTo == null,
+                               Muted = !IsPlugBound(setup, machineConfig, plugId),
                            };
             DrawRow(selection, setup, ref args);
         }
 
         foreach (var binding in machineConfig.Bindings)
         {
-            if (binding.DisplayIndex < screens.Length || setup.FindOutput(binding.OutputId) == null)
+            if (binding.IsStream || binding.DisplayIndex < screens.Length || setup.FindOutput(binding.OutputId) == null)
                 continue;
 
             var args = new EntityItem.Args
                            {
-                               Kind = SetupEntitySelection.EntityKind.None,
-                               Id = DisplayRowId(binding.DisplayIndex),
-                               Name = DisplayLabel(binding.DisplayIndex),
+                               Kind = SetupEntitySelection.EntityKind.Plug,
+                               Id = Plugs.DisplayPlugId(binding.DisplayIndex),
+                               Name = Plugs.DisplayLabel(binding.DisplayIndex),
                                Status = "not attached",
                                LeadingIcon = Icon.PlayOutput,
                                Muted = true,
                            };
             DrawRow(selection, setup, ref args);
         }
+
+        for (var i = 0; i < machineConfig.Streams.Count; i++)
+        {
+            var stream = machineConfig.Streams[i];
+            var available = Plugs.IsStreamKindAvailable(stream.Kind);
+            var args = new EntityItem.Args
+                           {
+                               Kind = SetupEntitySelection.EntityKind.Plug,
+                               Id = stream.Id,
+                               Name = stream.Name,
+                               Status = available ? stream.Kind : $"{stream.Kind} · package not loaded",
+                               LeadingIcon = Icon.ConnectedOutput,
+                               Muted = !available || !IsPlugBound(setup, machineConfig, stream.Id),
+                           };
+            DrawRow(selection, setup, ref args);
+        }
+
+        if (_addPlugMenuRequested)
+        {
+            ImGui.OpenPopup(AddPlugMenuId);
+            _addPlugMenuRequested = false;
+        }
+
+        if (ImGui.BeginPopup(AddPlugMenuId))
+        {
+            CustomComponents.MenuGroupHeader("Add stream sender");
+            var providers = OutputStreamRegistry.Providers;
+            if (providers.Count == 0)
+                CustomComponents.DrawMenuItem(0, "No stream packages loaded (Spout, NDI)", isEnabled: false);
+
+            for (var i = 0; i < providers.Count; i++)
+            {
+                if (CustomComponents.DrawMenuItem(1 + i, providers[i].Kind))
+                {
+                    var stream = Plugs.AddStream(machineConfig, providers[i].Kind);
+                    _entityItem.BeginRename(selection, SetupEntitySelection.EntityKind.Plug, stream.Id, stream.Name);
+                }
+            }
+
+            ImGui.EndPopup();
+        }
     }
 
-    private static string DisplayLabel(int displayIndex)
+    private static bool IsPlugBound(Setup setup, MachineConfig machineConfig, Guid plugId)
     {
-        while (_displayLabels.Count <= displayIndex)
-            _displayLabels.Add($"Local / Display {_displayLabels.Count + 1}");
+        foreach (var binding in machineConfig.Bindings)
+        {
+            if (Plugs.BoundPlugId(binding) == plugId && setup.FindOutput(binding.OutputId) != null)
+                return true;
+        }
 
-        return _displayLabels[displayIndex];
+        return false;
     }
 
     private static string ResolutionLabel(int displayIndex, int width, int height)
@@ -485,9 +532,6 @@ internal sealed class SetupFlowOutliner
 
         return cached;
     }
-
-    // A stable per-display row id, so ImGui ids and hover pulses stay put across frames.
-    private static Guid DisplayRowId(int displayIndex) => new(displayIndex + 1, 0x5c4e, 0x4e21, 0, 0, 0, 0, 0, 0, 0, 0);
 
     private void DrawContentSends(SetupEntitySelection selection, Setup setup)
     {
@@ -735,8 +779,13 @@ internal sealed class SetupFlowOutliner
     }
 
     private static readonly List<string> _availableNames = [];
-    private static readonly List<string> _displayLabels = [];
     private static readonly List<string> _resolutionLabels = [];
+
+    private const string AddPlugMenuId = "##addPlugMenu";
+    private const string HelpDocId = "OutputSetup";
+    private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
+    private bool _addPlugMenuRequested;
+    private readonly Action<SetupEntitySelection> _requestAddPlugMenu;
     private static EvaluationContext? _sendContext;
 
     // The column the rows currently draw into (screen x + width); 0 width = whole window.

@@ -47,14 +47,17 @@ internal static class OutputManager
     /// </summary>
     public static void UpdatePresentation()
     {
-        if (UserSettings.Config.MirrorUiOnSecondView)
-            return;
-
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
+        {
+            DisposeStreamSenders();
             return;
+        }
 
+        // Streams send regardless of the second window; the display path below yields to the UI mirror.
+        var mirrorUi = UserSettings.Config.MirrorUiOnSecondView;
         OutputDefinition? boundOutput = null;
         DeviceBinding? binding = null;
+        _activeStreamPlugs.Clear();
         foreach (var output in setup.Outputs)
         {
             // Send=false pauses presenting this output without dropping its binding.
@@ -65,10 +68,21 @@ internal static class OutputManager
             if (candidate == null)
                 continue;
 
-            boundOutput = output;
-            binding = candidate;
-            break;
+            if (candidate.IsStream)
+            {
+                SendToStream(machineConfig, output, candidate);
+                continue;
+            }
+
+            // One display can be driven today: the first bound output takes it.
+            if (boundOutput == null && !mirrorUi)
+            {
+                boundOutput = output;
+                binding = candidate;
+            }
         }
+
+        SweepStreamSenders();
 
         if (boundOutput == null || binding == null)
         {
@@ -99,6 +113,73 @@ internal static class OutputManager
             _presentedDisplayIndex = binding.DisplayIndex;
         }
     }
+
+    /// <summary>
+    /// Pushes an output's composite into its stream sender, opening (or re-opening after a rename) the sender
+    /// from the plug's provider. A plug whose package isn't loaded sends nothing and keeps its binding.
+    /// </summary>
+    private static void SendToStream(MachineConfig machineConfig, OutputDefinition output, DeviceBinding binding)
+    {
+        var stream = machineConfig.FindStream(binding.PlugId);
+        if (stream == null)
+            return;
+
+        _activeStreamPlugs.Add(stream.Id);
+        if (_streamSenders.TryGetValue(stream.Id, out var slot) && (slot.Kind != stream.Kind || slot.Name != stream.Name))
+        {
+            slot.Sender.Dispose();
+            _streamSenders.Remove(stream.Id);
+            slot = null;
+        }
+
+        if (slot == null)
+        {
+            var provider = OutputStreamRegistry.TryGetProvider(stream.Kind);
+            if (provider == null)
+                return;
+
+            slot = new StreamSlot(stream.Kind, stream.Name, provider.CreateSender(stream.Name));
+            _streamSenders[stream.Id] = slot;
+        }
+
+        var composite = RenderOutput(output.Id);
+        if (composite != null)
+            slot.Sender.Send(composite);
+    }
+
+    /// <summary>Closes senders whose plug wasn't sent to this frame (binding dropped, output paused or deleted).</summary>
+    private static void SweepStreamSenders()
+    {
+        if (_streamSenders.Count == 0)
+            return;
+
+        _staleStreamPlugs.Clear();
+        foreach (var entry in _streamSenders)
+        {
+            if (!_activeStreamPlugs.Contains(entry.Key))
+                _staleStreamPlugs.Add(entry.Key);
+        }
+
+        foreach (var plugId in _staleStreamPlugs)
+        {
+            _streamSenders[plugId].Sender.Dispose();
+            _streamSenders.Remove(plugId);
+        }
+    }
+
+    private static void DisposeStreamSenders()
+    {
+        foreach (var slot in _streamSenders.Values)
+            slot.Sender.Dispose();
+
+        _streamSenders.Clear();
+    }
+
+    private sealed record StreamSlot(string Kind, string Name, IOutputStreamSender Sender);
+
+    private static readonly Dictionary<Guid, StreamSlot> _streamSenders = [];
+    private static readonly HashSet<Guid> _activeStreamPlugs = [];
+    private static readonly List<Guid> _staleStreamPlugs = [];
 
     /// <summary>
     /// A representative source-content texture for the output — the first surface's content. Used as the

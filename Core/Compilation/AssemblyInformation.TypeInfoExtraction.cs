@@ -9,6 +9,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Attributes;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
+using T3.Core.Output;
 using T3.Core.Resource;
 
 namespace T3.Core.Compilation;
@@ -25,7 +26,7 @@ public sealed partial class AssemblyInformation
     /// <param name="typesByName"></param>
     /// <param name="operatorTypeInfo"></param>
     private static void LoadTypes(Type[] types, Assembly assembly, out bool shouldShareResources, ConcurrentDictionary<Guid, OperatorTypeInfo> operatorTypeInfo,
-                                  HashSet<string> namespaces, Dictionary<string, Type> typesByName)
+                                  HashSet<string> namespaces, Dictionary<string, Type> typesByName, List<IOutputStreamProvider> streamProviders)
     {
         if (!operatorTypeInfo.IsEmpty)
         {
@@ -106,6 +107,39 @@ public sealed partial class AssemblyInformation
 
                                          return false;
                                      }).Any();
+
+        RegisterStreamProviders(nonOperatorTypes, streamProviders);
+    }
+
+    /// <summary>
+    /// A package that carries a stream library (Spout, NDI) offers it to the output setup as an
+    /// <see cref="IOutputStreamProvider"/>. Instantiated here, alongside the resource-sharing probe, and kept
+    /// on the assembly so an unload can take them out of the registry again.
+    /// </summary>
+    private static void RegisterStreamProviders(IEnumerable<Type> candidates, List<IOutputStreamProvider> streamProviders)
+    {
+        foreach (var type in candidates)
+        {
+            if (type.IsAbstract || type.IsInterface || !type.IsAssignableTo(typeof(IOutputStreamProvider)))
+                continue;
+
+            try
+            {
+                var obj = Activator.CreateInstance(type, ConstructorBindingFlags, binder: null, args: null, culture: null);
+                if (obj is not IOutputStreamProvider provider)
+                {
+                    Log.Error($"Failed to create {nameof(IOutputStreamProvider)} for {type.FullName}");
+                    continue;
+                }
+
+                streamProviders.Add(provider);
+                OutputStreamRegistry.Register(provider);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Failed to create stream provider {type.FullName}\n{e.Message}");
+            }
+        }
     }
 
     /// <summary>

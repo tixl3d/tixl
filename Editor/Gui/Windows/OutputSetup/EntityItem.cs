@@ -121,7 +121,8 @@ internal sealed class EntityItem
         var isHovered = ImGui.IsItemHovered();
         hovered = isHovered;
 
-        var canRename = SetupActions.CanRename(args.Kind);
+        var canRename = SetupActions.CanRename(args.Kind)
+                        && (args.Kind != SetupEntitySelection.EntityKind.Plug || SetupActions.CanRenamePlug(args.Id));
         var isRenaming = canRename && _renamingId == args.Id;
 
         // Double-click a renamable row to edit its name inline. Suppress the click-select handling below so the
@@ -154,7 +155,7 @@ internal sealed class EntityItem
         {
             action = ItemAction.ToggleExpanded;
         }
-        else if (clicked && args.Kind != SetupEntitySelection.EntityKind.None) // inventory rows (plugs) are inert
+        else if (clicked && args.Kind is not (SetupEntitySelection.EntityKind.None or SetupEntitySelection.EntityKind.Plug)) // inventory rows (plugs) are inert
         {
             var io = ImGui.GetIO();
             if (io.KeyCtrl)
@@ -335,7 +336,8 @@ internal sealed class EntityItem
         // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
         // (ApplyDrop normalizes), so dragging an output onto a source works the same as the reverse.
         var routable = kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
-                            or SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.Output;
+                            or SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.Output
+                            or SetupEntitySelection.EntityKind.Plug;
         if (!routable)
             return;
 
@@ -436,12 +438,35 @@ internal sealed class EntityItem
                 if (output.Kind is not (OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display))
                     break;
 
-                if (CustomComponents.DrawSubMenu(4, "Bind to display")
+                if (CustomComponents.DrawSubMenu(4, "Bind to")
                     && OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
                 {
                     ResolutionHandling.DrawBindingMenuItems(output, machineConfig);
                     ImGui.EndMenu();
                 }
+
+                break;
+
+            case SetupEntitySelection.EntityKind.Plug:
+                if (!OutputSetupHandling.TryGetActiveSetup(out _, out var plugMachineConfig))
+                    break;
+
+                // Whatever output is bound here can be let go from the plug's side too.
+                foreach (var binding in plugMachineConfig.Bindings)
+                {
+                    if (Plugs.BoundPlugId(binding) != id)
+                        continue;
+
+                    var boundOutput = setup.FindOutput(binding.OutputId);
+                    if (boundOutput != null && CustomComponents.DrawMenuItem(15, $"Unbind {boundOutput.Name}"))
+                    {
+                        Plugs.UnbindOutput(plugMachineConfig, boundOutput.Id);
+                        break;
+                    }
+                }
+
+                if (plugMachineConfig.FindStream(id) != null && CustomComponents.DrawMenuItem(16, "Remove stream"))
+                    Plugs.RemoveStream(plugMachineConfig, id);
 
                 break;
 

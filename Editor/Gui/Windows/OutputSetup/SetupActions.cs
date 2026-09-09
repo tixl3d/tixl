@@ -32,7 +32,7 @@ internal static class SetupActions
     /// <summary>
     /// Whether the two kinds form a routing connection at all — the drop matrix, direction-agnostic.
     /// Connectable pairs: surface↔output, slice↔output, source↔output, slice↔surface, source↔surface,
-    /// slice↔patch, source↔patch.
+    /// slice↔patch, source↔patch, output↔plug.
     /// </summary>
     internal static bool CanConnect(SetupEntitySelection.EntityKind a, SetupEntitySelection.EntityKind b)
     {
@@ -49,6 +49,7 @@ internal static class SetupActions
                                                                        or SetupEntitySelection.EntityKind.ContentSource,
                        SetupEntitySelection.EntityKind.Patch => a is SetupEntitySelection.EntityKind.Slice
                                                                      or SetupEntitySelection.EntityKind.ContentSource,
+                       SetupEntitySelection.EntityKind.Plug => a is SetupEntitySelection.EntityKind.Output,
                        _ => false,
                    };
     }
@@ -63,6 +64,7 @@ internal static class SetupActions
                        SetupEntitySelection.EntityKind.Surface => 2,
                        SetupEntitySelection.EntityKind.Patch => 3,
                        SetupEntitySelection.EntityKind.Output => 3,
+                       SetupEntitySelection.EntityKind.Plug => 4,
                        _ => -1,
                    };
     }
@@ -103,6 +105,17 @@ internal static class SetupActions
     internal static void ApplyDrop(Setup setup, SetupEntitySelection.EntityKind dragKind, Guid dragId,
                                    SetupEntitySelection.EntityKind targetKind, Guid targetId)
     {
+        // A plug binding is machine state, not setup state: it saves on its own and sits outside the setup's undo.
+        if (dragKind == SetupEntitySelection.EntityKind.Plug || targetKind == SetupEntitySelection.EntityKind.Plug)
+        {
+            var outputId = dragKind == SetupEntitySelection.EntityKind.Output ? dragId : targetId;
+            var plugId = dragKind == SetupEntitySelection.EntityKind.Plug ? dragId : targetId;
+            if (setup.FindOutput(outputId) != null && OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
+                Plugs.BindOutput(machineConfig, outputId, plugId);
+
+            return;
+        }
+
         RunUndoable("Connect", setup, () => ApplyDropInternal(setup, dragKind, dragId, targetKind, targetId));
     }
 
@@ -778,6 +791,14 @@ internal static class SetupActions
             return;
         }
 
+        if (kind == SetupEntitySelection.EntityKind.Plug)
+        {
+            if (OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
+                Plugs.RenameStream(machineConfig, id, newName);
+
+            return;
+        }
+
         RunUndoable("Rename", setup, () => RenameEntityInternal(setup, kind, id, newName));
     }
 
@@ -895,11 +916,14 @@ internal static class SetupActions
                     or SetupEntitySelection.EntityKind.Patch;
     }
 
-    /// <summary>A prop has no name to rename; a content source renames its op.</summary>
+    /// <summary>A prop has no name to rename; a content source renames its op; a plug renames its stream (displays
+    /// are named by the OS — see <see cref="CanRenamePlug"/>).</summary>
     internal static bool CanRename(SetupEntitySelection.EntityKind kind)
     {
         return kind is not (SetupEntitySelection.EntityKind.Prop or SetupEntitySelection.EntityKind.None);
     }
+
+    internal static bool CanRenamePlug(Guid plugId) => !Plugs.TryGetDisplayIndex(plugId, out _);
 
     internal static void DuplicateEntity(SetupEntitySelection selection, Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
     {

@@ -296,7 +296,7 @@ internal static class SetupParameterView
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(binding == null
                                           ? $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height} px · unbound"
-                                          : $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height} px · Display {binding.DisplayIndex + 1}",
+                                          : $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height} px · {Plugs.BindingLabel(machineConfig, binding)}",
                                       Fonts.FontSmall, UiColors.TextMuted);
     }
 
