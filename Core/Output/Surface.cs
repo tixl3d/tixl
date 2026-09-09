@@ -53,13 +53,19 @@ public sealed class Surface
         /// </summary>
         public Vector2[] Quad = new Vector2[4];
 
-        /// <summary>
-        /// Where the surface's reference points were aimed on this output, in the same 0..1 canvas space, by
-        /// point id. A point with a target is "activated": the pin is solved to project it exactly there, and
-        /// the target never moves unless the user drags it again. Points without one are ignored by the
-        /// solve — they are usually outside the projector's frame.
+/// <summary>
+        /// Where one of the surface's reference points sits on this output, in the same 0..1 canvas space.
+        /// <para><see cref="Aimed"/> means the user put it there and the pin is solved to project the point
+        /// exactly onto it. An un-aimed placement is only where the mark is drawn — seeded once from wherever
+        /// the pin projected the point when it first appeared here, and never moved again by anything but a
+        /// drag. That is what makes a mark something you can align against: a mark that rides the pin moves
+        /// every time the pin is re-solved, so it can never disagree with it, and a mark that cannot disagree
+        /// says nothing.</para>
         /// </summary>
-        public Dictionary<Guid, Vector2> PointTargets = new();
+        public readonly record struct PointAim(Vector2 Position, bool Aimed);
+
+        /// <summary>Where each of the surface's reference points sits on this output, by point id.</summary>
+        public Dictionary<Guid, PointAim> PointAims = new();
 
         public void WriteToJson(JsonTextWriter writer)
         {
@@ -67,15 +73,16 @@ public sealed class Surface
             writer.WriteObject("OutputId", OutputId);
             writer.WriteString("Mode", Mode);
             writer.WriteQuad("Quad", Quad);
-            if (PointTargets.Count > 0)
+            if (PointAims.Count > 0)
             {
-                writer.WritePropertyName("PointTargets");
+                writer.WritePropertyName("PointAims");
                 writer.WriteStartArray();
-                foreach (var (pointId, pixel) in PointTargets)
+                foreach (var (pointId, aim) in PointAims)
                 {
                     writer.WriteStartObject();
                     writer.WriteObject("Point", pointId);
-                    writer.WriteVector2("Pixel", pixel);
+                    writer.WriteVector2("Target", aim.Position);
+                    writer.WriteValue("Aimed", aim.Aimed);
                     writer.WriteEndObject();
                 }
 
@@ -94,13 +101,18 @@ public sealed class Surface
                                   Quad = OutputJson.ReadQuad(token["Quad"]),
                               };
 
-            if (token["PointTargets"] is JArray targets)
+            // "PointAims", not the old "PointTargets": those held canvas pixels, which read as fractions would
+            // put every mark a thousand canvases away. Dropping them re-seeds the marks from the pin.
+            if (token["PointAims"] is JArray aims)
             {
-                foreach (var target in targets)
+                foreach (var aim in aims)
                 {
-                    var pointId = OutputJson.ReadGuid(target["Point"]);
+                    var pointId = OutputJson.ReadGuid(aim["Point"]);
                     if (pointId != Guid.Empty)
-                        mapping.PointTargets[pointId] = OutputJson.ReadVector2(target["Pixel"]);
+                    {
+                        mapping.PointAims[pointId] = new PointAim(OutputJson.ReadVector2(aim["Target"]),
+                                                                 aim.ReadValueSafe("Aimed", true));
+                    }
                 }
             }
 

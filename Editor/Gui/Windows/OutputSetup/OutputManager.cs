@@ -335,8 +335,10 @@ internal static class OutputManager
                 var quad = mapping.Quad;
                 if (!ReferenceEquals(carrier, surface))
                 {
-                    // Buffer is consumed by TryComputeNdcHomography before the next iteration reuses it.
-                    if (!SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, mapping, output.CanvasSize, _childQuadBuffer))
+                    // Buffer is consumed by TryComputeNdcHomography before the next iteration reuses it, and
+                    // that wants the canvas' 0..1 space — Vector2.One keeps the child's quad in it, where a
+                    // pixel size would hand it canvas pixels and throw the region off the canvas entirely.
+                    if (!SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, mapping, Vector2.One, _childQuadBuffer))
                         continue;
 
                     quad = _childQuadBuffer;
@@ -461,6 +463,11 @@ internal static class OutputManager
             if (!annotation.IsPoint)
                 continue;
 
+            // Around where the pin actually lands this point, which is the one thing the wall can show: the
+            // mask cuts the warped photo at a canvas position, so cutting it at the mark would show whatever
+            // the photo covers there rather than this point's own feature. The crosshair stays at the mark, so
+            // the gap between the disc and its crosshair is the miss — drag until the disc covers the real
+            // feature and the two come together.
             var centre = surfaceToOutput.TransformPoint(annotation.P1);
             _drawItems.Add(new DrawItem(_photoSrv, homography, _photoUv, Vector4.One, Vector4.Zero, Vector4.Zero, Vector4.Zero,
                                         new Vector4(centre.X, centre.Y, radius, 1)));
@@ -528,17 +535,18 @@ internal static class OutputManager
             var annotation = surface.Annotations[i];
             var isEmphasizedPoint = i == emphasizedIndex;
 
-            // A reference point is a crosshair to walk onto its feature; the one being dragged pulses. An
-            // activated point's crosshair stands at its target — where it was aimed, which never moves — while
-            // an idle one just rides the pin, dimmer.
+            // A reference point is a crosshair to walk onto its feature; the one being dragged pulses. It
+            // stands where it was placed on this output and stays there — the pin moving under it is the whole
+            // signal, and a crosshair that rides the pin can never show it. An aimed one reads brighter.
             if (annotation.IsPoint)
             {
-                var isActivated = mapping.PointTargets.TryGetValue(annotation.Id, out var p);
-                if (!isActivated)
-                    p = surfaceToOutput.TransformPoint(annotation.P1);
+                // Stored as a fraction of the canvas; this overlay is drawn in its pixels. A point the editor
+                // has not seeded yet falls back to the pin, which is where the seed would land anyway.
+                var hasAim = mapping.PointAims.TryGetValue(annotation.Id, out var aim);
+                var p = hasAim ? aim.Position * canvasSize : surfaceToOutput.TransformPoint(annotation.P1);
 
                 var arm = (isEmphasizedPoint ? _pointCrosshairSize * 1.5f : _pointCrosshairSize) * 0.5f;
-                var baseColor = isActivated ? _pointColor : _pointColor * new Vector4(0.6f, 0.6f, 0.6f, 1);
+                var baseColor = hasAim && aim.Aimed ? _pointColor : _pointColor * new Vector4(0.6f, 0.6f, 0.6f, 1);
                 var pointColor = isEmphasizedPoint ? Vector4.Lerp(baseColor, white, blink) : baseColor;
                 var pointWidth = new Vector4(isEmphasizedPoint ? _aimLineWidth * 2f : _aimLineWidth, 0, 0, 0);
                 _overlayLines.Add(new OverlayLine(new Vector4(p.X - arm, p.Y, p.X + arm, p.Y), pointColor, pointWidth));

@@ -281,7 +281,13 @@ internal sealed partial class SetupOutputView
             // toward the new selection instead of snapping there.
             basisQuad = BlendBasisTransition(basisId, basisQuad, ref basisSize, ref anchor, framingFrozen);
 
-            Bounds(basisQuad, out var quadMin, out var quadMax);
+            // Mappings are stored as fractions of the canvas; this view works in its pixels (so does R, and the
+            // straightened rect it lands on, which is metres × px/m). Convert once, here.
+            var basisPx = _basisPxQuad;
+            for (var c = 0; c < 4; c++)
+                basisPx[c] = basisQuad[c] * canvasSize;
+
+            Bounds(basisPx, out var quadMin, out var quadMax);
 
             // Straightening lands on the surface's real content canvas (metres × px/m) — so Size (m) is what
             // gives the rectangle its aspect. Anchored at the anchor, so changing a dimension extends the rect
@@ -293,10 +299,10 @@ internal sealed partial class SetupOutputView
 
             var interp = _interpQuad;
             for (var c = 0; c < 4; c++)
-                interp[c] = Vector2.Lerp(basisQuad[c], stageTarget[c], straighten);
+                interp[c] = Vector2.Lerp(basisPx[c], stageTarget[c], straighten);
 
-            if (Homography.TryComputeQuadToQuad(basisQuad, interp, out rToView)
-                && Homography.TryComputeQuadToQuad(interp, basisQuad, out rToOutput))
+            if (Homography.TryComputeQuadToQuad(basisPx, interp, out rToView)
+                && Homography.TryComputeQuadToQuad(interp, basisPx, out rToOutput))
             {
                 // Frame to the focused surface's straightened bounds + margin — not the whole warped canvas,
                 // which a steep rectify sends toward infinity. Interpolated from the full canvas at t=0.
@@ -476,9 +482,11 @@ internal sealed partial class SetupOutputView
 
             // The quad in view space: R applied, then offset into the framed region. One buffer for every
             // surface — nothing below keeps it past this iteration.
+            // Into the canvas' pixels first: the quad is stored as a fraction of it, and R and this canvas
+            // both work in pixels — the same conversion the patches and the child regions make.
             var viewQuad = _viewQuad;
             for (var c = 0; c < 4; c++)
-                viewQuad[c] = rToView.TransformPoint(mappingData.Quad[c]) - viewMin;
+                viewQuad[c] = rToView.TransformPoint(mappingData.Quad[c] * canvasSize) - viewMin;
 
             // While the space comes in, the quad flies from the surface's Board card to its mapped place.
             if (_spaceBlend < 1f && TryGetBoardQuadInView(setup, surface.Id, viewMin, _boardFlyQuad))
@@ -564,7 +572,7 @@ internal sealed partial class SetupOutputView
                 // slowly drift the stored quad while merely viewing in a rectified mode.
                 var previousDraggedCorner = draggedCorner >= 0 ? mappingData.Quad[draggedCorner] : Vector2.Zero;
                 for (var c = 0; c < 4; c++)
-                    mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin);
+                    mappingData.Quad[c] = rToOutput.TransformPoint(viewQuad[c] + viewMin) / canvasSize;
 
                 // Group drag: the dragged corner's output-space delta rides onto every other selected corner.
                 if (phase == CanvasPointHandle.DragPhase.Dragging && draggedCorner >= 0)
@@ -612,7 +620,10 @@ internal sealed partial class SetupOutputView
                     // warps exactly as if each corner had been dragged by the same screen offset.
                     var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
                     for (var c = 0; c < 4; c++)
-                        mappingData.Quad[c] = rToOutput.TransformPoint(rToView.TransformPoint(preMoveQuad[c]) + moveDelta);
+                    {
+                        var moved = rToView.TransformPoint(preMoveQuad[c] * canvasSize) + moveDelta;
+                        mappingData.Quad[c] = rToOutput.TransformPoint(moved) / canvasSize;
+                    }
                 }
                 else if (movePhase == CanvasPointHandle.DragPhase.Completed)
                 {
@@ -693,7 +704,8 @@ internal sealed partial class SetupOutputView
     private void DrawReferencePointPins(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping, Guid outputId,
                                         Vector2 canvasSize, bool editable, float fade)
     {
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var surfaceToOutput))
+        var pinCanvas = SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId);
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, pinCanvas, out var surfaceToOutput))
             return;
 
         // The discs are always on the canvas — they are what says which feature a point marks; the toggle
@@ -717,20 +729,26 @@ internal sealed partial class SetupOutputView
                 continue;
 
             ordinal++;
-            var isActivated = mapping.PointTargets.TryGetValue(point.Id, out var px);
-            if (!isActivated)
-                px = surfaceToOutput.TransformPoint(point.P1);
+            // The mark stands still. Its place is stored as a fraction of the canvas (this view works in the
+            // canvas' pixels, so it converts here), seeded once from wherever the pin projected the point when
+            // it first appeared on this output. Re-deriving it from the pin every frame would make it agree
+            // with the pin by construction — and a mark that cannot disagree with the pin is worth nothing to
+            // someone aligning one against a wall.
+            var aim = AimOf(mapping, point.Id, point.P1, surfaceToOutput, pinCanvas);
+            var px = aim.Position * pinCanvas;
+            var isAimed = aim.Aimed;
 
             ImGui.PushID(i);
-            var phase = CanvasPointHandle.Draw(ref px, _projection, isActivated ? activeStyle : idleStyle);
+            var phase = CanvasPointHandle.Draw(ref px, _projection, isAimed ? activeStyle : idleStyle);
             var hovered = ImGui.IsItemHovered();
             ImGui.PopID();
 
             if (editable && hovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
-                // Back to idle: the pin keeps its shape, the point just stops constraining it.
-                if (isActivated)
-                    SetupActions.RunUndoable("Reset reference point", setup, () => mapping.PointTargets.Remove(point.Id));
+                // Back to idle: the mark stays where it is, it just stops constraining the pin.
+                if (isAimed)
+                    SetupActions.RunUndoable("Reset reference point", setup,
+                                             () => mapping.PointAims[point.Id] = aim with { Aimed = false });
 
                 CancelGesture(); // the press that became this double-click must not also commit a drag
             }
@@ -740,8 +758,8 @@ internal sealed partial class SetupOutputView
             }
             else if (phase == CanvasPointHandle.DragPhase.Dragging && _gesture.Is(GestureKinds.AimPoint, surface.Id))
             {
-                mapping.PointTargets[point.Id] = px;
-                SolvePinFromTargets(surface, mapping, canvasSize);
+                mapping.PointAims[point.Id] = new Surface.OutputMapping.PointAim(px / pinCanvas, true);
+                SolvePinFromTargets(surface, mapping, pinCanvas);
             }
             else if (phase == CanvasPointHandle.DragPhase.Completed)
             {
@@ -751,8 +769,12 @@ internal sealed partial class SetupOutputView
             if (hovered || phase != CanvasPointHandle.DragPhase.None)
                 OutputManager.EmphasizeAnnotation(surface.Id, i);
 
+            // Where the pin currently sends this point. An arrow from the mark to it is the miss, drawn rather
+            // than hidden by moving the mark: it says which way and how far the pin is off at this point.
+            DrawProjectionArrow(dl, px, surfaceToOutput.TransformPoint(point.P1), fade);
+
             var screen = _projection.CanvasToScreen(px);
-            var markColor = isActivated ? green.Fade(0.9f * fade) : UiColors.ForegroundFull.Fade(0.5f * fade);
+            var markColor = isAimed ? green.Fade(0.9f * fade) : UiColors.ForegroundFull.Fade(0.5f * fade);
             CanvasDraw.Crosshair(dl, screen, markColor, 9f, 1f);
             DrawPointLabel(dl, screen, string.IsNullOrEmpty(point.Name) ? $"P{ordinal}" : point.Name, markColor);
         }
@@ -764,23 +786,101 @@ internal sealed partial class SetupOutputView
     /// feature it marks while it is dragged into the frame. The photo is warped through the pin once, then
     /// each disc is a round cut-out of that.
     /// </summary>
+    /// <summary>
+    /// Where a point's mark sits on this output, seeding it on first sight from wherever the pin projects the
+    /// point. Seeding is a one-off write per point and output — after it, nothing but a drag moves the mark.
+    /// </summary>
+    private static Surface.OutputMapping.PointAim AimOf(Surface.OutputMapping mapping, Guid pointId, Vector2 pointInSurface,
+                                                        in Homography surfaceToOutput, Vector2 canvasSize)
+    {
+        if (mapping.PointAims.TryGetValue(pointId, out var existing))
+            return existing;
+
+        var projected = surfaceToOutput.TransformPoint(pointInSurface);
+        var seeded = new Surface.OutputMapping.PointAim(projected / canvasSize, false);
+        mapping.PointAims[pointId] = seeded;
+        OutputSetupHandling.SaveActive();
+        return seeded;
+    }
+
+    /// <summary>
+    /// The miss at one reference point: from its mark to where the current pin actually projects it. Nothing is
+    /// drawn while the two agree — an arrow that is always there stops being a signal.
+    /// </summary>
+    private void DrawProjectionArrow(ImDrawListPtr dl, Vector2 markInCanvas, Vector2 projectedInCanvas, float fade)
+    {
+        var from = _projection.CanvasToScreen(markInCanvas);
+        var to = _projection.CanvasToScreen(projectedInCanvas);
+        var delta = to - from;
+        var length = delta.Length();
+        var scale = T3Ui.UiScaleFactor;
+        if (length < 6 * scale)
+            return;
+
+        // Stops short of both ends so the mark and the projected spot stay readable under it.
+        var direction = delta / length;
+        var start = from + direction * 7 * scale;
+        var end = to - direction * 3 * scale;
+        var color = UiColors.StatusAttention.Fade(0.8f * fade);
+        dl.AddLine(start, end, color, 1.5f * scale);
+
+        var head = 5 * scale;
+        var side = new Vector2(-direction.Y, direction.X) * head * 0.5f;
+        dl.AddTriangleFilled(end, end - direction * head + side, end - direction * head - side, color);
+        CanvasDraw.Crosshair(dl, to, color, 4f, 1f);
+    }
+
+    /// <summary>
+    /// A disc of the surface's straightened photo around each reference point: the wall's own picture, right
+    /// where the feature is, so a mark can be walked onto it. Centred on the marks, not on where the pin
+    /// projects them — the disc belongs to its mark and stands still with it.
+    /// </summary>
     private void DrawCanvasPhotoDiscs(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping,
                                       in Homography surfaceToOutput, Vector2 canvasSize, float fade)
     {
-        if (!TryGetTracedFragment(setup, surface, out _, out var photo, out var uvMin, out var uvMax))
+        if (!TryGetTracedFragment(setup, surface, out var fragmentSrv, out var photo, out var uvMin, out var uvMax))
             return;
 
-        Bounds(mapping.Quad, out var bboxMin, out var bboxMax);
-        var bboxSize = Vector2.Max(bboxMax - bboxMin, new Vector2(1f));
-        var scale = MathF.Min(1f, 2048f / MathF.Max(bboxSize.X, bboxSize.Y));
+        // The pin is stored as fractions of the canvas; this warp works in its pixels, like the view around it.
         for (var c = 0; c < 4; c++)
-            _canvasDiscQuad[c] = (mapping.Quad[c] - bboxMin) * scale;
+            _canvasDiscQuad[c] = mapping.Quad[c] * canvasSize;
 
-        var size = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(bboxSize.X * scale)), Math.Max(1, (int)(bboxSize.Y * scale)));
-        var warped = OutputManager.RenderWarpedTexture(photo, _canvasDiscQuad, size, _canvasDiscKey, new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y));
-        var srv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
+        Bounds(_canvasDiscQuad, out var bboxMin, out var bboxMax);
+        var bboxSize = bboxMax - bboxMin;
+
+        // A pin that has collapsed — or gone non-finite mid-solve — has no area to warp into: the target would
+        // be a pixel or two across and every disc would come out a single smeared colour. That is the state you
+        // are most likely to be in while fixing a bad pin, which is exactly when the discs have to be there.
+        var pinIsUsable = float.IsFinite(bboxSize.X) && float.IsFinite(bboxSize.Y)
+                          && bboxSize.X >= MinDiscWarpExtent && bboxSize.Y >= MinDiscWarpExtent;
+
+        SharpDX.Direct3D11.ShaderResourceView? srv = null;
+        if (pinIsUsable)
+        {
+            var scale = MathF.Min(1f, 2048f / MathF.Max(bboxSize.X, bboxSize.Y));
+            for (var c = 0; c < 4; c++)
+                _canvasDiscQuad[c] = (_canvasDiscQuad[c] - bboxMin) * scale;
+
+            var size = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(bboxSize.X * scale)),
+                                                         Math.Max(1, (int)(bboxSize.Y * scale)));
+            var warped = OutputManager.RenderWarpedTexture(photo, _canvasDiscQuad, size, _canvasDiscKey,
+                                                           new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y));
+            srv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
+        }
+
+        // Fall back to the straightened photo itself: upright and a fixed size, so it is wrong about the
+        // keystone and right about what the feature looks like — which is all the disc is for.
+        var upright = srv is not { IsDisposed: false };
+        if (upright)
+            srv = fragmentSrv;
+
         if (srv is not { IsDisposed: false })
             return;
+
+        SurfaceGeometry.LocalBounds(surface, out var surfaceMin, out var surfaceMax);
+        var surfaceSpan = Vector2.Max(surfaceMax - surfaceMin, new Vector2(0.0001f));
+        var uvSpan = uvMax - uvMin;
+        var uvRadius = uvSpan * UserSettings.Config.OutputSetupPhotoDiscRadius;
 
         var radius = canvasSize.Y * UserSettings.Config.OutputSetupPhotoDiscRadius;
         var tint = UiColors.ForegroundFull.Fade(fade);
@@ -789,17 +889,42 @@ internal sealed partial class SetupOutputView
             if (!point.IsPoint)
                 continue;
 
-            var centre = surfaceToOutput.TransformPoint(point.P1);
+            var centre = AimOf(mapping, point.Id, point.P1, surfaceToOutput, canvasSize).Position * canvasSize;
             var min = centre - new Vector2(radius);
             var max = centre + new Vector2(radius);
-            var uv0 = (min - bboxMin) / bboxSize;
-            var uv1 = (max - bboxMin) / bboxSize;
+
+            Vector2 uv0, uv1;
+            if (upright)
+            {
+                // The point's place in the surface's own rectangle, into the fragment's window. Surface metres
+                // run Y-up, the photo's V downward.
+                var inSurface = new Vector2((point.P1.X - surfaceMin.X) / surfaceSpan.X,
+                                            1f - (point.P1.Y - surfaceMin.Y) / surfaceSpan.Y);
+                var centreUv = uvMin + uvSpan * inSurface;
+                uv0 = centreUv - uvRadius;
+                uv1 = centreUv + uvRadius;
+            }
+            else
+            {
+                // Sampled around where the pin puts *this* point, not around the mark. The disc has to keep
+                // showing the feature it belongs to: reading the warp at the mark would show whatever the photo
+                // happens to cover there, so every disc's picture would slide whenever any other point is
+                // dragged. It still carries the pin's own distortion, which is what makes it comparable to the
+                // wall — only the feature inside it stays the same one.
+                var sampled = surfaceToOutput.TransformPoint(point.P1);
+                uv0 = (sampled - new Vector2(radius) - bboxMin) / bboxSize;
+                uv1 = (sampled + new Vector2(radius) - bboxMin) / bboxSize;
+            }
+
             var screenMin = _projection.CanvasToScreen(min);
             var screenMax = _projection.CanvasToScreen(max);
             dl.AddImageRounded(srv.NativePointer, screenMin, screenMax, uv0, uv1, tint, (screenMax.X - screenMin.X) * 0.5f, ImDrawFlags.RoundCornersAll);
             dl.AddCircle((screenMin + screenMax) * 0.5f, (screenMax.X - screenMin.X) * 0.5f, UiColors.BackgroundFull.Fade(0.5f * fade), 0, 1f);
         }
     }
+
+    /// <summary>Canvas pixels a pin's bounding box must span before it is worth warping a photo through.</summary>
+    private const float MinDiscWarpExtent = 8f;
 
     /// <summary>
     /// Re-solves the pin so every activated point projects to its target. Up to three targets the solve is
@@ -808,7 +933,10 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void SolvePinFromTargets(Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize)
     {
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
+        // Solved in the canvas' own 0..1 space, because that is what the quad it writes is stored in — a solve
+        // in pixels would put pixel numbers into a normalized pin and throw the surface off the canvas.
+        // Vector2.One: the mapping is read and written in the same space, so the two cancel.
+        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, Vector2.One, out var surfaceToOutput))
             return;
 
         _pinFrom.Clear();
@@ -816,11 +944,13 @@ internal sealed partial class SetupOutputView
         _pinSurfacePositions.Clear();
         foreach (var point in surface.Annotations)
         {
-            if (!point.IsPoint || !mapping.PointTargets.TryGetValue(point.Id, out var target))
+            // Only aimed points constrain: an un-aimed mark is where the pin happened to put the point, so
+            // feeding it back in would just ask the solve to keep the pin exactly as it already is.
+            if (!point.IsPoint || !mapping.PointAims.TryGetValue(point.Id, out var aim) || !aim.Aimed)
                 continue;
 
             _pinFrom.Add(surfaceToOutput.TransformPoint(point.P1));
-            _pinTargets.Add(target);
+            _pinTargets.Add(aim.Position);
             _pinSurfacePositions.Add(point.P1);
         }
 
@@ -843,8 +973,12 @@ internal sealed partial class SetupOutputView
                     return;
             }
 
+            // The readout is in pixels — that is the unit an operator can judge a miss in.
             for (var i = 0; i < _pinTargets.Count; i++)
-                _pinResidualPx = MathF.Max(_pinResidualPx, (surfaceToTargets.TransformPoint(_pinSurfacePositions[i]) - _pinTargets[i]).Length());
+            {
+                var missed = (surfaceToTargets.TransformPoint(_pinSurfacePositions[i]) - _pinTargets[i]) * canvasSize;
+                _pinResidualPx = MathF.Max(_pinResidualPx, missed.Length());
+            }
         }
         else
         {
@@ -1093,6 +1227,7 @@ internal sealed partial class SetupOutputView
     private const float _straightSurroundFactor = 0.4f;
     // Per-frame quad scratch: the rectify interpolation, the projector outline, the warp target, the surface in view.
     private readonly Vector2[] _interpQuad = new Vector2[4];
+    private readonly Vector2[] _basisPxQuad = new Vector2[4];
     private readonly Vector2[] _canvasOutline = new Vector2[4];
     private readonly Vector2[] _warpDestQuad = new Vector2[4];
     private readonly Vector2[] _viewQuad = new Vector2[4];

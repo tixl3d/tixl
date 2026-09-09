@@ -393,6 +393,18 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   features. Inside the "Reference 1" image the same three points sit on the green traced
   quad, at the features they were placed on.
 
+## Step: Discs survive a collapsed pin
+
+**Action:**
+With "Project photo" on, drag three corners of the surface's quad almost onto the fourth so the
+quad is nearly a point; then undo.
+
+**Expected:**
+- The discs stay visible at their marks, showing the photo upright at their usual size instead
+  of turning into flat smears of one colour. A pin with no area cannot warp a photo through
+  itself, and that is exactly the state you are in while repairing a bad pin.
+- Undo restores the quad and the discs go back to being warped through it.
+
 ## Step: Calibrating the pin by its reference points
 
 **Action:**
@@ -413,15 +425,22 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   its "P1".."P3" chip — also a point whose projection falls outside the projector frame, which
   has no disc on the wall but keeps its disc on the canvas so you can see which feature it marks.
 - After 2: while dragging, the whole quad shifts so the P1 disc follows the cursor; on release
-  P1 turns green (activated) and stays exactly where it was dropped. P2 and P3 keep riding the
-  pin and moved with it.
-- After 3: with two activated points the quad turns and scales so both sit at their targets;
-  P1 does not move. Ctrl+Z puts the quad back and P2 back to idle (white); Ctrl+Y restores both.
-- After 4: with three activated points the quad shears; P1 and P2 stay put. The double-click
-  turns P3 white again and the quad does not change.
-- After 5: with four activated points the quad keystones and every activated target is hit
-  exactly. With five, the header shows "points miss by up to N px" with N above zero, and the
-  fifth point's disc no longer sits exactly on its crosshair.
+  P1 turns green (aimed) and stays exactly where it was dropped. **P2 and P3 do not move, and
+  neither does the picture inside their discs**: each disc keeps showing its own feature, so
+  only its distortion changes as the pin turns. Each grows an amber arrow to where the pin now
+  projects its point, which is the miss the drag just introduced there.
+- On the wall the disc goes where the pin actually lands the photo, while the crosshair stays at
+  the mark: the gap between them is the same miss, seen from the room.
+- After 3: with two aimed points the quad turns and scales so both sit at their marks; P1 does
+  not move, and its arrow shrinks to nothing once the pin sends the point onto the mark again.
+  Ctrl+Z puts the quad back and P2 back to idle (white, still where it stands); Ctrl+Y restores
+  both.
+- After 4: with three aimed points the quad shears; P1 and P2 stay put. The double-click turns
+  P3 white again, leaves it exactly where it is, and the quad does not change — un-aiming stops
+  a point constraining the pin, it does not move the mark.
+- After 5: with four aimed points the quad keystones and every mark is hit exactly, so no arrows
+  remain. With five, the header shows "points miss by up to N px" with N above zero, and the
+  points that miss keep an arrow each, pointing where the pin sends them.
 - After 6: the discs grow to three times their radius on the canvas and on the wall alike. Where
   "Region 1" overlaps a disc, the disc draws over the region's content, on the wall as on the
   canvas.

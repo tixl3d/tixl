@@ -24,7 +24,7 @@ public sealed class LineAnnotation
 
     public bool IsPoint => Kind == Kinds.Point;
 
-    /// <summary>Stable identity, so an output can remember where a point was aimed (<see cref="Surface.OutputMapping.PointTargets"/>).</summary>
+    /// <summary>Stable identity, so an output can remember where a point was aimed (<see cref="Surface.OutputMapping.PointAims"/>).</summary>
     public Guid Id = Guid.NewGuid();
 
     public string Kind = Kinds.Line;

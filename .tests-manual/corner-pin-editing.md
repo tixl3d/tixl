@@ -48,6 +48,21 @@ Click `+ Surface 1`.
   `Surface 1` in its middle.
 - Its four corners carry handles: the top-left is a small square, the other three are circles.
 - The `+ Surface 1` button disappears (the surface is now mapped).
+- The quad covers a real part of the canvas and is centred in it. It must not sit collapsed in
+  the canvas' top-left corner: mappings are stored as fractions of the canvas, and a view that
+  forgets to scale them into its pixels draws every surface as a dot at the origin.
+
+## Step: The quad follows the canvas resolution
+
+**Action:**
+With the surface mapped, open the output's parameters and change its canvas from 1920×1080 to
+3840×2160, then back.
+
+**Expected:**
+- The quad stays exactly where it is, covering the same fraction of the canvas, and its label
+  and handles stay on it. Only the numbers under "Rendered" change.
+- The same holds in the **Straight** view of that surface: the rectified frame keeps the wall
+  centred rather than sliding off or collapsing.
 
 ## Step: Drag a corner
 
