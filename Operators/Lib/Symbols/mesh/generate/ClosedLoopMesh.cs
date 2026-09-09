@@ -110,15 +110,16 @@ internal sealed class ClosedLoopMesh : Instance<ClosedLoopMesh>
                     Vector3 Pc = positions[tri.Z];
 
                     var faceNormal = Vector3.Normalize(Vector3.Cross(Pb - Pa, Pc - Pa));
-                    if (Vector3.Dot(faceNormal, loopNormal) < 0)
+                    if (faceNormal.Z < 0)
                         faceNormal = -faceNormal;
 
                     AddPlanarVertex(vertices, Pa, loop[tri.X], faceNormal, uAxis, vAxis, plane[tri.X], minU, rangeU, minV, rangeV);
                     AddPlanarVertex(vertices, Pb, loop[tri.Y], faceNormal, uAxis, vAxis, plane[tri.Y], minU, rangeU, minV, rangeV);
                     AddPlanarVertex(vertices, Pc, loop[tri.Z], faceNormal, uAxis, vAxis, plane[tri.Z], minU, rangeU, minV, rangeV);
 
-                    // Reversed winding for TiXL's back-face culling (same convention as DelaunayMesh)
-                    triangles.Add(new Int3(firstVertex, firstVertex + 2, firstVertex + 1));
+                    // Flat fills face the default camera at (0, 0, +DefaultCameraDistance):
+                    // normal attribute and winding agree and both point toward +Z
+                    triangles.Add(new Int3(firstVertex, firstVertex + 1, firstVertex + 2));
                     firstVertex += 3;
                 }
             }
