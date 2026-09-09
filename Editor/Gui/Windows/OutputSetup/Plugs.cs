@@ -1,4 +1,5 @@
 #nullable enable
+using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 using T3.Editor.App;
 using T3.Editor.Gui.Windows.Layouts;
@@ -32,6 +33,44 @@ internal static class Plugs
 
         var stream = machineConfig.FindStream(binding.PlugId);
         return stream == null ? "missing stream" : $"{stream.Kind}: {stream.Name}";
+    }
+
+    /// <summary>The plug's own name — the display's label, or the stream sender's name.</summary>
+    public static string PlugName(MachineConfig machineConfig, Guid plugId)
+    {
+        if (TryGetDisplayIndex(plugId, out var displayIndex))
+            return DisplayLabel(displayIndex);
+
+        return machineConfig.FindStream(plugId)?.Name ?? "Output";
+    }
+
+    /// <summary>The pixels a canvas presented here should have: the display's mode, or a sensible default for a stream.</summary>
+    public static Int2 PlugResolution(Guid plugId)
+    {
+        if (TryGetDisplayIndex(plugId, out var displayIndex))
+        {
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            if (displayIndex < screens.Length)
+                return new Int2(screens[displayIndex].Bounds.Width, screens[displayIndex].Bounds.Height);
+        }
+
+        return new Int2(1920, 1080);
+    }
+
+    /// <summary>The output a plug currently presents, or null when nothing is bound to it.</summary>
+    public static OutputDefinition? TryGetBoundOutput(Setup setup, MachineConfig machineConfig, Guid plugId)
+    {
+        foreach (var binding in machineConfig.Bindings)
+        {
+            if (BoundPlugId(binding) != plugId)
+                continue;
+
+            var output = setup.FindOutput(binding.OutputId);
+            if (output != null)
+                return output;
+        }
+
+        return null;
     }
 
     /// <summary>Binds an output to a plug (display or stream), replacing any earlier binding, and saves.</summary>

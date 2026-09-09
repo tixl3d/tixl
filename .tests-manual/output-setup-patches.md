@@ -27,16 +27,29 @@ helpers, and promoting a patch to a surface.
 - A "SendToOutput" item under CONTENT and a **"P1"** item under OUTPUTS, with no chevron on
   P1 (it has no patches yet).
 
-## Step: Dropping content on an output creates a full-canvas patch
+## Step: Dropping content on an output fills it, with no patch to manage
 
 **Action:**
 Drag the "SendToOutput" CONTENT item onto the "P1" item.
 
 **Expected:**
-- P1 gains a chevron and one child item **"Patch 1"**, connected from "Slice 1".
-- The output view of P1 shows the image full-frame.
-- The Parameter window (after clicking "Patch 1") shows a **Patch** card: the line
-  "Shows Slice 1 on P1", **Position (px)** 0 × 0 and **Size (px)** 1920 × 1080.
+- P1 shows the image full-frame in its output view and on its Board card, and a connection
+  runs from "Slice 1" straight to the "P1" row.
+- **No** child item appears and P1 gains no chevron: an output's sole full-canvas patch is
+  the output as far as the UI is concerned, so it is folded into the row (the same way a
+  source's full-frame slice folds into the source).
+- Dragging the same content onto "P1" again changes nothing.
+
+## Step: Add Patch makes a visible tile
+
+**Action:**
+Right-click "P1" → **Add Patch**.
+
+**Expected:**
+- P1 gains a chevron and now lists **two** items: the previously folded full-canvas patch and
+  the new one, which is a centred quarter of the canvas (visible and draggable on the output
+  canvas, not lying exactly on the canvas border).
+- Ctrl+Z removes the new patch and folds the remaining one away again.
 
 ## Step: Patch geometry edits from the card
 

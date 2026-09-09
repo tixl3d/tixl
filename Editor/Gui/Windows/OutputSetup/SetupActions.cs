@@ -32,7 +32,8 @@ internal static class SetupActions
     /// <summary>
     /// Whether the two kinds form a routing connection at all — the drop matrix, direction-agnostic.
     /// Connectable pairs: surface↔output, slice↔output, source↔output, slice↔surface, source↔surface,
-    /// slice↔patch, source↔patch, output↔plug.
+    /// slice↔patch, source↔patch, surface↔patch, output↔plug, and surface/slice/source↔plug (which route into
+    /// the output the plug presents).
     /// </summary>
     internal static bool CanConnect(SetupEntitySelection.EntityKind a, SetupEntitySelection.EntityKind b)
     {
@@ -48,8 +49,12 @@ internal static class SetupActions
                        SetupEntitySelection.EntityKind.Surface => a is SetupEntitySelection.EntityKind.Slice
                                                                        or SetupEntitySelection.EntityKind.ContentSource,
                        SetupEntitySelection.EntityKind.Patch => a is SetupEntitySelection.EntityKind.Slice
-                                                                     or SetupEntitySelection.EntityKind.ContentSource,
-                       SetupEntitySelection.EntityKind.Plug => a is SetupEntitySelection.EntityKind.Output,
+                                                                     or SetupEntitySelection.EntityKind.ContentSource
+                                                                     or SetupEntitySelection.EntityKind.Surface,
+                       SetupEntitySelection.EntityKind.Plug => a is SetupEntitySelection.EntityKind.Output
+                                                                    or SetupEntitySelection.EntityKind.Surface
+                                                                    or SetupEntitySelection.EntityKind.Slice
+                                                                    or SetupEntitySelection.EntityKind.ContentSource,
                        _ => false,
                    };
     }
@@ -108,17 +113,48 @@ internal static class SetupActions
         // A plug binding is machine state, not setup state: it saves on its own and sits outside the setup's undo.
         if (dragKind == SetupEntitySelection.EntityKind.Plug || targetKind == SetupEntitySelection.EntityKind.Plug)
         {
-            var outputId = dragKind == SetupEntitySelection.EntityKind.Output ? dragId : targetId;
-            var plugId = dragKind == SetupEntitySelection.EntityKind.Plug ? dragId : targetId;
-            if (setup.FindOutput(outputId) != null && OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
-                Plugs.BindOutput(machineConfig, outputId, plugId);
+            if (!OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
+                return;
 
+            var plugId = dragKind == SetupEntitySelection.EntityKind.Plug ? dragId : targetId;
+            var otherKind = dragKind == SetupEntitySelection.EntityKind.Plug ? targetKind : dragKind;
+            var otherId = dragKind == SetupEntitySelection.EntityKind.Plug ? targetId : dragId;
+
+            if (otherKind == SetupEntitySelection.EntityKind.Output)
+            {
+                if (setup.FindOutput(otherId) != null)
+                    Plugs.BindOutput(machineConfig, otherId, plugId);
+
+                return;
+            }
+
+            // A plug stands for what it presents: dropping content or a surface on it routes into that output,
+            // creating and binding one when the plug is still free — the three steps that shortcut asks for.
+            var target = Plugs.TryGetBoundOutput(setup, machineConfig, plugId);
+            if (target == null)
+            {
+                var created = CreateOutputForPlug(setup, machineConfig, plugId);
+                if (created == null)
+                    return;
+
+                target = created;
+            }
+
+            var outputTargetId = target.Id;
+            RunUndoable("Connect", setup, () => ApplyDropInternal(setup, otherKind, otherId,
+                                                                  SetupEntitySelection.EntityKind.Output, outputTargetId));
             return;
         }
 
         RunUndoable("Connect", setup, () => ApplyDropInternal(setup, dragKind, dragId, targetKind, targetId));
     }
 
+    /// <summary>
+    /// One rule for every pair: a drop connects the two. Dropping what the target already takes changes nothing,
+    /// and otherwise the target's input is *replaced* — a drop never stacks a second route onto the same place,
+    /// which would read as "re-fed" while quietly keeping the old one alive underneath. Sub-regions and extra
+    /// patches are made deliberately (their "Add …" actions), never as a side effect of a drop.
+    /// </summary>
     private static void ApplyDropInternal(Setup setup, SetupEntitySelection.EntityKind dragKind, Guid dragId,
                                           SetupEntitySelection.EntityKind targetKind, Guid targetId)
     {
@@ -135,14 +171,37 @@ internal static class SetupActions
         {
             var surface = setup.FindSurface(dragId);
             var output = setup.FindOutput(targetId);
-            if (surface != null && output != null
-                // A Layout child rides its parent's pin — a mapping of its own would detach it from the hierarchy.
-                && !(surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
-                && !surface.HasMapping(targetId))
-            {
-                surface.OutputMappings.Add(CreateDefaultMapping(output));
-            }
 
+            // A region normally rides its parent's pin; a mapping of its own overrides that for this output
+            // (see Surface.OutputMappings). It stays a child everywhere else — same plane, same rectangle.
+            if (surface != null && output != null && !surface.HasMapping(targetId))
+                surface.OutputMappings.Add(CreateDefaultMapping(output));
+
+            return;
+        }
+
+        // A surface (or region) dropped on a patch takes the patch's place: it is pinned to the patch's quad on
+        // that output and the patch goes. The inverse of "Use on Surface", and for a region the way to give it a
+        // pin of its own on one output while it keeps riding its parent everywhere else.
+        if (targetKind == SetupEntitySelection.EntityKind.Patch && dragKind == SetupEntitySelection.EntityKind.Surface)
+        {
+            var surface = setup.FindSurface(dragId);
+            var patch = setup.FindPatch(targetId, out var patchOutput);
+            if (surface == null || patch == null || patchOutput == null || patch.Quad.Length < 4)
+                return;
+
+            var quad = (Vector2[])patch.Quad.Clone();
+            var mapping = surface.FindMapping(patchOutput.Id);
+            if (mapping != null)
+                mapping.Quad = quad;
+            else
+                surface.OutputMappings.Add(new Surface.OutputMapping { OutputId = patchOutput.Id, Quad = quad });
+
+            // Nothing shown here yet: adopt what the patch fed, so the drop doesn't silently drop its content.
+            if (surface.SliceId == Guid.Empty)
+                surface.SliceId = patch.SliceId;
+
+            patchOutput.Patches.RemoveAll(p => p.Id == targetId);
             return;
         }
 
@@ -176,26 +235,20 @@ internal static class SetupActions
             {
                 var output = setup.FindOutput(targetId);
                 if (output != null)
-                    AddPatchInternal(output, sliceId);
+                    FeedOutputDirectly(output, sliceId);
             }
 
             return;
         }
 
-        // Dropping a slice on a free surface shows it there. A *different* slice dropped on an occupied surface
-        // lands as a sub-region cut to its own aspect (the poster-slot case) rather than replacing — but
-        // re-dropping the slice the surface already shows is a no-op, not a spurious duplicate sub-region.
+        // A surface shows one slice: the drop sets it, replacing whatever it showed. (To show a second thing on
+        // the same wall, add a region and feed that — a drop is a connection, not a layout decision.)
         if (dragKind == SetupEntitySelection.EntityKind.Slice)
         {
             var slice = setup.FindSlice(dragId);
             var surface = setup.FindSurface(targetId);
-            if (slice != null && surface != null && surface.SliceId != slice.Id)
-            {
-                if (surface.SliceId == Guid.Empty)
-                    surface.SliceId = slice.Id;
-                else
-                    AddRegionForSlice(setup, surface, slice);
-            }
+            if (slice != null && surface != null)
+                surface.SliceId = slice.Id;
         }
 
         if (dragKind == SetupEntitySelection.EntityKind.ContentSource)
@@ -254,13 +307,47 @@ internal static class SetupActions
     }
 
     /// <summary>Adds an unfed full-canvas patch to an output — the direct pipe waiting for content.</summary>
+    /// <summary>
+    /// Adds a patch as a visible tile — a centred quarter of the canvas — rather than the full canvas. A sole
+    /// full-canvas patch is the output's implicit one and is folded away in the views
+    /// (<see cref="SetupRelations.TryGetImplicitPatch"/>), so a patch added by hand has to be something you can
+    /// see and drag.
+    /// </summary>
     internal static void AddPatch(SetupEntitySelection selection, Setup setup, OutputDefinition output)
     {
         RunUndoable("Add patch", setup, () =>
                                         {
                                             var patch = AddPatchInternal(output, Guid.Empty);
+                                            var w = Math.Max(1, output.CanvasResolution.Width);
+                                            var h = Math.Max(1, output.CanvasResolution.Height);
+                                            var min = new Vector2(w * 0.25f, h * 0.25f);
+                                            var max = new Vector2(w * 0.75f, h * 0.75f);
+                                            patch.Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)];
                                             selection.Select(SetupEntitySelection.EntityKind.Patch, patch.Id);
                                         });
+    }
+
+    /// <summary>
+    /// Feeds a slice straight onto an output's canvas. The direct pipe is one full-canvas patch, so a repeat
+    /// drop re-feeds it instead of stacking a second one exactly over it. An output already split into tiles
+    /// keeps them: the drop adds the full-canvas layer it asked for, which the tiles then sit under.
+    /// </summary>
+    private static void FeedOutputDirectly(OutputDefinition output, Guid sliceId)
+    {
+        foreach (var existing in output.Patches)
+        {
+            // Already showing it: the drop asked for a connection that is already there.
+            if (existing.SliceId == sliceId)
+                return;
+        }
+
+        if (output.Patches.Count == 1)
+        {
+            output.Patches[0].SliceId = sliceId;
+            return;
+        }
+
+        AddPatchInternal(output, sliceId);
     }
 
     private static OutputDefinition.Patch AddPatchInternal(OutputDefinition output, Guid sliceId)
@@ -535,6 +622,32 @@ internal static class SetupActions
                                            setup.Props.Add(prop);
                                            selection.Select(SetupEntitySelection.EntityKind.Prop, prop.Id);
                                        });
+    }
+
+    /// <summary>
+    /// The canvas a free plug needs before anything can be routed to it: named and sized after the plug, and
+    /// bound to it right away. Its creation is undoable; the binding is machine state and saves on its own, so
+    /// undoing the drop leaves the binding pointing at a canvas that is gone — harmless (the plug reads as free
+    /// again) and re-done by redo.
+    /// </summary>
+    private static OutputDefinition? CreateOutputForPlug(Setup setup, MachineConfig machineConfig, Guid plugId)
+    {
+        OutputDefinition? created = null;
+        RunUndoable("Add output", setup, () =>
+                                         {
+                                             created = new OutputDefinition
+                                                           {
+                                                               Name = Plugs.PlugName(machineConfig, plugId),
+                                                               Kind = OutputDefinition.Kinds.Display,
+                                                               CanvasResolution = Plugs.PlugResolution(plugId),
+                                                           };
+                                             setup.Outputs.Add(created);
+                                         });
+
+        if (created != null)
+            Plugs.BindOutput(machineConfig, created.Id, plugId);
+
+        return created;
     }
 
     internal static void AddOutput(SetupEntitySelection selection)
@@ -1225,6 +1338,22 @@ internal static class SetupActions
     /// size, raster, straightening). The quad transfers verbatim onto the surface's mapping — same numbers,
     /// nothing moves on the wall — and the patch goes, since a route's quad has one home at a time.
     /// </summary>
+    /// <summary>Whether this surface is a region that overrides its parent's pin on at least one output.</summary>
+    internal static bool HasOwnPin(Surface surface)
+    {
+        return surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty && surface.OutputMappings.Count > 0;
+    }
+
+    /// <summary>Drops a region's own pins, so it rides its parent's again on every output.</summary>
+    internal static void ClearOwnPin(Setup setup, Guid surfaceId)
+    {
+        var surface = setup.FindSurface(surfaceId);
+        if (surface == null || !HasOwnPin(surface))
+            return;
+
+        RunUndoable("Follow parent's pin", setup, () => surface.OutputMappings.Clear());
+    }
+
     internal static void PromotePatchToSurface(SetupEntitySelection selection, Setup setup, Guid patchId)
     {
         var patch = setup.FindPatch(patchId, out var output);
@@ -1373,42 +1502,6 @@ internal static class SetupActions
         var slice = new Slice { SourceId = source.Id };
         setup.Slices.Add(slice);
         return slice;
-    }
-
-    /// <summary>
-    /// A sub-region shaped to a slice: sized so its real-world proportions match the slice's pixels, so the
-    /// content lands undistorted, and centred in the parent.
-    /// </summary>
-    private static void AddRegionForSlice(Setup setup, Surface parent, Slice slice)
-    {
-        var parentSize = parent.SizeInMeters;
-        var aspect = TryGetSliceAspect(setup, slice, out var value) ? value : 1f;
-
-        var width = parentSize.X * 0.5f;
-        var height = width / MathF.Max(aspect, 0.0001f);
-        if (height > parentSize.Y * 0.8f)
-        {
-            height = parentSize.Y * 0.5f;
-            width = height * aspect;
-        }
-
-        // Centred in the parent, expressed from the parent's anchor like every child position.
-        var bottomLeft = new Vector2(parentSize.X * 0.5f - width * 0.5f, parentSize.Y * 0.5f - height * 0.5f)
-                         - parent.AnchorInMeters;
-
-        var region = new Surface
-                         {
-                             Name = string.IsNullOrEmpty(slice.Name) ? $"Region {SetupRelations.CountChildren(setup, parent.Id) + 1}" : slice.Name,
-                             Kind = Surface.SurfaceKinds.Layout,
-                             ParentId = parent.Id,
-                             SizeInMeters = new Vector2(MathF.Max(width, SurfaceGeometry.MinSize),
-                                                        MathF.Max(height, SurfaceGeometry.MinSize)),
-                             LocalPosition = bottomLeft,
-                             PixelsPerMeter = parent.PixelsPerMeter,
-                             SliceId = slice.Id,
-                         };
-
-        setup.Surfaces.Add(region);
     }
 
     /// <summary>

@@ -29,7 +29,11 @@ public sealed class Surface
         public const string Layout = "Layout";
     }
 
-    /// <summary>ContentCanvas → OutputCanvas transfer for one output (L1/L2 corner pin).</summary>
+    /// <summary>
+    /// ContentCanvas → OutputCanvas transfer for one output (L1/L2 corner pin). A Layout child normally has
+    /// none and is projected through its nearest mapped ancestor; a mapping of its own overrides that for
+    /// that one output, which is how a region reaches a projector or tile of its own while staying a child.
+    /// </summary>
     public sealed class OutputMapping
     {
         public static class Modes

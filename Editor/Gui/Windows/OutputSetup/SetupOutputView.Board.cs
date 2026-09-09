@@ -252,7 +252,8 @@ internal sealed partial class SetupOutputView
             var ppm = PixelsPerMeterOf(output.BoardPlacement);
             foreach (var patch in output.Patches)
             {
-                if (patch.Quad.Length < 4)
+                // The implicit full-canvas patch is the whole card; its outline would just double the card's.
+                if (patch.Quad.Length < 4 || SetupRelations.IsImplicitPatch(output, patch))
                     continue;
 
                 for (var c = 0; c < 4; c++)
@@ -969,6 +970,12 @@ internal sealed partial class SetupOutputView
         // "empty click" that clears the selection just made.
         if (_boardFence.State == SelectionFence.States.Inactive
             && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            return;
+
+        // The fence's hover rules include child windows, and the outliner strip is one: a press on a row up
+        // there must not start a fence here — its release would read as an empty click and clear the selection
+        // the row just made.
+        if (_boardFence.State == SelectionFence.States.Inactive && !IsMouseOverCanvas())
             return;
 
         switch (_boardFence.UpdateAndDraw(out var selectMode))

@@ -99,6 +99,9 @@ Hard-won from the HTML prototype; the crop-vs-scale distinction is subtle, so it
   moves to the scale gizmo / a modifier, where "I'm distorting" is explicit.
   - **Pan:** modifier + body-drag inside a region slides the slice UV under the fixed window — same
     invariant (slice fills region), no extra state.
+  - **Superseded (2026-09-09):** the *drop* no longer creates a poster-slot sub-region — a slice dropped on an
+    occupied surface replaces what it shows, like every other drop (one rule: a drop connects, and replaces).
+    Sub-regions are made with "Add region" and then fed. The synchronized-crop behaviour above stands.
   - **Shared slices fork on crop (copy-on-write):** cropping a slice that feeds other
     surfaces/outputs forks a private slice for this surface — local intent wins; the shared edit
     stays reachable on the content card, where shared-ness is visible.

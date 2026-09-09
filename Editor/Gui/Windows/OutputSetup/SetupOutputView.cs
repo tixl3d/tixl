@@ -426,8 +426,9 @@ internal sealed partial class SetupOutputView
             var surface = setup.Surfaces[i];
             var mappingData = surface.FindMapping(outputId);
 
-            // A Layout child carries no corner pin — its quad is derived from its parent's, so it follows the
-            // parent automatically. Drawn (not handled) until child editing lands, so you can see it do that.
+            // No pin of its own on this output: a Layout child's quad is derived from its carrier's, so it
+            // follows the parent automatically. (A region *with* a mapping took the branch above and is edited
+            // like any pinned surface — see Surface.OutputMappings.)
             if (mappingData == null)
             {
                 if (surface.Kind != Surface.SurfaceKinds.Layout || surface.ParentId == Guid.Empty)
@@ -830,8 +831,18 @@ internal sealed partial class SetupOutputView
             mapping.Quad[c] = quad[c];
     }
 
+    /// <summary>Whether the pointer is over the canvas area this view draws into (not the strip below it).</summary>
+    private bool IsMouseOverCanvas()
+    {
+        return ImGui.IsMouseHoveringRect(_boardCanvas.WindowPos, _boardCanvas.WindowPos + _boardCanvas.WindowSize);
+    }
+
     private void UpdateCornerFence()
     {
+        // Same rule as the Board fence: a press on the outliner strip below is not a press on this canvas.
+        if (_fence.State == SelectionFence.States.Inactive && !IsMouseOverCanvas())
+            return;
+
         switch (_fence.UpdateAndDraw(out var selectMode))
         {
             case SelectionFence.States.Updated:

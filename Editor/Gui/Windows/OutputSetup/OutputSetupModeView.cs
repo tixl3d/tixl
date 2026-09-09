@@ -135,14 +135,20 @@ internal sealed class OutputSetupModeView
         var selectedInGraph = ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
         var focusedId = selectedInGraph?.SymbolChildId ?? Guid.Empty;
         var graphOwnsInspection = GlobalSelectionHandling.InspectionTarget == GlobalSelectionHandling.InspectionTargets.GraphNode;
-        if (graphOwnsInspection && (focusedId != _lastFocusedId || !_graphOwnedInspection))
+        var focusTransition = focusedId != _lastFocusedId || !_graphOwnedInspection;
+        if (graphOwnsInspection && selectedInGraph is IOutputSink
+            && (focusTransition || !_entitySelection.IsSelected(SetupEntitySelection.EntityKind.ContentSource, focusedId)))
         {
             // The graph pick already cleared the entity selection; a focused SendToOutput mirrors back as its
-            // CONTENT row so the canvas opens on its slices. With several output windows each runs this
-            // transition on the same frame — the writes are identical, so the repetition is harmless.
-            if (selectedInGraph is IOutputSink)
-                _entitySelection.Mirror(SetupEntitySelection.EntityKind.ContentSource, focusedId);
+            // CONTENT row so the canvas opens on its slices. Not only on the transition: re-picking the same
+            // send (a second click on its row reveals it in the graph again) clears the row the same way and
+            // must land back on it. With several output windows each runs this on the same frame — the writes
+            // are identical, so the repetition is harmless.
+            _entitySelection.Mirror(SetupEntitySelection.EntityKind.ContentSource, focusedId);
+        }
 
+        if (graphOwnsInspection && focusTransition)
+        {
             // The outliner follows the OE-editing context: a focused SendToOutput opens it (its surfaces/outputs are
             // at hand); selecting any other op — or clicking the graph background — closes it. Only on the
             // transition, so it can still be toggled manually while the focus stays put.

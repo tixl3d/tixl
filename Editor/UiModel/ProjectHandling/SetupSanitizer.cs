@@ -52,17 +52,6 @@ internal static class SetupSanitizer
                 changed = true;
             }
 
-            // A Layout child rides its carrier's corner pin — a mapping of its own silently turns it back
-            // into an independently editable surface (hierarchy corruption, e.g. from older builds that
-            // allowed mapping a region directly).
-            if (surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty
-                && surface.OutputMappings.Count > 0)
-            {
-                Log.Warning($"Setup repair: sub-region '{surface.Name}' carried {surface.OutputMappings.Count} corner-pin mapping(s) of its own — removed (regions ride their parent's mapping).");
-                surface.OutputMappings.Clear();
-                changed = true;
-            }
-
             foreach (var mapping in surface.OutputMappings)
             {
                 var output = setup.FindOutput(mapping.OutputId);

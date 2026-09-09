@@ -55,6 +55,7 @@ Click the SendToOutput op in the graph window.
    CONTENT column.
 2. Click the "Patch 1" item in the OUTPUTS column, then right-click it.
 3. Drag the "SendToOutput" item (CONTENT) onto the "P1" item (OUTPUTS).
+4. Right-click "P1" → **Add Patch**, then drag "SendToOutput" onto "P1" again.
 
 **Expected:**
 - After 1: with "Surface 1" hovered, its connections to "Slice 1" and to "P1" turn fully
@@ -63,7 +64,11 @@ Click the SendToOutput op in the graph window.
   a plug's resolution and an output's "unbound" remain as status.
 - After 2: "Patch 1" is selected and the Parameter window shows the Patch card; the context
   menu offers Use on Surface, Duplicate, Rename, Delete.
-- After 3: a "Patch 2" item appears under "P1".
+- After 3: no second patch appears — "Patch 1" is re-fed instead (its connection now comes from
+  the send's slice), because a drop replaces the target's input rather than stacking a second
+  full-canvas layer over it.
+- After 4: with two patches under "P1" the drop can no longer tell which one was meant, so it
+  adds "Patch 3" as a new full-canvas layer.
 
 ## Step: Connections follow the routing
 
@@ -117,15 +122,15 @@ Look at the strip with nothing selected; hover an item; select it.
 ## Step: Del deletes the selection
 
 **Action:**
-1. Click the "Patch 2" item, then press Del with the mouse still over the strip.
+1. Click the last patch item under "P1", then press Del with the mouse still over the strip.
 2. Click "Patch 1", then double-click it to start renaming, press Del while the name field is
    active, then Escape.
 3. Press Ctrl+Z.
 
 **Expected:**
-- After 1: "Patch 2" is gone from under "P1".
+- After 1: that patch is gone from under "P1".
 - After 2: Del only edits the text; "Patch 1" survives.
-- After 3: "Patch 2" is back.
+- After 3: it is back.
 
 ## Step: Bindings column reflects the machine
 

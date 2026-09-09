@@ -270,6 +270,53 @@ internal static class SetupRelations
         return count;
     }
 
+    /// <summary>
+    /// An output's implicit patch: its only patch, unnamed and covering the whole canvas — the full-canvas
+    /// route a drop makes. It *is* the output as far as the user is concerned, so the views fold it into the
+    /// output row/card instead of listing it, exactly as a source's full-frame slice folds into the source.
+    /// It becomes a patch of its own the moment it is named, moved off the full canvas, or joined by a second.
+    /// </summary>
+    public static bool TryGetImplicitPatch(OutputDefinition output, out OutputDefinition.Patch? implicitPatch)
+    {
+        implicitPatch = null;
+        if (output.Patches.Count != 1)
+            return false;
+
+        var patch = output.Patches[0];
+        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(output, patch))
+            return false;
+
+        implicitPatch = patch;
+        return true;
+    }
+
+    public static bool IsImplicitPatch(OutputDefinition output, OutputDefinition.Patch patch)
+    {
+        return TryGetImplicitPatch(output, out var implicitPatch) && ReferenceEquals(implicitPatch, patch);
+    }
+
+    /// <summary>Patches the views list — the output's implicit full-canvas patch is folded into the output.</summary>
+    public static int CountListedPatches(OutputDefinition output)
+    {
+        return TryGetImplicitPatch(output, out _) ? 0 : output.Patches.Count;
+    }
+
+    private static bool CoversFullCanvas(OutputDefinition output, OutputDefinition.Patch patch)
+    {
+        if (patch.Quad.Length < 4)
+            return false;
+
+        var full = output.FullCanvasQuad();
+        // A pixel of slack: a quad round-tripped through JSON, or nudged by a drag, is still "the whole canvas".
+        for (var i = 0; i < 4; i++)
+        {
+            if (Vector2.Distance(patch.Quad[i], full[i]) > 1f)
+                return false;
+        }
+
+        return true;
+    }
+
     /// <summary>Whether any patch on the output shows this slice.</summary>
     public static bool OutputShowsSlice(OutputDefinition output, Guid sliceId)
     {

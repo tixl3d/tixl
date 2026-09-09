@@ -334,10 +334,11 @@ internal sealed class EntityItem
     private void HandleDragDrop(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
     {
         // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
-        // (ApplyDrop normalizes), so dragging an output onto a source works the same as the reverse.
+        // (ApplyDrop normalizes), so dragging an output onto a source works the same as the reverse. A patch
+        // takes a slice or source to re-feed it.
         var routable = kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
                             or SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.Output
-                            or SetupEntitySelection.EntityKind.Plug;
+                            or SetupEntitySelection.EntityKind.Patch or SetupEntitySelection.EntityKind.Plug;
         if (!routable)
             return;
 
@@ -520,6 +521,12 @@ internal sealed class EntityItem
 
                 if (CustomComponents.DrawMenuItem(6, "Clear content inputs"))
                     SetupActions.ClearContentInputs(surface.Id);
+
+                if (SetupActions.HasOwnPin(surface) && CustomComponents.DrawMenuItem(17, "Follow parent's pin"))
+                    SetupActions.ClearOwnPin(setup, surface.Id);
+
+                CustomComponents.TooltipForLastItem("Drops this region's own corner pin.",
+                                                    "It goes back to riding its parent's pin, following the parent wherever it is aimed.");
 
                 break;
         }

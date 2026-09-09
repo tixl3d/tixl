@@ -43,7 +43,9 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < output.Patches.Count; i++)
         {
             var patch = output.Patches[i];
-            if (patch.Quad.Length < 4)
+            // The implicit full-canvas patch sits exactly on the canvas border — drawing it adds an outline and
+            // four handles that say nothing. It appears once it is named, moved, or joined by a second patch.
+            if (patch.Quad.Length < 4 || SetupRelations.IsImplicitPatch(output, patch))
                 continue;
 
             for (var c = 0; c < 4; c++)

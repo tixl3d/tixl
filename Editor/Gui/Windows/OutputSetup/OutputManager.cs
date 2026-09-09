@@ -295,9 +295,9 @@ internal static class OutputManager
             if (!surface.Render)
                 continue;
 
-            // A Layout child carries no corner pin of its own — it rides its parent's, so the mappings to walk
-            // (and the quad each one yields) come from the parent.
-            // Regions nest arbitrarily deep, so walk up to whichever ancestor actually holds the pin.
+            // A Layout child usually rides an ancestor's corner pin, so the mappings to walk (and the quad each
+            // one yields) come from that ancestor. Regions nest arbitrarily deep, so walk up to whichever one
+            // actually holds the pin — which is the region itself when it carries an override mapping.
             var carrier = surface;
             if (surface.Kind == T3.Core.Output.Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
             {

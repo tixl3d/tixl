@@ -394,7 +394,9 @@ internal sealed class SetupFlowOutliner
             if (output.Kind == OutputDefinition.Kinds.Default)
                 continue;
 
-            var hasPatches = output.Patches.Count > 0;
+            // The implicit full-canvas patch is the output itself here: no row, and its slice connection
+            // lands on the output row (TryGetAnchor folds an undrawn patch onto its output).
+            var hasPatches = SetupRelations.CountListedPatches(output) > 0;
             var isExpanded = !_collapsedOutputs.Contains(output.Id);
             var args = new EntityItem.Args
                            {
@@ -421,7 +423,10 @@ internal sealed class SetupFlowOutliner
 
             // Patches under their output, like regions under a surface: the direct pipe's canvas cuts.
             for (var p = 0; p < output.Patches.Count; p++)
-                DrawPatchRow(selection, setup, output, output.Patches[p]);
+            {
+                if (!SetupRelations.IsImplicitPatch(output, output.Patches[p]))
+                    DrawPatchRow(selection, setup, output, output.Patches[p]);
+            }
         }
     }
 
@@ -658,6 +663,9 @@ internal sealed class SetupFlowOutliner
                            Id = surface.Id,
                            Name = surface.Name,
                            LeadingIcon = Icon.Grid,
+                           // A region that overrides its parent's pin no longer follows it — say so, since the
+                           // row still sits nested under that parent.
+                           Status = SetupActions.HasOwnPin(surface) ? "own pin" : null,
                            Depth = depth,
                            IsExpanded = hasChildren ? isExpanded : null,
                            ReserveExpander = true,

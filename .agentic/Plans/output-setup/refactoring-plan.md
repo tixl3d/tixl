@@ -671,6 +671,36 @@ with an explanatory comment) — the row-callback API design made compliance imp
   outliner no longer builds a "package not loaded" string per stream row per frame. Not measured — the
   composite halving is the only one expected to show on a profile.
 
+- **2026-09-09 (region override pin):** a region (Layout child) may now carry its own `OutputMapping` for one
+  output, overriding the derived quad there while it stays a child everywhere else — the LED-strip / split-matrix
+  case from `use-case-flows.md`. Renderer and canvas editor needed no change: both already dispatch on
+  `FindMapping(outputId)` / `FindCarrier`, which return the region itself once it has a mapping. What blocked it
+  was three gates: `ApplyDropInternal` refused a Layout child a mapping, `CanConnect` had no surface↔patch pair,
+  and — the one that silently undid it on reload — `SetupSanitizer` stripped a region's mappings as hierarchy
+  corruption. All three lifted. Dropping a surface or region on a patch takes the patch's quad and removes the
+  patch (inverse of "Use on Surface"), adopting the patch's slice when the surface showed nothing. The way back
+  is the region's "Follow parent's pin" menu item; the outliner marks such a row "own pin".
+
+- **2026-09-09 (one drop rule):** "already fed" had four different answers depending on the pair (replace /
+  stack / add-a-region / no-op). Unified: a drop connects, dropping what the target already takes changes
+  nothing, otherwise the target's input is *replaced*. Slice/content onto an occupied surface now replaces
+  instead of adding a poster-slot sub-region (overturns that decision in `canvas-interaction.md` §Edge dragging;
+  `AddRegionForSlice` deleted — regions are made with "Add region"). Slice/content onto an output re-feeds its
+  single full-canvas patch rather than stacking a second one exactly over it (`FeedOutputDirectly`); an output
+  already split into tiles still gets a new full-canvas layer, since no single patch is "the" input. Plugs also
+  accept surface/slice/content: a plug stands for what it presents, so the drop routes into its bound output —
+  creating and binding one when the plug is free (`CreateOutputForPlug`, named and sized after the plug).
+  Known seam: that creation is undoable while the binding is machine state, so undo leaves the binding pointing
+  at a removed output — the plug just reads as free again.
+
+- **2026-09-09 (implicit patch):** an output's sole unnamed full-canvas patch — what a drop on an output makes —
+  is folded into the output the way a source's full-frame slice folds into the source
+  (`SetupRelations.TryGetImplicitPatch` / `IsImplicitPatch` / `CountListedPatches`): no outliner row (its slice
+  connection lands on the output row, via `TryGetAnchor`'s existing patch→output fold), no outline on the Board
+  card, no quad or handles on the output canvas. It reappears once named, moved off the full canvas, or joined
+  by a second patch. Consequence: "Add Patch" now seeds a centred quarter-canvas tile, since a full-canvas one
+  would be folded away the moment it was created.
+
 ## Suggested order (revised for the flow-view pivot)
 
 1. **P0** (bug fixes, 1–2 days) — independent of every decision below.

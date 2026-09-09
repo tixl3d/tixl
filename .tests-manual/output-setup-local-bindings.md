@@ -114,3 +114,21 @@ Hover the **?** left of the collapse chevron in the strip's header; then click i
   and Output views, the four columns and how to connect them. (With the Help window's hover
   preview off, the same text shows as a tooltip.)
 - Clicking shows the topic in the Help window and brings the window forward.
+
+## Step: Content and surfaces route through a plug
+
+**Action:**
+1. Drag the "SendToOutput" row onto the "Wall 2" stream row while nothing is bound to it.
+2. Look at the OUTPUTS column and at the row's status.
+3. Press Ctrl+Z once, then look at the plug row again.
+4. With an output bound to the plug, drag "Surface 1" onto the plug row.
+
+**Expected:**
+- After 1: a new output named after the plug appears in OUTPUTS, bound to it, showing the
+  send full-canvas — the plug stands for what it presents, so the drop created the missing
+  canvas rather than doing nothing.
+- After 2: the plug is no longer dimmed and a curve joins the new output to it.
+- After 3: the undo removes the created output; the plug reads as free again. (The binding
+  itself is machine state and is not undone, so it simply points at nothing.)
+- After 4: no second output is created — "Surface 1" is mapped onto the output already bound
+  to that plug.
