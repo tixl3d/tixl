@@ -1,0 +1,34 @@
+{
+  "FormatVersion": 3,
+  "Id": "4E5AC2B9-5905-4F24-B0FC-0980357927D4"/*ClosedLoopMesh*/,
+  "Description": "Turns closed point loops into a flat, filled triangle mesh. The counterpart to the fill step of an After Effects style shape repeater.\n\n- Consumes the same point buffer as [DrawClosedLines] (GPoints + PointsPerShape)\n- PointsPerShape = 0 wraps the whole buffer into one loop, otherwise the buffer is split into chunks of that size; separator points split loops within a chunk\n- Each loop is triangulated in its own plane (ear clipping), so concave shapes (stars, arrows, ...) fill correctly\n- Outputs a flat-shaded MeshBuffers: planar UVs, per-face normals, per-vertex ColorRgb and Selection (= source Point.F1, use it to address individual repeated shapes)\n\nRender the result with [DrawMesh] or combine with [ExtrudeCurves], [CombineMeshes], ...",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "CCCAC1C9-926A-466A-B252-0D0E279102AE"/*Points*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Point buffer containing one or more closed loops (e.g. the output of [RepeatShapePoints])"
+    },
+    {
+      "InputId": "0F0D10D0-3EB0-4E12-8C06-E9DB4C000917"/*PointsPerShape*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Points per closed loop; 0 wraps the entire buffer into a single loop"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "87125559-AF11-409E-B61A-D4DEA84202BA"/*Mesh*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
