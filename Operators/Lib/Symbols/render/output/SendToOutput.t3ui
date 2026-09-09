@@ -1,0 +1,31 @@
+{
+  "FormatVersion": 3,
+  "Id": "0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60"/*SendToOutput*/,
+  "Description": "Supplies a texture to the project's active output setup.\n\nRouting lives in the setup, not on this op: the setup holds a content source standing 1:1 with this node, slices cut rectangles from it, and surfaces name the slice they show. So one render can be sliced across many surfaces without this op knowing about any of them.\n\nThis is a sink: it needs no output connection.\n\nAKA: corner pin, perspective, map, warp, projector output, send, sink, slice, atlas",
+  "InputUis": [
+    {
+      "InputId": "1d83a6f2-49c0-4e17-8b5d-c72e90fa4b36"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942"/*Texture*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "9a1c4f7e-2d38-4b6a-8e50-1f7c3d9b0a24"/*Update*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": []
+}
