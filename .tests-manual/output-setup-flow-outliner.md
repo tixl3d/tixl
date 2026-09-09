@@ -48,6 +48,16 @@ Click the SendToOutput op in the graph window.
 - After 3: the strip disappears entirely, the window's own toolbar returns with the list
   icon; clicking it brings the strip back at its previous height and the toolbar goes again.
 
+## Step: Right-drag scrolls the list
+
+**Action:**
+With more rows than fit, press the right mouse button over the columns and drag up and down;
+then right-click a row without dragging.
+
+**Expected:**
+- The list pans with the drag, like the parameter popup.
+- No context menu opens from the drag; the plain right-click still opens the row's menu.
+
 ## Step: The header's "+" adds what the columns don't list
 
 **Action:**
@@ -114,23 +124,18 @@ Look at the strip with nothing selected; hover an item; select it.
   outline (content magenta, surfaces green, outputs and plugs gray). Hovering lifts the fill
   and outline; selecting fills the pill solid. Nothing turns blue.
 
-## Step: Kind colours and the bind arrows
+## Step: Kind colours
 
 **Action:**
-1. Look at the column headers, then click the "Slice 1" item, then the "Surface 1" item, then
-   the "SendToOutput" item.
-2. With "Slice 1" selected, click the arrow at the left of the "Surface 1" item, then click it
-   again.
+Look at the column headers, then click the "Slice 1" item, then the "Surface 1" item, then
+the "SendToOutput" item.
 
 **Expected:**
-- After 1: the CONTENT header is tinted magenta, SURFACES green, OUTPUTS gray. A selected
-  content or slice item fills magenta, a selected surface fills green, a selected output
-  fills gray; hovering tints the item in the same colour. With "Slice 1" selected, an arrow
-  appears at the left of every surface, output and patch item, filled on the ones showing
-  that slice ("Surface 1", "Patch 1"). With "Surface 1" selected the arrows sit on the
-  output items only. With "SendToOutput" selected there are **no** arrows at all.
-- After 2: the first click unbinds "Surface 1" from "Slice 1" (its curve disappears, the
-  arrow hollows); the second binds it again.
+- The CONTENT header is tinted magenta, SURFACES green, OUTPUTS gray. A selected content or
+  slice item fills magenta, a selected surface fills green, a selected output fills gray;
+  hovering tints the item in the same colour.
+- No row grows an arrow in a left gutter for any selection, and no row shifts sideways as the
+  selection moves. Connecting is the drag, and the curves say what feeds what.
 
 ## Step: Del deletes the selection
 

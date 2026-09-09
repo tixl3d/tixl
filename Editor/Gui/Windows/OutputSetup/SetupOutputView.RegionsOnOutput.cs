@@ -89,6 +89,7 @@ internal sealed partial class SetupOutputView
         if (!edgeActive && !string.IsNullOrEmpty(child.Name) && IsMouseOverLabel(screen, child.Name))
             style.Editable = false;
 
+        style.EdgeHandleShape = EdgeDragStretches(child.Id) ? CanvasPointHandle.Shape.Circle : CanvasPointHandle.Shape.Square;
         var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
         if (edge >= 0)
         {

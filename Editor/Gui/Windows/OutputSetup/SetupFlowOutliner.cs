@@ -55,14 +55,6 @@ internal sealed class SetupFlowOutliner
 
         // (The hover cross-highlight border was removed — selection now shows its source via the "→|" marker.)
 
-        // Resolved once: TryResolve prunes the target list behind a closure, and every row asks for the
-        // primary when deciding whether to offer an in-gutter toggle.
-        if (!selection.TryResolve(setup, out _primaryKind, out _primaryId))
-        {
-            _primaryKind = SetupEntitySelection.EntityKind.None;
-            _primaryId = Guid.Empty;
-        }
-
         _pendingHoveredKind = SetupEntitySelection.EntityKind.None;
         _pendingHoveredId = Guid.Empty;
 
@@ -170,6 +162,11 @@ internal sealed class SetupFlowOutliner
     {
         var scale = T3Ui.UiScaleFactor;
         ImGui.BeginChild("##outlinerBody", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+
+        // Right-drag pans the list, as it does in the parameter popup. The row menus already ignore a right
+        // release that came from a drag, so the two gestures don't fight over the button.
+        CustomComponents.HandleDragScrolling(this);
+
         var origin = ImGui.GetCursorScreenPos();
         var avail = ImGui.GetContentRegionAvail();
 
@@ -792,14 +789,12 @@ internal sealed class SetupFlowOutliner
         }
     }
 
-    /// <summary>Outliner-side item wrapper: injects the column rect and the bind context every item needs,
-    /// records its anchor for the connections, and its hover for their emphasis next frame.</summary>
+    /// <summary>Outliner-side item wrapper: injects the column rect every item needs, records its anchor for
+    /// the connections, and its hover for their emphasis next frame.</summary>
     private EntityItem.ItemAction DrawRow(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
     {
         args.ColumnMinX = _columnMinX;
         args.ColumnWidth = _columnWidth;
-        args.PrimaryKind = _primaryKind;
-        args.PrimaryId = _primaryId;
         var action = _entityItem.DrawRow(selection, setup, in args, out var hovered);
         var rect = _entityItem.LastRowRect;
         _anchors.Add(new Anchor(args.Kind, args.Id, rect.Min.X, rect.Max.X, (rect.Min.Y + rect.Max.Y) * 0.5f));
@@ -865,8 +860,6 @@ internal sealed class SetupFlowOutliner
     private readonly HashSet<Guid> _collapsedSources = [];
     private readonly HashSet<Guid> _collapsedOutputs = [];
     private readonly EntityItem _entityItem;
-    private SetupEntitySelection.EntityKind _primaryKind;
-    private Guid _primaryId;
 
     // The item hovered this frame (committed at end of Draw) — its connections draw emphasized next frame.
     private SetupEntitySelection.EntityKind _hoveredKind;

@@ -522,9 +522,12 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// The selected surface's edge handles, as on the Straight view: an edge crops the footprint (Ctrl
-    /// stretches instead), the anchor — the card's placement — stays put, and the corner pin follows through
-    /// the shared gesture skeleton, one undo step per drag.
+    /// The selected surface's edge handles: an edge crops the footprint, the anchor — the card's placement —
+    /// stays put, and the corner pin follows through the shared gesture skeleton, one undo step per drag.
+    /// <para>Ctrl here <b>scales</b> the surface along that axis (the wall really is bigger, so its lines and
+    /// regions grow with it), where Ctrl on the projector and Straight canvases <b>stretches</b> (the declared
+    /// rectangle is kept and only its mapping changes). Both wear the circle handle; they differ because the
+    /// Board is where a surface's real size is stated, and the canvases are where it is aimed.</para>
     /// </summary>
     private void DrawBoardSurfaceEdges(Setup setup, Surface surface, Vector2 min, Vector2 max)
     {

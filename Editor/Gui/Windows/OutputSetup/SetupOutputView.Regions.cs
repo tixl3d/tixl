@@ -113,7 +113,10 @@ internal sealed partial class SetupOutputView
         var edge = -1;
         var edgePos = Vector2.Zero;
         if (cornerPhase == CanvasPointHandle.DragPhase.None)
+        {
+            style.EdgeHandleShape = EdgeDragStretches(child.Id) ? CanvasPointHandle.Shape.Circle : CanvasPointHandle.Shape.Square;
             edgePhase = CornerPinHandles.DrawEdgeHandles(_regionQuad, projection, style, out edge, out edgePos);
+        }
 
         ImGui.PopID();
 

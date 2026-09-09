@@ -53,11 +53,6 @@ internal sealed class EntityItem
         /// <summary>Strike the leading icon (a paused output / non-rendered surface).</summary>
         public bool StrikeLeadingIcon;
 
-        /// <summary>The selection primary, for the in-gutter bind toggle.</summary>
-        public SetupEntitySelection.EntityKind PrimaryKind;
-
-        public Guid PrimaryId;
-
         /// <summary>The column the row spans, in screen px; a zero width means the whole window (the tree layout).</summary>
         public float ColumnMinX;
 
@@ -78,20 +73,6 @@ internal sealed class EntityItem
         var indent = args.Depth * 12 * scale;
 
         var fade = args.Muted ? 0.45f : 1f;
-
-        // The in-gutter exists for one gesture: with a source selected, clicking the arrow on an item that
-        // could take it binds or unbinds without dragging. It is reserved for every consumer item while any
-        // such source is the primary, so items don't shift relative to each other, and gone otherwise — the
-        // connections say what feeds what.
-        // A source is not a bind context: which of its slices would bind is ambiguous, and the arrows lit on
-        // every consumer of any slice read as a claim the connections don't make.
-        var bindContext = args.PrimaryKind is SetupEntitySelection.EntityKind.Slice
-                              or SetupEntitySelection.EntityKind.Surface;
-        var hasInputGutter = bindContext
-                             && args.Kind is SetupEntitySelection.EntityKind.Surface
-                                 or SetupEntitySelection.EntityKind.Output
-                                 or SetupEntitySelection.EntityKind.Patch;
-        var gutterWidth = hasInputGutter ? Icons.FontSize + 4 * scale : 0;
 
         ImGui.PushID(args.Id.GetHashCode());
 
@@ -138,18 +119,7 @@ internal sealed class EntityItem
 
         // The chevron shares the row's selectable rather than overlapping it with its own button — a click in
         // its column toggles instead of selecting.
-        // A source is selected, so every row that could take it offers a click-target to bind or unbind.
-        var isBound = false;
-        var canBind = hasInputGutter
-                      && SetupActions.TryDescribeInputToggle(setup, args.Kind, args.Id, args.PrimaryKind, args.PrimaryId, out isBound);
-        var gutterMaxX = rowMin.X + gutterWidth;
-        if (clicked && canBind && ImGui.GetMousePos().X < gutterMaxX)
-        {
-            SetupActions.ToggleInput(setup, args.Kind, args.Id, args.PrimaryKind, args.PrimaryId);
-            clicked = false;
-        }
-
-        var chevronMaxX = rowMin.X + gutterWidth + indent + 20 * scale;
+        var chevronMaxX = rowMin.X + indent + 20 * scale;
         if (clicked && args.IsExpanded.HasValue && ImGui.GetMousePos().X < chevronMaxX)
         {
             action = ItemAction.ToggleExpanded;
@@ -217,15 +187,7 @@ internal sealed class EntityItem
         var contentY = (float)Math.Round(rowMin.Y + (height - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
         var iconY = contentY + 3 * scale; // glyphs render high vs the text baseline — drop them to match.
 
-        if (canBind)
-        {
-            var overGutter = isHovered && ImGui.GetMousePos().X < gutterMaxX;
-            var color = isBound ? UiColors.StatusActivated : UiColors.BackgroundFull.Fade(0.5f);
-            ImGui.SetCursorScreenPos(new Vector2(rowMin.X + 4 * scale, iconY));
-            Icons.DrawInlineGlyph(Icon.ArrowRight, overGutter ? UiColors.ForegroundFull.Rgba : color.Rgba);
-        }
-
-        var contentX = rowMin.X + 6 * scale + gutterWidth + indent;
+        var contentX = rowMin.X + 6 * scale + indent;
         if (args.IsExpanded.HasValue)
         {
             ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));

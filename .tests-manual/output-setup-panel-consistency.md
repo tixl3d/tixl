@@ -96,8 +96,8 @@ drag a measuring-line endpoint in Straight mode.
 
 **Action:**
 Perform each of these, pressing Ctrl-Z once after each: add a surface; duplicate an output;
-drag a content send onto a surface (the connect); click a surface's in-gutter arrow with a
-slice selected (the bind toggle); delete three multi-selected entities at once; draw a new
+drag a content send onto a surface (the connect); drag a slice onto a surface that already
+shows another (the replace); delete three multi-selected entities at once; draw a new
 measuring line; click "Straighten" with traced lines; rename a slice.
 
 **Expected:**

@@ -157,6 +157,8 @@ down to 0%, then up to 100% (or double-click it and type).
   the image card stays where it was (the wall in the photo did not change).
 - After 3: the crop from the earlier step: the width grows, the raster spacing and the
   regions stay put, and the traced quad on the image card crops along.
+- After 3: switch to **Straight** on that surface. The measuring lines and any reference
+  points still lie on the photo features they were traced on.
 
 
 **Action:**
@@ -312,6 +314,23 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 - After 2: the scene turns from one rectified wall to the other, the warp and the view easing
   together rather than cutting, and back.
 - After 3: the photo relaxes back to its unwarped state and the view returns to the Board.
+
+## Step: Leaving a photo transition half-way leaves the camera free
+
+**Action:**
+1. Click **Straight** on a traced surface and, while the photo is still turning, click an
+   output item in the OUTPUTS column.
+2. Pan the canvas with a right-drag and zoom with the wheel.
+3. Click the other output item, then back.
+
+**Expected:**
+- After 1: the view goes to that output's canvas; the abandoned photo ease does not come back
+  in any form.
+- After 2: panning and zooming work normally. (They used to die here: the abandoned ease held
+  the framing in a permanent transition, and a framing in transition re-sets the camera every
+  frame.)
+- After 3: each switch is one continuous camera move to the other canvas, not a jump and not a
+  half-way stall.
 
 ## Step: Editing on the straightened photo
 

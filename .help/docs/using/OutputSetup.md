@@ -35,7 +35,7 @@ Drag a row onto another row to connect them. The direction doesn't matter: dropp
 - A slice or source onto a patch re-feeds that patch. A surface onto a patch takes the patch's place, pinned to its quad.
 - An output onto a plug binds it to that display or stream. Content or a surface dropped on a plug routes into the output it presents, creating and binding one if the plug is still free.
 
-With a slice or surface selected, every row that could take it shows an arrow in its gutter; clicking the arrow binds or unbinds without dragging. Each row's context menu offers the same connections plus Rename, Duplicate and Delete. `Del` removes the selection while the strip has focus.
+Each row's context menu offers Rename, Duplicate and Delete. `Del` removes the selection while the strip has focus.
 
 ## The canvas
 

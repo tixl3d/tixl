@@ -88,18 +88,17 @@ With "Patch 1" selected, set **Size (px)** to 960 × 540, then **Position (px)**
   position edit it sits centred.
 - Each Ctrl+Z reverts exactly one of the two edits.
 
-## Step: A second patch, added empty and fed by the gutter toggle
+## Step: A second patch, added empty and then fed
 
 **Action:**
 1. Right-click "P1" → **Add Patch**.
-2. Click the "Slice 1" item under the SendToOutput content.
-3. Click the input arrow in the left gutter of the new "Patch 2" item.
+2. Drag the "Slice 1" item under the SendToOutput content onto the new "Patch 2" item.
 
 **Expected:**
 - After 1: "Patch 2" appears dimmed under P1 with no connection; its card says nothing is
   routed yet.
-- After 3: the arrow lights up, a connection from "Slice 1" reaches "Patch 2" in the outliner,
-  and the item is no longer dimmed. Clicking the arrow again unfeeds it.
+- After 2: a connection from "Slice 1" reaches "Patch 2" in the outliner and the item is no
+  longer dimmed. Ctrl+Z unfeeds it again.
 
 ## Step: Patches sit under surfaces
 

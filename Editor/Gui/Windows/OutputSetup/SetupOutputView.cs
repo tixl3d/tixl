@@ -142,6 +142,18 @@ internal sealed partial class SetupOutputView
             _spaceId = id;
         }
 
+        // The photo space's own eases (Photo ↔ Straight, and turning from one traced subject to another) only
+        // advance while that space is drawn. Leaving it mid-flight — clicking an output while the photo is still
+        // turning — would strand them below 1, and they gate the framing: every later frame would then re-set the
+        // camera to a half-eased fit, which pins the view and takes pan and zoom down with it. Nothing is showing
+        // them any more, so they land where they were heading.
+        if (_spaceKind != SetupEntitySelection.EntityKind.ReferenceImage)
+        {
+            _referenceProgress = 1f;
+            _referenceSubjectProgress = 1f;
+            _referenceStraighten = _referenceStraightenTarget;
+        }
+
         if (TryGetBoardBounds(setup, _spaceKind, _spaceId, out var min, out var max))
         {
             _projection.Origin = new Vector2(min.X, max.Y);
@@ -622,9 +634,13 @@ internal sealed partial class SetupOutputView
                 DrawAnchorMarker(dl, surface, mappingData, rToView, viewMin, canvasSize, handleFade);
 
             // Edge handles belong to the focused surface only — they're contextual, and four extra dots on
-            // every quad would drown the canvas. A corner moves freely (perspective); an edge crops.
+            // every quad would drown the canvas. A corner moves freely (perspective); an edge crops the
+            // footprint, or stretches it with Ctrl.
             if (handlesEditable && surface.Id == _shownSurfaceId)
             {
+                style.EdgeHandleShape = EdgeDragStretches(surface.Id)
+                                            ? CanvasPointHandle.Shape.Circle
+                                            : CanvasPointHandle.Shape.Square;
                 var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
                 if (edge >= 0)
                     HandleEdgeDrag(edgePhase, setup, surface, mappingData, edge, edgePos, rToOutput, viewMin);
@@ -984,6 +1000,16 @@ internal sealed partial class SetupOutputView
 
     // Whether the live edge drag stretches (Ctrl at the press) rather than crops — held for the drag.
     private bool _edgeStretch;
+
+    /// <summary>
+    /// Whether an edge drag on this surface would stretch rather than crop: Ctrl at the press, then the mode
+    /// the live gesture started in. Also picks the edge handles' shape, so the choice is visible before
+    /// committing to it — a circle stretches, a square crops, the same signal the Board's edges give.
+    /// </summary>
+    private bool EdgeDragStretches(Guid surfaceId)
+    {
+        return _gesture.Is(GestureKinds.SurfaceResize, surfaceId) ? _edgeStretch : ImGui.GetIO().KeyCtrl;
+    }
 
     /// <summary>A corner drag (the grabbed surface, plus any with selected corners riding along) as one gesture.</summary>
     private void HandleDrag(CanvasPointHandle.DragPhase phase, Setup setup, Guid surfaceId, Guid outputId, Vector2[] liveQuad)

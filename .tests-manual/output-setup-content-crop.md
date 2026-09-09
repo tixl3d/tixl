@@ -42,12 +42,15 @@ Then Ctrl+Z.
 
 **Action:**
 Switch to **Straight** with "Surface 1" selected. Drag the top edge handle down; then Ctrl-drag
-it back up. Ctrl+Z twice.
+it back up. Ctrl+Z twice. Then do the same on the **Output** canvas, and on a region there.
 
 **Expected:**
 - Plain: the top of the picture is cut away, the rest stays put; the slice on the content card
   loses its top.
 - Ctrl: the picture re-fits (stretches) into the changed frame; the slice is unchanged.
+- The edge handles say which it will be before you commit: holding Ctrl turns them from squares
+  into circles, on the Straight and Output canvases and on regions, as on the Board. The shape
+  is fixed at the press, so releasing Ctrl mid-drag does not switch modes underneath you.
 
 ## Step: Region crop and pan
 
