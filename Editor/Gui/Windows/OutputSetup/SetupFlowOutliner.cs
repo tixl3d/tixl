@@ -476,7 +476,7 @@ internal sealed class SetupFlowOutliner
                                Kind = SetupEntitySelection.EntityKind.Plug,
                                Id = stream.Id,
                                Name = stream.Name,
-                               Status = available ? stream.Kind : $"{stream.Kind} · package not loaded",
+                               Status = available ? stream.Kind : MissingPackageStatus(stream.Kind),
                                LeadingIcon = Icon.ConnectedOutput,
                                Muted = !available || !IsPlugBound(setup, machineConfig, stream.Id),
                            };
@@ -508,6 +508,19 @@ internal sealed class SetupFlowOutliner
             ImGui.EndPopup();
         }
     }
+
+    private static string MissingPackageStatus(string kind)
+    {
+        if (!_missingPackageStatus.TryGetValue(kind, out var status))
+        {
+            status = $"{kind} · package not loaded";
+            _missingPackageStatus[kind] = status;
+        }
+
+        return status;
+    }
+
+    private static readonly Dictionary<string, string> _missingPackageStatus = [];
 
     private static bool IsPlugBound(Setup setup, MachineConfig machineConfig, Guid plugId)
     {

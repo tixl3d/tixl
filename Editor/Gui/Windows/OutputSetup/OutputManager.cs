@@ -244,13 +244,21 @@ internal static class OutputManager
         }
     }
 
-    /// <summary>Renders the output's composite, or null if nothing is bound to it.</summary>
+    /// <summary>
+    /// Renders the output's composite, or null if nothing is bound to it. Rendered at most once per frame:
+    /// presentation, the Board card and an open output view all ask for the same pixels, so later calls in
+    /// the frame get the target rendered by the first.
+    /// </summary>
     public static Texture2D? RenderOutput(Guid outputId)
     {
         var setup = ActiveSetup.Current;
         var output = ActiveSetup.TryFindOutput(outputId);
         if (setup == null || output == null)
             return null;
+
+        var frame = ImGui.GetFrameCount();
+        if (_compositeFrames.TryGetValue(outputId, out var rendered) && rendered.Frame == frame)
+            return rendered.HasContent && _targets.TryGetValue(outputId, out var renderedTarget) ? renderedTarget.Texture : null;
 
         _context ??= new EvaluationContext();
         _context.Reset();
@@ -363,7 +371,10 @@ internal static class OutputManager
             CollectPhotoFragments(pending.Surface, pending.Mapping, pending.Homography, output.CanvasResolution);
 
         if (_drawItems.Count == 0)
+        {
+            _compositeFrames[outputId] = (frame, false);
             return null;
+        }
 
         var target = GetOrCreateTarget(outputId, output.CanvasResolution);
         if (target == null)
@@ -413,6 +424,7 @@ internal static class OutputManager
         deviceContext.PixelShader.SetShaderResource(0, null);
 
         DrawOverlay(deviceContext, output.CanvasResolution);
+        _compositeFrames[outputId] = (frame, true);
         return target.Texture;
     }
 
@@ -716,24 +728,41 @@ internal static class OutputManager
     /// </summary>
     public static bool TryGetSurfaceSlice(Guid surfaceId, out Slice? slice, out Texture2D? content, out Vector4 uv)
     {
-        slice = null;
-        content = null;
-        uv = _fullSourceRect;
+        // Every card, region and traced quad asks per frame; the chain of linear finds behind it is answered once.
+        var frame = ImGui.GetFrameCount();
+        if (frame != _surfaceSliceFrame)
+        {
+            _surfaceSliceFrame = frame;
+            _surfaceSlices.Clear();
+        }
 
+        if (!_surfaceSlices.TryGetValue(surfaceId, out var resolved))
+        {
+            resolved = ResolveSurfaceSlice(surfaceId);
+            _surfaceSlices[surfaceId] = resolved;
+        }
+
+        slice = resolved.Slice;
+        content = resolved.Content;
+        // The UV is read live: a crop or pan edits it mid-frame and the previews must follow within the frame.
+        uv = resolved.Slice?.UvRect ?? _fullSourceRect;
+        return resolved.Found;
+    }
+
+    private static (bool Found, Slice? Slice, Texture2D? Content) ResolveSurfaceSlice(Guid surfaceId)
+    {
         var setup = ActiveSetup.Current;
         var surface = setup?.FindSurface(surfaceId);
         if (setup == null || surface == null || surface.SliceId == Guid.Empty)
-            return false;
+            return (false, null, null);
 
-        var found = setup.FindSlice(surface.SliceId);
-        slice = found;
-        var sourceId = found?.SourceId ?? Guid.Empty;
+        var slice = setup.FindSlice(surface.SliceId);
+        var sourceId = slice?.SourceId ?? Guid.Empty;
         var source = sourceId == Guid.Empty ? null : setup.FindSource(sourceId);
-        if (source == null || !TryGetSourceContent(source.SymbolChildId, out _, out content))
-            return false;
+        if (source == null || !TryGetSourceContent(source.SymbolChildId, out _, out var content))
+            return (false, slice, null);
 
-        uv = slice!.UvRect;
-        return true;
+        return (true, slice, content);
     }
 
     /// <summary>
@@ -969,6 +998,12 @@ internal static class OutputManager
 
     private static readonly Guid _scratchTargetId = new("f1e2d3c4-b5a6-4788-9012-3456789abcde");
     private static readonly Dictionary<Guid, Target> _targets = new();
+
+    // Per-frame memos: which outputs were composited this frame (and whether anything was drawn), and the
+    // surface→slice→content resolves already answered.
+    private static readonly Dictionary<Guid, (int Frame, bool HasContent)> _compositeFrames = new();
+    private static readonly Dictionary<Guid, (bool Found, Slice? Slice, Texture2D? Content)> _surfaceSlices = new();
+    private static int _surfaceSliceFrame = -1;
     private static readonly List<DrawItem> _drawItems = [];
 
     private static int _presentedDisplayIndex = -1;

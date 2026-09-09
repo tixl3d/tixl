@@ -664,6 +664,13 @@ with an explanatory comment) — the row-callback API design made compliance imp
   and the content card reads "full frame → N targets". Dropping content onto a surface therefore needs no slice
   in the user's eyes; the slice becomes visible once cut, named, or joined by a second one. The model is unchanged.
 
+- **2026-09-09 (per-frame memos in `OutputManager`):** `RenderOutput` composites each output at most once per
+  frame (`_compositeFrames` stamps outputId → frame + whether anything was drawn); presentation, the Board card
+  and an open output view share the target. `TryGetSurfaceSlice` memoizes the surface→slice→content resolve per
+  frame (`_surfaceSlices`) but reads the slice's UV live, so a crop/pan preview follows within the frame. The
+  outliner no longer builds a "package not loaded" string per stream row per frame. Not measured — the
+  composite halving is the only one expected to show on a profile.
+
 ## Suggested order (revised for the flow-view pivot)
 
 1. **P0** (bug fixes, 1–2 days) — independent of every decision below.

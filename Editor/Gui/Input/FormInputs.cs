@@ -679,7 +679,7 @@ internal static class FormInputs
 
             var font = isSelected ? Fonts.FontBold : Fonts.FontNormal;
             var textColor = isDisabled
-                                ? UiColors.TextMuted.Fade(0.4f)
+                                ? UiColors.TextMuted.Fade(0.25f)
                                 : isSelected
                                     ? UiColors.ForegroundFull
                                     : (isHovered ? UiColors.Text : UiColors.TextMuted);
