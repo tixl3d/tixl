@@ -21,12 +21,24 @@ public sealed class StreamPlug
     /// <summary>The sender name receivers see.</summary>
     public string Name = string.Empty;
 
+    /// <summary>Frames per second advertised to receivers, for kinds that clock their output (NDI).</summary>
+    public int FrameRate = 60;
+
+    /// <summary>Whether the alpha channel is sent, for kinds that can carry it (NDI).</summary>
+    public bool EnableAlpha;
+
+    public OutputStreamSettings ToSettings() => new(FrameRate, EnableAlpha);
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
         writer.WriteObject("Id", Id);
         writer.WriteString("Kind", Kind);
         writer.WriteString("Name", Name);
+        writer.WriteValue("FrameRate", FrameRate);
+        if (EnableAlpha)
+            writer.WriteValue("EnableAlpha", EnableAlpha);
+
         writer.WriteEndObject();
     }
 
@@ -37,6 +49,8 @@ public sealed class StreamPlug
                        Id = OutputJson.ReadGuid(token["Id"]),
                        Kind = token.ReadValueSafe("Kind", string.Empty) ?? string.Empty,
                        Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
+                       FrameRate = token.ReadValueSafe("FrameRate", 60),
+                       EnableAlpha = token.ReadValueSafe("EnableAlpha", false),
                    };
     }
 }

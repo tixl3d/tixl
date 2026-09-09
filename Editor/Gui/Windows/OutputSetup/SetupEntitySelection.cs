@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using T3.Core.Operator;
 using T3.Core.Output;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
@@ -204,6 +205,14 @@ internal sealed class SetupEntitySelection
                 }
 
                 return false;
+
+            case EntityKind.Plug:
+                // Plugs are machine state, not setup state: an attached display, or a stream this machine offers.
+                if (Plugs.TryGetDisplayIndex(id, out var displayIndex))
+                    return displayIndex < System.Windows.Forms.Screen.AllScreens.Length;
+
+                return OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig)
+                       && machineConfig.FindStream(id) != null;
 
             default:
                 return false;

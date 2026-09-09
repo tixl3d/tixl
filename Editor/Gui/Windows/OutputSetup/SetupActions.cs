@@ -1295,6 +1295,11 @@ internal static class SetupActions
                 return patch == null || owner == null ? "Patch" : PatchLabel(owner, patch);
             }
 
+            case SetupEntitySelection.EntityKind.Plug:
+                return OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig)
+                           ? Plugs.PlugName(machineConfig, id)
+                           : "Plug";
+
             default:
                 return kind.ToString();
         }

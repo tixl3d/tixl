@@ -146,6 +146,115 @@ internal static class SetupRelations
     }
 
     /// <summary>
+    /// The output any entity reaches, following the routing downstream: an output is itself, a patch and a
+    /// surface name theirs, a slice and a send are traced through whatever shows them. Lets a view offer the
+    /// projector a selection *leads to* — picking it is then a matter of selecting that output.
+    /// </summary>
+    public static bool TryGetOutputOf(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, out Guid outputId)
+    {
+        outputId = Guid.Empty;
+        switch (kind)
+        {
+            case SetupEntitySelection.EntityKind.Output:
+                if (setup.FindOutput(id) == null)
+                    return false;
+
+                outputId = id;
+                return true;
+
+            case SetupEntitySelection.EntityKind.Patch:
+                return TryGetPatchOutput(setup, id, out outputId);
+
+            case SetupEntitySelection.EntityKind.Surface:
+                return TryGetSurfaceOutput(setup, id, out outputId);
+
+            case SetupEntitySelection.EntityKind.Slice:
+                return TryGetSliceOutput(setup, id, out outputId);
+
+            case SetupEntitySelection.EntityKind.ContentSource:
+                return TryGetSendOutput(setup, id, out outputId);
+
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// The surface an entity reaches: itself, or the first one showing this slice (or any slice of this send).
+    /// A patch has none — it is the surface-less pipe — and neither has an output, whose surfaces are picked
+    /// on its own canvas.
+    /// </summary>
+    public static bool TryGetSurfaceOf(Setup setup, SetupEntitySelection.EntityKind kind, Guid id, out Guid surfaceId)
+    {
+        surfaceId = Guid.Empty;
+        switch (kind)
+        {
+            case SetupEntitySelection.EntityKind.Surface:
+                if (setup.FindSurface(id) == null)
+                    return false;
+
+                surfaceId = id;
+                return true;
+
+            case SetupEntitySelection.EntityKind.Slice:
+                return TryGetSurfaceShowing(setup, id, out surfaceId);
+
+            case SetupEntitySelection.EntityKind.ContentSource:
+                var source = setup.FindSourceByChildId(id);
+                if (source == null)
+                    return false;
+
+                foreach (var slice in setup.Slices)
+                {
+                    if (slice.SourceId == source.Id && TryGetSurfaceShowing(setup, slice.Id, out surfaceId))
+                        return true;
+                }
+
+                return false;
+
+            default:
+                return false;
+        }
+    }
+
+    private static bool TryGetSurfaceShowing(Setup setup, Guid sliceId, out Guid surfaceId)
+    {
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId != sliceId)
+                continue;
+
+            surfaceId = surface.Id;
+            return true;
+        }
+
+        surfaceId = Guid.Empty;
+        return false;
+    }
+
+    /// <summary>The output a slice reaches first: a patch showing it, else a surface showing it that is mapped.</summary>
+    public static bool TryGetSliceOutput(Setup setup, Guid sliceId, out Guid outputId)
+    {
+        outputId = Guid.Empty;
+        foreach (var output in setup.Outputs)
+        {
+            if (!OutputShowsSlice(output, sliceId))
+                continue;
+
+            outputId = output.Id;
+            return true;
+        }
+
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId == sliceId && TryGetSurfaceOutput(setup, surface.Id, out outputId))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// The output a send op's content reaches first: through a patch showing one of its slices, or a surface
     /// showing one that is mapped somewhere.
     /// </summary>

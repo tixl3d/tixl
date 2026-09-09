@@ -19,6 +19,10 @@ using SkillTraining = T3.Editor.Skills.Training.SkillTraining;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Vector2 = System.Numerics.Vector2;
 
+using T3.Core.Operator.Slots;
+
+using T3.Editor.Gui.Windows.OutputSetup;
+
 namespace T3.Editor.Gui.Windows.Output;
 
 internal sealed partial class OutputWindow
@@ -98,8 +102,14 @@ internal sealed partial class OutputWindow
             return viewOutputUi.Type;
         }
 
+        // Already rendered this frame for an output the setup presents: show that texture rather than
+        // invalidating the chain and rendering the same scene a second time at this window's resolution.
+        var alreadyRendered = evalOutput is Slot<Texture2D> textureSlot
+                              && textureSlot.Value is { IsDisposed: false } shown
+                              && OutputManager.WasContentPulledThisFrame(shown);
+
         // Render!
-        evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title);
+        evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title, recompute: !alreadyRendered);
         return evalOutput.ValueType;
     }
 

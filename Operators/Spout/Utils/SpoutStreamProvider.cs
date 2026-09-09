@@ -7,5 +7,7 @@ internal sealed class SpoutStreamProvider : IOutputStreamProvider
 {
     public string Kind => "Spout";
 
+    public OutputStreamOptions Supported => OutputStreamOptions.None;
+
     public IOutputStreamSender CreateSender(string name) => new SpoutSender(name);
 }

@@ -69,19 +69,45 @@ internal sealed partial class SetupOutputView
         var straightCarrier = SurfaceGeometry.FindCarrier(setup, _shownSurfaceId, outputId);
         var hasOutput = output != null;
         var hasStraightSubject = straightCarrier != null || TracedImageOf(setup, _shownSurfaceId) != null;
-        CustomComponents.SegmentedButton(ref _editMode,
-                                         isItemDisabled: mode => mode switch
-                                                                     {
-                                                                         EditMode.Board => false,
-                                                                         EditMode.Straight => !hasStraightSubject,
-                                                                         _ => !hasOutput,
-                                                                     });
+
+        // A camera whose subject this view doesn't hold may still be *reachable* from the selection along the
+        // routing — with a slice selected, the projector it ends up on is unambiguous. Offer the tab then, and
+        // let picking it select that subject, rather than making the user walk the columns to it by hand.
+        var selection = OutputSetupHandling.EntitySelection;
+        var reachedOutputId = Guid.Empty;
+        var reachedSurfaceId = Guid.Empty;
+        if (selection.TryResolve(setup, out var primaryKind, out var primaryId))
+        {
+            if (!hasOutput)
+                SetupRelations.TryGetOutputOf(setup, primaryKind, primaryId, out reachedOutputId);
+
+            if (!hasStraightSubject)
+                SetupRelations.TryGetSurfaceOf(setup, primaryKind, primaryId, out reachedSurfaceId);
+        }
+
+        var canOutput = hasOutput || reachedOutputId != Guid.Empty;
+        var canStraight = hasStraightSubject || reachedSurfaceId != Guid.Empty;
+
+        if (CustomComponents.SegmentedButton(ref _editMode,
+                                             isItemDisabled: mode => mode switch
+                                                                         {
+                                                                             EditMode.Board => false,
+                                                                             EditMode.Straight => !canStraight,
+                                                                             _ => !canOutput,
+                                                                         }))
+        {
+            // Picked a camera the selection only leads to: select its subject so the next frame frames it.
+            if (_editMode == EditMode.Output && reachedOutputId != Guid.Empty)
+                selection.Select(SetupEntitySelection.EntityKind.Output, reachedOutputId);
+            else if (_editMode == EditMode.Straight && reachedSurfaceId != Guid.Empty)
+                selection.Select(SetupEntitySelection.EntityKind.Surface, reachedSurfaceId);
+        }
 
         // A disabled segment can't be clicked away, so a mode left selected after its precondition lapses
-        // (focus moved off the surface, no output at all) is reset here instead.
-        if (!hasStraightSubject && _editMode == EditMode.Straight)
-            _editMode = hasOutput ? EditMode.Output : EditMode.Board;
-        else if (!hasOutput && _editMode != EditMode.Straight)
+        // (the selection no longer reaches a surface or an output) is reset here instead.
+        if (!canStraight && _editMode == EditMode.Straight)
+            _editMode = canOutput ? EditMode.Output : EditMode.Board;
+        else if (!canOutput && _editMode != EditMode.Straight)
             _editMode = EditMode.Board;
 
         // Isolate: locks the canvas to the focused frame — the others stay visible and keep snapping, but

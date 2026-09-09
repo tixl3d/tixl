@@ -142,6 +142,7 @@ internal static class OutputManager
             _streamSenders[stream.Id] = slot;
         }
 
+        slot.Sender.Configure(stream.ToSettings());
         var composite = RenderOutput(output.Id);
         if (composite != null)
             slot.Sender.Send(composite);
@@ -204,7 +205,7 @@ internal static class OutputManager
             if (!TryResolveSurfaceContent(setup, surface, out var surfaceSend, out _) || surfaceSend == null)
                 continue;
 
-            var content = surfaceSend.GetContent(_context);
+            var content = PullContent(surfaceSend);
             if (content is { IsDisposed: false })
                 return content;
         }
@@ -214,7 +215,7 @@ internal static class OutputManager
             if (!TryResolveSliceContent(setup, patch.SliceId, out var directSend, out _) || directSend == null)
                 continue;
 
-            var direct = directSend.GetContent(_context);
+            var direct = PullContent(directSend);
             if (direct is { IsDisposed: false })
                 return direct;
         }
@@ -279,7 +280,7 @@ internal static class OutputManager
             if (patch.Quad.Length < 4 || !TryResolveSliceContent(setup, patch.SliceId, out var patchSend, out var patchRect))
                 continue;
 
-            var content = patchSend!.GetContent(_context);
+            var content = PullContent(patchSend!);
             if (content is not { IsDisposed: false })
                 continue;
 
@@ -307,7 +308,7 @@ internal static class OutputManager
             }
 
             TryResolveSurfaceContent(setup, surface, out var sink, out var resolvedRect);
-            var content = sink?.GetContent(_context);
+            var content = sink == null ? null : PullContent(sink);
             var srv = content is { IsDisposed: false } ? SrvManager.GetSrvForTexture(content) : null;
             var hasContent = srv is { IsDisposed: false };
             var color = hasContent ? sink!.GetColor(_context) : Vector4.One;
@@ -710,6 +711,37 @@ internal static class OutputManager
         return target.Texture;
     }
 
+    /// <summary>
+    /// Whether this texture was already produced this frame by pulling a send's content — i.e. its upstream
+    /// graph has run, at the bound output's canvas resolution. A view showing the same texture can then draw it
+    /// as it is instead of invalidating and re-rendering the whole chain at its own requested resolution, which
+    /// would evaluate the scene twice per frame and resize the render target back and forth.
+    /// </summary>
+    public static bool WasContentPulledThisFrame(Texture2D texture)
+    {
+        return _pulledFrame == ImGui.GetFrameCount() && _pulledContent.Contains(texture);
+    }
+
+    /// <summary>Pulls a send's content and notes the texture as produced this frame (see <see cref="WasContentPulledThisFrame"/>).</summary>
+    private static Texture2D? PullContent(IOutputSink sink)
+    {
+        var frame = ImGui.GetFrameCount();
+        if (frame != _pulledFrame)
+        {
+            _pulledFrame = frame;
+            _pulledContent.Clear();
+        }
+
+        var content = sink.GetContent(_context!);
+        if (content is { IsDisposed: false })
+            _pulledContent.Add(content);
+
+        return content;
+    }
+
+    private static readonly HashSet<Texture2D> _pulledContent = [];
+    private static int _pulledFrame = -1;
+
     /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>
     public static bool TryGetSourceContent(Guid symbolChildId, out IOutputSink? sink, out Texture2D? content)
     {
@@ -718,7 +750,7 @@ internal static class OutputManager
         if (sink == null || _context == null)
             return false;
 
-        content = sink.GetContent(_context);
+        content = PullContent(sink);
         return content is { IsDisposed: false };
     }
 

@@ -5,6 +5,20 @@ using T3.Core.DataTypes;
 
 namespace T3.Core.Output;
 
+/// <summary>Settings a stream can be given, where its transport has a notion of them (see
+/// <see cref="IOutputStreamProvider.Supported"/>). Frame size is never among them: it follows the texture.</summary>
+public readonly record struct OutputStreamSettings(int FrameRate, bool EnableAlpha);
+
+/// <summary>Which of <see cref="OutputStreamSettings"/> a stream kind actually honours, so a host can offer
+/// exactly those and no dead controls.</summary>
+[Flags]
+public enum OutputStreamOptions
+{
+    None = 0,
+    FrameRate = 1,
+    Alpha = 2,
+}
+
 /// <summary>
 /// A kind of network/IPC video stream this machine can send (Spout, NDI, …). Implemented by operator packages
 /// that carry the native library; discovered by type when the package assembly loads, so the host can offer a
@@ -15,6 +29,9 @@ public interface IOutputStreamProvider
     /// <summary>Stable identifier persisted in machine configs (e.g. "Spout", "NDI").</summary>
     string Kind { get; }
 
+    /// <summary>The settings senders of this kind honour; the rest are not offered for it.</summary>
+    OutputStreamOptions Supported { get; }
+
     /// <summary>Opens a sender under the given name. Frame size follows the textures sent.</summary>
     IOutputStreamSender CreateSender(string name);
 }
@@ -23,6 +40,10 @@ public interface IOutputStreamProvider
 public interface IOutputStreamSender : IDisposable
 {
     string Name { get; }
+
+    /// <summary>Applies the plug's settings; called before each <see cref="Send"/>, so an edit takes effect at
+    /// once. A sender ignores whatever its transport has no notion of.</summary>
+    void Configure(OutputStreamSettings settings);
 
     /// <summary>Sends one frame. False when nothing was sent (no receiver, unsupported format, native failure);
     /// <see cref="LastError"/> then says why, if the sender knows.</summary>

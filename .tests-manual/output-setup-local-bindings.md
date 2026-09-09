@@ -37,7 +37,9 @@ Then right-click the new row.
 **Expected:**
 - A new dimmed row "Wall feed" appears under the displays with "Spout" as its status.
 - The context menu offers **Rename** and **Remove stream** (and nothing to duplicate or delete).
-- Clicking the row selects nothing and shows nothing in the Parameter window.
+- Clicking the row selects it and the Parameter window shows a **Plug** card: its name, a read-only
+  **Resolution (px)** (0 × 0 while nothing is bound) and the line "Spout · nothing bound". No
+  frame-rate or alpha field, because Spout has no notion of either.
 
 ## Step: Binding by drag and drop
 
@@ -132,3 +134,19 @@ Hover the **?** left of the collapse chevron in the strip's header; then click i
   itself is machine state and is not undone, so it simply points at nothing.)
 - After 4: no second output is created — "Surface 1" is mapped onto the output already bound
   to that plug.
+
+## Step: A stream plug's settings
+
+**Action:**
+1. Add an **NDI** stream plug (needs the NDI package) and select it.
+2. Set **Frame rate** to 30 and tick **Send alpha**.
+3. Bind an output to it and look at **Resolution (px)**.
+4. Reopen the project and select the plug again.
+
+**Expected:**
+- After 1: the Plug card shows **Frame rate** and **Send alpha** in addition to the name and
+  resolution — NDI honours both, so both are offered.
+- After 2: an NDI receiver reports the stream at 30 fps with alpha; the edits take effect while
+  it runs, without re-adding the plug.
+- After 3: the resolution reads the bound output's canvas size, and the line names that output.
+- After 4: both settings are still there (they live in the machine config).

@@ -27,6 +27,11 @@ internal sealed class SpoutSender : IOutputStreamSender
 
     public string LastError => _lastError;
 
+    /// <summary>Spout has no frame-rate or alpha notion here — it shares the texture as it is.</summary>
+    public void Configure(OutputStreamSettings settings)
+    {
+    }
+
     /// <summary>Re-targets the sender; takes effect on the next <see cref="Send"/>.</summary>
     public void Rename(string name)
     {

@@ -68,6 +68,9 @@ internal static class SetupParameterView
             case SetupEntitySelection.EntityKind.Patch:
                 DrawPatchCard(setup, id);
                 break;
+            case SetupEntitySelection.EntityKind.Plug:
+                DrawPlugCard(setup, machineConfig, id);
+                break;
         }
 
         if (selection.Count > 1)
@@ -149,6 +152,7 @@ internal static class SetupParameterView
                                         SetupEntitySelection.EntityKind.ReferenceImage => (Icon.FileImage, "Reference Image"),
                                         SetupEntitySelection.EntityKind.Prop => (Icon.Grid, "Prop"),
                                         SetupEntitySelection.EntityKind.Patch => (Icon.Patch, "Patch"),
+                                        SetupEntitySelection.EntityKind.Plug => (Icon.PlayOutput, "Plug"),
                                         _ => (Icon.Grid, kind.ToString()),
                                     };
 
@@ -158,8 +162,10 @@ internal static class SetupParameterView
         CustomComponents.StylizedText(kindLabel, Fonts.FontLarge, UiColors.Text);
         FormInputs.AddVerticalSpace(4);
 
-        // Props carry no name; a content source's name is its op (rename cascades through the sync).
-        if (kind != SetupEntitySelection.EntityKind.Prop)
+        // Props carry no name; a content source's name is its op (rename cascades through the sync); a
+        // display's name comes from the OS.
+        var namedByOs = kind == SetupEntitySelection.EntityKind.Plug && Plugs.TryGetDisplayIndex(id, out _);
+        if (kind != SetupEntitySelection.EntityKind.Prop && !namedByOs)
             DrawNameField(setup, kind, id);
     }
 
@@ -294,12 +300,94 @@ internal static class SetupParameterView
         if (FormInputs.AddCheckBox("Send", ref send, "Pause presenting without dropping the display binding."))
             SetupActions.RunUndoable("Toggle send", setup, () => output.Send = send);
 
+        // The canvas every route onto this output is measured in, and what its content is asked to render at:
+        // an unset resolution upstream (a RenderTarget at 0×0) resolves to this, so it is the one place the
+        // pixel size of a projector or a stream is decided.
+        Span<int> canvas = [output.CanvasResolution.Width, output.CanvasResolution.Height];
+        var canvasState = DrawIntsRow("Canvas (px)", canvas,
+                                      "The output's pixel size. Content rendering at 'Fill' resolution follows it, and a stream sends at it.");
+        if ((canvasState & InputEditStateFlags.Modified) != 0)
+        {
+            var width = Math.Clamp(canvas[0], 1, 16384);
+            var height = Math.Clamp(canvas[1], 1, 16384);
+            output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(width, height);
+        }
+
+        CommitFieldUndo(setup, "Resize canvas", canvasState);
+
         var binding = machineConfig.TryGetBinding(output.Id);
         FormInputs.ApplyIndent();
-        CustomComponents.StylizedText(binding == null
-                                          ? $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height} px · unbound"
-                                          : $"{output.CanvasResolution.Width}×{output.CanvasResolution.Height} px · {Plugs.BindingLabel(machineConfig, binding)}",
+        CustomComponents.StylizedText(binding == null ? "unbound" : Plugs.BindingLabel(machineConfig, binding),
                                       Fonts.FontSmall, UiColors.TextMuted);
+    }
+
+    /// <summary>
+    /// A plug: what this machine presents through. A display is read-only (the OS owns its name and mode); a
+    /// stream carries the settings its kind honours — the host asks the provider which those are, so a kind
+    /// that has no notion of frame rate or alpha simply doesn't offer them.
+    /// </summary>
+    private static void DrawPlugCard(Setup setup, MachineConfig machineConfig, Guid id)
+    {
+        var boundOutput = Plugs.TryGetBoundOutput(setup, machineConfig, id);
+        var boundLabel = boundOutput == null ? "nothing bound" : $"presenting {boundOutput.Name}";
+
+        if (Plugs.TryGetDisplayIndex(id, out var displayIndex))
+        {
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            Span<int> mode = [0, 0];
+            if (displayIndex < screens.Length)
+            {
+                mode[0] = screens[displayIndex].Bounds.Width;
+                mode[1] = screens[displayIndex].Bounds.Height;
+            }
+
+            DrawIntsRow("Resolution (px)", mode, "The display's current mode (read-only).", readOnly: true);
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText(boundLabel, Fonts.FontSmall, UiColors.TextMuted);
+            return;
+        }
+
+        var stream = machineConfig.FindStream(id);
+        if (stream == null)
+            return;
+
+        var provider = OutputStreamRegistry.TryGetProvider(stream.Kind);
+        var supported = provider?.Supported ?? OutputStreamOptions.None;
+
+        // What the receivers get: the canvas of whatever output is bound here.
+        Span<int> resolution = [0, 0];
+        if (boundOutput != null)
+        {
+            resolution[0] = boundOutput.CanvasResolution.Width;
+            resolution[1] = boundOutput.CanvasResolution.Height;
+        }
+
+        DrawIntsRow("Resolution (px)", resolution, "Comes from the canvas of the output bound here (read-only).", readOnly: true);
+
+        if ((supported & OutputStreamOptions.FrameRate) != 0)
+        {
+            var frameRate = stream.FrameRate;
+            if (FormInputs.AddInt("Frame rate", ref frameRate, 1, 240, 1,
+                                  "Frames per second advertised to receivers.", 60))
+            {
+                stream.FrameRate = Math.Clamp(frameRate, 1, 240);
+                OutputSetupHandling.SaveActive();
+            }
+        }
+
+        if ((supported & OutputStreamOptions.Alpha) != 0)
+        {
+            var alpha = stream.EnableAlpha;
+            if (FormInputs.AddCheckBox("Send alpha", ref alpha, "Carry the alpha channel; off sends an opaque frame."))
+            {
+                stream.EnableAlpha = alpha;
+                OutputSetupHandling.SaveActive();
+            }
+        }
+
+        FormInputs.ApplyIndent();
+        var kindLine = provider == null ? $"{stream.Kind} · package not loaded" : $"{stream.Kind} · {boundLabel}";
+        CustomComponents.StylizedText(kindLine, Fonts.FontSmall, UiColors.TextMuted);
     }
 
     private static void DrawContentCard(Setup setup, Guid childId)

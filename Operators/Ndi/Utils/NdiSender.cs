@@ -30,6 +30,12 @@ internal sealed class NdiSender : IOutputStreamSender
     /// <summary>Whether the alpha channel is sent, or receivers get an opaque frame.</summary>
     public bool EnableAlpha;
 
+    public void Configure(OutputStreamSettings settings)
+    {
+        FrameRate = settings.FrameRate;
+        EnableAlpha = settings.EnableAlpha;
+    }
+
     /// <summary>Re-targets the sender; takes effect on the next <see cref="Send"/>.</summary>
     public void Rename(string name)
     {

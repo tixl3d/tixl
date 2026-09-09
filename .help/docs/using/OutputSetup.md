@@ -66,6 +66,8 @@ An output presents when it is bound to a plug and its **Send** toggle is on. Tur
 - **Displays** open the output fullscreen on that display. One display can be driven at a time today; the first bound output takes it.
 - **Spout and NDI** push the output's composite into a sender under the plug's name every frame. Other applications on the same machine (Spout) or the network (NDI) receive it. Rename the plug to rename the sender; remove it from its context menu.
 
+Select a plug to see its settings in the Parameter window: the resolution it sends (the bound output's canvas), and for kinds that have them, the frame rate and whether alpha is carried. Only the settings a kind honours are shown, so a Spout plug offers neither.
+
 The bindings are also reachable from the output's context menu and from the Output window's breadcrumb menu.
 
 ## Content from the graph

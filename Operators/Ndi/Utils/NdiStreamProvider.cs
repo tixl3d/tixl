@@ -8,5 +8,7 @@ internal sealed class NdiStreamProvider : IOutputStreamProvider
 {
     public string Kind => "NDI";
 
+    public OutputStreamOptions Supported => OutputStreamOptions.FrameRate | OutputStreamOptions.Alpha;
+
     public IOutputStreamSender CreateSender(string name) => new NdiSender(name);
 }

@@ -719,6 +719,30 @@ with an explanatory comment) — the row-callback API design made compliance imp
   so they show wherever slices are drawn; they are created from the send's "Add slice" (row or card) and copied
   with the slice's "Duplicate".
 
+- **2026-09-09 (reachable tab subjects + plug settings):** a mode tab is now offered when the selection *reaches*
+  its subject along the routing, not only when this view already holds it — with a slice selected, Output lights
+  up and picking it selects the projector that slice ends on (`SetupRelations.TryGetOutputOf` / `TryGetSurfaceOf`
+  / `TryGetSliceOutput`; the header selects the resolved subject on click). Plug rows became selectable and got a
+  Parameter card: a display shows its mode read-only, a stream shows the resolution it sends plus the settings its
+  kind honours. Which those are comes from the provider (`IOutputStreamProvider.Supported`, an
+  `OutputStreamOptions` flags enum), so the editor offers no dead controls — Spout declares None, NDI declares
+  FrameRate | Alpha. `StreamPlug` carries `FrameRate`/`EnableAlpha` and the presenter pushes them through the new
+  `IOutputStreamSender.Configure` before each send, so an edit lands live. The debug bridge can address plugs by
+  name.
+
+- **2026-09-09 (resolution chain):** the requested resolution was already inferred from the output
+  (`_context.RequestedResolution = output.CanvasResolution` in both `RenderOutput` and `TryGetOutputContent`,
+  and `ContentPreviewResolution` for the parameter preview), so an upstream RenderTarget at 0×0 resolves to the
+  output's canvas. What was missing: that canvas could not be edited anywhere — fixed, it is a field on the
+  Output card now. A stream plug deliberately has no resolution of its own; it sends the bound output's canvas
+  (the plug card shows it read-only), because tying it to the output *window* would let editor layout decide
+  what receivers get. Second fix: showing a texture that a send already pulled this frame no longer re-renders
+  its chain. `OutputManager` notes the textures it pulled per frame (`WasContentPulledThisFrame`), and
+  `OutputWindow` passes `recompute: false` for those — before, selecting the RenderTarget in
+  [Scene]→[RenderTarget]→[SendToOutput] evaluated the scene twice per frame at two resolutions, resizing the
+  target back and forth. Ordering makes this safe: `UpdatePresentation` runs right after `ImGui.NewFrame()`,
+  before any window draws.
+
 ## Suggested order (revised for the flow-view pivot)
 
 1. **P0** (bug fixes, 1–2 days) — independent of every decision below.

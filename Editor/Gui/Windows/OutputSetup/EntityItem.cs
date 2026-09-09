@@ -155,7 +155,7 @@ internal sealed class EntityItem
         {
             action = ItemAction.ToggleExpanded;
         }
-        else if (clicked && args.Kind is not (SetupEntitySelection.EntityKind.None or SetupEntitySelection.EntityKind.Plug)) // inventory rows (plugs) are inert
+        else if (clicked && args.Kind != SetupEntitySelection.EntityKind.None)
         {
             var io = ImGui.GetIO();
             if (io.KeyCtrl)

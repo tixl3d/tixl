@@ -271,6 +271,32 @@ internal sealed class OutputSetupModeView
             }
         }
 
+        // Plugs are machine state rather than setup entities, but they are rows like any other and worth
+        // addressing by name (the debug bridge drives the panel through this).
+        if (OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
+        {
+            foreach (var stream in machineConfig.Streams)
+            {
+                if (stream.Name != name)
+                    continue;
+
+                kind = SetupEntitySelection.EntityKind.Plug;
+                id = stream.Id;
+                return true;
+            }
+
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            for (var i = 0; i < screens.Length; i++)
+            {
+                if (Plugs.DisplayLabel(i) != name)
+                    continue;
+
+                kind = SetupEntitySelection.EntityKind.Plug;
+                id = Plugs.DisplayPlugId(i);
+                return true;
+            }
+        }
+
         foreach (var source in setup.ContentSources)
         {
             if (source.Name == name)
