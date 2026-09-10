@@ -1,0 +1,33 @@
+{
+  "FormatVersion": 3,
+  "Id": "38000677-49F7-48D7-A576-FA081AFC29D6"/*BlobDataToBoxPoints*/,
+  "Inputs": [
+    {
+      "Id": "9B5A4D84-80FF-48DC-9A24-D905906B3CFD"/*Scale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "E6B707F4-7B2E-4BDE-B2D8-2B62F192A8E5"/*AspectRatio*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "6CE772FB-94E5-41BB-8A49-8E40B4BE139D"/*LineWidth*/,
+      "DefaultValue": 0.01
+    },
+    {
+      "Id": "956CDFD4-1616-4639-BD04-E1A63BCF01A1"/*Color*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 1.0,
+        "Z": 0.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "B97C5F9F-76E5-49A8-96A1-9B5E3F2FE2AD"/*BlobData*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
