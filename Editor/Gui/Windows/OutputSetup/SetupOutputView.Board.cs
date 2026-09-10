@@ -265,6 +265,8 @@ internal sealed partial class SetupOutputView
                 var color = (isSelected ? patchHue : PulseColor(patchHue.Fade(0.6f), pulse)).Fade(_boardLayerFade);
                 dl.AddQuad(_boardQuad[0], _boardQuad[1], _boardQuad[2], _boardQuad[3], color, (isSelected ? 2f : 1f) * scale);
                 DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, _boardQuad, patch.Id, SetupActions.PatchLabel(output, patch), isSelected, 0.9f * _boardLayerFade, pulse);
+                if (patch.QuarterTurns != 0)
+                    DrawPictureTopMarker(dl, _boardQuad, patch.QuarterTurns, color);
             }
         }
 

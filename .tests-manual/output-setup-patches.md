@@ -142,6 +142,28 @@ the right by a little and release.
 - Before the edge drag the tiles share their edges exactly; dragging the second tile's
   left edge opens a gap and, when dragged back, snaps shut against the first tile.
 
+## Step: Rotating a patch in quarter turns
+
+**Action:**
+1. Select "Patch 1" and click the clockwise rotate button next to **Rotation** in its parameters;
+   click it twice more; then type `100` into the field.
+2. Right-click "Patch 1" on the output canvas and choose **Rotate 90°** four times.
+3. With P1 fed directly (no listed patches), right-click "P1" and choose **Rotate Content 90°**.
+4. Rotate a patch to 90°, then **Split into 2×2**; then undo, and choose **Use on Surface** instead.
+
+**Expected:**
+- After 1: the field reads -90°, 180°, then 90°, the same angle field and buttons as any rotation
+  parameter, stepping a quarter turn here. The picture turns clockwise inside the patch with each
+  click; the typed 100 snaps to 90°. The patch's quad, handles, Position and Size do not change. A
+  small wedge on the patch's outline, on the canvas and on the Board card, points out of the
+  edge the picture's top now faces; at 0° it is gone. Each change is one undo step.
+- After 2: the picture steps round a quarter per click and is upright again after the fourth.
+- After 3: the picture on the whole canvas turns, and a "Patch 1" row appears under P1 — a turned
+  patch is shown on its own, since its rotation is state you need to be able to see and undo.
+- After 4: every tile of the split shows its part of the picture turned the same way. Promoted
+  to a surface instead, the picture on the wall does not change: the surface lies on its side,
+  and its size is measured along the picture, not along the canvas.
+
 ## Step: Use on Surface
 
 **Action:**

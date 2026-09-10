@@ -285,7 +285,7 @@ internal static class OutputManager
                 continue;
 
             var srv = SrvManager.GetSrvForTexture(content);
-            if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(patch.Quad, out var patchHomography))
+            if (srv is not { IsDisposed: false } || !TryComputeNdcHomography(TurnedQuad(patch), out var patchHomography))
                 continue;
 
             _drawItems.Add(new DrawItem(srv, patchHomography, patchRect, patchSend!.GetColor(_context), Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
@@ -878,6 +878,22 @@ internal static class OutputManager
         _shaderParams.SourceTlTr = new Vector4(rect.X, rect.Y, rect.Z, rect.Y);
         _shaderParams.SourceBrBl = new Vector4(rect.Z, rect.W, rect.X, rect.W);
     }
+
+    /// <summary>
+    /// The patch's quad with its corners shifted by its quarter turns: the source's top-left lands on the
+    /// quad's top-right after one turn, so the picture turns clockwise while the quad stays exactly where it
+    /// is. Scratch, consumed by the homography before the next patch reuses it.
+    /// </summary>
+    private static Vector2[] TurnedQuad(OutputDefinition.Patch patch)
+    {
+        if (patch.QuarterTurns == 0 || patch.Quad.Length < 4)
+            return patch.Quad;
+
+        patch.CopyTurnedCorners(_turnedQuad);
+        return _turnedQuad;
+    }
+
+    private static readonly Vector2[] _turnedQuad = new Vector2[4];
 
     /// <summary>Unit quad → a quad in the canvas' own 0..1 space → NDC. No resolution involved: that is the
     /// point of storing mappings normalized.</summary>

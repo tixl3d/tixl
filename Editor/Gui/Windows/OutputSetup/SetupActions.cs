@@ -1105,7 +1105,9 @@ internal static class SetupActions
     {
         RunUndoable($"Split {columns}×{rows}", setup, () =>
                                                        {
+                                                           // The tiles take over the old patch's picture: its feed, and which way up it is.
                                                            var feed = output.Patches.Count > 0 ? output.Patches[0].SliceId : Guid.Empty;
+                                                           var turns = output.Patches.Count > 0 ? output.Patches[0].QuarterTurns : 0;
                                                            output.Patches.Clear();
 
                                                            // Boundaries come from one expression per grid line, so tile n's right edge and
@@ -1121,6 +1123,7 @@ internal static class SetupActions
                                                                    output.Patches.Add(new OutputDefinition.Patch
                                                                                           {
                                                                                               SliceId = feed,
+                                                                                              QuarterTurns = turns,
                                                                                               Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)],
                                                                                           });
                                                                }
@@ -1171,8 +1174,15 @@ internal static class SetupActions
                                                  // measured, and the content density follows from the pixels the patch already covered —
                                                  // its share of the canvas, taken at the canvas' current size.
                                                  var covered = (max - min) * output.CanvasSize;
-                                                 var widthPx = MathF.Max(covered.X, 1);
-                                                 var heightPx = MathF.Max(covered.Y, 1);
+
+                                                 // A turned patch is a surface lying on its side: its own width runs along the picture,
+                                                 // which after an odd number of turns is the canvas' vertical. The mapping gets the
+                                                 // turned corner order, so the surface's top-left is where the picture's was.
+                                                 var sideways = (OutputDefinition.Patch.NormalizeTurns(patch.QuarterTurns) & 1) == 1;
+                                                 var widthPx = MathF.Max(sideways ? covered.Y : covered.X, 1);
+                                                 var heightPx = MathF.Max(sideways ? covered.X : covered.Y, 1);
+                                                 var mappedQuad = new Vector2[4];
+                                                 patch.CopyTurnedCorners(mappedQuad);
                                                  var surface = new Surface
                                                                    {
                                                                        Name = string.IsNullOrEmpty(patch.Name) ? $"Surface {setup.Surfaces.Count + 1}" : patch.Name,
@@ -1181,7 +1191,7 @@ internal static class SetupActions
                                                                        SliceId = patch.SliceId,
                                                                        OutputMappings =
                                                                        [
-                                                                           new Surface.OutputMapping { OutputId = output.Id, Quad = (Vector2[])patch.Quad.Clone() },
+                                                                           new Surface.OutputMapping { OutputId = output.Id, Quad = mappedQuad },
                                                                        ],
                                                                    };
 
@@ -1192,6 +1202,22 @@ internal static class SetupActions
     }
 
     /// <summary>A patch's display name: the typed name, else "Patch N" by its position on the output.</summary>
+    /// <summary>Sets how many quarter turns the patch's picture makes, as one undo step.</summary>
+    internal static void SetPatchTurns(Setup setup, OutputDefinition.Patch patch, int turns)
+    {
+        var normalized = OutputDefinition.Patch.NormalizeTurns(turns);
+        if (normalized == patch.QuarterTurns)
+            return;
+
+        RunUndoable("Rotate patch", setup, () => patch.QuarterTurns = normalized);
+    }
+
+    /// <summary>One more quarter turn clockwise — the context menu's step, cycling back to upright after four.</summary>
+    internal static void RotatePatchClockwise(Setup setup, OutputDefinition.Patch patch)
+    {
+        SetPatchTurns(setup, patch, patch.QuarterTurns + 1);
+    }
+
     internal static string PatchLabel(OutputDefinition output, OutputDefinition.Patch patch)
     {
         if (!string.IsNullOrEmpty(patch.Name))

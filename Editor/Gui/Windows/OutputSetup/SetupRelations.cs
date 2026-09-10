@@ -383,7 +383,7 @@ internal static class SetupRelations
     /// An output's implicit patch: its only patch, unnamed and covering the whole canvas — the full-canvas
     /// route a drop makes. It *is* the output as far as the user is concerned, so the views fold it into the
     /// output row/card instead of listing it, exactly as a source's full-frame slice folds into the source.
-    /// It becomes a patch of its own the moment it is named, moved off the full canvas, or joined by a second.
+    /// It becomes a patch of its own the moment it is named, turned, moved off the full canvas, or joined by a second.
     /// </summary>
     public static bool TryGetImplicitPatch(OutputDefinition output, out OutputDefinition.Patch? implicitPatch)
     {
@@ -391,8 +391,10 @@ internal static class SetupRelations
         if (output.Patches.Count != 1)
             return false;
 
+        // A turned patch is no longer "the output itself": its rotation is state worth seeing and undoing
+        // on its own row, which a folded-away patch has none of.
         var patch = output.Patches[0];
-        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(output, patch))
+        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(output, patch) || patch.QuarterTurns != 0)
             return false;
 
         implicitPatch = patch;

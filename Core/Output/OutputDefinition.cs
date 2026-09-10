@@ -123,6 +123,29 @@ public sealed class OutputDefinition
         /// reason a mapping's quad is — see <see cref="Surface.OutputMapping.Quad"/>.</summary>
         public Vector2[] Quad = [];
 
+        /// <summary>
+        /// Quarter turns of the picture inside the quad, clockwise, 0..3 — for a display or LED panel mounted on
+        /// its side. The quad itself does not turn: its corners stay TL, TR, BR, BL on the canvas, so every
+        /// edit, snap and size field keeps working unchanged, and only which corner receives the source's
+        /// top-left shifts when the patch is composited.
+        /// </summary>
+        public int QuarterTurns;
+
+        /// <summary>Folds any integer into 0..3, so a rotate that keeps adding stays a valid turn count.</summary>
+        public static int NormalizeTurns(int turns) => ((turns % 4) + 4) % 4;
+
+        /// <summary>
+        /// The quad's corners in the order the picture's corners land on them: the source's top-left goes to
+        /// the first. Shifting by the turns is the whole rotation — the same four points, starting one corner
+        /// further round per quarter turn.
+        /// </summary>
+        public void CopyTurnedCorners(Span<Vector2> destination)
+        {
+            var turns = NormalizeTurns(QuarterTurns);
+            for (var c = 0; c < 4; c++)
+                destination[c] = Quad[(c + turns) % 4];
+        }
+
         public void WriteToJson(JsonTextWriter writer)
         {
             writer.WriteStartObject();
@@ -132,6 +155,9 @@ public sealed class OutputDefinition
 
             writer.WriteObject("SliceId", SliceId);
             writer.WriteQuad("Quad", Quad);
+            if (QuarterTurns != 0)
+                writer.WriteValue("QuarterTurns", QuarterTurns);
+
             writer.WriteEndObject();
         }
 
@@ -143,6 +169,7 @@ public sealed class OutputDefinition
                            Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
                            SliceId = OutputJson.ReadGuid(token["SliceId"]),
                            Quad = OutputJson.ReadQuad(token["Quad"]),
+                           QuarterTurns = NormalizeTurns(token.ReadValueSafe("QuarterTurns", 0)),
                        };
         }
     }

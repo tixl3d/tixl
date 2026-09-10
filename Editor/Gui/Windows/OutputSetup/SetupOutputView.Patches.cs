@@ -127,6 +127,9 @@ internal sealed partial class SetupOutputView
             ImGui.PopID();
             if (!isImplicit)
                 DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, screen, patch.Id, label, isSelected, fade, pulse);
+
+            if (patch.QuarterTurns != 0)
+                DrawPictureTopMarker(dl, screen, patch.QuarterTurns, style.EdgeColor.Fade(fade));
         }
     }
 
@@ -371,6 +374,32 @@ internal sealed partial class SetupOutputView
     // The patch being edited, in canvas pixels. Stored quads are ratios; every edit in this file happens here.
     private static readonly Vector2[] _patchPx = new Vector2[4];
     private static readonly Vector2[] _scaleScratch = new Vector2[4];
+
+    /// <summary>
+    /// A small wedge on the edge the picture's top now faces, pointing out of the patch. A turned patch
+    /// otherwise looks like any other on the canvas — the composite shows the picture sideways, but not which
+    /// way is meant to be up, and that is the thing to check against the panel on the wall.
+    /// </summary>
+    private static void DrawPictureTopMarker(ImDrawListPtr dl, ReadOnlySpan<Vector2> screen, int quarterTurns, T3.Core.DataTypes.Vector.Color color)
+    {
+        // One turn clockwise sends the source's top edge (TL→TR) to the quad's right edge (TR→BR): edge n.
+        var edge = OutputDefinition.Patch.NormalizeTurns(quarterTurns);
+        var a = screen[edge];
+        var b = screen[(edge + 1) % 4];
+        var centre = (screen[0] + screen[1] + screen[2] + screen[3]) * 0.25f;
+        var midpoint = (a + b) * 0.5f;
+
+        var outward = midpoint - centre;
+        var length = outward.Length();
+        if (length < 1f)
+            return;
+
+        outward /= length;
+        var along = Vector2.Normalize(b - a);
+        var size = 6f * T3Ui.UiScaleFactor;
+        var tip = midpoint + outward * size;
+        dl.AddTriangleFilled(tip, midpoint + along * size * 0.8f, midpoint - along * size * 0.8f, color);
+    }
 
     /// <summary>How close two corners' coordinates must be to count as one axis-aligned edge, as a fraction of
     /// the canvas — well under a pixel at any sane resolution.</summary>

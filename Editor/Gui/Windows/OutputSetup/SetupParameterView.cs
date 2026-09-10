@@ -526,6 +526,9 @@ internal static class SetupParameterView
                                           : $"Shows {SetupActions.SliceLabel(setup, slice)} on {output.Name}",
                                       Fonts.FontSmall, UiColors.TextMuted);
 
+        // Ahead of the geometry, which a warped quad skips: turning the picture applies to any patch.
+        DrawPatchRotationRow(setup, patch);
+
         if (patch.Quad.Length < 4)
             return;
 
@@ -572,6 +575,48 @@ internal static class SetupParameterView
 
         CommitFieldUndo(setup, "Resize patch", sizeState);
     }
+
+    /// <summary>
+    /// The picture's turn inside the patch, as the same angle field every rotation input in TiXL uses — its
+    /// rotate buttons included, stepping a quarter turn here. Shown in degrees, positive counter-clockwise as
+    /// everywhere else; stored as clockwise quarter turns, because only a quarter turn is a pure reordering of
+    /// the quad's corners. A dragged or typed angle snaps to the nearest one.
+    /// </summary>
+    private static void DrawPatchRotationRow(Setup setup, OutputDefinition.Patch patch)
+    {
+        const string tooltip = "Turns the picture inside the patch in quarter turns, for a display or LED panel mounted on its side. The patch itself stays where it is.";
+        _rotationScratch[0] = DegreesOfTurns(patch.QuarterTurns);
+
+        var size = BeginValuesRow("Rotation", tooltip, 1, false, 0, out _);
+        var rightPadding = ImGui.GetContentRegionAvail().X - size.X - InputArea.ValueEditRightMargin;
+        var state = VectorValueEdit.Draw(_rotationScratch, -180, 180, 1f, clampMin: false, clampMax: false,
+                                         rightPadding, "{0:0}°", rotationStep: 90f);
+        EndValuesRow(tooltip, false);
+
+        BeginFieldUndo(setup, state);
+        if ((state & InputEditStateFlags.Modified) != 0)
+            patch.QuarterTurns = TurnsOfDegrees(_rotationScratch[0]);
+
+        CommitFieldUndo(setup, "Rotate patch", state);
+    }
+
+    /// <summary>Clockwise quarter turns → the counter-clockwise angle the field shows, folded into -90..180.</summary>
+    private static float DegreesOfTurns(int quarterTurns) => OutputDefinition.Patch.NormalizeTurns(quarterTurns) switch
+                                                                 {
+                                                                     1 => -90f,
+                                                                     2 => 180f,
+                                                                     3 => 90f,
+                                                                     _ => 0f,
+                                                                 };
+
+    /// <summary>Any angle → the nearest clockwise quarter-turn count.</summary>
+    private static int TurnsOfDegrees(float degrees)
+    {
+        var counterClockwiseQuarters = (int)MathF.Round(degrees / 90f);
+        return OutputDefinition.Patch.NormalizeTurns(-counterClockwiseQuarters);
+    }
+
+    private static readonly float[] _rotationScratch = new float[1];
 
     private static void DrawReferenceImageCard(Setup setup, Guid id)
     {

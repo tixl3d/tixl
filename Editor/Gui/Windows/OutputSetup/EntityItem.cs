@@ -397,6 +397,14 @@ internal sealed class EntityItem
                 CustomComponents.TooltipForLastItem("Disconnects every surface and patch from this output.",
                                                     "The surfaces and their content stay; only the routes into this canvas are removed.");
 
+                // Content fed straight to the output rides a folded-away patch; turning it is the common case of
+                // a display mounted on its side, so it is offered here rather than making the patch explicit first.
+                if (SetupRelations.TryGetImplicitPatch(output, out var implicitPatch)
+                    && CustomComponents.DrawMenuItem(18, "Rotate Content 90°"))
+                {
+                    SetupActions.RotatePatchClockwise(setup, implicitPatch!);
+                }
+
                 // No "Bind to" here: an output is bound by dragging it onto a plug, and released from the
                 // plug's own menu. One gesture, in the place that shows what is plugged in.
                 break;
@@ -432,6 +440,12 @@ internal sealed class EntityItem
                 break;
 
             case SetupEntitySelection.EntityKind.Patch:
+                if (setup.FindPatch(id, out _) is { } turnedPatch && CustomComponents.DrawMenuItem(17, "Rotate 90°"))
+                    SetupActions.RotatePatchClockwise(setup, turnedPatch);
+
+                CustomComponents.TooltipForLastItem("Turns the picture inside the patch a quarter clockwise.",
+                                                    "For a display or LED panel on its side. The patch stays where it is; the Rotation row in its parameters sets it directly.");
+
                 if (CustomComponents.DrawMenuItem(12, "Use on Surface"))
                     SetupActions.PromotePatchToSurface(selection, setup, id);
 
