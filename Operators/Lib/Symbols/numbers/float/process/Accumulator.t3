@@ -19,6 +19,13 @@
       "DefaultValue": true
     },
     {
+      "Id": "8e4e25e5-df86-4211-831b-fc834de156ec"/*Range*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
       "Id": "9f1d76d2-c3dd-4035-a37c-300eb011331b"/*ResetTrigger*/,
       "DefaultValue": false
     },
