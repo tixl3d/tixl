@@ -408,7 +408,7 @@ internal class EditorSymbolPackage : SymbolPackage
                 return [];
             }
             
-            return Directory.EnumerateFiles(dir, $"*{SymbolUiExtension}", SearchOption.AllDirectories);
+            return EnumeratePackageFiles(new DirectoryInfo(dir), $"*{SymbolUiExtension}");
         }
     }
 
@@ -423,7 +423,22 @@ internal class EditorSymbolPackage : SymbolPackage
                 return [];
             }
             
-            return Directory.EnumerateFiles(dir, $"*{SourceCodeExtension}", SearchOption.AllDirectories);
+            return EnumeratePackageFiles(new DirectoryInfo(dir), $"*{SourceCodeExtension}");
+        }
+    }
+
+    private static IEnumerable<string> EnumeratePackageFiles(DirectoryInfo directory, string pattern)
+    {
+        foreach (var file in directory.EnumerateFiles(pattern))
+            yield return file.FullName;
+
+        foreach (var subDirectory in directory.EnumerateDirectories())
+        {
+            if (subDirectory.Name.StartsWith('.'))
+                continue;
+
+            foreach (var file in EnumeratePackageFiles(subDirectory, pattern))
+                yield return file;
         }
     }
 
