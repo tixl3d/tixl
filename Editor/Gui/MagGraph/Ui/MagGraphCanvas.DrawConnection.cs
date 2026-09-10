@@ -21,6 +21,10 @@ internal sealed partial class MagGraphView
         if (connection.SourceItem.IsCollapsedAway && connection.TargetItem.IsCollapsedAway)
             return;
 
+        var stroke = context.ConnectionStroke;
+        var queryPath = stroke.IsActive && !connection.IsTemporary ? stroke.ObservePath : null;
+        stroke.SetConnection(queryPath != null ? connection : null);
+
         var type = connection.Type;
 
         // if (!TypeUiRegistry.TryGetPropertiesForType(type, out var typeUiProperties))
@@ -81,6 +85,16 @@ internal sealed partial class MagGraphView
 
         if (connection.IsSnapped)
         {
+            if (queryPath != null)
+            {
+                stroke.TestMarker(drawList, sourcePosOnScreen, 7 * CanvasScale);
+                if (stroke.Contains(connection))
+                {
+                    var highlight = stroke.IsCut ? UiColors.StatusAttention : UiColors.StatusAutomated;
+                    drawList.AddCircle(sourcePosOnScreen, 9 * CanvasScale, highlight, 12, 2 * T3Ui.UiScaleFactor);
+                }
+            }
+
             switch (connection.Style)
             {
                 case MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal:
@@ -169,7 +183,7 @@ internal sealed partial class MagGraphView
                                                                 typeColor,
                                                                 MathUtils.Lerp(0.25f, 2f, idleFadeProgress) + (isSelected | wasHoveredLastFrame ? 2 : 0),
                                                                 out var hoverPositionOnLine,
-                                                                out var normalizedHoverPos))
+                                                                out var normalizedHoverPos, queryPath))
                     {
                         if (context.StateMachine.CurrentState == GraphStates.Default)
                             ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);
@@ -183,21 +197,21 @@ internal sealed partial class MagGraphView
                     break;
                 }
                 case MagGraphConnection.ConnectionStyles.BottomToLeft:
-                    drawList.AddBezierCubic(sourcePosOnScreen,
-                                            sourcePosOnScreen + new Vector2(0, d),
-                                            targetPosOnScreen - new Vector2(d, 0),
-                                            targetPosOnScreen,
-                                            typeColor.Fade(0.6f),
-                                            2);
+                    drawList.PathClear();
+                    drawList.PathLineTo(sourcePosOnScreen);
+                    drawList.PathBezierCubicCurveTo(sourcePosOnScreen + new Vector2(0, d),
+                                                    targetPosOnScreen - new Vector2(d, 0), targetPosOnScreen);
+                    queryPath?.Invoke(drawList);
+                    drawList.PathStroke(typeColor.Fade(0.6f), ImDrawFlags.None, 2);
 
                     break;
                 case MagGraphConnection.ConnectionStyles.RightToTop:
-                    drawList.AddBezierCubic(sourcePosOnScreen,
-                                            sourcePosOnScreen + new Vector2(d, 0),
-                                            targetPosOnScreen - new Vector2(0, d),
-                                            targetPosOnScreen,
-                                            typeColor.Fade(0.6f),
-                                            2);
+                    drawList.PathClear();
+                    drawList.PathLineTo(sourcePosOnScreen);
+                    drawList.PathBezierCubicCurveTo(sourcePosOnScreen + new Vector2(d, 0),
+                                                    targetPosOnScreen - new Vector2(0, d), targetPosOnScreen);
+                    queryPath?.Invoke(drawList);
+                    drawList.PathStroke(typeColor.Fade(0.6f), ImDrawFlags.None, 2);
 
                     drawList.AddTriangleFilled(
                                                sourcePosOnScreen + new Vector2(-1, -1) * CanvasScale * 5,
@@ -217,7 +231,7 @@ internal sealed partial class MagGraphView
                                                              typeColor,
                                                              MathUtils.Lerp(0.25f, 2f, idleFadeProgress) + (isSelected | wasHoveredLastFrame ? 2 : 0),
                                                              out var hoverPositionOnLine,
-                                                             out var normalizedHoverPos))
+                                                             out var normalizedHoverPos, queryPath))
                     {
                         if (context.StateMachine.CurrentState == GraphStates.Default)
                             ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);

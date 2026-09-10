@@ -16,6 +16,16 @@ namespace T3.Editor.Gui.MagGraph.States
 {
     internal static class GraphStates
     {
+        internal static State<GraphUiContext> ConnectionStroke
+            = new(Enter: static context =>
+                         {
+                             context.ActiveItem = null;
+                             context.ActiveSourceItem = null;
+                             context.ActiveTargetItem = null;
+                         },
+                  Update: static _ => { },
+                  Exit: static context => context.ConnectionStroke.Cancel());
+
         internal static State<GraphUiContext> Default
             = new(
                   Enter: context =>

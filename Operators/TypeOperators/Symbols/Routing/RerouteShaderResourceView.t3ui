@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "84205996-1180-423d-934e-6b86dd232edd",
+  "Description": "Forwards SharpDX.Direct3D11.ShaderResourceView through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "3ab89bd7-3dc8-470a-a927-552f4f0e456e",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e08b4add-fa46-492f-8548-6ad4234aeff3",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

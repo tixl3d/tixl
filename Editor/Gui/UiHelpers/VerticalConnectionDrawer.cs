@@ -17,7 +17,8 @@ internal static class VerticalConnectionDrawer
                                         ImRect sourceNode, Vector2 sourcePos,
                                         ImRect targetNode, Vector2 targetPos,
                                         Color color, float thickness,
-                                        out Vector2 hoverPosition, out float normalizedHoverPos)
+                                        out Vector2 hoverPosition, out float normalizedHoverPos,
+                                        Action<ImDrawListPtr> queryPath = null)
     {
         var s = canvasScale.Clamp(0.2f, 2f);
         hoverPosition = Vector2.Zero;
@@ -46,7 +47,7 @@ internal static class VerticalConnectionDrawer
             dl.PathLineTo(sourcePos);
             dl.PathLineTo(targetPos);
             return FinalizeStroke(dl, s, color, thickness,
-                                  out hoverPosition, out normalizedHoverPos);
+                                  out hoverPosition, out normalizedHoverPos, queryPath);
         }
 
         var fallbackRectSize = new Vector2(120, 50) * s;
@@ -147,7 +148,7 @@ internal static class VerticalConnectionDrawer
             {
                 dl.PathLineTo(targetPos);
                 return FinalizeStroke(dl, s, color, thickness,
-                                      out hoverPosition, out normalizedHoverPos);
+                                      out hoverPosition, out normalizedHoverPos, queryPath);
             }
 
             if (MathF.Abs(dx) < sumR)
@@ -223,11 +224,12 @@ internal static class VerticalConnectionDrawer
         //dl.PathLineTo(targetPos);
 
         return FinalizeStroke(dl, s, color, thickness,
-                              out hoverPosition, out normalizedHoverPos);
+                              out hoverPosition, out normalizedHoverPos, queryPath);
     }
 
     private static bool FinalizeStroke(ImDrawListPtr dl, float s, Color color, float thickness,
-                                       out Vector2 hoverPosition, out float normalizedHoverPos)
+                                       out Vector2 hoverPosition, out float normalizedHoverPos,
+                                       Action<ImDrawListPtr> queryPath)
     {
         var hovering = LegacyConnectionDrawer.TestHoverDrawListPath(ref dl, out hoverPosition, out normalizedHoverPos);
 
@@ -238,6 +240,7 @@ internal static class VerticalConnectionDrawer
                            ImDrawFlags.None, thickness + 5f);
         }
 
+        queryPath?.Invoke(dl);
         dl.PathStroke(color, ImDrawFlags.None, thickness);
         return hovering;
     }
@@ -276,4 +279,3 @@ internal static class VerticalConnectionDrawer
         return a;
     }
 }
-

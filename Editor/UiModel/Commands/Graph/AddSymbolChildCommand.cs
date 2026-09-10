@@ -1,5 +1,8 @@
 ﻿using T3.Core.Operator;
 
+using T3.Editor.Gui.MagGraph.Interaction;
+using T3.Editor.Gui.MagGraph.Model;
+
 namespace T3.Editor.UiModel.Commands.Graph;
 
 public sealed class AddSymbolChildCommand : ICommand
@@ -43,7 +46,8 @@ public sealed class AddSymbolChildCommand : ICommand
             return;
         }
             
-        parentSymbolUi!.AddChild(symbolToAdd!.Symbol, _addedChildId, PosOnCanvas, Size, ChildName);
+        var childSize = RerouteOperations.IsReroute(symbolToAdd!.Symbol) ? MagGraphItem.RerouteSize : Size;
+        parentSymbolUi!.AddChild(symbolToAdd.Symbol, _addedChildId, PosOnCanvas, childSize, ChildName);
         InitContentClipSourceRange(parentSymbolUi.Symbol);
     }
 

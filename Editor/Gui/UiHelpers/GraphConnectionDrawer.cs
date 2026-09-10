@@ -14,7 +14,8 @@ internal static class GraphConnectionDrawer
     /// </summary>
     internal static bool DrawConnection(float canvasScale, ImRect Sn, Vector2 Sp,
                                         ImRect Tn, Vector2 Tp, Color color, float thickness,
-                                        out Vector2 hoverPosition, out float normalizedHoverPos)
+                                        out Vector2 hoverPosition, out float normalizedHoverPos,
+                                        Action<ImDrawListPtr> queryPath = null)
     {
         var currentCanvasScale = canvasScale.Clamp(0.2f, 2f);
         hoverPosition = Vector2.Zero;
@@ -164,6 +165,7 @@ internal static class GraphConnectionDrawer
                 {
                     // Circles are overlapping; draw a straight line for simplicity
                     drawList.PathLineTo(Tp);
+                    queryPath?.Invoke(drawList);
                     drawList.PathStroke(color, ImDrawFlags.None, thickness);
                     return false;
                 }
@@ -248,6 +250,7 @@ internal static class GraphConnectionDrawer
                                  thickness + 5f);
         }
 
+        queryPath?.Invoke(drawList);
         drawList.PathStroke(color, ImDrawFlags.None, thickness);
 
         return isHovering;

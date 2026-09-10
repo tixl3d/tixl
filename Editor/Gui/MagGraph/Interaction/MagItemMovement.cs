@@ -514,6 +514,9 @@ internal sealed partial class MagItemMovement
 
             foreach (var otherItem in overlappingItems)
             {
+                if (otherItem.IsReroute)
+                    continue;
+
                 _snapping.TestItemsForInsertion(otherItem, insertionAnchorItem, ip, _view);
             }
         }
@@ -522,6 +525,9 @@ internal sealed partial class MagItemMovement
         {
             foreach (var draggedItem in DraggedItems)
             {
+                if (otherItem.IsReroute || draggedItem.IsReroute)
+                    continue;
+
                 _snapping.TestItemsForSnap(otherItem, draggedItem, false, _view);
                 _snapping.TestItemsForSnap(draggedItem, otherItem, true, _view);
             }
@@ -1220,6 +1226,9 @@ internal sealed partial class MagItemMovement
 
     private static void GetPotentialConnectionsAfterSnap(ref List<PotentialConnection> result, MagGraphItem a, MagGraphItem b)
     {
+        if (a.IsReroute || b.IsReroute)
+            return;
+
         MagGraphConnection? inConnection;
 
         for (var bInputLineIndex = 0; bInputLineIndex < b.InputLines.Length; bInputLineIndex++)
@@ -1335,6 +1344,12 @@ internal sealed partial class MagItemMovement
     private void InitSpliceLinks(HashSet<MagGraphItem> draggedItems, Vector2 mousePosInCanvas)
     {
         SpliceSets.Clear();
+
+        foreach (var item in draggedItems)
+        {
+            if (item.IsReroute)
+                return;
+        }
 
         foreach (var inputItemA in draggedItems)
         {

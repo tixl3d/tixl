@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "d10bb007-dc97-4b8d-baa6-bbe290d90fe7",
+  "Description": "Forwards T3.Core.DataTypes.SceneSetup through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "fef80d4b-3602-4dac-8ded-bcb5d81b6228",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4bcbc5c8-f231-4535-a270-60c154dcc2d8",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

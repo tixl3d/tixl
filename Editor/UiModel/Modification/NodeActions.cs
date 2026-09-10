@@ -12,6 +12,7 @@ using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -35,6 +36,11 @@ internal static class NodeActions
     internal static void ToggleBypassedForSelectedElements(NodeSelection nodeSelection)
     {
         var selectedChildUis = nodeSelection.GetSelectedChildUis().ToList();
+
+        // Reroutes already forward their input; bypass would replace a command reroute's callback proxy.
+        selectedChildUis.RemoveAll(static child => RerouteOperations.IsReroute(child.SymbolChild.Symbol));
+        if (selectedChildUis.Count == 0)
+            return;
 
         var allSelectedAreBypassed = selectedChildUis.TrueForAll(selectedChildUi => selectedChildUi.SymbolChild.IsBypassed);
         var shouldBypass = !allSelectedAreBypassed;

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "c6bcc79b-fd52-40b6-9b0b-e3c43eb88c22",
+  "Description": "Forwards SharpDX.Direct3D11.ResourceOptionFlags through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "b4a1a907-2c80-4de5-a6dc-b139050e7ae4",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "ce4055a2-0c9c-4e8e-9244-894d8194bea3",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

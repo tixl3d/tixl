@@ -1,5 +1,7 @@
 ﻿using T3.Core.Operator;
 
+using T3.Editor.Gui.MagGraph.Interaction;
+
 namespace T3.Editor.UiModel.Commands.Graph;
 
 public sealed class ChangeInstanceBypassedCommand : ICommand
@@ -36,6 +38,9 @@ public sealed class ChangeInstanceBypassedCommand : ICommand
             Log.Assert("Failed to find child");
             return;
         }
+
+        if (shouldBeBypassed && RerouteOperations.IsReroute(child.Symbol))
+            return;
 
         try
         {

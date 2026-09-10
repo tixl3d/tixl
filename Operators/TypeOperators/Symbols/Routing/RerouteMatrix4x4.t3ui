@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "437441f1-2da5-49aa-945f-c941b22ffc5a",
+  "Description": "Forwards System.Numerics.Matrix4x4 through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "1b126c61-f8ea-4782-883d-e9099b37bf19",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "92c4f003-1d8a-4a7c-b647-042e4658ee5f",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -33,7 +33,7 @@ internal static class TreeLayouting
             if (!layout.Items.TryGetValue(selectable.Id, out var item))
                 continue;
 
-            if (item.Variant is not (MagGraphItem.Variants.Operator or MagGraphItem.Variants.Output))
+            if (item.IsReroute || item.Variant is not (MagGraphItem.Variants.Operator or MagGraphItem.Variants.Output))
                 continue;
 
             targets.Add(item);
@@ -72,6 +72,11 @@ internal static class TreeLayouting
         var handled = new HashSet<MagGraphItem>(selected);
         handled.ExceptWith(movableSelected);
         var obstacles = MagItemMovement.CollectSnappedItems(handled);
+        foreach (var item in layout.Items.Values)
+        {
+            if (item.IsReroute && !item.IsCollapsedAway)
+                obstacles.Add(item);
+        }
 
         // Classify first, place afterwards: sources that are going to move must not block each other's spots
         var placements = new List<Placement>();
@@ -88,6 +93,7 @@ internal static class TreeLayouting
 
                 var source = connection.SourceItem;
                 if (source.Variant is not (MagGraphItem.Variants.Operator or MagGraphItem.Variants.Input)
+                    || source.IsReroute
                     || source.IsCollapsedAway
                     || source == target
                     || handled.Contains(source))

@@ -89,6 +89,7 @@ internal sealed class GraphUiContext
     internal readonly PlaceholderCreation Placeholder;
     internal readonly ConnectionHovering ConnectionHovering = new();
     internal readonly MagGraphLayout Layout = new();
+    internal readonly ConnectionStroke ConnectionStroke = new();
     
     internal readonly StateMachine<GraphUiContext> StateMachine;
     internal  MacroCommand? MacroCommand { get; private set; }

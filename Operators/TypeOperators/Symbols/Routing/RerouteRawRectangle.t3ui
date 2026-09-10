@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "240b1703-395f-43b6-b9f7-b18e9c1ae979",
+  "Description": "Forwards SharpDX.Mathematics.Interop.RawRectangle through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "052b0b82-9067-423c-bbaf-07bcf8072c54",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fdead096-3d7f-4f4c-8d8c-649647b0cf8e",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -28,6 +28,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     internal int LastUpdateCycle;
     public Guid Id { get; init; }
     public Variants Variant;
+    public bool IsReroute;
     public Type PrimaryType = typeof(float);
     public required ISelectableCanvasObject Selectable;
     public SymbolUi.Child? ChildUi; // matches Selected for operators
@@ -160,6 +161,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     public const float WidthHalf = Width / 2;
     public const float LineHeight = 35;
     public static readonly Vector2 GridSize = new(Width, LineHeight);
+    public static readonly Vector2 RerouteSize = new(16, 16);
 
     public ImRect Bounds => ImRect.RectWithSize(PosOnCanvas, Size);
     
@@ -195,6 +197,17 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     /// </summary>
     public void GetOutputAnchorAtIndex(int index, ref OutputAnchorPoint point)
     {
+        if (IsReroute)
+        {
+            point.PositionOnCanvas = DampedPosOnCanvas + new Vector2(Size.X, Size.Y / 2);
+            point.Direction = Directions.Horizontal;
+            point.ConnectionType = OutputLines[0].Output.ValueType;
+            point.SnappedConnectionHash = FreeAnchor;
+            point.SlotId = OutputLines[0].Id;
+            point.OutputLineIndex = 0;
+            return;
+        }
+
         if (index == 0)
         {
             point.PositionOnCanvas = new Vector2(WidthHalf, Size.Y) + DampedPosOnCanvas;
@@ -215,7 +228,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         point.OutputLineIndex = lineIndex;
     }
 
-    public int GetOutputAnchorCount() => OutputLines.Length == 0 ? 0 : OutputLines.Length + 1;
+    public int GetOutputAnchorCount() => OutputLines.Length == 0 ? 0 : IsReroute ? 1 : OutputLines.Length + 1;
 
 
     /// <summary>
@@ -227,6 +240,17 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     /// </remarks>
     public void GetInputAnchorAtIndex(int index, ref InputAnchorPoint anchorPoint)
     {
+        if (IsReroute)
+        {
+            anchorPoint.PositionOnCanvas = DampedPosOnCanvas + new Vector2(0, Size.Y / 2);
+            anchorPoint.Direction = Directions.Horizontal;
+            anchorPoint.ConnectionType = InputLines[0].Type;
+            anchorPoint.SnappedConnectionHash = InputLines[0].ConnectionIn?.ConnectionHash ?? FreeAnchor;
+            anchorPoint.SlotId = InputLines[0].Id;
+            anchorPoint.InputLine = InputLines[0];
+            return;
+        }
+
         if (index == 0)
         {
             anchorPoint.PositionOnCanvas = new Vector2(WidthHalf, 0) + DampedPosOnCanvas;
@@ -248,7 +272,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         anchorPoint.InputLine = InputLines[lineIndex]; //TODO avoid copy
     }
     
-    public int GetInputAnchorCount() => InputLines.Length == 0 ? 0 : InputLines.Length + 1;
+    public int GetInputAnchorCount() => InputLines.Length == 0 ? 0 : IsReroute ? 1 : InputLines.Length + 1;
 
     /** Assume as free (I.e. not connected) unless an connection is snapped, then return this connection as hash. */
     private static int GetSnappedConnectionHash(List<MagGraphConnection> snapGraphConnections)

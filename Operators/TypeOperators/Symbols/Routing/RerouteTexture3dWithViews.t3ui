@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "543cde35-4c5f-427b-80f2-1ebebd020f27",
+  "Description": "Forwards T3.Core.DataTypes.Texture3dWithViews through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "0ac48bc4-a4af-4836-8bd0-078efc4d42d9",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fa12bb05-4871-4633-be20-19e2eaaa486f",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

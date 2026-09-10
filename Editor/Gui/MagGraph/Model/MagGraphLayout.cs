@@ -225,6 +225,7 @@ internal sealed class MagGraphLayout
             }
 
             opItem.Variant = MagGraphItem.Variants.Operator;
+            opItem.IsReroute = RerouteOperations.IsReroute(childInstance.Symbol);
             //opItem.Id = childId;
             opItem.InstancePath = childInstance.InstancePath;
             opItem.Selectable = childUi;
@@ -615,7 +616,9 @@ internal sealed class MagGraphLayout
             item.OutputLines = outputLines.ToArray();
 
             //var count = Math.Max(1, item.InputLines.Count + item.OutputLines.Count -2);
-            item.Size = new Vector2(MagGraphItem.Width, MagGraphItem.LineHeight * (Math.Max(1, visibleIndex)));
+            item.Size = item.IsReroute
+                            ? MagGraphItem.RerouteSize
+                            : new Vector2(MagGraphItem.Width, MagGraphItem.LineHeight * (Math.Max(1, visibleIndex)));
         }
     }
 
@@ -1063,6 +1066,13 @@ internal sealed class MagGraphLayout
         {
             item.VerticalStackArea = item.Area;
 
+            if (item.IsReroute)
+            {
+                ApplyStackToItems();
+                previousItem = null;
+                continue;
+            }
+
             if (previousItem == null)
             {
                 _listStackedItems.Clear();
@@ -1113,6 +1123,18 @@ internal sealed class MagGraphLayout
     {
         foreach (var sc in MagConnections)
         {
+            if (sc.SourceItem.IsReroute || sc.TargetItem.IsReroute)
+            {
+                MagGraphItem.OutputAnchorPoint outputAnchor = default;
+                MagGraphItem.InputAnchorPoint inputAnchor = default;
+                sc.SourceItem.GetOutputAnchorAtIndex(sc.SourceItem.IsReroute ? 0 : sc.OutputLineIndex + 1, ref outputAnchor);
+                sc.TargetItem.GetInputAnchorAtIndex(sc.TargetItem.IsReroute ? 0 : sc.InputLineIndex + 1, ref inputAnchor);
+                sc.SourcePos = outputAnchor.PositionOnCanvas - sc.SourceItem.DampedPosOnCanvas + sc.SourceItem.PosOnCanvas;
+                sc.TargetPos = inputAnchor.PositionOnCanvas - sc.TargetItem.DampedPosOnCanvas + sc.TargetItem.PosOnCanvas;
+                sc.Style = MagGraphConnection.ConnectionStyles.RightToLeft;
+                continue;
+            }
+
             var sourceMin = sc.SourceItem.PosOnCanvas;
             var sourceMax = sourceMin + sc.SourceItem.Size;
 

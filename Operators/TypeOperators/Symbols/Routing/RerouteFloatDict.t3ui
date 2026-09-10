@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "8d48de87-c55c-4224-9bbe-5b94d416dee4",
+  "Description": "Forwards T3.Core.DataTypes.Dict<float> through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "9b37212a-c061-47aa-bfd8-b41b9ed6c45a",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "789b1ec2-5c83-468f-bd5f-6fb2ed1f173f",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

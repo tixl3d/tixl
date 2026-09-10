@@ -12,6 +12,53 @@ namespace Editor.IntegrationTests;
 public sealed class GraphAcceptanceTests(EditorFixture editor)
 {
     [Fact]
+    public void RerouteFloat_ForwardsChangesAcrossReloadAndConnectionUndo()
+    {
+        var client = editor.Client;
+        editor.OpenPlayground();
+        var initial = client.GetGraphState();
+        var row = initial["children"]!.Select(c => c["posY"]?.Value<float>() ?? 0).DefaultIfEmpty(0).Max() + 250;
+        var source = client.AddOp("RerouteFloat", posY: row);
+        var target = client.AddOp("RerouteFloat", posX: 220, posY: row);
+        client.SetInput(source, "Input", JToken.FromObject(12.5f));
+        client.SetInput(target, "Input", JToken.FromObject(-3f));
+        client.ConnectOps(source, "Output", target, "Input");
+        client.Select(target);
+        client.PumpFrames(10);
+
+        Assert.Equal(12.5f, ReadOutput(target));
+        client.Undo();
+        client.PumpFrames(5);
+        Assert.Equal(-3f, ReadOutput(target));
+        client.Call("redo").Require("redo reroute connection");
+        client.PumpFrames(5);
+        Assert.Equal(12.5f, ReadOutput(target));
+
+        client.SetInput(source, "Input", JToken.FromObject(27.25f));
+        client.PumpFrames(10);
+        Assert.Equal(27.25f, ReadOutput(target));
+        client.Reload(EditorFixture.PlaygroundProject).Require("reload routed graph");
+        client.Select(target);
+        client.PumpFrames(10);
+        Assert.Equal(27.25f, ReadOutput(target));
+
+        var state = client.GetGraphState();
+        Assert.Contains(state["connections"]!, c => c["sourceParentOrChildId"]!.Value<string>() == source.ToString()
+                                                     && c["targetParentOrChildId"]!.Value<string>() == target.ToString());
+
+        // The parameter panel and debug bridge share this command, bypassing the graph hotkey filter.
+        var commandAnchor = client.AddOp("RerouteCommand", posX: 440, posY: row);
+        var bypass = client.Call("setBypass", new { childId = commandAnchor, bypassed = true }).Require("try bypassing a command anchor");
+        Assert.False(bypass["bypassed"]!.Value<bool>());
+        client.Select(target);
+        client.PumpFrames(5);
+        Assert.Equal(27.25f, ReadOutput(target));
+
+        float ReadOutput(Guid childId)
+            => client.Call("getOutput", new { childId, update = true }).Require("read forwarded float")["value"]!.Value<float>();
+    }
+
+    [Fact]
     public void BuildRenderRecolorUndo_RoundTrips()
     {
         var client = editor.Client;

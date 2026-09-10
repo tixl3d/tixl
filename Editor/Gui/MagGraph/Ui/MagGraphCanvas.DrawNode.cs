@@ -36,6 +36,12 @@ internal sealed partial class MagGraphView
         if (item.ChildUi != null && item.ChildUi.IsHiddenInCollapsedSection)
             return;
 
+        if (item.IsReroute)
+        {
+            DrawReroute(item, drawList, context);
+            return;
+        }
+
         var idleFadeFactor = 1f;
         var idleFactor = 0f;
         if (item.Variant == MagGraphItem.Variants.Operator && item.Instance != null)
@@ -161,7 +167,7 @@ internal sealed partial class MagGraphView
 
 
         OpUi.CustomUiResult customUiResult = OpUi.CustomUiResult.None;
-        if (Scale.X > 0.3f)
+        if (Scale.X > 0.3f && !context.View.ConsumesConnectionStrokeMouse)
         {
             // Custom Ui
             if (item.Variant == MagGraphItem.Variants.Operator)
@@ -185,8 +191,11 @@ internal sealed partial class MagGraphView
         var buttonSize = pMax - pMin;
         if (buttonSize.X < 1f) buttonSize.X = 1f;
         if (buttonSize.Y < 1f) buttonSize.Y = 1f;
+        ImGui.BeginDisabled(context.View.ConsumesConnectionStrokeMouse);
         ImGui.InvisibleButton("##op", buttonSize);
-        var isItemHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup
+        ImGui.EndDisabled();
+        var isItemHovered = !context.View.ConsumesConnectionStrokeMouse
+                            && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup
                                                 | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 
         if (_context.StateMachine.CurrentState == GraphStates.Default
@@ -205,6 +214,7 @@ internal sealed partial class MagGraphView
         //     //context.StateMachine.SetState(GraphStates.Default, context);
         // }
         
+        if (!context.View.ConsumesConnectionStrokeMouse)
         {
             ParameterPopUp.HandleOpenParameterPopUp(item.ChildUi, item.Instance, customUiResult, new ImRect(pMinVisible, pMaxVisible));
         }
@@ -599,7 +609,10 @@ internal sealed partial class MagGraphView
             if (!string.IsNullOrEmpty(item.ChildUi.Comment))
             {
                 ImGui.SetCursorScreenPos(new Vector2(pMax.X, pMin.Y) + Vector2.Round(new Vector2(-5, -1) * (T3Ui.UiScaleFactor + CanvasScale)));
-                if (ImGui.InvisibleButton("#comment", new Vector2(15, 15)))
+                ImGui.BeginDisabled(context.View.ConsumesConnectionStrokeMouse);
+                var editComment = ImGui.InvisibleButton("#comment", new Vector2(15, 15));
+                ImGui.EndDisabled();
+                if (editComment && !context.View.ConsumesConnectionStrokeMouse)
                 {
                     context.Selector.SetSelection(item.ChildUi, item.Instance);
                     context.EditCommentDialog.ShowNextFrame();
@@ -648,7 +661,7 @@ internal sealed partial class MagGraphView
             var isInputHovered =
                 // Only when the canvas is the window under the cursor — otherwise the anchor
                 // "hovers" through a window covering the graph and shows its tooltip on top.
-                IsHovered &&
+                 IsHovered && !context.View.ConsumesConnectionStrokeMouse &&
                 Vector2.Distance(ImGui.GetMousePos(), center) < 7 * CanvasScale &&
                 context.StateMachine.CurrentState == GraphStates.Default;
 
@@ -902,7 +915,8 @@ internal sealed partial class MagGraphView
 
             var isOutputHovered =
                                   // Suppress the hover when another window covers the graph at the cursor.
-                                  IsHovered
+                                   IsHovered
+                                   && !context.View.ConsumesConnectionStrokeMouse
                                   && Vector2.Distance(ImGui.GetMousePos(), center) < 7 * CanvasScale
                                   && context.StateMachine.CurrentState == GraphStates.Default;
             
@@ -1003,7 +1017,7 @@ internal sealed partial class MagGraphView
                                           p + new Vector2(0.4f, 0.5f) * CanvasScale * 7);
 
                     // Don't react to the toggle (tooltip or click) when another window covers the graph.
-                    var isToggleHovered = IsHovered && area.Contains(ImGui.GetMousePos());
+                    var isToggleHovered = IsHovered && !context.View.ConsumesConnectionStrokeMouse && area.Contains(ImGui.GetMousePos());
 
                     //var opacity = hoverProgress.RemapAndClamp(0, 1, 0.1f, 0.7f);
                     drawList.AddTriangleFilled(
@@ -1166,6 +1180,111 @@ internal sealed partial class MagGraphView
     }
 
 
+
+    private void DrawReroute(MagGraphItem item, ImDrawListPtr drawList, GraphUiContext context)
+    {
+        if (item.InputLines.Length != 1 || item.OutputLines.Length != 1)
+            return;
+
+        MagGraphItem.InputAnchorPoint inputAnchor = default;
+        MagGraphItem.OutputAnchorPoint outputAnchor = default;
+        item.GetInputAnchorAtIndex(0, ref inputAnchor);
+        item.GetOutputAnchorAtIndex(0, ref outputAnchor);
+        var inputPos = TransformPosition(inputAnchor.PositionOnCanvas);
+        var outputPos = TransformPosition(outputAnchor.PositionOnCanvas);
+        var center = (inputPos + outputPos) / 2;
+        var size = TransformDirection(item.Size);
+        var typeColor = TypeUiRegistry.GetPropertiesForType(item.PrimaryType).Color.Fade(context.GraphOpacity);
+        var outlineColor = ColorVariations.OperatorOutline.Apply(typeColor);
+        var pixelScale = T3Ui.UiScaleFactor * CanvasScale;
+        var socketRadius = MathF.Min(size.Y / 5, 3 * pixelScale);
+        var bodyRadius = MathF.Min(size.X, size.Y) * 0.3f;
+        var hitPadding = MathF.Max(4 * T3Ui.UiScaleFactor, 5 * pixelScale);
+        var hitMin = new Vector2(inputPos.X - hitPadding, center.Y - MathF.Max(size.Y / 2, hitPadding));
+        var hitMax = new Vector2(outputPos.X + hitPadding, center.Y + MathF.Max(size.Y / 2, hitPadding));
+
+        ImGui.SetCursorScreenPos(hitMin);
+        ImGui.PushID(item.Id.GetHashCode());
+        ImGui.BeginDisabled(context.View.ConsumesConnectionStrokeMouse);
+        ImGui.InvisibleButton("##reroute", Vector2.Max(hitMax - hitMin, Vector2.One * T3Ui.UiScaleFactor));
+        ImGui.EndDisabled();
+        var isHovered = IsHovered && !context.View.ConsumesConnectionStrokeMouse
+                                  && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
+        ImGui.PopID();
+
+        var isIdle = context.StateMachine.CurrentState == GraphStates.Default;
+        var mousePos = ImGui.GetMousePos();
+        var bodyHalfWidth = (outputPos.X - inputPos.X) / 4;
+        var inputHovered = isIdle && isHovered && mousePos.X < center.X - bodyHalfWidth;
+        var outputHovered = isIdle && isHovered && mousePos.X > center.X + bodyHalfWidth;
+        var bodyHovered = isIdle && isHovered && !inputHovered && !outputHovered;
+        var canConnectInput = !context.View.ConsumesConnectionStrokeMouse
+                              && context.StateMachine.CurrentState == GraphStates.DragConnectionEnd
+                              && context.DraggedPrimaryOutputType == inputAnchor.ConnectionType
+                              && context.ActiveItem != item;
+        var canConnectOutput = !context.View.ConsumesConnectionStrokeMouse
+                               && context.StateMachine.CurrentState == GraphStates.DragConnectionBeginning
+                               && context.DraggedPrimaryOutputType == outputAnchor.ConnectionType;
+
+        if (canConnectInput)
+            InputSnapper.RegisterAsPotentialTargetInput(item, inputPos, inputAnchor.SlotId);
+        if (canConnectOutput)
+            OutputSnapper.RegisterAsPotentialTargetOutput(context, item, outputAnchor);
+
+        drawList.AddLine(inputPos, outputPos, outlineColor, MathF.Max(pixelScale, T3Ui.UiScaleFactor));
+        drawList.AddCircleFilled(center, bodyRadius, ColorVariations.OperatorBackground.Apply(typeColor), 16);
+        drawList.AddCircle(center, bodyRadius, outlineColor, 16, T3Ui.UiScaleFactor);
+        drawList.AddCircleFilled(inputPos, socketRadius,
+                                 inputHovered || canConnectInput ? ColorVariations.Highlight.Apply(typeColor) : outlineColor, 12);
+        drawList.AddCircleFilled(outputPos, socketRadius,
+                                 outputHovered || canConnectOutput ? ColorVariations.Highlight.Apply(typeColor) : outlineColor, 12);
+
+        if (context.Selector.IsSelected(item) || bodyHovered)
+        {
+            drawList.AddCircle(center, bodyRadius + T3Ui.UiScaleFactor,
+                               UiColors.ForegroundFull.Fade(context.GraphOpacity), 16, T3Ui.UiScaleFactor);
+        }
+
+        if (isHovered && isIdle)
+        {
+            context.ActiveItem = item;
+            if (inputHovered)
+            {
+                context.ActiveTargetItem = item;
+                context.ActiveTargetInputId = inputAnchor.SlotId;
+                context.ActiveInputDirection = inputAnchor.Direction;
+            }
+            else if (outputHovered)
+            {
+                context.ActiveSourceItem = item;
+                context.ActiveSourceOutputId = outputAnchor.SlotId;
+                context.ActiveOutputDirection = outputAnchor.Direction;
+            }
+
+            if (item.SymbolChild != null)
+                HoveredHelpTarget.SetOperator(item.SymbolChild.Symbol.Id);
+
+            if (CustomComponents.BeginTooltip())
+            {
+                ImGui.TextUnformatted(item.ReadableName);
+                if (TypeNameRegistry.Entries.TryGetValue(item.PrimaryType, out var typeName))
+                    ImGui.TextUnformatted(typeName);
+                else
+                    ImGui.TextUnformatted(item.PrimaryType.Name);
+
+                CustomComponents.HelpText(inputHovered ? "Drag to connect an input"
+                                             : outputHovered ? "Drag to connect an output" : "Drag to move the anchor");
+                CustomComponents.EndTooltip();
+            }
+        }
+
+        if (isHovered && ImGui.IsMouseReleased(ImGuiMouseButton.Right)
+                      && ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() <= UserSettings.Config.ClickThreshold
+                      && !context.Selector.IsSelected(item))
+        {
+            item.Select(context.Selector);
+        }
+    }
 
     private void DrawMissingInputIndicator(ImDrawListPtr drawList, MagGraphItem item, Vector2 pMin, MagGraphItem.InputLine inputLine)
     {
