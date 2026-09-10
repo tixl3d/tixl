@@ -113,11 +113,21 @@ internal static class InputsAndOutputs
         public SyntaxNode? LastOutputNodeFound { get; private set; }
     }
 
-    private sealed class ClassDeclarationFinder : CSharpSyntaxWalker
+    /// <summary>
+    /// Finds the operator class by name. Source files can hold further classes, e.g. a project's
+    /// home symbol also defines its <c>ShareDefinition</c>.
+    /// </summary>
+    private sealed class ClassDeclarationFinder(string className) : CSharpSyntaxWalker
     {
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            ClassDeclarationNode = node;
+            if (node.Identifier.ValueText == className)
+            {
+                ClassDeclarationNode = node;
+                return;
+            }
+
+            base.VisitClassDeclaration(node);
         }
 
         public ClassDeclarationSyntax? ClassDeclarationNode;
@@ -176,20 +186,19 @@ internal static class InputsAndOutputs
         var root = syntaxTree.GetRoot();
 
         var inputNodeFinder = new InputNodeByTypeFinder();
-        var blockFinder = new ClassDeclarationFinder();
-        
+        root = inputNodeFinder.Visit(root);
+
+        var blockFinder = new ClassDeclarationFinder(symbol.Name);
         if (inputNodeFinder.LastInputNodeFound == null)
         {
             blockFinder.Visit(root);
             if (blockFinder.ClassDeclarationNode == null)
             {
-                Log.Error("Can't find class declaration.");
+                Log.Error($"Can't find class declaration of '{symbol.Name}'.");
                 return false;
             }
         }
-        
-        root = inputNodeFinder.Visit(root);
-        
+
         var @namespace = inputType.Namespace;
         if (@namespace == "System")
             @namespace = String.Empty;
@@ -246,7 +255,7 @@ internal static class InputsAndOutputs
         var outputNodeFinder = new InputsAndOutputs.OutputNodeByTypeFinder();
         root = outputNodeFinder.Visit(root);
         
-        var blockFinder = new InputsAndOutputs.ClassDeclarationFinder();
+        var blockFinder = new InputsAndOutputs.ClassDeclarationFinder(symbol.Name);
         if (outputNodeFinder.LastOutputNodeFound == null)
         {
             blockFinder.Visit(root);

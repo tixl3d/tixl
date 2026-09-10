@@ -16,6 +16,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Animation;
 using T3.Editor.Gui.Interaction.Variations;
+using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.UiHelpers;
@@ -261,15 +262,6 @@ public abstract class InputValueUi<T> : IInputUi
                                                         {
                                                             ProjectView.Focused?.GraphView.ExtractAsConnectedOperator(typedInputSlot, symbolChildUi, input);
                                                         }
-
-                                                        if (CustomComponents.DrawMenuItem(_publishAsInputItemId, Icon.None, "Publish as Input",
-                                                                                          isEnabled: false))
-                                                        {
-                                                            InputArea.PublishAsInput(nodeSelection, inputSlot, symbolChildUi, input);
-                                                        }
-
-                                                        CustomComponents
-                                                           .TooltipForLastItem("Publishing as input is not yet implemented. Please create a input of that type and connect manually.");
 
                                                         InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
 
@@ -560,6 +552,12 @@ public abstract class InputValueUi<T> : IInputUi
                                                        isEnabled: ParameterExtraction.IsInputSlotExtractable(typedInputSlot)))
                      {
                          ProjectView.Focused?.GraphView.ExtractAsConnectedOperator(typedInputSlot, symbolChildUi, input);
+                     }
+
+                     if (CustomComponents.DrawMenuItem(_publishAsInputItemId, Icon.None, "Publish as Input",
+                                                       isEnabled: !compositionSymbol.SymbolPackage.IsReadOnly))
+                     {
+                         InputArea.PublishAsInput(compositionSymbol, symbolChildUi, input, this);
                      }
 
                      if (CustomComponents.DrawMenuItem(_resetItemId, Icon.Reset, "Reset to Default",
@@ -944,57 +942,11 @@ internal static class InputArea
     }
 
 
-    public static void PublishAsInput(NodeSelection selection, IInputSlot originalInputSlot, SymbolUi.Child symbolChildUi, Symbol.Child.Input input)
+    public static void PublishAsInput(Symbol compositionSymbol, SymbolUi.Child symbolChildUi, Symbol.Child.Input input, IInputUi inputUi)
     {
-        var composition = selection.GetSelectedComposition() ?? originalInputSlot.Parent.Parent;
-
-        if (composition == null)
-        {
-            Log.Warning("Can't publish input to undefined composition");
-            return;
-        }
-
-        if (!InputsAndOutputs.AddInputToSymbol(Guid.NewGuid(), input.Name, input.IsMultiInput, input.DefaultValue.ValueType, composition.Symbol))
-            return;
-
-        // FIXME: Adding the input will trigger a recompile and thus discard the previous composition
-        // This would only be available after reloading with the next frame update. I currently have
-        // no idea how to create the connection line without this.
-
-        var updatedComposition = selection.GetSelectedComposition();
-        if (updatedComposition == null)
-        {
-            Log.Warning("Sadly, we currently can't create the connection lines and set the default values.");
-            return;
-        }
-
-        var newInputDefinition = updatedComposition.Symbol.InputDefinitions.SingleOrDefault(i => i.Name == input.Name);
-        if (newInputDefinition == null)
-        {
-            Log.Warning("Publishing wasn't possible");
-            return;
-        }
-
-        var cmd = new AddConnectionCommand(updatedComposition.Symbol,
-                                           new Symbol.Connection(sourceParentOrChildId: ConnectionMaker.UseSymbolContainerId,
-                                                                 sourceSlotId: newInputDefinition.Id,
-                                                                 targetParentOrChildId: symbolChildUi.Id,
-                                                                 targetSlotId: input.Id),
-                                           0);
-        cmd.Do();
-
-        newInputDefinition.DefaultValue.Assign(input.Value.Clone());
-        originalInputSlot.Input.Value.Assign(input.Value.Clone());
-        originalInputSlot.DirtyFlag.Invalidate();
-
-        var newSlot = updatedComposition.Inputs.FirstOrDefault(i => i.Id == newInputDefinition.Id);
-        if (newSlot != null)
-        {
-            newSlot.Input.Value.Assign(input.Value.Clone());
-            newSlot.Input.IsDefault = false;
-        }
-
-        UndoRedoStack.Clear();
+        // Leave a free grid cell between the input node and the child so they don't snap together
+        var posOnCanvas = symbolChildUi.PosOnCanvas - new Vector2(2 * MagGraphItem.GridSize.X, 0);
+        UndoRedoStack.AddAndExecute(new PublishAsInputCommand(compositionSymbol, symbolChildUi.Id, input, inputUi, posOnCanvas));
     }
 
     public static void DrawConnectedSingleInputArea(NodeSelection nodeSelection, IInputSlot inputSlot, SymbolUi compositionUi, Color typeColor,
