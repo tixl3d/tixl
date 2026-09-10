@@ -1,4 +1,19 @@
 
+## Graph Mouse Gestures
+
+| Action | Gesture |
+| --- | --- |
+| Route Connections through Anchors | Shift+Right Mouse Button drag across cables |
+| Cut Connections | Ctrl+Right Mouse Button drag across cables |
+
+Hold the modifier, press the right mouse button, and draw across the connections you want to change. Release to apply the preview. Each stroke is one undo step. Press Escape to cancel; release the mouse button before starting another gesture. Ctrl+Shift+Right Mouse Button makes no change.
+
+Routing creates one small anchor for each source output crossed by the stroke. Branches from the same output share an anchor; different outputs keep separate anchors, even when their types match. Uncrossed branches stay connected as before.
+
+Drag an anchor's center to move it, its left socket to connect an input, or its right socket to connect an output. Anchors retain their type when disconnected. They can be selected, copied, duplicated, and deleted like other operators. Deleting an anchor removes its cables; cutting a cable leaves the anchor in place. Automatic layout preserves manually placed anchors, and dragging them near other nodes does not create magnetic connections. Bypass leaves anchors unchanged because they already forward their input.
+
+Routing supports the built-in ordinary slot types. A stroke containing an unsupported type, a composition multi-input bundle source, or an output carrying clip metadata is rejected without changing its cables. Individual connections into multi-input targets can be routed and cut. These gestures apply to editable graphs and take precedence over canvas pan/zoom while held.
+
 ## Hotkeys
 
 The following is a list of the **default keyboard** short-cuts. With v4.0.4 you can customize this list in the *Settings*.
