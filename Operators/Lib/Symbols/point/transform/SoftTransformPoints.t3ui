@@ -145,6 +145,13 @@
       "Format": "{0:0.0}°"
     },
     {
+      "InputId": "ee8619ad-7cd8-4f9e-bdd6-a924a3c4bee2"/*Space*/,
+      "Position": {
+        "X": -876.99396,
+        "Y": 1971.9124
+      }
+    },
+    {
       "InputId": "f9025937-8e74-4f2d-b8f1-90e56e601137"/*Visibility*/,
       "Position": {
         "X": 2011.0109,

@@ -31,6 +31,7 @@ cbuffer Params : register(b1)
     // float UseWAsWeight;
     int VolumeShape; // 28
     int StrengthFactor;
+    int CoordinateSpace; // 0 = Object, 1 = Point
 }
 
 StructuredBuffer<Point> SourcePoints : register(t0);
@@ -98,25 +99,49 @@ static const float VolumeZebra = 3.5;
     float strength = s * Strength * (StrengthFactor == 0 ? 1 : (StrengthFactor == 1) ? p.FX1
                                                                                      : p.FX2);
 
-    float3 volumeCenter = TransformVolume._m30_m31_m32_m03.xyz;
-    float3 posInVolume2 = posInObject + volumeCenter.xyz;
-
-    float3 rot = RotateAxis * PI / 180 * strength;
-
-    float4 rotationX = qFromAngleAxis(rot.x, float3(1, 0, 0));
-    float4 rotationY = qFromAngleAxis(rot.y, float3(0, 1, 0));
-    float4 rotationZ = qFromAngleAxis(rot.z, float3(0, 0, 1));
-
-    posInVolume2 = qRotateVec3(posInVolume2, rotationX);
-    posInVolume2 = qRotateVec3(posInVolume2, rotationY);
-    posInVolume2 = qRotateVec3(posInVolume2, rotationZ);
-
-    p.Position = lerp(p.Position, -volumeCenter.xyz + posInVolume2 * Scale * ScaleMagnitude, strength) + strength * Translate;
-    p.Rotation = qMul(p.Rotation, rotationX);
-
     float fx1 = SourcePoints[i.x].FX1;
-    p.FX1 = lerp(fx1, fx1 * ScaleFx1 + OffsetFx1, strength);
 
-    p.Position.y += Translate.y * strength;
+    if (CoordinateSpace == 0) // Object space: pivot is the set origin
+    {
+        float3 volumeCenter = TransformVolume._m30_m31_m32_m03.xyz;
+        float3 posInVolume2 = posInObject + volumeCenter.xyz;
+
+        float3 rot = RotateAxis * PI / 180 * strength;
+
+        float4 rotationX = qFromAngleAxis(rot.x, float3(1, 0, 0));
+        float4 rotationY = qFromAngleAxis(rot.y, float3(0, 1, 0));
+        float4 rotationZ = qFromAngleAxis(rot.z, float3(0, 0, 1));
+
+        posInVolume2 = qRotateVec3(posInVolume2, rotationX);
+        posInVolume2 = qRotateVec3(posInVolume2, rotationY);
+        posInVolume2 = qRotateVec3(posInVolume2, rotationZ);
+
+        p.Position = lerp(p.Position, -volumeCenter.xyz + posInVolume2 * Scale * ScaleMagnitude, strength) + strength * Translate;
+        p.Rotation = qMul(p.Rotation, rotationX);
+        p.FX1 = lerp(fx1, fx1 * ScaleFx1 + OffsetFx1, strength);
+    }
+    else // Point space: each point transforms around its own center
+    {
+        float4 origRotation = p.Rotation;
+
+        float3 rot = RotateAxis * PI / 180 * strength;
+
+        float4 rotationX = qFromAngleAxis(rot.x, float3(1, 0, 0));
+        float4 rotationY = qFromAngleAxis(rot.y, float3(0, 1, 0));
+        float4 rotationZ = qFromAngleAxis(rot.z, float3(0, 0, 1));
+
+        float4 rotFull = qMul(rotationX, qMul(rotationY, rotationZ));
+
+        // Spin the point's own orientation about its center, position stays put
+        p.Rotation = qMul(origRotation, rotFull);
+
+        // Displace the point in its own local frame
+        p.Position += qRotateVec3(Translate, origRotation) * strength;
+
+        // Scale each point individually about its own center
+        p.Scale *= lerp(1, Scale * ScaleMagnitude, strength);
+        p.FX1 = lerp(fx1, fx1 * ScaleFx1 + OffsetFx1, strength);
+    }
+
     ResultPoints[i.x] = p;
 }

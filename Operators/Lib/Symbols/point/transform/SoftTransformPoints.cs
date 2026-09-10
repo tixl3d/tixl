@@ -74,7 +74,16 @@ internal sealed class SoftTransformPoints : Instance<SoftTransformPoints>, ITran
     [Input(Guid = "a7960bff-b388-4ebe-828d-4aedccf62d72", MappedType = typeof(FModes))]
     public readonly InputSlot<int> StrengthFactor = new InputSlot<int>();
 
+    [Input(Guid = "ee8619ad-7cd8-4f9e-bdd6-a924a3c4bee2", MappedType = typeof(Spaces))]
+    public readonly InputSlot<int> Space = new InputSlot<int>();
+
         
+    private enum Spaces
+    {
+        Object,
+        Point,
+    }
+
     private enum Shapes
     {
         Sphere,
