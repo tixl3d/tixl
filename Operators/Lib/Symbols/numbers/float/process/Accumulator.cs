@@ -15,18 +15,20 @@ internal sealed class Accumulator : Instance<Accumulator>
 
     private void Update(EvaluationContext context)
     {
+        var increment = Increment.GetValue(context);
         var running = Running.GetValue(context);
         var mode = Accumulate.GetEnumValue<AccumulationModes>(context);
-
         var startValue = StartValue.GetValue(context);
+        var range = Range.GetValue(context);
+        var modulo = Modulo.GetValue(context);
+
         if (ResetTrigger.GetValue(context))
         {
             Result.Value = startValue;
             _v = startValue;
         }
 
-        var increment = Increment.GetValue(context);
-        var range = Range.GetValue(context);
+
 
         var t = context.Playback.SecondsFromBars(context.LocalFxTime);
         var dt = t - _lastUpdateTime;
@@ -44,22 +46,12 @@ internal sealed class Accumulator : Instance<Accumulator>
             _v += increment * f;
         }
 
-        var modulo = Modulo.GetValue(context);
-
-        // --- New Clamping Logic Starts Here ---
         var rangeMin = range.X;
         var rangeMax = range.Y;
 
-  
-
-        // Check if the range is effectively (0, 0) by comparing both X and Y to epsilon or direct zero
-        // Using direct comparison for float inputs where exact 0 is expected usually works well enough 
-        // unless extreme precision issues occur.
-        if (range != Vector2.Zero)
+        if (range != Vector2.Zero) // a (0,0) range means infinite (original accumulator behavior)
         {
 
-
-            // Apply clamping to the internal accumulator value before modulo logic
             if (_v < rangeMin)
             {
                 _v = rangeMin;
@@ -69,7 +61,6 @@ internal sealed class Accumulator : Instance<Accumulator>
                 _v = rangeMax;
             }
         }
-        // --- New Clamping Logic Ends Here ---
 
         Result.Value = modulo > 0 ? (float)(_v % modulo) : (float)_v;
     }
