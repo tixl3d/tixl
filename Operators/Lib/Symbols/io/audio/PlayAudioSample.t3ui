@@ -1,7 +1,7 @@
 ﻿{
   "FormatVersion": 3,
   "Id": "65e95f77-4743-437f-ab31-f34b831d28d7"/*PlayAudioSample*/,
-  "Description": "Plays an audio file as a triggered sample, with an optional ADSR envelope.\n\nAudioReference is the primary output: wire it into an [AudioBus], directly or through a [CombineAudio], and the sampler becomes an ordinary source in the audio graph — group volume, effect inserts and ducking all apply to it, and Volume (envelope included) is folded in as its gain. Evaluating that output is also what drives playback, so no other connection is needed.\n\nLeft unwired, the sampler plays through the operator mixer as before; Result must then be routed into a command chain so the operator is evaluated. Panning and Speed always stay with the player — the graph has no equivalent for them.\n\nPlayAudio triggers the sample and StopAudio ends it. With UseEnvelope on, the Envelope vector is attack, decay, sustain and release. Speed changes pitch along with tempo.",
+  "Description": "Plays an audio file as a triggered sample, with an optional ADSR envelope.\n\nAudioReference is the primary output: wire it into an [AudioBus], directly or through a [CombineAudio], and the sampler becomes an ordinary source in the audio graph — group volume, effect inserts and ducking all apply to it, and Volume (envelope included) is folded in as its gain. Evaluating that output is also what drives playback, so no other connection is needed.\n\nLeft unwired, the sampler plays through the operator mixer as before; Result must then be routed into a command chain so the operator is evaluated. Panning and Speed always stay with the player — the graph has no equivalent for them.\n\nPlayAudio triggers the sample and StopAudio ends it. In Gate mode the sample plays while PlayAudio stays true; in Trigger mode a single-frame pulse plays it through. With UseEnvelope on, the Envelope vector is attack, decay, sustain and release, and the sample keeps playing until the envelope has faded out. Speed changes pitch along with tempo.",
   "InputUis": [
     {
       "InputId": "1a3f4b7c-12d3-4a5b-9c7d-8e1f2a3b4c5d"/*Mute*/,
@@ -77,7 +77,7 @@
         "Y": 475.0
       },
       "GroupTitle": "Envelope",
-      "Description": "The trigger behavior mode (e.g., trigger or gate) for envelope playback"
+      "Description": "Gate plays while PlayAudio stays true. Trigger starts the sample on a rising edge (a one-frame pulse is enough) and lets it play until it ends, StopAudio fires, or the envelope finishes."
     },
     {
       "InputId": "a5de0d72-5924-4f3a-a02f-d5de7c03f07f"/*Seek*/,

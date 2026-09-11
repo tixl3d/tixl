@@ -67,7 +67,6 @@ namespace Lib.io.audio
 
         private Guid _operatorId;
         private bool _wasPausedLastFrame;
-        private bool _previousPlayTrigger;
         private int _lastPlaybackFrame = int.MinValue / 2;
         private readonly AdsrCalculator _calculator = new();
         private readonly AudioGraphNode _node;
@@ -147,8 +146,7 @@ namespace Lib.io.audio
 
             string filePath = AudioFile.GetValue(context);
             bool shouldPlay = PlayAudio.GetValue(context);
-
-            var shouldStop = StopAudio.GetValue(context) || !shouldPlay;
+            var stopRequested = StopAudio.GetValue(context);
             var shouldPause = PauseAudio.GetValue(context);
             var volume = Volume.GetValue(context);
             var mute = Mute.GetValue(context);
@@ -174,24 +172,19 @@ namespace Lib.io.audio
             _calculator.SetMode(triggerMode);
             _calculator.SetDuration(duration);
 
-            // Detect play trigger edges for ADSR
-            var risingEdge = shouldPlay && !_previousPlayTrigger;
-            var fallingEdge = !shouldPlay && _previousPlayTrigger;
-            _previousPlayTrigger = shouldPlay;
+            if (useEnvelope)
+                _calculator.Update(shouldPlay, context.LocalFxTime, attack, decay, sustain, release, triggerMode, duration);
 
+            // A one-frame trigger pulse must not end the sample, and with an envelope the stream has to outlive
+            // the gate until the release has faded out.
+            bool shouldStop;
             if (useEnvelope)
             {
-                if (risingEdge)
-                {
-                    _calculator.TriggerAttack();
-                }
-                else if (fallingEdge && triggerMode == AdsrCalculator.TriggerMode.Gate)
-                {
-                    _calculator.TriggerRelease();
-                }
-
-                // Update envelope (frame-based for UI display)
-                _calculator.Update(shouldPlay, context.LocalFxTime, attack, decay, sustain, release, triggerMode, duration);
+                shouldStop = stopRequested || !_calculator.IsActive;
+            }
+            else
+            {
+                shouldStop = stopRequested || (triggerMode == AdsrCalculator.TriggerMode.Gate && !shouldPlay);
             }
 
             // Apply envelope to volume only if UseEnvelope is enabled
