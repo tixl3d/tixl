@@ -126,6 +126,7 @@ Drag from a reroute's right socket to a compatible input, then reconnect its lef
 **Expected:**
 - Both socket targets remain usable when disconnected and retain the same type.
 - Socket drag and body movement have distinct hit regions. Temporary cables terminate at the visible socket.
+- Outgoing cables start at the dot's edge without a gap. Incoming arrowheads keep their existing shape and position.
 - Incompatible connections and cycles are refused. Ordinary duplicate, clipboard, deletion, and undo behavior works.
 - Deleting an anchor removes its incident cables without reconnecting its neighbors.
 

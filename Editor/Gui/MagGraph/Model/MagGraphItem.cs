@@ -162,6 +162,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     public const float LineHeight = 35;
     public static readonly Vector2 GridSize = new(Width, LineHeight);
     public static readonly Vector2 RerouteSize = new(16, 16);
+    internal float RerouteRadius => MathF.Min(Size.X, Size.Y) * 0.3f;
 
     public ImRect Bounds => ImRect.RectWithSize(PosOnCanvas, Size);
     
@@ -199,7 +200,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     {
         if (IsReroute)
         {
-            point.PositionOnCanvas = DampedPosOnCanvas + new Vector2(Size.X, Size.Y / 2);
+            point.PositionOnCanvas = DampedPosOnCanvas + Size / 2 + new Vector2(RerouteRadius, 0);
             point.Direction = Directions.Horizontal;
             point.ConnectionType = OutputLines[0].Output.ValueType;
             point.SnappedConnectionHash = FreeAnchor;

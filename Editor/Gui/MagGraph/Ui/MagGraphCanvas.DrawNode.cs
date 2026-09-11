@@ -1192,13 +1192,13 @@ internal sealed partial class MagGraphView
         item.GetOutputAnchorAtIndex(0, ref outputAnchor);
         var inputPos = TransformPosition(inputAnchor.PositionOnCanvas);
         var outputPos = TransformPosition(outputAnchor.PositionOnCanvas);
-        var center = (inputPos + outputPos) / 2;
+        var center = TransformPosition(item.DampedPosOnCanvas + item.Size / 2);
         var size = TransformDirection(item.Size);
         var typeColor = TypeUiRegistry.GetPropertiesForType(item.PrimaryType).Color.Fade(context.GraphOpacity);
         var outlineColor = ColorVariations.OperatorOutline.Apply(typeColor);
         var pixelScale = T3Ui.UiScaleFactor * CanvasScale;
         var socketRadius = MathF.Min(size.Y / 5, 3 * pixelScale);
-        var bodyRadius = MathF.Min(size.X, size.Y) * 0.3f;
+        var bodyRadius = TransformDirection(new Vector2(item.RerouteRadius)).X;
         var hitPadding = MathF.Max(4 * T3Ui.UiScaleFactor, 5 * pixelScale);
         var hitMin = new Vector2(inputPos.X - hitPadding, center.Y - MathF.Max(size.Y / 2, hitPadding));
         var hitMax = new Vector2(outputPos.X + hitPadding, center.Y + MathF.Max(size.Y / 2, hitPadding));
@@ -1214,9 +1214,8 @@ internal sealed partial class MagGraphView
 
         var isIdle = context.StateMachine.CurrentState == GraphStates.Default;
         var mousePos = ImGui.GetMousePos();
-        var bodyHalfWidth = (outputPos.X - inputPos.X) / 4;
-        var inputHovered = isIdle && isHovered && mousePos.X < center.X - bodyHalfWidth;
-        var outputHovered = isIdle && isHovered && mousePos.X > center.X + bodyHalfWidth;
+        var inputHovered = isIdle && isHovered && mousePos.X < (inputPos.X + center.X) / 2;
+        var outputHovered = isIdle && isHovered && mousePos.X > (center.X + outputPos.X) / 2;
         var bodyHovered = isIdle && isHovered && !inputHovered && !outputHovered;
         var canConnectInput = !context.View.ConsumesConnectionStrokeMouse
                               && context.StateMachine.CurrentState == GraphStates.DragConnectionEnd
@@ -1236,8 +1235,8 @@ internal sealed partial class MagGraphView
         drawList.AddCircle(center, bodyRadius, outlineColor, 16, T3Ui.UiScaleFactor);
         drawList.AddCircleFilled(inputPos, socketRadius,
                                  inputHovered || canConnectInput ? ColorVariations.Highlight.Apply(typeColor) : outlineColor, 12);
-        drawList.AddCircleFilled(outputPos, socketRadius,
-                                 outputHovered || canConnectOutput ? ColorVariations.Highlight.Apply(typeColor) : outlineColor, 12);
+        if (outputHovered || canConnectOutput)
+            drawList.AddCircleFilled(outputPos, socketRadius, ColorVariations.Highlight.Apply(typeColor), 12);
 
         if (context.Selector.IsSelected(item) || bodyHovered)
         {
