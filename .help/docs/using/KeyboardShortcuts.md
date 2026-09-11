@@ -3,11 +3,11 @@
 
 | Action | Gesture |
 | --- | --- |
-| Route Connections through Anchors | Shift+Right Mouse Button drag across cables |
+| Route Connections through Anchors | Alt+Right Mouse Button drag across cables |
 | Cut Connections | Ctrl+Right Mouse Button drag across cables |
 | Merge Anchors | Drag one anchor onto another anchor of the same type and release |
 
-Hold the modifier, press the right mouse button, and draw across the connections you want to change. Release to apply the preview. Each stroke is one undo step. Press Escape to cancel; release the mouse button before starting another gesture. Ctrl+Shift+Right Mouse Button makes no change.
+Hold the modifier, press the right mouse button, and draw across the connections you want to change. Release to apply the preview. Each stroke is one undo step. Press Escape to cancel; release the mouse button before starting another gesture. Ctrl+Alt+Right Mouse Button makes no change.
 
 Routing creates one small anchor for each source output crossed by the stroke. Branches from the same output share an anchor; different outputs keep separate anchors, even when their types match. Uncrossed branches stay connected as before.
 

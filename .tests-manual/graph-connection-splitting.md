@@ -91,7 +91,7 @@ onto the snapped cable and drop it.
 ## Step: Route a subset of a fan-out
 
 **Action:**
-Connect one float output to three operators. Hold Shift and drag the right mouse button across only two cables. Inspect the preview, then release. Move the new anchor by its center.
+Connect one float output to three operators. Hold Alt and drag the right mouse button across only two cables. Inspect the preview, then release. Move the new anchor by its center.
 
 **Expected:**
 - One compact anchor appears at the previewed position, connected to the original source and the two crossed targets.
@@ -101,7 +101,7 @@ Connect one float output to three operators. Hold Shift and drag the right mouse
 ## Step: Keep independent sources separate
 
 **Action:**
-Cross wires from two different float outputs and a string output in one Shift+RMB stroke. Double back across a cable before releasing.
+Cross wires from two different float outputs and a string output in one Alt+RMB stroke. Double back across a cable before releasing.
 
 **Expected:**
 - Three separate anchors appear, with their original types and source values.
@@ -111,7 +111,7 @@ Cross wires from two different float outputs and a string output in one Shift+RM
 ## Step: Cut several multi-input occurrences
 
 **Action:**
-Connect several sources to a multi-input, including the same source twice with another source between those occurrences. Ctrl+RMB drag across the middle and last cables, then undo and redo. Repeat with Shift+RMB routing instead of cutting.
+Connect several sources to a multi-input, including the same source twice with another source between those occurrences. Ctrl+RMB drag across the middle and last cables, then undo and redo. Repeat with Alt+RMB routing instead of cutting.
 
 **Expected:**
 - Only the crossed occurrences change; untouched sources keep their order.
@@ -127,6 +127,7 @@ Drag from a reroute's right socket to a compatible input, then reconnect its lef
 - The disconnected socket remains usable and retains the same type while the other side is attached. Both sockets are available on a newly added blank anchor.
 - Socket drag and body movement have distinct hit regions. Temporary cables terminate at the visible socket.
 - Outgoing cables start at the dot's edge without a gap. Incoming arrowheads keep their existing shape and position.
+- Check horizontal, rising, falling, and backward cables at fractional zoom while dragging, merging, and undoing. Outgoing cables slightly overlap the dot's outline, and endpoints follow the displayed dot even while position smoothing is active.
 - At low zoom, hovering or pressing the anchor's body gives it priority over the input cable's hover area. No cable hover indicator covers the dot; dragging the center moves the anchor, while its sockets still start connections.
 - Incompatible connections and cycles are refused. Ordinary duplicate, clipboard, deletion, and undo behavior works.
 - Deleting an anchor removes its incident cables without reconnecting its neighbors.
@@ -169,7 +170,7 @@ Drop at center offsets of 16 canvas units on each axis, then just outside that s
 ## Step: Cancel without panning or opening a menu
 
 **Action:**
-Start each gesture and press Escape while still holding RMB. Move the mouse, then release. Repeat with a popup, leaving the graph window, dragging into a second graph view, and navigating to another composition during the stroke. Try a modified click without dragging, a stroke that hits nothing, and Ctrl+Shift+RMB.
+Start each gesture and press Escape while still holding RMB. Move the mouse, then release. Repeat with a popup, leaving the graph window, dragging into a second graph view, and navigating to another composition during the stroke. Try a modified click without dragging, a stroke that hits nothing, and Ctrl+Alt+RMB.
 
 **Expected:**
 - No graph edit or undo entry is created in any of these cases.
@@ -179,7 +180,7 @@ Start each gesture and press Escape while still holding RMB. Move the mouse, the
 ## Step: Check both canvas zoom settings
 
 **Action:**
-Repeat successful routing and cutting with each value of Middle Mouse Button Zooms. Begin a stroke immediately after zooming. Change Shift/Ctrl while holding the mouse during a stroke.
+Repeat successful routing and cutting with each value of Middle Mouse Button Zooms. Begin a stroke immediately after zooming. Change Alt/Ctrl while holding the mouse during a stroke.
 
 **Expected:**
 - The canvas stays fixed while a stroke is held, including pending smooth zoom/pan motion.
@@ -211,7 +212,7 @@ Move anchors to deliberate positions, include them in a mixed selection, and run
 ## Step: Reject unsupported routing without partial edits
 
 **Action:**
-Include a composition multi-input bundle source or a time-clip output in a Shift+RMB stroke together with an ordinary float cable. Try a routing stroke in a read-only graph. Separately cut an editable bundle cable with Ctrl+RMB.
+Include a composition multi-input bundle source or a time-clip output in a Alt+RMB stroke together with an ordinary float cable. Try a routing stroke in a read-only graph. Separately cut an editable bundle cable with Ctrl+RMB.
 
 **Expected:**
 - The unsupported routing stroke leaves all cables intact and explains the unsupported connection.

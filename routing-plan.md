@@ -8,7 +8,7 @@ Source baseline: `d969679f6000d18a635333b59450c52cc681e23a`, TiXL 4.3, .NET 10. 
 
 Add compact, movable routing anchors to MagGraph:
 
-- **Shift + RMB drag:** collect crossed connections and merge branches from each source output through a typed reroute operator.
+- **Alt + RMB drag:** collect crossed connections and merge branches from each source output through a typed reroute operator.
 - **Ctrl + RMB drag:** cut crossed connections.
 - Anchors are real operator children with real typed input/output slots. Their wires are ordinary `Symbol.Connection` objects.
 - Each completed gesture is one undo step. Previewing or cancelling a gesture does not mutate the graph.
@@ -23,7 +23,7 @@ Two deliberately bounded choices keep the implementation small:
 
 ## 2. Interaction contract
 
-### Shift + RMB routing
+### Alt + RMB routing
 
 The implemented behavior for a stroke crossing several source outputs is **one anchor per distinct source output**, including separate anchors for different outputs of the same type.
 
@@ -54,9 +54,9 @@ A.out -> D.in                R.out -> C.in
 ### Gesture ownership and cancellation
 
 - Start in an editable, hovered MagGraph canvas, with the graph in its normal idle state and no popup, active widget, or background-image interaction owning input.
-- Reserve Shift/Ctrl RMB at mouse-down, before canvas panning processes it. Start collecting after the normal drag threshold. A modified click without a drag makes no edit and consumes its release.
+- Reserve Alt/Ctrl RMB at mouse-down, before canvas panning processes it. Start collecting after the normal drag threshold. A modified click without a drag makes no edit and consumes its release.
 - Latch the tool at mouse-down. Modifier changes during the drag do not switch tools.
-- Ctrl + Shift + RMB is a consumed no-op; avoid ambiguous merge-versus-cut precedence. Alt combinations retain existing behavior.
+- Ctrl + Alt + RMB is a consumed no-op; avoid ambiguous merge-versus-cut precedence. Shift combinations retain existing behavior.
 - Escape, focus loss, composition/project change, package reload, popup takeover, or a structural edit during the stroke cancels it. Leaving the graph viewport cancels rather than cutting across another window.
 - Keep ownership through the release frame: suppress RMB selection and context-menu opening, fence selection, competing socket gestures, graph keyboard mutations, and canvas panning/zoom while active. If cancelled while RMB remains held, discard the preview immediately but keep consuming that button until release; do not hand the unfinished press to panning.
 - Keep this consumed-until-release latch in the `MagGraphView` partial, separate from per-context preview state, so navigation/reload replacing `GraphUiContext` cannot rearm the same press. Reserve the press across MagGraph views as well, so entering another graph cannot start panning. Clear it once release is observed, including after focus returns.
@@ -160,7 +160,7 @@ Add one per-context stroke helper and one dedicated graph state. Keep routing-de
 
 ### Frame order
 
-1. Before general keyboard actions and `UpdateCanvas`, reserve eligible modified RMB input and pass the existing `PreventMouseInteractions` flag to canvas interaction (or locally skip its interaction update). This suppresses both panning and Shift + RMB drag zoom; setting only `PreventPanningWithMouse` is insufficient. Enter the dedicated state before ordinary node drawing can act on RMB.
+1. Before general keyboard actions and `UpdateCanvas`, reserve eligible modified RMB input and pass the existing `PreventMouseInteractions` flag to canvas interaction (or locally skip its interaction update). This reserves Alt/Ctrl strokes while leaving Shift + RMB drag zoom available; setting only `PreventPanningWithMouse` is insufficient. Enter the dedicated state before ordinary node drawing can act on RMB.
 2. Compute normal layout/damping and draw the graph. During this gesture only, offer the newly traversed mouse segment to each eligible connection's displayed path.
 3. Accumulate unique occurrence hits and preview anchors/cut highlights. Use no graph mutations during enumeration.
 4. Process the release position as a final segment, finish all path queries, then validate and commit once after the connection enumeration. Preserve consumed-input state through context-menu handling at the end of the frame.
@@ -292,7 +292,7 @@ Move executable manual steps into the existing connection-splitting test set dur
 | Merge | One wire; subset/all of a fan-out; two outputs of one node; different sources of the same/different types; existing reroute chains; repeated stroke crossings. |
 | Multi-inputs | Middle/nonconsecutive target ordinals; identical duplicate edges; mixed merge/cut; exact undo/redo sequence; bundle-source merge rejected without mutation. |
 | Boundaries | Composition input to child, child to composition output, both through reroutes; correct `Guid.Empty` mapping; optional/custom unsupported types fail clearly. |
-| Gestures | Shift/Ctrl behavior; both `MiddleMouseButtonZooms` settings; consumed Ctrl+Shift; no-drag/no-hit; modifier changes; Escape; focus/window exit; popup; reload/navigation; read-only graph; release-frame suppression. |
+| Gestures | Alt/Ctrl behavior; both `MiddleMouseButtonZooms` settings; consumed Ctrl+Alt; no-drag/no-hit; modifier changes; Escape; focus/window exit; popup; reload/navigation; read-only graph; release-frame suppression. |
 | Geometry | Every visible cable style; snapped marker; rapid crossing; curved/backward connection; final mouse segment; damping; zoom/DPI; collapsed section boundary and hidden internal wires. |
 | Ordinary node behavior | Body versus socket hit tests; forward/backward socket drags; cycle rejection; selection/mixed movement; duplicate/copy/paste; Delete/undo; anchor type retention. |
 | Layout | No accidental block snap/splice/auto-wire; manual anchors stay fixed under tree layout; other nodes avoid anchor bounds; fit selection and section bounds use compact size. |
@@ -309,7 +309,7 @@ Completion means the declared supported types and gestures pass these checks, ex
 - The shared marker is `Types.Routing.IRerouteNode`, in TypeOperators. Recognition checks package GUID `c8a53b12-ded3-4327-86d2-bd731b25de22`, marker assembly identity, and the declared one-input/one-output contract. Marker reflection occurs when layout references are collected and definitions are requested, not for each rendered node each frame.
 - Seventy-seven operators forward through their ordinary internal composition connection. `RerouteCommand` owns a stable callback proxy and delegates preparation/restoration to the immediate source without pulling early. It forwards values through the normal input update and owns no upstream resource.
 - MagGraph keeps the semantic operator variant, derives an `IsReroute` display flag, and draws a 16-by-16 anchor. Actual transformed socket spacing determines the input/body/output partition, including low zoom and high DPI. Both persisted child size and layout size are compact; automatic tree layout and vertical obstacle stacks preserve the anchors.
-- Shift+RMB and Ctrl+RMB share one incremental collector over the actual rendered paths. Preview highlights, snapped markers, clipping, bounded trail storage, gesture reservation/cancellation, and the release-frame commit are implemented in the existing MagGraph draw flow.
+- Alt+RMB and Ctrl+RMB share one incremental collector over the actual rendered paths. Preview highlights, snapped markers, clipping, bounded trail storage, gesture reservation/cancellation, and the release-frame commit are implemented in the existing MagGraph draw flow.
 - The routing command preserves explicit target ordinals, exact duplicate occurrences, and source grouping. It validates all edits before mutation, checks each step's postcondition, rolls back partial failures or silent command no-ops, and stores one undo entry only after success. Redo retains the original child GUIDs and positions.
 - Reusable hit/placement buffers and cached draw callbacks avoid per-cable callback allocations and whole-stroke rescanning. Source lookup and graph mutation run only on commit.
 

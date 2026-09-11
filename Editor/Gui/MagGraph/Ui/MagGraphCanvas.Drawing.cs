@@ -387,7 +387,7 @@ internal sealed partial class MagGraphView
             return;
         }
 
-        if (!available || ImGui.IsAnyItemActive() || io.KeyAlt || (!io.KeyShift && !io.KeyCtrl)
+        if (!available || ImGui.IsAnyItemActive() || io.KeyShift || (!io.KeyCtrl && !io.KeyAlt)
                        || !ImGui.IsMouseClicked(ImGuiMouseButton.Right)
                        || _context.StateMachine.CurrentState != GraphStates.Default
                        || _context.CompositionInstance.Symbol.SymbolPackage.IsReadOnly)
@@ -402,7 +402,7 @@ internal sealed partial class MagGraphView
         ScrollTarget = Scroll;
         ScaleTarget = Scale;
         _context.StateMachine.SetState(GraphStates.ConnectionStroke, _context);
-        if (io.KeyCtrl != io.KeyShift)
+        if (io.KeyCtrl != io.KeyAlt)
         {
             _strokeOwner = _context.ConnectionStroke;
             _strokeOwner.Begin(_context, io.KeyCtrl, ImGui.GetMousePos());

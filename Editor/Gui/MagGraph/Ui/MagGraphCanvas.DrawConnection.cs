@@ -70,6 +70,15 @@ internal sealed partial class MagGraphView
             sourceOnCanvas = mergeSource + new Vector2(sourceRadius, 0);
 
         var sourcePosOnScreen = TransformPosition(sourceOnCanvas);
+        if (connection.SourceItem.IsReroute && !connection.SourceItem.IsCollapsedAway
+                                           && connection.Style == MagGraphConnection.ConnectionStyles.RightToLeft)
+        {
+            var radius = TransformDirection(new Vector2(sourceInMerge ? sourceRadius : connection.SourceItem.RerouteRadius)).X;
+            var overlap = MathF.Min(0.5f * T3Ui.UiScaleFactor, radius);
+            var center = sourceInMerge ? mergeSource : connection.SourceItem.DampedPosOnCanvas + connection.SourceItem.Size / 2;
+            // Cancel the path drawer's half-pixel shift and overlap the dot's outline.
+            sourcePosOnScreen = TransformPosition(center) + new Vector2(radius - overlap - 0.5f, -0.5f);
+        }
 
         Vector2 targetOnCanvas;
         if (connection.TargetItem.IsCollapsedAway)
@@ -78,6 +87,12 @@ internal sealed partial class MagGraphView
                 return;
 
             targetOnCanvas = section.PosOnCanvas + new Vector2(2, MagGraphItem.LineHeight/2);
+        }
+        else if (connection.TargetItem.IsReroute)
+        {
+            MagGraphItem.InputAnchorPoint anchor = default;
+            connection.TargetItem.GetInputAnchorAtIndex(0, ref anchor);
+            targetOnCanvas = anchor.PositionOnCanvas;
         }
         else
         {
