@@ -139,6 +139,7 @@ Connect an anchor between a source and two targets. Remove its input wire, then 
 - The anchor stays while any input or output cable remains and disappears when a completed action removes its last cable.
 - One undo restores the last disconnected cable and the anchor with the same ID, type, position, settings, and section. Redo removes it again.
 - Disconnect and shake retain their existing surrounding-wire reconnection behavior; their cleanup shares the disconnect undo entry. Shake ends the active anchor move before deletion.
+- After shaking off an anchor, keep holding the left mouse button and move across the background and other nodes: no box selection or new node interaction starts. Release, then press and drag again to select normally. Also release outside the graph and return; the next press works normally.
 - Ordinary disconnected nodes remain. A connection between two anchors keeps both alive until that connection is removed; cutting it removes both in the same undo step.
 - A newly added blank anchor is not removed by unrelated edits. Deleting a wire during a reconnect drag does not remove its anchor before the drag finishes; dropping on a compatible socket keeps it.
 

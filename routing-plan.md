@@ -339,6 +339,8 @@ The initial implementation changed **14 existing Editor files, 2 new Editor help
 
 ### Merge anchors on drop
 
+Shake cleanup enters a dedicated mouse-release wait state after finishing the move. It clears active node references and keeps selection-fence and new node interactions disabled until the left button is released, including release outside the graph. Ordinary operator shakes retain their existing drag behavior.
+
 - Limit implementation changes to `MagItemMovement.cs` and `RerouteOperations.cs`; reuse the existing guarded routing command, connection commands, and disconnected-anchor snapshot command. Update this plan, shortcut help, and the existing manual test document. No operator, rendering, Core, serialization, project, or general undo changes are needed.
 - On release of a single dragged reroute, search visible, stationary reroutes of the exact same CLR type. Compare actual canvas centers against a 32×32 square centered on each target, inclusive at ±16 units on each axis. Choose the nearest eligible center, using the child GUID to break exact ties. Multiple-item drags and shake completion do not attempt merging. Search only on drop, with no additional per-frame work.
 - Keep the stationary child and its identity, position, type, and settings. Transfer every outgoing occurrence of the dragged child to the stationary output at its original target ordinal, including duplicate multi-input connections. Keep the stationary input's source when both have external sources; otherwise retain the dragged input's source. Remove the internal edge of directly connected anchors and preserve the external source, without creating a self-connection.

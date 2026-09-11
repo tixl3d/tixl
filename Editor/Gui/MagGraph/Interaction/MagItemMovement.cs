@@ -463,7 +463,7 @@ internal sealed partial class MagItemMovement
         if (reroutesToRemove.Count > 0)
         {
             CompleteDragOperation(context, allowRerouteCollapse: false);
-            context.StateMachine.SetState(GraphStates.Default, context);
+            context.StateMachine.SetState(GraphStates.WaitForMouseRelease, context);
         }
 
         NodeActions.DisconnectNodes(context.CompositionInstance, draggedSelectables);

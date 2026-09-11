@@ -19,6 +19,8 @@ Anchors can be selected, copied, duplicated, and deleted like other operators. D
 
 Routing supports the built-in ordinary slot types. A stroke containing an unsupported type, a composition multi-input bundle source, or an output carrying clip metadata is rejected without changing its cables. Individual connections into multi-input targets can be routed and cut. These gestures apply to editable graphs and take precedence over canvas pan/zoom while held.
 
+After shaking off an anchor, release the left mouse button before starting another graph interaction, including box selection.
+
 ## Hotkeys
 
 The following is a list of the **default keyboard** short-cuts. With v4.0.4 you can customize this list in the *Settings*.

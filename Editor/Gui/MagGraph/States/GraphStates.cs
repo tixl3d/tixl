@@ -16,6 +16,20 @@ namespace T3.Editor.Gui.MagGraph.States
 {
     internal static class GraphStates
     {
+        internal static State<GraphUiContext> WaitForMouseRelease
+            = new(Enter: static context =>
+                         {
+                             Default.Enter(context);
+                             context.ActiveItem = null;
+                             context.ItemForInputSelection = null;
+                         },
+                  Update: static context =>
+                          {
+                              if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                                  context.StateMachine.SetState(Default, context);
+                          },
+                  Exit: static _ => { });
+
         internal static State<GraphUiContext> ConnectionStroke
             = new(Enter: static context =>
                          {
