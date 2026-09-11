@@ -127,6 +127,7 @@ Drag from a reroute's right socket to a compatible input, then reconnect its lef
 - The disconnected socket remains usable and retains the same type while the other side is attached. Both sockets are available on a newly added blank anchor.
 - Socket drag and body movement have distinct hit regions. Temporary cables terminate at the visible socket.
 - Outgoing cables start at the dot's edge without a gap. Incoming arrowheads keep their existing shape and position.
+- At low zoom, hovering or pressing the anchor's body gives it priority over the input cable's hover area. No cable hover indicator covers the dot; dragging the center moves the anchor, while its sockets still start connections.
 - Incompatible connections and cycles are refused. Ordinary duplicate, clipboard, deletion, and undo behavior works.
 - Deleting an anchor removes its incident cables without reconnecting its neighbors.
 
@@ -159,6 +160,8 @@ Drop at center offsets of 16 canvas units on each axis, then just outside that s
 
 **Expected:**
 - A single same-type anchor merges inside the 32×32 square, including its boundary. Just outside it, only the position changes. With overlapping eligible targets, the closest center wins.
+- Before release, a valid merge shows one larger highlighted dot at the stationary anchor, with cables attached and the dragged dot hidden. Moving out restores both normal dots and cable positions; reentering restores the preview. The graph and undo history remain unchanged until release. A direct cable between the pair is hidden during preview, avoiding a loop around the single dot.
+- Cycle-causing, incompatible, read-only, hidden-target, and grouped drags show no merge preview. Completing, cancelling, or shaking off the drag clears it. Check the preview and cable attachment throughout the zoom/UI-scale matrix above.
 - Zoom and UI scale do not change the area in canvas units. Different types, hidden anchors, and multiple-item drags do not merge.
 - A cycle-causing merge leaves both anchors and all cables intact. Shake disconnects without triggering a drop merge.
 - Outgoing wires still meet the dot, and incoming arrowheads keep their existing shape and position.

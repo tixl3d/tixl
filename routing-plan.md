@@ -350,6 +350,13 @@ Shake cleanup enters a dedicated mouse-release wait state after finishing the mo
 - Verify source precedence/fallback, direct chains in both directions, fan-out, repeated multi-input ordinals, blank anchors, cycle rejection, stale undo/redo, one-step movement undo, exact 32×32 bounds, zoom/scale independence, hidden targets, mixed selection, and shake suppression. Extend the ignored actual-Editor fixture and the existing manual checklist rather than introducing another test project.
 - Verification completed: the Debug Editor builds with zero warnings/errors, and the compiled Editor fixture passes 79 checks covering collapse and existing cleanup/cut behavior. These include source precedence/fallback, both chain directions, duplicate target ordinals, changed-topology cycle rejection on redo, movement undo/redo, ±16 canvas boundaries at 25% and 200% zoom, mixed selection, shake suppression, read-only rejection, and stale-reference cleanup for a chain with no external wires. Native mouse gestures and the full zoom/UI-scale matrix remain in the manual checklist.
 
+### Merge preview follow-up
+
+- Reuse the drop target search in `MagItemMovement` for an allocation-free per-frame proximity check. Cache the validation result by dragged/target IDs and the layout structure cycle; use a non-mutating path through `RerouteOperations` to validate source/slot compatibility and proposed cycle safety when the candidate or graph changes.
+- Keep preview state transient and store child IDs. Neither positions, sizes, damping, connections, nor undo history change during preview. Reset it when the drag stops, is shaken off, or leaves the valid merge region. Release revalidates the actual edit independently.
+- `DrawReroute` hides the absorbed dot and draws the stationary dot at 1.75 times its normal radius with a highlight. `DrawConnection` attaches incident cables to that visual dot and hides the pair's internal cable while previewing. The incoming arrowhead geometry is unchanged; its existing offset from the dot edge is preserved. Outside the preview all normal rendering is used.
+- Validation uses the compiled Editor in the existing ignored fixtures: entering/leaving/reentering, no graph mutation, cycle invalidation after a structure refresh, cleanup, centered larger-dot drawing, suppressed second dot, and restoration of normal rendering. A warm 1,000-update preview loop allocates zero bytes. Native pointer interaction and the full zoom/UI-scale matrix remain manual checks.
+
 ### Automated verification
 
 Build commands run from the workspace parent to avoid the unrelated invalid SDK version in the repository's `global.json`:

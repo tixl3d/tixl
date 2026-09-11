@@ -18,6 +18,11 @@ internal sealed partial class MagGraphView
         if (connection.Style == MagGraphConnection.ConnectionStyles.Unknown)
             return;
 
+        var sourceInMerge = context.ItemMovement.TryGetRerouteMergePreview(connection.SourceItem, out var mergeSource, out var sourceRadius);
+        var targetInMerge = context.ItemMovement.TryGetRerouteMergePreview(connection.TargetItem, out var mergeTarget, out var targetRadius);
+        if (sourceInMerge && targetInMerge)
+            return;
+
         if (connection.SourceItem.IsCollapsedAway && connection.TargetItem.IsCollapsedAway)
             return;
 
@@ -61,6 +66,9 @@ internal sealed partial class MagGraphView
             sourceOnCanvas = connection.DampedSourcePos;
         }
 
+        if (sourceInMerge)
+            sourceOnCanvas = mergeSource + new Vector2(sourceRadius, 0);
+
         var sourcePosOnScreen = TransformPosition(sourceOnCanvas);
 
         Vector2 targetOnCanvas;
@@ -74,6 +82,13 @@ internal sealed partial class MagGraphView
         else
         {
             targetOnCanvas = connection.DampedTargetPos;
+        }
+
+        if (targetInMerge)
+        {
+            // Preserve the incoming arrowhead's offset from the edge of the dot.
+            var socketOffset = connection.TargetItem.Size.X / 2 - connection.TargetItem.RerouteRadius;
+            targetOnCanvas = mergeTarget - new Vector2(targetRadius + socketOffset, 0);
         }
 
         var targetPosOnScreen = TransformPosition(targetOnCanvas);

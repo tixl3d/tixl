@@ -40,7 +40,8 @@ internal sealed class ConnectionHovering
         (_lastConnectionHovers, _connectionHoversForCurrentFrame) = (_connectionHoversForCurrentFrame, _lastConnectionHovers);
         _connectionHoversForCurrentFrame.Clear();
 
-        if (!context.View.IsHovered)
+        // A cable's screen-space hover tolerance must not steal the compact anchor's hit area.
+        if (!context.View.IsHovered || context.ActiveItem is { IsReroute: true })
             _lastConnectionHovers.Clear();
 
         if (_lastConnectionHovers.Count == 0)

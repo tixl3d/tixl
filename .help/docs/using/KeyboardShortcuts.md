@@ -19,6 +19,8 @@ Anchors can be selected, copied, duplicated, and deleted like other operators. D
 
 Routing supports the built-in ordinary slot types. A stroke containing an unsupported type, a composition multi-input bundle source, or an output carrying clip metadata is rejected without changing its cables. Individual connections into multi-input targets can be routed and cut. These gestures apply to editable graphs and take precedence over canvas pan/zoom while held.
 
+While dragging within a valid merge area, the two anchors snap visually into one larger highlighted dot with their cables attached. Moving outside the area restores the separate anchors. Release over the larger dot to merge; the preview itself does not change the graph.
+
 After shaking off an anchor, release the left mouse button before starting another graph interaction, including box selection.
 
 ## Hotkeys

@@ -275,7 +275,7 @@ internal static class RerouteOperations
         return true;
     }
 
-    internal static bool TryCollapse(GraphUiContext context, Guid draggedId, Guid targetId, out string error)
+    internal static bool TryCollapse(GraphUiContext context, Guid draggedId, Guid targetId, out string error, bool previewOnly = false)
     {
         error = string.Empty;
         var composition = context.ProjectView.CompositionInstance;
@@ -359,6 +359,18 @@ internal static class RerouteOperations
                 if (targetSources[index].ChildId == draggedId)
                     targetSources[index] = targetOutput;
             }
+        }
+
+        if (previewOnly)
+        {
+            var proposed = SnapshotTargets(targets);
+            foreach (var connection in beforeIncident.Concat(GetIncidentConnections(symbol, draggedId, targetId, proposed)))
+            {
+                if (!TryGetConnectionType(symbol, connection, true, out _, out error))
+                    return false;
+            }
+
+            return IsAcyclic(symbol, proposed);
         }
 
         var steps = new List<CommandStep>();
