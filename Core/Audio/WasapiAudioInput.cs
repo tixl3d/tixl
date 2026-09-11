@@ -209,6 +209,7 @@ public static class WasapiAudioInput
         BassWasapi.Stop();
         BassWasapi.Free();
         ActiveInputDeviceName = null;
+        BarPhaseTracker.Reset();
     }
 
     /// <summary>
@@ -472,7 +473,14 @@ public static class WasapiAudioInput
 
         if (playbackSettings.Playback.EnableAudioBeatLocking)
         {
-            BeatSynchronizer.UpdateBeatTimer();
+            if (playbackSettings.Playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModel)
+            {
+                BarPhaseTracker.FeedCapture(buffer, length, _activeChannelCount, SampleRate);
+            }
+            else
+            {
+                BeatSynchronizer.UpdateBeatTimer();
+            }
         }
         
         return length;

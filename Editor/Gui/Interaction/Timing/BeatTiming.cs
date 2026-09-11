@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Settings;
 
 namespace T3.Editor.Gui.Interaction.Timing;
 
@@ -157,7 +158,16 @@ internal static class BeatTiming
                 _measureStartTime += MeasureDuration;
             }
             
-            if (playback.Settings.Playback.EnableAudioBeatLocking && _resynced)
+            var usesPhaseModel = playbackSettings.Playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModel;
+            if (playbackSettings.Playback.EnableAudioBeatLocking && usesPhaseModel && BarPhaseTracker.IsAvailable)
+            {
+                // The model finds the bar start itself, so no resync tap is required and
+                // the extrapolator already smooths the phase.
+                BeatTime = BarPhaseTracker.BarProgress
+                           + playback.BarsFromSeconds(playbackSettings.Playback.BeatLockAudioOffsetSec);
+                _beatDuration = 60.0 / BarPhaseTracker.CurrentBpm;
+            }
+            else if (playbackSettings.Playback.EnableAudioBeatLocking && !usesPhaseModel && _resynced)
             {
                 BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress)
                            + playback.BarsFromSeconds(playbackSettings.Playback.BeatLockAudioOffsetSec);

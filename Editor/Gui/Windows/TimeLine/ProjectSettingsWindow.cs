@@ -1021,6 +1021,22 @@ internal sealed class ProjectSettingsWindow : Window
                         """,
                         true
                     );
+
+                    if (playback.EnableAudioBeatLocking)
+                    {
+                        modified |= FormInputs.AddSegmentedButtonWithLabel(ref playback.BeatLockSource, "Beat Lock Source",
+                                                                        tooltip: """
+                                                                        Onset Detection follows transients and needs a tapped resync to find the bar.
+                                                                        Phase Model uses a neural network that finds tempo and bar start on its own.
+                                                                        """);
+                        if (playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModel)
+                        {
+                            FormInputs.AddHint(BarPhaseTracker.IsAvailable
+                                                   ? $"{BarPhaseTracker.StatusMessage}: {BarPhaseTracker.CurrentBpm:0.0} BPM, phase error ±{BarPhaseTracker.ExpectedPhaseError:0.00} bars"
+                                                   : BarPhaseTracker.StatusMessage);
+                        }
+                    }
+
                     FormInputs.AddVerticalSpace();
                 }
 

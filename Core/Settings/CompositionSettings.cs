@@ -109,6 +109,15 @@ public sealed class CompositionSettings
     }
 
     /// <summary>
+    /// Which analysis drives the beat lock: classic onset detection or the DanceAi bar-phase model.
+    /// </summary>
+    public enum BeatLockSources
+    {
+        OnsetDetection,
+        PhaseModel,
+    }
+
+    /// <summary>
     /// What a BPM edit does to the composition's bar-timed content (clip placement, keyframes, loop range):
     /// <see cref="StretchWithBeat"/> leaves the bar values alone so everything plays faster or slower with the beat;
     /// <see cref="KeepSeconds"/> rescales them so everything stays at the same seconds and only the grid moves.
@@ -182,6 +191,7 @@ public sealed class CompositionSettings
         public float AudioDecayFactor = 0.9f;
 
         public bool EnableAudioBeatLocking = true;
+        public BeatLockSources BeatLockSource;
         public float BeatLockAudioOffsetSec;
     }
 
@@ -213,6 +223,7 @@ public sealed class CompositionSettings
                 writer.WriteValue(nameof(PlaybackConfig.AudioGainFactor), Playback.AudioGainFactor);
                 writer.WriteObject(nameof(PlaybackConfig.AudioInputDeviceName), Playback.AudioInputDeviceName);
                 writer.WriteObject(nameof(PlaybackConfig.EnableAudioBeatLocking), Playback.EnableAudioBeatLocking);
+                writer.WriteValue(nameof(PlaybackConfig.BeatLockSource), Playback.BeatLockSource);
                 writer.WriteObject(nameof(PlaybackConfig.BeatLockAudioOffsetSec), Playback.BeatLockAudioOffsetSec);
 
                 if (Playback.AudioClips.Count != 0)
@@ -318,6 +329,7 @@ public sealed class CompositionSettings
                                           AudioGainFactor = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.AudioGainFactor), 1f),
                                           AudioInputDeviceName = JsonUtils.ReadValueSafe<string>(playbackToken, nameof(PlaybackConfig.AudioInputDeviceName)) ?? string.Empty,
                                           EnableAudioBeatLocking = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.EnableAudioBeatLocking), false),
+                                          BeatLockSource = JsonUtils.ReadEnum<BeatLockSources>(playbackToken, nameof(PlaybackConfig.BeatLockSource)),
                                           BeatLockAudioOffsetSec = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.BeatLockAudioOffsetSec), 0f),
                                       },
                            Audio = audioToken != null
