@@ -57,22 +57,73 @@ internal sealed partial class MagItemMovement
         UpdateSnappedConnectionsToDraggedItems();
     }
 
-    internal void CompleteDragOperation(GraphUiContext context)
+    internal void CompleteDragOperation(GraphUiContext context, bool allowRerouteCollapse = true)
     {
         Debug.Assert(context.MacroCommand != null);
+        var collapsedReroute = false;
         if (context.MacroCommand != null)
         {
             context.MoveElementsCommand?.StoreCurrentValues();
             CompleteSlowGrow(context);
             GrowSectionsToFitDisplacedMembers(context);
+            if (allowRerouteCollapse)
+                collapsedReroute = TryCollapseDraggedReroute(context);
             context.CompleteMacroCommand();
 
             // Section ownership is re-derived from geometry on the layout refresh
             _layout.FlagStructureAsChanged();
         }
 
-        if (!InputPicking.TryInitializeInputSelectionPickerForDraggedItem(context))
+        if (collapsedReroute || !InputPicking.TryInitializeInputSelectionPickerForDraggedItem(context))
             Reset();
+    }
+
+    private bool TryCollapseDraggedReroute(GraphUiContext context)
+    {
+        // Moving a selection must not silently rewire the selected graph.
+        if (DraggedItems.Count != 1 || (_draggedItemsFromSelection && context.Selector.Selection.Count > 1))
+            return false;
+
+        var dragged = DraggedItems.First();
+        if (!dragged.IsReroute || dragged.IsCollapsedAway)
+            return false;
+
+        var draggedCenter = dragged.PosOnCanvas + dragged.Size * 0.5f;
+        MagGraphItem? target = null;
+        var closestDistance = float.MaxValue;
+        const float mergeHalfSize = 16; // 32 x 32 canvas units around the stationary anchor.
+        foreach (var candidate in _layout.Items.Values)
+        {
+            if (candidate.Id == dragged.Id || !candidate.IsReroute || candidate.IsCollapsedAway
+                || candidate.PrimaryType != dragged.PrimaryType)
+                continue;
+
+            var delta = candidate.PosOnCanvas + candidate.Size * 0.5f - draggedCenter;
+            if (MathF.Abs(delta.X) > mergeHalfSize || MathF.Abs(delta.Y) > mergeHalfSize)
+                continue;
+
+            var distance = delta.LengthSquared();
+            if (distance > closestDistance
+                || (distance == closestDistance && target != null && candidate.Id.CompareTo(target.Id) >= 0))
+                continue;
+
+            target = candidate;
+            closestDistance = distance;
+        }
+
+        if (target == null)
+            return false;
+
+        if (!RerouteOperations.TryCollapse(context, dragged.Id, target.Id, out var error))
+        {
+            if (!string.IsNullOrEmpty(error))
+                Log.Debug(error);
+            return false;
+        }
+
+        target.Select(context.Selector);
+        context.ActiveItem = null;
+        return true;
     }
 
     /// <summary>
@@ -411,7 +462,7 @@ internal sealed partial class MagItemMovement
 
         if (reroutesToRemove.Count > 0)
         {
-            CompleteDragOperation(context);
+            CompleteDragOperation(context, allowRerouteCollapse: false);
             context.StateMachine.SetState(GraphStates.Default, context);
         }
 

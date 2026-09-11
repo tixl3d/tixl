@@ -142,6 +142,26 @@ Connect an anchor between a source and two targets. Remove its input wire, then 
 - Ordinary disconnected nodes remain. A connection between two anchors keeps both alive until that connection is removed; cutting it removes both in the same undo step.
 - A newly added blank anchor is not removed by unrelated edits. Deleting a wire during a reconnect drag does not remove its anchor before the drag finishes; dropping on a compatible socket keeps it.
 
+## Step: Merge anchors by dropping one onto another
+
+**Action:**
+Create two float anchors with separate outgoing branches. Drag one anchor's center over the other and release. Repeat with the same source, different sources, one unconnected input, two blank anchors, and directly connected anchors in both directions. Connect the dragged output to a multi-input twice with another source between those occurrences. Undo and redo each merge.
+
+**Expected:**
+- The stationary anchor keeps its ID, type, position, and settings. All outgoing branches use its output, retaining multi-input order and duplicate occurrences.
+- The stationary input source wins if both anchors have sources. An empty stationary input takes the dragged input's source; a direct chain retains its external source without creating a self-connection.
+- One undo restores the absorbed anchor with its settings, original position, and exact wiring. One redo merges it again.
+- Two newly blank anchors become one blank anchor. Existing last-connection cleanup still applies if collapsing an isolated chain removes its final cable.
+
+**Action:**
+Drop at center offsets of 16 canvas units on each axis, then just outside that square. Repeat at 25%, 50%, 100%, and 200% zoom and 100% and 200% UI scale. Try a different type, a hidden anchor inside a collapsed section, a multiple-item drag, and a merge whose new branches would feed back into its source. Shake a connected anchor over another anchor.
+
+**Expected:**
+- A single same-type anchor merges inside the 32×32 square, including its boundary. Just outside it, only the position changes. With overlapping eligible targets, the closest center wins.
+- Zoom and UI scale do not change the area in canvas units. Different types, hidden anchors, and multiple-item drags do not merge.
+- A cycle-causing merge leaves both anchors and all cables intact. Shake disconnects without triggering a drop merge.
+- Outgoing wires still meet the dot, and incoming arrowheads keep their existing shape and position.
+
 ## Step: Cancel without panning or opening a menu
 
 **Action:**

@@ -5,12 +5,15 @@
 | --- | --- |
 | Route Connections through Anchors | Shift+Right Mouse Button drag across cables |
 | Cut Connections | Ctrl+Right Mouse Button drag across cables |
+| Merge Anchors | Drag one anchor onto another anchor of the same type and release |
 
 Hold the modifier, press the right mouse button, and draw across the connections you want to change. Release to apply the preview. Each stroke is one undo step. Press Escape to cancel; release the mouse button before starting another gesture. Ctrl+Shift+Right Mouse Button makes no change.
 
 Routing creates one small anchor for each source output crossed by the stroke. Branches from the same output share an anchor; different outputs keep separate anchors, even when their types match. Uncrossed branches stay connected as before.
 
 Drag an anchor's center to move it, its left socket to connect an input, or its right socket to connect an output. Anchors retain their type while either side remains connected. Disconnecting or cutting the last remaining cable removes the anchor automatically; shake and Disconnect do the same. Undo restores the anchor and its connections together. Reconnecting a wire keeps the anchor, and a newly added blank anchor stays available for wiring.
+
+Drop one anchor's center inside the 32×32 canvas area centered on another anchor of the same type to merge them. The stationary anchor stays in place and receives the dragged anchor's outgoing cables. Its input wins when both have sources; otherwise the dragged anchor's input is retained. Directly connected anchors collapse without connecting an anchor to itself. A merge that would create a cycle is refused. Moving a group does not merge anchors. One undo restores both anchors, their cables, and the original position.
 
 Anchors can be selected, copied, duplicated, and deleted like other operators. Deleting an anchor removes its cables. Automatic layout preserves manually placed anchors, and dragging them near other nodes does not create magnetic connections. Bypass leaves anchors unchanged because they already forward their input.
 
