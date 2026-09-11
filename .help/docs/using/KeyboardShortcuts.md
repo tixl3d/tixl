@@ -10,7 +10,9 @@ Hold the modifier, press the right mouse button, and draw across the connections
 
 Routing creates one small anchor for each source output crossed by the stroke. Branches from the same output share an anchor; different outputs keep separate anchors, even when their types match. Uncrossed branches stay connected as before.
 
-Drag an anchor's center to move it, its left socket to connect an input, or its right socket to connect an output. Anchors retain their type when disconnected. They can be selected, copied, duplicated, and deleted like other operators. Deleting an anchor removes its cables; cutting a cable leaves the anchor in place. Automatic layout preserves manually placed anchors, and dragging them near other nodes does not create magnetic connections. Bypass leaves anchors unchanged because they already forward their input.
+Drag an anchor's center to move it, its left socket to connect an input, or its right socket to connect an output. Anchors retain their type while either side remains connected. Disconnecting or cutting the last remaining cable removes the anchor automatically; shake and Disconnect do the same. Undo restores the anchor and its connections together. Reconnecting a wire keeps the anchor, and a newly added blank anchor stays available for wiring.
+
+Anchors can be selected, copied, duplicated, and deleted like other operators. Deleting an anchor removes its cables. Automatic layout preserves manually placed anchors, and dragging them near other nodes does not create magnetic connections. Bypass leaves anchors unchanged because they already forward their input.
 
 Routing supports the built-in ordinary slot types. A stroke containing an unsupported type, a composition multi-input bundle source, or an output carrying clip metadata is rejected without changing its cables. Individual connections into multi-input targets can be routed and cut. These gestures apply to editable graphs and take precedence over canvas pan/zoom while held.
 

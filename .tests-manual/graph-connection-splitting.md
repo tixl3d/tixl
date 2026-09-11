@@ -116,19 +116,31 @@ Connect several sources to a multi-input, including the same source twice with a
 **Expected:**
 - Only the crossed occurrences change; untouched sources keep their order.
 - Undo restores the exact source sequence, including both identical occurrences.
-- Routing preserves one target occurrence per crossed cable; cutting does not remove the source operators or anchors.
+- Routing preserves one target occurrence per crossed cable. Cutting keeps ordinary source operators and removes an anchor only when its last incident cable is cut.
 
 ## Step: Use the compact sockets
 
 **Action:**
-Drag from a reroute's right socket to a compatible input, then reconnect its left socket from another compatible output. Disconnect both sides. Repeat at 25% and 50% zoom with 100% and 200% UI scale. Try connecting an incompatible type. Select and duplicate the anchor; copy/paste it with its neighboring nodes, then delete and undo.
+Drag from a reroute's right socket to a compatible input, then reconnect its left socket from another compatible output. Disconnect one side while leaving the other attached. Repeat at 25% and 50% zoom with 100% and 200% UI scale. Try connecting an incompatible type. Select and duplicate the anchor; copy/paste it with its neighboring nodes, then delete and undo.
 
 **Expected:**
-- Both socket targets remain usable when disconnected and retain the same type.
+- The disconnected socket remains usable and retains the same type while the other side is attached. Both sockets are available on a newly added blank anchor.
 - Socket drag and body movement have distinct hit regions. Temporary cables terminate at the visible socket.
 - Outgoing cables start at the dot's edge without a gap. Incoming arrowheads keep their existing shape and position.
 - Incompatible connections and cycles are refused. Ordinary duplicate, clipboard, deletion, and undo behavior works.
 - Deleting an anchor removes its incident cables without reconnecting its neighbors.
+
+## Step: Remove an anchor after its last disconnection
+
+**Action:**
+Connect an anchor between a source and two targets. Remove its input wire, then its output wires one at a time. Undo and redo the final removal. Repeat using Disconnect, shake, and Ctrl+RMB cutting. Include two anchors joined only to each other, and a mixed selection of anchors and ordinary nodes. Give an anchor a name, comment, non-default input value, disabled state, and section membership before testing undo.
+
+**Expected:**
+- The anchor stays while any input or output cable remains and disappears when a completed action removes its last cable.
+- One undo restores the last disconnected cable and the anchor with the same ID, type, position, settings, and section. Redo removes it again.
+- Disconnect and shake retain their existing surrounding-wire reconnection behavior; their cleanup shares the disconnect undo entry. Shake ends the active anchor move before deletion.
+- Ordinary disconnected nodes remain. A connection between two anchors keeps both alive until that connection is removed; cutting it removes both in the same undo step.
+- A newly added blank anchor is not removed by unrelated edits. Deleting a wire during a reconnect drag does not remove its anchor before the drag finishes; dropping on a compatible socket keeps it.
 
 ## Step: Cancel without panning or opening a menu
 

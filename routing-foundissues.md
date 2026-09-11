@@ -63,3 +63,17 @@ Scope: unrelated observations during planning and implementation against `d96967
 - Observation: on the Debug editor launched at 1280 by 720, its first screenshot was 860 bytes, below the test's 2,000-byte content threshold. The test stopped there; it did not exercise recoloring or its final undo assertions. The debug log query reported no error entries.
 - Routing boundary: the separate reroute forwarding/reload/connection-undo test passed in the same run. No screenshot threshold, rendering code, or existing test behavior was changed.
 - Follow-up: investigate the captured output and window/scene state independently. The cause has not been established or reproduced on an unchanged baseline, so this is not claimed as a confirmed pre-existing product defect.
+
+## 9. Generic child deletion does not snapshot all child settings
+
+- Source: `Editor/UiModel/Commands/Graph/DeleteSymbolChildrenCommand.cs`, its `ChildEntry` snapshot and `Undo`; `Editor/UiModel/SymbolUi.Child.cs`.
+- Observation: the existing deletion snapshot keeps identity, name, geometry, section, non-default inputs, and time-clip data. It omits output disabled/dirty flags, bypass, UI style/comment, snapshot configuration, and connection-style overrides.
+- Potential impact: undoing a generic node deletion can lose these settings. This was identified from the snapshot fields; the full generic deletion UI was not independently reproduced.
+- Routing boundary: automatic removal uses a dedicated, complete reroute snapshot. Leave the generic deletion command unchanged.
+
+## 10. Escape from a connection-end drag does not cancel its macro
+
+- Source: `Editor/Gui/MagGraph/States/GraphStates.cs`, the Escape branch in `DragConnectionEnd.Update`.
+- Observation: this branch switches to `Default` without calling `CancelMacroCommand`; the equivalent `DragConnectionBeginning` branch does cancel. A disconnected edge and an unpublished macro can remain after the connection-end branch.
+- Routing boundary: cleanup is appended only when an edit macro completes, so it does not delete an anchor merely because a reconnect drag temporarily isolates it. Explicit macro cancellation discards pending cleanup. Do not rewrite existing connection-drag cancellation behavior as part of automatic removal.
+- Follow-up: reproduce Escape while dragging a previously connected input end, inspect the wire and next undo entry, then fix the existing state transition separately.

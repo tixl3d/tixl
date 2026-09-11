@@ -7,6 +7,7 @@ using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Modification;
@@ -174,21 +175,43 @@ internal sealed class GraphUiContext
     internal MacroCommand StartMacroCommand(string title)
     {
         Debug.Assert(MacroCommand == null);
+        var composition = CompositionInstance.Symbol;
+        _rerouteCleanupCompositionId = composition.Id;
+        _rerouteCleanupCommand = new RemoveDisconnectedReroutesCommand(composition.Id, RerouteOperations.CaptureConnectedReroutes(composition));
         MacroCommand = new MacroCommand(title);
         return MacroCommand;
     }
     
     internal MacroCommand StartOrContinueMacroCommand(string title)
     {
-        MacroCommand ??= new MacroCommand(title);
-        return MacroCommand;
+        return MacroCommand ?? StartMacroCommand(title);
     }
     
     internal void CompleteMacroCommand()
     {
         Debug.Assert(MacroCommand != null);
+        if (_rerouteCleanupCommand != null)
+        {
+            _rerouteCleanupCommand.Do();
+            if (_rerouteCleanupCommand.AppliedCount > 0)
+            {
+                MacroCommand!.AddExecutedCommandForUndo(_rerouteCleanupCommand);
+                Layout.FlagStructureAsChanged();
+                if (ProjectView.CompositionInstance?.Symbol.Id == _rerouteCleanupCompositionId)
+                {
+                    for (var index = Selector.Selection.Count - 1; index >= 0; index--)
+                    {
+                        var selected = Selector.Selection[index];
+                        if (selected is SymbolUi.Child && !CompositionInstance.Symbol.Children.ContainsKey(selected.Id))
+                            Selector.DeselectNode(selected);
+                    }
+                }
+            }
+        }
+
         UndoRedoStack.Add(MacroCommand);
         MacroCommand = null;
+        _rerouteCleanupCommand = null;
     }
     
     internal void CancelMacroCommand()
@@ -196,6 +219,7 @@ internal sealed class GraphUiContext
         Debug.Assert(MacroCommand != null);
         MacroCommand.Undo();
         MacroCommand = null;
+        _rerouteCleanupCommand = null;
     }
     
     // Dialogs
@@ -255,4 +279,7 @@ internal sealed class GraphUiContext
 
         return results;
     }
+
+    private RemoveDisconnectedReroutesCommand? _rerouteCleanupCommand;
+    private Guid _rerouteCleanupCompositionId;
 }

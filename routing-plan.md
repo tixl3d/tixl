@@ -47,7 +47,7 @@ A.out -> D.in                R.out -> C.in
 
 ### Ctrl + RMB cutting
 
-- Remove only crossed, existing connection occurrences. Leave operators, including now-disconnected reroutes, in place.
+- Remove only crossed, existing connection occurrences. Keep ordinary operators; remove reroutes that lose their last incident connection as part of the same undoable edit.
 - Support cuts on wires into or out of anchors and on ordinary wires.
 - A stroke hitting nothing produces no command and no dirty flag change.
 
@@ -64,13 +64,14 @@ A.out -> D.in                R.out -> C.in
 
 ### Anchor interaction
 
-- A small type-colored body, one real input on the left, and one real output on the right. Both socket targets remain available when disconnected.
+- A small type-colored body, one real input on the left, and one real output on the right. A disconnected socket remains available while the other side is connected; both remain available on a newly added blank anchor.
 - Initial body size: approximately 16 by 16 canvas units, with final screen scaling following existing TiXL canvas/UI scale rules. Tune this within the existing draw file after visual inspection.
 - Body click/drag selects and moves the ordinary child. Socket drag uses the existing input/output connection states, compatibility checks, replacement behavior, and cycle prevention.
 - Give input, body, and output distinct hover regions; a larger hit target must not let the last registered socket capture both sides.
 - Selection/hover outlines and a tooltip provide feedback. The tooltip can show the retained type and source name. No title row, thumbnail, custom UI, or normal node badges are needed on the compact body.
 - Default Delete removes the reroute and incident wires through ordinary node deletion. It does not reconnect its neighbors.
 - Disconnection does not change the concrete type. Reconnecting another type is rejected through normal type checking; implicit type changes or wildcard reroutes are outside scope.
+- When a completed disconnect action leaves an anchor with no input or output connections, delete it in the same undo entry. This applies to manual wire disconnection, Disconnect, shake, and cutting. Check final state after rewiring rather than deleting in an individual connection command. Do not sweep anchors during drawing or remove newly added blank anchors before they can be wired.
 
 ## 3. Verified constraints that determine the design
 
@@ -200,6 +201,8 @@ The rewritten topology is an edge subdivision/fan-out factorization. It cannot i
 
 Group captured occurrences by target endpoint, then delete in **descending target ordinal** within each group. Reverse undo restores ascending ordinals. This preserves remaining input order and duplicate edges even when one stroke cuts several inputs at the same target.
 
+Append deletion steps for reroute endpoints with no surviving incident connection. Undo recreates those children before restoring their wires. Keep these steps inside the guarded routing command so failed preflight or rollback cannot leave an independent cleanup command deleting nodes.
+
 ### Failure and undo-stack behavior
 
 `MacroCommand` is not a transaction: it does not roll back partial execution. Preflight must happen before execution. Keep the ordered subcommand list in the routing-specific wrapper so initial execution and redo can verify each step's expected child/connection postcondition. Existing add commands can warn and return without throwing; treat an unmet postcondition as failure too. Track completed subcommands and undo them in reverse if a step fails; include the failing step if inspection shows it already mutated the graph. Do not push a failed/empty edit. Implement this locally rather than changing `MacroCommand` for the whole editor or depending only on exceptions from `MacroCommand.Do()`.
@@ -322,7 +325,17 @@ The original eleven existing Editor files and two new helpers were sufficient fo
 
 Also extended the existing `Tests/Editor.IntegrationTests/GraphAcceptanceTests.cs` with a durable regression test. The existing shortcut help and manual connection test document contain usage and acceptance steps.
 
-Total production footprint: **14 existing Editor files, 2 new Editor helpers, and 235 new operator content/marker files**. The 234 small operator triplet files are required by the conventional one-concrete-type-per-source-file approach; no existing operator definitions were changed. Documentation and the existing integration test are counted separately. No changes were made to Core, Serialization, Player, project files, the shared canvas, the undo stack, connection commands, or snapper internals.
+The initial implementation changed **14 existing Editor files, 2 new Editor helpers, and 235 new operator content/marker files**. The automatic cleanup follow-up below adds one Editor helper and a narrow extension to `SymbolUi.External.cs`. The 234 small operator triplet files are required by the conventional one-concrete-type-per-source-file approach; no existing operator definitions were changed. Documentation and the existing integration test are counted separately. No changes were made to Core, Serialization, Player, project files, the shared canvas, the undo stack, connection commands, or snapper internals.
+
+### Automatic removal after disconnection
+
+- `RemoveDisconnectedReroutesCommand.cs` stores child/type/composition GUIDs and value/UI snapshots, removes only explicitly eligible fully isolated reroutes, and recreates them before connection undo. It preserves child identity, position, input values, output flags, name/comment, section membership, and snapshot/UI settings without retaining instances or package references.
+- `GraphUiContext` captures connected reroutes when an edit macro starts. It appends cleanup only after the macro finishes, and discards the pending cleanup when the macro is cancelled. This permits temporary disconnection while reconnecting or choosing a replacement operator.
+- `NodeActions.DisconnectNodes` appends the same cleanup after its existing disconnection/reconnection steps. `MagItemMovement` finishes a reroute's active move before shake can remove it, avoiding stale dragged-item references; movement and the disconnect retain their existing separate undo actions.
+- `RerouteOperations` includes cleanup as guarded child-removal steps for cutting. Its preflight can resolve absent children from their recorded definitions on undo, and rollback covers the cleanup along with the wire changes.
+- `SymbolUi.AddChild` receives an optional bypass-state argument for reconstructing a deleted child before live instances are created. Existing callers retain their defaults; this avoids losing an authored bypass state during cleanup undo.
+- Candidate collection and snapshots run at explicit edit boundaries. Drawing does no orphan scan, and initially blank anchors are not eligible for unrelated cleanup. The existing manual connection test set contains last-wire, multi-output, chained-anchor, undo/redo, reconnection, and shake cases.
+- Verification: the Debug Editor builds without warnings/errors. A 27-check isolated fixture using the actual compiled Editor graph and command types verifies macro completion/cancellation/reconnection, Disconnect, shake termination, last-wire cutting, selection cleanup, and undo/redo. A separate 26-check fixture loads TypeOperators normally and uses a live parent instance to verify exact metadata/default-value restoration, bypass/disabled/dirty flags in both model and live slots, redo, partial-connection retention, empty-anchor retention, and rejection of stale redo. The diagnostic fixtures live under ignored `artifacts/routing-ui-verification/` and `artifacts/routing-cleanup-verification/`; native mouse input is not part of these checks.
 
 ### Automated verification
 

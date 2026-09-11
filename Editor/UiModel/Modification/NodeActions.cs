@@ -684,6 +684,8 @@ internal static class NodeActions
 
         if (removeCommands.Count > 0)
         {
+            removeCommands.Add(new RemoveDisconnectedReroutesCommand(compositionOp.Symbol.Id,
+                                                                      RerouteOperations.CaptureConnectedReroutes(compositionOp.Symbol)));
             var macro = new MacroCommand("Disconnect nodes", removeCommands);
             UndoRedoStack.AddAndExecute(macro);
         }

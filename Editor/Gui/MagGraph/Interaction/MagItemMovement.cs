@@ -390,7 +390,32 @@ internal sealed partial class MagItemMovement
         if (_connectionsToDraggedItems.Count == 0)
             return false;
 
-        NodeActions.DisconnectNodes(context.CompositionInstance, DraggedItems.Select(i => i.Selectable).ToList());
+        var draggedSelectables = DraggedItems.Select(i => i.Selectable).ToList();
+        var reroutesToRemove = new HashSet<MagGraphItem>();
+        foreach (var connection in _connectionsToDraggedItems)
+        {
+            if (connection.SourceItem.IsReroute && DraggedItems.Contains(connection.SourceItem))
+                reroutesToRemove.Add(connection.SourceItem);
+            if (connection.TargetItem.IsReroute && DraggedItems.Contains(connection.TargetItem))
+                reroutesToRemove.Add(connection.TargetItem);
+        }
+
+        foreach (var connection in _layout.MagConnections)
+        {
+            if (!DraggedItems.Contains(connection.SourceItem) || !DraggedItems.Contains(connection.TargetItem))
+                continue;
+
+            reroutesToRemove.Remove(connection.SourceItem);
+            reroutesToRemove.Remove(connection.TargetItem);
+        }
+
+        if (reroutesToRemove.Count > 0)
+        {
+            CompleteDragOperation(context);
+            context.StateMachine.SetState(GraphStates.Default, context);
+        }
+
+        NodeActions.DisconnectNodes(context.CompositionInstance, draggedSelectables);
 
         // foreach (var c in _borderConnections)
         // {

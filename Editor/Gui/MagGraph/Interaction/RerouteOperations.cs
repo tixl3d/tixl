@@ -76,7 +76,8 @@ internal static class RerouteOperations
     private readonly record struct Endpoint(Guid ChildId, Guid SlotId);
     private readonly record struct Definition(Guid SymbolId, Guid InputId, Guid OutputId);
     private sealed record TargetSnapshot(Endpoint Target, Endpoint[] Sources);
-    private sealed record CommandStep(ICommand Command, ConnectionOccurrence? Connection, bool AddsConnection, Guid ChildId, Guid SymbolId);
+    private sealed record CommandStep(ICommand Command, ConnectionOccurrence? Connection, bool AddsConnection, Guid ChildId, Guid SymbolId,
+                                      bool AddsChild = true);
 
     internal static ConnectionOccurrence Capture(MagGraphConnection connection)
     {
@@ -87,6 +88,27 @@ internal static class RerouteOperations
     internal static bool IsReroute(Symbol symbol)
     {
         return TryGetDefinition(symbol, out _);
+    }
+
+    internal static HashSet<Guid> CaptureConnectedReroutes(Symbol symbol)
+    {
+        var connectedChildren = new HashSet<Guid>();
+        foreach (var connection in symbol.Connections)
+        {
+            if (connection.SourceParentOrChildId != Guid.Empty)
+                connectedChildren.Add(connection.SourceParentOrChildId);
+            if (connection.TargetParentOrChildId != Guid.Empty)
+                connectedChildren.Add(connection.TargetParentOrChildId);
+        }
+
+        var reroutes = new HashSet<Guid>();
+        foreach (var (id, child) in symbol.Children)
+        {
+            if (connectedChildren.Contains(id) && IsReroute(child.Symbol))
+                reroutes.Add(id);
+        }
+
+        return reroutes;
     }
 
     internal static void GetAnchorPositions(IReadOnlyList<StrokeHit> hits, List<Vector2> positions)
@@ -169,6 +191,28 @@ internal static class RerouteOperations
                 steps.Add(ConnectionStep(symbol, occurrence, false));
                 targets[TargetOf(occurrence)].RemoveAt(occurrence.MultiInputIndex);
             }
+
+            var isolatedReroutes = CaptureConnectedReroutes(symbol);
+            var targetOrdinals = new Dictionary<Endpoint, int>();
+            foreach (var connection in symbol.Connections)
+            {
+                var target = new Endpoint(connection.TargetParentOrChildId, connection.TargetSlotId);
+                var ordinal = targetOrdinals.GetValueOrDefault(target);
+                targetOrdinals[target] = ordinal + 1;
+                var occurrence = new ConnectionOccurrence(connection.SourceParentOrChildId, connection.SourceSlotId,
+                                                          connection.TargetParentOrChildId, connection.TargetSlotId, ordinal);
+                if (seen.Contains(occurrence))
+                    continue;
+
+                isolatedReroutes.Remove(connection.SourceParentOrChildId);
+                isolatedReroutes.Remove(connection.TargetParentOrChildId);
+            }
+
+            foreach (var id in isolatedReroutes)
+            {
+                var cleanup = new RemoveDisconnectedReroutesCommand(symbol.Id, [id]);
+                steps.Add(new CommandStep(cleanup, null, false, id, symbol.Children[id].Symbol.Id, AddsChild: false));
+            }
         }
         else
         {
@@ -214,6 +258,15 @@ internal static class RerouteOperations
             {
                 if (step.ChildId != Guid.Empty)
                     context.Selector.TrySelectCompositionChild(composition, step.ChildId);
+            }
+        }
+        else
+        {
+            for (var index = context.Selector.Selection.Count - 1; index >= 0; index--)
+            {
+                var selected = context.Selector.Selection[index];
+                if (selected is SymbolUi.Child && !symbol.Children.ContainsKey(selected.Id))
+                    context.Selector.DeselectNode(selected);
             }
         }
 
@@ -550,8 +603,9 @@ internal static class RerouteOperations
                 if (!SymbolUiRegistry.TryGetSymbolUi(step.SymbolId, out var definitionUi) || !IsReroute(definitionUi.Symbol))
                     return false;
 
+                var shouldExist = step.AddsChild == applied;
                 var exists = ui.Symbol.Children.TryGetValue(step.ChildId, out var child);
-                if (exists != applied || ui.ChildUis.ContainsKey(step.ChildId) != applied || exists && child!.Symbol.Id != step.SymbolId)
+                if (exists != shouldExist || ui.ChildUis.ContainsKey(step.ChildId) != shouldExist || exists && child!.Symbol.Id != step.SymbolId)
                     return false;
             }
 
@@ -561,6 +615,7 @@ internal static class RerouteOperations
         private bool ValidateSlotContracts(Symbol symbol)
         {
             var plannedChildren = new Dictionary<Guid, Symbol>();
+            var merging = false;
             foreach (var step in _steps)
             {
                 if (step.ChildId == Guid.Empty)
@@ -570,12 +625,13 @@ internal static class RerouteOperations
                     return false;
 
                 plannedChildren.Add(step.ChildId, definitionUi.Symbol);
+                merging |= step.AddsChild;
             }
 
             foreach (var step in _steps)
             {
                 if (step.Connection is { } connection
-                    && !TryGetConnectionType(symbol, connection, plannedChildren.Count > 0, out _, out _, plannedChildren))
+                    && !TryGetConnectionType(symbol, connection, merging, out _, out _, plannedChildren))
                     return false;
             }
 
@@ -595,7 +651,8 @@ internal static class RerouteOperations
                     step.Command.Do();
                 }
 
-                if (ui.Symbol.Children.ContainsKey(step.ChildId) == undo || ui.ChildUis.ContainsKey(step.ChildId) == undo)
+                var shouldExist = step.AddsChild != undo;
+                if (ui.Symbol.Children.ContainsKey(step.ChildId) != shouldExist || ui.ChildUis.ContainsKey(step.ChildId) != shouldExist)
                     throw new InvalidOperationException("The reroute child was not updated.");
                 return;
             }
