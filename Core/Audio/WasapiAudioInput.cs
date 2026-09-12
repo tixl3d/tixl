@@ -5,6 +5,7 @@ using System.Linq;
 using ManagedBass;
 using ManagedBass.Wasapi;
 using T3.Core.Animation;
+using T3.Core.Audio.Timing;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
@@ -209,7 +210,7 @@ public static class WasapiAudioInput
         BassWasapi.Stop();
         BassWasapi.Free();
         ActiveInputDeviceName = null;
-        BarPhaseTracker.Reset();
+        DanceAiPhaseTracker.Reset();
     }
 
     /// <summary>
@@ -475,7 +476,7 @@ public static class WasapiAudioInput
         {
             if (playbackSettings.Playback.BeatLockSource != CompositionSettings.BeatLockSources.OnsetDetection)
             {
-                BarPhaseTracker.FeedCapture(buffer, length, _activeChannelCount, SampleRate);
+                DanceAiPhaseTracker.FeedCapture(buffer, length, _activeChannelCount, SampleRate);
             }
             else
             {

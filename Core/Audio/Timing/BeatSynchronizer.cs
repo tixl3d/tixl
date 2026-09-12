@@ -4,7 +4,7 @@ using T3.Core.DataTypes.DataSet;
 using T3.Core.IO;
 using T3.Core.Settings;
 
-namespace T3.Core.Audio;
+namespace T3.Core.Audio.Timing;
 
 /// <summary>
 /// Analyzes the external WASAPI system audio and attempts to "latch onto" the audio timing so that the BPM

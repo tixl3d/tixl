@@ -1,4 +1,4 @@
-﻿namespace T3.Core.Audio;
+﻿namespace T3.Core.Audio.Timing;
 
 /// <summary>
 /// A helper class to provides current status details of the beat tapping / and timing offsets.

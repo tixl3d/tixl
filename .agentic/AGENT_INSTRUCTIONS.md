@@ -108,15 +108,18 @@ Follow the description conventions from the wiki
 - Prefix private fields with `_`
 - Prefer slightly longer, descriptive names when clarity improves (e.g. `faceIndex` over `i`)
 - When separating concerns, consider splitting pure data/state from drawing/IO into distinct classes (`RollingMetric` + `MetricGraphView` is a reference example). Useful when the data class has non-editor consumers, but don't force it when there's only one caller.
+- **Group a crowded namespace before adding to it.** Splitting a feature into small classes is welcome, but a folder like `Core/Audio` with 30+ files needs sub-folders per concern (`Core/Audio/Timing/` for beat tracking and tempo), each with its own namespace. When a change adds two or more related classes to a flat folder, create the sub-namespace and move the existing siblings of that concern along.
 
 ## Comments
 
 Comments live forever. They must earn their place. Anyone reading the file six months from now should still benefit from every line of comment in it.
 
 - **No session context in source.** Do not reference Sentry issue IDs (`see Sentry TOOLL3-XYZ`), plan filenames (`see Plan_FooBar.md Phase 2`), commit titles, dates, or "this fix / the previous commit." Those belong in commit messages and plan files, not in code. A reader without the conversation has no use for them — they're noise that erodes signal.
+- **Name from the description.** Before naming a field, constant or method, write the one sentence a reader would need about it, then make the name say that sentence: "how many bars the tempo is averaged over" is `MaxBarsAveragedForTempo`, not `IntervalCapacity`. A comment must never repeat an identifier or restate the name; if a name needs one, rename instead. Names are as short as possible and as long as necessary: `DefaultBpm` and `MinBarDurationSec` are complete, `TempoTrimPerBarOfError` earns its length, `MaxCorrectionSpeedRelativeToTempo` does not. Suffix seconds with `Sec`, not `S`.
 - **Comment why, not what.** If the code says `DataBuffers?.Dispose()`, explain *why* `DataBuffers` can be null in this branch — don't explain what `?.` does.
 - **One short line beats a paragraph.** `// MidiIn callbacks fire on per-device threads; serialize writes here.` is more useful than a five-line block restating the same. **Cap inline comments at ~2 lines.** A longer block enumerating every reason/edge case/alternative (e.g. "case-insensitive because X… strip by length not Replace because Y… which would also Z…") is a smell — keep the single most important *why* and drop the rest, or move it to xmldoc. If you find yourself writing a third sentence, ask whether the function name or xmldoc should carry it instead.
 - **No procedural narration.** "Register X as the very first thing because if we don't, Y will happen later" — drop. The order of statements is visible; the *reason ordering matters* is the only useful note, and it can be one line.
+- **Notes on members are doc comments, not `//` lines.** A `//` line above a field is invisible on hover; a doc comment shows. For private members (constants, fields, methods) the terse form `/** one line */` is enough (no `<summary>` tag needed for the IDE); public and internal API keeps `/// <summary>`. Reserve `//` for notes inside method bodies.
 - **xmldoc is for API contracts.** Use `<summary>` to describe what a member does and when callers should use it. Don't journal bugs of the day or fix history there.
 - **Preserve good existing comments.** Architectural notes, non-obvious invariants, "this looks wrong but it's correct because X" — leave them. The rule is about *not adding* noise, not about scrubbing the file.
 
@@ -405,6 +408,7 @@ Log.Debug("SwiftCam: pre-loading native DLL");
 **Use `Log.Warning` for user-actionable problems** (failed Open, disconnects, frame timeouts, unrecoverable state) and `Log.Debug` for one-time lifecycle traces (start/stop, first frame, reconnect triggered). High-frequency or per-frame trace probes belong behind a `LogMessages` (or equivalent) input toggle — default off — so the log stays readable in steady state.
 
 ## Review and Quality Expectations
+- **Feature reviews follow `.agentic/Reviews/FEATURE_REVIEW.md`** — four lenses (elegance, naming, robustness, realtime performance), ranked findings with file:line, fixes only on request. Agent-specific wrappers (e.g. `.claude/skills/review-tixl-feature`) must only point at that file, never duplicate it.
 - Point out obvious problems, misleading code, incorrect implementations, and typos
 - Fix spelling mistakes in touched comments on the fly
 - Add parameter documentation only when parameter purpose is not obvious from the name
