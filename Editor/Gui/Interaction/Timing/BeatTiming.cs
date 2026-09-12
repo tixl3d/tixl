@@ -158,13 +158,22 @@ internal static class BeatTiming
                 _measureStartTime += MeasureDuration;
             }
             
-            var usesPhaseModel = playbackSettings.Playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModel;
-            if (playbackSettings.Playback.EnableAudioBeatLocking && usesPhaseModel && BarPhaseTracker.IsAvailable)
+            var source = playbackSettings.Playback.BeatLockSource;
+            var usesPhaseModel = source != CompositionSettings.BeatLockSources.OnsetDetection;
+            var usesRawPhase = source == CompositionSettings.BeatLockSources.PhaseModelRaw;
+            if (usesPhaseModel)
+                BarPhaseTracker.Smoothing = playbackSettings.Playback.BeatLockSmoothing;
+
+            var offsetInBars = playback.BarsFromSeconds(playbackSettings.Playback.BeatLockAudioOffsetSec);
+            if (playbackSettings.Playback.EnableAudioBeatLocking && usesRawPhase && BarPhaseTracker.HasEstimates)
             {
-                // The model finds the bar start itself, so no resync tap is required and
-                // the extrapolator already smooths the phase.
-                BeatTime = BarPhaseTracker.BarProgress
-                           + playback.BarsFromSeconds(playbackSettings.Playback.BeatLockAudioOffsetSec);
+                BeatTime = BarPhaseTracker.RawBarProgress + offsetInBars;
+                _beatDuration = 60.0 / BarPhaseTracker.RawBpm;
+            }
+            else if (playbackSettings.Playback.EnableAudioBeatLocking && usesPhaseModel && !usesRawPhase && BarPhaseTracker.IsAvailable)
+            {
+                // The model finds the bar start itself, so no resync tap is required.
+                BeatTime = BarPhaseTracker.BarProgress + offsetInBars;
                 _beatDuration = 60.0 / BarPhaseTracker.CurrentBpm;
             }
             else if (playbackSettings.Playback.EnableAudioBeatLocking && !usesPhaseModel && _resynced)

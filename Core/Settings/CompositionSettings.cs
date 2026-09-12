@@ -115,6 +115,7 @@ public sealed class CompositionSettings
     {
         OnsetDetection,
         PhaseModel,
+        PhaseModelRaw,
     }
 
     /// <summary>
@@ -192,6 +193,7 @@ public sealed class CompositionSettings
 
         public bool EnableAudioBeatLocking = true;
         public BeatLockSources BeatLockSource;
+        public float BeatLockSmoothing = 0.5f;
         public float BeatLockAudioOffsetSec;
     }
 
@@ -224,6 +226,7 @@ public sealed class CompositionSettings
                 writer.WriteObject(nameof(PlaybackConfig.AudioInputDeviceName), Playback.AudioInputDeviceName);
                 writer.WriteObject(nameof(PlaybackConfig.EnableAudioBeatLocking), Playback.EnableAudioBeatLocking);
                 writer.WriteValue(nameof(PlaybackConfig.BeatLockSource), Playback.BeatLockSource);
+                writer.WriteValue(nameof(PlaybackConfig.BeatLockSmoothing), Playback.BeatLockSmoothing);
                 writer.WriteObject(nameof(PlaybackConfig.BeatLockAudioOffsetSec), Playback.BeatLockAudioOffsetSec);
 
                 if (Playback.AudioClips.Count != 0)
@@ -330,6 +333,7 @@ public sealed class CompositionSettings
                                           AudioInputDeviceName = JsonUtils.ReadValueSafe<string>(playbackToken, nameof(PlaybackConfig.AudioInputDeviceName)) ?? string.Empty,
                                           EnableAudioBeatLocking = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.EnableAudioBeatLocking), false),
                                           BeatLockSource = JsonUtils.ReadEnum<BeatLockSources>(playbackToken, nameof(PlaybackConfig.BeatLockSource)),
+                                          BeatLockSmoothing = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.BeatLockSmoothing), 0.5f),
                                           BeatLockAudioOffsetSec = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.BeatLockAudioOffsetSec), 0f),
                                       },
                            Audio = audioToken != null

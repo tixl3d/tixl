@@ -473,7 +473,7 @@ public static class WasapiAudioInput
 
         if (playbackSettings.Playback.EnableAudioBeatLocking)
         {
-            if (playbackSettings.Playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModel)
+            if (playbackSettings.Playback.BeatLockSource != CompositionSettings.BeatLockSources.OnsetDetection)
             {
                 BarPhaseTracker.FeedCapture(buffer, length, _activeChannelCount, SampleRate);
             }

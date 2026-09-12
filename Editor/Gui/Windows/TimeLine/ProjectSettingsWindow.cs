@@ -1028,12 +1028,29 @@ internal sealed class ProjectSettingsWindow : Window
                                                                         tooltip: """
                                                                         Onset Detection follows transients and needs a tapped resync to find the bar.
                                                                         Phase Model uses a neural network that finds tempo and bar start on its own.
+                                                                        Phase Model Raw passes the network output through unprocessed, for comparison.
                                                                         """);
-                        if (playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModel)
+                        if (playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModelRaw)
+                        {
+                            FormInputs.AddHint(BarPhaseTracker.HasEstimates
+                                                   ? $"Raw: {BarPhaseTracker.RawBpm:0.0} BPM, phase error ±{BarPhaseTracker.ExpectedPhaseError:0.00} bars"
+                                                   : BarPhaseTracker.StatusMessage);
+                        }
+                        else if (playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModel)
                         {
                             FormInputs.AddHint(BarPhaseTracker.IsAvailable
-                                                   ? $"{BarPhaseTracker.StatusMessage}: {BarPhaseTracker.CurrentBpm:0.0} BPM, phase error ±{BarPhaseTracker.ExpectedPhaseError:0.00} bars"
+                                                   ? $"{BarPhaseTracker.StatusMessage}: {BarPhaseTracker.CurrentBpm:0.0} BPM (model {BarPhaseTracker.RawBpm:0.0}), phase error ±{BarPhaseTracker.ExpectedPhaseError:0.00} bars"
                                                    : BarPhaseTracker.StatusMessage);
+                            FormInputs.SetIndentToParameters();
+                            modified |= FormInputs.AddFloat("Beat Lock Smoothing",
+                                ref playback.BeatLockSmoothing,
+                                0f, 1f, 0.01f,
+                                true, true,
+                                """
+                                How strongly each detected beat corrects the clock.
+                                0 follows the model tightly and may wobble, 1 trusts the running tempo and corrects slowly.
+                                """,
+                                0.5f);
                         }
                     }
 
