@@ -6,6 +6,13 @@ using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
+/*
+ * Tracks a cut or reroute gesture against the actual tessellated paths drawn by the canvas.
+ * Mouse segments, hit tolerance, and the bounded trail use screen coordinates; stored hits and
+ * anchor positions use canvas coordinates. Occurrences are collected once and committed on release.
+ * _compositionId and _version invalidate the gesture if its graph changes, while reusable buffers
+ * avoid rebuilding placement data on every frame when no additional wire has been crossed.
+ */
 internal sealed class ConnectionStroke
 {
     internal ConnectionStroke()
@@ -13,6 +20,7 @@ internal sealed class ConnectionStroke
         ObservePath = TestDrawnPath;
     }
 
+    // Invoke after SetConnection and before PathStroke clears the draw list's path; the delegate is reused.
     internal Action<ImDrawListPtr> ObservePath { get; }
     internal bool IsActive { get; private set; }
     internal bool IsCut { get; private set; }
@@ -63,6 +71,7 @@ internal sealed class ConnectionStroke
         _connection = connection;
     }
 
+    // Snapped wires have a visible marker instead of a cable path to intersect.
     internal void TestMarker(ImDrawListPtr drawList, Vector2 center, float radius)
     {
         if (!IsActive || _connection == null)
@@ -141,6 +150,10 @@ internal sealed class ConnectionStroke
         _context = null;
     }
 
+    /*
+     * Tests screen-space segments with a pixel tolerance and returns a point on the cable.
+     * Endpoint distance checks also cover near misses, parallel segments, and zero-length markers.
+     */
     internal static bool TryIntersectSegments(Vector2 strokeStart, Vector2 strokeEnd,
                                              Vector2 cableStart, Vector2 cableEnd,
                                              float tolerance, out Vector2 crossing)
@@ -202,6 +215,7 @@ internal sealed class ConnectionStroke
             {
                 var start = drawList._Path[i - 1];
                 var end = drawList._Path[i];
+                // Hidden cable portions must not receive hits through clipped canvas content.
                 if (!ClipSegment(ref start, ref end, clipMin, clipMax)
                     || !TryIntersectSegments(_previous, _current, start, end, HitTolerance, out var crossing))
                     continue;

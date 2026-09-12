@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.ShaderGraphNode through the .t3 connection; no C# evaluator is needed.
 [Guid("f46cd7e5-291c-4dfa-9eb0-ecc97ee317b8")]
 public sealed class RerouteShaderGraphNode : Instance<RerouteShaderGraphNode>, IRerouteNode
 {

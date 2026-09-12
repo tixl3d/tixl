@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes System.Collections.Generic.List<float> through the .t3 connection; no C# evaluator is needed.
 [Guid("b86b65d9-db1e-46d8-88a9-2bb010835929")]
 public sealed class RerouteFloatList : Instance<RerouteFloatList>, IRerouteNode
 {

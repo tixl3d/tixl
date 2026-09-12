@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.VectorField through the .t3 connection; no C# evaluator is needed.
 [Guid("7df77232-14f0-4a13-849b-a7b5d2315dca")]
 public sealed class RerouteVectorField : Instance<RerouteVectorField>, IRerouteNode
 {

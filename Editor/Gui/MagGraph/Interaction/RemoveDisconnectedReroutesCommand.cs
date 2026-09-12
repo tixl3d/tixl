@@ -8,8 +8,15 @@ using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
+/*
+ * Removes candidate anchors only when they have no incoming or outgoing connections at Do time.
+ * Callers capture candidates before disconnecting and append cleanup to the same undo operation,
+ * so undo restores anchors before reconnecting wires. The first successful Do fixes the snapshot
+ * set for redo; IDs and copied state survive graph reloads without retaining live graph objects.
+ */
 internal sealed class RemoveDisconnectedReroutesCommand : ICommand
 {
+    // Retain slot settings and editor metadata so undo restores more than the anchor's topology.
     private sealed class ChildSnapshot
     {
         internal ChildSnapshot(SymbolUi.Child ui)
@@ -73,6 +80,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
 
     public string Name => "Remove Disconnected Reroutes";
     public bool IsUndoable => true;
+    // Nonzero only while deletion is applied; callers use this to avoid recording an empty cleanup.
     internal int AppliedCount { get; private set; }
 
     public void Do()

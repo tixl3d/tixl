@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.SceneSetup through the .t3 connection; no C# evaluator is needed.
 [Guid("d10bb007-dc97-4b8d-baa6-bbe290d90fe7")]
 public sealed class RerouteSceneSetup : Instance<RerouteSceneSetup>, IRerouteNode
 {

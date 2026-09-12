@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.ComputeShader through the .t3 connection; no C# evaluator is needed.
 [Guid("cb80cc64-6ab1-4930-bfbb-f28f44385d40")]
 public sealed class RerouteComputeShader : Instance<RerouteComputeShader>, IRerouteNode
 {

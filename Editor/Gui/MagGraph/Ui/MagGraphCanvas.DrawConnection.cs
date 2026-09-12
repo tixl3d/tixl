@@ -18,6 +18,7 @@ internal sealed partial class MagGraphView
         if (connection.Style == MagGraphConnection.ConnectionStyles.Unknown)
             return;
 
+        // Preview geometry converges at the surviving dot; wires between the merging anchors disappear.
         var sourceInMerge = context.ItemMovement.TryGetRerouteMergePreview(connection.SourceItem, out var mergeSource, out var sourceRadius);
         var targetInMerge = context.ItemMovement.TryGetRerouteMergePreview(connection.TargetItem, out var mergeTarget, out var targetRadius);
         if (sourceInMerge && targetInMerge)
@@ -26,6 +27,7 @@ internal sealed partial class MagGraphView
         if (connection.SourceItem.IsCollapsedAway && connection.TargetItem.IsCollapsedAway)
             return;
 
+        // Observe only persistent wires: temporary drag previews have no graph occurrence to edit.
         var stroke = context.ConnectionStroke;
         var queryPath = stroke.IsActive && !connection.IsTemporary ? stroke.ObservePath : null;
         stroke.SetConnection(queryPath != null ? connection : null);

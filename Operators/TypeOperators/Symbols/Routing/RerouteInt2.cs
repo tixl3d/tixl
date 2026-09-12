@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.Vector.Int2 through the .t3 connection; no C# evaluator is needed.
 [Guid("abd018dc-c414-4897-a9b3-eb2375da196d")]
 public sealed class RerouteInt2 : Instance<RerouteInt2>, IRerouteNode
 {

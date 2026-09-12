@@ -16,6 +16,7 @@ namespace T3.Editor.Gui.MagGraph.States
 {
     internal static class GraphStates
     {
+        // A shake-off can delete the dragged anchor; wait for release before accepting another interaction.
         internal static State<GraphUiContext> WaitForMouseRelease
             = new(Enter: static context =>
                          {
@@ -30,6 +31,7 @@ namespace T3.Editor.Gui.MagGraph.States
                           },
                   Exit: static _ => { });
 
+        // The canvas owns stroke input and commits after drawing has collected the final frame's wire hits.
         internal static State<GraphUiContext> ConnectionStroke
             = new(Enter: static context =>
                          {

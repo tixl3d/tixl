@@ -11,11 +11,22 @@ using T3.Editor.UiModel.Commands.Graph;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
+/*
+ * Builds undoable cuts, typed reroute insertions, and anchor merges from connection snapshots.
+ * Crossed wires sharing one source slot share an anchor; target input order and duplicate wires
+ * are preserved. Definitions and live graph state are checked before applying or replaying an edit.
+ */
 internal static class RerouteOperations
 {
+    // MultiInputIndex distinguishes repeated wires with identical endpoints; Guid.Empty denotes the composition.
     internal readonly record struct ConnectionOccurrence(Guid SourceId, Guid SourceSlotId, Guid TargetId, Guid TargetSlotId, int MultiInputIndex);
     internal readonly record struct StrokeHit(ConnectionOccurrence Occurrence, Vector2 PositionOnCanvas);
 
+    /*
+     * Reuses grouping storage while previewing a stroke. Each source slot gets the average of its
+     * distinct wire hits in canvas coordinates; overlapping groups are separated vertically.
+     * Preview and commit use the same calculation so the inserted anchors match the preview.
+     */
     internal sealed class AnchorPlacementBuffer
     {
         internal void EnsureCapacity(int count)
@@ -75,9 +86,11 @@ internal static class RerouteOperations
 
     private readonly record struct Endpoint(Guid ChildId, Guid SlotId);
     private readonly record struct Definition(Guid SymbolId, Guid InputId, Guid OutputId);
+    // Sources is an ordered list, including duplicates, rather than a set of upstream endpoints.
     private sealed record TargetSnapshot(Endpoint Target, Endpoint[] Sources);
     private sealed record CommandStep(ICommand Command, ConnectionOccurrence? Connection, bool AddsConnection, Guid ChildId, Guid SymbolId,
                                       bool AddsChild = true);
+    // Guard all wires touching either anchor, including fan-out outside the replaced target inputs.
     private sealed record CollapseGuard(Guid DraggedId, Definition DraggedDefinition, Guid TargetId, Definition TargetDefinition,
                                         ConnectionOccurrence[] Before, ConnectionOccurrence[] After);
 
@@ -92,6 +105,7 @@ internal static class RerouteOperations
         return TryGetDefinition(symbol, out _);
     }
 
+    // Capture before editing so cleanup leaves deliberately unconnected anchors alone.
     internal static HashSet<Guid> CaptureConnectedReroutes(Symbol symbol)
     {
         var connectedChildren = new HashSet<Guid>();
@@ -123,6 +137,11 @@ internal static class RerouteOperations
         buffer.Calculate(hits, positions);
     }
 
+    /*
+     * Validates every captured occurrence before changing the graph. A cut removes only crossed
+     * occurrences; insertion replaces their source at the same target index and adds one anchor
+     * per source slot. Only a successfully applied edit is added to the undo stack.
+     */
     internal static bool TryApply(GraphUiContext context, bool cut, IReadOnlyList<StrokeHit> hits, out string error)
     {
         error = string.Empty;
@@ -275,6 +294,12 @@ internal static class RerouteOperations
         return true;
     }
 
+    /*
+     * Absorbs the dragged anchor into the stationary target within the current move macro.
+     * The target's upstream source wins when connected; otherwise the dragged source is used.
+     * Direct chains are resolved to an external source, fan-out retains its target indices,
+     * and cyclic results are rejected. previewOnly validates the proposal without mutating it.
+     */
     internal static bool TryCollapse(GraphUiContext context, Guid draggedId, Guid targetId, out string error, bool previewOnly = false)
     {
         error = string.Empty;
@@ -412,6 +437,11 @@ internal static class RerouteOperations
         return true;
     }
 
+    /*
+     * Only accept marked TypeOperators with one plain input/output pair of the same value type.
+     * Resolve the marker by name in the operator's own assembly because package reloads replace
+     * its CLR types; the Editor must not hold a reference to a particular package assembly.
+     */
     private static bool TryGetDefinition(Symbol symbol, out Definition definition)
     {
         definition = default;
@@ -499,6 +529,11 @@ internal static class RerouteOperations
         return true;
     }
 
+    /*
+     * merging requires value-only wiring: a scalar reroute cannot preserve a composition
+     * multi-input bundle or output metadata. Cutting may remove either. plannedChildren supplies
+     * definitions for anchors that the command will create or restore but that are not live yet.
+     */
     private static bool TryGetConnectionType(Symbol symbol, ConnectionOccurrence occurrence, bool merging, out Type? type, out string error,
                                              IReadOnlyDictionary<Guid, Symbol>? plannedChildren = null)
     {
@@ -624,6 +659,7 @@ internal static class RerouteOperations
         return connections.ToArray();
     }
 
+    // Check the proposed child graph; composition boundary slots are not child-to-child dependencies.
     private static bool IsAcyclic(Symbol symbol, TargetSnapshot[] replacements)
     {
         var downstream = new Dictionary<Guid, List<Guid>>();
@@ -658,6 +694,7 @@ internal static class RerouteOperations
         return visited == remainingInputs.Count;
     }
 
+    // Delete higher target indices first so earlier removals cannot shift the remaining occurrences.
     private static int CompareForDeletion(ConnectionOccurrence a, ConnectionOccurrence b)
     {
         var comparison = a.TargetId.CompareTo(b.TargetId);
@@ -704,6 +741,12 @@ internal static class RerouteOperations
         return false;
     }
 
+    /*
+     * Replays a routing edit using IDs and ordered before/after snapshots, resolving live symbols
+     * on each Do/Undo. _isApplied selects the expected state; undo reverses the step order.
+     * Stale contracts are rejected before mutation, each step's result is verified, and failures
+     * attempt to roll back completed steps rather than leaving an unchecked partial edit.
+     */
     private sealed class RoutingCommand : ICommand
     {
         public string Name { get; }

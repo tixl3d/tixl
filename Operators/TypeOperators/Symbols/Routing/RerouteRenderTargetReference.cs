@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.RenderTargetReference through the .t3 connection; no C# evaluator is needed.
 [Guid("fbc12c1a-ec4f-46a5-91c3-31ddd923bf5f")]
 public sealed class RerouteRenderTargetReference : Instance<RerouteRenderTargetReference>, IRerouteNode
 {

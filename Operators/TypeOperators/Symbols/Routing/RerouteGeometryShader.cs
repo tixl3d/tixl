@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.GeometryShader through the .t3 connection; no C# evaluator is needed.
 [Guid("15a56ac6-a12c-4191-a3c9-08f70e9d9547")]
 public sealed class RerouteGeometryShader : Instance<RerouteGeometryShader>, IRerouteNode
 {

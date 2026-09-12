@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.Rendering.Material.PbrMaterial through the .t3 connection; no C# evaluator is needed.
 [Guid("00fbd77b-c94a-4606-8ed1-2db9360c70cf")]
 public sealed class ReroutePbrMaterial : Instance<ReroutePbrMaterial>, IRerouteNode
 {

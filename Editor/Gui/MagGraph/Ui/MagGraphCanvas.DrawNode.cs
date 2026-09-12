@@ -1181,6 +1181,12 @@ internal sealed partial class MagGraphView
 
 
 
+    /*
+     * Draws the compact anchor with one padded hit area split into input, movable body, and output.
+     * The body retains a drag region even when socket tolerances overlap at low zoom. A valid merge
+     * preview hides the absorbed anchor and enlarges the survivor without changing graph topology.
+     * Stroke mouse ownership suppresses node interactions until the gesture has released the button.
+     */
     private void DrawReroute(MagGraphItem item, ImDrawListPtr drawList, GraphUiContext context)
     {
         if (item.InputLines.Length != 1 || item.OutputLines.Length != 1)

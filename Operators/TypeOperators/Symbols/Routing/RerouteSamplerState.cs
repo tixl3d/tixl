@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.SamplerState through the .t3 connection; no C# evaluator is needed.
 [Guid("cbf73235-5b79-4ceb-9d40-81ae9e29ee6f")]
 public sealed class RerouteSamplerState : Instance<RerouteSamplerState>, IRerouteNode
 {

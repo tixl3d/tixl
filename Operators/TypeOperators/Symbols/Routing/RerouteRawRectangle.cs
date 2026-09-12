@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Mathematics.Interop.RawRectangle through the .t3 connection; no C# evaluator is needed.
 [Guid("240b1703-395f-43b6-b9f7-b18e9c1ae979")]
 public sealed class RerouteRawRectangle : Instance<RerouteRawRectangle>, IRerouteNode
 {

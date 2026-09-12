@@ -39,6 +39,7 @@ public sealed class ChangeInstanceBypassedCommand : ICommand
             return;
         }
 
+        // Enforce this for every caller: bypass would replace a command reroute's prepare/restore proxy.
         if (shouldBeBypassed && RerouteOperations.IsReroute(child.Symbol))
             return;
 

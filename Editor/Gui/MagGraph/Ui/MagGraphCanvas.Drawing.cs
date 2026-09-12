@@ -16,6 +16,7 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 
 internal sealed partial class MagGraphView
 {
+    // Reservation outlives cancellation and includes release, preventing clicks from leaking into other widgets.
     internal bool ConsumesConnectionStrokeMouse => _consumeStrokeMouse || _strokeMouseOwner != null
                                                    || _strokeMouseReleaseFrame == ImGui.GetFrameCount();
 
@@ -346,6 +347,12 @@ internal sealed partial class MagGraphView
         FinishConnectionStrokeInput();
     }
 
+    /*
+     * Reserve a modified right-button gesture across graph views before their widgets see input.
+     * Alt routes and Ctrl cuts; holding both reserves the gesture without starting an edit.
+     * _strokeMouseOwner is shared across views, while _strokeOwner is the local hit collector.
+     * Cancellation stops collection but retains mouse ownership until release to suppress menus.
+     */
     private void UpdateConnectionStrokeInput()
     {
         UpdateSharedStrokeReservation();
@@ -409,6 +416,7 @@ internal sealed partial class MagGraphView
         }
     }
 
+    // Commit after drawing so the mouse-release segment can still cross a cable in this frame.
     private void FinishConnectionStrokeInput()
     {
         if (!_consumeStrokeMouse || !_strokeReleasePending)

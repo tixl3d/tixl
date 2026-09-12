@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.BindFlags through the .t3 connection; no C# evaluator is needed.
 [Guid("98932409-f9e8-46ca-bc4f-ccc08e021729")]
 public sealed class RerouteBindFlags : Instance<RerouteBindFlags>, IRerouteNode
 {

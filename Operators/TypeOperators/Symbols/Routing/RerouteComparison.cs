@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.Comparison through the .t3 connection; no C# evaluator is needed.
 [Guid("751aacca-1381-4582-ad22-aac1815d81e9")]
 public sealed class RerouteComparison : Instance<RerouteComparison>, IRerouteNode
 {

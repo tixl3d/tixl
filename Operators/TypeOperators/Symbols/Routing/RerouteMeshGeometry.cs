@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.MeshGeometry through the .t3 connection; no C# evaluator is needed.
 [Guid("f25793d0-e843-43ce-aeae-0980866a3080")]
 public sealed class RerouteMeshGeometry : Instance<RerouteMeshGeometry>, IRerouteNode
 {

@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.Operator.GizmoVisibility through the .t3 connection; no C# evaluator is needed.
 [Guid("bf099cc0-025d-44e5-a97b-46ae404442ae")]
 public sealed class RerouteGizmoVisibility : Instance<RerouteGizmoVisibility>, IRerouteNode
 {

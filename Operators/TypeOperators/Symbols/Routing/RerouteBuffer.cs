@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.Buffer through the .t3 connection; no C# evaluator is needed.
 [Guid("68d70eca-47a5-4ec1-99aa-70b9ae2e7728")]
 public sealed class RerouteBuffer : Instance<RerouteBuffer>, IRerouteNode
 {

@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.LegacyParticleSystem through the .t3 connection; no C# evaluator is needed.
 [Guid("2a96d838-4966-429c-96eb-22841855fe70")]
 public sealed class RerouteLegacyParticleSystem : Instance<RerouteLegacyParticleSystem>, IRerouteNode
 {

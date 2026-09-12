@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes System.Collections.Generic.List<string> through the .t3 connection; no C# evaluator is needed.
 [Guid("1a256d0e-f56d-4f13-b2a1-2147ad63248d")]
 public sealed class RerouteStringList : Instance<RerouteStringList>, IRerouteNode
 {

@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes float through the .t3 connection; no C# evaluator is needed.
 [Guid("f41e72fb-82ec-4381-b835-8007f2ce6894")]
 public sealed class RerouteFloat : Instance<RerouteFloat>, IRerouteNode
 {

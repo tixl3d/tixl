@@ -684,6 +684,7 @@ internal static class NodeActions
 
         if (removeCommands.Count > 0)
         {
+            // Capture before disconnecting; undo must restore removed anchors before reconnecting their wires.
             removeCommands.Add(new RemoveDisconnectedReroutesCommand(compositionOp.Symbol.Id,
                                                                       RerouteOperations.CaptureConnectedReroutes(compositionOp.Symbol)));
             var macro = new MacroCommand("Disconnect nodes", removeCommands);

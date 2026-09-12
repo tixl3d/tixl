@@ -72,6 +72,7 @@ internal static class TreeLayouting
         var handled = new HashSet<MagGraphItem>(selected);
         handled.ExceptWith(movableSelected);
         var obstacles = MagItemMovement.CollectSnappedItems(handled);
+        // Preserve hand-routed cable paths: anchors stay fixed and reserve space during auto-layout.
         foreach (var item in layout.Items.Values)
         {
             if (item.IsReroute && !item.IsCollapsedAway)

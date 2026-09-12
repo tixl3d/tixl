@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.RasterizerState through the .t3 connection; no C# evaluator is needed.
 [Guid("fff832dd-d776-4789-9e0f-41ca344c80e5")]
 public sealed class RerouteRasterizerState : Instance<RerouteRasterizerState>, IRerouteNode
 {

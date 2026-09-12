@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.PixelShader through the .t3 connection; no C# evaluator is needed.
 [Guid("dc440a5c-796e-475c-9c21-4b2f23a68509")]
 public sealed class ReroutePixelShader : Instance<ReroutePixelShader>, IRerouteNode
 {

@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.MeshBuffers through the .t3 connection; no C# evaluator is needed.
 [Guid("010bf03a-27a0-4d1b-bd8e-d23a482d8efd")]
 public sealed class RerouteMeshBuffers : Instance<RerouteMeshBuffers>, IRerouteNode
 {

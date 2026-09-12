@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.DXGI.Format through the .t3 connection; no C# evaluator is needed.
 [Guid("b5c8085e-05dc-4e58-92a5-44aa1f0e7abb")]
 public sealed class RerouteFormat : Instance<RerouteFormat>, IRerouteNode
 {

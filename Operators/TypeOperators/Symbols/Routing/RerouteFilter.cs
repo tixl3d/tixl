@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.Filter through the .t3 connection; no C# evaluator is needed.
 [Guid("38f55b51-360a-44df-b51a-cb9e013fc9a7")]
 public sealed class RerouteFilter : Instance<RerouteFilter>, IRerouteNode
 {

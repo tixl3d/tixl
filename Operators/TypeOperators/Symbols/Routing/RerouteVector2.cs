@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes System.Numerics.Vector2 through the .t3 connection; no C# evaluator is needed.
 [Guid("601cb757-45e5-422c-a4fa-f8e8faf24720")]
 public sealed class RerouteVector2 : Instance<RerouteVector2>, IRerouteNode
 {

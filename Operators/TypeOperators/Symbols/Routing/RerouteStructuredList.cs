@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.StructuredList through the .t3 connection; no C# evaluator is needed.
 [Guid("65f98fa4-5e8b-45ed-804f-5843cf331817")]
 public sealed class RerouteStructuredList : Instance<RerouteStructuredList>, IRerouteNode
 {

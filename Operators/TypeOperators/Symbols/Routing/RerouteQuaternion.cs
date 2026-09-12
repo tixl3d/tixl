@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes System.Numerics.Quaternion through the .t3 connection; no C# evaluator is needed.
 [Guid("2d54c862-9e4b-4068-8381-ea793a1a0cce")]
 public sealed class RerouteQuaternion : Instance<RerouteQuaternion>, IRerouteNode
 {

@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes string through the .t3 connection; no C# evaluator is needed.
 [Guid("b6c47dc1-e755-4221-a4ec-65440c631479")]
 public sealed class RerouteString : Instance<RerouteString>, IRerouteNode
 {

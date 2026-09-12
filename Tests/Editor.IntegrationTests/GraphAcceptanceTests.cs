@@ -11,6 +11,7 @@ namespace Editor.IntegrationTests;
 [Collection("Editor")]
 public sealed class GraphAcceptanceTests(EditorFixture editor)
 {
+    // Direct .t3 forwarding must retain dirty propagation and fallback values after undo, redo, and reload.
     [Fact]
     public void RerouteFloat_ForwardsChangesAcrossReloadAndConnectionUndo()
     {

@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes System.Text.StringBuilder through the .t3 connection; no C# evaluator is needed.
 [Guid("d88ac991-b40f-44a1-a120-12a8bf94125a")]
 public sealed class RerouteStringBuilder : Instance<RerouteStringBuilder>, IRerouteNode
 {

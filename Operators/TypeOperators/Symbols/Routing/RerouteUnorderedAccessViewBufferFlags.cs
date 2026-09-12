@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.UnorderedAccessViewBufferFlags through the .t3 connection; no C# evaluator is needed.
 [Guid("199e4bc5-d36e-4fad-b947-8461ebdf32ad")]
 public sealed class RerouteUnorderedAccessViewBufferFlags : Instance<RerouteUnorderedAccessViewBufferFlags>, IRerouteNode
 {

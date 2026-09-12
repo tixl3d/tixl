@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.DataSet.DataSet through the .t3 connection; no C# evaluator is needed.
 [Guid("d1c6b114-4670-4fb6-b906-91275533bcc2")]
 public sealed class RerouteDataSet : Instance<RerouteDataSet>, IRerouteNode
 {

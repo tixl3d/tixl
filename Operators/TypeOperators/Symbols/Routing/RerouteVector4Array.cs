@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes System.Numerics.Vector4[] through the .t3 connection; no C# evaluator is needed.
 [Guid("64e71fcf-b3c2-4428-aaeb-6dcf34d5be6a")]
 public sealed class RerouteVector4Array : Instance<RerouteVector4Array>, IRerouteNode
 {

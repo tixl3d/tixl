@@ -58,6 +58,11 @@ internal sealed partial class MagItemMovement
         UpdateSnappedConnectionsToDraggedItems();
     }
 
+    /*
+     * Finish movement and any valid single-anchor merge in one undo macro. Shake-off disables
+     * collapse because it is about to disconnect the dragged nodes, not drop them on a target.
+     * A merged anchor no longer exists, so it must not enter the input-selection picker.
+     */
     internal void CompleteDragOperation(GraphUiContext context, bool allowRerouteCollapse = true)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -136,6 +141,11 @@ internal sealed partial class MagItemMovement
         return target;
     }
 
+    /*
+     * Cache merge validation by candidate, dragged ID, and layout structure cycle; mouse movement
+     * alone does not change the proposed wiring. _previewDraggedId and _previewTargetId expose
+     * only a valid pair to drawing, which hides the dragged dot and joins wires at the target.
+     */
     private void UpdateRerouteMergePreview(GraphUiContext context)
     {
         _previewDraggedId = Guid.Empty;
@@ -524,6 +534,7 @@ internal sealed partial class MagItemMovement
 
         if (reroutesToRemove.Count > 0)
         {
+            // Cleanup removes dragged anchors; consume the held mouse button before they leave the layout.
             CompleteDragOperation(context, allowRerouteCollapse: false);
             context.StateMachine.SetState(GraphStates.WaitForMouseRelease, context);
         }
@@ -652,6 +663,7 @@ internal sealed partial class MagItemMovement
 
             foreach (var otherItem in overlappingItems)
             {
+                // Routing anchors keep their manually placed paths instead of joining operator snap stacks.
                 if (otherItem.IsReroute)
                     continue;
 
@@ -1364,6 +1376,7 @@ internal sealed partial class MagItemMovement
 
     private static void GetPotentialConnectionsAfterSnap(ref List<PotentialConnection> result, MagGraphItem a, MagGraphItem b)
     {
+        // Anchor wiring is explicit; proximity to a node must not introduce extra connections.
         if (a.IsReroute || b.IsReroute)
             return;
 
@@ -1483,6 +1496,7 @@ internal sealed partial class MagItemMovement
     {
         SpliceSets.Clear();
 
+        // Splicing assumes full operator rows and must not bypass selected routing anchors.
         foreach (var item in draggedItems)
         {
             if (item.IsReroute)

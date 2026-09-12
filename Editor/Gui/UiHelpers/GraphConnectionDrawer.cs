@@ -12,6 +12,10 @@ internal static class GraphConnectionDrawer
     /// <summary>
     /// Returns true if hovering...
     /// </summary>
+    /*
+     * queryPath lets routing gestures inspect the tessellated screen-space cable before
+     * PathStroke consumes it. Observers must leave the draw list's pending path intact.
+     */
     internal static bool DrawConnection(float canvasScale, ImRect Sn, Vector2 Sp,
                                         ImRect Tn, Vector2 Tp, Color color, float thickness,
                                         out Vector2 hoverPosition, out float normalizedHoverPos,

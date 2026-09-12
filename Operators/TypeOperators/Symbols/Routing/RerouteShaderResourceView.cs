@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.ShaderResourceView through the .t3 connection; no C# evaluator is needed.
 [Guid("84205996-1180-423d-934e-6b86dd232edd")]
 public sealed class RerouteShaderResourceView : Instance<RerouteShaderResourceView>, IRerouteNode
 {

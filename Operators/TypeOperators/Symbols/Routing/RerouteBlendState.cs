@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.BlendState through the .t3 connection; no C# evaluator is needed.
 [Guid("09d3027c-7387-4ded-9691-3f55744eda41")]
 public sealed class RerouteBlendState : Instance<RerouteBlendState>, IRerouteNode
 {

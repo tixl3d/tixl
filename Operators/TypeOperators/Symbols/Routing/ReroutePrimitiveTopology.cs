@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D.PrimitiveTopology through the .t3 connection; no C# evaluator is needed.
 [Guid("0f98aa11-4e24-4546-8aa4-ab7621c084bf")]
 public sealed class ReroutePrimitiveTopology : Instance<ReroutePrimitiveTopology>, IRerouteNode
 {

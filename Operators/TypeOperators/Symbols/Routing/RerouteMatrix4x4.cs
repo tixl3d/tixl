@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes System.Numerics.Matrix4x4 through the .t3 connection; no C# evaluator is needed.
 [Guid("437441f1-2da5-49aa-945f-c941b22ffc5a")]
 public sealed class RerouteMatrix4x4 : Instance<RerouteMatrix4x4>, IRerouteNode
 {

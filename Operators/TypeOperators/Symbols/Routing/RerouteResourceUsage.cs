@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.ResourceUsage through the .t3 connection; no C# evaluator is needed.
 [Guid("1faf7577-3416-4408-b0f8-656a9e8c02dc")]
 public sealed class RerouteResourceUsage : Instance<RerouteResourceUsage>, IRerouteNode
 {

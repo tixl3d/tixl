@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.FillMode through the .t3 connection; no C# evaluator is needed.
 [Guid("fcb87682-a90f-4ef2-8928-e32187ea6e92")]
 public sealed class RerouteFillMode : Instance<RerouteFillMode>, IRerouteNode
 {

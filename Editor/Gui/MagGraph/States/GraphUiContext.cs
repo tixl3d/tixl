@@ -172,6 +172,11 @@ internal sealed class GraphUiContext
     internal Vector2 PeekAnchorInCanvas;
     internal bool ShouldAttemptToSnapToInput;
     
+    /*
+     * Capture connected anchors before the first mutation so completion removes only anchors
+     * disconnected by this interaction. Cleanup is appended last, making undo restore anchors
+     * before replaying the macro's connection changes; cancellation discards pending cleanup.
+     */
     internal MacroCommand StartMacroCommand(string title)
     {
         Debug.Assert(MacroCommand == null);

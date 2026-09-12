@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.ColorWriteMaskFlags through the .t3 connection; no C# evaluator is needed.
 [Guid("147e1ea2-cf9b-4111-81f1-5229a345d7ca")]
 public sealed class RerouteColorWriteMaskFlags : Instance<RerouteColorWriteMaskFlags>, IRerouteNode
 {

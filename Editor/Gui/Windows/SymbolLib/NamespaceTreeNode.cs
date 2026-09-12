@@ -79,7 +79,7 @@ internal sealed class NamespaceTreeNode
 
         foreach (var ui in ordered)
         {
-            // Hide reroute operators
+            // Routing gestures create typed anchors; their implementation operators do not belong in the browser.
             if (RerouteOperations.IsReroute(ui.Symbol))
                 continue;
 

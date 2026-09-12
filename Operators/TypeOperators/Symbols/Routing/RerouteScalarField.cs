@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.ScalarField through the .t3 connection; no C# evaluator is needed.
 [Guid("68cd4a98-f507-43fb-99f3-f8e819887a41")]
 public sealed class RerouteScalarField : Instance<RerouteScalarField>, IRerouteNode
 {

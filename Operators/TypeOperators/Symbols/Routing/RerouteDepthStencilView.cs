@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.DepthStencilView through the .t3 connection; no C# evaluator is needed.
 [Guid("6f778f18-aadc-424e-b2c7-fc6190b8c980")]
 public sealed class RerouteDepthStencilView : Instance<RerouteDepthStencilView>, IRerouteNode
 {

@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.UnorderedAccessView through the .t3 connection; no C# evaluator is needed.
 [Guid("7aef6927-a8d4-43fc-8353-67b7f20c62b9")]
 public sealed class RerouteUnorderedAccessView : Instance<RerouteUnorderedAccessView>, IRerouteNode
 {

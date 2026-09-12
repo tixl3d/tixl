@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.RemapCurve through the .t3 connection; no C# evaluator is needed.
 [Guid("e5d94302-1cec-4ced-9962-9f1ef6d05e53")]
 public sealed class RerouteRemapCurve : Instance<RerouteRemapCurve>, IRerouteNode
 {

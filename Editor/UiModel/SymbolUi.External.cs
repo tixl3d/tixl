@@ -8,6 +8,7 @@ namespace T3.Editor.UiModel;
 
 public sealed partial class SymbolUi
 {
+    // Apply restored bypass state during creation so live instances start with the matching slot wiring.
     internal Child AddChild(Symbol symbolToAdd, Guid addedChildId, Vector2 posInCanvas, Vector2 size, string name = null, bool isBypassed = false)
     {
         FlagAsModified();

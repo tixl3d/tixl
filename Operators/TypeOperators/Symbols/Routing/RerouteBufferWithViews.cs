@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.BufferWithViews through the .t3 connection; no C# evaluator is needed.
 [Guid("33df134e-2e82-49e4-a259-18a6f33791db")]
 public sealed class RerouteBufferWithViews : Instance<RerouteBufferWithViews>, IRerouteNode
 {

@@ -28,6 +28,11 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     internal int LastUpdateCycle;
     public Guid Id { get; init; }
     public Variants Variant;
+    /*
+     * Reroutes retain the Operator variant and selection identity but expose one horizontal
+     * input/output pair on a compact body. RerouteSize is in canvas units; anchor positions
+     * use DampedPosOnCanvas so attached cables follow the animated dot.
+     */
     public bool IsReroute;
     public Type PrimaryType = typeof(float);
     public required ISelectableCanvasObject Selectable;

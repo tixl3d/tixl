@@ -225,6 +225,7 @@ internal sealed class MagGraphLayout
             }
 
             opItem.Variant = MagGraphItem.Variants.Operator;
+            // Cache the validated routing contract when rebuilding; drawing must not reflect over package types.
             opItem.IsReroute = RerouteOperations.IsReroute(childInstance.Symbol);
             //opItem.Id = childId;
             opItem.InstancePath = childInstance.InstancePath;
@@ -1068,6 +1069,7 @@ internal sealed class MagGraphLayout
 
             if (item.IsReroute)
             {
+                // A compact routing point interrupts the vertical operator stack even when grid-aligned.
                 ApplyStackToItems();
                 previousItem = null;
                 continue;
@@ -1129,6 +1131,7 @@ internal sealed class MagGraphLayout
                 MagGraphItem.InputAnchorPoint inputAnchor = default;
                 sc.SourceItem.GetOutputAnchorAtIndex(sc.SourceItem.IsReroute ? 0 : sc.OutputLineIndex + 1, ref outputAnchor);
                 sc.TargetItem.GetInputAnchorAtIndex(sc.TargetItem.IsReroute ? 0 : sc.InputLineIndex + 1, ref inputAnchor);
+                // Anchor helpers return damped coordinates; layout stores undamped endpoints for animation.
                 sc.SourcePos = outputAnchor.PositionOnCanvas - sc.SourceItem.DampedPosOnCanvas + sc.SourceItem.PosOnCanvas;
                 sc.TargetPos = inputAnchor.PositionOnCanvas - sc.TargetItem.DampedPosOnCanvas + sc.TargetItem.PosOnCanvas;
                 sc.Style = MagGraphConnection.ConnectionStyles.RightToLeft;

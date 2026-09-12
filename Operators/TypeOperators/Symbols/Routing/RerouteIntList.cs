@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes System.Collections.Generic.List<int> through the .t3 connection; no C# evaluator is needed.
 [Guid("df8d3f09-86e3-457e-943f-0cf968daf1a8")]
 public sealed class RerouteIntList : Instance<RerouteIntList>, IRerouteNode
 {

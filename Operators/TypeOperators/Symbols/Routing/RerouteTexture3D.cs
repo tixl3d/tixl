@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.Texture3D through the .t3 connection; no C# evaluator is needed.
 [Guid("0733b9e4-236e-4c97-b967-01d144c33388")]
 public sealed class RerouteTexture3D : Instance<RerouteTexture3D>, IRerouteNode
 {

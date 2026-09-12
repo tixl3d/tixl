@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes int through the .t3 connection; no C# evaluator is needed.
 [Guid("aced3297-133d-479d-833b-736f76412340")]
 public sealed class RerouteInt : Instance<RerouteInt>, IRerouteNode
 {

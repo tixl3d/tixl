@@ -116,7 +116,7 @@ internal sealed class SymbolFilter
             var symbolUiSymbol = symbolUi.Symbol;
             Debug.Assert(symbolUiSymbol != null);
             
-            // Hide reroute operators
+            // Routing gestures choose the anchor type from the wire, so anchors are excluded from node search.
             if (RerouteOperations.IsReroute(symbolUiSymbol))
                 continue;
 

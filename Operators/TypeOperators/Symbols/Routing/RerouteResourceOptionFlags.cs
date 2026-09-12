@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.ResourceOptionFlags through the .t3 connection; no C# evaluator is needed.
 [Guid("c6bcc79b-fd52-40b6-9b0b-e3c43eb88c22")]
 public sealed class RerouteResourceOptionFlags : Instance<RerouteResourceOptionFlags>, IRerouteNode
 {

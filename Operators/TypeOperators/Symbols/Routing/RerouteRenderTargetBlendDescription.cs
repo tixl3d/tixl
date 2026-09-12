@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.RenderTargetBlendDescription through the .t3 connection; no C# evaluator is needed.
 [Guid("d1ab44fe-eb4a-4e0c-bb52-2c2382f34f91")]
 public sealed class RerouteRenderTargetBlendDescription : Instance<RerouteRenderTargetBlendDescription>, IRerouteNode
 {

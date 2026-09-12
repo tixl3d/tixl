@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.Dict<float> through the .t3 connection; no C# evaluator is needed.
 [Guid("8d48de87-c55c-4224-9bbe-5b94d416dee4")]
 public sealed class RerouteFloatDict : Instance<RerouteFloatDict>, IRerouteNode
 {

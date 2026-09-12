@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes double through the .t3 connection; no C# evaluator is needed.
 [Guid("52a23d05-009a-44ba-9047-191930bffe05")]
 public sealed class RerouteDouble : Instance<RerouteDouble>, IRerouteNode
 {

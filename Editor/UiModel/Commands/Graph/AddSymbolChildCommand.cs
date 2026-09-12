@@ -46,6 +46,7 @@ public sealed class AddSymbolChildCommand : ICommand
             return;
         }
             
+        // Persist compact geometry even when a caller uses the default operator dimensions.
         var childSize = RerouteOperations.IsReroute(symbolToAdd!.Symbol) ? MagGraphItem.RerouteSize : Size;
         parentSymbolUi!.AddChild(symbolToAdd.Symbol, _addedChildId, PosOnCanvas, childSize, ChildName);
         InitContentClipSourceRange(parentSymbolUi.Symbol);

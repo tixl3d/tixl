@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.Gradient through the .t3 connection; no C# evaluator is needed.
 [Guid("1a1605fe-b256-4806-a3e1-210496350ea0")]
 public sealed class RerouteGradient : Instance<RerouteGradient>, IRerouteNode
 {

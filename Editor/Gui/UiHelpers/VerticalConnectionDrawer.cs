@@ -13,6 +13,10 @@ internal static class VerticalConnectionDrawer
 {
     private const float Pi = (float)System.Math.PI;
 
+    /*
+     * queryPath observes the final screen-space cable path before it is stroked and cleared.
+     * It must leave the pending path intact so drawing and gesture hit testing share the geometry.
+     */
     internal static bool DrawConnection(float canvasScale,
                                         ImRect sourceNode, Vector2 sourcePos,
                                         ImRect targetNode, Vector2 targetPos,

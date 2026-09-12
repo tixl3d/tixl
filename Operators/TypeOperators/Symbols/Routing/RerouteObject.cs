@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes object through the .t3 connection; no C# evaluator is needed.
 [Guid("507de710-a745-4f8c-9245-90fc4ac105f8")]
 public sealed class RerouteObject : Instance<RerouteObject>, IRerouteNode
 {

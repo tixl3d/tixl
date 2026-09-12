@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.RenderTargetView through the .t3 connection; no C# evaluator is needed.
 [Guid("13f07889-a261-496c-9631-6d91b4b96541")]
 public sealed class RerouteRenderTargetView : Instance<RerouteRenderTargetView>, IRerouteNode
 {

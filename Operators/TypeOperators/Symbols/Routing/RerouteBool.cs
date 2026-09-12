@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes bool through the .t3 connection; no C# evaluator is needed.
 [Guid("0334db8e-e2d4-46d2-b2be-c48d2dc7c1e5")]
 public sealed class RerouteBool : Instance<RerouteBool>, IRerouteNode
 {

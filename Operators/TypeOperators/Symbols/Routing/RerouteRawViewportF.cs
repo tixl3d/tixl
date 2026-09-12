@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Mathematics.Interop.RawViewportF through the .t3 connection; no C# evaluator is needed.
 [Guid("38c3fe02-c841-428d-aeb0-689a57e15388")]
 public sealed class RerouteRawViewportF : Instance<RerouteRawViewportF>, IRerouteNode
 {

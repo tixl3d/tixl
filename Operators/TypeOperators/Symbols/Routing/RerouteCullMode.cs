@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.CullMode through the .t3 connection; no C# evaluator is needed.
 [Guid("ca0062a7-1add-4a90-8934-26de96897d6e")]
 public sealed class RerouteCullMode : Instance<RerouteCullMode>, IRerouteNode
 {

@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes SharpDX.Direct3D11.CpuAccessFlags through the .t3 connection; no C# evaluator is needed.
 [Guid("edeb4c56-ca52-4f54-88df-2cf57bd82095")]
 public sealed class RerouteCpuAccessFlags : Instance<RerouteCpuAccessFlags>, IRerouteNode
 {

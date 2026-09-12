@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.AudioGraphNode through the .t3 connection; no C# evaluator is needed.
 [Guid("35367fa4-ef12-4e9a-b1f2-11f093108dd5")]
 public sealed class RerouteAudioGraphNode : Instance<RerouteAudioGraphNode>, IRerouteNode
 {

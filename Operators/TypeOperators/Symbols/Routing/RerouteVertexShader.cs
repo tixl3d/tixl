@@ -1,5 +1,6 @@
 namespace Types.Routing;
 
+// Passes T3.Core.DataTypes.VertexShader through the .t3 connection; no C# evaluator is needed.
 [Guid("4eaba812-9652-4cae-b761-96cf714961b6")]
 public sealed class RerouteVertexShader : Instance<RerouteVertexShader>, IRerouteNode
 {
