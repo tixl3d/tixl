@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using T3.Core.Operator;
+using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -114,6 +115,10 @@ internal sealed class SymbolFilter
         {
             var symbolUiSymbol = symbolUi.Symbol;
             Debug.Assert(symbolUiSymbol != null);
+            
+            // Hide reroute operators
+            if (RerouteOperations.IsReroute(symbolUiSymbol))
+                continue;
 
             // Prevent graph cycles
             if (parentSymbolIds.Contains(symbolUiSymbol.Id))

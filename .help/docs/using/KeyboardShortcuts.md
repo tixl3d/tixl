@@ -1,6 +1,8 @@
 
 ## Graph Mouse Gestures
 
+Reroute anchors are created with the routing gesture below. They are hidden from node search and the node browser.
+
 | Action | Gesture |
 | --- | --- |
 | Route Connections through Anchors | Alt+Right Mouse Button drag across cables |

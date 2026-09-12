@@ -88,6 +88,17 @@ onto the snapped cable and drop it.
   is still connected, now through the new operator.
 - `Ctrl+Z` restores the direct snapped cable.
 
+## Step: Keep reroute anchors out of search and browsing
+
+**Action:**
+Open node search on empty graph space and search for `rer`, `RerouteFloat`, and `Types.Routing`. Repeat when inserting an operator into a float cable. In the node browser, search for the same terms, then clear the search and expand `Types`. Refresh the browser tree. Search for `Float` in both search surfaces, then Alt+RMB drag across a float cable to create an anchor.
+
+**Expected:**
+- No reroute operator appears in either search surface, including exact-name and namespace searches.
+- The browser tree contains no reroute entries or empty `Routing` folder, including after refresh.
+- Ordinary operators such as `Float` remain discoverable.
+- The routing gesture still creates a working anchor; undo and redo restore the expected connections.
+
 ## Step: Route a subset of a fan-out
 
 **Action:**

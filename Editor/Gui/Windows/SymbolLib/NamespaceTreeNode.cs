@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Operator;
+using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Gui.Windows.SymbolLib;
@@ -78,6 +79,10 @@ internal sealed class NamespaceTreeNode
 
         foreach (var ui in ordered)
         {
+            // Hide reroute operators
+            if (RerouteOperations.IsReroute(ui.Symbol))
+                continue;
+
             var keep = filterAction == null || filterAction(ui);
             if (!keep)
                 continue;
