@@ -230,21 +230,13 @@ internal sealed partial class EditableSymbolProject
 
     private static void WriteSymbolUi(SymbolUi symbolUi, string uiFilePath)
     {
-        using var sw = new StreamWriter(uiFilePath, _saveOptions);
-        using var writer = new JsonTextWriter(sw);
-
-        writer.Formatting = Formatting.Indented;
-        SymbolUiJson.WriteSymbolUi(symbolUi, writer);
-
+        WriteAtomically(uiFilePath, writer => SymbolUiJson.WriteSymbolUi(symbolUi, writer));
         symbolUi.ClearModifiedFlag();
     }
 
     private void SaveSymbolDefinition(Symbol symbol, string filePath)
     {
-        using var sw = new StreamWriter(filePath, _saveOptions);
-        using var writer = new JsonTextWriter(sw);
-        writer.Formatting = Formatting.Indented;
-        SymbolJson.WriteSymbol(symbol, writer);
+        WriteAtomically(filePath, writer => SymbolJson.WriteSymbol(symbol, writer));
     }
 
     private void WriteSymbolSourceToFile(Guid id, string sourcePath)
@@ -252,9 +244,34 @@ internal sealed partial class EditableSymbolProject
         if (!_pendingSource.Remove(id, out var sourceCode))
             return;
 
-        using var sw = new StreamWriter(sourcePath, _saveOptions);
-        sw.Write(sourceCode);
+        var tempPath = sourcePath + TempSuffix;
+        using (var sw = new StreamWriter(tempPath, _saveOptions))
+        {
+            sw.Write(sourceCode);
+        }
+
+        File.Move(tempPath, sourcePath, overwrite: true);
     }
+
+    /// <summary>
+    /// Writes next to the target and moves over it, so a crash, kill or exception mid-write
+    /// leaves the previous file intact instead of an empty or half-written one. An empty
+    /// .t3ui from an interrupted save has cost a project before.
+    /// </summary>
+    private static void WriteAtomically(string path, Action<JsonTextWriter> write)
+    {
+        var tempPath = path + TempSuffix;
+        using (var sw = new StreamWriter(tempPath, _saveOptions))
+        using (var writer = new JsonTextWriter(sw))
+        {
+            writer.Formatting = Formatting.Indented;
+            write(writer);
+        }
+
+        File.Move(tempPath, path, overwrite: true);
+    }
+
+    private const string TempSuffix = ".saving";
 
     public bool CodeExternallyModified { get; private set; }
     private DateTime? _lastRecompilationTimeUtc;

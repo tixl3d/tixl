@@ -1,0 +1,89 @@
+{
+  "Id": "53c8b5f4-fd3b-4a7c-a22a-dea37c45b6d4",
+  "Variations": [
+    {
+      "Id": "c314773c-b261-463b-a9b6-49268fdf8c14",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "CorruptMemory",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2a28f084-bc2f-4458-8ad8-f3bf11086fc4": true
+        }
+      }
+    },
+    {
+      "Id": "c1132de1-f76f-40b1-92f6-c3f32e9cbd56",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "WigglyBits",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2a28f084-bc2f-4458-8ad8-f3bf11086fc4": false,
+          "b7b21d3c-80e1-450e-a1c7-b8720b550924": 0.0,
+          "80c6ed94-e5e5-480b-b69e-2c4f9b2935c7": 0.0,
+          "bcadf77c-be02-482d-9cd7-87085831e9cd": 2.5
+        }
+      }
+    },
+    {
+      "Id": "dba75418-6793-47e4-bc40-fd720f99e99f",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "ComputersAreNoToys",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2a28f084-bc2f-4458-8ad8-f3bf11086fc4": true,
+          "b7b21d3c-80e1-450e-a1c7-b8720b550924": 0.2,
+          "bcadf77c-be02-482d-9cd7-87085831e9cd": 99.95
+        }
+      }
+    },
+    {
+      "Id": "0bcc6d11-64a1-4b7d-8824-775c0b6880e1",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "CRTAndMe",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2a28f084-bc2f-4458-8ad8-f3bf11086fc4": false,
+          "b7b21d3c-80e1-450e-a1c7-b8720b550924": 0.16,
+          "bcadf77c-be02-482d-9cd7-87085831e9cd": 0.01
+        }
+      }
+    },
+    {
+      "Id": "f42a761d-72ff-4760-bce5-00fb8e20cdf7",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "CheckSummer",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2a28f084-bc2f-4458-8ad8-f3bf11086fc4": true,
+          "b7b21d3c-80e1-450e-a1c7-b8720b550924": 0.0,
+          "80c6ed94-e5e5-480b-b69e-2c4f9b2935c7": 0.0
+        }
+      }
+    }
+  ]
+}

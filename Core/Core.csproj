@@ -33,6 +33,7 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="NuGet.Configuration" Version="7.6.0" />
         <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
         <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
         <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
         <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
@@ -50,6 +51,13 @@
         <Using Alias="Vector4" Include="System.Numerics.Vector4" />
         <Using Alias="Matrix4x4" Include="System.Numerics.Matrix4x4" />
         <Using Alias="Quaternion" Include="System.Numerics.Quaternion" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Bar-phase estimation (DanceAi by Felix Niemeyer, MIT). Source package in Vendor/DanceAi. -->
+        <Reference Include="DanceAi">
+            <HintPath>..\Dependencies\DanceAi.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>

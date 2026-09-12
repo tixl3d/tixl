@@ -1,0 +1,25 @@
+{
+  "f_max": 8000.0,
+  "f_min": 27.5,
+  "fft_frames": 4,
+  "frame_size": 400,
+  "hidden": 576,
+  "inputs": [
+    "mel",
+    "state_h"
+  ],
+  "model_type": "phase_gru_mel",
+  "n_layers": 2,
+  "n_mels": 128,
+  "output_channels": [
+    "sin",
+    "cos",
+    "log_bar_duration",
+    "log_var"
+  ],
+  "outputs": [
+    "phase_out",
+    "state_h_out"
+  ],
+  "samplerate": 24000
+}

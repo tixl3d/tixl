@@ -43,12 +43,12 @@ namespace T3.Editor.Gui.Windows.Utilities
         }
 
         #region Default Values
-        private const float DefaultFontSize = 30;
+        private const float DefaultFontSize = 82;
         private const int DefaultWidth = 1024;
         private const int DefaultHeight = 1024;
         private const float DefaultMiterLimit = 3.0f;
         private const int DefaultSpacing = 2;
-        private const float DefaultRange = 7.0f;
+        private const float DefaultRange = 4.0f;
         private const float DefaultAngleThreshold = 3.0f;
         private const ColoringStrategy DefaultExampleColoring = ColoringStrategy.Simple; // As per recommended settings
         private const ErrorCorrectionMode DefaultErrorCorrection = ErrorCorrectionMode.Indiscriminate;
@@ -516,17 +516,17 @@ namespace T3.Editor.Gui.Windows.Utilities
                 return new GenerationSettings
                            {
                                FontPath = _fontFilePath ?? string.Empty,
-                               FontSize = 90.0, // Original recommended value
+                               FontSize = 82.0, // Original recommended value
                                Width = 1024,
                                Height = 1024,
                                MiterLimit = 3.0,
                                Spacing = 2,
-                               RangeValue = 2.0,
+                               RangeValue = 4.0,
                                AngleThreshold = 3.0,
                                Strategy = ColoringStrategy.Simple,
-                               ErrorCorrection = ErrorCorrectionMode.Indiscriminate,
+                               ErrorCorrection = ErrorCorrectionMode.Auto,
                                Overlap = true,
-                               OuterPadding = new MsdfAtlasGen.Padding(0, 0, 0, 0),
+                               OuterPadding = new MsdfAtlasGen.Padding(4, 4, 4, 4),
                                CharsetMode = CharsetMode.Ascii
                            };
             }

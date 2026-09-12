@@ -44,6 +44,14 @@
       }
     },
     {
+      "InputId": "8e4e25e5-df86-4211-831b-fc834de156ec"/*Range*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 493.0
+      },
+      "Description": "0,0 means infinite \n-1, 1 the accumulation will contained between this range"
+    },
+    {
       "InputId": "9f1d76d2-c3dd-4035-a37c-300eb011331b"/*ResetTrigger*/,
       "Position": {
         "X": 197.0,

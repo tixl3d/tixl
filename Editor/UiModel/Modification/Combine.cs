@@ -47,9 +47,21 @@ internal static class Combine
         var connectionsFromNewInputs = new List<Symbol.Connection>(inputConnections.Length);
         int inputNameCounter = 2;
         var inputNameHashSet = new HashSet<string>();
+
+        // One outside source feeding several selected parameters becomes a single shared input. Multi-inputs keep
+        // an input per connection, so the order of their connections stays untouched.
+        var sharedInputIdsForSources = new Dictionary<(Guid SourceId, Guid SourceSlotId, Type ValueType), Guid>();
         foreach (var (child, input, origConnection) in inputsToGenerate)
         {
             var inputValueType = input.DefaultValue.ValueType;
+            var sourceKey = (origConnection.SourceParentOrChildId, origConnection.SourceSlotId, inputValueType);
+            if (!input.IsMultiInput && sharedInputIdsForSources.TryGetValue(sourceKey, out var sharedInputId))
+            {
+                connectionToNewSlotIdMap.Add(origConnection, sharedInputId);
+                connectionsFromNewInputs.Add(new Symbol.Connection(Guid.Empty, sharedInputId, child.Id, input.Id));
+                continue;
+            }
+
             if (TypeNameRegistry.Entries.TryGetValue(inputValueType, out var typeName))
             {
                 var @namespace = input.DefaultValue.ValueType.Namespace;
@@ -67,6 +79,9 @@ internal static class Combine
 
                 var newConnection = new Symbol.Connection(Guid.Empty, newInputGuid, child.Id, input.Id);
                 connectionsFromNewInputs.Add(newConnection);
+
+                if (!input.IsMultiInput)
+                    sharedInputIdsForSources[sourceKey] = newInputGuid;
             }
             else
             {
@@ -259,13 +274,20 @@ internal static class Combine
 
         var newSymbolChildId = addCommand.AddedChildId;
 
+        var connectedNewInputIds = new HashSet<Guid>();
         for (var i = inputConnections.Length - 1; i >= 0; i--) // reverse for multi input order preservation
         {
             var con = inputConnections[i];
+            if (!connectionToNewSlotIdMap.TryGetValue(con, out var targetSlotId))
+                continue;
+
+            // Shared inputs get their outside connection only once
+            if (!connectedNewInputIds.Add(targetSlotId))
+                continue;
+
             var sourceId = con.SourceParentOrChildId;
             var sourceSlotId = con.SourceSlotId;
             var targetId = newSymbolChildId;
-            var targetSlotId = connectionToNewSlotIdMap[con];
 
             var newConnection = new Symbol.Connection(sourceId, sourceSlotId, targetId, targetSlotId);
             parentCompositionSymbol.AddConnection(newConnection);

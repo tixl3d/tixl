@@ -77,7 +77,9 @@ internal sealed class ActionCamera : Instance<ActionCamera>, ICamera, ICameraPro
         _cameraDefinition.Target = _cameraDefinition.Position + newViewDirection;
         _cameraDefinition.Roll += roll * speed * deltaTime;
         _cameraDefinition.FieldOfView += fov * deltaTime;
-
+        
+        _cameraDefinition.FieldOfView = MathUtils.Clamp(_cameraDefinition.FieldOfView, 0.01f, 3.01f);
+        //Log.Debug($"{_cameraDefinition.FieldOfView}");
         _cameraDefinition.BuildProjectionMatrices(out var camToClipSpace, out var worldToCamera);
 
         CameraToClipSpace = camToClipSpace;

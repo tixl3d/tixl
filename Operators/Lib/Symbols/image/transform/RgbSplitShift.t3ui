@@ -1,0 +1,161 @@
+{
+  "FormatVersion": 3,
+  "Id": "66f2492d-9bd6-45e9-af12-c7b48c16c8e2"/*RgbSplitShift*/,
+  "Description": "Split RGB channels and Shift them independently",
+  "InputUis": [
+    {
+      "InputId": "04675fbd-234f-453b-bc06-1abb4e17b9af"/*WrapMode*/,
+      "Position": {
+        "X": 321.92157,
+        "Y": 510.93793
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "35592f38-7109-4853-be37-5e086f0f5796"/*R*/,
+      "Position": {
+        "X": 461.92157,
+        "Y": 160.93791
+      },
+      "GroupTitle": "Shift direction",
+      "Min": -0.5,
+      "Max": 0.5,
+      "Scale": 0.01,
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "435abe18-64b2-4032-b697-00514ad059a8"/*B*/,
+      "Position": {
+        "X": 461.9216,
+        "Y": 300.93793
+      },
+      "Min": -0.5,
+      "Max": 0.5,
+      "Scale": 0.01,
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "65cb2ce4-1ce4-42b4-a830-4c4308b9012e"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 601.9216,
+        "Y": 20.937912
+      }
+    },
+    {
+      "InputId": "939a5c15-4376-4f81-8bfc-d140ebb5f429"/*G*/,
+      "Position": {
+        "X": 461.92157,
+        "Y": 230.93791
+      },
+      "Min": -0.5,
+      "Max": 0.5,
+      "Scale": 0.01,
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "95d4c527-3cdd-45d9-8cec-12ab96398c8a"/*Center*/,
+      "Position": {
+        "X": 461.92157,
+        "Y": 90.93791
+      },
+      "Description": "Translates only the main image.",
+      "Min": -1.0,
+      "Max": 1.0,
+      "Scale": 0.01,
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "c21412ed-708b-4136-84b6-b9c7665a2d10"/*Amount*/,
+      "Position": {
+        "X": 461.92157,
+        "Y": 372.00543
+      },
+      "AddPadding": "True",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "e4a3dad4-80a9-432a-8d48-5e1dcbecf1b0"/*FxTexture*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 130.84799,
+        "Y": 46.565887
+      },
+      "Description": "Controls the shifting strength. It allows to create creative glitch effects. "
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0173fcbd-30c7-4cf8-bedf-42be23541996"/*Vector2Components*/,
+      "Position": {
+        "X": 601.9216,
+        "Y": 230.93791
+      }
+    },
+    {
+      "ChildId": "10e8f75c-7863-4762-ac7d-9a995159f585"/*AddInt*/,
+      "Position": {
+        "X": 461.92157,
+        "Y": 510.93793
+      }
+    },
+    {
+      "ChildId": "193b96b4-6565-4098-bf00-498ff7de25e5"/*Vector2Components*/,
+      "Position": {
+        "X": 601.9216,
+        "Y": 90.93791
+      }
+    },
+    {
+      "ChildId": "234b7111-6484-4936-b665-79fa751d7e03"/*FirstValidTexture*/,
+      "Position": {
+        "X": 270.848,
+        "Y": 46.565887
+      }
+    },
+    {
+      "ChildId": "37cac43d-1bad-41a2-85de-5fec9e97b580"/*Vector2Components*/,
+      "Position": {
+        "X": 601.9216,
+        "Y": 160.93791
+      }
+    },
+    {
+      "ChildId": "6937ad75-d7ef-4384-8dc2-b1795a87b08e"/*IntToWrapmode*/,
+      "Position": {
+        "X": 601.9216,
+        "Y": 510.93793
+      }
+    },
+    {
+      "ChildId": "d759d8fe-560b-4922-8047-83e3402b802b"/*LoadImage*/,
+      "Position": {
+        "X": 130.84799,
+        "Y": 81.56589
+      }
+    },
+    {
+      "ChildId": "e477bdf9-b04d-43e8-aac3-acbd27490012"/*Vector2Components*/,
+      "Position": {
+        "X": 601.9216,
+        "Y": 300.93793
+      }
+    },
+    {
+      "ChildId": "f339a8fa-9700-4c82-832d-f5156d7cd69c"/*_multiImageFxSetupStatic*/,
+      "Position": {
+        "X": 741.9216,
+        "Y": -14.062088
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "642faa41-fd77-42db-911c-edbe56267db5"/*Output*/,
+      "Position": {
+        "X": 926.4041,
+        "Y": -8.463083
+      }
+    }
+  ]
+}

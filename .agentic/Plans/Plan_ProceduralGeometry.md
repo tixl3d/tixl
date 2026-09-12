@@ -433,6 +433,36 @@ holes). The honest fix is to build caps with the tessellator already in Lib
 hull-walk heuristic. The same mechanism is behind the remaining `ring-bevelled.obj`
 failures at oversized scatter (`n=40 s=2.52`: 15 boundary edges, 12.7% volume).
 
+**Tessellated cap builder (2026-09-07, in progress, uncommitted).** The hull-walk
+heuristic is gone. Per plane the cell's hull face is tessellated (LibTessDotNet) with
+every cut segment - and every outline edge of a surface polygon lying in the plane - as
+a constraint; a two-vertex contour is discarded as degenerate (verified in isolation),
+so each constraint is a hair-thin quad (0.1 weld wide, 45-degree chamfered ends so it
+never crosses a shallow hull edge far from its corner). Output triangles are flood-
+filled into regions across non-constraint edges; each region is probed once for the
+solid at its largest triangle (thin triangles inherit), regions covered by a coplanar
+surface polygon or whose largest triangle is thinner than the weld tolerance are
+dropped. All planes' cut endpoints are collected first and inserted, projected, into
+every hull contour edge they lie on, so neighbouring planes subdivide their shared
+edge identically. Cut segment collection, clipping and welding are unchanged.
+
+Caps are emitted per region as one polygon (outline edges of the region's triangles
+chained into a loop; a region with a hole or a pinched outline keeps its triangles),
+so `BevelGeometry` after a fracture works as before (verified: 203-face fracture ->
+3686-face bevel, watertight, volume preserved). Face counts vs. the old builder:
+beveled cube 300 seeds 4219 -> 5961 (was 12088 as triangles); time 22 -> 43 ms.
+
+Status (honest, full suites): the concave cases (the X sweep's thin slabs) render
+correctly with no misshapen faces, the small cases are watertight, and volume is
+within 0.1% on most configurations - but not all: `ring-bevelled` at 20 seeds loses
+3.6% (402 boundary edges) and `TiXL Xg8&@` d=0.05 at 30 seeds 6%. Broken counts:
+cube 2/12, text 11/18, ring 6/6, sweep 24/36 (the old heuristic: 0/30, 2/36, but wrong
+geometry on concave shapes). Most residual boundary edges are surface edges along
+sub-weld strips; the larger volume losses on the ring are unexplained and are the
+next thing to trace. Next: trace one ring cell at 20 seeds, then the weld/strip issue. Also landed: symbol/ui/source files are written
+atomically (temp + move) after an interrupted save left `_agentTests.t3ui` empty
+(restored from `.temp/Backup`).
+
 Measured with a bridge-driven suite (cube x seed count x scatter size x bevel, text
 x depth x seed count, and loaded meshes), scoring boundary edges, non-manifold edges,
 volume against the source and bounds growth: cube and text went from 4 of 30 broken

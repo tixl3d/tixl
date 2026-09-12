@@ -6,6 +6,7 @@ using ManagedBass;
 using ManagedBass.Wasapi;
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Audio.Timing;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Model;
@@ -1021,6 +1022,39 @@ internal sealed class ProjectSettingsWindow : Window
                         """,
                         true
                     );
+
+                    if (playback.EnableAudioBeatLocking)
+                    {
+                        modified |= FormInputs.AddSegmentedButtonWithLabel(ref playback.BeatLockSource, "Beat Lock Source",
+                                                                        tooltip: """
+                                                                        Onset Detection follows transients and needs a tapped resync to find the bar.
+                                                                        Phase Model uses DanceAi, a small network (16 MB) trained by Felix Niemeyer for exactly one job: bar phase and tempo of an audio stream. It runs locally in the background at about 40 % of one CPU core and needs no tapping.
+                                                                        Phase Model Raw passes the network output through unprocessed, for comparison.
+                                                                        """);
+                        if (playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModelRaw)
+                        {
+                            FormInputs.AddHint(DanceAiPhaseTracker.HasEstimates
+                                                   ? $"Raw: {DanceAiPhaseTracker.RawBpm:0.0} BPM, phase error ±{DanceAiPhaseTracker.ExpectedPhaseError:0.00} bars"
+                                                   : DanceAiPhaseTracker.StatusMessage);
+                        }
+                        else if (playback.BeatLockSource == CompositionSettings.BeatLockSources.PhaseModel)
+                        {
+                            FormInputs.AddHint(DanceAiPhaseTracker.IsLocked
+                                                   ? $"{DanceAiPhaseTracker.StatusMessage}: {DanceAiPhaseTracker.CurrentBpm:0.0} BPM (model {DanceAiPhaseTracker.RawBpm:0.0}), phase error ±{DanceAiPhaseTracker.ExpectedPhaseError:0.00} bars"
+                                                   : DanceAiPhaseTracker.StatusMessage);
+                            FormInputs.SetIndentToParameters();
+                            modified |= FormInputs.AddFloat("Beat Lock Smoothing",
+                                ref playback.BeatLockSmoothing,
+                                0f, 1f, 0.01f,
+                                true, true,
+                                """
+                                How strongly each detected bar start corrects the clock.
+                                0 follows the model tightly and may wobble, 1 trusts the running tempo and corrects slowly.
+                                """,
+                                0.5f);
+                        }
+                    }
+
                     FormInputs.AddVerticalSpace();
                 }
 
