@@ -14,8 +14,9 @@ related-help:
   - ../.help/docs/using/LivePerformances.md
 ---
 
-The **Phase Model** beat lock source uses a neural network to find the tempo and
-the start of each bar in live audio, without any tapping. This set checks that the
+The **Phase Model** beat lock source uses DanceAi, a small neural network (16 MB) trained by
+Felix Niemeyer for exactly one job: bar phase and tempo of an audio stream. It runs locally in
+the background and needs no tapping. This set checks that the
 model loads, that playback locks onto the music, and that switching back to onset
 detection still works.
 

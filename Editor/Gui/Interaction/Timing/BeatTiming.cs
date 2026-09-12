@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.Audio.Timing;
 using T3.Core.Settings;
 
 namespace T3.Editor.Gui.Interaction.Timing;
@@ -158,32 +159,7 @@ internal static class BeatTiming
                 _measureStartTime += MeasureDuration;
             }
             
-            var source = playbackSettings.Playback.BeatLockSource;
-            var usesPhaseModel = source != CompositionSettings.BeatLockSources.OnsetDetection;
-            var usesRawPhase = source == CompositionSettings.BeatLockSources.PhaseModelRaw;
-            if (usesPhaseModel)
-                BarPhaseTracker.Smoothing = playbackSettings.Playback.BeatLockSmoothing;
-
-            var offsetInBars = playback.BarsFromSeconds(playbackSettings.Playback.BeatLockAudioOffsetSec);
-            if (playbackSettings.Playback.EnableAudioBeatLocking && usesRawPhase && BarPhaseTracker.HasEstimates)
-            {
-                BeatTime = BarPhaseTracker.RawBarProgress + offsetInBars;
-                _beatDuration = 60.0 / BarPhaseTracker.RawBpm;
-            }
-            else if (playbackSettings.Playback.EnableAudioBeatLocking && usesPhaseModel && !usesRawPhase && BarPhaseTracker.IsAvailable)
-            {
-                // The model finds the bar start itself, so no resync tap is required.
-                BeatTime = BarPhaseTracker.BarProgress + offsetInBars;
-                _beatDuration = 60.0 / BarPhaseTracker.CurrentBpm;
-            }
-            else if (playbackSettings.Playback.EnableAudioBeatLocking && !usesPhaseModel && _resynced)
-            {
-                BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress)
-                           + playback.BarsFromSeconds(playbackSettings.Playback.BeatLockAudioOffsetSec);
-                
-                _beatDuration =   (float)(60f / BeatSynchronizer.CurrentBpm);
-            }
-            else
+            if (!TryFollowAudio())
             {
                 var tInMeasure = (runTime - _measureStartTime) / MeasureDuration;
                 BeatTime = (_measureCount + tInMeasure + _syncMeasureOffset) * BeatsPerBar;
@@ -191,6 +167,39 @@ internal static class BeatTiming
         }
 
         
+        // The phase-model sources find the bar start themselves, so no resync tap is required for them.
+        bool TryFollowAudio()
+        {
+            var config = playbackSettings.Playback;
+            if (!config.EnableAudioBeatLocking)
+                return false;
+
+            if (config.BeatLockSource != CompositionSettings.BeatLockSources.OnsetDetection)
+                DanceAiPhaseTracker.Smoothing = config.BeatLockSmoothing;
+
+            var offsetInBars = playback.BarsFromSeconds(config.BeatLockAudioOffsetSec);
+            switch (config.BeatLockSource)
+            {
+                case CompositionSettings.BeatLockSources.PhaseModelRaw when DanceAiPhaseTracker.HasEstimates:
+                    BeatTime = DanceAiPhaseTracker.RawBarProgress + offsetInBars;
+                    _beatDuration = 60.0 / DanceAiPhaseTracker.RawBpm;
+                    return true;
+
+                case CompositionSettings.BeatLockSources.PhaseModel when DanceAiPhaseTracker.IsLocked:
+                    BeatTime = DanceAiPhaseTracker.BarProgress + offsetInBars;
+                    _beatDuration = 60.0 / DanceAiPhaseTracker.CurrentBpm;
+                    return true;
+
+                case CompositionSettings.BeatLockSources.OnsetDetection when _resynced:
+                    BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress) + offsetInBars;
+                    _beatDuration = 60.0 / BeatSynchronizer.CurrentBpm;
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
         void UpdateDebugData()
         {
             BeatTimingDetails.WasResyncTriggered = tappedMeasureSync ? 1f : 0f;
