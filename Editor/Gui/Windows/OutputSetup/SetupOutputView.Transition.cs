@@ -126,7 +126,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>Frames a view-space area of <paramref name="size"/> px from the space's origin (a static space's whole extent).</summary>
-    private void FitToArea(Vector2 size, EditMode mode, Guid outputId, bool keepScope = false)
+    private void FitToArea(Vector2 size, EditModes mode, Guid outputId, bool keepScope = false)
     {
         var topLeft = _projection.CanvasToBoard(Vector2.Zero);
         var bottomRight = _projection.CanvasToBoard(size);
@@ -146,7 +146,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <param name="min">Board metres, Y up, of what the settled view frames.</param>
-    private void FitToBoardRect(Vector2 min, Vector2 max, EditMode mode, Guid outputId, bool keepScope = false)
+    private void FitToBoardRect(Vector2 min, Vector2 max, EditModes mode, Guid outputId, bool keepScope = false)
     {
         var size = max - min;
         var key = (outputId, mode, size);

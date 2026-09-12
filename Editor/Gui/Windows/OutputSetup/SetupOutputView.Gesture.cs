@@ -124,23 +124,23 @@ internal sealed partial class SetupOutputView
     /// <paramref name="onDragging"/> while live, ends on Completed. The re-basing edits restore the snapshot
     /// inside <paramref name="onDragging"/> before applying, so a long drag never compounds.
     /// </summary>
-    private void RunGesture(CanvasPointHandle.DragPhase phase, Setup setup, GestureKinds kind, string name, Surface hot,
+    private void RunGesture(CanvasPointHandle.DragPhases phase, Setup setup, GestureKinds kind, string name, Surface hot,
                             Action onDragging, Action? onStarted = null, Action? onCompleted = null)
     {
         switch (phase)
         {
-            case CanvasPointHandle.DragPhase.Started:
+            case CanvasPointHandle.DragPhases.Started:
                 BeginGesture(setup, kind, name, hot.Id, hot);
                 onStarted?.Invoke();
                 break;
 
-            case CanvasPointHandle.DragPhase.Dragging:
+            case CanvasPointHandle.DragPhases.Dragging:
                 if (_gesture.Is(kind, hot.Id))
                     onDragging();
 
                 break;
 
-            case CanvasPointHandle.DragPhase.Completed:
+            case CanvasPointHandle.DragPhases.Completed:
                 if (_gesture.Is(kind, hot.Id))
                     EndGesture(setup);
 

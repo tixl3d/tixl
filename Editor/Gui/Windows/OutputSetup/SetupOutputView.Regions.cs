@@ -62,9 +62,9 @@ internal sealed partial class SetupOutputView
         for (var c = 0; c < 4; c++)
             screen[c] = projection.CanvasToScreen(corners[c]);
 
-        var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, child.Id) ?? false;
+        var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKinds.Surface, child.Id) ?? false;
         var pulse = isSelected ? 0f : FrameStats.GetPulse(child.Id);
-        var color = PulseColor(SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface).Fade(isSelected ? 1f : 0.6f), pulse).Fade(fade);
+        var color = PulseColor(SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface).Fade(isSelected ? 1f : 0.6f), pulse).Fade(fade);
         var editable = isSelected && fade >= 0.999f;
 
         // The region's own slice, at the preview opacity — over whatever its parent shows underneath.
@@ -90,31 +90,31 @@ internal sealed partial class SetupOutputView
                 bMax = Vector2.Max(bMax, screen[c]);
             }
 
-            _picker.AddTarget(SetupEntitySelection.EntityKind.Surface, child.Id, bMin, bMax, isBackground: true);
+            _picker.AddTarget(SetupEntitySelection.EntityKinds.Surface, child.Id, bMin, bMax, isBackground: true);
         }
 
         if (!editable)
         {
             dl.AddQuad(screen[0], screen[1], screen[2], screen[3], color, 1 * scale);
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, isSelected, 0.9f * fade, pulse, pickable: false);
+            DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screen, child.Id, child.Name, isSelected, 0.9f * fade, pulse, pickable: false);
             return;
         }
 
         // The body is the move grip; the handles sit on its outline and take precedence, except while a move is live.
         var moveActive = _gesture.Is(GestureKinds.RegionMove, child.Id) || _gesture.Is(GestureKinds.ContentPan, child.Id);
-        var style = CornerPinHandles.Style.ForSurface(null, editable: !moveActive, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
+        var style = CornerPinHandles.Style.ForSurface(null, editable: !moveActive, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
         style.DrawChecker = false;
         style.EdgeColor = color;
 
         ImGui.PushID(child.Id.GetHashCode());
         Array.Copy(corners, _regionQuad, 4);
         var cornerPhase = CornerPinHandles.Draw(_regionQuad, projection, style, out var draggedCorner);
-        var edgePhase = CanvasPointHandle.DragPhase.None;
+        var edgePhase = CanvasPointHandle.DragPhases.None;
         var edge = -1;
         var edgePos = Vector2.Zero;
-        if (cornerPhase == CanvasPointHandle.DragPhase.None)
+        if (cornerPhase == CanvasPointHandle.DragPhases.None)
         {
-            style.EdgeHandleShape = EdgeDragStretches(child.Id) ? CanvasPointHandle.Shape.Circle : CanvasPointHandle.Shape.Square;
+            style.EdgeHandleShape = EdgeDragStretches(child.Id) ? CanvasPointHandle.Shapes.Circle : CanvasPointHandle.Shapes.Square;
             edgePhase = CornerPinHandles.DrawEdgeHandles(_regionQuad, projection, style, out edge, out edgePos);
         }
 
@@ -123,7 +123,7 @@ internal sealed partial class SetupOutputView
         var thresholds = RegionSnapThresholds(projection, parent);
         var snapping = !ImGui.GetIO().KeyShift;
 
-        if (draggedCorner >= 0 && cornerPhase != CanvasPointHandle.DragPhase.None)
+        if (draggedCorner >= 0 && cornerPhase != CanvasPointHandle.DragPhases.None)
         {
             var dragged = _regionQuad[draggedCorner];
             RunGesture(cornerPhase, setup, GestureKinds.SurfaceResize, "Edit region", child, () =>
@@ -156,7 +156,7 @@ internal sealed partial class SetupOutputView
                                                             SurfaceGeometry.SetChildBounds(child, newMin, newMax);
                                                         });
         }
-        else if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhase.None)
+        else if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhases.None)
         {
             RunGesture(edgePhase, setup, GestureKinds.SurfaceResize, "Edit region", child,
                        onStarted: () =>
@@ -209,7 +209,7 @@ internal sealed partial class SetupOutputView
         for (var c = 0; c < 4; c++)
             screen[c] = projection.CanvasToScreen(corners[c]);
 
-        DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screen, child.Id, child.Name, true, fade, pulse, pickable: false);
+        DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screen, child.Id, child.Name, true, fade, pulse, pickable: false);
 
         // The region's own anchor — the origin of its space, what its own children measure from.
         DrawAnchorGlyph(dl, projection.CanvasToScreen(child.LocalPosition + child.AnchorInMeters), fade);
@@ -222,14 +222,14 @@ internal sealed partial class SetupOutputView
         if (string.IsNullOrEmpty(child.Name))
             return;
 
-        var phase = CanvasPointHandle.DragPhase.None;
+        var phase = CanvasPointHandle.DragPhases.None;
         // Alt at the press pans the content under the region instead of moving the region.
         var panning = _gesture.Is(GestureKinds.ContentPan, child.Id)
                       || (!_gesture.IsLive && ImGui.GetIO().KeyAlt && child.SliceId != Guid.Empty);
         var kind = panning ? GestureKinds.ContentPan : GestureKinds.RegionMove;
         if (_gesture.Is(kind, child.Id))
         {
-            phase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhase.Dragging : CanvasPointHandle.DragPhase.Completed;
+            phase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhases.Dragging : CanvasPointHandle.DragPhases.Completed;
         }
         else if (!_gesture.IsLive && _labelGrabScreen != null
                  && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
@@ -238,10 +238,10 @@ internal sealed partial class SetupOutputView
                  && _picker.IsPicked(child.Id) && IsPointInQuadBounds(screen, _labelGrabScreen.Value))
         {
             _labelGrabScreen = null;
-            phase = CanvasPointHandle.DragPhase.Started;
+            phase = CanvasPointHandle.DragPhases.Started;
         }
 
-        if (phase == CanvasPointHandle.DragPhase.None)
+        if (phase == CanvasPointHandle.DragPhases.None)
             return;
 
         RunGesture(phase, setup, kind, panning ? "Pan content" : "Move region", child,

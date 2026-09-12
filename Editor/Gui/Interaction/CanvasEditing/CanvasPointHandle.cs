@@ -15,7 +15,7 @@ namespace T3.Editor.Gui.Interaction.CanvasEditing;
 /// </summary>
 internal static class CanvasPointHandle
 {
-    internal enum DragPhase
+    internal enum DragPhases
     {
         None,
         Started,
@@ -23,7 +23,7 @@ internal static class CanvasPointHandle
         Completed,
     }
 
-    internal enum Shape
+    internal enum Shapes
     {
         Circle,
         Square,
@@ -37,11 +37,11 @@ internal static class CanvasPointHandle
         /// <summary>Drawn around the fill; transparent by default so plain handles are unchanged.</summary>
         public Color OutlineColor;
 
-        public Shape Shape;
+        public Shapes Shape;
         public float Radius; // unscaled screen pixels
         public bool Editable;
 
-        public static Style Default(Color color, Shape shape = Shape.Circle, bool editable = true)
+        public static Style Default(Color color, Shapes shape = Shapes.Circle, bool editable = true)
         {
             return new Style
                        {
@@ -60,13 +60,13 @@ internal static class CanvasPointHandle
     /// dragging; snapping is the caller's job afterwards, in whatever space its edit lives in. Returns the
     /// drag phase for the caller's undo logic.
     /// </summary>
-    public static DragPhase Draw(ref Vector2 posInCanvas, ICanvasProjection projection, in Style style)
+    public static DragPhases Draw(ref Vector2 posInCanvas, ICanvasProjection projection, in Style style)
     {
         var dl = ImGui.GetWindowDrawList();
         var screen = projection.CanvasToScreen(posInCanvas);
         var radius = style.Radius * T3Ui.UiScaleFactor;
 
-        var phase = DragPhase.None;
+        var phase = DragPhases.None;
         var isHovered = false;
         var isHeld = false;
         if (style.Editable)
@@ -84,7 +84,7 @@ internal static class CanvasPointHandle
                 // The drag accumulates mouse deltas from where the point was, so it never jumps to the cursor
                 // and a precision modifier can scale the motion mid-drag.
                 _dragScreen = screen;
-                phase = DragPhase.Started;
+                phase = DragPhases.Started;
             }
             else if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left, 0f))
             {
@@ -93,11 +93,11 @@ internal static class CanvasPointHandle
                 _dragScreen += io.MouseDelta * (io.KeyShift ? PrecisionDragFactor : 1f);
                 posInCanvas = projection.ScreenToCanvas(_dragScreen);
                 screen = projection.CanvasToScreen(posInCanvas);
-                phase = DragPhase.Dragging;
+                phase = DragPhases.Dragging;
             }
             else if (ImGui.IsItemDeactivated())
             {
-                phase = DragPhase.Completed;
+                phase = DragPhases.Completed;
             }
         }
 
@@ -106,7 +106,7 @@ internal static class CanvasPointHandle
         var outlineWidth = 1.5f * T3Ui.UiScaleFactor;
         var hasOutline = style.OutlineColor.Rgba.W > 0.01f;
 
-        if (style.Shape == Shape.Square)
+        if (style.Shape == Shapes.Square)
         {
             var half = new Vector2(radius);
             dl.AddRectFilled(screen - half, screen + half, color);

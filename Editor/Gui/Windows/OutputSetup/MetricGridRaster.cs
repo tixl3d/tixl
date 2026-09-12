@@ -65,7 +65,7 @@ internal static class MetricGridRaster
         {
             var y = Snap(projection.CanvasToScreen(Vector2.Zero).Y);
             dl.AddLine(new Vector2(screenMin.X, y), new Vector2(screenMax.X, y),
-                       SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface).Fade(0.5f * emphasis), 1.5f * scale);
+                       SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface).Fade(0.5f * emphasis), 1.5f * scale);
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(screenMin.X + 6 * scale, y - Fonts.FontSmall.FontSize - 2 * scale),
                        labelColor, "Floor (0 m)");
         }

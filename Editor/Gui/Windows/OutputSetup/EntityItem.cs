@@ -18,7 +18,7 @@ internal sealed class EntityItem
 {
     /// <summary>What the caller must react to; everything else (selection, rename, delete, menus) is
     /// handled internally.</summary>
-    public enum ItemAction
+    public enum ItemActions
     {
         None,
 
@@ -28,7 +28,7 @@ internal sealed class EntityItem
 
     public struct Args
     {
-        public SetupEntitySelection.EntityKind Kind;
+        public SetupEntitySelection.EntityKinds Kind;
         public Guid Id;
         public string Name;
 
@@ -63,9 +63,9 @@ internal sealed class EntityItem
     public (Vector2 Min, Vector2 Max) LastRowRect { get; private set; }
 
     /// <param name="hovered">Reported so the caller can track hover-driven cross-highlights.</param>
-    public ItemAction DrawRow(SetupEntitySelection selection, Setup setup, in Args args, out bool hovered)
+    public ItemActions DrawRow(SetupEntitySelection selection, Setup setup, in Args args, out bool hovered)
     {
-        var action = ItemAction.None;
+        var action = ItemActions.None;
         var scale = T3Ui.UiScaleFactor;
         var rounding = 4 * scale;
         // Odd height so a 15px icon centers exactly ((23-15)/2 = 4).
@@ -102,7 +102,7 @@ internal sealed class EntityItem
         hovered = isHovered;
 
         var canRename = SetupActions.CanRename(args.Kind)
-                        && (args.Kind != SetupEntitySelection.EntityKind.Plug || SetupActions.CanRenamePlug(args.Id));
+                        && (args.Kind != SetupEntitySelection.EntityKinds.Plug || SetupActions.CanRenamePlug(args.Id));
         var isRenaming = canRename && _renamingId == args.Id;
 
         // Double-click a renamable row to edit its name inline. Suppress the click-select handling below so the
@@ -122,9 +122,9 @@ internal sealed class EntityItem
         var chevronMaxX = rowMin.X + indent + 20 * scale;
         if (clicked && args.IsExpanded.HasValue && ImGui.GetMousePos().X < chevronMaxX)
         {
-            action = ItemAction.ToggleExpanded;
+            action = ItemActions.ToggleExpanded;
         }
-        else if (clicked && args.Kind != SetupEntitySelection.EntityKind.None)
+        else if (clicked && args.Kind != SetupEntitySelection.EntityKinds.None)
         {
             var io = ImGui.GetIO();
             if (io.KeyCtrl)
@@ -135,7 +135,7 @@ internal sealed class EntityItem
             {
                 selection.Select(args.Kind, args.Id);
                 // A content row is a live op — a plain click selects it in the graph and brings it into view.
-                if (args.Kind == SetupEntitySelection.EntityKind.ContentSource)
+                if (args.Kind == SetupEntitySelection.EntityKinds.ContentSource)
                     SetupActions.RevealContentOpInGraph(args.Id);
             }
         }
@@ -143,13 +143,13 @@ internal sealed class EntityItem
         if (isHovered)
         {
             FrameStats.PulseItemWithId(args.Id);
-            if (args.Kind == SetupEntitySelection.EntityKind.ContentSource)
+            if (args.Kind == SetupEntitySelection.EntityKinds.ContentSource)
                 FrameStats.AddHoveredId(args.Id);
         }
 
         HandleDragDrop(setup, args.Kind, args.Id);
 
-        if (args.Kind != SetupEntitySelection.EntityKind.None)
+        if (args.Kind != SetupEntitySelection.EntityKinds.None)
         {
             // Static context + a cached delegate: the menu body only runs for the row whose popup is open,
             // and ContextMenuForItem invokes it synchronously within this call — so per-row closures would
@@ -284,7 +284,7 @@ internal sealed class EntityItem
     }
 
     /// <summary>Enters inline-rename mode for an item: selects it, seeds the buffer, and focuses the field next frame.</summary>
-    public void BeginRename(SetupEntitySelection selection, SetupEntitySelection.EntityKind kind, Guid id, string name)
+    public void BeginRename(SetupEntitySelection selection, SetupEntitySelection.EntityKinds kind, Guid id, string name)
     {
         selection.Select(kind, id);
         _renamingId = id;
@@ -292,14 +292,14 @@ internal sealed class EntityItem
         _renameFocusPending = true;
     }
 
-    private void HandleDragDrop(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    private void HandleDragDrop(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id)
     {
         // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
         // (ApplyDrop normalizes), so dragging an output onto a source works the same as the reverse. A patch
         // takes a slice or source to re-feed it.
-        var routable = kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.ContentSource
-                            or SetupEntitySelection.EntityKind.Slice or SetupEntitySelection.EntityKind.Output
-                            or SetupEntitySelection.EntityKind.Patch or SetupEntitySelection.EntityKind.Plug;
+        var routable = kind is SetupEntitySelection.EntityKinds.Surface or SetupEntitySelection.EntityKinds.ContentSource
+                            or SetupEntitySelection.EntityKinds.Slice or SetupEntitySelection.EntityKinds.Output
+                            or SetupEntitySelection.EntityKinds.Patch or SetupEntitySelection.EntityKinds.Plug;
         if (!routable)
             return;
 
@@ -333,7 +333,7 @@ internal sealed class EntityItem
     /// kind supports them.
     /// </summary>
     public void DrawContextMenuItems(SetupEntitySelection selection, Setup setup,
-                                            SetupEntitySelection.EntityKind kind, Guid id, string name)
+                                            SetupEntitySelection.EntityKinds kind, Guid id, string name)
     {
         // Right-clicking inside a multi-selection acts on the whole thing. The per-entity actions stay
         // visible but dimmed rather than vanishing, so the menu keeps its shape and it is obvious *why*
@@ -373,11 +373,11 @@ internal sealed class EntityItem
     }
 
     private void DrawKindMenuItems(SetupEntitySelection selection, Setup setup,
-                                          SetupEntitySelection.EntityKind kind, Guid id)
+                                          SetupEntitySelection.EntityKinds kind, Guid id)
     {
         switch (kind)
         {
-            case SetupEntitySelection.EntityKind.Output:
+            case SetupEntitySelection.EntityKinds.Output:
                 var output = setup.FindOutput(id);
                 if (output == null)
                     break;
@@ -409,7 +409,7 @@ internal sealed class EntityItem
                 // plug's own menu. One gesture, in the place that shows what is plugged in.
                 break;
 
-            case SetupEntitySelection.EntityKind.Plug:
+            case SetupEntitySelection.EntityKinds.Plug:
                 if (!OutputSetupHandling.TryGetActiveSetup(out _, out var plugMachineConfig))
                     break;
 
@@ -432,14 +432,14 @@ internal sealed class EntityItem
 
                 break;
 
-            case SetupEntitySelection.EntityKind.ContentSource:
+            case SetupEntitySelection.EntityKinds.ContentSource:
                 var source = setup.FindSourceByChildId(id);
                 if (source != null && CustomComponents.DrawMenuItem(8, "Add slice"))
                     SetupActions.AddSlice(selection, setup, source);
 
                 break;
 
-            case SetupEntitySelection.EntityKind.Patch:
+            case SetupEntitySelection.EntityKinds.Patch:
                 if (setup.FindPatch(id, out _) is { } turnedPatch && CustomComponents.DrawMenuItem(17, "Rotate 90°"))
                     SetupActions.RotatePatchClockwise(setup, turnedPatch);
 
@@ -453,7 +453,7 @@ internal sealed class EntityItem
                                                     "The quad stays exactly where it is; the surface adds real size, raster and straightening.");
                 break;
 
-            case SetupEntitySelection.EntityKind.ReferenceImage:
+            case SetupEntitySelection.EntityKinds.ReferenceImage:
                 var image = setup.FindReferenceImage(id);
                 if (image == null)
                     break;
@@ -474,7 +474,7 @@ internal sealed class EntityItem
 
                 break;
 
-            case SetupEntitySelection.EntityKind.Surface:
+            case SetupEntitySelection.EntityKinds.Surface:
                 var surface = setup.FindSurface(id);
                 if (surface == null)
                     break;

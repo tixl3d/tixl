@@ -47,28 +47,28 @@ internal static class SetupParameterView
 
         switch (kind)
         {
-            case SetupEntitySelection.EntityKind.Surface:
+            case SetupEntitySelection.EntityKinds.Surface:
                 DrawSurfaceCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKind.Output:
+            case SetupEntitySelection.EntityKinds.Output:
                 DrawOutputCard(setup, machineConfig, id);
                 break;
-            case SetupEntitySelection.EntityKind.ContentSource:
+            case SetupEntitySelection.EntityKinds.ContentSource:
                 DrawContentCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKind.Slice:
+            case SetupEntitySelection.EntityKinds.Slice:
                 DrawSliceCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKind.ReferenceImage:
+            case SetupEntitySelection.EntityKinds.ReferenceImage:
                 DrawReferenceImageCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKind.Prop:
+            case SetupEntitySelection.EntityKinds.Prop:
                 DrawPropCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKind.Patch:
+            case SetupEntitySelection.EntityKinds.Patch:
                 DrawPatchCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKind.Plug:
+            case SetupEntitySelection.EntityKinds.Plug:
                 DrawPlugCard(setup, machineConfig, id);
                 break;
         }
@@ -150,19 +150,19 @@ internal static class SetupParameterView
         GuidListLabels.Picker = PickTarget;
     }
 
-    private static void DrawHeader(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    private static void DrawHeader(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id)
     {
         var (icon, kindLabel) = kind switch
                                     {
-                                        SetupEntitySelection.EntityKind.Surface when IsRegion(setup, id) => (Icon.Grid, "Region"),
-                                        SetupEntitySelection.EntityKind.Surface => (Icon.Grid, "Surface"),
-                                        SetupEntitySelection.EntityKind.Output => (Icon.Projector, "Output"),
-                                        SetupEntitySelection.EntityKind.Slice => (Icon.Slice, "Slice"),
-                                        SetupEntitySelection.EntityKind.ContentSource => (Icon.FileImage, "Content"),
-                                        SetupEntitySelection.EntityKind.ReferenceImage => (Icon.FileImage, "Reference Image"),
-                                        SetupEntitySelection.EntityKind.Prop => (Icon.Grid, "Prop"),
-                                        SetupEntitySelection.EntityKind.Patch => (Icon.Patch, "Patch"),
-                                        SetupEntitySelection.EntityKind.Plug => (Icon.PlayOutput, "Plug"),
+                                        SetupEntitySelection.EntityKinds.Surface when IsRegion(setup, id) => (Icon.Grid, "Region"),
+                                        SetupEntitySelection.EntityKinds.Surface => (Icon.Grid, "Surface"),
+                                        SetupEntitySelection.EntityKinds.Output => (Icon.Projector, "Output"),
+                                        SetupEntitySelection.EntityKinds.Slice => (Icon.Slice, "Slice"),
+                                        SetupEntitySelection.EntityKinds.ContentSource => (Icon.FileImage, "Content"),
+                                        SetupEntitySelection.EntityKinds.ReferenceImage => (Icon.FileImage, "Reference Image"),
+                                        SetupEntitySelection.EntityKinds.Prop => (Icon.Grid, "Prop"),
+                                        SetupEntitySelection.EntityKinds.Patch => (Icon.Patch, "Patch"),
+                                        SetupEntitySelection.EntityKinds.Plug => (Icon.PlayOutput, "Plug"),
                                         _ => (Icon.Grid, kind.ToString()),
                                     };
 
@@ -174,13 +174,13 @@ internal static class SetupParameterView
 
         // Props carry no name; a content source's name is its op (rename cascades through the sync); a
         // display's name comes from the OS.
-        var namedByOs = kind == SetupEntitySelection.EntityKind.Plug && Plugs.TryGetDisplayIndex(id, out _);
-        if (kind != SetupEntitySelection.EntityKind.Prop && !namedByOs)
+        var namedByOs = kind == SetupEntitySelection.EntityKinds.Plug && Plugs.TryGetDisplayIndex(id, out _);
+        if (kind != SetupEntitySelection.EntityKinds.Prop && !namedByOs)
             DrawNameField(setup, kind, id);
     }
 
     /// <summary>Editable name, committed as one undoable rename when the field loses focus.</summary>
-    private static void DrawNameField(Setup setup, SetupEntitySelection.EntityKind kind, Guid id)
+    private static void DrawNameField(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id)
     {
         var currentName = SetupActions.NameForEntity(kind, id);
         if (_renameTargetId != id)

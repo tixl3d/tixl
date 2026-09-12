@@ -150,21 +150,21 @@ internal sealed partial class SetupOutputView
                 ImGui.PopID();
 
                 // Pre-drag snapshot before this frame's apply, so the whole drag undoes as one step.
-                if ((phase1 == CanvasPointHandle.DragPhase.Started || phase2 == CanvasPointHandle.DragPhase.Started)
+                if ((phase1 == CanvasPointHandle.DragPhases.Started || phase2 == CanvasPointHandle.DragPhases.Started)
                     && ActiveSetup.Current is { } dragSetup)
                     BeginGesture(dragSetup, GestureKinds.Annotation, "Move measuring line", carrier.Id);
 
-                if (phase1 != CanvasPointHandle.DragPhase.None)
+                if (phase1 != CanvasPointHandle.DragPhases.None)
                     annotation.P1 = ToSurface(p1);
 
-                if (phase2 != CanvasPointHandle.DragPhase.None)
+                if (phase2 != CanvasPointHandle.DragPhases.None)
                     annotation.P2 = ToSurface(p2);
 
-                if (phase1 is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging
-                    || phase2 is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging)
+                if (phase1 is CanvasPointHandle.DragPhases.Started or CanvasPointHandle.DragPhases.Dragging
+                    || phase2 is CanvasPointHandle.DragPhases.Started or CanvasPointHandle.DragPhases.Dragging)
                     nextDragIndex = i;
 
-                if ((phase1 == CanvasPointHandle.DragPhase.Completed || phase2 == CanvasPointHandle.DragPhase.Completed)
+                if ((phase1 == CanvasPointHandle.DragPhases.Completed || phase2 == CanvasPointHandle.DragPhases.Completed)
                     && _gesture.Is(GestureKinds.Annotation, carrier.Id) && ActiveSetup.Current is { } doneSetup)
                     EndGesture(doneSetup); // value already applied live during the drag
             }

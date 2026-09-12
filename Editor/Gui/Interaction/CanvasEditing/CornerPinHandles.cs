@@ -10,8 +10,8 @@ namespace T3.Editor.Gui.Interaction.CanvasEditing;
 /// Corner-pin quad editor: composes four <see cref="CanvasPointHandle"/>s (top-left marked with a
 /// square) with quad edges, a faint bilinear checker, and a centered label. Agnostic of what the
 /// quad means; the caller owns the data (mutated in place) and any undo command, and reads the
-/// drag lifecycle to snapshot on <see cref="CanvasPointHandle.DragPhase.Started"/> and commit on
-/// <see cref="CanvasPointHandle.DragPhase.Completed"/>. Corners: top-left, top-right, bottom-right,
+/// drag lifecycle to snapshot on <see cref="CanvasPointHandle.DragPhases.Started"/> and commit on
+/// <see cref="CanvasPointHandle.DragPhases.Completed"/>. Corners: top-left, top-right, bottom-right,
 /// bottom-left.
 /// </summary>
 internal static class CornerPinHandles
@@ -29,7 +29,7 @@ internal static class CornerPinHandles
         public bool Editable;
 
         /// <summary>Squares read as "crop along the edge"; a caller whose edge drag scales instead shows circles.</summary>
-        public CanvasPointHandle.Shape EdgeHandleShape;
+        public CanvasPointHandle.Shapes EdgeHandleShape;
 
         /// <summary>Outline width in unscaled px; 0 = the default.</summary>
         public float EdgeThickness;
@@ -59,7 +59,7 @@ internal static class CornerPinHandles
                            DrawChecker = true,
                            Label = label,
                            Editable = editable,
-                           EdgeHandleShape = CanvasPointHandle.Shape.Square,
+                           EdgeHandleShape = CanvasPointHandle.Shapes.Square,
                        };
         }
     }
@@ -69,7 +69,7 @@ internal static class CornerPinHandles
     /// in canvas space) is mutated in place while dragging. Push a unique ImGui id before calling
     /// when several quads share a frame. Returns the drag phase and, during a live drag, the corner.
     /// </summary>
-    public static CanvasPointHandle.DragPhase Draw(Vector2[] corners, ICanvasProjection projection, in Style style, out int draggedCorner)
+    public static CanvasPointHandle.DragPhases Draw(Vector2[] corners, ICanvasProjection projection, in Style style, out int draggedCorner)
     {
         return Draw(corners, projection, style, out draggedCorner, out _);
     }
@@ -77,13 +77,13 @@ internal static class CornerPinHandles
     /// <summary>As <see cref="Draw(Vector2[],ICanvasProjection,in Style,out int)"/>, also reporting whether any
     /// of the four corner handles is hovered — used to cross-highlight the quad's entity from the canvas.
     /// <paramref name="selectedCornersMask"/> marks corners in the canvas sub-element selection (bit per corner).</summary>
-    public static CanvasPointHandle.DragPhase Draw(Vector2[] corners, ICanvasProjection projection, in Style style,
+    public static CanvasPointHandle.DragPhases Draw(Vector2[] corners, ICanvasProjection projection, in Style style,
                                                    out int draggedCorner, out bool hovered, int selectedCornersMask = 0)
     {
         draggedCorner = -1;
         hovered = false;
         if (corners.Length != 4)
-            return CanvasPointHandle.DragPhase.None;
+            return CanvasPointHandle.DragPhases.None;
 
         var dl = ImGui.GetWindowDrawList();
         Span<Vector2> screen = stackalloc Vector2[4];
@@ -100,13 +100,13 @@ internal static class CornerPinHandles
         if (!string.IsNullOrEmpty(style.Label))
             DrawCenteredLabel(dl, screen, style.Label!, style.LabelColor, style.LabelBackgroundColor);
 
-        var phase = CanvasPointHandle.DragPhase.None;
+        var phase = CanvasPointHandle.DragPhases.None;
         for (var i = 0; i < 4; i++)
         {
             ImGui.PushID(i);
             // Corners are circles, edge handles squares — the anchor marker shows orientation, so the corners
             // don't need a winding cue of their own.
-            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shape.Circle, style.Editable);
+            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shapes.Circle, style.Editable);
             handleStyle.OutlineColor = style.HandleOutlineColor;
 
             // A selected corner reads as part of the active set: filled in the frame's hue, bright rim, a touch larger.
@@ -118,7 +118,7 @@ internal static class CornerPinHandles
             }
 
             var handlePhase = CanvasPointHandle.Draw(ref corners[i], projection, handleStyle);
-            if (handlePhase != CanvasPointHandle.DragPhase.None)
+            if (handlePhase != CanvasPointHandle.DragPhases.None)
             {
                 phase = handlePhase;
                 draggedCorner = i;
@@ -138,23 +138,23 @@ internal static class CornerPinHandles
     /// is therefore reported rather than written back into <paramref name="corners"/>.
     /// Edges are indexed 0 = top, 1 = right, 2 = bottom, 3 = left, matching the TL, TR, BR, BL winding.
     /// </summary>
-    public static CanvasPointHandle.DragPhase DrawEdgeHandles(Vector2[] corners, ICanvasProjection projection, in Style style,
+    public static CanvasPointHandle.DragPhases DrawEdgeHandles(Vector2[] corners, ICanvasProjection projection, in Style style,
                                                               out int draggedEdge, out Vector2 draggedPosition)
     {
         return DrawEdgeHandles(corners, projection, style, out draggedEdge, out draggedPosition, out _);
     }
 
     /// <summary>As the four-out overload, also reporting whether any edge handle is hovered.</summary>
-    public static CanvasPointHandle.DragPhase DrawEdgeHandles(Vector2[] corners, ICanvasProjection projection, in Style style,
+    public static CanvasPointHandle.DragPhases DrawEdgeHandles(Vector2[] corners, ICanvasProjection projection, in Style style,
                                                               out int draggedEdge, out Vector2 draggedPosition, out bool hovered)
     {
         draggedEdge = -1;
         draggedPosition = Vector2.Zero;
         hovered = false;
         if (corners.Length != 4)
-            return CanvasPointHandle.DragPhase.None;
+            return CanvasPointHandle.DragPhases.None;
 
-        var phase = CanvasPointHandle.DragPhase.None;
+        var phase = CanvasPointHandle.DragPhases.None;
         ImGui.PushID("edges");
         for (var i = 0; i < 4; i++)
         {
@@ -165,7 +165,7 @@ internal static class CornerPinHandles
             handleStyle.Radius = 4;
 
             var handlePhase = CanvasPointHandle.Draw(ref midpoint, projection, handleStyle);
-            if (handlePhase != CanvasPointHandle.DragPhase.None)
+            if (handlePhase != CanvasPointHandle.DragPhases.None)
             {
                 phase = handlePhase;
                 draggedEdge = i;

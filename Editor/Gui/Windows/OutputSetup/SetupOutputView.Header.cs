@@ -91,17 +91,17 @@ internal sealed partial class SetupOutputView
         if (CustomComponents.SegmentedButton(ref _editMode,
                                              isItemDisabled: mode => mode switch
                                                                          {
-                                                                             EditMode.Board => false,
-                                                                             EditMode.Straight => !canStraight,
+                                                                             EditModes.Board => false,
+                                                                             EditModes.Straight => !canStraight,
                                                                              _ => !canOutput,
                                                                          },
                                              tooltipForItem: mode => mode switch
                                                                          {
-                                                                             EditMode.Board =>
+                                                                             EditModes.Board =>
                                                                                  "Everything at once: content, surfaces and outputs as cards you can arrange and route.",
-                                                                             EditMode.Straight when canStraight =>
+                                                                             EditModes.Straight when canStraight =>
                                                                                  "One surface seen head-on, its keystone taken out, so you can place content on it without fighting the perspective.",
-                                                                             EditMode.Straight =>
+                                                                             EditModes.Straight =>
                                                                                  "Needs a surface. Select one that is mapped to an output or traced on a reference photo — straightening rectifies a single surface.",
                                                                              _ when canOutput =>
                                                                                  "The output canvas as the projector sees it: patches, mapped surfaces and their handles in its pixels.",
@@ -110,18 +110,18 @@ internal sealed partial class SetupOutputView
                                                                          }))
         {
             // Picked a camera the selection only leads to: select its subject so the next frame frames it.
-            if (_editMode == EditMode.Output && reachedOutputId != Guid.Empty)
-                selection.Select(SetupEntitySelection.EntityKind.Output, reachedOutputId);
-            else if (_editMode == EditMode.Straight && reachedSurfaceId != Guid.Empty)
-                selection.Select(SetupEntitySelection.EntityKind.Surface, reachedSurfaceId);
+            if (_editMode == EditModes.Output && reachedOutputId != Guid.Empty)
+                selection.Select(SetupEntitySelection.EntityKinds.Output, reachedOutputId);
+            else if (_editMode == EditModes.Straight && reachedSurfaceId != Guid.Empty)
+                selection.Select(SetupEntitySelection.EntityKinds.Surface, reachedSurfaceId);
         }
 
         // A disabled segment can't be clicked away, so a mode left selected after its precondition lapses
         // (the selection no longer reaches a surface or an output) is reset here instead.
-        if (!canStraight && _editMode == EditMode.Straight)
-            _editMode = canOutput ? EditMode.Output : EditMode.Board;
-        else if (!canOutput && _editMode != EditMode.Straight)
-            _editMode = EditMode.Board;
+        if (!canStraight && _editMode == EditModes.Straight)
+            _editMode = canOutput ? EditModes.Output : EditModes.Board;
+        else if (!canOutput && _editMode != EditModes.Straight)
+            _editMode = EditModes.Board;
 
         // Isolate: locks the canvas to the focused frame — the others stay visible and keep snapping, but
         // can't be selected or edited from the canvas, so you can work one frame without nudging its
@@ -150,7 +150,7 @@ internal sealed partial class SetupOutputView
 
         // Isolate is an Output-canvas affair: it locks the corner-pin editing to one frame. Elsewhere it has
         // nothing to lock, so it isn't offered (and clears).
-        if (_editMode == EditMode.Output)
+        if (_editMode == EditModes.Output)
         {
             ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
             ImGui.BeginDisabled(!canIsolate);
@@ -173,7 +173,7 @@ internal sealed partial class SetupOutputView
         if (photoCarrier == null)
             _projectPhoto = false;
 
-        if (_editMode is EditMode.Output or EditMode.Straight && photoCarrier != null)
+        if (_editMode is EditModes.Output or EditModes.Straight && photoCarrier != null)
         {
             ImGui.SameLine();
             if (CustomComponents.StateButton("Project photo", _projectPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
@@ -211,9 +211,9 @@ internal sealed partial class SetupOutputView
         // Measuring only makes sense against the straightened surface — on the projector canvas the
         // lengths would be perspective-foreshortened and mean nothing.
         // The line tool serves both Straight flows: on the photo it refines the trace, on the projector the pin.
-        var tracedForLines = _editMode == EditMode.Straight ? TracedImageOf(setup, _shownSurfaceId) : null;
+        var tracedForLines = _editMode == EditModes.Straight ? TracedImageOf(setup, _shownSurfaceId) : null;
         var lineSubject = tracedForLines != null ? setup.FindSurface(_shownSurfaceId) : straightCarrier;
-        if (_editMode == EditMode.Straight && lineSubject != null)
+        if (_editMode == EditModes.Straight && lineSubject != null)
         {
             ImGui.SameLine();
             if (CustomComponents.StateButton("+ Line", _measureArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
@@ -282,7 +282,7 @@ internal sealed partial class SetupOutputView
         }
 
         // "+ <surface>" maps a surface onto this output — an Output-canvas action; the Board has no output to map to.
-        if (output == null || _editMode == EditMode.Board)
+        if (output == null || _editMode == EditModes.Board)
             return;
 
         for (var i = 0; i < setup.Surfaces.Count; i++)

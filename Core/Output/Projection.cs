@@ -9,7 +9,7 @@ namespace T3.Core.Output;
 /// </summary>
 public struct Projection
 {
-    public ProjectionKind Kind;
+    public ProjectionKinds Kind;
 
     /// <summary>Vertical field of view in radians (perspective only).</summary>
     public float FieldOfViewY;
@@ -30,7 +30,7 @@ public struct Projection
     {
         return new Projection
                    {
-                       Kind = ProjectionKind.Perspective,
+                       Kind = ProjectionKinds.Perspective,
                        FieldOfViewY = fieldOfViewY,
                        LensShift = lensShift,
                        NearZ = nearZ,
@@ -42,7 +42,7 @@ public struct Projection
     {
         return new Projection
                    {
-                       Kind = ProjectionKind.Orthographic,
+                       Kind = ProjectionKinds.Orthographic,
                        OrthographicHeight = heightInMeters,
                        NearZ = nearZ,
                        FarZ = farZ,
@@ -55,7 +55,7 @@ public struct Projection
     /// </summary>
     public Matrix4x4 GetMatrix(float aspect)
     {
-        if (Kind == ProjectionKind.Orthographic)
+        if (Kind == ProjectionKinds.Orthographic)
         {
             var height = MathF.Max(OrthographicHeight, 1e-5f);
             return Matrix4x4.CreateOrthographic(height * aspect, height, NearZ, FarZ);
@@ -80,7 +80,7 @@ public struct Projection
     }
 }
 
-public enum ProjectionKind
+public enum ProjectionKinds
 {
     Perspective,
     Orthographic,

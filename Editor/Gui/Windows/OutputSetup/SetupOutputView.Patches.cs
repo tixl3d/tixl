@@ -35,7 +35,7 @@ internal sealed partial class SetupOutputView
             return;
 
         var focusedPatchId = selection != null && selection.Targets.Count > 0
-                             && selection.Targets[0].Kind == SetupEntitySelection.EntityKind.Patch
+                             && selection.Targets[0].Kind == SetupEntitySelection.EntityKinds.Patch
                                  ? selection.Targets[0].EntityId
                                  : Guid.Empty;
 
@@ -51,7 +51,7 @@ internal sealed partial class SetupOutputView
             // keystones a feed that goes straight to the output, without first having to make a patch by hand.
             // That drag is also what promotes it, since it then no longer covers the full canvas.
             var isImplicit = SetupRelations.IsImplicitPatch(output, patch);
-            if (isImplicit && _editMode != EditMode.Output)
+            if (isImplicit && _editMode != EditModes.Output)
                 continue;
 
             // Stored as ratios of the canvas; this canvas works in its pixels like the rest of the output view,
@@ -69,10 +69,10 @@ internal sealed partial class SetupOutputView
             // second name for it. The label (and the whole-tile move it carries) appears with the promotion.
             var label = isImplicit ? string.Empty : SetupActions.PatchLabel(output, patch);
             var isFocused = patch.Id == focusedPatchId;
-            var isSelected = isFocused || (selection?.IsSelected(SetupEntitySelection.EntityKind.Patch, patch.Id) ?? false);
+            var isSelected = isFocused || (selection?.IsSelected(SetupEntitySelection.EntityKinds.Patch, patch.Id) ?? false);
             var pulse = isSelected ? 0f : FrameStats.GetPulse(patch.Id);
 
-            var style = CornerPinHandles.Style.ForSurface(null, editable, isSelected, fade, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
+            var style = CornerPinHandles.Style.ForSurface(null, editable, isSelected, fade, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
             style.DrawChecker = !hasContent;
             style.EdgeColor = PulseColor(style.EdgeColor, pulse);
 
@@ -82,12 +82,12 @@ internal sealed partial class SetupOutputView
             style.Editable = editable && !pointerOverLabel && !_isolate;
 
             var phase = CornerPinHandles.Draw(_patchViewQuad, _projection, style, out var draggedCorner, out var cornerHovered);
-            if (phase != CanvasPointHandle.DragPhase.None)
+            if (phase != CanvasPointHandle.DragPhases.None)
             {
                 for (var c = 0; c < 4; c++)
                     _patchPx[c] = rToOutput.TransformPoint(_patchViewQuad[c] + viewMin);
 
-                if (phase == CanvasPointHandle.DragPhase.Dragging && draggedCorner >= 0 && !ImGui.GetIO().KeyShift)
+                if (phase == CanvasPointHandle.DragPhases.Dragging && draggedCorner >= 0 && !ImGui.GetIO().KeyShift)
                 {
                     CollectPatchSnapCandidates(output, patch.Id, canvasSize);
                     var threshold = PatchSnapThreshold();
@@ -107,14 +107,14 @@ internal sealed partial class SetupOutputView
             RunPatchQuadDrag(phase, setup, patch, canvasSize);
 
             // The label doubles as the move handle — the press selects (through the picker), holding on moves.
-            if (phase == CanvasPointHandle.DragPhase.None && !isImplicit)
+            if (phase == CanvasPointHandle.DragPhases.None && !isImplicit)
                 HandlePatchMove(setup, output, patch, isFocused, editable && !_isolate, label, screen, rToView, rToOutput, viewMin, canvasSize);
 
-            if (cornerHovered || phase != CanvasPointHandle.DragPhase.None)
+            if (cornerHovered || phase != CanvasPointHandle.DragPhases.None)
                 FrameStats.PulseItemWithId(patch.Id);
 
-            if (phase == CanvasPointHandle.DragPhase.Started && !_isolate)
-                selection?.Select(SetupEntitySelection.EntityKind.Patch, patch.Id);
+            if (phase == CanvasPointHandle.DragPhases.Started && !_isolate)
+                selection?.Select(SetupEntitySelection.EntityKinds.Patch, patch.Id);
 
             // Edge handles for the focused patch only: an edge crops the tile, keeping the opposite edge put.
             if (style.Editable && isFocused)
@@ -126,7 +126,7 @@ internal sealed partial class SetupOutputView
 
             ImGui.PopID();
             if (!isImplicit)
-                DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Patch, screen, patch.Id, label, isSelected, fade, pulse);
+                DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Patch, screen, patch.Id, label, isSelected, fade, pulse);
 
             if (patch.QuarterTurns != 0)
                 DrawPictureTopMarker(dl, screen, patch.QuarterTurns, style.EdgeColor.Fade(fade));
@@ -134,12 +134,12 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>A patch gesture: the pre-drag quad kept for re-basing, the undo step from the setup snapshot.</summary>
-    private void RunPatchQuadDrag(CanvasPointHandle.DragPhase phase, Setup setup, OutputDefinition.Patch patch, Vector2 canvasSize,
+    private void RunPatchQuadDrag(CanvasPointHandle.DragPhases phase, Setup setup, OutputDefinition.Patch patch, Vector2 canvasSize,
                                   bool move = false)
     {
         switch (phase)
         {
-            case CanvasPointHandle.DragPhase.Started:
+            case CanvasPointHandle.DragPhases.Started:
                 for (var c = 0; c < 4; c++)
                     _patchOldQuad[c] = patch.Quad[c] * canvasSize;
 
@@ -147,7 +147,7 @@ internal sealed partial class SetupOutputView
                              grabPoint: _projection.ScreenToCanvas(ImGui.GetMousePos()));
                 break;
 
-            case CanvasPointHandle.DragPhase.Completed:
+            case CanvasPointHandle.DragPhases.Completed:
                 if (_gesture.HotId == patch.Id)
                     EndGesture(setup);
 
@@ -158,12 +158,12 @@ internal sealed partial class SetupOutputView
     private void HandlePatchMove(Setup setup, OutputDefinition output, OutputDefinition.Patch patch, bool isFocused, bool editable, string label,
                                  ReadOnlySpan<Vector2> screen, Homography rToView, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize)
     {
-        var movePhase = CanvasPointHandle.DragPhase.None;
+        var movePhase = CanvasPointHandle.DragPhases.None;
         if (_gesture.Is(GestureKinds.PatchMove, patch.Id))
         {
             movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left)
-                            ? CanvasPointHandle.DragPhase.Dragging
-                            : CanvasPointHandle.DragPhase.Completed;
+                            ? CanvasPointHandle.DragPhases.Dragging
+                            : CanvasPointHandle.DragPhases.Completed;
         }
         else if (!_gesture.IsLive && _labelGrabScreen != null && isFocused && editable
                  && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
@@ -171,16 +171,16 @@ internal sealed partial class SetupOutputView
                  && IsPointOverLabel(screen, label, _labelGrabScreen.Value))
         {
             _labelGrabScreen = null;
-            movePhase = CanvasPointHandle.DragPhase.Started;
+            movePhase = CanvasPointHandle.DragPhases.Started;
         }
 
         switch (movePhase)
         {
-            case CanvasPointHandle.DragPhase.Started:
+            case CanvasPointHandle.DragPhases.Started:
                 RunPatchQuadDrag(movePhase, setup, patch, canvasSize, move: true);
                 break;
 
-            case CanvasPointHandle.DragPhase.Dragging when _gesture.Is(GestureKinds.PatchMove, patch.Id):
+            case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.PatchMove, patch.Id):
             {
                 // Rigid in view space, carried through R per corner — the same rule as a surface move.
                 var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
@@ -219,7 +219,7 @@ internal sealed partial class SetupOutputView
                 break;
             }
 
-            case CanvasPointHandle.DragPhase.Completed:
+            case CanvasPointHandle.DragPhases.Completed:
                 RunPatchQuadDrag(movePhase, setup, patch, canvasSize);
                 break;
         }
@@ -229,13 +229,13 @@ internal sealed partial class SetupOutputView
     /// An edge drag on a patch moves that edge along its normal (a crop for a tile); with Ctrl the edge slides
     /// by the full delta (a shear). Re-based from the pre-drag quad each frame, so the edit doesn't compound.
     /// </summary>
-    private void HandlePatchEdgeDrag(CanvasPointHandle.DragPhase phase, Setup setup, OutputDefinition output, OutputDefinition.Patch patch,
+    private void HandlePatchEdgeDrag(CanvasPointHandle.DragPhases phase, Setup setup, OutputDefinition output, OutputDefinition.Patch patch,
                                      int edge, Vector2 viewPos, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize)
     {
-        if (phase == CanvasPointHandle.DragPhase.Started)
+        if (phase == CanvasPointHandle.DragPhases.Started)
             RunPatchQuadDrag(phase, setup, patch, canvasSize);
 
-        if (phase == CanvasPointHandle.DragPhase.Dragging && _gesture.Is(GestureKinds.PatchQuad, patch.Id))
+        if (phase == CanvasPointHandle.DragPhases.Dragging && _gesture.Is(GestureKinds.PatchQuad, patch.Id))
         {
             var e0 = edge;
             var e1 = (edge + 1) % 4;
@@ -288,7 +288,7 @@ internal sealed partial class SetupOutputView
             StorePatchPixels(patch, canvasSize);
         }
 
-        if (phase == CanvasPointHandle.DragPhase.Completed)
+        if (phase == CanvasPointHandle.DragPhases.Completed)
             RunPatchQuadDrag(phase, setup, patch, canvasSize);
     }
 

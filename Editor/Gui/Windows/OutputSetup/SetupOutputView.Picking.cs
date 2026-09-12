@@ -28,7 +28,7 @@ internal sealed partial class SetupOutputView
     /// styles by selection/hover so the same label reads the same in the tree and on the canvas.
     /// </summary>
     /// <param name="pickable">False where the frame itself is the pick target and the chip only names it and shows its state.</param>
-    private void DrawEntityLabel(ImDrawListPtr dl, SetupEntitySelection.EntityKind kind, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected,
+    private void DrawEntityLabel(ImDrawListPtr dl, SetupEntitySelection.EntityKinds kind, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected,
                                  float emphasis, float pulse = 0f, bool pickable = true)
     {
         if (string.IsNullOrEmpty(name) || emphasis <= 0.01f)
@@ -95,7 +95,7 @@ internal sealed partial class SetupOutputView
                 // frame — select-and-drag in one gesture. Plain presses only; a modifier press is a
                 // selection edit, not a grab.
                 var io = ImGui.GetIO();
-                if (hit.Kind is SetupEntitySelection.EntityKind.Surface or SetupEntitySelection.EntityKind.Patch && !io.KeyCtrl && !io.KeyShift)
+                if (hit.Kind is SetupEntitySelection.EntityKinds.Surface or SetupEntitySelection.EntityKinds.Patch && !io.KeyCtrl && !io.KeyShift)
                     _labelGrabScreen = ImGui.GetMousePos();
             }
 
@@ -156,14 +156,14 @@ internal sealed partial class SetupOutputView
         }
     }
 
-    private void SelectPicked(SetupEntitySelection? selection, SetupEntitySelection.EntityKind kind, Guid id)
+    private void SelectPicked(SetupEntitySelection? selection, SetupEntitySelection.EntityKinds kind, Guid id)
     {
         if (selection != null)
         {
             // Shift toggles, plain replaces. Ctrl toggles too — except on the Board, where it is the push-through
             // into nested regions and the click it ends in is a plain pick.
             var io = ImGui.GetIO();
-            if (io.KeyShift || (io.KeyCtrl && _editMode != EditMode.Board))
+            if (io.KeyShift || (io.KeyCtrl && _editMode != EditModes.Board))
                 selection.Toggle(kind, id);
             else
                 selection.Select(kind, id);

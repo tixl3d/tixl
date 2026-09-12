@@ -14,18 +14,18 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal static class SetupColors
 {
-    public static Color ForKind(SetupEntitySelection.EntityKind kind)
+    public static Color ForKind(SetupEntitySelection.EntityKinds kind)
     {
         return kind switch
                    {
-                       SetupEntitySelection.EntityKind.ContentSource
-                           or SetupEntitySelection.EntityKind.Slice => TypeUiRegistry.GetPropertiesForType(typeof(Texture2D)).Color,
-                       SetupEntitySelection.EntityKind.Surface => TypeUiRegistry.GetPropertiesForType(typeof(string)).Color,
-                       SetupEntitySelection.EntityKind.ReferenceImage => TypeUiRegistry.GetPropertiesForType(typeof(Command)).Color,
+                       SetupEntitySelection.EntityKinds.ContentSource
+                           or SetupEntitySelection.EntityKinds.Slice => TypeUiRegistry.GetPropertiesForType(typeof(Texture2D)).Color,
+                       SetupEntitySelection.EntityKinds.Surface => TypeUiRegistry.GetPropertiesForType(typeof(string)).Color,
+                       SetupEntitySelection.EntityKinds.ReferenceImage => TypeUiRegistry.GetPropertiesForType(typeof(Command)).Color,
                        _ => UiColors.TextMuted,
                    };
     }
 
     /// <summary>A kind's hue as label text: lifted and desaturated the way operator labels are.</summary>
-    public static Color LabelFor(SetupEntitySelection.EntityKind kind) => ColorVariations.OperatorLabel.Apply(ForKind(kind));
+    public static Color LabelFor(SetupEntitySelection.EntityKinds kind) => ColorVariations.OperatorLabel.Apply(ForKind(kind));
 }

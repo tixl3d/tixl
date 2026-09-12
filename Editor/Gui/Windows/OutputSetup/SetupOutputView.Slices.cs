@@ -147,7 +147,7 @@ internal sealed partial class SetupOutputView
 
         // No tint inside: the crop now reads from the dimmed surround, and colouring the content would work
         // against judging it.
-        dl.AddRect(min, max, SetupColors.ForKind(SetupEntitySelection.EntityKind.Slice), 0, ImDrawFlags.None, 2 * T3Ui.UiScaleFactor);
+        dl.AddRect(min, max, SetupColors.ForKind(SetupEntitySelection.EntityKinds.Slice), 0, ImDrawFlags.None, 2 * T3Ui.UiScaleFactor);
 
 
         // Canvas space, like every other handle — the projection subtracts the framing origin itself.
@@ -159,7 +159,7 @@ internal sealed partial class SetupOutputView
         _sliceQuadBuffer[3] = new Vector2(sliceMin.X, sliceMax.Y);
 
         ImGui.PushID("slice");
-        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
         var edgePhase = CornerPinHandles.DrawEdgeHandles(_sliceQuadBuffer, _projection, style, out var edge, out var edgePos);
 
         // The slice's name label doubles as its move handle, the same as a surface — so there's no separate
@@ -170,7 +170,7 @@ internal sealed partial class SetupOutputView
         labelCorners[2] = max;
         labelCorners[3] = new Vector2(min.X, max.Y);
         var sliceName = SetupActions.SliceLabel(setup, slice);
-        DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Slice, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
+        DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Slice, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
         DrawSliceConsumers(dl, setup, slice.Id, CornerPinHandles.GetCenteredLabelRect(labelCorners, sliceName), 0.9f);
         if (ImGui.IsWindowHovered() && IsMouseInRect(min, max))
             PulseConsumers(setup, slice.Id);
@@ -184,26 +184,26 @@ internal sealed partial class SetupOutputView
         if (overLabel && !ImGui.IsAnyItemHovered())
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 
-        var movePhase = CanvasPointHandle.DragPhase.None;
+        var movePhase = CanvasPointHandle.DragPhases.None;
         if (_sliceLabelGrabPending)
         {
             // The grab from the source-canvas label (select + move in one gesture) lands here one frame
             // later, once this slice is the edited one.
             _sliceLabelGrabPending = false;
             _sliceLabelDragging = true;
-            movePhase = CanvasPointHandle.DragPhase.Started;
+            movePhase = CanvasPointHandle.DragPhases.Started;
         }
         else if (_sliceLabelDragging)
         {
-            movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhase.Dragging
-                                                                 : CanvasPointHandle.DragPhase.Completed;
-            if (movePhase == CanvasPointHandle.DragPhase.Completed)
+            movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhases.Dragging
+                                                                 : CanvasPointHandle.DragPhases.Completed;
+            if (movePhase == CanvasPointHandle.DragPhases.Completed)
                 _sliceLabelDragging = false;
         }
         else if (overLabel && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
             _sliceLabelDragging = true;
-            movePhase = CanvasPointHandle.DragPhase.Started;
+            movePhase = CanvasPointHandle.DragPhases.Started;
         }
 
         var centreInCanvas = _projection.ScreenToCanvas(mousePos);
@@ -216,10 +216,10 @@ internal sealed partial class SetupOutputView
         var thresholdY = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(sourceSize.Y, 0.0001f);
         var snapping = !ImGui.GetIO().KeyShift;
 
-        if (edge >= 0 && edgePhase is not CanvasPointHandle.DragPhase.None)
+        if (edge >= 0 && edgePhase is not CanvasPointHandle.DragPhases.None)
         {
             // Capture the pre-drag rect before this frame's apply; the commit runs after it (below).
-            if (edgePhase == CanvasPointHandle.DragPhase.Started)
+            if (edgePhase == CanvasPointHandle.DragPhases.Started)
                 RunSliceDrag(edgePhase, setup, slice);
 
             var inSource = (edgePos - sourceOrigin) / sourceSize;
@@ -258,7 +258,7 @@ internal sealed partial class SetupOutputView
 
             ApplySliceRect(slice, new Vector4(Math.Clamp(next.X, 0, 1), Math.Clamp(next.Y, 0, 1),
                                            Math.Clamp(next.Z, 0, 1), Math.Clamp(next.W, 0, 1)));
-            if (edgePhase != CanvasPointHandle.DragPhase.Started)
+            if (edgePhase != CanvasPointHandle.DragPhases.Started)
                 RunSliceDrag(edgePhase, setup, slice);
 
             return;
@@ -270,7 +270,7 @@ internal sealed partial class SetupOutputView
         var cornerStyle = CanvasPointHandle.Style.Default(style.HandleColor);
         cornerStyle.OutlineColor = style.HandleOutlineColor;
 
-        var cornerPhase = CanvasPointHandle.DragPhase.None;
+        var cornerPhase = CanvasPointHandle.DragPhases.None;
         var draggedCorner = -1;
         var cornerPos = Vector2.Zero;
         for (var i = 0; i < 4; i++)
@@ -278,7 +278,7 @@ internal sealed partial class SetupOutputView
             ImGui.PushID(i);
             var point = _sliceQuadBuffer[i];
             var phase = CanvasPointHandle.Draw(ref point, _projection, cornerStyle);
-            if (phase is not CanvasPointHandle.DragPhase.None)
+            if (phase is not CanvasPointHandle.DragPhases.None)
             {
                 cornerPhase = phase;
                 draggedCorner = i;
@@ -290,10 +290,10 @@ internal sealed partial class SetupOutputView
 
         ImGui.PopID();
 
-        if (draggedCorner >= 0 && cornerPhase is not CanvasPointHandle.DragPhase.None)
+        if (draggedCorner >= 0 && cornerPhase is not CanvasPointHandle.DragPhases.None)
         {
             // Capture the pre-drag rect before this frame's apply; the commit runs after it (below).
-            if (cornerPhase == CanvasPointHandle.DragPhase.Started)
+            if (cornerPhase == CanvasPointHandle.DragPhases.Started)
                 RunSliceDrag(cornerPhase, setup, slice);
 
             var dragged = (cornerPos - sourceOrigin) / sourceSize;
@@ -320,7 +320,7 @@ internal sealed partial class SetupOutputView
             var cornerMax = Vector2.Max(fixedCorner, moved);
             ApplySliceRect(slice, new Vector4(Math.Clamp(cornerMin.X, 0, 1), Math.Clamp(cornerMin.Y, 0, 1),
                                            Math.Clamp(cornerMax.X, 0, 1), Math.Clamp(cornerMax.Y, 0, 1)));
-            if (cornerPhase != CanvasPointHandle.DragPhase.Started)
+            if (cornerPhase != CanvasPointHandle.DragPhases.Started)
                 RunSliceDrag(cornerPhase, setup, slice);
 
             return;
@@ -335,12 +335,12 @@ internal sealed partial class SetupOutputView
         RunSliceDrag(movePhase, setup, slice);
         switch (movePhase)
         {
-            case CanvasPointHandle.DragPhase.Started:
+            case CanvasPointHandle.DragPhases.Started:
                 // Recomputed from this snapshot each frame, so the move can't accumulate drift.
                 _sliceMoveStart = (cursorUv, uv);
                 break;
 
-            case CanvasPointHandle.DragPhase.Dragging when _sliceMoveStart != null:
+            case CanvasPointHandle.DragPhases.Dragging when _sliceMoveStart != null:
             {
                 var (origin, startUv) = _sliceMoveStart.Value;
                 var size = new Vector2(startUv.Z - startUv.X, startUv.W - startUv.Y);
@@ -394,7 +394,7 @@ internal sealed partial class SetupOutputView
                 break;
             }
 
-            case CanvasPointHandle.DragPhase.Completed:
+            case CanvasPointHandle.DragPhases.Completed:
                 _sliceMoveStart = null;
                 break;
         }
@@ -462,15 +462,15 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>The one drag lifecycle for slice-rect edits (edge crop, corner scale, label move): a gesture like every other.</summary>
-    private void RunSliceDrag(CanvasPointHandle.DragPhase phase, Setup setup, Slice slice)
+    private void RunSliceDrag(CanvasPointHandle.DragPhases phase, Setup setup, Slice slice)
     {
         switch (phase)
         {
-            case CanvasPointHandle.DragPhase.Started:
+            case CanvasPointHandle.DragPhases.Started:
                 BeginGesture(setup, GestureKinds.Slice, "Edit slice", slice.Id);
                 break;
 
-            case CanvasPointHandle.DragPhase.Completed:
+            case CanvasPointHandle.DragPhases.Completed:
                 if (_gesture.Is(GestureKinds.Slice, slice.Id))
                     EndGesture(setup);
 

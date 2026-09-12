@@ -42,7 +42,7 @@ internal sealed partial class SetupOutputView
 
         SeedBoardPlacements(setup);
         var texture = TryGetReferenceTexture(image);
-        EnterSpace(setup, SetupEntitySelection.EntityKind.ReferenceImage, imageId, texture != null);
+        EnterSpace(setup, SetupEntitySelection.EntityKinds.ReferenceImage, imageId, texture != null);
         DrawBoardLayer(setup, machineConfig, selection);
 
         if (texture == null)
@@ -181,7 +181,7 @@ internal sealed partial class SetupOutputView
 
         var topLeft = _projection.CanvasToBoard(settledMin);
         var bottomRight = _projection.CanvasToBoard(settledMax);
-        FitToBoardRect(new Vector2(topLeft.X, bottomRight.Y), new Vector2(bottomRight.X, topLeft.Y), EditMode.Straight, image.Id);
+        FitToBoardRect(new Vector2(topLeft.X, bottomRight.Y), new Vector2(bottomRight.X, topLeft.Y), EditModes.Straight, image.Id);
 
         var dl = ImGui.GetWindowDrawList();
         var t = _referenceStraighten;
@@ -219,8 +219,8 @@ internal sealed partial class SetupOutputView
             for (var c = 0; c < 4; c++)
                 screenQuad[c] = _projection.CanvasToScreen(_referenceInterpQuad[c]);
 
-            dl.AddQuad(screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3], SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface), 2 * scale);
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screenQuad, subject!.Id, subject.Name, true, 1f - t);
+            dl.AddQuad(screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3], SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface), 2 * scale);
+            DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screenQuad, subject!.Id, subject.Name, true, 1f - t);
 
             _probeSurfaceCentre = (screenQuad[0] + screenQuad[2]) * 0.5f;
             SampleTransitionMetrics();
@@ -253,7 +253,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void DrawTracedQuads(Setup setup, ReferenceImage image, SetupEntitySelection? selection, ImDrawListPtr dl, bool editable, float fade)
     {
-        var imageSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.ReferenceImage, image.Id) ?? false;
+        var imageSelected = selection?.IsSelected(SetupEntitySelection.EntityKinds.ReferenceImage, image.Id) ?? false;
         Span<Vector2> screenQuad = stackalloc Vector2[4];
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
@@ -262,7 +262,7 @@ internal sealed partial class SetupOutputView
             if (binding == null || binding.ImageId != image.Id || binding.Quad.Length < 4)
                 continue;
 
-            var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKind.Surface, surface.Id) ?? false;
+            var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKinds.Surface, surface.Id) ?? false;
             var pulse = isSelected ? 0f : FrameStats.GetPulse(surface.Id);
 
             // What the surface shows, laid into its trace — the wall with its content, as it will be. At the
@@ -283,17 +283,17 @@ internal sealed partial class SetupOutputView
             }
 
             ImGui.PushID(surface.Id.GetHashCode());
-            var style = CornerPinHandles.Style.ForSurface(null, editable && isSelected, isSelected, fade, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
+            var style = CornerPinHandles.Style.ForSurface(null, editable && isSelected, isSelected, fade, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
             style.DrawChecker = false;
-            style.EdgeColor = PulseColor(SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface).Fade(isSelected ? 1f : 0.7f), pulse).Fade(fade);
+            style.EdgeColor = PulseColor(SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface).Fade(isSelected ? 1f : 0.7f), pulse).Fade(fade);
 
             var phase = CornerPinHandles.Draw(binding.Quad, _projection, style, out _);
-            if (phase == CanvasPointHandle.DragPhase.Started)
+            if (phase == CanvasPointHandle.DragPhases.Started)
             {
                 BeginGesture(setup, GestureKinds.TraceCorner, "Trace surface", surface.Id);
-                selection?.Select(SetupEntitySelection.EntityKind.Surface, surface.Id);
+                selection?.Select(SetupEntitySelection.EntityKinds.Surface, surface.Id);
             }
-            else if (phase == CanvasPointHandle.DragPhase.Completed)
+            else if (phase == CanvasPointHandle.DragPhases.Completed)
             {
                 EndGesture(setup);
             }
@@ -303,7 +303,7 @@ internal sealed partial class SetupOutputView
             for (var c = 0; c < 4; c++)
                 screenQuad[c] = _projection.CanvasToScreen(binding.Quad[c]);
 
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKind.Surface, screenQuad, surface.Id, surface.Name, isSelected, fade, pulse);
+            DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screenQuad, surface.Id, surface.Name, isSelected, fade, pulse);
 
             // Its reference points, where they sit in the photo.
             if (SetupActions.CountPoints(surface) > 0
@@ -319,7 +319,7 @@ internal sealed partial class SetupOutputView
     private void DrawBoardTraces(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, ReferenceImage image, Vector2 min, Vector2 max)
     {
         var fade = _boardLayerFade;
-        var pixelSize = BoardPixelSize(setup, SetupEntitySelection.EntityKind.ReferenceImage, image.Id);
+        var pixelSize = BoardPixelSize(setup, SetupEntitySelection.EntityKinds.ReferenceImage, image.Id);
         _projection.Origin = new Vector2(min.X, max.Y);
         _projection.PixelsPerMeter = pixelSize.X / MathF.Max(max.X - min.X, 0.0001f);
         DrawTracedQuads(setup, image, selection, dl, fade >= 0.999f, fade);
@@ -328,7 +328,7 @@ internal sealed partial class SetupOutputView
     /// <summary>The surface the Straight toggle rectifies around: the primary selection, when it is traced on this image.</summary>
     private static Surface? FindStraightenSubject(Setup setup, Guid imageId, SetupEntitySelection? selection)
     {
-        if (selection == null || !selection.TryResolve(setup, out var kind, out var id) || kind != SetupEntitySelection.EntityKind.Surface)
+        if (selection == null || !selection.TryResolve(setup, out var kind, out var id) || kind != SetupEntitySelection.EntityKinds.Surface)
             return null;
 
         var surface = setup.FindSurface(id);
@@ -472,20 +472,20 @@ internal sealed partial class SetupOutputView
             return;
 
         ImGui.PushID("straightEdit");
-        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface));
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
         style.DrawChecker = false;
-        style.EdgeColor = SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface);
+        style.EdgeColor = SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface);
         var cornerPhase = CornerPinHandles.Draw(_referenceRectQuad, _projection, style, out var draggedCorner);
-        var edgePhase = CanvasPointHandle.DragPhase.None;
+        var edgePhase = CanvasPointHandle.DragPhases.None;
         var edge = -1;
         var edgePos = Vector2.Zero;
-        if (cornerPhase == CanvasPointHandle.DragPhase.None)
+        if (cornerPhase == CanvasPointHandle.DragPhases.None)
             edgePhase = CornerPinHandles.DrawEdgeHandles(_referenceRectQuad, _projection, style, out edge, out edgePos);
 
         ImGui.PopID();
 
         // An edge moves along its normal only: a crop of the trace, axis-aligned on the rectified wall.
-        if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhase.None)
+        if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhases.None)
         {
             switch (edge)
             {
@@ -496,8 +496,8 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        var phase = cornerPhase != CanvasPointHandle.DragPhase.None ? cornerPhase : edgePhase;
-        if (phase == CanvasPointHandle.DragPhase.Started)
+        var phase = cornerPhase != CanvasPointHandle.DragPhases.None ? cornerPhase : edgePhase;
+        if (phase == CanvasPointHandle.DragPhases.Started)
         {
             BeginGesture(setup, GestureKinds.TraceRefine, "Refine trace", subject.Id);
             refining = true;
@@ -505,7 +505,7 @@ internal sealed partial class SetupOutputView
 
         // Only a live phase carries a handle position; on the release frame the handles already sit back on the
         // rect's corners, so applying then would undo the whole drag.
-        if (phase is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging && refining)
+        if (phase is CanvasPointHandle.DragPhases.Started or CanvasPointHandle.DragPhases.Dragging && refining)
         {
             // The handle's position through the press-time rectification is where that corner lies in the photo.
             if (draggedCorner >= 0)
@@ -519,7 +519,7 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        if (phase == CanvasPointHandle.DragPhase.Completed)
+        if (phase == CanvasPointHandle.DragPhases.Completed)
         {
             EndGesture(setup);
             refining = false;
@@ -543,7 +543,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void DrawReferencePoints(Setup setup, ImDrawListPtr dl, Surface subject, in Homography surfaceToRect, in Homography rectToSurface)
     {
-        var color = SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface);
+        var color = SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface);
 
         if (_pointArmed && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
@@ -563,19 +563,19 @@ internal sealed partial class SetupOutputView
             ordinal++;
             var px = surfaceToRect.TransformPoint(point.P1);
             ImGui.PushID(i);
-            var style = CanvasPointHandle.Style.Default(UiColors.ForegroundFull, CanvasPointHandle.Shape.Circle, true);
+            var style = CanvasPointHandle.Style.Default(UiColors.ForegroundFull, CanvasPointHandle.Shapes.Circle, true);
             style.OutlineColor = color;
             style.Radius = 6;
             var phase = CanvasPointHandle.Draw(ref px, _projection, style);
             var hovered = ImGui.IsItemHovered();
             ImGui.PopID();
 
-            if (phase == CanvasPointHandle.DragPhase.Started)
+            if (phase == CanvasPointHandle.DragPhases.Started)
                 BeginGesture(setup, GestureKinds.ReferencePoint, "Move reference point", subject.Id);
 
-            if (phase is CanvasPointHandle.DragPhase.Started or CanvasPointHandle.DragPhase.Dragging)
+            if (phase is CanvasPointHandle.DragPhases.Started or CanvasPointHandle.DragPhases.Dragging)
                 point.P1 = point.P2 = rectToSurface.TransformPoint(px);
-            else if (phase == CanvasPointHandle.DragPhase.Completed)
+            else if (phase == CanvasPointHandle.DragPhases.Completed)
                 EndGesture(setup);
 
             var screen = _projection.CanvasToScreen(px);
@@ -618,7 +618,7 @@ internal sealed partial class SetupOutputView
     /// <summary>Read-only marks for a surface's reference points, through any surface-space → screen mapping.</summary>
     private static void DrawReferencePointMarks(ImDrawListPtr dl, Surface surface, in Homography surfaceToView, ICanvasProjection view, float fade)
     {
-        var color = SetupColors.ForKind(SetupEntitySelection.EntityKind.Surface).Fade(0.8f * fade);
+        var color = SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface).Fade(0.8f * fade);
         var ordinal = 0;
         foreach (var point in surface.Annotations)
         {
