@@ -1,0 +1,36 @@
+{
+  "FormatVersion": 3,
+  "Id": "BE4931F8-9816-48E5-A0A2-6AE8BC2DD390"/*RepeatShapePoints*/,
+  "Inputs": [
+    {
+      "Id": "3CA75113-5CD1-4FF5-8C4C-B8B22D60020D"/*Shape*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "A1AC028E-ADB7-46FC-814C-66551773AFBC"/*Count*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "6FAA2E91-082F-4656-8997-CEF767A7FBF2"/*OffsetPerCopy*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "2E5DA9D4-0E82-4A93-84F8-BEE94DF58EBA"/*RotatePerCopy*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "CD071504-AC40-4D03-9740-136B1C8AAE19"/*ScalePerCopy*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

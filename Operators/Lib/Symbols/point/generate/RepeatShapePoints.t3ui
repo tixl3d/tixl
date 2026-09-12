@@ -1,0 +1,66 @@
+{
+  "FormatVersion": 3,
+  "Id": "BE4931F8-9816-48E5-A0A2-6AE8BC2DD390"/*RepeatShapePoints*/,
+  "Description": "Repeats a closed shape point loop Count times, like an After Effects shape repeater.\n\nEach copy is transformed by its index:\n- OffsetPerCopy: how far to move each consecutive copy (a Vector3 -> can point along any axis)\n- RotatePerCopy: rotation increment around the shape centroid (degrees)\n- ScalePerCopy: linear scale increment per copy\n\nAll vertices of a copy share Point.F1 = copy index, so downstream operators (AddNoise, MapPointAttributes, CustomPointShader, ...) can manipulate the points of a single repeated shape.\n\nThe output buffer is laid out for [DrawClosedLines] with PointsPerShape set to the count of its shape points.\n\nConnect the ShapeSize output to the PointsPerShape input of [DrawClosedLines] and [ClosedLoopMesh] so every repeated copy is drawn and filled as its own separate closed shape.",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "A1AC028E-ADB7-46FC-814C-66551773AFBC"/*Count*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Number of shape copies"
+    },
+    {
+      "InputId": "6FAA2E91-082F-4656-8997-CEF767A7FBF2"/*OffsetPerCopy*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Translation offset per copy - a Vector3, so it can point along any axis"
+    },
+    {
+      "InputId": "2E5DA9D4-0E82-4A93-84F8-BEE94DF58EBA"/*RotatePerCopy*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Rotation increment per copy around the shape centroid (degrees)"
+    },
+    {
+      "InputId": "CD071504-AC40-4D03-9740-136B1C8AAE19"/*ScalePerCopy*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Linear scale increment per copy (1 + index * ScalePerCopy)"
+    },
+    {
+      "InputId": "3CA75113-5CD1-4FF5-8C4C-B8B22D60020D"/*Shape*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "Closed loop of points describing the base shape (separators are skipped)"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "B559D2B6-9A76-47C6-A0C6-2BB159B4C5FD"/*ShapeSize*/,
+      "Position": {
+        "X": 160.0,
+        "Y": 45.0
+      },
+      "Description": "Points per repeated shape - connect to PointsPerShape of [DrawClosedLines] / [ClosedLoopMesh]"
+    },
+    {
+      "OutputId": "64248B6B-C738-4D02-850C-9765CD0616D8"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

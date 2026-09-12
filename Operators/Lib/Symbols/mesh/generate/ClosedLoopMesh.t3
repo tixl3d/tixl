@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "4E5AC2B9-5905-4F24-B0FC-0980357927D4"/*ClosedLoopMesh*/,
+  "Inputs": [
+    {
+      "Id": "CCCAC1C9-926A-466A-B252-0D0E279102AE"/*Points*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "0F0D10D0-3EB0-4E12-8C06-E9DB4C000917"/*PointsPerShape*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
