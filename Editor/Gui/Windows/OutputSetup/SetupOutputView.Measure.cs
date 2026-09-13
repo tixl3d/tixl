@@ -243,8 +243,11 @@ internal sealed partial class SetupOutputView
         if (ImGui.Button("Set") || ImGui.IsKeyPressed(ImGuiKey.Enter))
         {
             // Zero or less is how a measurement becomes an ordinary reference line again.
-            annotation.LengthInMeters = _lengthEdit > 0 ? _lengthEdit : 0;
-            OutputSetupHandling.SaveActive();
+            var length = _lengthEdit > 0 ? _lengthEdit : 0;
+            var setup = ActiveSetup.Current;
+            if (setup != null)
+                SetupActions.RunUndoable("Set line length", setup, () => annotation.LengthInMeters = length);
+
             ImGui.CloseCurrentPopup();
         }
 

@@ -5,6 +5,7 @@ using System.Numerics;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 
 namespace T3.Core.Output;
 
@@ -21,7 +22,9 @@ public interface IOutputSink
     /// <summary>When false the host stops invalidating this content, freezing it at its last frame.</summary>
     bool GetUpdateEnabled(EvaluationContext context);
 
-    void SetUpdateEnabled(bool enabled);
+    /// <summary>The op input behind <see cref="GetUpdateEnabled"/>, so a host edits it through its own undoable
+    /// input command rather than writing the slot directly.</summary>
+    IInputSlot UpdateInput { get; }
 
     /// <summary>
     /// The resolution this content is rendered at, or 0×0 to inherit the one the host asks for — the canvas of
@@ -30,7 +33,8 @@ public interface IOutputSink
     /// </summary>
     Int2 GetResolution(EvaluationContext context);
 
-    void SetResolution(Int2 resolution);
+    /// <summary>The op input behind <see cref="GetResolution"/>; see <see cref="UpdateInput"/>.</summary>
+    IInputSlot ResolutionInput { get; }
 
     /// <summary>Marks the content input graph dirty so a following <see cref="GetContent"/> re-evaluates
     /// time-dependent upstream ops (the manager pulls content manually, outside the normal output path).</summary>

@@ -968,6 +968,7 @@ internal static class SetupActions
     private static void DeleteOutputInternal(Setup setup, MachineConfig machineConfig, Guid outputId)
     {
         setup.Outputs.RemoveAll(o => o.Id == outputId);
+        OutputManager.ReleaseOutput(outputId);
         foreach (var surface in setup.Surfaces)
             surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
 
@@ -1418,36 +1419,28 @@ internal static class SetupActions
         }
     }
 
+    /// <summary>
+    /// A full copy through the JSON round-trip (so measurements, the trace and the Board card come along, and
+    /// so do fields added later), with fresh identities: the surface's own, and its annotations' — the aims
+    /// keyed on them are re-keyed to match. The slice is deliberately not carried: the copy starts unfed.
+    /// </summary>
     private static Surface CloneSurface(Surface source)
     {
-        var copy = new Surface
-                       {
-                           Name = source.Name,
-                           Type = source.Type,
-                           Kind = source.Kind,
-                           ParentId = source.ParentId,
-                           Render = source.Render,
-                           SizeInMeters = source.SizeInMeters,
-                           Anchor = source.Anchor,
-                           LockAspect = source.LockAspect,
-                           LocalPosition = source.LocalPosition,
-                           PixelsPerMeter = source.PixelsPerMeter,
-                           ShowGrid = source.ShowGrid,
-                           GridSubdivisions = source.GridSubdivisions,
-                       };
+        var copy = CloneViaJson(source.WriteToJson, Surface.ReadFromJson) ?? new Surface();
+        copy.Id = Guid.NewGuid();
+        copy.SliceId = Guid.Empty;
 
-        foreach (var mapping in source.OutputMappings)
+        foreach (var annotation in copy.Annotations)
         {
-            copy.OutputMappings.Add(new Surface.OutputMapping
-                                        {
-                                            OutputId = mapping.OutputId,
-                                            Mode = mapping.Mode,
-                                            Quad = (Vector2[])mapping.Quad.Clone(),
-                                        });
-        }
+            var newId = Guid.NewGuid();
+            foreach (var mapping in copy.OutputMappings)
+            {
+                if (mapping.PointAims.Remove(annotation.Id, out var aim))
+                    mapping.PointAims[newId] = aim;
+            }
 
-        if (source.Placement != null)
-            copy.Placement = new Surface.StagePlacement { Pose = source.Placement.Pose };
+            annotation.Id = newId;
+        }
 
         return copy;
     }

@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 using T3.Core.Output;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.InputUi.ListInputs;
@@ -9,6 +10,7 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
@@ -316,6 +318,7 @@ internal static class SetupParameterView
         Span<int> canvas = [output.CanvasResolution.Width, output.CanvasResolution.Height];
         var canvasState = DrawIntsRow("Canvas (px)", canvas,
                                       "The output's pixel size, or 0 to take it from whatever is plugged in. Content rendering at 'Fill' follows it, and a stream sends at it.");
+        BeginFieldUndo(setup, canvasState);
         if ((canvasState & InputEditStateFlags.Modified) != 0)
         {
             // 0 means "follow the plug". Only a render size either way: every quad on this canvas is stored as
@@ -403,6 +406,24 @@ internal static class SetupParameterView
         FormInputs.ApplyIndent();
         var kindLine = provider == null ? $"{stream.Kind} · package not loaded" : $"{stream.Kind} · {boundLabel}";
         CustomComponents.StylizedText(kindLine, Fonts.FontSmall, UiColors.TextMuted);
+
+        // A refused frame is otherwise invisible: the output looks bound and sending while receivers get nothing.
+        if (OutputManager.TryGetStreamError(id, out var streamError))
+        {
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText(streamError, Fonts.FontSmall, UiColors.StatusAttention);
+        }
+    }
+
+    /// <summary>Edits one of the send op's inputs as a regular parameter change: undoable, and it dirties the symbol.</summary>
+    private static void SetInputUndoable<T>(Instance instance, IInputSlot slot, T value)
+    {
+        var parent = instance.Parent;
+        if (parent == null || slot.Input.Value.Clone() is not InputValue<T> newValue)
+            return;
+
+        newValue.Value = value;
+        UndoRedoStack.AddAndExecute(new ChangeInputValueCommand(parent.Symbol, instance.SymbolChildId, slot.Input, newValue, instance));
     }
 
     private static void DrawContentCard(Setup setup, Guid childId)
@@ -417,7 +438,7 @@ internal static class SetupParameterView
 
         var update = sink.GetUpdateEnabled(_sendContext);
         if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this content at its last frame."))
-            sink.SetUpdateEnabled(update);
+            SetInputUndoable(instance, sink.UpdateInput, update);
 
         // 0×0 means "whatever the output asks for", so the content follows the projector or display it is routed
         // to; a set value pins it. The line underneath says what that resolves to right now.
@@ -427,8 +448,9 @@ internal static class SetupParameterView
                                 "0 follows the output this content is routed to. Set a size to render at it regardless.");
         if ((state & InputEditStateFlags.Modified) != 0)
         {
-            sink.SetResolution(new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution[0], 0, 16384),
-                                                                 Math.Clamp(resolution[1], 0, 16384)));
+            SetInputUndoable(instance, sink.ResolutionInput,
+                             new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution[0], 0, 16384),
+                                                               Math.Clamp(resolution[1], 0, 16384)));
         }
 
         var content = sink.GetContent(_sendContext);
@@ -624,22 +646,12 @@ internal static class SetupParameterView
         if (image == null)
             return;
 
-        // The project's image assets, through the same type-ahead picker the LoadImage op uses. Save-only:
-        // the address is a pointer to an asset, not calibration.
+        // The project's image assets, through the same type-ahead picker the LoadImage op uses.
         FormInputs.DrawInputLabel("Image");
         string? path = image.FilePath;
         var pathState = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, SetupActions.ImageFileFilter, ref path);
         if ((pathState & InputEditStateFlags.Modified) != 0 && path != null && path != image.FilePath)
-        {
-            image.FilePath = path;
-            _referencePathDirty = true;
-        }
-
-        if (_referencePathDirty && !ImGui.IsAnyItemActive())
-        {
-            OutputSetupHandling.SaveActive();
-            _referencePathDirty = false;
-        }
+            SetupActions.RunUndoable("Pick reference image", setup, () => image.FilePath = path);
 
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(image.Width > 0
@@ -974,7 +986,6 @@ internal static class SetupParameterView
     private static string? _fieldEditOldJson;
 
     private static EvaluationContext? _sendContext;
-    private static bool _referencePathDirty;
 
     // Name-field editing state: buffer follows the entity until the field takes focus.
     private static Guid _renameTargetId;

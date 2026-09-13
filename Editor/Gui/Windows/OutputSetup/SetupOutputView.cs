@@ -755,6 +755,7 @@ internal sealed partial class SetupOutputView
             else if (phase == CanvasPointHandle.DragPhases.Started)
             {
                 BeginGesture(setup, GestureKinds.AimPoint, "Aim reference point", surface.Id);
+                SeedPointAims(setup, surface);
             }
             else if (phase == CanvasPointHandle.DragPhases.Dragging && _gesture.Is(GestureKinds.AimPoint, surface.Id))
             {
@@ -796,11 +797,33 @@ internal sealed partial class SetupOutputView
         if (mapping.PointAims.TryGetValue(pointId, out var existing))
             return existing;
 
+        // Not yet placed: shown riding the pin, stored only once a gesture starts (see SeedPointAims).
         var projected = surfaceToOutput.TransformPoint(pointInSurface);
-        var seeded = new Surface.OutputMapping.PointAim(projected / canvasSize, false);
-        mapping.PointAims[pointId] = seeded;
-        OutputSetupHandling.SaveActive();
-        return seeded;
+        return new Surface.OutputMapping.PointAim(projected / canvasSize, false);
+    }
+
+    /// <summary>
+    /// Places every mark of the surface that has none yet, at where each pin projects its point right now.
+    /// Runs at the start of a gesture that moves a pin or a mark, inside its undo snapshot: from then on the
+    /// marks stand still while the pin moves, which is what makes the miss between them visible. Before that
+    /// the two agree by construction, so nothing needs storing — and nothing gets written from a mere view.
+    /// </summary>
+    private static void SeedPointAims(Setup setup, Surface surface)
+    {
+        foreach (var mapping in surface.OutputMappings)
+        {
+            var canvasSize = SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId);
+            if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
+                continue;
+
+            foreach (var point in surface.Annotations)
+            {
+                if (!point.IsPoint || mapping.PointAims.ContainsKey(point.Id))
+                    continue;
+
+                mapping.PointAims[point.Id] = AimOf(mapping, point.Id, point.P1, surfaceToOutput, canvasSize);
+            }
+        }
     }
 
     /// <summary>

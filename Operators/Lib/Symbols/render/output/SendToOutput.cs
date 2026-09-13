@@ -47,9 +47,9 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IOutputSink, IStatu
     }
     void IOutputSink.InvalidateContent() => Texture.InvalidateGraph();
     bool IOutputSink.GetUpdateEnabled(EvaluationContext context) => Update.GetValue(context);
-    void IOutputSink.SetUpdateEnabled(bool enabled) => Update.SetTypedInputValue(enabled);
+    IInputSlot IOutputSink.UpdateInput => Update;
     Int2 IOutputSink.GetResolution(EvaluationContext context) => Resolution.GetValue(context);
-    void IOutputSink.SetResolution(Int2 resolution) => Resolution.SetTypedInputValue(resolution);
+    IInputSlot IOutputSink.ResolutionInput => Resolution;
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()
     {

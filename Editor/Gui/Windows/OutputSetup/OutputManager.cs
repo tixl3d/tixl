@@ -125,27 +125,77 @@ internal static class OutputManager
             return;
 
         _activeStreamPlugs.Add(stream.Id);
-        if (_streamSenders.TryGetValue(stream.Id, out var slot) && (slot.Kind != stream.Kind || slot.Name != stream.Name))
+
+        // The provider is looked up every frame: a sender must not outlive the package that implements it,
+        // and a package reload replaces the provider instance.
+        var provider = OutputStreamRegistry.TryGetProvider(stream.Kind);
+        if (_streamSenders.TryGetValue(stream.Id, out var slot)
+            && (slot.Provider != provider || slot.Name != stream.Name))
         {
             slot.Sender.Dispose();
             _streamSenders.Remove(stream.Id);
             slot = null;
         }
 
+        if (provider == null)
+            return;
+
         if (slot == null)
         {
-            var provider = OutputStreamRegistry.TryGetProvider(stream.Kind);
-            if (provider == null)
-                return;
-
-            slot = new StreamSlot(stream.Kind, stream.Name, provider.CreateSender(stream.Name));
+            slot = new StreamSlot(stream.Name, provider, provider.CreateSender(stream.Name));
             _streamSenders[stream.Id] = slot;
         }
 
         slot.Sender.Configure(stream.ToSettings());
         var composite = RenderOutput(output.Id);
-        if (composite != null)
-            slot.Sender.Send(composite);
+        if (composite == null)
+            return;
+
+        slot.Sender.Send(composite);
+        slot.LastError = slot.Sender.LastError;
+    }
+
+    /// <summary>Why the stream plug's sender refused its last frame, if it did (e.g. an unsupported format).</summary>
+    public static bool TryGetStreamError(Guid plugId, out string error)
+    {
+        error = string.Empty;
+        if (!_streamSenders.TryGetValue(plugId, out var slot) || string.IsNullOrEmpty(slot.LastError))
+            return false;
+
+        error = slot.LastError;
+        return true;
+    }
+
+    /// <summary>
+    /// Drops everything held for the active setup — composite targets, per-frame memos, stream senders — for
+    /// when the setup itself goes away or is swapped (project close, setup switch); the next frame rebuilds
+    /// what the new one needs.
+    /// </summary>
+    public static void ReleaseAll()
+    {
+        foreach (var target in _targets.Values)
+            target.Dispose();
+
+        _targets.Clear();
+        _compositeFrames.Clear();
+        _surfaceSlices.Clear();
+        DisposeStreamSenders();
+
+        if (PresentedOutputId != Guid.Empty)
+        {
+            WindowManager.ShowSecondaryRenderWindow = false;
+            PresentedOutputId = Guid.Empty;
+            _presentedDisplayIndex = -1;
+        }
+    }
+
+    /// <summary>Frees a deleted output's composite target; the memos keyed on it drop out with the next frame.</summary>
+    public static void ReleaseOutput(Guid outputId)
+    {
+        if (_targets.Remove(outputId, out var target))
+            target.Dispose();
+
+        _compositeFrames.Remove(outputId);
     }
 
     /// <summary>Closes senders whose plug wasn't sent to this frame (binding dropped, output paused or deleted).</summary>
@@ -176,7 +226,10 @@ internal static class OutputManager
         _streamSenders.Clear();
     }
 
-    private sealed record StreamSlot(string Kind, string Name, IOutputStreamSender Sender);
+    private sealed record StreamSlot(string Name, IOutputStreamProvider Provider, IOutputStreamSender Sender)
+    {
+        public string? LastError;
+    }
 
     private static readonly Dictionary<Guid, StreamSlot> _streamSenders = [];
     private static readonly HashSet<Guid> _activeStreamPlugs = [];
@@ -379,7 +432,11 @@ internal static class OutputManager
             return null;
         }
 
-        var target = GetOrCreateTarget(outputId, output.ResolvedResolution);
+        // A stream sender reads the composite back as 8-bit pixels (NDI accepts nothing else), so a stream-bound
+        // output composites straight into that; displays keep the float target for the blit.
+        var isStreamBound = ActiveSetup.Machine?.TryGetBinding(outputId) is { IsStream: true };
+        var target = GetOrCreateTarget(outputId, output.ResolvedResolution,
+                                       isStreamBound ? Format.B8G8R8A8_UNorm : Format.R16G16B16A16_Float);
         if (target == null)
             return null;
 
@@ -689,7 +746,7 @@ internal static class OutputManager
         if (!TryComputeNdcHomographyFromPixels(destQuad, targetSize, out var homography))
             return null;
 
-        var target = GetOrCreateTarget(targetKey == Guid.Empty ? _scratchTargetId : targetKey, targetSize);
+        var target = GetOrCreateTarget(targetKey == Guid.Empty ? _scratchTargetId : targetKey, targetSize, Format.R16G16B16A16_Float);
         if (target == null || !EnsureShaders())
             return null;
 
@@ -924,11 +981,12 @@ internal static class OutputManager
 
     private static readonly Vector2[] _ndcScratch = new Vector2[4];
 
-    private static Target? GetOrCreateTarget(Guid outputId, Int2 resolution)
+    private static Target? GetOrCreateTarget(Guid outputId, Int2 resolution, Format format)
     {
         var width = Math.Max(1, resolution.Width);
         var height = Math.Max(1, resolution.Height);
-        if (_targets.TryGetValue(outputId, out var existing) && existing.Size.Width == width && existing.Size.Height == height)
+        if (_targets.TryGetValue(outputId, out var existing)
+            && existing.Size.Width == width && existing.Size.Height == height && existing.Format == format)
             return existing;
 
         existing?.Dispose();
@@ -942,7 +1000,7 @@ internal static class OutputManager
                                   BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                                   Usage = ResourceUsage.Default,
                                   CpuAccessFlags = CpuAccessFlags.None,
-                                  Format = Format.R16G16B16A16_Float,
+                                  Format = format,
                                   OptionFlags = ResourceOptionFlags.None,
                                   SampleDescription = new SampleDescription(1, 0),
                               };
@@ -953,6 +1011,7 @@ internal static class OutputManager
                              Texture = texture,
                              Rtv = new RenderTargetView(ResourceManager.Device, texture),
                              Size = new Int2(width, height),
+                             Format = format,
                          };
         _targets[outputId] = target;
         return target;
@@ -1016,6 +1075,7 @@ internal static class OutputManager
         public required Texture2D Texture;
         public required RenderTargetView Rtv;
         public Int2 Size;
+        public Format Format;
 
         public void Dispose()
         {

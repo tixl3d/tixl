@@ -82,6 +82,10 @@ internal sealed partial class SetupOutputView
                            Snapshot = snapshotOf != null ? new ResizeSurfaceCommand.State(snapshotOf) : null,
                            GrabPoint = grabPoint,
                        };
+
+        // A gesture with a surface snapshot is one that moves its pins; its marks must be placed before they move.
+        if (snapshotOf != null)
+            SeedPointAims(setup, snapshotOf);
     }
 
     /// <summary>

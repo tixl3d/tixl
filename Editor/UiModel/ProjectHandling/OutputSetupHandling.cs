@@ -71,6 +71,7 @@ internal static class OutputSetupHandling
     public static void OnProjectClosed(string projectFolder)
     {
         _entriesByProjectFolder.Remove(projectFolder);
+        OutputManager.ReleaseAll();
     }
 
     public static bool TryGetActiveSetup(out Setup setup, out MachineConfig machineConfig)
@@ -140,6 +141,7 @@ internal static class OutputSetupHandling
         SetupSanitizer.Sanitize(setup); // persisted by the SaveActive below
 
         entry.Setup = setup;
+        OutputManager.ReleaseAll();
         SaveActive(); // records the new active setup name so the switch survives a restart
         return true;
     }
@@ -152,6 +154,7 @@ internal static class OutputSetupHandling
 
         var duplicate = entry.Setup.Duplicate(newName);
         entry.Setup = duplicate;
+        OutputManager.ReleaseAll();
         SaveActive();
         return true;
     }
@@ -163,6 +166,7 @@ internal static class OutputSetupHandling
             return false;
 
         entry.Setup = Setup.CreateDefault(newName);
+        OutputManager.ReleaseAll();
         SaveActive();
         return true;
     }
@@ -194,6 +198,7 @@ internal static class OutputSetupHandling
         else
         {
             entry.Setup = Setup.CreateDefault();
+            OutputManager.ReleaseAll();
             SaveActive();
         }
 
