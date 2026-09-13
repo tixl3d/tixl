@@ -311,7 +311,15 @@ internal sealed class ViewSelectionPinning
     {
         state.IsPinned = _isPinned;
         state.PinnedOutputId = _selectedOutputId;
-        state.PinnedInstancePath = _isPinned ? _pinnedInstancePath.ToArray() : [];
+        // Synced every frame: copy only when the pinned path actually changed.
+        if (!_isPinned)
+        {
+            state.PinnedInstancePath = [];
+        }
+        else if (!IsSamePath(state.PinnedInstancePath, _pinnedInstancePath))
+        {
+            state.PinnedInstancePath = _pinnedInstancePath.ToArray();
+        }
     }
 
     internal void LoadStateFrom(Output.OutputWindowState state)
@@ -326,6 +334,20 @@ internal sealed class ViewSelectionPinning
     private bool _isPinned;
     private Guid _selectedOutputId; // Empty if default
     private ProjectView? _pinnedProjectView;
+    private static bool IsSamePath(Guid[] stored, IReadOnlyList<Guid> path)
+    {
+        if (stored.Length != path.Count)
+            return false;
+
+        for (var i = 0; i < stored.Length; i++)
+        {
+            if (stored[i] != path[i])
+                return false;
+        }
+
+        return true;
+    }
+
     private IReadOnlyList<Guid> _pinnedInstancePath = [];
     private IReadOnlyList<Guid> _pinnedEvaluationInstancePath = [];
 

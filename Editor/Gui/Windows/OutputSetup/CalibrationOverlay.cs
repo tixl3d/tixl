@@ -220,7 +220,15 @@ internal static class CalibrationOverlay
             return;
 
         _overlayParams.TargetSize = new Vector4(Math.Max(1, canvasResolution.Width), Math.Max(1, canvasResolution.Height), 0, 0);
-        ResourceManager.SetupConstBuffer(_overlayParams, ref _overlayParamBuffer);
+        if (_overlayParamBuffer is not { IsDisposed: false })
+        {
+            _overlayParamBuffer = null;
+            ResourceManager.SetupConstBuffer(_overlayParams, ref _overlayParamBuffer);
+        }
+        else
+        {
+            ResourceManager.UpdateConstBuffer(_overlayParams, _overlayParamBuffer);
+        }
         deviceContext.VertexShader.SetConstantBuffer(0, _overlayParamBuffer);
         deviceContext.PixelShader.SetConstantBuffer(0, _overlayParamBuffer);
 
@@ -244,31 +252,37 @@ internal static class CalibrationOverlay
     }
 
     /// <summary>
-    /// Uploads instances into a structured buffer, re-creating the view when the buffer had to be rebuilt —
-    /// which <see cref="ResourceManager.SetupStructuredBuffer{T}"/> does whenever the count changes, leaving
-    /// any earlier view pointing at a disposed buffer.
+    /// Uploads instances into a structured buffer straight from the list's memory. The buffer grows by doubling
+    /// and never shrinks, so a count that changes from frame to frame (a line being dragged in and out of view)
+    /// neither rebuilds it nor allocates; only the first <paramref name="count"/> elements are written and drawn.
+    /// The view is re-created whenever the buffer was rebuilt.
     /// </summary>
-    private static bool TryUploadInstances<T>(List<T> instances, ref Buffer? buffer, ref Buffer? viewSource,
-                                              ref ShaderResourceView? srv, out int count) where T : struct
+    private static unsafe bool TryUploadInstances<T>(List<T> instances, ref Buffer? buffer, ref Buffer? viewSource,
+                                                     ref ShaderResourceView? srv, out int count) where T : unmanaged
     {
         count = instances.Count;
         if (count == 0)
             return false;
 
-        var stride = Marshal.SizeOf<T>();
-        using (var data = new SharpDX.DataStream(stride * count, true, true))
+        var stride = sizeof(T);
+        var capacity = buffer is { IsDisposed: false } ? buffer.Description.SizeInBytes / stride : 0;
+        if (count > capacity)
         {
-            // Written one at a time: the span overload would want an array, and materializing one here would
-            // allocate every frame the overlay is visible.
-            foreach (var instance in instances)
-                data.Write(instance);
+            capacity = Math.Max(MinInstanceCapacity, (int)System.Numerics.BitOperations.RoundUpToPowerOf2((uint)count));
+            if (buffer is { IsDisposed: true })
+                buffer = null;
 
-            data.Position = 0;
-            ResourceManager.SetupStructuredBuffer(data, stride * count, stride, ref buffer);
+            ResourceManager.SetupStructuredBuffer(capacity * stride, stride, ref buffer);
         }
 
         if (buffer == null)
             return false;
+
+        fixed (T* first = CollectionsMarshal.AsSpan(instances))
+        {
+            var region = new ResourceRegion(0, 0, 0, count * stride, 1, 1);
+            ResourceManager.Device.ImmediateContext.UpdateSubresource(new SharpDX.DataBox((IntPtr)first, 0, 0), buffer, 0, region);
+        }
 
         if (!ReferenceEquals(viewSource, buffer))
         {
@@ -278,6 +292,8 @@ internal static class CalibrationOverlay
 
         return srv is { IsDisposed: false };
     }
+
+    private const int MinInstanceCapacity = 64;
 
     private static bool EnsureShaders()
     {

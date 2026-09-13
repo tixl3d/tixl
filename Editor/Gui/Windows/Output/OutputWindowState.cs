@@ -29,6 +29,32 @@ internal sealed class OutputWindowState
     // Background
     public float[] BackgroundColor = [0.1f, 0.1f, 0.1f, 1.0f];
 
+    /// <summary>
+    /// Writes values into <paramref name="target"/>, reusing it when it already has the right length. The window
+    /// syncs its state every frame, so replacing these arrays each time would allocate per frame per window.
+    /// </summary>
+    internal static void CopyInto(ref float[] target, float x, float y, float z)
+    {
+        if (target.Length != 3)
+            target = new float[3];
+
+        target[0] = x;
+        target[1] = y;
+        target[2] = z;
+    }
+
+    /// <inheritdoc cref="CopyInto(ref float[], float, float, float)"/>
+    internal static void CopyInto(ref float[] target, System.Numerics.Vector4 value)
+    {
+        if (target.Length != 4)
+            target = new float[4];
+
+        target[0] = value.X;
+        target[1] = value.Y;
+        target[2] = value.Z;
+        target[3] = value.W;
+    }
+
     // Camera
     [JsonConverter(typeof(StringEnumConverter))]
     public CameraControlModes CameraControlMode = CameraControlModes.AutoUseFirstCam;

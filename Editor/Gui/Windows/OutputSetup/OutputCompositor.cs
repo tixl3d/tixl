@@ -206,7 +206,7 @@ internal static class OutputCompositor
             _shaderParams.GridOrigin = item.GridOrigin;
             _shaderParams.Mask = item.Mask;
             SetSourceRect(item.SourceRect);
-            ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
+            UploadShaderParams();
             deviceContext.VertexShader.SetConstantBuffer(0, _paramBuffer);
             deviceContext.PixelShader.SetConstantBuffer(0, _paramBuffer);
             deviceContext.PixelShader.SetShaderResource(0, item.Srv);
@@ -265,7 +265,7 @@ internal static class OutputCompositor
         _shaderParams.GridParams = Vector4.Zero; // shared struct — clear any grid mode a prior composite left set
         _shaderParams.Mask = Vector4.Zero; // ...and any fragment disc, or the warp itself comes out masked
         SetSourceRect(sourceRect ?? _fullSourceRect);
-        ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
+        UploadShaderParams();
         deviceContext.VertexShader.SetConstantBuffer(0, _paramBuffer);
         deviceContext.PixelShader.SetConstantBuffer(0, _paramBuffer);
         deviceContext.PixelShader.SetShaderResource(0, srv);
@@ -442,6 +442,20 @@ internal static class OutputCompositor
             Rtv.Dispose();
             Texture.Dispose();
         }
+    }
+
+    /// <summary>Creates the constant buffer once, then updates it in place: the compositor uploads once per draw
+    /// item every frame, so a staging stream per upload would allocate in the hottest loop of the output path.</summary>
+    private static void UploadShaderParams()
+    {
+        if (_paramBuffer is not { IsDisposed: false })
+        {
+            _paramBuffer = null;
+            ResourceManager.SetupConstBuffer(_shaderParams, ref _paramBuffer);
+            return;
+        }
+
+        ResourceManager.UpdateConstBuffer(_shaderParams, _paramBuffer);
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]

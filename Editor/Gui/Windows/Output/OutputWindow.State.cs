@@ -131,22 +131,13 @@ internal sealed partial class OutputWindow
         if (state == _fallbackState)
             return;
 
-        state.BackgroundColor = [_backgroundColor.X, _backgroundColor.Y, _backgroundColor.Z, _backgroundColor.W];
-        state.ResolutionTitle = _selectedResolution.Title;
-        state.ResolutionWidth = _selectedResolution.Size.Width;
-        state.ResolutionHeight = _selectedResolution.Size.Height;
-        state.ResolutionUseAsAspectRatio = _selectedResolution.UseAsAspectRatio;
-        state.CameraSpeed = UserSettings.Config.CameraSpeed;
-
-        _camSelectionHandling.SaveStateTo(state);
-        Pinning.SaveStateTo(state);
-        _setupMode.SaveStateTo(state);
+        SaveStateTo(state);
     }
 
     private void SaveStateTo(OutputWindowState state)
     {
         // ShowGizmos and TransformGizmoMode are already on the state object (direct backing store)
-        state.BackgroundColor = [_backgroundColor.X, _backgroundColor.Y, _backgroundColor.Z, _backgroundColor.W];
+        OutputWindowState.CopyInto(ref state.BackgroundColor, _backgroundColor);
         state.CameraSpeed = UserSettings.Config.CameraSpeed;
 
         // Resolution

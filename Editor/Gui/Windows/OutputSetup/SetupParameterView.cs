@@ -93,7 +93,7 @@ internal static class SetupParameterView
     /// </summary>
     public static void DrawSendExtras(Instance instance)
     {
-        if (instance is not IContentSupplier supplier)
+        if (instance is not IContentSupplier)
             return;
 
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
@@ -102,16 +102,11 @@ internal static class SetupParameterView
         FormInputs.SetIndentToParameters();
         FormInputs.AddSectionSubHeader("Output Setup");
 
-        _sendContext ??= new EvaluationContext();
-        _sendContext.Reset();
-
-        // Reset() leaves RequestedResolution at 0×0; pulling the content preview at that size makes the
-        // graph's auto-sized RenderTargets bail ("invalid texture size") and stop updating. Preview at
-        // the resolution the content would render at when bound.
-        _sendContext.RequestedResolution = OutputContentResolver.RequestedResolutionFor(setup, instance.SymbolChildId);
+        // Through the shared resolver: the same context and size the composite pulls with, so this shows the
+        // frame the output renders rather than evaluating the graph a second time at a size of its own.
+        OutputContentResolver.TryGetSourceContent(instance.SymbolChildId, out _, out var content);
 
         Span<int> resolution = [1, 1];
-        var content = supplier.GetContent(_sendContext);
         if (content is { IsDisposed: false })
         {
             resolution[0] = content.Description.Width;
@@ -422,17 +417,16 @@ internal static class SetupParameterView
         if (instance is not IContentSupplier supplier)
             return;
 
-        _sendContext ??= new EvaluationContext();
-        _sendContext.Reset();
-        _sendContext.RequestedResolution = OutputContentResolver.RequestedResolutionFor(setup, instance.SymbolChildId);
+        OutputContentResolver.TryGetSourceContent(childId, out _, out var content);
+        var context = OutputContentResolver.Context;
 
-        var update = supplier.GetUpdateEnabled(_sendContext);
+        var update = supplier.GetUpdateEnabled(context);
         if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this content at its last frame."))
             SetInputUndoable(instance, supplier.UpdateInput, update);
 
         // 0×0 means "whatever the output asks for", so the content follows the projector or display it is routed
         // to; a set value pins it. The line underneath says what that resolves to right now.
-        var requested = supplier.GetResolution(_sendContext);
+        var requested = supplier.GetResolution(context);
         Span<int> resolution = [requested.Width, requested.Height];
         var state = DrawIntsRow("Render at (px)", resolution,
                                 "0 follows the output this content is routed to. Set a size to render at it regardless.");
@@ -443,7 +437,6 @@ internal static class SetupParameterView
                                                                Math.Clamp(resolution[1], 0, 16384)));
         }
 
-        var content = supplier.GetContent(_sendContext);
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(content is { IsDisposed: false }
                                           ? $"rendering {content.Description.Width}×{content.Description.Height}"
@@ -951,7 +944,6 @@ internal static class SetupParameterView
     // Pre-edit setup snapshot while a card drag-field gesture is live (see BeginFieldUndo/CommitFieldUndo).
     private static string? _fieldEditOldJson;
 
-    private static EvaluationContext? _sendContext;
 
     // Name-field editing state: buffer follows the entity until the field takes focus.
     private static Guid _renameTargetId;

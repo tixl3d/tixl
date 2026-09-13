@@ -407,8 +407,10 @@ internal sealed class CameraSelectionHandling
     internal void SaveStateTo(OutputWindowState state)
     {
         state.CameraControlMode = (OutputWindowState.CameraControlModes)(int)_controlMode;
-        state.CameraPosition = [_outputWindowViewCamera.CameraPosition.X, _outputWindowViewCamera.CameraPosition.Y, _outputWindowViewCamera.CameraPosition.Z];
-        state.CameraTarget = [_outputWindowViewCamera.CameraTarget.X, _outputWindowViewCamera.CameraTarget.Y, _outputWindowViewCamera.CameraTarget.Z];
+        var position = _outputWindowViewCamera.CameraPosition;
+        var target = _outputWindowViewCamera.CameraTarget;
+        OutputWindowState.CopyInto(ref state.CameraPosition, position.X, position.Y, position.Z);
+        OutputWindowState.CopyInto(ref state.CameraTarget, target.X, target.Y, target.Z);
         state.CameraRoll = _outputWindowViewCamera.CameraRoll;
     }
 
