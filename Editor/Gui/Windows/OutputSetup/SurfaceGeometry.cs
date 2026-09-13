@@ -19,11 +19,15 @@ internal static class SurfaceGeometry
     /// <summary>Smallest edge length we allow, so a crop can't collapse a surface to nothing.</summary>
     public const float MinSize = 0.01f;
 
+    /// <summary>Smallest slice extent, as a fraction of its source — shared by the canvas handles and the parameter fields.</summary>
+    public const float MinSliceSize = 0.01f;
+
     /// <summary>The surface's own rectangle in its space, as a TL, TR, BR, BL quad — the frame the corner pin maps.</summary>
-    public static Vector2[] LocalRect(Surface surface)
+    /// <param name="corners">Caller-owned, at least 4 entries — this runs per frame, so it doesn't allocate.</param>
+    public static void WriteLocalRect(Surface surface, Span<Vector2> corners)
     {
         LocalBounds(surface, out var min, out var max);
-        return RectFromBounds(min, max);
+        WriteRectCorners(min, max, corners, yUp: true);
     }
 
     /// <summary>The surface's own rectangle in its space: bottom-left and top-right, in metres from the anchor.</summary>
@@ -33,10 +37,41 @@ internal static class SurfaceGeometry
         max = min + surface.SizeInMeters;
     }
 
-    /// <summary>TL, TR, BR, BL from Y-up bounds.</summary>
-    public static Vector2[] RectFromBounds(Vector2 min, Vector2 max)
+    /// <summary>
+    /// The four corners of a rect in the projector's winding, TL, TR, BR, BL. Which corner is "top" depends on
+    /// the space: <paramref name="yUp"/> for metres (surface and Board space), false for pixels (canvas, photo).
+    /// </summary>
+    public static void WriteRectCorners(Vector2 min, Vector2 max, Span<Vector2> corners, bool yUp)
     {
-        return [new Vector2(min.X, max.Y), max, new Vector2(max.X, min.Y), min];
+        if (yUp)
+        {
+            corners[0] = new Vector2(min.X, max.Y);
+            corners[1] = max;
+            corners[2] = new Vector2(max.X, min.Y);
+            corners[3] = min;
+        }
+        else
+        {
+            corners[0] = min;
+            corners[1] = new Vector2(max.X, min.Y);
+            corners[2] = max;
+            corners[3] = new Vector2(min.X, max.Y);
+        }
+    }
+
+    /// <summary>
+    /// Moves one edge of a Y-up rect (0 = top, 1 = right, 2 = bottom, 3 = left) to <paramref name="pos"/>, the
+    /// opposite edge staying put and the rect never thinner than <paramref name="minSize"/>.
+    /// </summary>
+    public static void MoveEdge(ref Vector2 min, ref Vector2 max, int edge, Vector2 pos, float minSize)
+    {
+        switch (edge)
+        {
+            case 0: max.Y = MathF.Max(pos.Y, min.Y + minSize); break;
+            case 1: max.X = MathF.Max(pos.X, min.X + minSize); break;
+            case 2: min.Y = MathF.Min(pos.Y, max.Y - minSize); break;
+            default: min.X = MathF.Min(pos.X, max.X - minSize); break;
+        }
     }
 
     /// <summary>The pixel size of the canvas a mapping lands on — what its stored 0..1 quad is measured
@@ -57,7 +92,9 @@ internal static class SurfaceGeometry
         if (size.X <= 0.0001f || size.Y <= 0.0001f || mapping.Quad.Length < 4)
             return false;
 
-        return Homography.TryComputeQuadToQuad(LocalRect(surface), ScaledQuad(mapping.Quad, canvasSize), out surfaceToOutput);
+        Span<Vector2> rect = stackalloc Vector2[4];
+        WriteLocalRect(surface, rect);
+        return Homography.TryComputeQuadToQuad(rect, ScaledQuad(mapping.Quad, canvasSize), out surfaceToOutput);
     }
 
     /// <summary>The stored 0..1 quad in the given space; the scratch is reused, so consume it before the next call.</summary>
@@ -79,7 +116,9 @@ internal static class SurfaceGeometry
         if (size.X <= 0.0001f || size.Y <= 0.0001f || mapping.Quad.Length < 4)
             return false;
 
-        return Homography.TryComputeQuadToQuad(ScaledQuad(mapping.Quad, canvasSize), LocalRect(surface), out outputToSurface);
+        Span<Vector2> rect = stackalloc Vector2[4];
+        WriteLocalRect(surface, rect);
+        return Homography.TryComputeQuadToQuad(ScaledQuad(mapping.Quad, canvasSize), rect, out outputToSurface);
     }
 
     /// <summary>
@@ -91,7 +130,8 @@ internal static class SurfaceGeometry
     /// </summary>
     public static void ApplyBounds(Surface surface, Vector2 min, Vector2 max)
     {
-        var corners = RectFromBounds(min, max);
+        Span<Vector2> corners = stackalloc Vector2[4];
+        WriteRectCorners(min, max, corners, yUp: true);
         foreach (var mapping in surface.OutputMappings)
         {
             // Read and write both in the canvas' normalized space, so no output (and no resolution) is needed.
@@ -115,23 +155,8 @@ internal static class SurfaceGeometry
     /// </summary>
     public static Surface? FindMappingCarrier(Setup setup, Guid surfaceId, Guid outputId)
     {
-        if (surfaceId == Guid.Empty)
-            return null;
-
-        var surface = setup.FindSurface(surfaceId);
-        for (var guard = 0; surface != null && guard < 16; guard++)
-        {
-            if (surface.HasMapping(outputId))
-                return surface;
-
-            if (surface.ParentId == Guid.Empty)
-                break;
-
-            var parentId = surface.ParentId;
-            surface = setup.FindSurface(parentId);
-        }
-
-        return null;
+        var carrier = setup.FindMappedAncestor(surfaceId);
+        return carrier != null && carrier.HasMapping(outputId) ? carrier : null;
     }
 
     /// <summary>A Layout child's rectangle in its parent's space — its stored bottom-left plus its size.</summary>
@@ -213,62 +238,6 @@ internal static class SurfaceGeometry
         return true;
     }
 
-    /// <summary>
-    /// Coordinates worth snapping to, in the parent's space: the parent's own edges and centre, plus every
-    /// sibling's. Filled into caller-owned lists, since this runs inside a drag. Snapping in the parent's
-    /// space (rather than on screen) means alignments survive the perspective — edges that read as flush stay
-    /// flush on the wall.
-    /// </summary>
-    public static void CollectSnapCandidates(Setup setup, Surface parent, Guid excludeId, List<float> xs, List<float> ys)
-    {
-        xs.Clear();
-        ys.Clear();
-
-        LocalBounds(parent, out var parentMin, out var parentMax);
-        AddEdgesAndCentre(xs, ys, parentMin, parentMax);
-
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            var sibling = setup.Surfaces[i];
-            if (sibling.ParentId != parent.Id || sibling.Id == excludeId)
-                continue;
-
-            RegionBounds(sibling, out var min, out var max);
-            AddEdgesAndCentre(xs, ys, min, max);
-        }
-    }
-
-    /// <summary>
-    /// Nearest candidate to any of <paramref name="anchors"/> (a rectangle offers its two edges and its
-    /// centre), returning the offset that lands on it and the coordinate hit, so a guide can be drawn.
-    /// </summary>
-    public static bool TrySnapOffset(List<float> candidates, ReadOnlySpan<float> anchors, float threshold,
-                                     out float offset, out float target)
-    {
-        offset = 0;
-        target = 0;
-        var bestDistance = threshold;
-        var found = false;
-
-        foreach (var anchor in anchors)
-        {
-            foreach (var candidate in candidates)
-            {
-                var delta = candidate - anchor;
-                var distance = MathF.Abs(delta);
-                if (distance >= bestDistance)
-                    continue;
-
-                bestDistance = distance;
-                offset = delta;
-                target = candidate;
-                found = true;
-            }
-        }
-
-        return found;
-    }
-
     /// <summary>Resizes keeping the anchor in place, so editing one dimension extends rather than recentres.</summary>
     public static void ResizeAnchored(Surface surface, Vector2 newSize)
     {
@@ -303,14 +272,7 @@ internal static class SurfaceGeometry
 
         var anchor = surface.Anchor;
         LocalBounds(surface, out var min, out var max);
-        switch (edge)
-        {
-            case 0: max.Y = MathF.Max(surfacePos.Y, min.Y + MinSize); break;
-            case 1: max.X = MathF.Max(surfacePos.X, min.X + MinSize); break;
-            case 2: min.Y = MathF.Min(surfacePos.Y, max.Y - MinSize); break;
-            default: min.X = MathF.Min(surfacePos.X, max.X - MinSize); break;
-        }
-
+        MoveEdge(ref min, ref max, edge, surfacePos, MinSize);
         ApplyBounds(surface, min, max);
 
         if (!keepDimensions)
@@ -320,16 +282,6 @@ internal static class SurfaceGeometry
         // mapping onto the wall changed.
         surface.SizeInMeters = size;
         surface.Anchor = anchor;
-    }
-
-    private static void AddEdgesAndCentre(List<float> xs, List<float> ys, Vector2 min, Vector2 max)
-    {
-        xs.Add(min.X);
-        xs.Add((min.X + max.X) * 0.5f);
-        xs.Add(max.X);
-        ys.Add(min.Y);
-        ys.Add((min.Y + max.Y) * 0.5f);
-        ys.Add(max.Y);
     }
 
     // Ancestor chain scratch — the editor is single-threaded, and this runs inside the per-frame draw.

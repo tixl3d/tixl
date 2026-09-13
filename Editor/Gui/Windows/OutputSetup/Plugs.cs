@@ -1,6 +1,7 @@
 #nullable enable
 using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
+using T3.Core.Output.Streaming;
 using T3.Editor.App;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.ProjectHandling;
@@ -42,6 +43,15 @@ internal static class Plugs
             return DisplayLabel(displayIndex);
 
         return machineConfig.FindStreamPlug(plugId)?.Name ?? "Output";
+    }
+
+    /// <summary>Whether a plug id still names an attached display or a stream this machine offers.</summary>
+    public static bool Exists(MachineConfig machineConfig, Guid plugId)
+    {
+        if (TryGetDisplayIndex(plugId, out var displayIndex))
+            return displayIndex < System.Windows.Forms.Screen.AllScreens.Length;
+
+        return machineConfig.FindStreamPlug(plugId) != null;
     }
 
     /// <summary>The pixels a canvas presented here should have: the display's mode, or a sensible default for a stream.</summary>
@@ -89,10 +99,10 @@ internal static class Plugs
         machineConfig.Unbind(outputId);
         OutputSetupHandling.SaveActive();
 
-        if (binding is { IsStream: false } && OutputManager.PresentedOutputId == outputId)
+        if (binding is { IsStream: false } && OutputPresentation.PresentedOutputId == outputId)
         {
             WindowManager.ShowSecondaryRenderWindow = false;
-            OutputManager.PresentedOutputId = Guid.Empty;
+            OutputPresentation.PresentedOutputId = Guid.Empty;
         }
     }
     #endregion
@@ -134,7 +144,7 @@ internal static class Plugs
                                    DisplayIndex = displayIndex,
                                });
         OutputSetupHandling.SaveActive();
-        OutputManager.PresentedOutputId = outputId;
+        OutputPresentation.PresentedOutputId = outputId;
         WindowManager.ShowSecondaryRenderWindow = true;
         ProgramWindows.Viewer.SetFullScreen(displayIndex);
     }

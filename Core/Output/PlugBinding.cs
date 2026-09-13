@@ -57,7 +57,7 @@ public sealed class PlugBinding
                    {
                        OutputId = OutputJson.ReadGuid(token["OutputId"]),
                        Kind = token.ReadValueSafe("Kind", Kinds.Display) ?? Kinds.Display,
-                       PlugId = token["PlugId"] == null ? Guid.Empty : OutputJson.ReadGuid(token["PlugId"]),
+                       PlugId = OutputJson.ReadGuid(token["PlugId"]),
                        DisplayName = token.ReadValueSafe("DisplayName", string.Empty) ?? string.Empty,
                        DisplayIndex = token.ReadValueSafe("DisplayIndex", 0),
                        IsFullscreen = token.ReadValueSafe("Fullscreen", true),

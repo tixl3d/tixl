@@ -67,7 +67,7 @@ internal sealed partial class SetupOutputView
 
             // No label while it is still the output itself: it would sit over the whole canvas and read as a
             // second name for it. The label (and the whole-tile move it carries) appears with the promotion.
-            var label = isImplicit ? string.Empty : SetupActions.PatchLabel(output, patch);
+            var label = isImplicit ? string.Empty : CachedPatchLabel(output, patch);
             var isFocused = patch.Id == focusedPatchId;
             var isSelected = isFocused || (selection?.IsSelected(SetupEntityKinds.Patch, patch.Id) ?? false);
             var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(patch.Id);
@@ -93,11 +93,11 @@ internal sealed partial class SetupOutputView
                     var threshold = PatchSnapThreshold();
                     ref var corner = ref _patchPx[draggedCorner];
                     Span<float> x = [corner.X];
-                    if (SurfaceGeometry.TrySnapOffset(_snapXs, x, threshold, out _, out var targetX))
+                    if (_snapping.TrySnap(RectSnapping.Axes.X, x, threshold, out _, out var targetX))
                         corner.X = targetX;
 
                     Span<float> y = [corner.Y];
-                    if (SurfaceGeometry.TrySnapOffset(_snapYs, y, threshold, out _, out var targetY))
+                    if (_snapping.TrySnap(RectSnapping.Axes.Y, y, threshold, out _, out var targetY))
                         corner.Y = targetY;
                 }
 
@@ -165,12 +165,8 @@ internal sealed partial class SetupOutputView
                             ? CanvasPointHandle.DragPhases.Dragging
                             : CanvasPointHandle.DragPhases.Completed;
         }
-        else if (!_gesture.IsLive && _labelGrabScreen != null && isFocused && editable
-                 && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
-                 && (ImGui.GetMousePos() - _labelGrabScreen.Value).Length() > UserSettings.Config.ClickThreshold
-                 && IsPointOverLabel(screen, label, _labelGrabScreen.Value))
+        else if (isFocused && editable && TryTakeLabelGrab(screen, label))
         {
-            _labelGrabScreen = null;
             movePhase = CanvasPointHandle.DragPhases.Started;
         }
 
@@ -191,17 +187,17 @@ internal sealed partial class SetupOutputView
                 {
                     CollectPatchSnapCandidates(output, patch.Id, canvasSize);
                     var threshold = PatchSnapThreshold();
-                    QuadBounds(_patchPx, out var min, out var max);
+                    CanvasDraw.Bounds(_patchPx, out var min, out var max);
                     Span<float> xs = [min.X, (min.X + max.X) * 0.5f, max.X];
                     Span<float> ys = [min.Y, (min.Y + max.Y) * 0.5f, max.Y];
                     // Move the tile by the offset, then pin the edge that caught to the exact coordinate it
                     // caught on — the shared edge has to be the same float as its neighbour's, not merely close.
                     var offset = Vector2.Zero;
-                    var snappedX = SurfaceGeometry.TrySnapOffset(_snapXs, xs, threshold, out var offsetX, out var targetX);
+                    var snappedX = _snapping.TrySnap(RectSnapping.Axes.X, xs, threshold, out var offsetX, out var targetX);
                     if (snappedX)
                         offset.X = offsetX;
 
-                    var snappedY = SurfaceGeometry.TrySnapOffset(_snapYs, ys, threshold, out var offsetY, out var targetY);
+                    var snappedY = _snapping.TrySnap(RectSnapping.Axes.Y, ys, threshold, out var offsetY, out var targetY);
                     if (snappedY)
                         offset.Y = offsetY;
 
@@ -267,7 +263,7 @@ internal sealed partial class SetupOutputView
             {
                 CollectPatchSnapCandidates(output, patch.Id, canvasSize);
                 Span<float> coordinate = [horizontal ? _patchPx[e0].Y : _patchPx[e0].X];
-                if (SurfaceGeometry.TrySnapOffset(horizontal ? _snapYs : _snapXs, coordinate, PatchSnapThreshold(), out _, out var target))
+                if (_snapping.TrySnap(horizontal ? RectSnapping.Axes.Y : RectSnapping.Axes.X, coordinate, PatchSnapThreshold(), out _, out var target))
                 {
                     // Assigned, not offset: `pos + (target - pos)` can land a bit short of target, and two tiles
                     // whose shared edge differs in the last bit either double a row of pixels or leave a gap.
@@ -295,37 +291,23 @@ internal sealed partial class SetupOutputView
     /// <summary>Canvas edges and centre plus every other patch's bounds — what a patch edit snaps to, in output px.</summary>
     private void CollectPatchSnapCandidates(OutputDefinition output, Guid excludeId, Vector2 canvasSize)
     {
-        _snapXs.Clear();
-        _snapYs.Clear();
-        _snapXs.Add(0);
-        _snapXs.Add(canvasSize.X * 0.5f);
-        _snapXs.Add(canvasSize.X);
-        _snapYs.Add(0);
-        _snapYs.Add(canvasSize.Y * 0.5f);
-        _snapYs.Add(canvasSize.Y);
+        _snapping.Clear();
+        _snapping.AddRectEdgesAndCentre(Vector2.Zero, canvasSize);
 
         foreach (var other in output.Patches)
         {
             if (other.Id == excludeId || other.Quad.Length < 4)
                 continue;
 
-            QuadBounds(ScaleQuad(other.Quad, canvasSize), out var min, out var max);
-            _snapXs.Add(min.X);
-            _snapXs.Add((min.X + max.X) * 0.5f);
-            _snapXs.Add(max.X);
-            _snapYs.Add(min.Y);
-            _snapYs.Add((min.Y + max.Y) * 0.5f);
-            _snapYs.Add(max.Y);
+            CanvasDraw.Bounds(ScaleQuad(other.Quad, canvasSize), out var min, out var max);
+            _snapping.AddRectEdgesAndCentre(min, max);
         }
     }
 
     /// <summary>A constant screen distance expressed in output pixels at the current zoom.</summary>
     private float PatchSnapThreshold()
     {
-        var a = _projection.CanvasToScreen(Vector2.Zero);
-        var b = _projection.CanvasToScreen(new Vector2(1, 0));
-        var screenPerCanvas = Vector2.Distance(a, b);
-        return screenPerCanvas > 0.0001f ? 7 * T3Ui.UiScaleFactor / screenPerCanvas : 0f;
+        return RectSnapping.ThresholdFor(_projection, Vector2.Zero, 1f).X;
     }
 
     /// <summary>
@@ -371,10 +353,6 @@ internal sealed partial class SetupOutputView
         return _scaleScratch;
     }
 
-    // The patch being edited, in canvas pixels. Stored quads are ratios; every edit in this file happens here.
-    private static readonly Vector2[] _patchPx = new Vector2[4];
-    private static readonly Vector2[] _scaleScratch = new Vector2[4];
-
     /// <summary>
     /// A small wedge on the edge the picture's top now faces, pointing out of the patch. A turned patch
     /// otherwise looks like any other on the canvas — the composite shows the picture sideways, but not which
@@ -405,13 +383,11 @@ internal sealed partial class SetupOutputView
     /// the canvas — well under a pixel at any sane resolution.</summary>
     private const float AlignedEpsilon = 0.00002f;
 
-    private static void QuadBounds(Vector2[] quad, out Vector2 min, out Vector2 max)
-    {
-        min = max = quad[0];
-        for (var i = 1; i < quad.Length; i++)
-        {
-            min = Vector2.Min(min, quad[i]);
-            max = Vector2.Max(max, quad[i]);
-        }
-    }
+    // Patch edit scratch: the patch being edited in canvas pixels (stored quads are ratios; every edit in this
+    // file happens there), a stored quad scaled to pixels, the quad in view space (reused per patch), and the
+    // pre-drag quad a re-based edit starts from.
+    private static readonly Vector2[] _patchPx = new Vector2[4];
+    private static readonly Vector2[] _scaleScratch = new Vector2[4];
+    private readonly Vector2[] _patchViewQuad = new Vector2[4];
+    private readonly Vector2[] _patchOldQuad = new Vector2[4];
 }

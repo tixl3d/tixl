@@ -17,15 +17,6 @@ namespace T3.Editor.UiModel.ProjectHandling;
 internal static class OutputSetupHandling
 {
     /// <summary>
-    /// The one entity selection shared by all output windows (and, later, the Parameter window).
-    /// Windows follow it by default; a window that should keep showing something else carries a
-    /// per-window pin instead (<see cref="OutputSetupModeView"/>). Targets resolve
-    /// lazily against the active setup, so no clearing is needed on project or setup switches —
-    /// stale targets prune themselves.
-    /// </summary>
-    public static readonly SetupEntitySelection EntitySelection = new();
-
-    /// <summary>
     /// Publishes the focused project's setup to <see cref="ActiveSetup"/> once per frame — operators only
     /// reference Core and resolve GUIDs against it. Publication must not depend on any window being open or
     /// any UI code happening to query the setup, so this runs from the frame loop, not from a getter.
@@ -46,47 +37,22 @@ internal static class OutputSetupHandling
         ResolveCanvasResolutions(entry.Setup, entry.MachineConfig);
     }
 
-    /// <summary>
-    /// Fills each output's <see cref="OutputDefinition.ResolvedResolution"/>: its own canvas size, or the size
-    /// of the plug bound to it when that is left at 0×0. Done here rather than in the model because a binding
-    /// is machine state — the setup file stays free of display numbering.
-    /// </summary>
-    private static void ResolveCanvasResolutions(Setup setup, MachineConfig machineConfig)
-    {
-        foreach (var output in setup.Outputs)
-        {
-            if (!output.FollowsPlug)
-            {
-                output.ResolvedResolution = output.CanvasResolution;
-                continue;
-            }
-
-            var plugId = Plugs.BoundPlugId(machineConfig.FindBinding(output.Id));
-            var resolution = plugId == Guid.Empty ? new Int2(1920, 1080) : Plugs.PlugResolution(plugId);
-            output.ResolvedResolution = resolution;
-        }
-    }
-
     /// <summary>Drops a closed project's cached setup, so reopening reloads from disk.</summary>
     public static void OnProjectClosed(string projectFolder)
     {
         _entriesByProjectFolder.Remove(projectFolder);
-        OutputManager.ReleaseAll();
+        OutputPresentation.ReleaseAll();
     }
 
+    /// <summary>
+    /// The setup and machine config <see cref="UpdateFrame"/> published for this frame. Only a reader: no disk
+    /// IO, so it is safe inside per-frame draws. False until the first publication or while no project is focused.
+    /// </summary>
     public static bool TryGetActiveSetup(out Setup setup, out MachineConfig machineConfig)
     {
-        setup = null!;
-        machineConfig = null!;
-
-        var package = ProjectView.Focused?.OpenedProject.Package;
-        if (package == null)
-            return false;
-
-        var entry = GetOrLoadEntry(package.Folder);
-        setup = entry.Setup;
-        machineConfig = entry.MachineConfig;
-        return true;
+        setup = ActiveSetup.Current!;
+        machineConfig = ActiveSetup.Machine!;
+        return setup != null && machineConfig != null;
     }
 
     /// <summary>
@@ -105,15 +71,8 @@ internal static class OutputSetupHandling
 
         Directory.CreateDirectory(metaFolder);
         entry.Setup.TrySaveToFile(SetupFilePath(metaFolder, entry.Setup.Name));
+        entry.MachineConfig.ActiveSetupName = entry.Setup.Name;
         entry.MachineConfig.TrySaveToFile(Path.Combine(metaFolder, MachineConfig.FileName));
-
-        // Remember which setup is active in the project's settings (.t3ui), so a restart reopens the same venue.
-        var symbolUi = ProjectView.Focused?.RootInstance?.Symbol.GetSymbolUi();
-        if (symbolUi is { ReadOnly: false } && symbolUi.ActiveOutputSetupName != entry.Setup.Name)
-        {
-            symbolUi.ActiveOutputSetupName = entry.Setup.Name;
-            symbolUi.FlagAsModified();
-        }
     }
 
     /// <summary>Setup names available for the focused project (from .meta/*.setup.json).</summary>
@@ -135,14 +94,12 @@ internal static class OutputSetupHandling
         if (!TryGetFocusedEntry(out var entry, out var metaFolder))
             return false;
 
-        if (!Setup.TryLoadFromFile(SetupFilePath(metaFolder, setupName), out var setup) || setup == null)
+        if (!Setup.TryLoadFromFile(SetupFilePath(metaFolder, setupName), out var setup, out _))
             return false;
 
-        SetupSanitizer.Sanitize(setup); // persisted by the SaveActive below
-
         entry.Setup = setup;
-        OutputManager.ReleaseAll();
-        SaveActive(); // records the new active setup name so the switch survives a restart
+        OutputPresentation.ReleaseAll();
+        SaveActive(); // records the new active setup name (and any load-time repair) so the switch survives a restart
         return true;
     }
 
@@ -154,7 +111,7 @@ internal static class OutputSetupHandling
 
         var duplicate = entry.Setup.Duplicate(newName);
         entry.Setup = duplicate;
-        OutputManager.ReleaseAll();
+        OutputPresentation.ReleaseAll();
         SaveActive();
         return true;
     }
@@ -166,7 +123,7 @@ internal static class OutputSetupHandling
             return false;
 
         entry.Setup = Setup.CreateDefault(newName);
-        OutputManager.ReleaseAll();
+        OutputPresentation.ReleaseAll();
         SaveActive();
         return true;
     }
@@ -198,7 +155,7 @@ internal static class OutputSetupHandling
         else
         {
             entry.Setup = Setup.CreateDefault();
-            OutputManager.ReleaseAll();
+            OutputPresentation.ReleaseAll();
             SaveActive();
         }
 
@@ -209,6 +166,27 @@ internal static class OutputSetupHandling
     {
         public required Setup Setup;
         public required MachineConfig MachineConfig;
+    }
+
+    /// <summary>
+    /// Fills each output's <see cref="OutputDefinition.ResolvedResolution"/>: its own canvas size, or the size
+    /// of the plug bound to it when that is left at 0×0. Done here rather than in the model because a binding
+    /// is machine state — the setup file stays free of display numbering.
+    /// </summary>
+    private static void ResolveCanvasResolutions(Setup setup, MachineConfig machineConfig)
+    {
+        foreach (var output in setup.Outputs)
+        {
+            if (!output.FollowsPlug)
+            {
+                output.ResolvedResolution = output.CanvasResolution;
+                continue;
+            }
+
+            var plugId = Plugs.BoundPlugId(machineConfig.FindBinding(output.Id));
+            var resolution = plugId == Guid.Empty ? new Int2(1920, 1080) : Plugs.PlugResolution(plugId);
+            output.ResolvedResolution = resolution;
+        }
     }
 
     private static bool TryGetFocusedEntry([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out ProjectEntry? entry, out string metaFolder)
@@ -236,6 +214,10 @@ internal static class OutputSetupHandling
         return true;
     }
 
+    /// <summary>
+    /// Loads from disk on first access per project. Only <see cref="UpdateFrame"/> and the switcher operations
+    /// call this; per-frame readers go through <see cref="TryGetActiveSetup"/> and never touch the disk.
+    /// </summary>
     private static ProjectEntry GetOrLoadEntry(string projectFolder)
     {
         if (_entriesByProjectFolder.TryGetValue(projectFolder, out var entry))
@@ -243,30 +225,30 @@ internal static class OutputSetupHandling
 
         var metaFolder = Path.Combine(projectFolder, Setup.FolderName);
 
-        // Load the machine config first — it remembers which setup this machine last had active.
+        // The machine config remembers which setup this machine last had active, so it is read first.
         var machineConfigPath = Path.Combine(metaFolder, MachineConfig.FileName);
         var machineConfig = new MachineConfig();
         if (File.Exists(machineConfigPath))
             MachineConfig.TryLoadFromFile(machineConfigPath, out machineConfig);
 
         Setup? setup = null;
+        var wasRepaired = false;
         if (Directory.Exists(metaFolder))
         {
-            // Prefer the setup the project last had active (from its .t3ui settings); fall back to the first on
-            // disk if it's gone or none was recorded.
-            var activeName = ProjectView.Focused?.RootInstance?.Symbol.GetSymbolUi()?.ActiveOutputSetupName;
-            if (!string.IsNullOrEmpty(activeName))
+            // Fall back to the first setup on disk if the remembered one is gone or none was recorded.
+            var activeName = machineConfig.ActiveSetupName;
+            if (activeName.Length > 0)
             {
                 var preferred = SetupFilePath(metaFolder, activeName);
                 if (File.Exists(preferred))
-                    Setup.TryLoadFromFile(preferred, out setup);
+                    Setup.TryLoadFromFile(preferred, out setup, out wasRepaired);
             }
 
             if (setup == null)
             {
                 foreach (var filePath in Directory.EnumerateFiles(metaFolder, "*" + Setup.FileSuffix))
                 {
-                    if (Setup.TryLoadFromFile(filePath, out setup))
+                    if (Setup.TryLoadFromFile(filePath, out setup, out wasRepaired))
                         break;
                 }
             }
@@ -278,7 +260,7 @@ internal static class OutputSetupHandling
             Directory.CreateDirectory(metaFolder);
             setup.TrySaveToFile(SetupFilePath(metaFolder, setup.Name));
         }
-        else if (SetupSanitizer.Sanitize(setup))
+        else if (wasRepaired)
         {
             // Persist the repair right away, so the file on disk stops being broken.
             setup.TrySaveToFile(SetupFilePath(metaFolder, setup.Name));

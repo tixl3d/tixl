@@ -4,6 +4,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
+using T3.Core.Output.Streaming;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.InputUi.ListInputs;
 using T3.Editor.Gui.Interaction;
@@ -35,7 +36,7 @@ internal static class SetupParameterView
         if (GlobalSelectionHandling.InspectionTarget != GlobalSelectionHandling.InspectionTargets.SetupEntity)
             return false;
 
-        var selection = OutputSetupHandling.EntitySelection;
+        var selection = GlobalSelectionHandling.SetupEntities;
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig)
             || !selection.TryResolve(setup, out var kind, out var id))
         {
@@ -107,7 +108,7 @@ internal static class SetupParameterView
         // Reset() leaves RequestedResolution at 0×0; pulling the content preview at that size makes the
         // graph's auto-sized RenderTargets bail ("invalid texture size") and stop updating. Preview at
         // the resolution the content would render at when bound.
-        _sendContext.RequestedResolution = OutputManager.RequestedResolutionFor(setup, instance.SymbolChildId);
+        _sendContext.RequestedResolution = OutputContentResolver.RequestedResolutionFor(setup, instance.SymbolChildId);
 
         Span<int> resolution = [1, 1];
         var content = supplier.GetContent(_sendContext);
@@ -154,37 +155,26 @@ internal static class SetupParameterView
 
     private static void DrawHeader(Setup setup, SetupEntityKinds kind, Guid id)
     {
-        var (icon, kindLabel) = kind switch
-                                    {
-                                        SetupEntityKinds.Surface when IsRegion(setup, id) => (Icon.Grid, "Region"),
-                                        SetupEntityKinds.Surface => (Icon.Grid, "Surface"),
-                                        SetupEntityKinds.Output => (Icon.Projector, "Output"),
-                                        SetupEntityKinds.Slice => (Icon.Slice, "Slice"),
-                                        SetupEntityKinds.ContentSource => (Icon.FileImage, "Content"),
-                                        SetupEntityKinds.ReferenceImage => (Icon.FileImage, "Reference Image"),
-                                        SetupEntityKinds.Prop => (Icon.Grid, "Prop"),
-                                        SetupEntityKinds.Patch => (Icon.Patch, "Patch"),
-                                        SetupEntityKinds.Plug => (Icon.PlayOutput, "Plug"),
-                                        _ => (Icon.Grid, kind.ToString()),
-                                    };
+        var kindInfo = SetupEntityKindInfo.Of(kind);
+        // The two roles must never read alike: a plane-root is a Surface, a coplanar child is a Region.
+        var kindLabel = kind == SetupEntityKinds.Surface && IsRegion(setup, id) ? "Region" : kindInfo.Label;
 
         FormInputs.ApplyIndent();
-        Icons.DrawInlineGlyph(icon, UiColors.TextMuted.Rgba);
+        Icons.DrawInlineGlyph(kindInfo.Icon, UiColors.TextMuted.Rgba);
         ImGui.SameLine(0, 6 * T3Ui.UiScaleFactor);
         CustomComponents.StylizedText(kindLabel, Fonts.FontLarge, UiColors.Text);
         FormInputs.AddVerticalSpace(4);
 
-        // Props carry no name; a content source's name is its op (rename cascades through the sync); a
-        // display's name comes from the OS.
-        var namedByOs = kind == SetupEntityKinds.Plug && Plugs.TryGetDisplayIndex(id, out _);
-        if (kind != SetupEntityKinds.Prop && !namedByOs)
+        // A display's name comes from the OS; a content source's is its op (rename cascades through the sync).
+        var namedByOs = kind == SetupEntityKinds.Plug && !SetupActions.CanRenamePlug(id);
+        if (kindInfo.CanRename && !namedByOs)
             DrawNameField(setup, kind, id);
     }
 
     /// <summary>Editable name, committed as one undoable rename when the field loses focus.</summary>
     private static void DrawNameField(Setup setup, SetupEntityKinds kind, Guid id)
     {
-        var currentName = SetupActions.NameForEntity(kind, id);
+        var currentName = SetupLabels.NameForEntity(kind, id);
         if (_renameTargetId != id)
         {
             _renameTargetId = id;
@@ -211,7 +201,7 @@ internal static class SetupParameterView
 
         var render = surface.IsRendered;
         if (FormInputs.AddCheckBox("Render", ref render, "Skip drawing this surface without removing it."))
-            SetupActions.RunUndoable("Toggle render", setup, () => surface.IsRendered = render);
+            SetupUndo.RunUndoable("Toggle render", setup, () => surface.IsRendered = render);
 
         var position = surface.Placement?.Pose.Position ?? Vector3.Zero;
         Span<float> pos = [position.X, position.Y, position.Z];
@@ -248,7 +238,7 @@ internal static class SetupParameterView
         if (CustomComponents.IconButton(Icon.Link, Vector2.Zero,
                                         surface.IsAspectLocked ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
         {
-            SetupActions.RunUndoable("Lock aspect", setup, () => surface.IsAspectLocked = !surface.IsAspectLocked);
+            SetupUndo.RunUndoable("Lock aspect", setup, () => surface.IsAspectLocked = !surface.IsAspectLocked);
         }
 
         CustomComponents.TooltipForLastItem("Lock aspect ratio", "Resizing keeps the current width-to-height ratio.");
@@ -269,7 +259,7 @@ internal static class SetupParameterView
         // A re-metering: lines and regions scale along, nothing moves on the wall. One undo step per gesture.
         BeginFieldUndo(setup, sizeState);
         if ((sizeState & InputEditStateFlags.Modified) != 0)
-            SetupActions.RemeterSurface(setup, surface, ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.IsAspectLocked));
+            SurfaceMetrics.RemeterSurface(setup, surface, ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.IsAspectLocked));
 
         CommitFieldUndo(setup, "Resize surface", sizeState);
 
@@ -277,7 +267,7 @@ internal static class SetupParameterView
         if (FormInputs.AddCheckBox("Show size raster", ref showGrid,
                                    "Projects a real-world grid (no content needed) so you can hand-align the corner-pin to physical wall features."))
         {
-            SetupActions.RunUndoable("Toggle raster", setup, () => surface.ShowGrid = showGrid);
+            SetupUndo.RunUndoable("Toggle raster", setup, () => surface.ShowGrid = showGrid);
         }
 
         if (surface.ShowGrid)
@@ -310,7 +300,7 @@ internal static class SetupParameterView
 
         var send = output.IsSending;
         if (FormInputs.AddCheckBox("Send", ref send, "Pause presenting without dropping the display binding."))
-            SetupActions.RunUndoable("Toggle send", setup, () => output.IsSending = send);
+            SetupUndo.RunUndoable("Toggle send", setup, () => output.IsSending = send);
 
         // The canvas every route onto this output is measured in, and what its content is asked to render at:
         // an unset resolution upstream (a RenderTarget at 0×0) resolves to this, so it is the one place the
@@ -408,7 +398,7 @@ internal static class SetupParameterView
         CustomComponents.StylizedText(kindLine, Fonts.FontSmall, UiColors.TextMuted);
 
         // A refused frame is otherwise invisible: the output looks bound and sending while receivers get nothing.
-        if (OutputManager.TryGetStreamError(id, out var streamError))
+        if (OutputPresentation.TryGetStreamError(id, out var streamError))
         {
             FormInputs.ApplyIndent();
             CustomComponents.StylizedText(streamError, Fonts.FontSmall, UiColors.StatusAttention);
@@ -428,13 +418,13 @@ internal static class SetupParameterView
 
     private static void DrawContentCard(Setup setup, Guid childId)
     {
-        var instance = SetupActions.FindSendInstance(childId);
+        var instance = ContentSourceSync.FindSendInstance(childId);
         if (instance is not IContentSupplier supplier)
             return;
 
         _sendContext ??= new EvaluationContext();
         _sendContext.Reset();
-        _sendContext.RequestedResolution = OutputManager.RequestedResolutionFor(setup, instance.SymbolChildId);
+        _sendContext.RequestedResolution = OutputContentResolver.RequestedResolutionFor(setup, instance.SymbolChildId);
 
         var update = supplier.GetUpdateEnabled(_sendContext);
         if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this content at its last frame."))
@@ -480,7 +470,7 @@ internal static class SetupParameterView
         var source = setup.FindSource(slice.SourceId);
         var texW = 0;
         var texH = 0;
-        if (source != null && OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content)
+        if (source != null && OutputContentResolver.TryGetSourceContent(source.SymbolChildId, out _, out var content)
             && content is { IsDisposed: false })
         {
             texW = content.Description.Width;
@@ -499,8 +489,8 @@ internal static class SetupParameterView
             return;
         }
 
-        var widthUv = MathF.Max(uv.Z - uv.X, MinSliceSize);
-        var heightUv = MathF.Max(uv.W - uv.Y, MinSliceSize);
+        var widthUv = MathF.Max(uv.Z - uv.X, SurfaceGeometry.MinSliceSize);
+        var heightUv = MathF.Max(uv.W - uv.Y, SurfaceGeometry.MinSliceSize);
 
         // A slice is a fraction of its source, shown in whichever unit is selected — pixels of that source
         // while cutting an atlas, ratios when the source's size is not the point.
@@ -523,8 +513,8 @@ internal static class SetupParameterView
         BeginFieldUndo(setup, sizePxState);
         if ((sizePxState & InputEditStateFlags.Modified) != 0)
         {
-            var nw = Math.Clamp(FromUnit(size[0], texW), MinSliceSize, 1f - uv.X);
-            var nh = Math.Clamp(FromUnit(size[1], texH), MinSliceSize, 1f - uv.Y);
+            var nw = Math.Clamp(FromUnit(size[0], texW), SurfaceGeometry.MinSliceSize, 1f - uv.X);
+            var nh = Math.Clamp(FromUnit(size[1], texH), SurfaceGeometry.MinSliceSize, 1f - uv.Y);
             slice.UvRect = new Vector4(uv.X, uv.Y, uv.X + nw, uv.Y + nh);
         }
 
@@ -545,7 +535,7 @@ internal static class SetupParameterView
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(slice == null
                                           ? "Nothing routed yet — drop a slice or content onto this patch."
-                                          : $"Shows {SetupActions.SliceLabel(setup, slice)} on {output.Name}",
+                                          : $"Shows {SetupLabels.SliceLabel(setup, slice)} on {output.Name}",
                                       Fonts.FontSmall, UiColors.TextMuted);
 
         // Ahead of the geometry, which a warped quad skips: turning the picture applies to any patch.
@@ -651,7 +641,7 @@ internal static class SetupParameterView
         string? path = image.FilePath;
         var pathState = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, SetupActions.ImageFileFilter, ref path);
         if ((pathState & InputEditStateFlags.Modified) != 0 && path != null && path != image.FilePath)
-            SetupActions.RunUndoable("Pick reference image", setup, () => image.FilePath = path);
+            SetupUndo.RunUndoable("Pick reference image", setup, () => image.FilePath = path);
 
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(image.Width > 0
@@ -820,13 +810,7 @@ internal static class SetupParameterView
         if ((state & InputEditStateFlags.Finished) == 0 || _fieldEditOldJson == null)
             return;
 
-        var newJson = setup.ToJsonString();
-        if (newJson != _fieldEditOldJson)
-        {
-            UndoRedoStack.Add(new SetupSnapshotCommand(name, setup.Id, _fieldEditOldJson, newJson));
-            OutputSetupHandling.SaveActive();
-        }
-
+        SetupUndo.CommitGesture(setup, name, _fieldEditOldJson);
         _fieldEditOldJson = null;
     }
 
@@ -855,7 +839,7 @@ internal static class SetupParameterView
         FormInputs.AddVerticalSpace(4);
         if (ImGui.Button("Apply"))
         {
-            SetupActions.RunUndoable("Set measured size", setup, () => SetupActions.RemeterSurface(setup, surface, _measuredEdit));
+            SetupUndo.RunUndoable("Set measured size", setup, () => SurfaceMetrics.RemeterSurface(setup, surface, _measuredEdit));
             ImGui.CloseCurrentPopup();
         }
 
@@ -883,11 +867,8 @@ internal static class SetupParameterView
         return new Vector2(typed.Y * (old.X / old.Y), typed.Y);
     }
 
-    // A valid render resolution for previewing a content graph: the first output's canvas size, else a
-    // 1080p fallback. Never 0×0 (which auto-sized RenderTargets treat as invalid and skip).
     private static bool IsRegion(Setup setup, Guid id)
     {
-        // The two roles must never read alike: a plane-root is a Surface, a coplanar child is a Region.
         var surface = setup.FindSurface(id);
         return surface is { Kind: Surface.Kinds.Layout } && surface.ParentId != Guid.Empty;
     }
@@ -955,7 +936,7 @@ internal static class SetupParameterView
 
         var surface = setup.FindSurface(id);
         if (surface != null)
-            return SetupActions.SurfaceShortLabel(surface);
+            return SetupLabels.SurfaceShortLabel(surface);
 
         var output = setup.FindOutput(id);
         if (output != null)
@@ -963,9 +944,6 @@ internal static class SetupParameterView
 
         return "(missing)";
     }
-
-    /// <summary>Smallest slice fraction — mirrors <c>SetupOutputView.MinSliceSize</c>.</summary>
-    private const float MinSliceSize = 0.01f;
 
     private const string MeasuredSizePopupId = "##measuredSize";
     private static Vector2 _measuredEdit;

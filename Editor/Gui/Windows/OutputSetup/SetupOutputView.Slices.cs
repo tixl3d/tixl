@@ -9,6 +9,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Editor.UiModel.Selection;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Vector2 = System.Numerics.Vector2;
 
@@ -22,35 +23,6 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal sealed partial class SetupOutputView
 {
-
-    private static bool IsMouseInRect(Vector2 min, Vector2 max)
-    {
-        var mouse = ImGui.GetMousePos();
-        return mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y;
-    }
-
-    /// <summary>The strongest sidebar pulse among the surfaces and patches showing this slice.</summary>
-    private static float ConsumerPulse(Setup setup, Guid sliceId)
-    {
-        var pulse = 0f;
-        foreach (var surface in setup.Surfaces)
-        {
-            if (surface.SliceId == sliceId)
-                pulse = MathF.Max(pulse, FrameStats.CrossHighlightAmount(surface.Id));
-        }
-
-        foreach (var output in setup.Outputs)
-        {
-            foreach (var patch in output.Patches)
-            {
-                if (patch.SliceId == sliceId)
-                    pulse = MathF.Max(pulse, FrameStats.CrossHighlightAmount(patch.Id));
-            }
-        }
-
-        return pulse;
-    }
-
     /// <summary>Lights the rows of everything showing this slice — the answer to "where does this go?" on hover.</summary>
     private static void PulseConsumers(Setup setup, Guid sliceId)
     {
@@ -107,7 +79,7 @@ internal sealed partial class SetupOutputView
                 if (patch.SliceId != sliceId)
                     continue;
 
-                _consumerText.Append(_consumerText.Length == 0 ? "→ " : ", ").Append(SetupActions.PatchLabel(output, patch));
+                _consumerText.Append(_consumerText.Length == 0 ? "→ " : ", ").Append(SetupLabels.PatchLabel(output, patch));
             }
         }
 
@@ -163,31 +135,22 @@ internal sealed partial class SetupOutputView
         labelCorners[1] = new Vector2(max.X, min.Y);
         labelCorners[2] = max;
         labelCorners[3] = new Vector2(min.X, max.Y);
-        var sliceName = SetupActions.SliceLabel(setup, slice);
+        var sliceName = CachedSliceLabel(setup, slice);
         DrawEntityLabel(dl, SetupEntityKinds.Slice, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
         DrawSliceConsumers(dl, setup, slice.Id, CornerPinHandles.GetCenteredLabelRect(labelCorners, sliceName), 0.9f);
-        if (ImGui.IsWindowHovered() && IsMouseInRect(min, max))
+        var mousePos = ImGui.GetMousePos();
+        if (ImGui.IsWindowHovered() && CanvasDraw.Contains(min, max, mousePos))
             PulseConsumers(setup, slice.Id);
 
         // Move is detected by hand rather than an InvisibleButton, so the label stays a plain draw and the
         // frame-label pick pass (which selects and opens the context menu) isn't blocked by a hovered item.
         var (labelMin, labelMax) = CornerPinHandles.GetCenteredLabelRect(labelCorners, sliceName);
-        var mousePos = ImGui.GetMousePos();
-        var overLabel = mousePos.X >= labelMin.X && mousePos.X <= labelMax.X
-                        && mousePos.Y >= labelMin.Y && mousePos.Y <= labelMax.Y;
+        var overLabel = CanvasDraw.Contains(labelMin, labelMax, mousePos);
         if (overLabel && !ImGui.IsAnyItemHovered())
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 
         var movePhase = CanvasPointHandle.DragPhases.None;
-        if (_sliceLabelGrabPending)
-        {
-            // The grab from the source-canvas label (select + move in one gesture) lands here one frame
-            // later, once this slice is the edited one.
-            _sliceLabelGrabPending = false;
-            _sliceLabelDragging = true;
-            movePhase = CanvasPointHandle.DragPhases.Started;
-        }
-        else if (_sliceLabelDragging)
+        if (_sliceLabelDragging)
         {
             movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? CanvasPointHandle.DragPhases.Dragging
                                                                  : CanvasPointHandle.DragPhases.Completed;
@@ -203,11 +166,11 @@ internal sealed partial class SetupOutputView
         var centreInCanvas = _projection.ScreenToCanvas(mousePos);
         ImGui.PopID();
 
-        // One screen pixel in UV — per axis, since UV is normalized: on a non-square source the same 7px is
-        // a different UV distance horizontally than vertically.
-        var perPixel = (_projection.ScreenToCanvas(new Vector2(1, 0)) - _projection.ScreenToCanvas(Vector2.Zero)).X;
-        var thresholdX = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(sourceSize.X, 0.0001f);
-        var thresholdY = 7 * T3Ui.UiScaleFactor * perPixel / MathF.Max(sourceSize.Y, 0.0001f);
+        // The snap distance in UV — per axis, since UV is normalized: on a non-square source the same few
+        // pixels are a different UV distance horizontally than vertically.
+        var thresholds = RectSnapping.ThresholdFor(_projection, sourceOrigin, 1f) / Vector2.Max(sourceSize, new Vector2(0.0001f));
+        var thresholdX = thresholds.X;
+        var thresholdY = thresholds.Y;
         var snapping = !ImGui.GetIO().KeyShift;
 
         if (edge >= 0 && edgePhase is not CanvasPointHandle.DragPhases.None)
@@ -220,10 +183,10 @@ internal sealed partial class SetupOutputView
             var next = uv;
             switch (edge)
             {
-                case 0: next.Y = MathF.Min(inSource.Y, uv.W - MinSliceSize); break;
-                case 1: next.Z = MathF.Max(inSource.X, uv.X + MinSliceSize); break;
-                case 2: next.W = MathF.Max(inSource.Y, uv.Y + MinSliceSize); break;
-                default: next.X = MathF.Min(inSource.X, uv.Z - MinSliceSize); break;
+                case 0: next.Y = MathF.Min(inSource.Y, uv.W - SurfaceGeometry.MinSliceSize); break;
+                case 1: next.Z = MathF.Max(inSource.X, uv.X + SurfaceGeometry.MinSliceSize); break;
+                case 2: next.W = MathF.Max(inSource.Y, uv.Y + SurfaceGeometry.MinSliceSize); break;
+                default: next.X = MathF.Min(inSource.X, uv.Z - SurfaceGeometry.MinSliceSize); break;
             }
 
             // Snap to the source's bounds/midlines and the sibling slices' edges and centres — the same
@@ -233,8 +196,8 @@ internal sealed partial class SetupOutputView
                 CollectSliceSnapCandidates(setup, slice.SourceId, slice.Id);
                 var movesX = edge is 1 or 3;
                 Span<float> anchor = [edge switch { 0 => next.Y, 1 => next.Z, 2 => next.W, _ => next.X }];
-                if (SurfaceGeometry.TrySnapOffset(movesX ? _sliceSnapXs : _sliceSnapYs, anchor, movesX ? thresholdX : thresholdY,
-                                                  out _, out var snapTarget))
+                if (_snapping.TrySnap(movesX ? RectSnapping.Axes.X : RectSnapping.Axes.Y, anchor, movesX ? thresholdX : thresholdY,
+                                      out _, out var snapTarget))
                 {
                     // Assigned, not offset: two slices meeting on an edge have to store the identical value, or
                     // the sampled source rows on either side overlap by one or skip one.
@@ -250,8 +213,9 @@ internal sealed partial class SetupOutputView
                 }
             }
 
-            ApplySliceRect(slice, new Vector4(Math.Clamp(next.X, 0, 1), Math.Clamp(next.Y, 0, 1),
-                                           Math.Clamp(next.Z, 0, 1), Math.Clamp(next.W, 0, 1)));
+            // A plain field write per frame; the undo step and save happen once, on Completed (RunSliceDrag).
+            slice.UvRect = new Vector4(Math.Clamp(next.X, 0, 1), Math.Clamp(next.Y, 0, 1),
+                                       Math.Clamp(next.Z, 0, 1), Math.Clamp(next.W, 0, 1));
             if (edgePhase != CanvasPointHandle.DragPhases.Started)
                 RunSliceDrag(edgePhase, setup, slice);
 
@@ -305,15 +269,15 @@ internal sealed partial class SetupOutputView
 
             var scale = MathF.Max(MathF.Abs(dragged.X - fixedCorner.X) / currentWidth,
                                   MathF.Abs(dragged.Y - fixedCorner.Y) / currentHeight);
-            var width = MathF.Max(currentWidth * scale, MinSliceSize);
-            var height = MathF.Max(currentHeight * scale, MinSliceSize);
+            var width = MathF.Max(currentWidth * scale, SurfaceGeometry.MinSliceSize);
+            var height = MathF.Max(currentHeight * scale, SurfaceGeometry.MinSliceSize);
 
             var moved = fixedCorner + new Vector2(draggedCorner is 1 or 2 ? width : -width,
                                                   draggedCorner is 2 or 3 ? height : -height);
             var cornerMin = Vector2.Min(fixedCorner, moved);
             var cornerMax = Vector2.Max(fixedCorner, moved);
-            ApplySliceRect(slice, new Vector4(Math.Clamp(cornerMin.X, 0, 1), Math.Clamp(cornerMin.Y, 0, 1),
-                                           Math.Clamp(cornerMax.X, 0, 1), Math.Clamp(cornerMax.Y, 0, 1)));
+            slice.UvRect = new Vector4(Math.Clamp(cornerMin.X, 0, 1), Math.Clamp(cornerMin.Y, 0, 1),
+                                       Math.Clamp(cornerMax.X, 0, 1), Math.Clamp(cornerMax.Y, 0, 1));
             if (cornerPhase != CanvasPointHandle.DragPhases.Started)
                 RunSliceDrag(cornerPhase, setup, slice);
 
@@ -342,18 +306,7 @@ internal sealed partial class SetupOutputView
 
                 // Same axis lock as a region move: directional, but capped at a constant screen budget so
                 // it can't widen with drag distance.
-                var lockX = false;
-                var lockY = false;
-                if (snapping)
-                {
-                    lockX = MathF.Abs(delta.X) > MathF.Abs(delta.Y) * 4 && MathF.Abs(delta.Y) < thresholdY * 1.5f;
-                    lockY = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 4 && MathF.Abs(delta.X) < thresholdX * 1.5f;
-                    if (lockX)
-                        delta.Y = 0;
-                    else if (lockY)
-                        delta.X = 0;
-                }
-
+                var axisLock = snapping ? RectSnapping.LockAxis(ref delta, thresholds) : RectSnapping.AxisLocks.None;
                 var sliceOrigin = new Vector2(startUv.X, startUv.Y) + delta;
 
                 if (snapping)
@@ -363,28 +316,28 @@ internal sealed partial class SetupOutputView
                     CollectSliceSnapCandidates(setup, slice.SourceId, slice.Id);
                     Span<float> xs = [sliceOrigin.X, sliceOrigin.X + size.X * 0.5f, sliceOrigin.X + size.X];
                     Span<float> ys = [sliceOrigin.Y, sliceOrigin.Y + size.Y * 0.5f, sliceOrigin.Y + size.Y];
-                    if (SurfaceGeometry.TrySnapOffset(_sliceSnapXs, xs, thresholdX, out var offsetX, out var targetX))
+                    if (_snapping.TrySnap(RectSnapping.Axes.X, xs, thresholdX, out var offsetX, out var targetX))
                     {
                         sliceOrigin.X += offsetX;
                         DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: true, targetX);
                     }
 
-                    if (SurfaceGeometry.TrySnapOffset(_sliceSnapYs, ys, thresholdY, out var offsetY, out var targetY))
+                    if (_snapping.TrySnap(RectSnapping.Axes.Y, ys, thresholdY, out var offsetY, out var targetY))
                     {
                         sliceOrigin.Y += offsetY;
                         DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: false, targetY);
                     }
 
                     // The locked movement axis, drawn across the source so it reads as a guide (surface parity).
-                    if (lockX)
+                    if (axisLock == RectSnapping.AxisLocks.X)
                         DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: false, sliceOrigin.Y + size.Y * 0.5f);
-                    else if (lockY)
+                    else if (axisLock == RectSnapping.AxisLocks.Y)
                         DrawSliceSnapGuide(dl, sourceOrigin, sourceSize, vertical: true, sliceOrigin.X + size.X * 0.5f);
                 }
 
                 sliceOrigin.X = Math.Clamp(sliceOrigin.X, 0, MathF.Max(1 - size.X, 0));
                 sliceOrigin.Y = Math.Clamp(sliceOrigin.Y, 0, MathF.Max(1 - size.Y, 0));
-                ApplySliceRect(slice, new Vector4(sliceOrigin.X, sliceOrigin.Y, sliceOrigin.X + size.X, sliceOrigin.Y + size.Y));
+                slice.UvRect = new Vector4(sliceOrigin.X, sliceOrigin.Y, sliceOrigin.X + size.X, sliceOrigin.Y + size.Y);
                 break;
             }
 
@@ -401,8 +354,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void DrawSliceMenu(Setup setup, Guid targetId, Slice slice, Vector4 uv, Vector2 min, Vector2 max)
     {
-        var mouse = ImGui.GetMousePos();
-        var inside = mouse.X >= min.X && mouse.X <= max.X && mouse.Y >= min.Y && mouse.Y <= max.Y;
+        var inside = CanvasDraw.Contains(min, max, ImGui.GetMousePos());
         var wasDraggingRight = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() > UserSettings.Config.ClickThreshold;
         if (inside && !wasDraggingRight && ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !ImGui.IsAnyItemHovered())
             ImGui.OpenPopup(SliceMenuId);
@@ -423,7 +375,7 @@ internal sealed partial class SetupOutputView
     private void MatchSliceToTargetAspect(Setup setup, Guid targetId, Slice slice, Vector4 uv)
     {
         var surface = setup.FindSurface(targetId);
-        if (surface == null || !OutputManager.TryGetSurfaceSlice(targetId, out _, out var sourceTexture, out _)
+        if (surface == null || !OutputContentResolver.TryGetSurfaceSlice(targetId, out _, out var sourceTexture, out _)
             || sourceTexture is not { IsDisposed: false })
             return;
 
@@ -432,7 +384,7 @@ internal sealed partial class SetupOutputView
         var textureHeight = MathF.Max(sourceTexture.Description.Height, 1);
 
         // Want (width·texW)/(height·texH) == surfaceAspect; keep the width and solve for the height.
-        var width = MathF.Max(uv.Z - uv.X, MinSliceSize);
+        var width = MathF.Max(uv.Z - uv.X, SurfaceGeometry.MinSliceSize);
         var height = width * textureWidth / (textureHeight * MathF.Max(surfaceAspect, 0.0001f));
 
         var fit = MathF.Min(1f, MathF.Min(1f / MathF.Max(width, 0.0001f), 1f / MathF.Max(height, 0.0001f)));
@@ -444,15 +396,8 @@ internal sealed partial class SetupOutputView
         var minX = Math.Clamp(centreX - width * 0.5f, 0, MathF.Max(1 - width, 0));
         var minY = Math.Clamp(centreY - height * 0.5f, 0, MathF.Max(1 - height, 0));
 
-        UndoRedoStack.AddAndExecute(new ChangeSliceRectCommand(slice.Id, slice.UvRect,
-                                                               new Vector4(minX, minY, minX + width, minY + height)));
-    }
-
-    /// <summary>Live drag application — a plain field write. Persistence and undo happen once, on the drag's
-    /// Completed phase (<see cref="RunSliceDrag"/>), not per mouse-move frame.</summary>
-    private static void ApplySliceRect(Slice slice, Vector4 rect)
-    {
-        slice.UvRect = rect;
+        var rect = new Vector4(minX, minY, minX + width, minY + height);
+        SetupUndo.RunUndoable("Adjust slice", setup, () => slice.UvRect = rect);
     }
 
     /// <summary>The one drag lifecycle for slice-rect edits (edge crop, corner scale, label move): a gesture like every other.</summary>
@@ -474,16 +419,10 @@ internal sealed partial class SetupOutputView
 
     /// <summary>Snap targets for slice edits, in source UV: the source's bounds and midlines plus every
     /// sibling slice's edges and centres — the same vocabulary a surface edit snaps to (parent + siblings).</summary>
-    private static void CollectSliceSnapCandidates(Setup setup, Guid sourceId, Guid excludeSliceId)
+    private void CollectSliceSnapCandidates(Setup setup, Guid sourceId, Guid excludeSliceId)
     {
-        _sliceSnapXs.Clear();
-        _sliceSnapYs.Clear();
-        _sliceSnapXs.Add(0);
-        _sliceSnapXs.Add(0.5f);
-        _sliceSnapXs.Add(1);
-        _sliceSnapYs.Add(0);
-        _sliceSnapYs.Add(0.5f);
-        _sliceSnapYs.Add(1);
+        _snapping.Clear();
+        _snapping.AddRectEdgesAndCentre(Vector2.Zero, Vector2.One);
 
         foreach (var other in setup.Slices)
         {
@@ -491,12 +430,7 @@ internal sealed partial class SetupOutputView
                 continue;
 
             var rect = other.UvRect;
-            _sliceSnapXs.Add(rect.X);
-            _sliceSnapXs.Add((rect.X + rect.Z) * 0.5f);
-            _sliceSnapXs.Add(rect.Z);
-            _sliceSnapYs.Add(rect.Y);
-            _sliceSnapYs.Add((rect.Y + rect.W) * 0.5f);
-            _sliceSnapYs.Add(rect.W);
+            _snapping.AddRectEdgesAndCentre(new Vector2(rect.X, rect.Y), new Vector2(rect.Z, rect.W));
         }
     }
 
@@ -510,21 +444,13 @@ internal sealed partial class SetupOutputView
         dl.AddLine(a, b, UiColors.StatusAnimated.Fade(0.6f), 1 * T3Ui.UiScaleFactor);
     }
 
-    // Slice-editing state (the Content-stage framing lives with the morph in the core partial, which writes it).
+    // Slice editing: the label drag, its start, the slice's quad (reused per slice), and its menu.
     private bool _sliceLabelDragging;
-    private bool _sliceLabelGrabPending; // label pressed on a not-yet-selected slice; the editor starts the move next frame
-    private const float MinSliceSize = 0.01f;
-    private const string SliceMenuId = "##sliceMenu";
-    private readonly Vector2[] _sliceQuadBuffer = new Vector2[4];
     private (Vector2 Origin, Vector4 Uv)? _sliceMoveStart;
+    private readonly Vector2[] _sliceQuadBuffer = new Vector2[4];
+    private const string SliceMenuId = "##sliceMenu";
 
-    // Sends cutting from the same source — rebuilt per frame in the source view.
-    private readonly List<(Guid ChildId, IContentSupplier Supplier, Vector4 SourceRect)> _sharingSinks = [];
-
-    // The source's own borders and centre, in UV — what a slice snaps against.
-    private static readonly List<float> _sliceSnapXs = [];
-    private static readonly List<float> _sliceSnapYs = [];
-
+    // Consumer labels ("→ P1, Wall"), rebuilt per structure change.
     private readonly System.Text.StringBuilder _consumerText = new();
     private readonly Dictionary<Guid, string> _consumerLabels = [];
     private int _consumerLabelsVersion = -1;

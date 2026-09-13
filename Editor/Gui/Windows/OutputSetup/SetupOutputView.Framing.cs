@@ -22,8 +22,6 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal sealed partial class SetupOutputView
 {
-    /// <param name="keepScope">Adopt the new framing without moving the view — for a size change the user
-    /// caused themselves, where a refit reads as the canvas jumping out from under them.</param>
     /// <summary>
     /// Eases the rectify basis from the previously focused surface to the newly selected one. Blends on a
     /// private buffer so the stored quad is never touched, and only between two real surfaces — entering or
@@ -34,48 +32,33 @@ internal sealed partial class SetupOutputView
         // A lifted freeze is the same situation as a basis switch: an edge crop rewrote the quad, size, and
         // anchor R is built from, and they'd land in one frame — a view jump the user never asked for. Ease
         // from the frozen state instead, so the rectified view settles onto the edit.
-        if (!frozen && _basisWasFrozen && basisId == _basisTransitionId && _basisHasLast)
+        if (!frozen && _hold.BasisWasFrozen && basisId == _basisTransitionId && _hold.BasisHasLast)
         {
-            for (var i = 0; i < 4; i++)
-                _basisFromQuad[i] = _basisLastQuad[i];
-
-            _basisFromSize = _basisLastSize;
-            _basisFromAnchor = _basisLastAnchor;
-            _basisMorph = 0f;
+            StartBasisEaseFromLast();
 
             // Same basis: the edit settles *inside* the held framing — the camera must not chase it.
-            _easeKeepsFraming = true;
+            _hold.EaseKeepsFraming = true;
         }
 
-        _basisWasFrozen = frozen;
+        _hold.BasisWasFrozen = frozen;
 
         if (basisId != _basisTransitionId)
         {
-            if (!frozen && _basisTransitionId != Guid.Empty && basisId != Guid.Empty && _basisHasLast)
-            {
-                for (var i = 0; i < 4; i++)
-                    _basisFromQuad[i] = _basisLastQuad[i];
-
-                _basisFromSize = _basisLastSize;
-                _basisFromAnchor = _basisLastAnchor;
-                _basisMorph = 0f;
-            }
+            if (!frozen && _basisTransitionId != Guid.Empty && basisId != Guid.Empty && _hold.BasisHasLast)
+                StartBasisEaseFromLast();
             else
-            {
-                _basisMorph = 1f;
-            }
+                _basisEase.Settle();
 
             // A different basis is a different rectified world — the framing re-derives (with the ease).
-            _easeKeepsFraming = false;
+            _hold.EaseKeepsFraming = false;
             _basisTransitionId = basisId;
         }
 
         var resultQuad = targetQuad;
-        if (_basisMorph < 1f && !frozen)
+        if (!_basisEase.IsSettled && !frozen)
         {
-            var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-            _basisMorph = MathF.Min(1f, _basisMorph + dt / MorphDurationSec);
-            var t = MathF.Pow(_basisMorph, MorphEaseExponent);
+            _basisEase.Advance(FrameDeltaSec(), MorphDurationSec, MorphEaseExponent);
+            var t = _basisEase.Value;
             for (var i = 0; i < 4; i++)
                 _basisBlendQuad[i] = Vector2.Lerp(_basisFromQuad[i], targetQuad[i], t);
 
@@ -90,62 +73,51 @@ internal sealed partial class SetupOutputView
 
         _basisLastSize = targetSize;
         _basisLastAnchor = targetAnchor;
-        _basisHasLast = true;
+        _hold.BasisHasLast = true;
         return resultQuad;
+    }
+
+    /// <summary>Eases the basis from wherever it was last resolved, so an interrupted turn chains instead of jumping.</summary>
+    private void StartBasisEaseFromLast()
+    {
+        for (var i = 0; i < 4; i++)
+            _basisFromQuad[i] = _basisLastQuad[i];
+
+        _basisFromSize = _basisLastSize;
+        _basisFromAnchor = _basisLastAnchor;
+        _basisEase.Restart();
     }
 
     /// <summary>
     /// The board rect (Y up) this output view settles on: the output card for Original, the rectified surface
-    /// with its surround (inside the output card's space) for Straight, and the frame in flight otherwise (Content).
+    /// with its surround (inside the output card's space) for Straight.
     /// </summary>
-    private void GetSettledBoardRect(Setup setup, Guid basisId, Surface? basis, Surface.OutputMapping? basisMapping,
-                                     Vector2 canvasSize, Vector2 viewSize, out Vector2 min, out Vector2 max)
+    private void GetSettledBoardRect(Surface? basis, Surface.OutputMapping? basisMapping, Vector2 canvasSize, out Vector2 min, out Vector2 max)
     {
-        if (_morphTarget < 0.5f || basis == null || basisMapping == null)
+        if (_viewMorph.Target < 0.5f || basis == null || basisMapping == null)
         {
             min = new Vector2(_spaceOrigin.X, _spaceOrigin.Y - canvasSize.Y / _spacePixelsPerMeter);
             max = new Vector2(_spaceOrigin.X + canvasSize.X / _spacePixelsPerMeter, _spaceOrigin.Y);
             return;
         }
 
-        if (_morphTarget < 1.5f)
-        {
-            var span = _straightRectMax - _straightRectMin;
-            var surround = new Vector2(MathF.Max(span.X, span.Y) * StraightSurroundFactor);
-            var framedMin = _straightRectMin - surround;
-            var framedMax = _straightRectMax + surround;
-            min = new Vector2(_spaceOrigin.X + framedMin.X / _spacePixelsPerMeter, _spaceOrigin.Y - framedMax.Y / _spacePixelsPerMeter);
-            max = new Vector2(_spaceOrigin.X + framedMax.X / _spacePixelsPerMeter, _spaceOrigin.Y - framedMin.Y / _spacePixelsPerMeter);
-            return;
-        }
-
-        var topLeft = _projection.CanvasToBoard(Vector2.Zero);
-        var bottomRight = _projection.CanvasToBoard(viewSize);
-        min = new Vector2(topLeft.X, bottomRight.Y);
-        max = new Vector2(bottomRight.X, topLeft.Y);
+        var span = _framing.StraightMax - _framing.StraightMin;
+        var surround = new Vector2(MathF.Max(span.X, span.Y) * RectifiedFraming.StraightSurroundFactor);
+        var framedMin = _framing.StraightMin - surround;
+        var framedMax = _framing.StraightMax + surround;
+        min = new Vector2(_spaceOrigin.X + framedMin.X / _spacePixelsPerMeter, _spaceOrigin.Y - framedMax.Y / _spacePixelsPerMeter);
+        max = new Vector2(_spaceOrigin.X + framedMax.X / _spacePixelsPerMeter, _spaceOrigin.Y - framedMin.Y / _spacePixelsPerMeter);
     }
 
-    /// <summary>Frames a view-space area of <paramref name="size"/> px from the space's origin (a static space's whole extent).</summary>
-    private void FitToArea(Vector2 size, EditModes mode, Guid outputId, bool keepScope = false)
-    {
-        var topLeft = _projection.CanvasToBoard(Vector2.Zero);
-        var bottomRight = _projection.CanvasToBoard(size);
-        FitToBoardRect(new Vector2(topLeft.X, bottomRight.Y), new Vector2(bottomRight.X, topLeft.Y), mode, outputId, keepScope);
-    }
-
-    /// <summary>Remembers the camera and the board rect it shows, so a starting transition eases from there.</summary>
+    /// <summary>Remembers the camera, so a starting transition eases from there.</summary>
     private void CaptureTransitionStart()
     {
-        _probeCentreSamples.Clear();
         _morphFromScope = _boardCanvas.GetCurrentScope();
-        var scale = new Vector2(MathF.Max(MathF.Abs(_morphFromScope.Scale.X), 0.0001f), MathF.Max(MathF.Abs(_morphFromScope.Scale.Y), 0.0001f));
-        var canvasMin = _morphFromScope.Scroll;
-        var canvasMax = canvasMin + _boardCanvas.WindowSize / scale;
-        _morphFromMin = new Vector2(canvasMin.X, -canvasMax.Y);
-        _morphFromMax = new Vector2(canvasMax.X, -canvasMin.Y);
     }
 
     /// <param name="min">Board metres, Y up, of what the settled view frames.</param>
+    /// <param name="keepScope">Adopt the new framing without moving the view — for a size change the user
+    /// caused themselves, where a refit reads as the canvas jumping out from under them.</param>
     private void FitToBoardRect(Vector2 min, Vector2 max, EditModes mode, Guid outputId, bool keepScope = false)
     {
         var size = max - min;
@@ -156,7 +128,7 @@ internal sealed partial class SetupOutputView
             _canvasSelection.Clear();
 
         // Folding back to the Board: the camera is on its way to the remembered Board view, not to a fit.
-        if (_spaceTarget <= 0f)
+        if (_spaceBlend.Target <= 0f)
         {
             _fitKey = key;
             return;
@@ -168,10 +140,8 @@ internal sealed partial class SetupOutputView
         // animate along with everything else.
         // One easing for camera and geometry: the framed rect itself is interpolated from the view the user
         // had to the settled rect (already carrying its margin), and the camera simply shows that rect.
-        var progress = MathF.Min(MathF.Min(_morphProgress, _spaceProgress), MathF.Min(_referenceProgress, _referenceSubjectProgress));
-        if (progress >= 1f)
-            ReportTransitionMetrics();
-
+        var progress = MathF.Min(MathF.Min(_viewMorph.Progress, _spaceBlend.Progress),
+                                 MathF.Min(_referenceStraighten.Progress, _referenceSubjectEase.Progress));
         if (progress < 1f)
         {
             InflateByScreenMargin(ref min, ref max);
@@ -195,47 +165,6 @@ internal sealed partial class SetupOutputView
         InflateByScreenMargin(ref min, ref max);
         _boardCanvas.SetScopeInstant(FitScope(min, max));
         _fitKey = key;
-    }
-
-    private void SampleTransitionMetrics()
-    {
-        if (MathF.Min(MathF.Min(_morphProgress, _spaceProgress), MathF.Min(_referenceProgress, _referenceSubjectProgress)) >= 1f)
-            return;
-
-        _probeCentreSamples.Add(_probeSurfaceCentre - (_boardCanvas.WindowPos + _boardCanvas.WindowSize * 0.5f));
-    }
-
-    private void ReportTransitionMetrics()
-    {
-        if (_probeCentreSamples.Count < 2)
-        {
-            _probeCentreSamples.Clear();
-            return;
-        }
-
-        var first = _probeCentreSamples[0];
-        var last = _probeCentreSamples[^1];
-        var chord = last - first;
-        var chordLength = MathF.Max(chord.Length(), 0.001f);
-        var path = 0f;
-        var sumDistance = 0f;
-        var maxDeviation = 0f;
-        for (var i = 0; i < _probeCentreSamples.Count; i++)
-        {
-            var point = _probeCentreSamples[i];
-            sumDistance += point.Length();
-            if (i > 0)
-                path += (point - _probeCentreSamples[i - 1]).Length();
-
-            // Distance from the chord line.
-            var rel = point - first;
-            var deviation = MathF.Abs(rel.X * chord.Y - rel.Y * chord.X) / chordLength;
-            maxDeviation = MathF.Max(maxDeviation, deviation);
-        }
-
-        T3.Core.Logging.Log.Debug($"[fold] metrics mode={_editMode} samples={_probeCentreSamples.Count} meanDistFromCentre={sumDistance / _probeCentreSamples.Count:0} px "
-                                  + $"pathOverChord={path / chordLength:0.00} maxChordDeviation={maxDeviation:0} px start={first} end={last}");
-        _probeCentreSamples.Clear();
     }
 
     /// <summary>The scope the Board camera would take to show a board rect (Y up), centred — pure, nothing set.</summary>
@@ -276,13 +205,6 @@ internal sealed partial class SetupOutputView
         return new CanvasScope { Scale = new Vector2(scale, scale), Scroll = centre - halfWindow / scale };
     }
 
-    /// <summary>A board point (Y up) on screen under a given camera scope.</summary>
-    private Vector2 BoardToScreen(Vector2 board, CanvasScope scope)
-    {
-        var canvas = new Vector2(board.X, -board.Y);
-        return (canvas - scope.Scroll) * scope.Scale + _boardCanvas.WindowPos;
-    }
-
     /// <summary>The Board camera showing a board rect (Y up), centred, the canvas' own Y-down convention applied.</summary>
     private CanvasScope FitScope(Vector2 min, Vector2 max)
     {
@@ -291,8 +213,8 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// Grows a board rect by a small screen-space margin so a surface that overhangs the output (common in
-    /// Content/Output views) isn't jammed against the window edge.
+    /// Grows a board rect by a small screen-space margin so a surface that overhangs the output (common on
+    /// the Output canvas) isn't jammed against the window edge.
     /// </summary>
     private void InflateByScreenMargin(ref Vector2 min, ref Vector2 max)
     {
@@ -304,4 +226,17 @@ internal sealed partial class SetupOutputView
         min -= margin;
         max += margin;
     }
+
+    // Basis transition: eases the rectify basis (quad/size/anchor) from the previously focused surface to the
+    // newly selected one, so switching selection in a rectified view turns the scene rather than snapping.
+    private readonly Vector2[] _basisFromQuad = new Vector2[4];
+    private readonly Vector2[] _basisLastQuad = new Vector2[4];
+    private readonly Vector2[] _basisBlendQuad = new Vector2[4];
+    private Vector2 _basisFromSize, _basisLastSize, _basisFromAnchor, _basisLastAnchor;
+    private Guid _basisTransitionId;
+    private EasedValue _basisEase = EasedValue.Settled(1f);
+
+    // Rectified framing: this frame's R and window, and the hold that keeps the window still across frames.
+    private RectifiedFraming _framing;
+    private RectifiedFraming.FramingHold _hold;
 }

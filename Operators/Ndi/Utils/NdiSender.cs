@@ -4,6 +4,7 @@ using NewTek;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using T3.Core.Output;
+using T3.Core.Output.Streaming;
 using T3.Core.Utils;
 
 namespace Lib.Utils;

@@ -106,7 +106,7 @@ internal sealed partial class OutputWindow
         // invalidating the chain and rendering the same scene a second time at this window's resolution.
         var alreadyRendered = evalOutput is Slot<Texture2D> textureSlot
                               && textureSlot.Value is { IsDisposed: false } shown
-                              && OutputManager.WasContentPulledThisFrame(shown);
+                              && OutputContentResolver.WasContentPulledThisFrame(shown);
 
         // Render!
         evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title, recompute: !alreadyRendered);

@@ -1,12 +1,13 @@
 #nullable enable
 using Newtonsoft.Json.Linq;
 using T3.Core.Logging;
+using T3.Core.Output;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.UiModel.Commands.Setup;
 
 /// <summary>
-/// Undo for structural setup edits (add/delete/duplicate/rebind/rename) as whole-setup JSON snapshots.
+/// Undo for setup edits as whole-setup JSON snapshots — the one undo mechanism for setup data.
 /// A setup file is a few KB of plain DTOs, so restoring the complete state is simpler and more robust
 /// than per-operation inverse logic — every cascade an edit performs is captured by construction.
 /// Restores IN PLACE (the live <see cref="T3.Core.Output.Setup"/> instance keeps its identity), so every
@@ -33,10 +34,10 @@ internal sealed class SetupSnapshotCommand : ICommand
 
     private void Apply(string json)
     {
-        if (!SetupCommands.TryGetSetup(_setupId, Name, out var setup))
+        if (!TryGetSetup(out var setup))
             return;
 
-        T3.Core.Output.Setup? restored;
+        T3.Core.Output.Setup restored;
         try
         {
             restored = T3.Core.Output.Setup.ReadFromJson(JObject.Parse(json));
@@ -47,9 +48,6 @@ internal sealed class SetupSnapshotCommand : ICommand
             return;
         }
 
-        if (restored == null)
-            return;
-
         setup.Name = restored.Name;
         setup.ReferenceImages = restored.ReferenceImages;
         setup.Surfaces = restored.Surfaces;
@@ -58,6 +56,30 @@ internal sealed class SetupSnapshotCommand : ICommand
         setup.Outputs = restored.Outputs;
         setup.Props = restored.Props;
         OutputSetupHandling.SaveActive();
+    }
+
+    /// <summary>
+    /// Resolves the active setup guarded by identity: <see cref="T3.Core.Output.Setup.Duplicate"/> preserves
+    /// entity GUIDs across venue copies, so a bare lookup would happily apply an undo from one venue onto
+    /// another. The command no-ops when a different setup is active than the one it was recorded on.
+    /// </summary>
+    private bool TryGetSetup([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T3.Core.Output.Setup? setup)
+    {
+        setup = ActiveSetup.Current;
+        if (setup == null)
+        {
+            Log.Warning($"{Name}: no active setup — skipping.");
+            return false;
+        }
+
+        if (setup.Id != _setupId)
+        {
+            Log.Warning($"{Name}: a different setup is active than the one this edit belongs to — skipping.");
+            setup = null;
+            return false;
+        }
+
+        return true;
     }
 
     private readonly Guid _setupId;

@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
+using T3.Editor.UiModel.Selection;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;

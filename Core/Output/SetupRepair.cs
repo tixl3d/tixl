@@ -1,21 +1,21 @@
 #nullable enable
+using System;
 using System.Numerics;
 using T3.Core.Logging;
-using T3.Core.Output;
 
-namespace T3.Editor.UiModel.ProjectHandling;
+namespace T3.Core.Output;
 
 /// <summary>
-/// Repairs setup data that would break the editor's projection math. Setups are user-editable JSON on
-/// disk, so any loader must assume hostile input — hand edits, other tools, or leftovers from old bugs.
-/// Values that make the recovered projection numerically useless (non-finite, absurdly out of range,
+/// Repairs setup data that would break the projection math. Setups are user-editable JSON on disk, so
+/// <see cref="Setup.TryLoadFromFile"/> runs this for every loader and assumes hostile input — hand edits,
+/// other tools, or leftovers from old bugs. Values that make the recovered projection numerically useless (non-finite, absurdly out of range,
 /// degenerate quads) are force-reset to safe defaults, each with a warning naming what was fixed; merely
 /// unusual values (overhanging quads, out-of-rect pivots from crops) are left alone.
 /// </summary>
-internal static class SetupSanitizer
+public static class SetupRepair
 {
-    /// <summary>Returns true when something had to be repaired (the caller should persist the setup).</summary>
-    public static bool Sanitize(Setup setup)
+    /// <summary>Returns true when something had to be repaired — the caller should persist the setup.</summary>
+    public static bool Repair(Setup setup)
     {
         var changed = false;
 

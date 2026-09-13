@@ -1,0 +1,221 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using ImGuiNET;
+using T3.Core.Operator;
+using T3.Core.Operator.Slots;
+using T3.Core.Output;
+using T3.Editor.UiModel.ProjectHandling;
+using Texture2D = T3.Core.DataTypes.Texture2D;
+using Int2 = T3.Core.DataTypes.Vector.Int2;
+using Vector4 = System.Numerics.Vector4;
+using Surface = T3.Core.Output.Surface;
+
+namespace T3.Editor.Gui.Windows.OutputSetup;
+
+/// <summary>
+/// Resolves setup routing (slice → source → send op) to live textures and pulls that content through one
+/// shared evaluation context. Content is pulled once per send op per frame, so several surfaces slicing
+/// one image cost a single upstream evaluation, and the surface→slice chain of finds is memoised per frame.
+/// </summary>
+internal static class OutputContentResolver
+{
+    /// <summary>The shared evaluation context, valid after <see cref="PrepareContext"/> ran this frame.</summary>
+    public static EvaluationContext Context => _context ??= new EvaluationContext();
+
+    /// <summary>
+    /// Readies the shared evaluation context for pulling content this frame: fresh state, the resolution the
+    /// content is asked to render at, and the once-per-frame invalidation of every send — whichever entry
+    /// point pulls first (a composite, or a source preview on the Board) does it.
+    /// </summary>
+    public static EvaluationContext PrepareContext(Int2 requestedResolution)
+    {
+        var context = Context;
+        context.Reset();
+        context.RequestedResolution = requestedResolution;
+        InvalidateContentOncePerFrame(context);
+        return context;
+    }
+
+    /// <summary>Pulls a send's content and notes the texture as produced this frame (see <see cref="WasContentPulledThisFrame"/>).</summary>
+    public static Texture2D? PullContent(IContentSupplier supplier)
+    {
+        var frame = ImGui.GetFrameCount();
+        if (frame != _pulledFrame)
+        {
+            _pulledFrame = frame;
+            _pulledContent.Clear();
+        }
+
+        var context = Context;
+        var content = supplier.GetContent(context);
+        if (content is { IsDisposed: false })
+            _pulledContent.Add(content);
+
+        // What this send was asked for, so it can warn when two outputs disagree about its size.
+        if (supplier is Instance instance)
+            OutputContentStats.NotePull(instance.SymbolChildId, context.RequestedResolution, frame);
+
+        return content;
+    }
+
+    /// <summary>
+    /// Whether this texture was already produced this frame by pulling a send's content — i.e. its upstream
+    /// graph has run, at the bound output's canvas resolution. A view showing the same texture can then draw it
+    /// as it is instead of invalidating and re-rendering the whole chain at its own requested resolution, which
+    /// would evaluate the scene twice per frame and resize the render target back and forth.
+    /// </summary>
+    public static bool WasContentPulledThisFrame(Texture2D texture)
+    {
+        return _pulledFrame == ImGui.GetFrameCount() && _pulledContent.Contains(texture);
+    }
+
+    /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>
+    public static bool TryGetSourceContent(Guid symbolChildId, out IContentSupplier? supplier, out Texture2D? content)
+    {
+        content = null;
+        supplier = FindSendByChildId(symbolChildId);
+        var setup = ActiveSetup.Current;
+        if (supplier == null || setup == null)
+            return false;
+
+        PrepareContext(RequestedResolutionFor(setup, symbolChildId));
+        content = PullContent(supplier);
+        return content is { IsDisposed: false };
+    }
+
+    /// <summary>
+    /// The size a send's content is asked to render at when nothing composites it this frame: the canvas of
+    /// the output it is routed to, else the first output with a size, so a preview matches what a binding
+    /// would show and never re-renders the graph at a size of its own.
+    /// </summary>
+    public static Int2 RequestedResolutionFor(Setup setup, Guid symbolChildId)
+    {
+        if (SetupRelations.TryGetSendOutput(setup, symbolChildId, out var outputId))
+        {
+            var routed = setup.FindOutput(outputId);
+            if (routed != null && routed.ResolvedResolution.Width > 0 && routed.ResolvedResolution.Height > 0)
+                return routed.ResolvedResolution;
+        }
+
+        for (var i = 0; i < setup.Outputs.Count; i++)
+        {
+            var r = setup.Outputs[i].ResolvedResolution;
+            if (r.Width > 0 && r.Height > 0)
+                return r;
+        }
+
+        return new Int2(1920, 1080);
+    }
+
+    /// <summary>
+    /// What a surface shows, resolved through the setup: its slice, the source that slice cuts from, and the
+    /// live texture behind it.
+    /// </summary>
+    public static bool TryGetSurfaceSlice(Guid surfaceId, out Slice? slice, out Texture2D? content, out Vector4 uv)
+    {
+        // Every card, region and traced quad asks per frame; the chain of linear finds behind it is answered once.
+        var frame = ImGui.GetFrameCount();
+        if (frame != _surfaceSliceFrame)
+        {
+            _surfaceSliceFrame = frame;
+            _surfaceSlices.Clear();
+        }
+
+        if (!_surfaceSlices.TryGetValue(surfaceId, out var resolved))
+        {
+            resolved = ResolveSurfaceSlice(surfaceId);
+            _surfaceSlices[surfaceId] = resolved;
+        }
+
+        slice = resolved.Slice;
+        content = resolved.Content;
+        // The UV is read live: a crop or pan edits it mid-frame and the previews must follow within the frame.
+        uv = resolved.Slice?.UvRect ?? _fullUvRect;
+        return resolved.Found;
+    }
+
+    /// <summary>
+    /// A slice's live send op and its uv rect: <c>Slice → SourceId → ContentSource → SymbolChildId → op</c>.
+    /// Routing is setup data, so it survives the op being re-instantiated.
+    /// </summary>
+    public static bool TryResolveSliceContent(Setup setup, Guid sliceId, out IContentSupplier? supplier, out Vector4 sourceRect)
+    {
+        supplier = null;
+        sourceRect = _fullUvRect;
+        if (sliceId == Guid.Empty)
+            return false;
+
+        var slice = setup.FindSlice(sliceId);
+        var source = slice == null ? null : setup.FindSource(slice.SourceId);
+        if (source == null)
+            return false;
+
+        supplier = FindSendByChildId(source.SymbolChildId);
+        sourceRect = slice!.UvRect;
+        return supplier != null;
+    }
+
+    public static bool TryResolveSurfaceContent(Setup setup, Surface surface, out IContentSupplier? supplier, out Vector4 sourceRect)
+    {
+        return TryResolveSliceContent(setup, surface.SliceId, out supplier, out sourceRect);
+    }
+
+    /// <summary>Drops the surface→slice memo; the next frame re-resolves against the new setup.</summary>
+    public static void ReleaseAll()
+    {
+        _surfaceSlices.Clear();
+    }
+
+    private static void InvalidateContentOncePerFrame(EvaluationContext context)
+    {
+        var frame = ImGui.GetFrameCount();
+        if (frame == _invalidatedContentFrame)
+            return;
+
+        _invalidatedContentFrame = frame;
+
+        DirtyFlag.GlobalInvalidationTick++;
+        foreach (var supplier in ContentSupplierRegistry.Suppliers)
+        {
+            // Update=false freezes this content at its last frame — skip its invalidation.
+            if (supplier.GetUpdateEnabled(context))
+                supplier.InvalidateContent();
+        }
+    }
+
+    private static (bool Found, Slice? Slice, Texture2D? Content) ResolveSurfaceSlice(Guid surfaceId)
+    {
+        var setup = ActiveSetup.Current;
+        var surface = setup?.FindSurface(surfaceId);
+        if (setup == null || surface == null || surface.SliceId == Guid.Empty)
+            return (false, null, null);
+
+        var slice = setup.FindSlice(surface.SliceId);
+        var sourceId = slice?.SourceId ?? Guid.Empty;
+        var source = sourceId == Guid.Empty ? null : setup.FindSource(sourceId);
+        if (source == null || !TryGetSourceContent(source.SymbolChildId, out _, out var content))
+            return (false, slice, null);
+
+        return (true, slice, content);
+    }
+
+    private static IContentSupplier? FindSendByChildId(Guid childId)
+    {
+        foreach (var supplier in ContentSupplierRegistry.Suppliers)
+        {
+            if (supplier is Instance instance && instance.SymbolChildId == childId)
+                return supplier;
+        }
+
+        return null;
+    }
+
+    private static readonly Vector4 _fullUvRect = new(0, 0, 1, 1);
+    private static EvaluationContext? _context;
+    private static int _invalidatedContentFrame = -1;
+    private static readonly HashSet<Texture2D> _pulledContent = [];
+    private static int _pulledFrame = -1;
+    private static readonly Dictionary<Guid, (bool Found, Slice? Slice, Texture2D? Content)> _surfaceSlices = new();
+    private static int _surfaceSliceFrame = -1;
+}

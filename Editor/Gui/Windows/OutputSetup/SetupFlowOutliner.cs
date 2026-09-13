@@ -4,6 +4,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
+using T3.Core.Output.Streaming;
 using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.InputUi.ListInputs;
@@ -23,18 +24,15 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// <summary>
 /// The Flow Outliner: the strip under the output canvas that lays the setup out along its content flow —
 /// CONTENT → SURFACES → OUTPUTS → LOCAL BINDINGS as columns, with a shelf for reference images and props
-/// at the right end. Items are <see cref="EntityItem"/>s (surfaces nest by <see cref="Surface.ParentId"/>,
+/// at the right end. Items are <see cref="OutlinerItem"/>s (surfaces nest by <see cref="Surface.ParentId"/>,
 /// slices under their source, patches under their output); the relationships between them light up
 /// through the gutters and the connections drawn between the columns. CONTENT lists the live <see cref="IContentSupplier"/> ops, everything else the active
 /// setup; LOCAL BINDINGS is this machine's inventory of plugs.
 /// </summary>
 internal sealed class SetupFlowOutliner
 {
-    /// <summary>One outliner per output window, sharing the window's <see cref="EntityItem"/> with its canvas
-    /// views — so rename state and menus stay per-window instead of bleeding between open windows.</summary>
-    public SetupFlowOutliner(EntityItem entityItem)
+    public SetupFlowOutliner()
     {
-        _entityItem = entityItem;
         _requestAddPlugMenu = _ => _addPlugMenuRequested = true;
     }
 
@@ -120,18 +118,12 @@ internal sealed class SetupFlowOutliner
         if (ImGui.BeginPopup(AddBoardItemMenuId))
         {
             if (CustomComponents.DrawMenuItem(1, "Add Reference Image"))
-            {
                 SetupActions.AddReferenceImage(selection);
-                OutputSetupHandling.SaveActive();
-            }
 
             CustomComponents.TooltipForLastItem("Adds an empty image card; pick its photo in the Parameter window.", "Or drop an image file onto the Board.");
 
             if (CustomComponents.DrawMenuItem(2, "Add Prop"))
-            {
                 SetupActions.AddProp(selection);
-                OutputSetupHandling.SaveActive();
-            }
 
             CustomComponents.TooltipForLastItem("A box of known size on the Board — a doorway, a table — to judge the venue against.");
 
@@ -181,7 +173,7 @@ internal sealed class SetupFlowOutliner
         var gap = ColumnGap * scale;
 
         BeginColumn(origin.X + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("CONTENT", "##addContent", selection, SetupActions.AddContentSend, SetupEntityKinds.ContentSource);
+        DrawColumnHeader("CONTENT", "##addContent", selection, ContentSourceSync.AddContentSend, SetupEntityKinds.ContentSource);
         DrawContentSends(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -255,7 +247,7 @@ internal sealed class SetupFlowOutliner
         _patchLabels.Clear();
 
         foreach (var slice in setup.Slices)
-            _sliceLabels[slice.Id] = SetupActions.SliceLabel(setup, slice);
+            _sliceLabels[slice.Id] = SetupLabels.SliceLabel(setup, slice);
 
         foreach (var surface in setup.Surfaces)
         {
@@ -273,7 +265,7 @@ internal sealed class SetupFlowOutliner
 
             foreach (var patch in output.Patches)
             {
-                _patchLabels[patch.Id] = SetupActions.PatchLabel(output, patch);
+                _patchLabels[patch.Id] = SetupLabels.PatchLabel(output, patch);
                 if (patch.SliceId != Guid.Empty)
                     _connections.Add(new Connection(SetupEntityKinds.Slice, patch.SliceId, SetupEntityKinds.Patch, patch.Id));
             }
@@ -395,12 +387,7 @@ internal sealed class SetupFlowOutliner
             ImGui.SetCursorScreenPos(new Vector2(pos.X + _columnWidth - height - 4 * scale, pos.Y));
             ImGui.PushID(addButtonId);
             if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
-            {
                 onAdd(selection);
-                // The plug "+" only opens a menu; the pick inside it saves for itself.
-                if (kind != SetupEntityKinds.Plug)
-                    OutputSetupHandling.SaveActive();
-            }
 
             ImGui.PopID();
         }
@@ -422,21 +409,20 @@ internal sealed class SetupFlowOutliner
             // lands on the output item (TryGetAnchor folds an undrawn patch onto its output).
             var hasPatches = SetupRelations.CountListedPatches(output) > 0;
             var isExpanded = !_collapsedOutputs.Contains(output.Id);
-            var args = new EntityItem.Args
+            var args = new OutlinerItem.Args
                            {
                                Kind = SetupEntityKinds.Output,
                                Id = output.Id,
                                Name = output.Name,
                                // Nothing presents it yet — said in words, where the plug connection would otherwise start.
                                Status = machineConfig.FindBinding(output.Id) == null ? "unbound" : null,
-                               LeadingIcon = Icon.Projector,
                                IsExpanded = hasPatches ? isExpanded : null,
                                KeepsExpanderColumn = true,
                                // A paused output (Send off) reads the same as a non-rendering surface.
                                IsMuted = !output.IsSending,
                                HasStruckIcon = !output.IsSending,
                            };
-            if (DrawItem(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
+            if (DrawItem(selection, setup, ref args) == OutlinerItem.Actions.ToggleExpanded)
             {
                 if (!_collapsedOutputs.Add(output.Id))
                     _collapsedOutputs.Remove(output.Id);
@@ -467,13 +453,12 @@ internal sealed class SetupFlowOutliner
         for (var i = 0; i < screens.Length; i++)
         {
             var plugId = Plugs.DisplayPlugId(i);
-            var args = new EntityItem.Args
+            var args = new OutlinerItem.Args
                            {
                                Kind = SetupEntityKinds.Plug,
                                Id = plugId,
                                Name = Plugs.DisplayLabel(i),
                                Status = ResolutionLabel(i, screens[i].Bounds.Width, screens[i].Bounds.Height),
-                               LeadingIcon = Icon.PlayOutput,
                                IsMuted = !IsPlugBound(setup, machineConfig, plugId),
                            };
             DrawItem(selection, setup, ref args);
@@ -484,13 +469,12 @@ internal sealed class SetupFlowOutliner
             if (binding.IsStream || binding.DisplayIndex < screens.Length || setup.FindOutput(binding.OutputId) == null)
                 continue;
 
-            var args = new EntityItem.Args
+            var args = new OutlinerItem.Args
                            {
                                Kind = SetupEntityKinds.Plug,
                                Id = Plugs.DisplayPlugId(binding.DisplayIndex),
                                Name = Plugs.DisplayLabel(binding.DisplayIndex),
                                Status = "not attached",
-                               LeadingIcon = Icon.PlayOutput,
                                IsMuted = true,
                            };
             DrawItem(selection, setup, ref args);
@@ -500,7 +484,7 @@ internal sealed class SetupFlowOutliner
         {
             var stream = machineConfig.StreamPlugs[i];
             var available = Plugs.IsStreamKindAvailable(stream.Kind);
-            var args = new EntityItem.Args
+            var args = new OutlinerItem.Args
                            {
                                Kind = SetupEntityKinds.Plug,
                                Id = stream.Id,
@@ -530,7 +514,7 @@ internal sealed class SetupFlowOutliner
                 if (CustomComponents.DrawMenuItem(1 + i, providers[i].Kind))
                 {
                     var stream = Plugs.AddStream(machineConfig, providers[i].Kind);
-                    _entityItem.BeginRename(selection, SetupEntityKinds.Plug, stream.Id, stream.Name);
+                    OutlinerItem.BeginRename(selection, SetupEntityKinds.Plug, stream.Id, stream.Name);
                 }
             }
 
@@ -586,9 +570,6 @@ internal sealed class SetupFlowOutliner
             return;
         }
 
-        _sendContext ??= new EvaluationContext();
-        _sendContext.Reset();
-
         for (var i = 0; i < suppliers.Count; i++)
         {
             if (suppliers[i] is not Instance instance)
@@ -600,18 +581,17 @@ internal sealed class SetupFlowOutliner
             var sliceCount = source == null ? 0 : SetupRelations.CountListedSlicesOfSource(setup, source.Id);
             var expanded = !_collapsedSources.Contains(childId);
 
-            var args = new EntityItem.Args
+            var args = new OutlinerItem.Args
                            {
                                Kind = SetupEntityKinds.ContentSource,
                                Id = childId,
-                               Name = SetupActions.SendName(instance),
-                               LeadingIcon = Icon.FileImage,
+                               Name = ContentSourceSync.SendName(instance),
                                IsExpanded = sliceCount > 0 ? expanded : null,
                                KeepsExpanderColumn = true,
                                // Nothing shows this source, so it steps back visually.
                                IsMuted = source == null || SetupRelations.CountConsumersOfSource(setup, source.Id) == 0,
                            };
-            if (DrawItem(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
+            if (DrawItem(selection, setup, ref args) == OutlinerItem.Actions.ToggleExpanded)
                 ToggleSourceExpanded(childId);
 
             if (source == null || sliceCount == 0 || !expanded)
@@ -632,12 +612,11 @@ internal sealed class SetupFlowOutliner
     /// <summary>A slice under its source. A slice nothing shows reads as "unused".</summary>
     private void DrawSliceItem(SetupEntitySelection selection, Setup setup, Slice slice)
     {
-        var args = new EntityItem.Args
+        var args = new OutlinerItem.Args
                        {
                            Kind = SetupEntityKinds.Slice,
                            Id = slice.Id,
-                           Name = _sliceLabels.TryGetValue(slice.Id, out var sliceLabel) ? sliceLabel : SetupActions.SliceLabel(setup, slice),
-                           LeadingIcon = Icon.Slice,
+                           Name = _sliceLabels.TryGetValue(slice.Id, out var sliceLabel) ? sliceLabel : SetupLabels.SliceLabel(setup, slice),
                            Depth = 1,
                            IsMuted = !SetupRelations.IsSliceShown(setup, slice.Id),
                        };
@@ -647,12 +626,11 @@ internal sealed class SetupFlowOutliner
     /// <summary>A patch under its output; unfed patches step back.</summary>
     private void DrawPatchItem(SetupEntitySelection selection, Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
     {
-        var args = new EntityItem.Args
+        var args = new OutlinerItem.Args
                        {
                            Kind = SetupEntityKinds.Patch,
                            Id = patch.Id,
-                           Name = _patchLabels.TryGetValue(patch.Id, out var patchLabel) ? patchLabel : SetupActions.PatchLabel(output, patch),
-                           LeadingIcon = Icon.Patch,
+                           Name = _patchLabels.TryGetValue(patch.Id, out var patchLabel) ? patchLabel : SetupLabels.PatchLabel(output, patch),
                            Depth = 1,
                            IsMuted = setup.FindSlice(patch.SliceId) == null,
                        };
@@ -681,12 +659,11 @@ internal sealed class SetupFlowOutliner
         var hasChildren = SetupRelations.CountChildren(setup, surfaceId) > 0;
         var isExpanded = !_collapsedSurfaces.Contains(surfaceId);
 
-        var args = new EntityItem.Args
+        var args = new OutlinerItem.Args
                        {
                            Kind = SetupEntityKinds.Surface,
                            Id = surface.Id,
                            Name = surface.Name,
-                           LeadingIcon = Icon.Grid,
                            // A region that overrides its parent's pin no longer follows it — say so, since the
                            // item still sits nested under that parent.
                            Status = SetupActions.HasOwnPin(surface) ? "own pin" : null,
@@ -697,7 +674,7 @@ internal sealed class SetupFlowOutliner
                            IsMuted = !surface.IsRendered,
                            HasStruckIcon = !surface.IsRendered,
                        };
-        if (DrawItem(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
+        if (DrawItem(selection, setup, ref args) == OutlinerItem.Actions.ToggleExpanded)
             ToggleSurfaceExpanded(surfaceId);
 
         if (!hasChildren || !isExpanded)
@@ -789,12 +766,12 @@ internal sealed class SetupFlowOutliner
 
     /// <summary>Outliner-side item wrapper: injects the column rect every item needs, records its anchor for
     /// the connections, and its hover for their emphasis next frame.</summary>
-    private EntityItem.ItemActions DrawItem(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
+    private OutlinerItem.Actions DrawItem(SetupEntitySelection selection, Setup setup, ref OutlinerItem.Args args)
     {
         args.ColumnMinX = _columnMinX;
         args.ColumnWidth = _columnWidth;
-        var action = _entityItem.DrawItem(selection, setup, in args, out var hovered);
-        var rect = _entityItem.LastItemRect;
+        var action = _outlinerItem.DrawItem(selection, setup, in args, out var hovered);
+        var rect = _outlinerItem.LastItemRect;
         _anchors.Add(new Anchor(args.Kind, args.Id, rect.Min.X, rect.Max.X, (rect.Min.Y + rect.Max.Y) * 0.5f));
         if (hovered)
         {
@@ -831,7 +808,6 @@ internal sealed class SetupFlowOutliner
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
     private bool _addPlugMenuRequested;
     private readonly Action<SetupEntitySelection> _requestAddPlugMenu;
-    private static EvaluationContext? _sendContext;
 
     // The column the items currently draw into (screen x + width); 0 width = whole window.
     private float _columnMinX;
@@ -855,7 +831,7 @@ internal sealed class SetupFlowOutliner
     private readonly HashSet<Guid> _collapsedSurfaces = [];
     private readonly HashSet<Guid> _collapsedSources = [];
     private readonly HashSet<Guid> _collapsedOutputs = [];
-    private readonly EntityItem _entityItem;
+    private readonly OutlinerItem _outlinerItem = new();
 
     // The item hovered this frame (committed at end of Draw) — its connections draw emphasized next frame.
     private SetupEntityKinds _hoveredKind;

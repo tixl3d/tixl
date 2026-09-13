@@ -24,6 +24,18 @@ public class MachineConfigTests
     }
 
     [Fact]
+    public void ActiveSetupName_RoundTrips_AndDefaultsToEmpty()
+    {
+        var config = new MachineConfig { ActiveSetupName = "Venue B" };
+
+        var restored = MachineConfig.ReadFromJson(JObject.Parse(config.ToJsonString()));
+        Assert.Equal("Venue B", restored.ActiveSetupName);
+
+        var withoutName = MachineConfig.ReadFromJson(JObject.Parse(new MachineConfig().ToJsonString()));
+        Assert.Equal(string.Empty, withoutName.ActiveSetupName);
+    }
+
+    [Fact]
     public void Bind_ReplacesExistingBindingForSameOutput()
     {
         var outputId = Guid.NewGuid();

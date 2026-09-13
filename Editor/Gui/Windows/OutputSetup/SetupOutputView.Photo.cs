@@ -7,6 +7,7 @@ using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Editor.UiModel.Selection;
 using Int2 = T3.Core.DataTypes.Vector.Int2;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Vector2 = System.Numerics.Vector2;
@@ -14,10 +15,10 @@ using Vector2 = System.Numerics.Vector2;
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// The reference image's space: the photo or plan inside its Board card, with the surfaces traced on it as
-/// corner-pin quads (in image pixels) and the Photo ↔ Straight morph that rectifies the photo around the
-/// selected traced surface. Entered from the image card by double-click, left through the Board button; the
-/// Board itself always shows the traced quads on the card, read-only.
+/// The reference image's space: the photo or plan inside its Board card, and the Photo ↔ Straight morph that
+/// rectifies the photo around the selected traced surface — its subject transition, its warp render, and the
+/// texture cache behind every photo card. Entered from the image card by double-click, left through the
+/// Board button. The traced quads and their edits are <c>SetupOutputView.Trace.cs</c>.
 /// </summary>
 internal sealed partial class SetupOutputView
 {
@@ -42,12 +43,16 @@ internal sealed partial class SetupOutputView
 
         SeedBoardPlacements(setup);
         var texture = TryGetReferenceTexture(image);
-        EnterSpace(setup, SetupEntityKinds.ReferenceImage, imageId, texture != null);
+        if (texture != null)
+            EnterSpace(setup, SetupEntityKinds.ReferenceImage, imageId);
+        else
+            LeaveSpace(setup);
+
         DrawBoardLayer(setup, machineConfig, selection);
 
         if (texture == null)
             CustomComponents.EmptyWindowMessage("No image yet — pick one in the Parameter window,\nor drop a photo onto the Board.");
-        else if (_spaceBlend > 0.001f)
+        else if (_spaceBlend.Value > 0.001f)
             DrawReferenceSpace(setup, image, texture, subject, selection);
 
         ResolvePicking(setup, selection);
@@ -108,13 +113,8 @@ internal sealed partial class SetupOutputView
     /// <summary>Starts the Photo ↔ Straight transition (camera included) when the target changes.</summary>
     private void SetReferenceStraightenTarget(float target)
     {
-        if (target == _referenceStraightenTarget)
-            return;
-
-        _referenceStraightenTarget = target;
-        _referenceStraightenFrom = _referenceStraighten;
-        _referenceProgress = 0f;
-        CaptureTransitionStart();
+        if (_referenceStraighten.Retarget(target))
+            CaptureTransitionStart();
     }
 
     /// <summary>Board button · name · kind, and the Photo / Straight toggle once a traced surface is the subject.</summary>
@@ -129,11 +129,11 @@ internal sealed partial class SetupOutputView
         }
 
         ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
-        if (CustomComponents.StateButton("Photo", _referenceStraightenTarget < 0.5f ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+        if (CustomComponents.StateButton("Photo", _referenceStraighten.Target < 0.5f ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
             SetReferenceStraightenTarget(0f);
 
         ImGui.SameLine();
-        if (CustomComponents.StateButton("Straight", _referenceStraightenTarget >= 0.5f ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+        if (CustomComponents.StateButton("Straight", _referenceStraighten.Target >= 0.5f ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
             SetReferenceStraightenTarget(1f);
 
         ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
@@ -151,15 +151,7 @@ internal sealed partial class SetupOutputView
         var scale = T3Ui.UiScaleFactor;
         var size = new Vector2(Math.Max(1, image.Width), Math.Max(1, image.Height));
 
-        if (_referenceProgress < 1f)
-        {
-            var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-            _referenceProgress = MathF.Min(1f, _referenceProgress + dt / MorphDurationSec);
-            var eased = MathF.Pow(_referenceProgress, MorphEaseExponent);
-            _referenceStraighten = _referenceProgress >= 1f
-                                       ? _referenceStraightenTarget
-                                       : _referenceStraightenFrom + (_referenceStraightenTarget - _referenceStraightenFrom) * eased;
-        }
+        _referenceStraighten.Advance(FrameDeltaSec(), MorphDurationSec, MorphEaseExponent);
 
         // The subject's traced quad and its target rectangle — eased from the previous subject's when the
         // selection moves between surfaces on this photo while straightened, so the scene turns rather than jumps.
@@ -171,10 +163,10 @@ internal sealed partial class SetupOutputView
         // The camera settles on the rectified region with its surround, or on the whole photo.
         var settledMin = Vector2.Zero;
         var settledMax = size;
-        if (hasSubject && _referenceStraightenTarget >= 0.5f)
+        if (hasSubject && _referenceStraighten.Target >= 0.5f)
         {
             var span = targetMax - targetMin;
-            var surround = new Vector2(MathF.Max(span.X, span.Y) * StraightSurroundFactor);
+            var surround = new Vector2(MathF.Max(span.X, span.Y) * RectifiedFraming.StraightSurroundFactor);
             settledMin = targetMin - surround;
             settledMax = targetMax + surround;
         }
@@ -184,7 +176,7 @@ internal sealed partial class SetupOutputView
         FitToBoardRect(new Vector2(topLeft.X, bottomRight.Y), new Vector2(bottomRight.X, topLeft.Y), EditModes.Straight, image.Id);
 
         var dl = ImGui.GetWindowDrawList();
-        var t = _referenceStraighten;
+        var t = _referenceStraighten.Value;
         if (hasSubject && t > 0.001f
             && TryRenderStraightened(image, _referenceSubjectQuad, targetMin, targetMax, texture, t,
                                      image.Id, 4096f,
@@ -222,12 +214,9 @@ internal sealed partial class SetupOutputView
             dl.AddQuad(screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3], SetupColors.ForKind(SetupEntityKinds.Surface), 2 * scale);
             DrawEntityLabel(dl, SetupEntityKinds.Surface, screenQuad, subject!.Id, subject.Name, true, 1f - t);
 
-            _probeSurfaceCentre = (screenQuad[0] + screenQuad[2]) * 0.5f;
-            SampleTransitionMetrics();
-
             // Settled: the rectified rect is editable (corners and edges refine the trace through the frozen
             // rectification), and the measuring lines live on it.
-            var settled = _referenceProgress >= 1f && _referenceSubjectProgress >= 1f && _spaceBlend >= 1f && t >= 0.999f;
+            var settled = _referenceStraighten.IsSettled && _referenceSubjectEase.IsSettled && _spaceBlend.Value >= 1f && t >= 0.999f;
             if (settled || _gesture.Kind == GestureKinds.TraceRefine)
                 DrawStraightEdits(setup, dl, subject!, targetMin, targetMax, selection);
 
@@ -243,86 +232,7 @@ internal sealed partial class SetupOutputView
 
         dl.AddRect(min, max, UiColors.ForegroundFull.Fade(0.25f));
 
-        DrawTracedQuads(setup, image, selection, dl, _spaceBlend >= 1f && _referenceProgress >= 1f, 1f);
-    }
-
-    /// <summary>
-    /// The surfaces traced on an image as corner-pin quads in photo pixels, through the current projection
-    /// (the image's space, or its card on the Board). Editable quads get live handles; a drag is one undo
-    /// step through the setup snapshot, like every Board gesture, and selects its surface.
-    /// </summary>
-    private void DrawTracedQuads(Setup setup, ReferenceImage image, SetupEntitySelection? selection, ImDrawListPtr dl, bool editable, float fade)
-    {
-        var imageSelected = selection?.IsSelected(SetupEntityKinds.ReferenceImage, image.Id) ?? false;
-        Span<Vector2> screenQuad = stackalloc Vector2[4];
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            var surface = setup.Surfaces[i];
-            var binding = surface.Trace;
-            if (binding == null || binding.ImageId != image.Id || binding.Quad.Length < 4)
-                continue;
-
-            var isSelected = selection?.IsSelected(SetupEntityKinds.Surface, surface.Id) ?? false;
-            var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(surface.Id);
-
-            // What the surface shows, laid into its trace — the wall with its content, as it will be. At the
-            // preview opacity, so the photo stays the reference; per-triangle, which is close enough for a preview.
-            var preview = UserSettings.Config.OutputSetupContentPreviewOpacity;
-            if (preview > 0.01f && OutputManager.TryGetSurfaceSlice(surface.Id, out _, out var content, out var uv) && content is { IsDisposed: false })
-            {
-                var contentSrv = SrvManager.GetSrvForTexture(content);
-                if (contentSrv is { IsDisposed: false })
-                {
-                    for (var c = 0; c < 4; c++)
-                        screenQuad[c] = _projection.CanvasToScreen(binding.Quad[c]);
-
-                    dl.AddImageQuad(contentSrv.NativePointer, screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3],
-                                    new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.Y), new Vector2(uv.Z, uv.W), new Vector2(uv.X, uv.W),
-                                    UiColors.ForegroundFull.Fade(preview * fade));
-                }
-            }
-
-            ImGui.PushID(surface.Id.GetHashCode());
-            var style = CornerPinHandles.Style.ForSurface(null, editable && isSelected, isSelected, fade, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
-            style.ShowsChecker = false;
-            style.EdgeColor = PulseColor(SetupColors.ForKind(SetupEntityKinds.Surface).Fade(isSelected ? 1f : 0.7f), pulse).Fade(fade);
-
-            var phase = CornerPinHandles.Draw(binding.Quad, _projection, style, out _);
-            if (phase == CanvasPointHandle.DragPhases.Started)
-            {
-                BeginGesture(setup, GestureKinds.TraceCorner, "Trace surface", surface.Id);
-                selection?.Select(SetupEntityKinds.Surface, surface.Id);
-            }
-            else if (phase == CanvasPointHandle.DragPhases.Completed)
-            {
-                EndGesture(setup);
-            }
-
-            ImGui.PopID();
-
-            for (var c = 0; c < 4; c++)
-                screenQuad[c] = _projection.CanvasToScreen(binding.Quad[c]);
-
-            DrawEntityLabel(dl, SetupEntityKinds.Surface, screenQuad, surface.Id, surface.Name, isSelected, fade, pulse);
-
-            // Its reference points, where they sit in the photo.
-            if (SetupActions.CountPoints(surface) > 0
-                && Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(surface), binding.Quad, out var surfaceToPhoto))
-                DrawReferencePointMarks(dl, surface, surfaceToPhoto, _projection, fade);
-        }
-    }
-
-    /// <summary>
-    /// The traced quads on an image card on the Board, through a projection pointed at the card. On the settled
-    /// Board they are as editable as in the image's space; while a space fades the layer they are only drawn.
-    /// </summary>
-    private void DrawBoardTraces(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, ReferenceImage image, Vector2 min, Vector2 max)
-    {
-        var fade = _boardLayerFade;
-        var pixelSize = BoardPixelSize(setup, SetupEntityKinds.ReferenceImage, image.Id);
-        _projection.Origin = new Vector2(min.X, max.Y);
-        _projection.PixelsPerMeter = pixelSize.X / MathF.Max(max.X - min.X, 0.0001f);
-        DrawTracedQuads(setup, image, selection, dl, fade >= 0.999f, fade);
+        DrawTracedQuads(setup, image, selection, dl, _spaceBlend.Value >= 1f && _referenceStraighten.IsSettled, 1f);
     }
 
     /// <summary>The surface the Straight toggle rectifies around: the primary selection, when it is traced on this image.</summary>
@@ -349,7 +259,8 @@ internal sealed partial class SetupOutputView
         bboxMin = bboxMax = regionMin = regionMax = Vector2.Zero;
         var w = Math.Max(1, image.Width);
         var h = Math.Max(1, image.Height);
-        var targetRect = RectCorners(targetMin, targetMax);
+        Span<Vector2> targetRect = stackalloc Vector2[4];
+        SurfaceGeometry.WriteRectCorners(targetMin, targetMax, targetRect, yUp: false);
 
         var interp = _referenceInterpQuad;
         for (var i = 0; i < 4; i++)
@@ -364,12 +275,7 @@ internal sealed partial class SetupOutputView
         dest[2] = homography.TransformPoint(new Vector2(w, h));
         dest[3] = homography.TransformPoint(new Vector2(0, h));
 
-        regionMin = regionMax = interp[0];
-        for (var i = 1; i < 4; i++)
-        {
-            regionMin = Vector2.Min(regionMin, interp[i]);
-            regionMax = Vector2.Max(regionMax, interp[i]);
-        }
+        CanvasDraw.Bounds(interp, out regionMin, out regionMax);
 
         // Extent = the rectified surface plus a margin of surround, so it isn't clipped to the photo rect.
         // Bounding to the region — not the whole warped photo — is essential: a steep rectification sends the
@@ -389,7 +295,7 @@ internal sealed partial class SetupOutputView
         _referenceWarpDest[2] = (dest[2] - bboxMin) * renderScale;
         _referenceWarpDest[3] = (dest[3] - bboxMin) * renderScale;
 
-        warped = OutputManager.RenderWarpedTexture(texture, _referenceWarpDest, rtSize, targetKey);
+        warped = OutputCompositor.RenderWarpedTexture(texture, _referenceWarpDest, rtSize, targetKey);
         return warped is { IsDisposed: false };
     }
 
@@ -419,27 +325,26 @@ internal sealed partial class SetupOutputView
             // photos the new subject snaps (the camera still travels, see EnterSpace).
             var sameImage = _referenceSubjectImageId == subject.Trace!.ImageId;
             _referenceSubjectImageId = subject.Trace.ImageId;
-            if (_referenceSubjectId != Guid.Empty && _referenceStraighten > 0.001f && sameImage)
+            if (_referenceSubjectId != Guid.Empty && _referenceStraighten.Value > 0.001f && sameImage)
             {
                 Array.Copy(_referenceSubjectQuad, _referenceSubjectFromQuad, 4);
                 _referenceSubjectFromMin = _referenceSubjectLastMin;
                 _referenceSubjectFromMax = _referenceSubjectLastMax;
-                _referenceSubjectProgress = 0f;
+                _referenceSubjectEase.Restart();
                 CaptureTransitionStart();
             }
             else
             {
-                _referenceSubjectProgress = 1f;
+                _referenceSubjectEase.Settle();
             }
 
             _referenceSubjectId = subject.Id;
         }
 
-        if (_referenceSubjectProgress < 1f)
+        if (!_referenceSubjectEase.IsSettled)
         {
-            var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-            _referenceSubjectProgress = MathF.Min(1f, _referenceSubjectProgress + dt / MorphDurationSec);
-            var eased = MathF.Pow(_referenceSubjectProgress, MorphEaseExponent);
+            _referenceSubjectEase.Advance(FrameDeltaSec(), MorphDurationSec, MorphEaseExponent);
+            var eased = _referenceSubjectEase.Value;
             for (var i = 0; i < 4; i++)
                 _referenceSubjectQuad[i] = Vector2.Lerp(_referenceSubjectFromQuad[i], quad[i], eased);
 
@@ -455,210 +360,6 @@ internal sealed partial class SetupOutputView
         _referenceSubjectLastMax = targetMax;
     }
 
-    /// <summary>
-    /// Handles on the rectified rect. The rect stays fixed and upright; dragging a corner or an edge moves the
-    /// traced quad live so the photo re-warps under it — you pull the wall's corner (or edge) into the frame.
-    /// The mapping from handle to photo is the rectification at press time, so the drag can't chase its own
-    /// re-warp; on release nothing moves. One undo step per drag. The surface's measuring lines are drawn and
-    /// edited here too, mapped from surface metres onto the rect.
-    /// </summary>
-    private void DrawStraightEdits(Setup setup, ImDrawListPtr dl, Surface subject, Vector2 targetMin, Vector2 targetMax, SetupEntitySelection? selection)
-    {
-        var binding = subject.Trace!;
-        var rect = RectCorners(targetMin, targetMax);
-        Array.Copy(rect, _referenceRectQuad, 4);
-        var refining = _gesture.Is(GestureKinds.TraceRefine, subject.Id);
-        if (!refining && !Homography.TryComputeQuadToQuad(rect, binding.Quad, out _referenceEditToPhoto))
-            return;
-
-        ImGui.PushID("straightEdit");
-        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
-        style.ShowsChecker = false;
-        style.EdgeColor = SetupColors.ForKind(SetupEntityKinds.Surface);
-        var cornerPhase = CornerPinHandles.Draw(_referenceRectQuad, _projection, style, out var draggedCorner);
-        var edgePhase = CanvasPointHandle.DragPhases.None;
-        var edge = -1;
-        var edgePos = Vector2.Zero;
-        if (cornerPhase == CanvasPointHandle.DragPhases.None)
-            edgePhase = CornerPinHandles.DrawEdgeHandles(_referenceRectQuad, _projection, style, out edge, out edgePos);
-
-        ImGui.PopID();
-
-        // An edge moves along its normal only: a crop of the trace, axis-aligned on the rectified wall.
-        if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhases.None)
-        {
-            switch (edge)
-            {
-                case 0: _referenceRectQuad[0].Y = _referenceRectQuad[1].Y = edgePos.Y; break;
-                case 1: _referenceRectQuad[1].X = _referenceRectQuad[2].X = edgePos.X; break;
-                case 2: _referenceRectQuad[2].Y = _referenceRectQuad[3].Y = edgePos.Y; break;
-                default: _referenceRectQuad[3].X = _referenceRectQuad[0].X = edgePos.X; break;
-            }
-        }
-
-        var phase = cornerPhase != CanvasPointHandle.DragPhases.None ? cornerPhase : edgePhase;
-        if (phase == CanvasPointHandle.DragPhases.Started)
-        {
-            BeginGesture(setup, GestureKinds.TraceRefine, "Refine trace", subject.Id);
-            refining = true;
-        }
-
-        // Only a live phase carries a handle position; on the release frame the handles already sit back on the
-        // rect's corners, so applying then would undo the whole drag.
-        if (phase is CanvasPointHandle.DragPhases.Started or CanvasPointHandle.DragPhases.Dragging && refining)
-        {
-            // The handle's position through the press-time rectification is where that corner lies in the photo.
-            if (draggedCorner >= 0)
-                binding.Quad[draggedCorner] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[draggedCorner]);
-            else if (edge >= 0)
-            {
-                var a = edge;
-                var b = (edge + 1) % 4;
-                binding.Quad[a] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[a]);
-                binding.Quad[b] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[b]);
-            }
-        }
-
-        if (phase == CanvasPointHandle.DragPhases.Completed)
-        {
-            EndGesture(setup);
-            refining = false;
-        }
-
-        // Measuring lines: surface metres ↔ the rectified rect, a plain scale (Y up in metres, down in px).
-        if (!refining
-            && Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(subject), rect, out var surfaceToRect)
-            && Homography.TryComputeQuadToQuad(rect, SurfaceGeometry.LocalRect(subject), out var rectToSurface))
-        {
-            DrawAnnotations(dl, subject, surfaceToRect, rectToSurface, Vector2.Zero, editable: true, fade: 1f, projected: false);
-            DrawStraightRegions(setup, dl, subject, subject, Vector2.Zero, surfaceToRect, rectToSurface, selection);
-            DrawReferencePoints(setup, dl, subject, surfaceToRect, rectToSurface);
-        }
-    }
-
-    /// <summary>
-    /// The surface's reference points on the rectified photo: placed by a click while "+ Point" is armed,
-    /// dragged by their handle (Shift for precision), removed from their right-click menu. Stored in surface
-    /// metres, so they are the same spots the projector will be aimed at.
-    /// </summary>
-    private void DrawReferencePoints(Setup setup, ImDrawListPtr dl, Surface subject, in Homography surfaceToRect, in Homography rectToSurface)
-    {
-        var color = SetupColors.ForKind(SetupEntityKinds.Surface);
-
-        if (_isPointToolArmed && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-        {
-            var position = rectToSurface.TransformPoint(_projection.ScreenToCanvas(ImGui.GetMousePos()));
-            SetupActions.AddReferencePoint(setup, subject, position);
-            _isPointToolArmed = false;
-        }
-
-        var toDelete = -1;
-        var ordinal = 0;
-        for (var i = 0; i < subject.Annotations.Count; i++)
-        {
-            var point = subject.Annotations[i];
-            if (!point.IsPoint)
-                continue;
-
-            ordinal++;
-            var px = surfaceToRect.TransformPoint(point.P1);
-            ImGui.PushID(i);
-            var style = CanvasPointHandle.Style.Default(UiColors.ForegroundFull, CanvasPointHandle.Shapes.Circle, true);
-            style.OutlineColor = color;
-            style.Radius = 6;
-            var phase = CanvasPointHandle.Draw(ref px, _projection, style);
-            var hovered = ImGui.IsItemHovered();
-            ImGui.PopID();
-
-            if (phase == CanvasPointHandle.DragPhases.Started)
-                BeginGesture(setup, GestureKinds.ReferencePoint, "Move reference point", subject.Id);
-
-            if (phase is CanvasPointHandle.DragPhases.Started or CanvasPointHandle.DragPhases.Dragging)
-                point.P1 = point.P2 = rectToSurface.TransformPoint(px);
-            else if (phase == CanvasPointHandle.DragPhases.Completed)
-                EndGesture(setup);
-
-            var screen = _projection.CanvasToScreen(px);
-            CanvasDraw.Crosshair(dl, screen, color.Fade(0.8f), 9f, 1f);
-            DrawPointLabel(dl, screen, string.IsNullOrEmpty(point.Name) ? $"P{ordinal}" : point.Name, color);
-
-            if (hovered && ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-            {
-                _pointMenuIndex = i;
-                ImGui.OpenPopup(PointMenuId);
-            }
-        }
-
-        if (ImGui.BeginPopup(PointMenuId))
-        {
-            if (CustomComponents.DrawMenuItem(1, "Delete"))
-                toDelete = _pointMenuIndex;
-
-            ImGui.EndPopup();
-        }
-
-        if (toDelete >= 0 && toDelete < subject.Annotations.Count)
-            SetupActions.RunUndoable("Delete reference point", setup, () => subject.Annotations.RemoveAt(toDelete));
-    }
-
-    /// <summary>A point's name chip, offset to the upper right so the crosshair stays readable.</summary>
-    private static void DrawPointLabel(ImDrawListPtr dl, Vector2 screen, string label, T3.Core.DataTypes.Vector.Color color)
-    {
-        var scale = T3Ui.UiScaleFactor;
-        ImGui.PushFont(Fonts.FontSmall);
-        var size = ImGui.CalcTextSize(label);
-        ImGui.PopFont();
-        // Straight above the mark, centred — an offset to the side reads as belonging to something else.
-        var min = screen + new Vector2(-size.X * 0.5f - 3 * scale, -10 * scale - size.Y);
-        var max = min + size + new Vector2(6, 2) * scale;
-        dl.AddRectFilled(min, max, UiColors.BackgroundFull.Fade(0.7f), 3 * scale);
-        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(3, 1) * scale, color, label);
-    }
-
-    /// <summary>Read-only marks for a surface's reference points, through any surface-space → screen mapping.</summary>
-    private static void DrawReferencePointMarks(ImDrawListPtr dl, Surface surface, in Homography surfaceToView, ICanvasProjection view, float fade)
-    {
-        var color = SetupColors.ForKind(SetupEntityKinds.Surface).Fade(0.8f * fade);
-        var ordinal = 0;
-        foreach (var point in surface.Annotations)
-        {
-            if (!point.IsPoint)
-                continue;
-
-            ordinal++;
-            var screen = view.CanvasToScreen(surfaceToView.TransformPoint(point.P1));
-            CanvasDraw.Crosshair(dl, screen, color, 5f, 1f);
-            DrawPointLabel(dl, screen, string.IsNullOrEmpty(point.Name) ? $"P{ordinal}" : point.Name, color);
-        }
-    }
-
-    private const string PointMenuId = "##referencePointMenu";
-    private int _pointMenuIndex = -1;
-
-    /// <summary>
-    /// The regions on the rectified photo, nested recursively: each edits in its parent's space, whose origin is
-    /// given in the subject's (carrier) space, through the rectification into the photo's px.
-    /// </summary>
-    private void DrawStraightRegions(Setup setup, ImDrawListPtr dl, Surface subject, Surface parent, Vector2 parentOriginInSubject,
-                                     in Homography surfaceToRect, in Homography rectToSurface, SetupEntitySelection? selection)
-    {
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            var child = setup.Surfaces[i];
-            if (child.ParentId != parent.Id)
-                continue;
-
-            _regionProjection.View = _projection;
-            _regionProjection.Origin = parentOriginInSubject;
-            _regionProjection.HasHomography = true;
-            _regionProjection.ToView = surfaceToRect;
-            _regionProjection.FromView = rectToSurface;
-            DrawRegionEditable(setup, dl, parent, child, _regionProjection, selection, 1f);
-
-            SurfaceGeometry.RegionBounds(child, out var localMin, out _);
-            DrawStraightRegions(setup, dl, subject, child, parentOriginInSubject + localMin + child.AnchorInMeters, surfaceToRect, rectToSurface, selection);
-        }
-    }
 
     /// <summary>
     /// The straightened crop of the photo a traced surface stands for, for its Board card: the warp rendered
@@ -708,7 +409,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private static void StraightTargetBounds(Surface surface, out Vector2 min, out Vector2 max)
     {
-        Bounds(surface.Trace!.Quad, out var quadMin, out var quadMax);
+        CanvasDraw.Bounds(surface.Trace!.Quad, out var quadMin, out var quadMax);
         var width = MathF.Max(quadMax.X - quadMin.X, 1f);
         var aspect = surface.SizeInMeters.X / MathF.Max(surface.SizeInMeters.Y, 0.0001f);
         var height = width / MathF.Max(aspect, 0.0001f);
@@ -783,15 +484,8 @@ internal sealed partial class SetupOutputView
     }
 
     // Photo ↔ Straight morph of the reference space (0 = photo, 1 = rectified around the subject), eased like
-    // the view morph; the camera transition follows _referenceProgress.
-    private float _referenceStraightenTarget;
-    private float _referenceStraighten;
-    private float _referenceStraightenFrom;
-    private float _referenceProgress = 1f;
-
-    // A live handle drag on the rectified rect: the press-time rect→photo mapping, and the handle positions.
-    private Homography _referenceEditToPhoto;
-    private readonly Vector2[] _referenceRectQuad = new Vector2[4];
+    // the view morph; the camera transition follows its progress.
+    private EasedValue _referenceStraighten = EasedValue.Settled(0f);
 
     // The rect the subject is put upright into — sticky across trace edits (see ResolveStraightSubject).
     private Vector2 _referenceStickyMin, _referenceStickyMax, _referenceStickySize;
@@ -799,12 +493,17 @@ internal sealed partial class SetupOutputView
     // Subject transition: the quad/target in use (eased between surfaces), where the ease started, and its progress.
     private Guid _referenceSubjectId;
     private Guid _referenceSubjectImageId;
-    private float _referenceSubjectProgress = 1f;
+    private EasedValue _referenceSubjectEase = EasedValue.Settled(1f);
     private readonly Vector2[] _referenceSubjectQuad = new Vector2[4];
     private readonly Vector2[] _referenceSubjectFromQuad = new Vector2[4];
     private Vector2 _referenceSubjectFromMin, _referenceSubjectFromMax, _referenceSubjectLastMin, _referenceSubjectLastMax;
+
+    // Photo warp scratch, reused every frame.
     private static readonly Vector2[] _referenceWarpDest = new Vector2[4];
     private static readonly Vector2[] _referenceInterpQuad = new Vector2[4];
     private static readonly Vector2[] _referencePhotoQuad = new Vector2[4];
+
+    // Loaded photo textures by image id, and the context that resolves their resources.
     private readonly Dictionary<Guid, ReferenceTextureEntry> _boardRefTextures = new();
+    private EvaluationContext? _boardContext; // resolves the image resources; created on first use
 }

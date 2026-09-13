@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ImGuiNET;
 using T3.Core.Output;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -43,7 +44,7 @@ internal sealed partial class SetupOutputView
         Vector2 ToView(Vector2 inSurface) => toViewH.TransformPoint(inSurface) - viewMin;
         Vector2 ToSurface(Vector2 inView) => toSurfaceH.TransformPoint(inView + viewMin);
 
-        var canEdit = editable && _viewMorph < 1.5f;
+        var canEdit = editable;
         var annotations = carrier.Annotations;
 
         // Arming the tool turns the next drag on empty canvas into a new line, then disarms — "create then
@@ -57,7 +58,7 @@ internal sealed partial class SetupOutputView
             // composite for this frame is already rendered, so it lands one frame later — imperceptible for a
             // cursor, and the same lag the hover cross-highlight accepts.
             if (projected)
-                OutputManager.SetAimPoint(carrier.Id, start);
+                CalibrationOverlay.SetAimPoint(carrier.Id, start);
 
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && ActiveSetup.Current is { } draftSetup)
             {
@@ -117,7 +118,7 @@ internal sealed partial class SetupOutputView
             // The line's own colour reports how close it is to the axis it claims — this is the readout that
             // tells you whether straighten has converged, so it belongs on the line rather than in a panel.
             IsHorizontal(annotation, out var deviation);
-            var color = OutputManager.AlignmentColor(deviation).Fade(fade);
+            var color = CalibrationOverlay.AlignmentColor(deviation).Fade(fade);
 
             ImGui.PushID(i);
 
@@ -129,7 +130,7 @@ internal sealed partial class SetupOutputView
             // via the projected composite, on the wall itself.
             var isDragging = i == _measureDraftIndex || i == _measureDragIndex;
             if (isDragging && projected)
-                OutputManager.EmphasizeAnnotation(carrier.Id, i);
+                CalibrationOverlay.EmphasizeAnnotation(carrier.Id, i);
 
             var lineColor = isDragging ? Color.Mix(color, white, blink) : color;
             var lineWidth = (isDragging && projected ? 6f : 2f) * scale;
@@ -189,7 +190,7 @@ internal sealed partial class SetupOutputView
             {
                 var setup = ActiveSetup.Current;
                 if (setup != null)
-                    SetupActions.RunUndoable("Delete measuring line", setup, () => annotations.RemoveAt(_annotationToDelete));
+                    SetupUndo.RunUndoable("Delete measuring line", setup, () => annotations.RemoveAt(_annotationToDelete));
                 else
                     annotations.RemoveAt(_annotationToDelete);
             }
@@ -211,7 +212,7 @@ internal sealed partial class SetupOutputView
         // read as a measurement that was never taken.
         if (isMeasurement)
         {
-            var text = $"{annotation.LengthInMeters:0.###} m";
+            var text = LengthChipText(annotation);
             ImGui.PushFont(Fonts.FontSmall);
             var textSize = ImGui.CalcTextSize(text);
             ImGui.PopFont();
@@ -238,15 +239,16 @@ internal sealed partial class SetupOutputView
             return;
 
         CustomComponents.StylizedText("Real length in meters", Fonts.FontSmall, UiColors.TextMuted);
-        ImGui.SetNextItemWidth(100 * scale);
-        ImGui.InputFloat("##len", ref _lengthEdit);
+        ImGui.PushID("##len");
+        SingleValueEdit.Draw(ref _lengthEdit, new Vector2(100 * scale, ImGui.GetFrameHeight()), format: "{0:0.###}");
+        ImGui.PopID();
         if (ImGui.Button("Set") || ImGui.IsKeyPressed(ImGuiKey.Enter))
         {
             // Zero or less is how a measurement becomes an ordinary reference line again.
             var length = _lengthEdit > 0 ? _lengthEdit : 0;
             var setup = ActiveSetup.Current;
             if (setup != null)
-                SetupActions.RunUndoable("Set line length", setup, () => annotation.LengthInMeters = length);
+                SetupUndo.RunUndoable("Set line length", setup, () => annotation.LengthInMeters = length);
 
             ImGui.CloseCurrentPopup();
         }
@@ -260,6 +262,17 @@ internal sealed partial class SetupOutputView
         }
 
         ImGui.EndPopup();
+    }
+
+    /// <summary>The chip's "1.25 m", formatted again only when the line's length changes.</summary>
+    private static string LengthChipText(Annotation annotation)
+    {
+        if (_lengthChipTexts.TryGetValue(annotation.Id, out var cached) && cached.LengthInMeters == annotation.LengthInMeters)
+            return cached.Text;
+
+        var text = $"{annotation.LengthInMeters:0.###} m";
+        _lengthChipTexts[annotation.Id] = (annotation.LengthInMeters, text);
+        return text;
     }
 
     /// <summary>Which axis the line claims and by how much it misses it — inferred, never stored.</summary>
@@ -288,7 +301,7 @@ internal sealed partial class SetupOutputView
     private static bool TryStraightenFromLines(Setup setup, Surface surface, Guid outputId)
     {
         var mapping = surface.FindMapping(outputId);
-        if (mapping == null || mapping.Quad.Length < 4 || SetupActions.CountLines(surface) < MinLinesToStraighten
+        if (mapping == null || mapping.Quad.Length < 4 || SurfaceMetrics.CountLines(surface) < MinLinesToStraighten
             || !SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var surfaceToOutput))
         {
             return false;
@@ -316,7 +329,8 @@ internal sealed partial class SetupOutputView
         var rectify = Homography.Multiply(outputToSurface, surfaceToOutput);
         if (rectify.TryInvert(out var inverse))
         {
-            var rect = SurfaceGeometry.LocalRect(surface);
+            Span<Vector2> rect = stackalloc Vector2[4];
+            SurfaceGeometry.WriteLocalRect(surface, rect);
             foreach (var other in surface.OutputMappings)
             {
                 if (ReferenceEquals(other, mapping) || !SurfaceGeometry.TryGetSurfaceToOutput(surface, other, SurfaceGeometry.CanvasSizeOf(setup, other.OutputId), out var otherToOutput))
@@ -347,11 +361,13 @@ internal sealed partial class SetupOutputView
     private static bool TryStraightenTraceFromLines(Surface surface)
     {
         var binding = surface.Trace;
-        if (binding == null || binding.Quad.Length < 4 || SetupActions.CountLines(surface) < MinLinesToStraighten
-            || !Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(surface), binding.Quad, out var surfaceToPhoto))
-        {
+        if (binding == null || binding.Quad.Length < 4 || SurfaceMetrics.CountLines(surface) < MinLinesToStraighten)
             return false;
-        }
+
+        Span<Vector2> localRect = stackalloc Vector2[4];
+        SurfaceGeometry.WriteLocalRect(surface, localRect);
+        if (!Homography.TryComputeQuadToQuad(localRect, binding.Quad, out var surfaceToPhoto))
+            return false;
 
         CollectAnnotationsIn(surface, surfaceToPhoto);
 
@@ -365,7 +381,7 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < 4; i++)
             binding.Quad[i] = refined[i];
 
-        if (!Homography.TryComputeQuadToQuad(binding.Quad, SurfaceGeometry.LocalRect(surface), out var photoToSurface))
+        if (!Homography.TryComputeQuadToQuad(binding.Quad, localRect, out var photoToSurface))
             return false;
 
         for (var i = 0; i < surface.Annotations.Count; i++)
@@ -394,9 +410,6 @@ internal sealed partial class SetupOutputView
                 _refineSolveLines.Add(line);
         }
     }
-
-    /// <summary>Two lines is the least that says anything about the pin; one only pins a single direction.</summary>
-    private const int MinLinesToStraighten = 2;
 
     /// <summary>
     /// Rescales the surface so its measured lines read their real lengths. Everything stored in this surface's
@@ -440,19 +453,28 @@ internal sealed partial class SetupOutputView
         var scaleX = countX > 0 ? sumX / countX : sumY / countY;
         var scaleY = countY > 0 ? sumY / countY : sumX / countX;
 
-        SetupActions.ScaleSurfaceMetric(setup, surface, new Vector2(scaleX, scaleY));
+        SurfaceMetrics.ScaleSurfaceMetric(setup, surface, new Vector2(scaleX, scaleY));
         return true;
     }
 
-    // Measure/straighten state.
-    private bool _isLineToolArmed;
-    private bool _isPointToolArmed; // "+ Point": the next click on the straightened photo places a reference point
-    private int _measureDraftIndex = -1;
-    private int _measureDragIndex = -1; // endpoint grabbed last frame, so its line can emphasize this frame
+    /// <summary>Two lines is the least that says anything about the pin; one only pins a single direction.</summary>
+    private const int MinLinesToStraighten = 2;
 
     private const float BlinkRate = 8f;
+
+    // Line tool: armed for the next click, the line being drawn, and the endpoint grabbed last frame (so its
+    // line can emphasize this frame).
+    private bool _isLineToolArmed;
+    private int _measureDraftIndex = -1;
+    private int _measureDragIndex = -1;
+
+    // Length popup and chip: the value being typed, the line to remove once iteration is done, and each line's
+    // chip text with the length it was formatted for.
     private static float _lengthEdit;
     private static int _annotationToDelete = -1;
+    private static readonly Dictionary<Guid, (float LengthInMeters, string Text)> _lengthChipTexts = [];
+
+    // Straighten solve input, rebuilt per solve: every line, and the ones the solve fits.
     private static readonly List<Vector4> _refineLines = [];
     private static readonly List<Vector4> _refineSolveLines = [];
 }

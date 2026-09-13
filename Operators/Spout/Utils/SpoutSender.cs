@@ -3,6 +3,7 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SpoutDX;
 using T3.Core.Output;
+using T3.Core.Output.Streaming;
 using DeviceContext = OpenGL.DeviceContext;
 using DXTexture2D = SharpDX.Direct3D11.Texture2D;
 

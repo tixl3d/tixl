@@ -33,8 +33,8 @@ public class SetupSerializationTests
         var mapping = Assert.Single(surface.OutputMappings);
         Assert.Equal(setup.Outputs[1].Id, mapping.OutputId);
         Assert.Equal(Surface.OutputMapping.Modes.CornerPin, mapping.Mode);
-        Assert.Equal(new Vector2(210, 95), mapping.Quad[0]);
-        Assert.Equal(new Vector2(215, 905), mapping.Quad[3]);
+        Assert.Equal(new Vector2(0.11f, 0.08f), mapping.Quad[0]);
+        Assert.Equal(new Vector2(0.112f, 0.755f), mapping.Quad[3]);
 
         Assert.NotNull(surface.Trace);
         Assert.Equal(setup.ReferenceImages[0].Id, surface.Trace!.ImageId);
@@ -60,8 +60,8 @@ public class SetupSerializationTests
         Assert.Equal(setup.Outputs[1].Patches[0].Id, patch.Id);
         Assert.Equal(setup.Outputs[1].Patches[0].SliceId, patch.SliceId);
         Assert.Equal("left half", patch.Name);
-        Assert.Equal(new Vector2(960, 0), patch.Quad[1]);
-        Assert.Equal(new Vector2(0, 1200), patch.Quad[3]);
+        Assert.Equal(new Vector2(0.5f, 0), patch.Quad[1]);
+        Assert.Equal(new Vector2(0, 1), patch.Quad[3]);
         Assert.NotNull(projector.Camera);
         Assert.NotNull(projector.Camera!.Pose);
         Assert.NotNull(projector.Camera.Lens);
@@ -71,6 +71,16 @@ public class SetupSerializationTests
 
         var prop = Assert.Single(restored.Props);
         Assert.Equal(1.70f, prop.HeightInMeters);
+    }
+
+    [Fact]
+    public void FullSetup_RoundTrip_NeedsNoRepair()
+    {
+        var restored = RoundTrip(CreateStudioSetup());
+        var before = restored.ToJsonString();
+
+        Assert.False(SetupRepair.Repair(restored));
+        Assert.Equal(before, restored.ToJsonString());
     }
 
     [Fact]
@@ -94,7 +104,7 @@ public class SetupSerializationTests
     {
         var setup = Setup.ReadFromJson(JObject.Parse("""{ "Version": 1, "Name": "s", "Surfaces": [ { "Name": "wall", "SizeInMeters": [4, 2] } ] }"""));
 
-        var surface = Assert.Single(setup!.Surfaces);
+        var surface = Assert.Single(setup.Surfaces);
         Assert.Equal(Surface.DefaultAnchor, surface.Anchor);
         Assert.Equal(new Vector2(2, 0), surface.AnchorInMeters);
     }
@@ -104,8 +114,7 @@ public class SetupSerializationTests
     {
         var setup = Setup.ReadFromJson(JObject.Parse("""{ "Version": 1, "Name": "sparse" }"""));
 
-        Assert.NotNull(setup);
-        Assert.Equal("sparse", setup!.Name);
+        Assert.Equal("sparse", setup.Name);
         Assert.Empty(setup.Surfaces);
         Assert.Empty(setup.Outputs);
     }
@@ -125,8 +134,7 @@ public class SetupSerializationTests
             }
             """));
 
-        Assert.NotNull(setup);
-        var surface = Assert.Single(setup!.Surfaces);
+        var surface = Assert.Single(setup.Surfaces);
         Assert.Equal("wall", surface.Name);
         Assert.Equal(new Vector2(2, 1), surface.SizeInMeters);
     }
@@ -160,9 +168,7 @@ public class SetupSerializationTests
 
     private static Setup RoundTrip(Setup setup)
     {
-        var restored = Setup.ReadFromJson(JObject.Parse(setup.ToJsonString()));
-        Assert.NotNull(restored);
-        return restored!;
+        return Setup.ReadFromJson(JObject.Parse(setup.ToJsonString()));
     }
 
     private static Setup CreateStudioSetup()
@@ -194,7 +200,7 @@ public class SetupSerializationTests
                                   {
                                       Name = "left half",
                                       SliceId = Guid.NewGuid(),
-                                      Quad = [Vector2.Zero, new Vector2(960, 0), new Vector2(960, 1200), new Vector2(0, 1200)],
+                                      Quad = [Vector2.Zero, new Vector2(0.5f, 0), new Vector2(0.5f, 1), new Vector2(0, 1)],
                                   });
 
         var setup = Setup.CreateDefault("studio");
@@ -211,10 +217,10 @@ public class SetupSerializationTests
                                                OutputId = projector.Id,
                                                Quad =
                                                [
-                                                   new Vector2(210, 95),
-                                                   new Vector2(1660, 120),
-                                                   new Vector2(1655, 940),
-                                                   new Vector2(215, 905),
+                                                   new Vector2(0.11f, 0.08f),
+                                                   new Vector2(0.865f, 0.1f),
+                                                   new Vector2(0.86f, 0.78f),
+                                                   new Vector2(0.112f, 0.755f),
                                                ],
                                            }
                                    ],

@@ -1,5 +1,5 @@
 #nullable enable
-namespace T3.Editor.Gui.Windows.OutputSetup;
+namespace T3.Editor.UiModel.Selection;
 
 internal enum SetupEntityKinds
 {

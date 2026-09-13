@@ -19,8 +19,8 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// The setup's one canvas: the Board (every entity at its neutral placement, in metres) and the spaces that
-/// fold out of it — an output's canvas (corner-pin each surface's quad over the live composite, Straight and
-/// Content morphs), a source's texture (lay out its slices), a projector's calibration. A space draws its
+/// fold out of it — an output's canvas (corner-pin each surface's quad over the live composite, with the
+/// Straight morph), a source's texture (lay out its slices), a projector's calibration. A space draws its
 /// pixels inside its entity's Board card through <see cref="SpaceProjection"/>, so entering one is a camera
 /// move plus the participating entities flying into place while the rest fades. Handles reuse
 /// <see cref="CornerPinHandles"/>; drags go through undo commands and persist. One per output window.
@@ -38,9 +38,8 @@ internal sealed partial class SetupOutputView
         Output,
     }
 
-    public SetupOutputView(EntityItem entityItem)
+    public SetupOutputView()
     {
-        _entityItem = entityItem;
         _boardProjection = new BoardProjection(_boardCanvas);
         _projection = new SpaceProjection(_boardProjection);
     }
@@ -56,40 +55,53 @@ internal sealed partial class SetupOutputView
         if (output == null)
             return;
 
+        DrawFrame(setup, machineConfig, output, outputId, shownSurfaceId, selection);
+    }
+
+    /// <summary>
+    /// The Board with no output focused — what the window shows while nothing else claims it. A shown surface
+    /// traced on a photo can still take the Straight tab: it straightens on that photo, in place.
+    /// </summary>
+    public void DrawBoardStandalone(SetupEntitySelection? selection, Guid shownSurfaceId = default)
+    {
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
+            return;
+
+        DrawFrame(setup, machineConfig, null, Guid.Empty, shownSurfaceId, selection);
+    }
+
+    /// <summary>
+    /// One frame of the canvas: the header, the Board layer, and the space the mode asks for — an output's
+    /// canvas (<paramref name="output"/> given) or the shown surface's photo — folding in or out over it.
+    /// </summary>
+    private void DrawFrame(Setup setup, MachineConfig machineConfig, OutputDefinition? output, Guid outputId, Guid shownSurfaceId,
+                           SetupEntitySelection? selection)
+    {
         _shownSurfaceId = shownSurfaceId;
         OpenedReferenceImageId = Guid.Empty;
+        ResolveEditMode(setup, output, outputId);
 
         if (!DeferHeader(HeaderKinds.Modes, outputId))
             DrawHeader(setup, output, outputId);
 
-        // Original (0) → Straight (1) is one continuous axis, not two modes. The composite is the content
-        // texture already warped through the corner-pin, so both are the same pixels at different points of one
-        // homography chain — a blended rectify plus a framing that tightens onto the focused surface. No
-        // cross-fading anywhere. Time-driven with an ease-in power (slow start, fast finish): the visual
-        // midpoint lands at 75% of the duration.
-        // A Layout child straightens against its parent — that's the space it lives in — so the basis is
-        // whichever surface up the chain actually carries the corner pin.
-        var hasFocusBasis = SurfaceGeometry.FindMappingCarrier(setup, _shownSurfaceId, outputId) != null;
-
         // A surface traced on a photo straightens *on that photo*, in place — the projector view stays put.
         var tracedImage = _editMode == EditModes.Straight ? TracedImageOf(setup, _shownSurfaceId) : null;
 
-        var target = !hasFocusBasis || tracedImage != null || _editMode != EditModes.Straight ? 0f : 1f;
-
-        if (target != _morphTarget)
+        if (output != null)
         {
-            _morphTarget = target;
-            _morphFrom = _viewMorph;
-            _morphProgress = 0f;
-            CaptureTransitionStart(); // so the pan/zoom eases too, instead of snapping
-        }
+            // Original (0) → Straight (1) is one continuous axis, not two modes. The composite is the content
+            // texture already warped through the corner-pin, so both are the same pixels at different points of
+            // one homography chain — a blended rectify plus a framing that tightens onto the focused surface. No
+            // cross-fading anywhere. Time-driven with an ease-in power (slow start, fast finish): the visual
+            // midpoint lands at 75% of the duration.
+            // A Layout child straightens against its parent — that's the space it lives in — so the basis is
+            // whichever surface up the chain actually carries the corner pin.
+            var hasFocusBasis = SurfaceGeometry.FindMappingCarrier(setup, _shownSurfaceId, outputId) != null;
+            var target = !hasFocusBasis || tracedImage != null || _editMode != EditModes.Straight ? 0f : 1f;
+            if (_viewMorph.Retarget(target))
+                CaptureTransitionStart(); // so the pan/zoom eases too, instead of snapping
 
-        if (_morphProgress < 1f)
-        {
-            var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-            _morphProgress = MathF.Min(1f, _morphProgress + dt / MorphDurationSec);
-            var eased = MathF.Pow(_morphProgress, MorphEaseExponent);
-            _viewMorph = _morphProgress >= 1f ? _morphTarget : _morphFrom + (_morphTarget - _morphFrom) * eased;
+            _viewMorph.Advance(FrameDeltaSec(), MorphDurationSec, MorphEaseExponent);
         }
 
         // Clip the canvas to the region below the toolbar: it draws straight to the window draw list, so
@@ -99,20 +111,22 @@ internal sealed partial class SetupOutputView
         var dl = ImGui.GetWindowDrawList();
         dl.PushClipRect(canvasTop, ImGui.GetWindowPos() + ImGui.GetWindowSize(), true);
 
-        // This output's space lives inside its card; the Board layer behind fades as the space comes in.
+        // A space lives inside its entity's card; the Board layer behind fades as the space comes in.
         SeedBoardPlacements(setup);
         if (tracedImage != null)
-            EnterSpace(setup, SetupEntityKinds.ReferenceImage, tracedImage.Id, true);
+            EnterSpace(setup, SetupEntityKinds.ReferenceImage, tracedImage.Id);
+        else if (output != null && _editMode != EditModes.Board)
+            EnterSpace(setup, SetupEntityKinds.Output, outputId);
         else
-            EnterSpace(setup, SetupEntityKinds.Output, outputId, _editMode != EditModes.Board);
+            LeaveSpace(setup); // whatever was open fades back into its card
 
         DrawBoardLayer(setup, machineConfig, selection);
 
-        if (_spaceBlend > 0.001f)
+        if (_spaceBlend.Value > 0.001f)
         {
             if (_spaceKind == SetupEntityKinds.ReferenceImage)
                 DrawReferenceSpaceForShown(setup, selection, straighten: tracedImage != null);
-            else
+            else if (output != null)
                 DrawOutputCanvas(setup, output, outputId, selection); // Original / Straight, morphed by _viewMorph
         }
 
@@ -121,27 +135,67 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// Points the space at its entity's card — the projection's origin and scale — and drives the Board ↔ space
-    /// blend toward <paramref name="inSpace"/>. Entering remembers the Board camera; leaving eases back to it.
+    /// Corrects the mode against what this frame can actually show. Every writer (the header's tabs, a card's
+    /// double-click, the debug bridge) writes the mode raw; this runs first each frame so a mode whose
+    /// precondition lapsed — the selection no longer reaches a surface or an output — falls back instead of
+    /// sticking on a tab that can't be clicked away.
     /// </summary>
-    private void EnterSpace(Setup setup, SetupEntityKinds kind, Guid id, bool inSpace)
+    private void ResolveEditMode(Setup setup, OutputDefinition? output, Guid outputId)
     {
-        // Leaving keeps the fading space's identity and origin: it is still the one being drawn out.
-        if (inSpace)
-        {
-            // Straight from one space into another (a surface on a different photo): no fold, but the camera
-            // still travels — a transition at full blend.
-            if ((_spaceKind != kind || _spaceId != id) && _spaceTarget >= 1f && _spaceBlend >= 1f)
-            {
-                _spaceFrom = 1f;
-                _spaceProgress = 0f;
-                CaptureTransitionStart();
-            }
+        var canStraight = SurfaceGeometry.FindMappingCarrier(setup, _shownSurfaceId, outputId) != null
+                          || TracedImageOf(setup, _shownSurfaceId) != null;
+        var canOutput = output != null;
 
-            _spaceKind = kind;
-            _spaceId = id;
+        if (!canStraight && _editMode == EditModes.Straight)
+        {
+            _editMode = canOutput ? EditModes.Output : EditModes.Board;
+        }
+        else if (!canOutput && _editMode != EditModes.Straight)
+        {
+            _editMode = EditModes.Board;
+        }
+    }
+
+    /// <summary>
+    /// Points the space at its entity's card — the projection's origin and scale — and drives the Board ↔ space
+    /// blend in. Entering remembers the Board camera, so <see cref="LeaveSpace"/> can ease back to it.
+    /// </summary>
+    private void EnterSpace(Setup setup, SetupEntityKinds kind, Guid id)
+    {
+        // Straight from one space into another (a surface on a different photo): no fold, but the camera
+        // still travels — a transition at full blend.
+        if ((_spaceKind != kind || _spaceId != id) && _spaceBlend.Target >= 1f && _spaceBlend.Value >= 1f)
+        {
+            _spaceBlend.From = 1f;
+            _spaceBlend.Progress = 0f;
+            CaptureTransitionStart();
         }
 
+        _spaceKind = kind;
+        _spaceId = id;
+        PointProjectionAtSpace(setup);
+
+        if (_spaceBlend.Retarget(1f))
+        {
+            CaptureTransitionStart();
+            _boardScopeBeforeSpace = _morphFromScope;
+        }
+
+        AdvanceSpaceBlend();
+    }
+
+    /// <summary>Drives the blend back to the Board. The fading space keeps its identity and origin: it is still the one being drawn out.</summary>
+    private void LeaveSpace(Setup setup)
+    {
+        PointProjectionAtSpace(setup);
+        if (_spaceBlend.Retarget(0f))
+            CaptureTransitionStart();
+
+        AdvanceSpaceBlend();
+    }
+
+    private void PointProjectionAtSpace(Setup setup)
+    {
         // The photo space's own eases (Photo ↔ Straight, and turning from one traced subject to another) only
         // advance while that space is drawn. Leaving it mid-flight — clicking an output while the photo is still
         // turning — would strand them below 1, and they gate the framing: every later frame would then re-set the
@@ -149,9 +203,8 @@ internal sealed partial class SetupOutputView
         // them any more, so they land where they were heading.
         if (_spaceKind != SetupEntityKinds.ReferenceImage)
         {
-            _referenceProgress = 1f;
-            _referenceSubjectProgress = 1f;
-            _referenceStraighten = _referenceStraightenTarget;
+            _referenceStraighten.Settle();
+            _referenceSubjectEase.Settle();
         }
 
         if (TryGetBoardBounds(setup, _spaceKind, _spaceId, out var min, out var max))
@@ -162,29 +215,19 @@ internal sealed partial class SetupOutputView
 
         _spaceOrigin = _projection.Origin;
         _spacePixelsPerMeter = _projection.PixelsPerMeter;
+    }
 
-        var target = inSpace ? 1f : 0f;
-        if (target != _spaceTarget)
-        {
-            _spaceTarget = target;
-            _spaceFrom = _spaceBlend;
-            _spaceProgress = 0f;
-            CaptureTransitionStart();
-            if (inSpace)
-                _boardScopeBeforeSpace = _morphFromScope;
-        }
-
-        if (_spaceProgress >= 1f)
+    /// <summary>One step of the Board ↔ space blend; on the way back the camera returns to where it was before the space was entered.</summary>
+    private void AdvanceSpaceBlend()
+    {
+        if (_spaceBlend.IsSettled)
             return;
 
-        var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-        _spaceProgress = MathF.Min(1f, _spaceProgress + dt / MorphDurationSec);
-        var eased = MathF.Pow(_spaceProgress, MorphEaseExponent);
-        _spaceBlend = _spaceProgress >= 1f ? _spaceTarget : _spaceFrom + (_spaceTarget - _spaceFrom) * eased;
+        _spaceBlend.Advance(FrameDeltaSec(), MorphDurationSec, MorphEaseExponent);
 
-        // Back to the Board: the camera returns to where it was before the space was entered.
-        if (!inSpace)
+        if (_spaceBlend.Target < 0.5f)
         {
+            var eased = MathF.Pow(_spaceBlend.Progress, MorphEaseExponent);
             _boardCanvas.SetScopeInstant(new CanvasScope
                                              {
                                                  Scale = Vector2.Lerp(_morphFromScope.Scale, _boardScopeBeforeSpace.Scale, eased),
@@ -193,11 +236,17 @@ internal sealed partial class SetupOutputView
         }
     }
 
+    /// <summary>The frame's time step, capped so a stall (a load, a dropped window) can't skip a transition to its end.</summary>
+    private static float FrameDeltaSec()
+    {
+        return Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
+    }
+
     /// <summary>Whether a Board card is drawn by the current space instead of the Board layer: the space's own
     /// entity, and for an output the surfaces mapped to it (their quads fly into place).</summary>
     private bool IsDrawnBySpace(Setup setup, SetupEntityKinds kind, Guid id)
     {
-        if (_spaceBlend <= 0.001f)
+        if (_spaceBlend.Value <= 0.001f)
             return false;
 
         if (kind == _spaceKind && id == _spaceId)
@@ -223,8 +272,8 @@ internal sealed partial class SetupOutputView
 
     // The output canvas carries a global rectify transform R (output px → view space): identity at _viewMorph
     // 0 (Original), and by 1 (Straight) it maps the focused surface's quad onto its own axis-aligned bounding
-    // box, carrying the whole composite and every surface with it. From 1 to 2 (Content) R holds and the
-    // framing tightens onto that surface. Blending R and the framing is what makes the views morph.
+    // box, carrying the whole composite and every surface with it. Blending R and the framing is what makes
+    // the views morph.
     private void DrawOutputCanvas(Setup setup, OutputDefinition output, Guid outputId, SetupEntitySelection? selection)
     {
         // This canvas works in the output's pixels — framing, grids, snap thresholds and handles are all tuned
@@ -232,10 +281,10 @@ internal sealed partial class SetupOutputView
         // pixels on the way in and divided back out on the way to the model.
         var canvasSize = output.CanvasSize;
 
-        var straighten = Math.Clamp(_viewMorph, 0f, 1f);
+        var straighten = _viewMorph.Value;
 
         // Pulled before the transform so the content aspect below reads a live evaluation context.
-        var composite = OutputManager.RenderOutput(outputId);
+        var composite = OutputCompositor.RenderOutput(outputId);
 
         // Rectify basis = the focused surface. Freeze it while it is the one being dragged, so the transform
         // doesn't chase its own edit; otherwise the live quad keeps R settled and current.
@@ -243,18 +292,14 @@ internal sealed partial class SetupOutputView
         var focusCarrier = SurfaceGeometry.FindMappingCarrier(setup, _shownSurfaceId, outputId);
         var focusCarrierId = focusCarrier?.Id ?? Guid.Empty;
 
-        var basis = _viewMorph > 0.0001f ? focusCarrier : null;
+        var rectifying = straighten > 0.0001f;
+        var basis = rectifying ? focusCarrier : null;
         var basisMapping = basis?.FindMapping(outputId);
         var basisId = basis?.Id ?? Guid.Empty;
 
-        var rectifiedToView = Homography.Identity;
-        var rectifiedToOutput = Homography.Identity;
-        var viewMin = Vector2.Zero;
-        var viewSize = canvasSize;
-
-        // The framing is held still for the duration of an edit (see below), so the size it is derived from
-        // only catches up on release. Refitting to that is a jump the user never asked for, so the frame the
-        // freeze lifts adopts the new framing without moving the view.
+        // The framing is held still for the duration of an edit, so the size it is derived from only catches
+        // up on release. Refitting to that is a jump the user never asked for, so the frame the freeze lifts
+        // adopts the new framing without moving the view.
         var framingFrozen = false;
 
         if (basisMapping != null && basisMapping.Quad.Length >= 4)
@@ -281,96 +326,31 @@ internal sealed partial class SetupOutputView
             // toward the new selection instead of snapping there.
             basisQuad = BlendBasisTransition(basisId, basisQuad, ref basisSize, ref anchor, framingFrozen);
 
-            // Mappings are stored as fractions of the canvas; this view works in its pixels (so does R, and the
-            // straightened rect it lands on, which is metres × px/m). Convert once, here.
-            var basisPx = _basisPxQuad;
-            for (var c = 0; c < 4; c++)
-                basisPx[c] = basisQuad[c] * canvasSize;
-
-            Bounds(basisPx, out var quadMin, out var quadMax);
-
-            // Straightening lands on the surface's real content canvas (metres × px/m) — so Size (m) is what
-            // gives the rectangle its aspect. Anchored at the anchor, so changing a dimension extends the rect
-            // from there rather than recentring it.
-            var straightSize = new Vector2(MathF.Max(basisSize.X, 0.001f),
-                                           MathF.Max(basisSize.Y, 0.001f)) * MathF.Max(basis.PixelsPerMeter, 1f);
-            var stageTarget = AnchoredRect(quadMin, quadMax, anchor, straightSize);
-            Bounds(stageTarget, out _straightRectMin, out _straightRectMax);
-
-            var interp = _interpQuad;
-            for (var c = 0; c < 4; c++)
-                interp[c] = Vector2.Lerp(basisPx[c], stageTarget[c], straighten);
-
-            if (Homography.TryComputeQuadToQuad(basisPx, interp, out rectifiedToView)
-                && Homography.TryComputeQuadToQuad(interp, basisPx, out rectifiedToOutput))
-            {
-                // Frame to the focused surface's straightened bounds + margin — not the whole warped canvas,
-                // which a steep rectify sends toward infinity. Interpolated from the full canvas at t=0.
-                // The surround shrinks to nothing as we go on to Content, so the surface itself fills the view.
-                Bounds(interp, out var focusMin, out var focusMax);
-
-                // Uniform surround from the larger dimension, not per-axis: a thin surface (a beam, a strip) has
-                // a near-zero short axis, and a per-axis margin there collapses the frame onto the surface,
-                // clipping the neighbouring surfaces' content out of the warped composite. Off the long side it
-                // stays generous on both.
-                var focusSpan = focusMax - focusMin;
-                var surround = MathF.Max(focusSpan.X, focusSpan.Y) * StraightSurroundFactor;
-                var m = new Vector2(surround);
-                var framedMin = focusMin - m;
-                var framedMax = focusMax + m;
-
-                // Once the view and basis transitions have settled, the framing — the world window this
-                // rectified view renders — stays put across edits and releases: a dragged surface stays
-                // where it was dropped instead of the window re-centering on it. Re-framing comes only from
-                // a basis or mode change; anything else is the user's own pan/zoom. R itself stays live, so
-                // corner edits still update the rectification within the held window.
-                // Held framing is only ever captured *at* the settled state — capturing during a transition
-                // would freeze a half-way window. A post-edit settle ease (same basis) keeps the hold, so
-                // releasing a drag never moves the camera; a basis/mode transition re-derives live.
-                var framingHeld = _morphProgress >= 1f && (_basisMorph >= 1f || _easeKeepsFraming);
-                if (!framingHeld)
-                {
-                    _frozenFramedMin = null;
-                }
-                else if (_frozenFramedMin == null)
-                {
-                    _frozenFramedMin = framedMin;
-                    _frozenFramedMax = framedMax;
-                }
-                else
-                {
-                    framedMin = _frozenFramedMin.Value;
-                    framedMax = _frozenFramedMax;
-                }
-
-                viewMin = Vector2.Lerp(Vector2.Zero, framedMin, straighten);
-                var viewMax = Vector2.Lerp(canvasSize, framedMax, straighten);
-                viewSize = viewMax - viewMin;
-
-                // Straight is the surface's own space: as the view rectifies it slides from the output's card
-                // onto the surface's card, at the surface's true scale — so the wall is looked at head-on
-                // where it stands on the Board, not inside the projector's frame.
-            }
-            else
-            {
-                rectifiedToView = Homography.Identity;
-                rectifiedToOutput = Homography.Identity;
-            }
+            // Straight is the surface's own space: as the view rectifies it slides from the output's card onto
+            // the surface's card, at the surface's true scale — so the wall is looked at head-on where it
+            // stands on the Board, not inside the projector's frame.
+            _framing.Compute(basisQuad, basisSize, anchor, basis.PixelsPerMeter, canvasSize, straighten,
+                             viewSettled: _viewMorph.IsSettled, basisSettled: _basisEase.IsSettled, ref _hold);
+        }
+        else
+        {
+            _framing.Reset(canvasSize);
         }
 
+        // Left the rectified context — the next entry re-derives the framing.
         if (basisMapping == null)
-            _frozenFramedMin = null; // left the rectified context — next entry re-derives the framing
+            _hold.FrozenMin = null;
 
-        var rectifying = _viewMorph > 0.0001f;
+        var rectifiedToView = _framing.RectifiedToView;
+        var rectifiedToOutput = _framing.RectifiedToOutput;
+        var viewMin = _framing.ViewMin;
+        var viewSize = _framing.ViewSize;
 
         // The camera heads for where this view will settle, not for the framing of the frame in flight —
         // easing toward a moving target lags behind the geometry and reads as content sliding into place.
-        GetSettledBoardRect(setup, basisId, basis, basisMapping, canvasSize, viewSize, out var settledMin, out var settledMax);
-        FitToBoardRect(settledMin, settledMax, EditModes.Output, outputId, keepScope: _framingWasFrozen && !framingFrozen);
-        _framingWasFrozen = framingFrozen;
-
-        _probeSurfaceCentre = _projection.CanvasToScreen((_straightRectMin + _straightRectMax) * 0.5f - viewMin);
-        SampleTransitionMetrics();
+        GetSettledBoardRect(basis, basisMapping, canvasSize, out var settledMin, out var settledMax);
+        FitToBoardRect(settledMin, settledMax, EditModes.Output, outputId, keepScope: _hold.WasFrozen && !framingFrozen);
+        _hold.WasFrozen = framingFrozen;
 
         var dl = ImGui.GetWindowDrawList();
         var frameMin = _projection.CanvasToScreen(Vector2.Zero);
@@ -406,7 +386,7 @@ internal sealed partial class SetupOutputView
                 dest[2] = (rectifiedToView.TransformPoint(new Vector2(w, h)) - viewMin) * renderScale;
                 dest[3] = (rectifiedToView.TransformPoint(new Vector2(0, h)) - viewMin) * renderScale;
 
-                var warped = OutputManager.RenderWarpedTexture(composite, dest, rtSize);
+                var warped = OutputCompositor.RenderWarpedTexture(composite, dest, rtSize);
                 var warpedSrv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
                 if (warpedSrv is { IsDisposed: false })
                 {
@@ -432,24 +412,18 @@ internal sealed partial class SetupOutputView
         // so a patch, surface or label under the cursor still wins.
         if (_editMode == EditModes.Output && !_isolatesFocusedSurface)
         {
-            QuadBounds(canvasOutline, out var outlineMin, out var outlineMax);
+            CanvasDraw.Bounds(canvasOutline, out var outlineMin, out var outlineMax);
             _picker.AddTarget(SetupEntityKinds.Output, outputId, outlineMin, outlineMax, isBackground: true);
         }
 
         // Corner-pin handles are editable only when the morph has settled (so a mid-animation drag can't fight
         // the moving transform) and the space is fully entered.
-        var editable = _morphProgress >= 1f && _spaceBlend >= 1f;
+        var editable = _viewMorph.IsSettled && _spaceBlend.Value >= 1f;
         var handleFade = 1f;
-
-        // A label grab that never became a drag (released before the move machinery picked it up) must not linger.
-        if (_labelGrabScreen != null && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
-            _labelGrabScreen = null;
 
         // Patches sit under the surfaces in the composite, so their frames go first and the surfaces draw over them.
         DrawPatches(setup, output, selection, dl, rectifiedToView, rectifiedToOutput, viewMin, canvasSize, editable, handleFade, hasContent);
 
-        _fenceCandidates.Clear();
-        Span<Vector2> labelQuad = stackalloc Vector2[4]; // hoisted: one buffer reused by every surface
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             var surface = setup.Surfaces[i];
@@ -464,7 +438,7 @@ internal sealed partial class SetupOutputView
                     continue;
 
                 // Regions ride their parent, which is still flying in — they appear once the space has settled.
-                if (_spaceBlend < 1f)
+                if (_spaceBlend.Value < 1f)
                     continue;
 
                 // The pin lives on some ancestor (possibly several levels up); edits live in the immediate
@@ -472,196 +446,14 @@ internal sealed partial class SetupOutputView
                 var carrier = SurfaceGeometry.FindMappingCarrier(setup, surface.Id, outputId);
                 var carrierMapping = carrier?.FindMapping(outputId);
                 var immediateParent = setup.FindSurface(surface.ParentId);
-                if (carrier == null || carrierMapping == null || immediateParent == null
-                    || !SurfaceGeometry.TryGetRegionQuad(setup, carrier, surface, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), _childQuadBuffer))
+                if (carrier == null || carrierMapping == null || immediateParent == null)
                     continue;
 
-                DrawRegion(setup, selection, dl, rectifiedToView, rectifiedToOutput, viewMin, carrier, carrierMapping, immediateParent, surface, editable, handleFade);
+                DrawRegionOnOutput(setup, selection, dl, rectifiedToView, rectifiedToOutput, viewMin, carrier, carrierMapping, immediateParent, surface, editable, handleFade);
                 continue;
             }
 
-            // The quad in view space: R applied, then offset into the framed region. One buffer for every
-            // surface — nothing below keeps it past this iteration.
-            // Into the canvas' pixels first: the quad is stored as a fraction of it, and R and this canvas
-            // both work in pixels — the same conversion the patches and the child regions make.
-            var viewQuad = _viewQuad;
-            for (var c = 0; c < 4; c++)
-                viewQuad[c] = rectifiedToView.TransformPoint(mappingData.Quad[c] * canvasSize) - viewMin;
-
-            // While the space comes in, the quad flies from the surface's Board card to its mapped place.
-            if (_spaceBlend < 1f && TryGetBoardQuadInView(setup, surface.Id, viewMin, _boardFlyQuad))
-            {
-                for (var c = 0; c < 4; c++)
-                    viewQuad[c] = Vector2.Lerp(_boardFlyQuad[c], viewQuad[c], _spaceBlend);
-            }
-
-            ImGui.PushID(surface.Id.GetHashCode());
-
-            // A parent recedes while one of its children is the subject, so the child's handles read first.
-            // Selection styling covers the whole multi-selection; the *focused* (primary) surface keeps the
-            // exclusive affordances below (edge handles, anchor, isolate).
-            var isFocused = surface.Id == _shownSurfaceId;
-            var isSelected = isFocused
-                             || (selection?.IsSelected(SetupEntityKinds.Surface, surface.Id) ?? false);
-            var emphasis = handleFade * (!isSelected && surface.Id == focusCarrierId ? 0.45f : 1f);
-
-            // Still draggable when unselected — the canvas has no click-to-select yet, so gating edits on
-            // selection would strand every surface but the one picked in the sidebar.
-            var style = CornerPinHandles.Style.ForSurface(surface.Name, editable, isSelected, emphasis, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
-            style.ShowsChecker = !hasContent;
-
-            // The label doubles as the surface's grab area, and it sits over the middle where an edge or corner
-            // handle can land under it. Grabbing the label was the intent, so while the pointer rests on it the
-            // handles go non-interactive — unless a handle drag is already live, which must not be dropped just
-            // because the cursor passed over the label.
-            for (var c = 0; c < 4; c++)
-                labelQuad[c] = _projection.CanvasToScreen(viewQuad[c]);
-
-            // Hovered from the sidebar or a handle (not itself the subject): highlight the frame so "which
-            // frame is that row?" answers itself. The outline carries it (it reads first); the fill is only a
-            // faint wash behind, and the label picks it up below.
-            var surfacePulse = isSelected ? 0 : FrameStats.CrossHighlightAmount(surface.Id);
-            if (surfacePulse > 0.001f)
-                dl.AddQuadFilled(labelQuad[0], labelQuad[1], labelQuad[2], labelQuad[3],
-                                 SetupColors.ForKind(SetupEntityKinds.Surface).Fade(surfacePulse * 0.15f * handleFade));
-
-            style.EdgeColor = PulseColor(style.EdgeColor, surfacePulse);
-
-            var handleActive = _gesture.EditsSurface(surface.Id);
-            var pointerOverLabel = !handleActive && !string.IsNullOrEmpty(surface.Name)
-                                   && IsMouseOverLabel(labelQuad, surface.Name);
-            // In isolate only the focused frame is editable; the others are locked (they still snap).
-            var lockedByIsolate = _isolatesFocusedSurface && !isFocused;
-            var handlesEditable = editable && !pointerOverLabel && !lockedByIsolate;
-            style.IsEditable = handlesEditable;
-
-            // Selected corners render marked, and every editable corner is a fence-select candidate.
-            var selectedMask = 0;
-            for (var c = 0; c < 4; c++)
-            {
-                var cornerTarget = new SelectionTarget(SetupEntityKinds.Surface, surface.Id, SubParts.Corner, c);
-                if (_canvasSelection.Contains(cornerTarget))
-                    selectedMask |= 1 << c;
-
-                if (handlesEditable)
-                    _fenceCandidates.Add((cornerTarget, labelQuad[c]));
-            }
-
-            // The label is drawn separately so it can be hit-tested as the surface's pick/grab area.
-            style.Label = null;
-            var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out var draggedCorner, out var cornerHovered, selectedMask);
-
-            if (phase != CanvasPointHandle.DragPhases.None)
-            {
-                // Grabbing a corner selects it in the sub-element plane: ctrl toggles, shift adds, plain replaces —
-                // unless the corner is already selected, which keeps the set so the grab starts a group drag.
-                if (phase == CanvasPointHandle.DragPhases.Started && draggedCorner >= 0)
-                {
-                    var target = new SelectionTarget(SetupEntityKinds.Surface, surface.Id, SubParts.Corner, draggedCorner);
-                    var io = ImGui.GetIO();
-                    if (io.KeyCtrl)
-                        _canvasSelection.Toggle(target);
-                    else if (io.KeyShift)
-                        _canvasSelection.Add(target);
-                    else if (!_canvasSelection.Contains(target))
-                        _canvasSelection.Set(target);
-                }
-
-                // Map the edited view-space quad back to projector space — only while a corner drag is live.
-                // At rest the round-trip is only near-identity in float, so writing it back every frame would
-                // slowly drift the stored quad while merely viewing in a rectified mode.
-                var previousDraggedCorner = draggedCorner >= 0 ? mappingData.Quad[draggedCorner] : Vector2.Zero;
-                for (var c = 0; c < 4; c++)
-                    mappingData.Quad[c] = rectifiedToOutput.TransformPoint(viewQuad[c] + viewMin) / canvasSize;
-
-                // Group drag: the dragged corner's output-space delta rides onto every other selected corner.
-                if (phase == CanvasPointHandle.DragPhases.Dragging && draggedCorner >= 0)
-                    ApplyGroupCornerDelta(setup, outputId, surface.Id, draggedCorner,
-                                          mappingData.Quad[draggedCorner] - previousDraggedCorner);
-            }
-
-            HandleDrag(phase, setup, surface.Id, outputId, mappingData.Quad);
-
-            // The label doubles as the surface's move handle: the press selects it (through the picker, so
-            // stacked labels still cycle), and holding on continues into a whole-quad move — one gesture,
-            // no select-first click. The move rides the corner-drag lifecycle, so undo and the straighten
-            // freeze come along for free.
-            if (phase == CanvasPointHandle.DragPhases.None)
-            {
-                var movePhase = CanvasPointHandle.DragPhases.None;
-                if (_gesture.Is(GestureKinds.SurfaceMove, surface.Id))
-                {
-                    movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left)
-                                    ? CanvasPointHandle.DragPhases.Dragging
-                                    : CanvasPointHandle.DragPhases.Completed;
-                }
-                else if (!_gesture.IsLive && _labelGrabScreen != null
-                         && surface.Id == _shownSurfaceId
-                         && editable && !lockedByIsolate
-                         && !string.IsNullOrEmpty(surface.Name)
-                         && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseClicked(ImGuiMouseButton.Left)
-                         // Below the click threshold a press is a selection click, not a grab — otherwise
-                         // switching surfaces by clicking labels triggers zero-distance "moves".
-                         && (ImGui.GetMousePos() - _labelGrabScreen.Value).Length() > UserSettings.Config.ClickThreshold
-                         && IsPointOverLabel(labelQuad, surface.Name, _labelGrabScreen.Value))
-                {
-                    _labelGrabScreen = null;
-                    movePhase = CanvasPointHandle.DragPhases.Started;
-                }
-
-                if (movePhase == CanvasPointHandle.DragPhases.Started)
-                {
-                    BeginGesture(setup, GestureKinds.SurfaceMove, "Move surface", surface.Id, surface, _projection.ScreenToCanvas(ImGui.GetMousePos()));
-                }
-                else if (movePhase == CanvasPointHandle.DragPhases.Dragging
-                         && _gesture.Snapshot is { } moveSnapshot && moveSnapshot.TryGetQuad(outputId, out var preMoveQuad))
-                {
-                    // Rigid in view space; carried through R per corner, so in a rectified view the quad
-                    // warps exactly as if each corner had been dragged by the same screen offset.
-                    var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
-                    for (var c = 0; c < 4; c++)
-                    {
-                        var moved = rectifiedToView.TransformPoint(preMoveQuad[c] * canvasSize) + moveDelta;
-                        mappingData.Quad[c] = rectifiedToOutput.TransformPoint(moved) / canvasSize;
-                    }
-                }
-                else if (movePhase == CanvasPointHandle.DragPhases.Completed)
-                {
-                    EndGesture(setup);
-                }
-            }
-
-            // A handle stands in for its frame: hovering one lights the frame (and its sidebar row), and
-            // grabbing one selects it — so you can't edit a frame that isn't the selected item. Isolate mode
-            // takes selection off the canvas entirely, so it doesn't fire there.
-            if (cornerHovered || phase != CanvasPointHandle.DragPhases.None)
-                FrameStats.RequestCrossHighlight(surface.Id);
-
-            if (phase == CanvasPointHandle.DragPhases.Started && !_isolatesFocusedSurface)
-                selection?.Select(SetupEntityKinds.Surface, surface.Id);
-
-            // Only the focused surface shows its anchor — one origin at a time, or the canvas fills with them.
-            if (isFocused)
-                DrawAnchorMarker(dl, surface, mappingData, rectifiedToView, viewMin, canvasSize, handleFade);
-
-            // Edge handles belong to the focused surface only — they're contextual, and four extra dots on
-            // every quad would drown the canvas. A corner moves freely (perspective); an edge crops the
-            // footprint, or stretches it with Ctrl.
-            if (handlesEditable && surface.Id == _shownSurfaceId)
-            {
-                style.EdgeHandleShape = EdgeDragStretches(surface.Id)
-                                            ? CanvasPointHandle.Shapes.Circle
-                                            : CanvasPointHandle.Shapes.Square;
-                var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
-                if (edge >= 0)
-                    HandleEdgeDrag(edgePhase, setup, surface, mappingData, edge, edgePos, rectifiedToOutput, viewMin);
-            }
-
-            ImGui.PopID();
-
-            // Under isolate the other frames' labels recede further, so the focused one clearly owns the canvas.
-            var labelEmphasis = lockedByIsolate ? emphasis * 0.4f : emphasis;
-            DrawEntityLabel(dl, SetupEntityKinds.Surface, labelQuad, surface.Id, surface.Name, isSelected, labelEmphasis, surfacePulse);
+            DrawMappedSurface(setup, selection, dl, surface, mappingData, outputId, canvasSize, _framing, focusCarrierId, editable, handleFade, hasContent);
         }
 
         // Marquee over corner handles — plain output view only for now, and never while another canvas
@@ -687,326 +479,198 @@ internal sealed partial class SetupOutputView
         // The reference points on the plain projector canvas, where they can be walked onto the wall.
         var pinMapping = focusCarrier?.FindMapping(outputId);
         if (_editMode == EditModes.Output && !rectifying && focusCarrier != null && pinMapping != null && pinMapping.Quad.Length >= 4
-            && SetupActions.CountPoints(focusCarrier) > 0)
+            && SurfaceMetrics.CountPoints(focusCarrier) > 0)
         {
             DrawReferencePointPins(setup, dl, focusCarrier, pinMapping, outputId, canvasSize, editable, handleFade);
         }
     }
 
     /// <summary>
-    /// The focused surface's reference points as handles on the projector canvas. An idle point rides the pin
-    /// (it shows where the photo's feature currently lands); dragging it activates it — its target is where it
-    /// was dropped, in output pixels, and it never moves again on its own. The pin is re-solved from the
-    /// activated targets alone: exactly as free as they allow (one shifts, two turn and scale, three shear,
-    /// four keystone; beyond four the solve averages and the header reports the miss). Double-click resets a
-    /// point to idle. One undo step per drag or reset.
+    /// One mapped surface on the output canvas: its quad carried through R (flying in from its Board card while
+    /// the space enters), the corner-pin handles with the group drag, the label as move grip, and — for the
+    /// focused surface — the anchor and the edge handles.
     /// </summary>
-    private void DrawReferencePointPins(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping, Guid outputId,
-                                        Vector2 canvasSize, bool editable, float fade)
+    private void DrawMappedSurface(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mappingData,
+                                   Guid outputId, Vector2 canvasSize, in RectifiedFraming framing, Guid focusCarrierId, bool editable, float handleFade,
+                                   bool hasContent)
     {
-        var pinCanvas = SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId);
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, pinCanvas, out var surfaceToOutput))
-            return;
+        var rectifiedToView = framing.RectifiedToView;
+        var rectifiedToOutput = framing.RectifiedToOutput;
+        var viewMin = framing.ViewMin;
+        Span<Vector2> labelQuad = stackalloc Vector2[4];
+        // The quad in view space: R applied, then offset into the framed region. One buffer for every
+        // surface — nothing below keeps it past this iteration.
+        // Into the canvas' pixels first: the quad is stored as a fraction of it, and R and this canvas
+        // both work in pixels — the same conversion the patches and the child regions make.
+        var viewQuad = _viewQuad;
+        for (var c = 0; c < 4; c++)
+            viewQuad[c] = rectifiedToView.TransformPoint(mappingData.Quad[c] * canvasSize) - viewMin;
 
-        // The discs are always on the canvas — they are what says which feature a point marks; the toggle
-        // only decides whether they also go to the wall.
-        DrawCanvasPhotoDiscs(setup, dl, surface, mapping, surfaceToOutput, canvasSize, fade);
-
-        var green = SetupColors.ForKind(SetupEntityKinds.Surface);
-        var idleStyle = CanvasPointHandle.Style.Default(UiColors.ForegroundFull.Fade(0.6f * fade), CanvasPointHandle.Shapes.Circle, editable);
-        idleStyle.OutlineColor = UiColors.ForegroundFull.Fade(0.4f * fade);
-        idleStyle.Radius = 6;
-        var activeStyle = idleStyle;
-        activeStyle.Color = UiColors.ForegroundFull.Fade(fade);
-        activeStyle.OutlineColor = green.Fade(fade);
-        activeStyle.Radius = 7;
-
-        var ordinal = 0;
-        for (var i = 0; i < surface.Annotations.Count; i++)
+        // While the space comes in, the quad flies from the surface's Board card to its mapped place.
+        if (_spaceBlend.Value < 1f && TryGetBoardQuadInView(setup, surface.Id, viewMin, _boardFlyQuad))
         {
-            var point = surface.Annotations[i];
-            if (!point.IsPoint)
-                continue;
+            for (var c = 0; c < 4; c++)
+                viewQuad[c] = Vector2.Lerp(_boardFlyQuad[c], viewQuad[c], _spaceBlend.Value);
+        }
 
-            ordinal++;
-            // The mark stands still. Its place is stored as a fraction of the canvas (this view works in the
-            // canvas' pixels, so it converts here), seeded once from wherever the pin projected the point when
-            // it first appeared on this output. Re-deriving it from the pin every frame would make it agree
-            // with the pin by construction — and a mark that cannot disagree with the pin is worth nothing to
-            // someone aligning one against a wall.
-            var aim = AimOf(mapping, point.Id, point.P1, surfaceToOutput, pinCanvas);
-            var px = aim.Position * pinCanvas;
-            var isAimed = aim.IsAimed;
+        ImGui.PushID(surface.Id.GetHashCode());
 
-            ImGui.PushID(i);
-            var phase = CanvasPointHandle.Draw(ref px, _projection, isAimed ? activeStyle : idleStyle);
-            var hovered = ImGui.IsItemHovered();
-            ImGui.PopID();
+        // A parent recedes while one of its children is the subject, so the child's handles read first.
+        // Selection styling covers the whole multi-selection; the *focused* (primary) surface keeps the
+        // exclusive affordances below (edge handles, anchor, isolate).
+        var isFocused = surface.Id == _shownSurfaceId;
+        var isSelected = isFocused
+                         || (selection?.IsSelected(SetupEntityKinds.Surface, surface.Id) ?? false);
+        var emphasis = handleFade * (!isSelected && surface.Id == focusCarrierId ? 0.45f : 1f);
 
-            if (editable && hovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        // Still draggable when unselected — the canvas has no click-to-select yet, so gating edits on
+        // selection would strand every surface but the one picked in the sidebar.
+        var style = CornerPinHandles.Style.ForSurface(surface.Name, editable, isSelected, emphasis, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
+        style.ShowsChecker = !hasContent;
+
+        // The label doubles as the surface's grab area, and it sits over the middle where an edge or corner
+        // handle can land under it. Grabbing the label was the intent, so while the pointer rests on it the
+        // handles go non-interactive — unless a handle drag is already live, which must not be dropped just
+        // because the cursor passed over the label.
+        for (var c = 0; c < 4; c++)
+            labelQuad[c] = _projection.CanvasToScreen(viewQuad[c]);
+
+        // Hovered from the sidebar or a handle (not itself the subject): highlight the frame so "which
+        // frame is that row?" answers itself. The outline carries it (it reads first); the fill is only a
+        // faint wash behind, and the label picks it up below.
+        var surfacePulse = isSelected ? 0 : FrameStats.CrossHighlightAmount(surface.Id);
+        if (surfacePulse > 0.001f)
+            dl.AddQuadFilled(labelQuad[0], labelQuad[1], labelQuad[2], labelQuad[3],
+                             SetupColors.ForKind(SetupEntityKinds.Surface).Fade(surfacePulse * 0.15f * handleFade));
+
+        style.EdgeColor = PulseColor(style.EdgeColor, surfacePulse);
+
+        var handleActive = _gesture.EditsSurface(surface.Id);
+        var pointerOverLabel = !handleActive && !string.IsNullOrEmpty(surface.Name)
+                               && IsMouseOverLabel(labelQuad, surface.Name);
+        // In isolate only the focused frame is editable; the others are locked (they still snap).
+        var lockedByIsolate = _isolatesFocusedSurface && !isFocused;
+        var handlesEditable = editable && !pointerOverLabel && !lockedByIsolate;
+        style.IsEditable = handlesEditable;
+
+        // Selected corners render marked, and every editable corner is a fence-select candidate.
+        var selectedMask = 0;
+        for (var c = 0; c < 4; c++)
+        {
+            var cornerTarget = new SelectionTarget(SetupEntityKinds.Surface, surface.Id, SubParts.Corner, c);
+            if (_canvasSelection.Contains(cornerTarget))
+                selectedMask |= 1 << c;
+
+            if (handlesEditable)
+                _fenceCandidates.Add((cornerTarget, labelQuad[c]));
+        }
+
+        // The label is drawn separately so it can be hit-tested as the surface's pick/grab area.
+        style.Label = null;
+        var phase = CornerPinHandles.Draw(viewQuad, _projection, style, out var draggedCorner, out var cornerHovered, selectedMask);
+
+        if (phase != CanvasPointHandle.DragPhases.None)
+        {
+            // Grabbing a corner selects it in the sub-element plane: ctrl toggles, shift adds, plain replaces —
+            // unless the corner is already selected, which keeps the set so the grab starts a group drag.
+            if (phase == CanvasPointHandle.DragPhases.Started && draggedCorner >= 0)
             {
-                // Back to idle: the mark stays where it is, it just stops constraining the pin.
-                if (isAimed)
-                    SetupActions.RunUndoable("Reset reference point", setup,
-                                             () => mapping.PointAims[point.Id] = aim with { IsAimed = false });
+                var target = new SelectionTarget(SetupEntityKinds.Surface, surface.Id, SubParts.Corner, draggedCorner);
+                var io = ImGui.GetIO();
+                if (io.KeyCtrl)
+                    _canvasSelection.Toggle(target);
+                else if (io.KeyShift)
+                    _canvasSelection.Add(target);
+                else if (!_canvasSelection.Contains(target))
+                    _canvasSelection.Set(target);
+            }
 
-                CancelGesture(); // the press that became this double-click must not also commit a drag
-            }
-            else if (phase == CanvasPointHandle.DragPhases.Started)
+            // Map the edited view-space quad back to projector space — only while a corner drag is live.
+            // At rest the round-trip is only near-identity in float, so writing it back every frame would
+            // slowly drift the stored quad while merely viewing in a rectified mode.
+            var previousDraggedCorner = draggedCorner >= 0 ? mappingData.Quad[draggedCorner] : Vector2.Zero;
+            for (var c = 0; c < 4; c++)
+                mappingData.Quad[c] = rectifiedToOutput.TransformPoint(viewQuad[c] + viewMin) / canvasSize;
+
+            // Group drag: the dragged corner's output-space delta rides onto every other selected corner.
+            if (phase == CanvasPointHandle.DragPhases.Dragging && draggedCorner >= 0)
+                ApplyGroupCornerDelta(setup, outputId, surface.Id, draggedCorner,
+                                      mappingData.Quad[draggedCorner] - previousDraggedCorner);
+        }
+
+        RunCornerPinGesture(phase, setup, surface.Id);
+
+        // The label doubles as the surface's move handle: the press selects it (through the picker, so
+        // stacked labels still cycle), and holding on continues into a whole-quad move — one gesture,
+        // no select-first click. The move rides the corner-drag lifecycle, so undo and the straighten
+        // freeze come along for free.
+        if (phase == CanvasPointHandle.DragPhases.None)
+        {
+            var movePhase = CanvasPointHandle.DragPhases.None;
+            if (_gesture.Is(GestureKinds.SurfaceMove, surface.Id))
             {
-                BeginGesture(setup, GestureKinds.AimPoint, "Aim reference point", surface.Id);
-                SeedPointAims(setup, surface);
+                movePhase = ImGui.IsMouseDown(ImGuiMouseButton.Left)
+                                ? CanvasPointHandle.DragPhases.Dragging
+                                : CanvasPointHandle.DragPhases.Completed;
             }
-            else if (phase == CanvasPointHandle.DragPhases.Dragging && _gesture.Is(GestureKinds.AimPoint, surface.Id))
+            else if (surface.Id == _shownSurfaceId && editable && !lockedByIsolate && TryTakeLabelGrab(labelQuad, surface.Name))
             {
-                mapping.PointAims[point.Id] = new Surface.OutputMapping.PointAim(px / pinCanvas, true);
-                SolvePinFromTargets(surface, mapping, pinCanvas);
+                movePhase = CanvasPointHandle.DragPhases.Started;
             }
-            else if (phase == CanvasPointHandle.DragPhases.Completed)
+
+            if (movePhase == CanvasPointHandle.DragPhases.Started)
+            {
+                BeginGesture(setup, GestureKinds.SurfaceMove, "Move surface", surface.Id, surface, _projection.ScreenToCanvas(ImGui.GetMousePos()));
+            }
+            else if (movePhase == CanvasPointHandle.DragPhases.Dragging
+                     && _gesture.Snapshot is { } moveSnapshot && moveSnapshot.TryGetQuad(outputId, out var preMoveQuad))
+            {
+                // Rigid in view space; carried through R per corner, so in a rectified view the quad
+                // warps exactly as if each corner had been dragged by the same screen offset.
+                var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
+                for (var c = 0; c < 4; c++)
+                {
+                    var moved = rectifiedToView.TransformPoint(preMoveQuad[c] * canvasSize) + moveDelta;
+                    mappingData.Quad[c] = rectifiedToOutput.TransformPoint(moved) / canvasSize;
+                }
+            }
+            else if (movePhase == CanvasPointHandle.DragPhases.Completed)
             {
                 EndGesture(setup);
             }
-
-            if (hovered || phase != CanvasPointHandle.DragPhases.None)
-                OutputManager.EmphasizeAnnotation(surface.Id, i);
-
-            // Where the pin currently sends this point. An arrow from the mark to it is the miss, drawn rather
-            // than hidden by moving the mark: it says which way and how far the pin is off at this point.
-            DrawProjectionArrow(dl, px, surfaceToOutput.TransformPoint(point.P1), fade);
-
-            var screen = _projection.CanvasToScreen(px);
-            var markColor = isAimed ? green.Fade(0.9f * fade) : UiColors.ForegroundFull.Fade(0.5f * fade);
-            CanvasDraw.Crosshair(dl, screen, markColor, 9f, 1f);
-            DrawPointLabel(dl, screen, string.IsNullOrEmpty(point.Name) ? $"P{ordinal}" : point.Name, markColor);
         }
-    }
 
-    /// <summary>
-    /// Where a point's mark sits on this output: its stored aim, or — until a gesture has placed it — wherever
-    /// the pin projects the point right now.
-    /// </summary>
-    private static Surface.OutputMapping.PointAim AimOf(Surface.OutputMapping mapping, Guid pointId, Vector2 pointInSurface,
-                                                        in Homography surfaceToOutput, Vector2 canvasSize)
-    {
-        if (mapping.PointAims.TryGetValue(pointId, out var existing))
-            return existing;
+        // A handle stands in for its frame: hovering one lights the frame (and its sidebar row), and
+        // grabbing one selects it — so you can't edit a frame that isn't the selected item. Isolate mode
+        // takes selection off the canvas entirely, so it doesn't fire there.
+        if (cornerHovered || phase != CanvasPointHandle.DragPhases.None)
+            FrameStats.RequestCrossHighlight(surface.Id);
 
-        // Not yet placed: shown riding the pin, stored only once a gesture starts (see SeedPointAims).
-        var projected = surfaceToOutput.TransformPoint(pointInSurface);
-        return new Surface.OutputMapping.PointAim(projected / canvasSize, false);
-    }
+        if (phase == CanvasPointHandle.DragPhases.Started && !_isolatesFocusedSurface)
+            selection?.Select(SetupEntityKinds.Surface, surface.Id);
 
-    /// <summary>
-    /// Places every mark of the surface that has none yet, at where each pin projects its point right now.
-    /// Runs at the start of a gesture that moves a pin or a mark, inside its undo snapshot: from then on the
-    /// marks stand still while the pin moves, which is what makes the miss between them visible. Before that
-    /// the two agree by construction, so nothing needs storing — and nothing gets written from a mere view.
-    /// </summary>
-    private static void SeedPointAims(Setup setup, Surface surface)
-    {
-        foreach (var mapping in surface.OutputMappings)
+        // Only the focused surface shows its anchor — one origin at a time, or the canvas fills with them.
+        if (isFocused)
+            DrawAnchorMarker(dl, surface, mappingData, rectifiedToView, viewMin, canvasSize, handleFade);
+
+        // Edge handles belong to the focused surface only — they're contextual, and four extra dots on
+        // every quad would drown the canvas. A corner moves freely (perspective); an edge crops the
+        // footprint, or stretches it with Ctrl.
+        if (handlesEditable && surface.Id == _shownSurfaceId)
         {
-            var canvasSize = SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId);
-            if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, canvasSize, out var surfaceToOutput))
-                continue;
-
-            foreach (var point in surface.Annotations)
-            {
-                if (!point.IsPoint || mapping.PointAims.ContainsKey(point.Id))
-                    continue;
-
-                mapping.PointAims[point.Id] = AimOf(mapping, point.Id, point.P1, surfaceToOutput, canvasSize);
-            }
-        }
-    }
-
-    /// <summary>
-    /// The miss at one reference point: from its mark to where the current pin actually projects it. Nothing is
-    /// drawn while the two agree — an arrow that is always there stops being a signal.
-    /// </summary>
-    private void DrawProjectionArrow(ImDrawListPtr dl, Vector2 markInCanvas, Vector2 projectedInCanvas, float fade)
-    {
-        var from = _projection.CanvasToScreen(markInCanvas);
-        var to = _projection.CanvasToScreen(projectedInCanvas);
-        var delta = to - from;
-        var length = delta.Length();
-        var scale = T3Ui.UiScaleFactor;
-        if (length < 6 * scale)
-            return;
-
-        // Stops short of both ends so the mark and the projected spot stay readable under it.
-        var direction = delta / length;
-        var start = from + direction * 7 * scale;
-        var end = to - direction * 3 * scale;
-        var color = UiColors.StatusAttention.Fade(0.8f * fade);
-        dl.AddLine(start, end, color, 1.5f * scale);
-
-        var head = 5 * scale;
-        var side = new Vector2(-direction.Y, direction.X) * head * 0.5f;
-        dl.AddTriangleFilled(end, end - direction * head + side, end - direction * head - side, color);
-        CanvasDraw.Crosshair(dl, to, color, 4f, 1f);
-    }
-
-    /// <summary>
-    /// A disc of the surface's straightened photo around each reference point: the wall's own picture, right
-    /// where the feature is, so a mark can be walked onto it. Centred on the marks, not on where the pin
-    /// projects them — the disc belongs to its mark and stands still with it.
-    /// </summary>
-    private void DrawCanvasPhotoDiscs(Setup setup, ImDrawListPtr dl, Surface surface, Surface.OutputMapping mapping,
-                                      in Homography surfaceToOutput, Vector2 canvasSize, float fade)
-    {
-        if (!TryGetTracedFragment(setup, surface, out var fragmentSrv, out var photo, out var uvMin, out var uvMax))
-            return;
-
-        // The pin is stored as fractions of the canvas; this warp works in its pixels, like the view around it.
-        for (var c = 0; c < 4; c++)
-            _canvasDiscQuad[c] = mapping.Quad[c] * canvasSize;
-
-        Bounds(_canvasDiscQuad, out var bboxMin, out var bboxMax);
-        var bboxSize = bboxMax - bboxMin;
-
-        // A pin that has collapsed — or gone non-finite mid-solve — has no area to warp into: the target would
-        // be a pixel or two across and every disc would come out a single smeared colour. That is the state you
-        // are most likely to be in while fixing a bad pin, which is exactly when the discs have to be there.
-        var pinIsUsable = float.IsFinite(bboxSize.X) && float.IsFinite(bboxSize.Y)
-                          && bboxSize.X >= MinDiscWarpExtent && bboxSize.Y >= MinDiscWarpExtent;
-
-        SharpDX.Direct3D11.ShaderResourceView? srv = null;
-        if (pinIsUsable)
-        {
-            var scale = MathF.Min(1f, 2048f / MathF.Max(bboxSize.X, bboxSize.Y));
-            for (var c = 0; c < 4; c++)
-                _canvasDiscQuad[c] = (_canvasDiscQuad[c] - bboxMin) * scale;
-
-            var size = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(bboxSize.X * scale)),
-                                                         Math.Max(1, (int)(bboxSize.Y * scale)));
-            var warped = OutputManager.RenderWarpedTexture(photo, _canvasDiscQuad, size, _canvasDiscKey,
-                                                           new Vector4(uvMin.X, uvMin.Y, uvMax.X, uvMax.Y));
-            srv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
+            style.EdgeHandleShape = EdgeDragStretches(surface.Id)
+                                        ? CanvasPointHandle.Shapes.Circle
+                                        : CanvasPointHandle.Shapes.Square;
+            var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
+            if (edge >= 0)
+                HandleEdgeDrag(edgePhase, setup, surface, mappingData, edge, edgePos, rectifiedToOutput, viewMin);
         }
 
-        // Fall back to the straightened photo itself: upright and a fixed size, so it is wrong about the
-        // keystone and right about what the feature looks like — which is all the disc is for.
-        var upright = srv is not { IsDisposed: false };
-        if (upright)
-            srv = fragmentSrv;
+        ImGui.PopID();
 
-        if (srv is not { IsDisposed: false })
-            return;
-
-        SurfaceGeometry.LocalBounds(surface, out var surfaceMin, out var surfaceMax);
-        var surfaceSpan = Vector2.Max(surfaceMax - surfaceMin, new Vector2(0.0001f));
-        var uvSpan = uvMax - uvMin;
-        var uvRadius = uvSpan * UserSettings.Config.OutputSetupPhotoDiscRadius;
-
-        var radius = canvasSize.Y * UserSettings.Config.OutputSetupPhotoDiscRadius;
-        var tint = UiColors.ForegroundFull.Fade(fade);
-        foreach (var point in surface.Annotations)
-        {
-            if (!point.IsPoint)
-                continue;
-
-            var centre = AimOf(mapping, point.Id, point.P1, surfaceToOutput, canvasSize).Position * canvasSize;
-            var min = centre - new Vector2(radius);
-            var max = centre + new Vector2(radius);
-
-            Vector2 uv0, uv1;
-            if (upright)
-            {
-                // The point's place in the surface's own rectangle, into the fragment's window. Surface metres
-                // run Y-up, the photo's V downward.
-                var inSurface = new Vector2((point.P1.X - surfaceMin.X) / surfaceSpan.X,
-                                            1f - (point.P1.Y - surfaceMin.Y) / surfaceSpan.Y);
-                var centreUv = uvMin + uvSpan * inSurface;
-                uv0 = centreUv - uvRadius;
-                uv1 = centreUv + uvRadius;
-            }
-            else
-            {
-                // Sampled around where the pin puts *this* point, not around the mark. The disc has to keep
-                // showing the feature it belongs to: reading the warp at the mark would show whatever the photo
-                // happens to cover there, so every disc's picture would slide whenever any other point is
-                // dragged. It still carries the pin's own distortion, which is what makes it comparable to the
-                // wall — only the feature inside it stays the same one.
-                var sampled = surfaceToOutput.TransformPoint(point.P1);
-                uv0 = (sampled - new Vector2(radius) - bboxMin) / bboxSize;
-                uv1 = (sampled + new Vector2(radius) - bboxMin) / bboxSize;
-            }
-
-            var screenMin = _projection.CanvasToScreen(min);
-            var screenMax = _projection.CanvasToScreen(max);
-            dl.AddImageRounded(srv.NativePointer, screenMin, screenMax, uv0, uv1, tint, (screenMax.X - screenMin.X) * 0.5f, ImDrawFlags.RoundCornersAll);
-            dl.AddCircle((screenMin + screenMax) * 0.5f, (screenMax.X - screenMin.X) * 0.5f, UiColors.BackgroundFull.Fade(0.5f * fade), 0, 1f);
-        }
-    }
-
-    /// <summary>Canvas pixels a pin's bounding box must span before it is worth warping a photo through.</summary>
-    private const float MinDiscWarpExtent = 8f;
-
-    /// <summary>
-    /// Re-solves the pin so every activated point projects to its target. Up to three targets the solve is
-    /// incremental — the transform taking the current projections to the targets, applied to the pin; from
-    /// four on it is the (least-squares) homography from surface metres straight to the targets.
-    /// </summary>
-    private void SolvePinFromTargets(Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize)
-    {
-        // Solved in the canvas' own 0..1 space, because that is what the quad it writes is stored in — a solve
-        // in pixels would put pixel numbers into a normalized pin and throw the surface off the canvas.
-        // Vector2.One: the mapping is read and written in the same space, so the two cancel.
-        if (!SurfaceGeometry.TryGetSurfaceToOutput(surface, mapping, Vector2.One, out var surfaceToOutput))
-            return;
-
-        _pinFrom.Clear();
-        _pinTargets.Clear();
-        _pinSurfacePositions.Clear();
-        foreach (var point in surface.Annotations)
-        {
-            // Only aimed points constrain: an un-aimed mark is where the pin happened to put the point, so
-            // feeding it back in would just ask the solve to keep the pin exactly as it already is.
-            if (!point.IsPoint || !mapping.PointAims.TryGetValue(point.Id, out var aim) || !aim.IsAimed)
-                continue;
-
-            _pinFrom.Add(surfaceToOutput.TransformPoint(point.P1));
-            _pinTargets.Add(aim.Position);
-            _pinSurfacePositions.Add(point.P1);
-        }
-
-        _pinResidualPx = 0;
-        if (_pinTargets.Count == 0)
-            return;
-
-        Span<Vector2> quad = stackalloc Vector2[4];
-        if (_pinTargets.Count >= 4)
-        {
-            if (!Homography.TryComputeLeastSquares(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_pinSurfacePositions),
-                                                   System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_pinTargets), out var surfaceToTargets))
-                return;
-
-            var rect = SurfaceGeometry.LocalRect(surface);
-            for (var c = 0; c < 4; c++)
-            {
-                quad[c] = surfaceToTargets.TransformPoint(rect[c]);
-                if (!float.IsFinite(quad[c].X) || !float.IsFinite(quad[c].Y))
-                    return;
-            }
-
-            // The readout is in pixels — that is the unit an operator can judge a miss in.
-            for (var i = 0; i < _pinTargets.Count; i++)
-            {
-                var missed = (surfaceToTargets.TransformPoint(_pinSurfacePositions[i]) - _pinTargets[i]) * canvasSize;
-                _pinResidualPx = MathF.Max(_pinResidualPx, missed.Length());
-            }
-        }
-        else
-        {
-            mapping.Quad.AsSpan(0, 4).CopyTo(quad);
-            if (!PointPinSolver.TrySolve(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_pinFrom),
-                                         System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_pinTargets), quad, out _))
-                return;
-        }
-
-        for (var c = 0; c < 4; c++)
-            mapping.Quad[c] = quad[c];
+        // Under isolate the other frames' labels recede further, so the focused one clearly owns the canvas.
+        var labelEmphasis = lockedByIsolate ? emphasis * 0.4f : emphasis;
+        DrawEntityLabel(dl, SetupEntityKinds.Surface, labelQuad, surface.Id, surface.Name, isSelected, labelEmphasis, surfacePulse);
     }
 
     /// <summary>Whether the pointer is over the canvas area this view draws into (not the strip below it).</summary>
@@ -1055,45 +719,6 @@ internal sealed partial class SetupOutputView
         }
     }
 
-    // Preview of the content the output manager sends to this output. Per-slice source editing now lives on
-    // the SendToOutput op (its SourceRect), so this canvas is a read-only backdrop.
-
-    // Fold metric, read through the debug bridge (getLogTail, "[fold] metrics"): the rectified surface's centre
-    // on screen, sampled per transition frame. A good fold moves it in a straight line — reported as mean
-    // distance from the window centre, path length over the chord (1 = straight) and the largest deviation
-    // from the chord. Cheap (one Vector2 per frame while a fold runs), so it stays in.
-    private Vector2 _probeSurfaceCentre;
-    private readonly List<Vector2> _probeCentreSamples = [];
-
-    private static void AddMapping(Surface surface, OutputDefinition output, Guid outputId)
-    {
-        var canvasW = Math.Max(1, output.ResolvedResolution.Width);
-        var canvasH = Math.Max(1, output.ResolvedResolution.Height);
-
-        var aspect = surface.SizeInMeters.Y > 0.0001f ? surface.SizeInMeters.X / surface.SizeInMeters.Y : 1f;
-        var maxW = canvasW * 0.6f;
-        var maxH = canvasH * 0.6f;
-        var w = maxW;
-        var h = w / aspect;
-        if (h > maxH)
-        {
-            h = maxH;
-            w = h * aspect;
-        }
-
-        var cx = canvasW * 0.5f;
-        var cy = canvasH * 0.5f;
-        var quad = new[]
-                       {
-                           new Vector2(cx - w * 0.5f, cy - h * 0.5f), // top-left
-                           new Vector2(cx + w * 0.5f, cy - h * 0.5f), // top-right
-                           new Vector2(cx + w * 0.5f, cy + h * 0.5f), // bottom-right
-                           new Vector2(cx - w * 0.5f, cy + h * 0.5f), // bottom-left
-                       };
-
-        surface.OutputMappings.Add(new Surface.OutputMapping { OutputId = outputId, Quad = quad });
-    }
-
     /// <summary>
     /// Marks the surface's anchor — where the calibration raster's origin sits, and what a resize grows from.
     /// Drawn as a crosshair ring so it can't be confused with the orange top-left corner, which only marks the
@@ -1125,32 +750,40 @@ internal sealed partial class SetupOutputView
     private void HandleEdgeDrag(CanvasPointHandle.DragPhases phase, Setup setup, Surface surface, Surface.OutputMapping mapping,
                                 int edge, Vector2 viewPos, Homography rectifiedToOutput, Vector2 viewMin)
     {
-        RunGesture(phase, setup, GestureKinds.SurfaceResize, _edgeDragStretches ? "Stretch surface" : "Crop surface", surface,
-                   onStarted: () =>
-                              {
-                                  _edgeDragStretches = ImGui.GetIO().KeyCtrl;
-                                  if (!_edgeDragStretches)
-                                      BeginContentEdit(setup, surface);
-                              },
-                   onDragging: () =>
-                               {
-                                   // Re-base to the pre-drag rectangle first: the crop rewrites the surface's own frame, so
-                                   // an incremental edit would compound frame over frame. From the snapshot the cursor maps to
-                                   // one absolute edge position, stable however long the drag runs.
-                                   _gesture.Snapshot!.Value.Restore(surface);
-                                   if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var outputToSurface))
-                                       return;
+        switch (phase)
+        {
+            case CanvasPointHandle.DragPhases.Started:
+                _edgeDragStretches = ImGui.GetIO().KeyCtrl;
+                BeginGesture(setup, GestureKinds.SurfaceResize, _edgeDragStretches ? "Stretch surface" : "Crop surface", surface.Id, surface);
+                if (!_edgeDragStretches)
+                    BeginContentEdit(setup, surface);
 
-                                   SurfaceGeometry.LocalBounds(surface, out var oldMin, out var oldMax);
-                                   var surfacePos = outputToSurface.TransformPoint(rectifiedToOutput.TransformPoint(viewPos + viewMin));
-                                   SurfaceGeometry.DragEdge(surface, edge, surfacePos, _edgeDragStretches);
-                                   SurfaceGeometry.LocalBounds(surface, out var newMin, out var newMax);
-                                   KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
-                               });
+                break;
+
+            case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.SurfaceResize, surface.Id):
+            {
+                // Re-base to the pre-drag rectangle first: the crop rewrites the surface's own frame, so an
+                // incremental edit would compound frame over frame. From the snapshot the cursor maps to one
+                // absolute edge position, stable however long the drag runs.
+                _gesture.Snapshot!.Restore(surface);
+                if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var outputToSurface))
+                    break;
+
+                SurfaceGeometry.LocalBounds(surface, out var oldMin, out var oldMax);
+                var surfacePos = outputToSurface.TransformPoint(rectifiedToOutput.TransformPoint(viewPos + viewMin));
+                SurfaceGeometry.DragEdge(surface, edge, surfacePos, _edgeDragStretches);
+                SurfaceGeometry.LocalBounds(surface, out var newMin, out var newMax);
+                KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
+                break;
+            }
+
+            case CanvasPointHandle.DragPhases.Completed:
+                if (_gesture.Is(GestureKinds.SurfaceResize, surface.Id))
+                    EndGesture(setup);
+
+                break;
+        }
     }
-
-    // Whether the live edge drag stretches (Ctrl at the press) rather than crops — held for the drag.
-    private bool _edgeDragStretches;
 
     /// <summary>
     /// Whether an edge drag on this surface would stretch rather than crop: Ctrl at the press, then the mode
@@ -1163,7 +796,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>A corner drag (the grabbed surface, plus any with selected corners riding along) as one gesture.</summary>
-    private void HandleDrag(CanvasPointHandle.DragPhases phase, Setup setup, Guid surfaceId, Guid outputId, Vector2[] liveQuad)
+    private void RunCornerPinGesture(CanvasPointHandle.DragPhases phase, Setup setup, Guid surfaceId)
     {
         switch (phase)
         {
@@ -1200,159 +833,48 @@ internal sealed partial class SetupOutputView
         }
     }
 
-    private static bool QuadsDiffer(Vector2[] a, Vector2[] b)
-    {
-        for (var i = 0; i < a.Length && i < b.Length; i++)
-        {
-            if (a[i] != b[i])
-                return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// An axis-aligned rect of <paramref name="size"/> placed so its anchor coincides with the same anchor of
-    /// the reference box — so resizing extends the rect from the anchor instead of recentring it. The anchor
-    /// is signed and Y-up, while canvas Y grows downward. Returns TL, TR, BR, BL.
-    /// </summary>
-    private static Vector2[] AnchoredRect(Vector2 refMin, Vector2 refMax, Vector2 anchor, Vector2 size)
-    {
-        var t = (anchor + Vector2.One) * 0.5f;
-        var anchorX = refMin.X + t.X * (refMax.X - refMin.X);
-        var anchorY = refMax.Y - t.Y * (refMax.Y - refMin.Y);
-
-        var minX = anchorX - t.X * size.X;
-        var maxX = minX + size.X;
-        var maxY = anchorY + t.Y * size.Y;
-        var minY = maxY - size.Y;
-
-        return [new Vector2(minX, minY), new Vector2(maxX, minY), new Vector2(maxX, maxY), new Vector2(minX, maxY)];
-    }
-
-    private static void Bounds(Vector2[] points, out Vector2 min, out Vector2 max)
-    {
-        min = max = points[0];
-        for (var i = 1; i < points.Length; i++)
-        {
-            min = Vector2.Min(min, points[i]);
-            max = Vector2.Max(max, points[i]);
-        }
-    }
-
-    // Straight morph: fraction of the focused surface's straightened size kept as surround margin (context).
-    private const float StraightSurroundFactor = 0.4f;
-    // Per-frame quad scratch: the rectify interpolation, the projector outline, the warp target, the surface in view.
-    private readonly Vector2[] _interpQuad = new Vector2[4];
-    private readonly Vector2[] _basisPxQuad = new Vector2[4];
-    private readonly Vector2[] _canvasOutline = new Vector2[4];
-    private readonly Vector2[] _warpDestQuad = new Vector2[4];
-    private readonly Vector2[] _viewQuad = new Vector2[4];
-
-    // View morph timing: eased in so it starts slowly and finishes quickly. The exponent solves 0.75^k = 0.5,
+    // Morph timing: eased in so it starts slowly and finishes quickly. The exponent solves 0.75^k = 0.5,
     // i.e. the visual midpoint is reached at 75% of the duration.
     private const float MorphDurationSec = 0.5f;
     private const float MorphEaseExponent = 2.41f;
 
-    private readonly SpaceProjection _projection;
-    private readonly Vector2[] _boardFlyQuad = new Vector2[4];
-    private readonly EntityItem _entityItem;
-    private EditModes _editMode = EditModes.Board; // the Board is the home view, so a fresh window opens on it
-
-    /// <summary>Set by the window: the outliner strip is shown and hosts the toolbar (see <see cref="DeferHeader"/>).</summary>
-    public bool IsHeaderHostedByStrip;
-
-    private enum HeaderKinds { None, Modes, Return, Reference }
-
-    private HeaderKinds _pendingHeaderKind;
-    private Guid _pendingHeaderOutputId;
-    private string _pendingHeaderTitle = string.Empty;
-    private Guid _pendingHeaderImageId;
-    private Guid _pendingHeaderSubjectId;
-
-    // Calibrating a pin by its reference points: the projected photo discs, and the solve's scratch lists.
-    private bool _projectsPhoto;
-    private float _pinResidualPx;
-    private readonly List<Vector2> _pinTargets = [];
-    private readonly List<Vector2> _pinFrom = [];
-    private readonly List<Vector2> _pinSurfacePositions = [];
-    private readonly Vector2[] _canvasDiscQuad = new Vector2[4];
-    private static readonly Guid _canvasDiscKey = new("6a1f0c2e-7b3d-4e8f-9a0b-1c2d3e4f5a6b");
+    // Mode and framed subject: the edit mode (the Board is the home view, so a fresh window opens on it), the
+    // surface this frame shows, and the key of the last fit.
+    private EditModes _editMode = EditModes.Board;
     private bool _isolatesFocusedSurface;
     private Guid _shownSurfaceId; // frame-scoped: what the caller passed to this Draw, never read across frames
     private (Guid OutputId, EditModes Mode, Vector2 Size) _fitKey;
 
-    // View morph position: 0 = Original (projector space), 1 = Straight (focused surface rectified),
-    // 2 = Content (framing tightened onto that surface). One continuous axis, animated.
-    private float _viewMorph;
-    private float _morphTarget;
-    private float _morphFrom;
-    private float _morphProgress = 1f; // 1 = settled (no animation running)
-
-    // Camera at the moment a morph or a space transition started, and the board rect it showed, so the
-    // framing eases from the user's view.
+    // View morph: 0 = Original (projector space), 1 = Straight (focused surface rectified), one continuous
+    // axis; the camera at a transition's start, so the framing eases from the user's view.
+    private EasedValue _viewMorph = EasedValue.Settled(0f);
     private CanvasScope _morphFromScope;
-    private Vector2 _morphFromMin, _morphFromMax;
 
-    // Board ↔ space blend: 0 = the Board, 1 = the current space (an output's canvas, a source's texture),
-    // eased like the view morph; the camera returns to the pre-space Board view on the way back.
-    private float _spaceBlend;
-    private float _spaceTarget;
-    private float _spaceFrom;
-    private float _spaceProgress = 1f;
+    // Board ↔ space blend: 0 = the Board, 1 = the current space (an output's canvas, a source's texture); the
+    // camera returns to the pre-space Board view on the way back.
+    private readonly SpaceProjection _projection;
+    private EasedValue _spaceBlend = EasedValue.Settled(0f);
     private CanvasScope _boardScopeBeforeSpace;
     private SetupEntityKinds _spaceKind;
     private Guid _spaceId;
     private Vector2 _spaceOrigin; // the space's card top-left and scale, as EnterSpace set them
     private float _spacePixelsPerMeter;
-    private Vector2 _straightRectMin, _straightRectMax; // the rectified surface's rect in output px, per frame
 
-    // Basis transition: eases the rectify basis (quad/size/anchor) from the previously focused surface to the
-    // newly selected one, so switching selection in a rectified view turns the scene rather than snapping.
-    private readonly Vector2[] _basisFromQuad = new Vector2[4];
-    private readonly Vector2[] _basisLastQuad = new Vector2[4];
-    private readonly Vector2[] _basisBlendQuad = new Vector2[4];
-    private Vector2 _basisFromSize, _basisLastSize, _basisFromAnchor, _basisLastAnchor;
-    private Guid _basisTransitionId;
-    private float _basisMorph = 1f; // 1 = settled
-    private bool _basisHasLast;
-    private bool _basisWasFrozen; // last frame's freeze, so a lifted freeze can ease instead of jumping
+    // Output canvas scratch, reused every frame: the projector outline, the warp target, a surface's quad in
+    // view, and where that quad flies in from.
+    private readonly Vector2[] _canvasOutline = new Vector2[4];
+    private readonly Vector2[] _warpDestQuad = new Vector2[4];
+    private readonly Vector2[] _viewQuad = new Vector2[4];
+    private readonly Vector2[] _boardFlyQuad = new Vector2[4];
 
-    // The settled straight framing, held across edits (null = re-derive on the next rectified frame).
-    private Vector2? _frozenFramedMin;
-    private Vector2 _frozenFramedMax;
-    private bool _easeKeepsFraming; // post-edit settle (same basis): ease R, but hold the framing window
-
-    // The canvas sub-element plane: selected mapping-quad corners (SelectionTarget.Part == Corner) of the
-    // shown output canvas. Deliberately separate from the entity selection — the two planes never mix.
+    // The canvas sub-element plane: selected mapping-quad corners of the shown output canvas and the marquee
+    // over them. Deliberately separate from the entity selection — the two planes never mix.
     private readonly SelectionSet<SelectionTarget> _canvasSelection = new();
     private readonly SelectionFence _fence = new();
     private readonly List<(SelectionTarget Target, Vector2 ScreenPos)> _fenceCandidates = new();
 
-    // Label chips collected this frame (id + screen rect) and the pick they resolve to — labels double as
-    // each surface's click target, and overlapping ones cycle.
-    private readonly CanvasItemPicker<SetupEntityKinds> _picker = new();
-
-    // The held-grab handoff: a plain press on a surface/region label selects it (via the picker, which
-    // cycles stacks); if the button is still down next frame, the move machinery starts from this position.
-    private Vector2? _labelGrabScreen;
-
-    // Patch gestures: the quad in view space (reused per patch) and the pre-drag quad a re-based edit starts from.
-    private readonly Vector2[] _patchViewQuad = new Vector2[4];
-    private readonly Vector2[] _patchOldQuad = new Vector2[4];
-    private SetupEntityKinds _menuKind;
-    private Guid _menuId;
-
-    // Snap candidates in the parent's space, rebuilt per drag frame; reused so dragging doesn't allocate.
-    private readonly List<float> _snapXs = [];
-    private readonly List<float> _snapYs = [];
-    private const string PickMenuId = "##canvasPickMenu";
-    private const string BoardMenuId = "##boardMenu";
-
-    // Scratch for a Layout child's derived quad; consumed before the next child reuses it.
-    private readonly Vector2[] _childQuadBuffer = new Vector2[4];
-
-    // The axis a nearly-straight region move locked to (0 none, 1 horizontal, 2 vertical), so the guide can be drawn.
-    private int _childMoveAxis;
-    private bool _framingWasFrozen;
+    // Surface edit gestures: whether the live edge drag stretches (Ctrl at the press) rather than crops, and
+    // the snap candidates every editor rebuilds per drag frame into one instance, so dragging doesn't allocate.
+    private bool _edgeDragStretches;
+    private readonly RectSnapping _snapping = new();
 }

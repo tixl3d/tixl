@@ -14,6 +14,23 @@ namespace T3.Editor.Gui.Interaction.CanvasEditing;
 /// </summary>
 internal static class CanvasDraw
 {
+    /// <summary>The axis-aligned bounds of a point set (any winding, at least one point).</summary>
+    public static void Bounds(System.ReadOnlySpan<Vector2> points, out Vector2 min, out Vector2 max)
+    {
+        min = max = points[0];
+        for (var i = 1; i < points.Length; i++)
+        {
+            min = Vector2.Min(min, points[i]);
+            max = Vector2.Max(max, points[i]);
+        }
+    }
+
+    /// <summary>Whether a point lies inside an axis-aligned rect, edges included.</summary>
+    public static bool Contains(Vector2 min, Vector2 max, Vector2 p)
+    {
+        return p.X >= min.X && p.X <= max.X && p.Y >= min.Y && p.Y <= max.Y;
+    }
+
     /// <summary>The four edges of a quad (any winding), as a closed outline.</summary>
     public static void QuadOutline(ImDrawListPtr dl, System.ReadOnlySpan<Vector2> screen, Color color, float thickness = 1f)
     {

@@ -18,6 +18,13 @@ internal static class GlobalSelectionHandling
         SetupEntity,
     }
 
+    /// <summary>
+    /// The one setup-entity selection shared by all output windows and the Parameter window. Windows follow it
+    /// by default; a window that should keep showing something else carries a per-window pin instead. Targets
+    /// resolve lazily against the active setup, so stale targets prune themselves on project or setup switches.
+    /// </summary>
+    public static readonly SetupEntitySelection SetupEntities = new();
+
     /// <summary>Which selection system the Parameter window currently shows. <see cref="InspectionTargets.None"/>
     /// reads like <see cref="InspectionTargets.GraphNode"/> — the window falls back to the graph's composition.</summary>
     public static InspectionTargets InspectionTarget { get; private set; }
@@ -34,7 +41,7 @@ internal static class GlobalSelectionHandling
                 ProjectView.Focused?.NodeSelection.Clear();
                 break;
             case InspectionTargets.GraphNode:
-                OutputSetupHandling.EntitySelection.Clear();
+                SetupEntities.Clear();
                 break;
         }
     }

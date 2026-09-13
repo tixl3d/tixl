@@ -22,7 +22,11 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal sealed partial class SetupOutputView
 {
-    /// <param name="output">Null while the Board is shown without any output focused.</param>
+    private enum HeaderKinds { None, Modes, Return, Reference }
+
+    /// <summary>Set by the window: the outliner strip is shown and hosts the toolbar (see <see cref="DeferHeader"/>).</summary>
+    public bool IsHeaderHostedByStrip;
+
     /// <summary>
     /// The strip hosts the canvas' toolbar while it is shown: the canvas records what its header would be and
     /// draws nothing at its top; the strip's header row calls <see cref="DrawHostedHeader"/> in its place.
@@ -60,6 +64,7 @@ internal sealed partial class SetupOutputView
         }
     }
 
+    /// <param name="output">Null while the Board is shown without any output focused.</param>
     private void DrawHeader(Setup setup, OutputDefinition? output, Guid outputId)
     {
         // The Board and its two cameras as one segmented control. Straightening rectifies a single surface,
@@ -73,7 +78,7 @@ internal sealed partial class SetupOutputView
         // A camera whose subject this view doesn't hold may still be *reachable* from the selection along the
         // routing — with a slice selected, the projector it ends up on is unambiguous. Offer the tab then, and
         // let picking it select that subject, rather than making the user walk the columns to it by hand.
-        var selection = OutputSetupHandling.EntitySelection;
+        var selection = GlobalSelectionHandling.SetupEntities;
         var reachedOutputId = Guid.Empty;
         var reachedSurfaceId = Guid.Empty;
         if (selection.TryResolve(setup, out var primaryKind, out var primaryId))
@@ -115,13 +120,6 @@ internal sealed partial class SetupOutputView
             else if (_editMode == EditModes.Straight && reachedSurfaceId != Guid.Empty)
                 selection.Select(SetupEntityKinds.Surface, reachedSurfaceId);
         }
-
-        // A disabled segment can't be clicked away, so a mode left selected after its precondition lapses
-        // (the selection no longer reaches a surface or an output) is reset here instead.
-        if (!canStraight && _editMode == EditModes.Straight)
-            _editMode = canOutput ? EditModes.Output : EditModes.Board;
-        else if (!canOutput && _editMode != EditModes.Straight)
-            _editMode = EditModes.Board;
 
         // Isolate: locks the canvas to the focused frame — the others stay visible and keep snapping, but
         // can't be selected or edited from the canvas, so you can work one frame without nudging its
@@ -206,7 +204,7 @@ internal sealed partial class SetupOutputView
         }
 
         if (_projectsPhoto && photoCarrier != null && TryGetTracedFragment(setup, photoCarrier, out var photoSrv, out var photoUvMin, out var photoUvMax))
-            OutputManager.SetCalibrationPhoto(photoCarrier.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius);
+            CalibrationOverlay.SetCalibrationPhoto(photoCarrier.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius);
 
         // Measuring only makes sense against the straightened surface — on the projector canvas the
         // lengths would be perspective-foreshortened and mean nothing.
@@ -250,26 +248,26 @@ internal sealed partial class SetupOutputView
             // Straighten first (it fixes the keystone but cannot know the aspect), lengths second. Both
             // stay visible and disabled rather than appearing once they happen to qualify — a button that
             // isn't there yet can't explain what it wants.
-            var canStraighten = SetupActions.CountLines(lineSubject) >= MinLinesToStraighten;
+            var canStraighten = SurfaceMetrics.CountLines(lineSubject) >= MinLinesToStraighten;
             ImGui.SameLine();
             ImGui.BeginDisabled(!canStraighten);
             if (ImGui.SmallButton("Straighten") && canStraighten)
             {
                 if (tracedForLines != null)
-                    SetupActions.RunUndoable("Straighten trace from lines", setup, () => TryStraightenTraceFromLines(lineSubject));
+                    SetupUndo.RunUndoable("Straighten trace from lines", setup, () => TryStraightenTraceFromLines(lineSubject));
                 else
-                    SetupActions.RunUndoable("Straighten from lines", setup, () => TryStraightenFromLines(setup, lineSubject, outputId));
+                    SetupUndo.RunUndoable("Straighten from lines", setup, () => TryStraightenFromLines(setup, lineSubject, outputId));
             }
 
             ImGui.EndDisabled();
             if (!canStraighten && ImGui.IsItemHovered())
                 ImGui.SetTooltip($"Trace at least {MinLinesToStraighten} reference lines along features that are straight in reality.");
 
-            var canApply = SetupActions.HasMeasuredLine(lineSubject);
+            var canApply = SurfaceMetrics.HasMeasuredLine(lineSubject);
             ImGui.SameLine();
             ImGui.BeginDisabled(!canApply);
             if (ImGui.SmallButton("Apply lengths") && canApply)
-                SetupActions.RunUndoable("Apply lengths", setup, () => TryApplyLengths(setup, lineSubject));
+                SetupUndo.RunUndoable("Apply lengths", setup, () => TryApplyLengths(setup, lineSubject));
 
             ImGui.EndDisabled();
             if (!canApply && ImGui.IsItemHovered())
@@ -300,7 +298,7 @@ internal sealed partial class SetupOutputView
             var label = string.IsNullOrEmpty(surface.Name) ? "untitled" : surface.Name;
             if (ImGui.SmallButton("+ " + label))
             {
-                SetupActions.RunUndoable("Map surface", setup, () => AddMapping(surface, output, outputId));
+                SetupUndo.RunUndoable("Map surface", setup, () => SetupActions.AddMapping(surface, output, outputId));
             }
 
             CustomComponents.TooltipForLastItem("Map this surface onto the output",
@@ -308,4 +306,11 @@ internal sealed partial class SetupOutputView
             ImGui.PopID();
         }
     }
+
+    // The header the last drawn canvas deferred to the strip.
+    private HeaderKinds _pendingHeaderKind;
+    private Guid _pendingHeaderOutputId;
+    private string _pendingHeaderTitle = string.Empty;
+    private Guid _pendingHeaderImageId;
+    private Guid _pendingHeaderSubjectId;
 }

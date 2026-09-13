@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
@@ -55,7 +56,7 @@ public sealed class Setup
     public Setup Duplicate(string newName)
     {
         var json = ToJsonString();
-        var clone = ReadFromJson(JObject.Parse(json)) ?? throw new InvalidOperationException("Setup round-trip failed during duplication");
+        var clone = ReadFromJson(JObject.Parse(json));
         clone.Id = Guid.NewGuid();
         clone.Name = newName;
         return clone;
@@ -71,6 +72,29 @@ public sealed class Setup
         {
             if (surface.Id == id)
                 return surface;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The surface that carries the corner pins for <paramref name="surfaceId"/>: itself when it has output
+    /// mappings, else the nearest ancestor with mappings. A Layout child has no mapping of its own — it is
+    /// shown wherever its parent is mapped. Null when nothing in the chain is mapped.
+    /// </summary>
+    public Surface? FindMappedAncestor(Guid surfaceId)
+    {
+        var surface = FindSurface(surfaceId);
+        for (var guard = 0; surface != null && guard < 16; guard++)
+        {
+            if (surface.OutputMappings.Count > 0)
+                return surface;
+
+            if (surface.ParentId == Guid.Empty)
+                break;
+
+            var parentId = surface.ParentId;
+            surface = FindSurface(parentId);
         }
 
         return null;
@@ -234,7 +258,7 @@ public sealed class Setup
         writer.WriteEndObject();
     }
 
-    public static Setup? ReadFromJson(JToken token)
+    public static Setup ReadFromJson(JToken token)
     {
         var version = token.ReadValueSafe("Version", 0);
         if (version > CurrentVersion)
@@ -281,19 +305,26 @@ public sealed class Setup
         }
     }
 
-    public static bool TryLoadFromFile(string filePath, out Setup? setup)
+    /// <summary>
+    /// Loads and runs <see cref="SetupRepair"/> on the result, so every loader gets sane data.
+    /// <paramref name="wasRepaired"/> tells the caller to persist the repaired setup.
+    /// </summary>
+    public static bool TryLoadFromFile(string filePath, [NotNullWhen(true)] out Setup? setup, out bool wasRepaired)
     {
         setup = null;
+        wasRepaired = false;
         try
         {
             var json = File.ReadAllText(filePath);
             setup = ReadFromJson(JObject.Parse(json));
-            return setup != null;
         }
         catch (Exception e)
         {
             Log.Warning($"Can't load setup from {filePath}: {e.Message}");
             return false;
         }
+
+        wasRepaired = SetupRepair.Repair(setup);
+        return true;
     }
 }

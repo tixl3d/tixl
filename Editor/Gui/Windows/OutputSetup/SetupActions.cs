@@ -3,308 +3,33 @@ using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Slots;
 using T3.Core.Logging;
-using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 using T3.Core.Resource.Assets;
-using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.AssetLib;
-using T3.Editor.UiModel;
-using T3.Editor.UiModel.Commands;
-using T3.Editor.UiModel.Commands.Graph;
-using T3.Editor.UiModel.Commands.Setup;
-using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// Entity mutations, graph glue, and shared labels/menus for output setups. These operations are shared
-/// by the setup sidebar, the canvas views, and the flow view — they are model operations, not panel UI,
-/// so they live here in a neutral class none of the views own.
+/// Creating, deleting, renaming and duplicating setup entities — the per-kind mutations, each one undo step
+/// (see <see cref="SetupUndo"/>). Shared by the outliner, the canvas views and the parameter cards, so they live
+/// in a neutral class none of the views own. Routing is <see cref="SetupRouting"/>, graph glue
+/// <see cref="ContentSourceSync"/>, names <see cref="SetupLabels"/>, metres <see cref="SurfaceMetrics"/>.
 /// </summary>
 internal static class SetupActions
 {
-    /// <summary>
-    /// Whether the two kinds form a routing connection at all — the drop matrix, direction-agnostic.
-    /// Connectable pairs: surface↔output, slice↔output, source↔output, slice↔surface, source↔surface,
-    /// slice↔patch, source↔patch, surface↔patch, output↔plug, and surface/slice/source↔plug (which route into
-    /// the output the plug presents).
-    /// </summary>
-    internal static bool CanConnect(SetupEntityKinds a, SetupEntityKinds b)
-    {
-        // Normalize so `a` is the content-flow upstream side.
-        if (RoutingRank(a) > RoutingRank(b))
-            (a, b) = (b, a);
-
-        return b switch
-                   {
-                       SetupEntityKinds.Output => a is SetupEntityKinds.Surface
-                                                                      or SetupEntityKinds.Slice
-                                                                      or SetupEntityKinds.ContentSource,
-                       SetupEntityKinds.Surface => a is SetupEntityKinds.Slice
-                                                                       or SetupEntityKinds.ContentSource,
-                       SetupEntityKinds.Patch => a is SetupEntityKinds.Slice
-                                                                     or SetupEntityKinds.ContentSource
-                                                                     or SetupEntityKinds.Surface,
-                       SetupEntityKinds.Plug => a is SetupEntityKinds.Output
-                                                                    or SetupEntityKinds.Surface
-                                                                    or SetupEntityKinds.Slice
-                                                                    or SetupEntityKinds.ContentSource,
-                       _ => false,
-                   };
-    }
-
-    // Position along the content flow (source → slice → surface → output); used to normalize drop direction.
-    private static int RoutingRank(SetupEntityKinds kind)
-    {
-        return kind switch
-                   {
-                       SetupEntityKinds.ContentSource => 0,
-                       SetupEntityKinds.Slice => 1,
-                       SetupEntityKinds.Surface => 2,
-                       SetupEntityKinds.Patch => 3,
-                       SetupEntityKinds.Output => 3,
-                       SetupEntityKinds.Plug => 4,
-                       _ => -1,
-                   };
-    }
-
-    /// <summary>
-    /// Wraps a structural setup mutation in one undo step: snapshot the whole setup before, run the edit,
-    /// and push a snapshot command + save only when something actually changed. Setup files are a few KB
-    /// of plain DTOs, so whole-state snapshots are simpler and more robust than per-operation inverses —
-    /// every cascade the edit performs is captured by construction.
-    /// </summary>
-    internal static void RunUndoable(string name, Setup setup, Action mutate)
-    {
-        var oldJson = setup.ToJsonString();
-        mutate();
-        var newJson = setup.ToJsonString();
-        if (newJson == oldJson)
-            return;
-
-        // Already applied by mutate(), so Add rather than AddAndExecute.
-        UndoRedoStack.Add(new SetupSnapshotCommand(name, setup.Id, oldJson, newJson));
-        OutputSetupHandling.SaveActive();
-    }
-
-    /// <summary>
-    /// Closes a continuous gesture (a drag) as one undo step: <paramref name="oldJson"/> is the setup's snapshot
-    /// from the gesture's start; nothing is pushed when the setup came back unchanged.
-    /// </summary>
-    internal static void CommitGesture(Setup setup, string name, string oldJson)
-    {
-        var newJson = setup.ToJsonString();
-        if (newJson == oldJson)
-            return;
-
-        UndoRedoStack.Add(new SetupSnapshotCommand(name, setup.Id, oldJson, newJson));
-        OutputSetupHandling.SaveActive();
-    }
-
-    internal static void ApplyDrop(Setup setup, SetupEntityKinds dragKind, Guid dragId,
-                                   SetupEntityKinds targetKind, Guid targetId)
-    {
-        // A plug binding is machine state, not setup state: it saves on its own and sits outside the setup's undo.
-        if (dragKind == SetupEntityKinds.Plug || targetKind == SetupEntityKinds.Plug)
-        {
-            if (!OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
-                return;
-
-            var plugId = dragKind == SetupEntityKinds.Plug ? dragId : targetId;
-            var otherKind = dragKind == SetupEntityKinds.Plug ? targetKind : dragKind;
-            var otherId = dragKind == SetupEntityKinds.Plug ? targetId : dragId;
-
-            if (otherKind == SetupEntityKinds.Output)
-            {
-                if (setup.FindOutput(otherId) != null)
-                    Plugs.BindOutput(machineConfig, otherId, plugId);
-
-                return;
-            }
-
-            // A plug stands for what it presents: dropping content or a surface on it routes into that output,
-            // creating and binding one when the plug is still free — the three steps that shortcut asks for.
-            var target = Plugs.TryGetBoundOutput(setup, machineConfig, plugId);
-            if (target == null)
-            {
-                var created = CreateOutputForPlug(setup, machineConfig, plugId);
-                if (created == null)
-                    return;
-
-                target = created;
-            }
-
-            var outputTargetId = target.Id;
-            RunUndoable("Connect", setup, () => ApplyDropInternal(setup, otherKind, otherId,
-                                                                  SetupEntityKinds.Output, outputTargetId));
-            return;
-        }
-
-        RunUndoable("Connect", setup, () => ApplyDropInternal(setup, dragKind, dragId, targetKind, targetId));
-    }
-
-    /// <summary>
-    /// One rule for every pair: a drop connects the two. Dropping what the target already takes changes nothing,
-    /// and otherwise the target's input is *replaced* — a drop never stacks a second route onto the same place,
-    /// which would read as "re-fed" while quietly keeping the old one alive underneath. Sub-regions and extra
-    /// patches are made deliberately (their "Add …" actions), never as a side effect of a drop.
-    /// </summary>
-    private static void ApplyDropInternal(Setup setup, SetupEntityKinds dragKind, Guid dragId,
-                                          SetupEntityKinds targetKind, Guid targetId)
-    {
-        // A drop means "connect these two" regardless of which one was picked up — dragging an output onto a
-        // surface is the same link as dragging the surface onto the output. Normalize so the upstream side is
-        // always the drag and the cases below only handle one direction each.
-        if (RoutingRank(dragKind) > RoutingRank(targetKind))
-        {
-            (dragKind, targetKind) = (targetKind, dragKind);
-            (dragId, targetId) = (targetId, dragId);
-        }
-
-        if (targetKind == SetupEntityKinds.Output && dragKind == SetupEntityKinds.Surface)
-        {
-            var surface = setup.FindSurface(dragId);
-            var output = setup.FindOutput(targetId);
-
-            // A region normally rides its parent's pin; a mapping of its own overrides that for this output
-            // (see Surface.OutputMappings). It stays a child everywhere else — same plane, same rectangle.
-            if (surface != null && output != null && !surface.HasMapping(targetId))
-                surface.OutputMappings.Add(CreateDefaultMapping(output));
-
-            return;
-        }
-
-        // A surface (or region) dropped on a patch takes the patch's place: it is pinned to the patch's quad on
-        // that output and the patch goes. The inverse of "Use on Surface", and for a region the way to give it a
-        // pin of its own on one output while it keeps riding its parent everywhere else.
-        if (targetKind == SetupEntityKinds.Patch && dragKind == SetupEntityKinds.Surface)
-        {
-            var surface = setup.FindSurface(dragId);
-            var patch = setup.FindPatch(targetId, out var patchOutput);
-            if (surface == null || patch == null || patchOutput == null || patch.Quad.Length < 4)
-                return;
-
-            var quad = (Vector2[])patch.Quad.Clone();
-            var mapping = surface.FindMapping(patchOutput.Id);
-            if (mapping != null)
-                mapping.Quad = quad;
-            else
-                surface.OutputMappings.Add(new Surface.OutputMapping { OutputId = patchOutput.Id, Quad = quad });
-
-            // Nothing shown here yet: adopt what the patch fed, so the drop doesn't silently drop its content.
-            if (surface.SliceId == Guid.Empty)
-                surface.SliceId = patch.SliceId;
-
-            patchOutput.Patches.RemoveAll(p => p.Id == targetId);
-            return;
-        }
-
-        // Dropping a source or slice straight onto an output shows it full-frame: the direct pipe, as a new
-        // full-canvas patch (no surface, no corner pin). Dropped onto a patch, it re-feeds that patch.
-        if (dragKind is SetupEntityKinds.Slice or SetupEntityKinds.ContentSource
-            && targetKind is SetupEntityKinds.Output or SetupEntityKinds.Patch)
-        {
-            var sliceId = Guid.Empty;
-            if (dragKind == SetupEntityKinds.Slice && setup.FindSlice(dragId) != null)
-            {
-                sliceId = dragId;
-            }
-            else if (dragKind == SetupEntityKinds.ContentSource)
-            {
-                var source = setup.FindSourceByChildId(dragId);
-                if (source != null)
-                    sliceId = EnsureSlice(setup, source).Id;
-            }
-
-            if (sliceId == Guid.Empty)
-                return;
-
-            if (targetKind == SetupEntityKinds.Patch)
-            {
-                var patch = setup.FindPatch(targetId, out _);
-                if (patch != null)
-                    patch.SliceId = sliceId;
-            }
-            else
-            {
-                var output = setup.FindOutput(targetId);
-                if (output != null)
-                    FeedOutputDirectly(output, sliceId);
-            }
-
-            return;
-        }
-
-        // A surface shows one slice: the drop sets it, replacing whatever it showed. (To show a second thing on
-        // the same wall, add a region and feed that — a drop is a connection, not a layout decision.)
-        if (dragKind == SetupEntityKinds.Slice)
-        {
-            var slice = setup.FindSlice(dragId);
-            var surface = setup.FindSurface(targetId);
-            if (slice != null && surface != null)
-                surface.SliceId = slice.Id;
-        }
-
-        if (dragKind == SetupEntityKinds.ContentSource)
-        {
-            var source = setup.FindSourceByChildId(dragId);
-            var surface = source == null ? null : setup.FindSurface(targetId);
-            if (source != null && surface != null)
-                surface.SliceId = EnsureSlice(setup, source).Id;
-        }
-    }
-
-    internal static bool TryParseDrag(string data, out SetupEntityKinds kind, out Guid id)
-    {
-        kind = SetupEntityKinds.None;
-        id = Guid.Empty;
-        var separator = data.IndexOf(':');
-        if (separator <= 0
-            || !int.TryParse(data.AsSpan(0, separator), out var kindInt)
-            || !Guid.TryParse(data.AsSpan(separator + 1), out id))
-            return false;
-
-        kind = (SetupEntityKinds)kindInt;
-        return true;
-    }
-
     internal static void AddSlice(SetupEntitySelection selection, Setup setup, ContentSource source)
     {
-        RunUndoable("Add slice", setup, () =>
-                                        {
-                                            // Left unnamed: the label is derived from the source, so it stays right when the op is later renamed.
-                                            var slice = new Slice { SourceId = source.Id };
-                                            setup.Slices.Add(slice);
-                                            selection.Select(SetupEntityKinds.Slice, slice.Id);
-                                        });
-    }
-
-    /// <summary>Deleting a slice clears it from anything showing it — the reference would mean nothing.</summary>
-    private static void DeleteSliceInternal(Setup setup, Guid sliceId)
-    {
-        foreach (var surface in setup.Surfaces)
-        {
-            if (surface.SliceId == sliceId)
-                surface.SliceId = Guid.Empty;
-        }
-
-        foreach (var output in setup.Outputs)
-        {
-            foreach (var patch in output.Patches)
-            {
-                if (patch.SliceId == sliceId)
-                    patch.SliceId = Guid.Empty; // the patch keeps its place on the canvas, just unfed
-            }
-        }
-
-        setup.Slices.RemoveAll(s => s.Id == sliceId);
+        SetupUndo.RunUndoable("Add slice", setup, () =>
+                                                  {
+                                                      // Left unnamed: the label is derived from the source, so it stays right when the op is later renamed.
+                                                      var slice = new Slice { SourceId = source.Id };
+                                                      setup.Slices.Add(slice);
+                                                      selection.Select(SetupEntityKinds.Slice, slice.Id);
+                                                  });
     }
 
     /// <summary>
@@ -315,77 +40,23 @@ internal static class SetupActions
     /// </summary>
     internal static void AddPatch(SetupEntitySelection selection, Setup setup, OutputDefinition output)
     {
-        RunUndoable("Add patch", setup, () =>
-                                        {
-                                            var patch = AddPatchInternal(output, Guid.Empty);
-                                            var min = new Vector2(0.25f, 0.25f);
-                                            var max = new Vector2(0.75f, 0.75f);
-                                            patch.Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)];
-                                            selection.Select(SetupEntityKinds.Patch, patch.Id);
-                                        });
+        SetupUndo.RunUndoable("Add patch", setup, () =>
+                                                  {
+                                                      var patch = AddPatchInternal(output, Guid.Empty);
+                                                      var min = new Vector2(0.25f, 0.25f);
+                                                      var max = new Vector2(0.75f, 0.75f);
+                                                      patch.Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)];
+                                                      selection.Select(SetupEntityKinds.Patch, patch.Id);
+                                                  });
     }
 
-    /// <summary>
-    /// Feeds a slice straight onto an output's canvas. The direct pipe is one full-canvas patch, so a repeat
-    /// drop re-feeds it instead of stacking a second one exactly over it. An output already split into tiles
-    /// keeps them: the drop adds the full-canvas layer it asked for, which the tiles then sit under.
-    /// </summary>
-    private static void FeedOutputDirectly(OutputDefinition output, Guid sliceId)
+    /// <summary>A full-canvas patch fed by a slice, appended outside any undo step — the caller's.</summary>
+    internal static OutputDefinition.Patch AddPatchInternal(OutputDefinition output, Guid sliceId)
     {
-        foreach (var existing in output.Patches)
-        {
-            // Already showing it: the drop asked for a connection that is already there.
-            if (existing.SliceId == sliceId)
-                return;
-        }
-
-        if (output.Patches.Count == 1)
-        {
-            output.Patches[0].SliceId = sliceId;
-            return;
-        }
-
-        AddPatchInternal(output, sliceId);
-    }
-
-    private static OutputDefinition.Patch AddPatchInternal(OutputDefinition output, Guid sliceId)
-    {
-        // Left unnamed: the label is derived from its position (see PatchLabel).
+        // Left unnamed: the label is derived from its position (see SetupLabels.PatchLabel).
         var patch = new OutputDefinition.Patch { SliceId = sliceId, Quad = OutputDefinition.FullCanvasQuad() };
         output.Patches.Add(patch);
         return patch;
-    }
-
-    /// <summary>
-    /// Copies a surface — with its sub-regions — offset a little so it doesn't hide under the original. The
-    /// copy gets fresh GUIDs, so content sends still point at the original; the duplicate starts unbound.
-    /// </summary>
-    private static void DuplicateSurface(SetupEntitySelection selection, Setup setup, Surface surface)
-    {
-        var copy = CloneSurface(surface);
-        var isChild = surface.ParentId != Guid.Empty;
-        copy.Name = isChild ? $"Region {SetupRelations.CountChildren(setup, surface.ParentId) + 1}" : surface.Name + " copy";
-
-        if (isChild)
-        {
-            copy.LocalPosition = surface.LocalPosition + new Vector2(surface.SizeInMeters.X * 0.15f,
-                                                                    -surface.SizeInMeters.Y * 0.15f);
-        }
-        else
-        {
-            // A root carries its own pins, so nudge those instead.
-            foreach (var mapping in copy.OutputMappings)
-            {
-                // A nudge of the canvas rather than a pixel count, so it reads the same at any resolution.
-                for (var i = 0; i < mapping.Quad.Length; i++)
-                    mapping.Quad[i] += new Vector2(0.0125f, 0.0125f);
-            }
-        }
-
-        setup.Surfaces.Add(copy);
-        DuplicateChildrenOf(setup, surface.Id, copy.Id);
-
-        selection.Select(SetupEntityKinds.Surface, copy.Id);
     }
 
     internal static void AddSurface(SetupEntitySelection selection)
@@ -393,12 +64,12 @@ internal static class SetupActions
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        RunUndoable("Add surface", setup, () =>
-                                          {
-                                              var surface = new Surface { Name = $"Surface {setup.Surfaces.Count + 1}" };
-                                              setup.Surfaces.Add(surface);
-                                              selection.Select(SetupEntityKinds.Surface, surface.Id);
-                                          });
+        SetupUndo.RunUndoable("Add surface", setup, () =>
+                                                    {
+                                                        var surface = new Surface { Name = $"Surface {setup.Surfaces.Count + 1}" };
+                                                        setup.Surfaces.Add(surface);
+                                                        selection.Select(SetupEntityKinds.Surface, surface.Id);
+                                                    });
     }
 
     internal static void AddProp(SetupEntitySelection selection)
@@ -406,38 +77,12 @@ internal static class SetupActions
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        RunUndoable("Add prop", setup, () =>
-                                       {
-                                           var prop = new Prop();
-                                           setup.Props.Add(prop);
-                                           selection.Select(SetupEntityKinds.Prop, prop.Id);
-                                       });
-    }
-
-    /// <summary>
-    /// The canvas a free plug needs before anything can be routed to it: named and sized after the plug, and
-    /// bound to it right away. Its creation is undoable; the binding is machine state and saves on its own, so
-    /// undoing the drop leaves the binding pointing at a canvas that is gone — harmless (the plug reads as free
-    /// again) and re-done by redo.
-    /// </summary>
-    private static OutputDefinition? CreateOutputForPlug(Setup setup, MachineConfig machineConfig, Guid plugId)
-    {
-        OutputDefinition? created = null;
-        RunUndoable("Add output", setup, () =>
-                                         {
-                                             created = new OutputDefinition
-                                                           {
-                                                               Name = Plugs.PlugName(machineConfig, plugId),
-                                                               Kind = OutputDefinition.Kinds.Display,
-                                                               CanvasResolution = Plugs.PlugResolution(plugId),
-                                                           };
-                                             setup.Outputs.Add(created);
-                                         });
-
-        if (created != null)
-            Plugs.BindOutput(machineConfig, created.Id, plugId);
-
-        return created;
+        SetupUndo.RunUndoable("Add prop", setup, () =>
+                                                 {
+                                                     var prop = new Prop();
+                                                     setup.Props.Add(prop);
+                                                     selection.Select(SetupEntityKinds.Prop, prop.Id);
+                                                 });
     }
 
     internal static void AddOutput(SetupEntitySelection selection)
@@ -445,17 +90,50 @@ internal static class SetupActions
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        RunUndoable("Add output", setup, () =>
-                                         {
-                                             var output = new OutputDefinition
-                                                              {
-                                                                  Name = $"P{CountProjectorOutputs(setup) + 1}",
-                                                                  Kind = OutputDefinition.Kinds.Projector,
-                                                                  CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1200),
-                                                              };
-                                             setup.Outputs.Add(output);
-                                             selection.Select(SetupEntityKinds.Output, output.Id);
-                                         });
+        SetupUndo.RunUndoable("Add output", setup, () =>
+                                                   {
+                                                       var output = new OutputDefinition
+                                                                        {
+                                                                            Name = $"P{CountProjectorOutputs(setup) + 1}",
+                                                                            Kind = OutputDefinition.Kinds.Projector,
+                                                                            CanvasResolution = new T3.Core.DataTypes.Vector.Int2(1920, 1200),
+                                                                        };
+                                                       setup.Outputs.Add(output);
+                                                       selection.Select(SetupEntityKinds.Output, output.Id);
+                                                   });
+    }
+
+    /// <summary>Maps a surface onto an output with a centred corner-pin quad at the surface's aspect — appended outside any undo step, the caller's.</summary>
+    internal static void AddMapping(Surface surface, OutputDefinition output, Guid outputId)
+    {
+        var canvasW = Math.Max(1, output.ResolvedResolution.Width);
+        var canvasH = Math.Max(1, output.ResolvedResolution.Height);
+
+        var aspect = surface.SizeInMeters.Y > 0.0001f ? surface.SizeInMeters.X / surface.SizeInMeters.Y : 1f;
+        var maxW = canvasW * 0.6f;
+        var maxH = canvasH * 0.6f;
+        var w = maxW;
+        var h = w / aspect;
+        if (h > maxH)
+        {
+            h = maxH;
+            w = h * aspect;
+        }
+
+        var cx = canvasW * 0.5f;
+        var cy = canvasH * 0.5f;
+
+        // Laid out in pixels for the aspect, stored as fractions of the canvas like every mapping quad.
+        var canvas = new Vector2(canvasW, canvasH);
+        var quad = new[]
+                       {
+                           new Vector2(cx - w * 0.5f, cy - h * 0.5f) / canvas, // top-left
+                           new Vector2(cx + w * 0.5f, cy - h * 0.5f) / canvas, // top-right
+                           new Vector2(cx + w * 0.5f, cy + h * 0.5f) / canvas, // bottom-right
+                           new Vector2(cx - w * 0.5f, cy + h * 0.5f) / canvas, // bottom-left
+                       };
+
+        surface.OutputMappings.Add(new Surface.OutputMapping { OutputId = outputId, Quad = quad });
     }
 
     /// <summary>The image asset type's extensions in the picker's comma-separated form, built once.</summary>
@@ -505,27 +183,40 @@ internal static class SetupActions
             return;
         }
 
-        RunUndoable("Add reference image", setup, () =>
-                                                  {
-                                                      var image = new ReferenceImage
-                                                                      {
-                                                                          Name = Path.GetFileNameWithoutExtension(asset.Address),
-                                                                          FilePath = asset.Address,
-                                                                          BoardPlacement = new BoardPlacement { Position = boardPosition },
-                                                                      };
-                                                      setup.ReferenceImages.Add(image);
-                                                      selection.Select(SetupEntityKinds.ReferenceImage, image.Id);
-                                                  });
+        SetupUndo.RunUndoable("Add reference image", setup, () =>
+                                                            {
+                                                                var image = new ReferenceImage
+                                                                                {
+                                                                                    Name = Path.GetFileNameWithoutExtension(asset.Address),
+                                                                                    FilePath = asset.Address,
+                                                                                    BoardPlacement = new BoardPlacement { Position = boardPosition },
+                                                                                };
+                                                                setup.ReferenceImages.Add(image);
+                                                                selection.Select(SetupEntityKinds.ReferenceImage, image.Id);
+                                                            });
+    }
+
+    internal static void AddReferenceImage(SetupEntitySelection selection)
+    {
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return;
+
+        SetupUndo.RunUndoable("Add reference image", setup, () =>
+                                                            {
+                                                                var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
+                                                                setup.ReferenceImages.Add(image);
+                                                                selection.Select(SetupEntityKinds.ReferenceImage, image.Id);
+                                                            });
     }
 
     /// <summary>Traces an existing (untraced) surface on an image: a default quad in the photo's middle to drag onto the wall.</summary>
     internal static void TraceSurfaceOnImage(SetupEntitySelection selection, Setup setup, Surface surface, ReferenceImage image)
     {
-        RunUndoable("Trace surface", setup, () =>
-                                            {
-                                                surface.Trace = new Surface.TraceBinding { ImageId = image.Id, Quad = DefaultReferenceQuad(image) };
-                                                selection.Select(SetupEntityKinds.Surface, surface.Id);
-                                            });
+        SetupUndo.RunUndoable("Trace surface", setup, () =>
+                                                      {
+                                                          surface.Trace = new Surface.TraceBinding { ImageId = image.Id, Quad = DefaultReferenceQuad(image) };
+                                                          selection.Select(SetupEntityKinds.Surface, surface.Id);
+                                                      });
     }
 
     /// <summary>
@@ -535,154 +226,249 @@ internal static class SetupActions
     /// </summary>
     internal static void TraceNewSurface(SetupEntitySelection selection, Setup setup, ReferenceImage image)
     {
-        RunUndoable("Trace new surface", setup, () =>
-                                                {
-                                                    var quad = DefaultReferenceQuad(image);
-                                                    var surface = new Surface
-                                                                      {
-                                                                          Name = $"Surface {setup.Surfaces.Count + 1}",
-                                                                          Trace = new Surface.TraceBinding { ImageId = image.Id, Quad = quad },
-                                                                          SizeInMeters = EstimateTracedSize(setup, image, quad),
-                                                                      };
-                                                    surface.BoardPlacement = new BoardPlacement { Position = new Vector2(NextFreeBoardX(setup), 0) + surface.AnchorInMeters };
-                                                    setup.Surfaces.Add(surface);
-                                                    selection.Select(SetupEntityKinds.Surface, surface.Id);
-                                                });
+        SetupUndo.RunUndoable("Trace new surface", setup, () =>
+                                                          {
+                                                              var quad = DefaultReferenceQuad(image);
+                                                              var surface = new Surface
+                                                                                {
+                                                                                    Name = $"Surface {setup.Surfaces.Count + 1}",
+                                                                                    Trace = new Surface.TraceBinding { ImageId = image.Id, Quad = quad },
+                                                                                    SizeInMeters = SurfaceMetrics.EstimateTracedSize(setup, image, quad),
+                                                                                };
+                                                              surface.BoardPlacement = new BoardPlacement
+                                                                                           {
+                                                                                               Position = new Vector2(SurfaceMetrics.NextFreeBoardX(setup), 0) + surface.AnchorInMeters,
+                                                                                           };
+                                                              setup.Surfaces.Add(surface);
+                                                              selection.Select(SetupEntityKinds.Surface, surface.Id);
+                                                          });
     }
 
     /// <summary>
-    /// Metres for a traced quad: its bounding box's aspect, at the photo's pixels-per-metre averaged over the
-    /// surfaces already traced on it — or, with none to learn from, a typical wall height.
+    /// Adds a Layout child — a rectangle living inside its parent, riding the parent's corner pin rather than
+    /// carrying one of its own. Its position is stored in meters from the parent's anchor, so it stays welded
+    /// to the meter raster when the parent is cropped or stretched.
     /// </summary>
-    private static Vector2 EstimateTracedSize(Setup setup, ReferenceImage image, Vector2[] quad)
+    internal static void AddSubRegion(SetupEntitySelection selection, Setup setup, Surface parent)
     {
-        QuadBounds(quad, out var min, out var max);
-        var width = MathF.Max(max.X - min.X, 1f);
-        var height = MathF.Max(max.Y - min.Y, 1f);
+        var parentSize = parent.SizeInMeters;
+        var size = new Vector2(MathF.Max(parentSize.X * 0.3f, SurfaceGeometry.MinSize),
+                               MathF.Max(parentSize.Y * 0.3f, SurfaceGeometry.MinSize));
 
-        var pixelsPerMetre = 0f;
-        var samples = 0;
-        foreach (var other in setup.Surfaces)
-        {
-            if (other.Trace == null || other.Trace.ImageId != image.Id || other.Trace.Quad.Length < 4 || other.SizeInMeters.X <= 0.01f)
-                continue;
+        // Land inside the parent rather than at its anchor: cropping an edge past the anchor legitimately
+        // pushes it outside the rectangle, and a child sitting on it would then start outside the parent —
+        // where extrapolating through a keystoned projection sends it a very long way off.
+        var bottomLeft = new Vector2(parentSize.X * 0.1f, parentSize.Y * 0.1f) - parent.AnchorInMeters;
 
-            QuadBounds(other.Trace.Quad, out var otherMin, out var otherMax);
-            pixelsPerMetre += MathF.Max(otherMax.X - otherMin.X, 1f) / other.SizeInMeters.X;
-            samples++;
-        }
+        SetupUndo.RunUndoable("Add region", setup, () =>
+                                                   {
+                                                       var child = new Surface
+                                                                       {
+                                                                           Name = $"Region {SetupRelations.CountChildren(setup, parent.Id) + 1}",
+                                                                           Kind = Surface.Kinds.Layout,
+                                                                           ParentId = parent.Id,
+                                                                           SizeInMeters = size,
+                                                                           LocalPosition = bottomLeft,
+                                                                           PixelsPerMeter = parent.PixelsPerMeter,
+                                                                       };
 
-        if (samples > 0)
-        {
-            pixelsPerMetre /= samples;
-            return new Vector2(width / pixelsPerMetre, height / pixelsPerMetre);
-        }
-
-        const float typicalWallHeight = 2.5f;
-        return new Vector2(typicalWallHeight * width / height, typicalWallHeight);
+                                                       setup.Surfaces.Add(child);
+                                                       selection.Select(SetupEntityKinds.Surface, child.Id);
+                                                   });
     }
 
-    private static void QuadBounds(Vector2[] quad, out Vector2 min, out Vector2 max)
+    /// <summary>Adds a reference point at a surface-space position, named by its ordinal ("P3").</summary>
+    internal static void AddReferencePoint(Setup setup, Surface surface, Vector2 position)
     {
-        min = max = quad[0];
-        for (var i = 1; i < quad.Length; i++)
-        {
-            min = Vector2.Min(min, quad[i]);
-            max = Vector2.Max(max, quad[i]);
-        }
+        SetupUndo.RunUndoable("Add reference point", setup, () =>
+                                                            {
+                                                                surface.Annotations.Add(new Annotation
+                                                                                            {
+                                                                                                Kind = Annotation.Kinds.Point,
+                                                                                                Name = $"P{SurfaceMetrics.CountPoints(surface) + 1}",
+                                                                                                P1 = position,
+                                                                                                P2 = position,
+                                                                                            });
+                                                            });
     }
 
-    /// <summary>The x right of every placed surface card, plus a gap — where the next one stands on the floor.</summary>
-    private static float NextFreeBoardX(Setup setup)
+    /// <summary>
+    /// Replaces the output's patches with a columns × rows grid of tiles covering the canvas — the split-matrix
+    /// and TV-wall case. Every tile is fed by what the first patch showed, so a full-frame feed becomes N copies
+    /// ready to be re-routed one by one.
+    /// </summary>
+    internal static void SplitOutput(SetupEntitySelection selection, Setup setup, OutputDefinition output, int columns, int rows)
     {
-        const float gap = 0.5f;
-        var right = float.NegativeInfinity;
+        SetupUndo.RunUndoable($"Split {columns}×{rows}", setup, () =>
+                                                                 {
+                                                                     // The tiles take over the old patch's picture: its feed, and which way up it is.
+                                                                     var feed = output.Patches.Count > 0 ? output.Patches[0].SliceId : Guid.Empty;
+                                                                     var turns = output.Patches.Count > 0 ? output.Patches[0].QuarterTurns : 0;
+                                                                     output.Patches.Clear();
+
+                                                                     // Boundaries come from one expression per grid line, so tile n's right edge and
+                                                                     // tile n+1's left edge are the *same float* — bit-identical shared edges are what
+                                                                     // makes the rasterizer's top-left fill rule tile them with no seam and no overlap.
+                                                                     // Deriving max as min + cell would round differently and could cost a pixel row.
+                                                                     for (var row = 0; row < rows; row++)
+                                                                     {
+                                                                         for (var column = 0; column < columns; column++)
+                                                                         {
+                                                                             var min = new Vector2(column / (float)columns, row / (float)rows);
+                                                                             var max = new Vector2((column + 1) / (float)columns, (row + 1) / (float)rows);
+                                                                             output.Patches.Add(new OutputDefinition.Patch
+                                                                                                    {
+                                                                                                        SliceId = feed,
+                                                                                                        QuarterTurns = turns,
+                                                                                                        Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)],
+                                                                                                    });
+                                                                         }
+                                                                     }
+
+                                                                     selection.Select(SetupEntityKinds.Patch, output.Patches[0].Id);
+                                                                 });
+    }
+
+    /// <summary>Whether this surface is a region that overrides its parent's pin on at least one output.</summary>
+    internal static bool HasOwnPin(Surface surface)
+    {
+        return surface.Kind == Surface.Kinds.Layout && surface.ParentId != Guid.Empty && surface.OutputMappings.Count > 0;
+    }
+
+    /// <summary>Drops a region's own pins, so it rides its parent's again on every output.</summary>
+    internal static void ClearOwnPin(Setup setup, Guid surfaceId)
+    {
+        var surface = setup.FindSurface(surfaceId);
+        if (surface == null || !HasOwnPin(surface))
+            return;
+
+        SetupUndo.RunUndoable("Follow parent's pin", setup, () => surface.OutputMappings.Clear());
+    }
+
+    /// <summary>
+    /// "Use on Surface": materializes a surface for a patch when a surface-only feature is reached for (real
+    /// size, raster, straightening). The quad transfers verbatim onto the surface's mapping — same numbers,
+    /// nothing moves on the wall — and the patch goes, since a route's quad has one home at a time.
+    /// </summary>
+    internal static void PromotePatchToSurface(SetupEntitySelection selection, Setup setup, Guid patchId)
+    {
+        var patch = setup.FindPatch(patchId, out var output);
+        if (patch == null || output == null || patch.Quad.Length < 4)
+            return;
+
+        SetupUndo.RunUndoable("Use on surface", setup, () =>
+                                                       {
+                                                           var min = patch.Quad[0];
+                                                           var max = patch.Quad[0];
+                                                           foreach (var corner in patch.Quad)
+                                                           {
+                                                               min = Vector2.Min(min, corner);
+                                                               max = Vector2.Max(max, corner);
+                                                           }
+
+                                                           // A metre of width, the height by the quad's aspect: the physical size is unknown until
+                                                           // measured, and the content density follows from the pixels the patch already covered —
+                                                           // its share of the canvas, taken at the canvas' current size.
+                                                           var covered = (max - min) * output.CanvasSize;
+
+                                                           // A turned patch is a surface lying on its side: its own width runs along the picture,
+                                                           // which after an odd number of turns is the canvas' vertical. The mapping gets the
+                                                           // turned corner order, so the surface's top-left is where the picture's was.
+                                                           var sideways = (OutputDefinition.Patch.NormalizeTurns(patch.QuarterTurns) & 1) == 1;
+                                                           var widthPx = MathF.Max(sideways ? covered.Y : covered.X, 1);
+                                                           var heightPx = MathF.Max(sideways ? covered.X : covered.Y, 1);
+                                                           var mappedQuad = new Vector2[4];
+                                                           patch.CopyTurnedCorners(mappedQuad);
+                                                           var surface = new Surface
+                                                                             {
+                                                                                 Name = string.IsNullOrEmpty(patch.Name) ? $"Surface {setup.Surfaces.Count + 1}" : patch.Name,
+                                                                                 SizeInMeters = new Vector2(1, heightPx / widthPx),
+                                                                                 PixelsPerMeter = widthPx,
+                                                                                 SliceId = patch.SliceId,
+                                                                                 OutputMappings =
+                                                                                 [
+                                                                                     new Surface.OutputMapping { OutputId = output.Id, Quad = mappedQuad },
+                                                                                 ],
+                                                                             };
+
+                                                           setup.Surfaces.Add(surface);
+                                                           output.Patches.RemoveAll(p => p.Id == patchId);
+                                                           selection.Select(SetupEntityKinds.Surface, surface.Id);
+                                                       });
+    }
+
+    /// <summary>One more quarter turn clockwise — the context menu's step, cycling back to upright after four.</summary>
+    internal static void RotatePatchClockwise(Setup setup, OutputDefinition.Patch patch)
+    {
+        SetPatchTurns(setup, patch, patch.QuarterTurns + 1);
+    }
+
+    /// <summary>
+    /// Gives the surface a private copy of a slice it shares with other consumers, so a local crop leaves the
+    /// others untouched. Called from inside a canvas gesture — the gesture's snapshot makes it undoable.
+    /// </summary>
+    internal static Slice CloneSliceForSurface(Setup setup, Surface surface, Slice shared)
+    {
+        var copy = CloneViaJson(shared.WriteToJson, Slice.ReadFromJson) ?? new Slice { SourceId = shared.SourceId, UvRect = shared.UvRect };
+        copy.Id = Guid.NewGuid();
+        setup.Slices.Add(copy);
+        surface.SliceId = copy.Id;
+        return copy;
+    }
+
+    /// <summary>Whether anything feeds the output: a surface mapped onto it, or a patch on its canvas.</summary>
+    internal static bool OutputHasInputs(Setup setup, OutputDefinition output)
+    {
+        if (output.Patches.Count > 0)
+            return true;
+
         foreach (var surface in setup.Surfaces)
         {
-            if (surface.ParentId != Guid.Empty || surface.BoardPlacement == null)
-                continue;
-
-            right = MathF.Max(right, surface.BoardPlacement.Position.X - surface.AnchorInMeters.X + surface.SizeInMeters.X);
+            if (SetupRelations.IsMappedTo(surface, output.Id))
+                return true;
         }
 
-        return float.IsNegativeInfinity(right) ? 0f : right + gap;
+        return false;
     }
 
-    private static Vector2[] DefaultReferenceQuad(ReferenceImage image)
+    /// <summary>
+    /// Disconnects everything from an output: every surface's mapping onto it and all of its patches go. The
+    /// surfaces, their slices and the output itself stay — only the routes into this canvas are cut.
+    /// </summary>
+    internal static void ClearOutputInputs(Setup setup, OutputDefinition output)
     {
-        float w = Math.Max(1, image.Width);
-        float h = Math.Max(1, image.Height);
-        float x0 = w * 0.25f, x1 = w * 0.75f, y0 = h * 0.25f, y1 = h * 0.75f;
-        return [new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1)];
+        SetupUndo.RunUndoable("Clear output inputs", setup, () =>
+                                                            {
+                                                                foreach (var surface in setup.Surfaces)
+                                                                    surface.OutputMappings.RemoveAll(m => m.OutputId == output.Id);
+
+                                                                output.Patches.Clear();
+                                                            });
     }
 
-    internal static void AddReferenceImage(SetupEntitySelection selection)
+    /// <summary>
+    /// Drops this surface from every send that targets it, so it stops receiving content. The surface itself
+    /// and its calibration are untouched — this only edits the sends' target lists (op-side, like the drag).
+    /// </summary>
+    internal static void ClearContentInputs(Guid surfaceId)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
 
-        RunUndoable("Add reference image", setup, () =>
-                                                  {
-                                                      var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
-                                                      setup.ReferenceImages.Add(image);
-                                                      selection.Select(SetupEntityKinds.ReferenceImage, image.Id);
-                                                  });
-    }
-
-    /// <summary>
-    /// Drops a <c>SendToOutput</c> op into the focused composition, selects it, and frames the view on it. When a
-    /// texture-outputting op is selected it lands to its right and is wired straight in, so the feed shows up in
-    /// the setup at once (the CONTENT row appears next frame, once <see cref="ContentSourceSync"/> adopts it).
-    /// </summary>
-    internal static void AddContentSend(SetupEntitySelection selection)
-    {
-        var projectView = ProjectView.Focused;
-        var composition = projectView?.CompositionInstance;
-        if (projectView == null || composition == null)
+        var surface = setup.FindSurface(surfaceId);
+        if (surface == null || surface.SliceId == Guid.Empty)
             return;
 
-        if (!composition.Symbol.TryGetSymbolUi(out var compositionUi)
-            || !SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out var sendSymbolUi))
-            return;
-
-        // A selected texture op becomes the feed: place the send op to its right and wire it up.
-        var selected = projectView.NodeSelection.GetSelectedInstanceWithoutComposition();
-        var sourceSlot = selected == null ? null : FindTextureOutput(selected);
-        var selectedUi = selected?.GetChildUi();
-        var pos = selectedUi != null
-                      ? selectedUi.PosOnCanvas + new Vector2(selectedUi.Size.X + 40, 0)
-                      : Vector2.Zero;
-
-        var newChildUi = GraphOperations.AddSymbolChild(sendSymbolUi.Symbol, compositionUi, pos);
-
-        if (sourceSlot != null && selectedUi != null)
-        {
-            var connection = new Symbol.Connection(selectedUi.Id, sourceSlot.Id, newChildUi.Id, SendToOutputTextureInputId);
-            UndoRedoStack.AddAndExecute(new AddConnectionCommand(compositionUi.Symbol, connection, 0));
-        }
-
-        projectView.NodeSelection.TrySelectCompositionChild(composition, newChildUi.Id, add: false);
-        projectView.FocusViewToSelection();
+        SetupUndo.RunUndoable("Clear content inputs", setup, () => surface.SliceId = Guid.Empty);
     }
 
-    /// <summary>
-    /// Deletes everything deletable in the selection. Each kind keeps its own cascade (a surface re-parents
-    /// its children, an output drops the mappings onto it), so deleting a set is just deleting each in turn —
-    /// which is why the targets are copied first: those cascades mutate the setup underneath us.
-    /// </summary>
-    internal static void DeleteSelection(SetupEntitySelection selection, Setup setup)
-    {
-        RunUndoable("Delete selection", setup, () =>
-                                               {
-                                                   _deleteBuffer.Clear();
-                                                   _deleteBuffer.AddRange(selection.Targets);
+    // ---- Rename ------------------------------------------------------------------------------------
 
-                                                   foreach (var target in _deleteBuffer)
-                                                       DeleteEntityInternal(setup, target.Kind, target.EntityId);
+    /// <summary>A prop has no name to rename; a content source renames its op; a plug renames its stream (displays
+    /// are named by the OS — see <see cref="CanRenamePlug"/>).</summary>
+    internal static bool CanRename(SetupEntityKinds kind) => SetupEntityKindInfo.Of(kind).CanRename;
 
-                                                   selection.Clear();
-                                               });
-    }
+    internal static bool CanRenamePlug(Guid plugId) => !Plugs.TryGetDisplayIndex(plugId, out _);
 
     /// <summary>Renames an entity by kind. A content source has no name of its own — renaming it renames its
     /// op (already undoable as a graph command), which flows back through the sync.</summary>
@@ -690,7 +476,7 @@ internal static class SetupActions
     {
         if (kind == SetupEntityKinds.ContentSource)
         {
-            RenameContentSourceOp(id, newName);
+            ContentSourceSync.RenameContentSourceOp(id, newName);
             return;
         }
 
@@ -702,71 +488,98 @@ internal static class SetupActions
             return;
         }
 
-        RunUndoable("Rename", setup, () => RenameEntityInternal(setup, kind, id, newName));
+        SetupUndo.RunUndoable("Rename", setup, () => SetupEntities.TrySetName(setup, kind, id, newName));
     }
 
-    private static void RenameEntityInternal(Setup setup, SetupEntityKinds kind, Guid id, string newName)
-    {
-        switch (kind)
-        {
-            case SetupEntityKinds.Output:
-                var output = setup.FindOutput(id);
-                if (output == null)
-                    return;
-
-                output.Name = newName;
-                break;
-
-            case SetupEntityKinds.ReferenceImage:
-                var image = setup.FindReferenceImage(id);
-                if (image == null)
-                    return;
-
-                image.Name = newName;
-                break;
-
-            case SetupEntityKinds.Surface:
-                var surface = setup.FindSurface(id);
-                if (surface == null)
-                    return;
-
-                surface.Name = newName;
-                break;
-
-            case SetupEntityKinds.Slice:
-                var slice = setup.FindSlice(id);
-                if (slice == null)
-                    return;
-
-                slice.Name = newName;
-                break;
-
-            case SetupEntityKinds.Patch:
-                var patch = setup.FindPatch(id, out _);
-                if (patch == null)
-                    return;
-
-                patch.Name = newName;
-                break;
-        }
-    }
+    // ---- Delete ------------------------------------------------------------------------------------
 
     /// <summary>A content source is a graph op (delete the op instead); everything else deletes here.</summary>
-    internal static bool CanDeleteDirectly(SetupEntityKinds kind)
+    internal static bool CanDeleteDirectly(SetupEntityKinds kind) => SetupEntityKindInfo.Of(kind).CanDelete;
+
+    /// <summary>
+    /// How many of the selected entities can actually be deleted here. A content source is a graph op and a
+    /// slice's source may be gone, so the menu counts what will really go rather than how many items are lit.
+    /// </summary>
+    internal static int CountDeletable(SetupEntitySelection selection)
     {
-        return kind is SetupEntityKinds.Surface
-                    or SetupEntityKinds.Slice
-                    or SetupEntityKinds.Output
-                    or SetupEntityKinds.ReferenceImage
-                    or SetupEntityKinds.Prop
-                    or SetupEntityKinds.Patch;
+        var count = 0;
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            if (CanDeleteDirectly(selection.Targets[i].Kind))
+                count++;
+        }
+
+        return count;
     }
 
     internal static void DeleteEntity(Setup setup, SetupEntityKinds kind, Guid id)
     {
-        RunUndoable("Delete", setup, () => DeleteEntityInternal(setup, kind, id));
+        SetupUndo.RunUndoable("Delete", setup, () => DeleteEntityInternal(setup, kind, id));
     }
 
+    /// <summary>
+    /// Deletes everything deletable in the selection. Each kind keeps its own cascade (a surface re-parents
+    /// its children, an output drops the mappings onto it), so deleting a set is just deleting each in turn —
+    /// which is why the targets are copied first: those cascades mutate the setup underneath us.
+    /// </summary>
+    internal static void DeleteSelection(SetupEntitySelection selection, Setup setup)
+    {
+        SetupUndo.RunUndoable("Delete selection", setup, () =>
+                                                         {
+                                                             _deleteBuffer.Clear();
+                                                             _deleteBuffer.AddRange(selection.Targets);
+
+                                                             foreach (var target in _deleteBuffer)
+                                                                 DeleteEntityInternal(setup, target.Kind, target.EntityId);
+
+                                                             selection.Clear();
+                                                         });
+    }
+
+    // ---- Duplicate ---------------------------------------------------------------------------------
+
+    /// <summary>A content source is its op — duplicating it wouldn't carry the feed; everything else clones.</summary>
+    internal static bool CanDuplicate(SetupEntityKinds kind) => SetupEntityKindInfo.Of(kind).CanDuplicate;
+
+    internal static void DuplicateEntity(SetupEntitySelection selection, Setup setup, SetupEntityKinds kind, Guid id)
+    {
+        SetupUndo.RunUndoable("Duplicate", setup, () => DuplicateEntityInternal(selection, setup, kind, id));
+    }
+
+    /// <summary>Clones a setup entity through its own JSON round-trip, so new fields are picked up without
+    /// touching the clone. The caller re-ids the copy.</summary>
+    internal static T? CloneViaJson<T>(Action<JsonTextWriter> write, Func<JToken, T> read) where T : class
+    {
+        var sb = new StringBuilder();
+        using (var stringWriter = new StringWriter(sb))
+        using (var writer = new JsonTextWriter(stringWriter))
+        {
+            write(writer);
+            writer.Flush();
+        }
+
+        return read(JObject.Parse(sb.ToString()));
+    }
+
+    /// <summary>Sets how many quarter turns the patch's picture makes, as one undo step.</summary>
+    private static void SetPatchTurns(Setup setup, OutputDefinition.Patch patch, int turns)
+    {
+        var normalized = OutputDefinition.Patch.NormalizeTurns(turns);
+        if (normalized == patch.QuarterTurns)
+            return;
+
+        SetupUndo.RunUndoable("Rotate patch", setup, () => patch.QuarterTurns = normalized);
+    }
+
+    private static Vector2[] DefaultReferenceQuad(ReferenceImage image)
+    {
+        float w = Math.Max(1, image.Width);
+        float h = Math.Max(1, image.Height);
+        float x0 = w * 0.25f, x1 = w * 0.75f, y0 = h * 0.25f, y1 = h * 0.75f;
+        return [new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1)];
+    }
+
+    /// <summary>The delete cascades, one per kind, side by side.</summary>
     private static void DeleteEntityInternal(Setup setup, SetupEntityKinds kind, Guid id)
     {
         switch (kind)
@@ -808,31 +621,68 @@ internal static class SetupActions
         }
     }
 
-    /// <summary>A content source is its op — duplicating it wouldn't carry the feed; everything else clones.</summary>
-    internal static bool CanDuplicate(SetupEntityKinds kind)
+    /// <summary>Deleting a slice clears it from anything showing it — the reference would mean nothing.</summary>
+    private static void DeleteSliceInternal(Setup setup, Guid sliceId)
     {
-        return kind is SetupEntityKinds.Surface
-                    or SetupEntityKinds.Slice
-                    or SetupEntityKinds.Output
-                    or SetupEntityKinds.ReferenceImage
-                    or SetupEntityKinds.Prop
-                    or SetupEntityKinds.Patch;
+        foreach (var surface in setup.Surfaces)
+        {
+            if (surface.SliceId == sliceId)
+                surface.SliceId = Guid.Empty;
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            foreach (var patch in output.Patches)
+            {
+                if (patch.SliceId == sliceId)
+                    patch.SliceId = Guid.Empty; // the patch keeps its place on the canvas, just unfed
+            }
+        }
+
+        setup.Slices.RemoveAll(s => s.Id == sliceId);
     }
 
-    /// <summary>A prop has no name to rename; a content source renames its op; a plug renames its stream (displays
-    /// are named by the OS — see <see cref="CanRenamePlug"/>).</summary>
-    internal static bool CanRename(SetupEntityKinds kind)
+    // Deleting a surface takes its sub-region subtree with it (they're cuts of the parent, meaningless on
+    // their own). Children aren't guaranteed to follow their parent in list order, so sweep until no new
+    // descendant is found.
+    private static void DeleteSurfaceSubtree(Setup setup, Guid rootId)
     {
-        return kind is not (SetupEntityKinds.Prop or SetupEntityKinds.None);
+        var ids = new HashSet<Guid> { rootId };
+        bool grew;
+        do
+        {
+            grew = false;
+            foreach (var surface in setup.Surfaces)
+            {
+                if (ids.Contains(surface.ParentId) && ids.Add(surface.Id))
+                    grew = true;
+            }
+        }
+        while (grew);
+
+        for (var i = setup.Surfaces.Count - 1; i >= 0; i--)
+        {
+            if (ids.Contains(setup.Surfaces[i].Id))
+                setup.Surfaces.RemoveAt(i);
+        }
     }
 
-    internal static bool CanRenamePlug(Guid plugId) => !Plugs.TryGetDisplayIndex(plugId, out _);
-
-    internal static void DuplicateEntity(SetupEntitySelection selection, Setup setup, SetupEntityKinds kind, Guid id)
+    // Deleting an output cascades: drop every surface's mapping onto it, unbind the display, and stop
+    // presenting it. Surfaces left without a mapping simply have no output — not lost. (The display binding
+    // lives in the per-machine config outside the setup file, so an undo restores the output unbound.)
+    private static void DeleteOutputInternal(Setup setup, MachineConfig machineConfig, Guid outputId)
     {
-        RunUndoable("Duplicate", setup, () => DuplicateEntityInternal(selection, setup, kind, id));
+        setup.Outputs.RemoveAll(o => o.Id == outputId);
+        OutputPresentation.ReleaseOutput(outputId);
+        foreach (var surface in setup.Surfaces)
+            surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
+
+        machineConfig.Unbind(outputId);
+        if (OutputPresentation.PresentedOutputId == outputId)
+            OutputPresentation.PresentedOutputId = Guid.Empty;
     }
 
+    /// <summary>The duplicate cascades, one per kind, side by side.</summary>
     private static void DuplicateEntityInternal(SetupEntitySelection selection, Setup setup, SetupEntityKinds kind, Guid id)
     {
         switch (kind)
@@ -921,488 +771,36 @@ internal static class SetupActions
         }
     }
 
-    /// <summary>Clones a setup entity through its own JSON round-trip, so new fields are picked up without
-    /// touching the clone. The caller re-ids the copy.</summary>
-    private static T? CloneViaJson<T>(Action<JsonTextWriter> write, Func<JToken, T> read) where T : class
+    /// <summary>
+    /// Copies a surface — with its sub-regions — offset a little so it doesn't hide under the original. The
+    /// copy gets fresh GUIDs, so content sends still point at the original; the duplicate starts unbound.
+    /// </summary>
+    private static void DuplicateSurface(SetupEntitySelection selection, Setup setup, Surface surface)
     {
-        var sb = new StringBuilder();
-        using (var stringWriter = new StringWriter(sb))
-        using (var writer = new JsonTextWriter(stringWriter))
+        var copy = CloneSurface(surface);
+        var isChild = surface.ParentId != Guid.Empty;
+        copy.Name = isChild ? $"Region {SetupRelations.CountChildren(setup, surface.ParentId) + 1}" : surface.Name + " copy";
+
+        if (isChild)
         {
-            write(writer);
-            writer.Flush();
+            copy.LocalPosition = surface.LocalPosition + new Vector2(surface.SizeInMeters.X * 0.15f,
+                                                                    -surface.SizeInMeters.Y * 0.15f);
         }
-
-        return read(JObject.Parse(sb.ToString()));
-    }
-
-    // Deleting a surface takes its sub-region subtree with it (they're cuts of the parent, meaningless on
-    // their own). Children aren't guaranteed to follow their parent in list order, so sweep until no new
-    // descendant is found.
-    private static void DeleteSurfaceSubtree(Setup setup, Guid rootId)
-    {
-        var ids = new HashSet<Guid> { rootId };
-        bool grew;
-        do
+        else
         {
-            grew = false;
-            foreach (var surface in setup.Surfaces)
+            // A root carries its own pins, so nudge those instead.
+            foreach (var mapping in copy.OutputMappings)
             {
-                if (ids.Contains(surface.ParentId) && ids.Add(surface.Id))
-                    grew = true;
+                // A nudge of the canvas rather than a pixel count, so it reads the same at any resolution.
+                for (var i = 0; i < mapping.Quad.Length; i++)
+                    mapping.Quad[i] += new Vector2(0.0125f, 0.0125f);
             }
         }
-        while (grew);
 
-        for (var i = setup.Surfaces.Count - 1; i >= 0; i--)
-        {
-            if (ids.Contains(setup.Surfaces[i].Id))
-                setup.Surfaces.RemoveAt(i);
-        }
-    }
+        setup.Surfaces.Add(copy);
+        DuplicateChildrenOf(setup, surface.Id, copy.Id);
 
-    // Deleting an output cascades: drop every surface's mapping onto it, unbind the display, and stop
-    // presenting it. Surfaces left without a mapping simply have no output — not lost. (The display binding
-    // lives in the per-machine config outside the setup file, so an undo restores the output unbound.)
-    private static void DeleteOutputInternal(Setup setup, MachineConfig machineConfig, Guid outputId)
-    {
-        setup.Outputs.RemoveAll(o => o.Id == outputId);
-        OutputManager.ReleaseOutput(outputId);
-        foreach (var surface in setup.Surfaces)
-            surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
-
-        machineConfig.Unbind(outputId);
-        if (OutputManager.PresentedOutputId == outputId)
-            OutputManager.PresentedOutputId = Guid.Empty;
-    }
-
-    /// <summary>
-    /// How many of the selected entities this panel can actually delete. A content source is a graph op and a
-    /// slice's source may be gone, so the menu counts what will really go rather than how many rows are lit.
-    /// </summary>
-    internal static int CountDeletable(SetupEntitySelection selection)
-    {
-        var count = 0;
-        for (var i = 0; i < selection.Targets.Count; i++)
-        {
-            if (CanDeleteDirectly(selection.Targets[i].Kind))
-                count++;
-        }
-
-        return count;
-    }
-
-    internal static string SendName(Instance instance)
-    {
-        var parent = instance.Parent;
-        if (parent != null && parent.Symbol.Children.TryGetValue(instance.SymbolChildId, out var child))
-            return child.ReadableName;
-
-        return "content";
-    }
-
-    internal static Instance? FindSendInstance(Guid childId)
-    {
-        var suppliers = ContentSupplierRegistry.Suppliers;
-        for (var i = 0; i < suppliers.Count; i++)
-        {
-            if (suppliers[i] is Instance instance && instance.SymbolChildId == childId)
-                return instance;
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Renames a content source by renaming its op — the source has no name of its own, it mirrors the
-    /// SendToOutput op (see <see cref="ContentSourceSync"/>). Needs a live instance to reach the graph; an
-    /// op that isn't instantiated can't be renamed from here.
-    /// </summary>
-    internal static void RenameContentSourceOp(Guid childId, string newName)
-    {
-        var parent = FindSendInstance(childId)?.Parent;
-        var parentSymbolUi = parent?.GetSymbolUi();
-        if (parentSymbolUi == null || !parentSymbolUi.ChildUis.TryGetValue(childId, out var childUi))
-            return;
-
-        UndoRedoStack.AddAndExecute(new ChangeSymbolChildNameCommand(childUi, parentSymbolUi.Symbol) { NewName = newName });
-    }
-
-    // Select the content's SendToOutput op in the focused graph and frame it — the sidebar → graph half of
-    // the sync (the graph → sidebar highlight is handled by the highlighted-content id).
-    internal static void RevealContentOpInGraph(Guid childId)
-    {
-        var instance = FindSendInstance(childId);
-        var parentSymbolUi = instance?.Parent?.GetSymbolUi();
-        if (instance == null || parentSymbolUi == null || ProjectView.Focused == null)
-            return;
-
-        if (!parentSymbolUi.ChildUis.TryGetValue(instance.SymbolChildId, out var childUi))
-            return;
-
-        ProjectView.Focused.NodeSelection.SetSelection(childUi, instance);
-        FitViewToSelectionHandling.FitViewToSelection();
-    }
-
-    /// <summary>Display name of a content send, for labelling its slice on the source canvas.</summary>
-    internal static string? TryGetContentName(Guid contentChildId)
-    {
-        return FindSendInstance(contentChildId) is { } instance ? SendName(instance) : null;
-    }
-
-    /// <summary>A display name for any entity kind — pin labels, tooltips. Resolves against the
-    /// active setup; falls back to the kind's name when the entity (or its name) is gone.</summary>
-    internal static string NameForEntity(SetupEntityKinds kind, Guid id)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return kind.ToString();
-
-        switch (kind)
-        {
-            case SetupEntityKinds.Surface:
-                return FallbackIfEmpty(setup.FindSurface(id)?.Name, "Surface");
-
-            case SetupEntityKinds.Output:
-                return FallbackIfEmpty(setup.FindOutput(id)?.Name, "Output");
-
-            case SetupEntityKinds.ReferenceImage:
-                return FallbackIfEmpty(setup.FindReferenceImage(id)?.Name, "Reference Image");
-
-            case SetupEntityKinds.Slice:
-            {
-                var slice = setup.FindSlice(id);
-                return slice == null ? "Slice" : SliceLabel(setup, slice);
-            }
-
-            case SetupEntityKinds.ContentSource:
-                return TryGetContentName(id) ?? "Content";
-
-            case SetupEntityKinds.Prop:
-                return FallbackIfEmpty(setup.FindProp(id)?.Kind, "Prop");
-
-            case SetupEntityKinds.Patch:
-            {
-                var patch = setup.FindPatch(id, out var owner);
-                return patch == null || owner == null ? "Patch" : PatchLabel(owner, patch);
-            }
-
-            case SetupEntityKinds.Plug:
-                return OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig)
-                           ? Plugs.PlugName(machineConfig, id)
-                           : "Plug";
-
-            default:
-                return kind.ToString();
-        }
-    }
-
-    /// <summary>
-    /// Replaces the output's patches with a columns × rows grid of tiles covering the canvas — the split-matrix
-    /// and TV-wall case. Every tile is fed by what the first patch showed, so a full-frame feed becomes N copies
-    /// ready to be re-routed one by one.
-    /// </summary>
-    internal static void SplitOutput(SetupEntitySelection selection, Setup setup, OutputDefinition output, int columns, int rows)
-    {
-        RunUndoable($"Split {columns}×{rows}", setup, () =>
-                                                       {
-                                                           // The tiles take over the old patch's picture: its feed, and which way up it is.
-                                                           var feed = output.Patches.Count > 0 ? output.Patches[0].SliceId : Guid.Empty;
-                                                           var turns = output.Patches.Count > 0 ? output.Patches[0].QuarterTurns : 0;
-                                                           output.Patches.Clear();
-
-                                                           // Boundaries come from one expression per grid line, so tile n's right edge and
-                                                           // tile n+1's left edge are the *same float* — bit-identical shared edges are what
-                                                           // makes the rasterizer's top-left fill rule tile them with no seam and no overlap.
-                                                           // Deriving max as min + cell would round differently and could cost a pixel row.
-                                                           for (var row = 0; row < rows; row++)
-                                                           {
-                                                               for (var column = 0; column < columns; column++)
-                                                               {
-                                                                   var min = new Vector2(column / (float)columns, row / (float)rows);
-                                                                   var max = new Vector2((column + 1) / (float)columns, (row + 1) / (float)rows);
-                                                                   output.Patches.Add(new OutputDefinition.Patch
-                                                                                          {
-                                                                                              SliceId = feed,
-                                                                                              QuarterTurns = turns,
-                                                                                              Quad = [min, new Vector2(max.X, min.Y), max, new Vector2(min.X, max.Y)],
-                                                                                          });
-                                                               }
-                                                           }
-
-                                                           selection.Select(SetupEntityKinds.Patch, output.Patches[0].Id);
-                                                       });
-    }
-
-    /// <summary>Whether this surface is a region that overrides its parent's pin on at least one output.</summary>
-    internal static bool HasOwnPin(Surface surface)
-    {
-        return surface.Kind == Surface.Kinds.Layout && surface.ParentId != Guid.Empty && surface.OutputMappings.Count > 0;
-    }
-
-    /// <summary>Drops a region's own pins, so it rides its parent's again on every output.</summary>
-    internal static void ClearOwnPin(Setup setup, Guid surfaceId)
-    {
-        var surface = setup.FindSurface(surfaceId);
-        if (surface == null || !HasOwnPin(surface))
-            return;
-
-        RunUndoable("Follow parent's pin", setup, () => surface.OutputMappings.Clear());
-    }
-
-    /// <summary>
-    /// "Use on Surface": materializes a surface for a patch when a surface-only feature is reached for (real
-    /// size, raster, straightening). The quad transfers verbatim onto the surface's mapping — same numbers,
-    /// nothing moves on the wall — and the patch goes, since a route's quad has one home at a time.
-    /// </summary>
-    internal static void PromotePatchToSurface(SetupEntitySelection selection, Setup setup, Guid patchId)
-    {
-        var patch = setup.FindPatch(patchId, out var output);
-        if (patch == null || output == null || patch.Quad.Length < 4)
-            return;
-
-        RunUndoable("Use on surface", setup, () =>
-                                             {
-                                                 var min = patch.Quad[0];
-                                                 var max = patch.Quad[0];
-                                                 foreach (var corner in patch.Quad)
-                                                 {
-                                                     min = Vector2.Min(min, corner);
-                                                     max = Vector2.Max(max, corner);
-                                                 }
-
-                                                 // A metre of width, the height by the quad's aspect: the physical size is unknown until
-                                                 // measured, and the content density follows from the pixels the patch already covered —
-                                                 // its share of the canvas, taken at the canvas' current size.
-                                                 var covered = (max - min) * output.CanvasSize;
-
-                                                 // A turned patch is a surface lying on its side: its own width runs along the picture,
-                                                 // which after an odd number of turns is the canvas' vertical. The mapping gets the
-                                                 // turned corner order, so the surface's top-left is where the picture's was.
-                                                 var sideways = (OutputDefinition.Patch.NormalizeTurns(patch.QuarterTurns) & 1) == 1;
-                                                 var widthPx = MathF.Max(sideways ? covered.Y : covered.X, 1);
-                                                 var heightPx = MathF.Max(sideways ? covered.X : covered.Y, 1);
-                                                 var mappedQuad = new Vector2[4];
-                                                 patch.CopyTurnedCorners(mappedQuad);
-                                                 var surface = new Surface
-                                                                   {
-                                                                       Name = string.IsNullOrEmpty(patch.Name) ? $"Surface {setup.Surfaces.Count + 1}" : patch.Name,
-                                                                       SizeInMeters = new Vector2(1, heightPx / widthPx),
-                                                                       PixelsPerMeter = widthPx,
-                                                                       SliceId = patch.SliceId,
-                                                                       OutputMappings =
-                                                                       [
-                                                                           new Surface.OutputMapping { OutputId = output.Id, Quad = mappedQuad },
-                                                                       ],
-                                                                   };
-
-                                                 setup.Surfaces.Add(surface);
-                                                 output.Patches.RemoveAll(p => p.Id == patchId);
-                                                 selection.Select(SetupEntityKinds.Surface, surface.Id);
-                                             });
-    }
-
-    /// <summary>Sets how many quarter turns the patch's picture makes, as one undo step.</summary>
-    internal static void SetPatchTurns(Setup setup, OutputDefinition.Patch patch, int turns)
-    {
-        var normalized = OutputDefinition.Patch.NormalizeTurns(turns);
-        if (normalized == patch.QuarterTurns)
-            return;
-
-        RunUndoable("Rotate patch", setup, () => patch.QuarterTurns = normalized);
-    }
-
-    /// <summary>One more quarter turn clockwise — the context menu's step, cycling back to upright after four.</summary>
-    internal static void RotatePatchClockwise(Setup setup, OutputDefinition.Patch patch)
-    {
-        SetPatchTurns(setup, patch, patch.QuarterTurns + 1);
-    }
-
-    /// <summary>A patch's display name: the typed name, else "Patch N" by its position on the output.</summary>
-    internal static string PatchLabel(OutputDefinition output, OutputDefinition.Patch patch)
-    {
-        if (!string.IsNullOrEmpty(patch.Name))
-            return patch.Name;
-
-        var ordinal = 1;
-        foreach (var other in output.Patches)
-        {
-            if (other.Id == patch.Id)
-                break;
-
-            ordinal++;
-        }
-
-        return $"Patch {ordinal}";
-    }
-
-    private static string FallbackIfEmpty(string? name, string fallback)
-    {
-        return string.IsNullOrEmpty(name) ? fallback : name;
-    }
-
-    /// <summary>
-    /// A slice's display name: a name the user typed if there is one, otherwise a default derived from its
-    /// source. Unnamed sources give "Slice N"; a renamed source gives "{name}.N", so naming the op renames
-    /// every one of its auto-named slices at once. N is the slice's position among its source's slices.
-    /// </summary>
-    internal static string SliceLabel(Setup setup, Slice slice)
-    {
-        if (!string.IsNullOrEmpty(slice.Name))
-            return slice.Name;
-
-        var ordinal = 1;
-        foreach (var other in setup.Slices)
-        {
-            if (other.SourceId != slice.SourceId)
-                continue;
-
-            if (other.Id == slice.Id)
-                break;
-
-            ordinal++;
-        }
-
-        var source = setup.FindSource(slice.SourceId);
-        return source is { IsRenamed: true } && !string.IsNullOrEmpty(source.Name)
-                   ? $"{source.Name}.{ordinal}"
-                   : $"Slice {ordinal}";
-    }
-
-    internal static string SurfaceShortLabel(Surface surface)
-    {
-        return Abbreviate(surface.Name);
-    }
-
-    // Compact gutter form: uppercase letters + digits ("Surface 1" → "S1", "WallFront" → "WF"), falling back
-    // to the full name when there's nothing to abbreviate (all-lowercase).
-    internal static string Abbreviate(string name)
-    {
-        Span<char> buffer = stackalloc char[6];
-        var length = 0;
-        foreach (var c in name)
-        {
-            if ((char.IsUpper(c) || char.IsDigit(c)) && length < buffer.Length)
-                buffer[length++] = c;
-        }
-
-        return length >= 1 ? new string(buffer[..length]) : name;
-    }
-
-    private static Surface.OutputMapping CreateDefaultMapping(OutputDefinition output)
-    {
-        float w = Math.Max(1, output.ResolvedResolution.Width);
-        float h = Math.Max(1, output.ResolvedResolution.Height);
-        float x0 = w * 0.2f, x1 = w * 0.8f, y0 = h * 0.2f, y1 = h * 0.8f;
-        return new Surface.OutputMapping
-                   {
-                       OutputId = output.Id,
-                       Quad = [new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1)],
-                   };
-    }
-
-    /// <summary>
-    /// Gives the surface a private copy of a slice it shares with other consumers, so a local crop leaves the
-    /// others untouched. Called from inside a canvas gesture — the gesture's snapshot makes it undoable.
-    /// </summary>
-    internal static Slice CloneSliceForSurface(Setup setup, Surface surface, Slice shared)
-    {
-        var copy = CloneViaJson(shared.WriteToJson, Slice.ReadFromJson) ?? new Slice { SourceId = shared.SourceId, UvRect = shared.UvRect };
-        copy.Id = Guid.NewGuid();
-        setup.Slices.Add(copy);
-        surface.SliceId = copy.Id;
-        return copy;
-    }
-
-    /// <summary>
-    /// A source's first slice, creating a full-frame one if it has none — assigning content needs a slice to
-    /// name, and "the whole image" is simply the identity rect.
-    /// </summary>
-    private static Slice EnsureSlice(Setup setup, ContentSource source)
-    {
-        var existing = setup.Slices.Find(s => s.SourceId == source.Id);
-        if (existing != null)
-            return existing;
-
-        // Unnamed: its label is derived from the source (see SliceLabel), so renaming the op renames it too.
-        var slice = new Slice { SourceId = source.Id };
-        setup.Slices.Add(slice);
-        return slice;
-    }
-
-    /// <summary>
-    /// Re-meters a surface: everything stored in its metres — the size, the measuring lines, the regions and
-    /// their descendants — scales by <paramref name="scale"/> about the anchor. The projection and the trace
-    /// are untouched: the wall is where it was, only the numbers describing it change.
-    /// </summary>
-    internal static void ScaleSurfaceMetric(Setup setup, Surface surface, Vector2 scale)
-    {
-        surface.SizeInMeters *= scale;
-        foreach (var annotation in surface.Annotations)
-        {
-            annotation.P1 *= scale;
-            annotation.P2 *= scale;
-        }
-
-        for (var i = 0; i < setup.Surfaces.Count; i++)
-        {
-            var child = setup.Surfaces[i];
-            if (child.ParentId != surface.Id)
-                continue;
-
-            child.LocalPosition *= scale;
-            ScaleSurfaceMetric(setup, child, scale);
-        }
-    }
-
-    /// <summary>Declares a surface's real size — a re-metering (see <see cref="ScaleSurfaceMetric"/>), so lines and regions keep their place on the wall.</summary>
-    internal static void RemeterSurface(Setup setup, Surface surface, Vector2 newSize)
-    {
-        var target = new Vector2(MathF.Max(newSize.X, SurfaceGeometry.MinSize), MathF.Max(newSize.Y, SurfaceGeometry.MinSize));
-        var old = surface.SizeInMeters;
-        if (old.X <= 0.0001f || old.Y <= 0.0001f)
-        {
-            surface.SizeInMeters = target;
-            return;
-        }
-
-        ScaleSurfaceMetric(setup, surface, target / old);
-    }
-
-    /// <summary>
-    /// Reshapes the surface so its real-world proportions match the pixels of the slice it shows — the inverse
-    /// of the slice's "Match target aspect", for when the wall is what should give. Keeps the width and solves
-    /// the height, so it reads as a nudge rather than a jump.
-    /// </summary>
-    internal static void MatchSurfaceToSliceAspect(Setup setup, Surface surface)
-    {
-        var slice = setup.FindSlice(surface.SliceId);
-        if (slice == null || !TryGetSliceAspect(setup, slice, out var aspect))
-            return;
-
-        var oldState = new ResizeSurfaceCommand.State(surface);
-        var width = MathF.Max(surface.SizeInMeters.X, SurfaceGeometry.MinSize);
-        SurfaceGeometry.ResizeAnchored(surface, new Vector2(width, width / MathF.Max(aspect, 0.0001f)));
-
-        UndoRedoStack.Add(new ResizeSurfaceCommand(surface.Id, oldState, new ResizeSurfaceCommand.State(surface)));
-        OutputSetupHandling.SaveActive();
-    }
-
-    /// <summary>Aspect of a slice's pixels — its uv extent against the source's resolution.</summary>
-    private static bool TryGetSliceAspect(Setup setup, Slice slice, out float aspect)
-    {
-        aspect = 1f;
-        var source = setup.FindSource(slice.SourceId);
-        if (source == null || !OutputManager.TryGetSourceContent(source.SymbolChildId, out _, out var content)
-            || content is not { IsDisposed: false })
-            return false;
-
-        var width = content.Description.Width * MathF.Max(slice.UvRect.Z - slice.UvRect.X, 0.0001f);
-        var height = content.Description.Height * MathF.Max(slice.UvRect.W - slice.UvRect.Y, 0.0001f);
-        if (width <= 0 || height <= 0)
-            return false;
-
-        aspect = width / height;
-        return true;
+        selection.Select(SetupEntityKinds.Surface, copy.Id);
     }
 
     private static void DuplicateChildrenOf(Setup setup, Guid sourceParentId, Guid newParentId)
@@ -1444,149 +842,6 @@ internal static class SetupActions
         return copy;
     }
 
-    /// <summary>
-    /// Adds a Layout child — a rectangle living inside its parent, riding the parent's corner pin rather than
-    /// carrying one of its own. Its position is stored in meters from the parent's anchor, so it stays welded
-    /// to the meter raster when the parent is cropped or stretched.
-    /// </summary>
-    internal static void AddSubRegion(SetupEntitySelection selection, Setup setup, Surface parent)
-    {
-        var parentSize = parent.SizeInMeters;
-        var size = new Vector2(MathF.Max(parentSize.X * 0.3f, SurfaceGeometry.MinSize),
-                               MathF.Max(parentSize.Y * 0.3f, SurfaceGeometry.MinSize));
-
-        // Land inside the parent rather than at its anchor: cropping an edge past the anchor legitimately
-        // pushes it outside the rectangle, and a child sitting on it would then start outside the parent —
-        // where extrapolating through a keystoned projection sends it a very long way off.
-        var bottomLeft = new Vector2(parentSize.X * 0.1f, parentSize.Y * 0.1f) - parent.AnchorInMeters;
-
-        RunUndoable("Add region", setup, () =>
-                                             {
-                                                 var child = new Surface
-                                                                 {
-                                                                     Name = $"Region {SetupRelations.CountChildren(setup, parent.Id) + 1}",
-                                                                     Kind = Surface.Kinds.Layout,
-                                                                     ParentId = parent.Id,
-                                                                     SizeInMeters = size,
-                                                                     LocalPosition = bottomLeft,
-                                                                     PixelsPerMeter = parent.PixelsPerMeter,
-                                                                 };
-
-                                                 setup.Surfaces.Add(child);
-                                                 selection.Select(SetupEntityKinds.Surface, child.Id);
-                                             });
-    }
-
-    /// <summary>The measuring lines among a surface's annotations (points don't count toward a straighten).</summary>
-    internal static int CountLines(Surface surface)
-    {
-        var count = 0;
-        foreach (var annotation in surface.Annotations)
-        {
-            if (!annotation.IsPoint)
-                count++;
-        }
-
-        return count;
-    }
-
-    /// <summary>Whether any line carries a real length — what "Apply lengths" needs.</summary>
-    internal static bool HasMeasuredLine(Surface surface)
-    {
-        foreach (var annotation in surface.Annotations)
-        {
-            if (!annotation.IsPoint && annotation.LengthInMeters > 0)
-                return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>The reference points among a surface's annotations.</summary>
-    internal static int CountPoints(Surface surface)
-    {
-        var count = 0;
-        foreach (var annotation in surface.Annotations)
-        {
-            if (annotation.IsPoint)
-                count++;
-        }
-
-        return count;
-    }
-
-    /// <summary>Adds a reference point at a surface-space position, named by its ordinal ("P3").</summary>
-    internal static void AddReferencePoint(Setup setup, Surface surface, Vector2 position)
-    {
-        RunUndoable("Add reference point", setup, () =>
-                                                  {
-                                                      surface.Annotations.Add(new Annotation
-                                                                                  {
-                                                                                      Kind = Annotation.Kinds.Point,
-                                                                                      Name = $"P{CountPoints(surface) + 1}",
-                                                                                      P1 = position,
-                                                                                      P2 = position,
-                                                                                  });
-                                                  });
-    }
-
-    /// <summary>Whether anything feeds the output: a surface mapped onto it, or a patch on its canvas.</summary>
-    internal static bool OutputHasInputs(Setup setup, OutputDefinition output)
-    {
-        if (output.Patches.Count > 0)
-            return true;
-
-        foreach (var surface in setup.Surfaces)
-        {
-            if (SetupRelations.IsMappedTo(surface, output.Id))
-                return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Disconnects everything from an output: every surface's mapping onto it and all of its patches go. The
-    /// surfaces, their slices and the output itself stay — only the routes into this canvas are cut.
-    /// </summary>
-    internal static void ClearOutputInputs(Setup setup, OutputDefinition output)
-    {
-        RunUndoable("Clear output inputs", setup, () =>
-                                                  {
-                                                      foreach (var surface in setup.Surfaces)
-                                                          surface.OutputMappings.RemoveAll(m => m.OutputId == output.Id);
-
-                                                      output.Patches.Clear();
-                                                  });
-    }
-
-    /// <summary>
-    /// Drops this surface from every send that targets it, so it stops receiving content. The surface itself
-    /// and its calibration are untouched — this only edits the sends' target lists (op-side, like the drag).
-    /// </summary>
-    internal static void ClearContentInputs(Guid surfaceId)
-    {
-        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
-            return;
-
-        var surface = setup.FindSurface(surfaceId);
-        if (surface == null || surface.SliceId == Guid.Empty)
-            return;
-
-        RunUndoable("Clear content inputs", setup, () => surface.SliceId = Guid.Empty);
-    }
-
-    private static ISlot? FindTextureOutput(Instance instance)
-    {
-        foreach (var slot in instance.Outputs)
-        {
-            if (slot.ValueType == typeof(Texture2D))
-                return slot;
-        }
-
-        return null;
-    }
-
     private static int CountProjectorOutputs(Setup setup)
     {
         var count = 0;
@@ -1600,12 +855,9 @@ internal static class SetupActions
     }
 
     private static readonly List<SelectionTarget> _deleteBuffer = [];
+
     private static string? _imageFileFilter;
 
     /// <summary>Where dropped photos and plans land inside the project's assets folder.</summary>
     private const string ReferenceImageFolder = "images/reference";
-
-    // Lib SendToOutput op and its texture input — the CONTENT "+" instantiates this and wires a selected feed in.
-    private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
-    private static readonly Guid SendToOutputTextureInputId = new("8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942");
 }

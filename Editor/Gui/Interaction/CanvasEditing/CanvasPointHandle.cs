@@ -47,7 +47,7 @@ internal static class CanvasPointHandle
                        {
                            Color = color,
                            ActiveColor = UiColors.ForegroundFull,
-                           OutlineColor = new Color(0f, 0f, 0f, 0f),
+                           OutlineColor = Color.TransparentBlack,
                            Shape = shape,
                            Radius = 5,
                            IsEditable = editable,

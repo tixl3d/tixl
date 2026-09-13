@@ -9,7 +9,8 @@ using T3.Core.Operator;
 using T3.Core.Operator.Attributes;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
-using T3.Core.Output;
+using T3.Core.Output.Streaming;
+using T3.Core.Output.Streaming;
 using T3.Core.Resource;
 
 namespace T3.Core.Compilation;

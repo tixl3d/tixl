@@ -23,6 +23,12 @@ public sealed class MachineConfig
 
     public List<PlugBinding> Bindings = [];
 
+    /// <summary>
+    /// The setup this machine last had active for the project. Per-machine because the venue a
+    /// computer stands in is machine state, not project content.
+    /// </summary>
+    public string ActiveSetupName = string.Empty;
+
     /// <summary>Stream senders this machine offers as plugs, next to its displays.</summary>
     public List<StreamPlug> StreamPlugs = [];
 
@@ -76,6 +82,9 @@ public sealed class MachineConfig
             writer.Formatting = Formatting.Indented;
             writer.WriteStartObject();
             writer.WriteValue("Version", CurrentVersion);
+            if (ActiveSetupName.Length > 0)
+                writer.WriteString("ActiveSetupName", ActiveSetupName);
+
             writer.WritePropertyName("Bindings");
             writer.WriteStartArray();
             foreach (var binding in Bindings)
@@ -107,6 +116,7 @@ public sealed class MachineConfig
 
         return new MachineConfig
                    {
+                       ActiveSetupName = token.ReadValueSafe("ActiveSetupName", string.Empty) ?? string.Empty,
                        Bindings = token.ReadListSafe("Bindings", PlugBinding.ReadFromJson),
                        StreamPlugs = token.ReadListSafe("Streams", StreamPlug.ReadFromJson),
                    };

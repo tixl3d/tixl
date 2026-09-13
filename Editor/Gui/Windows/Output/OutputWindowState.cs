@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.Output;
 

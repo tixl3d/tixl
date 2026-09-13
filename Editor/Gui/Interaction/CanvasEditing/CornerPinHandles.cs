@@ -48,7 +48,7 @@ internal static class CornerPinHandles
                            HandleColor = UiColors.ForegroundFull.Fade(selected ? emphasis : 0.6f * emphasis),
                            HandleOutlineColor = selected
                                                     ? frame.Fade(emphasis)
-                                                    : new Color(0f, 0f, 0f, 0f),
+                                                    : Color.TransparentBlack,
                            LabelColor = selected
                                             ? UiColors.ForegroundFull.Fade(emphasis)
                                             : UiColors.Text.Fade(0.7f * emphasis),

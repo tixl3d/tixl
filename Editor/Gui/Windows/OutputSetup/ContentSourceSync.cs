@@ -1,14 +1,22 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 using T3.Core.Output;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// Keeps the setup's <see cref="ContentSource"/> list 1:1 with the ops that supply pixels.
+/// The op ↔ source relationship: keeps the setup's <see cref="ContentSource"/> list 1:1 with the ops that supply
+/// pixels, and is the setup side's way into the graph — placing, finding, naming and revealing a send op.
 /// <para>Bound to the op's <b>SymbolChild</b> — the durable graph entity — not to a live instance. Instances
 /// come and go with hot-reloads and with whichever part of the graph happens to be instantiated, so "no live
 /// send op" only means "no pixels this frame". A source is removed only once its child is confirmed *gone* from
@@ -24,6 +32,96 @@ internal static class ContentSourceSync
         var setup = ActiveSetup.Current;
         if (setup != null)
             Update(setup);
+    }
+
+    /// <summary>
+    /// Drops a <c>SendToOutput</c> op into the focused composition, selects it, and frames the view on it. When a
+    /// texture-outputting op is selected it lands to its right and is wired straight in, so the feed shows up in
+    /// the setup at once (the CONTENT item appears next frame, once the sync adopts it).
+    /// </summary>
+    public static void AddContentSend(SetupEntitySelection selection)
+    {
+        var projectView = ProjectView.Focused;
+        var composition = projectView?.CompositionInstance;
+        if (projectView == null || composition == null)
+            return;
+
+        if (!composition.Symbol.TryGetSymbolUi(out var compositionUi)
+            || !SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out var sendSymbolUi))
+            return;
+
+        // A selected texture op becomes the feed: place the send op to its right and wire it up.
+        var selected = projectView.NodeSelection.GetSelectedInstanceWithoutComposition();
+        var sourceSlot = selected == null ? null : FindTextureOutput(selected);
+        var selectedUi = selected?.GetChildUi();
+        var pos = selectedUi != null
+                      ? selectedUi.PosOnCanvas + new Vector2(selectedUi.Size.X + 40, 0)
+                      : Vector2.Zero;
+
+        var newChildUi = GraphOperations.AddSymbolChild(sendSymbolUi.Symbol, compositionUi, pos);
+
+        if (sourceSlot != null && selectedUi != null)
+        {
+            var connection = new Symbol.Connection(selectedUi.Id, sourceSlot.Id, newChildUi.Id, SendToOutputTextureInputId);
+            UndoRedoStack.AddAndExecute(new AddConnectionCommand(compositionUi.Symbol, connection, 0));
+        }
+
+        projectView.NodeSelection.TrySelectCompositionChild(composition, newChildUi.Id, add: false);
+        projectView.FocusViewToSelection();
+    }
+
+    /// <summary>The live send op with this SymbolChildId, or null while it isn't instantiated.</summary>
+    public static Instance? FindSendInstance(Guid childId)
+    {
+        var suppliers = ContentSupplierRegistry.Suppliers;
+        for (var i = 0; i < suppliers.Count; i++)
+        {
+            if (suppliers[i] is Instance instance && instance.SymbolChildId == childId)
+                return instance;
+        }
+
+        return null;
+    }
+
+    /// <summary>The name a send op shows as a CONTENT item.</summary>
+    public static string SendName(Instance instance)
+    {
+        var parent = instance.Parent;
+        if (parent != null && parent.Symbol.Children.TryGetValue(instance.SymbolChildId, out var child))
+            return child.ReadableName;
+
+        return "content";
+    }
+
+    /// <summary>
+    /// Renames a content source by renaming its op — the source has no name of its own, it mirrors the
+    /// SendToOutput op. Needs a live instance to reach the graph; an op that isn't instantiated can't be
+    /// renamed from here.
+    /// </summary>
+    public static void RenameContentSourceOp(Guid childId, string newName)
+    {
+        var parent = FindSendInstance(childId)?.Parent;
+        var parentSymbolUi = parent?.GetSymbolUi();
+        if (parentSymbolUi == null || !parentSymbolUi.ChildUis.TryGetValue(childId, out var childUi))
+            return;
+
+        UndoRedoStack.AddAndExecute(new ChangeSymbolChildNameCommand(childUi, parentSymbolUi.Symbol) { NewName = newName });
+    }
+
+    /// <summary>Selects the content's SendToOutput op in the focused graph and frames it — the setup → graph
+    /// half of the sync (the graph → setup highlight is handled by the highlighted-content id).</summary>
+    public static void RevealContentOpInGraph(Guid childId)
+    {
+        var instance = FindSendInstance(childId);
+        var parentSymbolUi = instance?.Parent?.GetSymbolUi();
+        if (instance == null || parentSymbolUi == null || ProjectView.Focused == null)
+            return;
+
+        if (!parentSymbolUi.ChildUis.TryGetValue(instance.SymbolChildId, out var childUi))
+            return;
+
+        ProjectView.Focused.NodeSelection.SetSelection(childUi, instance);
+        FitViewToSelectionHandling.FitViewToSelection();
     }
 
     private static void Update(Setup setup)
@@ -152,17 +250,19 @@ internal static class ContentSourceSync
 
     private static bool TryFindInstance(Guid childId, out Instance? instance)
     {
-        foreach (var supplier in ContentSupplierRegistry.Suppliers)
+        instance = FindSendInstance(childId);
+        return instance != null;
+    }
+
+    private static ISlot? FindTextureOutput(Instance instance)
+    {
+        foreach (var slot in instance.Outputs)
         {
-            if (supplier is Instance candidate && candidate.SymbolChildId == childId)
-            {
-                instance = candidate;
-                return true;
-            }
+            if (slot.ValueType == typeof(Texture2D))
+                return slot;
         }
 
-        instance = null;
-        return false;
+        return null;
     }
 
     private static string ReadName(Instance instance)
@@ -179,4 +279,8 @@ internal static class ContentSourceSync
         var childUi = instance.Parent?.GetSymbolUi().ChildUis.GetValueOrDefault(instance.SymbolChildId);
         return !string.IsNullOrEmpty(childUi?.SymbolChild.Name);
     }
+
+    // Lib SendToOutput op and its texture input — the CONTENT "+" instantiates this and wires a selected feed in.
+    private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
+    private static readonly Guid SendToOutputTextureInputId = new("8a4dd1b3-2e6f-4c25-9d0a-7f3b61c8e942");
 }

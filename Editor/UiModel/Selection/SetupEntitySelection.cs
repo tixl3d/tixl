@@ -1,12 +1,10 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using T3.Core.Operator;
 using T3.Core.Output;
-using T3.Editor.UiModel.ProjectHandling;
-using T3.Editor.UiModel.Selection;
+using T3.Editor.Gui.Windows.OutputSetup;
 
-namespace T3.Editor.Gui.Windows.OutputSetup;
+namespace T3.Editor.UiModel.Selection;
 
 /// <summary>A sub-element of a selectable entity, addressed by index. The entity plane uses <see cref="None"/>;
 /// the canvas plane addresses corners, annotation endpoints, and lattice points.</summary>
@@ -34,7 +32,7 @@ internal readonly record struct SelectionTarget(
 /// Ordered: element 0 is the primary (drives the shown entity view). Single-click replaces,
 /// ctrl/shift extend. Entities are referenced by kind + GUID, resolved against the active setup on
 /// use — never by cached object reference. One instance shared by all output windows
-/// (<see cref="T3.Editor.UiModel.ProjectHandling.OutputSetupHandling.EntitySelection"/>); a window
+/// (<see cref="GlobalSelectionHandling.SetupEntities"/>); a window
 /// that shouldn't follow it keeps a per-window pin instead (see <see cref="OutputSetupModeView"/>).
 /// </summary>
 internal sealed class SetupEntitySelection
@@ -117,92 +115,7 @@ internal sealed class SetupEntitySelection
 
     private static bool ExistsInSetup(Setup setup, SelectionTarget target)
     {
-        return Exists(setup, target.Kind, target.EntityId);
-    }
-
-    /// <summary>Whether an entity reference still resolves against the setup — shared with the
-    /// per-window pin, which validates the same way the selection prunes.</summary>
-    internal static bool Exists(Setup setup, SetupEntityKinds kind, Guid id)
-    {
-        switch (kind)
-        {
-            case SetupEntityKinds.ReferenceImage:
-                foreach (var e in setup.ReferenceImages)
-                {
-                    if (e.Id == id)
-                        return true;
-                }
-
-                return false;
-
-            case SetupEntityKinds.Surface:
-                foreach (var e in setup.Surfaces)
-                {
-                    if (e.Id == id)
-                        return true;
-                }
-
-                return false;
-
-            case SetupEntityKinds.Prop:
-                foreach (var e in setup.Props)
-                {
-                    if (e.Id == id)
-                        return true;
-                }
-
-                return false;
-
-            case SetupEntityKinds.Output:
-                foreach (var e in setup.Outputs)
-                {
-                    if (e.Id == id)
-                        return true;
-                }
-
-                return false;
-
-            case SetupEntityKinds.Slice:
-                foreach (var e in setup.Slices)
-                {
-                    if (e.Id == id)
-                        return true;
-                }
-
-                return false;
-
-            case SetupEntityKinds.Patch:
-                return setup.FindPatch(id, out _) != null;
-
-            case SetupEntityKinds.ContentSource:
-                // Content items are addressed by the op's SymbolChildId, not ContentSource.Id. A freshly
-                // created send can be selected before the sync adopts it into the setup, so a live send op
-                // with that child also counts as existing.
-                foreach (var source in setup.ContentSources)
-                {
-                    if (source.SymbolChildId == id)
-                        return true;
-                }
-
-                foreach (var supplier in ContentSupplierRegistry.Suppliers)
-                {
-                    if (supplier is Instance instance && instance.SymbolChildId == id)
-                        return true;
-                }
-
-                return false;
-
-            case SetupEntityKinds.Plug:
-                // Plugs are machine state, not setup state: an attached display, or a stream this machine offers.
-                if (Plugs.TryGetDisplayIndex(id, out var displayIndex))
-                    return displayIndex < System.Windows.Forms.Screen.AllScreens.Length;
-
-                return OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig)
-                       && machineConfig.FindStreamPlug(id) != null;
-
-            default:
-                return false;
-        }
+        return SetupEntities.Exists(setup, target.Kind, target.EntityId);
     }
 
     private readonly SelectionSet<SelectionTarget> _targets = new();
