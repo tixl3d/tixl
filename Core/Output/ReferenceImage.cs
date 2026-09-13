@@ -7,7 +7,8 @@ namespace T3.Core.Output;
 
 /// <summary>
 /// Image used to define and measure surfaces. Photos are perspective and need straightening;
-/// plans are orthographic drawings that only need a scale.
+/// plans are orthographic drawings that only need a scale; pixel maps are a venue's layout of an
+/// output canvas, drawn 1:1 over it.
 /// </summary>
 public sealed class ReferenceImage
 {
@@ -16,6 +17,7 @@ public sealed class ReferenceImage
     {
         public const string Photo = "Photo";
         public const string Plan = "Plan";
+        public const string PixelMap = "PixelMap";
     }
 
     public Guid Id = Guid.NewGuid();

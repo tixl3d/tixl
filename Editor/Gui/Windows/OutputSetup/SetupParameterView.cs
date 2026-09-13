@@ -6,6 +6,7 @@ using T3.Core.Operator.Slots;
 using T3.Core.Output;
 using T3.Core.Output.Streaming;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.InputUi.ListInputs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
@@ -322,7 +323,228 @@ internal static class SetupParameterView
                                           ? $"following {boundTo} · {output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
                                           : boundTo,
                                       Fonts.FontSmall, UiColors.TextMuted);
+
+        DrawPixelMapRows(setup, output);
+        DrawPatchTable(setup, output, Guid.Empty);
     }
+
+    /// <summary>
+    /// The image drawn over the canvas while placing patches — a venue's pixel map at the output's pixel size.
+    /// Picking a file creates the setup's reference image for it, or repoints the one already linked.
+    /// </summary>
+    private static void DrawPixelMapRows(Setup setup, OutputDefinition output)
+    {
+        FormInputs.AddSectionSubHeader("Pixel Map");
+        var image = setup.FindReferenceImage(output.ReferenceImageId);
+
+        FormInputs.DrawInputLabel("Image");
+        string? path = image?.FilePath;
+        var pathState = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, SetupActions.ImageFileFilter, ref path);
+        if ((pathState & InputEditStateFlags.Modified) != 0 && path != null && path != image?.FilePath)
+        {
+            SetupUndo.RunUndoable("Pick pixel map", setup, () =>
+                                                           {
+                                                               if (image == null)
+                                                               {
+                                                                   image = new ReferenceImage
+                                                                               {
+                                                                                   Name = $"{output.Name} map",
+                                                                                   Kind = ReferenceImage.Kinds.PixelMap,
+                                                                                   FilePath = path,
+                                                                               };
+                                                                   setup.ReferenceImages.Add(image);
+                                                                   output.ReferenceImageId = image.Id;
+                                                               }
+                                                               else
+                                                               {
+                                                                   image.FilePath = path;
+                                                               }
+                                                           });
+        }
+
+        if (image == null)
+        {
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText("None — pick the venue's pixel map to place patches against.", Fonts.FontSmall, UiColors.TextMuted);
+            return;
+        }
+
+        ImGui.SameLine();
+        if (CustomComponents.IconButton(Icon.Close, Vector2.Zero, CustomComponents.ButtonStates.Default))
+            SetupUndo.RunUndoable("Remove pixel map", setup, () => output.ReferenceImageId = Guid.Empty);
+
+        CustomComponents.TooltipForLastItem("Remove the pixel map from this output", "The image stays in the setup.");
+
+        var opacity = output.ReferenceOpacity;
+        var opacityState = FormInputs.AddFloatWithEditState("Opacity", ref opacity, 0, 1, 0.005f, clampMin: true, clampMax: true,
+                                                            "How strongly the map shows over the output's content.", defaultValue: 0.5f);
+        BeginFieldUndo(setup, opacityState);
+        if ((opacityState & InputEditStateFlags.Modified) != 0)
+            output.ReferenceOpacity = opacity;
+
+        CommitFieldUndo(setup, "Change pixel map opacity", opacityState);
+
+        // The map is laid out for one canvas size; a mismatch means every patch typed from it lands off.
+        FormInputs.ApplyIndent();
+        if (image.Width <= 0)
+        {
+            CustomComponents.StylizedText("Not loaded yet — it shows once this output is open.", Fonts.FontSmall, UiColors.TextMuted);
+        }
+        else if (image.Width == output.CanvasResolution.Width && image.Height == output.CanvasResolution.Height)
+        {
+            CustomComponents.StylizedText($"{image.Width}×{image.Height} px · matches the canvas", Fonts.FontSmall, UiColors.TextMuted);
+        }
+        else
+        {
+            CustomComponents.StylizedText($"{image.Width}×{image.Height} px · canvas is {output.CanvasResolution.Width}×{output.CanvasResolution.Height}",
+                                          Fonts.FontSmall, UiColors.StatusAttention);
+            ImGui.SameLine(0, 6 * T3Ui.UiScaleFactor);
+            if (ImGui.SmallButton("Use as Canvas Size"))
+            {
+                SetupUndo.RunUndoable("Resize canvas to pixel map", setup,
+                                      () => output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(image.Width, image.Height));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Every patch on the canvas as one row — name, top-left, size, rotation — so a venue's spec sheet can be
+    /// typed in as it is printed. Clicking a name selects that patch; <paramref name="highlightedPatchId"/>
+    /// is the row shown as current. Fitted and warped patches show their rect read-only, since their shape is
+    /// decided elsewhere (the aspect rows, the corners on the canvas).
+    /// </summary>
+    private static void DrawPatchTable(Setup setup, OutputDefinition output, Guid highlightedPatchId)
+    {
+        FormInputs.AddSectionSubHeader("Patches");
+        var selection = GlobalSelectionHandling.SetupEntities;
+        if (output.Patches.Count > 0)
+            DrawUnitSwitch();
+
+        var scale = T3Ui.UiScaleFactor;
+        FormInputs.ApplyIndent();
+        var tableWidth = ImGui.GetContentRegionAvail().X - InputArea.ValueEditRightMargin;
+        if (output.Patches.Count > 0
+            && ImGui.BeginTable("patches", 6, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.PadOuterX,
+                                new Vector2(tableWidth, 0)))
+        {
+            ImGui.TableSetupColumn("Patch", ImGuiTableColumnFlags.WidthStretch, 2.2f);
+            ImGui.TableSetupColumn("X", ImGuiTableColumnFlags.WidthStretch, 1f);
+            ImGui.TableSetupColumn("Y", ImGuiTableColumnFlags.WidthStretch, 1f);
+            ImGui.TableSetupColumn("W", ImGuiTableColumnFlags.WidthStretch, 1f);
+            ImGui.TableSetupColumn("H", ImGuiTableColumnFlags.WidthStretch, 1f);
+            ImGui.TableSetupColumn("Turn", ImGuiTableColumnFlags.WidthStretch, 0.9f);
+
+            ImGui.TableNextRow();
+            for (var column = 0; column < _patchColumnLabels.Length; column++)
+            {
+                ImGui.TableSetColumnIndex(column);
+                CustomComponents.StylizedText(_patchColumnLabels[column], Fonts.FontSmall, UiColors.TextMuted);
+            }
+
+            var canvas = output.CanvasSize;
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 3 * scale);
+            for (var index = 0; index < output.Patches.Count; index++)
+            {
+                var patch = output.Patches[index];
+                ImGui.PushID(index);
+                ImGui.TableNextRow();
+                if (patch.Id == highlightedPatchId)
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, UiColors.BackgroundButton);
+
+                ImGui.TableSetColumnIndex(0);
+                if (ImGui.Selectable(SetupLabels.PatchLabel(output, patch), selection.IsSelected(SetupEntityKinds.Patch, patch.Id)))
+                    selection.Select(SetupEntityKinds.Patch, patch.Id);
+
+                DrawPatchRectCells(setup, output, patch, canvas);
+                ImGui.PopID();
+            }
+
+            ImGui.PopStyleVar();
+            ImGui.EndTable();
+        }
+
+        if (ImGui.Button("Add Patch"))
+            SetupActions.AddPatch(selection, setup, output);
+
+        CustomComponents.TooltipForLastItem("Adds a full-canvas patch to place by dragging on the output, or by typing its rect here.");
+    }
+
+    /// <summary>The X, Y, W, H and turn cells of one table row, editable for a freely placed axis-aligned patch.</summary>
+    private static void DrawPatchRectCells(Setup setup, OutputDefinition output, OutputDefinition.Patch patch, Vector2 canvas)
+    {
+        var quad = patch.Quad;
+        if (quad.Length < 4)
+            return;
+
+        CanvasDraw.Bounds(quad, out var min, out var max);
+        var cells = _patchCellScratch;
+        cells[0] = ToUnit(min.X, canvas.X);
+        cells[1] = ToUnit(min.Y, canvas.Y);
+        cells[2] = ToUnit(max.X - min.X, canvas.X);
+        cells[3] = ToUnit(max.Y - min.Y, canvas.Y);
+
+        const float aligned = 0.0001f; // of the canvas
+        var isAxisAligned = MathF.Abs(quad[0].Y - quad[1].Y) < aligned && MathF.Abs(quad[2].Y - quad[3].Y) < aligned
+                            && MathF.Abs(quad[0].X - quad[3].X) < aligned && MathF.Abs(quad[1].X - quad[2].X) < aligned;
+        var editable = isAxisAligned && !patch.IsFitted;
+        var format = EditsInPixels ? "{0:0}" : "{0:0.000}";
+
+        var state = InputEditStateFlags.Nothing;
+        for (var cell = 0; cell < 4; cell++)
+        {
+            ImGui.TableSetColumnIndex(cell + 1);
+            if (!editable)
+            {
+                CustomComponents.StylizedText(string.Format(format, cells[cell]), Fonts.FontSmall, UiColors.TextMuted);
+                continue;
+            }
+
+            ImGui.PushID(cell);
+            var value = cells[cell];
+            var cellState = SingleValueEdit.Draw(ref value, new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()),
+                                                 float.NegativeInfinity, float.PositiveInfinity, clampMin: false, clampMax: false,
+                                                 scale: EditsInPixels ? 1f : 0.001f, format: format);
+            cells[cell] = EditsInPixels ? MathF.Round(value) : value;
+            state |= cellState;
+            ImGui.PopID();
+        }
+
+        if (editable)
+        {
+            BeginFieldUndo(setup, state);
+            if ((state & InputEditStateFlags.Modified) != 0)
+            {
+                var topLeft = new Vector2(FromUnit(cells[0], canvas.X), FromUnit(cells[1], canvas.Y));
+                var w = MathF.Max(FromUnit(cells[2], canvas.X), 0.0001f);
+                var h = MathF.Max(FromUnit(cells[3], canvas.Y), 0.0001f);
+                quad[0] = topLeft;
+                quad[1] = new Vector2(topLeft.X + w, topLeft.Y);
+                quad[2] = new Vector2(topLeft.X + w, topLeft.Y + h);
+                quad[3] = new Vector2(topLeft.X, topLeft.Y + h);
+            }
+
+            CommitFieldUndo(setup, "Edit patch rect", state);
+        }
+
+        ImGui.TableSetColumnIndex(5);
+        if (!isAxisAligned)
+        {
+            CustomComponents.StylizedText("warped", Fonts.FontSmall, UiColors.TextMuted);
+            return;
+        }
+
+        var degrees = DegreesOfTurns(patch.QuarterTurns);
+        var turnState = SingleValueEdit.Draw(ref degrees, new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()),
+                                             -180, 180, clampMin: false, clampMax: false, scale: 1f, format: "{0:0}°");
+        BeginFieldUndo(setup, turnState);
+        if ((turnState & InputEditStateFlags.Modified) != 0)
+            SetupActions.TurnPatch(output, patch, TurnsOfDegrees(degrees) - patch.QuarterTurns);
+
+        CommitFieldUndo(setup, "Rotate patch", turnState);
+    }
+
+    private static readonly string[] _patchColumnLabels = ["Patch", "X", "Y", "W", "H", "Turn"];
+    private static readonly float[] _patchCellScratch = new float[4];
 
     /// <summary>
     /// A plug: what this machine presents through. A display is read-only (the OS owns its name and mode); a
@@ -524,6 +746,14 @@ internal static class SetupParameterView
         if (patch == null || output == null)
             return;
 
+        DrawPatchRows(setup, output, patch);
+
+        // Its siblings on the same canvas, with this one current — a venue's patches are placed as a set.
+        DrawPatchTable(setup, output, patch.Id);
+    }
+
+    private static void DrawPatchRows(Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
+    {
         var slice = setup.FindSlice(patch.SliceId);
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(slice == null

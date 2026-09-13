@@ -13,6 +13,9 @@ using T3.Editor.UiModel.Commands.Setup;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
+using Color = T3.Core.DataTypes.Vector.Color;
+using Int2 = T3.Core.DataTypes.Vector.Int2;
+using Texture2D = T3.Core.DataTypes.Texture2D;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
@@ -367,42 +370,33 @@ internal sealed partial class SetupOutputView
 
         dl.AddQuadFilled(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.BackgroundFull.Fade(0.4f));
 
-        // The composite (rendered above), transformed by R. At t=0 it's drawn 1:1; while rectifying it's warped
-        // into a scratch target so the perspective stays correct.
-        var hasContent = false;
-        if (composite is { IsDisposed: false })
+        // Whatever is drawn 1:1 on the canvas is carried through R while rectifying: warped into a scratch
+        // target so the perspective stays correct. The destination is the canvas' corners in the framing window.
+        var rtSize = default(Int2);
+        if (rectifying)
         {
-            if (rectifying)
-            {
-                var maxDim = Math.Max(viewSize.X, viewSize.Y);
-                var renderScale = maxDim > 4096f ? 4096f / maxDim : 1f;
-                var rtSize = new T3.Core.DataTypes.Vector.Int2(Math.Max(1, (int)(viewSize.X * renderScale)),
-                                                               Math.Max(1, (int)(viewSize.Y * renderScale)));
-                var w = canvasSize.X;
-                var h = canvasSize.Y;
-                var dest = _warpDestQuad;
-                dest[0] = (rectifiedToView.TransformPoint(new Vector2(0, 0)) - viewMin) * renderScale;
-                dest[1] = (rectifiedToView.TransformPoint(new Vector2(w, 0)) - viewMin) * renderScale;
-                dest[2] = (rectifiedToView.TransformPoint(new Vector2(w, h)) - viewMin) * renderScale;
-                dest[3] = (rectifiedToView.TransformPoint(new Vector2(0, h)) - viewMin) * renderScale;
+            var maxDim = Math.Max(viewSize.X, viewSize.Y);
+            var renderScale = maxDim > 4096f ? 4096f / maxDim : 1f;
+            rtSize = new Int2(Math.Max(1, (int)(viewSize.X * renderScale)),
+                              Math.Max(1, (int)(viewSize.Y * renderScale)));
+            var w = canvasSize.X;
+            var h = canvasSize.Y;
+            var dest = _warpDestQuad;
+            dest[0] = (rectifiedToView.TransformPoint(new Vector2(0, 0)) - viewMin) * renderScale;
+            dest[1] = (rectifiedToView.TransformPoint(new Vector2(w, 0)) - viewMin) * renderScale;
+            dest[2] = (rectifiedToView.TransformPoint(new Vector2(w, h)) - viewMin) * renderScale;
+            dest[3] = (rectifiedToView.TransformPoint(new Vector2(0, h)) - viewMin) * renderScale;
+        }
 
-                var warped = OutputCompositor.RenderWarpedTexture(composite, dest, rtSize);
-                var warpedSrv = warped is { IsDisposed: false } ? SrvManager.GetSrvForTexture(warped) : null;
-                if (warpedSrv is { IsDisposed: false })
-                {
-                    dl.AddImage(warpedSrv.NativePointer, frameMin, frameMax);
-                    hasContent = true;
-                }
-            }
-            else
-            {
-                var srv = SrvManager.GetSrvForTexture(composite);
-                if (srv is { IsDisposed: false })
-                {
-                    dl.AddImage(srv.NativePointer, frameMin, frameMax);
-                    hasContent = true;
-                }
-            }
+        var hasContent = DrawCanvasImage(dl, composite, rectifying, rtSize, frameMin, frameMax, Color.White, default);
+
+        // The output's pixel map over the content, so patches are placed against the venue's layout while
+        // what they show stays visible through it.
+        var pixelMap = setup.FindReferenceImage(output.ReferenceImageId);
+        if (pixelMap != null && output.ReferenceOpacity > 0f)
+        {
+            DrawCanvasImage(dl, TryGetReferenceTexture(pixelMap), rectifying, rtSize, frameMin, frameMax,
+                            UiColors.ForegroundFull.Fade(output.ReferenceOpacity), _pixelMapWarpTargetId);
         }
 
         dl.AddQuad(canvasOutline[0], canvasOutline[1], canvasOutline[2], canvasOutline[3], UiColors.ForegroundFull.Fade(0.25f));
@@ -674,6 +668,26 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>Whether the pointer is over the canvas area this view draws into (not the strip below it).</summary>
+    /// <summary>
+    /// A texture covering the whole output canvas, drawn into the framing window: 1:1, or warped through R
+    /// (into the scratch target <paramref name="warpTargetKey"/>, sized <paramref name="rtSize"/>) while
+    /// rectifying. False when there is nothing to draw.
+    /// </summary>
+    private bool DrawCanvasImage(ImDrawListPtr dl, Texture2D? texture, bool rectifying, Int2 rtSize,
+                                 Vector2 frameMin, Vector2 frameMax, Color tint, Guid warpTargetKey)
+    {
+        if (texture is not { IsDisposed: false })
+            return false;
+
+        var shown = rectifying ? OutputCompositor.RenderWarpedTexture(texture, _warpDestQuad, rtSize, warpTargetKey) : texture;
+        var srv = shown is { IsDisposed: false } ? SrvManager.GetSrvForTexture(shown) : null;
+        if (srv is not { IsDisposed: false })
+            return false;
+
+        dl.AddImage(srv.NativePointer, frameMin, frameMax, Vector2.Zero, Vector2.One, tint);
+        return true;
+    }
+
     private bool IsMouseOverCanvas()
     {
         return ImGui.IsMouseHoveringRect(_boardCanvas.WindowPos, _boardCanvas.WindowPos + _boardCanvas.WindowSize);
@@ -864,6 +878,9 @@ internal sealed partial class SetupOutputView
     // view, and where that quad flies in from.
     private readonly Vector2[] _canvasOutline = new Vector2[4];
     private readonly Vector2[] _warpDestQuad = new Vector2[4];
+
+    /** The pixel map's own warp target, so it and the composite are both alive in one rectified frame. */
+    private static readonly Guid _pixelMapWarpTargetId = new("6b0c2d51-9e4f-4a8b-b3c7-2f1d8e5a9c40");
     private readonly Vector2[] _viewQuad = new Vector2[4];
     private readonly Vector2[] _boardFlyQuad = new Vector2[4];
 

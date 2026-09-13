@@ -272,6 +272,15 @@ public sealed class OutputDefinition
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
     public BoardPlacement? BoardPlacement;
 
+    /// <summary>
+    /// The reference image the editor draws over this canvas, at <see cref="ReferenceOpacity"/> — a venue's
+    /// pixel map, laid out at the canvas' pixel size, so patches are placed against it. Empty for none.
+    /// </summary>
+    public Guid ReferenceImageId;
+
+    /// <summary>How strongly the reference image shows over the composited content, 0..1.</summary>
+    public float ReferenceOpacity = 0.5f;
+
     /// <summary>The whole canvas as a TL, TR, BR, BL quad in its 0..1 space — the default patch, and the reset shape.</summary>
     public static Vector2[] FullCanvasQuad()
     {
@@ -333,6 +342,12 @@ public sealed class OutputDefinition
             BoardPlacement.WriteToJson(writer);
         }
 
+        if (ReferenceImageId != Guid.Empty)
+        {
+            writer.WriteObject("ReferenceImage", ReferenceImageId);
+            writer.WriteValue("ReferenceOpacity", ReferenceOpacity);
+        }
+
         writer.WriteEndObject();
     }
 
@@ -346,6 +361,8 @@ public sealed class OutputDefinition
                              CanvasResolution = OutputJson.ReadInt2(token["CanvasResolution"], new Int2(1920, 1080)),
                              IsSending = token.ReadValueSafe("Send", true),
                              Patches = token.ReadListSafe("Patches", Patch.ReadFromJson),
+                             ReferenceImageId = OutputJson.ReadGuid(token["ReferenceImage"]),
+                             ReferenceOpacity = Math.Clamp(token.ReadValueSafe("ReferenceOpacity", 0.5f), 0f, 1f),
                          };
 
         if (token["Camera"] is JObject cameraToken)

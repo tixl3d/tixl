@@ -55,6 +55,8 @@ The selected surface seen flat, as if you stood in front of it. Place its conten
 
 An output's canvas: the live composite the projector receives. Each mapped surface appears as a quad you corner-pin over the real wall while watching the projector. Once a surface carries reference points, aim them at their real positions and the pin is solved to hit them exactly. Patches appear as plain quads on the canvas.
 
+**Pixel map.** Venues that take one video signal for a whole room hand out a pixel map: an image at the signal's resolution with every wall's rectangle drawn in. Select the output and pick that image under **Pixel Map** in the Parameter window; it is drawn over the canvas at the **Opacity** you set, so patches can be placed against it while their content still shows through. The card warns when the image and the canvas differ in size, with a button to adopt the image's size. Below it, the **Patches** table lists every patch on the canvas with its top-left corner, size and rotation, in pixels or as ratios of the canvas, so a spec sheet can be typed in as printed. Clicking a name selects that patch; the same table sits on each patch's card, with that patch marked.
+
 ## Reference images and props
 
 A **reference image** is a photo or a plan of the venue. Trace a surface on a photo to define it from the picture, then measure it with line annotations to give it real dimensions. Plans are orthographic and only need a scale. A **prop** is a scale reference in the stage — a 1.70 m person, a table — so sizes can be sanity-checked at a glance.
