@@ -79,7 +79,8 @@ internal sealed partial class SetupOutputView
             // Same label-over-handle rule as surfaces: the label is the grab area, so handles under it yield.
             var handleActive = _gesture.HotId == patch.Id && _gesture.Kind is GestureKinds.PatchQuad or GestureKinds.PatchMove;
             var pointerOverLabel = !handleActive && !isImplicit && IsMouseOverLabel(screen, label);
-            style.IsEditable = editable && !pointerOverLabel && !_isolatesFocusedSurface;
+            // A fitted patch's place and size are derived from its aspect and scale, so it has no handles to drag.
+            style.IsEditable = editable && !patch.IsFitted && !pointerOverLabel && !_isolatesFocusedSurface;
 
             var phase = CornerPinHandles.Draw(_patchViewQuad, _projection, style, out var draggedCorner, out var cornerHovered);
             if (phase != CanvasPointHandle.DragPhases.None)
@@ -108,7 +109,7 @@ internal sealed partial class SetupOutputView
 
             // The label doubles as the move handle — the press selects (through the picker), holding on moves.
             if (phase == CanvasPointHandle.DragPhases.None && !isImplicit)
-                HandlePatchMove(setup, output, patch, isFocused, editable && !_isolatesFocusedSurface, label, screen, rectifiedToView, rectifiedToOutput, viewMin, canvasSize);
+                HandlePatchMove(setup, output, patch, isFocused, editable && !patch.IsFitted && !_isolatesFocusedSurface, label, screen, rectifiedToView, rectifiedToOutput, viewMin, canvasSize);
 
             if (cornerHovered || phase != CanvasPointHandle.DragPhases.None)
                 FrameStats.RequestCrossHighlight(patch.Id);

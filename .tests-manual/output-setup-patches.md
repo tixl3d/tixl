@@ -167,6 +167,28 @@ the right by a little and release.
   to a surface instead, the picture on the wall does not change: the surface lies on its side,
   and its size is measured along the picture, not along the canvas.
 
+## Step: Fitting a patch to an aspect ratio
+
+**Action:**
+1. Select "Patch 1", set **Rotation** back to 0°, then set **Scale mode** to **Fit**.
+2. Set **Aspect ratio** to 2.39 : 1.
+3. Set **Scale** to 50%.
+4. Select "P1" and set its **Canvas (px)** to 1080 × 1920; then press Ctrl+Z.
+5. Select "Patch 1" again and set **Scale mode** back to **Stretch**.
+
+**Expected:**
+- After 1: the **Position** and **Size** rows disappear and **Aspect ratio** (16 : 9) and **Scale**
+  (100%) appear instead. The card reads "1920 × 1080 px on the canvas, centred" and the patch covers
+  the whole canvas. On the output canvas the patch has no corner or edge handles, and dragging its
+  label does not move it.
+- After 2: the card reads "1920 × 803 px on the canvas, centred": the patch spans the full width,
+  with equal gaps above and below.
+- After 3: the card reads "960 × 402 px on the canvas, centred", still centred on the canvas.
+- After 4: the canvas turns portrait and the patch re-fits at once: the card reads "540 × 226 px on
+  the canvas, centred". Ctrl+Z restores the 1920 × 1080 canvas and the patch returns to 960 × 402.
+- After 5: **Position** (about 480 × 339) and **Size** (about 960 × 402) come back, the handles return,
+  and the patch stays exactly where it was. Each of the five changes is one undo step.
+
 ## Step: Use on Surface
 
 **Action:**

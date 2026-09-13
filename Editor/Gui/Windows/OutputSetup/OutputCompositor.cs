@@ -67,7 +67,16 @@ internal static class OutputCompositor
             if (patch.Quad.Length < 4 || !OutputContentResolver.TryResolveSliceContent(setup, patch.SliceId, out var patchSend, out var patchRect))
                 continue;
 
+            // A fitted patch asks for its own size, so the content arrives in the patch's aspect; the context
+            // goes back to the canvas size for the next consumer.
+            var isFittedRequest = OutputContentResolver.TryGetFittedRequest(output, patch, patchRect, out var fittedResolution);
+            if (isFittedRequest)
+                context.RequestedResolution = fittedResolution;
+
             var content = OutputContentResolver.PullContent(patchSend!);
+            if (isFittedRequest)
+                context.RequestedResolution = output.ResolvedResolution;
+
             if (content is not { IsDisposed: false })
                 continue;
 

@@ -171,7 +171,8 @@ internal static class OutputSetupHandling
     /// <summary>
     /// Fills each output's <see cref="OutputDefinition.ResolvedResolution"/>: its own canvas size, or the size
     /// of the plug bound to it when that is left at 0×0. Done here rather than in the model because a binding
-    /// is machine state — the setup file stays free of display numbering.
+    /// is machine state — the setup file stays free of display numbering. Fitted patches are re-derived right
+    /// after, so a display of another aspect re-fits them before anything draws this frame.
     /// </summary>
     private static void ResolveCanvasResolutions(Setup setup, MachineConfig machineConfig)
     {
@@ -186,6 +187,13 @@ internal static class OutputSetupHandling
             var plugId = Plugs.BoundPlugId(machineConfig.FindBinding(output.Id));
             var resolution = plugId == Guid.Empty ? new Int2(1920, 1080) : Plugs.PlugResolution(plugId);
             output.ResolvedResolution = resolution;
+        }
+
+        foreach (var output in setup.Outputs)
+        {
+            var canvas = output.CanvasSize;
+            foreach (var patch in output.Patches)
+                patch.TryFitQuad(canvas);
         }
     }
 

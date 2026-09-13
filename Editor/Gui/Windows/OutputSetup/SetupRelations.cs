@@ -247,10 +247,11 @@ internal static class SetupRelations
         if (output.Patches.Count != 1)
             return false;
 
-        // A turned patch is no longer "the output itself": its rotation is state worth seeing and undoing
-        // on its own row, which a folded-away patch has none of.
+        // A turned or fitted patch is no longer "the output itself": its rotation or fit is state worth seeing
+        // and undoing on its own item, which a folded-away patch has none of — and a fitted one only covers the
+        // canvas while the display happens to match its aspect.
         var patch = output.Patches[0];
-        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(output, patch) || patch.QuarterTurns != 0)
+        if (!string.IsNullOrEmpty(patch.Name) || !CoversFullCanvas(output, patch) || patch.QuarterTurns != 0 || patch.IsFitted)
             return false;
 
         implicitPatch = patch;

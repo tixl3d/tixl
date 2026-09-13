@@ -533,6 +533,8 @@ internal static class SetupParameterView
 
         // Ahead of the geometry, which a warped quad skips: turning the picture applies to any patch.
         DrawPatchRotationRow(setup, output, patch);
+        if (DrawPatchScaleRows(setup, output, patch))
+            return;
 
         if (patch.Quad.Length < 4)
             return;
@@ -582,6 +584,79 @@ internal static class SetupParameterView
     }
 
     /// <summary>
+    /// The scale mode and, for a fitted patch, its aspect pair and scale. Returns true for a fitted patch: its
+    /// place and size are derived from these, so the free Position and Size rows below don't apply to it.
+    /// Every change re-fits at once, inside its undo step, so the snapshot holds the quad that is drawn.
+    /// </summary>
+    private static bool DrawPatchScaleRows(Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
+    {
+        var mode = patch.ScaleMode;
+        if (FormInputs.AddSegmentedButtonWithLabel(ref mode, "Scale mode",
+                                                   "Stretch places the patch freely, as a share of the canvas, so it stretches when the canvas changes aspect. "
+                                                   + "Fit keeps the aspect ratio below and fits it into the canvas, centred."))
+        {
+            // Switching back to Stretch keeps the fitted rectangle as the starting point for free editing.
+            SetupUndo.RunUndoable("Change patch scale mode", setup, () =>
+                                                                    {
+                                                                        patch.ScaleMode = mode;
+                                                                        patch.TryFitQuad(output.CanvasSize);
+                                                                    });
+        }
+
+        if (!patch.IsFitted)
+            return false;
+
+        Span<float> aspect = [patch.AspectRatio.X, patch.AspectRatio.Y];
+        var aspectState = DrawFloatsRow("Aspect ratio", aspect,
+                                        "Width : height of the picture, such as 16 : 9 or 2.39 : 1. Measured along the picture, so a quarter turn fits it sideways.");
+        BeginFieldUndo(setup, aspectState);
+        if ((aspectState & InputEditStateFlags.Modified) != 0)
+        {
+            patch.AspectRatio = new Vector2(MathF.Max(aspect[0], MinAspectComponent), MathF.Max(aspect[1], MinAspectComponent));
+            patch.TryFitQuad(output.CanvasSize);
+        }
+
+        CommitFieldUndo(setup, "Change patch aspect", aspectState);
+
+        Span<float> scalePercent = [patch.Scale * 100f];
+        var scaleState = DrawFloatsRow("Scale", scalePercent,
+                                       "Size as a share of the largest rectangle of this aspect that fits the canvas. 100% touches the canvas edges.",
+                                       speed: 0.5f, format: "{0:0.#}%");
+        BeginFieldUndo(setup, scaleState);
+        if ((scaleState & InputEditStateFlags.Modified) != 0)
+        {
+            patch.Scale = Math.Clamp(scalePercent[0] / 100f, OutputDefinition.Patch.MinScale, OutputDefinition.Patch.MaxScale);
+            patch.TryFitQuad(output.CanvasSize);
+        }
+
+        CommitFieldUndo(setup, "Scale patch", scaleState);
+
+        if (patch.Quad.Length == 4)
+        {
+            var pixels = (patch.Quad[2] - patch.Quad[0]) * output.CanvasSize;
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText(FittedSizeLabel(pixels), Fonts.FontSmall, UiColors.TextMuted);
+        }
+
+        return true;
+    }
+
+    /// <summary>The fitted size line, rebuilt only when the pixel size changes: the card draws every frame.</summary>
+    private static string FittedSizeLabel(Vector2 pixels)
+    {
+        var width = (int)MathF.Round(pixels.X);
+        var height = (int)MathF.Round(pixels.Y);
+        if (width != _fittedLabelWidth || height != _fittedLabelHeight)
+        {
+            _fittedLabelWidth = width;
+            _fittedLabelHeight = height;
+            _fittedLabel = $"{width} × {height} px on the canvas, centred";
+        }
+
+        return _fittedLabel;
+    }
+
+    /// <summary>
     /// The picture's turn inside the patch, as the same angle field every rotation input in TiXL uses — its
     /// rotate buttons included, stepping a quarter turn here. Shown in degrees, positive counter-clockwise as
     /// everywhere else; stored as clockwise quarter turns, because only a quarter turn is a pure reordering of
@@ -622,6 +697,11 @@ internal static class SetupParameterView
     }
 
     private static readonly float[] _rotationScratch = new float[1];
+
+    private const float MinAspectComponent = 0.01f;
+    private static int _fittedLabelWidth = -1;
+    private static int _fittedLabelHeight = -1;
+    private static string _fittedLabel = string.Empty;
 
     private static void DrawReferenceImageCard(Setup setup, Guid id)
     {

@@ -131,8 +131,64 @@ public sealed class OutputDefinition
         /// </summary>
         public int QuarterTurns;
 
+        /// <summary>Whether the quad is placed freely (stretching with the canvas) or derived from
+        /// <see cref="AspectRatio"/> and <see cref="Scale"/>.</summary>
+        public PatchScaleModes ScaleMode = PatchScaleModes.Stretch;
+
+        /// <summary>Width : height of the picture a fitted patch keeps, such as 16 : 9 or 2.39 : 1. A pair rather
+        /// than one factor so it reads the way it is specified. Measured along the picture, so a quarter turn
+        /// fits it sideways on the canvas.</summary>
+        public Vector2 AspectRatio = new(16, 9);
+
+        /// <summary>A fitted patch's size as a share of the largest rectangle of its aspect that fits the canvas:
+        /// 1 touches the canvas edges, 0.5 is half as wide and half as tall.</summary>
+        public float Scale = 1f;
+
+        public bool IsFitted => ScaleMode == PatchScaleModes.Fit;
+
         /// <summary>Folds any integer into 0..3, so a rotate that keeps adding stays a valid turn count.</summary>
         public static int NormalizeTurns(int turns) => ((turns % 4) + 4) % 4;
+
+        /// <summary>
+        /// For a fitted patch, rewrites <see cref="Quad"/> for a canvas of <paramref name="canvasPixels"/>: the
+        /// largest rectangle of <see cref="AspectRatio"/> that fits, times <see cref="Scale"/>, centred. Worked in
+        /// pixels because the aspect is a pixel ratio, stored in the canvas' 0..1 space like every patch quad.
+        /// False, with the quad untouched, for a stretched patch or a degenerate ratio or canvas.
+        /// </summary>
+        public bool TryFitQuad(Vector2 canvasPixels)
+        {
+            if (!IsFitted || !(AspectRatio.X > 0) || !(AspectRatio.Y > 0) || !(canvasPixels.X > 0) || !(canvasPixels.Y > 0))
+                return false;
+
+            var aspect = AspectRatio.X / AspectRatio.Y;
+            if ((NormalizeTurns(QuarterTurns) & 1) == 1)
+                aspect = 1 / aspect; // turned sideways: the picture's width runs along the canvas' height
+
+            var width = canvasPixels.X;
+            var height = width / aspect;
+            if (height > canvasPixels.Y)
+            {
+                height = canvasPixels.Y;
+                width = height * aspect;
+            }
+
+            var halfExtent = new Vector2(width, height) * (Math.Clamp(Scale, MinScale, MaxScale) * 0.5f) / canvasPixels;
+            var centre = new Vector2(0.5f, 0.5f);
+            if (Quad.Length != 4)
+                Quad = new Vector2[4];
+
+            Quad[0] = centre - halfExtent;
+            Quad[1] = new Vector2(centre.X + halfExtent.X, centre.Y - halfExtent.Y);
+            Quad[2] = centre + halfExtent;
+            Quad[3] = new Vector2(centre.X - halfExtent.X, centre.Y + halfExtent.Y);
+            return true;
+        }
+
+        /// <summary>Bounds for <see cref="Scale"/>: above 1 overscans past the canvas, within what setup repair
+        /// still accepts as a usable quad.</summary>
+        public const float MinScale = 0.01f;
+
+        public const float MaxScale = 4f;
 
         /// <summary>
         /// The quad's corners in the order the picture's corners land on them: the source's top-left goes to
@@ -158,6 +214,13 @@ public sealed class OutputDefinition
             if (QuarterTurns != 0)
                 writer.WriteValue("QuarterTurns", QuarterTurns);
 
+            if (IsFitted)
+            {
+                writer.WriteString("ScaleMode", ScaleMode.ToString());
+                writer.WriteVector2("AspectRatio", AspectRatio);
+                writer.WriteValue("Scale", Scale);
+            }
+
             writer.WriteEndObject();
         }
 
@@ -170,6 +233,11 @@ public sealed class OutputDefinition
                            SliceId = OutputJson.ReadGuid(token["SliceId"]),
                            Quad = OutputJson.ReadQuad(token["Quad"]),
                            QuarterTurns = NormalizeTurns(token.ReadValueSafe("QuarterTurns", 0)),
+                           ScaleMode = Enum.TryParse<PatchScaleModes>(token.ReadValueSafe("ScaleMode", string.Empty), out var mode)
+                                           ? mode
+                                           : PatchScaleModes.Stretch,
+                           AspectRatio = OutputJson.ReadVector2(token["AspectRatio"], new Vector2(16, 9)),
+                           Scale = token.ReadValueSafe("Scale", 1f),
                        };
         }
     }

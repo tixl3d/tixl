@@ -424,10 +424,12 @@ internal static class SetupActions
             return;
 
         patch.QuarterTurns = OutputDefinition.Patch.NormalizeTurns(patch.QuarterTurns + turns);
-        if (patch.Quad.Length < 4)
+        var canvas = output.CanvasSize;
+
+        // A fitted patch is always centred, so re-fitting with the new turns is the whole rotation.
+        if (patch.TryFitQuad(canvas) || patch.Quad.Length < 4)
             return;
 
-        var canvas = output.CanvasSize;
         Span<Vector2> pixels = stackalloc Vector2[4];
         Span<Vector2> turned = stackalloc Vector2[4];
         var centre = Vector2.Zero;

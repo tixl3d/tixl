@@ -94,6 +94,9 @@ internal static class OutputContentResolver
         if (SetupRelations.TryGetSendOutput(setup, symbolChildId, out var outputId))
         {
             var routed = setup.FindOutput(outputId);
+            if (routed != null && TryGetFittedPatchRequest(setup, routed, symbolChildId, out var fitted))
+                return fitted;
+
             if (routed != null && routed.ResolvedResolution.Width > 0 && routed.ResolvedResolution.Height > 0)
                 return routed.ResolvedResolution;
         }
@@ -106,6 +109,31 @@ internal static class OutputContentResolver
         }
 
         return new Int2(1920, 1080);
+    }
+
+    /// <summary>
+    /// The size a fitted patch asks its content to render at: the patch's own pixel size along the picture,
+    /// divided by the share of the source its slice cuts, so the full content has exactly the patch's aspect and
+    /// the slice lands 1:1. That is what makes a fit a fit rather than the canvas-sized content squeezed into it.
+    /// False for a stretched patch, which keeps asking for the canvas size.
+    /// </summary>
+    public static bool TryGetFittedRequest(OutputDefinition output, OutputDefinition.Patch patch, Vector4 uvRect, out Int2 resolution)
+    {
+        resolution = default;
+        if (!patch.IsFitted || patch.Quad.Length < 4)
+            return false;
+
+        var canvas = output.CanvasSize;
+        var width = (patch.Quad[1].X - patch.Quad[0].X) * canvas.X;
+        var height = (patch.Quad[3].Y - patch.Quad[0].Y) * canvas.Y;
+        if ((OutputDefinition.Patch.NormalizeTurns(patch.QuarterTurns) & 1) == 1)
+            (width, height) = (height, width);
+
+        var uvWidth = MathF.Max(uvRect.Z - uvRect.X, 0.0001f);
+        var uvHeight = MathF.Max(uvRect.W - uvRect.Y, 0.0001f);
+        resolution = new Int2(Math.Clamp((int)MathF.Round(width / uvWidth), 1, MaxRequestedSize),
+                              Math.Clamp((int)MathF.Round(height / uvHeight), 1, MaxRequestedSize));
+        return true;
     }
 
     /// <summary>
@@ -218,4 +246,27 @@ internal static class OutputContentResolver
     private static int _pulledFrame = -1;
     private static readonly Dictionary<Guid, (bool Found, Slice? Slice, Texture2D? Content)> _surfaceSlices = new();
     private static int _surfaceSliceFrame = -1;
+
+    /// <summary>The first fitted patch on <paramref name="output"/> that shows this send's content, as a request.</summary>
+    private static bool TryGetFittedPatchRequest(Setup setup, OutputDefinition output, Guid symbolChildId, out Int2 resolution)
+    {
+        resolution = default;
+        var source = setup.FindSourceByChildId(symbolChildId);
+        if (source == null)
+            return false;
+
+        foreach (var patch in output.Patches)
+        {
+            if (!patch.IsFitted)
+                continue;
+
+            var slice = setup.FindSlice(patch.SliceId);
+            if (slice != null && slice.SourceId == source.Id && TryGetFittedRequest(output, patch, slice.UvRect, out resolution))
+                return true;
+        }
+
+        return false;
+    }
+
+    private const int MaxRequestedSize = 16384;
 }
