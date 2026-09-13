@@ -122,7 +122,8 @@ public static class OutputStreamRegistry
     /// <summary>Bumped whenever membership changes, so hosts can rebuild their plug inventory lazily.</summary>
     public static int Version { get; private set; }
 
-    public static IReadOnlyList<IOutputStreamProvider> Providers => _providers;
+    /// <summary>A snapshot, so a per-frame walk never races a package (un)load on another thread.</summary>
+    public static IReadOnlyList<IOutputStreamProvider> Providers => _providersSnapshot;
 
     public static void Register(IOutputStreamProvider provider)
     {
@@ -135,6 +136,7 @@ public static class OutputStreamRegistry
             }
 
             _providers.Add(provider);
+            _providersSnapshot = _providers.ToArray();
             Version++;
         }
     }
@@ -143,8 +145,11 @@ public static class OutputStreamRegistry
     {
         lock (_providers)
         {
-            if (_providers.Remove(provider))
-                Version++;
+            if (!_providers.Remove(provider))
+                return;
+
+            _providersSnapshot = _providers.ToArray();
+            Version++;
         }
     }
 
@@ -163,4 +168,5 @@ public static class OutputStreamRegistry
     }
 
     private static readonly List<IOutputStreamProvider> _providers = [];
+    private static IOutputStreamProvider[] _providersSnapshot = [];
 }

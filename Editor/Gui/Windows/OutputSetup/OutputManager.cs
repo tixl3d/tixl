@@ -247,11 +247,7 @@ internal static class OutputManager
         if (setup == null || output == null)
             return null;
 
-        _context ??= new EvaluationContext();
-        _context.Reset();
-        _context.RequestedResolution = output.ResolvedResolution;
-
-        InvalidateContentOncePerFrame(_context);
+        PrepareContext(output.ResolvedResolution);
 
         foreach (var surface in setup.Surfaces)
         {
@@ -281,6 +277,20 @@ internal static class OutputManager
     /// but only once per frame: presentation, the setup canvas, and the content preview can all pull in one
     /// frame, and every extra tick re-evaluates each send op's whole upstream graph.
     /// </summary>
+    /// <summary>
+    /// Readies the shared evaluation context for pulling content this frame: fresh state, the resolution the
+    /// content is asked to render at, and the once-per-frame invalidation of every send — whichever entry
+    /// point pulls first (a composite, or a source preview on the Board) does it.
+    /// </summary>
+    private static EvaluationContext PrepareContext(Int2 requestedResolution)
+    {
+        _context ??= new EvaluationContext();
+        _context.Reset();
+        _context.RequestedResolution = requestedResolution;
+        InvalidateContentOncePerFrame(_context);
+        return _context;
+    }
+
     private static void InvalidateContentOncePerFrame(EvaluationContext context)
     {
         var frame = ImGui.GetFrameCount();
@@ -314,11 +324,7 @@ internal static class OutputManager
         if (_compositeFrames.TryGetValue(outputId, out var rendered) && rendered.Frame == frame)
             return rendered.HasContent && _targets.TryGetValue(outputId, out var renderedTarget) ? renderedTarget.Texture : null;
 
-        _context ??= new EvaluationContext();
-        _context.Reset();
-        _context.RequestedResolution = output.ResolvedResolution;
-
-        InvalidateContentOncePerFrame(_context);
+        PrepareContext(output.ResolvedResolution);
 
         // Phase 1: resolve each surface's content and mapping. Pulling content here (before our RT is
         // bound) keeps the content's own rendering from clobbering the target we bind in phase 2.
@@ -819,11 +825,37 @@ internal static class OutputManager
     {
         content = null;
         sink = FindSendByChildId(symbolChildId);
-        if (sink == null || _context == null)
+        var setup = ActiveSetup.Current;
+        if (sink == null || setup == null)
             return false;
 
+        PrepareContext(RequestedResolutionFor(setup, symbolChildId));
         content = PullContent(sink);
         return content is { IsDisposed: false };
+    }
+
+    /// <summary>
+    /// The size a send's content is asked to render at when nothing composites it this frame: the canvas of
+    /// the output it is routed to, else the first output with a size, so a preview matches what a binding
+    /// would show and never re-renders the graph at a size of its own.
+    /// </summary>
+    public static Int2 RequestedResolutionFor(Setup setup, Guid symbolChildId)
+    {
+        if (SetupRelations.TryGetSendOutput(setup, symbolChildId, out var outputId))
+        {
+            var routed = setup.FindOutput(outputId);
+            if (routed != null && routed.ResolvedResolution.Width > 0 && routed.ResolvedResolution.Height > 0)
+                return routed.ResolvedResolution;
+        }
+
+        for (var i = 0; i < setup.Outputs.Count; i++)
+        {
+            var r = setup.Outputs[i].ResolvedResolution;
+            if (r.Width > 0 && r.Height > 0)
+                return r;
+        }
+
+        return new Int2(1920, 1080);
     }
 
     /// <summary>

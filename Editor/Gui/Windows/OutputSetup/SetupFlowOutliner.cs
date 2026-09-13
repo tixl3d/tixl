@@ -567,14 +567,14 @@ internal sealed class SetupFlowOutliner
     private static string ResolutionLabel(int displayIndex, int width, int height)
     {
         while (_resolutionLabels.Count <= displayIndex)
-            _resolutionLabels.Add(string.Empty);
+            _resolutionLabels.Add((0, 0, string.Empty));
 
         // Rebuilt only when the display's mode changed since the last look.
         var cached = _resolutionLabels[displayIndex];
-        if (cached.Length == 0 || !cached.StartsWith(width.ToString()))
-            _resolutionLabels[displayIndex] = cached = $"{width}×{height}";
+        if (cached.Width != width || cached.Height != height)
+            _resolutionLabels[displayIndex] = cached = (width, height, $"{width}×{height}");
 
-        return cached;
+        return cached.Label;
     }
 
     private void DrawContentSends(SetupEntitySelection selection, Setup setup)
@@ -825,7 +825,7 @@ internal sealed class SetupFlowOutliner
     }
 
     private static readonly List<string> _availableNames = [];
-    private static readonly List<string> _resolutionLabels = [];
+    private static readonly List<(int Width, int Height, string Label)> _resolutionLabels = [];
 
     private const string AddPlugMenuId = "##addPlugMenu";
     private const string AddBoardItemMenuId = "##addBoardItemMenu";

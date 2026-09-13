@@ -107,7 +107,7 @@ internal static class SetupParameterView
         // Reset() leaves RequestedResolution at 0×0; pulling the content preview at that size makes the
         // graph's auto-sized RenderTargets bail ("invalid texture size") and stop updating. Preview at
         // the resolution the content would render at when bound.
-        _sendContext.RequestedResolution = ContentPreviewResolution(setup);
+        _sendContext.RequestedResolution = OutputManager.RequestedResolutionFor(setup, instance.SymbolChildId);
 
         Span<int> resolution = [1, 1];
         var content = sink.GetContent(_sendContext);
@@ -434,7 +434,7 @@ internal static class SetupParameterView
 
         _sendContext ??= new EvaluationContext();
         _sendContext.Reset();
-        _sendContext.RequestedResolution = ContentPreviewResolution(setup);
+        _sendContext.RequestedResolution = OutputManager.RequestedResolutionFor(setup, instance.SymbolChildId);
 
         var update = sink.GetUpdateEnabled(_sendContext);
         if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this content at its last frame."))
@@ -885,18 +885,6 @@ internal static class SetupParameterView
 
     // A valid render resolution for previewing a content graph: the first output's canvas size, else a
     // 1080p fallback. Never 0×0 (which auto-sized RenderTargets treat as invalid and skip).
-    private static T3.Core.DataTypes.Vector.Int2 ContentPreviewResolution(Setup setup)
-    {
-        for (var i = 0; i < setup.Outputs.Count; i++)
-        {
-            var r = setup.Outputs[i].ResolvedResolution;
-            if (r.Width > 0 && r.Height > 0)
-                return r;
-        }
-
-        return new T3.Core.DataTypes.Vector.Int2(1920, 1080);
-    }
-
     private static bool IsRegion(Setup setup, Guid id)
     {
         // The two roles must never read alike: a plane-root is a Surface, a coplanar child is a Region.
