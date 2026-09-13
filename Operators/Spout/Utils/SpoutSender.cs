@@ -146,6 +146,7 @@ internal sealed class SpoutSender : IOutputStreamSender
         {
             _lastError = "Texture sending failed: " + e.Message;
             Log.Debug("Texture sending failed : " + e);
+            return false;
         }
         finally
         {
