@@ -79,16 +79,47 @@ internal sealed partial class OutputWindow
             EvaluationContext.IntVariables.Remove(overrideSampleVariableName);
         }
 
-        // Already rendered this frame for an output the setup presents: show that texture rather than
-        // invalidating the chain and rendering the same scene a second time at this window's resolution.
-        var alreadyRendered = evalOutput is Slot<Texture2D> textureSlot
-                              && textureSlot.Value is { IsDisposed: false } shown
-                              && OutputContentResolver.WasContentPulledThisFrame(shown);
+        // Already evaluated this frame — by the output setup compositing a send downstream of this op, or by
+        // another window — and at a size this window's resolution preset accepts: show the value as it is.
+        // Otherwise the preset wins and the chain renders again at this window's resolution, which for a
+        // render target means it is resized back and forth every frame — hence the warning by the caption.
+        var alreadyEvaluated = !evalOutput.DirtyFlag.IsDirty && evalOutput.DirtyFlag.WasUpdatedThisFrame;
+        var reuse = alreadyEvaluated && PresetAcceptsValue(evalOutput);
+        _imageCanvas.IsRenderedTwice = alreadyEvaluated && !reuse;
 
         // Render!
-        evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title, recompute: !alreadyRendered);
+        evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title, recompute: !reuse);
         return evalOutput.ValueType;
     }
+
+    /// <summary>
+    /// Whether the resolution preset is content with a texture as it was rendered elsewhere: always for "Fill"
+    /// (the window takes whatever size it gets), for an aspect preset when the aspect matches, for a fixed
+    /// resolution when the size matches. Values that aren't textures have no size to disagree about.
+    /// </summary>
+    private bool PresetAcceptsValue(ISlot slot)
+    {
+        if (RenderProcess.IsExporting)
+            return false;
+
+        if (slot is not Slot<Texture2D> { Value: { IsDisposed: false } texture })
+            return true;
+
+        var preset = _selectedResolution;
+        var width = texture.Description.Width;
+        var height = texture.Description.Height;
+        if (!preset.UseAsAspectRatio)
+            return preset.Size.Width == width && preset.Size.Height == height;
+
+        if (preset.Size.Width <= 0 || preset.Size.Height <= 0)
+            return true;
+
+        var presetAspect = (float)preset.Size.Width / preset.Size.Height;
+        var textureAspect = (float)width / Math.Max(1, height);
+        return Math.Abs(presetAspect - textureAspect) < AspectTolerance;
+    }
+
+    private const float AspectTolerance = 0.005f;
 
     public Instance? ShownInstance
     {

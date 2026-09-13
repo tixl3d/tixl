@@ -37,37 +37,18 @@ internal static class OutputContentResolver
         return context;
     }
 
-    /// <summary>Pulls a send's content and notes the texture as produced this frame (see <see cref="WasContentPulledThisFrame"/>).</summary>
+    /// <summary>Pulls a send's content at the context's requested resolution. Views showing any op along the way
+    /// see its slot as updated this frame and draw it without evaluating again.</summary>
     public static Texture2D? PullContent(IContentSupplier supplier)
     {
-        var frame = ImGui.GetFrameCount();
-        if (frame != _pulledFrame)
-        {
-            _pulledFrame = frame;
-            _pulledContent.Clear();
-        }
-
         var context = Context;
         var content = supplier.GetContent(context);
-        if (content is { IsDisposed: false })
-            _pulledContent.Add(content);
 
         // What this send was asked for, so it can warn when two outputs disagree about its size.
         if (supplier is Instance instance)
-            OutputContentStats.NotePull(instance.SymbolChildId, context.RequestedResolution, frame);
+            OutputContentStats.NotePull(instance.SymbolChildId, context.RequestedResolution, ImGui.GetFrameCount());
 
         return content;
-    }
-
-    /// <summary>
-    /// Whether this texture was already produced this frame by pulling a send's content — i.e. its upstream
-    /// graph has run, at the bound output's canvas resolution. A view showing the same texture can then draw it
-    /// as it is instead of invalidating and re-rendering the whole chain at its own requested resolution, which
-    /// would evaluate the scene twice per frame and resize the render target back and forth.
-    /// </summary>
-    public static bool WasContentPulledThisFrame(Texture2D texture)
-    {
-        return _pulledFrame == ImGui.GetFrameCount() && _pulledContent.Contains(texture);
     }
 
     /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>
@@ -242,8 +223,6 @@ internal static class OutputContentResolver
     private static readonly Vector4 _fullUvRect = new(0, 0, 1, 1);
     private static EvaluationContext? _context;
     private static int _invalidatedContentFrame = -1;
-    private static readonly HashSet<Texture2D> _pulledContent = [];
-    private static int _pulledFrame = -1;
     private static readonly Dictionary<Guid, (bool Found, Slice? Slice, Texture2D? Content)> _surfaceSlices = new();
     private static int _surfaceSliceFrame = -1;
 
