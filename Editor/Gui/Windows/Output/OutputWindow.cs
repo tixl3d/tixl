@@ -150,9 +150,7 @@ internal sealed partial class OutputWindow : Window
             }
             else if (graphCanvas != null)
             {
-                Pinning.TryGetPinnedEvaluationInstance(graphCanvas.Structure, out var evaluationInstance);
-
-                var drawnType = UpdateAndDrawOutput(drawnInstance, evaluationInstance);
+                var drawnType = UpdateAndDrawOutput(drawnInstance);
                 ImageOutputCanvas.Deactivate();
                 _camSelectionHandling.Update(drawnInstance, drawnType);
                 var editingFlags = _camSelectionHandling.PreventCameraInteraction 

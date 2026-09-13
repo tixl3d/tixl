@@ -27,15 +27,15 @@ namespace T3.Editor.Gui.Windows.Output;
 
 internal sealed partial class OutputWindow
 {
-    private Type? UpdateAndDrawOutput(Instance? instanceForOutput, Instance?instanceForEvaluation = null)
+    /// <summary>Evaluates the shown op from its own output and draws it. Evaluation always starts at the shown op:
+    /// a separate start op used to exist and left windows stuck on an op with no output.</summary>
+    private Type? UpdateAndDrawOutput(Instance? instance)
     {
-        instanceForEvaluation ??= instanceForOutput;
-
-        if (instanceForEvaluation == null || instanceForEvaluation.Outputs.Count <= 0)
+        if (instance == null || instance.Outputs.Count <= 0)
             return null;
 
-        var evaluatedSymbolUi = instanceForEvaluation.GetSymbolUi();
-        var evalOutput = Pinning.GetPinnedOrDefaultOutput(instanceForEvaluation.Outputs);
+        var evaluatedSymbolUi = instance.GetSymbolUi();
+        var evalOutput = Pinning.GetPinnedOrDefaultOutput(instance.Outputs);
 
         if (evalOutput == null || !evaluatedSymbolUi.OutputUis.TryGetValue(evalOutput.Id, out var evaluatedOutputUi))
             return null;
@@ -77,29 +77,6 @@ internal sealed partial class OutputWindow
         else
         {
             EvaluationContext.IntVariables.Remove(overrideSampleVariableName);
-        }
-
-        // Ugly hack to hide final target
-        if (instanceForOutput != instanceForEvaluation)
-        {
-            ImGui.BeginChild("hidden", Vector2.One);
-            {
-                evaluatedOutputUi.DrawValue(evalOutput, EvaluationContext, Config.Title);
-            }
-            ImGui.EndChild();
-
-            if (instanceForOutput == null || instanceForOutput.Outputs.Count == 0)
-                return null;
-
-            var viewOutput = Pinning.GetPinnedOrDefaultOutput(instanceForOutput.Outputs);
-
-            var viewSymbolUi = instanceForOutput.GetSymbolUi();
-            if (viewOutput == null || !viewSymbolUi.OutputUis.TryGetValue(viewOutput.Id, out var viewOutputUi))
-                return null;
-
-            // Render!
-            viewOutputUi.DrawValue(viewOutput, EvaluationContext, Config.Title, recompute: false);
-            return viewOutputUi.Type;
         }
 
         // Already rendered this frame for an output the setup presents: show that texture rather than

@@ -504,12 +504,6 @@ internal static class DebugServer
                 outputJson["childId"] = shownInstance.SymbolChildId.ToString();
                 outputJson["symbolName"] = shownInstance.Symbol.Name;
                 outputJson["path"] = new JArray(shownView.Structure.GetReadableInstancePath(shownInstance.InstancePath));
-                if (pinning.TryGetPinnedEvaluationInstance(shownView.Structure, out var evaluationStart)
-                    && evaluationStart != shownInstance)
-                {
-                    outputJson["evaluationStartChildId"] = evaluationStart.SymbolChildId.ToString();
-                    outputJson["evaluationStartSymbolName"] = evaluationStart.Symbol.Name;
-                }
             }
 
             result["outputView"] = outputJson;

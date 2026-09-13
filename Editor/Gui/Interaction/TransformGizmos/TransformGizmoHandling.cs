@@ -117,6 +117,11 @@ internal static class TransformGizmoHandling
     /// </summary>
     public static void TransformCallback(Instance instance, EvaluationContext context)
     {
+        // Evaluations that ask for no gizmos (the output setup composites content outside any window's draw
+        // pass) are not an error, so they are answered before the draw-list check below can warn about them.
+        if (context.ShowGizmos == GizmoVisibility.Off)
+            return;
+
         if (!_isDrawListValid)
         {
             Log.Warning("can't draw gizmo without initialized draw list");
@@ -133,11 +138,6 @@ internal static class TransformGizmoHandling
         if (!_selectedTransformables.Contains(_transformable))
         {
             Log.Warning("transform-callback from non-selected node?" + _transformable);
-            return;
-        }
-
-        if (context.ShowGizmos == GizmoVisibility.Off)
-        {
             return;
         }
 

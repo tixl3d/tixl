@@ -693,8 +693,9 @@ internal sealed class ParameterWindow : Window
             }
             else
             {
-                var isPinned = RenderProcess.OutputWindow!.Pinning.TryGetPinnedEvaluationInstance(projectView!.Structure,
-                                   out var pinnedInstance)
+                var pinning = RenderProcess.OutputWindow!.Pinning;
+                var isPinned = pinning.IsPinned
+                               && pinning.TryGetPinnedOrSelectedInstance(out var pinnedInstance, out _)
                                && pinnedInstance == op;
 
                 if (CustomComponents.ToggleIconButton(ref isPinned, Icon.PlayOutput, Vector2.Zero))
