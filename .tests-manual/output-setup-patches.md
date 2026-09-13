@@ -153,11 +153,14 @@ the right by a little and release.
 
 **Expected:**
 - After 1: the field reads -90°, 180°, then 90°, the same angle field and buttons as any rotation
-  parameter, stepping a quarter turn here. The picture turns clockwise inside the patch with each
-  click; the typed 100 snaps to 90°. The patch's quad, handles, Position and Size do not change. A
+  parameter, stepping a quarter turn here. Each click turns the whole patch clockwise around its
+  centre, its outline and its picture together: **Size (px)** goes from 960 × 540 to 540 × 960,
+  back to 960 × 540, then 540 × 960 again, and at 540 × 960 **Position (px)** reads 210 × -210 (the
+  patch pokes above the canvas top). The typed 100 snaps to 90° and changes nothing further. A
   small wedge on the patch's outline, on the canvas and on the Board card, points out of the
   edge the picture's top now faces; at 0° it is gone. Each change is one undo step.
-- After 2: the picture steps round a quarter per click and is upright again after the fourth.
+- After 2: the patch and its picture step round a quarter per click; after the fourth they are
+  back at 540 × 960, at the same place as before the clicks.
 - After 3: the picture on the whole canvas turns, and a "Patch 1" row appears under P1 — a turned
   patch is shown on its own, since its rotation is state you need to be able to see and undo.
 - After 4: every tile of the split shows its part of the picture turned the same way. Promoted

@@ -397,10 +397,61 @@ internal static class SetupActions
                                                        });
     }
 
-    /// <summary>One more quarter turn clockwise — the context menu's step, cycling back to upright after four.</summary>
-    internal static void RotatePatchClockwise(Setup setup, OutputDefinition.Patch patch)
+    /// <summary>Turns the whole patch a quarter clockwise around its centre, shape and picture together, as one undo step.</summary>
+    internal static void RotatePatchClockwise(Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
+    {
+        SetupUndo.RunUndoable("Rotate patch", setup, () => TurnPatch(output, patch, 1));
+    }
+
+    /// <summary>Turns only the picture a quarter clockwise while the patch keeps its place and shape — for content
+    /// fed straight to a display mounted on its side, where the patch must go on filling the canvas.</summary>
+    internal static void RotatePatchContentClockwise(Setup setup, OutputDefinition.Patch patch)
     {
         SetPatchTurns(setup, patch, patch.QuarterTurns + 1);
+    }
+
+    /// <summary>
+    /// Turns a patch by quarter turns clockwise around its centre: the quad turns on the canvas, so a wide patch
+    /// becomes a tall one, and the picture turns with it. Worked in canvas pixels, so the shape keeps its
+    /// proportions on a canvas that isn't square. The corners are re-indexed afterwards so they stay TL, TR, BR,
+    /// BL on the canvas, which every edit, snap and size field relies on. Mutates in place; the caller owns the
+    /// undo step.
+    /// </summary>
+    internal static void TurnPatch(OutputDefinition output, OutputDefinition.Patch patch, int quarterTurns)
+    {
+        var turns = OutputDefinition.Patch.NormalizeTurns(quarterTurns);
+        if (turns == 0)
+            return;
+
+        patch.QuarterTurns = OutputDefinition.Patch.NormalizeTurns(patch.QuarterTurns + turns);
+        if (patch.Quad.Length < 4)
+            return;
+
+        var canvas = output.CanvasSize;
+        Span<Vector2> pixels = stackalloc Vector2[4];
+        Span<Vector2> turned = stackalloc Vector2[4];
+        var centre = Vector2.Zero;
+        for (var c = 0; c < 4; c++)
+        {
+            pixels[c] = patch.Quad[c] * canvas;
+            centre += pixels[c];
+        }
+
+        centre /= 4;
+        for (var t = 0; t < turns; t++)
+        {
+            for (var c = 0; c < 4; c++)
+            {
+                // Clockwise on a Y-down canvas; the corner that was top-left is now top-right, one index further round.
+                var d = pixels[c] - centre;
+                turned[(c + 1) % 4] = centre + new Vector2(-d.Y, d.X);
+            }
+
+            turned.CopyTo(pixels);
+        }
+
+        for (var c = 0; c < 4; c++)
+            patch.Quad[c] = pixels[c] / canvas;
     }
 
     /// <summary>

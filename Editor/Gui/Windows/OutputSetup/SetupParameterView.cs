@@ -539,7 +539,7 @@ internal static class SetupParameterView
                                       Fonts.FontSmall, UiColors.TextMuted);
 
         // Ahead of the geometry, which a warped quad skips: turning the picture applies to any patch.
-        DrawPatchRotationRow(setup, patch);
+        DrawPatchRotationRow(setup, output, patch);
 
         if (patch.Quad.Length < 4)
             return;
@@ -594,9 +594,9 @@ internal static class SetupParameterView
     /// everywhere else; stored as clockwise quarter turns, because only a quarter turn is a pure reordering of
     /// the quad's corners. A dragged or typed angle snaps to the nearest one.
     /// </summary>
-    private static void DrawPatchRotationRow(Setup setup, OutputDefinition.Patch patch)
+    private static void DrawPatchRotationRow(Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
     {
-        const string tooltip = "Turns the picture inside the patch in quarter turns, for a display or LED panel mounted on its side. The patch itself stays where it is.";
+        const string tooltip = "Turns the patch around its centre in quarter turns, its shape and its picture together — for a display or LED panel mounted on its side.";
         _rotationScratch[0] = DegreesOfTurns(patch.QuarterTurns);
 
         var size = BeginValuesRow("Rotation", tooltip, 1, false, 0, out _);
@@ -607,7 +607,7 @@ internal static class SetupParameterView
 
         BeginFieldUndo(setup, state);
         if ((state & InputEditStateFlags.Modified) != 0)
-            patch.QuarterTurns = TurnsOfDegrees(_rotationScratch[0]);
+            SetupActions.TurnPatch(output, patch, TurnsOfDegrees(_rotationScratch[0]) - patch.QuarterTurns);
 
         CommitFieldUndo(setup, "Rotate patch", state);
     }

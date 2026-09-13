@@ -106,7 +106,7 @@ internal static class SetupEntityContextMenu
                 if (SetupRelations.TryGetImplicitPatch(output, out var implicitPatch)
                     && CustomComponents.DrawMenuItem(18, "Rotate Content 90°"))
                 {
-                    SetupActions.RotatePatchClockwise(setup, implicitPatch!);
+                    SetupActions.RotatePatchContentClockwise(setup, implicitPatch!);
                 }
 
                 // No "Bind to" here: an output is bound by dragging it onto a plug, and released from the
@@ -144,11 +144,14 @@ internal static class SetupEntityContextMenu
                 break;
 
             case SetupEntityKinds.Patch:
-                if (setup.FindPatch(id, out _) is { } turnedPatch && CustomComponents.DrawMenuItem(17, "Rotate 90°"))
-                    SetupActions.RotatePatchClockwise(setup, turnedPatch);
+                if (setup.FindPatch(id, out var turnedOwner) is { } turnedPatch && turnedOwner != null
+                    && CustomComponents.DrawMenuItem(17, "Rotate 90°"))
+                {
+                    SetupActions.RotatePatchClockwise(setup, turnedOwner, turnedPatch);
+                }
 
-                CustomComponents.TooltipForLastItem("Turns the picture inside the patch a quarter clockwise.",
-                                                    "For a display or LED panel on its side. The patch stays where it is; the Rotation row in its parameters sets it directly.");
+                CustomComponents.TooltipForLastItem("Turns the patch a quarter clockwise around its centre, shape and picture together.",
+                                                    "For a display or LED panel on its side. The Rotation row in its parameters sets it directly.");
 
                 if (CustomComponents.DrawMenuItem(12, "Use on Surface"))
                     SetupActions.PromotePatchToSurface(selection, setup, id);

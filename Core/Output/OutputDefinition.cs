@@ -124,10 +124,10 @@ public sealed class OutputDefinition
         public Vector2[] Quad = [];
 
         /// <summary>
-        /// Quarter turns of the picture inside the quad, clockwise, 0..3 — for a display or LED panel mounted on
-        /// its side. The quad itself does not turn: its corners stay TL, TR, BR, BL on the canvas, so every
-        /// edit, snap and size field keeps working unchanged, and only which corner receives the source's
-        /// top-left shifts when the patch is composited.
+        /// Quarter turns of the picture relative to the quad's corners, clockwise, 0..3 — for a display or LED
+        /// panel mounted on its side. The quad's corners always stay TL, TR, BR, BL on the canvas, so every edit,
+        /// snap and size field works unchanged; only which corner receives the source's top-left shifts when the
+        /// patch is composited. Turning a whole patch in the editor also turns its quad, so the two stay in step.
         /// </summary>
         public int QuarterTurns;
 
