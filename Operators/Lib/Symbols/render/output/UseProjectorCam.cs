@@ -23,7 +23,7 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>
 
     private void Update(EvaluationContext context)
     {
-        var output = ActiveSetup.TryFindOutput(OutputRef.GetValue(context));
+        var output = ActiveSetup.FindOutput(OutputRef.GetValue(context));
         if (context.BypassCameras || output == null)
         {
             Command.GetValue(context);

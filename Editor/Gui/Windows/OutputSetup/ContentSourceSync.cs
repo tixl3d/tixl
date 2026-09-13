@@ -31,9 +31,9 @@ internal static class ContentSourceSync
         var changed = false;
 
         // Adopt any send that has no source yet.
-        foreach (var sink in OutputSinkRegistry.Sinks)
+        foreach (var supplier in ContentSupplierRegistry.Suppliers)
         {
-            if (sink is not Instance instance)
+            if (supplier is not Instance instance)
                 continue;
 
             var childId = instance.SymbolChildId;
@@ -68,9 +68,9 @@ internal static class ContentSourceSync
         // The deletion sweep scans the whole symbol library, so it only runs when a send could actually have
         // gone away — i.e. when registry membership changed. Everything above is O(sends × sources) on two
         // small lists, so it stays per-frame and keeps names live.
-        if (_sweptRegistryVersion != OutputSinkRegistry.Version || _sweptSetupId != setup.Id)
+        if (_sweptRegistryVersion != ContentSupplierRegistry.Version || _sweptSetupId != setup.Id)
         {
-            _sweptRegistryVersion = OutputSinkRegistry.Version;
+            _sweptRegistryVersion = ContentSupplierRegistry.Version;
             _sweptSetupId = setup.Id;
             changed |= DropDeletedSources(setup);
         }
@@ -152,9 +152,9 @@ internal static class ContentSourceSync
 
     private static bool TryFindInstance(Guid childId, out Instance? instance)
     {
-        foreach (var sink in OutputSinkRegistry.Sinks)
+        foreach (var supplier in ContentSupplierRegistry.Suppliers)
         {
-            if (sink is Instance candidate && candidate.SymbolChildId == childId)
+            if (supplier is Instance candidate && candidate.SymbolChildId == childId)
             {
                 instance = candidate;
                 return true;

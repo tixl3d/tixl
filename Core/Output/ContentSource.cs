@@ -28,7 +28,7 @@ public sealed class ContentSource
     public bool IsRenamed;
 
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
-    public CanvasPlacement? BoardPlacement;
+    public BoardPlacement? BoardPlacement;
 
     public void WriteToJson(JsonTextWriter writer)
     {
@@ -58,7 +58,7 @@ public sealed class ContentSource
                              IsRenamed = token.ReadValueSafe("IsRenamed", false),
                          };
         if (token["BoardPlacement"] is JObject placement)
-            source.BoardPlacement = CanvasPlacement.ReadFromJson(placement);
+            source.BoardPlacement = BoardPlacement.ReadFromJson(placement);
 
         return source;
     }

@@ -9,10 +9,10 @@ namespace T3.Core.Output;
 /// <summary>
 /// Annotation primitive: a measuring line, or a reference point (the Kind discriminator keeps room for
 /// markers and text). Coordinates are in the owner's space: reference-image pixels on a
-/// <see cref="ReferenceBinding"/>, surface metres on a <see cref="Surface"/>. An optional physical length
+/// <see cref="TraceBinding"/>, surface metres on a <see cref="Surface"/>. An optional physical length
 /// turns a line into a measurement. A point uses <see cref="P1"/> only (<see cref="P2"/> mirrors it).
 /// </summary>
-public sealed class LineAnnotation
+public sealed class Annotation
 {
     public static class Kinds
     {
@@ -56,10 +56,10 @@ public sealed class LineAnnotation
         writer.WriteEndObject();
     }
 
-    public static LineAnnotation ReadFromJson(JToken token)
+    public static Annotation ReadFromJson(JToken token)
     {
         var id = OutputJson.ReadGuid(token["Id"]);
-        return new LineAnnotation
+        return new Annotation
                    {
                        Id = id == Guid.Empty ? Guid.NewGuid() : id,
                        Kind = token.ReadValueSafe("Kind", Kinds.Line) ?? Kinds.Line,

@@ -20,7 +20,7 @@ public sealed class Surface
         public const string Rect = "Rect";
     }
 
-    public static class SurfaceKinds
+    public static class Kinds
     {
         /// <summary>A real plane placed in the stage — meters, own pose, calibratable.</summary>
         public const string Physical = "Physical";
@@ -30,7 +30,7 @@ public sealed class Surface
     }
 
     /// <summary>
-    /// ContentCanvas → OutputCanvas transfer for one output (L1/L2 corner pin). A Layout child normally has
+    /// ContentCanvas → OutputCanvas transfer for one output (a corner pin). A Layout child normally has
     /// none and is projected through its nearest mapped ancestor; a mapping of its own overrides that for
     /// that one output, which is how a region reaches a projector or tile of its own while staying a child.
     /// </summary>
@@ -55,14 +55,14 @@ public sealed class Surface
 
 /// <summary>
         /// Where one of the surface's reference points sits on this output, in the same 0..1 canvas space.
-        /// <para><see cref="Aimed"/> means the user put it there and the pin is solved to project the point
+        /// <para><see cref="IsAimed"/> means the user put it there and the pin is solved to project the point
         /// exactly onto it. An un-aimed placement is only where the mark is drawn — seeded once from wherever
         /// the pin projected the point when it first appeared here, and never moved again by anything but a
         /// drag. That is what makes a mark something you can align against: a mark that rides the pin moves
         /// every time the pin is re-solved, so it can never disagree with it, and a mark that cannot disagree
         /// says nothing.</para>
         /// </summary>
-        public readonly record struct PointAim(Vector2 Position, bool Aimed);
+        public readonly record struct PointAim(Vector2 Position, bool IsAimed);
 
         /// <summary>Where each of the surface's reference points sits on this output, by point id.</summary>
         public Dictionary<Guid, PointAim> PointAims = new();
@@ -82,7 +82,7 @@ public sealed class Surface
                     writer.WriteStartObject();
                     writer.WriteObject("Point", pointId);
                     writer.WriteVector2("Target", aim.Position);
-                    writer.WriteValue("Aimed", aim.Aimed);
+                    writer.WriteValue("Aimed", aim.IsAimed);
                     writer.WriteEndObject();
                 }
 
@@ -120,15 +120,15 @@ public sealed class Surface
         }
     }
 
-    /// <summary>L2 upgrade: where this surface was traced on a reference image, plus its measurements.</summary>
-    public sealed class ReferenceBinding
+    /// <summary>Where this surface was traced on a reference image, plus its measurements.</summary>
+    public sealed class TraceBinding
     {
         public Guid ImageId;
 
         /// <summary>Corners in reference-image pixels, same winding as <see cref="OutputMapping.Quad"/>.</summary>
         public Vector2[] Quad = new Vector2[4];
 
-        public List<LineAnnotation> Annotations = [];
+        public List<Annotation> Annotations = [];
 
         public void WriteToJson(JsonTextWriter writer)
         {
@@ -144,19 +144,19 @@ public sealed class Surface
             writer.WriteEndObject();
         }
 
-        public static ReferenceBinding ReadFromJson(JToken token)
+        public static TraceBinding ReadFromJson(JToken token)
         {
-            return new ReferenceBinding
+            return new TraceBinding
                        {
                            ImageId = OutputJson.ReadGuid(token["ImageId"]),
                            Quad = OutputJson.ReadQuad(token["Quad"]),
-                           Annotations = token.ReadListSafe("Annotations", LineAnnotation.ReadFromJson),
+                           Annotations = token.ReadListSafe("Annotations", Annotation.ReadFromJson),
                        };
         }
     }
 
     /// <summary>
-    /// L3 upgrade: placement in the stage. Position is the world position of the <see cref="Anchor"/>;
+    /// Placement in the stage. Position is the world position of the <see cref="Anchor"/>;
     /// axis-aligned presets are editing rigs over the pose, not a storage format.
     /// </summary>
     public sealed class StagePlacement
@@ -185,8 +185,8 @@ public sealed class Surface
     public string Name = string.Empty;
     public string Type = SurfaceTypes.Rect;
 
-    /// <summary>Physical (own stage pose, meters) vs Layout (coplanar child, pixels) — see <see cref="SurfaceKinds"/>.</summary>
-    public string Kind = SurfaceKinds.Physical;
+    /// <summary>Physical (own stage pose, meters) vs Layout (coplanar child, pixels) — see <see cref="Kinds"/>.</summary>
+    public string Kind = Kinds.Physical;
 
     /// <summary>Parent surface for nesting; <see cref="Guid.Empty"/> for a root. A Layout child inherits its parent's plane.</summary>
     public Guid ParentId;
@@ -199,7 +199,7 @@ public sealed class Surface
     public Vector2 LocalPosition;
 
     /// <summary>When false the output manager skips this surface (kept in the setup, just not drawn).</summary>
-    public bool Render = true;
+    public bool IsRendered = true;
 
     /// <summary>The <see cref="Slice"/> this surface shows; <see cref="Guid.Empty"/> for none. Several
     /// surfaces may name the same slice (the feed mirrored), and a surface shows at most one.</summary>
@@ -222,7 +222,7 @@ public sealed class Surface
     public Vector2 AnchorInMeters => (Anchor + Vector2.One) * 0.5f * SizeInMeters;
 
     /// <summary>When set, resizing keeps the current width/height ratio: editing one dimension solves the other.</summary>
-    public bool LockAspect;
+    public bool IsAspectLocked;
 
     /// <summary>Projects a real-world calibration raster over this surface (no content needed) so its
     /// corner-pin can be hand-aligned to physical wall features. Major lines are one meter apart and start at
@@ -240,11 +240,11 @@ public sealed class Surface
 
     /// <summary>
     /// Measuring lines in <b>surface space</b> (meters, origin at the <see cref="Anchor"/>, Y up) — drawn across features of
-    /// the projected raster that were measured for real. Distinct from <see cref="ReferenceBinding.Annotations"/>,
+    /// the projected raster that were measured for real. Distinct from <see cref="TraceBinding.Annotations"/>,
     /// which live in reference-photo pixels: these say how big this surface actually is, and "apply lengths"
     /// re-meters the surface from them without moving anything on the wall.
     /// </summary>
-    public List<LineAnnotation> Annotations = [];
+    public List<Annotation> Annotations = [];
 
     public List<OutputMapping> OutputMappings = [];
 
@@ -261,11 +261,11 @@ public sealed class Surface
     }
 
     public bool HasMapping(Guid outputId) => FindMapping(outputId) != null;
-    public ReferenceBinding? Reference;
+    public TraceBinding? Trace;
     public StagePlacement? Placement;
 
     /// <summary>A root surface's neutral (unwarped) place on the Board; null until the Board seeded one.</summary>
-    public CanvasPlacement? BoardPlacement;
+    public BoardPlacement? BoardPlacement;
 
     public void WriteToJson(JsonTextWriter writer)
     {
@@ -276,11 +276,11 @@ public sealed class Surface
         writer.WriteString("Kind", Kind);
         writer.WriteObject("ParentId", ParentId);
         writer.WriteVector2("LocalPosition", LocalPosition);
-        writer.WriteValue("Render", Render);
+        writer.WriteValue("Render", IsRendered);
         writer.WriteObject("SliceId", SliceId);
         writer.WriteVector2("SizeInMeters", SizeInMeters);
         writer.WriteVector2("Anchor", Anchor);
-        writer.WriteValue("LockAspect", LockAspect);
+        writer.WriteValue("LockAspect", IsAspectLocked);
         writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
         writer.WriteValue("ShowGrid", ShowGrid);
         writer.WriteValue("GridSubdivisions", GridSubdivisions);
@@ -302,10 +302,10 @@ public sealed class Surface
 
         writer.WriteEndArray();
 
-        if (Reference != null)
+        if (Trace != null)
         {
             writer.WritePropertyName("Reference");
-            Reference.WriteToJson(writer);
+            Trace.WriteToJson(writer);
         }
 
         if (Placement != null)
@@ -330,29 +330,29 @@ public sealed class Surface
                               Id = OutputJson.ReadGuid(token["Id"]),
                               Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
                               Type = token.ReadValueSafe("Type", SurfaceTypes.Rect) ?? SurfaceTypes.Rect,
-                              Kind = token.ReadValueSafe("Kind", SurfaceKinds.Physical) ?? SurfaceKinds.Physical,
+                              Kind = token.ReadValueSafe("Kind", Kinds.Physical) ?? Kinds.Physical,
                               ParentId = OutputJson.ReadGuid(token["ParentId"]),
                               LocalPosition = OutputJson.ReadVector2(token["LocalPosition"], Vector2.Zero),
-                              Render = token.ReadValueSafe("Render", true),
+                              IsRendered = token.ReadValueSafe("Render", true),
                               SliceId = OutputJson.ReadGuid(token["SliceId"]),
                               SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
                               Anchor = OutputJson.ReadVector2(token["Anchor"], DefaultAnchor),
-                              LockAspect = token.ReadValueSafe("LockAspect", false),
+                              IsAspectLocked = token.ReadValueSafe("LockAspect", false),
                               PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
                               ShowGrid = token.ReadValueSafe("ShowGrid", false),
                               GridSubdivisions = token.ReadValueSafe("GridSubdivisions", 10),
-                              Annotations = token.ReadListSafe("Annotations", LineAnnotation.ReadFromJson),
+                              Annotations = token.ReadListSafe("Annotations", Annotation.ReadFromJson),
                               OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),
                           };
 
         if (token["Reference"] is JObject referenceToken)
-            surface.Reference = ReferenceBinding.ReadFromJson(referenceToken);
+            surface.Trace = TraceBinding.ReadFromJson(referenceToken);
 
         if (token["Placement"] is JObject placementToken)
             surface.Placement = StagePlacement.ReadFromJson(placementToken);
 
         if (token["BoardPlacement"] is JObject boardToken)
-            surface.BoardPlacement = CanvasPlacement.ReadFromJson(boardToken);
+            surface.BoardPlacement = BoardPlacement.ReadFromJson(boardToken);
 
         return surface;
     }

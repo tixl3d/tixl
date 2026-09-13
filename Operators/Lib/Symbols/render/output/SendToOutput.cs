@@ -7,33 +7,33 @@ namespace Lib.render.output;
 /// <summary>
 /// Supplies a texture to the project's active output setup. Routing lives in the setup, not here: the setup
 /// holds a ContentSource standing 1:1 with this op, slices cut rectangles from it, and surfaces name the slice
-/// they show. So this op only says "here are the pixels" — it registers with the <see cref="OutputSinkRegistry"/>
-/// and the host's output manager pulls from it. A pure sink: no output slot.
+/// they show. So this op only says "here are the pixels" — it registers with the <see cref="ContentSupplierRegistry"/>
+/// and the host's output manager pulls from it. A pure supplier: no output slot.
 /// </summary>
 [Guid("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60")]
-internal sealed class SendToOutput : Instance<SendToOutput>, IOutputSink, IStatusProvider
+internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, IStatusProvider
 {
     public SendToOutput()
     {
-        OutputSinkRegistry.Register(this);
+        ContentSupplierRegistry.Register(this);
     }
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
-            OutputSinkRegistry.Unregister(this);
+            ContentSupplierRegistry.Unregister(this);
 
         base.Dispose(disposing);
     }
 
-    Vector4 IOutputSink.GetColor(EvaluationContext context) => Color.GetValue(context);
+    Vector4 IContentSupplier.GetColor(EvaluationContext context) => Color.GetValue(context);
 
     /// <summary>
     /// Pulls the content, rendered at <see cref="Resolution"/> when one is set. Left at 0×0 the host's requested
     /// resolution stands — the canvas of the output this content is routed to — so an auto-sized render target
     /// upstream follows the projector rather than needing a size of its own.
     /// </summary>
-    T3.Core.DataTypes.Texture2D IOutputSink.GetContent(EvaluationContext context)
+    T3.Core.DataTypes.Texture2D IContentSupplier.GetContent(EvaluationContext context)
     {
         var requested = Resolution.GetValue(context);
         if (requested.Width <= 0 || requested.Height <= 0)
@@ -45,11 +45,11 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IOutputSink, IStatu
         context.RequestedResolution = inherited;
         return texture;
     }
-    void IOutputSink.InvalidateContent() => Texture.InvalidateGraph();
-    bool IOutputSink.GetUpdateEnabled(EvaluationContext context) => Update.GetValue(context);
-    IInputSlot IOutputSink.UpdateInput => Update;
-    Int2 IOutputSink.GetResolution(EvaluationContext context) => Resolution.GetValue(context);
-    IInputSlot IOutputSink.ResolutionInput => Resolution;
+    void IContentSupplier.InvalidateContent() => Texture.InvalidateGraph();
+    bool IContentSupplier.GetUpdateEnabled(EvaluationContext context) => Update.GetValue(context);
+    IInputSlot IContentSupplier.UpdateInput => Update;
+    Int2 IContentSupplier.GetResolution(EvaluationContext context) => Resolution.GetValue(context);
+    IInputSlot IContentSupplier.ResolutionInput => Resolution;
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()
     {

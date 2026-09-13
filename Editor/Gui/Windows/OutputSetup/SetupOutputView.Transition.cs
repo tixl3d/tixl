@@ -74,8 +74,8 @@ internal sealed partial class SetupOutputView
         if (_basisMorph < 1f && !frozen)
         {
             var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-            _basisMorph = MathF.Min(1f, _basisMorph + dt / _morphDuration);
-            var t = MathF.Pow(_basisMorph, _morphEaseExponent);
+            _basisMorph = MathF.Min(1f, _basisMorph + dt / MorphDurationSec);
+            var t = MathF.Pow(_basisMorph, MorphEaseExponent);
             for (var i = 0; i < 4; i++)
                 _basisBlendQuad[i] = Vector2.Lerp(_basisFromQuad[i], targetQuad[i], t);
 
@@ -111,7 +111,7 @@ internal sealed partial class SetupOutputView
         if (_morphTarget < 1.5f)
         {
             var span = _straightRectMax - _straightRectMin;
-            var surround = new Vector2(MathF.Max(span.X, span.Y) * _straightSurroundFactor);
+            var surround = new Vector2(MathF.Max(span.X, span.Y) * StraightSurroundFactor);
             var framedMin = _straightRectMin - surround;
             var framedMax = _straightRectMax + surround;
             min = new Vector2(_spaceOrigin.X + framedMin.X / _spacePixelsPerMeter, _spaceOrigin.Y - framedMax.Y / _spacePixelsPerMeter);
@@ -152,7 +152,7 @@ internal sealed partial class SetupOutputView
         var key = (outputId, mode, size);
 
         // A different framed canvas shows different handles — the sub-element plane can't carry over.
-        if (_fitKey.Item1 != outputId || _fitKey.Item2 != mode)
+        if (_fitKey.OutputId != outputId || _fitKey.Mode != mode)
             _canvasSelection.Clear();
 
         // Folding back to the Board: the camera is on its way to the remembered Board view, not to a fit.
@@ -175,7 +175,7 @@ internal sealed partial class SetupOutputView
         if (progress < 1f)
         {
             InflateByScreenMargin(ref min, ref max);
-            var eased = MathF.Pow(progress, _morphEaseExponent);
+            var eased = MathF.Pow(progress, MorphEaseExponent);
             var scope = BlendScopes(_morphFromScope, ScopeShowing(min, max), eased);
             _boardCanvas.SetScopeInstant(scope);
             _fitKey = key;

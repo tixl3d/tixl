@@ -28,7 +28,7 @@ internal sealed partial class SetupOutputView
     /// styles by selection/hover so the same label reads the same in the tree and on the canvas.
     /// </summary>
     /// <param name="pickable">False where the frame itself is the pick target and the chip only names it and shows its state.</param>
-    private void DrawEntityLabel(ImDrawListPtr dl, SetupEntitySelection.EntityKinds kind, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected,
+    private void DrawEntityLabel(ImDrawListPtr dl, SetupEntityKinds kind, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected,
                                  float emphasis, float pulse = 0f, bool pickable = true)
     {
         if (string.IsNullOrEmpty(name) || emphasis <= 0.01f)
@@ -49,7 +49,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>Mixes <paramref name="baseColor"/> toward the selection highlight by the pulse amount (see
-    /// <see cref="FrameStats.GetPulse"/>) — the shared way a hovered frame's outline/label/fill light up.</summary>
+    /// <see cref="FrameStats.CrossHighlightAmount"/>) — the shared way a hovered frame's outline/label/fill light up.</summary>
     private static T3.Core.DataTypes.Vector.Color PulseColor(T3.Core.DataTypes.Vector.Color baseColor, float pulse)
     {
         // Toward white and opaque, never toward a status hue: a hovered thing stays what it is, only louder.
@@ -71,23 +71,23 @@ internal sealed partial class SetupOutputView
 
         if (hit.HasHit)
         {
-            FrameStats.PulseItemWithId(hit.Id);
+            FrameStats.RequestCrossHighlight(hit.Id);
 
             // Isolate takes selection off the canvas: only the focused frame's label still acts (so it can move
             // and its menu opens); the others are inert until picked in the sidebar. (Slices aren't isolated.)
-            var canPick = !_isolate || hit.Id == _shownSurfaceId;
+            var canPick = !_isolatesFocusedSurface || hit.Id == _shownSurfaceId;
 
             // A Board press arms the card under the cursor — unless the pick resolves to something drawn on that
             // card (a region's or traced quad's label), which wins over the card beneath it.
             if (_boardGrabScreen != null && hit.Id != _boardGrabId)
             {
                 _boardGrabScreen = null;
-                _boardGrabOnSelected = false;
+                _boardGrabKeepsSelection = false;
             }
 
             // A drag on the selected region's label moves it, so that press mustn't also count as a pick — nor
             // does a Board press that keeps the selection for a group drag.
-            if (canPick && hit.LeftClicked && _gesture.Kind is not (GestureKinds.RegionMove or GestureKinds.SurfaceMove or GestureKinds.ContentPan) && !_boardGrabOnSelected)
+            if (canPick && hit.LeftClicked && _gesture.Kind is not (GestureKinds.RegionMove or GestureKinds.SurfaceMove or GestureKinds.ContentPan) && !_boardGrabKeepsSelection)
             {
                 SelectPicked(selection, hit.Kind, hit.Id);
 
@@ -95,7 +95,7 @@ internal sealed partial class SetupOutputView
                 // frame — select-and-drag in one gesture. Plain presses only; a modifier press is a
                 // selection edit, not a grab.
                 var io = ImGui.GetIO();
-                if (hit.Kind is SetupEntitySelection.EntityKinds.Surface or SetupEntitySelection.EntityKinds.Patch && !io.KeyCtrl && !io.KeyShift)
+                if (hit.Kind is SetupEntityKinds.Surface or SetupEntityKinds.Patch && !io.KeyCtrl && !io.KeyShift)
                     _labelGrabScreen = ImGui.GetMousePos();
             }
 
@@ -156,7 +156,7 @@ internal sealed partial class SetupOutputView
         }
     }
 
-    private void SelectPicked(SetupEntitySelection? selection, SetupEntitySelection.EntityKinds kind, Guid id)
+    private void SelectPicked(SetupEntitySelection? selection, SetupEntityKinds kind, Guid id)
     {
         if (selection != null)
         {

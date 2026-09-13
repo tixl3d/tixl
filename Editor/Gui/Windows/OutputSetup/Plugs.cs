@@ -17,7 +17,7 @@ internal static class Plugs
 {
     #region Binding (kind-agnostic)
     /// <summary>The plug id an output is bound to, or empty.</summary>
-    public static Guid BoundPlugId(DeviceBinding? binding)
+    public static Guid BoundPlugId(PlugBinding? binding)
     {
         if (binding == null)
             return Guid.Empty;
@@ -26,12 +26,12 @@ internal static class Plugs
     }
 
     /// <summary>The name the binding presents to — for status lines ("→ Display 2", "→ Spout: Main").</summary>
-    public static string BindingLabel(MachineConfig machineConfig, DeviceBinding binding)
+    public static string BindingLabel(MachineConfig machineConfig, PlugBinding binding)
     {
         if (!binding.IsStream)
             return $"Display {binding.DisplayIndex + 1}";
 
-        var stream = machineConfig.FindStream(binding.PlugId);
+        var stream = machineConfig.FindStreamPlug(binding.PlugId);
         return stream == null ? "missing stream" : $"{stream.Kind}: {stream.Name}";
     }
 
@@ -41,7 +41,7 @@ internal static class Plugs
         if (TryGetDisplayIndex(plugId, out var displayIndex))
             return DisplayLabel(displayIndex);
 
-        return machineConfig.FindStream(plugId)?.Name ?? "Output";
+        return machineConfig.FindStreamPlug(plugId)?.Name ?? "Output";
     }
 
     /// <summary>The pixels a canvas presented here should have: the display's mode, or a sensible default for a stream.</summary>
@@ -85,7 +85,7 @@ internal static class Plugs
     /// <summary>Drops an output's binding and takes down its presentation window if it drove one.</summary>
     public static void UnbindOutput(MachineConfig machineConfig, Guid outputId)
     {
-        var binding = machineConfig.TryGetBinding(outputId);
+        var binding = machineConfig.FindBinding(outputId);
         machineConfig.Unbind(outputId);
         OutputSetupHandling.SaveActive();
 
@@ -126,10 +126,10 @@ internal static class Plugs
     private static void BindOutputToDisplay(MachineConfig machineConfig, Guid outputId, int displayIndex)
     {
         var screens = System.Windows.Forms.Screen.AllScreens;
-        machineConfig.Bind(new DeviceBinding
+        machineConfig.Bind(new PlugBinding
                                {
                                    OutputId = outputId,
-                                   Kind = DeviceBinding.Kinds.Display,
+                                   Kind = PlugBinding.Kinds.Display,
                                    DisplayName = displayIndex < screens.Length ? screens[displayIndex].DeviceName : string.Empty,
                                    DisplayIndex = displayIndex,
                                });
@@ -150,14 +150,14 @@ internal static class Plugs
     public static StreamPlug AddStream(MachineConfig machineConfig, string kind)
     {
         var stream = new StreamPlug { Kind = kind, Name = FreeStreamName(machineConfig, kind) };
-        machineConfig.Streams.Add(stream);
+        machineConfig.StreamPlugs.Add(stream);
         OutputSetupHandling.SaveActive();
         return stream;
     }
 
     public static void RenameStream(MachineConfig machineConfig, Guid plugId, string newName)
     {
-        var stream = machineConfig.FindStream(plugId);
+        var stream = machineConfig.FindStreamPlug(plugId);
         if (stream == null || stream.Name == newName)
             return;
 
@@ -176,13 +176,13 @@ internal static class Plugs
 
     private static void BindOutputToStream(MachineConfig machineConfig, Guid outputId, Guid plugId)
     {
-        if (machineConfig.FindStream(plugId) == null)
+        if (machineConfig.FindStreamPlug(plugId) == null)
             return;
 
-        machineConfig.Bind(new DeviceBinding
+        machineConfig.Bind(new PlugBinding
                                {
                                    OutputId = outputId,
-                                   Kind = DeviceBinding.Kinds.Stream,
+                                   Kind = PlugBinding.Kinds.Stream,
                                    PlugId = plugId,
                                });
         OutputSetupHandling.SaveActive();
@@ -200,7 +200,7 @@ internal static class Plugs
 
     private static bool HasStreamNamed(MachineConfig machineConfig, string name)
     {
-        foreach (var stream in machineConfig.Streams)
+        foreach (var stream in machineConfig.StreamPlugs)
         {
             if (stream.Name == name)
                 return true;

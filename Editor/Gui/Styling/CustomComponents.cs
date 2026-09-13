@@ -486,12 +486,9 @@ internal static partial class CustomComponents
     }
 
     /// <summary>
-    /// Horizontal segmented control drawn as one rounded track with the active option floating inside it.
-    /// Custom draw-list rendering (rather than per-option ImGui.Button) so the track and the active pill
-    /// share corners and the active label can use a heavier font.
-    /// </summary>
-    /// <summary>
-    /// A pill of mutually exclusive options. <paramref name="isItemDisabled"/> greys an option out without
+    /// A pill of mutually exclusive options, drawn as one rounded track with the active option floating inside
+    /// it (custom draw-list rendering, so the track and the active pill share corners and the active label can
+    /// use a heavier font). <paramref name="isItemDisabled"/> greys an option out without
     /// removing it, so the control keeps its shape; <paramref name="tooltipForItem"/> is what says *why* — a
     /// greyed segment that can't explain itself reads as a bug, so give disabled options a tooltip.
     /// </summary>

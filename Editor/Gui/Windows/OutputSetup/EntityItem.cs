@@ -9,9 +9,9 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// The one visual for a setup entity: icon, name, inline rename, status, state coloring, context menu,
-/// and drag source. The setup panel lays it out as tree rows; a flow view lays the same item out as node
+/// and drag source. The setup panel lays it out as tree items; a flow view lays the same item out as node
 /// bodies — the item itself carries no layout beyond the insets the caller passes in.
-/// <para>Deliberately delegate-free: rows draw every frame, so all per-kind behavior (rename, delete,
+/// <para>Deliberately delegate-free: items draw every frame, so all per-kind behavior (rename, delete,
 /// extra menu items) dispatches through <see cref="SetupActions"/> instead of per-item callbacks.</para>
 /// </summary>
 internal sealed class EntityItem
@@ -28,7 +28,7 @@ internal sealed class EntityItem
 
     public struct Args
     {
-        public SetupEntitySelection.EntityKinds Kind;
+        public SetupEntityKinds Kind;
         public Guid Id;
         public string Name;
 
@@ -45,25 +45,25 @@ internal sealed class EntityItem
         public bool? IsExpanded;
 
         /// <summary>Keep the chevron column even without children, so siblings align.</summary>
-        public bool ReserveExpander;
+        public bool KeepsExpanderColumn;
 
-        /// <summary>Nothing shows this entity — it recedes rather than competing with rows in use.</summary>
-        public bool Muted;
+        /// <summary>Nothing shows this entity — it recedes rather than competing with items in use.</summary>
+        public bool IsMuted;
 
         /// <summary>Strike the leading icon (a paused output / non-rendered surface).</summary>
-        public bool StrikeLeadingIcon;
+        public bool HasStruckIcon;
 
-        /// <summary>The column the row spans, in screen px; a zero width means the whole window (the tree layout).</summary>
+        /// <summary>The column the item spans, in screen px; a zero width means the whole window (the tree layout).</summary>
         public float ColumnMinX;
 
         public float ColumnWidth;
     }
 
     /// <summary>Screen rect of the item drawn last — where the outliner's connections attach.</summary>
-    public (Vector2 Min, Vector2 Max) LastRowRect { get; private set; }
+    public (Vector2 Min, Vector2 Max) LastItemRect { get; private set; }
 
     /// <param name="hovered">Reported so the caller can track hover-driven cross-highlights.</param>
-    public ItemActions DrawRow(SetupEntitySelection selection, Setup setup, in Args args, out bool hovered)
+    public ItemActions DrawItem(SetupEntitySelection selection, Setup setup, in Args args, out bool hovered)
     {
         var action = ItemActions.None;
         var scale = T3Ui.UiScaleFactor;
@@ -72,11 +72,11 @@ internal sealed class EntityItem
         var height = (float)Math.Round(23 * scale);
         var indent = args.Depth * 12 * scale;
 
-        var fade = args.Muted ? 0.45f : 1f;
+        var fade = args.IsMuted ? 0.45f : 1f;
 
         ImGui.PushID(args.Id.GetHashCode());
 
-        // Rounded row inset 4px from the window edges (so the selection/outline never clips), pixel-snapped
+        // Rounded item inset 4px from the window edges (so the selection/outline never clips), pixel-snapped
         // to avoid a blurry sub-pixel edge.
         var entryPos = ImGui.GetCursorScreenPos();
         var windowPos = ImGui.GetWindowPos();
@@ -84,12 +84,12 @@ internal sealed class EntityItem
         var spanRight = args.ColumnWidth > 0 ? args.ColumnMinX + args.ColumnWidth : windowPos.X + ImGui.GetWindowWidth();
         var rowMin = new Vector2((float)Math.Round(spanLeft + 4 * scale), (float)Math.Round(entryPos.Y));
         var rowMax = new Vector2((float)Math.Round(spanRight - 4 * scale), rowMin.Y + height);
-        LastRowRect = (rowMin, rowMax);
+        LastItemRect = (rowMin, rowMax);
         var dl = ImGui.GetWindowDrawList();
         var isSelected = selection.IsSelected(args.Kind, args.Id);
         var kindColor = SetupColors.ForKind(args.Kind);
 
-        // Full-row hit test — a selectable spanning the padded row; its own header background is suppressed
+        // Full-item hit test — a selectable spanning the padded item; its own header background is suppressed
         // so we can draw a rounded one instead.
         ImGui.PushStyleColor(ImGuiCol.Header, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Vector4.Zero);
@@ -102,10 +102,10 @@ internal sealed class EntityItem
         hovered = isHovered;
 
         var canRename = SetupActions.CanRename(args.Kind)
-                        && (args.Kind != SetupEntitySelection.EntityKinds.Plug || SetupActions.CanRenamePlug(args.Id));
+                        && (args.Kind != SetupEntityKinds.Plug || SetupActions.CanRenamePlug(args.Id));
         var isRenaming = canRename && _renamingId == args.Id;
 
-        // Double-click a renamable row to edit its name inline. Suppress the click-select handling below so the
+        // Double-click a renamable item to edit its name inline. Suppress the click-select handling below so the
         // double-click doesn't also toggle/reselect while the field takes focus.
         if (canRename && !isRenaming && isHovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
         {
@@ -117,14 +117,14 @@ internal sealed class EntityItem
         if (isRenaming)
             clicked = false;
 
-        // The chevron shares the row's selectable rather than overlapping it with its own button — a click in
+        // The chevron shares the item's selectable rather than overlapping it with its own button — a click in
         // its column toggles instead of selecting.
         var chevronMaxX = rowMin.X + indent + 20 * scale;
         if (clicked && args.IsExpanded.HasValue && ImGui.GetMousePos().X < chevronMaxX)
         {
             action = ItemActions.ToggleExpanded;
         }
-        else if (clicked && args.Kind != SetupEntitySelection.EntityKinds.None)
+        else if (clicked && args.Kind != SetupEntityKinds.None)
         {
             var io = ImGui.GetIO();
             if (io.KeyCtrl)
@@ -134,25 +134,25 @@ internal sealed class EntityItem
             else
             {
                 selection.Select(args.Kind, args.Id);
-                // A content row is a live op — a plain click selects it in the graph and brings it into view.
-                if (args.Kind == SetupEntitySelection.EntityKinds.ContentSource)
+                // A content item is a live op — a plain click selects it in the graph and brings it into view.
+                if (args.Kind == SetupEntityKinds.ContentSource)
                     SetupActions.RevealContentOpInGraph(args.Id);
             }
         }
 
         if (isHovered)
         {
-            FrameStats.PulseItemWithId(args.Id);
-            if (args.Kind == SetupEntitySelection.EntityKinds.ContentSource)
+            FrameStats.RequestCrossHighlight(args.Id);
+            if (args.Kind == SetupEntityKinds.ContentSource)
                 FrameStats.AddHoveredId(args.Id);
         }
 
         HandleDragDrop(setup, args.Kind, args.Id);
 
-        if (args.Kind != SetupEntitySelection.EntityKinds.None)
+        if (args.Kind != SetupEntityKinds.None)
         {
-            // Static context + a cached delegate: the menu body only runs for the row whose popup is open,
-            // and ContextMenuForItem invokes it synchronously within this call — so per-row closures would
+            // Static context + a cached delegate: the menu body only runs for the item whose popup is open,
+            // and ContextMenuForItem invokes it synchronously within this call — so per-item closures would
             // buy nothing but a per-frame allocation.
             _menuArgs = args;
             _menuSelection = selection;
@@ -160,14 +160,14 @@ internal sealed class EntityItem
             CustomComponents.ContextMenuForItem(_drawMenuItemsCached, null);
         }
 
-        // While this row's context menu is open the pointer sits on the popup, not the row, so keep the row
+        // While this item's context menu is open the pointer sits on the popup, not the item, so keep the item
         // lit anyway — otherwise it's no longer obvious which entity the menu belongs to. The popup id is
-        // scoped by the row's PushID, so this only matches our own menu.
+        // scoped by the item's PushID, so this only matches our own menu.
         var menuOpen = ImGui.IsPopupOpen("context_menu");
 
         // Hovered from the canvas (its frame is under the cursor) but not here: pulse so the eye is drawn to
-        // the row that answers "which item is that frame?".
-        var canvasPulse = !isHovered && !isSelected && !menuOpen ? FrameStats.GetPulse(args.Id) : 0;
+        // the item that answers "which item is that frame?".
+        var canvasPulse = !isHovered && !isSelected && !menuOpen ? FrameStats.CrossHighlightAmount(args.Id) : 0;
 
         // The item is a pill in its kind's colour, always: solid while selected, a light tint otherwise that
         // hovering (from here or from the canvas) merely lifts.
@@ -182,7 +182,7 @@ internal sealed class EntityItem
             dl.AddRect(rowMin, rowMax, kindColor.Fade(0.45f + 0.45f * lift), rounding);
         }
 
-        // Content over the background (the selectable is transparent), vertically centered in the fixed row
+        // Content over the background (the selectable is transparent), vertically centered in the fixed item
         // (the -1px nudges the label up so it isn't sitting low).
         var contentY = (float)Math.Round(rowMin.Y + (height - ImGui.GetTextLineHeight()) * 0.5f - 1 * scale);
         var iconY = contentY + 3 * scale; // glyphs render high vs the text baseline — drop them to match.
@@ -194,9 +194,9 @@ internal sealed class EntityItem
             Icons.DrawInlineGlyph(args.IsExpanded.Value ? Icon.ChevronDown : Icon.ChevronRight, UiColors.TextMuted.Fade(0.6f).Rgba);
             contentX = ImGui.GetItemRectMax().X + 3 * scale;
         }
-        else if (args.Depth > 0 || args.ReserveExpander)
+        else if (args.Depth > 0 || args.KeepsExpanderColumn)
         {
-            // Keep the chevron column even when this row has nothing to expand — otherwise a childless row
+            // Keep the chevron column even when this item has nothing to expand — otherwise a childless item
             // sits further left than its siblings and the tree reads as ragged. Drawing the same glyph fully
             // transparent reserves *exactly* the width the real one takes, rather than a guessed constant.
             ImGui.SetCursorScreenPos(new Vector2(contentX, iconY));
@@ -211,7 +211,7 @@ internal sealed class EntityItem
 
             // A disabled (non-rendered) surface is struck through its icon — visible at a glance without
             // stealing the gutter or the name.
-            if (args.StrikeLeadingIcon)
+            if (args.HasStruckIcon)
             {
                 var iconMin = ImGui.GetItemRectMin();
                 var iconMax = ImGui.GetItemRectMax();
@@ -224,7 +224,7 @@ internal sealed class EntityItem
 
         if (isRenaming)
         {
-            // Inline editor in place of the name. Full row height, seeded and focused on the first frame;
+            // Inline editor in place of the name. Full item height, seeded and focused on the first frame;
             // commits on Enter/blur, cancels on Escape.
             var fieldY = (float)Math.Round(rowMin.Y + (height - ImGui.GetFrameHeight()) * 0.5f);
             ImGui.SetCursorScreenPos(new Vector2(contentX, fieldY));
@@ -259,7 +259,7 @@ internal sealed class EntityItem
                                           (isSelected ? UiColors.ForegroundFull : SetupColors.LabelFor(args.Kind)).Fade(fade));
         }
 
-        // Right-aligned status text, small and muted (FontSmall is shorter than the row's baseline — centre it on its own height).
+        // Right-aligned status text, small and muted (FontSmall is shorter than the item's baseline — centre it on its own height).
         if (!isRenaming && args.Status != null)
         {
             ImGui.PushFont(Fonts.FontSmall);
@@ -272,9 +272,9 @@ internal sealed class EntityItem
             CustomComponents.StylizedText(args.Status, Fonts.FontSmall, UiColors.TextMuted.Fade(fade));
         }
 
-        // Next row starts a tight 2px below, independent of the content cursor above. Claimed with a zero-height
+        // Next item starts a tight 2px below, independent of the content cursor above. Claimed with a zero-height
         // item (no spacing) rather than a bare cursor set: ImGui asserts on a window whose extent was only ever
-        // extended by SetCursorPos, which is exactly what the last row of the last section would do.
+        // extended by SetCursorPos, which is exactly what the last item of the last section would do.
         ImGui.SetCursorScreenPos(new Vector2(entryPos.X, rowMax.Y + 2 * scale));
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
         ImGui.Dummy(Vector2.Zero);
@@ -284,7 +284,7 @@ internal sealed class EntityItem
     }
 
     /// <summary>Enters inline-rename mode for an item: selects it, seeds the buffer, and focuses the field next frame.</summary>
-    public void BeginRename(SetupEntitySelection selection, SetupEntitySelection.EntityKinds kind, Guid id, string name)
+    public void BeginRename(SetupEntitySelection selection, SetupEntityKinds kind, Guid id, string name)
     {
         selection.Select(kind, id);
         _renamingId = id;
@@ -292,14 +292,14 @@ internal sealed class EntityItem
         _renameFocusPending = true;
     }
 
-    private void HandleDragDrop(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id)
+    private void HandleDragDrop(Setup setup, SetupEntityKinds kind, Guid id)
     {
         // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
         // (ApplyDrop normalizes), so dragging an output onto a source works the same as the reverse. A patch
         // takes a slice or source to re-feed it.
-        var routable = kind is SetupEntitySelection.EntityKinds.Surface or SetupEntitySelection.EntityKinds.ContentSource
-                            or SetupEntitySelection.EntityKinds.Slice or SetupEntitySelection.EntityKinds.Output
-                            or SetupEntitySelection.EntityKinds.Patch or SetupEntitySelection.EntityKinds.Plug;
+        var routable = kind is SetupEntityKinds.Surface or SetupEntityKinds.ContentSource
+                            or SetupEntityKinds.Slice or SetupEntityKinds.Output
+                            or SetupEntityKinds.Patch or SetupEntityKinds.Plug;
         if (!routable)
             return;
 
@@ -328,12 +328,12 @@ internal sealed class EntityItem
     }
 
     /// <summary>
-    /// The one context menu for a setup entity — identical whether opened from a setup-panel row or a canvas
+    /// The one context menu for a setup entity — identical whether opened from a setup-panel item or a canvas
     /// label: kind-specific extras first, then the common Duplicate / Rename / Delete verbs wherever the
     /// kind supports them.
     /// </summary>
     public void DrawContextMenuItems(SetupEntitySelection selection, Setup setup,
-                                            SetupEntitySelection.EntityKinds kind, Guid id, string name)
+                                            SetupEntityKinds kind, Guid id, string name)
     {
         // Right-clicking inside a multi-selection acts on the whole thing. The per-entity actions stay
         // visible but dimmed rather than vanishing, so the menu keeps its shape and it is obvious *why*
@@ -373,11 +373,11 @@ internal sealed class EntityItem
     }
 
     private void DrawKindMenuItems(SetupEntitySelection selection, Setup setup,
-                                          SetupEntitySelection.EntityKinds kind, Guid id)
+                                          SetupEntityKinds kind, Guid id)
     {
         switch (kind)
         {
-            case SetupEntitySelection.EntityKinds.Output:
+            case SetupEntityKinds.Output:
                 var output = setup.FindOutput(id);
                 if (output == null)
                     break;
@@ -409,7 +409,7 @@ internal sealed class EntityItem
                 // plug's own menu. One gesture, in the place that shows what is plugged in.
                 break;
 
-            case SetupEntitySelection.EntityKinds.Plug:
+            case SetupEntityKinds.Plug:
                 if (!OutputSetupHandling.TryGetActiveSetup(out _, out var plugMachineConfig))
                     break;
 
@@ -427,19 +427,19 @@ internal sealed class EntityItem
                     }
                 }
 
-                if (plugMachineConfig.FindStream(id) != null && CustomComponents.DrawMenuItem(16, "Remove stream"))
+                if (plugMachineConfig.FindStreamPlug(id) != null && CustomComponents.DrawMenuItem(16, "Remove stream"))
                     Plugs.RemoveStream(plugMachineConfig, id);
 
                 break;
 
-            case SetupEntitySelection.EntityKinds.ContentSource:
+            case SetupEntityKinds.ContentSource:
                 var source = setup.FindSourceByChildId(id);
                 if (source != null && CustomComponents.DrawMenuItem(8, "Add slice"))
                     SetupActions.AddSlice(selection, setup, source);
 
                 break;
 
-            case SetupEntitySelection.EntityKinds.Patch:
+            case SetupEntityKinds.Patch:
                 if (setup.FindPatch(id, out _) is { } turnedPatch && CustomComponents.DrawMenuItem(17, "Rotate 90°"))
                     SetupActions.RotatePatchClockwise(setup, turnedPatch);
 
@@ -453,7 +453,7 @@ internal sealed class EntityItem
                                                     "The quad stays exactly where it is; the surface adds real size, raster and straightening.");
                 break;
 
-            case SetupEntitySelection.EntityKinds.ReferenceImage:
+            case SetupEntityKinds.ReferenceImage:
                 var image = setup.FindReferenceImage(id);
                 if (image == null)
                     break;
@@ -465,7 +465,7 @@ internal sealed class EntityItem
                 for (var i = 0; i < setup.Surfaces.Count; i++)
                 {
                     var candidate = setup.Surfaces[i];
-                    if (candidate.Reference != null || candidate.ParentId != Guid.Empty)
+                    if (candidate.Trace != null || candidate.ParentId != Guid.Empty)
                         continue;
 
                     if (CustomComponents.DrawMenuItem(100 + i, $"Trace {candidate.Name} Here"))
@@ -474,7 +474,7 @@ internal sealed class EntityItem
 
                 break;
 
-            case SetupEntitySelection.EntityKinds.Surface:
+            case SetupEntityKinds.Surface:
                 var surface = setup.FindSurface(id);
                 if (surface == null)
                     break;

@@ -84,12 +84,6 @@ internal static partial class CustomComponents
     }
 
     /// <summary>
-    /// Menu item with the checkbox slot on the left, an optional icon, label and an optional
-    /// right-aligned keyboard shortcut. <paramref name="state"/> controls the label brightness:
-    /// <see cref="ButtonStates.Emphasized"/> reads as the primary/active row, <see cref="ButtonStates.Default"/>
-    /// as a muted secondary row. A disabled item always renders greyed regardless of <paramref name="state"/>.
-    /// </summary>
-    /// <summary>
     /// Grays out every item drawn while it is set, without the callers having to thread an enabled flag
     /// through. Used where a menu is shared between contexts and only some of its items apply — a
     /// multi-selection, say, where the per-entity actions can't act on N things at once. Set it around the
@@ -105,6 +99,12 @@ internal static partial class CustomComponents
     /// </summary>
     public static bool MenuItemsFlushLeft;
 
+    /// <summary>
+    /// Menu item with the checkbox slot on the left, an optional icon, label and an optional
+    /// right-aligned keyboard shortcut. <paramref name="state"/> controls the label brightness:
+    /// <see cref="ButtonStates.Emphasized"/> reads as the primary/active item, <see cref="ButtonStates.Default"/>
+    /// as a muted secondary item. A disabled item always renders greyed regardless of <paramref name="state"/>.
+    /// </summary>
     public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true,
                                     bool reserveCheckmarkColumn = true, bool reserveIconColumn = true,
                                     ButtonStates state = ButtonStates.Default)

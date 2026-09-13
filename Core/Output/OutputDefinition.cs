@@ -25,7 +25,7 @@ public sealed class OutputDefinition
     }
 
     /// <summary>
-    /// L3: a first-class camera authored by calibration — referencable by graph ops for any
+    /// A first-class camera authored by calibration — referencable by graph ops for any
     /// render, not just the output's own canvas. Pose/lens stay unset until solved.
     /// </summary>
     public sealed class ProjectorCamera
@@ -196,15 +196,15 @@ public sealed class OutputDefinition
     public ProjectorCamera? Camera;
 
     /// <summary>Pause presenting to this output without dropping its device binding (e.g. mute an NDI feed).</summary>
-    public bool Send = true;
+    public bool IsSending = true;
 
     /// <summary>Canvas regions on the direct pipe, composited in list order underneath the surfaces mapped here.</summary>
     public List<Patch> Patches = [];
 
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
-    public CanvasPlacement? BoardPlacement;
+    public BoardPlacement? BoardPlacement;
 
-    /// <summary>The whole canvas as a TL, TR, BR, BL quad in its 0..1 space — the rung-0 patch, and the reset shape.</summary>
+    /// <summary>The whole canvas as a TL, TR, BR, BL quad in its 0..1 space — the default patch, and the reset shape.</summary>
     public static Vector2[] FullCanvasQuad()
     {
         return [Vector2.Zero, new Vector2(1, 0), Vector2.One, new Vector2(0, 1)];
@@ -242,7 +242,7 @@ public sealed class OutputDefinition
         writer.WriteString("Name", Name);
         writer.WriteString("Kind", Kind);
         writer.WriteInt2("CanvasResolution", CanvasResolution);
-        writer.WriteValue("Send", Send);
+        writer.WriteValue("Send", IsSending);
         if (Patches.Count > 0)
         {
             writer.WritePropertyName("Patches");
@@ -276,7 +276,7 @@ public sealed class OutputDefinition
                              Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
                              Kind = token.ReadValueSafe("Kind", Kinds.Display) ?? Kinds.Display,
                              CanvasResolution = OutputJson.ReadInt2(token["CanvasResolution"], new Int2(1920, 1080)),
-                             Send = token.ReadValueSafe("Send", true),
+                             IsSending = token.ReadValueSafe("Send", true),
                              Patches = token.ReadListSafe("Patches", Patch.ReadFromJson),
                          };
 
@@ -284,7 +284,7 @@ public sealed class OutputDefinition
             output.Camera = ProjectorCamera.ReadFromJson(cameraToken);
 
         if (token["BoardPlacement"] is JObject placement)
-            output.BoardPlacement = CanvasPlacement.ReadFromJson(placement);
+            output.BoardPlacement = BoardPlacement.ReadFromJson(placement);
 
         return output;
     }

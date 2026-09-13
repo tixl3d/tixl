@@ -42,7 +42,7 @@ internal sealed partial class SetupOutputView
 
         SeedBoardPlacements(setup);
         var texture = TryGetReferenceTexture(image);
-        EnterSpace(setup, SetupEntitySelection.EntityKinds.ReferenceImage, imageId, texture != null);
+        EnterSpace(setup, SetupEntityKinds.ReferenceImage, imageId, texture != null);
         DrawBoardLayer(setup, machineConfig, selection);
 
         if (texture == null)
@@ -57,17 +57,17 @@ internal sealed partial class SetupOutputView
     /// <summary>The image a surface is traced on, if any — a region through the traced ancestor it lives in.</summary>
     private static ReferenceImage? TracedImageOf(Setup setup, Guid surfaceId)
     {
-        var binding = TracedAncestorOf(setup, surfaceId)?.Reference;
+        var binding = FindTraceCarrier(setup, surfaceId)?.Trace;
         return binding == null ? null : setup.FindReferenceImage(binding.ImageId);
     }
 
     /// <summary>The surface itself when traced, else the nearest traced ancestor (a region rides its parent's photo).</summary>
-    private static Surface? TracedAncestorOf(Setup setup, Guid surfaceId)
+    private static Surface? FindTraceCarrier(Setup setup, Guid surfaceId)
     {
         var surface = setup.FindSurface(surfaceId);
         for (var guard = 0; surface != null && guard < 16; guard++)
         {
-            if (surface.Reference != null)
+            if (surface.Trace != null)
                 return surface;
 
             if (surface.ParentId == Guid.Empty)
@@ -97,8 +97,8 @@ internal sealed partial class SetupOutputView
             return;
         }
 
-        var subject = TracedAncestorOf(setup, _shownSurfaceId);
-        if (subject?.Reference?.ImageId != image.Id)
+        var subject = FindTraceCarrier(setup, _shownSurfaceId);
+        if (subject?.Trace?.ImageId != image.Id)
             subject = null;
 
         SetReferenceStraightenTarget(straighten && subject != null ? 1f : 0f);
@@ -154,8 +154,8 @@ internal sealed partial class SetupOutputView
         if (_referenceProgress < 1f)
         {
             var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-            _referenceProgress = MathF.Min(1f, _referenceProgress + dt / _morphDuration);
-            var eased = MathF.Pow(_referenceProgress, _morphEaseExponent);
+            _referenceProgress = MathF.Min(1f, _referenceProgress + dt / MorphDurationSec);
+            var eased = MathF.Pow(_referenceProgress, MorphEaseExponent);
             _referenceStraighten = _referenceProgress >= 1f
                                        ? _referenceStraightenTarget
                                        : _referenceStraightenFrom + (_referenceStraightenTarget - _referenceStraightenFrom) * eased;
@@ -163,7 +163,7 @@ internal sealed partial class SetupOutputView
 
         // The subject's traced quad and its target rectangle — eased from the previous subject's when the
         // selection moves between surfaces on this photo while straightened, so the scene turns rather than jumps.
-        var hasSubject = subject?.Reference != null && subject.Reference.Quad.Length >= 4;
+        var hasSubject = subject?.Trace != null && subject.Trace.Quad.Length >= 4;
         Vector2 targetMin = Vector2.Zero, targetMax = Vector2.Zero;
         if (hasSubject)
             ResolveStraightSubject(subject!, out targetMin, out targetMax);
@@ -174,7 +174,7 @@ internal sealed partial class SetupOutputView
         if (hasSubject && _referenceStraightenTarget >= 0.5f)
         {
             var span = targetMax - targetMin;
-            var surround = new Vector2(MathF.Max(span.X, span.Y) * _straightSurroundFactor);
+            var surround = new Vector2(MathF.Max(span.X, span.Y) * StraightSurroundFactor);
             settledMin = targetMin - surround;
             settledMax = targetMax + surround;
         }
@@ -219,8 +219,8 @@ internal sealed partial class SetupOutputView
             for (var c = 0; c < 4; c++)
                 screenQuad[c] = _projection.CanvasToScreen(_referenceInterpQuad[c]);
 
-            dl.AddQuad(screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3], SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface), 2 * scale);
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screenQuad, subject!.Id, subject.Name, true, 1f - t);
+            dl.AddQuad(screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3], SetupColors.ForKind(SetupEntityKinds.Surface), 2 * scale);
+            DrawEntityLabel(dl, SetupEntityKinds.Surface, screenQuad, subject!.Id, subject.Name, true, 1f - t);
 
             _probeSurfaceCentre = (screenQuad[0] + screenQuad[2]) * 0.5f;
             SampleTransitionMetrics();
@@ -253,21 +253,21 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void DrawTracedQuads(Setup setup, ReferenceImage image, SetupEntitySelection? selection, ImDrawListPtr dl, bool editable, float fade)
     {
-        var imageSelected = selection?.IsSelected(SetupEntitySelection.EntityKinds.ReferenceImage, image.Id) ?? false;
+        var imageSelected = selection?.IsSelected(SetupEntityKinds.ReferenceImage, image.Id) ?? false;
         Span<Vector2> screenQuad = stackalloc Vector2[4];
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             var surface = setup.Surfaces[i];
-            var binding = surface.Reference;
+            var binding = surface.Trace;
             if (binding == null || binding.ImageId != image.Id || binding.Quad.Length < 4)
                 continue;
 
-            var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKinds.Surface, surface.Id) ?? false;
-            var pulse = isSelected ? 0f : FrameStats.GetPulse(surface.Id);
+            var isSelected = selection?.IsSelected(SetupEntityKinds.Surface, surface.Id) ?? false;
+            var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(surface.Id);
 
             // What the surface shows, laid into its trace — the wall with its content, as it will be. At the
             // preview opacity, so the photo stays the reference; per-triangle, which is close enough for a preview.
-            var preview = UserSettings.Config.OutputSetupContentPreview;
+            var preview = UserSettings.Config.OutputSetupContentPreviewOpacity;
             if (preview > 0.01f && OutputManager.TryGetSurfaceSlice(surface.Id, out _, out var content, out var uv) && content is { IsDisposed: false })
             {
                 var contentSrv = SrvManager.GetSrvForTexture(content);
@@ -283,15 +283,15 @@ internal sealed partial class SetupOutputView
             }
 
             ImGui.PushID(surface.Id.GetHashCode());
-            var style = CornerPinHandles.Style.ForSurface(null, editable && isSelected, isSelected, fade, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
-            style.DrawChecker = false;
-            style.EdgeColor = PulseColor(SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface).Fade(isSelected ? 1f : 0.7f), pulse).Fade(fade);
+            var style = CornerPinHandles.Style.ForSurface(null, editable && isSelected, isSelected, fade, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
+            style.ShowsChecker = false;
+            style.EdgeColor = PulseColor(SetupColors.ForKind(SetupEntityKinds.Surface).Fade(isSelected ? 1f : 0.7f), pulse).Fade(fade);
 
             var phase = CornerPinHandles.Draw(binding.Quad, _projection, style, out _);
             if (phase == CanvasPointHandle.DragPhases.Started)
             {
                 BeginGesture(setup, GestureKinds.TraceCorner, "Trace surface", surface.Id);
-                selection?.Select(SetupEntitySelection.EntityKinds.Surface, surface.Id);
+                selection?.Select(SetupEntityKinds.Surface, surface.Id);
             }
             else if (phase == CanvasPointHandle.DragPhases.Completed)
             {
@@ -303,7 +303,7 @@ internal sealed partial class SetupOutputView
             for (var c = 0; c < 4; c++)
                 screenQuad[c] = _projection.CanvasToScreen(binding.Quad[c]);
 
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screenQuad, surface.Id, surface.Name, isSelected, fade, pulse);
+            DrawEntityLabel(dl, SetupEntityKinds.Surface, screenQuad, surface.Id, surface.Name, isSelected, fade, pulse);
 
             // Its reference points, where they sit in the photo.
             if (SetupActions.CountPoints(surface) > 0
@@ -319,7 +319,7 @@ internal sealed partial class SetupOutputView
     private void DrawBoardTraces(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, ReferenceImage image, Vector2 min, Vector2 max)
     {
         var fade = _boardLayerFade;
-        var pixelSize = BoardPixelSize(setup, SetupEntitySelection.EntityKinds.ReferenceImage, image.Id);
+        var pixelSize = BoardPixelSize(setup, SetupEntityKinds.ReferenceImage, image.Id);
         _projection.Origin = new Vector2(min.X, max.Y);
         _projection.PixelsPerMeter = pixelSize.X / MathF.Max(max.X - min.X, 0.0001f);
         DrawTracedQuads(setup, image, selection, dl, fade >= 0.999f, fade);
@@ -328,11 +328,11 @@ internal sealed partial class SetupOutputView
     /// <summary>The surface the Straight toggle rectifies around: the primary selection, when it is traced on this image.</summary>
     private static Surface? FindStraightenSubject(Setup setup, Guid imageId, SetupEntitySelection? selection)
     {
-        if (selection == null || !selection.TryResolve(setup, out var kind, out var id) || kind != SetupEntitySelection.EntityKinds.Surface)
+        if (selection == null || !selection.TryResolve(setup, out var kind, out var id) || kind != SetupEntityKinds.Surface)
             return null;
 
         var surface = setup.FindSurface(id);
-        return surface?.Reference?.ImageId == imageId ? surface : null;
+        return surface?.Trace?.ImageId == imageId ? surface : null;
     }
 
     /// <summary>
@@ -400,7 +400,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void ResolveStraightSubject(Surface subject, out Vector2 targetMin, out Vector2 targetMax)
     {
-        var quad = subject.Reference!.Quad;
+        var quad = subject.Trace!.Quad;
 
         // The rect is where the wall was first put upright; refining the trace must not move or re-centre it.
         // It is re-derived only for a new subject or a changed physical size (which changes its aspect).
@@ -417,8 +417,8 @@ internal sealed partial class SetupOutputView
         {
             // Only surfaces on the same photo can turn into each other: their quads share a pixel space. Across
             // photos the new subject snaps (the camera still travels, see EnterSpace).
-            var sameImage = _referenceSubjectImageId == subject.Reference!.ImageId;
-            _referenceSubjectImageId = subject.Reference.ImageId;
+            var sameImage = _referenceSubjectImageId == subject.Trace!.ImageId;
+            _referenceSubjectImageId = subject.Trace.ImageId;
             if (_referenceSubjectId != Guid.Empty && _referenceStraighten > 0.001f && sameImage)
             {
                 Array.Copy(_referenceSubjectQuad, _referenceSubjectFromQuad, 4);
@@ -438,8 +438,8 @@ internal sealed partial class SetupOutputView
         if (_referenceSubjectProgress < 1f)
         {
             var dt = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
-            _referenceSubjectProgress = MathF.Min(1f, _referenceSubjectProgress + dt / _morphDuration);
-            var eased = MathF.Pow(_referenceSubjectProgress, _morphEaseExponent);
+            _referenceSubjectProgress = MathF.Min(1f, _referenceSubjectProgress + dt / MorphDurationSec);
+            var eased = MathF.Pow(_referenceSubjectProgress, MorphEaseExponent);
             for (var i = 0; i < 4; i++)
                 _referenceSubjectQuad[i] = Vector2.Lerp(_referenceSubjectFromQuad[i], quad[i], eased);
 
@@ -464,7 +464,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void DrawStraightEdits(Setup setup, ImDrawListPtr dl, Surface subject, Vector2 targetMin, Vector2 targetMax, SetupEntitySelection? selection)
     {
-        var binding = subject.Reference!;
+        var binding = subject.Trace!;
         var rect = RectCorners(targetMin, targetMax);
         Array.Copy(rect, _referenceRectQuad, 4);
         var refining = _gesture.Is(GestureKinds.TraceRefine, subject.Id);
@@ -472,9 +472,9 @@ internal sealed partial class SetupOutputView
             return;
 
         ImGui.PushID("straightEdit");
-        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
-        style.DrawChecker = false;
-        style.EdgeColor = SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface);
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
+        style.ShowsChecker = false;
+        style.EdgeColor = SetupColors.ForKind(SetupEntityKinds.Surface);
         var cornerPhase = CornerPinHandles.Draw(_referenceRectQuad, _projection, style, out var draggedCorner);
         var edgePhase = CanvasPointHandle.DragPhases.None;
         var edge = -1;
@@ -543,13 +543,13 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void DrawReferencePoints(Setup setup, ImDrawListPtr dl, Surface subject, in Homography surfaceToRect, in Homography rectToSurface)
     {
-        var color = SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface);
+        var color = SetupColors.ForKind(SetupEntityKinds.Surface);
 
-        if (_pointArmed && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        if (_isPointToolArmed && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
             var position = rectToSurface.TransformPoint(_projection.ScreenToCanvas(ImGui.GetMousePos()));
             SetupActions.AddReferencePoint(setup, subject, position);
-            _pointArmed = false;
+            _isPointToolArmed = false;
         }
 
         var toDelete = -1;
@@ -618,7 +618,7 @@ internal sealed partial class SetupOutputView
     /// <summary>Read-only marks for a surface's reference points, through any surface-space → screen mapping.</summary>
     private static void DrawReferencePointMarks(ImDrawListPtr dl, Surface surface, in Homography surfaceToView, ICanvasProjection view, float fade)
     {
-        var color = SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface).Fade(0.8f * fade);
+        var color = SetupColors.ForKind(SetupEntityKinds.Surface).Fade(0.8f * fade);
         var ordinal = 0;
         foreach (var point in surface.Annotations)
         {
@@ -650,12 +650,12 @@ internal sealed partial class SetupOutputView
 
             _regionProjection.View = _projection;
             _regionProjection.Origin = parentOriginInSubject;
-            _regionProjection.UseHomography = true;
+            _regionProjection.HasHomography = true;
             _regionProjection.ToView = surfaceToRect;
             _regionProjection.FromView = rectToSurface;
             DrawRegionEditable(setup, dl, parent, child, _regionProjection, selection, 1f);
 
-            SurfaceGeometry.ChildBounds(child, out var localMin, out _);
+            SurfaceGeometry.RegionBounds(child, out var localMin, out _);
             DrawStraightRegions(setup, dl, subject, child, parentOriginInSubject + localMin + child.AnchorInMeters, surfaceToRect, rectToSurface, selection);
         }
     }
@@ -676,7 +676,7 @@ internal sealed partial class SetupOutputView
         warpedTexture = null;
         uvMin = Vector2.Zero;
         uvMax = Vector2.One;
-        var binding = surface.Reference;
+        var binding = surface.Trace;
         if (binding == null || binding.Quad.Length < 4)
             return false;
 
@@ -708,7 +708,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private static void StraightTargetBounds(Surface surface, out Vector2 min, out Vector2 max)
     {
-        Bounds(surface.Reference!.Quad, out var quadMin, out var quadMax);
+        Bounds(surface.Trace!.Quad, out var quadMin, out var quadMax);
         var width = MathF.Max(quadMax.X - quadMin.X, 1f);
         var aspect = surface.SizeInMeters.X / MathF.Max(surface.SizeInMeters.Y, 0.0001f);
         var height = width / MathF.Max(aspect, 0.0001f);

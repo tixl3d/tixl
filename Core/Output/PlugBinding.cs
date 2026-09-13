@@ -11,7 +11,7 @@ namespace T3.Core.Output;
 /// Displays are matched by name first, index as fallback; a failed match must surface as
 /// explicitly unresolved, never silently re-matched.
 /// </summary>
-public sealed class DeviceBinding
+public sealed class PlugBinding
 {
     public static class Kinds
     {
@@ -35,7 +35,7 @@ public sealed class DeviceBinding
     /// <summary>Fallback when the name no longer matches (displays renamed/replugged).</summary>
     public int DisplayIndex;
 
-    public bool Fullscreen = true;
+    public bool IsFullscreen = true;
 
     public void WriteToJson(JsonTextWriter writer)
     {
@@ -47,20 +47,20 @@ public sealed class DeviceBinding
 
         writer.WriteString("DisplayName", DisplayName);
         writer.WriteValue("DisplayIndex", DisplayIndex);
-        writer.WriteValue("Fullscreen", Fullscreen);
+        writer.WriteValue("Fullscreen", IsFullscreen);
         writer.WriteEndObject();
     }
 
-    public static DeviceBinding ReadFromJson(JToken token)
+    public static PlugBinding ReadFromJson(JToken token)
     {
-        return new DeviceBinding
+        return new PlugBinding
                    {
                        OutputId = OutputJson.ReadGuid(token["OutputId"]),
                        Kind = token.ReadValueSafe("Kind", Kinds.Display) ?? Kinds.Display,
                        PlugId = token["PlugId"] == null ? Guid.Empty : OutputJson.ReadGuid(token["PlugId"]),
                        DisplayName = token.ReadValueSafe("DisplayName", string.Empty) ?? string.Empty,
                        DisplayIndex = token.ReadValueSafe("DisplayIndex", 0),
-                       Fullscreen = token.ReadValueSafe("Fullscreen", true),
+                       IsFullscreen = token.ReadValueSafe("Fullscreen", true),
                    };
     }
 }

@@ -12,15 +12,15 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 internal static class SetupRelations
 {
     /// <summary>One neighbour of an entity: a consumer sits downstream, a producer upstream.</summary>
-    internal readonly record struct Relation(SetupEntitySelection.EntityKinds Kind, Guid Id, bool IsConsumer);
+    internal readonly record struct Relation(SetupEntityKinds Kind, Guid Id, bool IsConsumer);
 
     /// <summary>Every entity directly related to <paramref name="kind"/>/<paramref name="id"/>, both directions, into <paramref name="into"/>.</summary>
-    public static void CollectRelated(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id, List<Relation> into)
+    public static void CollectRelated(Setup setup, SetupEntityKinds kind, Guid id, List<Relation> into)
     {
         into.Clear();
         switch (kind)
         {
-            case SetupEntitySelection.EntityKinds.Surface:
+            case SetupEntityKinds.Surface:
             {
                 var surface = setup.FindSurface(id);
                 if (surface == null)
@@ -30,14 +30,14 @@ internal static class SetupRelations
                 AddSourceOfSlice(setup, surface.SliceId, into);
                 break;
             }
-            case SetupEntitySelection.EntityKinds.Output:
+            case SetupEntityKinds.Output:
             {
                 foreach (var surface in setup.Surfaces)
                 {
                     if (!IsMappedTo(surface, id))
                         continue;
 
-                    into.Add(new Relation(SetupEntitySelection.EntityKinds.Surface, surface.Id, false));
+                    into.Add(new Relation(SetupEntityKinds.Surface, surface.Id, false));
                     AddSourceOfSlice(setup, surface.SliceId, into); // the feed behind each mapped surface
                 }
 
@@ -50,7 +50,7 @@ internal static class SetupRelations
 
                 break;
             }
-            case SetupEntitySelection.EntityKinds.Patch:
+            case SetupEntityKinds.Patch:
             {
                 var patch = setup.FindPatch(id, out _);
                 if (patch != null)
@@ -58,7 +58,7 @@ internal static class SetupRelations
 
                 break;
             }
-            case SetupEntitySelection.EntityKinds.ContentSource:
+            case SetupEntityKinds.ContentSource:
             {
                 var source = setup.FindSourceByChildId(id);
                 if (source != null)
@@ -66,16 +66,16 @@ internal static class SetupRelations
 
                 break;
             }
-            case SetupEntitySelection.EntityKinds.Slice:
+            case SetupEntityKinds.Slice:
                 AddConsumersOfSlice(setup, id, into);
                 break;
 
-            case SetupEntitySelection.EntityKinds.ReferenceImage:
+            case SetupEntityKinds.ReferenceImage:
             {
                 foreach (var surface in setup.Surfaces)
                 {
-                    if (surface.Reference != null && surface.Reference.ImageId == id)
-                        into.Add(new Relation(SetupEntitySelection.EntityKinds.Surface, surface.Id, true));
+                    if (surface.Trace != null && surface.Trace.ImageId == id)
+                        into.Add(new Relation(SetupEntityKinds.Surface, surface.Id, true));
                 }
 
                 break;
@@ -88,30 +88,30 @@ internal static class SetupRelations
     /// <paramref name="targetKind"/>/<paramref name="targetId"/> — the slice a surface, patch or output shows,
     /// or the content source a slice belongs to.
     /// </summary>
-    public static bool IsDirectSourceOf(Setup setup, SetupEntitySelection.EntityKinds targetKind, Guid targetId,
-                                        SetupEntitySelection.EntityKinds kind, Guid id)
+    public static bool IsDirectSourceOf(Setup setup, SetupEntityKinds targetKind, Guid targetId,
+                                        SetupEntityKinds kind, Guid id)
     {
         if (id == Guid.Empty)
             return false;
 
         switch (targetKind)
         {
-            case SetupEntitySelection.EntityKinds.Surface:
+            case SetupEntityKinds.Surface:
                 var surface = setup.FindSurface(targetId);
-                return surface != null && kind == SetupEntitySelection.EntityKinds.Slice && surface.SliceId == id;
+                return surface != null && kind == SetupEntityKinds.Slice && surface.SliceId == id;
 
-            case SetupEntitySelection.EntityKinds.Output:
+            case SetupEntityKinds.Output:
                 var output = setup.FindOutput(targetId);
-                return output != null && kind == SetupEntitySelection.EntityKinds.Slice && OutputShowsSlice(output, id);
+                return output != null && kind == SetupEntityKinds.Slice && OutputShowsSlice(output, id);
 
-            case SetupEntitySelection.EntityKinds.Patch:
+            case SetupEntityKinds.Patch:
                 var patch = setup.FindPatch(targetId, out _);
-                return patch != null && kind == SetupEntitySelection.EntityKinds.Slice && patch.SliceId == id;
+                return patch != null && kind == SetupEntityKinds.Slice && patch.SliceId == id;
 
-            case SetupEntitySelection.EntityKinds.Slice:
+            case SetupEntityKinds.Slice:
                 var slice = setup.FindSlice(targetId);
                 var source = slice == null ? null : setup.FindSource(slice.SourceId);
-                return source != null && kind == SetupEntitySelection.EntityKinds.ContentSource && source.SymbolChildId == id;
+                return source != null && kind == SetupEntityKinds.ContentSource && source.SymbolChildId == id;
 
             default:
                 return false;
@@ -150,28 +150,28 @@ internal static class SetupRelations
     /// surface name theirs, a slice and a send are traced through whatever shows them. Lets a view offer the
     /// projector a selection *leads to* — picking it is then a matter of selecting that output.
     /// </summary>
-    public static bool TryGetOutputOf(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id, out Guid outputId)
+    public static bool TryGetOutputOf(Setup setup, SetupEntityKinds kind, Guid id, out Guid outputId)
     {
         outputId = Guid.Empty;
         switch (kind)
         {
-            case SetupEntitySelection.EntityKinds.Output:
+            case SetupEntityKinds.Output:
                 if (setup.FindOutput(id) == null)
                     return false;
 
                 outputId = id;
                 return true;
 
-            case SetupEntitySelection.EntityKinds.Patch:
+            case SetupEntityKinds.Patch:
                 return TryGetPatchOutput(setup, id, out outputId);
 
-            case SetupEntitySelection.EntityKinds.Surface:
+            case SetupEntityKinds.Surface:
                 return TryGetSurfaceOutput(setup, id, out outputId);
 
-            case SetupEntitySelection.EntityKinds.Slice:
+            case SetupEntityKinds.Slice:
                 return TryGetSliceOutput(setup, id, out outputId);
 
-            case SetupEntitySelection.EntityKinds.ContentSource:
+            case SetupEntityKinds.ContentSource:
                 return TryGetSendOutput(setup, id, out outputId);
 
             default:
@@ -184,22 +184,22 @@ internal static class SetupRelations
     /// A patch has none — it is the surface-less pipe — and neither has an output, whose surfaces are picked
     /// on its own canvas.
     /// </summary>
-    public static bool TryGetSurfaceOf(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id, out Guid surfaceId)
+    public static bool TryGetSurfaceOf(Setup setup, SetupEntityKinds kind, Guid id, out Guid surfaceId)
     {
         surfaceId = Guid.Empty;
         switch (kind)
         {
-            case SetupEntitySelection.EntityKinds.Surface:
+            case SetupEntityKinds.Surface:
                 if (setup.FindSurface(id) == null)
                     return false;
 
                 surfaceId = id;
                 return true;
 
-            case SetupEntitySelection.EntityKinds.Slice:
+            case SetupEntityKinds.Slice:
                 return TryGetSurfaceShowing(setup, id, out surfaceId);
 
-            case SetupEntitySelection.EntityKinds.ContentSource:
+            case SetupEntityKinds.ContentSource:
                 var source = setup.FindSourceByChildId(id);
                 if (source == null)
                     return false;
@@ -560,7 +560,7 @@ internal static class SetupRelations
             if (surface.OutputMappings.Count > 0)
             {
                 foreach (var mapping in surface.OutputMappings)
-                    into.Add(new Relation(SetupEntitySelection.EntityKinds.Output, mapping.OutputId, true));
+                    into.Add(new Relation(SetupEntityKinds.Output, mapping.OutputId, true));
 
                 return;
             }
@@ -579,11 +579,11 @@ internal static class SetupRelations
         if (sliceId == Guid.Empty)
             return;
 
-        into.Add(new Relation(SetupEntitySelection.EntityKinds.Slice, sliceId, false));
+        into.Add(new Relation(SetupEntityKinds.Slice, sliceId, false));
         var slice = setup.FindSlice(sliceId);
         var source = slice == null ? null : setup.FindSource(slice.SourceId);
         if (source != null)
-            into.Add(new Relation(SetupEntitySelection.EntityKinds.ContentSource, source.SymbolChildId, false));
+            into.Add(new Relation(SetupEntityKinds.ContentSource, source.SymbolChildId, false));
     }
 
     /// <summary>Surfaces and patches showing any slice of this source — consumers.</summary>
@@ -592,7 +592,7 @@ internal static class SetupRelations
         foreach (var surface in setup.Surfaces)
         {
             if (IsSliceOf(setup, surface.SliceId, sourceId))
-                into.Add(new Relation(SetupEntitySelection.EntityKinds.Surface, surface.Id, true));
+                into.Add(new Relation(SetupEntityKinds.Surface, surface.Id, true));
         }
 
         foreach (var output in setup.Outputs)
@@ -600,7 +600,7 @@ internal static class SetupRelations
             foreach (var patch in output.Patches)
             {
                 if (IsSliceOf(setup, patch.SliceId, sourceId))
-                    into.Add(new Relation(SetupEntitySelection.EntityKinds.Patch, patch.Id, true));
+                    into.Add(new Relation(SetupEntityKinds.Patch, patch.Id, true));
             }
         }
     }
@@ -611,7 +611,7 @@ internal static class SetupRelations
         foreach (var surface in setup.Surfaces)
         {
             if (surface.SliceId == sliceId)
-                into.Add(new Relation(SetupEntitySelection.EntityKinds.Surface, surface.Id, true));
+                into.Add(new Relation(SetupEntityKinds.Surface, surface.Id, true));
         }
 
         foreach (var output in setup.Outputs)
@@ -619,7 +619,7 @@ internal static class SetupRelations
             foreach (var patch in output.Patches)
             {
                 if (patch.SliceId == sliceId)
-                    into.Add(new Relation(SetupEntitySelection.EntityKinds.Patch, patch.Id, true));
+                    into.Add(new Relation(SetupEntityKinds.Patch, patch.Id, true));
             }
         }
     }

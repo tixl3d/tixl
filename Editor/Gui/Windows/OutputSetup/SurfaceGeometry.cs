@@ -39,7 +39,6 @@ internal static class SurfaceGeometry
         return [new Vector2(min.X, max.Y), max, new Vector2(max.X, min.Y), min];
     }
 
-    /// <summary>The projection carrying the surface's own space into this mapping's output pixels.</summary>
     /// <summary>The pixel size of the canvas a mapping lands on — what its stored 0..1 quad is measured
     /// against wherever the editor works in output pixels.</summary>
     public static Vector2 CanvasSizeOf(Setup setup, Guid outputId)
@@ -114,7 +113,7 @@ internal static class SurfaceGeometry
     /// needs the projection (straightening, framing, editing) has to work from its carrier instead.
     /// Null when nothing in the chain is mapped to the output.
     /// </summary>
-    public static Surface? FindCarrier(Setup setup, Guid surfaceId, Guid outputId)
+    public static Surface? FindMappingCarrier(Setup setup, Guid surfaceId, Guid outputId)
     {
         if (surfaceId == Guid.Empty)
             return null;
@@ -136,14 +135,14 @@ internal static class SurfaceGeometry
     }
 
     /// <summary>A Layout child's rectangle in its parent's space — its stored bottom-left plus its size.</summary>
-    public static void ChildBounds(Surface child, out Vector2 min, out Vector2 max)
+    public static void RegionBounds(Surface child, out Vector2 min, out Vector2 max)
     {
         min = child.LocalPosition;
         max = min + child.SizeInMeters;
     }
 
-    /// <summary>Writes a child's rectangle back from bounds in the parent's space — the inverse of <see cref="ChildBounds"/>.</summary>
-    public static void SetChildBounds(Surface child, Vector2 min, Vector2 max)
+    /// <summary>Writes a child's rectangle back from bounds in the parent's space — the inverse of <see cref="RegionBounds"/>.</summary>
+    public static void SetRegionBounds(Surface child, Vector2 min, Vector2 max)
     {
         child.SizeInMeters = new Vector2(MathF.Max(max.X - min.X, MinSize), MathF.Max(max.Y - min.Y, MinSize));
         child.LocalPosition = min;
@@ -157,7 +156,7 @@ internal static class SurfaceGeometry
     /// immediate parent's origin (anchor) in carrier space — what converts a cursor back into the space edits
     /// live in.
     /// </summary>
-    public static bool TryGetDescendantRect(Setup setup, Surface carrier, Surface child,
+    public static bool TryGetRegionRect(Setup setup, Surface carrier, Surface child,
                                             out Vector2 min, out Vector2 max, out Vector2 parentOrigin)
     {
         min = max = parentOrigin = Vector2.Zero;
@@ -187,7 +186,7 @@ internal static class SurfaceGeometry
         for (var i = _chainScratch.Count - 1; i >= 0; i--)
         {
             var current = _chainScratch[i];
-            ChildBounds(current, out var localMin, out var localMax);
+            RegionBounds(current, out var localMin, out var localMax);
             parentOrigin = origin;
             min = origin + localMin;
             max = origin + localMax;
@@ -199,12 +198,12 @@ internal static class SurfaceGeometry
     }
 
     /// <param name="quad">Caller-owned buffer of at least 4 entries — this runs per frame, so it doesn't allocate.</param>
-    public static bool TryGetChildQuad(Setup setup, Surface carrier, Surface child, Surface.OutputMapping carrierMapping,
+    public static bool TryGetRegionQuad(Setup setup, Surface carrier, Surface child, Surface.OutputMapping carrierMapping,
                                        Vector2 canvasSize, Vector2[] quad)
     {
         if (quad.Length < 4
             || !TryGetSurfaceToOutput(carrier, carrierMapping, canvasSize, out var surfaceToOutput)
-            || !TryGetDescendantRect(setup, carrier, child, out var min, out var max, out _))
+            || !TryGetRegionRect(setup, carrier, child, out var min, out var max, out _))
             return false;
 
         quad[0] = surfaceToOutput.TransformPoint(new Vector2(min.X, max.Y));
@@ -234,7 +233,7 @@ internal static class SurfaceGeometry
             if (sibling.ParentId != parent.Id || sibling.Id == excludeId)
                 continue;
 
-            ChildBounds(sibling, out var min, out var max);
+            RegionBounds(sibling, out var min, out var max);
             AddEdgesAndCentre(xs, ys, min, max);
         }
     }

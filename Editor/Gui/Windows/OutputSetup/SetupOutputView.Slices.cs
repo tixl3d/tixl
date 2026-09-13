@@ -36,7 +36,7 @@ internal sealed partial class SetupOutputView
         foreach (var surface in setup.Surfaces)
         {
             if (surface.SliceId == sliceId)
-                pulse = MathF.Max(pulse, FrameStats.GetPulse(surface.Id));
+                pulse = MathF.Max(pulse, FrameStats.CrossHighlightAmount(surface.Id));
         }
 
         foreach (var output in setup.Outputs)
@@ -44,7 +44,7 @@ internal sealed partial class SetupOutputView
             foreach (var patch in output.Patches)
             {
                 if (patch.SliceId == sliceId)
-                    pulse = MathF.Max(pulse, FrameStats.GetPulse(patch.Id));
+                    pulse = MathF.Max(pulse, FrameStats.CrossHighlightAmount(patch.Id));
             }
         }
 
@@ -57,7 +57,7 @@ internal sealed partial class SetupOutputView
         foreach (var surface in setup.Surfaces)
         {
             if (surface.SliceId == sliceId)
-                FrameStats.PulseItemWithId(surface.Id);
+                FrameStats.RequestCrossHighlight(surface.Id);
         }
 
         foreach (var output in setup.Outputs)
@@ -65,7 +65,7 @@ internal sealed partial class SetupOutputView
             foreach (var patch in output.Patches)
             {
                 if (patch.SliceId == sliceId)
-                    FrameStats.PulseItemWithId(patch.Id);
+                    FrameStats.RequestCrossHighlight(patch.Id);
             }
         }
     }
@@ -117,12 +117,6 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// At the Content end the view has zoomed out onto the whole source, so the slice becomes a plain
-    /// axis-aligned rect on it — draggable by its edges, moveable by its middle, snapping to the source's own
-    /// bounds. Edits go straight to the send's SourceRect. No perspective is involved here: the source is
-    /// shown flat, which is exactly why slices are edited at this end and not on the wall.
-    /// </summary>
-    /// <summary>
     /// The slice as an editable rect on its source, in plain canvas space: edges reshape, corners scale with
     /// the aspect held, the middle moves it, everything snapping to the source's borders and midlines. Shared
     /// by the surface's Content view and the source view, which differ only in framing.
@@ -147,7 +141,7 @@ internal sealed partial class SetupOutputView
 
         // No tint inside: the crop now reads from the dimmed surround, and colouring the content would work
         // against judging it.
-        dl.AddRect(min, max, SetupColors.ForKind(SetupEntitySelection.EntityKinds.Slice), 0, ImDrawFlags.None, 2 * T3Ui.UiScaleFactor);
+        dl.AddRect(min, max, SetupColors.ForKind(SetupEntityKinds.Slice), 0, ImDrawFlags.None, 2 * T3Ui.UiScaleFactor);
 
 
         // Canvas space, like every other handle — the projection subtracts the framing origin itself.
@@ -159,7 +153,7 @@ internal sealed partial class SetupOutputView
         _sliceQuadBuffer[3] = new Vector2(sliceMin.X, sliceMax.Y);
 
         ImGui.PushID("slice");
-        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
+        var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
         var edgePhase = CornerPinHandles.DrawEdgeHandles(_sliceQuadBuffer, _projection, style, out var edge, out var edgePos);
 
         // The slice's name label doubles as its move handle, the same as a surface — so there's no separate
@@ -170,7 +164,7 @@ internal sealed partial class SetupOutputView
         labelCorners[2] = max;
         labelCorners[3] = new Vector2(min.X, max.Y);
         var sliceName = SetupActions.SliceLabel(setup, slice);
-        DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Slice, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
+        DrawEntityLabel(dl, SetupEntityKinds.Slice, labelCorners, slice.Id, sliceName, isSelected: true, emphasis: 1f);
         DrawSliceConsumers(dl, setup, slice.Id, CornerPinHandles.GetCenteredLabelRect(labelCorners, sliceName), 0.9f);
         if (ImGui.IsWindowHovered() && IsMouseInRect(min, max))
             PulseConsumers(setup, slice.Id);
@@ -525,7 +519,7 @@ internal sealed partial class SetupOutputView
     private (Vector2 Origin, Vector4 Uv)? _sliceMoveStart;
 
     // Sends cutting from the same source — rebuilt per frame in the source view.
-    private readonly List<(Guid ChildId, IOutputSink Sink, Vector4 SourceRect)> _sharingSinks = [];
+    private readonly List<(Guid ChildId, IContentSupplier Supplier, Vector4 SourceRect)> _sharingSinks = [];
 
     // The source's own borders and centre, in UV — what a slice snaps against.
     private static readonly List<float> _sliceSnapXs = [];

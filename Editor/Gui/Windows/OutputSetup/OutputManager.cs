@@ -29,7 +29,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Composites the content bound to a setup output. Walking the active setup's surfaces, it pulls each
-/// surface's content from the registered <see cref="IOutputSink"/> (SendToOutput), corner-pin warps the
+/// surface's content from the registered <see cref="IContentSupplier"/> (SendToOutput), corner-pin warps the
 /// surface's source slice into the output's own render target, and returns the composite texture. The
 /// send ops never draw — the drawing lives here, in one place. Content is pulled once per send op (cached), so
 /// several surfaces slicing one image cost a single upstream evaluation.
@@ -56,15 +56,15 @@ internal static class OutputManager
         // Streams send regardless of the second window; the display path below yields to the UI mirror.
         var mirrorUi = UserSettings.Config.MirrorUiOnSecondView;
         OutputDefinition? boundOutput = null;
-        DeviceBinding? binding = null;
+        PlugBinding? binding = null;
         _activeStreamPlugs.Clear();
         foreach (var output in setup.Outputs)
         {
             // Send=false pauses presenting this output without dropping its binding.
-            if (!output.Send)
+            if (!output.IsSending)
                 continue;
 
-            var candidate = machineConfig.TryGetBinding(output.Id);
+            var candidate = machineConfig.FindBinding(output.Id);
             if (candidate == null)
                 continue;
 
@@ -118,9 +118,9 @@ internal static class OutputManager
     /// Pushes an output's composite into its stream sender, opening (or re-opening after a rename) the sender
     /// from the plug's provider. A plug whose package isn't loaded sends nothing and keeps its binding.
     /// </summary>
-    private static void SendToStream(MachineConfig machineConfig, OutputDefinition output, DeviceBinding binding)
+    private static void SendToStream(MachineConfig machineConfig, OutputDefinition output, PlugBinding binding)
     {
-        var stream = machineConfig.FindStream(binding.PlugId);
+        var stream = machineConfig.FindStreamPlug(binding.PlugId);
         if (stream == null)
             return;
 
@@ -142,7 +142,7 @@ internal static class OutputManager
 
         if (slot == null)
         {
-            slot = new StreamSlot(stream.Name, provider, provider.CreateSender(stream.Name));
+            slot = new OpenStream(stream.Name, provider, provider.CreateSender(stream.Name));
             _streamSenders[stream.Id] = slot;
         }
 
@@ -226,12 +226,12 @@ internal static class OutputManager
         _streamSenders.Clear();
     }
 
-    private sealed record StreamSlot(string Name, IOutputStreamProvider Provider, IOutputStreamSender Sender)
+    private sealed record OpenStream(string Name, IOutputStreamProvider Provider, IOutputStreamSender Sender)
     {
         public string? LastError;
     }
 
-    private static readonly Dictionary<Guid, StreamSlot> _streamSenders = [];
+    private static readonly Dictionary<Guid, OpenStream> _streamSenders = [];
     private static readonly HashSet<Guid> _activeStreamPlugs = [];
     private static readonly List<Guid> _staleStreamPlugs = [];
 
@@ -243,7 +243,7 @@ internal static class OutputManager
     public static Texture2D? TryGetOutputContent(Guid outputId)
     {
         var setup = ActiveSetup.Current;
-        var output = ActiveSetup.TryFindOutput(outputId);
+        var output = ActiveSetup.FindOutput(outputId);
         if (setup == null || output == null)
             return null;
 
@@ -300,11 +300,11 @@ internal static class OutputManager
         _invalidatedContentFrame = frame;
 
         DirtyFlag.GlobalInvalidationTick++;
-        foreach (var sink in OutputSinkRegistry.Sinks)
+        foreach (var supplier in ContentSupplierRegistry.Suppliers)
         {
             // Update=false freezes this content at its last frame — skip its invalidation.
-            if (sink.GetUpdateEnabled(context))
-                sink.InvalidateContent();
+            if (supplier.GetUpdateEnabled(context))
+                supplier.InvalidateContent();
         }
     }
 
@@ -316,7 +316,7 @@ internal static class OutputManager
     public static Texture2D? RenderOutput(Guid outputId)
     {
         var setup = ActiveSetup.Current;
-        var output = ActiveSetup.TryFindOutput(outputId);
+        var output = ActiveSetup.FindOutput(outputId);
         if (setup == null || output == null)
             return null;
 
@@ -352,25 +352,25 @@ internal static class OutputManager
 
         foreach (var surface in setup.Surfaces)
         {
-            if (!surface.Render)
+            if (!surface.IsRendered)
                 continue;
 
             // A Layout child usually rides an ancestor's corner pin, so the mappings to walk (and the quad each
             // one yields) come from that ancestor. Regions nest arbitrarily deep, so walk up to whichever one
             // actually holds the pin — which is the region itself when it carries an override mapping.
             var carrier = surface;
-            if (surface.Kind == T3.Core.Output.Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
+            if (surface.Kind == T3.Core.Output.Surface.Kinds.Layout && surface.ParentId != Guid.Empty)
             {
-                carrier = SurfaceGeometry.FindCarrier(setup, surface.Id, outputId);
-                if (carrier == null || !carrier.Render)
+                carrier = SurfaceGeometry.FindMappingCarrier(setup, surface.Id, outputId);
+                if (carrier == null || !carrier.IsRendered)
                     continue;
             }
 
-            TryResolveSurfaceContent(setup, surface, out var sink, out var resolvedRect);
-            var content = sink == null ? null : PullContent(sink);
+            TryResolveSurfaceContent(setup, surface, out var supplier, out var resolvedRect);
+            var content = supplier == null ? null : PullContent(supplier);
             var srv = content is { IsDisposed: false } ? SrvManager.GetSrvForTexture(content) : null;
             var hasContent = srv is { IsDisposed: false };
-            var color = hasContent ? sink!.GetColor(_context) : Vector4.One;
+            var color = hasContent ? supplier!.GetColor(_context) : Vector4.One;
             var sourceRect = hasContent ? resolvedRect : _fullSourceRect;
 
             // While a surface is being calibrated against its photo, a disc of the photo is projected around each
@@ -397,7 +397,7 @@ internal static class OutputManager
                     // Buffer is consumed by TryComputeNdcHomography before the next iteration reuses it, and
                     // that wants the canvas' 0..1 space — Vector2.One keeps the child's quad in it, where a
                     // pixel size would hand it canvas pixels and throw the region off the canvas entirely.
-                    if (!SurfaceGeometry.TryGetChildQuad(setup, carrier, surface, mapping, Vector2.One, _childQuadBuffer))
+                    if (!SurfaceGeometry.TryGetRegionQuad(setup, carrier, surface, mapping, Vector2.One, _childQuadBuffer))
                         continue;
 
                     quad = _childQuadBuffer;
@@ -440,7 +440,7 @@ internal static class OutputManager
 
         // A stream sender reads the composite back as 8-bit pixels (NDI accepts nothing else), so a stream-bound
         // output composites straight into that; displays keep the float target for the blit.
-        var isStreamBound = ActiveSetup.Machine?.TryGetBinding(outputId) is { IsStream: true };
+        var isStreamBound = ActiveSetup.Machine?.FindBinding(outputId) is { IsStream: true };
         var target = GetOrCreateTarget(outputId, output.ResolvedResolution,
                                        isStreamBound ? Format.B8G8R8A8_UNorm : Format.R16G16B16A16_Float);
         if (target == null)
@@ -609,7 +609,7 @@ internal static class OutputManager
                 var p = hasAim ? aim.Position * canvasSize : surfaceToOutput.TransformPoint(annotation.P1);
 
                 var arm = (isEmphasizedPoint ? _pointCrosshairSize * 1.5f : _pointCrosshairSize) * 0.5f;
-                var baseColor = hasAim && aim.Aimed ? _pointColor : _pointColor * new Vector4(0.6f, 0.6f, 0.6f, 1);
+                var baseColor = hasAim && aim.IsAimed ? _pointColor : _pointColor * new Vector4(0.6f, 0.6f, 0.6f, 1);
                 var pointColor = isEmphasizedPoint ? Vector4.Lerp(baseColor, white, blink) : baseColor;
                 var pointWidth = new Vector4(isEmphasizedPoint ? _aimLineWidth * 2f : _aimLineWidth, 0, 0, 0);
                 _overlayLines.Add(new OverlayLine(new Vector4(p.X - arm, p.Y, p.X + arm, p.Y), pointColor, pointWidth));
@@ -797,7 +797,7 @@ internal static class OutputManager
     }
 
     /// <summary>Pulls a send's content and notes the texture as produced this frame (see <see cref="WasContentPulledThisFrame"/>).</summary>
-    private static Texture2D? PullContent(IOutputSink sink)
+    private static Texture2D? PullContent(IContentSupplier supplier)
     {
         var frame = ImGui.GetFrameCount();
         if (frame != _pulledFrame)
@@ -806,12 +806,12 @@ internal static class OutputManager
             _pulledContent.Clear();
         }
 
-        var content = sink.GetContent(_context!);
+        var content = supplier.GetContent(_context!);
         if (content is { IsDisposed: false })
             _pulledContent.Add(content);
 
         // What this send was asked for, so it can warn when two outputs disagree about its size.
-        if (sink is Instance instance)
+        if (supplier is Instance instance)
             OutputContentStats.NotePull(instance.SymbolChildId, _context!.RequestedResolution, frame);
 
         return content;
@@ -821,16 +821,16 @@ internal static class OutputManager
     private static int _pulledFrame = -1;
 
     /// <summary>The live texture a content source resolves to, if its op is currently instantiated.</summary>
-    public static bool TryGetSourceContent(Guid symbolChildId, out IOutputSink? sink, out Texture2D? content)
+    public static bool TryGetSourceContent(Guid symbolChildId, out IContentSupplier? supplier, out Texture2D? content)
     {
         content = null;
-        sink = FindSendByChildId(symbolChildId);
+        supplier = FindSendByChildId(symbolChildId);
         var setup = ActiveSetup.Current;
-        if (sink == null || setup == null)
+        if (supplier == null || setup == null)
             return false;
 
         PrepareContext(RequestedResolutionFor(setup, symbolChildId));
-        content = PullContent(sink);
+        content = PullContent(supplier);
         return content is { IsDisposed: false };
     }
 
@@ -924,9 +924,9 @@ internal static class OutputManager
     /// A slice's live send op and its uv rect: <c>Slice → SourceId → ContentSource → SymbolChildId → op</c>.
     /// Routing is setup data, so it survives the op being re-instantiated.
     /// </summary>
-    private static bool TryResolveSliceContent(Setup setup, Guid sliceId, out IOutputSink? sink, out Vector4 sourceRect)
+    private static bool TryResolveSliceContent(Setup setup, Guid sliceId, out IContentSupplier? supplier, out Vector4 sourceRect)
     {
-        sink = null;
+        supplier = null;
         sourceRect = _fullSourceRect;
         if (sliceId == Guid.Empty)
             return false;
@@ -936,22 +936,22 @@ internal static class OutputManager
         if (source == null)
             return false;
 
-        sink = FindSendByChildId(source.SymbolChildId);
+        supplier = FindSendByChildId(source.SymbolChildId);
         sourceRect = slice!.UvRect;
-        return sink != null;
+        return supplier != null;
     }
 
-    private static bool TryResolveSurfaceContent(Setup setup, T3.Core.Output.Surface surface, out IOutputSink? sink, out Vector4 sourceRect)
+    private static bool TryResolveSurfaceContent(Setup setup, T3.Core.Output.Surface surface, out IContentSupplier? supplier, out Vector4 sourceRect)
     {
-        return TryResolveSliceContent(setup, surface.SliceId, out sink, out sourceRect);
+        return TryResolveSliceContent(setup, surface.SliceId, out supplier, out sourceRect);
     }
 
-    private static IOutputSink? FindSendByChildId(Guid childId)
+    private static IContentSupplier? FindSendByChildId(Guid childId)
     {
-        foreach (var sink in OutputSinkRegistry.Sinks)
+        foreach (var supplier in ContentSupplierRegistry.Suppliers)
         {
-            if (sink is Instance instance && instance.SymbolChildId == childId)
-                return sink;
+            if (supplier is Instance instance && instance.SymbolChildId == childId)
+                return supplier;
         }
 
         return null;

@@ -12,7 +12,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// The output-editing side of an output window. There is no explicit Operator/Setup mode — the window
-/// follows focus: a focused <see cref="IOutputSink"/> (SendToOutput) op shows its output's editing
+/// follows focus: a focused <see cref="IContentSupplier"/> (SendToOutput) op shows its output's editing
 /// canvas, and a picked panel entity shows that entity. Selecting any op in the graph drops a panel
 /// edit (graph selection wins). Owns the Flow Outliner; the entity selection is the one instance shared
 /// by all output windows (<see cref="OutputSetupHandling.EntitySelection"/>) — what stays per window
@@ -119,7 +119,7 @@ internal sealed class OutputSetupModeView
     }
 
     /// <summary>Whether the strip is shown — and with it hosts the canvas' toolbar, so the window's own goes.</summary>
-    public bool HeaderInStrip => _showOutliner;
+    public bool IsHeaderHostedByStrip => _showOutliner;
 
     /// <summary>
     /// Draws an output-editing view if one applies to the current focus, and returns true; returns false
@@ -136,15 +136,15 @@ internal sealed class OutputSetupModeView
         var focusedId = selectedInGraph?.SymbolChildId ?? Guid.Empty;
         var graphOwnsInspection = GlobalSelectionHandling.InspectionTarget == GlobalSelectionHandling.InspectionTargets.GraphNode;
         var focusTransition = focusedId != _lastFocusedId || !_graphOwnedInspection;
-        if (graphOwnsInspection && selectedInGraph is IOutputSink
-            && (focusTransition || !_entitySelection.IsSelected(SetupEntitySelection.EntityKinds.ContentSource, focusedId)))
+        if (graphOwnsInspection && selectedInGraph is IContentSupplier
+            && (focusTransition || !_entitySelection.IsSelected(SetupEntityKinds.ContentSource, focusedId)))
         {
             // The graph pick already cleared the entity selection; a focused SendToOutput mirrors back as its
             // CONTENT row so the canvas opens on its slices. Not only on the transition: re-picking the same
             // send (a second click on its row reveals it in the graph again) clears the row the same way and
             // must land back on it. With several output windows each runs this on the same frame — the writes
             // are identical, so the repetition is harmless.
-            _entitySelection.Mirror(SetupEntitySelection.EntityKinds.ContentSource, focusedId);
+            _entitySelection.Mirror(SetupEntityKinds.ContentSource, focusedId);
         }
 
         if (graphOwnsInspection && focusTransition)
@@ -152,12 +152,12 @@ internal sealed class OutputSetupModeView
             // The outliner follows the OE-editing context: a focused SendToOutput opens it (its surfaces/outputs are
             // at hand); selecting any other op — or clicking the graph background — closes it. Only on the
             // transition, so it can still be toggled manually while the focus stays put.
-            _showOutliner = selectedInGraph is IOutputSink;
+            _showOutliner = selectedInGraph is IContentSupplier;
         }
 
         _lastFocusedId = focusedId;
         _graphOwnedInspection = graphOwnsInspection;
-        _outputView.HeaderHostedByStrip = _showOutliner;
+        _outputView.IsHeaderHostedByStrip = _showOutliner;
 
         if (TryGetShownEntity(out var entityKind, out var entityId) && OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
         {
@@ -168,22 +168,22 @@ internal sealed class OutputSetupModeView
             if (openedImageId != Guid.Empty && IsInReferenceSpace(setup, openedImageId, entityKind, entityId))
                 // The image's space stays open while the selection moves between it and the surfaces traced on it.
                 _outputView.DrawReferenceCanvas(openedImageId, _entitySelection);
-            else if (entityKind == SetupEntitySelection.EntityKinds.Output)
+            else if (entityKind == SetupEntityKinds.Output)
                 // Pass the selection so a surface label on the canvas can still be clicked to select it, even
                 // though the shown entity is the output itself (no surface focused).
                 _outputView.Draw(entityId, selection: _entitySelection);
-            else if (entityKind == SetupEntitySelection.EntityKinds.Surface && SetupRelations.TryGetSurfaceOutput(setup, entityId, out var surfaceOutputId))
+            else if (entityKind == SetupEntityKinds.Surface && SetupRelations.TryGetSurfaceOutput(setup, entityId, out var surfaceOutputId))
                 _outputView.Draw(surfaceOutputId, entityId, _entitySelection); // labels on the canvas can re-pick
-            else if (entityKind == SetupEntitySelection.EntityKinds.Patch && SetupRelations.TryGetPatchOutput(setup, entityId, out var patchOutputId))
+            else if (entityKind == SetupEntityKinds.Patch && SetupRelations.TryGetPatchOutput(setup, entityId, out var patchOutputId))
                 _outputView.Draw(patchOutputId, selection: _entitySelection); // a patch lives on its output's canvas
-            else if (entityKind == SetupEntitySelection.EntityKinds.Surface)
+            else if (entityKind == SetupEntityKinds.Surface)
                 _outputView.DrawBoardStandalone(_entitySelection, entityId); // unmapped: the Board, or Straight on its photo
             else
                 _outputView.DrawBoardStandalone(_entitySelection);
         }
         else
         {
-            if (focusedInstance is not IOutputSink
+            if (focusedInstance is not IContentSupplier
                 || !OutputSetupHandling.TryGetActiveSetup(out var activeSetup, out _)
                 || !SetupRelations.TryGetSendOutput(activeSetup, focusedInstance.SymbolChildId, out var sendOutputId))
             {
@@ -239,13 +239,13 @@ internal sealed class OutputSetupModeView
         return true;
     }
 
-    private static bool TryFindEntityByName(Setup setup, string name, out SetupEntitySelection.EntityKinds kind, out Guid id)
+    private static bool TryFindEntityByName(Setup setup, string name, out SetupEntityKinds kind, out Guid id)
     {
         foreach (var surface in setup.Surfaces)
         {
             if (surface.Name == name)
             {
-                kind = SetupEntitySelection.EntityKinds.Surface;
+                kind = SetupEntityKinds.Surface;
                 id = surface.Id;
                 return true;
             }
@@ -255,7 +255,7 @@ internal sealed class OutputSetupModeView
         {
             if (output.Name == name)
             {
-                kind = SetupEntitySelection.EntityKinds.Output;
+                kind = SetupEntityKinds.Output;
                 id = output.Id;
                 return true;
             }
@@ -265,7 +265,7 @@ internal sealed class OutputSetupModeView
         {
             if (image.Name == name)
             {
-                kind = SetupEntitySelection.EntityKinds.ReferenceImage;
+                kind = SetupEntityKinds.ReferenceImage;
                 id = image.Id;
                 return true;
             }
@@ -275,12 +275,12 @@ internal sealed class OutputSetupModeView
         // addressing by name (the debug bridge drives the panel through this).
         if (OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig))
         {
-            foreach (var stream in machineConfig.Streams)
+            foreach (var stream in machineConfig.StreamPlugs)
             {
                 if (stream.Name != name)
                     continue;
 
-                kind = SetupEntitySelection.EntityKinds.Plug;
+                kind = SetupEntityKinds.Plug;
                 id = stream.Id;
                 return true;
             }
@@ -291,7 +291,7 @@ internal sealed class OutputSetupModeView
                 if (Plugs.DisplayLabel(i) != name)
                     continue;
 
-                kind = SetupEntitySelection.EntityKinds.Plug;
+                kind = SetupEntityKinds.Plug;
                 id = Plugs.DisplayPlugId(i);
                 return true;
             }
@@ -301,7 +301,7 @@ internal sealed class OutputSetupModeView
         {
             if (source.Name == name)
             {
-                kind = SetupEntitySelection.EntityKinds.ContentSource;
+                kind = SetupEntityKinds.ContentSource;
                 id = source.SymbolChildId;
                 return true;
             }
@@ -311,13 +311,13 @@ internal sealed class OutputSetupModeView
         {
             if (SetupActions.SliceLabel(setup, slice) == name)
             {
-                kind = SetupEntitySelection.EntityKinds.Slice;
+                kind = SetupEntityKinds.Slice;
                 id = slice.Id;
                 return true;
             }
         }
 
-        kind = SetupEntitySelection.EntityKinds.None;
+        kind = SetupEntityKinds.None;
         id = Guid.Empty;
         return false;
     }
@@ -343,20 +343,20 @@ internal sealed class OutputSetupModeView
         ImGui.SameLine();
     }
 
-    private static bool IsInReferenceSpace(Setup setup, Guid imageId, SetupEntitySelection.EntityKinds kind, Guid id)
+    private static bool IsInReferenceSpace(Setup setup, Guid imageId, SetupEntityKinds kind, Guid id)
     {
-        if (kind == SetupEntitySelection.EntityKinds.ReferenceImage)
+        if (kind == SetupEntityKinds.ReferenceImage)
             return id == imageId;
 
-        if (kind != SetupEntitySelection.EntityKinds.Surface)
+        if (kind != SetupEntityKinds.Surface)
             return false;
 
         // A region rides its traced ancestor's photo.
         var surface = setup.FindSurface(id);
         for (var guard = 0; surface != null && guard < 16; guard++)
         {
-            if (surface.Reference != null)
-                return surface.Reference.ImageId == imageId;
+            if (surface.Trace != null)
+                return surface.Trace.ImageId == imageId;
 
             if (surface.ParentId == Guid.Empty)
                 break;
@@ -368,9 +368,9 @@ internal sealed class OutputSetupModeView
         return false;
     }
 
-    private bool TryGetShownEntity(out SetupEntitySelection.EntityKinds kind, out Guid id)
+    private bool TryGetShownEntity(out SetupEntityKinds kind, out Guid id)
     {
-        kind = SetupEntitySelection.EntityKinds.None;
+        kind = SetupEntityKinds.None;
         id = Guid.Empty;
 
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
@@ -378,7 +378,7 @@ internal sealed class OutputSetupModeView
 
         // A pinned window ignores the shared selection for what it *shows* (highlights still follow).
         // A pin whose entity is gone silently reverts to following — same pruning rule the selection uses.
-        if (_pinnedKind != SetupEntitySelection.EntityKinds.None)
+        if (_pinnedKind != SetupEntityKinds.None)
         {
             if (SetupEntitySelection.Exists(setup, _pinnedKind, _pinnedId))
             {
@@ -396,7 +396,7 @@ internal sealed class OutputSetupModeView
     /// <summary>Pin menu entry for the breadcrumb: pins the currently shown entity, or releases the pin.</summary>
     public void DrawPinMenuItem()
     {
-        if (_pinnedKind != SetupEntitySelection.EntityKinds.None)
+        if (_pinnedKind != SetupEntityKinds.None)
         {
             if (CustomComponents.DrawMenuItem(_pinViewMenuId, $"Unpin view ({PinnedEntityName()})", isChecked: true))
                 ClearPin();
@@ -404,7 +404,7 @@ internal sealed class OutputSetupModeView
             return;
         }
 
-        if (!TryGetShownEntity(out var kind, out var id) || kind == SetupEntitySelection.EntityKinds.None)
+        if (!TryGetShownEntity(out var kind, out var id) || kind == SetupEntityKinds.None)
         {
             CustomComponents.DrawMenuItem(_pinViewMenuId, "Pin view", isEnabled: false);
             return;
@@ -421,7 +421,7 @@ internal sealed class OutputSetupModeView
     /// won't follow the selection. Clicking releases the pin.</summary>
     public void DrawPinIndicator()
     {
-        if (_pinnedKind == SetupEntitySelection.EntityKinds.None)
+        if (_pinnedKind == SetupEntityKinds.None)
             return;
 
         if (CustomComponents.IconButton(Icon.Pin, Vector2.Zero, CustomComponents.ButtonStates.Activated))
@@ -448,7 +448,7 @@ internal sealed class OutputSetupModeView
 
     private void ClearPin()
     {
-        _pinnedKind = SetupEntitySelection.EntityKinds.None;
+        _pinnedKind = SetupEntityKinds.None;
         _pinnedId = Guid.Empty;
     }
 
@@ -465,7 +465,7 @@ internal sealed class OutputSetupModeView
     private bool _graphOwnedInspection;
 
     // The per-window pin: None = follow the shared selection (persisted via OutputWindowState).
-    private SetupEntitySelection.EntityKinds _pinnedKind;
+    private SetupEntityKinds _pinnedKind;
     private Guid _pinnedId;
     private static readonly int _pinViewMenuId = nameof(_pinViewMenuId).GetHashCode();
 

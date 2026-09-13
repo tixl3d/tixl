@@ -11,10 +11,10 @@ namespace T3.Core.Output;
 
 /// <summary>
 /// A graph node that supplies pixels to the output setup. It does no drawing: it registers itself with the
-/// <see cref="OutputSinkRegistry"/> so the host's output manager can pull the content and composite it.
+/// <see cref="ContentSupplierRegistry"/> so the host's output manager can pull the content and composite it.
 /// Routing (which surface shows what) is setup data keyed to this op's SymbolChild, not state on the op.
 /// </summary>
-public interface IOutputSink
+public interface IContentSupplier
 {
     Vector4 GetColor(EvaluationContext context);
     Texture2D? GetContent(EvaluationContext context);
@@ -42,11 +42,11 @@ public interface IOutputSink
 }
 
 /// <summary>
-/// The set of live <see cref="IOutputSink"/> instances. Sinks add themselves on construction and
+/// The set of live <see cref="IContentSupplier"/> instances. Suppliers add themselves on construction and
 /// remove themselves on dispose, so the registry survives operator hot-reloads (which recreate the
 /// instances). Insertion order is preserved; the output manager resolves per output/surface.
 /// </summary>
-public static class OutputSinkRegistry
+public static class ContentSupplierRegistry
 {
     /// <summary>
     /// Bumped whenever membership changes. Lets hosts skip work that can only be invalidated by a send
@@ -54,22 +54,22 @@ public static class OutputSinkRegistry
     /// </summary>
     public static int Version { get; private set; }
 
-    public static void Register(IOutputSink sink)
+    public static void Register(IContentSupplier supplier)
     {
-        if (_sinks.Contains(sink))
+        if (_suppliers.Contains(supplier))
             return;
 
-        _sinks.Add(sink);
+        _suppliers.Add(supplier);
         Version++;
     }
 
-    public static void Unregister(IOutputSink sink)
+    public static void Unregister(IContentSupplier supplier)
     {
-        if (_sinks.Remove(sink))
+        if (_suppliers.Remove(supplier))
             Version++;
     }
 
-    public static IReadOnlyList<IOutputSink> Sinks => _sinks;
+    public static IReadOnlyList<IContentSupplier> Suppliers => _suppliers;
 
-    private static readonly List<IOutputSink> _sinks = [];
+    private static readonly List<IContentSupplier> _suppliers = [];
 }

@@ -27,8 +27,8 @@ internal sealed partial class SetupOutputView
     /// thinner than a mapped surface, and without handles, because it isn't independently editable — its shape
     /// comes from the parent's corner pin plus its own rectangle in the parent's space.
     /// </summary>
-    private void DrawChildRegion(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, Homography rToView,
-                                 Homography rToOutput, Vector2 viewMin,
+    private void DrawRegion(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, Homography rectifiedToView,
+                                 Homography rectifiedToOutput, Vector2 viewMin,
                                  Surface carrier, Surface.OutputMapping carrierMapping, Surface parent, Surface child,
                                  bool editable, float fade)
     {
@@ -39,23 +39,23 @@ internal sealed partial class SetupOutputView
 
         // Multi-selection styling only — editing and the anchor stay with the focused (primary) region.
         var isSelected = isFocused
-                         || (selection?.IsSelected(SetupEntitySelection.EntityKinds.Surface, child.Id) ?? false);
+                         || (selection?.IsSelected(SetupEntityKinds.Surface, child.Id) ?? false);
 
         // The child's quad (already derived into the buffer) carried into the framed canvas. Shares the
         // surface loop's view buffer: a child is drawn and done before its parent's iteration fills it.
         var viewQuad = _viewQuad;
         for (var c = 0; c < 4; c++)
-            viewQuad[c] = rToView.TransformPoint(_childQuadBuffer[c]) - viewMin;
+            viewQuad[c] = rectifiedToView.TransformPoint(_childQuadBuffer[c]) - viewMin;
 
         Span<Vector2> screen = stackalloc Vector2[4];
         for (var i = 0; i < 4; i++)
             screen[i] = _projection.CanvasToScreen(viewQuad[i]);
 
-        var style = CornerPinHandles.Style.ForSurface(child.Name, editable && isFocused, isSelected, fade, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
-        var childPulse = isSelected ? 0f : FrameStats.GetPulse(child.Id);
+        var style = CornerPinHandles.Style.ForSurface(child.Name, editable && isFocused, isSelected, fade, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
+        var childPulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(child.Id);
         if (childPulse > 0.001f)
             dl.AddQuadFilled(screen[0], screen[1], screen[2], screen[3],
-                             SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface).Fade(childPulse * 0.15f * fade));
+                             SetupColors.ForKind(SetupEntityKinds.Surface).Fade(childPulse * 0.15f * fade));
 
         // The outline carries the hover highlight, same as a top-level surface.
         CanvasDraw.QuadOutline(dl, screen, PulseColor(style.EdgeColor, childPulse), isSelected ? 2f : 1f);
@@ -63,10 +63,10 @@ internal sealed partial class SetupOutputView
         // A region has its own anchor, in its own space — mapped out through the parent's rectangle and pin.
         if (isFocused
             && SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), out var carrierToOutput)
-            && SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out var rectMin, out _, out _))
+            && SurfaceGeometry.TryGetRegionRect(setup, carrier, child, out var rectMin, out _, out _))
         {
             var anchorInCarrier = rectMin + child.AnchorInMeters;
-            DrawAnchorGlyph(dl, _projection.CanvasToScreen(rToView.TransformPoint(carrierToOutput.TransformPoint(anchorInCarrier)) - viewMin), fade);
+            DrawAnchorGlyph(dl, _projection.CanvasToScreen(rectifiedToView.TransformPoint(carrierToOutput.TransformPoint(anchorInCarrier)) - viewMin), fade);
         }
 
         // Edited in the parent's space: the child has no projection of its own, so the parent's inverse maps
@@ -77,7 +77,7 @@ internal sealed partial class SetupOutputView
         {
             // Still registered as a pick target — an unselected region has to stay clickable, which is the
             // only way to reach it while its parent is selected.
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screen, child.Id, child.Name, isSelected, fade, childPulse);
+            DrawEntityLabel(dl, SetupEntityKinds.Surface, screen, child.Id, child.Name, isSelected, fade, childPulse);
             return;
         }
 
@@ -87,24 +87,24 @@ internal sealed partial class SetupOutputView
         // an edge crop is already live, which the cursor passing over the label mustn't drop.
         var edgeActive = _gesture.Is(GestureKinds.SurfaceResize, child.Id);
         if (!edgeActive && !string.IsNullOrEmpty(child.Name) && IsMouseOverLabel(screen, child.Name))
-            style.Editable = false;
+            style.IsEditable = false;
 
         style.EdgeHandleShape = EdgeDragStretches(child.Id) ? CanvasPointHandle.Shapes.Circle : CanvasPointHandle.Shapes.Square;
         var edgePhase = CornerPinHandles.DrawEdgeHandles(viewQuad, _projection, style, out var edge, out var edgePos);
         if (edge >= 0)
         {
             var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), out var parentProjection);
-            SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out _, out _, out var edgeParentOrigin);
+            SurfaceGeometry.TryGetRegionRect(setup, carrier, child, out _, out _, out var edgeParentOrigin);
             RunGesture(edgePhase, setup, GestureKinds.SurfaceResize, "Edit region", child,
                             onStarted: () =>
                                        {
-                                           _edgeStretch = ImGui.GetIO().KeyCtrl;
-                                           if (!_edgeStretch)
+                                           _edgeDragStretches = ImGui.GetIO().KeyCtrl;
+                                           if (!_edgeDragStretches)
                                                BeginContentEdit(setup, child);
                                        },
                             onDragging: () =>
                             {
-                                var pos = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin, edgePos);
+                                var pos = ToParentSpace(setup, carrier, child, outputToSurface, rectifiedToOutput, viewMin, edgePos);
                                 var horizontal = edge is 1 or 3;
                                 float? guide = null;
 
@@ -113,7 +113,7 @@ internal sealed partial class SetupOutputView
                                 {
                                     SurfaceGeometry.CollectSnapCandidates(setup, parent, child.Id, _snapXs, _snapYs);
                                     Span<float> anchor = [horizontal ? pos.X : pos.Y];
-                                    var thresholds = SnapThresholds(parentProjection, rToView, viewMin, parent, edgeParentOrigin, pos);
+                                    var thresholds = SnapThresholds(parentProjection, rectifiedToView, viewMin, parent, edgeParentOrigin, pos);
                                     if (SurfaceGeometry.TrySnapOffset(horizontal ? _snapXs : _snapYs, anchor,
                                                                       horizontal ? thresholds.X : thresholds.Y,
                                                                       out var offset, out var target))
@@ -129,7 +129,7 @@ internal sealed partial class SetupOutputView
 
                                 // Re-based on the pre-drag rectangle, so the crop's UV derivation never compounds.
                                 _gesture.Snapshot!.Value.Restore(child);
-                                SurfaceGeometry.ChildBounds(child, out var min, out var max);
+                                SurfaceGeometry.RegionBounds(child, out var min, out var max);
                                 var oldMin = min;
                                 var oldMax = max;
                                 switch (edge) // 0 = top … 3 = left in screen winding; parent space is Y-up
@@ -140,18 +140,18 @@ internal sealed partial class SetupOutputView
                                     default: min.X = MathF.Min(pos.X, max.X - SurfaceGeometry.MinSize); break;
                                 }
 
-                                SurfaceGeometry.SetChildBounds(child, min, max);
-                                ApplyCropHandling(setup, oldMin, oldMax, min, max);
+                                SurfaceGeometry.SetRegionBounds(child, min, max);
+                                KeepContentInPlace(setup, oldMin, oldMax, min, max);
 
                                 if (guide.HasValue && hasProjection)
-                                    DrawSnapGuide(dl, parentProjection, rToView, viewMin, parent, horizontal, guide.Value, edgeParentOrigin);
+                                    DrawSnapGuide(dl, parentProjection, rectifiedToView, viewMin, parent, horizontal, guide.Value, edgeParentOrigin);
                             });
         }
 
         ImGui.PopID();
 
-        DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screen, child.Id, child.Name, isFocused, fade, childPulse);
-        HandleLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child, screen);
+        DrawEntityLabel(dl, SetupEntityKinds.Surface, screen, child.Id, child.Name, isFocused, fade, childPulse);
+        HandleLabelMove(setup, dl, rectifiedToView, rectifiedToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child, screen);
     }
 
     /// <summary>
@@ -160,7 +160,7 @@ internal sealed partial class SetupOutputView
     /// rectangle edit (<see cref="RunGesture"/>). Free movement, but a nearly-straight drag snaps flat and
     /// draws the axis it locked to — placing a region level with its neighbours is the common case.
     /// </summary>
-    private void HandleLabelMove(Setup setup, ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
+    private void HandleLabelMove(Setup setup, ImDrawListPtr dl, Homography rectifiedToView, Homography rectifiedToOutput, Vector2 viewMin,
                                  Homography outputToSurface, Surface carrier, Surface.OutputMapping carrierMapping,
                                  Surface parent, Surface child, ReadOnlySpan<Vector2> screen)
     {
@@ -205,18 +205,18 @@ internal sealed partial class SetupOutputView
                                {
                                    if (panning)
                                    {
-                                       var delta = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin) - _gesture.GrabPoint;
+                                       var delta = ToParentSpace(setup, carrier, child, outputToSurface, rectifiedToOutput, viewMin) - _gesture.GrabPoint;
                                        if (_gesture.EditsContent)
-                                           CropHandling.ApplyPan(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, delta, child.SizeInMeters);
+                                           SliceUvAnchoring.ApplyPan(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, delta, child.SizeInMeters);
                                    }
                                    else
                                    {
-                                       ApplyLabelMove(setup, dl, rToView, rToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child);
+                                       ApplyLabelMove(setup, dl, rectifiedToView, rectifiedToOutput, viewMin, outputToSurface, carrier, carrierMapping, parent, child);
                                    }
                                },
                    onStarted: () =>
                               {
-                                  _gesture.GrabPoint = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin);
+                                  _gesture.GrabPoint = ToParentSpace(setup, carrier, child, outputToSurface, rectifiedToOutput, viewMin);
                                   _childMoveAxis = 0;
                                   if (panning)
                                       BeginContentEdit(setup, child);
@@ -224,23 +224,23 @@ internal sealed partial class SetupOutputView
                    onCompleted: () => _childMoveAxis = 0);
     }
 
-    private void ApplyLabelMove(Setup setup, ImDrawListPtr dl, Homography rToView, Homography rToOutput, Vector2 viewMin,
+    private void ApplyLabelMove(Setup setup, ImDrawListPtr dl, Homography rectifiedToView, Homography rectifiedToOutput, Vector2 viewMin,
                                 Homography outputToSurface, Surface carrier, Surface.OutputMapping carrierMapping,
                                 Surface parent, Surface child)
     {
         if (_gesture.Snapshot is not { } start)
             return;
 
-        SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out _, out _, out var parentOrigin);
+        SurfaceGeometry.TryGetRegionRect(setup, carrier, child, out _, out _, out var parentOrigin);
         var startMin = start.LocalPosition;
         var startMax = startMin + start.Size;
-        var delta = ToParentSpace(setup, carrier, child, outputToSurface, rToOutput, viewMin) - _gesture.GrabPoint;
+        var delta = ToParentSpace(setup, carrier, child, outputToSurface, rectifiedToOutput, viewMin) - _gesture.GrabPoint;
         var snapping = !ImGui.GetIO().KeyShift;
 
         var hasProjection = SurfaceGeometry.TryGetSurfaceToOutput(carrier, carrierMapping, SurfaceGeometry.CanvasSizeOf(setup, carrierMapping.OutputId), out var surfaceToOutput);
         var halfSize = (startMax - startMin) * 0.5f;
         var thresholds = hasProjection
-                             ? SnapThresholds(surfaceToOutput, rToView, viewMin, parent, parentOrigin, startMin + delta + halfSize)
+                             ? SnapThresholds(surfaceToOutput, rectifiedToView, viewMin, parent, parentOrigin, startMin + delta + halfSize)
                              : Vector2.Zero;
 
         // Nearly-straight drags flatten onto the axis — but only within a constant screen-space budget
@@ -291,24 +291,24 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        SurfaceGeometry.SetChildBounds(child, newMin, newMax);
+        SurfaceGeometry.SetRegionBounds(child, newMin, newMax);
 
         if (!hasProjection)
             return;
 
         if (guideX.HasValue)
-            DrawSnapGuide(dl, surfaceToOutput, rToView, viewMin, parent, true, guideX.Value, parentOrigin);
+            DrawSnapGuide(dl, surfaceToOutput, rectifiedToView, viewMin, parent, true, guideX.Value, parentOrigin);
 
         if (guideY.HasValue)
-            DrawSnapGuide(dl, surfaceToOutput, rToView, viewMin, parent, false, guideY.Value, parentOrigin);
+            DrawSnapGuide(dl, surfaceToOutput, rectifiedToView, viewMin, parent, false, guideY.Value, parentOrigin);
 
         if (_childMoveAxis == 0)
             return;
 
         // The locked movement axis, drawn across the parent so it reads as a guide rather than a stub.
-        SurfaceGeometry.ChildBounds(child, out var minNow, out var maxNow);
+        SurfaceGeometry.RegionBounds(child, out var minNow, out var maxNow);
         var mid = (minNow + maxNow) * 0.5f;
-        DrawSnapGuide(dl, surfaceToOutput, rToView, viewMin, parent, _childMoveAxis == 2, _childMoveAxis == 1 ? mid.Y : mid.X, parentOrigin);
+        DrawSnapGuide(dl, surfaceToOutput, rectifiedToView, viewMin, parent, _childMoveAxis == 2, _childMoveAxis == 1 ? mid.Y : mid.X, parentOrigin);
     }
 
     private static Vector2[] RectCorners(Vector2 min, Vector2 max)
@@ -323,13 +323,13 @@ internal sealed partial class SetupOutputView
     /// catch from far more than the intended 7px — and under perspective the scale varies across the surface,
     /// so only a local measurement feels the same everywhere.
     /// </summary>
-    private Vector2 SnapThresholds(Homography surfaceToOutput, Homography rToView, Vector2 viewMin, Surface parent,
+    private Vector2 SnapThresholds(Homography surfaceToOutput, Homography rectifiedToView, Vector2 viewMin, Surface parent,
                                    Vector2 originInCarrier, Vector2 probeInParent)
     {
         var probe = MathF.Max(MathF.Min(parent.SizeInMeters.X, parent.SizeInMeters.Y) * 0.05f, 0.0001f);
-        var origin = ProjectParentPoint(surfaceToOutput, rToView, viewMin, originInCarrier, probeInParent);
-        var alongX = ProjectParentPoint(surfaceToOutput, rToView, viewMin, originInCarrier, probeInParent + new Vector2(probe, 0));
-        var alongY = ProjectParentPoint(surfaceToOutput, rToView, viewMin, originInCarrier, probeInParent + new Vector2(0, probe));
+        var origin = ProjectParentPoint(surfaceToOutput, rectifiedToView, viewMin, originInCarrier, probeInParent);
+        var alongX = ProjectParentPoint(surfaceToOutput, rectifiedToView, viewMin, originInCarrier, probeInParent + new Vector2(probe, 0));
+        var alongY = ProjectParentPoint(surfaceToOutput, rectifiedToView, viewMin, originInCarrier, probeInParent + new Vector2(0, probe));
 
         var wantedPixels = 7 * T3Ui.UiScaleFactor;
         var pixelsX = Vector2.Distance(origin, alongX);
@@ -338,13 +338,13 @@ internal sealed partial class SetupOutputView
                            pixelsY > 0.001f ? probe / pixelsY * wantedPixels : 0f);
     }
 
-    private Vector2 ProjectParentPoint(Homography surfaceToOutput, Homography rToView, Vector2 viewMin,
+    private Vector2 ProjectParentPoint(Homography surfaceToOutput, Homography rectifiedToView, Vector2 viewMin,
                                        Vector2 originInCarrier, Vector2 pointInParent)
     {
-        return _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(originInCarrier + pointInParent)) - viewMin);
+        return _projection.CanvasToScreen(rectifiedToView.TransformPoint(surfaceToOutput.TransformPoint(originInCarrier + pointInParent)) - viewMin);
     }
 
-    private void DrawSnapGuide(ImDrawListPtr dl, Homography surfaceToOutput, Homography rToView, Vector2 viewMin,
+    private void DrawSnapGuide(ImDrawListPtr dl, Homography surfaceToOutput, Homography rectifiedToView, Vector2 viewMin,
                                Surface parent, bool vertical, float coordinate, Vector2 originInCarrier)
     {
         // Coordinates are in the parent's space; the projection expects the carrier's, so step across. The
@@ -354,8 +354,8 @@ internal sealed partial class SetupOutputView
         var from = originInCarrier + (vertical ? new Vector2(coordinate, parentMin.Y - size.Y) : new Vector2(parentMin.X - size.X, coordinate));
         var to = originInCarrier + (vertical ? new Vector2(coordinate, parentMax.Y + size.Y) : new Vector2(parentMax.X + size.X, coordinate));
 
-        var a = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(from)) - viewMin);
-        var b = _projection.CanvasToScreen(rToView.TransformPoint(surfaceToOutput.TransformPoint(to)) - viewMin);
+        var a = _projection.CanvasToScreen(rectifiedToView.TransformPoint(surfaceToOutput.TransformPoint(from)) - viewMin);
+        var b = _projection.CanvasToScreen(rectifiedToView.TransformPoint(surfaceToOutput.TransformPoint(to)) - viewMin);
         dl.AddLine(a, b, UiColors.StatusAnimated.Fade(0.6f), 1 * T3Ui.UiScaleFactor);
     }
 
@@ -365,12 +365,12 @@ internal sealed partial class SetupOutputView
     /// that offset is what makes editing work at any nesting depth.
     /// </summary>
     private Vector2 ToParentSpace(Setup setup, Surface carrier, Surface child, Homography outputToSurface,
-                                  Homography rToOutput, Vector2 viewMin, Vector2? viewPoint = null)
+                                  Homography rectifiedToOutput, Vector2 viewMin, Vector2? viewPoint = null)
     {
         var inView = viewPoint ?? _projection.ScreenToCanvas(ImGui.GetMousePos());
-        var inCarrier = outputToSurface.TransformPoint(rToOutput.TransformPoint(inView + viewMin));
+        var inCarrier = outputToSurface.TransformPoint(rectifiedToOutput.TransformPoint(inView + viewMin));
 
-        return SurfaceGeometry.TryGetDescendantRect(setup, carrier, child, out _, out _, out var parentOrigin)
+        return SurfaceGeometry.TryGetRegionRect(setup, carrier, child, out _, out _, out var parentOrigin)
                    ? inCarrier - parentOrigin
                    : inCarrier;
     }

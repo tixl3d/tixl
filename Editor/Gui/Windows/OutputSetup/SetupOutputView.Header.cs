@@ -35,7 +35,7 @@ internal sealed partial class SetupOutputView
         _pendingHeaderTitle = title;
         _pendingHeaderImageId = imageId;
         _pendingHeaderSubjectId = subjectId;
-        return HeaderHostedByStrip;
+        return IsHeaderHostedByStrip;
     }
 
     /// <summary>The header the last drawn canvas asked for, in the strip's header row (see <see cref="DeferHeader"/>).</summary>
@@ -66,7 +66,7 @@ internal sealed partial class SetupOutputView
         // so it is only usable when the focused entity resolves to one mapped to this output (for a Layout
         // child, its parent) or traced on a photo; the projector needs an output. Those segments show disabled
         // rather than vanishing, so the toolbar keeps its shape.
-        var straightCarrier = SurfaceGeometry.FindCarrier(setup, _shownSurfaceId, outputId);
+        var straightCarrier = SurfaceGeometry.FindMappingCarrier(setup, _shownSurfaceId, outputId);
         var hasOutput = output != null;
         var hasStraightSubject = straightCarrier != null || TracedImageOf(setup, _shownSurfaceId) != null;
 
@@ -111,9 +111,9 @@ internal sealed partial class SetupOutputView
         {
             // Picked a camera the selection only leads to: select its subject so the next frame frames it.
             if (_editMode == EditModes.Output && reachedOutputId != Guid.Empty)
-                selection.Select(SetupEntitySelection.EntityKinds.Output, reachedOutputId);
+                selection.Select(SetupEntityKinds.Output, reachedOutputId);
             else if (_editMode == EditModes.Straight && reachedSurfaceId != Guid.Empty)
-                selection.Select(SetupEntitySelection.EntityKinds.Surface, reachedSurfaceId);
+                selection.Select(SetupEntityKinds.Surface, reachedSurfaceId);
         }
 
         // A disabled segment can't be clicked away, so a mode left selected after its precondition lapses
@@ -129,7 +129,7 @@ internal sealed partial class SetupOutputView
         // StatusAttention so the locked state reads as deliberate rather than a glitch.
         var canIsolate = straightCarrier != null;
         if (!canIsolate)
-            _isolate = false;
+            _isolatesFocusedSurface = false;
 
         // How much of the surfaces' content shows over their photos, on the Board and the traced quads: a
         // drag-edit field in percent, like the parameter fields.
@@ -137,13 +137,13 @@ internal sealed partial class SetupOutputView
         ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText("Overlay", Fonts.FontSmall, UiColors.TextMuted);
         ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
-        var previewPercent = UserSettings.Config.OutputSetupContentPreview * 100f;
+        var previewPercent = UserSettings.Config.OutputSetupContentPreviewOpacity * 100f;
         ImGui.PushID("contentPreview");
         var previewState = SingleValueEdit.Draw(ref previewPercent, new Vector2(60 * T3Ui.UiScaleFactor, ImGui.GetFrameHeight()),
                                                 0f, 100f, clampMin: true, clampMax: true, scale: 0.5f, format: "{0:0}%", defaultValue: 65f);
         ImGui.PopID();
         if ((previewState & InputEditStateFlags.Modified) != 0)
-            UserSettings.Config.OutputSetupContentPreview = previewPercent / 100f;
+            UserSettings.Config.OutputSetupContentPreviewOpacity = previewPercent / 100f;
 
         if (ImGui.IsItemHovered())
             CustomComponents.TooltipForLastItem("Overlay opacity", "Opacity of each surface's content over its photo — on the traced quads and the surface cards. Drag, or double-click to type.");
@@ -154,8 +154,8 @@ internal sealed partial class SetupOutputView
         {
             ImGui.SameLine(0, 12 * T3Ui.UiScaleFactor);
             ImGui.BeginDisabled(!canIsolate);
-            if (CustomComponents.StateButton("Isolate", _isolate ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized) && canIsolate)
-                _isolate = !_isolate;
+            if (CustomComponents.StateButton("Isolate", _isolatesFocusedSurface ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized) && canIsolate)
+                _isolatesFocusedSurface = !_isolatesFocusedSurface;
 
             ImGui.EndDisabled();
             if (canIsolate && ImGui.IsItemHovered())
@@ -163,21 +163,21 @@ internal sealed partial class SetupOutputView
         }
         else
         {
-            _isolate = false;
+            _isolatesFocusedSurface = false;
         }
 
         // Calibrating against the photo: the straightened photo is projected in place of the content, and the
         // reference points become handles on the projector canvas — drag one until its crosshair sits on the
         // real feature; the pin re-solves so every placed point stays exactly where it was aimed.
-        var photoCarrier = straightCarrier is { Reference: not null } ? straightCarrier : null;
+        var photoCarrier = straightCarrier is { Trace: not null } ? straightCarrier : null;
         if (photoCarrier == null)
-            _projectPhoto = false;
+            _projectsPhoto = false;
 
         if (_editMode is EditModes.Output or EditModes.Straight && photoCarrier != null)
         {
             ImGui.SameLine();
-            if (CustomComponents.StateButton("Project photo", _projectPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
-                _projectPhoto = !_projectPhoto;
+            if (CustomComponents.StateButton("Project photo", _projectsPhoto ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Emphasized))
+                _projectsPhoto = !_projectsPhoto;
 
             if (ImGui.IsItemHovered())
                 CustomComponents.TooltipForLastItem("Project the photo", "Projects a disc of the straightened photo around each reference point, with a crosshair. Drag a point on the canvas until the photo's feature lands on the real one; that activates it (green) and the pin is solved through every activated point. Double-click a point to reset it.");
@@ -196,7 +196,7 @@ internal sealed partial class SetupOutputView
             if (ImGui.IsItemHovered())
                 CustomComponents.TooltipForLastItem("Disc radius", "Radius of the photo disc around each reference point, in percent of the canvas height. Drag, or double-click to type.");
 
-            if (_projectPhoto && _pinResidualPx > 0.5f)
+            if (_projectsPhoto && _pinResidualPx > 0.5f)
             {
                 ImGui.SameLine();
                 CustomComponents.StylizedText($"points miss by up to {_pinResidualPx:0.0} px", Fonts.FontSmall, UiColors.TextMuted);
@@ -205,7 +205,7 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        if (_projectPhoto && photoCarrier != null && TryGetTracedFragment(setup, photoCarrier, out var photoSrv, out var photoUvMin, out var photoUvMax))
+        if (_projectsPhoto && photoCarrier != null && TryGetTracedFragment(setup, photoCarrier, out var photoSrv, out var photoUvMin, out var photoUvMax))
             OutputManager.SetCalibrationPhoto(photoCarrier.Id, photoSrv!, photoUvMin, photoUvMax, UserSettings.Config.OutputSetupPhotoDiscRadius);
 
         // Measuring only makes sense against the straightened surface — on the projector canvas the
@@ -216,32 +216,32 @@ internal sealed partial class SetupOutputView
         if (_editMode == EditModes.Straight && lineSubject != null)
         {
             ImGui.SameLine();
-            if (CustomComponents.StateButton("+ Line", _measureArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
-                _measureArmed = !_measureArmed;
+            if (CustomComponents.StateButton("+ Line", _isLineToolArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+                _isLineToolArmed = !_isLineToolArmed;
 
-            if (_measureArmed)
-                _pointArmed = false;
+            if (_isLineToolArmed)
+                _isPointToolArmed = false;
 
             // Reference points are placed on the photo — a physical feature the projector will be aimed at.
             if (tracedForLines != null)
             {
                 ImGui.SameLine();
-                if (CustomComponents.StateButton("+ Point", _pointArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+                if (CustomComponents.StateButton("+ Point", _isPointToolArmed ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
                 {
-                    _pointArmed = !_pointArmed;
-                    if (_pointArmed)
-                        _measureArmed = false;
+                    _isPointToolArmed = !_isPointToolArmed;
+                    if (_isPointToolArmed)
+                        _isLineToolArmed = false;
                 }
             }
 
             // Nothing else on the canvas says a click or drag is now expected, and the tools disarm after
             // one use — so say what to do with them while armed.
-            if (_measureArmed)
+            if (_isLineToolArmed)
             {
                 ImGui.SameLine();
                 CustomComponents.StylizedText("drag along something straight in reality", Fonts.FontSmall, UiColors.StatusAnimated);
             }
-            else if (_pointArmed)
+            else if (_isPointToolArmed)
             {
                 ImGui.SameLine();
                 CustomComponents.StylizedText("click a feature you can find on the real wall", Fonts.FontSmall, UiColors.StatusAnimated);
@@ -277,8 +277,8 @@ internal sealed partial class SetupOutputView
         }
         else
         {
-            _measureArmed = false;
-            _pointArmed = false;
+            _isLineToolArmed = false;
+            _isPointToolArmed = false;
         }
 
         // "+ <surface>" maps a surface onto this output — an Output-canvas action; the Board has no output to map to.
@@ -292,7 +292,7 @@ internal sealed partial class SetupOutputView
                 continue;
 
             // A Layout child rides its parent's corner pin — offering it one of its own would detach it.
-            if (surface.Kind == Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
+            if (surface.Kind == Surface.Kinds.Layout && surface.ParentId != Guid.Empty)
                 continue;
 
             ImGui.SameLine();

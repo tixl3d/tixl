@@ -36,9 +36,9 @@ public class SetupSerializationTests
         Assert.Equal(new Vector2(210, 95), mapping.Quad[0]);
         Assert.Equal(new Vector2(215, 905), mapping.Quad[3]);
 
-        Assert.NotNull(surface.Reference);
-        Assert.Equal(setup.ReferenceImages[0].Id, surface.Reference!.ImageId);
-        var annotation = Assert.Single(surface.Reference.Annotations);
+        Assert.NotNull(surface.Trace);
+        Assert.Equal(setup.ReferenceImages[0].Id, surface.Trace!.ImageId);
+        var annotation = Assert.Single(surface.Trace.Annotations);
         Assert.Equal(4.5f, annotation.LengthInMeters);
         Assert.Equal("mortar-3", annotation.Name);
         Assert.True(annotation.ShowArrows);
@@ -55,7 +55,7 @@ public class SetupSerializationTests
         Assert.Equal(OutputDefinition.Kinds.Projector, projector.Kind);
         Assert.Equal(new Int2(1920, 1200), projector.CanvasResolution);
         Assert.NotNull(projector.BoardPlacement);
-        Assert.Equal(800f, projector.BoardPlacement!.PixelsPerMeter);
+        Assert.Equal(800f, projector.BoardPlacement!.CardScale);
         var patch = Assert.Single(projector.Patches);
         Assert.Equal(setup.Outputs[1].Patches[0].Id, patch.Id);
         Assert.Equal(setup.Outputs[1].Patches[0].SliceId, patch.SliceId);
@@ -145,7 +145,7 @@ public class SetupSerializationTests
         Assert.Null(surfaceJson["Placement"]);
 
         var restored = RoundTrip(setup);
-        Assert.Null(restored.Surfaces[0].Reference);
+        Assert.Null(restored.Surfaces[0].Trace);
         Assert.Null(restored.Surfaces[0].Placement);
     }
 
@@ -189,7 +189,7 @@ public class SetupSerializationTests
                                                  ResidualPx = 0.4f,
                                              },
                             };
-        projector.BoardPlacement = new CanvasPlacement { Position = new Vector2(7, 0), PixelsPerMeter = 800 };
+        projector.BoardPlacement = new BoardPlacement { Position = new Vector2(7, 0), CardScale = 800 };
         projector.Patches.Add(new OutputDefinition.Patch
                                   {
                                       Name = "left half",
@@ -218,7 +218,7 @@ public class SetupSerializationTests
                                                ],
                                            }
                                    ],
-                                   Reference = new Surface.ReferenceBinding
+                                   Trace = new Surface.TraceBinding
                                                    {
                                                        ImageId = image.Id,
                                                        Quad =
@@ -230,7 +230,7 @@ public class SetupSerializationTests
                                                        ],
                                                        Annotations =
                                                        [
-                                                           new LineAnnotation
+                                                           new Annotation
                                                                {
                                                                    P1 = new Vector2(500, 400),
                                                                    P2 = new Vector2(1200, 410),
@@ -241,7 +241,7 @@ public class SetupSerializationTests
                                                        ],
                                                    },
                                    Anchor = new Vector2(0.4f, 1),
-                                   BoardPlacement = new CanvasPlacement { Position = new Vector2(1.5f, 0) },
+                                   BoardPlacement = new BoardPlacement { Position = new Vector2(1.5f, 0) },
                                    Placement = new Surface.StagePlacement
                                                    {
                                                        Pose = new Pose(new Vector3(0.5f, 0, 1), Quaternion.Identity),

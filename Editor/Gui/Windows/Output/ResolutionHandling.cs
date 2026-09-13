@@ -119,7 +119,7 @@ internal static class ResolutionHandling
         for (var index = 0; index < setup.Outputs.Count; index++)
         {
             var output = setup.Outputs[index];
-            var binding = machineConfig.TryGetBinding(output.Id);
+            var binding = machineConfig.FindBinding(output.Id);
             var isBindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
             var label = binding == null
                             ? $"{output.Name}  ·  {output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
@@ -145,7 +145,7 @@ internal static class ResolutionHandling
     internal static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)
     {
         var screens = System.Windows.Forms.Screen.AllScreens;
-        var binding = machineConfig.TryGetBinding(output.Id);
+        var binding = machineConfig.FindBinding(output.Id);
         var boundPlug = Plugs.BoundPlugId(binding);
         for (var screenIndex = 0; screenIndex < screens.Length; screenIndex++)
         {
@@ -156,9 +156,9 @@ internal static class ResolutionHandling
                 Plugs.BindOutput(machineConfig, output.Id, plugId);
         }
 
-        for (var i = 0; i < machineConfig.Streams.Count; i++)
+        for (var i = 0; i < machineConfig.StreamPlugs.Count; i++)
         {
-            var stream = machineConfig.Streams[i];
+            var stream = machineConfig.StreamPlugs[i];
             var label = $"Send to {stream.Kind}: {stream.Name}";
             if (CustomComponents.DrawMenuItem(100 + i, label, isChecked: boundPlug == stream.Id, isEnabled: Plugs.IsStreamKindAvailable(stream.Kind)))
                 Plugs.BindOutput(machineConfig, output.Id, stream.Id);

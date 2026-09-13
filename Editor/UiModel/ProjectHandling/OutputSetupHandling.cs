@@ -61,7 +61,7 @@ internal static class OutputSetupHandling
                 continue;
             }
 
-            var plugId = Plugs.BoundPlugId(machineConfig.TryGetBinding(output.Id));
+            var plugId = Plugs.BoundPlugId(machineConfig.FindBinding(output.Id));
             var resolution = plugId == Guid.Empty ? new Int2(1920, 1080) : Plugs.PlugResolution(plugId);
             output.ResolvedResolution = resolution;
         }
@@ -89,7 +89,6 @@ internal static class OutputSetupHandling
         return true;
     }
 
-    /// <summary>Persists the active setup and machine config of the focused project.</summary>
     /// <summary>
     /// Bumped on every save of the active setup or machine config — every mutation funnels through
     /// <see cref="SaveActive"/> (commands, undo, sync, repair). Views key per-structure caches (labels,
@@ -97,6 +96,7 @@ internal static class OutputSetupHandling
     /// </summary>
     public static int StructureVersion { get; private set; }
 
+    /// <summary>Persists the active setup and machine config of the focused project.</summary>
     public static void SaveActive()
     {
         StructureVersion++;

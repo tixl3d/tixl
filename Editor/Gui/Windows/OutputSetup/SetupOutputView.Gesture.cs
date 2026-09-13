@@ -94,7 +94,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private void BeginContentEdit(Setup setup, Surface surface)
     {
-        if (CropHandling.TryBegin(setup, surface, out var sliceId, out var uvStart))
+        if (SliceUvAnchoring.TryBegin(setup, surface, out var sliceId, out var uvStart))
         {
             _gesture.ContentSliceId = sliceId;
             _gesture.ContentUvStart = uvStart;
@@ -102,10 +102,10 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>After a re-based rect edit: keeps the pixels where the pre-drag rect showed them.</summary>
-    private void ApplyCropHandling(Setup setup, Vector2 oldMin, Vector2 oldMax, Vector2 newMin, Vector2 newMax)
+    private void KeepContentInPlace(Setup setup, Vector2 oldMin, Vector2 oldMax, Vector2 newMin, Vector2 newMax)
     {
         if (_gesture.EditsContent)
-            CropHandling.ApplyCrop(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, oldMin, oldMax, newMin, newMax);
+            SliceUvAnchoring.ApplyCrop(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, oldMin, oldMax, newMin, newMax);
     }
 
     /// <summary>One undo step for whatever the gesture changed (none for a click that moved nothing), one save.</summary>

@@ -10,7 +10,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// fixed window (pan). Rect bounds are Y-up (the surface and parent spaces), UVs Y-down (the texture), so the
 /// top edge of the rect meets the UV's top row.
 /// </summary>
-internal static class CropHandling
+internal static class SliceUvAnchoring
 {
     /// <summary>
     /// The slice a content edit will write, and its UV at the press. A slice that also feeds other surfaces or

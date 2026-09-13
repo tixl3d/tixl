@@ -45,7 +45,7 @@ internal static class SetupSanitizer
             // Only Regions (Layout kind) may be children. A Physical surface nested under another surface is
             // contradictory — it claims its own plane while riding a parent's — so it is detached back to a
             // root, keeping its mappings and placement intact.
-            if (surface.Kind != Surface.SurfaceKinds.Layout && surface.ParentId != Guid.Empty)
+            if (surface.Kind != Surface.Kinds.Layout && surface.ParentId != Guid.Empty)
             {
                 Log.Warning($"Setup repair: surface '{surface.Name}' was nested under another surface — detached to a root (only regions nest).");
                 surface.ParentId = Guid.Empty;

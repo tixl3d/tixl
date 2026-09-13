@@ -127,7 +127,7 @@ internal sealed partial class OutputWindow : Window
             _imageCanvas.SetAsCurrent();
 
             // Move down to avoid overlapping with the toolbar — none while the outliner strip hosts it.
-            ImGui.SetCursorPos(ImGui.GetCursorStartPos() + new Vector2(0, _setupMode.HeaderInStrip ? 0 : 40));
+            ImGui.SetCursorPos(ImGui.GetCursorStartPos() + new Vector2(0, _setupMode.IsHeaderHostedByStrip ? 0 : 40));
             // ImGui 1.91 sets an internal IsSetPos flag on SetCursorPos and asserts in End()
             // if no item is submitted afterwards. The image canvas draws to the raw draw list
             // and does not emit items, so submit an empty Dummy as an extent marker.
@@ -138,7 +138,7 @@ internal sealed partial class OutputWindow : Window
                 // Output-editing view (focused send op or picked entity) was drawn — give it the
                 // breadcrumb so the outliner and op selection stay reachable while editing. With the strip
                 // shown its header row is the toolbar (setup menu carries the pin and the strip toggle).
-                if (!SkillTraining.IsInPlayMode && !_setupMode.HeaderInStrip)
+                if (!SkillTraining.IsInPlayMode && !_setupMode.IsHeaderHostedByStrip)
                 {
                     ImGui.SetCursorPos(ImGui.GetCursorStartPos());
                     CustomComponents.PushToolbarIconBackground();

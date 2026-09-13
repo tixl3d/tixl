@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 namespace T3.Core.Output;
 
 /// <summary>
-/// One L3 constraint: "this projected pixel lands on this physical point".
+/// One camera-calibration constraint: "this projected pixel lands on this physical point".
 /// Six or more spanning two planes constrain a projector's camera.
 /// </summary>
 public sealed class CalibrationPoint

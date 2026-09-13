@@ -140,7 +140,7 @@ public sealed class Setup
         return null;
     }
 
-    /// <summary>Content rows and sinks address sources by the supplying op's SymbolChildId, not by entity id.</summary>
+    /// <summary>Content items and suppliers address sources by the supplying op's SymbolChildId, not by entity id.</summary>
     public ContentSource? FindSourceByChildId(Guid symbolChildId)
     {
         if (symbolChildId == Guid.Empty)

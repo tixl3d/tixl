@@ -10,20 +10,14 @@ using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Gui.Windows.TimeLine;
 
+using T3.Editor.Gui.Windows.OutputSetup;
+
 namespace T3.Editor.Gui.UiHelpers;
 
 /// <summary>
 /// Saves view layout, currently open node and other user settings 
 /// </summary>
 ///  todo - make internal, make extendable by external packages
-/// <summary>How the output setup shows rectangles that are stored as ratios: as pixels of the thing they sit
-/// on (a canvas, a source texture), or as the ratios themselves.</summary>
-public enum SetupEditUnits
-{
-    Pixels,
-    Ratios,
-}
-
 public sealed class UserSettings : Settings<UserSettings.ConfigData>
 {
     internal UserSettings(bool saveOnQuit) : base("userSettings.json", saveOnQuit: saveOnQuit)
@@ -139,12 +133,13 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public float PanSpeed = 20;
 
         /// <summary>Opacity of a surface's content previewed over its photo — on the traced quad and on its Board card.</summary>
-        public float OutputSetupContentPreview = 0.65f;
+        public float OutputSetupContentPreviewOpacity = 0.65f;
 
         /// <summary>Whether the output setup's rect fields read in pixels of what they sit on, or as ratios of it.
         /// The values are stored as ratios either way; this is only how they are shown and typed.</summary>
-        public SetupEditUnits OutputSetupEditUnits = SetupEditUnits.Pixels;
-        public float OutputSetupPhotoDiscRadius = 0.05f; // calibration photo disc around a reference point, share of the canvas height
+        public OutputSetupEditUnits OutputSetupEditUnits = OutputSetupEditUnits.Pixels;
+        /// <summary>The calibration-photo disc around a reference point, as a share of the canvas height.</summary>
+        public float OutputSetupPhotoDiscRadius = 0.05f;
 
         // Mag Graph
         public bool DisconnectOnUnsnap = true;
@@ -200,7 +195,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         public float GizmoSize = 100;
 
-        // Fullscreen settings
+        // IsFullscreen settings
         public int FullScreenIndexMain = 0;
         // Output window
         public int FullScreenIndexViewer = 0;

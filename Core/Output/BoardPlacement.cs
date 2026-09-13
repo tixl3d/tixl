@@ -11,30 +11,30 @@ namespace T3.Core.Output;
 /// Presentation only: moving or scaling a card never touches calibration, routing or resolution. Absent
 /// until the Board seeds it, so setups that never opened the Board carry no layout.
 /// </summary>
-public sealed class CanvasPlacement
+public sealed class BoardPlacement
 {
     /// <summary>Board metres: a surface's anchor, or a pixel card's bottom-left corner.</summary>
     public Vector2 Position;
 
     /// <summary>Presentation scale of a pixel entity (content, output, reference image); 0 = the Board's default.</summary>
-    public float PixelsPerMeter;
+    public float CardScale;
 
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
         writer.WriteVector2("Position", Position);
-        if (PixelsPerMeter > 0)
-            writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
+        if (CardScale > 0)
+            writer.WriteValue("PixelsPerMeter", CardScale);
 
         writer.WriteEndObject();
     }
 
-    public static CanvasPlacement ReadFromJson(JToken token)
+    public static BoardPlacement ReadFromJson(JToken token)
     {
-        return new CanvasPlacement
+        return new BoardPlacement
                    {
                        Position = OutputJson.ReadVector2(token["Position"]),
-                       PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 0f),
+                       CardScale = token.ReadValueSafe("PixelsPerMeter", 0f),
                    };
     }
 }

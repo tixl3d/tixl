@@ -39,7 +39,7 @@ internal static class CanvasPointHandle
 
         public Shapes Shape;
         public float Radius; // unscaled screen pixels
-        public bool Editable;
+        public bool IsEditable;
 
         public static Style Default(Color color, Shapes shape = Shapes.Circle, bool editable = true)
         {
@@ -50,7 +50,7 @@ internal static class CanvasPointHandle
                            OutlineColor = new Color(0f, 0f, 0f, 0f),
                            Shape = shape,
                            Radius = 5,
-                           Editable = editable,
+                           IsEditable = editable,
                        };
         }
     }
@@ -69,7 +69,7 @@ internal static class CanvasPointHandle
         var phase = DragPhases.None;
         var isHovered = false;
         var isHeld = false;
-        if (style.Editable)
+        if (style.IsEditable)
         {
             var hitSize = new Vector2(radius * 3);
             ImGui.SetCursorScreenPos(screen - hitSize * 0.5f);

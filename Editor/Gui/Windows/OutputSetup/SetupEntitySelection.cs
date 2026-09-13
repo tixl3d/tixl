@@ -24,7 +24,7 @@ internal enum SubParts
 /// content and de-duplicates in a set/list.
 /// </summary>
 internal readonly record struct SelectionTarget(
-    SetupEntitySelection.EntityKinds Kind,
+    SetupEntityKinds Kind,
     Guid EntityId,
     SubParts Part = SubParts.None,
     int Index = -1);
@@ -39,37 +39,23 @@ internal readonly record struct SelectionTarget(
 /// </summary>
 internal sealed class SetupEntitySelection
 {
-    public enum EntityKinds
-    {
-        None,
-        ReferenceImage,
-        Surface,
-        Prop,
-        Output,
-        Slice,
-        ContentSource,
-        Patch,
-
-        /// <summary>A local plug (display or stream sender) — an inventory row, never a selection target.</summary>
-        Plug,
-    }
 
     /// <summary>Replace the selection with a single entity. A pick: takes over the Parameter window.</summary>
-    public void Select(EntityKinds kind, Guid id)
+    public void Select(SetupEntityKinds kind, Guid id)
     {
         _targets.Set(new SelectionTarget(kind, id));
         GlobalSelectionHandling.ClaimInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
     }
 
     /// <summary>Add an entity to the selection (no-op if already present).</summary>
-    public void Add(EntityKinds kind, Guid id)
+    public void Add(SetupEntityKinds kind, Guid id)
     {
         _targets.Add(new SelectionTarget(kind, id));
         GlobalSelectionHandling.ClaimInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
     }
 
     /// <summary>Drops an entity from the selection (no-op if absent); an emptied selection lets the inspection go.</summary>
-    public void Remove(EntityKinds kind, Guid id)
+    public void Remove(SetupEntityKinds kind, Guid id)
     {
         if (!_targets.Remove(new SelectionTarget(kind, id)))
             return;
@@ -79,7 +65,7 @@ internal sealed class SetupEntitySelection
     }
 
     /// <summary>Toggle an entity's membership.</summary>
-    public void Toggle(EntityKinds kind, Guid id)
+    public void Toggle(SetupEntityKinds kind, Guid id)
     {
         _targets.Toggle(new SelectionTarget(kind, id));
         if (_targets.Count > 0)
@@ -90,9 +76,9 @@ internal sealed class SetupEntitySelection
 
     /// <summary>
     /// Replaces the selection to mirror a pick made in the graph (a focused SendToOutput shows as its CONTENT
-    /// row) without taking over the Parameter window — the graph keeps it and shows the op's parameters.
+    /// item) without taking over the Parameter window — the graph keeps it and shows the op's parameters.
     /// </summary>
-    public void Mirror(EntityKinds kind, Guid id) => _targets.Set(new SelectionTarget(kind, id));
+    public void Mirror(SetupEntityKinds kind, Guid id) => _targets.Set(new SelectionTarget(kind, id));
 
     public void Clear()
     {
@@ -100,7 +86,7 @@ internal sealed class SetupEntitySelection
         GlobalSelectionHandling.ReleaseInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
     }
 
-    public bool IsSelected(EntityKinds kind, Guid id) => _targets.Contains(new SelectionTarget(kind, id));
+    public bool IsSelected(SetupEntityKinds kind, Guid id) => _targets.Contains(new SelectionTarget(kind, id));
 
     public int Count => _targets.Count;
 
@@ -109,7 +95,7 @@ internal sealed class SetupEntitySelection
     public IReadOnlyList<SelectionTarget> Targets => _targets.Items;
 
     /// <summary>Resolves the primary selection against a setup, dropping any target whose entity is gone.</summary>
-    public bool TryResolve(Setup setup, out EntityKinds kind, out Guid id)
+    public bool TryResolve(Setup setup, out SetupEntityKinds kind, out Guid id)
     {
         for (var i = _targets.Count - 1; i >= 0; i--)
         {
@@ -119,7 +105,7 @@ internal sealed class SetupEntitySelection
 
         if (!_targets.TryGetPrimary(out var primary))
         {
-            kind = EntityKinds.None;
+            kind = SetupEntityKinds.None;
             id = Guid.Empty;
             return false;
         }
@@ -136,11 +122,11 @@ internal sealed class SetupEntitySelection
 
     /// <summary>Whether an entity reference still resolves against the setup — shared with the
     /// per-window pin, which validates the same way the selection prunes.</summary>
-    internal static bool Exists(Setup setup, EntityKinds kind, Guid id)
+    internal static bool Exists(Setup setup, SetupEntityKinds kind, Guid id)
     {
         switch (kind)
         {
-            case EntityKinds.ReferenceImage:
+            case SetupEntityKinds.ReferenceImage:
                 foreach (var e in setup.ReferenceImages)
                 {
                     if (e.Id == id)
@@ -149,7 +135,7 @@ internal sealed class SetupEntitySelection
 
                 return false;
 
-            case EntityKinds.Surface:
+            case SetupEntityKinds.Surface:
                 foreach (var e in setup.Surfaces)
                 {
                     if (e.Id == id)
@@ -158,7 +144,7 @@ internal sealed class SetupEntitySelection
 
                 return false;
 
-            case EntityKinds.Prop:
+            case SetupEntityKinds.Prop:
                 foreach (var e in setup.Props)
                 {
                     if (e.Id == id)
@@ -167,7 +153,7 @@ internal sealed class SetupEntitySelection
 
                 return false;
 
-            case EntityKinds.Output:
+            case SetupEntityKinds.Output:
                 foreach (var e in setup.Outputs)
                 {
                     if (e.Id == id)
@@ -176,7 +162,7 @@ internal sealed class SetupEntitySelection
 
                 return false;
 
-            case EntityKinds.Slice:
+            case SetupEntityKinds.Slice:
                 foreach (var e in setup.Slices)
                 {
                     if (e.Id == id)
@@ -185,11 +171,11 @@ internal sealed class SetupEntitySelection
 
                 return false;
 
-            case EntityKinds.Patch:
+            case SetupEntityKinds.Patch:
                 return setup.FindPatch(id, out _) != null;
 
-            case EntityKinds.ContentSource:
-                // Content rows are addressed by the op's SymbolChildId, not ContentSource.Id. A freshly
+            case SetupEntityKinds.ContentSource:
+                // Content items are addressed by the op's SymbolChildId, not ContentSource.Id. A freshly
                 // created send can be selected before the sync adopts it into the setup, so a live send op
                 // with that child also counts as existing.
                 foreach (var source in setup.ContentSources)
@@ -198,21 +184,21 @@ internal sealed class SetupEntitySelection
                         return true;
                 }
 
-                foreach (var sink in OutputSinkRegistry.Sinks)
+                foreach (var supplier in ContentSupplierRegistry.Suppliers)
                 {
-                    if (sink is Instance instance && instance.SymbolChildId == id)
+                    if (supplier is Instance instance && instance.SymbolChildId == id)
                         return true;
                 }
 
                 return false;
 
-            case EntityKinds.Plug:
+            case SetupEntityKinds.Plug:
                 // Plugs are machine state, not setup state: an attached display, or a stream this machine offers.
                 if (Plugs.TryGetDisplayIndex(id, out var displayIndex))
                     return displayIndex < System.Windows.Forms.Screen.AllScreens.Length;
 
                 return OutputSetupHandling.TryGetActiveSetup(out _, out var machineConfig)
-                       && machineConfig.FindStream(id) != null;
+                       && machineConfig.FindStreamPlug(id) != null;
 
             default:
                 return false;

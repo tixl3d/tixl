@@ -25,14 +25,14 @@ internal sealed partial class SetupOutputView
     {
         public ICanvasProjection View = null!;
         public Vector2 Origin;
-        public bool UseHomography;
+        public bool HasHomography;
         public Homography ToView;
         public Homography FromView;
 
         public Vector2 CanvasToScreen(Vector2 posInCanvas)
         {
             var p = Origin + posInCanvas;
-            if (UseHomography)
+            if (HasHomography)
                 p = ToView.TransformPoint(p);
 
             return View.CanvasToScreen(p);
@@ -41,7 +41,7 @@ internal sealed partial class SetupOutputView
         public Vector2 ScreenToCanvas(Vector2 posOnScreen)
         {
             var p = View.ScreenToCanvas(posOnScreen);
-            if (UseHomography)
+            if (HasHomography)
                 p = FromView.TransformPoint(p);
 
             return p - Origin;
@@ -56,19 +56,19 @@ internal sealed partial class SetupOutputView
                                     SetupEntitySelection? selection, float fade)
     {
         var scale = T3Ui.UiScaleFactor;
-        SurfaceGeometry.ChildBounds(child, out var min, out var max);
+        SurfaceGeometry.RegionBounds(child, out var min, out var max);
         var corners = SurfaceGeometry.RectFromBounds(min, max);
         Span<Vector2> screen = stackalloc Vector2[4];
         for (var c = 0; c < 4; c++)
             screen[c] = projection.CanvasToScreen(corners[c]);
 
-        var isSelected = selection?.IsSelected(SetupEntitySelection.EntityKinds.Surface, child.Id) ?? false;
-        var pulse = isSelected ? 0f : FrameStats.GetPulse(child.Id);
-        var color = PulseColor(SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface).Fade(isSelected ? 1f : 0.6f), pulse).Fade(fade);
+        var isSelected = selection?.IsSelected(SetupEntityKinds.Surface, child.Id) ?? false;
+        var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(child.Id);
+        var color = PulseColor(SetupColors.ForKind(SetupEntityKinds.Surface).Fade(isSelected ? 1f : 0.6f), pulse).Fade(fade);
         var editable = isSelected && fade >= 0.999f;
 
         // The region's own slice, at the preview opacity — over whatever its parent shows underneath.
-        var preview = UserSettings.Config.OutputSetupContentPreview;
+        var preview = UserSettings.Config.OutputSetupContentPreviewOpacity;
         if (preview > 0.01f && OutputManager.TryGetSurfaceSlice(child.Id, out _, out var content, out var uv) && content is { IsDisposed: false })
         {
             var contentSrv = SrvManager.GetSrvForTexture(content);
@@ -90,20 +90,20 @@ internal sealed partial class SetupOutputView
                 bMax = Vector2.Max(bMax, screen[c]);
             }
 
-            _picker.AddTarget(SetupEntitySelection.EntityKinds.Surface, child.Id, bMin, bMax, isBackground: true);
+            _picker.AddTarget(SetupEntityKinds.Surface, child.Id, bMin, bMax, isBackground: true);
         }
 
         if (!editable)
         {
             dl.AddQuad(screen[0], screen[1], screen[2], screen[3], color, 1 * scale);
-            DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screen, child.Id, child.Name, isSelected, 0.9f * fade, pulse, pickable: false);
+            DrawEntityLabel(dl, SetupEntityKinds.Surface, screen, child.Id, child.Name, isSelected, 0.9f * fade, pulse, pickable: false);
             return;
         }
 
         // The body is the move grip; the handles sit on its outline and take precedence, except while a move is live.
         var moveActive = _gesture.Is(GestureKinds.RegionMove, child.Id) || _gesture.Is(GestureKinds.ContentPan, child.Id);
-        var style = CornerPinHandles.Style.ForSurface(null, editable: !moveActive, selected: true, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
-        style.DrawChecker = false;
+        var style = CornerPinHandles.Style.ForSurface(null, editable: !moveActive, selected: true, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
+        style.ShowsChecker = false;
         style.EdgeColor = color;
 
         ImGui.PushID(child.Id.GetHashCode());
@@ -130,7 +130,7 @@ internal sealed partial class SetupOutputView
                                                         {
                                                             // Re-based on the pre-drag rectangle each frame; the opposite corner stays.
                                                             _gesture.Snapshot!.Value.Restore(child);
-                                                            SurfaceGeometry.ChildBounds(child, out var oldMin, out var oldMax);
+                                                            SurfaceGeometry.RegionBounds(child, out var oldMin, out var oldMax);
                                                             var fixedCorner = draggedCorner switch
                                                                                   {
                                                                                       0 => new Vector2(oldMax.X, oldMin.Y),
@@ -153,7 +153,7 @@ internal sealed partial class SetupOutputView
 
                                                             var newMin = Vector2.Min(point, fixedCorner);
                                                             var newMax = Vector2.Max(point, fixedCorner);
-                                                            SurfaceGeometry.SetChildBounds(child, newMin, newMax);
+                                                            SurfaceGeometry.SetRegionBounds(child, newMin, newMax);
                                                         });
         }
         else if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhases.None)
@@ -162,14 +162,14 @@ internal sealed partial class SetupOutputView
                        onStarted: () =>
                                   {
                                       // Plain = crop with the pixels kept in place; Ctrl = stretch, content re-fitted.
-                                      _edgeStretch = ImGui.GetIO().KeyCtrl;
-                                      if (!_edgeStretch)
+                                      _edgeDragStretches = ImGui.GetIO().KeyCtrl;
+                                      if (!_edgeDragStretches)
                                           BeginContentEdit(setup, child);
                                   },
                        onDragging: () =>
                                                       {
                                                           _gesture.Snapshot!.Value.Restore(child);
-                                                          SurfaceGeometry.ChildBounds(child, out var newMin, out var newMax);
+                                                          SurfaceGeometry.RegionBounds(child, out var newMin, out var newMax);
                                                           var oldMin = newMin;
                                                           var oldMax = newMax;
                                                           var pos = edgePos;
@@ -196,20 +196,20 @@ internal sealed partial class SetupOutputView
                                                               default: newMin.X = MathF.Min(pos.X, newMax.X - SurfaceGeometry.MinSize); break;
                                                           }
 
-                                                          SurfaceGeometry.SetChildBounds(child, newMin, newMax);
-                                                          ApplyCropHandling(setup, oldMin, oldMax, newMin, newMax);
+                                                          SurfaceGeometry.SetRegionBounds(child, newMin, newMax);
+                                                          KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
                                                       });
         }
 
         HandleRegionLabelMove(setup, parent, child, projection, screen, thresholds, snapping);
 
         // Re-read: an edit above may have moved the rectangle this frame.
-        SurfaceGeometry.ChildBounds(child, out min, out max);
+        SurfaceGeometry.RegionBounds(child, out min, out max);
         corners = SurfaceGeometry.RectFromBounds(min, max);
         for (var c = 0; c < 4; c++)
             screen[c] = projection.CanvasToScreen(corners[c]);
 
-        DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Surface, screen, child.Id, child.Name, true, fade, pulse, pickable: false);
+        DrawEntityLabel(dl, SetupEntityKinds.Surface, screen, child.Id, child.Name, true, fade, pulse, pickable: false);
 
         // The region's own anchor — the origin of its space, what its own children measure from.
         DrawAnchorGlyph(dl, projection.CanvasToScreen(child.LocalPosition + child.AnchorInMeters), fade);
@@ -256,7 +256,7 @@ internal sealed partial class SetupOutputView
                                       if (panning)
                                       {
                                           if (_gesture.EditsContent)
-                                              CropHandling.ApplyPan(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, delta, size);
+                                              SliceUvAnchoring.ApplyPan(setup, _gesture.ContentSliceId, _gesture.ContentUvStart, delta, size);
 
                                           return;
                                       }
@@ -275,7 +275,7 @@ internal sealed partial class SetupOutputView
                                       }
 
                                       _gesture.Snapshot!.Value.Restore(child);
-                                      SurfaceGeometry.SetChildBounds(child, newMin, newMin + size);
+                                      SurfaceGeometry.SetRegionBounds(child, newMin, newMin + size);
                                   },
                       onStarted: () =>
                                  {
@@ -285,7 +285,6 @@ internal sealed partial class SetupOutputView
                                  });
     }
 
-    /// <summary>A constant screen distance (7 px) in the parent's units, per axis.</summary>
     private static bool IsPointInQuadBounds(ReadOnlySpan<Vector2> screenQuad, Vector2 p)
     {
         var min = screenQuad[0];
@@ -299,6 +298,7 @@ internal sealed partial class SetupOutputView
         return p.X >= min.X && p.X <= max.X && p.Y >= min.Y && p.Y <= max.Y;
     }
 
+    /// <summary>A constant screen distance (7 px) in the parent's units, per axis.</summary>
     private static Vector2 RegionSnapThresholds(RegionProjection projection, Surface parent)
     {
         var probe = MathF.Max(MathF.Min(parent.SizeInMeters.X, parent.SizeInMeters.Y) * 0.05f, 0.0001f);

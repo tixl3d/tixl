@@ -50,7 +50,7 @@ internal sealed class OutputWindowState
 
     // Setup-entity pin (the setup-editing view's pin; orthogonal to the op-instance pin above)
     [JsonConverter(typeof(StringEnumConverter))]
-    public SetupEntitySelection.EntityKinds PinnedEntityKind = SetupEntitySelection.EntityKinds.None;
+    public SetupEntityKinds PinnedEntityKind = SetupEntityKinds.None;
 
     public Guid PinnedEntityId = Guid.Empty;
 

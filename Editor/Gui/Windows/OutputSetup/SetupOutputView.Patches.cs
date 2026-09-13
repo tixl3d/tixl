@@ -28,14 +28,14 @@ internal sealed partial class SetupOutputView
     /// label moves it whole. Every edit snaps to the canvas edges and to the other patches, so tiles butt up.
     /// </summary>
     private void DrawPatches(Setup setup, OutputDefinition output, SetupEntitySelection? selection, ImDrawListPtr dl,
-                             Homography rToView, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize,
+                             Homography rectifiedToView, Homography rectifiedToOutput, Vector2 viewMin, Vector2 canvasSize,
                              bool editable, float fade, bool hasContent)
     {
         if (output.Patches.Count == 0 || fade <= 0.01f)
             return;
 
         var focusedPatchId = selection != null && selection.Targets.Count > 0
-                             && selection.Targets[0].Kind == SetupEntitySelection.EntityKinds.Patch
+                             && selection.Targets[0].Kind == SetupEntityKinds.Patch
                                  ? selection.Targets[0].EntityId
                                  : Guid.Empty;
 
@@ -59,7 +59,7 @@ internal sealed partial class SetupOutputView
             LoadPatchPixels(patch, canvasSize);
             for (var c = 0; c < 4; c++)
             {
-                _patchViewQuad[c] = rToView.TransformPoint(_patchPx[c]) - viewMin;
+                _patchViewQuad[c] = rectifiedToView.TransformPoint(_patchPx[c]) - viewMin;
                 screen[c] = _projection.CanvasToScreen(_patchViewQuad[c]);
             }
 
@@ -69,23 +69,23 @@ internal sealed partial class SetupOutputView
             // second name for it. The label (and the whole-tile move it carries) appears with the promotion.
             var label = isImplicit ? string.Empty : SetupActions.PatchLabel(output, patch);
             var isFocused = patch.Id == focusedPatchId;
-            var isSelected = isFocused || (selection?.IsSelected(SetupEntitySelection.EntityKinds.Patch, patch.Id) ?? false);
-            var pulse = isSelected ? 0f : FrameStats.GetPulse(patch.Id);
+            var isSelected = isFocused || (selection?.IsSelected(SetupEntityKinds.Patch, patch.Id) ?? false);
+            var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(patch.Id);
 
-            var style = CornerPinHandles.Style.ForSurface(null, editable, isSelected, fade, hue: SetupColors.ForKind(SetupEntitySelection.EntityKinds.Surface));
-            style.DrawChecker = !hasContent;
+            var style = CornerPinHandles.Style.ForSurface(null, editable, isSelected, fade, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
+            style.ShowsChecker = !hasContent;
             style.EdgeColor = PulseColor(style.EdgeColor, pulse);
 
             // Same label-over-handle rule as surfaces: the label is the grab area, so handles under it yield.
             var handleActive = _gesture.HotId == patch.Id && _gesture.Kind is GestureKinds.PatchQuad or GestureKinds.PatchMove;
             var pointerOverLabel = !handleActive && !isImplicit && IsMouseOverLabel(screen, label);
-            style.Editable = editable && !pointerOverLabel && !_isolate;
+            style.IsEditable = editable && !pointerOverLabel && !_isolatesFocusedSurface;
 
             var phase = CornerPinHandles.Draw(_patchViewQuad, _projection, style, out var draggedCorner, out var cornerHovered);
             if (phase != CanvasPointHandle.DragPhases.None)
             {
                 for (var c = 0; c < 4; c++)
-                    _patchPx[c] = rToOutput.TransformPoint(_patchViewQuad[c] + viewMin);
+                    _patchPx[c] = rectifiedToOutput.TransformPoint(_patchViewQuad[c] + viewMin);
 
                 if (phase == CanvasPointHandle.DragPhases.Dragging && draggedCorner >= 0 && !ImGui.GetIO().KeyShift)
                 {
@@ -108,25 +108,25 @@ internal sealed partial class SetupOutputView
 
             // The label doubles as the move handle — the press selects (through the picker), holding on moves.
             if (phase == CanvasPointHandle.DragPhases.None && !isImplicit)
-                HandlePatchMove(setup, output, patch, isFocused, editable && !_isolate, label, screen, rToView, rToOutput, viewMin, canvasSize);
+                HandlePatchMove(setup, output, patch, isFocused, editable && !_isolatesFocusedSurface, label, screen, rectifiedToView, rectifiedToOutput, viewMin, canvasSize);
 
             if (cornerHovered || phase != CanvasPointHandle.DragPhases.None)
-                FrameStats.PulseItemWithId(patch.Id);
+                FrameStats.RequestCrossHighlight(patch.Id);
 
-            if (phase == CanvasPointHandle.DragPhases.Started && !_isolate)
-                selection?.Select(SetupEntitySelection.EntityKinds.Patch, patch.Id);
+            if (phase == CanvasPointHandle.DragPhases.Started && !_isolatesFocusedSurface)
+                selection?.Select(SetupEntityKinds.Patch, patch.Id);
 
             // Edge handles for the focused patch only: an edge crops the tile, keeping the opposite edge put.
-            if (style.Editable && isFocused)
+            if (style.IsEditable && isFocused)
             {
                 var edgePhase = CornerPinHandles.DrawEdgeHandles(_patchViewQuad, _projection, style, out var edge, out var edgePos);
                 if (edge >= 0)
-                    HandlePatchEdgeDrag(edgePhase, setup, output, patch, edge, edgePos, rToOutput, viewMin, canvasSize);
+                    HandlePatchEdgeDrag(edgePhase, setup, output, patch, edge, edgePos, rectifiedToOutput, viewMin, canvasSize);
             }
 
             ImGui.PopID();
             if (!isImplicit)
-                DrawEntityLabel(dl, SetupEntitySelection.EntityKinds.Patch, screen, patch.Id, label, isSelected, fade, pulse);
+                DrawEntityLabel(dl, SetupEntityKinds.Patch, screen, patch.Id, label, isSelected, fade, pulse);
 
             if (patch.QuarterTurns != 0)
                 DrawPictureTopMarker(dl, screen, patch.QuarterTurns, style.EdgeColor.Fade(fade));
@@ -156,7 +156,7 @@ internal sealed partial class SetupOutputView
     }
 
     private void HandlePatchMove(Setup setup, OutputDefinition output, OutputDefinition.Patch patch, bool isFocused, bool editable, string label,
-                                 ReadOnlySpan<Vector2> screen, Homography rToView, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize)
+                                 ReadOnlySpan<Vector2> screen, Homography rectifiedToView, Homography rectifiedToOutput, Vector2 viewMin, Vector2 canvasSize)
     {
         var movePhase = CanvasPointHandle.DragPhases.None;
         if (_gesture.Is(GestureKinds.PatchMove, patch.Id))
@@ -185,7 +185,7 @@ internal sealed partial class SetupOutputView
                 // Rigid in view space, carried through R per corner — the same rule as a surface move.
                 var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
                 for (var c = 0; c < 4; c++)
-                    _patchPx[c] = rToOutput.TransformPoint(rToView.TransformPoint(_patchOldQuad[c]) + moveDelta);
+                    _patchPx[c] = rectifiedToOutput.TransformPoint(rectifiedToView.TransformPoint(_patchOldQuad[c]) + moveDelta);
 
                 if (!ImGui.GetIO().KeyShift)
                 {
@@ -230,7 +230,7 @@ internal sealed partial class SetupOutputView
     /// by the full delta (a shear). Re-based from the pre-drag quad each frame, so the edit doesn't compound.
     /// </summary>
     private void HandlePatchEdgeDrag(CanvasPointHandle.DragPhases phase, Setup setup, OutputDefinition output, OutputDefinition.Patch patch,
-                                     int edge, Vector2 viewPos, Homography rToOutput, Vector2 viewMin, Vector2 canvasSize)
+                                     int edge, Vector2 viewPos, Homography rectifiedToOutput, Vector2 viewMin, Vector2 canvasSize)
     {
         if (phase == CanvasPointHandle.DragPhases.Started)
             RunPatchQuadDrag(phase, setup, patch, canvasSize);
@@ -239,7 +239,7 @@ internal sealed partial class SetupOutputView
         {
             var e0 = edge;
             var e1 = (edge + 1) % 4;
-            var pos = rToOutput.TransformPoint(viewPos + viewMin);
+            var pos = rectifiedToOutput.TransformPoint(viewPos + viewMin);
             var midpoint = (_patchOldQuad[e0] + _patchOldQuad[e1]) * 0.5f;
             var delta = pos - midpoint;
 

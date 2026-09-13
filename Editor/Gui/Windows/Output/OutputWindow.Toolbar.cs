@@ -319,7 +319,4 @@ internal sealed partial class OutputWindow
 
         dl.AddRectFilled(p, p + new Vector2(size.X * (float)progress, size.Y), UiColors.StatusAttention);
     }
-
-    /// <summary>
-    /// Update content with an <see cref="Core.Operator.EvaluationContext"/> and use the DrawImplementation for the given type to draw it. 
 }

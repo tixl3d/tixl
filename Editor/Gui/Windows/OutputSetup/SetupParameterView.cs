@@ -49,28 +49,28 @@ internal static class SetupParameterView
 
         switch (kind)
         {
-            case SetupEntitySelection.EntityKinds.Surface:
+            case SetupEntityKinds.Surface:
                 DrawSurfaceCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKinds.Output:
+            case SetupEntityKinds.Output:
                 DrawOutputCard(setup, machineConfig, id);
                 break;
-            case SetupEntitySelection.EntityKinds.ContentSource:
+            case SetupEntityKinds.ContentSource:
                 DrawContentCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKinds.Slice:
+            case SetupEntityKinds.Slice:
                 DrawSliceCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKinds.ReferenceImage:
+            case SetupEntityKinds.ReferenceImage:
                 DrawReferenceImageCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKinds.Prop:
+            case SetupEntityKinds.Prop:
                 DrawPropCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKinds.Patch:
+            case SetupEntityKinds.Patch:
                 DrawPatchCard(setup, id);
                 break;
-            case SetupEntitySelection.EntityKinds.Plug:
+            case SetupEntityKinds.Plug:
                 DrawPlugCard(setup, machineConfig, id);
                 break;
         }
@@ -92,7 +92,7 @@ internal static class SetupParameterView
     /// </summary>
     public static void DrawSendExtras(Instance instance)
     {
-        if (instance is not IOutputSink sink)
+        if (instance is not IContentSupplier supplier)
             return;
 
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
@@ -110,7 +110,7 @@ internal static class SetupParameterView
         _sendContext.RequestedResolution = OutputManager.RequestedResolutionFor(setup, instance.SymbolChildId);
 
         Span<int> resolution = [1, 1];
-        var content = sink.GetContent(_sendContext);
+        var content = supplier.GetContent(_sendContext);
         if (content is { IsDisposed: false })
         {
             resolution[0] = content.Description.Width;
@@ -152,19 +152,19 @@ internal static class SetupParameterView
         GuidListLabels.Picker = PickTarget;
     }
 
-    private static void DrawHeader(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id)
+    private static void DrawHeader(Setup setup, SetupEntityKinds kind, Guid id)
     {
         var (icon, kindLabel) = kind switch
                                     {
-                                        SetupEntitySelection.EntityKinds.Surface when IsRegion(setup, id) => (Icon.Grid, "Region"),
-                                        SetupEntitySelection.EntityKinds.Surface => (Icon.Grid, "Surface"),
-                                        SetupEntitySelection.EntityKinds.Output => (Icon.Projector, "Output"),
-                                        SetupEntitySelection.EntityKinds.Slice => (Icon.Slice, "Slice"),
-                                        SetupEntitySelection.EntityKinds.ContentSource => (Icon.FileImage, "Content"),
-                                        SetupEntitySelection.EntityKinds.ReferenceImage => (Icon.FileImage, "Reference Image"),
-                                        SetupEntitySelection.EntityKinds.Prop => (Icon.Grid, "Prop"),
-                                        SetupEntitySelection.EntityKinds.Patch => (Icon.Patch, "Patch"),
-                                        SetupEntitySelection.EntityKinds.Plug => (Icon.PlayOutput, "Plug"),
+                                        SetupEntityKinds.Surface when IsRegion(setup, id) => (Icon.Grid, "Region"),
+                                        SetupEntityKinds.Surface => (Icon.Grid, "Surface"),
+                                        SetupEntityKinds.Output => (Icon.Projector, "Output"),
+                                        SetupEntityKinds.Slice => (Icon.Slice, "Slice"),
+                                        SetupEntityKinds.ContentSource => (Icon.FileImage, "Content"),
+                                        SetupEntityKinds.ReferenceImage => (Icon.FileImage, "Reference Image"),
+                                        SetupEntityKinds.Prop => (Icon.Grid, "Prop"),
+                                        SetupEntityKinds.Patch => (Icon.Patch, "Patch"),
+                                        SetupEntityKinds.Plug => (Icon.PlayOutput, "Plug"),
                                         _ => (Icon.Grid, kind.ToString()),
                                     };
 
@@ -176,13 +176,13 @@ internal static class SetupParameterView
 
         // Props carry no name; a content source's name is its op (rename cascades through the sync); a
         // display's name comes from the OS.
-        var namedByOs = kind == SetupEntitySelection.EntityKinds.Plug && Plugs.TryGetDisplayIndex(id, out _);
-        if (kind != SetupEntitySelection.EntityKinds.Prop && !namedByOs)
+        var namedByOs = kind == SetupEntityKinds.Plug && Plugs.TryGetDisplayIndex(id, out _);
+        if (kind != SetupEntityKinds.Prop && !namedByOs)
             DrawNameField(setup, kind, id);
     }
 
     /// <summary>Editable name, committed as one undoable rename when the field loses focus.</summary>
-    private static void DrawNameField(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id)
+    private static void DrawNameField(Setup setup, SetupEntityKinds kind, Guid id)
     {
         var currentName = SetupActions.NameForEntity(kind, id);
         if (_renameTargetId != id)
@@ -209,9 +209,9 @@ internal static class SetupParameterView
         if (surface == null)
             return;
 
-        var render = surface.Render;
+        var render = surface.IsRendered;
         if (FormInputs.AddCheckBox("Render", ref render, "Skip drawing this surface without removing it."))
-            SetupActions.RunUndoable("Toggle render", setup, () => surface.Render = render);
+            SetupActions.RunUndoable("Toggle render", setup, () => surface.IsRendered = render);
 
         var position = surface.Placement?.Pose.Position ?? Vector3.Zero;
         Span<float> pos = [position.X, position.Y, position.Z];
@@ -226,7 +226,7 @@ internal static class SetupParameterView
         CommitFieldUndo(setup, "Move surface", posState);
 
         // A Layout child inherits its parent's plane, so it's placed in the parent's local space instead of the stage.
-        if (surface.Kind == Surface.SurfaceKinds.Layout)
+        if (surface.Kind == Surface.Kinds.Layout)
         {
             Span<float> local = [surface.LocalPosition.X, surface.LocalPosition.Y];
             var localState = DrawFloatsRow("Position in parent (m)", local,
@@ -246,9 +246,9 @@ internal static class SetupParameterView
         // Locking keeps the current width/height ratio while resizing — the edited axis drives, the other follows.
         ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
         if (CustomComponents.IconButton(Icon.Link, Vector2.Zero,
-                                        surface.LockAspect ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+                                        surface.IsAspectLocked ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
         {
-            SetupActions.RunUndoable("Lock aspect", setup, () => surface.LockAspect = !surface.LockAspect);
+            SetupActions.RunUndoable("Lock aspect", setup, () => surface.IsAspectLocked = !surface.IsAspectLocked);
         }
 
         CustomComponents.TooltipForLastItem("Lock aspect ratio", "Resizing keeps the current width-to-height ratio.");
@@ -269,7 +269,7 @@ internal static class SetupParameterView
         // A re-metering: lines and regions scale along, nothing moves on the wall. One undo step per gesture.
         BeginFieldUndo(setup, sizeState);
         if ((sizeState & InputEditStateFlags.Modified) != 0)
-            SetupActions.RemeterSurface(setup, surface, ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.LockAspect));
+            SetupActions.RemeterSurface(setup, surface, ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.IsAspectLocked));
 
         CommitFieldUndo(setup, "Resize surface", sizeState);
 
@@ -308,9 +308,9 @@ internal static class SetupParameterView
         if (output == null)
             return;
 
-        var send = output.Send;
+        var send = output.IsSending;
         if (FormInputs.AddCheckBox("Send", ref send, "Pause presenting without dropping the display binding."))
-            SetupActions.RunUndoable("Toggle send", setup, () => output.Send = send);
+            SetupActions.RunUndoable("Toggle send", setup, () => output.IsSending = send);
 
         // The canvas every route onto this output is measured in, and what its content is asked to render at:
         // an unset resolution upstream (a RenderTarget at 0×0) resolves to this, so it is the one place the
@@ -330,7 +330,7 @@ internal static class SetupParameterView
 
         CommitFieldUndo(setup, "Resize canvas", canvasState);
 
-        var binding = machineConfig.TryGetBinding(output.Id);
+        var binding = machineConfig.FindBinding(output.Id);
         var boundTo = binding == null ? "unbound" : Plugs.BindingLabel(machineConfig, binding);
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(output.FollowsPlug
@@ -365,7 +365,7 @@ internal static class SetupParameterView
             return;
         }
 
-        var stream = machineConfig.FindStream(id);
+        var stream = machineConfig.FindStreamPlug(id);
         if (stream == null)
             return;
 
@@ -429,31 +429,31 @@ internal static class SetupParameterView
     private static void DrawContentCard(Setup setup, Guid childId)
     {
         var instance = SetupActions.FindSendInstance(childId);
-        if (instance is not IOutputSink sink)
+        if (instance is not IContentSupplier supplier)
             return;
 
         _sendContext ??= new EvaluationContext();
         _sendContext.Reset();
         _sendContext.RequestedResolution = OutputManager.RequestedResolutionFor(setup, instance.SymbolChildId);
 
-        var update = sink.GetUpdateEnabled(_sendContext);
+        var update = supplier.GetUpdateEnabled(_sendContext);
         if (FormInputs.AddCheckBox("Update", ref update, "When off, freezes this content at its last frame."))
-            SetInputUndoable(instance, sink.UpdateInput, update);
+            SetInputUndoable(instance, supplier.UpdateInput, update);
 
         // 0×0 means "whatever the output asks for", so the content follows the projector or display it is routed
         // to; a set value pins it. The line underneath says what that resolves to right now.
-        var requested = sink.GetResolution(_sendContext);
+        var requested = supplier.GetResolution(_sendContext);
         Span<int> resolution = [requested.Width, requested.Height];
         var state = DrawIntsRow("Render at (px)", resolution,
                                 "0 follows the output this content is routed to. Set a size to render at it regardless.");
         if ((state & InputEditStateFlags.Modified) != 0)
         {
-            SetInputUndoable(instance, sink.ResolutionInput,
+            SetInputUndoable(instance, supplier.ResolutionInput,
                              new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution[0], 0, 16384),
                                                                Math.Clamp(resolution[1], 0, 16384)));
         }
 
-        var content = sink.GetContent(_sendContext);
+        var content = supplier.GetContent(_sendContext);
         FormInputs.ApplyIndent();
         CustomComponents.StylizedText(content is { IsDisposed: false }
                                           ? $"rendering {content.Description.Width}×{content.Description.Height}"
@@ -701,7 +701,6 @@ internal static class SetupParameterView
         return result;
     }
 
-    /// <summary>Integer counterpart of <see cref="DrawFloatsRow"/>.</summary>
     /// <summary>
     /// The unit the rect fields below read in. Quads and slice rects are stored as ratios of what they sit on,
     /// so pixels are a presentation: handy while aiming at a projector's raster, wrong once the canvas changes
@@ -717,7 +716,7 @@ internal static class SetupParameterView
         }
     }
 
-    private static bool EditsInPixels => UserSettings.Config.OutputSetupEditUnits == SetupEditUnits.Pixels;
+    private static bool EditsInPixels => UserSettings.Config.OutputSetupEditUnits == OutputSetupEditUnits.Pixels;
 
     /// <summary>A ratio shown in the current unit, against the size of what it sits on.</summary>
     private static float ToUnit(float ratio, float extent) => EditsInPixels ? ratio * extent : ratio;
@@ -753,6 +752,7 @@ internal static class SetupParameterView
         return result;
     }
 
+    /// <summary>Integer counterpart of <see cref="DrawFloatsRow"/>.</summary>
     private static InputEditStateFlags DrawIntsRow(string label, Span<int> values, string? tooltip = null, bool readOnly = false)
     {
         var size = BeginValuesRow(label, tooltip, values.Length, readOnly, 0, out var gap);
@@ -889,7 +889,7 @@ internal static class SetupParameterView
     {
         // The two roles must never read alike: a plane-root is a Surface, a coplanar child is a Region.
         var surface = setup.FindSurface(id);
-        return surface is { Kind: Surface.SurfaceKinds.Layout } && surface.ParentId != Guid.Empty;
+        return surface is { Kind: Surface.Kinds.Layout } && surface.ParentId != Guid.Empty;
     }
 
     /// <summary>Full-width dropdown for a SendToOutput target-id list item: lists the active setup's surfaces

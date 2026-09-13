@@ -24,9 +24,9 @@ internal static class CornerPinHandles
         public Color LabelColor;
         public Color LabelBackgroundColor;
         public Color CheckerColor;
-        public bool DrawChecker;
+        public bool ShowsChecker;
         public string? Label;
-        public bool Editable;
+        public bool IsEditable;
 
         /// <summary>Squares read as "crop along the edge"; a caller whose edge drag scales instead shows circles.</summary>
         public CanvasPointHandle.Shapes EdgeHandleShape;
@@ -56,9 +56,9 @@ internal static class CornerPinHandles
                                                       ? frame.Fade(emphasis)
                                                       : UiColors.BackgroundFull.Fade(0.6f * emphasis),
                            CheckerColor = UiColors.ForegroundFull.Fade(0.06f * emphasis),
-                           DrawChecker = true,
+                           ShowsChecker = true,
                            Label = label,
-                           Editable = editable,
+                           IsEditable = editable,
                            EdgeHandleShape = CanvasPointHandle.Shapes.Square,
                        };
         }
@@ -90,8 +90,8 @@ internal static class CornerPinHandles
         for (var i = 0; i < 4; i++)
             screen[i] = projection.CanvasToScreen(corners[i]);
 
-        if (style.DrawChecker)
-            DrawChecker(dl, corners, projection, style.CheckerColor);
+        if (style.ShowsChecker)
+            ShowsChecker(dl, corners, projection, style.CheckerColor);
 
         var edgeThickness = (style.EdgeThickness > 0 ? style.EdgeThickness : 1.5f) * T3Ui.UiScaleFactor;
         for (var i = 0; i < 4; i++)
@@ -106,7 +106,7 @@ internal static class CornerPinHandles
             ImGui.PushID(i);
             // Corners are circles, edge handles squares — the anchor marker shows orientation, so the corners
             // don't need a winding cue of their own.
-            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shapes.Circle, style.Editable);
+            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, CanvasPointHandle.Shapes.Circle, style.IsEditable);
             handleStyle.OutlineColor = style.HandleOutlineColor;
 
             // A selected corner reads as part of the active set: filled in the frame's hue, bright rim, a touch larger.
@@ -124,7 +124,7 @@ internal static class CornerPinHandles
                 draggedCorner = i;
             }
 
-            hovered |= style.Editable && (ImGui.IsItemHovered() || ImGui.IsItemActive());
+            hovered |= style.IsEditable && (ImGui.IsItemHovered() || ImGui.IsItemActive());
             ImGui.PopID();
         }
 
@@ -160,7 +160,7 @@ internal static class CornerPinHandles
         {
             ImGui.PushID(i);
             var midpoint = (corners[i] + corners[(i + 1) % 4]) * 0.5f;
-            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, style.EdgeHandleShape, style.Editable);
+            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, style.EdgeHandleShape, style.IsEditable);
             handleStyle.OutlineColor = style.HandleOutlineColor;
             handleStyle.Radius = 4;
 
@@ -172,7 +172,7 @@ internal static class CornerPinHandles
                 draggedPosition = midpoint;
             }
 
-            hovered |= style.Editable && (ImGui.IsItemHovered() || ImGui.IsItemActive());
+            hovered |= style.IsEditable && (ImGui.IsItemHovered() || ImGui.IsItemActive());
             ImGui.PopID();
         }
 
@@ -180,7 +180,7 @@ internal static class CornerPinHandles
         return phase;
     }
 
-    private static void DrawChecker(ImDrawListPtr dl, Vector2[] corners, ICanvasProjection projection, Color color)
+    private static void ShowsChecker(ImDrawListPtr dl, Vector2[] corners, ICanvasProjection projection, Color color)
     {
         const int cellsX = 6;
         const int cellsY = 4;

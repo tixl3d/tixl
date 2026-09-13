@@ -23,9 +23,9 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// <summary>
 /// The Flow Outliner: the strip under the output canvas that lays the setup out along its content flow —
 /// CONTENT → SURFACES → OUTPUTS → LOCAL BINDINGS as columns, with a shelf for reference images and props
-/// at the right end. Rows are <see cref="EntityItem"/>s (surfaces nest by <see cref="Surface.ParentId"/>,
+/// at the right end. Items are <see cref="EntityItem"/>s (surfaces nest by <see cref="Surface.ParentId"/>,
 /// slices under their source, patches under their output); the relationships between them light up
-/// through the gutters and the connections drawn between the columns. CONTENT lists the live <see cref="IOutputSink"/> ops, everything else the active
+/// through the gutters and the connections drawn between the columns. CONTENT lists the live <see cref="IContentSupplier"/> ops, everything else the active
 /// setup; LOCAL BINDINGS is this machine's inventory of plugs.
 /// </summary>
 internal sealed class SetupFlowOutliner
@@ -39,8 +39,8 @@ internal sealed class SetupFlowOutliner
     }
 
     /// <param name="onToggleCollapse">Collapses the strip to its header bar, or expands it again.</param>
-    /// <param name="bodyVisible">False while collapsed: only the header row draws.</param>
-    /// <param name="drawGrip">The strip's resize grip, drawn first in the header row.</param>
+    /// <param name="bodyVisible">False while collapsed: only the header draws.</param>
+    /// <param name="drawGrip">The strip's resize grip, drawn first in the header.</param>
     /// <param name="drawToolbar">The canvas' toolbar (mode switch and its actions), drawn after the setup switcher.</param>
     /// <param name="drawMenuExtras">Window-level entries appended to the setup menu (outliner toggle, pin).</param>
     public void Draw(SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible,
@@ -53,9 +53,7 @@ internal sealed class SetupFlowOutliner
             return;
         }
 
-        // (The hover cross-highlight border was removed — selection now shows its source via the "→|" marker.)
-
-        _pendingHoveredKind = SetupEntitySelection.EntityKinds.None;
+        _pendingHoveredKind = SetupEntityKinds.None;
         _pendingHoveredId = Guid.Empty;
 
         // Labels and the connection list follow the structure, not the frame.
@@ -80,7 +78,7 @@ internal sealed class SetupFlowOutliner
         _hoveredId = _pendingHoveredId;
     }
 
-    /// <summary>Grip · setup switcher · the canvas' toolbar · collapse toggle at the right — one row that is
+    /// <summary>Grip · setup switcher · the canvas' toolbar · collapse toggle at the right — one strip that is
     /// the whole window's toolbar while the strip is shown.</summary>
     private void DrawHeader(Setup setup, SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible,
                             Action? drawGrip, Action? drawToolbar)
@@ -155,7 +153,7 @@ internal sealed class SetupFlowOutliner
 
     /// <summary>
     /// The columns side by side inside one shared vertical scroll region: the four flow columns split the
-    /// width left of the shelf equally. Each column draws its header and rows at its own x; the tallest one
+    /// width left of the shelf equally. Each column draws its header and items at its own x; the tallest one
     /// sets the scroll extent.
     /// </summary>
     private void DrawColumns(Setup setup, MachineConfig machineConfig, SetupEntitySelection selection)
@@ -163,7 +161,7 @@ internal sealed class SetupFlowOutliner
         var scale = T3Ui.UiScaleFactor;
         ImGui.BeginChild("##outlinerBody", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
 
-        // Right-drag pans the list, as it does in the parameter popup. The row menus already ignore a right
+        // Right-drag pans the list, as it does in the parameter popup. The item menus already ignore a right
         // release that came from a drag, so the two gestures don't fight over the button.
         CustomComponents.HandleDragScrolling(this);
 
@@ -183,22 +181,22 @@ internal sealed class SetupFlowOutliner
         var gap = ColumnGap * scale;
 
         BeginColumn(origin.X + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("CONTENT", "##addContent", selection, SetupActions.AddContentSend, SetupEntitySelection.EntityKinds.ContentSource);
+        DrawColumnHeader("CONTENT", "##addContent", selection, SetupActions.AddContentSend, SetupEntityKinds.ContentSource);
         DrawContentSends(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("SURFACES", "##addSurface", selection, SetupActions.AddSurface, SetupEntitySelection.EntityKinds.Surface);
+        DrawColumnHeader("SURFACES", "##addSurface", selection, SetupActions.AddSurface, SetupEntityKinds.Surface);
         DrawSurfaces(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + 2 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput, SetupEntitySelection.EntityKinds.Output);
+        DrawColumnHeader("OUTPUTS", "##addOutput", selection, SetupActions.AddOutput, SetupEntityKinds.Output);
         DrawOutputs(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + 3 * columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("LOCAL BINDINGS", "##addPlug", selection, _requestAddPlugMenu, SetupEntitySelection.EntityKinds.Plug);
+        DrawColumnHeader("LOCAL BINDINGS", "##addPlug", selection, _requestAddPlugMenu, SetupEntityKinds.Plug);
         DrawLocalBindings(selection, setup, machineConfig);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -262,10 +260,10 @@ internal sealed class SetupFlowOutliner
         foreach (var surface in setup.Surfaces)
         {
             if (surface.SliceId != Guid.Empty)
-                _connections.Add(new Connection(SetupEntitySelection.EntityKinds.Slice, surface.SliceId, SetupEntitySelection.EntityKinds.Surface, surface.Id));
+                _connections.Add(new Connection(SetupEntityKinds.Slice, surface.SliceId, SetupEntityKinds.Surface, surface.Id));
 
             foreach (var mapping in surface.OutputMappings)
-                _connections.Add(new Connection(SetupEntitySelection.EntityKinds.Surface, surface.Id, SetupEntitySelection.EntityKinds.Output, mapping.OutputId));
+                _connections.Add(new Connection(SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Output, mapping.OutputId));
         }
 
         foreach (var output in setup.Outputs)
@@ -277,21 +275,21 @@ internal sealed class SetupFlowOutliner
             {
                 _patchLabels[patch.Id] = SetupActions.PatchLabel(output, patch);
                 if (patch.SliceId != Guid.Empty)
-                    _connections.Add(new Connection(SetupEntitySelection.EntityKinds.Slice, patch.SliceId, SetupEntitySelection.EntityKinds.Patch, patch.Id));
+                    _connections.Add(new Connection(SetupEntityKinds.Slice, patch.SliceId, SetupEntityKinds.Patch, patch.Id));
             }
 
-            var binding = machineConfig.TryGetBinding(output.Id);
+            var binding = machineConfig.FindBinding(output.Id);
             if (binding != null)
-                _connections.Add(new Connection(SetupEntitySelection.EntityKinds.Output, output.Id, SetupEntitySelection.EntityKinds.Plug, Plugs.BoundPlugId(binding)));
+                _connections.Add(new Connection(SetupEntityKinds.Output, output.Id, SetupEntityKinds.Plug, Plugs.BoundPlugId(binding)));
         }
     }
 
-    private readonly record struct Connection(SetupEntitySelection.EntityKinds FromKind, Guid FromId,
-                                              SetupEntitySelection.EntityKinds ToKind, Guid ToId);
+    private readonly record struct Connection(SetupEntityKinds FromKind, Guid FromId,
+                                              SetupEntityKinds ToKind, Guid ToId);
 
     private void DrawConnection(ImDrawListPtr dl, SetupEntitySelection selection,
-                          SetupEntitySelection.EntityKinds fromKind, Guid fromId,
-                          SetupEntitySelection.EntityKinds toKind, Guid toId, Setup setup)
+                          SetupEntityKinds fromKind, Guid fromId,
+                          SetupEntityKinds toKind, Guid toId, Setup setup)
     {
         if (!TryGetAnchor(setup, fromKind, fromId, out var from) || !TryGetAnchor(setup, toKind, toId, out var to))
             return;
@@ -310,13 +308,13 @@ internal sealed class SetupFlowOutliner
         dl.AddBezierCubic(a, a + new Vector2(reach, 0), b - new Vector2(reach, 0), b, color, thickness);
     }
 
-    private bool IsEmphasized(SetupEntitySelection selection, SetupEntitySelection.EntityKinds kind, Guid id)
+    private bool IsEmphasized(SetupEntitySelection selection, SetupEntityKinds kind, Guid id)
     {
-        return (_hoveredKind == kind && _hoveredId == id) || (kind != SetupEntitySelection.EntityKinds.None && selection.IsSelected(kind, id));
+        return (_hoveredKind == kind && _hoveredId == id) || (kind != SetupEntityKinds.None && selection.IsSelected(kind, id));
     }
 
     /// <summary>The item's connection attachment, or its nearest drawn parent's when it is folded away.</summary>
-    private bool TryGetAnchor(Setup setup, SetupEntitySelection.EntityKinds kind, Guid id, out Anchor anchor)
+    private bool TryGetAnchor(Setup setup, SetupEntityKinds kind, Guid id, out Anchor anchor)
     {
         for (var guard = 0; guard < 8; guard++)
         {
@@ -332,24 +330,24 @@ internal sealed class SetupFlowOutliner
             // Not drawn — fold up one level and try again.
             switch (kind)
             {
-                case SetupEntitySelection.EntityKinds.Slice:
+                case SetupEntityKinds.Slice:
                     var source = setup.FindSource(setup.FindSlice(id)?.SourceId ?? Guid.Empty);
                     if (source == null)
                         goto fail;
 
-                    kind = SetupEntitySelection.EntityKinds.ContentSource;
+                    kind = SetupEntityKinds.ContentSource;
                     id = source.SymbolChildId;
                     break;
 
-                case SetupEntitySelection.EntityKinds.Patch:
+                case SetupEntityKinds.Patch:
                     if (setup.FindPatch(id, out var owner) == null || owner == null)
                         goto fail;
 
-                    kind = SetupEntitySelection.EntityKinds.Output;
+                    kind = SetupEntityKinds.Output;
                     id = owner.Id;
                     break;
 
-                case SetupEntitySelection.EntityKinds.Surface:
+                case SetupEntityKinds.Surface:
                     var parentId = setup.FindSurface(id)?.ParentId ?? Guid.Empty;
                     if (parentId == Guid.Empty)
                         goto fail;
@@ -368,9 +366,9 @@ internal sealed class SetupFlowOutliner
     }
 
     /// <summary>Where an item's connections attach: its left and right x and its vertical centre, in screen px.</summary>
-    private readonly record struct Anchor(SetupEntitySelection.EntityKinds Kind, Guid Id, float Left, float Right, float Y);
+    private readonly record struct Anchor(SetupEntityKinds Kind, Guid Id, float Left, float Right, float Y);
 
-    /// <summary>Points the cursor at a column's top and tells the rows how wide they are.</summary>
+    /// <summary>Points the cursor at a column's top and tells the items how wide they are.</summary>
     private void BeginColumn(float x, float y, float width)
     {
         _columnMinX = x;
@@ -380,7 +378,7 @@ internal sealed class SetupFlowOutliner
 
     /// <summary>A column's persistent title, tinted in its kind's colour, with its `+` at the right end (none for the plug inventory).</summary>
     private void DrawColumnHeader(string title, string? addButtonId, SetupEntitySelection selection, Action<SetupEntitySelection>? onAdd,
-                                  SetupEntitySelection.EntityKinds kind = SetupEntitySelection.EntityKinds.None)
+                                  SetupEntityKinds kind = SetupEntityKinds.None)
     {
         var scale = T3Ui.UiScaleFactor;
         // Anchored on the column's x: a spacer before a second header (the shelf) resets the cursor's x to the window.
@@ -389,7 +387,7 @@ internal sealed class SetupFlowOutliner
 
         ImGui.SetCursorScreenPos(new Vector2(pos.X + 8 * scale, pos.Y));
         ImGui.AlignTextToFramePadding();
-        var titleColor = kind == SetupEntitySelection.EntityKinds.None ? UiColors.TextMuted : SetupColors.ForKind(kind).Fade(0.8f);
+        var titleColor = kind == SetupEntityKinds.None ? UiColors.TextMuted : SetupColors.ForKind(kind).Fade(0.8f);
         CustomComponents.StylizedText(title, Fonts.FontSmall, titleColor);
 
         if (addButtonId != null && onAdd != null)
@@ -400,7 +398,7 @@ internal sealed class SetupFlowOutliner
             {
                 onAdd(selection);
                 // The plug "+" only opens a menu; the pick inside it saves for itself.
-                if (kind != SetupEntitySelection.EntityKinds.Plug)
+                if (kind != SetupEntityKinds.Plug)
                     OutputSetupHandling.SaveActive();
             }
 
@@ -420,25 +418,25 @@ internal sealed class SetupFlowOutliner
             if (output.Kind == OutputDefinition.Kinds.Default)
                 continue;
 
-            // The implicit full-canvas patch is the output itself here: no row, and its slice connection
-            // lands on the output row (TryGetAnchor folds an undrawn patch onto its output).
+            // The implicit full-canvas patch is the output itself here: no item, and its slice connection
+            // lands on the output item (TryGetAnchor folds an undrawn patch onto its output).
             var hasPatches = SetupRelations.CountListedPatches(output) > 0;
             var isExpanded = !_collapsedOutputs.Contains(output.Id);
             var args = new EntityItem.Args
                            {
-                               Kind = SetupEntitySelection.EntityKinds.Output,
+                               Kind = SetupEntityKinds.Output,
                                Id = output.Id,
                                Name = output.Name,
                                // Nothing presents it yet — said in words, where the plug connection would otherwise start.
-                               Status = machineConfig.TryGetBinding(output.Id) == null ? "unbound" : null,
+                               Status = machineConfig.FindBinding(output.Id) == null ? "unbound" : null,
                                LeadingIcon = Icon.Projector,
                                IsExpanded = hasPatches ? isExpanded : null,
-                               ReserveExpander = true,
+                               KeepsExpanderColumn = true,
                                // A paused output (Send off) reads the same as a non-rendering surface.
-                               Muted = !output.Send,
-                               StrikeLeadingIcon = !output.Send,
+                               IsMuted = !output.IsSending,
+                               HasStruckIcon = !output.IsSending,
                            };
-            if (DrawRow(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
+            if (DrawItem(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
             {
                 if (!_collapsedOutputs.Add(output.Id))
                     _collapsedOutputs.Remove(output.Id);
@@ -451,7 +449,7 @@ internal sealed class SetupFlowOutliner
             for (var p = 0; p < output.Patches.Count; p++)
             {
                 if (!SetupRelations.IsImplicitPatch(output, output.Patches[p]))
-                    DrawPatchRow(selection, setup, output, output.Patches[p]);
+                    DrawPatchItem(selection, setup, output, output.Patches[p]);
             }
         }
     }
@@ -460,7 +458,7 @@ internal sealed class SetupFlowOutliner
     /// This machine's plugs — the attached displays and its stream senders — as an inventory: every plug is
     /// listed, the bound ones read normal (their connection says which output), the free ones recede. A
     /// display an output is bound to but that isn't attached right now is listed too, so its connection has
-    /// somewhere to land. Plug rows aren't selectable; they take an output by drop and offer their menu.
+    /// somewhere to land. Plug items aren't selectable; they take an output by drop and offer their menu.
     /// The column's "+" adds a stream sender of any kind whose package is loaded.
     /// </summary>
     private void DrawLocalBindings(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
@@ -471,14 +469,14 @@ internal sealed class SetupFlowOutliner
             var plugId = Plugs.DisplayPlugId(i);
             var args = new EntityItem.Args
                            {
-                               Kind = SetupEntitySelection.EntityKinds.Plug,
+                               Kind = SetupEntityKinds.Plug,
                                Id = plugId,
                                Name = Plugs.DisplayLabel(i),
                                Status = ResolutionLabel(i, screens[i].Bounds.Width, screens[i].Bounds.Height),
                                LeadingIcon = Icon.PlayOutput,
-                               Muted = !IsPlugBound(setup, machineConfig, plugId),
+                               IsMuted = !IsPlugBound(setup, machineConfig, plugId),
                            };
-            DrawRow(selection, setup, ref args);
+            DrawItem(selection, setup, ref args);
         }
 
         foreach (var binding in machineConfig.Bindings)
@@ -488,30 +486,30 @@ internal sealed class SetupFlowOutliner
 
             var args = new EntityItem.Args
                            {
-                               Kind = SetupEntitySelection.EntityKinds.Plug,
+                               Kind = SetupEntityKinds.Plug,
                                Id = Plugs.DisplayPlugId(binding.DisplayIndex),
                                Name = Plugs.DisplayLabel(binding.DisplayIndex),
                                Status = "not attached",
                                LeadingIcon = Icon.PlayOutput,
-                               Muted = true,
+                               IsMuted = true,
                            };
-            DrawRow(selection, setup, ref args);
+            DrawItem(selection, setup, ref args);
         }
 
-        for (var i = 0; i < machineConfig.Streams.Count; i++)
+        for (var i = 0; i < machineConfig.StreamPlugs.Count; i++)
         {
-            var stream = machineConfig.Streams[i];
+            var stream = machineConfig.StreamPlugs[i];
             var available = Plugs.IsStreamKindAvailable(stream.Kind);
             var args = new EntityItem.Args
                            {
-                               Kind = SetupEntitySelection.EntityKinds.Plug,
+                               Kind = SetupEntityKinds.Plug,
                                Id = stream.Id,
                                Name = stream.Name,
                                Status = available ? stream.Kind : MissingPackageStatus(stream.Kind),
                                LeadingIcon = Icon.ConnectedOutput,
-                               Muted = !available || !IsPlugBound(setup, machineConfig, stream.Id),
+                               IsMuted = !available || !IsPlugBound(setup, machineConfig, stream.Id),
                            };
-            DrawRow(selection, setup, ref args);
+            DrawItem(selection, setup, ref args);
         }
 
         if (_addPlugMenuRequested)
@@ -532,7 +530,7 @@ internal sealed class SetupFlowOutliner
                 if (CustomComponents.DrawMenuItem(1 + i, providers[i].Kind))
                 {
                     var stream = Plugs.AddStream(machineConfig, providers[i].Kind);
-                    _entityItem.BeginRename(selection, SetupEntitySelection.EntityKinds.Plug, stream.Id, stream.Name);
+                    _entityItem.BeginRename(selection, SetupEntityKinds.Plug, stream.Id, stream.Name);
                 }
             }
 
@@ -579,8 +577,8 @@ internal sealed class SetupFlowOutliner
 
     private void DrawContentSends(SetupEntitySelection selection, Setup setup)
     {
-        var sinks = OutputSinkRegistry.Sinks;
-        if (sinks.Count == 0)
+        var suppliers = ContentSupplierRegistry.Suppliers;
+        if (suppliers.Count == 0)
         {
             ImGui.Indent(8 * T3Ui.UiScaleFactor);
             CustomComponents.StylizedText("no SendToOutput ops", Fonts.FontSmall, UiColors.TextMuted.Fade(0.6f));
@@ -591,74 +589,74 @@ internal sealed class SetupFlowOutliner
         _sendContext ??= new EvaluationContext();
         _sendContext.Reset();
 
-        for (var i = 0; i < sinks.Count; i++)
+        for (var i = 0; i < suppliers.Count; i++)
         {
-            if (sinks[i] is not Instance instance)
+            if (suppliers[i] is not Instance instance)
                 continue;
 
             var childId = instance.SymbolChildId;
             var source = setup.FindSourceByChildId(childId);
-            // The implicit full-frame slice is the source itself here: no row, its connections start at the source.
+            // The implicit full-frame slice is the source itself here: no item, its connections start at the source.
             var sliceCount = source == null ? 0 : SetupRelations.CountListedSlicesOfSource(setup, source.Id);
             var expanded = !_collapsedSources.Contains(childId);
 
             var args = new EntityItem.Args
                            {
-                               Kind = SetupEntitySelection.EntityKinds.ContentSource,
+                               Kind = SetupEntityKinds.ContentSource,
                                Id = childId,
                                Name = SetupActions.SendName(instance),
                                LeadingIcon = Icon.FileImage,
                                IsExpanded = sliceCount > 0 ? expanded : null,
-                               ReserveExpander = true,
+                               KeepsExpanderColumn = true,
                                // Nothing shows this source, so it steps back visually.
-                               Muted = source == null || SetupRelations.CountConsumersOfSource(setup, source.Id) == 0,
+                               IsMuted = source == null || SetupRelations.CountConsumersOfSource(setup, source.Id) == 0,
                            };
-            if (DrawRow(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
+            if (DrawItem(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
                 ToggleSourceExpanded(childId);
 
             if (source == null || sliceCount == 0 || !expanded)
                 continue;
 
-            // Indexed: a row's context menu can delete its slice mid-walk, which an enumerator would refuse.
+            // Indexed: an item's context menu can delete its slice mid-walk, which an enumerator would refuse.
             for (var s = 0; s < setup.Slices.Count; s++)
             {
                 var slice = setup.Slices[s];
                 if (slice.SourceId != source.Id)
                     continue;
 
-                DrawSliceRow(selection, setup, slice);
+                DrawSliceItem(selection, setup, slice);
             }
         }
     }
 
     /// <summary>A slice under its source. A slice nothing shows reads as "unused".</summary>
-    private void DrawSliceRow(SetupEntitySelection selection, Setup setup, Slice slice)
+    private void DrawSliceItem(SetupEntitySelection selection, Setup setup, Slice slice)
     {
         var args = new EntityItem.Args
                        {
-                           Kind = SetupEntitySelection.EntityKinds.Slice,
+                           Kind = SetupEntityKinds.Slice,
                            Id = slice.Id,
                            Name = _sliceLabels.TryGetValue(slice.Id, out var sliceLabel) ? sliceLabel : SetupActions.SliceLabel(setup, slice),
                            LeadingIcon = Icon.Slice,
                            Depth = 1,
-                           Muted = !SetupRelations.IsSliceShown(setup, slice.Id),
+                           IsMuted = !SetupRelations.IsSliceShown(setup, slice.Id),
                        };
-        DrawRow(selection, setup, ref args);
+        DrawItem(selection, setup, ref args);
     }
 
     /// <summary>A patch under its output; unfed patches step back.</summary>
-    private void DrawPatchRow(SetupEntitySelection selection, Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
+    private void DrawPatchItem(SetupEntitySelection selection, Setup setup, OutputDefinition output, OutputDefinition.Patch patch)
     {
         var args = new EntityItem.Args
                        {
-                           Kind = SetupEntitySelection.EntityKinds.Patch,
+                           Kind = SetupEntityKinds.Patch,
                            Id = patch.Id,
                            Name = _patchLabels.TryGetValue(patch.Id, out var patchLabel) ? patchLabel : SetupActions.PatchLabel(output, patch),
                            LeadingIcon = Icon.Patch,
                            Depth = 1,
-                           Muted = setup.FindSlice(patch.SliceId) == null,
+                           IsMuted = setup.FindSlice(patch.SliceId) == null,
                        };
-        DrawRow(selection, setup, ref args);
+        DrawItem(selection, setup, ref args);
     }
 
     private void ToggleSourceExpanded(Guid childId)
@@ -673,11 +671,11 @@ internal sealed class SetupFlowOutliner
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             if (setup.Surfaces[i].ParentId == Guid.Empty)
-                DrawSurfaceRow(selection, setup, setup.Surfaces[i], 0);
+                DrawSurfaceItem(selection, setup, setup.Surfaces[i], 0);
         }
     }
 
-    private void DrawSurfaceRow(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
+    private void DrawSurfaceItem(SetupEntitySelection selection, Setup setup, Surface surface, int depth)
     {
         var surfaceId = surface.Id;
         var hasChildren = SetupRelations.CountChildren(setup, surfaceId) > 0;
@@ -685,21 +683,21 @@ internal sealed class SetupFlowOutliner
 
         var args = new EntityItem.Args
                        {
-                           Kind = SetupEntitySelection.EntityKinds.Surface,
+                           Kind = SetupEntityKinds.Surface,
                            Id = surface.Id,
                            Name = surface.Name,
                            LeadingIcon = Icon.Grid,
                            // A region that overrides its parent's pin no longer follows it — say so, since the
-                           // row still sits nested under that parent.
+                           // item still sits nested under that parent.
                            Status = SetupActions.HasOwnPin(surface) ? "own pin" : null,
                            Depth = depth,
                            IsExpanded = hasChildren ? isExpanded : null,
-                           ReserveExpander = true,
+                           KeepsExpanderColumn = true,
                            // A surface that won't render reads as unused (dimmed) and is struck through its icon.
-                           Muted = !surface.Render,
-                           StrikeLeadingIcon = !surface.Render,
+                           IsMuted = !surface.IsRendered,
+                           HasStruckIcon = !surface.IsRendered,
                        };
-        if (DrawRow(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
+        if (DrawItem(selection, setup, ref args) == EntityItem.ItemActions.ToggleExpanded)
             ToggleSurfaceExpanded(surfaceId);
 
         if (!hasChildren || !isExpanded)
@@ -708,7 +706,7 @@ internal sealed class SetupFlowOutliner
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             if (setup.Surfaces[i].ParentId == surfaceId)
-                DrawSurfaceRow(selection, setup, setup.Surfaces[i], depth + 1);
+                DrawSurfaceItem(selection, setup, setup.Surfaces[i], depth + 1);
         }
     }
 
@@ -791,12 +789,12 @@ internal sealed class SetupFlowOutliner
 
     /// <summary>Outliner-side item wrapper: injects the column rect every item needs, records its anchor for
     /// the connections, and its hover for their emphasis next frame.</summary>
-    private EntityItem.ItemActions DrawRow(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
+    private EntityItem.ItemActions DrawItem(SetupEntitySelection selection, Setup setup, ref EntityItem.Args args)
     {
         args.ColumnMinX = _columnMinX;
         args.ColumnWidth = _columnWidth;
-        var action = _entityItem.DrawRow(selection, setup, in args, out var hovered);
-        var rect = _entityItem.LastRowRect;
+        var action = _entityItem.DrawItem(selection, setup, in args, out var hovered);
+        var rect = _entityItem.LastItemRect;
         _anchors.Add(new Anchor(args.Kind, args.Id, rect.Min.X, rect.Max.X, (rect.Min.Y + rect.Max.Y) * 0.5f));
         if (hovered)
         {
@@ -835,11 +833,9 @@ internal sealed class SetupFlowOutliner
     private readonly Action<SetupEntitySelection> _requestAddPlugMenu;
     private static EvaluationContext? _sendContext;
 
-    // The column the rows currently draw into (screen x + width); 0 width = whole window.
+    // The column the items currently draw into (screen x + width); 0 width = whole window.
     private float _columnMinX;
     private float _columnWidth;
-
-    // Header breadcrumb cache — rebuilt on a primary change or every ~half second, not per frame.
 
     // Per-structure caches (see RefreshCaches), keyed on the structure version and the setup.
     private int _cacheVersion = -1;
@@ -862,8 +858,8 @@ internal sealed class SetupFlowOutliner
     private readonly EntityItem _entityItem;
 
     // The item hovered this frame (committed at end of Draw) — its connections draw emphasized next frame.
-    private SetupEntitySelection.EntityKinds _hoveredKind;
+    private SetupEntityKinds _hoveredKind;
     private Guid _hoveredId;
-    private SetupEntitySelection.EntityKinds _pendingHoveredKind;
+    private SetupEntityKinds _pendingHoveredKind;
     private Guid _pendingHoveredId;
 }

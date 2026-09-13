@@ -14,7 +14,7 @@ public static class ActiveSetup
     public static Setup? Current;
     public static MachineConfig? Machine;
 
-    public static Surface? TryFindSurface(Guid id) => Current?.FindSurface(id);
+    public static Surface? FindSurface(Guid id) => Current?.FindSurface(id);
 
-    public static OutputDefinition? TryFindOutput(Guid id) => Current?.FindOutput(id);
+    public static OutputDefinition? FindOutput(Guid id) => Current?.FindOutput(id);
 }

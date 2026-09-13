@@ -5,9 +5,8 @@ namespace T3.Core.Output;
 
 /// <summary>
 /// 3x3 projective 2D transform (row-major, double precision), used for corner-pin output
-/// mappings and reference-image straightening. Ported from the validated projection-studio
-/// prototype: Hartley-normalized 4-point solve with a w-sign fix so quads that cross the
-/// horizon of the projective map don't flip.
+/// mappings and reference-image straightening. Hartley-normalized 4-point solve with a w-sign fix so
+/// quads that cross the horizon of the projective map don't flip.
 /// </summary>
 public struct Homography
 {

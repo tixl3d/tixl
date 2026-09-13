@@ -32,7 +32,7 @@ public sealed class ReferenceImage
     public float MetersPerPixel;
 
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
-    public CanvasPlacement? BoardPlacement;
+    public BoardPlacement? BoardPlacement;
 
     public void WriteToJson(JsonTextWriter writer)
     {
@@ -68,7 +68,7 @@ public sealed class ReferenceImage
                             MetersPerPixel = token.ReadValueSafe("MetersPerPixel", 0f),
                         };
         if (token["BoardPlacement"] is JObject placement)
-            image.BoardPlacement = CanvasPlacement.ReadFromJson(placement);
+            image.BoardPlacement = BoardPlacement.ReadFromJson(placement);
 
         return image;
     }

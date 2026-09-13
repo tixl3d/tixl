@@ -48,7 +48,7 @@ internal sealed partial class SetupOutputView
 
         // Arming the tool turns the next drag on empty canvas into a new line, then disarms — "create then
         // edit", so you don't have to remember to leave a mode.
-        if (canEdit && _measureArmed && _measureDraftIndex < 0
+        if (canEdit && _isLineToolArmed && _measureDraftIndex < 0
             && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered())
         {
             var start = ToSurface(_projection.ScreenToCanvas(ImGui.GetMousePos()));
@@ -63,7 +63,7 @@ internal sealed partial class SetupOutputView
             {
                 // Snapshot before the draft exists, so the whole create-and-drag undoes as one step.
                 BeginGesture(draftSetup, GestureKinds.AnnotationDraft, "Add measuring line", carrier.Id);
-                annotations.Add(new LineAnnotation { P1 = start, P2 = start });
+                annotations.Add(new Annotation { P1 = start, P2 = start });
                 _measureDraftIndex = annotations.Count - 1;
             }
         }
@@ -93,7 +93,7 @@ internal sealed partial class SetupOutputView
                 }
 
                 _measureDraftIndex = -1;
-                _measureArmed = false;
+                _isLineToolArmed = false;
             }
         }
 
@@ -202,7 +202,7 @@ internal sealed partial class SetupOutputView
     /// The length chip at the line's middle: the typed real length once it has one, the drawn length until
     /// then. Clicking it is how a line becomes a measurement.
     /// </summary>
-    private static void DrawAnnotationLabel(ImDrawListPtr dl, LineAnnotation annotation, int index, float measured, bool isMeasurement,
+    private static void DrawAnnotationLabel(ImDrawListPtr dl, Annotation annotation, int index, float measured, bool isMeasurement,
                                             Vector2 screen, T3.Core.DataTypes.Vector.Color color, bool canEdit, bool requestLength)
     {
         var scale = T3Ui.UiScaleFactor;
@@ -263,7 +263,7 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>Which axis the line claims and by how much it misses it — inferred, never stored.</summary>
-    private static bool IsHorizontal(LineAnnotation annotation, out float deviationInDegrees)
+    private static bool IsHorizontal(Annotation annotation, out float deviationInDegrees)
     {
         return LineRectifier.IsHorizontal(annotation.P1, annotation.P2, out deviationInDegrees);
     }
@@ -346,7 +346,7 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private static bool TryStraightenTraceFromLines(Surface surface)
     {
-        var binding = surface.Reference;
+        var binding = surface.Trace;
         if (binding == null || binding.Quad.Length < 4 || SetupActions.CountLines(surface) < MinLinesToStraighten
             || !Homography.TryComputeQuadToQuad(SurfaceGeometry.LocalRect(surface), binding.Quad, out var surfaceToPhoto))
         {
@@ -445,8 +445,8 @@ internal sealed partial class SetupOutputView
     }
 
     // Measure/straighten state.
-    private bool _measureArmed;
-    private bool _pointArmed; // "+ Point": the next click on the straightened photo places a reference point
+    private bool _isLineToolArmed;
+    private bool _isPointToolArmed; // "+ Point": the next click on the straightened photo places a reference point
     private int _measureDraftIndex = -1;
     private int _measureDragIndex = -1; // endpoint grabbed last frame, so its line can emphasize this frame
 
