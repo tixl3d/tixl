@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Compilation;
@@ -20,19 +22,33 @@ internal static class Duplicate
     public static Symbol DuplicateAsNewType(SymbolUi compositionUi, EditableSymbolProject project, Guid symbolId, string newTypeName, string nameSpace,
                                             string description, Vector2 posOnCanvas)
     {
+        return DuplicateAsNewType(compositionUi, project, symbolId, newTypeName, nameSpace, description, posOnCanvas, out _);
+    }
+
+    /// <param name="failureReason">Set when null is returned; the compiler output for compile failures.</param>
+    public static Symbol DuplicateAsNewType(SymbolUi compositionUi, EditableSymbolProject project, Guid symbolId, string newTypeName, string nameSpace,
+                                            string description, Vector2 posOnCanvas, out string failureReason)
+    {
+        failureReason = null;
         var sourceSymbol = EditorSymbolPackage.AllSymbols.FirstOrDefault(x => x.Id == symbolId);
         if (sourceSymbol == null)
         {
-            Log.Warning("Can't find symbol to duplicate");
+            failureReason = "Can't find symbol to duplicate";
+            Log.Warning(failureReason);
             return null;
         }
 
-        //var sourceSymbol = symbolChildToDuplicate.Symbol;
+        if (TryGetDuplicationBlocker(sourceSymbol, project, out failureReason))
+        {
+            Log.Warning(failureReason);
+            return null;
+        }
 
         var syntaxTree = GraphUtils.GetSyntaxTree(sourceSymbol);
         if (syntaxTree == null)
         {
-            Log.Error($"Error getting syntax tree from symbol '{sourceSymbol.Name}' source.");
+            failureReason = $"Error getting syntax tree from symbol '{sourceSymbol.Name}' source.";
+            Log.Error(failureReason);
             return null;
         }
 
@@ -51,12 +67,14 @@ internal static class Duplicate
         // the duplicate in the source namespace — rewrite the declaration node instead.
         if (!GraphUtils.TryConvertToValidCodeNamespace(nameSpace, out var codeNamespace))
         {
-            Log.Error($"'{nameSpace}' is not a valid namespace.");
+            failureReason = $"'{nameSpace}' is not a valid namespace.";
+            Log.Error(failureReason);
             return null;
         }
 
         var namespaceRewriter = new NamespaceRenameRewriter(codeNamespace);
         root = namespaceRewriter.Visit(root);
+        root = AddUsingForSourceNamespace(root, sourceSymbol, project, codeNamespace);
 
         var newSource = root.GetText().ToString();
 
@@ -65,9 +83,10 @@ internal static class Duplicate
         Log.Debug(newSource);
 
         var sourceSymbolUi = sourceSymbol.GetSymbolUi();
-        
+
         if (!project.TryCompile(newSource, newTypeName, newSymbolId, nameSpace, out var newSymbol, out _, out var failureLog))
         {
+            failureReason = failureLog;
             Log.Error($"Could not compile new symbol '{newTypeName}': {failureLog}");
             return null;
         }
@@ -252,6 +271,182 @@ internal static class Duplicate
         }
 
         newPool.SaveVariationsToFile();
+    }
+
+    /// <summary>
+    /// Checks up front whether the duplicate could compile in the target project, so the dialog can
+    /// refuse with an explanation instead of the raw compiler output. User projects compile against
+    /// Core only — never against Lib, Io or other operator packages — so a duplicate that references
+    /// any type or namespace of its source package, or a third-party library the package pulls in,
+    /// can only live inside that package. Syntax-only heuristics: a false negative still ends in the
+    /// compile-failure dialog, a false positive would need an identifier that happens to share its
+    /// name with a package type in a type position.
+    /// </summary>
+    public static bool TryGetDuplicationBlocker(Symbol sourceSymbol, EditableSymbolProject targetProject, out string reason)
+    {
+        reason = null;
+        var sourcePackage = sourceSymbol.SymbolPackage;
+        if (ReferenceEquals(sourcePackage, targetProject))
+            return false;
+
+        var syntaxTree = GraphUtils.GetSyntaxTree(sourceSymbol);
+        if (syntaxTree?.GetRoot() is not CompilationUnitSyntax compilationUnit)
+            return false;
+
+        var sourceNamespaces = sourcePackage.AssemblyInformation.Namespaces;
+        var packageNamespaces = new List<string>();
+        var libraryNamespaces = new List<string>();
+
+        foreach (var usingDirective in compilationUnit.Usings)
+        {
+            if (usingDirective.Name == null)
+                continue;
+
+            var name = usingDirective.Name.ToString().Replace("@", "");
+            if (IsNamespaceVisibleToProject(name, targetProject))
+                continue;
+
+            if (sourceNamespaces.Contains(name))
+                packageNamespaces.Add(name);
+            else
+                libraryNamespaces.Add(name);
+        }
+
+        // Types declared in the op's own file travel with the duplicate; everything else in the
+        // package assembly does not.
+        var declaredInFile = new HashSet<string>();
+        foreach (var declaration in compilationUnit.DescendantNodes().OfType<BaseTypeDeclarationSyntax>())
+        {
+            declaredInFile.Add(declaration.Identifier.ValueText);
+        }
+
+        var referencedIdentifiers = new HashSet<string>();
+        foreach (var node in compilationUnit.DescendantNodes())
+        {
+            if (node is not SimpleNameSyntax simpleName)
+                continue;
+
+            // The right-hand side of a member access (slot.Value) is a member, never a type reference
+            if (node.Parent is MemberAccessExpressionSyntax memberAccess && memberAccess.Name == node)
+                continue;
+
+            referencedIdentifiers.Add(simpleName.Identifier.ValueText);
+        }
+
+        var packageTypes = new List<string>();
+        foreach (var type in sourcePackage.AssemblyInformation.TypesInheritingFrom(typeof(object)))
+        {
+            if (type.DeclaringType != null
+                || type.IsAssignableTo(typeof(Instance))
+                || type.Name.Contains('<'))
+                continue;
+
+            var typeName = type.Name;
+            var arity = typeName.IndexOf('`');
+            if (arity >= 0)
+                typeName = typeName[..arity];
+
+            if (declaredInFile.Contains(typeName) || !referencedIdentifiers.Contains(typeName))
+                continue;
+
+            packageTypes.Add(typeName);
+        }
+
+        if (packageTypes.Count == 0 && packageNamespaces.Count == 0 && libraryNamespaces.Count == 0)
+            return false;
+
+        var packageName = sourcePackage.DisplayName;
+        var sb = new StringBuilder();
+        sb.Append($"[{sourceSymbol.Name}] can't be duplicated into {targetProject.DisplayName}:\n");
+
+        if (packageTypes.Count > 0)
+        {
+            packageTypes.Sort(StringComparer.Ordinal);
+            sb.Append($"• It uses {string.Join(", ", packageTypes)} from the {packageName} package. Helper code like this is only available inside that package.\n");
+        }
+
+        if (packageNamespaces.Count > 0)
+        {
+            sb.Append($"• It imports the {packageName} package's namespace {string.Join(", ", packageNamespaces)}, which projects can't reference.\n");
+        }
+
+        if (libraryNamespaces.Count > 0)
+        {
+            sb.Append($"• It uses the library {string.Join(", ", libraryNamespaces)}, which your project doesn't reference.\n");
+        }
+
+        sb.Append("Such operators can only be duplicated within their own package, or by copying the code they depend on into your project.");
+        reason = sb.ToString();
+        return true;
+    }
+
+    private static bool IsNamespaceVisibleToProject(string namespaceName, EditableSymbolProject project)
+    {
+        // Core, Logging and SharpDX are referenced by every project; the project's own namespaces too.
+        if (namespaceName.StartsWith("System", StringComparison.Ordinal)
+            || namespaceName.StartsWith("Microsoft", StringComparison.Ordinal)
+            || namespaceName.StartsWith("T3.", StringComparison.Ordinal)
+            || namespaceName.StartsWith("SharpDX", StringComparison.Ordinal)
+            || namespaceName == project.RootNamespace
+            || namespaceName.StartsWith(project.RootNamespace + ".", StringComparison.Ordinal))
+            return true;
+
+        foreach (var package in SymbolPackage.AllPackages)
+        {
+            if (package.AssemblyInformation.Namespaces.Contains(namespaceName) && CanProjectSeePackage(project, package))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Moving the duplicate into another namespace drops the implicit access to types declared
+    /// beside the source op (package helpers like Lib.io.data.DataClipSampling). Importing the
+    /// source namespace keeps those references resolving. A using of a namespace the target
+    /// project can't see is itself a compile error, so it is only added when the source package
+    /// is the target or one of its references. Helpers that are internal to a foreign package
+    /// still fail, but with the clearer "inaccessible" diagnostic instead of "not found".
+    /// </summary>
+    private static SyntaxNode AddUsingForSourceNamespace(SyntaxNode root, Symbol sourceSymbol, EditableSymbolProject project, string targetCodeNamespace)
+    {
+        if (root is not CompilationUnitSyntax compilationUnit)
+            return root;
+
+        if (!GraphUtils.TryConvertToValidCodeNamespace(sourceSymbol.Namespace, out var sourceCodeNamespace)
+            || sourceCodeNamespace == targetCodeNamespace)
+            return root;
+
+        if (!CanProjectSeePackage(project, sourceSymbol.SymbolPackage))
+            return root;
+
+        foreach (var existing in compilationUnit.Usings)
+        {
+            if (existing.Alias == null && existing.Name?.ToString() == sourceCodeNamespace)
+                return root;
+        }
+
+        var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(sourceCodeNamespace))
+                                          .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+        return compilationUnit.AddUsings(usingDirective);
+    }
+
+    private static bool CanProjectSeePackage(EditableSymbolProject project, SymbolPackage package)
+    {
+        if (ReferenceEquals(project, package))
+            return true;
+
+        if (!project.AssemblyInformation.TryGetReleaseInfo(out var releaseInfo))
+            return false;
+
+        // Reference identities are the referenced package's root namespace
+        foreach (var reference in releaseInfo.OperatorPackages)
+        {
+            if (!reference.ResourcesOnly && reference.Identity == package.RootNamespace)
+                return true;
+        }
+
+        return false;
     }
 
     private static string ReplaceGuidAttributeWith(Guid newSymbolId, string newSource)

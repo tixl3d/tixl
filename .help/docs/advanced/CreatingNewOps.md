@@ -24,6 +24,8 @@ Select the operator and pick *Symbol Definition* → *Duplicate as new Type* fro
 
 Tip: Please note that this will not duplicate any of the resources used by the operator. For instance, if the operator uses a shader, make sure to save that shader file under a new filename and change the reference to that new version.
 
+Note: Your project compiles against TiXL's core only, not against the built-in operator packages. Operators that use helper classes of their package (for example the `Sample…FromDataClip` operators in *Io*) or third-party libraries (such as the OSC operators) can't be duplicated into your project. The dialog explains which dependency is in the way and disables the button. Copy the required code into your project if you need a variant of such an operator.
+
 ## Adding Dropdown Parameters
 
 Internally, dropdown parameters like _BlendMode_ are treated as integer parameters and only "presented" as dropdown options by the UI. This means you can treat them as integer values: animate them or connect them with ops like [CountInt]. To display the option as a dropdown list, the editor needs to know how to map each integer value to an option name. This is done in two steps:

@@ -63,6 +63,13 @@ internal sealed class NewProjectDialog : ModalDialog
                 warning = "Name must not contain dots.";
                 nameCorrect = false;
             }
+            else if (!char.IsUpper(_newProjectName[0]))
+            {
+                // The name becomes the home symbol's class name; all-lowercase type names
+                // trigger CS8981 (reserved for future language keywords) on every build.
+                warning = "Name must start with a capital letter.";
+                nameCorrect = false;
+            }
             else if (string.IsNullOrWhiteSpace(_newProjectName))
             {
                 nameCorrect = false;
@@ -77,7 +84,7 @@ internal sealed class NewProjectDialog : ModalDialog
             //ImGui.SetKeyboardFocusHere();
             
             FormInputs.AddStringInput("Name", ref _newProjectName, "(mandatory)", warning, 
-                                      "Is used to identify your project. Must not contain spaces or special characters.",
+                                      "Is used to identify your project. Must start with a capital letter and not contain spaces or special characters.",
                                       autoFocus: ImGui.IsWindowAppearing());
 
             var allValid = namespaceCorrect && nameCorrect;
