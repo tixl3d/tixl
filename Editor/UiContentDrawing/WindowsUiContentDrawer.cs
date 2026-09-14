@@ -355,7 +355,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         _deviceContext.VertexShader.SetShader(_vertexShader, null, 0);
         _deviceContext.VertexShader.SetConstantBuffer(0, _vertexConstantBuffer);
         _deviceContext.PixelShader.SetShader(_pixelShader, null, 0);
-        _deviceContext.PixelShader.SetSampler(0, _fontSampler);
+        _deviceContext.PixelShader.SetSampler(0, _imGuiSampler);
 
         //make sure we have no tessel/gs
         _deviceContext.HullShader.Set(null);
@@ -456,7 +456,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
         lock (_contextLock)
         {
-            FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _fontSampler);
+            FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _imGuiSampler);
         }
 
         return true;
@@ -464,7 +464,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
     private bool CreateShaders()
     {
-        if (_fontSampler == null)
+        if (_imGuiSampler == null)
             DisposeDeviceObjects();
 
         // Create the vertex shader
@@ -602,7 +602,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             // Sadly a resource leak causes this to trigger memory exceptions.
             // So disabled for now
 
-            DisposeObj(ref _fontSampler);
+            DisposeObj(ref _imGuiSampler);
             DisposeObj(ref _fontTextureView);
             DisposeObj(ref _ib);
             DisposeObj(ref _vb);
@@ -633,7 +633,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     private Buffer _vertexConstantBuffer;
     private ShaderBytecode _pixelShaderBlob;
     private PixelShader _pixelShader;
-    private SamplerState _fontSampler;
+    private SamplerState _imGuiSampler;
     private ShaderResourceView _fontTextureView;
     private RasterizerState _rasterizerState;
     private BlendState _blendState;
