@@ -6,6 +6,7 @@
   "InputUis": [
     {
       "InputId": "02f5e531-2579-4eca-8fef-a8586e6534cf"/*Width*/,
+      "Description": "Base radius of the tube in world units. Per-point Width Factor / Scale multiplies this value.",
       "Position": {
         "X": -226.94064,
         "Y": 209.1991
@@ -15,6 +16,7 @@
     {
       "InputId": "0a6a91d1-be44-459a-94cd-49b48d755377"/*GPoints*/,
       "Relevancy": "Required",
+      "Description": "The point buffer to draw. Points are connected in order into a tube.",
       "Position": {
         "X": -226.24692,
         "Y": 43.842525
@@ -22,6 +24,7 @@
     },
     {
       "InputId": "8f609301-338d-45e0-82de-660963ec0174"/*Twist*/,
+      "Description": "Extra rotation that accumulates along the tube length (degrees) — spirals the cross-section from start to end.",
       "Position": {
         "X": -226.94064,
         "Y": 344.1991
@@ -32,6 +35,7 @@
     },
     {
       "InputId": "9a486753-840e-4d53-9627-8a2ed02fd39e"/*Culling*/,
+      "Description": "Face culling mode (None / Front / Back). Default Back culls back-facing triangles for a solid tube.",
       "Position": {
         "X": -228.65521,
         "Y": 706.3835
@@ -39,6 +43,7 @@
     },
     {
       "InputId": "ae484c37-1bf0-4e20-8698-3f7179ab7c24"/*Color*/,
+      "Description": "Base tint multiplied against each point's color and the shading result.",
       "Position": {
         "X": -226.94064,
         "Y": 164.1991
@@ -46,13 +51,15 @@
     },
     {
       "InputId": "b1bffdfb-fc45-4ec1-baac-39a3ef2f065a"/*EnableDepthWrite*/,
+      "Description": "Whether the tube writes to the depth buffer. Disable for additive/transparent tubes that should not occlude.",
       "Position": {
         "X": -228.65521,
         "Y": 616.3835
       }
     },
     {
-      "InputId": "bdf36fc7-cbaf-48f5-ab41-d903036e7d46"/*TextureMode*/,
+      "InputId": "7671239b-7934-4f2a-9e01-851516d817e0"/*UseWAsU*/,
+      "Description": "Drive the U texture coordinate from each point's FX1 value (interpolated along the tube) instead of arc length — useful for animating or slicing a texture with per-point data. Off = physical arc-length UVs at a constant texel size.",
       "Position": {
         "X": -224.65475,
         "Y": 408.20538
@@ -60,6 +67,7 @@
     },
     {
       "InputId": "c3742de6-6720-4a18-a6da-063e05696f9d"/*Spin*/,
+      "Description": "Constant rotation of the cross-section around the line direction, in degrees.",
       "Position": {
         "X": -226.94064,
         "Y": 299.1991
@@ -69,14 +77,32 @@
       "Scale": 1.0
     },
     {
-      "InputId": "c43b1052-2942-43c7-aaf4-56c91dc8e521"/*UseWAsWeight*/,
+      "InputId": "c43b1052-2942-43c7-aaf4-56c91dc8e521"/*WidthFactor*/,
+      "Description": "Selects the point attribute used as a per-point width weight. None = uniform width, F1/F2 = use the point's FX1/FX2 value (NaN falls back to 1).",
       "Position": {
         "X": -228.65521,
         "Y": 751.3835
       }
     },
     {
+      "InputId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"/*UseScale*/,
+      "Description": "Scales the tube from the points' Scale attribute instead of a width weight. With Uniform Scale on, only Scale.x is used as a single factor.",
+      "Position": {
+        "X": -228.65521,
+        "Y": 796.3835
+      }
+    },
+    {
+      "InputId": "03c7aa3c-5c78-4fc7-80d0-93c8eccdf385"/*UniformScale*/,
+      "Description": "On: uses Scale.x as a single uniform width factor.\nOff: uses all three axes independently - X stretches or compresses the line along its direction around each point (1 = no change), Y and Z scale the cross-section into an ellipse.",
+      "Position": {
+        "X": -228.65521,
+        "Y": 841.3835
+      }
+    },
+    {
       "InputId": "e1f3945d-1ab8-4e6c-b5ca-c5036ed7d52a"/*TextureRange*/,
+      "Description": "Affine remap applied to the procedural U coordinate (default 0..1 = identity). UVs are generated at a constant texel size set by Texture Scale: the side uses cylindrical projection (U along arc length, V around the circumference) and end caps use a planar disk placed adjacent to each tube end.",
       "Position": {
         "X": -224.65475,
         "Y": 453.20538
@@ -84,6 +110,7 @@
     },
     {
       "InputId": "ec6a8011-f1da-413b-a9e4-f909859444b5"/*BlendMod*/,
+      "Description": "Blending mode used when compositing the tube against what is behind it.",
       "Position": {
         "X": -228.65521,
         "Y": 661.3835
@@ -91,6 +118,7 @@
     },
     {
       "InputId": "f8fc2813-2156-4ffd-a546-38214b887e87"/*Sides*/,
+      "Description": "Number of sides around the tube cross-section.",
       "Position": {
         "X": -231.56293,
         "Y": 970.3622
@@ -100,6 +128,7 @@
     },
     {
       "InputId": "4876fa78-b008-42d9-83bf-ae0f577d5e5c"/*CapStart*/,
+      "Description": "Draws a flat cap closing the start of the tube.",
       "Position": {
         "X": -228.65521,
         "Y": 1015.3622
@@ -107,6 +136,7 @@
     },
     {
       "InputId": "740ee4c7-ea29-45ee-aebc-59d74627ed31"/*CapEnd*/,
+      "Description": "Draws a flat cap closing the end of the tube.",
       "Position": {
         "X": -228.65521,
         "Y": 1060.3622
@@ -114,6 +144,7 @@
     },
     {
       "InputId": "d4e5f6a7-b8c9-4d1e-2f3a-4b5c6d7e8f90"/*Smooth*/,
+      "Description": "Interpolates the line with a smooth curve instead of straight segments.",
       "Position": {
         "X": -228.65521,
         "Y": 1105.3622
@@ -121,6 +152,7 @@
     },
     {
       "InputId": "a7b8c9d0-e1f2-4a3b-5c6d-7e8f90123456"/*RoundAmount*/,
+      "Description": "Bulges each segment's width in its middle. Positive = rounded joints, negative = pinched.",
       "Position": {
         "X": -228.65521,
         "Y": 1150.3622
@@ -131,6 +163,7 @@
     },
     {
       "InputId": "b8c9d0e1-f2a3-4b5c-6d7e-8f9012345678"/*SubSegments*/,
+      "Description": "Curve subdivisions per segment while Smooth is on. Higher = smoother curves.",
       "Position": {
         "X": -228.65521,
         "Y": 1195.3622
@@ -139,14 +172,16 @@
       "Max": 10
     },
     {
-      "InputId": "a0b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d"/*DistanceScale*/,
+      "InputId": "a0b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d"/*DistanceFade*/,
+      "Description": "Fades the tube width with camera distance: full width up to Fade Start Dist, shrinking to Min Width Factor x Width at Fade End Dist.",
       "Position": {
         "X": -228.65521,
         "Y": 1240.3622
       }
     },
     {
-      "InputId": "b1c2d3e4-f5a6-4b7c-9d8e-0f1a2b3c4d5e"/*ScaleNearDist*/,
+      "InputId": "b1c2d3e4-f5a6-4b7c-9d8e-0f1a2b3c4d5e"/*FadeStartDist*/,
+      "Description": "Camera distance at which the width fade starts. The tube is at full width up to this distance.",
       "Position": {
         "X": -228.65521,
         "Y": 1285.3622
@@ -156,7 +191,8 @@
       "Scale": 0.01
     },
     {
-      "InputId": "c2d3e4f5-a6b7-4c8d-0e9f-1a2b3c4d5e6f"/*ScaleFarDist*/,
+      "InputId": "c2d3e4f5-a6b7-4c8d-0e9f-1a2b3c4d5e6f"/*FadeEndDist*/,
+      "Description": "Camera distance at which the width fade reaches its minimum (Min Width Factor x Width).",
       "Position": {
         "X": -228.65521,
         "Y": 1330.3622
@@ -166,13 +202,25 @@
       "Scale": 0.01
     },
     {
-      "InputId": "d3e4f5a6-b7c8-4d9e-1f0a-2b3c4d5e6f70"/*MinScale*/,
+      "InputId": "d3e4f5a6-b7c8-4d9e-1f0a-2b3c4d5e6f70"/*MinWidthFactor*/,
+      "Description": "Multiplier applied to Width at maximum fade distance. 1 = no fade, 0 = fully faded out.",
       "Position": {
         "X": -228.65521,
         "Y": 1375.3622
       },
       "Min": 0.0,
       "Max": 1.0,
+      "Scale": 0.01
+    },
+    {
+      "InputId": "e5dbb74c-5762-447b-a365-9ea7f6229204"/*TextureScale*/,
+      "Description": "World units per one texture repeat. Sets the texel size for all generated UVs (side and caps) so the pattern stays a constant size along and around the tube. Smaller = denser texture.",
+      "Position": {
+        "X": -228.65521,
+        "Y": 1420.3622
+      },
+      "Min": 0.01,
+      "Max": 10.0,
       "Scale": 0.01
     }
   ],
@@ -204,7 +252,7 @@
       }
     },
     {
-      "ChildId": "127d82d7-9b43-4cdd-a715-4c89d1a8e1bb"/*IntToFloat*/,
+      "ChildId": "0e6ae555-bdc4-45b2-adb0-c7ac153ae8c5"/*BoolToFloat_UseWAsU*/,
       "Position": {
         "X": -94.65464,
         "Y": 408.20538
@@ -295,10 +343,17 @@
       }
     },
     {
-      "ChildId": "55d6c299-b3a2-4d41-90a9-e234f154f66e"/*BoolToFloat*/,
+      "ChildId": "55d6c299-b3a2-4d41-90a9-e234f154f66e"/*IntToFloat_WidthFX*/,
       "Position": {
         "X": 10.208252,
         "Y": 799.1068
+      }
+    },
+    {
+      "ChildId": "cf2eeaef-972e-46f8-9f0d-55ad759f63b2"/*BoolToFloat_UniformScale*/,
+      "Position": {
+        "X": 10.208252,
+        "Y": 990.1068
       }
     },
     {
@@ -491,6 +546,62 @@
       "Position": {
         "X": 10.208252,
         "Y": 1240.3622
+      }
+    },
+    {
+      "ChildId": "13a570d9-9658-4cd3-8711-23d114e71a72"/*SegLengths*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1250.0
+      }
+    },
+    {
+      "ChildId": "cb6d93e1-8633-43e4-8985-bba080e37cd4"/*SegComponents*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1310.0
+      }
+    },
+    {
+      "ChildId": "2767851e-7c4f-4296-8bc2-2068b8c58b0e"/*ArcParams*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1370.0
+      }
+    },
+    {
+      "ChildId": "d7be0bf7-866e-407a-9b58-1ab1de8f61db"/*ArcLengthShader*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1430.0
+      }
+    },
+    {
+      "ChildId": "53479b70-879a-4e00-b5d8-e3fb96d87a92"/*ArcDispatch*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1490.0
+      }
+    },
+    {
+      "ChildId": "fdfca65f-8a7a-4ca2-a3c1-dc90b660f789"/*ArcCS*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1550.0
+      }
+    },
+    {
+      "ChildId": "1763734d-3509-40a2-a1e2-62941ff79125"/*ArcPrefixSum*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1610.0
+      }
+    },
+    {
+      "ChildId": "cb445f5d-b187-4b8f-a7d3-b288f57cc1a1"/*ArcCumComponents*/,
+      "Position": {
+        "X": -420.0,
+        "Y": 1670.0
       }
     }
   ],
