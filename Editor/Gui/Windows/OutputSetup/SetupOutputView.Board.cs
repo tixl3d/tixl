@@ -243,6 +243,11 @@ internal sealed partial class SetupOutputView
         if (!onBoard)
             return;
 
+        // While walls are being drawn the tool owns every click and key on the Board.
+        HandlePlanDraw(setup, selection);
+        if (IsDrawingPlan)
+            return;
+
         HandleBoardDrag(setup, selection);
         _boardSetupForFence = setup;
         HandleBoardFence(selection);
@@ -614,7 +619,7 @@ internal sealed partial class SetupOutputView
     private void GrabBoardCard(SetupEntityKinds kind, Guid id, bool hovered, bool isSelected)
     {
         if (!hovered || !ImGui.IsMouseClicked(ImGuiMouseButton.Left) || ImGui.IsAnyItemHovered()
-            || _boardDragKind != SetupEntityKinds.None)
+            || _boardDragKind != SetupEntityKinds.None || IsDrawingPlan)
             return;
 
         var io = ImGui.GetIO();
@@ -813,8 +818,10 @@ internal sealed partial class SetupOutputView
 
         // Corners drag in board metres; a corner near a neighbour's line snaps onto it, so rooms stay square.
         // Drawn before the card's grab, so a press on a handle is an item press and never arms a card drag.
-        var handleStyle = CanvasPointHandle.Style.Default(isSelected ? hue : hue.Fade(0.6f), CanvasPointHandle.Shapes.Square);
+        // While drawing, the corners are only shown: a click near one plants the next corner or closes the room.
+        var handleStyle = CanvasPointHandle.Style.Default(isSelected ? hue : hue.Fade(0.6f), CanvasPointHandle.Shapes.Square, editable: !IsDrawingPlan);
         ImGui.PushID(plan.Id.GetHashCode());
+        DrawPlanDrawEntries(plan, origin, isSelected);
         for (var i = 0; i < count; i++)
         {
             ImGui.PushID(i);

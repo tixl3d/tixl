@@ -99,3 +99,35 @@ Drag "Floor Plan 1"'s frame (not a corner) about 3 m to the right and release.
 
 **Expected:**
 - "Wall 1"'s Position (m) x and "Floor"'s grow by the same amount; nothing else changes.
+
+## Step: Draw walls from an open run
+
+**Action:**
+1. With "Floor Plan 2" (the open run from the previous step) selected, click the plus that sits just
+   past its right end on the Board.
+2. Move the mouse straight up from that corner; watch the preview line, then type `4`.
+3. Click.
+4. Move the mouse left until the preview points at the run's first corner and the line reads
+   "close", then click.
+
+**Expected:**
+- After 1: a line follows the cursor from the run's right end, with its length written along it.
+- After 2: the line snaps to 90° from the first wall and locks to 4 m, labelled "4 m", whatever the
+  cursor's distance.
+- After 3: a second corner and a "Wall 2" surface appear; SURFACES lists it; the tool stays active.
+- After 4: the plan closes (its card now shows **Closed** ticked and a **Floor surface** row), a
+  "Wall 3" stands on the closing edge, and the tool ends. Ctrl+Z three times undoes the close and
+  the two walls one step each.
+
+## Step: Free angles and ending the tool
+
+**Action:**
+1. Select "Floor Plan 2", open its context menu in the outliner or on its card and choose
+   **Draw Walls**. It is disabled, since the plan is closed; instead untick **Closed** on its card and
+   choose **Draw Walls** again.
+2. Hold Shift and move the mouse: the line follows the cursor freely. Release Shift: it snaps to 45°
+   steps. Press Escape.
+
+**Expected:**
+- After 1: the preview line appears from the run's last corner.
+- After 2: the preview disappears on Escape and clicking on the Board selects cards again.

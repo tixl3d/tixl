@@ -107,6 +107,10 @@ internal static class SetupActions
                                                                                                                     ? FloorPlanSync.StartFromFloor(setup, surface)
                                                                                                                     : FloorPlanSync.StartFromWall(setup, surface);
                                                                                                      selection.Select(SetupEntityKinds.FloorPlan, plan.Id);
+
+                                                                                                     // A run started from a wall wants its next wall right away.
+                                                                                                     if (!asFloor)
+                                                                                                         SetupOutputView.PendingPlanDrawId = plan.Id;
                                                                                                  });
     }
 

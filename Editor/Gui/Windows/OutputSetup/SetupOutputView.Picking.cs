@@ -77,6 +77,10 @@ internal sealed partial class SetupOutputView
         var current = selection != null && selection.TryResolve(setup, out _, out var primaryId) ? primaryId : Guid.Empty;
         var hit = _picker.Resolve(current);
 
+        // A click while drawing walls plants a corner; it picks nothing.
+        if (IsDrawingPlan)
+            return;
+
         if (hit.HasHit)
         {
             FrameStats.RequestCrossHighlight(hit.Id);

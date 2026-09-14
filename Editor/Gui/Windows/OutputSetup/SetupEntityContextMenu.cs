@@ -81,6 +81,17 @@ internal static class SetupEntityContextMenu
     {
         switch (kind)
         {
+            case SetupEntityKinds.FloorPlan:
+                var plan = setup.FindFloorPlan(id);
+                if (plan == null)
+                    break;
+
+                if (CustomComponents.DrawMenuItem(21, "Draw Walls", isEnabled: !plan.IsClosed && plan.Vertices.Count >= 2))
+                    SetupOutputView.PendingPlanDrawId = plan.Id;
+
+                CustomComponents.TooltipForLastItem("Continue the run from its last corner on the Board: each click plants a corner and raises a wall.");
+                break;
+
             case SetupEntityKinds.Output:
                 var output = setup.FindOutput(id);
                 if (output == null)

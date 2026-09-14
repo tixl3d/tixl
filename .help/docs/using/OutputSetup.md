@@ -65,6 +65,8 @@ A floor plan is a card on the Board: a run of corners in metres, drawn at the sa
 
 Start one with **Add Floor Plan...** in the Board's `+` menu, which asks for a rectangle's width and depth, or from a surface you already have: its context menu offers **Start Floor Plan from Bottom Edge** (the surface becomes the first wall of an open run) and **Use as Floor of New Plan**. Walls are raised per edge on the plan's card, and each wall's name and length are written along its edge on the Board. All walls stand on one ground level.
 
+**Drawing walls.** A selected open plan shows a plus at each end of its run; click it, or **Draw Walls** in the plan's menu, and a line follows the cursor from that corner, snapped to 45° steps of the last wall (hold Shift to draw free). Type a number to set the length, and each click or Enter plants the next corner with a wall on the new edge, one undo step each. Clicking the run's other end closes the room. Escape or a right-click ends the tool. Starting a plan from a surface's bottom edge enters the tool right away, so a traced wall becomes a room in a few clicks.
+
 ## Reference images and props
 
 A **reference image** is a photo or a plan of the venue. Trace a surface on a photo to define it from the picture, then measure it with line annotations to give it real dimensions. Plans are orthographic and only need a scale. A **prop** is a scale reference in the stage — a 1.70 m person, a table — so sizes can be sanity-checked at a glance.
