@@ -33,7 +33,7 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="NuGet.Configuration" Version="7.6.0" />
         <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" />
         <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
         <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
         <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
