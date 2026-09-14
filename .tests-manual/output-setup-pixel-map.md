@@ -7,7 +7,7 @@ added: 2026-09-14
 added-in-version: 4.3
 prerequisites:
   - A writable project is open whose active setup is empty (a freshly created project works — it starts with "Setup 1" and no content, surfaces, or outputs).
-  - Three windows are visible - the graph window, the Parameter window, and one output window with its Flow Outliner shown (it opens with a selected SendToOutput; otherwise the toolbar's list icon).
+  - Three windows are visible - the graph window, the Parameter window, and one output window with its Flow Outliner shown (it opens with a selected SendToOutput; otherwise the toolbar's "Output Setup" button at its right end).
   - A LoadImage op showing a recognisable image exists in the graph, and a second image file is available in the project's assets (for example `chipmunk.jpg` from the Examples package).
 related-help:
   - ../.help/docs/using/OutputSetup.md

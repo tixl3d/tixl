@@ -28,6 +28,9 @@ internal static class SetupEntities
             case SetupEntityKinds.Prop:
                 return setup.FindProp(id) != null;
 
+            case SetupEntityKinds.FloorPlan:
+                return setup.FindFloorPlan(id) != null;
+
             case SetupEntityKinds.Output:
                 return setup.FindOutput(id) != null;
 
@@ -81,6 +84,12 @@ internal static class SetupEntities
             {
                 var prop = setup.FindProp(id);
                 return TryName(prop?.Kind, label, prop != null, out name);
+            }
+
+            case SetupEntityKinds.FloorPlan:
+            {
+                var plan = setup.FindFloorPlan(id);
+                return TryName(plan?.Name, label, plan != null, out name);
             }
 
             case SetupEntityKinds.Slice:
@@ -160,6 +169,16 @@ internal static class SetupEntities
                 return true;
             }
 
+            case SetupEntityKinds.FloorPlan:
+            {
+                var plan = setup.FindFloorPlan(id);
+                if (plan == null)
+                    return false;
+
+                plan.Name = newName;
+                return true;
+            }
+
             case SetupEntityKinds.Slice:
             {
                 var slice = setup.FindSlice(id);
@@ -206,6 +225,12 @@ internal static class SetupEntities
         foreach (var image in setup.ReferenceImages)
         {
             if (Matches(setup, SetupEntityKinds.ReferenceImage, image.Id, name, out kind, out id))
+                return true;
+        }
+
+        foreach (var plan in setup.FloorPlans)
+        {
+            if (Matches(setup, SetupEntityKinds.FloorPlan, plan.Id, name, out kind, out id))
                 return true;
         }
 

@@ -225,6 +225,9 @@ internal sealed partial class SetupOutputView
             }
         }
 
+        foreach (var plan in setup.FloorPlans)
+            DrawBoardFloorPlan(setup, selection, dl, plan);
+
         foreach (var prop in setup.Props)
             DrawBoardProp(setup, selection, dl, prop);
 
@@ -711,6 +714,174 @@ internal sealed partial class SetupOutputView
         _picker.AddTarget(SetupEntityKinds.Prop, prop.Id, sMin, sMax, isBackground: true);
         _boardFenceCandidates.Add((SetupEntityKinds.Prop, prop.Id, new ImRect(sMin, sMax)));
         GrabBoardCard(SetupEntityKinds.Prop, prop.Id, hovered, isSelected);
+    }
+
+    /// <summary>
+    /// A floor plan's card: its run of segments at true scale, walls thick and named, open sides thin, a light
+    /// fill for a floor; each corner a handle that drags the plan and re-derives its surfaces as it goes.
+    /// </summary>
+    private void DrawBoardFloorPlan(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl, FloorPlan plan)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var fade = _boardLayerFade;
+        var origin = plan.BoardPlacement?.Position ?? Vector2.Zero;
+        var isSelected = selection?.IsSelected(SetupEntityKinds.FloorPlan, plan.Id) ?? false;
+        var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(plan.Id);
+        var hue = SetupColors.ForKind(SetupEntityKinds.FloorPlan);
+        var wallColor = (isSelected ? hue : PulseColor(hue.Fade(0.7f), pulse)).Fade(fade);
+        var openColor = UiColors.TextMuted.Fade(0.5f * fade);
+        var count = plan.Vertices.Count;
+
+        if (_boardPlanPoints.Length < count)
+            _boardPlanPoints = new Vector2[Math.Max(count, _boardPlanPoints.Length * 2)];
+
+        for (var i = 0; i < count; i++)
+            _boardPlanPoints[i] = _boardProjection.CanvasToScreen(origin + plan.Vertices[i]);
+
+        if (plan.IsClosed && count >= 3 && setup.FindSurface(plan.RaisedFloorId) != null)
+            dl.AddConvexPolyFilled(ref _boardPlanPoints[0], count, hue.Fade(0.08f * fade));
+
+        // Walls face the room, so their labels sit on the other side of the line, outside; an open run's
+        // labels sit on the right of its drawing direction, which is the outside of a wall facing left.
+        var facesLeft = !plan.IsClosed || plan.SignedAreaTwice() >= 0;
+        for (var segment = 0; segment < plan.SegmentCount; segment++)
+        {
+            var a = _boardPlanPoints[segment];
+            var b = _boardPlanPoints[(segment + 1) % count];
+            var wall = setup.FindSurface(plan.WallOf(segment));
+            var wallSelected = wall != null && (selection?.IsSelected(SetupEntityKinds.Surface, wall.Id) ?? false);
+            if (wall == null)
+            {
+                dl.AddLine(a, b, openColor, 1f * scale);
+            }
+            else
+            {
+                var wallPulse = wallSelected ? 0f : FrameStats.CrossHighlightAmount(wall.Id);
+                dl.AddLine(a, b, wallSelected ? UiColors.Selection.Fade(fade) : PulseColor(wallColor, wallPulse), (wallSelected ? 4f : 3f) * scale);
+            }
+
+            // The name and length along the segment, offset to its outside, so the plan reads as the room's spec sheet.
+            plan.GetSegment(segment, out var start, out var end);
+            var along = b - a;
+            if (along.LengthSquared() < 1f)
+                continue;
+
+            along /= along.Length();
+            // Screen y runs down, so the plan's left of travel is (-y, x) turned the other way: (y, -x) is outside.
+            var outward = facesLeft ? new Vector2(along.Y, -along.X) : new Vector2(-along.Y, along.X);
+            var label = wall == null ? $"{(end - start).Length():0.##} m" : $"{wall.Name} · {(end - start).Length():0.##} m";
+            CanvasDraw.TextAlong(dl, Fonts.FontSmall, Fonts.FontSmall.FontSize, (a + b) * 0.5f + outward * 10 * scale, along,
+                                 (wallSelected ? UiColors.Text : UiColors.TextMuted).Fade(fade), label);
+        }
+
+        // The card's frame is the run's bounds with a margin: the pick and grab area. Its name sits above the
+        // top-left like every other card's, and hovering, picking and grabbing work there as on the card.
+        PlanBounds(plan, out var min, out var max);
+        var sMin = _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y));
+        var sMax = _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y));
+        var pad = 4 * scale;
+        var rounding = 3 * scale;
+        var nameFont = isSelected ? Fonts.FontBold : Fonts.FontSmall;
+        ImGui.PushFont(nameFont);
+        var nameSize = ImGui.CalcTextSize(plan.Name);
+        ImGui.PopFont();
+        var labelMin = new Vector2(sMin.X, sMin.Y - nameSize.Y - 2 * pad);
+        var labelMax = labelMin + nameSize + new Vector2(2 * pad, 2 * pad);
+
+        var interactive = fade >= 0.999f;
+        var hovered = interactive && ImGui.IsWindowHovered()
+                      && (ImGui.IsMouseHoveringRect(sMin, sMax) || ImGui.IsMouseHoveringRect(labelMin, labelMax));
+        if (hovered)
+            FrameStats.RequestCrossHighlight(plan.Id);
+
+        dl.AddRect(sMin, sMax, PulseColor(hue.Fade(hovered ? 1f : 0.7f), pulse).Fade(fade), rounding, ImDrawFlags.None, 1 * scale);
+        if (isSelected)
+        {
+            var outset = new Vector2(1.5f * scale);
+            dl.AddRect(sMin - outset, sMax + outset, hue.Fade(fade), rounding, ImDrawFlags.None, 3 * scale);
+        }
+
+        dl.AddRectFilled(labelMin, labelMax, UiColors.BackgroundFull.Fade(0.3f * fade), rounding);
+        dl.AddText(nameFont, nameFont.FontSize, labelMin + new Vector2(pad, pad), SetupColors.LabelFor(SetupEntityKinds.FloorPlan).Fade(fade), plan.Name);
+        var meta = BoardMeta(plan.Id);
+        if (meta != null && (hovered || isSelected))
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(labelMax.X + pad, labelMax.Y - pad - Fonts.FontSmall.FontSize),
+                       UiColors.TextMuted.Fade(0.5f * fade), meta);
+
+        if (!interactive)
+            return;
+
+        // Corners drag in board metres; a corner near a neighbour's line snaps onto it, so rooms stay square.
+        // Drawn before the card's grab, so a press on a handle is an item press and never arms a card drag.
+        var handleStyle = CanvasPointHandle.Style.Default(isSelected ? hue : hue.Fade(0.6f), CanvasPointHandle.Shapes.Square);
+        ImGui.PushID(plan.Id.GetHashCode());
+        for (var i = 0; i < count; i++)
+        {
+            ImGui.PushID(i);
+            var pos = origin + plan.Vertices[i];
+            var phase = CanvasPointHandle.Draw(ref pos, _boardProjection, handleStyle);
+            ImGui.PopID();
+            switch (phase)
+            {
+                case CanvasPointHandle.DragPhases.Started:
+                    BeginGesture(setup, GestureKinds.PlanVertex, "Move corner", plan.Id);
+                    break;
+
+                case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.PlanVertex, plan.Id):
+                {
+                    var local = pos - origin;
+                    if (!ImGui.GetIO().KeyShift)
+                        SnapPlanVertex(plan, i, ref local);
+
+                    plan.Vertices[i] = local;
+                    FloorPlanSync.Apply(setup, plan, i);
+                    break;
+                }
+
+                case CanvasPointHandle.DragPhases.Completed:
+                    EndGesture(setup);
+                    break;
+            }
+        }
+
+        ImGui.PopID();
+
+        _picker.AddTarget(SetupEntityKinds.FloorPlan, plan.Id, sMin, sMax, isBackground: true);
+        // The label is a foreground target: it wins over any card stacked beneath it.
+        _picker.AddTarget(SetupEntityKinds.FloorPlan, plan.Id, labelMin, labelMax);
+        _boardFenceCandidates.Add((SetupEntityKinds.FloorPlan, plan.Id, new ImRect(sMin, sMax)));
+        GrabBoardCard(SetupEntityKinds.FloorPlan, plan.Id, hovered, isSelected);
+    }
+
+    /// <summary>Aligns a dragged corner with its two neighbours' x or y when within the snap threshold.</summary>
+    private void SnapPlanVertex(FloorPlan plan, int index, ref Vector2 local)
+    {
+        var count = plan.Vertices.Count;
+        var threshold = BoardSnapThreshold();
+        for (var step = -1; step <= 1; step += 2)
+        {
+            var neighbourIndex = index + step;
+            if (!plan.IsClosed && (neighbourIndex < 0 || neighbourIndex >= count))
+                continue;
+
+            var neighbour = plan.Vertices[(neighbourIndex + count) % count];
+            if (MathF.Abs(local.X - neighbour.X) < threshold)
+                local.X = neighbour.X;
+
+            if (MathF.Abs(local.Y - neighbour.Y) < threshold)
+                local.Y = neighbour.Y;
+        }
+    }
+
+    private static void PlanBounds(FloorPlan plan, out Vector2 min, out Vector2 max)
+    {
+        const float margin = 1f;
+        var origin = plan.BoardPlacement?.Position ?? Vector2.Zero;
+        if (!plan.TryGetBounds(out min, out max))
+            min = max = Vector2.Zero;
+
+        min += origin - new Vector2(margin);
+        max += origin + new Vector2(margin);
     }
 
     private static void PropBounds(Prop prop, out Vector2 min, out Vector2 max)
@@ -1255,6 +1426,21 @@ internal sealed partial class SetupOutputView
             y += size.Y + gap * 0.5f;
         }
 
+        // Floor plans below the floor line, side by side — the stage seen from above, under the walls seen head-on.
+        x = 0f;
+        foreach (var plan in setup.FloorPlans)
+        {
+            plan.TryGetBounds(out var planMin, out var planMax);
+            if (plan.BoardPlacement == null)
+            {
+                plan.BoardPlacement = new BoardPlacement { Position = new Vector2(x - planMin.X, -gap * 2 - planMax.Y) };
+                FloorPlanSync.Apply(setup, plan);
+                seeded = true;
+            }
+
+            x += planMax.X - planMin.X + gap;
+        }
+
         if (seeded)
             OutputSetupHandling.SaveActive();
     }
@@ -1334,6 +1520,12 @@ internal sealed partial class SetupOutputView
         foreach (var prop in setup.Props)
         {
             PropBounds(prop, out var a, out var b);
+            Include(ref any, ref min, ref max, a, b);
+        }
+
+        foreach (var plan in setup.FloorPlans)
+        {
+            PlanBounds(plan, out var a, out var b);
             Include(ref any, ref min, ref max, a, b);
         }
 
@@ -1438,6 +1630,15 @@ internal sealed partial class SetupOutputView
                 max = min + BoardPixelSize(setup, kind, id) / PixelsPerMeterOf(image.BoardPlacement, image);
                 return true;
             }
+            case SetupEntityKinds.FloorPlan:
+            {
+                var plan = setup.FindFloorPlan(id);
+                if (plan?.BoardPlacement == null)
+                    return false;
+
+                PlanBounds(plan, out min, out max);
+                return true;
+            }
             default:
                 return false;
         }
@@ -1493,6 +1694,7 @@ internal sealed partial class SetupOutputView
                             SetupEntityKinds.ContentSource => setup.FindSourceByChildId(id)?.BoardPlacement,
                             SetupEntityKinds.Output => setup.FindOutput(id)?.BoardPlacement,
                             SetupEntityKinds.ReferenceImage => setup.FindReferenceImage(id)?.BoardPlacement,
+                            SetupEntityKinds.FloorPlan => setup.FindFloorPlan(id)?.BoardPlacement,
                             _ => null,
                         } ?? null!;
         return placement != null;
@@ -1530,6 +1732,10 @@ internal sealed partial class SetupOutputView
 
         if (TryGetPlacement(setup, kind, id, out var placement))
             placement.Position = position;
+
+        // A plan's place on the Board is its place in the stage, so its walls move with the card.
+        if (kind == SetupEntityKinds.FloorPlan && setup.FindFloorPlan(id) is { } plan)
+            FloorPlanSync.Apply(setup, plan);
     }
 
     // ---- per-structure caches ------------------------------------------------------------------------
@@ -1562,6 +1768,12 @@ internal sealed partial class SetupOutputView
 
         foreach (var prop in setup.Props)
             _boardMeta[prop.Id] = $"{prop.HeightInMeters:0.##} m";
+
+        foreach (var plan in setup.FloorPlans)
+        {
+            plan.TryGetBounds(out var min, out var max);
+            _boardMeta[plan.Id] = $"{max.X - min.X:0.##}×{max.Y - min.Y:0.##} m · {(plan.IsClosed ? "closed" : "open")}";
+        }
     }
 
     private void RefreshSurfaceMeta(Surface surface)
@@ -1645,6 +1857,7 @@ internal sealed partial class SetupOutputView
     private Guid _boardDragId;
     private Vector2 _boardDragGrabOnBoard;
     private readonly List<(SetupEntityKinds Kind, Guid Id, Vector2 Start)> _boardDragItems = [];
+    private Vector2[] _boardPlanPoints = new Vector2[8]; // a plan's corners on screen, grown to the largest plan
 
     // Marquee over the cards: candidates are collected as the cards draw (cleared per frame), and the fence
     // resolves containers against the setup set before it runs.

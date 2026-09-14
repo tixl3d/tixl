@@ -69,6 +69,9 @@ internal static class SetupParameterView
             case SetupEntityKinds.Prop:
                 DrawPropCard(setup, id);
                 break;
+            case SetupEntityKinds.FloorPlan:
+                DrawFloorPlanCard(setup, id);
+                break;
             case SetupEntityKinds.Patch:
                 DrawPatchCard(setup, id);
                 break;
@@ -199,9 +202,19 @@ internal static class SetupParameterView
         if (FormInputs.AddCheckBox("Render", ref render, "Skip drawing this surface without removing it."))
             SetupUndo.RunUndoable("Toggle render", setup, () => surface.IsRendered = render);
 
+        var plan = setup.FindFloorPlanOf(surface.Id, out var planSegment);
+        if (plan != null)
+        {
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText(planSegment < 0
+                                              ? $"Floor of {plan.Name} — its size and place follow the plan."
+                                              : $"Wall on edge {planSegment + 1} of {plan.Name} — its width and place follow the plan.",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+        }
+
         var position = surface.Placement?.Pose.Position ?? Vector3.Zero;
         Span<float> pos = [position.X, position.Y, position.Z];
-        var posState = DrawFloatsRow("Position (m)", pos);
+        var posState = DrawFloatsRow("Position (m)", pos, readOnly: plan != null);
         BeginFieldUndo(setup, posState);
         if ((posState & InputEditStateFlags.Modified) != 0)
         {
@@ -210,6 +223,9 @@ internal static class SetupParameterView
         }
 
         CommitFieldUndo(setup, "Move surface", posState);
+
+        if (surface.Kind == Surface.Kinds.Physical)
+            DrawStageOrientationRows(setup, surface, readOnly: plan != null);
 
         // A Layout child inherits its parent's plane, so it's placed in the parent's local space instead of the stage.
         if (surface.Kind == Surface.Kinds.Layout)
@@ -255,7 +271,19 @@ internal static class SetupParameterView
         // A re-metering: lines and regions scale along, nothing moves on the wall. One undo step per gesture.
         BeginFieldUndo(setup, sizeState);
         if ((sizeState & InputEditStateFlags.Modified) != 0)
-            SurfaceMetrics.RemeterSurface(setup, surface, ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.IsAspectLocked));
+        {
+            var typed = ConstrainSize(surface.SizeInMeters, new Vector2(size[0], size[1]), surface.IsAspectLocked);
+            if (plan != null && planSegment >= 0)
+            {
+                // A wall's width is its segment: the typed number goes to the plan, which hands it back.
+                SurfaceMetrics.RemeterSurface(setup, surface, new Vector2(surface.SizeInMeters.X, typed.Y));
+                FloorPlanSync.SetSegmentLength(setup, plan, planSegment, typed.X);
+            }
+            else if (plan == null)
+            {
+                SurfaceMetrics.RemeterSurface(setup, surface, typed);
+            }
+        }
 
         CommitFieldUndo(setup, "Resize surface", sizeState);
 
@@ -286,6 +314,89 @@ internal static class SetupParameterView
             surface.Anchor = new Vector2(anchor[0], anchor[1]);
 
         CommitFieldUndo(setup, "Move anchor", anchorState);
+    }
+
+    /// <summary>How a physical surface is turned in the stage: yaw, pitch and roll, for reading and fine-tuning a free surface.</summary>
+    private static void DrawStageOrientationRows(Setup setup, Surface surface, bool readOnly)
+    {
+        var orientation = surface.Placement?.Pose.Orientation ?? System.Numerics.Quaternion.Identity;
+        var degrees = StagePlacing.ToYawPitchRollDegrees(orientation);
+        Span<float> rotation = [degrees.X, degrees.Y, degrees.Z];
+        var rotationState = DrawFloatsRow("Rotation (°)", rotation,
+                                          "Yaw, pitch and roll in the stage. An unturned surface stands upright facing the viewer; a floor is pitched -90.",
+                                          speed: 0.5f, readOnly: readOnly, format: "{0:0.#}");
+        BeginFieldUndo(setup, rotationState);
+        if ((rotationState & InputEditStateFlags.Modified) != 0)
+        {
+            var placement = surface.Placement ??= new Surface.StagePlacement();
+            placement.Pose = new Pose(placement.Pose.Position,
+                                      StagePlacing.FromYawPitchRollDegrees(new System.Numerics.Vector3(rotation[0], rotation[1], rotation[2])));
+        }
+
+        CommitFieldUndo(setup, "Turn surface", rotationState);
+    }
+
+    /// <summary>
+    /// A floor plan's card: whether it closes into a room and carries a floor, the height new walls get, and one
+    /// row per edge with its length and a wall toggle — the venue's spec sheet, typed in as printed.
+    /// </summary>
+    private static void DrawFloorPlanCard(Setup setup, Guid id)
+    {
+        var plan = setup.FindFloorPlan(id);
+        if (plan == null)
+            return;
+
+        FormInputs.ApplyIndent();
+        plan.TryGetBounds(out var min, out var max);
+        CustomComponents.StylizedText($"{max.X - min.X:0.##}×{max.Y - min.Y:0.##} m · drag its corners on the Board", Fonts.FontSmall, UiColors.TextMuted);
+
+        var closed = plan.IsClosed;
+        if (FormInputs.AddCheckBox("Closed", ref closed, "The last corner joins the first: a room, which can carry a floor."))
+        {
+            SetupUndo.RunUndoable("Toggle plan closed", setup, () =>
+                                                              {
+                                                                  plan.IsClosed = closed;
+                                                                  plan.EnsureWallSlots();
+                                                                  FloorPlanSync.Apply(setup, plan);
+                                                              });
+        }
+
+        if (plan.IsClosed)
+        {
+            var hasFloor = setup.FindSurface(plan.RaisedFloorId) != null;
+            if (FormInputs.AddCheckBox("Floor surface", ref hasFloor,
+                                       "A surface lying on the footprint. Unticking removes it, unless content, a projection or regions were put on it — then it is kept, free of the plan, and ticking again brings it back."))
+                SetupUndo.RunUndoable(hasFloor ? "Add floor" : "Take up floor", setup, () => FloorPlanSync.SetFloor(setup, plan, hasFloor));
+        }
+
+        Span<float> height = [plan.WallHeight];
+        var heightState = DrawFloatsRow("Wall height (m)", height, "What a newly raised wall gets; walls already standing keep their own height.");
+        BeginFieldUndo(setup, heightState);
+        if ((heightState & InputEditStateFlags.Modified) != 0)
+            plan.WallHeight = MathF.Max(height[0], 0.1f);
+
+        CommitFieldUndo(setup, "Change wall height", heightState);
+
+        FormInputs.AddSectionSubHeader("Edges");
+        for (var segment = 0; segment < plan.SegmentCount; segment++)
+        {
+            ImGui.PushID(segment);
+            plan.GetSegment(segment, out var start, out var end);
+            var wall = setup.FindSurface(plan.WallOf(segment));
+            var lowered = wall == null ? setup.FindSurface(plan.SlotOf(segment)) : null;
+            var hasWall = wall != null;
+            var label = wall != null ? $"{wall.Name} · {(end - start).Length():0.##} m"
+                        : lowered != null ? $"Edge {segment + 1} · {(end - start).Length():0.##} m · {lowered.Name} lowered"
+                        : $"Edge {segment + 1} · {(end - start).Length():0.##} m";
+            if (FormInputs.AddCheckBox(label, ref hasWall,
+                                       "A wall standing on this edge, facing in. Unticking removes it, unless content, a projection, a trace or regions were put on it — then it is kept, free of the plan, and ticking again brings it back."))
+            {
+                var index = segment;
+                SetupUndo.RunUndoable(hasWall ? "Raise wall" : "Take down wall", setup, () => FloorPlanSync.SetWall(setup, plan, index, hasWall));
+            }
+
+            ImGui.PopID();
+        }
     }
 
     private static void DrawOutputCard(Setup setup, MachineConfig machineConfig, Guid id)
@@ -417,6 +528,9 @@ internal static class SetupParameterView
     {
         FormInputs.AddSectionSubHeader("Patches");
         var selection = GlobalSelectionHandling.SetupEntities;
+
+        // A patch card draws the same switch for its own rows above, so this one needs its own id scope.
+        ImGui.PushID("patchTable");
         if (output.Patches.Count > 0)
             DrawUnitSwitch();
 
@@ -467,6 +581,7 @@ internal static class SetupParameterView
             SetupActions.AddPatch(selection, setup, output);
 
         CustomComponents.TooltipForLastItem("Adds a full-canvas patch to place by dragging on the output, or by typing its rect here.");
+        ImGui.PopID();
     }
 
     /// <summary>The X, Y, W, H and turn cells of one table row, editable for a freely placed axis-aligned patch.</summary>

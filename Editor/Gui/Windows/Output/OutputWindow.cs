@@ -53,6 +53,21 @@ internal sealed partial class OutputWindow : Window
         _camSelectionHandling.ResetView();
     }
 
+    /// <summary>Puts the primary output window into setup mode, showing it first if none is visible.</summary>
+    public static void EnterSetupOnPrimaryWindow()
+    {
+        if (!TryGetPrimaryOutputWindow(out var window))
+        {
+            if (OutputWindowInstances.Count == 0)
+                return;
+
+            window = (OutputWindow)OutputWindowInstances[0];
+            window.Config.Visible = true;
+        }
+
+        window._setupMode.EnterSetupMode();
+    }
+
     public static bool TryGetPrimaryOutputWindow([NotNullWhen(true)] out OutputWindow? outputWindow)
     {
         foreach (var window in OutputWindowInstances)
@@ -142,9 +157,10 @@ internal sealed partial class OutputWindow : Window
                 {
                     ImGui.SetCursorPos(ImGui.GetCursorStartPos());
                     CustomComponents.PushToolbarIconBackground();
-                    _setupMode.DrawOutlinerToggleButton();
                     _setupMode.DrawPinIndicator();
                     Pinning.DrawPinning(_drawOutputMenuExtras);
+                    ImGui.SameLine(0, 16 * T3Ui.UiScaleFactor);
+                    _setupMode.DrawSetupButton();
                     CustomComponents.PopToolbarIconBackground();
                 }
             }

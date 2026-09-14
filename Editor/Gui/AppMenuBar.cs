@@ -437,6 +437,9 @@ internal static class AppMenuBar
                 }
             }
 
+            if (MenuItem("Edit Output Setup", isEnabled: ProjectView.Focused != null))
+                Windows.Output.OutputWindow.EnterSetupOnPrimaryWindow();
+
             CustomComponents.SeparatorLine();
 
             if (MenuItem("Exit", isEnabled: !T3Ui.IsCurrentlySaving))

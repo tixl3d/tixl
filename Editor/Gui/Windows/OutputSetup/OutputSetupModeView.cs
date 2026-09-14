@@ -118,18 +118,24 @@ internal sealed class OutputSetupModeView
             _viewMode = IsSetupMode ? ViewModes.Operator : ViewModes.Setup;
     }
 
-    /// <summary>The outliner toggle icon for the output toolbar. Only drawn while the strip is hidden — the
-    /// open strip's own header carries the collapse icon, and showing the control twice reads as two
-    /// different buttons.</summary>
-    public void DrawOutlinerToggleButton()
+    /// <summary>The "Output Setup" button for the output toolbar. Only drawn while the strip is hidden — the
+    /// open strip's own header carries the way back, and showing the control twice reads as two different
+    /// buttons.</summary>
+    public void DrawSetupButton()
     {
         if (IsSetupMode)
             return;
 
-        if (CustomComponents.IconButton(Icon.ViewList, Vector2.Zero))
-            _viewMode = ViewModes.Setup;
+        if (CustomComponents.StateButton("Output Setup", CustomComponents.ButtonStates.Default))
+            EnterSetupMode();
 
-        ImGui.SameLine();
+        CustomComponents.TooltipForLastItem("Edit the output setup", "Surfaces, outputs and what is routed where, with the Flow Outliner under the canvas.");
+    }
+
+    /// <summary>Shows the setup view with its Flow Outliner, whatever the graph selection is.</summary>
+    public void EnterSetupMode()
+    {
+        _viewMode = ViewModes.Setup;
     }
 
     /// <summary>Pin menu entry for the breadcrumb: pins the currently shown entity, or releases the pin.</summary>

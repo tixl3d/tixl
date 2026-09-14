@@ -24,7 +24,7 @@ namespace T3.Editor.Gui.Windows.Output;
 internal sealed partial class OutputWindow
 {
     /// <summary>Output-specific items appended to the breadcrumb menu. Display binding lives on the outliner's
-    /// OUTPUT rows (right-click → Bind to display); the outliner toggle is the toolbar's list icon.</summary>
+    /// OUTPUT rows (right-click → Bind to display); the setup itself is entered by the toolbar's last button.</summary>
     private void DrawOutputMenuExtras()
     {
         _setupMode.DrawOutlinerMenuItem();
@@ -45,7 +45,6 @@ internal sealed partial class OutputWindow
         // Keep filled backgrounds so the toolbar reads as a continuous bar.
         CustomComponents.PushToolbarIconBackground();
 
-        _setupMode.DrawOutlinerToggleButton();
         _setupMode.DrawPinIndicator();
         Pinning.DrawPinning(_drawOutputMenuExtras);
         ImGui.SameLine();
@@ -250,6 +249,10 @@ internal sealed partial class OutputWindow
                 CustomComponents.TooltipForLastItem("Toggle render settings",
                                                     "Open or close the \"Render To File\" window.");
         }
+
+        // Entering the setup is a change of what the window is for, not one more view tool, so it stands apart.
+        ImGui.SameLine(0, 16 * T3Ui.UiScaleFactor);
+        _setupMode.DrawSetupButton();
 
         CustomComponents.PopToolbarIconBackground();
         ImGui.EndChild();

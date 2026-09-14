@@ -113,8 +113,9 @@ internal sealed class SetupFlowOutliner
         if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
             ImGui.OpenPopup(AddBoardItemMenuId);
 
-        CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, or a prop for scale.");
+        CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, a prop for scale, or a whole room.");
 
+        var openRoomDialog = false;
         if (ImGui.BeginPopup(AddBoardItemMenuId))
         {
             if (CustomComponents.DrawMenuItem(1, "Add Reference Image"))
@@ -127,8 +128,19 @@ internal sealed class SetupFlowOutliner
 
             CustomComponents.TooltipForLastItem("A box of known size on the Board — a doorway, a table — to judge the venue against.");
 
+            // The dialog can't open from inside the menu (it would close with it), so it is opened once the menu is gone.
+            if (CustomComponents.DrawMenuItem(3, "Add Floor Plan..."))
+                openRoomDialog = true;
+
+            CustomComponents.TooltipForLastItem("The venue seen from above: a footprint whose edges carry the walls, drawn at true scale.");
+
             ImGui.EndPopup();
         }
+
+        if (openRoomDialog)
+            ImGui.OpenPopup(AddRoomDialogId);
+
+        DrawAddRoomDialog(setup, selection);
 
         if (onToggleCollapse != null)
         {
@@ -803,7 +815,42 @@ internal sealed class SetupFlowOutliner
     private static readonly List<(int Width, int Height, string Label)> _resolutionLabels = [];
 
     private const string AddPlugMenuId = "##addPlugMenu";
+    /// <summary>A rectangular footprint to start from; walls are raised per edge on the plan's card afterwards.</summary>
+    private static void DrawAddRoomDialog(Setup setup, SetupEntitySelection selection)
+    {
+        ImGui.SetNextWindowSize(new Vector2(280 * T3Ui.UiScaleFactor, 0));
+        if (!ImGui.BeginPopup(AddRoomDialogId))
+            return;
+
+        CustomComponents.StylizedText("Add Floor Plan", Fonts.FontBold, UiColors.Text);
+        CustomComponents.StylizedText("A rectangle to start from; raise walls on its edges on its card.",
+                                      Fonts.FontSmall, UiColors.TextMuted);
+
+        FormInputs.AddFloat("Width (m)", ref _roomWidth, 0.1f, 1000, 0.05f, clampMin: true, clampMax: true, "Left to right.");
+        FormInputs.AddFloat("Depth (m)", ref _roomDepth, 0.1f, 1000, 0.05f, clampMin: true, clampMax: true, "Near to far.");
+        FormInputs.AddCheckBox("With floor surface", ref _roomWithFloor, "A surface lying on the footprint, for floor projection.");
+
+        FormInputs.AddVerticalSpace(4);
+        if (ImGui.Button("Create"))
+        {
+            SetupActions.AddFloorPlan(selection, new Vector2(_roomWidth, _roomDepth), _roomWithFloor);
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Cancel"))
+            ImGui.CloseCurrentPopup();
+
+        ImGui.EndPopup();
+    }
+
     private const string AddBoardItemMenuId = "##addBoardItemMenu";
+    private const string AddRoomDialogId = "##addFloorPlanDialog";
+
+    // The dialog's fields, kept between openings so a venue's numbers can be tweaked and re-added.
+    private static float _roomWidth = 10;
+    private static float _roomDepth = 8;
+    private static bool _roomWithFloor = true;
     private const string HelpDocId = "OutputSetup";
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
     private bool _addPlugMenuRequested;

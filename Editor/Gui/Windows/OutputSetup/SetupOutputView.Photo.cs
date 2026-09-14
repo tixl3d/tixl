@@ -444,19 +444,6 @@ internal sealed partial class SetupOutputView
             return null;
         }
 
-        // The bitmap loader allocates a full mip chain but fills only level 0 — the coarse levels are garbage
-        // until regenerated, and the oblique straighten warp minifies into them (ghosts of other content).
-        // The resource can swap its texture object after loading, so this is keyed on the object, not the path.
-        if (!ReferenceEquals(entry.MipsGeneratedFor, texture))
-        {
-            var srv = SrvManager.GetSrvForTexture(texture);
-            if (srv is { IsDisposed: false })
-            {
-                ResourceManager.Device.ImmediateContext.GenerateMips(srv);
-                entry.MipsGeneratedFor = texture;
-            }
-        }
-
         // The stored pixel size is what traces and measurements are in, and what the card and its metadata
         // show — keep it in step with the loaded texture (persisted with the next save).
         if (image.Width != texture.Description.Width || image.Height != texture.Description.Height)
@@ -479,7 +466,6 @@ internal sealed partial class SetupOutputView
     {
         public readonly string Path = path;
         public readonly Resource<Texture2D> Resource = resource;
-        public Texture2D? MipsGeneratedFor; // the texture object whose mip chain was filled (held only as long as the resource)
         public bool WarnedMissing;
     }
 

@@ -6,7 +6,7 @@ This page walks through the parts of the view, the way content flows through a s
 
 ## Where to find it
 
-Open an **Output window** and switch it to setup mode with the projector button in its toolbar. The window then shows the setup canvas on top and the **flow outliner** strip below it. The strip's header holds the setup switcher, the canvas tabs (**Board**, **Straight**, **Output**), a help button and a toggle that collapses the strip to its header.
+Open an **Output window** and click **Output Setup**, the last button in its toolbar. **Edit Output Setup** in the TiXL menu does the same for the primary output window, showing one first if none is open. Selecting a SendToOutput op in the graph also switches the window over. The window then shows the setup canvas on top and the **flow outliner** strip below it. The strip's header holds the setup switcher, the canvas tabs (**Board**, **Straight**, **Output**), a help button and a toggle that collapses the strip to its header.
 
 A project can hold several setups, one per venue. The switcher's menu creates, duplicates and deletes them. Duplicating keeps every entity id, so operators that reference a surface or output keep working in the copy.
 
@@ -56,6 +56,14 @@ The selected surface seen flat, as if you stood in front of it. Place its conten
 An output's canvas: the live composite the projector receives. Each mapped surface appears as a quad you corner-pin over the real wall while watching the projector. Once a surface carries reference points, aim them at their real positions and the pin is solved to hit them exactly. Patches appear as plain quads on the canvas.
 
 **Pixel map.** Venues that take one video signal for a whole room hand out a pixel map: an image at the signal's resolution with every wall's rectangle drawn in. Select the output and pick that image under **Pixel Map** in the Parameter window; it is drawn over the canvas at the **Opacity** you set, so patches can be placed against it while their content still shows through. The card warns when the image and the canvas differ in size, with a button to adopt the image's size. Below it, the **Patches** table lists every patch on the canvas with its top-left corner, size and rotation, in pixels or as ratios of the canvas, so a spec sheet can be typed in as printed. Clicking a name selects that patch; the same table sits on each patch's card, with that patch marked.
+
+## The stage and floor plans
+
+Every physical surface has a place in the stage: a position in metres and a rotation, shown on its card as **Position** and **Rotation** (yaw, pitch, roll). An unturned surface stands upright facing the viewer, and a floor is pitched by -90. For a room nobody types those numbers: a **floor plan** describes the venue from above, and its surfaces follow it.
+
+A floor plan is a card on the Board: a run of corners in metres, drawn at the same scale as the surface cards next to it. Each edge between two corners can carry a **wall**, a real surface that is as wide as the edge and stands on it facing the room; a **closed** plan can carry a **floor** surface covering its footprint. The walls stay derived: drag a corner on the Board, move the card, or type a wall's width on its card, and the plan and its walls agree again. A derived surface shows its position and rotation read-only, its height stays yours. Unticking a wall or floor on the plan's card removes the surface if nothing was done to it; one that carries content, a projection, a trace or regions is kept and stops following, and ticking the edge again brings that same surface back.
+
+Start one with **Add Floor Plan...** in the Board's `+` menu, which asks for a rectangle's width and depth, or from a surface you already have: its context menu offers **Start Floor Plan from Bottom Edge** (the surface becomes the first wall of an open run) and **Use as Floor of New Plan**. Walls are raised per edge on the plan's card, and each wall's name and length are written along its edge on the Board. All walls stand on one ground level.
 
 ## Reference images and props
 

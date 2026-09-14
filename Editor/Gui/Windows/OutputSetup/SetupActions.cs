@@ -85,6 +85,31 @@ internal static class SetupActions
                                                  });
     }
 
+    /// <summary>A closed rectangular floor plan of <paramref name="size"/> metres, with or without its floor surface.</summary>
+    internal static void AddFloorPlan(SetupEntitySelection selection, Vector2 size, bool withFloor)
+    {
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
+            return;
+
+        SetupUndo.RunUndoable("Add floor plan", setup, () =>
+                                                       {
+                                                           var plan = FloorPlanSync.CreateRectangle(setup, size, withFloor);
+                                                           selection.Select(SetupEntityKinds.FloorPlan, plan.Id);
+                                                       });
+    }
+
+    /// <summary>Starts a floor plan from a surface: as its first wall, or as the floor of a room its size.</summary>
+    internal static void StartFloorPlanFromSurface(SetupEntitySelection selection, Setup setup, Surface surface, bool asFloor)
+    {
+        SetupUndo.RunUndoable(asFloor ? "Use surface as floor" : "Start floor plan from wall", setup, () =>
+                                                                                                 {
+                                                                                                     var plan = asFloor
+                                                                                                                    ? FloorPlanSync.StartFromFloor(setup, surface)
+                                                                                                                    : FloorPlanSync.StartFromWall(setup, surface);
+                                                                                                     selection.Select(SetupEntityKinds.FloorPlan, plan.Id);
+                                                                                                 });
+    }
+
     internal static void AddOutput(SetupEntitySelection selection)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
@@ -666,6 +691,11 @@ internal static class SetupActions
                 setup.Props.RemoveAll(p => p.Id == id);
                 break;
 
+            case SetupEntityKinds.FloorPlan:
+                // Its surfaces stay where the plan last put them; only the derivation ends.
+                setup.FloorPlans.RemoveAll(p => p.Id == id);
+                break;
+
             case SetupEntityKinds.Patch:
                 if (setup.FindPatch(id, out var owner) != null)
                     owner!.Patches.RemoveAll(p => p.Id == id);
@@ -713,6 +743,7 @@ internal static class SetupActions
         }
         while (grew);
 
+        FloorPlanSync.ReleaseSurfaces(setup, ids);
         for (var i = setup.Surfaces.Count - 1; i >= 0; i--)
         {
             if (ids.Contains(setup.Surfaces[i].Id))
@@ -802,6 +833,28 @@ internal static class SetupActions
                 copy.Id = Guid.NewGuid();
                 setup.Props.Add(copy);
                 selection.Select(SetupEntityKinds.Prop, copy.Id);
+                break;
+            }
+
+            case SetupEntityKinds.FloorPlan:
+            {
+                var plan = setup.FindFloorPlan(id);
+                var copy = plan == null ? null : CloneViaJson(plan.WriteToJson, FloorPlan.ReadFromJson);
+                if (copy == null || plan == null)
+                    return;
+
+                // The footprint copies, its surfaces don't: a wall stands on one segment only.
+                copy.Id = Guid.NewGuid();
+                copy.Name += " copy";
+                copy.FloorSurfaceId = Guid.Empty;
+                for (var i = 0; i < copy.WallSurfaceIds.Count; i++)
+                    copy.WallSurfaceIds[i] = Guid.Empty;
+
+                if (copy.BoardPlacement != null && plan.TryGetBounds(out var planMin, out var planMax))
+                    copy.BoardPlacement.Position += new Vector2(planMax.X - planMin.X + 0.5f, 0);
+
+                setup.FloorPlans.Add(copy);
+                selection.Select(SetupEntityKinds.FloorPlan, copy.Id);
                 break;
             }
 

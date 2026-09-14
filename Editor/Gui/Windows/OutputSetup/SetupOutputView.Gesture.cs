@@ -34,6 +34,7 @@ internal sealed partial class SetupOutputView
         Annotation,     // a measuring line's endpoint
         AnnotationDraft,// a new measuring line being drawn
         BoardCard,      // Board cards moving
+        PlanVertex,     // a floor plan's corner on its Board card
         BoardScale,     // the Board scale handle
         TraceCorner,    // a traced quad's corner on the image card / in the photo
         TraceRefine,    // the straightened rect's handles refining the trace

@@ -66,4 +66,34 @@ internal static class CanvasDraw
         dl.AddRectFilled(new Vector2(outerMin.X, innerMin.Y), new Vector2(innerMin.X, innerMax.Y), color); // left
         dl.AddRectFilled(new Vector2(innerMax.X, innerMin.Y), new Vector2(outerMax.X, innerMax.Y), color); // right
     }
+
+    /// <summary>
+    /// Text centred on <paramref name="centre"/> and turned to run along <paramref name="direction"/> (screen
+    /// space), flipped so it never reads upside down. The glyphs are laid out flat and their vertices turned
+    /// afterwards — the draw list has no rotated text of its own.
+    /// </summary>
+    public static void TextAlong(ImDrawListPtr dl, ImFontPtr font, float fontSize, Vector2 centre, Vector2 direction, Color color, string text)
+    {
+        var angle = MathF.Atan2(direction.Y, direction.X);
+        if (angle > MathF.PI * 0.5f)
+            angle -= MathF.PI;
+        else if (angle < -MathF.PI * 0.5f)
+            angle += MathF.PI;
+
+        ImGui.PushFont(font);
+        var textSize = ImGui.CalcTextSize(text);
+        ImGui.PopFont();
+        var first = dl.VtxBuffer.Size;
+        dl.AddText(font, fontSize, centre - textSize * 0.5f, color, text);
+        var last = dl.VtxBuffer.Size;
+
+        var cos = MathF.Cos(angle);
+        var sin = MathF.Sin(angle);
+        for (var i = first; i < last; i++)
+        {
+            var vertex = dl.VtxBuffer[i];
+            var p = vertex.pos - centre;
+            vertex.pos = centre + new Vector2(p.X * cos - p.Y * sin, p.X * sin + p.Y * cos);
+        }
+    }
 }

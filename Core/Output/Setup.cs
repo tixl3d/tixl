@@ -39,6 +39,9 @@ public sealed class Setup
     public List<OutputDefinition> Outputs = [];
     public List<Prop> Props = [];
 
+    /// <summary>Venue footprints whose segments carry the wall surfaces standing on them.</summary>
+    public List<FloorPlan> FloorPlans = [];
+
     /// <summary>Creates a setup containing the always-present Default output.</summary>
     public static Setup CreateDefault(string name = "Setup 1")
     {
@@ -207,6 +210,49 @@ public sealed class Setup
         return null;
     }
 
+    public FloorPlan? FindFloorPlan(Guid id)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        foreach (var plan in FloorPlans)
+        {
+            if (plan.Id == id)
+                return plan;
+        }
+
+        return null;
+    }
+
+    /// <summary>The plan a surface is derived from, and which part of it: the floor (-1) or a segment index.</summary>
+    public FloorPlan? FindFloorPlanOf(Guid surfaceId, out int segment)
+    {
+        segment = -1;
+        if (surfaceId == Guid.Empty)
+            return null;
+
+        foreach (var plan in FloorPlans)
+        {
+            // A lowered surface is linked but free: it no longer follows the plan.
+            if (plan.LoweredSurfaceIds.Contains(surfaceId))
+                continue;
+
+            if (plan.FloorSurfaceId == surfaceId)
+                return plan;
+
+            for (var i = 0; i < plan.WallSurfaceIds.Count; i++)
+            {
+                if (plan.WallSurfaceIds[i] != surfaceId)
+                    continue;
+
+                segment = i;
+                return plan;
+            }
+        }
+
+        return null;
+    }
+
     public void WriteToJson(JsonTextWriter writer)
     {
         writer.WriteStartObject();
@@ -255,6 +301,17 @@ public sealed class Setup
             prop.WriteToJson(writer);
 
         writer.WriteEndArray();
+
+        if (FloorPlans.Count > 0)
+        {
+            writer.WritePropertyName("FloorPlans");
+            writer.WriteStartArray();
+            foreach (var plan in FloorPlans)
+                plan.WriteToJson(writer);
+
+            writer.WriteEndArray();
+        }
+
         writer.WriteEndObject();
     }
 
@@ -274,6 +331,7 @@ public sealed class Setup
                        Slices = token.ReadListSafe("Slices", Slice.ReadFromJson),
                        Outputs = token.ReadListSafe("Outputs", OutputDefinition.ReadFromJson),
                        Props = token.ReadListSafe("Props", Prop.ReadFromJson),
+                       FloorPlans = token.ReadListSafe("FloorPlans", FloorPlan.ReadFromJson),
                    };
     }
 

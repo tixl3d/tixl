@@ -43,7 +43,8 @@ internal sealed class SetupEntityKindInfo
                               {
                                   SetupEntityKinds.ContentSource
                                       or SetupEntityKinds.Slice => TypeUiRegistry.GetPropertiesForType(typeof(Texture2D)).Color,
-                                  SetupEntityKinds.Surface => UiColors.SetupSurface,
+                                  SetupEntityKinds.Surface
+                                      or SetupEntityKinds.FloorPlan => UiColors.SetupSurface,
                                   SetupEntityKinds.ReferenceImage => UiColors.SetupReferenceImage,
                                   _ => UiColors.TextMuted,
                               };
@@ -77,6 +78,7 @@ internal sealed class SetupEntityKindInfo
         Add(new SetupEntityKindInfo(SetupEntityKinds.ReferenceImage, Icon.FileImage, "Reference Image", -1, false, true, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.Surface, Icon.Grid, "Surface", 2, true, true, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.Prop, Icon.Grid, "Prop", -1, false, false, true, true));
+        Add(new SetupEntityKindInfo(SetupEntityKinds.FloorPlan, Icon.Mapping, "Floor Plan", -1, false, true, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.Output, Icon.Projector, "Output", 3, true, true, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.Slice, Icon.Slice, "Slice", 1, true, true, true, true));
         Add(new SetupEntityKindInfo(SetupEntityKinds.ContentSource, Icon.FileImage, "Content", 0, true, true, false, false));

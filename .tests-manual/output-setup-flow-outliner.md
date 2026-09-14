@@ -36,7 +36,7 @@ Click the SendToOutput op in the graph window.
 1. Drag the strip's top edge upward by about 100 px, then downward past the middle of the
    window; then drag the dotted grip at the header's left the same way.
 2. Click the chevron at the right end of the header, then click it again.
-3. Open the setup-name menu and untick **Show Flow Outliner**; then click the list icon at
+3. Open the setup-name menu and untick **Show Flow Outliner**; then click the "Output Setup" button at
    the left of the toolbar that reappears.
 
 **Expected:**

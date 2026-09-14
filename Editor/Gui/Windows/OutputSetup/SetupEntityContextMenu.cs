@@ -186,6 +186,15 @@ internal static class SetupEntityContextMenu
                 if (surface == null)
                     break;
 
+                if (surface.Kind == Surface.Kinds.Physical && setup.FindFloorPlanOf(surface.Id, out _) == null)
+                {
+                    if (CustomComponents.DrawMenuItem(19, "Start Floor Plan from Bottom Edge"))
+                        SetupActions.StartFloorPlanFromSurface(selection, setup, surface, asFloor: false);
+
+                    if (CustomComponents.DrawMenuItem(20, "Use as Floor of New Plan"))
+                        SetupActions.StartFloorPlanFromSurface(selection, setup, surface, asFloor: true);
+                }
+
                 if (CustomComponents.DrawMenuItem(4, "Add region"))
                     SetupActions.AddSubRegion(selection, setup, surface);
 

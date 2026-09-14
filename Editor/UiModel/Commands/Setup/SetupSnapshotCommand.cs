@@ -55,6 +55,7 @@ internal sealed class SetupSnapshotCommand : ICommand
         setup.Slices = restored.Slices;
         setup.Outputs = restored.Outputs;
         setup.Props = restored.Props;
+        setup.FloorPlans = restored.FloorPlans;
         OutputSetupHandling.SaveActive();
     }
 
