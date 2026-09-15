@@ -1,3 +1,4 @@
+#nullable enable
 using ImGuiNET;
 using T3.Core.Utils;
 using T3.Editor.Gui.MagGraph.Interaction;
@@ -13,7 +14,8 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 
 internal sealed partial class MagGraphView
 {
-    private void DrawConnection(MagGraphConnection connection, ImDrawListPtr drawList, GraphUiContext context)
+    /// <summary>Draws one wire, borrowing an optional active stroke observer until the persistent pass ends.</summary>
+    private void DrawConnection(MagGraphConnection connection, ImDrawListPtr drawList, GraphUiContext context, ConnectionStroke? stroke)
     {
         if (connection.Style == MagGraphConnection.ConnectionStyles.Unknown)
             return;
@@ -21,10 +23,8 @@ internal sealed partial class MagGraphView
         if (connection.SourceItem.IsCollapsedAway && connection.TargetItem.IsCollapsedAway)
             return;
 
-        // Observe only persistent wires: temporary drag previews have no graph occurrence to edit.
-        var stroke = context.ConnectionStroke;
-        var queryPath = stroke.IsActive && !connection.IsTemporary ? stroke.ObservePath : null;
-        stroke.SetConnection(queryPath != null ? connection : null);
+        var queryPath = stroke?.ObservePath;
+        stroke?.SetConnection(connection);
 
         var type = connection.Type;
 
@@ -101,15 +101,7 @@ internal sealed partial class MagGraphView
 
         if (connection.IsSnapped)
         {
-            if (queryPath != null)
-            {
-                stroke.TestMarker(drawList, sourcePosOnScreen, 7 * CanvasScale);
-                if (stroke.Contains(connection))
-                {
-                    var highlight = stroke.IsCut ? UiColors.StatusAttention : UiColors.StatusAutomated;
-                    drawList.AddCircle(sourcePosOnScreen, 9 * CanvasScale, highlight, 12, 2 * T3Ui.UiScaleFactor);
-                }
-            }
+            stroke?.DrawMarker(drawList, sourcePosOnScreen, CanvasScale);
 
             switch (connection.Style)
             {

@@ -170,12 +170,20 @@ internal sealed partial class MagGraphView
                 HighlightSplitInsertionPoints(drawList, _context);
 
             // Draw connections
-            foreach (var connection in _context.Layout.MagConnections)
+            // Borrow the active observer for this pass; temporary wires never represent editable occurrences.
+            var stroke = _context.ConnectionStroke.IsActive ? _context.ConnectionStroke : null;
+            try
             {
-                DrawConnection(connection, drawList, _context);
+                foreach (var connection in _context.Layout.MagConnections)
+                {
+                    DrawConnection(connection, drawList, _context, connection.IsTemporary ? null : stroke);
+                }
+            }
+            finally
+            {
+                stroke?.SetConnection(null);
             }
 
-            _context.ConnectionStroke.SetConnection(null);
             _context.ConnectionStroke.DrawPreview(drawList);
             if (_strokeErrorUntil > ImGui.GetTime())
                 drawList.AddText(ImGui.GetWindowPos() + new Vector2(20, 40) * T3Ui.UiScaleFactor,

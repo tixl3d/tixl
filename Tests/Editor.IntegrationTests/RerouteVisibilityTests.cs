@@ -23,6 +23,7 @@ using Command = T3.Core.DataTypes.Command;
 namespace Editor.IntegrationTests
 {
     /// <summary>Checks browser visibility against real symbol/UI replacement and definition validation.</summary>
+    [Collection("EditorModel")]
     public sealed class RerouteVisibilityTests
     {
         /// <summary>Scalar, vector, and command anchors keep their derived presentation across replacement.</summary>
@@ -288,7 +289,7 @@ namespace Editor.IntegrationTests
         }
 
         /// <summary>Creates in-memory editor symbols without assets or an editor process.</summary>
-        private sealed class TestPackage : EditorSymbolPackage, IDisposable
+        internal sealed class TestPackage : EditorSymbolPackage, IDisposable
         {
             /// <summary>Defaults to the supported package identity; a foreign ID tests rejection.</summary>
             internal TestPackage(Guid? id = null) : base(AssemblyInformation.CreateUninitialized(), "", false)
@@ -299,6 +300,12 @@ namespace Editor.IntegrationTests
 
             /// <summary>Provides package metadata without reading assets from disk.</summary>
             protected override ReleaseInfo ReleaseInfo => _releaseInfo;
+
+            /// <summary>Allows tests to verify both editable and read-only composition guards.</summary>
+            public override bool IsReadOnly => ReadOnly;
+
+            /// <summary>Simulates a package's editability without loading an editable project.</summary>
+            internal bool ReadOnly;
 
             /// <summary>Registers a definition and its editor presentation.</summary>
             internal SymbolUi Add(Type type)

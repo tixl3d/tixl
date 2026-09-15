@@ -6,13 +6,11 @@ using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
-/*
- * Tracks a cut or reroute gesture against the actual tessellated paths drawn by the canvas.
- * Mouse segments, hit tolerance, and the bounded trail use screen coordinates; stored hits and
- * anchor positions use canvas coordinates. Occurrences are collected once and committed on release.
- * _compositionId and _version invalidate the gesture if its graph changes, while reusable buffers
- * avoid rebuilding placement data on every frame when no additional wire has been crossed.
- */
+/// <summary>
+/// Tracks a cut or reroute gesture against the tessellated paths drawn by the canvas.
+/// Mouse segments and the bounded trail use screen coordinates; hits and anchor positions use canvas coordinates.
+/// Graph identity/version invalidate stale gestures, and reusable buffers retain hits until release or cancellation.
+/// </summary>
 internal sealed class ConnectionStroke
 {
     internal ConnectionStroke()
@@ -20,7 +18,10 @@ internal sealed class ConnectionStroke
         ObservePath = TestDrawnPath;
     }
 
-    // Invoke after SetConnection and before PathStroke clears the draw list's path; the delegate is reused.
+    /// <summary>
+    /// Reused observer invoked after borrowing a connection and before PathStroke consumes the path.
+    /// Hit testing and highlighting leave the pending path intact for the normal wire draw.
+    /// </summary>
     internal Action<ImDrawListPtr> ObservePath { get; }
     internal bool IsActive { get; private set; }
     internal bool IsCut { get; private set; }
@@ -66,13 +67,28 @@ internal sealed class ConnectionStroke
             AddTrailPoint(position);
     }
 
+    /// <summary>Borrows the persistent wire being drawn; the canvas clears it when the pass ends, including on failure.</summary>
     internal void SetConnection(MagGraphConnection? connection)
     {
         _connection = connection;
     }
 
-    // Snapped wires have a visible marker instead of a cable path to intersect.
-    internal void TestMarker(ImDrawListPtr drawList, Vector2 center, float radius)
+    /// <summary>Tests and highlights the snapped marker for the borrowed wire using the existing screen-space radii.</summary>
+    internal void DrawMarker(ImDrawListPtr drawList, Vector2 center, float canvasScale)
+    {
+        if (_connection == null)
+            return;
+
+        TestMarker(drawList, center, 7 * canvasScale);
+        if (Contains(_connection))
+        {
+            var color = IsCut ? UiColors.StatusAttention : UiColors.StatusAutomated;
+            drawList.AddCircle(center, 9 * canvasScale, color, 12, 2 * T3Ui.UiScaleFactor);
+        }
+    }
+
+    /// <summary>Intersects the visible part of a snapped marker with the current stroke segment.</summary>
+    private void TestMarker(ImDrawListPtr drawList, Vector2 center, float radius)
     {
         if (!IsActive || _connection == null)
             return;
