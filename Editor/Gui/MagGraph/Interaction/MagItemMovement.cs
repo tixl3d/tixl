@@ -47,7 +47,6 @@ internal sealed partial class MagItemMovement
 
     internal void PrepareFrame(GraphUiContext context)
     {
-        UpdateRerouteMergePreview(context);
         //PrepareDragInteraction();
         _snapHandlerX.DrawSnapIndicator(context.View, UiColors.StatusActivated.Fade(0.3f));
     }
@@ -58,142 +57,25 @@ internal sealed partial class MagItemMovement
         UpdateSnappedConnectionsToDraggedItems();
     }
 
-    /*
-     * Finish movement and any valid single-anchor merge in one undo macro. Shake-off disables
-     * collapse because it is about to disconnect the dragged nodes, not drop them on a target.
-     * A merged anchor no longer exists, so it must not enter the input-selection picker.
-     */
-    internal void CompleteDragOperation(GraphUiContext context, bool allowRerouteCollapse = true)
+    /// <summary>
+    /// Finishes movement and pending cleanup in the move macro, then resolves input picking.
+    /// </summary>
+    internal void CompleteDragOperation(GraphUiContext context)
     {
         Debug.Assert(context.MacroCommand != null);
-        var collapsedReroute = false;
         if (context.MacroCommand != null)
         {
             context.MoveElementsCommand?.StoreCurrentValues();
             CompleteSlowGrow(context);
             GrowSectionsToFitDisplacedMembers(context);
-            if (allowRerouteCollapse)
-                collapsedReroute = TryCollapseDraggedReroute(context);
             context.CompleteMacroCommand();
 
             // Section ownership is re-derived from geometry on the layout refresh
             _layout.FlagStructureAsChanged();
         }
 
-        if (collapsedReroute || !InputPicking.TryInitializeInputSelectionPickerForDraggedItem(context))
+        if (!InputPicking.TryInitializeInputSelectionPickerForDraggedItem(context))
             Reset();
-    }
-
-    private bool TryCollapseDraggedReroute(GraphUiContext context)
-    {
-        var target = FindRerouteMergeTarget(context, out var dragged);
-        if (target == null)
-            return false;
-
-        if (!RerouteOperations.TryCollapse(context, dragged!.Id, target.Id, out var error))
-        {
-            if (!string.IsNullOrEmpty(error))
-                Log.Debug(error);
-            return false;
-        }
-
-        target.Select(context.Selector);
-        context.ActiveItem = null;
-        return true;
-    }
-
-    private MagGraphItem? FindRerouteMergeTarget(GraphUiContext context, out MagGraphItem? dragged)
-    {
-        dragged = null;
-        // Moving a selection must not silently rewire the selected graph.
-        if (DraggedItems.Count != 1 || (_draggedItemsFromSelection && context.Selector.Selection.Count > 1))
-            return null;
-
-        using var enumerator = DraggedItems.GetEnumerator();
-        enumerator.MoveNext();
-        dragged = enumerator.Current;
-        if (!dragged.IsReroute || dragged.IsCollapsedAway)
-            return null;
-
-        var draggedCenter = dragged.PosOnCanvas + dragged.Size * 0.5f;
-        MagGraphItem? target = null;
-        var closestDistance = float.MaxValue;
-        const float mergeHalfSize = 16; // 32 x 32 canvas units around the stationary anchor.
-        foreach (var candidate in _layout.Items.Values)
-        {
-            if (candidate.Id == dragged.Id || !candidate.IsReroute || candidate.IsCollapsedAway
-                || candidate.PrimaryType != dragged.PrimaryType)
-                continue;
-
-            var delta = candidate.PosOnCanvas + candidate.Size * 0.5f - draggedCenter;
-            if (MathF.Abs(delta.X) > mergeHalfSize || MathF.Abs(delta.Y) > mergeHalfSize)
-                continue;
-
-            var distance = delta.LengthSquared();
-            if (distance > closestDistance
-                || (distance == closestDistance && target != null && candidate.Id.CompareTo(target.Id) >= 0))
-                continue;
-
-            target = candidate;
-            closestDistance = distance;
-        }
-
-        return target;
-    }
-
-    /*
-     * Cache merge validation by candidate, dragged ID, and layout structure cycle; mouse movement
-     * alone does not change the proposed wiring. _previewDraggedId and _previewTargetId expose
-     * only a valid pair to drawing, which hides the dragged dot and joins wires at the target.
-     */
-    private void UpdateRerouteMergePreview(GraphUiContext context)
-    {
-        _previewDraggedId = Guid.Empty;
-        _previewTargetId = Guid.Empty;
-        if (context.StateMachine.CurrentState != GraphStates.DragItems)
-        {
-            _previewCandidateId = Guid.Empty;
-            return;
-        }
-
-        var target = FindRerouteMergeTarget(context, out var dragged);
-        if (target == null)
-        {
-            _previewCandidateId = Guid.Empty;
-            return;
-        }
-
-        // Validation allocates only when the candidate or graph structure changes.
-        if (_previewCandidateId != target.Id || _previewCandidateDraggedId != dragged!.Id
-            || _previewStructureCycle != target.LastUpdateCycle)
-        {
-            _previewCandidateId = target.Id;
-            _previewCandidateDraggedId = dragged!.Id;
-            _previewStructureCycle = target.LastUpdateCycle;
-            _previewCandidateValid = RerouteOperations.TryCollapse(context, dragged.Id, target.Id, out _, previewOnly: true);
-        }
-
-        if (!_previewCandidateValid || context.PreventInteraction || target.SymbolChild?.Parent is not { } composition
-            || composition.GetSymbolUi().ReadOnly)
-            return;
-
-        _previewDraggedId = dragged!.Id;
-        _previewTargetId = target.Id;
-    }
-
-    internal bool IsAbsorbedReroutePreview(MagGraphItem item) => _previewDraggedId != Guid.Empty && item.Id == _previewDraggedId;
-
-    internal bool TryGetRerouteMergePreview(MagGraphItem item, out Vector2 center, out float radius)
-    {
-        center = default;
-        radius = 0;
-        if (_previewTargetId == Guid.Empty || (item.Id != _previewDraggedId && item.Id != _previewTargetId)
-            || !_layout.Items.TryGetValue(_previewTargetId, out var target))
-            return false;
-
-        center = target.DampedPosOnCanvas + target.Size / 2;
-        radius = target.RerouteRadius * 1.75f;
-        return true;
     }
 
     /// <summary>
@@ -411,7 +293,6 @@ internal sealed partial class MagItemMovement
     /// </summary>
     internal void StopDragOperation()
     {
-        _previewDraggedId = _previewTargetId = _previewCandidateId = Guid.Empty;
         _lastAppliedOffset = Vector2.Zero;
         SpliceSets.Clear();
         DraggedItems.Clear();
@@ -433,7 +314,6 @@ internal sealed partial class MagItemMovement
     /// </summary>
     internal void Reset()
     {
-        _previewDraggedId = _previewTargetId = _previewCandidateId = Guid.Empty;
         // TODO: should be done by states...
         _context.ActiveSourceItem = null;
         _context.DraggedPrimaryOutputType = null;
@@ -535,7 +415,7 @@ internal sealed partial class MagItemMovement
         if (reroutesToRemove.Count > 0)
         {
             // Cleanup removes dragged anchors; consume the held mouse button before they leave the layout.
-            CompleteDragOperation(context, allowRerouteCollapse: false);
+            CompleteDragOperation(context);
             context.StateMachine.SetState(GraphStates.WaitForMouseRelease, context);
         }
 
@@ -1938,11 +1818,5 @@ internal sealed partial class MagItemMovement
     private readonly MagGraphLayout _layout;
     private readonly NodeSelection _nodeSelection;
     private const float SnapTolerance = 0.01f;
-    private Guid _previewDraggedId;
-    private Guid _previewTargetId;
-    private Guid _previewCandidateId;
-    private Guid _previewCandidateDraggedId;
-    private int _previewStructureCycle;
-    private bool _previewCandidateValid;
 
 }

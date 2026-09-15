@@ -12,7 +12,7 @@ using T3.Editor.UiModel.Commands.Graph;
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
 /*
- * Builds undoable cuts, typed reroute insertions, and anchor merges from connection snapshots.
+ * Builds undoable cuts and typed reroute insertions from connection snapshots.
  * Crossed wires sharing one source slot share an anchor; target input order and duplicate wires
  * are preserved. Definitions and live graph state are checked before applying or replaying an edit.
  */
@@ -90,9 +90,6 @@ internal static class RerouteOperations
     private sealed record TargetSnapshot(Endpoint Target, Endpoint[] Sources);
     private sealed record CommandStep(ICommand Command, ConnectionOccurrence? Connection, bool AddsConnection, Guid ChildId, Guid SymbolId,
                                       bool AddsChild = true);
-    // Guard all wires touching either anchor, including fan-out outside the replaced target inputs.
-    private sealed record CollapseGuard(Guid DraggedId, Definition DraggedDefinition, Guid TargetId, Definition TargetDefinition,
-                                        ConnectionOccurrence[] Before, ConnectionOccurrence[] After);
 
     internal static ConnectionOccurrence Capture(MagGraphConnection connection)
     {
@@ -295,149 +292,6 @@ internal static class RerouteOperations
     }
 
     /*
-     * Absorbs the dragged anchor into the stationary target within the current move macro.
-     * The target's upstream source wins when connected; otherwise the dragged source is used.
-     * Direct chains are resolved to an external source, fan-out retains its target indices,
-     * and cyclic results are rejected. previewOnly validates the proposal without mutating it.
-     */
-    internal static bool TryCollapse(GraphUiContext context, Guid draggedId, Guid targetId, out string error, bool previewOnly = false)
-    {
-        error = string.Empty;
-        var composition = context.ProjectView.CompositionInstance;
-        var macro = context.MacroCommand;
-        if (composition == null || context.PreventInteraction || composition.Symbol.SymbolPackage.IsReadOnly || macro == null)
-        {
-            error = "The graph has no active editable move.";
-            return false;
-        }
-
-        var symbol = composition.Symbol;
-        if (draggedId == targetId
-            || !SymbolUiRegistry.TryGetSymbolUi(symbol.Id, out var ui)
-            || ui.ReadOnly
-            || !symbol.Children.TryGetValue(draggedId, out var dragged)
-            || !symbol.Children.TryGetValue(targetId, out var target)
-            || !ui.ChildUis.ContainsKey(draggedId) || !ui.ChildUis.ContainsKey(targetId)
-            || !TryGetDefinition(dragged.Symbol, out var draggedDefinition)
-            || !TryGetDefinition(target.Symbol, out var targetDefinition)
-            || dragged.Symbol.InputDefinitions[0].ValueType != target.Symbol.InputDefinitions[0].ValueType)
-        {
-            error = "Only two available reroutes of the same type can collapse.";
-            return false;
-        }
-
-        var draggedInput = new Endpoint(draggedId, draggedDefinition.InputId);
-        var targetInput = new Endpoint(targetId, targetDefinition.InputId);
-        var targets = new Dictionary<Endpoint, List<Endpoint>>
-                          {
-                              [draggedInput] = GetSources(symbol, draggedInput),
-                              [targetInput] = GetSources(symbol, targetInput),
-                          };
-        if (targets[draggedInput].Count > 1 || targets[targetInput].Count > 1)
-        {
-            error = "A reroute input has more than one connection.";
-            return false;
-        }
-
-        // Resolve a direct chain through either anchor before choosing the surviving input.
-        var sources = targets[targetInput].Count > 0 ? targets[targetInput] : targets[draggedInput];
-        Endpoint? source = sources.Count == 0 ? null : sources[0];
-        var visited = new HashSet<Guid>();
-        while (source is { } endpoint && (endpoint.ChildId == draggedId || endpoint.ChildId == targetId))
-        {
-            var definition = endpoint.ChildId == draggedId ? draggedDefinition : targetDefinition;
-            if (!visited.Add(endpoint.ChildId) || endpoint.SlotId != definition.OutputId)
-            {
-                error = "The reroutes contain a cyclic or invalid connection.";
-                return false;
-            }
-
-            sources = targets[new Endpoint(endpoint.ChildId, definition.InputId)];
-            source = sources.Count == 0 ? null : sources[0];
-        }
-
-        foreach (var connection in symbol.Connections)
-        {
-            if (connection.SourceParentOrChildId != draggedId && connection.SourceParentOrChildId != targetId)
-                continue;
-
-            var endpoint = new Endpoint(connection.TargetParentOrChildId, connection.TargetSlotId);
-            if (!targets.ContainsKey(endpoint))
-                targets.Add(endpoint, GetSources(symbol, endpoint));
-        }
-
-        var before = SnapshotTargets(targets);
-        var beforeIncident = GetIncidentConnections(symbol, draggedId, targetId);
-        targets[draggedInput].Clear();
-        targets[targetInput].Clear();
-        if (source is { } externalSource)
-            targets[targetInput].Add(externalSource);
-
-        var targetOutput = new Endpoint(targetId, targetDefinition.OutputId);
-        foreach (var (endpoint, targetSources) in targets)
-        {
-            if (endpoint == draggedInput || endpoint == targetInput)
-                continue;
-
-            for (var index = 0; index < targetSources.Count; index++)
-            {
-                if (targetSources[index].ChildId == draggedId)
-                    targetSources[index] = targetOutput;
-            }
-        }
-
-        if (previewOnly)
-        {
-            var proposed = SnapshotTargets(targets);
-            foreach (var connection in beforeIncident.Concat(GetIncidentConnections(symbol, draggedId, targetId, proposed)))
-            {
-                if (!TryGetConnectionType(symbol, connection, true, out _, out error))
-                    return false;
-            }
-
-            return IsAcyclic(symbol, proposed);
-        }
-
-        var steps = new List<CommandStep>();
-        foreach (var snapshot in before)
-        {
-            var desired = targets[snapshot.Target];
-            if (snapshot.Sources.Length == desired.Count)
-            {
-                for (var index = 0; index < desired.Count; index++)
-                {
-                    if (snapshot.Sources[index] == desired[index])
-                        continue;
-
-                    steps.Add(ConnectionStep(symbol, Occurrence(snapshot.Sources[index], snapshot.Target, index), false));
-                    steps.Add(ConnectionStep(symbol, Occurrence(desired[index], snapshot.Target, index), true));
-                }
-            }
-            else
-            {
-                for (var index = snapshot.Sources.Length - 1; index >= 0; index--)
-                    steps.Add(ConnectionStep(symbol, Occurrence(snapshot.Sources[index], snapshot.Target, index), false));
-                for (var index = 0; index < desired.Count; index++)
-                    steps.Add(ConnectionStep(symbol, Occurrence(desired[index], snapshot.Target, index), true));
-            }
-        }
-
-        var cleanup = new RemoveDisconnectedReroutesCommand(symbol.Id, [draggedId]);
-        steps.Add(new CommandStep(cleanup, null, false, draggedId, draggedDefinition.SymbolId, AddsChild: false));
-        var after = SnapshotTargets(targets);
-        var guard = new CollapseGuard(draggedId, draggedDefinition, targetId, targetDefinition, beforeIncident,
-                                      GetIncidentConnections(symbol, draggedId, targetId, after));
-        var command = new RoutingCommand(symbol.Id, "Collapse Reroutes", steps.ToArray(), before, after, guard);
-        if (!command.TryExecute(false, out error))
-            return false;
-
-        macro.AddExecutedCommandForUndo(command);
-        context.Layout.FlagStructureAsChanged();
-        context.Selector.TrySelectCompositionChild(composition, targetId);
-        return true;
-    }
-
-    /*
      * Only accept marked TypeOperators with one plain input/output pair of the same value type.
      * Resolve the marker by name in the operator's own assembly because package reloads replace
      * its CLR types; the Editor must not hold a reference to a particular package assembly.
@@ -530,11 +384,11 @@ internal static class RerouteOperations
     }
 
     /*
-     * merging requires value-only wiring: a scalar reroute cannot preserve a composition
+     * Reroute insertion requires value-only wiring: a scalar reroute cannot preserve a composition
      * multi-input bundle or output metadata. Cutting may remove either. plannedChildren supplies
      * definitions for anchors that the command will create or restore but that are not live yet.
      */
-    private static bool TryGetConnectionType(Symbol symbol, ConnectionOccurrence occurrence, bool merging, out Type? type, out string error,
+    private static bool TryGetConnectionType(Symbol symbol, ConnectionOccurrence occurrence, bool insertingReroutes, out Type? type, out string error,
                                              IReadOnlyDictionary<Guid, Symbol>? plannedChildren = null)
     {
         type = null;
@@ -563,7 +417,7 @@ internal static class RerouteOperations
             var input = sourceSymbol.InputDefinitions.Find(i => i.Id == occurrence.SourceSlotId);
             if (input != null)
             {
-                if (merging && input.IsMultiInput)
+                if (insertingReroutes && input.IsMultiInput)
                 {
                     error = "A composition multi-input bundle cannot be rerouted.";
                     return false;
@@ -575,7 +429,7 @@ internal static class RerouteOperations
         else
         {
             var output = sourceSymbol.OutputDefinitions.Find(o => o.Id == occurrence.SourceSlotId);
-            if (merging && output?.OutputDataType != null)
+            if (insertingReroutes && output?.OutputDataType != null)
             {
                 error = "Connections carrying output metadata cannot be rerouted.";
                 return false;
@@ -620,80 +474,6 @@ internal static class RerouteOperations
 
     private static Endpoint SourceOf(ConnectionOccurrence occurrence) => new(occurrence.SourceId, occurrence.SourceSlotId);
     private static Endpoint TargetOf(ConnectionOccurrence occurrence) => new(occurrence.TargetId, occurrence.TargetSlotId);
-    private static ConnectionOccurrence Occurrence(Endpoint source, Endpoint target, int index)
-        => new(source.ChildId, source.SlotId, target.ChildId, target.SlotId, index);
-
-    private static List<ConnectionOccurrence> GetConnections(Symbol symbol, TargetSnapshot[]? replacements = null)
-    {
-        var replacedTargets = replacements == null ? null : new HashSet<Endpoint>(replacements.Select(s => s.Target));
-        var ordinals = new Dictionary<Endpoint, int>();
-        var connections = new List<ConnectionOccurrence>();
-        foreach (var connection in symbol.Connections)
-        {
-            var target = new Endpoint(connection.TargetParentOrChildId, connection.TargetSlotId);
-            if (replacedTargets?.Contains(target) == true)
-                continue;
-
-            var index = ordinals.GetValueOrDefault(target);
-            ordinals[target] = index + 1;
-            connections.Add(Occurrence(new Endpoint(connection.SourceParentOrChildId, connection.SourceSlotId), target, index));
-        }
-
-        if (replacements != null)
-        {
-            foreach (var snapshot in replacements)
-            {
-                for (var index = 0; index < snapshot.Sources.Length; index++)
-                    connections.Add(Occurrence(snapshot.Sources[index], snapshot.Target, index));
-            }
-        }
-
-        return connections;
-    }
-
-    private static ConnectionOccurrence[] GetIncidentConnections(Symbol symbol, Guid firstId, Guid secondId, TargetSnapshot[]? replacements = null)
-    {
-        var connections = GetConnections(symbol, replacements);
-        connections.RemoveAll(c => c.SourceId != firstId && c.SourceId != secondId && c.TargetId != firstId && c.TargetId != secondId);
-        connections.Sort(CompareForDeletion);
-        return connections.ToArray();
-    }
-
-    // Check the proposed child graph; composition boundary slots are not child-to-child dependencies.
-    private static bool IsAcyclic(Symbol symbol, TargetSnapshot[] replacements)
-    {
-        var downstream = new Dictionary<Guid, List<Guid>>();
-        var remainingInputs = new Dictionary<Guid, int>();
-        foreach (var connection in GetConnections(symbol, replacements))
-        {
-            if (connection.SourceId == Guid.Empty || connection.TargetId == Guid.Empty)
-                continue;
-
-            if (!downstream.TryGetValue(connection.SourceId, out var targets))
-                downstream.Add(connection.SourceId, targets = new List<Guid>());
-            targets.Add(connection.TargetId);
-            remainingInputs.TryAdd(connection.SourceId, 0);
-            remainingInputs[connection.TargetId] = remainingInputs.GetValueOrDefault(connection.TargetId) + 1;
-        }
-
-        var ready = new Queue<Guid>(remainingInputs.Where(pair => pair.Value == 0).Select(pair => pair.Key));
-        var visited = 0;
-        while (ready.TryDequeue(out var id))
-        {
-            visited++;
-            if (!downstream.TryGetValue(id, out var targets))
-                continue;
-
-            foreach (var target in targets)
-            {
-                if (--remainingInputs[target] == 0)
-                    ready.Enqueue(target);
-            }
-        }
-
-        return visited == remainingInputs.Count;
-    }
-
     // Delete higher target indices first so earlier removals cannot shift the remaining occurrences.
     private static int CompareForDeletion(ConnectionOccurrence a, ConnectionOccurrence b)
     {
@@ -752,15 +532,13 @@ internal static class RerouteOperations
         public string Name { get; }
         public bool IsUndoable => true;
 
-        internal RoutingCommand(Guid compositionId, string name, CommandStep[] steps, TargetSnapshot[] before, TargetSnapshot[] after,
-                                CollapseGuard? collapse = null)
+        internal RoutingCommand(Guid compositionId, string name, CommandStep[] steps, TargetSnapshot[] before, TargetSnapshot[] after)
         {
             _compositionId = compositionId;
             Name = name;
             _steps = steps;
             _before = before;
             _after = after;
-            _collapse = collapse;
         }
 
         public void Do()
@@ -781,7 +559,7 @@ internal static class RerouteOperations
             if (_isApplied != undo)
                 return true;
 
-            if (!SymbolUiRegistry.TryGetSymbolUi(_compositionId, out var ui) || ui.Symbol.SymbolPackage.IsReadOnly || _collapse != null && ui.ReadOnly)
+            if (!SymbolUiRegistry.TryGetSymbolUi(_compositionId, out var ui) || ui.Symbol.SymbolPackage.IsReadOnly)
             {
                 error = "The editable graph is no longer available.";
                 return false;
@@ -790,12 +568,6 @@ internal static class RerouteOperations
             if (!MatchesState(ui, undo) || !ValidateSlotContracts(ui.Symbol))
             {
                 error = "The affected connections or reroute definitions changed.";
-                return false;
-            }
-
-            if (_collapse != null && !IsAcyclic(ui.Symbol, undo ? _before : _after))
-            {
-                error = "Collapsing these reroutes would create a cycle.";
                 return false;
             }
 
@@ -850,17 +622,6 @@ internal static class RerouteOperations
 
         private bool MatchesState(SymbolUi ui, bool applied)
         {
-            if (_collapse is { } collapse)
-            {
-                if (!ui.Symbol.Children.TryGetValue(collapse.TargetId, out var target) || !ui.ChildUis.ContainsKey(collapse.TargetId)
-                    || !TryGetDefinition(target.Symbol, out var definition) || definition != collapse.TargetDefinition
-                    || !SymbolUiRegistry.TryGetSymbolUi(collapse.DraggedDefinition.SymbolId, out var draggedUi)
-                    || !TryGetDefinition(draggedUi.Symbol, out var draggedDefinition) || draggedDefinition != collapse.DraggedDefinition
-                    || draggedUi.Symbol.InputDefinitions[0].ValueType != target.Symbol.InputDefinitions[0].ValueType
-                    || !GetIncidentConnections(ui.Symbol, collapse.DraggedId, collapse.TargetId).SequenceEqual(applied ? collapse.After : collapse.Before))
-                    return false;
-            }
-
             foreach (var snapshot in applied ? _after : _before)
             {
                 var sources = GetSources(ui.Symbol, snapshot.Target);
@@ -888,7 +649,7 @@ internal static class RerouteOperations
         private bool ValidateSlotContracts(Symbol symbol)
         {
             var plannedChildren = new Dictionary<Guid, Symbol>();
-            var merging = _collapse != null;
+            var addsReroutes = false;
             foreach (var step in _steps)
             {
                 if (step.ChildId == Guid.Empty)
@@ -898,23 +659,14 @@ internal static class RerouteOperations
                     return false;
 
                 plannedChildren.Add(step.ChildId, definitionUi.Symbol);
-                merging |= step.AddsChild;
+                addsReroutes |= step.AddsChild;
             }
 
             foreach (var step in _steps)
             {
                 if (step.Connection is { } connection
-                    && !TryGetConnectionType(symbol, connection, merging, out _, out _, plannedChildren))
+                    && !TryGetConnectionType(symbol, connection, addsReroutes, out _, out _, plannedChildren))
                     return false;
-            }
-
-            if (_collapse is { } collapse)
-            {
-                foreach (var connection in collapse.Before.Concat(collapse.After))
-                {
-                    if (!TryGetConnectionType(symbol, connection, true, out _, out _, plannedChildren))
-                        return false;
-                }
             }
 
             return true;
@@ -978,7 +730,6 @@ internal static class RerouteOperations
         private readonly CommandStep[] _steps;
         private readonly TargetSnapshot[] _before;
         private readonly TargetSnapshot[] _after;
-        private readonly CollapseGuard? _collapse;
         private bool _isApplied;
     }
 

@@ -1183,27 +1183,13 @@ internal sealed partial class MagGraphView
 
     /*
      * Draws the compact anchor with one padded hit area split into input, movable body, and output.
-     * The body retains a drag region even when socket tolerances overlap at low zoom. A valid merge
-     * preview hides the absorbed anchor and enlarges the survivor without changing graph topology.
+     * The body retains a drag region even when socket tolerances overlap at low zoom.
      * Stroke mouse ownership suppresses node interactions until the gesture has released the button.
      */
     private void DrawReroute(MagGraphItem item, ImDrawListPtr drawList, GraphUiContext context)
     {
         if (item.InputLines.Length != 1 || item.OutputLines.Length != 1)
             return;
-
-        if (context.ItemMovement.IsAbsorbedReroutePreview(item))
-            return;
-
-        if (context.ItemMovement.TryGetRerouteMergePreview(item, out var mergeCenter, out var mergeRadius))
-        {
-            var previewColor = TypeUiRegistry.GetPropertiesForType(item.PrimaryType).Color.Fade(context.GraphOpacity);
-            var previewCenter = TransformPosition(mergeCenter);
-            var previewRadius = TransformDirection(new Vector2(mergeRadius)).X;
-            drawList.AddCircleFilled(previewCenter, previewRadius, ColorVariations.Highlight.Apply(previewColor), 24);
-            drawList.AddCircle(previewCenter, previewRadius, UiColors.ForegroundFull.Fade(context.GraphOpacity), 24, T3Ui.UiScaleFactor);
-            return;
-        }
 
         MagGraphItem.InputAnchorPoint inputAnchor = default;
         MagGraphItem.OutputAnchorPoint outputAnchor = default;

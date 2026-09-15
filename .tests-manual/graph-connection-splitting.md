@@ -138,7 +138,7 @@ Drag from a reroute's right socket to a compatible input, then reconnect its lef
 - The disconnected socket remains usable and retains the same type while the other side is attached. Both sockets are available on a newly added blank anchor.
 - Socket drag and body movement have distinct hit regions. Temporary cables terminate at the visible socket.
 - Outgoing cables start at the dot's edge without a gap. Incoming arrowheads keep their existing shape and position.
-- Check horizontal, rising, falling, and backward cables at fractional zoom while dragging, merging, and undoing. Outgoing cables slightly overlap the dot's outline, and endpoints follow the displayed dot even while position smoothing is active.
+- Check horizontal, rising, falling, and backward cables at fractional zoom while dragging and undoing. Outgoing cables slightly overlap the dot's outline, and endpoints follow the displayed dot even while position smoothing is active.
 - At low zoom, hovering or pressing the anchor's body gives it priority over the input cable's hover area. No cable hover indicator covers the dot; dragging the center moves the anchor, while its sockets still start connections.
 - Incompatible connections and cycles are refused. Ordinary duplicate, clipboard, deletion, and undo behavior works.
 - Deleting an anchor removes its incident cables without reconnecting its neighbors.
@@ -156,27 +156,16 @@ Connect an anchor between a source and two targets. Remove its input wire, then 
 - Ordinary disconnected nodes remain. A connection between two anchors keeps both alive until that connection is removed; cutting it removes both in the same undo step.
 - A newly added blank anchor is not removed by unrelated edits. Deleting a wire during a reconnect drag does not remove its anchor before the drag finishes; dropping on a compatible socket keeps it.
 
-## Step: Merge anchors by dropping one onto another
+## Step: Move anchors over each other without combining
 
 **Action:**
-Create two float anchors with separate outgoing branches. Drag one anchor's center over the other and release. Repeat with the same source, different sources, one unconnected input, two blank anchors, and directly connected anchors in both directions. Connect the dragged output to a multi-input twice with another source between those occurrences. Undo and redo each merge.
+Create two float anchors with separate outgoing branches. Drag one anchor's center onto and near the other, then release. Repeat with shared and different sources, one unconnected input, two blank anchors, a direct chain, and a multiple-item selection. Include duplicate connections to a multi-input with another source between them. Undo and redo each move. Repeat at 25% zoom and 200% UI scale, then move the anchors apart.
 
 **Expected:**
-- The stationary anchor keeps its ID, type, position, and settings. All outgoing branches use its output, retaining multi-input order and duplicate occurrences.
-- The stationary input source wins if both anchors have sources. An empty stationary input takes the dragged input's source; a direct chain retains its external source without creating a self-connection.
-- One undo restores the absorbed anchor with its settings, original position, and exact wiring. One redo merges it again.
-- Two newly blank anchors become one blank anchor. Existing last-connection cleanup still applies if collapsing an isolated chain removes its final cable.
-
-**Action:**
-Drop at center offsets of 16 canvas units on each axis, then just outside that square. Repeat at 25%, 50%, 100%, and 200% zoom and 100% and 200% UI scale. Try a different type, a hidden anchor inside a collapsed section, a multiple-item drag, and a merge whose new branches would feed back into its source. Shake a connected anchor over another anchor.
-
-**Expected:**
-- A single same-type anchor merges inside the 32×32 square, including its boundary. Just outside it, only the position changes. With overlapping eligible targets, the closest center wins.
-- Before release, a valid merge shows one larger highlighted dot at the stationary anchor, with cables attached and the dragged dot hidden. Moving out restores both normal dots and cable positions; reentering restores the preview. The graph and undo history remain unchanged until release. A direct cable between the pair is hidden during preview, avoiding a loop around the single dot.
-- Cycle-causing, incompatible, read-only, hidden-target, and grouped drags show no merge preview. Completing, cancelling, or shaking off the drag clears it. Check the preview and cable attachment throughout the zoom/UI-scale matrix above.
-- Zoom and UI scale do not change the area in canvas units. Different types, hidden anchors, and multiple-item drags do not merge.
-- A cycle-causing merge leaves both anchors and all cables intact. Shake disconnects without triggering a drop merge.
-- Outgoing wires still meet the dot, and incoming arrowheads keep their existing shape and position.
+- Both anchors retain their IDs, types, settings, and original wiring, including multi-input order and duplicate occurrences. Only the dragged positions change.
+- Moving near or over another anchor shows no enlarged merge target, absorbed-node preview, or redirected preview cables. Overlapping dots may cover each other; moving them apart reveals both anchors.
+- One undo restores the original positions; one redo restores the moved positions. Neither action combines or deletes anchors.
+- Outgoing wires meet their own dot, and incoming arrowheads keep their existing shape and position.
 
 ## Step: Cancel without panning or opening a menu
 

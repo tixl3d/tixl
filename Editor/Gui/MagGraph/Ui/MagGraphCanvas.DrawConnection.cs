@@ -18,12 +18,6 @@ internal sealed partial class MagGraphView
         if (connection.Style == MagGraphConnection.ConnectionStyles.Unknown)
             return;
 
-        // Preview geometry converges at the surviving dot; wires between the merging anchors disappear.
-        var sourceInMerge = context.ItemMovement.TryGetRerouteMergePreview(connection.SourceItem, out var mergeSource, out var sourceRadius);
-        var targetInMerge = context.ItemMovement.TryGetRerouteMergePreview(connection.TargetItem, out var mergeTarget, out var targetRadius);
-        if (sourceInMerge && targetInMerge)
-            return;
-
         if (connection.SourceItem.IsCollapsedAway && connection.TargetItem.IsCollapsedAway)
             return;
 
@@ -68,16 +62,13 @@ internal sealed partial class MagGraphView
             sourceOnCanvas = connection.DampedSourcePos;
         }
 
-        if (sourceInMerge)
-            sourceOnCanvas = mergeSource + new Vector2(sourceRadius, 0);
-
         var sourcePosOnScreen = TransformPosition(sourceOnCanvas);
         if (connection.SourceItem.IsReroute && !connection.SourceItem.IsCollapsedAway
                                            && connection.Style == MagGraphConnection.ConnectionStyles.RightToLeft)
         {
-            var radius = TransformDirection(new Vector2(sourceInMerge ? sourceRadius : connection.SourceItem.RerouteRadius)).X;
+            var radius = TransformDirection(new Vector2(connection.SourceItem.RerouteRadius)).X;
             var overlap = MathF.Min(0.5f * T3Ui.UiScaleFactor, radius);
-            var center = sourceInMerge ? mergeSource : connection.SourceItem.DampedPosOnCanvas + connection.SourceItem.Size / 2;
+            var center = connection.SourceItem.DampedPosOnCanvas + connection.SourceItem.Size / 2;
             // Cancel the path drawer's half-pixel shift and overlap the dot's outline.
             sourcePosOnScreen = TransformPosition(center) + new Vector2(radius - overlap - 0.5f, -0.5f);
         }
@@ -99,13 +90,6 @@ internal sealed partial class MagGraphView
         else
         {
             targetOnCanvas = connection.DampedTargetPos;
-        }
-
-        if (targetInMerge)
-        {
-            // Preserve the incoming arrowhead's offset from the edge of the dot.
-            var socketOffset = connection.TargetItem.Size.X / 2 - connection.TargetItem.RerouteRadius;
-            targetOnCanvas = mergeTarget - new Vector2(targetRadius + socketOffset, 0);
         }
 
         var targetPosOnScreen = TransformPosition(targetOnCanvas);
