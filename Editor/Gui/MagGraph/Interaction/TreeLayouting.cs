@@ -14,14 +14,15 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// Selected items that feed other selected items are arranged as well, so a box selection gets tidied.
 /// Already snapped sources are kept where they are. A source snaps horizontally into a row only if it doesn't
 /// cover connected rows below it; taller ones and shared sources (fan-out, placed once all their consumers are
-/// part of the selection) go loosely left of their consumers with a gap. Only items taking part in the layout
-/// count as obstacles (the fixed part of the selection with everything snapped to it, plus placed clusters);
+/// part of the selection) go loosely left of their consumers with a gap. Visible items excluded from block layout
+/// stay fixed and count as obstacles, along with the fixed selection, its snapped items, and placed clusters;
 /// unrelated operators in the way are overlapped, not avoided. Items only touch each other at exact snap
 /// positions; everything placed loosely keeps at least a row or column of air, so nothing reads as snapped
 /// that isn't. Connections are never changed.
 /// </summary>
 internal static class TreeLayouting
 {
+    /// <summary>Arranges eligible inputs while keeping items excluded from block layout fixed.</summary>
     /// <returns>True if an item was moved or the selection grew</returns>
     internal static bool LayoutInputsOfSelection(GraphUiContext context)
     {
@@ -33,7 +34,7 @@ internal static class TreeLayouting
             if (!layout.Items.TryGetValue(selectable.Id, out var item))
                 continue;
 
-            if (item.IsReroute || item.Variant is not (MagGraphItem.Variants.Operator or MagGraphItem.Variants.Output))
+            if (!item.SupportsBlockLayout || item.Variant is not (MagGraphItem.Variants.Operator or MagGraphItem.Variants.Output))
                 continue;
 
             targets.Add(item);
@@ -72,10 +73,10 @@ internal static class TreeLayouting
         var handled = new HashSet<MagGraphItem>(selected);
         handled.ExceptWith(movableSelected);
         var obstacles = MagItemMovement.CollectSnappedItems(handled);
-        // Preserve hand-routed cable paths: anchors stay fixed and reserve space during auto-layout.
+        // Items excluded from block layout stay fixed and reserve space.
         foreach (var item in layout.Items.Values)
         {
-            if (item.IsReroute && !item.IsCollapsedAway)
+            if (!item.SupportsBlockLayout && !item.IsCollapsedAway)
                 obstacles.Add(item);
         }
 
@@ -94,7 +95,7 @@ internal static class TreeLayouting
 
                 var source = connection.SourceItem;
                 if (source.Variant is not (MagGraphItem.Variants.Operator or MagGraphItem.Variants.Input)
-                    || source.IsReroute
+                    || !source.SupportsBlockLayout
                     || source.IsCollapsedAway
                     || source == target
                     || handled.Contains(source))

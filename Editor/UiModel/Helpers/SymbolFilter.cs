@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using T3.Core.Operator;
-using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -102,6 +101,7 @@ internal sealed class SymbolFilter
         return true;
     }
 
+    /// <summary>Ranks visible symbols matching the query and contextual connection constraints.</summary>
     private void UpdateMatchingSymbols(NodeSelection? selection, int limit)
     {
         var compositionInstance = selection?.GetSelectedComposition();
@@ -116,8 +116,7 @@ internal sealed class SymbolFilter
             var symbolUiSymbol = symbolUi.Symbol;
             Debug.Assert(symbolUiSymbol != null);
             
-            // Routing gestures choose the anchor type from the wire, so anchors are excluded from node search.
-            if (RerouteOperations.IsReroute(symbolUiSymbol))
+            if (symbolUi.HiddenFromBrowser)
                 continue;
 
             // Prevent graph cycles

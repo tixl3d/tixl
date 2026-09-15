@@ -1,21 +1,20 @@
 #nullable enable
-using System.Reflection;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
-/*
- * Builds undoable cuts and typed reroute insertions from connection snapshots.
- * Crossed wires sharing one source slot share an anchor; target input order and duplicate wires
- * are preserved. Definitions and live graph state are checked before applying or replaying an edit.
- */
+/// <summary>
+/// Builds undoable cuts and typed reroute insertions from validated connection snapshots,
+/// preserving source-slot groups, target input order, and duplicate wires.
+/// </summary>
 internal static class RerouteOperations
 {
     // MultiInputIndex distinguishes repeated wires with identical endpoints; Guid.Empty denotes the composition.
@@ -85,7 +84,6 @@ internal static class RerouteOperations
     }
 
     private readonly record struct Endpoint(Guid ChildId, Guid SlotId);
-    private readonly record struct Definition(Guid SymbolId, Guid InputId, Guid OutputId);
     // Sources is an ordered list, including duplicates, rather than a set of upstream endpoints.
     private sealed record TargetSnapshot(Endpoint Target, Endpoint[] Sources);
     private sealed record CommandStep(ICommand Command, ConnectionOccurrence? Connection, bool AddsConnection, Guid ChildId, Guid SymbolId,
@@ -95,11 +93,6 @@ internal static class RerouteOperations
     {
         return new ConnectionOccurrence(connection.SourceParentOrChildId, connection.SourceOutput.Id,
                                         connection.TargetParentOrChildId, connection.TargetInput.Id, connection.MultiInputIndex);
-    }
-
-    internal static bool IsReroute(Symbol symbol)
-    {
-        return TryGetDefinition(symbol, out _);
     }
 
     // Capture before editing so cleanup leaves deliberately unconnected anchors alone.
@@ -117,7 +110,7 @@ internal static class RerouteOperations
         var reroutes = new HashSet<Guid>();
         foreach (var (id, child) in symbol.Children)
         {
-            if (connectedChildren.Contains(id) && IsReroute(child.Symbol))
+            if (connectedChildren.Contains(id) && SymbolAnalysis.IsReroute(child.Symbol))
                 reroutes.Add(id);
         }
 
@@ -187,7 +180,7 @@ internal static class RerouteOperations
         if (occurrences.Count == 0)
             return false;
 
-        var definitions = new Dictionary<Type, Definition>();
+        var definitions = new Dictionary<Type, SymbolAnalysis.RerouteDefinition>();
         if (!cut && !CollectDefinitions(groupTypes.Values, definitions, out error))
             return false;
 
@@ -236,7 +229,7 @@ internal static class RerouteOperations
         {
             var positions = new List<Vector2>();
             GetAnchorPositions(hits, positions);
-            var reroutes = new Dictionary<Endpoint, (Guid childId, Definition definition)>();
+            var reroutes = new Dictionary<Endpoint, (Guid childId, SymbolAnalysis.RerouteDefinition definition)>();
             var groupIndex = 0;
             foreach (var (source, type) in groupTypes)
             {
@@ -291,75 +284,18 @@ internal static class RerouteOperations
         return true;
     }
 
-    /*
-     * Only accept marked TypeOperators with one plain input/output pair of the same value type.
-     * Resolve the marker by name in the operator's own assembly because package reloads replace
-     * its CLR types; the Editor must not hold a reference to a particular package assembly.
-     */
-    private static bool TryGetDefinition(Symbol symbol, out Definition definition)
-    {
-        definition = default;
-        if (symbol.SymbolPackage.Id != TypeOperatorsPackageId || symbol.InputDefinitions.Count != 1 || symbol.OutputDefinitions.Count != 1
-            || symbol.InputDefinitions[0].IsMultiInput || symbol.InputDefinitions[0].ValueType != symbol.OutputDefinitions[0].ValueType
-            || symbol.OutputDefinitions[0].OutputDataType != null || symbol.Children.Count != 0)
-            return false;
-
-        var marked = false;
-        foreach (var marker in symbol.InstanceType.GetInterfaces())
-        {
-            if (marker.FullName == MarkerName && marker.Assembly == symbol.InstanceType.Assembly)
-            {
-                marked = true;
-                break;
-            }
-        }
-
-        if (!marked)
-            return false;
-
-        var inputs = 0;
-        var outputs = 0;
-        foreach (var field in symbol.InstanceType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-        {
-            if (!typeof(ISlot).IsAssignableFrom(field.FieldType))
-                continue;
-
-            if (!field.FieldType.IsGenericType || field.FieldType.GetGenericArguments()[0] != symbol.InputDefinitions[0].ValueType)
-                return false;
-
-            var genericType = field.FieldType.GetGenericTypeDefinition();
-            if (genericType == typeof(InputSlot<>))
-            {
-                inputs++;
-            }
-            else if (genericType == typeof(Slot<>))
-            {
-                outputs++;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        if (inputs != 1 || outputs != 1)
-            return false;
-
-        definition = new Definition(symbol.Id, symbol.InputDefinitions[0].Id, symbol.OutputDefinitions[0].Id);
-        return true;
-    }
-
-    private static bool CollectDefinitions(IEnumerable<Type> types, Dictionary<Type, Definition> definitions, out string error)
+    /// <summary>Finds one registered, validated anchor definition for each required value type.</summary>
+    private static bool CollectDefinitions(IEnumerable<Type> types, Dictionary<Type, SymbolAnalysis.RerouteDefinition> definitions, out string error)
     {
         error = string.Empty;
         foreach (var package in SymbolPackage.AllPackages)
         {
-            if (package.Id != TypeOperatorsPackageId)
+            if (package.Id != SymbolAnalysis.TypeOperatorsPackageId)
                 continue;
 
             foreach (var symbol in package.Symbols.Values)
             {
-                if (!TryGetDefinition(symbol, out var definition) || !SymbolUiRegistry.TryGetSymbolUi(symbol.Id, out _))
+                if (!SymbolAnalysis.TryGetRerouteDefinition(symbol, out var definition) || !SymbolUiRegistry.TryGetSymbolUi(symbol.Id, out _))
                     continue;
 
                 var type = symbol.InputDefinitions[0].ValueType;
@@ -634,7 +570,7 @@ internal static class RerouteOperations
                 if (step.ChildId == Guid.Empty)
                     continue;
 
-                if (!SymbolUiRegistry.TryGetSymbolUi(step.SymbolId, out var definitionUi) || !IsReroute(definitionUi.Symbol))
+                if (!SymbolUiRegistry.TryGetSymbolUi(step.SymbolId, out var definitionUi) || !SymbolAnalysis.IsReroute(definitionUi.Symbol))
                     return false;
 
                 var shouldExist = step.AddsChild == applied;
@@ -732,7 +668,4 @@ internal static class RerouteOperations
         private readonly TargetSnapshot[] _after;
         private bool _isApplied;
     }
-
-    private const string MarkerName = "Types.Routing.IRerouteNode";
-    private static readonly Guid TypeOperatorsPackageId = new("c8a53b12-ded3-4327-86d2-bd731b25de22");
 }

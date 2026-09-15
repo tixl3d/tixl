@@ -91,12 +91,13 @@ onto the snapped cable and drop it.
 ## Step: Keep reroute anchors out of search and browsing
 
 **Action:**
-Open node search on empty graph space and search for `rer`, `RerouteFloat`, and `Types.Routing`. Repeat when inserting an operator into a float cable. In the node browser, search for the same terms, then clear the search and expand `Types`. Refresh the browser tree. Search for `Float` in both search surfaces, then Alt+RMB drag across a float cable to create an anchor.
+Open node search on empty graph space, clear the query, then search for `rer`, `RerouteFloat`, and `Types.Routing`. Repeat when inserting an operator into a float cable. In the node browser, search for the same terms, then clear the search and expand `Types`. Refresh the browser tree. Search for `Float` in both search surfaces, then Alt+RMB drag across a float cable to create an anchor. Reload the editable graph and repeat both searches and tree refresh. Restart the editor to reload the built-in TypeOperators package, then repeat with float, vector, and command anchors.
 
 **Expected:**
 - No reroute operator appears in either search surface, including exact-name and namespace searches.
 - The browser tree contains no reroute entries or empty `Routing` folder, including after refresh.
 - Ordinary operators such as `Float` remain discoverable.
+- Reloading or replacing a symbol UI retains the same visibility; an ordinary duplicated operator remains visible.
 - The routing gesture still creates a working anchor; undo and redo restore the expected connections.
 
 ## Step: Route a subset of a fan-out
@@ -202,11 +203,13 @@ Use horizontal, vertical, backward-curving, and snapped connections. Cross them 
 ## Step: Preserve anchors during automatic layout
 
 **Action:**
-Move anchors to deliberate positions, include them in a mixed selection, and run automatic layout. Drag the selection near other nodes and connections. Fit the selection and place it inside a section.
+Move anchors to deliberate positions, include them in a mixed selection, and run automatic layout. Drag the selection near other nodes and connections, including a potential splice with the anchor elsewhere in the selection. Repeat with an ordinary-only selection. Manually reconnect an anchor socket after layout. Fit the selection and place it inside a section.
 
 **Expected:**
 - Automatic layout keeps anchors fixed and treats their bounds as obstacles.
 - Moving the selection still works, but anchors do not block-snap, splice, or create automatic connections.
+- Any selected anchor prevents splicing the whole selection; ordinary-only selections retain snapping and splicing.
+- Manual socket wiring still works after layout.
 - Fit-selection and section bounds reflect the compact anchor size.
 
 ## Step: Reject unsupported routing without partial edits

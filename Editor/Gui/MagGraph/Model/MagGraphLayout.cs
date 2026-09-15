@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using T3.Core.Operator;
+using T3.Editor.UiModel.Helpers;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.Interaction;
@@ -226,7 +227,7 @@ internal sealed class MagGraphLayout
 
             opItem.Variant = MagGraphItem.Variants.Operator;
             // Cache the validated routing contract when rebuilding; drawing must not reflect over package types.
-            opItem.IsReroute = RerouteOperations.IsReroute(childInstance.Symbol);
+            opItem.IsReroute = SymbolAnalysis.IsReroute(childInstance.Symbol);
             //opItem.Id = childId;
             opItem.InstancePath = childInstance.InstancePath;
             opItem.Selectable = childUi;

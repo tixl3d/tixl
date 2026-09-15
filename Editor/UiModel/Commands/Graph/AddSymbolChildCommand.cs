@@ -1,10 +1,10 @@
-﻿using T3.Core.Operator;
-
-using T3.Editor.Gui.MagGraph.Interaction;
+using T3.Core.Operator;
 using T3.Editor.Gui.MagGraph.Model;
+using T3.Editor.UiModel.Helpers;
 
 namespace T3.Editor.UiModel.Commands.Graph;
 
+/// <summary>Adds a child with persisted initial geometry and supports replay against the live parent symbol.</summary>
 public sealed class AddSymbolChildCommand : ICommand
 {
     public string Name => "Add Symbol Child";
@@ -47,7 +47,7 @@ public sealed class AddSymbolChildCommand : ICommand
         }
             
         // Persist compact geometry even when a caller uses the default operator dimensions.
-        var childSize = RerouteOperations.IsReroute(symbolToAdd!.Symbol) ? MagGraphItem.RerouteSize : Size;
+        var childSize = SymbolAnalysis.IsReroute(symbolToAdd!.Symbol) ? MagGraphItem.RerouteSize : Size;
         parentSymbolUi!.AddChild(symbolToAdd.Symbol, _addedChildId, PosOnCanvas, childSize, ChildName);
         InitContentClipSourceRange(parentSymbolUi.Symbol);
     }

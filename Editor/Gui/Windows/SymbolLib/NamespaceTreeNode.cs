@@ -2,7 +2,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Operator;
-using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Gui.Windows.SymbolLib;
@@ -59,6 +58,7 @@ internal sealed class NamespaceTreeNode
     }
     
     // Define an action delegate that takes a Symbol and returns a bool
+    /// <summary>Rebuilds the namespace tree from browser-visible symbols accepted by the optional filter.</summary>
     internal void PopulateCompleteTree(Predicate<SymbolUi>? filterAction)
     {
         Name = RootNodeId;
@@ -79,8 +79,7 @@ internal sealed class NamespaceTreeNode
 
         foreach (var ui in ordered)
         {
-            // Routing gestures create typed anchors; their implementation operators do not belong in the browser.
-            if (RerouteOperations.IsReroute(ui.Symbol))
+            if (ui.HiddenFromBrowser)
                 continue;
 
             var keep = filterAction == null || filterAction(ui);

@@ -14,6 +14,7 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.MagGraph.Model;
 
+/// <summary>Represents a selectable graph item with its geometry, connections, and automatic layout eligibility.</summary>
 internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttractor
 {
     public enum Variants
@@ -34,6 +35,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
      * use DampedPosOnCanvas so attached cables follow the animated dot.
      */
     public bool IsReroute;
+
+    /// <summary>Allows automatic block snapping, splicing, connection creation, and tree placement; manual wiring is independent.</summary>
+    internal bool SupportsBlockLayout => !IsReroute;
     public Type PrimaryType = typeof(float);
     public required ISelectableCanvasObject Selectable;
     public SymbolUi.Child? ChildUi; // matches Selected for operators

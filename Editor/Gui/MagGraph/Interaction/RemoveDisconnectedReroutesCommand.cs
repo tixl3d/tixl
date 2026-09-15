@@ -4,16 +4,16 @@ using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Window;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
-/*
- * Removes candidate anchors only when they have no incoming or outgoing connections at Do time.
- * Callers capture candidates before disconnecting and append cleanup to the same undo operation,
- * so undo restores anchors before reconnecting wires. The first successful Do fixes the snapshot
- * set for redo; IDs and copied state survive graph reloads without retaining live graph objects.
- */
+/// <summary>
+/// Removes previously connected candidate anchors only when fully disconnected at execution time.
+/// Appending cleanup last lets undo restore anchors before their wires; IDs and copied state survive reloads.
+/// The first successful execution fixes the snapshot set for redo.
+/// </summary>
 internal sealed class RemoveDisconnectedReroutesCommand : ICommand
 {
     // Retain slot settings and editor metadata so undo restores more than the anchor's topology.
@@ -46,7 +46,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
 
         internal bool Matches(Symbol definition)
         {
-            return definition.Id == SymbolId && RerouteOperations.IsReroute(definition)
+            return definition.Id == SymbolId && SymbolAnalysis.IsReroute(definition)
                    && definition.InputDefinitions[0].Id == InputId
                    && definition.InputDefinitions[0].ValueType == InputValue.ValueType
                    && definition.OutputDefinitions[0].Id == OutputId;
@@ -96,7 +96,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
             foreach (var id in _candidateIds)
             {
                 if (connected.Contains(id) || !composition.ChildUis.TryGetValue(id, out var childUi)
-                    || !composition.Symbol.Children.TryGetValue(id, out var child) || !RerouteOperations.IsReroute(child.Symbol))
+                    || !composition.Symbol.Children.TryGetValue(id, out var child) || !SymbolAnalysis.IsReroute(child.Symbol))
                     continue;
 
                 candidates.Add(new ChildSnapshot(childUi));

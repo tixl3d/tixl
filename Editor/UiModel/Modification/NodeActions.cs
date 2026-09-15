@@ -22,6 +22,7 @@ using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Sections;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using T3.Serialization;
@@ -38,7 +39,7 @@ internal static class NodeActions
         var selectedChildUis = nodeSelection.GetSelectedChildUis().ToList();
 
         // Reroutes already forward their input; bypass would replace a command reroute's callback proxy.
-        selectedChildUis.RemoveAll(static child => RerouteOperations.IsReroute(child.SymbolChild.Symbol));
+        selectedChildUis.RemoveAll(static child => SymbolAnalysis.IsReroute(child.SymbolChild.Symbol));
         if (selectedChildUis.Count == 0)
             return;
 

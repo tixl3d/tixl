@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System.Diagnostics;
 using ImGuiNET;
@@ -350,6 +350,7 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Moves dragged items and tests automatic insertion and snapping only for eligible blocks.</summary>
     internal void UpdateDragging(GraphUiContext context)
     {
         if (!T3Ui.IsCurrentlySaving && _shakeDetector.TestDragForShake(ImGui.GetMousePos()))
@@ -543,8 +544,8 @@ internal sealed partial class MagItemMovement
 
             foreach (var otherItem in overlappingItems)
             {
-                // Routing anchors keep their manually placed paths instead of joining operator snap stacks.
-                if (otherItem.IsReroute)
+                // Only eligible items can join operator snap stacks.
+                if (!otherItem.SupportsBlockLayout)
                     continue;
 
                 _snapping.TestItemsForInsertion(otherItem, insertionAnchorItem, ip, _view);
@@ -555,7 +556,7 @@ internal sealed partial class MagItemMovement
         {
             foreach (var draggedItem in DraggedItems)
             {
-                if (otherItem.IsReroute || draggedItem.IsReroute)
+                if (!otherItem.SupportsBlockLayout || !draggedItem.SupportsBlockLayout)
                     continue;
 
                 _snapping.TestItemsForSnap(otherItem, draggedItem, false, _view);
@@ -1254,10 +1255,11 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Collects compatible automatic connections between two block-layout participants.</summary>
     private static void GetPotentialConnectionsAfterSnap(ref List<PotentialConnection> result, MagGraphItem a, MagGraphItem b)
     {
-        // Anchor wiring is explicit; proximity to a node must not introduce extra connections.
-        if (a.IsReroute || b.IsReroute)
+        // Automatic connections require both items to participate in block layout.
+        if (!a.SupportsBlockLayout || !b.SupportsBlockLayout)
             return;
 
         MagGraphConnection? inConnection;
@@ -1376,10 +1378,10 @@ internal sealed partial class MagItemMovement
     {
         SpliceSets.Clear();
 
-        // Splicing assumes full operator rows and must not bypass selected routing anchors.
+        // Splicing requires the entire selection to participate in block layout.
         foreach (var item in draggedItems)
         {
-            if (item.IsReroute)
+            if (!item.SupportsBlockLayout)
                 return;
         }
 

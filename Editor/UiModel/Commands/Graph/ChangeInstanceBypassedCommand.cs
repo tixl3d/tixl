@@ -1,9 +1,10 @@
 ﻿using T3.Core.Operator;
 
-using T3.Editor.Gui.MagGraph.Interaction;
+using T3.Editor.UiModel.Helpers;
 
 namespace T3.Editor.UiModel.Commands.Graph;
 
+/// <summary>Changes a child's bypass state while preserving routing-anchor callback forwarding.</summary>
 public sealed class ChangeInstanceBypassedCommand : ICommand
 {
     public string Name => "Bypass";
@@ -40,7 +41,7 @@ public sealed class ChangeInstanceBypassedCommand : ICommand
         }
 
         // Enforce this for every caller: bypass would replace a command reroute's prepare/restore proxy.
-        if (shouldBeBypassed && RerouteOperations.IsReroute(child.Symbol))
+        if (shouldBeBypassed && SymbolAnalysis.IsReroute(child.Symbol))
             return;
 
         try
