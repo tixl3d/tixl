@@ -172,16 +172,11 @@ internal sealed class GraphUiContext
     internal Vector2 PeekAnchorInCanvas;
     internal bool ShouldAttemptToSnapToInput;
     
-    /*
-     * Capture connected anchors before the first mutation so completion removes only anchors
-     * disconnected by this interaction. Cleanup is appended last, making undo restore anchors
-     * before replaying the macro's connection changes; cancellation discards pending cleanup.
-     */
+    /// <summary>Starts an undo group and captures connected anchors before the first mutation for selective cleanup.</summary>
     internal MacroCommand StartMacroCommand(string title)
     {
         Debug.Assert(MacroCommand == null);
         var composition = CompositionInstance.Symbol;
-        _rerouteCleanupCompositionId = composition.Id;
         _rerouteCleanupCommand = new RemoveDisconnectedReroutesCommand(composition.Id, RerouteOperations.CaptureConnectedReroutes(composition));
         MacroCommand = new MacroCommand(title);
         return MacroCommand;
@@ -192,33 +187,19 @@ internal sealed class GraphUiContext
         return MacroCommand ?? StartMacroCommand(title);
     }
     
+    /// <summary>Completes feature-owned cleanup before recording the undo group; cleanup refreshes affected views.</summary>
     internal void CompleteMacroCommand()
     {
         Debug.Assert(MacroCommand != null);
-        if (_rerouteCleanupCommand != null)
-        {
-            _rerouteCleanupCommand.Do();
-            if (_rerouteCleanupCommand.AppliedCount > 0)
-            {
-                MacroCommand!.AddExecutedCommandForUndo(_rerouteCleanupCommand);
-                Layout.FlagStructureAsChanged();
-                if (ProjectView.CompositionInstance?.Symbol.Id == _rerouteCleanupCompositionId)
-                {
-                    for (var index = Selector.Selection.Count - 1; index >= 0; index--)
-                    {
-                        var selected = Selector.Selection[index];
-                        if (selected is SymbolUi.Child && !CompositionInstance.Symbol.Children.ContainsKey(selected.Id))
-                            Selector.DeselectNode(selected);
-                    }
-                }
-            }
-        }
+        if (RerouteOperations.CompleteCleanup(_rerouteCleanupCommand, MacroCommand!))
+            Layout.FlagStructureAsChanged();
 
         UndoRedoStack.Add(MacroCommand);
         MacroCommand = null;
         _rerouteCleanupCommand = null;
     }
     
+    /// <summary>Reverses the edit group and discards cleanup that has not executed.</summary>
     internal void CancelMacroCommand()
     {
         Debug.Assert(MacroCommand != null);
@@ -286,5 +267,4 @@ internal sealed class GraphUiContext
     }
 
     private RemoveDisconnectedReroutesCommand? _rerouteCleanupCommand;
-    private Guid _rerouteCleanupCompositionId;
 }

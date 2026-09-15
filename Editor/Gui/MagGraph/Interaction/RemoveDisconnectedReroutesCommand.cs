@@ -261,6 +261,10 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
             composition.RemoveChild(id);
     }
 
+    /// <summary>
+    /// Refreshes the focused view and every registered graph window showing this composition.
+    /// This includes the initiating canvas; selection removal is limited to the anchors this command deleted.
+    /// </summary>
     private void RefreshViews(bool removeSelection)
     {
         var focused = ProjectView.Focused;

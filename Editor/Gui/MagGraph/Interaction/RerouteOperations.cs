@@ -95,7 +95,22 @@ internal static class RerouteOperations
                                         connection.TargetParentOrChildId, connection.TargetInput.Id, connection.MultiInputIndex);
     }
 
-    // Capture before editing so cleanup leaves deliberately unconnected anchors alone.
+    /// <summary>Executes pending cleanup and appends it last so undo restores anchors before their connections.</summary>
+    /// <returns>Whether cleanup removed anchors and the initiating layout needs a refresh.</returns>
+    internal static bool CompleteCleanup(RemoveDisconnectedReroutesCommand? cleanup, MacroCommand macro)
+    {
+        if (cleanup == null)
+            return false;
+
+        cleanup.Do();
+        if (cleanup.AppliedCount == 0)
+            return false;
+
+        macro.AddExecutedCommandForUndo(cleanup);
+        return true;
+    }
+
+    /// <summary>Captures connected anchors before editing so cleanup leaves deliberately blank anchors alone.</summary>
     internal static HashSet<Guid> CaptureConnectedReroutes(Symbol symbol)
     {
         var connectedChildren = new HashSet<Guid>();

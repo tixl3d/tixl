@@ -311,7 +311,7 @@ namespace Editor.IntegrationTests
             internal SymbolUi Add(Type type)
             {
                 var symbol = ReplaceDefinition(Guid.NewGuid(), type);
-                var ui = new SymbolUi(symbol, true);
+                var ui = new SymbolUi(symbol, true) { ReadOnly = IsReadOnly };
                 SymbolUiDict[symbol.Id] = ui;
                 return ui;
             }

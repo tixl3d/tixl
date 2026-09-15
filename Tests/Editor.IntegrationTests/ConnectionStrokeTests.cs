@@ -18,7 +18,7 @@ namespace Editor.IntegrationTests;
 
 /// <summary>Exercises stroke observation against native ImGui paths and real graph commands.</summary>
 [Collection("EditorModel")]
-public sealed class ConnectionStrokeTests : IDisposable
+public sealed partial class ConnectionStrokeTests : IDisposable
 {
     /// <summary>Creates an isolated editable graph with a single ordinary wire and no GPU background.</summary>
     public ConnectionStrokeTests()
