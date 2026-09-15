@@ -1065,8 +1065,25 @@ internal sealed class MagGraphLayout
         MagGraphItem? previousItem = null;
 
         _listStackedItems.Clear();
-        foreach (var item in Items.Values.OrderBy(i => MathF.Round(i.PosOnCanvas.X)).ThenBy(i => i.PosOnCanvas.Y))
+        _orderedStackItems.Clear();
+        foreach (var item in Items.Values)
         {
+            var position = item.PosOnCanvas;
+            _orderedStackItems.Add((item, MathF.Round(position.X), position.Y, _orderedStackItems.Count));
+        }
+        _orderedStackItems.Sort(static (a, b) =>
+                                {
+                                    var byX = a.X.CompareTo(b.X);
+                                    if (byX != 0)
+                                        return byX;
+                                    var byY = a.Y.CompareTo(b.Y);
+                                    // Preserve the stable order of coincident nodes, including reroute stack breaks.
+                                    return byY != 0 ? byY : a.Index.CompareTo(b.Index);
+                                });
+
+        foreach (var entry in _orderedStackItems)
+        {
+            var item = entry.Item;
             item.VerticalStackArea = item.Area;
 
             if (item.IsReroute)
@@ -1240,4 +1257,6 @@ internal sealed class MagGraphLayout
 
     private int _compositionModelHash;
     private bool StructureFlaggedAsChanged { get; set; }
+    /// <summary>Reuses sort keys and source order across frames while resolving current items on each update.</summary>
+    private readonly List<(MagGraphItem Item, float X, float Y, int Index)> _orderedStackItems = new(127);
 }

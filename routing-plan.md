@@ -1,10 +1,27 @@
 # Typed connection reroutes in MagGraph
 
-Current revision: drag-to-combine and its preview were removed in `c0ad024d8`. S0 passed on user confirmation; S1–S3 are verified local commits. S4 documents the retained contracts and adds the nullable success annotation. The implementation record below includes historical verification; the PR revision tracker outside this repository records current evidence.
+Current revision: drag-to-combine and its preview were removed in `c0ad024d8`. S0 passed on user confirmation; S1–S5 are verified local commits. The subsequent 1,000-node comparison and measured allocation fixes are recorded below. The implementation record includes historical verification; the PR revision tracker outside this repository records complete current evidence.
 
-Status: implemented. The sections below describe the delivered design; section 11 records implementation details, verification, and remaining manual acceptance work.
+Status: implemented. The sections below describe the delivered design; section 11 records implementation details and historical verification.
 
 Source baseline: `d969679f6000d18a635333b59450c52cc681e23a`, TiXL 4.3, .NET 10. Paths below are relative to this repository root. The supplied Blender GIF is a visual reference; the requested gestures and architecture below define the feature.
+
+## Performance follow-up: 1,000 actual reroutes
+
+Release measurements on a Ryzen 7 5800X with .NET 10.0.10 and tiered compilation disabled found 0.037–0.137 ms of additional runtime invalidation/evaluation work per frame, with zero managed allocation in the measured loop. Cases cover 1,000 parallel routes, a serial chain of 1,000 anchors, and 1,000 shared-source branches, using dirty/cached float values and Command prepare/update/restore forwarding. Source setup and graph construction are outside the timed phases.
+
+The editor comparison uses 50 source operators and 20 targets: 1,000 direct wires versus the same connections through 1,000 real `RerouteFloat` children and 2,000 wires. All fixture endpoints are visible in a fixed 296×393 graph viewport at 16% zoom. Two runs per case each record 600 frames after 200 warm-up frames; the original 85 children and 59 wires remain offscreen.
+
+The measurements justify two bounded Editor changes:
+
+- Connection drawing checks splice eligibility with an explicit loop, removing captured predicates and their per-wire allocations.
+- Stack layout reuses sorting storage, with the original enumeration index preserving stable ties and reroute stack breaks. Positions and boundaries still update every frame.
+
+For the visible idle routed fixture, graph allocations fell from 87,904 to 14,928 bytes/frame (83%). The wire pass allocates zero managed bytes; layout retains 288 bytes/frame from other work. Whole-UI allocation remains nonzero. Graph CPU medians changed from 3.401 to 3.328 ms, with overlapping block ranges. After the fixes, direct wiring costs 0.745 ms and 1,000 visible reroutes add 2.583 ms. These are CPU measurements; GPU execution and uncapped FPS were not measured.
+
+The earlier S5 dense fixture had 1,003 wires and only two reroutes. Its revision comparison must not be used as a 1,000-node result. The full methods and raw evidence are in the sibling review folder's `p1000-performance.md`.
+
+Final verification: uninstrumented Release Editor build with zero warnings/errors, 37 focused routing tests, and 228 native rendered-path checks. Tests cover allocation-free warmed drawing/sorting, splice type/direction/source eligibility, stable ties and movement, as well as existing routing/undo behavior. Both comparison runs restore the original graph records and connection order; temporary probes were removed. No runtime slot, Command, serialization, or Player changes were made.
 
 ## 1. Goal and scope
 
@@ -16,7 +33,7 @@ Add compact, movable routing anchors to MagGraph:
 - Each completed gesture is one undo step. Previewing or cancelling a gesture does not mutate the graph.
 - Save/load, duplication, copy/paste, and playback use existing operator and connection infrastructure.
 
-Keep `Core/`, serialization, project formats, migrations, Player, and the legacy graph unchanged. Shared Editor commands receive only the two reroute-specific guards documented in section 11. New operator definitions are necessary content, but require no new runtime graph mechanism. Do not refactor or optimize neighboring code. Record unrelated findings in [routing-foundissues.md](routing-foundissues.md).
+Keep `Core/`, serialization, project formats, migrations, Player, and the legacy graph unchanged. Shared Editor commands receive only the two reroute-specific guards documented in section 11. New operator definitions are necessary content, but require no new runtime graph mechanism. The later performance follow-up adds only the two measured Editor allocation fixes above; further neighboring refactoring remains separate. Record unrelated findings in [routing-foundissues.md](routing-foundissues.md).
 
 Two deliberately bounded choices keep the implementation small:
 
