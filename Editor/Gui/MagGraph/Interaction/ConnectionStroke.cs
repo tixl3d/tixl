@@ -13,6 +13,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// </summary>
 internal sealed class ConnectionStroke
 {
+    /// <summary>Creates the reusable path observer and reserves gesture buffers.</summary>
     internal ConnectionStroke()
     {
         ObservePath = TestDrawnPath;
@@ -23,9 +24,12 @@ internal sealed class ConnectionStroke
     /// Hit testing and highlighting leave the pending path intact for the normal wire draw.
     /// </summary>
     internal Action<ImDrawListPtr> ObservePath { get; }
+    /// <summary>Whether this collector owns an active gesture context.</summary>
     internal bool IsActive { get; private set; }
+    /// <summary>Whether the gesture removes wires instead of inserting typed anchors.</summary>
     internal bool IsCut { get; private set; }
 
+    /// <summary>Starts a gesture against the current composition and reserves buffers for its visible connections.</summary>
     internal void Begin(GraphUiContext context, bool cut, Vector2 position)
     {
         Cancel();
@@ -43,6 +47,7 @@ internal sealed class ConnectionStroke
         AddTrailPoint(position);
     }
 
+    /// <summary>Checks that the owning view, editable composition, and graph version still match the gesture.</summary>
     internal bool IsCurrent(GraphUiContext context)
     {
         return IsActive
@@ -52,6 +57,7 @@ internal sealed class ConnectionStroke
                && !context.CompositionInstance.Symbol.SymbolPackage.IsReadOnly;
     }
 
+    /// <summary>Advances the screen-space stroke segment after the drag threshold is crossed.</summary>
     internal void UpdatePosition(Vector2 position, float dragThreshold)
     {
         _previous = _current;
@@ -109,11 +115,13 @@ internal sealed class ConnectionStroke
         }
     }
 
+    /// <summary>Checks whether this exact ordered wire occurrence has already been hit.</summary>
     internal bool Contains(MagGraphConnection connection)
     {
         return IsActive && _hitSet.Contains(RerouteOperations.Capture(connection));
     }
 
+    /// <summary>Draws the screen-space trail and cached canvas-space anchor placements.</summary>
     internal void DrawPreview(ImDrawListPtr drawList)
     {
         if (!IsActive || _context == null)
@@ -143,6 +151,7 @@ internal sealed class ConnectionStroke
         }
     }
 
+    /// <summary>Applies collected hits only while the original editable graph is current; the caller ends the gesture.</summary>
     internal bool Commit(GraphUiContext context, out string error)
     {
         error = string.Empty;
@@ -152,6 +161,7 @@ internal sealed class ConnectionStroke
         return _dragging && _hits.Count > 0 && RerouteOperations.TryApply(context, IsCut, _hits, out error);
     }
 
+    /// <summary>Releases borrowed graph references and clears collected hits while retaining reusable storage.</summary>
     internal void Cancel()
     {
         IsActive = false;
@@ -166,10 +176,10 @@ internal sealed class ConnectionStroke
         _context = null;
     }
 
-    /*
-     * Tests screen-space segments with a pixel tolerance and returns a point on the cable.
-     * Endpoint distance checks also cover near misses, parallel segments, and zero-length markers.
-     */
+    /// <summary>
+    /// Tests screen-space segments with a pixel tolerance and returns a point on the cable.
+    /// Endpoint distance checks also cover near misses, parallel segments, and zero-length markers.
+    /// </summary>
     internal static bool TryIntersectSegments(Vector2 strokeStart, Vector2 strokeEnd,
                                              Vector2 cableStart, Vector2 cableEnd,
                                              float tolerance, out Vector2 crossing)
@@ -217,6 +227,7 @@ internal sealed class ConnectionStroke
         return Vector2.DistanceSquared(ClosestPoint(strokeStart, strokeEnd, cableEnd), cableEnd) <= limit;
     }
 
+    /// <summary>Tests the current stroke against the renderer path after clipping each segment to the visible rectangle.</summary>
     private void TestDrawnPath(ImDrawListPtr drawList)
     {
         if (!IsActive || _context == null || _connection == null || drawList._Path.Size < 2)
@@ -249,6 +260,7 @@ internal sealed class ConnectionStroke
         }
     }
 
+    /// <summary>Records a wire occurrence once and invalidates its grouped preview placement.</summary>
     private void AddHit(Vector2 crossing)
     {
         if (_connection == null || _context == null)
@@ -262,6 +274,7 @@ internal sealed class ConnectionStroke
         _placementsDirty = true;
     }
 
+    /// <summary>Appends a screen position to the bounded trail, replacing its oldest point when full.</summary>
     private void AddTrailPoint(Vector2 position)
     {
         if (_trailCount == _trail.Length)
@@ -274,6 +287,7 @@ internal sealed class ConnectionStroke
         _trailCount++;
     }
 
+    /// <summary>Projects a point onto a finite segment, handling a zero-length segment.</summary>
     private static Vector2 ClosestPoint(Vector2 start, Vector2 end, Vector2 point)
     {
         var direction = end - start;
@@ -283,6 +297,7 @@ internal sealed class ConnectionStroke
                    : start + direction * Math.Clamp(Vector2.Dot(point - start, direction) / lengthSquared, 0, 1);
     }
 
+    /// <summary>Clips a segment to the draw rectangle before hit testing.</summary>
     private static bool ClipSegment(ref Vector2 start, ref Vector2 end, Vector2 min, Vector2 max)
     {
         var direction = end - start;
@@ -297,6 +312,7 @@ internal sealed class ConnectionStroke
         return true;
     }
 
+    /// <summary>Narrows the segment entry and exit parameters for one clipping boundary.</summary>
     private static bool ClipAxis(float start, float direction, float min, float max, ref float enter, ref float leave)
     {
         if (direction == 0)
@@ -309,24 +325,43 @@ internal sealed class ConnectionStroke
         return enter <= leave;
     }
 
+    /// <summary>Returns the signed two-dimensional cross product used by segment intersection.</summary>
     private static float Cross(Vector2 a, Vector2 b) => a.X * b.Y - a.Y * b.X;
+    /// <summary>Screen-space hit tolerance scaled with the user interface.</summary>
     private static float HitTolerance => 4 * T3Ui.UiScaleFactor;
 
+    /// <summary>Distinct wire occurrences and their canvas-space hit positions in encounter order.</summary>
     private readonly List<RerouteOperations.StrokeHit> _hits = new();
+    /// <summary>Deduplicates occurrences without scanning the ordered hit list.</summary>
     private readonly HashSet<RerouteOperations.ConnectionOccurrence> _hitSet = new();
+    /// <summary>Cached canvas-space placements shared by preview and commit.</summary>
     private readonly List<Vector2> _anchorPositions = new();
+    /// <summary>Reusable source-group storage for preview placement.</summary>
     private readonly RerouteOperations.AnchorPlacementBuffer _placementBuffer = new();
+    /// <summary>Bounded ring of screen-space points used to draw the gesture trail.</summary>
     private readonly Vector2[] _trail = new Vector2[128];
+    /// <summary>Borrowed owning context, cleared when the gesture ends.</summary>
     private GraphUiContext? _context;
+    /// <summary>Borrowed persistent wire currently being drawn; cleared at the end of the connection pass.</summary>
     private MagGraphConnection? _connection;
+    /// <summary>Composition identity captured when the gesture starts.</summary>
     private Guid _compositionId;
+    /// <summary>Graph structure version captured to reject stale hits.</summary>
     private int _version;
+    /// <summary>Initial screen position used to enforce the drag threshold.</summary>
     private Vector2 _start;
+    /// <summary>Start of the screen-space segment tested this frame.</summary>
     private Vector2 _previous;
+    /// <summary>Latest screen position and end of the segment tested this frame.</summary>
     private Vector2 _current;
+    /// <summary>Index of the oldest valid point in the trail ring.</summary>
     private int _trailStart;
+    /// <summary>Number of valid points in the trail ring.</summary>
     private int _trailCount;
+    /// <summary>Whether movement has crossed the drag threshold.</summary>
     private bool _dragging;
+    /// <summary>Whether the latest update supplies a nonzero segment for hit testing.</summary>
     private bool _hasSegment;
+    /// <summary>Whether newly collected hits require preview placement to be recalculated.</summary>
     private bool _placementsDirty;
 }

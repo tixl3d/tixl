@@ -29,11 +29,11 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     internal int LastUpdateCycle;
     public Guid Id { get; init; }
     public Variants Variant;
-    /*
-     * Reroutes retain the Operator variant and selection identity but expose one horizontal
-     * input/output pair on a compact body. RerouteSize is in canvas units; anchor positions
-     * use DampedPosOnCanvas so attached cables follow the animated dot.
-     */
+    /// <summary>
+    /// Reroutes retain the Operator variant and selection identity but expose one horizontal
+    /// input/output pair on a compact body. RerouteSize is in canvas units; anchor positions
+    /// use DampedPosOnCanvas so attached cables follow the animated dot.
+    /// </summary>
     public bool IsReroute;
 
     /// <summary>Allows automatic block snapping, splicing, connection creation, and tree placement; manual wiring is independent.</summary>
@@ -170,7 +170,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     public const float WidthHalf = Width / 2;
     public const float LineHeight = 35;
     public static readonly Vector2 GridSize = new(Width, LineHeight);
+    /// <summary>Compact reroute body dimensions in canvas units.</summary>
     public static readonly Vector2 RerouteSize = new(16, 16);
+    /// <summary>Reroute dot radius derived from its displayed canvas size.</summary>
     internal float RerouteRadius => MathF.Min(Size.X, Size.Y) * 0.3f;
 
     public ImRect Bounds => ImRect.RectWithSize(PosOnCanvas, Size);
@@ -238,6 +240,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         point.OutputLineIndex = lineIndex;
     }
 
+    /// <summary>Counts displayed output anchors, with one horizontal socket for a reroute.</summary>
     public int GetOutputAnchorCount() => OutputLines.Length == 0 ? 0 : IsReroute ? 1 : OutputLines.Length + 1;
 
 
@@ -282,6 +285,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         anchorPoint.InputLine = InputLines[lineIndex]; //TODO avoid copy
     }
     
+    /// <summary>Counts displayed input anchors, with one horizontal socket for a reroute.</summary>
     public int GetInputAnchorCount() => InputLines.Length == 0 ? 0 : IsReroute ? 1 : InputLines.Length + 1;
 
     /** Assume as free (I.e. not connected) unless an connection is snapped, then return this connection as hash. */

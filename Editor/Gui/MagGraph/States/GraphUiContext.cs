@@ -90,6 +90,7 @@ internal sealed class GraphUiContext
     internal readonly PlaceholderCreation Placeholder;
     internal readonly ConnectionHovering ConnectionHovering = new();
     internal readonly MagGraphLayout Layout = new();
+    /// <summary>Gesture collector owned by this graph context.</summary>
     internal readonly ConnectionStroke ConnectionStroke = new();
     
     internal readonly StateMachine<GraphUiContext> StateMachine;
@@ -182,6 +183,7 @@ internal sealed class GraphUiContext
         return MacroCommand;
     }
     
+    /// <summary>Reuses the active macro or starts one with a before-edit snapshot of connected anchors.</summary>
     internal MacroCommand StartOrContinueMacroCommand(string title)
     {
         return MacroCommand ?? StartMacroCommand(title);
@@ -266,5 +268,6 @@ internal sealed class GraphUiContext
         return results;
     }
 
+    /// <summary>Pending before-edit candidate capture, executed only when the active macro completes.</summary>
     private RemoveDisconnectedReroutesCommand? _rerouteCleanupCommand;
 }

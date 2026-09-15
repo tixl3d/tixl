@@ -273,12 +273,16 @@ public sealed partial class ConnectionStrokeTests : IDisposable
     private readonly IntPtr _imgui;
     /// <summary>In-memory package and its graph presentation.</summary>
     private readonly RerouteVisibilityTests.TestPackage _package;
+    /// <summary>Editable composition symbol containing the fixture graph.</summary>
     private readonly SymbolUi _home;
     /// <summary>Actual canvas, graph context, and wire under test.</summary>
     private readonly MagGraphView _canvas;
+    /// <summary>Real graph context exercised by drawing and gesture tests.</summary>
     private readonly GraphUiContext _context;
+    /// <summary>Persistent fixture wire supplied to the actual renderer.</summary>
     private readonly MagGraphConnection _connection;
     /// <summary>Native draw list and a bound delegate to the existing private wire drawer.</summary>
     private readonly ImDrawListPtr _drawList;
+    /// <summary>Delegate bound to the production private connection drawing method.</summary>
     private readonly Action<MagGraphConnection, ImDrawListPtr, GraphUiContext, ConnectionStroke?> _draw;
 }

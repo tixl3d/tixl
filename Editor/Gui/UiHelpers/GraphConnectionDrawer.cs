@@ -1,10 +1,11 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.UiHelpers;
 
+/// <summary>Builds graph cable paths and exposes the final path before stroking it.</summary>
 internal static class GraphConnectionDrawer
 {
     private const float Pi = (float)Math.PI;

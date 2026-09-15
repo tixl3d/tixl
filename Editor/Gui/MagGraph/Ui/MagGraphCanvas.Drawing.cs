@@ -14,14 +14,16 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
+/// <summary>Draws graph contents and coordinates connection-stroke input with the drawing pass.</summary>
 internal sealed partial class MagGraphView
 {
-    // Reservation outlives cancellation and includes release, preventing clicks from leaking into other widgets.
+    /// <summary>Reservation outlives cancellation and includes release, preventing clicks from leaking into other widgets.</summary>
     internal bool ConsumesConnectionStrokeMouse => _consumeStrokeMouse || _strokeMouseOwner != null
                                                    || _strokeMouseReleaseFrame == ImGui.GetFrameCount();
 
     private readonly Dictionary<int, (Vector2 source, Vector2 target)> _previousConnectionPositions = new();
     
+    /// <summary>Draws graph items and connections, collecting stroke hits before committing the release frame.</summary>
     public void DrawGraph(ImDrawListPtr drawList, float graphOpacity)
     {
         _context.GraphOpacity = graphOpacity;
@@ -355,12 +357,12 @@ internal sealed partial class MagGraphView
         FinishConnectionStrokeInput();
     }
 
-    /*
-     * Reserve a modified right-button gesture across graph views before their widgets see input.
-     * Alt routes and Ctrl cuts; holding both reserves the gesture without starting an edit.
-     * _strokeMouseOwner is shared across views, while _strokeOwner is the local hit collector.
-     * Cancellation stops collection but retains mouse ownership until release to suppress menus.
-     */
+    /// <summary>
+    /// Reserve a modified right-button gesture across graph views before their widgets see input.
+    /// Alt routes and Ctrl cuts; holding both reserves the gesture without starting an edit.
+    /// _strokeMouseOwner is shared across views, while _strokeOwner is the local hit collector.
+    /// Cancellation stops collection but retains mouse ownership until release to suppress menus.
+    /// </summary>
     private void UpdateConnectionStrokeInput()
     {
         UpdateSharedStrokeReservation();
@@ -424,7 +426,7 @@ internal sealed partial class MagGraphView
         }
     }
 
-    // Commit after drawing so the mouse-release segment can still cross a cable in this frame.
+    /// <summary>Commit after drawing so the mouse-release segment can still cross a cable in this frame.</summary>
     private void FinishConnectionStrokeInput()
     {
         if (!_consumeStrokeMouse || !_strokeReleasePending)
@@ -453,6 +455,7 @@ internal sealed partial class MagGraphView
         }
     }
 
+    /// <summary>Keeps canceled or inactive view gestures reserved through the entire mouse-release frame.</summary>
     private static void UpdateSharedStrokeReservation()
     {
         if (_strokeMouseOwner == null)
@@ -532,13 +535,21 @@ internal sealed partial class MagGraphView
     }
 
     private bool _contextMenuIsOpen;
+    /// <summary>Shared view reserving right-button input until release, even after collection is canceled.</summary>
     private static MagGraphView? _strokeMouseOwner;
+    /// <summary>Frame whose right-button release remains reserved across graph views.</summary>
     private static int _strokeMouseReleaseFrame = -1;
+    /// <summary>Local collector used by the current reserved gesture.</summary>
     private ConnectionStroke? _strokeOwner;
+    /// <summary>Last frame that refreshed this view gesture, used to detect an inactive owner.</summary>
     private int _lastStrokeDrawFrame = -1;
+    /// <summary>Whether this view suppresses ordinary right-button interaction for the gesture.</summary>
     private bool _consumeStrokeMouse;
+    /// <summary>Defers gesture completion until the release-frame connection pass has collected its hits.</summary>
     private bool _strokeReleasePending;
+    /// <summary>Last failed stroke message displayed near the graph.</summary>
     private string _strokeError = string.Empty;
+    /// <summary>ImGui time at which the transient stroke error disappears.</summary>
     private double _strokeErrorUntil;
 
     private void HighlightSplitInsertionPoints(ImDrawListPtr drawList, GraphUiContext context)

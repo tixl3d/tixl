@@ -1,5 +1,7 @@
 # Typed connection reroutes in MagGraph
 
+Current revision: drag-to-combine and its preview were removed in `c0ad024d8`. S0 passed on user confirmation; S1–S3 are verified local commits. S4 documents the retained contracts and adds the nullable success annotation. The implementation record below includes historical verification; the PR revision tracker outside this repository records current evidence.
+
 Status: implemented. The sections below describe the delivered design; section 11 records implementation details, verification, and remaining manual acceptance work.
 
 Source baseline: `d969679f6000d18a635333b59450c52cc681e23a`, TiXL 4.3, .NET 10. Paths below are relative to this repository root. The supplied Blender GIF is a visual reference; the requested gestures and architecture below define the feature.
@@ -8,7 +10,7 @@ Source baseline: `d969679f6000d18a635333b59450c52cc681e23a`, TiXL 4.3, .NET 10. 
 
 Add compact, movable routing anchors to MagGraph:
 
-- **Alt + RMB drag:** collect crossed connections and merge branches from each source output through a typed reroute operator.
+- **Alt + RMB drag:** collect crossed connections and route branches from each source output through a typed reroute operator.
 - **Ctrl + RMB drag:** cut crossed connections.
 - Anchors are real operator children with real typed input/output slots. Their wires are ordinary `Symbol.Connection` objects.
 - Each completed gesture is one undo step. Previewing or cancelling a gesture does not mutate the graph.
@@ -19,7 +21,7 @@ Keep `Core/`, serialization, project formats, migrations, Player, and the legacy
 Two deliberately bounded choices keep the implementation small:
 
 1. Reroutes remain semantic `MagGraphItem.Variants.Operator` items, with a separate, transient reroute display flag. They look like another variant without falling out of ordinary operator selection/deletion behavior.
-2. Reroutes support manual movement, normal socket connections, and merging by dropping one anchor onto another of the same type. Magnetic block snapping, automatic insertion by dragging a node onto a wire, and preserve-wires dissolve remain outside scope. Automatic tree layout preserves manually placed anchors as obstacles.
+2. Reroutes support manual movement and normal socket connections. Dropping one anchor over another preserves both children and their wiring; no merge preview appears. Magnetic block snapping, automatic insertion by dragging a node onto a wire, and preserve-wires dissolve remain outside scope. Automatic tree layout preserves manually placed anchors as obstacles.
 
 ## 2. Interaction contract
 
@@ -56,7 +58,7 @@ A.out -> D.in                R.out -> C.in
 - Start in an editable, hovered MagGraph canvas, with the graph in its normal idle state and no popup, active widget, or background-image interaction owning input.
 - Reserve Alt/Ctrl RMB at mouse-down, before canvas panning processes it. Start collecting after the normal drag threshold. A modified click without a drag makes no edit and consumes its release.
 - Latch the tool at mouse-down. Modifier changes during the drag do not switch tools.
-- Ctrl + Alt + RMB is a consumed no-op; avoid ambiguous merge-versus-cut precedence. Shift combinations retain existing behavior.
+- Ctrl + Alt + RMB is a consumed no-op; avoid ambiguous route-versus-cut precedence. Shift combinations retain existing behavior.
 - Escape, focus loss, composition/project change, package reload, popup takeover, or a structural edit during the stroke cancels it. Leaving the graph viewport cancels rather than cutting across another window.
 - Keep ownership through the release frame: suppress RMB selection and context-menu opening, fence selection, competing socket gestures, graph keyboard mutations, and canvas panning/zoom while active. If cancelled while RMB remains held, discard the preview immediately but keep consuming that button until release; do not hand the unfinished press to panning.
 - Keep this consumed-until-release latch in the `MagGraphView` partial, separate from per-context preview state, so navigation/reload replacing `GraphUiContext` cannot rearm the same press. Reserve the press across MagGraph views as well, so entering another graph cannot start panning. Clear it once release is observed, including after focus returns.
@@ -185,10 +187,10 @@ Use existing `AddSymbolChildCommand`, `AddConnectionCommand`, and `DeleteConnect
 - Capture the composition GUID/version and connections as value snapshots: source parent/child GUID, source slot GUID, target parent/child GUID, target slot GUID, and ordinal among connections to that target slot.
 - Preserve `Guid.Empty` for composition interfaces. Use `MagGraphConnection.SourceParentOrChildId` / `TargetParentOrChildId`, not visual node IDs for interface nodes.
 - Identify duplicates by occurrence ordinal. Neither `ConnectionHash` nor value-equal endpoint tuples distinguish repeated connections. Do not use `GetMultiInputIndexFor` for this operation; enumerate actual target occurrences.
-- Validate all sources, targets, types, target ordinals, package editability, loaded reroute definitions, and slot contracts before the first mutation. Reject bundle sources for merge. Reject stale/ambiguous snapshots wholesale.
+- Validate all sources, targets, types, target ordinals, package editability, loaded reroute definitions, and slot contracts before the first mutation. Reject bundle sources for insertion. Reject stale/ambiguous snapshots wholesale.
 - Resolve graph objects from GUIDs at Do/Undo. Do not retain `Instance`, `Symbol`, or `SymbolUi` fields in the command. When the project/package is absent, log a warning and no-op defensively. This wrapper avoids invoking the existing deletion command's missing-symbol exception path.
 
-### Merge command ordering
+### Routing insertion command ordering
 
 1. Allocate stable child IDs via one `AddSymbolChildCommand` per source group; set compact size and the previewed canvas position.
 2. Add each child and its single original-source-to-reroute-input connection.
@@ -217,7 +219,7 @@ This is a budget, not permission for adjacent cleanup. Keep edits limited to the
 | --- | --- |
 | `Operators/TypeOperators/Utils/IRerouteNode.cs` (new) | Marker only. |
 | `Operators/TypeOperators/Symbols/Routing/Reroute<Type>.cs/.t3/.t3ui` (new, N triplets) | Concrete forwarding definitions, including the dedicated Command implementation if its lifecycle checks pass. |
-| `Editor/Gui/MagGraph/Interaction/RerouteOperations.cs` (new) | Cold definition lookup/validation, occurrence snapshots, merge/cut construction, and nested guarded undo command. |
+| `Editor/Gui/MagGraph/Interaction/RerouteOperations.cs` (new) | Cold definition lookup/validation, occurrence snapshots, route/cut construction, and nested guarded undo command. |
 | `Editor/Gui/MagGraph/Interaction/ConnectionStroke.cs` (new) | Per-context gesture lifecycle, incremental path queries, reusable hit/preview buffers. |
 | `Editor/Gui/MagGraph/Model/MagGraphItem.cs` | Transient display flag and compact anchor geometry. |
 | `Editor/Gui/MagGraph/Model/MagGraphLayout.cs` | Detection, compact size, always-available sockets, nonsnapped reroute endpoint layout. |
@@ -259,7 +261,7 @@ Exit: a manually added reroute behaves like a real typed node and renders as an 
 
 ### Phase C — implement occurrence-safe edit operations
 
-- Implement the cold merge/cut command builder and preflight without mouse-state dependencies.
+- Implement the cold route/cut command builder and preflight without mouse-state dependencies.
 - Verify exact connection tuples, multiplicity, and ordering for shared fan-out, duplicate edges, non-first multi-input occurrences, composition interfaces, and multiple source groups.
 - Verify one-step undo/redo, repeat redo, missing-project guards, and failure rollback. Verify invalid requests leave graph/undo history unchanged.
 
@@ -289,8 +291,8 @@ Move executable manual steps into the existing connection-splitting test set dur
 | --- | --- |
 | Forwarding | Numeric equality; reference identity for list/resource data; null/disconnected defaults; source changes; reference replacement; dirty propagation; no owned-resource disposal. |
 | Command | First prepare before pull; pull once per consumer evaluation; restore afterward; chains; fan-out; callback changes; disconnect/rewire; disable/bypass; no premature evaluation. |
-| Merge | One wire; subset/all of a fan-out; two outputs of one node; different sources of the same/different types; existing reroute chains; repeated stroke crossings. |
-| Multi-inputs | Middle/nonconsecutive target ordinals; identical duplicate edges; mixed merge/cut; exact undo/redo sequence; bundle-source merge rejected without mutation. |
+| Routing | One wire; subset/all of a fan-out; two outputs of one node; different sources of the same/different types; existing reroute chains; repeated stroke crossings. |
+| Multi-inputs | Middle/nonconsecutive target ordinals; identical duplicate edges; mixed route/cut; exact undo/redo sequence; bundle-source merge rejected without mutation. |
 | Boundaries | Composition input to child, child to composition output, both through reroutes; correct `Guid.Empty` mapping; optional/custom unsupported types fail clearly. |
 | Gestures | Alt/Ctrl behavior; both `MiddleMouseButtonZooms` settings; consumed Ctrl+Alt; no-drag/no-hit; modifier changes; Escape; focus/window exit; popup; reload/navigation; read-only graph; release-frame suppression. |
 | Geometry | Every visible cable style; snapped marker; rapid crossing; curved/backward connection; final mouse segment; damping; zoom/DPI; collapsed section boundary and hidden internal wires. |
@@ -337,25 +339,19 @@ The initial implementation changed **14 existing Editor files, 2 new Editor help
 - Candidate collection and snapshots run at explicit edit boundaries. Drawing does no orphan scan, and initially blank anchors are not eligible for unrelated cleanup. The existing manual connection test set contains last-wire, multi-output, chained-anchor, undo/redo, reconnection, and shake cases.
 - Verification: the Debug Editor builds without warnings/errors. A 27-check isolated fixture using the actual compiled Editor graph and command types verifies macro completion/cancellation/reconnection, Disconnect, shake termination, last-wire cutting, selection cleanup, and undo/redo. A separate 26-check fixture loads TypeOperators normally and uses a live parent instance to verify exact metadata/default-value restoration, bypass/disabled/dirty flags in both model and live slots, redo, partial-connection retention, empty-anchor retention, and rejection of stale redo. The diagnostic fixtures live under ignored `artifacts/routing-ui-verification/` and `artifacts/routing-cleanup-verification/`; native mouse input is not part of these checks.
 
-### Merge anchors on drop
+### Anchor overlap and shake completion
 
-Shake cleanup enters a dedicated mouse-release wait state after finishing the move. It clears active node references and keeps selection-fence and new node interactions disabled until the left button is released, including release outside the graph. Ordinary operator shakes retain their existing drag behavior.
+Drag-to-combine and its preview are deferred and removed. Moving a single anchor or a selection near or over another anchor changes positions only. Both children, their identities, and all ordered connection occurrences remain. There is no target enlargement, absorbed-node hiding, or preview cable redirection. Undo/redo restores movement without rewriting topology.
 
-- Limit implementation changes to `MagItemMovement.cs` and `RerouteOperations.cs`; reuse the existing guarded routing command, connection commands, and disconnected-anchor snapshot command. Update this plan, shortcut help, and the existing manual test document. No operator, rendering, Core, serialization, project, or general undo changes are needed.
-- On release of a single dragged reroute, search visible, stationary reroutes of the exact same CLR type. Compare actual canvas centers against a 32×32 square centered on each target, inclusive at ±16 units on each axis. Choose the nearest eligible center, using the child GUID to break exact ties. Multiple-item drags and shake completion do not attempt merging. Search only on drop, with no additional per-frame work.
-- Keep the stationary child and its identity, position, type, and settings. Transfer every outgoing occurrence of the dragged child to the stationary output at its original target ordinal, including duplicate multi-input connections. Keep the stationary input's source when both have external sources; otherwise retain the dragged input's source. Remove the internal edge of directly connected anchors and preserve the external source, without creating a self-connection.
-- Validate editability, marker/slot contracts, captured wiring, and the proposed graph's cycle safety before mutation. Reject an incompatible, stale, or cyclic merge without changing connections. Use source/target snapshots and guarded steps for rollback and undo/redo; remove the absorbed child only after its cables have been transferred or removed.
-- Store the movement's final values first, then append the executed collapse command to the same movement macro. Undo recreates the absorbed child's metadata and wires before restoring its original position; redo moves and collapses it again. Select the stationary survivor and skip hidden-input picking after a successful merge.
-- Two newly blank anchors merge into one. Existing automatic last-connection cleanup still applies to anchors whose only cable was the removed internal chain edge. Incoming arrowheads and outgoing dot attachment remain unchanged.
-- Verify source precedence/fallback, direct chains in both directions, fan-out, repeated multi-input ordinals, blank anchors, cycle rejection, stale undo/redo, one-step movement undo, exact 32×32 bounds, zoom/scale independence, hidden targets, mixed selection, and shake suppression. Extend the ignored actual-Editor fixture and the existing manual checklist rather than introducing another test project.
-- Verification completed: the Debug Editor builds with zero warnings/errors, and the compiled Editor fixture passes 79 checks covering collapse and existing cleanup/cut behavior. These include source precedence/fallback, both chain directions, duplicate target ordinals, changed-topology cycle rejection on redo, movement undo/redo, ±16 canvas boundaries at 25% and 200% zoom, mixed selection, shake suppression, read-only rejection, and stale-reference cleanup for a chain with no external wires. Native mouse gestures and the full zoom/UI-scale matrix remain in the manual checklist.
+Shake cleanup enters a dedicated mouse-release wait state after finishing the move. It clears active node references and keeps selection-fence and new node interactions disabled until the left button is released, including release outside the graph. Ordinary operator shakes retain their existing drag behavior. Movement and disconnect keep their existing separate undo entries.
 
-### Merge preview follow-up
+### PR revision boundaries
 
-- Reuse the drop target search in `MagItemMovement` for an allocation-free per-frame proximity check. Cache the validation result by dragged/target IDs and the layout structure cycle; use a non-mutating path through `RerouteOperations` to validate source/slot compatibility and proposed cycle safety when the candidate or graph changes.
-- Keep preview state transient and store child IDs. Neither positions, sizes, damping, connections, nor undo history change during preview. Reset it when the drag stops, is shaken off, or leaves the valid merge region. Release revalidates the actual edit independently.
-- `DrawReroute` hides the absorbed dot and draws the stationary dot at 1.75 times its normal radius with a highlight. `DrawConnection` attaches incident cables to that visual dot and hides the pair's internal cable while previewing. The incoming arrowhead geometry is unchanged; its existing offset from the dot edge is preserved. Outside the preview all normal rendering is used.
-- Validation uses the compiled Editor in the existing ignored fixtures: entering/leaving/reentering, no graph mutation, cycle invalidation after a structure refresh, cleanup, centered larger-dot drawing, suppressed second dot, and restoration of normal rendering. A warm 1,000-update preview loop allocates zero bytes. Native pointer interaction and the full zoom/UI-scale matrix remain manual checks.
+Browser filtering uses nonserialized `SymbolUi.HiddenFromBrowser`, refreshed with the validated definition query in `SymbolAnalysis` and transferred to the surviving UI on replacement. Automatic block consumers use `MagGraphItem.SupportsBlockLayout`; manual wiring and movement retain their compact geometry.
+
+The connection pass selects the active `ConnectionStroke` once, excludes temporary wires, and clears its borrowed connection in `finally`. The generic path observer still sees the exact pending rendered path before stroking clears it. Snapped-marker hit/highlight handling lives in the collector.
+
+`GraphUiContext` keeps the before-edit cleanup capture and delegates completion to `RerouteOperations.CompleteCleanup`. Cleanup runs last only when it removes anchors, so undo restores metadata before reconnecting wires. The cleanup command owns refresh and selection pruning across registered graph views.
 
 ### Automated verification
 
@@ -385,5 +381,5 @@ Local diagnostic harnesses and reports are in ignored `artifacts/routing-operato
 - Clipboard operations, all collapsed-section/layout combinations, ordinary node split/pan regressions, cross-project dependency handling, and exported Player execution still need the listed manual acceptance checks. Normal runtime serialization/loading passed; that does not claim a completed exported executable test.
 - The existing `BuildRenderRecolorUndo_RoundTrips` cube test was also attempted and failed its first screenshot content-size assertion. Its cause is unconfirmed; details are recorded in `routing-foundissues.md`. Its later recolor/undo assertions did not run.
 - Routing from composition multi-input bundles, metadata-bearing outputs such as time-clip slots, and optional/custom types without a registered reroute is rejected before mutation. Existing editable bundle wires can still be cut. Anchors retain their original type and are not polymorphic after reconnection.
-- Reroutes deliberately do not participate in block snapping or automatic splice/dissolve. Merging requires dropping a single anchor within the same-type target's 32×32 area. Ordinary editor bypass requests leave them unchanged; direct external manipulation of Core bypass state is outside this UI feature.
+- Reroutes deliberately do not participate in block snapping or automatic splice/dissolve. Overlapping anchors remain separate and preserve their wiring. Ordinary editor bypass requests leave them unchanged; direct external manipulation of Core bypass state is outside this UI feature.
 - The inherited double value-control mismatch and all other unrelated observations remain in `routing-foundissues.md`; they were not repaired as part of routing.

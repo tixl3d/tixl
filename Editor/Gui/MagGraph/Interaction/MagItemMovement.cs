@@ -45,6 +45,7 @@ internal sealed partial class MagItemMovement
 
     private readonly GraphUiContext _context;
 
+    /// <summary>Updates movement targets and frame state for the current selection.</summary>
     internal void PrepareFrame(GraphUiContext context)
     {
         //PrepareDragInteraction();
@@ -387,6 +388,7 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Completes the move, disconnects the selection, and starts selective anchor cleanup with the existing undo grouping.</summary>
     private bool HandleShakeDisconnect(GraphUiContext context)
     {
         //Log.Debug("Shake it!");

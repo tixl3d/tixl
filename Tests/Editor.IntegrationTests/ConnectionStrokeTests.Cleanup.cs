@@ -17,6 +17,7 @@ using Xunit;
 
 namespace Editor.IntegrationTests;
 
+/// <summary>Verifies cleanup state restoration, view refresh, cancellation, and shake undo grouping.</summary>
 public sealed partial class ConnectionStrokeTests
 {
     /// <summary>Cleanup is selective, refreshes each view once, and restores metadata before ordered wires are replayed.</summary>

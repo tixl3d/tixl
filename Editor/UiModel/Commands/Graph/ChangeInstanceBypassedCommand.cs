@@ -1,4 +1,4 @@
-﻿using T3.Core.Operator;
+using T3.Core.Operator;
 
 using T3.Editor.UiModel.Helpers;
 
@@ -28,6 +28,7 @@ public sealed class ChangeInstanceBypassedCommand : ICommand
         AssignValue(_newState);
     }
 
+    /// <summary>Applies bypass to an ordinary child while preserving reroute forwarding contracts.</summary>
     private void AssignValue(bool shouldBeBypassed)
     {
         if (!SymbolUiRegistry.TryGetSymbolUi(_inputParentSymbolId, out var symbolUi))

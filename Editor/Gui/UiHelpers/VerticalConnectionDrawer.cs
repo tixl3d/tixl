@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
@@ -13,10 +13,10 @@ internal static class VerticalConnectionDrawer
 {
     private const float Pi = (float)System.Math.PI;
 
-    /*
-     * queryPath observes the final screen-space cable path before it is stroked and cleared.
-     * It must leave the pending path intact so drawing and gesture hit testing share the geometry.
-     */
+    /// <summary>
+    /// queryPath observes the final screen-space cable path before it is stroked and cleared.
+    /// It must leave the pending path intact so drawing and gesture hit testing share the geometry.
+    /// </summary>
     internal static bool DrawConnection(float canvasScale,
                                         ImRect sourceNode, Vector2 sourcePos,
                                         ImRect targetNode, Vector2 targetPos,
@@ -231,6 +231,7 @@ internal static class VerticalConnectionDrawer
                               out hoverPosition, out normalizedHoverPos, queryPath);
     }
 
+    /// <summary>Notifies the path observer before stroking clears the path, then calculates hover distance.</summary>
     private static bool FinalizeStroke(ImDrawListPtr dl, float s, Color color, float thickness,
                                        out Vector2 hoverPosition, out float normalizedHoverPos,
                                        Action<ImDrawListPtr> queryPath)

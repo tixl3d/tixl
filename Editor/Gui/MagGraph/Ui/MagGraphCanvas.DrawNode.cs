@@ -23,8 +23,10 @@ using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
+/// <summary>Draws graph nodes, including compact typed reroute bodies and their sockets.</summary>
 internal sealed partial class MagGraphView
 {
+    /// <summary>Draws the appropriate node body and slot interaction for an item variant.</summary>
     private void DrawNode(MagGraphItem item, ImDrawListPtr drawList, GraphUiContext context)
     {
         if (item.Variant == MagGraphItem.Variants.Placeholder || item.Instance == null)
@@ -1181,11 +1183,11 @@ internal sealed partial class MagGraphView
 
 
 
-    /*
-     * Draws the compact anchor with one padded hit area split into input, movable body, and output.
-     * The body retains a drag region even when socket tolerances overlap at low zoom.
-     * Stroke mouse ownership suppresses node interactions until the gesture has released the button.
-     */
+    /// <summary>
+    /// Draws the compact anchor with one padded hit area split into input, movable body, and output.
+    /// The body retains a drag region even when socket tolerances overlap at low zoom.
+    /// Stroke mouse ownership suppresses node interactions until the gesture has released the button.
+    /// </summary>
     private void DrawReroute(MagGraphItem item, ImDrawListPtr drawList, GraphUiContext context)
     {
         if (item.InputLines.Length != 1 || item.OutputLines.Length != 1)
@@ -1449,6 +1451,7 @@ internal sealed partial class MagGraphView
     private static readonly Vector2[] _inputIndicatorPoints = new Vector2[5];
 }
 
+/// <summary>Draws a circular interaction indicator clipped to a rectangular node region.</summary>
 internal static class CircleInBoxHelper
 {
     public static void DrawClippedCircle(Vector2 pMin, Vector2 pMax, Vector2 center, float radius, Color color, ImDrawListPtr drawList)

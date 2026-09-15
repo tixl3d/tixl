@@ -16,9 +16,10 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// </summary>
 internal sealed class RemoveDisconnectedReroutesCommand : ICommand
 {
-    // Retain slot settings and editor metadata so undo restores more than the anchor's topology.
+    /// <summary>Retain slot settings and editor metadata so undo restores more than the anchor's topology.</summary>
     private sealed class ChildSnapshot
     {
+        /// <summary>Copies the anchor identity, slot values, and editor state without retaining its live child.</summary>
         internal ChildSnapshot(SymbolUi.Child ui)
         {
             var child = ui.SymbolChild;
@@ -44,6 +45,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
             ConnectionStyles = ui.ConnectionStyleOverrides.ToArray();
         }
 
+        /// <summary>Checks that the current definition still has the captured reroute slot IDs and value type.</summary>
         internal bool Matches(Symbol definition)
         {
             return definition.Id == SymbolId && SymbolAnalysis.IsReroute(definition)
@@ -52,37 +54,59 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
                    && definition.OutputDefinitions[0].Id == OutputId;
         }
 
+        /// <summary>Definition identity used to resolve the current symbol during replay.</summary>
         internal readonly Guid SymbolId;
+        /// <summary>Persistent child identity restored by undo.</summary>
         internal readonly Guid ChildId;
+        /// <summary>Child name captured before removal.</summary>
         internal readonly string Name;
+        /// <summary>Captured bypass state restored with the child.</summary>
         internal readonly bool IsBypassed;
+        /// <summary>Persistent input slot identity required when restoring the value.</summary>
         internal readonly Guid InputId;
+        /// <summary>Cloned input value retained independently of the removed child.</summary>
         internal readonly InputValue InputValue;
+        /// <summary>Whether the captured input uses its definition default.</summary>
         internal readonly bool InputIsDefault;
+        /// <summary>Persistent output slot identity required when restoring settings.</summary>
         internal readonly Guid OutputId;
+        /// <summary>Captured output disable state.</summary>
         internal readonly bool OutputIsDisabled;
+        /// <summary>Captured output invalidation trigger.</summary>
         internal readonly DirtyFlagTrigger OutputDirtyTrigger;
+        /// <summary>Saved top-left position in canvas coordinates.</summary>
         internal readonly Vector2 Position;
+        /// <summary>Saved child size, including the compact reroute dimensions.</summary>
         internal readonly Vector2 Size;
+        /// <summary>Saved section membership.</summary>
         internal readonly Guid SectionId;
+        /// <summary>Saved child display style.</summary>
         internal readonly SymbolUi.Child.Styles Style;
+        /// <summary>Saved optional child comment.</summary>
         internal readonly string? Comment;
+        /// <summary>Saved parameter snapshot group.</summary>
         internal readonly int SnapshotGroupIndex;
+        /// <summary>Copied input IDs enabled for parameter snapshots, preserving an unset selection.</summary>
         internal readonly Guid[]? SnapshotEnabledInputIds;
+        /// <summary>Copied per-connection display overrides.</summary>
         internal readonly KeyValuePair<Guid, SymbolUi.Child.ConnectionStyles>[] ConnectionStyles;
     }
 
+    /// <summary>Captures distinct candidate IDs before editing; removal is deferred until macro completion.</summary>
     public RemoveDisconnectedReroutesCommand(Guid compositionId, IEnumerable<Guid> candidateIds)
     {
         _compositionId = compositionId;
         _candidateIds = candidateIds.Distinct().ToArray();
     }
 
+    /// <summary>Label shown in undo history.</summary>
     public string Name => "Remove Disconnected Reroutes";
+    /// <summary>Cleanup can restore its captured children through undo.</summary>
     public bool IsUndoable => true;
-    // Nonzero only while deletion is applied; callers use this to avoid recording an empty cleanup.
+    /// <summary>Nonzero only while deletion is applied; callers use this to avoid recording an empty cleanup.</summary>
     internal int AppliedCount { get; private set; }
 
+    /// <summary>Removes newly isolated candidates and fixes the first successful snapshot set for redo.</summary>
     public void Do()
     {
         if (AppliedCount != 0 || !TryGetComposition(out var composition))
@@ -146,6 +170,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
             RefreshViews(removeSelection: true);
     }
 
+    /// <summary>Restores captured anchors and metadata before earlier macro commands reconnect their wires.</summary>
     public void Undo()
     {
         if (AppliedCount == 0 || _snapshots == null || !TryGetComposition(out var composition))
@@ -181,6 +206,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
         RefreshViews(removeSelection: false);
     }
 
+    /// <summary>Resolves the current editable composition by ID and reports an unavailable graph.</summary>
     private bool TryGetComposition(out SymbolUi? composition)
     {
         if (SymbolUiRegistry.TryGetSymbolUi(_compositionId, out composition) && !composition.ReadOnly
@@ -191,6 +217,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
         return false;
     }
 
+    /// <summary>Resolves and validates every captured definition before any replay mutation.</summary>
     private static bool TryResolveDefinitions(ChildSnapshot[] snapshots, out Dictionary<Guid, Symbol> definitions)
     {
         definitions = new Dictionary<Guid, Symbol>();
@@ -208,6 +235,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
         return true;
     }
 
+    /// <summary>Collects both endpoints so either incoming or outgoing wiring prevents cleanup.</summary>
     private static HashSet<Guid> GetConnectedChildren(Symbol composition)
     {
         var connected = new HashSet<Guid>();
@@ -220,6 +248,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
         return connected;
     }
 
+    /// <summary>Recreates an anchor with its original identity, slot settings, and editor metadata.</summary>
     private static void Restore(SymbolUi composition, Symbol definition, ChildSnapshot snapshot)
     {
         var ui = composition.AddChild(definition, snapshot.ChildId, snapshot.Position, snapshot.Size, snapshot.Name, snapshot.IsBypassed);
@@ -255,6 +284,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
         composition.FlagAsModified();
     }
 
+    /// <summary>Removes any model or UI fragment left by a failed child restore.</summary>
     private static void RemovePartialChild(SymbolUi composition, Guid id)
     {
         if (composition.Symbol.Children.ContainsKey(id) || composition.ChildUis.ContainsKey(id))
@@ -305,7 +335,10 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
         }
     }
 
+    /// <summary>Composition identity used to resolve live state on each execution.</summary>
     private readonly Guid _compositionId;
+    /// <summary>Previously connected anchor IDs eligible for removal after editing.</summary>
     private readonly Guid[] _candidateIds;
+    /// <summary>Snapshot set fixed by the first successful deletion and reused for undo and redo.</summary>
     private ChildSnapshot[]? _snapshots;
 }

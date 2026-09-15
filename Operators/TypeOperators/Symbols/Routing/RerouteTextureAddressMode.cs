@@ -1,12 +1,14 @@
 namespace Types.Routing;
 
-// Passes SharpDX.Direct3D11.TextureAddressMode through the .t3 connection; no C# evaluator is needed.
+/// <summary>Passes SharpDX.Direct3D11.TextureAddressMode through the .t3 connection; no C# evaluator is needed.</summary>
 [Guid("c683e480-28fd-48e8-a30b-2c063d70b699")]
 public sealed class RerouteTextureAddressMode : Instance<RerouteTextureAddressMode>, IRerouteNode
 {
+    /// <summary>Forwards the input value through the direct connection in the .t3 definition.</summary>
     [Output(Guid = "9c13fc6e-ab98-4be2-8ce0-e0ad3545d4c0")]
     public readonly Slot<SharpDX.Direct3D11.TextureAddressMode> Output = new();
 
+    /// <summary>Value forwarded unchanged to the output.</summary>
     [Input(Guid = "1a5c7a33-a8cf-48d7-9936-365f159a69df")]
     public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> Input = new();
 }

@@ -12,6 +12,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
+/// <summary>Draws persistent connection geometry and offers its visible path to an active stroke.</summary>
 internal sealed partial class MagGraphView
 {
     /// <summary>Draws one wire, borrowing an optional active stroke observer until the persistent pass ends.</summary>

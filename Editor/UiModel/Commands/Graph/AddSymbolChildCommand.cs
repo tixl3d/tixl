@@ -32,6 +32,7 @@ public sealed class AddSymbolChildCommand : ICommand
         parentSymbolUi!.RemoveChild(_addedChildId);
     }
 
+    /// <summary>Creates the child with its saved position and size, using compact dimensions for a reroute.</summary>
     public void Do()
     {
         if(!SymbolUiRegistry.TryGetSymbolUi(_parentSymbolId, out var parentSymbolUi))

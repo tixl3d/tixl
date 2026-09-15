@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
@@ -32,6 +32,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// </summary>
 internal sealed class ConnectionHovering
 {
+    /// <summary>Swaps hover buffers and prepares this frame picking state for the current graph.</summary>
     internal void PrepareNewFrame(GraphUiContext context)
     {
         _mousePosition = ImGui.GetMousePos();
@@ -274,6 +275,7 @@ internal sealed class ConnectionHovering
         LineRegions Region);
 }
 
+/// <summary>Draws the source operator output preview used by graph tooltips.</summary>
 internal static class ToolTipContentDrawer
 {
     internal static SymbolUi DrawForOutput(ISlot outputSlot, out IOutputUi? sourceOutputUi)

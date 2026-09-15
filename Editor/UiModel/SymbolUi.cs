@@ -19,6 +19,7 @@ public sealed partial class SymbolUi : ISelectionContainer
     private SymbolPackage _package;
     private readonly Guid _id;
 
+    /// <summary>Creates UI metadata for a symbol and derives its browser visibility before optional consistency checks.</summary>
     internal SymbolUi(Symbol symbol, bool updateConsistency)
     {
         _id = symbol.Id;

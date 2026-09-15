@@ -34,6 +34,7 @@ namespace T3.Editor.UiModel.Modification;
 /// </summary>
 internal static class NodeActions
 {
+    /// <summary>Toggles bypass for eligible selected operators while leaving reroute forwarding intact.</summary>
     internal static void ToggleBypassedForSelectedElements(NodeSelection nodeSelection)
     {
         var selectedChildUis = nodeSelection.GetSelectedChildUis().ToList();
@@ -547,6 +548,7 @@ internal static class NodeActions
         }
     }
 
+    /// <summary>Disconnects selected nodes with undoable reconnection of eligible upstream and downstream wires.</summary>
     public static void DisconnectNodes(Instance compositionOp, List<ISelectableCanvasObject> nodes)
     {
         Log.Info($"Disconnecting {nodes.Count} nodes from their inputs and outputs");

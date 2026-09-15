@@ -14,9 +14,10 @@ using SkillTraining = T3.Editor.Skills.Training.SkillTraining;
 
 namespace T3.Editor.Gui.MagGraph.States
 {
+    /// <summary>Defines graph interaction states and their transition handlers.</summary>
     internal static class GraphStates
     {
-        // A shake-off can delete the dragged anchor; wait for release before accepting another interaction.
+        /// <summary>A shake-off can delete the dragged anchor; wait for release before accepting another interaction.</summary>
         internal static State<GraphUiContext> WaitForMouseRelease
             = new(Enter: static context =>
                          {
@@ -31,7 +32,7 @@ namespace T3.Editor.Gui.MagGraph.States
                           },
                   Exit: static _ => { });
 
-        // The canvas owns stroke input and commits after drawing has collected the final frame's wire hits.
+        /// <summary>The canvas owns stroke input and commits after drawing has collected the final frame's wire hits.</summary>
         internal static State<GraphUiContext> ConnectionStroke
             = new(Enter: static context =>
                          {

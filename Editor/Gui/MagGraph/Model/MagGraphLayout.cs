@@ -540,6 +540,7 @@ internal sealed class MagGraphLayout
 
     private readonly HashSet<int> _inputHashesWithMissingConnections = new();
 
+    /// <summary>Builds visible slot lines and applies compact reroute dimensions without changing saved child size.</summary>
     private void UpdateVisibleItemLines(GraphUiContext context)
     {
         var inputLines = new List<MagGraphItem.InputLine>(8);

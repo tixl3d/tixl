@@ -6,9 +6,10 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.UiModel;
 
+/// <summary>Creates and removes graph children together with their model and editor state.</summary>
 public sealed partial class SymbolUi
 {
-    // Apply restored bypass state during creation so live instances start with the matching slot wiring.
+    /// <summary>Creates a child and its UI metadata with the supplied persistent identity, canvas placement, and bypass state.</summary>
     internal Child AddChild(Symbol symbolToAdd, Guid addedChildId, Vector2 posInCanvas, Vector2 size, string name = null, bool isBypassed = false)
     {
         FlagAsModified();

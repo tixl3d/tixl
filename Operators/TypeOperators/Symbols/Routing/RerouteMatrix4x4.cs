@@ -1,12 +1,14 @@
 namespace Types.Routing;
 
-// Passes System.Numerics.Matrix4x4 through the .t3 connection; no C# evaluator is needed.
+/// <summary>Passes System.Numerics.Matrix4x4 through the .t3 connection; no C# evaluator is needed.</summary>
 [Guid("437441f1-2da5-49aa-945f-c941b22ffc5a")]
 public sealed class RerouteMatrix4x4 : Instance<RerouteMatrix4x4>, IRerouteNode
 {
+    /// <summary>Forwards the input value through the direct connection in the .t3 definition.</summary>
     [Output(Guid = "92c4f003-1d8a-4a7c-b647-042e4658ee5f")]
     public readonly Slot<System.Numerics.Matrix4x4> Output = new();
 
+    /// <summary>Value forwarded unchanged to the output.</summary>
     [Input(Guid = "1b126c61-f8ea-4782-883d-e9099b37bf19")]
     public readonly InputSlot<System.Numerics.Matrix4x4> Input = new();
 }

@@ -15,7 +15,7 @@ Scope: unrelated observations during planning and implementation against `d96967
 - Source: `Editor/Gui/MagGraph/Interaction/InputSnapper.cs`, around lines 73–77.
 - Observation: the replacement path snapshots `FirstOrDefault` for the target input, but passes `BestInputMatch.MultiInputIndex` to deletion.
 - Potential impact: replacing a non-first occurrence can undo by restoring the first occurrence's source at the replaced position.
-- Routing boundary: build merge/cut commands directly from complete occurrence snapshots. Do not reuse this replacement path for the new stroke operation or refactor the existing snapper as part of routing.
+- Routing boundary: build route/cut commands directly from complete occurrence snapshots. Do not reuse this replacement path for the new stroke operation or refactor the existing snapper as part of routing.
 - Follow-up reproduction: use three distinct sources in one multi-input, replace the second through socket snapping, then undo and compare the source sequence.
 
 ## 3. Connection deletion throws after its parent symbol is unloaded
