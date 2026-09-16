@@ -101,6 +101,14 @@ internal static class CanvasPointHandle
             }
         }
 
+        // A caller that snapped the dragged point reports where it landed; the held handle draws there rather
+        // than under the cursor, so the handle and the edges it moves agree.
+        if (isHeld && _snapReported)
+        {
+            screen = _snapScreen;
+            _snapReported = false;
+        }
+
         var isActive = isHovered || isHeld;
         var color = isActive ? style.ActiveColor : style.Color;
         var outlineWidth = 1.5f * T3Ui.UiScaleFactor;
@@ -126,6 +134,29 @@ internal static class CanvasPointHandle
     // Only one handle drags at a time, so a single shared grab offset is sufficient.
     /// <summary>Held Shift slows a handle drag to this fraction of the mouse's motion.</summary>
     public const float PrecisionDragFactor = 0.1f;
+
+    /// <summary>
+
+    /// Tells the handle being dragged where its point ended up after the caller's snapping, so its next draw
+
+    /// sits on that point. Call right after <see cref="Draw"/> returned <see cref="DragPhases.Dragging"/>.
+
+    /// </summary>
+
+    public static void ReportSnappedPosition(ICanvasProjection projection, Vector2 posInCanvas)
+
+    {
+
+        _snapScreen = projection.CanvasToScreen(posInCanvas);
+
+        _snapReported = true;
+
+    }
+
+
+    private static Vector2 _snapScreen;
+
+    private static bool _snapReported;
 
     private static Vector2 _dragScreen;
 }

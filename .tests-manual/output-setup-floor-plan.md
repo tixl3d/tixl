@@ -154,7 +154,8 @@ right and release.
 **Action:**
 1. On a closed rectangular plan with walls on every edge, drag the small dot in the middle of the
    top edge upward by about 2 m and release.
-2. Double-click the dot in the middle of the right edge.
+2. Right-click the dot in the middle of the right edge and choose **Split Edge**. Then click the dot
+   of the new second half once, and once more.
 3. Right-click the new corner and choose **Remove Corner**.
 4. Right-click any corner of a plan with only three corners.
 
@@ -162,7 +163,8 @@ right and release.
 - After 1: the top edge moves up, staying parallel; the left and right walls grow by 2 m and their
   labels say so; the top wall keeps its width. Ctrl+Z puts it back in one step.
 - After 2: a corner appears in the middle of the right edge and a new wall stands on the second half,
-  so the room stays closed.
+  so the room stays closed. The first click takes that wall down (the dot turns hollow), the second
+  raises it again.
 - After 3: the corner is gone, the right edge is one segment again with one wall; the other wall's
   surface is gone too if it had no content, or stays in SURFACES if it had.
 - After 4: **Remove Corner** is disabled.

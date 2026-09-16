@@ -203,27 +203,25 @@ internal sealed partial class SetupOutputView
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.Output, output.Id, min, max,
                           output.Name, BoardMeta(output.Id), srv, true);
 
-            // Patches are cuts of the canvas: their 0..1 quads mapped into the card (Y runs down from the top).
-            foreach (var patch in output.Patches)
+            // The pixel map over the card's composite, as on the output canvas, so patches are placed against it here too.
+            var pixelMap = setup.FindReferenceImage(output.ReferenceImageId);
+            if (pixelMap != null && output.ReferenceOpacity > 0f && TryGetReferenceSrv(pixelMap) is { IsDisposed: false } mapSrv)
             {
-                // The implicit full-canvas patch is the whole card; its outline would just double the card's.
-                if (patch.Quad.Length < 4 || SetupRelations.IsImplicitPatch(output, patch))
-                    continue;
-
-                var cardSize = max - min;
-                for (var c = 0; c < 4; c++)
-                    _boardQuad[c] = _boardProjection.CanvasToScreen(new Vector2(min.X + patch.Quad[c].X * cardSize.X,
-                                                                               max.Y - patch.Quad[c].Y * cardSize.Y));
-
-                var isSelected = selection?.IsSelected(SetupEntityKinds.Patch, patch.Id) ?? false;
-                var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(patch.Id);
-                var patchHue = SetupColors.ForKind(SetupEntityKinds.Patch);
-                var color = (isSelected ? patchHue : PulseColor(patchHue.Fade(0.6f), pulse)).Fade(_boardLayerFade);
-                dl.AddQuad(_boardQuad[0], _boardQuad[1], _boardQuad[2], _boardQuad[3], color, (isSelected ? 2f : 1f) * scale);
-                DrawEntityLabel(dl, SetupEntityKinds.Patch, _boardQuad, patch.Id, CachedPatchLabel(output, patch), isSelected, 0.9f * _boardLayerFade, pulse);
-                if (patch.QuarterTurns != 0)
-                    DrawPictureTopMarker(dl, _boardQuad, patch.QuarterTurns, color);
+                dl.AddImage(mapSrv.NativePointer, _boardProjection.CanvasToScreen(new Vector2(min.X, max.Y)), _boardProjection.CanvasToScreen(new Vector2(max.X, min.Y)),
+                            Vector2.Zero, Vector2.One, UiColors.ForegroundFull.Fade(output.ReferenceOpacity * _boardLayerFade));
             }
+
+            // Patches are cuts of the canvas, edited on the card the way they are on the output canvas: the card
+            // borrows the space projection at the canvas' pixel scale, and the same corner and edge handles apply.
+            var canvasSize = output.CanvasSize;
+            _projection.Origin = new Vector2(min.X, max.Y);
+            _projection.PixelsPerMeter = canvasSize.X / MathF.Max(max.X - min.X, 0.0001f);
+            DrawPatches(setup, output, selection, dl, Homography.Identity, Homography.Identity, Vector2.Zero, canvasSize,
+                        editable: onBoard && !IsDrawingPlan, fade: _boardLayerFade, hasContent: srv != null);
+
+            // A patch gesture is the patch's, not the card's — the card must not come along.
+            if (_gesture.Kind is GestureKinds.PatchQuad or GestureKinds.PatchMove)
+                _pressHandoff.Cancel();
         }
 
         foreach (var plan in setup.FloorPlans)
@@ -857,6 +855,7 @@ internal sealed partial class SetupOutputView
                         SnapPlanVertex(plan, i, ref local);
 
                     plan.Vertices[i] = local;
+                    CanvasPointHandle.ReportSnappedPosition(_boardProjection, origin + local);
                     FloorPlanSync.Apply(setup, plan, i);
                     break;
                 }
@@ -949,6 +948,7 @@ internal sealed partial class SetupOutputView
                             _planEdgeMoved = true;
 
                         _planEdgeMidNow = _planEdgeStartMid + offset;
+                        CanvasPointHandle.ReportSnappedPosition(_boardProjection, origin + _planEdgeMidNow);
                         FloorPlanSync.MoveSegment(setup, plan, segment, _planEdgeStartVertices, offset);
                     }
 
@@ -984,7 +984,11 @@ internal sealed partial class SetupOutputView
             var menuSegment = _planMenuSegment;
             if (menuSegment >= 0 && menuSegment < plan.SegmentCount)
             {
-                var menuHasWall = setup.FindSurface(plan.WallOf(menuSegment)) != null;
+                var menuWall = setup.FindSurface(plan.WallOf(menuSegment));
+                var menuHasWall = menuWall != null;
+                if (menuHasWall && selection != null && CustomComponents.DrawMenuItem(3, "Rename Wall"))
+                    OutlinerItem.BeginRename(selection, SetupEntityKinds.Surface, menuWall!.Id, menuWall.Name);
+
                 if (CustomComponents.DrawMenuItem(1, menuHasWall ? "Take Down Wall" : "Raise Wall"))
                     SetupUndo.RunUndoable(menuHasWall ? "Take down wall" : "Raise wall", setup, () => FloorPlanSync.SetWall(setup, plan, menuSegment, !menuHasWall));
 
@@ -1067,6 +1071,41 @@ internal sealed partial class SetupOutputView
             if (selection != null && !selection.IsSelected(grabKind, grabId))
                 selection.Select(grabKind, grabId);
 
+            // Alt: the drag moves copies, the originals stay. Copied inside the gesture's snapshot, so copy and
+            // move undo as one step; each copy starts where its original is, under the cursor.
+            var duplicating = ImGui.GetIO().KeyAlt && selection != null;
+            if (duplicating)
+            {
+                BeginGesture(setup, GestureKinds.BoardCard, selection!.Count > 1 ? "Duplicate cards" : "Duplicate card", grabId);
+                _boardDupOriginals.Clear();
+                for (var i = 0; i < selection.Targets.Count; i++)
+                    _boardDupOriginals.Add(selection.Targets[i]);
+
+                _boardDupCopies.Clear();
+                var grabCopyId = Guid.Empty;
+                foreach (var original in _boardDupOriginals)
+                {
+                    if (!SetupActions.CanDuplicate(original.Kind) || !TryGetBoardPosition(setup, original.Kind, original.EntityId, out var originalPosition))
+                        continue;
+
+                    SetupActions.DuplicateEntityInternal(selection, setup, original.Kind, original.EntityId);
+                    if (!selection.TryResolve(setup, out var copyKind, out var copyId) || copyId == original.EntityId)
+                        continue;
+
+                    SetBoardPosition(setup, copyKind, copyId, originalPosition);
+                    _boardDupCopies.Add(new SelectionTarget(copyKind, copyId));
+                    if (original.EntityId == grabId)
+                        grabCopyId = copyId;
+                }
+
+                selection.Clear();
+                foreach (var copy in _boardDupCopies)
+                    selection.Add(copy.Kind, copy.EntityId);
+
+                if (grabCopyId != Guid.Empty)
+                    grabId = grabCopyId;
+            }
+
             _boardDragItems.Clear();
             if (selection != null)
             {
@@ -1083,12 +1122,20 @@ internal sealed partial class SetupOutputView
             }
 
             if (_boardDragItems.Count == 0)
+            {
+                if (duplicating)
+                    EndGesture(setup);
+
                 return;
+            }
 
             _boardDragKind = grabKind;
             _boardDragId = grabId;
             _boardDragGrabOnBoard = _boardProjection.ScreenToCanvas(ImGui.GetMousePos());
-            BeginGesture(setup, GestureKinds.BoardCard, _boardDragItems.Count > 1 ? "Move cards" : "Move card", _boardDragId);
+            if (!duplicating)
+                BeginGesture(setup, GestureKinds.BoardCard, _boardDragItems.Count > 1 ? "Move cards" : "Move card", _boardDragId);
+            else
+                _gesture.HotId = _boardDragId;
         }
 
         if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
@@ -1969,6 +2016,9 @@ internal sealed partial class SetupOutputView
     /// canvases) would stop a metre-sized board at a thumbnail; this one spans a whole room down to a centimetre.</summary>
     private sealed class BoardCanvas : ScalableCanvas
     {
+        /** Alt + drag copies cards here. */
+        internal protected override bool PansWithAltDrag => false;
+
         internal protected override Vector2 ClampScaleToValidRange(Vector2 scale)
         {
             return new Vector2(Math.Clamp(scale.X, MinPixelsPerMeter, MaxPixelsPerMeter),
@@ -2008,6 +2058,8 @@ internal sealed partial class SetupOutputView
     private Guid _boardDragId;
     private Vector2 _boardDragGrabOnBoard;
     private readonly List<(SetupEntityKinds Kind, Guid Id, Vector2 Start)> _boardDragItems = [];
+    private readonly List<SelectionTarget> _boardDupOriginals = [];
+    private readonly List<SelectionTarget> _boardDupCopies = [];
     private Vector2[] _boardPlanPoints = new Vector2[8]; // a plan's corners on screen, grown to the largest plan
 
     // A plan edge being slid: which segment, its middle at the press and now, and every corner at the press.

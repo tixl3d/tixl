@@ -28,8 +28,10 @@ internal sealed partial class SetupOutputView
     /// styles by selection/hover so the same label reads the same in the tree and on the canvas.
     /// </summary>
     /// <param name="pickable">False where the frame itself is the pick target and the chip only names it and shows its state.</param>
+    /// <param name="frameColor">The colour of the frame the label sits in; a selected label takes it, so label
+    /// and frame read as one. The kind's hue when not given.</param>
     private void DrawEntityLabel(ImDrawListPtr dl, SetupEntityKinds kind, ReadOnlySpan<Vector2> screenQuad, Guid id, string name, bool isSelected,
-                                 float emphasis, float pulse = 0f, bool pickable = true)
+                                 float emphasis, float pulse = 0f, bool pickable = true, T3.Core.DataTypes.Vector.Color? frameColor = null)
     {
         if (string.IsNullOrEmpty(name) || emphasis <= 0.01f)
             return;
@@ -39,8 +41,9 @@ internal sealed partial class SetupOutputView
             _picker.AddTarget(kind, id, rect.Min, rect.Max);
 
         var alpha = (_picker.IsPicked(id) ? 1f : 0.9f) * emphasis;
-        var text = (isSelected ? SetupColors.ForKind(kind) : SetupColors.LabelFor(kind)).Fade(alpha);
-        var background = UiColors.BackgroundFull.Fade(0.3f * alpha);
+        var selectedColor = frameColor ?? SetupColors.ForKind(kind);
+        var text = (isSelected ? selectedColor : SetupColors.LabelFor(kind)).Fade(alpha);
+        var background = UiColors.BackgroundFull.Fade(0.6f * alpha);
 
         // Pulls the chip toward the selected look while pulsing, so the label answers the hover like the outline.
         text = PulseColor(text, pulse);
@@ -197,6 +200,23 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>A patch's label; an unnamed one's ordinal label is formatted once per structure change, not per frame.</summary>
+    /// <summary>
+    /// The patch's label with its pixel size on a second line — rebuilt only when the size changes, so a
+    /// drag that resizes it updates the label without a string per frame the rest of the time.
+    /// </summary>
+    private string CachedPatchLabelWithSize(OutputDefinition output, OutputDefinition.Patch patch, Vector2 canvasSize)
+    {
+        CanvasDraw.Bounds(patch.Quad, out var min, out var max);
+        var size = new T3.Core.DataTypes.Vector.Int2((int)MathF.Round((max.X - min.X) * canvasSize.X), (int)MathF.Round((max.Y - min.Y) * canvasSize.Y));
+        var name = CachedPatchLabel(output, patch);
+        if (_patchSizeLabels.TryGetValue(patch.Id, out var cached) && cached.Size == size && ReferenceEquals(cached.Name, name))
+            return cached.Label;
+
+        var label = $"{name}\n{size.Width}×{size.Height}";
+        _patchSizeLabels[patch.Id] = (size, name, label);
+        return label;
+    }
+
     private string CachedPatchLabel(OutputDefinition output, OutputDefinition.Patch patch)
     {
         if (!string.IsNullOrEmpty(patch.Name))
@@ -257,6 +277,7 @@ internal sealed partial class SetupOutputView
 
     // Label caches: unnamed slices' and patches' ordinal labels by id, and "P{n}" by ordinal.
     private readonly Dictionary<Guid, string> _ordinalLabels = [];
+    private readonly Dictionary<Guid, (T3.Core.DataTypes.Vector.Int2 Size, string Name, string Label)> _patchSizeLabels = [];
     private int _ordinalLabelsVersion = -1;
     private static readonly List<string> _pointOrdinalLabels = [];
 }

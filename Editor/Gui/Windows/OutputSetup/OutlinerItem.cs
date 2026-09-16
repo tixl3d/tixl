@@ -232,6 +232,7 @@ internal sealed class OutlinerItem
             ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
             if (_renameFocusPending)
             {
+                ImGui.SetScrollHereY();
                 ImGui.SetKeyboardFocusHere();
                 _renameFocusPending = false;
             }
@@ -291,6 +292,10 @@ internal sealed class OutlinerItem
         _renameBuffer = name ?? string.Empty;
         _renameFocusPending = true;
     }
+
+    /// <summary>The item a rename was just requested for and whose row must be brought into view — a collapsed
+    /// parent expands, the strip scrolls to it. Cleared once the row has drawn its field.</summary>
+    public static Guid RevealPendingId => _renameFocusPending ? _renamingId : Guid.Empty;
 
     private static void HandleDragDrop(Setup setup, SetupEntityKindInfo kindInfo, Guid id)
     {

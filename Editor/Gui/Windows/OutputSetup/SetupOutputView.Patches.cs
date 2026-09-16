@@ -67,12 +67,13 @@ internal sealed partial class SetupOutputView
 
             // No label while it is still the output itself: it would sit over the whole canvas and read as a
             // second name for it. The label (and the whole-tile move it carries) appears with the promotion.
-            var label = isImplicit ? string.Empty : CachedPatchLabel(output, patch);
+            var label = isImplicit ? string.Empty : CachedPatchLabelWithSize(output, patch, canvasSize);
             var isFocused = patch.Id == focusedPatchId;
             var isSelected = isFocused || (selection?.IsSelected(SetupEntityKinds.Patch, patch.Id) ?? false);
             var pulse = isSelected ? 0f : FrameStats.CrossHighlightAmount(patch.Id);
 
-            var style = CornerPinHandles.Style.ForSurface(null, editable, isSelected, fade, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
+            // A patch is a cut of the canvas, not a surface: it wears the neutral patch hue, never the surface green.
+            var style = CornerPinHandles.Style.ForSurface(null, editable, isSelected, fade, hue: SetupColors.ForKind(SetupEntityKinds.Patch));
             style.ShowsChecker = !hasContent;
             style.EdgeColor = PulseColor(style.EdgeColor, pulse);
 
@@ -90,29 +91,48 @@ internal sealed partial class SetupOutputView
 
                 if (phase == CanvasPointHandle.DragPhases.Dragging && draggedCorner >= 0 && !ImGui.GetIO().KeyShift)
                 {
-                    CollectPatchSnapCandidates(output, patch.Id, canvasSize);
                     var threshold = PatchSnapThreshold();
                     ref var corner = ref _patchPx[draggedCorner];
-                    Span<float> x = [corner.X];
-                    if (_snapping.TrySnap(RectSnapping.Axes.X, x, threshold, out _, out var targetX))
-                        corner.X = targetX;
 
-                    Span<float> y = [corner.Y];
-                    if (_snapping.TrySnap(RectSnapping.Axes.Y, y, threshold, out _, out var targetY))
-                        corner.Y = targetY;
+                    // Onto another patch's corner when close, else onto 45° steps from the two neighbouring corners so
+                    // edges stay straight, else onto the other patches' edges and the canvas.
+                    if (!TrySnapToPatchCorners(output, patch.Id, canvasSize, threshold, ref corner)
+                        && !TrySnapCornerAngles(_patchPx, draggedCorner, threshold, ref corner))
+                    {
+                        CollectPatchSnapCandidates(output, patch.Id, canvasSize);
+                        Span<float> x = [corner.X];
+                        if (_snapping.TrySnap(RectSnapping.Axes.X, x, threshold, out _, out var targetX))
+                            corner.X = targetX;
+
+                        Span<float> y = [corner.Y];
+                        if (_snapping.TrySnap(RectSnapping.Axes.Y, y, threshold, out _, out var targetY))
+                            corner.Y = targetY;
+                    }
                 }
 
                 StorePatchPixels(patch, canvasSize);
+                if (phase == CanvasPointHandle.DragPhases.Dragging && draggedCorner >= 0)
+                {
+                    _patchViewQuad[draggedCorner] = rectifiedToView.TransformPoint(_patchPx[draggedCorner]) - viewMin;
+                    CanvasPointHandle.ReportSnappedPosition(_projection, _patchViewQuad[draggedCorner]);
+                }
             }
 
             RunPatchQuadDrag(phase, setup, patch, canvasSize);
 
             // The label doubles as the move handle — the press selects (through the picker), holding on moves.
             if (phase == CanvasPointHandle.DragPhases.None && !isImplicit)
-                HandlePatchMove(setup, output, patch, isFocused, editable && !patch.IsFitted && !_isolatesFocusedSurface, label, screen, rectifiedToView, rectifiedToOutput, viewMin, canvasSize);
+                HandlePatchMove(setup, output, patch, selection, isFocused, editable && !patch.IsFitted && !_isolatesFocusedSurface, label, screen, rectifiedToView, rectifiedToOutput, viewMin, canvasSize);
 
             if (cornerHovered || phase != CanvasPointHandle.DragPhases.None)
                 FrameStats.RequestCrossHighlight(patch.Id);
+
+            // A double-click on the label renames the patch where names are edited: its row in the Flow Outliner.
+            if (!isImplicit && pointerOverLabel && selection != null && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+                CancelGesture();
+                OutlinerItem.BeginRename(selection, SetupEntityKinds.Patch, patch.Id, patch.Name);
+            }
 
             if (phase == CanvasPointHandle.DragPhases.Started && !_isolatesFocusedSurface)
                 selection?.Select(SetupEntityKinds.Patch, patch.Id);
@@ -127,7 +147,7 @@ internal sealed partial class SetupOutputView
 
             ImGui.PopID();
             if (!isImplicit)
-                DrawEntityLabel(dl, SetupEntityKinds.Patch, screen, patch.Id, label, isSelected, fade, pulse);
+                DrawEntityLabel(dl, SetupEntityKinds.Patch, screen, patch.Id, label, isSelected, fade, pulse, frameColor: style.EdgeColor);
 
             if (patch.QuarterTurns != 0)
                 DrawPictureTopMarker(dl, screen, patch.QuarterTurns, style.EdgeColor.Fade(fade));
@@ -156,8 +176,8 @@ internal sealed partial class SetupOutputView
         }
     }
 
-    private void HandlePatchMove(Setup setup, OutputDefinition output, OutputDefinition.Patch patch, bool isFocused, bool editable, string label,
-                                 ReadOnlySpan<Vector2> screen, Homography rectifiedToView, Homography rectifiedToOutput, Vector2 viewMin, Vector2 canvasSize)
+    private void HandlePatchMove(Setup setup, OutputDefinition output, OutputDefinition.Patch patch, SetupEntitySelection? selection, bool isFocused, bool editable,
+                                 string label, ReadOnlySpan<Vector2> screen, Homography rectifiedToView, Homography rectifiedToOutput, Vector2 viewMin, Vector2 canvasSize)
     {
         var movePhase = CanvasPointHandle.DragPhases.None;
         if (_gesture.Is(GestureKinds.PatchMove, patch.Id))
@@ -175,6 +195,18 @@ internal sealed partial class SetupOutputView
         {
             case CanvasPointHandle.DragPhases.Started:
                 RunPatchQuadDrag(movePhase, setup, patch, canvasSize, move: true);
+
+                // Alt: a copy takes the drag, the original stays; copied inside the snapshot, so it undoes as one.
+                if (ImGui.GetIO().KeyAlt && selection != null)
+                {
+                    SetupActions.DuplicateEntityInternal(selection, setup, SetupEntityKinds.Patch, patch.Id);
+                    if (selection.TryResolve(setup, out var copyKind, out var copyId) && copyKind == SetupEntityKinds.Patch && copyId != patch.Id)
+                    {
+                        _gesture.HotId = copyId;
+                        _gesture.Name = "Duplicate patch";
+                    }
+                }
+
                 break;
 
             case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.PatchMove, patch.Id):
@@ -305,6 +337,91 @@ internal sealed partial class SetupOutputView
         }
     }
 
+    /// <summary>A corner near another patch's corner (or the canvas') lands exactly on it.</summary>
+    private static bool TrySnapToPatchCorners(OutputDefinition output, Guid excludeId, Vector2 canvasSize, float threshold, ref Vector2 corner)
+    {
+        var best = threshold;
+        var found = false;
+        var snapped = corner;
+        Span<Vector2> canvasCorners = [Vector2.Zero, new Vector2(canvasSize.X, 0), canvasSize, new Vector2(0, canvasSize.Y)];
+        for (var c = 0; c < 4; c++)
+            Consider(canvasCorners[c], ref best, ref snapped, ref found, corner);
+
+        foreach (var other in output.Patches)
+        {
+            if (other.Id == excludeId || other.Quad.Length < 4)
+                continue;
+
+            for (var c = 0; c < 4; c++)
+                Consider(other.Quad[c] * canvasSize, ref best, ref snapped, ref found, corner);
+        }
+
+        corner = snapped;
+        return found;
+
+        static void Consider(Vector2 candidate, ref float best, ref Vector2 snapped, ref bool found, Vector2 corner)
+        {
+            var distance = (candidate - corner).Length();
+            if (distance >= best)
+                return;
+
+            best = distance;
+            snapped = candidate;
+            found = true;
+        }
+    }
+
+    /// <summary>
+    /// Keeps the edges meeting at a dragged corner on 45° steps: each neighbouring corner whose 45° ray passes
+    /// within <paramref name="threshold"/> of the corner (a fixed screen distance, whatever the edge's length or
+    /// the zoom) pulls the corner onto that ray; with both pulling, the corner goes where the two rays cross.
+    /// False when neither ray is near.
+    /// </summary>
+    private static bool TrySnapCornerAngles(Vector2[] quad, int draggedCorner, float threshold, ref Vector2 corner)
+    {
+        const float step = MathF.PI / 4;
+        var previous = quad[(draggedCorner + 3) % 4];
+        var next = quad[(draggedCorner + 1) % 4];
+        var hasPrevious = TrySnappedRay(previous, corner, threshold, out var rayPrevious);
+        var hasNext = TrySnappedRay(next, corner, threshold, out var rayNext);
+        if (!hasPrevious && !hasNext)
+            return false;
+
+        if (hasPrevious && hasNext)
+        {
+            var cross = rayPrevious.X * rayNext.Y - rayPrevious.Y * rayNext.X;
+            if (MathF.Abs(cross) > 0.01f)
+            {
+                // previous + t·rayPrevious = next + u·rayNext, solved for t.
+                var between = next - previous;
+                var t = (between.X * rayNext.Y - between.Y * rayNext.X) / cross;
+                corner = previous + rayPrevious * t;
+                return true;
+            }
+        }
+
+        var from = hasPrevious ? previous : next;
+        var ray = hasPrevious ? rayPrevious : rayNext;
+        corner = from + ray * Vector2.Dot(corner - from, ray);
+        return true;
+
+        static bool TrySnappedRay(Vector2 from, Vector2 to, float threshold, out Vector2 ray)
+        {
+            ray = Vector2.Zero;
+            var edge = to - from;
+            if (edge.LengthSquared() < 0.0001f)
+                return false;
+
+            var angle = MathF.Atan2(edge.Y, edge.X);
+            var snapped = MathF.Round(angle / step) * step;
+            ray = new Vector2(MathF.Cos(snapped), MathF.Sin(snapped));
+
+            // The corner's distance from the ray, not the angle: the same few pixels for a short and a long edge.
+            var offRay = MathF.Abs(edge.X * ray.Y - edge.Y * ray.X);
+            return offRay <= threshold;
+        }
+    }
+
     /// <summary>A constant screen distance expressed in output pixels at the current zoom.</summary>
     private float PatchSnapThreshold()
     {
@@ -318,7 +435,13 @@ internal sealed partial class SetupOutputView
     /// </summary>
     private static void PinAxisToTarget(Vector2[] quad, float movedMin, float movedMax, float target, bool horizontal)
     {
-        var onMin = MathF.Abs(movedMin - target) <= MathF.Abs(movedMax - target);
+        // Only an edge that actually landed on the target is pinned. When the tile's centre was what caught the
+        // line, neither edge is there, and pulling one onto it would resize the tile instead of placing it.
+        var onMin = MathF.Abs(movedMin - target) <= AlignedEpsilon * 100;
+        var onMax = MathF.Abs(movedMax - target) <= AlignedEpsilon * 100;
+        if (!onMin && !onMax)
+            return;
+
         var edgeValue = onMin ? movedMin : movedMax;
         for (var i = 0; i < 4; i++)
         {
@@ -373,11 +496,18 @@ internal sealed partial class SetupOutputView
         if (length < 1f)
             return;
 
+        // An arrow just inside the quad pointing at that edge — clear of the edge handle sitting on the midpoint,
+        // and big enough to read at a glance which way the picture stands.
         outward /= length;
         var along = Vector2.Normalize(b - a);
-        var size = 6f * T3Ui.UiScaleFactor;
-        var tip = midpoint + outward * size;
-        dl.AddTriangleFilled(tip, midpoint + along * size * 0.8f, midpoint - along * size * 0.8f, color);
+        var scale = T3Ui.UiScaleFactor;
+        var size = 14f * scale;
+        var tip = midpoint - outward * 8f * scale;
+        var baseCentre = tip - outward * size;
+        var left = baseCentre + along * size * 0.6f;
+        var right = baseCentre - along * size * 0.6f;
+        dl.AddTriangleFilled(tip, left, right, color);
+        dl.AddTriangle(tip, left, right, UiColors.BackgroundFull.Fade(0.6f), 1f * scale);
     }
 
     /// <summary>How close two corners' coordinates must be to count as one axis-aligned edge, as a fraction of

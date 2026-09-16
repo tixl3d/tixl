@@ -176,20 +176,34 @@ internal static class SetupParameterView
         var currentName = SetupLabels.NameForEntity(kind, id);
         if (_renameTargetId != id)
         {
+            // The card moved on while a name was being typed: that name belongs to the entity it was typed for.
+            if (_renameFieldActive && _renameTargetId != Guid.Empty && SetupEntities.Exists(setup, _renameTargetKind, _renameTargetId))
+            {
+                var typed = _renameBuffer.Trim();
+                if (!string.IsNullOrWhiteSpace(typed) && typed != SetupLabels.NameForEntity(_renameTargetKind, _renameTargetId))
+                    SetupActions.RenameEntity(setup, _renameTargetKind, _renameTargetId, typed);
+            }
+
             _renameTargetId = id;
+            _renameTargetKind = kind;
             _renameBuffer = currentName;
+            _renameFieldActive = false;
         }
         else if (!_renameFieldActive)
         {
             _renameBuffer = currentName; // follow external renames while not editing
         }
 
+        // The field is the entity's own item, so switching entities can never hand one's text to another.
         FormInputs.DrawInputLabel("Name");
+        ImGui.PushID(id.GetHashCode());
         ImGui.SetNextItemWidth(FormInputs.GetAvailableInputSize(null, false, fillWidth: true, maxWidth: FormInputs.MaxNumberInputWidth).X);
         ImGui.InputText("##entityName", ref _renameBuffer, 256);
         _renameFieldActive = ImGui.IsItemActive();
         if (ImGui.IsItemDeactivatedAfterEdit() && !string.IsNullOrWhiteSpace(_renameBuffer) && _renameBuffer.Trim() != currentName)
             SetupActions.RenameEntity(setup, kind, id, _renameBuffer.Trim());
+
+        ImGui.PopID();
     }
 
     private static void DrawSurfaceCard(Setup setup, Guid id)
@@ -448,10 +462,11 @@ internal static class SetupParameterView
         FormInputs.AddSectionSubHeader("Pixel Map");
         var image = setup.FindReferenceImage(output.ReferenceImageId);
 
+        // An empty string, not null: the picker only draws its search field for a string it can edit.
         FormInputs.DrawInputLabel("Image");
-        string? path = image?.FilePath;
+        string? path = image?.FilePath ?? string.Empty;
         var pathState = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, SetupActions.ImageFileFilter, ref path);
-        if ((pathState & InputEditStateFlags.Modified) != 0 && path != null && path != image?.FilePath)
+        if ((pathState & InputEditStateFlags.Modified) != 0 && !string.IsNullOrEmpty(path) && path != image?.FilePath)
         {
             SetupUndo.RunUndoable("Pick pixel map", setup, () =>
                                                            {
@@ -534,9 +549,12 @@ internal static class SetupParameterView
         if (output.Patches.Count > 0)
             DrawUnitSwitch();
 
+        // Flush with the window's left edge: the table is its own block, not a value in the parameter column.
         var scale = T3Ui.UiScaleFactor;
-        FormInputs.ApplyIndent();
         var tableWidth = ImGui.GetContentRegionAvail().X - InputArea.ValueEditRightMargin;
+        var tableScreenX = ImGui.GetCursorScreenPos().X;
+        var highlightMin = Vector2.Zero;
+        var highlightMax = Vector2.Zero;
         if (output.Patches.Count > 0
             && ImGui.BeginTable("patches", 6, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.PadOuterX,
                                 new Vector2(tableWidth, 0)))
@@ -562,19 +580,63 @@ internal static class SetupParameterView
                 var patch = output.Patches[index];
                 ImGui.PushID(index);
                 ImGui.TableNextRow();
-                if (patch.Id == highlightedPatchId)
-                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, UiColors.BackgroundButton);
+                var isCurrent = patch.Id == highlightedPatchId || selection.IsSelected(SetupEntityKinds.Patch, patch.Id);
+                if (isCurrent)
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, UiColors.BackgroundActive.Fade(0.12f));
 
+                // The name cell is a plain click target; the row's selection shows as an outline around the whole
+                // row, drawn after the table so no cell paints over it.
                 ImGui.TableSetColumnIndex(0);
-                if (ImGui.Selectable(SetupLabels.PatchLabel(output, patch), selection.IsSelected(SetupEntityKinds.Patch, patch.Id)))
+                var rowTop = ImGui.GetCursorScreenPos().Y;
+
+                // The whole name cell is the click and drag area, not just the letters of the name.
+                var cellPos = ImGui.GetCursorScreenPos();
+                ImGui.InvisibleButton("##row", new Vector2(MathF.Max(ImGui.GetContentRegionAvail().X, 1), ImGui.GetFrameHeight()));
+                if (ImGui.IsItemClicked())
                     selection.Select(SetupEntityKinds.Patch, patch.Id);
 
+                // A double-click renames, in the Flow Outliner's row, where names are edited.
+                if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                    OutlinerItem.BeginRename(selection, SetupEntityKinds.Patch, patch.Id, patch.Name);
+
+                var nameFont = isCurrent ? Fonts.FontBold : Fonts.FontNormal;
+                ImGui.GetWindowDrawList().AddText(nameFont, nameFont.FontSize, cellPos + new Vector2(0, (ImGui.GetFrameHeight() - nameFont.FontSize) * 0.5f),
+                                                  isCurrent ? UiColors.Text : UiColors.TextMuted, SetupLabels.PatchLabel(output, patch));
+
+                // Dragging the name past a neighbour swaps the two: the list is the composite order (later patches
+                // draw over earlier ones), and the ordinal names follow it. One undo step for the whole drag.
+                if (ImGui.IsItemActive() && !ImGui.IsItemHovered())
+                {
+                    var towards = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Y < 0 ? -1 : 1;
+                    var swapWith = index + towards;
+                    if (swapWith >= 0 && swapWith < output.Patches.Count)
+                    {
+                        _patchReorderOldJson ??= setup.ToJsonString();
+                        (output.Patches[index], output.Patches[swapWith]) = (output.Patches[swapWith], output.Patches[index]);
+                        ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
+                    }
+                }
+
                 DrawPatchRectCells(setup, output, patch, canvas);
+                if (isCurrent)
+                {
+                    highlightMin = new Vector2(tableScreenX, rowTop - 2 * scale);
+                    highlightMax = new Vector2(tableScreenX + tableWidth, rowTop + ImGui.GetFrameHeight() + 2 * scale);
+                }
+
                 ImGui.PopID();
             }
 
             ImGui.PopStyleVar();
             ImGui.EndTable();
+            if (_patchReorderOldJson != null && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            {
+                SetupUndo.CommitGesture(setup, "Reorder patches", _patchReorderOldJson);
+                _patchReorderOldJson = null;
+            }
+
+            if (highlightMax.X > highlightMin.X)
+                ImGui.GetWindowDrawList().AddRect(highlightMin, highlightMax, UiColors.Selection.Fade(0.6f), 3 * scale, ImDrawFlags.None, 1 * scale);
         }
 
         if (ImGui.Button("Add Patch"))
@@ -601,7 +663,7 @@ internal static class SetupParameterView
         const float aligned = 0.0001f; // of the canvas
         var isAxisAligned = MathF.Abs(quad[0].Y - quad[1].Y) < aligned && MathF.Abs(quad[2].Y - quad[3].Y) < aligned
                             && MathF.Abs(quad[0].X - quad[3].X) < aligned && MathF.Abs(quad[1].X - quad[2].X) < aligned;
-        var editable = isAxisAligned && !patch.IsFitted;
+        var editable = !patch.IsFitted;
         var format = EditsInPixels ? "{0:0}" : "{0:0.000}";
 
         var state = InputEditStateFlags.Nothing;
@@ -630,23 +692,14 @@ internal static class SetupParameterView
             if ((state & InputEditStateFlags.Modified) != 0)
             {
                 var topLeft = new Vector2(FromUnit(cells[0], canvas.X), FromUnit(cells[1], canvas.Y));
-                var w = MathF.Max(FromUnit(cells[2], canvas.X), 0.0001f);
-                var h = MathF.Max(FromUnit(cells[3], canvas.Y), 0.0001f);
-                quad[0] = topLeft;
-                quad[1] = new Vector2(topLeft.X + w, topLeft.Y);
-                quad[2] = new Vector2(topLeft.X + w, topLeft.Y + h);
-                quad[3] = new Vector2(topLeft.X, topLeft.Y + h);
+                var size = new Vector2(MathF.Max(FromUnit(cells[2], canvas.X), 0.0001f), MathF.Max(FromUnit(cells[3], canvas.Y), 0.0001f));
+                ApplyBoundsToQuad(quad, isAxisAligned, min, max, topLeft, size);
             }
 
             CommitFieldUndo(setup, "Edit patch rect", state);
         }
 
         ImGui.TableSetColumnIndex(5);
-        if (!isAxisAligned)
-        {
-            CustomComponents.StylizedText("warped", Fonts.FontSmall, UiColors.TextMuted);
-            return;
-        }
 
         var degrees = DegreesOfTurns(patch.QuarterTurns);
         var turnState = SingleValueEdit.Draw(ref degrees, new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()),
@@ -658,7 +711,29 @@ internal static class SetupParameterView
         CommitFieldUndo(setup, "Rotate patch", turnState);
     }
 
+    /// <summary>
+    /// Gives a quad new bounds: an axis-aligned one is rewritten as that exact rectangle (which also squares a
+    /// sub-pixel skew), a warped one is moved and scaled about its old top-left, so its shape rides along.
+    /// </summary>
+    private static void ApplyBoundsToQuad(Vector2[] quad, bool isAxisAligned, Vector2 oldMin, Vector2 oldMax, Vector2 newMin, Vector2 newSize)
+    {
+        if (isAxisAligned)
+        {
+            quad[0] = newMin;
+            quad[1] = new Vector2(newMin.X + newSize.X, newMin.Y);
+            quad[2] = newMin + newSize;
+            quad[3] = new Vector2(newMin.X, newMin.Y + newSize.Y);
+            return;
+        }
+
+        var oldSize = Vector2.Max(oldMax - oldMin, new Vector2(0.0001f));
+        var factor = newSize / oldSize;
+        for (var c = 0; c < 4; c++)
+            quad[c] = newMin + (quad[c] - oldMin) * factor;
+    }
+
     private static readonly string[] _patchColumnLabels = ["Patch", "X", "Y", "W", "H", "Turn"];
+    private static string? _patchReorderOldJson; // the setup before a row drag started reordering, until the button is released
     private static readonly float[] _patchCellScratch = new float[4];
 
     /// <summary>
@@ -891,8 +966,7 @@ internal static class SetupParameterView
         if (!isAxisAligned)
         {
             FormInputs.ApplyIndent();
-            CustomComponents.StylizedText("Warped quad — edit its corners on the output canvas.", Fonts.FontSmall, UiColors.TextMuted);
-            return;
+            CustomComponents.StylizedText("Warped quad — its corners are on the output canvas; these rows move and scale its bounds.", Fonts.FontSmall, UiColors.TextMuted);
         }
 
         // Stored as ratios of the canvas; shown in whichever unit is selected. The round trip only touches what
@@ -900,29 +974,29 @@ internal static class SetupParameterView
         DrawUnitSwitch();
         var canvas = output.CanvasSize;
 
-        Span<float> position = [ToUnit(quad[0].X, canvas.X), ToUnit(quad[0].Y, canvas.Y)];
+        // Measured as the bounding box, like the table and the label: a corner drag may leave the quad skewed by a
+        // fraction of a pixel, and the three readouts must still agree. Typing here squares it again.
+        CanvasDraw.Bounds(quad, out var quadMin, out var quadMax);
+        Span<float> position = [ToUnit(quadMin.X, canvas.X), ToUnit(quadMin.Y, canvas.Y)];
         var positionState = DrawRectRow("Position", position, "Top-left corner on the output canvas.");
         BeginFieldUndo(setup, positionState);
         if ((positionState & InputEditStateFlags.Modified) != 0)
         {
-            var delta = new Vector2(FromUnit(position[0], canvas.X), FromUnit(position[1], canvas.Y)) - quad[0];
+            var delta = new Vector2(FromUnit(position[0], canvas.X), FromUnit(position[1], canvas.Y)) - quadMin;
             for (var i = 0; i < 4; i++)
                 quad[i] += delta;
         }
 
         CommitFieldUndo(setup, "Move patch", positionState);
 
-        var covered = quad[2] - quad[0];
+        var covered = quadMax - quadMin;
         Span<float> size = [ToUnit(covered.X, canvas.X), ToUnit(covered.Y, canvas.Y)];
         var sizeState = DrawRectRow("Size", size);
         BeginFieldUndo(setup, sizeState);
         if ((sizeState & InputEditStateFlags.Modified) != 0)
         {
-            var w = MathF.Max(FromUnit(size[0], canvas.X), 0.0001f);
-            var h = MathF.Max(FromUnit(size[1], canvas.Y), 0.0001f);
-            quad[1] = new Vector2(quad[0].X + w, quad[0].Y);
-            quad[2] = new Vector2(quad[0].X + w, quad[0].Y + h);
-            quad[3] = new Vector2(quad[0].X, quad[0].Y + h);
+            var newSize = new Vector2(MathF.Max(FromUnit(size[0], canvas.X), 0.0001f), MathF.Max(FromUnit(size[1], canvas.Y), 0.0001f));
+            ApplyBoundsToQuad(quad, isAxisAligned, quadMin, quadMax, quadMin, newSize);
         }
 
         CommitFieldUndo(setup, "Resize patch", sizeState);
@@ -1126,8 +1200,9 @@ internal static class SetupParameterView
 
     private static bool EditsInPixels => UserSettings.Config.OutputSetupEditUnits == OutputSetupEditUnits.Pixels;
 
-    /// <summary>A ratio shown in the current unit, against the size of what it sits on.</summary>
-    private static float ToUnit(float ratio, float extent) => EditsInPixels ? ratio * extent : ratio;
+    /// <summary>A ratio shown in the current unit, against the size of what it sits on. Pixels are rounded: a
+    /// typed 1200 stored as a ratio comes back as 1199.9999, which must read as 1200 again.</summary>
+    private static float ToUnit(float ratio, float extent) => EditsInPixels ? MathF.Round(ratio * extent) : ratio;
 
     /// <summary>The inverse of <see cref="ToUnit"/>, back to the stored ratio.</summary>
     private static float FromUnit(float value, float extent) => EditsInPixels ? value / MathF.Max(extent, 1) : value;
@@ -1372,6 +1447,7 @@ internal static class SetupParameterView
 
     // Name-field editing state: buffer follows the entity until the field takes focus.
     private static Guid _renameTargetId;
+    private static SetupEntityKinds _renameTargetKind;
     private static string _renameBuffer = string.Empty;
     private static bool _renameFieldActive;
 }

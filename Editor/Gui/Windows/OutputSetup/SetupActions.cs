@@ -771,7 +771,8 @@ internal static class SetupActions
     }
 
     /// <summary>The duplicate cascades, one per kind, side by side.</summary>
-    private static void DuplicateEntityInternal(SetupEntitySelection selection, Setup setup, SetupEntityKinds kind, Guid id)
+    /// <summary>The copy without its own undo step, for a gesture that duplicates and moves in one; selects the copy.</summary>
+    internal static void DuplicateEntityInternal(SetupEntitySelection selection, Setup setup, SetupEntityKinds kind, Guid id)
     {
         switch (kind)
         {
