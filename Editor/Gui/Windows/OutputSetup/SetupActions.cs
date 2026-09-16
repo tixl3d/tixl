@@ -114,6 +114,64 @@ internal static class SetupActions
                                                                                                  });
     }
 
+    /// <summary>Whether the kind has an order of its own to move within: outputs, surfaces among their siblings, slices under their source, patches on their output.</summary>
+    internal static bool CanReorder(SetupEntityKinds kind)
+    {
+        return kind is SetupEntityKinds.Output or SetupEntityKinds.Surface or SetupEntityKinds.Slice or SetupEntityKinds.Patch;
+    }
+
+    /// <summary>Moves an entity one place up (-1) or down (+1) among its siblings in the list that orders it. No undo step of its own: the caller's gesture holds the snapshot.</summary>
+    internal static void MoveAmongSiblings(Setup setup, SetupEntityKinds kind, Guid id, int direction)
+    {
+        switch (kind)
+        {
+            case SetupEntityKinds.Patch:
+                if (setup.FindPatch(id, out var owner) != null && owner != null)
+                    SwapWithNeighbour(owner.Patches, owner.Patches.FindIndex(p => p.Id == id), direction, _ => true);
+
+                break;
+
+            case SetupEntityKinds.Output:
+                // The Default output is hidden, so it is never a neighbour to swap with.
+                SwapWithNeighbour(setup.Outputs, setup.Outputs.FindIndex(o => o.Id == id), direction, o => o.Kind != OutputDefinition.Kinds.Default);
+                break;
+
+            case SetupEntityKinds.Surface:
+            {
+                var surface = setup.FindSurface(id);
+                if (surface != null)
+                    SwapWithNeighbour(setup.Surfaces, setup.Surfaces.IndexOf(surface), direction, s => s.ParentId == surface.ParentId);
+
+                break;
+            }
+
+            case SetupEntityKinds.Slice:
+            {
+                var slice = setup.FindSlice(id);
+                if (slice != null)
+                    SwapWithNeighbour(setup.Slices, setup.Slices.IndexOf(slice), direction, s => s.SourceId == slice.SourceId);
+
+                break;
+            }
+        }
+    }
+
+    /** Swaps the item at index with the nearest list neighbour in the given direction that is a sibling. */
+    private static void SwapWithNeighbour<T>(List<T> list, int index, int direction, Func<T, bool> isSibling)
+    {
+        if (index < 0)
+            return;
+
+        for (var other = index + direction; other >= 0 && other < list.Count; other += direction)
+        {
+            if (!isSibling(list[other]))
+                continue;
+
+            (list[index], list[other]) = (list[other], list[index]);
+            return;
+        }
+    }
+
     internal static void AddOutput(SetupEntitySelection selection)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))

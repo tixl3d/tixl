@@ -196,7 +196,11 @@ internal static class FloorPlanSync
         Apply(setup, plan);
     }
 
-    /// <summary>Gives a segment a typed length by moving its end vertex along it — the wall's width, written back to the plan.</summary>
+    /// <summary>
+    /// Gives a segment a typed length: its end corner moves along it, and the change travels on through the run
+    /// — a corner that turns lets the next wall lengthen or shorten along its own line, a straight corner passes
+    /// the shift on so that wall keeps its length, until a turning corner absorbs it.
+    /// </summary>
     public static void SetSegmentLength(Setup setup, FloorPlan plan, int segment, float length)
     {
         if (segment < 0 || segment >= plan.SegmentCount)
@@ -210,8 +214,61 @@ internal static class FloorPlanSync
         else
             direction /= current;
 
-        var endVertex = (segment + 1) % plan.Vertices.Count;
-        plan.Vertices[endVertex] = start + direction * MathF.Max(length, SurfaceGeometry.MinSize);
+        var delta = direction * (MathF.Max(length, SurfaceGeometry.MinSize) - current);
+        var count = plan.Vertices.Count;
+        var endVertex = (segment + 1) % count;
+        plan.Vertices[endVertex] += delta;
+
+        // Carry the shift forward: each following corner either absorbs it by sliding along its far edge, or
+        // passes it on when its edge runs straight. Bounded by the run, so a fully straight run just shifts.
+        var moved = endVertex;
+        for (var step = 0; step < count - 2; step++)
+        {
+            var next = moved + 1;
+            if (next >= count)
+            {
+                if (!plan.IsClosed)
+                    break;
+
+                next = 0;
+            }
+
+            if (next == segment)
+                break;
+
+            var edge = plan.Vertices[next] - (plan.Vertices[moved] - delta);
+            var cross = edge.X * delta.Y - edge.Y * delta.X;
+            if (MathF.Abs(cross) > 0.0001f * MathF.Max(edge.Length(), 0.0001f) * MathF.Max(delta.Length(), 0.0001f))
+            {
+                // A turning corner: the edge keeps its line, so the next corner slides along the edge after it.
+                var after = next + 1;
+                if (after >= count)
+                {
+                    if (!plan.IsClosed)
+                        break;
+
+                    after = 0;
+                }
+
+                var wanted = plan.Vertices[moved] + edge; // where the edge would end if it kept both length and line
+                var far = plan.Vertices[after] - plan.Vertices[next];
+                var farCross = edge.X * far.Y - edge.Y * far.X;
+                if (MathF.Abs(farCross) > 0.0001f)
+                {
+                    // wanted + t·edge lies on the line through next along far: solve for t.
+                    var toNext = plan.Vertices[next] - wanted;
+                    var t = (toNext.X * far.Y - toNext.Y * far.X) / farCross;
+                    plan.Vertices[next] = wanted + edge * t;
+                }
+
+                break;
+            }
+
+            // A straight corner: the next wall shifts as a whole and keeps its length.
+            plan.Vertices[next] += delta;
+            moved = next;
+        }
+
         Apply(setup, plan, endVertex);
     }
 
@@ -303,6 +360,43 @@ internal static class FloorPlanSync
         var toMoved = moved - startVertices[corner];
         var t = (toMoved.X * direction.Y - toMoved.Y * direction.X) / (other.X * direction.Y - other.Y * direction.X);
         return startVertices[corner] + other * t;
+    }
+
+    /// <summary>
+    /// Closes an open run whose end corner <paramref name="dropped"/> was put onto the other end: the dropped
+    /// corner goes, the run closes, and the edge that now joins the ends gets a wall.
+    /// </summary>
+    public static void CloseByMerging(Setup setup, FloorPlan plan, int dropped)
+    {
+        var count = plan.Vertices.Count;
+        if (plan.IsClosed || count < 3 || (dropped != 0 && dropped != count - 1))
+            return;
+
+        plan.EnsureWallSlots();
+        var closingWall = Guid.Empty;
+        if (dropped == 0)
+        {
+            // Segment 0 ran from the dropped corner; its wall carries on as the closing edge's wall.
+            closingWall = plan.WallSurfaceIds[0];
+            plan.WallSurfaceIds.RemoveAt(0);
+            plan.Vertices.RemoveAt(0);
+        }
+        else
+        {
+            closingWall = plan.WallSurfaceIds[count - 2];
+            plan.WallSurfaceIds.RemoveAt(count - 2);
+            plan.Vertices.RemoveAt(count - 1);
+        }
+
+        plan.IsClosed = true;
+        plan.EnsureWallSlots();
+        var closingSegment = plan.SegmentCount - 1;
+        if (closingWall != Guid.Empty && setup.FindSurface(closingWall) != null)
+            plan.WallSurfaceIds[closingSegment] = closingWall;
+        else
+            SetWall(setup, plan, closingSegment, true);
+
+        Apply(setup, plan);
     }
 
     /// <summary>Forgets deleted surfaces: their slots open up, the plan itself stays.</summary>

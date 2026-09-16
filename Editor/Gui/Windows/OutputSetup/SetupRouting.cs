@@ -140,7 +140,9 @@ internal static class SetupRouting
             if (surface == null || patch == null || patchOutput == null || patch.Quad.Length < 4)
                 return;
 
-            var quad = (Vector2[])patch.Quad.Clone();
+            // In the turned corner order, so a wall that the patch showed on its side keeps standing that way.
+            var quad = new Vector2[4];
+            patch.CopyTurnedCorners(quad);
             var mapping = surface.FindMapping(patchOutput.Id);
             if (mapping != null)
             {

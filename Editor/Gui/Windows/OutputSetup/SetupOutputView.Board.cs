@@ -4,6 +4,7 @@ using T3.Core.Operator;
 using T3.Core.Output;
 using T3.Core.Resource;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.CanvasEditing;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
@@ -114,7 +115,10 @@ internal sealed partial class SetupOutputView
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.ReferenceImage, image.Id, min, max,
                           image.Name, BoardMeta(image.Id), srv, true);
             DrawBoardTraces(setup, selection, dl, image, min, max);
+            DrawBoardScaleLine(setup, dl, image, min, max);
         }
+
+        DrawScaleLengthPopup(setup);
 
         foreach (var source in setup.ContentSources)
         {
@@ -242,9 +246,9 @@ internal sealed partial class SetupOutputView
         if (!onBoard)
             return;
 
-        // While walls are being drawn the tool owns every click and key on the Board.
+        // While walls are being drawn or a scale line is being set, the tool owns every click and key on the Board.
         HandlePlanDraw(setup, selection);
-        if (IsDrawingPlan)
+        if (IsDrawingPlan || IsSettingScale)
             return;
 
         HandleBoardDrag(setup, selection);
@@ -328,8 +332,10 @@ internal sealed partial class SetupOutputView
         if (hovered)
             FrameStats.RequestCrossHighlight(id);
 
+        // A reference image shows at its own opacity, so a backdrop can be dimmed under what is traced over it.
+        var imageOpacity = kind == SetupEntityKinds.ReferenceImage && setup.FindReferenceImage(id) is { } shownImage ? shownImage.Opacity : 1f;
         if (srv is { IsDisposed: false })
-            dl.AddImage(srv.NativePointer, sMin, sMax, uvMin, uvMax ?? Vector2.One, UiColors.ForegroundFull.Fade(fade));
+            dl.AddImage(srv.NativePointer, sMin, sMax, uvMin, uvMax ?? Vector2.One, UiColors.ForegroundFull.Fade(fade * imageOpacity));
         else
             dl.AddRectFilled(sMin, sMax, UiColors.BackgroundPopup.Fade(0.85f * fade));
 
@@ -364,6 +370,13 @@ internal sealed partial class SetupOutputView
         if (meta != null && (hovered || isSelected))
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(labelMax.X + pad, labelMax.Y - pad - Fonts.FontSmall.FontSize),
                        UiColors.TextMuted.Fade(0.5f * fade), meta);
+
+        // A locked image is a backdrop: it shows its lock beside the name and takes no press of any kind.
+        if (kind == SetupEntityKinds.ReferenceImage && setup.FindReferenceImage(id) is { IsLocked: true })
+        {
+            Icons.DrawIconAtScreenPosition(Icon.Locked, new Vector2(labelMax.X + pad, labelMin.Y + pad * 0.5f));
+            return;
+        }
 
         if (!interactive)
             return;
@@ -618,7 +631,7 @@ internal sealed partial class SetupOutputView
     private void GrabBoardCard(SetupEntityKinds kind, Guid id, bool hovered, bool isSelected)
     {
         if (!hovered || !ImGui.IsMouseClicked(ImGuiMouseButton.Left) || ImGui.IsAnyItemHovered()
-            || _boardDragKind != SetupEntityKinds.None || IsDrawingPlan)
+            || _boardDragKind != SetupEntityKinds.None || IsDrawingPlan || IsSettingScale)
             return;
 
         var io = ImGui.GetIO();
@@ -861,8 +874,20 @@ internal sealed partial class SetupOutputView
                 }
 
                 case CanvasPointHandle.DragPhases.Completed:
+                {
+                    // An open run's end corner dropped onto its other end closes the room: the two corners merge and
+                    // a wall stands on the edge that now joins them.
+                    var isEnd = !plan.IsClosed && (i == 0 || i == count - 1) && count >= 3;
+                    var other = i == 0 ? plan.Vertices[count - 1] : plan.Vertices[0];
+                    if (isEnd && (plan.Vertices[i] - other).Length() < BoardSnapThreshold())
+                    {
+                        var dropped = i;
+                        FloorPlanSync.CloseByMerging(setup, plan, dropped);
+                    }
+
                     EndGesture(setup);
                     break;
+                }
             }
 
             // A corner's own menu; the picker leaves a hovered corner alone, so the card's menu doesn't open with it.
@@ -998,7 +1023,44 @@ internal sealed partial class SetupOutputView
                     var point = (a + b) * 0.5f;
                     SetupUndo.RunUndoable("Split edge", setup, () => FloorPlanSync.InsertVertex(setup, plan, menuSegment, point));
                 }
+
+                if (CustomComponents.DrawMenuItem(4, "Set Length..."))
+                {
+                    plan.GetSegment(menuSegment, out var a, out var b);
+                    _planLengthSegment = menuSegment;
+                    _planLengthValue = (b - a).Length();
+                    _planLengthPopupPending = true;
+                }
             }
+
+            ImGui.EndPopup();
+        }
+
+        // Opened once the edge menu has closed, since a popup opened from inside another closes with it.
+        if (_planLengthPopupPending)
+        {
+            _planLengthPopupPending = false;
+            ImGui.OpenPopup(PlanLengthPopupId);
+        }
+
+        ImGui.SetNextWindowSize(new Vector2(240 * scale, 0));
+        if (ImGui.BeginPopup(PlanLengthPopupId))
+        {
+            CustomComponents.StylizedText("Wall length", Fonts.FontBold, UiColors.Text);
+            FormInputs.AddFloat("Length (m)", ref _planLengthValue, 0.01f, 1000, 0.01f, clampMin: true, clampMax: true,
+                                "The next corner moves along the wall; the walls after it follow: a turning corner lengthens its wall, a straight one shifts it.");
+            FormInputs.AddVerticalSpace(4);
+            if (ImGui.Button("Apply") || ImGui.IsKeyPressed(ImGuiKey.Enter, false))
+            {
+                var index = _planLengthSegment;
+                var value = _planLengthValue;
+                SetupUndo.RunUndoable("Set wall length", setup, () => FloorPlanSync.SetSegmentLength(setup, plan, index, value));
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Cancel"))
+                ImGui.CloseCurrentPopup();
 
             ImGui.EndPopup();
         }
@@ -2076,6 +2138,10 @@ internal sealed partial class SetupOutputView
     private int _planMenuSegment;
     private bool _planEdgeMoved;
     private const string PlanEdgeMenuId = "##planEdgeMenu";
+    private const string PlanLengthPopupId = "##planEdgeLength";
+    private int _planLengthSegment;
+    private float _planLengthValue;
+    private bool _planLengthPopupPending;
 
     // Marquee over the cards: candidates are collected as the cards draw (cleared per frame), and the fence
     // resolves containers against the setup set before it runs.

@@ -155,7 +155,44 @@ internal sealed class OutlinerItem
                 FrameStats.AddHoveredId(args.Id);
         }
 
-        HandleDragDrop(setup, kindInfo, args.Id);
+        // A drag's first movement decides what it is: mostly vertical reorders the item among its siblings,
+        // anything else is a routing drag to another column. Decided once per press, so it can't flip midway.
+        var isActive = ImGui.IsItemActive();
+        if (isActive && _dragDecidedId != args.Id)
+        {
+            var delta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left, 0f);
+            if (delta.Length() > ImGui.GetIO().MouseDragThreshold)
+            {
+                _dragDecidedId = args.Id;
+                _dragIsReorder = MathF.Abs(delta.Y) > MathF.Abs(delta.X) * 1.5f && SetupActions.CanReorder(args.Kind);
+                if (_dragIsReorder)
+                    _reorderOldJson = setup.ToJsonString();
+            }
+        }
+
+        var reordering = isActive && _dragDecidedId == args.Id && _dragIsReorder;
+        if (reordering)
+        {
+            // Past the row's edge the item trades places with its neighbour; the row it then draws in is under the cursor again.
+            var mouseY = ImGui.GetMousePos().Y;
+            if (mouseY < rowMin.Y)
+                SetupActions.MoveAmongSiblings(setup, args.Kind, args.Id, -1);
+            else if (mouseY > rowMax.Y)
+                SetupActions.MoveAmongSiblings(setup, args.Kind, args.Id, +1);
+        }
+
+        if (ImGui.IsItemDeactivated() && _dragDecidedId == args.Id)
+        {
+            if (_dragIsReorder && _reorderOldJson != null)
+                SetupUndo.CommitGesture(setup, "Reorder", _reorderOldJson);
+
+            _reorderOldJson = null;
+            _dragDecidedId = Guid.Empty;
+            _dragIsReorder = false;
+        }
+
+        // The routing drag only starts once the press has been decided as one, so a reorder never carries a payload.
+        HandleDragDrop(setup, kindInfo, args.Id, allowSource: _dragDecidedId == args.Id && !_dragIsReorder);
 
         if (args.Kind != SetupEntityKinds.None)
             SetupEntityContextMenu.DrawForLastItem(selection, setup, args.Kind, args.Id, args.Name);
@@ -297,7 +334,7 @@ internal sealed class OutlinerItem
     /// parent expands, the strip scrolls to it. Cleared once the row has drawn its field.</summary>
     public static Guid RevealPendingId => _renameFocusPending ? _renamingId : Guid.Empty;
 
-    private static void HandleDragDrop(Setup setup, SetupEntityKindInfo kindInfo, Guid id)
+    private static void HandleDragDrop(Setup setup, SetupEntityKindInfo kindInfo, Guid id, bool allowSource)
     {
         // Every routable kind is both a drag source and a drop target — connections are direction-agnostic
         // (SetupRouting normalizes), so dragging an output onto a source works the same as the reverse.
@@ -308,8 +345,11 @@ internal sealed class OutlinerItem
 
         // The payload is only read while the item is active (the drag start), so skip the string build
         // for the idle case — the helper's deactivation cleanup doesn't use it.
-        var payload = ImGui.IsItemActive() ? SetupRouting.DragPayload(kind, id) : string.Empty;
-        DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.SetupEntity, payload);
+        if (allowSource || !ImGui.IsItemActive())
+        {
+            var payload = ImGui.IsItemActive() ? SetupRouting.DragPayload(kind, id) : string.Empty;
+            DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.SetupEntity, payload);
+        }
 
         if (!DragAndDropHandling.TryGetDragData(DragAndDropHandling.DragTypes.SetupEntity, out var dragData)
             || !SetupRouting.TryParseDrag(dragData, out var dragKind, out var dragId))
@@ -321,6 +361,11 @@ internal sealed class OutlinerItem
         if (DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SetupEntity, out _) == DragAndDropHandling.DragInteractionResult.Dropped)
             SetupRouting.ApplyDrop(setup, dragKind, dragId, kind, id);
     }
+
+    // The press being dragged, and whether its first movement made it a reorder rather than a routing drag.
+    private static Guid _dragDecidedId;
+    private static bool _dragIsReorder;
+    private static string? _reorderOldJson;
 
     private static Guid _renamingId;
     private static string _renameBuffer = string.Empty;

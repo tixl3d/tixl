@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Serialization;
@@ -33,6 +34,22 @@ public sealed class ReferenceImage
     /// <summary>Scale for plans; ignored for photos (their scale comes from annotations).</summary>
     public float MetersPerPixel;
 
+    /// <summary>A known length drawn on the image, in image pixels, from which <see cref="MetersPerPixel"/> is derived.</summary>
+    public Vector2 ScaleLineStart;
+
+    public Vector2 ScaleLineEnd;
+
+    /// <summary>The real length of the scale line, in metres.</summary>
+    public float ScaleLineMeters;
+
+    public bool HasScaleLine => (ScaleLineEnd - ScaleLineStart).LengthSquared() > 0.25f;
+
+    /// <summary>A locked image is a backdrop: drawn beneath every other card and never picked, grabbed or fenced.</summary>
+    public bool IsLocked;
+
+    /// <summary>How strongly the card shows the image on the Board, 0..1 — dimmed, a backdrop stays behind what is drawn over it.</summary>
+    public float Opacity = 1f;
+
     /// <summary>Its card's place on the Board; null until the Board seeded one.</summary>
     public BoardPlacement? BoardPlacement;
 
@@ -47,6 +64,19 @@ public sealed class ReferenceImage
         writer.WriteValue("Height", Height);
         if (MetersPerPixel > 0)
             writer.WriteValue("MetersPerPixel", MetersPerPixel);
+
+        if (HasScaleLine)
+        {
+            writer.WriteVector2("ScaleLineStart", ScaleLineStart);
+            writer.WriteVector2("ScaleLineEnd", ScaleLineEnd);
+            writer.WriteValue("ScaleLineMeters", ScaleLineMeters);
+        }
+
+        if (IsLocked)
+            writer.WriteValue("IsLocked", true);
+
+        if (Opacity < 1f)
+            writer.WriteValue("Opacity", Opacity);
 
         if (BoardPlacement != null)
         {
@@ -68,6 +98,11 @@ public sealed class ReferenceImage
                             Width = token.ReadValueSafe("Width", 0),
                             Height = token.ReadValueSafe("Height", 0),
                             MetersPerPixel = token.ReadValueSafe("MetersPerPixel", 0f),
+                            ScaleLineStart = OutputJson.ReadVector2(token["ScaleLineStart"]),
+                            ScaleLineEnd = OutputJson.ReadVector2(token["ScaleLineEnd"]),
+                            ScaleLineMeters = token.ReadValueSafe("ScaleLineMeters", 0f),
+                            IsLocked = token.ReadValueSafe("IsLocked", false),
+                            Opacity = Math.Clamp(token.ReadValueSafe("Opacity", 1f), 0f, 1f),
                         };
         if (token["BoardPlacement"] is JObject placement)
             image.BoardPlacement = BoardPlacement.ReadFromJson(placement);

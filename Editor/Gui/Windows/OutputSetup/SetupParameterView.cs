@@ -1140,6 +1140,41 @@ internal static class SetupParameterView
                                           ? $"{image.Width}×{image.Height} px · double-click its card on the Board to trace and straighten"
                                           : "No image loaded yet — pick one above, or drop a photo onto the Board.",
                                       Fonts.FontSmall, UiColors.TextMuted);
+
+        var locked = image.IsLocked;
+        if (FormInputs.AddCheckBox("Locked", ref locked, "A backdrop: drawn beneath every card, never picked, grabbed or fenced."))
+            SetupUndo.RunUndoable(locked ? "Lock image" : "Unlock image", setup, () => image.IsLocked = locked);
+
+        var opacity = image.Opacity;
+        var opacityState = FormInputs.AddFloatWithEditState("Opacity", ref opacity, 0, 1, 0.005f, clampMin: true, clampMax: true,
+                                                            "How strongly the card shows the image on the Board.", defaultValue: 1f);
+        BeginFieldUndo(setup, opacityState);
+        if ((opacityState & InputEditStateFlags.Modified) != 0)
+            image.Opacity = opacity;
+
+        CommitFieldUndo(setup, "Change image opacity", opacityState);
+
+        // The scale line's length re-derives the image's scale; the line itself is drawn with Set Scale on the Board.
+        if (image.HasScaleLine)
+        {
+            Span<float> length = [image.ScaleLineMeters];
+            var lengthState = DrawFloatsRow("Scale line (m)", length, "The real length of the line drawn on the image. The card's size follows it.");
+            BeginFieldUndo(setup, lengthState);
+            if ((lengthState & InputEditStateFlags.Modified) != 0)
+            {
+                image.ScaleLineMeters = MathF.Max(length[0], 0.001f);
+                SetupOutputView.ApplyScaleLine(image);
+            }
+
+            CommitFieldUndo(setup, "Change scale line length", lengthState);
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText($"{image.MetersPerPixel * 1000:0.##} mm per pixel", Fonts.FontSmall, UiColors.TextMuted);
+        }
+        else
+        {
+            FormInputs.ApplyIndent();
+            CustomComponents.StylizedText("No scale yet — Set Scale in the card's menu draws a line over a known length.", Fonts.FontSmall, UiColors.TextMuted);
+        }
     }
 
     private static void DrawPropCard(Setup setup, Guid id)

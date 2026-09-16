@@ -81,7 +81,7 @@ internal sealed partial class SetupOutputView
         var hit = _picker.Resolve(current);
 
         // A click while drawing walls plants a corner; it picks nothing. A hovered plan corner has its own menu.
-        if (IsDrawingPlan || _hoveredPlanHandlePlanId != Guid.Empty)
+        if (IsDrawingPlan || IsSettingScale || _hoveredPlanHandlePlanId != Guid.Empty)
             return;
 
         if (hit.HasHit)

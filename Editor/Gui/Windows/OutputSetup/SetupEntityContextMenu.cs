@@ -176,6 +176,16 @@ internal static class SetupEntityContextMenu
                 if (image == null)
                     break;
 
+                if (CustomComponents.DrawMenuItem(22, "Set Scale..."))
+                    SetupOutputView.PendingScaleToolImageId = image.Id;
+
+                CustomComponents.TooltipForLastItem("Draw a line over a known length on the image and type the length; the card takes its true size.");
+
+                if (CustomComponents.DrawMenuItem(23, image.IsLocked ? "Unlock" : "Lock"))
+                    SetupUndo.RunUndoable(image.IsLocked ? "Unlock image" : "Lock image", setup, () => image.IsLocked = !image.IsLocked);
+
+                CustomComponents.TooltipForLastItem("A locked image is a backdrop: it stays beneath every card and can't be picked or moved.");
+
                 if (CustomComponents.DrawMenuItem(13, "Trace New Surface"))
                     SetupActions.TraceNewSurface(selection, setup, image);
 

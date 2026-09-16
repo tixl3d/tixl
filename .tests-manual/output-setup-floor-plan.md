@@ -168,3 +168,28 @@ right and release.
 - After 3: the corner is gone, the right edge is one segment again with one wall; the other wall's
   surface is gone too if it had no content, or stays in SURFACES if it had.
 - After 4: **Remove Corner** is disabled.
+
+## Step: A scanned plan as the tracing backdrop
+
+**Action:**
+1. Drop a plan image onto the Board (any image with a straight edge of known length will do).
+2. Right-click its card and choose **Set Scale...**; click two points about a third of the image
+   apart along one edge; in the prompt type `6` and click **Apply**.
+3. On the image's card in the Parameter window, tick **Locked**.
+4. Try to drag the image card, then start a fence across it.
+
+**Expected:**
+- After 2: the card resizes so the drawn line spans 6 m against the Board's metre grid; the line
+  stays on the card labelled "6 m" with a handle at each end; the card reads "… mm per pixel".
+- After 3: a lock icon appears beside the card's name.
+- After 4: the card neither moves nor gets selected; a fence started over it selects only what
+  lies on top of it. Unticking **Locked** restores both.
+
+## Step: Closing a run by dropping a corner
+
+**Action:**
+On an open run with at least three corners, drag its last corner onto its first and release.
+
+**Expected:**
+- The two corners merge, the plan's card shows **Closed** ticked, and a wall stands on the edge
+  that now joins them. Ctrl+Z reopens the run in one step.
