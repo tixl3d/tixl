@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "98aac8ba-480c-4a28-8391-23c7d1ae11d9"/*StageGeometry*/,
+  "Description": "Emits the active output setup's physical surfaces as geometry in the stage.\n\nOne quad per surface, at its stage pose and real size in metres, so the room can be drawn, previewed and projected onto from the graph. TexCoord runs over each surface. TexCoord2 is where the surface lands on an output's canvas — the output named by OutputRef, or each surface's first mapping. With CanvasUvOnTexCoord the two are swapped, so [DrawMesh] textured with that output's composite or pixel map puts every wall's picture on its wall.\n\nUse [GeometryToMesh] to compile it for [DrawMesh].\n\nAKA: room, floor plan, walls, venue, previz, stage, 3d",
+  "InputUis": [
+    {
+      "InputId": "e64bc3c3-cbe2-4460-91a6-d0fc207c1743"/*OutputRef*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Usage": "OutputSetupEntities"
+    },
+    {
+      "InputId": "b5066b38-41aa-4bbb-9d85-6f5bdf48c82d"/*CanvasUvOnTexCoord*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fcdaba8f-c63c-4913-b5d2-90b586ddc5f4"/*Geometry*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

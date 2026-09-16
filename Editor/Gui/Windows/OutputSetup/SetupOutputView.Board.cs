@@ -79,6 +79,7 @@ internal sealed partial class SetupOutputView
 
         FitBoardIfNeeded(setup);
         ReleasePressHandoff(selection);
+        _hoveredPlanHandlePlanId = Guid.Empty;
 
         var pixelsPerMeter = MathF.Abs(_boardCanvas.Scale.X);
         MetricGridRaster.Draw(dl, _boardProjection, screenMin, screenMax, pixelsPerMeter, _boardDragKind != SetupEntityKinds.None ? 1f : 0.6f);
@@ -743,6 +744,11 @@ internal sealed partial class SetupOutputView
         for (var i = 0; i < count; i++)
             _boardPlanPoints[i] = _boardProjection.CanvasToScreen(origin + plan.Vertices[i]);
 
+        // A faint fill says the frame is a card: dragging anywhere inside moves it, like every other card.
+        PlanBounds(plan, out var fillMin, out var fillMax);
+        dl.AddRectFilled(_boardProjection.CanvasToScreen(new Vector2(fillMin.X, fillMax.Y)), _boardProjection.CanvasToScreen(new Vector2(fillMax.X, fillMin.Y)),
+                         hue.Fade(0.05f * fade), 3 * scale);
+
         if (plan.IsClosed && count >= 3 && setup.FindSurface(plan.RaisedFloorId) != null)
             dl.AddConvexPolyFilled(ref _boardPlanPoints[0], count, hue.Fade(0.08f * fade));
 
@@ -828,6 +834,16 @@ internal sealed partial class SetupOutputView
             var pos = origin + plan.Vertices[i];
             var phase = CanvasPointHandle.Draw(ref pos, _boardProjection, handleStyle);
             ImGui.PopID();
+
+            // Tested by distance rather than by item, so the corner keeps its menu whatever else claims the hover.
+            var cornerHovered = interactive && !IsDrawingPlan
+                                && (ImGui.GetMousePos() - _boardProjection.CanvasToScreen(origin + plan.Vertices[i])).Length() < handleStyle.Radius * 1.5f * scale;
+            if (cornerHovered)
+            {
+                _hoveredPlanHandlePlanId = plan.Id;
+                _hoveredPlanCorner = i;
+            }
+
             switch (phase)
             {
                 case CanvasPointHandle.DragPhases.Started:
@@ -849,6 +865,138 @@ internal sealed partial class SetupOutputView
                     EndGesture(setup);
                     break;
             }
+
+            // A corner's own menu; the picker leaves a hovered corner alone, so the card's menu doesn't open with it.
+            if (cornerHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            {
+                _planMenuVertex = i;
+                ImGui.OpenPopup(PlanCornerMenuId);
+            }
+
+            // Double-click takes the corner out, the mirror of splitting an edge by double-click.
+            if (cornerHovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && count > (plan.IsClosed ? 3 : 2))
+            {
+                var vertex = i;
+                CancelGesture();
+                SetupUndo.RunUndoable("Remove corner", setup, () => FloorPlanSync.RemoveVertex(setup, plan, vertex));
+                break;
+            }
+        }
+
+        if (ImGui.BeginPopup(PlanCornerMenuId))
+        {
+            var canRemove = count > (plan.IsClosed ? 3 : 2);
+            if (CustomComponents.DrawMenuItem(1, "Remove Corner", isEnabled: canRemove))
+            {
+                var vertex = _planMenuVertex;
+                SetupUndo.RunUndoable("Remove corner", setup, () => FloorPlanSync.RemoveVertex(setup, plan, vertex));
+            }
+
+            ImGui.EndPopup();
+        }
+
+        // Each edge's middle is a handle too: a click raises or takes down the wall on it (the dot is filled while
+        // one stands there), a drag slides the edge sideways with the neighbouring walls following along their
+        // own lines, and a right-click offers to split the edge.
+        for (var segment = 0; segment < plan.SegmentCount; segment++)
+        {
+            plan.GetSegment(segment, out var start, out var end);
+            var startMid = (start + end) * 0.5f;
+            var dragging = _gesture.Is(GestureKinds.PlanEdge, plan.Id) && _planEdgeSegment == segment;
+            var mid = origin + (dragging ? _planEdgeMidNow : startMid);
+            var hasWall = setup.FindSurface(plan.WallOf(segment)) != null;
+            var edgeStyle = CanvasPointHandle.Style.Default(hasWall ? (isSelected ? hue.Fade(0.9f) : hue.Fade(0.5f)) : UiColors.BackgroundFull.Fade(0.7f),
+                                                            CanvasPointHandle.Shapes.Circle, editable: !IsDrawingPlan);
+            edgeStyle.Radius = 4;
+            edgeStyle.OutlineColor = hasWall ? T3.Core.DataTypes.Vector.Color.TransparentBlack : (isSelected ? hue.Fade(0.9f) : hue.Fade(0.5f));
+
+            ImGui.PushID(1000 + segment);
+            var phase = CanvasPointHandle.Draw(ref mid, _boardProjection, edgeStyle);
+            ImGui.PopID();
+
+            var edgeHovered = interactive && !IsDrawingPlan
+                              && (ImGui.GetMousePos() - _boardProjection.CanvasToScreen(origin + startMid)).Length() < edgeStyle.Radius * 2f * scale;
+            if (edgeHovered)
+            {
+                // The dot stands for the wall: hovering it lights the wall up wherever else it is shown.
+                _hoveredPlanHandlePlanId = plan.Id;
+                if (hasWall)
+                    FrameStats.RequestCrossHighlight(plan.WallOf(segment));
+            }
+
+            switch (phase)
+            {
+                case CanvasPointHandle.DragPhases.Started:
+                    BeginGesture(setup, GestureKinds.PlanEdge, "Move edge", plan.Id);
+                    _planEdgeSegment = segment;
+                    _planEdgeStartMid = startMid;
+                    _planEdgeMidNow = startMid;
+                    _planEdgeMoved = false;
+                    _planEdgeStartVertices.Clear();
+                    _planEdgeStartVertices.AddRange(plan.Vertices);
+                    break;
+
+                case CanvasPointHandle.DragPhases.Dragging when dragging:
+                {
+                    // Only the sideways part of the drag moves the edge; along itself it has nowhere to go.
+                    var direction = end - start;
+                    if (direction.LengthSquared() > 0.000001f)
+                    {
+                        direction /= direction.Length();
+                        var normal = new Vector2(-direction.Y, direction.X);
+                        var offset = normal * Vector2.Dot(mid - origin - _planEdgeStartMid, normal);
+                        if (offset.Length() > 0.001f)
+                            _planEdgeMoved = true;
+
+                        _planEdgeMidNow = _planEdgeStartMid + offset;
+                        FloorPlanSync.MoveSegment(setup, plan, segment, _planEdgeStartVertices, offset);
+                    }
+
+                    break;
+                }
+
+                case CanvasPointHandle.DragPhases.Completed:
+                {
+                    EndGesture(setup);
+                    _planEdgeSegment = -1;
+
+                    // A press that never moved is a click: the wall on this edge comes or goes.
+                    if (!_planEdgeMoved)
+                    {
+                        var index = segment;
+                        var raise = !hasWall;
+                        SetupUndo.RunUndoable(raise ? "Raise wall" : "Take down wall", setup, () => FloorPlanSync.SetWall(setup, plan, index, raise));
+                    }
+
+                    break;
+                }
+            }
+
+            if (edgeHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            {
+                _planMenuSegment = segment;
+                ImGui.OpenPopup(PlanEdgeMenuId);
+            }
+        }
+
+        if (ImGui.BeginPopup(PlanEdgeMenuId))
+        {
+            var menuSegment = _planMenuSegment;
+            if (menuSegment >= 0 && menuSegment < plan.SegmentCount)
+            {
+                var menuHasWall = setup.FindSurface(plan.WallOf(menuSegment)) != null;
+                if (CustomComponents.DrawMenuItem(1, menuHasWall ? "Take Down Wall" : "Raise Wall"))
+                    SetupUndo.RunUndoable(menuHasWall ? "Take down wall" : "Raise wall", setup, () => FloorPlanSync.SetWall(setup, plan, menuSegment, !menuHasWall));
+
+                if (CustomComponents.DrawMenuItem(2, "Split Edge"))
+                {
+                    plan.GetSegment(menuSegment, out var a, out var b);
+                    var point = (a + b) * 0.5f;
+                    SetupUndo.RunUndoable("Split edge", setup, () => FloorPlanSync.InsertVertex(setup, plan, menuSegment, point));
+                }
+            }
+
+            ImGui.EndPopup();
         }
 
         ImGui.PopID();
@@ -1739,10 +1887,6 @@ internal sealed partial class SetupOutputView
 
         if (TryGetPlacement(setup, kind, id, out var placement))
             placement.Position = position;
-
-        // A plan's place on the Board is its place in the stage, so its walls move with the card.
-        if (kind == SetupEntityKinds.FloorPlan && setup.FindFloorPlan(id) is { } plan)
-            FloorPlanSync.Apply(setup, plan);
     }
 
     // ---- per-structure caches ------------------------------------------------------------------------
@@ -1865,6 +2009,21 @@ internal sealed partial class SetupOutputView
     private Vector2 _boardDragGrabOnBoard;
     private readonly List<(SetupEntityKinds Kind, Guid Id, Vector2 Start)> _boardDragItems = [];
     private Vector2[] _boardPlanPoints = new Vector2[8]; // a plan's corners on screen, grown to the largest plan
+
+    // A plan edge being slid: which segment, its middle at the press and now, and every corner at the press.
+    private int _planEdgeSegment = -1;
+    private Vector2 _planEdgeStartMid;
+    private Vector2 _planEdgeMidNow;
+    private readonly List<Vector2> _planEdgeStartVertices = [];
+    private int _planMenuVertex;
+    private const string PlanCornerMenuId = "##planCornerMenu";
+
+    // The plan whose corner or edge dot is under the cursor this frame: the handle takes the click before the card does.
+    private Guid _hoveredPlanHandlePlanId;
+    private int _hoveredPlanCorner;
+    private int _planMenuSegment;
+    private bool _planEdgeMoved;
+    private const string PlanEdgeMenuId = "##planEdgeMenu";
 
     // Marquee over the cards: candidates are collected as the cards draw (cleared per frame), and the fence
     // resolves containers against the setup set before it runs.

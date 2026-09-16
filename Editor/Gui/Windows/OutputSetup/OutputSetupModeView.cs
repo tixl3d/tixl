@@ -58,7 +58,8 @@ internal sealed class OutputSetupModeView
         _drawGrip ??= DrawOutlinerGrip;
         _drawHostedHeader ??= _outputView.DrawHostedHeader;
         _drawStripMenuExtras ??= DrawStripMenuExtras;
-        _outliner.Draw(_entitySelection, _toggleOutlinerCollapse, !_outlinerCollapsed, _drawGrip, _drawHostedHeader, _drawStripMenuExtras);
+        _leaveSetup ??= () => _viewMode = ViewModes.Operator;
+        _outliner.Draw(_entitySelection, _toggleOutlinerCollapse, !_outlinerCollapsed, _drawGrip, _drawHostedHeader, _drawStripMenuExtras, _leaveSetup);
         ImGui.EndChild();
         ImGui.PopStyleColor();
     }
@@ -66,10 +67,13 @@ internal sealed class OutputSetupModeView
     /// <summary>
     /// Draws an output-editing view if one applies to the current focus, and returns true; returns false
     /// when the caller should draw the operator output instead. A picked entity takes precedence over a
-    /// focused send op; both are dropped when the focused op changes (graph selection wins).
+    /// focused send op; both are dropped when the focused op changes (graph selection wins). A window pinned
+    /// to an op (<paramref name="opPinned"/>) keeps showing it: neither the graph focus nor the shared entity
+    /// selection pulls it into the setup.
     /// </summary>
-    public bool TryDrawEditingView(Instance? focusedInstance, EvaluationContext context)
+    public bool TryDrawEditingView(Instance? focusedInstance, EvaluationContext context, bool opPinned = false)
     {
+        _opPinned = opPinned;
         FollowGraphFocus();
         _outputView.IsHeaderHostedByStrip = IsSetupMode;
 
@@ -220,6 +224,10 @@ internal sealed class OutputSetupModeView
 
     private bool IsSetupMode => _viewMode == ViewModes.Setup;
 
+    /** Whether the host window is pinned to an op this frame, so focus and selection leave its view alone. */
+    private bool _opPinned;
+    private Action? _leaveSetup;
+
     /// <summary>
     /// Mirrors a graph pick into the entity selection and lets the mode follow focus. What's <i>drawn</i> may be
     /// pinned, so it doesn't follow the graph; which CONTENT item is selected should follow the graph selection
@@ -243,11 +251,11 @@ internal sealed class OutputSetupModeView
             _entitySelection.Mirror(SetupEntityKinds.ContentSource, focusedId);
         }
 
-        if (graphOwnsInspection && focusTransition)
+        if (graphOwnsInspection && focusTransition && !_opPinned)
         {
             // A focused SendToOutput enters Setup (its surfaces/outputs are at hand); selecting any other op —
             // or clicking the graph background — leaves it. Only on the transition, so the mode can still be
-            // toggled by hand while the focus stays put.
+            // toggled by hand while the focus stays put. A window pinned to an op is looking at that op.
             _viewMode = selectedInGraph is IContentSupplier ? ViewModes.Setup : ViewModes.Operator;
         }
 
@@ -431,7 +439,8 @@ internal sealed class OutputSetupModeView
             ClearPin();
         }
 
-        return _entitySelection.TryResolve(setup, out kind, out id);
+        // The shared selection only steers windows that are in the setup; an operator view stays on its op.
+        return IsSetupMode && _entitySelection.TryResolve(setup, out kind, out id);
     }
 
     private void ClearPin()

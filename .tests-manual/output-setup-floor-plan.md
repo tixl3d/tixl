@@ -92,13 +92,15 @@ Select "Wall 1" and type `12` into the first Size (m) field.
   floor row, and one edge row ticked.
 - The surface's card now says it is the wall on edge 1 of Floor Plan 2, with Rotation read-only.
 
-## Step: Moving the card moves the room
+## Step: Moving the card leaves the stage alone
 
 **Action:**
-Drag "Floor Plan 1"'s frame (not a corner) about 3 m to the right and release.
+Note "Wall 1"'s Position (m), then drag "Floor Plan 1"'s frame (not a corner) about 3 m to the
+right and release.
 
 **Expected:**
-- "Wall 1"'s Position (m) x and "Floor"'s grow by the same amount; nothing else changes.
+- The card moves; "Wall 1"'s Position (m) and "Floor"'s are unchanged — the plan's corners are stage
+  metres, the card's place on the Board is only presentation.
 
 ## Step: Draw walls from an open run
 
@@ -131,3 +133,36 @@ Drag "Floor Plan 1"'s frame (not a corner) about 3 m to the right and release.
 **Expected:**
 - After 1: the preview line appears from the run's last corner.
 - After 2: the preview disappears on Escape and clicking on the Board selects cards again.
+
+## Step: The room in the graph
+
+**Action:**
+1. In the graph, add **StageGeometry**, connect it to a **GeometryToMesh** and that to a **DrawMesh**;
+   show the DrawMesh in an output window in operator mode.
+2. On StageGeometry, tick **CanvasUvOnTexCoord**. Put a **SetMaterial** after the DrawMesh with the
+   pixel-map image (a LoadImage of the same file) as its BaseColorMap. Set the output window's camera
+   to look at the room.
+
+**Expected:**
+- After 1: the floor and the walls appear as flat quads standing where the Board placed them, the
+  walls facing the room's inside.
+- After 2: each wall shows the part of the pixel map that its patch or mapping covers on the output
+  canvas, the right way up, and changing the plan on the Board moves the quads at once.
+
+## Step: Edges and corners
+
+**Action:**
+1. On a closed rectangular plan with walls on every edge, drag the small dot in the middle of the
+   top edge upward by about 2 m and release.
+2. Double-click the dot in the middle of the right edge.
+3. Right-click the new corner and choose **Remove Corner**.
+4. Right-click any corner of a plan with only three corners.
+
+**Expected:**
+- After 1: the top edge moves up, staying parallel; the left and right walls grow by 2 m and their
+  labels say so; the top wall keeps its width. Ctrl+Z puts it back in one step.
+- After 2: a corner appears in the middle of the right edge and a new wall stands on the second half,
+  so the room stays closed.
+- After 3: the corner is gone, the right edge is one segment again with one wall; the other wall's
+  surface is gone too if it had no content, or stays in SURFACES if it had.
+- After 4: **Remove Corner** is disabled.

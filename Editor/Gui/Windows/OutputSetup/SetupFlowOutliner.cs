@@ -41,10 +41,12 @@ internal sealed class SetupFlowOutliner
     /// <param name="drawGrip">The strip's resize grip, drawn first in the header.</param>
     /// <param name="drawToolbar">The canvas' toolbar (mode switch and its actions), drawn after the setup switcher.</param>
     /// <param name="drawMenuExtras">Window-level entries appended to the setup menu (outliner toggle, pin).</param>
+    /// <param name="onLeave">Leaves the setup for the operator view; drawn as the header's close button.</param>
     public void Draw(SetupEntitySelection selection, Action? onToggleCollapse, bool bodyVisible,
-                     Action? drawGrip = null, Action? drawToolbar = null, Action? drawMenuExtras = null)
+                     Action? drawGrip = null, Action? drawToolbar = null, Action? drawMenuExtras = null, Action? onLeave = null)
     {
         _drawMenuExtras = drawMenuExtras;
+        _onLeave = onLeave;
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
             CustomComponents.EmptyWindowMessage("No project focused");
@@ -107,9 +109,21 @@ internal sealed class SetupFlowOutliner
         ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height, rowPos.Y + 3 * scale));
         DocumentationButton.Draw(HelpDocId, HelpWikiUrl, new Vector2(height, height));
 
+        // The way out: back to the operator view, whatever the window is pinned to or the graph has focused.
+        var leaveWidth = 0f;
+        if (_onLeave != null)
+        {
+            leaveWidth = height;
+            ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height * 2, rowPos.Y + 3 * scale));
+            if (CustomComponents.IconButton(Icon.Close, Vector2.Zero))
+                _onLeave();
+
+            CustomComponents.TooltipForLastItem("Leave the output setup", "Back to the operator view; the Output Setup button in its toolbar returns here.");
+        }
+
         // Reference images and props belong to the Board, not to any flow column, so they have no "+" of their
         // own. This one is theirs — reachable without having to find bare Board to right-click.
-        ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height * 2, rowPos.Y + 3 * scale));
+        ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - leaveWidth - height * 2, rowPos.Y + 3 * scale));
         if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero))
             ImGui.OpenPopup(AddBoardItemMenuId);
 
@@ -844,6 +858,7 @@ internal sealed class SetupFlowOutliner
         ImGui.EndPopup();
     }
 
+    private Action? _onLeave;
     private const string AddBoardItemMenuId = "##addBoardItemMenu";
     private const string AddRoomDialogId = "##addFloorPlanDialog";
 

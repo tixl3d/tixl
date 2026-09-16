@@ -7,8 +7,9 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// Keeps a floor plan's surfaces derived from it: a wall is as wide as its segment and stands on it facing the
-/// room, the floor covers the footprint. Called after every edit of a plan, so the persisted surface poses are
-/// always what the plan says and nothing downstream needs to know plans exist.
+/// room, the floor covers the footprint. The plan's vertices are stage metres already (X right, Y away from the
+/// viewer, on the ground), so its Board card can sit anywhere. Called after every edit of a plan, so the
+/// persisted surface poses are always what the plan says and nothing downstream needs to know plans exist.
 /// </summary>
 internal static class FloorPlanSync
 {
@@ -17,10 +18,12 @@ internal static class FloorPlanSync
     /// segment changed length is cropped from the end that moved — <paramref name="movedVertex"/>, or the
     /// segment's end when unknown — so its pixels and its projection stay where they were.
     /// </summary>
-    public static void Apply(Setup setup, FloorPlan plan, int movedVertex = -1)
+    public static void Apply(Setup setup, FloorPlan plan, int movedVertex = -1, int alsoMovedVertex = -1)
     {
         plan.EnsureWallSlots();
-        var origin = plan.BoardPlacement?.Position ?? Vector2.Zero;
+
+        // The plan's own space is the stage: its card's place on the Board is presentation, like every card's.
+        var origin = Vector2.Zero;
 
         // Walls face the inside of a room; on an open run they face left of the direction the run is drawn in.
         var facesLeft = !plan.IsClosed || plan.SignedAreaTwice() >= 0;
@@ -47,7 +50,7 @@ internal static class FloorPlanSync
             {
                 // Seen from inside, a wall facing left of its segment runs right-to-left along it: the segment's
                 // start is the wall's right end. So the start moving crops the right side, the end the left.
-                var startMoved = movedVertex == segment;
+                var startMoved = movedVertex == segment || alsoMovedVertex == segment;
                 var cropLeft = facesLeft ? !startMoved : startMoved;
                 CropWall(setup, wall, length, cropLeft);
             }
@@ -210,6 +213,96 @@ internal static class FloorPlanSync
         var endVertex = (segment + 1) % plan.Vertices.Count;
         plan.Vertices[endVertex] = start + direction * MathF.Max(length, SurfaceGeometry.MinSize);
         Apply(setup, plan, endVertex);
+    }
+
+    /// <summary>
+    /// Takes a corner out, merging its two segments into one. The first segment's wall carries on across the
+    /// merged edge; the second's is taken down (removed when untouched, lowered when in use). A closed plan keeps
+    /// at least three corners, an open run two.
+    /// </summary>
+    public static void RemoveVertex(Setup setup, FloorPlan plan, int index)
+    {
+        var count = plan.Vertices.Count;
+        if (index < 0 || index >= count || count <= (plan.IsClosed ? 3 : 2))
+            return;
+
+        plan.EnsureWallSlots();
+
+        // The segment that starts at the corner disappears; on an open run's first corner that is segment 0,
+        // on its last corner the segment before it (there is none after).
+        var goneSegment = !plan.IsClosed && index == count - 1 ? index - 1 : index;
+        if (goneSegment >= 0 && goneSegment < plan.WallSurfaceIds.Count)
+        {
+            LowerOrRemove(setup, plan, plan.WallSurfaceIds[goneSegment]);
+            plan.WallSurfaceIds.RemoveAt(goneSegment);
+        }
+
+        plan.Vertices.RemoveAt(index);
+        plan.EnsureWallSlots();
+        Apply(setup, plan);
+    }
+
+    /// <summary>
+    /// Splits a segment at <paramref name="point"/>: the new corner joins the run, the first half keeps the wall,
+    /// and the second half gets one of its own when there was a wall, so a room stays closed.
+    /// </summary>
+    public static void InsertVertex(Setup setup, FloorPlan plan, int segment, Vector2 point)
+    {
+        if (segment < 0 || segment >= plan.SegmentCount)
+            return;
+
+        plan.EnsureWallSlots();
+        var hadWall = setup.FindSurface(plan.WallOf(segment)) != null;
+        plan.Vertices.Insert(segment + 1, point);
+        plan.WallSurfaceIds.Insert(segment + 1, Guid.Empty);
+        plan.EnsureWallSlots();
+        if (hadWall)
+            SetWall(setup, plan, segment + 1, true);
+
+        Apply(setup, plan);
+    }
+
+    /// <summary>
+    /// Slides a segment sideways by <paramref name="offset"/> (plan metres, along its normal), from the corners
+    /// it had at <paramref name="startVertices"/>: its two corners travel along their other edges, so the
+    /// neighbouring walls lengthen or shorten and every angle stays. A corner with no other edge, or one whose
+    /// other edge runs parallel, moves with the segment instead.
+    /// </summary>
+    public static void MoveSegment(Setup setup, FloorPlan plan, int segment, IReadOnlyList<Vector2> startVertices, Vector2 offset)
+    {
+        var count = startVertices.Count;
+        if (segment < 0 || segment >= plan.SegmentCount || count != plan.Vertices.Count)
+            return;
+
+        var a = segment;
+        var b = (segment + 1) % count;
+        var direction = startVertices[b] - startVertices[a];
+        if (direction.LengthSquared() < 0.000001f)
+            return;
+
+        var movedA = startVertices[a] + offset;
+        var movedB = startVertices[b] + offset;
+        plan.Vertices[a] = SlideAlongOtherEdge(startVertices, a, a - 1, movedA, direction, plan.IsClosed);
+        plan.Vertices[b] = SlideAlongOtherEdge(startVertices, b, b + 1, movedB, direction, plan.IsClosed);
+        Apply(setup, plan, a, b);
+    }
+
+    /** Where the moved segment's line meets the corner's other edge; the plain move when there is no such edge or it is parallel. */
+    private static Vector2 SlideAlongOtherEdge(IReadOnlyList<Vector2> startVertices, int corner, int neighbour, Vector2 moved, Vector2 direction, bool closed)
+    {
+        var count = startVertices.Count;
+        if (!closed && (neighbour < 0 || neighbour >= count))
+            return moved;
+
+        var other = startVertices[(neighbour + count) % count] - startVertices[corner];
+        var cross = direction.X * other.Y - direction.Y * other.X;
+        if (MathF.Abs(cross) < 0.0001f)
+            return moved;
+
+        // Corner + t·other lies on the line through moved along direction: solve for t.
+        var toMoved = moved - startVertices[corner];
+        var t = (toMoved.X * direction.Y - toMoved.Y * direction.X) / (other.X * direction.Y - other.Y * direction.X);
+        return startVertices[corner] + other * t;
     }
 
     /// <summary>Forgets deleted surfaces: their slots open up, the plan itself stays.</summary>

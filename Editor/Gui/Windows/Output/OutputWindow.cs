@@ -148,7 +148,7 @@ internal sealed partial class OutputWindow : Window
             // and does not emit items, so submit an empty Dummy as an extent marker.
             ImGui.Dummy(Vector2.Zero);
 
-            if (_setupMode.TryDrawEditingView(drawnInstance, EvaluationContext))
+            if (_setupMode.TryDrawEditingView(drawnInstance, EvaluationContext, opPinned: Pinning.IsPinned))
             {
                 // Output-editing view (focused send op or picked entity) was drawn — give it the
                 // breadcrumb so the outliner and op selection stay reachable while editing. With the strip
