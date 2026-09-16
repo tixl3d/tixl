@@ -192,6 +192,7 @@ internal sealed class SetupFlowOutliner
         dl.ChannelsSplit(2);
         dl.ChannelsSetCurrent(1);
         _anchors.Clear();
+        _fenceCandidates.Clear();
         var columnWidth = MathF.Max(avail.X / 4, 60 * scale);
         var maxY = origin.Y;
 
@@ -231,6 +232,7 @@ internal sealed class SetupFlowOutliner
 
         DrawConnections(dl, setup, machineConfig, selection);
         dl.ChannelsMerge();
+        HandleFence(selection);
 
         // One item at the tallest column's end claims the scroll extent for all of them.
         _columnWidth = 0;
@@ -386,6 +388,51 @@ internal sealed class SetupFlowOutliner
     /// <summary>Where an item's connections attach: its left and right x and its vertical centre, in screen px.</summary>
     private readonly record struct Anchor(SetupEntityKinds Kind, Guid Id, float Left, float Right, float Y);
 
+    /// <summary>
+    /// A drag on empty strip space fences the items it crosses, as on the Board: plain replaces, Shift adds,
+    /// Ctrl removes; a click on nothing clears. It never starts on an item, whose press is a pick or a drag.
+    /// </summary>
+    private void HandleFence(SetupEntitySelection selection)
+    {
+        // A fence starts only on the frame the button goes down, and only on empty space — a press on an item is
+        // that item's (a pick, a routing drag), and picking it up mid-press would end as a click that clears.
+        if (_fence.State == SelectionFence.States.Inactive
+            && (!ImGui.IsMouseClicked(ImGuiMouseButton.Left) || ImGui.IsAnyItemHovered() || ImGui.IsAnyItemActive()))
+        {
+            return;
+        }
+
+        switch (_fence.UpdateAndDraw(out var selectMode))
+        {
+            case SelectionFence.States.Updated:
+            case SelectionFence.States.CompletedAsArea:
+                if (selectMode == SelectionFence.SelectModes.Replace)
+                    selection.Clear();
+
+                var bounds = _fence.BoundsInScreen;
+                for (var i = 0; i < _fenceCandidates.Count; i++)
+                {
+                    var (kind, id, rect) = _fenceCandidates[i];
+                    if (!bounds.Overlaps(rect))
+                        continue;
+
+                    if (selectMode == SelectionFence.SelectModes.Remove)
+                        selection.Remove(kind, id);
+                    else
+                        selection.Add(kind, id);
+                }
+
+                break;
+
+            case SelectionFence.States.CompletedAsClick:
+                selection.Clear();
+                break;
+        }
+    }
+
+    private readonly SelectionFence _fence = new();
+    private readonly List<(SetupEntityKinds Kind, Guid Id, ImRect Rect)> _fenceCandidates = [];
+
     /// <summary>Points the cursor at a column's top and tells the items how wide they are.</summary>
     private void BeginColumn(float x, float y, float width)
     {
@@ -434,6 +481,11 @@ internal sealed class SetupFlowOutliner
             // The implicit full-canvas patch is the output itself here: no item, and its slice connection
             // lands on the output item (TryGetAnchor folds an undrawn patch onto its output).
             var hasPatches = SetupRelations.CountListedPatches(output) > 0;
+            // A rename requested from the canvas needs the row on screen: an output folded over that patch unfolds.
+            var reveal = OutlinerItem.RevealPendingId;
+            if (reveal != Guid.Empty && setup.FindPatch(reveal, out var revealOwner) != null && revealOwner?.Id == output.Id)
+                _collapsedOutputs.Remove(output.Id);
+
             var isExpanded = !_collapsedOutputs.Contains(output.Id);
             var args = new OutlinerItem.Args
                            {
@@ -799,6 +851,7 @@ internal sealed class SetupFlowOutliner
         var action = _outlinerItem.DrawItem(selection, setup, in args, out var hovered);
         var rect = _outlinerItem.LastItemRect;
         _anchors.Add(new Anchor(args.Kind, args.Id, rect.Min.X, rect.Max.X, (rect.Min.Y + rect.Max.Y) * 0.5f));
+        _fenceCandidates.Add((args.Kind, args.Id, new ImRect(rect.Min, rect.Max)));
         if (hovered)
         {
             _pendingHoveredKind = args.Kind;
