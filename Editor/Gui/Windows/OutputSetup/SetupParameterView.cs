@@ -4,6 +4,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Output;
+using T3.Core.Output.Rendering;
 using T3.Core.Output.Streaming;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.CanvasEditing;

@@ -18,15 +18,7 @@ internal static class SetupRelations
     /// </summary>
     public static bool TryGetSurfaceOutput(Setup setup, Guid surfaceId, out Guid outputId)
     {
-        var carrier = setup.FindMappedAncestor(surfaceId);
-        if (carrier == null)
-        {
-            outputId = Guid.Empty;
-            return false;
-        }
-
-        outputId = carrier.OutputMappings[0].OutputId;
-        return true;
+        return setup.TryGetOutputOfSurface(surfaceId, out outputId);
     }
 
     /// <summary>
@@ -119,23 +111,7 @@ internal static class SetupRelations
     /// <summary>The output a slice reaches first: a patch showing it, else a surface showing it that is mapped.</summary>
     public static bool TryGetSliceOutput(Setup setup, Guid sliceId, out Guid outputId)
     {
-        outputId = Guid.Empty;
-        foreach (var output in setup.Outputs)
-        {
-            if (!OutputShowsSlice(output, sliceId))
-                continue;
-
-            outputId = output.Id;
-            return true;
-        }
-
-        foreach (var surface in setup.Surfaces)
-        {
-            if (surface.SliceId == sliceId && TryGetSurfaceOutput(setup, surface.Id, out outputId))
-                return true;
-        }
-
-        return false;
+        return setup.TryGetOutputOfSlice(sliceId, out outputId);
     }
 
     /// <summary>
@@ -144,18 +120,7 @@ internal static class SetupRelations
     /// </summary>
     public static bool TryGetSendOutput(Setup setup, Guid symbolChildId, out Guid outputId)
     {
-        outputId = Guid.Empty;
-        var source = setup.FindSourceByChildId(symbolChildId);
-        if (source == null)
-            return false;
-
-        foreach (var slice in setup.Slices)
-        {
-            if (slice.SourceId == source.Id && TryGetSliceOutput(setup, slice.Id, out outputId))
-                return true;
-        }
-
-        return false;
+        return setup.TryGetOutputOfSend(symbolChildId, out outputId);
     }
 
     public static bool TryGetPatchOutput(Setup setup, Guid patchId, out Guid outputId)
@@ -289,16 +254,7 @@ internal static class SetupRelations
     /// <summary>Whether any patch on the output shows this slice.</summary>
     public static bool OutputShowsSlice(OutputDefinition output, Guid sliceId)
     {
-        if (sliceId == Guid.Empty)
-            return false;
-
-        foreach (var patch in output.Patches)
-        {
-            if (patch.SliceId == sliceId)
-                return true;
-        }
-
-        return false;
+        return output.ShowsSlice(sliceId);
     }
 
     /// <summary>

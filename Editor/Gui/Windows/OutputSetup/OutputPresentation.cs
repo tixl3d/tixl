@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using T3.Core.Output;
+using T3.Core.Output.Rendering;
 using T3.Core.Output.Streaming;
 using T3.Editor.App;
 using T3.Editor.UiModel.ProjectHandling;
@@ -23,6 +24,8 @@ internal static class OutputPresentation
     /// </summary>
     public static void UpdatePresentation()
     {
+        // One token per frame for everything the compositing path memoises, advanced before anything asks.
+        OutputFrame.Advance();
         OutputWindowHandling.BeginFrame();
 
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))

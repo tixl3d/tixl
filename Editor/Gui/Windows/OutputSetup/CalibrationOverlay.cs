@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using ImGuiNET;
 using SharpDX.Direct3D11;
 using T3.Core.Output;
+using T3.Core.Output.Rendering;
 using T3.Core.Resource;
 using T3.Editor.Gui.Styling;
 using Buffer = SharpDX.Direct3D11.Buffer;
@@ -27,6 +28,34 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// </summary>
 internal static class CalibrationOverlay
 {
+    /// <summary>
+    /// Hands the compositor its calibration hook. Installed once at startup: a host that never calls this
+    /// composites without any of it, which is what a show wants.
+    /// </summary>
+    public static void Install()
+    {
+        OutputCompositor.Overlay = new Hook();
+    }
+
+    /// <summary>Forwards to the static entry points, which hold the session state the tools write into.</summary>
+    private sealed class Hook : ICalibrationOverlay
+    {
+        void ICalibrationOverlay.BeginCollect() => CalibrationOverlay.BeginCollect();
+        bool ICalibrationOverlay.ProjectsPhoto(Guid surfaceId) => CalibrationOverlay.ProjectsPhoto(surfaceId);
+
+        void ICalibrationOverlay.DeferPhotoFragments(Surface surface, Surface.OutputMapping mapping, Matrix4x4 homography)
+            => CalibrationOverlay.DeferPhotoFragments(surface, mapping, homography);
+
+        void ICalibrationOverlay.CollectPhotoFragments(Int2 canvasResolution, List<OutputCompositor.DrawItem> drawItems)
+            => CalibrationOverlay.CollectPhotoFragments(canvasResolution, drawItems);
+
+        void ICalibrationOverlay.CollectAnnotations(Surface surface, Surface.OutputMapping mapping, Vector2 canvasSize)
+            => CalibrationOverlay.CollectAnnotations(surface, mapping, canvasSize);
+
+        void ICalibrationOverlay.Draw(DeviceContext deviceContext, Int2 canvasResolution)
+            => CalibrationOverlay.Draw(deviceContext, canvasResolution);
+    }
+
     /// <summary>
     /// Where a tool is currently being aimed on <paramref name="surfaceId"/>, in surface meters. Projected as
     /// a crosshair so the point can be placed against a physical feature *before* the drag starts — until the

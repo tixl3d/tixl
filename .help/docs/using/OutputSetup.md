@@ -97,6 +97,7 @@ The bindings are also reachable from the output's context menu and from the Outp
 - Name surfaces after the real thing ("Left wall", "Bar counter"); slices and patches are named after what they cut from, so they stay right when you rename.
 - Keep the outliner strip tall while routing and collapse it while pinning corners.
 - Every structural edit is undoable with `Ctrl+Z`. Bindings are machine state and save immediately, outside the undo stack.
+- Exporting an executable copies the setup beside it, so the operators that read the venue work there too. The bindings stay behind — see [Export Executables](ExportExecutables.md).
 
 ## See also
 

@@ -176,26 +176,16 @@ internal static class OutputSetupHandling
     /// </summary>
     private static void ResolveCanvasResolutions(Setup setup, MachineConfig machineConfig)
     {
-        foreach (var output in setup.Outputs)
-        {
-            if (!output.FollowsPlug)
-            {
-                output.ResolvedResolution = output.CanvasResolution;
-                continue;
-            }
-
-            var plugId = Plugs.BoundPlugId(machineConfig.FindBinding(output.Id));
-            var resolution = plugId == Guid.Empty ? new Int2(1920, 1080) : Plugs.PlugResolution(plugId);
-            output.ResolvedResolution = resolution;
-        }
-
-        foreach (var output in setup.Outputs)
-        {
-            var canvas = output.CanvasSize;
-            foreach (var patch in output.Patches)
-                patch.TryFitQuad(canvas);
-        }
+        SetupFiles.ResolveCanvasResolutions(setup, machineConfig, _resolutionOfBinding);
     }
+
+    /** Cached so the per-frame resolve doesn't allocate a closure for every output. */
+    private static readonly Func<PlugBinding?, Int2> _resolutionOfBinding =
+        binding =>
+        {
+            var plugId = Plugs.BoundPlugId(binding);
+            return plugId == Guid.Empty ? SetupFiles.UnboundResolution : Plugs.PlugResolution(plugId);
+        };
 
     private static bool TryGetFocusedEntry([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out ProjectEntry? entry, out string metaFolder)
     {
@@ -232,35 +222,7 @@ internal static class OutputSetupHandling
             return entry;
 
         var metaFolder = Path.Combine(projectFolder, Setup.FolderName);
-
-        // The machine config remembers which setup this machine last had active, so it is read first.
-        var machineConfigPath = Path.Combine(metaFolder, MachineConfig.FileName);
-        var machineConfig = new MachineConfig();
-        if (File.Exists(machineConfigPath))
-            MachineConfig.TryLoadFromFile(machineConfigPath, out machineConfig);
-
-        Setup? setup = null;
-        var wasRepaired = false;
-        if (Directory.Exists(metaFolder))
-        {
-            // Fall back to the first setup on disk if the remembered one is gone or none was recorded.
-            var activeName = machineConfig.ActiveSetupName;
-            if (activeName.Length > 0)
-            {
-                var preferred = SetupFilePath(metaFolder, activeName);
-                if (File.Exists(preferred))
-                    Setup.TryLoadFromFile(preferred, out setup, out wasRepaired);
-            }
-
-            if (setup == null)
-            {
-                foreach (var filePath in Directory.EnumerateFiles(metaFolder, "*" + Setup.FileSuffix))
-                {
-                    if (Setup.TryLoadFromFile(filePath, out setup, out wasRepaired))
-                        break;
-                }
-            }
-        }
+        SetupFiles.TryLoad(metaFolder, out var setup, out var machineConfig, out var wasRepaired);
 
         if (setup == null)
         {

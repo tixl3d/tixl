@@ -349,6 +349,59 @@ public sealed class Setup
         return sb.ToString();
     }
 
+    /// <summary>The output a surface is mapped to, following a region up to whichever ancestor carries the pin.</summary>
+    public bool TryGetOutputOfSurface(Guid surfaceId, out Guid outputId)
+    {
+        var carrier = FindMappedAncestor(surfaceId);
+        if (carrier == null || carrier.OutputMappings.Count == 0)
+        {
+            outputId = Guid.Empty;
+            return false;
+        }
+
+        outputId = carrier.OutputMappings[0].OutputId;
+        return true;
+    }
+
+    /// <summary>The output a slice reaches: a patch showing it directly, else a surface that shows it.</summary>
+    public bool TryGetOutputOfSlice(Guid sliceId, out Guid outputId)
+    {
+        outputId = Guid.Empty;
+        foreach (var output in Outputs)
+        {
+            if (!output.ShowsSlice(sliceId))
+                continue;
+
+            outputId = output.Id;
+            return true;
+        }
+
+        foreach (var surface in Surfaces)
+        {
+            if (surface.SliceId == sliceId && TryGetOutputOfSurface(surface.Id, out outputId))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>The output a send op's content reaches first, through any of the slices cut from it.</summary>
+    public bool TryGetOutputOfSend(Guid symbolChildId, out Guid outputId)
+    {
+        outputId = Guid.Empty;
+        var source = FindSourceByChildId(symbolChildId);
+        if (source == null)
+            return false;
+
+        foreach (var slice in Slices)
+        {
+            if (slice.SourceId == source.Id && TryGetOutputOfSlice(slice.Id, out outputId))
+                return true;
+        }
+
+        return false;
+    }
+
     public bool TrySaveToFile(string filePath)
     {
         try

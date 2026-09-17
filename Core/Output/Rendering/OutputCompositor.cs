@@ -2,28 +2,21 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using ImGuiNET;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
-using T3.Core.Output;
 using T3.Core.Rendering;
 using T3.Core.Resource;
-using T3.Editor.UiModel.ProjectHandling;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Format = SharpDX.DXGI.Format;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Int2 = T3.Core.DataTypes.Vector.Int2;
-using Vector2 = System.Numerics.Vector2;
-using Vector4 = System.Numerics.Vector4;
-using Matrix4x4 = System.Numerics.Matrix4x4;
-using Surface = T3.Core.Output.Surface;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using VertexShader = T3.Core.DataTypes.VertexShader;
 
-namespace T3.Editor.Gui.Windows.OutputSetup;
+namespace T3.Core.Output.Rendering;
 
 /// <summary>
 /// Composites the content bound to a setup output. Walking the active setup's patches and surfaces, it pulls
@@ -31,11 +24,17 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// output's own render target and returns the composite texture. The send ops never draw — the drawing lives
 /// here, in one place.
 /// </summary>
-internal static class OutputCompositor
+public static class OutputCompositor
 {
     // GridParams.w > 0.5 selects the analytic calibration grid (Srv unused); otherwise Srv is warped as content.
-    internal readonly record struct DrawItem(ShaderResourceView? Srv, Matrix4x4 Homography, Vector4 SourceRect, Vector4 Color,
+    public readonly record struct DrawItem(ShaderResourceView? Srv, Matrix4x4 Homography, Vector4 SourceRect, Vector4 Color,
                                              Vector4 GridParams, Vector4 GridColor, Vector4 GridOrigin, Vector4 Mask);
+
+    /// <summary>
+    /// What an authoring host adds while calibrating, installed by that host. Null in a show, where nothing is
+    /// being aligned and the composite is only the content.
+    /// </summary>
+    public static ICalibrationOverlay? Overlay;
 
     /// <summary>
     /// Renders the output's composite, or null if nothing is bound to it. Rendered at most once per frame:
@@ -49,7 +48,7 @@ internal static class OutputCompositor
         if (setup == null || output == null)
             return null;
 
-        var frame = ImGui.GetFrameCount();
+        var frame = OutputFrame.Token;
         if (_compositeFrames.TryGetValue(outputId, out var rendered) && rendered.Frame == frame)
             return rendered.HasContent && _targets.TryGetValue(outputId, out var renderedTarget) ? renderedTarget.Texture : null;
 
@@ -58,7 +57,7 @@ internal static class OutputCompositor
         // Phase 1: resolve each surface's content and mapping. Pulling content here (before our RT is
         // bound) keeps the content's own rendering from clobbering the target we bind in phase 2.
         _drawItems.Clear();
-        CalibrationOverlay.BeginCollect();
+        Overlay?.BeginCollect();
 
         // Patches first: they are the canvas layer (pixels), and the surfaces (the room) composite over them.
         // Painter's order among patches is list order.
@@ -113,7 +112,7 @@ internal static class OutputCompositor
 
             // While a surface is being calibrated against its photo, a disc of the photo is projected around each
             // reference point: the wall's own picture, right where the feature is, so it can be walked onto it.
-            var projectsPhoto = CalibrationOverlay.ProjectsPhoto(surface.Id);
+            var projectsPhoto = Overlay != null && Overlay.ProjectsPhoto(surface.Id);
 
             // Metres spanned by the surface, and the origin (its anchor) in source UV — the anchor is signed
             // and Y-up while V runs downward from the top.
@@ -147,7 +146,7 @@ internal static class OutputCompositor
                     _drawItems.Add(new DrawItem(srv, homography, sourceRect, color, Vector4.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero));
 
                 if (projectsPhoto && ReferenceEquals(carrier, surface))
-                    CalibrationOverlay.DeferPhotoFragments(surface, mapping, homography);
+                    Overlay?.DeferPhotoFragments(surface, mapping, homography);
 
                 // Calibration raster after the content, so it composites *over* it and stays readable while
                 // aligning. Emitted with or without content — with none, it's lines on the cleared black.
@@ -161,11 +160,11 @@ internal static class OutputCompositor
                 // its *projection* lies along a real feature, and walk a point onto the feature it marks. They
                 // ride the raster's switch or the projected photo — both calibration sessions, neither a show.
                 if ((surface.ShowGrid || projectsPhoto) && ReferenceEquals(carrier, surface))
-                    CalibrationOverlay.CollectAnnotations(surface, mapping, output.CanvasSize);
+                    Overlay?.CollectAnnotations(surface, mapping, output.CanvasSize);
             }
         }
 
-        CalibrationOverlay.CollectPhotoFragments(output.ResolvedResolution, _drawItems);
+        Overlay?.CollectPhotoFragments(output.ResolvedResolution, _drawItems);
 
         if (_drawItems.Count == 0)
         {
@@ -186,8 +185,8 @@ internal static class OutputCompositor
         var vs = _vertexShaderResource!.Value;
         var ps = _pixelShaderResource!.Value;
 
-        // Phase 2: bind our render target and composite. No state restore — like the thumbnail renderer,
-        // this runs during ImGui layout and ImGui rebinds the main target when it renders at frame end.
+        // Phase 2: bind our render target and composite. No state restore: the host binds its own target for
+        // the rest of the frame, and every caller here runs before that happens.
         var deviceContext = ResourceManager.Device.ImmediateContext;
         deviceContext.OutputMerger.SetTargets(target.Rtv);
         deviceContext.Rasterizer.SetViewport(new ViewportF(0, 0, target.Size.Width, target.Size.Height, 0f, 1f));
@@ -223,7 +222,7 @@ internal static class OutputCompositor
 
         deviceContext.PixelShader.SetShaderResource(0, null);
 
-        CalibrationOverlay.Draw(deviceContext, output.ResolvedResolution);
+        Overlay?.Draw(deviceContext, output.ResolvedResolution);
         _compositeFrames[outputId] = (frame, true);
         return target.Texture;
     }

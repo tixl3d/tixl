@@ -1,24 +1,19 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Core.Output;
-using T3.Editor.UiModel.ProjectHandling;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Int2 = T3.Core.DataTypes.Vector.Int2;
-using Vector4 = System.Numerics.Vector4;
-using Surface = T3.Core.Output.Surface;
 
-namespace T3.Editor.Gui.Windows.OutputSetup;
+namespace T3.Core.Output.Rendering;
 
 /// <summary>
 /// Resolves setup routing (slice → source → send op) to live textures and pulls that content through one
 /// shared evaluation context. Content is pulled once per send op per frame, so several surfaces slicing
 /// one image cost a single upstream evaluation, and the surface→slice chain of finds is memoised per frame.
 /// </summary>
-internal static class OutputContentResolver
+public static class OutputContentResolver
 {
     /// <summary>The shared evaluation context, valid after <see cref="PrepareContext"/> ran this frame.</summary>
     public static EvaluationContext Context => _context ??= new EvaluationContext();
@@ -42,7 +37,7 @@ internal static class OutputContentResolver
     public static Texture2D? PullContent(IContentSupplier supplier)
     {
         var context = Context;
-        var frame = ImGui.GetFrameCount();
+        var frame = OutputFrame.Token;
         if (frame != _pulledContentFrame)
         {
             _pulledContentFrame = frame;
@@ -85,7 +80,7 @@ internal static class OutputContentResolver
     /// </summary>
     public static Int2 RequestedResolutionFor(Setup setup, Guid symbolChildId)
     {
-        if (SetupRelations.TryGetSendOutput(setup, symbolChildId, out var outputId))
+        if (setup.TryGetOutputOfSend(symbolChildId, out var outputId))
         {
             var routed = setup.FindOutput(outputId);
             if (routed != null && TryGetFittedPatchRequest(setup, routed, symbolChildId, out var fitted))
@@ -137,7 +132,7 @@ internal static class OutputContentResolver
     public static bool TryGetSurfaceSlice(Guid surfaceId, out Slice? slice, out Texture2D? content, out Vector4 uv)
     {
         // Every card, region and traced quad asks per frame; the chain of linear finds behind it is answered once.
-        var frame = ImGui.GetFrameCount();
+        var frame = OutputFrame.Token;
         if (frame != _surfaceSliceFrame)
         {
             _surfaceSliceFrame = frame;
@@ -191,7 +186,7 @@ internal static class OutputContentResolver
 
     private static void InvalidateContentOncePerFrame(EvaluationContext context)
     {
-        var frame = ImGui.GetFrameCount();
+        var frame = OutputFrame.Token;
         if (frame == _invalidatedContentFrame)
             return;
 

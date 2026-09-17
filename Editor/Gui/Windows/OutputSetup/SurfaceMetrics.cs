@@ -1,5 +1,6 @@
 #nullable enable
 using T3.Core.Output;
+using T3.Core.Output.Rendering;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;

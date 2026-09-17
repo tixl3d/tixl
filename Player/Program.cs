@@ -21,6 +21,7 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Output;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
 using T3.Core.Resource;
@@ -263,6 +264,8 @@ internal static partial class Program
                             {
                                 Settings = playbackSettings
                             };
+
+            LoadOutputSetup();
 
             // Create instance of project op, all children are create automatically
             loadReport.BeginStage("Create instances");
@@ -553,6 +556,27 @@ internal static partial class Program
     /// Logs and remembered settings live in a .temp folder next to the executable, where users look for them.
     /// Falls back to the roaming app-data folder when the export location is read-only.
     /// </summary>
+    /// <summary>
+    /// Publishes the venue shipped beside the player, so operators that read the active setup (the stage
+    /// geometry, the projector camera) work in an export as they do in the editor. Bindings are this machine's
+    /// business and are absent unless a machine config travelled with the show, in which case every
+    /// plug-following output falls back to a default canvas size.
+    /// </summary>
+    private static void LoadOutputSetup()
+    {
+        var metaFolder = Path.Combine(FileLocations.StartFolder, Setup.FolderName);
+        if (!SetupFiles.TryLoad(metaFolder, out var setup, out var machineConfig, out _) || setup == null)
+        {
+            Log.Debug("No output setup shipped with this project.");
+            return;
+        }
+
+        SetupFiles.ResolveCanvasResolutions(setup, machineConfig, null);
+        ActiveSetup.Current = setup;
+        ActiveSetup.Machine = machineConfig;
+        Log.Info($"Loaded output setup \"{setup.Name}\": {setup.Outputs.Count} output(s), {setup.Surfaces.Count} surface(s).");
+    }
+
     private static string ResolvePlayerDataDirectory(ExportSettings exportSettings)
     {
         var localDirectory = Path.Combine(FileLocations.StartFolder, ".temp");

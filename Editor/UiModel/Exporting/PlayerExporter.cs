@@ -7,6 +7,7 @@ using T3.Core.DataTypes;
 using T3.Core.IO;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Output;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
 using T3.Core.Resource;
@@ -171,6 +172,8 @@ internal static partial class PlayerExporter
 
         if (!TryExportSettings(exportDir, symbol, exportConfig, title, author, out reason))
             return false;
+
+        TryExportOutputSetups(symbol, exportDir);
 
         RenamePlayerExecutable(exportDir, title);
 
@@ -617,6 +620,38 @@ internal static partial class PlayerExporter
         catch (Exception e)
         {
             Log.Warning($"Failed to rename Player.exe to {exeName}.exe: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Ships the project's output setups beside the player, so ops that read the venue (and, later, the player's
+    /// own presentation) still find it. The setups describe the venue and travel with the show; the machine
+    /// config holds this computer's display numbering and deliberately does not.
+    /// </summary>
+    private static void TryExportOutputSetups(Symbol symbol, string exportDir)
+    {
+        var projectFolder = symbol.SymbolPackage.Folder;
+        var sourceFolder = Path.Combine(projectFolder, Setup.FolderName);
+        if (!Directory.Exists(sourceFolder))
+            return;
+
+        var setupFiles = Directory.GetFiles(sourceFolder, "*" + Setup.FileSuffix);
+        if (setupFiles.Length == 0)
+            return;
+
+        var targetFolder = Path.Combine(exportDir, Setup.FolderName);
+        try
+        {
+            Directory.CreateDirectory(targetFolder);
+            foreach (var filePath in setupFiles)
+                File.Copy(filePath, Path.Combine(targetFolder, Path.GetFileName(filePath)), overwrite: true);
+
+            Log.Info($"Exported {setupFiles.Length} output setup(s).");
+        }
+        catch (Exception e)
+        {
+            // The graph still runs without a setup; only the ops that read the venue go quiet.
+            Log.Warning($"Could not export the output setup: {e.Message}");
         }
     }
 

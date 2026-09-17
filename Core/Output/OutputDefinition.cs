@@ -108,6 +108,21 @@ public sealed class OutputDefinition
     /// surface-less keystone (a warped quad) — where surfaces model the room in metres. A route's quad lives
     /// on a patch <em>or</em> on a surface's mapping, never both.
     /// </summary>
+    /// <summary>Whether one of this output's patches feeds from the slice — the direct pipe, without a surface.</summary>
+    public bool ShowsSlice(Guid sliceId)
+    {
+        if (sliceId == Guid.Empty)
+            return false;
+
+        foreach (var patch in Patches)
+        {
+            if (patch.SliceId == sliceId)
+                return true;
+        }
+
+        return false;
+    }
+
     public sealed class Patch
     {
         public Guid Id = Guid.NewGuid();

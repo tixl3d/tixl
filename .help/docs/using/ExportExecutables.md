@@ -50,6 +50,12 @@ On start, the player opens a small dialog asking for the display, the resolution
 
 The player writes its log files and the remembered startup choice to a `.temp/` folder next to the executable (falling back to the user's app-data folder when that location is read-only).
 
+### Output setup
+
+If the project has an [output setup](OutputSetup.md), its `*.setup.json` files are copied into a `.meta` folder beside the executable and the player loads one at startup, picking the same file the editor would. Operators that read the venue — [StageGeometry], [DrawStageCanvas], [UseProjectorCam] — therefore work in an export exactly as they do in the editor.
+
+The local bindings (`outputs.machine.json`) are *not* exported: they name this computer's displays, and the machine running the show is rarely the one that authored it. Without them, an output whose canvas is left at 0 × 0 renders at 1920 × 1080. The player still presents through its own single window; driving projectors from the setup is not yet part of an export.
+
 ### Loading screen
 
 After the dialog the player shows a dark loading screen with a progress bar and the latest log line while it loads the operator packages, creates the graph and warms up shaders. `Esc` cancels. When loading completes, the log (and `.temp/loadReport.json`) contains a short report: package / symbol / instance counts, shaders compiled vs. loaded from cache, asset size and the duration of each stage — handy when an export starts slowly.

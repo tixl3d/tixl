@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Output;
+using T3.Core.Output.Rendering;
 using T3.Core.Resource;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Input;

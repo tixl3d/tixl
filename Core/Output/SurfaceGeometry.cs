@@ -1,8 +1,8 @@
 #nullable enable
-using T3.Core.Output;
-using Vector2 = System.Numerics.Vector2;
+using System;
+using System.Collections.Generic;
 
-namespace T3.Editor.Gui.Windows.OutputSetup;
+namespace T3.Core.Output;
 
 /// <summary>
 /// Surface-space geometry, shared by the Size (m) fields and the canvas edge handles. A surface's corner-pin
@@ -14,7 +14,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// that changes the footprint leaves all of them where they are: only the rectangle's bounds move, never the
 /// origin. Quads are handed out in the projector's winding, TL, TR, BR, BL; bounds as (min, max).</para>
 /// </summary>
-internal static class SurfaceGeometry
+public static class SurfaceGeometry
 {
     /// <summary>Smallest edge length we allow, so a crop can't collapse a surface to nothing.</summary>
     public const float MinSize = 0.01f;
