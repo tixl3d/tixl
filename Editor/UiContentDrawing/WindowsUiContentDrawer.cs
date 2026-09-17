@@ -487,7 +487,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         {
             lock (StallWatchdog.PresentLock)
             {
-                FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _fontSampler);
+                FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _imGuiSampler);
                 StallOverlay.SnapshotFonts();
             }
         }
@@ -509,7 +509,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         context.InputAssembler.InputLayout = _inputLayout;
         context.VertexShader.SetShader(_vertexShader, null, 0);
         context.PixelShader.SetShader(_pixelShader, null, 0);
-        context.PixelShader.SetSampler(0, _fontSampler);
+        context.PixelShader.SetSampler(0, _imGuiSampler);
         context.OutputMerger.SetBlendState(_blendState, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
         context.OutputMerger.SetDepthStencilState(_depthStencilState, 0);
         context.Rasterizer.State = _rasterizerState;
