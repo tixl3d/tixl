@@ -139,6 +139,7 @@ internal static class Program
         Log.AddWriter(new ConsoleWriter());
         Log.AddWriter(FileWriter.CreateDefault(FileLocations.SettingsDirectory, out var logPath));
         Log.AddWriter(StatusErrorLine);
+        Log.AddWriter(new StallOverlay.LastLogMessage());
         Log.AddWriter(ConsoleLogWindow);
             
         Log.Info($"Starting {FormattedEditorVersion}");
@@ -266,9 +267,12 @@ internal static class Program
 
         T3Style.Apply();
             
+        StallWatchdog.Start(device, ProgramWindows.Main, contentDrawer);
+
         // ReSharper disable once AccessToDisposedClosure
         ProgramWindows.Main.RunRenderLoop(UiContentContentDrawer.RenderCallback);
         IsShuttingDown = true;
+        StallWatchdog.Stop();
         App.DebugProtocol.DebugServer.Stop();
 
         try

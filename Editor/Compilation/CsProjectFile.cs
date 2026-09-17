@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.Construction;
 using T3.Core.Compilation;
 using T3.Core.Settings;
+using T3.Editor.Gui.UiHelpers;
 using Encoding = System.Text.Encoding;
 
 // ReSharper disable SuggestBaseTypeForParameterInConstructor
@@ -432,6 +433,7 @@ internal sealed class CsProjectFile
     /// <returns>True if successful</returns>
     public bool TryRecompile(bool nugetRestore, [NotNullWhen(false)] out string? output)
     {
+        using var activity = MainThreadActivity.Begin(nugetRestore ? "compile-restore" : "compile", $"Compiling {Name}...");
         if (!Compiler.TryCompile(this, EditorBuildMode, nugetRestore, out output))
         {
             return false;

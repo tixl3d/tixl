@@ -375,11 +375,26 @@ internal static class ProgramWindows
         }
     }
 
-    public static void RebuildUiCopyTextureIfRequired()
+    /// <summary>
+    /// Keeps a copy of the frame that is about to be presented. The flip-model swap chain discards
+    /// its back buffer, so this copy is what <see cref="StallWatchdog"/> shows during a stall and
+    /// what gets mirrored to the second view.
+    /// </summary>
+    public static void CaptureUiFrame()
     {
+        lock (StallWatchdog.PresentLock)
+        {
+            RebuildUiCopyTextureIfRequired();
+            _deviceContext.CopyResource(Main.BackBufferTexture, _uiCopyTexture);
+        }
+    }
+
+    private static void RebuildUiCopyTextureIfRequired()
+    {
+        var backBufferDescription = Main.BackBufferTexture.Description;
         var needsRebuild = _uiCopyTexture == null ||
-                           _uiCopyTexture.Description.Width != Main.SwapChain.Description.ModeDescription.Width ||
-                           _uiCopyTexture.Description.Height != Main.SwapChain.Description.ModeDescription.Height;
+                           UiCopyTextureDescription.Width != backBufferDescription.Width ||
+                           UiCopyTextureDescription.Height != backBufferDescription.Height;
 
         if (!needsRebuild)
             return;
@@ -387,8 +402,8 @@ internal static class ProgramWindows
         // Create a shader resource-compatible texture
         var textureDesc = new Texture2DDescription
         {
-            Width = Main.SwapChain.Description.ModeDescription.Width,
-            Height = Main.SwapChain.Description.ModeDescription.Height,
+            Width = backBufferDescription.Width,
+            Height = backBufferDescription.Height,
             MipLevels = 1,
             ArraySize = 1,
             Format = Main.SwapChain.Description.ModeDescription.Format,
@@ -403,6 +418,7 @@ internal static class ProgramWindows
             _uiCopyTexture.Dispose();
 
         _uiCopyTexture = new Texture2D(_device, textureDesc);
+        UiCopyTextureDescription = textureDesc;
 
         if (UiCopyTextureSrv is { IsDisposed: false })
             UiCopyTextureSrv.Dispose();
@@ -410,24 +426,13 @@ internal static class ProgramWindows
         UiCopyTextureSrv = new ShaderResourceView(_device, _uiCopyTexture);
     }
 
-    /// <summary>
-    /// For things like presentations, demos or certain live performance situations it
-    /// can be desired to share also T3's UI content on a second display.
-    ///  
-    /// On Windows duplicating a display is extremely expensive. This work around
-    /// copies the last frame into a texture which is then presented on the second display.
-    /// </summary>
-    public static void CopyUiContentToShareTexture()
-    {
-        if (_uiCopyTexture == null || _uiCopyTexture.IsDisposed)
-        {
-            Log.Warning("Can't use undefined uiCopyTexture");
-            return;
-        }
-
-        _deviceContext.CopyResource(Main.BackBufferTexture, _uiCopyTexture);
-    }
-
     private static Texture2D _uiCopyTexture;
+
+    /// <summary>
+    /// The last presented UI frame. For presentations or live performances it can be mirrored to the
+    /// second view, because duplicating a display on Windows is extremely expensive.
+    /// </summary>
     public static ShaderResourceView UiCopyTextureSrv { get; private set; }
+
+    internal static Texture2DDescription UiCopyTextureDescription { get; private set; }
 }

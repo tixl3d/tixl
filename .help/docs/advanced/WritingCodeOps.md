@@ -67,6 +67,7 @@ private void Update(EvaluationContext context)
 ```
 9. If things are setup correctly, you can now press Ctrl+S to save `Modulo2.cs`.
     - TiXL automatically notices the change and will recompile and reload the operator.
+    - While it compiles, the editor can't react to input. If that takes longer than about half a second, the interface dims and shows a progress panel with the current activity. The bar is an estimate based on how long the same kind of work took before on your machine.
 - Switch to TiXL
 - Open *Windows* -> *Console* or switch to a layout with the *Console Window* enabled.
 - If the Modulo2 operator selected and visible in the *Output window* you should see the `Modulo2: _Hello Op_` log messages.

@@ -11,6 +11,7 @@ using T3.Editor.Compilation;
 using T3.Editor.Gui.InputUi.VectorInputs;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using GraphUtils = T3.Editor.UiModel.Helpers.GraphUtils;
@@ -29,6 +30,7 @@ internal static class Duplicate
     public static Symbol DuplicateAsNewType(SymbolUi compositionUi, EditableSymbolProject project, Guid symbolId, string newTypeName, string nameSpace,
                                             string description, Vector2 posOnCanvas, out string failureReason)
     {
+        using var activity = MainThreadActivity.Begin("duplicate-symbol", $"Duplicating as {newTypeName}...");
         failureReason = null;
         var sourceSymbol = EditorSymbolPackage.AllSymbols.FirstOrDefault(x => x.Id == symbolId);
         if (sourceSymbol == null)

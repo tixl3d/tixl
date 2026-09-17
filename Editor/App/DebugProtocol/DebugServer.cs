@@ -372,6 +372,29 @@ internal static class DebugServer
                 HandleReload(request, context);
                 break;
 
+            case "stallMainThread":
+            {
+                // Simulates long synchronous work to exercise the stall overlay.
+                var seconds = Math.Clamp(request["seconds"]?.Value<double>() ?? 5, 0, 120);
+                var estimateKey = request["estimateKey"]?.Value<string>();
+                var message = request["message"]?.Value<string>() ?? "Simulating work...";
+                Log.Debug($"Stalling main thread for {seconds:0.0}s");
+                if (string.IsNullOrEmpty(estimateKey))
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(seconds));
+                }
+                else
+                {
+                    using (MainThreadActivity.Begin(estimateKey, message))
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(seconds));
+                    }
+                }
+
+                context.SendOk(new JObject());
+                break;
+            }
+
             case "undo":
                 if (UndoRedoStack.CanUndo)
                     UndoRedoStack.Undo();

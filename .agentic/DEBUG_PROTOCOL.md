@@ -43,7 +43,7 @@ Read surface: `ping`, `getVersion`, `getStructureVersion`, `getMetrics`, `getCon
 Control surface: `openProject` (`name`), `newProject`, `select` (`childId` / `childIds`, `add`),
 `setGraphView`, `focusGraphView`, `setInput` (`childId`, `inputName`, `value`), `addOp`,
 `connect`, `deleteOp`, `pin`, `pumpFrames` (`count`), `resetView`, `reload`, `undo`, `redo`,
-`setTime`, `setPlayback`, `shutdown`.
+`setTime`, `setPlayback`, `stallMainThread` (`seconds`, `estimateKey`, `message`), `shutdown`.
 
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 
@@ -55,6 +55,10 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 
 - `reload` works on **editable projects only** (synchronous recompile; MSBuild errors come
   back in a `COMPILE_FAILED` detail). Built-in packages like `Lib` need an editor restart.
+- `stallMainThread` sleeps on the main thread to exercise the stall overlay (`StallWatchdog`).
+  With an `estimateKey` it runs inside a `MainThreadActivity` scope, so the second run with the
+  same key shows estimated progress. The overlay is presented by another thread, so neither
+  `screenshot` nor `screenshotWindow` can capture it; they only run once the stall is over.
 - `shutdown` is fire-and-forget — the response may never arrive.
 - `getOutput` with a forced update only works for simple leaf evaluation and can
   double-evaluate; prefer the select-then-read pattern below.
