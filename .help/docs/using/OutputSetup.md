@@ -32,7 +32,7 @@ Drag a row onto another row to connect them. The direction doesn't matter: dropp
 - A slice or source onto a surface shows it there, replacing whatever it showed. To show a second thing on the same wall, add a region and feed that.
 - A surface onto an output maps it there with a default corner pin.
 - A slice or source onto an output fills its canvas. No patch appears in the strip: an output's sole full-canvas patch is folded into the output row, the way a source's full-frame slice is folded into the source.
-- A slice or source onto a patch re-feeds that patch. A surface onto a patch takes the patch's place, pinned to its quad.
+- A slice or source onto a patch re-feeds that patch. A surface onto a patch is pinned to the patch's quad; a patch that fed content hands it to the surface and goes, a patch without content (a traced pixel map area) stays. A surface without content of its own shows on its Board card what the output canvas holds at its place: its mapping, or a patch carrying its name.
 - An output onto a plug binds it to that display or stream. Content or a surface dropped on a plug routes into the output it presents, creating and binding one if the plug is still free.
 
 Each row's context menu offers Rename, Duplicate and Delete. `Del` removes the selection while the strip has focus.

@@ -88,6 +88,15 @@ internal sealed partial class SetupOutputView
 
             if (!hasStraightSubject)
                 SetupRelations.TryGetSurfaceOf(setup, primaryKind, primaryId, out reachedSurfaceId);
+
+            // Reaching a surface is not enough: one that is neither mapped to an output nor traced on a photo has
+            // nothing to straighten against, and the tab would bounce straight back to the Board.
+            if (reachedSurfaceId != Guid.Empty
+                && setup.FindMappedAncestor(reachedSurfaceId) is not { OutputMappings.Count: > 0 }
+                && TracedImageOf(setup, reachedSurfaceId) == null)
+            {
+                reachedSurfaceId = Guid.Empty;
+            }
         }
 
         var canOutput = hasOutput || reachedOutputId != Guid.Empty;

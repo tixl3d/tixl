@@ -349,6 +349,17 @@ internal sealed partial class SetupOutputView
                 dl.AddImage(contentSrv.NativePointer, sMin, sMax, new Vector2(contentUv.X, contentUv.Y), new Vector2(contentUv.Z, contentUv.W),
                             UiColors.ForegroundFull.Fade(preview * fade));
         }
+        else if (kind == SetupEntityKinds.Surface && preview > 0.01f && setup.FindSurface(id) is { } canvasFedSurface
+                 && TryFindCanvasQuad(setup, canvasFedSurface, _canvasFedQuad, out var feedingOutputId)
+                 && OutputCompositor.RenderOutput(feedingOutputId) is { IsDisposed: false } composite
+                 && SrvManager.GetSrvForTexture(composite) is { IsDisposed: false } compositeSrv)
+        {
+            // No content of its own, but the surface has a place on an output's canvas: the wall shows what the
+            // canvas holds there, which is what will land on it when the canvas is sent as one picture.
+            dl.AddImageQuad(compositeSrv.NativePointer, sMin, new Vector2(sMax.X, sMin.Y), sMax, new Vector2(sMin.X, sMax.Y),
+                            _canvasFedQuad[0], _canvasFedQuad[1], _canvasFedQuad[2], _canvasFedQuad[3],
+                            UiColors.ForegroundFull.Fade(preview * fade));
+        }
 
         // The frame is the kind's hue, rounded; hovering lifts it. Selection is the white outline just outside
         // it — never a hue, so a selected card still says what it is.
@@ -2152,6 +2163,41 @@ internal sealed partial class SetupOutputView
 
     // Marquee over the cards: candidates are collected as the cards draw (cleared per frame), and the fence
     // resolves containers against the setup set before it runs.
+    /// <summary>
+    /// Where a surface sits on an output's canvas (TL, TR, BR, BL in canvas 0..1): its first mapping, else a patch
+    /// carrying its name, in the patch's turned corner order — a venue's pixel map names its areas after the walls.
+    /// </summary>
+    private static bool TryFindCanvasQuad(Setup setup, Surface surface, Vector2[] quad, out Guid outputId)
+    {
+        if (surface.OutputMappings.Count > 0 && surface.OutputMappings[0].Quad.Length >= 4)
+        {
+            Array.Copy(surface.OutputMappings[0].Quad, quad, 4);
+            outputId = surface.OutputMappings[0].OutputId;
+            return true;
+        }
+
+        outputId = Guid.Empty;
+        if (string.IsNullOrEmpty(surface.Name))
+            return false;
+
+        for (var o = 0; o < setup.Outputs.Count; o++)
+        {
+            var patches = setup.Outputs[o].Patches;
+            for (var p = 0; p < patches.Count; p++)
+            {
+                if (patches[p].Quad.Length < 4 || !string.Equals(patches[p].Name, surface.Name, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                patches[p].CopyTurnedCorners(quad);
+                outputId = setup.Outputs[o].Id;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private readonly Vector2[] _canvasFedQuad = new Vector2[4];
     private readonly SelectionFence _boardFence = new();
     private readonly List<(SetupEntityKinds Kind, Guid Id, ImRect Rect)> _boardFenceCandidates = [];
     private Setup? _boardSetupForFence;
