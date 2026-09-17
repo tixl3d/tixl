@@ -195,11 +195,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         public float GizmoSize = 100;
 
-        // IsFullscreen settings
-        public int FullScreenIndexMain = 0;
-        // Output window
-        public int FullScreenIndexViewer = 0;
-        public Vector4 OutputArea = new(0,0,0,0);
 
         /// <summary>Seconds between captures while continuous screenshot mode is active (Ctrl-click the output's screenshot icon).</summary>
         public float ContinuousScreenshotDelay = 5;

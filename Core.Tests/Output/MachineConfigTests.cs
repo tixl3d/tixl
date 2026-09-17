@@ -20,7 +20,6 @@ public class MachineConfigTests
         Assert.Equal(outputId, binding.OutputId);
         Assert.Equal(@"\\.\DISPLAY2", binding.DisplayName);
         Assert.Equal(1, binding.DisplayIndex);
-        Assert.True(binding.IsFullscreen);
     }
 
     [Fact]

@@ -96,6 +96,17 @@ Right-click "Wall 2" → **Remove stream**.
 - The row is gone; "P1" shows "unbound" again; the receiver no longer lists the sender.
 - Reopening the project keeps it that way (the machine config saved).
 
+## Step: A display row shows where its screen is
+
+**Action:**
+Hover "Local / Display 2" in the LOCAL BINDINGS column.
+
+**Expected:**
+- A tooltip shows every attached screen as a rectangle in its desktop arrangement, each labelled
+  with its number, "(Primary)" where it applies, and its resolution. Display 2's rectangle is
+  highlighted; the others are muted. The tooltip holds nothing else.
+- Right-click the same row: **Display Settings...** opens the system display settings.
+
 ## Step: Two outputs drive two displays at once
 
 **Prerequisite:** two or more displays attached.

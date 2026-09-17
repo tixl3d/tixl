@@ -29,13 +29,16 @@ public sealed class PlugBinding
 
     public bool IsStream => Kind == Kinds.Stream;
 
-    /// <summary>OS device name (e.g. \\.\DISPLAY2) — the stable identity across reboots.</summary>
+    /// <summary>
+    /// OS device name (e.g. \\.\DISPLAY2), recorded when the binding was made. Its number is an adapter
+    /// slot, not a position, so it neither matches <see cref="DisplayIndex"/> nor survives a replug
+    /// reliably. Nothing resolves a binding by it yet: <see cref="DisplayIndex"/> alone decides which
+    /// display presents.
+    /// </summary>
     public string DisplayName = string.Empty;
 
-    /// <summary>Fallback when the name no longer matches (displays renamed/replugged).</summary>
+    /// <summary>Which display presents this output, by its index in the machine's arrangement.</summary>
     public int DisplayIndex;
-
-    public bool IsFullscreen = true;
 
     public void WriteToJson(JsonTextWriter writer)
     {
@@ -47,7 +50,6 @@ public sealed class PlugBinding
 
         writer.WriteString("DisplayName", DisplayName);
         writer.WriteValue("DisplayIndex", DisplayIndex);
-        writer.WriteValue("Fullscreen", IsFullscreen);
         writer.WriteEndObject();
     }
 
@@ -60,7 +62,6 @@ public sealed class PlugBinding
                        PlugId = OutputJson.ReadGuid(token["PlugId"]),
                        DisplayName = token.ReadValueSafe("DisplayName", string.Empty) ?? string.Empty,
                        DisplayIndex = token.ReadValueSafe("DisplayIndex", 0),
-                       IsFullscreen = token.ReadValueSafe("Fullscreen", true),
                    };
     }
 }

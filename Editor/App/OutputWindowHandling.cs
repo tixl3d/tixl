@@ -125,6 +125,19 @@ internal static class OutputWindowHandling
         }
     }
 
+    /// <summary>Frees every display window's swap chain; the process is shutting down.</summary>
+    public static void Release()
+    {
+        _presenting.Clear();
+        foreach (var displayWindow in _windows.Values)
+        {
+            displayWindow.ReleaseTexture();
+            displayWindow.Window.Release();
+        }
+
+        _windows.Clear();
+    }
+
     /// <summary>
     /// The window for a display, created and put full-screen on first use. Null for a display that isn't there —
     /// a binding outlives the display it names, so an unplugged projector simply presents nothing.

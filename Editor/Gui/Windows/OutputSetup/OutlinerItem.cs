@@ -60,6 +60,9 @@ internal sealed class OutlinerItem
         public float ColumnMinX;
 
         public float ColumnWidth;
+
+        /// <summary>Drawn in a tooltip while the item is hovered, for detail the row has no space for.</summary>
+        public Action? DrawTooltip;
     }
 
     /// <summary>Screen rect of the item drawn last — where the outliner's connections attach.</summary>
@@ -153,6 +156,13 @@ internal sealed class OutlinerItem
             FrameStats.RequestCrossHighlight(args.Id);
             if (args.Kind == SetupEntityKinds.ContentSource)
                 FrameStats.AddHoveredId(args.Id);
+
+            if (args.DrawTooltip != null)
+            {
+                ImGui.BeginTooltip();
+                args.DrawTooltip();
+                ImGui.EndTooltip();
+            }
         }
 
         // A drag's first movement decides what it is: mostly vertical reorders the item among its siblings,
@@ -179,21 +189,33 @@ internal sealed class OutlinerItem
             if (mouse.X < rowMin.X || mouse.X > rowMax.X)
             {
                 _dragIsReorder = false;
+                _movedRowAwaitsCursor = false;
                 if (_reorderOldJson != null)
                 {
                     SetupUndo.CommitGesture(setup, "Reorder", _reorderOldJson);
                     _reorderOldJson = null;
                 }
             }
-            else
+            else if (_movedRowAwaitsCursor)
             {
-                // Past the row's edge the item trades places with its neighbour — after this frame's drawing, since
-                // the list is being walked right now and a swap mid-walk draws the row twice. Next frame it is under
-                // the cursor again in its new place.
-                if (mouse.Y < rowMin.Y)
-                    _pendingMove = (args.Kind, args.Id, -1);
-                else if (mouse.Y > rowMax.Y)
-                    _pendingMove = (args.Kind, args.Id, +1);
+                // A swap can land the row clear of the cursor: its neighbour in the list carries a block of
+                // children, or sits behind rows that aren't siblings at all. Arming the next swap right away
+                // would only bounce the row between the same two places, so wait until it is back under the
+                // cursor and the drag can be read as a fresh intent.
+                if (mouse.Y >= rowMin.Y && mouse.Y <= rowMax.Y)
+                {
+                    _movedRowAwaitsCursor = false;
+                }
+            }
+            else if (mouse.Y < rowMin.Y)
+            {
+                // Past the row's edge the item trades places with its neighbour — after this frame's drawing,
+                // since the list is being walked right now and a swap mid-walk draws the row twice.
+                _pendingMove = (args.Kind, args.Id, -1);
+            }
+            else if (mouse.Y > rowMax.Y)
+            {
+                _pendingMove = (args.Kind, args.Id, +1);
             }
         }
 
@@ -205,6 +227,7 @@ internal sealed class OutlinerItem
             _reorderOldJson = null;
             _dragDecidedId = Guid.Empty;
             _dragIsReorder = false;
+            _movedRowAwaitsCursor = false;
         }
 
         // The routing drag only starts once the press has been decided as one, so a reorder never carries a payload.
@@ -354,6 +377,7 @@ internal sealed class OutlinerItem
 
         SetupActions.MoveAmongSiblings(setup, _pendingMove.Kind, _pendingMove.Id, _pendingMove.Direction);
         _pendingMove = default;
+        _movedRowAwaitsCursor = true;
     }
 
     /// <summary>The item a rename was just requested for and whose row must be brought into view — a collapsed
@@ -393,6 +417,9 @@ internal sealed class OutlinerItem
     private static bool _dragIsReorder;
     private static string? _reorderOldJson;
     private static (SetupEntityKinds Kind, Guid Id, int Direction) _pendingMove;
+
+    /** Set while a swap has moved the row out from under the cursor; the next swap waits for it to come back. */
+    private static bool _movedRowAwaitsCursor;
 
     private static Guid _renamingId;
     private static string _renameBuffer = string.Empty;

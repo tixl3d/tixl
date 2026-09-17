@@ -62,6 +62,7 @@ internal static class SetupRouting
     public static void ApplyDrop(Setup setup, SetupEntityKinds dragKind, Guid dragId,
                                  SetupEntityKinds targetKind, Guid targetId)
     {
+
         // A plug binding is machine state, not setup state: it saves on its own and sits outside the setup's undo.
         if (dragKind == SetupEntityKinds.Plug || targetKind == SetupEntityKinds.Plug)
         {

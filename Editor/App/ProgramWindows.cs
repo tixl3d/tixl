@@ -13,7 +13,6 @@ using T3.Editor.UiModel;
 using Device = SharpDX.Direct3D11.Device;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using VertexShader = T3.Core.DataTypes.VertexShader;
-using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.App;
 
@@ -46,56 +45,15 @@ internal static class ProgramWindows
         if (Main.IsFullScreen == UserSettings.Config.FullScreen)
             return;
 
-        var screenCount = Screen.AllScreens.Length;
         if (UserSettings.Config.FullScreen)
         {
-            Main.SetFullScreen(UserSettings.Config.FullScreenIndexMain < screenCount ? UserSettings.Config.FullScreenIndexMain : 0);
+            // The display the window is already on: drag the editor where you want it, then go fullscreen —
+            // which beats keeping a screen index that silently means a different monitor after a replug.
+            Main.SetFullScreen(IndexOfScreenUnder(Main));
         }
         else
         {
             Main.SetSizeable();
-        }
-    }
-
-    /// <summary>
-    /// Updates the viewer window spanning bounds dynamically
-    /// Called whenever the spanning area selection changes in the Screen Manager
-    /// </summary>
-    internal static void UpdateViewerSpanning(ImRect spanningBounds)
-    {
-        if (Viewer == null)
-            return;
-
-        // Check if there's a valid spanning area defined
-        if (spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0)
-        {
-            // Update the viewer window to the spanning bounds
-            Viewer.UpdateSpanningBounds(
-                (int)spanningBounds.Min.X,
-                (int)spanningBounds.Min.Y,
-                (int)spanningBounds.Max.X,
-                (int)spanningBounds.Max.Y
-            );
-        }
-    
-    }
-
-    /// <summary>
-    /// Call this when the secondary render window is enabled/disabled
-    /// to ensure the viewer window is properly configured
-    /// </summary>
-    internal static void UpdateViewerWindowState()
-    {
-        if (Viewer == null)
-            return;
-
-        var spanning = UserSettings.Config.OutputArea;
-        var spanningBounds = new ImRect(new Vector2(spanning.X, spanning.Y), new Vector2(spanning.Z, spanning.W));
-
-        var isSpanningValid = spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0;
-        if (isSpanningValid)
-        {
-            UpdateViewerSpanning(spanningBounds);
         }
     }
 
@@ -267,6 +225,20 @@ internal static class ProgramWindows
         Viewer.Show();
     }
 
+    /// <summary>The display a window sits on, by its index in the arrangement; 0 when it can't be placed.</summary>
+    private static int IndexOfScreenUnder(AppWindow window)
+    {
+        var screen = Screen.FromControl(window.Form);
+        var screens = Screen.AllScreens;
+        for (var i = 0; i < screens.Length; i++)
+        {
+            if (screens[i].DeviceName == screen.DeviceName)
+                return i;
+        }
+
+        return 0;
+    }
+
     /// <summary>
     /// A window for showing a rendered texture: its own swap chain, no ImGui content and no key tracking, so it
     /// can sit on a projector while the editor keeps the keyboard.
@@ -302,6 +274,7 @@ internal static class ProgramWindows
 
     public static void Release()
     {
+        OutputWindowHandling.Release();
         Main.Release();
         Viewer.Release();
         _device.ImmediateContext.ClearState();

@@ -145,6 +145,11 @@ internal static class SetupEntityContextMenu
                 if (plugMachineConfig.FindStreamPlug(id) != null && CustomComponents.DrawMenuItem(16, "Remove stream"))
                     Plugs.RemoveStream(plugMachineConfig, id);
 
+                // Which display is which, and how they are arranged, is the OS's to answer — TiXL only lists
+                // what it finds. The row's tooltip shows the arrangement; this is where it is changed.
+                if (Plugs.TryGetDisplayIndex(id, out _) && CustomComponents.DrawMenuItem(17, "Display Settings..."))
+                    DisplayLayoutView.OpenSystemDisplaySettings();
+
                 break;
 
             case SetupEntityKinds.ContentSource:

@@ -19,11 +19,13 @@ TiXL supports many input channels that you can use to control or sync your visua
 
 ## Outputs
 
-Currently, TiXL can only handle one additional fullscreen display output. This means you have the following options:
+Bind an output to a display in the [Output Setup](OutputSetup.md) and it opens fullscreen there. Every bound output gets its own window, so several projectors run side by side. Beyond that you have the following options:
 
 - Duplicate the display and use the output in the background (this is great for live patching) and sharing with the audience what you're doing.
 - Extend to two displays and use the primary notebook screen for controlling TiXL and the secondary display as fullscreen output connected via HDMI, USB-C, or DisplayPort.
 - Use various other tricks to output and split video signals (like HDMI mixers, splitters, Spout output, etc.).
+
+Going fullscreen (View → Fullscreen) puts the editor on whichever display its window is already on, so drag the main window to the screen you want before you press it.
 
 ## Overview
 

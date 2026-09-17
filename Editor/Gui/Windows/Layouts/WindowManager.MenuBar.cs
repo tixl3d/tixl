@@ -24,17 +24,14 @@ internal static partial class WindowManager
         }
 
         CustomComponents.SeparatorLine();
+
+        // Mirrors this editor's Output window on a second screen. Outputs bound to a display in the output
+        // setup get their own windows and are not affected by this.
+        if (CustomComponents.DrawMenuItem("Output Window".GetHashCode(), Icon.None, "Output Window", isChecked: ShowSecondaryRenderWindow,
+                                          reserveIconColumn: false,
+                                          state: ShowSecondaryRenderWindow ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Default))
         {
-            var screens = EditorUi.Instance.AllScreens;
-
-            if (CustomComponents.DrawMenuItem("Output Window".GetHashCode(), Icon.None, "Output Window", isChecked: ShowSecondaryRenderWindow,
-                                              reserveIconColumn: false,
-                                              state: ShowSecondaryRenderWindow ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Default))
-            {
-                ShowSecondaryRenderWindow = !ShowSecondaryRenderWindow;
-                ProgramWindows.UpdateViewerWindowState();
-            }
-
+            ShowSecondaryRenderWindow = !ShowSecondaryRenderWindow;
         }
 
         CustomComponents.SeparatorLine();

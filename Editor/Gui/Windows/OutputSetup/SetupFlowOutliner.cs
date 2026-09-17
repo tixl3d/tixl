@@ -34,6 +34,7 @@ internal sealed class SetupFlowOutliner
     public SetupFlowOutliner()
     {
         _requestAddPlugMenu = _ => _addPlugMenuRequested = true;
+        _drawDisplayTooltip = DrawDisplayTooltip;
     }
 
     /// <param name="onToggleCollapse">Collapses the strip to its header bar, or expands it again.</param>
@@ -532,6 +533,7 @@ internal sealed class SetupFlowOutliner
         for (var i = 0; i < screens.Length; i++)
         {
             var plugId = Plugs.DisplayPlugId(i);
+            _tooltipDisplayIndex = i;
             var args = new OutlinerItem.Args
                            {
                                Kind = SetupEntityKinds.Plug,
@@ -539,6 +541,7 @@ internal sealed class SetupFlowOutliner
                                Name = Plugs.DisplayLabel(i),
                                Status = ResolutionLabel(i, screens[i].Bounds.Width, screens[i].Bounds.Height),
                                IsMuted = !IsPlugBound(setup, machineConfig, plugId),
+                               DrawTooltip = _drawDisplayTooltip,
                            };
             DrawItem(selection, setup, ref args);
         }
@@ -613,6 +616,15 @@ internal sealed class SetupFlowOutliner
     }
 
     private static readonly Dictionary<string, string> _missingPackageStatus = [];
+
+    /// <summary>
+    /// Where the hovered display sits among the machine's screens. The arrangement is only ever asked about
+    /// one display at a time, so it rides the row it belongs to instead of a window of its own.
+    /// </summary>
+    private void DrawDisplayTooltip()
+    {
+        DisplayLayoutView.DrawTooltip(_tooltipDisplayIndex);
+    }
 
     private static bool IsPlugBound(Setup setup, MachineConfig machineConfig, Guid plugId)
     {
@@ -923,6 +935,11 @@ internal sealed class SetupFlowOutliner
     private const string HelpDocId = "OutputSetup";
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
     private bool _addPlugMenuRequested;
+
+    // The display whose row is being drawn, read by the tooltip; a field rather than a captured lambda, which
+    // would allocate a closure for every plug row every frame.
+    private int _tooltipDisplayIndex;
+    private readonly Action _drawDisplayTooltip;
     private readonly Action<SetupEntitySelection> _requestAddPlugMenu;
 
     // The column the items currently draw into (screen x + width); 0 width = whole window.
