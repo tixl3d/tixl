@@ -207,6 +207,35 @@ internal static class SetupEntityContextMenu
                 if (surface == null)
                     break;
 
+                // A pin can be taken off again: the surface then follows a same-named patch, or is simply unmapped.
+                for (var m = 0; m < surface.OutputMappings.Count; m++)
+                {
+                    var pinnedOutput = setup.FindOutput(surface.OutputMappings[m].OutputId);
+                    var pinnedOutputId = surface.OutputMappings[m].OutputId;
+                    if (CustomComponents.DrawMenuItem(400 + m, $"Unpin from {pinnedOutput?.Name ?? "Output"}"))
+                        SetupUndo.RunUndoable("Unpin surface", setup, () => surface.OutputMappings.RemoveAll(x => x.OutputId == pinnedOutputId));
+                }
+
+                // The menu route to what a drop on a patch does: the surface takes the patch's place on its output.
+                var patchOrdinal = 0;
+                foreach (var patchOutput in setup.Outputs)
+                {
+                    foreach (var patch in patchOutput.Patches)
+                    {
+                        if (patch.Quad.Length < 4 || SetupRelations.IsImplicitPatch(patchOutput, patch))
+                            continue;
+
+                        if (patchOrdinal == 0)
+                            CustomComponents.DrawMenuGroupLabel("Pin to Patch");
+
+                        var patchId = patch.Id;
+                        if (CustomComponents.DrawMenuItem(300 + patchOrdinal, $"{SetupLabels.PatchLabel(patchOutput, patch)} on {patchOutput.Name}"))
+                            SetupRouting.ApplyDrop(setup, SetupEntityKinds.Surface, surface.Id, SetupEntityKinds.Patch, patchId);
+
+                        patchOrdinal++;
+                    }
+                }
+
                 if (surface.Kind == Surface.Kinds.Physical && setup.FindFloorPlanOf(surface.Id, out _) == null)
                 {
                     if (CustomComponents.DrawMenuItem(19, "Start Floor Plan from Bottom Edge"))

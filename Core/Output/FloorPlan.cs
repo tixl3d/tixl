@@ -97,6 +97,88 @@ public sealed class FloorPlan
         return true;
     }
 
+    /// <summary>
+    /// Triangulates the closed footprint by ear clipping, writing vertex-index triples into <paramref name="triangles"/>
+    /// (cleared first), counter-clockwise seen from above whatever way the run was drawn. Handles concave rooms;
+    /// a self-intersecting run gets whatever ears remain.
+    /// </summary>
+    public void Triangulate(List<int> triangles)
+    {
+        triangles.Clear();
+        var count = Vertices.Count;
+        if (count < 3)
+            return;
+
+        _earScratch.Clear();
+        if (SignedAreaTwice() >= 0)
+        {
+            for (var i = 0; i < count; i++)
+                _earScratch.Add(i);
+        }
+        else
+        {
+            for (var i = count - 1; i >= 0; i--)
+                _earScratch.Add(i);
+        }
+
+        var guard = 0;
+        while (_earScratch.Count > 3 && guard++ < count * count)
+        {
+            var clipped = false;
+            for (var i = 0; i < _earScratch.Count; i++)
+            {
+                var previous = _earScratch[(i + _earScratch.Count - 1) % _earScratch.Count];
+                var current = _earScratch[i];
+                var next = _earScratch[(i + 1) % _earScratch.Count];
+                if (!IsEar(previous, current, next))
+                    continue;
+
+                triangles.Add(previous);
+                triangles.Add(current);
+                triangles.Add(next);
+                _earScratch.RemoveAt(i);
+                clipped = true;
+                break;
+            }
+
+            if (!clipped)
+                break;
+        }
+
+        if (_earScratch.Count == 3)
+        {
+            triangles.Add(_earScratch[0]);
+            triangles.Add(_earScratch[1]);
+            triangles.Add(_earScratch[2]);
+        }
+    }
+
+    /** A convex corner whose triangle contains no other remaining vertex. */
+    private bool IsEar(int previous, int current, int next)
+    {
+        var a = Vertices[previous];
+        var b = Vertices[current];
+        var c = Vertices[next];
+        if (Cross(b - a, c - a) <= 0.000001f)
+            return false;
+
+        foreach (var index in _earScratch)
+        {
+            if (index == previous || index == current || index == next)
+                continue;
+
+            var p = Vertices[index];
+            if (Cross(b - a, p - a) >= 0 && Cross(c - b, p - b) >= 0 && Cross(a - c, p - c) >= 0)
+                return false;
+        }
+
+        return true;
+    }
+
+    private static float Cross(Vector2 u, Vector2 v) => u.X * v.Y - u.Y * v.X;
+
+    private readonly List<int> _earScratch = [];
+
     /// <summary>Twice the signed area; positive when the vertices run counter-clockwise (seen from above).</summary>
     public float SignedAreaTwice()
     {

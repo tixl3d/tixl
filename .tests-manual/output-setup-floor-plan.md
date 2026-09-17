@@ -139,7 +139,7 @@ right and release.
 **Action:**
 1. In the graph, add **StageGeometry**, connect it to a **GeometryToMesh** and that to a **DrawMesh**;
    show the DrawMesh in an output window in operator mode.
-2. On StageGeometry, tick **CanvasUvOnTexCoord**. Put a **SetMaterial** after the DrawMesh with the
+2. On StageGeometry, set **UvMode** to OutputCanvas. Put a **SetMaterial** after the DrawMesh with the
    pixel-map image (a LoadImage of the same file) as its BaseColorMap. Set the output window's camera
    to look at the room.
 

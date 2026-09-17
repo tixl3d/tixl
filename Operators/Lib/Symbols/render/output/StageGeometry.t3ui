@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "98aac8ba-480c-4a28-8391-23c7d1ae11d9"/*StageGeometry*/,
-  "Description": "Emits the active output setup's physical surfaces as geometry in the stage.\n\nOne quad per surface, at its stage pose and real size in metres, so the room can be drawn, previewed and projected onto from the graph. TexCoord runs over each surface. TexCoord2 is where the surface lands on an output's canvas — the output named by OutputRef, or each surface's first mapping. With CanvasUvOnTexCoord the two are swapped, so [DrawMesh] textured with that output's composite or pixel map puts every wall's picture on its wall.\n\nUse [GeometryToMesh] to compile it for [DrawMesh].\n\nAKA: room, floor plan, walls, venue, previz, stage, 3d",
+  "Description": "Emits the active output setup's physical surfaces as geometry in the stage.\n\nOne quad per surface, at its stage pose and real size in metres, so the room can be drawn, previewed and projected onto from the graph. TexCoord runs over each surface. UvMode decides what TexCoord carries: Surface (0..1 over each surface), OutputCanvas (where the surface lands on the output named by OutputRef: its mapping there, else a patch on that output carrying the surface's name, else its first mapping anywhere; textured with that output's composite or pixel map, every wall shows its own picture), StageTriplanar (the world position on each face's plane, in metres over UvScale, for a seamless material) or StageTopDown (the world position from above, for a floor plan image over the whole room). TexCoord2 keeps the canvas coordinates for [DrawStageCanvas].\n\nUse [GeometryToMesh] to compile it for [DrawMesh].\n\nAKA: room, floor plan, walls, venue, previz, stage, 3d",
   "InputUis": [
     {
       "InputId": "e64bc3c3-cbe2-4460-91a6-d0fc207c1743"/*OutputRef*/,
@@ -12,11 +12,21 @@
       "Usage": "OutputSetupEntities"
     },
     {
-      "InputId": "b5066b38-41aa-4bbb-9d85-6f5bdf48c82d"/*CanvasUvOnTexCoord*/,
+      "InputId": "b5066b38-41aa-4bbb-9d85-6f5bdf48c82d"/*UvMode*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
       }
+    },
+    {
+      "InputId": "c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f"/*UvScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Min": 0.01,
+      "Max": 100.0,
+      "Scale": 0.01
     }
   ],
   "SymbolChildUis": [],

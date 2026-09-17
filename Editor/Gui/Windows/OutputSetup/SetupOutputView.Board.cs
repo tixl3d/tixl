@@ -761,7 +761,13 @@ internal sealed partial class SetupOutputView
                          hue.Fade(0.05f * fade), 3 * scale);
 
         if (plan.IsClosed && count >= 3 && setup.FindSurface(plan.RaisedFloorId) != null)
-            dl.AddConvexPolyFilled(ref _boardPlanPoints[0], count, hue.Fade(0.08f * fade));
+        {
+            // Triangulated, so an L-shaped or notched room fills its footprint and nothing outside it.
+            plan.Triangulate(_planTriangles);
+            var fill = hue.Fade(0.08f * fade);
+            for (var t = 0; t + 2 < _planTriangles.Count; t += 3)
+                dl.AddTriangleFilled(_boardPlanPoints[_planTriangles[t]], _boardPlanPoints[_planTriangles[t + 1]], _boardPlanPoints[_planTriangles[t + 2]], fill);
+        }
 
         // Walls face the room, so their labels sit on the other side of the line, outside; an open run's
         // labels sit on the right of its drawing direction, which is the outside of a wall facing left.
@@ -2123,6 +2129,7 @@ internal sealed partial class SetupOutputView
     private readonly List<SelectionTarget> _boardDupOriginals = [];
     private readonly List<SelectionTarget> _boardDupCopies = [];
     private Vector2[] _boardPlanPoints = new Vector2[8]; // a plan's corners on screen, grown to the largest plan
+    private readonly List<int> _planTriangles = [];
 
     // A plan edge being slid: which segment, its middle at the press and now, and every corner at the press.
     private int _planEdgeSegment = -1;

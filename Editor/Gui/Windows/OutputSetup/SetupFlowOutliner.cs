@@ -74,6 +74,7 @@ internal sealed class SetupFlowOutliner
         if (bodyVisible)
             DrawColumns(setup, machineConfig, selection);
 
+        OutlinerItem.ApplyPendingMove(setup);
         _hoveredKind = _pendingHoveredKind;
         _hoveredId = _pendingHoveredId;
     }

@@ -173,12 +173,28 @@ internal sealed class OutlinerItem
         var reordering = isActive && _dragDecidedId == args.Id && _dragIsReorder;
         if (reordering)
         {
-            // Past the row's edge the item trades places with its neighbour; the row it then draws in is under the cursor again.
-            var mouseY = ImGui.GetMousePos().Y;
-            if (mouseY < rowMin.Y)
-                SetupActions.MoveAmongSiblings(setup, args.Kind, args.Id, -1);
-            else if (mouseY > rowMax.Y)
-                SetupActions.MoveAmongSiblings(setup, args.Kind, args.Id, +1);
+            // Leaving the column sideways means the drag was heading for another column after all: it becomes a
+            // routing drag from here, and whatever reordering it did on the way stays as it is.
+            var mouse = ImGui.GetMousePos();
+            if (mouse.X < rowMin.X || mouse.X > rowMax.X)
+            {
+                _dragIsReorder = false;
+                if (_reorderOldJson != null)
+                {
+                    SetupUndo.CommitGesture(setup, "Reorder", _reorderOldJson);
+                    _reorderOldJson = null;
+                }
+            }
+            else
+            {
+                // Past the row's edge the item trades places with its neighbour — after this frame's drawing, since
+                // the list is being walked right now and a swap mid-walk draws the row twice. Next frame it is under
+                // the cursor again in its new place.
+                if (mouse.Y < rowMin.Y)
+                    _pendingMove = (args.Kind, args.Id, -1);
+                else if (mouse.Y > rowMax.Y)
+                    _pendingMove = (args.Kind, args.Id, +1);
+            }
         }
 
         if (ImGui.IsItemDeactivated() && _dragDecidedId == args.Id)
@@ -330,6 +346,16 @@ internal sealed class OutlinerItem
         _renameFocusPending = true;
     }
 
+    /// <summary>Applies the move a reorder drag asked for this frame; called once the columns are drawn.</summary>
+    public static void ApplyPendingMove(Setup setup)
+    {
+        if (_pendingMove.Kind == SetupEntityKinds.None)
+            return;
+
+        SetupActions.MoveAmongSiblings(setup, _pendingMove.Kind, _pendingMove.Id, _pendingMove.Direction);
+        _pendingMove = default;
+    }
+
     /// <summary>The item a rename was just requested for and whose row must be brought into view — a collapsed
     /// parent expands, the strip scrolls to it. Cleared once the row has drawn its field.</summary>
     public static Guid RevealPendingId => _renameFocusPending ? _renamingId : Guid.Empty;
@@ -366,6 +392,7 @@ internal sealed class OutlinerItem
     private static Guid _dragDecidedId;
     private static bool _dragIsReorder;
     private static string? _reorderOldJson;
+    private static (SetupEntityKinds Kind, Guid Id, int Direction) _pendingMove;
 
     private static Guid _renamingId;
     private static string _renameBuffer = string.Empty;

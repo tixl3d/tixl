@@ -69,7 +69,7 @@ Start one with **Add Floor Plan...** in the Board's `+` menu, which asks for a r
 
 ## The stage in the graph
 
-**StageGeometry** emits the active setup's physical surfaces as geometry: one quad per surface at its stage pose and real size, so the room drawn on the Board can be looked at in 3D. Wire it through **GeometryToMesh** into **DrawMesh**. Its TexCoord runs over each surface and its TexCoord2 is where the surface lands on an output's canvas; tick **CanvasUvOnTexCoord** and texture the mesh with that output's pixel map or composite, and every wall shows its own picture — the quickest way to catch a wall standing upside down.
+**StageGeometry** emits the active setup's physical surfaces as geometry: one quad per surface at its stage pose and real size, so the room drawn on the Board can be looked at in 3D. Wire it through **GeometryToMesh** into **DrawMesh**. Its **UvMode** decides what the mesh's texture coordinates are: over each surface, where the surface lands on the output canvas, from its mapping there or from a patch that carries the surface's name (texture the mesh with that output's pixel map or composite and every wall shows its own picture, the quickest way to catch a wall standing upside down), the world position on each face's plane in metres for a seamless material, or the world position seen from above for a floor plan image laid over the whole room. **DrawStageCanvas** goes the other way: it paints an output canvas from the room, looking from a viewer position through each wall into an equirectangular image or a cube map, so one scene lands continuous across every wall.
 
 ## Reference images and props
 
