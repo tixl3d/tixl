@@ -263,13 +263,23 @@ internal static class ProgramWindows
 
     internal static void InitializeSecondaryViewerWindow(string name, int width, int height)
     {
-        Viewer = new(name, disableClose: true);
-        Viewer.SetDevice(_device, _deviceContext);
-        Viewer.SetSize(width, height);
-        Viewer.SetSizeable();
-        Viewer.InitViewSwapChain(_factory);
-        Viewer.InitializeWindow(FormWindowState.Normal, null, false);
+        Viewer = CreateViewerWindow(name, width, height);
         Viewer.Show();
+    }
+
+    /// <summary>
+    /// A window for showing a rendered texture: its own swap chain, no ImGui content and no key tracking, so it
+    /// can sit on a projector while the editor keeps the keyboard.
+    /// </summary>
+    internal static AppWindow CreateViewerWindow(string name, int width, int height)
+    {
+        var window = new AppWindow(name, disableClose: true);
+        window.SetDevice(_device, _deviceContext);
+        window.SetSize(width, height);
+        window.SetSizeable();
+        window.InitViewSwapChain(_factory);
+        window.InitializeWindow(FormWindowState.Normal, null, false);
+        return window;
     }
 
     private static void OnCloseMainWindow(object sender, FormClosingEventArgs args)
@@ -323,7 +333,7 @@ internal static class ProgramWindows
         _deviceContext.OutputMerger.SetTargets(Main.RenderTargetView);
     }
 
-    public static void Present(bool useVSync, bool showSecondaryRenderWindow)
+    public static void Present(bool useVSync)
     {
         try
         {
@@ -337,6 +347,14 @@ internal static class ProgramWindows
             // is false; DWM doesn't display the hidden window; FlipDiscard discards the buffer
             // immediately on the next present cycle).
             Viewer?.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+
+            // Each display an output is bound to has its own swap chain, presented with the same sync as Main so
+            // a projector never tears.
+            var outputWindows = OutputWindowHandling.Presenting;
+            for (var i = 0; i < outputWindows.Count; i++)
+            {
+                outputWindows[i].Window.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+            }
         }
         catch (SharpDX.SharpDXException e)
         {

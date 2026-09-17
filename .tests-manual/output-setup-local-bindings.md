@@ -96,6 +96,21 @@ Right-click "Wall 2" → **Remove stream**.
 - The row is gone; "P1" shows "unbound" again; the receiver no longer lists the sender.
 - Reopening the project keeps it that way (the machine config saved).
 
+## Step: Two outputs drive two displays at once
+
+**Prerequisite:** two or more displays attached.
+
+**Action:**
+1. Add a second output "P2" (the OUTPUTS column's **+**) and feed it any content.
+2. Drag "P1" onto "Local / Display 1" and "P2" onto "Local / Display 2".
+3. Right-click "P2" and turn **Send** off, then on again.
+
+**Expected:**
+- After 2: both displays show their own output fullscreen, at the same time. Neither binding
+  takes the other's window away.
+- After 3: Display 2 goes black and its window disappears while Send is off, and comes back
+  when it is on again. Display 1 keeps running throughout.
+
 ## Step: A display binding still presents fullscreen
 
 **Action:**

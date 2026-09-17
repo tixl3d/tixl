@@ -201,6 +201,40 @@ Right-click "Patch 1" (in the panel or on its canvas label) → **Use on Surface
   was, now with the surface's anchor marker and its edge handles.
 - The surface card shows Size (m) 1 × 0.625 (the tile's aspect).
 
+## Step: A surface dropped on a patch that carries content replaces it
+
+**Action:**
+Drag the surface item created by "Use on Surface" onto the "Patch 2" item in the OUTPUTS column.
+
+**Expected:**
+- "Patch 2" disappears from P1 and the surface gains a second mapping onto P1, its corner pin
+  exactly where "Patch 2" was. The patch fed content, so it hands it over rather than drawing
+  the same pixels twice.
+
+## Step: A surface dropped on an empty patch keeps it
+
+**Action:**
+1. Right-click the "P1" item → **Add Patch**, and leave the new patch unfed.
+2. Drag any surface item onto that new patch's item.
+
+**Expected:**
+- After 2: the patch item stays under P1 and the surface is pinned to the patch's quad. An
+  unfed patch is layout — a venue's pixel map is traced as patches that hold no content — so
+  dropping a wall onto its area maps the wall there without consuming the area.
+- The surface's Board card now shows the part of P1's canvas that its new mapping covers,
+  at the Overlay percent. A surface whose name matches a patch shows that patch's area even
+  with no mapping at all.
+
+## Step: Straight needs a surface with a place to straighten against
+
+**Action:**
+1. Add a surface (the SURFACES column's **+**) and leave it unmapped and untraced.
+2. With it selected, hover the **Straight** tab.
+
+**Expected:**
+- The tab is disabled and its tooltip asks for a surface that is mapped to an output or
+  traced on a reference photo. Clicking it does nothing and the Board stays.
+
 ## Step: Deleting the slice unfeeds, deleting the patch removes
 
 **Action:**

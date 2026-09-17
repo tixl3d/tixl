@@ -79,7 +79,7 @@ A **reference image** is a photo or a plan of the venue. To trace a floor plan f
 
 An output presents when it is bound to a plug and its **Send** toggle is on. Turning Send off pauses the output without dropping the binding, useful to mute a projector between cues.
 
-- **Displays** open the output fullscreen on that display. One display can be driven at a time today; the first bound output takes it.
+- **Displays** open the output fullscreen on that display, each bound output on its own, so several projectors can run side by side. Two outputs bound to the same display is a mistake rather than a blend: the first one listed keeps it. A binding whose display is no longer attached presents nothing and is left alone, so a setup survives a projector being unplugged.
 - **Spout and NDI** push the output's composite into a sender under the plug's name every frame. Other applications on the same machine (Spout) or the network (NDI) receive it. Rename the plug to rename the sender; remove it from its context menu.
 
 Select a plug to see its settings in the Parameter window: the resolution it sends (the bound output's canvas), and for kinds that have them, the frame rate and whether alpha is carried. Only the settings a kind honours are shown, so a Spout plug offers neither.

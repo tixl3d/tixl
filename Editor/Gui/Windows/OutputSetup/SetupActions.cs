@@ -824,8 +824,6 @@ internal static class SetupActions
             surface.OutputMappings.RemoveAll(m => m.OutputId == outputId);
 
         machineConfig.Unbind(outputId);
-        if (OutputPresentation.PresentedOutputId == outputId)
-            OutputPresentation.PresentedOutputId = Guid.Empty;
     }
 
     /// <summary>The duplicate cascades, one per kind, side by side.</summary>

@@ -2,8 +2,6 @@
 using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 using T3.Core.Output.Streaming;
-using T3.Editor.App;
-using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
@@ -92,18 +90,11 @@ internal static class Plugs
             BindOutputToStream(machineConfig, outputId, plugId);
     }
 
-    /// <summary>Drops an output's binding and takes down its presentation window if it drove one.</summary>
+    /// <summary>Drops an output's binding; the next frame's presentation pass takes its window down.</summary>
     public static void UnbindOutput(MachineConfig machineConfig, Guid outputId)
     {
-        var binding = machineConfig.FindBinding(outputId);
         machineConfig.Unbind(outputId);
         OutputSetupHandling.SaveActive();
-
-        if (binding is { IsStream: false } && OutputPresentation.PresentedOutputId == outputId)
-        {
-            WindowManager.ShowSecondaryRenderWindow = false;
-            OutputPresentation.PresentedOutputId = Guid.Empty;
-        }
     }
     #endregion
 
@@ -144,9 +135,6 @@ internal static class Plugs
                                    DisplayIndex = displayIndex,
                                });
         OutputSetupHandling.SaveActive();
-        OutputPresentation.PresentedOutputId = outputId;
-        WindowManager.ShowSecondaryRenderWindow = true;
-        ProgramWindows.Viewer.SetFullScreen(displayIndex);
     }
 
     // Arbitrary markers in the id's second and third fields: they make a display id recognisable and keep it

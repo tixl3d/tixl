@@ -4,40 +4,34 @@ using System.Collections.Generic;
 using T3.Core.Output;
 using T3.Core.Output.Streaming;
 using T3.Editor.App;
-using T3.Editor.Gui.UiHelpers;
-using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
-/// Drives what the active setup presents each frame: the composite of the output bound to the secondary
-/// display goes to the viewer window, and every stream-bound output's composite goes to its stream sender,
-/// whose lifetime is owned here. The pixels themselves come from <see cref="OutputCompositor"/>.
+/// Drives what the active setup presents each frame: every display-bound output's composite goes to that
+/// display's window (see <see cref="OutputWindowHandling"/>), and every stream-bound output's composite goes to its
+/// stream sender, whose lifetime is owned here. The pixels themselves come from <see cref="OutputCompositor"/>.
 /// </summary>
 internal static class OutputPresentation
 {
-    /// <summary>The output currently presented on the secondary display window (Guid.Empty = none).</summary>
-    public static Guid PresentedOutputId;
-
     /// <summary>
-    /// Per-frame driver: renders each display-bound output's composite (so its content evaluates even
-    /// when nothing displays it) and presents it on its bound display. A binding is the intent to
-    /// present, so this auto-resumes a persisted binding after a restart. Skipped while the second
-    /// view mirrors the editor UI. Call before the viewer's back buffer is bound for the frame.
+    /// Per-frame driver: renders each bound output's composite (so its content evaluates even when nothing
+    /// displays it) and hands it to its display's window or its stream sender. A binding is the intent to
+    /// present, so this auto-resumes a persisted binding after a restart. Call before the viewer's back buffer
+    /// is bound for the frame.
     /// </summary>
     public static void UpdatePresentation()
     {
+        OutputWindowHandling.BeginFrame();
+
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
         {
             DisposeStreamSenders();
+            OutputWindowHandling.EndFrame();
             return;
         }
 
-        // Streams send regardless of the second window; the display path below yields to the UI mirror.
-        var mirrorUi = UserSettings.Config.MirrorUiOnSecondView;
-        OutputDefinition? boundOutput = null;
-        PlugBinding? binding = null;
         _activeStreamPlugs.Clear();
         foreach (var output in setup.Outputs)
         {
@@ -45,48 +39,23 @@ internal static class OutputPresentation
             if (!output.IsSending)
                 continue;
 
-            var candidate = machineConfig.FindBinding(output.Id);
-            if (candidate == null)
+            var binding = machineConfig.FindBinding(output.Id);
+            if (binding == null)
                 continue;
 
-            if (candidate.IsStream)
+            if (binding.IsStream)
             {
-                SendToStream(machineConfig, output, candidate);
+                SendToStream(machineConfig, output, binding);
                 continue;
             }
 
-            // One display can be driven today: the first bound output takes it.
-            if (boundOutput == null && !mirrorUi)
-            {
-                boundOutput = output;
-                binding = candidate;
-            }
+            // RenderOutput returns null when there's nothing to composite (no active send op for this
+            // output, empty target list, paused update); the window then keeps its last frame.
+            OutputWindowHandling.Present(binding.DisplayIndex, OutputCompositor.RenderOutput(output.Id));
         }
 
         SweepStreamSenders();
-
-        if (boundOutput == null || binding == null)
-        {
-            // Nothing presentable (unbound, or Send paused) — take down the second window if it was up.
-            HidePresentation();
-            return;
-        }
-
-        PresentedOutputId = boundOutput.Id;
-
-        // RenderOutput returns null when there's nothing to composite (no active send op for this
-        // output, empty target list, paused update). Assigning null trips the Texture2D→SharpDX
-        // implicit conversion (dereferences TextureObject) — keep the last presented frame instead.
-        var composite = OutputCompositor.RenderOutput(boundOutput.Id);
-        if (composite != null)
-            ProgramWindows.Viewer.Texture = composite;
-
-        if (!WindowManager.ShowSecondaryRenderWindow || _presentedDisplayIndex != binding.DisplayIndex)
-        {
-            WindowManager.ShowSecondaryRenderWindow = true;
-            ProgramWindows.Viewer.SetFullScreen(binding.DisplayIndex);
-            _presentedDisplayIndex = binding.DisplayIndex;
-        }
+        OutputWindowHandling.EndFrame();
     }
 
     /// <summary>Why the stream plug's sender refused its last frame, if it did (e.g. an unsupported format).</summary>
@@ -110,7 +79,7 @@ internal static class OutputPresentation
         OutputCompositor.ReleaseAll();
         OutputContentResolver.ReleaseAll();
         DisposeStreamSenders();
-        HidePresentation();
+        OutputWindowHandling.HideAll();
     }
 
     /// <summary>Frees a deleted output's composite target; the memos keyed on it drop out with the next frame.</summary>
@@ -160,16 +129,6 @@ internal static class OutputPresentation
         slot.LastError = slot.Sender.LastError;
     }
 
-    private static void HidePresentation()
-    {
-        if (PresentedOutputId == Guid.Empty)
-            return;
-
-        WindowManager.ShowSecondaryRenderWindow = false;
-        PresentedOutputId = Guid.Empty;
-        _presentedDisplayIndex = -1;
-    }
-
     /// <summary>Closes senders whose plug wasn't sent to this frame (binding dropped, output paused or deleted).</summary>
     private static void SweepStreamSenders()
     {
@@ -206,5 +165,4 @@ internal static class OutputPresentation
     private static readonly Dictionary<Guid, OpenStream> _streamSenders = [];
     private static readonly HashSet<Guid> _activeStreamPlugs = [];
     private static readonly List<Guid> _staleStreamPlugs = [];
-    private static int _presentedDisplayIndex = -1;
 }

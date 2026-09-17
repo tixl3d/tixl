@@ -155,9 +155,11 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             ContentSourceSync.UpdateFrame();
 
             // Drive projection-mapping outputs: renders each bound output's composite every frame
-            // (so its content evaluates even when nothing shows it), sets the viewer texture, and
-            // auto-presents. Must run before the viewer's back buffer is bound below.
+            // (so its content evaluates even when nothing shows it) and hands it to that output's
+            // display window. Must run before any viewer back buffer is bound below.
             OutputPresentation.UpdatePresentation();
+
+            DrawOutputWindows();
 
             // Render 2nd view
             ProgramWindows.Viewer.SetVisible(T3Ui.ShowSecondaryRenderWindow);
@@ -233,7 +235,31 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
         T3Metrics.UiRenderingCompleted();
 
-        ProgramWindows.Present(T3Ui.UseVSync, T3Ui.ShowSecondaryRenderWindow);
+        ProgramWindows.Present(T3Ui.UseVSync);
+    }
+
+    /// <summary>Blits each display-bound output's composite into that display's own window.</summary>
+    private static void DrawOutputWindows()
+    {
+        var outputWindows = OutputWindowHandling.Presenting;
+        if (outputWindows.Count == 0)
+            return;
+
+        ProgramWindows.SetVertexShader(SharedResources.FullScreenVertexShaderResource);
+        ProgramWindows.SetPixelShader(SharedResources.FullScreenPixelShaderResource);
+        ProgramWindows.SetRasterizerState(SharedResources.ViewWindowRasterizerState);
+
+        for (var i = 0; i < outputWindows.Count; i++)
+        {
+            var displayWindow = outputWindows[i];
+            var textureView = displayWindow.EnsureTextureView();
+            if (textureView == null)
+                continue;
+
+            displayWindow.Window.PrepareRenderingFrame();
+            ProgramWindows.SetPixelShaderSRV(textureView);
+            ProgramWindows.DrawTextureToSecondaryRenderOutput();
+        }
     }
 
     public void InitializeScaling()
