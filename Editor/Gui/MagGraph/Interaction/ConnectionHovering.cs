@@ -33,6 +33,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 internal sealed class ConnectionHovering
 {
     /// <summary>Swaps hover buffers and prepares this frame picking state for the current graph.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     internal void PrepareNewFrame(GraphUiContext context)
     {
         _mousePosition = ImGui.GetMousePos();
@@ -168,6 +169,8 @@ internal sealed class ConnectionHovering
         // _bestSnapSplitDistance = float.PositiveInfinity;
     }
 
+    /// <summary>Draws the source output tooltip for the previous frame's closest wire.</summary>
+    /// <param name="bestMatchLastFrame">Closest wire hover candidate retained from the preceding frame.</param>
     private static void DrawTooltipForSingleOutput(HoverPoint bestMatchLastFrame)
     {
         ImGui.BeginTooltip();
@@ -227,6 +230,9 @@ internal sealed class ConnectionHovering
         End,
     }
 
+    /// <summary>Checks whether the wire matches the previous frame's hover candidate.</summary>
+    /// <param name="connection">Wire to compare with the retained hover candidate.</param>
+    /// <returns>True when the retained candidate belongs to this wire.</returns>
     internal static bool IsHovered(MagGraphConnection connection)
     {
         foreach (var h in _lastConnectionHovers)
@@ -238,6 +244,12 @@ internal sealed class ConnectionHovering
         return false;
     }
 
+    /// <summary>Registers a wire hover candidate for selection on the next frame.</summary>
+    /// <param name="mcConnection">Wire represented by the candidate.</param>
+    /// <param name="color">Connection color used for hover feedback.</param>
+    /// <param name="positionOnScreen">Closest point on the wire in screen coordinates.</param>
+    /// <param name="normalizedPosition">Relative location of the hover point along the wire, from zero to one.</param>
+    /// <param name="sourcePosOnScreen">Wire source endpoint in screen coordinates.</param>
     public static void RegisterHoverPoint(MagGraphConnection mcConnection, Color color, Vector2 positionOnScreen, float normalizedPosition,
                                           Vector2 sourcePosOnScreen)
     {
@@ -278,6 +290,10 @@ internal sealed class ConnectionHovering
 /// <summary>Draws the source operator output preview used by graph tooltips.</summary>
 internal static class ToolTipContentDrawer
 {
+    /// <summary>Draws an output preview and identifies its source operator UI.</summary>
+    /// <param name="outputSlot">Runtime output whose value is previewed.</param>
+    /// <param name="sourceOutputUi">Resolved output UI, or null when that output has no registered presentation.</param>
+    /// <returns>The UI of the operator that owns the output.</returns>
     internal static SymbolUi DrawForOutput(ISlot outputSlot, out IOutputUi? sourceOutputUi)
     {
         var width = (int)(170 * T3Ui.UiScaleFactor);

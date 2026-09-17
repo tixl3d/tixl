@@ -20,6 +20,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
     private sealed class ChildSnapshot
     {
         /// <summary>Copies the anchor identity, slot values, and editor state without retaining its live child.</summary>
+        /// <param name="ui">Child UI whose editable metadata and runtime defaults are captured for undo.</param>
         internal ChildSnapshot(SymbolUi.Child ui)
         {
             var child = ui.SymbolChild;
@@ -46,6 +47,8 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
         }
 
         /// <summary>Checks that the current definition still has the captured reroute slot IDs and value type.</summary>
+        /// <param name="definition">Current symbol definition to compare with the captured slot contract.</param>
+        /// <returns>True when the current input and output definitions match the captured contract.</returns>
         internal bool Matches(Symbol definition)
         {
             return definition.Id == SymbolId && SymbolAnalysis.IsReroute(definition)
@@ -93,6 +96,8 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
     }
 
     /// <summary>Captures distinct candidate IDs before editing; removal is deferred until macro completion.</summary>
+    /// <param name="compositionId">ID of the composition to resolve whenever the command executes.</param>
+    /// <param name="candidateIds">IDs of reroutes that were connected before the enclosing edit.</param>
     public RemoveDisconnectedReroutesCommand(Guid compositionId, IEnumerable<Guid> candidateIds)
     {
         _compositionId = compositionId;
@@ -207,6 +212,8 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
     }
 
     /// <summary>Resolves the current editable composition by ID and reports an unavailable graph.</summary>
+    /// <param name="composition">Resolved editable composition UI when true; not usable when false.</param>
+    /// <returns>True when the composition is still registered and editable.</returns>
     private bool TryGetComposition(out SymbolUi? composition)
     {
         if (SymbolUiRegistry.TryGetSymbolUi(_compositionId, out composition) && !composition.ReadOnly
@@ -218,6 +225,9 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
     }
 
     /// <summary>Resolves and validates every captured definition before any replay mutation.</summary>
+    /// <param name="snapshots">Captured children whose operator definitions are needed for restoration.</param>
+    /// <param name="definitions">Definitions resolved by symbol ID; may be incomplete when false.</param>
+    /// <returns>True when every required definition exists and matches its captured slot contract.</returns>
     private static bool TryResolveDefinitions(ChildSnapshot[] snapshots, out Dictionary<Guid, Symbol> definitions)
     {
         definitions = new Dictionary<Guid, Symbol>();
@@ -236,6 +246,8 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
     }
 
     /// <summary>Collects both endpoints so either incoming or outgoing wiring prevents cleanup.</summary>
+    /// <param name="composition">Composition whose wires are inspected for connected children.</param>
+    /// <returns>IDs of children appearing at either endpoint of at least one connection.</returns>
     private static HashSet<Guid> GetConnectedChildren(Symbol composition)
     {
         var connected = new HashSet<Guid>();
@@ -249,6 +261,9 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
     }
 
     /// <summary>Recreates an anchor with its original identity, slot settings, and editor metadata.</summary>
+    /// <param name="composition">Composition UI into which the child is restored.</param>
+    /// <param name="definition">Current operator definition used to recreate the child.</param>
+    /// <param name="snapshot">Captured identity, presentation, input values, and output settings to restore.</param>
     private static void Restore(SymbolUi composition, Symbol definition, ChildSnapshot snapshot)
     {
         var ui = composition.AddChild(definition, snapshot.ChildId, snapshot.Position, snapshot.Size, snapshot.Name, snapshot.IsBypassed);
@@ -285,6 +300,8 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
     }
 
     /// <summary>Removes any model or UI fragment left by a failed child restore.</summary>
+    /// <param name="composition">Composition UI containing a partially restored child.</param>
+    /// <param name="id">ID of the partial child to remove after a failed restore.</param>
     private static void RemovePartialChild(SymbolUi composition, Guid id)
     {
         if (composition.Symbol.Children.ContainsKey(id) || composition.ChildUis.ContainsKey(id))
@@ -295,6 +312,7 @@ internal sealed class RemoveDisconnectedReroutesCommand : ICommand
     /// Refreshes the focused view and every registered graph window showing this composition.
     /// This includes the initiating canvas; selection removal is limited to the anchors this command deleted.
     /// </summary>
+    /// <param name="removeSelection">True to remove deleted anchors from selection while refreshing all matching graph views.</param>
     private void RefreshViews(bool removeSelection)
     {
         var focused = ProjectView.Focused;

@@ -35,6 +35,7 @@ namespace T3.Editor.UiModel.Modification;
 internal static class NodeActions
 {
     /// <summary>Toggles bypass for eligible selected operators while leaving reroute forwarding intact.</summary>
+    /// <param name="nodeSelection">Selection containing the graph items affected by the operation.</param>
     internal static void ToggleBypassedForSelectedElements(NodeSelection nodeSelection)
     {
         var selectedChildUis = nodeSelection.GetSelectedChildUis().ToList();
@@ -56,6 +57,8 @@ internal static class NodeActions
         UndoRedoStack.AddAndExecute(new MacroCommand("Changed Bypassed", commands));
     }
 
+    /// <summary>Toggles disabled state for the selected operator outputs through undoable commands.</summary>
+    /// <param name="nodeSelection">Selection containing the graph items affected by the operation.</param>
     public static void ToggleDisabledForSelectedElements(NodeSelection nodeSelection)
     {
         var selectedChildren = nodeSelection.GetSelectedChildUis().ToList();
@@ -72,6 +75,12 @@ internal static class NodeActions
         UndoRedoStack.AddAndExecute(new MacroCommand("Disable/Enable", commands));
     }
 
+    /// <summary>Deletes selected children and interface slots as one undoable graph edit.</summary>
+    /// <param name="nodeSelection">Selection containing the graph items affected by the operation.</param>
+    /// <param name="compositionSymbolUi">Composition UI from which selected graph objects are removed.</param>
+    /// <param name="selectedChildUis">Explicit child selection, or null to use the current selected children.</param>
+    /// <param name="selectedInputUis">Explicit interface-input selection, or null to use the current selected inputs.</param>
+    /// <param name="selectedOutputUis">Explicit interface-output selection, or null to use the current selected outputs.</param>
     public static void DeleteSelectedElements(NodeSelection nodeSelection, 
                                               SymbolUi compositionSymbolUi, 
                                               List<SymbolUi.Child>? selectedChildUis = null,
@@ -143,7 +152,12 @@ internal static class NodeActions
         nodeSelection.Clear();
     }
 
+    /// <summary>Creates an undoable section around the selection or at a canvas position.</summary>
     /// <param name="placementScreenPos">Screen position to place the section at when nothing is selected.</param>
+    /// <param name="nodeSelection">Selection containing the graph items affected by the operation.</param>
+    /// <param name="canvas">Canvas used to convert a screen placement into graph coordinates.</param>
+    /// <param name="compositionOp">Runtime composition that will own the section.</param>
+    /// <returns>The newly created section.</returns>
     public static Section AddSection(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp, Vector2? placementScreenPos = null)
     {
         var size = new Vector2(100, 140);
@@ -188,6 +202,11 @@ internal static class NodeActions
         return section;
     }
 
+    /// <summary>Pins the selected operator, or the composition when nothing is selected, optionally toggling an existing pin.</summary>
+    /// <param name="components">Project view containing the output-window and graph context.</param>
+    /// <param name="nodeSelection">Selection used to choose the operator to pin.</param>
+    /// <param name="compositionOp">Runtime composition to pin when nothing is selected, or to resolve the selected operator.</param>
+    /// <param name="unpinIfAlreadySelected">Whether selecting the already pinned operator should unpin it.</param>
     public static void PinSelectedToOutputWindow(ProjectView components, NodeSelection nodeSelection, Instance compositionOp, bool unpinIfAlreadySelected =false)
     {
         var outputWindow = OutputWindow.OutputWindowInstances.FirstOrDefault(ow => ow.Config.Visible) as OutputWindow;
@@ -221,7 +240,10 @@ internal static class NodeActions
     }
 
     #region Copy and paste
+    /// <summary>Copies selected operator children and their internal connections to the clipboard.</summary>
     /// <returns>False if the selection contained nothing copyable (e.g. only input nodes) and the clipboard was left untouched.</returns>
+    /// <param name="nodeSelection">Selection of operator children to copy.</param>
+    /// <param name="composition">Runtime composition containing the selected children.</param>
     public static bool CopySelectedNodesToClipboard(NodeSelection nodeSelection, Instance composition)
     {
         var selectedChildren = nodeSelection.GetSelectedNodes<SymbolUi.Child>().ToList();
@@ -238,6 +260,10 @@ internal static class NodeActions
 
     // todo - better encapsulate this in SymbolJson
 
+    /// <summary>Pastes serialized operator children and connections into the current composition.</summary>
+    /// <param name="nodeSelection">Selection updated to the pasted children.</param>
+    /// <param name="canvas">Canvas used to place the pasted graph near the pointer.</param>
+    /// <param name="compositionOp">Runtime composition receiving the pasted children.</param>
     public static void PasteClipboard(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp)
     {
         try
@@ -321,6 +347,9 @@ internal static class NodeActions
     ///   copying values between different versions of ops 
     /// 
     /// </summary>
+    /// <param name="nodeSelection">Selection whose operator input values may be replaced.</param>
+    /// <param name="canvas">Canvas context supplied by the caller; this value-only operation does not place nodes.</param>
+    /// <param name="compositionOp">Runtime composition containing the selected operators.</param>
     public static void PasteValues(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp)
     {
         try
@@ -467,6 +496,11 @@ internal static class NodeActions
         }
     }
 
+    /// <summary>Resolves a symbol definition from the clipboard payload.</summary>
+    /// <param name="jToken">Parsed clipboard payload containing a serialized symbol.</param>
+    /// <param name="package">Package in which the pasted definition is resolved or constructed.</param>
+    /// <param name="symbol">Parsed symbol when true; null when the payload cannot produce a symbol.</param>
+    /// <returns>True when the payload yields a usable symbol definition.</returns>
     private static bool TryGetPastedSymbol(JToken jToken, SymbolPackage package, [NotNullWhen(true)]out  Symbol? symbol)
     {
         if (!JsonUtils.TryGetGuid(jToken[SymbolJson.JsonKeys.Id], out var guid))
@@ -510,6 +544,10 @@ internal static class NodeActions
     /// <summary>
     /// Todo: There must be a better way... 
     /// </summary>
+    /// <param name="instance">Runtime operator whose configured file inputs are searched.</param>
+    /// <param name="filePath">Shader path when true; null when no shader input is found.</param>
+    /// <param name="owner">Resource package owning the shader path when true; null otherwise.</param>
+    /// <returns>True when a configured shader file input and its owning resource package are found.</returns>
     internal static bool TryGetShaderPath(Instance instance, 
                                           [NotNullWhen(true)] out string? filePath, 
                                           [NotNullWhen(true)]out IResourcePackage? owner)
@@ -549,6 +587,8 @@ internal static class NodeActions
     }
 
     /// <summary>Disconnects selected nodes with undoable reconnection of eligible upstream and downstream wires.</summary>
+    /// <param name="compositionOp">Runtime composition whose selected nodes are disconnected.</param>
+    /// <param name="nodes">Selected canvas objects whose graph connections are removed or rejoined.</param>
     public static void DisconnectNodes(Instance compositionOp, List<ISelectableCanvasObject> nodes)
     {
         Log.Info($"Disconnecting {nodes.Count} nodes from their inputs and outputs");

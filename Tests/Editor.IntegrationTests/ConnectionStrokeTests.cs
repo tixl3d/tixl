@@ -137,6 +137,7 @@ public sealed partial class ConnectionStrokeTests : IDisposable
     }
 
     /// <summary>Cables crossing a collapsed section boundary are observed at their visible redirected endpoints.</summary>
+    /// <param name="sourceCollapsed">Whether the source endpoint, rather than the target endpoint, is inside the collapsed section.</param>
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -174,6 +175,7 @@ public sealed partial class ConnectionStrokeTests : IDisposable
     }
 
     /// <summary>Cancellation keeps modified RMB reserved through release, including when another view receives input.</summary>
+    /// <param name="cancellation">Cancellation route to exercise: Escape, focus loss, or input handled by another view.</param>
     [Theory]
     [InlineData("escape")]
     [InlineData("focus")]
@@ -229,6 +231,7 @@ public sealed partial class ConnectionStrokeTests : IDisposable
     }
 
     /// <summary>Advances input through native ImGui frame boundaries.</summary>
+    /// <param name="input">Optional callback that queues native input before the next ImGui frame begins.</param>
     private void NextFrame(Action? input = null)
     {
         _drawList.PopClipRect();
@@ -241,10 +244,15 @@ public sealed partial class ConnectionStrokeTests : IDisposable
     }
 
     /// <summary>Sets the focus state normally supplied by DrawGraph without evaluating unrelated editor panels.</summary>
+    /// <param name="canvas">Graph canvas whose private interaction flag is set.</param>
+    /// <param name="name">Name of the canvas flag to set.</param>
+    /// <param name="value">Boolean state assigned to the flag.</param>
     private static void SetCanvasFlag(MagGraphView canvas, string name, bool value)
         => typeof(MagGraphView).GetProperty(name)!.SetValue(canvas, value);
 
     /// <summary>Calls the existing frame-level input handler without adding a production test API.</summary>
+    /// <param name="canvas">Graph canvas on which to invoke the private interaction method.</param>
+    /// <param name="name">Name of the parameterless canvas method to invoke.</param>
     private static void InvokeCanvas(MagGraphView canvas, string name)
         => typeof(MagGraphView).GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(canvas, null);
 

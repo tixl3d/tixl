@@ -27,6 +27,7 @@ namespace Editor.IntegrationTests
     public sealed class RerouteVisibilityTests
     {
         /// <summary>Scalar, vector, and command anchors keep their derived presentation across replacement.</summary>
+        /// <param name="valueType">Slot value type used to instantiate the test reroute definition.</param>
         [Theory]
         [InlineData(typeof(float))]
         [InlineData(typeof(Vector3))]
@@ -64,6 +65,7 @@ namespace Editor.IntegrationTests
         }
 
         /// <summary>Search and tree refresh honor visibility for empty, exact, namespace, and typed queries.</summary>
+        /// <param name="query">Search query used to verify that hidden reroutes are excluded.</param>
         [Theory]
         [InlineData("")]
         [InlineData("rer")]
@@ -140,6 +142,8 @@ namespace Editor.IntegrationTests
         }
 
         /// <summary>Traverses the actual browser tree without relying on its presentation order.</summary>
+        /// <param name="node">Namespace subtree whose operator symbols are collected.</param>
+        /// <returns>Symbols stored at this node and recursively in its descendants.</returns>
         private static IEnumerable<Symbol> CollectSymbols(NamespaceTreeNode node)
             => node.Symbols.Concat(node.Children.SelectMany(CollectSymbols));
 
@@ -267,6 +271,9 @@ namespace Editor.IntegrationTests
         }
 
         /// <summary>Exercises the existing private snap candidate query without exposing a production test API.</summary>
+        /// <param name="source">Source graph item in the candidate snapped pair.</param>
+        /// <param name="target">Target graph item in the candidate snapped pair.</param>
+        /// <returns>Number of compatible automatic connection candidates between the items.</returns>
         private static int CountAutomaticConnections(MagGraphItem source, MagGraphItem target)
         {
             var collect = typeof(MagItemMovement).GetMethod("GetPotentialConnectionsAfterSnap", BindingFlags.NonPublic | BindingFlags.Static)!;
@@ -276,6 +283,9 @@ namespace Editor.IntegrationTests
         }
 
         /// <summary>Runs snapping through the drag entry point, then cancels its pending macro.</summary>
+        /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+        /// <param name="child">Child whose drag is exercised against the current layout.</param>
+        /// <returns>Whether the simulated drag reports a snapped placement.</returns>
         private static bool DragSnaps(GraphUiContext context, SymbolUi.Child child)
         {
             context.ItemMovement.SetDraggedItems([child]);
@@ -292,6 +302,7 @@ namespace Editor.IntegrationTests
         internal sealed class TestPackage : EditorSymbolPackage, IDisposable
         {
             /// <summary>Defaults to the supported package identity; a foreign ID tests rejection.</summary>
+            /// <param name="id">Optional package identity; null uses the supported TypeOperators identity.</param>
             internal TestPackage(Guid? id = null) : base(AssemblyInformation.CreateUninitialized(), "", false)
             {
                 _releaseInfo = new ReleaseInfo("tests.dll", Guid.Empty, id ?? SymbolAnalysis.TypeOperatorsPackageId,
@@ -308,6 +319,8 @@ namespace Editor.IntegrationTests
             internal bool ReadOnly;
 
             /// <summary>Registers a definition and its editor presentation.</summary>
+            /// <param name="type">Runtime operator type whose symbol and editor UI are registered.</param>
+            /// <returns>Registered UI for the newly created symbol definition.</returns>
             internal SymbolUi Add(Type type)
             {
                 var symbol = ReplaceDefinition(Guid.NewGuid(), type);
@@ -317,6 +330,9 @@ namespace Editor.IntegrationTests
             }
 
             /// <summary>Replaces a definition under the same ID, as package recompilation does.</summary>
+            /// <param name="id">Symbol identity retained across the simulated reload.</param>
+            /// <param name="type">Replacement runtime operator type supplying the slot definitions.</param>
+            /// <returns>Replacement symbol definition registered under the supplied identity.</returns>
             internal Symbol ReplaceDefinition(Guid id, Type type)
             {
                 // Use the loader's slot extraction without loading another copy of the test assembly.
@@ -355,6 +371,7 @@ namespace Types.Routing
     public interface IRerouteNode;
 
     /// <summary>Marked scalar anchor used with representative value types.</summary>
+    /// <typeparam name="T">Value type shared by the test reroute's input and output slots.</typeparam>
     [Guid("a445e188-72ca-41da-8c2b-33b78d3252f1")]
     public sealed class TestReroute<T> : Instance<TestReroute<T>>, IRerouteNode
     {

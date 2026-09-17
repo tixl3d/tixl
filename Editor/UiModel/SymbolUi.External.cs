@@ -10,6 +10,13 @@ namespace T3.Editor.UiModel;
 public sealed partial class SymbolUi
 {
     /// <summary>Creates a child and its UI metadata with the supplied persistent identity, canvas placement, and bypass state.</summary>
+    /// <param name="symbolToAdd">Operator definition to instantiate as a child.</param>
+    /// <param name="addedChildId">Stable identity assigned to the new child.</param>
+    /// <param name="posInCanvas">Initial child position in canvas coordinates.</param>
+    /// <param name="size">Initial child size in canvas units.</param>
+    /// <param name="name">Optional custom child name; null retains the default operator name.</param>
+    /// <param name="isBypassed">Requested initial bypass state, subject to reroute restrictions.</param>
+    /// <returns>UI record for the newly added child.</returns>
     internal Child AddChild(Symbol symbolToAdd, Guid addedChildId, Vector2 posInCanvas, Vector2 size, string name = null, bool isBypassed = false)
     {
         FlagAsModified();
@@ -24,6 +31,14 @@ public sealed partial class SymbolUi
         return childUi;
     }
 
+    /// <summary>Copies a child and its presentation into this composition under a new identity.</summary>
+    /// <param name="symbolToAdd">Operator definition used by the copied child.</param>
+    /// <param name="sourceChild">Existing child whose values and settings are copied.</param>
+    /// <param name="sourceCompositionSymbolUi">Composition UI owning the source child's presentation.</param>
+    /// <param name="posInCanvas">Destination position in canvas coordinates.</param>
+    /// <param name="newChildId">Stable identity assigned to the copied child.</param>
+    /// <param name="newChild">New symbol child carrying the copied runtime settings.</param>
+    /// <param name="newChildUi">New child UI carrying the copied presentation.</param>
     internal void AddChildAsCopyFromSource(Symbol symbolToAdd, Symbol.Child sourceChild, SymbolUi sourceCompositionSymbolUi, Vector2 posInCanvas,
                                                   Guid newChildId,
                                                   out Symbol.Child newChild,
@@ -41,6 +56,8 @@ public sealed partial class SymbolUi
         _childUis.Add(newChildUi.Id, newChildUi);
     }
 
+    /// <summary>Removes a child and its associated presentation and graph connections.</summary>
+    /// <param name="id">Identity of the child to remove with its attached graph state.</param>
     internal void RemoveChild(Guid id)
     {
         FlagAsModified();
@@ -97,6 +114,10 @@ public sealed partial class SymbolUi
     /// </summary>
     internal static int GlobalVersionCounter { get; private set; }
 
+    /// <summary>Clones the symbol presentation for a destination definition, remapping identities when supplied.</summary>
+    /// <param name="newSymbol">Destination operator definition represented by the clone.</param>
+    /// <param name="oldToNewIds">Optional mapping from source child and slot IDs to destination IDs.</param>
+    /// <returns>Independent symbol UI associated with the destination definition.</returns>
     internal SymbolUi CloneForNewSymbol(Symbol newSymbol, Dictionary<Guid, Guid> oldToNewIds = null)
     {
         FlagAsModified();
@@ -156,6 +177,9 @@ public sealed partial class SymbolUi
     /// Deep-copies a settings object through the same Newtonsoft serialization that persists it,
     /// so the clone matches what a save/load round-trip of the source would produce.
     /// </summary>
+    /// <param name="source">Presentation object to copy through JSON serialization.</param>
+    /// <typeparam name="T">Reference type of the serialized presentation object.</typeparam>
+    /// <returns>Deserialized copy of the source object, or null when the source is null.</returns>
     private static T CloneViaJson<T>(T source) where T : class
     {
         if (source == null)

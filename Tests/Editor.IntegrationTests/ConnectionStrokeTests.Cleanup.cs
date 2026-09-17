@@ -168,6 +168,7 @@ public sealed partial class ConnectionStrokeTests
     }
 
     /// <summary>Shake keeps its existing move/disconnect undo groups and preserves other selected operators.</summary>
+    /// <param name="mixedSelection">Whether an ordinary operator is selected together with the reroute.</param>
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -228,6 +229,8 @@ public sealed partial class ConnectionStrokeTests
     }
 
     /// <summary>Models registered graph windows without constructing unrelated window chrome.</summary>
+    /// <param name="view">Project view to expose through a registered graph window for refresh checks.</param>
+    /// <returns>Registered window displaying the supplied project view.</returns>
     private static GraphWindow RegisterWindow(ProjectView view)
     {
         var window = (GraphWindow)RuntimeHelpers.GetUninitializedObject(typeof(GraphWindow));
@@ -237,6 +240,8 @@ public sealed partial class ConnectionStrokeTests
     }
 
     /// <summary>Checks restored state before the real connection command runs its undo.</summary>
+    /// <param name="command">Wrapped command whose undo is observed.</param>
+    /// <param name="verify">Assertion callback invoked immediately before undoing the wrapped command.</param>
     private sealed class VerifyBeforeUndo(ICommand command, Action verify) : ICommand
     {
         /// <summary>Preserves the wrapped command's history label.</summary>

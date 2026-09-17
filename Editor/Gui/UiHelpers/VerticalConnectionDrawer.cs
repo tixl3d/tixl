@@ -17,6 +17,17 @@ internal static class VerticalConnectionDrawer
     /// queryPath observes the final screen-space cable path before it is stroked and cleared.
     /// It must leave the pending path intact so drawing and gesture hit testing share the geometry.
     /// </summary>
+    /// <param name="canvasScale">Canvas zoom factor used to scale the graph geometry.</param>
+    /// <param name="sourceNode">Source node bounds in screen coordinates.</param>
+    /// <param name="sourcePos">Source socket position in screen coordinates.</param>
+    /// <param name="targetNode">Target node or stack bounds in screen coordinates.</param>
+    /// <param name="targetPos">Target socket position in screen coordinates.</param>
+    /// <param name="color">Connection stroke color.</param>
+    /// <param name="thickness">Connection line width in screen pixels.</param>
+    /// <param name="hoverPosition">Closest hover point on the wire when hovered.</param>
+    /// <param name="normalizedHoverPos">Relative position of the hover point along the wire, from zero to one.</param>
+    /// <param name="queryPath">Optional observer invoked on the pending tessellated path before it is stroked; must preserve that path.</param>
+    /// <returns>True when the pointer is close enough to the visible connection path to hover it.</returns>
     internal static bool DrawConnection(float canvasScale,
                                         ImRect sourceNode, Vector2 sourcePos,
                                         ImRect targetNode, Vector2 targetPos,
@@ -232,6 +243,14 @@ internal static class VerticalConnectionDrawer
     }
 
     /// <summary>Notifies the path observer before stroking clears the path, then calculates hover distance.</summary>
+    /// <param name="dl">Draw list containing the pending connection path.</param>
+    /// <param name="s">Canvas scale used by the path hover test.</param>
+    /// <param name="color">Connection stroke color.</param>
+    /// <param name="thickness">Connection line width in screen pixels.</param>
+    /// <param name="hoverPosition">Closest hover point on the wire when hovered.</param>
+    /// <param name="normalizedHoverPos">Relative position of the hover point along the wire, from zero to one.</param>
+    /// <param name="queryPath">Optional observer invoked before stroking; must leave the pending path intact.</param>
+    /// <returns>True when the finalized visible path is hovered.</returns>
     private static bool FinalizeStroke(ImDrawListPtr dl, float s, Color color, float thickness,
                                        out Vector2 hoverPosition, out float normalizedHoverPos,
                                        Action<ImDrawListPtr> queryPath)
@@ -250,12 +269,23 @@ internal static class VerticalConnectionDrawer
         return hovering;
     }
 
+    /// <summary>Chooses the vertical connection arc tessellation count.</summary>
+    /// <param name="arcLenRad">Arc length in radians.</param>
+    /// <param name="scale">Canvas zoom factor used to select tessellation detail.</param>
+    /// <returns>Segment count clamped between one and the configured maximum.</returns>
     private static int SegmentCount(float arcLenRad, float scale)
     {
         var circleResolution = (int)scale.RemapAndClamp(0.2f, 1.5f, 6, 15);
         return (int)(arcLenRad * circleResolution).Clamp(1, UserSettings.Config.MaxSegmentCount);
     }
 
+    /// <summary>Computes the angle of an inner tangent between two circles.</summary>
+    /// <param name="centerA">First circle center in a shared coordinate system.</param>
+    /// <param name="radiusA">First circle radius in the same units as its center.</param>
+    /// <param name="centerB">Second circle center in the same coordinate system.</param>
+    /// <param name="radiusB">Second circle radius in the same units as its center.</param>
+    /// <param name="flipped">Whether to choose the opposite inner tangent.</param>
+    /// <returns>Inner-tangent direction in radians for the selected side.</returns>
     private static float ComputeInnerTangentAngle(Vector2 centerA, float radiusA,
                                                   Vector2 centerB, float radiusB,
                                                   bool flipped = false)
@@ -277,6 +307,9 @@ internal static class VerticalConnectionDrawer
                    : (a2 > 0 ? a1 : a2);
     }
 
+    /// <summary>Wraps an angle into the signed half-turn range.</summary>
+    /// <param name="a">Angle in radians to wrap.</param>
+    /// <returns>Equivalent angle greater than negative pi and less than or equal to pi.</returns>
     private static float Normalize(float a)
     {
         while (a <= -Pi) a += 2 * Pi;

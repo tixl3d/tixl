@@ -52,6 +52,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     public ImRect Area => ImRect.RectWithSize(PosOnCanvas, Size);
     public ImRect VerticalStackArea;
 
+    /// <summary>Returns the readable name used to identify this graph item.</summary>
+    /// <returns>The item's readable operator or interface name.</returns>
     public override string ToString() => ReadableName;
 
     public SymbolUi? SymbolUi;
@@ -91,6 +93,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     // {
     //     return nodeSelection.Selection.Any(c => c.Id == Id);
     // }
+    /// <summary>Clears cached slot lines and records the layout cycle that retained the item.</summary>
+    /// <param name="updateCycle">Layout refresh cycle in which the item was collected.</param>
     public void ResetConnections(int updateCycle)
     {
         InputLines = Array.Empty<InputLine>();
@@ -177,6 +181,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
 
     public ImRect Bounds => ImRect.RectWithSize(PosOnCanvas, Size);
     
+    /// <summary>Computes one canvas rectangle enclosing the supplied items.</summary>
+    /// <param name="items">Items whose canvas rectangles are combined.</param>
+    /// <returns>Combined bounds, or a default rectangle when the sequence is empty.</returns>
     public static ImRect GetItemsBounds(IEnumerable<MagGraphItem> items)
     {
         ImRect extend = default;
@@ -207,6 +214,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     /// output anchor is taken if...
     /// - 
     /// </summary>
+    /// <param name="index">Zero-based displayed anchor index; reroutes expose only index zero.</param>
+    /// <param name="point">Caller-owned anchor record filled with slot identity, orientation, position, and snapped connection state.</param>
     public void GetOutputAnchorAtIndex(int index, ref OutputAnchorPoint point)
     {
         if (IsReroute)
@@ -241,6 +250,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     }
 
     /// <summary>Counts displayed output anchors, with one horizontal socket for a reroute.</summary>
+    /// <returns>Number of displayed output anchors available for drawing and snapping.</returns>
     public int GetOutputAnchorCount() => OutputLines.Length == 0 ? 0 : IsReroute ? 1 : OutputLines.Length + 1;
 
 
@@ -251,6 +261,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     /// Using an Enumerable interface here is bad, because it creates a lot of allocations.
     /// In the long term, this should be cached.
     /// </remarks>
+    /// <param name="index">Zero-based displayed anchor index; reroutes expose only index zero.</param>
+    /// <param name="anchorPoint">Caller-owned anchor record filled with slot identity, orientation, position, and snapped connection state.</param>
     public void GetInputAnchorAtIndex(int index, ref InputAnchorPoint anchorPoint)
     {
         if (IsReroute)
@@ -286,9 +298,13 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     }
     
     /// <summary>Counts displayed input anchors, with one horizontal socket for a reroute.</summary>
+    /// <returns>Number of displayed input anchors available for drawing and snapping.</returns>
     public int GetInputAnchorCount() => InputLines.Length == 0 ? 0 : IsReroute ? 1 : InputLines.Length + 1;
 
     /** Assume as free (I.e. not connected) unless an connection is snapped, then return this connection as hash. */
+    /// <summary>Finds the snapped connection occupying an anchor.</summary>
+    /// <param name="snapGraphConnections">Connections attached to the anchor being classified.</param>
+    /// <returns>Hash of the first snapped connection, or FreeAnchor when none is snapped.</returns>
     private static int GetSnappedConnectionHash(List<MagGraphConnection> snapGraphConnections)
     {
         foreach (var sc in snapGraphConnections)
@@ -302,6 +318,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         return FreeAnchor;
     }
 
+    /// <summary>Retrieves the connection attached to the primary displayed input.</summary>
+    /// <param name="connection">Connection occupying the primary input when true; null when absent.</param>
+    /// <returns>True when the primary input has a connection.</returns>
     public bool TryGetPrimaryInConnection([NotNullWhen(true)]out  MagGraphConnection? connection)
     {
         connection = null;
@@ -313,6 +332,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         return connection != null;
     }
     
+    /// <summary>Retrieves the connections attached to the primary displayed output.</summary>
+    /// <param name="connections">Connection list from the primary displayed output, or an empty list when no output exists.</param>
+    /// <returns>True when the primary output has at least one connection.</returns>
     public bool TryGetPrimaryOutConnections(out List<MagGraphConnection> connections)
     {
         if (OutputLines.Length == 0)
@@ -328,6 +350,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
 
     public const int FreeAnchor = -1;
 
+    /// <summary>Offers this graph item as a positional snap target.</summary>
+    /// <param name="snapResult">Accumulated snapping result offered this item's candidate position.</param>
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)
     {
         if (snapResult.Orientation == SnapResult.Orientations.Horizontal)
@@ -374,6 +398,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     //     }
     // }
 
+    /// <summary>Selects this item using its current symbol UI and runtime instance.</summary>
+    /// <param name="nodeSelection">Selection to replace with this graph item.</param>
     public void Select(NodeSelection nodeSelection)
     {
         // TODO: Avoid this by not using magGraphItem as selectable
@@ -391,6 +417,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         }
     }
 
+    /// <summary>Adds this item to the selection using its current symbol UI and runtime instance.</summary>
+    /// <param name="nodeSelection">Selection to extend with this graph item.</param>
     public void AddToSelection(NodeSelection nodeSelection)
     {
         // TODO: Avoid this by not using magGraphItem as selectable

@@ -13,10 +13,18 @@ internal static class GraphConnectionDrawer
     /// <summary>
     /// Returns true if hovering...
     /// </summary>
-    /*
-     * queryPath lets routing gestures inspect the tessellated screen-space cable before
-     * PathStroke consumes it. Observers must leave the draw list's pending path intact.
-     */
+    /// <param name="canvasScale">Canvas zoom factor used to scale the graph geometry.</param>
+    /// <param name="Sn">Source node bounds in screen coordinates.</param>
+    /// <param name="Sp">Source socket position in screen coordinates.</param>
+    /// <param name="Tn">Target node or stack bounds in screen coordinates.</param>
+    /// <param name="Tp">Target socket position in screen coordinates.</param>
+    /// <param name="color">Connection stroke color.</param>
+    /// <param name="thickness">Connection line width in screen pixels.</param>
+    /// <param name="hoverPosition">Closest hover point on the wire when hovered.</param>
+    /// <param name="normalizedHoverPos">Relative position of the hover point along the wire, from zero to one.</param>
+    /// <param name="queryPath">Optional observer invoked on the pending tessellated path before it is stroked; must preserve that path.</param>
+    /// <returns>True when the pointer is close enough to the visible connection path to hover it.</returns>
+    /// <remarks>queryPath lets routing gestures inspect the tessellated screen-space cable before PathStroke consumes it. Observers must leave the draw list's pending path intact.</remarks>
     internal static bool DrawConnection(float canvasScale, ImRect Sn, Vector2 Sp,
                                         ImRect Tn, Vector2 Tp, Color color, float thickness,
                                         out Vector2 hoverPosition, out float normalizedHoverPos,
@@ -261,12 +269,23 @@ internal static class GraphConnectionDrawer
         return isHovering;
     }
 
+    /// <summary>Chooses the arc tessellation count from curvature and canvas zoom.</summary>
+    /// <param name="arcLengthRad">Arc length in radians.</param>
+    /// <param name="canvasScale">Canvas zoom factor used to scale the graph geometry.</param>
+    /// <returns>Segment count clamped between one and the configured maximum.</returns>
     private static int ComputerSegmentCount(float arcLengthRad, float canvasScale)
     {
         var circleResolution = (int) canvasScale.RemapAndClamp(0.2f, 1.5f, 6, 15);
         return (int)(arcLengthRad * circleResolution).Clamp(1, UserSettings.Config.MaxSegmentCount);
     }
     
+    /// <summary>Computes the angle of an inner tangent between two circles.</summary>
+    /// <param name="centerA">First circle center in a shared coordinate system.</param>
+    /// <param name="radiusA">First circle radius in the same units as its center.</param>
+    /// <param name="centerB">Second circle center in the same coordinate system.</param>
+    /// <param name="radiusB">Second circle radius in the same units as its center.</param>
+    /// <param name="flipped">Whether to choose the opposite inner tangent.</param>
+    /// <returns>Inner-tangent direction in radians for the selected side.</returns>
     private static float ComputeInnerTangentAngle(Vector2 centerA, float radiusA, Vector2 centerB, float radiusB, bool flipped = false)
     {
         // Calculate the differences in x and y coordinates
@@ -309,6 +328,9 @@ internal static class GraphConnectionDrawer
         return selectedAngle;
     }
 
+    /// <summary>Wraps an angle into the signed half-turn range.</summary>
+    /// <param name="angle">Angle in radians to wrap.</param>
+    /// <returns>Equivalent angle greater than negative pi and less than or equal to pi.</returns>
     private static float NormalizeAngle(float angle)
     {
         while (angle <= -Math.PI) angle += 2 * MathF.PI;

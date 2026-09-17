@@ -30,12 +30,14 @@ public sealed class RerouteCommand : Instance<RerouteCommand>, IRerouteNode
     }
 
     /// <summary>Evaluates the current input between the consumer prepare and restore phases.</summary>
+    /// <param name="context">Evaluation state passed unchanged to the upstream command input.</param>
     private void Update(EvaluationContext context)
     {
         Input.GetValue(context);
     }
 
     /// <summary>Forwards prepare to the current source without evaluating it, unless the output is disabled.</summary>
+    /// <param name="context">Evaluation state passed unchanged to the current source's prepare callback.</param>
     private void ForwardPrepare(EvaluationContext context)
     {
         if (Output.IsDisabled)
@@ -45,6 +47,7 @@ public sealed class RerouteCommand : Instance<RerouteCommand>, IRerouteNode
     }
 
     /// <summary>Forwards restore to the current source without evaluating it, unless the output is disabled.</summary>
+    /// <param name="context">Evaluation state passed unchanged to the current source's restore callback.</param>
     private void ForwardRestore(EvaluationContext context)
     {
         if (Output.IsDisabled)
@@ -54,6 +57,7 @@ public sealed class RerouteCommand : Instance<RerouteCommand>, IRerouteNode
     }
 
     /// <summary>Reads the connected command or local input value without triggering evaluation.</summary>
+    /// <returns>Current connected command, or the local input value/default when unconnected; may be null.</returns>
     private Command? GetSourceCommand()
     {
         // Consumers prepare before pulling, so inspecting the source must not evaluate it.

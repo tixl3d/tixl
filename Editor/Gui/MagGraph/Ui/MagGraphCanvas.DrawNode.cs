@@ -27,6 +27,9 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 internal sealed partial class MagGraphView
 {
     /// <summary>Draws the appropriate node body and slot interaction for an item variant.</summary>
+    /// <param name="item">Graph item whose variant selects the node body and slot presentation.</param>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="context">Graph context providing selection, hover, connection-drag, and stroke interaction state.</param>
     private void DrawNode(MagGraphItem item, ImDrawListPtr drawList, GraphUiContext context)
     {
         if (item.Variant == MagGraphItem.Variants.Placeholder || item.Instance == null)
@@ -1188,6 +1191,9 @@ internal sealed partial class MagGraphView
     /// The body retains a drag region even when socket tolerances overlap at low zoom.
     /// Stroke mouse ownership suppresses node interactions until the gesture has released the button.
     /// </summary>
+    /// <param name="item">Typed reroute item providing its compact body geometry and single input/output anchors.</param>
+    /// <param name="drawList">ImGui draw list receiving the reroute body, sockets, and interaction highlights in screen coordinates.</param>
+    /// <param name="context">Graph interaction state used to resolve selection, hover, socket snapping, and stroke mouse ownership.</param>
     private void DrawReroute(MagGraphItem item, ImDrawListPtr drawList, GraphUiContext context)
     {
         if (item.InputLines.Length != 1 || item.OutputLines.Length != 1)
@@ -1292,6 +1298,11 @@ internal sealed partial class MagGraphView
         }
     }
 
+    /// <summary>Draws a missing-input marker and its connection-type tooltip.</summary>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="item">Node containing the disconnected required input.</param>
+    /// <param name="pMin">Screen-space origin used to position the input indicator.</param>
+    /// <param name="inputLine">Input row whose required connection is missing.</param>
     private void DrawMissingInputIndicator(ImDrawListPtr drawList, MagGraphItem item, Vector2 pMin, MagGraphItem.InputLine inputLine)
     {
         var s = GridSizeOnScreen.Y;
@@ -1316,6 +1327,14 @@ internal sealed partial class MagGraphView
         ImGui.PopID();
     }
 
+    /// <summary>Draws multi-input insertion feedback and registers the candidate snap target.</summary>
+    /// <param name="item">Node containing the multi-input target.</param>
+    /// <param name="slotId">ID of the multi-input slot receiving the candidate connection.</param>
+    /// <param name="multiInputIndex">Occurrence index at which the connection would be inserted or replaced.</param>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="inputPosOnCanvas">Target input anchor position in canvas coordinates.</param>
+    /// <param name="color">Color used for insertion or replacement feedback.</param>
+    /// <param name="snapType">Whether the candidate inserts before, inserts after, or replaces an occurrence.</param>
     private void DrawMultiInputIndicator(MagGraphItem item, Guid slotId, int multiInputIndex, ImDrawListPtr drawList, Vector2 inputPosOnCanvas, Color color,
                                          InputSnapper.InputSnapTypes snapType)
     {
@@ -1341,6 +1360,15 @@ internal sealed partial class MagGraphView
         InputSnapper.RegisterAsPotentialTargetInput(item, pOnScreen, slotId, snapType, multiInputIndex);
     }
 
+    /// <summary>Draws the next status indicator along a node and optionally provides a tooltip.</summary>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="color">Status color for the indicator.</param>
+    /// <param name="opacity">Opacity multiplier for the indicator.</param>
+    /// <param name="areaMin">Minimum corner of the node's screen-space area.</param>
+    /// <param name="areaMax">Maximum corner of the node's screen-space area.</param>
+    /// <param name="canvasScale">Canvas zoom factor used to scale the graph geometry.</param>
+    /// <param name="indicatorCount">Number of indicators already placed; advanced after drawing this indicator.</param>
+    /// <param name="tooltip">Optional explanatory text displayed when the indicator is hovered.</param>
     private void DrawIndicator(ImDrawListPtr drawList, Color color, float opacity, Vector2 areaMin, Vector2 areaMax, float canvasScale,
                                ref int indicatorCount, string tooltip=null)
     {
@@ -1373,6 +1401,13 @@ internal sealed partial class MagGraphView
     }
     
 
+    /// <summary>Draws a texture output preview when the node and current canvas support one.</summary>
+    /// <param name="item">Node whose output may supply a texture thumbnail.</param>
+    /// <param name="itemMin">Minimum corner of the node's screen-space rectangle.</param>
+    /// <param name="itemMax">Maximum corner of the node's screen-space rectangle.</param>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="typeColor">Type-derived color used for preview framing or feedback.</param>
+    /// <returns>True when the texture preview was drawn; false when it is unavailable or suppressed.</returns>
     private bool TryDrawTexturePreview(MagGraphItem item, Vector2 itemMin, Vector2 itemMax, ImDrawListPtr drawList, Color typeColor)
     {
         if (item.Variant != MagGraphItem.Variants.Operator)
@@ -1454,6 +1489,13 @@ internal sealed partial class MagGraphView
 /// <summary>Draws a circular interaction indicator clipped to a rectangular node region.</summary>
 internal static class CircleInBoxHelper
 {
+    /// <summary>Draws a circle constrained to a rectangular clipping area.</summary>
+    /// <param name="pMin">Minimum corner of the screen-space clipping rectangle.</param>
+    /// <param name="pMax">Maximum corner of the screen-space clipping rectangle.</param>
+    /// <param name="center">Circle center in screen coordinates.</param>
+    /// <param name="radius">Circle radius in screen pixels.</param>
+    /// <param name="color">Color used to draw the circle.</param>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
     public static void DrawClippedCircle(Vector2 pMin, Vector2 pMax, Vector2 center, float radius, Color color, ImDrawListPtr drawList)
     {
         if (!new ImRect(pMin, pMax).Contains(center))

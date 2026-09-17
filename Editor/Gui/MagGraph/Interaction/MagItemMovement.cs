@@ -35,6 +35,11 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// </remarks>
 internal sealed partial class MagItemMovement
 {
+    /// <summary>Creates movement handling for one graph view and its selection.</summary>
+    /// <param name="graphUiContext">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="magGraphView">Canvas that transforms mouse positions and displays the dragged nodes.</param>
+    /// <param name="layout">Layout whose node and connection records participate in snapping.</param>
+    /// <param name="nodeSelection">Selection used to determine and update the dragged items.</param>
     internal MagItemMovement(GraphUiContext graphUiContext, MagGraphView magGraphView, MagGraphLayout layout, NodeSelection nodeSelection)
     {
         _view = magGraphView;
@@ -46,6 +51,7 @@ internal sealed partial class MagItemMovement
     private readonly GraphUiContext _context;
 
     /// <summary>Updates movement targets and frame state for the current selection.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     internal void PrepareFrame(GraphUiContext context)
     {
         //PrepareDragInteraction();
@@ -61,6 +67,7 @@ internal sealed partial class MagItemMovement
     /// <summary>
     /// Finishes movement and pending cleanup in the move macro, then resolves input picking.
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     internal void CompleteDragOperation(GraphUiContext context)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -88,6 +95,7 @@ internal sealed partial class MagItemMovement
     /// decides afresh. Disabled while the frame is selected, or when
     /// <see cref="UserSettings.ConfigData.SectionSlowResizeSpeed"/> is 0.
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     private void TrySlowGrowSection(GraphUiContext context)
     {
         var unlockSpeed = UserSettings.Config.SectionSlowResizeSpeed;
@@ -172,6 +180,7 @@ internal sealed partial class MagItemMovement
     /// Folds the accumulated slow-grow resize into the drag's MacroCommand and pushes
     /// neighbors out of the grown bounds.
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     private void CompleteSlowGrow(GraphUiContext context)
     {
         if (_slowGrowCommand == null)
@@ -218,6 +227,7 @@ internal sealed partial class MagItemMovement
     /// the drag's MacroCommand. Dragged items themselves are ignored, so deliberately
     /// dragging an op out of a frame never grows it.
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     private void GrowSectionsToFitDisplacedMembers(GraphUiContext context)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -247,6 +257,10 @@ internal sealed partial class MagItemMovement
     /// MacroCommand. Ops in <paramref name="excludedChildIds"/> are ignored, so a
     /// deliberate drag out of the frame never grows it.
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="symbolUi">Composition UI containing the section and its children.</param>
+    /// <param name="section">Section whose bounds must enclose its content.</param>
+    /// <param name="excludedChildIds">Child IDs omitted from the bounds calculation, or null to include all children.</param>
     private static void GrowSectionToFitContent(GraphUiContext context, SymbolUi symbolUi, Section section, HashSet<Guid>? excludedChildIds)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -323,6 +337,8 @@ internal sealed partial class MagItemMovement
         _shakeDetector.ResetShaking();
     }
 
+    /// <summary>Selects the active item while respecting the current multi-selection modifiers.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     internal static void SelectActiveItem(GraphUiContext context)
     {
         var item = context.ActiveItem;
@@ -352,6 +368,7 @@ internal sealed partial class MagItemMovement
     }
 
     /// <summary>Moves dragged items and tests automatic insertion and snapping only for eligible blocks.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     internal void UpdateDragging(GraphUiContext context)
     {
         if (!T3Ui.IsCurrentlySaving && _shakeDetector.TestDragForShake(ImGui.GetMousePos()))
@@ -389,6 +406,8 @@ internal sealed partial class MagItemMovement
     }
 
     /// <summary>Completes the move, disconnects the selection, and starts selective anchor cleanup with the existing undo grouping.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <returns>True when a detected shake disconnects the dragged selection.</returns>
     private bool HandleShakeDisconnect(GraphUiContext context)
     {
         //Log.Debug("Shake it!");
@@ -433,6 +452,8 @@ internal sealed partial class MagItemMovement
         return true;
     }
 
+    /// <summary>Draws the mouse-centered progress indicator for a pending long press.</summary>
+    /// <param name="longTapProgress">Normalized progress toward completing the long-press gesture.</param>
     internal static void UpdateLongPressIndicator(float longTapProgress)
     {
         var dl = ImGui.GetWindowDrawList();
@@ -442,6 +463,8 @@ internal sealed partial class MagItemMovement
     /// <summary>
     /// Update dragged items and use anchor definitions to identify and use potential snap targets
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <returns>True when the drag changes its snapped placement.</returns>
     private bool HandleSnappedDragging(GraphUiContext context)
     {
         var dl = ImGui.GetWindowDrawList();
@@ -623,6 +646,8 @@ internal sealed partial class MagItemMovement
         return snappingChanged;
     }
 
+    /// <summary>Adjusts dragged node positions to nearby horizontal alignment guides.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     private void HandleHorizontalAlignmentSnapping(GraphUiContext context)
     {
         if (!UserSettings.Config.EnableHorizontalSnapping) 
@@ -676,6 +701,8 @@ internal sealed partial class MagItemMovement
     private static readonly ValueSnapHandler _snapHandlerX = new(SnapResult.Orientations.Horizontal);
     private static readonly List<MagGraphItem> _visibleItemsForSnapping = [];
 
+    /// <summary>Captures movement state and splice candidates at the start of a drag.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     public void StartDragOperation(GraphUiContext context)
     {
         _draggedSelectables = DraggedItems.Select(i => i as ISelectableCanvasObject).ToList();
@@ -714,6 +741,7 @@ internal sealed partial class MagItemMovement
     /// <summary>
     /// Handles op disconnection and collapsed
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     private void HandleUnsnapAndCollapse(GraphUiContext context)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -762,6 +790,10 @@ internal sealed partial class MagItemMovement
         TryCollapseDisconnectedInputs(context, unsnappedConnections);
     }
 
+    /// <summary>Closes an eligible vertical stack gap left by the dragged block.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="unsnappedConnections">Connections crossing between the dragged items and the stationary graph.</param>
+    /// <returns>True when a collapsible vertical connection pair is found and processed.</returns>
     private bool TryCollapseDragFromVerticalStack(GraphUiContext context, List<MagGraphConnection> unsnappedConnections)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -813,6 +845,10 @@ internal sealed partial class MagItemMovement
         return true;
     }
 
+    /// <summary>Closes an eligible horizontal stack gap left by the dragged block.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="unsnappedConnections">Connections crossing between the dragged items and the stationary graph.</param>
+    /// <returns>True when a collapsible horizontal connection pair is found and processed.</returns>
     private bool TryCollapseDragFromHorizontalStack(GraphUiContext context, List<MagGraphConnection> unsnappedConnections)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -863,6 +899,9 @@ internal sealed partial class MagItemMovement
         return true;
     }
 
+    /// <summary>Finds vertical connection pairs linked through the dragged block.</summary>
+    /// <param name="unsnappedConnections">Connections exposed by unsnapping the dragged block.</param>
+    /// <returns>Connection pairs whose stationary sides can be joined after removing the block.</returns>
     internal static List<SnapCollapseConnectionPair> FindLinkedVerticalCollapsableConnectionPairs(List<MagGraphConnection> unsnappedConnections)
     {
         // Find collapses
@@ -914,6 +953,9 @@ internal sealed partial class MagItemMovement
         return pairs;
     }
 
+    /// <summary>Collects vertical connection pairs that can close a stack gap.</summary>
+    /// <param name="unsnappedConnections">Connections exposed by unsnapping the dragged block.</param>
+    /// <returns>Eligible incoming and outgoing connection pairs.</returns>
     private static List<SnapCollapseConnectionPair> FindVerticalCollapsableConnectionPairs(List<MagGraphConnection> unsnappedConnections)
     {
         var list = new List<SnapCollapseConnectionPair>();
@@ -952,6 +994,9 @@ internal sealed partial class MagItemMovement
         return list;
     }
 
+    /// <summary>Collects horizontal connection pairs that can close a stack gap.</summary>
+    /// <param name="unsnappedConnections">Connections exposed by unsnapping the dragged block.</param>
+    /// <returns>Eligible incoming and outgoing connection pairs.</returns>
     private static List<SnapCollapseConnectionPair> FindHorizontalCollapsableConnectionPairs(List<MagGraphConnection> unsnappedConnections)
     {
         var list = new List<SnapCollapseConnectionPair>();
@@ -991,6 +1036,9 @@ internal sealed partial class MagItemMovement
         return list;
     }
 
+    /// <summary>Moves downstream stacks to close rows released by disconnected inputs.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="unsnappedConnections">Connections exposed by unsnapping the dragged block.</param>
     private void TryCollapseDisconnectedInputs(GraphUiContext context, List<MagGraphConnection> unsnappedConnections)
     {
         if (unsnappedConnections.Count == 0)
@@ -1026,6 +1074,9 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Checks whether disconnecting a wire would remove an optional or repeated input row.</summary>
+    /// <param name="connection">Connection whose removal may eliminate its target input row.</param>
+    /// <returns>True when the disconnected occurrence would collapse a visible input row.</returns>
     public static bool DisconnectedInputWouldCollapseLine(MagGraphConnection connection)
     {
         var inputWasNotPrimary = connection.InputLineIndex > 0;
@@ -1060,6 +1111,11 @@ internal sealed partial class MagItemMovement
     ///<summary>
     /// Iterate through gap lines and move items below upwards
     /// </summary>
+    /// <param name="ca">Connection entering the removed block from the stationary source.</param>
+    /// <param name="cb">Connection leaving the removed block for the stationary target.</param>
+    /// <param name="movableItems">Items allowed to move while closing the vertical gap.</param>
+    /// <param name="dryRun">True to collect affected items without changing their positions.</param>
+    /// <returns>Items affected by the proposed or applied vertical collapse.</returns>
     public static HashSet<MagGraphItem> MoveToCollapseVerticalGaps(MagGraphConnection ca, MagGraphConnection cb, HashSet<MagGraphItem> movableItems,
                                                                    bool dryRun)
     {
@@ -1107,6 +1163,11 @@ internal sealed partial class MagItemMovement
     ///<summary>
     /// Try to close gap be looking for disjoint snapped set on the left and right
     /// </summary>
+    /// <param name="ca">Connection entering the removed block from the stationary source.</param>
+    /// <param name="cb">Connection leaving the removed block for the stationary target.</param>
+    /// <param name="movableItems">Items allowed to move while closing the horizontal gap.</param>
+    /// <param name="dryRun">True to collect affected items without changing their positions.</param>
+    /// <returns>Items affected by the proposed or applied horizontal collapse.</returns>
     private  HashSet<MagGraphItem> MoveToCollapseHorizontalGaps(MagGraphConnection ca, MagGraphConnection cb, HashSet<MagGraphItem> movableItems,
                                                                       bool dryRun)
     {
@@ -1162,6 +1223,7 @@ internal sealed partial class MagItemMovement
     ///<summary>
     /// Search for potential new connections through snapping
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     private void TryCreateNewConnectionFromSnap(GraphUiContext context)
     {
         if (!_snapping.IsSnapped)
@@ -1258,6 +1320,9 @@ internal sealed partial class MagItemMovement
     }
 
     /// <summary>Collects compatible automatic connections between two block-layout participants.</summary>
+    /// <param name="result">Destination list to which compatible connection candidates are appended.</param>
+    /// <param name="a">Source item at the newly snapped boundary.</param>
+    /// <param name="b">Target item at the newly snapped boundary.</param>
     private static void GetPotentialConnectionsAfterSnap(ref List<PotentialConnection> result, MagGraphItem a, MagGraphItem b)
     {
         // Automatic connections require both items to participate in block layout.
@@ -1333,6 +1398,8 @@ internal sealed partial class MagItemMovement
         MagGraphItem TargetItem,
         MagGraphItem.InputLine InputLine);
 
+    /// <summary>Collects connections crossing the boundary of the dragged block.</summary>
+    /// <param name="draggedItems">Items in the current dragged block.</param>
     private void UpdateConnectionsToDraggedItems(HashSet<MagGraphItem> draggedItems)
     {
         _connectionsToDraggedItems.Clear();
@@ -1349,6 +1416,10 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Checks whether exactly one connection endpoint belongs to the dragged block.</summary>
+    /// <param name="c">Connection to test for crossing the drag boundary.</param>
+    /// <param name="draggedItems">Items in the current dragged block.</param>
+    /// <returns>True when one endpoint is dragged and the other is stationary.</returns>
     private static bool IsBorderConnection(MagGraphConnection c, HashSet<MagGraphItem> draggedItems)
     {
         var isTargetDragged = draggedItems.Contains(c.TargetItem);
@@ -1376,6 +1447,8 @@ internal sealed partial class MagItemMovement
     /// When starting a new drag operation, we try to identify border input anchors of the dragged items,
     /// that can be used to insert them between other snapped items.
     /// </summary>
+    /// <param name="draggedItems">Dragged items whose exposed slots may splice an existing connection.</param>
+    /// <param name="mousePosInCanvas">Mouse position at drag start in canvas coordinates.</param>
     private void InitSpliceLinks(HashSet<MagGraphItem> draggedItems, Vector2 mousePosInCanvas)
     {
         SpliceSets.Clear();
@@ -1456,6 +1529,8 @@ internal sealed partial class MagItemMovement
     ///<summary>
     /// Search for potential new connections through snapping
     /// </summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <returns>True when the current splice candidate is accepted and its graph edits are applied.</returns>
     // ReSharper disable once UnusedMethodReturnValue.Local
     private static bool TrySplitInsert(GraphUiContext context)
     {
@@ -1550,6 +1625,10 @@ internal sealed partial class MagItemMovement
     /// <returns>
     /// True if some items where moved
     /// </returns>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="snappedItems">Snapped block containing the nodes eligible for movement.</param>
+    /// <param name="yThreshold">Canvas-space Y threshold used to select the movable side of the block.</param>
+    /// <param name="yDistance">Signed vertical displacement in canvas units.</param>
     public static void MoveSnappedItemsVertically(GraphUiContext context, HashSet<MagGraphItem> snappedItems, float yThreshold, float yDistance)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -1574,6 +1653,10 @@ internal sealed partial class MagItemMovement
     /// <returns>
     /// True if some items where moved
     /// </returns>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="snappedItems">Snapped block containing the nodes eligible for movement.</param>
+    /// <param name="xThreshold">Canvas-space X threshold used to select the movable side of the block.</param>
+    /// <param name="xDistance">Signed horizontal displacement in canvas units.</param>
     public static void MoveSnappedItemsHorizontally(GraphUiContext context, HashSet<MagGraphItem> snappedItems, float xThreshold, float xDistance)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -1593,6 +1676,10 @@ internal sealed partial class MagItemMovement
         MoveItems(context, movableItems, new Vector2(xDistance,0));
     }
 
+    /// <summary>Moves the supplied items through the active undoable graph edit.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="movableItems">Items whose positions are updated by the movement command.</param>
+    /// <param name="offset">Signed displacement in canvas coordinates.</param>
     private static void MoveItems(GraphUiContext context, IEnumerable<MagGraphItem> movableItems, Vector2 offset)
     {
         Debug.Assert(context.MacroCommand != null);
@@ -1654,6 +1741,7 @@ internal sealed partial class MagItemMovement
     /// This part is a little fishy. To have "some" solution we try to identify dragged
     /// constellations that has a single free horizontal output anchor on the left column.
     /// </summary>
+    /// <returns>Primary output item of a supported dragged block, or null when no unambiguous eligible item exists.</returns>
     private MagGraphItem? FindPrimaryOutputItem()
     {
         if (DraggedItems.Count == 0)
@@ -1685,6 +1773,11 @@ internal sealed partial class MagItemMovement
     /// <summary>
     /// Add snapped items to the given set or create new set
     /// </summary>
+    /// <param name="rootItem">Item at which traversal of snapped connections begins.</param>
+    /// <param name="set">Optional destination set to extend; a new set is created when null.</param>
+    /// <param name="includeRoot">Whether the starting item is included in the result.</param>
+    /// <param name="ignoreConnectionHash">Connection hash to exclude from traversal, or zero for no exclusion.</param>
+    /// <returns>The supplied or newly created set of items reachable through the allowed snapped connections.</returns>
     public static HashSet<MagGraphItem> CollectSnappedItems(MagGraphItem rootItem,  HashSet<MagGraphItem>? set = null, bool includeRoot= true, int ignoreConnectionHash= 0)
     {
         set ??= [];
@@ -1722,6 +1815,9 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Collects the union of the snapped blocks containing the supplied roots.</summary>
+    /// <param name="rootItems">Starting items whose snapped neighborhoods are combined.</param>
+    /// <returns>Distinct items in the reachable snapped blocks.</returns>
     public static HashSet<MagGraphItem> CollectSnappedItems(IEnumerable<MagGraphItem> rootItems)
     {
         var set = new HashSet<MagGraphItem>();
@@ -1734,6 +1830,8 @@ internal sealed partial class MagItemMovement
         return set;
     }
 
+    /// <summary>Sets the dragged items by resolving their IDs in the current layout.</summary>
+    /// <param name="selectedIds">Child IDs to resolve into the current layout's dragged-item set.</param>
     internal void SetDraggedItemIds(List<Guid> selectedIds)
     {
         DraggedItems.Clear();
@@ -1747,6 +1845,8 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Sets the dragged items from the supplied canvas selection.</summary>
+    /// <param name="selection">Selected canvas objects to resolve into graph items.</param>
     internal void SetDraggedItems(List<ISelectableCanvasObject> selection)
     {
         DraggedItems.Clear();
@@ -1760,6 +1860,8 @@ internal sealed partial class MagItemMovement
         }
     }
 
+    /// <summary>Sets the dragged items to the snapped block containing the given item.</summary>
+    /// <param name="item">Root item whose complete snapped block is to be dragged.</param>
     internal void SetDraggedItemIdsToSnappedForItem(MagGraphItem item)
     {
         DraggedItems.Clear();
@@ -1767,6 +1869,9 @@ internal sealed partial class MagItemMovement
         CollectSnappedItems(item, DraggedItems);
     }
 
+    /// <summary>Checks whether an item belongs to the active drag.</summary>
+    /// <param name="item">Graph item to look up in the active drag set.</param>
+    /// <returns>True when the item is in the dragged-item set.</returns>
     internal bool IsItemDragged(MagGraphItem item) => DraggedItems.Contains(item);
 
     internal double LastSnapTime = double.NegativeInfinity;

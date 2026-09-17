@@ -24,6 +24,8 @@ internal sealed partial class MagGraphView
     private readonly Dictionary<int, (Vector2 source, Vector2 target)> _previousConnectionPositions = new();
     
     /// <summary>Draws graph items and connections, collecting stroke hits before committing the release frame.</summary>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="graphOpacity">Opacity multiplier applied to the graph's node and connection colors.</param>
     public void DrawGraph(ImDrawListPtr drawList, float graphOpacity)
     {
         _context.GraphOpacity = graphOpacity;
@@ -486,6 +488,7 @@ internal sealed partial class MagGraphView
     /// Transform gizmos of cached operators like [Point] might not be visible in the output window.
     /// This method force-invalidates them, if selected. 
     /// </summary>
+    /// <param name="item">Graph item whose selected transform provider may need input invalidation.</param>
     private void InvalidateSelectedGizmoProviders(MagGraphItem item)
     {
         if (item.Variant == MagGraphItem.Variants.Operator
@@ -552,6 +555,9 @@ internal sealed partial class MagGraphView
     /// <summary>ImGui time at which the transient stroke error disappears.</summary>
     private double _strokeErrorUntil;
 
+    /// <summary>Draws insertion feedback for eligible snapped connections during a node drag.</summary>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="context">Graph context supplying the active drag and its splice candidates.</param>
     private void HighlightSplitInsertionPoints(ImDrawListPtr drawList, GraphUiContext context)
     {
         foreach (var sp in context.ItemMovement.SpliceSets)
@@ -589,6 +595,8 @@ internal sealed partial class MagGraphView
         }
     }
 
+    /// <summary>Draws the visible graph background grids at their configured scales.</summary>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
     private void DrawBackgroundGrids(ImDrawListPtr drawList)
     {
         var minSize = MathF.Min(MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y);
@@ -610,6 +618,10 @@ internal sealed partial class MagGraphView
         }
     }
 
+    /// <summary>Draws one grid layer within the visible canvas.</summary>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="gridSize">Spacing between grid lines in canvas units.</param>
+    /// <param name="color">Color used for the grid lines.</param>
     private void DrawBackgroundGrid(ImDrawListPtr drawList, Vector2 gridSize, Color color)
     {
         var window = new ImRect(WindowPos, WindowPos + WindowSize);

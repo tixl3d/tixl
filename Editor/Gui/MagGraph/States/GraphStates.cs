@@ -743,6 +743,9 @@ namespace T3.Editor.Gui.MagGraph.States
         /// the primary outputs of all other selected operators with a matching type are picked up too, ordered by
         /// canvas position, so they can be dropped onto a multi-input or the symbol browser together.
         /// </summary>
+        /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+        /// <param name="sourceItem">Item whose picked output starts the drag.</param>
+        /// <param name="outputLine">Picked output row whose type determines eligible additional selected outputs.</param>
         private static void AddTempConnectionsForOutputDrag(GraphUiContext context, MagGraphItem sourceItem, MagGraphItem.OutputLine outputLine)
         {
             var draggedItems = new List<MagGraphItem> { sourceItem };

@@ -24,6 +24,7 @@ internal static class TreeLayouting
 {
     /// <summary>Arranges eligible inputs while keeping items excluded from block layout fixed.</summary>
     /// <returns>True if an item was moved or the selection grew</returns>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
     internal static bool LayoutInputsOfSelection(GraphUiContext context)
     {
         var layout = context.Layout;
@@ -198,6 +199,10 @@ internal static class TreeLayouting
                                              bool Snaps,
                                              bool MaySnapIntoRow);
 
+    /// <summary>Moves a snapped cluster as part of the current layout command.</summary>
+    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+    /// <param name="cluster">Snapped items that must move together as one block.</param>
+    /// <param name="offset">Signed displacement in canvas coordinates.</param>
     private static void MoveCluster(GraphUiContext context, HashSet<MagGraphItem> cluster, Vector2 offset)
     {
         var selectables = new List<ISelectableCanvasObject>(cluster.Count);
@@ -216,12 +221,19 @@ internal static class TreeLayouting
         moveCommand.StoreCurrentValues();
     }
 
+    /// <summary>Orders items from top to bottom, breaking ties from left to right.</summary>
+    /// <param name="a">First item to order.</param>
+    /// <param name="b">Second item to order.</param>
+    /// <returns>Signed comparison result for the items' canvas positions.</returns>
     private static int CompareTopLeftFirst(MagGraphItem a, MagGraphItem b)
     {
         var byY = a.PosOnCanvas.Y.CompareTo(b.PosOnCanvas.Y);
         return byY != 0 ? byY : a.PosOnCanvas.X.CompareTo(b.PosOnCanvas.X);
     }
 
+    /// <summary>Counts outgoing connection occurrences across an item's displayed outputs.</summary>
+    /// <param name="item">Item whose output-line connection lists are counted.</param>
+    /// <returns>Total number of outgoing occurrences, including repeated targets.</returns>
     private static int CountOutgoingConnections(MagGraphItem item)
     {
         var count = 0;
@@ -233,6 +245,11 @@ internal static class TreeLayouting
         return count;
     }
 
+    /// <summary>Checks whether every consumer belongs to the allowed item sets.</summary>
+    /// <param name="source">Source item whose downstream consumers are checked.</param>
+    /// <param name="set">Primary set of permitted consumer items.</param>
+    /// <param name="orSet">Additional permitted consumer items, or null for no additional set.</param>
+    /// <returns>True when each outgoing connection targets an item in either allowed set.</returns>
     private static bool AllConsumersAreIn(MagGraphItem source, HashSet<MagGraphItem> set, HashSet<MagGraphItem>? orSet = null)
     {
         foreach (var outputLine in source.OutputLines)
@@ -252,6 +269,9 @@ internal static class TreeLayouting
     /// Number of pending placements the item's position depends on: zero for a fixed target, one for a
     /// source that will move, two for a source of that source, and so on.
     /// </summary>
+    /// <param name="item">Item whose dependent placement chain is followed.</param>
+    /// <param name="sourceToTarget">Planned source-to-target placement dependencies.</param>
+    /// <returns>Number of pending placements on which this item depends.</returns>
     private static int GetChainDepth(MagGraphItem item, Dictionary<MagGraphItem, MagGraphItem> sourceToTarget)
     {
         var depth = 0;
@@ -267,6 +287,10 @@ internal static class TreeLayouting
     /// <summary>
     /// True if the target rows a source of this height would cover below its own row are unconnected or don't exist.
     /// </summary>
+    /// <param name="target">Consumer whose input rows may be covered by the source.</param>
+    /// <param name="lineIndex">Target input row at which the source would be placed.</param>
+    /// <param name="source">Source item whose height determines the covered rows.</param>
+    /// <returns>True when the covered rows below the attachment are absent or disconnected.</returns>
     private static bool CoveredRowsAreFree(MagGraphItem target, int lineIndex, MagGraphItem source)
     {
         var sourceRows = (int)MathF.Round(source.Size.Y / MagGraphItem.LineHeight);
@@ -284,6 +308,11 @@ internal static class TreeLayouting
     /// If neither exact spot is free, or the source would cover connected rows below, it falls back to the loose
     /// placement - the connection then becomes a curve.
     /// </summary>
+    /// <param name="placement">Source cluster and consumer attachment being positioned.</param>
+    /// <param name="obstacles">Fixed or already placed items that may obstruct the candidate.</param>
+    /// <param name="pendingItems">Items still awaiting placement, excluded from collision checks.</param>
+    /// <param name="position">Snapped or fallback loose canvas position when true; default when no position is found.</param>
+    /// <returns>True when an unobstructed snapped position or fallback loose placement is available.</returns>
     private static bool TryFindSnappedPosition(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> pendingItems,
                                                out Vector2 position)
     {
@@ -309,6 +338,11 @@ internal static class TreeLayouting
     /// Loose placement: one column left of the leftmost consumer, at the row of the topmost consumer connection,
     /// walking down row by row until there is air on all sides.
     /// </summary>
+    /// <param name="placement">Source cluster and its consumer attachments.</param>
+    /// <param name="obstacles">Fixed or already placed items that may obstruct the candidate.</param>
+    /// <param name="pendingItems">Items still awaiting placement, excluded from collision checks.</param>
+    /// <param name="position">Canvas position left of the consumers when true; not a usable candidate when false.</param>
+    /// <returns>True when a free loose placement is found within the search limit.</returns>
     private static bool TryFindPositionLeftOfConsumers(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> pendingItems,
                                                        out Vector2 position)
     {
@@ -341,6 +375,12 @@ internal static class TreeLayouting
     /// clusters) minus those still pending a move. Unrelated items don't block: overlapping them is visible and
     /// easy to fix by hand, while avoiding them would silently break the snap the user asked for.
     /// </summary>
+    /// <param name="placement">Source cluster whose occupied rectangles are tested.</param>
+    /// <param name="obstacles">Fixed or already placed items against which to test overlap.</param>
+    /// <param name="pendingItems">Items still awaiting placement, excluded from collision checks.</param>
+    /// <param name="sourcePos">Proposed source origin in canvas coordinates.</param>
+    /// <param name="isSnapPosition">Whether the candidate intentionally snaps to its designated target.</param>
+    /// <returns>True when the proposed placement clears the relevant obstacles.</returns>
     private static bool IsFree(in Placement placement, HashSet<MagGraphItem> obstacles, HashSet<MagGraphItem> pendingItems,
                                Vector2 sourcePos, bool isSnapPosition)
     {
@@ -370,6 +410,9 @@ internal static class TreeLayouting
     /// Overlapping, or sharing an edge of some length (corner contact is fine): an item placed flush against
     /// an unrelated one would read as snapped to it.
     /// </summary>
+    /// <param name="area">First occupied rectangle in canvas coordinates.</param>
+    /// <param name="other">Second occupied rectangle in the same coordinate system.</param>
+    /// <returns>True when the rectangles overlap or share an edge beyond a single corner.</returns>
     private static bool IsTooClose(ImRect area, ImRect other)
     {
         var inflatedX = new ImRect(area.Min - new Vector2(TouchMargin, 0), area.Max + new Vector2(TouchMargin, 0));
@@ -377,6 +420,10 @@ internal static class TreeLayouting
         return inflatedX.Overlaps(other) || inflatedY.Overlaps(other);
     }
 
+    /// <summary>Checks for a direct connection between two graph items.</summary>
+    /// <param name="item">Item whose input and output connections are inspected.</param>
+    /// <param name="target">Other endpoint to look for.</param>
+    /// <returns>True when a displayed input or output connection links the two items.</returns>
     private static bool IsDirectlyConnected(MagGraphItem item, MagGraphItem target)
     {
         foreach (var inputLine in item.InputLines)

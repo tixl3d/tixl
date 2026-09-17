@@ -16,6 +16,10 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 internal sealed partial class MagGraphView
 {
     /// <summary>Draws one wire, borrowing an optional active stroke observer until the persistent pass ends.</summary>
+    /// <param name="connection">Wire whose endpoints, style, and selection state determine the drawing.</param>
+    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
+    /// <param name="context">Graph context supplying layout, selection, and interaction state for the wire.</param>
+    /// <param name="stroke">Active stroke observer borrowed for this persistent wire, or null when no observation is required.</param>
     private void DrawConnection(MagGraphConnection connection, ImDrawListPtr drawList, GraphUiContext context, ConnectionStroke? stroke)
     {
         if (connection.Style == MagGraphConnection.ConnectionStyles.Unknown)
@@ -259,6 +263,10 @@ internal sealed partial class MagGraphView
     }
 
     /// <summary>Checks splice eligibility without allocating a predicate for each drawn connection.</summary>
+    /// <param name="connection">Snapped wire that could receive a dragged block.</param>
+    /// <param name="direction">Required horizontal or vertical splice orientation.</param>
+    /// <param name="type">Slot value type that the dragged block must accept and produce.</param>
+    /// <returns>True when a compatible splice exists and the source is not part of the dragged block.</returns>
     private bool IsPotentialSplitTarget(MagGraphConnection connection, MagGraphItem.Directions direction, Type type)
     {
         var movement = _context.ItemMovement;
