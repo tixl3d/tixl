@@ -17,7 +17,12 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using T3.Editor.Compilation;
+using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Selection;
 using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport;
@@ -258,6 +263,10 @@ internal static class DebugServer
                 HandleScreenshot(request, context);
                 break;
 
+            case "screenshotWindow":
+                HandleScreenshotWindow(request, context);
+                break;
+
             case "openProject":
                 HandleOpenProject(request, context);
                 break;
@@ -271,17 +280,21 @@ internal static class DebugServer
                     break;
                 }
 
-                if (!Guid.TryParse(request["childId"]?.Value<string>(), out var selectId))
-                {
-                    context.SendError("MISSING_PARAM", "select requires a 'childId'");
-                    break;
-                }
-
-                view.NodeSelection.Clear();
-                view.NodeSelection.TrySelectCompositionChild(view.CompositionInstance, selectId, false);
-                context.SendOk(new JObject());
+                HandleSelect(request, context, view);
                 break;
             }
+
+            case "getGraphView":
+                HandleGetGraphView(context);
+                break;
+
+            case "setGraphView":
+                HandleSetGraphView(request, context);
+                break;
+
+            case "focusGraphView":
+                HandleFocusGraphView(request, context);
+                break;
 
             case "setInput":
                 HandleSetInput(request, context);
@@ -437,6 +450,258 @@ internal static class DebugServer
                    };
     }
 
+    private static void HandleSelect(JObject request, RequestContext context, ProjectView view)
+    {
+        var ids = new List<Guid>();
+        if (Guid.TryParse(request["childId"]?.Value<string>(), out var singleId))
+            ids.Add(singleId);
+
+        if (request["childIds"] is JArray idArray)
+        {
+            foreach (var token in idArray)
+            {
+                if (!Guid.TryParse(token.Value<string>(), out var id))
+                {
+                    context.SendError("INVALID_PARAM", $"'{token}' in childIds is not a Guid");
+                    return;
+                }
+
+                ids.Add(id);
+            }
+        }
+
+        var add = request["add"]?.Value<bool>() ?? false;
+        if (ids.Count == 0 && add)
+        {
+            context.SendError("MISSING_PARAM", "select with 'add' requires a 'childId' or 'childIds'");
+            return;
+        }
+
+        // Without ids this clears the selection
+        if (!add)
+            view.NodeSelection.Clear();
+
+        var notFound = new JArray();
+        foreach (var id in ids)
+        {
+            if (!view.NodeSelection.TrySelectCompositionChild(view.CompositionInstance!, id))
+                notFound.Add(id.ToString());
+        }
+
+        var result = new JObject { ["selectedCount"] = view.NodeSelection.Selection.Count };
+        if (notFound.Count > 0)
+            result["notFound"] = notFound;
+
+        context.SendOk(result);
+    }
+
+    private static bool TryGetGraphCanvas(RequestContext context, [NotNullWhen(true)] out ProjectView? view,
+                                          [NotNullWhen(true)] out ScalableCanvas? canvas)
+    {
+        view = ProjectView.Focused;
+        canvas = view?.GraphView?.Canvas;
+        if (view?.CompositionInstance != null && canvas != null)
+            return true;
+
+        context.SendError("NO_COMPOSITION", "No composition focused");
+        return false;
+    }
+
+    private static JObject DescribeGraphView(ScalableCanvas canvas)
+    {
+        // The target scope is what the damped view converges to, so it is valid right after a change
+        var scope = canvas.GetTargetScope();
+        var visibleSize = canvas.WindowSize / scope.Scale;
+        return new JObject
+                   {
+                       ["scale"] = scope.Scale.X,
+                       ["scrollX"] = scope.Scroll.X,
+                       ["scrollY"] = scope.Scroll.Y,
+                       ["visibleArea"] = new JObject
+                                             {
+                                                 ["minX"] = scope.Scroll.X,
+                                                 ["minY"] = scope.Scroll.Y,
+                                                 ["maxX"] = scope.Scroll.X + visibleSize.X,
+                                                 ["maxY"] = scope.Scroll.Y + visibleSize.Y,
+                                             },
+                       ["windowX"] = canvas.WindowPos.X,
+                       ["windowY"] = canvas.WindowPos.Y,
+                       ["windowWidth"] = canvas.WindowSize.X,
+                       ["windowHeight"] = canvas.WindowSize.Y,
+                   };
+    }
+
+    private static void HandleGetGraphView(RequestContext context)
+    {
+        if (!TryGetGraphCanvas(context, out _, out var canvas))
+            return;
+
+        context.SendOk(DescribeGraphView(canvas));
+    }
+
+    /// <summary>
+    /// Absolute: 'area' {minX,minY,maxX,maxY} to fit, or 'centerX'/'centerY' and/or 'scale'.
+    /// Relative: 'zoomBy' (factor around the view center) and 'scrollByX'/'scrollByY' (canvas units).
+    /// </summary>
+    private static void HandleSetGraphView(JObject request, RequestContext context)
+    {
+        if (!TryGetGraphCanvas(context, out _, out var canvas))
+            return;
+
+        var smooth = request["smooth"]?.Value<bool>() ?? false;
+
+        if (request["area"] is JObject areaJson)
+        {
+            var min = new Vector2(areaJson["minX"]?.Value<float>() ?? 0, areaJson["minY"]?.Value<float>() ?? 0);
+            var max = new Vector2(areaJson["maxX"]?.Value<float>() ?? 0, areaJson["maxY"]?.Value<float>() ?? 0);
+            if (max.X <= min.X || max.Y <= min.Y)
+            {
+                context.SendError("INVALID_PARAM", "'area' needs minX < maxX and minY < maxY");
+                return;
+            }
+
+            // Fitting needs the graph window's size, which the canvas only knows during its own update
+            canvas.RequestTargetViewAreaWithTransition(new ImRect(min, max),
+                                                       smooth ? ScalableCanvas.Transition.Smooth : ScalableCanvas.Transition.Instant);
+            context.SendOk(new JObject { ["appliesNextFrame"] = true });
+            return;
+        }
+
+        var scope = canvas.GetTargetScope();
+        var center = scope.Scroll + canvas.WindowSize / scope.Scale * 0.5f;
+
+        var scale = request["scale"]?.Value<float>() ?? scope.Scale.X;
+        scale *= request["zoomBy"]?.Value<float>() ?? 1;
+        if (float.IsNaN(scale) || scale <= 0.001f || scale > 100)
+        {
+            context.SendError("INVALID_PARAM", "Resulting scale must be within 0.001 .. 100");
+            return;
+        }
+
+        center.X = request["centerX"]?.Value<float>() ?? center.X;
+        center.Y = request["centerY"]?.Value<float>() ?? center.Y;
+        center.X += request["scrollByX"]?.Value<float>() ?? 0;
+        center.Y += request["scrollByY"]?.Value<float>() ?? 0;
+
+        var newScope = new CanvasScope
+                           {
+                               Scale = new Vector2(scale),
+                               Scroll = center - canvas.WindowSize / scale * 0.5f,
+                           };
+
+        if (smooth)
+        {
+            canvas.SetTargetScope(newScope);
+        }
+        else
+        {
+            canvas.SetScopeInstant(newScope);
+        }
+
+        context.SendOk(DescribeGraphView(canvas));
+    }
+
+    /// <summary>
+    /// Frames 'childIds', or the selection, or - with nothing selected or 'all' - the whole graph.
+    /// 'includeMissing' adds the stand-ins of operators whose symbol is missing.
+    /// </summary>
+    private static void HandleFocusGraphView(JObject request, RequestContext context)
+    {
+        if (!TryGetGraphCanvas(context, out var view, out var canvas))
+            return;
+
+        var composition = view.CompositionInstance!;
+        var symbolUi = composition.GetSymbolUi();
+        var hasBounds = false;
+        var bounds = new ImRect();
+
+        if (request["childIds"] is JArray idArray)
+        {
+            foreach (var token in idArray)
+            {
+                if (!Guid.TryParse(token.Value<string>(), out var id))
+                {
+                    context.SendError("INVALID_PARAM", $"'{token}' in childIds is not a Guid");
+                    return;
+                }
+
+                if (symbolUi.ChildUis.TryGetValue(id, out var childUi))
+                {
+                    Accumulate(ImRect.RectWithSize(childUi.PosOnCanvas, childUi.Size));
+                    continue;
+                }
+
+                var foundMissing = false;
+                foreach (var (missingId, posOnCanvas, _) in symbolUi.UnresolvedChildUiJsons)
+                {
+                    if (missingId != id)
+                        continue;
+
+                    Accumulate(ImRect.RectWithSize(posOnCanvas, SymbolUi.Child.DefaultOpSize));
+                    foundMissing = true;
+                    break;
+                }
+
+                if (!foundMissing)
+                {
+                    context.SendError("NOT_FOUND", $"No child '{id}' in the focused composition");
+                    return;
+                }
+            }
+        }
+        else
+        {
+            if (request["all"]?.Value<bool>() ?? false)
+                view.NodeSelection.Clear();
+
+            // Falls back to all children when nothing is selected
+            var selectionBounds = NodeSelection.GetSelectionBounds(view.NodeSelection, composition, padding: 0);
+            if (selectionBounds.GetWidth() > 0 || selectionBounds.GetHeight() > 0)
+                Accumulate(selectionBounds);
+        }
+
+        if (request["includeMissing"]?.Value<bool>() ?? false)
+        {
+            foreach (var (_, posOnCanvas, _) in symbolUi.UnresolvedChildUiJsons)
+                Accumulate(ImRect.RectWithSize(posOnCanvas, SymbolUi.Child.DefaultOpSize));
+        }
+
+        if (!hasBounds)
+        {
+            context.SendError("NOTHING_TO_FOCUS", "The composition has no operators to frame");
+            return;
+        }
+
+        bounds.Expand(request["padding"]?.Value<float>() ?? 100);
+        var smooth = request["smooth"]?.Value<bool>() ?? false;
+        canvas.RequestTargetViewAreaWithTransition(bounds, smooth ? ScalableCanvas.Transition.Smooth : ScalableCanvas.Transition.Instant);
+        context.SendOk(new JObject
+                           {
+                               ["appliesNextFrame"] = true,
+                               ["area"] = new JObject
+                                              {
+                                                  ["minX"] = bounds.Min.X,
+                                                  ["minY"] = bounds.Min.Y,
+                                                  ["maxX"] = bounds.Max.X,
+                                                  ["maxY"] = bounds.Max.Y,
+                                              },
+                           });
+        return;
+
+        void Accumulate(ImRect rect)
+        {
+            if (hasBounds)
+            {
+                bounds.Add(rect);
+            }
+            else
+            {
+                bounds = rect;
+                hasBounds = true;
+            }
+        }
+    }
+
     private static void HandleGetContext(RequestContext context)
     {
         var view = ProjectView.Focused;
@@ -584,13 +849,57 @@ internal static class DebugServer
                                 });
         }
 
-        context.SendOk(new JObject
-                           {
-                               ["symbolId"] = symbol.Id.ToString(),
-                               ["symbolName"] = symbol.Name,
-                               ["children"] = children,
-                               ["connections"] = connections,
-                           });
+        var result = new JObject
+                         {
+                             ["symbolId"] = symbol.Id.ToString(),
+                             ["symbolName"] = symbol.Name,
+                             ["children"] = children,
+                             ["connections"] = connections,
+                         };
+
+        // Children whose symbol is missing: not instantiated, but kept in the file and shown as stand-ins
+        if (symbol.HasUnresolvedChildren)
+        {
+            var missingChildren = new JArray();
+            foreach (var missing in symbol.UnresolvedChildren)
+            {
+                var missingJson = new JObject
+                                      {
+                                          ["childId"] = missing.Id.ToString(),
+                                          ["symbolId"] = missing.SymbolId.ToString(),
+                                          ["displayName"] = missing.DisplayName,
+                                      };
+                foreach (var (missingId, posOnCanvas, _) in symbolUi.UnresolvedChildUiJsons)
+                {
+                    if (missingId != missing.Id)
+                        continue;
+
+                    missingJson["posX"] = posOnCanvas.X;
+                    missingJson["posY"] = posOnCanvas.Y;
+                    break;
+                }
+
+                missingChildren.Add(missingJson);
+            }
+
+            var missingConnections = new JArray();
+            foreach (var (connection, multiInputIndex) in symbol.ConnectionsOfUnresolvedChildren)
+            {
+                missingConnections.Add(new JObject
+                                           {
+                                               ["sourceParentOrChildId"] = connection.SourceParentOrChildId.ToString(),
+                                               ["sourceSlotId"] = connection.SourceSlotId.ToString(),
+                                               ["targetParentOrChildId"] = connection.TargetParentOrChildId.ToString(),
+                                               ["targetSlotId"] = connection.TargetSlotId.ToString(),
+                                               ["multiInputIndex"] = multiInputIndex,
+                                           });
+            }
+
+            result["missingChildren"] = missingChildren;
+            result["missingConnections"] = missingConnections;
+        }
+
+        context.SendOk(result);
     }
 
     private static JToken TrySerializeInputValue(InputValue value)
@@ -695,6 +1004,44 @@ internal static class DebugServer
         {
             context.SendError("SCREENSHOT_BUSY", "Screenshot queue rejected the request");
         }
+    }
+
+    /// <summary>
+    /// Captures the editor UI of the last presented frame. 'region': "graph" crops to the graph canvas.
+    /// </summary>
+    private static void HandleScreenshotWindow(JObject request, RequestContext context)
+    {
+        var path = request["path"]?.Value<string>();
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            context.SendError("MISSING_PARAM", "screenshotWindow requires a 'path'");
+            return;
+        }
+
+        System.Drawing.Rectangle? crop = null;
+        var region = request["region"]?.Value<string>();
+        if (region == "graph")
+        {
+            if (!TryGetGraphCanvas(context, out _, out var canvas))
+                return;
+
+            // Without multi-viewports, ImGui screen positions are relative to the window's client area
+            crop = new System.Drawing.Rectangle((int)canvas.WindowPos.X, (int)canvas.WindowPos.Y,
+                                                (int)canvas.WindowSize.X, (int)canvas.WindowSize.Y);
+        }
+        else if (!string.IsNullOrEmpty(region))
+        {
+            context.SendError("INVALID_PARAM", $"Unknown region '{region}' - supported: \"graph\"");
+            return;
+        }
+
+        if (!WindowCapture.TrySaveClientArea(ProgramWindows.Main.HwndHandle, path, crop, out var error))
+        {
+            context.SendError("SCREENSHOT_FAILED", error);
+            return;
+        }
+
+        context.SendOk(new JObject { ["path"] = Path.GetFullPath(path) });
     }
 
     private static void HandleOpenProject(JObject request, RequestContext context)

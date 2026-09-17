@@ -163,6 +163,7 @@ internal sealed partial class MagGraphView
                 DrawConnection(connection, drawList, _context);
             }
 
+            DrawMissingItems(drawList);
             DrawOffscreenIndicators(drawList);
             DrawAutoCollectIndicators(drawList);
 

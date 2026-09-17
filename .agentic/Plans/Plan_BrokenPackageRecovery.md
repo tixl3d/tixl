@@ -180,11 +180,10 @@ flagging would require marking the empty-from-corrupt symbol and propagating "re
 symbol" to dependents (or switching to the guid-skip approach so the symbol is absent and dependents
 go unresolved — but that leaves a corrupt *home* symbol's project homeless). Deferred as its own slice.
 
-**Known tradeoff:** a project with a corrupt file can't save until reloaded (protected, not lost); and a
-symbol with a permanently-missing package stays unsaveable for the session
-(protected, not lost) — the fix is installing the package and reloading. **Still open (from Phase 1):**
-the round-trip preservation (above) and dependency-cascade handling. A manual test set
-(`.tests-manual/BrokenPackageRecovery/`) is still to be written.
+**Known tradeoff:** a project with a corrupt file can't save until reloaded (protected, not lost).
+(The matching tradeoff for missing packages — symbol unsaveable for the session — was removed by the
+2026-09-17 round-trip.) **Still open (from Phase 1):** dependency-cascade handling, and manual test
+sets for the compile-fail / corrupt-file scenarios.
 
 **2026-07-08 (backup list markers)** — `BackupEntry` now carries `IsMinimal` + `KeepTag`
 ([AutoBackup.cs](Editor/Gui/AutoBackup/AutoBackup.cs)); the restore submenu
@@ -192,6 +191,44 @@ the round-trip preservation (above) and dependency-cascade handling. A manual te
 (`pre-restore` / `pre-format-upgrade`) instead of a generic "pinned", and **mutes pre-restore rows**
 (they snapshot the state being recovered from, so restoring one usually re-applies a bad state — the
 exact #16 trap). Helps the user avoid restoring a backup that captured the corruption.
+
+**2026-09-17 (round-trip landed — refuse-to-save guard removed)** — The guard from 2026-07-08 turned out
+to do more harm than good in practice: users kept editing a symbol that silently never saved (the only
+hint was a magenta auto-save log line per symbol), the per-child warnings were bare Guids, and the
+`PreventSavingSymbolsWithMissingReferences` setting was a choice between losing the session's edits and
+truncating the file. Replaced by the verbatim round-trip; see
+[Phase 1b](#phase-1b-missing-operator-placeholders) for the design and the remaining steps.
+- `Symbol.UnresolvedChildren` ([Symbol.UnresolvedChildren.cs](../../Core/Operator/Symbol.UnresolvedChildren.cs))
+  keeps the raw child JSON, the connections touching it (set aside from `Symbol.Connections` right after
+  the children are read, so the instance-creation pruning never sees them; each remembers its
+  multi-input index) and the raw `Animator` entries. `SymbolJson.WriteSymbol` re-emits all three,
+  interleaved by id so a save doesn't reorder the file. Nothing is interpreted, so nothing can be
+  re-serialized wrongly — the risk the 2026-07-08 note raised.
+- Stale-data rules at write time: a set-aside connection is dropped if its other end no longer exists,
+  or if its single-input target got a new connection in the meantime.
+- Names: every child now carries an optional `"SymbolName"` attribute (`Namespace.Name`, written next
+  to `SymbolId`, only read when the symbol can't be resolved). Namespace included on purpose — it tells
+  the user *which package* is missing. Every `.t3` gains one line per child on its next save (one-time
+  diff churn). A stored name goes stale if the symbol is renamed/moved until the parent is resaved —
+  it's a hint, never an identifier.
+- **Name fallback for files saved before 4.4** (no `SymbolName` yet): the `/*ReadableName*/` comment
+  behind the child id, scraped with a raw `JsonTextReader` because files are parsed with
+  `CommentHandling.Ignore`. Isolated in
+  [PreV4_4ChildNameComments.cs](../../Editor/Migrations/SymbolFiles/PreV4_4ChildNameComments.cs) +
+  `UnresolvedChild.FallbackName` + the comment restore in `SymbolJson.WriteUnresolvedChild`.
+  It's a hack (comments aren't data, and hold the child's custom name if there is one) — **retire all
+  three after 4.4**, when most projects carry `SymbolName`.
+- `.t3ui`: `SymbolUi.UnresolvedChildUiJsons` keeps the layout entries of those children and writes them
+  back (dropped while the child is removed via `Symbol.TryRemoveUnresolvedChild`).
+- Removed: the `SaveSymbolFile` early return, `UnresolvedChildCount`, the user setting and its checkbox.
+  The corrupt-file guard stays and is now unconditional (it was gated by the same setting).
+- An unresolved child is no longer a load *failure*: `TryReadSymbolChild` returns true, so
+  `EditorSymbolPackage.Reload` no longer aborts and pasting a clipboard with unknown ops pastes the
+  known ones. Core logs one warning per parent; the editor startup summary
+  (`WarnAboutUnresolvedChildren`) lists package / symbol / operator names.
+- Tests: [SymbolJsonUnresolvedChildrenTests.cs](../../Core.Tests/SymbolJsonUnresolvedChildrenTests.cs)
+  (round-trip equality of children/connections/animator, `SymbolName`, removal). Manual set:
+  [missing-operators-preserved](../../.tests-manual/missing-operators-preserved.md).
 
 **Still open (Phase 2 step 2 / Phase 1):** capture per-project startup compile failures into a
 `ProjectSetup.BrokenProjects` list (today `LoadProjects`' `failedProjects` is dropped as `out _`),
@@ -258,6 +295,95 @@ Add `.tests-manual/BrokenPackageRecovery/` covering:
   the Release `PackageNames` list): placeholders shown, saving and reloading with the package restored
   brings the ops back intact.
 For each: editor still reaches main loop, broken project shown with explanation, other projects usable.
+
+---
+
+## Phase 1b: Missing-operator placeholders
+
+**Goal:** A project with missing symbols stays fully editable and saveable, and the user can see *what*
+is missing and decide what to do about it — without reading the log.
+
+Motivation (2026-09-17): log errors are overlooked, look scary and aren't actionable; the warnings were
+Guids; the prevent-saving setting did more harm than good. Frequently the missing symbols *are*
+obsolete, so the user needs a way to knowingly drop them — which becomes an ordinary graph edit once
+placeholders exist, rather than a special "save anyway" mode.
+
+### Step 1 — Core round-trip (done 2026-09-17)
+
+See the progress entry above.
+
+### Step 2 — Missing-operators popup (done 2026-09-17)
+
+Decision: a **one-time popup with a summary** after startup (not only a Hub attention bar).
+- [MissingOperatorsDialog.cs](../../Editor/Gui/Graph/Dialogs/MissingOperatorsDialog.cs), queued in
+  `T3Ui.Update` after the sync-conflict dialog, once per launch, only when nothing else is open.
+- Title "Warning: Missing Symbols"; headline "N operators in M symbols could not be found" with a help
+  icon linking to [Pitfalls](../../.help/docs/using/Pitfalls.md#missing-operators) (the explanation
+  lives in the docs, not in the dialog), then a fixed-height list grouped by package: symbol, missing
+  names (`Name x2` for repeats), `Show in Graph`, and a folder icon with a "Reveal in Explorer" tooltip.
+  Data is gathered once when shown, never per frame.
+- **Read-only packages are skipped**: the user can't fix them, so a popup on every start would only
+  nag. Their gaps still show in the graph (delete disabled) and in the startup log.
+- `Show in Graph` opens the symbol as graph root (`OpenedProject.TryCreateWithExplicitHome`, the same path the
+  debug bridge uses) and frames its missing items. **Not click-tested** - the bridge has no mouse input.
+- It informs only; there is no read-only / restore / save choice to make.
+- The startup log summary (`WarnAboutUnresolvedChildren`) stays for headless / log-only diagnosis.
+
+Open follow-ups:
+- Reopen it later: a Hub attention bar on affected projects (same `StatusAttention` treatment as
+  corrupt files in [ProjectsPanel.cs](../../Editor/Gui/Hub/ProjectsPanel.cs)) that opens this dialog.
+- `Restore from Backup` submenu per row.
+- Fallback name source for files without `SymbolName`: scan the `.t3` files of *not loaded* projects
+  (archived, broken) for the SymbolId - the file name is the symbol name - to say "defined in project
+  X, which failed to load". The registry can't answer this (anything it knows would have resolved).
+
+### Step 3 — Missing items in MagGraph
+
+**3a (done 2026-09-17) — show the gaps.** The connections from and to missing operators are what
+identifies the gaps, so they are part of the layout rather than a list in a dialog:
+- `MagGraphLayout.MissingItems` / `MissingConnections`
+  ([MagGraphMissingItem.cs](../../Editor/Gui/MagGraph/Model/MagGraphMissingItem.cs)), rebuilt with the
+  rest of the structure. Position from `SymbolUi.UnresolvedChildUiJsons`; lines derived from the slot
+  ids the connections refer to (one input line per incoming connection, first output on line 0).
+- Deliberately **not** a `MagGraphItem`: everything else (drawing, snapping, movement, selection)
+  assumes `Instance`, `SymbolUi` and real `ISlot`s. A separate type keeps those paths untouched.
+- Real items keep their original shape: inputs fed by a missing op get an input line with the new
+  `InputLineStates.MissingConnection` (single and multi-input, at the original multi-input index via
+  the same hash mechanism as `DisconnectedInputHashes`), and secondary outputs that only feed missing
+  ops stay visible. Without this, nodes shrink and snapped stacks shift.
+- Drawn in [MagGraphCanvas.DrawMissingItems.cs](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.DrawMissingItems.cs)
+  with `StatusAttention`: box + name + "missing", bezier wires with anchor dots, tooltip with the full
+  `Namespace.Name` and SymbolId. Non-interactive.
+- Verified in `_agentTests` via the debug bridge: broke a multi-input `[Sum]`'s SymbolId → ghost with 3
+  wires in / 1 out; auto-save with the ghost loaded changed only the edited value (plus the lost name
+  comments); restoring the SymbolId brought the op back with all 4 connections in order.
+
+**3b — act on them.**
+- **Delete (done 2026-09-17):** right-clicking a missing item adds a "<Name> (Missing)" group with
+  `Delete Missing Operator` to the graph context menu (`MagGraphLayout.TryGetMissingItemAt` on the
+  position the menu was opened at - missing items aren't selectable). Undoable via
+  [DeleteMissingOperatorCommand.cs](../../Editor/UiModel/Commands/Graph/DeleteMissingOperatorCommand.cs):
+  `Symbol.TryRemoveUnresolvedChild` hands back a `RemovedUnresolvedChild` (child, connections and
+  animation entries with their list indices - pure data, no symbol references) and
+  `RestoreUnresolvedChild` puts it back exactly; the unit test asserts the restored file equals the
+  original. The `.t3ui` entry stays on the `SymbolUi` and is merely skipped by the writer while the
+  child is gone, so undo needs no ui handling. Disabled for read-only packages. **Not click-tested.**
+- Open: `Replace with...` (re-point the preserved connections to a new child by slot id where the
+  ids match), `Reveal Parent Symbol Folder`.
+- Tint the `MissingConnection` input line label in DrawNode (today it looks like any unconnected input).
+- Missing items are not selectable / movable, and excluded from copy / duplicate / combine — they
+  have no `Symbol.Child`.
+- Offscreen: each missing item gets a `StatusAttention` edge marker (done). "Frame all" still ignores them.
+- Snapped neighbours (done): vertically stacked or side-by-side snapped connections draw a dot on the
+  shared edge instead of a wire that would loop around both items.
+
+### Known gaps after step 1
+
+- **Duplicating / combining a symbol** goes through in-memory copies, so unresolved children are not
+  carried into the new symbol. Acceptable (the source keeps them), but worth a warning in the report.
+- **Dependency cascade from corrupt files** (above) is unchanged: an empty-from-type symbol still
+  resolves, so dependents aren't flagged.
+- The name comments of an unresolved child are lost on save (both files). Cosmetic — nothing reads them.
 
 ---
 

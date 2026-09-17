@@ -8,6 +8,7 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 - [Audio](Audio.md) — timeline clips, routing and effects, audio-reactivity, export.
 - [Presets and snapshots](PresetsAndSnapshots.md) — variations, blending, live previews.
 - [Keyboard shortcuts](KeyboardShortcuts.md) — the default map.
+- [Pitfalls](Pitfalls.md) — alarming-looking situations like missing operators, and what to do about them.
 
 *Still to write:* dedicated pages for the **Graph window**, **Parameter window**, **Output window**, and **Settings / configuration**. These exist conceptually in [Introduction](../getting-started/Introduction.md) but aren't broken out yet.
 

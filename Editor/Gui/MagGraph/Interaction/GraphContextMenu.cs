@@ -44,6 +44,7 @@ internal static class GraphContextMenu
         OpenFolderMenu, OpenProjectFolder, OpenResourcesFolder,
         AddNode, AddSection, AddInput, AddOutput,
         SymbolDefMenu, RenameSymbol, DuplicateAsNewType, CombineIntoNewType, SetThumbnail,
+        DeleteMissingOperator,
     }
 
     internal static void DrawContextMenuContent(GraphUiContext context, ProjectView projectView)
@@ -67,6 +68,23 @@ internal static class GraphContextMenu
                                           reserveIconColumn: false, state: muted))
         {
             UndoRedoStack.Undo();
+        }
+
+        // ----- Missing operator under the cursor ---------------------------
+        // They can't be selected, so the menu acts on the one it was opened on.
+        var posOnCanvasWhenOpened = context.View.InverseTransformPositionFloat(CustomComponents.ScreenPosOnOpeningContextMenu);
+        if (context.Layout.TryGetMissingItemAt(posOnCanvasWhenOpened, out var missingItem))
+        {
+            CustomComponents.SeparatorLine();
+            CustomComponents.DrawMenuGroupLabel(missingItem.Label + " (Missing)");
+            if (CustomComponents.DrawMenuItem((int)MenuItemIds.DeleteMissingOperator, Icon.None, "Delete Missing Operator",
+                                              null, isChecked: false, isEnabled: canModify && !isSaving,
+                                              reserveIconColumn: false, state: muted))
+            {
+                UndoRedoStack.AddAndExecute(new DeleteMissingOperatorCommand(compositionSymbolUi.Symbol.Id, missingItem.Child.Id,
+                                                                             missingItem.Label));
+                context.Layout.FlagStructureAsChanged();
+            }
         }
 
         // ----- Selection state, toggles & per-op actions -------------------

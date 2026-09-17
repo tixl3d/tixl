@@ -1,4 +1,5 @@
 #nullable enable
+using Newtonsoft.Json.Linq;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Editor.Gui.OutputUi;
@@ -327,6 +328,13 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal bool NeedsSaving => _hasBeenModified && !ReadOnly;
     private Dictionary<Guid, Child> _childUis = new();
     internal IReadOnlyDictionary<Guid, Child> ChildUis => _childUis;
+
+    /// <summary>
+    /// Serialized child uis of <see cref="Symbol.UnresolvedChildren"/>, written back as read so the
+    /// layout survives until the missing operators are available again.
+    /// </summary>
+    internal List<(Guid ChildId, Vector2 PosOnCanvas, JToken Json)> UnresolvedChildUiJsons { get; set; } = [];
+
     internal OrderedDictionary<Guid, ExternalLink> Links { get; private set; }
     internal List<TourPoint> TourPoints { get; private set; }
     
@@ -337,6 +345,7 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal void ReplaceWith(SymbolUi newSymbolUi)
     {
         _childUis = newSymbolUi._childUis;
+        UnresolvedChildUiJsons = newSymbolUi.UnresolvedChildUiJsons;
         InputUis = newSymbolUi.InputUis;
         OutputUis = newSymbolUi.OutputUis;
         Sections = newSymbolUi.Sections;

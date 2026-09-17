@@ -77,8 +77,21 @@ internal static class SymbolUiJson
         writer.WritePropertyName(JsonKeys.SymbolChildUis);
         writer.WriteStartArray();
 
+        // Interleaved by id like the resolved child uis, so saving doesn't reorder the file.
+        // Entries of children that were removed since loading are dropped.
+        var unresolvedChildUis = symbolUi.UnresolvedChildUiJsons
+                                         .Where(x => symbolUi.Symbol.IsUnresolvedChild(x.ChildId))
+                                         .OrderBy(x => x.ChildId)
+                                         .ToList();
+        var unresolvedIndex = 0;
+
         foreach (var childUi in symbolUi.ChildUis.Values.OrderBy(x => x.Id))
         {
+            while (unresolvedIndex < unresolvedChildUis.Count && unresolvedChildUis[unresolvedIndex].ChildId.CompareTo(childUi.Id) < 0)
+            {
+                unresolvedChildUis[unresolvedIndex++].Json.WriteTo(writer);
+            }
+
             // Skip orphaned or invalid child UIs
             if (childUi == null ||
                 childUi.SymbolChild == null ||
@@ -153,6 +166,11 @@ internal static class SymbolUiJson
             }
 
             writer.WriteEndObject();
+        }
+
+        while (unresolvedIndex < unresolvedChildUis.Count)
+        {
+            unresolvedChildUis[unresolvedIndex++].Json.WriteTo(writer);
         }
 
         writer.WriteEndArray();
@@ -374,14 +392,16 @@ internal static class SymbolUiJson
             symbolChildUiJsonEnumerable = Array.Empty<JToken>();
         }
 
+        var unresolvedChildUiJsons = new List<(Guid ChildId, Vector2 PosOnCanvas, JToken Json)>();
         symbolUi = new SymbolUi(symbol: symbol,
-                                childUis: parent => CreateSymbolUiChildren(parent, symbolChildUiJsonEnumerable),
+                                childUis: parent => CreateSymbolUiChildren(parent, symbolChildUiJsonEnumerable, unresolvedChildUiJsons),
                                 inputs: inputDict,
                                 outputs: outputDict,
                                 sections: sectionDict,
                                 links: linksDict,
                                 tourPoints: tourPoints,
                                 updateConsistency: false);
+        symbolUi.UnresolvedChildUiJsons = unresolvedChildUiJsons;
 
         var descriptionEntry = mainObject[JsonKeys.Description];
         if (descriptionEntry?.Value<string>() != null)
@@ -428,7 +448,8 @@ internal static class SymbolUiJson
         return false;
     }
 
-    private static List<SymbolUi.Child> CreateSymbolUiChildren(Symbol parentSymbol, IEnumerable<JToken> childJsons)
+    private static List<SymbolUi.Child> CreateSymbolUiChildren(Symbol parentSymbol, IEnumerable<JToken> childJsons,
+                                                               List<(Guid ChildId, Vector2 PosOnCanvas, JToken Json)> unresolvedChildUiJsons)
     {
         var symbolChildUis = new List<SymbolUi.Child>();
         var symbolId = parentSymbol.Id;
@@ -452,6 +473,12 @@ internal static class SymbolUiJson
                         child.ClearPreviousId();
                         break;
                     }
+                }
+
+                if (symbolChild == null && parentSymbol.IsUnresolvedChild(childId))
+                {
+                    unresolvedChildUiJsons.Add((childId, GetVec2OrDefault(childEntry[JsonKeys.Position]), childEntry));
+                    continue;
                 }
 
                 if (symbolChild == null)

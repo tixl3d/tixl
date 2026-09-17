@@ -27,10 +27,10 @@ public static class SymbolJson
         writer.WriteComment(symbol.Name);
 
         WriteSymbolInputs(symbol.InputDefinitions, writer);
-        WriteSymbolChildren(symbol.Children.Values.OrderBy(x => x.Id), writer);
-        WriteConnections(symbol.Connections, writer);
+        WriteSymbolChildren(symbol.Children.Values.OrderBy(x => x.Id), symbol.UnresolvedChildren, writer);
+        WriteConnections(symbol.GetConnectionsIncludingUnresolved(), writer);
         symbol.CompositionSettings?.WriteToJson(writer);
-        symbol.Animator.Write(writer);
+        symbol.Animator.Write(writer, symbol.UnresolvedAnimationJsons);
 
         writer.WriteEndObject();
     }
@@ -70,12 +70,45 @@ public static class SymbolJson
         writer.WriteEndArray();
     }
 
-    private static void WriteSymbolChildren(IEnumerable<Symbol.Child> children, JsonTextWriter writer)
+    private static void WriteUnresolvedChild(Symbol.UnresolvedChild child, JsonTextWriter writer)
+    {
+        if (string.IsNullOrEmpty(child.FallbackName) || child.Json is not JObject childObject)
+        {
+            child.Json.WriteTo(writer);
+            return;
+        }
+
+        // Back-compat for files saved before TiXL 4.4: the reader drops comments, so the name comment
+        // has to be restored or the only hint at what this operator was is gone after the first save.
+        writer.WriteStartObject();
+        foreach (var property in childObject.Properties())
+        {
+            writer.WritePropertyName(property.Name);
+            property.Value.WriteTo(writer);
+            if (property.Name == JsonKeys.Id)
+                writer.WriteComment(child.FallbackName);
+        }
+
+        writer.WriteEndObject();
+    }
+
+    private static void WriteSymbolChildren(IEnumerable<Symbol.Child> children, IReadOnlyList<Symbol.UnresolvedChild> unresolvedChildren,
+                                            JsonTextWriter writer)
     {
         writer.WritePropertyName(JsonKeys.Children);
         writer.WriteStartArray();
+
+        // Interleaved by id like the resolved children, so saving doesn't reorder the file
+        var sortedUnresolved = unresolvedChildren.OrderBy(x => x.Id).ToList();
+        var unresolvedIndex = 0;
+
         foreach (var child in children)
         {
+            while (unresolvedIndex < sortedUnresolved.Count && sortedUnresolved[unresolvedIndex].Id.CompareTo(child.Id) < 0)
+            {
+                WriteUnresolvedChild(sortedUnresolved[unresolvedIndex++], writer);
+            }
+
             writer.WriteStartObject();
             writer.WriteValue(JsonKeys.Id, child.Id);
             writer.WriteComment(child.ReadableName);
@@ -85,6 +118,9 @@ public static class SymbolJson
             }
 
             writer.WriteValue(JsonKeys.SymbolId, child.Symbol.Id);
+
+            // Only read when the symbol can't be found, to tell the user which operator is missing
+            writer.WriteObject(JsonKeys.SymbolName, child.Symbol.Namespace + "." + child.Symbol.Name);
             if (!string.IsNullOrEmpty(child.Name))
             {
                 writer.WriteObject(JsonKeys.SymbolChildName, child.Name);
@@ -145,6 +181,11 @@ public static class SymbolJson
             writer.WriteEndArray();
 
             writer.WriteEndObject(); // child
+        }
+
+        while (unresolvedIndex < sortedUnresolved.Count)
+        {
+            WriteUnresolvedChild(sortedUnresolved[unresolvedIndex++], writer);
         }
 
         writer.WriteEndArray();
@@ -242,9 +283,17 @@ public static class SymbolJson
         
         var result = true;
 
+        parent.ClearUnresolved();
         foreach (var childJson in childrenJson)
         {
             result &= TryReadSymbolChild(in childJson, parent);
+        }
+
+        parent.MoveConnectionsOfUnresolvedChildrenToOwnList();
+        if (parent.HasUnresolvedChildren)
+        {
+            Log.Warning($"[{parent.Name}] uses {parent.UnresolvedChildren.Count} operator(s) that are not available. "
+                        + "They are skipped but kept in the file.");
         }
 
         if (symbolReadResult.AnimatorJsonData != null)
@@ -258,16 +307,16 @@ public static class SymbolJson
         // If the used symbol hasn't been loaded so far ensure it's loaded now
         if (!SymbolRegistry.TryGetSymbol(childJsonResult.SymbolId, out var symbol))
         {
-            Log.Warning($"Error loading symbol child {childJsonResult.SymbolId}");
-            // Record the miss so the editor won't later overwrite this symbol's file and truncate
-            // the child (and its connections) that we couldn't resolve here. Same thread per parent,
-            // so a plain increment is safe.
-            parent.UnresolvedChildCount++;
-            return false;
+            var json = childJsonResult.Json;
+            parent.AddUnresolvedChild(new Symbol.UnresolvedChild(childJsonResult.ChildId, childJsonResult.SymbolId,
+                                                                 json[JsonKeys.SymbolName]?.Value<string>(),
+                                                                 json[JsonKeys.SymbolChildName]?.Value<string>(),
+                                                                 json));
+            return true;
         }
 
         var symbolChildJson = childJsonResult.Json;
-        
+
         var name = symbolChildJson[JsonKeys.SymbolChildName]?.Value<string>();
 
         var isBypassed = false;
@@ -489,6 +538,7 @@ public static class SymbolJson
         // Child fields
         internal const string SymbolChildName = "Name";
         internal const string SymbolId = "SymbolId";
+        internal const string SymbolName = "SymbolName";
         internal const string InputValues = "InputValues";
         internal const string Outputs = "Outputs";
         internal const string OutputData = "OutputData";

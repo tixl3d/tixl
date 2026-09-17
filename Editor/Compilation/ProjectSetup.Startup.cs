@@ -1,6 +1,7 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Text;
 using T3.Core.Compilation;
 using T3.Core.IO;
 using T3.Core.Model;
@@ -12,6 +13,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Migrations.AssetPaths;
 using T3.Editor.Migrations.Variations;
 using T3.Editor.Migrations.AudioClips;
+using T3.Editor.Migrations.SymbolFiles;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Compilation;
@@ -141,14 +143,14 @@ internal static partial class ProjectSetup
     }
 
     /// <summary>
-    /// Summarises symbols that lost children on load (missing package) into one clear warning, since
-    /// the per-child console warnings are just raw Guids and easy to miss. These symbols are protected
-    /// from being saved over (see <see cref="Symbol.HasUnresolvedChildren"/>), so nothing is lost.
+    /// Names the operators that are missing in each symbol (see <see cref="Symbol.UnresolvedChildren"/>)
+    /// in one summary. They are written back on save, so nothing is lost.
     /// </summary>
     private static void WarnAboutUnresolvedChildren(EditorSymbolPackage[] packages)
     {
         var affectedSymbols = 0;
         var totalChildren = 0;
+        var details = new StringBuilder();
         foreach (var package in packages)
         {
             foreach (var symbol in package.Symbols.Values)
@@ -156,17 +158,30 @@ internal static partial class ProjectSetup
                 if (!symbol.HasUnresolvedChildren)
                     continue;
 
+                if (package.TryGetSymbolFilePath(symbol, out var symbolFilePath))
+                    PreV4_4ChildNameComments.ReadFor(symbol, symbolFilePath);
+
                 affectedSymbols++;
-                totalChildren += symbol.UnresolvedChildCount;
+                totalChildren += symbol.UnresolvedChildren.Count;
+
+                details.Append($"\n  {package.DisplayName} / [{symbol.Name}]: ");
+                for (var index = 0; index < symbol.UnresolvedChildren.Count; index++)
+                {
+                    var child = symbol.UnresolvedChildren[index];
+                    if (index > 0)
+                        details.Append(", ");
+
+                    details.Append(child.DisplayName);
+                }
             }
         }
 
         if (affectedSymbols == 0)
             return;
 
-        Log.Warning($"{totalChildren} operator(s) across {affectedSymbols} symbol(s) could not be loaded — "
-                    + "most likely a missing package. Those symbols are protected: the editor will not save over "
-                    + "them, so nothing is lost. Install the missing package(s) and reload to restore them.");
+        Log.Warning($"{totalChildren} operator(s) in {affectedSymbols} symbol(s) are not available — most likely "
+                    + "a missing package or a deleted operator. They are hidden but stay in the files when saving, "
+                    + "and return once the package is installed:" + details);
     }
 
     /// <summary>

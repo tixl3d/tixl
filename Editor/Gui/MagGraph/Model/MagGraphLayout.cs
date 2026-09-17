@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -41,6 +42,11 @@ internal sealed class MagGraphLayout
     public readonly Dictionary<Guid, MagGraphItem> Items = new(127);
     public readonly List<MagGraphConnection> MagConnections = new(127);
     public readonly Dictionary<Guid, MagGraphSection> Sections = new(63);
+
+    /// <summary>Stand-ins for children whose symbol is missing, and the connections from and to them.</summary>
+    public readonly List<MagGraphMissingItem> MissingItems = new(4);
+
+    public readonly List<MagGraphMissingConnection> MissingConnections = new(8);
 
     /// <summary>
     /// <see cref="Sections"/> ordered outermost-first, so nested sections draw on top of the
@@ -85,6 +91,7 @@ internal sealed class MagGraphLayout
 
         _structureUpdateCycle++;
         CollectItemReferences(composition, parentSymbolUi);
+        CollectMissingItems(composition.Symbol, parentSymbolUi);
         CollectedSections(parentSymbolUi);
         SectionTree.UpdateOwnershipFromGeometry(parentSymbolUi);
         SectionTree.UpdateCollapsedVisibility(parentSymbolUi);
@@ -92,6 +99,7 @@ internal sealed class MagGraphLayout
         UpdateConnectionSources(composition);
         UpdateVisibleItemLines(context);
         CollectConnectionReferences(composition);
+        ResolveMissingConnectionLines();
         StructureFlaggedAsChanged = false;
     }
 
@@ -337,7 +345,197 @@ internal sealed class MagGraphLayout
 
             _connectedOutputs.Add(GetConnectionSourceHash(c));
         }
+
+        // Keeps secondary outputs visible that only feed missing operators
+        foreach (var unresolved in composition.Symbol.ConnectionsOfUnresolvedChildren)
+        {
+            if (!unresolved.Connection.IsConnectedToSymbolInput)
+                _connectedOutputs.Add(GetConnectionSourceHash(unresolved.Connection));
+        }
     }
+
+    private void CollectMissingItems(Symbol compositionSymbol, SymbolUi compositionSymbolUi)
+    {
+        MissingItems.Clear();
+        MissingConnections.Clear();
+        _inputHashesWithMissingConnections.Clear();
+
+        if (!compositionSymbol.HasUnresolvedChildren)
+            return;
+
+        foreach (var child in compositionSymbol.UnresolvedChildren)
+        {
+            var missingItem = new MagGraphMissingItem { Child = child, Label = GetLabel(child) };
+            foreach (var (childId, posOnCanvas, _) in compositionSymbolUi.UnresolvedChildUiJsons)
+            {
+                if (childId != child.Id)
+                    continue;
+
+                missingItem.PosOnCanvas = posOnCanvas;
+                missingItem.HasSavedPosition = true;
+                break;
+            }
+
+            MissingItems.Add(missingItem);
+        }
+
+        foreach (var (c, multiInputIndex) in compositionSymbol.ConnectionsOfUnresolvedChildren)
+        {
+            var missingConnection = new MagGraphMissingConnection
+                                        {
+                                            SourceSlotId = c.SourceSlotId,
+                                            TargetSlotId = c.TargetSlotId,
+                                        };
+
+            if (TryGetMissingItem(c.SourceParentOrChildId, out var sourceMissingItem))
+            {
+                var outputIndex = sourceMissingItem.OutputSlotIds.IndexOf(c.SourceSlotId);
+                if (outputIndex < 0)
+                {
+                    outputIndex = sourceMissingItem.OutputSlotIds.Count;
+                    sourceMissingItem.OutputSlotIds.Add(c.SourceSlotId);
+                }
+
+                missingConnection.SourceMissingItem = sourceMissingItem;
+                missingConnection.SourceMissingOutputIndex = outputIndex;
+            }
+            else if (!Items.TryGetValue(c.IsConnectedToSymbolInput ? c.SourceSlotId : c.SourceParentOrChildId, out missingConnection.SourceItem))
+            {
+                continue;
+            }
+
+            if (TryGetMissingItem(c.TargetParentOrChildId, out var targetMissingItem))
+            {
+                missingConnection.TargetMissingItem = targetMissingItem;
+                missingConnection.TargetMissingInputLineIndex = targetMissingItem.InputSlotIds.Count;
+                targetMissingItem.InputSlotIds.Add(c.TargetSlotId);
+            }
+            else if (Items.TryGetValue(c.IsConnectedToSymbolOutput ? c.TargetSlotId : c.TargetParentOrChildId, out missingConnection.TargetItem))
+            {
+                // Inputs fed by a missing operator stay visible, like they were when it was connected,
+                // so items keep their height and the gap shows up in the graph.
+                if (!c.IsConnectedToSymbolOutput)
+                    _inputHashesWithMissingConnections.Add(MagGraphConnection.GetItemInputHash(c.TargetParentOrChildId, c.TargetSlotId, multiInputIndex));
+            }
+            else
+            {
+                continue;
+            }
+
+            MissingConnections.Add(missingConnection);
+        }
+
+        // Files without a ui entry: place the item next to something it is connected to
+        foreach (var missingConnection in MissingConnections)
+        {
+            if (missingConnection.SourceMissingItem is { HasSavedPosition: false } source && missingConnection.TargetItem != null)
+            {
+                source.PosOnCanvas = missingConnection.TargetItem.PosOnCanvas - new Vector2(MagGraphItem.Width * 1.5f, 0);
+                source.HasSavedPosition = true;
+            }
+
+            if (missingConnection.TargetMissingItem is { HasSavedPosition: false } target && missingConnection.SourceItem != null)
+            {
+                target.PosOnCanvas = missingConnection.SourceItem.PosOnCanvas + new Vector2(MagGraphItem.Width * 1.5f, 0);
+                target.HasSavedPosition = true;
+            }
+        }
+    }
+
+    private static string GetLabel(Symbol.UnresolvedChild child)
+    {
+        if (child.SymbolName == null)
+            return child.DisplayName;
+
+        var lastDotIndex = child.SymbolName.LastIndexOf('.');
+        return lastDotIndex >= 0 && lastDotIndex < child.SymbolName.Length - 1
+                   ? child.SymbolName[(lastDotIndex + 1)..]
+                   : child.SymbolName;
+    }
+
+    internal bool TryGetMissingItemAt(Vector2 posOnCanvas, [NotNullWhen(true)] out MagGraphMissingItem? missingItem)
+    {
+        foreach (var item in MissingItems)
+        {
+            if (!ImRect.RectWithSize(item.PosOnCanvas, item.Size).Contains(posOnCanvas))
+                continue;
+
+            missingItem = item;
+            return true;
+        }
+
+        missingItem = null;
+        return false;
+    }
+
+    private bool TryGetMissingItem(Guid childId, [NotNullWhen(true)] out MagGraphMissingItem? missingItem)
+    {
+        foreach (var item in MissingItems)
+        {
+            if (item.Child.Id != childId)
+                continue;
+
+            missingItem = item;
+            return true;
+        }
+
+        missingItem = null;
+        return false;
+    }
+
+    /// <summary>Finds the visible lines of the real items that missing connections start or end at.</summary>
+    private void ResolveMissingConnectionLines()
+    {
+        foreach (var missingConnection in MissingConnections)
+        {
+            if (missingConnection.SourceItem is { } sourceItem)
+            {
+                missingConnection.SourceItemVisibleIndex = 0;
+                foreach (var outputLine in sourceItem.OutputLines)
+                {
+                    if (outputLine.Id != missingConnection.SourceSlotId)
+                        continue;
+
+                    missingConnection.SourceItemVisibleIndex = outputLine.VisibleIndex;
+                    break;
+                }
+            }
+
+            if (missingConnection.TargetItem is not { } targetItem)
+                continue;
+
+            // The n-th missing line of a slot belongs to its n-th missing connection
+            var precedingCount = 0;
+            foreach (var other in MissingConnections)
+            {
+                if (other == missingConnection)
+                    break;
+
+                if (other.TargetItem == targetItem && other.TargetSlotId == missingConnection.TargetSlotId)
+                    precedingCount++;
+            }
+
+            missingConnection.TargetItemVisibleIndex = 0;
+            foreach (var inputLine in targetItem.InputLines)
+            {
+                if (inputLine.Id != missingConnection.TargetSlotId
+                    || inputLine.ConnectionState != MagGraphItem.InputLineStates.MissingConnection)
+                    continue;
+
+                missingConnection.TargetItemVisibleIndex = inputLine.VisibleIndex;
+                if (precedingCount-- == 0)
+                    break;
+            }
+        }
+    }
+
+    internal bool HasMissingConnection(Guid itemId, Guid inputId, int multiInputIndex)
+    {
+        return _inputHashesWithMissingConnections.Count > 0
+               && _inputHashesWithMissingConnections.Contains(MagGraphConnection.GetItemInputHash(itemId, inputId, multiInputIndex));
+    }
+
+    private readonly HashSet<int> _inputHashesWithMissingConnections = new();
 
     private void UpdateVisibleItemLines(GraphUiContext context)
     {
@@ -466,6 +664,24 @@ internal sealed class MagGraphLayout
                 var tempConnectionCount = 0; // count additional to connectionsToInput.count
                 for (var virtualSubIndex = 0; virtualSubIndex < connectionsToInput.Count + tempConnectionCount + 1; virtualSubIndex++)
                 {
+                    if (context.Layout.HasMissingConnection(item.Id, input.Id, virtualConnectionCount))
+                    {
+                        inputLines.Add(new MagGraphItem.InputLine
+                                           {
+                                               Id = input.Id,
+                                               Type = input.ValueType,
+                                               Input = input,
+                                               InputUi = inputUi,
+                                               VisibleIndex = visibleIndex,
+                                               MultiInputIndex = multiConIndex,
+                                               ConnectionState = MagGraphItem.InputLineStates.MissingConnection,
+                                           });
+                        visibleIndex++;
+                        virtualConnectionCount++;
+                        tempConnectionCount++;
+                        continue;
+                    }
+
                     if (IsDisconnectedVisibleMultiInputLine(context, item.Id, input.Id, virtualConnectionCount))
                     {
                         inputLines.Add(new MagGraphItem.InputLine
@@ -521,6 +737,21 @@ internal sealed class MagGraphLayout
             else
             {
                 var hasInputConnections = input.HasInputConnections;
+                if (!hasInputConnections && context.Layout.HasMissingConnection(item.Id, input.Id, 0))
+                {
+                    inputLines.Add(new MagGraphItem.InputLine
+                                       {
+                                           Id = input.Id,
+                                           Type = input.ValueType,
+                                           Input = input,
+                                           InputUi = inputUi,
+                                           VisibleIndex = visibleIndex,
+                                           ConnectionState = MagGraphItem.InputLineStates.MissingConnection,
+                                       });
+                    visibleIndex++;
+                    continue;
+                }
+
                 if (isRelevant || isPrimaryInput || hasInputConnections)
                 {
                     inputLines.Add(new MagGraphItem.InputLine
@@ -797,8 +1028,9 @@ internal sealed class MagGraphLayout
             if (targetItemInputLine.Id != input.Id)
                 continue;
 
-            // Skip temp connections
-            if (targetItemInputLine.ConnectionState == MagGraphItem.InputLineStates.TempConnection)
+            // Skip temp connections and lines reserved for missing operators
+            if (targetItemInputLine.ConnectionState is MagGraphItem.InputLineStates.TempConnection
+                                                       or MagGraphItem.InputLineStates.MissingConnection)
                 continue;
 
             // Skip already connected multi-inputs slots...

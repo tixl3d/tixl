@@ -481,9 +481,10 @@ public sealed class Animator : SymbolExtension
         }
     }
 
-    internal void Write(JsonTextWriter writer)
+    /// <param name="unresolvedEntries">Entries of children that couldn't be loaded, written back as read.</param>
+    internal void Write(JsonTextWriter writer, IEnumerable<JToken> unresolvedEntries)
     {
-        if (_curvesByChildAndInput.Count == 0)
+        if (_curvesByChildAndInput.Count == 0 && !unresolvedEntries.Any())
             return;
 
         // Flatten everything into a list (childId, inputId, index, curve).
@@ -517,6 +518,12 @@ public sealed class Animator : SymbolExtension
             curve.Write(writer);
             writer.WriteEndObject();
         }
+
+        foreach (var entry in unresolvedEntries)
+        {
+            entry.WriteTo(writer);
+        }
+
         writer.WriteEndArray();
     }
         
@@ -535,7 +542,12 @@ public sealed class Animator : SymbolExtension
             var index = indexToken?.Value<int>() ?? 0;
 
             if (!symbol.Children.ContainsKey(childId))
+            {
+                if (symbol.IsUnresolvedChild(childId))
+                    symbol.AddUnresolvedAnimation(childId, entry);
+
                 continue;
+            }
 
             var curve = new Curve();
             curve.Read(entry);

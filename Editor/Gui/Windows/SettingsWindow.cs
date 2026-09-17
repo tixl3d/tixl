@@ -397,15 +397,6 @@ internal sealed partial class SettingsWindow : Window
                                                      );
 
                     FormInputs.AddVerticalSpace();
-                    changed |= FormInputs.AddCheckBox("Prevent Saving Symbols with Broken References",
-                                                      ref UserSettings.Config.PreventSavingSymbolsWithMissingReferences,
-                                                      """
-                                                      Warning: Saving symbols that reference other missing Symbols will purge this reference and all connections to it.
-                                                      This can't be undone or reverted.   
-                                                      """,
-                                                      UserSettings.Defaults.PreventSavingSymbolsWithMissingReferences
-                                                     );
-                    
                     changed |= FormInputs.AddCheckBox("Load multi-threaded",
                                                       ref UserSettings.Config.LoadMultiThreaded,
                                                       """
