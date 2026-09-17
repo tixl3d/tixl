@@ -24,11 +24,11 @@ internal sealed partial class EditableSymbolProject
                 return;
             }
 
-            if (UserSettings.Config.PreventSavingSymbolsWithMissingReferences && CorruptedSymbolFilePaths.Count > 0)
+            if (CorruptedSymbolFilePaths.Count > 0)
             {
                 Log.Warning($"{CsProjectFile.Name}: Not saving — {CorruptedSymbolFilePaths.Count} operator file(s) "
                             + "are corrupt. Restore an earlier backup to recover them; saving stays disabled until "
-                            + "then so nothing is overwritten. You can disable warning in Settings.");
+                            + "then so nothing is overwritten.");
                 return;
             }
 
@@ -178,19 +178,6 @@ internal sealed partial class EditableSymbolProject
     private void SaveSymbolFile(SymbolUi symbolUi)
     {
         var symbol = symbolUi.Symbol;
-
-        // Data-loss guard: if children couldn't be resolved on load (usually a missing package), the
-        // in-memory symbol is a truncated copy. Writing it would strip those operators and their
-        // connections from the on-disk file. Leave the intact file untouched instead.
-        
-        if (UserSettings.Config.PreventSavingSymbolsWithMissingReferences && symbol.HasUnresolvedChildren)
-        {
-            Log.Warning($"Not saving [{symbol.Name}]: {symbol.UnresolvedChildCount} operator(s) could not be "
-                        + "loaded — most likely a missing package. Leaving the existing file untouched so its "
-                        + "operators and connections aren't lost. Install the missing package and reload to edit it.");
-            return;
-        }
-
         var id = symbol.Id;
         var pathHandler = FilePathHandlers[id];
 

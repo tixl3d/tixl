@@ -24,6 +24,7 @@ internal static class Combine
                                         string newSymbolName,
                                         string nameSpace, string description, bool shouldBeTimeClip)
     {
+        using var activity = MainThreadActivity.Begin("combine-symbol", $"Combining into {newSymbolName}...");
         Dictionary<Guid, Guid> oldToNewIdMap = new Dictionary<Guid, Guid>();
         Dictionary<Symbol.Connection, Guid> connectionToNewSlotIdMap = new Dictionary<Symbol.Connection, Guid>();
 

@@ -154,7 +154,7 @@ internal static class Compiler
             process.WaitForExit(); 
         }
 
-        var time = startTime.Elapsed.Milliseconds * 0.001;
+        var time = startTime.Elapsed.TotalSeconds;
         Log.Debug($" Compiled in {time:0.0}s");
 
         return (outputBuilder.ToString(), process.ExitCode);

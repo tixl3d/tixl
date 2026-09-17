@@ -58,6 +58,7 @@ internal static partial class ProjectSetup
                                         [NotNullWhen(false)] out string? failureLog)
     {
         var name = nameSpace.Split('.').Last();
+        using var activity = MainThreadActivity.Begin("create-project", $"Creating project {name}...");
 
         // Filesystem failures (OneDrive virtualisation, broken symlinks, antivirus,
         // missing/removed drives) surface as exceptions; route them through failureLog.
@@ -147,6 +148,7 @@ internal static partial class ProjectSetup
 
     public static void UpdateSymbolPackages(params EditorSymbolPackage[] packages)
     {
+        using var activity = MainThreadActivity.Begin("load-packages", "Loading operators...");
         lock (SymbolDataLock)
         {
             UpdateSymbolPackagesInternal(packages);

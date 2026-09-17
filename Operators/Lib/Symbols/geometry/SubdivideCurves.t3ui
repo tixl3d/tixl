@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "f7a2c9e1-4b63-4d08-9e5a-2c7f8b1d6a34"/*SubdivideCurves*/,
+  "Description": "Subdivides long straight edges while keeping intact the small ones.\n- The curve shape is preserved\n- only the segment density changes.\n- use it after [TextToCurves]",
+  "InputUis": [
+    {
+      "InputId": "4a7e2c9f-6d15-4b83-a0e6-9c3f8b1d5e27"/*Curves*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "85c26820-f36b-4f44-9e78-4b63be33a65d"/*MaxEdgeLength*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Min": 0.01,
+      "ClampMin": true
+    },
+    {
+      "InputId": "b8d3f5a2-9e41-4c76-8a0b-5d2f7c9e1a34"/*EvenSpacing*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "3e8b5f2a-9c14-4d67-a0e3-7b1f6c9a2e85"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

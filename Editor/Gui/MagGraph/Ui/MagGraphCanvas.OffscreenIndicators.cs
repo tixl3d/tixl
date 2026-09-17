@@ -32,6 +32,14 @@ internal sealed partial class MagGraphView
                 DrawEdgeMarker(drawList, bounds, UiColors.ForegroundFull);
         }
 
+        // Missing operators: one marker each, so the gaps can be found in large graphs.
+        foreach (var missingItem in _context.Layout.MissingItems)
+        {
+            var area = ImRect.RectWithSize(missingItem.PosOnCanvas, missingItem.Size);
+            if (!IsRectVisible(area))
+                DrawEdgeMarker(drawList, area, UiColors.StatusAttention);
+        }
+
         // Hover: blinking marker for an operator highlighted from another panel. Mirrors the on-node
         // highlight condition (FrameStats hover + graph window not hovered) so it reads the same.
         if (!IsHovered)

@@ -120,6 +120,7 @@ public static partial class T3Ui
         ShareProjectDialog.Draw();
         RestoreBackupDialog.Draw();
         _couldNotLoadProjectDialog.Draw();
+        _missingOperatorsDialog.Draw();
         CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
         Windows.AssetLib.FolderImportDialog.Instance.Draw();
@@ -146,6 +147,11 @@ public static partial class T3Ui
                 // projects a sync tool blocked from loading.
                 _blockedProjectsChecked = true;
                 _couldNotLoadProjectDialog.ShowIfProjectsBlocked();
+            }
+            else if (!_missingOperatorsChecked && !IsAnyPopupOpen)
+            {
+                _missingOperatorsChecked = true;
+                _missingOperatorsDialog.ShowIfOperatorsAreMissing();
             }
         }
 
@@ -196,6 +202,7 @@ public static partial class T3Ui
 
     private static bool _versionWelcomeChecked;
     private static bool _blockedProjectsChecked;
+    private static bool _missingOperatorsChecked;
 
     private static void UpdateModifiedProjects()
     {

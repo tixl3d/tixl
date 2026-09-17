@@ -97,6 +97,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         Connected,
         TempConnection,
         NotConnected,
+
+        /// <summary>Fed by an operator whose symbol is missing.</summary>
+        MissingConnection,
     } 
 
     public struct InputLine

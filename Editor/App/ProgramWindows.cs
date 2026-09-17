@@ -366,11 +366,26 @@ internal static class ProgramWindows
         }
     }
 
-    public static void RebuildUiCopyTextureIfRequired()
+    /// <summary>
+    /// Keeps a copy of the frame that is about to be presented. The flip-model swap chain discards
+    /// its back buffer, so this copy is what <see cref="StallWatchdog"/> shows during a stall and
+    /// what gets mirrored to the second view.
+    /// </summary>
+    public static void CaptureUiFrame()
     {
+        lock (StallWatchdog.PresentLock)
+        {
+            RebuildUiCopyTextureIfRequired();
+            _deviceContext.CopyResource(Main.BackBufferTexture, _uiCopyTexture);
+        }
+    }
+
+    private static void RebuildUiCopyTextureIfRequired()
+    {
+        var backBufferDescription = Main.BackBufferTexture.Description;
         var needsRebuild = _uiCopyTexture == null ||
-                           _uiCopyTexture.Description.Width != Main.SwapChain.Description.ModeDescription.Width ||
-                           _uiCopyTexture.Description.Height != Main.SwapChain.Description.ModeDescription.Height;
+                           UiCopyTextureDescription.Width != backBufferDescription.Width ||
+                           UiCopyTextureDescription.Height != backBufferDescription.Height;
 
         if (!needsRebuild)
             return;
@@ -378,8 +393,8 @@ internal static class ProgramWindows
         // Create a shader resource-compatible texture
         var textureDesc = new Texture2DDescription
         {
-            Width = Main.SwapChain.Description.ModeDescription.Width,
-            Height = Main.SwapChain.Description.ModeDescription.Height,
+            Width = backBufferDescription.Width,
+            Height = backBufferDescription.Height,
             MipLevels = 1,
             ArraySize = 1,
             Format = Main.SwapChain.Description.ModeDescription.Format,
@@ -394,6 +409,7 @@ internal static class ProgramWindows
             _uiCopyTexture.Dispose();
 
         _uiCopyTexture = new Texture2D(_device, textureDesc);
+        UiCopyTextureDescription = textureDesc;
 
         if (UiCopyTextureSrv is { IsDisposed: false })
             UiCopyTextureSrv.Dispose();
@@ -460,4 +476,6 @@ internal static class ProgramWindows
     private static Texture2D _uiCopyTexture;
     private static Action<T3.Core.DataTypes.Texture2D> _pendingUiCapture;
     public static ShaderResourceView UiCopyTextureSrv { get; private set; }
+
+    internal static Texture2DDescription UiCopyTextureDescription { get; private set; }
 }

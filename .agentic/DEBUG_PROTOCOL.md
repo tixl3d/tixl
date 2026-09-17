@@ -64,6 +64,10 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 
 - `reload` works on **editable projects only** (synchronous recompile; MSBuild errors come
   back in a `COMPILE_FAILED` detail). Built-in packages like `Lib` need an editor restart.
+- `stallMainThread` sleeps on the main thread to exercise the stall overlay (`StallWatchdog`).
+  With an `estimateKey` it runs inside a `MainThreadActivity` scope, so the second run with the
+  same key shows estimated progress. The overlay is presented by another thread, so neither
+  `screenshot` nor `screenshotWindow` can capture it; they only run once the stall is over.
 - `shutdown` is fire-and-forget — the response may never arrive.
 - `getOutput` with a forced update only works for simple leaf evaluation and can
   double-evaluate; prefer the select-then-read pattern below.
@@ -84,6 +88,39 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   `.cs` files on exit, which leaves them older than the previous DLL and makes
   MSBuild skip the compile. `touch` the edited files before building, and check
   that the built DLL actually changed.
+
+## Looking at the graph
+
+The graph canvas can be driven like a user would scroll and zoom it. All positions are canvas
+units - the same space as `posX`/`posY` in `getGraphState`.
+
+- `select` takes `childId`, `childIds` (array), or both; `add: true` extends the selection
+  instead of replacing it. Without ids it clears the selection. The result reports
+  `selectedCount` and any ids that were `notFound`.
+- `getGraphView` returns `scale`, `scrollX`/`scrollY` (canvas position of the window's top-left
+  corner), the `visibleArea` rectangle, and the graph window's screen rect.
+- `setGraphView` - absolute: `area` (`minX`,`minY`,`maxX`,`maxY`) to fit, or `centerX`/`centerY`
+  and/or `scale`. Relative: `zoomBy` (factor around the view center), `scrollByX`/`scrollByY`.
+  Absolute and relative values combine in one call.
+- `focusGraphView` frames `childIds` if given, otherwise the selection, otherwise - or with
+  `all: true` - the whole graph. `padding` (canvas units, default 100). `includeMissing: true`
+  adds the stand-ins of operators whose symbol is missing; their ids also work in `childIds`.
+- Both apply instantly by default so a capture right after is deterministic; pass `smooth: true`
+  for the damped transition a user would see. Fitting an area needs the graph window's size, so
+  `area` and `focusGraphView` answer with `appliesNextFrame` - `pumpFrames` (a few) before
+  reading `getGraphView` or capturing.
+- `getGraphState` lists operators whose symbol could not be found as `missingChildren`
+  (`childId`, `symbolId`, `displayName`, position) with their `missingConnections`. They are not
+  part of `children` / `connections`.
+
+**Capturing the editor UI.** `screenshot` writes the output texture; `screenshotWindow` writes the
+editor window's client area as the user sees it (`.png` or `.jpg` by extension). `region: "graph"`
+crops to the graph canvas. It captures the last presented frame, so `pumpFrames` after view or
+selection changes first. Windows-only (`PrintWindow`), and it fails while the window is minimized.
+
+**A minimized editor stalls the bridge.** An editor launched from a background shell can come
+up minimized; its frame loop pauses, so requests time out while the process still reports as
+responding. Restore it without stealing focus - P/Invoke `ShowWindow(hwnd, 4)` from PowerShell - and retry.
 
 ## Hand-over and blocking dialogs
 

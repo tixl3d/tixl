@@ -261,6 +261,14 @@ internal sealed class AppWindow
 
     private void RebuildBackBuffer()
     {
+        lock (StallWatchdog.PresentLock)
+        {
+            RebuildBackBufferUnlocked();
+        }
+    }
+
+    private void RebuildBackBufferUnlocked()
+    {
         // ResizeBuffers requires that no reference to the back buffer survives - including a
         // binding on the output merger. A still-bound RTV leaves the pipeline in undefined
         // state which can escalate to DXGI_ERROR_DEVICE_HUNG on the next Present.

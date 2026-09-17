@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using ImGuiNET;
+using T3.Core.SystemUi;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -80,6 +81,22 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
 
             if (_projectToCopyTo != null)
             {
+                // The check parses the source file, so only redo it when symbol or target change
+                if (selectionChanged || !ReferenceEquals(_checkedProject, _projectToCopyTo))
+                {
+                    _checkedProject = _projectToCopyTo;
+                    Duplicate.TryGetDuplicationBlocker(s, _projectToCopyTo, out _blockReason);
+                }
+
+                var isBlocked = _blockReason != null;
+                if (isBlocked)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
+                    ImGui.TextWrapped(_blockReason);
+                    ImGui.PopStyleColor();
+                    ImGui.Spacing();
+                }
+
                 _ = SymbolModificationInputs.DrawSymbolNameAndNamespaceInputs(ref newTypeName, ref nameSpace, _projectToCopyTo, out var symbolNamesValid);
                 ImGui.Spacing();
 
@@ -88,19 +105,38 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
 
                 FormInputs.AddHint("Duplicating creates a new operator and can't be undone — this clears the undo history.");
 
-                if (CustomComponents.DrawCtaButton("Duplicate", symbolNamesValid))
+                if (CustomComponents.DrawCtaButton("Duplicate", symbolNamesValid && !isBlocked))
                 {
                     if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))
                         throw new InvalidOperationException($"Failed to find symbol ui for {symbolGuid}");
                     
                     var position = selectedChildUis.First().PosOnCanvas + new Vector2(0, 100);
 
-                    Duplicate.DuplicateAsNewType(compositionSymbolUi, _projectToCopyTo, 
-                                                 selectedChildUis.First().SymbolChild.Symbol.Id, newTypeName, nameSpace, description,
-                                                 position);
-                    
-                    result = ChangeSymbol.SymbolModificationResults.StructureChanged;
-                    T3Ui.Save(false);
+                    var newSymbol = Duplicate.DuplicateAsNewType(compositionSymbolUi, _projectToCopyTo,
+                                                                 selectedChildUis.First().SymbolChild.Symbol.Id, newTypeName, nameSpace, description,
+                                                                 position, out var failureReason);
+
+                    if (newSymbol == null)
+                    {
+                        BlockingWindow.Instance.ShowMessageBox($"""
+                                                                Sadly the duplicated operator could not be compiled.
+
+                                                                Potential reasons:
+                                                                - The operator uses helper classes that are internal to its package
+                                                                  and can't be accessed from another project.
+                                                                - The target project does not reference the operator's package.
+                                                                - A name clashes with a reserved word or a known core type.
+
+                                                                {failureReason}
+                                                                """,
+                                                               "Can't duplicate operator");
+                    }
+                    else
+                    {
+                        result = ChangeSymbol.SymbolModificationResults.StructureChanged;
+                        T3Ui.Save(false);
+                    }
+
                     ImGui.CloseCurrentPopup();
                     _completedReloadPrompt = false;
                     Closed?.Invoke();
@@ -131,4 +167,6 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
     private EditableSymbolProject? _projectToCopyTo;
     private bool _completedReloadPrompt;
     private Guid _selectedSymbolId;
+    private EditableSymbolProject? _checkedProject;
+    private string? _blockReason;
 }

@@ -117,6 +117,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         // per-frame work so the loop is locked to the swap chain's signalled cadence rather than
         // queueing up speculatively. No-op if the waitable wasn't enabled at swap-chain creation.
         ProgramWindows.Main.WaitForFrameLatency();
+        StallWatchdog.NotifyFrameStarted();
 
         lock (_contextLock)
         {
@@ -174,9 +175,6 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
                 if (UserSettings.Config.MirrorUiOnSecondView)
                 {
-                    ProgramWindows.RebuildUiCopyTextureIfRequired();
-                    ProgramWindows.CopyUiContentToShareTexture();
-
                     if (ProgramWindows.UiCopyTextureSrv != null && !ProgramWindows.UiCopyTextureSrv.IsDisposed)
                     {
                         ProgramWindows.SetRasterizerState(SharedResources.ViewWindowRasterizerState);
@@ -214,6 +212,11 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
                 ImGui.Render();
                 ProgramWindows.Main.Form.ApplyRequestedCursor();
+
+                // Presenting the stall overlay discarded the cleared back buffer of this frame.
+                if (StallWatchdog.NotifyRenderingBackBuffer())
+                    ProgramWindows.Main.PrepareRenderingFrame();
+
                 RenderDrawData(ImGui.GetDrawData());
             }
             catch (SEHException e)
@@ -482,9 +485,34 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
         lock (_contextLock)
         {
-            FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _imGuiSampler);
+            lock (StallWatchdog.PresentLock)
+            {
+                FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _fontSampler);
+                StallOverlay.SnapshotFonts();
+            }
         }
 
+        return true;
+    }
+
+    /// <summary>
+    /// Binds the shaders and states used for ImGui draw data, so other code can draw
+    /// <see cref="ImDrawVert"/> geometry with its own vertex and constant buffer.
+    /// </summary>
+    /// <remarks>Callers on other threads must hold <see cref="StallWatchdog.PresentLock"/>.</remarks>
+    internal bool TryBindUiPipeline(DeviceContext context, out ShaderResourceView fontAtlasSrv)
+    {
+        fontAtlasSrv = _fontTextureView;
+        if (!_initialized || _fontTextureView == null || _fontTextureView.IsDisposed)
+            return false;
+
+        context.InputAssembler.InputLayout = _inputLayout;
+        context.VertexShader.SetShader(_vertexShader, null, 0);
+        context.PixelShader.SetShader(_pixelShader, null, 0);
+        context.PixelShader.SetSampler(0, _fontSampler);
+        context.OutputMerger.SetBlendState(_blendState, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+        context.OutputMerger.SetDepthStencilState(_depthStencilState, 0);
+        context.Rasterizer.State = _rasterizerState;
         return true;
     }
 

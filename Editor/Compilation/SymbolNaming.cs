@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using T3.Core.Operator;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using GraphUtils = T3.Editor.UiModel.Helpers.GraphUtils;
 
@@ -36,8 +37,11 @@ internal static class SymbolNaming
     {
         if (symbol.SymbolPackage.IsReadOnly)
             throw new ArgumentException("Symbol is read-only and cannot be renamed");
-        
-        
+
+        // Spans the recompilation and the update of all instances, so that both stalls share
+        // one message and one duration estimate.
+        using var activity = MainThreadActivity.Begin("rename-symbol", $"Renaming to {newName}...");
+
         var syntaxTree = GraphUtils.GetSyntaxTree(symbol);
         if (syntaxTree == null)
         {

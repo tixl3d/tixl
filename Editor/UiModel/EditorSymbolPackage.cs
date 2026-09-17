@@ -500,6 +500,7 @@ internal class EditorSymbolPackage : SymbolPackage
             return;
         }
 
+        Migrations.SymbolFiles.PreV4_4ChildNameComments.ReadFor(symbol, symbolPath);
         UpdateSymbolInstances(symbol, forceTypeUpdate: true);
 
         JsonFileResult<SymbolUi> symbolUiJson;

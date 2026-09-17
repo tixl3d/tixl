@@ -383,8 +383,8 @@ public abstract partial class SymbolPackage : IResourcePackage
             catch (Exception e)
             {
                 // A single corrupt/unreadable .t3 must not abort loading every project. Skip it — the
-                // symbol goes missing (parents referencing it are protected by
-                // Symbol.HasUnresolvedChildren) and the file is recorded for restore-from-backup.
+                // symbol goes missing (parents referencing it keep those children as
+                // Symbol.UnresolvedChildren) and the file is recorded for restore-from-backup.
                 Log.Error($"Skipping corrupted symbol file '{filePath}': {e.Message}");
                 _corruptedSymbolFiles.Add(filePath);
                 return null;
