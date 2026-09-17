@@ -77,26 +77,6 @@ RWStructuredBuffer<Point> ResultPoints : register(u0); // output
 
 sampler texSampler : register(s0);
 
-// inline float SBiasGain(float4 value, float2 biasGain)
-// {
-//     float bias = saturate(biasGain.x);
-//     float gain = saturate(biasGain.y);
-
-//     // Apply bias
-//     value /= (1.0 / bias - 2.0) * (1.0 - value) + 1.0;
-
-//     // Calculate gain factors
-//     float gainFactorLow = 1.0 / gain - 2.0;
-//     float gainFactorHigh = 1.0 / (1.0 - gain) - 2.0;
-
-//     // Use a conditional expression to remove branching
-//     float scaledValue = (value < 0.5)
-//                             ? (value * 2.0) / (gainFactorLow * (1.0 - value * 2.0) + 1.0) * 0.5
-//                             : ((value * 2.0 - 1.0) / (gainFactorHigh * (1.0 - (value * 2.0 - 1.0)) + 1.0)) * 0.5 + 0.5;
-
-//     return scaledValue;
-// }
-
 [numthreads(256, 4, 1)] void main(uint3 i
                                   : SV_DispatchThreadID)
 {
@@ -139,6 +119,9 @@ sampler texSampler : register(s0);
     }
     p.Position += offset;
 
+    
+    
+
     p.Scale += (float3(factors[Attribute_Scale_X],
                        factors[Attribute_Scale_Y],
                        factors[Attribute_Scale_Z]) +
@@ -152,8 +135,15 @@ sampler texSampler : register(s0);
     deltaRot = qMul(deltaRot, qFromAngleAxis(radians(-factors[Attribute_Rotate_X]), float3(1, 0, 0)));
     deltaRot = qMul(deltaRot, qFromAngleAxis(radians(-factors[Attribute_Rotate_Y]), float3(0, 1, 0)));
     deltaRot = qMul(deltaRot, qFromAngleAxis(radians(-factors[Attribute_Rotate_Z]), float3(0, 0, 1)));
+    deltaRot = normalize(deltaRot);
+    p.Rotation = qMul(deltaRot, p.Rotation);
 
-    p.Rotation = normalize(deltaRot);
+    if (RotationSpace == 0)
+    {
+        float3 newPos = p.Position;
+        newPos = qRotateVec3(newPos, deltaRot);
+        p.Position = newPos;
+    }
 
     // // Rotation
     // // ResultPoints[index].Rotation = p.Rotation;
