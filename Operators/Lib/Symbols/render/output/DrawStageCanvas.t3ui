@@ -1,0 +1,85 @@
+{
+  "FormatVersion": 3,
+  "Id": "533eb7f8-f18d-41bf-a094-167e0557eae8"/*DrawStageCanvas*/,
+  "Description": "Paints an output canvas from the room's geometry, looking from a viewer into an environment.\n\nThe stage mesh is rasterized where each surface lands on the canvas (its second UV set), and every pixel looks from ViewerPosition through its point on the wall into the environment: an equirectangular Image, or a CubeMap when one is connected. One scene rendered once lands continuous across every wall, the way a spectator standing at the viewer's position would see it. The canvas takes the size of Resolution, else of the output named by OutputRef.\n\nWire [StageGeometry] → [GeometryToMesh] → DrawStageCanvas → [SendToOutput] bound to the same output. RotateY turns the environment around the viewer; FlipHorizontal mirrors it.\n\nAKA: immersive, projection, cubemap, equirect, panorama, dome, room, cave",
+  "InputUis": [
+    {
+      "InputId": "ec895305-671f-4f1b-ada1-7ef91afc6212"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d5dee94b-5dbc-448b-b8eb-c44eb6e36539"/*Image*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "acd9fcfb-5693-49e5-890f-95ffce4d0d32"/*CubeMap*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "a17c5fd5-04f8-4ed1-bc89-c389d845f152"/*ViewerPosition*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "379b6223-920b-448f-a508-c93dccb06316"/*OutputRef*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Usage": "OutputSetupEntities"
+    },
+    {
+      "InputId": "2fb9a2cb-8583-49bc-9745-438a5d2eed63"/*Resolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "8213f365-71e2-41dc-8e84-e3948f0ceea2"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "0f0b5a2e-4b9e-4f3a-9c2d-7a1e6d8c5b41"/*RotateY*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 315.0
+      },
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "3c7d9e11-2a6f-4d5b-8e4c-1f9a0b7c6d52"/*FlipHorizontal*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "6befcc3f-1d7d-4d94-85da-633723eb3d79"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

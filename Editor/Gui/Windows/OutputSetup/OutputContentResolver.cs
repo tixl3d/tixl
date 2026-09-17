@@ -42,12 +42,25 @@ internal static class OutputContentResolver
     public static Texture2D? PullContent(IContentSupplier supplier)
     {
         var context = Context;
-        var content = supplier.GetContent(context);
+        var frame = ImGui.GetFrameCount();
+        if (frame != _pulledContentFrame)
+        {
+            _pulledContentFrame = frame;
+            _pulledContent.Clear();
+        }
 
         // What this send was asked for, so it can warn when two outputs disagree about its size.
         if (supplier is Instance instance)
-            OutputContentStats.NotePull(instance.SymbolChildId, context.RequestedResolution, ImGui.GetFrameCount());
+            OutputContentStats.NotePull(instance.SymbolChildId, context.RequestedResolution, frame);
 
+        // One evaluation per send and frame, however many patches and surfaces cut from it: a graph with an
+        // always-dirty op renders again on every pull, and a second render lands in the same texture anyway,
+        // so every consumer would show the last one regardless.
+        if (_pulledContent.TryGetValue(supplier, out var pulled))
+            return pulled;
+
+        var content = supplier.GetContent(context);
+        _pulledContent[supplier] = content;
         return content;
     }
 
@@ -225,6 +238,8 @@ internal static class OutputContentResolver
     private static int _invalidatedContentFrame = -1;
     private static readonly Dictionary<Guid, (bool Found, Slice? Slice, Texture2D? Content)> _surfaceSlices = new();
     private static int _surfaceSliceFrame = -1;
+    private static readonly Dictionary<IContentSupplier, Texture2D?> _pulledContent = new();
+    private static int _pulledContentFrame = -1;
 
     /// <summary>The first fitted patch on <paramref name="output"/> that shows this send's content, as a request.</summary>
     private static bool TryGetFittedPatchRequest(Setup setup, OutputDefinition output, Guid symbolChildId, out Int2 resolution)

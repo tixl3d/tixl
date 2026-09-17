@@ -4,8 +4,6 @@
 // across every wall. Consumes the mesh [StageGeometry] → [GeometryToMesh] produce.
 #include "shared/pbr.hlsl"
 
-static const float PI = 3.14159265;
-
 cbuffer Params : register(b0)
 {
     float3 ViewerPosition;

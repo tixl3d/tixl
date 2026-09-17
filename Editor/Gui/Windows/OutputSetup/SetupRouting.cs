@@ -130,8 +130,9 @@ internal static class SetupRouting
             return;
         }
 
-        // A surface (or region) dropped on a patch takes the patch's place: it is pinned to the patch's quad on
-        // that output and the patch goes. The inverse of "Use on Surface", and for a region the way to give it a
+        // A surface (or region) dropped on a patch is pinned to the patch's quad on that output. A patch that fed
+        // content hands it over and goes, or both would draw the same pixels; a patch without content is layout
+        // (a venue's pixel map traced as patches) and stays. The inverse of "Use on Surface", and for a region the way to give it a
         // pin of its own on one output while it keeps riding its parent everywhere else.
         if (targetKind == SetupEntityKinds.Patch && dragKind == SetupEntityKinds.Surface)
         {
@@ -157,7 +158,9 @@ internal static class SetupRouting
             if (surface.SliceId == Guid.Empty)
                 surface.SliceId = patch.SliceId;
 
-            patchOutput.Patches.RemoveAll(p => p.Id == targetId);
+            if (patch.SliceId != Guid.Empty)
+                patchOutput.Patches.RemoveAll(p => p.Id == targetId);
+
             return;
         }
 

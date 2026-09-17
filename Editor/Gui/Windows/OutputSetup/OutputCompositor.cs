@@ -173,11 +173,10 @@ internal static class OutputCompositor
             return null;
         }
 
-        // A stream sender reads the composite back as 8-bit pixels (NDI accepts nothing else), so a stream-bound
-        // output composites straight into that; displays keep the float target for the blit.
-        var isStreamBound = ActiveSetup.Machine?.FindBinding(outputId) is { IsStream: true };
-        var target = GetOrCreateTarget(outputId, output.ResolvedResolution,
-                                       isStreamBound ? Format.B8G8R8A8_UNorm : Format.R16G16B16A16_Float);
+        // 8-bit is what every consumer ends at: a stream sender reads the composite back as 8-bit pixels (NDI
+        // accepts nothing else) and a display's swap chain is 8-bit too. A float target would only double the
+        // bandwidth of the largest texture in the pipeline — a venue canvas runs to tens of megapixels.
+        var target = GetOrCreateTarget(outputId, output.ResolvedResolution, Format.B8G8R8A8_UNorm);
         if (target == null)
             return null;
 

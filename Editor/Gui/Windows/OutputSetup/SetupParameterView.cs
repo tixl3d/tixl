@@ -110,7 +110,7 @@ internal static class SetupParameterView
         // frame the output renders rather than evaluating the graph a second time at a size of its own.
         OutputContentResolver.TryGetSourceContent(instance.SymbolChildId, out _, out var content);
 
-        Span<int> resolution = [1, 1];
+        Span<int> resolution = [0, 0]; // nothing connected: no size, rather than a made-up one
         if (content is { IsDisposed: false })
         {
             resolution[0] = content.Description.Width;

@@ -109,7 +109,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>
                         normals.Values[corner] = Vector3.UnitY;
                         var canvasUv = hasCanvasQuad ? BilinearCanvas(_canvasQuad, inRect.X, 1 - inRect.Y) : new Vector2(inRect.X, 1 - inRect.Y);
                         texCoords.Values[corner] = TexCoordFor(uvMode, uvScale, position, Vector3.UnitY, inRect, canvasUv);
-                        canvasCoords.Values[corner] = uvMode == UvModes.OutputCanvas ? new Vector2(inRect.X, 1 - inRect.Y) : canvasUv;
+                        canvasCoords.Values[corner] = canvasUv;
                         corner++;
                     }
                 }
@@ -134,7 +134,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>
                     var inRect = new Vector2(sign.X > 0 ? 1 : 0, sign.Y > 0 ? 1 : 0);
                     var canvasUv = hasCanvasQuad ? _canvasQuad[_cornerToQuadIndex[c]] : new Vector2(inRect.X, 1 - inRect.Y);
                     texCoords.Values[corner] = TexCoordFor(uvMode, uvScale, position, normal, inRect, canvasUv);
-                    canvasCoords.Values[corner] = uvMode == UvModes.OutputCanvas ? new Vector2(inRect.X, 1 - inRect.Y) : canvasUv;
+                    canvasCoords.Values[corner] = canvasUv;
                     point++;
                     corner++;
                 }
@@ -297,7 +297,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>
     [Input(Guid = "c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f")]
     public readonly InputSlot<float> UvScale = new();
 
-    /// <summary>What TexCoord carries; TexCoord2 always keeps the output-canvas coordinates (or the surface's own when those are on TexCoord).</summary>
+    /// <summary>What TexCoord carries; TexCoord2 always keeps the output-canvas coordinates, so one mesh serves the previz and [DrawStageCanvas] alike.</summary>
     private enum UvModes
     {
         /// <summary>0..1 over each surface, the image's top at the surface's top.</summary>
