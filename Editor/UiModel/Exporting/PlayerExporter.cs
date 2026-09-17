@@ -112,6 +112,8 @@ internal static partial class PlayerExporter
         // Include implicitly shared assets
         foreach (var shared in (string[]) [
                          "Lib:shaders/dx11/resolve-multisampled-depth-buffer-cs.hlsl",
+                         // The output compositor warps every slice with this; no graph references it.
+                         "Lib:shaders/dx11/corner-pin-layer.hlsl",
                          "Lib:pbr/studio_small_08-prefiltered.dds",
                          "Lib:pbr/BRDF-LookUp.dds",
                      ])
@@ -173,7 +175,7 @@ internal static partial class PlayerExporter
         if (!TryExportSettings(exportDir, symbol, exportConfig, title, author, out reason))
             return false;
 
-        TryExportOutputSetups(symbol, exportDir);
+        TryExportOutputSetups(symbol, exportDir, exportConfig.PlayerMode);
 
         RenamePlayerExecutable(exportDir, title);
 
@@ -624,11 +626,11 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
-    /// Ships the project's output setups beside the player, so ops that read the venue (and, later, the player's
-    /// own presentation) still find it. The setups describe the venue and travel with the show; the machine
-    /// config holds this computer's display numbering and deliberately does not.
+    /// Ships the project's output setups beside the player, so the venue-reading ops and the player's own
+    /// presentation both find them. The setups describe the venue and always travel; this machine's display
+    /// bindings only do so for an installation, which is exported for one computer.
     /// </summary>
-    private static void TryExportOutputSetups(Symbol symbol, string exportDir)
+    private static void TryExportOutputSetups(Symbol symbol, string exportDir, CompositionSettings.PlayerModes playerMode)
     {
         var projectFolder = symbol.SymbolPackage.Folder;
         var sourceFolder = Path.Combine(projectFolder, Setup.FolderName);
@@ -647,6 +649,22 @@ internal static partial class PlayerExporter
                 File.Copy(filePath, Path.Combine(targetFolder, Path.GetFileName(filePath)), overwrite: true);
 
             Log.Info($"Exported {setupFiles.Length} output setup(s).");
+
+            // An installation runs on the machine it was exported for, so its display bindings travel with it.
+            // A demo does not: the same numbering would name different screens wherever it is run.
+            if (playerMode != CompositionSettings.PlayerModes.Installation)
+                return;
+
+            var machineConfigPath = Path.Combine(sourceFolder, MachineConfig.FileName);
+            if (!File.Exists(machineConfigPath))
+            {
+                Log.Warning("Installation export: no local bindings to ship. Bind the outputs to displays first, "
+                            + "or the player will show only the first output in a window.");
+                return;
+            }
+
+            File.Copy(machineConfigPath, Path.Combine(targetFolder, MachineConfig.FileName), overwrite: true);
+            Log.Info("Exported this machine's display bindings.");
         }
         catch (Exception e)
         {

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using SharpDX;
 using SharpDX.Direct3D;
@@ -7,6 +8,8 @@ using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Logging;
 using T3.Core.Operator;
+using T3.Core.Output.Rendering;
+using T3.Core.Output;
 using T3.Core.Operator.Slots;
 using T3.Core.Stats;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -68,6 +71,7 @@ internal static partial class Program
         EvaluateAndDrawOutput(_evalContext, _resolution, _textureOutput, _deviceContext, _renderView);
 
         _swapChain.Present(_vsyncInterval, PresentFlags.None);
+        PresentOutputWindows();
 
         PerformanceMetrics.RecordFrame((float)(Playback.LastFrameDuration * 1000.0));
     }
@@ -76,12 +80,49 @@ internal static partial class Program
     {
     }
 
+    /// <summary>
+    /// The composite of the setup's first output, or null when this project ships no setup. One window can show
+    /// one canvas, so the first output is the one a windowed player presents; bound displays are a separate path.
+    /// </summary>
+    private static Texture2D? RenderSetupComposite()
+    {
+        var setup = ActiveSetup.Current;
+        if (setup == null || setup.Outputs.Count == 0)
+            return null;
+
+        // Every other display is drawn first, while the back buffer is still free.
+        DrawOutputWindows();
+
+        if (_mainWindowOutputId != Guid.Empty)
+            return OutputCompositor.RenderOutput(_mainWindowOutputId);
+
+        for (var i = 0; i < setup.Outputs.Count; i++)
+        {
+            var output = setup.Outputs[i];
+            if (output.Kind == OutputDefinition.Kinds.Default || !output.IsSending)
+                continue;
+
+            var composite = OutputCompositor.RenderOutput(output.Id);
+            if (composite != null)
+                return composite;
+        }
+
+        return null;
+    }
+
     private static bool EvaluateAndDrawOutput(EvaluationContext evalContext,
                                               T3.Core.DataTypes.Vector.Int2 resolution,
                                               Slot<Texture2D> textureOutput,
                                               DeviceContext deviceContext,
                                               RenderTargetView renderView)
     {
+        // One token per frame for everything the compositing path memoises, advanced before anything asks.
+        OutputFrame.Advance();
+
+        // Composited first: the compositor binds render targets of its own and leaves them bound, so the back
+        // buffer is claimed after it is done rather than before.
+        var outputTexture = RenderSetupComposite();
+
         // The output is rendered at the requested resolution and stretched onto the back buffer,
         // whose size follows the window (borderless fullscreen may differ from the requested size).
         deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _backBufferSize.Width, _backBufferSize.Height, 0.0f, 1.0f));
@@ -94,13 +135,18 @@ internal static partial class Program
         evalContext.Reset();
         evalContext.RequestedResolution = resolution;
 
-        if (textureOutput == null)
+        // Without a setup the project's own texture output is what there is to show.
+        if (outputTexture == null)
         {
-            return false;
+            if (textureOutput == null)
+            {
+                return false;
+            }
+
+            textureOutput.InvalidateGraph();
+            outputTexture = textureOutput.GetValue(evalContext);
         }
 
-        textureOutput.InvalidateGraph();
-        var outputTexture = textureOutput.GetValue(evalContext);
         if (outputTexture == null)
         {
             if (!_loggedNullOutput)

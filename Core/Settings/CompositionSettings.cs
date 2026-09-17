@@ -142,12 +142,28 @@ public sealed class CompositionSettings
         public float AudioResyncThreshold = 0.04f;
     }
 
+    /// <summary>What an exported executable is for, which decides how it starts and what travels with it.</summary>
+    public enum PlayerModes
+    {
+        /// <summary>Runs anywhere: asks for a display and resolution on startup and shows one window.</summary>
+        Demo,
+
+        /// <summary>
+        /// Runs on the machine it was exported for: this computer's display bindings travel with it, so every
+        /// output opens full-screen where it belongs and no dialog is shown.
+        /// </summary>
+        Installation,
+    }
+
     /// <summary>
     /// Defaults baked into an exported executable. The player lets the user override them on startup
     /// unless <see cref="SkipStartupDialog"/> is set.
     /// </summary>
     public sealed class ExportConfig
     {
+        /// <summary>What the executable is for; Installation ships this machine's display bindings.</summary>
+        public PlayerModes PlayerMode = PlayerModes.Demo;
+
         /// <summary>Window title of the executable; empty uses the exported operator's name.</summary>
         public string Title = string.Empty;
         /// <summary>Shown in the startup dialog and used for log/cache folders; empty uses the package name.</summary>

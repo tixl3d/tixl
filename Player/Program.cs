@@ -88,7 +88,11 @@ internal static partial class Program
             _startupOptions = PlayerStartupOptions.Resolve(exportSettings, commandLine, lastUsedPath);
             var displays = silkWindows.GetDisplays();
 
-            var showDialog = commandLine.ForceDialog || (!commandLine.NoDialog && !exportSettings.Export.SkipStartupDialog);
+            // An installation comes up on its own displays with no one at the keyboard, so it never asks —
+            // though --dialog still forces the question when someone is there to answer it.
+            var skipDialog = exportSettings.Export.SkipStartupDialog
+                             || exportSettings.Export.PlayerMode == CompositionSettings.PlayerModes.Installation;
+            var showDialog = commandLine.ForceDialog || (!commandLine.NoDialog && !skipDialog);
             if (showDialog)
             {
                 var dialog = new PlayerStartupDialog(exportSettings.ApplicationTitle, exportSettings.Author, displays, _startupOptions);
@@ -266,6 +270,7 @@ internal static partial class Program
                             };
 
             LoadOutputSetup();
+            InitializeOutputWindows(displays);
 
             // Create instance of project op, all children are create automatically
             loadReport.BeginStage("Create instances");
@@ -474,6 +479,7 @@ internal static partial class Program
             // Release all resources
             try
             {
+                DisposeOutputWindows();
                 _renderView?.Dispose();
                 _backBuffer?.Dispose();
                 _deviceContext?.ClearState();

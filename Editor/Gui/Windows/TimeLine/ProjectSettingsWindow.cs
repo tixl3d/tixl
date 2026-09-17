@@ -738,6 +738,13 @@ internal sealed class ProjectSettingsWindow : Window
                                               defaultValue: defaults.Author);
         FormInputs.AddVerticalSpace();
 
+        modified |= FormInputs.AddEnumDropdown(ref export.PlayerMode,
+            "Player Mode",
+            "Demo runs anywhere: it asks for a display and resolution and shows one window.\n"
+            + "Installation is for the machine it was exported for: this computer's display bindings\n"
+            + "travel with it, so every output opens full-screen where it belongs and no dialog is shown.",
+            defaults.PlayerMode);
+
         modified |= FormInputs.AddEnumDropdown(ref export.DefaultWindowMode,
             "Window Mode",
             "The default window mode when running the exported executable.",

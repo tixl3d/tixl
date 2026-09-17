@@ -37,7 +37,7 @@ public static class OutputContentResolver
     public static Texture2D? PullContent(IContentSupplier supplier)
     {
         var context = Context;
-        var frame = OutputFrame.Token;
+        var frame = OutputFrame.Index;
         if (frame != _pulledContentFrame)
         {
             _pulledContentFrame = frame;
@@ -132,7 +132,7 @@ public static class OutputContentResolver
     public static bool TryGetSurfaceSlice(Guid surfaceId, out Slice? slice, out Texture2D? content, out Vector4 uv)
     {
         // Every card, region and traced quad asks per frame; the chain of linear finds behind it is answered once.
-        var frame = OutputFrame.Token;
+        var frame = OutputFrame.Index;
         if (frame != _surfaceSliceFrame)
         {
             _surfaceSliceFrame = frame;
@@ -186,7 +186,7 @@ public static class OutputContentResolver
 
     private static void InvalidateContentOncePerFrame(EvaluationContext context)
     {
-        var frame = OutputFrame.Token;
+        var frame = OutputFrame.Index;
         if (frame == _invalidatedContentFrame)
             return;
 

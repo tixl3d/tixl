@@ -54,7 +54,14 @@ The player writes its log files and the remembered startup choice to a `.temp/` 
 
 If the project has an [output setup](OutputSetup.md), its `*.setup.json` files are copied into a `.meta` folder beside the executable and the player loads one at startup, picking the same file the editor would. Operators that read the venue — [StageGeometry], [DrawStageCanvas], [UseProjectorCam] — therefore work in an export exactly as they do in the editor.
 
-The local bindings (`outputs.machine.json`) are *not* exported: they name this computer's displays, and the machine running the show is rarely the one that authored it. Without them, an output whose canvas is left at 0 × 0 renders at 1920 × 1080. The player still presents through its own single window; driving projectors from the setup is not yet part of an export.
+What else travels depends on **Player Mode** in the project's `Executable` settings:
+
+- **Demo** — runs anywhere. It asks for a display and a resolution on startup and shows one window, with the setup's first output composited into it. The local bindings stay behind, because the same display numbering names different screens on a different computer.
+- **Installation** — runs on the machine it was exported for. That machine's bindings (`outputs.machine.json`) travel with it, so every output bound to a display opens full-screen where it belongs, the first one reusing the player's own window. The startup dialog is skipped; `--dialog` still forces it when someone is there to answer.
+
+An output whose canvas is left at 0 × 0 renders at 1920 × 1080 when nothing is bound to it. A binding naming a display the machine doesn't have is reported in the log and skipped, so an installation says what is wrong instead of coming up dark.
+
+To move an installation to another machine, or to rebind at a venue, edit `outputs.machine.json` in the export's `.meta` folder or open the project in TiXL and export again. The player has no binding UI of its own — an installation should come up the same way every time.
 
 ### Loading screen
 

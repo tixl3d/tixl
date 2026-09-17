@@ -48,7 +48,7 @@ public static class OutputCompositor
         if (setup == null || output == null)
             return null;
 
-        var frame = OutputFrame.Token;
+        var frame = OutputFrame.Index;
         if (_compositeFrames.TryGetValue(outputId, out var rendered) && rendered.Frame == frame)
             return rendered.HasContent && _targets.TryGetValue(outputId, out var renderedTarget) ? renderedTarget.Texture : null;
 
