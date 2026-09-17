@@ -98,51 +98,84 @@ internal static class StallWatchdog
 
     private static void Run()
     {
-        var takeoverStartTimestamp = 0L;
+        // Kept across a brief recovery, so that a second stall continues the first one's fade in
+        // instead of starting over.
+        var stallStartTimestamp = 0L;
+        var recoveryStartTimestamp = 0L;
 
         while (!_isStopped && !Program.IsShuttingDown)
         {
-            if (!IsMainThreadStalled())
+            var lastHeartbeat = Volatile.Read(ref _lastHeartbeatTimestamp);
+            var hasTakeover = stallStartTimestamp != 0;
+
+            if (!IsMainThreadStalled(lastHeartbeat, hasTakeover))
             {
-                takeoverStartTimestamp = 0;
+                if (hasTakeover)
+                {
+                    // Work that comes in several steps lets the main thread render between them.
+                    // The overlay only ends once the frames have been fast again for a while.
+                    if (Stopwatch.GetElapsedTime(lastHeartbeat).TotalSeconds > RecoveredFrameSeconds)
+                        recoveryStartTimestamp = 0;
+                    else if (recoveryStartTimestamp == 0)
+                        recoveryStartTimestamp = Stopwatch.GetTimestamp();
+                    else if (Stopwatch.GetElapsedTime(recoveryStartTimestamp).TotalSeconds > RecoveryHoldSeconds)
+                        stallStartTimestamp = 0;
+                }
+
                 Thread.Sleep(IdlePollMilliseconds);
                 continue;
             }
 
-            if (takeoverStartTimestamp == 0)
-                takeoverStartTimestamp = Stopwatch.GetTimestamp();
-
-            try
+            recoveryStartTimestamp = 0;
+            if (!hasTakeover)
             {
-                PresentOverlay(Stopwatch.GetElapsedTime(takeoverStartTimestamp).TotalSeconds);
+                stallStartTimestamp = lastHeartbeat;
+                StallOverlay.BeginTakeover();
             }
-            catch (Exception e)
+
+            var takeoverSeconds = Stopwatch.GetElapsedTime(stallStartTimestamp).TotalSeconds;
+
+            // Presenting discards the back buffer and forces the main thread into a full redraw, so
+            // a stall short enough to keep the overlay invisible is not worth a frame.
+            if (StallOverlay.GetFadeIn(takeoverSeconds) >= MinVisibleFade)
             {
-                Log.Warning($"Stall overlay disabled after failing to present: {e.Message}");
-                return;
+                try
+                {
+                    PresentOverlay(takeoverSeconds);
+                }
+                catch (Exception e)
+                {
+                    Log.Warning($"Stall overlay disabled after failing to present: {e.Message}");
+                    return;
+                }
             }
 
             Thread.Sleep(OverlayFrameMilliseconds);
         }
     }
 
-    private static bool IsMainThreadStalled()
+    private static bool IsMainThreadStalled(long lastHeartbeat, bool hasTakeover)
     {
-        var lastHeartbeat = Volatile.Read(ref _lastHeartbeatTimestamp);
         if (Stopwatch.GetElapsedTime(lastHeartbeat).TotalSeconds < StallThresholdSeconds)
             return false;
 
         if (IsIconic(_mainWindowHandle))
             return false;
 
+        // The probe below blocks for its full timeout while the thread is stuck, which costs more
+        // than an overlay frame. During a takeover the missing heartbeat already proves the stall.
+        if (hasTakeover && Stopwatch.GetElapsedTime(_lastHungCheckTimestamp).TotalSeconds < HungCheckIntervalSeconds)
+            return true;
+
         // Modal loops (dragging the window, menus, message boxes, file dialogs) stop the render
         // loop as well, but they still answer messages. Only an unresponsive thread is a stall.
+        _lastHungCheckTimestamp = Stopwatch.GetTimestamp();
         var isResponding = SendMessageTimeout(_mainWindowHandle, WmNull, IntPtr.Zero, IntPtr.Zero,
                                               SmtoAbortIfHung, HungCheckTimeoutMilliseconds, out _) != IntPtr.Zero;
         return !isResponding;
     }
 
-    private static void PresentOverlay(double secondsSinceTakeover)
+    private static void PresentOverlay(double takeoverSeconds)
     {
         lock (PresentLock)
         {
@@ -159,7 +192,7 @@ internal static class StallWatchdog
             var textureDescription = ProgramWindows.UiCopyTextureDescription;
             var size = new Vector2(textureDescription.Width, textureDescription.Height);
 
-            var vertexCount = StallOverlay.Build(size, secondsSinceTakeover);
+            var vertexCount = StallOverlay.Build(size, takeoverSeconds);
             if (vertexCount == 0)
                 return;
 
@@ -255,8 +288,15 @@ internal static class StallWatchdog
     private const uint SmtoAbortIfHung = 0x0002;
     private const uint HungCheckTimeoutMilliseconds = 100;
 
-    private const double StallThresholdSeconds = 0.5;
-    private const int IdlePollMilliseconds = 100;
+    private const double StallThresholdSeconds = 0.15;
+
+    /// <summary>A frame this fast counts as recovered, although the overlay might still be up.</summary>
+    private const double RecoveredFrameSeconds = 0.1;
+
+    private const double RecoveryHoldSeconds = 0.25;
+    private const double HungCheckIntervalSeconds = 0.5;
+    private const float MinVisibleFade = 0.1f;
+    private const int IdlePollMilliseconds = 50;
     private const int OverlayFrameMilliseconds = 33;
 
     private static Thread? _thread;
@@ -268,6 +308,7 @@ internal static class StallWatchdog
     private static Buffer? _vertexBuffer;
     private static Buffer? _projectionBuffer;
     private static long _lastHeartbeatTimestamp;
+    private static long _lastHungCheckTimestamp;
     private static bool _hasPresentedSinceLastFrame;
     private static volatile bool _isStopped;
 }

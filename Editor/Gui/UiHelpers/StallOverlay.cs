@@ -49,11 +49,21 @@ internal static class StallOverlay
     }
 
     /// <summary>
+    /// Starts over with an empty progress bar. To be called once per takeover, before the first <see cref="Build"/>.
+    /// </summary>
+    /// <remarks>Needs no lock, because only the watchdog thread begins takeovers and builds.</remarks>
+    internal static void BeginTakeover()
+    {
+        _estimatedSeconds = 0;
+        _progress = 0;
+    }
+
+    /// <summary>
     /// Fills <see cref="Vertices"/> with non-indexed triangles. The first <see cref="ScreenVertexCount"/>
     /// vertices sample the captured frame, all following ones sample the font atlas.
     /// </summary>
     /// <returns>The total vertex count</returns>
-    internal static int Build(Vector2 size, double secondsSinceTakeover)
+    internal static int Build(Vector2 size, double takeoverSeconds)
     {
         _vertexCount = 0;
         AddQuad(Vector2.Zero, size, Vector2.Zero, Vector2.One, UiColors.ForegroundFull);
@@ -63,7 +73,7 @@ internal static class StallOverlay
             if (_titleFont == null || _detailFont == null)
                 return _vertexCount;
 
-            var fade = (float)Math.Clamp(secondsSinceTakeover / FadeInSeconds, 0, 1);
+            var fade = GetFadeIn(takeoverSeconds);
             var scale = T3Ui.UiScaleFactor;
 
             AddRect(Vector2.Zero, size, UiColors.BackgroundFull.Fade(0.45f * fade));
@@ -84,13 +94,19 @@ internal static class StallOverlay
             var textColor = UiColors.Text.Fade(fade);
             var mutedColor = UiColors.TextMuted.Fade(fade);
 
+            // Work that comes in several steps opens a scope per step. The progress follows the whole
+            // takeover instead, so that a following step does not send the bar back to the start.
+            if (hasActivity && activity.EstimatedSeconds > _estimatedSeconds)
+                _estimatedSeconds = activity.EstimatedSeconds;
+
+            var estimatedSeconds = _estimatedSeconds > 0 ? _estimatedSeconds : DefaultEstimateSeconds;
+
             // Once the stall outlasts the estimate, the elapsed time is the only honest progress left.
-            var stallSeconds = hasActivity ? activity.ElapsedSeconds : secondsSinceTakeover;
-            var showsElapsed = !hasActivity || activity.EstimatedSeconds <= 0 || stallSeconds > activity.EstimatedSeconds;
+            var showsElapsed = takeoverSeconds > estimatedSeconds;
             var elapsedWidth = 0f;
             if (showsElapsed)
             {
-                var length = FormatSeconds(stallSeconds);
+                var length = FormatSeconds(takeoverSeconds);
                 var elapsedText = _numberBuffer.AsSpan(0, length);
                 elapsedWidth = MeasureText(_detailFont, elapsedText) + 8 * scale;
                 AddText(_detailFont, elapsedText,
@@ -104,20 +120,13 @@ internal static class StallOverlay
             var barSize = new Vector2(contentWidth, 3 * scale);
             AddRect(barMin, barMin + barSize, UiColors.ForegroundFull.Fade(0.12f * fade));
 
-            if (hasActivity && activity.EstimatedSeconds > 0)
-            {
-                // Approaches but never reaches the end, because the estimate is only an average.
-                var progress = (float)(1 - Math.Exp(-1.5 * activity.ElapsedSeconds / activity.EstimatedSeconds));
-                AddRect(barMin, barMin + new Vector2(barSize.X * MathF.Min(progress, 0.97f), barSize.Y), textColor);
-            }
-            else
-            {
-                var phase = (float)(secondsSinceTakeover * 0.6 % 1.0);
-                var segmentWidth = barSize.X * 0.25f;
-                var segmentMin = MathF.Max(0, -segmentWidth + phase * (barSize.X + segmentWidth));
-                var segmentMax = MathF.Min(barSize.X, phase * (barSize.X + segmentWidth));
-                AddRect(barMin + new Vector2(segmentMin, 0), barMin + new Vector2(segmentMax, barSize.Y), textColor);
-            }
+            // Approaches but never reaches the end, because the estimate is only an average. A later
+            // step raising the estimate would pull the bar back, so it is kept monotonic.
+            var progress = (float)(1 - Math.Exp(-ProgressApproachRate * takeoverSeconds / estimatedSeconds));
+            _progress = MathF.Max(_progress, MathF.Min(progress, MaxProgress));
+
+            AddProgressFill(barMin, new Vector2(barSize.X * _progress, barSize.Y), textColor,
+                            (float)(takeoverSeconds % 1.0), ShimmerWaveLength * scale, SegmentWidth * scale);
 
             var logMessage = _lastLogMessage;
             if (!string.IsNullOrEmpty(logMessage))
@@ -132,6 +141,15 @@ internal static class StallOverlay
         }
 
         return _vertexCount;
+    }
+
+    /// <summary>
+    /// Eases in, so that a stall short enough to pass unnoticed never flashes a panel.
+    /// </summary>
+    internal static float GetFadeIn(double takeoverSeconds)
+    {
+        var t = (float)Math.Clamp(takeoverSeconds / FadeInSeconds, 0, 1);
+        return t * t * (3 - 2 * t);
     }
 
     internal const int ScreenVertexCount = 6;
@@ -196,6 +214,38 @@ internal static class StallOverlay
         }
     }
 
+    /// <summary>
+    /// Draws the filled part of the progress bar with a brightness wave travelling right, so that the
+    /// bar keeps moving while the progress itself barely does.
+    /// </summary>
+    /// <remarks>
+    /// The wave is approximated by strips whose corner colors the rasterizer interpolates between.
+    /// </remarks>
+    private static void AddProgressFill(Vector2 min, Vector2 size, Color color, float phase, float waveLength, float segmentWidth)
+    {
+        if (size.X <= 0)
+            return;
+
+        var segmentCount = Math.Clamp((int)(size.X / segmentWidth), 1, MaxProgressSegments);
+        var actualWidth = size.X / segmentCount;
+        var leftColor = color.Fade(GetShimmer(min.X, phase, waveLength));
+
+        for (var i = 0; i < segmentCount; i++)
+        {
+            var right = min.X + (i + 1) * actualWidth;
+            var rightColor = color.Fade(GetShimmer(right, phase, waveLength));
+            AddQuad(new Vector2(right - actualWidth, min.Y), new Vector2(right, min.Y + size.Y),
+                    _whitePixelUv, _whitePixelUv, leftColor, rightColor);
+            leftColor = rightColor;
+        }
+    }
+
+    /// <summary>A crest sits wherever <paramref name="x"/> has travelled a full wave length.</summary>
+    private static float GetShimmer(float x, float phase, float waveLength)
+    {
+        return 1 - ShimmerDepth * (0.5f + 0.5f * MathF.Cos(MathF.Tau * (x / waveLength - phase)));
+    }
+
     private static void AddRect(Vector2 min, Vector2 max, Color color)
     {
         AddQuad(min, max, _whitePixelUv, _whitePixelUv, color);
@@ -203,14 +253,20 @@ internal static class StallOverlay
 
     private static void AddQuad(Vector2 min, Vector2 max, Vector2 uvMin, Vector2 uvMax, Color color)
     {
+        AddQuad(min, max, uvMin, uvMax, color, color);
+    }
+
+    private static void AddQuad(Vector2 min, Vector2 max, Vector2 uvMin, Vector2 uvMax, Color leftColor, Color rightColor)
+    {
         if (_vertexCount + 6 > Vertices.Length)
             return;
 
-        uint packedColor = color;
-        var topLeft = new ImDrawVert { pos = min, uv = uvMin, col = packedColor };
-        var topRight = new ImDrawVert { pos = new Vector2(max.X, min.Y), uv = new Vector2(uvMax.X, uvMin.Y), col = packedColor };
-        var bottomRight = new ImDrawVert { pos = max, uv = uvMax, col = packedColor };
-        var bottomLeft = new ImDrawVert { pos = new Vector2(min.X, max.Y), uv = new Vector2(uvMin.X, uvMax.Y), col = packedColor };
+        uint packedLeft = leftColor;
+        uint packedRight = rightColor;
+        var topLeft = new ImDrawVert { pos = min, uv = uvMin, col = packedLeft };
+        var topRight = new ImDrawVert { pos = new Vector2(max.X, min.Y), uv = new Vector2(uvMax.X, uvMin.Y), col = packedRight };
+        var bottomRight = new ImDrawVert { pos = max, uv = uvMax, col = packedRight };
+        var bottomLeft = new ImDrawVert { pos = new Vector2(min.X, max.Y), uv = new Vector2(uvMin.X, uvMax.Y), col = packedLeft };
 
         Vertices[_vertexCount++] = topLeft;
         Vertices[_vertexCount++] = topRight;
@@ -244,13 +300,27 @@ internal static class StallOverlay
     private const char FirstSnapshotChar = (char)32;
     private const char LastSnapshotChar = (char)255;
     private const char FallbackChar = '?';
-    private const double FadeInSeconds = 0.4;
+    private const double FadeInSeconds = 1.0;
+
+    /// <summary>Used until the work has been timed once, so that the bar is never indeterminate.</summary>
+    private const double DefaultEstimateSeconds = 5;
+
+    /// <summary>Reaches half of the estimate in 40% of its time, then slows down.</summary>
+    private const double ProgressApproachRate = 1.75;
+
+    private const float MaxProgress = 0.97f;
+    private const float ShimmerDepth = 0.25f;
+    private const float ShimmerWaveLength = 90;
+    private const float SegmentWidth = 8;
+    private const int MaxProgressSegments = 128;
 
     private static readonly Lock _fontLock = new();
     private static readonly char[] _numberBuffer = new char[16];
     private static FontSnapshot? _titleFont;
     private static FontSnapshot? _detailFont;
     private static Vector2 _whitePixelUv;
+    private static double _estimatedSeconds;
+    private static float _progress;
     private static volatile string? _lastLogMessage;
     private static int _vertexCount;
 }

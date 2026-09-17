@@ -158,7 +158,7 @@ internal static class MainThreadActivity
 
     private static string EstimatesFilePath => Path.Combine(FileLocations.SettingsDirectory, "activityEstimates.json");
 
-    /// <summary>Shorter work would only add noise; the overlay never appears for it anyway.</summary>
+    /// <summary>Shorter work barely shows an overlay and would only add noise to the average.</summary>
     private const double MinRecordedSeconds = 0.5;
 
     private const double AveragingWeight = 0.3;
