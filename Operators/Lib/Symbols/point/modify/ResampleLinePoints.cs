@@ -34,8 +34,8 @@ internal sealed class ResampleLinePoints : Instance<ResampleLinePoints>
 
     private enum SampleModes
     {
-        StartEnd,
         StartLength,
+        StartEnd,
     }
 
     private enum RotationModes
