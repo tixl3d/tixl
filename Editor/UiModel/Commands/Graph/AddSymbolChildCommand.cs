@@ -12,8 +12,6 @@ public sealed class AddSymbolChildCommand : ICommand
     public Guid AddedChildId => _addedChildId;
 
     /// <summary>Prepares an undoable child insertion into a composition.</summary>
-    /// <param name="compositionOp">Composition definition that will own the new child.</param>
-    /// <param name="symbolIdToAdd">Registered operator definition ID to instantiate as a child.</param>
     public AddSymbolChildCommand(Symbol compositionOp, Guid symbolIdToAdd)
     {
         if (compositionOp == null)
@@ -60,14 +58,6 @@ public sealed class AddSymbolChildCommand : ICommand
     // (0-based seconds), not the placement position the generic TimeClip default uses. Symbols with an authored source
     // extent (TimelineState.SourceExtent) start with that extent and its duration instead. Set on the new child's
     // persisted TimeClip here — editor-side — so it serializes and undoes together with the add (mirrors RecordingSession).
-    /// <summary>Initializes a new clip's source range from its authored extent or timeline duration.</summary>
-    /// <param name="composition">Composition containing the newly inserted content-clip child.</param>
-    /// <remarks>
-    /// Content clips (e.g. [VideoClip]) play from the start of their source, so their SourceRange is content-time
-    /// (0-based seconds), not the placement position the generic TimeClip default uses. Symbols with an authored source
-    /// extent (TimelineState.SourceExtent) start with that extent and its duration instead. Set on the new child's
-    /// persisted TimeClip here — editor-side — so it serializes and undoes together with the add (mirrors RecordingSession).
-    /// </remarks>
     private void InitContentClipSourceRange(Symbol composition)
     {
         if (!composition.Children.TryGetValue(_addedChildId, out var child))

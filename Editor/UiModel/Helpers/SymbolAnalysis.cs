@@ -14,27 +14,13 @@ namespace T3.Editor.UiModel.Helpers;
 /// </summary>
 internal static class SymbolAnalysis
 {
-    /// <summary>Identifies the symbol and scalar slots of a validated routing anchor.</summary>
-    /// <param name="SymbolId">ID of the supported typed reroute operator definition.</param>
-    /// <param name="InputId">ID of its single plain input slot.</param>
-    /// <param name="OutputId">ID of its matching plain output slot.</param>
     internal readonly record struct RerouteDefinition(Guid SymbolId, Guid InputId, Guid OutputId);
 
-    /// <summary>Package containing the supported typed routing anchors.</summary>
     internal static readonly Guid TypeOperatorsPackageId = new("c8a53b12-ded3-4327-86d2-bd731b25de22");
 
-    /// <summary>Checks whether a symbol is a validated routing anchor.</summary>
-    /// <param name="symbol">Operator definition to inspect for the supported reroute contract.</param>
-    /// <returns>True when the definition satisfies the recognized typed reroute contract.</returns>
     internal static bool IsReroute(Symbol symbol) => TryGetRerouteDefinition(symbol, out _);
 
-    /// <summary>
-    /// Validates a marked TypeOperators anchor with one matching plain input/output pair and no children.
-    /// Resolves the assembly-local marker by name so package reloads need no retained CLR type reference.
-    /// </summary>
-    /// <param name="symbol">Operator definition whose package, marker, slots, and graph shape are validated.</param>
-    /// <param name="definition">Supported symbol and slot IDs when true; default when validation fails.</param>
-    /// <returns>True when the operator is a supported typed reroute.</returns>
+    // Resolve the marker by name from the current package assembly so reloads need no retained CLR type.
     internal static bool TryGetRerouteDefinition(Symbol symbol, out RerouteDefinition definition)
     {
         definition = default;
@@ -287,7 +273,6 @@ internal static class SymbolAnalysis
     /// If true, forces a fresh analysis for this symbol even if cached data is available.
     /// If false, uses the cached information when possible.
     /// </param>
-    /// <returns>True when a current symbol UI is available and its analysis can be returned.</returns>
     internal static bool TryGetSymbolInfo(Symbol symbol, out SymbolInformation info, bool forceUpdate = false)
     {
         info = new SymbolInformation();
@@ -367,10 +352,6 @@ internal static class SymbolAnalysis
 
     // Shared helpers (used by both bulk and single analysis)
     #region Shared Helpers
-    /// <summary>Classifies an operator from its symbol analysis.</summary>
-    /// <param name="symbol">Operator definition to classify.</param>
-    /// <param name="opType">Detected classification, or Unknown when classification fails.</param>
-    /// <returns>True when the operator has a known classification.</returns>
     internal static bool TryGetOperatorType(Symbol symbol, out OperatorClassification opType)
     {
         var ns = symbol.Namespace ?? string.Empty;
@@ -388,14 +369,6 @@ internal static class SymbolAnalysis
         return opType != OperatorClassification.Unknown;
     }
 
-    /// <summary>Builds the metadata, classification, and dependency summary for an operator.</summary>
-    /// <param name="symbol">Operator definition being analyzed.</param>
-    /// <param name="symbolUi">Editor presentation supplying the operator's metadata.</param>
-    /// <param name="requiredSymbols">Transitive operator definitions required by this symbol.</param>
-    /// <param name="invalidRequirements">Required definition IDs that could not be resolved.</param>
-    /// <param name="dependingSymbols">IDs of definitions that depend on this symbol.</param>
-    /// <param name="usageCount">Number of references to this symbol in the collected graph definitions.</param>
-    /// <returns>Analysis record combining operator metadata and dependency information.</returns>
     private static SymbolInformation BuildSymbolInformation(Symbol symbol,
                                                             SymbolUi symbolUi,
                                                             HashSet<Symbol> requiredSymbols,
@@ -439,9 +412,6 @@ internal static class SymbolAnalysis
                    };
     }
 
-    /// <summary>Collects operator definitions reachable through child dependencies.</summary>
-    /// <param name="root">Operator definition from which dependency traversal starts.</param>
-    /// <returns>Distinct required definitions discovered by the traversal.</returns>
     private static HashSet<Symbol> CollectRequiredSymbols(Symbol root)
     {
         var all = new HashSet<Symbol>();
@@ -462,9 +432,6 @@ internal static class SymbolAnalysis
     /// <summary>
     /// Collect Ids of required symbols that are not within the list of projects
     /// </summary>
-    /// <param name="root">Root definition whose unresolved child references are checked.</param>
-    /// <param name="requiredSymbols">Resolved dependencies whose child references must also be checked.</param>
-    /// <returns>IDs of required child definitions that cannot be resolved.</returns>
     private static IEnumerable<Guid> CollectInvalidRequirements(Symbol root, HashSet<Symbol> requiredSymbols)
     {
         var result = new List<Symbol>();
@@ -493,8 +460,6 @@ internal static class SymbolAnalysis
               .Select(s => s.Id);
     }
 
-    /// <summary>Counts child references to each registered operator definition.</summary>
-    /// <returns>Map from operator definition ID to its number of child references.</returns>
     private static Dictionary<Guid, int> CollectSymbolUsageCounts()
     {
         var results = new Dictionary<Guid, int>();
@@ -522,7 +487,6 @@ internal static class SymbolAnalysis
     /// over <see cref="EditorSymbolPackage.AllSymbols"/>.
     /// This is used by single-symbol analysis without running the full detail update.
     /// </summary>
-    /// <returns>Usage counts and reverse dependency sets keyed by operator definition ID.</returns>
     private static (Dictionary<Guid, int> UsageCounts, Dictionary<Guid, HashSet<Guid>> ReverseDependencies)
         CollectUsageAndReverseDependencies()
     {
@@ -553,9 +517,6 @@ internal static class SymbolAnalysis
     #endregion
 
     /// <summary>Finds a string input configured as a file path on an operator instance.</summary>
-    /// <param name="instance">Runtime operator whose string inputs are inspected for file-path usage.</param>
-    /// <param name="stringInput">Matching runtime string input when true; null when no match exists.</param>
-    /// <param name="stringInputUi">Editor configuration for the matching file-path input when true; null otherwise.</param>
     /// <returns>True when a compatible runtime slot and file-path input UI are both found.</returns>
     public static bool TryGetFileInputFromInstance(Instance instance,
                                                    [NotNullWhen(true)] out InputSlot<string>? stringInput,
@@ -583,6 +544,5 @@ internal static class SymbolAnalysis
         return false;
     }
 
-    /// <summary>Assembly-local marker implemented by typed routing anchors.</summary>
     private const string MarkerName = "Types.Routing.IRerouteNode";
 }

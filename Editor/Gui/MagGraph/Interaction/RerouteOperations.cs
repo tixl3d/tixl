@@ -12,33 +12,15 @@ using T3.Editor.UiModel.Commands.Graph;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
-/// <summary>
-/// Builds undoable cuts and typed reroute insertions from validated connection snapshots,
-/// preserving source-slot groups, target input order, and duplicate wires.
-/// </summary>
 internal static class RerouteOperations
 {
-    /// <summary>Identifies one ordered wire; the multi-input index distinguishes duplicates and an empty child ID denotes the composition.</summary>
-    /// <param name="SourceId">Source child ID, or Guid.Empty for a composition input.</param>
-    /// <param name="SourceSlotId">Source output or composition input slot ID.</param>
-    /// <param name="TargetId">Target child ID, or Guid.Empty for a composition output.</param>
-    /// <param name="TargetSlotId">Target input or composition output slot ID.</param>
-    /// <param name="MultiInputIndex">Occurrence index within the target input's ordered connections.</param>
+    // MultiInputIndex distinguishes duplicate wires; an empty child ID denotes the composition.
     internal readonly record struct ConnectionOccurrence(Guid SourceId, Guid SourceSlotId, Guid TargetId, Guid TargetSlotId, int MultiInputIndex);
-    /// <summary>Pairs a wire occurrence with its canvas-space crossing position.</summary>
-    /// <param name="Occurrence">Exact ordered wire occurrence crossed by the stroke.</param>
-    /// <param name="PositionOnCanvas">Accepted crossing position in canvas coordinates.</param>
     internal readonly record struct StrokeHit(ConnectionOccurrence Occurrence, Vector2 PositionOnCanvas);
 
-    /// <summary>
-    /// Reuses grouping storage while previewing a stroke. Each source slot gets the average of its
-    /// distinct wire hits in canvas coordinates; overlapping groups are separated vertically.
-    /// Preview and commit use the same calculation so the inserted anchors match the preview.
-    /// </summary>
+    // Preview and commit share source-slot averages and vertical separation of overlapping groups.
     internal sealed class AnchorPlacementBuffer
     {
-        /// <summary>Reserves source-group and deduplication storage before preview updates.</summary>
-        /// <param name="count">Maximum number of hits for which reusable placement storage should be reserved.</param>
         internal void EnsureCapacity(int count)
         {
             _groups.EnsureCapacity(count);
@@ -46,9 +28,6 @@ internal static class RerouteOperations
             _seen.EnsureCapacity(count);
         }
 
-        /// <summary>Averages distinct hits per source slot and separates overlapping groups using the shared placement rule.</summary>
-        /// <param name="hits">Crossed occurrences and their canvas-space hit positions.</param>
-        /// <param name="positions">Destination list replaced with one nonoverlapping anchor position per distinct source.</param>
         internal void Calculate(IReadOnlyList<StrokeHit> hits, List<Vector2> positions)
         {
             positions.Clear();
@@ -92,45 +71,24 @@ internal static class RerouteOperations
             }
         }
 
-        /// <summary>Maps each source slot to its placement index in encounter order.</summary>
         private readonly Dictionary<Endpoint, int> _groups = new();
-        /// <summary>Number of distinct wire hits contributing to each source-group average.</summary>
         private readonly List<int> _counts = new();
-        /// <summary>Deduplicates ordered wire occurrences within one placement calculation.</summary>
         private readonly HashSet<ConnectionOccurrence> _seen = new();
     }
 
-    /// <summary>Identifies a child slot or a composition boundary slot without retaining live objects.</summary>
-    /// <param name="ChildId">Child ID, or Guid.Empty for a composition interface slot.</param>
-    /// <param name="SlotId">Slot ID within the child or composition interface.</param>
     private readonly record struct Endpoint(Guid ChildId, Guid SlotId);
-    /// <summary>Sources is an ordered list, including duplicates, rather than a set of upstream endpoints.</summary>
-    /// <param name="Target">Target input whose incoming connection order is captured.</param>
-    /// <param name="Sources">Source endpoints in their original order, including duplicates.</param>
+    // Sources preserves target-input order and duplicate endpoints.
     private sealed record TargetSnapshot(Endpoint Target, Endpoint[] Sources);
-    /// <summary>Describes a child or wire mutation with the IDs needed to validate its replay.</summary>
-    /// <param name="Command">Undoable child or wire mutation represented by this step.</param>
-    /// <param name="Connection">Ordered wire occurrence for a wire step, or null for a child step.</param>
-    /// <param name="AddsConnection">Whether a wire step adds rather than removes its occurrence.</param>
-    /// <param name="ChildId">Child identity used to verify a child mutation.</param>
-    /// <param name="SymbolId">Operator definition identity used to verify a child mutation.</param>
-    /// <param name="AddsChild">Whether a child step adds rather than removes its child.</param>
     private sealed record CommandStep(ICommand Command, ConnectionOccurrence? Connection, bool AddsConnection, Guid ChildId, Guid SymbolId,
                                       bool AddsChild = true);
 
-    /// <summary>Copies the displayed wire endpoints and target occurrence index for later validation.</summary>
-    /// <param name="connection">Displayed wire whose endpoint IDs and multi-input ordinal are captured.</param>
-    /// <returns>Value snapshot identifying this exact ordered connection occurrence.</returns>
     internal static ConnectionOccurrence Capture(MagGraphConnection connection)
     {
         return new ConnectionOccurrence(connection.SourceParentOrChildId, connection.SourceOutput.Id,
                                         connection.TargetParentOrChildId, connection.TargetInput.Id, connection.MultiInputIndex);
     }
 
-    /// <summary>Executes pending cleanup and appends it last so undo restores anchors before their connections.</summary>
-    /// <returns>Whether cleanup removed anchors and the initiating layout needs a refresh.</returns>
-    /// <param name="cleanup">Cleanup captured before the edit, or null when no cleanup was prepared.</param>
-    /// <param name="macro">Enclosing undo group to which applied cleanup is appended.</param>
+    // Append cleanup last so undo restores anchors before their connections.
     internal static bool CompleteCleanup(RemoveDisconnectedReroutesCommand? cleanup, MacroCommand macro)
     {
         if (cleanup == null)
@@ -144,9 +102,7 @@ internal static class RerouteOperations
         return true;
     }
 
-    /// <summary>Captures connected anchors before editing so cleanup leaves deliberately blank anchors alone.</summary>
-    /// <param name="symbol">Composition whose currently connected reroutes are captured.</param>
-    /// <returns>IDs of recognized reroute children with at least one incoming or outgoing connection.</returns>
+    // Capture before editing so cleanup leaves deliberately blank anchors alone.
     internal static HashSet<Guid> CaptureConnectedReroutes(Symbol symbol)
     {
         var connectedChildren = new HashSet<Guid>();
@@ -168,33 +124,17 @@ internal static class RerouteOperations
         return reroutes;
     }
 
-    /// <summary>Calculates canvas-space anchor positions using the same source-group rule as insertion.</summary>
-    /// <param name="hits">Crossed occurrences and their canvas-space hit positions.</param>
-    /// <param name="positions">Destination list replaced with the resulting anchor positions.</param>
     internal static void GetAnchorPositions(IReadOnlyList<StrokeHit> hits, List<Vector2> positions)
     {
         GetAnchorPositions(hits, positions, new AnchorPlacementBuffer());
     }
 
-    /// <summary>Calculates canvas-space anchor positions using the same source-group rule as insertion.</summary>
-    /// <param name="hits">Crossed occurrences and their canvas-space hit positions.</param>
-    /// <param name="positions">Destination list replaced with the resulting anchor positions.</param>
-    /// <param name="buffer">Reusable grouping and placement storage owned by the caller.</param>
     internal static void GetAnchorPositions(IReadOnlyList<StrokeHit> hits, List<Vector2> positions, AnchorPlacementBuffer buffer)
     {
         buffer.Calculate(hits, positions);
     }
 
-    /// <summary>
-    /// Validates every captured occurrence before changing the graph. A cut removes only crossed
-    /// occurrences; insertion replaces their source at the same target index and adds one anchor
-    /// per source slot. Only a successfully applied edit is added to the undo stack.
-    /// </summary>
-    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
-    /// <param name="cut">True to delete hit occurrences; false to route them through new typed anchors.</param>
-    /// <param name="hits">Crossed wire occurrences and their canvas-space hit positions.</param>
-    /// <param name="error">Validation or execution failure explanation; empty on success.</param>
-    /// <returns>True when the complete routing or cutting edit succeeds.</returns>
+    // Validate all occurrences before mutation; insertion preserves target indices and groups hits by source slot.
     internal static bool TryApply(GraphUiContext context, bool cut, IReadOnlyList<StrokeHit> hits, out string error)
     {
         error = string.Empty;
@@ -347,11 +287,6 @@ internal static class RerouteOperations
         return true;
     }
 
-    /// <summary>Finds one registered, validated anchor definition for each required value type.</summary>
-    /// <param name="types">Distinct slot value types that require a supported reroute definition.</param>
-    /// <param name="definitions">Destination map populated with the validated definition for each requested type.</param>
-    /// <param name="error">Explanation of an unsupported or missing definition; empty on success.</param>
-    /// <returns>True when every requested value type has a valid reroute definition.</returns>
     private static bool CollectDefinitions(IEnumerable<Type> types, Dictionary<Type, SymbolAnalysis.RerouteDefinition> definitions, out string error)
     {
         error = string.Empty;
@@ -386,18 +321,8 @@ internal static class RerouteOperations
         return true;
     }
 
-    /// <summary>
-    /// Reroute insertion requires value-only wiring: a scalar reroute cannot preserve a composition
-    /// multi-input bundle or output metadata. Cutting may remove either. plannedChildren supplies
-    /// definitions for anchors that the command will create or restore but that are not live yet.
-    /// </summary>
-    /// <param name="symbol">Composition owning the current or planned connection.</param>
-    /// <param name="occurrence">Ordered occurrence whose endpoint slot types are checked.</param>
-    /// <param name="insertingReroutes">Whether the check must enforce the constraints for inserting reroutes.</param>
-    /// <param name="type">Matching slot value type when true; not usable when false.</param>
-    /// <param name="error">Explanation of a missing or incompatible endpoint; empty on success.</param>
-    /// <param name="plannedChildren">Definitions for children planned by the edit but not yet present, or null when checking only existing children.</param>
-    /// <returns>True when both endpoint contracts permit the requested operation.</returns>
+    // Scalar reroutes cannot preserve composition multi-input bundles or output metadata; cuts can remove either.
+    // plannedChildren supplies definitions for anchors not yet created or restored.
     private static bool TryGetConnectionType(Symbol symbol, ConnectionOccurrence occurrence, bool insertingReroutes, [NotNullWhen(true)] out Type? type, out string error,
                                              IReadOnlyDictionary<Guid, Symbol>? plannedChildren = null)
     {
@@ -473,11 +398,6 @@ internal static class RerouteOperations
         return true;
     }
 
-    /// <summary>Creates an add or delete command for the exact target occurrence index.</summary>
-    /// <param name="symbol">Composition on which the wire command operates.</param>
-    /// <param name="occurrence">Exact occurrence to add or remove.</param>
-    /// <param name="add">True to add the occurrence; false to remove it.</param>
-    /// <returns>Replay step containing the wire command and its expected topology change.</returns>
     private static CommandStep ConnectionStep(Symbol symbol, ConnectionOccurrence occurrence, bool add)
     {
         var connection = new Symbol.Connection(occurrence.SourceId, occurrence.SourceSlotId, occurrence.TargetId, occurrence.TargetSlotId);
@@ -487,18 +407,9 @@ internal static class RerouteOperations
         return new CommandStep(command, occurrence, add, Guid.Empty, Guid.Empty);
     }
 
-    /// <summary>Returns the source slot identity of a wire occurrence.</summary>
-    /// <param name="occurrence">Occurrence whose source identity is requested.</param>
-    /// <returns>Source child/interface ID and slot ID.</returns>
     private static Endpoint SourceOf(ConnectionOccurrence occurrence) => new(occurrence.SourceId, occurrence.SourceSlotId);
-    /// <summary>Returns the target slot identity of a wire occurrence.</summary>
-    /// <param name="occurrence">Occurrence whose target identity is requested.</param>
-    /// <returns>Target child/interface ID and slot ID.</returns>
     private static Endpoint TargetOf(ConnectionOccurrence occurrence) => new(occurrence.TargetId, occurrence.TargetSlotId);
-    /// <summary>Orders deletions by target and descending input index so removals do not shift later occurrences.</summary>
-    /// <param name="a">First occurrence to order for deletion.</param>
-    /// <param name="b">Second occurrence to order for deletion.</param>
-    /// <returns>Comparison result grouping target inputs and deleting higher ordinals before lower ones.</returns>
+    // Delete higher input indices first so removals do not shift the remaining occurrences.
     private static int CompareForDeletion(ConnectionOccurrence a, ConnectionOccurrence b)
     {
         var comparison = a.TargetId.CompareTo(b.TargetId);
@@ -509,10 +420,6 @@ internal static class RerouteOperations
         return comparison != 0 ? comparison : b.MultiInputIndex.CompareTo(a.MultiInputIndex);
     }
 
-    /// <summary>Reads upstream endpoints in target-input order, retaining duplicates.</summary>
-    /// <param name="symbol">Composition containing the target input's connections.</param>
-    /// <param name="target">Input endpoint whose incoming connections are read.</param>
-    /// <returns>Source endpoints in the target input's connection order, retaining duplicates.</returns>
     private static List<Endpoint> GetSources(Symbol symbol, Endpoint target)
     {
         var sources = new List<Endpoint>();
@@ -525,9 +432,6 @@ internal static class RerouteOperations
         return sources;
     }
 
-    /// <summary>Copies ordered input lists into immutable replay snapshots.</summary>
-    /// <param name="targets">Target inputs mapped to their ordered incoming source endpoints.</param>
-    /// <returns>Snapshots of each target and its source order.</returns>
     private static TargetSnapshot[] SnapshotTargets(Dictionary<Endpoint, List<Endpoint>> targets)
     {
         var snapshots = new TargetSnapshot[targets.Count];
@@ -537,10 +441,6 @@ internal static class RerouteOperations
         return snapshots;
     }
 
-    /// <summary>Checks that the source still occupies the captured target-input index.</summary>
-    /// <param name="symbol">Composition whose current topology is checked.</param>
-    /// <param name="occurrence">Expected wire endpoints and target ordinal.</param>
-    /// <returns>True when the specified source still occupies the target occurrence.</returns>
     private static bool MatchesOccurrence(Symbol symbol, ConnectionOccurrence occurrence)
     {
         var index = 0;
@@ -556,25 +456,13 @@ internal static class RerouteOperations
         return false;
     }
 
-    /// <summary>
-    /// Replays a routing edit using IDs and ordered before/after snapshots, resolving live symbols
-    /// on each Do/Undo. _isApplied selects the expected state; undo reverses the step order.
-    /// Stale contracts are rejected before mutation, each step's result is verified, and failures
-    /// attempt to roll back completed steps rather than leaving an unchecked partial edit.
-    /// </summary>
+    // Resolve live symbols on replay and validate ordered snapshots before mutation.
+    // Roll back completed steps if an edit fails.
     private sealed class RoutingCommand : ICommand
     {
-        /// <summary>Label shown in routing undo history.</summary>
         public string Name { get; }
-        /// <summary>Routing edits retain enough ordered state to replay in either direction.</summary>
         public bool IsUndoable => true;
 
-        /// <summary>Stores the ordered edit steps and before/after state under the composition ID.</summary>
-        /// <param name="compositionId">ID of the composition to resolve on each execution.</param>
-        /// <param name="name">Label shown for the edit in undo history.</param>
-        /// <param name="steps">Child and wire mutations in forward execution order.</param>
-        /// <param name="before">Expected target input orders before applying the edit.</param>
-        /// <param name="after">Expected target input orders after applying the edit.</param>
         internal RoutingCommand(Guid compositionId, string name, CommandStep[] steps, TargetSnapshot[] before, TargetSnapshot[] after)
         {
             _compositionId = compositionId;
@@ -584,24 +472,18 @@ internal static class RerouteOperations
             _after = after;
         }
 
-        /// <summary>Applies or replays the routing edit and reports a rejected or failed execution.</summary>
         public void Do()
         {
             if (!TryExecute(false, out var error))
                 Log.Warning($"{Name}: {error}");
         }
 
-        /// <summary>Reverses the routing edit and reports a rejected or failed restoration.</summary>
         public void Undo()
         {
             if (!TryExecute(true, out var error))
                 Log.Warning($"Undo {Name}: {error}");
         }
 
-        /// <summary>Validates current state, executes in the requested order, and rolls back completed steps on failure.</summary>
-        /// <param name="undo">True to undo completed steps in reverse order; false to apply them forward.</param>
-        /// <param name="error">Failure explanation if validation or execution fails; empty on success.</param>
-        /// <returns>True when the requested replay succeeds or is already in the requested state.</returns>
         internal bool TryExecute(bool undo, out string error)
         {
             error = string.Empty;
@@ -669,10 +551,6 @@ internal static class RerouteOperations
             }
         }
 
-        /// <summary>Checks ordered target inputs and created anchor identities against the expected replay state.</summary>
-        /// <param name="ui">Current composition UI against which replay state is checked.</param>
-        /// <param name="applied">True to require the post-edit state; false to require the pre-edit state.</param>
-        /// <returns>True when target connection orders and anchor identities match the requested state.</returns>
         private bool MatchesState(SymbolUi ui, bool applied)
         {
             foreach (var snapshot in applied ? _after : _before)
@@ -699,9 +577,6 @@ internal static class RerouteOperations
             return true;
         }
 
-        /// <summary>Checks current and planned child definitions before replaying wire mutations.</summary>
-        /// <param name="symbol">Current composition whose existing and planned child slots are validated.</param>
-        /// <returns>True when every wire step still has compatible endpoint contracts.</returns>
         private bool ValidateSlotContracts(Symbol symbol)
         {
             var plannedChildren = new Dictionary<Guid, Symbol>();
@@ -728,10 +603,6 @@ internal static class RerouteOperations
             return true;
         }
 
-        /// <summary>Runs one child or wire command and verifies that its expected topology change occurred.</summary>
-        /// <param name="ui">Current composition UI used to verify the step's effect.</param>
-        /// <param name="step">Child or wire mutation to execute.</param>
-        /// <param name="undo">True to invoke the reverse mutation; false to invoke the forward mutation.</param>
         private static void ExecuteStep(SymbolUi ui, CommandStep step, bool undo)
         {
             if (step.Connection is not { } connection)
@@ -786,15 +657,10 @@ internal static class RerouteOperations
                 throw new InvalidOperationException("A connection command did not produce the expected input order.");
         }
 
-        /// <summary>Composition identity resolved afresh for each execution.</summary>
         private readonly Guid _compositionId;
-        /// <summary>Ordered mutations applied forward and undone in reverse.</summary>
         private readonly CommandStep[] _steps;
-        /// <summary>Ordered target-input state required before applying the edit.</summary>
         private readonly TargetSnapshot[] _before;
-        /// <summary>Ordered target-input state required before undoing the edit.</summary>
         private readonly TargetSnapshot[] _after;
-        /// <summary>Selects the expected topology and prevents duplicate execution in the same direction.</summary>
         private bool _isApplied;
     }
 }

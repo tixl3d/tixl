@@ -137,7 +137,6 @@ public sealed partial class ConnectionStrokeTests : IDisposable
     }
 
     /// <summary>Cables crossing a collapsed section boundary are observed at their visible redirected endpoints.</summary>
-    /// <param name="sourceCollapsed">Whether the source endpoint, rather than the target endpoint, is inside the collapsed section.</param>
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -175,7 +174,6 @@ public sealed partial class ConnectionStrokeTests : IDisposable
     }
 
     /// <summary>Cancellation keeps modified RMB reserved through release, including when another view receives input.</summary>
-    /// <param name="cancellation">Cancellation route to exercise: Escape, focus loss, or input handled by another view.</param>
     [Theory]
     [InlineData("escape")]
     [InlineData("focus")]
@@ -230,8 +228,6 @@ public sealed partial class ConnectionStrokeTests : IDisposable
         Assert.Single(_home.Symbol.Connections);
     }
 
-    /// <summary>Advances input through native ImGui frame boundaries.</summary>
-    /// <param name="input">Optional callback that queues native input before the next ImGui frame begins.</param>
     private void NextFrame(Action? input = null)
     {
         _drawList.PopClipRect();
@@ -243,20 +239,13 @@ public sealed partial class ConnectionStrokeTests : IDisposable
         _drawList.PushClipRect(Vector2.Zero, new Vector2(500, 500), false);
     }
 
-    /// <summary>Sets the focus state normally supplied by DrawGraph without evaluating unrelated editor panels.</summary>
-    /// <param name="canvas">Graph canvas whose private interaction flag is set.</param>
-    /// <param name="name">Name of the canvas flag to set.</param>
-    /// <param name="value">Boolean state assigned to the flag.</param>
+    // Supply the focus state normally set by DrawGraph without evaluating unrelated panels.
     private static void SetCanvasFlag(MagGraphView canvas, string name, bool value)
         => typeof(MagGraphView).GetProperty(name)!.SetValue(canvas, value);
 
-    /// <summary>Calls the existing frame-level input handler without adding a production test API.</summary>
-    /// <param name="canvas">Graph canvas on which to invoke the private interaction method.</param>
-    /// <param name="name">Name of the parameterless canvas method to invoke.</param>
     private static void InvokeCanvas(MagGraphView canvas, string name)
         => typeof(MagGraphView).GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(canvas, null);
 
-    /// <summary>Builds a simple native path whose clipping and preservation are independently inspectable.</summary>
     private void SetHorizontalPath()
     {
         _drawList.PathClear();
@@ -277,20 +266,12 @@ public sealed partial class ConnectionStrokeTests : IDisposable
         T3Ui.OscDataRecording.Dispose();
     }
 
-    /// <summary>Owned native context for this test case.</summary>
     private readonly IntPtr _imgui;
-    /// <summary>In-memory package and its graph presentation.</summary>
     private readonly RerouteVisibilityTests.TestPackage _package;
-    /// <summary>Editable composition symbol containing the fixture graph.</summary>
     private readonly SymbolUi _home;
-    /// <summary>Actual canvas, graph context, and wire under test.</summary>
     private readonly MagGraphView _canvas;
-    /// <summary>Real graph context exercised by drawing and gesture tests.</summary>
     private readonly GraphUiContext _context;
-    /// <summary>Persistent fixture wire supplied to the actual renderer.</summary>
     private readonly MagGraphConnection _connection;
-    /// <summary>Native draw list and a bound delegate to the existing private wire drawer.</summary>
     private readonly ImDrawListPtr _drawList;
-    /// <summary>Delegate bound to the production private connection drawing method.</summary>
     private readonly Action<MagGraphConnection, ImDrawListPtr, GraphUiContext, ConnectionStroke?> _draw;
 }

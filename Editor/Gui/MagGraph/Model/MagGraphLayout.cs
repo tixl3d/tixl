@@ -56,8 +56,6 @@ internal sealed class MagGraphLayout
     public readonly List<MagGraphSection> SectionsInDrawOrder = new(63);
 
     /// <summary>Refreshes graph records when needed and updates connection geometry and stack bounds.</summary>
-    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
-    /// <param name="forceUpdate">True to rebuild item and connection records even without a detected structural change.</param>
     public void ComputeLayout(GraphUiContext context, bool forceUpdate = false)
     {
         var compositionOp = context.CompositionInstance;
@@ -89,9 +87,6 @@ internal sealed class MagGraphLayout
 
     private int _structureUpdateCycle;
 
-    /// <summary>Rebuilds graph item, section, slot-line, and connection references.</summary>
-    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
-    /// <param name="parentSymbolUi">Current composition UI supplying child, interface, and section records.</param>
     private void RefreshDataStructure(GraphUiContext context, SymbolUi parentSymbolUi)
     {
         var composition = context.CompositionInstance;
@@ -110,8 +105,6 @@ internal sealed class MagGraphLayout
         StructureFlaggedAsChanged = false;
     }
 
-    /// <summary>Adds, refreshes, and removes layout section records to match the composition UI.</summary>
-    /// <param name="compositionSymbolUi">Composition UI supplying the authoritative section collection.</param>
     private void CollectedSections(SymbolUi compositionSymbolUi)
     {
         var addedCount = 0;
@@ -158,7 +151,6 @@ internal sealed class MagGraphLayout
     /// Orders sections outermost-first by nesting depth so inner sections draw on top of their
     /// containers. Runs after ownership is resolved, so <see cref="Section.ParentSectionId"/> is current.
     /// </summary>
-    /// <param name="compositionSymbolUi">Composition UI whose section parent IDs define nesting depth.</param>
     private void RebuildSectionDrawOrder(SymbolUi compositionSymbolUi)
     {
         SectionsInDrawOrder.Clear();
@@ -171,10 +163,6 @@ internal sealed class MagGraphLayout
         SectionsInDrawOrder.Sort(static (a, b) => a.NestingDepth.CompareTo(b.NestingDepth));
     }
 
-    /// <summary>Computes a section's nesting depth from its parent chain.</summary>
-    /// <param name="compositionSymbolUi">Composition UI used to resolve parent sections.</param>
-    /// <param name="section">Section whose parent chain is counted.</param>
-    /// <returns>Number of resolvable parent levels, bounded against cyclic references.</returns>
     private static int GetSectionDepth(SymbolUi compositionSymbolUi, Section section)
     {
         var depth = 0;
@@ -192,12 +180,9 @@ internal sealed class MagGraphLayout
         return depth;
     }
 
-    /// <summary>Collects current node and interface references and removes obsolete layout items.</summary>
     /// <remarks>
     /// This method is extremely slow for large compositions...
     /// </remarks>
-    /// <param name="compositionOp">Runtime composition supplying child and interface instances.</param>
-    /// <param name="compositionSymbolUi">Composition UI supplying each item's selectable presentation.</param>
     private void CollectItemReferences(Instance compositionOp, SymbolUi compositionSymbolUi)
     {
         //Items.Clear();
@@ -333,9 +318,6 @@ internal sealed class MagGraphLayout
 
     private readonly HashSet<int> _connectedOutputs = new(100);
 
-    /// <summary>Computes the lookup hash identifying a connection's source slot.</summary>
-    /// <param name="c">Symbol connection whose source child and slot IDs form the key.</param>
-    /// <returns>Combined hash of the source child/interface ID and source slot ID.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int GetConnectionSourceHash(Symbol.Connection c)
     {
@@ -344,9 +326,6 @@ internal sealed class MagGraphLayout
         return hash;
     }
 
-    /// <summary>Computes the lookup hash identifying a runtime output slot.</summary>
-    /// <param name="output">Runtime output whose parent identity and slot ID form the key.</param>
-    /// <returns>Hash compatible with the source keys used by connection layout.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int GetHashCodeForOutputSlot(ISlot output)
     {
@@ -359,7 +338,6 @@ internal sealed class MagGraphLayout
     /// Sadly there is no obvious easy method to store if an output has a connection.
     /// So we collect connected outputs in a hashset. 
     /// </summary>
-    /// <param name="composition">Runtime composition whose connections determine which outputs are connected.</param>
     private void UpdateConnectionSources(Instance composition)
     {
         _connectedOutputs.Clear();
@@ -560,11 +538,10 @@ internal sealed class MagGraphLayout
         return _inputHashesWithMissingConnections.Count > 0
                && _inputHashesWithMissingConnections.Contains(MagGraphConnection.GetItemInputHash(itemId, inputId, multiInputIndex));
     }
-
+  
     private readonly HashSet<int> _inputHashesWithMissingConnections = new();
-
-    /// <summary>Builds visible slot lines and applies compact reroute dimensions without changing saved child size.</summary>
-    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
+  
+    // Compact reroute dimensions affect layout only; retain the saved child size.
     private void UpdateVisibleItemLines(GraphUiContext context)
     {
         var inputLines = new List<MagGraphItem.InputLine>(8);
@@ -655,12 +632,6 @@ internal sealed class MagGraphLayout
     /// <remarks>
     /// This is accessible because for some use-cases we need to compute the height of inserted items.
     /// </remarks>
-    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
-    /// <param name="item">Item whose visible input and output rows are being built.</param>
-    /// <param name="inputLines">Destination list populated with the visible input rows.</param>
-    /// <param name="outputLines">Destination list populated with the visible output rows.</param>
-    /// <param name="connectedOutputs">Optional source-slot hashes used to decide which connected outputs must remain visible.</param>
-    /// <returns>Number of visible rows needed to size the item.</returns>
     internal static int CollectVisibleLines(GraphUiContext context, MagGraphItem item, List<MagGraphItem.InputLine> inputLines,
                                             List<MagGraphItem.OutputLine> outputLines,
                                             HashSet<int>? connectedOutputs = null)
@@ -870,12 +841,6 @@ internal sealed class MagGraphLayout
         return visibleIndex;
     }
 
-    /// <summary>Checks whether a displayed multi-input occurrence is the temporarily disconnected drag target.</summary>
-    /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
-    /// <param name="itemId">ID of the child containing the multi-input.</param>
-    /// <param name="inputId">ID of the multi-input slot.</param>
-    /// <param name="multiInputIndex">Ordinal of the displayed multi-input row.</param>
-    /// <returns>True when the active connection drag keeps this disconnected row visible.</returns>
     private static bool IsDisconnectedVisibleMultiInputLine(GraphUiContext context, Guid itemId, Guid inputId,
                                                             int multiInputIndex)
     {
@@ -886,8 +851,6 @@ internal sealed class MagGraphLayout
         return isDisconnectedVisibleMultiInputLine;
     }
 
-    /// <summary>Rebuilds displayed connection references against the current visible slot lines.</summary>
-    /// <param name="composition">Runtime composition whose ordered symbol connections are converted to layout records.</param>
     private void CollectConnectionReferences(Instance composition)
     {
         MagConnections.Clear();
@@ -1061,10 +1024,6 @@ internal sealed class MagGraphLayout
     /// This method needs to be rethought and cleaned up.
     /// MultiInputIndex will always return max count?
     /// </summary>
-    /// <param name="targetItem">Target item whose displayed input rows are searched.</param>
-    /// <param name="input">Runtime input whose next available displayed occurrence is needed.</param>
-    /// <param name="visibleInputIndex">Matching displayed input-line index, or the scan end when no match is found.</param>
-    /// <param name="multiInputIndex">Occurrence ordinal reached within the matching multi-input rows.</param>
     private static void FindVisibleIndex(MagGraphItem targetItem, IInputSlot input, out int visibleInputIndex, out int multiInputIndex)
     {
         // Find connected index
@@ -1102,7 +1061,6 @@ internal sealed class MagGraphLayout
     /// This improves the layout of arc connections inputs into multiple stacked ops so they
     /// avoid overlap.
     /// </summary>
-    /// <param name="canvas">Graph canvas available for optional stack-bound debug drawing; current boundary calculation does not use it.</param>
     private void ComputeVerticalStackBoundaries(ScalableCanvas canvas)
     {
         MagGraphItem? previousItem = null;
@@ -1287,9 +1245,6 @@ internal sealed class MagGraphLayout
     /// We rely on manually flagging structure changes, because 
     /// computing a hash of a composition is not easy because the item order of children can change...
     /// </summary>
-    /// <param name="composition">Composition whose identity hash is compared with the recorded value.</param>
-    /// <param name="originalHash">Previous composition identity hash, updated when a different composition is detected.</param>
-    /// <returns>True when the composition identity changed; structural edits also require explicit layout invalidation.</returns>
     private static bool HasCompositionDataChanged(Symbol composition, ref int originalHash)
     {
         var newHash = composition.Id.GetHashCode();
@@ -1303,6 +1258,5 @@ internal sealed class MagGraphLayout
 
     private int _compositionModelHash;
     private bool StructureFlaggedAsChanged { get; set; }
-    /// <summary>Reuses sort keys and source order across frames while resolving current items on each update.</summary>
     private readonly List<(MagGraphItem Item, float X, float Y, int Index)> _orderedStackItems = new(127);
 }

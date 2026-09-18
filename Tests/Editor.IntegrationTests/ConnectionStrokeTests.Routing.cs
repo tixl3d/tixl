@@ -11,8 +11,6 @@ namespace Editor.IntegrationTests;
 public sealed partial class ConnectionStrokeTests
 {
     /// <summary>Dropping blank or chained anchors onto another anchor changes only positions, including mixed selections and ordered duplicates.</summary>
-    /// <param name="connected">Whether the overlapping reroutes are already connected.</param>
-    /// <param name="grouped">Whether the moved reroute is dragged together with an ordinary operator.</param>
     [Theory]
     [InlineData(false, false)]
     [InlineData(false, true)]
@@ -139,9 +137,7 @@ public sealed partial class ConnectionStrokeTests
         Assert.True(childrenBefore.SetEquals(_home.Symbol.Children.Keys));
         Assert.False(UndoRedoStack.CanUndo);
     }
-    /// <summary>Canonicalizes independent target groups while retaining every target's exact occurrence order.</summary>
-    /// <param name="connections">Connection sequence to normalize for comparison by target child.</param>
-    /// <returns>Connections ordered by target child ID and then target slot ID.</returns>
+    // Sort independent target groups while preserving each target's exact occurrence order.
     private static Symbol.Connection[] ConnectionsByTarget(IEnumerable<Symbol.Connection> connections)
         => connections.OrderBy(c => c.TargetParentOrChildId).ThenBy(c => c.TargetSlotId).ToArray();
 

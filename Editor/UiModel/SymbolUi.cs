@@ -12,16 +12,13 @@ namespace T3.Editor.UiModel;
 /// <summary>Stores a symbol's editor presentation, selection containers, and derived browser visibility.</summary>
 public sealed partial class SymbolUi : ISelectionContainer
 {
-    /// <summary>Derived browser exclusion; refreshed from the symbol and never serialized.</summary>
+    // Derived from the symbol and never serialized.
     internal bool HiddenFromBrowser { get; private set; }
 
     internal Symbol Symbol => _package.Symbols[_id];
     private SymbolPackage _package;
     private readonly Guid _id;
 
-    /// <summary>Creates UI metadata for a symbol and derives its browser visibility before optional consistency checks.</summary>
-    /// <param name="symbol">Operator definition represented by the new editor UI.</param>
-    /// <param name="updateConsistency">Whether to reconcile child and slot UI records with the definition immediately.</param>
     internal SymbolUi(Symbol symbol, bool updateConsistency)
     {
         _id = symbol.Id;
@@ -43,15 +40,6 @@ public sealed partial class SymbolUi : ISelectionContainer
         ReadOnly = true;
     }
 
-    /// <summary>Constructs a symbol UI from existing presentation collections.</summary>
-    /// <param name="symbol">Operator definition represented by the new editor UI.</param>
-    /// <param name="childUis">Factory that creates the child UI records for the supplied definition.</param>
-    /// <param name="inputs">Ordered editor presentations for the definition's input slots.</param>
-    /// <param name="outputs">Ordered editor presentations for the definition's output slots.</param>
-    /// <param name="sections">Ordered graph sections to attach to the UI.</param>
-    /// <param name="links">Ordered external documentation and resource links.</param>
-    /// <param name="tourPoints">Guided-tour points associated with the symbol.</param>
-    /// <param name="updateConsistency">Whether to reconcile the supplied UI records with the definition immediately.</param>
     internal SymbolUi(Symbol symbol,
                       Func<Symbol, List<Child>> childUis,
                       OrderedDictionary<Guid, IInputUi> inputs,
@@ -74,8 +62,6 @@ public sealed partial class SymbolUi : ISelectionContainer
             UpdateConsistencyWithSymbol(symbol);
     }
 
-    /// <summary>Updates the symbol UI's package association.</summary>
-    /// <param name="package">Editor package now owning this symbol and its UI.</param>
     internal void UpdateSymbolPackage(EditorSymbolPackage package)
     {
         if (package == null)
@@ -88,12 +74,8 @@ public sealed partial class SymbolUi : ISelectionContainer
         }
     }
 
-    /// <summary>Enumerates selectable graph objects through the selection-container interface.</summary>
-    /// <returns>The children, interface slots, and sections exposed by this symbol UI.</returns>
     IEnumerable<ISelectableCanvasObject> ISelectionContainer.GetSelectables() => GetSelectables();
 
-    /// <summary>Enumerates the graph objects that can participate in canvas selection.</summary>
-    /// <returns>The children, interface slots, and sections exposed by this symbol UI.</returns>
     internal IEnumerable<ISelectableCanvasObject> GetSelectables()
     {
         foreach (var childUi in ChildUis.Values)
@@ -225,10 +207,6 @@ public sealed partial class SymbolUi : ISelectionContainer
         }
     }
 
-    /// <summary>Chooses a canvas position for a newly exposed composition output.</summary>
-    /// <param name="childUis">Existing child UIs used to locate the right edge of graph content.</param>
-    /// <param name="outputUis">Existing interface-output UIs used to avoid reusing their positions.</param>
-    /// <returns>Suggested output-interface position in canvas coordinates.</returns>
     private static Vector2 ComputeNewOutputUiPositionOnCanvas(IEnumerable<Child> childUis, IEnumerable<IOutputUi> outputUis)
     {
         bool setByOutputs = false;
@@ -265,9 +243,6 @@ public sealed partial class SymbolUi : ISelectionContainer
         return new Vector2(300, 200);
     }
 
-    /// <summary>Chooses a canvas position for the next composition input.</summary>
-    /// <param name="symbolUi">Symbol UI whose existing input positions are considered.</param>
-    /// <returns>Suggested input-interface position in canvas coordinates.</returns>
     private static Vector2 GetCanvasPositionForNextInputUi(SymbolUi symbolUi)
     {
         if (symbolUi.Symbol.InputDefinitions.Count == 0)
@@ -375,8 +350,6 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal OrderedDictionary<Guid, IOutputUi> OutputUis { get; private set; }
     internal OrderedDictionary<Guid, Section> Sections { get; private set; }
 
-    /// <summary>Transfers reloaded presentation and derived visibility to the surviving UI object.</summary>
-    /// <param name="newSymbolUi">Replacement UI whose current definition and presentation state are adopted.</param>
     internal void ReplaceWith(SymbolUi newSymbolUi)
     {
         HiddenFromBrowser = newSymbolUi.HiddenFromBrowser;
@@ -389,8 +362,6 @@ public sealed partial class SymbolUi : ISelectionContainer
         Description = newSymbolUi.Description;
     }
 
-    /// <summary>Formats a diagnostic label for the symbol UI.</summary>
-    /// <returns>The symbol name followed by the UI label.</returns>
     public override string ToString()
     {
         return $"{Symbol.Name} UI";

@@ -8,7 +8,6 @@ namespace Editor.IntegrationTests;
 /// change a parameter, screenshot, undo - app never touched by hand. Runs in the
 /// _agentTests playground and leaves it at its baseline.
 /// </summary>
-/// <param name="editor">Shared live-editor fixture providing the debug client and editor lifecycle.</param>
 [Collection("Editor")]
 public sealed class GraphAcceptanceTests(EditorFixture editor)
 {

@@ -11,7 +11,6 @@ namespace Editor.IntegrationTests;
 public sealed partial class ConnectionStrokeTests
 {
     /// <summary>Drawing warmed persistent wires must not allocate managed objects per connection.</summary>
-    /// <param name="style">Connection style name to exercise during the allocation measurement.</param>
     [Theory]
     [InlineData("RightToLeft")]
     [InlineData("MainOutToMainInSnappedHorizontal")]
@@ -37,7 +36,6 @@ public sealed partial class ConnectionStrokeTests
     }
 
     /// <summary>Splice highlighting requires a matching direction and type and excludes the dragged source.</summary>
-    /// <param name="vertical">Whether to test vertical rather than horizontal snapped splice highlighting.</param>
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -129,10 +127,6 @@ public sealed partial class ConnectionStrokeTests
         }
     }
 
-    /// <summary>Builds a candidate whose slot identities do not affect drawing eligibility.</summary>
-    /// <param name="direction">Splice orientation to use in the test candidate.</param>
-    /// <param name="type">Value type that the candidate accepts and produces.</param>
-    /// <returns>Synthetic splice candidate with fresh identities and the requested direction and type.</returns>
     private static MagItemMovement.SpliceLink Splice(MagGraphItem.Directions direction, Type type)
     {
         return new MagItemMovement.SpliceLink(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(),

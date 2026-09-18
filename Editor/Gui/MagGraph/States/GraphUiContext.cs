@@ -66,9 +66,6 @@ namespace T3.Editor.Gui.MagGraph.States;
 ///</remarks>
 internal sealed class GraphUiContext
 {
-    /// <summary>Creates per-view graph interaction state and its layout and movement helpers.</summary>
-    /// <param name="projectView">Project view owning the composition and selection.</param>
-    /// <param name="view">Graph canvas using this interaction context.</param>
     internal GraphUiContext(ProjectView projectView,  MagGraphView view)
     {
         ProjectView = projectView;
@@ -93,7 +90,6 @@ internal sealed class GraphUiContext
     internal readonly PlaceholderCreation Placeholder;
     internal readonly ConnectionHovering ConnectionHovering = new();
     internal readonly MagGraphLayout Layout = new();
-    /// <summary>Gesture collector owned by this graph context.</summary>
     internal readonly ConnectionStroke ConnectionStroke = new();
     
     internal readonly StateMachine<GraphUiContext> StateMachine;
@@ -131,9 +127,6 @@ internal sealed class GraphUiContext
     /** Used to prevent disconnected inputLines from collapsing... */
     internal readonly HashSet<int> DisconnectedInputHashes = []; 
     
-    /// <summary>Resolves the output row selected by the current interaction state.</summary>
-    /// <param name="outputLine">Active output row when true; default when the active item or slot cannot be resolved.</param>
-    /// <returns>True when the active source slot has a displayed output row.</returns>
     internal bool TryGetActiveOutputLine(out MagGraphItem.OutputLine outputLine)
     {
         if (ActiveSourceItem == null || ActiveSourceItem.OutputLines.Length == 0)
@@ -155,9 +148,6 @@ internal sealed class GraphUiContext
         return false;
     }
     
-    /// <summary>Resolves the input row selected by the current interaction state.</summary>
-    /// <param name="inputLine">Active input row when true; default when the active item or slot cannot be resolved.</param>
-    /// <returns>True when the active target slot has a displayed input row.</returns>
     internal bool TryGetActiveInputLine(out MagGraphItem.InputLine inputLine)
     {
         if (ActiveTargetItem == null || ActiveTargetItem.InputLines.Length == 0)
@@ -182,9 +172,7 @@ internal sealed class GraphUiContext
     internal Vector2 PeekAnchorInCanvas;
     internal bool ShouldAttemptToSnapToInput;
     
-    /// <summary>Starts an undo group and captures connected anchors before the first mutation for selective cleanup.</summary>
-    /// <param name="title">Label used for the grouped edit in undo history.</param>
-    /// <returns>New active macro to which graph-edit commands are appended.</returns>
+    // Capture connected anchors before the first mutation so cleanup can distinguish deliberately blank anchors.
     internal MacroCommand StartMacroCommand(string title)
     {
         Debug.Assert(MacroCommand == null);
@@ -194,15 +182,11 @@ internal sealed class GraphUiContext
         return MacroCommand;
     }
     
-    /// <summary>Reuses the active macro or starts one with a before-edit snapshot of connected anchors.</summary>
-    /// <param name="title">Undo-history label to use if a new macro must be started.</param>
-    /// <returns>Existing active macro, or a newly created macro when none is active.</returns>
     internal MacroCommand StartOrContinueMacroCommand(string title)
     {
         return MacroCommand ?? StartMacroCommand(title);
     }
     
-    /// <summary>Completes feature-owned cleanup before recording the undo group; cleanup refreshes affected views.</summary>
     internal void CompleteMacroCommand()
     {
         Debug.Assert(MacroCommand != null);
@@ -214,7 +198,6 @@ internal sealed class GraphUiContext
         _rerouteCleanupCommand = null;
     }
     
-    /// <summary>Reverses the edit group and discards cleanup that has not executed.</summary>
     internal void CancelMacroCommand()
     {
         Debug.Assert(MacroCommand != null);
@@ -242,7 +225,6 @@ internal sealed class GraphUiContext
     internal readonly List<MagGraphConnection> TempConnections = [];
 
     /// <summary>Draws pending symbol dialogs and reports their modification outcome.</summary>
-    /// <param name="projectView">Project view used by the graph's symbol-editing dialogs.</param>
     /// <returns>Combined symbol modification result produced by the dialogs.</returns>
     public ChangeSymbol.SymbolModificationResults DrawDialogs(ProjectView projectView)
     {
@@ -284,6 +266,5 @@ internal sealed class GraphUiContext
         return results;
     }
 
-    /// <summary>Pending before-edit candidate capture, executed only when the active macro completes.</summary>
     private RemoveDisconnectedReroutesCommand? _rerouteCleanupCommand;
 }

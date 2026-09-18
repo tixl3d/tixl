@@ -11,8 +11,6 @@ public sealed class ChangeInstanceBypassedCommand : ICommand
     public bool IsUndoable => true;
 
     /// <summary>Captures an operator child's bypass state and the requested replacement value.</summary>
-    /// <param name="symbolChild">Child whose current bypass state is captured for undo.</param>
-    /// <param name="setBypassedTo">Bypass state to assign when the command executes.</param>
     public ChangeInstanceBypassedCommand(Symbol.Child symbolChild, bool setBypassedTo)
     {
         _inputParentSymbolId = symbolChild.Parent.Id;
@@ -31,8 +29,6 @@ public sealed class ChangeInstanceBypassedCommand : ICommand
         AssignValue(_newState);
     }
 
-    /// <summary>Applies bypass to an ordinary child while preserving reroute forwarding contracts.</summary>
-    /// <param name="shouldBeBypassed">Requested bypass state; recognized reroutes retain their protected forwarding behavior.</param>
     private void AssignValue(bool shouldBeBypassed)
     {
         if (!SymbolUiRegistry.TryGetSymbolUi(_inputParentSymbolId, out var symbolUi))

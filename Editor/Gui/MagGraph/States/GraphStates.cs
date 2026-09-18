@@ -14,10 +14,9 @@ using SkillTraining = T3.Editor.Skills.Training.SkillTraining;
 
 namespace T3.Editor.Gui.MagGraph.States
 {
-    /// <summary>Defines graph interaction states and their transition handlers.</summary>
     internal static class GraphStates
     {
-        /// <summary>A shake-off can delete the dragged anchor; wait for release before accepting another interaction.</summary>
+        // Shake-off can delete the dragged anchor; wait for release before accepting another interaction.
         internal static State<GraphUiContext> WaitForMouseRelease
             = new(Enter: static context =>
                          {
@@ -32,7 +31,7 @@ namespace T3.Editor.Gui.MagGraph.States
                           },
                   Exit: static _ => { });
 
-        /// <summary>The canvas owns stroke input and commits after drawing has collected the final frame's wire hits.</summary>
+        // Commit after drawing so the release frame contributes its final wire hits.
         internal static State<GraphUiContext> ConnectionStroke
             = new(Enter: static context =>
                          {
@@ -743,9 +742,6 @@ namespace T3.Editor.Gui.MagGraph.States
         /// the primary outputs of all other selected operators with a matching type are picked up too, ordered by
         /// canvas position, so they can be dropped onto a multi-input or the symbol browser together.
         /// </summary>
-        /// <param name="context">Graph context providing the current composition, layout, selection, and interaction state.</param>
-        /// <param name="sourceItem">Item whose picked output starts the drag.</param>
-        /// <param name="outputLine">Picked output row whose type determines eligible additional selected outputs.</param>
         private static void AddTempConnectionsForOutputDrag(GraphUiContext context, MagGraphItem sourceItem, MagGraphItem.OutputLine outputLine)
         {
             var draggedItems = new List<MagGraphItem> { sourceItem };

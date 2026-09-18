@@ -19,9 +19,6 @@ internal sealed class NamespaceTreeNode
     internal string Namespace => GetAsString();
     internal SymbolFolderTypes FolderType = SymbolFolderTypes.Undefined;
 
-    /// <summary>Creates a node in the operator namespace tree.</summary>
-    /// <param name="name">Namespace segment represented by this node.</param>
-    /// <param name="parent">Containing namespace node, or null for a root.</param>
     internal NamespaceTreeNode(string name, NamespaceTreeNode? parent = null)
     {
         Name = name;
@@ -29,8 +26,6 @@ internal sealed class NamespaceTreeNode
         Id = name.GetHashCode();
     }
 
-    /// <summary>Builds the qualified namespace represented by this node.</summary>
-    /// <returns>Dot-separated namespace path assembled from the node and its ancestors, excluding the root name.</returns>
     internal string GetAsString()
     {
         var list = new List<string>();
@@ -63,8 +58,6 @@ internal sealed class NamespaceTreeNode
     }
     
     // Define an action delegate that takes a Symbol and returns a bool
-    /// <summary>Rebuilds the namespace tree from browser-visible symbols accepted by the optional filter.</summary>
-    /// <param name="filterAction">Optional predicate selecting which visible operator UIs enter the tree; null includes all otherwise eligible operators.</param>
     internal void PopulateCompleteTree(Predicate<SymbolUi>? filterAction)
     {
         Name = RootNodeId;
@@ -106,8 +99,6 @@ internal sealed class NamespaceTreeNode
         ProjectSubNamespace,
     } 
 
-    /// <summary>Inserts an operator under the matching namespace nodes, creating missing nodes.</summary>
-    /// <param name="symbol">Operator definition to place under its namespace path.</param>
     private void SortInOperator(Symbol symbol)
     {
         if (symbol.Namespace == null)
@@ -169,10 +160,6 @@ internal sealed class NamespaceTreeNode
         currentNode.Symbols.Add(symbol);
     }
 
-    /// <summary>Looks up a namespace segment in the preferred ordering list.</summary>
-    /// <param name="part">Namespace segment whose preferred sort position is requested.</param>
-    /// <param name="list">Ordered namespace segments defining the preferred order.</param>
-    /// <returns>Matching zero-based position, or -1 when no list entry matches.</returns>
     private static int GetIndexInList(string part, string[] list)
     {
         var partIndex = -1;
@@ -189,10 +176,6 @@ internal sealed class NamespaceTreeNode
         return -1;
     }
 
-    /// <summary>Looks up a direct child namespace node by name.</summary>
-    /// <param name="name">Name of the immediate child namespace to find.</param>
-    /// <param name="node">Matching child node when true; null when absent.</param>
-    /// <returns>True when a matching child namespace node exists.</returns>
     private bool TryFindNodeDataByName(string name, [NotNullWhen(true)]out  NamespaceTreeNode? node)
     {
         node=Children.FirstOrDefault(n => n.Name == name);

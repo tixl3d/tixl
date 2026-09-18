@@ -14,18 +14,15 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
-/// <summary>Draws graph contents and coordinates connection-stroke input with the drawing pass.</summary>
 internal sealed partial class MagGraphView
 {
-    /// <summary>Reservation outlives cancellation and includes release, preventing clicks from leaking into other widgets.</summary>
+    // Reserve through cancellation and the release frame so clicks cannot leak into other widgets.
     internal bool ConsumesConnectionStrokeMouse => _consumeStrokeMouse || _strokeMouseOwner != null
                                                    || _strokeMouseReleaseFrame == ImGui.GetFrameCount();
 
     private readonly Dictionary<int, (Vector2 source, Vector2 target)> _previousConnectionPositions = new();
     
     /// <summary>Draws graph items and connections, collecting stroke hits before committing the release frame.</summary>
-    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
-    /// <param name="graphOpacity">Opacity multiplier applied to the graph's node and connection colors.</param>
     public void DrawGraph(ImDrawListPtr drawList, float graphOpacity)
     {
         _context.GraphOpacity = graphOpacity;
@@ -359,12 +356,8 @@ internal sealed partial class MagGraphView
         FinishConnectionStrokeInput();
     }
 
-    /// <summary>
-    /// Reserve a modified right-button gesture across graph views before their widgets see input.
-    /// Alt routes and Ctrl cuts; holding both reserves the gesture without starting an edit.
-    /// _strokeMouseOwner is shared across views, while _strokeOwner is the local hit collector.
-    /// Cancellation stops collection but retains mouse ownership until release to suppress menus.
-    /// </summary>
+    // Reserve modified right-button input across views before widgets see it.
+    // Cancellation retains ownership until release to suppress context menus.
     private void UpdateConnectionStrokeInput()
     {
         UpdateSharedStrokeReservation();
@@ -428,7 +421,7 @@ internal sealed partial class MagGraphView
         }
     }
 
-    /// <summary>Commit after drawing so the mouse-release segment can still cross a cable in this frame.</summary>
+    // Commit after drawing so the release segment can still cross a cable in this frame.
     private void FinishConnectionStrokeInput()
     {
         if (!_consumeStrokeMouse || !_strokeReleasePending)
@@ -457,7 +450,6 @@ internal sealed partial class MagGraphView
         }
     }
 
-    /// <summary>Keeps canceled or inactive view gestures reserved through the entire mouse-release frame.</summary>
     private static void UpdateSharedStrokeReservation()
     {
         if (_strokeMouseOwner == null)
@@ -488,7 +480,6 @@ internal sealed partial class MagGraphView
     /// Transform gizmos of cached operators like [Point] might not be visible in the output window.
     /// This method force-invalidates them, if selected. 
     /// </summary>
-    /// <param name="item">Graph item whose selected transform provider may need input invalidation.</param>
     private void InvalidateSelectedGizmoProviders(MagGraphItem item)
     {
         if (item.Variant == MagGraphItem.Variants.Operator
@@ -538,26 +529,17 @@ internal sealed partial class MagGraphView
     }
 
     private bool _contextMenuIsOpen;
-    /// <summary>Shared view reserving right-button input until release, even after collection is canceled.</summary>
+    // Shared across graph views; retained through release even after collection is canceled.
     private static MagGraphView? _strokeMouseOwner;
-    /// <summary>Frame whose right-button release remains reserved across graph views.</summary>
     private static int _strokeMouseReleaseFrame = -1;
-    /// <summary>Local collector used by the current reserved gesture.</summary>
     private ConnectionStroke? _strokeOwner;
-    /// <summary>Last frame that refreshed this view gesture, used to detect an inactive owner.</summary>
     private int _lastStrokeDrawFrame = -1;
-    /// <summary>Whether this view suppresses ordinary right-button interaction for the gesture.</summary>
     private bool _consumeStrokeMouse;
-    /// <summary>Defers gesture completion until the release-frame connection pass has collected its hits.</summary>
+    // Defer completion until the release-frame connection pass has collected its hits.
     private bool _strokeReleasePending;
-    /// <summary>Last failed stroke message displayed near the graph.</summary>
     private string _strokeError = string.Empty;
-    /// <summary>ImGui time at which the transient stroke error disappears.</summary>
     private double _strokeErrorUntil;
 
-    /// <summary>Draws insertion feedback for eligible snapped connections during a node drag.</summary>
-    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
-    /// <param name="context">Graph context supplying the active drag and its splice candidates.</param>
     private void HighlightSplitInsertionPoints(ImDrawListPtr drawList, GraphUiContext context)
     {
         foreach (var sp in context.ItemMovement.SpliceSets)
@@ -595,8 +577,6 @@ internal sealed partial class MagGraphView
         }
     }
 
-    /// <summary>Draws the visible graph background grids at their configured scales.</summary>
-    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
     private void DrawBackgroundGrids(ImDrawListPtr drawList)
     {
         var minSize = MathF.Min(MagGraphItem.GridSize.X, MagGraphItem.GridSize.Y);
@@ -618,10 +598,6 @@ internal sealed partial class MagGraphView
         }
     }
 
-    /// <summary>Draws one grid layer within the visible canvas.</summary>
-    /// <param name="drawList">ImGui draw list receiving the screen-space geometry.</param>
-    /// <param name="gridSize">Spacing between grid lines in canvas units.</param>
-    /// <param name="color">Color used for the grid lines.</param>
     private void DrawBackgroundGrid(ImDrawListPtr drawList, Vector2 gridSize, Color color)
     {
         var window = new ImRect(WindowPos, WindowPos + WindowSize);

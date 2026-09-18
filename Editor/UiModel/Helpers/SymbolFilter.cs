@@ -48,8 +48,6 @@ internal sealed class SymbolFilter
     public List<SymbolUi> MatchingSymbolUis { get; private set; } = [];
 
     /// <summary>Refreshes operator search results when the query or relevant context changes.</summary>
-    /// <param name="selection">Current graph selection used to rank contextual search results, or null without selection context.</param>
-    /// <param name="forceUpdate">True to recompute results even when the search has not changed.</param>
     /// <param name="limit">Maximum result count, or zero for the default unbounded result set.</param>
     public void UpdateIfNecessary(NodeSelection? selection, bool forceUpdate = false, int limit = 0)
     {
@@ -70,13 +68,6 @@ internal sealed class SymbolFilter
         _needsUpdate = false;
     }
 
-    /// <summary>Parses changed search text into operator and preset filters.</summary>
-    /// <param name="search">Current raw search text.</param>
-    /// <param name="lastSearch">Previously parsed search text, updated when the query changes.</param>
-    /// <param name="symbolFilter">Parsed operator-name filter, updated from the search text.</param>
-    /// <param name="presetFilter">Parsed preset-name filter, updated from the search text.</param>
-    /// <param name="searchRegex">Compiled pattern for matching the operator filter.</param>
-    /// <returns>True when the parsed filter state changed.</returns>
     private static bool UpdateFilters(string search,
                                       ref string lastSearch, ref string symbolFilter, ref string presetFilter, ref Regex searchRegex)
     {
@@ -112,9 +103,6 @@ internal sealed class SymbolFilter
         return true;
     }
 
-    /// <summary>Ranks visible symbols matching the query and contextual connection constraints.</summary>
-    /// <param name="selection">Current graph selection used to provide contextual ranking, or null without selection context.</param>
-    /// <param name="limit">Maximum number of matches to retain, or zero for no explicit limit.</param>
     private void UpdateMatchingSymbols(NodeSelection? selection, int limit)
     {
         var compositionInstance = selection?.GetSelectedComposition();
@@ -213,16 +201,6 @@ internal sealed class SymbolFilter
 
     private static readonly List<string> _logList = [];
 
-    /// <summary>Scores an operator candidate against text, type, and graph context.</summary>
-    /// <param name="symbolUi">Candidate operator UI whose search relevance is scored.</param>
-    /// <param name="query">Operator-name query used for text matching.</param>
-    /// <param name="currentProject">Current editable package used to favor local operators, or null without project context.</param>
-    /// <param name="composition">Current runtime composition used to score graph-related matches, or null.</param>
-    /// <param name="targetInputHash">Hash of the candidate target input used for contextual ranking, or zero when absent.</param>
-    /// <param name="filterInputType">Required candidate input value type, or null without an input-type filter.</param>
-    /// <param name="filterOutputType">Required candidate output value type, or null without an output-type filter.</param>
-    /// <param name="logOutput">Whether to log scoring details for diagnostics.</param>
-    /// <returns>Relevance score used to order the matching operators.</returns>
     internal static double ComputeRelevancy(SymbolUi symbolUi,
                                             string query,
                                             EditorSymbolPackage? currentProject,
