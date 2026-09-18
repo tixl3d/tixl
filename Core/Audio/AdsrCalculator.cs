@@ -354,6 +354,15 @@ public sealed class AdsrCalculator
     }
 
     /// <summary>
+    /// Rebases the frame clock and gate edge detector without advancing the envelope.
+    /// </summary>
+    public void SynchronizeFrameInput(bool gate, double currentTime)
+    {
+        _previousGate = gate;
+        _lastTime = currentTime;
+    }
+
+    /// <summary>
     /// Manually trigger the release phase (e.g., when gate goes low in gate mode)
     /// For frame-based mode. For sample-based, use TriggerRelease().
     /// </summary>

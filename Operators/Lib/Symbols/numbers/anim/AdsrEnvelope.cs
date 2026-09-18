@@ -76,26 +76,38 @@ internal sealed class AdsrEnvelope : Instance<AdsrEnvelope>
 
     private void Update(EvaluationContext context)
     {
+        var timeMode = TimeMode.GetEnumValue<TimeModes>(context);
+        if (timeMode == TimeModes.Frozen)
+        {
+            _wasFrozen = true;
+            return;
+        }
+
         var gate = Gate.GetValue(context);
         var duration = Duration.GetValue(context);
         var triggerMode = (AdsrCalculator.TriggerMode)Mode.GetValue(context);
         var envelope = Envelope.GetValue(context);
         var min = Min.GetValue(context);
         var max = Max.GetValue(context);
-        var timeMode = TimeMode.GetEnumValue<TimeModes>(context);
         var currentTime = timeMode switch
                               {
                                   TimeModes.LocalIdleMotionFxTime => context.LocalFxTime,
                                   TimeModes.LocalTime             => context.LocalTime,
                                   TimeModes.PlaybackTime          => context.Playback.TimeInBars,
                                   TimeModes.Runtime               => context.Playback.BarsFromSeconds(Playback.RunTimeInSecs),
-                                  TimeModes.Frozen                => 0,
                                   _                              => throw new ArgumentOutOfRangeException()
                               };
 
         if (Units.GetValue(context) == (int)TimeUnits.Secs)
         {
             currentTime = context.Playback.SecondsFromBars(currentTime);
+        }
+
+        if (_wasFrozen)
+        {
+            _calculator.SynchronizeFrameInput(gate, currentTime);
+            _wasFrozen = false;
+            return;
         }
 
         // Extract ADSR from Vector4
@@ -112,4 +124,5 @@ internal sealed class AdsrEnvelope : Instance<AdsrEnvelope>
     }
 
     private readonly AdsrCalculator _calculator = new();
+    private bool _wasFrozen;
 }
