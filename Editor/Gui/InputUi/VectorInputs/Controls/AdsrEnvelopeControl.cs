@@ -1,47 +1,37 @@
 using ImGuiNET;
-using T3.Core.Operator;
+using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.InputsAndTypes;
 
-namespace T3.Editor.Gui.InputUi.CombinedInputs;
+namespace T3.Editor.Gui.InputUi.VectorInputs.Controls;
 
 /// <summary>
 /// Custom UI for editing ADSR envelope parameters stored in a Vector4 (X=Attack, Y=Decay, Z=Sustain, W=Release).
-/// Used via MappedType attribute on Vector4 inputs.
 /// </summary>
-public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
+internal sealed class AdsrEnvelopeControl : IVector4InputControl
 {
-    public override IInputUi Clone()
+    public InputEditStateFlags Draw(InputSlot<Vector4> inputSlot, ref Vector4 envelope)
     {
-        return new AdsrEnvelopeInputUi
+        var timeInBars = false;
+        foreach (var sibling in inputSlot.Parent.Inputs)
         {
-            InputDefinition = InputDefinition,
-            Parent = Parent,
-            PosOnCanvas = PosOnCanvas,
-            Relevancy = Relevancy,
-            Size = Size,
-        };
-    }
+            if (sibling.Id != _unitsId || sibling is not InputSlot<int> units)
+                continue;
 
-    protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref Vector4 envelope, bool readOnly)
-    {
-        var cloneIfModified = input.IsDefault;
-        var modified = DrawAdsrControl(ref envelope, cloneIfModified);
-
-        if (cloneIfModified && modified.HasFlag(InputEditStateFlags.Modified))
-        {
-            input.IsDefault = false;
+            timeInBars = units.GetCurrentValue() != 1;
+            break;
         }
-        return modified;
+
+        return DrawEnvelope(ref envelope, timeInBars);
     }
 
     /// <summary>
     /// Draws a compact ADSR envelope editor with visual curve display.
     /// Vector4 layout: X=Attack, Y=Decay, Z=Sustain, W=Release
     /// </summary>
-    public static InputEditStateFlags DrawAdsrControl(ref Vector4 envelope, bool cloneIfModified, bool timeInBars = false)
+    private static InputEditStateFlags DrawEnvelope(ref Vector4 envelope, bool timeInBars)
     {
         var modified = InputEditStateFlags.Nothing;
         var drawList = ImGui.GetWindowDrawList();
@@ -91,14 +81,14 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
         // Make the envelope area interactive for dragging (legacy drag)
         ImGui.SetCursorScreenPos(envelopeArea.Min);
         ImGui.InvisibleButton("##envelope_drag", envelopeArea.GetSize());
-        if (ImGui.IsItemActive() && _activeDragTarget == DragTarget.None)
+        if (ImGui.IsItemActive())
         {
-            modified |= HandleEnvelopeDrag(ref envelope, envelopeArea, cloneIfModified);
+            modified |= HandleEnvelopeDrag(ref envelope, envelopeArea);
         }
 
         // Move cursor below the envelope graph
         ImGui.SetCursorScreenPos(new Vector2(startPos.X, envelopeArea.Max.Y + 2));
-        modified |= DrawParameterRow(ref envelope, availableWidth, cloneIfModified, timeInBars);
+        modified |= DrawParameterRow(ref envelope, availableWidth, timeInBars);
         return modified;
     }
 
@@ -269,9 +259,7 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
         return modified;
     }
 
-    private static DragTarget _activeDragTarget = DragTarget.None;
-
-    private static InputEditStateFlags HandleEnvelopeDrag(ref Vector4 envelope, ImRect area, bool cloneIfModified)
+    private static InputEditStateFlags HandleEnvelopeDrag(ref Vector4 envelope, ImRect area)
     {
         var modified = InputEditStateFlags.Nothing;
         var mousePos = ImGui.GetMousePos();
@@ -322,7 +310,7 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
         return modified;
     }
 
-    private static InputEditStateFlags DrawParameterRow(ref Vector4 envelope, float availableWidth, bool cloneIfModified, bool timeInBars)
+    private static InputEditStateFlags DrawParameterRow(ref Vector4 envelope, float availableWidth, bool timeInBars)
     {
         var modified = InputEditStateFlags.Nothing;
         var paramWidth = (availableWidth - 12) / 4;
@@ -401,8 +389,5 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
         return modified;
     }
 
-    protected override void DrawReadOnlyControl(string name, ref Vector4 value)
-    {
-        ImGui.TextUnformatted($"A:{value.X:F3} D:{value.Y:F3} S:{value.Z:F2} R:{value.W:F3}");
-    }
+    private static readonly Guid _unitsId = new("d9a48d43-124d-4928-9c32-57a7d09d0ec6");
 }

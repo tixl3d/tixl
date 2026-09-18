@@ -45,7 +45,7 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
             || curves.Length < FloatComponents.Length)
         {
             ImGui.PushID(inputSlot.Parent.SymbolChildId.GetHashCode() + inputSlot.Id.GetHashCode());
-            DrawReadOnlyControl(name, ref inputSlot.Value);
+            DrawValueControl(name, inputSlot, ref inputSlot.Value, true);
             ImGui.PopID();
             return InputEditStateFlags.Nothing;
         }
@@ -56,7 +56,7 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
         }
 
         ImGui.PushID(inputSlot.Parent.SymbolChildId.GetHashCode() + inputSlot.Id.GetHashCode());
-        var inputEditState = DrawEditControl(name, inputSlot.Input, ref inputSlot.Value, false);
+        var inputEditState = DrawValueControl(name, inputSlot, ref inputSlot.Value, false);
         ImGui.PopID();
 
         if ((inputEditState & InputEditStateFlags.Modified) == InputEditStateFlags.Modified)
