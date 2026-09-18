@@ -1,0 +1,11 @@
+<!-- SolutionRoot\Directory.Build.targets -->
+<Project>
+  <!-- Packages like Microsoft.ML.OnnxRuntime ship Android/iOS native blobs (~110 MB) under runtimes/.
+       TiXL never runs there, but the SDK copies them into every output folder that references the package. -->
+  <Target Name="ExcludeMobileNativeRuntimes" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <RuntimeTargetsCopyLocalItems Remove="@(RuntimeTargetsCopyLocalItems)"
+                                    Condition="'%(RuntimeTargetsCopyLocalItems.RuntimeIdentifier)' == 'android' Or '%(RuntimeTargetsCopyLocalItems.RuntimeIdentifier)' == 'ios'" />
+    </ItemGroup>
+  </Target>
+</Project>
