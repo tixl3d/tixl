@@ -8,6 +8,7 @@ using T3.Core.IO;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Output;
+using T3.Core.Output.Streaming;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
 using T3.Core.Resource;
@@ -79,8 +80,7 @@ internal static partial class PlayerExporter
         Log.Info($"Exporting {symbol.Name}...");
 
         _contentSuppliers.Clear();
-        _containsSupplierBySymbol.Clear();
-        CollectContentSuppliers(exportedInstance, _contentSuppliers);
+        ContentSupplierSearch.CollectUnder(exportedInstance, _contentSuppliers);
         if (_contentSuppliers.Count == 0)
         {
             reason = NoContentSupplierReason;
@@ -106,6 +106,8 @@ internal static partial class PlayerExporter
 
         CollectAutoCollectedOps(exportedInstance, exportData);
         exportData.FinishCollection(exportConfig.StripUnusedOperators);
+        if (exportConfig.PlayerMode == CompositionSettings.PlayerModes.Installation)
+            IncludeStreamSenderPackages(symbol, exportData);
 
         // Get soundtrack or show warning message
         if (TryFindSoundtrack(exportedInstance, symbol, out var address))
@@ -516,6 +518,49 @@ internal static partial class PlayerExporter
         }
     }
 
+    /// <summary>
+    /// An installation that streams (NDI, Spout) needs the package implementing that sender, which no operator in
+    /// the graph pulls in: the binding names a stream kind, and the provider for it registers when its package loads.
+    /// </summary>
+    private static void IncludeStreamSenderPackages(Symbol symbol, ExportData exportData)
+    {
+        var machineConfigPath = Path.Combine(symbol.SymbolPackage.Folder, Setup.FolderName, MachineConfig.FileName);
+        if (!File.Exists(machineConfigPath) || !MachineConfig.TryLoadFromFile(machineConfigPath, out var machineConfig))
+            return;
+
+        foreach (var binding in machineConfig.Bindings)
+        {
+            if (!binding.IsStream)
+                continue;
+
+            var stream = machineConfig.FindStreamPlug(binding.PlugId);
+            var provider = stream == null ? null : OutputStreamRegistry.TryGetProvider(stream.Kind);
+            if (stream == null || provider == null)
+                continue;
+
+            var assemblyName = provider.GetType().Assembly.GetName().Name;
+            SymbolPackage? providerPackage = null;
+            foreach (var package in SymbolPackage.AllPackages)
+            {
+                if (package.AssemblyInformation.Name == assemblyName)
+                {
+                    providerPackage = package;
+                    break;
+                }
+            }
+
+            if (providerPackage == null)
+            {
+                Log.Warning($"Stream \"{stream.Name}\" needs the {stream.Kind} sender, but its package could not be found. "
+                            + "The installation will not send it.");
+                continue;
+            }
+
+            exportData.IncludePackage(providerPackage);
+            Log.Info($"Including {providerPackage.DisplayName} for stream \"{stream.Name}\" ({stream.Kind}).");
+        }
+    }
+
     /** A child is named as it reads in its parent; a project root has no parent and goes by its symbol. */
     private static string ExportName(Instance exportedInstance)
     {
@@ -529,67 +574,10 @@ internal static partial class PlayerExporter
     public const string NoContentSupplierReason = "Add a [SendToOutput] inside this operator. "
                                                   + "An executable ships what its sends put on the setup's outputs.";
 
-    /// <summary>
-    /// Whether this op holds anything an export could ship — the check behind an offered export button. Answered
-    /// from the symbols alone, so asking every frame instantiates nothing.
-    /// </summary>
+    /// <summary>Whether this op holds anything an export could ship — the check behind an offered export button.</summary>
     public static bool CanExport(Instance exportedInstance)
     {
-        _containsSupplierBySymbol.Clear();
-        return ContainsContentSupplier(exportedInstance.Symbol);
-    }
-
-    /// <summary>
-    /// Every send under the exported op, at any depth. Found by interface rather than by the send operator's id,
-    /// so a second kind of supplier needs no change here. Only the paths that lead to a send are instantiated —
-    /// a large project would otherwise build every op it contains just to be searched.
-    /// </summary>
-    private static void CollectContentSuppliers(Instance instance, List<Instance> suppliers)
-    {
-        foreach (var child in instance.Symbol.Children.Values)
-        {
-            var isSupplier = IsContentSupplier(child.Symbol);
-            if (!isSupplier && !ContainsContentSupplier(child.Symbol))
-                continue;
-
-            if (!instance.Children.TryGetChildInstance(child.Id, out var childInstance))
-                continue;
-
-            if (isSupplier)
-            {
-                suppliers.Add(childInstance);
-            }
-            else
-            {
-                CollectContentSuppliers(childInstance, suppliers);
-            }
-        }
-    }
-
-    /** Symbol-level and memoised per query: a symbol used in many places is searched once. */
-    private static bool ContainsContentSupplier(Symbol symbol)
-    {
-        if (_containsSupplierBySymbol.TryGetValue(symbol.Id, out var known))
-            return known;
-
-        _containsSupplierBySymbol[symbol.Id] = false;
-        var found = false;
-        foreach (var child in symbol.Children.Values)
-        {
-            if (IsContentSupplier(child.Symbol) || ContainsContentSupplier(child.Symbol))
-            {
-                found = true;
-                break;
-            }
-        }
-
-        _containsSupplierBySymbol[symbol.Id] = found;
-        return found;
-    }
-
-    private static bool IsContentSupplier(Symbol symbol)
-    {
-        return symbol.InstanceType != null && typeof(IContentSupplier).IsAssignableFrom(symbol.InstanceType);
+        return ContentSupplierSearch.ContainsAny(exportedInstance.Symbol);
     }
 
     /// <summary>
@@ -806,7 +794,6 @@ internal static partial class PlayerExporter
     }
 
     private static readonly List<Instance> _contentSuppliers = [];
-    private static readonly Dictionary<Guid, bool> _containsSupplierBySymbol = new();
 
     private static bool TryRemoveExistingExportDir(out string reason, string exportDir)
     {

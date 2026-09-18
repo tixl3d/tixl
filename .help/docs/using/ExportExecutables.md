@@ -59,7 +59,9 @@ What else travels depends on **Player Mode** in the project's `Executable` setti
 - **Demo** — runs anywhere. It asks for a display and a resolution on startup and shows one window, with the setup's first output composited into it. The local bindings stay behind, because the same display numbering names different screens on a different computer.
 - **Installation** — runs on the machine it was exported for. That machine's bindings (`outputs.machine.json`) travel with it, so every output bound to a display opens full-screen where it belongs, the first one reusing the player's own window. The startup dialog is skipped; `--dialog` still forces it when someone is there to answer.
 
-An output whose canvas is left at 0 × 0 renders at 1920 × 1080 when nothing is bound to it. A binding naming a display the machine doesn't have is reported in the log and skipped, so an installation says what is wrong instead of coming up dark.
+An output whose canvas is left at 0 × 0 takes the size of what shows it: its display in an installation, otherwise the resolution chosen in the startup dialog. A project whose sends reach no output yet — no setup, or nothing routed — shows its first [SendToOutput] directly in the window, so a quick export works before the output setup has been touched. A binding naming a display the machine doesn't have is reported in the log and skipped, so an installation says what is wrong instead of coming up dark.
+
+Streams travel the same way. An installation whose outputs are bound to an NDI or Spout plug sends them from the player just as the editor does, and the export includes the package that implements the sender even when no operator in the graph comes from it. A stream whose sender is missing on the target machine is reported once in the log.
 
 To move an installation to another machine, or to rebind at a venue, edit `outputs.machine.json` in the export's `.meta` folder or open the project in TiXL and export again. The player has no binding UI of its own — an installation should come up the same way every time.
 

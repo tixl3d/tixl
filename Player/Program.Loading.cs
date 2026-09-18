@@ -113,7 +113,6 @@ internal static partial class Program
                                                    Playback playback,
                                                    DeviceContext deviceContext,
                                                    EvaluationContext context,
-                                                   Slot<Texture2D> textureOutput,
                                                    RenderTargetView renderView)
     {
         var previousSpeed = playback.PlaybackSpeed;
@@ -192,7 +191,7 @@ internal static partial class Program
             DirtyFlag.IncrementGlobalTicks();
             DirtyFlag.GlobalInvalidationTick++;
 
-            return EvaluateAndDrawOutput(context, resolution, textureOutput, deviceContext, renderView);
+            return EvaluateAndDrawOutput(resolution, deviceContext, renderView);
         }
     }
 

@@ -137,6 +137,16 @@ internal static partial class PlayerExporter
             return true;
         }
 
+        /// <summary>
+        /// Ships a package no exported symbol reaches but the show still needs — the implementation of a stream
+        /// sender, which a binding names by kind rather than by operator.
+        /// </summary>
+        public void IncludePackage(SymbolPackage package)
+        {
+            if (!_symbolPackages.ContainsKey(package))
+                _symbolPackages.Add(package, []);
+        }
+
         private void AddSymbolWithChildren(Symbol symbol)
         {
             if (!AddSymbol(symbol))

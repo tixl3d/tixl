@@ -68,7 +68,7 @@ internal static partial class Program
         DirtyFlag.IncrementGlobalTicks();
         DirtyFlag.GlobalInvalidationTick++;
 
-        EvaluateAndDrawOutput(_evalContext, _resolution, _textureOutput, _deviceContext, _renderView);
+        EvaluateAndDrawOutput(_resolution, _deviceContext, _renderView);
 
         _swapChain.Present(_vsyncInterval, PresentFlags.None);
         PresentOutputWindows();
@@ -81,38 +81,41 @@ internal static partial class Program
     }
 
     /// <summary>
-    /// The composite of the setup's first output, or null when this project ships no setup. One window can show
-    /// one canvas, so the first output is the one a windowed player presents; bound displays are a separate path.
+    /// What the main window shows: its bound output's composite, else the first sending output's. A project whose
+    /// sends reach no output — no setup, or nothing routed yet — shows its first send's own texture instead, so a
+    /// quick export works before anyone has opened the output setup.
     /// </summary>
-    private static Texture2D? RenderSetupComposite()
+    private static Texture2D? RenderMainWindowTexture(T3.Core.DataTypes.Vector.Int2 resolution)
     {
         var setup = ActiveSetup.Current;
-        if (setup == null || setup.Outputs.Count == 0)
-            return null;
-
-        // Every other display is drawn first, while the back buffer is still free.
-        DrawOutputWindows();
-
-        if (_mainWindowOutputId != Guid.Empty)
-            return OutputCompositor.RenderOutput(_mainWindowOutputId);
-
-        for (var i = 0; i < setup.Outputs.Count; i++)
+        if (setup != null)
         {
-            var output = setup.Outputs[i];
-            if (output.Kind == OutputDefinition.Kinds.Default || !output.IsSending)
-                continue;
+            // Every other display is drawn first, while the back buffer is still free.
+            DrawOutputWindows();
 
-            var composite = OutputCompositor.RenderOutput(output.Id);
-            if (composite != null)
-                return composite;
+            if (_mainWindowOutputId != Guid.Empty)
+                return OutputCompositor.RenderOutput(_mainWindowOutputId);
+
+            for (var i = 0; i < setup.Outputs.Count; i++)
+            {
+                var output = setup.Outputs[i];
+                if (output.Kind == OutputDefinition.Kinds.Default || !output.IsSending)
+                    continue;
+
+                var composite = OutputCompositor.RenderOutput(output.Id);
+                if (composite != null)
+                    return composite;
+            }
         }
 
-        return null;
+        if (_sends.Count == 0 || _sends[0] is not IContentSupplier firstSend)
+            return null;
+
+        OutputContentResolver.PrepareContext(resolution);
+        return OutputContentResolver.PullContent(firstSend);
     }
 
-    private static bool EvaluateAndDrawOutput(EvaluationContext evalContext,
-                                              T3.Core.DataTypes.Vector.Int2 resolution,
-                                              Slot<Texture2D> textureOutput,
+    private static bool EvaluateAndDrawOutput(T3.Core.DataTypes.Vector.Int2 resolution,
                                               DeviceContext deviceContext,
                                               RenderTargetView renderView)
     {
@@ -121,7 +124,8 @@ internal static partial class Program
 
         // Composited first: the compositor binds render targets of its own and leaves them bound, so the back
         // buffer is claimed after it is done rather than before.
-        var outputTexture = RenderSetupComposite();
+        var outputTexture = RenderMainWindowTexture(resolution);
+        SendStreams();
 
         // The output is rendered at the requested resolution and stretched onto the back buffer,
         // whose size follows the window (borderless fullscreen may differ from the requested size).
@@ -131,21 +135,6 @@ internal static partial class Program
         // Clear before evaluating: with a flip-model swap chain an un-drawn back buffer is undefined
         // (typically white), which hides the fact that the output produced nothing.
         deviceContext.ClearRenderTargetView(renderView, new Color(0.45f, 0.55f, 0.6f, 1.0f));
-
-        evalContext.Reset();
-        evalContext.RequestedResolution = resolution;
-
-        // Without a setup the project's own texture output is what there is to show.
-        if (outputTexture == null)
-        {
-            if (textureOutput == null)
-            {
-                return false;
-            }
-
-            textureOutput.InvalidateGraph();
-            outputTexture = textureOutput.GetValue(evalContext);
-        }
 
         if (outputTexture == null)
         {

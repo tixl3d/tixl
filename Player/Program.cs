@@ -22,6 +22,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Output;
+using T3.Core.Output.Rendering;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
 using T3.Core.Resource;
@@ -269,7 +270,7 @@ internal static partial class Program
                                 Settings = playbackSettings
                             };
 
-            LoadOutputSetup();
+            LoadOutputSetup(displays, resolution);
             InitializeOutputWindows(displays);
 
             // Create instance of project op, all children are create automatically
@@ -351,39 +352,13 @@ internal static partial class Program
                                      };
             _rasterizerState = new RasterizerState(_device, rasterizerDesc);
 
-            foreach (var output in _project.Outputs)
+            // The sends are what a show puts on screen. Creating them also registers them, which is how the
+            // compositor finds the content the setup routes — nothing else would ever instantiate them.
+            ContentSupplierSearch.CollectUnder(_project, _sends);
+            if (_sends.Count == 0)
             {
-                if (output is Slot<Texture2D> textureSlot)
-                {
-                    if (_textureOutput == null)
-                        _textureOutput = textureSlot;
-                    else
-                    {
-                        var message = "Multiple texture outputs found. Only the first one will be used.";
-                        Log.Warning(message);
-                        break;
-                    }
-                }
-            }
-
-            // A project that ships a setup presents through its sends; the texture output is only what a project
-            // without one has to show.
-            var presentsThroughSetup = ActiveSetup.Current is { Outputs.Count: > 0 };
-            if (_textureOutput == null && !presentsThroughSetup)
-            {
-                var sb = new StringBuilder();
-                var slots = _project.Outputs.Where(x => x is not null).ToArray();
-                sb.AppendLine("Found the following outputs:");
-                foreach (var slot in slots)
-                {
-                    sb.AppendLine($"{slot.GetType()} | {slot.ValueType} ({slot.ValueType.Assembly.ToString()}\n");
-                }
-
-                sb.AppendLine();
-                sb.AppendLine("Expected:");
-                sb.Append($"{typeof(Slot<Texture2D>).FullName} | {typeof(Texture2D).FullName} ({typeof(Texture2D).Assembly.ToString()}\n");
-                var message = $"Failed to find texture output. \n{sb}";
-                CloseApplication(true, message);
+                CloseApplication(true, "Nothing to show: this project contains no [SendToOutput].\n"
+                                       + "Connect what it renders to a [SendToOutput] and export it again.");
                 return;
             }
 
@@ -393,7 +368,7 @@ internal static partial class Program
             loadReport.BeginStage("Warm up shaders");
             if (prerenderRequired)
             {
-                if (!PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext, _textureOutput,
+                if (!PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext,
                                                 _renderView))
                 {
                     CloseApplication(false, "Loading cancelled.");
@@ -483,6 +458,7 @@ internal static partial class Program
             try
             {
                 DisposeOutputWindows();
+                OutputStreaming.DisposeAll();
                 _renderView?.Dispose();
                 _backBuffer?.Dispose();
                 _deviceContext?.ClearState();
@@ -567,11 +543,10 @@ internal static partial class Program
     /// </summary>
     /// <summary>
     /// Publishes the venue shipped beside the player, so operators that read the active setup (the stage
-    /// geometry, the projector camera) work in an export as they do in the editor. Bindings are this machine's
-    /// business and are absent unless a machine config travelled with the show, in which case every
-    /// plug-following output falls back to a default canvas size.
+    /// geometry, the projector camera) work in an export as they do in the editor. An output left at 0 × 0
+    /// takes the size of what shows it: its display when bound, else the resolution this player runs at.
     /// </summary>
-    private static void LoadOutputSetup()
+    private static void LoadOutputSetup(IReadOnlyList<T3.SystemUi.DisplayInfo> displays, Int2 windowResolution)
     {
         var metaFolder = Path.Combine(FileLocations.StartFolder, Setup.FolderName);
         if (!SetupFiles.TryLoad(metaFolder, out var setup, out var machineConfig, out _) || setup == null)
@@ -580,7 +555,17 @@ internal static partial class Program
             return;
         }
 
-        SetupFiles.ResolveCanvasResolutions(setup, machineConfig, null);
+        // Called once at startup, so the capturing lambda costs nothing that matters.
+        SetupFiles.ResolveCanvasResolutions(setup, machineConfig,
+                                            binding => binding switch
+                                                           {
+                                                               null => windowResolution,
+                                                               { IsStream: true } => SetupFiles.UnboundResolution,
+                                                               _ when binding.DisplayIndex >= 0 && binding.DisplayIndex < displays.Count
+                                                                   => new Int2(displays[binding.DisplayIndex].Bounds.Width,
+                                                                               displays[binding.DisplayIndex].Bounds.Height),
+                                                               _ => windowResolution,
+                                                           });
         ActiveSetup.Current = setup;
         ActiveSetup.Machine = machineConfig;
         Log.Info($"Loaded output setup \"{setup.Name}\": {setup.Outputs.Count} output(s), {setup.Surfaces.Count} surface(s).");
@@ -674,5 +659,5 @@ internal static partial class Program
     private static Resource<PixelShader> _fullScreenPixelShaderResource;
     private static Device _device;
     private static Int2 _resolution;
-    private static Slot<Texture2D> _textureOutput;
+    private static readonly List<Instance> _sends = [];
 }

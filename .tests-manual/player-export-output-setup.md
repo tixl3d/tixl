@@ -72,6 +72,21 @@ the executable, or the console window with **Show Log Messages** enabled).
 **Also:** set Player Mode to Installation on a project whose outputs are all unbound and export.
 The console warns that there are no bindings to ship, and the export still succeeds.
 
+## Step: An installation sends its streams
+
+**Prerequisite:** the Ndi package is available and an NDI receiver (e.g. NDI Studio Monitor) runs on this or another machine on the network.
+
+**Action:**
+1. In LOCAL BINDINGS click **+** and add an NDI stream named "Show Feed"; drag an output onto it.
+2. Set **Player Mode** to **Installation** and export. Close the editor, then start the executable.
+3. In the NDI receiver, pick "Show Feed".
+
+**Expected:**
+- After 2: the console reported including the Ndi package for stream "Show Feed" during export, and
+  the export's `Operators` folder holds an `Ndi` folder although no NDI operator is in the graph.
+- After 3: the receiver shows the output's composite, live, while the editor is closed — the player
+  is the one sending.
+
 ## Step: Demo mode leaves the bindings behind
 
 **Action:**

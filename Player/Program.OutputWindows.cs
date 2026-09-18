@@ -152,6 +152,33 @@ internal static partial class Program
         }
     }
 
+    /// <summary>
+    /// Sends every stream-bound output to its sender. Like the extra windows it runs before the main window claims
+    /// the back buffer, since compositing binds render targets of its own.
+    /// </summary>
+    private static void SendStreams()
+    {
+        var setup = ActiveSetup.Current;
+        var machine = ActiveSetup.Machine;
+        if (setup == null || machine == null)
+            return;
+
+        OutputStreaming.BeginFrame();
+        foreach (var binding in machine.Bindings)
+        {
+            if (!binding.IsStream)
+                continue;
+
+            var output = setup.FindOutput(binding.OutputId);
+            if (output == null || !output.IsSending)
+                continue;
+
+            OutputStreaming.Send(machine, output, binding);
+        }
+
+        OutputStreaming.EndFrame();
+    }
+
     /// <summary>Shows what was drawn. Called right after the main window presents, so all displays flip together.</summary>
     private static void PresentOutputWindows()
     {
