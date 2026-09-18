@@ -52,7 +52,7 @@ The player writes its log files and the remembered startup choice to a `.temp/` 
 
 ### Output setup
 
-If the project has an [output setup](OutputSetup.md), its `*.setup.json` files are copied into a `.meta` folder beside the executable and the player loads one at startup, picking the same file the editor would. Operators that read the venue — [StageGeometry], [DrawStageCanvas], [UseProjectorCam] — therefore work in an export exactly as they do in the editor.
+If the project has an [output setup](OutputSetup.md), the setup that is active in the editor is copied into a `.meta` folder beside the executable and the player loads it at startup. Other setups of the project stay behind — the player can't switch between them. Operators that read the venue — [StageGeometry], [DrawStageCanvas], [UseProjectorCam] — therefore work in an export exactly as they do in the editor.
 
 What else travels depends on **Player Mode** in the project's `Executable` settings:
 

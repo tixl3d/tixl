@@ -122,6 +122,10 @@ internal static partial class Program
         // One token per frame for everything the compositing path memoises, advanced before anything asks.
         OutputFrame.Advance();
 
+        // Operators that render off-screen save and restore the bound viewports, and SharpDX's GetViewports
+        // throws when none is bound at all — so one is bound before any content runs, as the editor always has.
+        deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _backBufferSize.Width, _backBufferSize.Height, 0.0f, 1.0f));
+
         // Composited first: the compositor binds render targets of its own and leaves them bound, so the back
         // buffer is claimed after it is done rather than before.
         var outputTexture = RenderMainWindowTexture(resolution);

@@ -25,11 +25,12 @@ The local bindings stay behind by design.
 3. Open the export folder (`Export/<op name>/` inside the project folder).
 
 **Expected:**
-- A `.meta` folder sits next to the renamed `.exe`, holding one `<name>.setup.json` per setup in
-  the project — the same files as the project's own `.meta` folder.
+- A `.meta` folder sits next to the renamed `.exe`, holding exactly one `<name>.setup.json`: the
+  setup named in the strip header in step 1. With several setups in the project, the others are
+  not exported.
 - No `outputs.machine.json` is present: the bindings name this computer's displays and are not
   exported.
-- The editor's console reports how many output setups were exported.
+- The editor's console reports the exported setup by name.
 
 ## Step: The player loads it
 

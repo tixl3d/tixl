@@ -48,19 +48,36 @@ public static class OutputStreaming
             return;
         }
 
-        if (slot == null)
-        {
-            slot = new OpenStream(stream.Name, provider, provider.CreateSender(stream.Name));
-            _senders[stream.Id] = slot;
-        }
-
-        slot.Sender.Configure(stream.ToSettings());
-        var composite = OutputCompositor.RenderOutput(output.Id);
-        if (composite == null)
+        // A sender that threw is set aside until its provider changes (a package reload), rather than retried
+        // every frame — the failure is almost always a missing runtime, which a retry won't fix.
+        if (_failedProviders.TryGetValue(stream.Id, out var failedProvider) && failedProvider == provider)
             return;
 
-        slot.Sender.Send(composite);
-        slot.LastError = slot.Sender.LastError;
+        try
+        {
+            if (slot == null)
+            {
+                slot = new OpenStream(stream.Name, provider, provider.CreateSender(stream.Name));
+                _senders[stream.Id] = slot;
+            }
+
+            slot.Sender.Configure(stream.ToSettings());
+            var composite = OutputCompositor.RenderOutput(output.Id);
+            if (composite == null)
+                return;
+
+            slot.Sender.Send(composite);
+            slot.LastError = slot.Sender.LastError;
+        }
+        catch (Exception e)
+        {
+            // A stream going down must not take the rest of the show with it.
+            _failedProviders[stream.Id] = provider;
+            if (_senders.Remove(stream.Id, out var broken))
+                TryDispose(broken.Sender);
+
+            Log.Error($"Stream \"{stream.Name}\" ({stream.Kind}) stopped: {e.Message}");
+        }
     }
 
     /// <summary>Closes the senders no output sent to this frame (binding dropped, output paused or deleted).</summary>
@@ -103,6 +120,18 @@ public static class OutputStreaming
         _senders.Clear();
     }
 
+    private static void TryDispose(IOutputStreamSender sender)
+    {
+        try
+        {
+            sender.Dispose();
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Disposing a failed stream sender threw: {e.Message}");
+        }
+    }
+
     /// <summary>
     /// Said once per plug: an unattended player must not come up silent, but a missing package would otherwise
     /// repeat the line every frame.
@@ -125,4 +154,5 @@ public static class OutputStreaming
     private static readonly HashSet<Guid> _activeStreamPlugs = [];
     private static readonly List<Guid> _staleStreamPlugs = [];
     private static readonly HashSet<Guid> _reportedMissingProviders = [];
+    private static readonly Dictionary<Guid, IOutputStreamProvider> _failedProviders = [];
 }

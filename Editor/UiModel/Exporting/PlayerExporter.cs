@@ -1,6 +1,8 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using T3.Core.Operator.Attributes;
+using System.Reflection;
 using T3.Core.Audio;
 using T3.Core.Compilation;
 using T3.Core.DataTypes;
@@ -557,6 +559,10 @@ internal static partial class PlayerExporter
             }
 
             exportData.IncludePackage(providerPackage);
+            var declaredFiles = provider.GetType().GetCustomAttribute<ExportDependenciesAttribute>()?.FileNames;
+            if (declaredFiles != null)
+                exportData.RequireDependencyFiles(declaredFiles);
+
             Log.Info($"Including {providerPackage.DisplayName} for stream \"{stream.Name}\" ({stream.Kind}).");
         }
     }
@@ -717,8 +723,8 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
-    /// Ships the project's output setups beside the player, so the venue-reading ops and the player's own
-    /// presentation both find them. The setups describe the venue and always travel; this machine's display
+    /// Ships the project's active output setup beside the player, so the venue-reading ops and the player's own
+    /// presentation both find it. The setup describes the venue and always travels; this machine's display
     /// bindings only do so for an installation, which is exported for one computer.
     /// </summary>
     private static void TryExportOutputSetups(Symbol symbol, string exportDir, CompositionSettings.PlayerModes playerMode)
@@ -728,18 +734,17 @@ internal static partial class PlayerExporter
         if (!Directory.Exists(sourceFolder))
             return;
 
-        var setupFiles = Directory.GetFiles(sourceFolder, "*" + Setup.FileSuffix);
-        if (setupFiles.Length == 0)
+        // Only the setup the editor has active: the player can't switch between several, and a demo, which
+        // leaves the machine config behind, would otherwise pick whichever file the folder happens to list first.
+        if (!SetupFiles.TryFindActiveFile(sourceFolder, out var activeSetupPath))
             return;
 
         var targetFolder = Path.Combine(exportDir, Setup.FolderName);
         try
         {
             Directory.CreateDirectory(targetFolder);
-            foreach (var filePath in setupFiles)
-                File.Copy(filePath, Path.Combine(targetFolder, Path.GetFileName(filePath)), overwrite: true);
-
-            Log.Info($"Exported {setupFiles.Length} output setup(s).");
+            File.Copy(activeSetupPath, Path.Combine(targetFolder, Path.GetFileName(activeSetupPath)), overwrite: true);
+            Log.Info($"Exported output setup \"{Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(activeSetupPath))}\".");
 
             // An installation runs on the machine it was exported for, so its display bindings travel with it.
             // A demo does not: the same numbering would name different screens wherever it is run.

@@ -63,6 +63,46 @@ public static class SetupFiles
         return setup != null;
     }
 
+    /// <summary>
+    /// The file <see cref="TryLoad"/> would pick: the setup this machine last had active, else the first in the
+    /// folder. An export ships this one alone — a player has no way to switch, and without the machine config
+    /// (a demo leaves it behind) it could only guess among several.
+    /// </summary>
+    public static bool TryFindActiveFile(string metaFolder, out string filePath)
+    {
+        filePath = string.Empty;
+        if (!Directory.Exists(metaFolder))
+            return false;
+
+        var machineConfigPath = Path.Combine(metaFolder, MachineConfig.FileName);
+        if (File.Exists(machineConfigPath)
+            && MachineConfig.TryLoadFromFile(machineConfigPath, out var machineConfig)
+            && machineConfig.ActiveSetupName.Length > 0)
+        {
+            var preferred = FilePathFor(metaFolder, machineConfig.ActiveSetupName);
+            if (File.Exists(preferred))
+            {
+                filePath = preferred;
+                return true;
+            }
+        }
+
+        try
+        {
+            foreach (var candidate in Directory.EnumerateFiles(metaFolder, "*" + Setup.FileSuffix))
+            {
+                filePath = candidate;
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Could not read output setups from \"{metaFolder}\": {e.Message}");
+        }
+
+        return false;
+    }
+
     /// <summary>The path a setup of this name is stored at.</summary>
     public static string FilePathFor(string metaFolder, string setupName)
     {
