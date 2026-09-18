@@ -28,6 +28,7 @@ internal sealed partial class SetupOutputView
     {
         var imageSelected = selection?.IsSelected(SetupEntityKinds.ReferenceImage, image.Id) ?? false;
         Span<Vector2> screenQuad = stackalloc Vector2[4];
+        Span<Vector2> localRect = stackalloc Vector2[4];
         for (var i = 0; i < setup.Surfaces.Count; i++)
         {
             var surface = setup.Surfaces[i];
@@ -81,7 +82,6 @@ internal sealed partial class SetupOutputView
             // Its reference points, where they sit in the photo.
             if (SurfaceMetrics.CountPoints(surface) > 0)
             {
-                Span<Vector2> localRect = stackalloc Vector2[4];
                 SurfaceGeometry.WriteLocalRect(surface, localRect);
                 if (Homography.TryComputeQuadToQuad(localRect, binding.Quad, out var surfaceToPhoto))
                     DrawReferencePointMarks(dl, surface, surfaceToPhoto, _projection, fade);

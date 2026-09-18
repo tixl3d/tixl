@@ -14,7 +14,7 @@ namespace Lib.render.output;
 internal sealed class StageGeometry : Instance<StageGeometry>
 {
     [Output(Guid = "fcdaba8f-c63c-4913-b5d2-90b586ddc5f4", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
-    public readonly Slot<MeshGeometry> Geometry = new();
+    public readonly Slot<MeshGeometry?> Geometry = new();
 
     public StageGeometry()
     {

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Numerics;
 using Newtonsoft.Json;

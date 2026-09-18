@@ -11,7 +11,6 @@ using System.Threading;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Output.Streaming;
-using T3.Core.Output.Streaming;
 using T3.Core.Utils;
 using T3.Serialization;
 

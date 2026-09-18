@@ -1,3 +1,4 @@
+#nullable enable
 using System.Numerics;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
@@ -33,7 +34,7 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     /// resolution stands — the canvas of the output this content is routed to — so an auto-sized render target
     /// upstream follows the projector rather than needing a size of its own.
     /// </summary>
-    T3.Core.DataTypes.Texture2D IContentSupplier.GetContent(EvaluationContext context)
+    T3.Core.DataTypes.Texture2D? IContentSupplier.GetContent(EvaluationContext context)
     {
         var requested = Resolution.GetValue(context);
         if (requested.Width <= 0 || requested.Height <= 0)

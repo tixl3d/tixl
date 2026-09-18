@@ -685,15 +685,16 @@ internal sealed class ParameterWindow : Window
             // area up onto this line.
             ImGui.SameLine();
             var projectView = ProjectView.Focused;
-            var canPin = projectView != null && RenderProcess.OutputWindow != null && projectView.CompositionInstance != null;
-            if (!canPin)
+            var outputWindow = RenderProcess.OutputWindow;
+            var compositionInstance = projectView?.CompositionInstance;
+            if (projectView == null || outputWindow == null || compositionInstance == null)
             {
                 CustomComponents.IconButton(Icon.PlayOutput, Vector2.Zero, CustomComponents.ButtonStates.Disabled);
                 CustomComponents.TooltipForLastItem("Pin to output — needs an output window");
             }
             else
             {
-                var pinning = RenderProcess.OutputWindow!.Pinning;
+                var pinning = outputWindow.Pinning;
                 var isPinned = pinning.IsPinned
                                && pinning.TryGetPinnedOrSelectedInstance(out var pinnedInstance, out _)
                                && pinnedInstance == op;
@@ -712,7 +713,7 @@ internal sealed class ParameterWindow : Window
                     {
                         NodeActions.PinSelectedToOutputWindow(projectView,
                             projectView.NodeSelection,
-                            projectView.CompositionInstance!,
+                            compositionInstance,
                             true);
                     }
                 }

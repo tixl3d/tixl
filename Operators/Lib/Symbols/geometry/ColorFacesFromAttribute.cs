@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using T3.Core.Utils;
@@ -15,7 +16,7 @@ namespace Lib.geometry;
 internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute>, ICustomDropdownHolder
 {
     [Output(Guid = "c81e4b70-2f95-4d3a-96b1-e0d7a5c2f849")]
-    public readonly Slot<MeshGeometry> Result = new();
+    public readonly Slot<MeshGeometry?> Result = new();
 
     public ColorFacesFromAttribute()
     {
@@ -54,7 +55,7 @@ internal sealed class ColorFacesFromAttribute : Instance<ColorFacesFromAttribute
         var usePartIndex = attributeName == PartIndexOption;
         var usePartSeed = attributeName == PartSeedIndexOption;
         GeometryAttribute<float>? faceValues = null;
-        if (!usePartIndex && !usePartSeed)
+        if (!usePartIndex && !usePartSeed && attributeName != null)
             source.Attributes.TryGet(attributeName, AttributeDomain.Face, out faceValues);
 
         if (usePartIndex || usePartSeed)
