@@ -41,7 +41,7 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
     /// Draws a compact ADSR envelope editor with visual curve display.
     /// Vector4 layout: X=Attack, Y=Decay, Z=Sustain, W=Release
     /// </summary>
-    public static InputEditStateFlags DrawAdsrControl(ref Vector4 envelope, bool cloneIfModified)
+    public static InputEditStateFlags DrawAdsrControl(ref Vector4 envelope, bool cloneIfModified, bool timeInBars = false)
     {
         var modified = InputEditStateFlags.Nothing;
         var drawList = ImGui.GetWindowDrawList();
@@ -98,7 +98,7 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
 
         // Move cursor below the envelope graph
         ImGui.SetCursorScreenPos(new Vector2(startPos.X, envelopeArea.Max.Y + 2));
-        modified |= DrawParameterRow(ref envelope, availableWidth, cloneIfModified);
+        modified |= DrawParameterRow(ref envelope, availableWidth, cloneIfModified, timeInBars);
         return modified;
     }
 
@@ -322,7 +322,7 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
         return modified;
     }
 
-    private static InputEditStateFlags DrawParameterRow(ref Vector4 envelope, float availableWidth, bool cloneIfModified)
+    private static InputEditStateFlags DrawParameterRow(ref Vector4 envelope, float availableWidth, bool cloneIfModified, bool timeInBars)
     {
         var modified = InputEditStateFlags.Nothing;
         var paramWidth = (availableWidth - 12) / 4;
@@ -348,7 +348,7 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
         if (editState.HasFlag(InputEditStateFlags.Finished))
             modified |= InputEditStateFlags.Finished;
         ImGui.PopID();
-        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Attack time (seconds)");
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip(timeInBars ? "Attack time (bars)" : "Attack time (seconds)");
 
         ImGui.SameLine();
 
@@ -363,7 +363,7 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
         if (editState.HasFlag(InputEditStateFlags.Finished))
             modified |= InputEditStateFlags.Finished;
         ImGui.PopID();
-        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Decay time (seconds)");
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip(timeInBars ? "Decay time (bars)" : "Decay time (seconds)");
 
         ImGui.SameLine();
 
@@ -393,7 +393,7 @@ public sealed class AdsrEnvelopeInputUi : InputValueUi<Vector4>
         if (editState.HasFlag(InputEditStateFlags.Finished))
             modified |= InputEditStateFlags.Finished;
         ImGui.PopID();
-        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Release time (seconds)");
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip(timeInBars ? "Release time (bars)" : "Release time (seconds)");
 
         ImGui.PopStyleVar(2);
 

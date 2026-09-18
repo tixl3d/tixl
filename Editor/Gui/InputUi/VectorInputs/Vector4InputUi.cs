@@ -9,6 +9,7 @@ using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.InputUi.CombinedInputs;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Serialization;
 
@@ -44,6 +45,33 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
         Curve.UpdateCurveValues(curves, time, FloatComponents);
     }
 
+    public override InputEditStateFlags DrawParameterEdit(IInputSlot inputSlot, SymbolUi compositionUi, SymbolUi.Child symbolChildUi,
+                                                         bool hideNonEssentials, bool skipIfDefault)
+    {
+        var previousTimeInBars = _adsrTimeInBars;
+        _adsrTimeInBars = false;
+        if (UseVec4Control == Vec4Controls.AdsrEnvelope)
+        {
+            foreach (var sibling in inputSlot.Parent.Inputs)
+            {
+                if (sibling.Id != _adsrUnitsId || sibling is not InputSlot<int> units)
+                    continue;
+
+                _adsrTimeInBars = units.GetCurrentValue() != 1;
+                break;
+            }
+        }
+
+        try
+        {
+            return base.DrawParameterEdit(inputSlot, compositionUi, symbolChildUi, hideNonEssentials, skipIfDefault);
+        }
+        finally
+        {
+            _adsrTimeInBars = previousTimeInBars;
+        }
+    }
+
     protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref Vector4 float4Value, bool readOnly)
     {
         if (UseVec4Control == Vec4Controls.AdsrEnvelope)
@@ -51,11 +79,11 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
             if (readOnly)
             {
                 var tempEnvelope = float4Value;
-                AdsrEnvelopeInputUi.DrawAdsrControl(ref tempEnvelope, cloneIfModified: false);
+                AdsrEnvelopeInputUi.DrawAdsrControl(ref tempEnvelope, cloneIfModified: false, timeInBars: _adsrTimeInBars);
                 return InputEditStateFlags.Nothing;
             }
 
-            return AdsrEnvelopeInputUi.DrawAdsrControl(ref float4Value, input.IsDefault);
+            return AdsrEnvelopeInputUi.DrawAdsrControl(ref float4Value, input.IsDefault, timeInBars: _adsrTimeInBars);
         }
         
         float4Value.CopyTo(FloatComponents);
@@ -89,6 +117,8 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
     }
 
     private static readonly float[] _floatComponentsForEdit = new float[4];
+    private static readonly Guid _adsrUnitsId = new("d9a48d43-124d-4928-9c32-57a7d09d0ec6");
+    private bool _adsrTimeInBars;
 
     public static InputEditStateFlags DrawColorInput(ref Vector4 float4Value, bool readOnly, float rightPadding =0)
     {

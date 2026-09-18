@@ -30,6 +30,14 @@
     {
       "Id": "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*Mode*/,
       "DefaultValue": 0
+    },
+    {
+      "Id": "5b9d9303-a703-4376-a0aa-eb610f847c79"/*TimeMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "d9a48d43-124d-4928-9c32-57a7d09d0ec6"/*Units*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

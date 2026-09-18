@@ -117,7 +117,7 @@ public abstract class InputValueUi<T> : IInputUi
                                                            Icon.KeyframeToggleOnBoth,
                                                        };
 
-    public InputEditStateFlags DrawParameterEdit(IInputSlot inputSlot, SymbolUi compositionUi, SymbolUi.Child symbolChildUi, bool hideNonEssentials,
+    public virtual InputEditStateFlags DrawParameterEdit(IInputSlot inputSlot, SymbolUi compositionUi, SymbolUi.Child symbolChildUi, bool hideNonEssentials,
                                                  bool skipIfDefault)
     {
         var editState = InputEditStateFlags.Nothing;
