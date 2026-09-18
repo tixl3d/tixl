@@ -770,15 +770,28 @@ internal static class SetupParameterView
         var provider = OutputStreamRegistry.TryGetProvider(stream.Kind);
         var supported = provider?.Supported ?? OutputStreamOptions.None;
 
-        // What the receivers get: the canvas of whatever output is bound here.
+        // What the receivers get: the canvas of the output bound here. A stream has no size of its own, but this is
+        // where one looks for it, so an edit writes through to that output instead of pointing elsewhere.
         Span<int> resolution = [0, 0];
-        if (boundOutput != null)
+        if (boundOutput == null)
+        {
+            DrawIntsRow("Sends at (px)", resolution, "Nothing is bound to this stream, so it sends nothing.", readOnly: true);
+        }
+        else
         {
             resolution[0] = boundOutput.ResolvedResolution.Width;
             resolution[1] = boundOutput.ResolvedResolution.Height;
-        }
+            var resolutionState = DrawIntsRow("Sends at (px)", resolution,
+                                              $"The canvas of \"{boundOutput.Name}\", the output bound here — changing it resizes that output.");
+            BeginFieldUndo(setup, resolutionState);
+            if ((resolutionState & InputEditStateFlags.Modified) != 0)
+            {
+                boundOutput.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution[0], 1, 16384),
+                                                                                 Math.Clamp(resolution[1], 1, 16384));
+            }
 
-        DrawIntsRow("Sends at (px)", resolution, "The canvas of the output bound here (read-only).", readOnly: true);
+            CommitFieldUndo(setup, "Resize canvas", resolutionState);
+        }
 
         if ((supported & OutputStreamOptions.FrameRate) != 0)
         {

@@ -145,6 +145,8 @@ internal static partial class PlayerExporter
                          "Lib:shaders/dx11/resolve-multisampled-depth-buffer-cs.hlsl",
                          // The output compositor warps every slice with this; no graph references it.
                          "Lib:shaders/dx11/corner-pin-layer.hlsl",
+                         // The NDI sender packs frames to UYVY with this before reading them back.
+                         "Lib:shaders/img/rgba-to-uyvy-cs.hlsl",
                          "Lib:pbr/studio_small_08-prefiltered.dds",
                          "Lib:pbr/BRDF-LookUp.dds",
                      ])

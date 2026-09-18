@@ -871,8 +871,12 @@ internal static class SetupActions
                 if (copy == null)
                     return;
 
-                // Fresh id: mappings and the machine's display binding stay with the original.
+                // Fresh ids: mappings and the machine's display binding stay with the original, and each patch is an
+                // entity of its own that selection, routing and undo address by id.
                 copy.Id = Guid.NewGuid();
+                foreach (var patch in copy.Patches)
+                    patch.Id = Guid.NewGuid();
+
                 copy.Name += " copy";
                 setup.Outputs.Add(copy);
                 selection.Select(SetupEntityKinds.Output, copy.Id);

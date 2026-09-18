@@ -84,6 +84,18 @@ internal static class Plugs
     /// <summary>Binds an output to a plug (display or stream), replacing any earlier binding, and saves.</summary>
     public static void BindOutput(MachineConfig machineConfig, Guid outputId, Guid plugId)
     {
+        // A plug presents one output. Binding a new one lets go of the old, or a display would be fought over
+        // and a stream would carry two canvases through one sender, alternating frame by frame.
+        _outputsToRelease.Clear();
+        foreach (var existing in machineConfig.Bindings)
+        {
+            if (existing.OutputId != outputId && BoundPlugId(existing) == plugId)
+                _outputsToRelease.Add(existing.OutputId);
+        }
+
+        foreach (var releasedOutputId in _outputsToRelease)
+            machineConfig.Unbind(releasedOutputId);
+
         if (TryGetDisplayIndex(plugId, out var displayIndex))
             BindOutputToDisplay(machineConfig, outputId, displayIndex);
         else
@@ -209,4 +221,5 @@ internal static class Plugs
     #endregion
 
     private static readonly List<string> _displayLabels = [];
+    private static readonly List<Guid> _outputsToRelease = [];
 }

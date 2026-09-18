@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using T3.Core.Logging;
 
@@ -65,10 +66,21 @@ public static class SetupRepair
             }
         }
 
+        var patchIds = new HashSet<Guid>();
         foreach (var output in setup.Outputs)
         {
             foreach (var patch in output.Patches)
             {
+                // Duplicating an output once copied its patches' ids along; two patches with one id make
+                // selection, routing and undo reach the wrong one.
+                if (!patchIds.Add(patch.Id))
+                {
+                    Log.Warning($"Setup repair: a patch on output '{output.Name}' shared its id with another patch — given a new one.");
+                    patch.Id = Guid.NewGuid();
+                    patchIds.Add(patch.Id);
+                    changed = true;
+                }
+
                 if (QuadIsUsable(patch.Quad))
                     continue;
 

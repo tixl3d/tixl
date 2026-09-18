@@ -107,6 +107,35 @@ Hover "Local / Display 2" in the LOCAL BINDINGS column.
   highlighted; the others are muted. The tooltip holds nothing else.
 - Right-click the same row: **Display Settings...** opens the system display settings.
 
+## Step: A plug presents one output
+
+**Action:**
+1. Add an NDI stream in LOCAL BINDINGS (**+**) and drag "P1" onto it.
+2. Drag a second output onto the same stream item.
+3. Select the stream item and change **Sends at (px)** to 3840 × 2160.
+
+**Expected:**
+- After 2: only the second output is connected to the stream; "P1" reads "unbound" again. The
+  same holds for a display item.
+- After 3: the second output's card shows **Canvas (px)** 3840 × 2160 — the stream's size is its
+  output's canvas, set from either card. With nothing bound, the stream's row is read-only.
+
+## Step: A large NDI stream doesn't stall the editor
+
+**Prerequisite:** an NDI receiver (e.g. NDI Studio Monitor) and the performance overlay (click the frame graph in the top left) are open.
+
+**Action:**
+1. Bind an output to an NDI stream in LOCAL BINDINGS and set its **Canvas (px)** to 8038 × 5798.
+2. Note the overlay's **Frame** time with the output's **Send** ticked off.
+3. Tick **Send** with the receiver closed, then with the receiver showing the stream.
+
+**Expected:**
+- After 3, with the receiver closed: the frame time stays at what step 2 showed — nothing is read
+  back or compressed while nobody watches.
+- With the receiver showing the stream: the frame time rises by far less than the ~64 ms a
+  synchronous sender cost at this size (measured 13 → 77 ms), and the receiver's picture has the
+  same colours as the output's preview — no washed-out blacks or tinted greys.
+
 ## Step: Two outputs drive two displays at once
 
 **Prerequisite:** two or more displays attached.

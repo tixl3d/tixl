@@ -29,7 +29,9 @@ public static class OutputStreaming
         if (stream == null)
             return;
 
-        _activeStreamPlugs.Add(stream.Id);
+        // First output to claim a stream this frame keeps it, as with displays: a plug carries one canvas.
+        if (!_activeStreamPlugs.Add(stream.Id))
+            return;
 
         // Looked up every frame: a sender must not outlive the package that implements it, and a package
         // reload replaces the provider instance.

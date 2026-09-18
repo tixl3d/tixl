@@ -39,6 +39,23 @@ public class SetupRepairTests
     }
 
     [Fact]
+    public void Repair_GivesPatchesThatShareAnIdNewOnes()
+    {
+        var setup = Setup.CreateDefault();
+        var first = new OutputDefinition { Name = "first" };
+        var second = new OutputDefinition { Name = "second" };
+        var shared = new OutputDefinition.Patch { Quad = OutputDefinition.FullCanvasQuad() };
+        var copy = new OutputDefinition.Patch { Id = shared.Id, Quad = OutputDefinition.FullCanvasQuad() };
+        first.Patches.Add(shared);
+        second.Patches.Add(copy);
+        setup.Outputs.AddRange([first, second]);
+
+        Assert.True(SetupRepair.Repair(setup));
+        Assert.NotEqual(shared.Id, copy.Id);
+        Assert.False(SetupRepair.Repair(setup));
+    }
+
+    [Fact]
     public void Repair_ResetsCorruptedQuadsAndDetachesNestedPhysicalSurfaces()
     {
         var setup = Setup.CreateDefault();
