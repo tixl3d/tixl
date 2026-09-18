@@ -26,6 +26,15 @@ internal static partial class PlayerExporter
         /** Symbols shipped with the export */
         public IEnumerable<Symbol> Symbols => _symbols;
 
+        /// <summary>Dependency files needed by something other than an exported operator — a stream sender.</summary>
+        public IReadOnlyCollection<string> RequiredDependencyFiles => _requiredDependencyFiles;
+
+        public void RequireDependencyFiles(IEnumerable<string> fileNames)
+        {
+            foreach (var fileName in fileNames)
+                _requiredDependencyFiles.Add(fileName);
+        }
+
         /** Instances reached from the exported output; their compiled shaders seed the export's cache */
         public IEnumerable<Instance> CollectedInstances => _collectedInstances;
 
@@ -137,6 +146,16 @@ internal static partial class PlayerExporter
             return true;
         }
 
+        /// <summary>
+        /// Ships a package no exported symbol reaches but the show still needs — the implementation of a stream
+        /// sender, which a binding names by kind rather than by operator.
+        /// </summary>
+        public void IncludePackage(SymbolPackage package)
+        {
+            if (!_symbolPackages.ContainsKey(package))
+                _symbolPackages.Add(package, []);
+        }
+
         private void AddSymbolWithChildren(Symbol symbol)
         {
             if (!AddSymbol(symbol))
@@ -166,6 +185,7 @@ internal static partial class PlayerExporter
 
         private static readonly HashSet<Guid> _noChildIds = [];
         private readonly HashSet<Symbol> _symbols = [];
+        private readonly HashSet<string> _requiredDependencyFiles = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<Instance> _collectedInstances = [];
         private readonly Dictionary<SymbolPackage, List<Symbol>> _symbolPackages = new();
         private readonly Dictionary<Guid, HashSet<Guid>> _reachableChildIds = new();

@@ -33,7 +33,7 @@
       "AddPadding": "True"
     },
     {
-      "InputId": "91459607-22c1-4536-a384-8b1f1d8ecb64"/*CollistionResolve*/,
+      "InputId": "91459607-22c1-4536-a384-8b1f1d8ecb64"/*CollisionResolve*/,
       "Position": {
         "X": 2489.1,
         "Y": 652.9964

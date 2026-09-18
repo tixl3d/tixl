@@ -6,7 +6,7 @@ tags: [player, export]
 added: 2026-08-23
 added-in-version: 4.3
 prerequisites:
-  - A writable project with an operator that has a Texture2D output (e.g. a simple [Blob] wrapped in a symbol) is open.
+  - A writable project with an operator that contains a [SendToOutput] fed by a simple [Blob] is open.
   - The editor was built in Release so `Player/` exists next to the editor binaries.
   - Ideally two displays are connected; the single-display variant of each step is noted.
 related-help:
@@ -28,7 +28,7 @@ Open `Project Settings` for the operator you will export and switch to the `Exec
 ## Step: Export and start with the dialog
 
 **Action:**
-Press the `Export` button at the bottom of the `Executable` panel (it is disabled with a hint when the composition is the project root or has no Texture2D output; `File → Export as Executable` with the operator selected does the same). When the success message appears, the export folder opens; the folder icon next to `Export` opens it again later. The executable is named `My Demo.exe` (after the `Title` setting; without a title it stays `Player.exe`). Double-click it.
+Press the `Export` button at the bottom of the `Executable` panel (it is shown dimmed with a hint when the composition contains no [SendToOutput], with **Add SendToOutput** below it; a project root exports like any other operator; `File → Export as Executable` with the operator selected does the same). When the success message appears, the export folder opens; the folder icon next to `Export` opens it again later. The executable is named `My Demo.exe` (after the `Title` setting; without a title it stays `Player.exe`). Double-click it.
 
 **Expected:**
 - No console window opens.

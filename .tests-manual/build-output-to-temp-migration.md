@@ -6,8 +6,7 @@ tags: [projects, migration]
 added: 2026-08-26
 added-in-version: 4.3
 prerequisites:
-  - A user project in format V2 (Symbols/ folder present, build output still in root bin/obj)
-    from before this change, or any project committed earlier today.
+  - A user project in format V2 (Symbols/ folder present, build output still in root bin/obj) from before this change, or any project committed earlier today.
 ---
 
 Covers the format V2 -> V3 migration that moves build output (`bin/`, `obj/`) under `.temp/`

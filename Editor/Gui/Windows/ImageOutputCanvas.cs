@@ -40,6 +40,10 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
     protected override ScalableCanvas? Parent => null;
 
     public Texture2D? LastTexture;
+
+    /// <summary>Set by the window when the shown op was already evaluated this frame but had to render again for
+    /// this window's resolution preset; the caption then carries a warning.</summary>
+    public bool IsRenderedTwice;
         
     public void DrawTexture(Texture2D? texture)
     {
@@ -121,11 +125,30 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
             drawList.AddText(textPos + new Vector2(0,-1), shadowColor, description );
             drawList.AddText(textPos, UiColors.ForegroundFull, description );
             ImGui.PopFont();
+
+            if (IsRenderedTwice)
+                DrawRenderedTwiceWarning(drawList, textPos);
         }
     }
         
     //private static readonly Color ShadowColor = new Color(0.0f, 0.0f, 0.0f, 0.6f);
 
+
+    /// <summary>A warning glyph left of the caption: this op is rendered once for an output the setup presents
+    /// and once more for this window, because the resolution preset here doesn't accept the presented size.</summary>
+    private static void DrawRenderedTwiceWarning(ImDrawListPtr drawList, Vector2 captionPos)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var iconSize = new Vector2(16, 16) * scale;
+        var iconPos = captionPos - new Vector2(iconSize.X + 6 * scale, 2 * scale);
+        Icons.DrawIconAtScreenPosition(Icon.Warning, iconPos, iconSize, drawList, UiColors.StatusAttention);
+
+        if (ImGui.IsMouseHoveringRect(iconPos, iconPos + iconSize))
+        {
+            ImGui.SetTooltip("Rendered twice: once for the output setup, once more at this window's resolution.\n"
+                             + "Set the resolution preset to Fill, or to the presented size, to show the presented frame instead.");
+        }
+    }
 
     public void SetViewMode(Modes newMode)
     {

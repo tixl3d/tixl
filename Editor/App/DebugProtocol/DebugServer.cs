@@ -355,6 +355,25 @@ internal static class DebugServer
                 break;
             }
 
+            case "outputSetup":
+            {
+                // Drives the output-setup UI the way clicks would: select an entity by name, enter a mode.
+                if (!OutputWindow.TryGetPrimaryOutputWindow(out var setupWindow))
+                {
+                    context.SendError("NO_OUTPUT", "No visible output window");
+                    break;
+                }
+
+                if (!setupWindow.TryDriveOutputSetup(request["entity"]?.Value<string>(), request["mode"]?.Value<string>(), out var setupError))
+                {
+                    context.SendError("INVALID_PARAM", setupError);
+                    break;
+                }
+
+                context.SendOk(new JObject());
+                break;
+            }
+
             case "resetView":
             {
                 if (!OutputWindow.TryGetPrimaryOutputWindow(out var window))
@@ -773,12 +792,6 @@ internal static class DebugServer
                 outputJson["childId"] = shownInstance.SymbolChildId.ToString();
                 outputJson["symbolName"] = shownInstance.Symbol.Name;
                 outputJson["path"] = new JArray(shownView.Structure.GetReadableInstancePath(shownInstance.InstancePath));
-                if (pinning.TryGetPinnedEvaluationInstance(shownView.Structure, out var evaluationStart)
-                    && evaluationStart != shownInstance)
-                {
-                    outputJson["evaluationStartChildId"] = evaluationStart.SymbolChildId.ToString();
-                    outputJson["evaluationStartSymbolName"] = evaluationStart.Symbol.Name;
-                }
             }
 
             result["outputView"] = outputJson;
@@ -996,6 +1009,42 @@ internal static class DebugServer
             return;
         }
 
+        var format = path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+                         ? ScreenshotWriter.FileFormats.Jpg
+                         : ScreenshotWriter.FileFormats.Png;
+
+        // "ui": the whole editor window as rendered (windows, panels, canvases) — captured from the back
+        // buffer on the next frame, so UI verification doesn't depend on OS screen grabs or which window is
+        // in front. Default: the output window's texture.
+        var target = request["target"]?.Value<string>() ?? "output";
+        if (target == "ui")
+        {
+            ProgramWindows.RequestUiCapture(uiTexture =>
+                                            {
+                                                var startedUi = ScreenshotWriter.StartSavingToFile(uiTexture, path, format, opaque: true,
+                                                                                                   onComplete: filename =>
+                                                                                                               {
+                                                                                                                   uiTexture.Dispose();
+                                                                                                                   if (filename != null)
+                                                                                                                       context.SendOk(new JObject { ["path"] = filename });
+                                                                                                                   else
+                                                                                                                       context.SendError("SCREENSHOT_FAILED", "Readback or encoding failed - see log");
+                                                                                                               });
+                                                if (!startedUi)
+                                                {
+                                                    uiTexture.Dispose();
+                                                    context.SendError("SCREENSHOT_BUSY", "Screenshot queue rejected the request");
+                                                }
+                                            });
+            return;
+        }
+
+        if (target != "output")
+        {
+            context.SendError("INVALID_PARAM", $"screenshot target '{target}' is not 'output' or 'ui'");
+            return;
+        }
+
         if (!OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
         {
             context.SendError("NO_OUTPUT", "No output window is open");
@@ -1008,10 +1057,6 @@ internal static class DebugServer
             context.SendError("NO_OUTPUT", "Output window has no current texture (is a renderable op pinned?)");
             return;
         }
-
-        var format = path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
-                         ? ScreenshotWriter.FileFormats.Jpg
-                         : ScreenshotWriter.FileFormats.Png;
 
         // Completes on a later frame from ScreenshotWriter.Update (main thread), so the
         // deferred response is safe to build there.

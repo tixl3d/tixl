@@ -1,0 +1,122 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using T3.Core.Output;
+using T3.Editor.Gui.Windows.OutputSetup;
+
+namespace T3.Editor.UiModel.Selection;
+
+/// <summary>A sub-element of a selectable entity, addressed by index. The entity plane uses <see cref="None"/>;
+/// the canvas plane addresses corners, annotation endpoints, and lattice points.</summary>
+internal enum SubParts
+{
+    None,
+    Corner,
+    Annotation,
+    LatticePoint,
+}
+
+/// <summary>
+/// One addressable selection target: an entity, optionally a sub-element by index. The single address form
+/// shared by both selection planes (setup-entity and canvas sub-element). A value type, so it compares by
+/// content and de-duplicates in a set/list.
+/// </summary>
+internal readonly record struct SelectionTarget(
+    SetupEntityKinds Kind,
+    Guid EntityId,
+    SubParts Part = SubParts.None,
+    int Index = -1);
+
+/// <summary>
+/// Which setup entities are selected — the "entity plane" (whole entities, not sub-elements).
+/// Ordered: element 0 is the primary (drives the shown entity view). Single-click replaces,
+/// ctrl/shift extend. Entities are referenced by kind + GUID, resolved against the active setup on
+/// use — never by cached object reference. One instance shared by all output windows
+/// (<see cref="GlobalSelectionHandling.SetupEntities"/>); a window
+/// that shouldn't follow it keeps a per-window pin instead (see <see cref="OutputSetupModeView"/>).
+/// </summary>
+internal sealed class SetupEntitySelection
+{
+
+    /// <summary>Replace the selection with a single entity. A pick: takes over the Parameter window.</summary>
+    public void Select(SetupEntityKinds kind, Guid id)
+    {
+        _targets.Set(new SelectionTarget(kind, id));
+        GlobalSelectionHandling.ClaimInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
+    }
+
+    /// <summary>Add an entity to the selection (no-op if already present).</summary>
+    public void Add(SetupEntityKinds kind, Guid id)
+    {
+        _targets.Add(new SelectionTarget(kind, id));
+        GlobalSelectionHandling.ClaimInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
+    }
+
+    /// <summary>Drops an entity from the selection (no-op if absent); an emptied selection lets the inspection go.</summary>
+    public void Remove(SetupEntityKinds kind, Guid id)
+    {
+        if (!_targets.Remove(new SelectionTarget(kind, id)))
+            return;
+
+        if (_targets.Count == 0)
+            GlobalSelectionHandling.ReleaseInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
+    }
+
+    /// <summary>Toggle an entity's membership.</summary>
+    public void Toggle(SetupEntityKinds kind, Guid id)
+    {
+        _targets.Toggle(new SelectionTarget(kind, id));
+        if (_targets.Count > 0)
+            GlobalSelectionHandling.ClaimInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
+        else
+            GlobalSelectionHandling.ReleaseInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
+    }
+
+    /// <summary>
+    /// Replaces the selection to mirror a pick made in the graph (a focused SendToOutput shows as its CONTENT
+    /// item) without taking over the Parameter window — the graph keeps it and shows the op's parameters.
+    /// </summary>
+    public void Mirror(SetupEntityKinds kind, Guid id) => _targets.Set(new SelectionTarget(kind, id));
+
+    public void Clear()
+    {
+        _targets.Clear();
+        GlobalSelectionHandling.ReleaseInspection(GlobalSelectionHandling.InspectionTargets.SetupEntity);
+    }
+
+    public bool IsSelected(SetupEntityKinds kind, Guid id) => _targets.Contains(new SelectionTarget(kind, id));
+
+    public int Count => _targets.Count;
+
+    /// <summary>The selection in order, primary first. Copy before acting on it — anything that deletes
+    /// entities prunes this list as it goes.</summary>
+    public IReadOnlyList<SelectionTarget> Targets => _targets.Items;
+
+    /// <summary>Resolves the primary selection against a setup, dropping any target whose entity is gone.</summary>
+    public bool TryResolve(Setup setup, out SetupEntityKinds kind, out Guid id)
+    {
+        for (var i = _targets.Count - 1; i >= 0; i--)
+        {
+            if (!ExistsInSetup(setup, _targets[i]))
+                _targets.RemoveAt(i);
+        }
+
+        if (!_targets.TryGetPrimary(out var primary))
+        {
+            kind = SetupEntityKinds.None;
+            id = Guid.Empty;
+            return false;
+        }
+
+        kind = primary.Kind;
+        id = primary.EntityId;
+        return true;
+    }
+
+    private static bool ExistsInSetup(Setup setup, SelectionTarget target)
+    {
+        return SetupEntities.Exists(setup, target.Kind, target.EntityId);
+    }
+
+    private readonly SelectionSet<SelectionTarget> _targets = new();
+}

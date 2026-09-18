@@ -1,0 +1,162 @@
+#nullable enable
+using ImGuiNET;
+using T3.Editor.Gui.Styling;
+using Color = T3.Core.DataTypes.Vector.Color;
+using Vector2 = System.Numerics.Vector2;
+
+namespace T3.Editor.Gui.Interaction.CanvasEditing;
+
+/// <summary>
+/// A single draggable point on a <see cref="ScalableCanvas"/> — the shared primitive behind
+/// corner-pins, annotation-line endpoints, calibration points, etc. Owns the consistent handle
+/// glyph, hover state, hit-testing, the drag lifecycle, and an optional snapping pass; the caller
+/// owns the point data (mutated in place) and any undo command. Push a unique ImGui id before
+/// calling when several handles share a frame.
+/// </summary>
+internal static class CanvasPointHandle
+{
+    internal enum DragPhases
+    {
+        None,
+        Started,
+        Dragging,
+        Completed,
+    }
+
+    internal enum Shapes
+    {
+        Circle,
+        Square,
+    }
+
+    internal struct Style
+    {
+        public Color Color;
+        public Color ActiveColor;
+
+        /// <summary>Drawn around the fill; transparent by default so plain handles are unchanged.</summary>
+        public Color OutlineColor;
+
+        public Shapes Shape;
+        public float Radius; // unscaled screen pixels
+        public bool IsEditable;
+
+        public static Style Default(Color color, Shapes shape = Shapes.Circle, bool editable = true)
+        {
+            return new Style
+                       {
+                           Color = color,
+                           ActiveColor = UiColors.ForegroundFull,
+                           OutlineColor = Color.TransparentBlack,
+                           Shape = shape,
+                           Radius = 5,
+                           IsEditable = editable,
+                       };
+        }
+    }
+
+    /// <summary>
+    /// Draws one handle and processes its drag. <paramref name="posInCanvas"/> is mutated in place while
+    /// dragging; snapping is the caller's job afterwards, in whatever space its edit lives in. Returns the
+    /// drag phase for the caller's undo logic.
+    /// </summary>
+    public static DragPhases Draw(ref Vector2 posInCanvas, ICanvasProjection projection, in Style style)
+    {
+        var dl = ImGui.GetWindowDrawList();
+        var screen = projection.CanvasToScreen(posInCanvas);
+        var radius = style.Radius * T3Ui.UiScaleFactor;
+
+        var phase = DragPhases.None;
+        var isHovered = false;
+        var isHeld = false;
+        if (style.IsEditable)
+        {
+            var hitSize = new Vector2(radius * 3);
+            ImGui.SetCursorScreenPos(screen - hitSize * 0.5f);
+            ImGui.InvisibleButton("handle", hitSize);
+            isHovered = ImGui.IsItemHovered();
+            isHeld = ImGui.IsItemActive(); // stays true through a paused drag, when hover/drag both read false
+            if (isHovered)
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+
+            if (ImGui.IsItemActivated())
+            {
+                // The drag accumulates mouse deltas from where the point was, so it never jumps to the cursor
+                // and a precision modifier can scale the motion mid-drag.
+                _dragScreen = screen;
+                phase = DragPhases.Started;
+            }
+            else if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left, 0f))
+            {
+                // Shift: fine positioning — the point moves a tenth of the mouse.
+                var io = ImGui.GetIO();
+                _dragScreen += io.MouseDelta * (io.KeyShift ? PrecisionDragFactor : 1f);
+                posInCanvas = projection.ScreenToCanvas(_dragScreen);
+                screen = projection.CanvasToScreen(posInCanvas);
+                phase = DragPhases.Dragging;
+            }
+            else if (ImGui.IsItemDeactivated())
+            {
+                phase = DragPhases.Completed;
+            }
+        }
+
+        // A caller that snapped the dragged point reports where it landed; the held handle draws there rather
+        // than under the cursor, so the handle and the edges it moves agree.
+        if (isHeld && _snapReported)
+        {
+            screen = _snapScreen;
+            _snapReported = false;
+        }
+
+        var isActive = isHovered || isHeld;
+        var color = isActive ? style.ActiveColor : style.Color;
+        var outlineWidth = 1.5f * T3Ui.UiScaleFactor;
+        var hasOutline = style.OutlineColor.Rgba.W > 0.01f;
+
+        if (style.Shape == Shapes.Square)
+        {
+            var half = new Vector2(radius);
+            dl.AddRectFilled(screen - half, screen + half, color);
+            if (hasOutline)
+                dl.AddRect(screen - half, screen + half, style.OutlineColor, 0, ImDrawFlags.None, outlineWidth);
+        }
+        else
+        {
+            dl.AddCircleFilled(screen, radius, color);
+            if (hasOutline)
+                dl.AddCircle(screen, radius, style.OutlineColor, 0, outlineWidth);
+        }
+
+        return phase;
+    }
+
+    // Only one handle drags at a time, so a single shared grab offset is sufficient.
+    /// <summary>Held Shift slows a handle drag to this fraction of the mouse's motion.</summary>
+    public const float PrecisionDragFactor = 0.1f;
+
+    /// <summary>
+
+    /// Tells the handle being dragged where its point ended up after the caller's snapping, so its next draw
+
+    /// sits on that point. Call right after <see cref="Draw"/> returned <see cref="DragPhases.Dragging"/>.
+
+    /// </summary>
+
+    public static void ReportSnappedPosition(ICanvasProjection projection, Vector2 posInCanvas)
+
+    {
+
+        _snapScreen = projection.CanvasToScreen(posInCanvas);
+
+        _snapReported = true;
+
+    }
+
+
+    private static Vector2 _snapScreen;
+
+    private static bool _snapReported;
+
+    private static Vector2 _dragScreen;
+}

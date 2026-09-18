@@ -132,6 +132,13 @@ public static class UiColors
     [T3Style.Hint(Description = "Related to time — animation, keyframes, playback (orange).")]
     public static Color StatusAnimated = new(1f, 0.46f, 0f, 1f);
 
+    // -- Output setup ---------------------------------------------------------------------------------
+    [T3Style.Hint(GroupTitle = "Output setup", Description = "Surfaces and their regions — the physical things in a projection setup (green).")]
+    public static Color SetupSurface = new(0.468f, 0.586f, 0.320f, 1.000f);
+
+    [T3Style.Hint(Description = "Reference images on the setup Board (teal).")]
+    public static Color SetupReferenceImage = new(0.132f, 0.722f, 0.762f, 1.000f);
+
     // -- Graph operator widgets ----------------------------------------------------------------------
     [T3Style.Hint(GroupTitle = "Graph operator widgets",
                   Description = "Value text shown inside operator widgets on the graph (sliders, knobs, etc.).")]

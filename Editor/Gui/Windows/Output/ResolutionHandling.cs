@@ -1,8 +1,12 @@
 using ImGuiNET;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Output;
 using T3.Core.Settings;
+using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.Serialization;
 
 namespace T3.Editor.Gui.Windows.Output;
@@ -94,6 +98,78 @@ internal static class ResolutionHandling
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// The active setup's outputs and their present-on-display bindings, hung in the output window's
+    /// breadcrumb menu. Binding a projector/display presents it fullscreen; the output manager then
+    /// composites and drives it. This lives here (not in the resolution selector) — an output target
+    /// is not a view resolution.
+    /// </summary>
+    public static void DrawOutputBindingMenu()
+    {
+        if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out var machineConfig))
+            return;
+
+        CustomComponents.DrawMenuGroupLabel("Outputs");
+
+        if (setup.Outputs.Count == 0)
+            CustomComponents.DrawMenuItem(999, "No outputs in this setup", isEnabled: false);
+
+        for (var index = 0; index < setup.Outputs.Count; index++)
+        {
+            var output = setup.Outputs[index];
+            var binding = machineConfig.FindBinding(output.Id);
+            var isBindable = output.Kind is OutputDefinition.Kinds.Projector or OutputDefinition.Kinds.Display;
+            var label = binding == null
+                            ? $"{output.Name}  ·  {output.ResolvedResolution.Width}×{output.ResolvedResolution.Height}"
+                            : $"{output.Name}  →  {Plugs.BindingLabel(machineConfig, binding)}";
+
+            if (isBindable)
+            {
+                if (CustomComponents.DrawSubMenu(1000 + index, label))
+                {
+                    DrawBindingMenuItems(output, machineConfig);
+                    ImGui.EndMenu();
+                }
+            }
+            else
+            {
+                // Default/format outputs are render targets, not something you present to a display.
+                CustomComponents.DrawMenuItem(1000 + index, label, isEnabled: false);
+            }
+        }
+    }
+
+    /// <summary>The plugs an output can be bound to: every attached display, then the machine's stream senders.</summary>
+    internal static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)
+    {
+        var screens = System.Windows.Forms.Screen.AllScreens;
+        var binding = machineConfig.FindBinding(output.Id);
+        var boundPlug = Plugs.BoundPlugId(binding);
+        for (var screenIndex = 0; screenIndex < screens.Length; screenIndex++)
+        {
+            var screen = screens[screenIndex];
+            var plugId = Plugs.DisplayPlugId(screenIndex);
+            var label = $"Fullscreen on Display {screenIndex + 1} ({screen.Bounds.Width}×{screen.Bounds.Height})";
+            if (CustomComponents.DrawMenuItem(screenIndex, label, isChecked: boundPlug == plugId))
+                Plugs.BindOutput(machineConfig, output.Id, plugId);
+        }
+
+        for (var i = 0; i < machineConfig.StreamPlugs.Count; i++)
+        {
+            var stream = machineConfig.StreamPlugs[i];
+            var label = $"Send to {stream.Kind}: {stream.Name}";
+            if (CustomComponents.DrawMenuItem(100 + i, label, isChecked: boundPlug == stream.Id, isEnabled: Plugs.IsStreamKindAvailable(stream.Kind)))
+                Plugs.BindOutput(machineConfig, output.Id, stream.Id);
+        }
+
+        if (binding != null)
+        {
+            CustomComponents.SeparatorLine();
+            if (CustomComponents.DrawMenuItem(999, "Unbind"))
+                Plugs.UnbindOutput(machineConfig, output.Id);
+        }
     }
 
     private static Resolution _resolutionForEdit = new("untitled", 256, 256);

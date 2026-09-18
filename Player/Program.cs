@@ -21,6 +21,8 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Output;
+using T3.Core.Output.Rendering;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
 using T3.Core.Resource;
@@ -87,7 +89,11 @@ internal static partial class Program
             _startupOptions = PlayerStartupOptions.Resolve(exportSettings, commandLine, lastUsedPath);
             var displays = silkWindows.GetDisplays();
 
-            var showDialog = commandLine.ForceDialog || (!commandLine.NoDialog && !exportSettings.Export.SkipStartupDialog);
+            // An installation comes up on its own displays with no one at the keyboard, so it never asks —
+            // though --dialog still forces the question when someone is there to answer it.
+            var skipDialog = exportSettings.Export.SkipStartupDialog
+                             || exportSettings.Export.PlayerMode == CompositionSettings.PlayerModes.Installation;
+            var showDialog = commandLine.ForceDialog || (!commandLine.NoDialog && !skipDialog);
             if (showDialog)
             {
                 var dialog = new PlayerStartupDialog(exportSettings.ApplicationTitle, exportSettings.Author, displays, _startupOptions);
@@ -264,6 +270,9 @@ internal static partial class Program
                                 Settings = playbackSettings
                             };
 
+            LoadOutputSetup(displays, resolution);
+            InitializeOutputWindows(displays);
+
             // Create instance of project op, all children are create automatically
             loadReport.BeginStage("Create instances");
             if (!PumpLoadingScreen("Creating operators...", LoadProgressInstance))
@@ -343,36 +352,13 @@ internal static partial class Program
                                      };
             _rasterizerState = new RasterizerState(_device, rasterizerDesc);
 
-            foreach (var output in _project.Outputs)
+            // The sends are what a show puts on screen. Creating them also registers them, which is how the
+            // compositor finds the content the setup routes — nothing else would ever instantiate them.
+            ContentSupplierSearch.CollectUnder(_project, _sends);
+            if (_sends.Count == 0)
             {
-                if (output is Slot<Texture2D> textureSlot)
-                {
-                    if (_textureOutput == null)
-                        _textureOutput = textureSlot;
-                    else
-                    {
-                        var message = "Multiple texture outputs found. Only the first one will be used.";
-                        Log.Warning(message);
-                        break;
-                    }
-                }
-            }
-
-            if (_textureOutput == null)
-            {
-                var sb = new StringBuilder();
-                var slots = _project.Outputs.Where(x => x is not null).ToArray();
-                sb.AppendLine("Found the following outputs:");
-                foreach (var slot in slots)
-                {
-                    sb.AppendLine($"{slot.GetType()} | {slot.ValueType} ({slot.ValueType.Assembly.ToString()}\n");
-                }
-
-                sb.AppendLine();
-                sb.AppendLine("Expected:");
-                sb.Append($"{typeof(Slot<Texture2D>).FullName} | {typeof(Texture2D).FullName} ({typeof(Texture2D).Assembly.ToString()}\n");
-                var message = $"Failed to find texture output. \n{sb}";
-                CloseApplication(true, message);
+                CloseApplication(true, "Nothing to show: this project contains no [SendToOutput].\n"
+                                       + "Connect what it renders to a [SendToOutput] and export it again.");
                 return;
             }
 
@@ -382,7 +368,7 @@ internal static partial class Program
             loadReport.BeginStage("Warm up shaders");
             if (prerenderRequired)
             {
-                if (!PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext, _textureOutput,
+                if (!PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext,
                                                 _renderView))
                 {
                     CloseApplication(false, "Loading cancelled.");
@@ -471,6 +457,8 @@ internal static partial class Program
             // Release all resources
             try
             {
+                DisposeOutputWindows();
+                OutputStreaming.DisposeAll();
                 _renderView?.Dispose();
                 _backBuffer?.Dispose();
                 _deviceContext?.ClearState();
@@ -553,6 +541,36 @@ internal static partial class Program
     /// Logs and remembered settings live in a .temp folder next to the executable, where users look for them.
     /// Falls back to the roaming app-data folder when the export location is read-only.
     /// </summary>
+    /// <summary>
+    /// Publishes the venue shipped beside the player, so operators that read the active setup (the stage
+    /// geometry, the projector camera) work in an export as they do in the editor. An output left at 0 × 0
+    /// takes the size of what shows it: its display when bound, else the resolution this player runs at.
+    /// </summary>
+    private static void LoadOutputSetup(IReadOnlyList<T3.SystemUi.DisplayInfo> displays, Int2 windowResolution)
+    {
+        var metaFolder = Path.Combine(FileLocations.StartFolder, Setup.FolderName);
+        if (!SetupFiles.TryLoad(metaFolder, out var setup, out var machineConfig, out _) || setup == null)
+        {
+            Log.Debug("No output setup shipped with this project.");
+            return;
+        }
+
+        // Called once at startup, so the capturing lambda costs nothing that matters.
+        SetupFiles.ResolveCanvasResolutions(setup, machineConfig,
+                                            binding => binding switch
+                                                           {
+                                                               null => windowResolution,
+                                                               { IsStream: true } => SetupFiles.UnboundResolution,
+                                                               _ when binding.DisplayIndex >= 0 && binding.DisplayIndex < displays.Count
+                                                                   => new Int2(displays[binding.DisplayIndex].Bounds.Width,
+                                                                               displays[binding.DisplayIndex].Bounds.Height),
+                                                               _ => windowResolution,
+                                                           });
+        ActiveSetup.Current = setup;
+        ActiveSetup.Machine = machineConfig;
+        Log.Info($"Loaded output setup \"{setup.Name}\": {setup.Outputs.Count} output(s), {setup.Surfaces.Count} surface(s).");
+    }
+
     private static string ResolvePlayerDataDirectory(ExportSettings exportSettings)
     {
         var localDirectory = Path.Combine(FileLocations.StartFolder, ".temp");
@@ -641,5 +659,5 @@ internal static partial class Program
     private static Resource<PixelShader> _fullScreenPixelShaderResource;
     private static Device _device;
     private static Int2 _resolution;
-    private static Slot<Texture2D> _textureOutput;
+    private static readonly List<Instance> _sends = [];
 }

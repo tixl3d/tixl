@@ -114,7 +114,8 @@ public sealed class DebugProtocolClient : IDisposable
     public JObject GetGraphState(bool includeDefaults = false)
         => Call("getGraphState", new { includeDefaults }).Require("getGraphState");
 
-    public void Screenshot(string path) => Call("screenshot", new { path }).Require("screenshot");
+    /// <param name="target">"output" (the output window's texture) or "ui" (the whole editor window as rendered).</param>
+    public void Screenshot(string path, string target = "output") => Call("screenshot", new { path, target }).Require("screenshot");
     public Response Reload(string project) => Call("reload", new { project });
     public void Undo() => Call("undo").Require("undo");
 

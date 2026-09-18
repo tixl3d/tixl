@@ -37,13 +37,22 @@ JSON lines over TCP on `127.0.0.1:<port>`. One request per line, one response pe
 ## Methods
 
 Read surface: `ping`, `getVersion`, `getStructureVersion`, `getMetrics`, `getContext`,
-`getLogTail` (`minLevel`, `maxCount`), `getGraphState`, `getGraphView`, `getOutput`,
-`screenshot` (`path`), `screenshotWindow` (`path`, `region`).
+`getLogTail` (`minLevel`, `maxCount`), `getGraphState`, `getOutput`, `screenshot` (`path`,
+optional `target`: `output` = the output window's texture, the default; `ui` = the **whole editor
+window as rendered** — windows, panels, canvases — copied from the back buffer on the next frame).
+Use `target: "ui"` to verify UI work; it needs no OS screen grab and doesn't care which window is
+in front (a fullscreen presentation viewer, for instance). UI captures are written opaque — the back
+buffer's alpha is render residue and would make the PNG see-through.
 
-Control surface: `openProject` (`name`), `newProject`, `select` (`childId` / `childIds`, `add`),
-`setGraphView`, `focusGraphView`, `setInput` (`childId`, `inputName`, `value`), `addOp`,
-`connect`, `deleteOp`, `pin`, `pumpFrames` (`count`), `resetView`, `reload`, `undo`, `redo`,
-`setTime`, `setPlayback`, `stallMainThread` (`seconds`, `estimateKey`, `message`), `shutdown`.
+Control surface: `openProject` (`name`), `newProject`, `select` (`childId`), `setInput`
+(`childId`, `inputName`, `value`), `addOp`, `connect`, `deleteOp`, `pin`, `pumpFrames`
+(`count`), `resetView`, `reload`, `undo`, `redo`, `setTime`, `setPlayback`, `shutdown`,
+`outputSetup` (`entity`: a setup entity's display name to select, e.g. `"Surface 1"`; `mode`: the
+strip's toolbar tab — `Board`, `Straight`, `Output`; either optional).
+It does what the outliner click and the tab click do, so Board ↔ space folds can be driven without a
+mouse. Every fold logs one `[fold] metrics …` line at Debug level (read it with `getLogTail`): the
+rectified surface's on-screen centre path as mean distance from the window centre, path length over
+the chord (1.00 = a straight line) and the largest deviation from the chord.
 
 Parameter shapes are defined in `DebugServer.cs` — read the handler when unsure. Notes:
 

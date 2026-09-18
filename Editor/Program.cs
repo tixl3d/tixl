@@ -1,5 +1,6 @@
 #nullable enable
 using SharpDX.Direct3D11;
+using T3.Editor.Gui.Windows.OutputSetup;
 using SilkWindows;
 using System.Diagnostics;
 using System.Globalization;
@@ -240,6 +241,8 @@ internal static class Program
         UiContentUpdate.SetupResourcesAndFontsWithScaling();
             
         // Setup file watching the operator source
+        // The compositor draws the calibration overlay through this; a player installs none and gets a bare composite.
+        CalibrationOverlay.Install();
         T3Ui.InitializeEnvironment();
         SkillTraining.Initialize();
             

@@ -1,0 +1,14 @@
+using T3.Core.Output;
+using T3.Core.Output.Streaming;
+
+namespace Lib.Utils;
+
+/// <summary>Offers Spout senders to the output setup; discovered by type when this package loads.</summary>
+internal sealed class SpoutStreamProvider : IOutputStreamProvider
+{
+    public string Kind => "Spout";
+
+    public OutputStreamOptions Supported => OutputStreamOptions.None;
+
+    public IOutputStreamSender CreateSender(string name) => new SpoutSender(name);
+}

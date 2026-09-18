@@ -18,7 +18,7 @@ the optional libraries those operators declare, and no foreign-platform runtimes
 ## Step: Build the test graph
 
 **Action:**
-Create a new symbol `StripTest` with a `Texture2D` output. Inside, connect a `[Blob]` to the output.
+Create a new symbol `StripTest`. Inside, connect a `[Blob]` to a `[SendToOutput]`.
 Add a second, **unconnected** `[VideoDeviceInput]` (webcam) operator next to it and an unconnected `[AudioClip]`
 with `AutoPlay` on and a short audio file assigned.
 

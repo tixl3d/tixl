@@ -41,6 +41,26 @@ internal static class FrameStats
         return Last.HoveredIds.Contains(id);
     }
 
+    /// <summary>
+    /// Flags an item for a cross-highlight, wherever it happens to be drawn. Lets one place (a hovered list
+    /// row, a search hit) draw attention to an item elsewhere without the two sharing anything but its
+    /// <see cref="Guid"/>. Read the amount with <see cref="CrossHighlightAmount"/> and mix a highlight toward the item's
+    /// own color by it — <c>lerp(itemColor, highlight, CrossHighlightAmount(id))</c>. A plain on/off hover, no animation:
+    /// double-buffered like <see cref="HoveredIds"/>, so it lands one frame later (imperceptible).
+    /// </summary>
+    internal static void RequestCrossHighlight(Guid id)
+    {
+        Current.CrossHighlightedIds.Add(id);
+    }
+
+    /// <summary>The highlight-mix amount for <paramref name="id"/> — <see cref="CrossHighlightMix"/> while it's pulsing, else 0.</summary>
+    internal static float CrossHighlightAmount(Guid id)
+    {
+        return Last.CrossHighlightedIds.Contains(id) ? CrossHighlightMix : 0f;
+    }
+
+    private const float CrossHighlightMix = 0.7f;
+
     internal sealed class Stats
     {
         internal bool HasKeyframesBeforeCurrentTime;
@@ -54,6 +74,7 @@ internal static class FrameStats
         internal bool SomethingWithTooltipHovered;
         internal bool UndoRedoTriggered;
         internal readonly HashSet<Guid> HoveredIds = [];
+        internal readonly HashSet<Guid> CrossHighlightedIds = [];
             
         /// <summary>
         /// This is reset on Frame start and can be useful for allow context menu to stay open even if a
@@ -74,6 +95,7 @@ internal static class FrameStats
             SomethingWithTooltipHovered = false;
             UndoRedoTriggered = false;
             HoveredIds.Clear();
+            CrossHighlightedIds.Clear();
         }
     }
 

@@ -68,7 +68,7 @@ ___
 Day-to-day reference: UI windows, graphs, connecting data, exporting, and live-use workflows.
 
 - **Timeline and media:** [Timeline](using/Timeline.md) · [Export videos and image sequences](using/ExportVideos.md) · [Export as a standalone executable](using/ExportExecutables.md)
-- **Presets and performance:** [Presets and snapshots](using/PresetsAndSnapshots.md) · [Live performances](using/LivePerformances.md) · [Sharing example projects](using/SharingExampleProjects.md)
+- **Presets and performance:** [Presets and snapshots](using/PresetsAndSnapshots.md) · [Live performances](using/LivePerformances.md) · [Output Setup](using/OutputSetup.md) · [Sharing example projects](using/SharingExampleProjects.md)
 - **Rendering and perf:** [Real-time rendering](using/RealtimeRendering.md) · [Optimizing performance](using/OptimizingRenderingPerformance.md) · [Remove static background](using/RemoveStaticBackground.md)
 - **Connecting data:** [Sending and receiving OSC](using/OSC.md) · [ArtNet / DMX](using/ArtnetAndDMX.md)
 - **General:** [Keyboard shortcuts](using/KeyboardShortcuts.md) · [Backups](using/Backups.md) · [FAQ](using/FAQ.md) · [FAQ: building content](using/FaqBuildingContent.md)

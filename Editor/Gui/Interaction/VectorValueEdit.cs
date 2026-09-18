@@ -7,8 +7,10 @@ namespace T3.Editor.Gui.Interaction;
 internal static class VectorValueEdit
 {
     // Float control
+    /// <param name="rotationStep">Degrees per press of the rotate buttons a single "°" field gets, for a value that
+    /// only takes whole steps (a quarter turn); null keeps the free 45° (Shift: 5°).</param>
     internal static InputEditStateFlags Draw(float[] components, float min, float max, float scale, bool clampMin, bool clampMax, float rightPadding = 0,
-                                             string format = null)
+                                             string format = null, float? rotationStep = null)
     {
         // Editors fill the content region, so the snapshot control view's reserved space for
         // per-row revert buttons has to be subtracted here - SetNextItemWidth has no effect.
@@ -36,7 +38,11 @@ internal static class VectorValueEdit
                 resultingEditState |= SingleValueEdit.Draw(ref components[index], fieldSize, min, max, clampMin, clampMax, scale, format ??= "{0:0.000}");
 
                 // Draw +/- buttons for single float component with ° format
-                var increment = ImGui.GetIO().KeyShift ? ShiftIncrementFloat : DefaultIncrementFloat;
+                // Negative like the defaults: the counter-clockwise button subtracts it, so positive angles turn
+                // counter-clockwise as every rotation field in TiXL does.
+                var increment = rotationStep.HasValue
+                                    ? -rotationStep.Value
+                                    : ImGui.GetIO().KeyShift ? ShiftIncrementFloat : DefaultIncrementFloat;
                 ImGui.SameLine();
                 ImGui.PushFont(Icons.IconFont);
                 if (DrawButton((char)Icon.RotateCounterClockwise+"", buttonSize, !clampMin || components[index] > min))

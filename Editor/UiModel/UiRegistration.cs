@@ -1,4 +1,5 @@
 
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.DataTypes.Vector;
@@ -100,7 +101,7 @@ internal static class UiRegistration
 
         RegisterTypesToProperty(UiProperties.ShaderGraph,
                                 typeof(ShaderGraphNode));
-        
+
         RegisterTypesToProperty(UiProperties.AudioGraph,
                                 typeof(AudioGraphNode));
 
@@ -109,6 +110,7 @@ internal static class UiRegistration
                                 // system types
                                 RegisterIOType(typeof(float), () => new FloatInputUi(), () => new FloatOutputUi());
         RegisterIOType(typeof(int), () => new IntInputUi());
+        RegisterIOType(typeof(Guid), () => new GuidInputUi());
         RegisterIOType(typeof(bool), () => new BoolInputUi(), () => new BoolOutputUi());
         RegisterIOType(typeof(double), () => new FloatInputUi(), () => new FloatOutputUi());
 
@@ -122,6 +124,8 @@ internal static class UiRegistration
         RegisterIOType(typeof(string), () => new StringInputUi(), () => new StringOutputUi());
         RegisterIOType(typeof(List<string>), () => new StringListInputUi(), () => new StringListOutputUi());
         RegisterIOType(typeof(List<Vector4>), () => new ColorListInputUi(), () => new ColorListOutputUi());
+        RegisterIOType(typeof(List<Guid>), () => new GuidListInputUi());
+        T3.Editor.Gui.Windows.OutputSetup.SetupParameterView.RegisterGuidListHooks();
         
         // t3 core types
         RegisterIOType(typeof(Curve), () => new CurveInputUi());

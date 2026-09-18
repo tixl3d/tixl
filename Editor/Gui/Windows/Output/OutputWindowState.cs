@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.Output;
 
@@ -27,6 +29,32 @@ internal sealed class OutputWindowState
     // Background
     public float[] BackgroundColor = [0.1f, 0.1f, 0.1f, 1.0f];
 
+    /// <summary>
+    /// Writes values into <paramref name="target"/>, reusing it when it already has the right length. The window
+    /// syncs its state every frame, so replacing these arrays each time would allocate per frame per window.
+    /// </summary>
+    internal static void CopyInto(ref float[] target, float x, float y, float z)
+    {
+        if (target.Length != 3)
+            target = new float[3];
+
+        target[0] = x;
+        target[1] = y;
+        target[2] = z;
+    }
+
+    /// <inheritdoc cref="CopyInto(ref float[], float, float, float)"/>
+    internal static void CopyInto(ref float[] target, System.Numerics.Vector4 value)
+    {
+        if (target.Length != 4)
+            target = new float[4];
+
+        target[0] = value.X;
+        target[1] = value.Y;
+        target[2] = value.Z;
+        target[3] = value.W;
+    }
+
     // Camera
     [JsonConverter(typeof(StringEnumConverter))]
     public CameraControlModes CameraControlMode = CameraControlModes.AutoUseFirstCam;
@@ -46,6 +74,12 @@ internal sealed class OutputWindowState
     public bool IsPinned;
     public Guid[] PinnedInstancePath = [];
     public Guid PinnedOutputId = Guid.Empty;
+
+    // Setup-entity pin (the setup-editing view's pin; orthogonal to the op-instance pin above)
+    [JsonConverter(typeof(StringEnumConverter))]
+    public SetupEntityKinds PinnedEntityKind = SetupEntityKinds.None;
+
+    public Guid PinnedEntityId = Guid.Empty;
 
     /// <summary>
     /// Camera control modes — mirrors CameraSelectionHandling.ControlModes

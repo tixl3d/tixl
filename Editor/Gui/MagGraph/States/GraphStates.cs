@@ -403,10 +403,9 @@ namespace T3.Editor.Gui.MagGraph.States
                   Enter: _ => { },
                   Update: context =>
                           {
-                              var sourceItem = context.ActiveItem;
-                              Debug.Assert(sourceItem != null);
-                              Debug.Assert(sourceItem.OutputLines.Length > 0 ||
-                                           sourceItem.Variant == MagGraphItem.Variants.Output);
+                              // This state is entered from an input anchor, so the interaction happens on
+                              // the target item. It may well have no outputs at all (e.g. [SendToOutput]).
+                              Debug.Assert(context.ActiveTargetItem != null);
                               Debug.Assert(context.ActiveTargetInputId != Guid.Empty);
 
                               // Click

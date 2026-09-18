@@ -1,0 +1,359 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Numerics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using T3.Serialization;
+
+namespace T3.Core.Output;
+
+/// <summary>
+/// A projection target: physical size, rectified ContentCanvas, per-output mappings, and
+/// optional reference-image / stage upgrades. The calibration ladder is monotone in data —
+/// upgrading a surface adds fields, never rewrites existing ones.
+/// </summary>
+public sealed class Surface
+{
+    public static class SurfaceTypes
+    {
+        public const string Rect = "Rect";
+    }
+
+    public static class Kinds
+    {
+        /// <summary>A real plane placed in the stage — meters, own pose, calibratable.</summary>
+        public const string Physical = "Physical";
+
+        /// <summary>A coplanar child arranged in pixels; no independent pose, inherits its parent's plane.</summary>
+        public const string Layout = "Layout";
+    }
+
+    /// <summary>
+    /// ContentCanvas → OutputCanvas transfer for one output (a corner pin). A Layout child normally has
+    /// none and is projected through its nearest mapped ancestor; a mapping of its own overrides that for
+    /// that one output, which is how a region reaches a projector or tile of its own while staying a child.
+    /// </summary>
+    public sealed class OutputMapping
+    {
+        public static class Modes
+        {
+            public const string CornerPin = "CornerPin";
+        }
+
+        public Guid OutputId;
+        public string Mode = Modes.CornerPin;
+
+        /// <summary>
+        /// Corners in the output canvas' own 0..1 space (Y down): top-left, top-right, bottom-right,
+        /// bottom-left of the content canvas. Normalized rather than pixels, so the canvas resolution is only
+        /// a render size — changing it (or letting it follow the display that is plugged in) leaves every
+        /// mapping aimed exactly where it was. Editors work in pixels and convert at this boundary; see
+        /// <see cref="OutputDefinition.CanvasSize"/>.
+        /// </summary>
+        public Vector2[] Quad = new Vector2[4];
+
+/// <summary>
+        /// Where one of the surface's reference points sits on this output, in the same 0..1 canvas space.
+        /// <para><see cref="IsAimed"/> means the user put it there and the pin is solved to project the point
+        /// exactly onto it. An un-aimed placement is only where the mark is drawn — seeded once from wherever
+        /// the pin projected the point when it first appeared here, and never moved again by anything but a
+        /// drag. That is what makes a mark something you can align against: a mark that rides the pin moves
+        /// every time the pin is re-solved, so it can never disagree with it, and a mark that cannot disagree
+        /// says nothing.</para>
+        /// </summary>
+        public readonly record struct PointAim(Vector2 Position, bool IsAimed);
+
+        /// <summary>Where each of the surface's reference points sits on this output, by point id.</summary>
+        public Dictionary<Guid, PointAim> PointAims = new();
+
+        public void WriteToJson(JsonTextWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteObject("OutputId", OutputId);
+            writer.WriteString("Mode", Mode);
+            writer.WriteQuad("Quad", Quad);
+            if (PointAims.Count > 0)
+            {
+                writer.WritePropertyName("PointAims");
+                writer.WriteStartArray();
+                foreach (var (pointId, aim) in PointAims)
+                {
+                    writer.WriteStartObject();
+                    writer.WriteObject("Point", pointId);
+                    writer.WriteVector2("Target", aim.Position);
+                    writer.WriteValue("Aimed", aim.IsAimed);
+                    writer.WriteEndObject();
+                }
+
+                writer.WriteEndArray();
+            }
+
+            writer.WriteEndObject();
+        }
+
+        public static OutputMapping ReadFromJson(JToken token)
+        {
+            var mapping = new OutputMapping
+                              {
+                                  OutputId = OutputJson.ReadGuid(token["OutputId"]),
+                                  Mode = token.ReadValueSafe("Mode", Modes.CornerPin) ?? Modes.CornerPin,
+                                  Quad = OutputJson.ReadQuad(token["Quad"]),
+                              };
+
+            // "PointAims", not the old "PointTargets": those held canvas pixels, which read as fractions would
+            // put every mark a thousand canvases away. Dropping them re-seeds the marks from the pin.
+            if (token["PointAims"] is JArray aims)
+            {
+                foreach (var aim in aims)
+                {
+                    var pointId = OutputJson.ReadGuid(aim["Point"]);
+                    if (pointId != Guid.Empty)
+                    {
+                        mapping.PointAims[pointId] = new PointAim(OutputJson.ReadVector2(aim["Target"]),
+                                                                 aim.ReadValueSafe("Aimed", true));
+                    }
+                }
+            }
+
+            return mapping;
+        }
+    }
+
+    /// <summary>Where this surface was traced on a reference image, plus its measurements.</summary>
+    public sealed class TraceBinding
+    {
+        public Guid ImageId;
+
+        /// <summary>Corners in reference-image pixels, same winding as <see cref="OutputMapping.Quad"/>.</summary>
+        public Vector2[] Quad = new Vector2[4];
+
+        public List<Annotation> Annotations = [];
+
+        public void WriteToJson(JsonTextWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteObject("ImageId", ImageId);
+            writer.WriteQuad("Quad", Quad);
+            writer.WritePropertyName("Annotations");
+            writer.WriteStartArray();
+            foreach (var annotation in Annotations)
+                annotation.WriteToJson(writer);
+
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        public static TraceBinding ReadFromJson(JToken token)
+        {
+            return new TraceBinding
+                       {
+                           ImageId = OutputJson.ReadGuid(token["ImageId"]),
+                           Quad = OutputJson.ReadQuad(token["Quad"]),
+                           Annotations = token.ReadListSafe("Annotations", Annotation.ReadFromJson),
+                       };
+        }
+    }
+
+    /// <summary>
+    /// Placement in the stage. Position is the world position of the <see cref="Anchor"/>;
+    /// axis-aligned presets are editing rigs over the pose, not a storage format.
+    /// </summary>
+    public sealed class StagePlacement
+    {
+        public Pose Pose = Pose.Identity;
+
+        public void WriteToJson(JsonTextWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WriteVector3("Position", Pose.Position);
+            writer.WriteQuaternion("Orientation", Pose.Orientation);
+            writer.WriteEndObject();
+        }
+
+        public static StagePlacement ReadFromJson(JToken token)
+        {
+            return new StagePlacement
+                       {
+                           Pose = new Pose(OutputJson.ReadVector3(token["Position"]),
+                                           OutputJson.ReadQuaternion(token["Orientation"])),
+                       };
+        }
+    }
+
+    public Guid Id = Guid.NewGuid();
+    public string Name = string.Empty;
+    public string Type = SurfaceTypes.Rect;
+
+    /// <summary>Physical (own stage pose, meters) vs Layout (coplanar child, pixels) — see <see cref="Kinds"/>.</summary>
+    public string Kind = Kinds.Physical;
+
+    /// <summary>Parent surface for nesting; <see cref="Guid.Empty"/> for a root. A Layout child inherits its parent's plane.</summary>
+    public Guid ParentId;
+
+    /// <summary>
+    /// For a Layout child: its bottom-left corner in meters from the *parent's anchor*, X right and Y up.
+    /// Anchoring to the parent's grid origin — rather than normalizing to the parent's rect — is what keeps
+    /// sub-regions welded to the meter raster when the parent is cropped or stretched.
+    /// </summary>
+    public Vector2 LocalPosition;
+
+    /// <summary>When false the output manager skips this surface (kept in the setup, just not drawn).</summary>
+    public bool IsRendered = true;
+
+    /// <summary>The <see cref="Slice"/> this surface shows; <see cref="Guid.Empty"/> for none. Several
+    /// surfaces may name the same slice (the feed mirrored), and a surface shows at most one.</summary>
+    public Guid SliceId;
+
+    /// <summary>Physical size in meters. Defines the ContentCanvas aspect.</summary>
+    public Vector2 SizeInMeters = new(1, 1);
+
+    /// <summary>
+    /// The surface's anchor, signed and centred: (0,0) is the centre, (0,−1) the bottom-centre, (±1,±1) the
+    /// corners, Y up. It is the origin of the surface's own space — measuring lines, child regions and the
+    /// metre raster are all measured from it — and the point a stage placement positions.
+    /// </summary>
+    public Vector2 Anchor = DefaultAnchor;
+
+    /// <summary>Bottom-centre: a surface stands on the floor line by default.</summary>
+    public static readonly Vector2 DefaultAnchor = new(0, -1);
+
+    /// <summary>Where the anchor sits in metres from the surface's bottom-left corner.</summary>
+    public Vector2 AnchorInMeters => (Anchor + Vector2.One) * 0.5f * SizeInMeters;
+
+    /// <summary>When set, resizing keeps the current width/height ratio: editing one dimension solves the other.</summary>
+    public bool IsAspectLocked;
+
+    /// <summary>Projects a real-world calibration raster over this surface (no content needed) so its
+    /// corner-pin can be hand-aligned to physical wall features. Major lines are one meter apart and start at
+    /// the <see cref="Anchor"/>, so the raster doubles as a ruler you can match to marks on the wall.</summary>
+    public bool ShowGrid;
+
+    /// <summary>Minor raster lines per meter; 1 draws meter lines only. They fade out once too dense to resolve.</summary>
+    public int GridSubdivisions = 10;
+
+    /// <summary>
+    /// ContentCanvas resolution policy: pixel size is derived (px/m × physical size, clamped),
+    /// never stored — surfaces get resized during calibration and content must survive it.
+    /// </summary>
+    public float PixelsPerMeter = 400;
+
+    /// <summary>
+    /// Measuring lines in <b>surface space</b> (meters, origin at the <see cref="Anchor"/>, Y up) — drawn across features of
+    /// the projected raster that were measured for real. Distinct from <see cref="TraceBinding.Annotations"/>,
+    /// which live in reference-photo pixels: these say how big this surface actually is, and "apply lengths"
+    /// re-meters the surface from them without moving anything on the wall.
+    /// </summary>
+    public List<Annotation> Annotations = [];
+
+    public List<OutputMapping> OutputMappings = [];
+
+    /// <summary>This surface's corner pin onto an output, if any — a plain loop, so per-frame callers don't pay a closure.</summary>
+    public OutputMapping? FindMapping(Guid outputId)
+    {
+        foreach (var mapping in OutputMappings)
+        {
+            if (mapping.OutputId == outputId)
+                return mapping;
+        }
+
+        return null;
+    }
+
+    public bool HasMapping(Guid outputId) => FindMapping(outputId) != null;
+    public TraceBinding? Trace;
+    public StagePlacement? Placement;
+
+    /// <summary>A root surface's neutral (unwarped) place on the Board; null until the Board seeded one.</summary>
+    public BoardPlacement? BoardPlacement;
+
+    public void WriteToJson(JsonTextWriter writer)
+    {
+        writer.WriteStartObject();
+        writer.WriteObject("Id", Id);
+        writer.WriteString("Name", Name);
+        writer.WriteString("Type", Type);
+        writer.WriteString("Kind", Kind);
+        writer.WriteObject("ParentId", ParentId);
+        writer.WriteVector2("LocalPosition", LocalPosition);
+        writer.WriteValue("Render", IsRendered);
+        writer.WriteObject("SliceId", SliceId);
+        writer.WriteVector2("SizeInMeters", SizeInMeters);
+        writer.WriteVector2("Anchor", Anchor);
+        writer.WriteValue("LockAspect", IsAspectLocked);
+        writer.WriteValue("PixelsPerMeter", PixelsPerMeter);
+        writer.WriteValue("ShowGrid", ShowGrid);
+        writer.WriteValue("GridSubdivisions", GridSubdivisions);
+
+        if (Annotations.Count > 0)
+        {
+            writer.WritePropertyName("Annotations");
+            writer.WriteStartArray();
+            foreach (var annotation in Annotations)
+                annotation.WriteToJson(writer);
+
+            writer.WriteEndArray();
+        }
+
+        writer.WritePropertyName("OutputMappings");
+        writer.WriteStartArray();
+        foreach (var mapping in OutputMappings)
+            mapping.WriteToJson(writer);
+
+        writer.WriteEndArray();
+
+        if (Trace != null)
+        {
+            writer.WritePropertyName("Reference");
+            Trace.WriteToJson(writer);
+        }
+
+        if (Placement != null)
+        {
+            writer.WritePropertyName("Placement");
+            Placement.WriteToJson(writer);
+        }
+
+        if (BoardPlacement != null)
+        {
+            writer.WritePropertyName("BoardPlacement");
+            BoardPlacement.WriteToJson(writer);
+        }
+
+        writer.WriteEndObject();
+    }
+
+    public static Surface ReadFromJson(JToken token)
+    {
+        var surface = new Surface
+                          {
+                              Id = OutputJson.ReadGuid(token["Id"]),
+                              Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
+                              Type = token.ReadValueSafe("Type", SurfaceTypes.Rect) ?? SurfaceTypes.Rect,
+                              Kind = token.ReadValueSafe("Kind", Kinds.Physical) ?? Kinds.Physical,
+                              ParentId = OutputJson.ReadGuid(token["ParentId"]),
+                              LocalPosition = OutputJson.ReadVector2(token["LocalPosition"], Vector2.Zero),
+                              IsRendered = token.ReadValueSafe("Render", true),
+                              SliceId = OutputJson.ReadGuid(token["SliceId"]),
+                              SizeInMeters = OutputJson.ReadVector2(token["SizeInMeters"], new Vector2(1, 1)),
+                              Anchor = OutputJson.ReadVector2(token["Anchor"], DefaultAnchor),
+                              IsAspectLocked = token.ReadValueSafe("LockAspect", false),
+                              PixelsPerMeter = token.ReadValueSafe("PixelsPerMeter", 400f),
+                              ShowGrid = token.ReadValueSafe("ShowGrid", false),
+                              GridSubdivisions = token.ReadValueSafe("GridSubdivisions", 10),
+                              Annotations = token.ReadListSafe("Annotations", Annotation.ReadFromJson),
+                              OutputMappings = token.ReadListSafe("OutputMappings", OutputMapping.ReadFromJson),
+                          };
+
+        if (token["Reference"] is JObject referenceToken)
+            surface.Trace = TraceBinding.ReadFromJson(referenceToken);
+
+        if (token["Placement"] is JObject placementToken)
+            surface.Placement = StagePlacement.ReadFromJson(placementToken);
+
+        if (token["BoardPlacement"] is JObject boardToken)
+            surface.BoardPlacement = BoardPlacement.ReadFromJson(boardToken);
+
+        return surface;
+    }
+}

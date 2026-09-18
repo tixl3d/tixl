@@ -30,13 +30,13 @@ To export an executable you first make sure that...
 1. You're running TiXL in release mode.
 2. That you correctly rebuild the complete solution (including Player)
 
-If you want to export as an executable, then you first have to create a Symbol as well.
+What an executable shows is decided by the [SendToOutput] operators inside the exported operator: each one puts its texture onto the project's [output setup](OutputSetup.md), and the export ships everything that feeds them. No single combined output is needed, and a project's root operator can be exported directly.
 
-Then...
-1. For this your operator needs an Texture2d output.
-2. Select the operator (you can try this with [Demo_There]
-3. Right click → Export as Executable
-4. TiXL will create a new directory called "Export" (⚠if it already exists it will remove it first) and copy all required resources, the soundtrack, the libraries and the Player.exe there).
+1. Make sure the operator contains at least one [SendToOutput]. If it doesn't, the **Export** button in the `Executable` settings is disabled, and **Add SendToOutput** creates one for you to connect.
+2. Open the project settings (`Executable`) and click **Export**, or select the operator and choose **Export as Executable** from the menu.
+3. TiXL will create a new directory called "Export" (⚠ if it already exists it will remove it first) and copy all required resources, the soundtrack, the libraries and the Player.exe there.
+
+Projects exported before 4.3 used the operator's first texture output instead. To export such a project again, connect that output to a [SendToOutput].
 
 ![Animation](https://user-images.githubusercontent.com/1732545/175700494-348644a7-a68f-41d9-b6b8-f3cfd8d612a3.gif)
 
@@ -49,6 +49,21 @@ The executable `Player.exe` is a stand alone application that handles operator l
 On start, the player opens a small dialog asking for the display, the resolution (the native modes of that display, or a custom size), fullscreen and whether to show log messages in a console window. The defaults come from the project's `Executable` settings (`Preferred Width` / `Height`, `Window Mode`, `Show Log Messages`); the last choice is remembered per executable. Enable `Skip Startup Dialog` in the project settings to start directly with the project defaults — useful for installations. `Title` and `Author` in the same panel set the window title and the dialog header.
 
 The player writes its log files and the remembered startup choice to a `.temp/` folder next to the executable (falling back to the user's app-data folder when that location is read-only).
+
+### Output setup
+
+If the project has an [output setup](OutputSetup.md), the setup that is active in the editor is copied into a `.meta` folder beside the executable and the player loads it at startup. Other setups of the project stay behind — the player can't switch between them. Operators that read the venue — [StageGeometry], [DrawStageCanvas], [UseProjectorCam] — therefore work in an export exactly as they do in the editor.
+
+What else travels depends on **Player Mode** in the project's `Executable` settings:
+
+- **Demo** — runs anywhere. It asks for a display and a resolution on startup and shows one window, with the setup's first output composited into it. The local bindings stay behind, because the same display numbering names different screens on a different computer.
+- **Installation** — runs on the machine it was exported for. That machine's bindings (`outputs.machine.json`) travel with it, so every output bound to a display opens full-screen where it belongs, the first one reusing the player's own window. The startup dialog is skipped; `--dialog` still forces it when someone is there to answer.
+
+An output whose canvas is left at 0 × 0 takes the size of what shows it: its display in an installation, otherwise the resolution chosen in the startup dialog. A project whose sends reach no output yet — no setup, or nothing routed — shows its first [SendToOutput] directly in the window, so a quick export works before the output setup has been touched. A binding naming a display the machine doesn't have is reported in the log and skipped, so an installation says what is wrong instead of coming up dark.
+
+Streams travel the same way. An installation whose outputs are bound to an NDI or Spout plug sends them from the player just as the editor does, and the export includes the package that implements the sender even when no operator in the graph comes from it. A stream whose sender is missing on the target machine is reported once in the log.
+
+To move an installation to another machine, or to rebind at a venue, edit `outputs.machine.json` in the export's `.meta` folder or open the project in TiXL and export again. The player has no binding UI of its own — an installation should come up the same way every time.
 
 ### Loading screen
 

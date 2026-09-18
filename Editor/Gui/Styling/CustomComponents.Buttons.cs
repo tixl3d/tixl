@@ -398,7 +398,13 @@ internal static partial class CustomComponents
         var dl = ImGui.GetWindowDrawList();
         var isHovered = ImGui.IsItemHovered();
 
-        dl.AddRectFilled(min, max, bgColor.Fade(isHovered ? 0.8f : 1f), 5);
+        // Painted straight into the draw list, which ImGui's disabled fade never reaches — so the style alpha
+        // (which BeginDisabled lowers) is applied by hand, or a disabled CTA looks exactly like a live one.
+        var alpha = ImGui.GetStyle().Alpha;
+        textColor = textColor.Fade(alpha);
+        borderColor = borderColor.Fade(alpha);
+
+        dl.AddRectFilled(min, max, bgColor.Fade((isHovered ? 0.8f : 1f) * alpha), 5);
         dl.AddRect(min, max, borderColor, 5);
         dl.AddText(Fonts.FontLarge, Fonts.FontLarge.FontSize, min + CtaButtonPadding,
                    textColor,

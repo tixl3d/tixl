@@ -7,8 +7,7 @@ added: 2026-09-02
 added-in-version: 4.2
 prerequisites:
   - An empty project is open.
-  - A rigged, animated glTF file with several clips is available. The Khronos sample
-    "Fox.glb" is assumed below (clips - 0 Survey, 1 Walk, 2 Run); any similar model works.
+  - A rigged, animated glTF file with several clips is available. The Khronos sample "Fox.glb" is assumed below (clips - 0 Survey, 1 Walk, 2 Run); any similar model works.
 related-help:
   - ../.help/docs/using/CharacterAnimation.md
 ---

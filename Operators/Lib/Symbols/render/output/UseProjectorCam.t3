@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "b3e6f1a2-9c4d-4e58-8a71-2f5c6d0b93e4"/*UseProjectorCam*/,
+  "Inputs": [
+    {
+      "Id": "e6192d45-6f70-4c8b-bd04-528319e36c27"/*OutputRef*/,
+      "DefaultValue": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "Id": "d5081c34-7e6f-4b7a-ac93-417208d25b16"/*Command*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

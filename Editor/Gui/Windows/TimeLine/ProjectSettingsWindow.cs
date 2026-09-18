@@ -738,6 +738,13 @@ internal sealed class ProjectSettingsWindow : Window
                                               defaultValue: defaults.Author);
         FormInputs.AddVerticalSpace();
 
+        modified |= FormInputs.AddEnumDropdown(ref export.PlayerMode,
+            "Player Mode",
+            "Demo runs anywhere: it asks for a display and resolution and shows one window.\n"
+            + "Installation is for the machine it was exported for: this computer's display bindings\n"
+            + "travel with it, so every output opens full-screen where it belongs and no dialog is shown.",
+            defaults.PlayerMode);
+
         modified |= FormInputs.AddEnumDropdown(ref export.DefaultWindowMode,
             "Window Mode",
             "The default window mode when running the exported executable.",
@@ -779,30 +786,15 @@ internal sealed class ProjectSettingsWindow : Window
     }
 
     /// <summary>
-    /// Right-aligned "open export folder" icon and Export button, mirroring the Render window's footer.
-    /// Exporting needs the parent composition (the exported op is one of its children), so the root op can't export.
+    /// Right-aligned "open export folder" icon and Export button, mirroring the Render window's footer. The
+    /// composition shown here is what gets exported — a project's root as much as any op inside it.
     /// </summary>
     private static void DrawExportButtons(Instance composition)
     {
         var scale = T3Ui.UiScaleFactor;
-        var parent = composition.Parent;
-        SymbolUi.Child? childUi = null;
-        string? blockedReason = null;
-        if (parent == null)
-        {
-            blockedReason = "Open the parent of this operator to export it.";
-        }
-        else if (composition.Outputs.FirstOrDefault()?.ValueType != typeof(Texture2D))
-        {
-            blockedReason = "Only operators with a Texture2D output can be exported.";
-        }
-        else if (!parent.GetSymbolUi().ChildUis.TryGetValue(composition.SymbolChildId, out childUi))
-        {
-            blockedReason = "Can't resolve the operator in its parent.";
-        }
-
-        var canExport = blockedReason == null && childUi != null;
-        var exportDir = canExport ? PlayerExporter.GetExportDirectory(parent!, childUi!) : null;
+        var blockedReason = PlayerExporter.CanExport(composition) ? null : PlayerExporter.NoContentSupplierReason;
+        var canExport = blockedReason == null;
+        var exportDir = canExport ? PlayerExporter.GetExportDirectory(composition) : null;
         var canOpen = exportDir != null && Directory.Exists(exportDir);
 
         var iconSize = ImGui.GetFrameHeight();
@@ -820,20 +812,70 @@ internal sealed class ProjectSettingsWindow : Window
 
         ImGui.SameLine(0, 8 * scale);
 
-        if (!canExport)
-            ImGui.BeginDisabled();
-
-        if (CustomComponents.DrawCtaButton("Export", Icon.None, CustomComponents.ButtonStates.Activated) && canExport)
+        // Drawn in its disabled colours rather than inside BeginDisabled: the CTA paints straight into the draw
+        // list, so ImGui's disabled fade never reaches it, and a disabled item would also swallow the tooltip
+        // that says why.
+        var exportState = canExport ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Disabled;
+        if (CustomComponents.DrawCtaButton("Export", Icon.None, exportState) && canExport)
         {
-            PlayerExporter.ExportAndReport(parent!, childUi!);
+            PlayerExporter.ExportAndReport(composition);
         }
 
         if (!canExport)
-        {
-            ImGui.EndDisabled();
             CustomComponents.TooltipForLastItem(blockedReason!);
+
+        // A missing send is the one blocker the panel can clear itself, so it says so in plain sight — a reason
+        // hidden behind a hover delay is no warning — and offers the fix right below.
+        if (blockedReason == PlayerExporter.NoContentSupplierReason)
+        {
+            FormInputs.AddVerticalSpace(3);
+            ImGui.PushFont(Fonts.FontSmall);
+            var warningWidth = ImGui.CalcTextSize(NoSendWarning).X;
+            ImGui.PopFont();
+            CustomComponents.RightAlign(warningWidth);
+            CustomComponents.StylizedText(NoSendWarning, Fonts.FontSmall, UiColors.StatusAttention);
+            FormInputs.AddVerticalSpace(3);
+            CustomComponents.RightAlign(CustomComponents.GetCtaButtonSize("Add SendToOutput").X);
+            if (CustomComponents.DrawCtaButton("Add SendToOutput", Icon.None, CustomComponents.ButtonStates.Default))
+            {
+                CreateSendToOutputOp(composition);
+            }
+
+            CustomComponents.TooltipForLastItem("Adds a [SendToOutput] to this operator.",
+                                                "Connect what the show renders to its Texture input; the output setup then routes it.");
         }
     }
+
+    /// <summary>
+    /// Creates the send an export needs, where the user is looking. Its Texture input is left open: what a
+    /// show puts on its outputs is the one thing only the author can decide.
+    /// </summary>
+    private static void CreateSendToOutputOp(Instance composition)
+    {
+        if (!SymbolUiRegistry.TryGetSymbolUi(SendToOutputSymbolId, out _))
+        {
+            Log.Warning("The [SendToOutput] operator is not available - is the Lib package loaded?");
+            return;
+        }
+
+        var symbolUi = composition.GetSymbolUi();
+        var addCommand = new AddSymbolChildCommand(symbolUi.Symbol, SendToOutputSymbolId)
+                             {
+                                 PosOnCanvas = FindPositionForNewSoundtrackOp(symbolUi),
+                             };
+        UndoRedoStack.AddAndExecute(addCommand);
+        symbolUi.FlagAsModified();
+        ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children);
+
+        if (composition.Children.TryGetChildInstance(addCommand.AddedChildId, out var newInstance))
+        {
+            SelectSoundtrackOp(newInstance);
+        }
+    }
+
+    private const string NoSendWarning = "Nothing to export: this operator contains no [SendToOutput].";
+
+    private static readonly Guid SendToOutputSymbolId = new("0b8f2d4e-6a1c-47d3-9f5e-8c2a1b7d4e60");
 
 
     #endregion

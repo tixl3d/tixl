@@ -7,6 +7,7 @@ using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
+using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.Operator.Slots;
 using T3.Core.Rendering;
 using T3.Core.Resource;
@@ -16,7 +17,9 @@ using T3.Editor.Gui;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Analyze;
+using T3.Editor.Gui.Windows.Output;
 using T3.Editor.SystemUi;
+using T3.Editor.UiModel.ProjectHandling;
 using T3.SystemUi;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
@@ -141,7 +144,23 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 Program.NewImGuiLayoutDefinition = string.Empty;
             }
 
+            // Release any modifier whose key-up we never saw (Alt+Tab between the main and viewer windows is
+            // the usual culprit) before it can strand canvas interaction for the whole frame.
+            ImGuiDx11RenderForm.ReconcileStuckModifiers();
+
             ImGui.NewFrame();
+
+            // Publish the focused project's setup for operators, then keep the content-source list in
+            // step with the live send ops — both independent of which windows are open.
+            OutputSetupHandling.UpdateFrame();
+            ContentSourceSync.UpdateFrame();
+
+            // Drive projection-mapping outputs: renders each bound output's composite every frame
+            // (so its content evaluates even when nothing shows it) and hands it to that output's
+            // display window. Must run before any viewer back buffer is bound below.
+            OutputPresentation.UpdatePresentation();
+
+            DrawOutputWindows();
 
             // Render 2nd view
             ProgramWindows.Viewer.SetVisible(T3Ui.ShowSecondaryRenderWindow);
@@ -165,6 +184,8 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 }
                 else
                 {
+                    // No texture yet (bound output with nothing composited, or update paused) — the
+                    // window just stays cleared this frame. Not an error, so don't log per-frame.
                     if (viewer.Texture is { IsDisposed: false })
                     {
                         if (_viewWindowBackgroundSrv == null ||
@@ -177,10 +198,6 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                         ProgramWindows.SetRasterizerState(SharedResources.ViewWindowRasterizerState);
                         ProgramWindows.SetPixelShaderSRV(_viewWindowBackgroundSrv);
                         ProgramWindows.DrawTextureToSecondaryRenderOutput();
-                    }
-                    else
-                    {
-                        Log.Debug($"Null {nameof(ShaderResourceView)} for 2nd render view");
                     }
                 }
             }
@@ -214,12 +231,38 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 // "NewFrame called without Render".
                 try { ImGui.EndFrame(); } catch { /* best-effort cleanup */ }
             }
+
+            // The UI is in the back buffer now and not yet presented — the one moment a whole-window capture is exact.
+            ProgramWindows.ServePendingUiCapture();
         }
 
         T3Metrics.UiRenderingCompleted();
 
-        ProgramWindows.CaptureUiFrame();
-        ProgramWindows.Present(T3Ui.UseVSync, T3Ui.ShowSecondaryRenderWindow);
+        ProgramWindows.Present(T3Ui.UseVSync);
+    }
+
+    /// <summary>Blits each display-bound output's composite into that display's own window.</summary>
+    private static void DrawOutputWindows()
+    {
+        var outputWindows = OutputWindowHandling.Presenting;
+        if (outputWindows.Count == 0)
+            return;
+
+        ProgramWindows.SetVertexShader(SharedResources.FullScreenVertexShaderResource);
+        ProgramWindows.SetPixelShader(SharedResources.FullScreenPixelShaderResource);
+        ProgramWindows.SetRasterizerState(SharedResources.ViewWindowRasterizerState);
+
+        for (var i = 0; i < outputWindows.Count; i++)
+        {
+            var displayWindow = outputWindows[i];
+            var textureView = displayWindow.EnsureTextureView();
+            if (textureView == null)
+                continue;
+
+            displayWindow.Window.PrepareRenderingFrame();
+            ProgramWindows.SetPixelShaderSRV(textureView);
+            ProgramWindows.DrawTextureToSecondaryRenderOutput();
+        }
     }
 
     public void InitializeScaling()
@@ -341,7 +384,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         _deviceContext.VertexShader.SetShader(_vertexShader, null, 0);
         _deviceContext.VertexShader.SetConstantBuffer(0, _vertexConstantBuffer);
         _deviceContext.PixelShader.SetShader(_pixelShader, null, 0);
-        _deviceContext.PixelShader.SetSampler(0, _fontSampler);
+        _deviceContext.PixelShader.SetSampler(0, _imGuiSampler);
 
         //make sure we have no tessel/gs
         _deviceContext.HullShader.Set(null);
@@ -444,7 +487,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         {
             lock (StallWatchdog.PresentLock)
             {
-                FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _fontSampler);
+                FontAtlasGenerator.CreateFontAtlasWithIcons(_device, _imguiContext, out _fontTextureView, out _imGuiSampler);
                 StallOverlay.SnapshotFonts();
             }
         }
@@ -466,7 +509,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         context.InputAssembler.InputLayout = _inputLayout;
         context.VertexShader.SetShader(_vertexShader, null, 0);
         context.PixelShader.SetShader(_pixelShader, null, 0);
-        context.PixelShader.SetSampler(0, _fontSampler);
+        context.PixelShader.SetSampler(0, _imGuiSampler);
         context.OutputMerger.SetBlendState(_blendState, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
         context.OutputMerger.SetDepthStencilState(_depthStencilState, 0);
         context.Rasterizer.State = _rasterizerState;
@@ -475,7 +518,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
     private bool CreateShaders()
     {
-        if (_fontSampler == null)
+        if (_imGuiSampler == null)
             DisposeDeviceObjects();
 
         // Create the vertex shader
@@ -613,7 +656,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             // Sadly a resource leak causes this to trigger memory exceptions.
             // So disabled for now
 
-            DisposeObj(ref _fontSampler);
+            DisposeObj(ref _imGuiSampler);
             DisposeObj(ref _fontTextureView);
             DisposeObj(ref _ib);
             DisposeObj(ref _vb);
@@ -644,7 +687,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     private Buffer _vertexConstantBuffer;
     private ShaderBytecode _pixelShaderBlob;
     private PixelShader _pixelShader;
-    private SamplerState _fontSampler;
+    private SamplerState _imGuiSampler;
     private ShaderResourceView _fontTextureView;
     private RasterizerState _rasterizerState;
     private BlendState _blendState;

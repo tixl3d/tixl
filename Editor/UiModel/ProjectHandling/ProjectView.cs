@@ -361,7 +361,12 @@ internal sealed partial class ProjectView
     {
         if(CompositionInstance != null)
             SaveUsersViewForCurrentComposition();
-        
+
+        // Setup state is persisted on every change, so evicting just forces a reload from disk on reopen.
+        var packageFolder = OpenedProject.Package?.Folder;
+        if (packageFolder != null)
+            OutputSetupHandling.OnProjectClosed(packageFolder);
+
         GraphView.Close();
         if (Focused != this)
             return;

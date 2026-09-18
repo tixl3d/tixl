@@ -99,26 +99,20 @@ internal sealed class AppWindow
 
     internal void SetFullScreen(int screenIndex)
     {
+        // Checked before anything changes: a display unplugged since its binding was saved must not leave a
+        // borderless window stuck at its old bounds.
+        var screens = Screen.AllScreens;
+        if (screenIndex < 0 || screenIndex >= screens.Length)
+        {
+            Log.Error($"Attempt to set out of bounds screen #{screenIndex} to fullscreen");
+            return;
+        }
+
         _boundsBeforeFullscreen = Form.Bounds;
         Form.FormBorderStyle = FormBorderStyle.Sizable;
         Form.WindowState = FormWindowState.Normal;
         Form.FormBorderStyle = FormBorderStyle.None;
-        Form.Bounds = Screen.AllScreens[screenIndex].Bounds;
-  
-    }
-
-    internal void UpdateSpanningBounds(int x, int y, int width, int height)
-    {
-        if (Form.FormBorderStyle == FormBorderStyle.None)
-        {
-            Form.Bounds = new Rectangle(x, y, width, height);
-        }
-        else
-        {
-            _boundsBeforeFullscreen = Form.Bounds;
-            Form.FormBorderStyle = FormBorderStyle.None;
-            Form.Bounds = new Rectangle(x, y, width, height);
-        }
+        Form.Bounds = screens[screenIndex].Bounds;
     }
 
     internal void InitViewSwapChain(Factory factory)
