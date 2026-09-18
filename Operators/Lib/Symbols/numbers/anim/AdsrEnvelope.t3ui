@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c8d9e0f1-a2b3-4c5d-6e7f-8a9b0c1d2e3f"/*AdsrEnvelope*/,
-  "Description": "",
+  "Description": "Generates an Attack, Decay, Sustain, and Release (ADSR) envelope, mapped to the Min/Max range.\n\n**Envelope**\n\n- **Attack:** Time to rise from 0 to the peak level of 1.\n- **Decay:** Time to fall from the peak to Sustain.\n- **Sustain:** Level (not time) held after Decay, from 0 to 1.\n- **Release:** Time to fall from the current level back to 0.\n\n**Mode**\n\n- **Gate:** A false-to-true change starts Attack. While Gate stays true, the envelope completes Attack and Decay, then holds Sustain. Setting Gate false starts Release immediately, even during Attack or Decay. Duration is ignored.\n- **Trigger:** Each false-to-true change restarts Attack. Setting Gate false does not release the envelope; Release starts when Duration has elapsed since the trigger. Duration excludes Release; zero or less disables automatic release.\n\n**Timing and output**\n\n- **Time Mode:** Frozen pauses time progression while inputs still apply.\n- **Units:** Attack, Decay, Release, and Duration use Bars or Secs (seconds).\n- **IsActive:** Stays true until Release finishes.",
   "InputUis": [
     {
       "InputId": "a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6d"/*Envelope*/,
