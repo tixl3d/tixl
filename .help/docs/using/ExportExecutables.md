@@ -30,13 +30,13 @@ To export an executable you first make sure that...
 1. You're running TiXL in release mode.
 2. That you correctly rebuild the complete solution (including Player)
 
-If you want to export as an executable, then you first have to create a Symbol as well.
+What an executable shows is decided by the [SendToOutput] operators inside the exported operator: each one puts its texture onto the project's [output setup](OutputSetup.md), and the export ships everything that feeds them. No single combined output is needed, and a project's root operator can be exported directly.
 
-Then...
-1. For this your operator needs an Texture2d output.
-2. Select the operator (you can try this with [Demo_There]
-3. Right click → Export as Executable
-4. TiXL will create a new directory called "Export" (⚠if it already exists it will remove it first) and copy all required resources, the soundtrack, the libraries and the Player.exe there).
+1. Make sure the operator contains at least one [SendToOutput]. If it doesn't, the **Export** button in the `Executable` settings is disabled, and **Add SendToOutput** creates one for you to connect.
+2. Open the project settings (`Executable`) and click **Export**, or select the operator and choose **Export as Executable** from the menu.
+3. TiXL will create a new directory called "Export" (⚠ if it already exists it will remove it first) and copy all required resources, the soundtrack, the libraries and the Player.exe there.
+
+Projects exported before 4.3 used the operator's first texture output instead. To export such a project again, connect that output to a [SendToOutput].
 
 ![Animation](https://user-images.githubusercontent.com/1732545/175700494-348644a7-a68f-41d9-b6b8-f3cfd8d612a3.gif)
 

@@ -235,6 +235,20 @@ Drag the surface item created by "Use on Surface" onto the "Patch 2" item in the
 - The tab is disabled and its tooltip asks for a surface that is mapped to an output or
   traced on a reference photo. Clicking it does nothing and the Board stays.
 
+## Step: Clear Inputs on a patch
+
+**Action:**
+1. Right-click the unfed patch added in "A surface dropped on an empty patch keeps it" and look at
+   **Clear Inputs**.
+2. Drag "Slice 1" onto that patch's item, then right-click it → **Clear Inputs**.
+3. Press Ctrl+Z.
+
+**Expected:**
+- After 1: **Clear Inputs** is greyed out — nothing feeds the patch yet.
+- After 2: the connection from "Slice 1" disappears and the patch item turns dimmed, but it stays
+  under P1 at the same place on the canvas.
+- After 3: the connection is back, in one undo step.
+
 ## Step: Deleting the slice unfeeds, deleting the patch removes
 
 **Action:**

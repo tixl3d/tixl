@@ -30,7 +30,9 @@
     <!--This
     copies all files in the `dependencies` folder *directly* into the output directory-->
     <ItemGroup>
-        <Content Include="../Dependencies/**/*" Visible="false">
+        <!-- DanceAi.dll is referenced by Core and arrives through it; copying it here too makes publish fail with
+             NETSDK1152 (two outputs at the same path), which silently left the exported player stale. -->
+        <Content Include="../Dependencies/**/*" Exclude="../Dependencies/DanceAi.dll" Visible="false">
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

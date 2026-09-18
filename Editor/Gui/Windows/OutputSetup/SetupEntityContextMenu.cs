@@ -174,6 +174,15 @@ internal static class SetupEntityContextMenu
 
                 CustomComponents.TooltipForLastItem("Turns this patch into a surface with a corner pin.",
                                                     "The quad stays exactly where it is; the surface adds real size, raster and straightening.");
+
+                if (setup.FindPatch(id, out _) is { } fedPatch
+                    && CustomComponents.DrawMenuItem(14, "Clear Inputs", isEnabled: fedPatch.SliceId != Guid.Empty))
+                {
+                    SetupActions.ClearPatchInput(setup, fedPatch);
+                }
+
+                CustomComponents.TooltipForLastItem("Disconnects the content feeding this patch.",
+                                                    "The patch keeps its place on the canvas, ready to be fed again.");
                 break;
 
             case SetupEntityKinds.ReferenceImage:

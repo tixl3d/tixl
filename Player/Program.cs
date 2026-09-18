@@ -366,7 +366,10 @@ internal static partial class Program
                 }
             }
 
-            if (_textureOutput == null)
+            // A project that ships a setup presents through its sends; the texture output is only what a project
+            // without one has to show.
+            var presentsThroughSetup = ActiveSetup.Current is { Outputs.Count: > 0 };
+            if (_textureOutput == null && !presentsThroughSetup)
             {
                 var sb = new StringBuilder();
                 var slots = _project.Outputs.Where(x => x is not null).ToArray();

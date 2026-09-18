@@ -33,8 +33,17 @@ internal static partial class PlayerExporter
     /// </summary>
     public static void ExportAndReport(Instance composition, SymbolUi.Child childUi)
     {
-        var exportName = childUi.SymbolChild.ReadableName;
-        if (TryExportInstance(composition, childUi, out var reason, out var exportDir))
+        ExportAndReport(composition.Children[childUi.SymbolChild.Id]);
+    }
+
+    /// <summary>
+    /// Exports and reports the outcome to the user (message box, log, export folder opened on success). Any op
+    /// can be exported, a project's root included: the sends inside it decide what ships, not where it sits.
+    /// </summary>
+    public static void ExportAndReport(Instance exportedInstance)
+    {
+        var exportName = ExportName(exportedInstance);
+        if (TryExportInstance(exportedInstance, out var reason, out var exportDir))
         {
             Log.Info(reason);
             BlockingWindow.Instance.ShowMessageBox(reason, $"Exported {exportName} successfully!");
@@ -48,25 +57,33 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
-    /// Where <see cref="TryExportInstance"/> writes the export of the given child.
+    /// Where <see cref="TryExportInstance(Instance, out string, out string)"/> writes the export: inside the
+    /// project that holds the op, so exporting a library op from a project never writes into the library.
     /// </summary>
-    public static string GetExportDirectory(Instance composition, SymbolUi.Child childUi)
+    public static string GetExportDirectory(Instance exportedInstance)
     {
-        return Path.Combine(composition.Symbol.SymbolPackage.Folder, FileLocations.ExportSubFolder, childUi.SymbolChild.ReadableName);
+        var owner = exportedInstance.Parent ?? exportedInstance;
+        return Path.Combine(owner.Symbol.SymbolPackage.Folder, FileLocations.ExportSubFolder, ExportName(exportedInstance));
     }
 
     public static bool TryExportInstance(Instance composition, SymbolUi.Child childUi, out string reason, out string exportDir)
     {
+        return TryExportInstance(composition.Children[childUi.SymbolChild.Id], out reason, out exportDir);
+    }
+
+    public static bool TryExportInstance(Instance exportedInstance, out string reason, out string exportDir)
+    {
         T3Ui.Save(false);
 
-        var exportedInstance = composition.Children[childUi.SymbolChild.Id];
         var symbol = exportedInstance.Symbol;
         Log.Info($"Exporting {symbol.Name}...");
 
-        var output = exportedInstance.Outputs.FirstOrDefault();
-        if (output == null || output.ValueType != typeof(Texture2D))
+        _contentSuppliers.Clear();
+        _containsSupplierBySymbol.Clear();
+        CollectContentSuppliers(exportedInstance, _contentSuppliers);
+        if (_contentSuppliers.Count == 0)
         {
-            reason = "Can only export ops with 'Texture2D' output";
+            reason = NoContentSupplierReason;
             exportDir = string.Empty;
             return false;
         }
@@ -75,8 +92,18 @@ internal static partial class PlayerExporter
         var exportConfig = symbol.CompositionSettings?.Export ?? CompositionSettings.Current.Export;
         var exportData = new ExportData(symbol);
 
-        // Traverse starting at output and collect everything that can evaluate in the player
-        RecursivelyCollectExportData(output, exportData);
+        // The sends are the roots: what a show puts on its outputs is what has to travel. They have no output
+        // slot of their own, so the walk starts at each one's inputs and takes the op itself along.
+        foreach (var supplier in _contentSuppliers)
+        {
+            foreach (var input in supplier.Inputs)
+            {
+                RecursivelyCollectExportData(input, exportData);
+            }
+
+            exportData.TryAddInstance(supplier);
+        }
+
         CollectAutoCollectedOps(exportedInstance, exportData);
         exportData.FinishCollection(exportConfig.StripUnusedOperators);
 
@@ -130,7 +157,7 @@ internal static partial class PlayerExporter
 
         exportData.PrintInfo();
 
-        exportDir = GetExportDirectory(composition, childUi);
+        exportDir = GetExportDirectory(exportedInstance);
 
         if (!TryRemoveExistingExportDir(out reason, exportDir))
             return false;
@@ -489,6 +516,82 @@ internal static partial class PlayerExporter
         }
     }
 
+    /** A child is named as it reads in its parent; a project root has no parent and goes by its symbol. */
+    private static string ExportName(Instance exportedInstance)
+    {
+        return exportedInstance.Parent == null ? exportedInstance.Symbol.Name : exportedInstance.SymbolChild.ReadableName;
+    }
+
+    /// <summary>
+    /// Why an op cannot be exported yet — shown where the export is offered, so the answer arrives before the
+    /// attempt rather than after it.
+    /// </summary>
+    public const string NoContentSupplierReason = "Add a [SendToOutput] inside this operator. "
+                                                  + "An executable ships what its sends put on the setup's outputs.";
+
+    /// <summary>
+    /// Whether this op holds anything an export could ship — the check behind an offered export button. Answered
+    /// from the symbols alone, so asking every frame instantiates nothing.
+    /// </summary>
+    public static bool CanExport(Instance exportedInstance)
+    {
+        _containsSupplierBySymbol.Clear();
+        return ContainsContentSupplier(exportedInstance.Symbol);
+    }
+
+    /// <summary>
+    /// Every send under the exported op, at any depth. Found by interface rather than by the send operator's id,
+    /// so a second kind of supplier needs no change here. Only the paths that lead to a send are instantiated —
+    /// a large project would otherwise build every op it contains just to be searched.
+    /// </summary>
+    private static void CollectContentSuppliers(Instance instance, List<Instance> suppliers)
+    {
+        foreach (var child in instance.Symbol.Children.Values)
+        {
+            var isSupplier = IsContentSupplier(child.Symbol);
+            if (!isSupplier && !ContainsContentSupplier(child.Symbol))
+                continue;
+
+            if (!instance.Children.TryGetChildInstance(child.Id, out var childInstance))
+                continue;
+
+            if (isSupplier)
+            {
+                suppliers.Add(childInstance);
+            }
+            else
+            {
+                CollectContentSuppliers(childInstance, suppliers);
+            }
+        }
+    }
+
+    /** Symbol-level and memoised per query: a symbol used in many places is searched once. */
+    private static bool ContainsContentSupplier(Symbol symbol)
+    {
+        if (_containsSupplierBySymbol.TryGetValue(symbol.Id, out var known))
+            return known;
+
+        _containsSupplierBySymbol[symbol.Id] = false;
+        var found = false;
+        foreach (var child in symbol.Children.Values)
+        {
+            if (IsContentSupplier(child.Symbol) || ContainsContentSupplier(child.Symbol))
+            {
+                found = true;
+                break;
+            }
+        }
+
+        _containsSupplierBySymbol[symbol.Id] = found;
+        return found;
+    }
+
+    private static bool IsContentSupplier(Symbol symbol)
+    {
+        return symbol.InstanceType != null && typeof(IContentSupplier).IsAssignableFrom(symbol.InstanceType);
+    }
+
     /// <summary>
     /// The player's render loop evaluates some direct children of the exported op without an output connection:
     /// auto-playing audio clips (<see cref="AudioClipCollector"/>) and loose audio sources
@@ -701,6 +804,9 @@ internal static partial class PlayerExporter
         reason = $"Failed to save export settings to {ExportSettings.FileName}";
         return false;
     }
+
+    private static readonly List<Instance> _contentSuppliers = [];
+    private static readonly Dictionary<Guid, bool> _containsSupplierBySymbol = new();
 
     private static bool TryRemoveExistingExportDir(out string reason, string exportDir)
     {

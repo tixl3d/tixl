@@ -587,6 +587,15 @@ internal static class SetupActions
     }
 
     /// <summary>
+    /// Stops a patch showing its slice. The patch stays where it is — a traced pixel-map area keeps its place and
+    /// can be fed again — only the route into it is cut.
+    /// </summary>
+    internal static void ClearPatchInput(Setup setup, OutputDefinition.Patch patch)
+    {
+        SetupUndo.RunUndoable("Clear patch input", setup, () => patch.SliceId = Guid.Empty);
+    }
+
+    /// <summary>
     /// Drops this surface from every send that targets it, so it stops receiving content. The surface itself
     /// and its calibration are untouched — this only edits the sends' target lists (op-side, like the drag).
     /// </summary>
