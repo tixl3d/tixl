@@ -2,14 +2,15 @@
 id: player-sdl3-window-input
 title: Player Window and Input on SDL3 (Windows)
 scope: player
-tags: [player, platform]
+tags: [dev, essential, player, platform]
 added: 2026-09-18
 added-in-version: 4.3
 prerequisites:
   - Windows with a Direct3D 11 GPU.
+  - The Player was published from this branch before exporting (delete `Player\bin\ReleasePublished`, then `dotnet publish Player\Player.csproj -c Release -p:PublishProfile=FolderProfile`); otherwise the Editor bundles an older Player.
   - A project exported with the Player, whose output reacts to [KeyboardInput] and [MouseInput] (e.g. a key toggling a color, the mouse position moving a shape).
+  - For the display steps, a second display.
   - For the German layout step, the German (QWERTZ) keyboard layout is installed.
-  - For the multi-display step, a second display and a project with an output setup that binds two outputs to two displays.
 ---
 
 The Player's window, input and fullscreen handling now run on SDL3 instead of WinForms. Rendering is still
@@ -22,9 +23,17 @@ Start the exported Player, choose a resolution smaller than the display, leave F
 
 **Expected:**
 - The loading screen (title, status, progress bar) appears in a window centered on the chosen display.
-- The window's client area has exactly the chosen resolution, also on a display scaled to 150% or 200%.
+- The window's client area, without title bar and frame, has the chosen resolution.
 - The window and the taskbar show the TiXL icon.
 - Playback starts after loading; the mouse cursor is visible.
+
+## Step: Window size on a scaled display
+
+**Action:**
+In Windows Settings → System → Display, set Scale to 150% (one of the presets, not Custom scaling). Start the Player windowed at 1280 × 720, capture the window with `Win+Shift+S` → Window snip, paste the capture into Paint and read its size.
+
+**Expected:**
+- The client area, without title bar and frame, measures 1280 × 720 pixels; the window is not 1.5 times larger.
 
 ## Step: Cancel loading
 
@@ -47,10 +56,20 @@ During playback press `Alt+Enter`, wait, then press `Alt+Enter` again.
 ## Step: Start fullscreen on a chosen display
 
 **Action:**
-With two displays connected, start the Player, select the second display, check Fullscreen and press Start.
+With two displays connected, start the Player. In the startup dialog, open the display list, select the second display, check Fullscreen and press Start.
 
 **Expected:**
-- The Player covers the second display completely, without borders or a title bar.
+- The display list shows the names of the connected monitors. Its numbering comes from SDL and can differ from the numbers in Windows' display settings.
+- The Player covers the selected display completely, without borders or a title bar.
+
+## Step: Windowed on the second display
+
+**Action:**
+Start the Player windowed on the second display, then press `Alt+Enter` twice.
+
+**Expected:**
+- The window opens centered on the second display.
+- Fullscreen covers the second display, not the primary one, and the window returns to the same place.
 
 ## Step: Keyboard input ops
 
@@ -64,7 +83,7 @@ During playback press and hold keys the project reacts to (letters, digits, arro
 ## Step: German keyboard layout
 
 **Action:**
-Switch Windows to the German layout. In a project using [KeyboardInput], test the keys `Z`, `Y`, `ü`, `ö`, `ä`, `ß`, `#`, `+` and `-`.
+Switch Windows to the German layout (`Win+Space`). In a project using [KeyboardInput], test the keys `Z`, `Y`, `ü`, `ö`, `ä`, `ß`, `#`, `+` and `-`.
 
 **Expected:**
 - Each key triggers the same key code it triggered with the WinForms Player (`Z` and `Y` are not swapped).
@@ -86,13 +105,23 @@ Move the mouse over the Player window, then press and hold the left button while
 - [MouseInput] follows the pointer, 0..1 from the window's top-left to bottom-right corner.
 - Its left-button output is on while the button is held and off after release.
 
+## Step: Operators that need System.Drawing
+
+**Action:**
+Export a project that uses [LoadSvg] or [LineTextPoints] and start it.
+
+**Expected:**
+- The SVG or text renders as it does in the Editor.
+- The log in `.temp/Log` contains no "Failed to set up operator type" error.
+
 ## Step: Output setup on two displays
 
 **Action:**
-Start a Player exported with an output setup that binds two outputs to two displays.
+In the Editor, bind two outputs of a project's output setup to the two displays and export it. Start the exported Player.
 
 **Expected:**
 - The main window goes fullscreen on the first bound display, a second fullscreen window opens on the other.
+- Each output appears on the monitor it was bound to in the Editor.
 - Both show their outputs and update in sync.
 
 ## Step: Closing

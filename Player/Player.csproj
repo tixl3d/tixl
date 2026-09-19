@@ -23,6 +23,9 @@
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
         <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
         <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
+        <!-- Some operators (SVG loading, GDI+ text, OpenCV bitmaps) need System.Drawing.Common, which
+             net10.0-windows packages get from the Windows Desktop runtime. The Player no longer ships that runtime. -->
+        <PackageReference Include="System.Drawing.Common" Version="10.0.12" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.10" />
     </ItemGroup>
 
