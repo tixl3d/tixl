@@ -7,7 +7,9 @@ namespace T3.Spikes.VulkanPlayer;
 
 /// <summary>
 /// Throwaway proof that SDL3, Vulkan and Slang work together on TiXL's own shaders before the real Player
-/// moves over. Options: <c>--frames N</c> exits after N frames, <c>--no-validation</c> skips the validation layer.
+/// moves over. Renders the image-effect chain of <see cref="ImageEffectChain"/>: a generating shader into a
+/// render target, then an effect shader sampling it into the swapchain.
+/// Options: <c>--frames N</c> exits after N frames, <c>--no-validation</c> skips the validation layer.
 /// </summary>
 internal static unsafe class Program
 {
@@ -16,6 +18,9 @@ internal static unsafe class Program
         Log.AddWriter(new ConsoleWriter());
 
         var maxFrames = ReadIntOption(args, "--frames", 0);
+        var capturePath = ReadOption(args, "--capture");
+        if (float.TryParse(ReadOption(args, "--strength"), System.Globalization.CultureInfo.InvariantCulture, out var strength))
+            ImageEffectChain.EffectStrength = strength;
         var enableValidation = !args.Contains("--no-validation");
 
         if (!SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
@@ -37,10 +42,20 @@ internal static unsafe class Program
         int renderedFrames;
         using (var device = new VulkanDevice(window, enableValidation))
         using (var swapchain = new Swapchain(device, window))
-        using (var pass = new MandelbrotPass(device, swapchain.Format.format, FindShaderRoot(), FramesInFlight))
+        using (var uniforms = new UniformRing(device, FramesInFlight))
+        using (var chain = new ImageEffectChain(device, FindShaderRoot(), swapchain.Format.format, uniforms,
+                                               ReadOption(args, "--effect") ?? "img/fx/Sharpen.hlsl",
+                                               ReadOption(args, "--effect-entry") ?? "psMain"))
         using (var frames = new FrameResources(device, FramesInFlight))
         {
-            renderedFrames = RunLoop(window, device, swapchain, pass, frames, maxFrames);
+            renderedFrames = RunLoop(window, device, swapchain, chain, uniforms, frames, maxFrames);
+            if (capturePath != null)
+            {
+                // The loop's last frames may still be running, and the capture reuses their render target.
+                device.DeviceApi.vkDeviceWaitIdle().CheckResult();
+                uniforms.BeginFrame(0);
+                FrameCapture.WriteToFile(device, chain, swapchain.Extent, swapchain.Format.format, CaptureTimeSec, capturePath);
+            }
         }
 
         SDL_DestroyWindow(window);
@@ -51,8 +66,8 @@ internal static unsafe class Program
         return errorCount == 0 ? 0 : 2;
     }
 
-    private static int RunLoop(SDL_Window* window, VulkanDevice device, Swapchain swapchain, MandelbrotPass pass,
-                               FrameResources frames, int maxFrames)
+    private static int RunLoop(SDL_Window* window, VulkanDevice device, Swapchain swapchain, ImageEffectChain chain,
+                               UniformRing uniforms, FrameResources frames, int maxFrames)
     {
         var api = device.DeviceApi;
         var startTicksNs = SDL_GetTicksNS();
@@ -117,7 +132,9 @@ internal static unsafe class Program
             api.vkResetCommandPool(frame.CommandPool, VkCommandPoolResetFlags.None);
 
             var timeSec = (SDL_GetTicksNS() - startTicksNs) / 1e9f;
-            RecordFrame(device, swapchain, pass, frame.CommandBuffer, imageIndex, frameIndex, timeSec);
+            uniforms.BeginFrame(frameIndex);
+            chain.EnsureSize(swapchain.Extent);
+            RecordFrame(device, swapchain, chain, frame.CommandBuffer, imageIndex, timeSec);
 
             var commandBuffer = frame.CommandBuffer;
             var waitSemaphore = frame.ImageAvailable;
@@ -163,12 +180,15 @@ internal static unsafe class Program
         return renderedFrames;
     }
 
-    private static void RecordFrame(VulkanDevice device, Swapchain swapchain, MandelbrotPass pass,
-                                    VkCommandBuffer commandBuffer, uint imageIndex, int frameIndex, float timeSec)
+    private static void RecordFrame(VulkanDevice device, Swapchain swapchain, ImageEffectChain chain,
+                                    VkCommandBuffer commandBuffer, uint imageIndex, float timeSec)
     {
         var api = device.DeviceApi;
         VkCommandBufferBeginInfo beginInfo = new() { flags = VkCommandBufferUsageFlags.OneTimeSubmit };
         api.vkBeginCommandBuffer(commandBuffer, &beginInfo).CheckResult();
+
+        // Everything the chain renders off-screen happens before the swapchain image is claimed.
+        chain.RenderOffscreen(commandBuffer, timeSec);
 
         var image = swapchain.Images[imageIndex];
         device.TransitionImage(commandBuffer, image,
@@ -191,7 +211,7 @@ internal static unsafe class Program
                                                 pColorAttachments = &colorAttachment,
                                             };
         api.vkCmdBeginRendering(commandBuffer, &renderingInfo);
-        pass.Draw(commandBuffer, frameIndex, swapchain.Extent, timeSec);
+        chain.DrawEffect(commandBuffer, swapchain.Extent, timeSec);
         api.vkCmdEndRendering(commandBuffer);
 
         device.TransitionImage(commandBuffer, image,
@@ -214,6 +234,12 @@ internal static unsafe class Program
         throw new DirectoryNotFoundException("Operators/Lib/Assets/shaders not found above " + AppContext.BaseDirectory);
     }
 
+    private static string? ReadOption(string[] args, string name)
+    {
+        var index = Array.IndexOf(args, name);
+        return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;
+    }
+
     private static int ReadIntOption(string[] args, string name, int defaultValue)
     {
         var index = Array.IndexOf(args, name);
@@ -221,6 +247,9 @@ internal static unsafe class Program
     }
 
     private const int FramesInFlight = 2;
+
+    /** A moment where the zoom and the sharpen radius are both mid-range, so a capture shows both passes. */
+    private const float CaptureTimeSec = 4.0f;
 }
 
 /// <summary>Per-frame-in-flight command recording and CPU/GPU pacing objects.</summary>

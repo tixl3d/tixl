@@ -1,6 +1,6 @@
 # TiXL v5: Linux + Windows on Vulkan
 
-**Status:** Draft — 2026-09-11. Nothing implemented yet.
+**Status:** In progress — updated 2026-09-19. See [Progress](#progress-2026-09-19).
 **Scope:** Linux and Windows first. macOS and the Microsoft Store follow in v5.x.
 **Release label:** TiXL v5. v5.0 does not need feature parity with v4.
 
@@ -65,6 +65,66 @@
 | Missing symbols | An unresolved child stops the editor from overwriting its parent's file (`Symbol.UnresolvedChildCount`) | v5 needs editable placeholders |
 | Target frameworks | Core, Editor, Lib, Player: `net10.0-windows`; Core sets `UseWindowsForms` for 2 System.Drawing uses | Core → `net10.0` looks cheap |
 
+## Progress (2026-09-19)
+
+Work happens on `feat/linux-port`, branched from `main` after the output-setup merge. Development machine:
+Arch Linux (KDE Wayland), AMD Radeon 8060S (RADV, Mesa 26.2, Vulkan 1.4).
+
+Done:
+
+- **Case sensitivity.** Operator package folders and csproj files match their package names (`Examples`,
+  `Unsplash`, `Ndi`, `Skills`, `Spout`); the solution, installer and the Editor's release package list use the
+  same casing. No two tracked paths differ only in case, and no asset address or shader `#include` has a case
+  mismatch. The whole solution compiles on Linux with `-p:EnableWindowsTargeting=true`.
+- **Core → `net10.0`** (Phase 0, item 7, partly). Dropping `UseWindowsForms` needed no code change. The real
+  blocker was `OpenCvSharp4.Windows`, which pulls in WPF; OpenCV moved to the packages that use it. `Core.Tests`
+  pass on Linux. Not done yet: WASAPI input behind an interface.
+- **Vulkan spike** (`Spikes/VulkanPlayerSpike`). SDL3 window, Vulkan 1.3 device and swapchain (Vortice.Vulkan),
+  and Lib's unmodified `MandelbrotFractal.hlsl` compiled by `slangc`. Descriptor layout from Slang reflection,
+  push descriptors, negative viewport height for D3D's Y orientation. 120 fps on Wayland, clean under the
+  validation layers (synchronization validation was requested via environment variable, not confirmed active).
+- **Slang survey** (Phase 1, steps 1–2; `Spikes/ShaderSurvey/shader_survey.py`). Compiles every (file, entry
+  point, stage) the operators reference, plus unreferenced files with guessed entry points. Results:
+  - All 483 constant buffers match D3D packing with `-fvk-use-dx-layout`, checked against Slang's HLSL-target
+    layout and an independent implementation of FXC's rules. Without that flag Slang uses std140-style packing
+    and many members move.
+  - Failures were dominated by two FXC leniencies: duplicate cbuffer names in one file and implicit
+    truncation (`float4` into a `float3` member). Both are fixed on `main` (commit `b570f2091`, 105 files, one
+    line per edit, behavior unchanged; visual suite 96/98 with the 2 known flaky tests, no FXC errors).
+    Referenced entry points that compile: 170 → 261 of 276.
+  - Compile time via the `slangc` command line: ~180 ms median per entry point, single-threaded.
+- **Player on SDL3** (Phase 2, Player part). The Player targets `net10.0` and no longer uses WinForms,
+  SharpDX.Desktop or MsForms. New `SdlPlatform/` project for the parts the Editor will reuse: `SdlCoreUi`,
+  `SdlDisplayProvider`, `SdlKeyMap` (SDL keys → Win32 key codes, US and German punctuation), `SdlWindowIcon`.
+  `PlayerWindow` wraps an SDL window with its DXGI swap chain and serves the main and output-setup windows.
+  Rendering is still D3D11, so on Linux the Player stops after creating its window.
+  - Verified on Windows (`.tests-manual/player-sdl3-window-input.md`): startup dialog, loading, rendering,
+    audio, keyboard and mouse input ops, window icon, Alt+Enter, client size at 150 % display scaling,
+    fullscreen / windowed / Alt+Enter on a second display, clean exit via Esc and the close button, SVG ops in
+    an export.
+  - The `net10.0` Player no longer ships the Windows Desktop runtime; operators that need
+    `System.Drawing.Common` (SVG, GDI+ text, OpenCV bitmaps) now get it from a package reference.
+
+Findings that change this plan (folded into the sections below): `-fvk-use-dx-layout` is mandatory; the
+backend needs `scalarBlockLayout` and `shaderDrawParameters`; Slang names every SPIR-V entry point `main`;
+the global `parameters` list in Slang's reflection covers the whole file, so per-entry-point usage must come
+from `entryPoints[].bindings[].binding.used`.
+
+Open items from this work:
+
+- Player on Windows, not yet tested: German keyboard layout, key release on focus loss, output setup bound to
+  two displays. The Editor numbers displays in WinForms' order, the Player in SDL's; bindings saved in the
+  Editor may point at a different monitor until the Editor's display handling moves to SDL.
+- 15 referenced shader entry points still fail in Slang and need a decision: struct assignment between
+  `Point` and `Particle`, out-parameters given non-variables, mismatched vector sizes in operators, `SSAO`,
+  `depth-to-linear`, `mesh-CollapseVertices`, `DrawPointsShaded`, and `RenderToCubemap` (replaced anyway).
+  `DrawTubes` / `DrawTubesArcLength` compile but index an array with a negative constant.
+- Not surveyed: ShaderGraph-generated code (6 shader ops take a connected source). Matrix memory order in
+  cbuffers follows Slang's documented convention but still needs a GPU read-back test.
+- `SilkWindows` (startup dialog, message boxes) still runs GLFW + OpenGL next to SDL3; its assembly probes log
+  misleading "reinstall TiXL" warnings. Folding it into SDL3 is deferred.
+- Agent hours per commit were not tracked.
+
 ## Architecture
 
 ### Graphics layer
@@ -112,7 +172,9 @@ Compatibility contract — behavior ops rely on today, often without knowing it:
   `VK_KHR_push_descriptor` and `robustness2`. Used when present: extended dynamic state 3 (EDS3),
   graphics pipeline libraries, custom border colors, memory budget, debug utils. Required features
   include anisotropic filtering, independent blend, wireframe fill, depth clamp, BC texture
-  compression, and storage-image reads and writes without a format.
+  compression, storage-image reads and writes without a format, `scalarBlockLayout` (structured buffers
+  keep D3D's tight packing, e.g. a 12-byte `float3` stride) and `shaderDrawParameters` (Slang implements
+  `SV_VertexID` as `gl_VertexIndex - gl_BaseVertex` to keep D3D's draw-relative ids).
 - **Frames in flight:** 2–3, paced by a timeline semaphore. Per frame: a command buffer, an upload ring,
   a fallback descriptor pool, a deferred-destruction list.
 - **State → pipeline:** a hash of shaders, blend, raster, depth-stencil, input layout, topology class,
@@ -128,7 +190,21 @@ Compatibility contract — behavior ops rely on today, often without knowing it:
   readbacks and target changes. A clear directly before the first draw becomes `loadOp = CLEAR`.
 - **Barriers:** per-subresource tracking of the last access (read/write, stage, layout), batched before
   each command. Start conservative; optimize with measurements.
-- **Memory:** VMA sub-allocation; budget warnings.
+- **Memory:** D3D11 never made TiXL think about this — the OS pages allocations in and out of VRAM, so
+  overcommitting only got slower and running out was practically impossible. Vulkan allocates from explicit
+  heaps, `vkAllocateMemory` can fail, and the number of allocations is capped (often ~4096), so the backend
+  has to provide that comfort itself:
+  - VMA sub-allocation, so thousands of small resources share few allocations, plus a pool for transient
+    render targets, which operators create and drop constantly.
+  - A fallback chain when an allocation fails: retry in a non-device-local heap (slow, like D3D11 spilling to
+    system memory), and only then fail.
+  - A memory-pressure hook that drops rebuildable caches first — thumbnail atlas, proxy textures, pooled
+    targets — and retries.
+  - Failure is never a crash: an operator gets a null output, exactly as it does for any other failed
+    resource today.
+  - `VK_EXT_memory_budget` feeds the metrics and an editor warning as usage approaches the budget.
+  - Residency management does not disappear (WDDM on Windows, amdgpu on Linux still evict), but how
+    gracefully each driver overcommits differs and has to be measured — see Phase 6.
 - **D3D11 specifics:**
   - Append/consume counters live in separate counter buffers (Slang emits them). Initial counts are
     fills; `CopyStructureCount` is a copy.
@@ -146,9 +222,15 @@ Compatibility contract — behavior ops rely on today, often without knowing it:
   line.
 - The include handler becomes a Slang file system with the same shared-include resolution.
 - Targets: DXBC (temporary, through FXC on Windows) and SPIR-V.
-- Constant buffers keep D3D/FXC packing, because the C# structs depend on it. An automated check compares
-  every cbuffer member offset between FXC reflection and Slang reflection. It must find zero
-  differences.
+- Constant buffers keep D3D/FXC packing, because the C# structs depend on it. That requires
+  `-fvk-use-dx-layout`; without it Slang uses std140-style packing. An automated check compares every
+  cbuffer member offset against D3D's packing rules and must find zero differences (it does, for all 483
+  cbuffers of the survey).
+- Fixed compiler options: profile `sm_5_0` with `-capability spirv_1_5`; `-D sampler=SamplerState` for the
+  legacy keyword ~225 shaders (and user shaders) use; register shifts `s` 0–15, `b` 16–31, `t` 32–159,
+  `u` 160+ in set 0. SPIR-V entry points are always named `main`.
+- Per-entry-point resource usage comes from `entryPoints[].bindings[].binding.used` in Slang's reflection; the
+  global parameter list covers every resource declared in the file.
 - Compiled blobs and reflection are cached on disk, keyed by source and include hashes, defines, entry
   point, target and Slang version.
 - Errors map to file and line in TiXL's shader error display, including ShaderGraph-generated code.
@@ -165,6 +247,12 @@ Compatibility contract — behavior ops rely on today, often without knowing it:
   wrappers (cursor, dialogs), `SplashScreen`, direct `Screen.AllScreens` use (→ `IDisplayProvider`
   backed by SDL), XInput (→ SDL gamepads), SpaceMouse raw input (→ SDL HID, or dropped for v5.0), the
   Player's `RenderForm` and startup dialog, the `SilkWindows` popups.
+- `SilkWindows` popups (startup dialog, message boxes behind `BlockingWindow`, ~40 Editor call sites)
+  become an SDL3 provider in `SdlPlatform/` implementing the same `IImguiWindowProvider` /
+  `IMessageBoxProvider` interfaces. They draw with SDL's 2D renderer and a port of ImGui's
+  `imgui_impl_sdlrenderer3` backend, not OpenGL: these dialogs must work before any GPU device exists, and
+  SDL picks D3D, Vulkan or Metal underneath. `ImguiWindows/` drops its Silk.NET types for
+  `System.Numerics`.
 - SDL3 file dialogs are asynchronous (desktop portals on Linux), so call sites need callbacks.
 - Output windows go fullscreen on a chosen display, which works on Wayland. Absolute window positioning
   does not exist on Wayland.
@@ -295,6 +383,10 @@ Player first, because Phase 4 needs it.
 
 Tasks: see [Platform layer (SDL3)](#platform-layer-sdl3).
 
+Order: the Player's window and input are done (see [Progress](#progress-2026-09-19)). The `SilkWindows`
+replacement is deferred and done together with the Editor's migration, since both need the same provider;
+until then the Player's startup dialog and message boxes keep running on GLFW + OpenGL.
+
 Done when: the editor and the Player run on SDL3 with D3D11; no WinForms, SharpDX.Desktop or GLFW is
 left; the visual suite passes bit-exact; a new manual test set "SDL3 Windows and Input (Windows)" passes
 (keyboard layouts including German, DPI scaling, multiple monitors, drag & drop, dialogs, fullscreen on
@@ -302,6 +394,8 @@ a projector).
 Estimate: 25–50 commits, 50–115 agent hours. You: frequent interaction tests.
 
 ### Phase 3 — Graphics facade with D3D11 forwarding (v4.x)
+
+The API is specified in [Plan_GraphicsFacade](Plan_GraphicsFacade.md) — review that before the code starts.
 
 1. The `Graphics` project with the API above.
 2. The `Graphics.D3D11` forwarding backend.
@@ -350,6 +444,10 @@ Estimate: 20–40 commits, 40–90 agent hours. You: Wayland interaction tests.
    `getMetrics`.
 3. Performance against the Phase 0 baseline.
 4. Windows-specific Vulkan issues: presentation, overlay layers.
+5. Memory behaviour under pressure, measured per GPU: load a project whose textures exceed VRAM and record
+   what each target does — slows down, spills to system memory, or fails to allocate. Targets: AMD (RADV on
+   Linux, Windows driver), NVIDIA on Windows, lavapipe. The result decides whether the fallback chain above
+   is enough or whether TiXL needs its own eviction.
 
 Done when: all visual tests pass on Linux and Windows (NVIDIA and AMD, plus lavapipe in CI) with frozen
 thresholds; zero validation errors; no pipeline hitches after pre-warm; frame times within an agreed
@@ -435,6 +533,7 @@ Estimate: 25–50 commits, 50–120 agent hours.
 | Regressions from Slang or SDL3 updates | Pinned versions; deliberate upgrades |
 | Slower CPU submission than D3D11 | Baseline metrics; renaming ring; redundant-state filtering; small CPU differences accepted |
 | Old GPUs or drivers | Minimum spec from Sentry data; a clear startup error |
+| Running out of GPU memory, which D3D11 hid by paging | Sub-allocation and pooling; fallback to a non-device-local heap; memory-pressure hook that drops caches; no crash on failure; budget in the metrics; per-GPU overcommit test in Phase 6 |
 
 ## Relation to other plans
 
@@ -452,14 +551,14 @@ Estimate: 25–50 commits, 50–120 agent hours.
 ## Open questions
 
 1. Namespace and assembly names for the facade (`T3.Graphics`?).
-2. Vortice.Vulkan or Silk.NET.Vulkan?
+2. Vortice.Vulkan or Silk.NET.Vulkan? Decided 2026-09-20: stay on Vortice.Vulkan for the spike and the vertical slice, revisit once the slice has exercised descriptors, barriers and VMA.
 3. Minimum GPU and driver versions (after the Sentry data is in).
 4. Which stretch goals go into v5.0?
 5. Delete the legacy graph in Phase 0?
 6. Commit policy and editor-cycling rights for agents.
-7. Which GPUs are available for the Linux and Windows test machines?
+7. Which GPUs are available for the Linux and Windows test machines? Linux: AMD Radeon 8060S (RADV). Windows: open.
 8. How long does `release/4.x` get fixes?
-9. `SilkWindows` popups: fold them into SDL3 in Phase 2, or keep them for a while?
+9. ~~`SilkWindows` popups: fold them into SDL3 in Phase 2, or keep them for a while?~~ Decided 2026-09-19: replaced in Phase 2 together with the Editor's migration (see [Platform layer (SDL3)](#platform-layer-sdl3)).
 10. Linux packaging beyond the tarball and AUR (AppImage, Flatpak)?
 
 ## Alternatives considered
