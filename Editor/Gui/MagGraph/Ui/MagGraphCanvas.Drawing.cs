@@ -16,8 +16,13 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 
 internal sealed partial class MagGraphView
 {
+    // Reserve through cancellation and the release frame so clicks cannot leak into other widgets.
+    internal bool ConsumesConnectionStrokeMouse => _consumeStrokeMouse || _strokeMouseOwner != null
+                                                   || _strokeMouseReleaseFrame == ImGui.GetFrameCount();
+
     private readonly Dictionary<int, (Vector2 source, Vector2 target)> _previousConnectionPositions = new();
     
+    /// <summary>Draws graph items and connections, collecting stroke hits before committing the release frame.</summary>
     public void DrawGraph(ImDrawListPtr drawList, float graphOpacity)
     {
         _context.GraphOpacity = graphOpacity;
@@ -26,8 +31,9 @@ internal sealed partial class MagGraphView
         IsHovered = ImGui.IsWindowHovered();
 
         var result = _context.DrawDialogs(_projectView);
+        UpdateConnectionStrokeInput();
 
-        if (result == ChangeSymbol.SymbolModificationResults.Nothing)
+        if (!ConsumesConnectionStrokeMouse && result == ChangeSymbol.SymbolModificationResults.Nothing)
         {
             KeyboardActions.HandleKeyboardActions(_context);
         }
@@ -38,10 +44,11 @@ internal sealed partial class MagGraphView
         }
         else
         {
-            DropHandling.HandleDropOnWindow(_context);
+            if (!ConsumesConnectionStrokeMouse)
+                DropHandling.HandleDropOnWindow(_context);
 
             // Update view scope if required
-            if (FitViewToSelectionHandling.FitViewToSelectionRequested)
+            if (!ConsumesConnectionStrokeMouse && FitViewToSelectionHandling.FitViewToSelectionRequested)
             {
                 _context.ProjectView.FocusViewToSelection();
             }
@@ -50,6 +57,8 @@ internal sealed partial class MagGraphView
             _visibleCanvasArea = GetVisibleCanvasArea();
 
             var editingFlags = T3Ui.EditingFlags.None;
+            if (ConsumesConnectionStrokeMouse)
+                editingFlags |= T3Ui.EditingFlags.PreventMouseInteractions;
             if (T3Ui.IsAnyPopupOpen)
             {
                 if (!ImGui.IsWindowHovered())
@@ -71,6 +80,8 @@ internal sealed partial class MagGraphView
 
             // Prepare UiModel for frame
             _context.Layout.ComputeLayout(_context);
+            if (_strokeOwner is { IsActive: true } && !_strokeOwner.IsCurrent(_context))
+                _strokeOwner.Cancel();
 
             // Restore damped positions after layout
             foreach (var c in _context.Layout.MagConnections)
@@ -111,12 +122,13 @@ internal sealed partial class MagGraphView
             }
 
             // Selection fence...
-            if (!_context.PreventInteraction)
+            if (!_context.PreventInteraction && !ConsumesConnectionStrokeMouse)
             {
                 HandleFenceSelection(_context, _selectionFence);
             }
 
             // Draw sections outermost-first so nested sections paint on top of their containers
+            ImGui.BeginDisabled(ConsumesConnectionStrokeMouse);
             foreach (var a in _context.Layout.SectionsInDrawOrder)
             {
                 if (a.Section.IsHiddenInCollapsedSection)
@@ -124,6 +136,7 @@ internal sealed partial class MagGraphView
 
                 DrawSection(a, drawList, _context);
             }
+            ImGui.EndDisabled();
 
             // Draw items
             foreach (var item in _context.Layout.Items.Values)
@@ -154,14 +167,28 @@ internal sealed partial class MagGraphView
                 _lastHoverId = Guid.Empty;
             }
 
-            if (!_context.PreventInteraction)
+            if (!_context.PreventInteraction && !ConsumesConnectionStrokeMouse)
                 HighlightSplitInsertionPoints(drawList, _context);
 
             // Draw connections
-            foreach (var connection in _context.Layout.MagConnections)
+            // Borrow the active observer for this pass; temporary wires never represent editable occurrences.
+            var stroke = _context.ConnectionStroke.IsActive ? _context.ConnectionStroke : null;
+            try
             {
-                DrawConnection(connection, drawList, _context);
+                foreach (var connection in _context.Layout.MagConnections)
+                {
+                    DrawConnection(connection, drawList, _context, connection.IsTemporary ? null : stroke);
+                }
             }
+            finally
+            {
+                stroke?.SetConnection(null);
+            }
+
+            _context.ConnectionStroke.DrawPreview(drawList);
+            if (_strokeErrorUntil > ImGui.GetTime())
+                drawList.AddText(ImGui.GetWindowPos() + new Vector2(20, 40) * T3Ui.UiScaleFactor,
+                                 UiColors.StatusAttention, _strokeError);
 
             DrawMissingItems(drawList);
             DrawOffscreenIndicators(drawList);
@@ -213,7 +240,13 @@ internal sealed partial class MagGraphView
                 {
                     var sourcePos = new Vector2(tc.SourceItem.Area.Max.X,
                                                 tc.SourceItem.Area.Min.Y + MagGraphItem.GridSize.Y * (0.5f + tc.OutputLineIndex));
-                    if (tc.Style is MagGraphConnection.ConnectionStyles.BottomToTop or MagGraphConnection.ConnectionStyles.BottomToLeft)
+                    if (tc.SourceItem.IsReroute)
+                    {
+                        var anchor = default(MagGraphItem.OutputAnchorPoint);
+                        tc.SourceItem.GetOutputAnchorAtIndex(0, ref anchor);
+                        sourcePos = anchor.PositionOnCanvas;
+                    }
+                    else if (tc.Style is MagGraphConnection.ConnectionStyles.BottomToTop or MagGraphConnection.ConnectionStyles.BottomToLeft)
                     {
                         sourcePos = new Vector2(sourcePos.X - (tc.SourceItem.Area.GetWidth() / 2.0f), tc.SourceItem.Area.Max.Y);
                     }
@@ -232,6 +265,12 @@ internal sealed partial class MagGraphView
                 {
                     var targetPos = new Vector2(tc.TargetItem.Area.Min.X,
                                                 tc.TargetItem.Area.Min.Y + MagGraphItem.GridSize.Y * (0.5f + tc.InputLineIndex));
+                    if (tc.TargetItem.IsReroute)
+                    {
+                        var anchor = default(MagGraphItem.InputAnchorPoint);
+                        tc.TargetItem.GetInputAnchorAtIndex(0, ref anchor);
+                        targetPos = anchor.PositionOnCanvas;
+                    }
                     targetPosOnScreen = TransformPosition(targetPos);
 
                     if (_context.StateMachine.CurrentState == GraphStates.DragConnectionBeginning
@@ -285,11 +324,13 @@ internal sealed partial class MagGraphView
                 }
             }
 
-            OutputSnapper.Update(_context);
-            InputSnapper.Update(_context);
-
-            _context.ConnectionHovering.PrepareNewFrame(_context);
-            _context.Placeholder.Update(_context);
+            if (!ConsumesConnectionStrokeMouse)
+            {
+                OutputSnapper.Update(_context);
+                InputSnapper.Update(_context);
+                _context.ConnectionHovering.PrepareNewFrame(_context);
+                _context.Placeholder.Update(_context);
+            }
 
             // Draw animated Snap indicator
             {
@@ -303,12 +344,135 @@ internal sealed partial class MagGraphView
                 }
             }
 
-            if (FrameStats.Current.OpenedPopUpName == string.Empty)
+            if (!ConsumesConnectionStrokeMouse && FrameStats.Current.OpenedPopUpName == string.Empty)
                 CustomComponents.DrawContextMenuForScrollCanvas(() => GraphContextMenu.DrawContextMenuContent(_context, _projectView), ref _contextMenuIsOpen);
 
             SmoothItemPositions();
 
-            _context.StateMachine.UpdateAfterDraw(_context);
+            if (!ConsumesConnectionStrokeMouse || _context.StateMachine.CurrentState == GraphStates.ConnectionStroke)
+                _context.StateMachine.UpdateAfterDraw(_context);
+        }
+
+        FinishConnectionStrokeInput();
+    }
+
+    // Reserve modified right-button input across views before widgets see it.
+    // Cancellation retains ownership until release to suppress context menus.
+    private void UpdateConnectionStrokeInput()
+    {
+        UpdateSharedStrokeReservation();
+        if (_consumeStrokeMouse && !ReferenceEquals(_strokeMouseOwner, this))
+        {
+            _strokeOwner?.Cancel();
+            _strokeOwner = null;
+            _consumeStrokeMouse = false;
+            _strokeReleasePending = false;
+            if (_context.StateMachine.CurrentState == GraphStates.ConnectionStroke)
+                _context.StateMachine.SetState(GraphStates.Default, _context);
+        }
+
+        if ((_strokeMouseOwner != null && !ReferenceEquals(_strokeMouseOwner, this))
+            || (!_consumeStrokeMouse && _strokeMouseReleaseFrame == ImGui.GetFrameCount()))
+            return;
+
+        var validComposition = _context.ProjectView.InstView is { IsValid: true };
+        var io = ImGui.GetIO();
+        var available = validComposition && IsFocused && IsHovered && !_context.PreventInteraction
+                        && !T3Ui.IsAnyPopupOpen && !FrameStats.Last.OpenedPopupCapturedMouse;
+
+        if (_consumeStrokeMouse)
+        {
+            _lastStrokeDrawFrame = ImGui.GetFrameCount();
+            _strokeReleasePending = !ImGui.IsMouseDown(ImGuiMouseButton.Right);
+            if (!available || !ReferenceEquals(_strokeOwner, _context.ConnectionStroke)
+                           || (_strokeOwner is { IsActive: true } && !_strokeOwner.IsCurrent(_context))
+                           || ImGui.IsKeyPressed(ImGuiKey.Escape))
+            {
+                _strokeOwner?.Cancel();
+            }
+
+            if (_context.StateMachine.CurrentState == GraphStates.Default)
+                _context.StateMachine.SetState(GraphStates.ConnectionStroke, _context);
+
+            if (_strokeOwner is { IsActive: true })
+                _strokeOwner.UpdatePosition(ImGui.GetMousePos(), io.MouseDragThreshold);
+            return;
+        }
+
+        if (!available || ImGui.IsAnyItemActive() || io.KeyShift || (!io.KeyCtrl && !io.KeyAlt)
+                       || !ImGui.IsMouseClicked(ImGuiMouseButton.Right)
+                       || _context.StateMachine.CurrentState != GraphStates.Default
+                       || _context.CompositionInstance.Symbol.SymbolPackage.IsReadOnly)
+            return;
+
+        _consumeStrokeMouse = true;
+        _strokeMouseOwner = this;
+        _strokeMouseReleaseFrame = -1;
+        _lastStrokeDrawFrame = ImGui.GetFrameCount();
+        _strokeReleasePending = false;
+        _strokeErrorUntil = 0;
+        ScrollTarget = Scroll;
+        ScaleTarget = Scale;
+        _context.StateMachine.SetState(GraphStates.ConnectionStroke, _context);
+        if (io.KeyCtrl != io.KeyAlt)
+        {
+            _strokeOwner = _context.ConnectionStroke;
+            _strokeOwner.Begin(_context, io.KeyCtrl, ImGui.GetMousePos());
+        }
+    }
+
+    // Commit after drawing so the release segment can still cross a cable in this frame.
+    private void FinishConnectionStrokeInput()
+    {
+        if (!_consumeStrokeMouse || !_strokeReleasePending)
+            return;
+
+        if (_strokeOwner is { IsActive: true } && ReferenceEquals(_strokeOwner, _context.ConnectionStroke))
+        {
+            if (!_strokeOwner.Commit(_context, out var error) && error.Length > 0)
+            {
+                _strokeError = error;
+                _strokeErrorUntil = ImGui.GetTime() + 4;
+                Log.Warning(error);
+            }
+        }
+
+        _strokeOwner?.Cancel();
+        _strokeOwner = null;
+        if (_context.StateMachine.CurrentState == GraphStates.ConnectionStroke)
+            _context.StateMachine.SetState(GraphStates.Default, _context);
+        _consumeStrokeMouse = false;
+        _strokeReleasePending = false;
+        if (ReferenceEquals(_strokeMouseOwner, this))
+        {
+            _strokeMouseOwner = null;
+            _strokeMouseReleaseFrame = ImGui.GetFrameCount();
+        }
+    }
+
+    private static void UpdateSharedStrokeReservation()
+    {
+        if (_strokeMouseOwner == null)
+            return;
+
+        var frame = ImGui.GetFrameCount();
+        if (_strokeMouseOwner.Destroyed || _strokeMouseOwner._lastStrokeDrawFrame < frame - 1)
+            _strokeMouseOwner._strokeOwner?.Cancel();
+
+        if (_strokeMouseReleaseFrame >= 0 && frame > _strokeMouseReleaseFrame)
+        {
+            _strokeMouseOwner._strokeOwner?.Cancel();
+            _strokeMouseOwner = null;
+            return;
+        }
+
+        if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
+            return;
+
+        if (_strokeMouseReleaseFrame < 0)
+        {
+            // Keep release reserved for the whole frame so drawing another graph first cannot steal it.
+            _strokeMouseReleaseFrame = frame;
         }
     }
 
@@ -365,6 +529,16 @@ internal sealed partial class MagGraphView
     }
 
     private bool _contextMenuIsOpen;
+    // Shared across graph views; retained through release even after collection is canceled.
+    private static MagGraphView? _strokeMouseOwner;
+    private static int _strokeMouseReleaseFrame = -1;
+    private ConnectionStroke? _strokeOwner;
+    private int _lastStrokeDrawFrame = -1;
+    private bool _consumeStrokeMouse;
+    // Defer completion until the release-frame connection pass has collected its hits.
+    private bool _strokeReleasePending;
+    private string _strokeError = string.Empty;
+    private double _strokeErrorUntil;
 
     private void HighlightSplitInsertionPoints(ImDrawListPtr drawList, GraphUiContext context)
     {

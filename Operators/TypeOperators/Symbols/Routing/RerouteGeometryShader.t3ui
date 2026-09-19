@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "15a56ac6-a12c-4191-a3c9-08f70e9d9547",
+  "Description": "Forwards T3.Core.DataTypes.GeometryShader through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "dc39ef94-1842-4d0a-80f4-cab40fba687f",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8f57818f-03db-4076-95a7-e805817926f8",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

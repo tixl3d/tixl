@@ -47,6 +47,8 @@ internal sealed class SymbolFilter
     public bool OnlyMultiInputs { get; set; }
     public List<SymbolUi> MatchingSymbolUis { get; private set; } = [];
 
+    /// <summary>Refreshes operator search results when the query or relevant context changes.</summary>
+    /// <param name="limit">Maximum result count, or zero for the default unbounded result set.</param>
     public void UpdateIfNecessary(NodeSelection? selection, bool forceUpdate = false, int limit = 0)
     {
         _needsUpdate |= forceUpdate;
@@ -114,6 +116,9 @@ internal sealed class SymbolFilter
         {
             var symbolUiSymbol = symbolUi.Symbol;
             Debug.Assert(symbolUiSymbol != null);
+            
+            if (symbolUi.HiddenFromBrowser)
+                continue;
 
             // Prevent graph cycles
             if (parentSymbolIds.Contains(symbolUiSymbol.Id))

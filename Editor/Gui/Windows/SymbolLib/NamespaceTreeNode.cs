@@ -78,6 +78,9 @@ internal sealed class NamespaceTreeNode
 
         foreach (var ui in ordered)
         {
+            if (ui.HiddenFromBrowser)
+                continue;
+
             var keep = filterAction == null || filterAction(ui);
             if (!keep)
                 continue;

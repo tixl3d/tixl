@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "1a1605fe-b256-4806-a3e1-210496350ea0",
+  "Description": "Forwards T3.Core.DataTypes.Gradient through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "bcd622ce-1021-465a-bef6-a4b7d10003d2",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d28c30fc-8f1d-48e3-ba59-9aa6f28ac428",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}
