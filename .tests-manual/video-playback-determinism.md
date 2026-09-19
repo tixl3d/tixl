@@ -7,7 +7,7 @@ scope: operators
 tags: [user, essential, perf]
 prerequisites:
   - A scratch project is open with an empty Graph Window.
-  - A test video is available. The bundled `Operators/examples/Assets/videos/test-720p.mp4` works for every step; for the frame-accuracy and export steps, a clip with **burned-in frame numbers** (a frame counter or a clock with a visible frame digit) makes the checks unambiguous.
+  - A test video is available. The bundled `Operators/Examples/Assets/videos/test-720p.mp4` works for every step; for the frame-accuracy and export steps, a clip with **burned-in frame numbers** (a frame counter or a clock with a visible frame digit) makes the checks unambiguous.
 ---
 
 This checks that video playback in `[PlayVideo]` and `[PlayVideoClip]` is **repeatable**: the same point
