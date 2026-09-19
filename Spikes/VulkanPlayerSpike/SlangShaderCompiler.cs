@@ -37,6 +37,8 @@ internal static class SlangShaderCompiler
                 "-fvk-b-shift", "16", "0",
                 "-fvk-t-shift", "32", "0",
                 "-fvk-u-shift", "160", "0",
+                // Constant buffers must keep D3D packing: the operators' C# structs are laid out for it.
+                "-fvk-use-dx-layout",
                 "-o", spirvPath,
                 "-reflection-json", reflectionPath,
             ];
