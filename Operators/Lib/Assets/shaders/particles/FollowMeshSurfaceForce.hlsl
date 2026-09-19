@@ -16,7 +16,7 @@ cbuffer Params : register(b0)
     float Phase;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int ParticleCount;
     int VertexCount;
@@ -188,7 +188,7 @@ void main(uint3 i : SV_DispatchThreadID)
     float1 normalizedNoise = lerp(hash31((i.x + phaseId) % 123121),
                                     hash31((i.x + phaseId) % 123121 + 1),
                                     smoothstep(0, 1,
-                                               phase - phaseId));
+                                               phase - phaseId)).x;
     float3 signedNoise = normalizedNoise * 2 - 1;
 
     float3 pos = p.Position;
@@ -221,7 +221,7 @@ void main(uint3 i : SV_DispatchThreadID)
         float4 orientation = normalize(q_from_tangentAndNormal(movement, distanceFromSurface));
         float4 mixedOrientation = qSlerp(orientation, p.Rotation, 0.96);
 
-        float usedSpin = (Spin + RandomSpin) * signedNoise;
+        float usedSpin = (Spin + RandomSpin) * signedNoise.x;
         if(abs(usedSpin) > 0.001) 
         {
             float randomAngle = signedPointHash  * usedSpin;

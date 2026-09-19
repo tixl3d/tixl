@@ -13,7 +13,7 @@ cbuffer Params : register(b0)
     float Twist;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int SourceAlignmentAxis;
     int RepeatMode;

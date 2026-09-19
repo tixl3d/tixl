@@ -18,7 +18,7 @@ cbuffer ParamConstants : register(b1)
 }
 
 // int paramet const buffer
-cbuffer ParamConstants : register(b2)
+cbuffer ParamConstants2 : register(b2)
 {
     int PingPong;
     int Repeat;

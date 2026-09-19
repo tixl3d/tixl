@@ -3,7 +3,7 @@ cbuffer ParamConstants : register(b0)
     float Falloff;
 }
 
-cbuffer ParamConstants : register(b1)
+cbuffer ParamConstants2 : register(b1)
 {
     int Mode;
 }
@@ -32,7 +32,7 @@ float4 ApplyBlending(float4 color, float2 uv, int direction)
     float4 seamSample = Image.Sample(wrappedSampler, shiftedUV);
 
     float2 edge = abs(1.0 - ((direction == 0 ? uv.x : uv.y) * 2.0));
-    float blendFactor = smoothstep(0.0, Falloff, edge);
+    float blendFactor = smoothstep(0.0, Falloff, edge).x;
 
     return lerp(color, seamSample, blendFactor);
 }

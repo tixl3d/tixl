@@ -130,7 +130,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     // float dir = -SoftLimit(( min(leftComfort.r, frontComfort.r ) -  min(rightComfort.r, frontComfort.r)), 1);
 
-    float _rotateToComfort = CB.RotateToComfort + (float)(block.x - BlockCount/2) * 0.1 + (fxTexture.r -0.5) * FXRedFor_Rotate;
+    float _rotateToComfort = CB.RotateToComfort + (float)(block.x - BlockCount.x/2) * 0.1 + (fxTexture.r -0.5) * FXRedFor_Rotate;
 
     float dir =   (frontComfort < min(leftComfort,  rightComfort))
                     ? 0
@@ -140,7 +140,7 @@ void main(uint3 i : SV_DispatchThreadID)
     angle += dir * _rotateToComfort + CB.BaseRotation;
     angle = mod(angle, 2 * 3.141592);
     
-    float _baseMove = CB.BaseMovement + ((float)block.y - BlockCount/2.) * 5;
+    float _baseMove = CB.BaseMovement + ((float)block.y - BlockCount.x/2.) * 5;
 
     float move = clamp(((leftComfort + rightComfort)/2 - frontComfort),-1,1) * CB.MoveToComfort + _baseMove;
     pos += float3(sin(angle),cos(angle),0) * move / TargetHeight;

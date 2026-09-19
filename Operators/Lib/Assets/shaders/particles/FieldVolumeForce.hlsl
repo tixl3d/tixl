@@ -10,7 +10,7 @@ cbuffer Params : register(b0)
     /*{FLOAT_PARAMS}*/
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     float Amount;
     float Attraction;
@@ -26,7 +26,7 @@ cbuffer Params : register(b1)
     float SpeedFactor;
 }
 
-cbuffer Params : register(b2)
+cbuffer Params3 : register(b2)
 {
     uint ParticleCount;
     int EnableBounce;
@@ -105,7 +105,7 @@ float4 q_from_tangentAndNormal(float3 dx, float3 dz)
 
     float4 rot = Particles[gi].Rotation;
     float3 velocity = Particles[gi].Velocity;
-    float3 posNext = float4(pos + velocity * SpeedFactor * 0.01 * 2, 1);
+    float3 posNext = float4(pos + velocity * SpeedFactor * 0.01 * 2, 1).xyz;
     float distanceNext = GetDistance(posNext);
 
     float3 force = 0;

@@ -34,7 +34,7 @@ cbuffer Params : register(b0)
     float Variation;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int FieldCount;
     int ColorMode;

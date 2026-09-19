@@ -14,7 +14,7 @@ cbuffer Params : register(b0)
     float TestIndex;             // 6
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int CurrentStep;           // 0
 }

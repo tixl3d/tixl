@@ -43,7 +43,7 @@ void main(uint3 i : SV_DispatchThreadID)
     float4 posInClipSpace= mul(posInWorld, WorldToClipSpace);    
     posInClipSpace.xyz /= posInClipSpace.w;
 
-    float2 uv = (posInClipSpace ) /2 + 0.5;
+    float2 uv = (posInClipSpace.xy ) /2 + 0.5;
     uv.y = 1 - uv.y;
 
     float depth = DepthTexture.SampleLevel(texSampler, uv, 0);    

@@ -94,7 +94,7 @@ void main(uint3 i : SV_DispatchThreadID)
     lerp(
         lerp(pt0, pt1, uv.x),
         lerp(pt2, pt3, 1-uv.x),
-        uv.y);
+        uv.y).xy;
 
     
     v.Position = float3(targetPos.xy, vp.z);

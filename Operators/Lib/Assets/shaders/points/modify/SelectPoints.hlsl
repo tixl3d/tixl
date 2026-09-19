@@ -29,7 +29,7 @@ cbuffer Params : register(b1)
     float Scatter;
 }
 
-cbuffer Params : register(b2)
+cbuffer Params2 : register(b2)
 {
     int VolumeShape;
     int SelectMode;

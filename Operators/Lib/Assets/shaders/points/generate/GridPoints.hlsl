@@ -22,7 +22,7 @@ cbuffer Params : register(b0)
     float FX2;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int3 Count;
     int SizeMode;

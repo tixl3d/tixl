@@ -11,7 +11,7 @@ cbuffer Params : register(b0)
     /*{FLOAT_PARAMS}*/
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     float Strength;
     float3 UpVector;
@@ -20,7 +20,7 @@ cbuffer Params : register(b1)
     float ScaleLength;
 }
 
-cbuffer Params : register(b2)
+cbuffer Params3 : register(b2)
 {
     int Normalize;
     int StrengthFactor;

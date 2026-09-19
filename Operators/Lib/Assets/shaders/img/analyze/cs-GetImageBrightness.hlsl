@@ -14,7 +14,7 @@ cbuffer ParamConstants : register(b0)
 // static const float scaleFactor = 255.0f;
 //
 
-groupshared uint localSum = 0;
+groupshared uint localSum;
 
 [numthreads(1, 1, 1)] void clear(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, uint GI : SV_GroupIndex)
 {

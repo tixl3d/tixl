@@ -67,7 +67,7 @@ cbuffer CustomParams : register(b5)
 }
 
 
-cbuffer Params : register(b6)
+cbuffer Params2 : register(b6)
 {
     /*{FLOAT_PARAMS}*/
 }
@@ -165,7 +165,7 @@ psInput vsMain(uint id
         normalize(TBN._m10_m11_m12),
         normalize(TBN._m20_m21_m22));
 
-    output.worldPosition = mul(posInObject, ObjectToWorld);
+    output.worldPosition = mul(posInObject, ObjectToWorld).xyz;
 
     // Fog
     if (FogDistance > 0)

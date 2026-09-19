@@ -68,7 +68,7 @@ vsOutput vsMain(uint vertexId: SV_VertexID)
     float4 pointLigthPos4InWorld = float4(Position,1);
     float4 posInCam = mul(pointLigthPos4InWorld, WorldToClipSpace);
     posInCam.xyz /= posInCam.w;
-    output.lightPosInCam = posInCam;
+    output.lightPosInCam = posInCam.xyz;
     return output;
 }
 

@@ -104,11 +104,11 @@ void main(uint3 i : SV_DispatchThreadID)
     bool foundSegment = false;
     
     // First check regular segments between consecutive points
-    for (uint j = 0; j < sourceCount - 1 && !foundSegment; j++) {
-        if (!IsSeparator(SourcePoints[j]) && !IsSeparator(SourcePoints[j + 1])) {
+    for (uint k = 0; k < sourceCount - 1 && !foundSegment; k++) {
+        if (!IsSeparator(SourcePoints[k]) && !IsSeparator(SourcePoints[k + 1])) {
             if (currentSegment == segmentIndex) {
-                startIndex = j;
-                endIndex = j + 1;
+                startIndex = k;
+                endIndex = k + 1;
                 foundSegment = true;
             }
             currentSegment++;

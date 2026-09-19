@@ -84,7 +84,7 @@ vsOutput vsMain(uint vertexId: SV_VertexID)
     float3 quadVertexInObject = quadVertex * Size * 0.5;
     output.position = mul(float4(quadVertexInObject, 1), ObjectToClipSpace);
     output.texCoord = Quad[vertexId]*float3(0.5, 0.5, 0.5) + 0.5;
-    output.posInWorld = mul(float4(quadVertexInObject, 1), ObjectToWorld);
+    output.posInWorld = mul(float4(quadVertexInObject, 1), ObjectToWorld).xyz;
 
     return output;
 }
@@ -95,13 +95,13 @@ float4 psMainOnlyColor(vsOutput input) : SV_TARGET
 
     const int NUM_SAMPLES = 25;
     float4 vDir = float4(input.posInWorld - CameraToWorld[3].xyz, 0);
-    float3 viewDirInObject = mul(vDir, WorldToObject );
+    float3 viewDirInObject = mul(vDir, WorldToObject ).xyz;
     float3 sampleStep = normalize(viewDirInObject)/float(NUM_SAMPLES);
     float3 c = 0.0;
     float alpha = 0.0;
     for (int i = 0; i < NUM_SAMPLES; i++) {
-        float3 s = VolumeTexture.Sample(texSampler, uvw);
-        float a = s*(1.0 - alpha);
+        float3 s = VolumeTexture.Sample(texSampler, uvw).rgb;
+        float a = s.x*(1.0 - alpha);
         c += s*a;
         alpha += a;
         if (alpha > 0.99)

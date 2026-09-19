@@ -15,12 +15,12 @@ cbuffer Params : register(b0)
     float Range;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     /*{FLOAT_PARAMS}*/
 }
 
-cbuffer Params : register(b2)
+cbuffer Params3 : register(b2)
 {
     int SelectMode;
     int ClampResult;
