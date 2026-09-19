@@ -27,12 +27,16 @@
 
 1. **Vulkan everywhere, Windows included.** One backend, one shader format (SPIR-V), one set of bugs.
    D3D11 is frozen at Shader Model 5.0, and SharpDX has been unmaintained since 2019.
-2. **A D3D11-shaped graphics layer — "DXVK for TiXL's subset".** The 44 `_dx11` ops hand the D3D11
-   state machine to users, and the whole render stack is built from them. The new layer keeps that
-   model: it mirrors the ~60 SharpDX calls and the types and enums TiXL uses, with identical names. Ops
-   migrate by swapping `using` lines. The Vulkan backend turns the mutable state into cached pipelines,
-   tracks barriers and delays resource destruction. The D3D11 shape is permanent — it *is* TiXL's op
-   model. New GPU features become extensions of it.
+2. **Two layers: a Vulkan-shaped backend API, and a D3D11-shaped compatibility facade on top**
+   *(revised 2026-09-20; it was one D3D11-shaped layer)*. The 44 `_dx11` ops hand the D3D11 state machine
+   to users as the operator model, and saved projects are full of them, so a D3D11-shaped layer has to exist
+   — but it is a translator, not the foundation. The backend API (resources, pipelines, command encoders,
+   explicit barriers, descriptor tables) is the only thing backends implement and what new and hot code
+   targets directly; the facade mirrors the ~60 SharpDX calls and types so today's ops migrate by swapping
+   `using` lines. The Vulkan backend turns state into cached pipelines, tracks barriers and delays resource
+   destruction. This keeps the D3D11 shape removable: the render core moves to the backend API subsystem by
+   subsystem after v5.0, and legacy ops keep the facade for as long as projects use them. See
+   [Plan_GraphicsFacade](Plan_GraphicsFacade.md).
 3. **Slang** compiles the existing HLSL: DXBC for the temporary D3D11 path, SPIR-V for Vulkan.
 4. **SDL3** (ppy's SDL3-CS bindings) replaces WinForms, SharpDX.Desktop and Silk/GLFW for windows,
    input, displays, clipboard, dialogs, drag & drop and gamepads.
@@ -131,12 +135,16 @@ Open items from this work:
 
 Projects:
 
-- `Graphics/` (`net10.0`): the facade and the backend interface. TiXL's existing wrapper types
-  (`Texture2D`, `Texture3D`, `BufferWithViews`, shader types) move here and keep their namespaces.
-- `Graphics.D3D11/`: forwards to SharpDX. Windows only. Deleted before v5.0.
+- `Graphics/` (`net10.0`, `T3.Graphics`): the Vulkan-shaped backend API and the value types both layers
+  share. TiXL's existing wrapper types (`Texture2D`, `Texture3D`, `BufferWithViews`, shader types) move here
+  and keep their namespaces.
+- `Graphics.Compat/` (`T3.Graphics.Compat`): the D3D11-shaped facade the operators call. One consumer of the
+  backend API, removable subsystem by subsystem after v5.0.
+- `Graphics.D3D11/`: implements the backend API on SharpDX (pipelines become state objects, barriers are
+  no-ops). Windows only. Deleted before v5.0.
 - `Graphics.Vulkan/`: the real backend.
 
-API — mirrors the SharpDX subset TiXL uses:
+Facade API — mirrors the SharpDX subset TiXL uses:
 
 - `Device` (resource creation, thread-safe) and `DeviceContext` (immediate, main thread only) with the
   stage objects `VertexShader`, `PixelShader`, `ComputeShader`, `InputAssembler`, `Rasterizer`,
@@ -397,8 +405,9 @@ Estimate: 25–50 commits, 50–115 agent hours. You: frequent interaction tests
 
 The API is specified in [Plan_GraphicsFacade](Plan_GraphicsFacade.md) — review that before the code starts.
 
-1. The `Graphics` project with the API above.
-2. The `Graphics.D3D11` forwarding backend.
+1. The `Graphics` project: the backend API, the shared value types, and `Graphics.Compat` with the facade
+   API above. Designing both together keeps the facade from leaking D3D11 assumptions downwards.
+2. The `Graphics.D3D11` backend, with the facade forwarding through it.
 3. A codemod across ~150 files: `using` swaps, fully-qualified names, `NativePointer` →
    `ImGuiTextureId`, `DataStream` / `DataBox` replacements.
 4. Move the editor's ImGui renderer (`WindowsUiContentDrawer`) onto the facade.
@@ -530,6 +539,7 @@ Estimate: 25–50 commits, 50–120 agent hours.
 | User C# ops break | The facade mirrors SharpDX; the migration step rewrites `using` lines; docs |
 | Conflicts with active feature work | Phase 2 after `feat/projection-mapping` merges; codemods done in one quick pass |
 | Agents weakening tests | Frozen oracle; you review every threshold or mute change |
+| The D3D11-shaped facade becomes permanent debt and caps performance | The backend API below it is Vulkan-shaped and callable directly; the facade is one consumer with a named exit path (render core first, then new features); markers for when it starts to cost: bindless, async compute, multi-threaded recording, GPU-driven draws |
 | Regressions from Slang or SDL3 updates | Pinned versions; deliberate upgrades |
 | Slower CPU submission than D3D11 | Baseline metrics; renaming ring; redundant-state filtering; small CPU differences accepted |
 | Old GPUs or drivers | Minimum spec from Sentry data; a clear startup error |

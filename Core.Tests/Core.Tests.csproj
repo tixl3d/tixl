@@ -20,5 +20,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Core\Core.csproj" />
+        <ProjectReference Include="..\Graphics\Graphics.csproj" />
+        <ProjectReference Include="..\Graphics.Compat\Graphics.Compat.csproj" />
     </ItemGroup>
 </Project>

@@ -3,14 +3,38 @@
 **Status:** Draft — 2026-09-20. Nothing implemented.
 **Belongs to:** [Plan_CrossPlatformV5](Plan_CrossPlatformV5.md), Phase 3. Read its Key decisions first.
 
-This specifies the API of the new `Graphics/` project, which every operator and the editor call instead of
-SharpDX. The Vulkan backend is written against it later. The plan calls this API permanent — it *is* TiXL's
-operator model — so it is worth reviewing as text before ~150 files are rewritten onto it.
+This specifies what operators and the editor call instead of SharpDX, and how it sits on top of the backend.
+Worth reviewing as text before ~150 files are rewritten onto it.
 
-## What this has to be
+## Two layers, not one (revised 2026-09-20)
 
-1. **A D3D11-shaped API, not a new render API.** The 44 `_dx11` operators hand the D3D11 state machine to
-   users and everything else is built from them. Users' projects and their custom C# operators keep working.
+The first draft made one D3D11-shaped API that was also the backend interface. That would have made the
+D3D11 shape permanent: everything above *and* below it speaks 2009, and modern GPU features have nowhere to
+land. The layering is now:
+
+```
+operators, editor  ──►  compatibility facade (D3D11-shaped)  ──┐
+                                                               ├──►  backend API (Vulkan-shaped)  ──►  Graphics.D3D11 | Graphics.Vulkan
+new and hot code   ─────────────────────────────────────────────┘
+```
+
+- **The backend API is Vulkan-shaped** — resources, pipelines, command encoders, explicit barriers,
+  descriptor tables — and it is the only thing a backend implements. Core may call it directly.
+- **The compatibility facade is D3D11-shaped** and is one consumer of that API, for the operators that exist
+  today. It translates a mutable state machine into pipelines and barriers in one place.
+
+Why keep the facade at all: the D3D11 shape does not come from it. The 44 `_dx11` operators hand the D3D11
+state machine to users *as the operator model*, and saved projects are full of them. Something has to turn
+"set this blend state, bind this SRV, draw" into pipelines and barriers. The facade decides where that lives —
+one translator instead of the same translation scattered across ~100 operator files.
+
+Why the split matters: it gives the facade an exit. Hot subsystems can move to the backend API operator by
+operator (see [Exit path](#exit-path)) while legacy operators keep working, and removing the facade later
+means deleting a translator rather than rewriting the backend. Without the split it could never be removed.
+
+## What the facade has to be
+
+1. **D3D11-shaped on purpose.** It exists so today's operators and users' custom C# operators keep working.
 2. **Small.** Only what TiXL calls today, plus what the Vulkan backend needs to be told (see
    [Additions](#additions-the-backend-needs)). Every type below is in the repository today.
 3. **Mechanically portable.** Ops should migrate by swapping `using` lines and a handful of renames.
@@ -19,10 +43,17 @@ operator model — so it is worth reviewing as text before ~150 files are rewrit
 
 ## Naming and layout
 
-- Namespace `T3.Graphics` in project `Graphics/` (`net10.0`), with backends `Graphics.D3D11/` and
-  `Graphics.Vulkan/`.
+- `Graphics/` (`net10.0`), namespace `T3.Graphics`: the backend API and the value types both layers share
+  (formats, sizes, the resource handles). The long-term API, and what new code targets.
+- `Graphics.Compat/`, namespace `T3.Graphics.Compat`: the D3D11-shaped facade — `Device`, `DeviceContext`
+  with its stages, the D3D11 description structs and the D3D11-only enums. The namespace names what it is, so
+  every file that still needs it says so in its `using` lines.
+- `Graphics.D3D11/` and `Graphics.Vulkan/`: backends implementing the backend API. The D3D11 one maps
+  pipelines to state objects and ignores barriers; it is deleted before v5.0.
+- The type inventory below is the facade's. The backend API's own shape is designed with the first backend;
+  it is not a copy of this list.
 - Type names stay identical to SharpDX's (`Texture2D`, `ShaderResourceView`, `SamplerStateDescription`, …),
-  so ops migrate by swapping `using SharpDX.Direct3D11;` for `using T3.Graphics;`.
+  so ops migrate by swapping `using SharpDX.Direct3D11;` for `using T3.Graphics.Compat;`.
 - TiXL's existing wrapper types (`T3.Core.DataTypes.Texture2D`, `BufferWithViews`, the shader types) move into
   `Graphics/` and keep their namespaces, so operator code that uses the aliases does not change at all.
 - Enums are copied from SharpDX's MIT-licensed source with identical member names **and values**: projects
@@ -275,6 +306,22 @@ The backend must reproduce these behaviours; operators depend on them today, mos
 | `Dispose()` is safe at any time; another operator may still reference the resource this frame | ops dispose and recreate views per frame | deferred destruction after the frames in flight retire |
 | A state object created per frame is cheap | `Gfx` state ops recreate blend/raster/sampler states whenever dirty | cache by description hash in the backend |
 
+## Exit path
+
+The facade is compatibility, not the destination. It shrinks in this order, none of it part of v5.0:
+
+1. **First light and the visual suite green** — nothing moves; the facade carries everything.
+2. **The render core moves first**: the image-effect chain, `DrawScene`, particle simulation. They are hot,
+   they are ours (not user-authored), and they benefit most from batching, explicit barriers and
+   multi-threaded recording.
+3. **New features start on the backend API**, never on the facade. Anything bindless, async-compute or
+   GPU-driven is a backend-API feature by definition.
+4. **Legacy `_dx11` operators keep the facade** as long as projects use them. Their availability, not the
+   render architecture, decides when the facade can go.
+
+Markers that the debt is starting to cost real performance: wanting bindless textures, async compute,
+multi-threaded command recording, or GPU-driven draws. None of these are v5.0 goals.
+
 ## Migration
 
 - **By hand, not by codemod:** the ~10 state operators (push/pop API) and the operator slots that move to
@@ -292,8 +339,10 @@ The backend must reproduce these behaviours; operators depend on them today, mos
 
 ## Decisions (2026-09-20)
 
-1. **Namespace and assembly: `T3.Graphics`**, project `Graphics/`, backends `Graphics.D3D11/` and
-   `Graphics.Vulkan/`. Operator files swap one `using` line.
+1. **Namespaces:** `T3.Graphics` (project `Graphics/`) is the Vulkan-shaped backend API and the shared value
+   types; `T3.Graphics.Compat` (project `Graphics.Compat/`) is the D3D11-shaped facade. Operator files swap
+   one `using` line, to the compat namespace. *(Revised 2026-09-20 with the two-layer split; originally the
+   facade owned `T3.Graphics`.)*
 2. **State save/restore becomes an explicit push/pop API**, backed by the shadow state stack. The SharpDX
    `Get*` shape is not kept. Consequences: the ~10 state operators (`OutputMergerStage`, `Rasterizer`,
    `SetPixelAndVertexShaderStage`, `InputAssemblerStage`, `Draw`, the `Gfx` state ops) are rewritten by hand
