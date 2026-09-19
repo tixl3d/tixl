@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="$(SolutionDir)/Tixl.props" />
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>$(TixlNetCoreFrameworkVersion)</TargetFramework>
+        <RootNamespace>T3.Spikes.VulkanPlayer</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
+        <PackageReference Include="Vortice.Vulkan" Version="3.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Logging\Logging.csproj" />
+    </ItemGroup>
+</Project>
