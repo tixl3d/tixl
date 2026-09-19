@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <Import Project="$(SolutionDir)/Tixl.props" />
     <PropertyGroup>
-        <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
-        <UseWindowsForms>true</UseWindowsForms>
+        <TargetFramework>$(TixlNetCoreFrameworkVersion)</TargetFramework>
         <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
         <RootNamespace>T3.Core</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -34,9 +33,6 @@
         <PackageReference Include="NuGet.Configuration" Version="7.6.0" />
         <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
         <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" />
-        <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
-        <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
-        <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
         <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
         <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
         <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />

@@ -107,6 +107,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CppSharp.Runtime" Version="1.1.84.17100" />
+    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
     <PackageReference Include="OpenGL.Net" Version="0.8.4">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
