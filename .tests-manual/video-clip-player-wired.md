@@ -7,7 +7,7 @@ scope: operators
 tags: [user, essential]
 prerequisites:
   - A scratch project is open with an empty Graph Window.
-  - Two short test videos. The bundled `Operators/examples/Assets/videos/test-720p.mp4` works; a second, visually distinct clip makes the cut and overlap checks unambiguous. Clips with burned-in frame numbers help.
+  - Two short test videos. The bundled `Operators/Examples/Assets/videos/test-720p.mp4` works; a second, visually distinct clip makes the cut and overlap checks unambiguous. Clips with burned-in frame numbers help.
 related-help:
   - ../.help/docs/operators/lib/io/video/VideoClipPlayer.md
 ---

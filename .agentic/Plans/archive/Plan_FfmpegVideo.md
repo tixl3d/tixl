@@ -297,7 +297,7 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
 ## Verification
 
 **Decode core — already verified standalone (✅).** A throwaway probe ran the exact `VideoDecoderSession`
-FFmpeg sequence against `Operators/examples/Assets/videos/test-720p.mp4`: metadata correct (1280×720,
+FFmpeg sequence against `Operators/Examples/Assets/videos/test-720p.mp4`: metadata correct (1280×720,
 Yuv420p, timebase 1/60000, 60 s, 60 fps); sequential PTS strictly monotonic; forward seek frame-accurate
 (2.0 s → PTS 120000); backward seek correct; and **determinism confirmed** — the same time decoded twice
 gave identical landed PTS *and* identical luma checksum, even after intervening seeks. The seek strategy
@@ -305,7 +305,7 @@ works.
 
 **Testing strategy (two tracks):**
 - **End-to-end (integration):** use the existing `VisualTest`/`ExecuteTests` operator harness
-  ([Operators/examples/testing/VisualTest.cs](../../Operators/examples/testing/VisualTest.cs)) — it already
+  ([Operators/Examples/testing/VisualTest.cs](../../Operators/Examples/testing/VisualTest.cs)) — it already
   steps a `TimeRange`, honors `Playback.OpNotReady`, and was *explicitly built to wait on video seeking*
   (see its `UpdateTestParams` note). Add a test composition wiring `PlayVideo`(test-720p.mp4 / spray-1080p.mp4)
   → `VisualTest` with low-res reference PNGs, once `PlayVideo` is rewired (step 6). This catches

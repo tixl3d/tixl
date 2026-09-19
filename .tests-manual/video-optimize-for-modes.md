@@ -7,7 +7,7 @@ scope: operators
 tags: [user, essential, perf]
 prerequisites:
   - A scratch project is open with an empty Graph Window.
-  - A test video for the basic steps — the bundled `Operators/examples/Assets/videos/test-720p.mp4` works.
+  - A test video for the basic steps — the bundled `Operators/Examples/Assets/videos/test-720p.mp4` works.
   - For the GPU and cadence steps, a heavier real-world clip helps make the difference visible — ideally a 1080p or 4K clip, and a **23.976 fps** clip for the cadence check.
 related-help:
   - ../.help/docs/operators/lib/io/video/PlayVideo.md

@@ -41,7 +41,7 @@ the package is loaded only by projects that reference it, and that load is where
 - **OpenCV is entangled beyond `io/video/`:** also used by `io/ptz/OnvifCamera.cs` and
   `io/dmx/helpers/Video2DPointScanner.cs`. So moving the video-folder OpenCV ops **does not** let Lib drop
   EmguCV — PTZ/DMX keep it. FFmpeg has no such entanglement (clean).
-- **Package model** (from [`spout.csproj`](../../Operators/Spout/spout.csproj)): each package is a csproj with a
+- **Package model** (from [`Spout.csproj`](../../Operators/Spout/Spout.csproj)): each package is a csproj with a
   `PackageId` GUID, `RootNamespace`/`AssemblyName` (e.g. `t3.spout`), a curated **`<Using>` block** (the
   operator global-usings — moved `.cs` files need it), native deps via `<Content Include="./dependencies/**">`,
   and a `<Operators Include="lib"/>`-style dependency list emitted to `OperatorPackage.json`.
@@ -112,7 +112,7 @@ the package is loaded only by projects that reference it, and that load is where
    *Verify in a real export: a video project's player decodes; a non-video one carries no av*.dll.*
 5. **Registration in `Video`** → `Register()`. *(Lib hack already removed.)* Then **resume encode wiring**
    ([`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md) 1c-ii) with registration in the right place.
-6. **Migration:** add `<Operators Include="Video"/>` to `examples.csproj` (+ any first-party project using
+6. **Migration:** add `<Operators Include="Video"/>` to `Examples.csproj` (+ any first-party project using
    video) and the default new-project template; decide editor handling for existing user projects that use
    video ops (auto-add the dependency vs. a "missing package" prompt).
 7. **Later:** move `SwiftCamDevice` (+ swiftcam.dll) into `Video`. **Later/separate:** the OpenCV camera ops —
@@ -138,13 +138,13 @@ the package is loaded only by projects that reference it, and that load is where
 
 | Concern | File |
 |---|---|
-| Sibling package template to copy | `Operators/Spout/spout.csproj` |
+| Sibling package template to copy | `Operators/Spout/Spout.csproj` |
 | Lib package to slim (drop Video ref + natives) | `Operators/Lib/Lib.csproj` |
 | FFmpeg infra (renamed → `VideoServices`, done) | `VideoServices/VideoServices.csproj` |
 | FFmpeg ops to move | `Operators/Lib/io/video/{PlayVideo,VideoClip,VideoClipPlayer,VideoStreamInput,_ProcessVideoClips,_VideoClipObsolete}.*` |
 | Encoder registration entry (to call from `Video`) | `Video/FfmpegVideoExport.cs` (`FfmpegVideoEncoderFactory.Register`) |
 | Native-DLL export mapping | `Editor/UiModel/Exporting/PlayerExporter.cs` |
-| Consumers to migrate | `Operators/examples/examples.csproj`, new-project template |
+| Consumers to migrate | `Operators/Examples/Examples.csproj`, new-project template |
 
 ## Manual test
 

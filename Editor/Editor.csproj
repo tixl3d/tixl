@@ -170,14 +170,14 @@
     <!-- Specify the operator packages in the Operators directory to be included in Release builds - 
     their csproj file name should match their directory name -->
     <ItemGroup>
-        <PackageNames Include="lib" />
-        <PackageNames Include="examples" />
+        <PackageNames Include="Lib" />
+        <PackageNames Include="Examples" />
         <PackageNames Include="TypeOperators" />
         <!-- <PackageNames Include="pixtur"/>-->
-        <PackageNames Include="unsplash" />
-        <PackageNames Include="skills" />
-        <PackageNames Include="spout" />
-        <PackageNames Include="ndi" />
+        <PackageNames Include="Unsplash" />
+        <PackageNames Include="Skills" />
+        <PackageNames Include="Spout" />
+        <PackageNames Include="Ndi" />
         <PackageNames Include="Video" />
         <PackageNames Include="Io" />
         <PackageNames Include="Mediapipe">
