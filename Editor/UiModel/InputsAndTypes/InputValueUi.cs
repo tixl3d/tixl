@@ -84,6 +84,18 @@ public abstract class InputValueUi<T> : IInputUi
 
     protected abstract void DrawReadOnlyControl(string name, ref T? value);
 
+    /// <summary>Draws a value with its owning slot available to specialized controls.</summary>
+    protected virtual InputEditStateFlags DrawValueControl(string name, InputSlot<T> inputSlot, ref T? value, bool readOnly)
+    {
+        if (readOnly)
+        {
+            DrawReadOnlyControl(name, ref value);
+            return InputEditStateFlags.Nothing;
+        }
+
+        return DrawEditControl(name, inputSlot.Input, ref value, false);
+    }
+
     protected virtual string GetSlotValueAsString(ref T value)
     {
         return string.Empty;
@@ -229,7 +241,7 @@ public abstract class InputValueUi<T> : IInputUi
                     ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
 
                     var dummy = slot != null ? slot.Value : default;
-                    DrawReadOnlyControl(connectedName, ref dummy);
+                    DrawValueControl(connectedName, typedInputSlot, ref dummy, true);
                     ImGui.PopStyleVar();
                     ImGui.PopStyleColor();
                     ImGui.PopID();
@@ -323,7 +335,7 @@ public abstract class InputValueUi<T> : IInputUi
                 ImGui.PushStyleColor(ImGuiCol.Text, typeColor.Rgba);
                 ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
 
-                DrawReadOnlyControl(connectedName, ref typedInputSlot.Value!);
+                DrawValueControl(connectedName, typedInputSlot, ref typedInputSlot.Value!, true);
                 ImGui.PopStyleVar();
                 ImGui.PopStyleColor(1);
                 ImGui.PopItemWidth();
@@ -602,7 +614,7 @@ public abstract class InputValueUi<T> : IInputUi
                 input.Value.Assign(input.DefaultValue);
             }
 
-            editState |= DrawEditControl(name, input, ref typedInputSlot.TypedInputValue.Value!, false);
+            editState |= DrawValueControl(name, typedInputSlot, ref typedInputSlot.TypedInputValue.Value!, false);
             if ((editState & InputEditStateFlags.Modified) == InputEditStateFlags.Modified ||
                 (editState & InputEditStateFlags.Finished) == InputEditStateFlags.Finished)
             {

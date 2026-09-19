@@ -77,6 +77,7 @@ internal static class AdsrEnvelopeUi
                            ? data.Envelope.Value
                            : data.Envelope.TypedInputValue.Value;
 
+        ImGui.PushID(instance.SymbolChildId.GetHashCode());
         ImGui.PushClipRect(innerRect.Min, innerRect.Max, true);
 
         var attack = Math.Max(0.001f, envelope.X);
@@ -94,6 +95,7 @@ internal static class AdsrEnvelopeUi
         DrawValueIndicator(data, drawList, innerRect, canvas.Scale);
 
         ImGui.PopClipRect();
+        ImGui.PopID();
 
         return OpUi.CustomUiResult.Rendered
                | OpUi.CustomUiResult.PreventTooltip

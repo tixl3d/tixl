@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Operator;
 using T3.Core.Operator.Attributes;
@@ -21,6 +22,21 @@ namespace Lib.numbers.anim;
 [Guid("c8d9e0f1-a2b3-4c5d-6e7f-8a9b0c1d2e3f")]
 internal sealed class AdsrEnvelope : Instance<AdsrEnvelope>
 {
+    private enum TimeModes
+    {
+        LocalIdleMotionFxTime,
+        LocalTime,
+        PlaybackTime,
+        Runtime,
+        Frozen,
+    }
+
+    private enum TimeUnits
+    {
+        Bars,
+        Secs,
+    }
+
     [Input(Guid = "d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3a")]
     public readonly InputSlot<bool> Gate = new();
 
@@ -40,6 +56,12 @@ internal sealed class AdsrEnvelope : Instance<AdsrEnvelope>
     [Input(Guid = "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f")]
     public readonly InputSlot<float> Max = new();
 
+    [Input(Guid = "5b9d9303-a703-4376-a0aa-eb610f847c79", MappedType = typeof(TimeModes))]
+    public readonly InputSlot<int> TimeMode = new();
+
+    [Input(Guid = "d9a48d43-124d-4928-9c32-57a7d09d0ec6", MappedType = typeof(TimeUnits))]
+    public readonly InputSlot<int> Units = new();
+
     [Output(Guid = "d5e6f7a8-b9c0-4d1e-2f3a-4b5c6d7e8f9a", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<float> Result = new();
 
@@ -54,12 +76,39 @@ internal sealed class AdsrEnvelope : Instance<AdsrEnvelope>
 
     private void Update(EvaluationContext context)
     {
+        var timeMode = TimeMode.GetEnumValue<TimeModes>(context);
+        if (timeMode == TimeModes.Frozen)
+        {
+            _wasFrozen = true;
+            return;
+        }
+
         var gate = Gate.GetValue(context);
         var duration = Duration.GetValue(context);
-        var mode = (AdsrCalculator.TriggerMode)Mode.GetValue(context);
+        var triggerMode = (AdsrCalculator.TriggerMode)Mode.GetValue(context);
         var envelope = Envelope.GetValue(context);
         var min = Min.GetValue(context);
         var max = Max.GetValue(context);
+        var currentTime = timeMode switch
+                              {
+                                  TimeModes.LocalIdleMotionFxTime => context.LocalFxTime,
+                                  TimeModes.LocalTime             => context.LocalTime,
+                                  TimeModes.PlaybackTime          => context.Playback.TimeInBars,
+                                  TimeModes.Runtime               => context.Playback.BarsFromSeconds(Playback.RunTimeInSecs),
+                                  _                              => throw new ArgumentOutOfRangeException()
+                              };
+
+        if (Units.GetValue(context) == (int)TimeUnits.Secs)
+        {
+            currentTime = context.Playback.SecondsFromBars(currentTime);
+        }
+
+        if (_wasFrozen)
+        {
+            _calculator.SynchronizeFrameInput(gate, currentTime);
+            _wasFrozen = false;
+            return;
+        }
 
         // Extract ADSR from Vector4
         var attack = envelope.X > 0 ? envelope.X : 0.01f;
@@ -67,7 +116,7 @@ internal sealed class AdsrEnvelope : Instance<AdsrEnvelope>
         var sustain = envelope.Z >= 0 ? Math.Clamp(envelope.Z, 0f, 1f) : 0.7f;
         var release = envelope.W > 0 ? envelope.W : 0.3f;
 
-        _calculator.Update(gate, context.LocalFxTime, attack, decay, sustain, release, mode, duration);
+        _calculator.Update(gate, currentTime, attack, decay, sustain, release, triggerMode, duration);
 
         // Map envelope to output range
         Result.Value = MathUtils.Lerp(min, max, _calculator.Value);
@@ -75,4 +124,5 @@ internal sealed class AdsrEnvelope : Instance<AdsrEnvelope>
     }
 
     private readonly AdsrCalculator _calculator = new();
+    private bool _wasFrozen;
 }
