@@ -51,7 +51,7 @@ cbuffer FogParams : register(b3)
 }
 
 // For shader graph params
-cbuffer Params : register(b4)
+cbuffer Params2 : register(b4)
 {
     /*{FLOAT_PARAMS}*/
 }

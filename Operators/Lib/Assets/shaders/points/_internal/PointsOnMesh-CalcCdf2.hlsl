@@ -52,18 +52,18 @@ void main(uint3 i : SV_DispatchThreadID)
     }
 
     sum = 0;
-    for (int j = 0; j < faceCount; j++)
+    for (int k = 0; k < faceCount; k++)
     {
-        sum += FaceData[j].normalizedFaceArea;
+        sum += FaceData[k].normalizedFaceArea;
     }
 
     sum = 1.0/sum;
 
     float cdf = 0;
-    for (int j = 0; j < faceCount; j++)
+    for (int m = 0; m < faceCount; m++)
     {
-        cdf += FaceData[j].normalizedFaceArea * sum;
-        FaceData[j].cdf = cdf;
+        cdf += FaceData[m].normalizedFaceArea * sum;
+        FaceData[m].cdf = cdf;
     }
 }
 

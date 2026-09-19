@@ -72,7 +72,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     pInCell *= divisions;
 
     float4 color = Image.Sample(texSampler, cellTiles);
-    float grayScale = ApplyGainAndBias(saturate(color), GainAndBias);
+    float grayScale = ApplyGainAndBias(saturate(color), GainAndBias).x;
     float2 fragCoord = cellIds * res;
 
     float n = Method < 0.5

@@ -125,11 +125,11 @@ float4 psMain(vsOutput input) : SV_TARGET
     float sy = SampleRadius / height;
     float padding =1;
 
-    float3 cx1 = DisplaceMap.Sample(texSampler, float2(uv.x + sx, uv.y));
-    float3 cx2 = DisplaceMap.Sample(texSampler, float2(uv.x - sx, uv.y));
-    float3 cc = DisplaceMap.Sample(texSampler, float2(uv.x - sx, uv.y));    
-    float3 cy1 = DisplaceMap.Sample(texSampler, float2(uv.x, uv.y + sy));
-    float3 cy2 = DisplaceMap.Sample(texSampler, float2(uv.x, uv.y - sy));
+    float3 cx1 = DisplaceMap.Sample(texSampler, float2(uv.x + sx, uv.y)).rgb;
+    float3 cx2 = DisplaceMap.Sample(texSampler, float2(uv.x - sx, uv.y)).rgb;
+    float3 cc = DisplaceMap.Sample(texSampler, float2(uv.x - sx, uv.y)).rgb;    
+    float3 cy1 = DisplaceMap.Sample(texSampler, float2(uv.x, uv.y + sy)).rgb;
+    float3 cy2 = DisplaceMap.Sample(texSampler, float2(uv.x, uv.y - sy)).rgb;
     
 
     float2 d = float2(   
@@ -140,7 +140,7 @@ float4 psMain(vsOutput input) : SV_TARGET
 
     float a = (d.x == 0 && d.y == 0) ? 0 : atan2(d.x, d.y) + Twist / 180 * 3.14158;
 
-    float angleDelta = FractalNoise.Sample(texSampler, input.texCoord);
+    float angleDelta = FractalNoise.Sample(texSampler, input.texCoord).r;
     a-= (angleDelta - 0.5) * TwirlNoise;
 
     float2 direction = float2(sin(a), cos(a));

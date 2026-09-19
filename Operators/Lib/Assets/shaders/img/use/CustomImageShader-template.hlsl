@@ -12,7 +12,7 @@ cbuffer Params : register(b0)
     float2 GainAndBias;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int TargetWidth;
     int TargetHeight;

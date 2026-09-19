@@ -9,7 +9,7 @@ cbuffer Params : register(b0)
     int Mode;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     float2 GainAndBias;
     float ScatterWithinPixel;
@@ -24,7 +24,7 @@ RWTexture2D<float> CDF : register(u0);
 inline float ComputeIntensity(float4 rgba)
 {
     float4 ccc = rgba * ColorWeight;
-    float l1 = ColorWeight
+    float l1 = ColorWeight.x
                    ? saturate((ccc.r + ccc.g + ccc.b + ccc.a) / (ColorWeight.r + ColorWeight.g + ColorWeight.b + ColorWeight.a) - ClampEmit)
                    : saturate(1.2 - distance(rgba.rgb, ColorWeight.rgb) - ClampEmit);
 

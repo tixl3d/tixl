@@ -188,7 +188,7 @@ float4 psMain(psInput pin) : SV_TARGET
     // return float4(Lr.xyz,1);
 
     // Fresnel reflectance at normal incidence (for metals use albedo color).
-    float3 F0 = lerp(Fdielectric, albedo, metalness);
+    float3 F0 = lerp(Fdielectric, albedo, metalness).xyz;
 
     // Direct lighting calculation for analytical lights.
     float3 directLighting = 0.0;
@@ -197,7 +197,7 @@ float4 psMain(psInput pin) : SV_TARGET
         float3 Li = Lights[i].position - pin.worldPosition; //- Lights[i].direction;
         float distance = length(Li);
         float intensity = Lights[i].intensity / (pow(distance / Lights[i].range, Lights[i].decay) + 1);
-        float3 Lradiance = Lights[i].color * intensity; // Lights[i].radiance;
+        float3 Lradiance = Lights[i].color.rgb * intensity; // Lights[i].radiance;
 
         // Half-vector between Li and Lo.
         float3 Lh = normalize(Li + Lo);

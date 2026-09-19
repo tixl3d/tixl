@@ -10,7 +10,7 @@ cbuffer Params : register(b0)
     float ApplyScale;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int PointCount;
     int ScaleFX;
@@ -68,7 +68,7 @@ RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 
     posInObject += float4(p.Position, 0);
 
-    v.Position = posInObject;
+    v.Position = posInObject.xyz;
     v.Normal = qRotateVec3(v.Normal, p.Rotation);
     v.Tangent = qRotateVec3(v.Tangent, p.Rotation);
     v.Bitangent = qRotateVec3(v.Bitangent, p.Rotation);

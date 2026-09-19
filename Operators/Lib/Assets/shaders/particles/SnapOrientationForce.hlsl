@@ -15,7 +15,7 @@ cbuffer Params : register(b0)
     float SpaceAndPlane;  // 0 = Camera Space, 1 = World XY, 2 = World XZ, 3 = World YZ
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int RandomSeed;
 }

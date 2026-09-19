@@ -263,7 +263,7 @@ psInput vsMain(uint id : SV_VertexID)
         normalize(TBN._m10_m11_m12),
         normalize(TBN._m20_m21_m22));
 
-    output.worldPosition = mul(vInObject, ObjectToWorld);
+    output.worldPosition = mul(vInObject, ObjectToWorld).xyz;
 
     // Fog
     if (FogDistance > 0)
@@ -290,7 +290,7 @@ float4 psMain(psInput pin) : SV_TARGET
     float occlusion = roughnessMetallicOcclusion.z;
 
     // Outgoing light direction (vector from world-space fragment position to the "eye").
-    float3 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld);
+    float3 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld).xyz;
     float3 Lo = normalize(eyePosition - pin.worldPosition);
 
     // Get current fragment's normal and transform to world space.
@@ -306,7 +306,7 @@ float4 psMain(psInput pin) : SV_TARGET
     float3 Lr = 2.0 * cosLo * N - Lo;
 
     // Fresnel reflectance at normal incidence (for metals use albedo color).
-    float3 F0 = lerp(Fdielectric, albedo, metalness);
+    float3 F0 = lerp(Fdielectric, albedo, metalness).xyz;
 
     // Direct lighting calculation for analytical lights.
     // Direct lighting calculation for analytical lights.
@@ -316,7 +316,7 @@ float4 psMain(psInput pin) : SV_TARGET
         float3 Li = Lights[i].position - pin.worldPosition; //- Lights[i].direction;
         float distance = length(Li);
         float intensity = Lights[i].intensity / (pow(distance/Lights[i].range, Lights[i].decay) + 1);
-        float3 Lradiance = Lights[i].color * intensity; // Lights[i].radiance;
+        float3 Lradiance = Lights[i].color.rgb * intensity; // Lights[i].radiance;
 
         // Half-vector between Li and Lo.
         float3 Lh = normalize(Li + Lo);

@@ -38,7 +38,7 @@ RWStructuredBuffer<Point> ResultPoints : register(u0);
     float3 signedFraction = (mod(normlizedOffsetPosition, 1) - 0.5) * 2;
     float3 centerPoint = pos - signedFraction * gridSize / 2;
 
-    float3 scatter = (hash41u(i.x) - 0.5) * Scatter;
+    float3 scatter = ((hash41u(i.x) - 0.5) * Scatter).xyz;
 
     float3 snapAmount = 0;
     if (Mode < 0.5)

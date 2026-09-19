@@ -6,7 +6,7 @@ cbuffer Params : register(b0)
     float DebugParam;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int SourceCount;
     int ResultCount;
@@ -22,8 +22,8 @@ StructuredBuffer<Point> SourcePoints : register(t0);
 RWStructuredBuffer<Point> ResultPoints : register(u0);
 RWStructuredBuffer<MinMax> Bounds : register(u1);
 
-groupshared uint3 g_MinValue = 0xffffffffu;
-groupshared uint3 g_MaxValue = 0;
+groupshared uint3 g_MinValue;
+groupshared uint3 g_MaxValue;
 
 inline uint FloatToOInt(float value)
 {

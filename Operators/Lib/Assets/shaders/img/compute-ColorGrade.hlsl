@@ -45,9 +45,9 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     c.rgb = lerp( float3(gray, gray,gray), c.rgb, PreSaturate); 
          
     // Grade        
-    float3 liftScaled =   Lift * 2*Lift.a + (0.5-Lift.a);
-    float3 gammaScaled =   Gamma * 2*Gamma.a + (0.5-Gamma.a);
-    float3 gainScaled =   Gain * 2*Gain.a + (0.5-Gain.a);
+    float3 liftScaled =   Lift.rgb * 2*Lift.a + (0.5-Lift.a);
+    float3 gammaScaled =   Gamma.rgb * 2*Gamma.a + (0.5-Gamma.a);
+    float3 gainScaled =   Gain.rgb * 2*Gain.a + (0.5-Gain.a);
     
     c.rgb=  pow( 
                    ( c.rgb+ (liftScaled * 2-1)*(1-c))*      // Lift

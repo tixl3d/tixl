@@ -89,7 +89,7 @@ psInput vsMain(uint id: SV_VertexID)
     float3 posInObject =  (-float3(sprite.Pivot, 0) + quadCorners * float3(sprite.Size,0)) * s;
 
     float4x4 orientationMatrix = transpose(qToMatrix(p.Rotation));
-    posInObject = mul( float4(posInObject.xyz, 1), orientationMatrix);
+    posInObject = mul( float4(posInObject.xyz, 1), orientationMatrix).xyz;
     posInObject += p.Position;
 
     float4 quadPosInWorld = mul(float4(posInObject.xyz,1), ObjectToWorld);

@@ -25,7 +25,7 @@ cbuffer Params : register(b0)
     float ThicknessDirection; // New parameter: -1 = left, 0 = center, 1 = right
 };
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     int UvMode;
     int WidthFX;

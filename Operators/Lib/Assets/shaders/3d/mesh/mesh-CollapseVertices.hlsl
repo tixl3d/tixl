@@ -19,7 +19,7 @@ cbuffer Params : register(b0)
     float BlendStep;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     uint Count;
     int VolumeShape;
