@@ -149,6 +149,10 @@ public static class SerialConnectionManager
 
     private static List<string> QueryPortListBlocking()
     {
+        // Only WMI knows the friendly device names ("USB Serial Device (COM3)"); elsewhere the ports are /dev paths.
+        if (!OperatingSystem.IsWindows())
+            return SerialPort.GetPortNames().OrderBy(s => s).ToList();
+
         var portList = new List<string>();
         try
         {

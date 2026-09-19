@@ -90,6 +90,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Spikes", "Spikes", "{674B3D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VulkanPlayerSpike", "Spikes\VulkanPlayerSpike\VulkanPlayerSpike.csproj", "{3A980A65-29B9-442E-8F6C-0257EDA6605D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SdlPlatform", "SdlPlatform\SdlPlatform.csproj", "{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -436,6 +438,18 @@ Global
 		{3A980A65-29B9-442E-8F6C-0257EDA6605D}.Release|x64.Build.0 = Release|Any CPU
 		{3A980A65-29B9-442E-8F6C-0257EDA6605D}.Release|x86.ActiveCfg = Release|Any CPU
 		{3A980A65-29B9-442E-8F6C-0257EDA6605D}.Release|x86.Build.0 = Release|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Debug|x64.Build.0 = Debug|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Debug|x86.Build.0 = Debug|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Release|x64.ActiveCfg = Release|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Release|x64.Build.0 = Release|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Release|x86.ActiveCfg = Release|Any CPU
+		{4DDF995D-E19F-4A27-9C36-FB3FEBF697D3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

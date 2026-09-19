@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="$(SolutionDir)/Tixl.props" />
+    <PropertyGroup>
+        <TargetFramework>$(TixlNetCoreFrameworkVersion)</TargetFramework>
+        <RootNamespace>T3.SdlPlatform</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Logging\Logging.csproj" />
+        <ProjectReference Include="..\SystemUi\SystemUi.csproj" />
+    </ItemGroup>
+</Project>

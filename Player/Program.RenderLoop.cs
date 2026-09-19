@@ -68,9 +68,9 @@ internal static partial class Program
         DirtyFlag.IncrementGlobalTicks();
         DirtyFlag.GlobalInvalidationTick++;
 
-        EvaluateAndDrawOutput(_resolution, _deviceContext, _renderView);
+        EvaluateAndDrawOutput(_resolution, _deviceContext, _mainWindow.RenderTargetView);
 
-        _swapChain.Present(_vsyncInterval, PresentFlags.None);
+        _mainWindow.SwapChain.Present(_vsyncInterval, PresentFlags.None);
         PresentOutputWindows();
 
         PerformanceMetrics.RecordFrame((float)(Playback.LastFrameDuration * 1000.0));
@@ -124,7 +124,9 @@ internal static partial class Program
 
         // Operators that render off-screen save and restore the bound viewports, and SharpDX's GetViewports
         // throws when none is bound at all — so one is bound before any content runs, as the editor always has.
-        deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _backBufferSize.Width, _backBufferSize.Height, 0.0f, 1.0f));
+        var backBufferSize = _mainWindow.BackBufferSize;
+        var backBufferViewport = new Viewport(0, 0, backBufferSize.Width, backBufferSize.Height, 0.0f, 1.0f);
+        deviceContext.Rasterizer.SetViewport(backBufferViewport);
 
         // Composited first: the compositor binds render targets of its own and leaves them bound, so the back
         // buffer is claimed after it is done rather than before.
@@ -133,7 +135,7 @@ internal static partial class Program
 
         // The output is rendered at the requested resolution and stretched onto the back buffer,
         // whose size follows the window (borderless fullscreen may differ from the requested size).
-        deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _backBufferSize.Width, _backBufferSize.Height, 0.0f, 1.0f));
+        deviceContext.Rasterizer.SetViewport(backBufferViewport);
         deviceContext.OutputMerger.SetTargets(renderView);
 
         // Clear before evaluating: with a flip-model swap chain an un-drawn back buffer is undefined

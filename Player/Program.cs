@@ -29,11 +29,11 @@ using T3.Core.Resource;
 using T3.Core.SystemUi;
 using Device = SharpDX.Direct3D11.Device;
 using Resource = SharpDX.Direct3D11.Resource;
-using SharpDX.Windows;
-using System.Windows.Forms;
+using SDL;
 using SilkWindows;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.Utils;
+using T3.SdlPlatform;
 using T3.Serialization;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using Factory = SharpDX.DXGI.Factory;
@@ -43,6 +43,7 @@ using VertexShader = T3.Core.DataTypes.VertexShader;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 using Texture2D = T3.Core.DataTypes.Texture2D;
+using static SDL.SDL3;
 
 namespace T3.Player;
 
@@ -57,7 +58,7 @@ internal static partial class Program
         // Must run before any code that may trigger assembly resolution.
         T3.Core.Diagnostics.AssemblyLoadDiagnostics.Install();
 
-        CoreUi.Instance = new MsForms.MsForms();
+        CoreUi.Instance = _coreUi;
         var silkWindows = new SilkWindowProvider();
         BlockingWindow.Instance = silkWindows;
         TrySetDialogFonts(silkWindows);
@@ -73,6 +74,12 @@ internal static partial class Program
 
         CoreSettings.Config = exportSettings.ConfigData;
 
+        if (!SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
+        {
+            BlockingWindow.Instance.ShowMessageBox($"Failed to initialize SDL: {SDL_GetError()}");
+            return;
+        }
+
         var playerDataDirectory = ResolvePlayerDataDirectory(exportSettings);
         var fileWriter = FileWriter.CreateDefault(playerDataDirectory, out var logPath);
         try
@@ -87,7 +94,7 @@ internal static partial class Program
 
             var lastUsedPath = Path.Combine(playerDataDirectory, "playerSettings.json");
             _startupOptions = PlayerStartupOptions.Resolve(exportSettings, commandLine, lastUsedPath);
-            var displays = silkWindows.GetDisplays();
+            var displays = _displayProvider.GetDisplays();
 
             // An installation comes up on its own displays with no one at the keyboard, so it never asks —
             // though --dialog still forces the question when someone is there to answer it.
@@ -135,56 +142,27 @@ internal static partial class Program
             _vsyncInterval = Convert.ToInt16(_startupOptions.VSync);
 
             var iconPath = Path.Combine(SharedResources.EditorResourcesDirectory, "images", "t3.ico");
-            var gotIcon = File.Exists(iconPath);
-
-            Icon icon;
-            if (!gotIcon)
+            if (!File.Exists(iconPath))
             {
                 Log.Warning("Failed to load icon from " + iconPath);
-                icon = null;
-            }
-            else
-            {
-                icon = new Icon(iconPath);
+                iconPath = null;
             }
 
-            _renderForm = new RenderForm(exportSettings.ApplicationTitle)
-                              {
-                                  ClientSize = new Size(resolution.X, resolution.Y),
-                                  AllowUserResizing = false,
-                                  Icon = icon,
-                                  StartPosition = FormStartPosition.Manual,
-                              };
-
-            // Center on the chosen display; borderless fullscreen then covers that display.
-            var displayBounds = display.Bounds;
-            _renderForm.Location = new Point(displayBounds.X + Math.Max(0, (displayBounds.Width - _renderForm.Width) / 2),
-                                             displayBounds.Y + Math.Max(0, (displayBounds.Height - _renderForm.Height) / 2));
-
-            var windowHandle = _renderForm.Handle;
-
-            // "Fullscreen" is a borderless window covering the screen. DXGI exclusive fullscreen is
-            // avoided on purpose: it silently drops to windowed on focus loss (Alt+Tab), requires
-            // ResizeBuffers after every mode change and minimizes the window, which led to
-            // DXGI_ERROR_INVALID_CALL crashes. Flip-model swap chains get direct scan-out anyway.
+            // Centered on the chosen display; borderless fullscreen then covers that display.
+            _mainWindow = new PlayerWindow(exportSettings.ApplicationTitle,
+                                           new Size(resolution.X, resolution.Y),
+                                           _displayProvider.GetDisplayId(display.Index),
+                                           iconPath);
             if (_startupOptions.Fullscreen)
             {
                 SetBorderlessFullScreen(true);
             }
 
-            // SwapChain description
-            var desc = new SwapChainDescription
-                           {
-                               BufferCount = 3,
-                               ModeDescription = new ModeDescription(_renderForm.ClientSize.Width, _renderForm.ClientSize.Height,
-                                                                     new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                               IsWindowed = true,
-                               OutputHandle = windowHandle,
-                               SampleDescription = new SampleDescription(1, 0),
-                               SwapEffect = SwapEffect.FlipDiscard,
-                               Flags = SwapChainFlags.AllowModeSwitch,
-                               Usage = Usage.RenderTargetOutput,
-                           };
+            if (!OperatingSystem.IsWindows())
+            {
+                CloseApplication(true, "This player renders with Direct3D 11, which is only available on Windows.");
+                return;
+            }
 
             //Try to load 11.1 if possible, revert to 11.0 auto
             FeatureLevel[] levels =
@@ -200,22 +178,12 @@ internal static partial class Program
             // BgraSupport is required for the Direct2D loading screen
             var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
 #endif
-            Device.CreateWithSwapChain(DriverType.Hardware, deviceCreationFlags, desc, out _device, out _swapChain);
+            _device = new Device(DriverType.Hardware, deviceCreationFlags, levels);
             ResourceManager.Init(_device);
             _deviceContext = _device.ImmediateContext;
+            _mainWindow.CreateSwapChain(_device);
 
             CoreUi.Instance.Cursor.SetVisible(!_isFullScreen);
-            _backBufferSize = _renderForm.ClientSize;
-
-            // Ign ore all windows events
-            var factory = _swapChain.GetParent<Factory>();
-            factory.MakeWindowAssociation(_renderForm.Handle, WindowAssociationFlags.IgnoreAll);
-
-            InitializeInput(_renderForm);
-
-            // New RenderTargetView from the backbuffer
-            _backBuffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0);
-            _renderView = new RenderTargetView(_device, _backBuffer);
 
             var shaderCompiler = new DX11ShaderCompiler
                                      {
@@ -234,7 +202,7 @@ internal static partial class Program
             Log.AddWriter(_lastLogLine);
             _loadingScreen = new LoadingScreen(exportSettings.ApplicationTitle);
             _isLoading = true;
-            _renderForm.Show();
+            _mainWindow.Show();
             PumpLoadingScreen("Loading operators...", LoadProgressOperatorsStart);
 
             loadReport.BeginStage("Load operators");
@@ -369,7 +337,7 @@ internal static partial class Program
             if (prerenderRequired)
             {
                 if (!PreloadShadersAndResources(_soundtrackHandle.Clip.LengthInSeconds, _resolution, _playback, _deviceContext, _evalContext,
-                                                _renderView))
+                                                _mainWindow.RenderTargetView))
                 {
                     CloseApplication(false, "Loading cancelled.");
                     return;
@@ -400,8 +368,13 @@ internal static partial class Program
 
             try
             {
-                // Main loop
-                RenderLoop.Run(_renderForm, RenderCallback);
+                _coreUi.IsEventLoopRunning = true;
+                while (PumpEvents() && !_coreUi.QuitRequested)
+                {
+                    RenderCallback();
+                }
+
+                CloseApplication(false, null);
             }
             catch (TimelineEndedException)
             {
@@ -459,8 +432,7 @@ internal static partial class Program
             {
                 DisposeOutputWindows();
                 OutputStreaming.DisposeAll();
-                _renderView?.Dispose();
-                _backBuffer?.Dispose();
+                _mainWindow?.Dispose();
                 _deviceContext?.ClearState();
                 _deviceContext?.Flush();
                 _device?.Dispose();
@@ -481,8 +453,8 @@ internal static partial class Program
     }
 
     /// <summary>
-    /// Toggles between the normal window and a borderless window covering the screen the window is on.
-    /// The swap chain follows the new client size on the next frame (see <see cref="EnsureBackBufferSize"/>).
+    /// Toggles between the normal window and a borderless window covering the display the window is on.
+    /// The swap chain follows the new size on the next frame (see <see cref="EnsureBackBufferSize"/>).
     /// </summary>
     private static void SetBorderlessFullScreen(bool enable)
     {
@@ -490,57 +462,22 @@ internal static partial class Program
             return;
 
         _isFullScreen = enable;
-        if (enable)
-        {
-            _windowedBounds = _renderForm.Bounds;
-            _windowedBorderStyle = _renderForm.FormBorderStyle;
-            _renderForm.WindowState = FormWindowState.Normal;
-            _renderForm.FormBorderStyle = FormBorderStyle.None;
-            _renderForm.Bounds = Screen.FromControl(_renderForm).Bounds;
-        }
-        else
-        {
-            _renderForm.FormBorderStyle = _windowedBorderStyle;
-            _renderForm.Bounds = _windowedBounds;
-        }
-
+        _mainWindow.SetFullscreen(enable);
         CoreUi.Instance.Cursor.SetVisible(!enable);
     }
 
-    /// <summary>
-    /// Resizes the swap chain when the window's client size changed (fullscreen toggle, DPI change).
-    /// Called once per frame before rendering.
-    /// </summary>
+    /// <summary>Called once per frame before rendering.</summary>
     private static void EnsureBackBufferSize()
     {
-        var clientSize = _renderForm.ClientSize;
-        if (clientSize == _backBufferSize || clientSize.Width == 0 || clientSize.Height == 0)
-            return;
-
-        RebuildBackBuffer(_renderForm, _device, ref _renderView, ref _backBuffer, _swapChain);
+        _mainWindow.EnsureBackBufferSize(_device, _releaseLoadingScreenTarget);
     }
 
-    private static void RebuildBackBuffer(RenderForm form, Device device, ref RenderTargetView rtv, ref SharpDX.Direct3D11.Texture2D buffer, SwapChain swapChain)
+    /** The loading screen's Direct2D target references the back buffer, which blocks a swap chain resize. */
+    private static void ReleaseLoadingScreenTarget()
     {
-        // ResizeBuffers requires that no reference to the back buffer survives - including a
-        // binding on the output merger. A still-bound RTV leaves the pipeline in undefined
-        // state which can escalate to DXGI_ERROR_DEVICE_HUNG on the next Present.
-        device.ImmediateContext.OutputMerger.SetTargets((RenderTargetView)null);
         _loadingScreen?.ReleaseBackBufferResources();
-        rtv.Dispose();
-        buffer.Dispose();
-
-        // Preserve the swap chain's existing flags across the resize.
-        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, swapChain.Description.Flags);
-        buffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(swapChain, 0);
-        rtv = new RenderTargetView(device, buffer);
-        _backBufferSize = form.ClientSize;
     }
 
-    /// <summary>
-    /// Logs and remembered settings live in a .temp folder next to the executable, where users look for them.
-    /// Falls back to the roaming app-data folder when the export location is read-only.
-    /// </summary>
     /// <summary>
     /// Publishes the venue shipped beside the player, so operators that read the active setup (the stage
     /// geometry, the projector camera) work in an export as they do in the editor. An output left at 0 × 0
@@ -562,8 +499,8 @@ internal static partial class Program
                                                                null => windowResolution,
                                                                { IsStream: true } => SetupFiles.UnboundResolution,
                                                                _ when binding.DisplayIndex >= 0 && binding.DisplayIndex < displays.Count
-                                                                   => new Int2(displays[binding.DisplayIndex].Bounds.Width,
-                                                                               displays[binding.DisplayIndex].Bounds.Height),
+                                                                   => new Int2(displays[binding.DisplayIndex].CurrentMode.Width,
+                                                                               displays[binding.DisplayIndex].CurrentMode.Height),
                                                                _ => windowResolution,
                                                            });
         ActiveSetup.Current = setup;
@@ -571,6 +508,10 @@ internal static partial class Program
         Log.Info($"Loaded output setup \"{setup.Name}\": {setup.Outputs.Count} output(s), {setup.Surfaces.Count} surface(s).");
     }
 
+    /// <summary>
+    /// Logs and remembered settings live in a .temp folder next to the executable, where users look for them.
+    /// Falls back to the roaming app-data folder when the export location is read-only.
+    /// </summary>
     private static string ResolvePlayerDataDirectory(ExportSettings exportSettings)
     {
         var localDirectory = Path.Combine(FileLocations.StartFolder, ".temp");
@@ -633,9 +574,10 @@ internal static partial class Program
 
     // Private static bool _inResize;
     private static int _vsyncInterval;
-    private static SwapChain _swapChain;
-    private static RenderTargetView _renderView;
-    private static SharpDX.Direct3D11.Texture2D _backBuffer;
+    private static readonly SdlCoreUi _coreUi = new();
+    private static readonly SdlDisplayProvider _displayProvider = new();
+    private static readonly Action _releaseLoadingScreenTarget = ReleaseLoadingScreenTarget;
+    private static PlayerWindow _mainWindow;
     private static Instance _project;
     private static EvaluationContext _evalContext;
     private static Playback _playback;
@@ -646,14 +588,10 @@ internal static partial class Program
     private static readonly List<AudioClipResourceHandle> _allSoundtrackHandles = new();
     private static DeviceContext _deviceContext;
     private static PlayerStartupOptions _startupOptions;
-    private static RenderForm _renderForm;
     private static Texture2D _outputTexture;
     private static ShaderResourceView _outputTextureSrv;
     private static bool _loggedNullOutput;
     private static bool _isFullScreen;
-    private static Size _backBufferSize;
-    private static Rectangle _windowedBounds;
-    private static FormBorderStyle _windowedBorderStyle;
     private static RasterizerState _rasterizerState;
     private static Resource<VertexShader> _fullScreenVertexShaderResource;
     private static Resource<PixelShader> _fullScreenPixelShaderResource;

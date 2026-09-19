@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -28,8 +27,7 @@ internal static partial class Program
     /// </summary>
     private static bool PumpLoadingScreen(string status, float progress)
     {
-        Application.DoEvents();
-        if (_renderForm == null || _renderForm.IsDisposed)
+        if (!PumpEvents())
             _loadCancelled = true;
 
         if (_loadCancelled)
@@ -39,8 +37,9 @@ internal static partial class Program
             return true;
 
         EnsureBackBufferSize();
-        _loadingScreen.Draw(_backBuffer, _backBufferSize.Width, _backBufferSize.Height, status, progress, _lastLogLine?.Text, false);
-        _swapChain.Present(1, PresentFlags.None);
+        var size = _mainWindow.BackBufferSize;
+        _loadingScreen.Draw(_mainWindow.BackBuffer, size.Width, size.Height, status, progress, _lastLogLine?.Text, false);
+        _mainWindow.SwapChain.Present(1, PresentFlags.None);
         return true;
     }
 
