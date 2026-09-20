@@ -89,6 +89,8 @@ internal sealed class FakeGraphicsBackend : IGraphicsBackend
 
     public void RaiseMemoryPressure(MemoryReport report) => MemoryPressure?.Invoke(report);
 
+    public void Dispose() { }
+
     public readonly List<TextureDescription> Textures = [];
     public readonly List<GpuBufferDescription> Buffers = [];
     public readonly List<SamplerDescription> Samplers = [];

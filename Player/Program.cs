@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ManagedBass;
 using Newtonsoft.Json;
@@ -157,28 +158,9 @@ internal static partial class Program
                 SetBorderlessFullScreen(true);
             }
 
-            if (!OperatingSystem.IsWindows())
-            {
-                CloseApplication(true, "This player renders with Direct3D 11, which is only available on Windows.");
-                return;
-            }
-
-            //Try to load 11.1 if possible, revert to 11.0 auto
-            FeatureLevel[] levels =
-{
-                FeatureLevel.Level_11_1,
-                FeatureLevel.Level_11_0,
-            };
-
-            // Create Device and SwapChain
-#if DEBUG || FORCE_D3D_DEBUG
-            var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
-#else
-            // BgraSupport is required for the Direct2D loading screen
-            var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
-#endif
             // Which backend renders is decided here, and nothing above this line knows the difference.
-            _backend = T3.Graphics.D3D11.D3D11Backend.Create();
+            _backend = CreateBackend();
+            Log.Info($"Rendering with {_backend.GetType().Name} on {_backend.AdapterName}");
             _device = new Device(_backend);
             ResourceManager.Init(_device);
             _deviceContext = _device.ImmediateContext;
@@ -186,11 +168,10 @@ internal static partial class Program
 
             CoreUi.Instance.Cursor.SetVisible(!_isFullScreen);
 
-            var shaderCompiler = new DX11ShaderCompiler
-                                     {
-                                         Device = _device
-                                     };
-            ShaderCompiler.Instance = shaderCompiler;
+            // FXC only exists on Windows; Slang compiles the same HLSL to SPIR-V for Vulkan.
+            ShaderCompiler.Instance = OperatingSystem.IsWindows()
+                                          ? new DX11ShaderCompiler { Device = _device }
+                                          : new SlangShaderCompiler(_device);
                 
             SharedResources.Initialize();
                 
@@ -201,7 +182,9 @@ internal static partial class Program
             var loadReport = new PlayerLoadReport();
             _lastLogLine = new LastLogLineWriter();
             Log.AddWriter(_lastLogLine);
-            _loadingScreen = new LoadingScreen(exportSettings.ApplicationTitle);
+            // The loading screen draws with Direct2D; elsewhere loading just runs without one.
+            if (OperatingSystem.IsWindows())
+                _loadingScreen = new LoadingScreen(exportSettings.ApplicationTitle);
             _isLoading = true;
             _mainWindow.Show();
             PumpLoadingScreen("Loading operators...", LoadProgressOperatorsStart);
@@ -359,10 +342,10 @@ internal static partial class Program
 
             _isLoading = false;
             Log.RemoveWriter(_lastLogLine);
-            _loadingScreen.Dispose();
+            _loadingScreen?.Dispose();
             _loadingScreen = null;
 
-            // Start playback           
+            // Start playback
             _playback.Update();
             _playback.TimeInBars = 0;
             _playback.PlaybackSpeed = 1.0;
@@ -572,6 +555,27 @@ internal static partial class Program
         public readonly List<SymbolJson.SymbolReadResult> NewlyLoadedSymbols = newlyLoadedSymbols;
     }
 
+    /// <summary>
+    /// Direct3D 11 on Windows, Vulkan everywhere else. The D3D11 path stays in its own method so the
+    /// assembly is only touched where it can load.
+    /// </summary>
+    private static IGraphicsBackend CreateBackend()
+    {
+        if (OperatingSystem.IsWindows())
+            return CreateD3D11Backend();
+
+        return new T3.Graphics.Vulkan.VulkanBackend(new T3.Graphics.Vulkan.VulkanBackendOptions
+                                                        {
+                                                            InstanceExtensions = PlayerWindow.GetVulkanInstanceExtensions(),
+                                                        });
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static IGraphicsBackend CreateD3D11Backend()
+    {
+        return T3.Graphics.D3D11.D3D11Backend.Create();
+    }
+
     // Private static bool _inResize;
     private static int _vsyncInterval;
     private static readonly SdlCoreUi _coreUi = new();
@@ -595,7 +599,7 @@ internal static partial class Program
     private static RasterizerState _rasterizerState;
     private static Resource<VertexShader> _fullScreenVertexShaderResource;
     private static Resource<PixelShader> _fullScreenPixelShaderResource;
-    private static T3.Graphics.D3D11.D3D11Backend? _backend;
+    private static IGraphicsBackend? _backend;
     private static Device _device;
     private static Int2 _resolution;
     private static readonly List<Instance> _sends = [];

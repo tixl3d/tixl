@@ -6,7 +6,7 @@ namespace T3.Graphics;
 /// The compatibility layer in T3.Graphics.Compat translates D3D11-style calls into this; new code calls it
 /// directly.
 /// </summary>
-public interface IGraphicsBackend
+public interface IGraphicsBackend : IDisposable
 {
     string AdapterName { get; }
 

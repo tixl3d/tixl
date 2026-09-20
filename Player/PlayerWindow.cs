@@ -1,7 +1,10 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using SDL;
+using T3.Core.Logging;
 using T3.Graphics;
 using T3.Graphics.Compat;
 using T3.SdlPlatform;
@@ -13,8 +16,8 @@ using Resource = T3.Graphics.Compat.Resource;
 namespace T3.Player;
 
 /// <summary>
-/// An SDL window with the Direct3D 11 swap chain that presents into it. Used for the main window and for
-/// every additional output window.
+/// An SDL window with the swap chain that presents into it. Used for the main window and for every
+/// additional output window.
 /// </summary>
 internal sealed unsafe class PlayerWindow : IDisposable
 {
@@ -22,8 +25,14 @@ internal sealed unsafe class PlayerWindow : IDisposable
     public PlayerWindow(string title, Size clientSizeInPixels, SDL_DisplayID display, string? iconPath)
     {
         _requestedClientSize = clientSizeInPixels;
-        _window = SDL_CreateWindow(title, clientSizeInPixels.Width, clientSizeInPixels.Height,
-                                   SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY);
+
+        // A surface can only be created from a window that asked for Vulkan when it was made, so the flag has
+        // to match the backend the player will pick.
+        var flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY;
+        if (!OperatingSystem.IsWindows())
+            flags |= SDL_WindowFlags.SDL_WINDOW_VULKAN;
+
+        _window = SDL_CreateWindow(title, clientSizeInPixels.Width, clientSizeInPixels.Height, flags);
         if (_window == null)
             throw new InvalidOperationException($"SDL_CreateWindow failed: {SDL_GetError()}");
 
@@ -115,6 +124,31 @@ internal sealed unsafe class PlayerWindow : IDisposable
                     ?? throw new InvalidOperationException("Could not create a swap chain for the player window.");
 
         CreateBackBufferViews(device);
+    }
+
+    /// <summary>
+    /// The Vulkan instance extensions this platform's surface needs. Only SDL knows them, and they have to be
+    /// enabled when the instance is created, which happens before any window hands out a surface.
+    /// </summary>
+    public static IReadOnlyList<string> GetVulkanInstanceExtensions()
+    {
+        uint count;
+        var names = SDL_Vulkan_GetInstanceExtensions(&count);
+        if (names == null)
+        {
+            Log.Warning($"SDL could not report the Vulkan instance extensions: {SDL_GetError()}");
+            return [];
+        }
+
+        var extensions = new List<string>((int)count);
+        for (var i = 0; i < count; i++)
+        {
+            var name = Marshal.PtrToStringUTF8((nint)names[i]);
+            if (!string.IsNullOrEmpty(name))
+                extensions.Add(name);
+        }
+
+        return extensions;
     }
 
     private nint CreateVulkanSurface(nint instance)
