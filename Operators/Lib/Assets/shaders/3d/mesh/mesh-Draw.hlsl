@@ -48,7 +48,7 @@ cbuffer PbrParams : register(b4)
     float Metal;
 }
 
-cbuffer Params : register(b5)
+cbuffer FloatParams : register(b5)
 {
     /*{FLOAT_PARAMS}*/
 }

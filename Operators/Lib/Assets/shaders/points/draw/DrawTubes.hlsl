@@ -72,7 +72,7 @@ cbuffer PbrParams : register(b4)
     float Metal;
 }
 
-cbuffer Transforms : register(b5)
+cbuffer IntParams : register(b5)
 {
     int SideCount;
 };

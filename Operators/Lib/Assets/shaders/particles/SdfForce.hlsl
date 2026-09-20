@@ -19,12 +19,12 @@ cbuffer Params : register(b0)
     float Phase;
 }
 
-cbuffer Params : register(b1)
+cbuffer FloatParams : register(b1)
 {
     /*{FLOAT_PARAMS}*/
 }
 
-cbuffer Params : register(b2)
+cbuffer IntParams : register(b2)
 {
     uint ParticleCount;
 }

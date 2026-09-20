@@ -59,7 +59,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
         
         uint sid=IndexBuffer[idx].x;
 
-        Particle p=SourcePoints[sid];
+        Point p=SourcePoints[sid];
 
         float smp=c2k(p);
         smp=linstep(c2k(SourcePoints[IndexBuffer[BufferLength-1].x]),c2k(SourcePoints[IndexBuffer[0].x]),smp);

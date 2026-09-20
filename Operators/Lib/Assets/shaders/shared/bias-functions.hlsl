@@ -56,8 +56,12 @@ inline float4 GetBias(float bias, float4 x)
 
 inline float4 GetSchlickBias(float4 x, float gain)
 {
-    return x < 0.5 ? GetBias(gain, x * 2.0) / 2.0
-                   : GetBias(1.0 - gain, x * 2.0 - 1.0) / 2.0 + 0.5;
+    // A vector condition in ?: selects component by component. FXC accepts that spelling and Slang does
+    // not, so the same thing is written with a weight of exactly 0 or 1.
+    float4 isLower = (float4)(x < 0.5);
+    return lerp(GetBias(1.0 - gain, x * 2.0 - 1.0) / 2.0 + 0.5,
+                GetBias(gain, x * 2.0) / 2.0,
+                isLower);
 }
 
 inline float4 ApplyGainAndBias(float4 v4, float2 gainBias)
@@ -112,9 +116,12 @@ float4 ApplyBiasAndGain(float4 x, float s, float t)
     float r = 200;
     s *= 2;
     s = s < 1 ? (pow(r, 1 - s)) : 1 / pow(r, s - 1);
-    return x < t
-               ? ((t * x) / (x + s * (t - x) + eps))
-               : (((1 - t) * (x - 1)) / (1 - x - s * (t - x) + eps) + 1);
+
+    // As above: component-wise select, spelled so that both compilers accept it.
+    float4 isBelow = (float4)(x < t);
+    return lerp((((1 - t) * (x - 1)) / (1 - x - s * (t - x) + eps) + 1),
+                ((t * x) / (x + s * (t - x) + eps)),
+                isBelow);
 }
 
 #endif

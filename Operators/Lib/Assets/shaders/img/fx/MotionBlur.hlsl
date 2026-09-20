@@ -7,7 +7,7 @@ cbuffer ParamConstants : register(b0)
     // TBD Transform const buffer
 }
 
-cbuffer ParamConstants : register(b1)
+cbuffer ParamConstants2 : register(b1)
 {
     float SampleCount;
     float Strength;

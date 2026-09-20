@@ -8,7 +8,7 @@ cbuffer Params : register(b0)
     float Ratio;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int Seed;
     int Repeat;

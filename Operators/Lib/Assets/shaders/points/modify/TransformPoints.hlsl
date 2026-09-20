@@ -13,7 +13,7 @@ cbuffer Params : register(b0)
     // float WIsWeight;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int CoordinateSpace;
     int StrengthFactor;

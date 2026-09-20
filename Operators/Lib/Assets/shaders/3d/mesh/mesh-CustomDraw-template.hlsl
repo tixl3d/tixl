@@ -67,7 +67,7 @@ cbuffer CustomParams : register(b5)
 }
 
 
-cbuffer Params : register(b6)
+cbuffer FloatParams : register(b6)
 {
     /*{FLOAT_PARAMS}*/
 }

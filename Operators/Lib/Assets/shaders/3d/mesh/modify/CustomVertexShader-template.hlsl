@@ -20,7 +20,7 @@ cbuffer Params : register(b0)
     float2 GainAndBias;
 }
 
-cbuffer Params : register(b1)
+cbuffer FloatParams : register(b1)
 {
     /*{FLOAT_PARAMS}*/
 }

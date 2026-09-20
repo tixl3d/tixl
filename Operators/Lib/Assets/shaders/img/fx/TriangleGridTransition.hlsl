@@ -21,7 +21,7 @@ cbuffer TimeConstants : register(b1)
     float beatTime;
 }
 
-cbuffer TimeConstants : register(b2)
+cbuffer TimeConstants2 : register(b2)
 {
     float TargetWidth;
     float TargetHeight;

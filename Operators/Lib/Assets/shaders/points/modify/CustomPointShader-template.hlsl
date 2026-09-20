@@ -18,7 +18,7 @@ cbuffer FloatParams : register(b0)
 }
 
 
-cbuffer FloatParams : register(b1)
+cbuffer FloatParams2 : register(b1)
 {
     /*{FLOAT_PARAMS}*/
 }

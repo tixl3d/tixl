@@ -190,11 +190,11 @@ void main(uint3 i : SV_DispatchThreadID)
 
     float phase = ((Phase + (133.1123 * i.x) ) % 10000) * (1 + signedPointHash * 0.5);
     int phaseId = (int)phase;
-    float1 normalizedNoise = lerp(hash31((i.x + phaseId) % 123121),
-                                    hash31((i.x + phaseId) % 123121 + 1),
+    float normalizedNoise = lerp(hash31((i.x + phaseId) % 123121).x,
+                                    hash31((i.x + phaseId) % 123121 + 1).x,
                                     smoothstep(0, 1,
                                                phase - phaseId));
-    float3 signedNoise = normalizedNoise * 2 - 1;
+    float signedNoise = normalizedNoise * 2 - 1;
 
 
     float3 pos = p.Position;

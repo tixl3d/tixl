@@ -36,7 +36,7 @@ cbuffer Params : register(b1)
     float FadeNearest;
 };
 
-cbuffer Params : register(b2)
+cbuffer IntParams : register(b2)
 {
     // int SegmentCount;
     int ScaleFactorMode;
@@ -65,7 +65,7 @@ cbuffer PbrParams : register(b5)
     float Metal;
 }
 
-cbuffer Params : register(b6)
+cbuffer FloatParams : register(b6)
 {
     /*{FLOAT_PARAMS}*/
 }

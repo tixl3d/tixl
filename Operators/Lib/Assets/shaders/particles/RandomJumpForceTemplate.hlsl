@@ -15,7 +15,7 @@ cbuffer Params : register(b0)
     float3 AmountDistribution;
 }
 
-cbuffer Params : register(b1)
+cbuffer FloatParams : register(b1)
 {
     /*{FLOAT_PARAMS}*/
 }
