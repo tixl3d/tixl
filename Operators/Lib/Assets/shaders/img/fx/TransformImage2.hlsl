@@ -38,7 +38,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 {
     float height, width;
     ImageA.GetDimensions(height, width);
-    float2 aspect2 = width / height;
+    float aspect2 = width / height;
 
     float2 uv = psInput.texCoord;
 

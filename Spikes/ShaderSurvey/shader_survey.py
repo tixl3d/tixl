@@ -171,9 +171,13 @@ def resolve_address(address):
     return None
 
 
+COMMENT = re.compile(r"//[^\n]*|/\*.*?\*/", re.DOTALL)
+
+
 def guess_entries(path):
     """Entry points of an unreferenced file, from TiXL's naming conventions."""
-    text = path.read_text(encoding="utf-8", errors="replace")
+    # Commented-out code is not an entry point, and these files are full of it.
+    text = COMMENT.sub("", path.read_text(encoding="utf-8", errors="replace"))
     entries = [(name, "compute") for name in re.findall(r"\[numthreads\s*\([^)]*\)\]\s*void\s+(\w+)\s*\(", text)]
     for name, stage in (("vsMain", "vertex"), ("psMain", "fragment"), ("gsMain", "geometry")):
         if re.search(rf"\b{name}\s*\(", text):
@@ -515,6 +519,13 @@ def main():
 
     type_ops = read_type_op_inputs()
     usages, dynamic_sources, unreadable = collect_usages(type_ops)
+
+    # A type op's own default source is what every newly created shader op points at, so it has to
+    # compile even when no .t3 in the repo overrides it.
+    for symbol_id, (stage, _, _, default_source, default_entry) in type_ops.items():
+        if default_source and default_entry:
+            usages[(default_source, default_entry, stage)].append(
+                f"{SHADER_OPS[symbol_id][1]}.t3 (type default)")
 
     jobs = []
     missing_files = collections.defaultdict(list)
