@@ -3,10 +3,22 @@ using T3.Graphics;
 namespace T3.Graphics.Compat;
 
 /// <summary>
+/// What D3D11 calls a device child: anything the device created. TiXL constrains on it where a member is
+/// common to shaders and resources alike.
+/// </summary>
+public abstract class DeviceChild : IDisposable
+{
+    /// <summary>Shows up in RenderDoc and in validation messages.</summary>
+    public abstract string? DebugName { get; set; }
+
+    public abstract void Dispose();
+}
+
+/// <summary>
 /// Base for the D3D11-shaped resources. Everything here is a thin wrapper around a backend handle: the
 /// wrapper carries the D3D11 description operators read back, the handle does the work.
 /// </summary>
-public abstract class Resource : IDisposable
+public abstract class Resource : DeviceChild
 {
     protected Resource(Device device)
     {
@@ -22,7 +34,7 @@ public abstract class Resource : IDisposable
     /// </summary>
     public ulong Id { get; }
 
-    public string? DebugName
+    public override string? DebugName
     {
         get => Native?.Label;
         set
@@ -37,7 +49,19 @@ public abstract class Resource : IDisposable
     /// <summary>The backend object. Null only if creation failed, which on Vulkan can happen under memory pressure.</summary>
     public abstract GpuResource? Native { get; }
 
-    public virtual void Dispose()
+    /// <summary>
+    /// The native object, for the libraries TiXL hands resources to — FFmpeg's decoder, Spout, NDI. Zero on
+    /// a backend whose objects are not COM pointers, and those features are Windows-only anyway.
+    /// </summary>
+    public IntPtr NativePointer => Native?.NativeHandle ?? IntPtr.Zero;
+
+    /// <summary>The largest 2D texture D3D11 feature level 11 allows, which operators clamp against.</summary>
+    public const int MaximumTexture2DSize = 16384;
+
+    /// <summary>D3D11's subresource numbering: mips of slice 0, then of slice 1, and so on.</summary>
+    public static int CalculateSubResourceIndex(int mipSlice, int arraySlice, int mipLevels) => mipSlice + arraySlice * mipLevels;
+
+    public override void Dispose()
     {
         Native?.Dispose();
         GC.SuppressFinalize(this);
@@ -85,6 +109,26 @@ public sealed class Texture1D : Texture
         Description = description;
     }
 
+    public Texture1D(Device device, Texture1DDescription description, DataBox[] data)
+        : base(device, device.Backend.CreateTexture(new TextureDescription
+                                                        {
+                                                            Dimension = TextureDimension.Texture1D,
+                                                            Width = description.Width,
+                                                            Height = 1,
+                                                            Depth = 1,
+                                                            ArraySize = Math.Max(1, description.ArraySize),
+                                                            MipLevels = Math.Max(1, description.MipLevels),
+                                                            Format = description.Format,
+                                                            Samples = new SampleDescription(1, 0),
+                                                            Usage = Translate.ToTextureUsage(description.BindFlags, description.Usage,
+                                                                                             description.CpuAccessFlags, description.OptionFlags),
+                                                            Memory = Translate.ToMemoryKind(description.Usage, description.CpuAccessFlags),
+                                                        },
+                                                    Texture2D.ToSubresources(data)))
+    {
+        Description = description;
+    }
+
     public Texture1DDescription Description { get; }
 }
 
@@ -117,6 +161,60 @@ public sealed class Texture2D : Texture
                                                     initialData))
     {
         Description = description;
+    }
+
+    /// <summary>One entry per mip and slice, in D3D11's order.</summary>
+    public Texture2D(Device device, Texture2DDescription description, DataRectangle[] data)
+        : base(device, device.Backend.CreateTexture(Describe(description), ToSubresources(data)))
+    {
+        Description = description;
+    }
+
+    public Texture2D(Device device, Texture2DDescription description, DataBox[] data)
+        : base(device, device.Backend.CreateTexture(Describe(description), ToSubresources(data)))
+    {
+        Description = description;
+    }
+
+    internal static TextureDescription Describe(in Texture2DDescription description)
+        => new()
+               {
+                   Dimension = (description.OptionFlags & ResourceOptionFlags.TextureCube) != 0
+                                   ? TextureDimension.TextureCube
+                                   : TextureDimension.Texture2D,
+                   Width = description.Width,
+                   Height = description.Height,
+                   Depth = 1,
+                   ArraySize = Math.Max(1, description.ArraySize),
+                   MipLevels = Math.Max(1, description.MipLevels),
+                   Format = description.Format,
+                   Samples = description.SampleDescription.Count == 0 ? new SampleDescription(1, 0) : description.SampleDescription,
+                   Usage = Translate.ToTextureUsage(description.BindFlags, description.Usage, description.CpuAccessFlags, description.OptionFlags),
+                   Memory = Translate.ToMemoryKind(description.Usage, description.CpuAccessFlags),
+               };
+
+    internal static SubresourceData[] ToSubresources(DataRectangle[] data)
+    {
+        var result = new SubresourceData[data.Length];
+
+        for (var i = 0; i < data.Length; i++)
+        {
+            result[i] = new SubresourceData(data[i].DataPointer, data[i].Pitch, data[i].Pitch);
+        }
+
+        return result;
+    }
+
+    internal static SubresourceData[] ToSubresources(DataBox[] data)
+    {
+        var result = new SubresourceData[data.Length];
+
+        for (var i = 0; i < data.Length; i++)
+        {
+            result[i] = new SubresourceData(data[i].DataPointer, data[i].RowPitch, data[i].SlicePitch);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -158,12 +256,37 @@ public sealed class Texture3D : Texture
         Description = description;
     }
 
+    public Texture3D(Device device, Texture3DDescription description, DataBox[] data)
+        : base(device, device.Backend.CreateTexture(new TextureDescription
+                                                        {
+                                                            Dimension = TextureDimension.Texture3D,
+                                                            Width = description.Width,
+                                                            Height = description.Height,
+                                                            Depth = description.Depth,
+                                                            ArraySize = 1,
+                                                            MipLevels = Math.Max(1, description.MipLevels),
+                                                            Format = description.Format,
+                                                            Samples = new SampleDescription(1, 0),
+                                                            Usage = Translate.ToTextureUsage(description.BindFlags, description.Usage,
+                                                                                             description.CpuAccessFlags, description.OptionFlags),
+                                                            Memory = Translate.ToMemoryKind(description.Usage, description.CpuAccessFlags),
+                                                        },
+                                                    Texture2D.ToSubresources(data)))
+    {
+        Description = description;
+    }
+
     public Texture3DDescription Description { get; }
 }
 
 public sealed class Buffer : Resource
 {
     public Buffer(Device device, BufferDescription description)
+        : this(device, description, ReadOnlySpan<byte>.Empty)
+    {
+    }
+
+    public Buffer(Device device, ref BufferDescription description)
         : this(device, description, ReadOnlySpan<byte>.Empty)
     {
     }
@@ -182,6 +305,11 @@ public sealed class Buffer : Resource
                        StructureByteStride = structureByteStride,
                    },
                ReadOnlySpan<byte>.Empty)
+    {
+    }
+
+    public unsafe Buffer(Device device, DataStream data, BufferDescription description)
+        : this(device, description, new ReadOnlySpan<byte>((void*)data.DataPointer, description.SizeInBytes))
     {
     }
 
@@ -206,7 +334,7 @@ public sealed class Buffer : Resource
 public abstract class ResourceView(Device device, Resource resource) : Resource(device)
 {
     /// <summary>The resource this view points at. Operators read it back to compare identity.</summary>
-    public Resource ViewedResource { get; } = resource;
+    public Resource Resource { get; } = resource;
 }
 
 public sealed class ShaderResourceView : ResourceView
@@ -223,7 +351,36 @@ public sealed class ShaderResourceView : ResourceView
 
         if (resource is Texture { GpuTexture: { } texture })
             GpuView = device.Backend.CreateTextureView(texture, ViewDescriptions.ToTextureView(description));
+
+        if (GpuView != null)
+        {
+            lock (_byImGuiId)
+            {
+                _byImGuiId[GpuView.ImGuiTextureId] = new WeakReference<ShaderResourceView>(this);
+            }
+        }
     }
+
+    /// <summary>
+    /// Finds the view an ImGui draw command refers to. The draw list is consumed a frame after it was built,
+    /// so a view disposed in between resolves to null and the command draws nothing — which is what D3D11 got
+    /// away with by handing ImGui a raw pointer.
+    /// </summary>
+    public static ShaderResourceView? FromImGuiTextureId(ulong id)
+    {
+        if (id == 0)
+            return null;
+
+        lock (_byImGuiId)
+        {
+            if (!_byImGuiId.TryGetValue(id, out var weak) || !weak.TryGetTarget(out var view))
+                return null;
+
+            return view.IsDisposed ? null : view;
+        }
+    }
+
+    private static readonly Dictionary<ulong, WeakReference<ShaderResourceView>> _byImGuiId = [];
 
     public ShaderResourceViewDescription Description { get; }
 
@@ -236,10 +393,18 @@ public sealed class ShaderResourceView : ResourceView
     /// </summary>
     public ulong ImGuiTextureId => GpuView?.ImGuiTextureId ?? 0;
 
-    public override GpuResource? Native => GpuView ?? (GpuResource?)(ViewedResource as Buffer)?.GpuBuffer;
+    public override GpuResource? Native => GpuView ?? (GpuResource?)(Resource as Buffer)?.GpuBuffer;
 
     public override void Dispose()
     {
+        if (GpuView != null)
+        {
+            lock (_byImGuiId)
+            {
+                _byImGuiId.Remove(GpuView.ImGuiTextureId);
+            }
+        }
+
         // A buffer view owns nothing of its own; disposing it must not take the buffer with it.
         GpuView?.Dispose();
         GC.SuppressFinalize(this);
@@ -303,7 +468,7 @@ public sealed class UnorderedAccessView : ResourceView
 
     public UnorderedAccessViewDescription Description { get; }
     public GpuTextureView? GpuView { get; }
-    public override GpuResource? Native => GpuView ?? (GpuResource?)(ViewedResource as Buffer)?.GpuBuffer;
+    public override GpuResource? Native => GpuView ?? (GpuResource?)(Resource as Buffer)?.GpuBuffer;
 
     public override void Dispose()
     {
@@ -376,21 +541,84 @@ public abstract class Shader(Device device, GpuShader? shader) : Resource(device
     public override GpuResource? Native => GpuShader;
 }
 
-public sealed class VertexShader(Device device, GpuShader? shader) : Shader(device, shader);
+public sealed class VertexShader : Shader
+{
+    public VertexShader(Device device, GpuShader? shader) : base(device, shader)
+    {
+    }
 
-public sealed class PixelShader(Device device, GpuShader? shader) : Shader(device, shader);
+    /// <summary>
+    /// From compiled bytecode, the way the D3D11 shader compiler creates one. The third argument is D3D11's
+    /// class linkage, which TiXL always passes as null.
+    /// </summary>
+    public VertexShader(Device device, byte[] bytecode, object? classLinkage = null)
+        : base(device, device.Backend.CreateShader(ShaderStage.Vertex, bytecode, "main"))
+    {
+    }
+}
 
-public sealed class GeometryShader(Device device, GpuShader? shader) : Shader(device, shader);
+public sealed class PixelShader : Shader
+{
+    public PixelShader(Device device, GpuShader? shader) : base(device, shader)
+    {
+    }
 
-public sealed class ComputeShader(Device device, GpuShader? shader) : Shader(device, shader);
+    public PixelShader(Device device, byte[] bytecode, object? classLinkage = null)
+        : base(device, device.Backend.CreateShader(ShaderStage.Pixel, bytecode, "main"))
+    {
+    }
+}
+
+public sealed class GeometryShader : Shader
+{
+    public GeometryShader(Device device, GpuShader? shader) : base(device, shader)
+    {
+    }
+
+    public GeometryShader(Device device, byte[] bytecode, object? classLinkage = null)
+        : base(device, device.Backend.CreateShader(ShaderStage.Geometry, bytecode, "main"))
+    {
+    }
+}
+
+public sealed class ComputeShader : Shader
+{
+    public ComputeShader(Device device, GpuShader? shader) : base(device, shader)
+    {
+    }
+
+    public ComputeShader(Device device, byte[] bytecode, object? classLinkage = null)
+        : base(device, device.Backend.CreateShader(ShaderStage.Compute, bytecode, "main"))
+    {
+    }
+}
 
 /// <summary>
 /// The vertex layout. D3D11 validates it against the vertex shader's signature at creation; the backend
 /// resolves the semantics when it builds the pipeline, so this only carries the elements.
 /// </summary>
-public sealed class InputLayout(Device device, VertexAttribute[] elements) : Resource(device)
+public sealed class InputLayout : Resource
 {
-    internal readonly VertexAttribute[] Elements = elements;
+    public InputLayout(Device device, VertexAttribute[] elements) : base(device)
+    {
+        Elements = elements;
+    }
+
+    /// <summary>
+    /// The D3D11 shape. The shader bytecode it validated against is not needed here: the backend matches the
+    /// semantics against the shader's own reflection when it builds the pipeline.
+    /// </summary>
+    public InputLayout(Device device, byte[] shaderBytecode, InputElement[] elements) : base(device)
+    {
+        Elements = new VertexAttribute[elements.Length];
+
+        for (var i = 0; i < elements.Length; i++)
+        {
+            Elements[i] = elements[i].ToAttribute();
+        }
+    }
+
+    internal readonly VertexAttribute[] Elements;
     public override GpuResource? Native => null;
     public override void Dispose() => GC.SuppressFinalize(this);
 }

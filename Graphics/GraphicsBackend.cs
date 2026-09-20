@@ -11,10 +11,37 @@ public interface IGraphicsBackend
     string AdapterName { get; }
 
     /// <summary>
+    /// The native device, for the libraries TiXL hands it to: FFmpeg's hardware decoder, Spout, NDI. Zero on
+    /// a backend that has no such handle, and every one of those features is Windows-only anyway.
+    /// </summary>
+    IntPtr NativeDeviceHandle { get; }
+
+    /// <summary>
+    /// Lets another thread use the device safely. D3D11 has a switch for this; Vulkan is thread-safe for the
+    /// calls TiXL makes off the render thread, so it has nothing to turn on.
+    /// </summary>
+    void SetMultithreadProtected(bool enabled);
+
+    /// <summary>
+    /// Wraps a texture another library created. Null where the backend cannot: on Vulkan this needs an
+    /// external-memory import, and the features that want it do not run there yet.
+    /// </summary>
+    GpuTexture? AdoptTexture(IntPtr nativeHandle, in TextureDescription description, string? label = null);
+
+    /// <summary>
     /// Resource creation is thread-safe. TiXL loads images and builds buffers on worker threads while the
     /// main thread renders, and that has to keep working.
     /// </summary>
     GpuTexture CreateTexture(in TextureDescription description, ReadOnlySpan<byte> initialData, string? label = null);
+
+    /// <summary>
+    /// Creates a texture whose mips, array slices or volume slices are supplied separately. A DDS file
+    /// arrives this way, and generating the mips instead would change what the project looks like.
+    /// </summary>
+    /// <remarks>
+    /// The subresources are ordered as D3D11 orders them: mip 0..n of slice 0, then of slice 1, and so on.
+    /// </remarks>
+    GpuTexture CreateTexture(in TextureDescription description, ReadOnlySpan<SubresourceData> initialData, string? label = null);
 
     GpuBuffer CreateBuffer(in GpuBufferDescription description, ReadOnlySpan<byte> initialData, string? label = null);
     GpuTextureView CreateTextureView(GpuTexture texture, in TextureViewDescription description, string? label = null);
@@ -26,6 +53,12 @@ public interface IGraphicsBackend
     /// </summary>
     GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, ReadOnlySpan<ShaderBinding> bindings = default,
                            string? label = null);
+
+    /// <summary>
+    /// Creates the chain of images a window is presented from. Null when the window cannot be presented to,
+    /// which the caller reports rather than crashing on.
+    /// </summary>
+    GpuSwapchain? CreateSwapchain(in SwapchainDescription description, in SurfaceTarget target, string? label = null);
 
     /// <summary>Cached by description; calling this per draw is the expected usage.</summary>
     GpuPipeline GetOrCreatePipeline(in GraphicsPipelineDescription description);
@@ -135,6 +168,9 @@ public interface ICommandList
 
     void CopyTexture(GpuTexture source, GpuTexture destination);
     void CopyBuffer(GpuBuffer source, int sourceOffset, GpuBuffer destination, int destinationOffset, int size);
+
+    /// <summary>Copies one subresource into another at an offset, which is how a texture array is filled.</summary>
+    void CopyTextureRegion(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource, int x, int y, int z);
     void ResolveTexture(GpuTexture source, GpuTexture destination, Format format);
     void GenerateMips(GpuTextureView view);
 
@@ -146,6 +182,9 @@ public interface ICommandList
 
     void PopDebugGroup();
 }
+
+/// <summary>CPU memory for one mip or slice of a texture being created.</summary>
+public readonly record struct SubresourceData(IntPtr Data, int RowPitch, int SlicePitch);
 
 /// <summary>One resource a shader declares, as the shader compiler reports it.</summary>
 public readonly record struct ShaderBinding(int Set, int Slot, BindingKind Kind, string Name);
@@ -183,9 +222,58 @@ public readonly record struct Binding
 
 public readonly record struct VertexBufferView(GpuBuffer? Buffer, int Stride, int Offset);
 
-public readonly record struct Viewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth);
+public struct Viewport(float x, float y, float width, float height, float minDepth = 0f, float maxDepth = 1f)
+{
+    public float X = x;
+    public float Y = y;
+    public float Width = width;
+    public float Height = height;
+    public float MinDepth = minDepth;
+    public float MaxDepth = maxDepth;
+}
 
-public readonly record struct ScissorRect(int X, int Y, int Width, int Height);
+public struct ScissorRect(int x, int y, int width, int height)
+{
+    public int X = x;
+    public int Y = y;
+    public int Width = width;
+    public int Height = height;
+
+    // D3D11 describes a rectangle by its edges and TiXL's operators do too, so both spellings exist.
+    public int Left
+    {
+        get => X;
+        set
+        {
+            Width += X - value;
+            X = value;
+        }
+    }
+
+    public int Top
+    {
+        get => Y;
+        set
+        {
+            Height += Y - value;
+            Y = value;
+        }
+    }
+
+    public int Right
+    {
+        get => X + Width;
+        set => Width = value - X;
+    }
+
+    public int Bottom
+    {
+        get => Y + Height;
+        set => Height = value - Y;
+    }
+
+    public static ScissorRect FromEdges(int left, int top, int right, int bottom) => new(left, top, right - left, bottom - top);
+}
 
 /// <summary>CPU-visible copy of a resource, valid until disposed.</summary>
 public readonly struct ReadbackResult(ReadOnlyMemory<byte> data, int rowPitch, int slicePitch, IDisposable? owner) : IDisposable

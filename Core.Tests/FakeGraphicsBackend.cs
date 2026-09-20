@@ -10,9 +10,21 @@ internal sealed class FakeGraphicsBackend : IGraphicsBackend
 {
     public string AdapterName => "fake";
 
+    public IntPtr NativeDeviceHandle => IntPtr.Zero;
+
+    public void SetMultithreadProtected(bool enabled) { }
+
+    public GpuTexture? AdoptTexture(IntPtr nativeHandle, in TextureDescription description, string? label = null) => null;
+
     public readonly FakeCommandList Commands = new();
 
     public GpuTexture CreateTexture(in TextureDescription description, ReadOnlySpan<byte> initialData, string? label = null)
+    {
+        Textures.Add(description);
+        return new FakeTexture(description, label);
+    }
+
+    public GpuTexture CreateTexture(in TextureDescription description, ReadOnlySpan<SubresourceData> initialData, string? label = null)
     {
         Textures.Add(description);
         return new FakeTexture(description, label);
@@ -36,6 +48,8 @@ internal sealed class FakeGraphicsBackend : IGraphicsBackend
     public GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, ReadOnlySpan<ShaderBinding> bindings = default,
                                   string? label = null)
         => new FakeShader(stage, label);
+
+    public GpuSwapchain? CreateSwapchain(in SwapchainDescription description, in SurfaceTarget target, string? label = null) => null;
 
     public GpuPipeline GetOrCreatePipeline(in GraphicsPipelineDescription description)
     {
@@ -161,6 +175,9 @@ internal sealed class FakeCommandList : ICommandList
 
     public void CopyTexture(GpuTexture source, GpuTexture destination) => Copies++;
     public void CopyBuffer(GpuBuffer source, int sourceOffset, GpuBuffer destination, int destinationOffset, int size) => Copies++;
+    public void CopyTextureRegion(GpuTexture source, int sourceSubresource, GpuTexture destination, int destinationSubresource,
+                                  int x, int y, int z) => Copies++;
+
     public void ResolveTexture(GpuTexture source, GpuTexture destination, Format format) { }
     public void GenerateMips(GpuTextureView view) { }
     public void PushDebugGroup(string name) { }

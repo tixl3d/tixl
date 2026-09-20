@@ -20,6 +20,8 @@ public class ShaderStageState
 
     public void Set(Shader? shader) => Shader = shader;
 
+    public void SetShader(Shader? shader, object? classInstances = null, int count = 0) => Shader = shader;
+
     public void SetConstantBuffer(int slot, Buffer? buffer) => Assign(ConstantBuffers, slot, buffer, "constant buffer");
 
     public void SetConstantBuffers(int startSlot, params Buffer?[] buffers) => AssignRange(ConstantBuffers, startSlot, buffers, "constant buffer");
@@ -114,7 +116,7 @@ public class ShaderStageState
         if (view.GpuView != null)
             return new Binding { Kind = BindingKind.SampledTexture, Slot = slot, TextureView = view.GpuView };
 
-        var buffer = (Buffer)view.ViewedResource;
+        var buffer = (Buffer)view.Resource;
         var structured = (buffer.Description.OptionFlags & ResourceOptionFlags.BufferStructured) != 0;
         var (offset, size) = ViewDescriptions.BufferRange(buffer, view.Description.BufferEx.FirstElement, view.Description.BufferEx.ElementCount);
 
@@ -133,7 +135,7 @@ public class ShaderStageState
         if (view.GpuView != null)
             return new Binding { Kind = BindingKind.StorageTexture, Slot = slot, TextureView = view.GpuView, InitialCount = initialCount };
 
-        var buffer = (Buffer)view.ViewedResource;
+        var buffer = (Buffer)view.Resource;
         var (offset, size) = ViewDescriptions.BufferRange(buffer, view.Description.Buffer.FirstElement, view.Description.Buffer.ElementCount);
 
         return new Binding
@@ -193,6 +195,26 @@ public class ShaderStageState
         Array.Fill(counts, -1);
         return counts;
     }
+}
+
+public sealed class VertexShaderStage() : ShaderStageState(ShaderStage.Vertex);
+
+public sealed class PixelShaderStage() : ShaderStageState(ShaderStage.Pixel);
+
+public sealed class GeometryShaderStage() : ShaderStageState(ShaderStage.Geometry);
+
+/// <summary>A stage no backend implements. Setting anything on it is reported once and ignored.</summary>
+public sealed class UnusedShaderStage
+{
+    public Shader? Get() => null;
+
+    public void Set(Shader? shader)
+    {
+        if (shader != null)
+            GraphicsLog.WarnOnce("Hull and domain shaders are not supported.");
+    }
+
+    public void SetShader(Shader? shader, object? classInstances = null, int count = 0) => Set(shader);
 }
 
 public sealed class ComputeShaderStage() : ShaderStageState(ShaderStage.Compute)
@@ -306,6 +328,25 @@ public sealed class RasterizerStage
         _viewportCount = 1;
     }
 
+    public void SetViewports(Viewport[] viewports, int count) => SetViewports(viewports.AsSpan(0, Math.Min(count, viewports.Length)));
+
+    public void SetViewports(int count, Viewport[] viewports) => SetViewports(viewports, count);
+
+    public void SetScissorRectangles(params ScissorRect[] rectangles)
+    {
+        if (rectangles.Length == 0)
+        {
+            _hasScissor = false;
+            return;
+        }
+
+        if (rectangles.Length > 1)
+            GraphicsLog.WarnOnce("Only the first scissor rectangle is used; multiple ones are not supported.");
+
+        _scissor = rectangles[0];
+        _hasScissor = true;
+    }
+
     public void SetViewports(ReadOnlySpan<Viewport> viewports)
     {
         if (viewports.Length == 0)
@@ -328,6 +369,24 @@ public sealed class RasterizerStage
     }
 
     public Viewport GetViewport() => _viewport;
+
+    /// <summary>
+    /// The viewports currently set. Safe to hand out, unlike the view getters this facade dropped: a viewport
+    /// is a value, so there is no reference to leak and nothing for the caller to dispose.
+    /// </summary>
+    public T[] GetViewports<T>() where T : struct
+    {
+        if (typeof(T) != typeof(Viewport))
+        {
+            GraphicsLog.WarnOnce($"Viewports can only be read as {nameof(Viewport)}.");
+            return [];
+        }
+
+        var viewports = _viewportCount > 0 ? new[] { _viewport } : [];
+        return (T[])(object)viewports;
+    }
+
+    public ScissorRect[] GetScissorRectangles() => _hasScissor ? [_scissor] : [];
 
     internal void Flush(ICommandList commands)
     {
@@ -373,8 +432,17 @@ public sealed class OutputMergerStage
         _owner = owner;
     }
 
-    public BlendState? BlendState { get; private set; }
-    public DepthStencilState? DepthStencilState { get; private set; }
+    public BlendState? BlendState
+    {
+        get => _blendState;
+        set => SetBlendState(value, BlendFactor, SampleMask);
+    }
+
+    public DepthStencilState? DepthStencilState
+    {
+        get => _depthStencilState;
+        set => SetDepthStencilState(value, StencilReference);
+    }
     public DepthStencilView? DepthStencilTarget { get; private set; }
 
     public void SetTargets(DepthStencilView? depthStencil, params RenderTargetView?[] renderTargets)
@@ -407,14 +475,14 @@ public sealed class OutputMergerStage
 
     public void SetBlendState(BlendState? blendState, Vector4? blendFactor = null, uint sampleMask = 0xffffffff)
     {
-        BlendState = blendState;
+        _blendState = blendState;
         BlendFactor = blendFactor ?? Vector4.One;
         SampleMask = sampleMask;
     }
 
     public void SetDepthStencilState(DepthStencilState? depthStencilState, int stencilReference = 0)
     {
-        DepthStencilState = depthStencilState;
+        _depthStencilState = depthStencilState;
         StencilReference = stencilReference;
     }
 
@@ -474,7 +542,7 @@ public sealed class OutputMergerStage
         {
             foreach (var view in _renderTargets)
             {
-                if (view?.ViewedResource is Texture2D texture)
+                if (view?.Resource is Texture2D texture)
                     return texture.Description.SampleDescription.Count == 0 ? new SampleDescription(1, 0) : texture.Description.SampleDescription;
             }
 
@@ -505,14 +573,17 @@ public sealed class OutputMergerStage
         _owner.InvalidateRenderTargets();
         Array.Clear(_renderTargets);
         DepthStencilTarget = null;
-        BlendState = null;
-        DepthStencilState = null;
+        _blendState = null;
+        _depthStencilState = null;
         BlendFactor = Vector4.One;
         SampleMask = 0xffffffff;
         StencilReference = 0;
     }
 
     internal RenderTargetView?[] RenderTargets => _renderTargets;
+
+    private BlendState? _blendState;
+    private DepthStencilState? _depthStencilState;
 
     private readonly RenderTargetView?[] _renderTargets = new RenderTargetView?[BlendTargetStates.MaxRenderTargets];
     private readonly DeviceContext _owner;
@@ -526,10 +597,10 @@ public sealed class OutputMergerStage
 
     internal void RestoreStates(BlendState? blendState, Vector4 blendFactor, uint sampleMask, DepthStencilState? depthStencilState, int stencilReference)
     {
-        BlendState = blendState;
+        _blendState = blendState;
         BlendFactor = blendFactor;
         SampleMask = sampleMask;
-        DepthStencilState = depthStencilState;
+        _depthStencilState = depthStencilState;
         StencilReference = stencilReference;
     }
 }

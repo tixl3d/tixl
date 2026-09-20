@@ -31,6 +31,12 @@ public abstract class GpuResource : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// The native handle, where one exists: a COM pointer on D3D11, which the video and capture libraries
+    /// take. Zero everywhere else.
+    /// </summary>
+    public virtual IntPtr NativeHandle => IntPtr.Zero;
+
     /// <summary>Hands the native object to the backend's deferred-destruction queue.</summary>
     protected abstract void ReleaseWhenRetired();
 }

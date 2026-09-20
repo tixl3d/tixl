@@ -19,9 +19,9 @@ public sealed class DeviceContext
         InputAssembler = new InputAssemblerStage();
         Rasterizer = new RasterizerStage();
         OutputMerger = new OutputMergerStage(this);
-        VertexShader = new ShaderStageState(ShaderStage.Vertex);
-        PixelShader = new ShaderStageState(ShaderStage.Pixel);
-        GeometryShader = new ShaderStageState(ShaderStage.Geometry);
+        VertexShader = new VertexShaderStage();
+        PixelShader = new PixelShaderStage();
+        GeometryShader = new GeometryShaderStage();
         ComputeShader = new ComputeShaderStage();
     }
 
@@ -30,10 +30,18 @@ public sealed class DeviceContext
     public InputAssemblerStage InputAssembler { get; }
     public RasterizerStage Rasterizer { get; }
     public OutputMergerStage OutputMerger { get; }
-    public ShaderStageState VertexShader { get; }
-    public ShaderStageState PixelShader { get; }
-    public ShaderStageState GeometryShader { get; }
+    public VertexShaderStage VertexShader { get; }
+    public PixelShaderStage PixelShader { get; }
+    public GeometryShaderStage GeometryShader { get; }
     public ComputeShaderStage ComputeShader { get; }
+
+    /// <summary>
+    /// Tessellation stages. TiXL has no hull or domain shaders, and the backends do not offer them; these
+    /// exist so that code which only ever clears them keeps working.
+    /// </summary>
+    public UnusedShaderStage HullShader { get; } = new();
+
+    public UnusedShaderStage DomainShader { get; } = new();
 
     #region frame
     internal void BeginFrame()
@@ -192,6 +200,32 @@ public sealed class DeviceContext
         }
     }
 
+    /// <summary>Copies a box from one resource into another at an offset, as texture-array operators do.</summary>
+    public void CopySubresourceRegion(Resource source, int sourceSubresource, ResourceRegion? region, Resource destination,
+                                      int destinationSubresource, int x = 0, int y = 0, int z = 0)
+    {
+        EndRendering();
+
+        if (source is Texture { GpuTexture: { } from } && destination is Texture { GpuTexture: { } to })
+        {
+            Commands.CopyTextureRegion(from, sourceSubresource, to, destinationSubresource, x, y, z);
+            return;
+        }
+
+        if (source is Buffer { GpuBuffer: { } fromBuffer } && destination is Buffer { GpuBuffer: { } toBuffer })
+        {
+            var offset = region?.Left ?? 0;
+            var size = region.HasValue ? region.Value.Right - region.Value.Left : fromBuffer.Description.SizeInBytes;
+            Commands.CopyBuffer(fromBuffer, offset, toBuffer, x, size);
+        }
+    }
+
+    /// <summary>Copies an append or consume buffer's counter into a constant buffer, for indirect draws.</summary>
+    public void CopyStructureCount(Buffer destination, int destinationOffset, UnorderedAccessView source)
+    {
+        GraphicsLog.WarnOnce("CopyStructureCount is not implemented by the backends yet; the count is left unchanged.");
+    }
+
     public void ResolveSubresource(Resource source, int sourceSubresource, Resource destination, int destinationSubresource, Format format)
     {
         if (source is not Texture { GpuTexture: { } from } || destination is not Texture { GpuTexture: { } to })
@@ -223,6 +257,38 @@ public sealed class DeviceContext
         UpdateSubresource(resource, 0, System.Runtime.InteropServices.MemoryMarshal.AsBytes(new ReadOnlySpan<T>(in value)), 0, 0);
     }
 
+    public void UpdateSubresource<T>(T[] values, Resource resource) where T : unmanaged
+    {
+        UpdateSubresource(resource, 0, System.Runtime.InteropServices.MemoryMarshal.AsBytes<T>(values), 0, 0);
+    }
+
+    public unsafe void UpdateSubresource(DataBox source, Resource resource, int subresource = 0)
+    {
+        if (resource.Native == null || source.DataPointer == IntPtr.Zero)
+            return;
+
+        var size = Math.Max(source.SlicePitch, source.RowPitch);
+        Commands.UpdateResource(resource.Native, subresource, new ReadOnlySpan<byte>((void*)source.DataPointer, size),
+                                source.RowPitch, source.SlicePitch);
+    }
+
+    /// <summary>
+    /// The region form. The backend uploads whole subresources, so a partial update writes the rows it was
+    /// given at the region's pitch — which is what every caller in TiXL passes anyway.
+    /// </summary>
+    public void UpdateSubresource(DataBox source, Resource resource, int subresource, ResourceRegion region)
+        => UpdateSubresource(source, resource, subresource);
+
+    /// <summary>The pointer-and-pitch form, which is how the DDS loader walks a file's mips.</summary>
+    public unsafe void UpdateSubresource(Resource resource, int subresource, ResourceRegion? region, IntPtr data, int rowPitch, int slicePitch)
+    {
+        if (resource.Native == null || data == IntPtr.Zero)
+            return;
+
+        var size = Math.Max(slicePitch, rowPitch);
+        Commands.UpdateResource(resource.Native, subresource, new ReadOnlySpan<byte>((void*)data, size), rowPitch, slicePitch);
+    }
+
     /// <summary>
     /// Maps a resource. <see cref="MapMode.WriteDiscard"/> takes fresh memory from the frame's upload ring and
     /// never waits; <see cref="MapMode.Read"/> blocks until the GPU is done, exactly as D3D11 does.
@@ -241,10 +307,85 @@ public sealed class DeviceContext
         return new DataBox(mapped);
     }
 
+    public DataBox MapSubresource(Resource resource, int subresource, MapMode mode, MapFlags flags, out DataStream stream)
+    {
+        var box = MapSubresource(resource, subresource, mode, flags);
+        var size = SizeOf(resource);
+        stream = new DataStream(box.DataPointer, size, mode != MapMode.WriteDiscard, mode != MapMode.Read);
+        return box;
+    }
+
+    /// <summary>Reports how large the mapped mip is, which the dynamic-texture upload path uses.</summary>
+    public DataBox MapSubresourceWithSize(Resource resource, int mipSlice, int arraySlice, MapMode mode, MapFlags flags, out int mipSize)
+    {
+        var subresource = Resource.CalculateSubResourceIndex(mipSlice, arraySlice, MipLevelsOf(resource));
+        var box = MapSubresource(resource, subresource, mode, flags);
+        mipSize = Math.Max(box.SlicePitch, box.RowPitch);
+        return box;
+    }
+
+    public DataBox MapSubresource(Resource resource, MapMode mode, MapFlags flags, out DataStream stream)
+        => MapSubresource(resource, 0, mode, flags, SizeOf(resource), out stream);
+
+    public DataBox MapSubresource(Resource resource, int mipSlice, int arraySlice, MapMode mode, MapFlags flags, out DataStream stream)
+    {
+        var subresource = Resource.CalculateSubResourceIndex(mipSlice, arraySlice, MipLevelsOf(resource));
+        return MapSubresource(resource, subresource, mode, flags, SizeOf(resource), out stream);
+    }
+
+    public DataBox MapSubresource(Resource resource, int subresource, MapMode mode, MapFlags flags, int sizeInBytes, out DataStream stream)
+    {
+        var box = MapSubresource(resource, subresource, mode, flags);
+        stream = new DataStream(box.DataPointer, sizeInBytes, mode != MapMode.WriteDiscard, mode != MapMode.Read);
+        return box;
+    }
+
+    private static int SizeOf(Resource resource)
+    {
+        return resource switch
+                   {
+                       Buffer buffer       => buffer.Description.SizeInBytes,
+                       Texture2D texture   => texture.Description.Width * texture.Description.Height * 4,
+                       Texture3D texture   => texture.Description.Width * texture.Description.Height * texture.Description.Depth * 4,
+                       Texture1D texture   => texture.Description.Width * 4,
+                       _                   => 0,
+                   };
+    }
+
+    private static int MipLevelsOf(Resource resource)
+    {
+        return resource switch
+                   {
+                       Texture2D texture => Math.Max(1, texture.Description.MipLevels),
+                       Texture3D texture => Math.Max(1, texture.Description.MipLevels),
+                       Texture1D texture => Math.Max(1, texture.Description.MipLevels),
+                       _                 => 1,
+                   };
+    }
+
     public void UnmapSubresource(Resource resource, int subresource)
     {
         if (resource.Native != null)
             Backend.Unmap(resource.Native, subresource);
+    }
+
+    /// <summary>
+    /// Reads a query's result. Always false for now: the backend API has no queries, so a timing operator
+    /// reports nothing rather than a made-up number.
+    /// </summary>
+    public bool GetData<T>(Query query, AsynchronousFlags flags, out T result) where T : struct
+    {
+        GraphicsLog.WarnOnce("GPU queries are not implemented by the backends, so no timing is reported.");
+        result = default;
+        return false;
+    }
+
+    public void Begin(Query query)
+    {
+    }
+
+    public void End(Query query)
+    {
     }
 
     /// <summary>

@@ -7,7 +7,8 @@ string[] d3d11 = ["BindFlags","BlendOperation","BlendOption","ColorWriteMaskFlag
                   "DepthWriteMask","DeviceCreationFlags","FillMode","Filter","InputClassification","MapFlags","MapMode",
                   "QueryType","RenderTargetViewDimension","ResourceOptionFlags","ResourceUsage",
                   "StencilOperation","TextureAddressMode",
-                  "UnorderedAccessViewBufferFlags","UnorderedAccessViewDimension","ShaderResourceViewExtendedBufferFlags"];
+                  "UnorderedAccessViewBufferFlags","UnorderedAccessViewDimension","ShaderResourceViewExtendedBufferFlags",
+                  "ResourceDimension","FormatSupport"];
 string[] direct3D = ["PrimitiveTopology","FeatureLevel","DriverType","ShaderResourceViewDimension"];
 string[] dxgi = ["Format","SwapEffect","SwapChainFlags","Usage","WindowAssociationFlags"];
 
