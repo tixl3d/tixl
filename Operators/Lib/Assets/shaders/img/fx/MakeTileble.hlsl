@@ -3,7 +3,7 @@ cbuffer ParamConstants : register(b0)
     float Falloff;
 }
 
-cbuffer ParamConstants : register(b1)
+cbuffer IntParams : register(b1)
 {
     int Mode;
 }

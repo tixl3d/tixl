@@ -26,7 +26,7 @@ cbuffer Params : register(b0)
     float Strength;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     // float UseWAsWeight;
     int VolumeShape; // 28

@@ -77,8 +77,8 @@ float lines(float d, float angle, float spacing) {
 
 float4 psMain(vsOutput input) : SV_TARGET
 {
-    float angleX = fwidth(input.texCoord.x) / input.scale;
-    float angleY = fwidth(input.texCoord.y) / input.scale;
+    float angleX = fwidth(input.texCoord.x) / input.scale.x;
+    float angleY = fwidth(input.texCoord.y) / input.scale.x;
 
     float2 p = (input.texCoord -0.5) * divisions / input.scale;
     float combinedAngle = max(angleX, angleY);

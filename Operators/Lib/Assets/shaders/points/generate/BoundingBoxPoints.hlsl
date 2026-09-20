@@ -6,7 +6,7 @@ cbuffer Params : register(b0)
     float DebugParam;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int SourceCount;
     int ResultCount;
@@ -22,8 +22,10 @@ StructuredBuffer<Point> SourcePoints : register(t0);
 RWStructuredBuffer<Point> ResultPoints : register(u0);
 RWStructuredBuffer<MinMax> Bounds : register(u1);
 
-groupshared uint3 g_MinValue = 0xffffffffu;
-groupshared uint3 g_MaxValue = 0;
+// No initializers: a groupshared variable cannot have one. Both are only used by the reduction
+// below, which is currently commented out and would set them itself.
+groupshared uint3 g_MinValue;
+groupshared uint3 g_MaxValue;
 
 inline uint FloatToOInt(float value)
 {

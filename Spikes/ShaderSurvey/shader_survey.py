@@ -33,6 +33,13 @@ GFX_TYPE_OPS = OPERATORS / "TypeOperators" / "Symbols" / "Gfx"
 OUTPUT = pathlib.Path(__file__).resolve().parent / ".temp"
 PINNED_SLANGC = pathlib.Path.home() / ".local/opt/slang-2026.18/bin/slangc"
 
+# Wrapper ops that name a shader themselves and feed it to an inner shader op through a connection.
+# Their entry point is fixed inside the wrapper, so it cannot be read off the child's input values.
+FIXED_SHADER_OPS = {
+    "bd0b9c5b-c611-42d0-8200-31af9661f189": ("fragment", "1e4e274b-60b2-4fe8-b275-ebef80d520a7", "psMain"),
+    "2b20afce-2b54-4bcc-ba0e-e456a0d92833": ("fragment", "1e4e274b-60b2-4fe8-b275-ebef80d520a7", "psMain"),
+}
+
 # Shader operator symbol id -> (stage, type-op file). Input ids and defaults are read from the .t3 files.
 SHADER_OPS = {
     "a256d70f-adb3-481d-a926-caf35bd3e64c": ("compute", "ComputeShader"),
@@ -101,7 +108,18 @@ def collect_usages(type_ops):
 
         connected = {(c["TargetParentOrChildId"].lower(), c["TargetSlotId"].lower()) for c in symbol.get("Connections", [])}
         for child in symbol.get("Children", []):
-            op = type_ops.get(child["SymbolId"].lower())
+            symbol_id = child["SymbolId"].lower()
+            fixed = FIXED_SHADER_OPS.get(symbol_id)
+            if fixed is not None:
+                stage, source_id, entry = fixed
+                values = {v["Id"].lower(): v.get("Value") for v in child.get("InputValues", [])}
+                if (child["Id"].lower(), source_id) in connected:
+                    dynamic_sources.append(str(t3_path.relative_to(REPO)))
+                else:
+                    usages[(values.get(source_id), entry, stage)].append(str(t3_path.relative_to(REPO)))
+                continue
+
+            op = type_ops.get(symbol_id)
             if op is None:
                 continue
             stage, source_id, entry_id, default_source, default_entry = op
@@ -114,6 +132,32 @@ def collect_usages(type_ops):
             entry = values.get(entry_id, default_entry)
             usages[(address, entry, stage)].append(str(t3_path.relative_to(REPO)))
     return usages, dynamic_sources, unreadable
+
+
+SHADER_ADDRESS = re.compile(r"^\w+:.*\.hlsl$", re.IGNORECASE)
+
+
+def collect_named_shaders():
+    """Every shader address any .t3 stores, whatever operator holds it.
+
+    collect_usages only understands the shader ops it knows by id, and TiXL has several wrappers that
+    name a shader themselves. This catches the rest; the entry points then come from the naming
+    convention, which over- rather than under-reports what the editor needs.
+    """
+    named = collections.defaultdict(list)
+    for t3_path in OPERATORS.rglob("*.t3"):
+        if ".temp" in t3_path.parts:
+            continue
+        try:
+            symbol = load_t3(t3_path)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            continue
+        for child in symbol.get("Children", []):
+            for value in child.get("InputValues", []):
+                text = value.get("Value")
+                if isinstance(text, str) and SHADER_ADDRESS.match(text):
+                    named[text].append(str(t3_path.relative_to(REPO)))
+    return named
 
 
 def resolve_address(address):
@@ -483,11 +527,18 @@ def main():
         referenced_files.add(path.resolve())
         jobs.append({"path": path, "entry": entry, "stage": stage, "referenced": True, "users": users})
 
+    named_files = {}
+    for address, users in collect_named_shaders().items():
+        path = resolve_address(address)
+        if path is not None and path.exists():
+            named_files[path.resolve()] = users
+
     for path in sorted(OPERATORS.rglob("*.hlsl")):
         if ".temp" in path.parts or path.resolve() in referenced_files:
             continue
+        users = named_files.get(path.resolve(), [])
         for entry, stage in guess_entries(path):
-            jobs.append({"path": path, "entry": entry, "stage": stage, "referenced": False, "users": []})
+            jobs.append({"path": path, "entry": entry, "stage": stage, "referenced": bool(users), "users": users})
 
     if arguments.limit:
         jobs = jobs[:arguments.limit]
@@ -512,7 +563,7 @@ def main():
                     for j in jobs]
     (OUTPUT / "results.json").write_text(json.dumps(serializable, indent=1))
     ok = sum(1 for r in results.values() if r["ok"])
-    print(f"{ok}/{len(jobs)} compiled in {total_seconds:.0f} s — report: {(OUTPUT / 'report.md').relative_to(REPO)}")
+    print(f"{ok}/{len(jobs)} compiled in {total_seconds:.0f} s — report: {OUTPUT / 'report.md'}")
 
 
 if __name__ == "__main__":

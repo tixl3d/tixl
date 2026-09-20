@@ -11,7 +11,7 @@ cbuffer Params : register(b0)
     int ParticleCount;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     float InvBucketSize;
     float3 CameraPos;

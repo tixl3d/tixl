@@ -71,7 +71,7 @@ void main(uint3 i : SV_DispatchThreadID)
     if(Pattern == 1)
     {
         bool isOdd = cell.x % 2 > 0;
-        float3 verticalOffset= isOdd
+        float verticalOffset= isOdd
                             ? (0.331f * Size.y) 
                             : 0;
                             
