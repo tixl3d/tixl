@@ -428,6 +428,20 @@ Estimate: 20–40 commits, 40–80 agent hours. You: review the API — it's per
 
 ### Phase 4 — Vulkan backend and first light (v5 development)
 
+**Shader compilation (2026-09-20).** `SlangShaderCompiler` sits beside `DX11ShaderCompiler` and compiles
+TiXL's unmodified HLSL to SPIR-V by running slangc. The bindings Slang reports travel with the code through
+the existing shader cache in one blob, because Vulkan needs them before a pipeline exists; a compute shader's
+thread-group size rides along too, since it used to be read out of DXBC. Tested against the GPU: a compiled
+shader dispatches and writes what it was told, and a real operator shader with three includes compiles.
+
+Where the shipped shaders stand, compiled as compute with a `main` entry: 110 of 155 pass. The largest
+remaining group is **28 shaders that declare the same cbuffer name twice** (usually three `cbuffer Params`
+blocks at different registers) - FXC accepts it, Slang rejects it as ambiguous. That is a mechanical rename
+and belongs on main, like the earlier shader fixes. The rest are ~17 individual issues: type mismatches,
+an l-value argument, an initializer on a groupshared variable. Templates carrying `/*{FLOAT_PARAMS}*/` are
+counted separately - they are filled in before compiling - but the generated code inherits the duplicate
+cbuffer names, so the rename fixes both.
+
 *Started early, 2026-09-20, because it can be verified on the Linux machine while the D3D11 backend cannot:
 `Graphics.Vulkan` renders through the compatibility layer and reads the result back, and presents to an SDL3
 window (resize and vsync toggle included), with the validation layer silent, on a Radeon 8060S.*

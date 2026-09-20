@@ -11,9 +11,14 @@ namespace T3.Core.DataTypes;
 public sealed class ComputeShader(T3.Graphics.Compat.ComputeShader shader, byte[] compiledBytecode)
     : Shader<T3.Graphics.Compat.ComputeShader>(shader, compiledBytecode)
 {
+    /// <summary>
+    /// The group size the shader declares, which dispatching operators divide their work by. It comes from
+    /// the compiler's reflection for SPIR-V, and out of the bytecode itself for DXBC.
+    /// </summary>
     public bool TryGetThreadGroups(out Int3 threadGroups)
     {
-        threadGroups = default;
+        if (T3.Core.Resource.ShaderCompiling.SpirvBlob.IsSpirvBlob(CompiledBytecode))
+            return T3.Core.Resource.ShaderCompiling.SpirvBlob.TryGetThreadGroups(CompiledBytecode, out threadGroups);
 
         using var reflection = new ShaderReflection(CompiledBytecode);
         _ = reflection.GetThreadGroupSize(out var x, out var y, out var z);

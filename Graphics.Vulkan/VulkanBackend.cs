@@ -121,10 +121,13 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         if (supportsMemoryBudget)
             deviceExtensions.Add(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
 
-        // Enabled up front even though the backend starts headless: a window can appear later, and the
-        // device cannot gain an extension afterwards.
-        if (_supportsSwapchain)
+        // Only when the instance can make a surface at all: VK_KHR_swapchain requires VK_KHR_surface, and a
+        // headless instance was not given it. A window that appears later needs the extensions up front,
+        // which is why the caller passes them when it has a window in mind.
+        if (_supportsSwapchain && options.InstanceExtensions.Count > 0)
             deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        else
+            _supportsSwapchain = false;
 
         using var deviceExtensionNames = new VkStringArray(deviceExtensions);
 
@@ -1322,7 +1325,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private readonly uint _queueFamilyIndex;
     private readonly VkPhysicalDeviceLimits _limits;
     private readonly bool _supportsMemoryBudget;
-    private readonly bool _supportsSwapchain;
+    private bool _supportsSwapchain;
     private readonly bool _debugNamesAvailable;
     private readonly VkDebugUtilsMessengerEXT _debugMessenger = VkDebugUtilsMessengerEXT.Null;
     private readonly object _queueLock = new();
