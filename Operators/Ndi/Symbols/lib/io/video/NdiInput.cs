@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using NewTek;
 using NewTek.NDI;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.Utils;
@@ -471,8 +471,8 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
                                          // we have to map with a stride that represents multiples of 16 pixels here
                                          // (it is yet unclear why, but works)
                                          // map resource manually using our stride...
-                                         var dataBox = immediateContext.MapSubresource(writableImage, 0, 0, MapMode.WriteDiscard,
-                                                                                       SharpDX.Direct3D11.MapFlags.None, out int _);
+                                         var dataBox = immediateContext.MapSubresourceWithSize(writableImage, 0, 0, MapMode.WriteDiscard,
+                                                                                       T3.Graphics.Compat.MapFlags.None, out int _);
 
                                          T3.Core.Utils.Utilities.CopyImageMemory(videoFrame.p_data, dataBox.DataPointer, _yRes,
                                                                                  videoFrame.line_stride_in_bytes, dataBox.RowPitch);

@@ -45,8 +45,8 @@ namespace Lib.image.use;
         {
             if (formatChanged)
             {
-                Utilities.Dispose(ref _prevTextureA);
-                Utilities.Dispose(ref _prevTextureB);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _prevTextureA);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _prevTextureB);
 
                 _prevTextureA = Texture2D.CreateTexture2D(description);
                 _prevTextureB = Texture2D.CreateTexture2D(description);
@@ -73,8 +73,8 @@ namespace Lib.image.use;
         if (!isDisposing)
             return;
 
-        Utilities.Dispose(ref _prevTextureA);
-        Utilities.Dispose(ref _prevTextureB);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _prevTextureA);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _prevTextureB);
     }
         
     private bool _bufferToggle;

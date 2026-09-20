@@ -1,4 +1,4 @@
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 
 namespace Types.Gfx;
 
@@ -6,7 +6,7 @@ namespace Types.Gfx;
 public sealed class RasterizerState : Instance<RasterizerState>
 {
     [Output(Guid = "B409694A-0980-4992-8525-01871B940CD7")]
-    public readonly Slot<SharpDX.Direct3D11.RasterizerState> Value = new();
+    public readonly Slot<T3.Graphics.Compat.RasterizerState> Value = new();
 
     public RasterizerState()
     {
@@ -19,9 +19,9 @@ public sealed class RasterizerState : Instance<RasterizerState>
 
         var fillMode = FillMode.GetValue(context) switch
                            {
-                               (int)SharpDX.Direct3D11.FillMode.Solid     => SharpDX.Direct3D11.FillMode.Solid,
-                               (int)SharpDX.Direct3D11.FillMode.Wireframe => SharpDX.Direct3D11.FillMode.Wireframe,
-                               _                                          => SharpDX.Direct3D11.FillMode.Solid
+                               (int)T3.Graphics.Compat.FillMode.Solid     => T3.Graphics.Compat.FillMode.Solid,
+                               (int)T3.Graphics.Compat.FillMode.Wireframe => T3.Graphics.Compat.FillMode.Wireframe,
+                               _                                          => T3.Graphics.Compat.FillMode.Solid
                            };
 
         var rasterizerDesc = new RasterizerStateDescription()
@@ -41,7 +41,7 @@ public sealed class RasterizerState : Instance<RasterizerState>
 
         try
         {
-            Value.Value = new SharpDX.Direct3D11.RasterizerState(ResourceManager.Device, rasterizerDesc); // todo: put into resource manager 
+            Value.Value = new T3.Graphics.Compat.RasterizerState(ResourceManager.Device, rasterizerDesc); // todo: put into resource manager 
         }
         catch(Exception e)
         {

@@ -1,6 +1,6 @@
 #nullable enable
 using ImGuiNET;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Audio;
 using T3.Core.DataTypes;
 using T3.Core.Resource;
@@ -66,7 +66,7 @@ internal sealed class TimeLineImage
 
         if (_srv is { IsDisposed: false })
         {
-            drawList.AddImage((IntPtr)_srv,
+            drawList.AddImage((IntPtr)_srv.ImGuiTextureId,
                               new Vector2(xMin, yMin),
                               new Vector2(xMax, yMin + size.Y),
                               new Vector2(u0, 0),

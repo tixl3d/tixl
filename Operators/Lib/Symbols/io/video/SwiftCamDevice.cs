@@ -1,9 +1,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lib.io.video.swiftcam;
-using SharpDX;
-using SharpDX.DXGI;
-using Device = SharpDX.Direct3D11.Device;
+using T3.Graphics.Compat;
+using T3.Graphics;
+using Device = T3.Graphics.Compat.Device;
 using StatusLevel = T3.Core.Operator.Interfaces.IStatusProvider.StatusLevel;
 
 namespace Lib.io.video;
@@ -968,7 +968,7 @@ public class SwiftCamDevice : Instance<SwiftCamDevice>, ICustomDropdownHolder, I
                            CpuAccessFlags = CpuAccessFlags.None,
                            OptionFlags = ResourceOptionFlags.None,
                        };
-        _gpuTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+        _gpuTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
         _gpuWidth = width;
         _gpuHeight = height;
         _gpuFormat = format;

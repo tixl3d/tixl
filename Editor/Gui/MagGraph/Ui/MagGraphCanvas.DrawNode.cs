@@ -1,6 +1,6 @@
 using ImGuiNET;
 using System.Diagnostics;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -1302,7 +1302,7 @@ internal sealed partial class MagGraphView
         if (previewTextureView == null)
             return false;
 
-        drawList.AddImage((IntPtr)previewTextureView, min,
+        drawList.AddImage((IntPtr)previewTextureView.ImGuiTextureId, min,
                           min + previewSize,
                           uvMin,
                           uvMax,

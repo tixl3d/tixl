@@ -3,11 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using JeremyAnsel.Media.Dds;
-using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
-using Device = SharpDX.Direct3D11.Device;
+using T3.Graphics.Compat;
+using T3.Graphics;
+using Device = T3.Graphics.Compat.Device;
 
 // ReSharper disable InconsistentNaming
 
@@ -32,7 +30,7 @@ public static class DdsDirectX
     public static void CreateTexture(string fileName,
                                      Device device,
                                      DeviceContext context,
-                                     out SharpDX.Direct3D11.Resource texture,
+                                     out T3.Graphics.Compat.Resource texture,
                                      out ShaderResourceView textureView)
     {
         var dds = DdsFile.FromFile(fileName);
@@ -51,7 +49,7 @@ public static class DdsDirectX
     public static void CreateTexture(Stream stream,
                                      Device device,
                                      DeviceContext context,
-                                     out SharpDX.Direct3D11.Resource texture,
+                                     out T3.Graphics.Compat.Resource texture,
                                      out ShaderResourceView textureView)
     {
         var dds = DdsFile.FromStream(stream);
@@ -77,7 +75,7 @@ public static class DdsDirectX
     public static void CreateTexture(DdsFile dds,
                                      Device device,
                                      DeviceContext context,
-                                     out SharpDX.Direct3D11.Resource texture,
+                                     out T3.Graphics.Compat.Resource texture,
                                      out ShaderResourceView textureView)
     {
         CreateTexture(dds, device, context, 0, out texture, out textureView, out _);
@@ -97,7 +95,7 @@ public static class DdsDirectX
                                       Device device,
                                       DeviceContext context,
                                       int maxSize,
-                                      out SharpDX.Direct3D11.Resource texture,
+                                      out T3.Graphics.Compat.Resource texture,
                                       out ShaderResourceView textureView,
                                       out DdsAlphaMode alphaMode)
     {
@@ -125,7 +123,7 @@ public static class DdsDirectX
                                       CpuAccessFlags cpuAccessOptions,
                                       ResourceOptionFlags miscOptions,
                                       bool forceSRGB,
-                                      out SharpDX.Direct3D11.Resource texture,
+                                      out T3.Graphics.Compat.Resource texture,
                                       out ShaderResourceView textureView,
                                       out DdsAlphaMode alphaMode)
     {
@@ -257,7 +255,7 @@ public static class DdsDirectX
                                            bool forceSRGB,
                                            bool isCubeMap,
                                            D3D11SubResourceData[] initData,
-                                           out SharpDX.Direct3D11.Resource texture,
+                                           out T3.Graphics.Compat.Resource texture,
                                            out ShaderResourceView textureView)
     {
         texture = null;
@@ -348,7 +346,7 @@ public static class DdsDirectX
                                    Usage = usage,
                                    CpuAccessFlags = cpuAccessFlags,
                                    OptionFlags = ResourceOptionFlags.None,
-                                   SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                                   SampleDescription = new T3.Graphics.SampleDescription(1, 0),
                                };
 
                 if (isCubeMap)
@@ -526,7 +524,7 @@ public static class DdsDirectX
                                              CpuAccessFlags cpuAccessOptions,
                                              ResourceOptionFlags miscOptions,
                                              bool forceSRGB,
-                                             out SharpDX.Direct3D11.Resource texture,
+                                             out T3.Graphics.Compat.Resource texture,
                                              out ShaderResourceView textureView)
     {
         var width = dds.Width;
@@ -821,7 +819,7 @@ public static class DdsDirectX
                         var data = new byte[numBytes];
                         Array.Copy(bitData, pSrcBits, data, 0, numBytes);
 
-                        var res = SharpDX.Direct3D11.Resource.CalculateSubResourceIndex(0, item, mipLevels);
+                        var res = T3.Graphics.Compat.Resource.CalculateSubResourceIndex(0, item, mipLevels);
                             
                         var dataPointer = Marshal.UnsafeAddrOfPinnedArrayElement(data, 0);
                         context.UpdateSubresource(texture, res, null, dataPointer, rowBytes, numBytes);

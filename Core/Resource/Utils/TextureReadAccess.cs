@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.Logging;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
@@ -48,7 +48,7 @@ public sealed class TextureReadAccess : IDisposable
                                              completedRequest.CpuAccessTexture,
                                              0,
                                              MapMode.Read,
-                                             SharpDX.Direct3D11.MapFlags.None
+                                             T3.Graphics.Compat.MapFlags.None
                                             );
 
         try

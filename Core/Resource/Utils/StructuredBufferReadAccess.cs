@@ -2,10 +2,9 @@
 
 using System;
 using System.Collections.Generic;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Logging;
-using Buffer = SharpDX.Direct3D11.Buffer;
+using Buffer = T3.Graphics.Compat.Buffer;
 
 namespace T3.Core.Resource;
 

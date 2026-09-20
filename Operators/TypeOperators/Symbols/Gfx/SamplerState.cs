@@ -1,5 +1,4 @@
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 
 namespace Types.Gfx;
 
@@ -7,7 +6,7 @@ namespace Types.Gfx;
 public sealed class SamplerState : Instance<SamplerState>
 {
     [Output(Guid = "{0E45C596-C80F-4927-941F-E3199401AA10}")]
-    public readonly Slot<SharpDX.Direct3D11.SamplerState> Value = new();
+    public readonly Slot<T3.Graphics.Compat.SamplerState> Value = new();
 
     public SamplerState()
     {
@@ -32,11 +31,11 @@ public sealed class SamplerState : Instance<SamplerState>
 
         try
         {
-            var samplerState = new SharpDX.Direct3D11.SamplerState(ResourceManager.Device, samplerDesc); // todo: put into resource manager
+            var samplerState = new T3.Graphics.Compat.SamplerState(ResourceManager.Device, samplerDesc); // todo: put into resource manager
             Value.Value?.Dispose();
             Value.Value = samplerState;
         }
-        catch (SharpDXException e)
+        catch (Exception e)
         {
             Log.Error($"{Parent?.Symbol.Name}.SamplerStateOp: Invalid sampler state " + e.Message);
             if (Value.Value == null)
@@ -74,7 +73,7 @@ public sealed class SamplerState : Instance<SamplerState>
     public readonly InputSlot<Comparison> ComparisonFunction = new();
 
     //        [Input(Guid = "{5A6E8282-EBF6-4641-9574-A29E04F08B2E}")]
-    //        public InputSlot<RawColor4> BorderColor = new InputSlot<RawColor4>();
+    //        public InputSlot<Vector4> BorderColor = new InputSlot<Vector4>();
 
     [Input(Guid = "{05531EF5-72AA-4868-915F-A40D26DA9E80}")]
     public readonly InputSlot<float> MinimumLod = new();

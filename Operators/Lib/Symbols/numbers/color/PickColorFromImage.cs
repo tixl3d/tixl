@@ -1,4 +1,4 @@
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
@@ -59,7 +59,7 @@ internal sealed class PickColorFromImage : Instance<PickColorFromImage>
                                CpuAccessFlags = CpuAccessFlags.Read, // <- that we want
                                ArraySize = 1
                            };
-            Utilities.Dispose(ref _imageWithCpuAccess);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _imageWithCpuAccess);
             _imageWithCpuAccess = Texture2D.CreateTexture2D(desc);
             immediateContext.CopyResource(inputImage, _imageWithCpuAccess);
         }
@@ -96,7 +96,7 @@ internal sealed class PickColorFromImage : Instance<PickColorFromImage>
                     var buffPtr = stackalloc byte[count];
 
                     sourceStream.Position = GetStartIndex(row, sourceDataBox.RowPitch, column, count);
-                    sourceStream.Read((IntPtr)buffPtr, 0, count);
+                    sourceStream.ReadRange((IntPtr)buffPtr, count);
 
                     var fullSpan = new ReadOnlySpan<byte>(buffPtr, count);
                     var r = (float)BitConverter.ToHalf(fullSpan[..2]);

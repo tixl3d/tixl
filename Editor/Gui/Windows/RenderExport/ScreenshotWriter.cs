@@ -1,6 +1,6 @@
 #nullable enable
 
-using SharpDX;
+using T3.Graphics.Compat;
 using SharpDX.IO;
 using SharpDX.WIC;
 using T3.Core.Animation;
@@ -37,7 +37,7 @@ internal static class ScreenshotWriter
         _lastUpdateFrame = Playback.FrameCount;
     }
 
-    internal static bool InitiateConvertAndReadBack2(Texture2D gpuTexture, TextureBgraReadAccess.OnReadComplete saveSampleAfterReadback)
+    internal static bool InitiateConvertAndReadBack2(T3.Core.DataTypes.Texture2D gpuTexture, TextureBgraReadAccess.OnReadComplete saveSampleAfterReadback)
     {
         if (_textureBgraReadAccess == null)
             _textureBgraReadAccess = new TextureBgraReadAccess();
@@ -49,7 +49,7 @@ internal static class ScreenshotWriter
 
     /// <param name="opaque">Write alpha as fully opaque — for a UI back-buffer capture, whose alpha is
     /// render residue that makes the PNG see-through in viewers.</param>
-    internal static bool StartSavingToFile(Texture2D gpuTexture, string filepath, FileFormats format, Action<string?>? onComplete = null, bool logErrors=true, bool opaque = false)
+    internal static bool StartSavingToFile(T3.Core.DataTypes.Texture2D gpuTexture, string filepath, FileFormats format, Action<string?>? onComplete = null, bool logErrors=true, bool opaque = false)
     {
         _textureBgraReadAccess ??= new TextureBgraReadAccess();
         _useFormats = format;
@@ -76,8 +76,8 @@ internal static class ScreenshotWriter
         var dataBox = immediateContext.MapSubresource(request.CpuAccessTexture,
                                                       0,
                                                       0,
-                                                      SharpDX.Direct3D11.MapMode.Read,
-                                                      SharpDX.Direct3D11.MapFlags.None,
+                                                      T3.Graphics.Compat.MapMode.Read,
+                                                      T3.Graphics.Compat.MapFlags.None,
                                                       out var imageStream);
         using var dataStream = imageStream;
         
@@ -148,7 +148,7 @@ internal static class ScreenshotWriter
             }            
             
             // Copy the pixels from the buffer to the Wic Bitmap Frame encoder
-            bitmapFrameEncode.WritePixels(height, new DataRectangle(outDataStream.DataPointer, rowStride));
+            bitmapFrameEncode.WritePixels(height, new SharpDX.DataRectangle(outDataStream.DataPointer, rowStride));
 
             // Commit changes
             bitmapFrameEncode.Commit();

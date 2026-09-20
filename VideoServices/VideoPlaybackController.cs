@@ -1,8 +1,8 @@
 using System.Threading;
 using Sdcb.FFmpeg.Raw;
 using Sdcb.FFmpeg.Utils;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.Logging;
 using T3.Core.Resource;
 using T3.Core.Video;
@@ -232,7 +232,7 @@ public sealed class VideoPlaybackController : IDisposable
 
         fixed (byte* pixels = _pendingBuffer)
         {
-            var dataBox = new SharpDX.DataBox((IntPtr)pixels, _pendingWidth * bytesPerPixel, 0);
+            var dataBox = new T3.Graphics.Compat.DataBox((IntPtr)pixels, _pendingWidth * bytesPerPixel, 0);
             ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, _softwareTexture, 0);
         }
 

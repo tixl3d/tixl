@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Animation;
 using T3.Core.DataTypes.ShaderGraph;
 using T3.Core.Operator;

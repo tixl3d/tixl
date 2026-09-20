@@ -2,7 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.DataTypes;
@@ -92,7 +92,7 @@ internal static class AudioClipBodyRenderer
                     {
                         var segmentEndX = Math.Min(segmentStartX + segmentWidth, bodyMax.X);
                         var visibleFraction = (segmentEndX - segmentStartX) / segmentWidth;
-                        drawList.AddImage((IntPtr)srv,
+                        drawList.AddImage((IntPtr)srv.ImGuiTextureId,
                                           new Vector2(segmentStartX, bodyMin.Y),
                                           new Vector2(segmentEndX, bodyMax.Y),
                                           new Vector2(u0, 0),
@@ -119,7 +119,7 @@ internal static class AudioClipBodyRenderer
                 var u0 = (float)(visibleStartSecs / lengthSecs);
                 var u1 = (float)(visibleEndSecs / lengthSecs);
 
-                drawList.AddImage((IntPtr)srv,
+                drawList.AddImage((IntPtr)srv.ImGuiTextureId,
                                   new Vector2(bodyMin.X + x0 * bodyWidth + 1, bodyMin.Y + 1),
                                   new Vector2(bodyMin.X + x1 * bodyWidth - 1, bodyMax.Y - 1),
                                   new Vector2(u0, 0), new Vector2(u1, 1),
@@ -130,7 +130,7 @@ internal static class AudioClipBodyRenderer
 
         if (!drawn)
         {
-            drawList.AddImage((IntPtr)srv,
+            drawList.AddImage((IntPtr)srv.ImGuiTextureId,
                               bodyMin + new Vector2(1, 1),
                               bodyMax - new Vector2(1, 1),
                               Vector2.Zero, Vector2.One,

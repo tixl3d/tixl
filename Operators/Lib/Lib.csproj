@@ -58,36 +58,37 @@
     <Using Include="T3.Core.DataTypes" />
     <Using Include="T3.Core.Operator.Interfaces" />
     <Using Include="T3.Core.Resource" />
-    <Using Alias="Buffer" Include="SharpDX.Direct3D11.Buffer" />
-    <Using Alias="ShaderResourceView" Include="SharpDX.Direct3D11.ShaderResourceView" />
-    <Using Alias="UnorderedAccessView" Include="SharpDX.Direct3D11.UnorderedAccessView" />
-    <Using Alias="CullMode" Include="SharpDX.Direct3D11.CullMode" />
-    <Using Alias="FillMode" Include="SharpDX.Direct3D11.FillMode" />
-    <Using Alias="TextureAddressMode" Include="SharpDX.Direct3D11.TextureAddressMode" />
-    <Using Alias="Filter" Include="SharpDX.Direct3D11.Filter" />
-    <Using Alias="Format" Include="SharpDX.DXGI.Format" />
-    <Using Alias="Texture2DDescription" Include="SharpDX.Direct3D11.Texture2DDescription" />
-    <Using Alias="Texture3DDescription" Include="SharpDX.Direct3D11.Texture3DDescription" />
-    <Using Alias="RenderTargetBlendDescription" Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
-    <Using Alias="SamplerState" Include="SharpDX.Direct3D11.SamplerState" />
-    <Using Alias="UnorderedAccessViewBufferFlags" Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
-    <Using Alias="RawRectangle" Include="SharpDX.Mathematics.Interop.RawRectangle" />
-    <Using Alias="RawViewportF" Include="SharpDX.Mathematics.Interop.RawViewportF" />
-    <Using Alias="ResourceUsage" Include="SharpDX.Direct3D11.ResourceUsage" />
-    <Using Alias="ResourceOptionFlags" Include="SharpDX.Direct3D11.ResourceOptionFlags" />
-    <Using Alias="InputLayout" Include="SharpDX.Direct3D11.InputLayout" />
-    <using Alias="PrimitiveTopology" Include="SharpDX.Direct3D.PrimitiveTopology" />
-    <Using Alias="BlendState" Include="SharpDX.Direct3D11.BlendState" />
-    <Using Alias="Comparison" Include="SharpDX.Direct3D11.Comparison" />
-    <Using Alias="BlendOption" Include="SharpDX.Direct3D11.BlendOption" />
-    <Using Alias="BlendOperation" Include="SharpDX.Direct3D11.BlendOperation" />
-    <Using Alias="BindFlags" Include="SharpDX.Direct3D11.BindFlags" />
-    <Using Alias="ColorWriteMaskFlags" Include="SharpDX.Direct3D11.ColorWriteMaskFlags" />
-    <Using Alias="CpuAccessFlags" Include="SharpDX.Direct3D11.CpuAccessFlags" />
-    <Using Alias="DepthStencilView" Include="SharpDX.Direct3D11.DepthStencilView" />
-    <Using Alias="DepthStencilState" Include="SharpDX.Direct3D11.DepthStencilState" />
-    <Using Alias="RenderTargetView" Include="SharpDX.Direct3D11.RenderTargetView" />
-    <Using Alias="RasterizerState" Include="SharpDX.Direct3D11.RasterizerState" />
+    <Using Alias="Buffer" Include="T3.Graphics.Compat.Buffer" />
+    <Using Alias="ShaderResourceView" Include="T3.Graphics.Compat.ShaderResourceView" />
+    <Using Alias="UnorderedAccessView" Include="T3.Graphics.Compat.UnorderedAccessView" />
+    <Using Alias="CullMode" Include="T3.Graphics.Compat.CullMode" />
+    <Using Alias="FillMode" Include="T3.Graphics.Compat.FillMode" />
+    <Using Alias="TextureAddressMode" Include="T3.Graphics.Compat.TextureAddressMode" />
+    <Using Alias="Filter" Include="T3.Graphics.Compat.Filter" />
+    <Using Alias="Format" Include="T3.Graphics.Format" />
+    <Using Alias="Texture2DDescription" Include="T3.Graphics.Compat.Texture2DDescription" />
+    <Using Alias="Texture3DDescription" Include="T3.Graphics.Compat.Texture3DDescription" />
+    <Using Alias="RenderTargetBlendDescription" Include="T3.Graphics.Compat.RenderTargetBlendDescription" />
+    <Using Alias="SamplerState" Include="T3.Graphics.Compat.SamplerState" />
+    <Using Alias="UnorderedAccessViewBufferFlags" Include="T3.Graphics.Compat.UnorderedAccessViewBufferFlags" />
+    <Using Alias="ScissorRect" Include="T3.Graphics.ScissorRect" />
+    <Using Alias="Viewport" Include="T3.Graphics.Viewport" />
+    <Using Alias="ResourceUsage" Include="T3.Graphics.Compat.ResourceUsage" />
+    <Using Alias="ResourceOptionFlags" Include="T3.Graphics.Compat.ResourceOptionFlags" />
+    <Using Alias="InputLayout" Include="T3.Graphics.Compat.InputLayout" />
+    <using Alias="PrimitiveTopology" Include="T3.Graphics.Compat.PrimitiveTopology" />
+    <Using Alias="BlendState" Include="T3.Graphics.Compat.BlendState" />
+    <Using Alias="Comparison" Include="T3.Graphics.Compat.Comparison" />
+    <Using Alias="BlendOption" Include="T3.Graphics.Compat.BlendOption" />
+    <Using Alias="BlendOperation" Include="T3.Graphics.Compat.BlendOperation" />
+    <Using Alias="BindFlags" Include="T3.Graphics.Compat.BindFlags" />
+    <Using Alias="StateGroups" Include="T3.Graphics.Compat.StateGroups" />
+    <Using Alias="ColorWriteMaskFlags" Include="T3.Graphics.Compat.ColorWriteMaskFlags" />
+    <Using Alias="CpuAccessFlags" Include="T3.Graphics.Compat.CpuAccessFlags" />
+    <Using Alias="DepthStencilView" Include="T3.Graphics.Compat.DepthStencilView" />
+    <Using Alias="DepthStencilState" Include="T3.Graphics.Compat.DepthStencilState" />
+    <Using Alias="RenderTargetView" Include="T3.Graphics.Compat.RenderTargetView" />
+    <Using Alias="RasterizerState" Include="T3.Graphics.Compat.RasterizerState" />
     <Using Alias="Point" Include="T3.Core.DataTypes.Point" />
     <Using Alias="Texture2D" Include="T3.Core.DataTypes.Texture2D" />
     <Using Alias="Texture3D" Include="T3.Core.DataTypes.Texture3D" />
@@ -104,11 +105,13 @@
     <Using Alias="PixelShader" Include="T3.Core.DataTypes.PixelShader" />
     <Using Alias="VertexShader" Include="T3.Core.DataTypes.VertexShader" />
     <Using Alias="GeometryShader" Include="T3.Core.DataTypes.GeometryShader" />
-    <Using Alias="SampleDescription" Include="SharpDX.DXGI.SampleDescription" />
+    <Using Alias="SampleDescription" Include="T3.Graphics.SampleDescription" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mediapipe\Mediapipe.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="..\..\Graphics\Graphics.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="..\..\Graphics.Compat\Graphics.Compat.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\IoServices\IoServices.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Serialization\Serialization.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\SystemUi\SystemUi.csproj" Private="false" PrivateAssets="all" />

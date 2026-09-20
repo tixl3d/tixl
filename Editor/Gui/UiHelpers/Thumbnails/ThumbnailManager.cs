@@ -3,9 +3,8 @@
 using System.IO;
 using System.Threading.Tasks;
 using ImGuiNET;
-using SharpDX;
-using SharpDX.Direct3D11;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using System.Numerics;
 using SharpDX.WIC;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
@@ -184,7 +183,7 @@ internal static class ThumbnailManager
     /// <paramref name="guid"/>; the texture is consumed (disposed after the copy). Callable from a worker
     /// thread — same threading as <see cref="RequestAsyncLoad"/>'s continuation.
     /// </summary>
-    internal static void PushSlotTexture(Guid guid, SharpDX.Direct3D11.Texture2D texture)
+    internal static void PushSlotTexture(Guid guid, T3.Graphics.Compat.Texture2D texture)
     {
         if (!_slots.TryGetValue(guid, out var slot))
         {
@@ -259,7 +258,7 @@ internal static class ThumbnailManager
         }
     }
 
-    internal static async Task<SharpDX.Direct3D11.Texture2D?> LoadTextureViaWic(string path)
+    internal static async Task<T3.Graphics.Compat.Texture2D?> LoadTextureViaWic(string path)
     {
         return await Task.Run(async () =>
         {
@@ -279,19 +278,19 @@ internal static class ThumbnailManager
                     using var buffer = new SharpDX.DataStream(converter.Size.Height * stride, true, true);
                     converter.CopyPixels(stride, buffer);
 
-                    return new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, new Texture2DDescription()
+                    return new T3.Graphics.Compat.Texture2D(ResourceManager.Device, new Texture2DDescription()
                     {
                         Width = converter.Size.Width,
                         Height = converter.Size.Height,
                         ArraySize = 1,
                         BindFlags = BindFlags.ShaderResource,
                         Usage = ResourceUsage.Immutable,
-                        Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                        Format = T3.Graphics.Format.R8G8B8A8_UNorm,
                         MipLevels = 1,
-                        SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
-                    }, new SharpDX.DataRectangle(buffer.DataPointer, stride));
+                        SampleDescription = new T3.Graphics.SampleDescription(1, 0),
+                    }, [new T3.Graphics.Compat.DataRectangle(buffer.DataPointer, stride)]);
                 }
-                catch (SharpDXException ex) when ((uint)ex.HResult == 0x80070020)
+                catch (Exception ex) when ((uint)ex.HResult == 0x80070020)
                 {
                     retries--;
                     await Task.Delay(50); // Sharing violation retry
@@ -387,11 +386,11 @@ internal static class ThumbnailManager
         {
             Width = targetWidth, Height = targetHeight, ArraySize = 1,
             BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-            Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm, Usage = ResourceUsage.Default,
-            SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0), MipLevels = 1
+            Format = T3.Graphics.Format.R8G8B8A8_UNorm, Usage = ResourceUsage.Default,
+            SampleDescription = new T3.Graphics.SampleDescription(1, 0), MipLevels = 1
         };
 
-        using var tempTarget = new SharpDX.Direct3D11.Texture2D(device, desc);
+        using var tempTarget = new T3.Graphics.Compat.Texture2D(device, desc);
         using var rtv = new RenderTargetView(device, tempTarget);
         var sourceSrv = SrvManager.GetSrvForTexture(sourceTexture);
 
@@ -412,8 +411,8 @@ internal static class ThumbnailManager
         var offsetY = (targetHeight - viewHeight) / 2f;
 
         context.OutputMerger.SetTargets(rtv);
-        context.ClearRenderTargetView(rtv, new RawColor4(0, 0, 0, 0));
-        context.Rasterizer.SetViewport(new ViewportF(offsetX, offsetY, viewWidth, viewHeight));
+        context.ClearRenderTargetView(rtv, new Vector4(0, 0, 0, 0));
+        context.Rasterizer.SetViewport(new T3.Graphics.Viewport(offsetX, offsetY, viewWidth, viewHeight));
 
         context.VertexShader.Set(SharedResources.FullScreenVertexShaderResource.Value);
         context.PixelShader.Set(SharedResources.FullScreenPixelShaderResource.Value);
@@ -424,7 +423,7 @@ internal static class ThumbnailManager
         context.OutputMerger.SetTargets((RenderTargetView?)null);
 
         // Immediate Atlas Queueing
-        var uploadTex = new SharpDX.Direct3D11.Texture2D(device, desc);
+        var uploadTex = new T3.Graphics.Compat.Texture2D(device, desc);
         context.CopyResource(tempTarget, uploadTex);
         
         lock (_uploadQueue) {
@@ -455,15 +454,15 @@ internal static class ThumbnailManager
         var device = ResourceManager.Device;
         var desc = new Texture2DDescription {
             Width = AtlasSize, Height = AtlasSize, MipLevels = 1, ArraySize = 1,
-            Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm, Usage = ResourceUsage.Default,
+            Format = T3.Graphics.Format.R8G8B8A8_UNorm, Usage = ResourceUsage.Default,
             BindFlags = BindFlags.ShaderResource, CpuAccessFlags = CpuAccessFlags.None,
-            SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0)
+            SampleDescription = new T3.Graphics.SampleDescription(1, 0)
         };
         
-        Utilities.Dispose(ref _atlas);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _atlas);
         AtlasSrv?.Dispose();
         
-        _atlas = new SharpDX.Direct3D11.Texture2D(device, desc);
+        _atlas = new T3.Graphics.Compat.Texture2D(device, desc);
         AtlasSrv = new ShaderResourceView(device, _atlas);
         _initialized = true;
     }
@@ -524,7 +523,7 @@ internal static class ThumbnailManager
     public const float AspectRatio = (float)SlotWidth / SlotHeight;
     private const int Columns = AtlasSize / SlotWidth;
 
-    private static SharpDX.Direct3D11.Texture2D? _atlas;
+    private static T3.Graphics.Compat.Texture2D? _atlas;
     internal static ShaderResourceView? AtlasSrv { get; private set; }
     private static readonly Dictionary<Guid, ThumbnailSlot> _slots = new();
     private static readonly List<ThumbnailSlot> _atlasLru = new();
@@ -535,7 +534,7 @@ internal static class ThumbnailManager
     private static bool _initialized;
 
     internal readonly record struct ThumbnailRect(Vector2 UvMin, Vector2 UvMax, bool IsReady);
-    private record struct PendingUpload(Guid Guid, SharpDX.Direct3D11.Texture2D Texture, ThumbnailSlot Slot);
+    private record struct PendingUpload(Guid Guid, T3.Graphics.Compat.Texture2D Texture, ThumbnailSlot Slot);
     private enum LoadingState { NotLoaded, Loading, Ready, DoesntExist }
 
     private sealed class ThumbnailSlot {

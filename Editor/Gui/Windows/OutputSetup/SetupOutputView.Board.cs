@@ -305,7 +305,7 @@ internal sealed partial class SetupOutputView
     /// <summary>A card: fill or thumbnail, outline by state, name chip with muted metadata, and its pick/grab area.</summary>
     private void DrawBoardCard(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl,
                                SetupEntityKinds kind, Guid id, Vector2 min, Vector2 max,
-                               string name, string? meta, SharpDX.Direct3D11.ShaderResourceView? srv, bool scalable,
+                               string name, string? meta, T3.Graphics.Compat.ShaderResourceView? srv, bool scalable,
                                Vector2 uvMin = default, Vector2? uvMax = null)
     {
         var scale = T3Ui.UiScaleFactor;

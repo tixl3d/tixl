@@ -1,7 +1,6 @@
 #nullable enable
 using System;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Rendering;
 
 namespace Lib.mesh.draw._;

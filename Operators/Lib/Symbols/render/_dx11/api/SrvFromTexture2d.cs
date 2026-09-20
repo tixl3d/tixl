@@ -1,5 +1,4 @@
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 
 namespace Lib.render._dx11.api;
@@ -55,7 +54,7 @@ internal sealed class SrvFromTexture2d : Instance<SrvFromTexture2d>
             }
             else
             {
-                Utilities.Dispose(ref ShaderResourceView.Value);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref ShaderResourceView.Value);
             }
             _complainedOnce = false;
         }

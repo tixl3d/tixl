@@ -2,14 +2,14 @@
 using System;
 using System.Diagnostics;
 using SharpDX.D3DCompiler;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes.Vector;
 
 namespace T3.Core.DataTypes;
 
 // for some bytecode access convenience (reflection) and to avoid direct SharpDX references for later
-public sealed class ComputeShader(SharpDX.Direct3D11.ComputeShader shader, byte[] compiledBytecode)
-    : Shader<SharpDX.Direct3D11.ComputeShader>(shader, compiledBytecode)
+public sealed class ComputeShader(T3.Graphics.Compat.ComputeShader shader, byte[] compiledBytecode)
+    : Shader<T3.Graphics.Compat.ComputeShader>(shader, compiledBytecode)
 {
     public bool TryGetThreadGroups(out Int3 threadGroups)
     {
@@ -23,14 +23,14 @@ public sealed class ComputeShader(SharpDX.Direct3D11.ComputeShader shader, byte[
     }
 }
 
-public sealed class PixelShader(SharpDX.Direct3D11.PixelShader shader, byte[] compiledBytecode)
-    : Shader<SharpDX.Direct3D11.PixelShader>(shader, compiledBytecode);
+public sealed class PixelShader(T3.Graphics.Compat.PixelShader shader, byte[] compiledBytecode)
+    : Shader<T3.Graphics.Compat.PixelShader>(shader, compiledBytecode);
 
-public sealed class VertexShader(SharpDX.Direct3D11.VertexShader shader, byte[] compiledBytecode)
-    : Shader<SharpDX.Direct3D11.VertexShader>(shader, compiledBytecode);
+public sealed class VertexShader(T3.Graphics.Compat.VertexShader shader, byte[] compiledBytecode)
+    : Shader<T3.Graphics.Compat.VertexShader>(shader, compiledBytecode);
 
-public sealed class GeometryShader(SharpDX.Direct3D11.GeometryShader shader, byte[] compiledBytecode)
-    : Shader<SharpDX.Direct3D11.GeometryShader>(shader, compiledBytecode);
+public sealed class GeometryShader(T3.Graphics.Compat.GeometryShader shader, byte[] compiledBytecode)
+    : Shader<T3.Graphics.Compat.GeometryShader>(shader, compiledBytecode);
 
 public abstract class Shader<TShader> : AbstractShader where TShader : DeviceChild
 {

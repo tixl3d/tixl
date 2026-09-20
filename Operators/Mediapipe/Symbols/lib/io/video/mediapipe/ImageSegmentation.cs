@@ -1,7 +1,6 @@
 using System.Threading;
 using OpenCvSharp;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 #nullable enable
 
 using Mediapipe.Tasks.Vision.ImageSegmenter;
@@ -167,7 +166,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
     private readonly object _workerLock = new object();
     private SegmentationModel _activeModel;
     
-    private readonly ConcurrentDictionary<(int width, int height), SharpDX.Direct3D11.Texture2D> _cachedStagingTextures = new();
+    private readonly ConcurrentDictionary<(int width, int height), T3.Graphics.Compat.Texture2D> _cachedStagingTextures = new();
     private readonly object _textureCacheLock = new object();
     
     private readonly ConcurrentBag<Mat> _matPool = new();
@@ -391,7 +390,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
     #endregion
 
     #region Memory Management
-    private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, SharpDX.DXGI.Format format)
+    private T3.Graphics.Compat.Texture2D GetOrCreateStagingTexture(int width, int height, T3.Graphics.Format format)
     {
         var key = (width, height);
         
@@ -408,10 +407,10 @@ public class ImageSegmentation : Instance<ImageSegmentation>
             }
             
             var device = ResourceManager.Device;
-            var newTexture = new SharpDX.Direct3D11.Texture2D(device, new Texture2DDescription
+            var newTexture = new T3.Graphics.Compat.Texture2D(device, new Texture2DDescription
             {
                 Width = width, Height = height, MipLevels = 1, ArraySize = 1,
-                Format = format, SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                Format = format, SampleDescription = new T3.Graphics.SampleDescription(1, 0),
                 Usage = ResourceUsage.Staging, BindFlags = BindFlags.None,
                 CpuAccessFlags = CpuAccessFlags.Read, OptionFlags = ResourceOptionFlags.None
             });
@@ -534,7 +533,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
         _maskData = result.MaskData;
         Confidence.Value = result.Confidence;
         
-        if (_maskTexture == null || _maskTexture.Description.Width != result.Width || _maskTexture.Description.Height != result.Height || _maskTexture.Description.Format != SharpDX.DXGI.Format.R8G8B8A8_UNorm)
+        if (_maskTexture == null || _maskTexture.Description.Width != result.Width || _maskTexture.Description.Height != result.Height || _maskTexture.Description.Format != T3.Graphics.Format.R8G8B8A8_UNorm)
         {
             _maskTexture?.Dispose();
             var desc = new Texture2DDescription
@@ -543,13 +542,13 @@ public class ImageSegmentation : Instance<ImageSegmentation>
                 Height = result.Height,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                Format = T3.Graphics.Format.R8G8B8A8_UNorm,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                 OptionFlags = ResourceOptionFlags.None
             };
-            _maskTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+            _maskTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
         }
         
         var handle = System.Runtime.InteropServices.GCHandle.Alloc(result.MaskData, System.Runtime.InteropServices.GCHandleType.Pinned);
@@ -757,7 +756,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
             return;
         }
         
-        if (_categoryMaskTexture == null || _categoryMaskTexture.Description.Width != width || _categoryMaskTexture.Description.Height != height || _categoryMaskTexture.Description.Format != SharpDX.DXGI.Format.R8_UNorm)
+        if (_categoryMaskTexture == null || _categoryMaskTexture.Description.Width != width || _categoryMaskTexture.Description.Height != height || _categoryMaskTexture.Description.Format != T3.Graphics.Format.R8_UNorm)
         {
             _categoryMaskTexture?.Dispose();
             var desc = new Texture2DDescription
@@ -766,13 +765,13 @@ public class ImageSegmentation : Instance<ImageSegmentation>
                 Height = height,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDX.DXGI.Format.R8_UNorm,
+                Format = T3.Graphics.Format.R8_UNorm,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                 OptionFlags = ResourceOptionFlags.None
             };
-            _categoryMaskTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+            _categoryMaskTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
         }
         
         var handle = System.Runtime.InteropServices.GCHandle.Alloc(maskData, System.Runtime.InteropServices.GCHandleType.Pinned);
@@ -797,7 +796,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
             return;
         }
         
-        if (_confidenceMaskTexture == null || _confidenceMaskTexture.Description.Width != width || _confidenceMaskTexture.Description.Height != height || _confidenceMaskTexture.Description.Format != SharpDX.DXGI.Format.R32_Float)
+        if (_confidenceMaskTexture == null || _confidenceMaskTexture.Description.Width != width || _confidenceMaskTexture.Description.Height != height || _confidenceMaskTexture.Description.Format != T3.Graphics.Format.R32_Float)
         {
             _confidenceMaskTexture?.Dispose();
             var desc = new Texture2DDescription
@@ -806,13 +805,13 @@ public class ImageSegmentation : Instance<ImageSegmentation>
                 Height = height,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDX.DXGI.Format.R32_Float,
+                Format = T3.Graphics.Format.R32_Float,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                 OptionFlags = ResourceOptionFlags.None
             };
-            _confidenceMaskTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+            _confidenceMaskTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
         }
         
         var handle = System.Runtime.InteropServices.GCHandle.Alloc(maskData, System.Runtime.InteropServices.GCHandleType.Pinned);
@@ -914,13 +913,13 @@ public class ImageSegmentation : Instance<ImageSegmentation>
                     Height = mat.Height,
                     MipLevels = 1,
                     ArraySize = 1,
-                    Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                    Format = T3.Graphics.Format.B8G8R8A8_UNorm,
                     SampleDescription = new SampleDescription(1, 0),
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                     OptionFlags = ResourceOptionFlags.None
                 };
-                _debugTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+                _debugTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
             }
             
             var context = ResourceManager.Device.ImmediateContext;
@@ -1035,7 +1034,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
         var mat = GetMat(desc.Height, desc.Width, MatType.CV_8UC4);
         try
         {
-            Utilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
+            T3.Graphics.Compat.GraphicsUtilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
         }
         finally
         {

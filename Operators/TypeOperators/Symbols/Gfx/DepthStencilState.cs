@@ -1,5 +1,4 @@
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 
 namespace Types.Gfx;
 
@@ -7,7 +6,7 @@ namespace Types.Gfx;
 public sealed class DepthStencilState : Instance<DepthStencilState>
 {
     [Output(Guid = "26E300CD-2DBE-49F2-AAB5-A60317DF5434")]
-    public readonly Slot<SharpDX.Direct3D11.DepthStencilState> DepthState = new();
+    public readonly Slot<T3.Graphics.Compat.DepthStencilState> DepthState = new();
 
     public DepthStencilState()
     {
@@ -27,10 +26,10 @@ public sealed class DepthStencilState : Instance<DepthStencilState>
                                                        DepthComparison = Comparison.GetValue(context),
                                                    };
                 
-            DepthState.Value = new SharpDX.Direct3D11.DepthStencilState(ResourceManager.Device, depthStencilStateDescription);
+            DepthState.Value = new T3.Graphics.Compat.DepthStencilState(ResourceManager.Device, depthStencilStateDescription);
                 
         }
-        catch (SharpDXException e)
+        catch (Exception e)
         {
             Log.Error("Failed to create DepthStencilState " + e.Message);
         } 
@@ -44,6 +43,6 @@ public sealed class DepthStencilState : Instance<DepthStencilState>
 
          
     [Input(Guid = "27F1F703-7333-49E5-A024-4606E34E8427")]
-    public readonly InputSlot<Comparison> Comparison = new(SharpDX.Direct3D11.Comparison.Less);
+    public readonly InputSlot<Comparison> Comparison = new(T3.Graphics.Compat.Comparison.Less);
         
 }

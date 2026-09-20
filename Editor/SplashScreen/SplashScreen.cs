@@ -89,7 +89,7 @@ internal sealed class SplashScreen : ISplashScreen
 
     private static Size GetScaledSize(Image image)
     {
-        using var graphics = Graphics.FromHwnd(IntPtr.Zero);
+        using var graphics = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
 
         var dpiX = graphics.DpiX;
         var dpiY = graphics.DpiY;

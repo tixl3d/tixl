@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using SharpDX;
+using T3.Graphics.Compat;
 using SharpDX.D3DCompiler;
-using SharpDX.Direct3D11;
 using T3.Core.DataTypes;
 using T3.Core.IO;
 using T3.Core.Settings;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Resource.Assets;
-using ComputeShader = SharpDX.Direct3D11.ComputeShader;
-using GeometryShader = SharpDX.Direct3D11.GeometryShader;
-using PixelShader = SharpDX.Direct3D11.PixelShader;
-using VertexShader = SharpDX.Direct3D11.VertexShader;
+using ComputeShader = T3.Graphics.Compat.ComputeShader;
+using GeometryShader = T3.Graphics.Compat.GeometryShader;
+using PixelShader = T3.Graphics.Compat.PixelShader;
+using VertexShader = T3.Graphics.Compat.VertexShader;
 
 namespace T3.Core.Resource.ShaderCompiling;
 
@@ -52,7 +51,7 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
                                                        null, 
                                                        new IncludeHandler(args.Owner));
 
-            success = compilationResult.ResultCode == Result.Ok;
+            success = compilationResult.ResultCode == SharpDX.Result.Ok;
             resultMessage = compilationResult.Message;
         }
         catch (Exception ce)

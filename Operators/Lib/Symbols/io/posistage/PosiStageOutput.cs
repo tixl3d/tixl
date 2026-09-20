@@ -2,8 +2,7 @@
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using Exception = System.Exception;
 
 namespace Lib.io.posistage
@@ -266,7 +265,7 @@ namespace Lib.io.posistage
                 {
                     immediateContext.CopyResource(buffer, stagingBuffer);
                     var dataBox = immediateContext.MapSubresource(stagingBuffer, 0, MapMode.Read, MapFlags.None);
-                    Utilities.Read(dataBox.DataPointer, data, 0, pointCount);
+                    T3.Graphics.Compat.GraphicsUtilities.Read(dataBox.DataPointer, data, 0, pointCount);
                     immediateContext.UnmapSubresource(stagingBuffer, 0);
                 }
 

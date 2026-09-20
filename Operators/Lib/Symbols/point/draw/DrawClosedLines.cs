@@ -44,7 +44,7 @@ internal sealed class DrawClosedLines :Instance<DrawClosedLines>{
         public readonly InputSlot<float> TransitionProgress = new InputSlot<float>();
 
         [Input(Guid = "584039ef-c876-432a-800c-b1366c45242b")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> WrapMode = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<T3.Graphics.Compat.TextureAddressMode> WrapMode = new InputSlot<T3.Graphics.Compat.TextureAddressMode>();
 
         [Input(Guid = "73a384b1-f1f8-441f-a0a7-d40e4044e3d5")]
         public readonly InputSlot<float> UvScale = new InputSlot<float>();

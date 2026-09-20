@@ -3,15 +3,13 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
-using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using T3.Graphics;
+using System.Numerics;
 using T3.Core.Logging;
 using T3.Core.Operator.Slots;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using Device = SharpDX.Direct3D11.Device;
+using Buffer = T3.Graphics.Compat.Buffer;
+using Device = T3.Graphics.Compat.Device;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Core.Resource;
@@ -35,7 +33,7 @@ public static partial class ResourceManager
                                   MipLodBias = 0.0f,
                                   MaximumAnisotropy = 1,
                                   ComparisonFunction = Comparison.Never,
-                                  BorderColor = new RawColor4(1.0f, 1.0f, 1.0f, 1.0f),
+                                  BorderColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f),
                                   MinimumLod = -Single.MaxValue,
                                   MaximumLod = Single.MaxValue,
                               };
@@ -300,13 +298,13 @@ public static partial class ResourceManager
     /// <summary>
     /// Uploads <paramref name="value"/> into <paramref name="buffer"/> as a const buffer update.
     /// Allocation-free: takes the address of the local stack value via <c>&amp;value</c> and hands it
-    /// to <c>UpdateSubresource</c> through a <see cref="SharpDX.DataBox"/> (struct, no heap alloc).
-    /// The previous implementation allocated a <c>SharpDX.DataStream</c> per call (managed wrapper +
+    /// to <c>UpdateSubresource</c> through a <see cref="T3.Graphics.Compat.DataBox"/> (struct, no heap alloc).
+    /// The previous implementation allocated a <c>T3.Graphics.Compat.DataStream</c> per call (managed wrapper +
     /// unmanaged buffer via Marshal.AllocHGlobal), which dominated [Loop] iteration cost.
     /// </summary>
     public static unsafe void UpdateConstBuffer<T>(T value, Buffer buffer) where T : unmanaged
     {
-        Device.ImmediateContext.UpdateSubresource(new SharpDX.DataBox((IntPtr)(&value), 0, 0), buffer);
+        Device.ImmediateContext.UpdateSubresource(new T3.Graphics.Compat.DataBox((IntPtr)(&value), 0, 0), buffer);
     }
 
     public static SamplerState DefaultSamplerState { get; private set; } = null!;

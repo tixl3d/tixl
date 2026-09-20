@@ -196,7 +196,7 @@ internal sealed partial class SetupOutputView
         var pinIsUsable = float.IsFinite(bboxSize.X) && float.IsFinite(bboxSize.Y)
                           && bboxSize.X >= MinDiscWarpExtent && bboxSize.Y >= MinDiscWarpExtent;
 
-        SharpDX.Direct3D11.ShaderResourceView? srv = null;
+        T3.Graphics.Compat.ShaderResourceView? srv = null;
         if (pinIsUsable)
         {
             var scale = MathF.Min(1f, 2048f / MathF.Max(bboxSize.X, bboxSize.Y));

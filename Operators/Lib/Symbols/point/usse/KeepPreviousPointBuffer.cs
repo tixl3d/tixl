@@ -1,5 +1,4 @@
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 
 namespace Lib.point.usse;
 
@@ -94,7 +93,7 @@ internal sealed class KeepPreviousPointBuffer : Instance<KeepPreviousPointBuffer
 
         var srv = new ShaderResourceView(dev, buf, new ShaderResourceViewDescription
                                                        {
-                                                           Format = SharpDX.DXGI.Format.Unknown,
+                                                           Format = T3.Graphics.Format.Unknown,
                                                            Dimension = ShaderResourceViewDimension.Buffer,
                                                            Buffer = new ShaderResourceViewDescription.BufferResource
                                                                         {
@@ -105,7 +104,7 @@ internal sealed class KeepPreviousPointBuffer : Instance<KeepPreviousPointBuffer
 
         var uav = new UnorderedAccessView(dev, buf, new UnorderedAccessViewDescription
                                                         {
-                                                            Format = SharpDX.DXGI.Format.Unknown,
+                                                            Format = T3.Graphics.Format.Unknown,
                                                             Dimension = UnorderedAccessViewDimension.Buffer,
                                                             Buffer = new UnorderedAccessViewDescription.BufferResource
                                                                          {

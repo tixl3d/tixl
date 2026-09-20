@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using SharpDX.WIC;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
@@ -183,23 +183,23 @@ internal static class VideoClipThumbnailCache
     #endregion
 
     #region Texture and PNG helpers
-    private static SharpDX.Direct3D11.Texture2D CreateSlotTexture(byte[] rgba)
+    private static T3.Graphics.Compat.Texture2D CreateSlotTexture(byte[] rgba)
     {
         var handle = GCHandle.Alloc(rgba, GCHandleType.Pinned);
         try
         {
-            return new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, new Texture2DDescription
+            return new T3.Graphics.Compat.Texture2D(ResourceManager.Device, new Texture2DDescription
                                                         {
                                                             Width = SlotWidth,
                                                             Height = SlotHeight,
                                                             ArraySize = 1,
                                                             BindFlags = BindFlags.ShaderResource,
                                                             Usage = ResourceUsage.Immutable,
-                                                            Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                                                            Format = T3.Graphics.Format.R8G8B8A8_UNorm,
                                                             MipLevels = 1,
-                                                            SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                                                            SampleDescription = new T3.Graphics.SampleDescription(1, 0),
                                                         },
-                                                    new SharpDX.DataRectangle(handle.AddrOfPinnedObject(), SlotWidth * 4));
+                                                    [new T3.Graphics.Compat.DataRectangle(handle.AddrOfPinnedObject(), SlotWidth * 4)]);
         }
         finally
         {

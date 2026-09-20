@@ -3,8 +3,7 @@
 using System.Threading;
 using Mediapipe;
 using OpenCvSharp;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using Mediapipe.Tasks.Core;
 using Mediapipe.Tasks.Vision.Core;
 using Mediapipe.Tasks.Vision.FaceLandmarker;
@@ -183,7 +182,7 @@ namespace Lib.io.video.mediapipe
         private readonly object _faceLandmarkerLock = new object();
         private readonly object _landmarksLock = new object();
         
-        private readonly ConcurrentDictionary<(int width, int height), SharpDX.Direct3D11.Texture2D> _cachedStagingTextures = new();
+        private readonly ConcurrentDictionary<(int width, int height), T3.Graphics.Compat.Texture2D> _cachedStagingTextures = new();
         private readonly object _textureCacheLock = new object();
         
         private readonly ConcurrentBag<Mat> _matPool = new();
@@ -387,13 +386,13 @@ namespace Lib.io.video.mediapipe
                     Height = mat.Height,
                     MipLevels = 1,
                     ArraySize = 1,
-                    Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm, // Mat is BGRA
+                    Format = T3.Graphics.Format.B8G8R8A8_UNorm, // Mat is BGRA
                     SampleDescription = new SampleDescription(1, 0),
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                     OptionFlags = ResourceOptionFlags.None
                 };
-                _debugTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+                _debugTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
             }
             
             var context = ResourceManager.Device.ImmediateContext;
@@ -422,7 +421,7 @@ namespace Lib.io.video.mediapipe
             var mat = GetMat(desc.Height, desc.Width, MatType.CV_8UC4);
             try
             {
-                Utilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
+                T3.Graphics.Compat.GraphicsUtilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
             }
             finally
             {
@@ -657,7 +656,7 @@ namespace Lib.io.video.mediapipe
         #endregion
 
         #region Memory Management
-        private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, SharpDX.DXGI.Format format)
+        private T3.Graphics.Compat.Texture2D GetOrCreateStagingTexture(int width, int height, T3.Graphics.Format format)
         {
             var key = (width, height);
             
@@ -674,10 +673,10 @@ namespace Lib.io.video.mediapipe
                 }
                 
                 var device = ResourceManager.Device;
-                var newTexture = new SharpDX.Direct3D11.Texture2D(device, new Texture2DDescription
+                var newTexture = new T3.Graphics.Compat.Texture2D(device, new Texture2DDescription
                 {
                     Width = width, Height = height, MipLevels = 1, ArraySize = 1,
-                    Format = format, SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                    Format = format, SampleDescription = new T3.Graphics.SampleDescription(1, 0),
                     Usage = ResourceUsage.Staging, BindFlags = BindFlags.None,
                     CpuAccessFlags = CpuAccessFlags.Read, OptionFlags = ResourceOptionFlags.None
                 });
@@ -891,9 +890,9 @@ namespace Lib.io.video.mediapipe
                             textureHeight *= 2;
                     }
 
-                    CreateOrUpdateTexture(ref _aiDataTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R32G32B32A32_Float);
-                    CreateOrUpdateTexture(ref _aiDataHighPrecisionTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R16G16_Float);
-                    CreateOrUpdateTexture(ref _aiDataSegmentationTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R8_UNorm);
+                    CreateOrUpdateTexture(ref _aiDataTexture, textureWidth, textureHeight, T3.Graphics.Format.R32G32B32A32_Float);
+                    CreateOrUpdateTexture(ref _aiDataHighPrecisionTexture, textureWidth, textureHeight, T3.Graphics.Format.R16G16_Float);
+                    CreateOrUpdateTexture(ref _aiDataSegmentationTexture, textureWidth, textureHeight, T3.Graphics.Format.R8_UNorm);
 
                     FillAITextures(landmarks, faceCount, textureWidth, textureHeight);
                 }
@@ -903,7 +902,7 @@ namespace Lib.io.video.mediapipe
             }
         }
 
-        private void CreateOrUpdateTexture(ref Texture2D? texture, int width, int height, SharpDX.DXGI.Format format)
+        private void CreateOrUpdateTexture(ref Texture2D? texture, int width, int height, T3.Graphics.Format format)
         {
             if (texture == null || texture.Description.Width != width || texture.Description.Height != height || texture.Description.Format != format)
             {
@@ -922,7 +921,7 @@ namespace Lib.io.video.mediapipe
                     OptionFlags = ResourceOptionFlags.None
                 };
                 
-                texture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+                texture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
             }
         }
 

@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Xml.Linq;
 using OpenCvSharp;
-using SharpDX;
+using T3.Graphics.Compat;
 using T3.Core.Animation;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -206,7 +206,7 @@ namespace Lib.io.ptz
             _disposeCts.Cancel();
             StopDiscovery();
             StopCaptureThread();
-            Utilities.Dispose(ref _gpuTexture);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _gpuTexture);
             lock (_lockObject)
             {
                 _sharedBgraMat?.Dispose();
@@ -391,7 +391,7 @@ namespace Lib.io.ptz
 
             if (_gpuTexture == null || _gpuTexture.Description.Width != width || _gpuTexture.Description.Height != height)
             {
-                Utilities.Dispose(ref _gpuTexture);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _gpuTexture);
 
                 var texDesc = new Texture2DDescription
                 {

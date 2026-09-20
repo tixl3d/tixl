@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Logging;
 using T3.Core.Resource;
 

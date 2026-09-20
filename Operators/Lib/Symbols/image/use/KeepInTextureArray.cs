@@ -1,5 +1,5 @@
 #nullable enable
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 
 namespace Lib.image.use;
@@ -74,7 +74,7 @@ internal sealed class KeepInTextureArray : Instance<KeepInTextureArray>
 
             if (needsRecreate)
             {
-                Utilities.Dispose(ref _arrayTexture);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _arrayTexture);
                 
                 _arrayDesc = new Texture2DDescription
                                  {
@@ -90,9 +90,9 @@ internal sealed class KeepInTextureArray : Instance<KeepInTextureArray>
                                      OptionFlags = ResourceOptionFlags.None
                                  };
                 
-                _arrayTexture= new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, _arrayDesc));
+                _arrayTexture= new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, _arrayDesc));
                 
-                Utilities.Dispose(ref _sliceTexture);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _sliceTexture);
                 _sliceDesc = new Texture2DDescription
                                  {
                                      Width = srcDesc.Width,
@@ -106,7 +106,7 @@ internal sealed class KeepInTextureArray : Instance<KeepInTextureArray>
                                      CpuAccessFlags = CpuAccessFlags.None,
                                      OptionFlags = srcDesc.OptionFlags
                                  };
-                _sliceTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, _sliceDesc));
+                _sliceTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, _sliceDesc));
             }
             
             int dstSlice = writeIndex.Mod(arraySize);
@@ -161,8 +161,8 @@ internal sealed class KeepInTextureArray : Instance<KeepInTextureArray>
         if (!isDisposing)
             return;
 
-        Utilities.Dispose(ref _sliceTexture);
-        Utilities.Dispose(ref _arrayTexture);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _sliceTexture);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _arrayTexture);
     }
 
     private Texture2D? _sliceTexture;

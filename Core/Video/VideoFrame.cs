@@ -1,4 +1,5 @@
-using SharpDX.DXGI;
+using T3.Graphics;
+using T3.Graphics.Compat;
 using System;
 using System.Drawing;
 
@@ -36,7 +37,7 @@ public struct VideoFrame : IDisposable
         VideoFrame result = new VideoFrame();
         result.Size = size;
         result.StrideInBytes = stride;
-        result.Data = SharpDX.Utilities.AllocateMemory(stride * size.Height);
+        result.Data = T3.Graphics.Compat.GraphicsUtilities.AllocateMemory(stride * size.Height);
         result.Format = format;
         result.IsOwned = true;
         return result;
@@ -46,7 +47,7 @@ public struct VideoFrame : IDisposable
     {
         if (this.Data != IntPtr.Zero && this.IsOwned)
         {
-            SharpDX.Utilities.FreeMemory(this.Data);
+            T3.Graphics.Compat.GraphicsUtilities.FreeMemory(this.Data);
             this.Data = IntPtr.Zero;
         }
     }

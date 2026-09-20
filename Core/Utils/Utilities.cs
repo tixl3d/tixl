@@ -108,7 +108,7 @@ public static class Utilities
         // Fast path, both strides are the same
         if (srcStride == dstStride)
         {
-            SharpDX.Utilities.CopyMemory(dstData, srcData, height * srcStride);
+            T3.Graphics.Compat.GraphicsUtilities.CopyMemory(dstData, srcData, height * srcStride);
         }
         else
         {
@@ -116,7 +116,7 @@ public static class Utilities
             int rowWidth = Math.Min(srcStride, dstStride);
             for (int i = 0; i < height; i++)
             {
-                SharpDX.Utilities.CopyMemory(dstData, srcData, rowWidth);
+                T3.Graphics.Compat.GraphicsUtilities.CopyMemory(dstData, srcData, rowWidth);
                 srcData += srcStride;
                 dstData += dstStride;   
             }

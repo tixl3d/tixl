@@ -1,6 +1,6 @@
 #nullable enable annotations
 
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Resource;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
@@ -74,7 +74,7 @@ internal sealed class ReadPointColors : Instance<ReadPointColors>, IDisposable
         }
     }
 
-    private void OnReadComplete(StructuredBufferReadAccess.ReadRequestItem item, IntPtr dataPointer, SharpDX.DataStream stream)
+    private void OnReadComplete(StructuredBufferReadAccess.ReadRequestItem item, IntPtr dataPointer, T3.Graphics.Compat.DataStream stream)
     {
         using (stream)
         {
@@ -82,7 +82,7 @@ internal sealed class ReadPointColors : Instance<ReadPointColors>, IDisposable
         }
     }
 
-    private void CopyColorsFromStream(SharpDX.DataStream stream, int startIndex, int outputCount, int stride)
+    private void CopyColorsFromStream(T3.Graphics.Compat.DataStream stream, int startIndex, int outputCount, int stride)
     {
         var colors = Result.Value;
         EnsureColorListSize(colors, outputCount);
@@ -112,7 +112,7 @@ internal sealed class ReadPointColors : Instance<ReadPointColors>, IDisposable
             list.Add(default);
     }
 
-    private void EnsureSyncStaging(SharpDX.Direct3D11.Buffer source, int sizeInBytes, int stride)
+    private void EnsureSyncStaging(T3.Graphics.Compat.Buffer source, int sizeInBytes, int stride)
     {
         if (_syncStaging != null
             && !_syncStaging.IsDisposed
@@ -122,7 +122,7 @@ internal sealed class ReadPointColors : Instance<ReadPointColors>, IDisposable
             return;
         }
 
-        Utilities.Dispose(ref _syncStaging);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _syncStaging);
         var desc = new BufferDescription
                        {
                            Usage = ResourceUsage.Staging,
@@ -132,17 +132,17 @@ internal sealed class ReadPointColors : Instance<ReadPointColors>, IDisposable
                            StructureByteStride = stride,
                            CpuAccessFlags = CpuAccessFlags.Read,
                        };
-        _syncStaging = new SharpDX.Direct3D11.Buffer(ResourceManager.Device, desc);
+        _syncStaging = new T3.Graphics.Compat.Buffer(ResourceManager.Device, desc);
     }
 
     void IDisposable.Dispose()
     {
         _bufferReader.Dispose();
-        Utilities.Dispose(ref _syncStaging);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _syncStaging);
     }
 
     private readonly StructuredBufferReadAccess _bufferReader = new();
-    private SharpDX.Direct3D11.Buffer? _syncStaging;
+    private T3.Graphics.Compat.Buffer? _syncStaging;
     private int _pendingStartIndex;
     private int _pendingCount;
     private int _pendingStride;

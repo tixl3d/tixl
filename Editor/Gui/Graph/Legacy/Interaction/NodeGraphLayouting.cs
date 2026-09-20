@@ -1,5 +1,5 @@
-﻿using SharpDX.Direct3D11;
-using T3.Core.Operator;
+using T3.Graphics.Compat;
+﻿using T3.Core.Operator;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;

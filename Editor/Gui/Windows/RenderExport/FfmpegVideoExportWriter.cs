@@ -1,6 +1,6 @@
 #nullable enable
 using System;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Model;
 using T3.Core.Resource;
 using T3.Core.Video;
@@ -103,5 +103,5 @@ internal sealed class FfmpegVideoExportWriter : IRenderVideoWriter
 
     // Immediate (synchronous) readback, converting straight to RGBA8 so the bytes match the encoder's input.
     private readonly TextureBgraReadAccess _readAccess = new(useImmediateReadback: true,
-                                                             targetFormat: SharpDX.DXGI.Format.R8G8B8A8_UNorm);
+                                                             targetFormat: T3.Graphics.Format.R8G8B8A8_UNorm);
 }

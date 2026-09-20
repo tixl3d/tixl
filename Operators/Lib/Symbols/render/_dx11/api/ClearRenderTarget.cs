@@ -1,5 +1,5 @@
-using SharpDX.Direct3D11;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using System.Numerics;
 
 namespace Lib.render._dx11.api;
 
@@ -23,7 +23,7 @@ internal sealed class ClearRenderTarget : Instance<ClearRenderTarget>
         if (rtv != null)
         {
             var c = ClearColor.GetValue(context);
-            deviceContext.ClearRenderTargetView(rtv, new RawColor4(c.X, c.Y, c.Z, c.W));
+            deviceContext.ClearRenderTargetView(rtv, new Vector4(c.X, c.Y, c.Z, c.W));
         }
         
         var dsv = DepthStencilView.GetValue(context);
@@ -40,5 +40,5 @@ internal sealed class ClearRenderTarget : Instance<ClearRenderTarget>
     public readonly InputSlot<RenderTargetView> RenderTarget = new();
     
     [Input(Guid = "65077B57-F9EB-48AA-8195-588F906B0E72")]
-    public readonly InputSlot<SharpDX.Direct3D11.DepthStencilView> DepthStencilView = new();
+    public readonly InputSlot<T3.Graphics.Compat.DepthStencilView> DepthStencilView = new();
 }

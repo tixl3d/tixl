@@ -1,7 +1,8 @@
 ﻿using System;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Resource;
+
+using System.Numerics;
 
 namespace T3.Core.Rendering;
 
@@ -122,7 +123,7 @@ public static class DefaultRenderingStates
     }
     
     
-    public static Color4 DefaultBlendFactor { get { return new Color4(1, 1, 1, 1); } }
+    public static Vector4 DefaultBlendFactor => new(1, 1, 1, 1);
 
     private static RasterizerState _defaultRasterizerState;
 

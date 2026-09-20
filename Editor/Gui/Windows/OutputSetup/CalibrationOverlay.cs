@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ImGuiNET;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Output;
 using T3.Core.Output.Rendering;
 using T3.Core.Resource;
 using T3.Editor.Gui.Styling;
-using Buffer = SharpDX.Direct3D11.Buffer;
+using Buffer = T3.Graphics.Compat.Buffer;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Int2 = T3.Core.DataTypes.Vector.Int2;
 using Vector2 = System.Numerics.Vector2;
@@ -310,7 +310,7 @@ internal static class CalibrationOverlay
         fixed (T* first = CollectionsMarshal.AsSpan(instances))
         {
             var region = new ResourceRegion(0, 0, 0, count * stride, 1, 1);
-            ResourceManager.Device.ImmediateContext.UpdateSubresource(new SharpDX.DataBox((IntPtr)first, 0, 0), buffer, 0, region);
+            ResourceManager.Device.ImmediateContext.UpdateSubresource(new T3.Graphics.Compat.DataBox((IntPtr)first, 0, 0), buffer, 0, region);
         }
 
         if (!ReferenceEquals(viewSource, buffer))

@@ -77,7 +77,7 @@ internal sealed class SetMaterial : Instance<SetMaterial>
             return;
 
         if(currentSrv != defaultSrv)
-            Utilities.Dispose(ref currentSrv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref currentSrv);
 
         var changedTexture = textureInputSlot.GetValue(context);
 

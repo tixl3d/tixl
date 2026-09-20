@@ -1,4 +1,4 @@
-using SharpDX;
+using T3.Graphics.Compat;
 
 namespace Lib.render._dx11.buffer;
 

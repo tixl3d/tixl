@@ -3,18 +3,17 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using JeremyAnsel.Media.Dds;
-using SharpDX;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using SharpDX.WIC;
 using T3.Core.Logging;
 using T3.Core.Resource;
 using T3.Core.Resource.Dds;
-using Device = SharpDX.Direct3D11.Device;
+using Device = T3.Graphics.Compat.Device;
 
 namespace T3.Core.DataTypes;
 
-public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<SharpDX.Direct3D11.Texture2D>(texture)
+public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3.Graphics.Compat.Texture2D>(texture)
 {
     public override string Name { get => TextureObject.DebugName; set => TextureObject.DebugName = value; }
     public readonly Texture2DDescription Description = texture.Description;
@@ -23,7 +22,8 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
     {
         // Allocate DataStream to receive the WIC image pixels
         var stride = bitmapSource.Size.Width * 4;
-        using var buffer = new DataStream(bitmapSource.Size.Height * stride, true, true);
+        // WIC writes into its own stream type, so this one stays SharpDX until image loading is ported.
+        using var buffer = new SharpDX.DataStream(bitmapSource.Size.Height * stride, true, true);
 
         // Copy the content of the WIC to the buffer
         bitmapSource.CopyPixels(stride, buffer);
@@ -51,7 +51,7 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
             stride /= 2;
         }
 
-        var dxTexture = new SharpDX.Direct3D11.Texture2D(device, texDesc, dataRectangles);
+        var dxTexture = new T3.Graphics.Compat.Texture2D(device, texDesc, dataRectangles);
         if (mipLevels > 1)
         {
             using var srv = new ShaderResourceView(device, dxTexture);
@@ -63,7 +63,7 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
 
     public static Texture2D CreateTexture2D(Texture2DDescription description, DataRectangle[]? dataRectangles = null)
     {
-        var dxTexture = new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, description, dataRectangles);
+        var dxTexture = new T3.Graphics.Compat.Texture2D(ResourceManager.Device, description, dataRectangles);
         return new Texture2D(dxTexture);
     }
 
@@ -78,7 +78,7 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
             {
                 DdsDirectX.CreateTexture(ddsFile, ResourceManager.Device, ResourceManager.Device.ImmediateContext, out var dxTextureResource, out var srv);
                 srv?.Dispose();
-                var dxTex = (SharpDX.Direct3D11.Texture2D)dxTextureResource;
+                var dxTex = (T3.Graphics.Compat.Texture2D)dxTextureResource;
                 texture = new Texture2D(dxTex);
             }
             catch (Exception e)
@@ -125,23 +125,23 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
         }
     }
 }
-public sealed class Texture3D(SharpDX.Direct3D11.Texture3D texture) : Texture<SharpDX.Direct3D11.Texture3D>(texture)
+public sealed class Texture3D(T3.Graphics.Compat.Texture3D texture) : Texture<T3.Graphics.Compat.Texture3D>(texture)
 {
     public override string Name { get => TextureObject.DebugName; set => TextureObject.DebugName = value; }
     public readonly Texture3DDescription Description = texture.Description;
 
     public static Texture3D CreateTexture3D(Texture3DDescription description)
     {
-        var dxTexture = new SharpDX.Direct3D11.Texture3D(ResourceManager.Device, description);
+        var dxTexture = new T3.Graphics.Compat.Texture3D(ResourceManager.Device, description);
         return new Texture3D(dxTexture);
     }
 }
 
 public abstract class Texture<T>(T texture) : AbstractTexture(texture)
-    where T : SharpDX.Direct3D11.Resource
+    where T : T3.Graphics.Compat.Resource
 {
     public static implicit operator T(Texture<T> texture) => texture.TextureObject;
-    public static implicit operator SharpDX.Direct3D11.Resource?(Texture<T>? texture) => texture?.TextureObject;
+    public static implicit operator T3.Graphics.Compat.Resource?(Texture<T>? texture) => texture?.TextureObject;
     protected readonly T TextureObject = texture;
     public bool IsDisposed => TextureObject.IsDisposed;
 }
@@ -151,12 +151,12 @@ public abstract class AbstractTexture(IDisposable disposable) : IDisposable
     private IDisposable? _disposable = disposable;
     public abstract string Name { get; set; }
 
-    public static implicit operator SharpDX.Direct3D11.Resource?(AbstractTexture texture)
-        => texture._disposable as SharpDX.Direct3D11.Resource;
+    public static implicit operator T3.Graphics.Compat.Resource?(AbstractTexture texture)
+        => texture._disposable as T3.Graphics.Compat.Resource;
     
     // The original implementation. Not sure, if the above is valid.
-    // public static implicit operator SharpDX.Direct3D11.Resource(AbstractTexture texture) 
-    //     => (SharpDX.Direct3D11.Resource)texture._disposable;
+    // public static implicit operator T3.Graphics.Compat.Resource(AbstractTexture texture) 
+    //     => (T3.Graphics.Compat.Resource)texture._disposable;
 
     public void Dispose()
     {

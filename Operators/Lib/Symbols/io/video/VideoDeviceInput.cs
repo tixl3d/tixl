@@ -2,8 +2,8 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using DirectShowLib;
 using OpenCvSharp;
-using SharpDX;
-using Device = SharpDX.Direct3D11.Device;
+using T3.Graphics.Compat;
+using Device = T3.Graphics.Compat.Device;
 using FormatType = DirectShowLib.FormatType;
 
 namespace Lib.io.video;
@@ -436,7 +436,7 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
                                   CpuAccessFlags = CpuAccessFlags.None,
                                   OptionFlags = ResourceOptionFlags.None
                               };
-            var sharpDxTexture = new SharpDX.Direct3D11.Texture2D(device, texDesc);
+            var sharpDxTexture = new T3.Graphics.Compat.Texture2D(device, texDesc);
             _gpuTexture = new Texture2D(sharpDxTexture);
         }
 

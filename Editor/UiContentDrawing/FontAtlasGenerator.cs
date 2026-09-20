@@ -1,12 +1,11 @@
 ﻿using ImGuiNET;
-using SharpDX;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using T3.Graphics;
+using System.Numerics;
 using SharpDX.WIC;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Styling;
-using Device = SharpDX.Direct3D11.Device;
+using Device = T3.Graphics.Compat.Device;
 
 namespace T3.Editor.UiContentDrawing;
 
@@ -90,7 +89,7 @@ internal static class FontAtlasGenerator
             int py = (int)(icon.SourceArea.Min.Y * iconScaleFactor);
 
             uint[] iconContent = new uint[sx * sy];
-            formatConverter.CopyPixels(new RawBox(px, py, sx, sy), iconContent);
+            formatConverter.CopyPixels(new SharpDX.Mathematics.Interop.RawBox(px, py, sx, sy), iconContent);
 
             var rect = io.Fonts.GetCustomRectByIndex(glyphId);
             for (int y = 0, s = 0; y < rect.Height; y++)
@@ -132,7 +131,7 @@ internal static class FontAtlasGenerator
             texture.Dispose();
 
             // Store our identifier
-            io.Fonts.TexID = (IntPtr)fontTextureView;
+            io.Fonts.TexID = (IntPtr)fontTextureView.ImGuiTextureId;
 
             var samplerDesc = new SamplerStateDescription()
                                   {

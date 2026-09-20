@@ -1,4 +1,4 @@
-using SharpDX;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 using T3.Core.Utils.Splines;
 

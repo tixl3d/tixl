@@ -1,4 +1,4 @@
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.io.dmx.obsolete;
@@ -45,7 +45,7 @@ public sealed class PointsToRGBList : Instance<PointsToRGBList>
                 try
                 {
                     if (_bufferWithViewsCpuAccess != null)
-                        Utilities.Dispose(ref _bufferWithViewsCpuAccess.Buffer);
+                        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _bufferWithViewsCpuAccess.Buffer);
 
                     _bufferWithViewsCpuAccess ??= new BufferWithViews();
 

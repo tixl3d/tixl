@@ -1,5 +1,5 @@
 using Lib.Utils;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -23,9 +23,9 @@ public sealed class GpuMeasure : Instance<GpuMeasure>
 
     protected override void Dispose(bool disposing)
     {
-        Utilities.Dispose(ref _queryTimeStampDisjoint);
-        Utilities.Dispose(ref _queryTimeStampFrameBegin);
-        Utilities.Dispose(ref _queryTimeStampFrameEnd);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _queryTimeStampDisjoint);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _queryTimeStampFrameBegin);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _queryTimeStampFrameEnd);
     }
 
     private void Update(EvaluationContext context)

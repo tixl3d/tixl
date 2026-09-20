@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Logging;
 
 namespace T3.Core.Resource;

@@ -366,12 +366,12 @@ internal sealed partial class SetupOutputView
     /// The straightened crop of the photo a traced surface stands for, for its Board card: the warp rendered
     /// small into the surface's own target, and the uv window of the rectified region inside it.
     /// </summary>
-    private bool TryGetTracedFragment(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Vector2 uvMin, out Vector2 uvMax)
+    private bool TryGetTracedFragment(Setup setup, Surface surface, out T3.Graphics.Compat.ShaderResourceView? srv, out Vector2 uvMin, out Vector2 uvMax)
     {
         return TryGetTracedFragment(setup, surface, out srv, out _, out uvMin, out uvMax);
     }
 
-    private bool TryGetTracedFragment(Setup setup, Surface surface, out SharpDX.Direct3D11.ShaderResourceView? srv, out Texture2D? warpedTexture,
+    private bool TryGetTracedFragment(Setup setup, Surface surface, out T3.Graphics.Compat.ShaderResourceView? srv, out Texture2D? warpedTexture,
                                       out Vector2 uvMin, out Vector2 uvMax)
     {
         srv = null;
@@ -457,7 +457,7 @@ internal sealed partial class SetupOutputView
         return texture;
     }
 
-    private SharpDX.Direct3D11.ShaderResourceView? TryGetReferenceSrv(ReferenceImage image)
+    private T3.Graphics.Compat.ShaderResourceView? TryGetReferenceSrv(ReferenceImage image)
     {
         var texture = TryGetReferenceTexture(image);
         return texture == null ? null : SrvManager.GetSrvForTexture(texture);

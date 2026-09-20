@@ -1,5 +1,5 @@
 #nullable enable
-using SharpDX;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -126,7 +126,7 @@ internal sealed class ValuesToTexture2 : Instance<ValuesToTexture2>
             ValuesTexture.Value.Description.Height != height)
         {
             if (ValuesTexture.Value != null)
-                Utilities.Dispose(ref ValuesTexture.Value);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref ValuesTexture.Value);
 
             var desc = new Texture2DDescription
             {

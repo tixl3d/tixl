@@ -3,8 +3,7 @@ using System.Globalization;
 using System.Text.Json;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -469,7 +468,7 @@ internal sealed class Video2DPointScanner : Instance<Video2DPointScanner>
                                 Usage = ResourceUsage.Staging, BindFlags = BindFlags.None,
                                 CpuAccessFlags = CpuAccessFlags.Read, OptionFlags = ResourceOptionFlags.None
                             };
-        using var stageTex = new SharpDX.Direct3D11.Texture2D(device, stageDesc);
+        using var stageTex = new T3.Graphics.Compat.Texture2D(device, stageDesc);
         context.CopyResource(tex, stageTex);
         var box = context.MapSubresource(stageTex, 0, MapMode.Read, MapFlags.None);
         using var matBgra = Mat.FromPixelData(desc.Height, desc.Width, MatType.CV_8UC4, box.DataPointer, box.RowPitch);
@@ -504,7 +503,7 @@ internal sealed class Video2DPointScanner : Instance<Video2DPointScanner>
                                       Usage = ResourceUsage.Default,
                                       BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget
                                   };
-                tex = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, texDesc, new DataRectangle(bmpData.Scan0, bmpData.Stride)));
+                tex = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, texDesc, [new DataRectangle(bmpData.Scan0, bmpData.Stride)]));
             }
             else
             {

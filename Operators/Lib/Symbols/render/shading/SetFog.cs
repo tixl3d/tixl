@@ -16,7 +16,7 @@ internal sealed class SetFog : Instance<SetFog>
 
     private void Update(EvaluationContext context)
     {
-        Utilities.Dispose(ref _parameterBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _parameterBuffer);
         ResourceManager.SetupConstBuffer(new FogSettings.FogParameters
                                              {
                                                  Bias = Bias.GetValue(context),

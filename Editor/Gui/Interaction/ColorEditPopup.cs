@@ -138,9 +138,9 @@ internal static class ColorEditPopup
         var clampedV = v.Clamp(0, 1);
 
         const float colorEdgeWidth = 3;
-        drawList.AddImage((IntPtr)SharedResources.ColorPickerImageSrv, windowPos - Vector2.One * colorEdgeWidth,
+        drawList.AddImage((IntPtr)SharedResources.ColorPickerImageSrv.ImGuiTextureId, windowPos - Vector2.One * colorEdgeWidth,
                           windowPos + size + Vector2.One * colorEdgeWidth);
-        drawList.AddImage((IntPtr)SharedResources.ColorPickerImageSrv, windowPos, windowPos + size, Vector2.Zero, Vector2.One,
+        drawList.AddImage((IntPtr)SharedResources.ColorPickerImageSrv.ImGuiTextureId, windowPos, windowPos + size, Vector2.Zero, Vector2.One,
                           new Color(clampedV, clampedV, clampedV));
 
         var hueAngle = (hNormalized + 0.25f) * 2 * MathF.PI;
@@ -752,7 +752,7 @@ internal static class ColorEditPopup
         var bounds = new Rectangle(x, y, 1, 1);
         try
         {
-            using (var g = Graphics.FromImage(_bmp))
+            using (var g = System.Drawing.Graphics.FromImage(_bmp))
                 g.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size);
 
             var c = _bmp.GetPixel(0, 0);

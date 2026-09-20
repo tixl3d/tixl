@@ -1,6 +1,5 @@
 #nullable enable
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.point.combine;
@@ -100,7 +99,7 @@ public sealed class _ExecuteCombineBuffers : Instance<_ExecuteCombineBuffers>
         
         foreach (var bufferState in _inputBuffers)
         {
-            csStage.SetShaderResources(0, 1, bufferState.Buffer.Srv);
+            csStage.SetShaderResource(0, bufferState.Buffer.Srv);
 
             SetupPassParamBuffer(bufferState.StartIndex, bufferState.Length);
 
@@ -156,15 +155,15 @@ public sealed class _ExecuteCombineBuffers : Instance<_ExecuteCombineBuffers>
         if (!isDisposing)
             return;
         
-        Utilities.Dispose(ref _passParamBuffer);
-        Utilities.Dispose(ref _resultBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _passParamBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resultBuffer);
     }
     
     private const int PassParamSizeInBytes = 16; // min required
     private Buffer? _passParamBuffer;
     private BufferWithViews _resultBuffer = new();
     private readonly IndexDataForPass[] _passData = new IndexDataForPass[1];
-    private SharpDX.Direct3D11.ComputeShader? _computeShader;
+    private T3.Graphics.Compat.ComputeShader? _computeShader;
 
     [Input(Guid = "c8a5769e-2536-4caa-8380-22fbeed1ef12")]
     public readonly MultiInputSlot<BufferWithViews> InputBuffers = new();

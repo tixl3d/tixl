@@ -39,7 +39,7 @@ internal sealed class BuildAsciiFontSorting : Instance<BuildAsciiFontSorting>
         var listSizeInBytes = sampleCount * entrySizeInBytes;
         var bufferSizeInBytes = 1 * listSizeInBytes;
 
-        using (var dataStream = new SharpDX.DataStream(bufferSizeInBytes, true, true))
+        using (var dataStream = new T3.Graphics.Compat.DataStream(bufferSizeInBytes, true, true))
         {
             var texDesc = new Texture2DDescription()
                               {
@@ -62,8 +62,8 @@ internal sealed class BuildAsciiFontSorting : Instance<BuildAsciiFontSorting>
             }
 
             dataStream.Position = 0;
-            var dataRectangles = new SharpDX.DataRectangle[] { new(dataStream.DataPointer, listSizeInBytes) };
-            Utilities.Dispose(ref MappingTexture.Value);
+            var dataRectangles = new T3.Graphics.Compat.DataRectangle[] { new(dataStream.DataPointer, listSizeInBytes) };
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref MappingTexture.Value);
 
             MappingTexture.Value = Texture2D.CreateTexture2D(texDesc, dataRectangles);
         }

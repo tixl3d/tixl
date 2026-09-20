@@ -1,5 +1,5 @@
 #nullable enable
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 
 namespace Lib.render.skinning;
 

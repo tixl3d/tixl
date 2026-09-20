@@ -1,5 +1,5 @@
 ﻿using ImGuiNET;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
@@ -223,7 +223,7 @@ public static class SceneSetupPopup
         if (srv == null)
             return;
         
-        ImGui.Image((IntPtr)srv, new Vector2(100, 100));
+        ImGui.Image((IntPtr)srv.ImGuiTextureId, new Vector2(100, 100));
     }
 
     #nullable enable

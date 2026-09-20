@@ -1,5 +1,5 @@
 #nullable enable
-using SharpDX;
+using T3.Graphics.Compat;
 
 namespace Lib.flow.skillQuest;
 

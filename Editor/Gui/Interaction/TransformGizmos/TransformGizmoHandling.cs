@@ -239,7 +239,7 @@ internal static class TransformGizmoHandling
         // Don't draw gizmo behind camera (view plane)
         _renderGizmo = Math.Abs(_originInClipSpace.Z) <= 1 && Math.Abs(_originInClipSpace.X) <= 2 && Math.Abs(_originInClipSpace.Y) <= 2;
 
-        var viewports = ResourceManager.Device.ImmediateContext.Rasterizer.GetViewports<SharpDX.Mathematics.Interop.RawViewportF>();
+        var viewports = ResourceManager.Device.ImmediateContext.Rasterizer.GetViewports<T3.Graphics.Viewport>();
         _viewport = viewports[0];
         var originInViewport = new Vector2(_viewport.Width * (_originInClipSpace.X * 0.5f + 0.5f),
                                            _viewport.Height * (1.0f - (_originInClipSpace.Y * 0.5f + 0.5f)));
@@ -1152,7 +1152,7 @@ internal static class TransformGizmoHandling
         var homogenousPosInLocal = new Vector4(posInLocal.X, posInLocal.Y, posInLocal.Z, 1);
         Vector4 originInClipSpace = Vector4.Transform(homogenousPosInLocal, _localToClipSpace);
         Vector3 posInNdc = new Vector3(originInClipSpace.X, originInClipSpace.Y, originInClipSpace.Z) / originInClipSpace.W;
-        var viewports = ResourceManager.Device.ImmediateContext.Rasterizer.GetViewports<SharpDX.Mathematics.Interop.RawViewportF>();
+        var viewports = ResourceManager.Device.ImmediateContext.Rasterizer.GetViewports<T3.Graphics.Viewport>();
         var viewport = viewports[0];
         var originInViewport = new Vector2(viewport.Width * (posInNdc.X * 0.5f + 0.5f),
                                            viewport.Height * (1.0f - (posInNdc.Y * 0.5f + 0.5f)));
@@ -1317,7 +1317,7 @@ internal static class TransformGizmoHandling
 
     private static readonly HashSet<ITransformable> _selectedTransformables = [];
 
-    private static SharpDX.Mathematics.Interop.RawViewportF _viewport;
+    private static T3.Graphics.Viewport _viewport;
     private static Vector2 _mousePosInScreen;
     private static ImageOutputCanvas? _canvas;
     private static Vector2 _topLeftOnScreen;

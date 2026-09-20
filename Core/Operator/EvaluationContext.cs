@@ -8,7 +8,7 @@ using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
-using Buffer = SharpDX.Direct3D11.Buffer;
+using Buffer = T3.Graphics.Compat.Buffer;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Core.Operator;

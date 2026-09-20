@@ -1,6 +1,6 @@
 #nullable enable
 using System.Threading;
-using SharpDX;
+using T3.Graphics.Compat;
 using T3.Core.Video;
 using T3.VideoServices;
 using Utilities = T3.Core.Utils.Utilities;
@@ -218,7 +218,7 @@ namespace Lib.io.video
 
             if (_gpuTexture == null || _gpuTexture.Description.Width != width || _gpuTexture.Description.Height != height)
             {
-                Utilities.Dispose(ref _gpuTexture);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _gpuTexture);
 
                 _gpuTexture = Texture2D.CreateTexture2D(new Texture2DDescription
                                                             {
@@ -251,7 +251,7 @@ namespace Lib.io.video
                 return;
 
             StopCaptureThread();
-            Utilities.Dispose(ref _gpuTexture);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _gpuTexture);
             lock (_lockObject)
             {
                 _sharedRgba = null;

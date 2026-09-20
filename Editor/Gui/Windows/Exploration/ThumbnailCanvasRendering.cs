@@ -1,7 +1,6 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using System.Numerics;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -39,10 +38,10 @@ public sealed class ThumbnailCanvasRendering
                                   BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                                   Usage = ResourceUsage.Default,
                                   CpuAccessFlags = CpuAccessFlags.None,
-                                  Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                                  Format = T3.Graphics.Format.R8G8B8A8_UNorm,
                                   //MipLevels = mipLevels,
                                   OptionFlags = ResourceOptionFlags.GenerateMipMaps,
-                                  SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                                  SampleDescription = new T3.Graphics.SampleDescription(1, 0),
                               };
 
         _canvasTexture = Texture2D.CreateTexture2D(description);
@@ -62,7 +61,7 @@ public sealed class ThumbnailCanvasRendering
         var deviceContext = ResourceManager.Device.ImmediateContext;
         deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
-        deviceContext.Rasterizer.SetViewport(new ViewportF(rect.Min.X,
+        deviceContext.Rasterizer.SetViewport(new T3.Graphics.Viewport(rect.Min.X,
                                                            rect.Min.Y,
                                                            rect.GetWidth(),
                                                            rect.GetHeight(),
@@ -85,7 +84,7 @@ public sealed class ThumbnailCanvasRendering
         if (!_initialized)
             return;
             
-        Program.Device.ImmediateContext.ClearRenderTargetView(_canvasTextureRtv, new RawColor4(0, 0, 0, 0));
+        Program.Device.ImmediateContext.ClearRenderTargetView(_canvasTextureRtv, new System.Numerics.Vector4(0, 0, 0, 0));
     }
 
     public Vector2 GetCanvasTextureSize()

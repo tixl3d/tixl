@@ -5,8 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenCvSharp;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Operator;
@@ -15,7 +14,6 @@ using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using Google.Protobuf;
 using Mediapipe;
-using SharpDX.Direct3D;
 #nullable enable
 using Mediapipe.Tasks.Vision.ObjectDetector;
 using Mediapipe.Tasks.Vision.Core;
@@ -194,7 +192,7 @@ public class ObjectDetection : Instance<ObjectDetection>
     private string _activeCategoryDenylist = "";
     private readonly object _workerLock = new object();
 
-    private readonly ConcurrentDictionary<(int width, int height), SharpDX.Direct3D11.Texture2D> _cachedStagingTextures = new();
+    private readonly ConcurrentDictionary<(int width, int height), T3.Graphics.Compat.Texture2D> _cachedStagingTextures = new();
     private readonly object _textureCacheLock = new object();
 
     private readonly ConcurrentBag<Mat> _matPool = new();
@@ -403,7 +401,7 @@ public class ObjectDetection : Instance<ObjectDetection>
     #endregion Worker Thread
 
     #region Memory Management
-    private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, SharpDX.DXGI.Format format)
+    private T3.Graphics.Compat.Texture2D GetOrCreateStagingTexture(int width, int height, T3.Graphics.Format format)
     {
         var key = (width, height);
 
@@ -420,10 +418,10 @@ public class ObjectDetection : Instance<ObjectDetection>
             }
 
             var device = ResourceManager.Device;
-            var newTexture = new SharpDX.Direct3D11.Texture2D(device, new Texture2DDescription
+            var newTexture = new T3.Graphics.Compat.Texture2D(device, new Texture2DDescription
                                                                           {
                                                                               Width = width, Height = height, MipLevels = 1, ArraySize = 1,
-                                                                              Format = format, SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                                                                              Format = format, SampleDescription = new T3.Graphics.SampleDescription(1, 0),
                                                                               Usage = ResourceUsage.Staging, BindFlags = BindFlags.None,
                                                                               CpuAccessFlags = CpuAccessFlags.Read, OptionFlags = ResourceOptionFlags.None
                                                                           });
@@ -674,7 +672,7 @@ public class ObjectDetection : Instance<ObjectDetection>
                 _pointBufferWithViews.Srv = new ShaderResourceView(ResourceManager.Device, _pointBufferWithViews.Buffer,
                                                                    new ShaderResourceViewDescription
                                                                        {
-                                                                           Format = SharpDX.DXGI.Format.Unknown,
+                                                                           Format = T3.Graphics.Format.Unknown,
                                                                            Dimension = ShaderResourceViewDimension.Buffer,
                                                                            Buffer = new ShaderResourceViewDescription.BufferResource
                                                                                         {
@@ -690,7 +688,7 @@ public class ObjectDetection : Instance<ObjectDetection>
                 _pointBufferWithViews.Uav = new UnorderedAccessView(ResourceManager.Device, _pointBufferWithViews.Buffer,
                                                                     new UnorderedAccessViewDescription
                                                                         {
-                                                                            Format = SharpDX.DXGI.Format.Unknown,
+                                                                            Format = T3.Graphics.Format.Unknown,
                                                                             Dimension = UnorderedAccessViewDimension.Buffer,
                                                                             Buffer = new UnorderedAccessViewDescription.BufferResource
                                                                                          {
@@ -756,13 +754,13 @@ public class ObjectDetection : Instance<ObjectDetection>
                                Height = mat.Height,
                                MipLevels = 1,
                                ArraySize = 1,
-                               Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                               Format = T3.Graphics.Format.B8G8R8A8_UNorm,
                                SampleDescription = new SampleDescription(1, 0),
                                Usage = ResourceUsage.Default,
                                BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                                OptionFlags = ResourceOptionFlags.None
                            };
-            _debugTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+            _debugTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
         }
 
         var context = ResourceManager.Device.ImmediateContext;
@@ -940,7 +938,7 @@ public class ObjectDetection : Instance<ObjectDetection>
         var mat = GetMat(desc.Height, desc.Width, MatType.CV_8UC4);
         try
         {
-            Utilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
+            T3.Graphics.Compat.GraphicsUtilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
         }
         finally
         {

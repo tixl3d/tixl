@@ -2,8 +2,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Resource.Assets;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
@@ -512,7 +511,7 @@ namespace Lib.io.video
                                       SampleDescription = new SampleDescription(1, 0), Usage = ResourceUsage.Staging, BindFlags = BindFlags.None,
                                       CpuAccessFlags = CpuAccessFlags.Read, OptionFlags = ResourceOptionFlags.None
                                   };
-            using var stagingTexture = new SharpDX.Direct3D11.Texture2D(d3dDevice, stagingDesc);
+            using var stagingTexture = new T3.Graphics.Compat.Texture2D(d3dDevice, stagingDesc);
             deviceContext.CopyResource(t3Texture, stagingTexture);
             var dataBox = deviceContext.MapSubresource(stagingTexture, 0, MapMode.Read, MapFlags.None);
             using var matBgra = Mat.FromPixelData(desc.Height, desc.Width, MatType.CV_8UC4, dataBox.DataPointer, dataBox.RowPitch);
@@ -547,7 +546,7 @@ namespace Lib.io.video
                                           SampleDescription = new SampleDescription(1, 0), Usage = ResourceUsage.Default, BindFlags = BindFlags.ShaderResource
                                       };
                     var dataRectangle = new DataRectangle(bmpData.Scan0, bmpData.Stride);
-                    texture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, texDesc, dataRectangle));
+                    texture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, texDesc, [dataRectangle]));
                 }
                 else
                 {

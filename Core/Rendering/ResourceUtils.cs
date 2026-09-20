@@ -1,4 +1,4 @@
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3.Core.Utils;
 
-using Buffer = SharpDX.Direct3D11.Buffer;
+using Buffer = T3.Graphics.Compat.Buffer;
 
 namespace T3.Core.Rendering
 {
@@ -50,7 +50,7 @@ namespace T3.Core.Rendering
             int size = GetBufferSize(requestedSize);
             if (buffer != null && buffer.Description.SizeInBytes != size)
             {
-                Utilities.Dispose(ref buffer);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref buffer);
             }
             if (buffer == null)
             {
@@ -68,7 +68,7 @@ namespace T3.Core.Rendering
             // Use the no-DataStream MapSubresource overload — the (..., out DataStream) overloads
             // allocate a managed DataStream wrapper per call which becomes the dominant per-iteration
             // allocation under heavy [Loop] use.
-            SharpDX.DataBox box = deviceContext.MapSubresource(buffer, 0, MapMode.WriteDiscard, MapFlags.None);
+            T3.Graphics.Compat.DataBox box = deviceContext.MapSubresource(buffer, 0, MapMode.WriteDiscard, MapFlags.None);
             Span<T> boxData = new Span<T>((void*)box.DataPointer, data.Length);
             data.CopyTo(boxData);
             deviceContext.UnmapSubresource(buffer, 0);
@@ -76,7 +76,7 @@ namespace T3.Core.Rendering
 
         public static unsafe void WriteDynamicBufferData<T>(DeviceContext deviceContext, Buffer buffer, T data) where T : unmanaged
         {
-            SharpDX.DataBox box = deviceContext.MapSubresource(buffer, 0, MapMode.WriteDiscard, MapFlags.None);
+            T3.Graphics.Compat.DataBox box = deviceContext.MapSubresource(buffer, 0, MapMode.WriteDiscard, MapFlags.None);
             Unsafe.Write((void*)box.DataPointer, data);
             deviceContext.UnmapSubresource(buffer, 0);
         }

@@ -1,4 +1,4 @@
-using SharpDX;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -100,7 +100,7 @@ internal sealed class GradientsToTexture : Instance<GradientsToTexture>
             GradientsTexture.Value.Description.Height != height)
         {
             if (GradientsTexture.Value != null)
-                Utilities.Dispose(ref GradientsTexture.Value);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref GradientsTexture.Value);
 
             var desc = new Texture2DDescription
                            {

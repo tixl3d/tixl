@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using ImGuiNET;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -912,7 +912,7 @@ internal sealed class GraphNode
         if (_previewTextureView == null)
             return;
 
-        drawList.AddImage((IntPtr)_previewTextureView, _previewArea.Min, 
+        drawList.AddImage((IntPtr)_previewTextureView.ImGuiTextureId, _previewArea.Min, 
                           _previewArea.Max,
                           Vector2.Zero,
                           Vector2.One,

@@ -1,4 +1,4 @@
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 
 namespace Lib.render._dx11.api;

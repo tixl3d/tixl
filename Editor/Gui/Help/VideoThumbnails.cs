@@ -1,7 +1,6 @@
 #nullable enable
 using System.IO;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using SharpDX.WIC;
 using T3.Core.Resource;
 
@@ -62,7 +61,7 @@ internal static class VideoThumbnails
             var width = converter.Size.Width;
             var height = converter.Size.Height;
             var stride = width * 4;
-            using var buffer = new DataStream(height * stride, true, true);
+            using var buffer = new SharpDX.DataStream(height * stride, true, true);
             converter.CopyPixels(stride, buffer);
 
             // Texture and SRV are held for the session: the native pointer must stay valid while ImGui draws it.
@@ -74,11 +73,11 @@ internal static class VideoThumbnails
                                                 ArraySize = 1,
                                                 BindFlags = BindFlags.ShaderResource,
                                                 Usage = ResourceUsage.Immutable,
-                                                Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                                                Format = T3.Graphics.Format.R8G8B8A8_UNorm,
                                                 MipLevels = 1,
-                                                SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                                                SampleDescription = new T3.Graphics.SampleDescription(1, 0),
                                             },
-                                        new DataRectangle(buffer.DataPointer, stride));
+                                        [new DataRectangle(buffer.DataPointer, stride)]);
 
             var srv = SrvManager.GetSrvForTexture(texture);
             if (srv == null)

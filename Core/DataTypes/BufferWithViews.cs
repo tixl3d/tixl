@@ -4,9 +4,9 @@ namespace T3.Core.DataTypes;
 
 public sealed class BufferWithViews : IDisposable
 {
-    public SharpDX.Direct3D11.Buffer Buffer;
-    public SharpDX.Direct3D11.ShaderResourceView Srv;
-    public SharpDX.Direct3D11.UnorderedAccessView Uav;
+    public T3.Graphics.Compat.Buffer Buffer;
+    public T3.Graphics.Compat.ShaderResourceView Srv;
+    public T3.Graphics.Compat.UnorderedAccessView Uav;
 
         
     public void Dispose()

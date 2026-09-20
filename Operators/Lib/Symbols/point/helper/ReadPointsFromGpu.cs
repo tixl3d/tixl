@@ -1,4 +1,4 @@
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Resource;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
@@ -66,7 +66,7 @@ internal sealed class ReadPointsFromGpu : Instance<ReadPointsFromGpu>
                 try
                 {
                     if (_bufferWithViewsCpuAccess != null)
-                        Utilities.Dispose(ref _bufferWithViewsCpuAccess.Buffer);
+                        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _bufferWithViewsCpuAccess.Buffer);
 
                     _bufferWithViewsCpuAccess ??= new BufferWithViews();
 
@@ -143,7 +143,7 @@ internal sealed class ReadPointsFromGpu : Instance<ReadPointsFromGpu>
     }
 
 
-    private void OnAsyncReadComplete(StructuredBufferReadAccess.ReadRequestItem item, IntPtr dataPointer, SharpDX.DataStream stream)
+    private void OnAsyncReadComplete(StructuredBufferReadAccess.ReadRequestItem item, IntPtr dataPointer, T3.Graphics.Compat.DataStream stream)
     {
         using (stream)
         {

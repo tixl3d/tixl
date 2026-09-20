@@ -1,8 +1,7 @@
 ﻿#nullable enable
 using System.Globalization;
 using System.Text.Json;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Resource.Assets;
 using T3.Core.Utils;
 

@@ -40,11 +40,11 @@ public sealed class Texture3d : Instance<Texture3d>
             var tex = _texture3d;
             OutputTexture.Value!.Texture = tex;
                 
-            if ((BindFlags.Value & SharpDX.Direct3D11.BindFlags.ShaderResource) > 0)
+            if ((BindFlags.Value & T3.Graphics.Compat.BindFlags.ShaderResource) > 0)
                 tex.CreateShaderResourceView(ref OutputTexture.Value.Srv, "");
-            if ((BindFlags.Value & SharpDX.Direct3D11.BindFlags.RenderTarget) > 0)
+            if ((BindFlags.Value & T3.Graphics.Compat.BindFlags.RenderTarget) > 0)
                 tex.CreateRenderTargetView(ref OutputTexture.Value.Rtv, "");
-            if ((BindFlags.Value & SharpDX.Direct3D11.BindFlags.UnorderedAccess) > 0)
+            if ((BindFlags.Value & T3.Graphics.Compat.BindFlags.UnorderedAccess) > 0)
                 tex.CreateUnorderedAccessView(ref OutputTexture.Value.Uav, "");
                 
         }

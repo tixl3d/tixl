@@ -4,7 +4,7 @@ namespace Types.Gfx;
 public sealed class RenderTargetBlendDescription : Instance<RenderTargetBlendDescription>
 {
     [Output(Guid = "228E1DC2-944E-4235-BF2D-2EB3F895858C")]
-    public readonly Slot<SharpDX.Direct3D11.RenderTargetBlendDescription> Output = new();
+    public readonly Slot<T3.Graphics.Compat.RenderTargetBlendDescription> Output = new();
 
     public RenderTargetBlendDescription()
     {
@@ -14,7 +14,7 @@ public sealed class RenderTargetBlendDescription : Instance<RenderTargetBlendDes
 
     private void Update(EvaluationContext context)
     {
-        Output.Value = new SharpDX.Direct3D11.RenderTargetBlendDescription(BlendEnabled.GetValue(context),
+        Output.Value = new T3.Graphics.Compat.RenderTargetBlendDescription(BlendEnabled.GetValue(context),
                                                                            SourceBlend.GetValue(context),
                                                                            DestinationBlend.GetValue(context),
                                                                            BlendOperation.GetValue(context),

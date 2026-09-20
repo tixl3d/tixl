@@ -3,7 +3,7 @@
 public class Texture3dWithViews
 {
     public T3.Core.DataTypes.Texture3D Texture;
-    public SharpDX.Direct3D11.ShaderResourceView Srv;
-    public SharpDX.Direct3D11.UnorderedAccessView Uav;
-    public SharpDX.Direct3D11.RenderTargetView Rtv;
+    public T3.Graphics.Compat.ShaderResourceView Srv;
+    public T3.Graphics.Compat.UnorderedAccessView Uav;
+    public T3.Graphics.Compat.RenderTargetView Rtv;
 }

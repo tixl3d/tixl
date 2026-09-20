@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes.Vector;
 
 namespace T3.Core.Output.Rendering;

@@ -1,7 +1,8 @@
 #nullable enable
 using System.Diagnostics;
 using ImGuiNET;
-using SharpDX.DXGI;
+using T3.Graphics;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes;
 using T3.Core.Resource;
 using T3.Editor.Gui.Interaction;
@@ -39,13 +40,13 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
 
     protected override ScalableCanvas? Parent => null;
 
-    public Texture2D? LastTexture;
+    public T3.Core.DataTypes.Texture2D? LastTexture;
 
     /// <summary>Set by the window when the shown op was already evaluated this frame but had to render again for
     /// this window's resolution preset; the caption then carries a warning.</summary>
     public bool IsRenderedTwice;
         
-    public void DrawTexture(Texture2D? texture)
+    public void DrawTexture(T3.Core.DataTypes.Texture2D? texture)
     {
         CustomComponents.FillWithStripes(ImGui.GetWindowDrawList(), DrawUtils.GetContentRegionArea(), Scale.X);
         LastTexture = texture;
@@ -74,7 +75,7 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
         var sizeOnScreen = Current.TransformDirection(size);
 
         var srv = SrvManager.GetSrvForTexture(texture);
-        ImGui.Image((IntPtr)srv, sizeOnScreen);
+        ImGui.Image((IntPtr)srv.ImGuiTextureId, sizeOnScreen);
 
         if (ImGui.IsMouseHoveringRect(topLeftOnScreen, topLeftOnScreen + sizeOnScreen))
         {

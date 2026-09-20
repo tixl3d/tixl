@@ -1,5 +1,4 @@
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 
 namespace Lib.Utils;
 
@@ -14,7 +13,7 @@ internal sealed class GpuQuery : IDisposable
     public void Dispose()
     {
         _inBetweenQuery = false;
-        Utilities.Dispose(ref _query);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _query);
     }
 
     public void Begin(DeviceContext context)

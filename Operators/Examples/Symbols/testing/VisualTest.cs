@@ -1,12 +1,13 @@
 using System.Text.RegularExpressions;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using SharpDX.IO;
 using SharpDX.WIC;
 using T3.Core.Animation;
 using T3.Core.Settings;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
+
+using System.Numerics;
 
 namespace Examples.testing;
 
@@ -175,7 +176,7 @@ internal sealed class VisualTest : Instance<VisualTest>
 
     private void ConductTests(EvaluationContext context, List<string> testResult)
     {
-        SharpDX.Direct3D11.Texture2D diffColorImage = null;
+        T3.Graphics.Compat.Texture2D diffColorImage = null;
         for (; _testIndex < _stepCount; _testIndex++)
         {
             var referenceFilepath = GetReferenceFilepath(_testIndex);
@@ -228,7 +229,7 @@ internal sealed class VisualTest : Instance<VisualTest>
                 testResult.Add($"{testName} {timeLabel}: FAILED ({deviation:0.00} > {_threshold}) #{testId}");
             }
             
-            Utilities.Dispose(ref diffColorImage);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref diffColorImage);
         }
         _state = States.Completed;
         Playback.Current.IsRenderingToFile = false;
@@ -299,7 +300,7 @@ internal sealed class VisualTest : Instance<VisualTest>
         return compositionName;
     }
 
-    private static bool TryLoadTextureFromFile(SharpDX.Direct3D11.Device device, string filePath, out SharpDX.Direct3D11.Texture2D image)
+    private static bool TryLoadTextureFromFile(T3.Graphics.Compat.Device device, string filePath, out T3.Graphics.Compat.Texture2D image)
     {
         if (!File.Exists(filePath))
         {
@@ -322,7 +323,7 @@ internal sealed class VisualTest : Instance<VisualTest>
 
         // Copy pixels into a buffer
         var stride = width * 4;
-        var buffer = new DataStream(height * stride, true, true);
+        var buffer = new SharpDX.DataStream(height * stride, true, true);
         converter.CopyPixels(stride, buffer);
 
         // Create texture description
@@ -343,7 +344,7 @@ internal sealed class VisualTest : Instance<VisualTest>
         // Define initial data
         var dataBox = new DataBox(buffer.DataPointer, stride, 0);
         var dataBoxes = new[] { dataBox };
-        var texture = new SharpDX.Direct3D11.Texture2D(device, texDesc, dataBoxes);
+        var texture = new T3.Graphics.Compat.Texture2D(device, texDesc, dataBoxes);
 
         // Cleanup
         buffer.Dispose();
@@ -359,8 +360,8 @@ internal sealed class VisualTest : Instance<VisualTest>
     /// Sadly, we have to deal with BRGA vs RGBA because we convert the current image to brga on the GPU
     /// to speedup writing as PNG.  
     /// </remarks>
-    private float CompareImage(SharpDX.Direct3D11.Texture2D currentBgraWithCpuAccess,
-                               SharpDX.Direct3D11.Texture2D reference)
+    private float CompareImage(T3.Graphics.Compat.Texture2D currentBgraWithCpuAccess,
+                               T3.Graphics.Compat.Texture2D reference)
     {
         try
         {
@@ -393,17 +394,17 @@ internal sealed class VisualTest : Instance<VisualTest>
                                         CpuAccessFlags = CpuAccessFlags.Read,
                                         ArraySize = 1
                                     };
-            var referenceWithCpuAccess = new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, referenceDesc);
+            var referenceWithCpuAccess = new T3.Graphics.Compat.Texture2D(ResourceManager.Device, referenceDesc);
             immediateContext.CopyResource(reference, referenceWithCpuAccess);
             ResourceManager.Device.ImmediateContext.Flush();  // Ensure the copy is complete
             
 
             var currentDataBox =
-                immediateContext.MapSubresource(currentBgraWithCpuAccess, 0, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None, out var currentStream);
+                immediateContext.MapSubresource(currentBgraWithCpuAccess, 0, 0, MapMode.Read, T3.Graphics.Compat.MapFlags.None, out var currentStream);
             currentStream.Position = 0;
 
             var refDataBox =
-                immediateContext.MapSubresource(referenceWithCpuAccess, 0, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None, out var referenceStream);
+                immediateContext.MapSubresource(referenceWithCpuAccess, 0, 0, MapMode.Read, T3.Graphics.Compat.MapFlags.None, out var referenceStream);
             referenceStream.Position = 0;
 
 
@@ -412,12 +413,12 @@ internal sealed class VisualTest : Instance<VisualTest>
             {
                 for (int x = 0; x < currentBgraWithCpuAccess.Description.Width; ++x)
                 {
-                    var currentBgra = new Color4(currentStream.Read<Int32>());
-                    var referenceRgba = new Color4(referenceStream.Read<Int32>());
-                    deviation += Math.Abs(currentBgra.Alpha - referenceRgba.Alpha)
-                                 + Math.Abs(currentBgra.Blue - referenceRgba.Red)
-                                 + Math.Abs(currentBgra.Green - referenceRgba.Green)
-                                 + Math.Abs(currentBgra.Red - referenceRgba.Blue);
+                    var currentBgra = new Vector4(currentStream.Read<Int32>());
+                    var referenceRgba = new Vector4(referenceStream.Read<Int32>());
+                    deviation += Math.Abs(currentBgra.W - referenceRgba.W)
+                                 + Math.Abs(currentBgra.Z - referenceRgba.X)
+                                 + Math.Abs(currentBgra.Y - referenceRgba.Y)
+                                 + Math.Abs(currentBgra.X - referenceRgba.Z);
                 }
 
                 currentStream.Position += currentDataBox.RowPitch - currentBgraWithCpuAccess.Description.Width * 4;
@@ -427,10 +428,10 @@ internal sealed class VisualTest : Instance<VisualTest>
             deviation /= currentBgraWithCpuAccess.Description.Width * currentBgraWithCpuAccess.Description.Height;
 
             immediateContext.UnmapSubresource(currentBgraWithCpuAccess, 0);
-            Utilities.Dispose(ref currentStream);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref currentStream);
             immediateContext.UnmapSubresource(referenceWithCpuAccess, 0);
-            Utilities.Dispose(ref referenceStream);
-            Utilities.Dispose(ref referenceWithCpuAccess);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref referenceStream);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref referenceWithCpuAccess);
             return (float)deviation;
         }
         catch (Exception ex)
@@ -470,8 +471,8 @@ internal sealed class VisualTest : Instance<VisualTest>
         var dataBox = immediateContext.MapSubresource(requestCpuAccessTexture,
                                                       0,
                                                       0,
-                                                      SharpDX.Direct3D11.MapMode.Read,
-                                                      SharpDX.Direct3D11.MapFlags.None,
+                                                      T3.Graphics.Compat.MapMode.Read,
+                                                      T3.Graphics.Compat.MapFlags.None,
                                                       out var imageStream);
         using var dataStream = imageStream;
 
@@ -502,7 +503,7 @@ internal sealed class VisualTest : Instance<VisualTest>
 
         var rowStride = PixelFormat.GetStride(formatId, width);
         var outBufferSize = height * rowStride;
-        var outDataStream = new DataStream(outBufferSize, true, true);
+        var outDataStream = new SharpDX.DataStream(outBufferSize, true, true);
 
         try
         {
@@ -514,7 +515,7 @@ internal sealed class VisualTest : Instance<VisualTest>
             }
 
             // Copy the BGRA pixels from the buffer to the Wic Bitmap Frame encoder
-            bitmapFrameEncode.WritePixels(height, new DataRectangle(outDataStream.DataPointer, rowStride));
+            bitmapFrameEncode.WritePixels(height, new SharpDX.DataRectangle(outDataStream.DataPointer, rowStride));
 
             // Commit changes
             bitmapFrameEncode.Commit();

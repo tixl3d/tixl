@@ -5,8 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenCvSharp;
-using SharpDX;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Operator;
@@ -15,7 +14,6 @@ using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using Google.Protobuf;
 using Mediapipe;
-using SharpDX.Direct3D;
 #nullable enable
 
 using Mediapipe.Tasks.Vision.HandLandmarker;
@@ -226,7 +224,7 @@ public class GestureRecognition : Instance<GestureRecognition>
     private float _activeMinHandPresenceConfidence = -1f;
     private readonly object _workerLock = new object();
     
-    private readonly ConcurrentDictionary<(int width, int height), SharpDX.Direct3D11.Texture2D> _cachedStagingTextures = new();
+    private readonly ConcurrentDictionary<(int width, int height), T3.Graphics.Compat.Texture2D> _cachedStagingTextures = new();
     private readonly object _textureCacheLock = new object();
     
     private readonly ConcurrentBag<Mat> _matPool = new();
@@ -429,7 +427,7 @@ public class GestureRecognition : Instance<GestureRecognition>
     #endregion
     
     #region Memory Management
-    private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, SharpDX.DXGI.Format format)
+    private T3.Graphics.Compat.Texture2D GetOrCreateStagingTexture(int width, int height, T3.Graphics.Format format)
     {
         var key = (width, height);
         
@@ -446,10 +444,10 @@ public class GestureRecognition : Instance<GestureRecognition>
             }
             
             var device = ResourceManager.Device;
-            var newTexture = new SharpDX.Direct3D11.Texture2D(device, new Texture2DDescription
+            var newTexture = new T3.Graphics.Compat.Texture2D(device, new Texture2DDescription
             {
                 Width = width, Height = height, MipLevels = 1, ArraySize = 1,
-                Format = format, SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                Format = format, SampleDescription = new T3.Graphics.SampleDescription(1, 0),
                 Usage = ResourceUsage.Staging, BindFlags = BindFlags.None,
                 CpuAccessFlags = CpuAccessFlags.Read, OptionFlags = ResourceOptionFlags.None
             });
@@ -692,7 +690,7 @@ public class GestureRecognition : Instance<GestureRecognition>
                  bufferWithViews.Srv = new ShaderResourceView(ResourceManager.Device, bufferWithViews.Buffer, 
                      new ShaderResourceViewDescription
                      {
-                         Format = SharpDX.DXGI.Format.Unknown,
+                         Format = T3.Graphics.Format.Unknown,
                          Dimension = ShaderResourceViewDimension.Buffer,
                          Buffer = new ShaderResourceViewDescription.BufferResource
                          {
@@ -708,7 +706,7 @@ public class GestureRecognition : Instance<GestureRecognition>
                  bufferWithViews.Uav = new UnorderedAccessView(ResourceManager.Device, bufferWithViews.Buffer,
                      new UnorderedAccessViewDescription
                      {
-                         Format = SharpDX.DXGI.Format.Unknown,
+                         Format = T3.Graphics.Format.Unknown,
                          Dimension = UnorderedAccessViewDimension.Buffer,
                          Buffer = new UnorderedAccessViewDescription.BufferResource
                          {
@@ -759,13 +757,13 @@ public class GestureRecognition : Instance<GestureRecognition>
                 Height = mat.Height,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                Format = T3.Graphics.Format.B8G8R8A8_UNorm,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                 OptionFlags = ResourceOptionFlags.None
             };
-            _debugTexture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+            _debugTexture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
         }
 
         var context = ResourceManager.Device.ImmediateContext;
@@ -964,11 +962,11 @@ public class GestureRecognition : Instance<GestureRecognition>
                         textureHeight *= 2;
                 }
 
-                CreateOrUpdateTexture(ref _aiDataTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R32G32B32A32_Float);
+                CreateOrUpdateTexture(ref _aiDataTexture, textureWidth, textureHeight, T3.Graphics.Format.R32G32B32A32_Float);
 
-                CreateOrUpdateTexture(ref _aiDataHighPrecisionTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R16G16_Float);
+                CreateOrUpdateTexture(ref _aiDataHighPrecisionTexture, textureWidth, textureHeight, T3.Graphics.Format.R16G16_Float);
 
-                CreateOrUpdateTexture(ref _aiDataSegmentationTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R8_UNorm);
+                CreateOrUpdateTexture(ref _aiDataSegmentationTexture, textureWidth, textureHeight, T3.Graphics.Format.R8_UNorm);
 
                 FillAITextures(landmarks, gestureName, gestureConfidence, textureWidth, textureHeight);
             }
@@ -979,7 +977,7 @@ public class GestureRecognition : Instance<GestureRecognition>
         }
     }
 
-    private void CreateOrUpdateTexture(ref Texture2D? texture, int width, int height, SharpDX.DXGI.Format format)
+    private void CreateOrUpdateTexture(ref Texture2D? texture, int width, int height, T3.Graphics.Format format)
     {
         if (texture == null || texture.Description.Width != width || texture.Description.Height != height || texture.Description.Format != format)
         {
@@ -998,7 +996,7 @@ public class GestureRecognition : Instance<GestureRecognition>
                 OptionFlags = ResourceOptionFlags.None
             };
 
-            texture = new Texture2D(new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, desc));
+            texture = new Texture2D(new T3.Graphics.Compat.Texture2D(ResourceManager.Device, desc));
         }
     }
 
@@ -1300,7 +1298,7 @@ public class GestureRecognition : Instance<GestureRecognition>
         {
             if (dataBox.RowPitch == desc.Width * 4)
             {
-                Utilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
+                T3.Graphics.Compat.GraphicsUtilities.CopyMemory(mat.Data, dataBox.DataPointer, (int)mat.Total() * mat.ElemSize());
             }
             else
             {
@@ -1310,7 +1308,7 @@ public class GestureRecognition : Instance<GestureRecognition>
                     {
                         byte* src = (byte*)dataBox.DataPointer + y * dataBox.RowPitch;
                         byte* dst = (byte*)mat.Data + y * desc.Width * 4;
-                        Utilities.CopyMemory((IntPtr)dst, (IntPtr)src, desc.Width * 4);
+                        T3.Graphics.Compat.GraphicsUtilities.CopyMemory((IntPtr)dst, (IntPtr)src, desc.Width * 4);
                     }
                 }
             }

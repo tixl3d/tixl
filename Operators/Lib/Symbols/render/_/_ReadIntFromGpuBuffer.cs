@@ -1,4 +1,4 @@
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -140,7 +140,7 @@ internal sealed class _ReadIntFromGpuBuffer : Instance<_ReadIntFromGpuBuffer>,IS
             
         for (var i = 0; i < BufferCount; i++)
         {
-            Utilities.Dispose(ref _buffersWithCpuAccess[i]);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _buffersWithCpuAccess[i]);
         }
     }
         
