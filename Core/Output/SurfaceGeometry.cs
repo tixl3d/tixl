@@ -122,24 +122,34 @@ public static class SurfaceGeometry
     }
 
     /// <summary>
-    /// Adopts new bounds — expressed in the surface's *current* space — as the surface's rectangle. Every
-    /// mapping's quad is re-projected through its own recovered projection, so what the projector shows stays
-    /// put while the footprint changes. The origin does not move: the anchor's normalized position is re-derived
-    /// from where the origin now sits inside the new rectangle, and everything stored in surface space
-    /// (measuring lines, regions, the raster) keeps its coordinates.
+    /// Adopts new bounds — expressed in the surface's *current* space — as the surface's rectangle. The origin
+    /// does not move: the anchor's normalized position is re-derived from where the origin now sits inside the
+    /// new rectangle, and everything stored in surface space (measuring lines, regions, the raster) keeps its
+    /// coordinates.
     /// </summary>
-    public static void ApplyBounds(Surface surface, Vector2 min, Vector2 max)
+    /// <param name="movesMappings">True for a gesture that reshapes the rectangle *on the wall* — a crop takes
+    /// the projection with it, so each mapping's quad is re-projected through its own recovered projection and
+    /// what the projector shows stays put while the footprint changes. False for a *declaration* of how big the
+    /// surface really is, which must leave every projection exactly where it was aimed.</param>
+    public static void ApplyBounds(Surface surface, Vector2 min, Vector2 max, bool movesMappings = true)
     {
         Span<Vector2> corners = stackalloc Vector2[4];
         WriteRectCorners(min, max, corners, yUp: true);
-        foreach (var mapping in surface.OutputMappings)
+        if (movesMappings)
         {
-            // Read and write both in the canvas' normalized space, so no output (and no resolution) is needed.
-            if (!TryGetSurfaceToOutput(surface, mapping, Vector2.One, out var surfaceToOutput))
-                continue;
+            foreach (var mapping in surface.OutputMappings)
+            {
+                // A fill is the whole canvas whatever the surface measures — the display shows it, it is not aimed at it.
+                if (mapping.IsFilling)
+                    continue;
 
-            for (var i = 0; i < 4; i++)
-                mapping.Quad[i] = surfaceToOutput.TransformPoint(corners[i]);
+                // Read and write both in the canvas' normalized space, so no output (and no resolution) is needed.
+                if (!TryGetSurfaceToOutput(surface, mapping, Vector2.One, out var surfaceToOutput))
+                    continue;
+
+                for (var i = 0; i < 4; i++)
+                    mapping.Quad[i] = surfaceToOutput.TransformPoint(corners[i]);
+            }
         }
 
         var newSize = new Vector2(MathF.Max(max.X - min.X, MinSize), MathF.Max(max.Y - min.Y, MinSize));

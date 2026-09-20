@@ -32,7 +32,7 @@ public class SetupSerializationTests
 
         var mapping = Assert.Single(surface.OutputMappings);
         Assert.Equal(setup.Outputs[1].Id, mapping.OutputId);
-        Assert.Equal(Surface.OutputMapping.Modes.CornerPin, mapping.Mode);
+        Assert.Equal(MappingModes.CornerPin, mapping.Mode);
         Assert.Equal(new Vector2(0.11f, 0.08f), mapping.Quad[0]);
         Assert.Equal(new Vector2(0.112f, 0.755f), mapping.Quad[3]);
 

@@ -318,6 +318,7 @@ internal sealed partial class SetupOutputView
             return false;
         }
 
+        mapping.PromoteToCornerPin();
         for (var i = 0; i < 4; i++)
             mapping.Quad[i] = refined[i];
 

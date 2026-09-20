@@ -493,7 +493,9 @@ internal sealed partial class SetupOutputView
                              };
         var newMin = fixedPoint + (min - fixedPoint) * increment;
         var newMax = fixedPoint + (max - fixedPoint) * increment;
-        SurfaceGeometry.ApplyBounds(surface, newMin, newMax);
+        // Scaling the card declares how big the surface really is, exactly like typing into Size (m) — so it
+        // leaves every projection where it was aimed instead of dragging the pins along.
+        SurfaceGeometry.ApplyBounds(surface, newMin, newMax, movesMappings: false);
 
         foreach (var annotation in surface.Annotations)
         {

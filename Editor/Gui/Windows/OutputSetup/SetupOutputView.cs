@@ -580,6 +580,9 @@ internal sealed partial class SetupOutputView
                     _canvasSelection.Set(target);
             }
 
+            // Placed by hand from here on, however it got its corners.
+            mappingData.PromoteToCornerPin();
+
             // Map the edited view-space quad back to projector space — only while a corner drag is live.
             // At rest the round-trip is only near-identity in float, so writing it back every frame would
             // slowly drift the stored quad while merely viewing in a rectified mode.
@@ -623,6 +626,7 @@ internal sealed partial class SetupOutputView
                 // Rigid in view space; carried through R per corner, so in a rectified view the quad
                 // warps exactly as if each corner had been dragged by the same screen offset.
                 var moveDelta = _projection.ScreenToCanvas(ImGui.GetMousePos()) - _gesture.GrabPoint;
+                mappingData.PromoteToCornerPin();
                 for (var c = 0; c < 4; c++)
                 {
                     var moved = rectifiedToView.TransformPoint(preMoveQuad[c] * canvasSize) + moveDelta;
@@ -844,7 +848,10 @@ internal sealed partial class SetupOutputView
 
             var mapping = setup.FindSurface(target.EntityId)?.FindMapping(outputId);
             if (mapping != null && target.Index >= 0 && target.Index < mapping.Quad.Length)
+            {
+                mapping.PromoteToCornerPin();
                 mapping.Quad[target.Index] += delta;
+            }
         }
     }
 

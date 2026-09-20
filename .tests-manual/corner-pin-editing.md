@@ -34,7 +34,8 @@ Click `P1` in the OUTPUTS section.
 **Expected:**
 - The view area shows the output's frame — a dark rectangle with a thin border — fitted and
   centered in the view.
-- A header reads `P1  ·  1920×1200`.
+- A header reads `P1  ·  1920×1080` — a new output's canvas is 0 × 0, so it follows whatever is
+  plugged into it, and renders at the unbound fallback size until something is.
 - Because `Surface 1` is not mapped to this output yet, a `+ Surface 1` button sits next to
   the header.
 
@@ -44,23 +45,24 @@ Click `P1` in the OUTPUTS section.
 Click `+ Surface 1`.
 
 **Expected:**
-- A quad appears centered in the output frame, with a faint checker fill and the label
-  `Surface 1` in its middle.
+- A quad covering the whole output frame appears, with a faint checker fill and the label
+  `Surface 1` in its middle: a new mapping fills the canvas, whatever the surface measures.
 - Its four corners carry handles: the top-left is a small square, the other three are circles.
 - The `+ Surface 1` button disappears (the surface is now mapped).
-- The quad covers a real part of the canvas and is centred in it. It must not sit collapsed in
-  the canvas' top-left corner: mappings are stored as fractions of the canvas, and a view that
-  forgets to scale them into its pixels draws every surface as a dot at the origin.
+- The quad spans the canvas edge to edge. It must not sit collapsed in the canvas' top-left
+  corner: mappings are stored as fractions of the canvas, and a view that forgets to scale them
+  into its pixels draws every surface as a dot at the origin.
 
 ## Step: The quad follows the canvas resolution
 
 **Action:**
-With the surface mapped, open the output's parameters and change its canvas from 1920×1080 to
-3840×2160, then back.
+With the surface mapped, open the output's parameters and set its canvas to 3840×2160, then
+back to 0 × 0.
 
 **Expected:**
 - The quad stays exactly where it is, covering the same fraction of the canvas, and its label
-  and handles stay on it. Only the numbers under "Rendered" change.
+  and handles stay on it. Only the numbers under "Rendered" change; back at 0 × 0 the line under
+  the field reads "following unbound · 1920×1080" again.
 - The same holds in the **Straight** view of that surface: the rectified frame keeps the wall
   centred rather than sliding off or collapsing.
 

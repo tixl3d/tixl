@@ -321,6 +321,8 @@ internal static class SetupParameterView
             CommitFieldUndo(setup, "Change raster", gridCellState);
         }
 
+        DrawMappingModeRows(setup, surface);
+
         Span<float> anchor = [surface.Anchor.X, surface.Anchor.Y];
         var anchorState = DrawFloatsRow("Anchor (-1..1)", anchor,
                                         "Origin of the metre raster and of child regions: (0,0) is the centre, (0,-1) the bottom-centre, (±1,±1) the corners.");
@@ -329,6 +331,39 @@ internal static class SetupParameterView
             surface.Anchor = new Vector2(anchor[0], anchor[1]);
 
         CommitFieldUndo(setup, "Move anchor", anchorState);
+    }
+
+    /// <summary>
+    /// One row per output this surface is shown on: whether it takes the whole canvas or sits on corners you
+    /// place. A fill ignores every later resize of the surface, which is the point of it on a display; switching
+    /// to a corner pin hands over the quad it filled, so nothing moves until a corner is dragged.
+    /// </summary>
+    private static void DrawMappingModeRows(Setup setup, Surface surface)
+    {
+        for (var i = 0; i < surface.OutputMappings.Count; i++)
+        {
+            var mapping = surface.OutputMappings[i];
+            var output = setup.FindOutput(mapping.OutputId);
+            if (output == null)
+                continue;
+
+            var mode = mapping.Mode;
+            ImGui.PushID(mapping.OutputId.GetHashCode());
+            if (FormInputs.AddSegmentedButtonWithLabel(ref mode, $"On {output.Name}",
+                                                       "Fill takes the whole canvas and stays there however the surface is resized. "
+                                                       + "Corner pin is aimed: you drag its corners onto the wall, and reshaping the surface on the wall moves it along."))
+            {
+                SetupUndo.RunUndoable("Change mapping mode", setup, () =>
+                                                                    {
+                                                                        if (mode == MappingModes.Fill)
+                                                                            mapping.FillCanvas();
+                                                                        else
+                                                                            mapping.PromoteToCornerPin();
+                                                                    });
+            }
+
+            ImGui.PopID();
+        }
     }
 
     /// <summary>How a physical surface is turned in the stage: yaw, pitch and roll, for reading and fine-tuning a free surface.</summary>

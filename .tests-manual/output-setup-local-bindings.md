@@ -188,7 +188,25 @@ Hover the **?** left of the collapse chevron in the strip's header; then click i
 - After 3: the undo removes the created output; the plug reads as free again. (The binding
   itself is machine state and is not undone, so it simply points at nothing.)
 - After 4: no second output is created — "Surface 1" is mapped onto the output already bound
-  to that plug.
+  to that plug, covering its whole canvas (see the next step).
+
+## Step: A surface on a display fills its canvas
+
+**Action:**
+1. Look at the output bound to a local display in its Output view, with "Surface 1" mapped onto
+   it by the previous step.
+2. Select "Surface 1" and set its **Size (m)** to 3 × 1 in the parameter window.
+3. In the Output view, drag one corner handle of the surface a third of the way inward.
+4. Right-click the surface and choose **Fill Local / Display N** for that output; then Ctrl+Z.
+
+**Expected:**
+- After 1: the surface covers the canvas edge to edge, with no black border — a new mapping
+  fills, so nothing about the surface's physical size decides which pixels it gets.
+- After 2: the canvas is unchanged. The surface's footprint changes on the Board and in the
+  Straight view, but a display has nothing to aim.
+- After 3: the quad keystones. It is a corner pin from now on: resizing the surface again moves
+  it, exactly as on a projector.
+- After 4: it covers the whole canvas again, and Ctrl+Z puts the dragged corner back.
 
 ## Step: A stream plug's settings
 

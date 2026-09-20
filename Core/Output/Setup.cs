@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Logging;
 using T3.Serialization;
 
@@ -48,7 +49,16 @@ public sealed class Setup
         return new Setup
                    {
                        Name = name,
-                       Outputs = [new OutputDefinition { Name = "Default", Kind = OutputDefinition.Kinds.Default }],
+                       // A format, not a canvas anything is plugged into, so it carries a size rather than following one.
+                       Outputs =
+                       [
+                           new OutputDefinition
+                               {
+                                   Name = "Default",
+                                   Kind = OutputDefinition.Kinds.Default,
+                                   CanvasResolution = new Int2(1920, 1080),
+                               },
+                       ],
                    };
     }
 
