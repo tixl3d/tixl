@@ -232,7 +232,9 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 try { ImGui.EndFrame(); } catch { /* best-effort cleanup */ }
             }
 
-            // The UI is in the back buffer now and not yet presented — the one moment a whole-window capture is exact.
+            // The UI is in the back buffer now and not yet presented — the one moment a whole-window
+            // capture is exact. The kept copy outlives Present, which discards the back buffer.
+            ProgramWindows.CaptureUiFrame();
             ProgramWindows.ServePendingUiCapture();
         }
 
