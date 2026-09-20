@@ -407,6 +407,8 @@ The API is specified in [Plan_GraphicsFacade](Plan_GraphicsFacade.md) — review
 
 1. The `Graphics` project: the backend API, the shared value types, and `Graphics.Compat` with the facade
    API above. Designing both together keeps the facade from leaking D3D11 assumptions downwards.
+   *Started 2026-09-20: both layers are written and build on Linux, with the translation covered by tests
+   against a fake backend. See the facade plan's Progress section for what is still missing.*
 2. The `Graphics.D3D11` backend, with the facade forwarding through it.
 3. A codemod across ~150 files: `using` swaps, fully-qualified names, `NativePointer` →
    `ImGuiTextureId`, `DataStream` / `DataBox` replacements.

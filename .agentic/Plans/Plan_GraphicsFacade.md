@@ -1,6 +1,7 @@
 # Graphics facade: the API that replaces SharpDX
 
-**Status:** Draft — 2026-09-20. Nothing implemented.
+**Status:** In progress — 2026-09-20. The backend API and the compatibility types are written and build on
+Linux; no backend implements them yet. See [Progress](#progress-2026-09-20).
 **Belongs to:** [Plan_CrossPlatformV5](Plan_CrossPlatformV5.md), Phase 3. Read its Key decisions first.
 
 This specifies what operators and the editor call instead of SharpDX, and how it sits on top of the backend.
@@ -363,6 +364,45 @@ multi-threaded command recording, or GPU-driven draws. None of these are v5.0 go
    buffer and pool on Vulkan), so the "application is frozen" overlay survives the port.
 8. **`ICalibrationOverlay.Draw`** takes the facade's `DeviceContext` — a mechanical rename, no new
    abstraction.
+
+9. **Backend type names avoid the D3D11 ones.** The backend API calls them `Topology`, `PolygonMode`,
+   `FaceCulling`, `RasterState`, `DepthState`, `BlendTargetState(s)` and `VertexBufferView`. Reason: `Format`
+   and `SampleDescription` live in the shared layer, so almost every migrated file imports both namespaces,
+   and identical names in both would make every one of those files ambiguous — the opposite of a mechanical
+   codemod.
+10. **One descriptor set per shader stage**, numbered by `ShaderStage`. D3D11 gives each stage its own slot
+    space, so a vertex shader's `t0` and a pixel shader's `t0` are different resources and a single set would
+    collide. Code written directly against the backend API can put everything in set 0.
+11. **Bindings are sent on every draw, even when a stage has none**, so a stage that bound something for the
+    previous draw is cleared rather than left with live descriptors.
+12. **The render pass opens on the first draw, not when the targets are set.** Dynamic rendering has no
+    framebuffer object, and every clear, copy and dispatch has to interrupt the pass; opening it lazily keeps
+    D3D11's "set targets, then clear, then draw" order working unchanged.
+13. **Map splits by intent:** `WriteDiscard` takes memory from the frame's upload ring on the command list and
+    never waits; `Read` goes to the backend and blocks, as D3D11 does — the operators that copy, flush and map
+    in the same frame depend on the stall.
+14. **A buffer view is not a backend object.** Buffer SRVs and UAVs bind the buffer with a byte range, which
+    is all Vulkan has; only texture views become `GpuTextureView`.
+
+## Progress (2026-09-20)
+
+Written, building on Linux, uncommitted:
+
+- `Graphics/` — the backend API: `IGraphicsBackend` and `ICommandList`, the `Gpu*` resource handles with
+  deferred destruction and `ImGuiTextureId`, the resource and pipeline descriptions, `MappedMemory`,
+  `MemoryReport`, and `GraphicsLog` (Core points it at its logger; the graphics layer sits below Core).
+- `Graphics.Compat/` — the D3D11-shaped layer: the description structs, `Translate` (bind flags and usage to
+  explicit usage and memory kind, D3D11's packed `Filter` bits to min/mag/mip filters, the blend, raster and
+  depth state), `ViewDescriptions` (the per-dimension union to a flat view), the resources, views, state
+  objects and shader types, `Device`, and `DeviceContext` with its stages, the shadow state stack and the
+  pipeline resolve.
+- `Core.Tests/` — `FakeGraphicsBackend` records what it is told, so the translation is testable without a GPU;
+  `GraphicsCompatTests` covers the register shifts, the set-per-stage split, disposed views binding as
+  nothing, push/pop across operators, an unbalanced pop, the sampler and usage translation, the pipeline built
+  from the bound targets, and slot clamping. 144 tests pass.
+
+Not written yet: the swapchain, the shader compiler's interface, `DataStream`'s replacement, moving TiXL's
+wrapper types into `Graphics/`, and both backends.
 
 ## Still open
 

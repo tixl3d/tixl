@@ -16,9 +16,13 @@ public class GraphicsEnumParityTests
         var mismatches = new List<string>();
         var checkedEnums = 0;
 
-        var facadeAssemblies = new[] { typeof(T3.Graphics.Format).Assembly, typeof(T3.Graphics.Compat.BindFlags).Assembly };
-        foreach (var facadeEnum in facadeAssemblies.SelectMany(assembly => assembly.GetTypes())
-                                                   .Where(type => type.IsEnum && type.IsPublic))
+        // Every enum of the compatibility layer is a copy of a SharpDX one; of the shared layer only Format
+        // is, the rest being the backend's own vocabulary.
+        var generatedEnums = typeof(T3.Graphics.Compat.BindFlags).Assembly.GetTypes()
+                                                                 .Where(type => type.IsEnum && type.IsPublic && !_compatOwnEnums.Contains(type.Name))
+                                                                 .Append(typeof(T3.Graphics.Format));
+
+        foreach (var facadeEnum in generatedEnums)
         {
             var original = FindSharpDxEnum(facadeEnum.Name);
             if (original == null)
@@ -63,6 +67,9 @@ public class GraphicsEnumParityTests
                                                              .FirstOrDefault(type => type.IsEnum && type.IsPublic && type.Name == name))
                                  .FirstOrDefault(type => type != null);
     }
+
+    /// <summary>Enums the compatibility layer adds of its own; everything else must be a SharpDX copy.</summary>
+    private static readonly HashSet<string> _compatOwnEnums = ["StateGroups"];
 
     private static readonly Assembly[] _sharpDxAssemblies =
         [
