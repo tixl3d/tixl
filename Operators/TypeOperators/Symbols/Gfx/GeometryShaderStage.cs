@@ -22,9 +22,8 @@ public sealed class GeometryShaderStage : Instance<GeometryShaderStage>
         ShaderResources.GetValues(ref _shaderResourceViews, context);
         SamplerStates.GetValue(context);
 
-        _prevConstantBuffers = gsStage.GetConstantBuffers(0, _constantBuffers.Length);
-        _prevShaderResourceViews = gsStage.GetShaderResources(0, _shaderResourceViews.Length);
-        _prevGeometryShader = gsStage.Get();
+        // Saved explicitly; the enclosing operator pops it.
+        deviceContext.PushState(StateGroups.GeometryShader);
 
         var vs = GeometryShader.GetValue(context);
         if (vs == null)
@@ -37,23 +36,12 @@ public sealed class GeometryShaderStage : Instance<GeometryShaderStage>
 
     private void Restore(EvaluationContext context)
     {
-        var deviceContext = ResourceManager.Device.ImmediateContext;
-        var vsStage = deviceContext.GeometryShader;
-        vsStage.Set(_prevGeometryShader);
-        
-        if (_prevConstantBuffers != null)
-            vsStage.SetConstantBuffers(0, _prevConstantBuffers.Length, _prevConstantBuffers);
-        
-        if (_prevShaderResourceViews != null)
-            vsStage.SetShaderResources(0, _prevShaderResourceViews.Length, _prevShaderResourceViews);
+        ResourceManager.Device.ImmediateContext.PopState();
     }
 
     private Buffer[] _constantBuffers = new Buffer[0];
     private ShaderResourceView[] _shaderResourceViews = new ShaderResourceView[0];
 
-    private SharpDX.Direct3D11.GeometryShader? _prevGeometryShader;
-    private Buffer[]? _prevConstantBuffers;
-    private ShaderResourceView[]? _prevShaderResourceViews;
 
     [Input(Guid = "2A217F9D-2F9F-418A-8568-F767905384D5")]
     public readonly InputSlot<T3.Core.DataTypes.GeometryShader> GeometryShader = new();
@@ -65,5 +53,5 @@ public sealed class GeometryShaderStage : Instance<GeometryShaderStage>
     public readonly MultiInputSlot<ShaderResourceView> ShaderResources = new();
 
     [Input(Guid = "7173630b-d7fd-4aa1-9398-d7e028e5df03")]
-    public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
+    public readonly MultiInputSlot<T3.Graphics.Compat.SamplerState> SamplerStates = new();
 }

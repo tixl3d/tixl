@@ -1,9 +1,8 @@
 #nullable enable
 using System.Runtime.InteropServices;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using T3.Graphics;
+using System.Numerics;
 using T3.Core.DataTypes;
 using T3.Core.Output;
 using T3.Core.Rendering;
@@ -91,18 +90,10 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
         var deviceContext = device.ImmediateContext;
 
         // Everything touched is put back afterwards: this op renders on the side, inside whatever draw the graph is in.
-        var prevTargets = deviceContext.OutputMerger.GetRenderTargets(1, out var prevDepth);
-        var prevViewports = deviceContext.Rasterizer.GetViewports<RawViewportF>();
-        var prevTopology = deviceContext.InputAssembler.PrimitiveTopology;
-        var prevRasterizer = deviceContext.Rasterizer.State;
-        var prevBlend = deviceContext.OutputMerger.BlendState;
-        var prevDepthState = deviceContext.OutputMerger.DepthStencilState;
-        var prevVs = deviceContext.VertexShader.Get();
-        var prevPs = deviceContext.PixelShader.Get();
-        var prevGs = deviceContext.GeometryShader.Get();
+        deviceContext.PushState(StateGroups.All);
 
         deviceContext.OutputMerger.SetTargets((DepthStencilView?)null, _targetView);
-        deviceContext.ClearRenderTargetView(_targetView, new SharpDX.Color4(0, 0, 0, 0));
+        deviceContext.ClearRenderTargetView(_targetView, new Vector4(0, 0, 0, 0));
         deviceContext.Rasterizer.SetViewport(0, 0, resolution.Width, resolution.Height);
         // On the canvas a face's winding says nothing: a turned or mirrored patch flips it, and so does the floor.
         _cullNoneState ??= new RasterizerState(device, new RasterizerStateDescription
@@ -140,24 +131,7 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
         deviceContext.VertexShader.SetShaderResources(0, 2, _resources);
         deviceContext.PixelShader.SetShaderResources(0, 4, _resources);
 
-        deviceContext.VertexShader.Set(prevVs);
-        deviceContext.PixelShader.Set(prevPs);
-        deviceContext.GeometryShader.Set(prevGs);
-        deviceContext.InputAssembler.PrimitiveTopology = prevTopology;
-        deviceContext.Rasterizer.State = prevRasterizer;
-        deviceContext.OutputMerger.BlendState = prevBlend;
-        deviceContext.OutputMerger.DepthStencilState = prevDepthState;
-        deviceContext.OutputMerger.SetRenderTargets(prevDepth, prevTargets);
-        if (prevViewports.Length > 0)
-            deviceContext.Rasterizer.SetViewports(prevViewports, prevViewports.Length);
-
-        // Getters hand out references that must be released; the stage objects themselves live on.
-        Utilities.Dispose(ref prevVs);
-        Utilities.Dispose(ref prevPs);
-        Utilities.Dispose(ref prevGs);
-        Utilities.Dispose(ref prevDepth);
-        for (var i = 0; i < prevTargets.Length; i++)
-            prevTargets[i]?.Dispose();
+        deviceContext.PopState();
 
         Output.Value = _target;
     }
@@ -168,8 +142,8 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
         if (_target != null && !_target.IsDisposed && _target.Description.Width == size.Width && _target.Description.Height == size.Height)
             return;
 
-        Utilities.Dispose(ref _targetView);
-        Utilities.Dispose(ref _target);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _targetView);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _target);
         _target = Texture2D.CreateTexture2D(new Texture2DDescription
                                                {
                                                    ArraySize = 1,
@@ -191,10 +165,10 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
         if (!isDisposing)
             return;
 
-        Utilities.Dispose(ref _targetView);
-        Utilities.Dispose(ref _target);
-        Utilities.Dispose(ref _parameterBuffer);
-        Utilities.Dispose(ref _cullNoneState);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _targetView);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _target);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _parameterBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _cullNoneState);
     }
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() =>
@@ -219,14 +193,14 @@ internal sealed class DrawStageCanvas : Instance<DrawStageCanvas>, IStatusProvid
     private readonly Resource<PixelShader> _pixelShader;
     private Texture2D? _target;
     private RenderTargetView? _targetView;
-    private SharpDX.Direct3D11.Buffer? _parameterBuffer;
+    private T3.Graphics.Compat.Buffer? _parameterBuffer;
     private RasterizerState? _cullNoneState;
     private string? _lastError;
 
     // Scratch arrays for the stage calls, reused every frame.
     private readonly ShaderResourceView?[] _resources = new ShaderResourceView?[4];
     private readonly SamplerState?[] _samplers = new SamplerState?[1];
-    private readonly SharpDX.Direct3D11.Buffer?[] _constantBuffers = new SharpDX.Direct3D11.Buffer?[1];
+    private readonly T3.Graphics.Compat.Buffer?[] _constantBuffers = new T3.Graphics.Compat.Buffer?[1];
 
     [Input(Guid = "ec895305-671f-4f1b-ada1-7ef91afc6212")]
     public readonly InputSlot<MeshBuffers> Mesh = new();

@@ -1,15 +1,15 @@
 ﻿#nullable enable
 using System.Diagnostics;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using T3.Graphics;
+using System.Numerics;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Editor.Gui.Windows;
-using Device = SharpDX.Direct3D11.Device;
+using Device = T3.Graphics.Compat.Device;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -54,13 +54,12 @@ internal sealed class CommandOutputUi : OutputUi<Command>
         var size = context.RequestedResolution;
         UpdateTextures(device, size, Format.R16G16B16A16_Float);
         var deviceContext = device.ImmediateContext;
-        var prevViewports = deviceContext.Rasterizer.GetViewports<RawViewportF>();
-
-        RenderTargetView?[]? prevTargetViews = deviceContext.OutputMerger.GetRenderTargets(2);
-        deviceContext.Rasterizer.SetViewport(new SharpDX.Viewport(0, 0, size.Width, size.Height, 0.0f, 1.0f));
+        // Saved in one go and popped once the output is drawn.
+        deviceContext.PushState(StateGroups.Rasterizer | StateGroups.OutputMerger);
+        deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, size.Width, size.Height, 0.0f, 1.0f));
         deviceContext.OutputMerger.SetTargets(_msaaDepthBufferDsv, _msaaColorBufferRtv);
 
-        var colorRgba = new RawColor4(context.BackgroundColor.X,
+        var colorRgba = new Vector4(context.BackgroundColor.X,
                                       context.BackgroundColor.Y,
                                       context.BackgroundColor.Z,
                                       context.BackgroundColor.W);
@@ -98,24 +97,7 @@ internal sealed class CommandOutputUi : OutputUi<Command>
         }
 
         // Restore previous setup
-        deviceContext.Rasterizer.SetViewports(prevViewports);
-        deviceContext.OutputMerger.SetTargets(prevTargetViews);
-
-        if (prevTargetViews == null)
-        {
-            Log.Warning("Can't dispose obsolete RenderTargetView after draw. This indicates corrupted a render context.");
-        }
-        else
-        {
-            // Clean up ref counts for RTVs
-            foreach (var t in prevTargetViews)
-            {
-                if (t == null || t.IsDisposed)
-                    continue;
-
-                t.Dispose();
-            }
-        }
+        deviceContext.PopState();
     }
 
     private bool EnsureGridOutputsExist()
@@ -180,13 +162,13 @@ internal sealed class CommandOutputUi : OutputUi<Command>
                     && currentDesc.SampleDescription.Count == MsaaSampleCount)
                     return;
 
-                Utilities.Dispose(ref _msaaColorBufferRtv);
-                Utilities.Dispose(ref _msaaColorBuffer);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _msaaColorBufferRtv);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _msaaColorBuffer);
             }
 
-            Utilities.Dispose(ref _resolvedColorBufferSrv);
-            Utilities.Dispose(ref _resolvedColorBufferRtv);
-            Utilities.Dispose(ref _resolvedColorBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBufferSrv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBufferRtv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBuffer);
 
             var msaaDesc = _defaultColorDescription with
                                {
@@ -216,8 +198,8 @@ internal sealed class CommandOutputUi : OutputUi<Command>
             _resolvedColorBufferSrv = new ShaderResourceView(device, _resolvedColorBuffer);
             _resolvedColorBufferRtv = new RenderTargetView(device, _resolvedColorBuffer);
 
-            Utilities.Dispose(ref _msaaDepthBufferDsv);
-            Utilities.Dispose(ref _msaaDepthBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _msaaDepthBufferDsv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _msaaDepthBuffer);
 
             var depthDesc = _defaultDepthDescription with
                                 {

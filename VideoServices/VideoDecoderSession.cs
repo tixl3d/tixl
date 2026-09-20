@@ -295,8 +295,7 @@ public sealed class VideoDecoderSession : IDisposable
         if (_multithreadProtected)
             return;
 
-        using var mt = ResourceManager.Device.QueryInterface<SharpDX.Direct3D11.Multithread>();
-        mt.SetMultithreadProtected(true);
+        ResourceManager.Device.SetMultithreadProtected(true);
         _multithreadProtected = true;
     }
 

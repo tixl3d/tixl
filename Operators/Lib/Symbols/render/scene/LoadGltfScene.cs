@@ -1,5 +1,5 @@
 #nullable enable
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using SharpDX.WIC;
 using SharpGLTF.Animations;
 using SharpGLTF.Schema2;
@@ -806,10 +806,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         // TODO: create and test merge compute shader
 
         // Keep previous setup
-        var prevShader = csStage.Get();
-        var prevUavs = csStage.GetUnorderedAccessViews(0, 1);
-        var prevSrvs = csStage.GetShaderResources(0, 1);
-        var prevSamplers = csStage.GetSamplers(0, 1);
+        deviceContext.PushState(StateGroups.ComputeShader);
 
         // Set Shader
         if (_combineChannelsComputeShaderResource != null)
@@ -827,7 +824,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         var resultTextureDescription = new Texture2DDescription
                                            {
                                                BindFlags = BindFlags.UnorderedAccess | BindFlags.RenderTarget | BindFlags.ShaderResource,
-                                               Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                                               Format = T3.Graphics.Format.R8G8B8A8_UNorm,
                                                Width = width,
                                                Height = height,
                                                MipLevels = 1,
@@ -852,10 +849,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         ResourceManager.Device.ImmediateContext.GenerateMips(resultSrv);
 
         // Restore prev setup
-        csStage.SetUnorderedAccessView(0, prevUavs[0]);
-        csStage.SetShaderResource(0, prevSrvs[0]);
-        csStage.SetSamplers(0, prevSamplers);
-        csStage.Set(prevShader);
+        deviceContext.PopState();
     }
 
     private static Resource<T3.Core.DataTypes.ComputeShader>? _combineChannelsComputeShaderResource;

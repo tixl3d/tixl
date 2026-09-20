@@ -4,7 +4,7 @@ namespace Lib.render._dx11.api;
 internal sealed class Viewport : Instance<Viewport>
 {
     [Output(Guid = "C543AF89-018E-4540-9F65-32CF6688CD42")]
-    public readonly Slot<RawViewportF> Output = new();
+    public readonly Slot<T3.Graphics.Viewport> Output = new();
 
     public Viewport()
     {
@@ -13,7 +13,7 @@ internal sealed class Viewport : Instance<Viewport>
 
     private void Update(EvaluationContext context)
     {
-        Output.Value = new RawViewportF
+        Output.Value = new T3.Graphics.Viewport
                            {
                                X = X.GetValue(context),
                                Y = Y.GetValue(context),

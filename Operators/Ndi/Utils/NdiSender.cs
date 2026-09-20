@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using NewTek;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.Output;
 using T3.Core.Output.Streaming;
 using T3.Core.Resource.Assets;
@@ -135,7 +135,7 @@ internal sealed class NdiSender : IOutputStreamSender
             return true;
 
         var sendSlot = _queuedSlots.Dequeue();
-        var dataBox = context.MapSubresource(_stagingTextures[sendSlot], 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None, out _);
+        var dataBox = context.MapSubresource(_stagingTextures[sendSlot], 0, MapMode.Read, T3.Graphics.Compat.MapFlags.None, out _);
 
         var videoFrame = new NDIlib.video_frame_v2_t
                              {
@@ -262,13 +262,10 @@ internal sealed class NdiSender : IOutputStreamSender
         var computeStage = context.ComputeShader;
 
         // Everything touched is put back: this runs inside whatever the host is rendering.
-        var previousShader = computeStage.Get();
-        var previousUavs = computeStage.GetUnorderedAccessViews(0, 1);
-        var previousSrvs = computeStage.GetShaderResources(0, 1);
+        context.PushState(StateGroups.ComputeShader | StateGroups.OutputMerger);
 
         // The frame is often still bound as a render target (the output compositor leaves its target bound), and
         // D3D11 silently drops a view onto a resource that is bound for writing — the shader would read black.
-        var previousTargets = context.OutputMerger.GetRenderTargets(MaxRenderTargets, out var previousDepth);
         context.OutputMerger.SetRenderTargets((DepthStencilView?)null, (RenderTargetView?)null);
 
         computeStage.Set(shader);
@@ -277,18 +274,7 @@ internal sealed class NdiSender : IOutputStreamSender
         context.Dispatch((_packedWidth + 15) / 16, (_height + 15) / 16, 1);
 
         // Unbound before anything else touches the packed texture, which is read next as a copy source.
-        computeStage.SetUnorderedAccessView(0, previousUavs[0]);
-        computeStage.SetShaderResource(0, previousSrvs[0]);
-        computeStage.Set(previousShader);
-        context.OutputMerger.SetRenderTargets(previousDepth, previousTargets);
-
-        // Getters hand out references that must be released.
-        previousShader?.Dispose();
-        previousUavs[0]?.Dispose();
-        previousSrvs[0]?.Dispose();
-        previousDepth?.Dispose();
-        foreach (var target in previousTargets)
-            target?.Dispose();
+        context.PopState();
 
         return true;
     }
@@ -335,8 +321,8 @@ internal sealed class NdiSender : IOutputStreamSender
             stagingTexture.Dispose();
 
         _stagingTextures.Clear();
-        Utilities.Dispose(ref _packedUav);
-        Utilities.Dispose(ref _packedTexture);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _packedUav);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _packedTexture);
     }
 
     private static NDIlib.FourCC_type_e FourCcFor(Format format, bool packsToUyvy)

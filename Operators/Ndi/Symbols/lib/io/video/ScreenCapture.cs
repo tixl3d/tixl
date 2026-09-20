@@ -1,5 +1,6 @@
 #nullable enable
-using SharpDX.DXGI;
+using T3.Graphics;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
 
 namespace Lib.io.video;
@@ -23,57 +24,64 @@ public sealed class ScreenCapture : Instance<ScreenCapture>
 
         if (_currentScreenIndex != screenIndex)
         {
-            Utilities.Dispose(ref _dup);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _dup);
             _currentScreenIndex = screenIndex;
         }
 
         if (_dup == null)
         {
-            using var dxgiDevice = device.QueryInterface<SharpDX.DXGI.Device>();
+            using var nativeDevice = new SharpDX.Direct3D11.Device(device.NativePointer);
+            System.Runtime.InteropServices.Marshal.AddRef(device.NativePointer);
+            using var dxgiDevice = nativeDevice.QueryInterface<SharpDX.DXGI.Device>();
             
             var dxgiAdapter = dxgiDevice.GetParent<SharpDX.DXGI.Adapter>();
 
             var output = dxgiAdapter.GetOutput(Utilities.InfiniteModIndexer(screenIndex, dxgiAdapter.GetOutputCount()));
 
-            using var o1 = output.QueryInterface<Output1>();
-            _dup = o1.DuplicateOutput(device);
+            using var o1 = output.QueryInterface<SharpDX.DXGI.Output1>();
+            _dup = o1.DuplicateOutput(nativeDevice);
         }
 
         var capResult = _dup.TryAcquireNextFrame(timeOut, out _, out var newScreenResource);
 
         if (capResult.Success)
         {
-            using (var newTexture = newScreenResource.QueryInterface<SharpDX.Direct3D11.Texture2D>())
+            using (var nativeTexture = newScreenResource.QueryInterface<SharpDX.Direct3D11.Texture2D>())
             {
-                if (_currentScreen != null)
+                // The duplicated frame is a D3D11 texture DXGI owns; copy it into one of ours.
+                var captured = nativeTexture.Description;
+
+                if (_currentScreen != null
+                    && (_currentScreen.Description.Width != captured.Width
+                        || _currentScreen.Description.Height != captured.Height
+                        || (int)_currentScreen.Description.Format != (int)captured.Format))
                 {
-                    if (_currentScreen.Description.Width != newTexture.Description.Width
-                        || _currentScreen.Description.Height != newTexture.Description.Height
-                        || _currentScreen.Description.Format != newTexture.Description.Format)
-                    {
-                        Utilities.Dispose(ref _currentScreen);
-                    }
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _currentScreen);
                 }
 
-                if (_currentScreen == null)
-                {
-                    var desc = newTexture.Description;
-                    desc.OptionFlags = SharpDX.Direct3D11.ResourceOptionFlags.None;
-                    desc.BindFlags = SharpDX.Direct3D11.BindFlags.ShaderResource;
-                    _currentScreen = Texture2D.CreateTexture2D(desc);
-                    //using (var newTex = new SharpDX.Direct3D11.Texture2D((SharpDX.Direct3D11.Device)device, desc))
-                    //{
-                    //    currentScreen = new Texture2dReadView(newTex, device.ResourceFactory.ResourceTracker);
-                    //}
-                }
+                _currentScreen ??= Texture2D.CreateTexture2D(new T3.Graphics.Compat.Texture2DDescription
+                                                                 {
+                                                                     Width = captured.Width,
+                                                                     Height = captured.Height,
+                                                                     MipLevels = captured.MipLevels,
+                                                                     ArraySize = captured.ArraySize,
+                                                                     Format = (T3.Graphics.Format)captured.Format,
+                                                                     SampleDescription = new SampleDescription(captured.SampleDescription.Count,
+                                                                                                               captured.SampleDescription.Quality),
+                                                                     BindFlags = T3.Graphics.Compat.BindFlags.ShaderResource,
+                                                                     Usage = T3.Graphics.Compat.ResourceUsage.Default,
+                                                                 });
 
-                device.ImmediateContext.CopyResource(newTexture, _currentScreen);
+                var adopted = device.AdoptTexture(nativeTexture.NativePointer, _currentScreen.Description);
+
+                if (adopted != null)
+                    device.ImmediateContext.CopyResource(adopted, _currentScreen);
             }
 
             _dup.ReleaseFrame();
         }
 
-        Utilities.Dispose(ref newScreenResource);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref newScreenResource);
 
         TextureOutput.Value = _currentScreen;
     }
@@ -83,11 +91,11 @@ public sealed class ScreenCapture : Instance<ScreenCapture>
         if (!isDisposing)
             return;
 
-        Utilities.Dispose(ref _currentScreen);
-        Utilities.Dispose(ref _dup);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _currentScreen);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _dup);
     }
 
-    private OutputDuplication? _dup;
+    private SharpDX.DXGI.OutputDuplication? _dup;
     private int _currentScreenIndex = -1;
     private Texture2D? _currentScreen;
 

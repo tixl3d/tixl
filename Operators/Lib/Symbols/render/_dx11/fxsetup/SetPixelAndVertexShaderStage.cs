@@ -24,15 +24,10 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
         ShaderResources.GetValues(ref _shaderResourceViews, context);
         SamplerStates.GetValues(ref _samplerStates, context);
 
-        // TODO: SharpDX 4.2.0 doesn't publicly expose the no-allocation `GetX(int, int, T[])` overloads
-        // that are documented in its XML doc — the calls below allocate three small arrays per frame.
-        // ~half of this op's per-call allocation budget. Worth revisiting (P/Invoke or SharpDX upgrade).
-        _prevConstantBuffers = vsStage.GetConstantBuffers(0, _constantBuffers.Length);
-        _prevShaderResourceViews = vsStage.GetShaderResources(0, _shaderResourceViews.Length);
-        _prevSamplerStates = vsStage.GetSamplers(0, _samplerStates.Length);
-
-        _prevVertexShader = vsStage.Get();
-        _prevPixelShader = psStage.Get();
+        // Both stages are saved, and the pop puts each back where it was. The readback this replaces took
+        // the previous state from the vertex stage alone and applied it to both, left the appended resource
+        // views bound, and allocated three arrays a frame.
+        deviceContext.PushState(StateGroups.VertexShader | StateGroups.PixelShader);
 
         // First update Shaders -> GenerateShaderCode -> ShaderGraphNodes ...
         var vs = VertexShader.GetValue(context);
@@ -91,17 +86,7 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
 
     private void Restore(EvaluationContext context)
     {
-        var deviceContext = ResourceManager.Device.ImmediateContext;
-        var vsStage = deviceContext.VertexShader;
-        vsStage.Set(_prevVertexShader);
-        vsStage.SetConstantBuffers(0, _prevConstantBuffers.Length, _prevConstantBuffers);
-        vsStage.SetShaderResources(0, _prevShaderResourceViews.Length, _prevShaderResourceViews);
-
-        var psStage = deviceContext.PixelShader;
-        psStage.Set(_prevPixelShader);
-        psStage.SetConstantBuffers(0, _prevConstantBuffers.Length, _prevConstantBuffers);
-        psStage.SetShaderResources(0, _prevShaderResourceViews.Length, _prevShaderResourceViews);
-        psStage.SetSamplers(0, _prevSamplerStates.Length, _prevSamplerStates);
+        ResourceManager.Device.ImmediateContext.PopState();
     }
 
     private Buffer[] _constantBuffers = [];
@@ -109,11 +94,6 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
     private ShaderResourceView[] _additionalSrvs = [];
     private SamplerState[] _samplerStates = [];
 
-    private SharpDX.Direct3D11.PixelShader _prevPixelShader;
-    private SharpDX.Direct3D11.VertexShader _prevVertexShader;
-    private SamplerState[] _prevSamplerStates = [];
-    private Buffer[] _prevConstantBuffers;
-    private ShaderResourceView[] _prevShaderResourceViews;
 
     [Input(Guid = "7a9ae929-7001-42ef-b7f2-f2e03bbb7206")]
     public readonly InputSlot<T3.Core.DataTypes.VertexShader> VertexShader = new();

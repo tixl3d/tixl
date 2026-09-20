@@ -28,9 +28,8 @@ public sealed class VertexShaderStage : Instance<VertexShaderStage>
         ShaderResources.GetValues(ref _shaderResourceViews, context);
         SamplerStates.GetValues(ref _samplerStates, context);
 
-        _prevConstantBuffers = vsStage.GetConstantBuffers(0, _constantBuffers.Length);
-        _prevShaderResourceViews = vsStage.GetShaderResources(0, _shaderResourceViews.Length);
-        _prevVertexShader = vsStage.Get();
+        // Saved explicitly; the enclosing operator pops it.
+        deviceContext.PushState(StateGroups.VertexShader);
 
         var vs = VertexShader.GetValue(context);
         if (vs == null)
@@ -43,23 +42,13 @@ public sealed class VertexShaderStage : Instance<VertexShaderStage>
 
     private void Restore(EvaluationContext context)
     {
-        var deviceContext = ResourceManager.Device.ImmediateContext;
-        var vsStage = deviceContext.VertexShader;
-        vsStage.Set(_prevVertexShader);
-        if(_prevConstantBuffers != null)
-            vsStage.SetConstantBuffers(0, _prevConstantBuffers.Length, _prevConstantBuffers);
-        
-        if(_prevShaderResourceViews != null)
-            vsStage.SetShaderResources(0, _prevShaderResourceViews.Length, _prevShaderResourceViews);
+        ResourceManager.Device.ImmediateContext.PopState();
     }
 
     private Buffer[] _constantBuffers = new Buffer[0];
     private ShaderResourceView[] _shaderResourceViews = new ShaderResourceView[0];
-    private SharpDX.Direct3D11.SamplerState[] _samplerStates = new SharpDX.Direct3D11.SamplerState[0];
+    private T3.Graphics.Compat.SamplerState[] _samplerStates = new T3.Graphics.Compat.SamplerState[0];
 
-    private SharpDX.Direct3D11.VertexShader? _prevVertexShader;
-    private Buffer[]? _prevConstantBuffers;
-    private ShaderResourceView[]? _prevShaderResourceViews;
 
     [Input(Guid = "B1C236E5-6757-4D77-9911-E3ACD5EA9FE9")]
     public readonly InputSlot<T3.Core.DataTypes.VertexShader> VertexShader = new();
@@ -71,5 +60,5 @@ public sealed class VertexShaderStage : Instance<VertexShaderStage>
     public readonly MultiInputSlot<ShaderResourceView> ShaderResources = new();
 
     [Input(Guid = "2BC7584D-A347-4954-9120-C1841AF76650")]
-    public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
+    public readonly MultiInputSlot<T3.Graphics.Compat.SamplerState> SamplerStates = new();
 }

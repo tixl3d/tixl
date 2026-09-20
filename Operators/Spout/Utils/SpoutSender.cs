@@ -1,11 +1,11 @@
 using System.Runtime.InteropServices;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using SpoutDX;
 using T3.Core.Output;
 using T3.Core.Output.Streaming;
 using DeviceContext = OpenGL.DeviceContext;
-using DXTexture2D = SharpDX.Direct3D11.Texture2D;
+using DXTexture2D = T3.Graphics.Compat.Texture2D;
 
 namespace Lib.Utils;
 
@@ -190,7 +190,7 @@ internal sealed class SpoutSender : IOutputStreamSender
                 _deviceContext.MakeCurrent(_glContext);
             }
 
-            _device = ID3D11Device.__CreateInstance((IntPtr)ResourceManager.Device);
+            _device = ID3D11Device.__CreateInstance(ResourceManager.Device.NativePointer);
             _initialized = true;
         }
         else if (_glContext != DeviceContext.GetCurrentContext())

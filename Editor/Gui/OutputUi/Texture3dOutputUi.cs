@@ -1,15 +1,14 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using ImGuiNET;
-using SharpDX;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.DataTypes;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Editor.App;
 using T3.Editor.Gui.Windows;
-using Buffer = SharpDX.Direct3D11.Buffer;
+using Buffer = T3.Graphics.Compat.Buffer;
 using ComputeShader = T3.Core.DataTypes.ComputeShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
@@ -88,15 +87,12 @@ internal sealed class Texture3dOutputUi : OutputUi<Texture3dWithViews>
         var device = ResourceManager.Device;
         var deviceContext = device.ImmediateContext;
         var csStage = deviceContext.ComputeShader;
-        var prevShader = csStage.Get();
-        var prevUavs = csStage.GetUnorderedAccessViews(0, 1);
-        var prevSrvs = csStage.GetShaderResources(0, 1);
-        var prevConstBuffer = csStage.GetConstantBuffers(0, 1);
+        deviceContext.PushState(StateGroups.ComputeShader);
 
         var resolveShader = _shaderResource.Value;
         csStage.Set(resolveShader);
 
-        Int4 parameter = new Int4(_zPosIndex, 0, 0, 0);
+        var parameter = new T3.Core.DataTypes.Vector.Int4(_zPosIndex, 0, 0, 0);
         ResourceManager.SetupConstBuffer(parameter, ref _paramBuffer);
             
         const int threadNumX = 16, threadNumY = 16;
@@ -108,10 +104,7 @@ internal sealed class Texture3dOutputUi : OutputUi<Texture3dWithViews>
         deviceContext.Dispatch(dispatchCountX, dispatchCountY, 1);
 
         // Restore prev setup
-        csStage.SetConstantBuffer(0, prevConstBuffer[0]);
-        csStage.SetUnorderedAccessView(0, prevUavs[0]);
-        csStage.SetShaderResource(0, prevSrvs[0]);
-        csStage.Set(prevShader);
+        deviceContext.PopState();
 
         return _viewTexture;
     }

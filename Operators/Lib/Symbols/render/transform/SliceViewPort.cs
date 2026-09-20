@@ -48,7 +48,7 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
         var cellSizeX = cellSize.X * stretch.X;
         var cellSizeY = cellSize.Y * stretch.Y;
         
-        var newViewPort = new RawViewportF
+        var newViewPort = new Viewport
                               {
                                   X = (columnIndex + (1 - stretch.X) / 2) * cellSize.X,
                                   Y = (rowIndex + (1 - stretch.Y) / 2) * cellSize.Y,
@@ -97,8 +97,7 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
         var deviceContext = ResourceManager.Device.ImmediateContext;
         var rasterizer = deviceContext.Rasterizer;            
             
-        _prevViewports = rasterizer.GetViewports<RawViewportF>();
-        _prevRasterizerState = rasterizer.State;
+        deviceContext.PushState(StateGroups.Rasterizer);
         
         context.RequestedResolution = new Int2((int)cellSizeX.Clamp(1,16384),
                                                (int)cellSizeY.Clamp(1,16384));
@@ -107,13 +106,11 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
         // Execute subgraph
         SubGraph.GetValue(context);
 
-        rasterizer.SetViewports(_prevViewports, _prevViewports.Length);
-        rasterizer.State = _prevRasterizerState;
+        deviceContext.PopState();
         context.RequestedResolution = _prevResolution;
         context.CameraToClipSpace = _prevCameraToClipSpace;
     }
         
-    private RawViewportF[] _prevViewports;
     private Int2 _prevResolution;
 
     [Input(Guid = "21532B24-FED2-403B-ABB1-6FAA19311366")]
@@ -133,7 +130,6 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
     public readonly InputSlot<int> Mode = new ();
 
     
-    private RasterizerState _prevRasterizerState;
     private Matrix4x4 _prevCameraToClipSpace;
 
     private enum ViewModes

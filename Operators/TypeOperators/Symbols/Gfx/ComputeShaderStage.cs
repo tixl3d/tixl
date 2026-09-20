@@ -42,11 +42,9 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         if (_uavs.Length == 0 || _cs == null)
             return;
         
-        // TODO: SharpDX 4.2.0 does not expose the no-allocation 3-arg overload publicly,
-        // so this still allocates a fresh RenderTargetView[2] each frame. Worth a follow-up
-        // (P/Invoke OMGetRenderTargets directly, or upgrade SharpDX) — see allocation report.
-        _prevRenderTargetViews = device.ImmediateContext.OutputMerger.GetRenderTargets(2);
-        device.ImmediateContext.OutputMerger.GetRenderTargets(out _prevDepthStencilView);
+        // Saved explicitly, and popped by the enclosing operator. The readback this replaces allocated a
+        // fresh array of views every frame.
+        device.ImmediateContext.PushState(StateGroups.ComputeShader | StateGroups.OutputMerger);
         
         if (needAdditionalConstantBuffer && _constantBuffers.Length > 0)
         {
@@ -106,21 +104,9 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
             deviceContext.Dispatch(dispatchCount.X, dispatchCount.Y, dispatchCount.Z);
         }
         
-        if (_prevRenderTargetViews.Length > 0)
-            deviceContext.OutputMerger.SetRenderTargets(_prevDepthStencilView, _prevRenderTargetViews);
-
-        foreach (var rtv in _prevRenderTargetViews)
-        {
-            if (rtv == null || rtv.IsDisposed)
-                continue;
-            
-            rtv.Dispose();            
-        }
-            
-        Utilities.Dispose(ref _prevDepthStencilView);
         if (needAdditionalConstantBuffer)
         {
-            Utilities.Dispose(ref _dispatchCallParameterBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _dispatchCallParameterBuffer);
         }
 
         
@@ -178,11 +164,11 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
     }
     
 
-    private SharpDX.Direct3D11.ComputeShader? _cs;
+    private T3.Graphics.Compat.ComputeShader? _cs;
     private Buffer?[] _constantBuffers = [];
     private ShaderResourceView[] _shaderResourceViews = [];
     private ShaderResourceView[] _additionalSrvs = [];
-    private SharpDX.Direct3D11.SamplerState[] _samplerStates = [];
+    private T3.Graphics.Compat.SamplerState[] _samplerStates = [];
     private UnorderedAccessView[] _uavs = [];
         
         
@@ -261,10 +247,8 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
     public readonly InputSlot<int> UavBufferCounter = new();
         
     [Input(Guid = "4047c9e7-1edb-4c71-b85c-c1b87058c81c")]
-    public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
+    public readonly MultiInputSlot<T3.Graphics.Compat.SamplerState> SamplerStates = new();
 
-    private RenderTargetView?[]? _prevRenderTargetViews;
-    private DepthStencilView? _prevDepthStencilView;
 
     // Cached initial-counts arrays for SetUnorderedAccessViews, replacing per-call `[..]` literals.
     // Constant ones are static (never mutated). Mutating ones are per-instance.

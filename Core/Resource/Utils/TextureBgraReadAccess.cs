@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Resource.Assets;
@@ -241,10 +241,8 @@ public sealed class TextureBgraReadAccess : IDisposable
         var deviceContext = device.ImmediateContext;
         var csStage = deviceContext.ComputeShader;
 
-        // Keep previous setup
-        var prevShader = csStage.Get();
-        var prevUavs = csStage.GetUnorderedAccessViews(0, 1);
-        var prevSrvs = csStage.GetShaderResources(0, 1);
+        // Saved explicitly instead of read back from the driver, which Vulkan cannot do.
+        deviceContext.PushState(StateGroups.ComputeShader);
 
         var convertShader = _convertComputeShaderResource.Value;
         csStage.Set(convertShader);
@@ -258,10 +256,7 @@ public sealed class TextureBgraReadAccess : IDisposable
         var dispatchCountY = (inputTexture.Description.Height / threadNumY) + 1;
         deviceContext.Dispatch(dispatchCountX, dispatchCountY, 1);
 
-        // Restore prev setup
-        csStage.SetUnorderedAccessView(0, prevUavs[0]);
-        csStage.SetShaderResource(0, prevSrvs[0]);
-        csStage.Set(prevShader);
+        deviceContext.PopState();
     }
 
     private  Resource<ComputeShader>? _convertComputeShaderResource;

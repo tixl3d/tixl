@@ -1,7 +1,6 @@
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Utils;
-using Device = SharpDX.Direct3D11.Device;
+using Device = T3.Graphics.Compat.Device;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.image.generate.basic;
@@ -79,11 +78,9 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
             // Save settings in context
             var prevRequestedResolution = context.RequestedResolution;
-            var prevViewports = deviceContext.Rasterizer.GetViewports<RawViewportF>();
-            
-            // We only use 3 render targets
-            const int RtCount = 3;//OutputMergerStage.SimultaneousRenderTargetCount; // 8
-            var prevTargets = deviceContext.OutputMerger.GetRenderTargets(RtCount, out var prevDsv);
+
+            // Saved in one go, and popped further down; the facade tracks the state itself.
+            deviceContext.PushState(StateGroups.Rasterizer | StateGroups.OutputMerger);
             
             var prevObjectToWorld = context.ObjectToWorld;
             var prevWorldToCamera = context.WorldToCamera;
@@ -96,7 +93,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             context.ForegroundColor = Vector4.One;
                 
                 
-            deviceContext.Rasterizer.SetViewport(new SharpDX.Viewport(0, 0, size.Width, size.Height, 0.0f, 1.0f));
+            deviceContext.Rasterizer.SetViewport(new T3.Graphics.Viewport(0, 0, size.Width, size.Height, 0.0f, 1.0f));
             // Set render targets - include normal buffer if requested
             if (withNormalBuffer && _multiSampledNormalBufferRtv != null)
             {
@@ -113,11 +110,11 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             {
                 try
                 {
-                    deviceContext.ClearRenderTargetView(_multiSampledColorBufferRtv, new SharpDX.Color(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W));
+                    deviceContext.ClearRenderTargetView(_multiSampledColorBufferRtv, new Vector4(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W));
 
                     if (_multiSampledNormalBufferRtv != null)
                     {
-                        deviceContext.ClearRenderTargetView(_multiSampledNormalBufferRtv, new SharpDX.Color(0.0f, 0.0f, 0.0f, 1.0f));
+                        deviceContext.ClearRenderTargetView(_multiSampledNormalBufferRtv, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
                     }
 
 
@@ -158,8 +155,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             context.RequestedResolution = prevRequestedResolution;
             context.BackgroundColor = keepBackgroundColor;
             context.ForegroundColor = keepForegroundColor;
-            deviceContext.Rasterizer.SetViewports(prevViewports);
-            deviceContext.OutputMerger.SetTargets(prevDsv, prevTargets);
+            deviceContext.PopState();
             //deviceContext.OutputMerger.SetTargets(prevDepthStencilView, prevTargets);
                 
 
@@ -204,13 +200,6 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                 }
             }
 
-            // Clean up ref counts for RTVs
-            for (var i = 0; i < prevTargets.Length; i++)
-            {
-                prevTargets[i]?.Dispose();
-            }
-
-            prevDsv?.Dispose();
         }
             
         ColorBuffer.Value = ColorTexture;
@@ -264,9 +253,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         var device = ResourceManager.Device;
         var deviceContext = device.ImmediateContext;
         var csStage = deviceContext.ComputeShader;
-        var prevShader = csStage.Get();
-        var prevUavs = csStage.GetUnorderedAccessViews(0, 1);
-        var prevSrvs = csStage.GetShaderResources(0, 1);
+        deviceContext.PushState(StateGroups.ComputeShader);
 
         csStage.Set(resolveShader);
 
@@ -277,10 +264,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         var dispatchCountY = (_multiSampledDepthBuffer.Description.Height / threadNumY) + 1;
         deviceContext.Dispatch(dispatchCountX, dispatchCountY, 1);
             
-        // Restore prev setup
-        csStage.SetUnorderedAccessView(0, prevUavs[0]);
-        csStage.SetShaderResource(0, prevSrvs[0]);
-        csStage.Set(prevShader);
+        deviceContext.PopState();
     }
 
     private bool UpdateTextures(Device device, Int2 size, Format colorFormat, Format depthFormat, bool generateMips, bool withNormalBuffer)
@@ -301,9 +285,9 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         {
             wasChanged = true;
             // Color / Multi sampling
-            Utilities.Dispose(ref _multiSampledColorBufferSrv);
-            Utilities.Dispose(ref _multiSampledColorBufferRtv);
-            Utilities.Dispose(ref _multiSampledColorBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBufferSrv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBufferRtv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBuffer);
 
             try
             {
@@ -340,17 +324,17 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             catch (Exception e)
             {
                 Log.Error("Error creating color render target." + e.Message, this);
-                Utilities.Dispose(ref _multiSampledColorBufferSrv);
-                Utilities.Dispose(ref _multiSampledColorBufferRtv);
-                Utilities.Dispose(ref _multiSampledColorBuffer);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBufferSrv);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBufferRtv);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBuffer);
             }
 
             // Color / Down sampled
             if (_resolvedColorBuffer != null)
             {
-                Utilities.Dispose(ref _resolvedColorBufferSrv);
-                Utilities.Dispose(ref _resolvedColorBufferRtv);
-                Utilities.Dispose(ref _resolvedColorBuffer);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBufferSrv);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBufferRtv);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBuffer);
             }
 
             if (DownSamplingRequired)
@@ -379,9 +363,9 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                 catch
                 {
                     Log.Error("Error creating color render target.", this);
-                    Utilities.Dispose(ref _resolvedColorBufferSrv);
-                    Utilities.Dispose(ref _resolvedColorBufferRtv);
-                    Utilities.Dispose(ref _resolvedColorBuffer);
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBufferSrv);
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBufferRtv);
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBuffer);
                 }
             }
 
@@ -398,11 +382,11 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
         if (normalFormatChanged || (!normalRequired && normalInitialized))
         {
-            Utilities.Dispose(ref _multiSampledNormalBufferRtv);
-            Utilities.Dispose(ref _resolvedNormalBufferRtv);
-            Utilities.Dispose(ref _resolvedNormalBufferSrv);
-            Utilities.Dispose(ref _multiSampledNormalBuffer);
-            Utilities.Dispose(ref _resolvedNormalBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBufferRtv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferRtv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferSrv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBuffer);
         }
 
         if (normalRequired && (normalFormatChanged || !normalInitialized))
@@ -430,8 +414,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             }
             catch (Exception e)
             {
-                Utilities.Dispose(ref _multiSampledNormalBuffer);
-                Utilities.Dispose(ref _multiSampledNormalBufferRtv);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBuffer);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBufferRtv);
                 Log.Error("Error creating multisampled normal buffer: " + e.Message, this);
             }
 
@@ -460,9 +444,9 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                 }
                 catch (Exception e)
                 {
-                    Utilities.Dispose(ref _resolvedNormalBuffer);
-                    Utilities.Dispose(ref _resolvedNormalBufferSrv);
-                    Utilities.Dispose(ref _resolvedNormalBufferRtv);
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBuffer);
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferSrv);
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferRtv);
                     Log.Error("Error creating resolved normal buffer: " + e.Message, this);
                 }
             }
@@ -492,11 +476,11 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
         if (depthFormatChanged || (!depthRequired && depthInitialized))
         {
-            Utilities.Dispose(ref _multiSampledDepthBufferDsv);
-            Utilities.Dispose(ref _multiSampledDepthBufferSrv);
-            Utilities.Dispose(ref _multiSampledDepthBuffer);
-            Utilities.Dispose(ref _resolvedDepthBufferUav);
-            Utilities.Dispose(ref _resolvedDepthBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBufferDsv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBufferSrv);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedDepthBufferUav);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedDepthBuffer);
         }
 
         if (depthRequired && (depthFormatChanged || !depthInitialized))
@@ -541,9 +525,9 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             }
             catch
             {
-                Utilities.Dispose(ref _multiSampledDepthBufferDsv);
-                Utilities.Dispose(ref _multiSampledDepthBufferSrv);
-                Utilities.Dispose(ref _multiSampledDepthBuffer);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBufferDsv);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBufferSrv);
+                T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBuffer);
                 Log.Error("Error  creating multisampled depth/stencil buffer.", this);
             }
 
@@ -570,8 +554,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                 }
                 catch
                 {
-                    Utilities.Dispose(ref _resolvedDepthBufferUav);
-                    Utilities.Dispose(ref _resolvedDepthBuffer);
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedDepthBufferUav);
+                    T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedDepthBuffer);
                     Log.Error("Error creating depth/stencil downsampling buffer.", this);
                 }
             }
@@ -588,27 +572,27 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
         //Log.Debug("Disposing RenderTarget", this);
         
-        Utilities.Dispose(ref _multiSampledColorBuffer);
-        Utilities.Dispose(ref _multiSampledColorBufferSrv);
-        Utilities.Dispose(ref _multiSampledColorBufferRtv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBufferSrv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledColorBufferRtv);
 
-        Utilities.Dispose(ref _resolvedColorBuffer);
-        Utilities.Dispose(ref _resolvedColorBufferSrv);
-        Utilities.Dispose(ref _resolvedColorBufferRtv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBufferSrv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedColorBufferRtv);
 
-        Utilities.Dispose(ref _multiSampledDepthBuffer);
-        Utilities.Dispose(ref _multiSampledDepthBufferDsv);
-        Utilities.Dispose(ref _multiSampledDepthBufferSrv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBufferDsv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledDepthBufferSrv);
 
-        Utilities.Dispose(ref _resolvedDepthBuffer);
-        Utilities.Dispose(ref _resolvedDepthBufferUav);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedDepthBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedDepthBufferUav);
 
-        Utilities.Dispose(ref _resolvedNormalBuffer);
-        Utilities.Dispose(ref _resolvedNormalBufferSrv);
-        Utilities.Dispose(ref _resolvedNormalBufferRtv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferSrv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolvedNormalBufferRtv);
 
-        Utilities.Dispose(ref _multiSampledNormalBuffer);
-        Utilities.Dispose(ref _multiSampledNormalBufferRtv);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _multiSampledNormalBufferRtv);
     }
     
 

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.Logging;
 using T3.Core.Resource;
 
@@ -76,9 +76,10 @@ public class LegacyParticleSystem
         var device = ResourceManager.Device;
         var deviceContext = device.ImmediateContext;
         var csStage = deviceContext.ComputeShader;
-        var prevShader = csStage.Get();
-        var prevUavs = csStage.GetUnorderedAccessViews(0, 1);
-            
+
+        // Saved explicitly instead of read back from the driver, which Vulkan cannot do.
+        deviceContext.PushState(StateGroups.ComputeShader);
+
         // set and call the init shader
         deadListInitShader.TryGetThreadGroups(out var threadGroups);
             
@@ -87,10 +88,8 @@ public class LegacyParticleSystem
         int dispatchCount = MaxCount / (threadGroups.X > 0 ? threadGroups.X : 1);
         Log.Info($"particle system: maxcount {MaxCount}  dispatchCount: {dispatchCount} *64: {dispatchCount*64}");
         deviceContext.Dispatch(dispatchCount, 1, 1);
-            
-        // restore prev setup
-        csStage.SetUnorderedAccessView(0, prevUavs[0]);
-        csStage.Set(prevShader);
+
+        deviceContext.PopState();
     }
 
     private void InitAliveParticleIndices()

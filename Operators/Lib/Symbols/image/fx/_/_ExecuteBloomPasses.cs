@@ -1,14 +1,15 @@
 #nullable enable
 using System.Diagnostics;
-using SharpDX;
-using SharpDX.Direct3D11;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using System.Numerics;
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable InconsistentNaming
+
+using T3.Core.DataTypes.Vector;
 
 namespace Lib.image.fx._;
 
@@ -81,7 +82,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             return;
         }
 
-        var initialResolution = new Size2(sourceTexture.Description.Width,
+        var initialResolution = new Int2(sourceTexture.Description.Width,
                                           sourceTexture.Description.Height
                                          );
         var initialFormat = sourceTexture.Description.Format;
@@ -132,7 +133,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         {
             /* ... Bright Pass Code ... */
             deviceContext.OutputMerger.SetTargets(_brightPassTarget.RTV);
-            var viewport = new RawViewportF { X = 0, Y = 0, Width = initialResolution.Width, Height = initialResolution.Height, MinDepth = 0, MaxDepth = 1 };
+            var viewport = new Viewport { X = 0, Y = 0, Width = initialResolution.Width, Height = initialResolution.Height, MinDepth = 0, MaxDepth = 1 };
             deviceContext.Rasterizer.SetViewports([viewport]);
 
             deviceContext.PixelShader.Set(brightPassPS);
@@ -165,7 +166,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             // Downsample
             {
                 deviceContext.OutputMerger.SetTargets(targetSetA.RTV);
-                deviceContext.Rasterizer.SetViewport(new RawViewportF { X = 0, Y = 0, Width = levelResolution.Width, Height = levelResolution.Height });
+                deviceContext.Rasterizer.SetViewport(new Viewport { X = 0, Y = 0, Width = levelResolution.Width, Height = levelResolution.Height });
                 deviceContext.PixelShader.Set(downSamplePS);
                 deviceContext.PixelShader.SetSampler(0, linearSampler);
                 deviceContext.PixelShader.SetShaderResource(0, lastLevelSrv);
@@ -213,7 +214,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             /* ... Initial Composite Code ... */
             deviceContext.OutputMerger.SetTargets(_compositeTarget.RTV);
             deviceContext.OutputMerger.SetBlendState(DefaultRenderingStates.DisabledBlendState);
-            deviceContext.Rasterizer.SetViewport(new RawViewportF
+            deviceContext.Rasterizer.SetViewport(new Viewport
                                                      { X = 0, Y = 0, Width = _compositeTarget.Resolution.Width, Height = _compositeTarget.Resolution.Height });
             deviceContext.PixelShader.Set(copyPS);
             deviceContext.PixelShader.SetSampler(0, pointSampler);
@@ -228,7 +229,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             deviceContext.PixelShader.Set(upsampleAddPS);
             deviceContext.PixelShader.SetSampler(0, linearSampler);
             deviceContext.OutputMerger.SetTargets(_compositeTarget.RTV); // Always write to composite
-            deviceContext.Rasterizer.SetViewport(new RawViewportF
+            deviceContext.Rasterizer.SetViewport(new Viewport
                                                      { X = 0, Y = 0, Width = _compositeTarget.Resolution.Width, Height = _compositeTarget.Resolution.Height });
 
             for (var level = levels - 1; level >= 0; --level)
@@ -276,7 +277,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     {
         public RenderTargetSet(Device device, Texture2DDescription desc)
         {
-            Resolution = new Size2(desc.Width, desc.Height);
+            Resolution = new Int2(desc.Width, desc.Height);
             Texture = Texture2D.CreateTexture2D(desc);
 
             RTV = new RenderTargetView(device, Texture);
@@ -286,13 +287,13 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         public Texture2D Texture;
         public RenderTargetView RTV;
         public ShaderResourceView SRV;
-        public readonly Size2 Resolution;
+        public readonly Int2 Resolution;
 
         public void Dispose()
         {
-            Utilities.Dispose(ref Texture);
-            Utilities.Dispose(ref RTV);
-            Utilities.Dispose(ref SRV);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref Texture);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref RTV);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref SRV);
         }
     }
 
@@ -375,14 +376,14 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     private Buffer? _compositeParamsBuffer;
 
     // State Tracking 
-    private Size2 _lastResolution = Size2.Zero;
+    private Int2 _lastResolution = Int2.Zero;
     private Format _lastFormat = Format.Unknown;
     private int _lastLevels = -1;
     private Vector2 _lastGainAndBias = new(float.NaN, float.NaN);
     private List<float> _levelIntensities = []; // Stores normalized intensity per level
 
     // Creates/updates ALL internal resources
-    private bool InitializeOrUpdateResources(Size2 initialResolution, Format initialFormat, int numLevels)
+    private bool InitializeOrUpdateResources(Int2 initialResolution, Format initialFormat, int numLevels)
     {
         // Check if general resource recreation is needed (resolution, format, levels changed, or resources missing)
         var needsTextureRecreation = _compositeTarget?.Texture == null ||
@@ -418,9 +419,9 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         {
             Log.Debug("Recreating Bloom constant buffers.", this);
             // Only dispose buffers
-            Utilities.Dispose(ref _thresholdParamsBuffer);
-            Utilities.Dispose(ref _blurParamsBuffer);
-            Utilities.Dispose(ref _compositeParamsBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _thresholdParamsBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _blurParamsBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _compositeParamsBuffer);
         }
 
         try
@@ -485,7 +486,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     // {
     //     var set = new RenderTargetSet
     //                   {
-    //                       Resolution = new Size2(desc.Width, desc.Height),
+    //                       Resolution = new Int2(desc.Width, desc.Height),
     //                       Texture = Texture2D.CreateTexture2D(desc),
     //                   };
     //     set.RTV = new RenderTargetView(device, set.Texture);
@@ -513,12 +514,12 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         _compositeTarget?.Dispose();
 
         // ... (Dispose constant buffers) ...
-        Utilities.Dispose(ref _thresholdParamsBuffer);
-        Utilities.Dispose(ref _blurParamsBuffer);
-        Utilities.Dispose(ref _compositeParamsBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _thresholdParamsBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _blurParamsBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _compositeParamsBuffer);
 
         // ... (Reset state tracking) ...
-        _lastResolution = Size2.Zero;
+        _lastResolution = Int2.Zero;
         _lastFormat = Format.Unknown;
         _lastLevels = -1;
         _levelIntensities.Clear();
@@ -539,171 +540,38 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     }
 
     /// <summary>
-    /// Helper class to save and restore specific D3D11 pipeline states
-    /// commonly modified by fullscreen post-processing effects.
+    /// Saves and restores the pipeline state a fullscreen effect changes. The facade keeps the state itself,
+    /// so this is a push and a pop rather than dozens of reads from the driver — which is also the only shape
+    /// Vulkan can support, since there is nothing to read back there.
     /// </summary>
     private sealed class D3D11StateBackup : System.IDisposable
     {
-
-
-        /// <summary>
-        /// Saves the relevant D3D11 pipeline states modified by the effect.
-        /// </summary>
         public void Save(DeviceContext context)
         {
-            if (_isSaved) return; // Prevent double saves without restore
+            if (_isSaved)
+                return;
 
-            // IA
-            _topology = context.InputAssembler.PrimitiveTopology;
-
-            // Shaders (Get the objects)
-            var vsStage = context.VertexShader;
-            _vertexShader = vsStage.Get();
-            _geometryShader = context.GeometryShader.Get(); // Save even if we set to null later
-
-            // Pixel Shader Resources 
-            var psStage = context.PixelShader;
-            _pixelShader = psStage.Get();
-            _psConstantBuffers = psStage.GetConstantBuffers(0, 1);
-            _psShaderResourceViews = psStage.GetShaderResources(0, 2);
-            _psSamplerStates = psStage.GetSamplers(0, 1);
-
-            // Rasterizer
-            _rasterizerState = context.Rasterizer.State;
-            _viewports = context.Rasterizer.GetViewports<RawViewportF>(); // Get all active
-
-            // Output Merger
-            _blendState = context.OutputMerger.GetBlendState(out _blendFactor, out _sampleMask);
-
-            // Suggested API doesn't exist.
-            //context.OutputMerger.GetRenderTargets(OutputMergerStage.SimultaneousRenderTargetCount, _renderTargetViews, out _depthStencilView);
-            _prevRenderTargetViews = context.OutputMerger.GetRenderTargets(2);
-            context.OutputMerger.GetRenderTargets(out _depthStencilView);
+            context.PushState(StateGroups.All);
+            _context = context;
             _isSaved = true;
         }
 
-        /// <summary>
-        /// Restores the previously saved D3D11 pipeline state.
-        /// Also disposes the state objects retrieved during Save().
-        /// </summary>
         public void Restore(DeviceContext context)
         {
-            if (!_isSaved) return; // Nothing to restore
+            if (!_isSaved)
+                return;
 
-            // IA
-            context.InputAssembler.PrimitiveTopology = _topology;
-
-            // Shaders
-            context.VertexShader.Set(_vertexShader);
-            context.GeometryShader.Set(_geometryShader);
-
-            // Pixel Shader Resources
-            var psStage = context.PixelShader;
-            psStage.Set(_pixelShader);
-            psStage.SetConstantBuffers(0, _psConstantBuffers.Length, _psConstantBuffers);
-            psStage.SetShaderResources(0, _psShaderResourceViews.Length, _psShaderResourceViews);
-            psStage.SetSamplers(0, _psSamplerStates.Length, _psSamplerStates);
-
-            // Rasterizer
-            context.Rasterizer.State = _rasterizerState;
-            context.Rasterizer.SetViewports(_viewports, _viewports?.Length ?? 0); // SetViewports handles null array / count 0 correctly
-            _viewports = null; // Clear local reference
-
-            // Output Merger
-            context.OutputMerger.SetBlendState(_blendState, _blendFactor, _sampleMask);
-            //context.OutputMerger.SetDepthStencilState(_depthStencilState, _stencilRef);
-            //context.OutputMerger.SetRenderTargets(_depthStencilView, _renderTargetViews); // SetRenderTargets handles null DSV
-            if (_prevRenderTargetViews.Length > 0)
-                context.OutputMerger.SetRenderTargets(_depthStencilView, _prevRenderTargetViews);
-
-            foreach (var rtv in _prevRenderTargetViews)
-                rtv?.Dispose();
-
+            context.PopState();
             _isSaved = false;
-
-            Dispose();
         }
 
-        /// <summary>
-        /// Disposes potentially held state objects if Restore wasn't called.
-        /// </summary>
         public void Dispose()
         {
-            // If Save was called but Restore wasn't, dispose the retrieved state objects
-            if (_isSaved)
-            {
-                Utilities.Dispose(ref _vertexShader);
-                Utilities.Dispose(ref _geometryShader);
-                Utilities.Dispose(ref _pixelShader);
-                for (var i = 0; i < _psConstantBuffers.Length; ++i)
-                {
-                    Utilities.Dispose(ref _psConstantBuffers[i]);
-                    _psConstantBuffers[i] = null;
-                }
-                // Don't dispose SRVs in _psShaderResourceViews array
-
-                for (var i = 0; i < _psSamplerStates.Length; ++i)
-                {
-                    Utilities.Dispose(ref _psSamplerStates[i]);
-                    _psSamplerStates[i] = null;
-                }
-
-                Utilities.Dispose(ref _rasterizerState);
-                Utilities.Dispose(ref _blendState);
-                Utilities.Dispose(ref _depthStencilState);
-
-                for (var i = 0; i < _prevRenderTargetViews.Length; ++i)
-                {
-                    Utilities.Dispose(ref _prevRenderTargetViews[i]);
-                    _prevRenderTargetViews[i] = null;
-                }
-
-                Utilities.Dispose(ref _depthStencilView);
-            }
-
-            // Nullify references
-            _vertexShader = null;
-            _pixelShader = null;
-            _geometryShader = null; /* etc. */
-            _psShaderResourceViews[0] = null;
-            _psShaderResourceViews[1] = null;
-            _viewports = null;
-            _isSaved = false;
+            if (_isSaved && _context != null)
+                Restore(_context);
         }
-        
-        
-        // --- Saved State Members ---
 
-        // Input Assembler
-        private PrimitiveTopology _topology;
-
-        // Vertex Shader (minimal - just shader, assuming VS inputs aren't changed)
-        private SharpDX.Direct3D11.VertexShader? _vertexShader;
-
-        // Geometry Shader (minimal - just shader)
-        private SharpDX.Direct3D11.GeometryShader? _geometryShader;
-
-        // Pixel Shader (Shader, 1 CB, 2 SRVs, 1 Sampler)
-        private SharpDX.Direct3D11.PixelShader? _pixelShader;
-        private Buffer?[] _psConstantBuffers = new Buffer[1]; // Slot 0
-        private ShaderResourceView?[] _psShaderResourceViews = new ShaderResourceView[2]; // Slots 0, 1
-        private SamplerState?[] _psSamplerStates = new SamplerState[1]; // Slot 0
-
-        // Rasterizer Stage
-        private RasterizerState? _rasterizerState;
-        private RawViewportF[]? _viewports; // Need to save all active viewports
-
-        // Output Merger Stage
-        private BlendState? _blendState;
-        private RawColor4 _blendFactor;
-        private int _sampleMask;
-        private DepthStencilState? _depthStencilState;
-
-        private RenderTargetView?[]
-            _prevRenderTargetViews = new RenderTargetView?[OutputMergerStage.SimultaneousRenderTargetCount]; // Save max possible RTVs
-
-        private DepthStencilView? _depthStencilView;
-
+        private DeviceContext? _context;
         private bool _isSaved;
     }
 
@@ -804,7 +672,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     public readonly InputSlot<T3.Core.DataTypes.Texture2D> SourceTexture = new();
 
     [Input(Guid = "98E88D02-3B78-403C-B9C9-B5ECF8565ACD")]
-    public readonly InputSlot<SharpDX.Direct3D11.ShaderResourceView> SourceTextureSrv = new();
+    public readonly InputSlot<T3.Graphics.Compat.ShaderResourceView> SourceTextureSrv = new();
 
     [Input(Guid = "AC3B575A-DC62-48BD-955C-F945A18A2246")]
     public readonly InputSlot<Vector4> ColorWeights = new();
@@ -849,8 +717,8 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     public readonly InputSlot<T3.Core.DataTypes.PixelShader> CopyPS = new();
 
     [Input(Guid = "5D19C8BE-7EA0-4B8D-5F3D-9EBB3A914B8D")]
-    public readonly InputSlot<SharpDX.Direct3D11.SamplerState> LinearSampler = new();
+    public readonly InputSlot<T3.Graphics.Compat.SamplerState> LinearSampler = new();
 
     [Input(Guid = "4C08B7AD-6D9F-4A7C-4E2C-8DAA29803A7C")]
-    public readonly InputSlot<SharpDX.Direct3D11.SamplerState> PointSampler = new();
+    public readonly InputSlot<T3.Graphics.Compat.SamplerState> PointSampler = new();
 }

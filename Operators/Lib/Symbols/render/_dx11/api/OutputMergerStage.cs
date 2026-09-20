@@ -1,4 +1,4 @@
-using SharpDX.Mathematics.Interop;
+using System.Numerics;
 using T3.Core.Utils;
 
 namespace Lib.render._dx11.api;
@@ -29,13 +29,10 @@ internal sealed class OutputMergerStage : Instance<OutputMergerStage> {
         RenderTargetViews.GetValues(ref _renderTargetViews, context);
         UnorderedAccessViews.GetValues(ref _unorderedAccessViews, context);
 
-        // KEEP RTVs
-        _prevRenderTargetViews = outputMerger.GetRenderTargets(_renderTargetViews.Length);
-        outputMerger.GetRenderTargets(out _prevDepthStencilView);
-            
-        // KEEP blend state
-        _prevBlendState = outputMerger.GetBlendState(out _prevBlendFactor, out _prevSampleMask);
-            
+        // KEEP what this operator is about to change, until the enclosing operator restores it. Saved
+        // explicitly rather than read back from the driver, which also stops the previous views leaking.
+        deviceContext.PushState(StateGroups.OutputMerger);
+
         // SET depth state
         //_prevDepthStencilState = outputMerger.DepthStencilState;
         outputMerger.SetDepthStencilState(DepthStencilState.GetValue(context));
@@ -81,35 +78,13 @@ internal sealed class OutputMergerStage : Instance<OutputMergerStage> {
     }
 
     private void Restore(EvaluationContext context) {
-        var deviceContext = ResourceManager.Device.ImmediateContext;
-        var outputMerger = deviceContext.OutputMerger;
-
-        outputMerger.SetBlendState(_prevBlendState, _prevBlendFactor, _prevSampleMask);
-        if (_renderTargetViews.Length > 0)
-            outputMerger.SetRenderTargets(_prevDepthStencilView, _prevRenderTargetViews);
-        
-        foreach (var rtv in _prevRenderTargetViews)
-            rtv?.Dispose();
-
-        // if (_unorderedAccessViews.Length > 0)
-        // outputMerger.SetUnorderedAccessViews(1, _prevUnorderedAccessViews);
-        // foreach (var uav in _prevUnorderedAccessViews)
-        // uav?.Dispose();
-
-        Utilities.Dispose(ref _prevDepthStencilView);
-        _prevBlendState = null;
+        ResourceManager.Device.ImmediateContext.PopState();
     }
 
     private RenderTargetView[] _renderTargetViews = new RenderTargetView[0];
     private DepthStencilView _depthStencilView;
     
-    private RenderTargetView[] _prevRenderTargetViews;
     private UnorderedAccessView[] _unorderedAccessViews = new UnorderedAccessView[0];
-    //private UnorderedAccessView[] _prevUnorderedAccessViews;
-    private DepthStencilView _prevDepthStencilView;
-    private BlendState _prevBlendState;
-    private RawColor4 _prevBlendFactor;
-    private int _prevSampleMask;
 
     [Input(Guid = "E0BC9CF8-42C8-4632-B958-7A96F6D03BA2")]
     public readonly InputSlot<BlendState> BlendState = new();

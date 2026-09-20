@@ -37,12 +37,9 @@ internal sealed class _DispatchSceneDraws : Instance<_DispatchSceneDraws>
 
         _useSceneMaterials = UseSceneMaterials.GetValue(context);
             
-        // Keep current state
-        _prevConstantBuffers = vsStage.GetConstantBuffers(0, ConstantBufferIndexCount);
-        _prevShaderResourceViews = vsStage.GetShaderResources(0, _shaderResourceViews.Length);
-        _prevSamplerStates = vsStage.GetSamplers(0, _samplerStates.Length);
-        _prevVertexShader = vsStage.Get();
-        _prevPixelShader = psStage.Get();
+        // Keep current state. Both stages, each restored to what it had: the readback this replaces saved
+        // the vertex stage and put it back on both.
+        deviceContext.PushState(StateGroups.VertexShader | StateGroups.PixelShader);
             
             
 
@@ -77,18 +74,13 @@ internal sealed class _DispatchSceneDraws : Instance<_DispatchSceneDraws>
         }
 
         // Restore
-        vsStage.Set(_prevVertexShader);
-        vsStage.SetConstantBuffers(0, _prevConstantBuffers.Length, _prevConstantBuffers);
-        vsStage.SetShaderResources(0, _prevShaderResourceViews.Length, _prevShaderResourceViews);
+        deviceContext.PopState();
 
-        psStage.Set(_prevPixelShader);
-        psStage.SetConstantBuffers(0, _prevConstantBuffers.Length, _prevConstantBuffers);
-        psStage.SetShaderResources(0, _prevShaderResourceViews.Length, _prevShaderResourceViews);
-        psStage.SetSamplers(0, _prevSamplerStates.Length, _prevSamplerStates);
+
     }
 
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
-    private void TryDrawNodes(EvaluationContext context, SharpDX.Direct3D11.PixelShaderStage psStage, SharpDX.Direct3D11.VertexShaderStage vsStage)
+    private void TryDrawNodes(EvaluationContext context, T3.Graphics.Compat.PixelShaderStage psStage, T3.Graphics.Compat.VertexShaderStage vsStage)
     {
         var sceneSetup = SceneSetup.GetValue(context);
         if (sceneSetup?.Dispatches == null)
@@ -180,11 +172,6 @@ internal sealed class _DispatchSceneDraws : Instance<_DispatchSceneDraws>
     private readonly ShaderResourceView[] _shaderResourceViews = new ShaderResourceView[SrvIndexCount];
     private readonly Buffer[] _constantBuffers = new Buffer[ConstantBufferIndexCount];
     private SamplerState[] _samplerStates = Array.Empty<SamplerState>();
-    private SharpDX.Direct3D11.PixelShader _prevPixelShader;
-    private SharpDX.Direct3D11.VertexShader _prevVertexShader;
-    private SamplerState[] _prevSamplerStates = Array.Empty<SamplerState>();
-    private Buffer[] _prevConstantBuffers;
-    private ShaderResourceView[] _prevShaderResourceViews;
         
     private bool _useSceneMaterials;
 

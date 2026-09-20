@@ -19,11 +19,12 @@ internal sealed class Rasterizer : Instance<Rasterizer>
         var rasterizer = deviceContext.Rasterizer;
 
         ScissorRectangles.GetValue(context);
-        _prevViewports = rasterizer.GetViewports<RawViewportF>();
-            
+
+        // Saved explicitly, and restored by the enclosing operator.
+        deviceContext.PushState(StateGroups.Rasterizer);
+
         Viewports.GetValues(ref _viewports, context);
 
-        _prevState = rasterizer.State; 
         var newState = RasterizerState.GetValue(context);
         rasterizer.State = newState;
         
@@ -33,21 +34,16 @@ internal sealed class Rasterizer : Instance<Rasterizer>
 
     private void Restore(EvaluationContext context)
     {
-        var deviceContext = ResourceManager.Device.ImmediateContext;
-        var rasterizer = deviceContext.Rasterizer;
-        rasterizer.SetViewports(_prevViewports, _prevViewports.Length);
-        rasterizer.State = _prevState;
+        ResourceManager.Device.ImmediateContext.PopState();
     }
 
-    private RawViewportF[] _viewports = new RawViewportF[0];
-    private RawViewportF[] _prevViewports;
+    private T3.Graphics.Viewport[] _viewports = [];
 
     [Input(Guid = "35A52074-1E82-4352-91C3-D8E464F73BC7")]
     public readonly InputSlot<RasterizerState> RasterizerState = new();
     [Input(Guid = "73945E5D-3C3C-4742-B341-A061B0DC116F")]
-    public readonly MultiInputSlot<RawViewportF> Viewports = new();
+    public readonly MultiInputSlot<T3.Graphics.Viewport> Viewports = new();
     [Input(Guid = "3F71BE22-9DC2-4E47-8B3A-1EF3C9ECBD9D")]
-    public readonly MultiInputSlot<RawRectangle> ScissorRectangles = new();
+    public readonly MultiInputSlot<ScissorRect> ScissorRectangles = new();
 
-    private RasterizerState _prevState;
 }

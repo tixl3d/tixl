@@ -1,11 +1,12 @@
 // _ExecuteFastBlurPasses.cs
 #nullable enable
-using SharpDX;
-using SharpDX.Direct3D11;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using System.Numerics;
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
+
+using T3.Core.DataTypes.Vector;
 
 namespace Lib.image.fx._;
 
@@ -63,7 +64,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
             return;
         }
 
-        var initialResolution = new Size2(sourceTexture.Description.Width, sourceTexture.Description.Height);
+        var initialResolution = new Int2(sourceTexture.Description.Width, sourceTexture.Description.Height);
         var initialFormat = sourceTexture.Description.Format;
 
         var steps = ResolveSteps(stepsIn, initialResolution);
@@ -80,7 +81,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
         deviceContext.OutputMerger.BlendState = DefaultRenderingStates.DisabledBlendState;
         deviceContext.OutputMerger.DepthStencilState = DefaultRenderingStates.DisabledDepthStencilState;
         deviceContext.Rasterizer.State = DefaultRenderingStates.DefaultRasterizerState;
-        deviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+        deviceContext.InputAssembler.PrimitiveTopology = T3.Graphics.Compat.PrimitiveTopology.TriangleList;
 
         // Downsample + blur
         var lastSrv = sourceSrv;
@@ -97,7 +98,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
             var dstRes = dst.Resolution;
 
             deviceContext.OutputMerger.SetTargets(dst.RTV);
-            deviceContext.Rasterizer.SetViewport(new RawViewportF
+            deviceContext.Rasterizer.SetViewport(new Viewport
             {
                 X = 0, Y = 0,
                 Width = dstRes.Width, Height = dstRes.Height,
@@ -131,7 +132,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
                 continue;
 
             deviceContext.OutputMerger.SetTargets(dst.RTV);
-            deviceContext.Rasterizer.SetViewport(new RawViewportF
+            deviceContext.Rasterizer.SetViewport(new Viewport
             {
                 X = 0, Y = 0,
                 Width = dst.Resolution.Width, Height = dst.Resolution.Height,
@@ -155,7 +156,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
             if (low != null)
             {
                 deviceContext.OutputMerger.SetTargets(_fullResOutput.RTV);
-                deviceContext.Rasterizer.SetViewport(new RawViewportF
+                deviceContext.Rasterizer.SetViewport(new Viewport
                 {
                     X = 0, Y = 0,
                     Width = _fullResOutput.Resolution.Width, Height = _fullResOutput.Resolution.Height,
@@ -186,7 +187,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
         _stateBackup.Restore(deviceContext);
     }
 
-    private static int ResolveSteps(int stepsIn, Size2 res)
+    private static int ResolveSteps(int stepsIn, Int2 res)
     {
         if (stepsIn > 0)
             return stepsIn.Clamp(1, 12);
@@ -201,7 +202,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
     }
 
 
-    private void FillUpsampleKernel(int stageIndex, int stageCount, Size2 lowRes)
+    private void FillUpsampleKernel(int stageIndex, int stageCount, Int2 lowRes)
     {
         var t = stageCount <= 1 ? 1f : (float)stageIndex / (stageCount - 1); // 0..1 from deep mip -> final
         var wideC = 2f;
@@ -252,7 +253,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
     {
         public RenderTargetSet(Device device, Texture2DDescription desc)
         {
-            Resolution = new Size2(desc.Width, desc.Height);
+            Resolution = new Int2(desc.Width, desc.Height);
             Texture = Texture2D.CreateTexture2D(desc);
             RTV = new RenderTargetView(device, Texture);
             SRV = new ShaderResourceView(device, Texture);
@@ -261,13 +262,13 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
         public Texture2D Texture;
         public RenderTargetView RTV;
         public ShaderResourceView SRV;
-        public readonly Size2 Resolution;
+        public readonly Int2 Resolution;
 
         public void Dispose()
         {
-            Utilities.Dispose(ref Texture);
-            Utilities.Dispose(ref RTV);
-            Utilities.Dispose(ref SRV);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref Texture);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref RTV);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref SRV);
         }
     }
 
@@ -299,11 +300,11 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
     private UpParams _upParams;
     private Buffer? _upParamsBuffer;
 
-    private Size2 _lastResolution = Size2.Zero;
-    private SharpDX.DXGI.Format _lastFormat = SharpDX.DXGI.Format.Unknown;
+    private Int2 _lastResolution = Int2.Zero;
+    private T3.Graphics.Format _lastFormat = T3.Graphics.Format.Unknown;
     private int _lastSteps = -1;
 
-    private bool InitializeOrUpdateResources(Size2 initialResolution, SharpDX.DXGI.Format initialFormat, int steps)
+    private bool InitializeOrUpdateResources(Int2 initialResolution, T3.Graphics.Format initialFormat, int steps)
     {
         var needsRecreate =
             _fullResOutput?.Texture == null ||
@@ -327,8 +328,8 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
         }
         else
         {
-            Utilities.Dispose(ref _downParamsBuffer);
-            Utilities.Dispose(ref _upParamsBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _downParamsBuffer);
+            T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _upParamsBuffer);
         }
 
         try
@@ -348,7 +349,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
                     OptionFlags = ResourceOptionFlags.None,
                     MipLevels = 1,
                     ArraySize = 1,
-                    SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0)
+                    SampleDescription = new T3.Graphics.SampleDescription(1, 0)
                 };
 
                 _fullResOutput = new RenderTargetSet(device, fullDesc);
@@ -399,11 +400,11 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
         _fullResOutput?.Dispose();
         _fullResOutput = null;
 
-        Utilities.Dispose(ref _downParamsBuffer);
-        Utilities.Dispose(ref _upParamsBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _downParamsBuffer);
+        T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _upParamsBuffer);
 
-        _lastResolution = Size2.Zero;
-        _lastFormat = SharpDX.DXGI.Format.Unknown;
+        _lastResolution = Int2.Zero;
+        _lastFormat = T3.Graphics.Format.Unknown;
         _lastSteps = -1;
     }
 
@@ -420,129 +421,39 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
 
     private readonly D3D11StateBackup _stateBackup = new();
 
+    /// <summary>
+    /// Saves and restores the pipeline state a fullscreen effect changes. The facade keeps the state itself,
+    /// so this is a push and a pop rather than dozens of reads from the driver — which is also the only shape
+    /// Vulkan can support, since there is nothing to read back there.
+    /// </summary>
     private sealed class D3D11StateBackup : IDisposable
     {
         public void Save(DeviceContext context)
         {
-            if (_isSaved) return;
+            if (_isSaved)
+                return;
 
-            _topology = context.InputAssembler.PrimitiveTopology;
-
-            _vertexShader = context.VertexShader.Get();
-            _geometryShader = context.GeometryShader.Get();
-
-            var ps = context.PixelShader;
-            _pixelShader = ps.Get();
-            _psConstantBuffers = ps.GetConstantBuffers(0, 1);
-            _psShaderResourceViews = ps.GetShaderResources(0, 1);
-            _psSamplerStates = ps.GetSamplers(0, 1);
-
-            _rasterizerState = context.Rasterizer.State;
-            _viewports = context.Rasterizer.GetViewports<RawViewportF>();
-
-            _blendState = context.OutputMerger.GetBlendState(out _blendFactor, out _sampleMask);
-            _prevRenderTargetViews = context.OutputMerger.GetRenderTargets(1);
-            context.OutputMerger.GetRenderTargets(out _depthStencilView);
-
+            context.PushState(StateGroups.All);
+            _context = context;
             _isSaved = true;
         }
 
         public void Restore(DeviceContext context)
         {
-            if (!_isSaved) return;
+            if (!_isSaved)
+                return;
 
-            context.InputAssembler.PrimitiveTopology = _topology;
-
-            context.VertexShader.Set(_vertexShader);
-            context.GeometryShader.Set(_geometryShader);
-
-            var ps = context.PixelShader;
-            ps.Set(_pixelShader);
-            ps.SetConstantBuffers(0, _psConstantBuffers.Length, _psConstantBuffers);
-            ps.SetShaderResources(0, _psShaderResourceViews.Length, _psShaderResourceViews);
-            ps.SetSamplers(0, _psSamplerStates.Length, _psSamplerStates);
-
-            context.Rasterizer.State = _rasterizerState;
-            context.Rasterizer.SetViewports(_viewports, _viewports?.Length ?? 0);
-            _viewports = null;
-
-            context.OutputMerger.SetBlendState(_blendState, _blendFactor, _sampleMask);
-
-            if (_prevRenderTargetViews.Length > 0)
-                context.OutputMerger.SetRenderTargets(_depthStencilView, _prevRenderTargetViews);
-
-            foreach (var rtv in _prevRenderTargetViews)
-                rtv?.Dispose();
-
+            context.PopState();
             _isSaved = false;
-            Dispose();
         }
 
         public void Dispose()
         {
-            if (_isSaved)
-            {
-                Utilities.Dispose(ref _vertexShader);
-                Utilities.Dispose(ref _geometryShader);
-                Utilities.Dispose(ref _pixelShader);
-
-                for (var i = 0; i < _psConstantBuffers.Length; i++)
-                {
-                    Utilities.Dispose(ref _psConstantBuffers[i]);
-                    _psConstantBuffers[i] = null;
-                }
-
-                for (var i = 0; i < _psSamplerStates.Length; i++)
-                {
-                    Utilities.Dispose(ref _psSamplerStates[i]);
-                    _psSamplerStates[i] = null;
-                }
-
-                Utilities.Dispose(ref _rasterizerState);
-                Utilities.Dispose(ref _blendState);
-                Utilities.Dispose(ref _depthStencilState);
-
-                for (var i = 0; i < _prevRenderTargetViews.Length; i++)
-                {
-                    Utilities.Dispose(ref _prevRenderTargetViews[i]);
-                    _prevRenderTargetViews[i] = null;
-                }
-
-                Utilities.Dispose(ref _depthStencilView);
-            }
-
-            _vertexShader = null;
-            _geometryShader = null;
-            _pixelShader = null;
-
-            if (_psShaderResourceViews.Length > 0)
-                _psShaderResourceViews[0] = null;
-
-            _viewports = null;
-            _isSaved = false;
+            if (_isSaved && _context != null)
+                Restore(_context);
         }
 
-        private SharpDX.Direct3D.PrimitiveTopology _topology;
-
-        private SharpDX.Direct3D11.VertexShader? _vertexShader;
-        private SharpDX.Direct3D11.GeometryShader? _geometryShader;
-
-        private SharpDX.Direct3D11.PixelShader? _pixelShader;
-        private Buffer?[] _psConstantBuffers = new Buffer?[1];
-        private ShaderResourceView?[] _psShaderResourceViews = new ShaderResourceView?[1];
-        private SamplerState?[] _psSamplerStates = new SamplerState?[1];
-
-        private RasterizerState? _rasterizerState;
-        private RawViewportF[]? _viewports;
-
-        private BlendState? _blendState;
-        private RawColor4 _blendFactor;
-        private int _sampleMask;
-        private DepthStencilState? _depthStencilState;
-
-        private RenderTargetView?[] _prevRenderTargetViews = new RenderTargetView?[1];
-        private DepthStencilView? _depthStencilView;
-
+        private DeviceContext? _context;
         private bool _isSaved;
     }
 

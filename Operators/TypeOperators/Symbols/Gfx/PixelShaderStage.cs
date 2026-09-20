@@ -24,10 +24,8 @@ public sealed class PixelShaderStage : Instance<PixelShaderStage>
         ShaderResources.GetValues(ref _shaderResourceViews, context);
         SamplerStates.GetValues(ref _samplerStates, context);
 
-        _prevPixelShader = psStage.Get();
-        _prevConstantBuffers = psStage.GetConstantBuffers(0, _constantBuffers.Length);
-        _prevShaderResourceViews = psStage.GetShaderResources(0, _shaderResourceViews.Length);
-        _prevSamplerStates = psStage.GetSamplers(0, _samplerStates.Length);
+        // Saved explicitly; the enclosing operator pops it.
+        deviceContext.PushState(StateGroups.PixelShader);
 
         if (ps == null)
             return;
@@ -40,29 +38,16 @@ public sealed class PixelShaderStage : Instance<PixelShaderStage>
 
     private void Restore(EvaluationContext context)
     {
-        var deviceContext = ResourceManager.Device.ImmediateContext;
-        var psStage = deviceContext.PixelShader;
-
-        psStage.Set(_prevPixelShader);
-        if (_prevConstantBuffers != null)
-            psStage.SetConstantBuffers(0, _prevConstantBuffers.Length, _prevConstantBuffers);
-        
-        if (_prevShaderResourceViews != null)
-            psStage.SetShaderResources(0, _prevShaderResourceViews.Length, _prevShaderResourceViews);
-        psStage.SetSamplers(0, _prevSamplerStates.Length, _prevSamplerStates);
+        ResourceManager.Device.ImmediateContext.PopState();
     }
 
     private Buffer[] _constantBuffers = new Buffer[0];
     private ShaderResourceView[] _shaderResourceViews = new ShaderResourceView[0];
-    private SharpDX.Direct3D11.SamplerState[] _samplerStates = new SharpDX.Direct3D11.SamplerState[0];
+    private T3.Graphics.Compat.SamplerState[] _samplerStates = new T3.Graphics.Compat.SamplerState[0];
 
-    private SharpDX.Direct3D11.PixelShader? _prevPixelShader;
-    private Buffer[]? _prevConstantBuffers;
-    private ShaderResourceView[]? _prevShaderResourceViews;
-    private SharpDX.Direct3D11.SamplerState[] _prevSamplerStates = new SharpDX.Direct3D11.SamplerState[0];
 
     [Input(Guid = "C4E91BC6-1691-4EB4-AED5-DD4CAE528149")]
-    public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
+    public readonly MultiInputSlot<T3.Graphics.Compat.SamplerState> SamplerStates = new();
 
     [Input(Guid = "BE02A84B-A666-4119-BB6E-FEE1A3DF0981")]
     public readonly MultiInputSlot<Buffer> ConstantBuffers = new();

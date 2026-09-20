@@ -28,8 +28,8 @@ internal sealed class Draw : Instance<Draw>, IRenderStatsProvider
 
         var deviceContext = ResourceManager.Device.ImmediateContext;
 
-        var setVs = deviceContext.VertexShader.Get();
-        var setPs = deviceContext.PixelShader.Get();
+        var setVs = deviceContext.VertexShader.Shader;
+        var setPs = deviceContext.PixelShader.Shader;
             
         if (setVs == null || setPs == null)
         {

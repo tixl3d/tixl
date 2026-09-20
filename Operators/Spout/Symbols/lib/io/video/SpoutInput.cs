@@ -1,5 +1,5 @@
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using SpoutDX;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using DeviceContext = OpenGL.DeviceContext;
 using Resource = SharpDX.DXGI.Resource;
-using DXTexture2D = SharpDX.Direct3D11.Texture2D;
+using DXTexture2D = T3.Graphics.Compat.Texture2D;
 
 namespace Lib.io.video;
 
@@ -79,12 +79,26 @@ public class SpoutInput : Instance<SpoutInput>
             return _spoutDX.GetSenderInfo(_receiverName, ref width, ref height, handle, ref dwFormat);
     }
 
-    private static DXTexture2D CreateD3D11Texture2D(DXTexture2D d3d11Texture2D)
+    /// <summary>
+    /// Opens a texture another process shared. Sharing is a D3D11 COM feature the facade does not wrap, so
+    /// this goes through the native device — and stays Windows-only, as Spout itself is.
+    /// </summary>
+    private static DXTexture2D? CreateD3D11Texture2D(DXTexture2D d3d11Texture2D)
     {
-        using (var resource = d3d11Texture2D.QueryInterface<Resource>())
-        {
-            return ResourceManager.Device.OpenSharedResource<DXTexture2D>(resource.SharedHandle);
-        }
+        var nativeDevice = ResourceManager.Device.NativePointer;
+
+        if (nativeDevice == IntPtr.Zero || d3d11Texture2D.NativePointer == IntPtr.Zero)
+            return null;
+
+        using var nativeTexture = new SharpDX.Direct3D11.Texture2D(d3d11Texture2D.NativePointer);
+        using var resource = nativeTexture.QueryInterface<Resource>();
+        Marshal.AddRef(d3d11Texture2D.NativePointer);
+
+        using var device = new SharpDX.Direct3D11.Device(nativeDevice);
+        Marshal.AddRef(nativeDevice);
+        using var shared = device.OpenSharedResource<SharpDX.Direct3D11.Texture2D>(resource.SharedHandle);
+
+        return ResourceManager.Device.AdoptTexture(shared.NativePointer, d3d11Texture2D.Description);
     }
 
     private bool InitializeSpout(string receiverName, bool useWidthAndHeight, uint width, uint height)
@@ -101,7 +115,7 @@ public class SpoutInput : Instance<SpoutInput>
                 _deviceContext.MakeCurrent(_glContext);
             }
 
-            _device = ID3D11Device.__CreateInstance(((IntPtr)ResourceManager.Device));
+            _device = ID3D11Device.__CreateInstance(ResourceManager.Device.NativePointer);
             _initialized = true;
         }
         else if (_glContext != DeviceContext.GetCurrentContext())
@@ -211,9 +225,27 @@ public class SpoutInput : Instance<SpoutInput>
              * so we call QueryInterface which performs an AddRef
              *           
              */
-            Texture2D readTexture = new Texture2D(new DXTexture2D(_spoutDX.SenderTexture.__Instance));
-            SharpDX.Direct3D11.Texture2D sdxTex = (SharpDX.Direct3D11.Texture2D)readTexture;
-            var dummy = sdxTex.QueryInterface<SharpDX.Direct3D11.Texture2D>();
+            using var senderTexture = new SharpDX.Direct3D11.Texture2D(_spoutDX.SenderTexture.__Instance);
+            var description = senderTexture.Description;
+            var adopted = ResourceManager.Device.AdoptTexture(senderTexture.NativePointer,
+                                                              new T3.Graphics.Compat.Texture2DDescription
+                                                                  {
+                                                                      Width = description.Width,
+                                                                      Height = description.Height,
+                                                                      MipLevels = description.MipLevels,
+                                                                      ArraySize = description.ArraySize,
+                                                                      Format = (T3.Graphics.Format)description.Format,
+                                                                      SampleDescription = new SampleDescription(description.SampleDescription.Count,
+                                                                                                                description.SampleDescription.Quality),
+                                                                      BindFlags = (T3.Graphics.Compat.BindFlags)description.BindFlags,
+                                                                      Usage = (T3.Graphics.Compat.ResourceUsage)description.Usage,
+                                                                  });
+
+            if (adopted == null)
+                return false;
+
+            Marshal.AddRef(senderTexture.NativePointer);
+            Texture2D readTexture = new Texture2D(adopted);
 
             // check the input format
             uint senderWidth = 0;
