@@ -33,7 +33,8 @@ internal sealed class FakeGraphicsBackend : IGraphicsBackend
         return new FakeSampler(description, label);
     }
 
-    public GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, string? label = null)
+    public GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, ReadOnlySpan<ShaderBinding> bindings = default,
+                                  string? label = null)
         => new FakeShader(stage, label);
 
     public GpuPipeline GetOrCreatePipeline(in GraphicsPipelineDescription description)
@@ -118,7 +119,7 @@ internal sealed class FakeCommandList : ICommandList
 {
     public void Reset()
     {
-        BindingsPerSet.Clear();
+        BindingsPerStage.Clear();
         ColorTargetCounts.Clear();
         RenderingBegun = 0;
         Draws = 0;
@@ -142,9 +143,9 @@ internal sealed class FakeCommandList : ICommandList
     public void SetStencilReference(int reference) { }
     public void SetPipeline(GpuPipeline pipeline) { }
 
-    public void SetBindings(int set, ReadOnlySpan<Binding> bindings) => BindingsPerSet[set] = bindings.ToArray();
+    public void SetBindings(ShaderStage stage, ReadOnlySpan<Binding> bindings) => BindingsPerStage[stage] = bindings.ToArray();
 
-    public void SetInlineConstants(int set, int slot, ReadOnlySpan<byte> data) { }
+    public void SetInlineConstants(ShaderStage stage, int slot, ReadOnlySpan<byte> data) { }
     public MappedMemory MapForDiscard(GpuResource resource, int subresource) => default;
     public void Unmap(GpuResource resource, int subresource) { }
     public void UpdateResource(GpuResource resource, int subresource, ReadOnlySpan<byte> data, int rowPitch, int slicePitch) => Updates++;
@@ -165,7 +166,7 @@ internal sealed class FakeCommandList : ICommandList
     public void PushDebugGroup(string name) { }
     public void PopDebugGroup() { }
 
-    public readonly Dictionary<int, Binding[]> BindingsPerSet = [];
+    public readonly Dictionary<ShaderStage, Binding[]> BindingsPerStage = [];
     public readonly List<int> ColorTargetCounts = [];
     public Viewport Viewport;
     public ScissorRect Scissor;

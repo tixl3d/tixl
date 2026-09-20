@@ -29,14 +29,14 @@ public class GraphicsCompatTests
         context.OutputMerger.SetTargets(new RenderTargetView(device, texture));
         context.Draw(3, 0);
 
-        var bindings = backend.Commands.BindingsPerSet[(int)ShaderStage.Pixel];
+        var bindings = backend.Commands.BindingsPerStage[ShaderStage.Pixel];
         Assert.Equal(2, Slot(bindings, BindingKind.Sampler));
         Assert.Equal(16 + 1, Slot(bindings, BindingKind.ConstantBuffer));
         Assert.Equal(32 + 0, Slot(bindings, BindingKind.SampledTexture));
     }
 
     [Fact]
-    public void EachShaderStageGetsItsOwnDescriptorSet()
+    public void EachShaderStageKeepsItsOwnSlotSpace()
     {
         var (backend, device) = CreateDevice();
         var context = device.ImmediateContext;
@@ -44,14 +44,14 @@ public class GraphicsCompatTests
 
         var texture = RenderTarget(device);
 
-        // The same D3D11 slot in two stages: a single descriptor set would lose one of them.
+        // The same D3D11 slot in two stages: without a per-stage slot space one would overwrite the other.
         context.VertexShader.SetShaderResource(0, new ShaderResourceView(device, texture));
         context.PixelShader.SetShaderResource(0, new ShaderResourceView(device, texture));
         context.OutputMerger.SetTargets(new RenderTargetView(device, texture));
         context.Draw(3, 0);
 
-        Assert.Single(backend.Commands.BindingsPerSet[(int)ShaderStage.Vertex]);
-        Assert.Single(backend.Commands.BindingsPerSet[(int)ShaderStage.Pixel]);
+        Assert.Single(backend.Commands.BindingsPerStage[ShaderStage.Vertex]);
+        Assert.Single(backend.Commands.BindingsPerStage[ShaderStage.Pixel]);
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class GraphicsCompatTests
         view.Dispose();
         context.Draw(3, 0);
 
-        Assert.Empty(backend.Commands.BindingsPerSet[(int)ShaderStage.Pixel]);
+        Assert.Empty(backend.Commands.BindingsPerStage[ShaderStage.Pixel]);
     }
 
     [Fact]
@@ -266,7 +266,7 @@ public class GraphicsCompatTests
         context.OutputMerger.SetTargets(new RenderTargetView(device, texture));
         context.Draw(3, 0);
 
-        Assert.Empty(backend.Commands.BindingsPerSet[(int)ShaderStage.Pixel]);
+        Assert.Empty(backend.Commands.BindingsPerStage[ShaderStage.Pixel]);
         Assert.Contains(warnings, warning => warning.Contains("500"));
         GraphicsLog.Warning = null;
     }

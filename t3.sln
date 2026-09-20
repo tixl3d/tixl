@@ -100,6 +100,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphics.Compat", "Graphics
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphics.D3D11", "Graphics.D3D11\Graphics.D3D11.csproj", "{52F10904-388C-404B-BD23-31D3E80ECAA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphics.Vulkan", "Graphics.Vulkan\Graphics.Vulkan.csproj", "{70F10D2F-A374-4DC1-B50F-4382939F6F96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -506,6 +508,18 @@ Global
 		{52F10904-388C-404B-BD23-31D3E80ECAA3}.Release|x64.Build.0 = Release|Any CPU
 		{52F10904-388C-404B-BD23-31D3E80ECAA3}.Release|x86.ActiveCfg = Release|Any CPU
 		{52F10904-388C-404B-BD23-31D3E80ECAA3}.Release|x86.Build.0 = Release|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Debug|x64.Build.0 = Debug|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Debug|x86.Build.0 = Debug|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Release|x64.ActiveCfg = Release|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Release|x64.Build.0 = Release|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Release|x86.ActiveCfg = Release|Any CPU
+		{70F10D2F-A374-4DC1-B50F-4382939F6F96}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

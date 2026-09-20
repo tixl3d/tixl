@@ -425,6 +425,10 @@ Estimate: 20–40 commits, 40–80 agent hours. You: review the API — it's per
 
 ### Phase 4 — Vulkan backend and first light (v5 development)
 
+*Started early, 2026-09-20, because it can be verified on the Linux machine while the D3D11 backend cannot:
+`Graphics.Vulkan` renders through the compatibility layer and reads the result back, with the validation
+layer silent, on a Radeon 8060S. Headless — presentation is still missing.*
+
 1. Instance, device selection (prefer the discrete GPU), queues, frames in flight, SDL surfaces and
    swapchains, validation layers and debug names.
 2. Resources, formats, upload ring, staging, readback, deferred destruction.

@@ -306,7 +306,7 @@ public sealed class DeviceContext
         // Always sent, even when empty: a stage that bound something for the previous draw has to be
         // cleared, or its descriptors stay live.
         var count = stage.CollectBindings(_bindings);
-        Commands.SetBindings((int)stage.Stage, _bindings.AsSpan(0, count));
+        Commands.SetBindings(stage.Stage, _bindings.AsSpan(0, count));
     }
 
     /// <summary>

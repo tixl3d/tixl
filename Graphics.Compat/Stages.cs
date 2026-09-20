@@ -175,11 +175,11 @@ public class ShaderStageState
     internal const int MaxUnorderedAccessViews = 8;
     internal const int MaxBindingsPerStage = MaxConstantBuffers + MaxShaderResources + MaxSamplers + MaxUnorderedAccessViews;
 
-    // Register shifts, matching how the shaders are compiled (s→0, b→16, t→32, u→160).
-    private const int SamplerBase = 0;
-    private const int ConstantBufferBase = 16;
-    private const int ShaderResourceBase = 32;
-    private const int UnorderedAccessBase = 160;
+    // Register shifts, matching how the shaders are compiled. The table is shared with the backends.
+    private const int SamplerBase = ShaderSlots.SamplerBase;
+    private const int ConstantBufferBase = ShaderSlots.ConstantBufferBase;
+    private const int ShaderResourceBase = ShaderSlots.ShaderResourceBase;
+    private const int UnorderedAccessBase = ShaderSlots.UnorderedAccessBase;
 
     internal readonly Buffer?[] ConstantBuffers = new Buffer?[MaxConstantBuffers];
     internal readonly ShaderResourceView?[] ShaderResources = new ShaderResourceView?[MaxShaderResources];

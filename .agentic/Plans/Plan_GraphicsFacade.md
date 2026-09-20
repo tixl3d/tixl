@@ -370,9 +370,12 @@ multi-threaded command recording, or GPU-driven draws. None of these are v5.0 go
    and `SampleDescription` live in the shared layer, so almost every migrated file imports both namespaces,
    and identical names in both would make every one of those files ambiguous — the opposite of a mechanical
    codemod.
-10. **One descriptor set per shader stage**, numbered by `ShaderStage`. D3D11 gives each stage its own slot
-    space, so a vertex shader's `t0` and a pixel shader's `t0` are different resources and a single set would
-    collide. Code written directly against the backend API can put everything in set 0.
+10. **One descriptor set, each stage offset inside it** (`ShaderSlots`: stage stride 200, then s→0, b→16,
+    t→32, u→160). D3D11 gives each stage its own slot space, so a vertex shader's `t0` and a pixel shader's
+    `t0` are different resources and they must not collide. *Revised after trying it on the GPU: a set per
+    stage is not reachable, because Slang derives the descriptor set from the HLSL register space and none of
+    TiXL's shaders declare one — offsetting each stage through the compiler's register shifts needs no shader
+    edits and keeps them just as separate. `SetBindings` therefore takes a `ShaderStage`, not a set index.*
 11. **Bindings are sent on every draw, even when a stage has none**, so a stage that bound something for the
     previous draw is cleared rather than left with live descriptors.
 12. **The render pass opens on the first draw, not when the targets are set.** Dynamic rendering has no
@@ -420,8 +423,24 @@ Written, building on Linux, uncommitted:
   masks, address modes, comparisons, topologies including patch lists, bind flags and memory kinds. This is
   what caught the missing reduction mode. 161 tests pass.
 
-Not written yet: the swapchain, the shader compiler's interface, `DataStream`'s replacement, moving TiXL's
-wrapper types into `Graphics/`, and the Vulkan backend.
+- `Graphics.Vulkan/` — the Vulkan 1.3 backend: instance and device with dynamic rendering, synchronization2,
+  scalar block layout, shader draw parameters, push descriptors and the memory-budget extension; images,
+  buffers, views, samplers, shader modules; the pipeline factory (descriptor layouts built from what the
+  shaders declare); automatic barriers from tracked layout and access; frames with fences, deferred
+  destruction and an upload buffer per frame in flight (D3D11's renaming); staging textures as buffers;
+  placeholders for bindings a draw leaves unset; a validation messenger that counts errors.
+- `Core.Tests/VulkanBackendTests` — the only test that touches a GPU, skipping itself where there is none:
+  it drives the **compatibility layer over the Vulkan backend** (upload a texture, bind it with a sampler and
+  a constant buffer, draw a full-screen triangle, copy to a staging texture, map it) and checks the pixels,
+  a draw that leaves every declared binding unset, and the pipeline cache. Each test also asserts the
+  validation layer stayed silent. Verified on a Radeon 8060S (RADV): the readback is exactly source × tint.
+
+Not written yet: the swapchain and presentation, the shader compiler's interface, `DataStream`'s replacement,
+and moving TiXL's wrapper types into `Graphics/`.
+
+Known gaps in the Vulkan backend, each deliberate for now: one allocation per resource (drivers cap the
+count, so a sub-allocator comes before large scenes), whole-image layout tracking rather than per
+subresource, readback that completes synchronously, and no swapchain.
 
 **Untested on Windows.** The D3D11 backend compiles but has never talked to a device. First run needs a
 Windows machine, and the first thing to check is that a pipeline change applies every state object the

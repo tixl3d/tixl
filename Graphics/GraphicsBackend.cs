@@ -19,7 +19,13 @@ public interface IGraphicsBackend
     GpuBuffer CreateBuffer(in GpuBufferDescription description, ReadOnlySpan<byte> initialData, string? label = null);
     GpuTextureView CreateTextureView(GpuTexture texture, in TextureViewDescription description, string? label = null);
     GpuSampler CreateSampler(in SamplerDescription description, string? label = null);
-    GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, string? label = null);
+    /// <summary>
+    /// <paramref name="bindings"/> is what the shader declares, from the compiler's reflection. Vulkan needs
+    /// it before a pipeline exists, because the descriptor set layout is part of the pipeline layout and has
+    /// to name every resource the shader uses — including ones a draw happens to leave unbound. D3D11 ignores it.
+    /// </summary>
+    GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, ReadOnlySpan<ShaderBinding> bindings = default,
+                           string? label = null);
 
     /// <summary>Cached by description; calling this per draw is the expected usage.</summary>
     GpuPipeline GetOrCreatePipeline(in GraphicsPipelineDescription description);
@@ -93,22 +99,18 @@ public interface ICommandList
     void SetPipeline(GpuPipeline pipeline);
 
     /// <summary>
-    /// Binds everything one shader stage reads or writes. <paramref name="set"/> is the descriptor set, and
-    /// each <see cref="Binding.Slot"/> is the binding index the shader was compiled with — the register shifts
-    /// of the Slang setup (s→0, b→16, t→32, u→160) land here.
+    /// Binds everything one shader stage reads or writes. <paramref name="stage"/> says which stage's slot
+    /// space the slots belong to, and each <see cref="Binding.Slot"/> is the register shift inside it
+    /// (s→0, b→16, t→32, u→160); <see cref="ShaderSlots"/> holds the table, and the backend resolves it to
+    /// whatever its shaders were compiled with.
     /// </summary>
-    /// <remarks>
-    /// One set per shader stage, numbered by <see cref="ShaderStage"/>. D3D11 gives every stage its own slot
-    /// space, so a vertex shader's t0 and a pixel shader's t0 are different resources; a single set would
-    /// collide. New code that does not carry D3D11's stage split can put everything in set 0.
-    /// </remarks>
-    void SetBindings(int set, ReadOnlySpan<Binding> bindings);
+    void SetBindings(ShaderStage stage, ReadOnlySpan<Binding> bindings);
 
     /// <summary>
     /// Writes into the frame's upload ring and binds the result. Replaces D3D11's map/discard on a dynamic
     /// buffer, which is how nearly every TiXL operator updates its constants.
     /// </summary>
-    void SetInlineConstants(int set, int slot, ReadOnlySpan<byte> data);
+    void SetInlineConstants(ShaderStage stage, int slot, ReadOnlySpan<byte> data);
 
     /// <summary>
     /// Hands out memory for a whole-resource overwrite that never waits on the GPU. This is D3D11's
@@ -144,6 +146,9 @@ public interface ICommandList
 
     void PopDebugGroup();
 }
+
+/// <summary>One resource a shader declares, as the shader compiler reports it.</summary>
+public readonly record struct ShaderBinding(int Set, int Slot, BindingKind Kind, string Name);
 
 public enum BindingKind
 {
