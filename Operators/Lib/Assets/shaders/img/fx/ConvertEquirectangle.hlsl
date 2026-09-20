@@ -45,42 +45,42 @@ float4 psMain(vsOutput input) : SV_TARGET
       uv = (float2(-za, -ya)+1)/2;
       uv.x /= 6;
       uv.x += 0./6.;
-      c.rgb = Image.Sample(Sampler, uv);
+      c.rgb = Image.Sample(Sampler, uv).xyz;
     }
     else if (abs(xa+1.) < 1e-3f)
     {
       uv = (float2(za, -ya)+1)/2;
       uv.x /= 6;
       uv.x += 2./6.;
-      c.rgb = Image.Sample(Sampler, uv);
+      c.rgb = Image.Sample(Sampler, uv).xyz;
     }
     else if (abs(za-1.) < 1e-3f)
     {
       uv = (float2(xa, -ya)+1)/2;
       uv.x /= 6;
       uv.x += 3./6.;
-      c.rgb = Image.Sample(Sampler, uv);
+      c.rgb = Image.Sample(Sampler, uv).xyz;
     }
     else if (abs(za+1.) < 1e-3f)
     {
       uv = (float2(-xa, -ya)+1)/2;
       uv.x /= 6;
       uv.x += 1./6.;
-      c.rgb = Image.Sample(Sampler, uv);
+      c.rgb = Image.Sample(Sampler, uv).xyz;
     }
     else if (abs(ya-1.) < 1e-3f)
     {
       uv = (float2(-xa, -za)+1)/2;
       uv.x /= 6;
       uv.x += 4./6.;
-      c.rgb = Image.Sample(Sampler, uv);
+      c.rgb = Image.Sample(Sampler, uv).xyz;
     }
     else if (abs(ya+1.) < 1e-3f)
     {
       uv = (float2(xa, -za)+1)/2;
       uv.x /= 6;
       uv.x += 5./6.;
-      c.rgb = Image.Sample(Sampler, uv);
+      c.rgb = Image.Sample(Sampler, uv).xyz;
     }
     
     return c;

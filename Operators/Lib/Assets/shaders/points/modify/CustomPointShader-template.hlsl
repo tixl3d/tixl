@@ -38,7 +38,8 @@ RWStructuredBuffer<Point> ResultPoints : register(u0);
 sampler Sampler : register(s0);
 sampler ClampedSampler : register(s1);
 
-static const float3 Center=Offset;
+// An alias, not a constant: a static const global may only be initialized from a compile-time value.
+#define Center Offset
 
 //=== Additional Resources ==========================================
 /*{RESOURCES(t3)}*/

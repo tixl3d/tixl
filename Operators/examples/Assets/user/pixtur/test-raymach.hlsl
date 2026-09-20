@@ -128,12 +128,6 @@ float sdBox (in float2 p, in float2 b)
 
 
 //>>> setup
-SamplerState samLinear
-{
-    Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = Clamp;
-    AddressV = Clamp;
-};
 //<<< setup
 
 //>>> declarations

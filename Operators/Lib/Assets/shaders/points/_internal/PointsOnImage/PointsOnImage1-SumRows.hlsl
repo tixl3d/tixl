@@ -24,7 +24,7 @@ RWTexture2D<float> CDF : register(u0);
 inline float ComputeIntensity(float4 rgba)
 {
     float4 ccc = rgba * ColorWeight;
-    float l1 = ColorWeight
+    float l1 = ColorWeight.x != 0
                    ? saturate((ccc.r + ccc.g + ccc.b + ccc.a) / (ColorWeight.r + ColorWeight.g + ColorWeight.b + ColorWeight.a) - ClampEmit)
                    : saturate(1.2 - distance(rgba.rgb, ColorWeight.rgb) - ClampEmit);
 

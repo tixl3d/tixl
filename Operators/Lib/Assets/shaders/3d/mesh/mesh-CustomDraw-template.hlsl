@@ -165,7 +165,7 @@ psInput vsMain(uint id
         normalize(TBN._m10_m11_m12),
         normalize(TBN._m20_m21_m22));
 
-    output.worldPosition = mul(posInObject, ObjectToWorld);
+    output.worldPosition = mul(posInObject, ObjectToWorld).xyz;
 
     // Fog
     if (FogDistance > 0)
@@ -245,7 +245,7 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     return N;
 }
 
-inline float3 AdjustRoughnessForSpecularAA(float baseRoughness)
+inline float AdjustRoughnessForSpecularAA(float baseRoughness)
 {
     // --- Specular anti-aliasing ---
     // Compute normal variance using screen-space derivatives and increase roughness accordingly.

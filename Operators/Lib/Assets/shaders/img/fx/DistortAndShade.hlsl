@@ -35,7 +35,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float2 uv = psInput.texCoord;
     float2 d = uv - Center;
     float4 displaceAmount =  ImageB.Sample(texSampler, float2(uv.x,      uv.y)); 
-    float2 uv2= uv+ d* displaceAmount * Displacement;
+    float2 uv2= uv+ d* displaceAmount.xy * Displacement;
     
     // float cc= (c.r+ c.g +c.b);
     // float x1= (cx1.r + cx1.g + cx1.b) / 3;
