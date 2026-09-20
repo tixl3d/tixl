@@ -38,6 +38,7 @@
         <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
         <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
+        <PackageReference Include="StbImageSharp" Version="2.30.16" />
         <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
     </ItemGroup>
 

@@ -207,6 +207,249 @@ public class VulkanBackendTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// How image loading builds a mipped texture: every level points at the one buffer that holds level 0,
+    /// because the coarser levels are filtered down on the GPU straight after. A DataRectangle carries only a
+    /// row pitch, so the compatibility layer has to work out how many bytes each level covers — taking the
+    /// row pitch for it stages a single row and the copy then reads past the staging buffer, which faults the
+    /// GPU rather than failing cleanly.
+    /// </summary>
+    [Fact]
+    public void AMippedTextureUploadsEveryLevelFromOneBuffer()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+
+        const int width = 64;
+        const int height = 64;
+        var mipLevels = (int)Math.Log(width, 2.0) + 1;
+
+        var pixels = new byte[width * height * 4];
+        for (var i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = (byte)i;
+        }
+
+        var pinned = System.Runtime.InteropServices.GCHandle.Alloc(pixels, System.Runtime.InteropServices.GCHandleType.Pinned);
+
+        try
+        {
+            var data = pinned.AddrOfPinnedObject();
+            var stride = width * 4;
+            var rectangles = new DataRectangle[mipLevels];
+
+            for (var i = 0; i < mipLevels; i++)
+            {
+                rectangles[i] = new DataRectangle(data, stride);
+                stride /= 2;
+            }
+
+            var description = Describe(BindFlags.ShaderResource, ResourceUsage.Default) with
+                                  {
+                                      Width = width,
+                                      Height = height,
+                                      MipLevels = mipLevels,
+                                  };
+
+            using var texture = new Texture2D(device, description, rectangles);
+            Assert.Equal(mipLevels, texture.Description.MipLevels);
+        }
+        finally
+        {
+            pinned.Free();
+        }
+
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
+    /// Exactly what loading an image does: a non-square, non-power-of-two texture whose levels all alias the
+    /// one buffer holding level 0, then mips generated on the GPU from it.
+    /// </summary>
+    [Fact]
+    public void AnImageSizedTextureGeneratesItsMips()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+
+        const int width = 640;
+        const int height = 360;
+        var mipLevels = (int)Math.Log(width, 2.0) + 1;
+        output.WriteLine($"{width}x{height}, {mipLevels} mip levels");
+
+        var pixels = new byte[width * height * 4];
+        for (var i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = (byte)i;
+        }
+
+        var pinned = System.Runtime.InteropServices.GCHandle.Alloc(pixels, System.Runtime.InteropServices.GCHandleType.Pinned);
+
+        try
+        {
+            var stride = width * 4;
+            var rectangles = new DataRectangle[mipLevels];
+
+            for (var i = 0; i < mipLevels; i++)
+            {
+                rectangles[i] = new DataRectangle(pinned.AddrOfPinnedObject(), stride);
+                stride /= 2;
+            }
+
+            var description = new Texture2DDescription
+                                  {
+                                      Width = width,
+                                      Height = height,
+                                      ArraySize = 1,
+                                      MipLevels = mipLevels,
+                                      Format = Format.R8G8B8A8_UNorm,
+                                      BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
+                                      Usage = ResourceUsage.Default,
+                                      CpuAccessFlags = CpuAccessFlags.None,
+                                      OptionFlags = ResourceOptionFlags.GenerateMipMaps,
+                                      SampleDescription = new SampleDescription(1, 0),
+                                  };
+
+            using var texture = new Texture2D(device, description, rectangles);
+            using var view = new ShaderResourceView(device, texture);
+
+            device.BeginFrame();
+            context.GenerateMips(view);
+            device.EndFrame();
+        }
+        finally
+        {
+            pinned.Free();
+        }
+
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
+    /// D3D11 ignores the pitches when the target is a buffer, so callers pass zero for both and expect the
+    /// whole buffer to be written. Deriving the byte count from those pitches uploads nothing at all, which
+    /// no validation layer complains about — the constants are simply never there.
+    /// </summary>
+    [Fact]
+    public void AConstantBufferUpdatedWithoutPitchesReceivesItsData()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+
+        var values = new float[] { 1, 2, 3, 4 };
+        var bytes = System.Runtime.InteropServices.MemoryMarshal.AsBytes<float>(values);
+
+        using var constants = new Buffer(device,
+                                         new BufferDescription
+                                             {
+                                                 SizeInBytes = bytes.Length,
+                                                 BindFlags = BindFlags.ConstantBuffer,
+                                                 Usage = ResourceUsage.Default,
+                                             });
+
+        using var staging = new Buffer(device,
+                                       new BufferDescription
+                                           {
+                                               SizeInBytes = bytes.Length,
+                                               BindFlags = BindFlags.None,
+                                               Usage = ResourceUsage.Staging,
+                                               CpuAccessFlags = CpuAccessFlags.Read,
+                                           });
+
+        var pinned = System.Runtime.InteropServices.GCHandle.Alloc(values, System.Runtime.InteropServices.GCHandleType.Pinned);
+
+        try
+        {
+            device.BeginFrame();
+            // Both pitches zero, the way PointLightStack and ResourceManager write their constants.
+            context.UpdateSubresource(new DataBox(pinned.AddrOfPinnedObject(), 0, 0), constants);
+            context.CopyResource(constants, staging);
+            device.EndFrame();
+        }
+        finally
+        {
+            pinned.Free();
+        }
+
+        device.BeginFrame();
+        var box = context.MapSubresource(staging, 0, MapMode.Read, MapFlags.None);
+        Assert.NotEqual(IntPtr.Zero, box.DataPointer);
+
+        var readBack = new float[values.Length];
+        System.Runtime.InteropServices.Marshal.Copy(box.DataPointer, readBack, 0, readBack.Length);
+        context.UnmapSubresource(staging, 0);
+
+        Assert.Equal(values, readBack);
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
+    /// A 2D upload that declares only a row pitch still covers every row of the subresource. Treating the
+    /// zero slice pitch as the byte count stages one row, and the copy then reads past the staging buffer —
+    /// the fault the camera and video operators would hit on their first frame.
+    /// </summary>
+    [Fact]
+    public void A2DUploadWithoutASlicePitchCoversEveryRow()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+
+        var pixels = new byte[Size * Size * 4];
+        for (var i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = (byte)(i + 1);
+        }
+
+        using var texture = new Texture2D(device, Describe(BindFlags.ShaderResource, ResourceUsage.Default));
+        using var staging = new Texture2D(device, Describe(BindFlags.None, ResourceUsage.Staging, CpuAccessFlags.Read));
+
+        var pinned = System.Runtime.InteropServices.GCHandle.Alloc(pixels, System.Runtime.InteropServices.GCHandleType.Pinned);
+
+        try
+        {
+            device.BeginFrame();
+            // Row pitch only, the way the camera and video operators upload their frames.
+            context.UpdateSubresource(new DataBox(pinned.AddrOfPinnedObject(), Size * 4, 0), texture);
+            context.CopyResource(texture, staging);
+            device.EndFrame();
+        }
+        finally
+        {
+            pinned.Free();
+        }
+
+        device.BeginFrame();
+        var box = context.MapSubresource(staging, 0, MapMode.Read, MapFlags.None);
+        Assert.NotEqual(IntPtr.Zero, box.DataPointer);
+
+        var readBack = new byte[pixels.Length];
+        System.Runtime.InteropServices.Marshal.Copy(box.DataPointer, readBack, 0, readBack.Length);
+        context.UnmapSubresource(staging, 0);
+
+        // The last row matters: staging only the first one leaves it at zero.
+        Assert.Equal(pixels, readBack);
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
     /// The validation layer reports through the backend's messenger, and the count is process-wide, so a
     /// test that pushes it up fails even if its own pixels looked right.
     /// </summary>

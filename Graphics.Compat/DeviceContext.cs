@@ -46,7 +46,9 @@ public sealed class DeviceContext
     #region frame
     internal void BeginFrame()
     {
-        _commands = Backend.BeginFrame();
+        // Loading uploads textures and generates their mips before the render loop starts, which opens a
+        // frame implicitly. Adopt that one rather than starting a second.
+        _commands ??= Backend.BeginFrame();
         _renderingActive = false;
     }
 
@@ -60,7 +62,11 @@ public sealed class DeviceContext
         _commands = null;
     }
 
-    private ICommandList Commands => _commands ?? throw new InvalidOperationException("No frame is being recorded. Call Device.BeginFrame first.");
+    /// <summary>
+    /// D3D11's immediate context is usable whenever the device is, and TiXL relies on that while loading. The
+    /// backends record into a frame, so open one on demand; the render loop's <see cref="EndFrame"/> submits it.
+    /// </summary>
+    private ICommandList Commands => _commands ??= Backend.BeginFrame();
     #endregion
 
     #region state save and restore
@@ -267,9 +273,34 @@ public sealed class DeviceContext
         if (resource.Native == null || source.DataPointer == IntPtr.Zero)
             return;
 
-        var size = Math.Max(source.SlicePitch, source.RowPitch);
+        var size = SubresourceByteSize(source, resource, subresource);
+        if (size <= 0)
+            return;
+
         Commands.UpdateResource(resource.Native, subresource, new ReadOnlySpan<byte>((void*)source.DataPointer, size),
                                 source.RowPitch, source.SlicePitch);
+    }
+
+    /// <summary>
+    /// How many bytes a <see cref="DataBox"/> covers. D3D11 ignores the pitches when the target is a buffer,
+    /// and callers routinely leave the slice pitch at zero for a 2D texture. Taking the pitches at face value
+    /// uploads a single row — or nothing at all — and the copy then reads past the staging buffer.
+    /// </summary>
+    private static int SubresourceByteSize(in DataBox source, Resource resource, int subresource)
+    {
+        if (resource is Buffer buffer)
+            return buffer.Description.SizeInBytes;
+
+        if (source.SlicePitch > 0)
+            return source.SlicePitch;
+
+        if (resource is Texture2D texture2d && source.RowPitch > 0)
+        {
+            var mip = subresource % MipLevelsOf(resource);
+            return source.RowPitch * Math.Max(1, texture2d.Description.Height >> mip);
+        }
+
+        return Math.Max(source.SlicePitch, source.RowPitch);
     }
 
     /// <summary>

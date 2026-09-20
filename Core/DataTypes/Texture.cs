@@ -2,7 +2,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.Versioning;
 using JeremyAnsel.Media.Dds;
+using StbImageSharp;
 using T3.Graphics.Compat;
 using T3.Graphics;
 using SharpDX.WIC;
@@ -18,20 +20,37 @@ public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3
     public override string Name { get => TextureObject.DebugName; set => TextureObject.DebugName = value; }
     public readonly Texture2DDescription Description = texture.Description;
 
+    [SupportedOSPlatform("windows")]
     public static Texture2D CreateFromBitmap(Device device, BitmapSource bitmapSource)
     {
-        // Allocate DataStream to receive the WIC image pixels
         var stride = bitmapSource.Size.Width * 4;
-        // WIC writes into its own stream type, so this one stays SharpDX until image loading is ported.
+        // WIC writes into its own stream type, so this one stays SharpDX.
         using var buffer = new SharpDX.DataStream(bitmapSource.Size.Height * stride, true, true);
-
-        // Copy the content of the WIC to the buffer
         bitmapSource.CopyPixels(stride, buffer);
-        int mipLevels = (int)Math.Log(bitmapSource.Size.Width, 2.0) + 1;
+
+        return CreateFromRgba(device, bitmapSource.Size.Width, bitmapSource.Size.Height, buffer.DataPointer);
+    }
+
+    /// <summary>
+    /// Creates a texture from tightly packed RGBA8 pixels. The caller owns the memory; it is only read while
+    /// this runs.
+    /// </summary>
+    public static unsafe Texture2D CreateFromRgba(Device device, int width, int height, ReadOnlySpan<byte> rgba)
+    {
+        fixed (byte* pixels = rgba)
+        {
+            return CreateFromRgba(device, width, height, (IntPtr)pixels);
+        }
+    }
+
+    private static Texture2D CreateFromRgba(Device device, int width, int height, IntPtr rgba)
+    {
+        var stride = width * 4;
+        var mipLevels = (int)Math.Log(width, 2.0) + 1;
         var texDesc = new Texture2DDescription
                           {
-                              Width = bitmapSource.Size.Width,
-                              Height = bitmapSource.Size.Height,
+                              Width = width,
+                              Height = height,
                               ArraySize = 1,
                               BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
                               Usage = ResourceUsage.Default,
@@ -41,13 +60,13 @@ public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3
                               OptionFlags = ResourceOptionFlags.GenerateMipMaps,
                               SampleDescription = new SampleDescription(1, 0),
                           };
-        
+
         // Only level 0 has pixels; the coarser levels are filtered down from it on the GPU right away, so
         // anything that samples the image small (a thumbnail, a card, a minifying shader) sees the picture.
         var dataRectangles = new DataRectangle[mipLevels];
         for (var i = 0; i < mipLevels; i++)
         {
-            dataRectangles[i] = new DataRectangle(buffer.DataPointer, stride);
+            dataRectangles[i] = new DataRectangle(rgba, stride);
             stride /= 2;
         }
 
@@ -105,14 +124,15 @@ public sealed class Texture2D(T3.Graphics.Compat.Texture2D texture) : Texture<T3
     {
         try
         {
-            using var factory = new ImagingFactory();
-            using var bitmapDecoder = new BitmapDecoder(factory, stream, DecodeOptions.CacheOnDemand);
-            using var formatConverter = new FormatConverter(factory);
-            using var bitmapFrameDecode = bitmapDecoder.GetFrame(0);
-            formatConverter.Initialize(bitmapFrameDecode, PixelFormat.Format32bppRGBA, BitmapDitherType.None, null, 0.0, BitmapPaletteType.Custom);
+            var image = ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+            if (image.Width <= 0 || image.Height <= 0)
+            {
+                texture = null;
+                failureReason = "Image has no pixels";
+                return false;
+            }
 
-            
-            texture = CreateFromBitmap(ResourceManager.Device, formatConverter);
+            texture = CreateFromRgba(ResourceManager.Device, image.Width, image.Height, image.Data);
             failureReason = null;
             return true;
         }

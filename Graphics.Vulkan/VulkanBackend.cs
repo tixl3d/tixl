@@ -292,11 +292,15 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         var arraySize = Math.Max(1, description.Dimension == TextureDimension.TextureCube ? Math.Max(6, description.ArraySize) : description.ArraySize);
         var regions = new VkBufferImageCopy[Math.Min(initialData.Length, mipLevels * arraySize)];
 
+        // Every region's offset has to land on a texel boundary. The small end of a mip chain does not divide
+        // evenly - a 640-wide image reaches a 10-byte level - so each subresource starts at an aligned offset
+        // rather than wherever the previous one happened to end.
+        var alignment = (ulong)Math.Max(1, FormatSizes.BytesPerPixel(description.Format));
         ulong total = 0;
 
         foreach (var subresource in initialData)
         {
-            total += (ulong)Math.Max(subresource.SlicePitch, subresource.RowPitch);
+            total = AlignUp(total, alignment) + (ulong)Math.Max(subresource.SlicePitch, subresource.RowPitch);
         }
 
         var staging = CreateBufferCore(total, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped);
@@ -306,6 +310,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         {
             var subresource = initialData[i];
             var size = Math.Max(subresource.SlicePitch, subresource.RowPitch);
+            offset = AlignUp(offset, alignment);
             System.Buffer.MemoryCopy((void*)subresource.Data, (byte*)mapped + offset, size, size);
 
             var mip = i % mipLevels;

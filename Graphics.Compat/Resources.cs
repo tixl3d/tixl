@@ -165,7 +165,7 @@ public sealed class Texture2D : Texture
 
     /// <summary>One entry per mip and slice, in D3D11's order.</summary>
     public Texture2D(Device device, Texture2DDescription description, DataRectangle[] data)
-        : base(device, device.Backend.CreateTexture(Describe(description), ToSubresources(data)))
+        : base(device, device.Backend.CreateTexture(Describe(description), ToSubresources(data, description)))
     {
         Description = description;
     }
@@ -193,13 +193,20 @@ public sealed class Texture2D : Texture
                    Memory = Translate.ToMemoryKind(description.Usage, description.CpuAccessFlags),
                };
 
-    internal static SubresourceData[] ToSubresources(DataRectangle[] data)
+    /// <summary>
+    /// A D3D11 <see cref="DataRectangle"/> carries only a row pitch, but the backends need to know how many
+    /// bytes a subresource holds. Derive it from the mip's height: staging only the row pitch makes the copy
+    /// read past the end of the buffer, which faults the GPU rather than failing cleanly.
+    /// </summary>
+    internal static SubresourceData[] ToSubresources(DataRectangle[] data, in Texture2DDescription description)
     {
         var result = new SubresourceData[data.Length];
+        var mipLevels = Math.Max(1, description.MipLevels);
 
         for (var i = 0; i < data.Length; i++)
         {
-            result[i] = new SubresourceData(data[i].DataPointer, data[i].Pitch, data[i].Pitch);
+            var rows = Math.Max(1, description.Height >> (i % mipLevels));
+            result[i] = new SubresourceData(data[i].DataPointer, data[i].Pitch, data[i].Pitch * rows);
         }
 
         return result;

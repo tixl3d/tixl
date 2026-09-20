@@ -253,7 +253,80 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
             case VulkanTexture { Mapped: not null } texture:
                 data.CopyTo(new Span<byte>(texture.Mapped, data.Length));
                 break;
+
+            // A device-local texture has no memory the CPU can write, so the bytes go through a staging
+            // buffer. The camera and video operators upload their frames this way every frame.
+            case VulkanTexture texture:
+            {
+                EndRenderingIfActive();
+                UploadTexture(texture, subresource, data, rowPitch);
+                break;
+            }
         }
+    }
+
+    private void UploadTexture(VulkanTexture texture, int subresource, ReadOnlySpan<byte> data, int rowPitch)
+    {
+        if (texture.Image.IsNull || data.IsEmpty)
+            return;
+
+        var mipLevels = Math.Max(1, texture.Description.MipLevels);
+        var mip = subresource % mipLevels;
+        var slice = subresource / mipLevels;
+        var width = Math.Max(1, texture.Description.Width >> mip);
+        var height = Math.Max(1, texture.Description.Height >> mip);
+        var depth = texture.Description.Dimension == TextureDimension.Texture3D ? Math.Max(1, texture.Description.Depth >> mip) : 1;
+        var bytesPerPixel = Math.Max(1, FormatSizes.BytesPerPixel(texture.Description.Format));
+
+        if (rowPitch <= 0)
+            rowPitch = width * bytesPerPixel;
+
+        // Vulkan takes the row length in texels and requires it to cover the extent.
+        if (rowPitch < width * bytesPerPixel)
+        {
+            GraphicsLog.WarnOnce("A texture update declared a row pitch narrower than the image; it was dropped.");
+            return;
+        }
+
+        // The copy below reads rowPitch bytes for every row of the extent, so the caller has to have supplied
+        // all of them. Copying only what arrived and asking for the full extent reads past the staging buffer,
+        // which faults the device instead of failing.
+        var rows = height * depth;
+        var required = rowPitch * rows;
+
+        if (data.Length < required)
+        {
+            GraphicsLog.WarnOnce("A texture update supplied fewer rows than the subresource holds; it was dropped.");
+            return;
+        }
+
+        var staging = GetUploadBuffer(subresource, required);
+
+        if (staging == null || staging.Mapped == null)
+        {
+            GraphicsLog.WarnOnce("Could not allocate a staging buffer for a texture update; the upload was dropped.");
+            return;
+        }
+
+        data[..required].CopyTo(new Span<byte>(staging.Mapped, required));
+
+        VulkanBarriers.TransitionImage(backend, _commandBuffer, texture, VkImageLayout.TransferDstOptimal,
+                                       VkPipelineStageFlags2.Copy, VkAccessFlags2.TransferWrite);
+
+        var region = new VkBufferImageCopy
+                         {
+                             bufferRowLength = (uint)(rowPitch / bytesPerPixel),
+                             imageSubresource = new VkImageSubresourceLayers
+                                                    {
+                                                        aspectMask = texture.Aspect,
+                                                        mipLevel = (uint)mip,
+                                                        baseArrayLayer = (uint)slice,
+                                                        layerCount = 1,
+                                                    },
+                             imageExtent = new VkExtent3D(width, height, depth),
+                         };
+
+        backend.Api.vkCmdCopyBufferToImage(_commandBuffer, staging.Buffer, texture.Image, VkImageLayout.TransferDstOptimal, 1, &region);
     }
 
     public void SetVertexBuffers(int startSlot, ReadOnlySpan<VertexBufferView> buffers)
@@ -815,6 +888,28 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         return new VkRect2D((int)_viewport.x, (int)(_viewport.y - height), (uint)_viewport.width, (uint)height);
     }
 
+    /// <summary>Staging for one subresource's pixels, grown and reused across frames like the scratch constants.</summary>
+    private VulkanBuffer? GetUploadBuffer(int subresource, int size)
+    {
+        if (_uploadBuffers.TryGetValue(subresource, out var buffer) && buffer.Description.SizeInBytes >= size)
+            return buffer;
+
+        buffer?.Dispose();
+
+        buffer = backend.CreateBuffer(new GpuBufferDescription
+                                          {
+                                              SizeInBytes = Math.Max(256, size),
+                                              Usage = BufferUsage.CopySource,
+                                              Memory = MemoryKind.Upload,
+                                          },
+                                      ReadOnlySpan<byte>.Empty, "texture upload") as VulkanBuffer;
+
+        if (buffer != null)
+            _uploadBuffers[subresource] = buffer;
+
+        return buffer;
+    }
+
     private VulkanBuffer? ScratchBuffer(int set, int slot, int size)
     {
         var key = (set, slot);
@@ -858,6 +953,7 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
     private readonly VulkanTextureView[] _colorTargets = new VulkanTextureView[BlendTargetStates.MaxRenderTargets];
     private readonly VertexBufferView[] _vertexBuffers = new VertexBufferView[8];
     private readonly Dictionary<(int, int), VulkanBuffer> _scratchBuffers = [];
+    private readonly Dictionary<int, VulkanBuffer> _uploadBuffers = [];
 
     private VkCommandBuffer _commandBuffer;
     private VulkanPipeline? _pipeline;
