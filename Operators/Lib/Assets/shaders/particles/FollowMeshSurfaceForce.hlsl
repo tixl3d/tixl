@@ -221,7 +221,7 @@ void main(uint3 i : SV_DispatchThreadID)
         float4 orientation = normalize(q_from_tangentAndNormal(movement, distanceFromSurface));
         float4 mixedOrientation = qSlerp(orientation, p.Rotation, 0.96);
 
-        float usedSpin = (Spin + RandomSpin) * signedNoise;
+        float usedSpin = (Spin + RandomSpin) * signedNoise.x;
         if(abs(usedSpin) > 0.001) 
         {
             float randomAngle = signedPointHash  * usedSpin;
