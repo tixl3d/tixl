@@ -338,7 +338,10 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 1. With "Surface 1" straightened (previous step), drag its right edge handle 100 px further
    right, release; press Ctrl+Z.
 2. Drag its top-right corner handle up by 50 px, release.
-2b. Hold Ctrl and drag the bottom edge handle down by 80 px, release; press Ctrl+Z.
+2b. Hold Ctrl and drag the bottom edge handle down by 80 px, release; press Ctrl+Z. Repeat on
+    the right edge handle.
+2c. Pan the view with a right-drag so the wall sits off-centre, zoom in a little, then drag an
+    edge handle again and release. Hold Ctrl once more and look at the handles.
 3. Click **+ Line** in the header and drag along a mortar line of the brick wall; repeat for a
    vertical feature (a door frame); click **Straighten**.
 4. Double-click one of the lines, type its real length in metres, **Set**, then **Apply lengths**.
@@ -354,10 +357,15 @@ its width. Then open the Output tab and check the send's Resolution in the Param
   corner, live, and the frame never re-centres. Lines and points already drawn travel with the
   photo and stay on the features they mark — they name spots on the wall, not places in the
   frame — and a projector this surface is pinned to keeps showing the wall where it did.
-- After 2b: with Ctrl the edge handles turn into circles (the left and right ones stay squares,
-  since only the height can show a stretch here) and the drag re-declares the wall's height: the
-  photo stretches into the taller frame, **Size (m)** grows along Y, and the lines and regions
-  scale with it, staying on their features.
+- After 2b: with Ctrl held, all four edge handles turn into circles and the drag re-declares the
+  wall along the axis its edge faces — the bottom one its height, the right one its width. The
+  photo stretches into the re-proportioned frame, the matching **Size (m)** field follows the
+  cursor, and the lines and regions scale with it, staying on their features. The frame keeps its
+  area, so the wall is redrawn at the same overall size whichever axis you change.
+- After 2c: the camera stays exactly where you panned and zoomed to — the frame changes size
+  under a still view, rather than the view snapping back to a fit. (It used to re-fit on every
+  drag frame, since the framed area had changed size.) Ctrl still turns the handles round
+  afterwards: the finished drag let go of the modifier.
 - After 3: the lines are drawn in the alignment colours; Straighten refines the trace so both
   lines come out level and plumb, with the photo easing to the result. The lines still lie along
   the features they were drawn on, and a projector this surface is pinned to shows the wall in

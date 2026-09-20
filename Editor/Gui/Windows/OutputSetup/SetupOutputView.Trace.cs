@@ -120,16 +120,21 @@ internal sealed partial class SetupOutputView
         if (!refining && !Homography.TryComputeQuadToQuad(rect, subject.Trace!.Quad, out _referenceEditToPhoto))
             return;
 
+        // A frame that did not reach these handles swallows the release that would have ended the drag. Left
+        // open, the gesture goes on answering for the edit modifier below, so Ctrl would stop reading the key.
+        if (!ImGui.IsMouseDown(ImGuiMouseButton.Left) && _gesture.HotId == subject.Id
+            && _gesture.Kind is GestureKinds.SurfaceResize or GestureKinds.TraceRefine)
+        {
+            EndGesture(setup);
+        }
+
         ImGui.PushID("straightEdit");
         var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
         style.ShowsChecker = false;
         style.EdgeColor = SetupColors.ForKind(SetupEntityKinds.Surface);
 
-        // Only the height can show a stretch — the straightened photo is always drawn at the width it was
-        // traced at — so the left and right handles keep saying "crop" whether Ctrl is held or not.
         var stretching = StraightEdgeStretches(subject.Id);
         style.EdgeHandleShape = stretching ? CanvasPointHandle.Shapes.Circle : CanvasPointHandle.Shapes.Square;
-        style.VerticalEdgeShape = CanvasPointHandle.Shapes.Square;
 
         var cornerPhase = CornerPinHandles.Draw(_referenceRectQuad, _projection, style, out var draggedCorner);
         var edgePhase = CanvasPointHandle.DragPhases.None;
@@ -142,8 +147,8 @@ internal sealed partial class SetupOutputView
 
         if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhases.None)
         {
-            if (stretching && edge is 0 or 2)
-                HandleStraightStretch(setup, subject, edgePhase, edgePos);
+            if (stretching)
+                HandleStraightStretch(setup, subject, edgePhase, edge, edgePos);
             else
                 HandleStraightCrop(setup, subject, edgePhase, edge, edgePos);
         }
@@ -233,12 +238,12 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// Ctrl + a horizontal edge: the wall is re-declared taller or shorter while the trace and the photo stay
-    /// put. The frame is centred and drawn at the traced width, so the dragged edge's distance from the centre
-    /// is the declared half-height — read from the cursor against the rectangle as it was at the press, so a
-    /// long drag cannot compound. Lines, points and regions are re-metered along with it.
+    /// Ctrl + an edge: the wall is re-declared wider or taller while the trace and the photo stay put. The
+    /// frame is centred, so the dragged edge's distance from the centre is half the declared span along the
+    /// axis it faces — read from the cursor against the rectangle as it was at the press, so a long drag
+    /// cannot compound. Lines, points and regions are re-metered along with it.
     /// </summary>
-    private void HandleStraightStretch(Setup setup, Surface subject, CanvasPointHandle.DragPhases phase, Vector2 edgePos)
+    private void HandleStraightStretch(Setup setup, Surface subject, CanvasPointHandle.DragPhases phase, int edge, Vector2 edgePos)
     {
         switch (phase)
         {
@@ -251,10 +256,20 @@ internal sealed partial class SetupOutputView
             {
                 _gesture.Snapshot!.Restore(subject);
                 StraightTargetBounds(subject, out var pressMin, out var pressMax);
-                var width = MathF.Max(pressMax.X - pressMin.X, 1f);
-                var height = MathF.Max(2 * MathF.Abs(edgePos.Y - (pressMin.Y + pressMax.Y) * 0.5f), 1f);
-                SurfaceMetrics.RemeterSurface(setup, subject, new Vector2(subject.SizeInMeters.X,
-                                                                          subject.SizeInMeters.X * height / width));
+                var centre = (pressMin + pressMax) * 0.5f;
+                var size = subject.SizeInMeters;
+
+                // The frame's span along the dragged axis, and what the cursor asks it to become: the declared
+                // metres follow that ratio, and the other axis keeps what it says.
+                var frame = pressMax - pressMin;
+                var isVerticalEdge = (edge & 1) == 1;
+                var was = MathF.Max(isVerticalEdge ? frame.X : frame.Y, 1f);
+                var wanted = MathF.Max(2 * MathF.Abs((isVerticalEdge ? edgePos.X - centre.X : edgePos.Y - centre.Y)), 1f);
+                var metres = isVerticalEdge
+                                 ? new Vector2(size.X * wanted / was, size.Y)
+                                 : new Vector2(size.X, size.Y * wanted / was);
+
+                SurfaceMetrics.RemeterSurface(setup, subject, metres);
                 break;
             }
 

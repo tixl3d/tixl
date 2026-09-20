@@ -174,7 +174,13 @@ internal sealed partial class SetupOutputView
 
         var topLeft = _projection.CanvasToBoard(settledMin);
         var bottomRight = _projection.CanvasToBoard(settledMax);
-        FitToBoardRect(new Vector2(topLeft.X, bottomRight.Y), new Vector2(bottomRight.X, topLeft.Y), EditModes.Straight, image.Id);
+
+        // The fit fires whenever the framed area changes size — which a crop or a stretch does on every drag
+        // frame. Re-fitting then would throw away wherever the user had panned and zoomed to, mid-gesture, so
+        // the framing is adopted without moving the camera until the drag is over.
+        var editing = _gesture.IsLive && subject != null && _gesture.HotId == subject.Id;
+        FitToBoardRect(new Vector2(topLeft.X, bottomRight.Y), new Vector2(bottomRight.X, topLeft.Y), EditModes.Straight, image.Id,
+                       keepScope: editing);
 
         var dl = ImGui.GetWindowDrawList();
         var t = _referenceStraighten.Value;
@@ -215,10 +221,11 @@ internal sealed partial class SetupOutputView
             dl.AddQuad(screenQuad[0], screenQuad[1], screenQuad[2], screenQuad[3], SetupColors.ForKind(SetupEntityKinds.Surface), 2 * scale);
             DrawEntityLabel(dl, SetupEntityKinds.Surface, screenQuad, subject!.Id, subject.Name, true, 1f - t);
 
-            // Settled: the rectified rect is editable (corners and edges refine the trace through the frozen
-            // rectification), and the measuring lines live on it.
+            // Settled: the rectified rect is editable (its corners refine the trace, its edges crop the wall),
+            // and the measuring lines live on it. A live gesture on this subject keeps them drawn whatever the
+            // view is doing — a frame that skipped them would swallow the drag's release.
             var settled = _referenceStraighten.IsSettled && _referenceSubjectEase.IsSettled && _spaceBlend.Value >= 1f && t >= 0.999f;
-            if (settled || _gesture.Kind == GestureKinds.TraceRefine)
+            if (settled || editing)
                 DrawStraightEdits(setup, dl, subject!, targetMin, targetMax, selection);
 
             return;
@@ -405,15 +412,19 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// The rectangle a traced quad straightens to, in photo px: the quad's bounding box's width and centre,
-    /// with the surface's own aspect — the wall is as wide as it was traced, and as tall as it really is.
+    /// The rectangle a traced quad straightens to, in photo px: the surface's own aspect at the size the quad
+    /// was traced at, on the quad's centre. Only the aspect carries meaning here — how many photo pixels the
+    /// wall is drawn across is arbitrary — so the area is what is kept, not one of the sides. That keeps the
+    /// two axes symmetric: re-declaring the wall wider widens the frame instead of silently shortening it.
     /// </summary>
     private static void StraightTargetBounds(Surface surface, out Vector2 min, out Vector2 max)
     {
         CanvasDraw.Bounds(surface.Trace!.Quad, out var quadMin, out var quadMax);
-        var width = MathF.Max(quadMax.X - quadMin.X, 1f);
+        var traced = new Vector2(MathF.Max(quadMax.X - quadMin.X, 1f), MathF.Max(quadMax.Y - quadMin.Y, 1f));
         var aspect = surface.SizeInMeters.X / MathF.Max(surface.SizeInMeters.Y, 0.0001f);
-        var height = width / MathF.Max(aspect, 0.0001f);
+        var area = traced.X * traced.Y;
+        var height = MathF.Sqrt(area / MathF.Max(aspect, 0.0001f));
+        var width = MathF.Max(height * aspect, 1f);
         var centre = (quadMin + quadMax) * 0.5f;
         min = centre - new Vector2(width, height) * 0.5f;
         max = centre + new Vector2(width, height) * 0.5f;
