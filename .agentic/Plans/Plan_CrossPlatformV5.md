@@ -410,6 +410,8 @@ The API is specified in [Plan_GraphicsFacade](Plan_GraphicsFacade.md) — review
    *Started 2026-09-20: both layers are written and build on Linux, with the translation covered by tests
    against a fake backend. See the facade plan's Progress section for what is still missing.*
 2. The `Graphics.D3D11` backend, with the facade forwarding through it.
+   *Started 2026-09-20: the backend is written and builds, with the compat → backend → D3D11 round trip
+   covered by tests. It has not run against a device yet; that needs Windows.*
 3. A codemod across ~150 files: `using` swaps, fully-qualified names, `NativePointer` →
    `ImGuiTextureId`, `DataStream` / `DataBox` replacements.
 4. Move the editor's ImGui renderer (`WindowsUiContentDrawer`) onto the facade.

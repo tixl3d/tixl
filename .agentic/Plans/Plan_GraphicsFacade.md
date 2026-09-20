@@ -384,6 +384,15 @@ multi-threaded command recording, or GPU-driven draws. None of these are v5.0 go
 14. **A buffer view is not a backend object.** Buffer SRVs and UAVs bind the buffer with a byte range, which
     is all Vulkan has; only texture views become `GpuTextureView`.
 
+15. **The sampler carries a reduction mode** (`Standard` / `Minimum` / `Maximum`). D3D11's `Filter` encodes it
+    in two bits and the type picker offers those filters, so a project can have one saved; without it the
+    round trip silently turned a minimum filter into an averaging one. Vulkan needs `samplerFilterMinmax`
+    (core in 1.2). Found by the round-trip test below, not by reading the code.
+16. **A D3D11 view is created per use, lazily.** Vulkan has one image view for everything; D3D11 has four
+    objects. The backend's view creates the SRV, RTV, DSV or UAV it turns out to be asked for, so a
+    sampled-only texture never allocates a render target view, and a view the bind flags do not allow is a
+    warning and a null rather than an exception.
+
 ## Progress (2026-09-20)
 
 Written, building on Linux, uncommitted:
@@ -401,8 +410,22 @@ Written, building on Linux, uncommitted:
   nothing, push/pop across operators, an unbalanced pop, the sampler and usage translation, the pipeline built
   from the bound targets, and slot clamping. 144 tests pass.
 
+- `Graphics.D3D11/` — the forwarding backend: `Convert` (the backend's vocabulary back into D3D11's),
+  the resource, view, buffer, sampler, shader and pipeline wrappers, `D3D11CommandList` (state objects applied
+  per pipeline, bindings diffed per stage so a slot that disappeared is unbound, inline constants in a renamed
+  dynamic buffer) and `D3D11Backend` (resource creation, the pipeline cache, blocking map and readback).
+  It builds on Linux; nothing has run it yet — that needs Windows.
+- `Core.Tests/GraphicsTranslationRoundTripTests` — compat → backend → D3D11 has to be the identity for every
+  value a project can store: all 36 filters, every blend option and operation, stencil operations, write
+  masks, address modes, comparisons, topologies including patch lists, bind flags and memory kinds. This is
+  what caught the missing reduction mode. 161 tests pass.
+
 Not written yet: the swapchain, the shader compiler's interface, `DataStream`'s replacement, moving TiXL's
-wrapper types into `Graphics/`, and both backends.
+wrapper types into `Graphics/`, and the Vulkan backend.
+
+**Untested on Windows.** The D3D11 backend compiles but has never talked to a device. First run needs a
+Windows machine, and the first thing to check is that a pipeline change applies every state object the
+previous one set.
 
 ## Still open
 

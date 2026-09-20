@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="$(SolutionDir)/Tixl.props" />
+    <PropertyGroup>
+        <TargetFramework>$(TixlNetCoreFrameworkVersion)</TargetFramework>
+        <RootNamespace>T3.Graphics.D3D11</RootNamespace>
+        <AssemblyName>Graphics.D3D11</AssemblyName>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
+        <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Graphics\Graphics.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Core.Tests" />
+    </ItemGroup>
+</Project>

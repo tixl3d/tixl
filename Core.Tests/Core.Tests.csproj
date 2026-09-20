@@ -22,5 +22,6 @@
         <ProjectReference Include="..\Core\Core.csproj" />
         <ProjectReference Include="..\Graphics\Graphics.csproj" />
         <ProjectReference Include="..\Graphics.Compat\Graphics.Compat.csproj" />
+        <ProjectReference Include="..\Graphics.D3D11\Graphics.D3D11.csproj" />
     </ItemGroup>
 </Project>

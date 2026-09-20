@@ -184,6 +184,69 @@ public readonly record struct GraphicsPipelineDescription
 
     public Format DepthStencilFormat { get; init; }
     public SampleDescription Samples { get; init; }
+
+    /// <summary>
+    /// Written out rather than left to the compiler: the generated equality of a record struct compares an
+    /// inline-array field by its single declared element, so two descriptions differing only in the blend
+    /// state of target 3 would count as equal — and a backend caching pipelines by description would hand
+    /// back the wrong one.
+    /// </summary>
+    /// <remarks>
+    /// The vertex layout compares by reference. Layouts come from cached objects that live as long as the
+    /// pipelines built from them, so a new array means a new layout.
+    /// </remarks>
+    public bool Equals(GraphicsPipelineDescription other)
+    {
+        if (!ReferenceEquals(VertexShader, other.VertexShader)
+            || !ReferenceEquals(PixelShader, other.PixelShader)
+            || !ReferenceEquals(GeometryShader, other.GeometryShader)
+            || !ReferenceEquals(VertexLayout, other.VertexLayout)
+            || Topology != other.Topology
+            || PatchControlPoints != other.PatchControlPoints
+            || !Rasterizer.Equals(other.Rasterizer)
+            || !DepthStencil.Equals(other.DepthStencil)
+            || AlphaToCoverage != other.AlphaToCoverage
+            || RenderTargetCount != other.RenderTargetCount
+            || DepthStencilFormat != other.DepthStencilFormat
+            || Samples.Count != other.Samples.Count
+            || Samples.Quality != other.Samples.Quality)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < RenderTargetCount; i++)
+        {
+            if (!Blend[i].Equals(other.Blend[i]) || RenderTargetFormats[i] != other.RenderTargetFormats[i])
+                return false;
+        }
+
+        return true;
+    }
+
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(VertexShader);
+        hash.Add(PixelShader);
+        hash.Add(GeometryShader);
+        hash.Add(VertexLayout);
+        hash.Add(Topology);
+        hash.Add(PatchControlPoints);
+        hash.Add(Rasterizer);
+        hash.Add(DepthStencil);
+        hash.Add(AlphaToCoverage);
+        hash.Add(RenderTargetCount);
+        hash.Add(DepthStencilFormat);
+        hash.Add(Samples.Count);
+
+        for (var i = 0; i < RenderTargetCount; i++)
+        {
+            hash.Add(Blend[i]);
+            hash.Add(RenderTargetFormats[i]);
+        }
+
+        return hash.ToHashCode();
+    }
 }
 
 [System.Runtime.CompilerServices.InlineArray(BlendTargetStates.MaxRenderTargets)]

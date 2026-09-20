@@ -74,17 +74,20 @@ internal static class Translate
                    };
     }
 
-    // D3D11_FILTER is a bit field: bit 0 mip, bit 2 mag, bit 4 min, 0x40 anisotropic, 0x80 comparison.
+    // D3D11_FILTER is a bit field: bit 0 mip, bit 2 mag, bit 4 min, 0x40 anisotropic, and a two-bit
+    // reduction mode at bit 7 (0 average, 1 comparison, 2 minimum, 3 maximum).
     private const int MipLinearBit = 0x1;
     private const int MagLinearBit = 0x4;
     private const int MinLinearBit = 0x10;
     private const int AnisotropicBits = 0x40;
-    private const int ComparisonBit = 0x80;
+    private const int ReductionShift = 7;
+    private const int ReductionMask = 0x3;
 
     internal static SamplerDescription ToSampler(in SamplerStateDescription description)
     {
         var filter = (int)description.Filter;
         var anisotropic = (filter & AnisotropicBits) != 0;
+        var reduction = (filter >> ReductionShift) & ReductionMask;
 
         return new SamplerDescription
                    {
@@ -96,7 +99,13 @@ internal static class Translate
                        AddressW = ToAddressMode(description.AddressW),
                        MipLodBias = description.MipLodBias,
                        MaxAnisotropy = anisotropic ? description.MaximumAnisotropy : 1,
-                       Compare = (filter & ComparisonBit) != 0 ? ToCompare(description.ComparisonFunction) : null,
+                       Compare = reduction == 1 ? ToCompare(description.ComparisonFunction) : null,
+                       Reduction = reduction switch
+                                       {
+                                           2 => SamplerReduction.Minimum,
+                                           3 => SamplerReduction.Maximum,
+                                           _ => SamplerReduction.Standard,
+                                       },
                        BorderColor = description.BorderColor,
                        MinLod = description.MinimumLod,
                        MaxLod = description.MaximumLod,

@@ -96,9 +96,24 @@ public readonly record struct SamplerDescription
     public float MipLodBias { get; init; }
     public int MaxAnisotropy { get; init; }
     public CompareFunction? Compare { get; init; }
+
+    /// <summary>
+    /// D3D11 can reduce a filter footprint by minimum or maximum instead of averaging, and the type picker
+    /// offers those filters, so a project can have one saved. Vulkan needs samplerFilterMinmax (core in 1.2).
+    /// </summary>
+    public SamplerReduction Reduction { get; init; }
     public Vector4 BorderColor { get; init; }
     public float MinLod { get; init; }
     public float MaxLod { get; init; }
+}
+
+public enum SamplerReduction
+{
+    /// <summary>Weighted average, which is what everything but an explicit min/max filter wants.</summary>
+    Standard,
+
+    Minimum,
+    Maximum,
 }
 
 public enum FilterMode
