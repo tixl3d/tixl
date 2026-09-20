@@ -2,12 +2,13 @@
 using System;
 using System.Drawing;
 using SDL;
-using SharpDX.DXGI;
+using T3.Graphics;
+using T3.Graphics.Compat;
 using T3.SdlPlatform;
 using static SDL.SDL3;
-using Device = SharpDX.Direct3D11.Device;
-using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
-using Resource = SharpDX.Direct3D11.Resource;
+using Device = T3.Graphics.Compat.Device;
+using RenderTargetView = T3.Graphics.Compat.RenderTargetView;
+using Resource = T3.Graphics.Compat.Resource;
 
 namespace T3.Player;
 
@@ -34,7 +35,7 @@ internal sealed unsafe class PlayerWindow : IDisposable
 
     public SDL_WindowID Id { get; }
     public SwapChain SwapChain { get; private set; } = null!;
-    public SharpDX.Direct3D11.Texture2D BackBuffer { get; private set; } = null!;
+    public T3.Graphics.Compat.Texture2D BackBuffer { get; private set; } = null!;
     public RenderTargetView RenderTargetView { get; private set; } = null!;
     public Size BackBufferSize { get; private set; }
 
@@ -85,33 +86,41 @@ internal sealed unsafe class PlayerWindow : IDisposable
                    : System.Numerics.Vector2.Zero;
     }
 
+    /// <summary>
+    /// Creates the chain this window presents from. Which handle the backend needs is its own business: the
+    /// window hands over the Win32 one and a way to make a Vulkan surface, and the backend takes what it uses.
+    /// </summary>
     public void CreateSwapChain(Device device)
     {
-        if (!OperatingSystem.IsWindows())
-            throw new PlatformNotSupportedException("The player renders with Direct3D 11, which needs Windows.");
-
-        var windowHandle = SDL_GetPointerProperty(SDL_GetWindowProperties(_window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero);
         var size = GetPixelSize();
-        var description = new SwapChainDescription
-                              {
-                                  BufferCount = BufferCount,
-                                  ModeDescription = new ModeDescription(size.Width, size.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                                  IsWindowed = true,
-                                  OutputHandle = windowHandle,
-                                  SampleDescription = new SampleDescription(1, 0),
-                                  SwapEffect = SwapEffect.FlipDiscard,
-                                  Flags = SwapChainFlags.AllowModeSwitch,
-                                  Usage = Usage.RenderTargetOutput,
-                              };
+        var target = new SurfaceTarget
+                         {
+                             Win32Window = OperatingSystem.IsWindows()
+                                               ? SDL_GetPointerProperty(SDL_GetWindowProperties(_window), SDL_PROP_WINDOW_WIN32_HWND_POINTER,
+                                                                        IntPtr.Zero)
+                                               : IntPtr.Zero,
+                             CreateVulkanSurface = CreateVulkanSurface,
+                         };
 
-        using var dxgiDevice = device.QueryInterface<SharpDX.DXGI.Device>();
-        using var adapter = dxgiDevice.Adapter;
-        using var factory = adapter.GetParent<Factory>();
-        SwapChain = new SwapChain(factory, device, description);
+        SwapChain = SwapChain.TryCreate(device,
+                                        new SwapChainDescription
+                                            {
+                                                Width = size.Width,
+                                                Height = size.Height,
+                                                Format = Format.R8G8B8A8_UNorm,
+                                                BufferCount = BufferCount,
+                                                AllowModeSwitch = true,
+                                            },
+                                        target, "player window")
+                    ?? throw new InvalidOperationException("Could not create a swap chain for the player window.");
 
-        // SDL owns the window; DXGI must not react to Alt+Enter or other window messages on its own.
-        factory.MakeWindowAssociation(windowHandle, WindowAssociationFlags.IgnoreAll);
         CreateBackBufferViews(device);
+    }
+
+    private nint CreateVulkanSurface(nint instance)
+    {
+        VkSurfaceKHR_T* surface = null;
+        return SDL_Vulkan_CreateSurface(_window, (VkInstance_T*)instance, null, &surface) ? (nint)surface : IntPtr.Zero;
     }
 
     /// <summary>
@@ -132,7 +141,7 @@ internal sealed unsafe class PlayerWindow : IDisposable
         RenderTargetView.Dispose();
         BackBuffer.Dispose();
 
-        SwapChain.ResizeBuffers(BufferCount, size.Width, size.Height, Format.Unknown, SwapChain.Description.Flags);
+        SwapChain.ResizeBuffers(size.Width, size.Height);
         CreateBackBufferViews(device);
     }
 
@@ -146,7 +155,7 @@ internal sealed unsafe class PlayerWindow : IDisposable
 
     private void CreateBackBufferViews(Device device)
     {
-        BackBuffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(SwapChain, 0);
+        BackBuffer = SwapChain.GetBackBuffer();
         RenderTargetView = new RenderTargetView(device, BackBuffer);
         BackBufferSize = new Size(BackBuffer.Description.Width, BackBuffer.Description.Height);
     }

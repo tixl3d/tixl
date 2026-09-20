@@ -4,13 +4,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ImGuiNET;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiContentDrawing;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using Device = SharpDX.Direct3D11.Device;
+using Buffer = T3.Graphics.Compat.Buffer;
+using Device = T3.Graphics.Compat.Device;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.App;
@@ -48,8 +47,7 @@ internal static class StallWatchdog
 
         try
         {
-            using var multithread = device.QueryInterface<Multithread>();
-            multithread.SetMultithreadProtected(true);
+            device.SetMultithreadProtected(true);
         }
         catch (Exception e)
         {
@@ -199,13 +197,13 @@ internal static class StallWatchdog
             InitDeviceObjects();
 
             var context = _deferredContext!;
-            context.MapSubresource(_vertexBuffer, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out var vertexStream);
+            context.MapSubresource(_vertexBuffer, MapMode.WriteDiscard, T3.Graphics.Compat.MapFlags.None, out var vertexStream);
             vertexStream.WriteRange(StallOverlay.Vertices, 0, vertexCount);
             vertexStream.Dispose();
             context.UnmapSubresource(_vertexBuffer, 0);
 
             var projection = Matrix4x4.CreateOrthographicOffCenter(0, size.X, size.Y, 0, -1, 1);
-            context.MapSubresource(_projectionBuffer, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out var projectionStream);
+            context.MapSubresource(_projectionBuffer, MapMode.WriteDiscard, T3.Graphics.Compat.MapFlags.None, out var projectionStream);
             projectionStream.Write(projection);
             projectionStream.Dispose();
             context.UnmapSubresource(_projectionBuffer, 0);
@@ -221,7 +219,7 @@ internal static class StallWatchdog
             context.VertexShader.SetConstantBuffer(0, _projectionBuffer);
 
             // The captured frame carries arbitrary alpha and must replace the discarded back buffer.
-            context.OutputMerger.SetBlendState(null, null, -1);
+            context.OutputMerger.SetBlendState(null, null, 0xffffffff);
             context.PixelShader.SetShaderResource(0, capturedFrameSrv);
             context.Draw(StallOverlay.ScreenVertexCount, 0);
 
@@ -235,9 +233,11 @@ internal static class StallWatchdog
 
             context.PixelShader.SetShaderResource(0, null);
 
-            using var commandList = context.FinishCommandList(false);
-            _device!.ImmediateContext.ExecuteCommandList(commandList, true);
-            _mainWindow.SwapChain.Present(0, PresentFlags.None);
+            // The overlay was recorded on a deferred context and replayed from this thread. The backend API
+            // has no second recording context yet — Vulkan would need its own command buffer and pool — so
+            // the frozen-application overlay stays dark until it does. Detection is unaffected.
+            GraphicsLog.WarnOnce("The stall overlay needs a second recording context, which the backend does not provide yet.");
+            _mainWindow.SwapChain.Present(0);
             _hasPresentedSinceLastFrame = true;
         }
     }
@@ -247,7 +247,7 @@ internal static class StallWatchdog
         if (_deferredContext != null)
             return;
 
-        _deferredContext = new DeviceContext(_device);
+        _deferredContext = _device.ImmediateContext;
         _vertexBuffer = new Buffer(_device, new BufferDescription
                                                 {
                                                     SizeInBytes = StallOverlay.Vertices.Length * Unsafe.SizeOf<ImDrawVert>(),
@@ -270,7 +270,6 @@ internal static class StallWatchdog
         _vertexBuffer = null;
         _projectionBuffer?.Dispose();
         _projectionBuffer = null;
-        _deferredContext?.Dispose();
         _deferredContext = null;
     }
 

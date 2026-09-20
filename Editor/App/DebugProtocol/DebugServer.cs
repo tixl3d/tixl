@@ -982,7 +982,9 @@ internal static class DebugServer
         {
             if (_gpuAdapter == null)
             {
-                using var dxgiDevice = T3.Core.Resource.ResourceManager.Device.QueryInterface<SharpDX.DXGI.Device>();
+                using var nativeDevice = new SharpDX.Direct3D11.Device(T3.Core.Resource.ResourceManager.Device.NativePointer);
+                System.Runtime.InteropServices.Marshal.AddRef(T3.Core.Resource.ResourceManager.Device.NativePointer);
+                using var dxgiDevice = nativeDevice.QueryInterface<SharpDX.DXGI.Device>();
                 using var adapter = dxgiDevice.Adapter;
                 _gpuAdapter = adapter.QueryInterface<SharpDX.DXGI.Adapter3>();
             }

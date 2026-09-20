@@ -25,7 +25,7 @@ internal static class WindowCapture
         try
         {
             using var bitmap = new Bitmap(clientRect.Right, clientRect.Bottom, PixelFormat.Format32bppArgb);
-            using (var graphics = Graphics.FromImage(bitmap))
+            using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
             {
                 var deviceContext = graphics.GetHdc();
                 try

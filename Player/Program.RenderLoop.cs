@@ -1,9 +1,7 @@
 #nullable enable
 using System;
-using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Logging;
@@ -13,6 +11,8 @@ using T3.Core.Output;
 using T3.Core.Operator.Slots;
 using T3.Core.Stats;
 using Texture2D = T3.Core.DataTypes.Texture2D;
+
+using System.Numerics;
 
 namespace T3.Player;
 
@@ -70,7 +70,7 @@ internal static partial class Program
 
         EvaluateAndDrawOutput(_resolution, _deviceContext, _mainWindow.RenderTargetView);
 
-        _mainWindow.SwapChain.Present(_vsyncInterval, PresentFlags.None);
+        _mainWindow.SwapChain.Present(_vsyncInterval);
         PresentOutputWindows();
 
         PerformanceMetrics.RecordFrame((float)(Playback.LastFrameDuration * 1000.0));
@@ -140,7 +140,7 @@ internal static partial class Program
 
         // Clear before evaluating: with a flip-model swap chain an un-drawn back buffer is undefined
         // (typically white), which hides the fact that the output produced nothing.
-        deviceContext.ClearRenderTargetView(renderView, new Color(0.45f, 0.55f, 0.6f, 1.0f));
+        deviceContext.ClearRenderTargetView(renderView, new Vector4(0.45f, 0.55f, 0.6f, 1.0f));
 
         if (outputTexture == null)
         {

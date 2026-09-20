@@ -37,12 +37,12 @@ internal sealed class LoadingScreen : IDisposable
     /// Draws onto <paramref name="backBuffer"/>. <paramref name="progress"/> is 0..1; <paramref name="status"/> is the
     /// current step, <paramref name="lastLogLine"/> the most recent log message.
     /// </summary>
-    public void Draw(Texture2D backBuffer, int width, int height, string status, float progress, string? lastLogLine, bool cancelRequested)
+    public void Draw(nint backBufferHandle, int width, int height, string status, float progress, string? lastLogLine, bool cancelRequested)
     {
         if (_d2dFactory == null || _dwriteFactory == null)
             return;
 
-        if (!EnsureRenderTarget(backBuffer, width, height))
+        if (!EnsureRenderTarget(backBufferHandle, width, height))
             return;
 
         var renderTarget = _renderTarget!;
@@ -102,19 +102,21 @@ internal sealed class LoadingScreen : IDisposable
         _d2dFactory?.Dispose();
     }
 
-    private bool EnsureRenderTarget(Texture2D backBuffer, int width, int height)
+    private bool EnsureRenderTarget(nint backBufferHandle, int width, int height)
     {
-        if (_renderTarget != null && ReferenceEquals(_backBuffer, backBuffer))
+        if (_renderTarget != null && _backBufferHandle == backBufferHandle)
             return true;
 
         ReleaseRenderTarget();
         try
         {
+            using var backBuffer = new Texture2D(backBufferHandle);
+            System.Runtime.InteropServices.Marshal.AddRef(backBufferHandle);
             using var surface = backBuffer.QueryInterface<Surface>();
             var properties = new RenderTargetProperties(new PixelFormat(Format.Unknown, AlphaMode.Premultiplied));
             _renderTarget = new RenderTarget(_d2dFactory, surface, properties);
             _renderTarget.TextAntialiasMode = SharpDX.Direct2D1.TextAntialiasMode.Grayscale;
-            _backBuffer = backBuffer;
+            _backBufferHandle = backBufferHandle;
             _brushes = new Brushes(_renderTarget);
 
             var unit = height / 100f;
@@ -158,7 +160,7 @@ internal sealed class LoadingScreen : IDisposable
         _brushes = null;
         _renderTarget?.Dispose();
         _renderTarget = null;
-        _backBuffer = null;
+        _backBufferHandle = 0;
     }
 
     private sealed class Brushes : IDisposable
@@ -197,7 +199,7 @@ internal sealed class LoadingScreen : IDisposable
     private D2DFactory? _d2dFactory;
     private readonly DWriteFactory? _dwriteFactory;
     private RenderTarget? _renderTarget;
-    private Texture2D? _backBuffer;
+    private nint _backBufferHandle;
     private Brushes? _brushes;
     private TextFormat? _titleFormat;
     private TextFormat? _statusFormat;

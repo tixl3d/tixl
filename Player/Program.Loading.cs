@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using SharpDX;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Compilation;
@@ -16,6 +15,8 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
 using Texture2D = T3.Core.DataTypes.Texture2D;
+
+using System.Numerics;
 
 namespace T3.Player;
 
@@ -38,8 +39,8 @@ internal static partial class Program
 
         EnsureBackBufferSize();
         var size = _mainWindow.BackBufferSize;
-        _loadingScreen.Draw(_mainWindow.BackBuffer, size.Width, size.Height, status, progress, _lastLogLine?.Text, false);
-        _mainWindow.SwapChain.Present(1, PresentFlags.None);
+        _loadingScreen.Draw(_mainWindow.BackBuffer.NativePointer, size.Width, size.Height, status, progress, _lastLogLine?.Text, false);
+        _mainWindow.SwapChain.Present(1);
         return true;
     }
 

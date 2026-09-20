@@ -2,19 +2,17 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using SharpDX.Windows;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Styling;
-using Device = SharpDX.Direct3D11.Device;
+using Device = T3.Graphics.Compat.Device;
 using Icon = System.Drawing.Icon;
 using Rectangle = System.Drawing.Rectangle;
-using Resource = SharpDX.Direct3D11.Resource;
+using Resource = T3.Graphics.Compat.Resource;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.App;
@@ -45,20 +43,11 @@ internal sealed class AppWindow
 
     internal SwapChainDescription SwapChainDescription => new()
                                                               {
-                                                                  ModeDescription = new ModeDescription(Width,
-                                                                                                        Height,
-                                                                                                        new Rational(60, 1),
-                                                                                                        Format.R8G8B8A8_UNorm),
-                                                                  IsWindowed = true,
-                                                                  OutputHandle = Form.Handle,
-                                                                  SampleDescription = new SampleDescription(1, 0),
-
-                                                                  BufferCount = 2,
-                                                                  SwapEffect = SwapEffect.FlipDiscard,
-                                                                  Usage = Usage.RenderTargetOutput,
-                                                                  Flags = UseFrameLatencyWaitable
-                                                                              ? SwapChainFlags.FrameLatencyWaitAbleObject
-                                                                              : SwapChainFlags.None,
+                                                                  Width = Width,
+                                                                  Height = Height,
+                                                                  Format = Format.R8G8B8A8_UNorm,
+                                                                  BufferCount = 3,
+                                                                  UseFrameLatencyWaitableObject = UseFrameLatencyWaitable,
                                                               };
 
     internal bool IsMinimized => Form.WindowState == FormWindowState.Minimized;
@@ -92,7 +81,7 @@ internal sealed class AppWindow
 
     public Vector2 GetDpi()
     {
-        using Graphics graphics = Form.CreateGraphics();
+        using System.Drawing.Graphics graphics = Form.CreateGraphics();
         Vector2 dpi = new(graphics.DpiX, graphics.DpiY);
         return dpi;
     }
@@ -115,12 +104,10 @@ internal sealed class AppWindow
         Form.Bounds = screens[screenIndex].Bounds;
     }
 
-    internal void InitViewSwapChain(Factory factory)
+    internal void InitViewSwapChain(SharpDX.DXGI.Factory factory)
     {
-        SwapChain = new SwapChain(factory, _device, SwapChainDescription);
-        SwapChain.ResizeBuffers(bufferCount: 3, Width, Height,
-                                SwapChain.Description.ModeDescription.Format, SwapChain.Description.Flags);
-        CaptureFrameLatencyWaitableHandleIfEnabled();
+        SwapChain = SwapChain.TryCreate(_device, SwapChainDescription, new SurfaceTarget { Win32Window = Form.Handle }, "editor window")
+                    ?? throw new InvalidOperationException("Could not create a swap chain for the editor window.");
     }
 
     internal void PrepareRenderingFrame()
@@ -129,9 +116,7 @@ internal sealed class AppWindow
         _deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, Width, Height, 0.0f, 1.0f));
         _deviceContext.OutputMerger.SetTargets(RenderTargetView);
 
-        var color = UiColors.WindowBackground.ToByte4();
-        var sharpDxColor = new SharpDX.Color(color.X, color.Y, color.Z, color.W);
-        _deviceContext.ClearRenderTargetView(RenderTargetView, sharpDxColor);
+        _deviceContext.ClearRenderTargetView(RenderTargetView, UiColors.WindowBackground.Rgba);
     }
 
     internal void RunRenderLoop(Action callback)
@@ -170,7 +155,6 @@ internal sealed class AppWindow
         _device = device;
         _deviceContext = deviceContext;
         _swapChain = swapChain;
-        CaptureFrameLatencyWaitableHandleIfEnabled();
     }
 
     /// <summary>
@@ -184,10 +168,7 @@ internal sealed class AppWindow
             return;
         try
         {
-            using var swapChain2 = _swapChain.QueryInterface<SwapChain2>();
-            _frameLatencyWaitableHandle = swapChain2.FrameLatencyWaitableObject;
-            // 1 = lowest latency, 2 = small queue depth (less risk of stalls under jitter).
-            swapChain2.MaximumFrameLatency = 2;
+            _swapChain.WaitForFrameLatency();
         }
         catch (SharpDX.SharpDXException e)
         {
@@ -242,7 +223,7 @@ internal sealed class AppWindow
     private void InitRenderTargetsAndEventHandlers()
     {
         var device = _device;
-        _backBufferTexture = Resource.FromSwapChain<Texture2D>(SwapChain, 0);
+        _backBufferTexture = SwapChain.GetBackBuffer();
         RenderTargetView = new RenderTargetView(device, _backBufferTexture);
 
         Form.ResizeBegin += (sender, args) => _isResizingRightNow = true;
@@ -278,8 +259,8 @@ internal sealed class AppWindow
 
         // Preserve the swap chain's existing flags (in particular FrameLatencyWaitableObject must
         // be carried across resize, otherwise the waitable handle becomes invalid).
-        _swapChain.ResizeBuffers(3, Form.ClientSize.Width, Form.ClientSize.Height, Format.Unknown, _swapChain.Description.Flags);
-        _backBufferTexture = Resource.FromSwapChain<Texture2D>(_swapChain, 0);
+        _swapChain.ResizeBuffers(Form.ClientSize.Width, Form.ClientSize.Height);
+        _backBufferTexture = _swapChain.GetBackBuffer();
         _renderTargetView = new RenderTargetView(_device, _backBufferTexture);
     }
 

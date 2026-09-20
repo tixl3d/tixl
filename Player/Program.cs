@@ -10,9 +10,8 @@ using System.Numerics;
 using System.Text;
 using ManagedBass;
 using Newtonsoft.Json;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Compilation;
@@ -27,17 +26,17 @@ using T3.Core.Operator.Slots;
 using T3.Core.Settings;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
-using Device = SharpDX.Direct3D11.Device;
-using Resource = SharpDX.Direct3D11.Resource;
+using Device = T3.Graphics.Compat.Device;
+using Resource = T3.Graphics.Compat.Resource;
 using SDL;
 using SilkWindows;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.Utils;
 using T3.SdlPlatform;
 using T3.Serialization;
-using DeviceContext = SharpDX.Direct3D11.DeviceContext;
+using DeviceContext = T3.Graphics.Compat.DeviceContext;
 using Factory = SharpDX.DXGI.Factory;
-using FillMode = SharpDX.Direct3D11.FillMode;
+using FillMode = T3.Graphics.Compat.FillMode;
 using ResourceManager = T3.Core.Resource.ResourceManager;
 using VertexShader = T3.Core.DataTypes.VertexShader;
 using PixelShader = T3.Core.DataTypes.PixelShader;
@@ -178,7 +177,9 @@ internal static partial class Program
             // BgraSupport is required for the Direct2D loading screen
             var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
 #endif
-            _device = new Device(DriverType.Hardware, deviceCreationFlags, levels);
+            // Which backend renders is decided here, and nothing above this line knows the difference.
+            _backend = T3.Graphics.D3D11.D3D11Backend.Create();
+            _device = new Device(_backend);
             ResourceManager.Init(_device);
             _deviceContext = _device.ImmediateContext;
             _mainWindow.CreateSwapChain(_device);
@@ -435,8 +436,7 @@ internal static partial class Program
                 _mainWindow?.Dispose();
                 _deviceContext?.ClearState();
                 _deviceContext?.Flush();
-                _device?.Dispose();
-                _deviceContext?.Dispose();
+                _backend?.Dispose();
             }
             catch (Exception e)
             {
@@ -595,6 +595,7 @@ internal static partial class Program
     private static RasterizerState _rasterizerState;
     private static Resource<VertexShader> _fullScreenVertexShaderResource;
     private static Resource<PixelShader> _fullScreenPixelShaderResource;
+    private static T3.Graphics.D3D11.D3D11Backend? _backend;
     private static Device _device;
     private static Int2 _resolution;
     private static readonly List<Instance> _sends = [];

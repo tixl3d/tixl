@@ -4,9 +4,9 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using ImGuiNET;
 using SharpDX.D3DCompiler;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
-using SharpDX.Mathematics.Interop;
+using T3.Graphics.Compat;
+using T3.Graphics;
+using System.Numerics;
 using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.Operator.Slots;
 using T3.Core.Rendering;
@@ -21,8 +21,8 @@ using T3.Editor.Gui.Windows.Output;
 using T3.Editor.SystemUi;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.SystemUi;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using Device = SharpDX.Direct3D11.Device;
+using Buffer = T3.Graphics.Compat.Buffer;
+using Device = T3.Graphics.Compat.Device;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.UiContentDrawing;
@@ -34,7 +34,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 {
     private IntPtr _imguiContext;
     private object _contextLock;
-    private readonly ShaderResourceView _customImageView = new ShaderResourceView(IntPtr.Zero);
+    private ShaderResourceView? _customImageView;
 
     #region Init
     public void Initialize(Device device, int width, int height, object contextLock, out IntPtr imguiContext)
@@ -317,8 +317,8 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         }
 
         // Copy and convert all vertices into a single contiguous buffer
-        _deviceContext.MapSubresource(_vb, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out var vbStream);
-        _deviceContext.MapSubresource(_ib, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out var ibStream);
+        _deviceContext.MapSubresource(_vb, MapMode.WriteDiscard, T3.Graphics.Compat.MapFlags.None, out var vbStream);
+        _deviceContext.MapSubresource(_ib, MapMode.WriteDiscard, T3.Graphics.Compat.MapFlags.None, out var ibStream);
         for (int n = 0; n < drawData.CmdListsCount; n++)
         {
             ImDrawListPtr cmdList = drawData.CmdLists[n];
@@ -332,10 +332,10 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         _deviceContext.UnmapSubresource(_ib, 0);
     }
 
-    private readonly SharpDX.Mathematics.Interop.RawRectangle[] _prevScissorRects = new SharpDX.Mathematics.Interop.RawRectangle[16];
+    private readonly T3.Graphics.ScissorRect[] _prevScissorRects = new T3.Graphics.ScissorRect[16];
 
     //Note : mrvux : unless you use multi viewport, you can set to 1, I leave 16 for safety here since it's only called once per frame, better than accumulating GC
-    private readonly SharpDX.Mathematics.Interop.RawViewportF[] _prevViewports = new SharpDX.Mathematics.Interop.RawViewportF[16];
+    private readonly T3.Graphics.Viewport[] _prevViewports = new T3.Graphics.Viewport[16];
 
     private void DrawData(ImDrawDataPtr drawData)
     {
@@ -346,30 +346,9 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
         ResourceUtils.WriteDynamicBufferData<Matrix4x4>(_deviceContext, _vertexConstantBuffer, projectionMatrix);
 
-        // Backup DX state that will be modified to restore it afterwards (unfortunately this is very ugly looking and verbose. Close your eyes!)
-        _deviceContext.Rasterizer.GetScissorRectangles(_prevScissorRects);
-        _deviceContext.Rasterizer.GetViewports(_prevViewports);
-        var prevRasterizerState = _deviceContext.Rasterizer.State;
-        var prevBlendState = _deviceContext.OutputMerger.BlendState;
-        var prevBlendFactor = _deviceContext.OutputMerger.BlendFactor;
-        var prevSampleMask = _deviceContext.OutputMerger.BlendSampleMask;
-        var prevDepthStencilState = _deviceContext.OutputMerger.DepthStencilState;
-        var prevStencilRef = _deviceContext.OutputMerger.DepthStencilReference;
-        var prevPsShaderResource = _deviceContext.PixelShader.GetShaderResources(0, 1)[0];
-        var prevPsSampler = _deviceContext.PixelShader.GetSamplers(0, 1);
-        var prevPs = _deviceContext.PixelShader.Get();
-        var prevVs = _deviceContext.VertexShader.Get();
-        var prevHs = _deviceContext.HullShader.Get();
-        var prevGs = _deviceContext.GeometryShader.Get();
-        var prevDs = _deviceContext.DomainShader.Get();
-        var prevVsConstantBuffer = _deviceContext.VertexShader.GetConstantBuffers(0, 1);
-        var prevPrimitiveTopology = _deviceContext.InputAssembler.PrimitiveTopology;
-
-        _deviceContext.InputAssembler.GetIndexBuffer(out var prevIndexBuffer, out var prevIndexBufferFormat, out var prevIndexBufferOffset);
-        Buffer[] prevVertexBuffer = new Buffer[1];
-        int[] prevVertexBufferOffset = new int[1], prevVertexBufferStride = new int[1];
-        _deviceContext.InputAssembler.GetVertexBuffers(0, 1, prevVertexBuffer, prevVertexBufferOffset, prevVertexBufferStride);
-        var prevInputLayout = _deviceContext.InputAssembler.InputLayout;
+        // Everything ImGui touches is saved here and put back at the end of the method. This replaces two
+        // dozen reads from the driver, which is a thing Vulkan cannot do at all.
+        _deviceContext.PushState(StateGroups.All);
 
         // Setup viewport
         _deviceContext.Rasterizer.SetViewport(0, 0, drawData.DisplaySize.X, drawData.DisplaySize.Y);
@@ -380,7 +359,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         _deviceContext.InputAssembler.InputLayout = _inputLayout;
         _deviceContext.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(_vb, stride, offset));
         _deviceContext.InputAssembler.SetIndexBuffer(_ib, Format.R16_UInt, 0);
-        _deviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+        _deviceContext.InputAssembler.PrimitiveTopology = T3.Graphics.Compat.PrimitiveTopology.TriangleList;
         _deviceContext.VertexShader.SetShader(_vertexShader, null, 0);
         _deviceContext.VertexShader.SetConstantBuffer(0, _vertexConstantBuffer);
         _deviceContext.PixelShader.SetShader(_pixelShader, null, 0);
@@ -393,7 +372,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
         // Setup render state
         // Note : mrvux do not use properties for blend state / blend, since the native functions are packed with the 
-        _deviceContext.OutputMerger.SetBlendState(_blendState, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f)); //sample mask to -1, no GC     
+        _deviceContext.OutputMerger.SetBlendState(_blendState, new Vector4(0.0f, 0.0f, 0.0f, 0.0f)); //sample mask to -1, no GC     
         _deviceContext.OutputMerger.SetDepthStencilState(_depthStencilState, 0);
         _deviceContext.Rasterizer.State = _rasterizerState;
 
@@ -418,7 +397,8 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
                     //This set native pointer without using QueryInterface or new, which allows a "GC free" cast
 
-                    _customImageView.NativePointer = cmd.TextureId;
+                    // The draw list carries an id, not a pointer: the view it names may already be gone.
+                    _customImageView = ShaderResourceView.FromImGuiTextureId((ulong)cmd.TextureId);
                     _deviceContext.PixelShader.SetShaderResource(0, _customImageView);
                     _deviceContext.DrawIndexed((int)cmd.ElemCount,
                                                idxOffset + (int)cmd.IdxOffset,
@@ -426,7 +406,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
                     //Set to IntPtr.Zero since that would create issue when disposing (on application Exit)
                     //Internally it only resets the pointer and deref the device if it was queried (which in this case, did not)
-                    _customImageView.NativePointer = IntPtr.Zero;
+                    _customImageView = null;
                 }
             }
 
@@ -435,26 +415,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         }
 
         // Restore modified DX state
-        _deviceContext.Rasterizer.SetScissorRectangles(_prevScissorRects);
-        _deviceContext.Rasterizer.SetViewports(_prevViewports);
-        _deviceContext.Rasterizer.State = prevRasterizerState;
-        _deviceContext.OutputMerger.BlendState = prevBlendState;
-        _deviceContext.OutputMerger.BlendFactor = prevBlendFactor;
-        _deviceContext.OutputMerger.BlendSampleMask = prevSampleMask;
-        _deviceContext.OutputMerger.DepthStencilState = prevDepthStencilState;
-        _deviceContext.OutputMerger.DepthStencilReference = prevStencilRef;
-        _deviceContext.PixelShader.SetShaderResources(0, prevPsShaderResource);
-        _deviceContext.PixelShader.SetSamplers(0, prevPsSampler);
-        _deviceContext.PixelShader.Set(prevPs);
-        _deviceContext.VertexShader.Set(prevVs);
-        _deviceContext.DomainShader.Set(prevDs);
-        _deviceContext.HullShader.Set(prevHs);
-        _deviceContext.GeometryShader.Set(prevGs);
-        _deviceContext.VertexShader.SetConstantBuffers(0, prevVsConstantBuffer);
-        _deviceContext.InputAssembler.PrimitiveTopology = prevPrimitiveTopology;
-        _deviceContext.InputAssembler.SetIndexBuffer(prevIndexBuffer, prevIndexBufferFormat, prevIndexBufferOffset);
-        _deviceContext.InputAssembler.SetVertexBuffers(0, prevVertexBuffer, prevVertexBufferOffset, prevVertexBufferStride);
-        _deviceContext.InputAssembler.InputLayout = prevInputLayout;
+        _deviceContext.PopState();
     }
 
     private void SetPerFrameImGuiData(float deltaSeconds)
@@ -510,7 +471,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         context.VertexShader.SetShader(_vertexShader, null, 0);
         context.PixelShader.SetShader(_pixelShader, null, 0);
         context.PixelShader.SetSampler(0, _imGuiSampler);
-        context.OutputMerger.SetBlendState(_blendState, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+        context.OutputMerger.SetBlendState(_blendState, new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
         context.OutputMerger.SetDepthStencilState(_depthStencilState, 0);
         context.Rasterizer.State = _rasterizerState;
         return true;

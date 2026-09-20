@@ -2,16 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.Logging;
 using T3.Core.Output;
 using T3.Core.Output.Rendering;
 using T3.SystemUi;
-using Device = SharpDX.Direct3D11.Device;
+using Device = T3.Graphics.Compat.Device;
 using Color = SharpDX.Color;
-using Viewport = SharpDX.Viewport;
+using Viewport = T3.Graphics.Viewport;
 using Texture2D = T3.Core.DataTypes.Texture2D;
+
+using System.Numerics;
 
 namespace T3.Player;
 
@@ -116,7 +118,7 @@ internal static partial class Program
             var backBufferSize = window.Window.BackBufferSize;
             _deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, backBufferSize.Width, backBufferSize.Height, 0f, 1f));
             _deviceContext.OutputMerger.SetTargets(window.Window.RenderTargetView);
-            _deviceContext.ClearRenderTargetView(window.Window.RenderTargetView, new Color(0, 0, 0, 1));
+            _deviceContext.ClearRenderTargetView(window.Window.RenderTargetView, new Vector4(0, 0, 0, 1));
 
             _deviceContext.Rasterizer.State = _rasterizerState;
             if (_fullScreenVertexShaderResource?.Value != null)
@@ -126,7 +128,7 @@ internal static partial class Program
                 _deviceContext.PixelShader.Set(_fullScreenPixelShaderResource.Value);
 
             _deviceContext.PixelShader.SetShaderResource(0, window.TextureView);
-            _deviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+            _deviceContext.InputAssembler.PrimitiveTopology = T3.Graphics.Compat.PrimitiveTopology.TriangleList;
             _deviceContext.Draw(3, 0);
             _deviceContext.PixelShader.SetShaderResource(0, null);
         }
@@ -164,7 +166,7 @@ internal static partial class Program
     {
         for (var i = 0; i < _outputWindows.Count; i++)
         {
-            _outputWindows[i].Window.SwapChain.Present(_vsyncInterval, PresentFlags.None);
+            _outputWindows[i].Window.SwapChain.Present(_vsyncInterval);
         }
     }
 
@@ -190,7 +192,7 @@ internal static partial class Program
             if (composite.IsDisposed)
                 return;
 
-            var nativePointer = ((SharpDX.Direct3D11.Texture2D)composite).NativePointer;
+            var nativePointer = ((T3.Graphics.Compat.Texture2D)composite).NativePointer;
             if (TextureView != null && !TextureView.IsDisposed && _viewedTexture == nativePointer)
                 return;
 

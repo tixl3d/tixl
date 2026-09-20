@@ -1,8 +1,6 @@
 using System.Windows.Forms;
-using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using T3.Graphics.Compat;
+using T3.Graphics;
 using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
@@ -10,7 +8,7 @@ using T3.Editor.Gui;
 // for ReleaseMode
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
-using Device = SharpDX.Direct3D11.Device;
+using Device = T3.Graphics.Compat.Device;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using VertexShader = T3.Core.DataTypes.VertexShader;
 
@@ -22,7 +20,8 @@ internal static class ProgramWindows
     public static AppWindow Viewer { get; private set; } // Required it distinguish 2nd render view in mouse handling   
     private static Device _device;
     private static DeviceContext _deviceContext;
-    private static Factory _factory;
+    private static SharpDX.DXGI.Factory _factory;
+    private static T3.Graphics.D3D11.D3D11Backend? _backend;
     public static string ActiveGpu { get; private set; } = "Unknown";
 
     internal static void SetMainWindowSize(int width, int height)
@@ -78,7 +77,7 @@ internal static class ProgramWindows
 
         try
         {
-            using var factory = new Factory1();
+            using var factory = new SharpDX.DXGI.Factory1();
 
             if (factory.GetAdapterCount() == 0)
             {
@@ -97,13 +96,13 @@ internal static class ProgramWindows
                 
                 var newRating = new DisplayAdapterRating
                                     {
-                                        Name = adapter.Description.Description,
+                                        Name = adapter.Description1.Description,
                                         Index = i,
-                                        MemoryInGb = (float)((double)adapter.Description.DedicatedVideoMemory/gb),
+                                        MemoryInGb = (float)((double)adapter.Description1.DedicatedVideoMemory/gb),
                                     };
                 adapterRatings.Add(newRating);                
                 
-                var descriptionLower = adapter.Description.Description.ToLowerInvariant();
+                string descriptionLower = adapter.Description1.Description.ToLowerInvariant();
                 
                 // Positive keywords
                 foreach (var keyword in highPerformanceKeywords)
@@ -146,53 +145,43 @@ internal static class ProgramWindows
             ActiveGpu = selectedAdapter.Description.Description;
 
             //Try to load 11.1 if possible, revert to 11.0 auto
-            FeatureLevel[] levels =
+            SharpDX.Direct3D.FeatureLevel[] levels =
             [
-                FeatureLevel.Level_11_1,
-                FeatureLevel.Level_11_0,
+                SharpDX.Direct3D.FeatureLevel.Level_11_1,
+                SharpDX.Direct3D.FeatureLevel.Level_11_0,
             ];
 
             
             
             // Create Device and SwapChain with the selected adapter
-            var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
+            var deviceCreationFlags = SharpDX.Direct3D11.DeviceCreationFlags.BgraSupport;
 
             if (CoreSettings.Config.EnableDirectXDebug)
-                deviceCreationFlags |= DeviceCreationFlags.Debug;
+                deviceCreationFlags |= SharpDX.Direct3D11.DeviceCreationFlags.Debug;
             
             Log.Debug("Creating Device...");
 
-            SwapChain swapchain;
-            try
-            {
-                Device.CreateWithSwapChain(selectedAdapter,
-                                           deviceCreationFlags,
-                                           levels,
-                                           Main.SwapChainDescription,
-                                           out device,
-                                           out  swapchain);
-            }
-            catch (Exception e)
-            {
-                Log.Warning("Failed to create device with advanced features. Trying basic settings. " + e.Message);
-                Device.CreateWithSwapChain(selectedAdapter,
-                                           DeviceCreationFlags.None,
-                                           levels,
-                                           Main.SwapChainDescription,
-                                           out device,
-                                           out  swapchain);
-            }
+            // The device comes from a backend, and the window makes its own swap chain afterwards — the two
+            // are no longer created in one call, because only D3D11 creates them together.
+            var nativeDevice = new SharpDX.Direct3D11.Device(selectedAdapter, deviceCreationFlags, levels[0]);
+            _backend = new T3.Graphics.D3D11.D3D11Backend(nativeDevice, ownsDevice: true);
+            device = new Device(_backend);
 
             _device = device;
             _deviceContext = device.ImmediateContext;
-            _factory = swapchain.GetParent<Factory>();
 
-            Main.SetDevice(device, _deviceContext, swapchain);
+            using (var dxgiDevice = nativeDevice.QueryInterface<SharpDX.DXGI.Device>())
+            using (var adapter = dxgiDevice.Adapter)
+            {
+                _factory = adapter.GetParent<SharpDX.DXGI.Factory>();
+            }
+
+            Main.SetDevice(device, _deviceContext);
             var windowState = Program.WindowSizeOverride == null ? FormWindowState.Maximized : FormWindowState.Normal;
             Main.InitializeWindow(windowState, OnCloseMainWindow, true);
             if (Program.WindowSizeOverride is { } windowSize)
                 Main.SetSize(windowSize.Width, windowSize.Height);
-            _factory.MakeWindowAssociation(Main.HwndHandle, WindowAssociationFlags.IgnoreAll);
+            _factory.MakeWindowAssociation(Main.HwndHandle, SharpDX.DXGI.WindowAssociationFlags.IgnoreAll);
         }
         catch (Exception e)
         {
@@ -279,8 +268,7 @@ internal static class ProgramWindows
         Viewer.Release();
         _device.ImmediateContext.ClearState();
         _deviceContext.Flush();
-        _device.Dispose();
-        _deviceContext.Dispose();
+        _backend?.Dispose();
         _factory.Dispose();
     }
 
@@ -310,7 +298,7 @@ internal static class ProgramWindows
     {
         try
         {
-            Main.SwapChain.Present(useVSync ? 1 : 0, PresentFlags.None);
+            Main.SwapChain.Present(useVSync ? 1 : 0);
 
             // Always present the Viewer's swap chain, regardless of whether its window is shown.
             // Empirically, having two flip-model Present calls per frame in the same process
@@ -319,19 +307,21 @@ internal static class ProgramWindows
             // the extra Present is small (the back buffer is unchanged when ShowSecondaryRenderWindow
             // is false; DWM doesn't display the hidden window; FlipDiscard discards the buffer
             // immediately on the next present cycle).
-            Viewer?.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+            Viewer?.SwapChain?.Present(useVSync ? 1 : 0);
 
             // Each display an output is bound to has its own swap chain, presented with the same sync as Main so
             // a projector never tears.
             var outputWindows = OutputWindowHandling.Presenting;
             for (var i = 0; i < outputWindows.Count; i++)
             {
-                outputWindows[i].Window.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
+                outputWindows[i].Window.SwapChain?.Present(useVSync ? 1 : 0);
             }
         }
         catch (SharpDX.SharpDXException e)
         {
-            var reason = _device.DeviceRemovedReason;
+            using var nativeDevice = new SharpDX.Direct3D11.Device(_device.NativePointer);
+            System.Runtime.InteropServices.Marshal.AddRef(_device.NativePointer);
+            var reason = nativeDevice.DeviceRemovedReason;
             string description;
             if (reason.Code == SharpDX.DXGI.ResultCode.DeviceHung.Code)
             {
@@ -353,7 +343,7 @@ internal static class ProgramWindows
             {
                 description = "invalid API call";
             }
-            else if (reason.Code == Result.OutOfMemory.Code)
+            else if (reason.Code == SharpDX.Result.OutOfMemory.Code)
             {
                 description = "out of GPU memory";
             }
@@ -397,7 +387,7 @@ internal static class ProgramWindows
             Height = backBufferDescription.Height,
             MipLevels = 1,
             ArraySize = 1,
-            Format = Main.SwapChain.Description.ModeDescription.Format,
+            Format = Main.SwapChain.Format,
             SampleDescription = new SampleDescription(1, 0),
             Usage = ResourceUsage.Default,
             BindFlags = BindFlags.ShaderResource,
@@ -455,14 +445,14 @@ internal static class ProgramWindows
 
         // A fresh copy per capture: the wrapper handed out disposes its native texture, so it must not be
         // the mirror's shared one.
-        var mode = Main.SwapChain.Description.ModeDescription;
+        var swapChain = Main.SwapChain;
         var copy = new Texture2D(_device, new Texture2DDescription
                                               {
-                                                  Width = mode.Width,
-                                                  Height = mode.Height,
+                                                  Width = swapChain.Width,
+                                                  Height = swapChain.Height,
                                                   MipLevels = 1,
                                                   ArraySize = 1,
-                                                  Format = mode.Format,
+                                                  Format = swapChain.Format,
                                                   SampleDescription = new SampleDescription(1, 0),
                                                   Usage = ResourceUsage.Default,
                                                   BindFlags = BindFlags.ShaderResource,

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using SharpDX.Direct3D11;
+using T3.Graphics.Compat;
 using T3.Core.Resource;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
