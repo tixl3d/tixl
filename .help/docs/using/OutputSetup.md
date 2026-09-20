@@ -49,7 +49,7 @@ A send's card is already its texture seen flat, so slices live there rather than
 
 ### Straight
 
-The selected surface seen flat, as if you stood in front of it. Place its content here, add and arrange regions, and set the surface's real size. A surface traced on a reference photo straightens on that photo, in place.
+The selected surface seen flat, as if you stood in front of it. Place its content here, add and arrange regions, and set the surface's real size. A surface traced on a reference photo straightens on that photo, in place. The frame's handles read the same on both: a **corner** says the wall's corner lies elsewhere than it was traced or pinned, an **edge** crops the wall to end there — the surface's declared size along that edge goes with it, so the picture keeps its proportions — and **Ctrl** on a horizontal edge stretches instead, re-declaring the wall taller or shorter while the photo stays. Measuring lines and reference points mark features of the real wall, so every one of these carries them along.
 
 ### Output
 

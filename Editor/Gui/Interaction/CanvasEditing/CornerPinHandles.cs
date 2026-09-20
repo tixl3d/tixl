@@ -31,6 +31,10 @@ internal static class CornerPinHandles
         /// <summary>Squares read as "crop along the edge"; a caller whose edge drag scales instead shows circles.</summary>
         public CanvasPointHandle.Shapes EdgeHandleShape;
 
+        /// <summary>The shape for the left and right handles when only one axis offers the edit — null keeps
+        /// <see cref="EdgeHandleShape"/> on all four.</summary>
+        public CanvasPointHandle.Shapes? VerticalEdgeShape;
+
         /// <summary>Outline width in unscaled px; 0 = the default.</summary>
         public float EdgeThickness;
 
@@ -160,7 +164,9 @@ internal static class CornerPinHandles
         {
             ImGui.PushID(i);
             var midpoint = (corners[i] + corners[(i + 1) % 4]) * 0.5f;
-            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, style.EdgeHandleShape, style.IsEditable);
+            var isVerticalEdge = (i & 1) == 1;
+            var shape = isVerticalEdge && style.VerticalEdgeShape.HasValue ? style.VerticalEdgeShape.Value : style.EdgeHandleShape;
+            var handleStyle = CanvasPointHandle.Style.Default(style.HandleColor, shape, style.IsEditable);
             handleStyle.OutlineColor = style.HandleOutlineColor;
             handleStyle.Radius = 4;
 

@@ -338,6 +338,7 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 1. With "Surface 1" straightened (previous step), drag its right edge handle 100 px further
    right, release; press Ctrl+Z.
 2. Drag its top-right corner handle up by 50 px, release.
+2b. Hold Ctrl and drag the bottom edge handle down by 80 px, release; press Ctrl+Z.
 3. Click **+ Line** in the header and drag along a mortar line of the brick wall; repeat for a
    vertical feature (a door frame); click **Straighten**.
 4. Double-click one of the lines, type its real length in metres, **Set**, then **Apply lengths**.
@@ -345,15 +346,26 @@ its width. Then open the Output tab and check the send's Resolution in the Param
 6. Click the **Board** tab.
 
 **Expected:**
-- After 1: the rectangle itself stays put; while dragging, the photo re-warps live so the
-  wall's edge is pulled into the frame's edge, and nothing moves on release. Ctrl+Z restores
-  the previous trace in one step.
-- After 2: the same for a corner: dragging pulls the wall's corner into the frame's corner,
-  live; the frame never re-centres.
+- After 1: the edge crops the wall — the frame widens with the cursor and the surface's **Size
+  (m)** grows along X to match, so the picture keeps its proportions instead of squeezing into a
+  frame that kept its aspect. The traced quad on the image card crops along. Ctrl+Z restores
+  both in one step.
+- After 2: a corner refines the trace instead: dragging pulls the wall's corner into the frame's
+  corner, live, and the frame never re-centres. Lines and points already drawn travel with the
+  photo and stay on the features they mark — they name spots on the wall, not places in the
+  frame — and a projector this surface is pinned to keeps showing the wall where it did.
+- After 2b: with Ctrl the edge handles turn into circles (the left and right ones stay squares,
+  since only the height can show a stretch here) and the drag re-declares the wall's height: the
+  photo stretches into the taller frame, **Size (m)** grows along Y, and the lines and regions
+  scale with it, staying on their features.
 - After 3: the lines are drawn in the alignment colours; Straighten refines the trace so both
-  lines come out level and plumb, with the photo easing to the result.
+  lines come out level and plumb, with the photo easing to the result. The lines still lie along
+  the features they were drawn on, and a projector this surface is pinned to shows the wall in
+  exactly the same place as before — the straighten moved the surface's space, and everything
+  aimed at that wall came along.
 - After 4: the surface's Size in the Parameter window changes so the measured line reads its
-  real length.
+  real length. The lines keep lying along their features: the whole rectangle is re-metered,
+  the lines with it, so only the numbers change.
 - After 5: the view stays on the straightened photo; "Region 1" appears as a green rectangle
   inside the wall, selected, with round corner handles, square edge handles and its anchor
   crosshair; its item is nested under "Surface 1" in the outliner. Dragging a corner resizes it
