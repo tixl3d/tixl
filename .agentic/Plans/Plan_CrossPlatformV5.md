@@ -414,7 +414,10 @@ The API is specified in [Plan_GraphicsFacade](Plan_GraphicsFacade.md) — review
    covered by tests. It has not run against a device yet; that needs Windows.*
 3. A codemod across ~150 files: `using` swaps, fully-qualified names, `NativePointer` →
    `ImGuiTextureId`, `DataStream` / `DataBox` replacements.
-4. Move the editor's ImGui renderer (`WindowsUiContentDrawer`) onto the facade.
+   *Done 2026-09-20: the whole repository compiles against the facade, and the tests pass. It turned out to
+   be ~180 files plus the csproj alias lists, which is how most operator files migrated. See the facade
+   plan's codemod section for what stayed on SharpDX and for two known regressions.*
+4. Move the editor's ImGui renderer (`WindowsUiContentDrawer`) onto the facade. *Done 2026-09-20.*
 5. One commit that re-saves all library symbols (new `Type` strings).
 6. The project migration step for user packages.
 7. Remove the SharpDX graphics packages everywhere except `Graphics.D3D11`.
@@ -426,8 +429,8 @@ Estimate: 20–40 commits, 40–80 agent hours. You: review the API — it's per
 ### Phase 4 — Vulkan backend and first light (v5 development)
 
 *Started early, 2026-09-20, because it can be verified on the Linux machine while the D3D11 backend cannot:
-`Graphics.Vulkan` renders through the compatibility layer and reads the result back, with the validation
-layer silent, on a Radeon 8060S. Headless — presentation is still missing.*
+`Graphics.Vulkan` renders through the compatibility layer and reads the result back, and presents to an SDL3
+window (resize and vsync toggle included), with the validation layer silent, on a Radeon 8060S.*
 
 1. Instance, device selection (prefer the discrete GPU), queues, frames in flight, SDL surfaces and
    swapchains, validation layers and debug names.

@@ -396,6 +396,27 @@ multi-threaded command recording, or GPU-driven draws. None of these are v5.0 go
     sampled-only texture never allocates a render target view, and a view the bind flags do not allow is a
     warning and a null rather than an exception.
 
+17. **The window layer owns the surface.** The backend takes a `SurfaceTarget`: a Win32 handle for D3D11, or
+    a callback that makes a `VkSurfaceKHR` for a given instance for Vulkan. The platform layer also passes the
+    instance extensions a surface needs (`VK_KHR_surface` plus the Wayland, Xlib or Win32 one), since an
+    instance cannot gain them later and the graphics layer cannot know which platform it is on. SDL stays out
+    of `Graphics.Vulkan` entirely.
+18. **Present is queued, not immediate.** D3D11 presents inside the call; Vulkan has to present after the
+    frame's work is submitted, so `Present` records the layout transition and queues it, and `EndFrame`
+    issues it. The contract is "on screen by the end of the frame", which both satisfy.
+19. **Changing the sync interval rebuilds the swapchain.** D3D11 takes it per present, Vulkan bakes it into
+    the swapchain as a present mode, so the Vulkan swapchain recreates itself when the interval implies a
+    different mode — otherwise the Player's vsync toggle would silently do nothing.
+
+20. **The `Get*` state readback is gone, and push/pop replaced it everywhere.** Reading the tracked state
+    back would have been easy — the facade keeps it — but the getters that return *views* would hand out
+    borrowed objects, and the call sites disposed what they got (SharpDX had AddRef'd it). Values are
+    different: `GetViewports` and `GetScissorRectangles` stayed, because a viewport cannot be disposed.
+21. **A user project's global using aliases move with it.** Operator packages do not see the facade through
+    a `using` line but through `<Using Alias=...>` entries in their csproj, and the template in
+    `ProjectXml.cs` writes the same list into every user project. Flipping those is what migrated most
+    operator files without touching them.
+
 ## Progress (2026-09-20)
 
 Written, building on Linux, uncommitted:
@@ -435,12 +456,53 @@ Written, building on Linux, uncommitted:
   a draw that leaves every declared binding unset, and the pipeline cache. Each test also asserts the
   validation layer stayed silent. Verified on a Radeon 8060S (RADV): the readback is exactly source × tint.
 
-Not written yet: the swapchain and presentation, the shader compiler's interface, `DataStream`'s replacement,
-and moving TiXL's wrapper types into `Graphics/`.
+- **Presentation**: `GpuSwapchain` and `SurfaceTarget` in the backend API, `VulkanSwapchain` (surface, format
+  and present-mode selection, acquire on first back-buffer use, per-image render-finished semaphores, resize
+  and out-of-date recovery), `D3D11Swapchain` (DXGI flip model, waitable object, `ResizeBuffers`), and
+  `T3.Graphics.Compat.SwapChain` with the SharpDX-shaped surface the editor and Player use.
+- `Spikes/SwapchainCheck` — presents to a real SDL3 window through the compatibility layer on Vulkan, resizes
+  halfway through and reports the validation count, so it can be run without watching the window:
+  `dotnet run --project Spikes/SwapchainCheck -- <frames> <syncInterval>`. On the Radeon 8060S: 240 frames at
+  122 fps with vsync, 600 frames at 3150 fps without, a resize mid-run, zero validation errors. It caught two
+  real defects — a render-finished semaphore shared per frame instead of per swapchain image, and a sync
+  interval that only took effect when the swapchain happened to be recreated.
+
+### The codemod (2026-09-20)
+
+The whole repository now compiles against the facade: `Core`, all ten operator packages, `VideoServices`,
+`IoServices`, the `Player` and the `Editor`, plus the project template users' packages are generated from.
+
+- `Spikes/FacadeCodemod/facade_codemod.py` does the mechanical part — using lines, qualified names and the
+  interop value types — and reports what it could not touch. It rewrote about 180 files; the rest was by hand.
+- The csproj `<Using Alias=...>` lists were flipped to the facade (310 aliases across eleven projects), which
+  is what carried most operator files.
+- Hand-rewritten with push/pop: the `_dx11` stage operators (`OutputMergerStage`, `Rasterizer`, `Draw`,
+  `SetPixelAndVertexShaderStage`, the four `Gfx` stage operators), the effect helpers (`_ExecuteBloomPasses`,
+  `_ExecuteFastBlurPasses`, `_SpecularPrefilter`, `RenderTarget`, `DrawStageCanvas`, `_DispatchSceneDraws`,
+  `SliceViewPort`, `LoadGltfScene`, `Texture3dOutputUi`, `CommandOutputUi`), the readback and video helpers,
+  the NDI sender, and the editor's ImGui renderer — two dozen driver reads became one push and one pop there.
+- Three bugs the plan had predicted are fixed by construction: the previous state taken from the vertex stage
+  and applied to both, the appended resource views never unbound, and the AddRef'd objects the restores
+  disposed by hand.
+- `Player` and `Editor` now choose their backend in one line each and present through the facade's swapchain.
+
+What deliberately stayed on SharpDX, because the facade does not replace it: WIC image loading, the D3D11
+shader compiler, Direct2D and DirectWrite (the Player's loading screen, the editor's font atlas), XInput, and
+the Windows-only interop — Spout, NDI's desktop duplication, and FFmpeg's decoder surfaces, which now go
+through the backend's native device handle and `AdoptTexture`.
+
+Two regressions to be aware of: GPU timing queries report nothing (the backend API has no queries yet, so
+`GpuMeasure` shows no timing rather than a wrong one), and the stall overlay stays dark because it recorded
+on a deferred context, which the backend API does not offer. Both are noted where they happen.
+
+Not written yet: the shader compiler's interface and moving TiXL's wrapper types into `Graphics/` — they
+stayed in `Core`, which keeps operator code unchanged and avoids untangling their DDS, WIC and
+ResourceManager dependencies for now.
 
 Known gaps in the Vulkan backend, each deliberate for now: one allocation per resource (drivers cap the
 count, so a sub-allocator comes before large scenes), whole-image layout tracking rather than per
-subresource, readback that completes synchronously, and no swapchain.
+subresource, and readback that completes synchronously. The D3D11 swapchain, like the rest of that backend,
+has never run — it needs Windows.
 
 **Untested on Windows.** The D3D11 backend compiles but has never talked to a device. First run needs a
 Windows machine, and the first thing to check is that a pipeline change applies every state object the
