@@ -24,7 +24,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     Point p = Points[i];  
 
-    p.position.y += 0.1 * Amount;
+    p.Position.y += 0.1 * Amount;
 
     Points[i] = p;
 }

@@ -31,7 +31,7 @@ float4 ApplyBlending(float4 color, float2 uv, int direction)
 
     float4 seamSample = Image.Sample(wrappedSampler, shiftedUV);
 
-    float2 edge = abs(1.0 - ((direction == 0 ? uv.x : uv.y) * 2.0));
+    float edge = abs(1.0 - ((direction == 0 ? uv.x : uv.y) * 2.0));
     float blendFactor = smoothstep(0.0, Falloff, edge);
 
     return lerp(color, seamSample, blendFactor);

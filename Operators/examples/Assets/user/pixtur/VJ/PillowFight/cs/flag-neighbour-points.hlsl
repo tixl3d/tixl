@@ -17,7 +17,7 @@ void FlagPoints(uint3 DTid : SV_DispatchThreadID, uint GI: SV_GroupIndex)
     uint pointCount, stride;
     points.GetDimensions(pointCount, stride);
         
-    //points[DTid.x].w = 10;
+    //points[DTid.x].FX1 = 10;
 
     if(DTid.x >= pointCount)
         return; // out of bounds
@@ -33,7 +33,7 @@ void FlagPoints(uint3 DTid : SV_DispatchThreadID, uint GI: SV_GroupIndex)
         for(uint i=startIndex; i < endIndex; ++i) 
         {
             uint pointIndex = CellPointIndices[i];
-            points[pointIndex].w = 5;
+            points[pointIndex].FX1 = 5;
         }
     } 
 } 
