@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ImGuiNET;
-using SharpDX.D3DCompiler;
 using T3.Graphics.Compat;
 using T3.Graphics;
 using System.Numerics;
@@ -24,6 +23,7 @@ using T3.SystemUi;
 using Buffer = T3.Graphics.Compat.Buffer;
 using Device = T3.Graphics.Compat.Device;
 using Vector2 = System.Numerics.Vector2;
+using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Editor.UiContentDrawing;
 
@@ -488,11 +488,13 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 {
                 float4x4 ProjectionMatrix; 
                 };
+                // In the order of the input layout and of ImDrawVert. Vulkan binds vertex attributes by position
+                // rather than by semantic, so this order has to match; D3D11 matches semantics and does not mind.
                 struct VS_INPUT
                 {
                 float2 pos : POSITION;
-                float4 col : COLOR0;
                 float2 uv  : TEXCOORD0;
+                float4 col : COLOR0;
                 };
                 
                 struct PS_INPUT
@@ -511,16 +513,13 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 return output;
                 }";
 
-        _vertexShaderBlob = ShaderBytecode.Compile(vertexShader, "main", "vs_4_0", ShaderFlags.None, EffectFlags.None);
-        if (_vertexShaderBlob == null)
+        if (!TryCompile(vertexShader, "imgui-vs.hlsl", out _vertexShaderResource))
             return false;
 
-        _vertexShader = new VertexShader(_device, _vertexShaderBlob);
-        if (_vertexShader == null)
-            return false;
+        _vertexShader = _vertexShaderResource;
 
-        // Create the input layout
-        _inputLayout = new InputLayout(_device, ShaderSignature.GetInputSignature(_vertexShaderBlob),
+        // The backend matches the layout against the shader's own reflection, so it needs no bytecode here.
+        _inputLayout = new InputLayout(_device, [],
                                        new[]
                                            {
                                                new InputElement("POSITION", 0, Format.R32G32_Float, 0, 0),
@@ -539,8 +538,8 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 float4 col : COLOR0;
                 float2 uv  : TEXCOORD0;
                 };
-                sampler sampler0;
-                Texture2D texture0;
+                sampler sampler0 : register(s0);
+                Texture2D texture0 : register(t0);
                 
                 float4 main(PS_INPUT input) : SV_Target
                 {
@@ -548,13 +547,10 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 return out_col; 
                 }";
 
-        _pixelShaderBlob = ShaderBytecode.Compile(pixelShader, "main", "ps_4_0", ShaderFlags.None, EffectFlags.None);
-        if (_pixelShaderBlob == null)
+        if (!TryCompile(pixelShader, "imgui-ps.hlsl", out _pixelShaderResource))
             return false;
 
-        _pixelShader = new PixelShader(_device, _pixelShaderBlob);
-        if (_pixelShader == null)
-            return false;
+        _pixelShader = _pixelShaderResource;
 
         // Create the blending setup
         var blendDesc = new BlendStateDescription() { AlphaToCoverageEnable = false, IndependentBlendEnable = false };
@@ -601,6 +597,21 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         DisposeDeviceObjects();
     }
 
+    /// <summary>
+    /// Compiles through the platform's shader compiler rather than FXC directly, which does not exist outside
+    /// Windows. These shaders have no includes and no operator behind them, so they are compiled without an owner.
+    /// </summary>
+    private static bool TryCompile<TShader>(string source, string name, [NotNullWhen(true)] out TShader shader)
+        where TShader : T3.Core.DataTypes.AbstractShader
+    {
+        var args = new ShaderCompiler.ShaderCompilationArgs(source, "main", null, name, null);
+        if (ShaderCompiler.TryCompileShaderFromSource(args, useCache: true, forceRecompile: false, out shader, out var reason))
+            return true;
+
+        Log.Error($"Could not compile the ImGui shader {name}: {reason}");
+        return false;
+    }
+
     private void DisposeObj<T>(ref T obj) where T : class, IDisposable
     {
         obj?.Dispose();
@@ -624,12 +635,12 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             DisposeObj(ref _blendState);
             DisposeObj(ref _depthStencilState);
             DisposeObj(ref _rasterizerState);
-            DisposeObj(ref _pixelShader);
-            DisposeObj(ref _pixelShaderBlob);
+            DisposeObj(ref _pixelShaderResource);
+            _pixelShader = null;
             DisposeObj(ref _vertexConstantBuffer);
             DisposeObj(ref _inputLayout);
-            DisposeObj(ref _vertexShader);
-            DisposeObj(ref _vertexShaderBlob);
+            DisposeObj(ref _vertexShaderResource);
+            _vertexShader = null;
         }
         catch (Exception e)
         {
@@ -642,11 +653,11 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     private DeviceContext _deviceContext;
     private Buffer _vb;
     private Buffer _ib;
-    private ShaderBytecode _vertexShaderBlob;
+    private T3.Core.DataTypes.VertexShader _vertexShaderResource;
     private VertexShader _vertexShader;
     private InputLayout _inputLayout;
     private Buffer _vertexConstantBuffer;
-    private ShaderBytecode _pixelShaderBlob;
+    private T3.Core.DataTypes.PixelShader _pixelShaderResource;
     private PixelShader _pixelShader;
     private SamplerState _imGuiSampler;
     private ShaderResourceView _fontTextureView;

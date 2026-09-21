@@ -2,7 +2,7 @@
 using T3.Graphics.Compat;
 using T3.Graphics;
 using System.Numerics;
-using SharpDX.WIC;
+using StbImageSharp;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Styling;
 using Device = T3.Graphics.Compat.Device;
@@ -62,20 +62,12 @@ internal static class FontAtlasGenerator
         // Get pointer to texture data, must happen after font build
         io.Fonts.GetTexDataAsRGBA32(out IntPtr atlasPixels, out var atlasWidth, out var atlasHeight, out _);
 
-        // Load the source image
-        ImagingFactory factory = new ImagingFactory();
-        //var iconFilePath = Icons.IconAtlasPath;
-
-        var bitmapDecoder = new BitmapDecoder(factory, iconFilePath, DecodeOptions.CacheOnDemand);
-        var formatConverter = new FormatConverter(factory);
-        var bitmapFrameDecode = bitmapDecoder.GetFrame(0);
-
-        formatConverter.Initialize(bitmapFrameDecode,
-                                   PixelFormat.Format32bppRGBA,
-                                   BitmapDitherType.None,
-                                   null,
-                                   0.0,
-                                   BitmapPaletteType.Custom);
+        // Decoded as RGBA - byte for byte what ImGui's RGBA32 atlas holds, so icons copy straight across.
+        ImageResult icons;
+        using (var stream = System.IO.File.OpenRead(iconFilePath))
+        {
+            icons = ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+        }
 
         // Copy the data into the font atlas texture
         for (int i = 0; i < glyphIds.Length; i++)
@@ -89,7 +81,7 @@ internal static class FontAtlasGenerator
             int py = (int)(icon.SourceArea.Min.Y * iconScaleFactor);
 
             uint[] iconContent = new uint[sx * sy];
-            formatConverter.CopyPixels(new SharpDX.Mathematics.Interop.RawBox(px, py, sx, sy), iconContent);
+            CopyRegion(icons, px, py, sx, sy, iconContent);
 
             var rect = io.Fonts.GetCustomRectByIndex(glyphId);
             for (int y = 0, s = 0; y < rect.Height; y++)
@@ -155,5 +147,16 @@ internal static class FontAtlasGenerator
 
         if (previousContext != IntPtr.Zero)
             ImGui.SetCurrentContext(previousContext);
+    }
+
+    /// <summary>Copies one icon out of the decoded atlas, row by row, as packed RGBA pixels.</summary>
+    private static void CopyRegion(ImageResult image, int x, int y, int width, int height, uint[] target)
+    {
+        const int bytesPerPixel = 4;
+        for (var row = 0; row < height; row++)
+        {
+            var source = ((y + row) * image.Width + x) * bytesPerPixel;
+            System.Buffer.BlockCopy(image.Data, source, target, row * width * bytesPerPixel, width * bytesPerPixel);
+        }
     }
 }

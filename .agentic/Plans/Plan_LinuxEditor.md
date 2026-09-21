@@ -1,6 +1,6 @@
 # Linux editor: the editor on SDL3 and Vulkan
 
-**Status:** Draft — 2026-09-22. Not started.
+**Status:** In progress — M1 started 2026-09-22.
 **Parent:** [Plan_CrossPlatformV5](Plan_CrossPlatformV5.md) — this is the editor half of its Phase 2 (SDL3) and
 all of Phase 5 (Editor on Linux), broken into milestones that can each be verified on their own.
 **Branch:** `feat/linux-port`.
@@ -28,10 +28,9 @@ and only then moves the editor to Linux (Phase 5). The branch we are on can take
   visible editor, but input and DPI regressions surface on Linux where there is no D3D11 reference to diff
   against, and the SDL3 editor reaches Windows later.
 
-Recommendation: **Linux first on this branch, but keep every SDL3 change platform-neutral** — nothing in the
-window, input or display code may branch on Linux. Then the same commits cherry-pick to `main` for the
+**Decided 2026-09-22: Linux first on this branch, with every SDL3 change kept platform-neutral** — nothing in
+the window, input or display code may branch on Linux. The same commits then cherry-pick to `main` for the
 Windows-first shipping order the parent plan wants, and the visual suite on Windows still catches regressions.
-Record the decision here once made.
 
 ## Inventory (measured 2026-09-22)
 
@@ -75,6 +74,26 @@ and ImGui renderer together, with nothing else in the way.
 Done when: `TIXL_VULKAN_VALIDATION=1` runs the demo window for a minute of mouse and keyboard use with a
 silent validation layer and no device loss, and a frame-count probe shows presentation at the display's
 refresh rate rather than thousands of frames per second.
+
+**How the editor frame works today** (mapped 2026-09-22 — read before changing it):
+
+- `Program.Main` sets `EditorUi.Instance = new MsFormsEditor()` (the WinForms-specific UI services — a seam
+  to implement for SDL3), `ShaderCompiler.Instance = new DX11ShaderCompiler()` (needs the Player's platform
+  choice), and dialogs through `SilkWindowProvider`.
+- `ProgramWindows.InitializeMainWindow` enumerates adapters through DXGI and wraps a native SharpDX device in
+  `D3D11Backend`. On Linux the whole block becomes `new VulkanBackend(...)`, which picks its own device.
+- `AppWindow.RunRenderLoop` hands the loop to SharpDX's `RenderLoop.Run(Form, …)`, which pumps WinForms
+  messages. Frame pacing P/Invokes `kernel32.dll` `WaitForSingleObjectEx`; route it through
+  `SwapChain.WaitForFrameLatency()` instead, which the Vulkan backend already handles.
+- `WindowsUiContentDrawer.RenderCallback` is the frame: `NewFrame` → output windows → the viewer window →
+  `Main.PrepareRenderingFrame` → `T3Ui.ProcessFrame` → `ImGui.Render` + `RenderDrawData` → `Present`.
+- **It has both bugs the Player had.** Nothing calls `Device.BeginFrame()`/`EndFrame()`, and `AppWindow` keeps
+  one `RenderTargetView` for its lifetime instead of acquiring per frame. On Vulkan that renders nothing, at
+  thousands of frames per second, with a clean log. Bracket the frame and acquire every frame, as
+  `Player/Program.RenderLoop.cs` and `PlayerWindow.AcquireBackBuffer` now do.
+- **Several swapchains present in one frame**: the main window, the viewer (`T3Ui.ShowSecondaryRenderWindow`)
+  and each output display window. That is the first real use of the per-swapchain acquire semaphores. Keep
+  the viewer hidden for M1 and turn it on as the first thing M3 tests.
 
 ### M2 — a project opens
 
@@ -147,6 +166,15 @@ Rules for working on this, each learned the expensive way while bringing the Pla
 
 ## Open questions
 
+- **Vertex attributes bind by position, not by semantic.** `VertexAttribute.Semantic` is documented as
+  *"The backend resolves it against the shader's reflection"*, but `VulkanPipelineFactory` sets
+  `location = i` from the array index and never reads it. A vertex shader whose input struct is declared in a
+  different order from its input layout gets its attributes swapped on Vulkan and works on D3D11, which
+  matches semantics. Operators never hit it — they read through `SV_VertexID` — but the ImGui renderer
+  uses a vertex buffer, and its input struct was declared `pos, col, uv` against a `pos, uv, col` layout.
+  Worked around in M1 by declaring the ImGui inputs in layout order. The real fix: carry each vertex input's
+  semantic and location out of Slang's reflection into the `SpirvBlob`, and resolve `Semantic` against it when
+  the pipeline is built.
 - **Sequencing** — Linux first or Windows first; see [Sequencing](#sequencing--decide-before-starting).
 - **Per-swapchain acquire semaphores are unexercised.** Fixed by construction for multiple windows, but every
   run so far had one swapchain. M3's second output window is its first real test.

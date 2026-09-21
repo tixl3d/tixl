@@ -17,7 +17,12 @@ namespace T3.Core.Resource.ShaderCompiling;
 
 public abstract partial class ShaderCompiler
 {
-    internal static bool TryCompileShaderFromSource<TShader>(ShaderCompilationArgs args, bool useCache,
+    /// <summary>
+    /// Compiles HLSL source with whichever compiler the platform uses. An operator passes itself as the owner so
+    /// its includes resolve against its package; shaders with no includes and no operator behind them - the
+    /// editor's own ImGui shaders - pass none.
+    /// </summary>
+    public static bool TryCompileShaderFromSource<TShader>(ShaderCompilationArgs args, bool useCache,
                                                              bool forceRecompile, [NotNullWhen(true)] out TShader? shader, out string reason)
         where TShader : AbstractShader
     {
@@ -193,7 +198,7 @@ public abstract partial class ShaderCompiler
     public record struct ShaderCompilationArgs(
         string SourceCode, 
         string EntryPoint, 
-        IResourceConsumer Owner, 
+        IResourceConsumer? Owner, 
         string Name, 
         byte[]? OldBytecode);
 
