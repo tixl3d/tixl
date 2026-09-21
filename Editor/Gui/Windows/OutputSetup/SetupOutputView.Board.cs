@@ -123,7 +123,8 @@ internal sealed partial class SetupOutputView
 
         foreach (var source in setup.ContentSources)
         {
-            if (IsDrawnBySpace(setup, SetupEntityKinds.ContentSource, source.SymbolChildId)
+            if (!ContentSourceSync.IsSourceInScope(source.SymbolChildId)
+                || IsDrawnBySpace(setup, SetupEntityKinds.ContentSource, source.SymbolChildId)
                 || !TryGetBoardBounds(setup, SetupEntityKinds.ContentSource, source.SymbolChildId, out var min, out var max))
                 continue;
 
@@ -1268,7 +1269,11 @@ internal sealed partial class SetupOutputView
             AddBoardSnapCandidate(setup, SetupEntityKinds.Surface, setup.Surfaces[i].Id, excludeId, excludeDragItems);
 
         for (var i = 0; i < setup.ContentSources.Count; i++)
-            AddBoardSnapCandidate(setup, SetupEntityKinds.ContentSource, setup.ContentSources[i].SymbolChildId, excludeId, excludeDragItems);
+        {
+            var childId = setup.ContentSources[i].SymbolChildId;
+            if (ContentSourceSync.IsSourceInScope(childId))
+                AddBoardSnapCandidate(setup, SetupEntityKinds.ContentSource, childId, excludeId, excludeDragItems);
+        }
 
         for (var i = 0; i < setup.Outputs.Count; i++)
             AddBoardSnapCandidate(setup, SetupEntityKinds.Output, setup.Outputs[i].Id, excludeId, excludeDragItems);
@@ -1771,7 +1776,8 @@ internal sealed partial class SetupOutputView
 
         foreach (var source in setup.ContentSources)
         {
-            if (TryGetBoardBounds(setup, SetupEntityKinds.ContentSource, source.SymbolChildId, out var a, out var b))
+            if (ContentSourceSync.IsSourceInScope(source.SymbolChildId)
+                && TryGetBoardBounds(setup, SetupEntityKinds.ContentSource, source.SymbolChildId, out var a, out var b))
                 Include(ref any, ref min, ref max, a, b);
         }
 

@@ -9,9 +9,9 @@ namespace T3.Editor.UiModel.ProjectHandling;
 /// <summary>
 /// Loads and caches the active output <see cref="Setup"/> and per-machine
 /// <see cref="MachineConfig"/> for opened projects. Setups live at
-/// &lt;project&gt;/.meta/&lt;name&gt;.setup.json; every project gets a default setup with the
+/// &lt;project&gt;/.meta/Setups/&lt;name&gt;.setup.json; every project gets a default setup with the
 /// always-present Default output on first access. The active setup is the venue the project
-/// is currently configured for; switching, duplicating (GUID-preserving) and deleting are
+/// is currently configured for; switching, renaming, duplicating (GUID-preserving) and deleting are
 /// the setup-switcher operations of the output window's setup panel.
 /// </summary>
 internal static class OutputSetupHandling
@@ -66,23 +66,23 @@ internal static class OutputSetupHandling
     public static void SaveActive()
     {
         StructureVersion++;
-        if (!TryGetFocusedEntry(out var entry, out var metaFolder))
+        if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
             return;
 
-        Directory.CreateDirectory(metaFolder);
-        entry.Setup.TrySaveToFile(SetupFilePath(metaFolder, entry.Setup.Name));
+        Directory.CreateDirectory(setupsFolder);
+        entry.Setup.TrySaveToFile(SetupFilePath(setupsFolder, entry.Setup.Name));
         entry.MachineConfig.ActiveSetupName = entry.Setup.Name;
-        entry.MachineConfig.TrySaveToFile(Path.Combine(metaFolder, MachineConfig.FileName));
+        entry.MachineConfig.TrySaveToFile(Path.Combine(setupsFolder, MachineConfig.FileName));
     }
 
-    /// <summary>Setup names available for the focused project (from .meta/*.setup.json).</summary>
+    /// <summary>Setup names available for the focused project (from .meta/Setups/*.setup.json).</summary>
     public static void GetAvailableSetupNames(List<string> names)
     {
         names.Clear();
-        if (!TryGetFocusedMetaFolder(out var metaFolder) || !Directory.Exists(metaFolder))
+        if (!TryGetFocusedSetupsFolder(out var setupsFolder) || !Directory.Exists(setupsFolder))
             return;
 
-        foreach (var filePath in Directory.EnumerateFiles(metaFolder, "*" + Setup.FileSuffix))
+        foreach (var filePath in Directory.EnumerateFiles(setupsFolder, "*" + Setup.FileSuffix))
         {
             var fileName = Path.GetFileName(filePath);
             names.Add(fileName[..^Setup.FileSuffix.Length]);
@@ -91,10 +91,10 @@ internal static class OutputSetupHandling
 
     public static bool TrySwitchTo(string setupName)
     {
-        if (!TryGetFocusedEntry(out var entry, out var metaFolder))
+        if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
             return false;
 
-        if (!Setup.TryLoadFromFile(SetupFilePath(metaFolder, setupName), out var setup, out _))
+        if (!Setup.TryLoadFromFile(SetupFilePath(setupsFolder, setupName), out var setup, out _))
             return false;
 
         entry.Setup = setup;
@@ -103,10 +103,48 @@ internal static class OutputSetupHandling
         return true;
     }
 
+    /// <summary>
+    /// Renames the active setup and its file. Other machines that had it active fall back to the first setup
+    /// in the folder, as they do after a delete.
+    /// </summary>
+    public static bool TryRenameActive(string newName)
+    {
+        if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
+            return false;
+
+        var oldName = entry.Setup.Name;
+        if (newName == oldName)
+            return false;
+
+        // A case-only rename names the same file on Windows, so it must not count as a collision.
+        var isCaseOnlyChange = string.Equals(newName, oldName, StringComparison.OrdinalIgnoreCase);
+        if (!isCaseOnlyChange && !IsValidNewName(newName, setupsFolder))
+        {
+            T3.Core.Logging.Log.Warning($"Can't rename setup to \"{newName}\": the name is empty, invalid or already taken.");
+            return false;
+        }
+
+        var oldPath = SetupFilePath(setupsFolder, oldName);
+        try
+        {
+            if (File.Exists(oldPath))
+                File.Move(oldPath, SetupFilePath(setupsFolder, newName));
+        }
+        catch (Exception e)
+        {
+            T3.Core.Logging.Log.Warning($"Can't rename setup {oldPath}: {e.Message}");
+            return false;
+        }
+
+        entry.Setup.Name = newName;
+        SaveActive();
+        return true;
+    }
+
     /// <summary>GUID-preserving duplication — the venue-swap mechanism. The copy becomes active.</summary>
     public static bool TryDuplicateActive(string newName)
     {
-        if (!TryGetFocusedEntry(out var entry, out var metaFolder) || !IsValidNewName(newName, metaFolder))
+        if (!TryGetFocusedEntry(out var entry, out var setupsFolder) || !IsValidNewName(newName, setupsFolder))
             return false;
 
         var duplicate = entry.Setup.Duplicate(newName);
@@ -119,7 +157,7 @@ internal static class OutputSetupHandling
     /// <summary>Creates an empty setup (fresh GUIDs — op bindings into it start unresolved). It becomes active.</summary>
     public static bool TryCreateNew(string newName)
     {
-        if (!TryGetFocusedEntry(out var entry, out var metaFolder) || !IsValidNewName(newName, metaFolder))
+        if (!TryGetFocusedEntry(out var entry, out var setupsFolder) || !IsValidNewName(newName, setupsFolder))
             return false;
 
         entry.Setup = Setup.CreateDefault(newName);
@@ -131,10 +169,10 @@ internal static class OutputSetupHandling
     /// <summary>Deletes the active setup's file and switches to another one (or a fresh default).</summary>
     public static bool TryDeleteActive()
     {
-        if (!TryGetFocusedEntry(out var entry, out var metaFolder))
+        if (!TryGetFocusedEntry(out var entry, out var setupsFolder))
             return false;
 
-        var filePath = SetupFilePath(metaFolder, entry.Setup.Name);
+        var filePath = SetupFilePath(setupsFolder, entry.Setup.Name);
         try
         {
             if (File.Exists(filePath))
@@ -187,10 +225,10 @@ internal static class OutputSetupHandling
             return plugId == Guid.Empty ? SetupFiles.UnboundResolution : Plugs.PlugResolution(plugId);
         };
 
-    private static bool TryGetFocusedEntry([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out ProjectEntry? entry, out string metaFolder)
+    private static bool TryGetFocusedEntry([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out ProjectEntry? entry, out string setupsFolder)
     {
         entry = null;
-        if (!TryGetFocusedMetaFolder(out metaFolder))
+        if (!TryGetFocusedSetupsFolder(out setupsFolder))
             return false;
 
         var package = ProjectView.Focused?.OpenedProject.Package;
@@ -201,14 +239,14 @@ internal static class OutputSetupHandling
         return true;
     }
 
-    private static bool TryGetFocusedMetaFolder(out string metaFolder)
+    private static bool TryGetFocusedSetupsFolder(out string setupsFolder)
     {
-        metaFolder = string.Empty;
+        setupsFolder = string.Empty;
         var package = ProjectView.Focused?.OpenedProject.Package;
         if (package == null)
             return false;
 
-        metaFolder = Path.Combine(package.Folder, Setup.FolderName);
+        setupsFolder = SetupFiles.FolderIn(package.Folder);
         return true;
     }
 
@@ -221,19 +259,19 @@ internal static class OutputSetupHandling
         if (_entriesByProjectFolder.TryGetValue(projectFolder, out var entry))
             return entry;
 
-        var metaFolder = Path.Combine(projectFolder, Setup.FolderName);
-        SetupFiles.TryLoad(metaFolder, out var setup, out var machineConfig, out var wasRepaired);
+        var setupsFolder = SetupFiles.FolderIn(projectFolder);
+        SetupFiles.TryLoad(setupsFolder, out var setup, out var machineConfig, out var wasRepaired);
 
         if (setup == null)
         {
             setup = Setup.CreateDefault();
-            Directory.CreateDirectory(metaFolder);
-            setup.TrySaveToFile(SetupFilePath(metaFolder, setup.Name));
+            Directory.CreateDirectory(setupsFolder);
+            setup.TrySaveToFile(SetupFilePath(setupsFolder, setup.Name));
         }
         else if (wasRepaired)
         {
             // Persist the repair right away, so the file on disk stops being broken.
-            setup.TrySaveToFile(SetupFilePath(metaFolder, setup.Name));
+            setup.TrySaveToFile(SetupFilePath(setupsFolder, setup.Name));
         }
 
         entry = new ProjectEntry { Setup = setup, MachineConfig = machineConfig };
@@ -241,17 +279,17 @@ internal static class OutputSetupHandling
         return entry;
     }
 
-    private static string SetupFilePath(string metaFolder, string setupName)
+    private static string SetupFilePath(string setupsFolder, string setupName)
     {
-        return Path.Combine(metaFolder, setupName + Setup.FileSuffix);
+        return Path.Combine(setupsFolder, setupName + Setup.FileSuffix);
     }
 
-    private static bool IsValidNewName(string name, string metaFolder)
+    private static bool IsValidNewName(string name, string setupsFolder)
     {
         if (string.IsNullOrWhiteSpace(name) || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             return false;
 
-        return !File.Exists(SetupFilePath(metaFolder, name));
+        return !File.Exists(SetupFilePath(setupsFolder, name));
     }
 
     private static readonly Dictionary<string, ProjectEntry> _entriesByProjectFolder = new();

@@ -25,7 +25,7 @@ The local bindings stay behind by design.
 3. Open the export folder (`Export/<op name>/` inside the project folder).
 
 **Expected:**
-- A `.meta` folder sits next to the renamed `.exe`, holding exactly one `<name>.setup.json`: the
+- A `.meta/Setups` folder sits next to the renamed `.exe`, holding exactly one `<name>.setup.json`: the
   setup named in the strip header in step 1. With several setups in the project, the others are
   not exported.
 - No `outputs.machine.json` is present: the bindings name this computer's displays and are not
@@ -64,7 +64,7 @@ the executable, or the console window with **Show Log Messages** enabled).
 2. Open the export folder, then start the executable.
 
 **Expected:**
-- After 1: `outputs.machine.json` sits in the export's `.meta` folder beside the setup files, and
+- After 1: `outputs.machine.json` sits in the export's `.meta/Setups` folder beside the setup files, and
   the console reports that this machine's display bindings were exported.
 - After 2: no startup dialog appears. The bound output opens full-screen on its display. With two
   outputs bound to two displays, both open at once and each shows its own canvas.
@@ -94,7 +94,7 @@ The console warns that there are no bindings to ship, and the export still succe
 Set **Player Mode** back to **Demo**, export, and start the executable.
 
 **Expected:**
-- No `outputs.machine.json` in the export's `.meta` folder, however the outputs are bound here.
+- No `outputs.machine.json` in the export's `.meta/Setups` folder, however the outputs are bound here.
 - The startup dialog appears, and the player shows the first output in the window at the chosen
   resolution — on whichever display is picked, not the one the output is bound to at home.
 
@@ -104,5 +104,5 @@ Set **Player Mode** back to **Demo**, export, and start the executable.
 Export a project that has no output setup and start it.
 
 **Expected:**
-- No `.meta` folder is created beside the executable, the player starts normally, and its log
+- No `.meta/Setups` folder is created beside the executable, the player starts normally, and its log
   notes that no output setup was shipped.

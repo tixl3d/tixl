@@ -14,7 +14,7 @@ namespace T3.Core.Output;
 
 /// <summary>
 /// Everything that is re-done when the physical situation changes: surfaces, reference
-/// images, outputs, props. One JSON file per venue, stored in the project's .meta/ folder.
+/// images, outputs, props. One JSON file per venue, stored in the project's .meta/Setups/ folder.
 /// Ops bind to the contained entities by GUID; duplicating a Setup preserves those GUIDs —
 /// that is the venue-swap mechanism.
 /// </summary>
@@ -22,9 +22,9 @@ public sealed class Setup
 {
     public const int CurrentVersion = 1;
 
-    /// <summary>Setups live in the project's meta folder as &lt;name&gt;.setup.json.</summary>
+    /// <summary>Setups live in <see cref="SetupFiles.FolderIn"/> as &lt;name&gt;.setup.json.</summary>
     public const string FileSuffix = ".setup.json";
-    public const string FolderName = ".meta";
+    public const string FolderName = "Setups";
 
     public Guid Id = Guid.NewGuid();
     public string Name = string.Empty;

@@ -100,7 +100,7 @@ Right-drag in the view to pan; scroll the mouse wheel to zoom in and out.
 
 **Action:**
 Select `Surface 1` (or any other entity) in the panel, then click `P1` again. Optionally open
-`.meta/Setup 1.setup.json` in the project folder.
+`.meta/Setups/Setup 1.setup.json` in the project folder.
 
 **Expected:**
 - The quad reappears exactly where it was left.

@@ -548,8 +548,8 @@ internal static partial class Program
     /// </summary>
     private static void LoadOutputSetup(IReadOnlyList<T3.SystemUi.DisplayInfo> displays, Int2 windowResolution)
     {
-        var metaFolder = Path.Combine(FileLocations.StartFolder, Setup.FolderName);
-        if (!SetupFiles.TryLoad(metaFolder, out var setup, out var machineConfig, out _) || setup == null)
+        var setupsFolder = SetupFiles.FolderIn(FileLocations.StartFolder);
+        if (!SetupFiles.TryLoad(setupsFolder, out var setup, out var machineConfig, out _) || setup == null)
         {
             Log.Debug("No output setup shipped with this project.");
             return;

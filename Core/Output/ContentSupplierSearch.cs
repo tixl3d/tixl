@@ -31,6 +31,35 @@ public static class ContentSupplierSearch
         Collect(instance, suppliers);
     }
 
+    /// <summary>
+    /// The SymbolChild ids of every send under <paramref name="symbol"/>, at any depth, from symbols alone — so a
+    /// send counts even while nothing has instantiated it.
+    /// </summary>
+    public static void CollectSupplierChildIds(Symbol symbol, HashSet<Guid> childIds)
+    {
+        _containsSupplierBySymbol.Clear();
+        _visitedSymbolIds.Clear();
+        CollectChildIds(symbol, childIds);
+    }
+
+    private static void CollectChildIds(Symbol symbol, HashSet<Guid> childIds)
+    {
+        if (!_visitedSymbolIds.Add(symbol.Id))
+            return;
+
+        foreach (var child in symbol.Children.Values)
+        {
+            if (IsSupplier(child.Symbol))
+            {
+                childIds.Add(child.Id);
+            }
+            else if (ContainsSupplier(child.Symbol))
+            {
+                CollectChildIds(child.Symbol, childIds);
+            }
+        }
+    }
+
     private static void Collect(Instance instance, List<Instance> suppliers)
     {
         foreach (var child in instance.Symbol.Children.Values)
@@ -80,4 +109,5 @@ public static class ContentSupplierSearch
     }
 
     private static readonly Dictionary<Guid, bool> _containsSupplierBySymbol = new();
+    private static readonly HashSet<Guid> _visitedSymbolIds = new();
 }
