@@ -271,6 +271,40 @@ public class GraphicsCompatTests
         GraphicsLog.Warning = null;
     }
 
+    /// <summary>
+    /// Operators dispose a texture while views of it are still bound and expect the texture to outlive them,
+    /// because a D3D11 view AddRefs what it points at. Releasing the texture underneath a live view frees the
+    /// memory a descriptor still references, which reads back as a black frame or faults the device.
+    /// </summary>
+    [Fact]
+    public void ATextureOutlivesTheViewsThatPointAtIt()
+    {
+        var (_, device) = CreateDevice();
+
+        var texture = new Texture2D(device,
+                                    new Texture2DDescription
+                                        {
+                                            Width = 4,
+                                            Height = 4,
+                                            Format = Format.R8G8B8A8_UNorm,
+                                            BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
+                                            Usage = ResourceUsage.Default,
+                                        });
+
+        var shaderView = new ShaderResourceView(device, texture);
+        var targetView = new RenderTargetView(device, texture);
+
+        // What an operator does when its resolution or format changed.
+        texture.Dispose();
+        Assert.False(texture.IsDisposed);
+
+        shaderView.Dispose();
+        Assert.False(texture.IsDisposed);
+
+        targetView.Dispose();
+        Assert.True(texture.IsDisposed);
+    }
+
     private static (FakeGraphicsBackend Backend, Device Device) CreateDevice()
     {
         var backend = new FakeGraphicsBackend();

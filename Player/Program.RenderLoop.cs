@@ -22,6 +22,10 @@ internal static partial class Program
     private static void RenderCallback()
     {
         EnsureBackBufferSize();
+
+        // The backends record into a frame and submit it at the end; D3D11's immediate context needed no such
+        // bracketing, which is why the render loop never had it.
+        _device.BeginFrame();
         WasapiAudioInput.StartFrame(_playback.Settings);
         _playback.Update();
 
@@ -68,10 +72,15 @@ internal static partial class Program
         DirtyFlag.IncrementGlobalTicks();
         DirtyFlag.GlobalInvalidationTick++;
 
+        // Under Vulkan this is what acquires the image for this frame, so it has to happen every frame
+        // and after the graph has been updated, not once at start-up.
+        _mainWindow.AcquireBackBuffer(_device);
         EvaluateAndDrawOutput(_resolution, _deviceContext, _mainWindow.RenderTargetView);
 
         _mainWindow.SwapChain.Present(_vsyncInterval);
         PresentOutputWindows();
+        _device.EndFrame();
+
 
         PerformanceMetrics.RecordFrame((float)(Playback.LastFrameDuration * 1000.0));
     }

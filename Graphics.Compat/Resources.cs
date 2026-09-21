@@ -61,12 +61,23 @@ public abstract class Resource : DeviceChild
     /// <summary>D3D11's subresource numbering: mips of slice 0, then of slice 1, and so on.</summary>
     public static int CalculateSubResourceIndex(int mipSlice, int arraySlice, int mipLevels) => mipSlice + arraySlice * mipLevels;
 
+    /// <summary>
+    /// Claims a share of this resource's lifetime. A D3D11 view AddRefs what it points at, and operators rely
+    /// on that: they dispose a texture while views of it are still bound, and expect the texture to outlive
+    /// them. Without it the memory is freed while a descriptor still references the image.
+    /// </summary>
+    internal void AddReference() => Interlocked.Increment(ref _references);
+
     public override void Dispose()
     {
+        if (Interlocked.Decrement(ref _references) > 0)
+            return;
+
         Native?.Dispose();
         GC.SuppressFinalize(this);
     }
 
+    private int _references = 1;
     private static ulong _nextId;
 }
 
@@ -342,10 +353,19 @@ public sealed class Buffer : Resource
     public override GpuResource? Native => GpuBuffer;
 }
 
-public abstract class ResourceView(Device device, Resource resource) : Resource(device)
+public abstract class ResourceView : Resource
 {
+    protected ResourceView(Device device, Resource resource) : base(device)
+    {
+        Resource = resource;
+        resource.AddReference();
+    }
+
     /// <summary>The resource this view points at. Operators read it back to compare identity.</summary>
-    public Resource Resource { get; } = resource;
+    public Resource Resource { get; }
+
+    /// <summary>Gives up the share of the resource's lifetime this view claimed. Every view's Dispose calls it.</summary>
+    protected void ReleaseResource() => Resource.Dispose();
 }
 
 public sealed class ShaderResourceView : ResourceView
@@ -418,6 +438,7 @@ public sealed class ShaderResourceView : ResourceView
 
         // A buffer view owns nothing of its own; disposing it must not take the buffer with it.
         GpuView?.Dispose();
+        ReleaseResource();
         GC.SuppressFinalize(this);
     }
 }
@@ -440,6 +461,13 @@ public sealed class RenderTargetView : ResourceView
     public RenderTargetViewDescription Description { get; }
     public GpuTextureView? GpuView { get; }
     public override GpuResource? Native => GpuView;
+
+    public override void Dispose()
+    {
+        GpuView?.Dispose();
+        ReleaseResource();
+        GC.SuppressFinalize(this);
+    }
 }
 
 public sealed class DepthStencilView : ResourceView
@@ -460,6 +488,13 @@ public sealed class DepthStencilView : ResourceView
     public DepthStencilViewDescription Description { get; }
     public GpuTextureView? GpuView { get; }
     public override GpuResource? Native => GpuView;
+
+    public override void Dispose()
+    {
+        GpuView?.Dispose();
+        ReleaseResource();
+        GC.SuppressFinalize(this);
+    }
 }
 
 public sealed class UnorderedAccessView : ResourceView
@@ -484,6 +519,7 @@ public sealed class UnorderedAccessView : ResourceView
     public override void Dispose()
     {
         GpuView?.Dispose();
+        ReleaseResource();
         GC.SuppressFinalize(this);
     }
 }

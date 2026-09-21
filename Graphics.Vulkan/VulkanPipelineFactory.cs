@@ -112,11 +112,15 @@ internal static unsafe class VulkanPipelineFactory
                                                                                      },
 
                                                                       // D3D's front face is clockwise unless an
-                                                                      // operator says otherwise, and the viewport is
-                                                                      // flipped rather than the winding.
+                                                                      // operator says otherwise. The viewport is
+                                                                      // flipped to get D3D's +Y-up clip space, which
+                                                                      // reverses the winding a triangle presents on
+                                                                      // screen, so the front face flips with it -
+                                                                      // otherwise back-face culling removes exactly
+                                                                      // the faces that should be visible.
                                                                       frontFace = description.Rasterizer.FrontFaceIsCounterClockwise
-                                                                                      ? VkFrontFace.CounterClockwise
-                                                                                      : VkFrontFace.Clockwise,
+                                                                                      ? VkFrontFace.Clockwise
+                                                                                      : VkFrontFace.CounterClockwise,
                                                                       depthBiasEnable = description.Rasterizer.DepthBias != 0
                                                                                         || description.Rasterizer.SlopeScaledDepthBias != 0,
                                                                       depthBiasConstantFactor = description.Rasterizer.DepthBias,

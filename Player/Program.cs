@@ -564,8 +564,20 @@ internal static partial class Program
         if (OperatingSystem.IsWindows())
             return CreateD3D11Backend();
 
+        // TIXL_VULKAN_VALIDATION=1 turns the validation layer on. It reports invalid use while the command is
+        // recorded, which is the only way to see what a driver later reports as nothing but a lost device.
+        var validation = Environment.GetEnvironmentVariable("TIXL_VULKAN_VALIDATION") == "1";
+
+        if (validation)
+        {
+            Log.Info("Vulkan validation layer enabled.");
+            GraphicsLog.Error = message => Log.Error($"[vulkan] {message}");
+            GraphicsLog.Warning = message => Log.Warning($"[vulkan] {message}");
+        }
+
         return new T3.Graphics.Vulkan.VulkanBackend(new T3.Graphics.Vulkan.VulkanBackendOptions
                                                         {
+                                                            EnableValidation = validation,
                                                             InstanceExtensions = PlayerWindow.GetVulkanInstanceExtensions(),
                                                         });
     }

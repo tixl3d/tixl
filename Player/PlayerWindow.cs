@@ -172,7 +172,7 @@ internal sealed unsafe class PlayerWindow : IDisposable
         // bound can escalate to DXGI_ERROR_DEVICE_HUNG on the next Present.
         device.ImmediateContext.OutputMerger.SetTargets((RenderTargetView?)null);
         releaseBackBufferReferences?.Invoke();
-        RenderTargetView.Dispose();
+        DisposeBackBufferViews();
         BackBuffer.Dispose();
 
         SwapChain.ResizeBuffers(size.Width, size.Height);
@@ -181,18 +181,48 @@ internal sealed unsafe class PlayerWindow : IDisposable
 
     public void Dispose()
     {
-        RenderTargetView?.Dispose();
+        DisposeBackBufferViews();
         BackBuffer?.Dispose();
         SwapChain?.Dispose();
         SDL_DestroyWindow(_window);
     }
 
-    private void CreateBackBufferViews(Device device)
+    /// <summary>
+    /// Picks the image this frame draws into. Asking the swap chain for its back buffer is what acquires one
+    /// under Vulkan, so it has to happen every frame — holding the first one renders into an image that is
+    /// never presented. The views are kept per image because a chain cycles through the same few.
+    /// </summary>
+    public void AcquireBackBuffer(Device device)
     {
         BackBuffer = SwapChain.GetBackBuffer();
-        RenderTargetView = new RenderTargetView(device, BackBuffer);
         BackBufferSize = new Size(BackBuffer.Description.Width, BackBuffer.Description.Height);
+
+        if (!_viewsPerBackBuffer.TryGetValue(BackBuffer, out var view))
+        {
+            view = new RenderTargetView(device, BackBuffer);
+            _viewsPerBackBuffer[BackBuffer] = view;
+        }
+
+        RenderTargetView = view;
     }
+
+    private void CreateBackBufferViews(Device device)
+    {
+        DisposeBackBufferViews();
+        AcquireBackBuffer(device);
+    }
+
+    private void DisposeBackBufferViews()
+    {
+        foreach (var view in _viewsPerBackBuffer.Values)
+        {
+            view.Dispose();
+        }
+
+        _viewsPerBackBuffer.Clear();
+    }
+
+    private readonly Dictionary<T3.Graphics.Compat.Texture2D, RenderTargetView> _viewsPerBackBuffer = [];
 
     private Size GetPixelSize()
     {

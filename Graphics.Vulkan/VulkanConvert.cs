@@ -43,6 +43,11 @@ internal static class VulkanConvert
                        Format.R32_UInt              => VkFormat.R32Uint,
                        Format.R32_SInt              => VkFormat.R32Sint,
                        Format.D32_Float             => VkFormat.D32Sfloat,
+
+                       // Vulkan has no typeless formats. D3D11 declares a depth buffer it also samples as
+                       // typeless and picks the concrete format per view, so use the depth one for the image.
+                       Format.R32_Typeless          => VkFormat.D32Sfloat,
+                       Format.R24G8_Typeless        => VkFormat.D24UnormS8Uint,
                        Format.D32_Float_S8X24_UInt  => VkFormat.D32SfloatS8Uint,
                        Format.D24_UNorm_S8_UInt     => VkFormat.D24UnormS8Uint,
                        Format.D16_UNorm             => VkFormat.D16Unorm,

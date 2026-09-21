@@ -20,6 +20,7 @@ namespace Core.Tests;
 /// (s/b/t/u at 0/16/32/160, offset by <see cref="ShaderSlots.BaseOf"/> per stage). They are embedded so the
 /// test needs no compiler.
 /// </remarks>
+[Collection("Vulkan")]
 public class VulkanBackendTests(ITestOutputHelper output)
 {
     [Fact]

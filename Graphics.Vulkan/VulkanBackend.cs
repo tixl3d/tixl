@@ -138,6 +138,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         VkPhysicalDeviceVulkan12Features features12 = new() { pNext = &features13, scalarBlockLayout = true };
         VkPhysicalDeviceVulkan11Features features11 = new() { pNext = &features12, shaderDrawParameters = true };
         VkPhysicalDeviceFeatures2 features2 = new() { pNext = &features11 };
+        // D3D11 guarantees that reading past the end of a buffer returns zero, and TiXL's shaders rely on it -
+        // a point or vertex index one past the last element is common. Vulkan leaves that undefined unless
+        // this is on, and an undefined read faults the device rather than returning anything.
+        features2.features.robustBufferAccess = true;
         features2.features.samplerAnisotropy = true;
         features2.features.depthClamp = true;
         features2.features.fillModeNonSolid = true;
@@ -462,6 +466,12 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                            };
 
         var format = description.Format == Format.Unknown ? source.VulkanFormat : VulkanConvert.ToVulkan(description.Format);
+
+        // D3D11 samples a typeless depth buffer through a colour view - R32_Float over what it created as
+        // R32_Typeless. Vulkan has neither the typeless format nor the reinterpretation: a view of a depth
+        // image is a depth view, and the aspect already says so.
+        if (VulkanConvert.IsDepth(source.Description.Format))
+            format = source.VulkanFormat;
 
         VkImageViewCreateInfo viewInfo = new()
                                              {
