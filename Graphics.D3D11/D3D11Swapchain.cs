@@ -48,7 +48,13 @@ internal sealed class D3D11Swapchain : GpuSwapchain
             _swapChain2 = _swapChain.QueryInterfaceOrNull<DXGI.SwapChain2>();
 
             if (_swapChain2 != null)
+            {
                 _swapChain2.MaximumFrameLatency = 1;
+
+                // Every query opens a new handle for the caller to close, so it is taken once and kept; it stays
+                // valid across ResizeBuffers as long as the flag is kept.
+                _latencyWaitable = _swapChain2.FrameLatencyWaitableObject;
+            }
         }
 
         AcquireBackBuffer();
@@ -77,10 +83,8 @@ internal sealed class D3D11Swapchain : GpuSwapchain
 
     public override void WaitForFrameLatency()
     {
-        var waitable = _swapChain2?.FrameLatencyWaitableObject ?? nint.Zero;
-
-        if (waitable != nint.Zero)
-            WaitForSingleObject(waitable, 1000);
+        if (_latencyWaitable != nint.Zero)
+            WaitForSingleObject(_latencyWaitable, 1000);
     }
 
     private void AcquireBackBuffer()
@@ -106,6 +110,9 @@ internal sealed class D3D11Swapchain : GpuSwapchain
     protected override void ReleaseWhenRetired()
     {
         _backBuffer?.Dispose();
+        if (_latencyWaitable != nint.Zero)
+            CloseHandle(_latencyWaitable);
+
         _swapChain2?.Dispose();
         _swapChain.Dispose();
     }
@@ -113,8 +120,12 @@ internal sealed class D3D11Swapchain : GpuSwapchain
     [System.Runtime.InteropServices.DllImport("kernel32.dll")]
     private static extern uint WaitForSingleObject(nint handle, uint milliseconds);
 
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern bool CloseHandle(nint handle);
+
     private readonly D3D11Backend _backend;
     private readonly DXGI.SwapChain1 _swapChain;
     private readonly DXGI.SwapChain2? _swapChain2;
+    private readonly nint _latencyWaitable;
     private D3D11Texture? _backBuffer;
 }

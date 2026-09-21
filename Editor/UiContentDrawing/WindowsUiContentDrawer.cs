@@ -119,6 +119,22 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         ProgramWindows.Main.WaitForFrameLatency();
         StallWatchdog.NotifyFrameStarted();
 
+        // Vulkan records a frame into one command buffer and submits it after the swap chains are presented;
+        // under D3D11 the bracket costs nothing.
+        var device = Program.Device!;
+        device.BeginFrame();
+        try
+        {
+            RenderFrame();
+        }
+        finally
+        {
+            device.EndFrame();
+        }
+    }
+
+    private void RenderFrame()
+    {
         lock (_contextLock)
         {
             ImGui.SetCurrentContext(_imguiContext);
@@ -146,7 +162,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
             // Release any modifier whose key-up we never saw (Alt+Tab between the main and viewer windows is
             // the usual culprit) before it can strand canvas interaction for the whole frame.
-            ImGuiDx11RenderForm.ReconcileStuckModifiers();
+            SdlImGuiInput.ReconcileStuckModifiers();
 
             ImGui.NewFrame();
 
@@ -211,7 +227,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 ProgramWindows.RefreshViewport();
 
                 ImGui.Render();
-                ProgramWindows.Main.Form.ApplyRequestedCursor();
+                SdlImGuiInput.ApplyRequestedCursor();
 
                 // Presenting the stall overlay discarded the cleared back buffer of this frame.
                 if (StallWatchdog.NotifyRenderingBackBuffer())

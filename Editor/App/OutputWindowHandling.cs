@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using T3.Graphics.Compat;
 using T3.Core.Resource;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -147,8 +146,8 @@ internal static class OutputWindowHandling
         if (_windows.TryGetValue(displayIndex, out var existing))
             return existing;
 
-        // Screen.AllScreens allocates, so it is consulted only when a window is actually being opened.
-        if (displayIndex < 0 || displayIndex >= Screen.AllScreens.Length)
+        // Listing the displays allocates, so it is consulted only when a window is actually being opened.
+        if (displayIndex < 0 || displayIndex >= AppWindow.DisplayCount)
             return null;
 
         var window = ProgramWindows.CreateViewerWindow($"TiXL Output {displayIndex + 1}", 640, 360);

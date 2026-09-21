@@ -27,7 +27,7 @@ using T3.Editor.Skills.Training;
 using T3.Editor.SystemUi;
 using T3.Editor.UiContentDrawing;
 using T3.Editor.UiModel.Helpers;
-using T3.MsForms;
+using SDL;
 using T3.SystemUi;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
@@ -97,15 +97,19 @@ internal static class Program
         // Not calling this first will cause exceptions...
         Console.WriteLine("Starting T3 Editor");
         Console.WriteLine("Creating EditorUi");
-        EditorUi.Instance = new MsFormsEditor();
+        EditorUi.Instance = new SdlLoopEditorUi();
             
         var windowProvider = new SilkWindowProvider();
         var imguiContextLock = windowProvider.ContextLock;
         ImGuiWindowService.Instance = windowProvider;
         BlockingWindow.Instance = windowProvider;
 
-        Console.WriteLine("Creating DX11ShaderCompiler");
-        ShaderCompiler.Instance = new DX11ShaderCompiler();
+        // The editor's windows are SDL windows; its message boxes and splash screen are not, and do not need it.
+        if (!SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
+        {
+            BlockingWindow.Instance.ShowMessageBox($"Failed to initialize SDL: {SDL3.SDL_GetError()}");
+            return;
+        }
 
         // Console.WriteLine("Validating startup location");
         // StartupValidation.ValidateNotRunningFromSystemFolder();
@@ -189,10 +193,10 @@ internal static class Program
         
         Device = device;
 
-        if (ShaderCompiler.Instance is not DX11ShaderCompiler shaderCompiler)
-            throw new Exception("ShaderCompiler is not DX11ShaderCompiler");
-
-        shaderCompiler.Device = device;
+        // FXC only exists on Windows, and only D3D11 reads its bytecode.
+        ShaderCompiler.Instance = OperatingSystem.IsWindows()
+                                      ? new DX11ShaderCompiler { Device = device }
+                                      : new SlangShaderCompiler(device);
 
         Log.Debug("Initializing UiContentContentDrawer...");
         var contentDrawer = new WindowsUiContentDrawer();
@@ -299,6 +303,7 @@ internal static class Program
             Log.Warning("Exception freeing resources: " + e.Message);
         }
 
+        SDL3.SDL_Quit();
         Log.Debug("Shutdown complete");
     }
 

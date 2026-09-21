@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using SDL;
 using T3.Core.Logging;
 using T3.Graphics;
@@ -104,10 +103,7 @@ internal sealed unsafe class PlayerWindow : IDisposable
         var size = GetPixelSize();
         var target = new SurfaceTarget
                          {
-                             Win32Window = OperatingSystem.IsWindows()
-                                               ? SDL_GetPointerProperty(SDL_GetWindowProperties(_window), SDL_PROP_WINDOW_WIN32_HWND_POINTER,
-                                                                        IntPtr.Zero)
-                                               : IntPtr.Zero,
+                             Win32Window = SdlSurface.GetWin32Handle(_window),
                              CreateVulkanSurface = CreateVulkanSurface,
                          };
 
@@ -127,35 +123,12 @@ internal sealed unsafe class PlayerWindow : IDisposable
     }
 
     /// <summary>
-    /// The Vulkan instance extensions this platform's surface needs. Only SDL knows them, and they have to be
-    /// enabled when the instance is created, which happens before any window hands out a surface.
+    /// The Vulkan instance extensions this platform's surface needs; they have to be enabled when the instance is
+    /// created, which happens before any window hands out a surface.
     /// </summary>
-    public static IReadOnlyList<string> GetVulkanInstanceExtensions()
-    {
-        uint count;
-        var names = SDL_Vulkan_GetInstanceExtensions(&count);
-        if (names == null)
-        {
-            Log.Warning($"SDL could not report the Vulkan instance extensions: {SDL_GetError()}");
-            return [];
-        }
+    public static IReadOnlyList<string> GetVulkanInstanceExtensions() => SdlSurface.GetVulkanInstanceExtensions();
 
-        var extensions = new List<string>((int)count);
-        for (var i = 0; i < count; i++)
-        {
-            var name = Marshal.PtrToStringUTF8((nint)names[i]);
-            if (!string.IsNullOrEmpty(name))
-                extensions.Add(name);
-        }
-
-        return extensions;
-    }
-
-    private nint CreateVulkanSurface(nint instance)
-    {
-        VkSurfaceKHR_T* surface = null;
-        return SDL_Vulkan_CreateSurface(_window, (VkInstance_T*)instance, null, &surface) ? (nint)surface : IntPtr.Zero;
-    }
+    private nint CreateVulkanSurface(nint instance) => SdlSurface.CreateVulkanSurface(_window, instance);
 
     /// <summary>
     /// Resizes the swap chain when the window's pixel size changed (fullscreen toggle, DPI change). Call once
