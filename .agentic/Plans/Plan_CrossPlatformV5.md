@@ -462,6 +462,8 @@ Estimate: 40–80 commits, 100–200 agent hours.
 
 ### Phase 5 — Editor on Linux
 
+Detailed in [Plan_LinuxEditor](Plan_LinuxEditor.md).
+
 1. Editor windows on Vulkan; `--renderer vulkan` on Windows.
 2. Linux runtime: XDG paths, case-sensitive resource resolution, csproj generation, `dotnet build`.
 3. BASS libraries for Linux; audio input through BASS recording.
@@ -572,6 +574,8 @@ Estimate: 25–50 commits, 50–120 agent hours.
 
 ## Relation to other plans
 
+- [Plan_LinuxEditor](Plan_LinuxEditor.md): the detailed plan for the editor half of Phase 2 and all of
+  Phase 5, in milestones.
 - [Plan_BuildOutputClean](Plan_BuildOutputClean.md): prerequisite for fast agent loops (Phase 0).
 - [Plan_AutomaticTests](Plan_AutomaticTests.md): the visual-suite work here continues it.
 - [Plan_MidiControllerAbstraction](Plan_MidiControllerAbstraction.md): build its device layer on RtMidi.
