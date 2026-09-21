@@ -175,8 +175,6 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             VkFenceCreateInfo fenceInfo = new() { flags = VkFenceCreateFlags.Signaled };
             Api.vkCreateFence(&fenceInfo, null, out _frames[i].Fence).CheckResult();
 
-            VkSemaphoreCreateInfo semaphoreInfo = new();
-            Api.vkCreateSemaphore(&semaphoreInfo, null, out _frames[i].ImageAvailable).CheckResult();
             _frames[i].Retired = [];
         }
 
@@ -663,8 +661,22 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         Api.vkEndCommandBuffer(frame.CommandBuffer).CheckResult();
 
         var commandBuffer = frame.CommandBuffer;
-        var imageAvailable = frame.ImageAvailable;
-        var waitStage = VkPipelineStageFlags.ColorAttachmentOutput;
+
+        // Every swapchain that acquired this frame signalled its own semaphore, and each has to be waited on
+        // before anything draws into its image.
+        var waitSemaphores = stackalloc VkSemaphore[Math.Max(1, _acquiredSwapchains.Count)];
+        var waitStages = stackalloc VkPipelineStageFlags[Math.Max(1, _acquiredSwapchains.Count)];
+        var waitCount = 0;
+
+        foreach (var swapchain in _acquiredSwapchains)
+        {
+            if (swapchain.AcquireSemaphore.IsNull)
+                continue;
+
+            waitSemaphores[waitCount] = swapchain.AcquireSemaphore;
+            waitStages[waitCount] = VkPipelineStageFlags.ColorAttachmentOutput;
+            waitCount++;
+        }
 
         // One signal per swapchain being presented, each belonging to the image it will present.
         var signalSemaphores = stackalloc VkSemaphore[Math.Max(1, _pendingPresents.Count)];
@@ -680,12 +692,12 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                                           pCommandBuffers = &commandBuffer,
                                       };
 
-        // Only a frame that acquired a swapchain image has anything to wait for or to signal.
-        if (_acquiredSwapchains.Count > 0)
+        // Only a frame that acquired a swapchain image has anything to wait for.
+        if (waitCount > 0)
         {
-            submitInfo.waitSemaphoreCount = 1;
-            submitInfo.pWaitSemaphores = &imageAvailable;
-            submitInfo.pWaitDstStageMask = &waitStage;
+            submitInfo.waitSemaphoreCount = (uint)waitCount;
+            submitInfo.pWaitSemaphores = waitSemaphores;
+            submitInfo.pWaitDstStageMask = waitStages;
         }
 
         if (_pendingPresents.Count > 0)
@@ -709,8 +721,6 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         _frameActive = false;
         _frameIndex = (_frameIndex + 1) % FramesInFlight;
     }
-
-    internal VkSemaphore CurrentImageAvailableSemaphore => _frames[_frameIndex].ImageAvailable;
 
     internal void RegisterAcquiredSwapchain(VulkanSwapchain swapchain)
     {
@@ -1342,7 +1352,6 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         {
             RunRetired(ref _frames[i]);
             Api.vkDestroyFence(_frames[i].Fence);
-            Api.vkDestroySemaphore(_frames[i].ImageAvailable);
             Api.vkDestroyCommandPool(_frames[i].Pool);
         }
 
@@ -1360,11 +1369,6 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         internal VkCommandBuffer CommandBuffer;
         internal VkFence Fence;
 
-        /// <summary>
-        /// Signalled when a swapchain image is ready to be rendered into. Per frame rather than per image,
-        /// because the fence of the slot it belongs to has been waited on before it is used again.
-        /// </summary>
-        internal VkSemaphore ImageAvailable;
         internal List<Action<VkDeviceApi>> Retired;
     }
 

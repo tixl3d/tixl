@@ -16,6 +16,15 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
     {
         _backend = backend;
         _surface = surface;
+
+        // Each swapchain needs its own: two windows acquiring in the same frame on one shared semaphore signal it
+        // twice, and the frame's submit only waits on it once.
+        VkSemaphoreCreateInfo semaphoreInfo = new();
+        for (var i = 0; i < _imageAvailable.Length; i++)
+        {
+            backend.Api.vkCreateSemaphore(&semaphoreInfo, null, out _imageAvailable[i]).CheckResult();
+        }
+
         Create(description.Width, description.Height);
     }
 
@@ -32,6 +41,17 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
     {
         if (width <= 0 || height <= 0 || (width == Description.Width && height == Description.Height))
             return;
+
+        // An acquired image has signalled its semaphore, and only the submit that waits on it clears it.
+        // Recreating now would abandon the acquisition and leave that semaphore signalled for the next acquire
+        // to trip over, so an image already in flight is presented at the old size and the resize follows.
+        if (_acquired)
+        {
+            _requestedWidth = width;
+            _requestedHeight = height;
+            _needsRecreation = true;
+            return;
+        }
 
         _backend.Api.vkDeviceWaitIdle();
         DestroyImagesAndSwapchain();
@@ -93,6 +113,9 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
 
     internal bool WasAcquired => _acquired;
 
+    /// <summary>What the acquire of the current image signals. The frame's submit waits on it before drawing.</summary>
+    internal VkSemaphore AcquireSemaphore => _acquireSemaphore;
+
     /// <summary>The semaphore this image's present waits on. Signalled by the frame that rendered into it.</summary>
     internal VkSemaphore RenderFinishedSemaphore => _acquired ? _renderFinished[_imageIndex] : VkSemaphore.Null;
 
@@ -107,14 +130,17 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
         {
             _backend.Api.vkDeviceWaitIdle();
             DestroyImagesAndSwapchain();
-            Create(Description.Width, Description.Height);
+            Create(_requestedWidth > 0 ? _requestedWidth : Description.Width,
+                   _requestedHeight > 0 ? _requestedHeight : Description.Height);
+            _requestedWidth = 0;
+            _requestedHeight = 0;
         }
 
         if (_swapchain.IsNull)
             return;
 
         uint imageIndex = 0;
-        var semaphore = _backend.CurrentImageAvailableSemaphore;
+        var semaphore = _imageAvailable[_backend.CurrentFrameIndex];
         var result = _backend.Api.vkAcquireNextImageKHR(_swapchain, ulong.MaxValue, semaphore, VkFence.Null, &imageIndex);
 
         if (result is VkResult.ErrorOutOfDateKHR)
@@ -124,6 +150,7 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
         }
 
         _imageIndex = (int)imageIndex;
+        _acquireSemaphore = semaphore;
         _acquired = true;
         _backend.RegisterAcquiredSwapchain(this);
     }
@@ -310,6 +337,11 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
         _backend.Api.vkDeviceWaitIdle();
         DestroyImagesAndSwapchain();
 
+        foreach (var semaphore in _imageAvailable)
+        {
+            _backend.Api.vkDestroySemaphore(semaphore);
+        }
+
         var surface = _surface;
         var instanceApi = _backend.InstanceApi;
         instanceApi.vkDestroySurfaceKHR(surface);
@@ -320,9 +352,15 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
     private VkSwapchainKHR _swapchain;
     private VulkanTexture[] _images = [];
     private VkSemaphore[] _renderFinished = [];
+    private readonly VkSemaphore[] _imageAvailable = new VkSemaphore[VulkanBackend.FramesInFlight];
+    private VkSemaphore _acquireSemaphore;
     private int _imageIndex;
     private int _presentSyncInterval = 1;
     private VkPresentModeKHR _presentMode = VkPresentModeKHR.Fifo;
     private bool _acquired;
     private bool _needsRecreation;
+
+    /** A resize that arrived while an image was in flight, applied at the next acquire. Zero when none. */
+    private int _requestedWidth;
+    private int _requestedHeight;
 }
