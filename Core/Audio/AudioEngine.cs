@@ -227,7 +227,19 @@ public static class AudioEngine
     {
         if (_bassInitialized || _bassInitFailed) return;
 
-        AudioMixerManager.Initialize();
+        try
+        {
+            AudioMixerManager.Initialize();
+        }
+        catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException)
+        {
+            // The BASS native library is not there, or is built for another platform. Rendering does not
+            // depend on audio, so carry on without it rather than taking the whole render loop down.
+            Log.Warning($"[AudioEngine] BASS is unavailable; audio disabled. {e.Message}");
+            _bassInitFailed = true;
+            return;
+        }
+
         if (AudioMixerManager.OperatorMixerHandle == 0)
         {
             Log.Error("[AudioEngine] Failed to initialize AudioMixerManager; audio disabled.");

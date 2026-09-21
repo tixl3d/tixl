@@ -266,6 +266,61 @@ public class VulkanBackendTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// A multisampled render target, the way the RenderTarget operator asks for one. Vulkan only accepts a
+    /// sample count the device reports for that format and usage, so a graph asking for more has to be given
+    /// what the device has rather than an image that fails to create.
+    /// </summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(4)]
+    [InlineData(8)]
+    [InlineData(16)]
+    [InlineData(32)]
+    public void AMultisampledRenderTargetIsCreatedAtASupportedSampleCount(int sampleCount)
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+
+        var description = new Texture2DDescription
+                              {
+                                  Width = 256,
+                                  Height = 256,
+                                  ArraySize = 1,
+                                  MipLevels = 1,
+                                  Format = Format.R16G16B16A16_Float,
+                                  BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                                  Usage = ResourceUsage.Default,
+                                  CpuAccessFlags = CpuAccessFlags.None,
+                                  SampleDescription = new SampleDescription(sampleCount, 0),
+                              };
+
+        using var texture = new Texture2D(device, description);
+        Assert.NotNull(texture.Native);
+
+        // The views are where a texture that failed to create turns into a null reference far away.
+        using var srv = new ShaderResourceView(device, texture);
+        using var rtv = new RenderTargetView(device, texture,
+                                             new RenderTargetViewDescription
+                                                 {
+                                                     Format = description.Format,
+                                                     Dimension = sampleCount > 1
+                                                                     ? RenderTargetViewDimension.Texture2DMultisampled
+                                                                     : RenderTargetViewDimension.Texture2D,
+                                                 });
+
+        Assert.NotNull(srv.Native);
+        Assert.NotNull(rtv.Native);
+        output.WriteLine($"{sampleCount}x created with views");
+
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
     /// Exactly what loading an image does: a non-square, non-power-of-two texture whose levels all alias the
     /// one buffer holding level 0, then mips generated on the GPU from it.
     /// </summary>

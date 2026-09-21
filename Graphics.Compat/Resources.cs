@@ -200,6 +200,10 @@ public sealed class Texture2D : Texture
     /// </summary>
     internal static SubresourceData[] ToSubresources(DataRectangle[] data, in Texture2DDescription description)
     {
+        // A render target is created through this overload with no pixels at all.
+        if (data == null || data.Length == 0)
+            return [];
+
         var result = new SubresourceData[data.Length];
         var mipLevels = Math.Max(1, description.MipLevels);
 

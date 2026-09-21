@@ -89,7 +89,10 @@ public sealed class SlangShaderCompiler : ShaderCompiler
         // Compiled from a file rather than stdin: slangc resolves includes relative to the source, and the
         // editor compiles unsaved buffers, so the text on disk is not necessarily what is being compiled.
         var baseName = Path.Combine(workingDirectory, $"{Path.GetFileNameWithoutExtension(args.Name)}.{args.EntryPoint}.{Environment.CurrentManagedThreadId}");
-        var sourcePath = baseName + Path.GetExtension(args.Name);
+        // slangc infers the language from the extension, and a shader compiled from an operator's inline
+        // source has no file name to take one from.
+        var extension = Path.GetExtension(args.Name);
+        var sourcePath = baseName + (string.IsNullOrEmpty(extension) ? ".hlsl" : extension);
         var spirvPath = baseName + ".spv";
         var reflectionPath = baseName + ".json";
 

@@ -242,7 +242,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                                               arrayLayers = (uint)Math.Max(1, description.Dimension == TextureDimension.TextureCube
                                                                                   ? Math.Max(6, description.ArraySize)
                                                                                   : description.ArraySize),
-                                              samples = ToSampleCount(description.Samples.Count),
+                                              samples = SupportedSampleCount(description),
                                               tiling = VkImageTiling.Optimal,
                                               usage = VulkanConvert.ToVulkan(description.Usage),
                                               sharingMode = VkSharingMode.Exclusive,
@@ -1134,6 +1134,42 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     }
 
     private static int _validationErrorCount;
+
+    /// <summary>
+    /// The requested sample count, reduced to one the device offers for the ways this image will be used.
+    /// An unsupported count is invalid usage, and RADV faults on it rather than refusing the image.
+    /// </summary>
+    private VkSampleCountFlags SupportedSampleCount(in TextureDescription description)
+    {
+        var requested = ToSampleCount(description.Samples.Count);
+
+        if (requested == VkSampleCountFlags.Count1)
+            return requested;
+
+        var allowed = (VkSampleCountFlags)0x7f;
+
+        if ((description.Usage & TextureUsage.RenderTarget) != 0)
+            allowed &= _limits.framebufferColorSampleCounts;
+
+        if ((description.Usage & TextureUsage.DepthStencil) != 0)
+            allowed &= _limits.framebufferDepthSampleCounts;
+
+        if ((description.Usage & TextureUsage.Sampled) != 0)
+            allowed &= _limits.sampledImageColorSampleCounts;
+
+        if ((description.Usage & TextureUsage.Storage) != 0)
+            allowed &= _limits.storageImageSampleCounts;
+
+        while (requested > VkSampleCountFlags.Count1 && (allowed & requested) == 0)
+        {
+            requested = (VkSampleCountFlags)((uint)requested >> 1);
+        }
+
+        if (requested < ToSampleCount(description.Samples.Count))
+            GraphicsLog.WarnOnce($"{description.Samples.Count}x multisampling is not available here; using {(uint)requested}x.");
+
+        return requested == 0 ? VkSampleCountFlags.Count1 : requested;
+    }
 
     private static VkSampleCountFlags ToSampleCount(int count)
     {
