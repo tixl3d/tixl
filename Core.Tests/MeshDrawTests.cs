@@ -153,6 +153,113 @@ public class MeshDrawTests(ITestOutputHelper output)
         AssertValidationStayedQuiet();
     }
 
+    /// <summary>
+    /// A matrix goes from System.Numerics through a constant buffer into HLSL exactly as the Transforms
+    /// buffer does - transposed on the CPU, because Numerics stores rows and HLSL's default packing reads
+    /// columns - and <c>mul(v, M)</c> in the shader has to agree with the CPU. A layout that disagrees
+    /// transposes every matrix, which a near-identity 2D transform survives and a perspective one does not.
+    /// </summary>
+    [Fact]
+    public void AMatrixFromTheCpuTransformsAVectorTheSameWayInTheShader()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var shaders = RepositoryShaderFolder();
+
+        if (shaders == null || SlangShaderCompiler.FindCompiler() == null)
+        {
+            output.WriteLine("Skipped: slangc or the operator shaders are not available here.");
+            return;
+        }
+
+        const string source = """
+                              cbuffer Transforms : register(b0)
+                              {
+                                  float4x4 Transform;
+                              }
+
+                              RWStructuredBuffer<float4> Result : register(u0);
+
+                              [numthreads(1, 1, 1)]
+                              void main()
+                              {
+                                  Result[0] = mul(float4(1, 2, 3, 1), Transform);
+                              }
+                              """;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+        var compiler = new SlangShaderCompiler(device);
+
+        Assert.True(TryCompile<T3.Core.DataTypes.ComputeShader>(compiler, source, "main", shaders, "matrix.hlsl", out var blob, out var reason), reason);
+        Assert.True(SpirvBlob.TryUnpack(blob!, out var spirv, out var bindings, out _));
+        using var shader = new T3.Graphics.Compat.ComputeShader(device, backend.CreateShader(ShaderStage.Compute, spirv, "main", bindings, "matrix"));
+
+        // Non-symmetric, with a translation: a transposed matrix moves that into the w column and is obvious.
+        var matrix = Matrix4x4.CreateRotationZ(0.3f) * Matrix4x4.CreateTranslation(10, 20, 30);
+        var expected = Vector4.Transform(new Vector4(1, 2, 3, 1), matrix);
+
+        // What TransformBufferLayout uploads.
+        var uploaded = Matrix4x4.Transpose(matrix);
+        var matrixBytes = System.Runtime.InteropServices.MemoryMarshal.AsBytes(new ReadOnlySpan<Matrix4x4>(ref uploaded)).ToArray();
+
+        using var constants = new Buffer(device,
+                                         new BufferDescription
+                                             {
+                                                 SizeInBytes = 64,
+                                                 BindFlags = BindFlags.ConstantBuffer,
+                                                 Usage = ResourceUsage.Dynamic,
+                                                 CpuAccessFlags = CpuAccessFlags.Write,
+                                             },
+                                         matrixBytes);
+
+        using var result = new Buffer(device,
+                                      new BufferDescription
+                                          {
+                                              SizeInBytes = 16,
+                                              BindFlags = BindFlags.UnorderedAccess,
+                                              Usage = ResourceUsage.Default,
+                                              OptionFlags = ResourceOptionFlags.BufferStructured,
+                                              StructureByteStride = 16,
+                                          });
+        using var resultView = new UnorderedAccessView(device, result);
+
+        using var staging = new Buffer(device,
+                                       new BufferDescription
+                                           {
+                                               SizeInBytes = 16,
+                                               Usage = ResourceUsage.Staging,
+                                               CpuAccessFlags = CpuAccessFlags.Read,
+                                           });
+
+        device.BeginFrame();
+        context.ComputeShader.Set(shader);
+        context.ComputeShader.SetConstantBuffer(0, constants);
+        context.ComputeShader.SetUnorderedAccessView(0, resultView);
+        context.Dispatch(1, 1, 1);
+        context.CopyResource(result, staging);
+        device.EndFrame();
+
+        device.BeginFrame();
+        var box = context.MapSubresource(staging, 0, MapMode.Read, MapFlags.None);
+        var values = new float[4];
+        System.Runtime.InteropServices.Marshal.Copy(box.DataPointer, values, 0, 4);
+        context.UnmapSubresource(staging, 0);
+        device.EndFrame();
+
+        var actual = new Vector4(values[0], values[1], values[2], values[3]);
+        output.WriteLine($"expected {expected}, shader {actual}");
+
+        Assert.Equal(expected.X, actual.X, 3);
+        Assert.Equal(expected.Y, actual.Y, 3);
+        Assert.Equal(expected.Z, actual.Z, 3);
+        Assert.Equal(expected.W, actual.W, 3);
+        AssertValidationStayedQuiet();
+    }
+
     private static Buffer StructuredBuffer(Device device, int stride, int count)
         => new(device,
                new BufferDescription

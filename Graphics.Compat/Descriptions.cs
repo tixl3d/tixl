@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
 using T3.Graphics;
 
 namespace T3.Graphics.Compat;
@@ -137,29 +138,37 @@ public struct DepthStencilStateDescription
 }
 
 // View descriptions. SharpDX overlaps the per-dimension members in a union and nests their types inside the
-// description; the facade keeps the same names and shape — the difference is that these are plain fields, so
-// only the member matching Dimension is read and there is no layout trap.
+// description, and the facade keeps the same names and shape.
 
+/// <summary>
+/// Laid out as D3D11's own: the per-dimension members share memory. Operators rely on that — a structured
+/// buffer's view is described through <see cref="BufferEx"/>, and its length read back through
+/// <see cref="Buffer"/>. As separate fields that read returns zero, and every point, particle and mesh
+/// operator draws nothing.
+/// </summary>
+[StructLayout(LayoutKind.Explicit)]
 public struct ShaderResourceViewDescription
 {
-    public Format Format;
-    public ShaderResourceViewDimension Dimension;
-    public BufferResource Buffer;
-    public ExtendedBufferResource BufferEx;
-    public Texture1DResource Texture1D;
-    public Texture1DArrayResource Texture1DArray;
-    public Texture2DResource Texture2D;
-    public Texture2DArrayResource Texture2DArray;
-    public Texture3DResource Texture3D;
-    public TextureCubeResource TextureCube;
-    public TextureCubeArrayResource TextureCubeArray;
+    [FieldOffset(0)] public Format Format;
+    [FieldOffset(4)] public ShaderResourceViewDimension Dimension;
+    [FieldOffset(8)] public BufferResource Buffer;
+    [FieldOffset(8)] public ExtendedBufferResource BufferEx;
+    [FieldOffset(8)] public Texture1DResource Texture1D;
+    [FieldOffset(8)] public Texture1DArrayResource Texture1DArray;
+    [FieldOffset(8)] public Texture2DResource Texture2D;
+    [FieldOffset(8)] public Texture2DArrayResource Texture2DArray;
+    [FieldOffset(8)] public Texture3DResource Texture3D;
+    [FieldOffset(8)] public TextureCubeResource TextureCube;
+    [FieldOffset(8)] public TextureCubeArrayResource TextureCubeArray;
 
+    /// <summary>D3D11_BUFFER_SRV is itself two unions, which is what lines its count up with BufferEx's.</summary>
+    [StructLayout(LayoutKind.Explicit)]
     public struct BufferResource
     {
-        public int FirstElement;
-        public int ElementOffset;
-        public int ElementCount;
-        public int ElementWidth;
+        [FieldOffset(0)] public int FirstElement;
+        [FieldOffset(0)] public int ElementOffset;
+        [FieldOffset(4)] public int ElementCount;
+        [FieldOffset(4)] public int ElementWidth;
     }
 
     public struct ExtendedBufferResource

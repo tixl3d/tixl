@@ -305,6 +305,47 @@ public class GraphicsCompatTests
         Assert.True(texture.IsDisposed);
     }
 
+    /// <summary>
+    /// Structured buffers are described through BufferEx and their length is read back through Buffer by
+    /// AnalyzeMeshBuffers, GetSRVProperties and the point and particle operators. That only works because the
+    /// two share memory, as they do in D3D11; as separate fields the count reads zero and a mesh draws nothing.
+    /// </summary>
+    [Fact]
+    public void ABufferViewsLengthReadsTheSameThroughEitherMember()
+    {
+        var description = new ShaderResourceViewDescription
+                              {
+                                  Dimension = ShaderResourceViewDimension.ExtendedBuffer,
+                                  BufferEx = new ShaderResourceViewDescription.ExtendedBufferResource
+                                                 {
+                                                     FirstElement = 3,
+                                                     ElementCount = 1234,
+                                                 },
+                              };
+
+        Assert.Equal(1234, description.Buffer.ElementCount);
+        Assert.Equal(3, description.Buffer.FirstElement);
+    }
+
+    /// <summary>The default view of a structured buffer, which is where the mesh operators get theirs.</summary>
+    [Fact]
+    public void TheDefaultViewOfAStructuredBufferReportsItsLength()
+    {
+        var (_, device) = CreateDevice();
+
+        using var buffer = new Buffer(device,
+                                      new BufferDescription
+                                          {
+                                              SizeInBytes = 80 * 25,
+                                              BindFlags = BindFlags.ShaderResource,
+                                              OptionFlags = ResourceOptionFlags.BufferStructured,
+                                              StructureByteStride = 80,
+                                          });
+        using var view = new ShaderResourceView(device, buffer);
+
+        Assert.Equal(25, view.Description.Buffer.ElementCount);
+    }
+
     private static (FakeGraphicsBackend Backend, Device Device) CreateDevice()
     {
         var backend = new FakeGraphicsBackend();
