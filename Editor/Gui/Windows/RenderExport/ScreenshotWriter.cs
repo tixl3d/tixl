@@ -1,8 +1,8 @@
 #nullable enable
 
 using T3.Graphics.Compat;
-using SharpDX.IO;
-using SharpDX.WIC;
+using System.IO;
+using StbImageWriteSharp;
 using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.Resource;
@@ -80,95 +80,56 @@ internal static class ScreenshotWriter
                                                       T3.Graphics.Compat.MapFlags.None,
                                                       out var imageStream);
         using var dataStream = imageStream;
-        
+
         var width = request.CpuAccessTexture.Description.Width;
         var height = request.CpuAccessTexture.Description.Height;
-        var factory = new ImagingFactory();
-        
-        WICStream stream;
+
+        // Rows are copied out one by one: the mapped row pitch is padded and can exceed width * 4. JPEG has no
+        // alpha, so it gets three bytes per pixel.
+        var isPng = _useFormats == FileFormats.Png;
+        var bytesPerPixel = isPng ? 4 : 3;
+        var pixels = new byte[width * height * bytesPerPixel];
+        var row = new byte[width * 4];
+
         try
         {
-            stream = new WICStream(factory, request.Filepath, NativeFileAccess.Write);
-        }
-        catch (Exception e)
-        {
-            if(logErrors)
-                Log.Warning("Failed to export image: " + e.Message);
-            
-            return;
-        }
-
-        // Initialize a Jpeg encoder with this stream
-        BitmapEncoder encoder = _useFormats == FileFormats.Png
-                                    ? new PngBitmapEncoder(factory)
-                                    : new JpegBitmapEncoder(factory);
-        encoder.Initialize(stream);
-
-        // Create a Frame encoder
-        var bitmapFrameEncode = new BitmapFrameEncode(encoder);
-        bitmapFrameEncode.Initialize();
-        bitmapFrameEncode.SetSize(width, height);
-        var formatId = PixelFormat.Format32bppRGBA;
-        bitmapFrameEncode.SetPixelFormat(ref formatId);
-
-        var rowStride = PixelFormat.GetStride(formatId, width);
-        var outBufferSize = height * rowStride;
-        var outDataStream = new DataStream(outBufferSize, true, true);
-        
-        try
-        {
-            if (_useFormats == FileFormats.Png)
+            for (var y = 0; y < height; y++)
             {
-                // Note: dataBox.RowPitch and outputStream.RowPitch can diverge if width is not divisible by 16.
-                for (var loopY = 0; loopY < height; loopY++)
+                System.Runtime.InteropServices.Marshal.Copy(dataBox.DataPointer + y * dataBox.RowPitch, row, 0, row.Length);
+                var target = y * width * bytesPerPixel;
+                for (var x = 0; x < width; x++)
                 {
-                    imageStream.Position = (long)(loopY) * dataBox.RowPitch;
-                    var row = imageStream.ReadRange<byte>(rowStride);
-                    if (_forceOpaque)
-                    {
-                        for (var i = 3; i < row.Length; i += 4)
-                            row[i] = 255;
-                    }
-
-                    outDataStream.WriteRange(row);
+                    var source = x * 4;
+                    pixels[target++] = row[source];
+                    pixels[target++] = row[source + 1];
+                    pixels[target++] = row[source + 2];
+                    if (isPng)
+                        pixels[target++] = _forceOpaque ? (byte)255 : row[source + 3];
                 }
+            }
+
+            using var file = File.Create(request.Filepath);
+            var writer = new ImageWriter();
+            if (isPng)
+            {
+                writer.WritePng(pixels, width, height, ColorComponents.RedGreenBlueAlpha, file);
             }
             else
             {
-                // We need to skip bytes for alpha channel from stream... 
-                for (var y1 = 0; y1 < height; y1++)
-                {
-                    imageStream.Position = (long)(y1) * dataBox.RowPitch;
-                    for (var x1 = 0; x1 < width; x1++)
-                    {
-                        outDataStream.WriteRange(imageStream.ReadRange<byte>(3));
-                        imageStream.ReadByte();
-                    }
-                }
-            }            
-            
-            // Copy the pixels from the buffer to the Wic Bitmap Frame encoder
-            bitmapFrameEncode.WritePixels(height, new SharpDX.DataRectangle(outDataStream.DataPointer, rowStride));
+                writer.WriteJpg(pixels, width, height, ColorComponents.RedGreenBlue, file, JpegQuality);
+            }
 
-            // Commit changes
-            bitmapFrameEncode.Commit();
-            encoder.Commit();
+            LastFilename = request.Filepath;
         }
         catch (Exception e)
         {
-            Log.Error($"Screenshot internal image copy failed : {e.Message}");
-        }
-        finally
-        {
-            imageStream.Dispose();
-            outDataStream.Dispose();
-            bitmapFrameEncode.Dispose();
-            encoder.Dispose();
-            stream.Dispose();
-            LastFilename = request.Filepath;
+            if (logErrors)
+                Log.Warning("Failed to export image: " + e.Message);
         }
     }
-    
+
+    private const int JpegQuality = 90;
+
     /// <summary>
     /// Save the requested format for later use by callback.
     /// This is not ideal, but beats the alternative to moving file formats to

@@ -558,6 +558,196 @@ public class VulkanBackendTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// A texture uploaded mid-frame and sampled by a later draw of the same pass. The upload closes the pass, the
+    /// next draw reopens it, and the draw after that finds the texture still in the transfer layout: its
+    /// transition must not land inside the open pass, where Vulkan forbids layout changes.
+    /// </summary>
+    [Fact]
+    public void ATextureUploadedMidPassIsTransitionedOutsideThePass()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+
+        using var first = new Texture2D(device, Describe(BindFlags.ShaderResource, ResourceUsage.Default), UniformPixels(200, 100, 50));
+        using var firstView = new ShaderResourceView(device, first);
+        using var second = new Texture2D(device, Describe(BindFlags.ShaderResource, ResourceUsage.Default));
+        using var secondView = new ShaderResourceView(device, second);
+
+        using var target = new Texture2D(device, Describe(BindFlags.RenderTarget | BindFlags.ShaderResource, ResourceUsage.Default));
+        using var targetView = new RenderTargetView(device, target);
+
+        var tint = new[] { 0.5f, 0.5f, 0.5f, 1f };
+        using var constants = new Buffer(device,
+                                         new BufferDescription
+                                             {
+                                                 SizeInBytes = 16,
+                                                 BindFlags = BindFlags.ConstantBuffer,
+                                                 Usage = ResourceUsage.Dynamic,
+                                                 CpuAccessFlags = CpuAccessFlags.Write,
+                                             },
+                                         System.Runtime.InteropServices.MemoryMarshal.AsBytes<float>(tint));
+
+        using var sampler = new SamplerState(device, new SamplerStateDescription { Filter = Filter.MinMagMipPoint, MaximumLod = float.MaxValue });
+        using var vertexShader = new T3.Graphics.Compat.VertexShader(device, backend.CreateShader(ShaderStage.Vertex, VertexSpirv, "main", [], "vs"));
+        using var pixelShader = new T3.Graphics.Compat.PixelShader(device, backend.CreateShader(ShaderStage.Pixel, PixelSpirv, "main", PixelBindings,
+                                                                                                "ps"));
+        using var rasterizer = new RasterizerState(device, new RasterizerStateDescription { FillMode = FillMode.Solid, CullMode = CullMode.None });
+        using var depthStencil = new DepthStencilState(device, new DepthStencilStateDescription { IsDepthEnabled = false });
+
+        var secondPixels = UniformPixels(100, 200, 40);
+        var pinned = System.Runtime.InteropServices.GCHandle.Alloc(secondPixels, System.Runtime.InteropServices.GCHandleType.Pinned);
+
+        try
+        {
+            device.BeginFrame();
+            context.OutputMerger.SetTargets(targetView);
+            context.OutputMerger.SetDepthStencilState(depthStencil);
+            context.Rasterizer.State = rasterizer;
+            context.Rasterizer.SetViewport(0, 0, Size, Size);
+            context.ClearRenderTargetView(targetView, new Vector4(0, 0, 0, 1));
+            context.VertexShader.Set(vertexShader);
+            context.PixelShader.Set(pixelShader);
+            context.PixelShader.SetSampler(0, sampler);
+            context.PixelShader.SetConstantBuffer(0, constants);
+
+            context.UpdateSubresource(new DataBox(pinned.AddrOfPinnedObject(), Size * 4, 0), second);
+
+            context.PixelShader.SetShaderResource(0, firstView);
+            context.Draw(3, 0);
+
+            context.PixelShader.SetShaderResource(0, secondView);
+            context.Draw(3, 0);
+            device.EndFrame();
+        }
+        finally
+        {
+            pinned.Free();
+        }
+
+        using var staging = new Texture2D(device, Describe(BindFlags.None, ResourceUsage.Staging, CpuAccessFlags.Read));
+
+        device.BeginFrame();
+        context.CopyResource(target, staging);
+        var box = context.MapSubresource(staging, 0, MapMode.Read, MapFlags.None);
+        var pixels = new byte[Size * Size * 4];
+        System.Runtime.InteropServices.Marshal.Copy(box.DataPointer, pixels, 0, pixels.Length);
+        context.UnmapSubresource(staging, 0);
+        device.EndFrame();
+
+        // The second draw wins: the uploaded texture at half brightness.
+        for (var i = 0; i < pixels.Length; i += 4)
+        {
+            Assert.InRange(pixels[i], 45, 55);
+            Assert.InRange(pixels[i + 1], 95, 105);
+            Assert.InRange(pixels[i + 2], 15, 25);
+        }
+
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
+    /// A blocking read in the middle of a frame, as the screenshot readback does: the frame is submitted and
+    /// waited for, and the draws after it still land. D3D11's flush lets the frame go on, and the caller keeps
+    /// its targets and bindings without setting them again.
+    /// </summary>
+    [Fact]
+    public void AFrameGoesOnAfterAMidFrameRead()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+
+        using var first = new Texture2D(device, Describe(BindFlags.ShaderResource, ResourceUsage.Default), UniformPixels(200, 100, 50));
+        using var firstView = new ShaderResourceView(device, first);
+        using var second = new Texture2D(device, Describe(BindFlags.ShaderResource, ResourceUsage.Default), UniformPixels(100, 200, 40));
+        using var secondView = new ShaderResourceView(device, second);
+
+        using var target = new Texture2D(device, Describe(BindFlags.RenderTarget | BindFlags.ShaderResource, ResourceUsage.Default));
+        using var targetView = new RenderTargetView(device, target);
+        using var staging = new Texture2D(device, Describe(BindFlags.None, ResourceUsage.Staging, CpuAccessFlags.Read));
+
+        var tint = new[] { 0.5f, 0.5f, 0.5f, 1f };
+        using var constants = new Buffer(device,
+                                         new BufferDescription
+                                             {
+                                                 SizeInBytes = 16,
+                                                 BindFlags = BindFlags.ConstantBuffer,
+                                                 Usage = ResourceUsage.Dynamic,
+                                                 CpuAccessFlags = CpuAccessFlags.Write,
+                                             },
+                                         System.Runtime.InteropServices.MemoryMarshal.AsBytes<float>(tint));
+
+        using var sampler = new SamplerState(device, new SamplerStateDescription { Filter = Filter.MinMagMipPoint, MaximumLod = float.MaxValue });
+        using var vertexShader = new T3.Graphics.Compat.VertexShader(device, backend.CreateShader(ShaderStage.Vertex, VertexSpirv, "main", [], "vs"));
+        using var pixelShader = new T3.Graphics.Compat.PixelShader(device, backend.CreateShader(ShaderStage.Pixel, PixelSpirv, "main", PixelBindings,
+                                                                                                "ps"));
+        using var rasterizer = new RasterizerState(device, new RasterizerStateDescription { FillMode = FillMode.Solid, CullMode = CullMode.None });
+        using var depthStencil = new DepthStencilState(device, new DepthStencilStateDescription { IsDepthEnabled = false });
+
+        device.BeginFrame();
+        context.OutputMerger.SetTargets(targetView);
+        context.OutputMerger.SetDepthStencilState(depthStencil);
+        context.Rasterizer.State = rasterizer;
+        context.Rasterizer.SetViewport(0, 0, Size, Size);
+        context.VertexShader.Set(vertexShader);
+        context.PixelShader.Set(pixelShader);
+        context.PixelShader.SetSampler(0, sampler);
+        context.PixelShader.SetConstantBuffer(0, constants);
+        context.PixelShader.SetShaderResource(0, firstView);
+        context.Draw(3, 0);
+
+        context.CopyResource(target, staging);
+        var midFrame = ReadPixels(context, staging);
+
+        // Same targets, shaders and sampler, set before the read: only the texture changes.
+        context.PixelShader.SetShaderResource(0, secondView);
+        context.Draw(3, 0);
+        device.EndFrame();
+
+        device.BeginFrame();
+        context.CopyResource(target, staging);
+        var endOfFrame = ReadPixels(context, staging);
+        device.EndFrame();
+
+        Assert.InRange(midFrame[0], 95, 105);
+        Assert.InRange(endOfFrame[0], 45, 55);
+        Assert.InRange(endOfFrame[1], 95, 105);
+        AssertValidationStayedQuiet();
+    }
+
+    private static byte[] ReadPixels(DeviceContext context, Texture2D staging)
+    {
+        var box = context.MapSubresource(staging, 0, MapMode.Read, MapFlags.None);
+        var pixels = new byte[Size * Size * 4];
+        System.Runtime.InteropServices.Marshal.Copy(box.DataPointer, pixels, 0, pixels.Length);
+        context.UnmapSubresource(staging, 0);
+        return pixels;
+    }
+
+    private static byte[] UniformPixels(byte red, byte green, byte blue)
+    {
+        var pixels = new byte[Size * Size * 4];
+        for (var i = 0; i < pixels.Length; i += 4)
+        {
+            pixels[i] = red;
+            pixels[i + 1] = green;
+            pixels[i + 2] = blue;
+            pixels[i + 3] = 255;
+        }
+
+        return pixels;
+    }
+
+    /// <summary>
     /// Resources nobody disposed are released with the backend. The editor keeps textures, shaders and samplers in
     /// static caches for its whole life, and Vulkan requires every one of them gone before the device is.
     /// </summary>

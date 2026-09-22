@@ -646,7 +646,13 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     #endregion
 
     #region frames
-    public ICommandList BeginFrame()
+    public ICommandList BeginFrame() => BeginFrameCore(continueRecording: false);
+
+    /// <param name="continueRecording">
+    /// Keeps the targets, pipeline and bindings the command list collected, for a frame that was submitted
+    /// mid-way and goes on — the caller still believes that state is applied.
+    /// </param>
+    private VulkanCommandList BeginFrameCore(bool continueRecording)
     {
         ref var frame = ref _frames[_frameIndex];
 
@@ -662,7 +668,15 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         VkCommandBufferBeginInfo beginInfo = new() { flags = VkCommandBufferUsageFlags.OneTimeSubmit };
         Api.vkBeginCommandBuffer(frame.CommandBuffer, &beginInfo).CheckResult();
 
-        _commands.Begin(frame.CommandBuffer, _frameIndex);
+        if (continueRecording)
+        {
+            _commands.Continue(frame.CommandBuffer, _frameIndex);
+        }
+        else
+        {
+            _commands.Begin(frame.CommandBuffer, _frameIndex);
+        }
+
         _frameActive = true;
         return _commands;
     }
@@ -846,7 +860,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     }
 
     /// <summary>Submits whatever is recorded and blocks. The blocking map and readback paths need it.</summary>
-    internal void FlushAndWait()
+    /// <param name="continueFrame">
+    /// False when the caller opened the frame only for this work, so no one records into it afterwards.
+    /// </param>
+    internal void FlushAndWait(bool continueFrame = true)
     {
         if (_frameActive)
         {
@@ -855,6 +872,11 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
             var fence = _frames[current].Fence;
             Api.vkWaitForFences(1, &fence, true, ulong.MaxValue).CheckResult();
+
+            // D3D11's flush submits and the frame goes on. The caller keeps recording into the command list it
+            // holds, so it has to be recording again, into the next slot, with its state intact.
+            if (continueFrame)
+                BeginFrameCore(continueRecording: true);
         }
         else
         {
@@ -904,9 +926,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         var description = texture.Description with { Memory = MemoryKind.Readback, Usage = TextureUsage.CopyDestination };
         using var staging = (VulkanTexture)CreateTexture(description, ReadOnlySpan<byte>.Empty, "readback");
 
-        var commands = _frameActive ? _commands : (VulkanCommandList)BeginFrame();
+        var frameWasActive = _frameActive;
+        var commands = frameWasActive ? _commands : (VulkanCommandList)BeginFrame();
         commands.CopyTexture(source, staging);
-        FlushAndWait();
+        FlushAndWait(continueFrame: frameWasActive);
 
         var size = (int)SizeOf(description);
         var bytes = new byte[size];
@@ -925,9 +948,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         var description = buffer.Description with { Memory = MemoryKind.Readback, Usage = BufferUsage.CopyDestination };
         using var staging = (VulkanBuffer)CreateBuffer(description, ReadOnlySpan<byte>.Empty, "readback");
 
-        var commands = _frameActive ? _commands : (VulkanCommandList)BeginFrame();
+        var frameWasActive = _frameActive;
+        var commands = frameWasActive ? _commands : (VulkanCommandList)BeginFrame();
         commands.CopyBuffer(source, 0, staging, 0, buffer.Description.SizeInBytes);
-        FlushAndWait();
+        FlushAndWait(continueFrame: frameWasActive);
 
         var bytes = new byte[buffer.Description.SizeInBytes];
         new Span<byte>(staging.Mapped, bytes.Length).CopyTo(bytes);

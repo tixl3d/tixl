@@ -16,10 +16,7 @@ internal static unsafe class VulkanBarriers
         if (texture.Image.IsNull)
             return;
 
-        var isWrite = (access & WriteAccess) != 0;
-
-        // A read after a read in the same layout needs nothing; anything else does.
-        if (texture.Layout == layout && !isWrite && (texture.LastAccess & WriteAccess) == 0)
+        if (!NeedsTransition(texture, layout, access))
             return;
 
         VkImageMemoryBarrier2 barrier = new()
@@ -62,9 +59,7 @@ internal static unsafe class VulkanBarriers
         if (buffer.Buffer.IsNull)
             return;
 
-        var isWrite = (access & WriteAccess) != 0;
-
-        if (!isWrite && (buffer.LastAccess & WriteAccess) == 0)
+        if (!NeedsBarrier(buffer, access))
         {
             buffer.LastStage |= stage;
             buffer.LastAccess |= access;
@@ -94,6 +89,28 @@ internal static unsafe class VulkanBarriers
 
         buffer.LastStage = stage;
         buffer.LastAccess = access;
+    }
+
+    /// <summary>
+    /// Whether <see cref="TransitionImage"/> would emit a barrier. A read after a read in the same layout needs
+    /// nothing; anything else does.
+    /// </summary>
+    internal static bool NeedsTransition(VulkanTexture texture, VkImageLayout layout, VkAccessFlags2 access)
+    {
+        if (texture.Image.IsNull)
+            return false;
+
+        var isWrite = (access & WriteAccess) != 0;
+        return texture.Layout != layout || isWrite || (texture.LastAccess & WriteAccess) != 0;
+    }
+
+    /// <summary>Whether <see cref="BarrierBuffer"/> would emit a barrier: only a write on either side needs one.</summary>
+    internal static bool NeedsBarrier(VulkanBuffer buffer, VkAccessFlags2 access)
+    {
+        if (buffer.Buffer.IsNull)
+            return false;
+
+        return (access & WriteAccess) != 0 || (buffer.LastAccess & WriteAccess) != 0;
     }
 
     private const VkAccessFlags2 WriteAccess = VkAccessFlags2.ShaderWrite | VkAccessFlags2.ShaderStorageWrite

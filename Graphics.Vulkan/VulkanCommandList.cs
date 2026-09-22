@@ -27,6 +27,17 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         }
     }
 
+    /// <summary>
+    /// Records on into a new command buffer after a mid-frame submit. The collected state stays; only the render
+    /// pass has to be reopened, which the next draw does.
+    /// </summary>
+    internal void Continue(VkCommandBuffer commandBuffer, int frameIndex)
+    {
+        _commandBuffer = commandBuffer;
+        _frameIndex = frameIndex;
+        _renderingActive = false;
+    }
+
     internal void End() => EndRenderingIfActive();
 
     public void BeginRendering(ReadOnlySpan<GpuTextureView> colorTargets, GpuTextureView? depthTarget)
@@ -611,6 +622,12 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         if (_pipeline == null)
             return false;
 
+        // Barriers are not allowed inside a render pass. A texture uploaded or rendered into since the pass
+        // opened has to be transitioned before this draw samples it, so the pass is closed and reopened around
+        // the barriers; attachments always load, so nothing drawn so far is lost.
+        if (_renderingActive && BoundResourcesNeedBarriers())
+            EndRenderingIfActive();
+
         TransitionBoundResources(VkPipelineStageFlags2.AllGraphics);
         BeginRenderingIfNeeded();
 
@@ -682,6 +699,43 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                 }
             }
         }
+    }
+
+    /// <summary>Whether <see cref="TransitionBoundResources"/> would emit any barrier.</summary>
+    private bool BoundResourcesNeedBarriers()
+    {
+        for (var stageIndex = 0; stageIndex < MaxStages; stageIndex++)
+        {
+            var bindings = _bindings[stageIndex];
+
+            for (var i = 0; i < _bindingCounts[stageIndex]; i++)
+            {
+                var binding = bindings[i];
+
+                var needed = binding.Kind switch
+                                 {
+                                     BindingKind.SampledTexture when binding.TextureView is VulkanTextureView sampled
+                                         => VulkanBarriers.NeedsTransition(sampled.Texture, VkImageLayout.ShaderReadOnlyOptimal,
+                                                                           VkAccessFlags2.ShaderSampledRead),
+                                     BindingKind.StorageTexture when binding.TextureView is VulkanTextureView storage
+                                         => VulkanBarriers.NeedsTransition(storage.Texture, VkImageLayout.General,
+                                                                           VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite),
+                                     BindingKind.StructuredBuffer or BindingKind.StorageBuffer when binding.Buffer is VulkanBuffer buffer
+                                         => VulkanBarriers.NeedsBarrier(buffer,
+                                                                        binding.Slot % ShaderSlots.StageStride >= ShaderSlots.UnorderedAccessBase
+                                                                            ? VkAccessFlags2.ShaderStorageRead | VkAccessFlags2.ShaderStorageWrite
+                                                                            : VkAccessFlags2.ShaderStorageRead),
+                                     BindingKind.ConstantBuffer when binding.Buffer is VulkanBuffer constants
+                                         => VulkanBarriers.NeedsBarrier(constants, VkAccessFlags2.UniformRead),
+                                     _ => false,
+                                 };
+
+                if (needed)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     private void BeginRenderingIfNeeded()
