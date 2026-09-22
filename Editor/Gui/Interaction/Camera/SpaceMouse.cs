@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using T3.Editor.App;
+﻿using T3.Editor.App;
 using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.Interaction.Camera;
@@ -7,7 +6,7 @@ namespace T3.Editor.Gui.Interaction.Camera;
 /// <summary>
 /// Gathers update event information from SpaceMouse and apply it to a <see cref="CameraSetup"/>. 
 /// </summary>
-public sealed partial class SpaceMouse : ICameraManipulator, IWindowsFormsMessageHandler
+public sealed partial class SpaceMouse : ICameraManipulator, IWin32MessageHandler
 {
     private readonly SpaceMouseDevice _spaceMouseDevice;
     public SpaceMouse(IntPtr windowHandle)
@@ -128,5 +127,5 @@ public sealed partial class SpaceMouse : ICameraManipulator, IWindowsFormsMessag
 
     private double _lastUpdateTime;
     private bool _initialized;
-    public void ProcessMessage(Message message) => _spaceMouseDevice.ProcessMessage(message);
+    public void ProcessMessage(int message, IntPtr wParam, IntPtr lParam) => _spaceMouseDevice.ProcessMessage(message, wParam, lParam);
 }

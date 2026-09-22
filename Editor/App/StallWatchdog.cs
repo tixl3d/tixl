@@ -38,6 +38,15 @@ internal static class StallWatchdog
         if (_thread != null)
             return;
 
+        // Presenting from a second thread needs D3D11's thread-safe immediate context, and telling a stall from
+        // a busy window needs Win32 messages. Vulkan records a frame into one command buffer, so there is no
+        // equivalent yet.
+        if (!OperatingSystem.IsWindows())
+        {
+            Log.Debug("Stall overlay is only available on Windows.");
+            return;
+        }
+
         _device = device;
         _mainWindow = mainWindow;
         _contentDrawer = contentDrawer;

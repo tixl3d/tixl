@@ -334,6 +334,7 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
 
     protected override void ReleaseWhenRetired()
     {
+        _backend.Untrack(this);
         _backend.Api.vkDeviceWaitIdle();
         DestroyImagesAndSwapchain();
 

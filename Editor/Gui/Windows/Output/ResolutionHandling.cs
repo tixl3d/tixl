@@ -1,3 +1,4 @@
+using T3.Editor.SystemUi;
 using ImGuiNET;
 using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes.Vector;
@@ -144,10 +145,10 @@ internal static class ResolutionHandling
     /// <summary>The plugs an output can be bound to: every attached display, then the machine's stream senders.</summary>
     internal static void DrawBindingMenuItems(OutputDefinition output, MachineConfig machineConfig)
     {
-        var screens = System.Windows.Forms.Screen.AllScreens;
+        var screens = EditorUi.Instance.AllScreens;
         var binding = machineConfig.FindBinding(output.Id);
         var boundPlug = Plugs.BoundPlugId(binding);
-        for (var screenIndex = 0; screenIndex < screens.Length; screenIndex++)
+        for (var screenIndex = 0; screenIndex < screens.Count; screenIndex++)
         {
             var screen = screens[screenIndex];
             var plugId = Plugs.DisplayPlugId(screenIndex);

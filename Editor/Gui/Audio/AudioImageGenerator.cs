@@ -83,7 +83,7 @@ internal static class AudioImageGenerator
 
             var sampleLength = Bass.ChannelSeconds2Bytes(stream, samplingResolution);
             // Short samples (e.g. a one-shot drum hit) can yield <1 column at 0.01s resolution;
-            // a zero/negative width makes `new Bitmap(...)` throw. Use at least one column so the
+            // a zero/negative width makes the image allocation throw. Use at least one column so the
             // generator works for short clips, not just long soundtracks.
             var numSamples = sampleLength > 0 ? streamLength / sampleLength : 0;
             if (numSamples < 1)
@@ -107,7 +107,7 @@ internal static class AudioImageGenerator
 
             // Note: For decode-only streams, we don't call ChannelPlay - we just read data directly
 
-            var spectrumImage = new Bitmap((int)numSamples, ImageHeight);
+            var spectrumImage = new RgbaImage((int)numSamples, ImageHeight);
 
             var intensityPalette = IntensityPalette;
 
@@ -247,7 +247,7 @@ internal static class AudioImageGenerator
             rms[column] = floatCount > 0 ? Math.Min((float)Math.Sqrt(sumOfSquares / floatCount), 1f) : 0f;
         }
 
-        var image = new Bitmap(columns, ImageHeight);
+        var image = new RgbaImage(columns, ImageHeight);
         var solid = Color.FromArgb(230, 255, 255, 255);
         var soft = Color.FromArgb(90, 255, 255, 255);
 
@@ -300,6 +300,27 @@ internal static class AudioImageGenerator
             imagePathAbsolute = null;
             return false;
         }
+    }
+
+    /// <summary>An RGBA pixel buffer saved as PNG, on every platform — GDI+ only exists on Windows.</summary>
+    private sealed class RgbaImage(int width, int height)
+    {
+        public void SetPixel(int x, int y, Color color)
+        {
+            var offset = (y * width + x) * 4;
+            _pixels[offset] = color.R;
+            _pixels[offset + 1] = color.G;
+            _pixels[offset + 2] = color.B;
+            _pixels[offset + 3] = color.A;
+        }
+
+        public void Save(string path)
+        {
+            using var stream = File.Create(path);
+            new StbImageWriteSharp.ImageWriter().WritePng(_pixels, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+        }
+
+        private readonly byte[] _pixels = new byte[checked(width * height * 4)];
     }
 
     private static Color[] GeneratePalette()

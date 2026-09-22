@@ -84,7 +84,7 @@ public sealed class EditorFixture : IDisposable
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null)
         {
-            var candidate = Path.Combine(dir.FullName, "Editor", "bin", "Debug", "net10.0-windows", "TiXL.exe");
+            var candidate = Path.Combine(dir.FullName, "Editor", "bin", "Debug", "net10.0", OperatingSystem.IsWindows() ? "TiXL.exe" : "TiXL");
             if (File.Exists(candidate))
                 return candidate;
 

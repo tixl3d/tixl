@@ -195,6 +195,13 @@ public static class MidiConnectionManager
 
     private static void ScanAndRegisterToMidiDevices(bool logInformation = false)
     {
+        // NAudio's MIDI is WinMM, so elsewhere there are simply no devices.
+        if (!OperatingSystem.IsWindows())
+        {
+            Log.Debug("Midi devices are only available on Windows.");
+            return;
+        }
+
         Log.Debug("Capturing Midi devices...");
         if (!string.IsNullOrEmpty(CoreSettings.Config.LimitMidiDeviceCapture))
         {

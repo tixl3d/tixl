@@ -61,19 +61,38 @@ The editor window opens through SDL3 on Vulkan and draws ImGui's demo window. No
 outputs. This is the editor's equivalent of the Player's first frame: it proves the shell, input, font atlas
 and ImGui renderer together, with nothing else in the way.
 
-1. SDL3 window and main loop replacing `AppWindow` / `ImGuiDx11RenderForm` / `ProgramWindows`. Frame
+1. **Done.** SDL3 window and main loop replacing `AppWindow` / `ImGuiDx11RenderForm` / `ProgramWindows`. Frame
    lifecycle exactly as the Player's: `BeginFrame` → acquire the back buffer → draw → `Present` → `EndFrame`,
    acquiring **every frame** (see [Lessons](#lessons-from-the-player)).
-2. `imgui_impl_sdl3` port for mouse, keyboard, text input, cursors and clipboard. German QWERTZ must behave
+2. **Done, untested on a German layout.** `imgui_impl_sdl3` port for mouse, keyboard, text input, cursors and clipboard. German QWERTZ must behave
    as on Windows.
-3. `Screen`/`Cursor` call sites onto `IDisplayProvider` / `SdlCoreUi`; SpaceMouse gated off.
-4. `WindowsUiContentDrawer` compiles through `ShaderCompiler.Instance`.
-5. `FontAtlasGenerator` onto StbImageSharp.
-6. `Editor.csproj` to `net10.0` once no WinForms is left.
+3. **Done** — through `IEditorSystemUiService.AllScreens` (`SdlScreenList`, invalidated on SDL display events).
+   `Screen`/`Cursor` call sites onto `IDisplayProvider` / `SdlCoreUi`; SpaceMouse gated off.
+4. **Done.** `WindowsUiContentDrawer` compiles through `ShaderCompiler.Instance`.
+5. **Done.** `FontAtlasGenerator` onto StbImageSharp.
+6. **Done.** `Editor.csproj` to `net10.0` once no WinForms is left. The splash screen draws with SDL's
+   renderer; file dialogs are SDL's; the eyedropper and the debug bridge's window capture stay Windows-only
+   (GDI), off `System.Drawing.Common`. Display indices now follow SDL's order, which may differ from
+   WinForms' `Screen.AllScreens` — check saved output bindings on a multi-monitor Windows machine.
 
 Done when: `TIXL_VULKAN_VALIDATION=1` runs the demo window for a minute of mouse and keyboard use with a
 silent validation layer and no device loss, and a frame-count probe shows presentation at the display's
 refresh rate rather than thousands of frames per second.
+
+**Measured 2026-09-22** (Radeon 8060S, RADV, Wayland): the editor starts on Vulkan, loads all ten packages and
+runs its full UI — not only the demo window — for 60 s with the validation layer silent, at 122 fps on a 120 Hz
+display (`getMetrics` twice, 10 s apart). Still open: the minute of mouse and keyboard use, which needs a
+person at the machine.
+
+Found on the way, and gated or fixed:
+- MIDI (NAudio → `winmm.dll`) scans no devices off Windows.
+- The stall overlay presents from a second thread through D3D11's thread-safe immediate context and reads
+  Win32 message state; off on Vulkan until it has a design of its own.
+- WinForms installed a synchronization context on the main thread, and code relied on it
+  (`TaskScheduler.FromCurrentSynchronizationContext` in the OSC listener). `MainThreadSynchronizationContext`
+  replaces it, drained once per loop pass.
+- `SlangShaderCompiler` dereferenced a null owner for the editor's own shaders.
+- Texture creation with initial data sized a 2D subresource by its slice pitch, which D3D11 callers leave 0.
 
 **How the editor frame works today** (mapped 2026-09-22 — read before changing it):
 
@@ -120,6 +139,9 @@ The remaining WIC users (`ThumbnailManager`, `VideoThumbnails`, `VideoClipThumbn
 visual suite's comparisons.
 
 Done when: thumbnails appear in the symbol library and a screenshot round-trips.
+
+Known: the debug bridge's UI `screenshot` hangs the main thread on Vulkan — the readback or the WIC encode
+in `ScreenshotWriter` never completes. Start M4 there; it is also what the visual suite needs.
 
 ### M5 — the Linux runtime
 

@@ -1,150 +1,147 @@
-using System.Drawing;
-using System.Windows.Forms;
+using System.IO;
+using SDL;
+using StbImageSharp;
 using T3.SystemUi;
+using static SDL.SDL3;
 
 namespace T3.Editor.SplashScreen;
 
-internal sealed class SplashScreen : ISplashScreen
+/// <summary>
+/// A borderless SDL window with the splash image, the version and the latest log line, shown while the editor
+/// loads. Drawn with SDL's own renderer and debug font: nothing else that draws text is up yet.
+/// </summary>
+internal sealed unsafe class SplashScreen : ISplashScreen
 {
-    private sealed class SplashForm : Form
-    {
-        public void PreventFlickering()
-        {
-            SetStyle(ControlStyles.DoubleBuffer
-                     | ControlStyles.UserPaint
-                     | ControlStyles.AllPaintingInWmPaint, true);
-            UpdateStyles();
-        }
-    }
-
     public void Show(string imagePath)
     {
-        var backgroundImage = Image.FromFile(imagePath);
-        var imageSize = GetScaledSize(backgroundImage);
+        ImageResult image;
+        try
+        {
+            using var stream = File.OpenRead(imagePath);
+            image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Could not load the splash image: {e.Message}");
+            return;
+        }
 
-        _splashForm = new SplashForm
-                          {
-                              FormBorderStyle = FormBorderStyle.None,
-                              StartPosition = FormStartPosition.CenterScreen,
-                              BackgroundImage = backgroundImage,
-                              BackgroundImageLayout = ImageLayout.Stretch,
-                              Size = imageSize,
-                          };
-        _splashForm.PreventFlickering();
+        _window = SDL_CreateWindow("TiXL", image.Width, image.Height,
+                                   SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_BORDERLESS
+                                   | SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WindowFlags.SDL_WINDOW_UTILITY);
+        if (_window == null)
+        {
+            Log.Warning($"Could not open the splash screen: {SDL_GetError()}");
+            return;
+        }
 
-        var tableLayoutPanel = new TableLayoutPanel
-                                   {
-                                       Dock = DockStyle.Fill,
-                                       ColumnCount = 2,
-                                       RowCount = 1,
-                                       CellBorderStyle = TableLayoutPanelCellBorderStyle.None,
-                                       BackColor = Color.Transparent,
-                                       Padding = new Padding(0,0,0,5),
-                                   };
+        SDL_ShowWindow(_window);
+        SDL_SyncWindow(_window);
 
-        tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-        tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+        // The image is drawn for 96 dpi. A mapped window knows both its display's scale and how many pixels
+        // make a point, which sizes it alike on Windows (points are pixels) and Wayland (points are scaled).
+        var displayScale = SDL_GetWindowDisplayScale(_window);
+        var pixelDensity = SDL_GetWindowPixelDensity(_window);
+        if (displayScale > 0 && pixelDensity > 0)
+        {
+            var toPoints = displayScale / pixelDensity;
+            SDL_SetWindowSize(_window, (int)MathF.Round(image.Width * toPoints), (int)MathF.Round(image.Height * toPoints));
+        }
 
-        tableLayoutPanel.Controls.Add(new Label
-                                          {
-                                              Dock = DockStyle.Fill,
-                                              AutoSize = false,
-                                              TextAlign = ContentAlignment.BottomLeft,
-                                              BackColor = Color.Transparent,
-                                              ForeColor = Color.DimGray,
-                                              Text = Program.FormattedEditorVersion,
-                                              UseMnemonic = false,
-                                              Font = new Font("Arial", 8),
-                                              Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
-                                              Size = new Size(400, 16)
-                                          }, 0, 0);
+        SDL_SetWindowPosition(_window, (int)SDL_WINDOWPOS_CENTERED_MASK, (int)SDL_WINDOWPOS_CENTERED_MASK);
+        SDL_SyncWindow(_window);
 
-        _logMessageLabel = new Label
-                               {
-                                   Dock = DockStyle.Bottom,
-                                   AutoSize = false,
-                                   TextAlign = ContentAlignment.BottomRight,
-                                   BackColor = Color.Transparent,
-                                   ForeColor = Color.DimGray,
-                                   Text = @"Loading T3...",
-                                   UseMnemonic = false,
-                                   Font = new Font("Arial", 8),
-                                   Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-                                   Size = new Size(400, 16)
-                               };
+        _renderer = SDL_CreateRenderer(_window, (string?)null);
+        if (_renderer == null)
+        {
+            Log.Warning($"Could not draw the splash screen: {SDL_GetError()}");
+            return;
+        }
 
-        tableLayoutPanel.Controls.Add(_logMessageLabel, 1, 0);
+        // RGBA bytes in memory are ABGR8888 on a little-endian machine.
+        _texture = SDL_CreateTexture(_renderer, SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888, SDL_TextureAccess.SDL_TEXTUREACCESS_STATIC,
+                                     image.Width, image.Height);
+        if (_texture != null)
+        {
+            fixed (byte* pixels = image.Data)
+            {
+                SDL_UpdateTexture(_texture, null, (IntPtr)pixels, image.Width * 4);
+            }
+        }
 
-        _splashForm.Controls.Add(tableLayoutPanel);
-
-        _splashForm.Show();
-        _splashForm.Refresh();
+        // The debug font is 8 px; scaling the whole output keeps it readable on a high-dpi display.
+        _textScale = MathF.Max(1, MathF.Round(displayScale > 0 ? displayScale : 1));
+        _mainThreadId = Environment.CurrentManagedThreadId;
+        Draw();
     }
 
     public void Close()
     {
-        _splashForm.Close();
-        _splashForm = null;
-    }
+        if (_texture != null)
+            SDL_DestroyTexture(_texture);
 
-    private static Size GetScaledSize(Image image)
-    {
-        using var graphics = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
+        if (_renderer != null)
+            SDL_DestroyRenderer(_renderer);
 
-        var dpiX = graphics.DpiX;
-        var dpiY = graphics.DpiY;
+        if (_window != null)
+            SDL_DestroyWindow(_window);
 
-        var width = (int)(image.Width * (dpiX / _baseDpi.Width));
-        var height = (int)(image.Height * (dpiY / _baseDpi.Height));
-
-        return new Size(width, height);
+        _texture = null;
+        _renderer = null;
+        _window = null;
     }
 
     public void Dispose()
     {
+        Close();
     }
 
-    /// <summary>
-    /// Defer the setting the form UI element on the main Thread.
-    /// </summary>
-    private delegate void SafeCallDelegate(string text);
-
-    private void WriteTextSafe(string text)
-    {
-        if (_logMessageLabel.InvokeRequired)
-        {
-            if (!_invoked)
-                return;
-
-            var d = new SafeCallDelegate(WriteTextSafe);
-            _logMessageLabel.Invoke(d, text);
-            _invoked = true;
-        }
-        else
-        {
-            _logMessageLabel.Text = text;
-            _logMessageLabel.Refresh();
-            //_splashForm.Refresh();
-            _invoked = false;
-        }
-    }
-
-    private bool _invoked;
-
-    #region implement ILogWriter
     public ILogEntry.EntryLevel Filter { get; set; }
 
     public void ProcessEntry(ILogEntry entry)
     {
-        if (_logMessageLabel == null)
+        var firstLine = entry.Message.Split("\n")[0];
+        _logMessage = firstLine[..Math.Min(60, firstLine.Length)];
+
+        // SDL draws on the thread that made the window; a message from another shows with the next one from it.
+        if (Environment.CurrentManagedThreadId == _mainThreadId)
+            Draw();
+    }
+
+    private void Draw()
+    {
+        if (_renderer == null)
             return;
 
-        var firstLine = entry.Message.Split("\n").First();
-        WriteTextSafe(firstLine[..Math.Min(60, firstLine.Length)]);
-    }
-    #endregion
+        // Keeps Windows from marking a window that stops answering messages during a long load as hung.
+        SDL_PumpEvents();
 
-    private static readonly Size _baseDpi = new(96, 96);
-    private SplashForm _splashForm;
-    private Label _logMessageLabel;
+        SDL_SetRenderScale(_renderer, 1, 1);
+        SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+        SDL_RenderClear(_renderer);
+        if (_texture != null)
+            SDL_RenderTexture(_renderer, _texture, null, null);
+
+        int width, height;
+        SDL_GetCurrentRenderOutputSize(_renderer, &width, &height);
+        SDL_SetRenderScale(_renderer, _textScale, _textScale);
+        var logicalWidth = width / _textScale;
+        var baseline = height / _textScale - DebugFontSize - Margin;
+
+        SDL_SetRenderDrawColor(_renderer, 105, 105, 105, 255);
+        SDL_RenderDebugText(_renderer, Margin, baseline, Program.FormattedEditorVersion);
+        SDL_RenderDebugText(_renderer, logicalWidth - Margin - _logMessage.Length * DebugFontSize, baseline, _logMessage);
+
+        SDL_RenderPresent(_renderer);
+    }
+
+    private const float DebugFontSize = 8;
+    private const float Margin = 6;
+
+    private SDL_Window* _window;
+    private SDL_Renderer* _renderer;
+    private SDL_Texture* _texture;
+    private float _textScale = 1;
+    private int _mainThreadId = -1;
+    private string _logMessage = "Loading TiXL...";
 }

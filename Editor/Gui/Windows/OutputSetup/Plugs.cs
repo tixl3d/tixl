@@ -1,4 +1,5 @@
 #nullable enable
+using T3.Editor.SystemUi;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Output;
 using T3.Core.Output.Streaming;
@@ -47,7 +48,7 @@ internal static class Plugs
     public static bool Exists(MachineConfig machineConfig, Guid plugId)
     {
         if (TryGetDisplayIndex(plugId, out var displayIndex))
-            return displayIndex < System.Windows.Forms.Screen.AllScreens.Length;
+            return displayIndex < EditorUi.Instance.AllScreens.Count;
 
         return machineConfig.FindStreamPlug(plugId) != null;
     }
@@ -57,8 +58,8 @@ internal static class Plugs
     {
         if (TryGetDisplayIndex(plugId, out var displayIndex))
         {
-            var screens = System.Windows.Forms.Screen.AllScreens;
-            if (displayIndex < screens.Length)
+            var screens = EditorUi.Instance.AllScreens;
+            if (displayIndex < screens.Count)
                 return new Int2(screens[displayIndex].Bounds.Width, screens[displayIndex].Bounds.Height);
         }
 
@@ -138,12 +139,12 @@ internal static class Plugs
 
     private static void BindOutputToDisplay(MachineConfig machineConfig, Guid outputId, int displayIndex)
     {
-        var screens = System.Windows.Forms.Screen.AllScreens;
+        var screens = EditorUi.Instance.AllScreens;
         machineConfig.Bind(new PlugBinding
                                {
                                    OutputId = outputId,
                                    Kind = PlugBinding.Kinds.Display,
-                                   DisplayName = displayIndex < screens.Length ? screens[displayIndex].DeviceName : string.Empty,
+                                   DisplayName = displayIndex < screens.Count ? screens[displayIndex].DeviceName : string.Empty,
                                    DisplayIndex = displayIndex,
                                });
         OutputSetupHandling.SaveActive();

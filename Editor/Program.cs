@@ -94,10 +94,13 @@ internal static class Program
         // instance's save-on-quit writes otherwise.
         WaitForPredecessorArg(args);
 
+        // Before anything awaits: continuations started on this thread come back to it, as under WinForms.
+        MainThreadSynchronizationContext.Install();
+
         // Not calling this first will cause exceptions...
         Console.WriteLine("Starting T3 Editor");
         Console.WriteLine("Creating EditorUi");
-        EditorUi.Instance = new SdlLoopEditorUi();
+        EditorUi.Instance = new SdlEditorUi();
             
         var windowProvider = new SilkWindowProvider();
         var imguiContextLock = windowProvider.ContextLock;
@@ -203,10 +206,14 @@ internal static class Program
         UiContentContentDrawer = contentDrawer;
         contentDrawer.Initialize(device, ProgramWindows.Main.Width, ProgramWindows.Main.Height, imguiContextLock, out var context);
 
-        Log.Debug("Initialize Camera Interaction...");
-        var spaceMouse = new SpaceMouse(ProgramWindows.Main.HwndHandle);
-        CameraInteraction.ManipulationDevices = [spaceMouse];
-        ProgramWindows.SetInteractionDevices(spaceMouse);
+        // The SpaceMouse is read through Win32 raw input, so it only exists on Windows.
+        if (OperatingSystem.IsWindows())
+        {
+            Log.Debug("Initialize Camera Interaction...");
+            var spaceMouse = new SpaceMouse(ProgramWindows.Main.HwndHandle);
+            CameraInteraction.ManipulationDevices = [spaceMouse];
+            ProgramWindows.SetInteractionDevices(spaceMouse);
+        }
 
         Log.Debug("Initialize Resource Manager...");
         ResourceManager.Init(device);

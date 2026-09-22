@@ -1,4 +1,5 @@
 #nullable enable
+using T3.Editor.SystemUi;
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
@@ -529,8 +530,8 @@ internal sealed class SetupFlowOutliner
     /// </summary>
     private void DrawLocalBindings(SetupEntitySelection selection, Setup setup, MachineConfig machineConfig)
     {
-        var screens = System.Windows.Forms.Screen.AllScreens;
-        for (var i = 0; i < screens.Length; i++)
+        var screens = EditorUi.Instance.AllScreens;
+        for (var i = 0; i < screens.Count; i++)
         {
             var plugId = Plugs.DisplayPlugId(i);
             _tooltipDisplayIndex = i;
@@ -548,7 +549,7 @@ internal sealed class SetupFlowOutliner
 
         foreach (var binding in machineConfig.Bindings)
         {
-            if (binding.IsStream || binding.DisplayIndex < screens.Length || setup.FindOutput(binding.OutputId) == null)
+            if (binding.IsStream || binding.DisplayIndex < screens.Count || setup.FindOutput(binding.OutputId) == null)
                 continue;
 
             var args = new OutlinerItem.Args

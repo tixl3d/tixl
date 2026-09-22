@@ -9,7 +9,7 @@ namespace T3.Editor.Gui.Interaction.Camera;
 
 public sealed partial class SpaceMouse
 {
-    public sealed class SpaceMouseDevice: IWindowsFormsMessageHandler
+    public sealed class SpaceMouseDevice: IWin32MessageHandler
     {
         #region const definitions
 
@@ -587,21 +587,21 @@ public sealed partial class SpaceMouse
 
         #endregion EnumerateDevices()
 
-        #region ProcessInputCommand( Message message )
+        #region ProcessInputCommand
 
         /// <summary>
         /// Processes WM_INPUT messages to retrieve information about any
         /// keyboard events that occur.
         /// </summary>
-        /// <param name="message">The WM_INPUT message to process.</param>
-        private void ProcessInputCommand(System.Windows.Forms.Message message)
+        /// <param name="lParam">The WM_INPUT message's handle to its raw input data.</param>
+        private void ProcessInputCommand(IntPtr lParam)
         {
             uint dwSize = 0;
 
             // First call to GetRawInputData sets the value of dwSize
             // dwSize can then be used to allocate the appropriate amount of memory,
             // storing the pointer in "buffer".
-            GetRawInputData(message.LParam,
+            GetRawInputData(lParam,
                             RID_HEADER, IntPtr.Zero,
                             ref dwSize,
                             (uint)Marshal.SizeOf(typeof(RAWINPUTHEADER)));
@@ -613,7 +613,7 @@ public sealed partial class SpaceMouse
                 // call GetRawInputData again to fill the allocated memory
                 // with information about the input
                 if (headerBuffer != IntPtr.Zero &&
-                    GetRawInputData(message.LParam,
+                    GetRawInputData(lParam,
                                     RID_HEADER,
                                     headerBuffer,
                                     ref dwSize,
@@ -641,7 +641,7 @@ public sealed partial class SpaceMouse
 
                         uint eventSize = (uint)header.dwSize;
                         if (eventBuffer != IntPtr.Zero &&
-                            GetRawInputData(message.LParam,
+                            GetRawInputData(lParam,
                                             RID_INPUT,
                                             eventBuffer,
                                             ref eventSize,
@@ -709,27 +709,26 @@ public sealed partial class SpaceMouse
             }
         }
 
-        #endregion ProcessInputCommand( Message message )
+        #endregion ProcessInputCommand
 
-        #region ProcessMessage(Message message)
+        #region ProcessMessage
 
         /// <summary>
         /// Filters Windows messages for WM_INPUT messages and calls
         /// ProcessInputCommand if necessary.
         /// </summary>
-        /// <param name="message">The Windows message.</param>
-        public void ProcessMessage(System.Windows.Forms.Message message)
+        public void ProcessMessage(int message, IntPtr wParam, IntPtr lParam)
         {
-            switch (message.Msg)
+            switch (message)
             {
                 case WM_INPUT:
                 {
-                    ProcessInputCommand(message);
+                    ProcessInputCommand(lParam);
                 }
                     break;
             }
         }
 
-        #endregion ProcessMessage( Message message )
+        #endregion ProcessMessage
     }
 }

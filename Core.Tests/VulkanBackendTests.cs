@@ -506,6 +506,83 @@ public class VulkanBackendTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// A texture created with initial data that declares only a row pitch, as the editor's font atlas is. D3D11
+    /// ignores a 2D texture's slice pitch, so callers leave it 0, and the whole image still has to arrive.
+    /// </summary>
+    [Fact]
+    public void ATextureCreatedWithoutASlicePitchReceivesEveryRow()
+    {
+        using var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+        var context = device.ImmediateContext;
+
+        var pixels = new byte[Size * Size * 4];
+        for (var i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = (byte)(i + 1);
+        }
+
+        var pinned = System.Runtime.InteropServices.GCHandle.Alloc(pixels, System.Runtime.InteropServices.GCHandleType.Pinned);
+
+        try
+        {
+            using var texture = new Texture2D(device, Describe(BindFlags.ShaderResource, ResourceUsage.Default),
+                                              [new DataBox(pinned.AddrOfPinnedObject(), Size * 4, 0)]);
+            using var staging = new Texture2D(device, Describe(BindFlags.None, ResourceUsage.Staging, CpuAccessFlags.Read));
+
+            device.BeginFrame();
+            context.CopyResource(texture, staging);
+            device.EndFrame();
+
+            device.BeginFrame();
+            var box = context.MapSubresource(staging, 0, MapMode.Read, MapFlags.None);
+            Assert.NotEqual(IntPtr.Zero, box.DataPointer);
+
+            var readBack = new byte[pixels.Length];
+            System.Runtime.InteropServices.Marshal.Copy(box.DataPointer, readBack, 0, readBack.Length);
+            context.UnmapSubresource(staging, 0);
+            device.EndFrame();
+
+            Assert.Equal(pixels, readBack);
+        }
+        finally
+        {
+            pinned.Free();
+        }
+
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
+    /// Resources nobody disposed are released with the backend. The editor keeps textures, shaders and samplers in
+    /// static caches for its whole life, and Vulkan requires every one of them gone before the device is.
+    /// </summary>
+    [Fact]
+    public void DisposingTheBackendReleasesWhatWasNeverDisposed()
+    {
+        var backend = TryCreateBackend();
+
+        if (backend == null)
+            return;
+
+        var device = new Device(backend);
+
+        // Deliberately not disposed.
+        var texture = new Texture2D(device, Describe(BindFlags.ShaderResource, ResourceUsage.Default));
+        _ = new ShaderResourceView(device, texture);
+        _ = new Buffer(device, new BufferDescription { SizeInBytes = 16, BindFlags = BindFlags.ConstantBuffer, Usage = ResourceUsage.Default });
+        _ = new SamplerState(device, new SamplerStateDescription { Filter = Filter.MinMagMipLinear });
+
+        backend.Dispose();
+
+        AssertValidationStayedQuiet();
+    }
+
+    /// <summary>
     /// The validation layer reports through the backend's messenger, and the count is process-wide, so a
     /// test that pushes it up fails even if its own pixels looked right.
     /// </summary>

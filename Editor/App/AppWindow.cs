@@ -8,6 +8,7 @@ using T3.Graphics;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Resource;
 using T3.Editor.Gui.Styling;
+using T3.Editor.SystemUi;
 using T3.SdlPlatform;
 using static SDL.SDL3;
 using Device = T3.Graphics.Compat.Device;
@@ -233,6 +234,8 @@ internal sealed unsafe class AppWindow
                 HandleEvent(sdlEvent);
             }
 
+            MainThreadSynchronizationContext.RunPending();
+
             if (_exitRequested)
                 break;
 
@@ -321,6 +324,15 @@ internal sealed unsafe class AppWindow
                 if (sdlEvent.window.windowID == Id)
                     RequestClose();
 
+                break;
+
+            case SDL_EventType.SDL_EVENT_DISPLAY_ADDED:
+            case SDL_EventType.SDL_EVENT_DISPLAY_REMOVED:
+            case SDL_EventType.SDL_EVENT_DISPLAY_MOVED:
+            case SDL_EventType.SDL_EVENT_DISPLAY_ORIENTATION:
+            case SDL_EventType.SDL_EVENT_DISPLAY_CURRENT_MODE_CHANGED:
+            case SDL_EventType.SDL_EVENT_DISPLAY_CONTENT_SCALE_CHANGED:
+                (EditorUi.Instance as SdlEditorUi)?.Screens.Invalidate();
                 break;
         }
 

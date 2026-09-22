@@ -1,4 +1,5 @@
 #nullable enable
+using T3.Editor.SystemUi;
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
@@ -749,9 +750,9 @@ internal static class SetupParameterView
 
         if (Plugs.TryGetDisplayIndex(id, out var displayIndex))
         {
-            var screens = System.Windows.Forms.Screen.AllScreens;
+            var screens = EditorUi.Instance.AllScreens;
             Span<int> mode = [0, 0];
-            if (displayIndex < screens.Length)
+            if (displayIndex < screens.Count)
             {
                 mode[0] = screens[displayIndex].Bounds.Width;
                 mode[1] = screens[displayIndex].Bounds.Height;

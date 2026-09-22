@@ -39,7 +39,7 @@ internal static unsafe class ProgramWindows
     /// </summary>
     internal static void SetInteractionDevices(params object[] objects)
     {
-        _messageHandlers = objects.OfType<IWindowsFormsMessageHandler>().ToArray();
+        _messageHandlers = objects.OfType<IWin32MessageHandler>().ToArray();
         if (OperatingSystem.IsWindows() && _messageHandlers.Length > 0)
             SDL_SetWindowsMessageHook(&ForwardWindowsMessage, IntPtr.Zero);
     }
@@ -54,10 +54,9 @@ internal static unsafe class ProgramWindows
         // An exception must not unwind into SDL's native frame.
         try
         {
-            var message = System.Windows.Forms.Message.Create(msg->hwnd, (int)msg->message, (nint)msg->wParam, msg->lParam);
             foreach (var handler in _messageHandlers)
             {
-                handler.ProcessMessage(message);
+                handler.ProcessMessage((int)msg->message, (nint)msg->wParam, msg->lParam);
             }
         }
         catch (Exception e)
@@ -68,7 +67,7 @@ internal static unsafe class ProgramWindows
         return true;
     }
 
-    private static IWindowsFormsMessageHandler[] _messageHandlers = [];
+    private static IWin32MessageHandler[] _messageHandlers = [];
 
     public static void SetVertexShader(Resource<VertexShader> resource) => _deviceContext.VertexShader.Set(resource.Value);
     public static void SetPixelShader(Resource<PixelShader> resource) => _deviceContext.PixelShader.Set(resource.Value);
@@ -168,6 +167,7 @@ internal static unsafe class ProgramWindows
             Log.Info("Vulkan validation layer enabled.");
             GraphicsLog.Error = message => Log.Error($"[vulkan] {message}");
             GraphicsLog.Warning = message => Log.Warning($"[vulkan] {message}");
+            GraphicsLog.Debug = message => Log.Debug($"[vulkan] {message}");
         }
 
         return new T3.Graphics.Vulkan.VulkanBackend(new T3.Graphics.Vulkan.VulkanBackendOptions

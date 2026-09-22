@@ -153,7 +153,7 @@ The highest-value, lowest-effort path is **command-level integration tests** tha
 - `ProgramWindows.CopyUiContentToShareTexture()` copies the full UI backbuffer to a GPU texture every frame (used by "Mirror UI on 2nd view")
 - `ScreenshotWriter.StartSavingToFile()` saves any `Texture2D` to PNG via `TextureBgraReadAccess` (async GPU readback + WIC encoding)
 - `LayoutHandling.LoadAndApplyLayoutOrFocusMode()` switches layouts programmatically
-- Layouts are stored as JSON in `.Defaults/layouts/layout{0-12}.json`
+- Layouts are stored as JSON in `.Defaults/Layouts/layout{0-12}.json`
 - The Editor already has `--force-recompile` flag -- adding `--autotest` is straightforward
 
 **Approach:**

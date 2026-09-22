@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Windows.Forms;
 using ImGuiNET;
-using Microsoft.Win32;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.SystemUi;
+using T3.SystemUi;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.OutputSetup;
@@ -26,7 +26,7 @@ internal static class DisplayLayoutView
     public static void DrawTooltip(int highlightedIndex)
     {
         RefreshCache();
-        if (_screens.Length == 0)
+        if (_screens.Count == 0)
             return;
 
         var scale = ScaleToFit();
@@ -38,7 +38,7 @@ internal static class DisplayLayoutView
         var area = new Vector2(_overallBounds.Width, _overallBounds.Height) * scale;
         ImGui.Dummy(area + new Vector2(padding * 2));
 
-        for (var i = 0; i < _screens.Length; i++)
+        for (var i = 0; i < _screens.Count; i++)
         {
             var bounds = _screens[i].Bounds;
             var min = canvasPos + new Vector2((bounds.X - _overallBounds.X) * scale, (bounds.Y - _overallBounds.Y) * scale);
@@ -94,32 +94,27 @@ internal static class DisplayLayoutView
     }
 
     /// <summary>
-    /// Re-reads the arrangement when it changed. Screen.AllScreens allocates on every call, so the result is
-    /// held and only swapped when the OS says the displays moved or a count differs.
+    /// Re-measures the arrangement when the screen list is a new one — it is replaced, not changed, when the
+    /// displays do.
     /// </summary>
     private static void RefreshCache()
     {
-        var frame = ImGui.GetFrameCount();
-        if (frame == _cachedFrame && !_isDirty)
+        var screens = EditorUi.Instance.AllScreens;
+        if (ReferenceEquals(screens, _screens))
             return;
 
-        _cachedFrame = frame;
-        if (!_isDirty && _screens.Length > 0)
-            return;
-
-        _isDirty = false;
-        _screens = Screen.AllScreens;
+        _screens = screens;
         _labels.Clear();
         _resolutions.Clear();
 
-        if (_screens.Length == 0)
+        if (_screens.Count == 0)
         {
             _overallBounds = Rectangle.Empty;
             return;
         }
 
         var bounds = _screens[0].Bounds;
-        for (var i = 1; i < _screens.Length; i++)
+        for (var i = 1; i < _screens.Count; i++)
         {
             bounds = Rectangle.Union(bounds, _screens[i].Bounds);
         }
@@ -160,19 +155,12 @@ internal static class DisplayLayoutView
         return resolution;
     }
 
-    static DisplayLayoutView()
-    {
-        SystemEvents.DisplaySettingsChanged += (_, _) => _isDirty = true;
-    }
-
     private const string PrimaryMarker = "(Primary)";
     private const float DiagramScale = 0.06f;
     private const float MaxDiagramSize = 260f;
 
-    private static Screen[] _screens = [];
+    private static IReadOnlyList<IScreen> _screens = [];
     private static Rectangle _overallBounds;
-    private static bool _isDirty = true;
-    private static int _cachedFrame = -1;
     private static readonly Dictionary<int, string> _labels = [];
     private static readonly Dictionary<(int, int), string> _resolutions = [];
 }

@@ -1,4 +1,5 @@
 #nullable enable
+using T3.Editor.SystemUi;
 using T3.Core.Operator;
 using T3.Core.Output;
 using T3.Editor.UiModel.ProjectHandling;
@@ -242,8 +243,8 @@ internal static class SetupEntities
                     return true;
             }
 
-            var screens = System.Windows.Forms.Screen.AllScreens;
-            for (var i = 0; i < screens.Length; i++)
+            var screens = EditorUi.Instance.AllScreens;
+            for (var i = 0; i < screens.Count; i++)
             {
                 if (Matches(setup, SetupEntityKinds.Plug, Plugs.DisplayPlugId(i), name, out kind, out id))
                     return true;

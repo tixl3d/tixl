@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <Import Project="$(SolutionDir)/Tixl.props" />
     <PropertyGroup>
-        <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
+        <TargetFramework>$(TixlNetCoreFrameworkVersion)</TargetFramework>
         <VersionPrefix>$(TixlVersion)</VersionPrefix>
         <VersionSuffix>$(TixlVersionSuffix)</VersionSuffix>
         <InformationalVersion>$(Version)</InformationalVersion>
@@ -66,9 +66,7 @@
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
         <PackageReference Include="Sentry" Version="6.8.0" />
-        <PackageReference Include="SharpDX.Desktop" Version="4.2.0">
-            <NoWarn>NU1701</NoWarn>
-        </PackageReference>
+        <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
         <PackageReference Include="System.Management" Version="10.0.10" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.10" />
     </ItemGroup>
@@ -84,7 +82,6 @@
     <ProjectReference Include="..\SdlPlatform\SdlPlatform.csproj" />
         <ProjectReference Include="..\IoServices\IoServices.csproj" />
         <ProjectReference Include="..\Logging\Logging.csproj" />
-        <ProjectReference Include="..\MsForms\MsForms.csproj" />
         <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
     </ItemGroup>
     <!-- ===============================//======================================= -->

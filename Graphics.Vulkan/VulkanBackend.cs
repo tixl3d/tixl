@@ -219,7 +219,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             var staging = CreateBufferCore(SizeOf(description), VkBufferUsageFlags.TransferSrc | VkBufferUsageFlags.TransferDst,
                                            description.Memory, out var stagingMemory, out var mapped);
 
-            var stagingTexture = new VulkanTexture(this, VkImage.Null, stagingMemory, description, label) { StagingBuffer = staging, Mapped = mapped };
+            var stagingTexture = Track(new VulkanTexture(this, VkImage.Null, stagingMemory, description, label) { StagingBuffer = staging, Mapped = mapped });
 
             if (!initialData.IsEmpty)
                 initialData.CopyTo(new Span<byte>(mapped, initialData.Length));
@@ -272,7 +272,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         Api.vkBindImageMemory(image, memory, 0).CheckResult();
         Interlocked.Add(ref _allocatedBytes, (long)requirements.size);
 
-        var texture = new VulkanTexture(this, image, memory, description, label);
+        var texture = Track(new VulkanTexture(this, image, memory, description, label));
         SetDebugName(VkObjectType.Image, image.Handle, label);
 
         if (!initialData.IsEmpty)
@@ -300,9 +300,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         var alignment = (ulong)Math.Max(1, FormatSizes.BytesPerPixel(description.Format));
         ulong total = 0;
 
-        foreach (var subresource in initialData)
+        for (var i = 0; i < regions.Length; i++)
         {
-            total = AlignUp(total, alignment) + (ulong)Math.Max(subresource.SlicePitch, subresource.RowPitch);
+            total = AlignUp(total, alignment) + (ulong)SubresourceByteSize(description, i % mipLevels, initialData[i]);
         }
 
         var staging = CreateBufferCore(total, VkBufferUsageFlags.TransferSrc, MemoryKind.Upload, out var stagingMemory, out var mapped);
@@ -311,7 +311,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         for (var i = 0; i < regions.Length; i++)
         {
             var subresource = initialData[i];
-            var size = Math.Max(subresource.SlicePitch, subresource.RowPitch);
+            var size = SubresourceByteSize(description, i % mipLevels, subresource);
             offset = AlignUp(offset, alignment);
             System.Buffer.MemoryCopy((void*)subresource.Data, (byte*)mapped + offset, size, size);
 
@@ -361,6 +361,21 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         return texture;
     }
 
+    /// <summary>
+    /// The bytes one subresource of initial data spans. D3D11 ignores the slice pitch of a 2D texture, so callers
+    /// leave it 0; the rows are what count. A 3D subresource is all of its depth slices.
+    /// </summary>
+    private static long SubresourceByteSize(in TextureDescription description, int mip, in SubresourceData subresource)
+    {
+        var height = Math.Max(1, description.Height >> mip);
+
+        // Block-compressed formats have no per-pixel size, and their rows are rows of 4x4 blocks.
+        var rows = FormatSizes.BytesPerPixel(description.Format) == 0 ? (height + 3) / 4 : height;
+        var slice = Math.Max((long)subresource.SlicePitch, (long)subresource.RowPitch * rows);
+        var depth = description.Dimension == TextureDimension.Texture3D ? Math.Max(1, description.Depth >> mip) : 1;
+        return slice * depth;
+    }
+
     public GpuBuffer CreateBuffer(in GpuBufferDescription description, ReadOnlySpan<byte> initialData, string? label = null)
     {
         var usage = VulkanConvert.ToVulkan(description.Usage);
@@ -386,6 +401,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
                              SliceStride = stride,
                          };
 
+        Track(result);
         SetDebugName(VkObjectType.Buffer, buffer.Handle, label);
 
         if (!initialData.IsEmpty)
@@ -492,7 +508,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         Api.vkCreateImageView(&viewInfo, null, out var view).CheckResult();
         SetDebugName(VkObjectType.ImageView, view.Handle, label);
-        return new VulkanTextureView(this, source, view, description, label);
+        return Track(new VulkanTextureView(this, source, view, description, label));
     }
 
     public GpuSampler CreateSampler(in SamplerDescription description, string? label = null)
@@ -519,7 +535,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         Api.vkCreateSampler(&samplerInfo, null, out var sampler).CheckResult();
         SetDebugName(VkObjectType.Sampler, sampler.Handle, label);
-        return new VulkanSampler(this, sampler, description, label);
+        return Track(new VulkanSampler(this, sampler, description, label));
     }
 
     public GpuShader CreateShader(ShaderStage stage, ReadOnlySpan<byte> code, string entryPoint, ReadOnlySpan<ShaderBinding> bindings = default,
@@ -535,7 +551,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
             Api.vkCreateShaderModule(&moduleInfo, null, out var module).CheckResult();
             SetDebugName(VkObjectType.ShaderModule, module.Handle, label);
-            return new VulkanShader(this, module, stage, bindings.ToArray(), label);
+            return Track(new VulkanShader(this, module, stage, bindings.ToArray(), label));
         }
     }
     #endregion
@@ -568,7 +584,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             return null;
         }
 
-        return new VulkanSwapchain(this, surface, description, label);
+        return Track(new VulkanSwapchain(this, surface, description, label));
     }
 
     public GpuPipeline GetOrCreatePipeline(in GraphicsPipelineDescription description)
@@ -756,6 +772,58 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         {
             _frames[_frameIndex].Retired.Add(release);
         }
+    }
+
+    /// <summary>
+    /// Records a resource as alive until it is released, so <see cref="Dispose"/> can destroy what nobody did.
+    /// A device's objects have to be gone before the device is; under D3D11, exiting the process was enough.
+    /// </summary>
+    private T Track<T>(T resource) where T : GpuResource
+    {
+        lock (_liveResources)
+        {
+            _liveResources.Add(resource);
+        }
+
+        return resource;
+    }
+
+    /// <summary>Called by a resource as it is released.</summary>
+    internal void Untrack(GpuResource resource)
+    {
+        lock (_liveResources)
+        {
+            _liveResources.Remove(resource);
+        }
+    }
+
+    /// <summary>
+    /// Releases every resource still alive, swapchains first because they wait for the device themselves, and
+    /// logs what they were: a long-lived cache is expected here, a growing list is a leak.
+    /// </summary>
+    private void ReleaseSurvivors()
+    {
+        GpuResource[] survivors;
+        lock (_liveResources)
+        {
+            survivors = [.._liveResources];
+        }
+
+        if (survivors.Length == 0)
+            return;
+
+        Array.Sort(survivors, (a, b) => (a is GpuSwapchain ? 0 : 1).CompareTo(b is GpuSwapchain ? 0 : 1));
+
+        var counts = new SortedDictionary<string, int>();
+        foreach (var survivor in survivors)
+        {
+            var kind = survivor.GetType().Name;
+            counts[kind] = counts.GetValueOrDefault(kind) + 1;
+            survivor.Dispose();
+        }
+
+        GraphicsLog.Debug?.Invoke($"Released {survivors.Length} resources still alive at shutdown: "
+                                  + string.Join(", ", counts.Select(pair => $"{pair.Value} {pair.Key}")));
     }
 
     private void RunRetired(ref FrameSlot frame)
@@ -1336,6 +1404,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     public void Dispose()
     {
         Api.vkDeviceWaitIdle();
+        ReleaseSurvivors();
         _nullResources?.Dispose();
 
         foreach (var pipeline in _pipelines.Values)
@@ -1391,6 +1460,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private readonly Dictionary<ulong, VulkanTextureView> _imGuiTextures = [];
     private readonly List<VulkanSwapchain> _pendingPresents = [];
     private readonly List<VulkanSwapchain> _acquiredSwapchains = [];
+    private readonly HashSet<GpuResource> _liveResources = [];
 
     private VulkanNullResources? _nullResources;
     private long _allocatedBytes;

@@ -39,6 +39,7 @@ internal sealed unsafe class VulkanTexture(VulkanBackend backend, VkImage image,
 
     protected override void ReleaseWhenRetired()
     {
+        backend.Untrack(this);
         var image = OwnsImage ? Image : VkImage.Null;
         var staging = StagingBuffer;
         var memory = Memory;
@@ -78,6 +79,7 @@ internal sealed class VulkanTextureView : GpuTextureView
 
     protected override void ReleaseWhenRetired()
     {
+        _backend.Untrack(this);
         var view = View;
         _backend.UnregisterImGuiTexture(ImGuiTextureId);
         _backend.Retire(api => api.vkDestroyImageView(view));
@@ -113,6 +115,7 @@ internal sealed unsafe class VulkanBuffer(VulkanBackend backend, VkBuffer buffer
 
     protected override void ReleaseWhenRetired()
     {
+        backend.Untrack(this);
         var buffer = Buffer;
         var memory = Memory;
         backend.Retire(api =>
@@ -133,6 +136,7 @@ internal sealed class VulkanSampler(VulkanBackend backend, VkSampler sampler, Sa
 
     protected override void ReleaseWhenRetired()
     {
+        backend.Untrack(this);
         var sampler = Sampler;
         backend.Retire(api => api.vkDestroySampler(sampler));
     }
@@ -148,6 +152,7 @@ internal sealed class VulkanShader(VulkanBackend backend, VkShaderModule module,
 
     protected override void ReleaseWhenRetired()
     {
+        backend.Untrack(this);
         var module = Module;
         backend.Retire(api => api.vkDestroyShaderModule(module));
     }

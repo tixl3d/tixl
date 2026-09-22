@@ -8,7 +8,6 @@ using ImGuiNET;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.App;
-using System.Windows.Forms;
 using T3.Core.Resource;
 using System.Reflection;
 using T3.Editor.Gui.Input;
@@ -217,13 +216,19 @@ internal sealed class AboutDialog : ModalDialog
         }
     }
 
+    [DllImport("user32.dll", EntryPoint = "GetKeyboardLayout")]
+    private static extern IntPtr GetKeyboardLayoutHandle(uint threadId);
+
     private static string GetKeyboardLayout()
     {
+        if (!OperatingSystem.IsWindows())
+            return "Unknown";
+
         try
         {
-            var currentInputLanguage = InputLanguage.CurrentInputLanguage;
-
-            return $"{currentInputLanguage.Culture.Name} {currentInputLanguage.LayoutName} ";
+            // The low word of the layout handle is the input language.
+            var languageId = (int)((long)GetKeyboardLayoutHandle(0) & 0xffff);
+            return CultureInfo.GetCultureInfo(languageId).Name;
         }
         catch (Exception)
         {
@@ -281,6 +286,10 @@ internal sealed class AboutDialog : ModalDialog
     {
         var gpuList = new List<string>();
         var activeGpu = ProgramWindows.ActiveGpu;
+
+        // WMI is Windows-only; elsewhere the adapter the backend picked is all there is to report.
+        if (!OperatingSystem.IsWindows())
+            return infoType.ToLower() == "driver" ? "Unknown" : activeGpu;
 
         try
         {

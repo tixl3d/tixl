@@ -178,7 +178,9 @@ public sealed class SlangShaderCompiler : ShaderCompiler
     {
         var directories = new List<string>();
 
-        foreach (var package in args.Owner.AvailableResourcePackages)
+        // The editor's own shaders have no owner, and no includes to look up in packages.
+        var packages = args.Owner?.AvailableResourcePackages ?? [];
+        foreach (var package in packages)
         {
             Add(package.AssetsFolder);
             Add(Path.Combine(package.AssetsFolder, "shaders"));

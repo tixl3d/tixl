@@ -8,6 +8,7 @@ public static class GraphicsLog
 {
     public static Action<string>? Warning;
     public static Action<string>? Error;
+    public static Action<string>? Debug;
 
     /// <summary>
     /// Warns once per message. Used where a warning would otherwise repeat every frame — a shader binding

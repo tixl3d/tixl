@@ -573,6 +573,7 @@ internal static partial class Program
             Log.Info("Vulkan validation layer enabled.");
             GraphicsLog.Error = message => Log.Error($"[vulkan] {message}");
             GraphicsLog.Warning = message => Log.Warning($"[vulkan] {message}");
+            GraphicsLog.Debug = message => Log.Debug($"[vulkan] {message}");
         }
 
         return new T3.Graphics.Vulkan.VulkanBackend(new T3.Graphics.Vulkan.VulkanBackendOptions

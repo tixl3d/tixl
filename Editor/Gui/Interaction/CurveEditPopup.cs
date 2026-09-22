@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using ImGuiNET;
+﻿using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Editor.Gui.InputUi.CombinedInputs;
@@ -79,5 +78,4 @@ public static class CurveEditPopup
     
     private static readonly CurveInputEditing.CurveInteraction.SingleAnimationCanvas _singleCurveCanvas = new() { ImGuiTitle = "canvasPopup"};
     private const string CurvePopupId= "##CurvePopup";
-    private static readonly Bitmap _bmp = new(1, 1);
 }

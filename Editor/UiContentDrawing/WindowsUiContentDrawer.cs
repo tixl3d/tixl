@@ -77,6 +77,7 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors
                              | ImGuiBackendFlags.RendererHasVtxOffset;
             io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+            SdlImGuiInput.InstallClipboard();
 
             // ImGui 1.91 error-recovery: stack imbalances (Push/Pop, Begin/End, etc.)
             // are auto-fixed and logged. Recoverable errors appear as:

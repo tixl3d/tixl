@@ -381,22 +381,6 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
                                       _                                            => ImGuiMouseCursor.ResizeAll
                                   };
             ImGui.SetMouseCursor(imGuiCursor);
-
-            // During an active drag, also force the OS cursor directly. ImGui routes cursor
-            // updates through WM_SETCURSOR which doesn't fire reliably while the mouse button
-            // is held; without this the cursor reverts to default mid-drag. For pure hover we
-            // skip this — calling Cursor.Current here causes a one-frame flicker on every
-            // mouse move because Windows re-queries the form's cursor on WM_SETCURSOR.
-            if (isItemActive)
-            {
-                var winCursor = CurveInputEditing.MoveDirection switch
-                                    {
-                                        CurveInputEditing.MoveDirections.Horizontal => System.Windows.Forms.Cursors.SizeWE,
-                                        CurveInputEditing.MoveDirections.Vertical   => System.Windows.Forms.Cursors.SizeNS,
-                                        _                                            => System.Windows.Forms.Cursors.SizeAll
-                                    };
-                System.Windows.Forms.Cursor.Current = winCursor;
-            }
         }
 
         if (ImGui.IsItemDeactivated())

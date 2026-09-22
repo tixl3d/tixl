@@ -76,7 +76,7 @@ public static class ExportWikiDocumentation
 
     /// <summary>
     /// Resolves <see cref="HelpOperatorsFolder"/> against the current working directory. In DEBUG
-    /// builds the editor runs from <c>bin/Debug/netX.X-windows/</c>, so prepend <c>../../../..</c>
+    /// builds the editor runs from <c>bin/Debug/netX.X/</c>, so prepend <c>../../../..</c>
     /// to land back in the repo root. Release builds (run from an install dir) stay relative.
     /// </summary>
     private static string GetOperatorsRoot()
