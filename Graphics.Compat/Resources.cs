@@ -68,7 +68,23 @@ public abstract class Resource : DeviceChild
     /// </summary>
     internal void AddReference() => Interlocked.Increment(ref _references);
 
+    /// <summary>
+    /// Gives up the owner's share. Only the first call counts: SharpDX made a second Dispose a no-op, operator
+    /// code relies on that, and counting it again would free a resource that views still point at.
+    /// </summary>
     public override void Dispose()
+    {
+        if (!MarkDisposed())
+            return;
+
+        ReleaseReference();
+    }
+
+    /// <summary>True the first time it is called on this object, false after.</summary>
+    protected bool MarkDisposed() => Interlocked.Exchange(ref _disposeCalled, 1) == 0;
+
+    /// <summary>Gives up one share of the lifetime; the last one frees the native object.</summary>
+    internal void ReleaseReference()
     {
         if (Interlocked.Decrement(ref _references) > 0)
             return;
@@ -78,6 +94,7 @@ public abstract class Resource : DeviceChild
     }
 
     private int _references = 1;
+    private int _disposeCalled;
     private static ulong _nextId;
 }
 
@@ -365,7 +382,7 @@ public abstract class ResourceView : Resource
     public Resource Resource { get; }
 
     /// <summary>Gives up the share of the resource's lifetime this view claimed. Every view's Dispose calls it.</summary>
-    protected void ReleaseResource() => Resource.Dispose();
+    protected void ReleaseResource() => Resource.ReleaseReference();
 }
 
 public sealed class ShaderResourceView : ResourceView
@@ -428,6 +445,9 @@ public sealed class ShaderResourceView : ResourceView
 
     public override void Dispose()
     {
+        if (!MarkDisposed())
+            return;
+
         if (GpuView != null)
         {
             lock (_byImGuiId)
@@ -464,6 +484,9 @@ public sealed class RenderTargetView : ResourceView
 
     public override void Dispose()
     {
+        if (!MarkDisposed())
+            return;
+
         GpuView?.Dispose();
         ReleaseResource();
         GC.SuppressFinalize(this);
@@ -491,6 +514,9 @@ public sealed class DepthStencilView : ResourceView
 
     public override void Dispose()
     {
+        if (!MarkDisposed())
+            return;
+
         GpuView?.Dispose();
         ReleaseResource();
         GC.SuppressFinalize(this);
@@ -518,6 +544,9 @@ public sealed class UnorderedAccessView : ResourceView
 
     public override void Dispose()
     {
+        if (!MarkDisposed())
+            return;
+
         GpuView?.Dispose();
         ReleaseResource();
         GC.SuppressFinalize(this);

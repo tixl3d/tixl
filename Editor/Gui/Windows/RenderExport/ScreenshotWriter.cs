@@ -3,7 +3,6 @@
 using T3.Graphics.Compat;
 using System.IO;
 using StbImageWriteSharp;
-using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.Resource;
 
@@ -30,11 +29,14 @@ internal static class ScreenshotWriter
 
     internal static void Update()
     {
-        if (Playback.FrameCount == _lastUpdateFrame) 
+        // Once per UI frame. Counted in UI frames rather than playback frames, which stand still while no
+        // project is focused and would hold a capture of the editor's own window forever.
+        var frame = ImGuiNET.ImGui.GetFrameCount();
+        if (frame == _lastUpdateFrame)
             return;
-        
+
         _textureBgraReadAccess?.Update();
-        _lastUpdateFrame = Playback.FrameCount;
+        _lastUpdateFrame = frame;
     }
 
     internal static bool InitiateConvertAndReadBack2(T3.Core.DataTypes.Texture2D gpuTexture, TextureBgraReadAccess.OnReadComplete saveSampleAfterReadback)

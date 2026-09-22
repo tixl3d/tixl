@@ -306,6 +306,39 @@ public class GraphicsCompatTests
     }
 
     /// <summary>
+    /// Disposing twice counts once, as it did under SharpDX. Operators dispose views and resources in more than
+    /// one place; counting every call freed resources other views still used, and the next frame used freed
+    /// memory.
+    /// </summary>
+    [Fact]
+    public void DisposingTwiceReleasesOnlyOnce()
+    {
+        var (_, device) = CreateDevice();
+
+        var texture = new Texture2D(device,
+                                    new Texture2DDescription
+                                        {
+                                            Width = 4,
+                                            Height = 4,
+                                            Format = Format.R8G8B8A8_UNorm,
+                                            BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
+                                            Usage = ResourceUsage.Default,
+                                        });
+
+        var firstView = new ShaderResourceView(device, texture);
+        var secondView = new ShaderResourceView(device, texture);
+
+        firstView.Dispose();
+        firstView.Dispose();
+        texture.Dispose();
+        texture.Dispose();
+        Assert.False(texture.IsDisposed);
+
+        secondView.Dispose();
+        Assert.True(texture.IsDisposed);
+    }
+
+    /// <summary>
     /// Structured buffers are described through BufferEx and their length is read back through Buffer by
     /// AnalyzeMeshBuffers, GetSRVProperties and the point and particle operators. That only works because the
     /// two share memory, as they do in D3D11; as separate fields the count reads zero and a mesh draws nothing.

@@ -133,9 +133,21 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         VkPhysicalDeviceVulkan13Features features13 = new() { dynamicRendering = true, synchronization2 = true };
 
+        VkPhysicalDeviceVulkan12Features supported12 = new();
+        VkPhysicalDeviceFeatures2 supported = new() { pNext = &supported12 };
+        InstanceApi.vkGetPhysicalDeviceFeatures2(PhysicalDevice, &supported);
+
         // scalarBlockLayout lets a structured buffer keep D3D's tight packing; shaderDrawParameters is what
-        // makes SV_VertexID mean the same thing it does in D3D.
-        VkPhysicalDeviceVulkan12Features features12 = new() { pNext = &features13, scalarBlockLayout = true };
+        // makes SV_VertexID mean the same thing it does in D3D. The optional two are D3D11 features TiXL uses
+        // where the device has them: MIRROR_ONCE addressing, and writing SV_RenderTargetArrayIndex from a
+        // vertex shader for layered targets.
+        VkPhysicalDeviceVulkan12Features features12 = new()
+                                                          {
+                                                              pNext = &features13,
+                                                              scalarBlockLayout = true,
+                                                              samplerMirrorClampToEdge = supported12.samplerMirrorClampToEdge,
+                                                              shaderOutputLayer = supported12.shaderOutputLayer,
+                                                          };
         VkPhysicalDeviceVulkan11Features features11 = new() { pNext = &features12, shaderDrawParameters = true };
         VkPhysicalDeviceFeatures2 features2 = new() { pNext = &features11 };
         // D3D11 guarantees that reading past the end of a buffer returns zero, and TiXL's shaders rely on it -

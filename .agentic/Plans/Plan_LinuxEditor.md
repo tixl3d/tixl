@@ -122,6 +122,20 @@ No output views yet.
 Done when: a project opens, a node can be added, wired and edited, and the project saves and reloads
 unchanged.
 
+**Done 2026-09-22.** `newProject` scaffolds and compiles `pixtur._agentTests` on Linux; the non-visual
+integration tests (`dotnet test Tests/Editor.IntegrationTests --filter "Category!=VisualSuite"`, 10 tests:
+build, wire, edit, undo, screenshot, source reload) pass against the Vulkan editor with the validation layer
+on. After a restart the graph state is identical up to child order, and the project files are byte-identical.
+
+Found on the way:
+- A draw that samples a texture uploaded since the render pass opened emitted its layout transition inside
+  the pass. The command list now closes the pass, transitions, and reopens it with load.
+- A blocking map mid-frame (`MapForRead`) submitted the frame and left the context recording into the ended
+  command buffer. The backend now continues the frame in the next slot with the collected state intact,
+  which is what D3D11's flush does.
+- `ScreenshotWriter` moved off WIC to StbImageWriteSharp, and counts UI frames instead of playback frames,
+  which stand still while no project is focused.
+
 ### M3 — output views
 
 Output windows and in-editor previews: render-to-texture into ImGui images, several targets per frame, and
@@ -140,8 +154,8 @@ visual suite's comparisons.
 
 Done when: thumbnails appear in the symbol library and a screenshot round-trips.
 
-Known: the debug bridge's UI `screenshot` hangs the main thread on Vulkan — the readback or the WIC encode
-in `ScreenshotWriter` never completes. Start M4 there; it is also what the visual suite needs.
+`ScreenshotWriter` is done (see M2); `ThumbnailManager`, `VideoThumbnails` and `VideoClipThumbnailCache`
+still use WIC.
 
 ### M5 — the Linux runtime
 

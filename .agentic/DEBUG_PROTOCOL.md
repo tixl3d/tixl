@@ -14,7 +14,7 @@ Editor/bin/Debug/net10.0/TiXL.exe --debug-server 9042 --window 1600x900 --no-spl
 ```
 
 On Linux the executable is `Editor/bin/Debug/net10.0/TiXL`; add `TIXL_VULKAN_VALIDATION=1` to see validation
-errors in the log. A UI `screenshot` hangs the main thread there until the screenshot writer is off WIC.
+errors in the log.
 
 - `--debug-server <port>` starts the bridge (localhost only). Without the flag it is off.
 - `--window WxH` forces a predictable windowed size; `--no-splash` skips the splash screen.
