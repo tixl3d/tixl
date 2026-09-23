@@ -1,0 +1,115 @@
+{
+  "FormatVersion": 3,
+  "Id": "d07a12c2-2c1a-4c88-95a2-53db21e66bac"/*RadialRepeat*/,
+  "Inputs": [
+    {
+      "Id": "30ec3cb0-9977-4b03-8be1-10cbeb31bbe0"/*RotateImage*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "42451d9d-d1b1-49e2-813c-de01876ab8c5"/*Image*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "787b9749-ebc5-4dcf-ac4e-c2226049e0ea"/*RotateSlice*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "7cf442ea-5382-42d0-a111-5293f7f2fc57"/*Zoom*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "e9cb8bdb-ba6f-454a-bac7-c2eeb7a89d0d"/*Slices*/,
+      "DefaultValue": 8.0
+    },
+    {
+      "Id": "f3050fbe-b1f5-467d-bed3-f19b3b5570ca"/*Offset*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "f7067892-e0b4-45a9-969e-94c180d1ad91"/*Resolution*/,
+      "DefaultValue": {
+        "X": 0,
+        "Y": 0
+      }
+    }
+  ],
+  "Children": [
+    {
+      "Id": "e7b5b7c2-e51a-4d07-a720-4008acdb9001"/*CustomPixelShader*/,
+      "SymbolId": "46daab0e-e957-413e-826c-0699569d0e07",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
+      "InputValues": [
+        {
+          "Id": "3d84725a-594b-46d8-aa21-eec99026115d"/*A*/,
+          "Type": "System.Single",
+          "Value": 200.0
+        },
+        {
+          "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
+          "Type": "System.String",
+          "Value": "float aspectRatio = width / height;\nuv -= 0.5;\nuv.x *= aspectRatio;\n\nfloat2 p = uv;\n\np = radial_repeat(p, A, B, C, D);\np += Offset;\np.x /= aspectRatio;\n\np += 0.5;\nc = ImageA.Sample(Sampler, p);\n"
+        },
+        {
+          "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
+          "Type": "System.String",
+          "Value": "\nstatic const float tau = radians(360.0);\n\nfloat2 radial_repeat(float2 p, float n, float zoom, float rotateMirror, float rotateReflection)\n{\n\n    float r2 = 1.05;\n    float angle = atan2(p.y, p.x);\n    float radius = length(p)*zoom;\n    \n    float sector = tau / n;\n    \n    angle = fmod(angle - rotateMirror, tau);\n    if (angle < 0.0) angle += tau;\n    \n    angle = fmod(angle, sector);\n    \n    angle -= sector * rotateReflection;\n    \n    float2 q = float2(cos(angle), sin(angle)) * radius;\n    \n    return q;\n}"
+        }
+      ],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001",
+      "SourceSlotId": "12fcfd9e-1c2f-46fc-b570-83b93ec7d101",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "38b28631-28b6-4687-9a3f-ba3e87120476"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "e9cb8bdb-ba6f-454a-bac7-c2eeb7a89d0d",
+      "TargetParentOrChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001",
+      "TargetSlotId": "3d84725a-594b-46d8-aa21-eec99026115d"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "42451d9d-d1b1-49e2-813c-de01876ab8c5",
+      "TargetParentOrChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001",
+      "TargetSlotId": "5f90f885-0ccc-4014-a921-dc710257835a"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "30ec3cb0-9977-4b03-8be1-10cbeb31bbe0",
+      "TargetParentOrChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001",
+      "TargetSlotId": "60bdd684-8005-4576-b09b-1b5d6124da1d"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "f3050fbe-b1f5-467d-bed3-f19b3b5570ca",
+      "TargetParentOrChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001",
+      "TargetSlotId": "674cabbd-cf31-46ac-9a1a-4f6bd727c977"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "f7067892-e0b4-45a9-969e-94c180d1ad91",
+      "TargetParentOrChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001",
+      "TargetSlotId": "83e06d04-02bd-40cc-8666-d5dd62a9e63e"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "7cf442ea-5382-42d0-a111-5293f7f2fc57",
+      "TargetParentOrChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001",
+      "TargetSlotId": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "787b9749-ebc5-4dcf-ac4e-c2226049e0ea",
+      "TargetParentOrChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001",
+      "TargetSlotId": "db522fd4-5cfc-49f6-9983-02ec0dd6090a"
+    }
+  ]
+}

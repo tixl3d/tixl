@@ -1,0 +1,92 @@
+{
+  "FormatVersion": 3,
+  "Id": "d07a12c2-2c1a-4c88-95a2-53db21e66bac"/*RadialRepeat*/,
+  "Description": "Works like [MirrorRepeat] but with radial symmetry.",
+  "InputUis": [
+    {
+      "InputId": "30ec3cb0-9977-4b03-8be1-10cbeb31bbe0"/*RotateImage*/,
+      "Position": {
+        "X": -254.15134,
+        "Y": -124.80408
+      },
+      "Description": "Rotate the final image"
+    },
+    {
+      "InputId": "42451d9d-d1b1-49e2-813c-de01876ab8c5"/*Image*/,
+      "Position": {
+        "X": -250.25293,
+        "Y": -401.03207
+      }
+    },
+    {
+      "InputId": "787b9749-ebc5-4dcf-ac4e-c2226049e0ea"/*RotateSlice*/,
+      "Position": {
+        "X": -254.15134,
+        "Y": -49.804077
+      },
+      "Description": "Rotate the image within each slice"
+    },
+    {
+      "InputId": "7cf442ea-5382-42d0-a111-5293f7f2fc57"/*Zoom*/,
+      "Position": {
+        "X": -254.15134,
+        "Y": -199.80408
+      },
+      "Scale": 1.0
+    },
+    {
+      "InputId": "e9cb8bdb-ba6f-454a-bac7-c2eeb7a89d0d"/*Slices*/,
+      "Position": {
+        "X": -250.25293,
+        "Y": -270.3487
+      },
+      "Description": "The number of radial mirror slices",
+      "Min": 1.0,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "f3050fbe-b1f5-467d-bed3-f19b3b5570ca"/*Offset*/,
+      "Position": {
+        "X": -250.25293,
+        "Y": -344.23618
+      },
+      "AddPadding": "True",
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "f7067892-e0b4-45a9-969e-94c180d1ad91"/*Resolution*/,
+      "Position": {
+        "X": -254.15132,
+        "Y": 21.47519
+      },
+      "AddPadding": "True"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "e7b5b7c2-e51a-4d07-a720-4008acdb9001"/*CustomPixelShader*/,
+      "Position": {
+        "X": 112.299194,
+        "Y": -333.83694
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "38b28631-28b6-4687-9a3f-ba3e87120476"/*TextureOutput*/,
+      "Position": {
+        "X": 369.25745,
+        "Y": -333.4307
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "179198c7-60f5-46b4-94a2-b2bca6d14fc2",
+      "Title": "Wikipedia",
+      "Description": "",
+      "LinkUrl": "https://en.wikipedia.org/wiki/Koch_snowflake",
+      "LinkType": "Documentation"
+    }
+  ]
+}
