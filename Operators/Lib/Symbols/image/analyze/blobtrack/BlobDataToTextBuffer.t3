@@ -1,0 +1,64 @@
+{
+  "FormatVersion": 3,
+  "Id": "9C4E7D2A-6B1E-4F3C-9A5D-8E2F1A3C5B4D"/*BlobDataToTextBuffer*/,
+  "Inputs": [
+    {
+      "Id": "B97C5F9F-76E5-49A8-96A1-9B5E3F2FE2AD"/*BlobData*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "76D42773-DDBD-497A-8C17-927B09CCC6A9"/*LabelPrefix*/,
+      "DefaultValue": "ID:"
+    },
+    {
+      "Id": "64A3A4F5-420C-414D-80EF-5E0F33BB726F"/*IdFormat*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "F4885527-C56F-4040-AD4E-7D5351B19D08"/*LabelContent*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "3737C853-81F0-4FD9-9F82-207C2FE1A856"/*LabelColor*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "3C39D125-8CB4-4E84-A51D-D1C88721C740"/*LabelSize*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "9D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B4E"/*FontPath*/,
+      "DefaultValue": "Examples:fonts/Roboto-Black.fnt"
+    },
+    {
+      "Id": "8D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B4F"/*Spacing*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "7D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B40"/*LineHeight*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "6D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B41"/*Scale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "5D4E7F2A-6B1E-4F3C-9A5D-8E2F1A3C5B42"/*AspectRatio*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "4E4F5A6B-7C8D-4E9F-A0B1-C2D3E4F5A6B7"/*Offset*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

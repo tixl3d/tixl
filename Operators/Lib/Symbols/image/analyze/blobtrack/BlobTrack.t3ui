@@ -1,0 +1,185 @@
+{
+  "FormatVersion": 3,
+  "Id": "a3e7b1c4-5d2f-4896-b0e1-9c3f6a8d2e47"/*BlobTrack*/,
+  "Description": "Detects and tracks blobs in video or image input, returning their positions, sizes, and persistent IDs.\n\nSupports two detection modes:\n- SimpleBlobDetector: Works with a single input, no background needed. Slower but more flexible.\n- Background Subtraction: Connect a background frame to the second input for much faster detection with arbitrary bounding shapes.\n\nThe operator tracks blobs across frames, assigning persistent IDs based on proximity matching. Use MaxMoveDistance to control how far blobs can travel between frames while maintaining their identity.\n\nTips:\n- Lower the input resolution for better performance with SimpleBlobDetector.\n- Pre-process with Monochrome TOP and adjust contrast for cleaner detection.\n- Use the Overlay menu to visualize detected blobs on the output texture (bounds, labels, or both), and style them with the BoundsColor/LabelColor/Thickness/Size inputs.\n- Connect an Info CHOP or Info DAT to access structured blob data.\n\nAKA: blob detection, contour tracking, motion tracking, object detection, bright spot detection, touchdesigner blob track",
+  "SymbolTags": "72",
+  "InputUis": [
+    {
+      "InputId": "b1c2d3e4-f5a6-7890-abcd-ef0123456789"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200,
+        "Y": 0
+      },
+      "Description": "The input video or image to detect blobs in."
+    },
+    {
+      "InputId": "c2d3e4f5-a6b7-8901-bcde-f01234567890"/*Background*/,
+      "Position": {
+        "X": -200,
+        "Y": 75
+      },
+      "Description": "Optional background frame for background subtraction mode. When connected, enables much faster detection."
+    },
+    {
+      "InputId": "d3e4f5a6-b7c8-9012-cdef-012345678901"/*Threshold*/,
+      "Position": {
+        "X": -200,
+        "Y": 150
+      },
+      "Description": "Brightness threshold (0-1) for blob detection. Pixels above this value are considered part of a blob."
+    },
+    {
+      "InputId": "e4f5a6b7-c8d9-0123-defa-123456789012"/*MinBlobSize*/,
+      "Position": {
+        "X": -200,
+        "Y": 225
+      },
+      "Description": "Minimum blob area as a fraction of total image (0-1). Blobs smaller than this are ignored."
+    },
+    {
+      "InputId": "f5a6b7c8-d9e0-1234-efab-234567890123"/*MaxBlobSize*/,
+      "Position": {
+        "X": -200,
+        "Y": 300
+      },
+      "Description": "Maximum blob area as a fraction of total image (0-1). Blobs larger than this are ignored."
+    },
+    {
+      "InputId": "a6b7c8d9-e0f1-2345-fabc-345678901234"/*MaxMoveDistance*/,
+      "Position": {
+        "X": -200,
+        "Y": 375
+      },
+      "Description": "Maximum normalized distance a blob can move between frames while maintaining its ID."
+    },
+    {
+      "InputId": "b7c8d9e0-f1a2-3456-abcd-456789012345"/*MonoSource*/,
+      "Position": {
+        "X": -200,
+        "Y": 450
+      },
+      "Description": "Which color channel to use for detection."
+    },
+    {
+      "InputId": "c8d9e0f1-a2b3-4567-bcde-567890123456"/*Overlay*/,
+      "Position": {
+        "X": -200,
+        "Y": 525
+      },
+      "Description": "Controls what is drawn on the output texture: Bounds Only, Labels Only, Bounds And Labels, or Off."
+    },
+    {
+      "InputId": "4eb740e3-d5ba-4ebc-9707-018fb9d8df7e"/*BoundsColor*/,
+      "Position": {
+        "X": -200,
+        "Y": 600
+      },
+      "Description": "Color of the bounding rectangles. Given as R,G,B,A (0-1)."
+    },
+    {
+      "InputId": "3737c853-81f0-4fd9-9f82-207c2fe1a856"/*LabelColor*/,
+      "Position": {
+        "X": -200,
+        "Y": 675
+      },
+      "Description": "Color of the blob ID text labels. Given as R,G,B,A (0-1)."
+    },
+    {
+      "InputId": "1496761b-6455-45a1-a61a-303119b3a1e3"/*BoundsThickness*/,
+      "Position": {
+        "X": -200,
+        "Y": 750
+      },
+      "Description": "Stroke width (in pixels) of the bounding rectangles."
+    },
+    {
+      "InputId": "3c39d125-8cb4-4e84-a51d-d1c88721c740"/*LabelSize*/,
+      "Position": {
+        "X": -200,
+        "Y": 825
+      },
+      "Description": "Scale of the blob ID text. Higher values produce larger text."
+    },
+    {
+      "InputId": "dc4a0ab8-e412-4640-8ad3-de254039d9b1"/*LabelThickness*/,
+      "Position": {
+        "X": -200,
+        "Y": 900
+      },
+      "Description": "Stroke width (in pixels) of the blob ID text."
+    },
+    {
+      "InputId": "76d42773-ddbd-497a-8c17-927b09ccc6a9"/*LabelPrefix*/,
+      "Position": {
+        "X": -200,
+        "Y": 975
+      },
+      "Description": "Text that precedes the blob ID number, including any separator. Defaults to \"ID:\"."
+    },
+    {
+      "InputId": "64a3a4f5-420c-414d-80ef-5e0f33bb726f"/*IdFormat*/,
+      "Position": {
+        "X": -200,
+        "Y": 1050
+      },
+      "Description": "Number base/case for the blob ID: Decimal, Hexadecimal Upper (A-F), Hexadecimal Lower (a-f), or Binary."
+    },
+    {
+      "InputId": "f4885527-c56f-4040-ad4e-7d5351b19d08"/*LabelContent*/,
+      "Position": {
+        "X": -200,
+        "Y": 1125
+      },
+      "Description": "Which parts to show in the label: Id And Number, only the Id (prefix), or only the Number."
+    },
+    {
+      "InputId": "0b4aeb69-f133-4ade-8708-53245d99e728"/*DetectScale*/,
+      "Position": {
+        "X": -200,
+        "Y": 1200
+      },
+      "Description": "Resolution multiplier (0.001 - 1.0) used for the detection pass only. Lower values greatly speed up detection on large inputs; 1.0 uses full resolution. Overlay drawing is unaffected and stays full-res."
+    },
+    {
+      "InputId": "79ea740c-5c24-4969-b58f-724796d9ade2"/*AntiAlias*/,
+      "Position": {
+        "X": -200,
+        "Y": 1275
+      },
+      "Description": "Enables anti-aliased label text. Disabled by default for faster drawing; only turn on if you need smoother glyphs."
+    },
+    {
+      "InputId": "d9e0f1a2-b3c4-5678-cdef-678901234567"/*Reset*/,
+      "Position": {
+        "X": -200,
+        "Y": 1350
+      },
+      "Description": "Resets all tracking data and blob IDs."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e0f1a2b3-c4d5-6789-defa-789012345678"/*TextureOutput*/,
+      "Position": {
+        "X": 300,
+        "Y": 0
+      }
+    },
+    {
+      "OutputId": "f1a2b3c4-d5e6-7890-efab-890123456789"/*BlobData*/,
+      "Position": {
+        "X": 300,
+        "Y": 75
+      }
+    },
+    {
+      "OutputId": "a2b3c4d5-e6f7-8901-fabc-901234567890"/*NumBlobs*/,
+      "Position": {
+        "X": 300,
+        "Y": 150
+      }
+    }
+  ]
+}
