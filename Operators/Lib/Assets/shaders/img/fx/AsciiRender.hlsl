@@ -76,7 +76,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float4 letter = FontSortingOrder.SampleLevel(texSamplerPoint, float2(dBiased, 0.4), 0);
     // return float4(letter.x * 1, 0,0,1);
 
-    float letterIndex = letter * 256;
+    float letterIndex = letter.x * 256;
     float rowIndex = floor(letterIndex / 16);
     float columnIndex = floor(letterIndex % 16);
 

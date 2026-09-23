@@ -99,7 +99,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     // repetition in the methods is an attempt of optimisation because octaves are exenpsive
 
-    switch (Method)
+    switch ((int)Method)
     {
 
     case 0:

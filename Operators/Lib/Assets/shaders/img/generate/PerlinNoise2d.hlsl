@@ -112,7 +112,9 @@ inline float fbmPerlinTileable(float3 p, float3 basePeriod)
     [loop] for (float i = 0; i < Iterations; i++)
     {
         // Keep tiling by scaling period with frequency
-        float per = basePeriod * freq;
+        // Only the x period survives: the scalar is broadcast back to all three axes below,
+        // which is what this has always done.
+        float per = (basePeriod * freq).x;
 
         sum += amp * perlinTileable(p * freq, per);
         norm += amp;

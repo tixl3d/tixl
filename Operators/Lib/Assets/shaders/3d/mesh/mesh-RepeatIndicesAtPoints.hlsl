@@ -11,7 +11,7 @@ cbuffer Params : register(b0)
     float UseStretch;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int VertexCount;
     int PointCount;

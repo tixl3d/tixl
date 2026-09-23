@@ -31,6 +31,7 @@ internal static class CornerPinHandles
         /// <summary>Squares read as "crop along the edge"; a caller whose edge drag scales instead shows circles.</summary>
         public CanvasPointHandle.Shapes EdgeHandleShape;
 
+
         /// <summary>Outline width in unscaled px; 0 = the default.</summary>
         public float EdgeThickness;
 

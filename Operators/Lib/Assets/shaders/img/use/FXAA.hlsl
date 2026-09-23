@@ -39,7 +39,9 @@ float4 FxaaTexGrad(FxaaTex tex, float2 pos, float2 grad) {
 }
 /*--------------------------------------------------------------------------*/
 float4 FxaaTexOff(FxaaTex tex, float2 pos, int2 off, float2 rcpFrame) {
-    return tex.tex.SampleLevel(tex.smpl, pos.xy, 0.0, off.xy);
+    // Shifting the coordinate by one texel rather than using SampleLevel's offset argument, which has
+    // to be a literal and stops being one once it has passed through this parameter.
+    return FxaaTexLod0(tex, pos.xy + off * rcpFrame);
 }
 
 /*============================================================================

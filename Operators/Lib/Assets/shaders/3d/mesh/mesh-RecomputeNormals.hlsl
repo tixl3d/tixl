@@ -37,7 +37,7 @@ RWStructuredBuffer<FaceCount> VertexFaces : register(u1);
     if (faceIndex >= faceCount)
         return;
 
-    float tmp = SourceVertices[0].Normal;
+    float tmp = SourceVertices[0].Normal.x;
     int3 verticeIndices = SourceFaces[i.x];
 
     for (int side = 0; side < 3; ++side)

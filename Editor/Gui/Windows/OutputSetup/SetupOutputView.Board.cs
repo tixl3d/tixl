@@ -123,7 +123,8 @@ internal sealed partial class SetupOutputView
 
         foreach (var source in setup.ContentSources)
         {
-            if (IsDrawnBySpace(setup, SetupEntityKinds.ContentSource, source.SymbolChildId)
+            if (!ContentSourceSync.IsSourceInScope(source.SymbolChildId)
+                || IsDrawnBySpace(setup, SetupEntityKinds.ContentSource, source.SymbolChildId)
                 || !TryGetBoardBounds(setup, SetupEntityKinds.ContentSource, source.SymbolChildId, out var min, out var max))
                 continue;
 
@@ -493,7 +494,9 @@ internal sealed partial class SetupOutputView
                              };
         var newMin = fixedPoint + (min - fixedPoint) * increment;
         var newMax = fixedPoint + (max - fixedPoint) * increment;
-        SurfaceGeometry.ApplyBounds(surface, newMin, newMax);
+        // Scaling the card declares how big the surface really is, exactly like typing into Size (m) — so it
+        // leaves every projection where it was aimed instead of dragging the pins along.
+        SurfaceGeometry.ApplyBounds(surface, newMin, newMax, RectangleEdits.Declared);
 
         foreach (var annotation in surface.Annotations)
         {
@@ -576,8 +579,6 @@ internal sealed partial class SetupOutputView
                 _boardEdgeScaling = scaling;
                 _boardScaleApplied = Vector2.One;
                 SurfaceGeometry.LocalBounds(surface, out _boardEdgeStartMin, out _boardEdgeStartMax);
-                if (surface.Trace is { Quad.Length: >= 4 })
-                    Array.Copy(surface.Trace.Quad, _boardEdgeOldTrace, 4);
 
                 break;
 
@@ -606,8 +607,6 @@ internal sealed partial class SetupOutputView
                 // Re-based on the pre-drag rectangle, so the edit doesn't compound; the anchor is the origin of
                 // surface space and sits at the card's placement.
                 _gesture.Snapshot!.Restore(surface);
-                Span<Vector2> oldRect = stackalloc Vector2[4];
-                SurfaceGeometry.WriteLocalRect(surface, oldRect);
                 SurfaceGeometry.LocalBounds(surface, out var oldMin, out var oldMax);
                 var origin = surface.BoardPlacement?.Position ?? Vector2.Zero;
                 SurfaceGeometry.DragEdge(surface, edge, edgePos - origin, keepDimensions: false);
@@ -616,16 +615,6 @@ internal sealed partial class SetupOutputView
                 SurfaceGeometry.LocalBounds(surface, out var newMin, out var newMax);
                 KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
 
-                // The trace is the same wall seen in the photo: the cropped rectangle maps through the old
-                // rectangle's projection into the photo, so the traced quad crops with it.
-                if (surface.Trace is { Quad.Length: >= 4 } binding
-                    && Homography.TryComputeQuadToQuad(oldRect, _boardEdgeOldTrace, out var surfaceToPhoto))
-                {
-                    Span<Vector2> newRect = stackalloc Vector2[4];
-                    SurfaceGeometry.WriteLocalRect(surface, newRect);
-                    for (var c = 0; c < 4; c++)
-                        binding.Quad[c] = surfaceToPhoto.TransformPoint(newRect[c]);
-                }
 
                 break;
             }
@@ -1280,7 +1269,11 @@ internal sealed partial class SetupOutputView
             AddBoardSnapCandidate(setup, SetupEntityKinds.Surface, setup.Surfaces[i].Id, excludeId, excludeDragItems);
 
         for (var i = 0; i < setup.ContentSources.Count; i++)
-            AddBoardSnapCandidate(setup, SetupEntityKinds.ContentSource, setup.ContentSources[i].SymbolChildId, excludeId, excludeDragItems);
+        {
+            var childId = setup.ContentSources[i].SymbolChildId;
+            if (ContentSourceSync.IsSourceInScope(childId))
+                AddBoardSnapCandidate(setup, SetupEntityKinds.ContentSource, childId, excludeId, excludeDragItems);
+        }
 
         for (var i = 0; i < setup.Outputs.Count; i++)
             AddBoardSnapCandidate(setup, SetupEntityKinds.Output, setup.Outputs[i].Id, excludeId, excludeDragItems);
@@ -1783,7 +1776,8 @@ internal sealed partial class SetupOutputView
 
         foreach (var source in setup.ContentSources)
         {
-            if (TryGetBoardBounds(setup, SetupEntityKinds.ContentSource, source.SymbolChildId, out var a, out var b))
+            if (ContentSourceSync.IsSourceInScope(source.SymbolChildId)
+                && TryGetBoardBounds(setup, SetupEntityKinds.ContentSource, source.SymbolChildId, out var a, out var b))
                 Include(ref any, ref min, ref max, a, b);
         }
 
@@ -2121,10 +2115,9 @@ internal sealed partial class SetupOutputView
     private float _boardLayerFade = 1f;
     private float? _boardSnapGuideX, _boardSnapGuideY;
 
-    // Card quad scratch, reused every frame: a card or sub-rect, the selected surface's edges, and the trace before an edge edit.
+    // Card quad scratch, reused every frame: a card or sub-rect, and the selected surface's edges.
     private readonly Vector2[] _boardQuad = new Vector2[4];
     private readonly Vector2[] _boardEdgeQuad = new Vector2[4];
-    private readonly Vector2[] _boardEdgeOldTrace = new Vector2[4];
 
     // Scale gestures (top-right handle, Ctrl + edge): the mode held for the drag, the start bounds, and the
     // total factor applied so far — the increment per frame is total / applied.

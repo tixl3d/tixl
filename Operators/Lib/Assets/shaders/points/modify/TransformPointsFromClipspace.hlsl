@@ -39,7 +39,7 @@ RWStructuredBuffer<Point> ResultPoints : register(u0);
     float4 pInClipSpace = mul(float4(p.Position,1), CameraToWorld);
     pInClipSpace.xyz /= pInClipSpace.w;
     pInClipSpace.w =1;
-    p.Position = pInClipSpace;
+    p.Position = pInClipSpace.xyz;
 
 
     // Transform rotation is kind of tricky. There might be more efficient ways to do this.

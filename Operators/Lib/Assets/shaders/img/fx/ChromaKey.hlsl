@@ -91,12 +91,12 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     float distanceCenter = GetColorDistance(c);
 
-    float4 y1 = GetColorDistance(Image.Sample(texSampler, float2(uv.x, uv.y + sy)));
-    float4 y2 = GetColorDistance(Image.Sample(texSampler, float2(uv.x, uv.y - sy)));
-    float4 x1 = GetColorDistance(Image.Sample(texSampler, float2(uv.x + sx, uv.y)));
-    float4 x2 = GetColorDistance(Image.Sample(texSampler, float2(uv.x - sx, uv.y)));
+    float y1 = GetColorDistance(Image.Sample(texSampler, float2(uv.x, uv.y + sy)));
+    float y2 = GetColorDistance(Image.Sample(texSampler, float2(uv.x, uv.y - sy)));
+    float x1 = GetColorDistance(Image.Sample(texSampler, float2(uv.x + sx, uv.y)));
+    float x2 = GetColorDistance(Image.Sample(texSampler, float2(uv.x - sx, uv.y)));
 
-    float distance = min(distanceCenter, min(min(y1, y2), min(x1, x2)));
+    float distance = min(distanceCenter, min(min(y1, y2), min(x1, x2))).x;
 
     if (Mode < 0.5)
     {

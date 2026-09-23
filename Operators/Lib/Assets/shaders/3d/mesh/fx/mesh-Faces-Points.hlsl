@@ -18,7 +18,7 @@ cbuffer FloatParams : register(b0)
     float OffsetScale;
 }
 
-cbuffer FloatParams : register(b1)
+cbuffer IntParams : register(b1)
 {
     int OrientationMode;
     int OutputMode;

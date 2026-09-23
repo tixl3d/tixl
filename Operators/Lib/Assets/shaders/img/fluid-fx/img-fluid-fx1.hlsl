@@ -51,7 +51,7 @@ float4 psMain(vsOutput input) : SV_TARGET
     }      //avoid division by zero
     
     s = 1./s;
-    velocity+= (InputFx.Sample(samLinear, uv) - 1)  * float4(1,1,0,0) * TestParam  *1;
+    velocity+= ((InputFx.Sample(samLinear, uv) - 1)  * float4(1,1,0,0) * TestParam  *1).xy;
     return float4(velocity, s,1) ;   //velocity in .xy
                             //convolution normalization in .z
 

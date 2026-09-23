@@ -6,7 +6,7 @@ cbuffer Params : register(b0)
     float Scale;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int ApplyTargetOrientation;
     int ApplyTargetScale;

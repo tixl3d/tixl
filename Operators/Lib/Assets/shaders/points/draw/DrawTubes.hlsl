@@ -72,7 +72,7 @@ cbuffer PbrParams : register(b4)
     float Metal;
 }
 
-cbuffer Transforms : register(b5)
+cbuffer IntParams : register(b5)
 {
     int SideCount;
 };
@@ -123,9 +123,12 @@ float3 LineStretch(int i, uint pointCount)
 
     if (i > 0)
     {
-        float s = Points[i - 1].Scale.x;
+        // The branch is dead when a caller inlines this with a constant i of 0, but the compiler still
+        // emits the access, and a literal Points[-1] is invalid SPIR-V. max() keeps the index in range.
+        int prev = max(i - 1, 0);
+        float s = Points[prev].Scale.x;
         s = isnan(s) ? 1 : s;
-        disp += (s - 1.0) * 0.5 * (pos - Points[i - 1].Position);
+        disp += (s - 1.0) * 0.5 * (pos - Points[prev].Position);
     }
 
     if (i < (int)pointCount - 1)

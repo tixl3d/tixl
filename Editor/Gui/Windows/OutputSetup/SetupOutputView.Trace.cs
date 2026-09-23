@@ -103,26 +103,39 @@ internal sealed partial class SetupOutputView
     }
 
     /// <summary>
-    /// Handles on the rectified rect. The rect stays fixed and upright; dragging a corner or an edge moves the
-    /// traced quad live so the photo re-warps under it — you pull the wall's corner (or edge) into the frame.
-    /// The mapping from handle to photo is the rectification at press time, so the drag can't chase its own
-    /// re-warp; on release nothing moves. One undo step per drag. The surface's measuring lines are drawn and
-    /// edited here too, mapped from surface metres onto the rect.
+    /// Handles on the rectified rect, in the same grammar as the output canvas: a corner refines the trace —
+    /// the rect stays fixed and upright while the traced quad moves under it, so you pull the wall's corner
+    /// into the frame and the photo re-warps live — and an edge crops the wall, which takes its declared size
+    /// along that edge with it, so the picture keeps its proportions instead of squeezing into a frame that
+    /// kept its aspect. Ctrl on a horizontal edge stretches instead: the trace stays and the wall is
+    /// re-declared taller or shorter. One undo step per drag. The surface's marks are drawn and edited here
+    /// too, mapped from surface metres onto the rect.
     /// </summary>
     private void DrawStraightEdits(Setup setup, ImDrawListPtr dl, Surface subject, Vector2 targetMin, Vector2 targetMax, SetupEntitySelection? selection)
     {
-        var binding = subject.Trace!;
         Span<Vector2> rect = stackalloc Vector2[4];
         SurfaceGeometry.WriteRectCorners(targetMin, targetMax, rect, yUp: false);
         rect.CopyTo(_referenceRectQuad);
         var refining = _gesture.Is(GestureKinds.TraceRefine, subject.Id);
-        if (!refining && !Homography.TryComputeQuadToQuad(rect, binding.Quad, out _referenceEditToPhoto))
+        if (!refining && !Homography.TryComputeQuadToQuad(rect, subject.Trace!.Quad, out _referenceEditToPhoto))
             return;
+
+        // A frame that did not reach these handles swallows the release that would have ended the drag. Left
+        // open, the gesture goes on answering for the edit modifier below, so Ctrl would stop reading the key.
+        if (!ImGui.IsMouseDown(ImGuiMouseButton.Left) && _gesture.HotId == subject.Id
+            && _gesture.Kind is GestureKinds.SurfaceResize or GestureKinds.TraceRefine)
+        {
+            EndGesture(setup);
+        }
 
         ImGui.PushID("straightEdit");
         var style = CornerPinHandles.Style.ForSurface(null, editable: true, selected: true, hue: SetupColors.ForKind(SetupEntityKinds.Surface));
         style.ShowsChecker = false;
         style.EdgeColor = SetupColors.ForKind(SetupEntityKinds.Surface);
+
+        var stretching = StraightEdgeStretches(subject.Id);
+        style.EdgeHandleShape = stretching ? CanvasPointHandle.Shapes.Circle : CanvasPointHandle.Shapes.Square;
+
         var cornerPhase = CornerPinHandles.Draw(_referenceRectQuad, _projection, style, out var draggedCorner);
         var edgePhase = CanvasPointHandle.DragPhases.None;
         var edge = -1;
@@ -132,58 +145,199 @@ internal sealed partial class SetupOutputView
 
         ImGui.PopID();
 
-        // An edge moves along its normal only: a crop of the trace, axis-aligned on the rectified wall.
         if (edge >= 0 && edgePhase != CanvasPointHandle.DragPhases.None)
         {
-            switch (edge)
-            {
-                case 0: _referenceRectQuad[0].Y = _referenceRectQuad[1].Y = edgePos.Y; break;
-                case 1: _referenceRectQuad[1].X = _referenceRectQuad[2].X = edgePos.X; break;
-                case 2: _referenceRectQuad[2].Y = _referenceRectQuad[3].Y = edgePos.Y; break;
-                default: _referenceRectQuad[3].X = _referenceRectQuad[0].X = edgePos.X; break;
-            }
+            if (stretching)
+                HandleStraightStretch(setup, subject, edgePhase, edge, edgePos);
+            else
+                HandleStraightCrop(setup, subject, edgePhase, edge, edgePos);
+        }
+        else
+        {
+            HandleTraceRefine(setup, subject, cornerPhase, draggedCorner);
+            refining = _gesture.Is(GestureKinds.TraceRefine, subject.Id);
         }
 
-        var phase = cornerPhase != CanvasPointHandle.DragPhases.None ? cornerPhase : edgePhase;
-        if (phase == CanvasPointHandle.DragPhases.Started)
+        // A live refine moves the photo under the whole frame; its marks are re-expressed as it goes and would
+        // only fight the cursor for hover. Every other gesture wants to watch them.
+        if (!refining)
+            DrawStraightMarks(setup, dl, subject, rect, selection);
+    }
+
+    /// <summary>
+    /// A corner of the rectified rect: the wall's corner lies elsewhere in the photo than it was traced. The
+    /// handle's position through the press-time rectification is where that corner goes, and the surface's
+    /// space moves with the trace, so the marks and the pins aiming at the same wall are carried along.
+    /// </summary>
+    private void HandleTraceRefine(Setup setup, Surface subject, CanvasPointHandle.DragPhases phase, int draggedCorner)
+    {
+        switch (phase)
         {
-            BeginGesture(setup, GestureKinds.TraceRefine, "Refine trace", subject.Id);
-            refining = true;
+            case CanvasPointHandle.DragPhases.Started:
+                BeginGesture(setup, GestureKinds.TraceRefine, "Refine trace", subject.Id, subject);
+                break;
+
+            case CanvasPointHandle.DragPhases.Completed:
+                if (_gesture.Is(GestureKinds.TraceRefine, subject.Id))
+                    EndGesture(setup);
+
+                return;
         }
 
         // Only a live phase carries a handle position; on the release frame the handles already sit back on the
         // rect's corners, so applying then would undo the whole drag.
-        if (phase is CanvasPointHandle.DragPhases.Started or CanvasPointHandle.DragPhases.Dragging && refining)
+        if (draggedCorner < 0 || phase == CanvasPointHandle.DragPhases.None
+            || !_gesture.Is(GestureKinds.TraceRefine, subject.Id) || _gesture.Snapshot is not { } snapshot
+            || subject.Trace is not { Quad.Length: >= 4 } binding)
         {
-            // The handle's position through the press-time rectification is where that corner lies in the photo.
-            if (draggedCorner >= 0)
-                binding.Quad[draggedCorner] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[draggedCorner]);
-            else if (edge >= 0)
+            return;
+        }
+
+        // Re-based from the press: the marks follow the trace, so editing them frame over frame would compound
+        // the correction.
+        snapshot.Restore(subject);
+        binding.Quad[draggedCorner] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[draggedCorner]);
+        CarryTraceRefine(subject, snapshot);
+    }
+
+    /// <summary>
+    /// An edge of the rectified rect: the wall ends there. The rectangle is cropped to the cursor and its
+    /// declared size along that edge goes with it, so the traced photo crops along and the picture keeps its
+    /// proportions. The content window follows, as it does for an edge crop on the Board or the output canvas.
+    /// </summary>
+    private void HandleStraightCrop(Setup setup, Surface subject, CanvasPointHandle.DragPhases phase, int edge, Vector2 edgePos)
+    {
+        switch (phase)
+        {
+            case CanvasPointHandle.DragPhases.Started:
+                _edgeDragStretches = false;
+                BeginGesture(setup, GestureKinds.SurfaceResize, "Crop surface", subject.Id, subject);
+                BeginContentEdit(setup, subject);
+                break;
+
+            case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.SurfaceResize, subject.Id):
             {
-                var a = edge;
-                var b = (edge + 1) % 4;
-                binding.Quad[a] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[a]);
-                binding.Quad[b] = _referenceEditToPhoto.TransformPoint(_referenceRectQuad[b]);
+                // Re-based from the press: a crop rewrites the rectangle the cursor is measured against.
+                _gesture.Snapshot!.Restore(subject);
+                if (!TryGetPressedFrameToSurface(subject, out var frameToSurface))
+                    break;
+
+                SurfaceGeometry.LocalBounds(subject, out var oldMin, out var oldMax);
+                SurfaceGeometry.DragEdge(subject, edge, frameToSurface.TransformPoint(edgePos), keepDimensions: false);
+                SurfaceGeometry.LocalBounds(subject, out var newMin, out var newMax);
+                KeepContentInPlace(setup, oldMin, oldMax, newMin, newMax);
+                break;
             }
-        }
 
-        if (phase == CanvasPointHandle.DragPhases.Completed)
+            case CanvasPointHandle.DragPhases.Completed:
+                if (_gesture.Is(GestureKinds.SurfaceResize, subject.Id))
+                    EndGesture(setup);
+
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Ctrl + an edge: the wall is re-declared wider or taller while the trace and the photo stay put. The
+    /// frame is centred, so the dragged edge's distance from the centre is half the declared span along the
+    /// axis it faces — read from the cursor against the rectangle as it was at the press, so a long drag
+    /// cannot compound. Lines, points and regions are re-metered along with it.
+    /// </summary>
+    private void HandleStraightStretch(Setup setup, Surface subject, CanvasPointHandle.DragPhases phase, int edge, Vector2 edgePos)
+    {
+        switch (phase)
         {
-            EndGesture(setup);
-            refining = false;
-        }
+            case CanvasPointHandle.DragPhases.Started:
+                _edgeDragStretches = true;
+                BeginGesture(setup, GestureKinds.SurfaceResize, "Stretch surface", subject.Id, subject);
+                break;
 
-        // Measuring lines: surface metres ↔ the rectified rect, a plain scale (Y up in metres, down in px).
+            case CanvasPointHandle.DragPhases.Dragging when _gesture.Is(GestureKinds.SurfaceResize, subject.Id):
+            {
+                _gesture.Snapshot!.Restore(subject);
+                StraightTargetBounds(subject, out var pressMin, out var pressMax);
+                var centre = (pressMin + pressMax) * 0.5f;
+                var size = subject.SizeInMeters;
+
+                // The frame's span along the dragged axis, and what the cursor asks it to become: the declared
+                // metres follow that ratio, and the other axis keeps what it says.
+                var frame = pressMax - pressMin;
+                var isVerticalEdge = (edge & 1) == 1;
+                var was = MathF.Max(isVerticalEdge ? frame.X : frame.Y, 1f);
+                var wanted = MathF.Max(2 * MathF.Abs((isVerticalEdge ? edgePos.X - centre.X : edgePos.Y - centre.Y)), 1f);
+                var metres = isVerticalEdge
+                                 ? new Vector2(size.X * wanted / was, size.Y)
+                                 : new Vector2(size.X, size.Y * wanted / was);
+
+                SurfaceMetrics.RemeterSurface(setup, subject, metres);
+                break;
+            }
+
+            case CanvasPointHandle.DragPhases.Completed:
+                if (_gesture.Is(GestureKinds.SurfaceResize, subject.Id))
+                    EndGesture(setup);
+
+                break;
+        }
+    }
+
+    /// <summary>The rectified frame as it stood at the press, back into the surface's metres — what turns a
+    /// cursor on the photo into one absolute edge position, however long the drag runs.</summary>
+    private static bool TryGetPressedFrameToSurface(Surface subject, out Homography frameToSurface)
+    {
+        StraightTargetBounds(subject, out var pressMin, out var pressMax);
+        Span<Vector2> frame = stackalloc Vector2[4];
+        SurfaceGeometry.WriteRectCorners(pressMin, pressMax, frame, yUp: false);
+        Span<Vector2> local = stackalloc Vector2[4];
+        SurfaceGeometry.WriteLocalRect(subject, local);
+        return Homography.TryComputeQuadToQuad(frame, local, out frameToSurface);
+    }
+
+    /// <summary>Whether an edge drag on the straightened photo stretches rather than crops: Ctrl at the press,
+    /// then the mode the live gesture started in, so releasing Ctrl mid-drag changes nothing.</summary>
+    private bool StraightEdgeStretches(Guid surfaceId)
+    {
+        return _gesture.Is(GestureKinds.SurfaceResize, surfaceId) ? _edgeDragStretches : ImGui.GetIO().KeyCtrl;
+    }
+
+    /// <summary>Measuring lines, regions and reference points: surface metres ↔ the rectified rect, a plain
+    /// scale (Y up in metres, down in px).</summary>
+    private void DrawStraightMarks(Setup setup, ImDrawListPtr dl, Surface subject, ReadOnlySpan<Vector2> rect, SetupEntitySelection? selection)
+    {
         Span<Vector2> localRect = stackalloc Vector2[4];
         SurfaceGeometry.WriteLocalRect(subject, localRect);
-        if (!refining
-            && Homography.TryComputeQuadToQuad(localRect, rect, out var surfaceToRect)
-            && Homography.TryComputeQuadToQuad(rect, localRect, out var rectToSurface))
+        if (!Homography.TryComputeQuadToQuad(localRect, rect, out var surfaceToRect)
+            || !Homography.TryComputeQuadToQuad(rect, localRect, out var rectToSurface))
         {
-            DrawAnnotations(dl, subject, surfaceToRect, rectToSurface, Vector2.Zero, editable: true, fade: 1f, projected: false);
-            DrawStraightRegions(setup, dl, subject, subject, Vector2.Zero, surfaceToRect, rectToSurface, selection);
-            DrawReferencePoints(setup, dl, subject, surfaceToRect, rectToSurface);
+            return;
         }
+
+        DrawAnnotations(dl, subject, surfaceToRect, rectToSurface, Vector2.Zero, editable: true, fade: 1f, projected: false);
+        DrawStraightRegions(setup, dl, subject, subject, Vector2.Zero, surfaceToRect, rectToSurface, selection);
+        DrawReferencePoints(setup, dl, subject, surfaceToRect, rectToSurface);
+    }
+
+
+    /// <summary>
+    /// The trace just moved under the surface's space — dragging a corner or an edge says the wall lies
+    /// elsewhere in the photo. The marks name features of that photo, not places in the frame, so they are
+    /// re-expressed into the moved space, and the pins aiming at the same wall follow it.
+    /// </summary>
+    private static void CarryTraceRefine(Surface subject, SurfaceRectSnapshot snapshot)
+    {
+        if (snapshot.TraceQuad.Length < 4 || subject.Trace is not { Quad.Length: >= 4 } binding)
+            return;
+
+        Span<Vector2> localRect = stackalloc Vector2[4];
+        SurfaceGeometry.WriteLocalRect(subject, localRect);
+        if (!Homography.TryComputeQuadToQuad(snapshot.TraceQuad, localRect, out var photoToOldSurface)
+            || !Homography.TryComputeQuadToQuad(localRect, binding.Quad, out var newSurfaceToPhoto))
+        {
+            return;
+        }
+
+        SurfaceGeometry.CarrySpaceChange(subject, localRect, Homography.Multiply(photoToOldSurface, newSurfaceToPhoto),
+                                         solvedTrace: true);
     }
 
     /// <summary>

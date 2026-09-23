@@ -5,7 +5,7 @@ cbuffer Params : register(b0)
     int startVertexIndex;
 }
 
-cbuffer Params : register(b1)
+cbuffer Params2 : register(b1)
 {
     float DebugValue;
 }

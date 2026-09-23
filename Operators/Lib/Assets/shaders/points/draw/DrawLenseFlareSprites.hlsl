@@ -72,7 +72,7 @@ psInput vsMain(uint id: SV_VertexID)
 
     Sprite sprite = Sprites[particleId];
 
-    float3 axis = cornerFactors;
+    float3 axis = cornerFactors.xyz;
     float2 corner = float2(cornerFactors.x * sprite.Size.x, 
                           cornerFactors.y * sprite.Size.y) * Size;
 

@@ -97,6 +97,6 @@ Output vsMain(uint id: SV_VertexID)
     output.position = mul(quadPosInCamera, CameraToClipSpace);
     //output.position.z = 0;
     output.color = lerp(Color, HighlightColor, entry.highlight) * overrideBrightness;
-    output.texCoord = (entry.charUv + quadPos * float2(0.5, -0.5) + 0.5)/16;
+    output.texCoord = (entry.charUv + quadPos.xy * float2(0.5, -0.5) + 0.5)/16;
     return output;
 }

@@ -161,6 +161,101 @@ public class LineRectifierTests
             Assert.True((refined[i] - quad[i]).Length() < 1f, $"corner {i} drifted to {refined[i]} from {quad[i]}");
     }
 
+    /// <summary>
+    /// Straighten is not a ratchet: pressing it again must not keep reshaping the picture. Hand-traced lines
+    /// never agree perfectly, and an angular score cannot see scale — so squashing one axis brings every line
+    /// *relatively* closer to it, and each press would trade a little more of the wall's shape for a little
+    /// less residual. Measured before the gauge was pinned, five presses took the aspect from 1.58 to 0.73.
+    /// </summary>
+    [Fact]
+    public void Refine_RepeatedStraightenKeepsTheShape()
+    {
+        var size = new Vector2(4, 3);
+        Vector2[] startQuad = [new(300, 120), new(1750, 40), new(1900, 1180), new(60, 1020)];
+        Assert.True(Homography.TryComputeQuadToQuad(startQuad, RectOf(size), out var outputToSurface));
+        Assert.True(Homography.TryComputeQuadToQuad(RectOf(size), startQuad, out var surfaceToOutput));
+
+        // Five lines that each claim an axis and disagree with one another by a fraction of a degree, so no
+        // quad can bring the residual to zero and every press still has something to trade.
+        var lines = new[]
+                        {
+                            ToOutput(surfaceToOutput, 0.4f, 0.6f, 3.6f, 0.68f),
+                            ToOutput(surfaceToOutput, 0.4f, 2.3f, 3.6f, 2.18f),
+                            ToOutput(surfaceToOutput, 0.5f, 1.4f, 3.5f, 1.52f),
+                            ToOutput(surfaceToOutput, 0.9f, 0.3f, 0.96f, 2.7f),
+                            ToOutput(surfaceToOutput, 3.1f, 0.3f, 3.02f, 2.7f),
+                        };
+
+        var spans = AxisSpans(startQuad);
+        var current = startQuad;
+        for (var press = 1; press <= 5; press++)
+        {
+            var refined = new Vector2[4];
+            Assert.True(LineRectifier.TryRefineQuad(lines, size, current, refined));
+            AssertSpans(spans, AxisSpans(refined), $"after press {press}");
+            current = refined;
+        }
+
+        // And it settles: the fifth press has nothing left to move.
+        var again = new Vector2[4];
+        Assert.True(LineRectifier.TryRefineQuad(lines, size, current, again));
+        for (var i = 0; i < 4; i++)
+            Assert.True((again[i] - current[i]).Length() < 2f, $"corner {i} still moving: {current[i]} -> {again[i]}");
+
+        // The residual stays — inconsistent traces cannot be made to agree by any keystone, and pretending
+        // otherwise is exactly what the drift was.
+        Assert.True(ResidualOf(outputToSurface, lines[0]) > 0.05f);
+    }
+
+    /// <summary>
+    /// A short line states its direction from two close-together ends, so the same imprecision reads as a far
+    /// bigger angle: it is the weaker measurement and must not outvote a long one drawn along the same wall.
+    /// </summary>
+    [Fact]
+    public void Refine_TrustsTheLongerLine()
+    {
+        var size = new Vector2(4, 3);
+        Vector2[] quad = [new(100, 100), new(1800, 100), new(1800, 1200), new(100, 1200)];
+        Assert.True(Homography.TryComputeQuadToQuad(RectOf(size), quad, out var surfaceToOutput));
+
+        // One long line along a real feature, and a short one traced 3° off it.
+        var lines = new[]
+                        {
+                            ToOutput(surfaceToOutput, 0.2f, 1.5f, 3.8f, 1.5f),
+                            ToOutput(surfaceToOutput, 1.0f, 0.5f, 1.4f, 0.5f + 0.4f * MathF.Tan(3f * MathF.PI / 180f)),
+                        };
+
+        var refined = new Vector2[4];
+        Assert.True(LineRectifier.TryRefineQuad(lines, size, quad, refined));
+        Assert.True(Homography.TryComputeQuadToQuad(refined, RectOf(size), out var outputToSurface));
+
+        var longResidual = ResidualOf(outputToSurface, lines[0]);
+        var shortResidual = ResidualOf(outputToSurface, lines[1]);
+        Assert.True(longResidual < 0.3f, $"the long line was pulled off its feature: {longResidual:0.###}°");
+        Assert.True(shortResidual > longResidual * 3, $"the short line had as much say: {shortResidual:0.###}° vs {longResidual:0.###}°");
+    }
+
+    private static float ResidualOf(in Homography outputToSurface, Vector4 line)
+    {
+        var a = outputToSurface.TransformPoint(new Vector2(line.X, line.Y));
+        var b = outputToSurface.TransformPoint(new Vector2(line.Z, line.W));
+        LineRectifier.IsHorizontal(a, b, out var deviation);
+        return deviation;
+    }
+
+    /// <summary>A quad's span along each of its axes, as the solver's gauge measures it.</summary>
+    private static Vector2 AxisSpans(Vector2[] quad)
+    {
+        return new Vector2(((quad[1] - quad[0]).Length() + (quad[2] - quad[3]).Length()) * 0.5f,
+                           ((quad[3] - quad[0]).Length() + (quad[2] - quad[1]).Length()) * 0.5f);
+    }
+
+    private static void AssertSpans(Vector2 expected, Vector2 actual, string when)
+    {
+        Assert.True(MathF.Abs(actual.X / expected.X - 1) < 0.01f, $"width changed {when}: {expected.X:0.#} -> {actual.X:0.#}");
+        Assert.True(MathF.Abs(actual.Y / expected.Y - 1) < 0.01f, $"height changed {when}: {expected.Y:0.#} -> {actual.Y:0.#}");
+    }
+
     private static Vector2[] RectOf(Vector2 size)
     {
         return [Vector2.Zero, new Vector2(size.X, 0), size, new Vector2(0, size.Y)];

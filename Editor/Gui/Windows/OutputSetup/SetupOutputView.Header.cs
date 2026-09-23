@@ -307,7 +307,7 @@ internal sealed partial class SetupOutputView
             var label = string.IsNullOrEmpty(surface.Name) ? "untitled" : surface.Name;
             if (ImGui.SmallButton("+ " + label))
             {
-                SetupUndo.RunUndoable("Map surface", setup, () => SetupActions.AddMapping(surface, output, outputId));
+                SetupUndo.RunUndoable("Map surface", setup, () => SetupActions.AddMapping(surface, output));
             }
 
             CustomComponents.TooltipForLastItem("Map this surface onto the output",

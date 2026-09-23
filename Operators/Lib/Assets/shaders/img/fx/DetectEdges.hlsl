@@ -15,7 +15,7 @@ cbuffer Resolution : register(b1)
     float TargetHeight;
 }
 
-cbuffer ParamConstants : register(b2)
+cbuffer IntParams : register(b2)
 {
     int Invert;
 }

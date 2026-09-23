@@ -12,7 +12,7 @@ cbuffer Params : register(b0)
     float2 GainAndBias;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int TargetWidth;
     int TargetHeight;
@@ -33,9 +33,10 @@ sampler Sampler : register(s0);
 sampler ClampedSampler : register(s1);
 sampler CustomSampler : register(s2);
 
-static const float2 Center=Offset;
-static const Texture2D<float4> Image=ImageA;
-static const Texture2D<float4> Image2=ImageB;
+// Aliases, not constants: a static const global may only be initialized from a compile-time value.
+#define Center Offset
+#define Image ImageA
+#define Image2 ImageB
 
 //- DEFINES ------------------------------------
 /*{defines}*/

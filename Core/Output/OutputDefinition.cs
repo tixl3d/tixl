@@ -262,10 +262,11 @@ public sealed class OutputDefinition
     public string Kind = Kinds.Display;
     /// <summary>
     /// The canvas' pixel size, or 0×0 to follow whatever plug presents this output — the display's mode, so the
-    /// same setup renders at 1080p or 1440p depending on what is plugged in. Everything mapped onto the canvas
-    /// is stored as a fraction of it, so this is only a render size and changing it moves nothing.
+    /// same setup renders at 1080p or 1440p depending on what is plugged in. Following is the default: a canvas
+    /// sized by hand is a decision, and one taken before anything is plugged in is a guess. Everything mapped
+    /// onto the canvas is stored as a fraction of it, so this is only a render size and changing it moves nothing.
     /// </summary>
-    public Int2 CanvasResolution = new(1920, 1080);
+    public Int2 CanvasResolution;
 
     /// <summary>Whether this canvas takes its size from the plug it is bound to.</summary>
     public bool FollowsPlug => CanvasResolution.Width <= 0 || CanvasResolution.Height <= 0;

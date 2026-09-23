@@ -48,7 +48,7 @@ cbuffer PbrParams : register(b4)
     float Metal;
 }
 
-cbuffer Params : register(b5)
+cbuffer FloatParams : register(b5)
 {
     /*{FLOAT_PARAMS}*/
 }
@@ -189,7 +189,7 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     return N;
 }
 
-inline float3 AdjustRoughnessForSpecularAA(float baseRoughness)
+inline float AdjustRoughnessForSpecularAA(float baseRoughness)
 {
  // --- Specular anti-aliasing ---
     // Compute normal variance using screen-space derivatives and increase roughness accordingly.

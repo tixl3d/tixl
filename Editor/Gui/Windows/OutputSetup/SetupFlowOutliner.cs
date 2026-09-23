@@ -26,7 +26,7 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 /// CONTENT → SURFACES → OUTPUTS → LOCAL BINDINGS as columns, with a shelf for reference images and props
 /// at the right end. Items are <see cref="OutlinerItem"/>s (surfaces nest by <see cref="Surface.ParentId"/>,
 /// slices under their source, patches under their output); the relationships between them light up
-/// through the gutters and the connections drawn between the columns. CONTENT lists the live <see cref="IContentSupplier"/> ops, everything else the active
+/// through the gutters and the connections drawn between the columns. CONTENT lists the live <see cref="IContentSupplier"/> ops of the active composition, everything else the active
 /// setup; LOCAL BINDINGS is this machine's inventory of plugs.
 /// </summary>
 internal sealed class SetupFlowOutliner
@@ -653,18 +653,13 @@ internal sealed class SetupFlowOutliner
     private void DrawContentSends(SetupEntitySelection selection, Setup setup)
     {
         var suppliers = ContentSupplierRegistry.Suppliers;
-        if (suppliers.Count == 0)
-        {
-            ImGui.Indent(8 * T3Ui.UiScaleFactor);
-            CustomComponents.StylizedText("no SendToOutput ops", Fonts.FontSmall, UiColors.TextMuted.Fade(0.6f));
-            ImGui.Unindent(8 * T3Ui.UiScaleFactor);
-            return;
-        }
-
+        var drawnCount = 0;
         for (var i = 0; i < suppliers.Count; i++)
         {
-            if (suppliers[i] is not Instance instance)
+            if (suppliers[i] is not Instance instance || !ContentSourceSync.IsInScope(instance))
                 continue;
+
+            drawnCount++;
 
             var childId = instance.SymbolChildId;
             var source = setup.FindSourceByChildId(childId);
@@ -697,6 +692,13 @@ internal sealed class SetupFlowOutliner
 
                 DrawSliceItem(selection, setup, slice);
             }
+        }
+
+        if (drawnCount == 0)
+        {
+            ImGui.Indent(8 * T3Ui.UiScaleFactor);
+            CustomComponents.StylizedText("no SendToOutput ops in this composition", Fonts.FontSmall, UiColors.TextMuted.Fade(0.6f));
+            ImGui.Unindent(8 * T3Ui.UiScaleFactor);
         }
     }
 
@@ -791,6 +793,12 @@ internal sealed class SetupFlowOutliner
         var pos = ImGui.GetCursorScreenPos();
         var height = ImGui.GetFrameHeight();
         var width = MathF.Max(60 * scale, ImGui.CalcTextSize(setup.Name).X + Icons.FontSize + 16 * scale);
+        if (_isRenamingSetup)
+        {
+            DrawSetupRenameField(width);
+            return;
+        }
+
         if (ImGui.InvisibleButton("##setupSwitcher", new Vector2(width, height)))
             ImGui.OpenPopup("##setupMenu");
 
@@ -824,14 +832,21 @@ internal sealed class SetupFlowOutliner
             }
 
             CustomComponents.SeparatorLine();
-            if (CustomComponents.DrawMenuItem(900, "Duplicate current"))
+            if (CustomComponents.DrawMenuItem(903, "Rename"))
+            {
+                _isRenamingSetup = true;
+                _setupRenameFocusPending = true;
+                _setupRenameBuffer = setup.Name;
+            }
+
+            if (CustomComponents.DrawMenuItem(900, "Duplicate Current"))
             {
                 OutputSetupHandling.TryDuplicateActive(GetFreeName(setup.Name + " copy"));
             }
             CustomComponents.TooltipForLastItem("Duplicates the setup for another venue.",
                                                 "Entity ids are preserved, so operator bindings stay intact.");
 
-            if (CustomComponents.DrawMenuItem(901, "New (empty)"))
+            if (CustomComponents.DrawMenuItem(901, "New (Empty)"))
             {
                 if (OutputSetupHandling.TryCreateNew(GetFreeName("Setup")))
                     selection.Clear();
@@ -852,6 +867,28 @@ internal sealed class SetupFlowOutliner
             }
 
             ImGui.EndPopup();
+        }
+    }
+
+    /// <summary>Inline name field in place of the switcher; commits on Enter/blur, cancels on Escape.</summary>
+    private void DrawSetupRenameField(float switcherWidth)
+    {
+        ImGui.SetNextItemWidth(MathF.Max(switcherWidth, 160 * T3Ui.UiScaleFactor));
+        if (_setupRenameFocusPending)
+        {
+            ImGui.SetKeyboardFocusHere();
+            _setupRenameFocusPending = false;
+        }
+
+        ImGui.InputText("##renameSetup", ref _setupRenameBuffer, 256);
+        if (ImGui.IsItemDeactivatedAfterEdit())
+        {
+            OutputSetupHandling.TryRenameActive(_setupRenameBuffer.Trim());
+            _isRenamingSetup = false;
+        }
+        else if (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(ImGuiKey.Escape))
+        {
+            _isRenamingSetup = false;
         }
     }
 
@@ -954,6 +991,10 @@ internal sealed class SetupFlowOutliner
     private readonly Dictionary<Guid, string> _patchLabels = [];
 
     private Action? _drawMenuExtras;
+
+    private bool _isRenamingSetup;
+    private bool _setupRenameFocusPending;
+    private string _setupRenameBuffer = string.Empty;
 
     // Items drawn this frame, for the connections (cleared per frame; a few dozen entries, searched linearly).
     private readonly List<Anchor> _anchors = [];

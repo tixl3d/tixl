@@ -35,7 +35,7 @@ Drag the "SendToOutput" CONTENT item onto the "P1" item.
 **Expected:**
 - P1 shows the image full-frame in its output view and on its Board card, and a connection
   runs from "Slice 1" straight to the "P1" row.
-- **No** child item appears and P1 gains no chevron: an output's sole full-canvas patch is
+- **No** child item appears and P1 gains no chevron: an output's full-canvas base patch is
   the output as far as the UI is concerned, so it is folded into the row (the same way a
   source's full-frame slice folds into the source).
 - Dragging the same content onto "P1" again changes nothing.
@@ -72,10 +72,11 @@ In **Output** mode, right-click bare canvas (not on a patch, surface or label).
 Right-click "P1" → **Add Patch**.
 
 **Expected:**
-- P1 gains a chevron and now lists **two** items: the previously folded full-canvas patch and
-  the new one, which is a centred quarter of the canvas (visible and draggable on the output
-  canvas, not lying exactly on the canvas border).
-- Ctrl+Z removes the new patch and folds the remaining one away again.
+- P1 gains a chevron and lists exactly **one** item, "Patch 1": the new tile, a centred quarter
+  of the canvas (visible and draggable on the output canvas, not lying exactly on the canvas
+  border). The full-canvas patch feeding P1 stays folded into the P1 row — it still shows the
+  image behind the tile, and its connection still lands on P1.
+- Ctrl+Z removes the new patch and P1 loses its chevron again.
 
 ## Step: Patch geometry edits from the card
 

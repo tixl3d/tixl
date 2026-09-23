@@ -307,9 +307,9 @@ internal sealed partial class SetupOutputView
             return false;
         }
 
-        // Every annotation in output pixels: what was actually aimed at physical features, and the one thing
-        // that must not move when the corners do. Only the lines drive the solve; the points ride along.
-        CollectAnnotationsIn(surface, surfaceToOutput);
+        // The lines in output pixels — what was actually aimed at physical features — for the solve. Where they
+        // end up in the surface's own space afterwards is the carry's business, not the solver's.
+        CollectSolveLinesIn(surface, surfaceToOutput);
 
         Span<Vector2> refined = stackalloc Vector2[4];
         if (!LineRectifier.TryRefineQuad(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_refineSolveLines),
@@ -318,36 +318,21 @@ internal sealed partial class SetupOutputView
             return false;
         }
 
+        mapping.PromoteToCornerPin();
         for (var i = 0; i < 4; i++)
             mapping.Quad[i] = refined[i];
 
         if (!SurfaceGeometry.TryGetOutputToSurface(surface, mapping, SurfaceGeometry.CanvasSizeOf(setup, mapping.OutputId), out var outputToSurface))
             return false;
 
-        // How the surface's own space just moved. Every other projector on this surface has to follow it, or
-        // they would stop agreeing with the one that was just refined.
+        // How the surface's own space just moved: everything it carries — the other projectors, the photo it
+        // was traced on, and the marks themselves — follows it, or they stop agreeing with the refined pin.
         var rectify = Homography.Multiply(outputToSurface, surfaceToOutput);
         if (rectify.TryInvert(out var inverse))
         {
             Span<Vector2> rect = stackalloc Vector2[4];
             SurfaceGeometry.WriteLocalRect(surface, rect);
-            foreach (var other in surface.OutputMappings)
-            {
-                if (ReferenceEquals(other, mapping) || !SurfaceGeometry.TryGetSurfaceToOutput(surface, other, SurfaceGeometry.CanvasSizeOf(setup, other.OutputId), out var otherToOutput))
-                    continue;
-
-                for (var i = 0; i < 4; i++)
-                    other.Quad[i] = otherToOutput.TransformPoint(inverse.TransformPoint(rect[i]));
-            }
-        }
-
-        // Re-expressed from their unchanged output positions: the lines mark physical features, and those
-        // didn't move — only the space they are named in did.
-        for (var i = 0; i < surface.Annotations.Count; i++)
-        {
-            var line = _refineLines[i];
-            surface.Annotations[i].P1 = outputToSurface.TransformPoint(new Vector2(line.X, line.Y));
-            surface.Annotations[i].P2 = outputToSurface.TransformPoint(new Vector2(line.Z, line.W));
+            SurfaceGeometry.CarrySpaceChange(surface, rect, inverse, solvedMapping: mapping);
         }
 
         return true;
@@ -369,7 +354,7 @@ internal sealed partial class SetupOutputView
         if (!Homography.TryComputeQuadToQuad(localRect, binding.Quad, out var surfaceToPhoto))
             return false;
 
-        CollectAnnotationsIn(surface, surfaceToPhoto);
+        CollectSolveLinesIn(surface, surfaceToPhoto);
 
         Span<Vector2> refined = stackalloc Vector2[4];
         if (!LineRectifier.TryRefineQuad(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_refineSolveLines),
@@ -384,30 +369,27 @@ internal sealed partial class SetupOutputView
         if (!Homography.TryComputeQuadToQuad(binding.Quad, localRect, out var photoToSurface))
             return false;
 
-        for (var i = 0; i < surface.Annotations.Count; i++)
-        {
-            var line = _refineLines[i];
-            surface.Annotations[i].P1 = photoToSurface.TransformPoint(new Vector2(line.X, line.Y));
-            surface.Annotations[i].P2 = photoToSurface.TransformPoint(new Vector2(line.Z, line.W));
-        }
+        // The same correction seen from the photo: the marks and the pins aiming at this wall follow the space
+        // that just moved under them. The trace is the quad that was solved, so it stays as refined.
+        if (Homography.Multiply(photoToSurface, surfaceToPhoto).TryInvert(out var inverse))
+            SurfaceGeometry.CarrySpaceChange(surface, localRect, inverse, solvedTrace: true);
 
         return true;
     }
 
-    /// <summary>Every annotation (lines and points) transformed into <paramref name="toSpace"/>, in
-    /// <see cref="_refineLines"/> by index; the lines alone in <see cref="_refineSolveLines"/> for the solver.</summary>
-    private static void CollectAnnotationsIn(Surface surface, in Homography toSpace)
+    /// <summary>The measuring lines in <paramref name="toSpace"/>, which is the space the solve works in.
+    /// Points mark a spot rather than a direction, so they say nothing about level and plumb and stay out.</summary>
+    private static void CollectSolveLinesIn(Surface surface, in Homography toSpace)
     {
-        _refineLines.Clear();
         _refineSolveLines.Clear();
         foreach (var annotation in surface.Annotations)
         {
+            if (annotation.IsPoint)
+                continue;
+
             var a = toSpace.TransformPoint(annotation.P1);
             var b = toSpace.TransformPoint(annotation.P2);
-            var line = new Vector4(a.X, a.Y, b.X, b.Y);
-            _refineLines.Add(line);
-            if (!annotation.IsPoint)
-                _refineSolveLines.Add(line);
+            _refineSolveLines.Add(new Vector4(a.X, a.Y, b.X, b.Y));
         }
     }
 
@@ -474,7 +456,6 @@ internal sealed partial class SetupOutputView
     private static int _annotationToDelete = -1;
     private static readonly Dictionary<Guid, (float LengthInMeters, string Text)> _lengthChipTexts = [];
 
-    // Straighten solve input, rebuilt per solve: every line, and the ones the solve fits.
-    private static readonly List<Vector4> _refineLines = [];
+    // Straighten solve input, rebuilt per solve.
     private static readonly List<Vector4> _refineSolveLines = [];
 }

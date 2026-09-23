@@ -36,7 +36,7 @@ cbuffer Params : register(b1)
     float FadeNearest;
 };
 
-cbuffer Params : register(b2)
+cbuffer IntParams : register(b2)
 {
     // int SegmentCount;
     int ScaleFactorMode;
@@ -65,7 +65,7 @@ cbuffer PbrParams : register(b5)
     float Metal;
 }
 
-cbuffer Params : register(b6)
+cbuffer FloatParams : register(b6)
 {
     /*{FLOAT_PARAMS}*/
 }
@@ -91,7 +91,7 @@ struct psOutput
 sampler WrappedSampler : register(s0);
 sampler ClampedSampler : register(s1);
 
-static sampler LinearSampler = WrappedSampler;
+#define LinearSampler WrappedSampler
 
 StructuredBuffer<Point> Points : register(t0);
 
@@ -168,7 +168,7 @@ psInput vsMain(uint id : SV_VertexID)
                                                 : pointDef.FX2;
 
     float2 s = PointSize * sizeFactor * (UsePointScale ? pointDef.Scale.xy : 1);
-    output.radius = s;
+    output.radius = s.x;
     quadPosInCamera.xy += quadPos.xy * 0.050 * s; // sizeFactor * Size * tooCloseFactor;
     output.position = mul(quadPosInCamera, CameraToClipSpace);
 
@@ -206,7 +206,7 @@ psOutput psMain(psInput pin) : SV_TARGET
     frag.uv = pin.texCoord;
     frag.fog = pin.fog;
 
-    float3 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld);
+    float3 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld).xyz;
     frag.Lo = normalize(eyePosition - frag.worldPosition);
 
     float4 litColor = ComputePbr();

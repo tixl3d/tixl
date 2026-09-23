@@ -13,7 +13,7 @@ cbuffer Params : register(b0)
            
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int MaxIterations;   // Usually 10-20 is enough
     int Reset;

@@ -47,19 +47,22 @@ internal static class SetupLabels
                    : $"Slice {ordinal}";
     }
 
-    /// <summary>A patch's display name: the typed name, else "Patch N" by its position on the output.</summary>
+    /// <summary>A patch's display name: the typed name, else "Patch N" by its position among the listed
+    /// patches — the implicit full-canvas one reads as the output, so it takes no number.</summary>
     public static string PatchLabel(OutputDefinition output, OutputDefinition.Patch patch)
     {
         if (!string.IsNullOrEmpty(patch.Name))
             return patch.Name;
 
+        SetupRelations.TryGetImplicitPatch(output, out var implicitPatch);
         var ordinal = 1;
         foreach (var other in output.Patches)
         {
             if (other.Id == patch.Id)
                 break;
 
-            ordinal++;
+            if (!ReferenceEquals(other, implicitPatch))
+                ordinal++;
         }
 
         return $"Patch {ordinal}";

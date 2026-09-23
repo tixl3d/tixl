@@ -39,12 +39,6 @@ float DepthToSceneZ(float depth)
     return (2.0 * n) / (f + n - depth * (f - n)) * (Far - Near) + Near;
 }
 
-SamplerState samLinear
-{
-    Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = Wrap;
-    AddressV = Wrap;
-};
 
 const static int KERNEL_SIZE = 8;
 const static float3 avKernel[KERNEL_SIZE] = {
@@ -70,8 +64,8 @@ float4 blend(float4 tA, float4 tB)
 float4 psMain(vsOutput psInput) : SV_TARGET
 {
     // return float4(Passes, 0,0,1);
-    // return DepthTexture.Sample(samLinear, psInput.texCoord.xy);
-    float refDepth = DepthTexture.SampleLevel(samLinear, psInput.texCoord, 0).r;
+    // return DepthTexture.Sample(texSampler, psInput.texCoord.xy);
+    float refDepth = DepthTexture.SampleLevel(texSampler, psInput.texCoord, 0).r;
 
     float2 texelSize = float2(1.0 / textureSize.x, 1.0 / textureSize.y);
     float factor = 0;
@@ -87,14 +81,14 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
         float2 randomCoords = hash22(psInput.texCoord * unstretch * 11.213 + 112.1 * j);
 
-        float3 random = NoiseTexture.SampleLevel(samLinear, randomCoords, 0).rgb;
+        float3 random = NoiseTexture.SampleLevel(texSampler, randomCoords, 0).rgb;
 
         random = normalize(random * 2.0 - 1.0);
         for (int i = 0; i < KERNEL_SIZE; i++)
         {
             float3 vRotatedKernel = normalize(reflect(avKernel[i], random)); // * vKernelScale;
             float2 offset = vRotatedKernel.xy * KernelSize * texelSize /unstretch + psInput.texCoord.xy;
-            float depth = DepthTexture.SampleLevel(samLinear, offset, 0).r;
+            float depth = DepthTexture.SampleLevel(texSampler, offset, 0).r;
 
             float sceneZ = DepthToSceneZ(depth);
             if (refSceneZ < FarClipRange.y && refSceneZ < sceneZ + 0.001)
@@ -104,7 +98,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
         }
     }
 
-    float4 orgColor = ImageTexture.Sample(samLinear, psInput.texCoord);
+    float4 orgColor = ImageTexture.Sample(texSampler, psInput.texCoord);
     factor = pow(saturate(factor + BoostShadows.x), BoostShadows.y);
 
     float3 AOColor = lerp(Color.rgb, float3(1, 1, 1), factor); // mix shadow color
@@ -119,7 +113,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     return float4(blendedColor.rgb * AOColor, orgColor.a);
 
     // Experimenting with transparent backgrounds...
-    // float4 orgColor = ImageTexture.Sample(samLinear, psInput.texCoord);
+    // float4 orgColor = ImageTexture.Sample(texSampler, psInput.texCoord);
     // factor = pow(saturate(factor + BoostShadows.x), BoostShadows.y);
     // float4 AOColor = float4(Color.rgb, Color.a * factor); // mix shadow color
     // float fadeInBackgroundFactor = clamp((refSceneZ - FarClipRange.x) / (FarClipRange.y - FarClipRange.x), 0, 1);

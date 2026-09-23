@@ -26,10 +26,13 @@ internal class ImGuiDx11RenderForm : RenderForm
 
         MouseMove += (_, e) =>
         {
-            if (this != ProgramWindows.Viewer?.Form) // Ignore mouse updates from Viewer
-            {
-                ImGui.GetIO().MousePos = new System.Numerics.Vector2(e.X, e.Y);
-            }
+            // Only the main window drives ImGui's cursor position. The Viewer (and any
+            // other secondary form) has no ImGui content and must not overwrite the
+            // shared MousePos, otherwise hovering it moves the editor's UI cursor.
+            if (this != ProgramWindows.Main?.Form)
+                return;
+
+            ImGui.GetIO().MousePos = new System.Numerics.Vector2(e.X, e.Y);
         };
     }
 
