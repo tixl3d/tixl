@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "147e1ea2-cf9b-4111-81f1-5229a345d7ca",
+  "Description": "Forwards SharpDX.Direct3D11.ColorWriteMaskFlags through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "72edd0a5-7f6a-4cd7-80eb-5a7708e3fadc",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fa166c4c-4013-4ae4-b82f-33f38744d07f",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

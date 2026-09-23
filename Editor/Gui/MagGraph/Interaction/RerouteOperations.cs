@@ -1,0 +1,666 @@
+#nullable enable
+using System.Diagnostics.CodeAnalysis;
+using T3.Core.Model;
+using T3.Core.Operator;
+using T3.Core.Operator.Slots;
+using T3.Editor.Gui.MagGraph.Model;
+using T3.Editor.Gui.MagGraph.States;
+using T3.Editor.UiModel;
+using T3.Editor.UiModel.Helpers;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
+
+namespace T3.Editor.Gui.MagGraph.Interaction;
+
+internal static class RerouteOperations
+{
+    // MultiInputIndex distinguishes duplicate wires; an empty child ID denotes the composition.
+    internal readonly record struct ConnectionOccurrence(Guid SourceId, Guid SourceSlotId, Guid TargetId, Guid TargetSlotId, int MultiInputIndex);
+    internal readonly record struct StrokeHit(ConnectionOccurrence Occurrence, Vector2 PositionOnCanvas);
+
+    // Preview and commit share source-slot averages and vertical separation of overlapping groups.
+    internal sealed class AnchorPlacementBuffer
+    {
+        internal void EnsureCapacity(int count)
+        {
+            _groups.EnsureCapacity(count);
+            _counts.EnsureCapacity(count);
+            _seen.EnsureCapacity(count);
+        }
+
+        internal void Calculate(IReadOnlyList<StrokeHit> hits, List<Vector2> positions)
+        {
+            positions.Clear();
+            _groups.Clear();
+            _counts.Clear();
+            _seen.Clear();
+            for (var hitIndex = 0; hitIndex < hits.Count; hitIndex++)
+            {
+                var hit = hits[hitIndex];
+                if (!_seen.Add(hit.Occurrence))
+                    continue;
+
+                var source = SourceOf(hit.Occurrence);
+                if (!_groups.TryGetValue(source, out var index))
+                {
+                    index = positions.Count;
+                    _groups.Add(source, index);
+                    positions.Add(Vector2.Zero);
+                    _counts.Add(0);
+                }
+
+                positions[index] += hit.PositionOnCanvas;
+                _counts[index]++;
+            }
+
+            var spacing = MagGraphItem.RerouteSize + new Vector2(8);
+            for (var index = 0; index < positions.Count; index++)
+            {
+                var position = positions[index] / _counts[index];
+                for (var other = 0; other < index; other++)
+                {
+                    var distance = Vector2.Abs(position - positions[other]);
+                    if (distance.X >= spacing.X || distance.Y >= spacing.Y)
+                        continue;
+
+                    position.Y = positions[other].Y + spacing.Y;
+                    other = -1;
+                }
+
+                positions[index] = position;
+            }
+        }
+
+        private readonly Dictionary<Endpoint, int> _groups = new();
+        private readonly List<int> _counts = new();
+        private readonly HashSet<ConnectionOccurrence> _seen = new();
+    }
+
+    private readonly record struct Endpoint(Guid ChildId, Guid SlotId);
+    // Sources preserves target-input order and duplicate endpoints.
+    private sealed record TargetSnapshot(Endpoint Target, Endpoint[] Sources);
+    private sealed record CommandStep(ICommand Command, ConnectionOccurrence? Connection, bool AddsConnection, Guid ChildId, Guid SymbolId,
+                                      bool AddsChild = true);
+
+    internal static ConnectionOccurrence Capture(MagGraphConnection connection)
+    {
+        return new ConnectionOccurrence(connection.SourceParentOrChildId, connection.SourceOutput.Id,
+                                        connection.TargetParentOrChildId, connection.TargetInput.Id, connection.MultiInputIndex);
+    }
+
+    // Append cleanup last so undo restores anchors before their connections.
+    internal static bool CompleteCleanup(RemoveDisconnectedReroutesCommand? cleanup, MacroCommand macro)
+    {
+        if (cleanup == null)
+            return false;
+
+        cleanup.Do();
+        if (cleanup.AppliedCount == 0)
+            return false;
+
+        macro.AddExecutedCommandForUndo(cleanup);
+        return true;
+    }
+
+    // Capture before editing so cleanup leaves deliberately blank anchors alone.
+    internal static HashSet<Guid> CaptureConnectedReroutes(Symbol symbol)
+    {
+        var connectedChildren = new HashSet<Guid>();
+        foreach (var connection in symbol.Connections)
+        {
+            if (connection.SourceParentOrChildId != Guid.Empty)
+                connectedChildren.Add(connection.SourceParentOrChildId);
+            if (connection.TargetParentOrChildId != Guid.Empty)
+                connectedChildren.Add(connection.TargetParentOrChildId);
+        }
+
+        var reroutes = new HashSet<Guid>();
+        foreach (var (id, child) in symbol.Children)
+        {
+            if (connectedChildren.Contains(id) && SymbolAnalysis.IsReroute(child.Symbol))
+                reroutes.Add(id);
+        }
+
+        return reroutes;
+    }
+
+    internal static void GetAnchorPositions(IReadOnlyList<StrokeHit> hits, List<Vector2> positions)
+    {
+        GetAnchorPositions(hits, positions, new AnchorPlacementBuffer());
+    }
+
+    internal static void GetAnchorPositions(IReadOnlyList<StrokeHit> hits, List<Vector2> positions, AnchorPlacementBuffer buffer)
+    {
+        buffer.Calculate(hits, positions);
+    }
+
+    // Validate all occurrences before mutation; insertion preserves target indices and groups hits by source slot.
+    internal static bool TryApply(GraphUiContext context, bool cut, IReadOnlyList<StrokeHit> hits, out string error)
+    {
+        error = string.Empty;
+        var composition = context.ProjectView.CompositionInstance;
+        if (composition == null || context.PreventInteraction || composition.Symbol.SymbolPackage.IsReadOnly)
+        {
+            error = "This graph cannot be edited.";
+            return false;
+        }
+
+        var symbol = composition.Symbol;
+        if (!SymbolUiRegistry.TryGetSymbolUi(symbol.Id, out _))
+        {
+            error = "The graph is no longer available.";
+            return false;
+        }
+
+        var occurrences = new List<ConnectionOccurrence>();
+        var seen = new HashSet<ConnectionOccurrence>();
+        var groupTypes = new Dictionary<Endpoint, Type>();
+        foreach (var hit in hits)
+        {
+            var occurrence = hit.Occurrence;
+            if (!seen.Add(occurrence))
+                continue;
+
+            if (occurrence.MultiInputIndex < 0 || !MatchesOccurrence(symbol, occurrence))
+            {
+                error = "A crossed connection changed. Try the gesture again.";
+                return false;
+            }
+
+            if (!TryGetConnectionType(symbol, occurrence, !cut, out var type, out error))
+                return false;
+
+            if (!float.IsFinite(hit.PositionOnCanvas.X) || !float.IsFinite(hit.PositionOnCanvas.Y))
+            {
+                error = "The anchor position is invalid.";
+                return false;
+            }
+
+            groupTypes.TryAdd(SourceOf(occurrence), type);
+            occurrences.Add(occurrence);
+        }
+
+        if (occurrences.Count == 0)
+            return false;
+
+        var definitions = new Dictionary<Type, SymbolAnalysis.RerouteDefinition>();
+        if (!cut && !CollectDefinitions(groupTypes.Values, definitions, out error))
+            return false;
+
+        var steps = new List<CommandStep>();
+        var targets = new Dictionary<Endpoint, List<Endpoint>>();
+        foreach (var occurrence in occurrences)
+        {
+            var target = TargetOf(occurrence);
+            if (!targets.ContainsKey(target))
+                targets.Add(target, GetSources(symbol, target));
+        }
+
+        var before = SnapshotTargets(targets);
+        if (cut)
+        {
+            occurrences.Sort(CompareForDeletion);
+            foreach (var occurrence in occurrences)
+            {
+                steps.Add(ConnectionStep(symbol, occurrence, false));
+                targets[TargetOf(occurrence)].RemoveAt(occurrence.MultiInputIndex);
+            }
+
+            var isolatedReroutes = CaptureConnectedReroutes(symbol);
+            var targetOrdinals = new Dictionary<Endpoint, int>();
+            foreach (var connection in symbol.Connections)
+            {
+                var target = new Endpoint(connection.TargetParentOrChildId, connection.TargetSlotId);
+                var ordinal = targetOrdinals.GetValueOrDefault(target);
+                targetOrdinals[target] = ordinal + 1;
+                var occurrence = new ConnectionOccurrence(connection.SourceParentOrChildId, connection.SourceSlotId,
+                                                          connection.TargetParentOrChildId, connection.TargetSlotId, ordinal);
+                if (seen.Contains(occurrence))
+                    continue;
+
+                isolatedReroutes.Remove(connection.SourceParentOrChildId);
+                isolatedReroutes.Remove(connection.TargetParentOrChildId);
+            }
+
+            foreach (var id in isolatedReroutes)
+            {
+                var cleanup = new RemoveDisconnectedReroutesCommand(symbol.Id, [id]);
+                steps.Add(new CommandStep(cleanup, null, false, id, symbol.Children[id].Symbol.Id, AddsChild: false));
+            }
+        }
+        else
+        {
+            var positions = new List<Vector2>();
+            GetAnchorPositions(hits, positions);
+            var reroutes = new Dictionary<Endpoint, (Guid childId, SymbolAnalysis.RerouteDefinition definition)>();
+            var groupIndex = 0;
+            foreach (var (source, type) in groupTypes)
+            {
+                var definition = definitions[type];
+                var addChild = new AddSymbolChildCommand(symbol, definition.SymbolId)
+                                   {
+                                       PosOnCanvas = positions[groupIndex++] - MagGraphItem.RerouteSize / 2,
+                                       Size = MagGraphItem.RerouteSize,
+                                   };
+                steps.Add(new CommandStep(addChild, null, false, addChild.AddedChildId, definition.SymbolId));
+                var input = new ConnectionOccurrence(source.ChildId, source.SlotId, addChild.AddedChildId, definition.InputId, 0);
+                steps.Add(ConnectionStep(symbol, input, true));
+                targets.Add(TargetOf(input), [source]);
+                reroutes.Add(source, (addChild.AddedChildId, definition));
+            }
+
+            foreach (var occurrence in occurrences)
+            {
+                var (childId, definition) = reroutes[SourceOf(occurrence)];
+                var replacement = occurrence with { SourceId = childId, SourceSlotId = definition.OutputId };
+                steps.Add(ConnectionStep(symbol, occurrence, false));
+                steps.Add(ConnectionStep(symbol, replacement, true));
+                targets[TargetOf(occurrence)][occurrence.MultiInputIndex] = SourceOf(replacement);
+            }
+        }
+
+        var command = new RoutingCommand(symbol.Id, cut ? "Cut Connections" : "Reroute Connections", steps.ToArray(), before, SnapshotTargets(targets));
+        if (!command.TryExecute(false, out error))
+            return false;
+
+        UndoRedoStack.Add(command);
+        context.Layout.FlagStructureAsChanged();
+        if (!cut)
+        {
+            context.Selector.Clear();
+            foreach (var step in steps)
+            {
+                if (step.ChildId != Guid.Empty)
+                    context.Selector.TrySelectCompositionChild(composition, step.ChildId);
+            }
+        }
+        else
+        {
+            for (var index = context.Selector.Selection.Count - 1; index >= 0; index--)
+            {
+                var selected = context.Selector.Selection[index];
+                if (selected is SymbolUi.Child && !symbol.Children.ContainsKey(selected.Id))
+                    context.Selector.DeselectNode(selected);
+            }
+        }
+
+        return true;
+    }
+
+    private static bool CollectDefinitions(IEnumerable<Type> types, Dictionary<Type, SymbolAnalysis.RerouteDefinition> definitions, out string error)
+    {
+        error = string.Empty;
+        foreach (var package in SymbolPackage.AllPackages)
+        {
+            if (package.Id != SymbolAnalysis.TypeOperatorsPackageId)
+                continue;
+
+            foreach (var symbol in package.Symbols.Values)
+            {
+                if (!SymbolAnalysis.TryGetRerouteDefinition(symbol, out var definition) || !SymbolUiRegistry.TryGetSymbolUi(symbol.Id, out _))
+                    continue;
+
+                var type = symbol.InputDefinitions[0].ValueType;
+                if (!definitions.TryAdd(type, definition))
+                {
+                    error = $"More than one reroute definition is available for {type.Name}.";
+                    return false;
+                }
+            }
+        }
+
+        foreach (var type in types)
+        {
+            if (!definitions.ContainsKey(type))
+            {
+                error = $"No reroute is available for {type.Name}.";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Scalar reroutes cannot preserve composition multi-input bundles or output metadata; cuts can remove either.
+    // plannedChildren supplies definitions for anchors not yet created or restored.
+    private static bool TryGetConnectionType(Symbol symbol, ConnectionOccurrence occurrence, bool insertingReroutes, [NotNullWhen(true)] out Type? type, out string error,
+                                             IReadOnlyDictionary<Guid, Symbol>? plannedChildren = null)
+    {
+        type = null;
+        error = string.Empty;
+        Symbol sourceSymbol;
+        if (occurrence.SourceId == Guid.Empty)
+        {
+            sourceSymbol = symbol;
+        }
+        else if (symbol.Children.TryGetValue(occurrence.SourceId, out var sourceChild))
+        {
+            sourceSymbol = sourceChild.Symbol;
+        }
+        else if (plannedChildren != null && plannedChildren.TryGetValue(occurrence.SourceId, out var plannedSource))
+        {
+            sourceSymbol = plannedSource;
+        }
+        else
+        {
+            error = "A connection source is no longer available.";
+            return false;
+        }
+
+        if (occurrence.SourceId == Guid.Empty)
+        {
+            var input = sourceSymbol.InputDefinitions.Find(i => i.Id == occurrence.SourceSlotId);
+            if (input != null)
+            {
+                if (insertingReroutes && input.IsMultiInput)
+                {
+                    error = "A composition multi-input bundle cannot be rerouted.";
+                    return false;
+                }
+
+                type = input.ValueType;
+            }
+        }
+        else
+        {
+            var output = sourceSymbol.OutputDefinitions.Find(o => o.Id == occurrence.SourceSlotId);
+            if (insertingReroutes && output?.OutputDataType != null)
+            {
+                error = "Connections carrying output metadata cannot be rerouted.";
+                return false;
+            }
+
+            type = output?.ValueType;
+        }
+
+        Type? targetType = null;
+        if (occurrence.TargetId == Guid.Empty)
+        {
+            if (occurrence.MultiInputIndex == 0)
+                targetType = symbol.OutputDefinitions.Find(o => o.Id == occurrence.TargetSlotId)?.ValueType;
+        }
+        else
+        {
+            var targetSymbol = symbol.Children.TryGetValue(occurrence.TargetId, out var targetChild)
+                                   ? targetChild.Symbol
+                                   : plannedChildren?.GetValueOrDefault(occurrence.TargetId);
+            var targetInput = targetSymbol?.InputDefinitions.Find(i => i.Id == occurrence.TargetSlotId);
+            if (targetInput != null && (targetInput.IsMultiInput || occurrence.MultiInputIndex == 0))
+                targetType = targetInput.ValueType;
+        }
+
+        if (type == null || targetType != type)
+        {
+            error = "A connection slot is missing or its type changed.";
+            return false;
+        }
+
+        return true;
+    }
+
+    private static CommandStep ConnectionStep(Symbol symbol, ConnectionOccurrence occurrence, bool add)
+    {
+        var connection = new Symbol.Connection(occurrence.SourceId, occurrence.SourceSlotId, occurrence.TargetId, occurrence.TargetSlotId);
+        ICommand command = add
+                               ? new AddConnectionCommand(symbol, connection, occurrence.MultiInputIndex)
+                               : new DeleteConnectionCommand(symbol, connection, occurrence.MultiInputIndex);
+        return new CommandStep(command, occurrence, add, Guid.Empty, Guid.Empty);
+    }
+
+    private static Endpoint SourceOf(ConnectionOccurrence occurrence) => new(occurrence.SourceId, occurrence.SourceSlotId);
+    private static Endpoint TargetOf(ConnectionOccurrence occurrence) => new(occurrence.TargetId, occurrence.TargetSlotId);
+    // Delete higher input indices first so removals do not shift the remaining occurrences.
+    private static int CompareForDeletion(ConnectionOccurrence a, ConnectionOccurrence b)
+    {
+        var comparison = a.TargetId.CompareTo(b.TargetId);
+        if (comparison != 0)
+            return comparison;
+
+        comparison = a.TargetSlotId.CompareTo(b.TargetSlotId);
+        return comparison != 0 ? comparison : b.MultiInputIndex.CompareTo(a.MultiInputIndex);
+    }
+
+    private static List<Endpoint> GetSources(Symbol symbol, Endpoint target)
+    {
+        var sources = new List<Endpoint>();
+        foreach (var connection in symbol.Connections)
+        {
+            if (connection.IsTargetOf(target.ChildId, target.SlotId))
+                sources.Add(new Endpoint(connection.SourceParentOrChildId, connection.SourceSlotId));
+        }
+
+        return sources;
+    }
+
+    private static TargetSnapshot[] SnapshotTargets(Dictionary<Endpoint, List<Endpoint>> targets)
+    {
+        var snapshots = new TargetSnapshot[targets.Count];
+        var index = 0;
+        foreach (var (target, sources) in targets)
+            snapshots[index++] = new TargetSnapshot(target, sources.ToArray());
+        return snapshots;
+    }
+
+    private static bool MatchesOccurrence(Symbol symbol, ConnectionOccurrence occurrence)
+    {
+        var index = 0;
+        foreach (var connection in symbol.Connections)
+        {
+            if (!connection.IsTargetOf(occurrence.TargetId, occurrence.TargetSlotId))
+                continue;
+
+            if (index++ == occurrence.MultiInputIndex)
+                return connection.IsSourceOf(occurrence.SourceId, occurrence.SourceSlotId);
+        }
+
+        return false;
+    }
+
+    // Resolve live symbols on replay and validate ordered snapshots before mutation.
+    // Roll back completed steps if an edit fails.
+    private sealed class RoutingCommand : ICommand
+    {
+        public string Name { get; }
+        public bool IsUndoable => true;
+
+        internal RoutingCommand(Guid compositionId, string name, CommandStep[] steps, TargetSnapshot[] before, TargetSnapshot[] after)
+        {
+            _compositionId = compositionId;
+            Name = name;
+            _steps = steps;
+            _before = before;
+            _after = after;
+        }
+
+        public void Do()
+        {
+            if (!TryExecute(false, out var error))
+                Log.Warning($"{Name}: {error}");
+        }
+
+        public void Undo()
+        {
+            if (!TryExecute(true, out var error))
+                Log.Warning($"Undo {Name}: {error}");
+        }
+
+        internal bool TryExecute(bool undo, out string error)
+        {
+            error = string.Empty;
+            if (_isApplied != undo)
+                return true;
+
+            if (!SymbolUiRegistry.TryGetSymbolUi(_compositionId, out var ui) || ui.Symbol.SymbolPackage.IsReadOnly)
+            {
+                error = "The editable graph is no longer available.";
+                return false;
+            }
+
+            if (!MatchesState(ui, undo) || !ValidateSlotContracts(ui.Symbol))
+            {
+                error = "The affected connections or reroute definitions changed.";
+                return false;
+            }
+
+            var completed = new List<CommandStep>(_steps.Length);
+            try
+            {
+                for (var order = 0; order < _steps.Length; order++)
+                {
+                    var step = _steps[undo ? _steps.Length - order - 1 : order];
+                    var countBefore = ui.Symbol.Connections.Count;
+                    var childBefore = ui.Symbol.Children.ContainsKey(step.ChildId);
+                    try
+                    {
+                        ExecuteStep(ui, step, undo);
+                        completed.Add(step);
+                    }
+                    catch
+                    {
+                        // A subcommand can mutate its definition before failing while updating instances.
+                        if (ui.Symbol.Connections.Count != countBefore || ui.Symbol.Children.ContainsKey(step.ChildId) != childBefore)
+                            completed.Add(step);
+                        throw;
+                    }
+                }
+
+                if (!MatchesState(ui, !undo))
+                    throw new InvalidOperationException("The resulting connections do not match the requested edit.");
+
+                _isApplied = !undo;
+                return true;
+            }
+            catch (Exception exception)
+            {
+                error = $"The graph edit could not be completed: {exception.Message}";
+                for (var index = completed.Count - 1; index >= 0; index--)
+                {
+                    try
+                    {
+                        ExecuteStep(ui, completed[index], !undo);
+                    }
+                    catch (Exception rollbackException)
+                    {
+                        Log.Error($"Could not restore a routing edit: {rollbackException.Message}");
+                    }
+                }
+
+                if (!MatchesState(ui, undo))
+                    error += " Some changes could not be restored; inspect the graph before continuing.";
+                return false;
+            }
+        }
+
+        private bool MatchesState(SymbolUi ui, bool applied)
+        {
+            foreach (var snapshot in applied ? _after : _before)
+            {
+                var sources = GetSources(ui.Symbol, snapshot.Target);
+                if (!sources.SequenceEqual(snapshot.Sources))
+                    return false;
+            }
+
+            foreach (var step in _steps)
+            {
+                if (step.ChildId == Guid.Empty)
+                    continue;
+
+                if (!SymbolUiRegistry.TryGetSymbolUi(step.SymbolId, out var definitionUi) || !SymbolAnalysis.IsReroute(definitionUi.Symbol))
+                    return false;
+
+                var shouldExist = step.AddsChild == applied;
+                var exists = ui.Symbol.Children.TryGetValue(step.ChildId, out var child);
+                if (exists != shouldExist || ui.ChildUis.ContainsKey(step.ChildId) != shouldExist || exists && child!.Symbol.Id != step.SymbolId)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateSlotContracts(Symbol symbol)
+        {
+            var plannedChildren = new Dictionary<Guid, Symbol>();
+            var addsReroutes = false;
+            foreach (var step in _steps)
+            {
+                if (step.ChildId == Guid.Empty)
+                    continue;
+
+                if (!SymbolUiRegistry.TryGetSymbolUi(step.SymbolId, out var definitionUi))
+                    return false;
+
+                plannedChildren.Add(step.ChildId, definitionUi.Symbol);
+                addsReroutes |= step.AddsChild;
+            }
+
+            foreach (var step in _steps)
+            {
+                if (step.Connection is { } connection
+                    && !TryGetConnectionType(symbol, connection, addsReroutes, out _, out _, plannedChildren))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static void ExecuteStep(SymbolUi ui, CommandStep step, bool undo)
+        {
+            if (step.Connection is not { } connection)
+            {
+                if (undo)
+                {
+                    step.Command.Undo();
+                }
+                else
+                {
+                    step.Command.Do();
+                }
+
+                var shouldExist = step.AddsChild != undo;
+                if (ui.Symbol.Children.ContainsKey(step.ChildId) != shouldExist || ui.ChildUis.ContainsKey(step.ChildId) != shouldExist)
+                    throw new InvalidOperationException("The reroute child was not updated.");
+                return;
+            }
+
+            var add = step.AddsConnection != undo;
+            if (!TryGetConnectionType(ui.Symbol, connection, false, out _, out var error))
+                throw new InvalidOperationException(error);
+
+            var target = TargetOf(connection);
+            var before = GetSources(ui.Symbol, target);
+            var expected = new List<Endpoint>(before);
+            if (add)
+            {
+                if (connection.MultiInputIndex > expected.Count)
+                    throw new InvalidOperationException("The connection insertion index changed.");
+
+                expected.Insert(connection.MultiInputIndex, SourceOf(connection));
+            }
+            else
+            {
+                if (connection.MultiInputIndex >= expected.Count || expected[connection.MultiInputIndex] != SourceOf(connection))
+                    throw new InvalidOperationException("The connection to remove changed.");
+
+                expected.RemoveAt(connection.MultiInputIndex);
+            }
+
+            if (undo)
+            {
+                step.Command.Undo();
+            }
+            else
+            {
+                step.Command.Do();
+            }
+
+            if (!GetSources(ui.Symbol, target).SequenceEqual(expected))
+                throw new InvalidOperationException("A connection command did not produce the expected input order.");
+        }
+
+        private readonly Guid _compositionId;
+        private readonly CommandStep[] _steps;
+        private readonly TargetSnapshot[] _before;
+        private readonly TargetSnapshot[] _after;
+        private bool _isApplied;
+    }
+}

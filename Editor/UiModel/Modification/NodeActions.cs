@@ -12,6 +12,7 @@ using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -21,6 +22,7 @@ using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Sections;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using T3.Serialization;
@@ -36,6 +38,11 @@ internal static class NodeActions
     {
         var selectedChildUis = nodeSelection.GetSelectedChildUis().ToList();
 
+        // Reroutes already forward their input; bypass would replace a command reroute's callback proxy.
+        selectedChildUis.RemoveAll(static child => SymbolAnalysis.IsReroute(child.SymbolChild.Symbol));
+        if (selectedChildUis.Count == 0)
+            return;
+
         var allSelectedAreBypassed = selectedChildUis.TrueForAll(selectedChildUi => selectedChildUi.SymbolChild.IsBypassed);
         var shouldBypass = !allSelectedAreBypassed;
 
@@ -48,6 +55,7 @@ internal static class NodeActions
         UndoRedoStack.AddAndExecute(new MacroCommand("Changed Bypassed", commands));
     }
 
+    /// <summary>Toggles disabled state for the selected operator outputs through undoable commands.</summary>
     public static void ToggleDisabledForSelectedElements(NodeSelection nodeSelection)
     {
         var selectedChildren = nodeSelection.GetSelectedChildUis().ToList();
@@ -64,6 +72,10 @@ internal static class NodeActions
         UndoRedoStack.AddAndExecute(new MacroCommand("Disable/Enable", commands));
     }
 
+    /// <summary>Deletes selected children and interface slots as one undoable graph edit.</summary>
+    /// <param name="selectedChildUis">Explicit child selection, or null to use the current selected children.</param>
+    /// <param name="selectedInputUis">Explicit interface-input selection, or null to use the current selected inputs.</param>
+    /// <param name="selectedOutputUis">Explicit interface-output selection, or null to use the current selected outputs.</param>
     public static void DeleteSelectedElements(NodeSelection nodeSelection, 
                                               SymbolUi compositionSymbolUi, 
                                               List<SymbolUi.Child>? selectedChildUis = null,
@@ -135,7 +147,9 @@ internal static class NodeActions
         nodeSelection.Clear();
     }
 
+    /// <summary>Creates an undoable section around the selection or at a canvas position.</summary>
     /// <param name="placementScreenPos">Screen position to place the section at when nothing is selected.</param>
+    /// <returns>The newly created section.</returns>
     public static Section AddSection(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp, Vector2? placementScreenPos = null)
     {
         var size = new Vector2(100, 140);
@@ -180,6 +194,7 @@ internal static class NodeActions
         return section;
     }
 
+    /// <summary>Pins the selected operator, or the composition when nothing is selected, optionally toggling an existing pin.</summary>
     public static void PinSelectedToOutputWindow(ProjectView components, NodeSelection nodeSelection, Instance compositionOp, bool unpinIfAlreadySelected =false)
     {
         var outputWindow = OutputWindow.OutputWindowInstances.FirstOrDefault(ow => ow.Config.Visible) as OutputWindow;
@@ -213,6 +228,7 @@ internal static class NodeActions
     }
 
     #region Copy and paste
+    /// <summary>Copies selected operator children and their internal connections to the clipboard.</summary>
     /// <returns>False if the selection contained nothing copyable (e.g. only input nodes) and the clipboard was left untouched.</returns>
     public static bool CopySelectedNodesToClipboard(NodeSelection nodeSelection, Instance composition)
     {
@@ -230,6 +246,7 @@ internal static class NodeActions
 
     // todo - better encapsulate this in SymbolJson
 
+    /// <summary>Pastes serialized operator children and connections into the current composition.</summary>
     public static void PasteClipboard(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp)
     {
         try
@@ -540,6 +557,7 @@ internal static class NodeActions
         }
     }
 
+    /// <summary>Disconnects selected nodes with undoable reconnection of eligible upstream and downstream wires.</summary>
     public static void DisconnectNodes(Instance compositionOp, List<ISelectableCanvasObject> nodes)
     {
         Log.Info($"Disconnecting {nodes.Count} nodes from their inputs and outputs");
@@ -678,6 +696,9 @@ internal static class NodeActions
 
         if (removeCommands.Count > 0)
         {
+            // Capture before disconnecting; undo must restore removed anchors before reconnecting their wires.
+            removeCommands.Add(new RemoveDisconnectedReroutesCommand(compositionOp.Symbol.Id,
+                                                                      RerouteOperations.CaptureConnectedReroutes(compositionOp.Symbol)));
             var macro = new MacroCommand("Disconnect nodes", removeCommands);
             UndoRedoStack.AddAndExecute(macro);
         }

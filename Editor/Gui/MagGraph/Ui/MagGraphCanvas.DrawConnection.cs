@@ -1,3 +1,4 @@
+#nullable enable
 using ImGuiNET;
 using T3.Core.Utils;
 using T3.Editor.Gui.MagGraph.Interaction;
@@ -13,13 +14,16 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 
 internal sealed partial class MagGraphView
 {
-    private void DrawConnection(MagGraphConnection connection, ImDrawListPtr drawList, GraphUiContext context)
+    private void DrawConnection(MagGraphConnection connection, ImDrawListPtr drawList, GraphUiContext context, ConnectionStroke? stroke)
     {
         if (connection.Style == MagGraphConnection.ConnectionStyles.Unknown)
             return;
 
         if (connection.SourceItem.IsCollapsedAway && connection.TargetItem.IsCollapsedAway)
             return;
+
+        var queryPath = stroke?.ObservePath;
+        stroke?.SetConnection(connection);
 
         var type = connection.Type;
 
@@ -58,6 +62,15 @@ internal sealed partial class MagGraphView
         }
 
         var sourcePosOnScreen = TransformPosition(sourceOnCanvas);
+        if (connection.SourceItem.IsReroute && !connection.SourceItem.IsCollapsedAway
+                                           && connection.Style == MagGraphConnection.ConnectionStyles.RightToLeft)
+        {
+            var radius = TransformDirection(new Vector2(connection.SourceItem.RerouteRadius)).X;
+            var overlap = MathF.Min(0.5f * T3Ui.UiScaleFactor, radius);
+            var center = connection.SourceItem.DampedPosOnCanvas + connection.SourceItem.Size / 2;
+            // Cancel the path drawer's half-pixel shift and overlap the dot's outline.
+            sourcePosOnScreen = TransformPosition(center) + new Vector2(radius - overlap - 0.5f, -0.5f);
+        }
 
         Vector2 targetOnCanvas;
         if (connection.TargetItem.IsCollapsedAway)
@@ -66,6 +79,12 @@ internal sealed partial class MagGraphView
                 return;
 
             targetOnCanvas = section.PosOnCanvas + new Vector2(2, MagGraphItem.LineHeight/2);
+        }
+        else if (connection.TargetItem.IsReroute)
+        {
+            MagGraphItem.InputAnchorPoint anchor = default;
+            connection.TargetItem.GetInputAnchorAtIndex(0, ref anchor);
+            targetOnCanvas = anchor.PositionOnCanvas;
         }
         else
         {
@@ -81,17 +100,14 @@ internal sealed partial class MagGraphView
 
         if (connection.IsSnapped)
         {
+            stroke?.DrawMarker(drawList, sourcePosOnScreen, CanvasScale);
+
             switch (connection.Style)
             {
                 case MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedHorizontal:
                 case MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal:
                 {
-                    var isPotentialSplitTarget = _context.ItemMovement.SpliceSets.Count > 0
-                                                 && !_context.ItemMovement.DraggedItems.Contains(connection.SourceItem)
-                                                 && _context.ItemMovement.SpliceSets
-                                                            .Any(sp
-                                                                     => sp.Direction == MagGraphItem.Directions.Horizontal
-                                                                        && sp.Type == type);
+                    var isPotentialSplitTarget = IsPotentialSplitTarget(connection, MagGraphItem.Directions.Horizontal, type);
                     if (isPotentialSplitTarget)
                     {
                         var extend = new Vector2(0, MagGraphItem.GridSize.Y * CanvasScale * 0.25f);
@@ -114,12 +130,7 @@ internal sealed partial class MagGraphView
 
                 case MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedVertical:
                 {
-                    var isPotentialSplitTarget = _context.ItemMovement.SpliceSets.Count > 0
-                                                 && !_context.ItemMovement.DraggedItems.Contains(connection.SourceItem)
-                                                 && _context.ItemMovement.SpliceSets
-                                                            .Any(x
-                                                                     => x.Direction == MagGraphItem.Directions.Vertical
-                                                                        && x.Type == type);
+                    var isPotentialSplitTarget = IsPotentialSplitTarget(connection, MagGraphItem.Directions.Vertical, type);
                     if (isPotentialSplitTarget)
                     {
                         var extend = new Vector2(MagGraphItem.GridSize.X * CanvasScale * 0.06f, 0);
@@ -169,7 +180,7 @@ internal sealed partial class MagGraphView
                                                                 typeColor,
                                                                 MathUtils.Lerp(0.25f, 2f, idleFadeProgress) + (isSelected | wasHoveredLastFrame ? 2 : 0),
                                                                 out var hoverPositionOnLine,
-                                                                out var normalizedHoverPos))
+                                                                out var normalizedHoverPos, queryPath))
                     {
                         if (context.StateMachine.CurrentState == GraphStates.Default)
                             ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);
@@ -183,21 +194,21 @@ internal sealed partial class MagGraphView
                     break;
                 }
                 case MagGraphConnection.ConnectionStyles.BottomToLeft:
-                    drawList.AddBezierCubic(sourcePosOnScreen,
-                                            sourcePosOnScreen + new Vector2(0, d),
-                                            targetPosOnScreen - new Vector2(d, 0),
-                                            targetPosOnScreen,
-                                            typeColor.Fade(0.6f),
-                                            2);
+                    drawList.PathClear();
+                    drawList.PathLineTo(sourcePosOnScreen);
+                    drawList.PathBezierCubicCurveTo(sourcePosOnScreen + new Vector2(0, d),
+                                                    targetPosOnScreen - new Vector2(d, 0), targetPosOnScreen);
+                    queryPath?.Invoke(drawList);
+                    drawList.PathStroke(typeColor.Fade(0.6f), ImDrawFlags.None, 2);
 
                     break;
                 case MagGraphConnection.ConnectionStyles.RightToTop:
-                    drawList.AddBezierCubic(sourcePosOnScreen,
-                                            sourcePosOnScreen + new Vector2(d, 0),
-                                            targetPosOnScreen - new Vector2(0, d),
-                                            targetPosOnScreen,
-                                            typeColor.Fade(0.6f),
-                                            2);
+                    drawList.PathClear();
+                    drawList.PathLineTo(sourcePosOnScreen);
+                    drawList.PathBezierCubicCurveTo(sourcePosOnScreen + new Vector2(d, 0),
+                                                    targetPosOnScreen - new Vector2(0, d), targetPosOnScreen);
+                    queryPath?.Invoke(drawList);
+                    drawList.PathStroke(typeColor.Fade(0.6f), ImDrawFlags.None, 2);
 
                     drawList.AddTriangleFilled(
                                                sourcePosOnScreen + new Vector2(-1, -1) * CanvasScale * 5,
@@ -217,7 +228,7 @@ internal sealed partial class MagGraphView
                                                              typeColor,
                                                              MathUtils.Lerp(0.25f, 2f, idleFadeProgress) + (isSelected | wasHoveredLastFrame ? 2 : 0),
                                                              out var hoverPositionOnLine,
-                                                             out var normalizedHoverPos))
+                                                             out var normalizedHoverPos, queryPath))
                     {
                         if (context.StateMachine.CurrentState == GraphStates.Default)
                             ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);
@@ -243,5 +254,20 @@ internal sealed partial class MagGraphView
                     break;
             }
         }
+    }
+
+    private bool IsPotentialSplitTarget(MagGraphConnection connection, MagGraphItem.Directions direction, Type type)
+    {
+        var movement = _context.ItemMovement;
+        if (movement.SpliceSets.Count == 0 || movement.DraggedItems.Contains(connection.SourceItem))
+            return false;
+
+        foreach (var splice in movement.SpliceSets)
+        {
+            if (splice.Direction == direction && splice.Type == type)
+                return true;
+        }
+
+        return false;
     }
 }

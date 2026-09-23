@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "b6c47dc1-e755-4221-a4ec-65440c631479",
+  "Description": "Forwards string through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "30a16a09-c7ae-4e30-b21e-f94a3e85d534",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "ccfcc636-f1cd-4681-93f7-37ca464bbdbb",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

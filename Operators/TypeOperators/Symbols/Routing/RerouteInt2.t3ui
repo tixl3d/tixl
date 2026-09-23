@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "abd018dc-c414-4897-a9b3-eb2375da196d",
+  "Description": "Forwards T3.Core.DataTypes.Vector.Int2 through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "db79a1fe-095a-4cc8-9d27-ee16889ba398",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "cbf34915-6dc9-442d-b5f5-69adf14e163e",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

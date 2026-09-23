@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "dc440a5c-796e-475c-9c21-4b2f23a68509",
+  "Description": "Forwards T3.Core.DataTypes.PixelShader through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "85ee34ae-96e6-4e42-8cb7-07f17108d35e",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a5e178d4-b5fd-4443-ba4b-1e4ce26ec081",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "64e71fcf-b3c2-4428-aaeb-6dcf34d5be6a",
+  "Description": "Forwards System.Numerics.Vector4[] through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "3dbf4eaa-4da4-4f85-9c5e-320b2583bbba",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "cb0e0d94-8c3b-44a3-b402-12fb5658529a",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

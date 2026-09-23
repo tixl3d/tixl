@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "00fbd77b-c94a-4606-8ed1-2db9360c70cf",
+  "Description": "Forwards T3.Core.Rendering.Material.PbrMaterial through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "662a0079-c98c-4e92-95a0-cd71e011cc42",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "94deebfe-3ae6-46ac-ad6f-289dec1bdb3b",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

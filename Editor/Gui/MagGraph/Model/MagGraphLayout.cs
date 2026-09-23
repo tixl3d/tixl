@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using T3.Core.Operator;
+using T3.Editor.UiModel.Helpers;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.Interaction;
@@ -54,6 +55,7 @@ internal sealed class MagGraphLayout
     /// </summary>
     public readonly List<MagGraphSection> SectionsInDrawOrder = new(63);
 
+    /// <summary>Refreshes graph records when needed and updates connection geometry and stack bounds.</summary>
     public void ComputeLayout(GraphUiContext context, bool forceUpdate = false)
     {
         var compositionOp = context.CompositionInstance;
@@ -225,6 +227,8 @@ internal sealed class MagGraphLayout
             }
 
             opItem.Variant = MagGraphItem.Variants.Operator;
+            // Cache the validated routing contract when rebuilding; drawing must not reflect over package types.
+            opItem.IsReroute = SymbolAnalysis.IsReroute(childInstance.Symbol);
             //opItem.Id = childId;
             opItem.InstancePath = childInstance.InstancePath;
             opItem.Selectable = childUi;
@@ -534,9 +538,10 @@ internal sealed class MagGraphLayout
         return _inputHashesWithMissingConnections.Count > 0
                && _inputHashesWithMissingConnections.Contains(MagGraphConnection.GetItemInputHash(itemId, inputId, multiInputIndex));
     }
-
+  
     private readonly HashSet<int> _inputHashesWithMissingConnections = new();
-
+  
+    // Compact reroute dimensions affect layout only; retain the saved child size.
     private void UpdateVisibleItemLines(GraphUiContext context)
     {
         var inputLines = new List<MagGraphItem.InputLine>(8);
@@ -615,7 +620,9 @@ internal sealed class MagGraphLayout
             item.OutputLines = outputLines.ToArray();
 
             //var count = Math.Max(1, item.InputLines.Count + item.OutputLines.Count -2);
-            item.Size = new Vector2(MagGraphItem.Width, MagGraphItem.LineHeight * (Math.Max(1, visibleIndex)));
+            item.Size = item.IsReroute
+                            ? MagGraphItem.RerouteSize
+                            : new Vector2(MagGraphItem.Width, MagGraphItem.LineHeight * (Math.Max(1, visibleIndex)));
         }
     }
 
@@ -1059,9 +1066,34 @@ internal sealed class MagGraphLayout
         MagGraphItem? previousItem = null;
 
         _listStackedItems.Clear();
-        foreach (var item in Items.Values.OrderBy(i => MathF.Round(i.PosOnCanvas.X)).ThenBy(i => i.PosOnCanvas.Y))
+        _orderedStackItems.Clear();
+        foreach (var item in Items.Values)
         {
+            var position = item.PosOnCanvas;
+            _orderedStackItems.Add((item, MathF.Round(position.X), position.Y, _orderedStackItems.Count));
+        }
+        _orderedStackItems.Sort(static (a, b) =>
+                                {
+                                    var byX = a.X.CompareTo(b.X);
+                                    if (byX != 0)
+                                        return byX;
+                                    var byY = a.Y.CompareTo(b.Y);
+                                    // Preserve the stable order of coincident nodes, including reroute stack breaks.
+                                    return byY != 0 ? byY : a.Index.CompareTo(b.Index);
+                                });
+
+        foreach (var entry in _orderedStackItems)
+        {
+            var item = entry.Item;
             item.VerticalStackArea = item.Area;
+
+            if (item.IsReroute)
+            {
+                // A compact routing point interrupts the vertical operator stack even when grid-aligned.
+                ApplyStackToItems();
+                previousItem = null;
+                continue;
+            }
 
             if (previousItem == null)
             {
@@ -1113,6 +1145,19 @@ internal sealed class MagGraphLayout
     {
         foreach (var sc in MagConnections)
         {
+            if (sc.SourceItem.IsReroute || sc.TargetItem.IsReroute)
+            {
+                MagGraphItem.OutputAnchorPoint outputAnchor = default;
+                MagGraphItem.InputAnchorPoint inputAnchor = default;
+                sc.SourceItem.GetOutputAnchorAtIndex(sc.SourceItem.IsReroute ? 0 : sc.OutputLineIndex + 1, ref outputAnchor);
+                sc.TargetItem.GetInputAnchorAtIndex(sc.TargetItem.IsReroute ? 0 : sc.InputLineIndex + 1, ref inputAnchor);
+                // Anchor helpers return damped coordinates; layout stores undamped endpoints for animation.
+                sc.SourcePos = outputAnchor.PositionOnCanvas - sc.SourceItem.DampedPosOnCanvas + sc.SourceItem.PosOnCanvas;
+                sc.TargetPos = inputAnchor.PositionOnCanvas - sc.TargetItem.DampedPosOnCanvas + sc.TargetItem.PosOnCanvas;
+                sc.Style = MagGraphConnection.ConnectionStyles.RightToLeft;
+                continue;
+            }
+
             var sourceMin = sc.SourceItem.PosOnCanvas;
             var sourceMax = sourceMin + sc.SourceItem.Size;
 
@@ -1213,4 +1258,5 @@ internal sealed class MagGraphLayout
 
     private int _compositionModelHash;
     private bool StructureFlaggedAsChanged { get; set; }
+    private readonly List<(MagGraphItem Item, float X, float Y, int Index)> _orderedStackItems = new(127);
 }

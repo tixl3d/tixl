@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "0f98aa11-4e24-4546-8aa4-ab7621c084bf",
+  "Description": "Forwards SharpDX.Direct3D.PrimitiveTopology through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "9a7a2f09-02a3-4917-be03-107f6fda9558",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5ee1f523-cd50-4eb7-9130-ea687526cd5a",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

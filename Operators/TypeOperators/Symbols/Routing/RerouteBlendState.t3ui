@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "09d3027c-7387-4ded-9691-3f55744eda41",
+  "Description": "Forwards SharpDX.Direct3D11.BlendState through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "91a637bd-b2d6-4868-a926-46e092a06502",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c09df239-d2d6-4754-97d8-684a80a7e869",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

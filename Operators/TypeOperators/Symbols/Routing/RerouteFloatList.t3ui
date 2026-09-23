@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "b86b65d9-db1e-46d8-88a9-2bb010835929",
+  "Description": "Forwards System.Collections.Generic.List<float> through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "fea94872-a42b-4afd-9d27-2ce0477b71a3",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "cb2025c2-3b0c-4744-a55f-748abbe3e1bb",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

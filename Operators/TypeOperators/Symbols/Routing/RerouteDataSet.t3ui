@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "d1c6b114-4670-4fb6-b906-91275533bcc2",
+  "Description": "Forwards T3.Core.DataTypes.DataSet.DataSet through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "a16c3bd5-21cd-4f3f-8ff0-0741638ed6b5",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "21409764-e3bb-4bdb-89ad-341f6259bab4",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}

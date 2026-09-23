@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "68cd4a98-f507-43fb-99f3-f8e819887a41",
+  "Description": "Forwards T3.Core.DataTypes.ScalarField through a movable routing anchor.\n\nRetains its slot type when disconnected. Reference values are forwarded without cloning or taking ownership.",
+  "InputUis": [
+    {
+      "InputId": "ed6b443e-4876-4134-9920-d7192a055c31",
+      "Position": {
+        "X": -60,
+        "Y": 0
+      },
+      "Description": "Value forwarded to the output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "125fff18-59e3-4121-8161-2f9bf63b5ae6",
+      "Position": {
+        "X": 60,
+        "Y": 0
+      }
+    }
+  ]
+}
