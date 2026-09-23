@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "d2a3f0b4-8a17-4c22-9b61-2a4e6d81b0c5"/*WriteObj*/,
+  "Inputs": [
+    {
+      "Id": "1c7a6e9f-4b85-4d23-8a07-3e9d5f2b1c64"/*FileName*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "3a9d5c1e-7b42-4f86-a1e9-6c0d2f83a5b7"/*TriggerWrite*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "6e1f2d9a-3c87-4b15-9e24-5a0b8d7f1c63"/*MeshBuffer*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "8f4b7e2c-1a6d-4e93-b0c5-2d9a3f17e8b4"/*Folder*/,
+      "DefaultValue": "Paste a full folder path here"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
