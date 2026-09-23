@@ -62,7 +62,9 @@ internal static class SetupActions
         return new OutputDefinition.Patch { SliceId = sliceId, Quad = OutputDefinition.FullCanvasQuad() };
     }
 
-    internal static void AddSurface(SetupEntitySelection selection)
+    /// <param name="boardPosition">Where the card lands, in board metres — the point the request came from,
+    /// e.g. a menu's click. Null leaves the placement to the Board's own seeding.</param>
+    internal static void AddSurface(SetupEntitySelection selection, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -70,12 +72,110 @@ internal static class SetupActions
         SetupUndo.RunUndoable("Add surface", setup, () =>
                                                     {
                                                         var surface = new Surface { Name = $"Surface {setup.Surfaces.Count + 1}" };
+                                                        if (boardPosition != null)
+                                                            surface.BoardPlacement = new BoardPlacement { Position = boardPosition.Value };
+
                                                         setup.Surfaces.Add(surface);
                                                         selection.Select(SetupEntityKinds.Surface, surface.Id);
                                                     });
     }
 
-    internal static void AddProp(SetupEntitySelection selection)
+    /// <param name="boardPosition">Where it stands, in board metres. A prop has no card of its own, so this is
+    /// its place in the stage; null leaves it at the origin.</param>
+    /// <summary>How many of the selected entities are surfaces — what <see cref="ArrangeSurfacesAlongWalls"/> would act on.</summary>
+    internal static int CountSelectedSurfaces(SetupEntitySelection selection)
+    {
+        var count = 0;
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            if (selection.Targets[i].Kind == SetupEntityKinds.Surface)
+                count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// Lays the selected surfaces out on the Board side by side, in the order their walls run around the floor
+    /// plan — the room unfolded into an elevation. Surfaces that stand on no plan follow, ordered as they lie
+    /// now, so a mixed selection still lands in a readable row. Board placement only: nothing in the stage,
+    /// the routing or the calibration moves.
+    /// </summary>
+    internal static void ArrangeSurfacesAlongWalls(SetupEntitySelection selection, Setup setup)
+    {
+        var selected = new List<Surface>();
+        for (var i = 0; i < selection.Targets.Count; i++)
+        {
+            var target = selection.Targets[i];
+            if (target.Kind != SetupEntityKinds.Surface)
+                continue;
+
+            var surface = setup.FindSurface(target.EntityId);
+            if (surface != null && !selected.Contains(surface))
+                selected.Add(surface);
+        }
+
+        if (selected.Count < 2)
+            return;
+
+        // Walls first, plan by plan and edge by edge around each; then whatever is left, west to east.
+        var ordered = new List<Surface>(selected.Count);
+        foreach (var plan in setup.FloorPlans)
+        {
+            for (var segment = 0; segment < plan.SegmentCount; segment++)
+            {
+                var wall = setup.FindSurface(plan.WallOf(segment));
+                if (wall != null && selected.Contains(wall) && !ordered.Contains(wall))
+                    ordered.Add(wall);
+            }
+        }
+
+        var rest = new List<Surface>();
+        foreach (var surface in selected)
+        {
+            if (!ordered.Contains(surface))
+                rest.Add(surface);
+        }
+
+        rest.Sort((a, b) => LeftEdgeOf(a).CompareTo(LeftEdgeOf(b)));
+        ordered.AddRange(rest);
+
+        // The row starts where the selection already is, so an arrange doesn't fling the cards across the Board.
+        var left = float.MaxValue;
+        var bottom = float.MaxValue;
+        foreach (var surface in ordered)
+        {
+            left = MathF.Min(left, LeftEdgeOf(surface));
+            bottom = MathF.Min(bottom, BottomEdgeOf(surface));
+        }
+
+        SetupUndo.RunUndoable("Arrange surfaces", setup, () =>
+                                                         {
+                                                             var x = left;
+                                                             foreach (var surface in ordered)
+                                                             {
+                                                                 var anchor = surface.AnchorInMeters;
+                                                                 surface.BoardPlacement ??= new BoardPlacement();
+                                                                 surface.BoardPlacement.Position = new Vector2(x + anchor.X, bottom + anchor.Y);
+                                                                 x += surface.SizeInMeters.X + ArrangeGapInMeters;
+                                                             }
+                                                         });
+    }
+
+    private static float LeftEdgeOf(Surface surface)
+    {
+        return (surface.BoardPlacement?.Position.X ?? 0) - surface.AnchorInMeters.X;
+    }
+
+    private static float BottomEdgeOf(Surface surface)
+    {
+        return (surface.BoardPlacement?.Position.Y ?? 0) - surface.AnchorInMeters.Y;
+    }
+
+    /** Enough of a seam to tell two walls apart, far less than a wall's own width. */
+    private const float ArrangeGapInMeters = 0.1f;
+
+    internal static void AddProp(SetupEntitySelection selection, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -83,13 +183,16 @@ internal static class SetupActions
         SetupUndo.RunUndoable("Add prop", setup, () =>
                                                  {
                                                      var prop = new Prop();
+                                                     if (boardPosition != null)
+                                                         prop.Position = new Vector3(boardPosition.Value.X, boardPosition.Value.Y, prop.Position.Z);
+
                                                      setup.Props.Add(prop);
                                                      selection.Select(SetupEntityKinds.Prop, prop.Id);
                                                  });
     }
 
     /// <summary>A closed rectangular floor plan of <paramref name="size"/> metres, with or without its floor surface.</summary>
-    internal static void AddFloorPlan(SetupEntitySelection selection, Vector2 size, bool withFloor)
+    internal static void AddFloorPlan(SetupEntitySelection selection, Vector2 size, bool withFloor, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -97,6 +200,9 @@ internal static class SetupActions
         SetupUndo.RunUndoable("Add floor plan", setup, () =>
                                                        {
                                                            var plan = FloorPlanSync.CreateRectangle(setup, size, withFloor);
+                                                           if (boardPosition != null)
+                                                               plan.BoardPlacement = new BoardPlacement { Position = boardPosition.Value };
+
                                                            selection.Select(SetupEntityKinds.FloorPlan, plan.Id);
                                                        });
     }
@@ -272,7 +378,7 @@ internal static class SetupActions
                                                             });
     }
 
-    internal static void AddReferenceImage(SetupEntitySelection selection)
+    internal static void AddReferenceImage(SetupEntitySelection selection, Vector2? boardPosition = null)
     {
         if (!OutputSetupHandling.TryGetActiveSetup(out var setup, out _))
             return;
@@ -280,6 +386,9 @@ internal static class SetupActions
         SetupUndo.RunUndoable("Add reference image", setup, () =>
                                                             {
                                                                 var image = new ReferenceImage { Name = $"Image {setup.ReferenceImages.Count + 1}" };
+                                                                if (boardPosition != null)
+                                                                    image.BoardPlacement = new BoardPlacement { Position = boardPosition.Value };
+
                                                                 setup.ReferenceImages.Add(image);
                                                                 selection.Select(SetupEntityKinds.ReferenceImage, image.Id);
                                                             });
