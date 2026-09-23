@@ -268,6 +268,17 @@ public sealed class OutputDefinition
     /// </summary>
     public Int2 CanvasResolution;
 
+    /// <summary>
+    /// The largest pixel size anything in a setup may ask for — a D3D11 texture dimension limit, so a canvas,
+    /// a stream or a send beyond it would simply fail to allocate. 0 stays legal: it means "follow the plug".
+    /// </summary>
+    public const int MaxResolution = 16384;
+
+    public static Int2 ClampResolution(Int2 resolution)
+    {
+        return new Int2(Math.Clamp(resolution.Width, 0, MaxResolution), Math.Clamp(resolution.Height, 0, MaxResolution));
+    }
+
     /// <summary>Whether this canvas takes its size from the plug it is bound to.</summary>
     public bool FollowsPlug => CanvasResolution.Width <= 0 || CanvasResolution.Height <= 0;
 
@@ -374,7 +385,7 @@ public sealed class OutputDefinition
                              Id = OutputJson.ReadGuid(token["Id"]),
                              Name = token.ReadValueSafe("Name", string.Empty) ?? string.Empty,
                              Kind = token.ReadValueSafe("Kind", Kinds.Display) ?? Kinds.Display,
-                             CanvasResolution = OutputJson.ReadInt2(token["CanvasResolution"], new Int2(1920, 1080)),
+                             CanvasResolution = ClampResolution(OutputJson.ReadInt2(token["CanvasResolution"], new Int2(1920, 1080))),
                              IsSending = token.ReadValueSafe("Send", true),
                              Patches = token.ReadListSafe("Patches", Patch.ReadFromJson),
                              ReferenceImageId = OutputJson.ReadGuid(token["ReferenceImage"]),

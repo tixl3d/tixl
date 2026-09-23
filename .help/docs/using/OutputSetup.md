@@ -41,7 +41,7 @@ Each row's context menu offers Rename, Duplicate and Delete. `Del` removes the s
 
 ### Board
 
-The Board shows every entity as a card at its neutral placement, in metres: sources, surfaces, outputs, reference photos and props. It answers "what is in this venue and how big is it". Drag a card by its frame or its name label to move it; the handle at the top-right corner scales it. Selecting a card selects the entity everywhere else; right-click a card or its label for the entity's menu. Right-click empty Board to add a surface, a reference image or a prop.
+The Board shows every entity as a card at its neutral placement, in metres: sources, surfaces, outputs, reference photos and props. It answers "what is in this venue and how big is it". Drag a card by its frame or its name label to move it; the handle at the top-right corner scales it. Selecting a card selects the entity everywhere else; right-click a card or its label for the entity's menu. Right-click empty Board to add a surface, a reference image, a prop or a floor plan.
 
 Double-clicking a card opens its tab: a surface opens **Straight**, an output opens **Output**. Choosing **Board**, or clicking empty strip, returns.
 
@@ -65,7 +65,7 @@ A floor plan is a card on the Board: a run of corners in metres, drawn at the sa
 
 Start one with **Add Floor Plan...** in the Board's `+` menu, which asks for a rectangle's width and depth, or from a surface you already have: its context menu offers **Start Floor Plan from Bottom Edge** (the surface becomes the first wall of an open run) and **Use as Floor of New Plan**. Walls are raised per edge on the plan's card, and each wall's name and length are written along its edge on the Board. All walls stand on one ground level.
 
-**Drawing walls.** A selected open plan shows a plus at each end of its run; click it, or **Draw Walls** in the plan's menu, and a line follows the cursor from that corner, snapped to 45° steps of the last wall (hold Shift to draw free). Type a number to set the length, and each click or Enter plants the next corner with a wall on the new edge, one undo step each. Clicking the run's other end closes the room. Escape or a right-click ends the tool. Starting a plan from a surface's bottom edge enters the tool right away, so a traced wall becomes a room in a few clicks.
+**Drawing walls.** An open plan shows a plus at each end of its run — selected or not, like its corners and edges; click it, or **Draw Walls** in the plan's menu, and a line follows the cursor from that corner, snapped to 45° steps of the last wall or to the plan's own horizontal and vertical, whichever is nearer (hold Shift to draw free). Type a number to set the length, and each click or Enter plants the next corner with a wall on the new edge, one undo step each. Clicking the run's other end closes the room. Escape or a right-click ends the tool. Starting a plan from a surface's bottom edge enters the tool right away, so a traced wall becomes a room in a few clicks.
 
 ## The stage in the graph
 
@@ -73,7 +73,7 @@ Start one with **Add Floor Plan...** in the Board's `+` menu, which asks for a r
 
 ## Reference images and props
 
-A **reference image** is a photo or a plan of the venue. To trace a floor plan from a scanned plan, give the image a **scale**: choose **Set Scale...** in its card's menu, click both ends of a length you know on the drawing and type that length. The card then stands at true size on the Board, the line stays on it with its length, its ends can be dragged and the length edited on the card. **Lock** the image and it becomes a backdrop: drawn beneath every card and never picked, moved or fenced, so a floor plan can be drawn over it corner by corner. An open run also closes by dragging one of its end corners onto the other. Trace a surface on a photo to define it from the picture, then measure it with line annotations to give it real dimensions. Plans are orthographic and only need a scale. A **prop** is a scale reference in the stage — a 1.70 m person, a table — so sizes can be sanity-checked at a glance.
+A **reference image** is a photo or a plan of the venue. To trace a floor plan from a scanned plan, give the image a **scale**: choose **Set Scale...** in its card's menu, click both ends of a length you know on the drawing and type that length. The card then stands at true size on the Board, the line stays on it with its length, its ends can be dragged and the length edited on the card. **Lock** the image and it becomes a backdrop: drawn beneath every card and never picked, moved or fenced, so a floor plan can be drawn over it corner by corner. Since a locked image answers no click, right-click it and the Board's menu offers **Unlock \<name\>** for whichever locked images lie under the cursor. An open run also closes by dragging one of its end corners onto the other. Trace a surface on a photo to define it from the picture, then measure it with line annotations to give it real dimensions. Plans are orthographic and only need a scale. A **prop** is a scale reference in the stage — a 1.70 m person, a table — so sizes can be sanity-checked at a glance.
 
 ## Presenting
 
