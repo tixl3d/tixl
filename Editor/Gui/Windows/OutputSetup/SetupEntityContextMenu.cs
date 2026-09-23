@@ -58,7 +58,7 @@ internal static class SetupEntityContextMenu
         CustomComponents.MenuItemsDisabled = false;
 
         // Acts on the selection as a whole, like Delete below, so it lives outside the disabled block.
-        if (SetupActions.CountSelectedSurfaces(selection) > 1 && CustomComponents.DrawMenuItem(6, "Arrange along Walls"))
+        if (SetupActions.CountSelectedSurfaces(selection) > 1 && CustomComponents.DrawMenuItem(6, "Arrange Walls"))
             SetupActions.ArrangeSurfacesAlongWalls(selection, setup);
 
         if (SetupActions.CountSelectedSurfaces(selection) > 1)

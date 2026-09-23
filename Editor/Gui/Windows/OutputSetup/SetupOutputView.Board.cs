@@ -370,16 +370,18 @@ internal sealed partial class SetupOutputView
         if (pulse > 0.001f)
             dl.AddRectFilled(sMin, sMax, kindColor.Fade(pulse * 0.15f * fade), 3 * scale);
 
-        var frameColor = isSelected ? kindColor : PulseColor(kindColor.Fade(hovered ? 1f : 0.7f), pulse);
-        SetupStrokes.DrawFrame(dl, sMin, sMax, frameColor.Fade(fade), isSelected, rounding);
-
         // Name above the card's top-left, in the kind's label hue (bold while selected) on a faint shade; the
-        // metadata only while hovered or selected — it answers a question, it doesn't label.
+        // metadata only while hovered or selected — it answers a question, it doesn't label. Drawn *under* the
+        // frame: the label's shade ends where the card begins, and the frame now sits outside the card, so
+        // drawing the shade last left a dark seam along the card's top edge.
         dl.AddRectFilled(labelMin, labelMax, UiColors.BackgroundFull.Fade(0.3f * fade), rounding);
         dl.AddText(nameFont, nameFont.FontSize, labelMin + new Vector2(pad, pad), SetupColors.LabelFor(kind).Fade(fade), name);
         if (meta != null && (hovered || isSelected))
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(labelMax.X + pad, labelMax.Y - pad - Fonts.FontSmall.FontSize),
                        UiColors.TextMuted.Fade(0.5f * fade), meta);
+
+        var frameColor = isSelected ? kindColor : PulseColor(kindColor.Fade(hovered ? 1f : 0.7f), pulse);
+        SetupStrokes.DrawFrame(dl, sMin, sMax, frameColor.Fade(fade), isSelected, rounding);
 
         // A locked image is a backdrop: it shows its lock beside the name and takes no press of any kind.
         if (kind == SetupEntityKinds.ReferenceImage && setup.FindReferenceImage(id) is { IsLocked: true })

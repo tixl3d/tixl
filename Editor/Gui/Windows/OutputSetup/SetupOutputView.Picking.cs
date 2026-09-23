@@ -113,8 +113,12 @@ internal sealed partial class SetupOutputView
 
             if (canPick && hit.MenuRequested)
             {
-                // Right-click selects too, so the menu always acts on what's under the cursor.
-                SelectPicked(selection, hit.Kind, hit.Id);
+                // Right-clicking *inside* the selection keeps it, so the menu acts on the whole thing — which is
+                // what its own entries say ("Delete 5", "Arrange along Walls"). Only a right-click on something
+                // unselected picks it first, so the menu is never about an entity nobody pointed at.
+                if (selection == null || !selection.IsSelected(hit.Kind, hit.Id))
+                    SelectPicked(selection, hit.Kind, hit.Id);
+
                 _menuKind = hit.Kind;
                 _menuId = hit.Id;
                 ImGui.OpenPopup(PickMenuId);

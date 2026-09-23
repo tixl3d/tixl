@@ -115,9 +115,12 @@ internal sealed class SetupFlowOutliner
         var leaveWidth = 0f;
         if (_onLeave != null)
         {
-            leaveWidth = height;
-            ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height * 2, rowPos.Y + 3 * scale));
-            if (CustomComponents.IconButton(Icon.Close, Vector2.Zero))
+            // Labelled rather than an X, like the "Output Setup" button that leads in here: a lone X in a
+            // window's top right reads as "close the window".
+            const string leaveLabel = "Close";
+            leaveWidth = ImGui.CalcTextSize(leaveLabel).X + ImGui.GetStyle().FramePadding.X * 2;
+            ImGui.SetCursorScreenPos(new Vector2(rowRight - toggleWidth - height - leaveWidth, rowPos.Y + 3 * scale));
+            if (CustomComponents.StateButton(leaveLabel, CustomComponents.ButtonStates.Default))
                 _onLeave();
 
             CustomComponents.TooltipForLastItem("Leave the output setup", "Back to the operator view; the Output Setup button in its toolbar returns here.");
