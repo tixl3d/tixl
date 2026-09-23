@@ -209,6 +209,18 @@
       "score": 0.96
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 585,
+      "duration": 59,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=585s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 50,
+      "note": "Tried as seed sets for a Voronoi fracture. The geometry side has no grid-point generator yet, so a scatter-in-volume stood in.",
+      "score": 0.24
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 4315,
       "duration": 65,
@@ -305,6 +317,30 @@
       "confidence": 75,
       "note": "Instances a small point cloud at each target point, e.g. parenting an emission sphere onto a single point crawling along a text outline so bursts follow the stroke.",
       "score": 0.72
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3915,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3915s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 45,
+      "note": "A community-made variant that blends between two point shapes was announced.",
+      "score": 0.45
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 13352,
+      "duration": 56,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=13352s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Gotcha",
+      "confidence": 62,
+      "note": "Blending between two point sets for repeated instances only works when both sets have the same point count (e.g. two 10-point radial rings).",
+      "score": 1.2375
     },
     {
       "video": "Mqi2mEyd4jQ",
@@ -1025,6 +1061,18 @@
       "score": 2.7
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 5415,
+      "duration": 81,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=5415s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 50,
+      "note": "Previewing the finished mapping by feeding the setup output's projection in as base colour on stage geometry.",
+      "score": 0.24
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 1590,
       "duration": 180,
@@ -1233,6 +1281,18 @@
       "score": 0.3375
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7879,
+      "duration": 45,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7879s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A simple beat-locked pulse: an animated value driving a blob, which catches up once beat sync locks.",
+      "score": 0.24
+    },
+    {
       "video": "MAyETISMFi0",
       "startSecond": 968,
       "duration": 46,
@@ -1243,6 +1303,30 @@
       "confidence": 85,
       "note": "Drop it onto a parameter for keyframe-free motion: it oscillates at a rate (e.g. 120 BPM) and its shape can switch from a pulse to a back-and-forth ramp.",
       "score": 1.8
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5736,
+      "duration": 76,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5736s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 50,
+      "note": "When an animator seems frozen, check whether the playhead is actually inside the active range before blaming the op. A raw Time connection was used as a fallback.",
+      "score": 0.22
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9034,
+      "duration": 118,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9034s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 58,
+      "note": "After extracting a clip, set the source region correctly or the timing is off. BPM-synced animators inside it lose their phase when moved, unlike plain keyframes.",
+      "score": 0.66
     },
     {
       "video": "PWCfyUnFGdg",
@@ -1427,6 +1511,18 @@
       "confidence": 80,
       "note": "Declare a Texture2DArray in the additional-defines on the same t-register as an image input, sample it with float3(UV, slice), and drive the slice from a gradient image to displace pixels through time — brighter areas reach further back into the frame history.",
       "score": 0.96
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3053,
+      "duration": 73,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3053s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Parameters",
+      "confidence": 65,
+      "note": "Quantise a gradient into bands and count the highlight index up (with highlight opacity raised) to make a band chase across a surface.",
+      "score": 0.66
     },
     {
       "video": "MAyETISMFi0",
@@ -1843,6 +1939,18 @@
       "score": 3.6
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7620,
+      "duration": 40,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7620s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Gotcha",
+      "confidence": 58,
+      "note": "Rendering through a layer and a render target twice just to force an aspect ratio works, but it's a roundabout, costly workaround.",
+      "score": 0.4125
+    },
+    {
       "video": "_pEhs2jQ3Gg",
       "startSecond": 2153,
       "duration": 309,
@@ -1965,6 +2073,18 @@
       "confidence": 72,
       "note": "Remap particle lifetime through a white→blue gradient to color the spray by age without a separate color operator.",
       "score": 0.54
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13260,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13260s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 52,
+      "note": "Pairing a note trigger with a gradient flash to check that every hit fires.",
+      "score": 0.24
     },
     {
       "video": "PWCfyUnFGdg",
@@ -2099,6 +2219,18 @@
       "confidence": 75,
       "note": "Invert a grayscale image fastest by swapping the dark and light target colors; the same two color anchors plus contrast controls also give quick teal-orange style grades, slightly cheaper than a full color remap.",
       "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2504,
+      "duration": 70,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2504s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "Watching a projection through a webcam in the editor, inverting the feed with a colour remap to make the projected area stand out.",
+      "score": 0.24
     },
     {
       "video": "Q2nHQ-5msGQ",
@@ -2259,6 +2391,18 @@
       "confidence": 75,
       "note": "A final color-fringing pass at the edges to lend the rendered image a lens-like finish.",
       "score": 0.54
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7899,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7899s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "Part of a post chain: chromatic aberration with lens distortion, with an image transform used as camera shake.",
+      "score": 0.252
     }
   ],
   "op:Lib.point.generate.RadialPoints": [
@@ -2357,6 +2501,54 @@
       "confidence": 75,
       "note": "Unlike LinePoints or GridPoints it lacked a per-point color; the F1/F2 factor-plus-offset pair (also discussed here) drives a value range along the radius that turned out useful for many setups.",
       "score": 1.2375
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6060,
+      "duration": 111,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6060s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "Quick immersive test content: tori instanced on radial points with randomised scale and rotation, slowed down, with fog as a distance cue.",
+      "score": 0.24
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 13352,
+      "duration": 56,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=13352s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Gotcha",
+      "confidence": 62,
+      "note": "Blending between two point sets for repeated instances only works when both sets have the same point count (e.g. two 10-point radial rings).",
+      "score": 1.2375
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 585,
+      "duration": 59,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=585s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 50,
+      "note": "Tried as seed sets for a Voronoi fracture. The geometry side has no grid-point generator yet, so a scatter-in-volume stood in.",
+      "score": 0.24
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 2103,
+      "duration": 59,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=2103s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "A radial point set as Voronoi seeds slices space into cake-wedge pieces, because each region belongs to its nearest seed. Fewer points give fewer, larger shards.",
+      "score": 0.72
     },
     {
       "video": "PWCfyUnFGdg",
@@ -2751,6 +2943,18 @@
       "score": 1.5
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1583,
+      "duration": 188,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1583s",
+      "depth": "in-depth",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "Resolution flows as a request chain: an output asks for a size (e.g. override to 720p for a weak laptop), a render target with its own fixed size overrides the context for everything upstream, and entering 0×0 makes it inherit the requested size again.",
+      "score": 4.0
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 760,
       "duration": 55,
@@ -3005,6 +3209,18 @@
       "score": 3.0
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 8193,
+      "duration": 152,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=8193s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "To move an effect between the feedback stage and the post chain, combine it into its own operator so it can be bypassed or re-inserted instead of juggling switches.",
+      "score": 0.3375
+    },
+    {
       "video": "MAyETISMFi0",
       "startSecond": 683,
       "duration": 37,
@@ -3015,6 +3231,42 @@
       "confidence": 80,
       "note": "The whole composition is one node graph you freely arrange operators on, then dive into sub-graphs; framed for someone coming from layer-based tools.",
       "score": 0.375
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7269,
+      "duration": 89,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7269s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 60,
+      "note": "A strict left-to-right layout (effects → scenes → picker → overlays → post → output), combined with the graph's live-connection highlighting, shows at a glance which effect and crossfade is running.",
+      "score": 1.0125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8651,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8651s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 50,
+      "note": "Select a branch and press Shift+D to disable it and check what it contributes. Caching can hide the change.",
+      "score": 0.1008
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 11905,
+      "duration": 180,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=11905s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "A community extension locks selected nodes (right-click → lock) so parameters stay tweakable but the graph can't be changed at an unattended installation. A locked-UI mode built on snapshot groups was suggested as the built-in version.",
+      "score": 1.0125
     },
     {
       "video": "PJ9QwFt1r5k",
@@ -3357,6 +3609,42 @@
       "score": 3.6
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6060,
+      "duration": 111,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6060s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "Quick immersive test content: tori instanced on radial points with randomised scale and rotation, slowed down, with fog as a distance cue.",
+      "score": 0.24
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 8896,
+      "duration": 243,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=8896s",
+      "depth": "in-depth",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 72,
+      "note": "Separator points are skipped while drawing, so a very sparse buffer (each cell split into 8 with 7 marked as separators) costs little; a later pass could compact it.",
+      "score": 1.5
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 11916,
+      "duration": 104,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=11916s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 75,
+      "note": "Hide a point by writing NaN into its scale: every point draw op then skips it, so a field, the source points or a parameter can decide what gets drawn.",
+      "score": 2.7
+    },
+    {
       "video": "LjmnVL7azYw",
       "startSecond": 51,
       "duration": 271,
@@ -3553,6 +3841,30 @@
       "confidence": 78,
       "note": "Scatter cube instances over a single-row grid by drawing the mesh at grid points, adjusting the grid's Y count to one layer and the cube pivot to sit on the ground.",
       "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 384,
+      "duration": 66,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=384s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Comparison",
+      "confidence": 60,
+      "note": "The new procedural box geometry converted to a mesh looks the same, but CubeMesh still adds pivot, stretch and segmentation controls; both produce UV coordinates.",
+      "score": 0.24
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 456,
+      "duration": 75,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=456s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 65,
+      "note": "Why a triangle-mesh cube can't be bevelled: each corner is stored as three split vertices (one per face normal) in flat vertex and index buffers, so the topology needed to know they're fused is gone.",
+      "score": 1.125
     },
     {
       "video": "fFpMpa7qTB4",
@@ -3811,6 +4123,42 @@
       "score": 0.0
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 6980,
+      "duration": 110,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=6980s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 75,
+      "note": "In 4.3 an older project's soundtrack is converted to an audio clip you can move and align. The main soundtrack draws a waveform (or spectrum) behind the timeline, and the waveform makes snare hits easier to spot.",
+      "score": 3.0
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9718,
+      "duration": 58,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9718s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "Set a loop range and press Shift+L to play slowly, which helps when syncing keys to music. J/K/L control playback and Shift changes the speed.",
+      "score": 2.7
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9806,
+      "duration": 52,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9806s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 68,
+      "note": "Switch time display to bars and snap the loop to whole bars (1 or 4) so the loop repeats in time with the music while you tweak a section.",
+      "score": 2.7
+    },
+    {
       "video": "PJ9QwFt1r5k",
       "startSecond": 292,
       "duration": 22,
@@ -4057,6 +4405,18 @@
       "score": 0.72
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7270,
+      "duration": 101,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7270s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 45,
+      "note": "Two throwaway image sources set up to test switching what goes to a bound output in a VJ setup.",
+      "score": 1.2
+    },
+    {
       "video": "MAyETISMFi0",
       "startSecond": 762,
       "duration": 27,
@@ -4153,6 +4513,18 @@
       "confidence": 70,
       "note": "Restricting a path parameter's file filter (here to .obj) makes the resource picker show only matching files; many operators were missing these filters and returned noise or nothing.",
       "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 590,
+      "duration": 34,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=590s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A five-node test scene (mesh, orbiting camera, feedback trails, edge detection) for quickly getting a lively image to route to an output.",
+      "score": 0.24
     },
     {
       "video": "yy1kKa-wucA",
@@ -4379,6 +4751,18 @@
       "score": 1.2375
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 590,
+      "duration": 34,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=590s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A five-node test scene (mesh, orbiting camera, feedback trails, edge detection) for quickly getting a lively image to route to an output.",
+      "score": 0.24
+    },
+    {
       "video": "M7eOmqiUOZM",
       "startSecond": 21,
       "duration": 1019,
@@ -4505,6 +4889,18 @@
       "confidence": 75,
       "note": "Feeding a blurred text image in as a height map gives an almost-3D extruded look, and reflecting the field at an upward plane normal mirrors it into a grounded shape.",
       "score": 0.72
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 10895,
+      "duration": 62,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=10895s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 65,
+      "note": "Image-based fields bring extra resources (texture plus samplers) into the shader; a template stripped too far fails to compile because the wrapped sampler is missing.",
+      "score": 0.66
     },
     {
       "video": "PJ9QwFt1r5k",
@@ -5691,6 +6087,18 @@
       "score": 0.72
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9576,
+      "duration": 114,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9576s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 75,
+      "note": "A good template to duplicate for your own field-driven point op because it already has both a field input and a points input; test it with a sphere SDF, then \"duplicate as new type\".",
+      "score": 2.7
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 8850,
       "duration": 300,
@@ -5701,6 +6109,18 @@
       "confidence": 72,
       "note": "Turn an SDF surface into a directional field and use it as a vector force so particles accelerate along the surface normal; invert the amount and the shape becomes an attractor you can drag through the cloud.",
       "score": 0.96
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 1134,
+      "duration": 58,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=1134s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 72,
+      "note": "Write F1 with a sphere field and move the sphere so only fragments inside it get scattered, giving a localized explosion. It errors until a field is connected, and you must make sure it writes the strength attribute rather than scale.",
+      "score": 0.72
     },
     {
       "video": "fFpMpa7qTB4",
@@ -6013,6 +6433,78 @@
       "score": 4.4
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9576,
+      "duration": 114,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9576s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 75,
+      "note": "A good template to duplicate for your own field-driven point op because it already has both a field input and a points input; test it with a sphere SDF, then \"duplicate as new type\".",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9853,
+      "duration": 273,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9853s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "Anatomy of a compute-shader point op: an execute-buffer-update output runs the shader, dispatch count is derived from the input buffer length and a 64-thread group, then float params, field resources and a UAV output buffer sized like the input.",
+      "score": 4.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 10126,
+      "duration": 382,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=10126s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Copy its .hlsl into your project's shader folder, edit it in VS Code with the HLSL Tools extension (settings are pre-written there), and on save TiXL auto-registers the file so you can point the duplicate at it; strip unused params step by step while checking it still compiles.",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 10561,
+      "duration": 204,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=10561s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "The `register(bN)` slots map in order to the connected float-parameter buffers, so connection order matters; always keep the point-struct and quaternion includes.",
+      "score": 3.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 10964,
+      "duration": 239,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=10964s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "Sampler states set how textures are read: wire a clamp and a wrap sampler into the op, and add your own point sampler when you need unfiltered texel lookups.",
+      "score": 2.7
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 1134,
+      "duration": 58,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=1134s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 72,
+      "note": "Write F1 with a sphere field and move the sphere so only fragments inside it get scattered, giving a localized explosion. It errors until a field is connected, and you must make sure it writes the strength attribute rather than scale.",
+      "score": 0.72
+    },
+    {
       "video": "PJ9QwFt1r5k",
       "startSecond": 630,
       "duration": 16,
@@ -6229,6 +6721,18 @@
       "confidence": 80,
       "note": "The default changed to cell mode (fixed spacing between points) rather than bounds mode (a fixed outer extent filled by the count); GridPointsOld preserves the old default for existing projects.",
       "score": 1.2375
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 8604,
+      "duration": 149,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=8604s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 60,
+      "note": "Treat each cell as a point (position plus scale as its bounds) generated like a grid-points compute shader, so fields can then act on the cells.",
+      "score": 1.125
     },
     {
       "video": "Mqi2mEyd4jQ",
@@ -6471,6 +6975,18 @@
       "confidence": 80,
       "note": "Temporarily wire it in (and pin the output) just to visualize a generated point set while you tune the generator feeding it.",
       "score": 0.216
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 11916,
+      "duration": 104,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=11916s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 75,
+      "note": "Hide a point by writing NaN into its scale: every point draw op then skips it, so a field, the source points or a parameter can decide what gets drawn.",
+      "score": 2.7
     },
     {
       "video": "SMKigWtk_LQ",
@@ -7153,6 +7669,18 @@
       "score": 4.4
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9387,
+      "duration": 96,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9387s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Performance",
+      "confidence": 72,
+      "note": "Its buffer always holds the full particle count; skipping dead particles is negligible next to drawing live ones, while compacting a buffer requires an expensive GPU-to-CPU readback.",
+      "score": 3.0
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 270,
       "duration": 160,
@@ -7795,6 +8323,30 @@
       "score": 4.8
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 590,
+      "duration": 34,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=590s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A five-node test scene (mesh, orbiting camera, feedback trails, edge detection) for quickly getting a lively image to route to an output.",
+      "score": 0.24
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 5496,
+      "duration": 210,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=5496s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "First attempt at rendering 360° content for projection onto the mapped walls; the projector-camera draw stage needs more prep than shown.",
+      "score": 0.24
+    },
+    {
       "video": "PJ9QwFt1r5k",
       "startSecond": 777,
       "duration": 10,
@@ -7914,6 +8466,18 @@
       "purpose": "Tip",
       "confidence": 72,
       "note": "Right-click \"set thumbnail\" on a symbol to capture the current output as its library preview — works for both the operator and its example scene.",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9756,
+      "duration": 82,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9756s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "A symbol duplicated into the wrong namespace can be dragged into another namespace or even another project in the library (refresh first); avoid doing this with core library ops like Layer2d or video.",
       "score": 2.7
     },
     {
@@ -8281,6 +8845,18 @@
       "score": 3.3
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7924,
+      "duration": 126,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7924s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 45,
+      "note": "Beat syncing listens to the selected audio device; a wrong input/output device in settings makes it appear dead.",
+      "score": 0.22
+    },
+    {
       "video": "asiY0Jo1oJw",
       "startSecond": 815,
       "duration": 6,
@@ -8611,6 +9187,18 @@
       "confidence": 75,
       "note": "Clicking a parameter's input opens a typed search box to drop a driving operator straight onto that input; Alt-clicking instead adds a keyframe.",
       "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7090,
+      "duration": 17,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7090s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 60,
+      "note": "Ctrl+F to jump straight to an op (here the audio clip) in a huge project.",
+      "score": 0.432
     },
     {
       "video": "Q2nHQ-5msGQ",
@@ -9227,6 +9815,18 @@
       "score": 2.7
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9636,
+      "duration": 35,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9636s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 60,
+      "note": "Adding \"also known as letterbox\" to the description makes the symbol browser find it under that name.",
+      "score": 0.9
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 3117,
       "duration": 124,
@@ -9593,6 +10193,18 @@
       "score": 3.0
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1583,
+      "duration": 188,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1583s",
+      "depth": "in-depth",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "Resolution flows as a request chain: an output asks for a size (e.g. override to 720p for a weak laptop), a render target with its own fixed size overrides the context for everything upstream, and entering 0×0 makes it inherit the requested size again.",
+      "score": 4.0
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 2750,
       "duration": 100,
@@ -9603,6 +10215,18 @@
       "confidence": 72,
       "note": "Add a second texture output to a wrapped operator (right-click → add output, set type to texture), then a 2D layer lets you place that rendered image as a plane in 3D space.",
       "score": 3.6
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7620,
+      "duration": 40,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7620s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Gotcha",
+      "confidence": 58,
+      "note": "Rendering through a layer and a render target twice just to force an aspect ratio works, but it's a roundabout, costly workaround.",
+      "score": 0.4125
     },
     {
       "video": "SMKigWtk_LQ",
@@ -9853,6 +10477,18 @@
       "score": 0.54
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5504,
+      "duration": 68,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5504s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "Rather than hand-tuning tangents on both camera position and target keyframes, run coarse keyframed positions through damping and Perlin noise for fluid motion, and blend to an orbit camera where that fits.",
+      "score": 1.0125
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 5544,
       "duration": 96,
@@ -10025,6 +10661,18 @@
       "score": 3.6
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13260,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13260s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 52,
+      "note": "Pairing a note trigger with a gradient flash to check that every hit fires.",
+      "score": 0.24
+    },
+    {
       "video": "Q2nHQ-5msGQ",
       "startSecond": 3990,
       "duration": 210,
@@ -10121,6 +10769,42 @@
       "confidence": 60,
       "note": "Disable color-coded warning overlays before baking an export, otherwise the QA colors end up in the final output data.",
       "score": 0.396
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 8836,
+      "duration": 60,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=8836s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Gotcha",
+      "confidence": 72,
+      "note": "It can't grow its buffer on the fly; for recursion, compute the maximum point count (max depth) up front and use that as the buffer length.",
+      "score": 3.3
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9251,
+      "duration": 75,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9251s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 60,
+      "note": "Prototype a subdivision effect in 2D first; producing one point per cell centre unlocks placing text, colours or meshes in each cell.",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9491,
+      "duration": 51,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9491s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Comparison",
+      "confidence": 72,
+      "note": "For complex logic, duplicate a real compute-shader point operator instead: its .hlsl file is editable in a proper editor with autocompletion rather than crammed into one text field.",
+      "score": 3.6
     },
     {
       "video": "Mqi2mEyd4jQ",
@@ -10671,6 +11355,30 @@
       "score": 3.3
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 590,
+      "duration": 34,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=590s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A five-node test scene (mesh, orbiting camera, feedback trails, edge detection) for quickly getting a lively image to route to an output.",
+      "score": 0.24
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5504,
+      "duration": 68,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5504s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "Rather than hand-tuning tangents on both camera position and target keyframes, run coarse keyframed positions through damping and Perlin noise for fluid motion, and blend to an orbit camera where that fits.",
+      "score": 1.0125
+    },
+    {
       "video": "SMKigWtk_LQ",
       "startSecond": 566,
       "duration": 19,
@@ -10755,6 +11463,18 @@
       "confidence": 75,
       "note": "Shows each point's orientation axes (blue = local Z), revealing that sphere- and mesh-scattered points aim outward like normals — which drives particle emit direction — while grid-generated points don't.",
       "score": 0.6
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 2162,
+      "duration": 28,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=2162s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 60,
+      "note": "Push seed points into a buffer and draw them with a visualizer in a small scene to see where they sit before feeding them into a fracture.",
+      "score": 0.1656
     },
     {
       "video": "PWCfyUnFGdg",
@@ -11091,6 +11811,102 @@
       "score": 0.375
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 8440,
+      "duration": 157,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=8440s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 55,
+      "note": "Idea: let field strength choose the subdivision level of a 3D grid, scaling instanced meshes to fit each cell.",
+      "score": 0.375
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 8753,
+      "duration": 79,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=8753s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 60,
+      "note": "Use a field's intensity or gradient to decide cell size, merging fine cells into coarser boxes where the field says so.",
+      "score": 1.125
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 10774,
+      "duration": 110,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=10774s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "The final shader is assembled with the field's own code: pin the field's generated-code output to see its params (e.g. sphere centre and radius) injected, in an order that may differ from the Parameter window.",
+      "score": 4.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 11686,
+      "duration": 214,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=11686s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Concept",
+      "confidence": 65,
+      "note": "Sample the field distance at each point's position, then snap it (e.g. via log2) to discrete levels to pick a grid resolution for that point.",
+      "score": 0.6
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 1722,
+      "duration": 104,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=1722s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 55,
+      "note": "Geometry-node \"scalar field\" inputs aren't GPU fields. They are deferred CPU functions (C# compiled on the fly) that get called per vertex or part when needed, which is separate from shader-graph SDF fields.",
+      "score": 3.0
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8753,
+      "duration": 54,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8753s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 50,
+      "note": "Modeling logo and greetings as 3D SDF scenes makes glitchy 3D text effects easy that flat images can't do.",
+      "score": 0.45
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 10781,
+      "duration": 188,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=10781s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "SDF shapes modelled in Blender with a modified Chisel plugin can be exported as HLSL code and used in TiXL as a custom field shader.",
+      "score": 0.45
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 11798,
+      "duration": 107,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=11798s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 55,
+      "note": "A community mesh-to-SDF baker (voxel or exact closest-point modes, smoothing, auto-rebake when the mesh changes) turns meshes into fields you can raymarch and combine.",
+      "score": 0.375
+    },
+    {
       "video": "Q2nHQ-5msGQ",
       "startSecond": 5010,
       "duration": 1130,
@@ -11163,6 +11979,30 @@
       "confidence": 75,
       "note": "Renders the scene twice by iterating an index variable that downstream reads to flip the eye offset's sign; the same construct can mess up particle systems, since each iteration re-evaluates the subtree.",
       "score": 0.72
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 5496,
+      "duration": 210,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=5496s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "First attempt at rendering 360° content for projection onto the mapped walls; the projector-camera draw stage needs more prep than shown.",
+      "score": 0.24
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6060,
+      "duration": 111,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6060s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "Quick immersive test content: tori instanced on radial points with randomised scale and rotation, slowed down, with fog as a distance cue.",
+      "score": 0.24
     },
     {
       "video": "PWCfyUnFGdg",
@@ -11357,6 +12197,18 @@
       "confidence": 70,
       "note": "The selected operator's knobs live in a side panel; the per-parameter keyframes show up alongside them.",
       "score": 0.105
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9587,
+      "duration": 49,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9587s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "Fix a symbol's default value on the fly with \"set as default\" after editing the parameter.",
+      "score": 0.9
     },
     {
       "video": "PJ9QwFt1r5k",
@@ -11591,6 +12443,42 @@
       "confidence": 80,
       "note": "Its range output is a float list across all keys; switching the input from a single event type to a controller range (e.g. all 108 keys) lets one node expose the whole keyboard as a list you can texture and visualize.",
       "score": 1.65
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13138,
+      "duration": 122,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13138s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "Enable simulating a MIDI clip's data and a regular MIDI input op receives it as if from a live device. Set the channel and a control range (e.g. 60–70) to pull note data out of a file.",
+      "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13290,
+      "duration": 54,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13290s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Parameters",
+      "confidence": 65,
+      "note": "Turn damping off for note data. One output gives the latest note value and another the trigger and velocity.",
+      "score": 0.66
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13452,
+      "duration": 125,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13452s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 62,
+      "note": "With a control range set it can output a float list of each key's current velocity (0–127, e.g. 100 floats for range 0–100), which a helper can accumulate or reduce to a normalized last-note value.",
+      "score": 3.0
     },
     {
       "video": "PJ9QwFt1r5k",
@@ -11931,6 +12819,30 @@
       "confidence": 75,
       "note": "Put it between a raw UI value and a target so one slider can feed two places with a meaningful range — e.g. mapping a 0..1 scale into the units the projector actually wants.",
       "score": 0.54
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 12986,
+      "duration": 117,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=12986s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 60,
+      "note": "Map a MIDI note range (the lowest to highest key your music uses) to 0–1 to drive a position, e.g. along a ring, for pitch following.",
+      "score": 1.0125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13577,
+      "duration": 51,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13577s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "Remap a normalized last-note value into a rotation and damp it slightly for a smooth pitch-following motion.",
+      "score": 3.6
     },
     {
       "video": "a5_xCfC_3m4",
@@ -12326,6 +13238,18 @@
       "score": 1.5
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 4625,
+      "duration": 129,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=4625s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 68,
+      "note": "Previously each extra output needed its own output-window context pinned to it. Binding a graph to an output now keeps it evaluating no matter what the output window shows, though every bound output costs frame time.",
+      "score": 3.0
+    },
+    {
       "video": "fFpMpa7qTB4",
       "startSecond": 2477,
       "duration": 163,
@@ -12674,6 +13598,18 @@
       "score": 0.0768
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7879,
+      "duration": 45,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7879s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A simple beat-locked pulse: an animated value driving a blob, which catches up once beat sync locks.",
+      "score": 0.24
+    },
+    {
       "video": "VNC-zr-JOjQ",
       "startSecond": 6886,
       "duration": 14,
@@ -12722,7 +13658,7 @@
       "score": 0.24
     }
   ],
-  "ui:OutputSettings": [
+  "ui:OutputResolution": [
     {
       "video": "5KX92VWEAG8",
       "startSecond": 5070,
@@ -12758,138 +13694,6 @@
       "confidence": 86,
       "note": "The \"magic\" 0,0 resolution: take the incoming image's size if one is connected, else the output window's; aspect is preserved by cropping left/right, never top/bottom.",
       "score": 4.0
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 491,
-      "duration": 84,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=491s",
-      "depth": "passing",
-      "style": "discussion",
-      "purpose": "Concept",
-      "confidence": 60,
-      "note": "Sending to several NDI or Spout targets today means opening multiple output windows in the screen manager, which is the stated motivation for the new output-management system.",
-      "score": 0.375
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 1506,
-      "duration": 269,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=1506s",
-      "depth": "explained",
-      "style": "discussion",
-      "purpose": "Concept",
-      "confidence": 80,
-      "note": "The design deliberately scopes out niche cases (dome projection, laser mapping, structured-light scanning) after studying MadMapper, Resolume, disguise and TouchDesigner, aiming for a data model that covers most use cases without media-server complexity.",
-      "score": 1.125
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 1780,
-      "duration": 220,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=1780s",
-      "depth": "explained",
-      "style": "discussion",
-      "purpose": "Concept",
-      "confidence": 80,
-      "note": "Physical display enumeration is unstable (a Windows update or replug can renumber projectors), so outputs get logical names and are re-bound to devices rather than referenced by display index; projectors are the hardest device because each needs its own perspective projection matrix.",
-      "score": 1.125
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 2002,
-      "duration": 173,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=2002s",
-      "depth": "explained",
-      "style": "experiment",
-      "purpose": "Example",
-      "confidence": 85,
-      "note": "Publish any texture with \"send to output\", rename it to a meaningful content name, create an output (projector by default), and bind it to a physical display via drag-and-drop — unused content is greyed out and selecting an output scrolls the graph to its source.",
-      "score": 0.72
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 2177,
-      "duration": 328,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=2177s",
-      "depth": "in-depth",
-      "style": "experiment",
-      "purpose": "Example",
-      "confidence": 85,
-      "note": "Crop content into slices, place them on surfaces that apply a perspective-correct homographic projection, straighten the region into an orthographic canvas for editing, then refine the mapping by marking lines known to be straight in the real room; entering one real-world dimension makes all sub-regions physically sized in meters.",
-      "score": 0.96
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 2960,
-      "duration": 215,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=2960s",
-      "depth": "explained",
-      "style": "answer",
-      "purpose": "Concept",
-      "confidence": 80,
-      "note": "Persistence is split into three layers — the project (operators/animation), the setup (content/surface/output arrangement), and a machine-specific binding of outputs to displays — so whole setups can be switched, and the meter-based size raster makes an object literally A4-sized on the wall.",
-      "score": 3.0
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 3328,
-      "duration": 112,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=3328s",
-      "depth": "explained",
-      "style": "answer",
-      "purpose": "Tip",
-      "confidence": 75,
-      "note": "Create a setup that is never bound to a real display to get a virtual debug overview: one surface with several sub-regions collecting the streams you want to monitor while working.",
-      "score": 2.7
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 3441,
-      "duration": 309,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=3441s",
-      "depth": "in-depth",
-      "style": "discussion",
-      "purpose": "Concept",
-      "confidence": 80,
-      "note": "Calibrate from a single reference photo: four corner points yield a projection matrix, straight-line hints refine it, and one known dimension (a 2 m door) reconstructs planar physical space — then on site you drag roughly nine projected reference points into alignment to calibrate each projector, enabling pre-built multi-projector soft-edge setups.",
-      "score": 1.5
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 3759,
-      "duration": 361,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=3759s",
-      "depth": "explained",
-      "style": "discussion",
-      "purpose": "Concept",
-      "confidence": 70,
-      "note": "Per-output edge color correction with soft falloff and per-corner tinting is planned for overlap blending; compensating a discolored wall by projecting the inverse of its reference photo works, but only for casts within the projector's gamut — you can't recover a fully saturated surface color.",
-      "score": 1.125
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 4142,
-      "duration": 453,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=4142s",
-      "depth": "explained",
-      "style": "discussion",
-      "purpose": "Tip",
-      "confidence": 70,
-      "note": "Community feedback: arrange content→surfaces→outputs as left-to-right columns with visible arrows instead of tiny color indicators, add plus-buttons for slices/sub-regions, and note the green crosshair is the anchor point that scaling and future corner-wrapping align to.",
-      "score": 1.0125
-    },
-    {
-      "video": "dvpmRmqHMj0",
-      "startSecond": 4980,
-      "duration": 60,
-      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=4980s",
-      "depth": "passing",
-      "style": "discussion",
-      "purpose": "Example",
-      "confidence": 55,
-      "note": "A beat-reactive ceiling projection with feedback slices took about ten minutes to set up with the new flow, shown as phone footage.",
-      "score": 0.45
     }
   ],
   "op:Lib.image.analyze.WaveForm": [
@@ -13188,6 +13992,18 @@
       "score": 0.24
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6060,
+      "duration": 111,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6060s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "Quick immersive test content: tori instanced on radial points with randomised scale and rotation, slowed down, with fog as a distance cue.",
+      "score": 0.24
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 4621,
       "duration": 10,
@@ -13322,6 +14138,18 @@
       "confidence": 70,
       "note": "Its amount factor (drivable per-point from an FX attribute via SelectPointsWithSDF) and surface-offset mode control how far points pull onto the surface; step count and max distance trade quality for speed.",
       "score": 0.66
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5620,
+      "duration": 105,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5620s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 72,
+      "note": "Pre-shaping particle emit points with a move-to-SDF step gives an attractor system interesting starting formations. Applying it again after the simulation causes the major deformation.",
+      "score": 1.35
     },
     {
       "video": "PWCfyUnFGdg",
@@ -13506,6 +14334,18 @@
       "score": 3.3
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6060,
+      "duration": 111,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6060s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "Quick immersive test content: tori instanced on radial points with randomised scale and rotation, slowed down, with fog as a distance cue.",
+      "score": 0.24
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 450,
       "duration": 40,
@@ -13516,6 +14356,42 @@
       "confidence": 80,
       "note": "Randomize position and per-axis rotation right after emission to break up uniform spray into a more organic scatter.",
       "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 1012,
+      "duration": 62,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=1012s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 70,
+      "note": "Once fragments are drawn as chunks at points, randomizing those points' position and rotation scatters the pieces in real time without regenerating any geometry.",
+      "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 1111,
+      "duration": 23,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=1111s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Parameters",
+      "confidence": 68,
+      "note": "Take the randomization strength from a point's F1 attribute instead of a global factor, so an upstream selection decides which points get scattered and by how much.",
+      "score": 0.4752
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9568,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9568s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "Recommended for animating text-sprite points: randomize for jitter, soft transform for localized displacement.",
+      "score": 0.189
     },
     {
       "video": "PJ9QwFt1r5k",
@@ -13890,6 +14766,54 @@
       "confidence": 65,
       "note": "Emulate a 10 FPS device by quantizing animation time with a rounding step, and the discussion spawned a feature idea: a project-level frame rate the timeline would show as vertical bars so you notice when you animate faster than the hardware can update.",
       "score": 1.125
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 746,
+      "duration": 59,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=746s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Open the output setup from the button at the top right of the output window or via \"edit output setup\" next to the composition settings; each project gets a default setup on the fly, with the machine's local displays laid out inside it.",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 965,
+      "duration": 99,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=965s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "Exporting no longer requires wrapping the root composition into an operator with a texture output: set the project to executable demo mode and the player renders the setup's central output, which also lets productions play on non-16:9 or unusual-resolution displays.",
+      "score": 4.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7606,
+      "duration": 159,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7606s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 72,
+      "note": "A new machine-learning beat-detection model sits under the composition's audio tapping settings; ~12 MB, CPU-only (~2 cores), trained on thousands of hand-corrected annotated songs.",
+      "score": 3.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 8077,
+      "duration": 45,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=8077s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Comparison",
+      "confidence": 65,
+      "note": "The model tracks electronic music and some rock very well, jazz and heavy metal less so, and is more precise than manual tapping.",
+      "score": 3.6
     },
     {
       "video": "WK4j0H-oM3g",
@@ -14565,6 +15489,42 @@
       "score": 0.044
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7363,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7363s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "A toggle shows graph and dope sheet together, which saves switching back and forth with the curve view.",
+      "score": 0.3375
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7439,
+      "duration": 78,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7439s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 78,
+      "note": "Shift+K toggles auto-pin. While it's on, every parameter you touch collects in the dope sheet. Turning it off clears everything not selected, so pressing Shift+K twice starts a fresh working set.",
+      "score": 2.7
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8071,
+      "duration": 113,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8071s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 65,
+      "note": "A line now continues past the last visible key to show the animation goes on offscreen. To move keys between parameters, use Copy/Paste Keyframes rather than Ctrl+C.",
+      "score": 0.54
+    },
+    {
       "video": "WK4j0H-oM3g",
       "startSecond": 143,
       "duration": 44,
@@ -14639,6 +15599,30 @@
       "confidence": 68,
       "note": "Hundreds of keyframes squashed to a parameter's value range become practically invisible; auto-scaling the curve to the visible keyframes makes a dense track readable again.",
       "score": 3.168
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7517,
+      "duration": 64,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7517s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "The curve icon on a dope-sheet row pins that parameter into a temporary curve area below, so you can adjust tangents without switching views.",
+      "score": 2.7
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7581,
+      "duration": 33,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7581s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "Mouse wheel zooms the value range in one area and time in the other. Feedback on this split was requested.",
+      "score": 0.3375
     },
     {
       "video": "PJ9QwFt1r5k",
@@ -14761,6 +15745,42 @@
       "confidence": 80,
       "note": "The remapped time-clip drives a child's local time from 0→1 over its window, and that same local time feeds the child's internal keyframes — the basis for reusable, retimeable chapter/title animations.",
       "score": 4.0
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8857,
+      "duration": 100,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8857s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 72,
+      "note": "Combine an animation into a new operator wrapped in a time clip so it becomes a timeline bar. Alt-drag an edge to retime (stretch) it rather than trim it.",
+      "score": 3.6
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8957,
+      "duration": 77,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8957s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 65,
+      "note": "Inside the clip, drag all keyframes to start at zero so the animation runs in its own local time. You can then drop a new instance at any playhead position and it plays from its start.",
+      "score": 2.7
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9034,
+      "duration": 118,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9034s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 58,
+      "note": "After extracting a clip, set the source region correctly or the timing is off. BPM-synced animators inside it lose their phase when moved, unlike plain keyframes.",
+      "score": 0.66
     },
     {
       "video": "cGyCEkCJQUk",
@@ -14965,6 +15985,30 @@
       "confidence": 78,
       "note": "Read the current playback time, stringify it, and route it into a text operator to build an on-screen time readout.",
       "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5736,
+      "duration": 76,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5736s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 50,
+      "note": "When an animator seems frozen, check whether the playhead is actually inside the active range before blaming the op. A raw Time connection was used as a fallback.",
+      "score": 0.22
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 6115,
+      "duration": 114,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=6115s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 45,
+      "note": "A Time value that intermittently stops driving parameters looked like stale invalidation, possibly after copy-pasting a subgraph. It couldn't be reproduced, so report cases with a minimal project.",
+      "score": 0.22
     },
     {
       "video": "SMKigWtk_LQ",
@@ -15634,6 +16678,18 @@
       "confidence": 65,
       "note": "Using local reference time to dedupe a double evaluation is tricky because motion-blur passes also key off time — a workaround here, not a clean fix.",
       "score": 1.2375
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8957,
+      "duration": 77,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8957s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 65,
+      "note": "Inside the clip, drag all keyframes to start at zero so the animation runs in its own local time. You can then drop a new instance at any playhead position and it plays from its start.",
+      "score": 2.7
     },
     {
       "video": "Q2nHQ-5msGQ",
@@ -16494,6 +17550,18 @@
       "score": 0.6
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5310,
+      "duration": 37,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5310s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 65,
+      "note": "A feedback loop built from nothing more than noise-driven displacement plus directional blur gives flowing, smeared structures, and toggling it restarts the feedback from scratch in sync with music cues.",
+      "score": 1.35
+    },
+    {
       "video": "_pEhs2jQ3Gg",
       "startSecond": 11070,
       "duration": 290,
@@ -16544,6 +17612,18 @@
       "confidence": 60,
       "note": "Dropped in with mirror-repeat wrapping to dress up a flat output into something more interesting on the fly.",
       "score": 0.18
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 590,
+      "duration": 34,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=590s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A five-node test scene (mesh, orbiting camera, feedback trails, edge detection) for quickly getting a lively image to route to an output.",
+      "score": 0.24
     },
     {
       "video": "PWCfyUnFGdg",
@@ -16668,6 +17748,30 @@
       "confidence": 65,
       "note": "Scale and rotate an image (here the gradient mask) in 2D before it feeds the next stage.",
       "score": 0.0864
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7899,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7899s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "Part of a post chain: chromatic aberration with lens distortion, with an image transform used as camera shake.",
+      "score": 0.252
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8184,
+      "duration": 36,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8184s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Performance",
+      "confidence": 68,
+      "note": "Using it for camera shake costs an extra full-screen GPU buffer pass. It's not expensive alone but adds up, while animating the camera itself is nearly free.",
+      "score": 3.0
     },
     {
       "video": "_pEhs2jQ3Gg",
@@ -17384,6 +18488,18 @@
       "score": 3.0
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2504,
+      "duration": 70,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2504s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "Watching a projection through a webcam in the editor, inverting the feed with a colour remap to make the projected area stand out.",
+      "score": 0.24
+    },
+    {
       "video": "PJ9QwFt1r5k",
       "startSecond": 869,
       "duration": 24,
@@ -17500,6 +18616,18 @@
   ],
   "op:Lib.numbers.vec3.PerlinNoise3": [
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7927,
+      "duration": 63,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7927s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 68,
+      "note": "For camera shake, feed a vec3 Perlin noise into the camera's position or rotation offset instead of shaking the rendered image.",
+      "score": 2.7
+    },
+    {
       "video": "SMKigWtk_LQ",
       "startSecond": 778,
       "duration": 24,
@@ -17548,6 +18676,30 @@
       "confidence": 60,
       "note": "Briefly credited as the vertex-animation-texture route that brought a rigged character into a demo, pending real character-animation support.",
       "score": 0.306
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 14182,
+      "duration": 21,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=14182s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 50,
+      "note": "Currently the only operator family that reads a mesh's second UV set.",
+      "score": 0.24
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8279,
+      "duration": 32,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8279s",
+      "depth": "passing",
+      "style": "answer",
+      "purpose": "Example",
+      "confidence": 58,
+      "note": "Vertex-animation textures for a character in practice: about 1,800 polygons and 300 frames stayed safely within budget.",
+      "score": 1.2
     },
     {
       "video": "a5_xCfC_3m4",
@@ -17772,6 +18924,30 @@
       "score": 1.2375
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 6871,
+      "duration": 51,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=6871s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 50,
+      "note": "Used to feed two images into hand-written shader code in a demo that otherwise mixed stock operators with custom HLSL.",
+      "score": 0.45
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9934,
+      "duration": 94,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9934s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 68,
+      "note": "Reach for it when a hand-written effect needs an extra texture input such as an environment map. Load the source from a template file, put your code in the additional-code block, and keep a list of what each unnamed parameter drives.",
+      "score": 1.35
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 2654,
       "duration": 55,
@@ -17882,6 +19058,30 @@
   ],
   "op:Lib.render.scene.LoadGltfScene": [
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8335,
+      "duration": 206,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8335s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "How the 4.3 glTF skinning chain wires up: clips and mesh come from the loaded file, skeletal pose points become skin matrices, and those plus skin weights feed the skinned mesh. Hover tooltips show each slot's expected source.",
+      "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 8552,
+      "duration": 52,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=8552s",
+      "depth": "passing",
+      "style": "answer",
+      "purpose": "Gotcha",
+      "confidence": 55,
+      "note": "Blend shapes / morph targets are parsed by the glTF library but not applied yet, and vertex-animation textures can't be layered on top of bone animation.",
+      "score": 1.1
+    },
+    {
       "video": "a5_xCfC_3m4",
       "startSecond": 13860,
       "duration": 180,
@@ -17958,6 +19158,18 @@
   ],
   "ui:ProjectPanel": [
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 12175,
+      "duration": 100,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=12175s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 75,
+      "note": "Right-click a project in the project list and choose restore from backup to pick one of the automatic snapshots, e.g. from two minutes ago after breaking parameters.",
+      "score": 2.7
+    },
+    {
       "video": "PJ9QwFt1r5k",
       "startSecond": 21,
       "duration": 52,
@@ -18018,6 +19230,66 @@
       "confidence": 75,
       "note": "Shader variations are hashed by their code string and cached to disk, and exports now ship that cache, cutting a demo's startup from over a minute of shader compilation to a few seconds; stripping unused operators also keeps disconnected assets like videos out of the shipped package.",
       "score": 1.125
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 965,
+      "duration": 99,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=965s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "Exporting no longer requires wrapping the root composition into an operator with a texture output: set the project to executable demo mode and the player renders the setup's central output, which also lets productions play on non-16:9 or unusual-resolution displays.",
+      "score": 4.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7072,
+      "duration": 70,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7072s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Gotcha",
+      "confidence": 75,
+      "note": "Older demos won't export out of the box: add a central output and connect the demo's content to it first.",
+      "score": 3.3
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7154,
+      "duration": 66,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7154s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 75,
+      "note": "Demo mode shows the display/resolution picker and derives the aspect from the chosen display; installation mode skips the dialog and restores this machine's bound outputs — the one to use for exhibitions that must restart unattended.",
+      "score": 3.3
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 6598,
+      "duration": 42,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=6598s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Gotcha",
+      "confidence": 50,
+      "note": "Check the exported package contents: a demo was accidentally zipped twice, doubling the download size.",
+      "score": 0.4125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 10455,
+      "duration": 252,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=10455s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Fill in project title and author before exporting so the executable gets a proper name instead of demo.exe. The success popup may appear on another screen, and the shader cache makes the export start quickly.",
+      "score": 2.7
     },
     {
       "video": "dCX7CcL0ZJs",
@@ -18406,6 +19678,30 @@
   ],
   "op:Lib.numbers.float.process.Damp": [
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5504,
+      "duration": 68,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5504s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "Rather than hand-tuning tangents on both camera position and target keyframes, run coarse keyframed positions through damping and Perlin noise for fluid motion, and blend to an orbit camera where that fits.",
+      "score": 1.0125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13577,
+      "duration": 51,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13577s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "Remap a normalized last-note value into a rotation and damp it slightly for a smooth pitch-following motion.",
+      "score": 3.6
+    },
+    {
       "video": "cfUWSPJDRi4",
       "startSecond": 1390,
       "duration": 23,
@@ -18599,6 +19895,18 @@
     }
   ],
   "op:Lib.image.fx.distort.PolarCoordinates": [
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 6086,
+      "duration": 26,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=6086s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A cheap glowing aura on a 2D backing plate: scroll tileable fractal noise, wrap it to polar coordinates, then blend and mask it.",
+      "score": 0.378
+    },
     {
       "video": "cfUWSPJDRi4",
       "startSecond": 2803,
@@ -19208,6 +20516,18 @@
       "score": 0.375
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5347,
+      "duration": 18,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5347s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "Uses a feedback image as SDF data to project it flat onto geometry. The texture's square edge can show.",
+      "score": 0.234
+    },
+    {
       "video": "VNC-zr-JOjQ",
       "startSecond": 5190,
       "duration": 30,
@@ -19334,6 +20654,18 @@
       "confidence": 75,
       "note": "Alt-tabbing or an HDMI switcher changing ports used to crash exclusive fullscreen mid-show; the player now uses the same windowed-fullscreen mode as the editor and survives display changes.",
       "score": 1.2375
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1064,
+      "duration": 51,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1064s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 65,
+      "note": "Player and editor now share a single render pipeline instead of two separate implementations, removing a source of player-only glitches; the cost is creating an output once per project.",
+      "score": 3.0
     },
     {
       "video": "fFpMpa7qTB4",
@@ -19797,6 +21129,30 @@
   "op:Lib.numbers.float.trigonometry.Sin": [],
   "op:Lib.image.use.PickTexture": [
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7478,
+      "duration": 122,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7478s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "Switch which scene goes to a bound output by picking between textures (or rerouting a connection into send-to-output); only the active branch is evaluated, though you lose the quick P-to-pin gesture.",
+      "score": 1.0125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7122,
+      "duration": 40,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7122s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 70,
+      "note": "A demo-scale structure: scenes in a column feed one central texture picker, with sub-pickers where needed, and overlays, post-processing and a resolution-fixed output downstream.",
+      "score": 1.35
+    },
+    {
       "video": "WK4j0H-oM3g",
       "startSecond": 281,
       "duration": 8,
@@ -20027,6 +21383,30 @@
   ],
   "op:Lib.image.generate.noise.TileableNoise": [
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 91,
+      "duration": 54,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=91s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 55,
+      "note": "Animating its random-phase parameter over time jumps from pattern to pattern instead of morphing smoothly, so don't use it for smooth noise motion.",
+      "score": 0.22
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 6086,
+      "duration": 26,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=6086s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A cheap glowing aura on a 2D backing plate: scroll tileable fractal noise, wrap it to polar coordinates, then blend and mask it.",
+      "score": 0.378
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 8758,
       "duration": 62,
@@ -20065,6 +21445,18 @@
       "score": 17.28,
       "momentCount": 5,
       "focus": true
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3053,
+      "duration": 73,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3053s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Parameters",
+      "confidence": 65,
+      "note": "Quantise a gradient into bands and count the highlight index up (with highlight opacity raised) to make a band chase across a surface.",
+      "score": 0.66
     },
     {
       "video": "PWCfyUnFGdg",
@@ -20326,6 +21718,18 @@
       "score": 1.5
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 12042,
+      "duration": 57,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=12042s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 62,
+      "note": "Uses a GPU spatial hash map that can answer nearest-neighbour queries — the machinery you'd need to keep only one of several points that land in the same cell.",
+      "score": 3.0
+    },
+    {
       "video": "dvpmRmqHMj0",
       "startSecond": 378,
       "duration": 54,
@@ -20448,6 +21852,644 @@
       "score": 0.24
     }
   ],
+  "ui:OutputSetup": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 667,
+      "duration": 79,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=667s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "The old way of feeding a second display (pin, fix the resolution to Full HD, go full-screen, use the screen manager) is retired; the screen manager now lives inside the output setup.",
+      "score": 3.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 746,
+      "duration": 59,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=746s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Open the output setup from the button at the top right of the output window or via \"edit output setup\" next to the composition settings; each project gets a default setup on the fly, with the machine's local displays laid out inside it.",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 805,
+      "duration": 88,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=805s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "Create a central output, connect content to it and bind it to a physical display: that display keeps updating no matter what you pin, select or which resolution the output window uses.",
+      "score": 4.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 898,
+      "duration": 45,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=898s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 65,
+      "note": "An output can hold a fixed aspect ratio such as 21:9 and still fill the target display without stretching.",
+      "score": 3.3
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1122,
+      "duration": 90,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1122s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 72,
+      "note": "The setup view appears when nothing is pinned and you send to output, or via \"edit output\"; each composition can hold several setups (e.g. one display vs. two projectors) presenting the same content differently, with the \"board\" canvas on top.",
+      "score": 3.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1215,
+      "duration": 115,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1215s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "Reading the flow outliner: pink nodes are content, green are surfaces, grey are outputs; everything right of the outputs (display bindings) is machine-local, so on site you only rebind those — and it's the groundwork for multi-machine rendering.",
+      "score": 4.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1333,
+      "duration": 102,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1333s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "To mirror, create a second output fed by the same content: when resolution matches, the already-rendered frame is reused, so mirroring costs nothing (a single output can't be bound twice).",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1444,
+      "duration": 139,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1444s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 72,
+      "note": "Changing a display's resolution in the OS propagates straight through the output to the content; with a canvas resolution of 0×0 (\"smart resolution\") content renders at the requested size, so the same project adapts to a 4K projector or a different aspect without distortion.",
+      "score": 3.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1771,
+      "duration": 101,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1771s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Gotcha",
+      "confidence": 70,
+      "note": "Content whose aspect differs from its display shows stretched on the display even though the output preview looks right; select any item that reaches an output to unlock output mode and rescale/reposition it back to the correct aspect.",
+      "score": 3.3
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 1897,
+      "duration": 135,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=1897s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 78,
+      "note": "Driving two side-by-side displays: make the output double-wide, add a slice split at the centre, Alt-drag to duplicate it, name the halves L/R and bind each to its display.",
+      "score": 4.8
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2127,
+      "duration": 125,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2127s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 75,
+      "note": "The board is measured in metres with a floor line; add a 1.70 m prop figure for scale, and use green surfaces — physical rectangles with size, orientation and an anchor — so displays can be described by real dimensions (e.g. a 98\" TV preset) rather than pixels.",
+      "score": 4.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2252,
+      "duration": 116,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2252s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 70,
+      "note": "Map content onto surfaces instead of placing outputs directly; for walls of mixed TV sizes and aspects this keeps the layout true to physical size even when output resolutions change.",
+      "score": 3.6
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2368,
+      "duration": 88,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2368s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Select an output that is in use to get a simple corner-pin (keystone) handle set — enough to map a quad onto a floor or wall with a single projector.",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2635,
+      "duration": 44,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2635s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Comparison",
+      "confidence": 62,
+      "note": "Hold Shift to drag corner pins slower; eyeballing corners like Resolume/MadMapper works, but the computed projection matrix can give you a proper straightened working space instead.",
+      "score": 1.35
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2693,
+      "duration": 82,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2693s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "Drop any photo of the venue onto the board as a reference image; camera field of view or calibration doesn't matter because surfaces are reconstructed from it.",
+      "score": 3.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2775,
+      "duration": 187,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2775s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 78,
+      "note": "Trace a surface on the reference photo, add reference lines along edges you know are straight (they turn green as they approach horizontal/vertical), then press straighten to refine the projection matrix — more precise than dragging corners by eye.",
+      "score": 3.6
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2967,
+      "duration": 63,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2967s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 75,
+      "note": "Double-click a reference line to enter its real length (e.g. 4.5 m, 2.9 m); the surface then gets its true physical size on the board.",
+      "score": 3.3
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3126,
+      "duration": 69,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3126s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 70,
+      "note": "Because the surface is straightened, a slice region drawn in its straight coordinates lands precisely on a physical feature such as one curtain panel.",
+      "score": 0.72
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3195,
+      "duration": 134,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3195s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 50,
+      "note": "Duplicate the region, not the surface, when you want a second patch; dragging surfaces around was still glitchy in this build.",
+      "score": 0.22
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3365,
+      "duration": 120,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3365s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "In straight mode, add reference points on distinctive corners of the surface; everything up to here can be prepared from a single decent-resolution photo before arriving on site.",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3485,
+      "duration": 284,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3485s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "Calibrate a projector by binding the surface to it, selecting the surface and dragging each projected reference point onto the physical spot it represents until the mapping matches.",
+      "score": 0.8
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3987,
+      "duration": 220,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3987s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "You can keep any number of named reference images; straight lines can be placed anywhere along straight physical features, and cropping afterwards lets you check that a row of features stays straight.",
+      "score": 0.54
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 4207,
+      "duration": 126,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=4207s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 70,
+      "note": "Create a region on the straightened plane (its size shows in metres), put the primary output onto it, and add reference points on easy-to-find features like corners and logo letters.",
+      "score": 0.72
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 4333,
+      "duration": 237,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=4333s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 78,
+      "note": "Dragging projected reference points onto the real object is easier while looking at the object than at the screen; hold Shift for precision, shrink the markers to judge the fit, and hide them afterwards.",
+      "score": 0.72
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 4746,
+      "duration": 194,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=4746s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 68,
+      "note": "For a venue floor plan, start a new setup, add the plan as a reference image, set its scale by marking a known distance (e.g. an 8 m stage), lower its opacity and lock it — unlocking it again was buggy.",
+      "score": 0.54
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 4940,
+      "duration": 170,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=4940s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Parameters",
+      "confidence": 60,
+      "note": "Trace walls on the floor plan with exact segment lengths and vertical snapping; the plan can then be converted to stage geometry with the new geometry operators and rendered.",
+      "score": 0.66
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 5110,
+      "duration": 128,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=5110s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 65,
+      "note": "Add an NDI output with the venue's full pixel-map resolution (tens of millions of pixels, ~30 fps) as the destination for all wall patches.",
+      "score": 0.72
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 5238,
+      "duration": 177,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=5238s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 70,
+      "note": "Lay out patches on the pixel map by stretching and rotating (a small triangle marks \"up\"), check the output table below, and name each patch like its matching wall surface so content lands on the right wall.",
+      "score": 3.3
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 5932,
+      "duration": 128,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=5932s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Setups are saved per project in a new Meta/Setups folder, so a prepared venue setup (full floor plan, named walls, central output) travels with the project.",
+      "score": 2.7
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6245,
+      "duration": 179,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6245s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Comparison",
+      "confidence": 60,
+      "note": "Knowing the physical space beats rebuilding projection patches with dozens of nodes; walls can be dragged and tweaked live on site, though per-stage content previews are still missing.",
+      "score": 1.35
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6438,
+      "duration": 307,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6438s",
+      "depth": "in-depth",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 72,
+      "note": "Roadmap for projector blending: per-output masks, warp points, edge/corner feathering and brightness correction for areas that get more light; meanwhile the setup lets you render finished content at a venue's exact pixel-map resolution.",
+      "score": 4.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6792,
+      "duration": 109,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6792s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 50,
+      "note": "Using the board as a Figma-like thinking canvas and, with physical measurements, a basis for calibrating lasers, moving heads or LED strips with a webcam.",
+      "score": 0.375
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 2769,
+      "duration": 165,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=2769s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Concept",
+      "confidence": 58,
+      "note": "In the upcoming output board you pin a graph output to a named output and bind it to a physical display. You then cut the canvas into slices, each routed to a different screen, arranged like the real room.",
+      "score": 0.6
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 2951,
+      "duration": 231,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=2951s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "Drop a photo of the venue in as a reference image and draw reference lines for level edges and known lengths (e.g. a 2 m door). It straightens the perspective into a to-scale, orthographic wall layout.",
+      "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 3182,
+      "duration": 88,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=3182s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Concept",
+      "confidence": 58,
+      "note": "Surfaces created from a straightened reference keep real dimensions (floor line, ceiling height), and you place regions on them in orthogonal space and route a slice to each.",
+      "score": 0.6
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 3274,
+      "duration": 142,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=3274s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "Add anchor points to the reference image. Moving the projector box until its projection lines those points up with the real wall gives you a manual projector calibration, so you can prepare offsite and calibrate onsite.",
+      "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 3416,
+      "duration": 191,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=3416s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 55,
+      "note": "The traced box is the projector's keystoned footprint: narrow at the top for a ceiling mount, wider for a floor mount. Aligning it to reference points gives the corrected output.",
+      "score": 3.0
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 3607,
+      "duration": 56,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=3607s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 50,
+      "note": "The board's grid is physical space, so displays and props can be sized in real units to mirror the actual installation.",
+      "score": 1.0
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 3663,
+      "duration": 551,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=3663s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 50,
+      "note": "Why camera-based auto-calibration (a calibrated webcam watching structured light) is left for later: most users lack a calibrated camera. Manual point matching uses the same solver with a different interaction.",
+      "score": 1.125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 4243,
+      "duration": 165,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=4243s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "Output surfaces are laid out in pixel resolution with snapping, suited to complex multi-screen or LED layouts. Importing Resolume's XML mapping format was floated.",
+      "score": 1.0125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 4525,
+      "duration": 59,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=4525s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 50,
+      "note": "Several setups can coexist for alternative arrangements. Binding a setup to physical outputs is machine-specific, so one setup can later span render clients.",
+      "score": 0.375
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 4754,
+      "duration": 94,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=4754s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 58,
+      "note": "Override a surface's resolution and slice one wide output across a wall of stacked screens (e.g. via a hardware splitter box) so a single image stays continuous across all of them.",
+      "score": 1.35
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 491,
+      "duration": 84,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=491s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 60,
+      "note": "Sending to several NDI or Spout targets today means opening multiple output windows in the screen manager, which is the stated motivation for the new output-management system.",
+      "score": 0.375
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 1506,
+      "duration": 269,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=1506s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "The design deliberately scopes out niche cases (dome projection, laser mapping, structured-light scanning) after studying MadMapper, Resolume, disguise and TouchDesigner, aiming for a data model that covers most use cases without media-server complexity.",
+      "score": 1.125
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 1780,
+      "duration": 220,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=1780s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "Physical display enumeration is unstable (a Windows update or replug can renumber projectors), so outputs get logical names and are re-bound to devices rather than referenced by display index; projectors are the hardest device because each needs its own perspective projection matrix.",
+      "score": 1.125
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 2002,
+      "duration": 173,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=2002s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 85,
+      "note": "Publish any texture with \"send to output\", rename it to a meaningful content name, create an output (projector by default), and bind it to a physical display via drag-and-drop — unused content is greyed out and selecting an output scrolls the graph to its source.",
+      "score": 0.72
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 2177,
+      "duration": 328,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=2177s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 85,
+      "note": "Crop content into slices, place them on surfaces that apply a perspective-correct homographic projection, straighten the region into an orthographic canvas for editing, then refine the mapping by marking lines known to be straight in the real room; entering one real-world dimension makes all sub-regions physically sized in meters.",
+      "score": 0.96
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 2960,
+      "duration": 215,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=2960s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "Persistence is split into three layers — the project (operators/animation), the setup (content/surface/output arrangement), and a machine-specific binding of outputs to displays — so whole setups can be switched, and the meter-based size raster makes an object literally A4-sized on the wall.",
+      "score": 3.0
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 3328,
+      "duration": 112,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=3328s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 75,
+      "note": "Create a setup that is never bound to a real display to get a virtual debug overview: one surface with several sub-regions collecting the streams you want to monitor while working.",
+      "score": 2.7
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 3441,
+      "duration": 309,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=3441s",
+      "depth": "in-depth",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "Calibrate from a single reference photo: four corner points yield a projection matrix, straight-line hints refine it, and one known dimension (a 2 m door) reconstructs planar physical space — then on site you drag roughly nine projected reference points into alignment to calibrate each projector, enabling pre-built multi-projector soft-edge setups.",
+      "score": 1.5
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 3759,
+      "duration": 361,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=3759s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "Per-output edge color correction with soft falloff and per-corner tinting is planned for overlap blending; compensating a discolored wall by projecting the inverse of its reference photo works, but only for casts within the projector's gamut — you can't recover a fully saturated surface color.",
+      "score": 1.125
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 4142,
+      "duration": 453,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=4142s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Community feedback: arrange content→surfaces→outputs as left-to-right columns with visible arrows instead of tiny color indicators, add plus-buttons for slices/sub-regions, and note the green crosshair is the anchor point that scaling and future corner-wrapping align to.",
+      "score": 1.0125
+    },
+    {
+      "video": "dvpmRmqHMj0",
+      "startSecond": 4980,
+      "duration": 60,
+      "url": "https://www.youtube.com/watch?v=dvpmRmqHMj0&t=4980s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A beat-reactive ceiling projection with feedback slices took about ten minutes to set up with the new flow, shown as phone footage.",
+      "score": 0.45
+    }
+  ],
   "op:Lib.io.video.NdiOutput": [
     {
       "video": "F8J8w-JK3hA",
@@ -20460,6 +22502,30 @@
       "confidence": 70,
       "note": "Named as routing targets of the upcoming output-mapping setup, which should remove today's need to keep several output windows open just to keep multiple Spout/NDI streams updating.",
       "score": 0.3375
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7382,
+      "duration": 89,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7382s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Comparison",
+      "confidence": 75,
+      "note": "Prefer NDI outputs inside the output setup over this operator: same implementation, but they update in the background without an output window, can be named and sliced, and you can add as many as you like.",
+      "score": 3.6
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 4595,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=4595s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 50,
+      "note": "Planned as additional targets on the new output board, next to physical displays.",
+      "score": 0.375
     },
     {
       "video": "dvpmRmqHMj0",
@@ -20512,6 +22578,18 @@
       "score": 1.2375
     },
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 4595,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=4595s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 50,
+      "note": "Planned as additional targets on the new output board, next to physical displays.",
+      "score": 0.375
+    },
+    {
       "video": "dvpmRmqHMj0",
       "startSecond": 491,
       "duration": 84,
@@ -20560,6 +22638,18 @@
       "confidence": 70,
       "note": "Quickly rendered a date title into a feedback chain by blending a text layer over the simulation so the growing pattern consumes the lettering.",
       "score": 0.24
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 10350,
+      "duration": 99,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=10350s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Performance",
+      "confidence": 55,
+      "note": "The blend itself is trivial, but each image op keeps its own full-resolution buffer in GPU memory, so long chains of blends in a demo pipeline are what to cut first.",
+      "score": 0.375
     },
     {
       "video": "dvpmRmqHMj0",
@@ -20784,6 +22874,18 @@
       "score": 1.35
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 156,
+      "duration": 27,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=156s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 50,
+      "note": "Used as a quick smear over a text layer; bring the size factor down so the underlying text stays readable.",
+      "score": 0.2112
+    },
+    {
       "video": "MAyETISMFi0",
       "startSecond": 1240,
       "duration": 74,
@@ -20806,6 +22908,18 @@
       "confidence": 70,
       "note": "A refinement-pass count smooths the result, and the blur angle is the knob you animate to morph between the warped look and the untouched original.",
       "score": 0.66
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5310,
+      "duration": 37,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5310s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Example",
+      "confidence": 65,
+      "note": "A feedback loop built from nothing more than noise-driven displacement plus directional blur gives flowing, smeared structures, and toggling it restarts the feedback from scratch in sync with music cues.",
+      "score": 1.35
     },
     {
       "video": "S8chZaAS3uQ",
@@ -21381,6 +23495,18 @@
   ],
   "op:Lib.mesh.modify.CustomVertexShader": [
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 12856,
+      "duration": 387,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=12856s",
+      "depth": "in-depth",
+      "style": "answer",
+      "purpose": "Example",
+      "confidence": 78,
+      "note": "Rebuild broken tangents from a correct normal: tangent = normalize(cross(normal, up)), bitangent = normalize(cross(normal, tangent)); nudge the up vector slightly to avoid the singularity where it aligns with the normal.",
+      "score": 4.8
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 16255,
       "duration": 125,
@@ -21433,6 +23559,18 @@
   ],
   "op:Lib.numbers.anim.animators.AnimVec3": [
     {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7990,
+      "duration": 81,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7990s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 62,
+      "note": "\"Paste values\" (under More) copies matching parameters between animators, but it can't convert Vector2 to Vector3, so moving shake settings between the 2D and 3D variants fails until you use the matching one.",
+      "score": 0.66
+    },
+    {
       "video": "PWCfyUnFGdg",
       "startSecond": 13607,
       "duration": 73,
@@ -21470,6 +23608,18 @@
     }
   ],
   "ui:PlaybackTime": [
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 10236,
+      "duration": 25,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=10236s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Hold T and drag to scrub time anywhere, without needing the timeline open.",
+      "score": 2.16
+    },
     {
       "video": "fFpMpa7qTB4",
       "startSecond": 11738,
@@ -21619,6 +23769,42 @@
       "score": 0.24
     },
     {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7270,
+      "duration": 101,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7270s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 45,
+      "note": "Two throwaway image sources set up to test switching what goes to a bound output in a VJ setup.",
+      "score": 1.2
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9326,
+      "duration": 50,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9326s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 62,
+      "note": "Already does recursive subdivision, using random thresholds and alternating horizontal/vertical splits.",
+      "score": 1.125
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 12099,
+      "duration": 224,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=12099s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Comparison",
+      "confidence": 60,
+      "note": "Top-down subdivision (start from one cell, derive everything from the point index) versus bottom-up merging of a fine grid — both valid ways to build a quadtree layout.",
+      "score": 1.35
+    },
+    {
       "video": "pvvPsp03Hik",
       "startSecond": 24,
       "duration": 30,
@@ -21761,6 +23947,30 @@
       "confidence": 80,
       "note": "How to skip computing unused regions of the output (e.g. a letterbox or an unused dome ceiling) so the renderer never shades those pixels, instead of drawing black bars at full cost.",
       "score": 1.5
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7660,
+      "duration": 160,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7660s",
+      "depth": "in-depth",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 78,
+      "note": "Use it as a letterbox: the stretch value crops the render size and can clamp the camera's field of view to the bands. The cropped areas are never rendered, which is cheaper than masking a full frame. It takes a stretch value, not an aspect ratio.",
+      "score": 3.6
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9636,
+      "duration": 35,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9636s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 60,
+      "note": "Adding \"also known as letterbox\" to the description makes the symbol browser find it under that name.",
+      "score": 0.9
     }
   ],
   "op:Lib.render.shading.Equirectangle": [
@@ -21775,6 +23985,30 @@
       "confidence": 74,
       "note": "The cube-map path renders the scene six times then reprojects, which is why for pure raymarching it is far cheaper to change the projection matrix directly and march only the visible band.",
       "score": 1.5
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 5496,
+      "duration": 210,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=5496s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "First attempt at rendering 360° content for projection onto the mapped walls; the projector-camera draw stage needs more prep than shown.",
+      "score": 0.24
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 6171,
+      "duration": 74,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=6171s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 70,
+      "note": "Render the scene as an equirectangular 360° image and feed it to the mapped surfaces so every wall shows a perspective-correct slice of one virtual room.",
+      "score": 0.72
     },
     {
       "video": "wTLW7PXj2Co",
@@ -21977,6 +24211,276 @@
       "score": 1.8
     }
   ],
+  "op:Lib.numbers.anim.animators.AnimVec2": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 183,
+      "duration": 43,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=183s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "The \"scroll up\" preset is a ready-made driver for an offset input when you want continuous scrolling wipes.",
+      "score": 0.18
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 7990,
+      "duration": 81,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=7990s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 62,
+      "note": "\"Paste values\" (under More) copies matching parameters between animators, but it can't convert Vector2 to Vector3, so moving shake settings between the 2D and 3D variants fails until you use the matching one.",
+      "score": 0.66
+    }
+  ],
+  "op:Lib.string.convert.FloatToString": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 2042,
+      "duration": 76,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=2042s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 45,
+      "note": "Tried as a time readout to feed a secondary output; stacking several outputs of one content node was left unresolved.",
+      "score": 0.24
+    },
+    {
+      "video": "Mqi2mEyd4jQ",
+      "startSecond": 4190,
+      "duration": 80,
+      "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=4190s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 78,
+      "note": "Read the current playback time, stringify it, and route it into a text operator to build an on-screen time readout.",
+      "score": 0.72
+    }
+  ],
+  "op:Lib.image.generate.basic.CheckerBoard": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 3778,
+      "duration": 84,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=3778s",
+      "depth": "passing",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "Project a full checkerboard/grid first to see exactly where the projector can reach before choosing what to map.",
+      "score": 0.9
+    }
+  ],
+  "ui:GeometryOps": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 4940,
+      "duration": 170,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=4940s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Parameters",
+      "confidence": 60,
+      "note": "Trace walls on the floor plan with exact segment lengths and vertical snapping; the plan can then be converted to stage geometry with the new geometry operators and rendered.",
+      "score": 0.66
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 384,
+      "duration": 66,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=384s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Comparison",
+      "confidence": 60,
+      "note": "The new procedural box geometry converted to a mesh looks the same, but CubeMesh still adds pivot, stretch and segmentation controls; both produce UV coordinates.",
+      "score": 0.24
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 456,
+      "duration": 75,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=456s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 65,
+      "note": "Why a triangle-mesh cube can't be bevelled: each corner is stored as three split vertices (one per face normal) in flat vertex and index buffers, so the topology needed to know they're fused is gone.",
+      "score": 1.125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 585,
+      "duration": 59,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=585s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 50,
+      "note": "Tried as seed sets for a Voronoi fracture. The geometry side has no grid-point generator yet, so a scatter-in-volume stood in.",
+      "score": 0.24
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 1074,
+      "duration": 37,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=1074s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "Put a separate-loose-parts step before the chunk conversion so each fragment's pivot is centred on the piece, which makes per-chunk rotation spin in place.",
+      "score": 0.18
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 1722,
+      "duration": 104,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=1722s",
+      "depth": "explained",
+      "style": "answer",
+      "purpose": "Concept",
+      "confidence": 55,
+      "note": "Geometry-node \"scalar field\" inputs aren't GPU fields. They are deferred CPU functions (C# compiled on the fly) that get called per vertex or part when needed, which is separate from shader-graph SDF fields.",
+      "score": 3.0
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 2103,
+      "duration": 59,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=2103s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 60,
+      "note": "A radial point set as Voronoi seeds slices space into cake-wedge pieces, because each region belongs to its nearest seed. Fewer points give fewer, larger shards.",
+      "score": 0.72
+    }
+  ],
+  "ui:AudioInput": [
+    {
+      "video": "LLpl6QEL7bo",
+      "startSecond": 2160,
+      "duration": 310,
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2160s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "Tap a beat then let auto beat-locking continuously nudge BPM and phase toward detected snares/kicks, so a VJ no longer has to keep tapping; press the resync key on a measure to relock if it drifts.",
+      "score": 0.8
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7606,
+      "duration": 159,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7606s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 72,
+      "note": "A new machine-learning beat-detection model sits under the composition's audio tapping settings; ~12 MB, CPU-only (~2 cores), trained on thousands of hand-corrected annotated songs.",
+      "score": 3.0
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 7847,
+      "duration": 32,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=7847s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "Check the input level meter and raise the gain until the incoming signal visibly moves.",
+      "score": 0.18
+    },
+    {
+      "video": "Mqi2mEyd4jQ",
+      "startSecond": 12180,
+      "duration": 1500,
+      "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=12180s",
+      "depth": "in-depth",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "Why multi-stem audio is hard: audio runs on its own thread at the sound card's sample rate, fully decoupled from the frame loop, with re-seek jitter that must stay inside a ~40ms window or it stutters — far less forgiving than dropped video frames.",
+      "score": 1.5
+    }
+  ],
+  "op:Lib.image.fx.stylize.MosiacTiling": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 8394,
+      "duration": 46,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=8394s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Comparison",
+      "confidence": 50,
+      "note": "Named as the closest existing 2D analogue to a field-driven quadtree subdivision effect.",
+      "score": 0.45
+    }
+  ],
+  "op:Lib.mesh.modify.CollapseVertices": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9156,
+      "duration": 62,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9156s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 65,
+      "note": "An old pre-field operator that quantises vertex positions into levels; vertices aren't merged, just collapsed to zero size.",
+      "score": 1.125
+    },
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 12340,
+      "duration": 51,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=12340s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 45,
+      "note": "Recommended as the practical short-term route to a quantised-cells look.",
+      "score": 0.3375
+    }
+  ],
+  "op:Lib.point.modify.SetAttributesWithPointFields": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 9218,
+      "duration": 33,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=9218s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 50,
+      "note": "Suggested as a way to do similar collapsing driven by an SDF instead of a fixed pattern.",
+      "score": 0.3375
+    }
+  ],
+  "op:Lib.point.transform.TransformSomePoints": [
+    {
+      "video": "Lbgxw2cNAB0",
+      "startSecond": 13408,
+      "duration": 68,
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0&t=13408s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "Transform only every n-th point to turn a radial ring into a star without writing a custom point shader.",
+      "score": 1.0125
+    }
+  ],
   "op:Lib.numbers.float.basic.Multiply": [
     {
       "video": "LI5Pq5H9HFU",
@@ -22053,35 +24557,21 @@
       "confidence": 88,
       "note": "Always convert an environment image into a cube map before feeding it as the lighting environment — skipping this step can crash the app.",
       "score": 3.872
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 6056,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=6056s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 58,
+      "note": "Feed it an animated texture instead of a static image to get a living, changing reflection background.",
+      "score": 0.3375
     }
   ],
   "op:Lib.mesh.modify.MeshProjectUV": [],
-  "ui:AudioInput": [
-    {
-      "video": "LLpl6QEL7bo",
-      "startSecond": 2160,
-      "duration": 310,
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2160s",
-      "depth": "in-depth",
-      "style": "experiment",
-      "purpose": "Concept",
-      "confidence": 80,
-      "note": "Tap a beat then let auto beat-locking continuously nudge BPM and phase toward detected snares/kicks, so a VJ no longer has to keep tapping; press the resync key on a measure to relock if it drifts.",
-      "score": 0.8
-    },
-    {
-      "video": "Mqi2mEyd4jQ",
-      "startSecond": 12180,
-      "duration": 1500,
-      "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=12180s",
-      "depth": "in-depth",
-      "style": "discussion",
-      "purpose": "Concept",
-      "confidence": 70,
-      "note": "Why multi-stem audio is hard: audio runs on its own thread at the sound card's sample rate, fully decoupled from the frame loop, with re-seek jitter that must stay inside a ~40ms window or it stutters — far less forgiving than dropped video frames.",
-      "score": 1.5
-    }
-  ],
   "op:Lib.numbers.anim.animators.AnimInt": [
     {
       "video": "LLpl6QEL7bo",
@@ -22442,20 +24932,6 @@
       "score": 0.0792
     }
   ],
-  "op:Lib.string.convert.FloatToString": [
-    {
-      "video": "Mqi2mEyd4jQ",
-      "startSecond": 4190,
-      "duration": 80,
-      "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=4190s",
-      "depth": "explained",
-      "style": "experiment",
-      "purpose": "Example",
-      "confidence": 78,
-      "note": "Read the current playback time, stringify it, and route it into a text operator to build an on-screen time readout.",
-      "score": 0.72
-    }
-  ],
   "op:Lib.numbers.color.DefineGradient": [
     {
       "video": "Mqi2mEyd4jQ",
@@ -22562,6 +25038,54 @@
       "confidence": 65,
       "note": "A MIDI clip auto-detects its own length from the file; pull a named note (e.g. an A5 channel) out of it with select-float-from-dict to get that note's value over time.",
       "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 12605,
+      "duration": 116,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=12605s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 65,
+      "note": "A loaded MIDI file exposes one channel per note number carrying its velocity, not a pitch-plus-velocity stream, so following pitch isn't direct.",
+      "score": 1.125
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 12801,
+      "duration": 185,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=12801s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Gotcha",
+      "confidence": 60,
+      "note": "CC changes appear as triangle markers and come out as floats, but notes get separate channels because of polyphony: simultaneous notes can't share one value stream.",
+      "score": 1.2375
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13138,
+      "duration": 122,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13138s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "Enable simulating a MIDI clip's data and a regular MIDI input op receives it as if from a live device. Set the channel and a control range (e.g. 60–70) to pull note data out of a file.",
+      "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 13639,
+      "duration": 183,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=13639s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 58,
+      "note": "The clip's data output is a generic dictionary meant to replace older dict outputs. Exposing it as a float list would let custom analyzers process loaded MIDI directly.",
+      "score": 1.125
     }
   ],
   "op:Lib.numbers.data.utils.SelectFloatFromDict": [
@@ -22590,6 +25114,148 @@
       "confidence": 68,
       "note": "Turn a MIDI note value into hit triggers (detect increases only) to fire a trigger-animation per note; a sliding-history buffer can plot the activity over time.",
       "score": 0.72
+    }
+  ],
+  "op:Lib.mesh.draw.DrawMeshChunksAtPoints": [
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 973,
+      "duration": 39,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=973s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 72,
+      "note": "Draw fractured fragments as GPU chunks: wire the geometry's points to the points input and its chunk indices to chunk indices. It looks identical to drawing the mesh but is much faster, and every fragment becomes a movable point.",
+      "score": 0.72
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 1074,
+      "duration": 37,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=1074s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 62,
+      "note": "Put a separate-loose-parts step before the chunk conversion so each fragment's pivot is centred on the piece, which makes per-chunk rotation spin in place.",
+      "score": 0.18
+    }
+  ],
+  "op:Lib.render.camera.BlendCameras": [
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 5575,
+      "duration": 7,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=5575s",
+      "depth": "passing",
+      "style": "answer",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "Suggested for switching smoothly between separately keyframed camera setups.",
+      "score": 0.072
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "startSecond": 7860,
+      "duration": 150,
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7860s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "Switch between several cameras (animated, static A, static B) by index to cut or fade a scene's viewpoint; an unselected camera stops being updated.",
+      "score": 0.24
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "startSecond": 15031,
+      "duration": 156,
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=15031s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 68,
+      "note": "Camera interpolation feels wonky because position and target are blended separately; converting rotation to a quaternion and blending that (then inferring the target) would interpolate far more smoothly.",
+      "score": 1.125
+    }
+  ],
+  "op:Lib.render.sprite.TextSprites": [
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9191,
+      "duration": 113,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9191s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 62,
+      "note": "If the last character of the text doesn't show, adding a trailing space was the workaround.",
+      "score": 0.66
+    },
+    {
+      "video": "WK4j0H-oM3g",
+      "startSecond": 798,
+      "duration": 25,
+      "url": "https://www.youtube.com/watch?v=WK4j0H-oM3g&t=798s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "Characters of a string rendered into viewport cells to assemble a procedural atlas texture for billboard sprites.",
+      "score": 0.96
+    }
+  ],
+  "op:Lib.render.sprite.DrawPointSpritesShaded": [
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9519,
+      "duration": 38,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9519s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Gotcha",
+      "confidence": 70,
+      "note": "The missing last character came from the shaded sprite drawer (the unshaded one was fine), so switching drawers isolates it.",
+      "score": 0.66
+    },
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 12550,
+      "duration": 37,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=12550s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Gotcha",
+      "confidence": 58,
+      "note": "The dropped last character was traced to a stray subtract-one inside the shaded sprite op.",
+      "score": 0.4125
+    }
+  ],
+  "op:Lib.point.transform.SoftTransformPoints": [
+    {
+      "video": "MveQVWb1qsM",
+      "startSecond": 9568,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM&t=9568s",
+      "depth": "passing",
+      "style": "discussion",
+      "purpose": "Tip",
+      "confidence": 55,
+      "note": "Recommended for animating text-sprite points: randomize for jitter, soft transform for localized displacement.",
+      "score": 0.189
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "startSecond": 11760,
+      "duration": 120,
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=11760s",
+      "depth": "in-depth",
+      "style": "experiment",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "Applies a transform only inside a falloff volume, so points caught in the middle get squeezed toward center while outer ones stay — great for zoomed-into-the-core streak looks.",
+      "score": 0.8
     }
   ],
   "op:Lib.field.adjust.InvertSDF": [
@@ -22860,20 +25526,6 @@
       "score": 0.54
     }
   ],
-  "op:Lib.point.transform.SoftTransformPoints": [
-    {
-      "video": "PWCfyUnFGdg",
-      "startSecond": 11760,
-      "duration": 120,
-      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=11760s",
-      "depth": "in-depth",
-      "style": "experiment",
-      "purpose": "Concept",
-      "confidence": 80,
-      "note": "Applies a transform only inside a falloff volume, so points caught in the middle get squeezed toward center while outer ones stay — great for zoomed-into-the-core streak looks.",
-      "score": 0.8
-    }
-  ],
   "op:Lib.render.gizmo.PlotValueCurve": [
     {
       "video": "Q2nHQ-5msGQ",
@@ -22998,32 +25650,6 @@
       "confidence": 85,
       "note": "Use a picker as a manual bypass: feed both the original and the processed point set in and select between them by index, so index 0 is the untouched version and 1 is the effected one.",
       "score": 1.8
-    }
-  ],
-  "op:Lib.render.camera.BlendCameras": [
-    {
-      "video": "qavgcL72F1Y",
-      "startSecond": 7860,
-      "duration": 150,
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7860s",
-      "depth": "passing",
-      "style": "experiment",
-      "purpose": "Example",
-      "confidence": 55,
-      "note": "Switch between several cameras (animated, static A, static B) by index to cut or fade a scene's viewpoint; an unselected camera stops being updated.",
-      "score": 0.24
-    },
-    {
-      "video": "yy1kKa-wucA",
-      "startSecond": 15031,
-      "duration": 156,
-      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=15031s",
-      "depth": "explained",
-      "style": "discussion",
-      "purpose": "Concept",
-      "confidence": 68,
-      "note": "Camera interpolation feels wonky because position and target are blended separately; converting rotation to a quaternion and blending that (then inferring the target) would interpolate far more smoothly.",
-      "score": 1.125
     }
   ],
   "op:Lib.point.sim.SimDirectionalOffset": [
@@ -23418,20 +26044,6 @@
       "confidence": 62,
       "note": "Smooths the jumps between per-step random camera positions so the scene-to-scene transition eases instead of snapping.",
       "score": 0.18
-    }
-  ],
-  "op:Lib.render.sprite.TextSprites": [
-    {
-      "video": "WK4j0H-oM3g",
-      "startSecond": 798,
-      "duration": 25,
-      "url": "https://www.youtube.com/watch?v=WK4j0H-oM3g&t=798s",
-      "depth": "passing",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 55,
-      "note": "Characters of a string rendered into viewport cells to assemble a procedural atlas texture for billboard sprites.",
-      "score": 0.96
     }
   ],
   "op:Lib.image.fx.distort.BubbleZoom": [

@@ -80,7 +80,8 @@ def main():
             sys.exit(f"Unknown topic '{key}'. See ids in {IDX / 'topics.json'}.")
         targets = [key]
     else:
-        targets = [k for k, v in topics.items() if not v.get("doc")]
+        # Bodies live in their own files now; the index records a docFile pointer.
+        targets = [k for k, v in topics.items() if not v.get("docFile")]
         print(f"# {len(targets)} topic(s) with an empty doc\n")
 
     for key in targets:

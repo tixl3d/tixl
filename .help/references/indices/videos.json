@@ -416,6 +416,16 @@
       "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80"
     },
     {
+      "id": "Lbgxw2cNAB0",
+      "type": "meetup",
+      "date": "2026-09-21",
+      "title": "\"TiXL Meetup 2026-09-21 — The New Output System, Photo-Based Projector Calibration and Building a Field-Driven Compute Shader Op\"",
+      "duration": "3:58:08",
+      "summary": "A long, loose meet-up that starts with a walkthrough of the new output system: central outputs bound to displays, slices, physical-space surfaces, straightening a reference photo, calibrating a projector from reference points, floor plans with pixel maps for an immersive venue, and the new ML beat-detection model. The second half is community Q&A: planning a field-driven quadtree subdivision effect, dissecting a compute-shader point operator as a template for your own, fixing broken mesh tangents in a custom vertex shader, and a blend-able RepeatAtPoints variant.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=Lbgxw2cNAB0"
+    },
+    {
       "id": "LI5Pq5H9HFU",
       "type": "tutorial",
       "date": null,
@@ -492,6 +502,16 @@
       "summary": "A live meet-up that rebuilds a viewer's water/particle scene from scratch, then dives deep into wrapping graphs into operators, time clips and time-remapping, the pull-based evaluation model, an SDF-driven fog scene with color grading, particle factor remapping, and a long open design discussion about multi-channel audio routing.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ"
+    },
+    {
+      "id": "MveQVWb1qsM",
+      "type": "meetup",
+      "date": "2026-09-07",
+      "title": "\"TiXL Meetup 2026-09-07 — Geometry Nodes Preview, Output Management Board, Supercluster Demo Walkthrough and MIDI Clip Data\"",
+      "duration": "3:56:57",
+      "summary": "A long meet-up. It opens with a first look at the CPU geometry-node system coming in 4.3 (Voronoi fracture, bevel, C# deferred scalar functions, chunk drawing) and the output-management board being rebuilt (reference-image straightening, surfaces, slices, projector calibration). Then come demo walkthroughs: a feedback/attractor Evoke entry, and a long tour of the Supercluster demo project covering timeline clips, dope-sheet auto-pin, a letterbox via SliceViewPort, camera shake, player export and a sprite-text bug hunt. Community members show laser output, AI nodes and mesh-to-SDF, and it closes on how to get pitch and velocity out of loaded MIDI clips.",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=MveQVWb1qsM"
     },
     {
       "id": "o-Ojg_LOi4k",

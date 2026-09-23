@@ -360,14 +360,61 @@
       ],
       "docFile": "references/topics/ui/RenderSettings.md"
     },
-    "ui:OutputSettings": {
-      "term": "Output settings",
-      "parent": null,
-      "synonyms": [],
-      "classes": [
-        "OutputWindowState"
+    "ui:OutputResolution": {
+      "term": "Output resolution",
+      "parent": "ui:OutputWindow",
+      "synonyms": [
+        "output settings",
+        "resolution override",
+        "magic resolution",
+        "0x0 resolution"
       ],
-      "docFile": "references/topics/ui/OutputSettings.md"
+      "classes": [
+        "OutputWindowState",
+        "EditResolutionDialog"
+      ],
+      "docFile": "references/topics/ui/OutputResolution.md"
+    },
+    "ui:OutputSetup": {
+      "term": "Output setup",
+      "parent": null,
+      "synonyms": [
+        "output system",
+        "output board",
+        "setup view",
+        "screen manager",
+        "surfaces",
+        "slices",
+        "regions",
+        "patches",
+        "projector calibration",
+        "mapping",
+        "flow outliner",
+        "stage board"
+      ],
+      "classes": [
+        "SetupOutputView",
+        "SetupEntities",
+        "OutputPresentation",
+        "CalibrationOverlay"
+      ],
+      "docFile": "references/topics/ui/OutputSetup.md"
+    },
+    "ui:GeometryOps": {
+      "term": "Geometry operators",
+      "parent": null,
+      "synonyms": [
+        "geometry nodes",
+        "geometry node system",
+        "mesh geometry ops",
+        "procedural geometry",
+        "scalar field"
+      ],
+      "classes": [
+        "MeshGeometry",
+        "GeometryToMesh"
+      ],
+      "docFile": "references/topics/ui/GeometryOps.md"
     },
     "ui:IoView": {
       "term": "IO view",
