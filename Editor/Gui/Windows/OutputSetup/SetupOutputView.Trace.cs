@@ -393,12 +393,12 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        if (ImGui.BeginPopup(PointMenuId))
+        if (SetupPopup.Begin(PointMenuId))
         {
             if (CustomComponents.DrawMenuItem(1, "Delete"))
                 toDelete = _pointMenuIndex;
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
 
         if (toDelete >= 0 && toDelete < subject.Annotations.Count)

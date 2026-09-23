@@ -11,7 +11,8 @@ namespace T3.Editor.Gui.Windows.OutputSetup;
 
 /// <summary>
 /// The wall-drawing tool on a floor plan's Board card: from an open end of the run a line follows the cursor,
-/// snapped to 45° steps of the last wall (Shift draws free) or set to a typed length, and every click plants
+/// snapped to 45° steps of the last wall or to the room's own horizontal and vertical (Shift draws free), or
+/// set to a typed length, and every click plants
 /// the next corner with a wall on the new edge. Clicking the run's other end closes the room; Escape or a
 /// right-click ends the tool. Entered from the plus at an open end, the plan's menu, or right after a plan is
 /// started from a surface.
@@ -25,12 +26,14 @@ internal sealed partial class SetupOutputView
     private bool IsDrawingPlan => _planDrawId != Guid.Empty;
 
     /// <summary>
-    /// The plus at each open end of a selected plan's run: clicking it starts drawing there. Drawn with the
-    /// card, before its grab, so the press is an item press.
+    /// The plus at each open end of a plan's run: clicking it starts drawing there. Shown whether or not the
+    /// plan is selected — its corners and edges are live either way, and a control that only appears once
+    /// something is selected reads as if the plan itself were inert. Selection lifts it like the corners,
+    /// rather than summoning it. Drawn with the card, before its grab, so the press is an item press.
     /// </summary>
     private void DrawPlanDrawEntries(FloorPlan plan, Vector2 origin, bool isSelected)
     {
-        if (plan.IsClosed || plan.Vertices.Count < 2 || !isSelected || IsDrawingPlan)
+        if (plan.IsClosed || plan.Vertices.Count < 2 || IsDrawingPlan)
             return;
 
         for (var atEnd = 0; atEnd < 2; atEnd++)
@@ -55,8 +58,10 @@ internal sealed partial class SetupOutputView
             var hovered = ImGui.IsItemHovered();
             var dl = ImGui.GetWindowDrawList();
             var hue = SetupColors.ForKind(SetupEntityKinds.FloorPlan);
-            dl.AddCircleFilled(centre, radius, (hovered ? hue : hue.Fade(0.6f)).Fade(_boardLayerFade));
-            Icons.DrawIconAtScreenPosition(Icon.Plus, centre - new Vector2(8 * scale));
+            var resting = isSelected ? hue : hue.Fade(0.6f); // the corners' own selected/unselected pair
+            dl.AddCircleFilled(centre, radius, (hovered ? hue : resting).Fade(_boardLayerFade));
+            Icons.DrawIconAtScreenPosition(Icon.Plus, centre - new Vector2(8 * scale), dl,
+                                           UiColors.ForegroundFull.Fade(_boardLayerFade * (hovered || isSelected ? 1f : 0.8f)));
             if (hovered)
                 CustomComponents.TooltipForLastItem("Draw walls from here", "Click plants a corner and raises a wall; Escape ends.");
 
@@ -181,7 +186,11 @@ internal sealed partial class SetupOutputView
             EndPlanDraw();
     }
 
-    /// <summary>The next corner along the cursor, snapped to 45° steps of the last wall unless Shift is held.</summary>
+    /// <summary>
+    /// The next corner along the cursor, snapped to 45° steps of the last wall <b>or</b> to the plan's
+    /// horizontal and vertical, whichever the cursor is nearer to — a room drawn off a slanted wall usually
+    /// squares up with the venue again, not with that wall. Shift draws free.
+    /// </summary>
     private static Vector2 SnapPlanDirection(Vector2 anchor, Vector2 previous, Vector2 cursor)
     {
         var toCursor = cursor - anchor;
@@ -189,12 +198,25 @@ internal sealed partial class SetupOutputView
         if (length < 0.0001f || ImGui.GetIO().KeyShift)
             return cursor;
 
+        var cursorAngle = MathF.Atan2(toCursor.Y, toCursor.X);
         var reference = anchor - previous;
         var referenceAngle = reference.LengthSquared() < 0.0001f ? 0f : MathF.Atan2(reference.Y, reference.X);
-        var angle = MathF.Atan2(toCursor.Y, toCursor.X) - referenceAngle;
-        const float step = MathF.PI / 4;
-        var snapped = referenceAngle + MathF.Round(angle / step) * step;
+
+        const float alongWallStep = MathF.PI / 4;
+        var alongWall = referenceAngle + MathF.Round((cursorAngle - referenceAngle) / alongWallStep) * alongWallStep;
+
+        const float axisStep = MathF.PI / 2;
+        var alongAxis = MathF.Round(cursorAngle / axisStep) * axisStep;
+
+        var snapped = AngleDistance(cursorAngle, alongAxis) < AngleDistance(cursorAngle, alongWall) ? alongAxis : alongWall;
         return anchor + new Vector2(MathF.Cos(snapped), MathF.Sin(snapped)) * length;
+    }
+
+    /// <summary>The shorter way round between two angles, so candidates can be compared however they wrapped.</summary>
+    private static float AngleDistance(float a, float b)
+    {
+        var delta = MathF.Abs(a - b) % (MathF.PI * 2);
+        return delta > MathF.PI ? MathF.PI * 2 - delta : delta;
     }
 
     /// <summary>

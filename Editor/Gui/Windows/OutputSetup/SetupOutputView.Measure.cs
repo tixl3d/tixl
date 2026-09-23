@@ -235,7 +235,7 @@ internal sealed partial class SetupOutputView
             ImGui.OpenPopup("##setLength");
         }
 
-        if (!ImGui.BeginPopup("##setLength"))
+        if (!SetupPopup.Begin("##setLength"))
             return;
 
         CustomComponents.StylizedText("Real length in meters", Fonts.FontSmall, UiColors.TextMuted);
@@ -261,7 +261,7 @@ internal sealed partial class SetupOutputView
             ImGui.CloseCurrentPopup();
         }
 
-        ImGui.EndPopup();
+        SetupPopup.End();
     }
 
     /// <summary>The chip's "1.25 m", formatted again only when the line's length changes.</summary>

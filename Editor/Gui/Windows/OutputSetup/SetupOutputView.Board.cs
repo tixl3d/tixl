@@ -119,7 +119,7 @@ internal sealed partial class SetupOutputView
             DrawBoardScaleLine(setup, dl, image, min, max);
         }
 
-        DrawScaleLengthPopup(setup);
+        DrawScaleLengthPopup(setup, selection);
 
         foreach (var source in setup.ContentSources)
         {
@@ -908,8 +908,9 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        if (ImGui.BeginPopup(PlanCornerMenuId))
+        if (SetupPopup.Begin(PlanCornerMenuId))
         {
+            CustomComponents.MenuItemsFlushLeft = true;
             var canRemove = count > (plan.IsClosed ? 3 : 2);
             if (CustomComponents.DrawMenuItem(1, "Remove Corner", isEnabled: canRemove))
             {
@@ -917,7 +918,8 @@ internal sealed partial class SetupOutputView
                 SetupUndo.RunUndoable("Remove corner", setup, () => FloorPlanSync.RemoveVertex(setup, plan, vertex));
             }
 
-            ImGui.EndPopup();
+            CustomComponents.MenuItemsFlushLeft = false;
+            SetupPopup.End();
         }
 
         // Each edge's middle is a handle too: a click raises or takes down the wall on it (the dot is filled while
@@ -973,9 +975,14 @@ internal sealed partial class SetupOutputView
                         if (offset.Length() > 0.001f)
                             _planEdgeMoved = true;
 
-                        _planEdgeMidNow = _planEdgeStartMid + offset;
-                        CanvasPointHandle.ReportSnappedPosition(_boardProjection, origin + _planEdgeMidNow);
                         FloorPlanSync.MoveSegment(setup, plan, segment, _planEdgeStartVertices, offset);
+
+                        // Taken from the moved edge rather than from the cursor: its ends slide along the
+                        // neighbouring walls, so the new middle also travels *along* the edge, and a dot placed
+                        // at "old middle plus sideways offset" would drift off the wall it is moving.
+                        plan.GetSegment(segment, out var movedStart, out var movedEnd);
+                        _planEdgeMidNow = (movedStart + movedEnd) * 0.5f;
+                        CanvasPointHandle.ReportSnappedPosition(_boardProjection, origin + _planEdgeMidNow);
                     }
 
                     break;
@@ -1005,8 +1012,9 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        if (ImGui.BeginPopup(PlanEdgeMenuId))
+        if (SetupPopup.Begin(PlanEdgeMenuId))
         {
+            CustomComponents.MenuItemsFlushLeft = true;
             var menuSegment = _planMenuSegment;
             if (menuSegment >= 0 && menuSegment < plan.SegmentCount)
             {
@@ -1034,7 +1042,8 @@ internal sealed partial class SetupOutputView
                 }
             }
 
-            ImGui.EndPopup();
+            CustomComponents.MenuItemsFlushLeft = false;
+            SetupPopup.End();
         }
 
         // Opened once the edge menu has closed, since a popup opened from inside another closes with it.
@@ -1045,7 +1054,7 @@ internal sealed partial class SetupOutputView
         }
 
         ImGui.SetNextWindowSize(new Vector2(240 * scale, 0));
-        if (ImGui.BeginPopup(PlanLengthPopupId))
+        if (SetupPopup.Begin(PlanLengthPopupId))
         {
             CustomComponents.StylizedText("Wall length", Fonts.FontBold, UiColors.Text);
             FormInputs.AddFloat("Length (m)", ref _planLengthValue, 0.01f, 1000, 0.01f, clampMin: true, clampMax: true,
@@ -1063,7 +1072,7 @@ internal sealed partial class SetupOutputView
             if (ImGui.Button("Cancel"))
                 ImGui.CloseCurrentPopup();
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
 
         ImGui.PopID();

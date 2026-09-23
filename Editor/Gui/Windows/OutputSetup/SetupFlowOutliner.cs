@@ -132,7 +132,7 @@ internal sealed class SetupFlowOutliner
         CustomComponents.TooltipForLastItem("Add to the Board", "A reference photo to trace surfaces on, a prop for scale, or a whole room.");
 
         var openRoomDialog = false;
-        if (ImGui.BeginPopup(AddBoardItemMenuId))
+        if (SetupPopup.Begin(AddBoardItemMenuId))
         {
             if (CustomComponents.DrawMenuItem(1, "Add Reference Image"))
                 SetupActions.AddReferenceImage(selection);
@@ -150,13 +150,13 @@ internal sealed class SetupFlowOutliner
 
             CustomComponents.TooltipForLastItem("The venue seen from above: a footprint whose edges carry the walls, drawn at true scale.");
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
 
         if (openRoomDialog)
-            ImGui.OpenPopup(AddRoomDialogId);
+            AddFloorPlanDialog.RequestOpen();
 
-        DrawAddRoomDialog(setup, selection);
+        AddFloorPlanDialog.Draw(selection);
 
         if (onToggleCollapse != null)
         {
@@ -207,7 +207,7 @@ internal sealed class SetupFlowOutliner
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
         BeginColumn(origin.X + columnWidth + gap * 0.5f, origin.Y, columnWidth - gap);
-        DrawColumnHeader("SURFACES", "##addSurface", selection, SetupActions.AddSurface, SetupEntityKinds.Surface);
+        DrawColumnHeader("SURFACES", "##addSurface", selection, s => SetupActions.AddSurface(s), SetupEntityKinds.Surface);
         DrawSurfaces(selection, setup);
         maxY = MathF.Max(maxY, ImGui.GetCursorScreenPos().Y);
 
@@ -584,7 +584,7 @@ internal sealed class SetupFlowOutliner
             _addPlugMenuRequested = false;
         }
 
-        if (ImGui.BeginPopup(AddPlugMenuId))
+        if (SetupPopup.Begin(AddPlugMenuId))
         {
             CustomComponents.MenuGroupHeader("Add stream sender");
             var providers = OutputStreamRegistry.Providers;
@@ -600,7 +600,7 @@ internal sealed class SetupFlowOutliner
                 }
             }
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
     }
 
@@ -816,7 +816,7 @@ internal sealed class SetupFlowOutliner
         ImGui.SetCursorScreenPos(new Vector2(pos.X + width, pos.Y));
         ImGui.Dummy(Vector2.Zero); // the row continues to the right of the control
 
-        if (ImGui.BeginPopup("##setupMenu"))
+        if (SetupPopup.Begin("##setupMenu"))
         {
             CustomComponents.MenuGroupHeader("Setups");
             _availableNames.Clear();
@@ -866,7 +866,7 @@ internal sealed class SetupFlowOutliner
                 _drawMenuExtras();
             }
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
     }
 
@@ -932,43 +932,8 @@ internal sealed class SetupFlowOutliner
     private static readonly List<(int Width, int Height, string Label)> _resolutionLabels = [];
 
     private const string AddPlugMenuId = "##addPlugMenu";
-    /// <summary>A rectangular footprint to start from; walls are raised per edge on the plan's card afterwards.</summary>
-    private static void DrawAddRoomDialog(Setup setup, SetupEntitySelection selection)
-    {
-        ImGui.SetNextWindowSize(new Vector2(280 * T3Ui.UiScaleFactor, 0));
-        if (!ImGui.BeginPopup(AddRoomDialogId))
-            return;
-
-        CustomComponents.StylizedText("Add Floor Plan", Fonts.FontBold, UiColors.Text);
-        CustomComponents.StylizedText("A rectangle to start from; raise walls on its edges on its card.",
-                                      Fonts.FontSmall, UiColors.TextMuted);
-
-        FormInputs.AddFloat("Width (m)", ref _roomWidth, 0.1f, 1000, 0.05f, clampMin: true, clampMax: true, "Left to right.");
-        FormInputs.AddFloat("Depth (m)", ref _roomDepth, 0.1f, 1000, 0.05f, clampMin: true, clampMax: true, "Near to far.");
-        FormInputs.AddCheckBox("With floor surface", ref _roomWithFloor, "A surface lying on the footprint, for floor projection.");
-
-        FormInputs.AddVerticalSpace(4);
-        if (ImGui.Button("Create"))
-        {
-            SetupActions.AddFloorPlan(selection, new Vector2(_roomWidth, _roomDepth), _roomWithFloor);
-            ImGui.CloseCurrentPopup();
-        }
-
-        ImGui.SameLine();
-        if (ImGui.Button("Cancel"))
-            ImGui.CloseCurrentPopup();
-
-        ImGui.EndPopup();
-    }
-
     private Action? _onLeave;
     private const string AddBoardItemMenuId = "##addBoardItemMenu";
-    private const string AddRoomDialogId = "##addFloorPlanDialog";
-
-    // The dialog's fields, kept between openings so a venue's numbers can be tweaked and re-added.
-    private static float _roomWidth = 10;
-    private static float _roomDepth = 8;
-    private static bool _roomWithFloor = true;
     private const string HelpDocId = "OutputSetup";
     private const string HelpWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.OutputSetup";
     private bool _addPlugMenuRequested;

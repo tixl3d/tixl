@@ -121,10 +121,10 @@ internal sealed partial class SetupOutputView
             }
         }
 
-        if (ImGui.BeginPopup(PickMenuId))
+        if (SetupPopup.Begin(PickMenuId))
         {
             DrawPickMenu(setup, selection);
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
 
         // Empty Board: a right-click offers what the Board holds that no outliner column lists any more —
@@ -134,26 +134,73 @@ internal sealed partial class SetupOutputView
             && ImGui.IsMouseReleased(ImGuiMouseButton.Right)
             && ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() <= UserSettings.Config.ClickThreshold)
         {
+            // Where the press went down, not where it came up: what the menu adds lands where the gesture started.
+            // A locked image doesn't answer the picker either, so a right-click on one lands here — where its Unlock is.
+            var pressedAt = ImGui.GetMousePos() - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right);
+            _boardMenuPosition = _boardProjection.ScreenToCanvas(pressedAt);
             ImGui.OpenPopup(BoardMenuId);
         }
 
-        if (ImGui.BeginPopup(BoardMenuId))
+        var openFloorPlanDialog = false;
+        if (SetupPopup.Begin(BoardMenuId))
         {
+            // No icons and no toggles in this menu, so its labels sit flush left.
+            CustomComponents.MenuItemsFlushLeft = true;
             if (selection != null)
             {
                 if (CustomComponents.DrawMenuItem(1, "Add Surface"))
-                    SetupActions.AddSurface(selection);
+                    SetupActions.AddSurface(selection, _boardMenuPosition);
 
                 if (CustomComponents.DrawMenuItem(2, "Add Reference Image"))
-                    SetupActions.AddReferenceImage(selection);
+                    SetupActions.AddReferenceImage(selection, _boardMenuPosition);
 
                 CustomComponents.TooltipForLastItem("Adds an empty image card; pick its photo in the Parameter window.", "Or drop an image file onto the Board.");
 
                 if (CustomComponents.DrawMenuItem(3, "Add Prop"))
-                    SetupActions.AddProp(selection);
+                    SetupActions.AddProp(selection, _boardMenuPosition);
+
+                // The dialog can't open from inside the menu (it would close with it), so it opens once the menu is gone.
+                if (CustomComponents.DrawMenuItem(4, "Add Floor Plan..."))
+                    openFloorPlanDialog = true;
+
+                CustomComponents.TooltipForLastItem("The venue seen from above: a footprint whose edges carry the walls, drawn at true scale.");
             }
 
-            ImGui.EndPopup();
+            DrawUnlockItemsForLockedImagesUnderMenu(setup);
+            CustomComponents.MenuItemsFlushLeft = false;
+            SetupPopup.End();
+        }
+
+        if (openFloorPlanDialog)
+            AddFloorPlanDialog.RequestOpen(_boardMenuPosition);
+
+        if (selection != null)
+            AddFloorPlanDialog.Draw(selection);
+
+        // A locked image is a backdrop: it takes no press, so it can't be selected and has no menu of its own —
+        // and the outliner doesn't list images either. Without this its lock would be a one-way door.
+        void DrawUnlockItemsForLockedImagesUnderMenu(Setup menuSetup)
+        {
+            var first = true;
+            foreach (var image in menuSetup.ReferenceImages)
+            {
+                if (!image.IsLocked || !TryGetBoardBounds(menuSetup, SetupEntityKinds.ReferenceImage, image.Id, out var min, out var max))
+                    continue;
+
+                if (_boardMenuPosition.X < min.X || _boardMenuPosition.X > max.X
+                    || _boardMenuPosition.Y < min.Y || _boardMenuPosition.Y > max.Y)
+                    continue;
+
+                if (first)
+                {
+                    CustomComponents.SeparatorLine();
+                    first = false;
+                }
+
+                var unlocked = image;
+                if (CustomComponents.DrawMenuItem(unlocked.Id.GetHashCode(), $"Unlock {unlocked.Name}"))
+                    SetupUndo.RunUndoable("Unlock image", menuSetup, () => unlocked.IsLocked = false);
+            }
         }
 
         // Ctrl+D duplicates the primary selection, matching the menu entry — any duplicable kind, not just surfaces.
@@ -274,6 +321,9 @@ internal sealed partial class SetupOutputView
     private Guid _menuId;
     private const string PickMenuId = "##canvasPickMenu";
     private const string BoardMenuId = "##boardMenu";
+
+    /** Board metres where the Board's own menu was opened — what the menu offers depends on what lies there. */
+    private Vector2 _boardMenuPosition;
 
     // Label caches: unnamed slices' and patches' ordinal labels by id, and "P{n}" by ordinal.
     private readonly Dictionary<Guid, string> _ordinalLabels = [];

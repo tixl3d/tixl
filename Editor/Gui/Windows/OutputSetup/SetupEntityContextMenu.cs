@@ -41,7 +41,12 @@ internal static class SetupEntityContextMenu
         CustomComponents.MenuItemsDisabled = multi;
         ImGui.BeginDisabled(multi);
 
+        // The common verbs are their own group. Whether the kind drew any rows is read off the cursor rather
+        // than reported back from a dozen switch branches — a menu row is the only thing here that advances it.
+        var beforeKindItems = ImGui.GetCursorPosY();
         DrawKindMenuItems(selection, setup, kind, id);
+        if (ImGui.GetCursorPosY() > beforeKindItems)
+            CustomComponents.SeparatorLine();
 
         if (SetupActions.CanDuplicate(kind) && CustomComponents.DrawMenuItem(5, "Duplicate"))
             SetupActions.DuplicateEntity(selection, setup, kind, id);
@@ -51,6 +56,14 @@ internal static class SetupEntityContextMenu
 
         ImGui.EndDisabled();
         CustomComponents.MenuItemsDisabled = false;
+
+        // Acts on the selection as a whole, like Delete below, so it lives outside the disabled block.
+        if (SetupActions.CountSelectedSurfaces(selection) > 1 && CustomComponents.DrawMenuItem(6, "Arrange along Walls"))
+            SetupActions.ArrangeSurfacesAlongWalls(selection, setup);
+
+        if (SetupActions.CountSelectedSurfaces(selection) > 1)
+            CustomComponents.TooltipForLastItem("Lays the selected surfaces out side by side in the order their walls run around the floor plan.",
+                                                "Board layout only — nothing in the stage or the routing moves.");
 
         // Deleting is the one action that reads the selection rather than the item, so it is offered even
         // from an item that isn't itself deletable.
@@ -200,19 +213,31 @@ internal static class SetupEntityContextMenu
 
                 CustomComponents.TooltipForLastItem("A locked image is a backdrop: it stays beneath every card and can't be picked or moved.");
 
-                if (CustomComponents.DrawMenuItem(13, "Trace New Surface"))
-                    SetupActions.TraceNewSurface(selection, setup, image);
-
-                // Every root surface not yet traced anywhere can be traced here.
-                for (var i = 0; i < setup.Surfaces.Count; i++)
+                if (CustomComponents.DrawSubMenu(13, "Trace Here"))
                 {
-                    var candidate = setup.Surfaces[i];
-                    if (candidate.Trace != null || candidate.ParentId != Guid.Empty)
-                        continue;
+                    if (CustomComponents.DrawMenuItem(14, "New Surface"))
+                        SetupActions.TraceNewSurface(selection, setup, image);
 
-                    if (CustomComponents.DrawMenuItem(100 + i, $"Trace {candidate.Name} Here"))
-                        SetupActions.TraceSurfaceOnImage(selection, setup, candidate, image);
+                    // Every root surface not yet traced anywhere can be traced here. A room's walls add up, so
+                    // they live under the header rather than as a dozen rows in the entity's own menu.
+                    var tracable = 0;
+                    for (var i = 0; i < setup.Surfaces.Count; i++)
+                    {
+                        var candidate = setup.Surfaces[i];
+                        if (candidate.Trace != null || candidate.ParentId != Guid.Empty)
+                            continue;
+
+                        if (tracable++ == 0)
+                            CustomComponents.SeparatorLine();
+
+                        if (CustomComponents.DrawMenuItem(100 + i, candidate.Name))
+                            SetupActions.TraceSurfaceOnImage(selection, setup, candidate, image);
+                    }
+
+                    ImGui.EndMenu();
                 }
+
+                CustomComponents.TooltipForLastItem("Draws the surface's outline on this photo, to be dragged onto the wall it shows.");
 
                 break;
 

@@ -36,7 +36,7 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     /// </summary>
     T3.Core.DataTypes.Texture2D? IContentSupplier.GetContent(EvaluationContext context)
     {
-        var requested = Resolution.GetValue(context);
+        var requested = OutputDefinition.ClampResolution(Resolution.GetValue(context));
         if (requested.Width <= 0 || requested.Height <= 0)
             return Texture.GetValue(context);
 
@@ -49,7 +49,7 @@ internal sealed class SendToOutput : Instance<SendToOutput>, IContentSupplier, I
     void IContentSupplier.InvalidateContent() => Texture.InvalidateGraph();
     bool IContentSupplier.GetUpdateEnabled(EvaluationContext context) => Update.GetValue(context);
     IInputSlot IContentSupplier.UpdateInput => Update;
-    Int2 IContentSupplier.GetResolution(EvaluationContext context) => Resolution.GetValue(context);
+    Int2 IContentSupplier.GetResolution(EvaluationContext context) => OutputDefinition.ClampResolution(Resolution.GetValue(context));
     IInputSlot IContentSupplier.ResolutionInput => Resolution;
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()

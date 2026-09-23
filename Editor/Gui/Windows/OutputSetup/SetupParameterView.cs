@@ -470,9 +470,7 @@ internal static class SetupParameterView
         {
             // 0 means "follow the plug". Only a render size either way: every quad on this canvas is stored as
             // a fraction of it, so changing it re-renders without moving a single mapping.
-            var width = Math.Clamp(canvas[0], 0, 16384);
-            var height = Math.Clamp(canvas[1], 0, 16384);
-            output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(width, height);
+            output.CanvasResolution = OutputDefinition.ClampResolution(new T3.Core.DataTypes.Vector.Int2(canvas[0], canvas[1]));
         }
 
         CommitFieldUndo(setup, "Resize canvas", canvasState);
@@ -564,7 +562,8 @@ internal static class SetupParameterView
             if (ImGui.SmallButton("Use as Canvas Size"))
             {
                 SetupUndo.RunUndoable("Resize canvas to pixel map", setup,
-                                      () => output.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(image.Width, image.Height));
+                                      () => output.CanvasResolution =
+                                                OutputDefinition.ClampResolution(new T3.Core.DataTypes.Vector.Int2(image.Width, image.Height)));
             }
         }
     }
@@ -821,8 +820,9 @@ internal static class SetupParameterView
             BeginFieldUndo(setup, resolutionState);
             if ((resolutionState & InputEditStateFlags.Modified) != 0)
             {
-                boundOutput.CanvasResolution = new T3.Core.DataTypes.Vector.Int2(Math.Clamp(resolution[0], 1, 16384),
-                                                                                 Math.Clamp(resolution[1], 1, 16384));
+                // A bound output sends at its canvas, so 0 ("follow the plug") would be circular here.
+                boundOutput.CanvasResolution = OutputDefinition.ClampResolution(new T3.Core.DataTypes.Vector.Int2(Math.Max(resolution[0], 1),
+                                                                                                                 Math.Max(resolution[1], 1)));
             }
 
             CommitFieldUndo(setup, "Resize canvas", resolutionState);
@@ -1399,7 +1399,7 @@ internal static class SetupParameterView
     private static void DrawMeasuredSizePopup(Setup setup, Surface surface)
     {
         ImGui.SetNextWindowSize(new Vector2(260 * T3Ui.UiScaleFactor, 0));
-        if (!ImGui.BeginPopup(MeasuredSizePopupId))
+        if (!SetupPopup.Begin(MeasuredSizePopupId))
             return;
 
         ImGui.PushFont(Fonts.FontBold);
@@ -1424,7 +1424,7 @@ internal static class SetupParameterView
         if (ImGui.Button("Cancel"))
             ImGui.CloseCurrentPopup();
 
-        ImGui.EndPopup();
+        SetupPopup.End();
     }
 
     /// <summary>
@@ -1469,7 +1469,7 @@ internal static class SetupParameterView
             ImGui.OpenPopup("##pickTargetPopup");
 
         var changed = false;
-        if (ImGui.BeginPopup("##pickTargetPopup"))
+        if (SetupPopup.Begin("##pickTargetPopup"))
         {
             for (var i = 0; i < setup.Surfaces.Count; i++)
             {
@@ -1494,7 +1494,7 @@ internal static class SetupParameterView
                 }
             }
 
-            ImGui.EndPopup();
+            SetupPopup.End();
         }
 
         return changed;

@@ -359,13 +359,13 @@ internal sealed partial class SetupOutputView
         if (inside && !wasDraggingRight && ImGui.IsMouseReleased(ImGuiMouseButton.Right) && !ImGui.IsAnyItemHovered())
             ImGui.OpenPopup(SliceMenuId);
 
-        if (!ImGui.BeginPopup(SliceMenuId))
+        if (!SetupPopup.Begin(SliceMenuId))
             return;
 
         if (CustomComponents.DrawMenuItem(1, "Match target aspect"))
             MatchSliceToTargetAspect(setup, targetId, slice, uv);
 
-        ImGui.EndPopup();
+        SetupPopup.End();
     }
 
     /// <summary>
