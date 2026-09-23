@@ -81,10 +81,11 @@ internal sealed partial class SetupOutputView
         var hit = _picker.Resolve(current);
 
         // A click while drawing walls plants a corner; it picks nothing. A hovered plan corner has its own menu.
-        if (IsDrawingPlan || IsSettingScale || _hoveredPlanHandlePlanId != Guid.Empty)
-            return;
+        // Only picking is suspended — the popups below still have to be begun every frame, or ImGui closes the
+        // open one the moment the cursor passes over a plan handle underneath it.
+        var picksThisFrame = !IsDrawingPlan && !IsSettingScale && _hoveredPlanHandlePlanId == Guid.Empty;
 
-        if (hit.HasHit)
+        if (picksThisFrame && hit.HasHit)
         {
             FrameStats.RequestCrossHighlight(hit.Id);
 
@@ -133,7 +134,7 @@ internal sealed partial class SetupOutputView
 
         // Empty Board: a right-click offers what the Board holds that no outliner column lists any more —
         // reference images and props — plus a surface, so a venue can be started without leaving the canvas.
-        if (!hit.HasHit && selection != null && ShowsBoard
+        if (picksThisFrame && !hit.HasHit && selection != null && ShowsBoard
             && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered()
             && ImGui.IsMouseReleased(ImGuiMouseButton.Right)
             && ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Length() <= UserSettings.Config.ClickThreshold)
@@ -141,6 +142,7 @@ internal sealed partial class SetupOutputView
             // Where the press went down, not where it came up: what the menu adds lands where the gesture started.
             // A locked image doesn't answer the picker either, so a right-click on one lands here — where its Unlock is.
             var pressedAt = ImGui.GetMousePos() - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right);
+            _boardMenuScreenPosition = pressedAt;
             _boardMenuPosition = _boardProjection.ScreenToCanvas(pressedAt);
             ImGui.OpenPopup(BoardMenuId);
         }
@@ -188,11 +190,23 @@ internal sealed partial class SetupOutputView
             var first = true;
             foreach (var image in menuSetup.ReferenceImages)
             {
-                if (!image.IsLocked || !TryGetBoardBounds(menuSetup, SetupEntityKinds.ReferenceImage, image.Id, out var min, out var max))
+                if (!image.IsLocked)
                     continue;
 
-                if (_boardMenuPosition.X < min.X || _boardMenuPosition.X > max.X
-                    || _boardMenuPosition.Y < min.Y || _boardMenuPosition.Y > max.Y)
+                var onCard = TryGetBoardBounds(menuSetup, SetupEntityKinds.ReferenceImage, image.Id, out var min, out var max)
+                             && _boardMenuPosition.X >= min.X && _boardMenuPosition.X <= max.X
+                             && _boardMenuPosition.Y >= min.Y && _boardMenuPosition.Y <= max.Y;
+
+                // The title chip sits above the card, in screen space — right-clicking it is the obvious way to
+                // reach a locked image, so it counts as pointing at the image.
+                var onLabel = false;
+                for (var i = 0; i < _lockedImageLabels.Count && !onLabel; i++)
+                {
+                    var label = _lockedImageLabels[i];
+                    onLabel = label.Id == image.Id && label.ScreenRect.Contains(_boardMenuScreenPosition);
+                }
+
+                if (!onCard && !onLabel)
                     continue;
 
                 if (first)
@@ -328,6 +342,9 @@ internal sealed partial class SetupOutputView
 
     /** Board metres where the Board's own menu was opened — what the menu offers depends on what lies there. */
     private Vector2 _boardMenuPosition;
+
+    /** The same point in screen pixels — the locked images' title chips are tracked there, not in board metres. */
+    private Vector2 _boardMenuScreenPosition;
 
     // Label caches: unnamed slices' and patches' ordinal labels by id, and "P{n}" by ordinal.
     private readonly Dictionary<Guid, string> _ordinalLabels = [];

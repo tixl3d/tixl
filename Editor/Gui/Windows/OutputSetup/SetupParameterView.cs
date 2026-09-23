@@ -420,10 +420,15 @@ internal static class SetupParameterView
         }
 
         Span<float> height = [plan.WallHeight];
-        var heightState = DrawFloatsRow("Wall height (m)", height, "What a newly raised wall gets; walls already standing keep their own height.");
+        var heightState = DrawFloatsRow("Wall height (m)", height,
+                                        "The height of this plan's walls. A wall given a height of its own keeps it, and a newly raised wall starts here.");
         BeginFieldUndo(setup, heightState);
         if ((heightState & InputEditStateFlags.Modified) != 0)
+        {
+            var previous = plan.WallHeight;
             plan.WallHeight = MathF.Max(height[0], 0.1f);
+            FloorPlanSync.ApplyWallHeight(setup, plan, previous);
+        }
 
         CommitFieldUndo(setup, "Change wall height", heightState);
 

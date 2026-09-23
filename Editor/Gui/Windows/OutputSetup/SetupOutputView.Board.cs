@@ -100,10 +100,12 @@ internal sealed partial class SetupOutputView
         if (_boardLayerFade <= 0.001f)
         {
             _boardFenceCandidates.Clear();
+            _lockedImageLabels.Clear();
             return;
         }
 
         _boardFenceCandidates.Clear();
+        _lockedImageLabels.Clear();
 
         // Draw order is stacking order: reference images at the back, then content, surfaces, outputs, props.
         foreach (var image in setup.ReferenceImages)
@@ -303,6 +305,57 @@ internal sealed partial class SetupOutputView
         }
     }
 
+    /// <summary>Starts the inline rename of a card's label; the field takes the keyboard on the next frame.</summary>
+    private void BeginBoardRename(SetupEntitySelection? selection, SetupEntityKinds kind, Guid id, string name)
+    {
+        selection?.Select(kind, id);
+        _boardRenameId = id;
+        _boardRenameKind = kind;
+        _boardRenameBuffer = name;
+        _boardRenameFocusPending = true;
+    }
+
+    /// <summary>
+    /// The name field in place of a card's label: commits on Enter or when it loses focus, drops the edit on
+    /// Escape. While it is up the card takes no press — a click in the field would otherwise also pick the card.
+    /// </summary>
+    private void DrawBoardRenameField(Setup setup, SetupEntityKinds kind, Guid id, Vector2 labelMin, Vector2 labelMax)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        ImGui.SetCursorScreenPos(labelMin);
+        ImGui.SetNextItemWidth(MathF.Max(labelMax.X - labelMin.X, MinRenameFieldWidth * scale));
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
+        if (_boardRenameFocusPending)
+        {
+            ImGui.SetKeyboardFocusHere();
+            _boardRenameFocusPending = false;
+        }
+
+        ImGui.InputText("##boardRename", ref _boardRenameBuffer, 256);
+        if (ImGui.IsItemDeactivatedAfterEdit())
+        {
+            var newName = _boardRenameBuffer.Trim();
+            if (newName.Length > 0)
+                SetupActions.RenameEntity(setup, kind, id, newName);
+
+            _boardRenameId = Guid.Empty;
+        }
+        else if (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(ImGuiKey.Escape))
+        {
+            _boardRenameId = Guid.Empty;
+        }
+
+        ImGui.PopStyleColor();
+    }
+
+    /** A short name shouldn't collapse the field to a few pixels. */
+    private const float MinRenameFieldWidth = 90;
+
+    private Guid _boardRenameId;
+    private SetupEntityKinds _boardRenameKind;
+    private string _boardRenameBuffer = string.Empty;
+    private bool _boardRenameFocusPending;
+
     /// <summary>A card: fill or thumbnail, outline by state, name chip with muted metadata, and its pick/grab area.</summary>
     private void DrawBoardCard(Setup setup, SetupEntitySelection? selection, ImDrawListPtr dl,
                                SetupEntityKinds kind, Guid id, Vector2 min, Vector2 max,
@@ -375,6 +428,21 @@ internal sealed partial class SetupOutputView
         // frame: the label's shade ends where the card begins, and the frame now sits outside the card, so
         // drawing the shade last left a dark seam along the card's top edge.
         dl.AddRectFilled(labelMin, labelMax, UiColors.BackgroundFull.Fade(0.3f * fade), rounding);
+
+        // Renamed in place, like an outliner row: the label is where the name is, so it is where it is edited.
+        var labelHovered = interactive && ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(labelMin, labelMax);
+        if (_boardRenameId == id)
+        {
+            DrawBoardRenameField(setup, kind, id, labelMin, labelMax);
+            return;
+        }
+
+        if (labelHovered && SetupActions.CanRename(kind) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        {
+            BeginBoardRename(selection, kind, id, name);
+            return;
+        }
+
         dl.AddText(nameFont, nameFont.FontSize, labelMin + new Vector2(pad, pad), SetupColors.LabelFor(kind).Fade(fade), name);
         if (meta != null && (hovered || isSelected))
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(labelMax.X + pad, labelMax.Y - pad - Fonts.FontSmall.FontSize),
@@ -387,6 +455,10 @@ internal sealed partial class SetupOutputView
         if (kind == SetupEntityKinds.ReferenceImage && setup.FindReferenceImage(id) is { IsLocked: true })
         {
             Icons.DrawIconAtScreenPosition(Icon.Locked, new Vector2(labelMax.X + pad, labelMin.Y + pad * 0.5f));
+
+            // Its label lies outside the card, so the Board menu is told about it separately — a right-click on
+            // the title is the obvious place to look for Unlock.
+            _lockedImageLabels.Add((id, new ImRect(labelMin, labelMax)));
             return;
         }
 
@@ -2135,6 +2207,10 @@ internal sealed partial class SetupOutputView
     private SetupEntityKinds _boardDragKind;
     private Guid _boardDragId;
     private Vector2 _boardDragGrabOnBoard;
+    /** Where each locked image's title chip sits this frame: it lies outside the card, and a locked image
+        answers no press, so the Board's menu finds its Unlock entry through this. */
+    private readonly List<(Guid Id, ImRect ScreenRect)> _lockedImageLabels = [];
+
     private readonly List<(SetupEntityKinds Kind, Guid Id, Vector2 Start)> _boardDragItems = [];
     private readonly List<SelectionTarget> _boardDupOriginals = [];
     private readonly List<SelectionTarget> _boardDupCopies = [];
